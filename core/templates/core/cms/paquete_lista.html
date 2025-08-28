@@ -1,0 +1,36 @@
+{# Archivo: core/templates/core/cms/paquete_lista.html #}
+{% extends "core/base.html" %}
+
+{% block title %}Nuestros Paquetes Turísticos - TravelHub{% endblock %}
+
+{% block content %}
+<section class="flow" style="--flow-space:1.2rem;">
+    <div class="d-flex justify-between align-center flex-wrap gap-2">
+        <h2 class="mb-0" style="font-size:1.3rem;">Nuestros Paquetes Turísticos</h2>
+        <span class="badge badge-info">{{ paquetes|length }} disponibles</span>
+    </div>
+    {% if paquetes %}
+        <div class="grid" style="--cols:repeat(auto-fit,minmax(260px,1fr)); --gap:1rem;">
+        {% for paquete in paquetes %}
+            <article class="card h-100">
+                {% if paquete.imagen_destacada %}
+                <div class="card-media" style="aspect-ratio:4/3; overflow:hidden; border-bottom:1px solid var(--border); background:var(--surface-alt);">
+                    <img src="{{ paquete.imagen_destacada.url }}" alt="{{ paquete.titulo }}" style="width:100%; height:100%; object-fit:cover; display:block;">
+                </div>
+                {% endif %}
+                <div class="card-header" style="font-size:.9rem;">{{ paquete.titulo }}</div>
+                <div class="card-body">
+                    <p class="small" style="min-height:3.5rem;">{{ paquete.descripcion_corta|truncatewords:30 }}</p>
+                    <div class="d-flex justify-between small mt-2">
+                        <span><strong>{{ paquete.duracion_dias }}</strong> días</span>
+                        <span style="font-weight:600; color:var(--brand-primary);">{{ paquete.precio_desde_texto }}</span>
+                    </div>
+                </div>
+            </article>
+        {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-muted">No hay paquetes turísticos disponibles en este momento.</p>
+    {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends 'core/base.html' %}
+{% load i18n %}
+
+{% block title %}{{ titulo_pagina }}{% endblock %}
+
+{% block content %}
+<div class="card mx-auto" style="max-width:900px;">
+  <div class="card-header">
+    <h2 class="mb-0" style="font-size:1rem;">{% trans "Entrada Manual de Datos de Boleto" %}</h2>
+  </div>
+  <div class="card-body">
+    <form method="post" class="flow" style="--flow-space:1rem;">
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+            <div class="alert alert-danger">
+                {% for error in form.non_field_errors %}
+                    <div>{{ error }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="grid" style="--cols:repeat(auto-fit,minmax(240px,1fr)); --gap:1rem;">
+        {% for field in form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}" class="form-label small" style="font-weight:600; letter-spacing:.5px; text-transform:uppercase;">{{ field.label }}</label>
+                {{ field }}
+                {% if field.help_text %}
+                    <div class="form-text small text-muted">{{ field.help_text }}</div>
+                {% endif %}
+                {% for error in field.errors %}
+                    <div class="invalid-feedback d-block small" style="color:var(--status-danger);">{{ error }}</div>
+                {% endfor %}
+            </div>
+        {% endfor %}
+        </div>
+
+        <div class="d-flex gap-2 mt-2">
+            <button type="submit" class="btn btn-success">{% trans "Guardar Boleto" %}</button>
+            <a href="{% url 'core:dashboard_boletos' %}" class="btn btn-outline">{% trans "Cancelar" %}</a>
+        </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

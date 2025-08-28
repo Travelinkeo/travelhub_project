@@ -1,0 +1,144 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Dashboard de Boletos Importados{% endblock %}
+
+{% block content %}
+<div class="card mb-4">
+  <div class="card-header d-flex justify-between align-center">
+      <div>
+          <h2 class="mb-0" style="font-size:1.1rem;">Resumen de Ventas por Categoría</h2>
+          <p class="small text-muted mb-0">Totales acumulados de items de venta registrados.</p>
+      </div>
+  </div>
+  <div class="card-body p-0">
+    <div class="table-wrapper" style="--table-font-size:0.75rem;">
+      <table class="table is-striped is-hover">
+        <thead>
+          <tr>
+            <th>Categoría</th>
+            <th class="text-end">Cantidad Items</th>
+            <th class="text-end">Monto Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for fila in ventas_por_categoria %}
+          <tr>
+            <td>{{ fila.categoria }}</td>
+            <td class="text-end">{{ fila.cantidad }}</td>
+            <td class="text-end">{{ fila.monto|floatformat:2 }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="3" class="text-center text-muted">No hay datos de ventas.</td></tr>
+          {% endfor %}
+        </tbody>
+        <tfoot>
+          <tr>
+            <th>Total General</th>
+            <th></th>
+            <th class="text-end">{{ total_general_ventas|floatformat:2 }}</th>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="card mb-4">
+  <div class="card-header d-flex justify-between align-center">
+      <div>
+          <h2 class="mb-0" style="font-size:1.1rem;">Dashboard de Boletos Importados</h2>
+          <p class="small text-muted mb-0">Listado de boletos subidos y procesados automáticamente.</p>
+      </div>
+      <div class="d-flex gap-2 flex-wrap">
+          <a href="{% url 'core:manual_ticket_entry' %}" class="btn btn-primary btn-sm">Cargar Manual</a>
+          <form action="{% url 'core:upload_boleto_file' %}" method="post" enctype="multipart/form-data" class="d-inline-block">
+              {% csrf_token %}
+              <div class="d-flex gap-1 align-center">
+                  {{ upload_form.archivo_boleto }}
+                  <button type="submit" class="btn btn-success btn-sm">Subir</button>
+              </div>
+          </form>
+      </div>
+  </div>
+  <div class="card-body p-0">
+    <div class="table-wrapper" style="--table-font-size:0.72rem;">
+      <table class="table is-striped is-hover is-sticky-header">
+        <thead>
+            <tr>
+                <th>Archivo</th>
+                <th>Pasajero</th>
+                <th>N° Boleto</th>
+                <th>PNR</th>
+                <th>Fecha Emisión</th>
+                <th>Agente Emisor</th>
+                <th>Aerolínea</th>
+                <th>Tarifa Base</th>
+                <th>Impuestos</th>
+                <th>Total</th>
+                <th>Itinerario</th>
+                <th>Estado del Parseo</th>
+                <th>Venta Asociada</th>
+                <th>PDF Generado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for boleto in boletos %}
+            <tr>
+                <td>
+                    {% if boleto.archivo_boleto %}<a href="{{ boleto.archivo_boleto.url }}" target="_blank">{{ boleto.archivo_boleto.name|truncatechars:30 }}</a>{% else %}N/A (Manual){% endif %}
+                </td>
+                <td>{{ boleto.nombre_pasajero_procesado|default:"-" }}</td>
+                <td>{{ boleto.numero_boleto|default:"-" }}</td>
+                <td>{{ boleto.localizador_pnr|default:"-" }}</td>
+                <td>{{ boleto.fecha_emision_boleto|date:"d/m/Y"|default:"-" }}</td>
+                <td>{{ boleto.agente_emisor|default:"-" }}</td>
+                <td>{{ boleto.aerolinea_emisora|default:"-" }}</td>
+                <td>{{ boleto.tarifa_base|default:"-" }}</td>
+                <td>{{ boleto.impuestos_total_calculado|default:"-" }}</td>
+                <td>{{ boleto.total_boleto|default:"-" }}</td>
+                <td><div style="max-height: 100px; overflow-y: auto; white-space: pre-wrap;">{{ boleto.ruta_vuelo|default:"-" }}</div></td>
+                <td>
+                    <span class="badge" data-status="{{ boleto.estado_parseo }}">{{ boleto.get_estado_parseo_display }}</span>
+                </td>
+                <td>
+                    {% if boleto.venta_asociada %}
+                        <a href="{% url 'admin:core_venta_change' boleto.venta_asociada.id %}" target="_blank">{{ boleto.venta_asociada.numero_venta }}</a>
+                    {% else %}
+                        <span class="text-muted">No asociada</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if boleto.archivo_pdf_generado %}<a href="{{ boleto.archivo_pdf_generado.url }}" target="_blank">Ver PDF</a>{% else %}N/A{% endif %}
+                </td>
+                <td>
+                    <form action="{% url 'core:delete_boleto_importado' boleto.pk %}" method="post" onsubmit="return confirm('¿Estás seguro de que quieres eliminar este boleto? Esta acción no se puede deshacer.');">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
+                    </form>
+                </td>
+            </tr>
+            {% if boleto.estado_parseo == 'ERR' %}
+            <tr class="table-danger">
+                <td colspan="14">
+                    <strong>Log de Error:</strong>
+                    <pre style="white-space: pre-wrap; max-height: 200px; overflow-y: auto; background-color: #f8d7da; padding: 10px; border-radius: 5px;">{{ boleto.log_parseo }}</pre>
+                </td>
+            </tr>
+            {% endif %}
+            {% empty %}
+            <tr>
+                <td colspan="14">No hay boletos importados todavía.</td> {# Updated colspan #}
+            </tr>
+            {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% if is_paginated %}
+{% include 'core/partials/pagination.html' %}
+{% endif %}
+
+{% endblock %}

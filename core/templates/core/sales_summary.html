@@ -1,0 +1,41 @@
+{% extends 'core/base.html' %}
+{% block title %}Resumen de Ventas{% endblock %}
+{% block content %}
+<div class="card mb-4">
+  <div class="card-header">
+    <h2 class="mb-0" style="font-size:1.1rem;">Resumen de Ventas por Categoría</h2>
+    <p class="small text-muted mb-0">Vista dedicada de métricas agregadas. (Moneda sin conversión)</p>
+  </div>
+  <div class="card-body p-0">
+    <div class="table-wrapper" style="--table-font-size:0.8rem;">
+      <table class="table is-striped is-hover">
+        <thead>
+          <tr>
+            <th>Categoría</th>
+            <th class="text-end">Cantidad Items</th>
+            <th class="text-end">Monto Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for fila in ventas_por_categoria %}
+          <tr>
+            <td>{{ fila.categoria }}</td>
+            <td class="text-end">{{ fila.cantidad }}</td>
+            <td class="text-end">{{ fila.monto|floatformat:2 }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="3" class="text-center text-muted">No hay datos de ventas.</td></tr>
+          {% endfor %}
+        </tbody>
+        <tfoot>
+          <tr>
+            <th>Total General</th>
+            <th></th>
+            <th class="text-end">{{ total_general_ventas|floatformat:2 }}</th>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

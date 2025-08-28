@@ -1,0 +1,164 @@
+{# Archivo: core/templates/core/base.html #}
+{% load static %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE|default:"es" }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}TravelHub Agencia{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/branding.css' %}">
+    <meta name="theme-color" content="#333333">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <header class="site-header">
+        <div class="site-header__inner">
+            <div class="brand-logo" style="display:flex; align-items:center; gap:.6rem;">
+                <a href="{% url 'core:home' %}" style="display:flex; align-items:center; gap:.6rem; text-decoration:none;">
+                    <img src="{% static 'images/SVG/LOGO.svg' %}" alt="TravelHub Logo" style="height:40px; width:auto; display:block;" />
+                    <span style="font-family:var(--font-heading); font-size:1.15rem; font-weight:600; color:#fff; letter-spacing:.5px;">TravelHub</span>
+                </a>
+            </div>
+            <button id="themeToggle" class="btn btn--ghost" type="button" aria-label="Alternar tema" title="Alternar tema" style="font-size:.75rem; margin-left:auto;">🌙</button>
+        </div>
+    </header>
+
+    <div id="layoutShell" class="layout-shell layout-shell--with-left">
+        <aside id="appSidebar" class="app-sidebar" aria-label="Barra lateral principal">
+            <div class="app-sidebar__top">
+                <button id="sidebarCollapseBtn" class="sidebar-collapse-btn" type="button" aria-label="Colapsar" title="Colapsar"></button>
+                <button id="sidebarMobileClose" class="sidebar-mobile-close" type="button" aria-label="Cerrar menú">×</button>
+            </div>
+            <nav class="app-nav" aria-label="Menú principal">
+                <p class="app-nav__label">General</p>
+                <ul class="app-nav__list">
+                    <li><a class="app-nav__link" href="{% url 'core:home' %}">Inicio</a></li>
+                    <li><a class="app-nav__link" href="{% url 'core:lista_paquetes_cms' %}">Paquetes</a></li>
+                    <li><a class="app-nav__link" href="/admin/">Admin</a></li>
+                </ul>
+                <p class="app-nav__label">Boletos</p>
+                <ul class="app-nav__list">
+                    <li><a class="app-nav__link" href="{% url 'core:dashboard_boletos' %}">Dashboard Boletos</a></li>
+                    <li><a class="app-nav__link" href="{% url 'core:manual_ticket_entry' %}">Nuevo Boleto Manual</a></li>
+                </ul>
+                <p class="app-nav__label">Ventas</p>
+                <ul class="app-nav__list">
+                    <li><a class="app-nav__link" href="{% url 'core:dashboard_resumen_ventas' %}">Resumen por Categoría</a></li>
+                    <li><a class="app-nav__link" href="{% url 'core:air_tickets_editable' %}">Boletería Aérea (Editar)</a></li>
+                </ul>
+                <p class="app-nav__label">Extras</p>
+                <ul class="app-nav__list">
+                    <li><a class="app-nav__link app-nav__link--disabled" href="#">Reportes (próx.)</a></li>
+                    <li><a class="app-nav__link app-nav__link--disabled" href="#">Estadísticas (próx.)</a></li>
+                </ul>
+                <div class="app-sidebar__metrics">
+                    <h5>Métricas</h5>
+                    <ul>
+                        <li>Total: <strong id="mTotalBoletos">—</strong></li>
+                        <li>Completados: <strong id="mBoletosCom">—</strong></li>
+                        <li>Errores: <strong id="mBoletosErr">—</strong></li>
+                    </ul>
+                </div>
+            </nav>
+            <div class="app-sidebar__footer">UI 1.2 • Beta</div>
+        </aside>
+        <main class="layout-main fade-in" id="mainContent">
+            <button id="sidebarMobileOpen" class="sidebar-mobile-open" type="button" aria-label="Abrir menú">☰</button>
+            {% block content %}
+            <p>Bienvenido a TravelHub. Contenido por defecto.</p>
+            {% endblock %}
+        </main>
+    </div>
+    <footer class="site-footer">
+        <div class="site-footer__inner">
+            <div>
+                <h4 class="mb-1" style="color:#fff; font-family:var(--font-heading);">TravelHub</h4>
+                <p class="mb-2" style="font-size:.75rem; line-height:1.4;">Agencia de viajes: emisión de boletos, reservas y experiencias personalizadas.</p>
+                <p style="font-size:.7rem;">Tel: +58 412 3312314<br>Mail: travelinkeo@gmail.com</p>
+            </div>
+            <div>
+                <h5 class="mb-1" style="color:#fff; font-size:.8rem; letter-spacing:.5px; text-transform:uppercase;">Navegación</h5>
+                <ul style="list-style:none; padding:0; margin:0; font-size:.75rem;">
+                    <li><a href="{% url 'core:home' %}">Inicio</a></li>
+                    <li><a href="{% url 'core:lista_paquetes_cms' %}">Paquetes</a></li>
+                    <li><a href="/admin/">Admin</a></li>
+                </ul>
+            </div>
+            <div>
+                <h5 class="mb-1" style="color:#fff; font-size:.8rem; letter-spacing:.5px; text-transform:uppercase;">Legal</h5>
+                <p style="font-size:.7rem; line-height:1.4;">Términos y condiciones<br>Política de privacidad<br>Cookies</p>
+            </div>
+        </div>
+        <div class="footer-bottom">&copy; {% now "Y" %} TravelHub Agencia. Todos los derechos reservados.</div>
+        </footer>
+        <script>
+        (function(){
+            // Dark mode
+            const STORAGE_KEY = 'th_theme';
+            const root = document.documentElement;
+            const btn = document.getElementById('themeToggle');
+            const apply = (mode) => {
+                if(mode === 'dark'){ root.classList.add('theme-dark'); btn.textContent='☀️'; }
+                else { root.classList.remove('theme-dark'); btn.textContent='🌙'; }
+            };
+            const stored = localStorage.getItem(STORAGE_KEY);
+            if(stored){ apply(stored); }
+            else if(window.matchMedia('(prefers-color-scheme: dark)').matches){ apply('dark'); }
+            btn && btn.addEventListener('click', () => {
+                const next = root.classList.contains('theme-dark') ? 'light' : 'dark';
+                apply(next);
+                localStorage.setItem(STORAGE_KEY, next);
+            });
+        })();
+
+    (function(){
+            const sidebar = document.getElementById('appSidebar');
+            const collapseBtn = document.getElementById('sidebarCollapseBtn');
+            const mobileOpen = document.getElementById('sidebarMobileOpen');
+            const mobileClose = document.getElementById('sidebarMobileClose');
+            const STATE_KEY = 'th.sidebar.state';
+            if(!sidebar) return;
+
+            function applyDesktopState(state){
+                if(state==='collapsed'){ sidebar.classList.add('is-collapsed'); }
+                else { sidebar.classList.remove('is-collapsed'); }
+            }
+
+            function loadState(){
+                const v = localStorage.getItem(STATE_KEY);
+                if(window.matchMedia('(max-width: 991px)').matches){ return; }
+                if(v) applyDesktopState(v);
+            }
+            loadState();
+
+            collapseBtn && collapseBtn.addEventListener('click', ()=>{
+                const collapsed = sidebar.classList.toggle('is-collapsed');
+                localStorage.setItem(STATE_KEY, collapsed ? 'collapsed':'expanded');
+            });
+
+            mobileOpen && mobileOpen.addEventListener('click', ()=>{
+                sidebar.classList.add('is-open');
+                document.body.classList.add('has-offcanvas');
+            });
+            mobileClose && mobileClose.addEventListener('click', ()=>{
+                sidebar.classList.remove('is-open');
+                document.body.classList.remove('has-offcanvas');
+            });
+
+            // Close on backdrop click
+            document.addEventListener('click', (e)=>{
+                if(window.matchMedia('(min-width: 992px)').matches) return;
+                if(sidebar.classList.contains('is-open')){
+                    if(!sidebar.contains(e.target) && !mobileOpen.contains(e.target)){
+                        sidebar.classList.remove('is-open');
+                        document.body.classList.remove('has-offcanvas');
+                    }
+                }
+            });
+    })();
+        </script>
+
+        {% block extra_js %}{% endblock %}
+</body>
+</html>

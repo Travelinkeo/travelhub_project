@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<title>Boleto Electrónico (Amadeus) - {{ solo_nombre_pasajero }}</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Open+Sans:wght@400;600&display=swap');
+
+/* Paleta AMADEUS (turquesa) */
+:root {
+  --tk-primary: #008B8B; /* Dark Turquoise */
+  --tk-accent: #00A8A8;  /* Lighter Turquoise */
+  --tk-text-dark: #1f2933;
+  --tk-text-light: #4b5563;
+  --tk-bg-light: #f8f9fa;
+  --tk-border-light: #e5e7eb;
+}
+
+@page { margin:0; size:A4; }
+* { box-sizing: border-box; }
+body { margin:0; font-family:'Open Sans',sans-serif; font-size:9.5pt; background:#eef7f7; color:var(--tk-text-light); }
+.ticket-container { width:210mm; min-height:297mm; margin:0 auto; background:#fff; display:flex; flex-direction:column; }
+.ticket-header { background: linear-gradient(100deg,var(--tk-primary), var(--tk-accent) 70%); color:#fff; padding:20px 30px; display:flex; justify-content:space-between; align-items:center; }
+.ticket-header img.logo { height:45px; }
+.header-contact { text-align:right; font-size:8pt; line-height:1.5; }
+.ticket-body { padding:25px 30px; flex-grow:1; }
+.ticket-body h1 { font-family:'Poppins',sans-serif; font-size:22pt; margin:0 0 25px; color:var(--tk-primary); font-weight:700; }
+.greeting { font-size:13pt; margin:0 0 24px; }
+.greeting span { font-weight:700; color:var(--tk-primary); }
+.info-section { margin-bottom:25px; }
+.section-header { display:flex; align-items:center; margin-bottom:12px; }
+.info-icon { width:40px; height:40px; border-radius:50%; background:#e0fbfb; display:flex; align-items:center; justify-content:center; margin-right:14px; }
+.info-icon svg { width:20px; height:20px; fill:var(--tk-accent); }
+.section-header h2 { font-family:'Poppins',sans-serif; font-size:14pt; font-weight:600; margin:0; color:var(--tk-primary); }
+.details-card { background:var(--tk-bg-light); border:1px solid var(--tk-border-light); border-radius:8px; padding:18px 20px; }
+.details-card p { margin:0 0 10px; line-height:1.5; }
+.details-card p:last-child { margin-bottom:0; }
+.details-card .label { font-weight:400; color:var(--tk-text-light); }
+.details-card .value { font-weight:600; color:var(--tk-text-dark); }
+.details-table { width:100%; border-collapse:collapse; table-layout:fixed; }
+.details-table td { width:50%; vertical-align:top; padding:0 10px 12px 0; word-wrap:break-word; }
+.details-table tr:last-child td { padding-bottom:0; }
+.itinerary-header { font-family:'Consolas','Courier New',monospace; font-weight:bold; font-size:9.5pt; background:#eef7f7; padding:4px 10px; border-radius:8px; border:1px solid var(--tk-border-light); line-height:1.6; white-space:pre-wrap; }
+.itinerary-section pre { font-family:'Consolas','Courier New',monospace; font-weight:600; font-size:9.5pt; background:#fff; padding:14px; border-radius:8px; border:1px solid var(--tk-border-light); line-height:1.6; white-space:pre-wrap; }
+.ticket-footer { background:var(--tk-bg-light); color:var(--tk-text-dark); padding:18px 35px; text-align:center; font-size:8pt; line-height:1.5; }
+.ticket-footer .thank-you { font-size:9pt; font-weight:600; margin-bottom:8px; }
+</style>
+</head>
+<body>
+  <div class="ticket-container">
+    <header class="ticket-header">
+      <!-- Reutilizar el mismo logo embebido o ajustar si Amadeus requiere otro -->
+      <img class="logo" src="{{ logo_base64|default:'' }}" alt="Logo Agencia">
+      <div class="header-contact">
+        TELEFONO: +0000000000<br>
+        EMAIL: info@agencia.com
+      </div>
+    </header>
+    <main class="ticket-body">
+      <h1>Boleto Electrónico Confirmado</h1>
+      <p class="greeting">Hola, <span>{{ solo_nombre_pasajero }}</span>. Tu reserva está confirmada. Aquí tienes los detalles:</p>
+
+      <div class="info-section">
+        <div class="section-header">
+          <div class="info-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+          </div>
+          <h2>Información del Pasajero</h2>
+        </div>
+        <div class="details-card">
+          <table class="details-table">
+            <tr>
+              <td><p><span class="label">Nombre:</span><br><span class="value">{{ nombre_del_pasajero }}</span></p></td>
+              <td><p><span class="label">Documento:</span><br><span class="value">{{ codigo_identificacion }}</span></p></td>
+            </tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="info-section">
+        <div class="section-header">
+          <div class="info-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M22 10V6c0-1.11-.9-2-2-2H4c-1.1 0-2 .89-2 2v4c1.1 0 2 .89 2 2s-.9 2-2 2v4c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2v-4c-1.1 0-2-.89-2-2s.9-2 2-2zm-4 4H6v-2h12v2zm0-4H6V8h12v2z"/></svg>
+          </div>
+          <h2>Detalles de la Reserva</h2>
+        </div>
+        <div class="details-card">
+          <table class="details-table">
+            <tr>
+              <td><p><span class="label">Código de Reserva:</span><br><span class="value">{{ solo_codigo_reserva }}</span></p></td>
+              <td><p><span class="label">Número de Boleto:</span><br><span class="value">{{ numero_de_boleto }}</span></p></td>
+            </tr>
+            <tr>
+              <td><p><span class="label">Fecha de Emisión:</span><br><span class="value">{{ fecha_de_emision }}</span></p></td>
+              <td><p><span class="label">Agente Emisor:</span><br><span class="value">{{ agente_emisor }}</span></p></td>
+            </tr>
+            <tr>
+              <td colspan="2"><p><span class="label">Aerolínea:</span><br><span class="value">{{ nombre_aerolinea }}</span></p></td>
+            </tr>
+            <tr>
+              <td colspan="2"><p><span class="label">Dirección:</span><br><span class="value">{{ direccion_aerolinea }}</span></p></td>
+            </tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="info-section">
+        <div class="section-header">
+          <div class="info-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg>
+          </div>
+          <h2>Itinerario de Vuelo</h2>
+        </div>
+        <div class="itinerary-header">FROM/TO     FLIGHT CL DATE  DEP  ARR  FARE BASIS      NVB    NVA   BAG  ST</div>
+        <div class="itinerary-section"><pre>{{ salidas }}</pre></div>
+      </div>
+
+    </main>
+    <footer class="ticket-footer">
+      <div class="thank-you">Gracias por elegirnos. ¡Te deseamos un excelente viaje!</div>
+      @AGENCIA | CONTACTO | DIRECCIÓN
+    </footer>
+  </div>
+</body>
+</html>

@@ -1,0 +1,16 @@
+{# Partial reutilizable de paginación #}
+{% if is_paginated %}
+<nav class="pagination d-flex gap-2 flex-wrap mt-3" aria-label="Paginación">
+    {% if page_obj.has_previous %}
+        <a class="btn btn-outline btn-sm" href="?page=1" aria-label="Primera página">&laquo;</a>
+        <a class="btn btn-outline btn-sm" href="?page={{ page_obj.previous_page_number }}" aria-label="Página anterior">Anterior</a>
+    {% endif %}
+
+    <span class="badge badge-info" style="user-select:none;">Página {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+
+    {% if page_obj.has_next %}
+        <a class="btn btn-outline btn-sm" href="?page={{ page_obj.next_page_number }}" aria-label="Página siguiente">Siguiente</a>
+        <a class="btn btn-outline btn-sm" href="?page={{ page_obj.paginator.num_pages }}" aria-label="Última página">&raquo;</a>
+    {% endif %}
+</nav>
+{% endif %}

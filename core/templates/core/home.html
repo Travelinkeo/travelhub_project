@@ -1,0 +1,44 @@
+{# Archivo: core/templates/core/home.html #}
+{% extends "core/base.html" %}
+
+{% block title %}Bienvenido a TravelHub{% endblock %}
+
+{% block content %}
+<section class="hero card p-4 mb-4">
+    <div class="d-flex flex-column gap-2">
+        <h1 class="mb-1" style="font-family: var(--font-heading); font-size: clamp(1.8rem,3vw,2.4rem); color: var(--brand-primary);">Explora. Reserva. Disfruta.</h1>
+        <p class="lead" style="max-width: 60ch;">Tu plataforma integral para emisión y gestión de boletos aéreos, control de itinerarios y creación de experiencias de viaje.</p>
+        <div class="d-flex gap-2 flex-wrap mt-1">
+            <a class="btn btn-primary" href="{% url 'core:lista_paquetes_cms' %}">Ver Paquetes</a>
+            <a class="btn btn-outline" href="{% url 'core:dashboard_boletos' %}">Dashboard Boletos</a>
+        </div>
+    </div>
+</section>
+
+<section class="grid gap-3" style="--cols: repeat(auto-fit,minmax(250px,1fr));">
+    <div class="card">
+        <div class="card-header">Gestión Centralizada</div>
+        <div class="card-body">
+            <p class="mb-0 small">Importa boletos de múltiples fuentes (Sabre, KIU) y genera PDFs consistentes con tu branding.</p>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header">Parseo Inteligente</div>
+        <div class="card-body">
+            <p class="mb-0 small">Normalización de datos: fechas ISO, divisas, CO₂ y múltiples tramos de itinerario.</p>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header">Automatización</div>
+        <div class="card-body">
+            <p class="mb-0 small">Generación automática de PDF al importar o capturar manualmente un boleto.</p>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header">Escalable</div>
+        <div class="card-body">
+            <p class="mb-0 small">Arquitectura preparada para añadir nuevos GDS y enriquecer features sin romper el flujo actual.</p>
+        </div>
+    </div>
+</section>
+{% endblock %}

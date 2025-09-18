@@ -4,9 +4,9 @@ import re
 import logging
 from .identification_utils import normalize_codigo_identificacion, extract_codigo_identificacion_anywhere
 from .utils import LOCATION_TOKENS, STOP_NAME_TOKENS
+from .sabre_parser import parse_sabre_ticket
 
 logger = logging.getLogger(__name__)
-import json
 import datetime as dt
 from decimal import Decimal, InvalidOperation
 from typing import Dict, Any, List, Optional, Tuple
@@ -15,206 +15,402 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 from bs4 import BeautifulSoup
 import os
 
-# --- Funciones de Ayuda Generales ---
+# --- Funciones de Ayuda Generales (Importadas desde parsing_utils) ---
+from .parsing_utils import (
+    _clean_value,
+    _parse_currency_amount,
+    _extract_field,
+    _extract_field_single_line,
+    _formatear_fecha_dd_mm_yyyy
+)
 
-def _extract_field(text: str, patterns: List[str], default: str = 'No encontrado') -> str:
-    for pattern in patterns:
-        match = re.search(pattern, text, re.IGNORECASE | re.DOTALL)
-        if match:
-            try:
-                return match.group(1).strip()
-            except IndexError:
-                return match.group(0).strip()
-    return default
+# --- Lógica de Parseo Específica para KIU (Restaurada y Completa) ---
 
-def _formatear_fecha_dd_mm_yyyy(fecha_str: str) -> str:
-    if not fecha_str: return fecha_str
-    try:
-        return dt.datetime.strptime(fecha_str.strip(), '%d %b %y').strftime('%d-%m-%Y')
-    except (ValueError, TypeError):
-        return fecha_str
+def _extract_block(texto: str, start_patterns: list, end_patterns: list, default='No encontrado') -> str:
+    start_regex = r'(?:' + '|'.join(start_patterns) + r')'
+    end_regex = r'(?:' + '|'.join(end_patterns) + r')'
+    pattern_str = r'(?is)' + start_regex + r'(.*?)' + r'(?=\s*' + end_regex + r')'
+    match = re.search(pattern_str, texto)
+    return match.group(1).strip() if match and match.group(1) else default
 
-def _fecha_a_iso(fecha_str: str) -> Optional[str]:
-    if not fecha_str: return None
-    try:
-        return dt.datetime.strptime(fecha_str.strip(), '%d-%m-%Y').strftime('%Y-%m-%d')
-    except (ValueError, TypeError):
-        return None
+def _get_numero_boleto(texto: str) -> str:
+    patterns = [
+        r"TICKET N[BR]O\s*[:\s]*([0-9-]{8,})",
+        r"TICKET'?S? NUMBER'?S?\s*[:\s]*([0-9-]{8,})",
+        r"TICKET NUMBER/NRO DE BOLETO\s*[:\s]*([0-9-]{8,})"
+    ]
+    return _extract_field_single_line(texto, patterns)
 
-def normalize_common_fields(raw: Dict[str, Any]) -> None:
-    try:
-        source = raw.get('SOURCE_SYSTEM')
-        normalized = {'source_system': source}
-        if source == 'SABRE':
-            normalized['ticket_number'] = raw.get('numero_boleto')
-            normalized['reservation_code'] = raw.get('codigo_reservacion')
-            normalized['reservation_code_full'] = raw.get('codigo_reservacion')
-            pasajero = raw.get('preparado_para')
-            normalized['passenger_name_raw'] = pasajero
-            if pasajero and '/' in pasajero:
-                ap, nom = pasajero.split('/',1)
-                normalized['passenger_name'] = f"{nom.strip()} {ap.strip()}".strip()
-            else:
-                normalized['passenger_name'] = pasajero
-            normalized['airline_name'] = raw.get('aerolinea_emisora')
-            normalized['issuing_agent'] = raw.get('agente_emisor')
-            normalized['issuing_date_iso'] = raw.get('fecha_emision_iso')
-            if raw.get('vuelos'):
-                segments = []
-                for idx, v in enumerate(raw.get('vuelos', []), start=1):
-                    seg = {
-                        'segment_index': idx,
-                        'source_system': 'SABRE',
-                        'flight_number': v.get('numero_vuelo'),
-                        'marketing_airline': v.get('aerolinea'),
-                        'origin': (v.get('origen') or {}).get('ciudad'),
-                        'destination': (v.get('destino') or {}).get('ciudad'),
-                        'departure_date_iso': v.get('fecha_salida_iso'),
-                        'departure_time': v.get('hora_salida'),
-                        'arrival_date_iso': None, 
-                        'arrival_time': v.get('hora_llegada'),
-                    }
-                    segments.append(seg)
-                normalized['segments'] = segments
-        raw['normalized'] = normalized
-    except Exception as e:
-        logger.exception("Fallo al generar bloque normalized: %s", e)
-        return
+def _get_fecha_emision(texto: str) -> str:
+    return _extract_field_single_line(texto, [
+        r'ISSUE DATE/FECHA DE EMISION\s*[:\s]*([0-9]{1,2}\s+[A-Z]{3}\s+[0-9]{4}\s+[0-9]{2}:[0-9]{2})',
+        r'ISSUE DATE\s*[:\s]*([0-9]{1,2}\s+[A-Z]{3}\s+[0-9]{4}\s+[0-9]{2}:[0-9]{2})'
+    ])
 
-# --- Lógica de Parseo Específica para SABRE (Versión Definitiva) ---
+def _get_agente_emisor(texto: str) -> str:
+    return _extract_field_single_line(texto, [
+        r'ISSUE AGENT/AGENTE EMISOR\s*[:\s]*([A-Z0-9]+)',
+        r'ISSUE AGENT\s*[:\s]*([A-Z0-9]+)'
+    ])
 
-def _parsear_itinerario_sabre_final(itinerario_texto: str) -> List[Dict[str, Any]]:
-    vuelos = []
-    if not itinerario_texto: return vuelos
+def _get_nombre_completo_pasajero(texto: str) -> str:
+    raw = _extract_field_single_line(texto, [
+        r'NAME/NOMBRE\s*[:\s]*([A-ZÁÉÍÓÚÑ/ (),.-]{3,})',
+        r'NAME\s*[:\s]*([A-ZÁÉÍÓÚÑ/ (),.-]{3,})'
+    ])
+    if raw == 'No encontrado':
+        return raw
 
-    bloques = re.split(r'(?=\d{2}\s+\w{3}\s+\d{2})', itinerario_texto)
-    
-    for bloque in bloques:
-        bloque = bloque.strip()
-        if not bloque: continue
+    upper_raw = raw.upper()
+    stop_tokens = STOP_NAME_TOKENS
+    cut_positions = []
+    for token in stop_tokens:
+        idx = upper_raw.find(token)
+        if idx != -1 and idx > 5:
+            cut_positions.append(idx)
 
-        flight_match = re.search(r'\b([A-Z0-9]{2}\s*\d{2,4})\b', bloque)
-        if not flight_match: continue
+    par_idx = raw.find('(')
+    if par_idx != -1 and par_idx > 4:
+        cut_positions.append(par_idx)
 
-        vuelo = {'numero_vuelo': flight_match.group(1).replace(' ', '')}
-        
-        all_dates = re.findall(r'(\d{2}\s+\w{3}\s+\d{2})', bloque)
-        if all_dates:
-            vuelo['fecha_salida'] = all_dates[0]
-            vuelo['fecha_llegada'] = all_dates[1] if len(all_dates) > 1 else all_dates[0]
+    if cut_positions:
+        raw = raw[:min(cut_positions)].rstrip()
 
-        vuelo['aerolinea'] = _extract_field(bloque, [r'\d{2}\s+\w{3}\s+\d{2}\s+(.+?)(?=\s+(?:SALIDA|DEPARTURE))'])
-        
-        origen_str = _extract_field(bloque, [r'(?:SALIDA|DEPARTURE)\s*([^\n]+?)\s*(?:LLEGADA|ARRIVAL)'])
-        destino_str = _extract_field(bloque, [r'(?:LLEGADA|ARRIVAL)\s*([^\n]+)'])
+    raw = re.sub(r'[^A-ZÁÉÍÓÚÑ/ ]+', ' ', raw.upper())
+    raw = re.sub(r'\s{2,}', ' ', raw).strip()
 
-        vuelo['origen'] = {"ciudad": origen_str, "pais": ""}
-        vuelo['destino'] = {"ciudad": destino_str, "pais": ""}
+    if '/' not in raw:
+        return raw
 
-        horas = re.findall(r'(\d{2}:\d{2})', bloque)
-        if len(horas) >= 2:
-            vuelo['hora_salida'] = horas[0]
-            vuelo['hora_llegada'] = horas[1]
+    apellidos, nombres = raw.split('/', 1)
+    nombres = nombres.strip()
 
-        vuelo['terminal_salida'] = _extract_field(bloque, [r'TERMINAL\s*:\s*(\S+)'])
-        vuelo['terminal_llegada'] = _extract_field(bloque, [r'TERMINAL\s*:\s*(\S+)\s*LLEGADA'])
-        vuelo['codigo_reservacion_local'] = _extract_field(bloque, [r'AEROLÍNEA\s*:\s*([A-Z0-9]{6})'])
-        vuelo['cabina'] = _extract_field(bloque, [r'CABINA\s*:\s*(\w+)'])
-        vuelo['equipaje'] = _extract_field(bloque, [r'EQUIPAJE PERMITIDO\s*:\s*(\S+)'])
+    LOCATION_TOKENS_SET = {t.upper() for t in LOCATION_TOKENS}
+    nombres = re.sub(r'(?:CIUDAD DE [A-ZÁÉÍÓÚÑ]{2,}(?:\s+[A-ZÁÉÍÓÚÑ]{2,})*)$', '', nombres).strip()
 
-        vuelos.append(vuelo)
+    tokens = nombres.split()
+    if len(tokens) > 1:
+        for i in range(1, len(tokens)):
+            tail = tokens[i:]
+            if tail and all(t in LOCATION_TOKENS_SET for t in tail):
+                tokens = tokens[:i]
+                break
+        else:
+            if tokens[-1] in LOCATION_TOKENS_SET:
+                tokens = tokens[:-1]
+    nombres_limpios = ' '.join(tokens)
+
+    nombres_limpios = re.sub(r'\s{2,}', ' ', nombres_limpios).strip()
+
+    return f"{apellidos.strip()}/{nombres_limpios}"
+
+def _get_solo_nombre_pasajero(nombre_completo: str) -> str:
+    if '/' in nombre_completo:
+        nombre_bruto = nombre_completo.split('/')[1]
+        return re.sub(r'\s*(MR|MS|MRS|CHD|INF)\s*$', '', nombre_bruto, flags=re.IGNORECASE).strip()
+    return nombre_completo
+
+def _get_codigo_identificacion(texto: str) -> str:
+    codigo = normalize_codigo_identificacion(texto)
+    if not codigo or codigo == 'No encontrado':
+        codigo = extract_codigo_identificacion_anywhere(texto)
+    return codigo
+
+def _get_solo_codigo_reserva(texto: str) -> str:
+    pattern = r"C1\s*/\s*([A-Z0-9]{6})"
+    match = re.search(pattern, texto, re.IGNORECASE)
+    if match and match.group(1):
+        return match.group(1).strip()
+    booking_ref_text = _extract_field(texto, [r'BOOKING REF\./CODIGO DE RESERVA\s*[:\s]*(.+)', r'BOOKING REF\.?\s*[:\s]*(.+)'])
+    if booking_ref_text != 'No encontrado':
+        match_pnr = re.search(r'\b([A-Z0-9]{6})\b', booking_ref_text)
+        if match_pnr:
+            return match_pnr.group(1)
+    return 'No encontrado'
+
+def _get_codigo_reserva_completo(solo_codigo: str) -> str:
+    if solo_codigo and solo_codigo != 'No encontrado':
+        if 'C1/' in solo_codigo.upper():
+            return solo_codigo
+        return f"C1/{solo_codigo}"
+    return 'No encontrado'
+
+def _extraer_itinerario_kiu(plain_text: str, html_text: str = "") -> str:
+    # Intento prioritario con HTML si está disponible
+    if html_text:
+        try:
+            soup = BeautifulSoup(html_text, 'html.parser')
+            pre_tags = soup.find_all('pre')
+            itinerary_content = []
+            capturing = False
             
-    return vuelos
+            start_keywords = ['FROM/TO', 'DESDE/HACIA']
+            end_keywords = ['ENDORSEMENTS', 'CONDICIONES', 'FARE CALC', 'TOUR CODE', 'PAYMENT', 'TOTAL', 'TAX/IMPUESTOS']
+            
+            for tag in pre_tags:
+                text_content = tag.get_text()
+                # Busca el inicio del bloque de itinerario
+                if any(keyword in text_content.upper() for keyword in start_keywords):
+                    lines = text_content.splitlines()
+                    for line in lines:
+                        stripped_line = line.strip()
+                        upper_line = stripped_line.upper()
+                        
+                        if not capturing and any(keyword in upper_line for keyword in start_keywords) and ('FLIGHT' in upper_line or 'VUELO' in upper_line):
+                            capturing = True
+                            # No añadir la línea de cabecera, sino lo que sigue
+                            continue
+                        
+                        if capturing:
+                            # Si se encuentra una palabra clave de fin, se detiene la captura
+                            if any(keyword in upper_line for keyword in end_keywords):
+                                capturing = False
+                                break
+                            if stripped_line:
+                                itinerary_content.append(stripped_line)
+                    
+                    # Si se capturó algo, se detiene la búsqueda en más tags <pre>
+                    if itinerary_content:
+                        break
+            
+            if itinerary_content:
+                logger.debug("Itinerario extraído exitosamente desde HTML.")
+                return '\n'.join(itinerary_content)
 
-def _parse_sabre_ticket(plain_text: str) -> Dict[str, Any]:
-    raw_data = {'SOURCE_SYSTEM': 'SABRE', 'errores': []}
+        except Exception as e:
+            logger.exception("Error durante la extracción HTML; intentando fallback a texto plano.")
 
-    header_block = re.search(r'(.*?)(?:Itinerary Details|Información De Vuelo)', plain_text, re.DOTALL)
-    itinerary_block = re.search(r'(?:Itinerary Details|Información De Vuelo)(.*?)(?=Aviso:|CONDICIONES DEL CONTRATO|Please contact)', plain_text, re.DOTALL)
+    # Fallback a texto plano si HTML falla o no está disponible
+    logger.warning("No se encontró itinerario HTML válido o no fue provisto; usando método de texto plano.")
     
-    header_text = header_block.group(1) if header_block else plain_text
-    itinerary_text = itinerary_block.group(1) if itinerary_block else ''
+    lines = plain_text.splitlines()
+    itinerary_content = []
+    capturing = False
 
-    # Extracción de datos crudos
-    raw_data['preparado_para'] = _extract_field(header_text, [r'(?:Preparado para|Prepared For)\s*([A-ZÁÉÍÓÚ/ ]+)'])
-    raw_data['documento_identidad'] = _extract_field(header_text, [r'\[([A-Z0-9]+)\]'])
-    raw_data['codigo_reservacion'] = _extract_field(header_text, [r'(?:CÓDIGO DE RESERVACIÓN|Reservation Code)\s*([A-Z0-9]{6})'])
-    raw_data['numero_cliente'] = _extract_field(header_text, [r'(?:NÚMERO DE CLIENTE|Customer Number)\s*([A-Z0-9]+)'])
+    start_pattern = r'(FROM/TO|DESDE/HACIA)[\s/]+(FLIGHT|VUELO)'
+    end_keywords = ['ENDORSEMENTS', 'CONDICIONES', 'FARE CALC', 'TOUR CODE', 'PAYMENT', 'TOTAL', 'TAX/IMPUESTOS', 'FRANQUICIA DE EQUIPAJE', 'CONDICIONES DE CONTRATO']
 
-    pattern_columnas_1 = re.compile(r"FECHA DE EMISIÓN\s+NÚMERO DE BOLETO\s+AEROLÍNEA EMISORA\s+([\d\w\s]+?)\s+(\d{13})\s+([^\n]+)", re.I)
-    match_columnas_1 = pattern_columnas_1.search(header_text)
-    if match_columnas_1:
-        raw_data['fecha_emision'] = match_columnas_1.group(1).strip()
-        raw_data['numero_boleto'] = match_columnas_1.group(2).strip()
-        raw_data['aerolinea_emisora'] = match_columnas_1.group(3).strip()
-    else:  
-        raw_data['fecha_emision'] = _extract_field(header_text, [r'(?:Issue Date|Fecha de Emision)\s+([^\n]+)'])
-        raw_data['numero_boleto'] = _extract_field(header_text, [r'(?:Ticket Number|Numero de Boleto)\s+(\d{13})'])
-        raw_data['aerolinea_emisora'] = _extract_field(header_text, [r'(?:Issuing Airline|Aerolinea Emisora)\s+([^\n]+)'])
+    for line in lines:
+        stripped_line = line.strip()
+        upper_line = stripped_line.upper()
 
-    pattern_columnas_2 = re.compile(r"AGENTE EMISOR\s+UBICACIÓN DEL AGENTE EMISOR\s+NÚMERO IATA\s+([^\n]+)\s+([^\n]+)\s+(\d+)", re.I)
-    match_columnas_2 = pattern_columnas_2.search(header_text)
-    if match_columnas_2:
-        raw_data['agente_emisor'] = match_columnas_2.group(1).strip()
-        raw_data['numero_iata'] = match_columnas_2.group(3).strip()
+        if not capturing and re.search(start_pattern, upper_line):
+            capturing = True
+            continue
 
-    raw_data['vuelos'] = _parsear_itinerario_sabre_final(itinerary_text)
+        if capturing:
+            if any(keyword in upper_line for keyword in end_keywords):
+                break
+            
+            if stripped_line and not re.fullmatch(r'[-_\s]+', stripped_line):
+                itinerary_content.append(stripped_line)
 
-    # Formateo de fechas
-    raw_data['fecha_emision_fmt'] = _formatear_fecha_dd_mm_yyyy(raw_data.get('fecha_emision', ''))
-    raw_data['fecha_emision_iso'] = _fecha_a_iso(raw_data.get('fecha_emision_fmt'))
+    if itinerary_content:
+        # Limpieza final: a veces la segunda línea del cabecero se cuela
+        if 'VUELO' in itinerary_content[0] and 'FECHA' in itinerary_content[0]:
+            itinerary_content.pop(0)
+        
+        logger.debug("Itinerario extraído exitosamente desde texto plano.")
+        return '\n'.join(itinerary_content)
 
-    vuelos_fmt = []
-    for v in raw_data.get('vuelos', []):
-        v['fecha_salida_iso'] = _fecha_a_iso(_formatear_fecha_dd_mm_yyyy(v.get('fecha_salida', '')))
-        v['fecha_llegada_iso'] = _fecha_a_iso(_formatear_fecha_dd_mm_yyyy(v.get('fecha_llegada', '')))
-        vuelos_fmt.append(v)
-    raw_data['vuelos'] = vuelos_fmt
+    return "No se pudo procesar el itinerario."
 
-    # Estructuración de datos para la plantilla
-    data_for_template = {
-        'pasajero': {
-            'nombre_completo': raw_data.get('preparado_para', 'No encontrado'),
-            'documento_identidad': raw_data.get('documento_identidad', 'No encontrado')
-        },
-        'reserva': {
-            'codigo_reservacion': raw_data.get('codigo_reservacion', 'No encontrado'),
-            'numero_boleto': raw_data.get('numero_boleto', 'No encontrado'),
-            'fecha_emision': raw_data.get('fecha_emision_fmt', 'No encontrado'),
-            'fecha_emision_iso': raw_data.get('fecha_emision_iso', 'No encontrado'),
-            'aerolinea_emisora': raw_data.get('aerolinea_emisora', 'No encontrado'),
-            'agente_emisor': {
-                'nombre': raw_data.get('agente_emisor', 'No encontrado'),
-                'numero_iata': raw_data.get('numero_iata', 'No encontrado')
-            }
-        },
-        'itinerario': {
-            'vuelos': raw_data.get('vuelos', [])
-        },
-        'raw_data': raw_data,
-        'SOURCE_SYSTEM': 'SABRE'
+def _get_tarifa(texto: str) -> str:
+    return _extract_field_single_line(texto, [
+        r'AIR FARE/TARIFA\s*[:\s]*([A-Z]{3}\s*[0-9,.]+)',
+        r'AIR FARE\s*[:\s]*([A-Z]{3}\s*[0-9,.]+)'
+    ])
+
+def _get_impuestos(texto: str) -> str:
+    start_patterns = [r'(?:TAX/IMPUESTOS|TAX)\s*:']
+    end_patterns = [r'TOTAL']
+    bloque_impuestos = _extract_block(texto, start_patterns, end_patterns, default="No encontrado")
+    if bloque_impuestos != "No encontrado":
+        lines = bloque_impuestos.strip().splitlines()
+        cleaned_lines = [re.sub(r'(USD|VES)', '', line).strip() for line in lines if line.strip()]
+        return ' '.join(cleaned_lines)
+    return "No encontrado"
+
+def _get_total(texto: str) -> str:
+    return _extract_field_single_line(texto, [r'TOTAL\s*[:\s]*([A-Z]{3}\s*[0-9,.]+)'])
+
+def _get_nombre_aerolinea(texto: str) -> str:
+    raw = _extract_field_single_line(texto, [
+        r'ISSUING AIRLINE/LINEA AEREA EMISORA\s*[:\s]*([A-Z0-9 ,.&-]{3,})',
+        r'ISSUING AIRLINE\s*[:\s]*([A-Z0-9 ,.&-]{3,})'
+    ])
+    if raw == 'No encontrado':
+        return raw
+    stop_tokens = [
+        ' ADDRESS', ' ISSUE', ' BOOKING REF', ' NAME/', ' FOID', ' TICKET', ' AIR FARE', ' TAX', ' TOTAL',
+        ' DESDE/HACIA', ' FROM/TO', ' C1/'
+    ]
+    upper_raw = raw.upper()
+    cut_positions: List[int] = []
+    for token in stop_tokens:
+        idx = upper_raw.find(token)
+        if idx > 5:
+            cut_positions.append(idx)
+    par_idx = raw.find('(')
+    if par_idx != -1 and par_idx > 4:
+        cut_positions.append(par_idx)
+    if cut_positions:
+        raw = raw[:min(cut_positions)].rstrip()
+    raw = re.sub(r'\s{2,}', ' ', raw)
+    raw = re.sub(r',\s*,+', ', ', raw)
+    tail_tokens = [' ISSUE', ' ADDRESS', ' TICKET', ' AIR FARE', ' TAX', ' TOTAL']
+    for tt in tail_tokens:
+        pos = raw.upper().find(tt)
+        if pos != -1 and pos > 10:
+            raw = raw[:pos].rstrip(', ').strip()
+            break
+    return raw.rstrip(', ')
+
+def _get_direccion_aerolinea(texto: str) -> str:
+    return _extract_field_single_line(texto, [
+        r'ADDRESS/DIRECCION\s*[:\s]*([A-Z0-9 .,/+-]{5,})',
+        r'ADDRESS\s*[:\s]*([A-Z0-9 .,/+-]{5,})'
+    ])
+
+def _parse_kiu_ticket(plain_text: str, html_text: str) -> Dict[str, Any]:
+    logger.info("--- INICIO DE PARSEO KIU ---")
+    nombre_completo = _get_nombre_completo_pasajero(plain_text)
+    solo_codigo = _get_solo_codigo_reserva(plain_text)
+    data = {
+        'SOURCE_SYSTEM': 'KIU',
+        'NUMERO_DE_BOLETO': _get_numero_boleto(plain_text),
+        'FECHA_DE_EMISION': _get_fecha_emision(plain_text),
+        'AGENTE_EMISOR': _get_agente_emisor(plain_text),
+        'NOMBRE_DEL_PASAJERO': nombre_completo,
+        'SOLO_NOMBRE_PASAJERO': _get_solo_nombre_pasajero(nombre_completo),
+        'CODIGO_IDENTIFICACION': _get_codigo_identificacion(plain_text),
+        'CODIGO_RESERVA': _get_codigo_reserva_completo(solo_codigo),
+        'SOLO_CODIGO_RESERVA': solo_codigo,
+        'NOMBRE_AEROLINEA': _get_nombre_aerolinea(plain_text),
+        'DIRECCION_AEROLINEA': _get_direccion_aerolinea(plain_text),
+        'TARIFA': _get_tarifa(plain_text),
+        'IMPUESTOS': _get_impuestos(plain_text),
+        'TOTAL': _get_total(plain_text),
+        'ItinerarioFinalLimpio': _extraer_itinerario_kiu(plain_text, html_text),
     }
+    tarifa_moneda, tarifa_importe = _parse_currency_amount(data['TARIFA'])
+    total_moneda, total_importe = _parse_currency_amount(data['TOTAL'])
+    data['TARIFA_MONEDA'] = tarifa_moneda
+    data['TARIFA_IMPORTE'] = str(tarifa_importe) if tarifa_importe is not None else None
+    data['TOTAL_MONEDA'] = total_moneda
+    data['TOTAL_IMPORTE'] = str(total_importe) if total_importe is not None else None
+    logger.info("Datos KIU extraídos y normalizados correctamente.")
+    return data
 
-    normalize_common_fields(raw_data)
-    data_for_template['normalized'] = raw_data['normalized']
+# --- Lógica de Parseo para Amadeus y Travelport (Placeholders) ---
 
-    return data_for_template
+def _parse_amadeus_ticket(plain_text: str) -> Dict[str, Any]:
+    return {"SOURCE_SYSTEM": "AMADEUS", "error": "Parser para Amadeus no implementado."}
 
+def _parse_travelport_ticket(plain_text: str) -> Dict[str, Any]:
+    return {"SOURCE_SYSTEM": "TRAVELPORT", "error": "Parser para Travelport no implementado."}
 
 # --- PUNTO DE ENTRADA PRINCIPAL ---
 
 def extract_data_from_text(plain_text: str, html_text: str = "", pdf_path: Optional[str] = None) -> Dict[str, Any]:
+    """
+    Detecta el GDS del boleto y llama al parser correspondiente.
+    """
     plain_text_upper = plain_text.upper()
-    found_sabre = any([
-        ('ITINERARY DETAILS' in plain_text_upper or 'INFORMACIÓN DE VUELO' in plain_text_upper),
-        ('PREPARED FOR' in plain_text_upper or 'PREPARADO PARA' in plain_text_upper) and ('RESERVATION CODE' in plain_text_upper or 'CÓDIGO DE RESERVACIÓN' in plain_text_upper),
-        ('ETICKET RECEIPT' in plain_text_upper or 'RECIBO DE BOLETO ELECTRÓNICO' in plain_text_upper) and ('RESERVATION CODE' in plain_text_upper or 'CÓDIGO DE RESERVACIÓN' in plain_text_upper),
-    ])
-    if found_sabre:
-        logger.info("Detectado GDS: SABRE (parser sabre activado)")
-        return _parse_sabre_ticket(plain_text)
+    logger.info("Iniciando detección de GDS...")
+
+    # Heurística para Sabre (muy común)
+    if 'ETICKET RECEIPT' in plain_text_upper and 'RESERVATION CODE' in plain_text_upper:
+        logger.info("GDS detectado: SABRE. Procesando...")
+        return parse_sabre_ticket(plain_text)
+
+    # Heurística para KIU
+    if 'KIUSYS.COM' in plain_text_upper or 'PASSENGER ITINERARY RECEIPT' in plain_text_upper:
+        logger.info("GDS detectado: KIU. Procesando...")
+        return _parse_kiu_ticket(plain_text, html_text)
+
+    # Fallback: Si no se detecta un GDS claro, intentar con Sabre como último recurso.
+    logger.warning("No se pudo determinar el GDS del boleto; intentando con Sabre como fallback.")
+    sabre_result = parse_sabre_ticket(plain_text)
     
-    logger.warning("No se pudo determinar el GDS del boleto; retornando datos vacíos.")
-    unknown = {"error": "GDS no reconocido", "SOURCE_SYSTEM": None}
-    normalize_common_fields(unknown)
-    return unknown
+    if sabre_result and 'error' not in sabre_result:
+        logger.info("Parseo con fallback de Sabre tuvo éxito.")
+        return sabre_result
+
+    logger.error("Fallo final del parseo. No se pudo procesar el boleto con ningún parser disponible.")
+    return {"error": "No se pudo reconocer el GDS del boleto y el intento de fallback falló."}
+
+# --- GENERACIÓN DE PDF ---
+
+def generate_ticket(data: Dict[str, Any]) -> Tuple[bytes, str]:
+    """Genera un PDF a partir de los datos parseados, seleccionando la plantilla correcta."""
+    source_system = data.get('SOURCE_SYSTEM', 'KIU')
+    
+    # Define el directorio base de las plantillas de tickets
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    template_dir = os.path.join(base_dir, 'templates', 'core', 'tickets')
+    env = Environment(loader=FileSystemLoader(template_dir), autoescape=select_autoescape(['html', 'xml']))
+
+    if source_system.startswith('SABRE'):
+        template_name = "ticket_template_sabre.html"
+        
+        # Adaptador para la nueva estructura de datos de Sabre (IA o Regex)
+        pasajero_data = data.get('pasajero', {})
+        reserva_data = data.get('reserva', {})
+        itinerario_data = data.get('itinerario', {})
+        agente_data = reserva_data.get('agente_emisor', {})
+
+        # Corregido: Construir el contexto con la estructura anidada que la plantilla espera
+        context = {
+            'pasajero': {
+                'nombre_completo': pasajero_data.get('nombre_completo', ''),
+                'documento_identidad': pasajero_data.get('documento_identidad', '-')
+            },
+            'reserva': {
+                'codigo_reservacion': reserva_data.get('codigo_reservacion', ''),
+                'numero_boleto': reserva_data.get('numero_boleto', ''),
+                'fecha_emision': _formatear_fecha_dd_mm_yyyy(reserva_data.get('fecha_emision_iso', '')),
+                'aerolinea_emisora': reserva_data.get('aerolinea_emisora', ''),
+                'agente_emisor': {
+                    'nombre': agente_data.get('nombre', ''),
+                    'numero_iata': agente_data.get('numero_iata', '-')
+                }
+            },
+            'itinerario': {
+                'vuelos': itinerario_data.get('vuelos', [])
+            },
+        }
+    else: # Default para KIU
+        template_name = "ticket_template_kiu.html"
+        context = {
+            'solo_nombre_pasajero': data.get('SOLO_NOMBRE_PASAJERO', ''),
+            'solo_codigo_reserva': data.get('SOLO_CODIGO_RESERVA', ''),
+            'numero_de_boleto': data.get('NUMERO_DE_BOLETO', ''),
+            'nombre_del_pasajero': data.get('NOMBRE_DEL_PASAJERO', ''),
+            'codigo_identificacion': data.get('CODIGO_IDENTIFICACION', ''),
+            'fecha_de_emision': data.get('FECHA_DE_EMISION', ''),
+            'agente_emisor': data.get('AGENTE_EMISOR', ''),
+            'nombre_aerolinea': data.get('NOMBRE_AEROLINEA', ''),
+            'direccion_aerolinea': data.get('DIRECCION_AEROLINEA', ''),
+            'salidas': data.get('ItinerarioFinalLimpio', ''),
+        }
+    
+    try:
+        template = env.get_template(template_name)
+        html_out = template.render(context)
+    except Exception as e:
+        logger.error(f"Error al renderizar la plantilla {template_name}: {e}")
+        return b'', "error_template.pdf"
+
+    try:
+        from weasyprint import HTML
+        pdf_bytes = HTML(string=html_out, base_url=base_dir).write_pdf()
+    except Exception as e:
+        raise RuntimeError(f"WeasyPrint no está disponible. Error: {e}")
+
+    timestamp = dt.datetime.now().strftime("%Y%m%d%H%M%S")
+    ticket_num_raw = context.get('reserva', {}).get('numero_boleto') or data.get("NUMERO_DE_BOLETO", "SIN_TICKET")
+    ticket_num_for_file = re.sub(r'[\\/*?:",<>|]', "", _clean_value(ticket_num_raw)).replace(" ", "_") or "SIN_TICKET"
+    file_name = f"Boleto_{ticket_num_for_file}_{timestamp}.pdf" 
+    
+    return pdf_bytes, file_name

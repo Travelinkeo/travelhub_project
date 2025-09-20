@@ -6,12 +6,12 @@
 <div class="card mb-4">
   <div class="card-header d-flex justify-between align-center">
       <div>
-          <h2 class="mb-0" style="font-size:1.1rem;">Resumen de Ventas por Categoría</h2>
+          <h2 class="mb-0 heading-sm">Resumen de Ventas por Categoría</h2>
           <p class="small text-muted mb-0">Totales acumulados de items de venta registrados.</p>
       </div>
   </div>
   <div class="card-body p-0">
-    <div class="table-wrapper" style="--table-font-size:0.75rem;">
+  <div class="table-wrapper table-xxs">
       <table class="table is-striped is-hover">
         <thead>
           <tr>
@@ -46,7 +46,7 @@
 <div class="card mb-4">
   <div class="card-header d-flex justify-between align-center">
       <div>
-          <h2 class="mb-0" style="font-size:1.1rem;">Dashboard de Boletos Importados</h2>
+          <h2 class="mb-0 heading-sm">Dashboard de Boletos Importados</h2>
           <p class="small text-muted mb-0">Listado de boletos subidos y procesados automáticamente.</p>
       </div>
       <div class="d-flex gap-2 flex-wrap">
@@ -61,7 +61,7 @@
       </div>
   </div>
   <div class="card-body p-0">
-    <div class="table-wrapper" style="--table-font-size:0.72rem;">
+  <div class="table-wrapper table-xxs-alt">
       <table class="table is-striped is-hover is-sticky-header">
         <thead>
             <tr>
@@ -97,7 +97,7 @@
                 <td>{{ boleto.tarifa_base|default:"-" }}</td>
                 <td>{{ boleto.impuestos_total_calculado|default:"-" }}</td>
                 <td>{{ boleto.total_boleto|default:"-" }}</td>
-                <td><div style="max-height: 100px; overflow-y: auto; white-space: pre-wrap;">{{ boleto.ruta_vuelo|default:"-" }}</div></td>
+                <td><div class="scroll-box-sm">{{ boleto.ruta_vuelo|default:"-" }}</div></td>
                 <td>
                     <span class="badge" data-status="{{ boleto.estado_parseo }}">{{ boleto.get_estado_parseo_display }}</span>
                 </td>
@@ -122,7 +122,7 @@
             <tr class="table-danger">
                 <td colspan="14">
                     <strong>Log de Error:</strong>
-                    <pre style="white-space: pre-wrap; max-height: 200px; overflow-y: auto; background-color: #f8d7da; padding: 10px; border-radius: 5px;">{{ boleto.log_parseo }}</pre>
+                    <pre class="error-log-box">{{ boleto.log_parseo }}</pre>
                 </td>
             </tr>
             {% endif %}

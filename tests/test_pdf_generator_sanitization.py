@@ -1,13 +1,13 @@
-import sys, os
-import re
+import os
+
 import pytest
+
+from core.pdf_generator import generate_ticket_pdf
 
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(PROJECT_ROOT)
-if ROOT not in sys.path:
-    sys.path.insert(0, ROOT)
 
-from core.pdf_generator import generate_ticket_pdf
+
 
 @pytest.mark.parametrize("raw_name,expected", [
     ("DUQUE ECHEVERRY/OSCA (CIUDAD DE PANAMA)", "DUQUE ECHEVERRY/OSCA"),
@@ -36,4 +36,4 @@ def test_pdf_name_sanitization(raw_name, expected):
     # (Chequeo indirecto: el data mutado en generate_ticket_pdf ya está limpio)
     assert data['NOMBRE_DEL_PASAJERO'] == expected
     # Validación ligera de que se generó algo
-    assert isinstance(pdf_bytes, (bytes, bytearray)) and len(pdf_bytes) > 1000
+    assert isinstance(pdf_bytes, bytes | bytearray) and len(pdf_bytes) > 1000

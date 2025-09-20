@@ -1,5 +1,7 @@
-import pytest
-from core.identification_utils import normalize_codigo_identificacion, extract_codigo_identificacion_anywhere
+from core.identification_utils import (
+    extract_codigo_identificacion_anywhere,
+    normalize_codigo_identificacion,
+)
 
 CASOS_INLINE = [
     ("NAME/NOMBRE:  DUQUE ECHEVERRY/OSCA (FLORIDA) FOID/D.IDENTIDAD: IDEPPE151144 OFFICE ID: US-16445-0", "IDEPPE151144"),

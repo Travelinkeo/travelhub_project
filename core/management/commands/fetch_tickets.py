@@ -1,15 +1,15 @@
 # Archivo: core/management/commands/fetch_tickets.py
 
-import imaplib
 import email
+import imaplib
 from email.header import decode_header
-import os
 
-from django.core.management.base import BaseCommand
 from django.conf import settings
 from django.core.files.base import ContentFile
+from django.core.management.base import BaseCommand
 
-from core.models import BoletoImportado
+from core.models.boletos import BoletoImportado
+
 
 class Command(BaseCommand):
     help = 'Revisa el correo electrónico configurado, descarga nuevos boletos de Kiu y los guarda en la base de datos para ser procesados.'
@@ -76,7 +76,7 @@ class Command(BaseCommand):
                     boleto.archivo_boleto.save(filename, ContentFile(raw_email_bytes), save=True)
                     
                     self.stdout.write(self.style.SUCCESS(f"Boleto guardado con el ID {boleto.id_boleto_importado} y el archivo {filename}."))
-                    self.stdout.write(f"El procesamiento automático (parseo) se ha iniciado en segundo plano.")
+                    self.stdout.write("El procesamiento automático (parseo) se ha iniciado en segundo plano.")
 
                     # Marcar el correo como leído
                     mail.store(email_id, '+FLAGS', '\\Seen')

@@ -1,10 +1,12 @@
 import csv
 import json
 from pathlib import Path
-from typing import Iterable
+
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
-from core.models import Pais, Ciudad, Moneda, Proveedor, Cliente, ProductoServicio
+
+from core.models.personas import Cliente
+from core.models_catalogos import Ciudad, Moneda, Pais, ProductoServicio, Proveedor
 
 CATALOG_FILES = {
     'paises': 'fixtures/paises.json',
@@ -54,7 +56,7 @@ class Command(BaseCommand):
                 else:  # csv
                     data = self._read_csv(file_path)
             except Exception as e:
-                raise CommandError(f"Error leyendo {file_path}: {e}")
+                raise CommandError(f"Error leyendo {file_path}: {e}") from e
             if not isinstance(data, list):
                 raise CommandError(f"El archivo {file_path} debe contener una lista de objetos")
             created, updated, skipped = 0, 0, 0
@@ -62,7 +64,9 @@ class Command(BaseCommand):
                 with transaction.atomic():
                     for row in data:
                         c, u, s = self._process_row(cat, row, upsert)
-                        created += c; updated += u; skipped += s
+                        created += c
+                        updated += u
+                        skipped += s
             else:
                 for row in data:
                     # Simular uniqueness heurística

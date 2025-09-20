@@ -1,16 +1,17 @@
+
 import pytest
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
-from core.models import Moneda, Cliente, ProductoServicio, Venta, FeeVenta, PagoVenta, SegmentoVuelo, Ciudad, Pais, Proveedor
-from decimal import Decimal
-from django.utils import timezone
+
+from core.models.personas import Cliente
+from core.models_catalogos import Ciudad, Moneda, Pais, ProductoServicio, Proveedor
 
 pytestmark = pytest.mark.integration
 
 @pytest.fixture
 def api_client(db):
     User = get_user_model()
-    user = User.objects.create_user(username='tester', password='pass123', is_staff=True)
+    User.objects.create_user(username='tester', password='pass123', is_staff=True)
     client = APIClient()
     client.login(username='tester', password='pass123')
     return client

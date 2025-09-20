@@ -1,6 +1,8 @@
 import pytest
 from django.test import override_settings
+
 from core.utils import sanitize_passenger_name
+
 
 @pytest.mark.unit
 @override_settings(PASSENGER_FIRST_NAME_WHITELIST=["PANAMA"])  # For test, treat PANAMA as a valid first name

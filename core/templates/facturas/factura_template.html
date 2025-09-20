@@ -1,0 +1,173 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Factura {{ factura.numero_factura }}</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Lato', sans-serif;
+            font-size: 12px;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 100%;
+            margin: 20px;
+        }
+        .header, .footer {
+            width: 100%;
+        }
+        .header .company-details {
+            width: 50%;
+            float: left;
+        }
+        .header .invoice-details {
+            width: 50%;
+            float: right;
+            text-align: right;
+        }
+        .invoice-details h1 {
+            margin: 0;
+            color: #000;
+            font-size: 36px;
+            font-weight: bold;
+        }
+        .invoice-details p {
+            margin: 2px 0;
+            font-size: 14px;
+        }
+        .billing-info {
+            clear: both;
+            padding-top: 40px;
+            padding-bottom: 40px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border-bottom: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+        thead th {
+            background-color: #222;
+            color: #fff;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .totals {
+            float: right;
+            width: 40%;
+            margin-top: 20px;
+        }
+        .totals table td {
+            border: none;
+            padding: 5px 8px;
+        }
+        .totals table tr.total-final td {
+            font-weight: bold;
+            font-size: 16px;
+            background-color: #f0f0f0;
+        }
+        .notes, .terms {
+            clear: both;
+            margin-top: 30px;
+        }
+        .notes h3, .terms h3 {
+            font-size: 14px;
+            border-bottom: 1px solid #555;
+            padding-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="company-details">
+                <!-- TODO: Reemplazar con datos de la empresa desde settings o un modelo -->
+                <h2>Travelinkeo</h2>
+                <p>Servicios Travelinkeo 1331 C.A.</p>
+                <p>CALLE PROLONGACION ZULOAGA EDIF Q PISO 1 APT 4 URB</p>
+                <p>CARACAS, DISTRITO CAPITAL, 1040, VENEZUELA</p>
+            </div>
+            <div class="invoice-details">
+                <h1>Factura</h1>
+                <p># {{ factura.numero_factura }}</p>
+                <p><strong>Fecha de la factura:</strong> {{ factura.fecha_emision|date:"d M Y" }}</p>
+                <p><strong>Fecha de vencimiento:</strong> {{ factura.fecha_vencimiento|date:"d M Y" }}</p>
+            </div>
+        </div>
+
+        <div class="billing-info">
+            <h4>Facturar a</h4>
+            <p><strong>{{ factura.cliente.get_nombre_completo }}</strong></p>
+            <p>{{ factura.cliente.direccion|linebreaksbr }}</p>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Servicio & Descripción</th>
+                    <th style="text-align: right;">Cantidad</th>
+                    <th style="text-align: right;">Tarifa</th>
+                    <th style="text-align: right;">Monto</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in factura.items_factura.all %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ item.descripcion }}</td>
+                    <td style="text-align: right;">{{ item.cantidad|floatformat:2 }}</td>
+                    <td style="text-align: right;">{{ item.precio_unitario|floatformat:2 }}</td>
+                    <td style="text-align: right;">{{ item.subtotal_item|floatformat:2 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="totals">
+            <table>
+                <tr>
+                    <td>Subtotal:</td>
+                    <td style="text-align: right;">{{ factura.subtotal|floatformat:2 }} {{ factura.moneda.simbolo }}</td>
+                </tr>
+                <tr>
+                    <td>Impuestos:</td>
+                    <td style="text-align: right;">{{ factura.monto_impuestos|floatformat:2 }} {{ factura.moneda.simbolo }}</td>
+                </tr>
+                <tr class="total-final">
+                    <td><strong>Total:</strong></td>
+                    <td style="text-align: right;"><strong>{{ factura.monto_total|floatformat:2 }} {{ factura.moneda.simbolo }}</strong></td>
+                </tr>
+                 <tr>
+                    <td>Pago realizado:</td>
+                    <td style="text-align: right;">(-) {{ factura.monto_pagado|default:"0.00"|floatformat:2 }} {{ factura.moneda.simbolo }}</td>
+                </tr>
+                <tr class="total-final">
+                    <td><strong>Saldo adeudado:</strong></td>
+                    <td style="text-align: right;"><strong>{{ factura.saldo_pendiente|floatformat:2 }} {{ factura.moneda.simbolo }}</strong></td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="notes">
+            <h3>Notas</h3>
+            <p>{{ factura.notas|default:"Travelinkeo, Marca tu Destino" }}</p>
+        </div>
+
+        <div class="terms">
+            <h3>T_rminos y condiciones</h3>
+            <p>{{ factura.terminos|default:"Se emite en virtud del articulo 10 de la Ley de I.V.A. Venta por Cuenta de Terceros" }}</p>
+        </div>
+
+    </div>
+</body>
+</html>

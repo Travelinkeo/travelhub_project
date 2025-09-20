@@ -1,15 +1,33 @@
 # Archivo: core/serializers.py
 from rest_framework import serializers
+
 from .models import (
-    Pais, Ciudad, Moneda, Cliente, Proveedor, ProductoServicio,
-    Cotizacion, ItemCotizacion,
-    PlanContable, AsientoContable, DetalleAsiento,
-    Venta, ItemVenta, Factura, ItemFactura,
-    BoletoImportado,
-    SegmentoVuelo, AlojamientoReserva, TrasladoServicio, ActividadServicio,
-    FeeVenta, PagoVenta
+    ActividadServicio,
+    AlojamientoReserva,
+    AlquilerAutoReserva,
+    AsientoContable,
+    AuditLog,
+    CircuitoDia,
+    CircuitoTuristico,
+    Ciudad,
+    Cliente,
+    DetalleAsiento,
+    EventoServicio,
+    Factura,
+    FeeVenta,
+    ItemFactura,
+    ItemVenta,
+    Moneda,
+    PagoVenta,
+    Pais,
+    PaqueteAereo,
+    ProductoServicio,
+    SegmentoVuelo,
+    ServicioAdicionalDetalle,
+    TrasladoServicio,
+    Venta,
+    VentaParseMetadata,
 )
-from django.utils.translation import gettext_lazy as _
 
 # --- Serializadores de Modelos Compartidos/Básicos (para anidamiento o consulta) ---
 
@@ -184,6 +202,58 @@ class ActividadServicioSerializer(serializers.ModelSerializer):
             'venta': {'write_only': True, 'required': True}
         }
 
+class AlquilerAutoReservaSerializer(serializers.ModelSerializer):
+    # source='margen_amount' es redundante porque el método @property ya coincide con el nombre del campo.
+    margen_amount = serializers.DecimalField(max_digits=12, decimal_places=2, read_only=True)
+    margen_pct = serializers.SerializerMethodField()
+    class Meta:
+        model = AlquilerAutoReserva
+        fields = '__all__'
+    def get_margen_pct(self, obj):
+        return float(obj.margen_pct) if obj.margen_pct is not None else None
+
+class EventoServicioSerializer(serializers.ModelSerializer):
+    margen_amount = serializers.DecimalField(max_digits=12, decimal_places=2, read_only=True)
+    margen_pct = serializers.SerializerMethodField()
+    class Meta:
+        model = EventoServicio
+        fields = '__all__'
+    def get_margen_pct(self, obj):
+        return float(obj.margen_pct) if obj.margen_pct is not None else None
+
+class CircuitoDiaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CircuitoDia
+        fields = '__all__'
+
+class CircuitoTuristicoSerializer(serializers.ModelSerializer):
+    dias = CircuitoDiaSerializer(many=True, read_only=True)
+    margen_amount = serializers.DecimalField(max_digits=12, decimal_places=2, read_only=True)
+    margen_pct = serializers.SerializerMethodField()
+    class Meta:
+        model = CircuitoTuristico
+        fields = '__all__'
+    def get_margen_pct(self, obj):
+        return float(obj.margen_pct) if obj.margen_pct is not None else None
+
+class PaqueteAereoSerializer(serializers.ModelSerializer):
+    margen_amount = serializers.DecimalField(max_digits=12, decimal_places=2, read_only=True)
+    margen_pct = serializers.SerializerMethodField()
+    class Meta:
+        model = PaqueteAereo
+        fields = '__all__'
+    def get_margen_pct(self, obj):
+        return float(obj.margen_pct) if obj.margen_pct is not None else None
+
+class ServicioAdicionalDetalleSerializer(serializers.ModelSerializer):
+    margen_amount = serializers.DecimalField(max_digits=12, decimal_places=2, read_only=True)
+    margen_pct = serializers.SerializerMethodField()
+    class Meta:
+        model = ServicioAdicionalDetalle
+        fields = '__all__'
+    def get_margen_pct(self, obj):
+        return float(obj.margen_pct) if obj.margen_pct is not None else None
+
 class FeeVentaSerializer(serializers.ModelSerializer):
     tipo_fee_display = serializers.CharField(source='get_tipo_fee_display', read_only=True)
     moneda_detalle = MonedaSerializer(source='moneda', read_only=True)
@@ -220,6 +290,11 @@ class VentaSerializer(serializers.ModelSerializer):
     alojamientos = AlojamientoReservaSerializer(many=True, read_only=True)
     traslados = TrasladoServicioSerializer(many=True, read_only=True)
     actividades = ActividadServicioSerializer(many=True, read_only=True)
+    alquileres_autos = AlquilerAutoReservaSerializer(many=True, read_only=True)
+    eventos_servicios = EventoServicioSerializer(many=True, read_only=True)
+    circuitos_turisticos = CircuitoTuristicoSerializer(many=True, read_only=True)
+    paquetes_aereos = PaqueteAereoSerializer(many=True, read_only=True)
+    servicios_adicionales = ServicioAdicionalDetalleSerializer(many=True, read_only=True)
     fees_venta = FeeVentaSerializer(many=True, read_only=True)
     pagos_venta = PagoVentaSerializer(many=True, read_only=True)
     cliente_detalle = ClienteSerializer(source='cliente', read_only=True)
@@ -228,6 +303,11 @@ class VentaSerializer(serializers.ModelSerializer):
     tipo_venta_display = serializers.CharField(source='get_tipo_venta_display', read_only=True)
     canal_origen_display = serializers.CharField(source='get_canal_origen_display', read_only=True)
     puntos_fidelidad_asignados = serializers.BooleanField(read_only=True)
+    # Campos de consistencia monetaria provenientes del parseo de boletos (cuando existan)
+    amount_consistency = serializers.CharField(read_only=True, required=False, allow_null=True)
+    amount_difference = serializers.CharField(read_only=True, required=False, allow_null=True)
+    taxes_amount_expected = serializers.CharField(read_only=True, required=False, allow_null=True)
+    taxes_difference = serializers.CharField(read_only=True, required=False, allow_null=True)
 
     class Meta:
         model = Venta
@@ -237,13 +317,16 @@ class VentaSerializer(serializers.ModelSerializer):
             'tipo_venta', 'tipo_venta_display', 'canal_origen', 'canal_origen_display',
             'subtotal', 'impuestos', 'total_venta', 'monto_pagado', 'saldo_pendiente',
             'margen_estimado', 'co2_estimado_kg',
-            'estado', 'estado_display', 'asiento_contable_venta', 'notas',
+            'estado', 'estado_display', 'asiento_contable_venta', 'notas', 'creado_por',
             'items_venta', 'segmentos_vuelo', 'alojamientos', 'traslados', 'actividades', 'fees_venta', 'pagos_venta',
-            'puntos_fidelidad_asignados'
+            'alquileres_autos', 'eventos_servicios', 'circuitos_turisticos', 'paquetes_aereos', 'servicios_adicionales',
+            'puntos_fidelidad_asignados',
+            'amount_consistency', 'amount_difference', 'taxes_amount_expected', 'taxes_difference'
         ]
         read_only_fields = (
-            'localizador', 'total_venta', 'saldo_pendiente', 'fecha_venta',
-            'segmentos_vuelo', 'alojamientos', 'traslados', 'actividades', 'fees_venta', 'pagos_venta'
+            'localizador', 'total_venta', 'saldo_pendiente', 'fecha_venta', 'creado_por',
+            'segmentos_vuelo', 'alojamientos', 'traslados', 'actividades', 'fees_venta', 'pagos_venta',
+            'alquileres_autos', 'eventos_servicios', 'circuitos_turisticos', 'paquetes_aereos', 'servicios_adicionales'
         )
         extra_kwargs = {
             'cliente': {'write_only': True, 'allow_null': False, 'required': True},
@@ -339,3 +422,50 @@ class FacturaSerializer(serializers.ModelSerializer):
                 ItemFactura.objects.create(factura=instance, **item_data)
         
         return instance
+
+class VentaParseMetadataSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = VentaParseMetadata
+        fields = [
+            'id_metadata','venta','fuente','currency','fare_amount','taxes_amount','total_amount',
+            'amount_consistency','amount_difference','taxes_amount_expected','taxes_difference',
+            'segments_json','raw_normalized_json','creado'
+        ]
+        read_only_fields = ('creado',)
+
+# --- Serializadores para Integración con IA ---
+
+class ItinerarioSegmentoSerializer(serializers.Serializer):
+    origen_iata = serializers.CharField(max_length=3, required=False)
+    destino_iata = serializers.CharField(max_length=3, required=False)
+    numero_vuelo = serializers.CharField(max_length=10, required=False)
+    fecha_salida = serializers.DateTimeField(required=False)
+
+    class Meta:
+        fields = ['origen_iata', 'destino_iata', 'numero_vuelo', 'fecha_salida']
+
+class GeminiBoletoParseadoSerializer(serializers.Serializer):
+    localizador_pnr = serializers.CharField(max_length=10)
+    nombre_pasajero_completo = serializers.CharField(max_length=150)
+    numero_boleto = serializers.CharField(max_length=50, required=False, allow_null=True)
+    aerolinea_emisora = serializers.CharField(max_length=100, required=False, allow_null=True)
+    tarifa_base = serializers.DecimalField(max_digits=10, decimal_places=2, required=False, allow_null=True)
+    impuestos_total = serializers.DecimalField(max_digits=10, decimal_places=2, required=False, allow_null=True)
+    total_boleto = serializers.DecimalField(max_digits=10, decimal_places=2)
+    itinerario = ItinerarioSegmentoSerializer(many=True, required=False)
+
+    def create(self, validated_data):
+        # La lógica de creación se manejará en la vista que use este serializador.
+        # Por ahora, solo devolvemos los datos validados.
+        return validated_data
+
+
+class AuditLogSerializer(serializers.ModelSerializer):
+    venta_localizador = serializers.CharField(source='venta.localizador', read_only=True)
+    class Meta:
+        model = AuditLog
+        fields = [
+            'id_audit_log','modelo','object_id','venta','venta_localizador','accion','descripcion',
+            'datos_previos','datos_nuevos','metadata_extra','creado'
+        ]
+        read_only_fields = fields

@@ -1,14 +1,12 @@
-import os
-import sys
 import json
+import os
+
+from core.pdf_generator import generate_ticket_pdf as legacy_generate_ticket_pdf
+from core.ticket_parser import extract_data_from_text
 
 # Asegurar ruta del proyecto
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-if BASE_DIR not in sys.path:
-    sys.path.insert(0, BASE_DIR)
 
-from core.ticket_parser import extract_data_from_text
-from core.pdf_generator import generate_ticket_pdf as legacy_generate_ticket_pdf
 
 DEFAULT_SAMPLE = '0457281019415.txt'
 SABRE_DIR = os.path.join(BASE_DIR, 'external_ticket_generator', 'SABRE')
@@ -25,7 +23,7 @@ def main():
         print(f"No se encontró archivo en {target}")
         return
 
-    with open(target, 'r', encoding='utf-8') as f:
+    with open(target, encoding='utf-8') as f:
         plain_text = f.read()
 
     print('--- Iniciando parseo Sabre (texto plano copiado) ---')

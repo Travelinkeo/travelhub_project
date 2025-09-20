@@ -1,7 +1,7 @@
 import pytest
 from django.urls import reverse
-from django.core.files.uploadedfile import SimpleUploadedFile
-from core.models import BoletoImportado
+
+from core.models.boletos import BoletoImportado
 
 pytestmark = pytest.mark.django_db
 

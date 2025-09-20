@@ -1,9 +1,11 @@
+import os
+
 import pytest
-import sys, os
-PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-if PROJECT_ROOT not in sys.path:
-    sys.path.insert(0, PROJECT_ROOT)
+
 from core import ticket_parser
+
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+
 
 SAMPLE_KIU_TEXT = """
 ISSUING AIRLINE/LINEA AEREA EMISORA: RUTAS AEREAS DE VENEZUELA RAV, SA ISSUE DATE/FECHA DE EMISION: 17 AUG 2025 19:14
@@ -13,9 +15,11 @@ TICKET NRO: 364-0260391273
 
 EXPECTED_NAME = "RUTAS AEREAS DE VENEZUELA RAV, SA"
 
+
 def test_nombre_aerolinea_no_se_contamina():
-    nombre = ticket_parser._get_nombre_aerolinea(SAMPLE_KIU_TEXT)
+    nombre = ticket_parser._kiu_get_nombre_aerolinea(SAMPLE_KIU_TEXT)
     assert nombre == EXPECTED_NAME
+
 
 @pytest.mark.parametrize(
     "line,expected",
@@ -28,5 +32,5 @@ def test_nombre_aerolinea_no_se_contamina():
     ],
 )
 def test_cortes_por_tokens(line, expected):
-    nombre = ticket_parser._get_nombre_aerolinea(line)
+    nombre = ticket_parser._kiu_get_nombre_aerolinea(line)
     assert nombre == expected

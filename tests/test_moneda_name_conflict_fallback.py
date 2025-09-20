@@ -1,7 +1,10 @@
 import json
+
 import pytest
 from django.core.management import call_command
-from core.models import Moneda
+
+from core.models_catalogos import Moneda
+
 
 @pytest.mark.unit
 @pytest.mark.django_db

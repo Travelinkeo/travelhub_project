@@ -8,19 +8,20 @@
     <title>{% block title %}TravelHub Agencia{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <link rel="stylesheet" href="{% static 'css/branding.css' %}">
+    <link rel="stylesheet" href="{% static 'css/layout.css' %}">
     <meta name="theme-color" content="#333333">
     {% block extra_head %}{% endblock %}
 </head>
 <body>
     <header class="site-header">
         <div class="site-header__inner">
-            <div class="brand-logo" style="display:flex; align-items:center; gap:.6rem;">
-                <a href="{% url 'core:home' %}" style="display:flex; align-items:center; gap:.6rem; text-decoration:none;">
-                    <img src="{% static 'images/SVG/LOGO.svg' %}" alt="TravelHub Logo" style="height:40px; width:auto; display:block;" />
-                    <span style="font-family:var(--font-heading); font-size:1.15rem; font-weight:600; color:#fff; letter-spacing:.5px;">TravelHub</span>
+            <div class="brand-logo">
+                <a href="{% url 'core:home' %}">
+                    <img src="{% static 'images/SVG/LOGO.svg' %}" alt="TravelHub Logo" />
+                    <span>TravelHub</span>
                 </a>
             </div>
-            <button id="themeToggle" class="btn btn--ghost" type="button" aria-label="Alternar tema" title="Alternar tema" style="font-size:.75rem; margin-left:auto;">🌙</button>
+            <button id="themeToggle" class="btn btn--ghost" type="button" aria-label="Alternar tema" title="Alternar tema">🌙</button>
         </div>
     </header>
 
@@ -64,6 +65,15 @@
             <div class="app-sidebar__footer">UI 1.2 • Beta</div>
         </aside>
         <main class="layout-main fade-in" id="mainContent">
+            {% if messages %}
+                <div class="messages-container">
+                    {% for message in messages %}
+                        <div class="message {{ message.tags }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
             <button id="sidebarMobileOpen" class="sidebar-mobile-open" type="button" aria-label="Abrir menú">☰</button>
             {% block content %}
             <p>Bienvenido a TravelHub. Contenido por defecto.</p>
@@ -73,26 +83,26 @@
     <footer class="site-footer">
         <div class="site-footer__inner">
             <div>
-                <h4 class="mb-1" style="color:#fff; font-family:var(--font-heading);">TravelHub</h4>
-                <p class="mb-2" style="font-size:.75rem; line-height:1.4;">Agencia de viajes: emisión de boletos, reservas y experiencias personalizadas.</p>
-                <p style="font-size:.7rem;">Tel: +58 412 3312314<br>Mail: travelinkeo@gmail.com</p>
+                <h4 class="mb-1">TravelHub</h4>
+                <p class="mb-2">Agencia de viajes: emisión de boletos, reservas y experiencias personalizadas.</p>
+                <p class="small-note">Tel: +58 412 3312314<br>Mail: travelinkeo@gmail.com</p>
             </div>
             <div>
-                <h5 class="mb-1" style="color:#fff; font-size:.8rem; letter-spacing:.5px; text-transform:uppercase;">Navegación</h5>
-                <ul style="list-style:none; padding:0; margin:0; font-size:.75rem;">
+                <h5 class="mb-1">Navegación</h5>
+                <ul class="nav-simple-list">
                     <li><a href="{% url 'core:home' %}">Inicio</a></li>
                     <li><a href="{% url 'core:lista_paquetes_cms' %}">Paquetes</a></li>
                     <li><a href="/admin/">Admin</a></li>
                 </ul>
             </div>
             <div>
-                <h5 class="mb-1" style="color:#fff; font-size:.8rem; letter-spacing:.5px; text-transform:uppercase;">Legal</h5>
-                <p style="font-size:.7rem; line-height:1.4;">Términos y condiciones<br>Política de privacidad<br>Cookies</p>
+                <h5 class="mb-1">Legal</h5>
+                <p class="legal-block">Términos y condiciones<br>Política de privacidad<br>Cookies</p>
             </div>
         </div>
         <div class="footer-bottom">&copy; {% now "Y" %} TravelHub Agencia. Todos los derechos reservados.</div>
         </footer>
-        <script>
+        <script nonce="{{ csp_nonce }}">
         (function(){
             // Dark mode
             const STORAGE_KEY = 'th_theme';

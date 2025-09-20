@@ -16,6 +16,52 @@ TravelHub es una aplicación web integral diseñada para agencias de viajes, com
 * API REST para CRUD de ventas, facturas y asientos contables.
 * Importación y parseo de Boletos (PDF/TXT/EML) de KIU, SABRE, AMADEUS.
 
+## Manual de Usuario: Flujo de Venta y Contabilidad
+
+Esta guía describe el proceso completo desde la importación de un boleto hasta la generación de documentos contables.
+
+### Paso 1: Importación y Creación de la Venta
+
+1.  **Subir un Boleto:** En el panel de administración, ve a "Boletos Importados" y haz clic en "Añadir Boleto Importado". Selecciona un archivo de boleto (`.pdf`, `.eml`, `.txt`) y guárdalo.
+2.  **Proceso Automático:** Al guardar, el sistema automáticamente:
+    *   Parsea el boleto y extrae toda la información relevante.
+    *   Crea o actualiza una **Venta** agrupando todos los boletos que compartan el mismo **Localizador**.
+    *   La `Venta` se crea **sin un Cliente asignado**, lista para ser procesada.
+
+### Paso 2: Enriquecimiento de la Venta (Costos y Ganancias)
+
+1.  **Ir a la Venta:** Ve a la sección "Ventas / Reservas". Busca la venta creada en el paso anterior (puedes usar el localizador para encontrarla).
+2.  **Añadir Detalles Financieros:** Haz clic en la venta para ver su detalle. En la sección inferior **"Items de Venta/Reserva"**, verás los boletos como items individuales. Aquí puedes rellenar los campos financieros:
+    *   **Proveedor del Servicio:** Asigna el proveedor que emitió el boleto.
+    *   **Costo Neto Proveedor:** El costo base del servicio.
+    *   **Fee Emisión Proveedor:** El fee que cobra el proveedor por la emisión.
+    *   **Comisión Agencia (Monto):** La comisión que ganas del proveedor.
+    *   **Fee Interno Agencia:** Tu fee de servicio propio.
+3.  **Guardar los Cambios:** Una vez rellenados los datos, guarda la `Venta`.
+
+### Paso 3: Facturación al Cliente
+
+1.  **Seleccionar la Venta:** En la lista de "Ventas / Reservas", marca la casilla de la venta que acabas de editar.
+2.  **Ejecutar Acción de Facturar:** En el menú desplegable de "Acciones" (en la parte superior), selecciona **"Asignar Cliente y Generar Factura"** y haz clic en "Ir".
+3.  **Asignar Cliente:** En la página intermedia, selecciona el `Cliente` al que le vas a facturar y haz clic en "Confirmar y Facturar".
+4.  **Resultado:**
+    *   La `Venta` ahora tendrá el cliente asignado.
+    *   Se creará una nueva `Factura` en la sección "Facturas de Clientes".
+    *   Esta `Factura` tendrá un **PDF adjunto**, generado automáticamente con el formato de tu modelo.
+
+### Paso 4: Liquidación al Proveedor (Cuentas por Pagar)
+
+1.  **Seleccionar la Venta:** Vuelve a la lista de "Ventas / Reservas" y selecciona la misma venta (que ahora ya tiene cliente y factura).
+2.  **Ejecutar Acción de Liquidar:** En el menú de "Acciones", selecciona **"Generar Liquidación a Proveedor(es)"** y haz clic en "Ir".
+3.  **Resultado:**
+    *   El sistema calculará automáticamente cuánto se le debe a cada proveedor involucrado en la venta, usando la fórmula: `(Costo Neto + Fee Proveedor) - Comisión Agencia`.
+    *   Se creará un nuevo registro en la sección **"Liquidaciones a Proveedores"** (que ahora es visible en el menú principal del admin).
+    *   Este registro representa una **cuenta por pagar** al proveedor.
+
+Este flujo de trabajo te permite mantener un control detallado de cada etapa del proceso de venta.
+
+---
+
 ## Detalles Técnicos
 
 * **Backend:** Django 5.x, Django REST Framework.
@@ -23,6 +69,62 @@ TravelHub es una aplicación web integral diseñada para agencias de viajes, com
 * **Frontend (inicial):** Django Templates. PWA básica.
 * **Parseo de Boletos:** PyMuPDF, expresiones regulares.
 * **Configuración:** Español, Zona Horaria América/Caracas.
+
+## Integración Continua (CI) y Calidad de Código
+
+Se incluye un pipeline de GitHub Actions (`.github/workflows/ci.yml`) que se ejecuta en pushes y pull requests contra `main` y `master`.
+
+Etapas principales:
+1. Lint & Tests (matriz Python 3.12 / 3.13)
+    * `ruff check .` (estilo, errores comunes, seguridad básica, orden de imports)
+    * `ruff format --check .` (verifica formateo consistente)
+    * `pytest --cov --cov-report=xml --cov-fail-under=71 -q` (baseline actual 71%)
+    * Publicación de `coverage.xml` como artifact.
+2. Auditoría de dependencias
+    * `pip-audit` genera `pip-audit.json` (artifact) y marca el job si encuentra vulnerabilidades.
+
+Archivos de configuración relevantes:
+* `requirements-dev.txt`: dependencias de desarrollo (ruff, black, isort, pytest-cov, coverage, pip-audit).
+* `.ruff.toml`: reglas de lint/format (line-length=100, select de errores y seguridad básica).
+* `.coveragerc`: fuentes medidas (excluye migraciones, tests, `manage.py`).
+
+### Ejecución Local Rápida
+
+```bash
+pip install -r requirements-dev.txt
+ruff check .
+ruff format .  # Para aplicar formateo automático (opcional)
+pytest --cov -q
+```
+
+Para ver líneas faltantes:
+```bash
+pytest --cov --cov-report=term-missing
+```
+
+Si necesitas exigir un umbral distinto localmente:
+```bash
+pytest --cov --cov-fail-under=80 -q
+```
+
+### Auditoría de Dependencias Local
+```bash
+pip install pip-audit
+pip-audit
+```
+
+### Filosofía
+* El umbral de cobertura actual (71%) refleja el primer incremento sobre el estado de partida (70%) sin bloquear PRs.
+* Plan: incrementos pequeños (1–2 puntos) por iteración: próximo objetivo 73% y luego 75%; después avanzar a 80–85% priorizando módulos críticos.
+* Objetivo estratégico: >85% en lógica de dominio (`core/models.py`, parsers y utilidades de auditoría).
+* `ruff` reemplaza a múltiples herramientas (flake8, isort, pyupgrade, algunas reglas de seguridad) simplificando mantenimiento.
+
+### Próximos Mejores Pasos (Opcional)
+* Añadir `pip-audit` en modo SARIF para integración con la pestaña de seguridad de GitHub.
+* Incorporar `bandit` para análisis estático adicional de seguridad.
+* Generar badge de cobertura con un paso que procese `coverage.xml` (o usar Codecov).
+* Cache selectivo de la carpeta `.pytest_cache` para acelerar builds.
+
 
 ## Instalación
 
@@ -46,18 +148,23 @@ TravelHub es una aplicación web integral diseñada para agencias de viajes, com
     cp .env.example .env
     ```
 
-5.  **Realizar migraciones de la base de datos:**
+5.  **Levantar Postgres (opcional recomendado) con docker-compose:**
     ```bash
-    python manage.py makemigrations core
-    python manage.py migrate
+    docker-compose up -d db
+    ```
+    Ajusta variables en `.env` (ver `.env.example`). Si no defines `POSTGRES_HOST` el sistema usará SQLite como fallback.
+
+6.  **Realizar migraciones de la base de datos:**
+    ```bash
+    python manage.py migprate
     ```
 
-6.  **Crear un superusuario (administrador):**
+7.  **Crear un superusuario (administrador):**
     ```bash
     python manage.py createsuperuser
     ```
 
-7.  **Cargar datos iniciales (fixtures):**
+8.  **Cargar datos iniciales (fixtures):**
     ```bash
     python manage.py loaddata paises.json
     python manage.py loaddata monedas.json
@@ -105,6 +212,25 @@ Si un país referenciado no existe se detiene con error (para visibilidad) salvo
 Campos opcionales ignorados simplemente no se actualizan salvo que se utilice `--upsert`.
 
 Para CSV: proveer encabezados equivalentes (`nombre,pais_codigo_iso_2,region_estado`).
+
+## Autenticación (Legacy Token vs JWT)
+
+Actualmente coexisten dos mecanismos mientras se completa la migración:
+
+1. Legacy Token (endpoint `/api/auth/login/`) devuelve `{"token": "..."}`.
+2. JWT (endpoints SimpleJWT):
+    * Obtener par: `POST /api/auth/jwt/obtain/ {"username": "u", "password": "p"}` → `{access, refresh}`
+    * Refresh: `POST /api/auth/jwt/refresh/ {"refresh": "..."}` → nuevo `access` (y opcional nuevo `refresh`).
+    * Verificar: `POST /api/auth/jwt/verify/ {"token": "..."}`.
+    * Logout (blacklist refresh): `POST /api/auth/jwt/logout/ {"refresh": "..."}`.
+
+El frontend (`frontend/src/lib/api.ts`) ya soporta ambos (`login` y `loginJwt`). Nuevo desarrollo debe preferir JWT.
+
+Rotación configurada (`ROTATE_REFRESH_TOKENS=True`, `BLACKLIST_AFTER_ROTATION=True`). Ajusta lifetimes mediante variables:
+```
+JWT_ACCESS_MINUTES=15
+JWT_REFRESH_DAYS=7
+```
 
 ## Uso
 
@@ -172,6 +298,107 @@ python -m pytest -q tests/test_sabre_parser_enhanced.py
 * Consolidar un esquema pydantic para validación estricta.
 * Manejo de timezone y duración de vuelo calculada.
 * Captura de equipaje detallada (peso/piezas) y estatus del segmento.
+
+## Contrato de Normalización (`normalized`)
+
+Cada parseo de boleto (KIU, SABRE y futuros) inyecta un bloque `normalized` en el dict resultante mediante `normalize_common_fields`. Este bloque provee una interfaz estable para consumo por API, generación de PDF, analítica y futuras integraciones sin depender de claves específicas de cada GDS.
+
+### Campos Base
+| Clave | Tipo | Descripción |
+|-------|------|-------------|
+| source_system | str | GDS de origen (`KIU`, `SABRE`, etc.). |
+| ticket_number | str/None | Número de boleto si se detecta (con guiones o limpio según fuente). |
+| reservation_code | str/None | PNR limpio (sin prefijo `C1/` para KIU). |
+| reservation_code_full | str/None | PNR completo (ej. `C1/ABC123`). |
+| passenger_name_raw | str/None | Nombre crudo `APELLIDOS/NOMBRES`. |
+| passenger_name | str/None | Nombre legible (`Nombres Apellidos`). |
+| airline_name | str/None | Nombre de la aerolínea emisora (cuando disponible). |
+| issuing_agent | str/None | Agente emisor. |
+| issuing_date_iso | str/None | Fecha emisión en formato `YYYY-MM-DD`. |
+| fare_currency / fare_amount | str / str | Moneda y monto base de la tarifa. |
+| total_currency / total_amount | str / str | Moneda y monto total cobrado. |
+| taxes_currency / taxes_amount | str / str | Derivado (o reportado) = total - fare, misma moneda. |
+| itinerary_text | str/None | Texto crudo del itinerario (cuando no hay estructura completa). |
+| segments | list[dict] | Segmentos estructurados (ver abajo). |
+
+### Segmentos (`segments`)
+Cada elemento incluye (cuando se puede inferir):
+| Clave | Descripción |
+|-------|-------------|
+| segment_index | Índice 1-based. |
+| source_system | GDS de origen del segmento. |
+| flight_number | Número de vuelo (sin separar código marketing). |
+| marketing_airline | Código de aerolínea (2 letras) inferido del vuelo. |
+| origin / destination | Código de ciudad/IATA (KIU heurístico, SABRE desde texto estructurado). |
+| departure_date_iso / arrival_date_iso | Fechas ISO. Arrival se infiere (+1 día) si cruza medianoche. |
+| departure_time / arrival_time | Horas `HH:MM` si disponibles. |
+| cabin | Cabina (SABRE). |
+| baggage_allowance | Franquicia equipaje (SABRE). |
+| terminal_departure / terminal_arrival | Terminales si se detectan. |
+| co2_value / co2_unit | Emisiones de CO2 (si aparecen). |
+| duration_minutes | Duración calculada (SABRE) soporta cruce de medianoche. |
+| layover_minutes | Minutos de conexión respecto al segmento previo (SABRE multi‑tramo). |
+
+Limitaciones actuales KIU: segmentos sin horas y sin arrival_date por falta de datos explícitos; se provee sólo flight_number, origin, destination y (si es posible) departure_date_iso derivada de la fecha de emisión + token ddMMM.
+
+### Consistencia de Montos
+Para entradas con `fare`, `taxes` (reportado o derivado) y `total` en la misma moneda:
+* `amount_consistency`: `OK` si ambas condiciones se cumplen (|total - (fare+taxes)| ≤ 0.01 y |taxes - (total - fare)| ≤ 0.01) o `MISMATCH` en caso contrario.
+* `amount_difference`: `total - (fare + taxes)` (signado) en formato `±DD.DD`.
+* `taxes_amount_expected`: Valor esperado de taxes (= total - fare).
+* `taxes_difference`: taxes_reportado - taxes_esperado.
+* En mismatch puede añadirse `amount_difference_taxes` (sinónimo de `taxes_difference`).
+
+Se registran `logger.warning` con detalles del boleto cuando hay mismatch para facilitar auditoría.
+
+### Reglas y Fallbacks
+1. No se eliminan claves originales del parseo bruto; `normalized` sólo añade.
+2. Si faltan fechas de segmento pero hay horas, se usa `issuing_date_iso` como fallback para permitir cálculo de duración y layover.
+3. `taxes_amount` sólo se calcula si no viene proporcionado (para poder detectar inconsistencias si la fuente ya lo entregó).
+4. Tolerancia monetaria fija: 0.01 (puede parametrizarse en el futuro). 
+
+### Evolución Planeada
+| Mejora | Estado |
+|--------|--------|
+| Mapear origin/destination a códigos IATA normalizados | Pendiente |
+| Añadir horas/arrival completas en KIU | Pendiente |
+| Parser Amadeus/Travelport alimentando mismo contrato | Pendiente |
+| Validación cruzada fare + taxes = total con múltiples monedas (multi‑cambio) | Pendiente |
+| Exponer contrato en documentación OpenAPI/DRF | Pendiente |
+
+### Ejemplo de Uso
+```python
+from core import ticket_parser
+
+raw = ticket_parser._parse_sabre_ticket(sabre_text)
+n = raw["normalized"]
+if n.get('amount_consistency') == 'MISMATCH':
+    # trigger alerta o registrar auditoría
+    pass
+for seg in n.get('segments', []):
+    print(seg['flight_number'], seg['departure_date_iso'], seg['duration_minutes'])
+```
+
+Esto permite desacoplar la representación interna de cada GDS de los consumidores aguas arriba (API, PDFs, BI).
+
+## Auditoría (Logs de Eliminación)
+
+Implementación de auditoría con acciones `CREATE`, `UPDATE`, `DELETE` (Venta, ItemVenta) y `STATE` (cambios de estado de Venta).
+
+Endpoint API (solo lectura, autenticado): `/api/audit-logs/` (sin paginación por ahora). Admite filtros por `modelo`, `accion`, rango de fechas (`created_from`, `created_to`) y búsqueda en `object_id`/`descripcion` vía `?search=`.
+
+Evolución planificada: creación (`CREATE`), actualización (`UPDATE` con diffs compactos, `DELETE`, `STATE`)
+ con detalles completos en `AUDIT.md`.
+
+Resumen rápido del modelo `AuditLog`:
+* `modelo` + `object_id`
+* `accion` (`CREATE`, `UPDATE` con diff reducido, `DELETE`, `STATE`)
+* `venta` (FK opcional; actualmente `CASCADE`)
+* `descripcion` y campos prev/nuevos (se usan para `STATE`)
+* Diffs en `metadata_extra.diff` para `UPDATE` (lista blanca de campos de texto)
+* `metadata_extra` extensible (ej: `venta_id`, `diff`)
+
+Ver documentación ampliada: `AUDIT.md`.
 
 ## Esquema de Colores por GDS (PDF Tickets)
 
@@ -282,3 +509,97 @@ Estados operativos / avanzados (solo cambian manualmente o por procesos de negoc
 * Políticas de puntos por tipo de producto / margen.
 * Hooks para notificaciones (email / webhooks) al llegar a `PAG` o `COM`.
 
+## Componentes de Venta y Metadata Ampliada
+
+Se introdujo el modelo `VentaParseMetadata` para snapshots de parseo de boletos (KIU / SABRE) con campos de consistencia monetaria (`amount_consistency`, `amount_difference`, `taxes_amount_expected`, `taxes_difference`) y estructura de segmentos (`segments_json`). Las propiedades dinámicas en `Venta` exponen el snapshot más reciente sin duplicar columnas.
+
+### Nuevos Modelos de Componentes (Multi‑Producto)
+
+Ampliación de la plataforma para manejar más tipos de producto dentro de una misma `Venta`:
+
+| Modelo | Propósito | Notas |
+|--------|----------|-------|
+| `AlquilerAutoReserva` | Reservas de autos | Ciudades de retiro/devolución, categoría, compañía, seguro. |
+| `EventoServicio` | Tickets / eventos puntuales | Fecha/hora, ubicación, asiento / zona. |
+| `CircuitoTuristico` | Itinerario multi‑día | Agrupa días (`CircuitoDia`), descripción general. |
+| `CircuitoDia` | Día individual del circuito | Ciudad, actividades/resumen, unicidad (circuito, día_numero). |
+| `PaqueteAereo` | Paquete combinado (vuelos + hotel, etc.) | Campo JSON flexible `resumen_componentes`. |
+| `ServicioAdicionalDetalle` | Servicios complementarios | Tipos enumerados (Seguro, SIM, Lounge, etc.). |
+
+Todos referencian `Venta` mediante `ForeignKey` y se exponen en el `VentaSerializer` como listas read‑only:
+`alquileres_autos`, `eventos_servicios`, `circuitos_turisticos`, `paquetes_aereos`, `servicios_adicionales`.
+
+### Endpoints API
+
+Prefijo `/api/` (router DRF):
+
+```
+alquileres-autos/
+eventos-servicios/
+circuitos-turisticos/
+circuitos-dias/
+paquetes-aereos/
+servicios-adicionales/
+```
+
+### Ejemplo Creación (JSON)
+
+```json
+POST /api/alquileres-autos/
+{
+    "venta": 123,
+    "categoria_auto": "SUV",
+    "compania_rentadora": "Hertz"
+}
+```
+
+### Pruebas
+
+Archivo `tests/test_new_components_api.py` cubre:
+1. Creación de cada modelo vía API (201 esperado).
+2. Asociación correcta a `Venta`.
+3. Presencia de las colecciones en el detalle de `Venta`.
+
+### Próximos Pasos Recomendados
+
+1. Validaciones específicas (fechas coherentes retiro/devolución, cálculo automático `dias_total`).
+2. Índices DB (e.g. `tipo_servicio`, `fecha_evento`, combinados para filtros frecuentes).
+3. Permisos granulares por tipo de componente.
+4. Esquema validado para `PaqueteAereo.resumen_componentes` (pydantic / JSON Schema).
+5. KPI/Margen por componente (análisis de rentabilidad). 
+6. Reglas de propagación (al eliminar `Venta`, reporte agregado en auditoría previa).
+
+## Notas de migración y refactor
+
+**Septiembre 2025:**
+- Se aceptó la migración `0016` generada por Django debido a un cambio en el import path del validador de campos de catálogos tras modularización progresiva (`core/models_catalogos.py`).
+- La decisión se tomó para mantener la modularidad y evitar revertir la separación de modelos, ya que el cambio no afecta el schema real sino la referencia interna del validador.
+- Se recomienda documentar cualquier migración futura causada por cambios en paths de import o validadores personalizados.
+- El middleware de seguridad fue ajustado para generar el nonce CSP antes de la vista y propagarlo a templates, asegurando coincidencia entre header y atributo `nonce` en scripts.
+
+---
+
+### Comando de Importación de Pasajeros
+
+Se ha añadido un comando de gestión para facilitar la carga masiva de pasajeros desde un archivo Excel.
+
+*   **Comando:** `python manage.py importar_pasajeros "C:\ruta\completa\a\tu\archivo.xlsx"`
+*   **Ubicación del script:** `personas/management/commands/importar_pasajeros.py`
+
+**Formato del Archivo Excel:**
+
+El comando espera un archivo `.xlsx` con las siguientes columnas obligatorias:
+*   `Apellido`
+*   `Nombre`
+*   `Numero de Documento`
+
+**Funcionamiento:**
+
+*   El comando lee cada fila del archivo.
+*   Utiliza el `Numero de Documento` como identificador único.
+*   Si un pasajero con ese número de documento ya existe, actualiza su nombre y apellido.
+*   Si no existe, crea un nuevo registro de pasajero.
+*   Informa en la consola el resultado de cada fila (creado, actualizado, omitido por datos faltantes o error).
+
+```
+```

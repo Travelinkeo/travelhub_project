@@ -4,9 +4,9 @@
 {% block title %}{{ pagina.titulo }} - TravelHub{% endblock %}
 
 {% block content %}
-<article class="card fade-in" style="max-width:900px;">
-    <header class="card-header" style="font-size:1.05rem;">{{ pagina.titulo }}</header>
-    <div class="flow" style="--flow-space:1rem; font-size:.9rem; line-height:1.55;">
+<article class="card fade-in w-max-900">
+    <header class="card-header card-header-md">{{ pagina.titulo }}</header>
+    <div class="flow flow-rich">
         {{ pagina.contenido|safe }}
     </div>
 </article>

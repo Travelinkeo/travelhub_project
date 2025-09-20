@@ -1,6 +1,6 @@
 # Utilidades compartidas (quick win DRY)
-from typing import Any, Iterable
 import re
+from typing import Any
 
 # Tokens de ubicación usados para recortar contaminación en nombres de pasajero.
 # Incluye tanto frases compuestas como tokens individuales; fusiona listas previas de ticket_parser/pdf_generator.
@@ -32,12 +32,14 @@ def get_first_name_whitelist() -> set[str]:
         from django.conf import settings  # type: ignore
         custom = getattr(settings, 'PASSENGER_FIRST_NAME_WHITELIST', None)
         if custom:
-            if isinstance(custom, (set, list, tuple)):
+            if isinstance(custom, set | list | tuple):
                 return {str(x).upper() for x in custom}
             # Permitir string separada por comas
             if isinstance(custom, str):
                 return {s.strip().upper() for s in custom.split(',') if s.strip()}
-    except Exception:
+    except (ImportError, AttributeError):
+        # This happens when Django settings are not configured, e.g. in isolated scripts.
+        # In this case, we fall back to the default whitelist.
         pass
     return {n.upper() for n in DEFAULT_FIRST_NAME_WHITELIST}
 
@@ -121,3 +123,45 @@ def truncate_on_stop_tokens(upper_text: str) -> str:
         if idx != -1:
             return upper_text[:idx].strip()
     return upper_text
+
+# --- Audit Hash Chain Utilities ---
+def verify_audit_chain(limit: int | None = None) -> tuple[bool, int | None, str | None]:
+    """Verifica la cadena de hashes de AuditLog.
+
+    Retorna (ok, break_id, reason). Si ok es True, break_id y reason serán None.
+    Si False, break_id es el id_audit_log donde se detectó ruptura y reason una breve explicación.
+    Param limit permite cortar la verificación a los N registros más antiguos recientes (útil para pruebas parciales).
+    """
+    try:
+        from core.models.ventas import (
+            AuditLog,  # import local para evitar ciclos al importar utils en models
+        )
+        qs = AuditLog.objects.all().order_by('creado', 'id_audit_log')
+        if limit:
+            qs = qs[:limit]
+        prev_hash = None
+        import hashlib
+        import json
+        for log in qs:
+            # Validar previous_hash coincide con la cadena esperada
+            if log.previous_hash != prev_hash:
+                return False, log.id_audit_log, 'previous_hash mismatch'
+            payload = {
+                'modelo': log.modelo,
+                'object_id': log.object_id,
+                'accion': log.accion,
+                'descripcion': log.descripcion or '',
+                'datos_previos': log.datos_previos,
+                'datos_nuevos': log.datos_nuevos,
+                'metadata_extra': log.metadata_extra,
+                'creado': log.creado.isoformat() if log.creado else '',
+            }
+            canon = json.dumps(payload, sort_keys=True, separators=(',', ':'), ensure_ascii=False)
+            base_str = (prev_hash or '') + '|' + canon
+            recalculated = hashlib.sha256(base_str.encode('utf-8')).hexdigest()
+            if recalculated != log.record_hash:
+                return False, log.id_audit_log, 'record_hash mismatch'
+            prev_hash = log.record_hash
+        return True, None, None
+    except Exception as e:  # pragma: no cover - errores inesperados
+        return False, None, f'exception: {e}'

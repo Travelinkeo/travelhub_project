@@ -1,0 +1,16 @@
+-r requirements.txt
+
+# Lint & formato
+ruff==0.5.6
+black==24.8.0
+isort==5.13.2
+
+# Cobertura
+pytest-cov==5.0.0
+coverage==7.6.1
+
+# Auditoría de dependencias
+pip-audit==2.7.3
+
+# (Opcional futuro) bandit para análisis estático de seguridad
+# bandit==1.7.10

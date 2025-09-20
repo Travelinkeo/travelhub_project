@@ -1,5 +1,7 @@
 import pytest
+
 from core.utils import sanitize_passenger_name
+
 
 @pytest.mark.parametrize("raw,expected", [
     # Mantener nombre limpio

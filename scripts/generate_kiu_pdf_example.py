@@ -1,20 +1,25 @@
-import os, sys, json
+import json
+import os
+import sys
+from email import policy
+from email.parser import BytesParser
 from pathlib import Path
+
+import django
+
+from core.ticket_parser import extract_data_from_text, generate_ticket
 
 # Asegurar path del proyecto
 BASE_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(BASE_DIR))
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
 
-import django
 try:
     django.setup()
 except Exception as e:
-    print(f"Advertencia al inicializar Django (puede no ser necesario para solo generar PDF): {e}")
+    print(f"Error during Django setup: {e}")
+    sys.exit(1)
 
-from core.ticket_parser import extract_data_from_text, generate_ticket
-from email import policy
-from email.parser import BytesParser
 
 # Ruta del EML de ejemplo (ajusta si quieres otro)
 EML_DIR = BASE_DIR / 'external_ticket_generator'

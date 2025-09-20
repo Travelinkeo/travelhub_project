@@ -1,12 +1,19 @@
-import os, sys, json, email
+import email
+import json
+import os
+import re
+import sys
 from email import policy
+
 from bs4 import BeautifulSoup
+
+from core.ticket_parser import extract_data_from_text
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 if ROOT not in sys.path:
     sys.path.insert(0, ROOT)
 
-from external_ticket_generator.KIU.mi_proyecto_final.mi_proyecto_final.main import extract_data_from_text
+
 
 KIU_DIR = os.path.join(ROOT, 'external_ticket_generator', 'KIU')
 

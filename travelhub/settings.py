@@ -1,12 +1,19 @@
-from pathlib import Path
 import os
+from datetime import timedelta
+from pathlib import Path
+
 from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / '.env')
 
-SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-fallback-key-for-dev')
-DEBUG = os.getenv('DEBUG', 'True') == 'True'
+# SECRET_KEY must be set in .env file. We raise an error if it's not found.
+SECRET_KEY = os.getenv('SECRET_KEY')
+if not SECRET_KEY:
+    raise RuntimeError("SECRET_KEY is not set in the environment. Please set it in your .env file.")
+
+# DEBUG defaults to False for safety. Set DEBUG=True in .env for development.
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
 ALLOWED_HOSTS_STRING = os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost')
 ALLOWED_HOSTS = [host.strip() for host in ALLOWED_HOSTS_STRING.split(',')]
 
@@ -20,16 +27,25 @@ INSTALLED_APPS = [
     'django.contrib.humanize',
     'rest_framework',
     'rest_framework.authtoken',
+    'rest_framework_simplejwt.token_blacklist',  # enable blacklist for logout/invalidation
+    'corsheaders',  # CORS control
+    'personas.apps.PersonasConfig', # App para Cliente y Pasajero
+    'cotizaciones.apps.CotizacionesConfig', # App para Cotizaciones
+    'contabilidad.apps.ContabilidadConfig', # App para Contabilidad
     'core.apps.CoreConfig',
+    'accounting_assistant.apps.AccountingAssistantConfig',
 ]
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
+    'corsheaders.middleware.CorsMiddleware',  # debe ir antes de CommonMiddleware para añadir headers
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'core.models.RequestMetaAuditMiddleware',  # captura IP/UA para auditoría
+    'core.models.SecurityHeadersMiddleware',  # security headers & CSP report-only
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -45,6 +61,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'travelhub.settings.csp_nonce',
             ],
         },
     },
@@ -52,8 +69,12 @@ TEMPLATES = [
 WSGI_APPLICATION = 'travelhub.wsgi.application'
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'TravelHub',
+        'USER': 'postgres',
+        'PASSWORD': 'Linkeo1331*',
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
 AUTH_PASSWORD_VALIDATORS = [
@@ -93,9 +114,80 @@ GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.SessionAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        # Mantener token legacy temporalmente (deprecate pronto)
         'rest_framework.authentication.TokenAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': ['rest_framework.permissions.IsAuthenticatedOrReadOnly',],
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.UserRateThrottle',
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.ScopedRateThrottle',
+    ],
+    # Baseline conservative; can tune via env later.
+    'DEFAULT_THROTTLE_RATES': {
+        'user': os.getenv('THROTTLE_USER_RATE', '1000/day'),
+        'anon': os.getenv('THROTTLE_ANON_RATE', '100/day'),
+        'login': os.getenv('THROTTLE_LOGIN_RATE', '5/min'),
+    },
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10
 }
+
+
+
+_JWT_SIGNING_KEY = os.getenv('JWT_SIGNING_KEY', SECRET_KEY)
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=int(os.getenv('JWT_ACCESS_MINUTES', '15'))),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=int(os.getenv('JWT_REFRESH_DAYS', '7'))),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'UPDATE_LAST_LOGIN': True,
+    'AUTH_HEADER_TYPES': ('Bearer', 'JWT'),
+    'SIGNING_KEY': _JWT_SIGNING_KEY,
+    'ALGORITHM': os.getenv('JWT_ALGORITHM', 'HS256'),
+}
+
+def csp_nonce(request):  # pragma: no cover - simple context injection
+    return {'csp_nonce': request.META.get('CSP_NONCE')}
+
+# --- CORS Configuration ---
+# Explicit allowlist; populate from env CORS_ALLOWED_ORIGINS (comma separated) or sensible defaults for local dev.
+_cors_origins_env = os.getenv('CORS_ALLOWED_ORIGINS', '')
+if _cors_origins_env:
+    CORS_ALLOWED_ORIGINS = [o.strip() for o in _cors_origins_env.split(',') if o.strip()]
+else:
+    # Default development origins (adjust in production via env)
+    CORS_ALLOWED_ORIGINS = [
+        'http://localhost:3000',
+        'http://127.0.0.1:3000',
+    ]
+
+# Reduce surface: only allow credentials if explicitly enabled
+CORS_ALLOW_CREDENTIALS = os.getenv('CORS_ALLOW_CREDENTIALS', 'False') == 'True'
+
+# Optionally restrict headers/methods (defaults generally fine). We keep defaults.
+
+# --- HTTPS / Security Settings (applied when not DEBUG) ---
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SESSION_COOKIE_SAMESITE = 'Lax'
+    CSRF_COOKIE_SAMESITE = 'Lax'
+    SECURE_HSTS_SECONDS = int(os.getenv('SECURE_HSTS_SECONDS', '31536000'))  # 1 año
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
+else:
+    # Permitir override manual para probar redirecciones HTTPS en dev si se desea
+        SECURE_SSL_REDIRECT = os.getenv('FORCE_HTTPS_DEV', 'False') == 'True'
+
+# --- Custom App Settings ---
+
+# Lista de correos de proveedores para el Agente Autónomo de Operaciones
+SUPPLIER_EMAILS = [
+    'proveedor1@example.com',
+    'facturacion@proveedor2.com',
+    'notificaciones@otroproveedor.com',
+]

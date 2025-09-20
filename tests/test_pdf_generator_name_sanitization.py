@@ -1,7 +1,7 @@
-import re
 import pytest
+
 from core.pdf_generator import generate_ticket_pdf
-from core.utils import LOCATION_TOKENS
+
 
 @pytest.mark.unit
 @pytest.mark.parametrize(

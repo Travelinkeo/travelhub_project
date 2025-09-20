@@ -1,17 +1,15 @@
-import os
 import email
-from email import policy
-from bs4 import BeautifulSoup
 import json
-import re
-import sys
+import os
+from email import policy
+
+from bs4 import BeautifulSoup
+
+from core.ticket_parser import extract_data_from_text
 
 # Asegurar raíz en sys.path
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-if ROOT not in sys.path:
-    sys.path.insert(0, ROOT)
 
-from external_ticket_generator.KIU.mi_proyecto_final.mi_proyecto_final.main import extract_data_from_text
 
 BASE_DIR = os.path.join(ROOT, 'external_ticket_generator', 'KIU')
 # Patrones de archivos relevantes (varían un poco los nombres con sufijo 1)
@@ -55,7 +53,6 @@ def load_eml(path: str):
     if not plain_text and html_body:
         plain_text = BeautifulSoup(html_body, 'html.parser').get_text('\n')
     return plain_text, html_body
-
 
 def main():
     print("=== Prueba de parseo para EML de DUQUE ECHEVERRY / OSCAR HUMBERTO ===")

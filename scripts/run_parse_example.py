@@ -1,15 +1,15 @@
+import json
+import sys
 from email import policy
 from email.parser import BytesParser
 from pathlib import Path
-import json, sys
-import os
+
+from core import ticket_parser
 
 # Asegurar que la raíz del proyecto esté en sys.path para importar 'core'
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
-
-from core import ticket_parser
 
 p = Path('external_ticket_generator/KIU/E-TICKET ITINERARY RECEIPT - DUQUE ECHEVERRY_OSCAR HUMBERTO1.eml')
 raw = p.read_bytes()
@@ -33,5 +33,6 @@ print(plain[:1000])
 print('--- HTML head ---')
 print((html or '')[:1000])
 res = ticket_parser.extract_data_from_text(plain, html)
-print('\n--- PARSER RESULT ---')
+print('''
+--- PARSER RESULT ---''')
 print(json.dumps(res, indent=2, ensure_ascii=False))

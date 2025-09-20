@@ -1,60 +1,163 @@
 # Archivo: core/views.py
-from rest_framework import viewsets, permissions, status
-from rest_framework.response import Response
-from rest_framework.decorators import action
-from django.utils.translation import gettext_lazy as _
-from django.views.generic import TemplateView, ListView, DetailView
-from django.shortcuts import redirect, render, get_object_or_404
-from django.http import HttpRequest, HttpResponse
+import os
+import logging
+from .forms import BoletoAereoUpdateForm, BoletoFileUploadForm, BoletoManualForm
+
+from django.contrib import messages
+from django.contrib.auth import authenticate
 from django.contrib.auth.decorators import login_required
-from django.utils.functional import cached_property
+from django.db import connection
+from django.db import models as dj_models
+from django.db.models import Sum
+from django.http import HttpRequest, HttpResponse
+from django.shortcuts import get_object_or_404, redirect
+from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
+from django.views.generic import DetailView, ListView, TemplateView
+from rest_framework import permissions, status, viewsets
+from rest_framework.authtoken.models import Token
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from rest_framework.throttling import ScopedRateThrottle
+from rest_framework.views import APIView
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.permissions import IsAuthenticated
+from django.conf import settings
 
 from . import ticket_parser
+from django.core.files.base import ContentFile
 from .models import (
-    Cliente, Venta, Factura, AsientoContable,
-    PaginaCMS, PaqueteTuristicoCMS, BoletoImportado, ItemVenta,
-    SegmentoVuelo, AlojamientoReserva, TrasladoServicio, ActividadServicio,
-    FeeVenta, PagoVenta
+    ActividadServicio,
+    AlojamientoReserva,
+    AlquilerAutoReserva,
+    AsientoContable,
+    AuditLog,  # auditoría
+    BoletoImportado,
+    CircuitoDia,
+    CircuitoTuristico,
+    EventoServicio,
+    Factura,
+    FeeVenta,
+    ItemVenta,
+    PaginaCMS,
+    PagoVenta,
+    PaqueteAereo,
+    PaqueteTuristicoCMS,
+    ProductoServicio,
+    SegmentoVuelo,
+    ServicioAdicionalDetalle,
+    TrasladoServicio,
+    Venta,
+    VentaParseMetadata,
 )
-from .serializers import (
-    VentaSerializer, FacturaSerializer, AsientoContableSerializer,
-    SegmentoVueloSerializer, AlojamientoReservaSerializer, TrasladoServicioSerializer,
-    ActividadServicioSerializer, FeeVentaSerializer, PagoVentaSerializer
-)
-from .forms import BoletoManualForm, BoletoFileUploadForm, BoletoAereoUpdateForm
+from .permissions import IsStaffOrGroupWrite
 
-# --- Permisos Personalizados (Ejemplo Básico) ---
+# --- Vistas para Integración con IA ---
+from .serializers import (
+    ActividadServicioSerializer,
+    AlojamientoReservaSerializer,
+    AlquilerAutoReservaSerializer,
+    AsientoContableSerializer,
+    AuditLogSerializer,  # auditoría
+    CircuitoDiaSerializer,
+    CircuitoTuristicoSerializer,
+    EventoServicioSerializer,
+    FacturaSerializer,
+    FeeVentaSerializer,
+    GeminiBoletoParseadoSerializer,
+    PagoVentaSerializer,
+    PaqueteAereoSerializer,
+    SegmentoVueloSerializer,
+    ServicioAdicionalDetalleSerializer,
+    TrasladoServicioSerializer,
+    VentaParseMetadataSerializer,
+    VentaSerializer,
+)
+
+# Importar el nuevo servicio de parseo
+from .services.ticket_parser_service import orquestar_parseo_de_boleto
+from . import ticket_parser
+
+logger = logging.getLogger(__name__)
+
+class RegistrarBoletoParseadoView(APIView):
+    """
+    Endpoint para recibir datos de boletos parseados por un servicio de IA (Gemini).
+    Valida los datos y eventualmente creará los registros correspondientes.
+    """
+    permission_classes = [permissions.IsAdminUser] # Proteger el endpoint
+
+    def post(self, request, *args, **kwargs):
+        serializer = GeminiBoletoParseadoSerializer(data=request.data)
+        if serializer.is_valid():
+            return Response(
+                {"status": "Datos recibidos y validados correctamente."},
+                status=status.HTTP_200_OK
+            )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class HealthCheckView(APIView):
+    authentication_classes = []
+    permission_classes = []
+
+    def get(self, request, *args, **kwargs):
+        db_ok = True
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT 1")
+                cursor.fetchone()
+        except Exception:
+            db_ok = False
+        payload = {
+            'status': 'ok' if db_ok else 'degraded',
+            'db': db_ok,
+            'time': timezone.now().isoformat(),
+            'version': os.getenv('APP_VERSION', 'dev')
+        }
+        return Response(payload, status=200 if db_ok else 503)
+
+class LoginView(APIView):
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'login'
+    authentication_classes = []
+    permission_classes = []
+
+    def post(self, request, *args, **kwargs):
+        username = request.data.get('username')
+        password = request.data.get('password')
+        if not username or not password:
+            return Response({'detail': 'username y password requeridos'}, status=400)
+        user = authenticate(request, username=username, password=password)
+        if not user:
+            return Response({'detail': 'Credenciales inválidas'}, status=401)
+        token, _ = Token.objects.get_or_create(user=user)
+        return Response({'token': token.key})
+
 class IsAdminOrReadOnly(permissions.BasePermission):
-    """
-    Permiso personalizado para permitir solo lectura a usuarios no administradores,
-    y lectura/escritura a administradores.
-    """
     def has_permission(self, request, view):
         if request.method in permissions.SAFE_METHODS:
             return True
         return request.user and request.user.is_staff
 
-# --- ViewSets para la API ERP ---
-
 class VentaViewSet(viewsets.ModelViewSet):
-    """
-    ViewSet para gestionar Ventas y sus Items.
-    Permite operaciones CRUD completas.
-    """
     queryset = Venta.objects.select_related(
         'cliente', 'moneda', 'cotizacion_origen', 'asiento_contable_venta'
     ).prefetch_related('items_venta__producto_servicio', 'items_venta__proveedor_servicio').order_by('-fecha_venta')
     serializer_class = VentaSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+    def get_queryset(self):
+        qs = super().get_queryset()
+        user = self.request.user
+        if user.is_authenticated and not user.is_staff:
+            return qs.filter(dj_models.Q(creado_por=user) | dj_models.Q(creado_por__isnull=True))
+        return qs
+
     def perform_create(self, serializer):
-        serializer.save()
+        serializer.save(creado_por=self.request.user if self.request.user.is_authenticated else None)
 
 class FacturaViewSet(viewsets.ModelViewSet):
-    """
-    ViewSet para gestionar Facturas y sus Items.
-    Permite operaciones CRUD completas.
-    """
     queryset = Factura.objects.select_related(
         'cliente', 'moneda', 'venta_asociada', 'asiento_contable_factura'
     ).prefetch_related('items_factura').order_by('-fecha_emision')
@@ -65,10 +168,6 @@ class FacturaViewSet(viewsets.ModelViewSet):
         serializer.save()
 
 class AsientoContableViewSet(viewsets.ModelViewSet):
-    """
-    ViewSet para gestionar Asientos Contables y sus Detalles.
-    Permite operaciones CRUD completas.
-    """
     queryset = AsientoContable.objects.select_related(
         'moneda'
     ).prefetch_related('detalles_asiento__cuenta_contable').order_by('-fecha_contable', '-numero_asiento')
@@ -76,15 +175,13 @@ class AsientoContableViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated, IsAdminOrReadOnly]
 
     def perform_create(self, serializer):
-        asiento = serializer.save()
+        serializer.save()
 
     def perform_update(self, serializer):
         asiento = self.get_object()
         if asiento.estado == AsientoContable.EstadoAsientoChoices.CONTABILIZADO and not self.request.user.is_staff:
             raise permissions.PermissionDenied(_("Los asientos contabilizados no pueden ser modificados por usuarios no administradores."))
         serializer.save()
-
-# --- Nuevos ViewSets Phase 1 Componentes de Venta ---
 
 class SegmentoVueloViewSet(viewsets.ModelViewSet):
     queryset = SegmentoVuelo.objects.select_related('venta', 'origen__pais', 'destino__pais').order_by('fecha_salida')
@@ -106,6 +203,48 @@ class ActividadServicioViewSet(viewsets.ModelViewSet):
     serializer_class = ActividadServicioSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+class AlquilerAutoReservaViewSet(viewsets.ModelViewSet):
+    queryset = AlquilerAutoReserva.objects.all().select_related('venta', 'proveedor', 'ciudad_retiro', 'ciudad_devolucion')
+    serializer_class = AlquilerAutoReservaSerializer
+    filterset_fields = ['venta', 'proveedor', 'ciudad_retiro', 'ciudad_devolucion']
+    search_fields = ['numero_confirmacion', 'compania_rentadora']
+    permission_classes = [IsStaffOrGroupWrite]
+
+class EventoServicioViewSet(viewsets.ModelViewSet):
+    queryset = EventoServicio.objects.all().select_related('venta', 'proveedor')
+    serializer_class = EventoServicioSerializer
+    filterset_fields = ['venta', 'proveedor']
+    search_fields = ['nombre_evento', 'codigo_boleto_evento']
+    permission_classes = [IsStaffOrGroupWrite]
+
+class CircuitoTuristicoViewSet(viewsets.ModelViewSet):
+    queryset = CircuitoTuristico.objects.all().select_related('venta').prefetch_related('dias')
+    serializer_class = CircuitoTuristicoSerializer
+    filterset_fields = ['venta']
+    search_fields = ['nombre_circuito']
+    permission_classes = [IsStaffOrGroupWrite]
+
+class CircuitoDiaViewSet(viewsets.ModelViewSet):
+    queryset = CircuitoDia.objects.all().select_related('circuito', 'circuito__venta')
+    serializer_class = CircuitoDiaSerializer
+    filterset_fields = ['circuito', 'circuito__venta']
+    search_fields = ['titulo']
+    permission_classes = [IsStaffOrGroupWrite]
+
+class PaqueteAereoViewSet(viewsets.ModelViewSet):
+    queryset = PaqueteAereo.objects.all().select_related('venta')
+    serializer_class = PaqueteAereoSerializer
+    filterset_fields = ['venta']
+    search_fields = ['nombre_paquete']
+    permission_classes = [IsStaffOrGroupWrite]
+
+class ServicioAdicionalDetalleViewSet(viewsets.ModelViewSet):
+    queryset = ServicioAdicionalDetalle.objects.all().select_related('venta', 'proveedor')
+    serializer_class = ServicioAdicionalDetalleSerializer
+    filterset_fields = ['venta', 'proveedor', 'tipo_servicio']
+    search_fields = ['codigo_referencia']
+    permission_classes = [IsStaffOrGroupWrite]
+
 class FeeVentaViewSet(viewsets.ModelViewSet):
     queryset = FeeVenta.objects.select_related('venta', 'moneda').order_by('-creado')
     serializer_class = FeeVentaSerializer
@@ -116,9 +255,21 @@ class PagoVentaViewSet(viewsets.ModelViewSet):
     serializer_class = PagoVentaSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+class VentaParseMetadataViewSet(viewsets.ModelViewSet):
+    queryset = VentaParseMetadata.objects.select_related('venta').order_by('-creado')
+    serializer_class = VentaParseMetadataSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAdminUser])
     def contabilizar(self, request, pk=None):
-        asiento = self.get_object()
+        obj = self.get_object()
+        from .models import AsientoContable, VentaParseMetadata
+        if isinstance(obj, VentaParseMetadata):
+            asiento = getattr(obj.venta, 'asiento_contable_venta', None)
+            if asiento is None:
+                return Response({'error': _('La venta no tiene asiento contable asociado.')}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            asiento = obj
         if asiento.estado == AsientoContable.EstadoAsientoChoices.BORRADOR:
             if not asiento.esta_cuadrado():
                 return Response(
@@ -138,7 +289,14 @@ class PagoVentaViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAdminUser])
     def anular(self, request, pk=None):
-        asiento = self.get_object()
+        obj = self.get_object()
+        from .models import AsientoContable, VentaParseMetadata
+        if isinstance(obj, VentaParseMetadata):
+            asiento = getattr(obj.venta, 'asiento_contable_venta', None)
+            if asiento is None:
+                return Response({'error': _('La venta no tiene asiento contable asociado.')}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            asiento = obj
         if asiento.estado == AsientoContable.EstadoAsientoChoices.CONTABILIZADO:
             asiento.estado = AsientoContable.EstadoAsientoChoices.ANULADO
             asiento.save(update_fields=['estado'])
@@ -150,10 +308,6 @@ class PagoVentaViewSet(viewsets.ModelViewSet):
                 {'error': _('Solo los asientos contabilizados pueden ser anulados de esta forma.')},
                 status=status.HTTP_400_BAD_REQUEST
             )
-
-# --- Helper reutilizable para resumen de ventas ---
-from django.db.models import Sum
-from .models import ProductoServicio, ItemVenta
 
 def get_resumen_ventas_categorias():
     categoria_definiciones = [
@@ -176,8 +330,6 @@ def get_resumen_ventas_categorias():
         total_general += monto
         ventas_por_categoria.append({'categoria': cat['etiqueta'], 'cantidad': cantidad, 'monto': monto})
     return ventas_por_categoria, total_general
-
-# --- Vistas para el CMS (Django Templates) ---
 
 class HomeView(TemplateView):
     template_name = 'core/home.html'
@@ -246,14 +398,10 @@ class BoletoManualEntryView(TemplateView):
         form = BoletoManualForm(request.POST)
         if form.is_valid():
             boleto = form.save(commit=False)
-            # Para entrada manual, el nombre procesado es el mismo que el completo
             boleto.nombre_pasajero_procesado = boleto.nombre_pasajero_completo
             
-            # Crear un diccionario de datos parseados para la generación de PDF
-            # y para que el campo datos_parseados no esté vacío.
-            # Usamos los mismos nombres de clave que ticket_parser.extract_data_from_text
             extracted_data_manual = {
-                'SOURCE_SYSTEM': 'KIU', # Por defecto para entradas manuales
+                'SOURCE_SYSTEM': 'KIU',
                 'NUMERO_DE_BOLETO': boleto.numero_boleto,
                 'NOMBRE_DEL_PASAJERO': boleto.nombre_pasajero_completo,
                 'SOLO_NOMBRE_PASAJERO': boleto.nombre_pasajero_procesado,
@@ -270,9 +418,16 @@ class BoletoManualEntryView(TemplateView):
             }
             boleto.datos_parseados = extracted_data_manual
             
-            # Para boletos manuales, el estado inicial es PENDIENTE para que el signal lo procese
-            boleto.estado_parseo = BoletoImportado.EstadoParseo.PENDIENTE 
+            boleto.estado_parseo = BoletoImportado.EstadoParseo.COMPLETADO 
             boleto.save()
+
+            messages.warning(request, "Intentando generar PDF...")
+            try:
+                pdf_bytes, pdf_filename = ticket_parser.generate_ticket(boleto.datos_parseados)
+                boleto.archivo_pdf_generado.save(pdf_filename, ContentFile(pdf_bytes), save=True)
+                messages.success(request, f"PDF '{pdf_filename}' generado y guardado exitosamente.")
+            except Exception as e:
+                messages.error(request, f"El boleto fue guardado, pero no se pudo generar el PDF: {e}")
             
             return redirect('core:dashboard_boletos')
 
@@ -282,8 +437,6 @@ def delete_boleto_importado(request: HttpRequest, pk: int) -> HttpResponse:
     if request.method == 'POST':
         boleto.delete()
         return redirect('core:dashboard_boletos')
-    # If it's not a POST request, you might want to render a confirmation page
-    # For now, we'll just redirect back if not POST
     return redirect('core:dashboard_boletos')
 
 class SalesSummaryView(TemplateView):
@@ -299,11 +452,6 @@ class SalesSummaryView(TemplateView):
 
 
 class AirTicketsEditableListView(ListView):
-    """Lista boletos aéreos (derivados de archivos importados) con edición inline de montos.
-
-    Criterio: Se consideran 'aéreos' todos los boletos con tarifa_base no nula o ruta_vuelo presente.
-    (Se puede ajustar luego usando relacion con ProductoServicio si existe.)
-    """
     model = BoletoImportado
     template_name = 'core/air_tickets_editable.html'
     context_object_name = 'boletos'
@@ -311,7 +459,6 @@ class AirTicketsEditableListView(ListView):
 
     def get_queryset(self):
         qs = super().get_queryset().order_by('-fecha_emision_boleto', '-fecha_subida')
-        # Filtro simple heurístico; TODO: agregar flag explicito si se incorpora
         return qs.filter(tarifa_base__isnull=False)
 
     def post(self, request, *args, **kwargs):
@@ -321,7 +468,6 @@ class AirTicketsEditableListView(ListView):
         if form.is_valid():
             form.save()
             return redirect('core:air_tickets_editable')
-        # Si error, renderizar lista con errores en ese formulario específico
         self.object_list = self.get_queryset()
         context = self.get_context_data()
         context['form_errors_id'] = boleto.id_boleto_importado
@@ -336,3 +482,88 @@ class AirTicketsEditableListView(ListView):
         context['forms_map'] = forms_map
         context['titulo_pagina'] = _('Boletería Aérea - Edición de Montos')
         return context
+
+class AuditLogViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = AuditLog.objects.select_related('venta').order_by('-creado')
+    serializer_class = AuditLogSerializer
+    permission_classes = [permissions.IsAuthenticated, IsAdminOrReadOnly]
+    filterset_fields = ['modelo','accion','venta']
+    search_fields = ['object_id','descripcion']
+    pagination_class = None
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        created_from = self.request.query_params.get('created_from')
+        created_to = self.request.query_params.get('created_to')
+        if created_from:
+            qs = qs.filter(creado__date__gte=created_from)
+        if created_to:
+            qs = qs.filter(creado__date__lte=created_to)
+        return qs
+
+class BoletoUploadAPIView(APIView):
+    """
+    Endpoint para subir un archivo de boleto (PDF/TXT), parsearlo
+    de forma inteligente (IA con fallback a Regex) y guardar los
+    resultados en la base de datos.
+    """
+    parser_classes = (MultiPartParser, FormParser)
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        logger.info("-> BoletoUploadAPIView.post() ha sido alcanzado.")
+        
+        archivo_subido = request.FILES.get('boleto_file')
+        if not archivo_subido:
+            logger.warning("Intento de subida sin archivo.")
+            return Response(
+                {"error": "No se proporcionó ningún archivo en el campo 'boleto_file'."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # 1. Orquestar el parseo del boleto usando el servicio
+        datos_parseados, mensaje = orquestar_parseo_de_boleto(archivo_subido)
+        
+        if not datos_parseados:
+            logger.error(f"Fallo en el parseo del archivo '{archivo_subido.name}': {mensaje}")
+            return Response(
+                {"error": mensaje},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # 2. Guardar el boleto original y los datos parseados en el modelo
+        try:
+            boleto_importado = BoletoImportado.objects.create(
+                archivo_boleto=archivo_subido, # CORREGIDO: Nombre del campo
+                datos_parseados=datos_parseados,
+            )
+            
+        except Exception as e:
+            logger.exception(f"Error al guardar el boleto '{archivo_subido.name}' en la base de datos.")
+            return Response(
+                {"error": f"Error al guardar en la base de datos: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+            
+        # 3. (Opcional) Generar el PDF final y guardarlo en el modelo
+        try:
+            # Usar el generador de PDF unificado
+            pdf_bytes, nombre_archivo_generado = ticket_parser.generate_ticket(datos_parseados)
+            
+            if pdf_bytes:
+                boleto_importado.archivo_pdf_generado.save(nombre_archivo_generado, ContentFile(pdf_bytes), save=True)
+        except Exception as e:
+            logger.warning(f"No se pudo generar el PDF para el boleto {boleto_importado.id_boleto_importado}, pero el parseo fue exitoso. Error: {str(e)}")
+
+
+        logger.info(f"-> Boleto {boleto_importado.id_boleto_importado} procesado y guardado exitosamente.")
+
+        # 4. Devolver una respuesta exitosa con los datos extraídos
+        return Response(
+            {
+                "mensaje": "Boleto procesado y guardado con éxito.",
+                "id_boleto_importado": boleto_importado.id_boleto_importado,
+                "datos_extraidos": datos_parseados
+            },
+            status=status.HTTP_201_CREATED
+        )

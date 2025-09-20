@@ -1,14 +1,17 @@
 import json
-from pathlib import Path
+
 import pytest
 from django.core.management import call_command
-from core.models import Pais, Ciudad
+from django.core.management.base import CommandError
+
+from core.models_catalogos import Ciudad, Pais
+
 
 @pytest.mark.django_db
 def test_load_ciudades_creates_and_idempotent(tmp_path, settings):
     # Crear paises requeridos primero
-    ve = Pais.objects.create(codigo_iso_2='VE', codigo_iso_3='VEN', nombre='Venezuela')
-    co = Pais.objects.create(codigo_iso_2='CO', codigo_iso_3='COL', nombre='Colombia')
+    Pais.objects.create(codigo_iso_2='VE', codigo_iso_3='VEN', nombre='Venezuela')
+    Pais.objects.create(codigo_iso_2='CO', codigo_iso_3='COL', nombre='Colombia')
 
     ciudades_data = [
         {"nombre": "Caracas", "pais_codigo_iso_2": "VE", "region_estado": "Distrito Capital"},
@@ -49,7 +52,7 @@ def test_load_ciudades_missing_country(tmp_path):
     fixtures_dir.mkdir()
     (fixtures_dir / 'ciudades.json').write_text(json.dumps(ciudades_data), encoding='utf-8')
 
-    with pytest.raises(Exception):
+    with pytest.raises(CommandError):
         call_command('load_catalogs', '--only', 'ciudades', '--dir', str(tmp_path))
 
     # En dry-run solo lo omite

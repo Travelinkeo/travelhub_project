@@ -1,23 +1,58 @@
 # Archivo: core/admin.py
+import logging
+
+from django import forms
 from django.contrib import admin
-from django.urls import path
-from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.http import urlencode
 from django.utils.translation import gettext_lazy as _
-from django import forms
+from django.shortcuts import render
+from django.http import HttpResponseRedirect
+from django.core.files.base import ContentFile
+from .services.pdf_service import generar_pdf_factura
 
 from .models import (
-    Pais, Ciudad, Moneda, TipoCambio,
-    Cliente, Proveedor, ProductoServicio, Cotizacion, ItemCotizacion,
-    PlanContable, AsientoContable, DetalleAsiento,
-    Venta, ItemVenta, Factura, ItemFactura,
+    ActividadServicio,
+    AlojamientoReserva,
+    AlquilerAutoReserva,
+    ArticuloBlog,
+    AuditLog,
     BoletoImportado,
-    SegmentoVuelo, AlojamientoReserva, TrasladoServicio, ActividadServicio, PagoVenta, FeeVenta,
-    PaginaCMS, DestinoCMS, PaqueteTuristicoCMS, ArticuloBlog, Testimonio,
-    MenuItemCMS, FormularioContactoCMS
+    CircuitoDia,
+    CircuitoTuristico,
+    ComunicacionProveedor,
+    DestinoCMS,
+    EventoServicio,
+    Factura,
+    FeeVenta,
+    FormularioContactoCMS,
+    ItemFactura,
+    ItemVenta,
+    MenuItemCMS,
+    PaginaCMS,
+    PagoVenta,
+    PaqueteAereo,
+    PaqueteTuristicoCMS,
+    SegmentoVuelo,
+    ServicioAdicionalDetalle,
+    Testimonio,
+    TrasladoServicio,
+    Venta,
+    VentaParseMetadata,
 )
+from .models.contabilidad import AsientoContable, LiquidacionProveedor, ItemLiquidacion
+from .models_catalogos import Ciudad, Moneda, Pais, ProductoServicio, Proveedor, TipoCambio
+from personas.models import Cliente
+# No es necesario importar Cotizacion aquí, ya tiene su propio admin.py
+
+# --- Formulario para la acción de facturación ---
+class ClienteSelectionForm(forms.Form):
+    cliente = forms.ModelChoiceField(
+        queryset=Cliente.objects.all(),
+        label="Seleccionar Cliente para facturar",
+        required=True
+    )
 
 # --- Clases Admin para Configuración / Compartidos ---
 
@@ -49,26 +84,9 @@ class TipoCambioAdmin(admin.ModelAdmin):
 
 # --- Clases Admin para CRM ---
 
-class ItemCotizacionInline(admin.TabularInline):
-    model = ItemCotizacion
-    extra = 1
-    autocomplete_fields = ['producto_servicio']
 
-@admin.register(Cotizacion)
-class CotizacionAdmin(admin.ModelAdmin):
-    list_display = ('numero_cotizacion', 'cliente', 'fecha_emision', 'total_cotizado', 'moneda', 'estado')
-    search_fields = ('numero_cotizacion', 'cliente__nombres', 'cliente__apellidos')
-    list_filter = ('estado', 'fecha_emision')
-    autocomplete_fields = ['cliente', 'moneda']
-    inlines = [ItemCotizacionInline]
-    readonly_fields = ('total_cotizado',)
 
-@admin.register(Cliente)
-class ClienteAdmin(admin.ModelAdmin):
-    list_display = ('get_nombre_completo', 'email', 'telefono_principal', 'tipo_cliente')
-    search_fields = ('nombres', 'apellidos', 'nombre_empresa', 'email')
-    list_filter = ('tipo_cliente',)
-    autocomplete_fields = ['ciudad', 'pais_emision_pasaporte', 'nacionalidad']
+
 
 @admin.register(Proveedor)
 class ProveedorAdmin(admin.ModelAdmin):
@@ -85,32 +103,14 @@ class ProductoServicioAdmin(admin.ModelAdmin):
 
 # --- Clases Admin para ERP ---
 
-class DetalleAsientoInline(admin.TabularInline):
-    model = DetalleAsiento
-    extra = 2
-    autocomplete_fields = ['cuenta_contable']
 
-@admin.register(AsientoContable)
-class AsientoContableAdmin(admin.ModelAdmin):
-    list_display = ('numero_asiento', 'fecha_contable', 'descripcion_general', 'tipo_asiento', 'estado', 'esta_cuadrado')
-    search_fields = ('numero_asiento', 'descripcion_general', 'referencia_documento')
-    list_filter = ('estado', 'tipo_asiento', 'fecha_contable')
-    inlines = [DetalleAsientoInline]
-    readonly_fields = ('total_debe', 'total_haber')
-
-@admin.register(PlanContable)
-class PlanContableAdmin(admin.ModelAdmin):
-    list_display = ('codigo_cuenta', 'nombre_cuenta', 'tipo_cuenta', 'naturaleza', 'permite_movimientos')
-    search_fields = ('codigo_cuenta', 'nombre_cuenta')
-    list_filter = ('tipo_cuenta', 'naturaleza', 'permite_movimientos')
-    autocomplete_fields = ['cuenta_padre']
 
 class ItemVentaInline(admin.TabularInline):
     model = ItemVenta
     extra = 1
     autocomplete_fields = ['producto_servicio', 'proveedor_servicio']
     readonly_fields = ('subtotal_item_venta', 'total_item_venta')
-    fields = ('producto_servicio', 'descripcion_personalizada', 'cantidad', 'precio_unitario_venta', 'impuestos_item_venta', 'subtotal_item_venta', 'total_item_venta')
+    fields = ('producto_servicio', 'descripcion_personalizada', 'cantidad', 'precio_unitario_venta', 'impuestos_item_venta', 'costo_neto_proveedor', 'fee_proveedor', 'comision_agencia_monto', 'fee_agencia_interno', 'subtotal_item_venta', 'total_item_venta')
 
 class SegmentoVueloInline(admin.TabularInline):
     model = SegmentoVuelo
@@ -142,6 +142,26 @@ class PagoVentaInline(admin.TabularInline):
     extra = 0
     autocomplete_fields = ['moneda']
 
+class AlquilerAutoReservaInline(admin.TabularInline):
+    model = AlquilerAutoReserva
+    extra = 0
+    autocomplete_fields = ['proveedor', 'ciudad_retiro', 'ciudad_devolucion']
+    fields = ('compania_rentadora', 'categoria_auto', 'fecha_hora_retiro', 'fecha_hora_devolucion', 'ciudad_retiro', 'ciudad_devolucion', 'incluye_seguro', 'numero_confirmacion', 'proveedor')
+
+class ServicioAdicionalDetalleInline(admin.TabularInline):
+    model = ServicioAdicionalDetalle
+    extra = 0
+    autocomplete_fields = ['proveedor']
+    fields = ('tipo_servicio', 'descripcion', 'fecha_inicio', 'fecha_fin', 'nombre_pasajero', 'pasaporte_pasajero', 'detalles_cobertura', 'contacto_emergencia', 'participantes', 'operado_por', 'hora_lugar_encuentro', 'duracion_estimada', 'inclusiones_servicio', 'recomendaciones', 'codigo_referencia', 'proveedor')
+
+@admin.register(AsientoContable)
+class AsientoContableAdmin(admin.ModelAdmin):
+    list_display = ('numero_asiento', 'fecha_contable', 'descripcion_general', 'total_debe', 'total_haber', 'estado')
+    search_fields = ('numero_asiento', 'descripcion_general')
+    list_filter = ('estado', 'fecha_contable', 'tipo_asiento')
+    readonly_fields = ('total_debe', 'total_haber')
+
+
 class VentaAdminForm(forms.ModelForm):
     boleto_id = forms.IntegerField(widget=forms.HiddenInput(), required=False)
     class Meta:
@@ -155,15 +175,224 @@ class VentaAdmin(admin.ModelAdmin):
     search_fields = ('localizador', 'cliente__nombres', 'cliente__apellidos')
     list_filter = ('estado', 'fecha_venta', 'tipo_venta', 'canal_origen')
     autocomplete_fields = ['cliente', 'moneda', 'cotizacion_origen', 'asiento_contable_venta']
-    inlines = [ItemVentaInline, SegmentoVueloInline, AlojamientoReservaInline, TrasladoServicioInline, ActividadServicioInline, FeeVentaInline, PagoVentaInline]
+    inlines = [ItemVentaInline, SegmentoVueloInline, AlojamientoReservaInline, AlquilerAutoReservaInline, ServicioAdicionalDetalleInline, TrasladoServicioInline, ActividadServicioInline, FeeVentaInline, PagoVentaInline]
     readonly_fields = ('total_venta', 'saldo_pendiente', 'boleto_importado_link', 'margen_estimado')
+    actions = ['asignar_cliente_y_facturar', 'generar_liquidaciones_proveedor', 'generar_voucher_unificado']
+
+    def generar_voucher_unificado(self, request, queryset):
+        from django.http import HttpResponse
+        from django.contrib import messages
+        from .services.pdf_service import generar_pdf_voucher_unificado
+
+        if queryset.count() != 1:
+            messages.error(request, "Por favor, seleccione exactamente una Venta para generar el voucher unificado.")
+            return
+
+        venta = queryset.first()
+        pdf_bytes, filename = generar_pdf_voucher_unificado(venta.pk)
+
+        if pdf_bytes:
+            response = HttpResponse(pdf_bytes, content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="{filename}"'
+            return response
+        else:
+            messages.error(request, f"No se pudo generar el voucher para la Venta {venta.localizador or venta.id_venta}. Revise los logs para más detalles.")
+
+    generar_voucher_unificado.short_description = "Generar Voucher Unificado (PDF)"
+
+    def asignar_cliente_y_facturar(self, request, queryset):
+        # Filtramos solo ventas que no tengan cliente y no hayan sido facturadas
+        queryset = queryset.filter(cliente__isnull=True, factura__isnull=True)
+
+        if not queryset.exists():
+            self.message_user(request, "Las ventas seleccionadas ya tienen un cliente asignado o ya han sido facturadas.", level='warning')
+            return
+
+        form = ClienteSelectionForm(request.POST or None)
+
+        if 'apply' in request.POST:
+            if form.is_valid():
+                cliente = form.cleaned_data['cliente']
+                
+                facturas_creadas = 0
+                for venta in queryset:
+                    # 1. Asignar cliente a la Venta
+                    venta.cliente = cliente
+                    
+                    # 2. Crear la Factura
+                    factura = Factura.objects.create(
+                        cliente=cliente,
+                        moneda=venta.moneda,
+                        subtotal=venta.subtotal,
+                        monto_impuestos=venta.impuestos,
+                        # El método save() de Factura recalcula el total
+                    )
+                    
+                    # 3. Copiar los items de la Venta a la Factura
+                    for item_venta in venta.items_venta.all():
+                        descripcion = item_venta.descripcion_personalizada or item_venta.producto_servicio.nombre
+                        
+                        # Lógica para enriquecer la descripción
+                        if not item_venta.descripcion_personalizada:
+                            tipo_producto = item_venta.producto_servicio.tipo_producto
+                            if tipo_producto == 'AIR':
+                                if BoletoImportado.objects.filter(venta_asociada=venta).count() == 1:
+                                    boleto = BoletoImportado.objects.filter(venta_asociada=venta).first()
+                                    descripcion = f"Boleto Aéreo: {boleto.ruta_vuelo or ''}"
+                                    if boleto.numero_boleto:
+                                        descripcion += f" (Tkt: {boleto.numero_boleto})"
+                            elif tipo_producto == 'HTL' and venta.alojamientos.count() == 1:
+                                alojamiento = venta.alojamientos.first()
+                                descripcion = f"Alojamiento: {alojamiento.nombre_establecimiento} en {alojamiento.ciudad.nombre if alojamiento.ciudad else 'N/A'}"
+                            elif tipo_producto == 'CAR' and venta.alquileres_autos.count() == 1:
+                                alquiler = venta.alquileres_autos.first()
+                                descripcion = f"Alquiler de Auto: {alquiler.compania_rentadora or 'N/A'} - {alquiler.categoria_auto or 'N/A'}"
+                            elif tipo_producto == 'TRF' and venta.traslados.count() == 1:
+                                traslado = venta.traslados.first()
+                                descripcion = f"Traslado: {traslado.origen or 'N/A'} a {traslado.destino or 'N/A'}"
+                            elif tipo_producto == 'TOU' and venta.actividades.count() == 1:
+                                actividad = venta.actividades.first()
+                                descripcion = f"Actividad: {actividad.nombre}"
+                            elif tipo_producto == 'INS' and venta.servicios_adicionales.filter(tipo_servicio='SEG').count() == 1:
+                                seguro = venta.servicios_adicionales.filter(tipo_servicio='SEG').first()
+                                descripcion = f"Seguro de Viaje: {seguro.descripcion or 'N/A'}"
+
+                        ItemFactura.objects.create(
+                            factura=factura,
+                            descripcion=descripcion,
+                            cantidad=item_venta.cantidad,
+                            precio_unitario=item_venta.precio_unitario_venta
+                        )
+                    
+                    # 4. Enlazar la Venta con su Factura
+                    venta.factura = factura
+                    venta.save()
+
+                    # 5. Generar y adjuntar el PDF
+                    pdf_bytes, pdf_filename = generar_pdf_factura(factura.pk)
+                    if pdf_bytes and pdf_filename:
+                        factura.archivo_pdf.save(pdf_filename, ContentFile(pdf_bytes), save=True)
+
+                    facturas_creadas += 1
+
+                self.message_user(request, f"{facturas_creadas} factura(s) generada(s) exitosamente.")
+                return HttpResponseRedirect(request.get_full_path())
+
+        context = {
+            'ventas': queryset,
+            'cliente_form': form,
+            'title': 'Asignar Cliente y Facturar',
+            'opts': self.model._meta,
+        }
+        return render(request, 'admin/asignar_cliente_y_facturar.html', context)
+    asignar_cliente_y_facturar.short_description = "Asignar Cliente y Generar Factura"
+
+    def generar_liquidaciones_proveedor(self, request, queryset):
+        from collections import defaultdict
+
+        liquidaciones_creadas = 0
+        for venta in queryset:
+            items_por_proveedor = defaultdict(list)
+            for item in venta.items_venta.all():
+                if item.proveedor_servicio and item.costo_neto_proveedor is not None:
+                    items_por_proveedor[item.proveedor_servicio].append(item)
+
+            for proveedor, items in items_por_proveedor.items():
+                # Evitar duplicados
+                if LiquidacionProveedor.objects.filter(proveedor=proveedor, venta=venta).exists():
+                    continue
+
+                monto_total_a_pagar = 0
+                items_a_liquidar = []
+
+                for item in items:
+                    costo = item.costo_neto_proveedor or 0
+                    fee = item.fee_proveedor or 0
+                    comision = item.comision_agencia_monto or 0
+                    
+                    monto_item = (costo + fee) - comision
+                    monto_total_a_pagar += monto_item
+                    items_a_liquidar.append((item, monto_item))
+
+                if monto_total_a_pagar > 0:
+                    liquidacion = LiquidacionProveedor.objects.create(
+                        proveedor=proveedor,
+                        venta=venta,
+                        monto_total=monto_total_a_pagar
+                    )
+                    
+                    for item_venta, monto_a_pagar_item in items_a_liquidar:
+                        ItemLiquidacion.objects.create(
+                            liquidacion=liquidacion,
+                            item_venta=item_venta,
+                            descripcion=f"Liquidación por: {item_venta.descripcion_personalizada}",
+                            monto=monto_a_pagar_item
+                        )
+                    
+                    liquidaciones_creadas += 1
+
+        if liquidaciones_creadas > 0:
+            self.message_user(request, f"Se generaron {liquidaciones_creadas} liquidaciones a proveedores.")
+        else:
+            self.message_user(request, "No se generaron nuevas liquidaciones. Verifique que las ventas tengan proveedores, costos asignados y que no exista una liquidación previa para esa venta/proveedor.", level='warning')
+    generar_liquidaciones_proveedor.short_description = "Generar Liquidación a Proveedor(es)"
+
+    def generar_liquidaciones_proveedor(self, request, queryset):
+        from collections import defaultdict
+
+        liquidaciones_creadas = 0
+        for venta in queryset:
+            items_por_proveedor = defaultdict(list)
+            for item in venta.items_venta.all():
+                if item.proveedor_servicio and item.costo_neto_proveedor is not None:
+                    items_por_proveedor[item.proveedor_servicio].append(item)
+
+            for proveedor, items in items_por_proveedor.items():
+                # Evitar duplicados
+                if LiquidacionProveedor.objects.filter(proveedor=proveedor, venta=venta).exists():
+                    continue
+
+                monto_total_a_pagar = 0
+                items_a_liquidar = []
+
+                for item in items:
+                    costo = item.costo_neto_proveedor or 0
+                    fee = item.fee_proveedor or 0
+                    comision = item.comision_agencia_monto or 0
+                    
+                    monto_item = (costo + fee) - comision
+                    monto_total_a_pagar += monto_item
+                    items_a_liquidar.append((item, monto_item))
+
+                if monto_total_a_pagar > 0:
+                    liquidacion = LiquidacionProveedor.objects.create(
+                        proveedor=proveedor,
+                        venta=venta,
+                        monto_total=monto_total_a_pagar
+                    )
+                    
+                    for item_venta, monto_a_pagar_item in items_a_liquidar:
+                        ItemLiquidacion.objects.create(
+                            liquidacion=liquidacion,
+                            item_venta=item_venta,
+                            descripcion=f"Liquidación por: {item_venta.descripcion_personalizada}",
+                            monto=monto_a_pagar_item
+                        )
+                    
+                    liquidaciones_creadas += 1
+
+        if liquidaciones_creadas > 0:
+            self.message_user(request, f"Se generaron {liquidaciones_creadas} liquidaciones a proveedores.")
+        else:
+            self.message_user(request, "No se generaron nuevas liquidaciones. Verifique que las ventas tengan proveedores, costos asignados y que no exista una liquidación previa para esa venta/proveedor.", level='warning')
+    generar_liquidaciones_proveedor.short_description = "Generar Liquidación a Proveedor(es)"
 
     def boleto_importado_link(self, obj):
         boleto = BoletoImportado.objects.filter(venta_asociada=obj).first()
         if boleto:
             url = reverse('admin:core_boletoimportado_change', args=[boleto.pk])
             return format_html('<a href="{}">Ver Boleto Original (ID: {})</a>', url, boleto.pk)
-        return "N/A (Creada manualmente)"
+        return "N/A (Creada manually)"
     boleto_importado_link.short_description = "Boleto de Origen"
 
     def get_fieldsets(self, request, obj=None):
@@ -191,7 +420,8 @@ class VentaAdmin(admin.ModelAdmin):
                     if len(nombre_partes) > 1:
                         cliente = Cliente.objects.filter(nombres__icontains=nombre_partes[0], apellidos__icontains=nombre_partes[-1]).first()
                 
-                if cliente: initial['cliente'] = cliente.pk
+                if cliente:
+                    initial['cliente'] = cliente.pk
                 
                 moneda_usd, _ = Moneda.objects.get_or_create(codigo_iso='USD', defaults={'nombre': 'Dólar Estadounidense'})
                 initial['moneda'] = moneda_usd.pk
@@ -240,7 +470,7 @@ class VentaAdmin(admin.ModelAdmin):
 
 @admin.register(BoletoImportado)
 class BoletoImportadoAdmin(admin.ModelAdmin):
-    list_display = ('id_boleto_importado', 'archivo_boleto_link', 'fecha_subida', 'estado_parseo', 'numero_boleto', 'nombre_pasajero_procesado', 'venta_asociada')
+    list_display = ('id_boleto_importado', 'archivo_boleto_link', 'pdf_generado_link', 'fecha_subida', 'estado_parseo', 'numero_boleto', 'nombre_pasajero_procesado', 'venta_asociada')
     search_fields = ('archivo_boleto', 'numero_boleto', 'nombre_pasajero_completo')
     list_filter = ('estado_parseo', 'formato_detectado', 'fecha_subida')
     readonly_fields = (
@@ -248,7 +478,8 @@ class BoletoImportadoAdmin(admin.ModelAdmin):
         'numero_boleto', 'nombre_pasajero_completo', 'nombre_pasajero_procesado', 
         'ruta_vuelo', 'fecha_emision_boleto', 'aerolinea_emisora', 'direccion_aerolinea',
         'agente_emisor', 'foid_pasajero', 'localizador_pnr', 'tarifa_base', 
-        'impuestos_descripcion', 'impuestos_total_calculado', 'total_boleto', 'crear_venta_desde_boleto_link'
+        'impuestos_descripcion', 'impuestos_total_calculado', 'total_boleto', 'crear_venta_desde_boleto_link',
+        'pdf_generado_link'  # Añadido aquí
     )
     actions = ['reintentar_parseo']
     autocomplete_fields = ['venta_asociada']
@@ -256,7 +487,7 @@ class BoletoImportadoAdmin(admin.ModelAdmin):
     def get_fieldsets(self, request, obj=None):
         fieldsets = [
             (None, {'fields': ('archivo_boleto', 'venta_asociada')}),
-            (_("Información de Parseo (Automático)"), {'fields': ('estado_parseo', 'log_parseo', 'datos_parseados')}),
+            (_("Información de Parseo (Automático)"), {'fields': ('estado_parseo', 'log_parseo', 'datos_parseados', 'pdf_generado_link')}),
             (_("Datos Extraídos"), {'fields': ('numero_boleto', 'nombre_pasajero_procesado', 'total_boleto', 'localizador_pnr')}),
         ]
         if obj and (obj.estado_parseo == 'COM' or obj.venta_asociada):
@@ -267,7 +498,13 @@ class BoletoImportadoAdmin(admin.ModelAdmin):
         if obj.archivo_boleto:
             return format_html("<a href='{url}'>{name}</a>", url=obj.archivo_boleto.url, name=obj.archivo_boleto.name.split('/')[-1])
         return "-"
-    archivo_boleto_link.short_description = _("Archivo")
+    archivo_boleto_link.short_description = _("Archivo Original")
+
+    def pdf_generado_link(self, obj):
+        if obj.archivo_pdf_generado:
+            return format_html("<a href='{url}' target='_blank'>Ver PDF</a>", url=obj.archivo_pdf_generado.url)
+        return "No generado"
+    pdf_generado_link.short_description = "PDF Generado"
     
     def crear_venta_desde_boleto_link(self, obj):
         if obj.estado_parseo == 'COM' and not obj.venta_asociada:
@@ -276,7 +513,9 @@ class BoletoImportadoAdmin(admin.ModelAdmin):
             return format_html('<a class="button" href="{}">Crear Venta desde Boleto</a>', url)
         elif obj.venta_asociada:
             url_venta = reverse('admin:core_venta_change', args=[obj.venta_asociada.pk])
-            return format_html('Venta <a href="{}">{}</a> ya fue creada.', url_venta, obj.venta_asociada.numero_venta)
+            # El modelo Venta no posee campo numero_venta; usamos localizador si existe o el id_venta como fallback.
+            identificador = getattr(obj.venta_asociada, 'localizador', None) or getattr(obj.venta_asociada, 'id_venta', obj.venta_asociada.pk)
+            return format_html('Venta <a href="{}">{}</a> ya fue creada.', url_venta, identificador)
         else:
             return "El boleto debe ser parseado correctamente primero."
     crear_venta_desde_boleto_link.short_description = "Generar Venta"
@@ -287,7 +526,13 @@ class BoletoImportadoAdmin(admin.ModelAdmin):
                 estado_parseo=BoletoImportado.EstadoParseo.PENDIENTE,
                 log_parseo=_("Reintentando parseo manualmente...")
             )
-            self.message_user(request, _("Reintento de parseo iniciado para boleto ID {}.").format(boleto.id_boleto_importado))
+            # Tolerar ausencia del framework de mensajes en contextos de prueba.
+            try:
+                self.message_user(request, _("Reintento de parseo iniciado para boleto ID {}.").format(boleto.id_boleto_importado))
+            except Exception as e:
+                # In some test contexts, message_user may not be available.
+                # We log this as a warning instead of crashing.
+                logging.warning(f"Could not send admin message during re-parse action: {e}")
     reintentar_parseo.short_description = _("Reintentar parseo de boletos seleccionados")
 
 # Registrar el resto de los modelos CMS para que el admin los conozca
@@ -300,3 +545,88 @@ admin.site.register(MenuItemCMS)
 admin.site.register(FormularioContactoCMS)
 admin.site.register(Factura)
 admin.site.register(ItemFactura)
+
+
+
+
+
+class ItemLiquidacionInline(admin.TabularInline):
+    model = ItemLiquidacion
+    extra = 0
+    readonly_fields = ('item_venta', 'descripcion', 'monto')
+    can_delete = False
+    def has_add_permission(self, request, obj=None):
+        return False
+
+@admin.register(LiquidacionProveedor)
+class LiquidacionProveedorAdmin(admin.ModelAdmin):
+    list_display = ('id_liquidacion', 'proveedor', 'venta', 'fecha_emision', 'monto_total', 'saldo_pendiente', 'estado')
+    list_filter = ('estado', 'proveedor', 'fecha_emision')
+    search_fields = ('id_liquidacion', 'venta__localizador', 'proveedor__nombre')
+    inlines = [ItemLiquidacionInline]
+    readonly_fields = ('saldo_pendiente', 'monto_total', 'proveedor', 'venta')
+
+
+@admin.register(VentaParseMetadata)
+class VentaParseMetadataAdmin(admin.ModelAdmin):
+    list_display = ('id_metadata','venta','fuente','currency','total_amount','amount_consistency','creado')
+    list_filter = ('fuente','currency','amount_consistency','creado')
+    search_fields = ('venta__localizador',)
+    readonly_fields = ('raw_normalized_json','segments_json','creado')
+
+@admin.register(AlquilerAutoReserva)
+class AlquilerAutoReservaAdmin(admin.ModelAdmin):
+    list_display = ('id_alquiler_auto','venta','categoria_auto','compania_rentadora','fecha_hora_retiro','fecha_hora_devolucion','incluye_seguro')
+    search_fields = ('numero_confirmacion','compania_rentadora')
+    list_filter = ('incluye_seguro','compania_rentadora')
+    autocomplete_fields = ['venta','proveedor','ciudad_retiro','ciudad_devolucion']
+
+@admin.register(EventoServicio)
+class EventoServicioAdmin(admin.ModelAdmin):
+    list_display = ('id_evento_servicio','venta','nombre_evento','fecha_evento','ubicacion','zona_asiento')
+    search_fields = ('nombre_evento','codigo_boleto_evento')
+    list_filter = ('fecha_evento',)
+    autocomplete_fields = ['venta','proveedor']
+
+class CircuitoDiaInline(admin.TabularInline):
+    model = CircuitoDia
+    extra = 0
+    autocomplete_fields = ['ciudad']
+
+@admin.register(CircuitoTuristico)
+class CircuitoTuristicoAdmin(admin.ModelAdmin):
+    list_display = ('id_circuito','venta','nombre_circuito','fecha_inicio','fecha_fin','dias_total')
+    search_fields = ('nombre_circuito',)
+    list_filter = ('fecha_inicio',)
+    inlines = [CircuitoDiaInline]
+    autocomplete_fields = ['venta']
+
+@admin.register(PaqueteAereo)
+class PaqueteAereoAdmin(admin.ModelAdmin):
+    list_display = ('id_paquete_aereo','venta','nombre_paquete','incluye_vuelos','incluye_hotel','noches','pasajeros')
+    list_filter = ('incluye_vuelos','incluye_hotel')
+    search_fields = ('nombre_paquete',)
+    autocomplete_fields = ['venta']
+
+@admin.register(ServicioAdicionalDetalle)
+class ServicioAdicionalDetalleAdmin(admin.ModelAdmin):
+    list_display = ('id_servicio_adicional','venta','tipo_servicio','codigo_referencia','fecha_inicio','fecha_fin')
+    list_filter = ('tipo_servicio',)
+    search_fields = ('codigo_referencia',)
+    autocomplete_fields = ['venta','proveedor']
+
+@admin.register(AuditLog)
+class AuditLogAdmin(admin.ModelAdmin):
+    list_display = ('id_audit_log','modelo','object_id','accion','venta','creado')
+    list_filter = ('modelo','accion','creado')
+    search_fields = ('modelo','object_id','venta__localizador','descripcion')
+    readonly_fields = ('modelo','object_id','accion','venta','descripcion','datos_previos','datos_nuevos','metadata_extra','creado')
+    ordering = ('-creado',)
+
+@admin.register(ComunicacionProveedor)
+class ComunicacionProveedorAdmin(admin.ModelAdmin):
+    list_display = ('asunto', 'remitente', 'categoria', 'fecha_recepcion')
+    list_filter = ('categoria', 'remitente', 'fecha_recepcion')
+    search_fields = ('asunto', 'remitente', 'cuerpo_completo')
+    readonly_fields = ('remitente', 'asunto', 'fecha_recepcion', 'categoria', 'contenido_extraido', 'cuerpo_completo')
+    ordering = ('-fecha_recepcion',)

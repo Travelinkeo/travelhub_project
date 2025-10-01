@@ -1,3 +1,8 @@
 {
-  "/cms/page": "app/cms/page.js"
+  "/page": "app/page.js",
+  "/erp/cotizaciones/page": "app/erp/cotizaciones/page.js",
+  "/crm/clientes/page": "app/crm/clientes/page.js",
+  "/crm/page": "app/crm/page.js",
+  "/erp/ventas/page": "app/erp/ventas/page.js",
+  "/erp/ventas/nueva/page": "app/erp/ventas/nueva/page.js"
 }

@@ -26,7 +26,8 @@ const securityHeaders = [
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: https:",
       "font-src 'self' data:",
-      "connect-src 'self' https://localhost:8000", // API dev
+    // Allow local dev backend hosts (both localhost and 127.0.0.1) for fetch/ws in dev
+    "connect-src 'self' https://localhost:8000 http://localhost:8000 http://127.0.0.1:8000 ws://localhost:8000 ws://127.0.0.1:8000",
       "frame-ancestors 'self'",
       "base-uri 'self'",
       "form-action 'self'"
@@ -37,12 +38,28 @@ const securityHeaders = [
 const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  compiler: {
+    emotion: true,
+  },
+  transpilePackages: ['@mui/material', '@mui/x-data-grid', '@mui/icons-material'],
   async headers() {
     return [
       {
         source: '/(.*)',
         headers: securityHeaders,
       }
+    ];
+  },
+  async rewrites() {
+    return [
+      {
+        source: '/api/clientes/',
+        destination: 'http://127.0.0.1:8000/api/clientes/',
+      },
+      {
+        source: '/api/:path*',
+        destination: 'http://127.0.0.1:8000/api/:path*',
+      },
     ];
   },
 };

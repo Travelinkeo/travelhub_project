@@ -1,0 +1,91 @@
+{
+  "ejemplo_estructura_venta_hotel": {
+    "descripcion": "Estructura JSON correcta para crear una venta de hotel desde el frontend",
+    "endpoint": "POST /api/ventas/",
+    "estructura_datos": {
+      "cliente": 1,
+      "moneda": 1,
+      "tipo_venta": "B2C",
+      "canal_origen": "WEB",
+      "descripcion_general": "Reserva de hotel en Caracas",
+      "subtotal": 150.00,
+      "impuestos": 15.00,
+      "notas": "Cliente prefiere habitación con vista al mar",
+      "items_venta": [
+        {
+          "producto_servicio": 2,
+          "descripcion_personalizada": "Hotel Marriott - Habitación Doble",
+          "cantidad": 1,
+          "precio_unitario_venta": 150.00,
+          "fecha_inicio_servicio": "2024-12-15T15:00:00Z",
+          "fecha_fin_servicio": "2024-12-18T11:00:00Z",
+          "proveedor_servicio": 3,
+          "costo_neto_proveedor": 120.00,
+          "fee_proveedor": 5.00,
+          "comision_agencia_monto": 10.00,
+          "fee_agencia_interno": 15.00,
+          "notas_item": "Confirmar disponibilidad antes del check-in",
+          "alojamiento_details": {
+            "nombre_establecimiento": "Hotel Marriott Caracas",
+            "check_in": "2024-12-15",
+            "check_out": "2024-12-18",
+            "regimen_alimentacion": "Solo Desayuno",
+            "habitaciones": 1,
+            "ciudad": 1,
+            "proveedor": 3,
+            "notas": "Habitación con vista al mar solicitada"
+          }
+        }
+      ]
+    }
+  },
+  "ejemplo_estructura_alojamiento_separado": {
+    "descripcion": "Si prefieres crear el alojamiento por separado",
+    "endpoint_venta": "POST /api/ventas/",
+    "endpoint_alojamiento": "POST /api/alojamientos/",
+    "paso_1_crear_venta": {
+      "cliente": 1,
+      "moneda": 1,
+      "tipo_venta": "B2C",
+      "canal_origen": "WEB",
+      "descripcion_general": "Reserva de hotel en Caracas",
+      "subtotal": 150.00,
+      "impuestos": 15.00,
+      "items_venta": [
+        {
+          "producto_servicio": 2,
+          "descripcion_personalizada": "Hotel Marriott - Habitación Doble",
+          "cantidad": 1,
+          "precio_unitario_venta": 150.00,
+          "fecha_inicio_servicio": "2024-12-15T15:00:00Z",
+          "fecha_fin_servicio": "2024-12-18T11:00:00Z",
+          "proveedor_servicio": 3
+        }
+      ]
+    },
+    "paso_2_crear_alojamiento": {
+      "venta": "ID_DE_LA_VENTA_CREADA",
+      "item_venta": "ID_DEL_ITEM_CREADO",
+      "nombre_establecimiento": "Hotel Marriott Caracas",
+      "check_in": "2024-12-15",
+      "check_out": "2024-12-18",
+      "regimen_alimentacion": "Solo Desayuno",
+      "habitaciones": 1,
+      "ciudad": 1,
+      "proveedor": 3,
+      "notas": "Habitación con vista al mar solicitada"
+    }
+  },
+  "campos_requeridos": {
+    "venta": ["cliente", "moneda"],
+    "item_venta": ["producto_servicio", "precio_unitario_venta"],
+    "alojamiento": ["nombre_establecimiento", "ciudad"]
+  },
+  "notas_importantes": [
+    "Los IDs (cliente, moneda, producto_servicio, ciudad, proveedor) deben existir en la base de datos",
+    "Las fechas deben estar en formato ISO 8601",
+    "El campo 'alojamiento_details' en items_venta es opcional pero recomendado",
+    "Si no usas 'alojamiento_details', debes crear el alojamiento por separado",
+    "El sistema calculará automáticamente total_item_venta y total_venta"
+  ]
+}

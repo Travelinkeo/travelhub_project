@@ -27,6 +27,7 @@ class Cliente(models.Model):
     tipo_cliente = models.CharField(_("Tipo de Cliente"), max_length=3, choices=TipoCliente.choices, default=TipoCliente.PARTICULAR)
     nombres = models.CharField(_("Nombres"), max_length=150, blank=True, null=True)
     apellidos = models.CharField(_("Apellidos"), max_length=150, blank=True, null=True)
+    cedula_identidad = models.CharField(_("Cédula de Identidad"), max_length=20, blank=True, null=True, unique=True)
     nombre_empresa = models.CharField(_("Nombre de la Empresa"), max_length=200, blank=True, null=True)
     email = models.EmailField(_("Correo Electrónico"), unique=True, blank=True, null=True)
     telefono_principal = models.CharField(_("Teléfono Principal"), max_length=30, blank=True, null=True)

@@ -1,10 +1,23 @@
-export default function DashboardPage() {
+'use client';
+
+import DashboardStats from '@/components/Dashboard/DashboardStats';
+import CotizacionesPanel from '@/components/Dashboard/CotizacionesPanel';
+import { Box, Typography, Grid } from '@mui/material';
+
+export default function HomePage() {
   return (
-    <div>
-      <h1 className="text-2xl font-bold">Bienvenido al Dashboard</h1>
-      <p className="mt-2 text-gray-600">
-        Selecciona una opción de la barra lateral para comenzar.
-      </p>
-    </div>
+    <Box>
+      <Typography variant="h3" component="h1" gutterBottom sx={{ p: 3, pb: 0 }} color="text.primary">
+        TravelHub - Dashboard Ejecutivo
+      </Typography>
+      <DashboardStats />
+      <Box p={3}>
+        <Grid container spacing={3}>
+          <Grid item xs={12}>
+            <CotizacionesPanel />
+          </Grid>
+        </Grid>
+      </Box>
+    </Box>
   );
 }

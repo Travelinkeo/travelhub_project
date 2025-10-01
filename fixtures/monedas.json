@@ -1,142 +1,1402 @@
 [
-  {"codigo_iso": "AFN", "nombre": "Afgani", "simbolo": "؋", "es_moneda_local": false},
-  {"codigo_iso": "ALL", "nombre": "Lek", "simbolo": "L", "es_moneda_local": false},
-  {"codigo_iso": "DZD", "nombre": "Dinar Argelino", "simbolo": "د.ج", "es_moneda_local": false},
-  {"codigo_iso": "AOA", "nombre": "Kwanza", "simbolo": "Kz", "es_moneda_local": false},
-  {"codigo_iso": "XCD", "nombre": "Dólar del Caribe Oriental", "simbolo": "$", "es_moneda_local": false},
-  {"codigo_iso": "ARS", "nombre": "Peso Argentino", "simbolo": "$", "es_moneda_local": false},
-  {"codigo_iso": "AMD", "nombre": "Dram Armenio", "simbolo": "֏", "es_moneda_local": false},
-  {"codigo_iso": "AUD", "nombre": "Dólar Australiano", "simbolo": "$", "es_moneda_local": false},
-  {"codigo_iso": "EUR", "nombre": "Euro", "simbolo": "€", "es_moneda_local": false},
-  {"codigo_iso": "AZN", "nombre": "Manat Azerbaiyano", "simbolo": "₼", "es_moneda_local": false},
-  {"codigo_iso": "BSD", "nombre": "Dólar Bahameño", "simbolo": "$", "es_moneda_local": false},
-  {"codigo_iso": "BHD", "nombre": "Dinar Bahreiní", "simbolo": ".د.ب", "es_moneda_local": false},
-  {"codigo_iso": "BDT", "nombre": "Taka", "simbolo": "৳", "es_moneda_local": false},
-  {"codigo_iso": "BBD", "nombre": "Dólar Barbadense", "simbolo": "$", "es_moneda_local": false},
-  {"codigo_iso": "BYN", "nombre": "Rublo Bielorruso", "simbolo": "Br", "es_moneda_local": false},
-  {"codigo_iso": "BZD", "nombre": "Dólar Beliceño", "simbolo": "$", "es_moneda_local": false},
-  {"codigo_iso": "XOF", "nombre": "Franco CFA de África Occidental", "simbolo": "CFA", "es_moneda_local": false},
-  {"codigo_iso": "BOB", "nombre": "Boliviano", "simbolo": "Bs.", "es_moneda_local": false},
-  {"codigo_iso": "BAM", "nombre": "Marco Convertible", "simbolo": "KM", "es_moneda_local": false},
-  {"codigo_iso": "BWP", "nombre": "Pula", "simbolo": "P", "es_moneda_local": false},
-  {"codigo_iso": "BRL", "nombre": "Real Brasileño", "simbolo": "R$", "es_moneda_local": false},
-  {"codigo_iso": "BND", "nombre": "Dólar de Brunéi", "simbolo": "$", "es_moneda_local": false},
-  {"codigo_iso": "BGN", "nombre": "Lev Búlgaro", "simbolo": "лв", "es_moneda_local": false},
-  {"codigo_iso": "BIF", "nombre": "Franco Burundés", "simbolo": "FBu", "es_moneda_local": false},
-  {"codigo_iso": "BTN", "nombre": "Ngultrum", "simbolo": "Nu.", "es_moneda_local": false},
-  {"codigo_iso": "CVE", "nombre": "Escudo Caboverdiano", "simbolo": "$", "es_moneda_local": false},
-  {"codigo_iso": "KHR", "nombre": "Riel", "simbolo": "៛", "es_moneda_local": false},
-  {"codigo_iso": "XAF", "nombre": "Franco CFA de África Central", "simbolo": "CFA", "es_moneda_local": false},
-  {"codigo_iso": "CAD", "nombre": "Dólar Canadiense", "simbolo": "$", "es_moneda_local": false},
-  {"codigo_iso": "QAR", "nombre": "Riyal Catarí", "simbolo": "ر.ق", "es_moneda_local": false},
-  {"codigo_iso": "CLP", "nombre": "Peso Chileno", "simbolo": "$", "es_moneda_local": false},
-  {"codigo_iso": "CNY", "nombre": "Yuan", "simbolo": "¥", "es_moneda_local": false},
-  {"codigo_iso": "COP", "nombre": "Peso Colombiano", "simbolo": "$", "es_moneda_local": false},
-  {"codigo_iso": "KMF", "nombre": "Franco Comorense", "simbolo": "CF", "es_moneda_local": false},
-  {"codigo_iso": "CDF", "nombre": "Franco Congoleño", "simbolo": "FC", "es_moneda_local": false},
-  {"codigo_iso": "CRC", "nombre": "Colón Costarricense", "simbolo": "₡", "es_moneda_local": false},
-  {"codigo_iso": "HRK", "nombre": "Kuna Croata", "simbolo": "kn", "es_moneda_local": false},
-  {"codigo_iso": "CUP", "nombre": "Peso Cubano", "simbolo": "$", "es_moneda_local": false},
-  {"codigo_iso": "CZK", "nombre": "Corona Checa", "simbolo": "Kč", "es_moneda_local": false},
-  {"codigo_iso": "DKK", "nombre": "Corona Danesa", "simbolo": "kr", "es_moneda_local": false},
-  {"codigo_iso": "DJF", "nombre": "Franco Yibutiano", "simbolo": "Fdj", "es_moneda_local": false},
-  {"codigo_iso": "DOP", "nombre": "Peso Dominicano", "simbolo": "$", "es_moneda_local": false},
-  {"codigo_iso": "EGP", "nombre": "Libra Egipcia", "simbolo": "£", "es_moneda_local": false},
-  {"codigo_iso": "SVC", "nombre": "Colón Salvadoreño", "simbolo": "$", "es_moneda_local": false},
-  {"codigo_iso": "ERN", "nombre": "Nakfa", "simbolo": "Nfk", "es_moneda_local": false},
-  {"codigo_iso": "SZL", "nombre": "Lilangeni", "simbolo": "L", "es_moneda_local": false},
-  {"codigo_iso": "ETB", "nombre": "Birr Etíope", "simbolo": "Br", "es_moneda_local": false},
-  {"codigo_iso": "FJD", "nombre": "Dólar Fiyiano", "simbolo": "$", "es_moneda_local": false},
-  {"codigo_iso": "PHP", "nombre": "Peso Filipino", "simbolo": "₱", "es_moneda_local": false},
-  {"codigo_iso": "GMD", "nombre": "Dalasi", "simbolo": "D", "es_moneda_local": false},
-  {"codigo_iso": "GEL", "nombre": "Lari", "simbolo": "₾", "es_moneda_local": false},
-  {"codigo_iso": "GHS", "nombre": "Cedi", "simbolo": "₵", "es_moneda_local": false},
-  {"codigo_iso": "GTQ", "nombre": "Quetzal", "simbolo": "Q", "es_moneda_local": false},
-  {"codigo_iso": "GNF", "nombre": "Franco Guineano", "simbolo": "FG", "es_moneda_local": false},
-  {"codigo_iso": "GYD", "nombre": "Dólar Guyanés", "simbolo": "$", "es_moneda_local": false},
-  {"codigo_iso": "HTG", "nombre": "Gourde", "simbolo": "G", "es_moneda_local": false},
-  {"codigo_iso": "HNL", "nombre": "Lempira", "simbolo": "L", "es_moneda_local": false},
-  {"codigo_iso": "HUF", "nombre": "Forinto", "simbolo": "Ft", "es_moneda_local": false},
-  {"codigo_iso": "ISK", "nombre": "Corona Islandesa", "simbolo": "kr", "es_moneda_local": false},
-  {"codigo_iso": "INR", "nombre": "Rupia India", "simbolo": "₹", "es_moneda_local": false},
-  {"codigo_iso": "IDR", "nombre": "Rupia Indonesia", "simbolo": "Rp", "es_moneda_local": false},
-  {"codigo_iso": "IRR", "nombre": "Rial Iraní", "simbolo": "﷼", "es_moneda_local": false},
-  {"codigo_iso": "IQD", "nombre": "Dinar Iraquí", "simbolo": "ع.د", "es_moneda_local": false},
-  {"codigo_iso": "ILS", "nombre": "Séquel", "simbolo": "₪", "es_moneda_local": false},
-  {"codigo_iso": "JMD", "nombre": "Dólar Jamaiquino", "simbolo": "$", "es_moneda_local": false},
-  {"codigo_iso": "JPY", "nombre": "Yen", "simbolo": "¥", "es_moneda_local": false},
-  {"codigo_iso": "JOD", "nombre": "Dinar Jordano", "simbolo": "د.ا", "es_moneda_local": false},
-  {"codigo_iso": "KZT", "nombre": "Tenge", "simbolo": "₸", "es_moneda_local": false},
-  {"codigo_iso": "KES", "nombre": "Chelín Keniano", "simbolo": "KSh", "es_moneda_local": false},
-  {"codigo_iso": "KGS", "nombre": "Som", "simbolo": "с", "es_moneda_local": false},
-  {"codigo_iso": "KWD", "nombre": "Dinar Kuwaití", "simbolo": "د.ك", "es_moneda_local": false},
-  {"codigo_iso": "LAK", "nombre": "Kip", "simbolo": "₭", "es_moneda_local": false},
-  {"codigo_iso": "LBP", "nombre": "Libra Libanesa", "simbolo": "ل.ل", "es_moneda_local": false},
-  {"codigo_iso": "LSL", "nombre": "Loti", "simbolo": "L", "es_moneda_local": false},
-  {"codigo_iso": "LRD", "nombre": "Dólar Liberiano", "simbolo": "$", "es_moneda_local": false},
-  {"codigo_iso": "LYD", "nombre": "Dinar Libio", "simbolo": "ل.د", "es_moneda_local": false},
-  {"codigo_iso": "MOP", "nombre": "Pataca", "simbolo": "MOP$", "es_moneda_local": false},
-  {"codigo_iso": "MKD", "nombre": "Dinar Macedonio", "simbolo": "ден", "es_moneda_local": false},
-  {"codigo_iso": "MGA", "nombre": "Ariary", "simbolo": "Ar", "es_moneda_local": false},
-  {"codigo_iso": "MWK", "nombre": "Kwacha Malauí", "simbolo": "MK", "es_moneda_local": false},
-  {"codigo_iso": "MYR", "nombre": "Ringgit", "simbolo": "RM", "es_moneda_local": false},
-  {"codigo_iso": "MUR", "nombre": "Rupia Mauricia", "simbolo": "₨", "es_moneda_local": false},
-  {"codigo_iso": "MXN", "nombre": "Peso Mexicano", "simbolo": "$", "es_moneda_local": false},
-  {"codigo_iso": "MDL", "nombre": "Leu Moldavo", "simbolo": "L", "es_moneda_local": false},
-  {"codigo_iso": "MNT", "nombre": "Tugrik", "simbolo": "₮", "es_moneda_local": false},
-  {"codigo_iso": "MAD", "nombre": "Dírham Marroquí", "simbolo": "د.م.", "es_moneda_local": false},
-  {"codigo_iso": "MZN", "nombre": "Metical", "simbolo": "MT", "es_moneda_local": false},
-  {"codigo_iso": "MMK", "nombre": "Kyat", "simbolo": "K", "es_moneda_local": false},
-  {"codigo_iso": "NAD", "nombre": "Dólar Namibio", "simbolo": "$", "es_moneda_local": false},
-  {"codigo_iso": "NPR", "nombre": "Rupia Nepalí", "simbolo": "₨", "es_moneda_local": false},
-  {"codigo_iso": "NIO", "nombre": "Córdoba", "simbolo": "C$", "es_moneda_local": false},
-  {"codigo_iso": "NGN", "nombre": "Naira", "simbolo": "₦", "es_moneda_local": false},
-  {"codigo_iso": "NOK", "nombre": "Corona Noruega", "simbolo": "kr", "es_moneda_local": false},
-  {"codigo_iso": "NZD", "nombre": "Dólar Neozelandés", "simbolo": "$", "es_moneda_local": false},
-  {"codigo_iso": "OMR", "nombre": "Rial Omaní", "simbolo": "ر.ع.", "es_moneda_local": false},
-  {"codigo_iso": "PKR", "nombre": "Rupia Pakistaní", "simbolo": "₨", "es_moneda_local": false},
-  {"codigo_iso": "PAB", "nombre": "Balboa", "simbolo": "B/.", "es_moneda_local": false},
-  {"codigo_iso": "PGK", "nombre": "Kina", "simbolo": "K", "es_moneda_local": false},
-  {"codigo_iso": "PYG", "nombre": "Guaraní", "simbolo": "₲", "es_moneda_local": false},
-  {"codigo_iso": "PEN", "nombre": "Sol", "simbolo": "S/", "es_moneda_local": false},
-  {"codigo_iso": "PLN", "nombre": "Zloty", "simbolo": "zł", "es_moneda_local": false},
-  {"codigo_iso": "QAR", "nombre": "Riyal Catarí", "simbolo": "ر.ق", "es_moneda_local": false},
-  {"codigo_iso": "RON", "nombre": "Leu Rumano", "simbolo": "lei", "es_moneda_local": false},
-  {"codigo_iso": "RUB", "nombre": "Rublo Ruso", "simbolo": "₽", "es_moneda_local": false},
-  {"codigo_iso": "RWF", "nombre": "Franco Ruandés", "simbolo": "FRw", "es_moneda_local": false},
-  {"codigo_iso": "WST", "nombre": "Tala", "simbolo": "T", "es_moneda_local": false},
-  {"codigo_iso": "SAR", "nombre": "Riyal Saudí", "simbolo": "ر.س", "es_moneda_local": false},
-  {"codigo_iso": "RSD", "nombre": "Dinar Serbio", "simbolo": "дин.", "es_moneda_local": false},
-  {"codigo_iso": "SCR", "nombre": "Rupia Seychellense", "simbolo": "₨", "es_moneda_local": false},
-  {"codigo_iso": "SLL", "nombre": "Leone", "simbolo": "Le", "es_moneda_local": false},
-  {"codigo_iso": "SGD", "nombre": "Dólar de Singapur", "simbolo": "$", "es_moneda_local": false},
-  {"codigo_iso": "ZAR", "nombre": "Rand", "simbolo": "R", "es_moneda_local": false},
-  {"codigo_iso": "KRW", "nombre": "Won Surcoreano", "simbolo": "₩", "es_moneda_local": false},
-  {"codigo_iso": "SSP", "nombre": "Libra Sursudanesa", "simbolo": "£", "es_moneda_local": false},
-  {"codigo_iso": "LKR", "nombre": "Rupia de Sri Lanka", "simbolo": "₨", "es_moneda_local": false},
-  {"codigo_iso": "SDG", "nombre": "Libra Sudanesa", "simbolo": "£", "es_moneda_local": false},
-  {"codigo_iso": "SEK", "nombre": "Corona Sueca", "simbolo": "kr", "es_moneda_local": false},
-  {"codigo_iso": "CHF", "nombre": "Franco Suizo", "simbolo": "CHF", "es_moneda_local": false},
-  {"codigo_iso": "SRD", "nombre": "Dólar Surinamés", "simbolo": "$", "es_moneda_local": false},
-  {"codigo_iso": "SYP", "nombre": "Libra Siria", "simbolo": "£", "es_moneda_local": false},
-  {"codigo_iso": "TJS", "nombre": "Somoni", "simbolo": "ЅМ", "es_moneda_local": false},
-  {"codigo_iso": "TZS", "nombre": "Chelín Tanzano", "simbolo": "TSh", "es_moneda_local": false},
-  {"codigo_iso": "THB", "nombre": "Baht", "simbolo": "฿", "es_moneda_local": false},
-  {"codigo_iso": "TWD", "nombre": "Dólar Taiwanés", "simbolo": "NT$", "es_moneda_local": false},
-  {"codigo_iso": "TMT", "nombre": "Manat Turcomano", "simbolo": "m", "es_moneda_local": false},
-  {"codigo_iso": "TND", "nombre": "Dinar Tunecino", "simbolo": "د.ت", "es_moneda_local": false},
-  {"codigo_iso": "TRY", "nombre": "Lira Turca", "simbolo": "₺", "es_moneda_local": false},
-  {"codigo_iso": "TTD", "nombre": "Dólar de Trinidad y Tobago", "simbolo": "$", "es_moneda_local": false},
-  {"codigo_iso": "UGX", "nombre": "Chelín Ugandés", "simbolo": "USh", "es_moneda_local": false},
-  {"codigo_iso": "UAH", "nombre": "Grivna", "simbolo": "₴", "es_moneda_local": false},
-  {"codigo_iso": "AED", "nombre": "Dírham de los Emiratos Árabes Unidos", "simbolo": "د.إ", "es_moneda_local": false},
-  {"codigo_iso": "GBP", "nombre": "Libra Esterlina", "simbolo": "£", "es_moneda_local": false},
-  {"codigo_iso": "USD", "nombre": "Dólar Estadounidense", "simbolo": "$", "es_moneda_local": false},
-  {"codigo_iso": "UYU", "nombre": "Peso Uruguayo", "simbolo": "$", "es_moneda_local": false},
-  {"codigo_iso": "UZS", "nombre": "Som Uzbeko", "simbolo": "сўм", "es_moneda_local": false},
-  {"codigo_iso": "VUV", "nombre": "Vatu", "simbolo": "VT", "es_moneda_local": false},
-  {"codigo_iso": "VES", "nombre": "Bolívar", "simbolo": "Bs", "es_moneda_local": true},
-  {"codigo_iso": "VND", "nombre": "Dong", "simbolo": "₫", "es_moneda_local": false},
-  {"codigo_iso": "YER", "nombre": "Rial Yemení", "simbolo": "﷼", "es_moneda_local": false},
-  {"codigo_iso": "ZMW", "nombre": "Kwacha Zambiano", "simbolo": "ZK", "es_moneda_local": false}
+  {
+    "model": "core.moneda",
+    "pk": 1,
+    "fields": {
+      "codigo_iso": "AFN",
+      "nombre": "Afgani",
+      "simbolo": "؋",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 2,
+    "fields": {
+      "codigo_iso": "ALL",
+      "nombre": "Lek",
+      "simbolo": "L",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 3,
+    "fields": {
+      "codigo_iso": "DZD",
+      "nombre": "Dinar Argelino",
+      "simbolo": "د.ج",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 4,
+    "fields": {
+      "codigo_iso": "AOA",
+      "nombre": "Kwanza",
+      "simbolo": "Kz",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 5,
+    "fields": {
+      "codigo_iso": "XCD",
+      "nombre": "Dólar del Caribe Oriental",
+      "simbolo": "$",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 6,
+    "fields": {
+      "codigo_iso": "ARS",
+      "nombre": "Peso Argentino",
+      "simbolo": "$",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 7,
+    "fields": {
+      "codigo_iso": "AMD",
+      "nombre": "Dram Armenio",
+      "simbolo": "֏",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 8,
+    "fields": {
+      "codigo_iso": "AUD",
+      "nombre": "Dólar Australiano",
+      "simbolo": "$",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 9,
+    "fields": {
+      "codigo_iso": "EUR",
+      "nombre": "Euro",
+      "simbolo": "€",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 10,
+    "fields": {
+      "codigo_iso": "AZN",
+      "nombre": "Manat Azerbaiyano",
+      "simbolo": "₼",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 11,
+    "fields": {
+      "codigo_iso": "BSD",
+      "nombre": "Dólar Bahameño",
+      "simbolo": "$",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 12,
+    "fields": {
+      "codigo_iso": "BHD",
+      "nombre": "Dinar Bahreiní",
+      "simbolo": ".د.ب",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 13,
+    "fields": {
+      "codigo_iso": "BDT",
+      "nombre": "Taka",
+      "simbolo": "৳",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 14,
+    "fields": {
+      "codigo_iso": "BBD",
+      "nombre": "Dólar Barbadense",
+      "simbolo": "$",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 15,
+    "fields": {
+      "codigo_iso": "BYN",
+      "nombre": "Rublo Bielorruso",
+      "simbolo": "Br",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 16,
+    "fields": {
+      "codigo_iso": "BZD",
+      "nombre": "Dólar Beliceño",
+      "simbolo": "$",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 17,
+    "fields": {
+      "codigo_iso": "XOF",
+      "nombre": "Franco CFA de África Occidental",
+      "simbolo": "CFA",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 18,
+    "fields": {
+      "codigo_iso": "BOB",
+      "nombre": "Boliviano",
+      "simbolo": "Bs.",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 19,
+    "fields": {
+      "codigo_iso": "BAM",
+      "nombre": "Marco Convertible",
+      "simbolo": "KM",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 20,
+    "fields": {
+      "codigo_iso": "BWP",
+      "nombre": "Pula",
+      "simbolo": "P",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 21,
+    "fields": {
+      "codigo_iso": "BRL",
+      "nombre": "Real Brasileño",
+      "simbolo": "R$",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 22,
+    "fields": {
+      "codigo_iso": "BND",
+      "nombre": "Dólar de Brunéi",
+      "simbolo": "$",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 23,
+    "fields": {
+      "codigo_iso": "BGN",
+      "nombre": "Lev Búlgaro",
+      "simbolo": "лв",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 24,
+    "fields": {
+      "codigo_iso": "BIF",
+      "nombre": "Franco Burundés",
+      "simbolo": "FBu",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 25,
+    "fields": {
+      "codigo_iso": "BTN",
+      "nombre": "Ngultrum",
+      "simbolo": "Nu.",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 26,
+    "fields": {
+      "codigo_iso": "CVE",
+      "nombre": "Escudo Caboverdiano",
+      "simbolo": "$",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 27,
+    "fields": {
+      "codigo_iso": "KHR",
+      "nombre": "Riel",
+      "simbolo": "៛",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 28,
+    "fields": {
+      "codigo_iso": "XAF",
+      "nombre": "Franco CFA de África Central",
+      "simbolo": "CFA",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 29,
+    "fields": {
+      "codigo_iso": "CAD",
+      "nombre": "Dólar Canadiense",
+      "simbolo": "$",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 30,
+    "fields": {
+      "codigo_iso": "QAR",
+      "nombre": "Riyal Catarí",
+      "simbolo": "ر.ق",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 31,
+    "fields": {
+      "codigo_iso": "CLP",
+      "nombre": "Peso Chileno",
+      "simbolo": "$",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 32,
+    "fields": {
+      "codigo_iso": "CNY",
+      "nombre": "Yuan",
+      "simbolo": "¥",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 33,
+    "fields": {
+      "codigo_iso": "COP",
+      "nombre": "Peso Colombiano",
+      "simbolo": "$",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 34,
+    "fields": {
+      "codigo_iso": "KMF",
+      "nombre": "Franco Comorense",
+      "simbolo": "CF",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 35,
+    "fields": {
+      "codigo_iso": "CDF",
+      "nombre": "Franco Congoleño",
+      "simbolo": "FC",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 36,
+    "fields": {
+      "codigo_iso": "CRC",
+      "nombre": "Colón Costarricense",
+      "simbolo": "₡",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 37,
+    "fields": {
+      "codigo_iso": "HRK",
+      "nombre": "Kuna Croata",
+      "simbolo": "kn",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 38,
+    "fields": {
+      "codigo_iso": "CUP",
+      "nombre": "Peso Cubano",
+      "simbolo": "$",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 39,
+    "fields": {
+      "codigo_iso": "CZK",
+      "nombre": "Corona Checa",
+      "simbolo": "Kč",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 40,
+    "fields": {
+      "codigo_iso": "DKK",
+      "nombre": "Corona Danesa",
+      "simbolo": "kr",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 41,
+    "fields": {
+      "codigo_iso": "DJF",
+      "nombre": "Franco Yibutiano",
+      "simbolo": "Fdj",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 42,
+    "fields": {
+      "codigo_iso": "DOP",
+      "nombre": "Peso Dominicano",
+      "simbolo": "$",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 43,
+    "fields": {
+      "codigo_iso": "EGP",
+      "nombre": "Libra Egipcia",
+      "simbolo": "£",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 44,
+    "fields": {
+      "codigo_iso": "SVC",
+      "nombre": "Colón Salvadoreño",
+      "simbolo": "$",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 45,
+    "fields": {
+      "codigo_iso": "ERN",
+      "nombre": "Nakfa",
+      "simbolo": "Nfk",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 46,
+    "fields": {
+      "codigo_iso": "SZL",
+      "nombre": "Lilangeni",
+      "simbolo": "L",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 47,
+    "fields": {
+      "codigo_iso": "ETB",
+      "nombre": "Birr Etíope",
+      "simbolo": "Br",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 48,
+    "fields": {
+      "codigo_iso": "FJD",
+      "nombre": "Dólar Fiyiano",
+      "simbolo": "$",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 49,
+    "fields": {
+      "codigo_iso": "PHP",
+      "nombre": "Peso Filipino",
+      "simbolo": "₱",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 50,
+    "fields": {
+      "codigo_iso": "GMD",
+      "nombre": "Dalasi",
+      "simbolo": "D",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 51,
+    "fields": {
+      "codigo_iso": "GEL",
+      "nombre": "Lari",
+      "simbolo": "₾",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 52,
+    "fields": {
+      "codigo_iso": "GHS",
+      "nombre": "Cedi",
+      "simbolo": "₵",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 53,
+    "fields": {
+      "codigo_iso": "GTQ",
+      "nombre": "Quetzal",
+      "simbolo": "Q",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 54,
+    "fields": {
+      "codigo_iso": "GNF",
+      "nombre": "Franco Guineano",
+      "simbolo": "FG",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 55,
+    "fields": {
+      "codigo_iso": "GYD",
+      "nombre": "Dólar Guyanés",
+      "simbolo": "$",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 56,
+    "fields": {
+      "codigo_iso": "HTG",
+      "nombre": "Gourde",
+      "simbolo": "G",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 57,
+    "fields": {
+      "codigo_iso": "HNL",
+      "nombre": "Lempira",
+      "simbolo": "L",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 58,
+    "fields": {
+      "codigo_iso": "HUF",
+      "nombre": "Forinto",
+      "simbolo": "Ft",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 59,
+    "fields": {
+      "codigo_iso": "ISK",
+      "nombre": "Corona Islandesa",
+      "simbolo": "kr",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 60,
+    "fields": {
+      "codigo_iso": "INR",
+      "nombre": "Rupia India",
+      "simbolo": "₹",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 61,
+    "fields": {
+      "codigo_iso": "IDR",
+      "nombre": "Rupia Indonesia",
+      "simbolo": "Rp",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 62,
+    "fields": {
+      "codigo_iso": "IRR",
+      "nombre": "Rial Iraní",
+      "simbolo": "﷼",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 63,
+    "fields": {
+      "codigo_iso": "IQD",
+      "nombre": "Dinar Iraquí",
+      "simbolo": "ع.د",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 64,
+    "fields": {
+      "codigo_iso": "ILS",
+      "nombre": "Séquel",
+      "simbolo": "₪",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 65,
+    "fields": {
+      "codigo_iso": "JMD",
+      "nombre": "Dólar Jamaiquino",
+      "simbolo": "$",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 66,
+    "fields": {
+      "codigo_iso": "JPY",
+      "nombre": "Yen",
+      "simbolo": "¥",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 67,
+    "fields": {
+      "codigo_iso": "JOD",
+      "nombre": "Dinar Jordano",
+      "simbolo": "د.ا",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 68,
+    "fields": {
+      "codigo_iso": "KZT",
+      "nombre": "Tenge",
+      "simbolo": "₸",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 69,
+    "fields": {
+      "codigo_iso": "KES",
+      "nombre": "Chelín Keniano",
+      "simbolo": "KSh",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 70,
+    "fields": {
+      "codigo_iso": "KGS",
+      "nombre": "Som",
+      "simbolo": "с",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 71,
+    "fields": {
+      "codigo_iso": "KWD",
+      "nombre": "Dinar Kuwaití",
+      "simbolo": "د.ك",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 72,
+    "fields": {
+      "codigo_iso": "LAK",
+      "nombre": "Kip",
+      "simbolo": "₭",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 73,
+    "fields": {
+      "codigo_iso": "LBP",
+      "nombre": "Libra Libanesa",
+      "simbolo": "ل.ل",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 74,
+    "fields": {
+      "codigo_iso": "LSL",
+      "nombre": "Loti",
+      "simbolo": "L",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 75,
+    "fields": {
+      "codigo_iso": "LRD",
+      "nombre": "Dólar Liberiano",
+      "simbolo": "$",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 76,
+    "fields": {
+      "codigo_iso": "LYD",
+      "nombre": "Dinar Libio",
+      "simbolo": "ل.د",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 77,
+    "fields": {
+      "codigo_iso": "MOP",
+      "nombre": "Pataca",
+      "simbolo": "MOP$",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 78,
+    "fields": {
+      "codigo_iso": "MKD",
+      "nombre": "Dinar Macedonio",
+      "simbolo": "ден",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 79,
+    "fields": {
+      "codigo_iso": "MGA",
+      "nombre": "Ariary",
+      "simbolo": "Ar",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 80,
+    "fields": {
+      "codigo_iso": "MWK",
+      "nombre": "Kwacha Malauí",
+      "simbolo": "MK",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 81,
+    "fields": {
+      "codigo_iso": "MYR",
+      "nombre": "Ringgit",
+      "simbolo": "RM",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 82,
+    "fields": {
+      "codigo_iso": "MUR",
+      "nombre": "Rupia Mauricia",
+      "simbolo": "₨",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 83,
+    "fields": {
+      "codigo_iso": "MXN",
+      "nombre": "Peso Mexicano",
+      "simbolo": "$",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 84,
+    "fields": {
+      "codigo_iso": "MDL",
+      "nombre": "Leu Moldavo",
+      "simbolo": "L",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 85,
+    "fields": {
+      "codigo_iso": "MNT",
+      "nombre": "Tugrik",
+      "simbolo": "₮",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 86,
+    "fields": {
+      "codigo_iso": "MAD",
+      "nombre": "Dírham Marroquí",
+      "simbolo": "د.م.",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 87,
+    "fields": {
+      "codigo_iso": "MZN",
+      "nombre": "Metical",
+      "simbolo": "MT",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 88,
+    "fields": {
+      "codigo_iso": "MMK",
+      "nombre": "Kyat",
+      "simbolo": "K",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 89,
+    "fields": {
+      "codigo_iso": "NAD",
+      "nombre": "Dólar Namibio",
+      "simbolo": "$",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 90,
+    "fields": {
+      "codigo_iso": "NPR",
+      "nombre": "Rupia Nepalí",
+      "simbolo": "₨",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 91,
+    "fields": {
+      "codigo_iso": "NIO",
+      "nombre": "Córdoba",
+      "simbolo": "C$",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 92,
+    "fields": {
+      "codigo_iso": "NGN",
+      "nombre": "Naira",
+      "simbolo": "₦",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 93,
+    "fields": {
+      "codigo_iso": "NOK",
+      "nombre": "Corona Noruega",
+      "simbolo": "kr",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 94,
+    "fields": {
+      "codigo_iso": "NZD",
+      "nombre": "Dólar Neozelandés",
+      "simbolo": "$",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 95,
+    "fields": {
+      "codigo_iso": "OMR",
+      "nombre": "Rial Omaní",
+      "simbolo": "ر.ع.",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 96,
+    "fields": {
+      "codigo_iso": "PKR",
+      "nombre": "Rupia Pakistaní",
+      "simbolo": "₨",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 97,
+    "fields": {
+      "codigo_iso": "PAB",
+      "nombre": "Balboa",
+      "simbolo": "B/.",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 98,
+    "fields": {
+      "codigo_iso": "PGK",
+      "nombre": "Kina",
+      "simbolo": "K",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 99,
+    "fields": {
+      "codigo_iso": "PYG",
+      "nombre": "Guaraní",
+      "simbolo": "₲",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 100,
+    "fields": {
+      "codigo_iso": "PEN",
+      "nombre": "Sol",
+      "simbolo": "S/",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 101,
+    "fields": {
+      "codigo_iso": "PLN",
+      "nombre": "Zloty",
+      "simbolo": "zł",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 102,
+    "fields": {
+      "codigo_iso": "QAR",
+      "nombre": "Riyal Catarí",
+      "simbolo": "ر.ق",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 103,
+    "fields": {
+      "codigo_iso": "RON",
+      "nombre": "Leu Rumano",
+      "simbolo": "lei",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 104,
+    "fields": {
+      "codigo_iso": "RUB",
+      "nombre": "Rublo Ruso",
+      "simbolo": "₽",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 105,
+    "fields": {
+      "codigo_iso": "RWF",
+      "nombre": "Franco Ruandés",
+      "simbolo": "FRw",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 106,
+    "fields": {
+      "codigo_iso": "WST",
+      "nombre": "Tala",
+      "simbolo": "T",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 107,
+    "fields": {
+      "codigo_iso": "SAR",
+      "nombre": "Riyal Saudí",
+      "simbolo": "ر.س",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 108,
+    "fields": {
+      "codigo_iso": "RSD",
+      "nombre": "Dinar Serbio",
+      "simbolo": "дин.",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 109,
+    "fields": {
+      "codigo_iso": "SCR",
+      "nombre": "Rupia Seychellense",
+      "simbolo": "₨",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 110,
+    "fields": {
+      "codigo_iso": "SLL",
+      "nombre": "Leone",
+      "simbolo": "Le",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 111,
+    "fields": {
+      "codigo_iso": "SGD",
+      "nombre": "Dólar de Singapur",
+      "simbolo": "$",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 112,
+    "fields": {
+      "codigo_iso": "ZAR",
+      "nombre": "Rand",
+      "simbolo": "R",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 113,
+    "fields": {
+      "codigo_iso": "KRW",
+      "nombre": "Won Surcoreano",
+      "simbolo": "₩",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 114,
+    "fields": {
+      "codigo_iso": "SSP",
+      "nombre": "Libra Sursudanesa",
+      "simbolo": "£",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 115,
+    "fields": {
+      "codigo_iso": "LKR",
+      "nombre": "Rupia de Sri Lanka",
+      "simbolo": "₨",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 116,
+    "fields": {
+      "codigo_iso": "SDG",
+      "nombre": "Libra Sudanesa",
+      "simbolo": "£",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 117,
+    "fields": {
+      "codigo_iso": "SEK",
+      "nombre": "Corona Sueca",
+      "simbolo": "kr",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 118,
+    "fields": {
+      "codigo_iso": "CHF",
+      "nombre": "Franco Suizo",
+      "simbolo": "CHF",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 119,
+    "fields": {
+      "codigo_iso": "SRD",
+      "nombre": "Dólar Surinamés",
+      "simbolo": "$",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 120,
+    "fields": {
+      "codigo_iso": "SYP",
+      "nombre": "Libra Siria",
+      "simbolo": "£",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 121,
+    "fields": {
+      "codigo_iso": "TJS",
+      "nombre": "Somoni",
+      "simbolo": "ЅМ",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 122,
+    "fields": {
+      "codigo_iso": "TZS",
+      "nombre": "Chelín Tanzano",
+      "simbolo": "TSh",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 123,
+    "fields": {
+      "codigo_iso": "THB",
+      "nombre": "Baht",
+      "simbolo": "฿",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 124,
+    "fields": {
+      "codigo_iso": "TWD",
+      "nombre": "Dólar Taiwanés",
+      "simbolo": "NT$",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 125,
+    "fields": {
+      "codigo_iso": "TMT",
+      "nombre": "Manat Turcomano",
+      "simbolo": "m",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 126,
+    "fields": {
+      "codigo_iso": "TND",
+      "nombre": "Dinar Tunecino",
+      "simbolo": "د.ت",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 127,
+    "fields": {
+      "codigo_iso": "TRY",
+      "nombre": "Lira Turca",
+      "simbolo": "₺",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 128,
+    "fields": {
+      "codigo_iso": "TTD",
+      "nombre": "Dólar de Trinidad y Tobago",
+      "simbolo": "$",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 129,
+    "fields": {
+      "codigo_iso": "UGX",
+      "nombre": "Chelín Ugandés",
+      "simbolo": "USh",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 130,
+    "fields": {
+      "codigo_iso": "UAH",
+      "nombre": "Grivna",
+      "simbolo": "₴",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 131,
+    "fields": {
+      "codigo_iso": "AED",
+      "nombre": "Dírham de los Emiratos Árabes Unidos",
+      "simbolo": "د.إ",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 132,
+    "fields": {
+      "codigo_iso": "GBP",
+      "nombre": "Libra Esterlina",
+      "simbolo": "£",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 133,
+    "fields": {
+      "codigo_iso": "USD",
+      "nombre": "Dólar Estadounidense",
+      "simbolo": "$",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 134,
+    "fields": {
+      "codigo_iso": "UYU",
+      "nombre": "Peso Uruguayo",
+      "simbolo": "$",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 135,
+    "fields": {
+      "codigo_iso": "UZS",
+      "nombre": "Som Uzbeko",
+      "simbolo": "сўм",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 136,
+    "fields": {
+      "codigo_iso": "VUV",
+      "nombre": "Vatu",
+      "simbolo": "VT",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 137,
+    "fields": {
+      "codigo_iso": "VES",
+      "nombre": "Bolívar",
+      "simbolo": "Bs",
+      "es_moneda_local": true
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 138,
+    "fields": {
+      "codigo_iso": "VND",
+      "nombre": "Dong",
+      "simbolo": "₫",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 139,
+    "fields": {
+      "codigo_iso": "YER",
+      "nombre": "Rial Yemení",
+      "simbolo": "﷼",
+      "es_moneda_local": false
+    }
+  },
+  {
+    "model": "core.moneda",
+    "pk": 140,
+    "fields": {
+      "codigo_iso": "ZMW",
+      "nombre": "Kwacha Zambiano",
+      "simbolo": "ZK",
+      "es_moneda_local": false
+    }
+  }
 ]

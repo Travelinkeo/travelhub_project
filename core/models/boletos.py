@@ -16,7 +16,8 @@ class BoletoImportado(models.Model):
         _("Archivo del Boleto (.pdf, .txt, .eml)"),
         upload_to='boletos_importados/%Y/%m/',
         help_text=_("Suba el archivo del boleto en formato PDF, TXT o EML (máx 5MB)."),
-        validators=[validate_file_size, validate_file_extension, antivirus_hook]
+        validators=[validate_file_size, validate_file_extension, antivirus_hook],
+        blank=True, null=True
     )
     fecha_subida = models.DateTimeField(_("Fecha de Subida"), auto_now_add=True)
     

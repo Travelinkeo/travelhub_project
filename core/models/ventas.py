@@ -22,7 +22,7 @@ from decimal import Decimal
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.db.models.signals import post_delete, post_save
+from django.db.models.signals import post_delete, post_save, pre_save
 from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -96,63 +96,17 @@ class Venta(models.Model):
     def __str__(self):  # pragma: no cover
         return f"Venta {self.localizador or self.id_venta} a {self.cliente}"
 
-    def save(self, *args, **kwargs):  # copia literal
-        estado_anterior = None
-        es_creacion = self.pk is None
-        tracked_fields = ['descripcion_general','notas']
-        valores_previos = {}
-        if self.pk:
-            try:
-                original = Venta.objects.get(pk=self.pk)
-                estado_anterior = original.estado
-                for f in tracked_fields:
-                    valores_previos[f] = getattr(original, f)
-            except Venta.DoesNotExist:
-                estado_anterior = None
+    def save(self, *args, **kwargs):
+        # Generar localizador si no existe
         if not self.localizador:
             self.localizador = f"VTA-{self.fecha_venta.strftime('%Y%m%d')}-{Venta.objects.count() + 1:04d}"
-        if self.pk:
-            from django.db.models import Sum
-            subtotal_items = sum(iv.total_item_venta for iv in self.items_venta.all()) if self.items_venta.exists() else Decimal('0.00')
-            fees_total = self.fees_venta.aggregate(s=Sum('monto'))['s'] or Decimal('0.00') if hasattr(self, 'fees_venta') else Decimal('0.00')
-            pagos_confirmados = self.pagos_venta.filter(confirmado=True).aggregate(s=Sum('monto'))['s'] or Decimal('0.00') if hasattr(self, 'pagos_venta') else Decimal('0.00')
-            self.subtotal = subtotal_items
-            self.total_venta = subtotal_items + (self.impuestos or 0) + fees_total
-            self.saldo_pendiente = self.total_venta - pagos_confirmados
-        else:
+        
+        # Calcular totales básicos
+        if not self.pk:  # Solo en creación
             self.total_venta = (self.subtotal or 0) + (self.impuestos or 0)
             self.saldo_pendiente = self.total_venta - (self.monto_pagado or 0)
-        estados_financieros_base = {Venta.EstadoVenta.PENDIENTE_PAGO, Venta.EstadoVenta.PAGADA_PARCIAL, Venta.EstadoVenta.PAGADA_TOTAL}
-        if self.estado in estados_financieros_base and self.total_venta > 0:
-            if self.saldo_pendiente <= 0:
-                self.estado = Venta.EstadoVenta.PAGADA_TOTAL
-            elif 0 < self.saldo_pendiente < self.total_venta:
-                self.estado = Venta.EstadoVenta.PAGADA_PARCIAL
+        
         super().save(*args, **kwargs)
-        try:
-            from core.models.ventas import (  # evitar import cíclico global
-                AuditLog,
-                _crear_audit_log,
-            )
-            if estado_anterior and estado_anterior != self.estado:
-                _crear_audit_log(modelo='Venta', object_id=self.pk, accion=AuditLog.Accion.STATE if hasattr(AuditLog.Accion, 'STATE') else AuditLog.Accion.UPDATE, venta=self, descripcion=f"Cambio estado Venta {self.pk}: {estado_anterior} -> {self.estado}", datos_previos={'estado': estado_anterior}, datos_nuevos={'estado': self.estado})
-        except Exception:
-            logger.exception("Fallo auditando cambio de estado de Venta %s", self.pk)
-        try:
-            from core.models.ventas import AuditLog, _crear_audit_log
-            if es_creacion:
-                _crear_audit_log(modelo='Venta', object_id=self.pk, accion=AuditLog.Accion.CREATE, venta=self, descripcion=f"Creación Venta {self.pk}", datos_nuevos={f: getattr(self, f) for f in tracked_fields})
-            else:
-                cambios = {}
-                for f, prev in valores_previos.items():
-                    nuevo = getattr(self, f)
-                    if prev != nuevo:
-                        cambios[f] = {'antes': prev, 'despues': nuevo}
-                if cambios:
-                    _crear_audit_log(modelo='Venta', object_id=self.pk, accion=AuditLog.Accion.UPDATE, venta=self, descripcion=f"Actualización Venta {self.pk} ({', '.join(cambios.keys())})", metadata_extra={'diff': cambios})
-        except Exception:
-            logger.exception("Fallo auditando CREATE/UPDATE de Venta %s", self.pk)
-        self._evaluar_otorgar_puntos(contexto="save")
 
     def _evaluar_otorgar_puntos(self, contexto: str):  # pragma: no cover
         try:
@@ -263,40 +217,16 @@ class ItemVenta(models.Model):
         return f"{self.cantidad} x {self.producto_servicio.nombre} en Venta {self.venta.localizador}"
 
     def save(self, *args, **kwargs):
-        es_creacion = self.pk is None
-        tracked_fields = ['descripcion_personalizada','codigo_reserva_proveedor','notas_item']
-        prev_vals = {}
-        if self.pk:
-            try:
-                original = ItemVenta.objects.get(pk=self.pk)
-                for f in tracked_fields:
-                    prev_vals[f] = getattr(original, f)
-            except ItemVenta.DoesNotExist:
-                pass
+        # Calcular totales
         self.subtotal_item_venta = self.precio_unitario_venta * self.cantidad
         self.total_item_venta = self.subtotal_item_venta + (self.impuestos_item_venta * self.cantidad)
         super().save(*args, **kwargs)
-        try:
-            from core.models.ventas import AuditLog, _crear_audit_log
-            if es_creacion:
-                _crear_audit_log(modelo='ItemVenta', object_id=self.pk, accion=AuditLog.Accion.CREATE, venta=self.venta, descripcion=f"Creación ItemVenta {self.pk} (Venta {self.venta_id})", datos_nuevos={f: getattr(self, f) for f in tracked_fields})
-            else:
-                cambios = {}
-                for f, prev in prev_vals.items():
-                    nuevo = getattr(self, f)
-                    if prev != nuevo:
-                        cambios[f] = {'antes': prev, 'despues': nuevo}
-                if cambios:
-                    _crear_audit_log(modelo='ItemVenta', object_id=self.pk, accion=AuditLog.Accion.UPDATE, venta=self.venta, descripcion=f"Actualización ItemVenta {self.pk} ({', '.join(cambios.keys())})", metadata_extra={'diff': cambios})
-        except Exception:
-            logger.exception("Fallo auditando CREATE/UPDATE de ItemVenta %s", self.pk)
-        if self.venta_id:
-            self.venta.recalcular_finanzas()
 
 
 class AlojamientoReserva(models.Model):
     id_alojamiento_reserva = models.AutoField(primary_key=True, verbose_name=_('ID Alojamiento'))
     venta = models.ForeignKey('Venta', related_name='alojamientos', on_delete=models.CASCADE, verbose_name=_('Venta'))
+    item_venta = models.ForeignKey(ItemVenta, related_name='alojamientos_reserva', on_delete=models.CASCADE, null=True, blank=True, verbose_name=_('Item de Venta Asociado'))
     nombre_establecimiento = models.CharField(_('Nombre Establecimiento'), max_length=150)
     check_in = models.DateField(_('Check In'), blank=True, null=True)
     check_out = models.DateField(_('Check Out'), blank=True, null=True)
@@ -337,7 +267,7 @@ class TrasladoServicio(models.Model):
         ordering = ['fecha_hora']
 
     def __str__(self):
-        return f"Traslado {self.origen or ''}->{self.destino or ''} {self.fecha_hora or ''}"
+        return f"Traslado {self.origen or ''}->{self.destino or ''} {self.fecha_hora or ''}".strip()
 
 
 class ActividadServicio(models.Model):
@@ -881,14 +811,51 @@ def audit_delete_itemventa(sender, instance, **kwargs):  # pragma: no cover
 
 @receiver(post_save, sender=FeeVenta)
 def recalc_venta_por_fee(sender, instance, created, **kwargs):  # pragma: no cover
-    instance.venta.recalcular_finanzas()
-
+    try:
+        instance.venta.recalcular_finanzas()
+    except Exception:
+        pass
 
 @receiver(post_save, sender=PagoVenta)
 def recalc_venta_por_pago(sender, instance, created, **kwargs):  # pragma: no cover
-    if instance.confirmado:
-        instance.venta.recalcular_finanzas()
-        instance.venta._evaluar_otorgar_puntos(contexto="signal_pago_post_save")
+    try:
+        if instance.confirmado:
+            instance.venta.recalcular_finanzas()
+            instance.venta._evaluar_otorgar_puntos(contexto="signal_pago_post_save")
+    except Exception:
+        pass
+
+@receiver(post_save, sender=Venta)
+def enviar_email_confirmacion(sender, instance, created, **kwargs):
+    """Envía email de confirmación cuando se crea una venta"""
+    if created and instance.cliente and instance.cliente.email:
+        try:
+            from ..email_service import enviar_confirmacion_venta
+            enviar_confirmacion_venta(instance)
+        except Exception:
+            logger.exception(f"Error enviando email confirmación para venta {instance.id_venta}")
+
+@receiver(pre_save, sender=Venta)
+def detectar_cambio_estado(sender, instance, **kwargs):
+    """Detecta cambios de estado para enviar notificaciones"""
+    if instance.pk:
+        try:
+            venta_anterior = Venta.objects.get(pk=instance.pk)
+            if venta_anterior.estado != instance.estado:
+                # Guardar estado anterior para usar en post_save
+                instance._estado_anterior = venta_anterior.get_estado_display()
+        except Venta.DoesNotExist:
+            pass
+
+@receiver(post_save, sender=Venta)
+def enviar_email_cambio_estado(sender, instance, created, **kwargs):
+    """Envía email cuando cambia el estado de una venta"""
+    if not created and hasattr(instance, '_estado_anterior') and instance.cliente and instance.cliente.email:
+        try:
+            from ..email_service import enviar_cambio_estado
+            enviar_cambio_estado(instance, instance._estado_anterior)
+        except Exception:
+            logger.exception(f"Error enviando email cambio estado para venta {instance.id_venta}")
 
 __all__ = [
     'Venta','ItemVenta','AlojamientoReserva','TrasladoServicio','ActividadServicio','SegmentoVuelo',

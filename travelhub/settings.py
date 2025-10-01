@@ -17,6 +17,9 @@ DEBUG = os.getenv('DEBUG', 'False') == 'True'
 ALLOWED_HOSTS_STRING = os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost')
 ALLOWED_HOSTS = [host.strip() for host in ALLOWED_HOSTS_STRING.split(',')]
 
+# Evitar que Django agregue/redirija automáticamente barras finales (previene bucles con proxies/rewrite)
+APPEND_SLASH = False
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -45,7 +48,7 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'core.models.RequestMetaAuditMiddleware',  # captura IP/UA para auditoría
-    'core.models.SecurityHeadersMiddleware',  # security headers & CSP report-only
+    # 'core.models.SecurityHeadersMiddleware',  # security headers & CSP report-only
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -118,7 +121,7 @@ REST_FRAMEWORK = {
         # Mantener token legacy temporalmente (deprecate pronto)
         'rest_framework.authentication.TokenAuthentication',
     ],
-    'DEFAULT_PERMISSION_CLASSES': ['rest_framework.permissions.IsAuthenticatedOrReadOnly',],
+    'DEFAULT_PERMISSION_CLASSES': [],
     'DEFAULT_THROTTLE_CLASSES': [
         'rest_framework.throttling.UserRateThrottle',
         'rest_framework.throttling.AnonRateThrottle',
@@ -131,7 +134,7 @@ REST_FRAMEWORK = {
         'login': os.getenv('THROTTLE_LOGIN_RATE', '5/min'),
     },
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 10
+    'PAGE_SIZE': 25
 }
 
 
@@ -161,10 +164,25 @@ else:
     CORS_ALLOWED_ORIGINS = [
         'http://localhost:3000',
         'http://127.0.0.1:3000',
+        'http://localhost:3001',
+        'http://127.0.0.1:3001',
     ]
 
 # Reduce surface: only allow credentials if explicitly enabled
-CORS_ALLOW_CREDENTIALS = os.getenv('CORS_ALLOW_CREDENTIALS', 'False') == 'True'
+CORS_ALLOW_CREDENTIALS = True
+
+# Allow Authorization header for JWT
+CORS_ALLOWED_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
 
 # Optionally restrict headers/methods (defaults generally fine). We keep defaults.
 
@@ -180,8 +198,13 @@ if not DEBUG:
     SECURE_HSTS_PRELOAD = True
     SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
 else:
-    # Permitir override manual para probar redirecciones HTTPS en dev si se desea
-        SECURE_SSL_REDIRECT = os.getenv('FORCE_HTTPS_DEV', 'False') == 'True'
+    # En desarrollo, no redirigir a HTTPS para evitar loops con frontend
+    SECURE_SSL_REDIRECT = False
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False
+    SESSION_COOKIE_SAMESITE = 'Lax'
+    CSRF_COOKIE_SAMESITE = 'Lax'
+    SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
 
 # --- Custom App Settings ---
 
@@ -191,3 +214,13 @@ SUPPLIER_EMAILS = [
     'facturacion@proveedor2.com',
     'notificaciones@otroproveedor.com',
 ]
+
+# Email settings
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # Para desarrollo
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'  # Para producción
+# EMAIL_HOST = 'smtp.gmail.com'
+# EMAIL_PORT = 587
+# EMAIL_USE_TLS = True
+# EMAIL_HOST_USER = 'tu_email@gmail.com'
+# EMAIL_HOST_PASSWORD = 'tu_password'
+DEFAULT_FROM_EMAIL = 'TravelHub <noreply@travelhub.com>'

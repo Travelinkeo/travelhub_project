@@ -26,7 +26,9 @@ class RequestMetaAuditMiddleware:  # Middleware para auditoría IP/UA
         except Exception:
             _request_local.meta = {}
         try:
+            logger.info(f"Request: {request.method} {request.path} from IP: {ip}, UA: {ua[:50]}...")
             response = self.get_response(request)
+            logger.info(f"Response: {response.status_code} for {request.path}, Location: {getattr(response, 'get', lambda k: None)('Location')}")
         finally:  # limpieza
             try:
                 del _request_local.meta
@@ -52,7 +54,7 @@ class SecurityHeadersMiddleware:  # CSP + cabeceras
                 f"script-src 'self' 'nonce-{nonce}'; "
                 "style-src 'self'; img-src 'self' data:; font-src 'self' data:; "
                 "connect-src 'self'; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; "
-                f"report-uri {report_path}; report-to csp-endpoint; upgrade-insecure-requests;"
+                f"report-uri {report_path}; report-to csp-endpoint;"
             )
             response.setdefault('Content-Security-Policy', csp)
             response.setdefault('Referrer-Policy', 'strict-origin-when-cross-origin')

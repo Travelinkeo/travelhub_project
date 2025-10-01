@@ -171,13 +171,22 @@ class VentaAdminForm(forms.ModelForm):
 @admin.register(Venta)
 class VentaAdmin(admin.ModelAdmin):
     form = VentaAdminForm
-    list_display = ('localizador', 'cliente', 'fecha_venta', 'total_venta', 'estado', 'tipo_venta', 'canal_origen', 'saldo_pendiente')
-    search_fields = ('localizador', 'cliente__nombres', 'cliente__apellidos')
+    list_display = ('venta_link', 'cliente', 'fecha_venta', 'total_venta', 'estado', 'tipo_venta', 'canal_origen', 'saldo_pendiente')
+    list_display_links = ('venta_link',)
+    search_fields = ('localizador', 'id_venta', 'cliente__nombres', 'cliente__apellidos')
     list_filter = ('estado', 'fecha_venta', 'tipo_venta', 'canal_origen')
     autocomplete_fields = ['cliente', 'moneda', 'cotizacion_origen', 'asiento_contable_venta']
     inlines = [ItemVentaInline, SegmentoVueloInline, AlojamientoReservaInline, AlquilerAutoReservaInline, ServicioAdicionalDetalleInline, TrasladoServicioInline, ActividadServicioInline, FeeVentaInline, PagoVentaInline]
     readonly_fields = ('total_venta', 'saldo_pendiente', 'boleto_importado_link', 'margen_estimado')
     actions = ['asignar_cliente_y_facturar', 'generar_liquidaciones_proveedor', 'generar_voucher_unificado']
+
+    def venta_link(self, obj):
+        url = reverse('admin:core_venta_change', args=[obj.id_venta])
+        display_text = obj.localizador or f"Venta #{obj.id_venta}"
+        return format_html('<a href="{}">{}</a>', url, display_text)
+    venta_link.short_description = "Venta (ID/Localizador)"
+    venta_link.admin_order_field = 'localizador'
+
 
     def generar_voucher_unificado(self, request, queryset):
         from django.http import HttpResponse
@@ -543,7 +552,20 @@ admin.site.register(ArticuloBlog)
 admin.site.register(Testimonio)
 admin.site.register(MenuItemCMS)
 admin.site.register(FormularioContactoCMS)
-admin.site.register(Factura)
+class ItemFacturaInline(admin.TabularInline):
+    model = ItemFactura
+    extra = 0
+    readonly_fields = ('subtotal_item',)
+
+@admin.register(Factura)
+class FacturaAdmin(admin.ModelAdmin):
+    list_display = ('numero_factura', 'cliente', 'fecha_emision', 'monto_total', 'estado', 'archivo_pdf')
+    search_fields = ('numero_factura', 'cliente__nombres', 'cliente__apellidos', 'cliente__nombre_empresa')
+    list_filter = ('estado', 'fecha_emision')
+    autocomplete_fields = ['cliente', 'moneda']
+    readonly_fields = ('monto_total', 'saldo_pendiente')
+    inlines = [ItemFacturaInline]
+
 admin.site.register(ItemFactura)
 
 

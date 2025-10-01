@@ -9,12 +9,12 @@ from django.contrib.auth.decorators import login_required
 from django.db import connection
 from django.db import models as dj_models
 from django.db.models import Sum
-from django.http import HttpRequest, HttpResponse
+from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, ListView, TemplateView
-from rest_framework import permissions, status, viewsets
+from rest_framework import filters, permissions, status, viewsets
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -32,7 +32,6 @@ from .models import (
     AlquilerAutoReserva,
     AsientoContable,
     AuditLog,  # auditoría
-    BoletoImportado,
     CircuitoDia,
     CircuitoTuristico,
     EventoServicio,
@@ -50,6 +49,8 @@ from .models import (
     Venta,
     VentaParseMetadata,
 )
+from .models.boletos import BoletoImportado
+from .models_catalogos import Ciudad, Moneda, Pais, Proveedor, TipoCambio
 from .permissions import IsStaffOrGroupWrite
 
 # --- Vistas para Integración con IA ---
@@ -59,16 +60,23 @@ from .serializers import (
     AlquilerAutoReservaSerializer,
     AsientoContableSerializer,
     AuditLogSerializer,  # auditoría
+    BoletoImportadoSerializer,
+    CiudadSerializer,
     CircuitoDiaSerializer,
     CircuitoTuristicoSerializer,
     EventoServicioSerializer,
     FacturaSerializer,
     FeeVentaSerializer,
     GeminiBoletoParseadoSerializer,
+    MonedaSerializer,
     PagoVentaSerializer,
+    PaisSerializer,
     PaqueteAereoSerializer,
+    ProductoServicioSerializer,
+    ProveedorSerializer,
     SegmentoVueloSerializer,
     ServicioAdicionalDetalleSerializer,
+    TipoCambioSerializer,
     TrasladoServicioSerializer,
     VentaParseMetadataSerializer,
     VentaSerializer,
@@ -77,6 +85,9 @@ from .serializers import (
 # Importar el nuevo servicio de parseo
 from .services.ticket_parser_service import orquestar_parseo_de_boleto
 from . import ticket_parser
+from .dashboard_stats import get_dashboard_stats
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 
 logger = logging.getLogger(__name__)
 
@@ -145,7 +156,10 @@ class VentaViewSet(viewsets.ModelViewSet):
         'cliente', 'moneda', 'cotizacion_origen', 'asiento_contable_venta'
     ).prefetch_related('items_venta__producto_servicio', 'items_venta__proveedor_servicio').order_by('-fecha_venta')
     serializer_class = VentaSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    throttle_classes = []  # Desactivar rate limiting para esta vista
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['localizador', 'cliente__nombres', 'cliente__apellidos', 'cliente__nombre_empresa']
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -157,12 +171,33 @@ class VentaViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(creado_por=self.request.user if self.request.user.is_authenticated else None)
 
+class ProveedorViewSet(viewsets.ModelViewSet):
+    queryset = Proveedor.objects.all().order_by('nombre')
+    serializer_class = ProveedorSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    throttle_classes = []  # Desactivar rate limiting para esta vista
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['nombre', 'contacto_nombre', 'contacto_email', 'iata']
+
+class ProductoServicioViewSet(viewsets.ModelViewSet):
+    queryset = ProductoServicio.objects.filter(activo=True)
+    serializer_class = ProductoServicioSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
 class FacturaViewSet(viewsets.ModelViewSet):
     queryset = Factura.objects.select_related(
-        'cliente', 'moneda', 'venta_asociada', 'asiento_contable_factura'
+        'cliente', 'moneda', 'asiento_contable_factura'
     ).prefetch_related('items_factura').order_by('-fecha_emision')
     serializer_class = FacturaSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]
+    authentication_classes = []
+    throttle_classes = []  # Desactivar rate limiting para esta vista
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['numero_factura', 'cliente__nombres', 'cliente__apellidos', 'cliente__nombre_empresa']
+
+    def list(self, request, *args, **kwargs):
+        logger.info("FacturaViewSet.list() called")
+        return super().list(request, *args, **kwargs)
 
     def perform_create(self, serializer):
         serializer.save()
@@ -309,6 +344,14 @@ class VentaParseMetadataViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
+class BoletoImportadoViewSet(viewsets.ModelViewSet):
+    queryset = BoletoImportado.objects.all()
+    serializer_class = BoletoImportadoSerializer
+    permission_classes = [permissions.AllowAny]
+    authentication_classes = []
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['numero_boleto', 'nombre_pasajero_procesado', 'localizador_pnr', 'aerolinea_emisora']
+
 def get_resumen_ventas_categorias():
     categoria_definiciones = [
         { 'etiqueta': 'Boletería Aérea', 'filtro': {'producto_servicio__tipo_producto': ProductoServicio.TipoProductoChoices.BOLETO_AEREO}},
@@ -337,6 +380,7 @@ class HomeView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['titulo_pagina'] = _("Inicio")
+        context['dashboard_stats'] = get_dashboard_stats()
         return context
 
 class PaginaCMSDetailView(DetailView):
@@ -501,6 +545,38 @@ class AuditLogViewSet(viewsets.ReadOnlyModelViewSet):
             qs = qs.filter(creado__date__lte=created_to)
         return qs
 
+class PaisViewSet(viewsets.ModelViewSet):
+    queryset = Pais.objects.all()
+    serializer_class = PaisSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    throttle_classes = []  # Desactivar rate limiting para esta vista
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['nombre', 'codigo_iso_2', 'codigo_iso_3']
+
+class CiudadViewSet(viewsets.ModelViewSet):
+    queryset = Ciudad.objects.select_related('pais').all()
+    serializer_class = CiudadSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    throttle_classes = []  # Desactivar rate limiting para esta vista
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['nombre', 'pais__nombre', 'region_estado']
+    ordering_fields = ['nombre', 'pais__nombre']
+    ordering = ['nombre']  # Orden por defecto
+
+class MonedaViewSet(viewsets.ModelViewSet):
+    queryset = Moneda.objects.all()
+    serializer_class = MonedaSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    pagination_class = None  # Cargar todas las monedas a la vez
+    throttle_classes = []  # Desactivar rate limiting para esta vista
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['nombre', 'codigo_iso']
+
+class TipoCambioViewSet(viewsets.ModelViewSet):
+    queryset = TipoCambio.objects.select_related('moneda_origen', 'moneda_destino').all()
+    serializer_class = TipoCambioSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
 class BoletoUploadAPIView(APIView):
     """
     Endpoint para subir un archivo de boleto (PDF/TXT), parsearlo
@@ -567,3 +643,13 @@ class BoletoUploadAPIView(APIView):
             },
             status=status.HTTP_201_CREATED
         )
+
+def test_api_view(request):
+    print("!!!!!! TEST API VIEW WAS CALLED !!!!!!")
+    return JsonResponse({"status": "ok", "message": "Hello from the test API!"})
+
+@api_view(['GET'])
+def dashboard_stats_api(request):
+    """API endpoint para estadísticas del dashboard"""
+    stats = get_dashboard_stats()
+    return Response(stats)

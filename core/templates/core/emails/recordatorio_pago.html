@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Recordatorio de Pago</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .header { background: #ffc107; color: #212529; padding: 20px; text-align: center; }
+        .content { padding: 20px; }
+        .footer { background: #f8f9fa; padding: 15px; text-align: center; font-size: 12px; }
+        .saldo { background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Recordatorio de Pago</h1>
+        <p>Reserva #{{ venta.localizador }}</p>
+    </div>
+    
+    <div class="content">
+        <p>Estimado/a {{ cliente.get_nombre_completo }},</p>
+        
+        <p>Le recordamos que tiene un saldo pendiente en su reserva:</p>
+        
+        <div class="saldo">
+            <h3>Saldo Pendiente: ${{ saldo_pendiente }}</h3>
+            <p>Total de la Reserva: ${{ venta.total_venta }}</p>
+            <p>Monto Pagado: ${{ venta.monto_pagado }}</p>
+        </div>
+        
+        <p>Para completar su reserva, por favor realice el pago del saldo pendiente.</p>
+        
+        <p>Si ya realizó el pago, por favor ignore este mensaje o contáctenos para confirmar.</p>
+        
+        <p>Gracias por su atención.</p>
+    </div>
+    
+    <div class="footer">
+        <p>TravelHub - Tu socio de confianza en cada viaje</p>
+        <p>Este es un email automático, por favor no responder directamente.</p>
+    </div>
+</body>
+</html>

@@ -174,30 +174,50 @@
         </header>
         <main class="voucher-body">
             <h1 class="text-3xl font-bold brand-color">Voucher de Vuelo</h1>
-            {% for segmento in segmentos_vuelo %}
-            <div class="info-section">
-                <div class="details-card">
-                    <table class="details-table">
-                       <tr>
-                            <td>
-                                <p><span class="label">Ruta:</span><br><span class="value">{{ segmento.origen }} &rarr; {{ segmento.destino }}</span></p>
-                            </td>
-                            <td>
-                                 <p><span class="label">Vuelo:</span><br><span class="value">{{ segmento.aerolinea }} {{ segmento.numero_vuelo }}</span></p>
-                            </td>
-                       </tr>
-                       <tr>
-                            <td>
-                                <p><span class="label">Salida:</span><br><span class="value">{{ segmento.fecha_salida|date:"d M, Y - H:i" }}</span></p>
-                            </td>
-                            <td>
-                                 <p><span class="label">Llegada:</span><br><span class="value">{{ segmento.fecha_llegada|date:"d M, Y - H:i" }}</span></p>
-                            </td>
-                       </tr>
-                    </table>
-                </div>
+
+            <!-- Detalles del Pasajero -->
+            <h2 class="text-lg font-semibold brand-color border-b-2 brand-border pb-2 mb-4 mt-8">Detalles del Pasajero</h2>
+            <div class="text-gray-700">
+                {% with pasajero=venta.pasajeros.all.first %}
+                    {% if pasajero %}
+                        <p><strong class="w-32 inline-block">Pasajero:</strong> {{ pasajero.nombres }} {{ pasajero.apellidos }}</p>
+                        <p><strong class="w-32 inline-block">Documento:</strong> {{ pasajero.numero_documento }}</p>
+                    {% endif %}
+                {% endwith %}
             </div>
-            {% endfor %}
+
+            <!-- Información de la Reserva -->
+            <h2 class="text-lg font-semibold brand-color border-b-2 brand-border pb-2 mb-4 mt-8">Información de la Reserva</h2>
+            <div class="text-gray-700">
+                <p><strong class="w-40 inline-block">Código de Reserva:</strong> {{ venta.localizador }}</p>
+                <p><strong class="w-40 inline-block">Aerolínea:</strong> {{ venta.descripcion_general }}</p>
+                <p><strong class="w-40 inline-block">Fecha de Emisión:</strong> {{ venta.fecha_venta|date:"d M, Y" }}</p>
+            </div>
+
+            <!-- Itinerario de Vuelo -->
+            <h2 class="text-lg font-semibold brand-color border-b-2 brand-border pb-2 mb-4 mt-8">Itinerario de Vuelo</h2>
+            <table class="w-full text-left" style="font-size: 9pt;">
+                <thead style="background-color: #f3f4f6;">
+                    <tr>
+                        <th class="p-3 font-semibold">Trayecto</th>
+                        <th class="p-3 font-semibold">Ruta</th>
+                        <th class="p-3 font-semibold">Operado por</th>
+                        <th class="p-3 font-semibold">Salida</th>
+                        <th class="p-3 font-semibold">Llegada</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for segmento in segmentos_vuelo %}
+                    <tr class="border-b">
+                        <td class="p-3">{% if forloop.first %}Vuelo de Ida{% else %}Vuelo de Vuelta{% endif %}</td>
+                        <td class="p-3">{{ segmento.origen }} &rarr; {{ segmento.destino }}</td>
+                        <td class="p-3">{{ segmento.aerolinea }} {{ segmento.numero_vuelo|default_if_none:"" }}</td>
+                        <td class="p-3">{{ segmento.fecha_salida|date:"d M, Y - H:i" }}</td>
+                        <td class="p-3">{{ segmento.fecha_llegada|date:"d M, Y - H:i" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </main>
         <footer class="voucher-footer">
             <div class="thank-you">Gracias por elegirnos. ¡Te deseamos un excelente viaje!</div>

@@ -106,6 +106,39 @@ def orquestar_parseo_de_boleto(archivo_subido):
         error_msg = datos_parseados.get("error", "El parser no devolvió datos.")
         logger.error(f"Fallo en el parseo: {error_msg}")
         return None, f"Fallo en el parseo: {error_msg}"
+
+    # --- INICIO DE LA MODIFICACIÓN --- 
+    from decimal import Decimal, InvalidOperation
+
+    # Usar el diccionario 'normalized' si existe, si no, el principal
+    data_source = datos_parseados.get('normalized', datos_parseados)
+
+    # Mapeo de campos con fallbacks para diferentes GDS (Sabre, KIU, etc.)
+    fare_str = data_source.get('fare_amount') or data_source.get('TARIFA')
+    total_str = data_source.get('total_amount') or data_source.get('TOTAL_IMPORTE') or data_source.get('TOTAL')
+
+    try:
+        if fare_str and total_str:
+            tarifa_neta = Decimal(str(fare_str))
+            tarifa_total = Decimal(str(total_str))
+            
+            # Forzar el cálculo de impuestos
+            impuestos_calculados = tarifa_total - tarifa_neta
+            
+            # Actualizar el diccionario de datos parseados
+            # Se prioriza la actualización en 'normalized' si existe
+            if 'normalized' in datos_parseados:
+                datos_parseados['normalized']['taxes_amount'] = f"{impuestos_calculados:.2f}"
+            else:
+                # Mapear a los campos de impuestos correspondientes (ej. 'IMPUESTOS' para KIU)
+                datos_parseados['taxes_amount'] = f"{impuestos_calculados:.2f}"
+                datos_parseados['IMPUESTOS'] = f"{impuestos_calculados:.2f}" # Asegurar compatibilidad
+
+            logger.info(f"Cálculo de impuestos forzado: Total({tarifa_total}) - Neta({tarifa_neta}) = Impuestos({impuestos_calculados})")
+
+    except (InvalidOperation, TypeError) as e:
+        logger.warning(f"No se pudo forzar el cálculo de impuestos debido a un valor no decimal. Error: {e}")
+    # --- FIN DE LA MODIFICACIÓN ---
         
     source_system = datos_parseados.get("SOURCE_SYSTEM", "DESCONOCIDO")
     mensaje = f"Parseo exitoso. GDS detectado: {source_system}."

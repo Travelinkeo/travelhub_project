@@ -12,9 +12,20 @@
     "analyze": "ANALYZE=true next build"
   },
   "dependencies": {
+    "@emotion/react": "^11.11.4",
+    "@emotion/styled": "^11.11.5",
+    "@hookform/resolvers": "^5.2.2",
+    "@mui/icons-material": "^5.15.20",
+    "@mui/material": "^5.15.20",
+    "@mui/x-data-grid": "^5.17.26",
+    "@mui/x-date-pickers": "^8.12.0",
+    "dayjs": "^1.11.18",
     "next": "^14.2.32",
     "react": "18.3.1",
-    "react-dom": "18.3.1"
+    "react-dom": "18.3.1",
+    "react-hook-form": "^7.63.0",
+    "swr": "^2.3.6",
+    "zod": "^4.1.11"
   },
   "devDependencies": {
     "@types/node": "20.11.30",

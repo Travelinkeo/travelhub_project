@@ -17,7 +17,8 @@ logger = logging.getLogger(__name__)
 class Factura(models.Model):
     id_factura = models.AutoField(primary_key=True, verbose_name=_("ID Factura"))
     numero_factura = models.CharField(_("Número de Factura"), max_length=50, unique=True, blank=True, help_text=_("Puede ser un correlativo fiscal o interno."))
-    
+
+    venta_asociada = models.ForeignKey('Venta', on_delete=models.SET_NULL, blank=True, null=True, related_name='facturas', verbose_name=_("Venta Asociada"))
     cliente = models.ForeignKey('personas.Cliente', on_delete=models.PROTECT, verbose_name=_("Cliente"), blank=True, null=True)
 
     fecha_emision = models.DateField(_("Fecha de Emisión"), default=timezone.now)

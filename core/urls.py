@@ -18,6 +18,7 @@ from rest_framework_simplejwt.views import (
 
 from .views.passport_views import upload_passport, create_client_from_passport
 from personas.views import ClienteViewSet, PasajeroViewSet
+from .views import dashboard_stats_api
 
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -160,8 +161,7 @@ urlpatterns = [
     path('api/auth/jwt/refresh/', TokenRefreshView.as_view(), name='jwt_refresh'),
     path('api/auth/jwt/verify/', TokenVerifyView.as_view(), name='jwt_verify'),
     path('api/auth/jwt/logout/', TokenLogoutView.as_view(), name='jwt_logout'),
-    # path('api/dashboard/stats/', views.dashboard_stats_api, name='dashboard_stats'),
-    # path('api/ai-agent/chat/', views.ai_agent_chat, name='ai_agent_chat'),
+    path('api/dashboard/stats/', dashboard_stats_api, name='dashboard_stats'),
     path('csp-report/', csp_report_view, name='csp_report'),
     path('api/', include(router.urls)),
     path('core/api/', include((router.urls, 'core'), namespace='core-api-alias')),

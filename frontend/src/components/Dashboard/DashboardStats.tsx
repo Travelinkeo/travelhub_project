@@ -1,20 +1,28 @@
 'use client';
 
 import React from 'react';
-import { Card, CardContent, Typography, Grid, Box, Chip } from '@mui/material';
-import { TrendingUp, AttachMoney, Schedule, ShoppingCart } from '@mui/icons-material';
+import { Card, CardContent, Typography, Grid, Box, Chip, Alert } from '@mui/material';
+import { TrendingUp, AttachMoney, Schedule, ShoppingCart, ShowChart, CalendarToday } from '@mui/icons-material';
 import { useApi } from '@/hooks/useApi';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 interface DashboardStatsData {
   ventas_mes: { total: number; count: number };
+  ventas_ano: { total: number; count: number };
   ventas_30d: { total: number; count: number };
   pendientes_pago: { total: number; count: number };
   pagos_mes: { total: number };
+  margen_promedio: number;
   top_productos: Array<{
     producto_servicio__nombre: string;
     producto_servicio__tipo_producto: string;
     cantidad_total: number;
     monto_total: number;
+  }>;
+  tendencia_7dias: Array<{
+    fecha: string;
+    total: number;
+    count: number;
   }>;
 }
 
@@ -48,35 +56,7 @@ const StatCard = ({ title, value, subtitle, icon, color = 'primary' }: {
 );
 
 export default function DashboardStats() {
-  // Mock data for dashboard KPIs
-  const data: DashboardStatsData = {
-    ventas_mes: { total: 125000, count: 18 },
-    ventas_30d: { total: 180000, count: 25 },
-    pendientes_pago: { total: 45000, count: 8 },
-    pagos_mes: { total: 98000 },
-    top_productos: [
-      {
-        producto_servicio__nombre: "Boletos Aéreos Internacionales",
-        producto_servicio__tipo_producto: "AIR",
-        cantidad_total: 12,
-        monto_total: 85000
-      },
-      {
-        producto_servicio__nombre: "Paquetes Turísticos Europa",
-        producto_servicio__tipo_producto: "PKG",
-        cantidad_total: 5,
-        monto_total: 45000
-      },
-      {
-        producto_servicio__nombre: "Hoteles Premium",
-        producto_servicio__tipo_producto: "HTL",
-        cantidad_total: 8,
-        monto_total: 32000
-      }
-    ]
-  };
-  const isLoading = false;
-  const error = null;
+  const { data, isLoading, error } = useApi<DashboardStatsData>('/api/dashboard/stats/');
 
   if (isLoading) {
     return (
@@ -103,6 +83,13 @@ export default function DashboardStats() {
         Resumen Ejecutivo
       </Typography>
       
+      {/* Alertas */}
+      {data.pendientes_pago.count > 0 && (
+        <Alert severity="warning" sx={{ mb: 3 }}>
+          Tienes {data.pendientes_pago.count} ventas pendientes de pago por ${data.pendientes_pago.total.toLocaleString()}
+        </Alert>
+      )}
+
       {/* KPI Cards */}
       <Grid container spacing={2} mb={4}>
         <Grid item xs={12} sm={6} lg={3}>
@@ -134,59 +121,110 @@ export default function DashboardStats() {
         </Grid>
         <Grid item xs={12} sm={6} lg={3}>
           <StatCard
-            title="Ventas Últimos 30d"
-            value={data.ventas_30d.count.toString()}
-            subtitle={`$${data.ventas_30d.total.toLocaleString()}`}
-            icon={<ShoppingCart fontSize="large" />}
+            title="Ventas del Año"
+            value={`$${data.ventas_ano.total.toLocaleString()}`}
+            subtitle={`${data.ventas_ano.count} ventas`}
+            icon={<CalendarToday fontSize="large" />}
             color="info"
           />
         </Grid>
       </Grid>
 
-      {/* Top Productos */}
-      <Card>
+      {/* Gráfico de Tendencia */}
+      <Card sx={{ mb: 3 }}>
         <CardContent>
           <Typography variant="h6" gutterBottom color="text.primary">
-            Top Productos (30 días)
+            <ShowChart sx={{ verticalAlign: 'middle', mr: 1 }} />
+            Tendencia de Ventas (Últimos 7 días)
           </Typography>
-          {data.top_productos.length > 0 ? (
-            data.top_productos.map((producto, index) => (
-              <Box
-                key={index}
-                display="flex"
-                justifyContent="space-between"
-                alignItems="center"
-                py={1}
-                borderBottom={index < data.top_productos.length - 1 ? 1 : 0}
-                borderColor="divider"
-              >
-                <Box>
-                  <Typography variant="subtitle1" fontWeight="bold">
-                    {producto.producto_servicio__nombre}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {producto.producto_servicio__tipo_producto}
-                  </Typography>
-                </Box>
-                <Box textAlign="right">
-                  <Chip 
-                    label={`${producto.cantidad_total} unidades`} 
-                    color="primary" 
-                    size="small" 
-                  />
-                  <Typography variant="body2" color="text.secondary">
-                    ${producto.monto_total.toLocaleString()}
-                  </Typography>
-                </Box>
-              </Box>
-            ))
-          ) : (
-            <Typography color="text.secondary">
-              No hay datos de productos en los últimos 30 días
-            </Typography>
-          )}
+          <ResponsiveContainer width="100%" height={250}>
+            <LineChart data={data.tendencia_7dias}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis 
+                dataKey="fecha" 
+                tickFormatter={(value) => new Date(value).toLocaleDateString('es', { month: 'short', day: 'numeric' })}
+              />
+              <YAxis />
+              <Tooltip 
+                formatter={(value: number) => `$${value.toLocaleString()}`}
+                labelFormatter={(label) => new Date(label).toLocaleDateString('es', { weekday: 'long', month: 'long', day: 'numeric' })}
+              />
+              <Line type="monotone" dataKey="total" stroke="#1976d2" strokeWidth={2} />
+            </LineChart>
+          </ResponsiveContainer>
         </CardContent>
       </Card>
+
+      {/* Top Productos */}
+      <Grid container spacing={3}>
+        <Grid item xs={12} md={8}>
+          <Card>
+            <CardContent>
+              <Typography variant="h6" gutterBottom color="text.primary">
+                Top Productos por Ingresos (30 días)
+              </Typography>
+              {data.top_productos.length > 0 ? (
+                data.top_productos.map((producto, index) => (
+                  <Box
+                    key={index}
+                    display="flex"
+                    justifyContent="space-between"
+                    alignItems="center"
+                    py={1.5}
+                    borderBottom={index < data.top_productos.length - 1 ? 1 : 0}
+                    borderColor="divider"
+                  >
+                    <Box>
+                      <Typography variant="subtitle1" fontWeight="bold">
+                        {producto.producto_servicio__nombre}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {producto.cantidad_total} unidades vendidas
+                      </Typography>
+                    </Box>
+                    <Box textAlign="right">
+                      <Typography variant="h6" color="primary.main">
+                        ${producto.monto_total.toLocaleString()}
+                      </Typography>
+                    </Box>
+                  </Box>
+                ))
+              ) : (
+                <Typography color="text.secondary">
+                  No hay datos de productos en los últimos 30 días
+                </Typography>
+              )}
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid item xs={12} md={4}>
+          <Card>
+            <CardContent>
+              <Typography variant="h6" gutterBottom color="text.primary">
+                Resumen Rápido
+              </Typography>
+              <Box py={2}>
+                <Typography variant="body2" color="text.secondary">Margen Promedio</Typography>
+                <Typography variant="h5" color="success.main" fontWeight="bold">
+                  ${data.margen_promedio.toLocaleString()}
+                </Typography>
+              </Box>
+              <Box py={2}>
+                <Typography variant="body2" color="text.secondary">Ticket Promedio</Typography>
+                <Typography variant="h5" fontWeight="bold">
+                  ${data.ventas_mes.count > 0 ? (data.ventas_mes.total / data.ventas_mes.count).toLocaleString(undefined, {maximumFractionDigits: 0}) : 0}
+                </Typography>
+              </Box>
+              <Box py={2}>
+                <Typography variant="body2" color="text.secondary">Tasa de Cobro</Typography>
+                <Typography variant="h5" color="info.main" fontWeight="bold">
+                  {data.ventas_mes.total > 0 ? ((data.pagos_mes.total / data.ventas_mes.total) * 100).toFixed(1) : 0}%
+                </Typography>
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
     </Box>
   );
 }

@@ -14,10 +14,18 @@ def get_dashboard_stats():
     hoy = timezone.now().date()
     inicio_mes = hoy.replace(day=1)
     hace_30_dias = hoy - timedelta(days=30)
+    inicio_ano = hoy.replace(month=1, day=1)
     
     # Ventas del mes actual
     ventas_mes = Venta.objects.filter(fecha_venta__date__gte=inicio_mes)
     total_ventas_mes = ventas_mes.aggregate(
+        total=Sum('total_venta'),
+        count=Count('id_venta')
+    )
+    
+    # Ventas del año
+    ventas_ano = Venta.objects.filter(fecha_venta__date__gte=inicio_ano)
+    total_ventas_ano = ventas_ano.aggregate(
         total=Sum('total_venta'),
         count=Count('id_venta')
     )
@@ -52,23 +60,60 @@ def get_dashboard_stats():
     ).annotate(
         cantidad_total=Sum('cantidad'),
         monto_total=Sum('total_item_venta')
-    ).order_by('-cantidad_total')[:5]
+    ).order_by('-monto_total')[:5]
+    
+    # Tendencia últimos 7 días
+    tendencia = []
+    for i in range(6, -1, -1):
+        dia = hoy - timedelta(days=i)
+        ventas_dia = Venta.objects.filter(
+            fecha_venta__date=dia
+        ).aggregate(
+            total=Sum('total_venta'),
+            count=Count('id_venta')
+        )
+        tendencia.append({
+            'fecha': dia.isoformat(),
+            'total': float(ventas_dia['total'] or 0),
+            'count': ventas_dia['count'] or 0
+        })
+    
+    # Margen promedio
+    items_con_margen = ItemVenta.objects.filter(
+        venta__fecha_venta__date__gte=inicio_mes,
+        costo_neto_proveedor__isnull=False
+    )
+    margen_total = Decimal('0')
+    count_items = 0
+    for item in items_con_margen:
+        if item.costo_neto_proveedor:
+            margen = item.total_item_venta - item.costo_neto_proveedor
+            margen_total += margen
+            count_items += 1
+    
+    margen_promedio = (margen_total / count_items) if count_items > 0 else Decimal('0')
     
     return {
         'ventas_mes': {
-            'total': total_ventas_mes['total'] or Decimal('0'),
+            'total': float(total_ventas_mes['total'] or 0),
             'count': total_ventas_mes['count'] or 0
         },
+        'ventas_ano': {
+            'total': float(total_ventas_ano['total'] or 0),
+            'count': total_ventas_ano['count'] or 0
+        },
         'ventas_30d': {
-            'total': total_ventas_30d['total'] or Decimal('0'),
+            'total': float(total_ventas_30d['total'] or 0),
             'count': total_ventas_30d['count'] or 0
         },
         'pendientes_pago': {
-            'total': ventas_pendientes['total'] or Decimal('0'),
+            'total': float(ventas_pendientes['total'] or 0),
             'count': ventas_pendientes['count'] or 0
         },
         'pagos_mes': {
-            'total': pagos_mes['total'] or Decimal('0')
+            'total': float(pagos_mes['total'] or 0)
         },
-        'top_productos': list(top_productos)
+        'margen_promedio': float(margen_promedio),
+        'top_productos': list(top_productos),
+        'tendencia_7dias': tendencia
     }

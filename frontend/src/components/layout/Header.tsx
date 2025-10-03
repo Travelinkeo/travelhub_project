@@ -2,9 +2,10 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import { IconButton, Typography, Box } from '@mui/material';
-import { Menu, Settings, DarkMode, LightMode } from '@mui/icons-material';
+import { IconButton, Typography, Box, Button } from '@mui/material';
+import { Menu, Settings, DarkMode, LightMode, Logout } from '@mui/icons-material';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface HeaderProps {
   onMenuToggle: () => void;
@@ -13,6 +14,7 @@ interface HeaderProps {
 const Header = ({ onMenuToggle }: HeaderProps) => {
   const router = useRouter();
   const { isDarkMode, toggleTheme } = useTheme();
+  const { user, logout } = useAuth();
 
   const handleSettingsClick = () => {
     router.push('/configuraciones');
@@ -52,7 +54,7 @@ const Header = ({ onMenuToggle }: HeaderProps) => {
           sx={{ display: { xs: 'none', sm: 'block' } }} 
           color="text.secondary"
         >
-          Bienvenido, Usuario
+          Bienvenido, {user?.username || 'Usuario'}
         </Typography>
         <IconButton 
           onClick={toggleTheme}
@@ -63,6 +65,14 @@ const Header = ({ onMenuToggle }: HeaderProps) => {
         </IconButton>
         <IconButton color="primary" onClick={handleSettingsClick} aria-label="Configuraciones">
           <Settings />
+        </IconButton>
+        <IconButton 
+          color="error" 
+          onClick={logout}
+          aria-label="Cerrar sesión"
+          title="Cerrar sesión"
+        >
+          <Logout />
         </IconButton>
       </Box>
     </Box>

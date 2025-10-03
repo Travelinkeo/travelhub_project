@@ -11,7 +11,7 @@ const fetcher = async (url: string) => {
   const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
   const headers: HeadersInit = {};
   if (token) {
-    headers['Authorization'] = `Token ${token}`;
+    headers['Authorization'] = `Bearer ${token}`;
   }
   
   const res = await fetch(fullUrl, { headers });

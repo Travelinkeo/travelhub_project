@@ -11,3 +11,4 @@ class CoreConfig(AppConfig):
         # Importar las señales para que se registren correctamente
         import core.services.parsing
         import core.signals  # noqa: F401
+        import core.signals_passport  # noqa: F401

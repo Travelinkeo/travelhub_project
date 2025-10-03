@@ -24,13 +24,14 @@ from .models import (
     PaqueteAereo,
     SegmentoVuelo,
     ServicioAdicionalDetalle,
+    TipoCambio,
     TrasladoServicio,
     Venta,
     VentaParseMetadata,
 )
 
 # Evitar import circular: importar catálogos ligeros directamente
-from .models_catalogos import ProductoServicio, Proveedor, TipoCambio
+from .models_catalogos import ProductoServicio, Proveedor
 
 # --- Serializadores de Modelos Compartidos/Básicos (para anidamiento o consulta) ---
 
@@ -58,13 +59,10 @@ class TipoCambioSerializer(serializers.ModelSerializer):
     moneda_destino_detalle = MonedaSerializer(source='moneda_destino', read_only=True)
     class Meta:
         model = TipoCambio
-        fields = [
-            'id_tipo_cambio', 'moneda_origen', 'moneda_origen_detalle', 'moneda_destino', 'moneda_destino_detalle',
-            'fecha_efectiva', 'tasa_conversion'
-        ]
+        fields = '__all__'
 
 class ClienteSerializer(serializers.ModelSerializer):
-    get_nombre_completo = serializers.ReadOnlyField()
+    get_nombre_completo = serializers.CharField(read_only=True)
     class Meta:
         model = Cliente
         fields = ['id_cliente', 'get_nombre_completo', 'email', 'nombre_empresa']
@@ -72,11 +70,7 @@ class ClienteSerializer(serializers.ModelSerializer):
 class ProveedorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Proveedor
-        fields = [
-            'id_proveedor', 'nombre', 'tipo_proveedor', 'nivel_proveedor',
-            'contacto_nombre', 'contacto_email', 'contacto_telefono', 
-            'direccion', 'ciudad', 'notas', 'iata', 'activo'
-        ]
+        fields = '__all__'
 
 
 class ProductoServicioSerializer(serializers.ModelSerializer):
@@ -90,12 +84,7 @@ class BoletoImportadoSerializer(serializers.ModelSerializer):
     estado_parseo_display = serializers.CharField(source='get_estado_parseo_display', read_only=True)
     class Meta:
         model = BoletoImportado
-        fields = [
-            'id_boleto_importado', 'archivo_boleto', 'fecha_subida', 'formato_detectado',
-            'formato_detectado_display', 'estado_parseo', 'estado_parseo_display',
-            'datos_parseados', 'archivo_pdf_generado', 'numero_boleto', 'nombre_pasajero_procesado',
-            'localizador_pnr', 'aerolinea_emisora', 'tarifa_base', 'total_boleto'
-        ]
+        fields = '__all__'
 
 # --- Serializadores para ERP (API Principal) ---
 
@@ -161,29 +150,10 @@ class AsientoContableSerializer(serializers.ModelSerializer):
         instance.calcular_totales()
         return instance
 
-# --- Serializadores nuevos componentes de Venta (Phase 1) ---
-
-class AlojamientoReservaSerializer(serializers.ModelSerializer):
-    ciudad_detalle = CiudadSerializer(source='ciudad', read_only=True)
-    proveedor_detalle = serializers.StringRelatedField(source='proveedor', read_only=True)
-    class Meta:
-        model = AlojamientoReserva
-        fields = [
-            'id_alojamiento_reserva', 'venta', 'item_venta', 'proveedor', 'proveedor_detalle', 'ciudad', 'ciudad_detalle',
-            'nombre_establecimiento', 'check_in', 'check_out', 'regimen_alimentacion', 'habitaciones', 'notas'
-        ]
-        extra_kwargs = {
-            'venta': {'write_only': True, 'required': False},
-            'item_venta': {'write_only': True, 'required': False}
-        }
-
 class ItemVentaSerializer(serializers.ModelSerializer):
     producto_servicio_detalle = ProductoServicioSerializer(source='producto_servicio', read_only=True)
     proveedor_servicio_detalle = serializers.StringRelatedField(source='proveedor_servicio', read_only=True)
     estado_item_display = serializers.CharField(source='get_estado_item_display', read_only=True)
-    
-    # Write-only fields for nested details
-    alojamiento_details = AlojamientoReservaSerializer(write_only=True, required=False, allow_null=True)
 
     class Meta:
         model = ItemVenta
@@ -193,8 +163,7 @@ class ItemVentaSerializer(serializers.ModelSerializer):
             'costo_unitario_referencial', 'impuestos_item_venta',
             'subtotal_item_venta', 'total_item_venta',
             'fecha_inicio_servicio', 'fecha_fin_servicio', 'codigo_reserva_proveedor',
-            'proveedor_servicio', 'proveedor_servicio_detalle', 'estado_item', 'estado_item_display', 'notas_item',
-            'alojamiento_details' # Add field
+            'proveedor_servicio', 'proveedor_servicio_detalle', 'estado_item', 'estado_item_display', 'notas_item'
         ]
         read_only_fields = ('subtotal_item_venta', 'total_item_venta')
         extra_kwargs = {
@@ -202,6 +171,8 @@ class ItemVentaSerializer(serializers.ModelSerializer):
             'producto_servicio': {'write_only': True, 'allow_null': False, 'required': True},
             'proveedor_servicio': {'allow_null': True, 'required': False},
         }
+
+# --- Serializadores nuevos componentes de Venta (Phase 1) ---
 
 class SegmentoVueloSerializer(serializers.ModelSerializer):
     origen_detalle = CiudadSerializer(source='origen', read_only=True)
@@ -212,6 +183,19 @@ class SegmentoVueloSerializer(serializers.ModelSerializer):
             'id_segmento_vuelo', 'venta', 'origen', 'origen_detalle', 'destino', 'destino_detalle',
             'aerolinea', 'numero_vuelo', 'fecha_salida', 'fecha_llegada',
             'clase_reserva', 'cabina', 'notas'
+        ]
+        extra_kwargs = {
+            'venta': {'write_only': True, 'required': True}
+        }
+
+class AlojamientoReservaSerializer(serializers.ModelSerializer):
+    ciudad_detalle = CiudadSerializer(source='ciudad', read_only=True)
+    proveedor_detalle = serializers.StringRelatedField(source='proveedor', read_only=True)
+    class Meta:
+        model = AlojamientoReserva
+        fields = [
+            'id_alojamiento_reserva', 'venta', 'proveedor', 'proveedor_detalle', 'ciudad', 'ciudad_detalle',
+            'nombre_establecimiento', 'check_in', 'check_out', 'regimen_alimentacion', 'habitaciones', 'notas'
         ]
         extra_kwargs = {
             'venta': {'write_only': True, 'required': True}
@@ -243,6 +227,7 @@ class ActividadServicioSerializer(serializers.ModelSerializer):
         }
 
 class AlquilerAutoReservaSerializer(serializers.ModelSerializer):
+    # source='margen_amount' es redundante porque el método @property ya coincide con el nombre del campo.
     margen_amount = serializers.DecimalField(max_digits=12, decimal_places=2, read_only=True)
     margen_pct = serializers.SerializerMethodField()
     class Meta:
@@ -377,48 +362,25 @@ class VentaSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         items_data = validated_data.pop('items_venta', [])
         venta = Venta.objects.create(**validated_data)
-        
         for item_data in items_data:
-            # Extraer datos anidados antes de crear el item
-            alojamiento_data = item_data.pop('alojamiento_details', None)
-            
-            # Crear el item de venta
-            item_venta = ItemVenta.objects.create(venta=venta, **item_data)
-            
-            # Crear alojamiento si se proporcionaron datos
-            if alojamiento_data:
-                AlojamientoReserva.objects.create(
-                    venta=venta, 
-                    item_venta=item_venta, 
-                    **alojamiento_data
-                )
-        
+            ItemVenta.objects.create(venta=venta, **item_data)
         return venta
 
     def update(self, instance, validated_data):
         items_data = validated_data.pop('items_venta', None)
-        
-        # Actualizar campos básicos de la venta
-        for attr, value in validated_data.items():
-            setattr(instance, attr, value)
+        for attr in [
+            'cliente', 'cotizacion_origen', 'descripcion_general', 'moneda',
+            'subtotal', 'impuestos', 'monto_pagado', 'estado', 'asiento_contable_venta',
+            'notas', 'tipo_venta', 'canal_origen', 'margen_estimado', 'co2_estimado_kg'
+        ]:
+            if attr in validated_data:
+                setattr(instance, attr, validated_data[attr])
         instance.save()
-        
-        # Actualizar items si se proporcionaron
+
         if items_data is not None:
-            # Eliminar items existentes y recrear (enfoque simple)
             instance.items_venta.all().delete()
-            
             for item_data in items_data:
-                alojamiento_data = item_data.pop('alojamiento_details', None)
-                item_venta = ItemVenta.objects.create(venta=instance, **item_data)
-                
-                if alojamiento_data:
-                    AlojamientoReserva.objects.create(
-                        venta=instance, 
-                        item_venta=item_venta, 
-                        **alojamiento_data
-                    )
-        
+                ItemVenta.objects.create(venta=instance, **item_data)
         return instance
 
 class ItemFacturaSerializer(serializers.ModelSerializer):
@@ -449,7 +411,7 @@ class FacturaSerializer(serializers.ModelSerializer):
             'saldo_pendiente', 'estado', 'estado_display', 'asiento_contable_factura',
             'notas', 'items_factura', 'archivo_pdf'
         ]
-        read_only_fields = ('numero_factura', 'monto_total', 'saldo_pendiente', 'archivo_pdf')
+        read_only_fields = ('numero_factura', 'monto_total', 'saldo_pendiente')
         extra_kwargs = {
             'cliente': {'write_only': True, 'allow_null': False, 'required': True},
             'moneda': {'write_only': True, 'allow_null': False, 'required': True},

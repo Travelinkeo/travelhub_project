@@ -41,6 +41,7 @@ from .models import (
     Venta,
     VentaParseMetadata,
 )
+from .models.pasaportes import PasaporteEscaneado
 from .models.contabilidad import AsientoContable, LiquidacionProveedor, ItemLiquidacion
 from .models_catalogos import Ciudad, Moneda, Pais, ProductoServicio, Proveedor, TipoCambio
 from personas.models import Cliente
@@ -652,3 +653,52 @@ class ComunicacionProveedorAdmin(admin.ModelAdmin):
     search_fields = ('asunto', 'remitente', 'cuerpo_completo')
     readonly_fields = ('remitente', 'asunto', 'fecha_recepcion', 'categoria', 'contenido_extraido', 'cuerpo_completo')
     ordering = ('-fecha_recepcion',)
+
+@admin.register(PasaporteEscaneado)
+class PasaporteEscaneadoAdmin(admin.ModelAdmin):
+    list_display = ('numero_pasaporte', 'nombre_completo', 'nacionalidad', 'confianza_ocr', 'fecha_procesamiento', 'verificado_manualmente')
+    list_filter = ('confianza_ocr', 'nacionalidad', 'verificado_manualmente', 'fecha_procesamiento')
+    search_fields = ('numero_pasaporte', 'nombres', 'apellidos')
+    readonly_fields = ('fecha_procesamiento', 'datos_ocr_completos', 'texto_mrz', 'es_valido')
+    autocomplete_fields = ['cliente']
+    actions = ['marcar_como_verificado', 'crear_clientes_desde_pasaportes']
+    fields = ('imagen_original', 'cliente', 'numero_pasaporte', 'nombres', 'apellidos', 'nacionalidad', 'fecha_nacimiento', 'fecha_vencimiento', 'sexo', 'confianza_ocr', 'verificado_manualmente')
+    
+    def marcar_como_verificado(self, request, queryset):
+        updated = queryset.update(verificado_manualmente=True)
+        self.message_user(request, f'{updated} pasaporte(s) marcado(s) como verificado(s) manualmente.')
+    marcar_como_verificado.short_description = 'Marcar como verificado manualmente'
+    
+    def crear_clientes_desde_pasaportes(self, request, queryset):
+        created = 0
+        updated = 0
+        for pasaporte in queryset.filter(cliente__isnull=True):
+            if pasaporte.es_valido:
+                existing_client = Cliente.objects.filter(
+                    numero_documento=pasaporte.numero_pasaporte
+                ).first()
+                
+                if existing_client:
+                    client_data = pasaporte.to_cliente_data()
+                    for key, value in client_data.items():
+                        if value:
+                            setattr(existing_client, key, value)
+                    existing_client.save()
+                    pasaporte.cliente = existing_client
+                    pasaporte.save()
+                    updated += 1
+                else:
+                    client_data = pasaporte.to_cliente_data()
+                    nuevo_cliente = Cliente.objects.create(**client_data)
+                    pasaporte.cliente = nuevo_cliente
+                    pasaporte.save()
+                    created += 1
+        
+        message = f'Creados: {created} cliente(s), Actualizados: {updated} cliente(s)'
+        self.message_user(request, message)
+    crear_clientes_desde_pasaportes.short_description = 'Crear/actualizar clientes desde pasaportes válidos'
+    
+    def save_model(self, request, obj, form, change):
+        if not obj.procesado_por:
+            obj.procesado_por = request.user
+        super().save_model(request, obj, form, change)

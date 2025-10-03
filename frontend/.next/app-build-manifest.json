@@ -1,15 +1,55 @@
 {
   "pages": {
-    "/page": [
+    "/configuraciones/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/page.js"
+      "static/chunks/app/configuraciones/page.js"
     ],
     "/layout": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/css/app/layout.css",
       "static/chunks/app/layout.js"
+    ],
+    "/erp/ventas/nueva/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/erp/ventas/nueva/page.js"
+    ],
+    "/login/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/login/page.js"
+    ],
+    "/dashboard/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/dashboard/page.js"
+    ],
+    "/crm/clientes/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/crm/clientes/page.js"
+    ],
+    "/crm/proveedores/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/crm/proveedores/page.js"
+    ],
+    "/erp/ventas/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/erp/ventas/page.js"
+    ],
+    "/erp/boletos-importados/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/erp/boletos-importados/page.js"
+    ],
+    "/erp/facturas-clientes/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/erp/facturas-clientes/page.js"
     ],
     "/erp/cotizaciones/page": [
       "static/chunks/webpack.js",
@@ -21,20 +61,10 @@
       "static/chunks/main-app.js",
       "static/chunks/app/crm/page.js"
     ],
-    "/crm/clientes/page": [
+    "/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/crm/clientes/page.js"
-    ],
-    "/erp/ventas/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/erp/ventas/page.js"
-    ],
-    "/erp/ventas/nueva/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/erp/ventas/nueva/page.js"
+      "static/chunks/app/page.js"
     ]
   }
 }

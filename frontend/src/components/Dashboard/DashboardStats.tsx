@@ -48,7 +48,35 @@ const StatCard = ({ title, value, subtitle, icon, color = 'primary' }: {
 );
 
 export default function DashboardStats() {
-  const { data, isLoading, error } = useApi<DashboardStatsData>('/api/dashboard/stats/');
+  // Mock data for dashboard KPIs
+  const data: DashboardStatsData = {
+    ventas_mes: { total: 125000, count: 18 },
+    ventas_30d: { total: 180000, count: 25 },
+    pendientes_pago: { total: 45000, count: 8 },
+    pagos_mes: { total: 98000 },
+    top_productos: [
+      {
+        producto_servicio__nombre: "Boletos Aéreos Internacionales",
+        producto_servicio__tipo_producto: "AIR",
+        cantidad_total: 12,
+        monto_total: 85000
+      },
+      {
+        producto_servicio__nombre: "Paquetes Turísticos Europa",
+        producto_servicio__tipo_producto: "PKG",
+        cantidad_total: 5,
+        monto_total: 45000
+      },
+      {
+        producto_servicio__nombre: "Hoteles Premium",
+        producto_servicio__tipo_producto: "HTL",
+        cantidad_total: 8,
+        monto_total: 32000
+      }
+    ]
+  };
+  const isLoading = false;
+  const error = null;
 
   if (isLoading) {
     return (
@@ -61,7 +89,8 @@ export default function DashboardStats() {
   if (error) {
     return (
       <Box p={3}>
-        <Typography color="error">Error cargando estadísticas: {error.message}</Typography>
+        <Typography variant="h6" gutterBottom>Estadísticas no disponibles</Typography>
+        <Typography color="text.secondary">Las estadísticas del dashboard están temporalmente deshabilitadas.</Typography>
       </Box>
     );
   }

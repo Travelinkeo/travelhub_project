@@ -5,28 +5,23 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { Box, Button, TextField, Typography, Paper, Alert } from '@mui/material';
-import { apiMutate } from '@/lib/api';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function LoginPage() {
-  const router = useRouter();
+  const { login } = useAuth();
   const { register, handleSubmit } = useForm();
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const onSubmit = async (data: any) => {
     try {
       setError(null);
-      const response = await apiMutate('/api/auth/login/', {
-        method: 'POST',
-        body: data,
-      });
-      if (response.token) {
-        localStorage.setItem('auth_token', response.token);
-        router.push('/'); // Redirect to home page after login
-      } else {
-        setError('No se recibió un token.');
-      }
+      setIsLoading(true);
+      await login(data.username, data.password);
     } catch (err: any) {
       setError(err.message || 'Error al iniciar sesión.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -50,8 +45,8 @@ export default function LoginPage() {
               {...register('password', { required: true })}
               fullWidth
             />
-            <Button type="submit" variant="contained" fullWidth>
-              Entrar
+            <Button type="submit" variant="contained" fullWidth disabled={isLoading}>
+              {isLoading ? 'Iniciando sesión...' : 'Entrar'}
             </Button>
           </Box>
         </form>

@@ -48,7 +48,10 @@ export default function ConfiguracionesPage() {
 
   const paisesOptions = useMemo(() => (paises?.results || []).map((p: any) => ({ value: p.id, label: p.nombre })), [paises]);
   const ciudadesOptions = useMemo(() => (ciudades?.results || []).map((c: any) => ({ value: c.id, label: c.nombre })), [ciudades]);
-  const monedasOptions = useMemo(() => (monedas?.results || []).map((m: any) => ({ value: m.id, label: m.nombre })), [monedas]);
+  const monedasOptions = useMemo(() => {
+    const monedasArray = Array.isArray(monedas) ? monedas : (monedas?.results || []);
+    return monedasArray.map((m: any) => ({ value: m.id_moneda, label: m.nombre }));
+  }, [monedas]);
   const tiposCambioOptions = useMemo(() => (tiposCambio?.results || []).map((t: any) => ({ value: t.id, label: `${t.moneda_origen_detalle.nombre} to ${t.moneda_destino_detalle.nombre}` })), [tiposCambio]);
 
   return (

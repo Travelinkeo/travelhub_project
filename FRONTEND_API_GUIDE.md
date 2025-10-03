@@ -2,20 +2,40 @@
 
 ## 🔐 **Autenticación**
 
-### Login
+### Login JWT (Recomendado)
 ```javascript
-POST /api/auth/login/
+POST /api/auth/jwt/obtain/
 {
   "username": "tu_usuario",
   "password": "tu_contraseña"
 }
-// Respuesta: {"token": "61af56d1f722f4cc71889e07e9d49ebdb33bdd36"}
+// Respuesta: {
+//   "access": "eyJ0eXAiOiJKV1QiLCJhbGc...",
+//   "refresh": "eyJ0eXAiOiJKV1QiLCJhbGc..."
+// }
+```
+
+### Refresh Token
+```javascript
+POST /api/auth/jwt/refresh/
+{
+  "refresh": "eyJ0eXAiOiJKV1QiLCJhbGc..."
+}
+// Respuesta: {"access": "nuevo_token..."}
+```
+
+### Logout
+```javascript
+POST /api/auth/jwt/logout/
+{
+  "refresh": "eyJ0eXAiOiJKV1QiLCJhbGc..."
+}
 ```
 
 ### Headers para requests autenticados
 ```javascript
 headers: {
-  "Authorization": "Token 61af56d1f722f4cc71889e07e9d49ebdb33bdd36",
+  "Authorization": "Bearer eyJ0eXAiOiJKV1QiLCJhbGc...",
   "Content-Type": "application/json"
 }
 ```
@@ -114,13 +134,19 @@ GET /api/monedas/
 
 ### Productos/Servicios
 ```javascript
-GET /api/productos-servicio/
-GET /api/productos-servicio/?search=hotel
+GET /api/productoservicio/
+GET /api/productoservicio/?search=hotel
 ```
 
 ### Proveedores
 ```javascript
 GET /api/proveedores/?search=marriott
+```
+
+### Países
+```javascript
+GET /api/paises/
+GET /api/paises/?search=venezuela
 ```
 
 ## 🚗 **Otros Tipos de Venta**
@@ -199,12 +225,12 @@ POST /api/traslados/
 
 ```javascript
 const crearVentaHotel = async (datosVenta) => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('auth_token');
   
-  const response = await fetch('/api/ventas/', {
+  const response = await fetch('http://127.0.0.1:8000/api/ventas/', {
     method: 'POST',
     headers: {
-      'Authorization': `Token ${token}`,
+      'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(datosVenta)
@@ -221,3 +247,42 @@ const crearVentaHotel = async (datosVenta) => {
   }
 };
 ```
+
+## 📋 **Endpoints Disponibles**
+
+### Catálogos
+- `GET /api/paises/` - Países
+- `GET /api/ciudades/` - Ciudades
+- `GET /api/monedas/` - Monedas
+- `GET /api/tipos-cambio/` - Tipos de cambio
+- `GET /api/productoservicio/` - Productos y servicios
+
+### CRM
+- `GET/POST /api/clientes/` - Clientes
+- `GET/POST /api/pasajeros/` - Pasajeros
+- `GET/POST /api/proveedores/` - Proveedores
+- `GET/POST /api/cotizaciones/` - Cotizaciones
+
+### ERP - Ventas
+- `GET/POST /api/ventas/` - Ventas
+- `GET/POST /api/facturas/` - Facturas
+- `GET/POST /api/boletos-importados/` - Boletos importados
+- `GET/POST /api/alojamientos/` - Alojamientos
+- `GET/POST /api/alquileres-autos/` - Alquiler de autos
+- `GET/POST /api/traslados/` - Traslados
+- `GET/POST /api/actividades/` - Tours y actividades
+- `GET/POST /api/segmentos-vuelo/` - Segmentos de vuelo
+- `GET/POST /api/fees-venta/` - Fees de venta
+- `GET/POST /api/pagos-venta/` - Pagos de venta
+
+### Contabilidad
+- `GET/POST /api/asientos-contables/` - Asientos contables
+- `GET /api/audit-logs/` - Logs de auditoría
+
+## ⚙️ **Notas Importantes**
+
+1. **Todas las rutas usan plural**: `/api/ventas/`, `/api/facturas/`, `/api/proveedores/`
+2. **Autenticación JWT**: Usar `Bearer` en lugar de `Token`
+3. **Base URL**: `http://127.0.0.1:8000` en desarrollo
+4. **Paginación**: La mayoría de endpoints soportan `?page=1&page_size=25`
+5. **Búsqueda**: Usar `?search=termino` para filtrar resultados

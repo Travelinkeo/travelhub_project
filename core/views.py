@@ -42,7 +42,6 @@ from .models import (
     PagoVenta,
     PaqueteAereo,
     PaqueteTuristicoCMS,
-    ProductoServicio,
     SegmentoVuelo,
     ServicioAdicionalDetalle,
     TrasladoServicio,
@@ -50,7 +49,7 @@ from .models import (
     VentaParseMetadata,
 )
 from .models.boletos import BoletoImportado
-from .models_catalogos import Ciudad, Moneda, Pais, Proveedor, TipoCambio
+from .models_catalogos import Ciudad, Moneda, Pais, ProductoServicio, Proveedor, TipoCambio
 from .permissions import IsStaffOrGroupWrite
 
 # --- Vistas para Integración con IA ---
@@ -183,6 +182,8 @@ class ProductoServicioViewSet(viewsets.ModelViewSet):
     queryset = ProductoServicio.objects.filter(activo=True)
     serializer_class = ProductoServicioSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['nombre', 'codigo_interno', 'descripcion']
 
 class FacturaViewSet(viewsets.ModelViewSet):
     queryset = Factura.objects.select_related(
@@ -653,3 +654,28 @@ def dashboard_stats_api(request):
     """API endpoint para estadísticas del dashboard"""
     stats = get_dashboard_stats()
     return Response(stats)
+
+@api_view(['POST'])
+def ai_agent_chat(request):
+    """API endpoint para chat con el agente IA"""
+    from .ai_agent import agent
+    import asyncio
+    
+    try:
+        message = request.data.get('message', '')
+        if not message:
+            return Response({'error': 'Mensaje requerido'}, status=400)
+        
+        # Ejecutar consulta asíncrona
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        response = loop.run_until_complete(agent.process_query(message))
+        loop.close()
+        
+        return Response({
+            'response': response,
+            'timestamp': timezone.now().isoformat()
+        })
+        
+    except Exception as e:
+        return Response({'error': str(e)}, status=500)

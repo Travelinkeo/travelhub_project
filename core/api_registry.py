@@ -82,6 +82,7 @@ def register_auto_apis():
     Escanea admin.site y registra APIs para todos los modelos registrados.
     """
     print(f"Modelos en admin.site._registry: {[model.__name__ for model in admin.site._registry.keys()]}")
+    print(f"Iniciando registro automático de APIs...")
     for model, admin_class in admin.site._registry.items():
         if model not in api_registry:
             try:
@@ -93,8 +94,11 @@ def register_auto_apis():
                     'viewset': viewset,
                     'basename': basename
                 }
+                print(f"API registrada para {model.__name__} con basename: {basename}")
             except Exception as e:
                 print(f"Error generando API para {model.__name__}: {e}")
+    print(f"Total APIs en registry: {len(api_registry)}")
+    print(f"Basenames registrados: {[api['basename'] for api in api_registry.values()]}")
 
 
 def get_registered_apis():

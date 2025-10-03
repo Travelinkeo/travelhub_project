@@ -11,12 +11,28 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
-  SelectChangeEvent
+  SelectChangeEvent,
+  Checkbox,
+  FormControlLabel,
+  Autocomplete
 } from '@mui/material';
-import Grid from '@mui/material/Grid'; // Importación directa para Grid
+import Grid from '@mui/material/Grid';
 
-// Paso 1: Importar el tipo desde el archivo centralizado usando el alias de ruta.
+// Importar tipos y hooks
 import { Cliente } from '@/types/api';
+import { useApi } from '@/hooks/useApi';
+
+interface Pais {
+  id: number;
+  nombre: string;
+  codigo_iso_2: string;
+}
+
+interface Ciudad {
+  id: number;
+  nombre: string;
+  pais: number;
+}
 
 // La interfaz local de Cliente ha sido eliminada.
 
@@ -32,7 +48,9 @@ const style = {
   top: '50%',
   left: '50%',
   transform: 'translate(-50%, -50%)',
-  width: 600,
+  width: 800,
+  maxHeight: '90vh',
+  overflow: 'auto',
   bgcolor: 'background.paper',
   border: '2px solid #000',
   boxShadow: 24,
@@ -40,11 +58,13 @@ const style = {
 };
 
 const ClienteForm: React.FC<ClienteFormProps> = ({ open, onClose, onSave, cliente }) => {
-  // Usamos Partial<Cliente> para el estado del formulario, es más seguro.
   const [formData, setFormData] = useState<Partial<Cliente>>(cliente || { tipo_cliente: 'PAR' });
+  
+  // Cargar datos de países y ciudades
+  const { data: paises } = useApi<Pais[]>('/api/paises/');
+  const { data: ciudades } = useApi<Ciudad[]>('/api/ciudades/');
 
   useEffect(() => {
-    // Actualizar el estado del formulario si el cliente a editar cambia
     setFormData(cliente || { tipo_cliente: 'PAR' });
   }, [cliente, open]);
 
@@ -64,8 +84,8 @@ const ClienteForm: React.FC<ClienteFormProps> = ({ open, onClose, onSave, client
         <Typography variant="h6" component="h2">
           {cliente ? 'Editar Cliente' : 'Crear Nuevo Cliente'}
         </Typography>
-        {/* Paso 3: Corregir los componentes Grid eliminando la prop 'item' */}
         <Grid container spacing={2} sx={{ mt: 2 }}>
+          {/* Tipo de Cliente */}
           <Grid component="div" xs={12}>
             <FormControl fullWidth>
               <InputLabel>Tipo de Cliente</InputLabel>
@@ -81,29 +101,123 @@ const ClienteForm: React.FC<ClienteFormProps> = ({ open, onClose, onSave, client
             </FormControl>
           </Grid>
 
+          {/* Datos básicos según tipo */}
           {formData.tipo_cliente === 'PAR' ? (
             <>
               <Grid xs={6}>
-                <TextField name="nombres" label="Nombres" value={formData.nombres || ''} onChange={handleChange} fullWidth />
+                <TextField name="nombres" label="Nombres" value={formData.nombres || ''} onChange={handleChange} fullWidth required />
               </Grid>
               <Grid xs={6}>
-                <TextField name="apellidos" label="Apellidos" value={formData.apellidos || ''} onChange={handleChange} fullWidth />
+                <TextField name="apellidos" label="Apellidos" value={formData.apellidos || ''} onChange={handleChange} fullWidth required />
               </Grid>
             </>
           ) : (
             <Grid xs={12}>
-              <TextField name="nombre_empresa" label="Nombre de la Empresa" value={formData.nombre_empresa || ''} onChange={handleChange} fullWidth />
+              <TextField name="nombre_empresa" label="Nombre de la Empresa" value={formData.nombre_empresa || ''} onChange={handleChange} fullWidth required />
             </Grid>
           )}
 
-          <Grid xs={12}>
+          {/* Documentos */}
+          <Grid xs={6}>
             <TextField name="cedula_identidad" label="Cédula/RIF" value={formData.cedula_identidad || ''} onChange={handleChange} fullWidth />
           </Grid>
+          <Grid xs={6}>
+            <TextField name="numero_pasaporte" label="Número de Pasaporte" value={formData.numero_pasaporte || ''} onChange={handleChange} fullWidth />
+          </Grid>
+
+          {/* Contacto */}
           <Grid xs={6}>
             <TextField name="email" label="Email" type="email" value={formData.email || ''} onChange={handleChange} fullWidth />
           </Grid>
           <Grid xs={6}>
             <TextField name="telefono_principal" label="Teléfono" value={formData.telefono_principal || ''} onChange={handleChange} fullWidth />
+          </Grid>
+
+          {/* Fechas */}
+          <Grid xs={6}>
+            <TextField 
+              name="fecha_nacimiento" 
+              label="Fecha de Nacimiento" 
+              type="date" 
+              value={formData.fecha_nacimiento || ''} 
+              onChange={handleChange} 
+              fullWidth 
+              InputLabelProps={{ shrink: true }}
+            />
+          </Grid>
+          <Grid xs={6}>
+            <TextField 
+              name="fecha_expiracion_pasaporte" 
+              label="Fecha Expiración Pasaporte" 
+              type="date" 
+              value={formData.fecha_expiracion_pasaporte || ''} 
+              onChange={handleChange} 
+              fullWidth 
+              InputLabelProps={{ shrink: true }}
+            />
+          </Grid>
+
+          {/* Nacionalidad y País de Emisión */}
+          <Grid xs={6}>
+            <Autocomplete
+              options={Array.isArray(paises) ? paises : []}
+              getOptionLabel={(option) => option.nombre}
+              value={Array.isArray(paises) ? paises.find(p => p.id === formData.nacionalidad) || null : null}
+              onChange={(_, newValue) => {
+                setFormData(prev => ({ ...prev, nacionalidad: newValue?.id || null }));
+              }}
+              renderInput={(params) => <TextField {...params} label="Nacionalidad" fullWidth />}
+            />
+          </Grid>
+          <Grid xs={6}>
+            <Autocomplete
+              options={Array.isArray(paises) ? paises : []}
+              getOptionLabel={(option) => option.nombre}
+              value={Array.isArray(paises) ? paises.find(p => p.id === formData.pais_emision_pasaporte) || null : null}
+              onChange={(_, newValue) => {
+                setFormData(prev => ({ ...prev, pais_emision_pasaporte: newValue?.id || null }));
+              }}
+              renderInput={(params) => <TextField {...params} label="País Emisión Pasaporte" fullWidth />}
+            />
+          </Grid>
+
+          {/* Dirección y Ciudad */}
+          <Grid xs={8}>
+            <TextField name="direccion" label="Dirección" value={formData.direccion || ''} onChange={handleChange} fullWidth multiline rows={2} />
+          </Grid>
+          <Grid xs={4}>
+            <Autocomplete
+              options={Array.isArray(ciudades) ? ciudades : []}
+              getOptionLabel={(option) => option.nombre}
+              value={Array.isArray(ciudades) ? ciudades.find(c => c.id === formData.ciudad) || null : null}
+              onChange={(_, newValue) => {
+                setFormData(prev => ({ ...prev, ciudad: newValue?.id || null }));
+              }}
+              renderInput={(params) => <TextField {...params} label="Ciudad" fullWidth />}
+            />
+          </Grid>
+
+          {/* Puntos de Fidelidad y Cliente Frecuente */}
+          <Grid xs={6}>
+            <TextField 
+              name="puntos_fidelidad" 
+              label="Puntos de Fidelidad" 
+              type="number" 
+              value={formData.puntos_fidelidad || 0} 
+              onChange={handleChange} 
+              fullWidth 
+            />
+          </Grid>
+          <Grid xs={6}>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={formData.es_cliente_frecuente || false}
+                  onChange={(e) => setFormData(prev => ({ ...prev, es_cliente_frecuente: e.target.checked }))}
+                />
+              }
+              label="Es Cliente Frecuente"
+            />
           </Grid>
         </Grid>
         <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end' }}>

@@ -1,8 +1,10 @@
 {
-  "/page": "app/page.js",
+  "/configuraciones/page": "app/configuraciones/page.js",
+  "/erp/ventas/page": "app/erp/ventas/page.js",
+  "/erp/boletos-importados/page": "app/erp/boletos-importados/page.js",
+  "/erp/facturas-clientes/page": "app/erp/facturas-clientes/page.js",
   "/erp/cotizaciones/page": "app/erp/cotizaciones/page.js",
   "/crm/clientes/page": "app/crm/clientes/page.js",
-  "/crm/page": "app/crm/page.js",
-  "/erp/ventas/page": "app/erp/ventas/page.js",
+  "/crm/proveedores/page": "app/crm/proveedores/page.js",
   "/erp/ventas/nueva/page": "app/erp/ventas/nueva/page.js"
 }

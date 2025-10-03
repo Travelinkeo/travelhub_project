@@ -119,7 +119,7 @@ const ItemVentaFields = ({ index, control, remove, onOpenDetails }: any) => {
   const [productoInput, setProductoInput] = useState('');
   const debouncedProducto = useDebounce(productoInput, 500);
   const { data: productosData, isLoading: isLoadingProductos } = useApi<Paginated<ProductoServicio>>(
-    `/api/productos-servicio/?search=${debouncedProducto}`
+    `/api/productoservicio/?search=${debouncedProducto}`
   );
 
   const watchItems = useWatch({ control, name: 'items_venta' });

@@ -37,8 +37,14 @@ function CustomToolbar(
         placeholder="Buscar por localizador o cliente..."
         sx={{ width: '50%' }}
       />
-      <Button variant="contained" onClick={onAddNew}>
-        Crear Venta
+      <Button 
+        variant="contained" 
+        onClick={() => {
+          console.log('Crear Venta clicked');
+          onAddNew();
+        }}
+      >
+        Crear Nueva Venta
       </Button>
     </Box>
   );
@@ -164,18 +170,11 @@ export default function VentasClientComponent() {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '85vh', width: '100%' }}>
-      <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <TextField
-          variant="outlined"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          placeholder="Buscar por localizador o cliente..."
-          sx={{ width: '50%' }}
-        />
-        <Button variant="contained" onClick={handleCreateClick}>
-          Crear Venta
-        </Button>
-      </Box>
+      <CustomToolbar 
+        onSearch={setSearchTerm} 
+        searchTerm={searchTerm} 
+        onAddNew={handleCreateClick} 
+      />
       <DataGrid
         rows={data?.results || []}
         columns={columns}

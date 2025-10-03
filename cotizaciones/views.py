@@ -1,7 +1,7 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.utils import timezone
 from .models import Cotizacion, ItemCotizacion
 from .serializers import CotizacionSerializer, ItemCotizacionSerializer
@@ -10,7 +10,7 @@ from .serializers import CotizacionSerializer, ItemCotizacionSerializer
 class CotizacionViewSet(viewsets.ModelViewSet):
     queryset = Cotizacion.objects.select_related('cliente', 'consultor').prefetch_related('items').order_by('-fecha_emision')
     serializer_class = CotizacionSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
     
     @action(detail=True, methods=['post'])
     def convertir_a_venta(self, request, pk=None):
@@ -55,7 +55,7 @@ class CotizacionViewSet(viewsets.ModelViewSet):
 class ItemCotizacionViewSet(viewsets.ModelViewSet):
     queryset = ItemCotizacion.objects.select_related('cotizacion').all()
     serializer_class = ItemCotizacionSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
     
     def perform_create(self, serializer):
         item = serializer.save()

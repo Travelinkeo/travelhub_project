@@ -6,6 +6,7 @@ import { DataGrid, GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
 
 // Components
 import ClienteForm from './ClienteForm';
+import { PassportModal } from '@/components/PassportModal';
 
 // Hooks and types
 import { useApi } from '@/hooks/useApi';
@@ -15,8 +16,8 @@ import { apiMutate } from '@/lib/api';
 
 // Toolbar is now a separate component rendered outside the DataGrid
 function CustomToolbar(
-  { onSearch, searchTerm, onAddNew }
-  : { onSearch: (term: string) => void, searchTerm: string, onAddNew: () => void }
+  { onSearch, searchTerm, onAddNew, onScanPassport }
+  : { onSearch: (term: string) => void, searchTerm: string, onAddNew: () => void, onScanPassport: () => void }
 ) {
   return (
     <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #e0e0e0' }}>
@@ -25,11 +26,16 @@ function CustomToolbar(
         value={searchTerm}
         onChange={(e) => onSearch(e.target.value)}
         placeholder="Buscar cliente..."
-        sx={{ width: '50%' }}
+        sx={{ width: '40%' }}
       />
-      <Button variant="contained" onClick={onAddNew}>
-        Crear Nuevo Cliente
-      </Button>
+      <Box sx={{ display: 'flex', gap: 1 }}>
+        <Button variant="outlined" onClick={onScanPassport}>
+          📸 Escanear Pasaporte
+        </Button>
+        <Button variant="contained" onClick={onAddNew}>
+          Crear Nuevo Cliente
+        </Button>
+      </Box>
     </Box>
   );
 }
@@ -54,6 +60,7 @@ const ClientesClientComponent = () => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState<Cliente | null>(null);
+  const [isPassportModalOpen, setIsPassportModalOpen] = useState(false);
 
   const handleOpenModal = (cliente: Cliente | null) => {
     setSelectedClient(cliente);
@@ -128,7 +135,8 @@ const ClientesClientComponent = () => {
       <CustomToolbar 
         onSearch={setSearchTerm} 
         searchTerm={searchTerm} 
-        onAddNew={() => handleOpenModal(null)} 
+        onAddNew={() => handleOpenModal(null)}
+        onScanPassport={() => setIsPassportModalOpen(true)}
       />
       <Box sx={{ flexGrow: 1, width: '100%' }}>
         <DataGrid
@@ -155,6 +163,15 @@ const ClientesClientComponent = () => {
         onClose={handleCloseModal}
         onSave={handleSave}
         cliente={selectedClient}
+      />
+      <PassportModal
+        isOpen={isPassportModalOpen}
+        onClose={() => setIsPassportModalOpen(false)}
+        onClientCreated={(clientId) => {
+          setIsPassportModalOpen(false);
+          mutate(); // Refresh the client list
+          alert(`Cliente creado exitosamente con ID: ${clientId}`);
+        }}
       />
     </Box>
   );

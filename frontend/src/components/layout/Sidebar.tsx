@@ -29,8 +29,29 @@ const Sidebar = ({ isOpen, onToggle }: SidebarProps) => {
         { name: 'Boletos Importados', path: '/erp/boletos-importados' },
         { name: 'Facturas de Clientes', path: '/erp/facturas-clientes' },
         { name: 'Cotizaciones', path: '/erp/cotizaciones' },
+        { name: 'Liquidaciones', path: '/erp/liquidaciones' },
+        { name: 'Pasaportes OCR', path: '/erp/pasaportes' },
+        { name: 'Auditoría', path: '/erp/auditoria' },
       ],
     },
+    {
+      name: 'Reportes',
+      path: '/reportes',
+      subItems: [
+        { name: 'Libro Diario', path: '/reportes/libro-diario' },
+        { name: 'Balance', path: '/reportes/balance' },
+        { name: 'Validación', path: '/reportes/validacion' },
+      ],
+    },
+    {
+      name: 'Comunicaciones',
+      path: '/comunicaciones',
+      subItems: [
+        { name: 'Inbox Proveedores', path: '/comunicaciones/inbox' },
+      ],
+    },
+    { name: 'Traductor', path: '/traductor' },
+    { name: 'Linkeo (Chat)', path: '/chatbot' },
     { name: 'CMS', path: '/cms' },
   ];
 

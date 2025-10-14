@@ -1,102 +1,38 @@
-{# Archivo: core/templates/core/home.html #}
-{% extends "core/base.html" %}
-
-{% block title %}Bienvenido a TravelHub{% endblock %}
-
-{% block content %}
-<section class="hero card p-4 mb-4">
-    <div class="d-flex flex-column gap-2">
-    <h1 class="mb-1 hero-heading">Explora. Reserva. Disfruta.</h1>
-    <p class="lead lead-max">Tu plataforma integral para emisión y gestión de boletos aéreos, control de itinerarios y creación de experiencias de viaje.</p>
-        <div class="d-flex gap-2 flex-wrap mt-1">
-            <a class="btn btn-primary" href="{% url 'core:lista_paquetes_cms' %}">Ver Paquetes</a>
-            <a class="btn btn-outline" href="{% url 'core:dashboard_boletos' %}">Dashboard Boletos</a>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TravelHub - Sistema de Gestión</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 40px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1 { color: #2c3e50; text-align: center; margin-bottom: 30px; }
+        .links { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 30px; }
+        .link-card { background: #3498db; color: white; padding: 20px; border-radius: 8px; text-decoration: none; text-align: center; transition: background 0.3s; }
+        .link-card:hover { background: #2980b9; color: white; text-decoration: none; }
+        .description { text-align: center; color: #666; margin-bottom: 30px; line-height: 1.6; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌍 TravelHub</h1>
+        <p class="description">
+            Sistema integral de gestión para agencias de viajes.<br>
+            CRM • ERP • CMS • Gestión de Boletos • Contabilidad
+        </p>
+        
+        <div class="links">
+            <a href="/admin/" class="link-card">
+                <h3>📊 Panel de Administración</h3>
+                <p>Gestión completa del sistema</p>
+            </a>
+            
+            <a href="/api/" class="link-card">
+                <h3>🔌 API REST</h3>
+                <p>Interfaz de programación</p>
+            </a>
         </div>
     </div>
-</section>
-
-<!-- Dashboard KPIs -->
-<section class="mb-4">
-    <h2 class="mb-3">Resumen Ejecutivo</h2>
-    <div class="grid gap-3 grid-cards-auto">
-        <div class="card bg-primary text-white">
-            <div class="card-body text-center">
-                <h3 class="mb-1">${{ dashboard_stats.ventas_mes.total|floatformat:0 }}</h3>
-                <p class="mb-0 small">Ventas Este Mes</p>
-                <small>({{ dashboard_stats.ventas_mes.count }} ventas)</small>
-            </div>
-        </div>
-        <div class="card bg-success text-white">
-            <div class="card-body text-center">
-                <h3 class="mb-1">${{ dashboard_stats.pagos_mes.total|floatformat:0 }}</h3>
-                <p class="mb-0 small">Pagos Recibidos</p>
-                <small>Este mes</small>
-            </div>
-        </div>
-        <div class="card bg-warning text-white">
-            <div class="card-body text-center">
-                <h3 class="mb-1">${{ dashboard_stats.pendientes_pago.total|floatformat:0 }}</h3>
-                <p class="mb-0 small">Pendiente de Pago</p>
-                <small>({{ dashboard_stats.pendientes_pago.count }} ventas)</small>
-            </div>
-        </div>
-        <div class="card bg-info text-white">
-            <div class="card-body text-center">
-                <h3 class="mb-1">{{ dashboard_stats.ventas_30d.count }}</h3>
-                <p class="mb-0 small">Ventas Últimos 30d</p>
-                <small>${{ dashboard_stats.ventas_30d.total|floatformat:0 }}</small>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- Top Productos -->
-<section class="mb-4">
-    <h3 class="mb-3">Top Productos (30 días)</h3>
-    <div class="card">
-        <div class="card-body">
-            {% for producto in dashboard_stats.top_productos %}
-            <div class="d-flex justify-content-between align-items-center py-2 {% if not forloop.last %}border-bottom{% endif %}">
-                <div>
-                    <strong>{{ producto.producto_servicio__nombre }}</strong>
-                    <small class="text-muted d-block">{{ producto.producto_servicio__tipo_producto }}</small>
-                </div>
-                <div class="text-end">
-                    <span class="badge bg-primary">{{ producto.cantidad_total }} unidades</span>
-                    <small class="text-muted d-block">${{ producto.monto_total|floatformat:0 }}</small>
-                </div>
-            </div>
-            {% empty %}
-            <p class="text-muted mb-0">No hay datos de productos en los últimos 30 días</p>
-            {% endfor %}
-        </div>
-    </div>
-</section>
-
-<section class="grid gap-3 grid-cards-auto">
-    <div class="card">
-        <div class="card-header">Gestión Centralizada</div>
-        <div class="card-body">
-            <p class="mb-0 small">Importa boletos de múltiples fuentes (Sabre, KIU) y genera PDFs consistentes con tu branding.</p>
-        </div>
-    </div>
-    <div class="card">
-        <div class="card-header">Parseo Inteligente</div>
-        <div class="card-body">
-            <p class="mb-0 small">Normalización de datos: fechas ISO, divisas, CO₂ y múltiples tramos de itinerario.</p>
-        </div>
-    </div>
-    <div class="card">
-        <div class="card-header">Automatización</div>
-        <div class="card-body">
-            <p class="mb-0 small">Generación automática de PDF al importar o capturar manualmente un boleto.</p>
-        </div>
-    </div>
-    <div class="card">
-        <div class="card-header">Escalable</div>
-        <div class="card-body">
-            <p class="mb-0 small">Arquitectura preparada para añadir nuevos GDS y enriquecer features sin romper el flujo actual.</p>
-        </div>
-    </div>
-</section>
-{% endblock %}
+</body>
+</html>

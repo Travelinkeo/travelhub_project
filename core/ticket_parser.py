@@ -23,6 +23,7 @@ from .parsing_utils import (
     _extract_field_single_line,
     _formatear_fecha_dd_mm_yyyy
 )
+from .airline_utils import normalize_airline_name, extract_airline_code_from_flight
 
 # --- Lógica de Parseo Específica para KIU (Restaurada y Completa) ---
 
@@ -276,6 +277,18 @@ def _parse_kiu_ticket(plain_text: str, html_text: str) -> Dict[str, Any]:
     logger.info("--- INICIO DE PARSEO KIU ---")
     nombre_completo = _get_nombre_completo_pasajero(plain_text)
     solo_codigo = _get_solo_codigo_reserva(plain_text)
+    nombre_aerolinea_raw = _get_nombre_aerolinea(plain_text)
+    
+    # Intentar extraer código de aerolínea del itinerario para normalizar el nombre
+    itinerario = _extraer_itinerario_kiu(plain_text, html_text)
+    primer_vuelo = None
+    if itinerario and itinerario != "No se pudo procesar el itinerario.":
+        # Buscar el primer número de vuelo en el itinerario
+        import re
+        vuelo_match = re.search(r'\b([A-Z]{2}\d+)\b', itinerario)
+        if vuelo_match:
+            primer_vuelo = vuelo_match.group(1)
+    
     data = {
         'SOURCE_SYSTEM': 'KIU',
         'NUMERO_DE_BOLETO': _get_numero_boleto(plain_text),
@@ -286,12 +299,12 @@ def _parse_kiu_ticket(plain_text: str, html_text: str) -> Dict[str, Any]:
         'CODIGO_IDENTIFICACION': _get_codigo_identificacion(plain_text),
         'CODIGO_RESERVA': _get_codigo_reserva_completo(solo_codigo),
         'SOLO_CODIGO_RESERVA': solo_codigo,
-        'NOMBRE_AEROLINEA': _get_nombre_aerolinea(plain_text),
+        'NOMBRE_AEROLINEA': normalize_airline_name(nombre_aerolinea_raw, primer_vuelo),
         'DIRECCION_AEROLINEA': _get_direccion_aerolinea(plain_text),
         'TARIFA': _get_tarifa(plain_text),
         'IMPUESTOS': _get_impuestos(plain_text),
         'TOTAL': _get_total(plain_text),
-        'ItinerarioFinalLimpio': _extraer_itinerario_kiu(plain_text, html_text),
+        'ItinerarioFinalLimpio': itinerario,
     }
     tarifa_moneda, tarifa_importe = _parse_currency_amount(data['TARIFA'])
     total_moneda, total_importe = _parse_currency_amount(data['TOTAL'])
@@ -305,7 +318,8 @@ def _parse_kiu_ticket(plain_text: str, html_text: str) -> Dict[str, Any]:
 # --- Lógica de Parseo para Amadeus y Travelport (Placeholders) ---
 
 def _parse_amadeus_ticket(plain_text: str) -> Dict[str, Any]:
-    return {"SOURCE_SYSTEM": "AMADEUS", "error": "Parser para Amadeus no implementado."}
+    from .amadeus_parser import parse_amadeus_ticket
+    return parse_amadeus_ticket(plain_text)
 
 def _parse_travelport_ticket(plain_text: str) -> Dict[str, Any]:
     return {"SOURCE_SYSTEM": "TRAVELPORT", "error": "Parser para Travelport no implementado."}
@@ -324,6 +338,29 @@ def extract_data_from_text(plain_text: str, html_text: str = "", pdf_path: Optio
         logger.info("GDS detectado: SABRE. Procesando...")
         return parse_sabre_ticket(plain_text)
 
+    # Heurística para TK Connect (Turkish Airlines)
+    if 'IDENTIFICACIÓN DEL PEDIDO' in plain_text_upper or 'GRUPO SOPORTE GLOBAL' in plain_text_upper:
+        logger.info("GDS detectado: TK_CONNECT. Procesando...")
+        from .tk_connect_parser import parse_tk_connect_ticket
+        return parse_tk_connect_ticket(plain_text)
+    
+    # Heurística para COPA SPRK
+    if 'COPA AIRLINES' in plain_text_upper and 'SPRK' in plain_text_upper:
+        logger.info("Sistema detectado: COPA_SPRK. Procesando...")
+        from .copa_sprk_parser import parse_copa_sprk_ticket
+        return parse_copa_sprk_ticket(plain_text)
+    
+    # Heurística para WINGO
+    if 'WINGO' in plain_text_upper or 'WINGO.COM' in plain_text_upper:
+        logger.info("Sistema detectado: WINGO. Procesando...")
+        from .wingo_parser import parse_wingo_ticket
+        return parse_wingo_ticket(plain_text)
+    
+    # Heurística para AMADEUS
+    if 'ELECTRONIC TICKET RECEIPT' in plain_text_upper and 'BOOKING REF:' in plain_text_upper:
+        logger.info("GDS detectado: AMADEUS. Procesando...")
+        return _parse_amadeus_ticket(plain_text)
+    
     # Heurística para KIU
     if 'KIUSYS.COM' in plain_text_upper or 'PASSENGER ITINERARY RECEIPT' in plain_text_upper:
         logger.info("GDS detectado: KIU. Procesando...")
@@ -351,7 +388,80 @@ def generate_ticket(data: Dict[str, Any]) -> Tuple[bytes, str]:
     template_dir = os.path.join(base_dir, 'templates', 'core', 'tickets')
     env = Environment(loader=FileSystemLoader(template_dir), autoescape=select_autoescape(['html', 'xml']))
 
-    if source_system.startswith('SABRE'):
+    if source_system == 'AMADEUS':
+        template_name = "ticket_template_amadeus.html"
+        # Adaptar datos AMADEUS a estructura KIU
+        context = {
+            'solo_nombre_pasajero': data.get('pasajero', {}).get('nombre_completo', '').split()[0] if data.get('pasajero', {}).get('nombre_completo') else '',
+            'nombre_del_pasajero': data.get('pasajero', {}).get('nombre_completo', ''),
+            'codigo_identificacion': data.get('pasajero', {}).get('tipo', 'ADT'),
+            'solo_codigo_reserva': data.get('pnr', ''),
+            'numero_de_boleto': data.get('numero_boleto', ''),
+            'fecha_de_emision': data.get('fecha_emision', ''),
+            'agente_emisor': data.get('agencia', {}).get('agente', ''),
+            'nombre_aerolinea': 'AMADEUS GDS',
+            'direccion_aerolinea': data.get('agencia', {}).get('direccion', ''),
+            'salidas': '\n'.join([f"{v.get('origen', '')} -> {v.get('destino', '')} | {v.get('numero_vuelo', '')} | {v.get('fecha_salida', '')} {v.get('hora_salida', '')}" for v in data.get('vuelos', [])]) if data.get('vuelos') else 'No se pudieron extraer los vuelos'
+        }
+    elif source_system in ['COPA_SPRK', 'WINGO']:
+        template_name = f"ticket_template_{source_system.lower()}.html"
+        
+        # Contexto genérico para sistemas de aerolíneas
+        context = {
+            'pasajero': {
+                'nombre_completo': data.get('pasajero', {}).get('nombre_completo', 'N/A'),
+                'documento_identidad': data.get('pasajero', {}).get('documento', 'N/A')
+            },
+            'reserva': {
+                'codigo_reservacion': data.get('pnr', 'N/A'),
+                'numero_boleto': data.get('numero_boleto', 'N/A'),
+                'fecha_emision': data.get('fecha_creacion', 'N/A'),
+                'aerolinea_emisora': 'Copa Airlines' if source_system == 'COPA_SPRK' else 'Wingo',
+                'agente_emisor': {'numero_iata': 'N/A'}
+            },
+            'itinerario': {
+                'vuelos': [{
+                    'fecha_salida': v.get('fecha_salida', 'N/A'),
+                    'aerolinea': 'Copa Airlines' if source_system == 'COPA_SPRK' else 'Wingo',
+                    'numero_vuelo': v.get('numero_vuelo', 'N/A'),
+                    'origen': {'ciudad': v.get('origen', 'N/A')},
+                    'hora_salida': v.get('hora_salida', 'N/A'),
+                    'destino': {'ciudad': v.get('destino', 'N/A')},
+                    'hora_llegada': v.get('hora_llegada', 'N/A'),
+                    'cabina': v.get('cabina', 'N/A')
+                } for v in data.get('vuelos', [])]
+            }
+        }
+    elif source_system == 'TK_CONNECT':
+        template_name = "ticket_template_tk_connect.html"
+        
+        # Contexto para TK Connect
+        context = {
+            'pasajero': {
+                'nombre_completo': data.get('pasajero', {}).get('nombre_completo', 'N/A'),
+                'documento_identidad': data.get('pasajero', {}).get('telefono', 'N/A')
+            },
+            'reserva': {
+                'codigo_reservacion': data.get('pnr', 'N/A'),
+                'numero_boleto': data.get('numero_boleto', 'N/A'),
+                'fecha_emision': data.get('fecha_creacion', 'N/A'),
+                'aerolinea_emisora': 'Turkish Airlines',
+                'agente_emisor': {'numero_iata': data.get('oficina_emision', 'N/A')}
+            },
+            'itinerario': {
+                'vuelos': [{
+                    'fecha_salida': v['fecha_salida'],
+                    'aerolinea': 'Turkish Airlines',
+                    'numero_vuelo': v['numero_vuelo'],
+                    'origen': {'ciudad': v['origen']},
+                    'hora_salida': v['hora_salida'],
+                    'destino': {'ciudad': v['destino']},
+                    'hora_llegada': v['hora_llegada'],
+                    'cabina': v['cabina']
+                } for v in data.get('vuelos', [])]
+            }
+        }
+    elif source_system.startswith('SABRE'):
         template_name = "ticket_template_sabre.html"
         
         # Adaptador para la nueva estructura de datos de Sabre (IA o Regex)

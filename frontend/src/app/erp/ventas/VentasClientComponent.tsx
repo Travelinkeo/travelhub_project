@@ -142,12 +142,38 @@ export default function VentasClientComponent() {
     {
       field: 'actions',
       headerName: 'Acciones',
-      width: 200,
+      width: 300,
       sortable: false,
       renderCell: (params: GridRenderCellParams<Venta>) => (
         <Box sx={{ display: 'flex', gap: 1 }}>
           <Button variant="outlined" size="small" onClick={() => handleEditClick(params.row)}>
             Editar
+          </Button>
+          <Button 
+            variant="contained" 
+            size="small" 
+            color="primary"
+            onClick={async () => {
+              try {
+                const response = await fetch(`http://localhost:8000/api/ventas/${params.row.id_venta}/generar-voucher/`, {
+                  method: 'POST',
+                  headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+                  },
+                });
+                if (!response.ok) throw new Error('Error al generar voucher');
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `Voucher-${params.row.localizador}.pdf`;
+                a.click();
+              } catch (e) {
+                alert('Error al generar voucher');
+              }
+            }}
+          >
+            Voucher
           </Button>
           <Button 
             variant="outlined" 

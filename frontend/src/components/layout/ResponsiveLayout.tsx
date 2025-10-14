@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { Box } from '@mui/material';
 import Sidebar from './Sidebar';
 import Header from './Header';
-import AgentChat from '../AIAgent/AgentChat';
+
 import { useTheme } from '@/contexts/ThemeContext';
 
 export default function ResponsiveLayout({ children }: { children: React.ReactNode }) {
@@ -66,8 +66,7 @@ export default function ResponsiveLayout({ children }: { children: React.ReactNo
         </Box>
       </Box>
       
-      {/* Agente IA */}
-      <AgentChat />
+
     </Box>
   );
 }

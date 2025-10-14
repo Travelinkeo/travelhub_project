@@ -136,6 +136,15 @@ class LiquidacionProveedor(models.Model):
 
     def save(self, *args, **kwargs):
         self.saldo_pendiente = self.monto_total - self.monto_pagado
+        
+        # Actualizar estado automáticamente
+        if self.saldo_pendiente <= 0:
+            self.estado = 'PAG'
+        elif self.monto_pagado > 0:
+            self.estado = 'PAR'
+        else:
+            self.estado = 'PEN'
+        
         super().save(*args, **kwargs)
 
 class ItemLiquidacion(models.Model):

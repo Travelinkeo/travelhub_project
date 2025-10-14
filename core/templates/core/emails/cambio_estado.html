@@ -1,40 +1,21 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <title>Actualización de Reserva</title>
-    <style>
-        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-        .header { background: #28a745; color: white; padding: 20px; text-align: center; }
-        .content { padding: 20px; }
-        .footer { background: #f8f9fa; padding: 15px; text-align: center; font-size: 12px; }
-        .estado { background: #d4edda; border: 1px solid #c3e6cb; padding: 15px; border-radius: 5px; }
-    </style>
-</head>
-<body>
-    <div class="header">
-        <h1>Actualización de Reserva</h1>
-        <p>Reserva #{{ venta.localizador }}</p>
-    </div>
-    
-    <div class="content">
-        <p>Estimado/a {{ cliente.get_nombre_completo }},</p>
-        
-        <p>Le informamos que el estado de su reserva ha sido actualizado:</p>
-        
-        <div class="estado">
-            <p><strong>Estado Anterior:</strong> {{ estado_anterior }}</p>
-            <p><strong>Estado Actual:</strong> {{ estado_actual }}</p>
-        </div>
-        
-        <p>Si tiene alguna pregunta sobre este cambio, no dude en contactarnos.</p>
-        
-        <p>Gracias por confiar en nosotros.</p>
-    </div>
-    
-    <div class="footer">
-        <p>TravelHub - Tu socio de confianza en cada viaje</p>
-        <p>Este es un email automático, por favor no responder directamente.</p>
-    </div>
-</body>
-</html>
+{% extends "core/emails/base_email.html" %}
+
+{% block content %}
+<h2 style="color: #667eea; margin-top: 0;">🔄 Actualización de Reserva</h2>
+
+<p>Estimado/a <strong>{{ cliente_nombre }}</strong>,</p>
+
+<p>El estado de su reserva ha sido actualizado.</p>
+
+<div class="info-box">
+    <p><strong>Localizador:</strong> {{ localizador }}</p>
+    <p><strong>Estado anterior:</strong> {{ estado_anterior }}</p>
+    <p><strong>Estado actual:</strong> <span style="color: #28a745;">{{ estado_actual }}</span></p>
+</div>
+
+<p>Si tiene alguna pregunta, no dude en contactarnos.</p>
+
+<p style="margin-top: 30px;">Gracias por su preferencia.</p>
+
+<p><strong>Equipo TravelHub</strong></p>
+{% endblock %}

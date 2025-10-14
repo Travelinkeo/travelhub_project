@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+from decimal import Decimal
 
 from core.models_catalogos import Moneda
 
@@ -97,8 +98,15 @@ class DetalleAsiento(models.Model):
     asiento = models.ForeignKey(AsientoContable, related_name='detalles_asiento', on_delete=models.CASCADE, verbose_name=_('Asiento Contable'))
     linea = models.PositiveSmallIntegerField(_("Línea"), help_text=_('Número de línea dentro del asiento.'))
     cuenta_contable = models.ForeignKey(PlanContable, on_delete=models.PROTECT, verbose_name=_('Cuenta Contable'), limit_choices_to={'permite_movimientos': True})
-    debe = models.DecimalField(_("Debe"), max_digits=15, decimal_places=2, default=0)
-    haber = models.DecimalField(_("Haber"), max_digits=15, decimal_places=2, default=0)
+    
+    # Montos en moneda funcional (USD)
+    debe = models.DecimalField(_("Debe USD"), max_digits=15, decimal_places=2, default=0)
+    haber = models.DecimalField(_("Haber USD"), max_digits=15, decimal_places=2, default=0)
+    
+    # Montos en moneda de presentación (BSD) - VEN-NIF
+    debe_bsd = models.DecimalField(_("Debe BSD"), max_digits=18, decimal_places=2, default=0, help_text=_("Monto en bolívares para presentación legal"))
+    haber_bsd = models.DecimalField(_("Haber BSD"), max_digits=18, decimal_places=2, default=0, help_text=_("Monto en bolívares para presentación legal"))
+    
     descripcion_linea = models.CharField(_("Descripción de la Línea"), max_length=255, blank=True, null=True)
 
     class Meta:
@@ -109,3 +117,45 @@ class DetalleAsiento(models.Model):
 
     def __str__(self):
         return f"Detalle {self.linea} de Asiento {self.asiento_id}"
+
+
+class TasaCambioBCV(models.Model):
+    """
+    Historial de tasas de cambio oficiales del Banco Central de Venezuela.
+    Fuente única de verdad para conversiones contables y fiscales.
+    """
+    id_tasa = models.AutoField(primary_key=True, verbose_name=_("ID Tasa"))
+    fecha = models.DateField(_("Fecha"), unique=True, db_index=True, help_text=_("Fecha de vigencia de la tasa"))
+    tasa_bsd_por_usd = models.DecimalField(
+        _("Tasa BSD/USD"), 
+        max_digits=12, 
+        decimal_places=4,
+        help_text=_("Bolívares por cada dólar estadounidense")
+    )
+    fuente = models.CharField(
+        _("Fuente"), 
+        max_length=100, 
+        default="BCV",
+        help_text=_("Origen de la tasa (BCV, API, Manual)")
+    )
+    creado = models.DateTimeField(_("Creado"), auto_now_add=True)
+    actualizado = models.DateTimeField(_("Actualizado"), auto_now=True)
+    
+    class Meta:
+        verbose_name = _("Tasa de Cambio BCV")
+        verbose_name_plural = _("Tasas de Cambio BCV")
+        ordering = ['-fecha']
+        indexes = [
+            models.Index(fields=['-fecha']),
+        ]
+    
+    def __str__(self):
+        return f"{self.fecha}: {self.tasa_bsd_por_usd} BSD/USD"
+    
+    def clean(self):
+        if self.tasa_bsd_por_usd <= 0:
+            raise ValidationError({'tasa_bsd_por_usd': _("La tasa debe ser mayor a cero")})
+    
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)

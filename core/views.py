@@ -16,7 +16,7 @@ from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, ListView, TemplateView
 from rest_framework import filters, permissions, status, viewsets
 from rest_framework.authtoken.models import Token
-from rest_framework.decorators import action
+from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
 from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.views import APIView
@@ -650,6 +650,7 @@ def test_api_view(request):
     return JsonResponse({"status": "ok", "message": "Hello from the test API!"})
 
 @api_view(['GET'])
+@permission_classes([permissions.AllowAny])
 def dashboard_stats_api(request):
     """API endpoint para estadísticas del dashboard"""
     stats = get_dashboard_stats()

@@ -1,0 +1,27 @@
+{% extends "core/emails/base_email.html" %}
+
+{% block content %}
+<h2 style="color: #28a745; margin-top: 0;">💰 Confirmación de Pago Recibido</h2>
+
+<p>Estimado/a <strong>{{ cliente_nombre }}</strong>,</p>
+
+<p>Hemos recibido su pago correctamente. ¡Gracias!</p>
+
+<div class="info-box">
+    <p><strong>Localizador:</strong> {{ localizador }}</p>
+    <p><strong>Monto pagado:</strong> {{ moneda }}{{ monto }}</p>
+    <p><strong>Fecha:</strong> {{ fecha }}</p>
+    <p><strong>Método:</strong> {{ metodo }}</p>
+    <p><strong>Saldo restante:</strong> {{ moneda }}{{ saldo }}</p>
+</div>
+
+{% if saldo == 0 %}
+<p style="color: #28a745; font-weight: bold;">✅ Su reserva está completamente pagada.</p>
+{% else %}
+<p>Saldo pendiente: <strong>{{ moneda }}{{ saldo }}</strong></p>
+{% endif %}
+
+<p style="margin-top: 30px;">Gracias por su pago.</p>
+
+<p><strong>Equipo TravelHub</strong></p>
+{% endblock %}

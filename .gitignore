@@ -155,3 +155,25 @@ Thumbs.db
 
 # Frontend
 frontend/node_modules/
+
+
+# Archivos temporales
+temp/
+
+# Herramientas externas
+tools/ngola/ngola.exe
+tools/cloudflare/cloudflared.exe
+
+# Archivos de prueba en raíz
+test_*.py
+demo_*.py
+Boleta_*.pdf
+
+# Carpetas organizadas (nuevas)
+test_files_archive/
+scripts_archive/
+tools_bin/*.exe
+
+# Archivos organizados
+Boleto_*.pdf
+test_output_*.pdf

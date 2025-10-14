@@ -1,0 +1,88 @@
+Electronic Ticket Receipt 223PPDBooking ref: Electronic Ticket Receipt 223PPDBooking ref: CheckMyTrip App 
+04 SEPTEMBER 24Issue date: Baggage 
+Airline booking ref: TK/RJTERA 
+Issuing Airline: TURKISH AIRLINES 
+235-7120126507Ticket: 
+Traveler Eguiarte Rubio Camila Agency BRICKELL TRAVEL MANAGEMENT 
+66 WEST FLAGLER STREET -8TH 
+FLOOR 
+Telephone 
+Fax 
+MIAMI, FL 33130 
+305 856-8889 
+Email n 
+IATA 10970411 
+Website 12559747 
+Agent 3108 
+
+Carolina (CHD) 
+-
+Itinerary 
+
+From To Flight Class Date Departure Arrival Resa (1) NVB(2) NVA(3) Last check-in Baggage (4) Seat 
+
+Thursday 05 December 2024 
+CARACAS ISTANBUL TK0224 U 05Dec 11:35 06:20 Ok 05Dec 05Dec 1PC 15D 
+AIRPORT 
+Fare Basis UYCLRCH 
+Operated by TURKISH AIRLINES Marketed by TURKISH AIRLINES 
+Equipment Boeing 787-9 Arrival Day+1 Duration 11:45 (Non Stop) 
+Flight Meal Meal 
+Thursday 23 January 2025 
+ISTANBUL CARACAS TK0223 U 23Jan 02:05 08:25 Ok 23Jan 23Jan 1PC 18A 
+AIRPORT 
+Fare Basis UYCLRCH 
+Operated by TURKISH AIRLINES Marketed by TURKISH AIRLINES 
+Equipment Boeing 787-9 Duration 13:20 (Non Stop) 
+Flight Meal Meal 
+
+(1) Ok = confirmed (2)NVB= Not valid before (3)NVA= Not valid after(4) Each passenger can check in a specific amount of baggage at no extra cost as indicated 
+above in the column baggage. 
+At check-in, you must show a photo ID. 
+
+Receipt 
+
+Name : Eguiarte Rubio Camila Carolina (CHD) 
+Ticket number : 235 7120126507 
+Form of payment : CASH 
+
+Fare Calculation : CCS TK IST242.25UYCLRCH TK CCS242.25UYCLRCH NUC484.50END ROE1.00 
+
+Air Fare : USD 485.00 
+Tax : USD 69.70AK USD 1.25C2 USD 1.25C2 
+USD 4.90EU USD 38.80YN USD 3.30M6 
+USD 22.10TR 
+Airline Surcharges : USD 280.00YR 
+Total Amount : USD 906.30 
+Issuing Airline and date : TURKISH AIRLINES 04Sep24 
+Restriction(s)/Endorsements : NONEND/TK ONLY 
+
+The fare that applies on the date of purchase is only valid for the entire itinerary and the specific travel dates mentioned on the ticket. 
+
+
+FLIGHT(S) CALCULATED AVERAGE CO2 EMISSIONS IS 855.57 KG/PERSON 
+SOURCE: ICAO CARBON EMISSIONS CALCULATOR 
+http://www.icao.int/environmental-protection/CarbonOffset/Pages/default.aspx 
+
+Our company wishes you a very pleasant trip. 
+This document establishes the creation of your electronic ticket(s) in our computer systems. 
+For further information, please contact us. 
+
+Carriage and other services provided by the carrier are subject to conditions of carriage, which are hereby incorporated by reference. These conditions may be 
+obtained from the issuing carrier. The itinerary/receipt constitutes the passenger ticket for the purposes of article 3 of the Warsaw convention, except where the 
+carrier delivers to the passenger another document complying with the requirements of article 3. Passengers on a journey involving an ultimate destination or a 
+stop in a country other than the country of departure are advised that international treaties known as the montreal convention, or its predecessor, the warsaw 
+convention, including its amendments (the warsaw convention system), may apply to the entire journey, including any portion thereof within a country. For such 
+passengers, the applicable treaty, including special contracts of carriage embodied in any applicable tariffs, governs and may limit the liability of the carrier. 
+These conventions govern and may limit the liabilityof air carriers for death or bodily injury or loss of or damage to baggage, and for delay. 
+
+The carriage of certain hazardous materials, like aerosols, fireworks, and flammable liquids, aboard the aircraft is forbidden. If you do not understand these 
+restrictions, further information may be obtained from your airline. 
+
+Data Protection Notice: Your personal data will be processed in accordance with the applicable carrier's privacy policy and, if your booking is made via a 
+reservation system provider ( GDS ), with its privacy policy. These are available at http://www.iatatravelcenter.com/privacy or from the carrier or GDS directly. You 
+should read this documentation, which applies to your booking and specifies, for example, how your personal data is collected, stored, used, disclosed and 
+transferred.(applicable for interline carriage) 
+
+
+

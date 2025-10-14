@@ -41,6 +41,7 @@ export default function ConfiguracionesPage() {
   const { data: ciudades } = useApi<Paginated<any>>('/api/ciudades/');
   const { data: monedas } = useApi<Paginated<any>>('/api/monedas/');
   const { data: tiposCambio } = useApi<Paginated<any>>('/api/tipos-cambio/');
+  const { data: aerolineas } = useApi<Paginated<any>>('/api/aerolineas/');
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
@@ -62,6 +63,7 @@ export default function ConfiguracionesPage() {
           <Tab label="Ciudades" {...a11yProps(1)} />
           <Tab label="Monedas" {...a11yProps(2)} />
           <Tab label="Tipos de Cambio" {...a11yProps(3)} />
+          <Tab label="Aerolíneas" {...a11yProps(4)} />
         </Tabs>
       </Box>
       <TabPanel value={value} index={0}>
@@ -132,6 +134,25 @@ export default function ConfiguracionesPage() {
             { name: 'moneda_destino', label: 'Moneda Destino', type: 'select', options: monedasOptions, required: true },
             { name: 'fecha_efectiva', label: 'Fecha Efectiva', type: 'text', required: true }, // Podría ser date, pero usar text por simplicidad
             { name: 'tasa_conversion', label: 'Tasa de Conversión', type: 'number', required: true },
+          ]}
+        />
+      </TabPanel>
+      <TabPanel value={value} index={4}>
+        <ApiTable
+          endpoint="/api/aerolineas/"
+          columns={[
+            { key: 'codigo_iata', label: 'Código IATA' },
+            { key: 'nombre', label: 'Nombre' },
+            { key: 'activa', label: 'Activa' },
+          ]}
+          title="Aerolíneas"
+          fields={[
+            { name: 'codigo_iata', label: 'Código IATA', type: 'text', required: true },
+            { name: 'nombre', label: 'Nombre', type: 'text', required: true },
+            { name: 'activa', label: 'Activa', type: 'select', options: [
+              { value: true, label: 'Sí' },
+              { value: false, label: 'No' }
+            ], required: true },
           ]}
         />
       </TabPanel>

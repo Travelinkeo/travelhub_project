@@ -26,8 +26,8 @@ const securityHeaders = [
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: https:",
       "font-src 'self' data:",
-    // Allow local dev backend hosts (both localhost and 127.0.0.1) for fetch/ws in dev
-    "connect-src 'self' https://localhost:8000 http://localhost:8000 http://127.0.0.1:8000 ws://localhost:8000 ws://127.0.0.1:8000",
+    // Allow local dev backend hosts and Cloudflare tunnels
+    "connect-src 'self' https://localhost:8000 http://localhost:8000 http://127.0.0.1:8000 ws://localhost:8000 ws://127.0.0.1:8000 https://*.trycloudflare.com",
       "frame-ancestors 'self'",
       "base-uri 'self'",
       "form-action 'self'"
@@ -42,23 +42,33 @@ const nextConfig = {
     emotion: true,
   },
   transpilePackages: ['@mui/material', '@mui/x-data-grid', '@mui/icons-material'],
+  // Permitir acceso desde ngrok
   async headers() {
     return [
       {
         source: '/(.*)',
-        headers: securityHeaders,
-      }
+        headers: [
+          ...securityHeaders,
+          {
+            key: 'Access-Control-Allow-Origin',
+            value: '*',
+          },
+        ],
+      },
     ];
   },
+
   async rewrites() {
+    // En desarrollo con túneles, usar variables de entorno
+    const backendUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:8000';
     return [
       {
         source: '/api/clientes/',
-        destination: 'http://127.0.0.1:8000/api/clientes/',
+        destination: `${backendUrl}/api/clientes/`,
       },
       {
         source: '/api/:path*',
-        destination: 'http://127.0.0.1:8000/api/:path*',
+        destination: `${backendUrl}/api/:path*`,
       },
     ];
   },

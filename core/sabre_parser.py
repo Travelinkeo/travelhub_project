@@ -12,6 +12,7 @@ from .parsing_utils import (
     _inferir_fecha_llegada,
     _fecha_a_iso
 )
+from .airline_utils import normalize_airline_name
 
 logger = logging.getLogger(__name__)
 
@@ -53,7 +54,8 @@ def _parsear_itinerario_sabre(itinerario_texto: str, texto_completo: str) -> Lis
                 break
             airline_parts.insert(0, prev_line)
         if airline_parts:
-            vuelo['aerolinea'] = ' '.join(airline_parts)
+            raw_airline = ' '.join(airline_parts)
+            vuelo['aerolinea'] = normalize_airline_name(raw_airline, vuelo.get('numero_vuelo'))
 
         # 3. DATES (Flexible)
         m_fecha = re.search(r'(\d{1,2}\s+\w{3}\s+\d{2})', b)
@@ -151,7 +153,7 @@ def parse_sabre_ticket(plain_text: str) -> Dict[str, Any]:
             'codigo_reservacion': codigo_reservacion,
             'numero_boleto': numero_boleto,
             'fecha_emision_iso': fecha_emision_iso,
-            'aerolinea_emisora': aerolinea_emisora,
+            'aerolinea_emisora': normalize_airline_name(aerolinea_emisora, vuelos_fmt[0].get('numero_vuelo') if vuelos_fmt else None),
             'agente_emisor': {
                 'nombre': agente_emisor,
                 'numero_iata': numero_iata,

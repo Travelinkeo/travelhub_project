@@ -41,7 +41,7 @@ def list_available_models():
         return f"Error al contactar la API de Gemini para listar modelos: {e}"
 
 
-def get_gemini_model(model_name: str = "gemini-1.5-flash"):
+def get_gemini_model(model_name: str = "gemini-2.5-flash"):
     """
     Inicializa y devuelve un modelo generativo de Gemini.
     """
@@ -56,7 +56,7 @@ def get_gemini_model(model_name: str = "gemini-1.5-flash"):
         logger.error(f"Error al inicializar el modelo '{model_name}': {e}", exc_info=True)
         return None
 
-def generate_text_from_prompt(prompt: str, model_name: str = "gemini-1.5-flash") -> str:
+def generate_text_from_prompt(prompt: str, model_name: str = "gemini-2.5-flash") -> str:
     """
     Envía un prompt de texto simple a Gemini y devuelve la respuesta generada.
 

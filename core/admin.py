@@ -41,9 +41,12 @@ from .models import (
     Venta,
     VentaParseMetadata,
 )
+
+# Importar admin específico para Venezuela
+from . import admin_venezuela
 from .models.pasaportes import PasaporteEscaneado
 from .models.contabilidad import AsientoContable, LiquidacionProveedor, ItemLiquidacion
-from .models_catalogos import Ciudad, Moneda, Pais, ProductoServicio, Proveedor, TipoCambio
+from .models_catalogos import Aerolinea, Ciudad, Moneda, Pais, ProductoServicio, Proveedor, TipoCambio
 from personas.models import Cliente
 # No es necesario importar Cotizacion aquí, ya tiene su propio admin.py
 
@@ -82,6 +85,13 @@ class TipoCambioAdmin(admin.ModelAdmin):
     list_filter = ('fecha_efectiva', 'moneda_origen', 'moneda_destino')
     autocomplete_fields = ['moneda_origen', 'moneda_destino']
     date_hierarchy = 'fecha_efectiva'
+
+@admin.register(Aerolinea)
+class AerolineaAdmin(admin.ModelAdmin):
+    list_display = ('nombre', 'codigo_iata', 'activa')
+    search_fields = ('nombre', 'codigo_iata')
+    list_filter = ('activa',)
+    ordering = ('nombre',)
 
 # --- Clases Admin para CRM ---
 

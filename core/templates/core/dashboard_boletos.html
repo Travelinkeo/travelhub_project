@@ -1,144 +1,306 @@
-{% extends 'core/base.html' %}
+{% extends "admin/base_site.html" %}
+{% load static %}
 
-{% block title %}Dashboard de Boletos Importados{% endblock %}
+{% block title %}Dashboard de Ventas de Boletos{% endblock %}
+
+{% block extrastyle %}
+<style>
+    .dashboard-container {
+        padding: 20px;
+        max-width: 100%;
+    }
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-bottom: 30px;
+    }
+    .stat-card {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        border-left: 4px solid #0d6efd;
+    }
+    .stat-label {
+        font-size: 12px;
+        color: #666;
+        text-transform: uppercase;
+    }
+    .stat-value {
+        font-size: 24px;
+        font-weight: bold;
+        color: #333;
+    }
+    .filters-bar {
+        background: white;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .filters-bar input {
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        margin-right: 10px;
+    }
+    .filters-bar button {
+        padding: 8px 16px;
+        background: #0d6efd;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    .ventas-table {
+        width: 100%;
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .ventas-table table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .ventas-table th {
+        background: #0d6efd;
+        color: white;
+        padding: 12px;
+        text-align: left;
+        font-size: 12px;
+        text-transform: uppercase;
+    }
+    .ventas-table td {
+        padding: 10px 12px;
+        border-bottom: 1px solid #eee;
+        font-size: 13px;
+    }
+    .ventas-table tr:hover {
+        background: #f8f9fa;
+    }
+    .editable {
+        background: #fff3cd;
+        padding: 4px 8px;
+        border-radius: 4px;
+        cursor: pointer;
+        display: inline-block;
+        min-width: 60px;
+    }
+    .editable:hover {
+        background: #ffc107;
+    }
+    .pasajeros-list {
+        font-size: 11px;
+        color: #666;
+    }
+    .badge {
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 11px;
+        font-weight: bold;
+    }
+    .badge-success { background: #d4edda; color: #155724; }
+    .badge-warning { background: #fff3cd; color: #856404; }
+    .badge-info { background: #d1ecf1; color: #0c5460; }
+    .expand-btn {
+        cursor: pointer;
+        color: #0d6efd;
+        text-decoration: underline;
+    }
+    .items-detail {
+        display: none;
+        background: #f8f9fa;
+        padding: 10px;
+        margin: 10px 0;
+    }
+    .items-detail table {
+        width: 100%;
+        font-size: 12px;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="card mb-4">
-  <div class="card-header d-flex justify-between align-center">
-      <div>
-          <h2 class="mb-0 heading-sm">Resumen de Ventas por Categoría</h2>
-          <p class="small text-muted mb-0">Totales acumulados de items de venta registrados.</p>
-      </div>
-  </div>
-  <div class="card-body p-0">
-  <div class="table-wrapper table-xxs">
-      <table class="table is-striped is-hover">
-        <thead>
-          <tr>
-            <th>Categoría</th>
-            <th class="text-end">Cantidad Items</th>
-            <th class="text-end">Monto Total</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for fila in ventas_por_categoria %}
-          <tr>
-            <td>{{ fila.categoria }}</td>
-            <td class="text-end">{{ fila.cantidad }}</td>
-            <td class="text-end">{{ fila.monto|floatformat:2 }}</td>
-          </tr>
-          {% empty %}
-          <tr><td colspan="3" class="text-center text-muted">No hay datos de ventas.</td></tr>
-          {% endfor %}
-        </tbody>
-        <tfoot>
-          <tr>
-            <th>Total General</th>
-            <th></th>
-            <th class="text-end">{{ total_general_ventas|floatformat:2 }}</th>
-          </tr>
-        </tfoot>
-      </table>
-    </div>
-  </div>
-</div>
-
-<div class="card mb-4">
-  <div class="card-header d-flex justify-between align-center">
-      <div>
-          <h2 class="mb-0 heading-sm">Dashboard de Boletos Importados</h2>
-          <p class="small text-muted mb-0">Listado de boletos subidos y procesados automáticamente.</p>
-      </div>
-      <div class="d-flex gap-2 flex-wrap">
-          <a href="{% url 'core:manual_ticket_entry' %}" class="btn btn-primary btn-sm">Cargar Manual</a>
-          <form action="{% url 'core:upload_boleto_file' %}" method="post" enctype="multipart/form-data" class="d-inline-block">
-              {% csrf_token %}
-              <div class="d-flex gap-1 align-center">
-                  {{ upload_form.archivo_boleto }}
-                  <button type="submit" class="btn btn-success btn-sm">Subir</button>
-              </div>
-          </form>
-      </div>
-  </div>
-  <div class="card-body p-0">
-  <div class="table-wrapper table-xxs-alt">
-      <table class="table is-striped is-hover is-sticky-header">
-        <thead>
-            <tr>
-                <th>Archivo</th>
-                <th>Pasajero</th>
-                <th>N° Boleto</th>
-                <th>PNR</th>
-                <th>Fecha Emisión</th>
-                <th>Agente Emisor</th>
-                <th>Aerolínea</th>
-                <th>Tarifa Base</th>
-                <th>Impuestos</th>
-                <th>Total</th>
-                <th>Itinerario</th>
-                <th>Estado del Parseo</th>
-                <th>Venta Asociada</th>
-                <th>PDF Generado</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for boleto in boletos %}
-            <tr>
-                <td>
-                    {% if boleto.archivo_boleto %}<a href="{{ boleto.archivo_boleto.url }}" target="_blank">{{ boleto.archivo_boleto.name|truncatechars:30 }}</a>{% else %}N/A (Manual){% endif %}
-                </td>
-                <td>{{ boleto.nombre_pasajero_procesado|default:"-" }}</td>
-                <td>{{ boleto.numero_boleto|default:"-" }}</td>
-                <td>{{ boleto.localizador_pnr|default:"-" }}</td>
-                <td>{{ boleto.fecha_emision_boleto|date:"d/m/Y"|default:"-" }}</td>
-                <td>{{ boleto.agente_emisor|default:"-" }}</td>
-                <td>{{ boleto.aerolinea_emisora|default:"-" }}</td>
-                <td>{{ boleto.tarifa_base|default:"-" }}</td>
-                <td>{{ boleto.impuestos_total_calculado|default:"-" }}</td>
-                <td>{{ boleto.total_boleto|default:"-" }}</td>
-                <td><div class="scroll-box-sm">{{ boleto.ruta_vuelo|default:"-" }}</div></td>
-                <td>
-                    <span class="badge" data-status="{{ boleto.estado_parseo }}">{{ boleto.get_estado_parseo_display }}</span>
-                </td>
-                <td>
-                    {% if boleto.venta_asociada %}
-                        <a href="{% url 'admin:core_venta_change' boleto.venta_asociada.id %}" target="_blank">{{ boleto.venta_asociada.numero_venta }}</a>
-                    {% else %}
-                        <span class="text-muted">No asociada</span>
-                    {% endif %}
-                </td>
-                <td>
-                    {% if boleto.archivo_pdf_generado %}<a href="{{ boleto.archivo_pdf_generado.url }}" target="_blank">Ver PDF</a>{% else %}N/A{% endif %}
-                </td>
-                <td>
-                    <form action="{% url 'core:delete_boleto_importado' boleto.pk %}" method="post" onsubmit="return confirm('¿Estás seguro de que quieres eliminar este boleto? Esta acción no se puede deshacer.');">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
-                    </form>
-                </td>
-            </tr>
-            {% if boleto.estado_parseo == 'ERR' %}
-            <tr class="table-danger">
-                <td colspan="14">
-                    <strong>Log de Error:</strong>
-                    <pre class="error-log-box">{{ boleto.log_parseo }}</pre>
-                </td>
-            </tr>
-            {% endif %}
-            {% empty %}
-            <tr>
-                <td colspan="14">No hay boletos importados todavía.</td> {# Updated colspan #}
-            </tr>
-            {% endfor %}
-                </tbody>
-            </table>
+<div class="dashboard-container">
+    <h1>Dashboard de Ventas de Boletos</h1>
+    
+    <!-- Estadísticas -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-label">Total Ventas</div>
+            <div class="stat-value">{{ stats.total_ventas }}</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Total Boletos</div>
+            <div class="stat-value">{{ stats.total_boletos }}</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Ingresos Totales</div>
+            <div class="stat-value">${{ stats.total_ingresos|floatformat:2 }}</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Margen Total</div>
+            <div class="stat-value">${{ stats.total_margen|floatformat:2 }}</div>
         </div>
     </div>
+    
+    <!-- Filtros -->
+    <div class="filters-bar">
+        <form method="get">
+            <input type="text" name="localizador" placeholder="Localizador" value="{{ filtros.localizador }}">
+            <input type="date" name="fecha_desde" value="{{ filtros.fecha_desde }}">
+            <input type="date" name="fecha_hasta" value="{{ filtros.fecha_hasta }}">
+            <button type="submit">Filtrar</button>
+            <a href="{% url 'core:dashboard_boletos' %}" style="margin-left: 10px;">Limpiar</a>
+        </form>
+    </div>
+    
+    <!-- Tabla de Ventas -->
+    <div class="ventas-table">
+        <table>
+            <thead>
+                <tr>
+                    <th>Localizador</th>
+                    <th>Fecha</th>
+                    <th>Cliente</th>
+                    <th>Pasajeros</th>
+                    <th>Boletos</th>
+                    <th>Aerolínea</th>
+                    <th>Proveedor</th>
+                    <th>Total Venta</th>
+                    <th>Costo Neto</th>
+                    <th>Fee Prov.</th>
+                    <th>Comisión</th>
+                    <th>Fee Agencia</th>
+                    <th>Margen</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for venta in ventas %}
+                <tr>
+                    <td><strong>{{ venta.localizador }}</strong></td>
+                    <td>{{ venta.fecha|date:"d/m/Y" }}</td>
+                    <td>{{ venta.cliente }}</td>
+                    <td>
+                        <div class="pasajeros-list">
+                            {% for pax in venta.pasajeros %}
+                            <div>{{ pax.apellidos }}, {{ pax.nombres }} ({{ pax.tipo }})</div>
+                            {% endfor %}
+                        </div>
+                    </td>
+                    <td>{{ venta.cantidad_boletos }}</td>
+                    <td>{{ venta.aerolinea }}</td>
+                    <td>{{ venta.proveedores }}</td>
+                    <td><strong>{{ venta.moneda }} {{ venta.total_venta|floatformat:2 }}</strong></td>
+                    <td>{{ venta.moneda }} {{ venta.costo_neto|floatformat:2 }}</td>
+                    <td>{{ venta.moneda }} {{ venta.fee_proveedor|floatformat:2 }}</td>
+                    <td>{{ venta.moneda }} {{ venta.comision_agencia|floatformat:2 }}</td>
+                    <td>{{ venta.moneda }} {{ venta.fee_agencia|floatformat:2 }}</td>
+                    <td><strong>{{ venta.moneda }} {{ venta.margen|floatformat:2 }}</strong></td>
+                    <td><span class="badge badge-info">{{ venta.estado }}</span></td>
+                    <td>
+                        <span class="expand-btn" onclick="toggleItems({{ venta.id_venta }})">Ver Items</span>
+                    </td>
+                </tr>
+                <tr id="items-{{ venta.id_venta }}" class="items-detail">
+                    <td colspan="15">
+                        <h4>Items de Boletos (Editable)</h4>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Descripción</th>
+                                    <th>Precio Venta</th>
+                                    <th>Costo Neto</th>
+                                    <th>Fee Proveedor</th>
+                                    <th>Comisión Agencia</th>
+                                    <th>Fee Agencia</th>
+                                    <th>Proveedor</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in venta.items %}
+                                <tr>
+                                    <td>{{ item.descripcion_personalizada }}</td>
+                                    <td>{{ venta.moneda }} {{ item.precio_unitario_venta|floatformat:2 }}</td>
+                                    <td>
+                                        <span class="editable" 
+                                              onclick="editField({{ item.id_item_venta }}, 'costo_neto_proveedor', this)">
+                                            {{ item.costo_neto_proveedor|default:"0.00"|floatformat:2 }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="editable" 
+                                              onclick="editField({{ item.id_item_venta }}, 'fee_proveedor', this)">
+                                            {{ item.fee_proveedor|default:"0.00"|floatformat:2 }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="editable" 
+                                              onclick="editField({{ item.id_item_venta }}, 'comision_agencia_monto', this)">
+                                            {{ item.comision_agencia_monto|default:"0.00"|floatformat:2 }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="editable" 
+                                              onclick="editField({{ item.id_item_venta }}, 'fee_agencia_interno', this)">
+                                            {{ item.fee_agencia_interno|default:"0.00"|floatformat:2 }}
+                                        </span>
+                                    </td>
+                                    <td>{{ item.proveedor_servicio__nombre|default:"N/A" }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="15" style="text-align: center; padding: 40px;">
+                        No hay ventas de boletos para mostrar
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
 
-{% if is_paginated %}
-{% include 'core/partials/pagination.html' %}
-{% endif %}
+<script>
+function toggleItems(ventaId) {
+    const row = document.getElementById('items-' + ventaId);
+    row.style.display = row.style.display === 'table-row' ? 'none' : 'table-row';
+}
 
+function editField(itemId, campo, element) {
+    const valorActual = element.textContent.trim();
+    const nuevoValor = prompt('Ingrese nuevo valor para ' + campo + ':', valorActual);
+    
+    if (nuevoValor === null) return;
+    
+    fetch('{% url "core:actualizar_item_boleto" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: `item_id=${itemId}&campo=${campo}&valor=${nuevoValor}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            element.textContent = parseFloat(data.nuevo_valor).toFixed(2);
+            alert('Actualizado correctamente');
+            location.reload();
+        } else {
+            alert('Error: ' + data.error);
+        }
+    })
+    .catch(error => {
+        alert('Error de conexión: ' + error);
+    });
+}
+</script>
 {% endblock %}

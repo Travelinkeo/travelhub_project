@@ -11,13 +11,14 @@ from .models import (
     CircuitoDia,
     CircuitoTuristico,
     Ciudad,
-    Cliente,
     DetalleAsiento,
     EventoServicio,
     Factura,
     FeeVenta,
     ItemFactura,
+    ItemLiquidacion,
     ItemVenta,
+    LiquidacionProveedor,
     Moneda,
     PagoVenta,
     Pais,
@@ -29,9 +30,12 @@ from .models import (
     Venta,
     VentaParseMetadata,
 )
+from personas.models import Cliente
 
-# Evitar import circular: importar catálogos ligeros directamente
-from .models_catalogos import ProductoServicio, Proveedor
+# Importar catálogos ligeros directamente
+from .models_catalogos import Aerolinea, ProductoServicio, Proveedor
+
+
 
 # --- Serializadores de Modelos Compartidos/Básicos (para anidamiento o consulta) ---
 
@@ -71,6 +75,11 @@ class ProveedorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Proveedor
         fields = '__all__'
+
+class AerolineaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Aerolinea
+        fields = ['id_aerolinea', 'codigo_iata', 'nombre', 'activa']
 
 
 class ProductoServicioSerializer(serializers.ModelSerializer):
@@ -493,3 +502,53 @@ class AuditLogSerializer(serializers.ModelSerializer):
             'datos_previos','datos_nuevos','metadata_extra','creado'
         ]
         read_only_fields = fields
+
+
+class PasaporteEscaneadoSerializer(serializers.ModelSerializer):
+    cliente_detalle = ClienteSerializer(source='cliente', read_only=True)
+    
+    class Meta:
+        from core.models.pasaportes import PasaporteEscaneado
+        model = PasaporteEscaneado
+        fields = [
+            'id', 'imagen_original', 'cliente', 'cliente_detalle', 'numero_pasaporte',
+            'nombres', 'apellidos', 'nombre_completo', 'nacionalidad', 'fecha_nacimiento',
+            'fecha_vencimiento', 'sexo', 'confianza_ocr', 'verificado_manualmente',
+            'es_valido', 'fecha_procesamiento', 'datos_ocr_completos', 'texto_mrz'
+        ]
+        read_only_fields = ['fecha_procesamiento', 'datos_ocr_completos', 'texto_mrz', 'es_valido', 'nombre_completo']
+
+
+class ComunicacionProveedorSerializer(serializers.ModelSerializer):
+    class Meta:
+        from core.models import ComunicacionProveedor
+        model = ComunicacionProveedor
+        fields = [
+            'id', 'remitente', 'asunto', 'fecha_recepcion', 'categoria',
+            'contenido_extraido', 'cuerpo_completo'
+        ]
+        read_only_fields = fields
+
+
+class ItemLiquidacionSerializer(serializers.ModelSerializer):
+    item_venta_detalle = ItemVentaSerializer(source='item_venta', read_only=True)
+    class Meta:
+        model = ItemLiquidacion
+        fields = ['id_item_liquidacion', 'liquidacion', 'item_venta', 'item_venta_detalle', 'descripcion', 'monto']
+        read_only_fields = ['id_item_liquidacion']
+
+
+class LiquidacionProveedorSerializer(serializers.ModelSerializer):
+    proveedor_detalle = ProveedorSerializer(source='proveedor', read_only=True)
+    venta_detalle = serializers.StringRelatedField(source='venta', read_only=True)
+    items_liquidacion = ItemLiquidacionSerializer(many=True, read_only=True)
+    estado_display = serializers.CharField(source='get_estado_display', read_only=True)
+    
+    class Meta:
+        model = LiquidacionProveedor
+        fields = [
+            'id_liquidacion', 'proveedor', 'proveedor_detalle', 'venta', 'venta_detalle',
+            'fecha_emision', 'monto_total', 'saldo_pendiente', 'estado', 'estado_display',
+            'notas', 'items_liquidacion'
+        ]
+        read_only_fields = ['id_liquidacion', 'fecha_emision', 'saldo_pendiente']

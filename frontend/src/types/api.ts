@@ -70,6 +70,13 @@ export interface Ciudad {
   region_estado?: string;
 }
 
+export interface Aerolinea {
+  id_aerolinea?: number;
+  codigo_iata: string;
+  nombre: string;
+  activa: boolean;
+}
+
 export interface TipoCambio {
   id_tipo_cambio?: number;
   moneda_origen: number;

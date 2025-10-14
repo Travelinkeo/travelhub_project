@@ -33,5 +33,6 @@ if os.path.exists(views_file):
             ServicioAdicionalDetalleViewSet = views_module.ServicioAdicionalDetalleViewSet
             BoletoImportadoViewSet = views_module.BoletoImportadoViewSet
             AuditLogViewSet = views_module.AuditLogViewSet
+            dashboard_stats_api = views_module.dashboard_stats_api
         except Exception as e:
             print(f"Warning: Could not load ViewSets from views.py: {e}")

@@ -6,22 +6,23 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
 from core.models.personas import Cliente
-from core.models_catalogos import Ciudad, Moneda, Pais, ProductoServicio, Proveedor
+from core.models_catalogos import Aerolinea, Ciudad, Moneda, Pais, ProductoServicio, Proveedor
 
 CATALOG_FILES = {
     'paises': 'fixtures/paises.json',
     'monedas': 'fixtures/monedas.json',
     'ciudades': 'fixtures/ciudades.json',
+    'aerolineas': 'fixtures/aerolineas.json',
     'proveedores': 'fixtures/proveedores.json',
     'clientes': 'fixtures/clientes.json',
     'productos_servicios': 'fixtures/productos_servicios.json',
 }
 
 class Command(BaseCommand):
-    help = "Carga o actualiza catálogos base (paises, monedas, ciudades opcional, proveedores, clientes, productos_servicios) desde JSON o CSV. Idempotente."
+    help = "Carga o actualiza catálogos base (paises, monedas, ciudades opcional, aerolineas, proveedores, clientes, productos_servicios) desde JSON o CSV. Idempotente."
 
     def add_arguments(self, parser):
-        parser.add_argument('--only', nargs='*', help='Limitar a uno o varios catálogos: paises monedas ciudades proveedores clientes productos_servicios')
+        parser.add_argument('--only', nargs='*', help='Limitar a uno o varios catálogos: paises monedas ciudades aerolineas proveedores clientes productos_servicios')
         parser.add_argument('--format', choices=['json', 'csv', 'auto'], default='auto', help='Formato fuente si se usan archivos CSV alternativos')
         parser.add_argument('--dir', default='.', help='Directorio base donde buscar la carpeta fixtures o CSVs')
         parser.add_argument('--dry-run', action='store_true', help='Muestra qué haría sin escribir en la base de datos')
@@ -140,6 +141,11 @@ class Command(BaseCommand):
                     'nombres': row_upper_keys.get('nombres'),
                     'apellidos': row_upper_keys.get('apellidos'),
                     'telefono_principal': row_upper_keys.get('telefono_principal'),
+                }, upsert, simulate)
+            if catalog == 'aerolineas':
+                return self._upsert_model(Aerolinea, {'codigo_iata': row_upper_keys.get('codigo_iata')}, {
+                    'nombre': row_upper_keys.get('nombre'),
+                    'activa': self._to_bool(row_upper_keys.get('activa', True)),
                 }, upsert, simulate)
             if catalog == 'productos_servicios':
                 return self._upsert_model(ProductoServicio, {'nombre': row_upper_keys.get('nombre')}, {

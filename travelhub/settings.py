@@ -14,8 +14,24 @@ if not SECRET_KEY:
 
 # DEBUG defaults to False for safety. Set DEBUG=True in .env for development.
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
-ALLOWED_HOSTS_STRING = os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost')
-ALLOWED_HOSTS = [host.strip() for host in ALLOWED_HOSTS_STRING.split(',')]
+
+# Permitir acceso desde red local y ngrok
+ALLOWED_HOSTS_STRING = os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost,192.168.100.19')
+ALLOWED_HOSTS = [host.strip() for host in ALLOWED_HOSTS_STRING.split(',') if host.strip()]
+
+# En desarrollo, permitir dominios ngrok, localtunnel y cloudflare
+if DEBUG:
+    ALLOWED_HOSTS.extend(['.ngrok-free.app', '.ngrok-free.dev', '.ngrok.io', '.loca.lt', '.trycloudflare.com'])
+    # Confiar en ngrok, localtunnel y cloudflare para CSRF
+    CSRF_TRUSTED_ORIGINS = [
+        'https://*.ngrok-free.app',
+        'https://*.ngrok-free.dev',
+        'https://*.ngrok.io',
+        'https://*.loca.lt',
+        'https://*.trycloudflare.com',
+    ]
+else:
+    CSRF_TRUSTED_ORIGINS = []
 
 # Evitar que Django agregue/redirija automáticamente barras finales (previene bucles con proxies/rewrite)
 APPEND_SLASH = False
@@ -32,6 +48,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'rest_framework_simplejwt.token_blacklist',  # enable blacklist for logout/invalidation
     'corsheaders',  # CORS control
+    'drf_spectacular',  # OpenAPI/Swagger documentation
     'personas.apps.PersonasConfig', # App para Cliente y Pasajero
     'cotizaciones.apps.CotizacionesConfig', # App para Cotizaciones
     'contabilidad.apps.ContabilidadConfig', # App para Contabilidad
@@ -114,6 +131,13 @@ FIXTURE_DIRS = [BASE_DIR / 'fixtures',]
 # Gemini API Key
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
 
+# Google Cloud Platform settings
+GCP_PROJECT_ID = os.getenv('GCP_PROJECT_ID', '')
+GCP_LOCATION = os.getenv('GCP_LOCATION', 'us')
+GCP_PROCESSOR_ID = os.getenv('GCP_PROCESSOR_ID', '')
+GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY', '')
+GOOGLE_APPLICATION_CREDENTIALS = os.getenv('GOOGLE_APPLICATION_CREDENTIALS', '')
+
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.SessionAuthentication',
@@ -132,9 +156,23 @@ REST_FRAMEWORK = {
         'user': os.getenv('THROTTLE_USER_RATE', '1000/day'),
         'anon': os.getenv('THROTTLE_ANON_RATE', '100/day'),
         'login': os.getenv('THROTTLE_LOGIN_RATE', '5/min'),
+        'dashboard': '100/hour',
+        'liquidacion': '50/hour',
+        'reportes': '20/hour',
+        'upload': '30/hour',
     },
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 25
+    'PAGE_SIZE': 25,
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'TravelHub API',
+    'DESCRIPTION': 'API REST completa para gestión de agencia de viajes',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'COMPONENT_SPLIT_REQUEST': True,
+    'SCHEMA_PATH_PREFIX': r'/api/',
 }
 
 
@@ -166,6 +204,10 @@ else:
         'http://127.0.0.1:3000',
         'http://localhost:3001',
         'http://127.0.0.1:3001',
+        'https://alumni-pensions-sandwich-photographers.trycloudflare.com',
+        'https://firmware-traffic-connecting-expectations.trycloudflare.com',
+        'https://whole-license-sunday-too.trycloudflare.com',
+        'https://hang-kirk-clinton-institution.trycloudflare.com',
     ]
 
 # Reduce surface: only allow credentials if explicitly enabled
@@ -206,6 +248,39 @@ else:
     CSRF_COOKIE_SAMESITE = 'Lax'
     SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
 
+# --- Cache Configuration (Redis) ---
+REDIS_URL = os.getenv('REDIS_URL', 'redis://127.0.0.1:6379/1')
+
+try:
+    import redis
+    redis_client = redis.from_url(REDIS_URL, socket_connect_timeout=1)
+    redis_client.ping()
+    redis_available = True
+except Exception:
+    redis_available = False
+
+if redis_available:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django_redis.cache.RedisCache',
+            'LOCATION': REDIS_URL,
+            'OPTIONS': {
+                'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+                'SOCKET_CONNECT_TIMEOUT': 5,
+                'SOCKET_TIMEOUT': 5,
+            },
+            'KEY_PREFIX': 'travelhub',
+            'TIMEOUT': 300,
+        }
+    }
+else:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+            'LOCATION': 'travelhub-cache',
+        }
+    }
+
 # --- Custom App Settings ---
 
 # Lista de correos de proveedores para el Agente Autónomo de Operaciones
@@ -215,12 +290,23 @@ SUPPLIER_EMAILS = [
     'notificaciones@otroproveedor.com',
 ]
 
+# Gmail IMAP settings (para leer correos de boletos)
+GMAIL_USER = os.getenv('GMAIL_USER', '')
+GMAIL_APP_PASSWORD = os.getenv('GMAIL_APP_PASSWORD', '')
+GMAIL_IMAP_HOST = os.getenv('GMAIL_IMAP_HOST', 'imap.gmail.com')
+GMAIL_FROM_KIU = os.getenv('GMAIL_FROM_KIU', 'noreply@kiusys.com')
+
+# WhatsApp / Twilio settings
+WHATSAPP_NOTIFICATIONS_ENABLED = os.getenv('WHATSAPP_NOTIFICATIONS_ENABLED', 'False') == 'True'
+TWILIO_ACCOUNT_SID = os.getenv('TWILIO_ACCOUNT_SID', '')
+TWILIO_AUTH_TOKEN = os.getenv('TWILIO_AUTH_TOKEN', '')
+TWILIO_WHATSAPP_NUMBER = os.getenv('TWILIO_WHATSAPP_NUMBER', '')  # Formato: +14155238886
+
 # Email settings
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # Para desarrollo
-# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'  # Para producción
-# EMAIL_HOST = 'smtp.gmail.com'
-# EMAIL_PORT = 587
-# EMAIL_USE_TLS = True
-# EMAIL_HOST_USER = 'tu_email@gmail.com'
-# EMAIL_HOST_PASSWORD = 'tu_password'
-DEFAULT_FROM_EMAIL = 'TravelHub <noreply@travelhub.com>'
+EMAIL_BACKEND = os.getenv('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
+EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_PORT = int(os.getenv('EMAIL_PORT', '587'))
+EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True') == 'True'
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'TravelHub <noreply@travelhub.com>')

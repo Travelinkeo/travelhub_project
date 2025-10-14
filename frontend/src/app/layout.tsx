@@ -3,6 +3,7 @@ import React from 'react';
 import ResponsiveLayout from '@/components/Layout/ResponsiveLayout';
 import { ThemeContextProvider } from '@/contexts/ThemeContext';
 import { AuthProvider } from '@/contexts/AuthContext';
+import ChatWidget from '@/components/chatbot/ChatWidget';
 
 export const metadata = {
   title: 'TravelHub Dashboard',
@@ -18,6 +19,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <ResponsiveLayout>
               {children}
             </ResponsiveLayout>
+            <ChatWidget />
           </ThemeContextProvider>
         </AuthProvider>
       </body>

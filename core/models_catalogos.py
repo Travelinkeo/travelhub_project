@@ -165,3 +165,18 @@ class ProductoServicio(models.Model):
         unique_together = ('nombre', 'tipo_producto', 'proveedor_principal')
     def __str__(self):  # pragma: no cover
         return f"{self.nombre} ({self.get_tipo_producto_display()})"
+
+
+class Aerolinea(models.Model):
+    id_aerolinea = models.AutoField(primary_key=True, verbose_name=_("ID Aerolínea"))
+    codigo_iata = models.CharField(_("Código IATA"), max_length=2, unique=True, help_text=_("Código IATA de 2 letras de la aerolínea (ej. AA, AV, LA)."))
+    nombre = models.CharField(_("Nombre de la Aerolínea"), max_length=150, validators=[validar_no_vacio_o_espacios])
+    activa = models.BooleanField(_("Activa"), default=True, help_text=_("Indica si la aerolínea está actualmente operando."))
+    
+    class Meta:
+        verbose_name = _("Aerolínea")
+        verbose_name_plural = _("Aerolíneas")
+        ordering = ['nombre']
+    
+    def __str__(self):  # pragma: no cover
+        return f"{self.nombre} ({self.codigo_iata})"

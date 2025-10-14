@@ -26,10 +26,11 @@ class RequestMetaAuditMiddleware:  # Middleware para auditoría IP/UA
         except Exception:
             _request_local.meta = {}
         try:
-            logger.info(f"Request: {request.method} {request.path} from IP: {ip}, UA: {ua[:50]}...")
+            ua_short = (ua[:50] + '...') if ua else 'N/A'
+            logger.info(f"Request: {request.method} {request.path} from IP: {ip}, UA: {ua_short}")
             response = self.get_response(request)
-            logger.info(f"Response: {response.status_code} for {request.path}, Location: {getattr(response, 'get', lambda k: None)('Location')}")
-        finally:  # limpieza
+            logger.info(f"Response: {response.status_code} for {request.path}")
+        finally:
             try:
                 del _request_local.meta
             except AttributeError:

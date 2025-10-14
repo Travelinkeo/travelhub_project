@@ -2,14 +2,19 @@
 import logging
 from decimal import Decimal
 
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 from django.db import transaction
 
 from core.models.boletos import BoletoImportado
-from core.models.ventas import Venta, ItemVenta
+from core.models.ventas import Venta, ItemVenta, PagoVenta
 from core.models_catalogos import Moneda, ProductoServicio
 from personas.models import Pasajero
+from core.notification_service import (
+    notificar_confirmacion_venta,
+    notificar_cambio_estado,
+    notificar_confirmacion_pago
+)
 
 logger = logging.getLogger(__name__)
 
@@ -118,4 +123,43 @@ def crear_o_actualizar_venta_desde_boleto(sender, instance, created, **kwargs):
 
         except Exception as e:
             logger.error(f"Error en la señal para BoletoImportado {instance.pk}: {e}", exc_info=True)
+
+
+@receiver(pre_save, sender=Venta)
+def capturar_estado_anterior_venta(sender, instance, **kwargs):
+    """Captura el estado anterior antes de guardar para detectar cambios"""
+    if instance.pk:
+        try:
+            instance._estado_anterior = Venta.objects.get(pk=instance.pk).estado
+        except Venta.DoesNotExist:
+            instance._estado_anterior = None
+    else:
+        instance._estado_anterior = None
+
+
+@receiver(post_save, sender=Venta)
+def enviar_notificaciones_venta(sender, instance, created, **kwargs):
+    """Envía notificaciones automáticas según eventos de la venta"""
+    # Evitar envío en operaciones masivas o migraciones
+    if kwargs.get('raw', False):
+        return
+    
+    if created:
+        # Nueva venta creada
+        notificar_confirmacion_venta(instance)
+    else:
+        # Venta actualizada - verificar cambio de estado
+        estado_anterior = getattr(instance, '_estado_anterior', None)
+        if estado_anterior and estado_anterior != instance.estado:
+            notificar_cambio_estado(instance, estado_anterior)
+
+
+@receiver(post_save, sender=PagoVenta)
+def enviar_confirmacion_pago_recibido(sender, instance, created, **kwargs):
+    """Envía notificación de confirmación cuando se registra un pago"""
+    if kwargs.get('raw', False):
+        return
+    
+    if created and instance.confirmado:
+        notificar_confirmacion_pago(instance)
 

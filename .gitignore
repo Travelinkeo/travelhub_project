@@ -140,7 +140,13 @@ temp_*.html
 iniciar.bat
 start.sh
 README_TESTS.md
+
+# SEGURIDAD: Credenciales y archivos sensibles
 auth/
+auth/*.json
+.env
+.env.local
+.env.*.local
 
 # IDE
 .vscode/

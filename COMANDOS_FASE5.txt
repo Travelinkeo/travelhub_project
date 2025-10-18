@@ -1,0 +1,149 @@
+# ⚡ COMANDOS RÁPIDOS - FASE 5
+
+## 🧪 EJECUTAR TESTS
+
+# Todos los tests de Fase 5
+.\batch_scripts\run_tests_fase5.bat
+
+# Todos los tests del proyecto
+pytest
+
+# Con cobertura detallada
+pytest --cov --cov-report=term-missing
+
+# Reporte HTML de cobertura
+pytest --cov --cov-report=html
+# Abrir: htmlcov/index.html
+
+# Tests específicos
+pytest tests/test_notifications.py -v
+pytest tests/test_cache.py -v
+pytest tests/test_tasks.py -v
+pytest tests/test_cached_viewsets.py -v
+pytest tests/test_query_optimization.py -v
+pytest tests/test_middleware_performance.py -v
+pytest tests/test_management_commands.py -v
+pytest tests/test_parsers_coverage.py -v
+
+# Tests con output detallado
+pytest -vv
+
+# Tests con prints
+pytest -s
+
+# Tests con warnings
+pytest -W all
+
+# Tests en paralelo (requiere pytest-xdist)
+pytest -n auto
+
+
+## 📊 VERIFICAR COBERTURA
+
+# Cobertura por módulo
+pytest --cov=core --cov-report=term-missing
+
+# Cobertura de parsers
+pytest --cov=core.parsers --cov-report=term-missing
+
+# Cobertura de notificaciones
+pytest --cov=core.notification_service --cov-report=term-missing
+
+# Cobertura de caché
+pytest --cov=core.cache_utils --cov-report=term-missing
+
+# Cobertura de tareas
+pytest --cov=core.tasks --cov-report=term-missing
+
+
+## 🔍 DEBUGGING
+
+# Tests con debugger
+pytest --pdb
+
+# Tests con traceback completo
+pytest --tb=long
+
+# Tests con solo failures
+pytest --lf
+
+# Tests con solo errores
+pytest --ff
+
+
+## 📈 REPORTES
+
+# Reporte JUnit (para CI/CD)
+pytest --junitxml=report.xml
+
+# Reporte JSON
+pytest --json-report --json-report-file=report.json
+
+# Reporte de duración de tests
+pytest --durations=10
+
+
+## 🧹 LIMPIEZA
+
+# Limpiar caché de pytest
+pytest --cache-clear
+
+# Limpiar archivos .pyc
+python -m py_compile -c
+
+# Limpiar __pycache__
+find . -type d -name __pycache__ -exec rm -rf {} +
+
+
+## 🚀 CI/CD
+
+# Simular CI localmente
+pytest --cov --cov-report=xml --junitxml=report.xml
+
+# Verificar que todos los tests pasan
+pytest --exitfirst
+
+
+## 📚 DOCUMENTACIÓN
+
+# Ver documentación de Fase 5
+type FASE5_CALIDAD_COMPLETADA.md
+
+# Ver resumen visual
+type FASE5_RESUMEN.txt
+
+# Ver progreso del proyecto
+type PROGRESO_PROYECTO.md
+
+
+## 🎯 VERIFICACIONES RÁPIDAS
+
+# Verificar imports
+python -c "import core.cache_utils; import core.tasks; print('OK')"
+
+# Verificar Django
+python manage.py check
+
+# Verificar migraciones
+python manage.py showmigrations
+
+# Verificar configuración de tests
+pytest --collect-only
+
+
+## 💡 TIPS
+
+# Ver fixtures disponibles
+pytest --fixtures
+
+# Ver marcadores disponibles
+pytest --markers
+
+# Ejecutar solo tests marcados
+pytest -m "not slow"
+
+# Ejecutar tests por keyword
+pytest -k "cache"
+
+# Ejecutar tests con coverage mínimo
+pytest --cov --cov-fail-under=85

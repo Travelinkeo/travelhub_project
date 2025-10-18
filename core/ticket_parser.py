@@ -345,7 +345,7 @@ def extract_data_from_text(plain_text: str, html_text: str = "", pdf_path: Optio
         return parse_tk_connect_ticket(plain_text)
     
     # Heurística para COPA SPRK
-    if 'COPA AIRLINES' in plain_text_upper and 'SPRK' in plain_text_upper:
+    if ('COPA AIRLINES' in plain_text_upper and 'LOCALIZADOR DE RESERVA' in plain_text_upper) or 'SPRK' in plain_text_upper:
         logger.info("Sistema detectado: COPA_SPRK. Procesando...")
         from .copa_sprk_parser import parse_copa_sprk_ticket
         return parse_copa_sprk_ticket(plain_text)
@@ -390,23 +390,40 @@ def generate_ticket(data: Dict[str, Any]) -> Tuple[bytes, str]:
 
     if source_system == 'AMADEUS':
         template_name = "ticket_template_amadeus.html"
-        # Adaptar datos AMADEUS a estructura KIU
+        pasajero_data = data.get('pasajero', {})
+        agencia_data = data.get('agencia', {})
+        vuelos_data = data.get('vuelos', [])
+        
+        nombre_completo = pasajero_data.get('nombre_completo', '')
+        solo_nombre = nombre_completo.split('/')[-1].strip() if '/' in nombre_completo else nombre_completo
+        
         context = {
-            'solo_nombre_pasajero': data.get('pasajero', {}).get('nombre_completo', '').split()[0] if data.get('pasajero', {}).get('nombre_completo') else '',
-            'nombre_del_pasajero': data.get('pasajero', {}).get('nombre_completo', ''),
-            'codigo_identificacion': data.get('pasajero', {}).get('tipo', 'ADT'),
+            'solo_nombre_pasajero': solo_nombre,
+            'nombre_del_pasajero': nombre_completo,
+            'codigo_identificacion': pasajero_data.get('tipo', 'ADT'),
             'solo_codigo_reserva': data.get('pnr', ''),
             'numero_de_boleto': data.get('numero_boleto', ''),
-            'fecha_de_emision': data.get('fecha_emision', ''),
-            'agente_emisor': data.get('agencia', {}).get('agente', ''),
-            'nombre_aerolinea': 'AMADEUS GDS',
-            'direccion_aerolinea': data.get('agencia', {}).get('direccion', ''),
-            'salidas': '\n'.join([f"{v.get('origen', '')} -> {v.get('destino', '')} | {v.get('numero_vuelo', '')} | {v.get('fecha_salida', '')} {v.get('hora_salida', '')}" for v in data.get('vuelos', [])]) if data.get('vuelos') else 'No se pudieron extraer los vuelos'
+            'fecha_emision': data.get('fecha_emision', ''),
+            'agente_emisor': agencia_data.get('iata', ''),
+            'nombre_aerolinea': vuelos_data[0].get('aerolinea', 'N/A') if vuelos_data else 'N/A',
+            'direccion_aerolinea': agencia_data.get('direccion', ''),
+            'vuelos': [{
+                'fecha_salida': v.get('fecha_salida', ''),
+                'aerolinea': v.get('aerolinea', ''),
+                'numero_vuelo': v.get('numero_vuelo', ''),
+                'origen_ciudad': v.get('origen', ''),
+                'destino_ciudad': v.get('destino', ''),
+                'hora_salida': v.get('hora_salida', ''),
+                'hora_llegada': v.get('hora_llegada', ''),
+                'clase': v.get('clase', ''),
+                'equipaje': v.get('equipaje', ''),
+                'asiento': v.get('asiento', ''),
+                'terminal_salida': '',
+                'terminal_llegada': '',
+            } for v in vuelos_data]
         }
-    elif source_system in ['COPA_SPRK', 'WINGO']:
-        template_name = f"ticket_template_{source_system.lower()}.html"
-        
-        # Contexto genérico para sistemas de aerolíneas
+    elif source_system == 'COPA_SPRK':
+        template_name = "ticket_template_copa_sprk.html"
         context = {
             'pasajero': {
                 'nombre_completo': data.get('pasajero', {}).get('nombre_completo', 'N/A'),
@@ -416,13 +433,38 @@ def generate_ticket(data: Dict[str, Any]) -> Tuple[bytes, str]:
                 'codigo_reservacion': data.get('pnr', 'N/A'),
                 'numero_boleto': data.get('numero_boleto', 'N/A'),
                 'fecha_emision': data.get('fecha_creacion', 'N/A'),
-                'aerolinea_emisora': 'Copa Airlines' if source_system == 'COPA_SPRK' else 'Wingo',
+                'aerolinea_emisora': 'Copa Airlines',
                 'agente_emisor': {'numero_iata': 'N/A'}
             },
             'itinerario': {
                 'vuelos': [{
                     'fecha_salida': v.get('fecha_salida', 'N/A'),
-                    'aerolinea': 'Copa Airlines' if source_system == 'COPA_SPRK' else 'Wingo',
+                    'aerolinea': 'Copa Airlines',
+                    'numero_vuelo': v.get('numero_vuelo', 'N/A'),
+                    'origen': {'ciudad': v.get('origen', 'N/A')},
+                    'hora_salida': v.get('hora_salida', 'N/A'),
+                    'destino': {'ciudad': v.get('destino', 'N/A')},
+                    'hora_llegada': v.get('hora_llegada', 'N/A'),
+                    'cabina': v.get('cabina', 'N/A')
+                } for v in data.get('vuelos', [])]
+            }
+        }
+    elif source_system == 'WINGO':
+        template_name = "ticket_template_wingo.html"
+        context = {
+            'pasajero': {
+                'nombre_completo': data.get('pasajero', {}).get('nombre_completo', 'N/A'),
+                'documento_identidad': 'N/A'
+            },
+            'reserva': {
+                'codigo_reservacion': data.get('pnr', 'N/A'),
+                'fecha_emision': data.get('fecha_creacion', 'N/A'),
+                'aerolinea_emisora': 'Wingo'
+            },
+            'itinerario': {
+                'vuelos': [{
+                    'fecha_salida': v.get('fecha_salida', 'N/A'),
+                    'aerolinea': 'Wingo',
                     'numero_vuelo': v.get('numero_vuelo', 'N/A'),
                     'origen': {'ciudad': v.get('origen', 'N/A')},
                     'hora_salida': v.get('hora_salida', 'N/A'),
@@ -519,7 +561,11 @@ def generate_ticket(data: Dict[str, Any]) -> Tuple[bytes, str]:
         raise RuntimeError(f"WeasyPrint no está disponible. Error: {e}")
 
     timestamp = dt.datetime.now().strftime("%Y%m%d%H%M%S")
-    ticket_num_raw = context.get('reserva', {}).get('numero_boleto') or data.get("NUMERO_DE_BOLETO", "SIN_TICKET")
+    ticket_num_raw = (
+        context.get('reserva', {}).get('numero_boleto') or 
+        context.get('numero_de_boleto') or 
+        data.get("NUMERO_DE_BOLETO", "SIN_TICKET")
+    )
     ticket_num_for_file = re.sub(r'[\\/*?:",<>|]', "", _clean_value(ticket_num_raw)).replace(" ", "_") or "SIN_TICKET"
     file_name = f"Boleto_{ticket_num_for_file}_{timestamp}.pdf" 
     

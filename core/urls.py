@@ -62,24 +62,21 @@ from .models_catalogos import Pais, Ciudad, Moneda, TipoCambio, ProductoServicio
 class PaisViewSet(viewsets.ModelViewSet):
     queryset = Pais.objects.all()
     serializer_class = PaisSerializer
-    permission_classes = [permissions.AllowAny]
-    authentication_classes = []
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     filter_backends = [filters.SearchFilter]
     search_fields = ['nombre', 'codigo_iso_2', 'codigo_iso_3']
 
 class CiudadViewSet(viewsets.ModelViewSet):
     queryset = Ciudad.objects.all()
     serializer_class = CiudadSerializer
-    permission_classes = [permissions.AllowAny]
-    authentication_classes = []
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     filter_backends = [filters.SearchFilter]
     search_fields = ['nombre', 'pais__nombre', 'region_estado']
 
 class MonedaViewSet(viewsets.ModelViewSet):
     queryset = Moneda.objects.all()
     serializer_class = MonedaSerializer
-    permission_classes = [permissions.AllowAny]
-    authentication_classes = []
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     filter_backends = [filters.SearchFilter]
     search_fields = ['nombre', 'codigo_iso']
 

@@ -2,7 +2,7 @@
 Comando para monitorear correos de boletos y enviar por WhatsApp
 """
 from django.core.management.base import BaseCommand
-from core.email_monitor import MonitorTicketsWhatsApp
+from core.services.email_monitor_service import EmailMonitorService
 
 
 class Command(BaseCommand):
@@ -30,12 +30,13 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         self.stdout.write(
             self.style.SUCCESS(
-                f"🚀 Iniciando monitor de boletos -> {options['phone']}"
+                f"Iniciando monitor de boletos -> {options['phone']}"
             )
         )
         
-        monitor = MonitorTicketsWhatsApp(
-            phone_number=options['phone'],
+        monitor = EmailMonitorService(
+            notification_type='whatsapp',
+            destination=options['phone'],
             interval=options['interval'],
             mark_as_read=options['mark_read']
         )
@@ -43,4 +44,4 @@ class Command(BaseCommand):
         try:
             monitor.start()
         except KeyboardInterrupt:
-            self.stdout.write(self.style.WARNING('\n⏹️ Monitor detenido por el usuario'))
+            self.stdout.write(self.style.WARNING('\nMonitor detenido por el usuario'))

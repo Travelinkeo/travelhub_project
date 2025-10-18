@@ -27,6 +27,23 @@ travelhub_project/
 
 ## 🚀 Inicio Rápido
 
+### ⚠️ IMPORTANTE: Configuración de Seguridad (OBLIGATORIO)
+
+**ANTES DE INICIAR**, debes configurar las variables de entorno:
+
+```bash
+# Opción 1: Script automático (Recomendado)
+.\batch_scripts\configurar_seguridad.bat
+
+# Opción 2: Manual
+copy .env.example .env
+# Editar .env y configurar SECRET_KEY y DB_PASSWORD
+```
+
+📖 **Guía completa**: Ver `SEGURIDAD_ACCION_INMEDIATA.md`
+
+---
+
 ### 1. Instalación
 
 ```bash
@@ -36,10 +53,6 @@ python -m venv venv
 
 # Instalar dependencias
 pip install -r requirements.txt
-
-# Configurar variables de entorno
-copy .env.example .env
-# Editar .env con tus credenciales
 ```
 
 ### 2. Base de Datos

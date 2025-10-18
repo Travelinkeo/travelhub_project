@@ -1,0 +1,140 @@
+================================================================================
+SISTEMA AUTOMATICO DE BOLETOS - WHATSAPP + GOOGLE DRIVE
+================================================================================
+
+DESCRIPCION:
+------------
+Sistema que monitorea correos de boletos, los parsea, genera PDFs,
+los sube a Google Drive y envia notificacion por WhatsApp con link de descarga.
+
+SISTEMAS SOPORTADOS:
+-------------------
+✓ KIU (HTML/texto del correo)
+✓ SABRE (PDF adjunto)
+✓ AMADEUS (PDF adjunto)
+✓ Copa SPRK (PDF adjunto)
+✓ Wingo (PDF adjunto)
+✓ TK Connect (PDF adjunto)
+
+REQUISITOS PREVIOS:
+-------------------
+1. Activar tu numero en Twilio Sandbox:
+   - Envia WhatsApp a: +1 415 523 8886
+   - Con el mensaje: join [codigo-que-te-dieron]
+   - Espera confirmacion
+
+2. Google Drive API configurada (ya esta lista)
+
+COMO USAR:
+----------
+
+OPCION 1: Doble clic en el archivo .bat (MAS FACIL)
+   - Ubicacion: batch_scripts\monitor_boletos_whatsapp.bat
+   - Simplemente hacer doble clic para iniciar
+
+OPCION 2: Desde la linea de comandos
+   python manage.py monitor_tickets_whatsapp_drive --phone +584126080861 --interval 60 --mark-read
+
+PARAMETROS:
+-----------
+--phone       : Numero WhatsApp donde recibiras las notificaciones
+--interval    : Segundos entre cada revision (default: 60)
+--mark-read   : Marcar correos como leidos despues de procesarlos
+
+FLUJO DEL SISTEMA:
+------------------
+1. Monitor revisa correos no leidos cada 60 segundos
+2. Detecta automaticamente el tipo de boleto (KIU, SABRE, etc.)
+3. Extrae los datos del boleto
+4. Genera PDF profesional con plantilla especifica
+5. Sube PDF a Google Drive
+6. Obtiene link publico de descarga
+7. Envia WhatsApp con:
+   - Datos del boleto (PNR, numero, pasajero, aerolinea)
+   - Link directo de descarga del PDF
+8. Guarda en base de datos (modelo BoletoImportado)
+9. Marca el correo como leido (opcional)
+
+MENSAJE DE WHATSAPP:
+--------------------
+Boleto KIU Procesado
+
+PNR: IOHEAU
+Boleto: 308-0310871094
+Pasajero: [nombre]
+Aerolinea: CONVIASA
+
+Descarga tu PDF:
+https://drive.google.com/uc?export=download&id=xxxxx
+
+TravelHub
+
+ARCHIVOS GENERADOS:
+-------------------
+- PDFs locales: media/boletos_generados/
+- PDFs en Drive: Google Drive (carpeta configurada)
+- Base de datos: Modelo BoletoImportado
+
+DETENER EL MONITOR:
+-------------------
+Presionar Ctrl+C en la ventana del monitor
+
+CONFIGURACION:
+--------------
+WhatsApp destino: +584126080861
+Twilio Sandbox: +1 415 523 8886
+Correos monitoreados:
+  - noreply@kiusys.com (KIU)
+  - ww@kiusys.com (KIU)
+  - Cualquier remitente con PDF adjunto (otros sistemas)
+
+VENTAJAS:
+---------
+✓ Funciona con Twilio Sandbox GRATUITO
+✓ No requiere Twilio API de pago
+✓ PDF guardado en Google Drive (gratis, confiable)
+✓ Link directo de descarga
+✓ Notificacion instantanea por WhatsApp
+✓ Acceso al PDF desde cualquier dispositivo
+
+LIMITACIONES TWILIO SANDBOX:
+-----------------------------
+- Solo funciona con numeros activados manualmente
+- Mensaje de activacion caduca cada 72 horas
+- Para uso permanente, considera Twilio API de pago
+
+ALTERNATIVA:
+------------
+Si prefieres recibir el PDF por email (mas confiable):
+   - Usa: batch_scripts\monitor_boletos_email.bat
+   - No requiere activacion de WhatsApp
+   - PDF llega como adjunto en el email
+
+NOTAS:
+------
+- El sistema NO elimina correos, solo los marca como leidos
+- Los PDFs se guardan localmente Y en Drive
+- Cada boleto se procesa solo una vez (evita duplicados)
+- Los links de Drive son permanentes
+
+TROUBLESHOOTING:
+----------------
+Si no recibes WhatsApp:
+1. Verifica que activaste tu numero en Sandbox
+2. Revisa que el numero este correcto: +584126080861
+3. Prueba enviar mensaje de prueba desde Twilio Console
+
+Si no sube a Drive:
+1. Verifica que GOOGLE_APPLICATION_CREDENTIALS este configurado
+2. Revisa permisos de la cuenta de servicio
+
+SOPORTE:
+--------
+Para mas informacion:
+- docs_archive/PARSERS_AEROLINEAS.md
+- docs_archive/NOTIFICACIONES.md
+- INSTRUCCIONES_MONITOR_BOLETOS.txt (version email)
+
+================================================================================
+TRAVELHUB - Sistema de Gestion de Agencia de Viajes
+================================================================================

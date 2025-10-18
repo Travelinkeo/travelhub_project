@@ -159,6 +159,32 @@ Envía recordatorios de pago a clientes con saldo pendiente.
 
 ---
 
+## 🧪 Scripts de Testing
+
+### `run_tests_fase5.bat`
+Ejecuta todos los tests de Fase 5 (Mejoras de Calidad).
+
+```bash
+.\batch_scripts\run_tests_fase5.bat
+```
+
+**Qué hace**:
+- Ejecuta 8 suites de tests
+- Genera reporte de cobertura
+- Valida calidad del código
+
+**Tests incluidos**:
+- Tests de notificaciones
+- Tests de caché
+- Tests de Celery
+- Tests de ViewSets
+- Tests de optimización de queries
+- Tests de middleware
+- Tests de comandos
+- Tests adicionales de parsers
+
+---
+
 ## 📋 Configuración de Tareas Programadas
 
 ### Sincronización BCV (Diaria)

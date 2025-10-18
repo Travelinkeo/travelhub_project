@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Boleto AMADEUS - {{ pasajero.nombre_completo }}</title>
+    <style>
+        @page { margin: 0; size: A4; }
+        body { margin: 0; padding: 20px; font-family: Arial, sans-serif; font-size: 10pt; }
+        .header { background: #0c66e1; color: white; padding: 20px; margin: -20px -20px 20px -20px; }
+        .section { margin-bottom: 20px; border: 1px solid #ddd; padding: 15px; border-radius: 5px; }
+        .section h2 { margin: 0 0 10px 0; color: #0c66e1; font-size: 14pt; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 8px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background: #f5f5f5; font-weight: bold; }
+        .label { color: #666; }
+        .value { font-weight: bold; color: #333; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1 style="margin: 0;">Boleto Electrónico AMADEUS</h1>
+    </div>
+
+    <div class="section">
+        <h2>Información del Pasajero</h2>
+        <p><span class="label">Nombre:</span> <span class="value">{{ pasajero.nombre_completo }}</span></p>
+    </div>
+
+    <div class="section">
+        <h2>Detalles de la Reserva</h2>
+        <p><span class="label">Código de Reserva (PNR):</span> <span class="value">{{ reserva.codigo_reservacion }}</span></p>
+        <p><span class="label">Número de Boleto:</span> <span class="value">{{ reserva.numero_boleto }}</span></p>
+        <p><span class="label">Fecha de Emisión:</span> <span class="value">{{ reserva.fecha_emision }}</span></p>
+        <p><span class="label">Agente IATA:</span> <span class="value">{{ reserva.agente_emisor.numero_iata }}</span></p>
+        <p><span class="label">Aerolínea:</span> <span class="value">{{ reserva.aerolinea_emisora }}</span></p>
+    </div>
+
+    <div class="section">
+        <h2>Itinerario de Vuelo</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Vuelo</th>
+                    <th>Origen</th>
+                    <th>Destino</th>
+                    <th>Salida</th>
+                    <th>Llegada</th>
+                    <th>Clase</th>
+                    <th>Asiento</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for vuelo in itinerario.vuelos %}
+                <tr>
+                    <td>{{ vuelo.fecha_salida }}</td>
+                    <td>{{ vuelo.numero_vuelo }}</td>
+                    <td>{{ vuelo.origen.ciudad }}</td>
+                    <td>{{ vuelo.destino.ciudad }}</td>
+                    <td>{{ vuelo.hora_salida }}</td>
+                    <td>{{ vuelo.hora_llegada }}</td>
+                    <td>{{ vuelo.cabina }}</td>
+                    <td>{{ vuelo.equipaje }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div style="text-align: center; margin-top: 30px; color: #666; font-size: 9pt;">
+        <p><strong>Gracias por elegirnos. ¡Te deseamos un excelente viaje!</strong></p>
+        <p>TRAVELINKEO | +58412 3312314 | CARACAS, VENEZUELA</p>
+    </div>
+</body>
+</html>

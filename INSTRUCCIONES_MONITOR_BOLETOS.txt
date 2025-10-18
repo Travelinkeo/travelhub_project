@@ -1,0 +1,80 @@
+================================================================================
+SISTEMA AUTOMATICO DE PROCESAMIENTO DE BOLETOS - TRAVELHUB
+================================================================================
+
+DESCRIPCION:
+------------
+Sistema que monitorea automaticamente los correos de boletos, los parsea,
+genera PDFs profesionales y los envia por email.
+
+SISTEMAS SOPORTADOS:
+-------------------
+✓ KIU (HTML/texto del correo)
+✓ SABRE (PDF adjunto)
+✓ AMADEUS (PDF adjunto)
+✓ Copa SPRK (PDF adjunto)
+✓ Wingo (PDF adjunto)
+✓ TK Connect (PDF adjunto)
+
+COMO USAR:
+----------
+
+OPCION 1: Doble clic en el archivo .bat
+   - Ubicacion: batch_scripts\monitor_boletos_email.bat
+   - Simplemente hacer doble clic para iniciar
+
+OPCION 2: Desde la linea de comandos
+   python manage.py monitor_tickets_email --email travelinkeo@gmail.com --interval 60 --mark-read
+
+PARAMETROS:
+-----------
+--email       : Email donde recibiras los boletos procesados
+--interval    : Segundos entre cada revision (default: 60)
+--mark-read   : Marcar correos como leidos despues de procesarlos
+
+FLUJO DEL SISTEMA:
+------------------
+1. Monitor revisa correos no leidos cada 60 segundos
+2. Detecta automaticamente el tipo de boleto (KIU, SABRE, etc.)
+3. Extrae los datos del boleto
+4. Genera PDF profesional con plantilla especifica
+5. Envia email con:
+   - Asunto: "Boleto [SISTEMA] Procesado - [PNR]"
+   - Cuerpo: Datos del boleto
+   - Adjunto: PDF del boleto
+6. Guarda en base de datos (modelo BoletoImportado)
+7. Marca el correo como leido (opcional)
+
+ARCHIVOS GENERADOS:
+-------------------
+- PDFs: media/boletos_generados/
+- Base de datos: Modelo BoletoImportado
+
+DETENER EL MONITOR:
+-------------------
+Presionar Ctrl+C en la ventana del monitor
+
+CONFIGURACION:
+--------------
+Email configurado: travelinkeo@gmail.com
+Correos monitoreados:
+  - noreply@kiusys.com (KIU)
+  - ww@kiusys.com (KIU)
+  - Cualquier remitente con PDF adjunto (otros sistemas)
+
+NOTAS:
+------
+- El sistema NO elimina correos, solo los marca como leidos
+- Los PDFs se guardan permanentemente en media/boletos_generados/
+- Cada boleto se procesa solo una vez (evita duplicados)
+- El email se envia desde: travelinkeo@gmail.com
+
+SOPORTE:
+--------
+Para mas informacion, consulta:
+- docs_archive/PARSERS_AEROLINEAS.md
+- docs_archive/NOTIFICACIONES.md
+
+================================================================================
+TRAVELHUB - Sistema de Gestion de Agencia de Viajes
+================================================================================

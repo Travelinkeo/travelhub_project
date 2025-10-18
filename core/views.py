@@ -155,8 +155,7 @@ class VentaViewSet(viewsets.ModelViewSet):
         'cliente', 'moneda', 'cotizacion_origen', 'asiento_contable_venta'
     ).prefetch_related('items_venta__producto_servicio', 'items_venta__proveedor_servicio').order_by('-fecha_venta')
     serializer_class = VentaSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
-    throttle_classes = []  # Desactivar rate limiting para esta vista
+    permission_classes = [permissions.IsAuthenticated]
     filter_backends = [filters.SearchFilter]
     search_fields = ['localizador', 'cliente__nombres', 'cliente__apellidos', 'cliente__nombre_empresa']
 
@@ -173,8 +172,7 @@ class VentaViewSet(viewsets.ModelViewSet):
 class ProveedorViewSet(viewsets.ModelViewSet):
     queryset = Proveedor.objects.all().order_by('nombre')
     serializer_class = ProveedorSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
-    throttle_classes = []  # Desactivar rate limiting para esta vista
+    permission_classes = [permissions.IsAuthenticated]
     filter_backends = [filters.SearchFilter]
     search_fields = ['nombre', 'contacto_nombre', 'contacto_email', 'iata']
 
@@ -190,9 +188,7 @@ class FacturaViewSet(viewsets.ModelViewSet):
         'cliente', 'moneda', 'asiento_contable_factura'
     ).prefetch_related('items_factura').order_by('-fecha_emision')
     serializer_class = FacturaSerializer
-    permission_classes = [permissions.AllowAny]
-    authentication_classes = []
-    throttle_classes = []  # Desactivar rate limiting para esta vista
+    permission_classes = [permissions.IsAuthenticated]
     filter_backends = [filters.SearchFilter]
     search_fields = ['numero_factura', 'cliente__nombres', 'cliente__apellidos', 'cliente__nombre_empresa']
 
@@ -205,8 +201,12 @@ class FacturaViewSet(viewsets.ModelViewSet):
 
 class AsientoContableViewSet(viewsets.ModelViewSet):
     queryset = AsientoContable.objects.select_related(
-        'moneda'
-    ).prefetch_related('detalles_asiento__cuenta_contable').order_by('-fecha_contable', '-numero_asiento')
+        'moneda',
+        'venta_asiento',
+        'factura_asiento'
+    ).prefetch_related(
+        'detalles_asiento__cuenta_contable'
+    ).order_by('-fecha_contable', '-numero_asiento')
     serializer_class = AsientoContableSerializer
     permission_classes = [permissions.IsAuthenticated, IsAdminOrReadOnly]
 
@@ -346,10 +346,16 @@ class VentaParseMetadataViewSet(viewsets.ModelViewSet):
             )
 
 class BoletoImportadoViewSet(viewsets.ModelViewSet):
-    queryset = BoletoImportado.objects.all()
+    queryset = BoletoImportado.objects.select_related(
+        'venta',
+        'venta__cliente',
+        'venta__moneda'
+    ).prefetch_related(
+        'venta__items_venta',
+        'venta__items_venta__producto_servicio'
+    ).all()
     serializer_class = BoletoImportadoSerializer
-    permission_classes = [permissions.AllowAny]
-    authentication_classes = []
+    permission_classes = [permissions.IsAuthenticated]
     filter_backends = [filters.SearchFilter]
     search_fields = ['numero_boleto', 'nombre_pasajero_procesado', 'localizador_pnr', 'aerolinea_emisora']
 
@@ -550,28 +556,59 @@ class PaisViewSet(viewsets.ModelViewSet):
     queryset = Pais.objects.all()
     serializer_class = PaisSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
-    throttle_classes = []  # Desactivar rate limiting para esta vista
     filter_backends = [filters.SearchFilter]
     search_fields = ['nombre', 'codigo_iso_2', 'codigo_iso_3']
+    
+    def list(self, request, *args, **kwargs):
+        from django.core.cache import cache
+        cache_key = 'paises_list'
+        data = cache.get(cache_key)
+        if data is None:
+            response = super().list(request, *args, **kwargs)
+            cache.set(cache_key, response.data, 3600)  # 1 hora
+            return response
+        from rest_framework.response import Response
+        return Response(data)
 
 class CiudadViewSet(viewsets.ModelViewSet):
     queryset = Ciudad.objects.select_related('pais').all()
     serializer_class = CiudadSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
-    throttle_classes = []  # Desactivar rate limiting para esta vista
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['nombre', 'pais__nombre', 'region_estado']
     ordering_fields = ['nombre', 'pais__nombre']
-    ordering = ['nombre']  # Orden por defecto
+    ordering = ['nombre']
+    
+    def list(self, request, *args, **kwargs):
+        from django.core.cache import cache
+        search = request.query_params.get('search', '')
+        cache_key = f'ciudades_list:{search}'
+        data = cache.get(cache_key)
+        if data is None:
+            response = super().list(request, *args, **kwargs)
+            cache.set(cache_key, response.data, 1800)  # 30 min
+            return response
+        from rest_framework.response import Response
+        return Response(data)
 
 class MonedaViewSet(viewsets.ModelViewSet):
     queryset = Moneda.objects.all()
     serializer_class = MonedaSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
-    pagination_class = None  # Cargar todas las monedas a la vez
-    throttle_classes = []  # Desactivar rate limiting para esta vista
+    pagination_class = None
     filter_backends = [filters.SearchFilter]
     search_fields = ['nombre', 'codigo_iso']
+    
+    def list(self, request, *args, **kwargs):
+        from django.core.cache import cache
+        cache_key = 'monedas_list'
+        data = cache.get(cache_key)
+        if data is None:
+            response = super().list(request, *args, **kwargs)
+            cache.set(cache_key, response.data, 3600)  # 1 hora
+            return response
+        from rest_framework.response import Response
+        return Response(data)
 
 class TipoCambioViewSet(viewsets.ModelViewSet):
     queryset = TipoCambio.objects.select_related('moneda_origen', 'moneda_destino').all()

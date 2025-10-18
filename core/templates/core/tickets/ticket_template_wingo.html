@@ -7,8 +7,8 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Open+Sans:wght@400;600&display=swap');
         :root {
-            --tk-dark-blue: #232b38;
-            --tk-medium-blue: #232b38;
+            --tk-dark-blue: #6633cb;
+            --tk-medium-blue: #6633cb;
             --tk-text-dark: #2c3e50;
             --tk-text-light: #495057;
             --tk-background-light: #f8f9fa;
@@ -18,7 +18,7 @@
         * { box-sizing: border-box; }
         body { -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; padding: 0; background-color: #eef2f9; font-family: 'Open Sans', sans-serif; font-size: 9.5pt; color: var(--tk-text-light); }
         .ticket-container { width: 210mm; min-height: 297mm; margin: 0 auto; background-color: #ffffff; display: flex; flex-direction: column; }
-        .ticket-header { background: #232b38; color: #fff; padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; }
+        .ticket-header { background: #6633cb; color: #fff; padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; }
         .ticket-header img.logo { height: 45px; }
         .header-contact { text-align: right; font-size: 8pt; line-height: 1.6; }
         .ticket-body { padding: 25px 30px; flex-grow: 1; }
@@ -94,16 +94,8 @@
                                 <p><span class="label">Código de Reserva:</span><br><span class="value">{{ reserva.codigo_reservacion }}</span></p>
                             </td>
                             <td>
-                                <p><span class="label">Número de Boleto:</span><br><span class="value">{{ reserva.numero_boleto }}</span></p>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
                                 <p><span class="label">Fecha de Emisión:</span><br><span class="value">{{ reserva.fecha_emision }}</span></p>
                             </td>
-                       <td>
-                           <p><span class="label">Agente Emisor IATA:</span><br><span class="value">{{ reserva.agente_emisor.numero_iata }}</span></p>
-                       </td>
                         </tr>
                          <tr>
                             <td colspan="2">

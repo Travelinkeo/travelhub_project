@@ -33,8 +33,8 @@ def parse_amadeus_ticket(plain_text: str) -> Dict[str, Any]:
 
 def _extract_booking_ref(text: str) -> str:
     """Extrae el Booking Reference (PNR)."""
-    # El PNR aparece ANTES de "Booking ref:" en línea separada
-    match = re.search(r'([A-Z0-9]{6})\s*\n\s*Booking ref:', text, re.MULTILINE)
+    # Buscar patrón: 223PPDBooking ref:
+    match = re.search(r'([A-Z0-9]{6})Booking ref:', text)
     if match:
         return match.group(1)
     
@@ -48,8 +48,13 @@ def _extract_booking_ref(text: str) -> str:
 
 def _extract_ticket_number(text: str) -> str:
     """Extrae el número de ticket."""
+    # Buscar patrón: 235-7120126507Ticket:
+    match = re.search(r'(\d{3}-?\d{10})Ticket:', text)
+    if match:
+        return match.group(1)
+    
     patterns = [
-        r'Ticket:\s*\n?([\d-]+)',
+        r'Ticket:\s*\n?\s*([\d-]+)',
         r'Ticket number\s*:\s*([\d-]+)',
         r'(\d{3}-\d{10})',  # Formato estándar de ticket
     ]
@@ -78,12 +83,19 @@ def _extract_passenger(text: str) -> Dict[str, str]:
         'tipo': 'ADT'  # Default adult
     }
     
-    # Buscar nombre del pasajero
-    match = re.search(r'Traveler\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)+)\s*(?:\(([A-Z]{3})\))?', text)
+    # Buscar nombre del pasajero: Traveler Eguiarte Rubio Camila Agency
+    # O: Traveler Eguiarte Rubio Camila Carolina (CHD)
+    match = re.search(r'Traveler\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)+?)(?:\s+Agency|\s+\(([A-Z]{3})\))', text)
     if match:
-        passenger['nombre_completo'] = match.group(1)
+        passenger['nombre_completo'] = match.group(1).strip()
         if match.group(2):
             passenger['tipo'] = match.group(2)  # CHD, INF, etc.
+    
+    # Buscar tipo de pasajero en otra parte si no se encontró
+    if passenger['tipo'] == 'ADT':
+        type_match = re.search(r'\(([A-Z]{3})\)', text)
+        if type_match:
+            passenger['tipo'] = type_match.group(1)
     
     return passenger
 
@@ -130,87 +142,75 @@ def _extract_flights(text: str) -> List[Dict[str, Any]]:
     """Extrae información de los vuelos."""
     flights = []
     
-    # Buscar todos los números de vuelo (formato: TK0224, AA123, etc)
-    flight_numbers = re.findall(r'\b([A-Z]{2})(\d{3,4})\b', text)
-    print(f"DEBUG: Vuelos encontrados: {flight_numbers}")
-    if not flight_numbers:
-        return flights
+    # Patrón para línea de vuelo AMADEUS:
+    # CARACAS ISTANBUL TK0224 U 05Dec 11:35 06:20 Ok 05Dec 05Dec 1PC 15D
+    pattern = r'([A-Z]+)\s+([A-Z]+)\s+([A-Z]{2})(\d{3,4})\s+([A-Z])\s+(\d{2}[A-Za-z]{3})\s+(\d{2}:\d{2})\s+(\d{2}:\d{2})\s+(Ok|Waitlist)\s+\d{2}[A-Za-z]{3}\s+\d{2}[A-Za-z]{3}\s+(\d+PC)\s+(\d{1,2}[A-Z])'
     
-    lines = text.split('\n')
+    matches = re.finditer(pattern, text)
     
-    # Procesar cada número de vuelo encontrado
-    for airline_code, flight_num in flight_numbers:
+    for match in matches:
+        origen = match.group(1)
+        destino = match.group(2)
+        airline_code = match.group(3)
+        flight_num = match.group(4)
+        clase = match.group(5)
+        fecha = match.group(6)
+        hora_salida = match.group(7)
+        hora_llegada = match.group(8)
+        estado = match.group(9)
+        equipaje = match.group(10)
+        asiento = match.group(11)
+        
         flight_code = f"{airline_code}{flight_num}"
         
-        # Buscar el índice donde aparece este vuelo
-        flight_idx = -1
-        for i, line in enumerate(lines):
-            if flight_code in line:
-                flight_idx = i
-                break
+        # Buscar información adicional del vuelo
+        flight_section = re.search(
+            rf'{flight_code}.*?(?=(?:[A-Z]{{2}}\d{{3,4}}|Receipt|$))',
+            text,
+            re.DOTALL
+        )
         
-        if flight_idx == -1:
-            continue
+        duracion = 'No encontrado'
+        equipo = 'No encontrado'
+        comida = 'No encontrado'
         
-        # Extraer contexto (20 líneas antes y después)
-        start = max(0, flight_idx - 20)
-        end = min(len(lines), flight_idx + 20)
-        context = '\n'.join(lines[start:end])
+        if flight_section:
+            section = flight_section.group(0)
+            
+            # Duración
+            dur_match = re.search(r'Duration\s+(\d{1,2}:\d{2})', section)
+            if dur_match:
+                duracion = dur_match.group(1)
+            
+            # Equipo
+            eq_match = re.search(r'Equipment\s+([\w\s-]+)', section)
+            if eq_match:
+                equipo = eq_match.group(1).strip().split('\n')[0].strip()
+            
+            # Comida
+            meal_match = re.search(r'Flight Meal\s+(\w+)', section)
+            if meal_match:
+                comida = meal_match.group(1)
         
-        # Buscar ciudades (líneas con solo mayúsculas, excluyendo nombres comunes)
-        cities = []
-        exclude = ['AIRPORT', 'AIRLINES', 'TURKISH', 'FLOOR', 'IATA', 'BRICKELL', 'TRAVEL', 'MANAGEMENT']
-        for i in range(max(0, flight_idx - 15), min(len(lines), flight_idx + 5)):
-            city = lines[i].strip()
-            if re.match(r'^[A-Z]{3,}(?:\s+[A-Z]+)*$', city) and city not in exclude and len(city) > 2:
-                cities.append(city)
-                if len(cities) >= 2:
-                    break
+        flight = {
+            'segmento': len(flights) + 1,
+            'origen': origen,
+            'destino': destino,
+            'aerolinea': airline_code,
+            'numero_vuelo': flight_code,
+            'clase': clase,
+            'fecha_salida': fecha,
+            'hora_salida': hora_salida,
+            'hora_llegada': hora_llegada,
+            'estado': estado,
+            'asiento': asiento,
+            'equipaje': equipaje,
+            'duracion': duracion,
+            'equipo': equipo,
+            'comida': comida
+        }
         
-        if len(cities) < 2:
-            # Buscar después del vuelo
-            for i in range(flight_idx, min(len(lines), flight_idx + 15)):
-                city = lines[i].strip()
-                if re.match(r'^[A-Z]{3,}(?:\s+[A-Z]+)*$', city) and city not in exclude and len(city) > 2:
-                    cities.append(city)
-                    if len(cities) >= 2:
-                        break
-        
-        if len(cities) < 2:
-            continue
-        
-        # Extraer fecha y horas
-        date_match = re.search(r'(\d{2}[A-Z]{3})\s+(\d{2}:\d{2})', context)
-        arrival_match = re.search(r'(\d{2}:\d{2})\s*\n\s*Ok', context)
-        
-        # Extraer clase
-        class_match = re.search(r'^([A-Z])$', context, re.MULTILINE)
-        
-        # Extraer asiento
-        seat_match = re.search(r'^(\d{1,2}[A-Z])$', context, re.MULTILINE)
-        
-        # Extraer equipaje
-        baggage_match = re.search(r'(\d+PC)', context)
-        
-        if date_match:
-            flight = {
-                'segmento': len(flights) + 1,
-                'origen': cities[0],
-                'destino': cities[1] if len(cities) > 1 else 'No encontrado',
-                'aerolinea': airline_code,
-                'numero_vuelo': flight_code,
-                'clase': class_match.group(1) if class_match else 'Y',
-                'fecha_salida': date_match.group(1),
-                'hora_salida': date_match.group(2),
-                'hora_llegada': arrival_match.group(1) if arrival_match else 'No encontrado',
-                'estado': 'Ok',
-                'asiento': seat_match.group(1) if seat_match else 'No asignado',
-                'equipaje': baggage_match.group(1) if baggage_match else '1PC',
-                'duracion': 'No encontrado',
-                'equipo': 'No encontrado',
-                'comida': 'No encontrado'
-            }
-            flights.append(flight)
+        flights.append(flight)
     
     return flights
 

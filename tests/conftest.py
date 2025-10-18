@@ -83,3 +83,42 @@ def venta_base(db):
         descripcion_general='Venta base para tests'
     )
     return venta
+
+
+# ============================================
+# FIXTURES ADICIONALES PARA FASE 5
+# ============================================
+
+@pytest.fixture
+def mock_redis(mocker):
+    """Mock de Redis para tests de caché"""
+    mock = mocker.MagicMock()
+    mock.get.return_value = None
+    mock.set.return_value = True
+    mock.delete.return_value = True
+    return mock
+
+@pytest.fixture
+def mock_celery_task(mocker):
+    """Mock de tareas Celery"""
+    return mocker.patch('core.tasks.process_ticket_async.delay')
+
+@pytest.fixture
+def sample_pais(db):
+    """País de ejemplo para tests"""
+    from core.models_catalogos import Pais
+    pais, _ = Pais.objects.get_or_create(
+        codigo_iso='VE',
+        defaults={'nombre': 'Venezuela'}
+    )
+    return pais
+
+@pytest.fixture
+def sample_ciudad(db, sample_pais):
+    """Ciudad de ejemplo para tests"""
+    from core.models_catalogos import Ciudad
+    ciudad, _ = Ciudad.objects.get_or_create(
+        codigo_iata='CCS',
+        defaults={'nombre': 'Caracas', 'pais': sample_pais}
+    )
+    return ciudad

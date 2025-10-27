@@ -133,6 +133,8 @@ dmypy.json
 sandbox/
 media/boletos_generados/
 media/boletos_importados/
+media/pasaportes/
+media/facturas/
 staticfiles/
 *.pdf
 temp_*.py
@@ -141,12 +143,22 @@ iniciar.bat
 start.sh
 README_TESTS.md
 
+# Backups
+backup_*.json
+media_backup_*.tar.gz
+*.dump
+*.sql
+
 # SEGURIDAD: Credenciales y archivos sensibles
 auth/
 auth/*.json
 .env
 .env.local
 .env.*.local
+CREDENCIALES*.txt
+CREDENCIALES*.md
+PASSWORDS*.txt
+SECRETS*.txt
 
 # IDE
 .vscode/
@@ -161,6 +173,10 @@ Thumbs.db
 
 # Frontend
 frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/.env.local
+frontend/.env.*.local
 
 
 # Archivos temporales
@@ -183,3 +199,4 @@ tools_bin/*.exe
 # Archivos organizados
 Boleto_*.pdf
 test_output_*.pdf
+.env 

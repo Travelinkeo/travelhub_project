@@ -1,0 +1,77 @@
+{
+  "nombre_tarifario": "Tarifario Nacional Septiembre 2025",
+  "destino": "Los Roques",
+  "vigencia": {
+    "inicio": "2025-09-21",
+    "fin": "2026-01-15"
+  },
+  "comision_estandar": "15.00",
+  "hoteles": [
+    {
+      "nombre": "POSADA ACUARELA",
+      "destino": "Los Roques",
+      "ubicacion": "Gran Roque",
+      "regimen": "PENSION COMPLETA",
+      "comision": "15.00",
+      "politica_ninos": "0-3 años gratis, 4-10 años tarifa CHD, 11+ adulto",
+      "minimo_noches_baja": 2,
+      "minimo_noches_alta": 3,
+      "habitaciones": [
+        {
+          "tipo": "STANDARD",
+          "capacidad_adultos": 2,
+          "capacidad_ninos": 1,
+          "capacidad_total": 3,
+          "tarifas": [
+            {
+              "fecha_inicio": "2025-09-21",
+              "fecha_fin": "2025-12-20",
+              "temporada": "TEMPORADA BAJA",
+              "moneda": "EUR",
+              "sgl": "220.00",
+              "dbl": "250.00",
+              "tpl": "280.00",
+              "pax_adicional": "50.00",
+              "nino": "30.00"
+            },
+            {
+              "fecha_inicio": "2025-12-21",
+              "fecha_fin": "2026-01-06",
+              "temporada": "NAVIDAD Y FIN DE AÑO",
+              "moneda": "EUR",
+              "sgl": "280.00",
+              "dbl": "320.00",
+              "tpl": "360.00",
+              "pax_adicional": "70.00",
+              "nino": "40.00"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "nombre": "POSADA MEDITERRANEO",
+      "destino": "Los Roques",
+      "ubicacion": "Gran Roque",
+      "regimen": "TODO INCLUIDO",
+      "comision": "15.00",
+      "habitaciones": [
+        {
+          "tipo": "STANDARD",
+          "capacidad_adultos": 2,
+          "capacidad_total": 2,
+          "tarifas": [
+            {
+              "fecha_inicio": "2025-09-21",
+              "fecha_fin": "2025-12-20",
+              "temporada": "TEMPORADA BAJA",
+              "moneda": "USD",
+              "sgl": "180.00",
+              "dbl": "200.00"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

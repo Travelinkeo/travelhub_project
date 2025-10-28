@@ -47,11 +47,18 @@ export default function BoletoImportModal({ open, onClose, onUploadComplete }: B
 
     const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
     const endpoint = `${apiBaseUrl}/api/boletos-importados/`;
+    
+    // Obtener token de autenticación
+    const token = localStorage.getItem('auth_token');
+    const headers: HeadersInit = {};
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
 
     try {
       const response = await fetch(endpoint, {
         method: 'POST',
-        // Do NOT set Content-Type header for FormData, browser does it
+        headers,
         body: formData,
       });
 

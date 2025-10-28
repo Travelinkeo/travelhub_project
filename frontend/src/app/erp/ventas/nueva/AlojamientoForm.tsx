@@ -98,38 +98,20 @@ export default function AlojamientoForm({ open, onClose, onSave, alojamiento }: 
                         <Controller
                             name="ciudad"
                             control={control}
-                            render={({ field }) => {
-                                const [searchTerm, setSearchTerm] = React.useState('');
-                                const debouncedSearch = useDebounce(searchTerm, 300);
-                                const { data: ciudadesData, isLoading } = useApi<any>(
-                                    debouncedSearch ? `/api/ciudades/?search=${encodeURIComponent(debouncedSearch)}` : '/api/ciudades/'
-                                );
-                                
-                                const ciudades = ciudadesData?.results || [];
-                                const selectedCiudad = ciudades.find((c: any) => c.id_ciudad === field.value) || null;
-                                
-                                return (
-                                    <Autocomplete
-                                        options={ciudades}
-                                        loading={isLoading}
-                                        value={selectedCiudad}
-                                        onChange={(_, newValue) => field.onChange(newValue?.id_ciudad || null)}
-                                        onInputChange={(_, newInputValue) => setSearchTerm(newInputValue)}
-                                        getOptionLabel={(option) => option ? `${option.nombre} - ${option.pais_detalle?.nombre || ''}` : ''}
-                                        isOptionEqualToValue={(option, value) => option?.id_ciudad === value?.id_ciudad}
-                                        filterOptions={(x) => x}
-                                        renderInput={(params) => (
-                                            <TextField
-                                                {...params}
-                                                label="Ciudad"
-                                                error={!!errors.ciudad}
-                                                helperText={errors.ciudad?.message}
-                                                placeholder="Buscar ciudad..."
-                                            />
-                                        )}
-                                    />
-                                );
-                            }}
+                            render={({ field }) => (
+                                <ApiAutocomplete
+                                    value={field.value}
+                                    onChange={field.onChange}
+                                    endpoint="/api/ciudades/"
+                                    label="Ciudad"
+                                    optionIdField="id_ciudad"
+                                    optionLabelField="nombre"
+                                    enableSearch={true}
+                                    error={!!errors.ciudad}
+                                    helperText={errors.ciudad?.message}
+                                    getOptionLabel={(option: any) => option ? `${option.nombre} - ${option.pais_detalle?.nombre || ''}` : ''}
+                                />
+                            )}
                         />
                     </Box>
                     <IconButton 
@@ -180,12 +162,10 @@ export default function AlojamientoForm({ open, onClose, onSave, alojamiento }: 
                         value={field.value}
                         onChange={field.onChange}
                         endpoint="/api/proveedores/"
-                        label="Proveedor"
+                        label="Proveedor (opcional)"
                         optionIdField="id_proveedor"
                         optionLabelField="nombre"
                         enableSearch={true}
-                        error={!!errors.proveedor}
-                        helperText={errors.proveedor?.message}
                       />
                     )}
                   />

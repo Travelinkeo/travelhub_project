@@ -1,287 +1,295 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { 
-  Box, Typography, Alert, CircularProgress, Paper, Grid, Chip,
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow 
-} from '@mui/material';
+import { Box, Typography, Button, Card, CardContent, Chip, Alert, CircularProgress } from '@mui/material';
+import { useApi } from '@/hooks/useApi';
+import { Venta } from '@/types/api';
 
-// --- Interfaces based on Django Models ---
-interface VentaDetail {
-  [key: string]: any; // Keep for flexibility
-  items_venta: any[];
-  segmentos_vuelo: any[];
-  alojamientos: any[];
-  actividades: any[];
-  alquileres_autos: any[];
-  pagos_venta: any[];
-}
-
-// --- Reusable Table Components ---
-
-const ItemsVentaTable = ({ items }: { items: any[] }) => (
-  <Paper sx={{ p: 2, mt: 2 }}>
-    <Typography variant="h6" gutterBottom sx={{ pl: 2, pt: 1 }}>Items de Venta</Typography>
-    <TableContainer>
-      <Table size="small">
-        <TableHead>
-          <TableRow>
-            <TableCell>Descripción</TableCell>
-            <TableCell align="right">Cantidad</TableCell>
-            <TableCell align="right">Precio Unitario</TableCell>
-            <TableCell align="right">Total</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {items.map((item) => (
-            <TableRow key={item.id_item_venta}>
-              <TableCell>{item.descripcion_personalizada}</TableCell>
-              <TableCell align="right">{item.cantidad}</TableCell>
-              <TableCell align="right">{parseFloat(item.precio_unitario_venta).toFixed(2)}</TableCell>
-              <TableCell align="right">{parseFloat(item.total_item_venta).toFixed(2)}</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
-  </Paper>
-);
-
-const VuelosTable = ({ segmentos }: { segmentos: any[] }) => (
-  <Paper sx={{ p: 2, mt: 2 }}>
-    <Typography variant="h6" gutterBottom sx={{ pl: 2, pt: 1 }}>Vuelos</Typography>
-    <TableContainer>
-      <Table size="small">
-        <TableHead>
-          <TableRow>
-            <TableCell>Origen</TableCell>
-            <TableCell>Destino</TableCell>
-            <TableCell>Aerolínea</TableCell>
-            <TableCell>Vuelo</TableCell>
-            <TableCell>Salida</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {segmentos.map((seg) => (
-            <TableRow key={seg.id_segmento_vuelo}>
-              <TableCell>{seg.origen_detalle?.nombre || seg.origen}</TableCell>
-              <TableCell>{seg.destino_detalle?.nombre || seg.destino}</TableCell>
-              <TableCell>{seg.aerolinea}</TableCell>
-              <TableCell>{seg.numero_vuelo}</TableCell>
-              <TableCell>{new Date(seg.fecha_salida).toLocaleString('es-VE')}</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
-  </Paper>
-);
-
-const AlojamientosTable = ({ alojamientos }: { alojamientos: any[] }) => (
-  <Paper sx={{ p: 2, mt: 2 }}>
-    <Typography variant="h6" gutterBottom sx={{ pl: 2, pt: 1 }}>Alojamientos</Typography>
-    <TableContainer>
-      <Table size="small">
-        <TableHead>
-          <TableRow>
-            <TableCell>Establecimiento</TableCell>
-            <TableCell>Ciudad</TableCell>
-            <TableCell>Check-in</TableCell>
-            <TableCell>Check-out</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {alojamientos.map((h) => (
-            <TableRow key={h.id_alojamiento_reserva}>
-              <TableCell>{h.nombre_establecimiento}</TableCell>
-              <TableCell>{h.ciudad_detalle?.nombre || h.ciudad}</TableCell>
-              <TableCell>{new Date(h.check_in).toLocaleDateString('es-VE')}</TableCell>
-              <TableCell>{new Date(h.check_out).toLocaleDateString('es-VE')}</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
-  </Paper>
-);
-
-const ActividadesTable = ({ actividades }: { actividades: any[] }) => (
-    <Paper sx={{ p: 2, mt: 2 }}>
-        <Typography variant="h6" gutterBottom sx={{ pl: 2, pt: 1 }}>Actividades</Typography>
-        <TableContainer>
-        <Table size="small">
-            <TableHead>
-            <TableRow>
-                <TableCell>Nombre</TableCell>
-                <TableCell>Fecha</TableCell>
-                <TableCell>Proveedor</TableCell>
-                <TableCell align="right">Duración (hrs)</TableCell>
-            </TableRow>
-            </TableHead>
-            <TableBody>
-            {actividades.map((act) => (
-                <TableRow key={act.id_actividad_servicio}>
-                <TableCell>{act.nombre}</TableCell>
-                <TableCell>{new Date(act.fecha).toLocaleDateString('es-VE')}</TableCell>
-                <TableCell>{act.proveedor_detalle}</TableCell>
-                <TableCell align="right">{act.duracion_horas}</TableCell>
-                </TableRow>
-            ))}
-            </TableBody>
-        </Table>
-        </TableContainer>
-    </Paper>
-);
-
-const PagosTable = ({ pagos }: { pagos: any[] }) => (
-    <Paper sx={{ p: 2, mt: 2 }}>
-      <Typography variant="h6" gutterBottom sx={{ pl: 2, pt: 1 }}>Historial de Pagos</Typography>
-      <TableContainer>
-        <Table size="small">
-          <TableHead>
-            <TableRow>
-              <TableCell>Fecha</TableCell>
-              <TableCell>Método</TableCell>
-              <TableCell>Referencia</TableCell>
-              <TableCell align="right">Monto</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {pagos.map((pago) => (
-              <TableRow key={pago.id_pago_venta}>
-                <TableCell>{new Date(pago.fecha_pago).toLocaleDateString('es-VE')}</TableCell>
-                <TableCell>{pago.metodo_display}</TableCell>
-                <TableCell>{pago.referencia}</TableCell>
-                <TableCell align="right">{`${pago.moneda_detalle?.simbolo || '$'} ${parseFloat(pago.monto).toFixed(2)}`}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </Paper>
-  );
-
-// --- Main Detail Page Component ---
-
-export default function VentaDetailPage() {
+export default function VentaDetallePage() {
   const params = useParams();
-  const { id } = params;
+  const id = params.id as string;
+  
+  const { data: venta, isLoading, error } = useApi<Venta>(`/api/ventas/${id}/`);
 
-  const [venta, setVenta] = useState<VentaDetail | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const API_BASE = (process.env.NEXT_PUBLIC_API_BASE_URL || '').replace(/\/$/, '');
-
-  useEffect(() => {
-    if (!id) return;
-
-    async function fetchVentaDetail() {
-      try {
-        setLoading(true);
-        const url = API_BASE ? `${API_BASE}/api/ventas/${id}/` : `/api/ventas/${id}/`;
-        const response = await fetch(url);
-        if (!response.ok) {
-          throw new Error(`Error ${response.status}: No se pudo encontrar la venta.`);
-        }
-        const data = await response.json();
-        setVenta(data);
-      } catch (e: any) {
-        setError(`Error al cargar los detalles: ${e.message}`);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchVentaDetail();
-  }, [id, API_BASE]);
-
-  if (loading) {
-    return <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}><CircularProgress /></Box>;
-  }
-
-  if (error) {
-    return <Alert severity="error">{error}</Alert>;
-  }
-
-  if (!venta) {
-    return <Alert severity="warning">No se encontraron datos para esta venta.</Alert>;
-  }
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'PAG': case 'CNF': return 'success';
-      case 'PEN': case 'PAR': return 'warning';
-      case 'CAN': return 'error';
-      default: return 'default';
+  const handleGenerarVoucher = async (servicioId: number) => {
+    try {
+      const token = localStorage.getItem('auth_token') || localStorage.getItem('access_token');
+      const response = await fetch(`http://localhost:8000/api/servicios-adicionales/${servicioId}/generar_voucher/`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      
+      if (!response.ok) throw new Error('Error al generar voucher');
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Voucher-Servicio-${servicioId}.pdf`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    } catch (e) {
+      alert('Error al generar voucher: ' + (e instanceof Error ? e.message : 'Error desconocido'));
     }
   };
 
-  const hasProducts = [venta.items_venta, venta.segmentos_vuelo, venta.alojamientos, venta.actividades, venta.alquileres_autos].some(arr => arr && arr.length > 0);
+  const handleGenerarVoucherAlojamiento = async (alojamientoId: number) => {
+    try {
+      const token = localStorage.getItem('auth_token') || localStorage.getItem('access_token');
+      const response = await fetch(`http://localhost:8000/api/alojamientos/${alojamientoId}/generar_voucher/`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      
+      if (!response.ok) throw new Error('Error al generar voucher');
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Voucher-Alojamiento-${alojamientoId}.pdf`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    } catch (e) {
+      alert('Error al generar voucher: ' + (e instanceof Error ? e.message : 'Error desconocido'));
+    }
+  };
+
+  const handleGenerarVoucherGenerico = async (tipo: string, id: number, endpoint: string) => {
+    try {
+      const token = localStorage.getItem('auth_token') || localStorage.getItem('access_token');
+      const response = await fetch(`http://localhost:8000${endpoint}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Error al generar voucher');
+      }
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Voucher-${tipo}-${id}.pdf`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    } catch (e) {
+      alert('Error: ' + (e instanceof Error ? e.message : 'Error desconocido'));
+    }
+  };
+
+  if (isLoading) return <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}><CircularProgress /></Box>;
+  if (error) return <Alert severity="error">Error al cargar la venta: {error.message}</Alert>;
+  if (!venta) return <Alert severity="warning">Venta no encontrada</Alert>;
 
   return (
-    <Box sx={{ p: 3, maxWidth: 1400, margin: 'auto' }}>
+    <Box sx={{ p: 3 }}>
       <Typography variant="h4" gutterBottom>
-        Detalle de Venta
+        Venta {venta.localizador}
       </Typography>
-      
-      {/* --- Main Info Header --- */}
-      <Paper sx={{ p: 3, mt: 2, mb: 3 }}>
-        <Grid container spacing={3}>
-          <Grid item xs={12} sm={6} md={3}>
-            <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>Localizador</Typography>
-            <Typography variant="h6" component="p">{venta.localizador || 'N/A'}</Typography>
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>Cliente</Typography>
-            <Typography variant="h6" component="p">{venta.cliente_detalle?.get_nombre_completo || 'N/A'}</Typography>
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>Fecha</Typography>
-            <Typography variant="h6" component="p">{new Date(venta.fecha_venta).toLocaleDateString('es-VE')}</Typography>
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>Estado</Typography>
-            <Chip label={venta.estado_display} color={getStatusColor(venta.estado)} />
-          </Grid>
-        </Grid>
-      </Paper>
 
-      <Grid container spacing={3}>
-        {/* --- Left Column: Products & Services --- */}
-        <Grid item xs={12} md={8}>
-            <Typography variant="h5" gutterBottom>Productos y Servicios</Typography>
-            {venta.items_venta && venta.items_venta.length > 0 && <ItemsVentaTable items={venta.items_venta} />}
-            {venta.segmentos_vuelo && venta.segmentos_vuelo.length > 0 && <VuelosTable segmentos={venta.segmentos_vuelo} />}
-            {venta.alojamientos && venta.alojamientos.length > 0 && <AlojamientosTable alojamientos={venta.alojamientos} />}
-            {venta.actividades && venta.actividades.length > 0 && <ActividadesTable actividades={venta.actividades} />}
-            {!hasProducts && <Alert severity="info">No hay productos o servicios detallados para esta venta.</Alert>}
-        </Grid>
+      <Card sx={{ mb: 3 }}>
+        <CardContent>
+          <Typography variant="h6" gutterBottom>Información General</Typography>
+          <Typography>Cliente: {venta.cliente_detalle?.get_nombre_completo}</Typography>
+          <Typography>Fecha: {new Date(venta.fecha_venta).toLocaleDateString()}</Typography>
+          <Typography>Total: {venta.moneda_detalle?.codigo_iso} {parseFloat(venta.total_venta).toFixed(2)}</Typography>
+          <Chip label={venta.estado} color="primary" size="small" sx={{ mt: 1 }} />
+        </CardContent>
+      </Card>
 
-        {/* --- Right Column: Financials & Payments --- */}
-        <Grid item xs={12} md={4}>
-            <Typography variant="h5" gutterBottom>Finanzas</Typography>
-            <Paper sx={{ p: 2, mt: 2 }}>
-                <Grid container spacing={1.5}>
-                    <Grid item xs={6}><Typography variant="body1">Subtotal:</Typography></Grid>
-                    <Grid item xs={6}><Typography variant="body1" align="right">{parseFloat(venta.subtotal).toFixed(2)}</Typography></Grid>
-                    <Grid item xs={6}><Typography variant="body1">Impuestos:</Typography></Grid>
-                    <Grid item xs={6}><Typography variant="body1" align="right">{parseFloat(venta.impuestos).toFixed(2)}</Typography></Grid>
-                    <Grid item xs={12}><hr/></Grid>
-                    <Grid item xs={6}><Typography variant="h6">Total:</Typography></Grid>
-                    <Grid item xs={6}><Typography variant="h6" align="right">{parseFloat(venta.total_venta).toFixed(2)}</Typography></Grid>
-                    <Grid item xs={6}><Typography variant="body1" color="success.main">Pagado:</Typography></Grid>
-                    <Grid item xs={6}><Typography variant="body1" align="right" color="success.main">{parseFloat(venta.monto_pagado).toFixed(2)}</Typography></Grid>
-                    <Grid item xs={6}><Typography variant="h6" color="error.main">Saldo:</Typography></Grid>
-                    <Grid item xs={6}><Typography variant="h6" align="right" color="error.main">{parseFloat(venta.saldo_pendiente).toFixed(2)}</Typography></Grid>
-                </Grid>
-            </Paper>
+      {venta.alojamientos && venta.alojamientos.length > 0 && (
+        <Box sx={{ mb: 3 }}>
+          <Typography variant="h6" gutterBottom>Alojamientos</Typography>
+          {venta.alojamientos.map((alojamiento: any) => (
+            <Card key={alojamiento.id_alojamiento_reserva} sx={{ mb: 2 }}>
+              <CardContent>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Box>
+                    <Typography variant="subtitle1" fontWeight="bold">
+                      {alojamiento.nombre_establecimiento}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Ciudad: {alojamiento.ciudad_detalle?.nombre || 'N/A'}
+                    </Typography>
+                    {alojamiento.check_in && alojamiento.check_out && (
+                      <Typography variant="body2">
+                        {new Date(alojamiento.check_in).toLocaleDateString()} - {new Date(alojamiento.check_out).toLocaleDateString()}
+                      </Typography>
+                    )}
+                    {alojamiento.habitaciones && (
+                      <Typography variant="body2">
+                        Habitaciones: {alojamiento.habitaciones}
+                      </Typography>
+                    )}
+                  </Box>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => handleGenerarVoucherAlojamiento(alojamiento.id_alojamiento_reserva)}
+                  >
+                    Generar Voucher
+                  </Button>
+                </Box>
+              </CardContent>
+            </Card>
+          ))}
+        </Box>
+      )}
 
-            {venta.pagos_venta && venta.pagos_venta.length > 0 && <PagosTable pagos={venta.pagos_venta} />}
-        </Grid>
-      </Grid>
+      {venta.servicios_adicionales && venta.servicios_adicionales.length > 0 && (
+        <Box>
+          <Typography variant="h6" gutterBottom>Servicios Adicionales</Typography>
+          {venta.servicios_adicionales.map((servicio) => (
+            <Card key={servicio.id_servicio_adicional} sx={{ mb: 2 }}>
+              <CardContent>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Box>
+                    <Typography variant="subtitle1" fontWeight="bold">
+                      {servicio.descripcion}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Código: {servicio.codigo_referencia || 'N/A'}
+                    </Typography>
+                    {servicio.fecha_inicio && (
+                      <Typography variant="body2">
+                        Fecha: {new Date(servicio.fecha_inicio).toLocaleDateString()}
+                      </Typography>
+                    )}
+                  </Box>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => handleGenerarVoucher(servicio.id_servicio_adicional)}
+                  >
+                    Generar Voucher
+                  </Button>
+                </Box>
+              </CardContent>
+            </Card>
+          ))}
+        </Box>
+      )}
 
+      {venta.alquileres_autos && venta.alquileres_autos.length > 0 && (
+        <Box sx={{ mb: 3 }}>
+          <Typography variant="h6" gutterBottom>Alquileres de Auto</Typography>
+          {venta.alquileres_autos.map((alquiler: any) => (
+            <Card key={alquiler.id_alquiler_auto} sx={{ mb: 2 }}>
+              <CardContent>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Box>
+                    <Typography variant="subtitle1" fontWeight="bold">
+                      {alquiler.compania_rentadora} - {alquiler.categoria_auto}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Confirmación: {alquiler.numero_confirmacion || 'N/A'}
+                    </Typography>
+                    {alquiler.fecha_hora_retiro && alquiler.fecha_hora_devolucion && (
+                      <Typography variant="body2">
+                        {new Date(alquiler.fecha_hora_retiro).toLocaleDateString()} - {new Date(alquiler.fecha_hora_devolucion).toLocaleDateString()}
+                      </Typography>
+                    )}
+                  </Box>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => handleGenerarVoucherGenerico('AlquilerAuto', alquiler.id_alquiler_auto, `/api/alquileres-autos/${alquiler.id_alquiler_auto}/generar_voucher/`)}
+                  >
+                    Generar Voucher
+                  </Button>
+                </Box>
+              </CardContent>
+            </Card>
+          ))}
+        </Box>
+      )}
+
+      {venta.traslados && venta.traslados.length > 0 && (
+        <Box sx={{ mb: 3 }}>
+          <Typography variant="h6" gutterBottom>Traslados</Typography>
+          {venta.traslados.map((traslado: any) => (
+            <Card key={traslado.id_traslado_servicio} sx={{ mb: 2 }}>
+              <CardContent>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Box>
+                    <Typography variant="subtitle1" fontWeight="bold">
+                      {traslado.tipo_traslado_display}: {traslado.origen} → {traslado.destino}
+                    </Typography>
+                    {traslado.fecha_hora && (
+                      <Typography variant="body2">
+                        {new Date(traslado.fecha_hora).toLocaleString()}
+                      </Typography>
+                    )}
+                    <Typography variant="body2" color="text.secondary">
+                      Pasajeros: {traslado.pasajeros}
+                    </Typography>
+                  </Box>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => handleGenerarVoucherGenerico('Traslado', traslado.id_traslado_servicio, `/api/traslados/${traslado.id_traslado_servicio}/generar_voucher/`)}
+                  >
+                    Generar Voucher
+                  </Button>
+                </Box>
+              </CardContent>
+            </Card>
+          ))}
+        </Box>
+      )}
+
+      {venta.actividades && venta.actividades.length > 0 && (
+        <Box sx={{ mb: 3 }}>
+          <Typography variant="h6" gutterBottom>Actividades y Excursiones</Typography>
+          {venta.actividades.map((actividad: any) => (
+            <Card key={actividad.id_actividad_servicio} sx={{ mb: 2 }}>
+              <CardContent>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Box>
+                    <Typography variant="subtitle1" fontWeight="bold">
+                      {actividad.nombre}
+                    </Typography>
+                    {actividad.fecha && (
+                      <Typography variant="body2">
+                        {new Date(actividad.fecha).toLocaleDateString()}
+                      </Typography>
+                    )}
+                    {actividad.duracion_horas && (
+                      <Typography variant="body2" color="text.secondary">
+                        Duración: {actividad.duracion_horas} horas
+                      </Typography>
+                    )}
+                  </Box>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => handleGenerarVoucherGenerico('Actividad', actividad.id_actividad_servicio, `/api/actividades/${actividad.id_actividad_servicio}/generar_voucher/`)}
+                  >
+                    Generar Voucher
+                  </Button>
+                </Box>
+              </CardContent>
+            </Card>
+          ))}
+        </Box>
+      )}
+
+      {(!venta.alojamientos || venta.alojamientos.length === 0) && 
+       (!venta.servicios_adicionales || venta.servicios_adicionales.length === 0) &&
+       (!venta.alquileres_autos || venta.alquileres_autos.length === 0) &&
+       (!venta.traslados || venta.traslados.length === 0) &&
+       (!venta.actividades || venta.actividades.length === 0) && (
+        <Alert severity="info">Esta venta no tiene servicios asociados</Alert>
+      )}
     </Box>
   );
 }

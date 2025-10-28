@@ -71,9 +71,24 @@ class PasaporteEscaneado(models.Model):
     
     def to_cliente_data(self):
         """Convierte datos del pasaporte a formato para crear/actualizar cliente"""
-        return {
+        from core.models_catalogos import Pais
+        
+        data = {
             'nombres': self.nombres or 'Sin nombre',
             'apellidos': self.apellidos or 'Sin apellido',
             'numero_pasaporte': self.numero_pasaporte,
             'fecha_nacimiento': self.fecha_nacimiento,
+            'fecha_expiracion_pasaporte': self.fecha_vencimiento,
         }
+        
+        # Convertir código ISO de nacionalidad a instancia de País
+        if self.nacionalidad:
+            try:
+                pais = Pais.objects.filter(codigo_iso_3=self.nacionalidad).first()
+                if pais:
+                    data['nacionalidad'] = pais  # Asignar instancia, no ID
+                    data['pais_emision_pasaporte'] = pais  # Asignar instancia, no ID
+            except Exception:
+                pass
+        
+        return data

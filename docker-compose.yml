@@ -1,20 +1,54 @@
-version: '3.9'
+version: '3.8'
+
 services:
   db:
     image: postgres:16-alpine
-    restart: unless-stopped
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-travelhub}
-      POSTGRES_USER: ${POSTGRES_USER:-travelhub}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-travelhub}
+      POSTGRES_DB: ${DB_NAME:-TravelHub}
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
     volumes:
-      - db_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER:-travelhub}"]
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
       timeout: 5s
       retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build: .
+    command: gunicorn --bind 0.0.0.0:8000 --workers 4 travelhub.wsgi:application
+    volumes:
+      - .:/app
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      - DB_ENGINE=django.db.backends.postgresql
+      - DB_HOST=db
+      - REDIS_URL=redis://redis:6379/1
+
 volumes:
-  db_data:
+  postgres_data:
+  static_volume:
+  media_volume:

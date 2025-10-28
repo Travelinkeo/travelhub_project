@@ -35,6 +35,10 @@ const Sidebar = ({ isOpen, onToggle }: SidebarProps) => {
       ],
     },
     {
+      name: 'Cotizador Hoteles',
+      path: '/cotizaciones/hoteles',
+    },
+    {
       name: 'Reportes',
       path: '/reportes',
       subItems: [

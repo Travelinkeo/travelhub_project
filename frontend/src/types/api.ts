@@ -28,18 +28,39 @@ export interface Cliente {
 export interface Proveedor {
   id_proveedor?: number;
   nombre: string;
+  alias?: string;
+  rif?: string;
   tipo_proveedor: string;
   nivel_proveedor: string;
   contacto_nombre?: string;
   contacto_email?: string;
   contacto_telefono?: string;
   direccion?: string;
+  ciudad?: number;
   notas?: string;
   numero_cuenta_agencia?: string;
   condiciones_pago?: string;
   datos_bancarios?: string;
+  fee_nacional?: string;
+  fee_internacional?: string;
   activo: boolean;
-  // Añadir otros campos del modelo de Django según sea necesario
+  iata?: string;
+  seudo_sabre?: string;
+  office_id_kiu?: string;
+  office_id_amadeus?: string;
+  office_id_travelport?: string;
+  office_id_hotelbeds?: string;
+  office_id_expedia?: string;
+  otro_sistema_1_nombre?: string;
+  otro_sistema_1_id?: string;
+  otro_sistema_2_nombre?: string;
+  otro_sistema_2_id?: string;
+  otro_sistema_3_nombre?: string;
+  otro_sistema_3_id?: string;
+  otro_sistema_4_nombre?: string;
+  otro_sistema_4_id?: string;
+  otro_sistema_5_nombre?: string;
+  otro_sistema_5_id?: string;
 }
 
 
@@ -98,6 +119,20 @@ export interface ProductoServicio {
 
 export type EstadoVenta = 'PEN' | 'PAR' | 'PAG' | 'CNF' | 'COM' | 'CAN';
 
+export interface AlojamientoReserva {
+  id_alojamiento_reserva: number;
+  venta: number;
+  nombre_establecimiento: string;
+  ciudad?: number;
+  ciudad_detalle?: Ciudad;
+  check_in?: string;
+  check_out?: string;
+  regimen_alimentacion?: string;
+  habitaciones?: number;
+  proveedor?: number;
+  notas?: string;
+}
+
 export interface Venta {
   id_venta: number;
   localizador: string;
@@ -109,6 +144,8 @@ export interface Venta {
   moneda_detalle?: Moneda;
   descripcion_general?: string;
   estado?: string;
+  servicios_adicionales?: ServicioAdicionalDetalle[];
+  alojamientos?: AlojamientoReserva[];
 }
 
 export type EstadoFactura = 'BOR' | 'EMI' | 'PAR' | 'PAG' | 'VEN' | 'ANU';
@@ -229,12 +266,17 @@ export interface ItemCotizacion {
 }
 
 export interface ServicioAdicionalDetalle {
-  id_servicio_adicional_detalle: number;
+  id_servicio_adicional: number;
   venta: number;
+  tipo_servicio?: string;
   descripcion: string;
-  costo: string;
-  precio_venta: string;
-  proveedor: number | null;
+  fecha_inicio?: string;
+  fecha_fin?: string;
+  codigo_referencia?: string;
+  costo_neto?: string;
+  precio_venta?: string;
+  proveedor?: number | null;
+  notas?: string;
 }
 
 export interface Cotizacion {

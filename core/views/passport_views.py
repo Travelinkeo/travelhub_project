@@ -44,9 +44,12 @@ def upload_passport(request):
             nombres=passport_data.get('nombres', ''),
             apellidos=passport_data.get('apellidos', ''),
             nacionalidad=passport_data.get('nacionalidad', ''),
+            fecha_nacimiento=passport_data.get('fecha_nacimiento'),
+            fecha_vencimiento=passport_data.get('fecha_vencimiento'),
             sexo=passport_data.get('sexo', ''),
             confianza_ocr=result['confidence'],
             texto_mrz=passport_data.get('texto_mrz', ''),
+            datos_ocr_completos=passport_data,
         )
         
         return Response({
@@ -57,8 +60,8 @@ def upload_passport(request):
                 'nombres': pasaporte.nombres or '',
                 'apellidos': pasaporte.apellidos or '',
                 'nacionalidad': pasaporte.nacionalidad or '',
-                'fecha_nacimiento': '',
-                'fecha_vencimiento': '',
+                'fecha_nacimiento': str(pasaporte.fecha_nacimiento) if pasaporte.fecha_nacimiento else '',
+                'fecha_vencimiento': str(pasaporte.fecha_vencimiento) if pasaporte.fecha_vencimiento else '',
                 'sexo': pasaporte.sexo or '',
                 'confianza': pasaporte.confianza_ocr or 'LOW',
                 'es_valido': bool(pasaporte.numero_pasaporte)

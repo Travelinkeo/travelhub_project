@@ -1,0 +1,19 @@
+# PDF generation and processing
+weasyprint==65.1
+PyMuPDF==1.26.3
+pdfplumber==0.11.7
+pdfminer.six==20250506
+pdfkit==1.0.0
+reportlab==4.4.3
+
+# PDF dependencies
+Pillow==11.3.0
+pypdfium2==4.30.0
+lxml==5.4.0
+cssselect2==0.8.0
+tinycss2==1.4.0
+pydyf==0.11.0
+pyphen==0.17.2
+fonttools==4.58.4
+Brotli==1.1.0
+zopfli==0.2.3.post1

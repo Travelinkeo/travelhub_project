@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voucher de Alojamiento - {{ nombre_establecimiento }}</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Open+Sans:wght@400;600&display=swap');
+
+        :root {
+            --tk-dark-blue: #0d1e40;
+            --tk-medium-blue: #2173a6;
+            --tk-text-dark: #2c3e50;
+            --tk-text-light: #495057;
+            --tk-background-light: #f8f9fa;
+            --tk-border-light: #e9ecef;
+        }
+
+        @page { margin: 0; size: A4; }
+        * { box-sizing: border-box; }
+
+        body {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+            margin: 0;
+            padding: 0;
+            background-color: #eef2f9;
+            font-family: 'Open Sans', sans-serif;
+            font-size: 10pt;
+            color: var(--tk-text-light);
+        }
+
+        .voucher-container {
+            width: 210mm;
+            min-height: 297mm;
+            margin: 0 auto;
+            background-color: #ffffff;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .voucher-header {
+            background-color: var(--tk-dark-blue);
+            color: white;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .voucher-header img.logo { height: 45px; }
+
+        .header-contact {
+            text-align: right;
+            font-size: 8pt;
+            line-height: 1.6;
+        }
+
+        .voucher-body {
+            padding: 25px 30px;
+            flex-grow: 1;
+        }
+
+        .voucher-body h1 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 22pt;
+            color: var(--tk-dark-blue);
+            margin: 0 0 10px 0;
+            font-weight: 700;
+        }
+
+        .voucher-subtitle {
+            font-size: 11pt;
+            color: var(--tk-text-light);
+            margin-bottom: 25px;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .info-icon {
+            flex-shrink: 0;
+            margin-right: 15px;
+            width: 40px;
+            height: 40px;
+            background-color: #eaf5ff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .info-icon svg {
+            width: 20px;
+            height: 20px;
+            fill: var(--tk-medium-blue);
+        }
+        
+        .section-header h2 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 14pt;
+            font-weight: 600;
+            color: var(--tk-dark-blue);
+            margin: 0;
+        }
+
+        .details-card {
+            background-color: var(--tk-background-light);
+            border: 1px solid var(--tk-border-light);
+            border-radius: 8px;
+            padding: 20px;
+        }
+        
+        .details-card p {
+            margin: 0 0 12px 0;
+            line-height: 1.6;
+        }
+
+        .details-card p:last-child { margin-bottom: 0; }
+
+        .details-card .label {
+            font-weight: 400;
+            color: var(--tk-text-light);
+        }
+
+        .details-card .value {
+            font-weight: 600;
+            color: var(--tk-text-dark);
+        }
+
+        .hotel-highlight {
+            background: linear-gradient(135deg, var(--tk-dark-blue) 0%, var(--tk-medium-blue) 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+        }
+
+        .hotel-highlight h2 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 16pt;
+            margin: 0 0 5px 0;
+            font-weight: 700;
+        }
+
+        .hotel-highlight .location {
+            font-size: 9pt;
+            opacity: 0.9;
+            padding-left: 0;
+            margin-left: 0;
+        }
+
+        .dates-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .date-box {
+            background-color: rgba(255, 255, 255, 0.15);
+            padding: 10px 15px;
+            border-radius: 6px;
+            text-align: center;
+            min-height: 60px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .date-box .box-label {
+            font-size: 8pt;
+            opacity: 0.9;
+            margin-bottom: 6px;
+            color: #ffffff;
+            font-weight: 400;
+        }
+
+        .date-box .box-value {
+            font-size: 10pt;
+            font-weight: 600;
+            color: #ffffff;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .room-details {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-left: 4px solid white;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 15px;
+        }
+
+        .room-details h3 {
+            font-size: 10pt;
+            font-weight: 600;
+            margin: 0 0 8px 0;
+        }
+
+        .room-details p {
+            font-size: 9pt;
+            font-weight: 500;
+            margin: 0;
+        }
+
+        .notes-section {
+            background-color: #fff8e1;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+
+        .notes-section h3 {
+            font-size: 10pt;
+            font-weight: 600;
+            margin: 0 0 8px 0;
+            color: var(--tk-text-dark);
+        }
+
+        .voucher-footer {
+            background-color: var(--tk-background-light);
+            color: var(--tk-text-dark);
+            padding: 20px 35px;
+            text-align: center;
+            font-size: 8pt;
+            line-height: 1.6;
+        }
+        
+        .voucher-footer .thank-you {
+            font-size: 9pt;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="voucher-container">
+        <header class="voucher-header">
+            <img class="logo" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAUEAAABLCAYAAADu4jXjAAAAAXNSR0IArs4c6QAAIABJREFUeF7tnQe4bVdV7+cQUZ/P9/QVVPTxAKUXEVBApUkVBBJCk94IPUSqQEBCQoAEgQASSoIgEKQJohRBQBJCk94IPUSqQEBApUkVBBJCk97..." alt="Logo de Travelinkeo">
+            <div class="header-contact">
+                TELEFONO: +584123312314 / +584126080861<br>
+                MAIL INFO: TRAVELINKEO@GMAIL.COM
+            </div>
+        </header>
+
+        <main class="voucher-body">
+            <h1>Voucher de Alojamiento</h1>
+            <p class="voucher-subtitle">Número de Confirmación: <strong>{{ numero_confirmacion }}</strong></p>
+            
+            <div class="info-grid">
+                <div>
+                    <div class="section-header">
+                        <div class="info-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                        </div>
+                        <h2>Huésped</h2>
+                    </div>
+                    <div class="details-card">
+                        <p><span class="label">Nombre:</span><br><span class="value">{{ nombre_huesped }}</span></p>
+                        <p><span class="label">Ocupantes:</span><br><span class="value">{{ ocupantes }}</span></p>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="section-header">
+                        <div class="info-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M22 10V6c0-1.11-.9-2-2-2H4c-1.1 0-2 .89-2 2v4c1.1 0 2 .89 2 2s-.9 2-2 2v4c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2v-4c-1.1 0-2-.89-2-2s.9-2 2-2zm-4 4H6v-2h12v2zm0-4H6V8h12v2z"/></svg>
+                        </div>
+                        <h2>Reserva</h2>
+                    </div>
+                    <div class="details-card">
+                        <p><span class="label">Localizador:</span><br><span class="value">{{ localizador_proveedor|default:"N/A" }}</span></p>
+                        <p><span class="label">Código:</span><br><span class="value">{{ numero_confirmacion }}</span></p>
+                        <p><span class="label">Emisión:</span><br><span class="value">{{ fecha_emision }}</span></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hotel-highlight">
+                <h2>{{ nombre_establecimiento }}</h2>
+                <p class="location">📍 {{ ciudad }}</p>
+                
+                <div class="dates-grid">
+                    <div class="date-box">
+                        <div class="box-label">Check-in</div>
+                        <div class="box-value">{{ check_in }}</div>
+                    </div>
+                    <div class="date-box">
+                        <div class="box-label">Check-out</div>
+                        <div class="box-value">{{ check_out }}</div>
+                    </div>
+                    <div class="date-box">
+                        <div class="box-label">Duración</div>
+                        <div class="box-value">{{ duracion }}</div>
+                    </div>
+                </div>
+
+                {% if regimen_alimentacion or habitaciones %}
+                <div class="room-details">
+                    <h3>Habitación y Plan</h3>
+                    {% if regimen_alimentacion %}
+                    <p>{{ regimen_alimentacion }}</p>
+                    {% endif %}
+                    {% if habitaciones %}
+                    <p>{{ habitaciones }} Habitación{% if habitaciones > 1 %}es{% endif %}</p>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+
+            {% if notas %}
+            <div class="notes-section">
+                <h3>Notas Importantes</h3>
+                <p>{{ notas }}</p>
+            </div>
+            {% endif %}
+        </main>
+
+        <footer class="voucher-footer">
+            <div class="thank-you">¡Que disfrute de su estadía!</div>
+            @TRAVELINKEO | +58412 3312314 / +58412 6080861 | PROLONGACION ZULUAGA, EDIF. Q, LOS ROSALES, CARACAS
+        </footer>
+    </div>
+</body>
+</html>

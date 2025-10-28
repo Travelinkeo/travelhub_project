@@ -71,6 +71,8 @@ class TipoCambio(models.Model):
 class Proveedor(models.Model):
     id_proveedor = models.AutoField(primary_key=True, verbose_name=_("ID Proveedor"))
     nombre = models.CharField(_("Nombre del Proveedor"), max_length=150, unique=True, validators=[validar_no_vacio_o_espacios])
+    alias = models.CharField(_("Alias/Nombre Comercial"), max_length=150, blank=True, null=True, help_text=_("Nombre con el que es conocido en el mercado"))
+    rif = models.CharField(_("RIF"), max_length=20, blank=True, null=True, help_text=_("Registro de Información Fiscal"))
 
     class TipoProveedorChoices(models.TextChoices):
         AEROLINEA = 'AER', _('Aerolínea')
@@ -100,6 +102,11 @@ class Proveedor(models.Model):
     numero_cuenta_agencia = models.CharField(_("Número de Cuenta/IATA con el Proveedor"), max_length=50, blank=True, null=True)
     condiciones_pago = models.CharField(_("Condiciones de Pago"), max_length=100, blank=True, null=True)
     datos_bancarios = models.TextField(_("Datos Bancarios del Proveedor"), blank=True, null=True)
+    
+    # --- Fees y Comisiones ---
+    fee_nacional = models.DecimalField(_("Fee Nacional"), max_digits=10, decimal_places=2, blank=True, null=True, help_text=_("Fee por servicios nacionales"))
+    fee_internacional = models.DecimalField(_("Fee Internacional"), max_digits=10, decimal_places=2, blank=True, null=True, help_text=_("Fee por servicios internacionales"))
+    
     activo = models.BooleanField(_("Activo"), default=True, help_text=_("Indica si el proveedor está actualmente activo."))
 
     # --- Campos de Identificación GDS y Sistemas --- 
@@ -167,10 +174,38 @@ class ProductoServicio(models.Model):
         return f"{self.nombre} ({self.get_tipo_producto_display()})"
 
 
+class ComisionProveedorServicio(models.Model):
+    """Comisiones específicas del proveedor por tipo de servicio"""
+    id_comision = models.AutoField(primary_key=True, verbose_name=_("ID Comisión"))
+    proveedor = models.ForeignKey(Proveedor, on_delete=models.CASCADE, related_name='comisiones', verbose_name=_("Proveedor"))
+    tipo_servicio = models.CharField(_("Tipo de Servicio"), max_length=3, choices=ProductoServicio.TipoProductoChoices.choices)
+    comision_porcentaje = models.DecimalField(_("Comisión (%)"), max_digits=5, decimal_places=2, blank=True, null=True, help_text=_("Porcentaje de comisión"))
+    comision_monto_fijo = models.DecimalField(_("Comisión Monto Fijo"), max_digits=10, decimal_places=2, blank=True, null=True, help_text=_("Monto fijo de comisión"))
+    moneda = models.ForeignKey(Moneda, on_delete=models.PROTECT, blank=True, null=True, verbose_name=_("Moneda"))
+    notas = models.TextField(_("Notas"), blank=True, null=True)
+    activo = models.BooleanField(_("Activo"), default=True)
+    
+    class Meta:
+        verbose_name = _("Comisión de Proveedor por Servicio")
+        verbose_name_plural = _("Comisiones de Proveedores por Servicios")
+        ordering = ['proveedor__nombre', 'tipo_servicio']
+        unique_together = ('proveedor', 'tipo_servicio')
+    
+    def __str__(self):
+        if self.comision_porcentaje:
+            return f"{self.proveedor.nombre} - {self.get_tipo_servicio_display()}: {self.comision_porcentaje}%"
+        elif self.comision_monto_fijo:
+            return f"{self.proveedor.nombre} - {self.get_tipo_servicio_display()}: {self.comision_monto_fijo} {self.moneda.codigo_iso if self.moneda else ''}"
+        return f"{self.proveedor.nombre} - {self.get_tipo_servicio_display()}"
+
+
 class Aerolinea(models.Model):
     id_aerolinea = models.AutoField(primary_key=True, verbose_name=_("ID Aerolínea"))
-    codigo_iata = models.CharField(_("Código IATA"), max_length=2, unique=True, help_text=_("Código IATA de 2 letras de la aerolínea (ej. AA, AV, LA)."))
+    codigo_iata = models.CharField(_("Código IATA"), max_length=3, blank=True, help_text=_("Código IATA de 2 letras de la aerolínea (ej. AA, AV, LA)."))
+    codigo_icao = models.CharField(_("Código ICAO"), max_length=3, blank=True, help_text=_("Código ICAO de 3 letras"))
     nombre = models.CharField(_("Nombre de la Aerolínea"), max_length=150, validators=[validar_no_vacio_o_espacios])
+    pais_origen = models.CharField(_("País de Origen"), max_length=100, blank=True)
+    rif = models.CharField(_("RIF"), max_length=20, blank=True, help_text=_("RIF venezolano o E-99999999-X para internacionales"))
     activa = models.BooleanField(_("Activa"), default=True, help_text=_("Indica si la aerolínea está actualmente operando."))
     
     class Meta:

@@ -1,0 +1,12 @@
+# Parsing and data processing
+beautifulsoup4==4.13.4
+soupsieve==2.7
+html5lib==1.1
+html2text==2025.4.15
+eml_parser==2.0.0
+Jinja2==3.1.6
+
+# Data processing
+pandas==2.3.2
+numpy==2.3.2
+openpyxl==3.1.5

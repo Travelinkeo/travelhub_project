@@ -48,12 +48,14 @@ const alquilerAutoSchema = z.object({
 }).optional().nullable();
 
 const trasladoSchema = z.object({
-  origen: z.string().optional(),
-  destino: z.string().optional(),
-  fecha_hora: z.string().nullable().optional(),
-  hora: z.string().nullable().optional(),
+  traslados: z.array(z.object({
+    origen: z.string().optional(),
+    destino: z.string().optional(),
+    fecha_hora: z.string().nullable().optional(),
+    hora: z.string().nullable().optional(),
+  })).optional(),
   pasajeros: z.number().optional(),
-  proveedor: z.number().optional(),
+  proveedor: z.number().optional().nullable(),
   notas: z.string().optional(),
 }).optional().nullable();
 

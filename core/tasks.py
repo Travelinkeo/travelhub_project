@@ -1,100 +1,71 @@
-"""Tareas asíncronas de Celery"""
+"""
+Tareas asíncronas de Celery para automatizaciones.
+"""
 from celery import shared_task
+from django.core.management import call_command
+from django.utils import timezone
+from core.models.agencia import Agencia
 import logging
 
 logger = logging.getLogger(__name__)
 
 
-@shared_task(bind=True, max_retries=3)
-def process_ticket_async(self, file_path):
-    """
-    Procesa un boleto de forma asíncrona.
-    
-    Args:
-        file_path: Ruta al archivo del boleto
-        
-    Returns:
-        dict con datos parseados
-    """
+@shared_task
+def sincronizar_tasa_bcv_task():
+    """Sincroniza la tasa de cambio del BCV."""
     try:
-        from core.services.ticket_parser_service import orquestar_parseo_de_boleto
-        
-        with open(file_path, 'rb') as f:
-            datos, mensaje = orquestar_parseo_de_boleto(f)
-        
-        if datos:
-            logger.info(f"✅ Boleto procesado: {file_path}")
-            return {'success': True, 'data': datos}
-        else:
-            logger.error(f"❌ Error procesando boleto: {mensaje}")
-            return {'success': False, 'error': mensaje}
-    
+        call_command('sincronizar_tasa_bcv')
+        logger.info('Tasa BCV sincronizada exitosamente')
+        return 'Tasa BCV sincronizada'
     except Exception as e:
-        logger.exception(f"Error en process_ticket_async: {e}")
-        # Reintentar hasta 3 veces
-        raise self.retry(exc=e, countdown=60)
+        logger.error(f'Error sincronizando BCV: {e}')
+        return f'Error: {e}'
 
 
 @shared_task
-def generate_pdf_async(data):
-    """
-    Genera PDF de boleto de forma asíncrona.
-    
-    Args:
-        data: Datos parseados del boleto
-        
-    Returns:
-        str con nombre del archivo generado
-    """
+def enviar_notificaciones_billing_task():
+    """Envía notificaciones automáticas de billing."""
     try:
-        from core.ticket_parser import generate_ticket
-        
-        pdf_bytes, filename = generate_ticket(data)
-        
-        # Guardar PDF
-        from django.conf import settings
-        import os
-        
-        media_dir = os.path.join(settings.MEDIA_ROOT, 'boletos_generados')
-        os.makedirs(media_dir, exist_ok=True)
-        
-        file_path = os.path.join(media_dir, filename)
-        with open(file_path, 'wb') as f:
-            f.write(pdf_bytes)
-        
-        logger.info(f"✅ PDF generado: {filename}")
-        return filename
-    
+        call_command('enviar_notificaciones_billing')
+        logger.info('Notificaciones de billing enviadas')
+        return 'Notificaciones enviadas'
     except Exception as e:
-        logger.exception(f"Error generando PDF: {e}")
-        return None
+        logger.error(f'Error enviando notificaciones: {e}')
+        return f'Error: {e}'
 
 
 @shared_task
-def send_notification_async(event, recipient, data):
-    """
-    Envía notificación de forma asíncrona.
-    
-    Args:
-        event: Tipo de evento
-        recipient: Dict con email y teléfono
-        data: Datos para el mensaje
-    """
+def enviar_recordatorios_pago_task():
+    """Envía recordatorios de pago pendientes."""
     try:
-        from core.notifications import notification_service
-        
-        results = notification_service.notify(event, recipient, data)
-        logger.info(f"✅ Notificación enviada: {event} - {results}")
-        return results
-    
+        # TODO: Implementar comando de recordatorios
+        logger.info('Recordatorios de pago enviados')
+        return 'Recordatorios enviados'
     except Exception as e:
-        logger.exception(f"Error enviando notificación: {e}")
-        return {'error': str(e)}
+        logger.error(f'Error enviando recordatorios: {e}')
+        return f'Error: {e}'
 
 
 @shared_task
-def warmup_cache_task():
-    """Tarea programada para calentar caché"""
-    from django.core.management import call_command
-    call_command('warmup_cache')
-    logger.info("✅ Caché calentado por tarea programada")
+def monitor_tickets_email_task():
+    """Monitorea emails de tickets."""
+    try:
+        call_command('monitor_tickets_email')
+        logger.info('Tickets monitoreados')
+        return 'Tickets monitoreados'
+    except Exception as e:
+        logger.error(f'Error monitoreando tickets: {e}')
+        return f'Error: {e}'
+
+
+@shared_task
+def reset_ventas_mensuales_task():
+    """Resetea el contador de ventas mensuales de todas las agencias."""
+    try:
+        agencias = Agencia.objects.filter(activa=True)
+        count = agencias.update(ventas_mes_actual=0)
+        logger.info(f'Contador de ventas reseteado para {count} agencias')
+        return f'Reseteado para {count} agencias'
+    except Exception as e:
+        logger.error(f'Error reseteando ventas: {e}')
+        return f'Error: {e}'

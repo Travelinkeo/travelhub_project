@@ -1,0 +1,35 @@
+{
+  "nombre_tarifario": "Tarifario Nacional Septiembre 2025",
+  "destino": "Isla Margarita",
+  "vigencia": {
+    "inicio": "2025-09-21",
+    "fin": "2026-01-15"
+  },
+  "comision_estandar": "15.00",
+  "hoteles": [
+    {
+      "nombre": "PET FRIENDLY",
+      "destino": "Isla Margarita",
+      "regimen": "TODO INCLUIDO",
+      "comision": "7",
+      "habitaciones": [
+        {
+          "tipo": "STANDARD",
+          "capacidad_adultos": 2,
+          "capacidad_ninos": 0,
+          "capacidad_total": 2,
+          "tarifas": [
+            {
+              "fecha_inicio": "2025-09-21",
+              "fecha_fin": "2025-12-20",
+              "temporada": "TEMPORADA BAJA",
+              "moneda": "EUR",
+              "sgl": "10.00",
+              "dbl": "03.00"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

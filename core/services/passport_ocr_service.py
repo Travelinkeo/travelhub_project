@@ -174,10 +174,22 @@ class PassportOCRService:
             given_names = names_split[1].replace('<', ' ').strip() if len(names_split) > 1 else ''
             
             # Extraer datos de línea 2
+            # Formato: PASSPORT_NUM(9) + CHECK(1) + NATIONALITY(3) + BIRTH_DATE(6) + CHECK(1) + SEX(1) + EXPIRY_DATE(6)
             passport_num = line2[:9].replace('<', '').strip()
-            birth_date = self._parse_mrz_date(line2[13:19])
-            sex = line2[20] if len(line2) > 20 else ''
-            expiry_date = self._parse_mrz_date(line2[21:27])
+            
+            # Buscar fechas en formato YYMMDD (6 dígitos consecutivos)
+            dates_in_line2 = re.findall(r'(\d{6})', line2)
+            
+            birth_date = None
+            expiry_date = None
+            
+            if len(dates_in_line2) >= 2:
+                birth_date = self._parse_mrz_date(dates_in_line2[0])
+                expiry_date = self._parse_mrz_date(dates_in_line2[1])
+            
+            # Extraer sexo (buscar M o F)
+            sex_match = re.search(r'[MF]', line2[20:30])
+            sex = sex_match.group(0) if sex_match else ''
             
             return {
                 'numero_pasaporte': passport_num,
@@ -222,7 +234,10 @@ class PassportOCRService:
     
     def _parse_mrz_date(self, date_str):
         """Convierte fecha MRZ (YYMMDD) a fecha Python"""
-        if len(date_str) != 6 or not date_str.isdigit():
+        # Limpiar string de caracteres no numéricos
+        date_str = ''.join(c for c in date_str if c.isdigit())
+        
+        if len(date_str) != 6:
             return None
         
         try:
@@ -233,7 +248,9 @@ class PassportOCRService:
             # Determinar siglo (asumiendo que años > 50 son 1900s, <= 50 son 2000s)
             year = 1900 + yy if yy > 50 else 2000 + yy
             
-            return datetime(year, mm, dd).date()
+            date_obj = datetime(year, mm, dd).date()
+            # Retornar en formato ISO para JSON
+            return date_obj.isoformat()
         except ValueError:
             return None
     

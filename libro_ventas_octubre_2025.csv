@@ -1,0 +1,11 @@
+Fecha;Número Factura;Número Control;RIF Cliente;Nombre Cliente;Base Gravada;Base Exenta;Base Exportación;IVA 16%;IVA Adicional;IGTF;Total;Tipo Operación;RIF Tercero;Nombre Tercero
+24/10/2025;F-20251024-0008;;V-12345678;Armando Alemán;0.00;500.00;0.00;0.00;0.00;0.00;500.00;Venta Propia;;
+
+TOTALES VENTAS PROPIAS
+;;;;;0.00;500.00;0.00;0.00;0.00;0.00;500.00
+
+TOTALES VENTAS POR CUENTA DE TERCEROS
+;;;;;0.00;0.00;0.00;0.00;0.00;0.00;0.00
+
+DÉBITO FISCAL TOTAL (IVA A DECLARAR)
+;;;;;;;;0.00

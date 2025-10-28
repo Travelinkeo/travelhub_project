@@ -1,0 +1,504 @@
+﻿Guía Maestra de Facturación para Agencias de Viajes en Venezuela: Cumplimiento Normativo en un Entorno Multimoneda y Digital
+
+
+
+
+Introducción: Navegando el Complejo Ecosistema Fiscal Venezolano para el Sector Turismo
+
+
+La operación de una agencia de viajes en el entorno venezolano contemporáneo representa un desafío que trasciende la mera gestión comercial y logística. Se ha convertido en un ejercicio de alta precisión fiscal, donde la resiliencia empresarial está intrínsecamente ligada a la capacidad de navegar un marco normativo en constante evolución. Los profesionales del sector se enfrentan a una convergencia de fenómenos complejos: una dolarización transaccional de facto que coexiste con la moneda de curso legal, una transición acelerada y obligatoria hacia la facturación digital, y una arquitectura tributaria que superpone impuestos y obligaciones con cada reforma. La facturación, que en otros contextos podría ser una función administrativa rutinaria, es aquí un punto neurálgico de alto riesgo y, a la vez, de oportunidad estratégica.
+El propósito central de esta clase magistral es desmitificar el proceso de facturación para las agencias de viajes y prestadores de servicios turísticos en Venezuela. El objetivo es proporcionar una hoja de ruta exhaustiva y un manual de operaciones que permita transformar la facturación de una carga riesgosa a una función controlada que blinde a la empresa. Se busca desglosar la complejidad de la normativa vigente, desde los principios fundamentales establecidos en el Código Orgánico Tributario hasta las más recientes Providencias Administrativas del Servicio Nacional Integrado de Administración Aduanera y Tributaria (SENIAT). Al finalizar, cada participante estará en capacidad de asegurar que cada factura emitida sea un pilar de legalidad y solidez financiera, protegiendo a su organización de costosas sanciones, optimizando su carga fiscal y garantizando la continuidad operativa en un ecosistema fiscal sin parangón. Se analizarán los cimientos legales, los procedimientos técnicos y los casos prácticos más desafiantes que definen el día a día del sector.
+
+
+Sección 1: Fundamentos del Marco Legal de Facturación en Venezuela
+
+
+Para operar con solvencia fiscal, es imperativo comprender la jerarquía de las normas que rigen las obligaciones de una agencia de viajes. El marco legal venezolano no es un sistema único, sino que se compone de al menos tres capas regulatorias superpuestas —la tributaria general, la del Impuesto al Valor Agregado (IVA) y la específica del sector turismo— que convergen en el acto de la facturación. La factura no es solo un documento para el IVA; es la base para las contribuciones parafiscales y la puerta de entrada a los beneficios sectoriales. Ignorar cualquiera de estas capas al momento de la gestión contable es un error estratégico que puede acarrear graves consecuencias.
+
+
+1.1. El Código Orgánico Tributario (COT): La Columna Vertebral del Sistema
+
+
+El Código Orgánico Tributario, reformado por Decreto Constituyente y publicado en la Gaceta Oficial Extraordinaria N° 6.507, es la ley fundamental que estructura todo el sistema tributario nacional.1 No contiene normas específicas sobre cómo facturar un boleto aéreo, pero establece los principios, los deberes formales, los procedimientos de fiscalización y, de manera crucial, el régimen sancionatorio que castiga cualquier desviación.
+Puntos Clave para las Agencias de Viajes:
+* Deberes Formales: El COT establece la obligación ineludible de emitir facturas por cada operación, llevar libros y registros contables y fiscales, e inscribirse en los registros pertinentes.2 El incumplimiento de estos deberes formales constituye un ilícito tributario sancionable.
+* Régimen Sancionatorio Dolarizado: Una de las modificaciones más críticas y de mayor impacto fue la eliminación de la Unidad Tributaria (U.T.) como unidad de medida para el cálculo de multas y sanciones por ilícitos formales y materiales. En su lugar, se estableció el "tipo de cambio oficial de la moneda de mayor valor publicado por el Banco Central de Venezuela".1 En la práctica, esto significa que las sanciones están efectivamente dolarizadas. Un error que antes podía costar una suma nominal en bolívares, hoy representa un riesgo financiero significativo que puede comprometer la viabilidad de la empresa.
+* Facultades de la Administración Tributaria: El COT otorga amplias facultades al SENIAT, incluyendo la capacidad de dictar medidas cautelares como la prohibición de movilizar cuentas bancarias para asegurar el cobro de obligaciones tributarias.1 Esto subraya la importancia de mantener un historial de cumplimiento impecable, ya que las consecuencias de una disputa fiscal pueden paralizar las operaciones de la agencia.
+
+
+1.2. La Ley de Impuesto al Valor Agregado (IVA): Hechos Imponibles y Obligaciones
+
+
+La Ley que Establece el Impuesto al Valor Agregado, cuyo texto vigente fue publicado en la misma Gaceta Oficial N° 6.507, es la norma central que define qué operaciones de la agencia de viajes generan el impuesto (hecho imponible), cómo se calcula (base imponible) y a qué tasa (alícuota).4
+Puntos Clave para Agencias de Viajes:
+* Hecho Imponible General: La "prestación de servicios independientes a título oneroso" es el hecho imponible que abarca la mayoría de las actividades de la agencia, desde la asesoría hasta la venta de paquetes turísticos en nombre propio.5
+* Tratamiento de la Intermediación (Venta por Cuenta de Terceros): Este es uno de los conceptos más importantes para el sector. El Artículo 10 de la Ley de IVA y su reglamento establecen una distinción fundamental. Cuando una agencia de viajes vende un servicio en nombre de un tercero (por ejemplo, un boleto aéreo de una aerolínea), no es contribuyente por el valor total del boleto. La agencia es considerada contribuyente ordinario del IVA únicamente por el monto de su comisión o remuneración.5 El proveedor principal (la aerolínea) es el contribuyente por el valor del servicio, excluyendo la comisión. Esta diferenciación es la base para la correcta emisión de facturas en operaciones de intermediación.
+* Exportación de Servicios: La ley define la "exportación de servicios" como la prestación de servicios a beneficiarios que no tienen domicilio o residencia en el país, siempre que dichos servicios sean "exclusivamente utilizados o aprovechados en el extranjero".5 Esta definición, aunque textualmente ambigua para el turismo receptivo (cuyos servicios se consumen en Venezuela), es la base legal para el tratamiento fiscal preferencial de este segmento. La alícuota aplicable a las exportaciones de servicios es del $0\%$.7
+* Alícuota General: La alícuota impositiva general vigente en Venezuela está fijada en 16%.8
+
+
+1.3. La Ley Orgánica de Turismo: Obligaciones Parafiscales del Sector
+
+
+Además de las obligaciones tributarias nacionales administradas por el SENIAT, las agencias de viajes, como prestadores de servicios turísticos, están sujetas a una ley sectorial que impone deberes y contribuciones adicionales.10 Sus reglamentos complementan estas disposiciones.12
+Puntos Clave para las Agencias de Viajes:
+* Inscripción en el Registro Turístico Nacional (RTN): La inscripción en el RTN, administrado por el Ministerio del Poder Popular para el Turismo, es un requisito obligatorio para operar legalmente en el sector.12 Esta inscripción es, además, una condición indispensable para poder optar a los incentivos fiscales que la propia ley establece.
+* Contribución Especial del 1% (Aporte a INATUR): El Artículo 15 de la Ley Orgánica de Turismo establece una contribución especial parafiscal equivalente al $1\%$ de los ingresos brutos mensuales obtenidos por los prestadores de servicios turísticos.10 Este monto debe ser enterado al Instituto Nacional de Promoción y Capacitación Turística (INATUR) dentro de los primeros 15 días hábiles del mes siguiente. Es fundamental comprender que esta contribución se calcula sobre el total facturado (ingresos brutos), es independiente del IVA y del Impuesto Sobre la Renta (ISLR), y constituye una obligación financiera adicional.
+* Incentivos Fiscales Sectoriales: La ley y su reglamento contemplan ciertos beneficios para fomentar la inversión en el sector, como rebajas en el ISLR por nuevas inversiones en áreas específicas.12 Sin embargo, el acceso a estos beneficios está condicionado a la obtención de una "Certificación de Interés Turístico" y, crucialmente, a estar solvente con todas las obligaciones parafiscales, incluyendo el aporte del 1% a INATUR.12
+
+
+Sección 2: Modalidades de Emisión de Facturas: De lo Tradicional a lo Digital
+
+
+El panorama de la facturación en Venezuela ha experimentado una transformación radical, impulsada por la Administración Tributaria con el objetivo de modernizar la recaudación y aumentar el control fiscal. Este cambio representa una migración de un modelo basado en la auditoría posterior a uno de supervisión en tiempo real. La transición digital no es una simple actualización tecnológica; es una reconfiguración fundamental de la relación entre el contribuyente y el Estado, donde el cumplimiento normativo se verifica antes de que la transacción se concrete legalmente. Para la agencia de viajes, esto significa que la inversión en tecnología de cumplimiento y la elección de proveedores de software se han convertido en decisiones estratégicas de primer orden para la supervivencia del negocio.
+
+
+2.1. El Régimen Previo: Providencias 0071 y 0032
+
+
+Durante años, el marco normativo se basó en un sistema de facturación física o semi-digital regulado principalmente por dos providencias.
+* Providencia Administrativa N° 0071 (Régimen General): Esta providencia, emitida por el SENIAT, sentó las bases de la facturación formal en Venezuela. Estableció que las facturas deben ser emitidas a través de dos medios principales: formatos pre-impresos o formas libres, ambos elaborados por imprentas autorizadas por el SENIAT.17 Un punto clave es que prohibió la emisión manual de facturas sobre formas libres, exigiendo el uso de sistemas computarizados o automatizados para imprimir la información sobre dichas formas.17 Cada factura debía llevar un número de control único asignado por la imprenta autorizada.
+* Providencia Administrativa SNTA/2014/0032 (Régimen Especial para Servicios Masivos): Esta normativa es de vital importancia para el sector, ya que reconoce explícitamente a las "Agencias de viaje y similares" y a las "Líneas aéreas" como prestadores de servicios masivos, otorgándoles un régimen especial de facturación.18 Sus disposiciones más relevantes son:
+   * Requisitos Específicos para Facturas de Boletos (Artículo 10): Establece que, además de los requisitos generales, las facturas emitidas por la venta de servicios de líneas aéreas (ya sea directamente o a través de intermediarios como las agencias) deben contener obligatoriamente: el nombre y apellido del pasajero, el número del boleto de pasaje, el itinerario del viaje y la identificación de la aerolínea.18
+   * Regulación de la Facturación por Cuenta de Terceros (Artículo 16): Detalla cómo la agencia, actuando como intermediaria, debe emitir la factura en nombre de la aerolínea. Dicha factura debe incluir el IVA correspondiente al servicio de transporte, el cual es percibido por la agencia y posteriormente entregado a la aerolínea (el representado).18 Estas operaciones deben registrarse en el Libro de Ventas en una cuenta separada bajo el título "Ventas por Cuenta de Terceros".18
+
+
+2.2. La Transición Obligatoria: Facturación Digital (Providencias 102 y 121)
+
+
+El nuevo paradigma de facturación digital representa el cambio más disruptivo en la administración tributaria venezolana en más de una década. Los sistemas basados en papel o software no homologado tienen una fecha de caducidad inminente.
+* Providencia Administrativa SNAT/2024/000102 (El "Qué"): Publicada a finales de 2024, esta providencia establece el marco normativo para la emisión de documentos fiscales a través de medios digitales.19
+   * Obligatoriedad y Plazos: La obligatoriedad para los sujetos pasivos designados entra en vigor el 1 de marzo de 2025.19 Específicamente, las personas naturales o jurídicas que realicen sus operaciones exclusivamente a través de medios electrónicos (portales web, aplicaciones móviles, etc.) están obligadas a adoptar este sistema. Las agencias de viajes con un modelo de negocio mixto (oficina física y ventas online) deben utilizar la facturación digital exclusivamente para sus operaciones electrónicas.19
+   * Nuevo Proceso: El modelo digital rompe con el esquema de la imprenta física. Ahora, la agencia debe contratar los servicios de una "imprenta digital autorizada" por el SENIAT, que será la responsable de asignar el número de control fiscal digital para cada documento. Adicionalmente, se requiere la obtención de un certificado electrónico para poder aplicar una firma digital a cada factura, garantizando su autenticidad e integridad.19
+* Providencia Administrativa 121 (El "Cómo"): Esta providencia complementa a la 102, estableciendo los rigurosos requisitos técnicos, de seguridad y funcionales que deben cumplir los sistemas y software de facturación para poder ser "homologados" por el SENIAT.21
+   * Homologación Obligatoria: A partir del 19 de marzo de 2025, se prohíbe el uso de cualquier sistema de facturación que no haya pasado por el proceso de homologación y no esté debidamente autorizado por el SENIAT.21 Esto obliga a todas las agencias a verificar el estatus de su software actual o a migrar a uno que cumpla con la normativa.
+   * Responsabilidad Compartida: Una de las disposiciones más severas de esta providencia es la "responsabilidad compartida". Si se determina que un software facilita prácticas de evasión fiscal, tanto la agencia de viajes (como contribuyente) como el proveedor del software pueden ser considerados coautores del delito de defraudación tributaria.21 Esta cláusula eleva la elección del proveedor de tecnología de una decisión operativa a una de gestión de riesgo crítico.
+
+
+2.3. Planes de Contingencia: ¿Qué hacer cuando el sistema falla?
+
+
+La total dependencia de los sistemas digitales y la conectividad a internet introduce una nueva vulnerabilidad operativa. La normativa prevé mecanismos para asegurar la continuidad del negocio durante fallas técnicas.
+* Procedimiento de Contingencia: Según lo estipulado en la Providencia 0071 (cuyo principio se espera que se mantenga en el entorno digital), cuando el sistema computarizado principal se encuentre inoperante o averiado, la empresa debe recurrir a la emisión de facturas sobre formatos pre-impresos (talonarios de contingencia).17 Estos talonarios deben ser elaborados previamente por una imprenta tradicional autorizada por el SENIAT. Al emitir una factura de contingencia, el documento debe llevar la palabra "serie" precedida del número de documento.17
+* Importancia Estratégica: Aunque la normativa venezolana específica sobre contingencia en el nuevo ecosistema 100% digital está en desarrollo (a diferencia de otros países como Bolivia que ya tienen procedimientos detallados 23), el principio fundamental de tener un método de respaldo es crucial. Es imperativo que cada agencia de viajes gestione proactivamente la autorización e impresión de un lote de facturas de contingencia para no paralizar sus ventas ante cualquier eventualidad técnica, como fallas de internet, cortes de energía eléctrica o caídas del sistema del proveedor de software.
+La siguiente tabla resume las diferencias clave entre el régimen tradicional y el nuevo régimen digital, sirviendo como una guía rápida para la transición.
+Tabla 1: Comparativa de Regímenes de Facturación para Agencias de Viajes
+Característica
+	Régimen Tradicional (Prov. 0071 / 0032)
+	Nuevo Régimen Digital (Prov. 102 / 121)
+	Medio de Emisión
+	Formatos pre-impresos o Formas Libres de imprenta autorizada.
+	Archivo digital (ej. PDF, XML) generado por software.
+	Número de Control
+	Pre-impreso en el formato físico. Asignado por imprenta física.
+	Digital. Asignado por una "imprenta digital" autorizada.
+	Requisito de Software
+	Sistema computarizado para imprimir sobre formas libres.
+	Software obligatoriamente homologado por el SENIAT.
+	Validación
+	Fiscalización posterior (auditorías).
+	Pre-validación y control en tiempo real por el SENIAT.
+	Firma
+	No requerida.
+	Firma electrónica con certificado digital válido.
+	Fecha Límite
+	Vigente hasta la transición completa.
+	Obligatorio desde el 1 de marzo de 2025 para operaciones electrónicas.
+	Responsabilidad
+	Principalmente del contribuyente.
+	Compartida entre el contribuyente y el proveedor del software.
+	
+
+Sección 3: El Desafío Multimoneda: Facturación en Divisas
+
+
+La economía transaccional de Venezuela opera en una dualidad monetaria de facto. Si bien el Bolívar es la moneda de curso legal, una gran parte de las operaciones en el sector turístico se pactan y cancelan en divisas, principalmente el dólar estadounidense. Esta realidad económica ha sido reconocida por el marco legal, pero su implementación fiscal ha generado una cascada de obligaciones tributarias que convierten la facturación en moneda extranjera en el proceso más complejo y de mayor riesgo para una agencia de viajes. Un solo error en esta cadena de cálculo puede tener consecuencias financieras severas.
+
+
+3.1. Base Legal y Requisitos Formales de la Factura en Divisas
+
+
+La posibilidad de facturar y cobrar legalmente en moneda extranjera no es una práctica informal, sino que tiene un sustento legal claro que surgió tras la flexibilización del control de cambio.
+* Base Legal: El Convenio Cambiario N° 1, publicado en la Gaceta Oficial N° 6.405, es el instrumento que desmanteló el rígido control cambiario anterior y permitió la libre convertibilidad de la moneda.25 De manera fundamental, este convenio estableció la validez de las obligaciones contraídas en moneda extranjera y, en su sección sobre el "Régimen del sector turismo", autorizó explícitamente a los prestadores de servicios turísticos (incluyendo agencias de viajes) a realizar el cobro de sus servicios en divisas a turistas internacionales y visitantes.26
+* Requisitos Formales de la Factura: La normativa de facturación del SENIAT, específicamente la Providencia Administrativa 0071 en el numeral 14 de su Artículo 13, establece un requisito indispensable para estas operaciones. Cuando una operación es pactada en moneda extranjera, la factura debe reflejar esta dualidad. Es obligatorio que en el documento consten ambas cantidades: el monto en la divisa pactada y su equivalente en moneda nacional. Además, se debe indicar claramente el tipo de cambio aplicable, que debe ser la tasa oficial publicada por el Banco Central de Venezuela (BCV) para la fecha de la operación.17 Omitir esta doble expresión invalida la factura a efectos fiscales.
+
+
+3.2. El Impuesto al Valor Agregado (IVA) en Pagos con Divisas: La Alícuota Adicional
+
+
+La reforma de la Ley de IVA introducida en 2020 (G.O. N° 6.507) creó una de las mayores complejidades del sistema tributario actual. En la práctica, estableció un impuesto adicional que no grava el consumo en sí, sino el medio de pago utilizado.4
+* Normativa (Artículos 27 y 62 de la Ley de IVA): La ley faculta al Ejecutivo Nacional para establecer una alícuota impositiva adicional, comprendida en un rango de $5\%$ a $25\%$, aplicable a la venta de bienes y prestación de servicios cuyo pago sea realizado en moneda extranjera, criptomonedas o cualquier criptoactivo distinto a los emitidos y respaldados por la República (es decir, diferente al Bolívar y al Petro).28
+* Impacto en Servicios Exentos: El punto más crítico de esta reforma se encuentra en el Parágrafo Primero del Artículo 62. Esta disposición establece que, si un bien o servicio que por ley está exento del IVA (como el servicio de transporte nacional de pasajeros, según el Artículo 19 de la misma ley 31) es pagado en divisas, pierde su condición de exento y queda sujeto únicamente al pago de esta alícuota adicional.28 Esto obliga a las agencias de viajes a tener sistemas de facturación capaces de aplicar un impuesto de forma condicional, dependiendo del método de pago que elija el cliente, lo que añade una capa significativa de complejidad a la venta de servicios domésticos.
+
+
+3.3. El Impuesto a las Grandes Transacciones Financieras (IGTF): Aplicación y Facturación
+
+
+Como si la alícuota adicional del IVA no fuera suficiente, la reforma de la Ley de Impuesto a las Grandes Transacciones Financieras (IGTF) (G.O. N° 6.687) se sumó a la cascada tributaria, gravando también los pagos en divisas.32
+* Normativa y Sujetos: La ley establece una alícuota (actualmente fijada en $3\%$) sobre los pagos realizados en divisas o criptomonedas (distintas al Petro) cuando el receptor del pago es una persona calificada por el SENIAT como Sujeto Pasivo Especial (SPE).32
+* Rol de la Agencia (si es SPE): Una agencia de viajes calificada como SPE se convierte automáticamente en agente de percepción del IGTF. Esto significa que tiene la obligación legal de cobrar este $3\%$ adicional a sus clientes en todas las ventas pagadas en divisas y, posteriormente, enterar dicho monto al fisco nacional.32
+* Base Imponible del IGTF: Este es el punto de mayor confusión y error en la práctica. La base imponible del IGTF no es el precio del servicio antes de impuestos. La ley establece que el impuesto se calcula sobre el monto total del pago realizado en divisas. Esto significa que la base para el cálculo del IGTF es la suma de la base imponible del servicio más el monto del IVA correspondiente.32 Se trata de un "impuesto sobre impuesto", y calcularlo incorrectamente es uno de los ilícitos más comunes.
+* Reflejo en la Factura: El IGTF es un tributo de naturaleza distinta al IVA y, por lo tanto, debe reflejarse en la factura de forma completamente separada. Es un error grave sumar las alícuotas (ej. $16\% + 3\% = 19\%$).36 La estructura correcta de la factura debe mostrar el subtotal (Base Imponible + IVA) y luego, en una línea separada, el cálculo del IGTF sobre ese subtotal para llegar al monto final a pagar por el cliente.
+La siguiente tabla ilustra el cálculo correcto de esta cascada de impuestos para un servicio hipotético de USD 100, asumiendo que la agencia es un Sujeto Pasivo Especial.
+Tabla 2: Desglose de Impuestos en Pagos con Divisas (Ejemplo Práctico)
+Concepto
+	Monto en USD
+	Monto en Bs. (Tasa BCV hipotética: 37,00 Bs./USD)
+	Base Imponible del Servicio
+	$100,00$
+	$3.700,00$
+	IVA ($16\%$)
+	$16,00$
+	$592,00$
+	Subtotal (Base para IGTF)
+	$116,00$
+	$4.292,00$
+	IGTF ($3\%$ sobre Subtotal)
+	$3,48$
+	$128,76$
+	Total a Pagar por el Cliente
+	$119,48$
+	$4.420,76$
+	Este ejemplo demuestra que un servicio de USD 100 termina costando al cliente USD 119.48, lo que representa una carga tributaria efectiva de $19,48\%$. Comprender y aplicar correctamente esta secuencia es fundamental para el cumplimiento fiscal.
+
+
+Sección 4: Casos de Estudio y Tratamientos Fiscales Específicos
+
+
+La rentabilidad y sostenibilidad de una agencia de viajes en Venezuela dependen directamente de su capacidad para clasificar correctamente cada tipo de operación y aplicar el régimen fiscal correspondiente. La estructura de facturación no es monolítica; es un portafolio de tratamientos fiscales distintos que varían según la naturaleza del servicio (intermediación vs. venta propia), el destino (nacional vs. internacional) y la residencia del cliente (residente vs. no residente). Un error en esta clasificación inicial puede llevar a pagar impuestos en exceso, mermando los márgenes, o a omitir tributos, generando contingencias fiscales graves. A continuación, se desglosan los escenarios operativos más comunes.
+
+
+4.1. Facturación como Intermediario: Venta de Boletos Aéreos
+
+
+Este es el escenario más frecuente para la mayoría de las agencias. La agencia no es el prestador final del servicio de transporte, sino un comisionista que actúa por cuenta de la aerolínea.
+* Escenario Típico: Venta de un boleto aéreo, ya sea nacional o internacional, donde la agencia facilita la transacción entre el pasajero y la aerolínea.
+* Fundamento Legal: La operación se rige por el concepto de "venta por cuenta de terceros". El Artículo 10 de la Ley de IVA y el Artículo 4 de su Reglamento son explícitos: la agencia es contribuyente del IVA únicamente sobre el monto de su comisión o remuneración.5 La Providencia 0032, en sus artículos 10 y 16, detalla los requisitos específicos que debe contener la factura emitida en estas condiciones.18
+* Proceso de Facturación Dual:
+   1. Factura al Cliente (en nombre de la aerolínea): La agencia debe emitir una factura al cliente final que refleje la operación completa, pero actuando como un mero emisor en nombre de la aerolínea. Esta factura debe:
+      * Identificar a la aerolínea como el prestador del servicio (Razón Social y RIF).18
+      * Desglosar el costo del boleto (base imponible de la aerolínea) y el IVA correspondiente a dicho costo.
+      * Incluir obligatoriamente los datos específicos: nombre del pasajero, número del boleto, itinerario de vuelo y código de la aerolínea.18
+      * Llevar la leyenda "SE EMITE DE CONFORMIDAD CON EL ARTÍCULO 10 DE LA LEY DE IVA" para indicar su naturaleza de intermediación.6
+   2. Factura a la Aerolínea (por la comisión): De forma separada, la agencia debe emitir una factura propia dirigida a la aerolínea. Esta factura representa el ingreso genuino de la agencia. Su base imponible es el monto de la comisión acordada, y sobre esta base se calcula el IVA (16%) que la agencia debe declarar como débito fiscal propio.6
+* Registro Contable: Las ventas realizadas por cuenta de terceros (el valor total de los boletos) deben ser registradas en el Libro de Ventas en una columna o cuenta contable separada, para no contaminar los ingresos propios de la agencia.18 Solo el ingreso por comisiones y su respectivo IVA forman parte de los débitos fiscales de la agencia.
+
+
+4.2. Facturación de Paquetes Turísticos Nacionales
+
+
+En este caso, la agencia actúa en nombre propio, diseñando y vendiendo un producto consolidado que agrupa servicios de diferentes proveedores (aerolíneas, hoteles, transportistas).
+* Escenario Típico: Venta de un paquete turístico "todo incluido" a la Isla de Margarita para un cliente residente en Venezuela, que incluye boleto aéreo, alojamiento en hotel y traslados terrestres.
+* Fundamento Legal: La agencia es el vendedor directo del producto final. El hecho imponible es la venta del paquete completo, y la base imponible es el precio total cobrado al cliente.
+* Tratamiento Diferenciado del IVA: La complejidad radica en que los componentes del paquete pueden tener tratamientos de IVA distintos.
+   * Transporte Aéreo Nacional de Pasajeros: Según el Artículo 19, numeral 1, de la Ley de IVA, este servicio está exento del impuesto.31
+   * Servicios de Hotelería, Traslados y Otros: Estos servicios, por regla general, están gravados con la alícuota general del 16%.37
+* Proceso de Facturación: Para una correcta determinación del impuesto, es fundamental que la factura desglose el valor de los componentes del paquete. Se debe indicar claramente qué porción del precio total corresponde al servicio exento (el boleto aéreo) y qué porción corresponde a los servicios gravados (alojamiento, etc.). El IVA del 16% se calculará únicamente sobre la suma de los componentes gravados. Si la agencia emite una factura por un precio global sin realizar este desglose, la Administración Tributaria podría presumir que la totalidad del paquete está gravada, lo que resultaría en un pago de IVA en exceso y una pérdida de rentabilidad.
+
+
+4.3. Facturación de Turismo Receptivo (Exportación de Servicios)
+
+
+Este es el escenario de mayor beneficio fiscal, pero también el de mayor escrutinio por parte de la autoridad tributaria. Implica la venta de servicios turísticos dentro de Venezuela a clientes no residentes.
+* Escenario Típico: Venta de un paquete turístico que incluye alojamiento en Canaima, excursiones y traslados a un turista europeo, quien paga por el servicio desde su país de origen.
+* Fundamento Legal: A pesar de que los servicios se consumen íntegramente en territorio venezolano, la doctrina y la práctica fiscal venezolana, en línea con estándares internacionales, califican esta operación como una "Exportación de Servicios". La Ley de IVA la define como un servicio prestado a un beneficiario no domiciliado en el país 5, y esta interpretación se extiende al turismo receptivo.38
+* Tratamiento del IVA: La consecuencia directa de esta calificación es que la operación está gravada con una alícuota del 0%.7 Esto no significa que la operación esté exenta, sino que está gravada a una tasa cero, lo que permite a la agencia recuperar los créditos fiscales (IVA pagado en sus compras) asociados a la prestación de dicho servicio, convirtiéndolo en el modelo de negocio más eficiente desde el punto de vista fiscal.
+* Proceso de Facturación y Carga Documental:
+   1. Se debe emitir una Factura de Exportación. Este tipo de factura tiene requisitos formales específicos, detallados en el Artículo 17 de la Providencia 0071, que incluyen la expresión de los valores en moneda extranjera y su equivalente en bolívares, y la indicación del tipo de cambio.39
+   2. La factura debe indicar explícitamente la aplicación de la alícuota del 0% de IVA.
+   3. Burden of Proof (Carga de la Prueba): El beneficio del 0% no es automático. La agencia tiene la responsabilidad de demostrar, ante una eventual fiscalización del SENIAT, que la operación califica efectivamente como una exportación de servicios. Esto exige mantener un archivo documental robusto y meticuloso por cada transacción, que debe incluir, como mínimo:
+      * Copia legible del pasaporte del turista extranjero que demuestre su nacionalidad y estatus de no residente.
+      * Comprobantes de pago que evidencien que los fondos provinieron del exterior (transferencias bancarias internacionales, estados de cuenta de pasarelas de pago, etc.).
+La ausencia de esta documentación de soporte puede llevar a que el SENIAT reclasifique la operación como una venta nacional gravada al 16%, con la consecuente determinación de impuestos omitidos, multas e intereses.
+
+
+4.4. Consideraciones para Agencias Calificadas como Sujetos Pasivos Especiales (SPE)
+
+
+Ser calificado como SPE por el SENIAT, una designación que se aplica a empresas que superan ciertos umbrales de ingresos brutos 40, añade una capa adicional de obligaciones complejas que transforman radicalmente la gestión administrativa y financiera.
+   * Obligaciones Clave de un SPE:
+   * Agente de Retención de IVA: La obligación más significativa es convertirse en agente de retención del IVA. Al realizar compras de bienes o servicios a sus proveedores, la agencia SPE debe retener un porcentaje del IVA facturado por el proveedor (generalmente $75\%$ para servicios y compras de bienes, y $100\%$ en ciertos casos) y enterarlo directamente al SENIAT, entregando al proveedor un comprobante de retención.42
+   * Período Fiscal Quincenal: El ciclo de cumplimiento fiscal se acelera. Las declaraciones de IVA ya no son mensuales, sino quincenales. Esto exige un cierre administrativo y contable cada 15 días.42
+   * Agente de Percepción de IGTF: Como se detalló en la sección anterior, la agencia SPE debe percibir (cobrar) el IGTF del $3\%$ en todas las ventas que cobre en divisas y enterarlo al fisco.32
+   * Anticipos de ISLR: La obligación de presentar la declaración estimada de rentas es sustituida por el pago de anticipos quincenales de ISLR. Estos anticipos se calculan como un porcentaje de los ingresos brutos reportados en la declaración quincenal de IVA.42
+
+
+Sección 5: Taller Práctico: Construcción de la Factura y Prevención de Errores
+
+
+La correcta aplicación de la compleja normativa tributaria venezolana culmina en un único documento: la factura. Este taller práctico tiene como objetivo consolidar todo el conocimiento teórico en herramientas aplicables, proporcionando modelos de factura comentados para los escenarios más comunes y un listado de verificación para prevenir los errores más costosos. El objetivo es implementar un control de calidad efectivo que garantice el cumplimiento en cada transacción.
+
+
+5.1. Modelos de Factura Comentados
+
+
+A continuación, se presentan tres modelos de factura adaptados a la normativa venezolana, con anotaciones que explican los campos y cálculos clave. Estos modelos sirven como guía para la correcta parametrización de los sistemas de facturación.
+________________
+Modelo A: Factura por Venta de Boleto Nacional (Intermediación) en Bolívares
+
+
+
+
+
+
+FACTURA
+N°: 00001234
+N° de Control: 202501-00001234
+
+FECHA DE EMISIÓN: 15/05/2025
+
+EMISOR (Agencia de Viajes):
+Razón Social: Viajes Venezuela Feliz, C.A.
+RIF: J-12345678-9
+Dirección Fiscal: Av. Principal, Edif. Torre Central, Piso 10, Caracas, Venezuela.
+
+CLIENTE (Pasajero):
+Nombre: Juan Pérez
+C.I.: V-10.987.654
+Dirección: Av. Libertador, Edif. Residencias Sol, Apto. 5B, Caracas, Venezuela.
+
+--------------------------------------------------------------------------------------------------
+CANT. | DESCRIPCIÓN | P. UNITARIO (Bs.) | TOTAL (Bs.)
+--------------------------------------------------------------------------------------------------
+1.00 | Servicio de intermediación para emisión de boleto aéreo CCS-PMV-CCS | 185,00 | 185,00
+
+| (Comisión 10%) | |
+--------------------------------------------------------------------------------------------------
+                                                SUBTOTAL (Ingreso Propio): | 185,00
+                                                   IVA (16% sobre Comisión): | 29,60
+                                                              TOTAL A PAGAR: | 214,60
+--------------------------------------------------------------------------------------------------
+OBSERVACIONES:
+Esta factura ampara únicamente el servicio de intermediación de la agencia de viajes.
+El servicio de transporte aéreo es facturado por cuenta y orden de:
+AEROLÍNEA SOL DE VENEZUELA, C.A. - RIF: J-98765432-1
+Factura N° ASF-005678 emitida por cuenta de terceros.
+Monto del Boleto (Exento de IVA): 1.850,00 Bs.
+SE EMITE DE CONFORMIDAD CON EL ARTÍCULO 10 DE LA LEY DE IVA.
+
+Comentarios al Modelo A:
+   * Claridad en el Concepto: La factura especifica que el cobro es por "servicio de intermediación", no por el boleto en sí.
+   * Base Imponible Correcta: El IVA del $16\%$ se calcula exclusivamente sobre la comisión de 185,00 Bs., que es el ingreso propio de la agencia.6
+   * Información del Tercero: Cumple con la normativa al identificar claramente a la aerolínea por cuya cuenta se actúa y el monto del boleto, que en este caso es exento por ser transporte nacional de pasajeros.18
+   * Leyenda Obligatoria: Incluye la mención requerida por la ley para operaciones de intermediación.6
+________________
+Modelo B: Factura por Paquete Turístico Nacional pagado en Dólares (Operación Compleja)
+
+
+
+
+
+
+FACTURA
+N°: 00001235
+N° de Control: 202501-00001235
+
+FECHA DE EMISIÓN: 16/05/2025
+
+EMISOR (Agencia de Viajes y Sujeto Pasivo Especial):
+Razón Social: Viajes Venezuela Feliz, C.A.
+RIF: J-12345678-9
+Dirección Fiscal: Av. Principal, Edif. Torre Central, Piso 10, Caracas, Venezuela.
+
+CLIENTE:
+Nombre: Ana Rodríguez
+C.I.: V-11.222.333
+Dirección: Calle Las Acacias, Qta. Mi Refugio, Valencia, Venezuela.
+
+--------------------------------------------------------------------------------------------------
+CANT. | DESCRIPCIÓN | P. UNITARIO (USD) | TOTAL (USD)
+--------------------------------------------------------------------------------------------------
+1.00 | Paquete Turístico Isla de Margarita (3 Días / 2 Noches)
+
+| - Boleto Aéreo CCS-PMV-CCS (Servicio Exento) | 150,00 | 150,00
+| - Alojamiento y Traslados (Servicio Gravado) | 250,00 | 250,00
+--------------------------------------------------------------------------------------------------
+                                                Base Imponible Gravada (16%): | 250,00
+                                                       Monto Exento de IVA: | 150,00
+                                                                  Subtotal: | 400,00
+                                           IVA (16% sobre Base Gravada): | 40,00
+                                                 SUBTOTAL (BASE PARA IGTF): | 440,00
+                                              IGTF (3% sobre 440,00 USD): | 13,20
+                                                              TOTAL A PAGAR: | 453,20
+--------------------------------------------------------------------------------------------------
+A los solos efectos de lo previsto en la Providencia Administrativa 0071, se expresa la equivalencia
+en moneda nacional a la tasa de cambio del BCV de 37,00 Bs./USD del 16/05/2025:
+Base Imponible Gravada: 9.250,00 Bs.
+Monto Exento: 5.550,00 Bs.
+IVA (16%): 1.480,00 Bs.
+IGTF (3%): 488,40 Bs.
+TOTAL A PAGAR: 16.768,40 Bs.
+
+Comentarios al Modelo B:
+   * Expresión Dual: La factura muestra todos los montos tanto en USD como su equivalente en Bs., cumpliendo con la normativa.17
+   * Desglose de Servicios: Separa claramente el componente exento (boleto aéreo) del gravado (alojamiento), permitiendo el cálculo correcto del IVA.31
+   * Cálculo Correcto del IGTF: El IGTF del $3\%$ se calcula sobre el subtotal de USD 440 (Base + IVA), no sobre la base imponible de USD 250. Este es el punto más crítico a cumplir.34
+   * Separación de Impuestos: El IVA y el IGTF se muestran en líneas separadas, identificando su naturaleza y alícuota.36
+________________
+Modelo C: Factura de Exportación por Turismo Receptivo
+
+
+
+
+
+
+FACTURA DE EXPORTACIÓN
+N°: 00001236
+N° de Control: 202501-00001236
+
+FECHA DE EMISIÓN: 17/05/2025
+
+EMISOR (Agencia de Viajes):
+Razón Social: Viajes Venezuela Feliz, C.A.
+RIF: J-12345678-9
+Dirección Fiscal: Av. Principal, Edif. Torre Central, Piso 10, Caracas, Venezuela.
+
+CLIENTE (No Residente):
+Nombre: John Smith
+Pasaporte N°: US123456789
+Dirección: 123 Main Street, Miami, FL, USA.
+
+--------------------------------------------------------------------------------------------------
+CANT. | DESCRIPCIÓN | P. UNITARIO (USD) | TOTAL (USD)
+--------------------------------------------------------------------------------------------------
+1.00 | Paquete Turístico "Canaima Explorer" (4 Días / 3 Noches)
+
+| Alojamiento, excursiones y traslados internos. | 1.200,00 | 1.200,00
+--------------------------------------------------------------------------------------------------
+                                                                  Subtotal: | 1.200,00
+                                       IVA (Alícuota 0% - Exportación de Servicios): | 0,00
+                                                              TOTAL A PAGAR: | 1.200,00
+--------------------------------------------------------------------------------------------------
+A los solos efectos de lo previsto en la Providencia Administrativa 0071, se expresa la equivalencia
+en moneda nacional a la tasa de cambio del BCV de 37,10 Bs./USD del 17/05/2025:
+TOTAL A PAGAR: 44.520,00 Bs.
+Operación calificada como Exportación de Servicios según la Ley de IVA.
+
+Comentarios al Modelo C:
+   * Denominación Correcta: Se identifica como "Factura de Exportación".39
+   * Datos del Cliente Extranjero: Incluye el número de pasaporte y la dirección en el exterior, elementos clave para la documentación de soporte.
+   * Alícuota 0%: Aplica y muestra correctamente la alícuota del $0\%$ de IVA, indicando la naturaleza de la operación.7
+   * Sin IGTF: No se aplica IGTF, ya que el pago se origina y se procesa desde el extranjero, no siendo una transacción dentro del sistema financiero nacional o un pago directo a un SPE en territorio nacional en los términos de la ley del IGTF.
+
+
+5.2. Errores Comunes en la Facturación y Cómo Evitarlos
+
+
+La complejidad del marco fiscal venezolano crea un campo fértil para errores costosos. La prevención a través de controles internos y conocimiento es la mejor estrategia.
+   * Error de Cálculo de Impuestos en Divisas: El error más frecuente es calcular el IGTF sobre la base imponible antes del IVA. Solución: Parametrizar el sistema para que el IGTF se calcule siempre sobre el monto total del pago, que incluye el IVA.32
+   * Error de Clasificación de la Operación: Facturar el valor total de un boleto aéreo como ingreso propio de la agencia. Solución: Implementar un sistema que distinga entre productos de intermediación y productos propios, aplicando el tratamiento de "venta por cuenta de terceros" cuando corresponda.
+   * Omisión de Datos Obligatorios: No incluir en la factura de boletos aéreos los datos del pasajero, número de boleto e itinerario. Solución: Utilizar plantillas de facturación que contengan campos obligatorios para esta información, impidiendo la emisión si no están completos.18
+   * Facturación a Destiempo: Retrasar la emisión de facturas, lo que afecta el flujo de caja y genera desorden administrativo y fiscal.43 Solución: Establecer una política interna de facturación inmediata o diaria. Utilizar software que automatice la facturación recurrente o programada.
+   * Documentación Insuficiente para Exportación de Servicios: Vender un paquete a un extranjero con alícuota $0\%$ pero no archivar copia de su pasaporte o prueba del pago internacional. Solución: Crear un protocolo estricto donde la facturación de exportación esté vinculada a la recepción y archivo digital de todos los documentos de soporte.
+   * No Desglosar Servicios en Paquetes: Facturar un paquete nacional con un monto global, aplicando el $16\%$ de IVA a todo, incluyendo el boleto aéreo exento. Solución: Analizar la composición de costos de cada paquete y desglosar siempre en la factura los componentes exentos y gravados.
+Para sistematizar la revisión, se propone el siguiente checklist.
+Tabla 3: Checklist de Verificación de Facturas para Agencias de Viajes
+Verificación
+	Factura Nacional
+	Factura de Exportación
+	¿Contiene RIF y datos fiscales completos de emisor y receptor?
+	Sí
+	Sí
+	¿Incluye N° de Factura y N° de Control únicos y consecutivos?
+	Sí
+	Sí
+	¿Expresa montos en Bs. y Divisas (si el pago es en divisas)?
+	Sí
+	Sí
+	¿Incluye datos de pasajero/boleto/itinerario (si aplica)?
+	Sí
+	Sí
+	Tratamiento del IVA
+	
+
+	
+
+	¿Se calculó IVA solo sobre la comisión (si es intermediación)?
+	Sí
+	N/A
+	¿Se desglosaron servicios exentos y gravados (si es paquete)?
+	Sí
+	N/A
+	¿Se aplicó la alícuota $0\%$?
+	No
+	Sí
+	Otros Impuestos (si aplica)
+	
+
+	
+
+	¿Se calculó IGTF sobre (Base + IVA) si el pago fue en divisas a un SPE?
+	Sí
+	No
+	¿Se desglosó el IGTF de forma separada al IVA?
+	Sí
+	N/A
+	Documentación de Soporte
+	
+
+	
+
+	¿Se adjuntó copia del pasaporte y prueba de pago internacional?
+	No
+	Sí
+	
+
+5.3. Recomendaciones Finales y Mejores Prácticas de Cumplimiento
+
+
+   * Automatización y Homologación: La complejidad actual hace que la gestión manual sea insostenible. Es imperativo invertir en un sistema administrativo y de facturación que esté homologado por el SENIAT.21 Este sistema debe ser capaz de manejar los múltiples escenarios fiscales, la facturación multimoneda y el cálculo correcto de la cascada de impuestos (IVA, IGTF).
+   * Capacitación Continua: El entorno fiscal venezolano es dinámico. El personal de administración, contabilidad y ventas debe recibir formación periódica sobre las reformas tributarias y las nuevas providencias del SENIAT para mantenerse actualizado.
+   * Auditorías Internas Proactivas: No espere una fiscalización del SENIAT. Es una mejor práctica realizar revisiones y auditorías internas trimestrales o semestrales de los procesos de facturación y declaración de impuestos para identificar y corregir posibles incumplimientos de manera proactiva.2
+   * Asesoría Fiscal Especializada: Dada la especificidad de la normativa para el sector turismo, es altamente recomendable mantener una relación activa con un consultor o firma de contadores públicos especializados en el área. Un asesor experto puede resolver dudas complejas, ayudar en la planificación fiscal y ofrecer orientación estratégica ante nuevos cambios normativos.
+
+
+Conclusión
+
+
+La facturación en una agencia de viajes venezolana ha evolucionado de ser una tarea administrativa a una función estratégica de alta complejidad y riesgo. El marco legal, caracterizado por la superposición de normativas tributarias, parafiscales y sectoriales, exige un nivel de precisión y conocimiento que no admite improvisación. La transición obligatoria a la facturación digital, junto con la carga impositiva asociada a las transacciones en divisas, ha elevado significativamente la vara del cumplimiento.
+El análisis detallado revela tres realidades ineludibles. Primero, la complejidad es deliberada; la cascada de impuestos como el IVA adicional y el IGTF (con su efecto de impuesto sobre impuesto) está diseñada no solo para aumentar la recaudación, sino para forzar a las empresas a un ecosistema digital donde la supervisión del Estado es total y en tiempo real. Segundo, existe una dualidad estratégica en el tratamiento del IVA, donde el turismo receptivo, calificado como "exportación de servicios" con alícuota $0\%$, se presenta como la vía más eficiente fiscalmente, aunque sujeta a un riguroso escrutinio documental. Tercero, el paradigma ha cambiado de una fiscalización a posteriori a una de pre-cumplimiento, donde la capacidad de una agencia para emitir una factura legal depende de su adhesión a una infraestructura tecnológica controlada por el SENIAT.
+Para prosperar en este entorno, las agencias de viajes deben adoptar un enfoque proactivo y basado en la tecnología. La inversión en un software de facturación homologado, la capacitación constante del personal y la implementación de rigurosos controles internos ya no son opciones, sino elementos esenciales para la supervivencia y sostenibilidad del negocio. La correcta clasificación de cada operación, el cálculo preciso de los tributos y el mantenimiento de una documentación de soporte impecable son las claves para mitigar los riesgos, optimizar la carga fiscal y asegurar que la empresa pueda concentrarse en su misión principal: ofrecer experiencias de viaje excepcionales. En definitiva, el dominio de la facturación se ha convertido en una ventaja competitiva indispensable en el sector turístico venezolano.
+Fuentes citadas
+   1. Decreto Constituyente mediante el cual se dicta el Código Orgánico Tributario - PwC, acceso: octubre 4, 2025, https://www.pwc.com/ve/es/publicaciones/assets/PublicacionesNew/Boletines/AC_Decreto%20Constituyente%20COT.pdf
+   2. Actualizaciones del Código Orgánico Tributario (COT) en Venezuela, acceso: octubre 4, 2025, https://negociosgestionados.com/codigo-organico-tributario-venezuela/
+   3. NUEVO CÓDIGO ORGÁNICO TRIBUTARIO, acceso: octubre 4, 2025, https://assets.kpmg.com/content/dam/kpmg/ve/pdf/2020/02/NUEVO%20C%C3%93DIGO%20ORG%C3%81NICO%20TRIBUTARIO-2020%20(3).pdf
+   4. Decreto Constituyente de Reforma Parcial del Decreto con Rango ..., acceso: octubre 4, 2025, https://www.asambleanacional.gob.ve/leyes/sancionadas/decreto-constituyente-de-reforma-parcial-del-decreto-con-rango-valor-y-fuerza-de-ley-que-establece-el-impuesto-al-valor-agregado
+   5. Ley que Establece el Impuesto al Valor Agregado - Justia Venezuela, acceso: octubre 4, 2025, https://venezuela.justia.com/federales/leyes/ley-que-establece-el-impuesto-al-valor-agregado/gdoc/
+   6. Venta Por Cuenta de Terceros | PDF | Factura | Impuestos - Scribd, acceso: octubre 4, 2025, https://es.scribd.com/document/283398799/Venta-Por-Cuenta-de-Terceros
+   7. Ley que establece el Impuesto al Valor Agregado - UCV, acceso: octubre 4, 2025, http://www.ucv.ve/fileadmin/user_upload/auditoria_interna/Archivos/Material_de_Descarga/Ley_que_Establece_el_Impuesto_al_Valor_Agregado_-_37.999.pdf
+   8. 6 Claves sobre Tarifas y Exenciones del IVA en Venezuela, acceso: octubre 4, 2025, https://www.rodriguezc.com/6-claves-sobre-tarifas-y-exencioness-del-iva-en-venezuela/
+   9. Guía de Impuesto & Legal 2025 - KPMG International, acceso: octubre 4, 2025, https://assets.kpmg.com/content/dam/kpmg/ve/pdf/2025/2/Gu%C3%ADa-de-Inversione-%202025-(f).pdf
+   10. LEY ORGÁNICA DE TURISMO TÍTULO I DISPOSICIONES FUNDAMENTALES Artículo 1. La presente Ley tiene por objeto promover y regula - Justia, acceso: octubre 4, 2025, https://docs.venezuela.justia.com/estatales/amazonas/codigos/ley-organica-de-turismo.pdf
+   11. Decreto con Rango Valor y Fuerza de Ley Orgánica de Turismo - DHQR Escritorio Jurídico, acceso: octubre 4, 2025, https://dhqr.me/wp-content/uploads/2013/02/decreto-con-rango-valor-y-fuerza-de-ley-orgc3a1nica-de-turismo.pdf
+   12. Reglamento Parcial de la Ley Orgánica de Turismo sobre Incentivos Aplicables a las Empresas Prestadoras de Servicios Turísticos - Justia Venezuela, acceso: octubre 4, 2025, https://venezuela.justia.com/federales/reglamentos/reglamento-parcial-de-la-ley-organica-de-turismo-sobre-incentivos-aplicables-a-las-empresas-prestadoras-de-servicios-turisticos/gdoc/
+   13. Reglamento Parcial de la Ley Orgánica de Turismo sobre Establecimientos de Alojamiento Turístico - Justia Venezuela, acceso: octubre 4, 2025, https://venezuela.justia.com/federales/reglamentos/reglamento-parcial-de-la-ley-organica-de-turismo-sobre-establecimientos-de-alojamiento-turistico/gdoc/
+   14. Ley de Turismo del Estado Carabobo - Secretaría General de Gobierno, acceso: octubre 4, 2025, http://sgg.carabobo.gob.ve/leyes/Leydeturismo.pdf
+   15. Impuestos Turisticos en Venezuela y Procedimiento Sancionatorio | PDF | Turismo - Scribd, acceso: octubre 4, 2025, https://es.scribd.com/document/377087385/Impuestos-Turisticos-en-Venezuela-y-Procedimiento-Sancionatorio
+   16. gaceta oficial de la republica bolivariana de venezuela, acceso: octubre 4, 2025, https://faolex.fao.org/docs/pdf/ven83196.pdf
+   17. Providencia Administrativa 00071, acceso: octubre 4, 2025, https://www.mileoconsultores.com/wp-content/uploads/2015/02/PA00071_2011.pdf
+   18. Gaceta Oficial N°40.488, Providencia Administrativa SNTA/2014 ..., acceso: octubre 4, 2025, https://www.imprepide.com/2023/03/29/gaceta-oficial-n40-488-providencia-administrativa-snta-2014-0032-que-regula-la-utilizacion-de-medios-distintos-para-la-emision-de-facturas-y-otros-documentos-por-los-prestadores-de-servicios-m/
+   19. Providencia 102 del SENIAT: Impresionante Facturación Digital en ..., acceso: octubre 4, 2025, https://negociosgestionados.com/providencia-102-del-seniat/
+   20. Nuevos avances sobre la factura electrónica en Venezuela para 2025 - SERES Blog, acceso: octubre 4, 2025, https://blog.groupseres.com/los-primeros-pasos-de-venezuela-en-la-factura-electr%C3%B3nica
+   21. Consecuencias de No Tener un Software Homologado por el SENIAT: Guía Completa para Cumplir con la Providencia 121 - Negocios Gestionados, acceso: octubre 4, 2025, https://negociosgestionados.com/software-homologado-seniat-providencia-121/
+   22. HABLEMOS DE: Facturación digital en Venezuela. Prov. 102 y 121 emitidas por el SENIAT., acceso: octubre 4, 2025, https://www.youtube.com/watch?v=Wt0mWoh8nIs
+   23. Facturas de contingencia: Una solución ante situaciones inesperadas, acceso: octubre 4, 2025, https://boliviaimpuestos.com/facturas-de-contingencia-una-solucion-ante-situaciones-inesperadas/
+   24. Facturas Manuales de Contingencia - Siat - Impuestos Nacionales, acceso: octubre 4, 2025, https://siatinfo.impuestos.gob.bo/index.php/facturacion-en-linea/casos-especiales/manuales-contingencia
+   25. Lo que debes conocer sobre la facturación en divisas en Venezuela, acceso: octubre 4, 2025, https://www.marambio-hlb.com/lo-que-debes-conocer-sobre-la-facturacion-en-divisas-en-venezuela/?lang=es
+   26. CONVENIO CAMBIARIO N° 1 Convenio Cambiario N° 1 ... - lega.law, acceso: octubre 4, 2025, https://lega.law/wp-content/uploads/2018/12/lega-lettersN52.pdf
+   27. Facturación en Moneda Extranjera. Tratamiento contable y fiscal., acceso: octubre 4, 2025, https://www.ccpdistritocapital.org.ve/uploads/eventosanteriores/f6eabae4d6d775254c40db852276a592cd82fb8f.pdf
+   28. El IVA adicional a los pagos en divisas en Venezuela en palabras ..., acceso: octubre 4, 2025, https://naymaconsultores.com/claves-iva-adicional-a-los-pagos-en-dolares-venezuela/
+   29. Reforma del Impuesto al Valor Agregado - Moore Venezuela, acceso: octubre 4, 2025, https://www.moore-venezuela.com/noticias/febrero-2020/reforma-del-impuesto-al-valor-agregado
+   30. 18 Claves para comprender las modificaciones de la Ley del IVA en Venezuela, acceso: octubre 4, 2025, https://www.rodriguezc.com/18-claves-modificaciones-iva-venezuela/
+   31. LEY DE REFORMA PARCIAL DEL DECRETO CON ... - Justia, acceso: octubre 4, 2025, https://docs.venezuela.justia.com/estatales/miranda/leyes/ley-de-reforma-parcial-del-decreto-con-fuerza-y-rango-de-ley-que-establece-el-impuesto-al-valor-agre-2000.pdf
+   32. ¡Reforma del IGTF! Impuesto a las Transacciones en Divisas y Criptomonedas - Gálac, acceso: octubre 4, 2025, https://galac.com/galac-blog/reforma-del-igtf-impuesto-a-las-transacciones-en-divisas-y-criptomonedas/
+   33. Venezuela publica reforma de la Ley del Impuesto a las Grandes Transacciones Financieras - Holland & Knight, acceso: octubre 4, 2025, https://www.hklaw.com/-/media/files/insights/publications/2022/03/venezuelapublishesamendmentes.pdf?rev=251cdd4c713544b4b447d4c89b648f40&sc_lang=es&hash=3BEDB4A28ECE77A89E9088CBB5C29E72
+   34. Reforma del IGTF: Algunos Casos Prácticos. - Gálac: Soluciones Financieras, Tributarias y Laborales en Venezuela, acceso: octubre 4, 2025, https://galac.com/galac-blog/reforma-del-igtf-algunos-casos-practicos/
+   35. IGTF y pagos en dólares: 10 Preguntas y respuestas - Prodavinci, acceso: octubre 4, 2025, https://prodavinci.com/igtf-y-pagos-en-dolares-10-preguntas-y-respuestas/
+   36. IGTF ¿Cómo facturarlo? - YouTube, acceso: octubre 4, 2025, https://www.youtube.com/watch?v=AVi0Y2wb_H4
+   37. REGLAMENTO DE LA LEY DE IVA (GO Ext 5363 del 12/07/1999), acceso: octubre 4, 2025, https://www.mileoconsultores.com/wp-content/uploads/2017/06/Reglamento_Ley_de_IVA_1999-1.pdf
+   38. ARMONIZACION DE IMPUESTOS INDIRECTOS EN LOS PAISES MIEMBROS DE LA COMUNIDAD ANDINA: IMPUESTO AL VALOR AGREGADO (IVA), IMPUESTO SELECTIVO AL CONSUMO (ISC) - DOCUMENTO PRELIMINAR - PARTE 1, acceso: octubre 4, 2025, https://www.comunidadandina.org/DocOficialesFiles/DTrabajo/SGdt200_R1.doc
+   39. NORMAS DE EMISIÓN DE FACTURAS Y OTROS DOCUMENTOS, acceso: octubre 4, 2025, https://www.oas.org/juridico/spanish/mesicic3_ven_anexo26.pdf
+   40. República publica nueva regulación sobre los Sujetos Pasivos Especiales - Holland & Knight, acceso: octubre 4, 2025, https://www.hklaw.com/-/media/files/insights/publications/2023/04/venezuelarublicreleasesnewregulationes.pdf?rev=36b3221bf1dc455c8140b0d99ff1de8d&sc_lang=es&hash=1FC8C83F9CDC04777F67B9E74CF07693
+   41. Providencia Administrativa para Sujetos Pasivos Especiales - Moore Venezuela, acceso: octubre 4, 2025, https://www.moore-venezuela.com/noticias/abril-2023/providencia-administrativa-para-sujetos-pasivos-es
+   42. El régimen tributario de los Sujetos Pasivos Especiales. – Nayma ..., acceso: octubre 4, 2025, https://naymaconsultores.com/cuales-son-los-impuestos-obligaciones-contribuyentes-especiales-venezuela/
+   43. Los 7 principales errores de facturación de las pequeñas empresas - Flowlu, acceso: octubre 4, 2025, https://www.flowlu.com/es/blog/finances/small-business-invoicing-mistakes/

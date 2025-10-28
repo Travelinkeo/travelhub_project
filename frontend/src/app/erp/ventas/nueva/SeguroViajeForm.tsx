@@ -121,13 +121,14 @@ export default function SeguroViajeForm({ open, onClose, onSave, seguroViaje }: 
                 control={control}
                 render={({ field }) => (
                   <TextField 
-                    {...field} 
+                    {...field}
+                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
                     type="number" 
                     label="Cobertura (Monto USD)" 
                     fullWidth 
                     error={!!errors.cobertura_monto} 
                     helperText={errors.cobertura_monto?.message}
-                    inputProps={{ min: 1 }}
+                    inputProps={{ min: 1, step: "0.01" }}
                   />
                 )}
               />

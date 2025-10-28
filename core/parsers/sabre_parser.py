@@ -33,6 +33,12 @@ class SabreParser(BaseTicketParser):
             r'(?:Reservation Code|CÓDIGO DE RESERVACIÓN)\s*[:\t\s]*([A-Z0-9]+)'
         ])
         
+        # Extraer localizador de aerolínea (viene después de "Código de reservación de la aerolínea")
+        airline_locator = self.extract_field(text, [
+            r'(?:Airline Record Locator|Código de reservación de la\s*aerolínea)\s*[:\t\s]*([A-Z0-9]+)',
+            r'(?:Record Locator)\s*[:\t\s]*([A-Z0-9]+)'
+        ])
+        
         issue_date = self.extract_field(text, [
             r'(?:Issue Date|Fecha de Emisión|FECHA DE EMISIÓN)\s*[:\t\s]*([\d]{1,2}\s+\w{3}\s+[\d]{2})'
         ])
@@ -54,7 +60,7 @@ class SabreParser(BaseTicketParser):
         ])
         
         # Extraer vuelos
-        flights = self._parse_flights(text)
+        flights = self._parse_flights(text, airline_locator)
         
         # Extraer tarifas
         fare_raw = self.extract_field(text, [
@@ -116,7 +122,7 @@ class SabreParser(BaseTicketParser):
             }
         )
     
-    def _parse_flights(self, text: str) -> List[Dict[str, Any]]:
+    def _parse_flights(self, text: str, airline_locator: str = None) -> List[Dict[str, Any]]:
         """Extrae información de vuelos del texto"""
         flights = []
         
@@ -201,6 +207,10 @@ class SabreParser(BaseTicketParser):
             bag_match = re.search(r'(?:Límite de equipaje|Baggage Allowance)\s*([A-Z0-9]+)', block, re.IGNORECASE)
             if bag_match:
                 flight['equipaje'] = bag_match.group(1)
+            
+            # Agregar localizador de aerolínea si existe
+            if airline_locator:
+                flight['codigo_reservacion_local'] = airline_locator
             
             flights.append(flight)
         

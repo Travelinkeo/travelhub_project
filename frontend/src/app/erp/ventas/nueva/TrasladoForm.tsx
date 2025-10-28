@@ -177,7 +177,8 @@ export default function TrasladoForm({ open, onClose, onSave, traslado }: Trasla
                 control={control}
                 render={({ field }) => (
                   <TextField 
-                    {...field} 
+                    {...field}
+                    onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
                     type="number" 
                     label="Número de Pasajeros" 
                     fullWidth 

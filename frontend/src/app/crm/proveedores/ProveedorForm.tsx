@@ -56,8 +56,9 @@ const style = {
 const ProveedorForm: React.FC<ProveedorFormProps> = ({ open, onClose, onSave, proveedor }) => {
   const [formData, setFormData] = useState<Partial<Proveedor>>(proveedor || { activo: true });
   
-  // Cargar ciudades
-  const { data: ciudades } = useApi<Ciudad[]>('/api/ciudades/');
+  // Cargar ciudades sin paginación
+  const { data: ciudadesResponse } = useApi<any>('/api/ciudades/?page_size=1000');
+  const ciudades = ciudadesResponse?.results || ciudadesResponse || [];
 
   useEffect(() => {
     setFormData(proveedor || { activo: true });
@@ -69,7 +70,16 @@ const ProveedorForm: React.FC<ProveedorFormProps> = ({ open, onClose, onSave, pr
   };
 
   const handleSave = () => {
-    onSave(formData);
+    // Limpiar datos antes de enviar
+    const cleanData = { ...formData };
+    
+    // Convertir strings vacíos a undefined para campos numéricos
+    if (cleanData.fee_nacional === '') cleanData.fee_nacional = undefined;
+    if (cleanData.fee_internacional === '') cleanData.fee_internacional = undefined;
+    if (cleanData.ciudad === null) cleanData.ciudad = undefined;
+    
+    console.log('Datos a guardar:', cleanData);
+    onSave(cleanData);
   };
 
   return (
@@ -94,6 +104,26 @@ const ProveedorForm: React.FC<ProveedorFormProps> = ({ open, onClose, onSave, pr
                   onChange={handleChange}
                   fullWidth
                   required
+                />
+              </Grid>
+              <Grid xs={6}>
+                <TextField
+                  name="alias"
+                  label="Alias/Nombre Comercial"
+                  value={formData.alias || ''}
+                  onChange={handleChange}
+                  fullWidth
+                  helperText="Nombre con el que es conocido en el mercado"
+                />
+              </Grid>
+              <Grid xs={6}>
+                <TextField
+                  name="rif"
+                  label="RIF"
+                  value={formData.rif || ''}
+                  onChange={handleChange}
+                  fullWidth
+                  helperText="Registro de Información Fiscal"
                 />
               </Grid>
               <Grid xs={6}>
@@ -196,14 +226,55 @@ const ProveedorForm: React.FC<ProveedorFormProps> = ({ open, onClose, onSave, pr
               </Grid>
               <Grid xs={4}>
                 <Autocomplete
-                  options={Array.isArray(ciudades) ? ciudades : []}
+                  options={ciudades}
                   getOptionLabel={(option) => option.nombre}
-                  value={Array.isArray(ciudades) ? ciudades.find(c => c.id === formData.ciudad) || null : null}
+                  value={ciudades.find((c: Ciudad) => c.id_ciudad === formData.ciudad) || null}
                   onChange={(_, newValue) => {
-                    setFormData(prev => ({ ...prev, ciudad: newValue?.id || null }));
+                    setFormData(prev => ({ ...prev, ciudad: newValue?.id_ciudad || undefined }));
                   }}
                   renderInput={(params) => <TextField {...params} label="Ciudad" fullWidth />}
                 />
+              </Grid>
+            </Grid>
+          </AccordionDetails>
+        </Accordion>
+
+        {/* Fees y Comisiones */}
+        <Accordion>
+          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+            <Typography variant="subtitle1">Fees y Comisiones</Typography>
+          </AccordionSummary>
+          <AccordionDetails>
+            <Grid container spacing={2}>
+              <Grid xs={6}>
+                <TextField
+                  name="fee_nacional"
+                  label="Fee Nacional"
+                  type="number"
+                  value={formData.fee_nacional || ''}
+                  onChange={handleChange}
+                  fullWidth
+                  helperText="Fee por servicios nacionales"
+                />
+              </Grid>
+              <Grid xs={6}>
+                <TextField
+                  name="fee_internacional"
+                  label="Fee Internacional"
+                  type="number"
+                  value={formData.fee_internacional || ''}
+                  onChange={handleChange}
+                  fullWidth
+                  helperText="Fee por servicios internacionales"
+                />
+              </Grid>
+              <Grid xs={12}>
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 2, mb: 1 }}>
+                  💡 Las comisiones específicas por tipo de servicio (Boletos Aéreos, Hoteles, Tours, etc.) se gestionan desde el Admin de Django.
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Accede a: Admin → Proveedores → Editar Proveedor → Sección "Comisiones de Proveedores por Servicios"
+                </Typography>
               </Grid>
             </Grid>
           </AccordionDetails>

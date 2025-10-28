@@ -74,10 +74,11 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'core.models.RequestMetaAuditMiddleware',  # captura IP/UA para auditoría
-    # 'core.models.SecurityHeadersMiddleware',  # security headers & CSP report-only
+    'core.middleware.RequestMetaAuditMiddleware',  # captura IP/UA para auditoría
+    # 'core.middleware.SecurityHeadersMiddleware',  # security headers & CSP report-only
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'core.middleware_saas.SaaSLimitMiddleware',  # Verificar límites de plan SaaS
 ]
 ROOT_URLCONF = 'travelhub.urls'
 TEMPLATES = [
@@ -97,33 +98,24 @@ TEMPLATES = [
     },
 ]
 WSGI_APPLICATION = 'travelhub.wsgi.application'
-# Base de datos: SQLite para desarrollo, PostgreSQL para producción
-DB_ENGINE = os.getenv('DB_ENGINE', 'django.db.backends.sqlite3')
+# Base de datos: PostgreSQL únicamente
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('DB_NAME', 'TravelHub'),
+        'USER': os.getenv('DB_USER', 'postgres'),
+        'PASSWORD': os.getenv('DB_PASSWORD', ''),
+        'HOST': os.getenv('DB_HOST', 'localhost'),
+        'PORT': os.getenv('DB_PORT', '5432'),
+    }
+}
 
-if DB_ENGINE == 'django.db.backends.sqlite3':
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / os.getenv('DB_NAME', 'db.sqlite3'),
-        }
-    }
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': DB_ENGINE,
-            'NAME': os.getenv('DB_NAME', 'TravelHub'),
-            'USER': os.getenv('DB_USER', 'postgres'),
-            'PASSWORD': os.getenv('DB_PASSWORD'),
-            'HOST': os.getenv('DB_HOST', 'localhost'),
-            'PORT': os.getenv('DB_PORT', '5432'),
-        }
-    }
-    # Validar que la contraseña de BD esté configurada para PostgreSQL
-    if not DATABASES['default']['PASSWORD']:
-        raise RuntimeError(
-            "DB_PASSWORD no está configurada. "
-            "Por favor, configúrala en tu archivo .env"
-        )
+# Validar configuración de BD
+if not DATABASES['default']['PASSWORD'] and not DEBUG:
+    raise RuntimeError(
+        "DB_PASSWORD no está configurada. "
+        "Por favor, configúrala en tu archivo .env"
+    )
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',},
@@ -158,6 +150,20 @@ FIXTURE_DIRS = [BASE_DIR / 'fixtures',]
 # Gemini API Key
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
 
+# Sentry Configuration (Monitoreo)
+SENTRY_DSN = os.getenv('SENTRY_DSN')
+if SENTRY_DSN and not DEBUG:
+    import sentry_sdk
+    from sentry_sdk.integrations.django import DjangoIntegration
+    
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        integrations=[DjangoIntegration()],
+        traces_sample_rate=0.1,
+        send_default_pii=False,
+        environment=os.getenv('ENVIRONMENT', 'production'),
+    )
+
 # Google Cloud Platform settings
 GCP_PROJECT_ID = os.getenv('GCP_PROJECT_ID', '')
 GCP_LOCATION = os.getenv('GCP_LOCATION', 'us')
@@ -167,10 +173,9 @@ GOOGLE_APPLICATION_CREDENTIALS = os.getenv('GOOGLE_APPLICATION_CREDENTIALS', '')
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.SessionAuthentication',
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-        # Mantener token legacy temporalmente (deprecate pronto)
-        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',  # Prioridad 1: JWT (más seguro)
+        'rest_framework.authentication.SessionAuthentication',  # Prioridad 2: Sessions (Django Admin)
+        'rest_framework.authentication.TokenAuthentication',  # Prioridad 3: Legacy (deprecado)
     ],
     'DEFAULT_PERMISSION_CLASSES': [],
     'DEFAULT_THROTTLE_CLASSES': [
@@ -182,7 +187,7 @@ REST_FRAMEWORK = {
     'DEFAULT_THROTTLE_RATES': {
         'user': os.getenv('THROTTLE_USER_RATE', '1000/day'),
         'anon': os.getenv('THROTTLE_ANON_RATE', '100/day'),
-        'login': os.getenv('THROTTLE_LOGIN_RATE', '5/min'),
+        'login': os.getenv('THROTTLE_LOGIN_RATE', '100/hour'),  # Aumentado para desarrollo
         'dashboard': '100/hour',
         'liquidacion': '50/hour',
         'reportes': '20/hour',
@@ -190,6 +195,7 @@ REST_FRAMEWORK = {
     },
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 25,
+    'MAX_PAGE_SIZE': 1000,
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
@@ -206,14 +212,25 @@ SPECTACULAR_SETTINGS = {
 
 _JWT_SIGNING_KEY = os.getenv('JWT_SIGNING_KEY', SECRET_KEY)
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=int(os.getenv('JWT_ACCESS_MINUTES', '15'))),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=int(os.getenv('JWT_REFRESH_DAYS', '7'))),
-    'ROTATE_REFRESH_TOKENS': True,
-    'BLACKLIST_AFTER_ROTATION': True,
+    # Duración balanceada: seguridad + UX
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=int(os.getenv('JWT_ACCESS_MINUTES', '30'))),  # 30 min (antes 15)
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=int(os.getenv('JWT_REFRESH_DAYS', '7'))),  # 7 días
+    'ROTATE_REFRESH_TOKENS': True,  # Rotar refresh token en cada uso (más seguro)
+    'BLACKLIST_AFTER_ROTATION': True,  # Invalidar tokens viejos
     'UPDATE_LAST_LOGIN': True,
-    'AUTH_HEADER_TYPES': ('Bearer', 'JWT'),
+    'AUTH_HEADER_TYPES': ('Bearer',),  # Solo Bearer (estándar)
     'SIGNING_KEY': _JWT_SIGNING_KEY,
     'ALGORITHM': os.getenv('JWT_ALGORITHM', 'HS256'),
+    # Seguridad adicional
+    'VERIFYING_KEY': None,
+    'AUDIENCE': None,
+    'ISSUER': None,
+    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
+    'TOKEN_TYPE_CLAIM': 'token_type',
+    'JTI_CLAIM': 'jti',
+    'SLIDING_TOKEN_REFRESH_EXP_CLAIM': 'refresh_exp',
+    'SLIDING_TOKEN_LIFETIME': timedelta(minutes=5),
+    'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
 }
 
 def csp_nonce(request):  # pragma: no cover - simple context injection
@@ -318,6 +335,15 @@ CELERY_TIMEZONE = TIME_ZONE
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60  # 30 minutos
 
+# Celery Beat - Tareas programadas
+try:
+    from travelhub.celery_beat_schedule import CELERY_BEAT_SCHEDULE
+except ImportError:
+    CELERY_BEAT_SCHEDULE = {}
+
+# Frontend URL para emails
+FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:3000')
+
 # --- Custom App Settings ---
 
 # Lista de correos de proveedores para el Agente Autónomo de Operaciones
@@ -347,3 +373,11 @@ EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True') == 'True'
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'TravelHub <noreply@travelhub.com>')
+
+# Stripe settings (SaaS billing)
+STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY', '')
+STRIPE_PUBLISHABLE_KEY = os.getenv('STRIPE_PUBLISHABLE_KEY', '')
+STRIPE_WEBHOOK_SECRET = os.getenv('STRIPE_WEBHOOK_SECRET', '')
+STRIPE_PRICE_ID_BASIC = os.getenv('STRIPE_PRICE_ID_BASIC', '')
+STRIPE_PRICE_ID_PRO = os.getenv('STRIPE_PRICE_ID_PRO', '')
+STRIPE_PRICE_ID_ENTERPRISE = os.getenv('STRIPE_PRICE_ID_ENTERPRISE', '')

@@ -51,8 +51,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('refresh_token', data.refresh);
     setToken(data.access);
     
-    // Obtener datos del usuario desde el token
-    const userData = { username, email: '' };
+    // Guardar datos del usuario
+    const userData = data.user || { username, email: '' };
     localStorage.setItem('user', JSON.stringify(userData));
     setUser(userData);
     

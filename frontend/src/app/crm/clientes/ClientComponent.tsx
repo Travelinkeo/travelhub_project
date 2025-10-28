@@ -78,11 +78,14 @@ const ClientesClientComponent = () => {
     const method = isNew ? 'POST' : 'PUT';
 
     try {
+      console.log('Enviando datos:', clienteData);
       await apiMutate(endpoint, { method, body: clienteData });
       mutate();
       handleCloseModal();
-    } catch (e) {
-      alert(e instanceof Error ? `Error al guardar:\n${e.message}` : 'Ocurrió un error desconocido');
+    } catch (e: any) {
+      console.error('Error del servidor:', e);
+      console.error('Detalles del error:', e.response);
+      alert(JSON.stringify(e.response || e.message, null, 2));
     }
   };
 

@@ -14,7 +14,7 @@ from django.shortcuts import get_object_or_404, redirect
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, ListView, TemplateView
-from rest_framework import filters, permissions, status, viewsets
+from rest_framework import authentication, filters, permissions, status, viewsets
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
@@ -22,6 +22,7 @@ from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.conf import settings
 
 from . import ticket_parser
@@ -134,6 +135,8 @@ class LoginView(APIView):
     permission_classes = []
 
     def post(self, request, *args, **kwargs):
+        from rest_framework_simplejwt.tokens import RefreshToken
+        
         username = request.data.get('username')
         password = request.data.get('password')
         if not username or not password:
@@ -141,8 +144,20 @@ class LoginView(APIView):
         user = authenticate(request, username=username, password=password)
         if not user:
             return Response({'detail': 'Credenciales inválidas'}, status=401)
-        token, _ = Token.objects.get_or_create(user=user)
-        return Response({'token': token.key})
+        
+        # Generar JWT tokens
+        refresh = RefreshToken.for_user(user)
+        return Response({
+            'access': str(refresh.access_token),
+            'refresh': str(refresh),
+            'user': {
+                'id': user.id,
+                'username': user.username,
+                'email': user.email,
+                'first_name': user.first_name,
+                'last_name': user.last_name,
+            }
+        })
 
 class IsAdminOrReadOnly(permissions.BasePermission):
     def has_permission(self, request, view):
@@ -153,7 +168,21 @@ class IsAdminOrReadOnly(permissions.BasePermission):
 class VentaViewSet(viewsets.ModelViewSet):
     queryset = Venta.objects.select_related(
         'cliente', 'moneda', 'cotizacion_origen', 'asiento_contable_venta'
-    ).prefetch_related('items_venta__producto_servicio', 'items_venta__proveedor_servicio').order_by('-fecha_venta')
+    ).prefetch_related(
+        'items_venta__producto_servicio', 
+        'items_venta__proveedor_servicio',
+        'traslados',
+        'traslados__proveedor',
+        'alojamientos',
+        'alojamientos__ciudad',
+        'alojamientos__proveedor',
+        'actividades',
+        'actividades__proveedor',
+        'alquileres_autos',
+        'alquileres_autos__proveedor',
+        'servicios_adicionales',
+        'servicios_adicionales__proveedor'
+    ).order_by('-fecha_venta')
     serializer_class = VentaSerializer
     permission_classes = [permissions.IsAuthenticated]
     filter_backends = [filters.SearchFilter]
@@ -173,6 +202,7 @@ class ProveedorViewSet(viewsets.ModelViewSet):
     queryset = Proveedor.objects.all().order_by('nombre')
     serializer_class = ProveedorSerializer
     permission_classes = [permissions.IsAuthenticated]
+    pagination_class = None
     filter_backends = [filters.SearchFilter]
     search_fields = ['nombre', 'contacto_nombre', 'contacto_email', 'iata']
 
@@ -228,23 +258,75 @@ class AlojamientoReservaViewSet(viewsets.ModelViewSet):
     queryset = AlojamientoReserva.objects.select_related('venta', 'ciudad__pais', 'proveedor').order_by('check_in')
     serializer_class = AlojamientoReservaSerializer
     permission_classes = [permissions.IsAuthenticated]
+    
+    @action(detail=True, methods=['post'])
+    def generar_voucher(self, request, pk=None):
+        from .services.voucher_service import generar_voucher_alojamiento
+        
+        alojamiento = self.get_object()
+        try:
+            pdf_bytes, filename = generar_voucher_alojamiento(alojamiento)
+            response = HttpResponse(pdf_bytes, content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="{filename}"'
+            return response
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class TrasladoServicioViewSet(viewsets.ModelViewSet):
     queryset = TrasladoServicio.objects.select_related('venta', 'proveedor').order_by('fecha_hora')
     serializer_class = TrasladoServicioSerializer
     permission_classes = [permissions.IsAuthenticated]
+    
+    @action(detail=True, methods=['post'])
+    def generar_voucher(self, request, pk=None):
+        from .services.voucher_service import generar_voucher_traslado
+        
+        traslado = self.get_object()
+        try:
+            pdf_bytes, filename = generar_voucher_traslado(traslado)
+            response = HttpResponse(pdf_bytes, content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="{filename}"'
+            return response
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class ActividadServicioViewSet(viewsets.ModelViewSet):
     queryset = ActividadServicio.objects.select_related('venta', 'proveedor').order_by('fecha', 'nombre')
     serializer_class = ActividadServicioSerializer
     permission_classes = [permissions.IsAuthenticated]
+    
+    @action(detail=True, methods=['post'])
+    def generar_voucher(self, request, pk=None):
+        from .services.voucher_service import generar_voucher_actividad
+        
+        actividad = self.get_object()
+        try:
+            pdf_bytes, filename = generar_voucher_actividad(actividad)
+            response = HttpResponse(pdf_bytes, content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="{filename}"'
+            return response
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class AlquilerAutoReservaViewSet(viewsets.ModelViewSet):
     queryset = AlquilerAutoReserva.objects.all().select_related('venta', 'proveedor', 'ciudad_retiro', 'ciudad_devolucion')
     serializer_class = AlquilerAutoReservaSerializer
     filterset_fields = ['venta', 'proveedor', 'ciudad_retiro', 'ciudad_devolucion']
     search_fields = ['numero_confirmacion', 'compania_rentadora']
-    permission_classes = [IsStaffOrGroupWrite]
+    permission_classes = [permissions.IsAuthenticated]
+    
+    @action(detail=True, methods=['post'])
+    def generar_voucher(self, request, pk=None):
+        from .services.voucher_service import generar_voucher_alquiler_auto
+        
+        alquiler = self.get_object()
+        try:
+            pdf_bytes, filename = generar_voucher_alquiler_auto(alquiler)
+            response = HttpResponse(pdf_bytes, content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="{filename}"'
+            return response
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class EventoServicioViewSet(viewsets.ModelViewSet):
     queryset = EventoServicio.objects.all().select_related('venta', 'proveedor')
@@ -280,6 +362,19 @@ class ServicioAdicionalDetalleViewSet(viewsets.ModelViewSet):
     filterset_fields = ['venta', 'proveedor', 'tipo_servicio']
     search_fields = ['codigo_referencia']
     permission_classes = [IsStaffOrGroupWrite]
+    
+    @action(detail=True, methods=['post'])
+    def generar_voucher(self, request, pk=None):
+        from .services.voucher_service import generar_voucher_servicio
+        
+        servicio = self.get_object()
+        try:
+            pdf_bytes, filename = generar_voucher_servicio(servicio)
+            response = HttpResponse(pdf_bytes, content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="{filename}"'
+            return response
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class FeeVentaViewSet(viewsets.ModelViewSet):
     queryset = FeeVenta.objects.select_related('venta', 'moneda').order_by('-creado')
@@ -347,14 +442,20 @@ class VentaParseMetadataViewSet(viewsets.ModelViewSet):
 
 class BoletoImportadoViewSet(viewsets.ModelViewSet):
     queryset = BoletoImportado.objects.select_related(
-        'venta',
-        'venta__cliente',
-        'venta__moneda'
+        'venta_asociada',
+        'venta_asociada__cliente',
+        'venta_asociada__moneda'
     ).prefetch_related(
-        'venta__items_venta',
-        'venta__items_venta__producto_servicio'
+        'venta_asociada__items_venta',
+        'venta_asociada__items_venta__producto_servicio'
     ).all()
     serializer_class = BoletoImportadoSerializer
+    # Permitir SessionAuthentication para admin + JWT para API
+    authentication_classes = [
+        authentication.SessionAuthentication,
+        JWTAuthentication,
+        authentication.TokenAuthentication
+    ]
     permission_classes = [permissions.IsAuthenticated]
     filter_backends = [filters.SearchFilter]
     search_fields = ['numero_boleto', 'nombre_pasajero_procesado', 'localizador_pnr', 'aerolinea_emisora']

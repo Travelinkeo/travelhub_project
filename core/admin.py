@@ -14,6 +14,7 @@ from .services.pdf_service import generar_pdf_factura
 
 from .models import (
     ActividadServicio,
+    Agencia,
     AlojamientoReserva,
     AlquilerAutoReserva,
     ArticuloBlog,
@@ -38,12 +39,13 @@ from .models import (
     ServicioAdicionalDetalle,
     Testimonio,
     TrasladoServicio,
+    UsuarioAgencia,
     Venta,
     VentaParseMetadata,
 )
 
-# Importar admin específico para Venezuela
-from . import admin_venezuela
+# Importar admin consolidado de facturación
+from . import admin_facturacion_consolidada
 from .models.pasaportes import PasaporteEscaneado
 from .models.contabilidad import AsientoContable, LiquidacionProveedor, ItemLiquidacion
 from .models_catalogos import Aerolinea, Ciudad, Moneda, Pais, ProductoServicio, Proveedor, TipoCambio
@@ -99,11 +101,47 @@ class AerolineaAdmin(admin.ModelAdmin):
 
 
 
+class ComisionProveedorServicioInline(admin.TabularInline):
+    model = __import__('core.models_catalogos', fromlist=['ComisionProveedorServicio']).ComisionProveedorServicio
+    extra = 1
+    fields = ('tipo_servicio', 'comision_porcentaje', 'comision_monto_fijo', 'moneda', 'activo')
+    autocomplete_fields = ['moneda']
+
 @admin.register(Proveedor)
 class ProveedorAdmin(admin.ModelAdmin):
-    list_display = ('nombre', 'tipo_proveedor', 'nivel_proveedor', 'activo')
-    search_fields = ('nombre',)
+    list_display = ('nombre', 'rif', 'tipo_proveedor', 'nivel_proveedor', 'fee_nacional', 'fee_internacional', 'activo')
+    search_fields = ('nombre', 'rif')
     list_filter = ('tipo_proveedor', 'nivel_proveedor', 'activo')
+    inlines = [ComisionProveedorServicioInline]
+    
+    fieldsets = (
+        ('Información Básica', {
+            'fields': ('nombre', 'alias', 'rif', 'tipo_proveedor', 'nivel_proveedor', 'activo')
+        }),
+        ('Fees y Comisiones', {
+            'fields': ('fee_nacional', 'fee_internacional')
+        }),
+        ('Contacto', {
+            'fields': ('contacto_nombre', 'contacto_email', 'contacto_telefono', 'direccion', 'ciudad')
+        }),
+        ('Información Comercial', {
+            'fields': ('numero_cuenta_agencia', 'condiciones_pago', 'datos_bancarios', 'notas')
+        }),
+        ('Identificación GDS', {
+            'fields': ('iata', 'seudo_sabre', 'office_id_kiu', 'office_id_amadeus', 'office_id_travelport', 'office_id_hotelbeds', 'office_id_expedia'),
+            'classes': ('collapse',)
+        }),
+        ('Otros Sistemas', {
+            'fields': (
+                ('otro_sistema_1_nombre', 'otro_sistema_1_id'),
+                ('otro_sistema_2_nombre', 'otro_sistema_2_id'),
+                ('otro_sistema_3_nombre', 'otro_sistema_3_id'),
+                ('otro_sistema_4_nombre', 'otro_sistema_4_id'),
+                ('otro_sistema_5_nombre', 'otro_sistema_5_id'),
+            ),
+            'classes': ('collapse',)
+        }),
+    )
 
 @admin.register(ProductoServicio)
 class ProductoServicioAdmin(admin.ModelAdmin):
@@ -563,25 +601,9 @@ admin.site.register(ArticuloBlog)
 admin.site.register(Testimonio)
 admin.site.register(MenuItemCMS)
 admin.site.register(FormularioContactoCMS)
-class ItemFacturaInline(admin.TabularInline):
-    model = ItemFactura
-    extra = 0
-    readonly_fields = ('subtotal_item',)
+# Factura antigua deprecada - usar FacturaConsolidada en admin_facturacion_consolidada.py
 
-@admin.register(Factura)
-class FacturaAdmin(admin.ModelAdmin):
-    list_display = ('numero_factura', 'cliente', 'fecha_emision', 'monto_total', 'estado', 'archivo_pdf')
-    search_fields = ('numero_factura', 'cliente__nombres', 'cliente__apellidos', 'cliente__nombre_empresa')
-    list_filter = ('estado', 'fecha_emision')
-    autocomplete_fields = ['cliente', 'moneda']
-    readonly_fields = ('monto_total', 'saldo_pendiente')
-    inlines = [ItemFacturaInline]
-
-admin.site.register(ItemFactura)
-
-
-
-
+# ItemFactura ya no se registra - usar ItemFacturaConsolidada
 
 class ItemLiquidacionInline(admin.TabularInline):
     model = ItemLiquidacion
@@ -647,6 +669,27 @@ class ServicioAdicionalDetalleAdmin(admin.ModelAdmin):
     list_filter = ('tipo_servicio',)
     search_fields = ('codigo_referencia',)
     autocomplete_fields = ['venta','proveedor']
+    actions = ['generar_voucher_servicio']
+    
+    def generar_voucher_servicio(self, request, queryset):
+        from django.http import HttpResponse
+        from django.contrib import messages
+        from .services.voucher_service import generar_voucher_servicio
+        
+        if queryset.count() != 1:
+            messages.error(request, "Seleccione exactamente un servicio para generar el voucher.")
+            return
+        
+        servicio = queryset.first()
+        try:
+            pdf_bytes, filename = generar_voucher_servicio(servicio)
+            response = HttpResponse(pdf_bytes, content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="{filename}"'
+            return response
+        except Exception as e:
+            messages.error(request, f"Error al generar voucher: {str(e)}")
+    
+    generar_voucher_servicio.short_description = "Generar Voucher (PDF)"
 
 @admin.register(AuditLog)
 class AuditLogAdmin(admin.ModelAdmin):
@@ -663,6 +706,58 @@ class ComunicacionProveedorAdmin(admin.ModelAdmin):
     search_fields = ('asunto', 'remitente', 'cuerpo_completo')
     readonly_fields = ('remitente', 'asunto', 'fecha_recepcion', 'categoria', 'contenido_extraido', 'cuerpo_completo')
     ordering = ('-fecha_recepcion',)
+
+# --- Admin para Agencia (Multi-tenant) ---
+
+@admin.register(Agencia)
+class AgenciaAdmin(admin.ModelAdmin):
+    list_display = ['nombre', 'rif', 'iata', 'email_principal', 'activa', 'fecha_creacion']
+    list_filter = ['activa', 'pais', 'fecha_creacion']
+    search_fields = ['nombre', 'nombre_comercial', 'rif', 'iata', 'email_principal']
+    readonly_fields = ['fecha_creacion', 'fecha_actualizacion']
+    
+    fieldsets = (
+        ('Información Básica', {
+            'fields': ('nombre', 'nombre_comercial', 'rif', 'iata', 'propietario', 'activa')
+        }),
+        ('Contacto', {
+            'fields': ('telefono_principal', 'telefono_secundario', 'email_principal', 'email_soporte', 'email_ventas')
+        }),
+        ('Dirección', {
+            'fields': ('direccion', 'ciudad', 'estado', 'pais', 'codigo_postal')
+        }),
+        ('Branding', {
+            'fields': ('logo', 'logo_secundario', 'color_primario', 'color_secundario')
+        }),
+        ('Redes Sociales', {
+            'fields': ('website', 'facebook', 'instagram', 'twitter', 'whatsapp')
+        }),
+        ('Configuración', {
+            'fields': ('moneda_principal', 'timezone', 'idioma')
+        }),
+        ('Fechas', {
+            'fields': ('fecha_creacion', 'fecha_actualizacion')
+        }),
+    )
+
+@admin.register(UsuarioAgencia)
+class UsuarioAgenciaAdmin(admin.ModelAdmin):
+    list_display = ['usuario', 'agencia', 'rol', 'activo', 'fecha_asignacion']
+    list_filter = ['rol', 'activo', 'agencia']
+    search_fields = ['usuario__username', 'usuario__email', 'agencia__nombre']
+    readonly_fields = ['fecha_asignacion']
+
+# Registrar Retenciones ISLR
+from .models.retenciones_islr import RetencionISLR
+
+@admin.register(RetencionISLR)
+class RetencionISLRAdmin(admin.ModelAdmin):
+    list_display = ['numero_comprobante', 'fecha_emision', 'cliente', 'factura',
+                   'base_imponible', 'porcentaje_retencion', 'monto_retenido', 'estado']
+    list_filter = ['estado', 'tipo_operacion', 'periodo_fiscal']
+    search_fields = ['numero_comprobante', 'cliente__nombres', 'factura__numero_factura']
+    readonly_fields = ['monto_retenido', 'creado', 'actualizado']
+    autocomplete_fields = ['factura', 'cliente']
 
 @admin.register(PasaporteEscaneado)
 class PasaporteEscaneadoAdmin(admin.ModelAdmin):
@@ -712,3 +807,6 @@ class PasaporteEscaneadoAdmin(admin.ModelAdmin):
         if not obj.procesado_por:
             obj.procesado_por = request.user
         super().save_model(request, obj, form, change)
+
+# Importar admin de tarifario de hoteles
+from . import admin_tarifario

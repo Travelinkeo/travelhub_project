@@ -107,6 +107,43 @@ Mantiene ngrok activo con reconexión automática.
 
 ---
 
+## 🔒 Scripts de Seguridad y Backup
+
+### `backup_completo.bat`
+Crea backup completo del sistema antes de despliegues.
+
+```bash
+.\batch_scripts\backup_completo.bat
+```
+
+**Qué hace**:
+- Backup de base de datos (JSON)
+- Backup de archivos media
+- Backup de configuración (.env)
+- Guarda todo en carpeta `backups/`
+
+**Uso**: Ejecutar SIEMPRE antes de desplegar a producción.
+
+---
+
+### `verificar_seguridad.bat`
+Verifica configuración de seguridad antes de despliegue.
+
+```bash
+.\batch_scripts\verificar_seguridad.bat
+```
+
+**Qué verifica**:
+- .env NO está en git
+- SECRET_KEY tiene longitud adecuada
+- DEBUG está en False para producción
+- ALLOWED_HOSTS configurado
+- No hay archivos de build en git
+
+**Uso**: Ejecutar antes de cada despliegue.
+
+---
+
 ## 💰 Scripts de Contabilidad
 
 ### `sincronizar_bcv.bat`

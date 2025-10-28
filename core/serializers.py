@@ -1,39 +1,31 @@
 # Archivo: core/serializers.py
 from rest_framework import serializers
 
-from .models import (
+# Importar desde submódulos específicos
+from core.models.agencia import Agencia, UsuarioAgencia
+from core.models.boletos import BoletoImportado
+from core.models.contabilidad import AsientoContable, DetalleAsiento, ItemLiquidacion, LiquidacionProveedor
+from core.models.facturacion import Factura, ItemFactura
+from core.models.ventas import (
     ActividadServicio,
     AlojamientoReserva,
     AlquilerAutoReserva,
-    AsientoContable,
     AuditLog,
-    BoletoImportado,
     CircuitoDia,
     CircuitoTuristico,
-    Ciudad,
-    DetalleAsiento,
     EventoServicio,
-    Factura,
     FeeVenta,
-    ItemFactura,
-    ItemLiquidacion,
     ItemVenta,
-    LiquidacionProveedor,
-    Moneda,
     PagoVenta,
-    Pais,
     PaqueteAereo,
     SegmentoVuelo,
     ServicioAdicionalDetalle,
-    TipoCambio,
     TrasladoServicio,
     Venta,
     VentaParseMetadata,
 )
+from core.models_catalogos import Aerolinea, Ciudad, Moneda, Pais, ProductoServicio, Proveedor, TipoCambio
 from personas.models import Cliente
-
-# Importar catálogos ligeros directamente
-from .models_catalogos import Aerolinea, ProductoServicio, Proveedor
 
 
 
@@ -94,6 +86,44 @@ class BoletoImportadoSerializer(serializers.ModelSerializer):
     class Meta:
         model = BoletoImportado
         fields = '__all__'
+    
+    def create(self, validated_data):
+        # Si no hay archivo, es entrada manual - marcar como COMPLETADO
+        if not validated_data.get('archivo_boleto'):
+            validated_data['estado_parseo'] = BoletoImportado.EstadoParseo.COMPLETADO
+            
+            # Construir datos_parseados desde campos manuales para que el signal pueda crear la venta
+            if not validated_data.get('datos_parseados'):
+                validated_data['datos_parseados'] = {
+                    'normalized': {
+                        'reservation_code': validated_data.get('localizador_pnr', ''),
+                        'ticket_number': validated_data.get('numero_boleto', ''),
+                        'passenger_name': validated_data.get('nombre_pasajero_completo', ''),
+                        'passenger_document': validated_data.get('foid_pasajero', ''),
+                        'total_amount': str(validated_data.get('total_boleto', '0.00')),
+                        'total_currency': 'USD',
+                        'airline_name': validated_data.get('aerolinea_emisora', 'N/A'),
+                    }
+                }
+        
+        # Crear la instancia
+        instance = super().create(validated_data)
+        
+        # Si es entrada manual y tiene datos, generar PDF
+        if not instance.archivo_boleto and instance.datos_parseados:
+            try:
+                from core import ticket_parser
+                from django.core.files.base import ContentFile
+                
+                pdf_bytes, pdf_filename = ticket_parser.generate_ticket(instance.datos_parseados)
+                if pdf_bytes:
+                    instance.archivo_pdf_generado.save(pdf_filename, ContentFile(pdf_bytes), save=True)
+            except Exception as e:
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.warning(f"No se pudo generar PDF para boleto manual {instance.id_boleto_importado}: {e}")
+        
+        return instance
 
 # --- Serializadores para ERP (API Principal) ---
 
@@ -163,6 +193,14 @@ class ItemVentaSerializer(serializers.ModelSerializer):
     producto_servicio_detalle = ProductoServicioSerializer(source='producto_servicio', read_only=True)
     proveedor_servicio_detalle = serializers.StringRelatedField(source='proveedor_servicio', read_only=True)
     estado_item_display = serializers.CharField(source='get_estado_item_display', read_only=True)
+    
+    # Campos para detalles de servicios (write_only)
+    alojamiento_details = serializers.JSONField(write_only=True, required=False, allow_null=True)
+    alquiler_auto_details = serializers.JSONField(write_only=True, required=False, allow_null=True)
+    traslado_details = serializers.JSONField(write_only=True, required=False, allow_null=True)
+    tour_actividad_details = serializers.JSONField(write_only=True, required=False, allow_null=True)
+    seguro_viaje_details = serializers.JSONField(write_only=True, required=False, allow_null=True)
+    servicio_adicional_details = serializers.JSONField(write_only=True, required=False, allow_null=True)
 
     class Meta:
         model = ItemVenta
@@ -172,7 +210,9 @@ class ItemVentaSerializer(serializers.ModelSerializer):
             'costo_unitario_referencial', 'impuestos_item_venta',
             'subtotal_item_venta', 'total_item_venta',
             'fecha_inicio_servicio', 'fecha_fin_servicio', 'codigo_reserva_proveedor',
-            'proveedor_servicio', 'proveedor_servicio_detalle', 'estado_item', 'estado_item_display', 'notas_item'
+            'proveedor_servicio', 'proveedor_servicio_detalle', 'estado_item', 'estado_item_display', 'notas_item',
+            'alojamiento_details', 'alquiler_auto_details', 'traslado_details',
+            'tour_actividad_details', 'seguro_viaje_details', 'servicio_adicional_details'
         ]
         read_only_fields = ('subtotal_item_venta', 'total_item_venta')
         extra_kwargs = {
@@ -369,10 +409,155 @@ class VentaSerializer(serializers.ModelSerializer):
         }
 
     def create(self, validated_data):
+        import logging
+        logger = logging.getLogger(__name__)
+        
         items_data = validated_data.pop('items_venta', [])
+        logger.info(f"[VENTA DEBUG] Creando venta con {len(items_data)} items")
         venta = Venta.objects.create(**validated_data)
+        logger.info(f"[VENTA DEBUG] Venta creada con ID: {venta.id_venta}")
+        
         for item_data in items_data:
-            ItemVenta.objects.create(venta=venta, **item_data)
+            # Extraer detalles de servicios antes de crear el item
+            alojamiento_details = item_data.pop('alojamiento_details', None)
+            alquiler_auto_details = item_data.pop('alquiler_auto_details', None)
+            traslado_details = item_data.pop('traslado_details', None)
+            tour_actividad_details = item_data.pop('tour_actividad_details', None)
+            seguro_viaje_details = item_data.pop('seguro_viaje_details', None)
+            servicio_adicional_details = item_data.pop('servicio_adicional_details', None)
+            
+            # Crear el item de venta
+            item = ItemVenta.objects.create(venta=venta, **item_data)
+            
+            # Crear registros relacionados según el tipo de servicio
+            if alojamiento_details:
+                # Convertir IDs a instancias
+                if 'ciudad' in alojamiento_details and alojamiento_details['ciudad']:
+                    alojamiento_details['ciudad_id'] = alojamiento_details.pop('ciudad')
+                if 'proveedor' in alojamiento_details and alojamiento_details['proveedor']:
+                    alojamiento_details['proveedor_id'] = alojamiento_details.pop('proveedor')
+                AlojamientoReserva.objects.create(venta=venta, **alojamiento_details)
+            
+            if alquiler_auto_details:
+                # Mapear campos del frontend a campos del modelo
+                alquiler_data = {
+                    'venta': venta,
+                    'compania_rentadora': alquiler_auto_details.get('compania_rentadora'),
+                    'categoria_auto': alquiler_auto_details.get('categoria_auto'),
+                    'fecha_hora_retiro': f"{alquiler_auto_details.get('fecha_recogida')} {alquiler_auto_details.get('hora_recogida', '00:00')}" if alquiler_auto_details.get('fecha_recogida') else None,
+                    'fecha_hora_devolucion': f"{alquiler_auto_details.get('fecha_devolucion')} {alquiler_auto_details.get('hora_devolucion', '00:00')}" if alquiler_auto_details.get('fecha_devolucion') else None,
+                    'ciudad_retiro_id': alquiler_auto_details.get('ciudad_retiro'),
+                    'ciudad_devolucion_id': alquiler_auto_details.get('ciudad_devolucion'),
+                    'incluye_seguro': alquiler_auto_details.get('incluye_seguro', False),
+                    'numero_confirmacion': alquiler_auto_details.get('numero_confirmacion'),
+                    'proveedor_id': alquiler_auto_details.get('proveedor'),
+                    'notas': alquiler_auto_details.get('notas'),
+                }
+                AlquilerAutoReserva.objects.create(**alquiler_data)
+            
+            if traslado_details:
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.info(f"[TRASLADO DEBUG] traslado_details recibido: {traslado_details}")
+                
+                # traslado_details contiene: {traslados: [...], pasajeros, proveedor, notas}
+                traslados_list = traslado_details.get('traslados', [])
+                pasajeros = traslado_details.get('pasajeros', 1)
+                proveedor_id = traslado_details.get('proveedor')
+                notas = traslado_details.get('notas')
+                
+                logger.info(f"[TRASLADO DEBUG] traslados_list: {traslados_list}, pasajeros: {pasajeros}")
+                
+                # Crear un TrasladoServicio por cada traslado en la lista
+                for traslado_item in traslados_list:
+                    fecha_hora_str = None
+                    if traslado_item.get('fecha_hora') and traslado_item.get('hora'):
+                        fecha_hora_str = f"{traslado_item.get('fecha_hora')} {traslado_item.get('hora')}"
+                    elif traslado_item.get('fecha_hora'):
+                        fecha_hora_str = traslado_item.get('fecha_hora')
+                    
+                    traslado_data = {
+                        'venta': venta,
+                        'origen': traslado_item.get('origen'),
+                        'destino': traslado_item.get('destino'),
+                        'fecha_hora': fecha_hora_str,
+                        'pasajeros': pasajeros,
+                        'proveedor_id': proveedor_id,
+                        'notas': notas,
+                    }
+                    logger.info(f"[TRASLADO DEBUG] Creando traslado con data: {traslado_data}")
+                    traslado_creado = TrasladoServicio.objects.create(**traslado_data)
+                    logger.info(f"[TRASLADO DEBUG] Traslado creado con ID: {traslado_creado.id_traslado_servicio}")
+            
+            if tour_actividad_details:
+                if 'proveedor' in tour_actividad_details and tour_actividad_details['proveedor']:
+                    tour_actividad_details['proveedor_id'] = tour_actividad_details.pop('proveedor')
+                ActividadServicio.objects.create(venta=venta, **tour_actividad_details)
+            
+            if seguro_viaje_details:
+                servicio_data = {
+                    'venta': venta,
+                    'tipo_servicio': 'SEG',
+                    'descripcion': seguro_viaje_details.get('plan', 'Seguro de Viaje'),
+                    'proveedor_id': seguro_viaje_details.get('proveedor'),
+                    'fecha_inicio': seguro_viaje_details.get('fecha_salida'),
+                    'fecha_fin': seguro_viaje_details.get('fecha_regreso'),
+                    'detalles_cobertura': f"Cobertura: USD {seguro_viaje_details.get('cobertura_monto', 0)}",
+                    'notas': seguro_viaje_details.get('notas'),
+                    'metadata_json': seguro_viaje_details,
+                }
+                ServicioAdicionalDetalle.objects.create(**servicio_data)
+            
+            if servicio_adicional_details:
+                # Mapear tipo de servicio del frontend al modelo
+                tipo_map = {
+                    'SIM / E-SIM': 'SIM',
+                    'Asistencia': 'AST',
+                    'Lounge': 'LNG',
+                    'Otro': 'OTR'
+                }
+                tipo_frontend = servicio_adicional_details.get('tipo_servicio', 'Otro')
+                tipo_modelo = tipo_map.get(tipo_frontend, 'OTR')
+                
+                # Mapear campos del frontend a campos del modelo
+                servicio_data = {
+                    'venta': venta,
+                    'tipo_servicio': tipo_modelo,
+                    'descripcion': servicio_adicional_details.get('descripcion'),
+                    'proveedor_id': servicio_adicional_details.get('proveedor'),
+                    'notas': servicio_adicional_details.get('notas'),
+                }
+                
+                # Mapear campos específicos según el tipo
+                if servicio_adicional_details.get('lugar'):
+                    servicio_data['hora_lugar_encuentro'] = servicio_adicional_details.get('lugar')
+                
+                if servicio_adicional_details.get('fecha'):
+                    servicio_data['fecha_inicio'] = servicio_adicional_details.get('fecha')
+                
+                if servicio_adicional_details.get('destino'):
+                    servicio_data['descripcion'] = f"{servicio_data.get('descripcion', '')} - Destino: {servicio_adicional_details.get('destino')}".strip(' -')
+                
+                if servicio_adicional_details.get('fecha_salida'):
+                    servicio_data['fecha_inicio'] = servicio_adicional_details.get('fecha_salida')
+                
+                if servicio_adicional_details.get('fecha_retorno'):
+                    servicio_data['fecha_fin'] = servicio_adicional_details.get('fecha_retorno')
+                
+                if servicio_adicional_details.get('duracion_horas'):
+                    servicio_data['duracion_estimada'] = f"{servicio_adicional_details.get('duracion_horas')} horas"
+                
+                if servicio_adicional_details.get('pasajeros'):
+                    servicio_data['participantes'] = str(servicio_adicional_details.get('pasajeros'))
+                
+                # Guardar datos originales en metadata_json
+                servicio_data['metadata_json'] = servicio_adicional_details
+                
+                ServicioAdicionalDetalle.objects.create(**servicio_data)
+        
+        # Recalcular totales de la venta después de crear todos los items
+        venta.recalcular_finanzas()
+        
         return venta
 
     def update(self, instance, validated_data):
@@ -552,3 +737,59 @@ class LiquidacionProveedorSerializer(serializers.ModelSerializer):
             'notas', 'items_liquidacion'
         ]
         read_only_fields = ['id_liquidacion', 'fecha_emision', 'saldo_pendiente']
+
+
+# --- Serializadores para Agencia (Multi-tenant) ---
+
+from django.contrib.auth.models import User
+
+class UsuarioSerializer(serializers.ModelSerializer):
+    nombre_completo = serializers.CharField(source='get_full_name', read_only=True)
+    
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'nombre_completo', 'is_active']
+        read_only_fields = ['id']
+
+
+class AgenciaSerializer(serializers.ModelSerializer):
+    propietario_nombre = serializers.CharField(source='propietario.get_full_name', read_only=True)
+    total_usuarios = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Agencia
+        fields = '__all__'
+        read_only_fields = ['fecha_creacion', 'fecha_actualizacion', 'propietario']
+    
+    def get_total_usuarios(self, obj):
+        return obj.usuarios.filter(activo=True).count()
+
+
+class UsuarioAgenciaSerializer(serializers.ModelSerializer):
+    usuario_detalle = UsuarioSerializer(source='usuario', read_only=True)
+    agencia_nombre = serializers.CharField(source='agencia.nombre', read_only=True)
+    rol_display = serializers.CharField(source='get_rol_display', read_only=True)
+    
+    class Meta:
+        model = UsuarioAgencia
+        fields = '__all__'
+        read_only_fields = ['fecha_asignacion']
+
+
+class CrearUsuarioAgenciaSerializer(serializers.Serializer):
+    username = serializers.CharField(max_length=150)
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True, min_length=8)
+    first_name = serializers.CharField(max_length=150, required=False, allow_blank=True)
+    last_name = serializers.CharField(max_length=150, required=False, allow_blank=True)
+    rol = serializers.ChoiceField(choices=UsuarioAgencia.ROLES)
+    
+    def validate_username(self, value):
+        if User.objects.filter(username=value).exists():
+            raise serializers.ValidationError("Este nombre de usuario ya existe")
+        return value
+    
+    def validate_email(self, value):
+        if User.objects.filter(email=value).exists():
+            raise serializers.ValidationError("Este email ya está registrado")
+        return value

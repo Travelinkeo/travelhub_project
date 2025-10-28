@@ -1,0 +1,302 @@
+[
+  {
+    "model": "core.aerolinea",
+    "pk": 1,
+    "fields": {
+      "codigo_iata": "VO",
+      "codigo_icao": "VCV",
+      "nombre": "Conviasa",
+      "pais_origen": "Venezuela",
+      "rif": "G-20007774-3",
+      "activa": true
+    }
+  },
+  {
+    "model": "core.aerolinea",
+    "pk": 2,
+    "fields": {
+      "codigo_iata": "9V",
+      "codigo_icao": "ROI",
+      "nombre": "Avior Airlines",
+      "pais_origen": "Venezuela",
+      "rif": "J-302097843",
+      "activa": true
+    }
+  },
+  {
+    "model": "core.aerolinea",
+    "pk": 3,
+    "fields": {
+      "codigo_iata": "QL",
+      "codigo_icao": "LER",
+      "nombre": "LASER Airlines",
+      "pais_origen": "Venezuela",
+      "rif": "J-00364445-5",
+      "activa": true
+    }
+  },
+  {
+    "model": "core.aerolinea",
+    "pk": 4,
+    "fields": {
+      "codigo_iata": "VE",
+      "codigo_icao": "VNE",
+      "nombre": "Venezolana",
+      "pais_origen": "Venezuela",
+      "rif": "J-30819225-2",
+      "activa": true
+    }
+  },
+  {
+    "model": "core.aerolinea",
+    "pk": 5,
+    "fields": {
+      "codigo_iata": "E7",
+      "codigo_icao": "EST",
+      "nombre": "Estelar Latinoamérica",
+      "pais_origen": "Venezuela",
+      "rif": "J-29567805-3",
+      "activa": true
+    }
+  },
+  {
+    "model": "core.aerolinea",
+    "pk": 6,
+    "fields": {
+      "codigo_iata": "T3",
+      "codigo_icao": "TUR",
+      "nombre": "Turpial Airlines",
+      "pais_origen": "Venezuela",
+      "rif": "J-40491921-0",
+      "activa": true
+    }
+  },
+  {
+    "model": "core.aerolinea",
+    "pk": 7,
+    "fields": {
+      "codigo_iata": "5R",
+      "codigo_icao": "RUC",
+      "nombre": "Rutaca Airlines",
+      "pais_origen": "Venezuela",
+      "rif": "J-09500396-5",
+      "activa": true
+    }
+  },
+  {
+    "model": "core.aerolinea",
+    "pk": 8,
+    "fields": {
+      "codigo_iata": "AC",
+      "codigo_icao": "ACB",
+      "nombre": "Aerocaribe",
+      "pais_origen": "Venezuela",
+      "rif": "J-40149748-9",
+      "activa": true
+    }
+  },
+  {
+    "model": "core.aerolinea",
+    "pk": 9,
+    "fields": {
+      "codigo_iata": "SC",
+      "codigo_icao": "SAS",
+      "nombre": "SASCA Airlines",
+      "pais_origen": "Venezuela",
+      "rif": "J-080342470",
+      "activa": true
+    }
+  },
+  {
+    "model": "core.aerolinea",
+    "pk": 10,
+    "fields": {
+      "codigo_iata": "VH",
+      "codigo_icao": "LAV",
+      "nombre": "Aeropostal",
+      "pais_origen": "Venezuela",
+      "rif": "G-20012311-7",
+      "activa": true
+    }
+  },
+  {
+    "model": "core.aerolinea",
+    "pk": 11,
+    "fields": {
+      "codigo_iata": "AB",
+      "codigo_icao": "ALB",
+      "nombre": "Albatros Airlines",
+      "pais_origen": "Venezuela",
+      "rif": "E-99999999-1",
+      "activa": true
+    }
+  },
+  {
+    "model": "core.aerolinea",
+    "pk": 12,
+    "fields": {
+      "codigo_iata": "CM",
+      "codigo_icao": "CMP",
+      "nombre": "Copa Airlines",
+      "pais_origen": "Panamá",
+      "rif": "E-50700001-2",
+      "activa": true
+    }
+  },
+  {
+    "model": "core.aerolinea",
+    "pk": 13,
+    "fields": {
+      "codigo_iata": "AV",
+      "codigo_icao": "AVA",
+      "nombre": "Avianca",
+      "pais_origen": "Colombia",
+      "rif": "E-17000001-3",
+      "activa": true
+    }
+  },
+  {
+    "model": "core.aerolinea",
+    "pk": 14,
+    "fields": {
+      "codigo_iata": "P5",
+      "codigo_icao": "RPB",
+      "nombre": "Wingo",
+      "pais_origen": "Colombia",
+      "rif": "E-17000002-4",
+      "activa": true
+    }
+  },
+  {
+    "model": "core.aerolinea",
+    "pk": 15,
+    "fields": {
+      "codigo_iata": "LA",
+      "codigo_icao": "LAN",
+      "nombre": "LATAM Airlines",
+      "pais_origen": "Chile",
+      "rif": "E-15200001-5",
+      "activa": true
+    }
+  },
+  {
+    "model": "core.aerolinea",
+    "pk": 16,
+    "fields": {
+      "codigo_iata": "BW",
+      "codigo_icao": "BWA",
+      "nombre": "Caribbean Airlines",
+      "pais_origen": "Trinidad y Tobago",
+      "rif": "E-78000001-6",
+      "activa": true
+    }
+  },
+  {
+    "model": "core.aerolinea",
+    "pk": 17,
+    "fields": {
+      "codigo_iata": "OB",
+      "codigo_icao": "BOV",
+      "nombre": "Boliviana de Aviación",
+      "pais_origen": "Bolivia",
+      "rif": "E-59100001-7",
+      "activa": true
+    }
+  },
+  {
+    "model": "core.aerolinea",
+    "pk": 18,
+    "fields": {
+      "codigo_iata": "SH",
+      "codigo_icao": "SKH",
+      "nombre": "Sky High Aviation",
+      "pais_origen": "República Dominicana",
+      "rif": "E-80900001-8",
+      "activa": true
+    }
+  },
+  {
+    "model": "core.aerolinea",
+    "pk": 19,
+    "fields": {
+      "codigo_iata": "7A",
+      "codigo_icao": "AER",
+      "nombre": "Aeroregional",
+      "pais_origen": "Ecuador",
+      "rif": "E-59300001-9",
+      "activa": true
+    }
+  },
+  {
+    "model": "core.aerolinea",
+    "pk": 20,
+    "fields": {
+      "codigo_iata": "9R",
+      "codigo_icao": "NSE",
+      "nombre": "Satena",
+      "pais_origen": "Colombia",
+      "rif": "E-17000003-0",
+      "activa": true
+    }
+  },
+  {
+    "model": "core.aerolinea",
+    "pk": 21,
+    "fields": {
+      "codigo_iata": "IB",
+      "codigo_icao": "IBE",
+      "nombre": "Iberia",
+      "pais_origen": "España",
+      "rif": "E-72400001-1",
+      "activa": true
+    }
+  },
+  {
+    "model": "core.aerolinea",
+    "pk": 22,
+    "fields": {
+      "codigo_iata": "UX",
+      "codigo_icao": "AEA",
+      "nombre": "Air Europa",
+      "pais_origen": "España",
+      "rif": "E-72400002-2",
+      "activa": true
+    }
+  },
+  {
+    "model": "core.aerolinea",
+    "pk": 23,
+    "fields": {
+      "codigo_iata": "PU",
+      "codigo_icao": "PUA",
+      "nombre": "Plus Ultra",
+      "pais_origen": "España",
+      "rif": "E-72400003-3",
+      "activa": true
+    }
+  },
+  {
+    "model": "core.aerolinea",
+    "pk": 24,
+    "fields": {
+      "codigo_iata": "TP",
+      "codigo_icao": "TAP",
+      "nombre": "TAP Air Portugal",
+      "pais_origen": "Portugal",
+      "rif": "E-35100001-4",
+      "activa": true
+    }
+  },
+  {
+    "model": "core.aerolinea",
+    "pk": 25,
+    "fields": {
+      "codigo_iata": "TK",
+      "codigo_icao": "THY",
+      "nombre": "Turkish Airlines",
+      "pais_origen": "Turquía",
+      "rif": "E-90500001-5",
+      "activa": true
+    }
+  }
+]

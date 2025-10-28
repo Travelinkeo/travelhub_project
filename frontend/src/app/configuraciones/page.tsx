@@ -5,6 +5,7 @@ import { Box, Tabs, Tab } from '@mui/material';
 import { ApiTable } from '@/components/ApiTable';
 import { useApi } from '@/hooks/useApi';
 import { Paginated } from '@/types/api';
+import PerfilAgencia from '@/components/configuraciones/PerfilAgencia';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -59,14 +60,18 @@ export default function ConfiguracionesPage() {
     <Box sx={{ width: '100%' }}>
       <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
         <Tabs value={value} onChange={handleChange} aria-label="configuraciones tabs">
-          <Tab label="Países" {...a11yProps(0)} />
-          <Tab label="Ciudades" {...a11yProps(1)} />
-          <Tab label="Monedas" {...a11yProps(2)} />
-          <Tab label="Tipos de Cambio" {...a11yProps(3)} />
-          <Tab label="Aerolíneas" {...a11yProps(4)} />
+          <Tab label="Agencia" {...a11yProps(0)} />
+          <Tab label="Países" {...a11yProps(1)} />
+          <Tab label="Ciudades" {...a11yProps(2)} />
+          <Tab label="Monedas" {...a11yProps(3)} />
+          <Tab label="Tipos de Cambio" {...a11yProps(4)} />
+          <Tab label="Aerolíneas" {...a11yProps(5)} />
         </Tabs>
       </Box>
       <TabPanel value={value} index={0}>
+        <PerfilAgencia />
+      </TabPanel>
+      <TabPanel value={value} index={1}>
         <ApiTable
           endpoint="/api/paises/"
           columns={[
@@ -82,7 +87,7 @@ export default function ConfiguracionesPage() {
           ]}
         />
       </TabPanel>
-      <TabPanel value={value} index={1}>
+      <TabPanel value={value} index={2}>
         <ApiTable
           endpoint="/api/ciudades/"
           columns={[
@@ -98,7 +103,7 @@ export default function ConfiguracionesPage() {
           ]}
         />
       </TabPanel>
-      <TabPanel value={value} index={2}>
+      <TabPanel value={value} index={3}>
         <ApiTable
           endpoint="/api/monedas/"
           columns={[
@@ -119,7 +124,7 @@ export default function ConfiguracionesPage() {
           ]}
         />
       </TabPanel>
-      <TabPanel value={value} index={3}>
+      <TabPanel value={value} index={4}>
         <ApiTable
           endpoint="/api/tipos-cambio/"
           columns={[
@@ -137,7 +142,7 @@ export default function ConfiguracionesPage() {
           ]}
         />
       </TabPanel>
-      <TabPanel value={value} index={4}>
+      <TabPanel value={value} index={5}>
         <ApiTable
           endpoint="/api/aerolineas/"
           columns={[

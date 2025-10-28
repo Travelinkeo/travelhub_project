@@ -1,0 +1,83 @@
+{
+  "nombre_tarifario": "Tarifario Nacional Septiembre 2025",
+  "destino": "Los Roques",
+  "vigencia": {
+    "inicio": "2025-09-21",
+    "fin": "2026-01-15"
+  },
+  "comision_estandar": "15.00",
+  "hoteles": [
+    {
+      "nombre": "LAGUNITA BY MEDITERRÁNEO\nFULL PENSIÓN",
+      "destino": "Los Roques",
+      "regimen": "PENSION COMPLETA",
+      "comision": "15",
+      "habitaciones": [
+        {
+          "tipo": "STANDARD",
+          "capacidad_adultos": 2,
+          "capacidad_ninos": 0,
+          "capacidad_total": 2,
+          "tarifas": [
+            {
+              "fecha_inicio": "2025-09-21",
+              "fecha_fin": "2025-12-20",
+              "temporada": "TEMPORADA BAJA",
+              "moneda": "EUR",
+              "sgl": "15.00",
+              "dbl": "10.00"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "nombre": "LOS CORALES\nFULL PENSIÓN",
+      "destino": "Los Roques",
+      "regimen": "PENSION COMPLETA",
+      "comision": "7",
+      "habitaciones": [
+        {
+          "tipo": "STANDARD",
+          "capacidad_adultos": 2,
+          "capacidad_ninos": 0,
+          "capacidad_total": 2,
+          "tarifas": [
+            {
+              "fecha_inicio": "2025-09-21",
+              "fecha_fin": "2025-12-20",
+              "temporada": "TEMPORADA BAJA",
+              "moneda": "EUR",
+              "sgl": "01.00",
+              "dbl": "06.00"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "nombre": "LD\nFULL PENSIÓN",
+      "destino": "Los Roques",
+      "regimen": "PENSION COMPLETA",
+      "comision": "7",
+      "habitaciones": [
+        {
+          "tipo": "STANDARD",
+          "capacidad_adultos": 2,
+          "capacidad_ninos": 0,
+          "capacidad_total": 2,
+          "tarifas": [
+            {
+              "fecha_inicio": "2025-09-21",
+              "fecha_fin": "2025-12-20",
+              "temporada": "TEMPORADA BAJA",
+              "moneda": "EUR",
+              "sgl": "08.00",
+              "dbl": "10.00"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

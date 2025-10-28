@@ -1,0 +1,27 @@
+# Core Django dependencies
+Django==5.2.6
+djangorestframework==3.15.2
+djangorestframework-simplejwt==5.5.1
+drf-spectacular==0.27.2
+django-cors-headers==4.4.0
+python-dotenv==1.1.1
+whitenoise==6.7.0
+gunicorn==23.0.0
+
+# Database
+psycopg==3.2.9
+psycopg-binary==3.2.9
+psycopg2-binary
+
+# Cache
+redis==5.0.1
+django-redis==5.4.0
+
+# Security
+cryptography==45.0.5
+PyJWT==2.10.1
+
+# Utilities
+python-dateutil==2.9.0.post0
+pytz==2025.2
+requests==2.32.4

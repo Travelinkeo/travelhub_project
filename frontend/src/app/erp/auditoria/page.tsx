@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { api } from '@/lib/api';
+import api from '@/lib/api';
 import { TextField, Select, MenuItem, Chip, Button } from '@mui/material';
 
 interface AuditLog {

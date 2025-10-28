@@ -62,21 +62,26 @@ from .models_catalogos import Pais, Ciudad, Moneda, TipoCambio, ProductoServicio
 class PaisViewSet(viewsets.ModelViewSet):
     queryset = Pais.objects.all()
     serializer_class = PaisSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.AllowAny]
+    authentication_classes = []
+    pagination_class = None
     filter_backends = [filters.SearchFilter]
     search_fields = ['nombre', 'codigo_iso_2', 'codigo_iso_3']
 
 class CiudadViewSet(viewsets.ModelViewSet):
     queryset = Ciudad.objects.all()
     serializer_class = CiudadSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.AllowAny]
+    authentication_classes = []
+    pagination_class = None
     filter_backends = [filters.SearchFilter]
     search_fields = ['nombre', 'pais__nombre', 'region_estado']
 
 class MonedaViewSet(viewsets.ModelViewSet):
     queryset = Moneda.objects.all()
     serializer_class = MonedaSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.AllowAny]
+    authentication_classes = []
     filter_backends = [filters.SearchFilter]
     search_fields = ['nombre', 'codigo_iso']
 
@@ -168,6 +173,17 @@ try:
 except Exception as e:
     print(f"Error registering Comunicaciones ViewSet: {e}")
 
+# Register Agencia ViewSet
+try:
+    from .views.agencia_views import AgenciaViewSet, UsuarioAgenciaViewSet
+    router.register(r'agencias', AgenciaViewSet, basename='agencia')
+    router.register(r'usuarios-agencia', UsuarioAgenciaViewSet, basename='usuario-agencia')
+    print("Agencia ViewSets registered successfully")
+except Exception as e:
+    print(f"Error registering Agencia ViewSets: {e}")
+    import traceback
+    traceback.print_exc()
+
 # Manually register moneda API with search functionality
 # try:
 #     from .views import MonedaViewSet
@@ -181,6 +197,32 @@ router.register(r'productoservicio', ProductoServicioViewSet, basename='producto
 from cotizaciones.views import CotizacionViewSet, ItemCotizacionViewSet
 router.register(r'cotizaciones', CotizacionViewSet, basename='cotizaciones')
 router.register(r'items-cotizacion', ItemCotizacionViewSet, basename='items-cotizacion')
+
+# Register Facturas Consolidadas ViewSet
+try:
+    from .views.factura_consolidada_views import FacturaConsolidadaViewSet, ItemFacturaConsolidadaViewSet
+    router.register(r'facturas-consolidadas', FacturaConsolidadaViewSet, basename='factura-consolidada')
+    router.register(r'items-factura-consolidada', ItemFacturaConsolidadaViewSet, basename='item-factura-consolidada')
+    print("Facturas Consolidadas ViewSets registered successfully")
+except Exception as e:
+    print(f"Error registering Facturas Consolidadas ViewSets: {e}")
+
+# Register Libro de Ventas ViewSet
+try:
+    from .views.libro_ventas_views import LibroVentasViewSet
+    router.register(r'libro-ventas', LibroVentasViewSet, basename='libro-ventas')
+    print("Libro de Ventas ViewSet registered successfully")
+except Exception as e:
+    print(f"Error registering Libro de Ventas ViewSet: {e}")
+
+# Register Tarifario Hoteles ViewSets
+try:
+    from .views.tarifario_views import TarifarioProveedorViewSet, HotelTarifarioViewSet
+    router.register(r'tarifarios', TarifarioProveedorViewSet, basename='tarifario')
+    router.register(r'hoteles-tarifario', HotelTarifarioViewSet, basename='hotel-tarifario')
+    print("Tarifario Hoteles ViewSets registered successfully")
+except Exception as e:
+    print(f"Error registering Tarifario Hoteles ViewSets: {e}")
 
 print(f"Total URLs en router: {len(router.urls)}")
 
@@ -239,6 +281,34 @@ urlpatterns = [
     path(r'api/boletos/sin-venta/', lambda r: __import__('core.views.boleto_api_views', fromlist=['boletos_sin_venta']).boletos_sin_venta(r), name='boletos_sin_venta'),
     path(r'api/boletos/<int:boleto_id>/reintentar-parseo/', lambda r, boleto_id: __import__('core.views.boleto_api_views', fromlist=['reintentar_parseo']).reintentar_parseo(r, boleto_id), name='reintentar_parseo'),
     path(r'api/boletos/<int:boleto_id>/crear-venta/', lambda r, boleto_id: __import__('core.views.boleto_api_views', fromlist=['crear_venta_desde_boleto']).crear_venta_desde_boleto(r, boleto_id), name='crear_venta_desde_boleto'),
+    
+    # Billing/SaaS - Páginas
+    path(r'billing/success/', lambda r: __import__('core.views.billing_success_views', fromlist=['billing_success']).billing_success(r), name='billing_success'),
+    path(r'billing/cancel/', lambda r: __import__('core.views.billing_success_views', fromlist=['billing_cancel']).billing_cancel(r), name='billing_cancel'),
+    
+    # Billing/SaaS - API Básica
+    path(r'api/billing/plans/', lambda r: __import__('core.views.billing_views', fromlist=['get_plans']).get_plans(r), name='billing_plans'),
+    path(r'api/billing/subscription/', lambda r: __import__('core.views.billing_views', fromlist=['get_current_subscription']).get_current_subscription(r), name='current_subscription'),
+    path(r'api/billing/checkout/', csrf_exempt(lambda r: __import__('core.views.billing_views', fromlist=['create_checkout_session']).create_checkout_session(r)), name='create_checkout'),
+    path(r'api/billing/webhook/', csrf_exempt(lambda r: __import__('core.views.billing_views', fromlist=['stripe_webhook']).stripe_webhook(r)), name='stripe_webhook'),
+    path(r'api/billing/cancel/', lambda r: __import__('core.views.billing_views', fromlist=['cancel_subscription']).cancel_subscription(r), name='cancel_subscription'),
+    
+    # Billing/SaaS - Dashboard
+    path(r'api/billing/invoices/', lambda r: __import__('core.views.billing_dashboard_views', fromlist=['get_invoices']).get_invoices(r), name='billing_invoices'),
+    path(r'api/billing/payment-method/', lambda r: __import__('core.views.billing_dashboard_views', fromlist=['get_payment_method']).get_payment_method(r), name='billing_payment_method'),
+    path(r'api/billing/usage/', lambda r: __import__('core.views.billing_dashboard_views', fromlist=['get_usage_stats']).get_usage_stats(r), name='billing_usage'),
+    
+    # Billing/SaaS - Cambio de Plan
+    path(r'api/billing/change-plan/', csrf_exempt(lambda r: __import__('core.views.billing_plan_change_views', fromlist=['change_plan']).change_plan(r)), name='change_plan'),
+    path(r'api/billing/preview-change/', lambda r: __import__('core.views.billing_plan_change_views', fromlist=['preview_plan_change']).preview_plan_change(r), name='preview_plan_change'),
+    path(r'api/billing/downgrade-free/', csrf_exempt(lambda r: __import__('core.views.billing_plan_change_views', fromlist=['downgrade_to_free']).downgrade_to_free(r)), name='downgrade_free'),
+    
+    # Billing/SaaS - Analytics (Admin only)
+    path(r'api/billing/analytics/mrr/', lambda r: __import__('core.views.billing_analytics_views', fromlist=['get_mrr']).get_mrr(r), name='analytics_mrr'),
+    path(r'api/billing/analytics/churn/', lambda r: __import__('core.views.billing_analytics_views', fromlist=['get_churn_rate']).get_churn_rate(r), name='analytics_churn'),
+    path(r'api/billing/analytics/usage/', lambda r: __import__('core.views.billing_analytics_views', fromlist=['get_usage_metrics']).get_usage_metrics(r), name='analytics_usage'),
+    path(r'api/billing/analytics/conversion/', lambda r: __import__('core.views.billing_analytics_views', fromlist=['get_conversion_funnel']).get_conversion_funnel(r), name='analytics_conversion'),
+    path(r'api/billing/analytics/growth/', lambda r: __import__('core.views.billing_analytics_views', fromlist=['get_growth_metrics']).get_growth_metrics(r), name='analytics_growth'),
     
     # Reportes Contables
     path(r'api/reportes/libro-diario/', lambda r: __import__('core.views.reportes_views', fromlist=['libro_diario']).libro_diario(r), name='libro_diario'),

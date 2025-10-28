@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Factura {{ factura.numero_factura }}</title>
+    <style>
+        @page { margin: 1cm; size: letter; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; font-size: 9pt; color: #333; }
+        .header { display: table; width: 100%; margin-bottom: 20px; border-bottom: 2px solid #000; padding-bottom: 10px; }
+        .header-left { display: table-cell; width: 50%; vertical-align: top; }
+        .header-right { display: table-cell; width: 50%; vertical-align: top; text-align: right; }
+        .header-left h1 { font-size: 18pt; margin-bottom: 5px; }
+        .header-left p { font-size: 9pt; }
+        .header-right p { font-size: 8pt; line-height: 1.4; }
+        .logo { max-width: 150px; max-height: 80px; margin-bottom: 10px; }
+        .info-grid { display: table; width: 100%; margin-bottom: 15px; }
+        .info-row { display: table-row; }
+        .info-cell { display: table-cell; padding: 3px 5px; border: 1px solid #ddd; }
+        .info-label { font-weight: bold; background-color: #f0f0f0; width: 30%; }
+        .section-title { background-color: #000; color: #fff; padding: 5px; font-weight: bold; margin-top: 15px; margin-bottom: 5px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
+        th, td { border: 1px solid #ddd; padding: 5px; text-align: left; }
+        th { background-color: #f0f0f0; font-weight: bold; }
+        .text-right { text-align: right; }
+        .totals { margin-top: 20px; float: right; width: 50%; }
+        .totals table { margin-bottom: 5px; }
+        .total-final { font-weight: bold; background-color: #f0f0f0; }
+        .footer { clear: both; margin-top: 30px; padding-top: 10px; border-top: 1px solid #ddd; font-size: 7pt; text-align: center; }
+    </style>
+</head>
+<body>
+    <!-- Encabezado -->
+    <div class="header">
+        <div class="header-left">
+            <!-- Logo de la agencia -->
+            <img src="file:///C:/Users/ARMANDO/travelhub_project/static/images/Logo TravelHub Negro.png" alt="Logo" class="logo" />
+            <h1>FACTURA{% if factura.modalidad_emision == 'CONTINGENCIA_FISICA' %} - CONTINGENCIA{% endif %}</h1>
+            <p><strong>No: {{ factura.numero_factura }}</strong></p>
+            <p>No de Control: {{ factura.numero_control }}</p>
+        </div>
+        <div class="header-right">
+            <p><strong>{{ factura.emisor_razon_social }}</strong></p>
+            <p>RIF: {{ factura.emisor_rif }}</p>
+            <p>{{ factura.emisor_direccion_fiscal }}</p>
+            {% if factura.es_sujeto_pasivo_especial %}
+            <p style="font-weight: bold; margin-top: 5px;">CONTRIBUYENTE ESPECIAL</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Información de la Factura -->
+    <div class="info-grid">
+        <div class="info-row">
+            <div class="info-cell info-label">Fecha de Emisión:</div>
+            <div class="info-cell">{{ factura.fecha_emision|date:"dmY" }}</div>
+            <div class="info-cell info-label">Hora de Emisión:</div>
+            <div class="info-cell">{% now "h:i:s A" %}</div>
+        </div>
+        <div class="info-row">
+            <div class="info-cell info-label">Fecha de Vencimiento:</div>
+            <div class="info-cell" colspan="3">{{ factura.fecha_vencimiento|date:"d/m/Y"|default:"N/A" }}</div>
+        </div>
+    </div>
+
+    <!-- Información del Cliente -->
+    <div class="section-title">DATOS DEL CLIENTE</div>
+    <div class="info-grid">
+        <div class="info-row">
+            <div class="info-cell info-label">Cliente:</div>
+            <div class="info-cell">{{ factura.cliente.nombres }} {{ factura.cliente.apellidos }}</div>
+            <div class="info-cell info-label">RIF/Cédula:</div>
+            <div class="info-cell">{{ factura.cliente_identificacion|default:factura.cliente.cedula_identidad }}</div>
+        </div>
+        <div class="info-row">
+            <div class="info-cell info-label">Dirección:</div>
+            <div class="info-cell" colspan="3">{{ factura.cliente_direccion|default:"N/A" }}</div>
+        </div>
+    </div>
+
+    <!-- Tipo de Operación -->
+    <div class="section-title">TIPO DE OPERACIÓN</div>
+    <div class="info-grid">
+        <div class="info-row">
+            <div class="info-cell info-label">Tipo:</div>
+            <div class="info-cell">{{ factura.get_tipo_operacion_display }}</div>
+            <div class="info-cell info-label">Moneda:</div>
+            <div class="info-cell">{{ factura.moneda.nombre }} ({{ factura.moneda.codigo_iso }})</div>
+        </div>
+        {% if factura.tasa_cambio_bcv %}
+        <div class="info-row">
+            <div class="info-cell info-label">Tasa BCV:</div>
+            <div class="info-cell" colspan="3">Bs. {{ factura.tasa_cambio_bcv|floatformat:4 }} por USD</div>
+        </div>
+        {% endif %}
+        {% if factura.tipo_operacion == 'INTERMEDIACION' and factura.tercero_rif %}
+        <div class="info-row">
+            <div class="info-cell info-label">Servicio Prestado Por:</div>
+            <div class="info-cell" colspan="3"><strong>{{ factura.tercero_razon_social }}</strong> - RIF: {{ factura.tercero_rif }}</div>
+        </div>
+        {% endif %}
+    </div>
+    
+    {% if factura.tipo_operacion == 'INTERMEDIACION' %}
+    <div style="background-color: #ffffcc; padding: 8px; margin: 10px 0; border: 1px solid #ccc; font-size: 8pt; font-weight: bold; text-align: center;">
+        SE EMITE DE CONFORMIDAD CON EL ARTÍCULO 10 DE LA LEY DE IVA - FACTURACIÓN POR CUENTA DE TERCEROS
+    </div>
+    {% endif %}
+
+    <!-- Items de la Factura -->
+    <div class="section-title">DETALLE DE SERVICIOS</div>
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 50%;">Descripción</th>
+                <th style="width: 10%;">Cant.</th>
+                <th style="width: 15%;">Precio Unit.</th>
+                <th style="width: 10%;">IVA</th>
+                <th style="width: 15%;">Subtotal</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in factura.items_factura.all %}
+            <tr>
+                <td>
+                    {{ item.descripcion }}
+                    {% if item.nombre_pasajero %}
+                    <br><small>Pasajero: {{ item.nombre_pasajero }}</small>
+                    {% endif %}
+                    {% if item.numero_boleto %}
+                    <br><small>Boleto: {{ item.numero_boleto }}</small>
+                    {% endif %}
+                </td>
+                <td class="text-right">{{ item.cantidad }}</td>
+                <td class="text-right">{{ item.precio_unitario|floatformat:2 }}</td>
+                <td class="text-right">{% if item.es_gravado %}{{ item.alicuota_iva }}%{% else %}Exento{% endif %}</td>
+                <td class="text-right">{{ item.subtotal_item|floatformat:2 }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Totales -->
+    <div class="totals">
+        <table>
+            {% if factura.subtotal_base_gravada > 0 %}
+            <tr>
+                <td><strong>Base Gravada (16%):</strong></td>
+                <td class="text-right">{{ factura.moneda.simbolo }} {{ factura.subtotal_base_gravada|floatformat:2 }}</td>
+            </tr>
+            {% endif %}
+            {% if factura.subtotal_exento > 0 %}
+            <tr>
+                <td><strong>Base Exenta:</strong></td>
+                <td class="text-right">{{ factura.moneda.simbolo }} {{ factura.subtotal_exento|floatformat:2 }}</td>
+            </tr>
+            {% endif %}
+            {% if factura.subtotal_exportacion > 0 %}
+            <tr>
+                <td><strong>Exportación (0%):</strong></td>
+                <td class="text-right">{{ factura.moneda.simbolo }} {{ factura.subtotal_exportacion|floatformat:2 }}</td>
+            </tr>
+            {% endif %}
+            <tr>
+                <td><strong>Subtotal:</strong></td>
+                <td class="text-right">{{ factura.moneda.simbolo }} {{ factura.subtotal|floatformat:2 }}</td>
+            </tr>
+            {% if factura.monto_iva_16 > 0 %}
+            <tr>
+                <td><strong>IVA (16%):</strong></td>
+                <td class="text-right">{{ factura.moneda.simbolo }} {{ factura.monto_iva_16|floatformat:2 }}</td>
+            </tr>
+            {% endif %}
+            {% if factura.monto_iva_adicional > 0 %}
+            <tr>
+                <td><strong>IVA Adicional:</strong></td>
+                <td class="text-right">{{ factura.moneda.simbolo }} {{ factura.monto_iva_adicional|floatformat:2 }}</td>
+            </tr>
+            {% endif %}
+            {% if factura.monto_igtf > 0 %}
+            <tr>
+                <td><strong>IGTF (3%):</strong></td>
+                <td class="text-right">{{ factura.moneda.simbolo }} {{ factura.monto_igtf|floatformat:2 }}</td>
+            </tr>
+            {% endif %}
+            <tr class="total-final">
+                <td><strong>TOTAL A PAGAR:</strong></td>
+                <td class="text-right"><strong>{{ factura.moneda.simbolo }} {{ factura.monto_total|floatformat:2 }}</strong></td>
+            </tr>
+            {% if factura.monto_total_bs %}
+            <tr>
+                <td colspan="2" class="text-right"><small>Equivalente: Bs. {{ factura.monto_total_bs|floatformat:2 }}</small></td>
+            </tr>
+            {% endif %}
+        </table>
+        
+        {% if factura.tipo_operacion == 'INTERMEDIACION' %}
+        <div style="margin-top: 10px; padding: 5px; background-color: #f9f9f9; border: 1px solid #ddd; font-size: 7pt;">
+            <strong>Nota ISLR:</strong> Monto sujeto a retención de ISLR (5%): {{ factura.moneda.simbolo }} {{ factura.subtotal|floatformat:2 }}
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Notas -->
+    {% if factura.notas %}
+    <div style="clear: both; margin-top: 20px;">
+        <div class="section-title">NOTAS</div>
+        <p style="padding: 10px; border: 1px solid #ddd;">{{ factura.notas }}</p>
+    </div>
+    {% endif %}
+
+    <!-- Pie de página -->
+    <div class="footer">
+        <p><strong>{{ factura.emisor_razon_social }}</strong> | RIF: {{ factura.emisor_rif }}</p>
+        <p>{{ factura.emisor_direccion_fiscal }}</p>
+        {% if factura.modalidad_emision == 'DIGITAL' %}
+        <p style="margin-top: 10px;">Documento emitido conforme a la Providencia Administrativa SNAT/2024/000102</p>
+        <p>Este documento es una representación impresa de la factura electrónica</p>
+        {% else %}
+        <p style="margin-top: 10px;">Documento emitido conforme a la Providencia Administrativa SNAT/2011/00071</p>
+        <p>Factura de contingencia - Registrar en sistema digital una vez restablecido el servicio</p>
+        {% endif %}
+        {% if factura.venta_asociada.agencia.imprenta_digital_nombre %}
+        <p style="margin-top: 5px;">Imprenta Digital Autorizada: {{ factura.venta_asociada.agencia.imprenta_digital_nombre }} - RIF: {{ factura.venta_asociada.agencia.imprenta_digital_rif }} - Prov. {{ factura.venta_asociada.agencia.imprenta_digital_providencia }}</p>
+        {% else %}
+        <p style="margin-top: 5px;">Imprenta Digital Autorizada: [Configurar en datos de agencia]</p>
+        {% endif %}
+    </div>
+</body>
+</html>

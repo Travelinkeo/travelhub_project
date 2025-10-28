@@ -1,0 +1,16 @@
+
+(process:1376): GLib-GIO-WARNING **: 19:41:43.142: Unexpectedly, UWP app `Microsoft.ScreenSketch_11.2508.29.0_x64__8wekyb3d8bbwe' (AUMId `Microsoft.ScreenSketch_8wekyb3d8bbwe!App') supports 29 extensions but has no verbs
+
+(process:1376): GLib-GIO-WARNING **: 19:41:43.210: Unexpectedly, UWP app `Clipchamp.Clipchamp_4.4.10420.0_x64__yxz26nhyzhsrt' (AUMId `Clipchamp.Clipchamp_yxz26nhyzhsrt!App') supports 41 extensions but has no verbs
+
+(process:1376): GLib-GIO-WARNING **: 19:41:43.353: Unexpectedly, UWP app `Microsoft.OutlookForWindows_1.2025.1017.100_x64__8wekyb3d8bbwe' (AUMId `Microsoft.OutlookForWindows_8wekyb3d8bbwe!Microsoft.OutlookforWindows') supports 4 extensions but has no verbs
+CommandError: No installed app with label '2lu_194130'.
+All ViewSets registered successfully
+Liquidaciones ViewSets registered successfully
+Pasaportes ViewSet registered successfully
+Comunicaciones ViewSet registered successfully
+Agencia ViewSets registered successfully
+Facturas Consolidadas ViewSets registered successfully
+Libro de Ventas ViewSet registered successfully
+Tarifario Hoteles ViewSets registered successfully
+Total URLs en router: 220

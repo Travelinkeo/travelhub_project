@@ -13,10 +13,24 @@ class TKConnectParser(BaseTicketParser):
         return 'IDENTIFICACIÓN DEL PEDIDO' in text_upper or 'GRUPO SOPORTE GLOBAL' in text_upper
     
     def parse(self, text: str, html_text: str = "") -> ParsedTicketData:
-        from core.tk_connect_parser import parse_tk_connect_ticket
-        
-        # Usar parser legacy y adaptar resultado
-        legacy_data = parse_tk_connect_ticket(text)
+        try:
+            from core.tk_connect_parser import parse_tk_connect_ticket
+            # Usar parser legacy y adaptar resultado
+            legacy_data = parse_tk_connect_ticket(text)
+        except (ImportError, AttributeError) as e:
+            # Si no existe el parser legacy, retornar datos básicos
+            import re
+            pnr_match = re.search(r'IDENTIFICACIÓN DEL PEDIDO[:\s]+([A-Z0-9]{6})', text, re.IGNORECASE)
+            ticket_match = re.search(r'Número de boleto[:\s]+([0-9-]+)', text, re.IGNORECASE)
+            passenger_match = re.search(r'Pasajero[:\s]+([A-Z\s]+)', text, re.IGNORECASE)
+            
+            legacy_data = {
+                'pnr': pnr_match.group(1) if pnr_match else 'No encontrado',
+                'numero_boleto': ticket_match.group(1) if ticket_match else None,
+                'pasajero': {'nombre_completo': passenger_match.group(1).strip() if passenger_match else 'No encontrado'},
+                'fecha_creacion': '',
+                'vuelos': []
+            }
         
         return ParsedTicketData(
             source_system='TK_CONNECT',

@@ -69,12 +69,35 @@ const ProveedoresClientComponent = () => {
     const endpoint = isNew ? `/api/proveedores/` : `/api/proveedores/${proveedorData.id_proveedor}/`;
     const method = isNew ? 'POST' : 'PUT';
 
+    // Limpiar campos vacíos para evitar errores de validación
+    const cleanData = { ...proveedorData };
+    Object.keys(cleanData).forEach(key => {
+      const value = cleanData[key as keyof Proveedor];
+      if (value === '' || value === null) {
+        delete cleanData[key as keyof Proveedor];
+      }
+    });
+
+    console.log('Enviando datos:', cleanData);
+
     try {
-      await apiMutate(endpoint, { method, body: proveedorData });
+      await apiMutate(endpoint, { method, body: cleanData });
       mutate();
       handleCloseModal();
-    } catch (e) {
-      alert(e instanceof Error ? `Error al guardar:\n${e.message}` : 'Ocurrió un error desconocido');
+    } catch (e: any) {
+      console.error('Error completo:', e);
+      console.error('Respuesta del servidor:', e.response);
+      
+      let errorMsg = 'Error al guardar';
+      if (e.response) {
+        // Mostrar errores específicos del servidor
+        const errors = Object.entries(e.response)
+          .map(([field, msgs]) => `${field}: ${Array.isArray(msgs) ? msgs.join(', ') : msgs}`)
+          .join('\n');
+        errorMsg = errors || JSON.stringify(e.response);
+      }
+      
+      alert(`Error al guardar:\n${errorMsg}`);
     }
   };
 
@@ -90,14 +113,16 @@ const ProveedoresClientComponent = () => {
   };
 
   const columns: GridColDef<Proveedor>[] = [
-    { field: 'id_proveedor', headerName: 'ID', width: 90 },
+    { field: 'id_proveedor', headerName: 'ID', width: 70 },
     { field: 'nombre', headerName: 'Nombre', flex: 1 },
-    { field: 'tipo_proveedor', headerName: 'Tipo', width: 150 },
-    { field: 'contacto_email', headerName: 'Email de Contacto', flex: 1 },
+    { field: 'alias', headerName: 'Alias', width: 150 },
+    { field: 'rif', headerName: 'RIF', width: 120 },
+    { field: 'tipo_proveedor', headerName: 'Tipo', width: 120 },
+    { field: 'contacto_email', headerName: 'Email', flex: 1 },
     {
       field: 'activo',
       headerName: 'Activo',
-      width: 100,
+      width: 90,
       renderCell: (params) => (
         params.row ? <Chip label={params.value ? 'Sí' : 'No'} color={params.value ? 'success' : 'error'} size="small" /> : null
       ),

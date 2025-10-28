@@ -193,6 +193,56 @@ export const PassportModal: React.FC<PassportModalProps> = ({
                     readOnly
                   />
                 </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Fecha de Nacimiento
+                  </label>
+                  <input
+                    type="text"
+                    value={extractedData.fecha_nacimiento || 'No detectada'}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white"
+                    readOnly
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Fecha de Vencimiento
+                  </label>
+                  <input
+                    type="text"
+                    value={extractedData.fecha_vencimiento || 'No detectada'}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white"
+                    readOnly
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Sexo
+                  </label>
+                  <input
+                    type="text"
+                    value={extractedData.sexo === 'M' ? 'Masculino' : extractedData.sexo === 'F' ? 'Femenino' : 'No detectado'}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white"
+                    readOnly
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Confianza OCR
+                  </label>
+                  <span className={`inline-block px-3 py-2 rounded-md text-sm font-medium ${
+                    extractedData.confianza === 'HIGH' ? 'bg-green-100 text-green-800' :
+                    extractedData.confianza === 'MEDIUM' ? 'bg-yellow-100 text-yellow-800' :
+                    'bg-red-100 text-red-800'
+                  }`}>
+                    {extractedData.confianza === 'HIGH' ? 'Alta' : 
+                     extractedData.confianza === 'MEDIUM' ? 'Media' : 'Baja'}
+                  </span>
+                </div>
               </div>
 
               <div className="flex justify-end space-x-3">

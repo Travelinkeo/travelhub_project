@@ -106,6 +106,7 @@ def crear_o_actualizar_venta_desde_boleto(sender, instance, created, **kwargs):
 
             # --- 4. Crear el ItemVenta ---
             total_boleto = Decimal(total_str)
+            numero_boleto = data.get('ticket_number') or data.get('NUMERO_DE_BOLETO') or localizador
             
             ItemVenta.objects.create(
                 venta=venta,

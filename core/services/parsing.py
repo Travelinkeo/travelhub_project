@@ -98,8 +98,11 @@ def procesar_boleto_importado_automatico(boleto: BoletoImportado):
 def trigger_boleto_parse_service(sender, instance, created, **kwargs):
     """
     Disparador que se activa al crear un nuevo BoletoImportado.
+    Solo procesa si hay archivo adjunto (no entrada manual).
     """
     # Evitar que se ejecute en bucle si la función de procesamiento guarda el mismo objeto
-    if created and instance.estado_parseo == BoletoImportado.EstadoParseo.PENDIENTE:
+    if created and instance.estado_parseo == BoletoImportado.EstadoParseo.PENDIENTE and instance.archivo_boleto:
         logger.info(f"Disparador automático: Invocando servicio de parseo para nuevo boleto ID {instance.id_boleto_importado}")
         procesar_boleto_importado_automatico(instance)
+    elif created and not instance.archivo_boleto:
+        logger.info(f"Boleto ID {instance.id_boleto_importado} creado manualmente sin archivo. Se omite parseo automático.")

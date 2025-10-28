@@ -1,0 +1,34 @@
+# INSTALACIÓN COMPLETA DE TRAVELHUB
+# Este archivo instala todas las dependencias del proyecto
+
+# Core (obligatorio)
+-r requirements-core.txt
+
+# Parsing (obligatorio para boletos)
+-r requirements-parsing.txt
+
+# PDF (obligatorio para generación de documentos)
+-r requirements-pdf.txt
+
+# Google Cloud (opcional - solo si usas Gemini AI o Document AI)
+-r requirements-google.txt
+
+# Integraciones (opcional - solo si usas Twilio/WhatsApp)
+-r requirements-integrations.txt
+
+# Development (opcional - solo para desarrollo)
+-r requirements-dev.txt
+
+# Monitoring (opcional - solo para producción)
+# -r requirements-monitoring.txt
+
+# Type checking (opcional - solo para desarrollo)
+# -r requirements-typing.txt
+
+# Utilidades adicionales
+certifi==2025.6.15
+charset-normalizer==3.4.2
+idna==3.10
+urllib3==2.5.0
+sqlparse==0.5.3
+tzdata==2025.2

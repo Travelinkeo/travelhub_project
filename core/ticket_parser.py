@@ -4,7 +4,7 @@ import re
 import logging
 from .identification_utils import normalize_codigo_identificacion, extract_codigo_identificacion_anywhere
 from .utils import LOCATION_TOKENS, STOP_NAME_TOKENS
-from .sabre_parser import parse_sabre_ticket
+from core.parsers.sabre_parser import SabreParser
 
 logger = logging.getLogger(__name__)
 import datetime as dt
@@ -318,8 +318,10 @@ def _parse_kiu_ticket(plain_text: str, html_text: str) -> Dict[str, Any]:
 # --- Lógica de Parseo para Amadeus y Travelport (Placeholders) ---
 
 def _parse_amadeus_ticket(plain_text: str) -> Dict[str, Any]:
-    from .amadeus_parser import parse_amadeus_ticket
-    return parse_amadeus_ticket(plain_text)
+    from core.parsers.amadeus_parser import AmadeusParser
+    parser = AmadeusParser()
+    result = parser.parse(plain_text)
+    return result.to_dict()
 
 def _parse_travelport_ticket(plain_text: str) -> Dict[str, Any]:
     return {"SOURCE_SYSTEM": "TRAVELPORT", "error": "Parser para Travelport no implementado."}
@@ -333,28 +335,38 @@ def extract_data_from_text(plain_text: str, html_text: str = "", pdf_path: Optio
     plain_text_upper = plain_text.upper()
     logger.info("Iniciando detección de GDS...")
 
-    # Heurística para Sabre (muy común)
-    if 'ETICKET RECEIPT' in plain_text_upper and 'RESERVATION CODE' in plain_text_upper:
+    # Heurística para Sabre (PRIORIDAD ALTA - muy específica)
+    if ('ETICKET RECEIPT' in plain_text_upper or 'E-TICKET RECEIPT' in plain_text_upper) and \
+       ('RESERVATION CODE' in plain_text_upper or 'RECORD LOCATOR' in plain_text_upper):
         logger.info("GDS detectado: SABRE. Procesando...")
-        return parse_sabre_ticket(plain_text)
+        parser = SabreParser()
+        result = parser.parse(plain_text)
+        return result.to_dict()
 
-    # Heurística para TK Connect (Turkish Airlines)
-    if 'IDENTIFICACIÓN DEL PEDIDO' in plain_text_upper or 'GRUPO SOPORTE GLOBAL' in plain_text_upper:
+    # Heurística para TK Connect (Turkish Airlines) - MUY ESPECÍFICA
+    if ('IDENTIFICACIÓN DEL PEDIDO' in plain_text_upper and 'TURKISH AIRLINES' in plain_text_upper) or \
+       ('GRUPO SOPORTE GLOBAL' in plain_text_upper and 'TURKISH' in plain_text_upper):
         logger.info("GDS detectado: TK_CONNECT. Procesando...")
-        from .tk_connect_parser import parse_tk_connect_ticket
-        return parse_tk_connect_ticket(plain_text)
+        from core.parsers.tk_connect_parser import TKConnectParser
+        parser = TKConnectParser()
+        result = parser.parse(plain_text)
+        return result.to_dict()
     
     # Heurística para COPA SPRK
     if ('COPA AIRLINES' in plain_text_upper and 'LOCALIZADOR DE RESERVA' in plain_text_upper) or 'SPRK' in plain_text_upper:
         logger.info("Sistema detectado: COPA_SPRK. Procesando...")
-        from .copa_sprk_parser import parse_copa_sprk_ticket
-        return parse_copa_sprk_ticket(plain_text)
+        from core.parsers.copa_parser import CopaParser
+        parser = CopaParser()
+        result = parser.parse(plain_text)
+        return result.to_dict()
     
     # Heurística para WINGO
     if 'WINGO' in plain_text_upper or 'WINGO.COM' in plain_text_upper:
         logger.info("Sistema detectado: WINGO. Procesando...")
-        from .wingo_parser import parse_wingo_ticket
-        return parse_wingo_ticket(plain_text)
+        from core.parsers.wingo_parser import WingoParser
+        parser = WingoParser()
+        result = parser.parse(plain_text)
+        return result.to_dict()
     
     # Heurística para AMADEUS
     if 'ELECTRONIC TICKET RECEIPT' in plain_text_upper and 'BOOKING REF:' in plain_text_upper:
@@ -368,11 +380,14 @@ def extract_data_from_text(plain_text: str, html_text: str = "", pdf_path: Optio
 
     # Fallback: Si no se detecta un GDS claro, intentar con Sabre como último recurso.
     logger.warning("No se pudo determinar el GDS del boleto; intentando con Sabre como fallback.")
-    sabre_result = parse_sabre_ticket(plain_text)
-    
-    if sabre_result and 'error' not in sabre_result:
-        logger.info("Parseo con fallback de Sabre tuvo éxito.")
-        return sabre_result
+    try:
+        parser = SabreParser()
+        sabre_result = parser.parse(plain_text)
+        if sabre_result and not hasattr(sabre_result, 'error'):
+            logger.info("Parseo con fallback de Sabre tuvo éxito.")
+            return sabre_result.to_dict()
+    except Exception as e:
+        logger.error(f"Fallback de Sabre falló: {e}")
 
     logger.error("Fallo final del parseo. No se pudo procesar el boleto con ningún parser disponible.")
     return {"error": "No se pudo reconocer el GDS del boleto y el intento de fallback falló."}

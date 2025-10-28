@@ -8,38 +8,20 @@ import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, G
 import { DatePicker, TimePicker } from '@mui/x-date-pickers';
 import dayjs from 'dayjs';
 import ApiAutocomplete from '@/components/forms/ApiAutocomplete';
-import { useApi } from '@/hooks/useApi';
-import { useDebounce } from '@/hooks/useDebounce';
+
 
 const CiudadAutocomplete = ({ value, onChange, error, helperText, label }: any) => {
-  const [searchTerm, setSearchTerm] = React.useState('');
-  const debouncedSearch = useDebounce(searchTerm, 300);
-  const { data: ciudadesData, isLoading } = useApi<any>(
-    debouncedSearch ? `/api/ciudades/?search=${encodeURIComponent(debouncedSearch)}` : '/api/ciudades/'
-  );
-  
-  const ciudades = ciudadesData?.results || [];
-  const selectedCiudad = ciudades.find((c: any) => c.id_ciudad === value) || null;
-  
   return (
-    <Autocomplete
-      options={ciudades}
-      loading={isLoading}
-      value={selectedCiudad}
-      onChange={(_, newValue) => onChange(newValue?.id_ciudad || null)}
-      onInputChange={(_, newInputValue) => setSearchTerm(newInputValue)}
-      getOptionLabel={(option) => option ? `${option.nombre} - ${option.pais_detalle?.nombre || ''}` : ''}
-      isOptionEqualToValue={(option, value) => option?.id_ciudad === value?.id_ciudad}
-      filterOptions={(x) => x}
-      renderInput={(params) => (
-        <TextField
-          {...params}
-          label={label}
-          error={error}
-          helperText={helperText}
-          placeholder="Buscar ciudad..."
-        />
-      )}
+    <ApiAutocomplete
+      value={value}
+      onChange={onChange}
+      endpoint="/api/ciudades/"
+      label={label}
+      optionIdField="id_ciudad"
+      optionLabelField="nombre"
+      enableSearch={true}
+      error={error}
+      helperText={helperText}
     />
   );
 };

@@ -84,7 +84,8 @@ class Venta(models.Model):
     margen_estimado = models.DecimalField(_("Margen Estimado"), max_digits=12, decimal_places=2, blank=True, null=True, help_text=_("Precio venta - costo neto estimado (informativo)."))
     co2_estimado_kg = models.DecimalField(_("Emisiones CO₂ Estimadas (kg)"), max_digits=12, decimal_places=2, blank=True, null=True, help_text=_("Estimación agregada de la huella de carbono."))
     asiento_contable_venta = models.ForeignKey(AsientoContable, related_name='ventas_asociadas', on_delete=models.SET_NULL, blank=True, null=True, verbose_name=_("Asiento Contable de Venta"))
-    factura = models.ForeignKey('core.Factura', on_delete=models.SET_NULL, blank=True, null=True, related_name='ventas', verbose_name=_("Factura Asociada"))
+    factura = models.ForeignKey('core.Factura', on_delete=models.SET_NULL, blank=True, null=True, related_name='ventas', verbose_name=_("Factura Asociada (Legacy)"))
+    factura_consolidada = models.ForeignKey('core.FacturaConsolidada', on_delete=models.SET_NULL, blank=True, null=True, related_name='ventas_facturadas', verbose_name=_("Factura Consolidada"))
     notas = models.TextField(_("Notas de la Venta"), blank=True, null=True)
     puntos_fidelidad_asignados = models.BooleanField(_("Puntos Fidelidad Asignados"), default=False, editable=False, help_text=_("Evita otorgar puntos duplicados cuando la venta pasa a completada/pagada."))
 
@@ -234,6 +235,8 @@ class AlojamientoReserva(models.Model):
     habitaciones = models.PositiveSmallIntegerField(_('Habitaciones'), default=1)
     ciudad = models.ForeignKey(Ciudad, on_delete=models.PROTECT, verbose_name=_('Ciudad'))
     proveedor = models.ForeignKey(Proveedor, on_delete=models.SET_NULL, blank=True, null=True, verbose_name=_('Proveedor'))
+    nombre_pasajero = models.CharField(_('Nombre Pasajero'), max_length=255, blank=True)
+    localizador_proveedor = models.CharField(_('Localizador Proveedor'), max_length=100, blank=True)
     notas = models.TextField(_('Notas'), blank=True, null=True)
 
     class Meta:
@@ -279,6 +282,8 @@ class ActividadServicio(models.Model):
     incluye = models.TextField(_('Incluye'), blank=True, null=True)
     no_incluye = models.TextField(_('No Incluye'), blank=True, null=True)
     proveedor = models.ForeignKey(Proveedor, on_delete=models.SET_NULL, blank=True, null=True, verbose_name=_('Proveedor'))
+    nombre_pasajero = models.CharField(_('Nombre Pasajero'), max_length=255, blank=True)
+    localizador_proveedor = models.CharField(_('Localizador Proveedor'), max_length=100, blank=True)
     notas = models.TextField(_('Notas'), blank=True, null=True)
 
     class Meta:
@@ -379,6 +384,7 @@ class AlquilerAutoReserva(models.Model):
     categoria_auto = models.CharField(_("Categoría / Clase"), max_length=50, blank=True, null=True)
     compania_rentadora = models.CharField(_("Compañía Rentadora"), max_length=100, blank=True, null=True)
     numero_confirmacion = models.CharField(_("Número Confirmación"), max_length=100, blank=True, null=True)
+    nombre_conductor = models.CharField(_("Nombre Conductor"), max_length=255, blank=True)
     incluye_seguro = models.BooleanField(_("Incluye Seguro"), default=False)
     notas = models.TextField(_("Notas"), blank=True, null=True)
     costo_neto = models.DecimalField(_("Costo Neto"), max_digits=12, decimal_places=2, blank=True, null=True)

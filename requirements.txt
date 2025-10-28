@@ -12,7 +12,7 @@ cffi==1.17.1
 charset-normalizer==3.4.2
 click==8.2.1
 colorama==0.4.6
-coverage==7.6.1
+coverage[toml]==7.6.1
 cryptography==45.0.5
 cssselect2==0.8.0
 cyclonedx-python-lib==7.6.2
@@ -25,7 +25,7 @@ eml_parser==2.0.0
 et_xmlfile==2.0.0
 filelock==3.19.1
 Flask==3.1.1
-fonttools==4.58.4
+fonttools[woff]==4.58.4
 google-ai-generativelanguage==0.6.15
 google-api-core==2.25.1
 google-api-python-client==2.172.0

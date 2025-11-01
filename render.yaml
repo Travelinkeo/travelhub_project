@@ -3,7 +3,7 @@ services:
     name: travelhub
     runtime: python
     buildCommand: pip install -r requirements.txt && python manage.py collectstatic --no-input && python manage.py migrate
-    startCommand: python manage.py migrate && gunicorn --bind 0.0.0.0:$PORT travelhub.wsgi:application
+    startCommand: python manage.py migrate --noinput --verbosity 2 && gunicorn --bind 0.0.0.0:$PORT travelhub.wsgi:application
     envVars:
       - key: PYTHON_VERSION
         value: 3.12.0

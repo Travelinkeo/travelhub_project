@@ -2,7 +2,7 @@ services:
   - type: web
     name: travelhub
     runtime: python
-    buildCommand: chmod +x build.sh && ./build.sh
+    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --no-input && python manage.py migrate
     startCommand: gunicorn --bind 0.0.0.0:$PORT travelhub.wsgi:application
     envVars:
       - key: PYTHON_VERSION

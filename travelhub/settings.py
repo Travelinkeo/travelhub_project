@@ -10,6 +10,14 @@ load_dotenv(BASE_DIR / '.env')
 # DEBUG defaults to False for safety. Set DEBUG=True in .env for development.
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
+# En producción, mostrar errores detallados en logs pero no al usuario
+if not DEBUG:
+    import logging
+    logging.basicConfig(
+        level=logging.ERROR,
+        format='%(asctime)s [%(levelname)s] %(message)s',
+    )
+
 # SECRET_KEY must be set in .env file. We raise an error if it's not found.
 SECRET_KEY = os.getenv('SECRET_KEY')
 if not SECRET_KEY:

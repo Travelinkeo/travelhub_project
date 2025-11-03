@@ -51,11 +51,16 @@ def enviar_recordatorios_cron(request):
         return Response({'error': 'Token inválido'}, status=403)
     
     try:
-        call_command('enviar_recordatorios_pago')
-        logger.info("Recordatorios enviados exitosamente vía cron")
-        return Response({'status': 'success', 'message': 'Recordatorios enviados'})
+        # Ejecutar en modo dry-run para evitar errores de email no configurado
+        call_command('enviar_recordatorios_pago', '--dry-run')
+        logger.info("Recordatorios verificados exitosamente vía cron (dry-run)")
+        return Response({
+            'status': 'success', 
+            'message': 'Recordatorios verificados (dry-run mode)',
+            'note': 'Configura EMAIL_HOST_USER en Render para enviar emails reales'
+        })
     except Exception as e:
-        logger.error(f"Error enviando recordatorios: {e}")
+        logger.error(f"Error verificando recordatorios: {e}")
         return Response({'status': 'error', 'message': str(e)}, status=500)
 
 

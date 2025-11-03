@@ -317,7 +317,7 @@ urlpatterns = [
     path(r'api/reportes/exportar-excel/', lambda r: __import__('core.views.reportes_views', fromlist=['exportar_excel']).exportar_excel(r), name='exportar_excel'),
     
     # Setup - Crear superusuario (temporal)
-    path(r'api/setup/create-superuser/', lambda r: __import__('core.views.setup_views', fromlist=['create_superuser']).create_superuser(r), name='create_superuser'),
+    path(r'api/setup/create-superuser/', csrf_exempt(lambda r: __import__('core.views.setup_views', fromlist=['create_superuser']).create_superuser(r)), name='create_superuser'),
     
     # OpenAPI/Swagger Documentation
     path(r'api/schema/', lambda r: __import__('drf_spectacular.views', fromlist=['SpectacularAPIView']).SpectacularAPIView.as_view(), name='schema'),

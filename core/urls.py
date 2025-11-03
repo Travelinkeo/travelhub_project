@@ -319,6 +319,12 @@ urlpatterns = [
     # Setup - Crear superusuario (temporal)
     path(r'api/setup/create-superuser/', csrf_exempt(lambda r: __import__('core.views.setup_views', fromlist=['create_superuser']).create_superuser(r)), name='create_superuser'),
     
+    # Cron Jobs (tareas programadas vía HTTP)
+    path(r'api/cron/sincronizar-bcv/', lambda r: __import__('core.views.cron_views', fromlist=['sincronizar_bcv_cron']).sincronizar_bcv_cron(r), name='cron_sincronizar_bcv'),
+    path(r'api/cron/recordatorios-pago/', lambda r: __import__('core.views.cron_views', fromlist=['enviar_recordatorios_cron']).enviar_recordatorios_cron(r), name='cron_recordatorios'),
+    path(r'api/cron/cierre-mensual/', lambda r: __import__('core.views.cron_views', fromlist=['cierre_mensual_cron']).cierre_mensual_cron(r), name='cron_cierre_mensual'),
+    path(r'api/cron/health/', lambda r: __import__('core.views.cron_views', fromlist=['health_check']).health_check(r), name='cron_health'),
+    
     # OpenAPI/Swagger Documentation
     path(r'api/schema/', lambda r: __import__('drf_spectacular.views', fromlist=['SpectacularAPIView']).SpectacularAPIView.as_view(), name='schema'),
     path(r'api/docs/', lambda r: __import__('drf_spectacular.views', fromlist=['SpectacularSwaggerView']).SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),

@@ -51,6 +51,10 @@ if DEBUG:
 else:
     CSRF_TRUSTED_ORIGINS = []
 
+# Permitir Vercel en producción
+ALLOWED_HOSTS.extend(['.vercel.app', 'travelhub-project.onrender.com'])
+CSRF_TRUSTED_ORIGINS.extend(['https://*.vercel.app', 'https://travelhub-project.onrender.com'])
+
 # Evitar que Django agregue/redirija automáticamente barras finales (previene bucles con proxies/rewrite)
 APPEND_SLASH = False
 
@@ -264,6 +268,10 @@ else:
         'https://whole-license-sunday-too.trycloudflare.com',
         'https://hang-kirk-clinton-institution.trycloudflare.com',
     ]
+
+# Agregar Vercel a CORS
+CORS_ALLOWED_ORIGINS.append('https://travelhubproject-git-main-travelinkeos-projects.vercel.app')
+CORS_ALLOWED_ORIGINS.append('https://travelhubproject.vercel.app')
 
 # Reduce surface: only allow credentials if explicitly enabled
 CORS_ALLOW_CREDENTIALS = True

@@ -146,14 +146,8 @@ STATICFILES_DIRS = [BASE_DIR / 'static',]
 # Django 5: usar STORAGES en lugar de STATICFILES_STORAGE (evita deprecation warning)
 STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-    "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
+    "staticfiles": {"BACKEND": "whitenoise.storage.CompressedStaticFilesStorage"},
 }
-
-# Durante desarrollo y tests (DEBUG=True) usamos un storage más tolerante para evitar
-# fallos en tests que referencian assets no recopilados aún. En producción (DEBUG=False)
-# se mantiene el manifest para cache busting.
-if DEBUG:
-    STORAGES["staticfiles"] = {"BACKEND": "whitenoise.storage.CompressedStaticFilesStorage"}
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

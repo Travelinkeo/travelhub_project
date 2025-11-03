@@ -49,7 +49,7 @@ export default function AerolineasPage() {
     setShowForm(true);
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (_id: number) => {
     if (confirm('¿Estás seguro de que quieres eliminar esta aerolínea?')) {
       try {
         await deleteItem();

@@ -26,8 +26,8 @@ const securityHeaders = [
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: https:",
       "font-src 'self' data:",
-    // Allow local dev backend hosts and Cloudflare tunnels
-    "connect-src 'self' https://localhost:8000 http://localhost:8000 http://127.0.0.1:8000 ws://localhost:8000 ws://127.0.0.1:8000 https://*.trycloudflare.com",
+    // Allow local dev backend hosts, Cloudflare tunnels, and production backend
+    "connect-src 'self' https://localhost:8000 http://localhost:8000 http://127.0.0.1:8000 ws://localhost:8000 ws://127.0.0.1:8000 https://*.trycloudflare.com https://travelhub-project.onrender.com",
       "frame-ancestors 'self'",
       "base-uri 'self'",
       "form-action 'self'"

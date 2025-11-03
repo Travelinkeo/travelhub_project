@@ -14,12 +14,11 @@ def create_superuser(request):
     POST /api/setup/create-superuser/
     Body: {"username": "admin", "email": "admin@example.com", "password": "tu_password"}
     """
-    # Solo permitir si DEBUG=True o SECRET_SETUP_KEY coincide
-    setup_key = request.POST.get('setup_key') or request.headers.get('X-Setup-Key')
-    expected_key = os.getenv('SECRET_SETUP_KEY', 'CHANGE_ME_IN_PRODUCTION')
+    # Solo permitir si DEBUG=True
+    debug_mode = os.getenv('DEBUG', 'False').lower() in ('true', '1', 'yes')
     
-    if not (os.getenv('DEBUG') == 'True' or setup_key == expected_key):
-        return JsonResponse({'error': 'Unauthorized'}, status=403)
+    if not debug_mode:
+        return JsonResponse({'error': 'Unauthorized - DEBUG must be True'}, status=403)
     
     # Verificar si ya existe un superusuario
     if User.objects.filter(is_superuser=True).exists():

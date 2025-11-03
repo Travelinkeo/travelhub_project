@@ -1,6 +1,6 @@
 import './globals.css';
 import React from 'react';
-import ResponsiveLayout from '@/components/Layout/ResponsiveLayout';
+import ResponsiveLayout from '@/components/layout/ResponsiveLayout';
 import { ThemeContextProvider } from '@/contexts/ThemeContext';
 import { AuthProvider } from '@/contexts/AuthContext';
 import ChatWidget from '@/components/chatbot/ChatWidget';

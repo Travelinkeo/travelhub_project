@@ -3,6 +3,7 @@ Endpoints para tareas programadas vía HTTP (cron-job.org).
 Reemplazo gratuito de Celery Beat.
 """
 from django.conf import settings
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -104,6 +105,7 @@ def health_check(request):
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
+@csrf_exempt
 def cargar_catalogos_cron(request):
     """
     Carga catálogos iniciales (países, ciudades, monedas, aerolíneas).

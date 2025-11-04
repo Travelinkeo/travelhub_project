@@ -51,13 +51,23 @@ def enviar_recordatorios_cron(request):
         return Response({'error': 'Token inválido'}, status=403)
     
     try:
-        # Ejecutar en modo dry-run para evitar errores de email no configurado
-        call_command('enviar_recordatorios_pago', '--dry-run')
-        logger.info("Recordatorios verificados exitosamente vía cron (dry-run)")
+        from django.utils import timezone
+        from datetime import timedelta
+        from core.models import Venta
+        
+        # Contar ventas pendientes sin ejecutar el comando completo
+        fecha_limite = timezone.now() - timedelta(days=3)
+        ventas_pendientes = Venta.objects.filter(
+            estado__in=['PEN', 'PAR'],
+            saldo_pendiente__gt=0,
+            modificado__lte=fecha_limite
+        ).count()
+        
+        logger.info(f"Recordatorios verificados: {ventas_pendientes} ventas pendientes")
         return Response({
             'status': 'success', 
-            'message': 'Recordatorios verificados (dry-run mode)',
-            'note': 'Configura EMAIL_HOST_USER en Render para enviar emails reales'
+            'message': f'{ventas_pendientes} ventas con pago pendiente detectadas',
+            'note': 'Modo verificación - configura EMAIL_HOST_USER para enviar emails'
         })
     except Exception as e:
         logger.error(f"Error verificando recordatorios: {e}")

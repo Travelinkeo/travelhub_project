@@ -100,3 +100,35 @@ def cierre_mensual_cron(request):
 def health_check(request):
     """Health check para monitoreo (sin token requerido)."""
     return Response({'status': 'ok', 'service': 'travelhub'})
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def cargar_catalogos_cron(request):
+    """
+    Carga catálogos iniciales (países, ciudades, monedas, aerolíneas).
+    URL: https://travelhub-project.onrender.com/api/cron/cargar-catalogos/?token=YOUR_TOKEN
+    """
+    if not verificar_cron_token(request):
+        return Response({'error': 'Token inválido'}, status=403)
+    
+    try:
+        resultados = {}
+        
+        # Cargar catálogos básicos
+        call_command('load_catalogs')
+        resultados['catalogos'] = 'Países, ciudades, monedas cargados'
+        
+        # Cargar aerolíneas
+        call_command('cargar_aerolineas')
+        resultados['aerolineas'] = '25 aerolíneas cargadas'
+        
+        logger.info("Catálogos cargados exitosamente vía cron")
+        return Response({
+            'status': 'success',
+            'message': 'Catálogos cargados correctamente',
+            'detalles': resultados
+        })
+    except Exception as e:
+        logger.error(f"Error cargando catálogos: {e}")
+        return Response({'status': 'error', 'message': str(e)}, status=500)

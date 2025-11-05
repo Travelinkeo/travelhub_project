@@ -74,7 +74,7 @@ def normalize_airline_name(raw_name: str, flight_number: str = None) -> str:
     EXCLUDED_WORDS = {
         'DE', 'LA', 'EL', 'EN', 'AL', 'OR', 'NO', 'SI', 'SE', 'ME', 'TE', 'LE',
         'UN', 'DO', 'TO', 'OF', 'IN', 'ON', 'AT', 'BY', 'IS', 'IT', 'AS', 'AN',
-        'CA', 'SA', 'CO', 'US'  # Sufijos corporativos comunes
+        'CA', 'SA', 'CO', 'US', 'AE', 'AR', 'AP', 'RP'  # Sufijos corporativos y agente emisor
     }
     
     # PRIORIDAD 1: Código del vuelo (más confiable)

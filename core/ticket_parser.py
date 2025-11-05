@@ -211,8 +211,16 @@ def _extraer_itinerario_kiu(plain_text: str, html_text: str = "") -> str:
         if 'VUELO' in itinerary_content[0] and 'FECHA' in itinerary_content[0]:
             itinerary_content.pop(0)
         
+        # Limpiar cada línea del itinerario
+        cleaned_lines = []
+        for line in itinerary_content:
+            # Eliminar "AGENTE" y todo lo que viene después en cada línea
+            line = re.sub(r'\s+AGENTE.*$', '', line, flags=re.IGNORECASE)
+            if line.strip():
+                cleaned_lines.append(line)
+        
         logger.debug("Itinerario extraído exitosamente desde texto plano.")
-        return '\n'.join(itinerary_content)
+        return '\n'.join(cleaned_lines)
 
     return "No se pudo procesar el itinerario."
 
@@ -242,6 +250,13 @@ def _get_nombre_aerolinea(texto: str) -> str:
     ])
     if raw == 'No encontrado':
         return raw
+    
+    # Eliminar "AGENTE" y todo lo que viene después (PRIMERO)
+    raw = re.sub(r'\s+AGENTE.*$', '', raw, flags=re.IGNORECASE)
+    
+    # Limpiar sufijos de agente emisor (ej: /AE1, /ARP, /AR)
+    raw = re.sub(r'/[A-Z0-9]{2,3}\s*$', '', raw)
+    
     stop_tokens = [
         ' ADDRESS', ' ISSUE', ' BOOKING REF', ' NAME/', ' FOID', ' TICKET', ' AIR FARE', ' TAX', ' TOTAL',
         ' DESDE/HACIA', ' FROM/TO', ' C1/'

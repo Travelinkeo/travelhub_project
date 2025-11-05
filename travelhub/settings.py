@@ -34,8 +34,12 @@ if not DEBUG and len(SECRET_KEY) < 50:
     )
 
 # Permitir acceso desde red local y ngrok
-ALLOWED_HOSTS_STRING = os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost,192.168.100.19')
-ALLOWED_HOSTS = [host.strip() for host in ALLOWED_HOSTS_STRING.split(',') if host.strip()]
+ALLOWED_HOSTS_STRING = os.getenv('ALLOWED_HOSTS', '')
+if ALLOWED_HOSTS_STRING:
+    ALLOWED_HOSTS = [host.strip() for host in ALLOWED_HOSTS_STRING.split(',') if host.strip()]
+else:
+    # Defaults para desarrollo local
+    ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '192.168.100.19']
 
 # En desarrollo, permitir dominios ngrok, localtunnel y cloudflare
 if DEBUG:
@@ -66,6 +70,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.humanize',
+    'cloudinary_storage',  # Cloudinary para archivos media
+    'cloudinary',
     'rest_framework',
     'rest_framework.authtoken',
     'rest_framework_simplejwt.token_blacklist',  # enable blacklist for logout/invalidation
@@ -156,8 +162,22 @@ STORAGES = {
 # Whitenoise configuration
 WHITENOISE_USE_FINDERS = True
 WHITENOISE_AUTOREFRESH = True if DEBUG else False
+# Cloudinary configuration
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': os.getenv('CLOUDINARY_CLOUD_NAME'),
+    'API_KEY': os.getenv('CLOUDINARY_API_KEY'),
+    'API_SECRET': os.getenv('CLOUDINARY_API_SECRET')
+}
+
+# Media files
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+if not DEBUG:
+    # Producción: usar Cloudinary
+    DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+else:
+    # Desarrollo: usar sistema de archivos local
+    MEDIA_ROOT = BASE_DIR / 'media'
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 FIXTURE_DIRS = [BASE_DIR / 'fixtures',]

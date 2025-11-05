@@ -15,7 +15,9 @@ class SabreParser(BaseTicketParser):
     def can_parse(self, text: str) -> bool:
         """Detecta si es un boleto SABRE"""
         text_upper = text.upper()
-        return 'ETICKET RECEIPT' in text_upper and 'RESERVATION CODE' in text_upper
+        has_receipt = 'ETICKET RECEIPT' in text_upper or 'RECIBO DE BOLETO ELECTRÓNICO' in text_upper or 'RECIBO DE BOLETO ELECTRONICO' in text_upper
+        has_reservation = 'RESERVATION CODE' in text_upper or 'CÓDIGO DE RESERVACIÓN' in text_upper or 'CODIGO DE RESERVACION' in text_upper
+        return has_receipt and has_reservation
     
     def parse(self, text: str, html_text: str = "") -> ParsedTicketData:
         """Parsea boleto SABRE"""
@@ -35,8 +37,8 @@ class SabreParser(BaseTicketParser):
         
         # Extraer localizador de aerolínea (viene después de "Código de reservación de la aerolínea")
         airline_locator = self.extract_field(text, [
-            r'(?:Airline Record Locator|Código de reservación de la\s*aerolínea)\s*[:\t\s]*([A-Z0-9]+)',
-            r'(?:Record Locator)\s*[:\t\s]*([A-Z0-9]+)'
+            r'(?:Airline Record Locator|Código de reservación de\s*la\s*aerolínea)\s*[:\t\s\n]*([A-Z0-9]{6})',
+            r'(?:Record Locator)\s*[:\t\s]*([A-Z0-9]{6})'
         ])
         
         issue_date = self.extract_field(text, [
@@ -126,13 +128,21 @@ class SabreParser(BaseTicketParser):
         """Extrae información de vuelos del texto"""
         flights = []
         
+        # Remover sección de agente emisor para evitar confusión con códigos de vuelo
+        text_clean = re.sub(
+            r'(?:Issuing Agent|AGENTE EMISOR)\s*[:\t\s]*[^\n\r]+',
+            '',
+            text,
+            flags=re.IGNORECASE
+        )
+        
         # Extraer todas las horas del documento
-        all_times = re.findall(r'(?:Time|Hora)\s*(\d{1,2}:\d{2})', text)
+        all_times = re.findall(r'(?:Time|Hora)\s*(\d{1,2}:\d{2})', text_clean)
         
         # Dividir por bloques de vuelo
         flight_blocks = re.split(
             r'This is not a boarding pass|Esta no es una tarjeta de embarque',
-            text
+            text_clean
         )
         
         for block in flight_blocks:
@@ -168,14 +178,19 @@ class SabreParser(BaseTicketParser):
             if not flight.get('numero_vuelo'):
                 continue
             
-            # Extraer fechas
-            date_match = re.search(r'(\d{1,2}\s+\w{3}\s+\d{2})', block)
-            if date_match:
-                flight['fecha_salida'] = date_match.group(1)
+            # Extraer fechas (buscar específicamente Salida/Departure y Llegada/Arrival)
+            departure_match = re.search(r'(?:Salida|Departure):\s*(\d{1,2}\s+\w{3}\s+\d{2})', block)
+            if departure_match:
+                flight['fecha_salida'] = departure_match.group(1)
+            else:
+                # Fallback: primera fecha en el bloque
+                date_match = re.search(r'(\d{1,2}\s+\w{3}\s+\d{2})', block)
+                if date_match:
+                    flight['fecha_salida'] = date_match.group(1)
             
-            arrival_match = re.search(r'(Llegada|Arrival):\s*(\d{1,2}\s+\w{3}\s+\d{2})', block)
+            arrival_match = re.search(r'(?:Llegada|Arrival):\s*(\d{1,2}\s+\w{3}\s+\d{2})', block)
             if arrival_match:
-                flight['fecha_llegada'] = arrival_match.group(2)
+                flight['fecha_llegada'] = arrival_match.group(1)
             else:
                 flight['fecha_llegada'] = None
             
@@ -209,8 +224,7 @@ class SabreParser(BaseTicketParser):
                 flight['equipaje'] = bag_match.group(1)
             
             # Agregar localizador de aerolínea si existe
-            if airline_locator:
-                flight['codigo_reservacion_local'] = airline_locator
+            flight['codigo_reservacion_local'] = airline_locator or 'No encontrado'
             
             flights.append(flight)
         

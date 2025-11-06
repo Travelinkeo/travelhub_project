@@ -459,6 +459,28 @@ class BoletoImportadoViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
     filter_backends = [filters.SearchFilter]
     search_fields = ['numero_boleto', 'nombre_pasajero_procesado', 'localizador_pnr', 'aerolinea_emisora']
+    
+    @action(detail=True, methods=['get'])
+    def descargar_pdf(self, request, pk=None):
+        """Descarga el PDF del boleto a través de Django (evita problema de Cloudinary untrusted)"""
+        boleto = self.get_object()
+        if not boleto.archivo_pdf_generado:
+            return Response({'error': 'No hay PDF generado para este boleto'}, status=404)
+        
+        try:
+            # Leer el archivo desde storage (local o Cloudinary)
+            pdf_file = boleto.archivo_pdf_generado
+            pdf_file.open('rb')
+            pdf_content = pdf_file.read()
+            pdf_file.close()
+            
+            # Servir el PDF
+            response = HttpResponse(pdf_content, content_type='application/pdf')
+            response['Content-Disposition'] = f'inline; filename="{os.path.basename(pdf_file.name)}"'
+            return response
+        except Exception as e:
+            logger.error(f"Error al descargar PDF del boleto {pk}: {e}")
+            return Response({'error': str(e)}, status=500)
 
 def get_resumen_ventas_categorias():
     categoria_definiciones = [

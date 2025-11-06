@@ -91,6 +91,13 @@ class BoletoImportadoSerializer(serializers.ModelSerializer):
     
     def get_archivo_pdf_generado(self, obj):
         if obj.archivo_pdf_generado:
+            # En producción con Cloudinary, usar URL firmada o endpoint de descarga
+            from django.conf import settings
+            if getattr(settings, 'USE_CLOUDINARY', False):
+                # Generar URL de descarga a través de Django en lugar de URL directa de Cloudinary
+                request = self.context.get('request')
+                if request:
+                    return request.build_absolute_uri(f'/api/boletos-importados/{obj.id_boleto_importado}/descargar-pdf/')
             return obj.archivo_pdf_generado.url
         return None
     

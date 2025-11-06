@@ -169,14 +169,18 @@ CLOUDINARY_STORAGE = {
     'API_SECRET': os.getenv('CLOUDINARY_API_SECRET')
 }
 
-# Media files
+# Media files - Usar Cloudinary en desarrollo y producción
 MEDIA_URL = '/media/'
-if not DEBUG:
-    # Producción: usar Cloudinary
+USE_CLOUDINARY = os.getenv('USE_CLOUDINARY', 'True') == 'True'  # Por defecto usar Cloudinary
+
+if USE_CLOUDINARY and CLOUDINARY_STORAGE.get('CLOUD_NAME'):
+    # Usar Cloudinary (desarrollo y producción)
     DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+    MEDIA_ROOT = None  # No necesario con Cloudinary
 else:
-    # Desarrollo: usar sistema de archivos local
+    # Fallback: sistema de archivos local
     MEDIA_ROOT = BASE_DIR / 'media'
+    DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 

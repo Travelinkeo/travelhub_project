@@ -35,18 +35,22 @@ except ImportError:
 class EmailMonitorService:
     """Monitor unificado de correos con múltiples canales de notificación"""
     
-    def __init__(self, notification_type='whatsapp', destination=None, interval=60, mark_as_read=False):
+    def __init__(self, notification_type='whatsapp', destination=None, interval=60, mark_as_read=False, process_all=False, force_reprocess=False):
         """
         Args:
             notification_type: 'whatsapp', 'email', 'whatsapp_drive'
             destination: Número de teléfono o email destino
             interval: Segundos entre verificaciones
             mark_as_read: Marcar correos como leídos
+            process_all: Procesar todos los correos (incluso leídos)
+            force_reprocess: Reprocesar boletos existentes
         """
         self.notification_type = notification_type
         self.destination = destination
         self.interval = interval
         self.mark_as_read = mark_as_read
+        self.process_all = process_all
+        self.force_reprocess = force_reprocess
         self.drive_service = None
         
         if notification_type == 'whatsapp_drive' and GOOGLE_DRIVE_AVAILABLE:
@@ -63,6 +67,11 @@ class EmailMonitorService:
             logger.error(f"Error inicializando Drive: {e}")
             return None
 
+    def procesar_una_vez(self):
+        """Procesa correos una sola vez y retorna cantidad procesada"""
+        logger.info(f"🔍 Procesando correos una vez -> {self.notification_type}: {self.destination}")
+        return self._procesar_correos()
+    
     def start(self):
         """Inicia el monitoreo continuo"""
         logger.info(f"🚀 Monitor iniciado -> {self.notification_type}: {self.destination}")
@@ -76,55 +85,114 @@ class EmailMonitorService:
             time.sleep(self.interval)
 
     def _procesar_correos(self):
-        """Procesa correos no leídos"""
+        """Procesa correos no leídos y retorna cantidad procesada"""
         mail = imaplib.IMAP4_SSL(settings.GMAIL_IMAP_HOST)
         mail.login(settings.GMAIL_USER, settings.GMAIL_APP_PASSWORD)
         mail.select('inbox')
         
-        _, messages = mail.search(None, '(UNSEEN)')
+        # Buscar correos según configuración
+        if self.process_all:
+            _, messages = mail.search(None, 'ALL')
+            logger.info("📦 Procesando TODOS los correos")
+        else:
+            _, messages = mail.search(None, '(UNSEEN)')
+            logger.info("🆕 Procesando solo correos NO LEÍDOS")
         
-        for num in messages[0].split():
+        message_ids = messages[0].split()
+        
+        if not message_ids:
+            logger.info("📭 No hay correos nuevos")
+            mail.close()
+            mail.logout()
+            return 0
+        
+        logger.info(f"📬 Encontrados {len(message_ids)} correos nuevos")
+        procesados = 0
+        
+        for num in message_ids:
             try:
                 _, msg_data = mail.fetch(num, '(RFC822)')
                 message = email.message_from_bytes(msg_data[0][1])
                 
                 if self._procesar_mensaje(message, num, mail):
                     logger.info(f"✅ Correo {num} procesado")
+                    procesados += 1
             except Exception as e:
                 logger.error(f"❌ Error procesando {num}: {e}")
         
         mail.close()
         mail.logout()
+        return procesados
 
     def _procesar_mensaje(self, message, msg_num, mail_connection):
         """Procesa un mensaje individual"""
         subject = message.get('Subject', '')
         from_addr = message.get('From', '')
         
-        # KIU: HTML/texto en el cuerpo
-        if 'E-TICKET ITINERARY RECEIPT' in subject and 'kiusys.com' in from_addr.lower():
+        # Decodificar asunto si está codificado
+        if subject and subject.startswith('=?'):
+            try:
+                import email.header
+                decoded = email.header.decode_header(subject)
+                subject = ''.join([str(t[0], t[1] or 'utf-8') if isinstance(t[0], bytes) else t[0] for t in decoded])
+            except:
+                pass
+        
+        print(f"\n📧 Asunto: {subject}")
+        print(f"   De: {from_addr}")
+        
+        # KIU: HTML/texto en el cuerpo (buscar variantes del asunto)
+        subject_upper = subject.upper() if subject else ''
+        from_lower = from_addr.lower() if from_addr else ''
+        
+        is_kiu_subject = ('E-TICKET ITINERARY RECEIPT' in subject_upper or 
+                         'ETICKET ITINERARY RECEIPT' in subject_upper or
+                         'PASSENGER ITINERARY RECEIPT' in subject_upper)
+        is_kiu_sender = 'kiusys.com' in from_lower
+        
+        print(f"   KIU Subject: {is_kiu_subject}, KIU Sender: {is_kiu_sender}")
+        
+        if is_kiu_subject or is_kiu_sender:
+            print("🎫 Procesando como KIU")
             return self._procesar_boleto_email(message, msg_num, mail_connection)
         
         # Otros: PDF adjunto
-        if self._tiene_pdf_adjunto(message):
+        tiene_pdf = self._tiene_pdf_adjunto(message)
+        print(f"   PDF adjunto: {tiene_pdf}")
+        
+        if tiene_pdf:
+            print("📎 Procesando PDF adjunto")
             return self._procesar_boleto_pdf(message, msg_num, mail_connection)
         
+        print("⚠️ No reconocido como boleto")
         return False
 
     def _procesar_boleto_email(self, message, msg_num, mail_connection):
         """Procesa boleto desde HTML/texto del correo"""
+        print("   🔍 Extrayendo texto/HTML...")
         texto = self._extraer_texto(message)
         html = self._extraer_html(message)
         
+        # Si no hay texto pero hay HTML, extraer texto del HTML
+        if not texto and html:
+            from bs4 import BeautifulSoup
+            soup = BeautifulSoup(html, 'html.parser')
+            texto = soup.get_text(separator='\n')
+        
+        print(f"   Texto: {len(texto) if texto else 0} chars, HTML: {len(html) if html else 0} chars")
+        
         if not texto and not html:
+            print("   ❌ No hay texto ni HTML")
             return False
         
-        datos = extract_data_from_text(texto or html, html)
+        print("   🔧 Parseando datos...")
+        datos = extract_data_from_text(texto, html)
         
         if datos.get('error'):
-            logger.warning(f"⚠️ No parseado: {datos['error']}")
+            print(f"   ❌ Error parseando: {datos['error']}")
             return False
         
+        print(f"   ✅ Datos parseados: {datos.get('SOURCE_SYSTEM', 'UNKNOWN')}")
         return self._guardar_y_notificar(datos, msg_num, mail_connection)
 
     def _procesar_boleto_pdf(self, message, msg_num, mail_connection):
@@ -161,6 +229,7 @@ class EmailMonitorService:
         from core.models import BoletoImportado
         
         sistema = datos.get('SOURCE_SYSTEM', 'UNKNOWN')
+        print(f"   💾 Guardando boleto {sistema}...")
         
         # Extraer datos según sistema
         if sistema == 'SABRE':
@@ -174,33 +243,59 @@ class EmailMonitorService:
             pasajero = datos.get('NOMBRE_DEL_PASAJERO') or datos.get('pasajero', {}).get('nombre_completo')
             aerolinea = datos.get('NOMBRE_AEROLINEA') or datos.get('reserva', {}).get('aerolinea_emisora')
         
+        print(f"   Boleto: {numero_boleto}, PNR: {localizador}, Pasajero: {pasajero}")
+        
         if not numero_boleto:
-            logger.warning(f"⚠️ {sistema} sin número de boleto")
+            print(f"   ❌ {sistema} sin número de boleto")
             return False
         
         # Guardar en BD
         try:
-            boleto, created = BoletoImportado.objects.get_or_create(
-                numero_boleto=numero_boleto,
-                defaults={
-                    'localizador_pnr': localizador,
-                    'nombre_pasajero_completo': pasajero,
-                    'formato_detectado': f'EML_{sistema[:3]}',
-                    'estado_parseo': 'COM',
-                    'datos_parseados': datos,
-                    'aerolinea_emisora': aerolinea
-                }
-            )
+            print(f"   💾 Intentando guardar en BD...")
             
-            if not created:
-                logger.info(f"⏭️ Boleto {numero_boleto} ya existe")
-                return False
+            # Buscar boleto existente (puede haber duplicados)
+            boleto = BoletoImportado.objects.filter(numero_boleto=numero_boleto).first()
+            
+            if boleto:
+                # Ya existe
+                if not self.force_reprocess:
+                    print(f"   ⏭️ Boleto {numero_boleto} ya existe en BD (usa --force para reprocesar)")
+                    return False
+                else:
+                    print(f"   🔄 Boleto {numero_boleto} ya existe, reprocesando (--force)...")
+                    # Actualizar datos
+                    boleto.datos_parseados = datos
+                    boleto.nombre_pasajero_completo = pasajero
+                    boleto.localizador_pnr = localizador
+                    boleto.aerolinea_emisora = aerolinea
+                    boleto.save()
+                    created = False
+            else:
+                # Crear nuevo - ya parseado, solo falta generar PDF
+                boleto = BoletoImportado.objects.create(
+                    numero_boleto=numero_boleto,
+                    localizador_pnr=localizador,
+                    nombre_pasajero_completo=pasajero,
+                    formato_detectado=f'EML_{sistema[:3]}',
+                    estado_parseo='COM',  # Ya parseado por el monitor
+                    datos_parseados=datos,
+                    aerolinea_emisora=aerolinea
+                )
+                created = True
+            
+            if created:
+                print(f"   ✅ Boleto NUEVO guardado en BD (ID: {boleto.pk})")
+            else:
+                print(f"   ✅ Boleto ACTUALIZADO en BD (ID: {boleto.pk})")
         except Exception as e:
-            logger.error(f"Error guardando boleto: {e}")
+            print(f"   ❌ Error guardando boleto: {e}")
+            import traceback
+            traceback.print_exc()
             return False
         
-        # Generar PDF
+        # Generar PDF profesional
         try:
+            print(f"   📝 Generando PDF profesional...")
             pdf_bytes, pdf_filename = generate_ticket(datos)
             
             media_dir = os.path.join(settings.BASE_DIR, 'media', 'boletos_generados')
@@ -210,9 +305,16 @@ class EmailMonitorService:
             with open(pdf_path, 'wb') as f:
                 f.write(pdf_bytes)
             
-            logger.info(f"PDF generado: {pdf_path}")
+            # Guardar referencia del PDF en el boleto
+            from django.core.files import File
+            with open(pdf_path, 'rb') as f:
+                boleto.archivo_pdf_generado.save(pdf_filename, File(f), save=True)
+            
+            print(f"   ✅ PDF generado: {pdf_filename}")
         except Exception as e:
-            logger.error(f"Error generando PDF: {e}")
+            print(f"   ❌ Error generando PDF: {e}")
+            import traceback
+            traceback.print_exc()
             return False
         
         # Enviar notificación

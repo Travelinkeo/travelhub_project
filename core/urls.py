@@ -326,6 +326,9 @@ urlpatterns = [
     path(r'api/cron/cargar-catalogos/', lambda r: __import__('core.views.cron_views', fromlist=['cargar_catalogos_cron']).cargar_catalogos_cron(r), name='cron_cargar_catalogos'),
     path(r'api/cron/health/', lambda r: __import__('core.views.cron_views', fromlist=['health_check']).health_check(r), name='cron_health'),
     
+    # Email Monitor - Procesar correos de boletos manualmente
+    path(r'api/procesar-correos-boletos/', lambda r: __import__('core.views.email_monitor_views', fromlist=['procesar_correos_boletos']).procesar_correos_boletos(r), name='procesar_correos_boletos'),
+    
     # OpenAPI/Swagger Documentation
     path(r'api/schema/', lambda r: __import__('drf_spectacular.views', fromlist=['SpectacularAPIView']).SpectacularAPIView.as_view(), name='schema'),
     path(r'api/docs/', lambda r: __import__('drf_spectacular.views', fromlist=['SpectacularSwaggerView']).SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),

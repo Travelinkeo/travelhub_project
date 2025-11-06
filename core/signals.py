@@ -116,9 +116,14 @@ def crear_o_actualizar_venta_desde_boleto(sender, instance, created, **kwargs):
                 precio_unitario_venta=total_boleto,
             )
 
-            # --- 5. Asociar el boleto a la venta ---
-            instance.venta_asociada = venta
-            instance.save(update_fields=['venta_asociada'])
+            # --- 5. Asociar el boleto a la venta (solo si no existe ya otro boleto con esta venta) ---
+            # Verificar si ya existe otro boleto con esta venta
+            boleto_existente = BoletoImportado.objects.filter(venta_asociada=venta).exclude(pk=instance.pk).first()
+            if boleto_existente:
+                logger.warning(f"Ya existe BoletoImportado {boleto_existente.pk} asociado a Venta {venta.pk}. No se asocia el boleto {instance.pk}.")
+            else:
+                instance.venta_asociada = venta
+                instance.save(update_fields=['venta_asociada'])
 
             logger.info(f"Procesado BoletoImportado {instance.pk}. Venta {venta.pk} (localizador: {localizador}) creada/actualizada.")
 

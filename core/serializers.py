@@ -95,6 +95,13 @@ class BoletoImportadoSerializer(serializers.ModelSerializer):
         return None
     
     def create(self, validated_data):
+        import logging
+        from django.conf import settings
+        logger = logging.getLogger(__name__)
+        logger.info(f"[CLOUDINARY DEBUG] USE_CLOUDINARY: {getattr(settings, 'USE_CLOUDINARY', None)}")
+        logger.info(f"[CLOUDINARY DEBUG] DEFAULT_FILE_STORAGE: {settings.DEFAULT_FILE_STORAGE}")
+        logger.info(f"[CLOUDINARY DEBUG] CLOUDINARY_STORAGE: {getattr(settings, 'CLOUDINARY_STORAGE', None)}")
+        
         # Si no hay archivo, es entrada manual - marcar como COMPLETADO
         if not validated_data.get('archivo_boleto'):
             validated_data['estado_parseo'] = BoletoImportado.EstadoParseo.COMPLETADO

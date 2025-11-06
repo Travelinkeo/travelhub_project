@@ -132,7 +132,6 @@ class FacturaConsolidada(models.Model):
     archivo_pdf = models.FileField(
         _("Archivo PDF"),
         upload_to='facturas/%Y/%m/',
-        storage=lambda: __import__('core.storage', fromlist=['PDFCloudinaryStorage']).PDFCloudinaryStorage(),
         blank=True, null=True
     )
     

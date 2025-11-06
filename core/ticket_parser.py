@@ -420,7 +420,12 @@ def extract_data_from_text(plain_text: str, html_text: str = "", pdf_path: Optio
 
 def generate_ticket(data: Dict[str, Any]) -> Tuple[bytes, str]:
     """Genera un PDF a partir de los datos parseados, seleccionando la plantilla correcta."""
+    from django.core.files.storage import default_storage
+    from django.conf import settings
+    
     source_system = data.get('SOURCE_SYSTEM', 'KIU')
+    logger.info(f"Generando PDF para sistema: {source_system}")
+    logger.info(f"Storage backend: {default_storage.__class__.__name__}")
     
     # Define el directorio base de las plantillas de tickets
     base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -596,7 +601,9 @@ def generate_ticket(data: Dict[str, Any]) -> Tuple[bytes, str]:
     try:
         from weasyprint import HTML
         pdf_bytes = HTML(string=html_out, base_url=base_dir).write_pdf()
+        logger.info(f"PDF generado exitosamente, tamaño: {len(pdf_bytes)} bytes")
     except Exception as e:
+        logger.error(f"Error generando PDF con WeasyPrint: {e}")
         raise RuntimeError(f"WeasyPrint no está disponible. Error: {e}")
 
     timestamp = dt.datetime.now().strftime("%Y%m%d%H%M%S")
@@ -606,6 +613,7 @@ def generate_ticket(data: Dict[str, Any]) -> Tuple[bytes, str]:
         data.get("NUMERO_DE_BOLETO", "SIN_TICKET")
     )
     ticket_num_for_file = re.sub(r'[\\/*?:",<>|]', "", _clean_value(ticket_num_raw)).replace(" ", "_") or "SIN_TICKET"
-    file_name = f"Boleto_{ticket_num_for_file}_{timestamp}.pdf" 
+    file_name = f"Boleto_{ticket_num_for_file}_{timestamp}.pdf"
+    logger.info(f"Nombre de archivo generado: {file_name}")
     
     return pdf_bytes, file_name

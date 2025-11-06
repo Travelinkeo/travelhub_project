@@ -64,17 +64,37 @@ class BoletoUploadAPIView(APIView):
             
         # 3. (Opcional) Generar el PDF final y guardarlo en el modelo
         try:
+            from django.core.files.storage import default_storage
+            
+            logger.info(f"Iniciando generación de PDF para boleto {boleto_importado.id_boleto_importado}")
+            logger.info(f"Storage backend: {default_storage.__class__.__name__}")
+            logger.info(f"USE_CLOUDINARY: {getattr(settings, 'USE_CLOUDINARY', False)}")
+            
             plantilla_path = os.path.join(settings.BASE_DIR, 'core', 'templates', 'core', 'ticket_template_sabre.html')
             pdf_bytes = generar_pdf_en_memoria(datos_parseados, plantilla_path)
             
             if pdf_bytes:
+                logger.info(f"PDF generado, tamaño: {len(pdf_bytes)} bytes")
                 numero_boleto = datos_parseados.get("reserva", {}).get("numero_boleto", "SIN_BOLETO")
                 nombre_archivo_generado = f"Boleto_{numero_boleto}_{boleto_importado.id_boleto_importado}.pdf"
+                logger.info(f"Nombre de archivo: {nombre_archivo_generado}")
                 
                 # CORREGIDO: Nombre del campo 'archivo_pdf_generado'
                 boleto_importado.archivo_pdf_generado.save(nombre_archivo_generado, ContentFile(pdf_bytes), save=True)
+                
+                # Verificar que se guardó
+                if boleto_importado.archivo_pdf_generado:
+                    url = boleto_importado.archivo_pdf_generado.url
+                    logger.info(f"✅ PDF guardado exitosamente")
+                    logger.info(f"   Ruta: {boleto_importado.archivo_pdf_generado.name}")
+                    logger.info(f"   URL: {url}")
+                    logger.info(f"   Storage: {boleto_importado.archivo_pdf_generado.storage.__class__.__name__}")
+                else:
+                    logger.warning("⚠️ archivo_pdf_generado está vacío después de guardar")
         except Exception as e:
-            logger.warning(f"No se pudo generar el PDF para el boleto {boleto_importado.id_boleto_importado}, pero el parseo fue exitoso. Error: {str(e)}")
+            logger.warning(f"❌ No se pudo generar el PDF para el boleto {boleto_importado.id_boleto_importado}, pero el parseo fue exitoso. Error: {str(e)}")
+            import traceback
+            logger.error(traceback.format_exc())
 
 
         logger.info(f"-> Boleto {boleto_importado.id_boleto_importado} procesado y guardado exitosamente.")

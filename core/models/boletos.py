@@ -17,6 +17,7 @@ class BoletoImportado(models.Model):
         upload_to='boletos_importados/%Y/%m/',
         help_text=_("Suba el archivo del boleto en formato PDF, TXT o EML (máx 5MB)."),
         validators=[validate_file_size, validate_file_extension, antivirus_hook],
+        storage=lambda: __import__('core.storage', fromlist=['PDFCloudinaryStorage']).PDFCloudinaryStorage(),
         blank=True, null=True
     )
     fecha_subida = models.DateTimeField(_("Fecha de Subida"), auto_now_add=True)
@@ -79,7 +80,13 @@ class BoletoImportado(models.Model):
     comision_agencia = models.DecimalField(_("Comisión Agencia"), max_digits=10, decimal_places=2, blank=True, null=True, help_text=_("Comisión propia de la agencia respecto al boleto."))
     
     venta_asociada = models.OneToOneField(Venta, on_delete=models.SET_NULL, blank=True, null=True, related_name='boleto_importado', verbose_name=_("Venta/Reserva Asociada"))
-    archivo_pdf_generado = models.FileField(_("PDF Unificado Generado"), upload_to='boletos_generados/%Y/%m/', blank=True, null=True, help_text=_("El archivo PDF del boleto unificado, generado automáticamente."))
+    archivo_pdf_generado = models.FileField(
+        _("PDF Unificado Generado"),
+        upload_to='boletos_generados/%Y/%m/',
+        storage=lambda: __import__('core.storage', fromlist=['PDFCloudinaryStorage']).PDFCloudinaryStorage(),
+        blank=True, null=True,
+        help_text=_("El archivo PDF del boleto unificado, generado automáticamente.")
+    )
 
     class Meta:
         verbose_name = _("Boleto Importado")

@@ -129,7 +129,12 @@ class FacturaConsolidada(models.Model):
                             choices=EstadoFactura.choices, default=EstadoFactura.BORRADOR)
     
     # === ARCHIVOS ===
-    archivo_pdf = models.FileField(_("Archivo PDF"), upload_to='facturas/%Y/%m/', blank=True, null=True)
+    archivo_pdf = models.FileField(
+        _("Archivo PDF"),
+        upload_to='facturas/%Y/%m/',
+        storage=lambda: __import__('core.storage', fromlist=['PDFCloudinaryStorage']).PDFCloudinaryStorage(),
+        blank=True, null=True
+    )
     
     # === CONTABILIDAD ===
     asiento_contable_factura = models.ForeignKey(AsientoContable, related_name='facturas_consolidadas_asociadas',

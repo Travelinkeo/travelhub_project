@@ -35,7 +35,7 @@ class BoletoImportado(models.Model):
 
     formato_detectado = models.CharField(
         _("Formato Detectado"),
-        max_length=10,
+        max_length=20,  # Aumentado de 10 a 20
         choices=FormatoDetectado.choices,
         default=FormatoDetectado.OTRO,
         blank=True
@@ -67,7 +67,7 @@ class BoletoImportado(models.Model):
     direccion_aerolinea = models.TextField(_("Dirección Aerolínea"), blank=True, null=True)
     agente_emisor = models.CharField(_("Agente Emisor"), max_length=100, blank=True, null=True)
     foid_pasajero = models.CharField(_("FOID/D.Identidad Pasajero"), max_length=50, blank=True, null=True)
-    localizador_pnr = models.CharField(_("Localizador (PNR)"), max_length=10, blank=True, null=True)
+    localizador_pnr = models.CharField(_("Localizador (PNR)"), max_length=20, blank=True, null=True)
     tarifa_base = models.DecimalField(_("Tarifa Base"), max_digits=10, decimal_places=2, blank=True, null=True)
     impuestos_descripcion = models.TextField(_("Descripción Impuestos"), blank=True, null=True)
     impuestos_total_calculado = models.DecimalField(_("Total Impuestos (Calculado)"), max_digits=10, decimal_places=2, blank=True, null=True)

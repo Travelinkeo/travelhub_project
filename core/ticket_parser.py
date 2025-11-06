@@ -56,6 +56,7 @@ def _get_agente_emisor(texto: str) -> str:
 
 def _get_nombre_completo_pasajero(texto: str) -> str:
     raw = _extract_field_single_line(texto, [
+        r'NAME:\s*([A-ZÁÉÍÓÚÑ/ (),.-]{3,})',
         r'NAME/NOMBRE\s*[:\s]*([A-ZÁÉÍÓÚÑ/ (),.-]{3,})',
         r'NAME\s*[:\s]*([A-ZÁÉÍÓÚÑ/ (),.-]{3,})'
     ])
@@ -351,8 +352,12 @@ def extract_data_from_text(plain_text: str, html_text: str = "", pdf_path: Optio
     logger.info("Iniciando detección de GDS...")
 
     # Heurística para Sabre (PRIORIDAD ALTA - muy específica)
-    if ('ETICKET RECEIPT' in plain_text_upper or 'E-TICKET RECEIPT' in plain_text_upper) and \
-       ('RESERVATION CODE' in plain_text_upper or 'RECORD LOCATOR' in plain_text_upper):
+    # Debe tener ETICKET RECEIPT + RESERVATION CODE y NO tener marcadores de KIU
+    is_sabre = ('ETICKET RECEIPT' in plain_text_upper or 'E-TICKET RECEIPT' in plain_text_upper) and \
+               ('RESERVATION CODE' in plain_text_upper or 'RECORD LOCATOR' in plain_text_upper)
+    is_not_kiu = 'KIUSYS.COM' not in plain_text_upper and 'PASSENGER ITINERARY RECEIPT' not in plain_text_upper
+    
+    if is_sabre and is_not_kiu:
         logger.info("GDS detectado: SABRE. Procesando...")
         parser = SabreParser()
         result = parser.parse(plain_text)
@@ -388,8 +393,12 @@ def extract_data_from_text(plain_text: str, html_text: str = "", pdf_path: Optio
         logger.info("GDS detectado: AMADEUS. Procesando...")
         return _parse_amadeus_ticket(plain_text)
     
-    # Heurística para KIU
-    if 'KIUSYS.COM' in plain_text_upper or 'PASSENGER ITINERARY RECEIPT' in plain_text_upper:
+    # Heurística para KIU (debe tener marcadores específicos de KIU)
+    is_kiu = 'KIUSYS.COM' in plain_text_upper or \
+             'PASSENGER ITINERARY RECEIPT' in plain_text_upper or \
+             ('ISSUE AGENT/AGENTE EMISOR' in plain_text_upper and 'FROM/TO' in plain_text_upper)
+    
+    if is_kiu:
         logger.info("GDS detectado: KIU. Procesando...")
         return _parse_kiu_ticket(plain_text, html_text)
 

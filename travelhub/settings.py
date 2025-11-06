@@ -153,22 +153,10 @@ STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [BASE_DIR / 'static',]
 
-# Django 5: usar STORAGES en lugar de STATICFILES_STORAGE (evita deprecation warning)
-# IMPORTANTE: 'default' es para archivos media (usar Cloudinary si está configurado)
-if USE_CLOUDINARY and CLOUDINARY_STORAGE.get('CLOUD_NAME'):
-    STORAGES = {
-        "default": {"BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage"},
-        "staticfiles": {"BACKEND": "whitenoise.storage.CompressedStaticFilesStorage"},
-    }
-else:
-    STORAGES = {
-        "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-        "staticfiles": {"BACKEND": "whitenoise.storage.CompressedStaticFilesStorage"},
-    }
-
 # Whitenoise configuration
 WHITENOISE_USE_FINDERS = True
 WHITENOISE_AUTOREFRESH = True if DEBUG else False
+
 # Cloudinary configuration
 import cloudinary
 import cloudinary.uploader
@@ -200,6 +188,19 @@ if USE_CLOUDINARY and CLOUDINARY_STORAGE.get('CLOUD_NAME'):
 else:
     DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
     print("⚠️ Usando almacenamiento local (FileSystemStorage)")
+
+# Django 5: usar STORAGES en lugar de STATICFILES_STORAGE (evita deprecation warning)
+# IMPORTANTE: 'default' es para archivos media (usar Cloudinary si está configurado)
+if USE_CLOUDINARY and CLOUDINARY_STORAGE.get('CLOUD_NAME'):
+    STORAGES = {
+        "default": {"BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage"},
+        "staticfiles": {"BACKEND": "whitenoise.storage.CompressedStaticFilesStorage"},
+    }
+else:
+    STORAGES = {
+        "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+        "staticfiles": {"BACKEND": "whitenoise.storage.CompressedStaticFilesStorage"},
+    }
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 

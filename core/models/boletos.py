@@ -17,7 +17,6 @@ class BoletoImportado(models.Model):
         upload_to='boletos_importados/%Y/%m/',
         help_text=_("Suba el archivo del boleto en formato PDF, TXT o EML (máx 5MB)."),
         validators=[validate_file_size, validate_file_extension, antivirus_hook],
-        storage=lambda: __import__('core.storage', fromlist=['PDFCloudinaryStorage']).PDFCloudinaryStorage(),
         blank=True, null=True
     )
     fecha_subida = models.DateTimeField(_("Fecha de Subida"), auto_now_add=True)
@@ -64,9 +63,9 @@ class BoletoImportado(models.Model):
     nombre_pasajero_procesado = models.CharField(_("Nombre Pasajero (Procesado)"), max_length=150, blank=True, null=True)
     ruta_vuelo = models.TextField(_("Ruta del Vuelo (Itinerario)"), blank=True, null=True) 
     fecha_emision_boleto = models.DateField(_("Fecha de Emisión del Boleto"), blank=True, null=True)
-    aerolinea_emisora = models.CharField(_("Aerolínea Emisora"), max_length=100, blank=True, null=True)
+    aerolinea_emisora = models.CharField(_("Aerolínea Emisora"), max_length=200, blank=True, null=True)
     direccion_aerolinea = models.TextField(_("Dirección Aerolínea"), blank=True, null=True)
-    agente_emisor = models.CharField(_("Agente Emisor"), max_length=100, blank=True, null=True)
+    agente_emisor = models.CharField(_("Agente Emisor"), max_length=200, blank=True, null=True)
     foid_pasajero = models.CharField(_("FOID/D.Identidad Pasajero"), max_length=50, blank=True, null=True)
     localizador_pnr = models.CharField(_("Localizador (PNR)"), max_length=20, blank=True, null=True)
     tarifa_base = models.DecimalField(_("Tarifa Base"), max_digits=10, decimal_places=2, blank=True, null=True)
@@ -83,7 +82,6 @@ class BoletoImportado(models.Model):
     archivo_pdf_generado = models.FileField(
         _("PDF Unificado Generado"),
         upload_to='boletos_generados/%Y/%m/',
-        storage=lambda: __import__('core.storage', fromlist=['PDFCloudinaryStorage']).PDFCloudinaryStorage(),
         blank=True, null=True,
         help_text=_("El archivo PDF del boleto unificado, generado automáticamente.")
     )

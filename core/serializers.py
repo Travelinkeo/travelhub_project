@@ -83,9 +83,16 @@ class ProductoServicioSerializer(serializers.ModelSerializer):
 class BoletoImportadoSerializer(serializers.ModelSerializer):
     formato_detectado_display = serializers.CharField(source='get_formato_detectado_display', read_only=True)
     estado_parseo_display = serializers.CharField(source='get_estado_parseo_display', read_only=True)
+    archivo_pdf_generado = serializers.SerializerMethodField()
+    
     class Meta:
         model = BoletoImportado
         fields = '__all__'
+    
+    def get_archivo_pdf_generado(self, obj):
+        if obj.archivo_pdf_generado:
+            return obj.archivo_pdf_generado.url
+        return None
     
     def create(self, validated_data):
         # Si no hay archivo, es entrada manual - marcar como COMPLETADO

@@ -171,15 +171,12 @@ CLOUDINARY_STORAGE = {
 
 # Media files - Usar Cloudinary en desarrollo y producción
 MEDIA_URL = '/media/'
-USE_CLOUDINARY = os.getenv('USE_CLOUDINARY', 'True') == 'True'  # Por defecto usar Cloudinary
+MEDIA_ROOT = BASE_DIR / 'media'  # Siempre definir MEDIA_ROOT
+USE_CLOUDINARY = os.getenv('USE_CLOUDINARY', 'True') == 'True'
 
 if USE_CLOUDINARY and CLOUDINARY_STORAGE.get('CLOUD_NAME'):
-    # Usar Cloudinary (desarrollo y producción)
     DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
-    MEDIA_ROOT = None  # No necesario con Cloudinary
 else:
-    # Fallback: sistema de archivos local
-    MEDIA_ROOT = BASE_DIR / 'media'
     DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

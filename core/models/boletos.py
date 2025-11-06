@@ -5,6 +5,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from core.validators import antivirus_hook, validate_file_extension, validate_file_size
+from core.utils_storage import truncate_filename
 
 from .ventas import Venta
 
@@ -93,6 +94,14 @@ class BoletoImportado(models.Model):
 
     def __str__(self):
         return f"Boleto {self.id_boleto_importado} ({self.archivo_boleto.name if self.archivo_boleto else 'N/A'})"
+    
+    def save(self, *args, **kwargs):
+        # Truncar nombre de archivo si es muy largo
+        if self.archivo_boleto and hasattr(self.archivo_boleto, 'name'):
+            self.archivo_boleto.name = truncate_filename(self.archivo_boleto.name, max_length=100)
+        if self.archivo_pdf_generado and hasattr(self.archivo_pdf_generado, 'name'):
+            self.archivo_pdf_generado.name = truncate_filename(self.archivo_pdf_generado.name, max_length=100)
+        super().save(*args, **kwargs)
 
     def parsear(self):
         """Punto de entrada manual para el parseo (proxy al servicio)."""

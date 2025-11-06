@@ -51,19 +51,37 @@ def guardar_pdf_factura(factura):
     """
     try:
         from django.core.files.base import ContentFile
+        from django.core.files.storage import default_storage
+        
+        logger.info(f"Iniciando generación de PDF para factura {factura.numero_factura}")
+        logger.info(f"Storage backend: {default_storage.__class__.__name__}")
+        logger.info(f"USE_CLOUDINARY: {settings.USE_CLOUDINARY}")
         
         # Generar PDF
         pdf_content = generar_pdf_factura_consolidada(factura)
+        logger.info(f"PDF generado, tamaño: {len(pdf_content)} bytes")
         
         # Nombre del archivo
         filename = f"factura_{factura.numero_factura.replace('/', '_')}.pdf"
+        logger.info(f"Nombre de archivo: {filename}")
         
         # Guardar en el modelo
         factura.archivo_pdf.save(filename, ContentFile(pdf_content), save=True)
         
-        logger.info(f"PDF guardado exitosamente: {filename}")
+        # Verificar que se guardó
+        if factura.archivo_pdf:
+            url = factura.archivo_pdf.url
+            logger.info(f"✅ PDF guardado exitosamente")
+            logger.info(f"   Ruta: {factura.archivo_pdf.name}")
+            logger.info(f"   URL: {url}")
+            logger.info(f"   Storage: {factura.archivo_pdf.storage.__class__.__name__}")
+        else:
+            logger.warning("⚠️ archivo_pdf está vacío después de guardar")
+        
         return True
         
     except Exception as e:
-        logger.error(f"Error guardando PDF: {str(e)}")
+        logger.error(f"❌ Error guardando PDF: {str(e)}")
+        import traceback
+        logger.error(traceback.format_exc())
         return False

@@ -154,20 +154,40 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [BASE_DIR / 'static',]
 
 # Django 5: usar STORAGES en lugar de STATICFILES_STORAGE (evita deprecation warning)
-STORAGES = {
-    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-    "staticfiles": {"BACKEND": "whitenoise.storage.CompressedStaticFilesStorage"},
-}
+# IMPORTANTE: 'default' es para archivos media (usar Cloudinary si está configurado)
+if USE_CLOUDINARY and CLOUDINARY_STORAGE.get('CLOUD_NAME'):
+    STORAGES = {
+        "default": {"BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage"},
+        "staticfiles": {"BACKEND": "whitenoise.storage.CompressedStaticFilesStorage"},
+    }
+else:
+    STORAGES = {
+        "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+        "staticfiles": {"BACKEND": "whitenoise.storage.CompressedStaticFilesStorage"},
+    }
 
 # Whitenoise configuration
 WHITENOISE_USE_FINDERS = True
 WHITENOISE_AUTOREFRESH = True if DEBUG else False
 # Cloudinary configuration
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
+
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME': os.getenv('CLOUDINARY_CLOUD_NAME'),
     'API_KEY': os.getenv('CLOUDINARY_API_KEY'),
     'API_SECRET': os.getenv('CLOUDINARY_API_SECRET')
 }
+
+# Configurar cloudinary directamente
+if CLOUDINARY_STORAGE.get('CLOUD_NAME'):
+    cloudinary.config(
+        cloud_name=CLOUDINARY_STORAGE['CLOUD_NAME'],
+        api_key=CLOUDINARY_STORAGE['API_KEY'],
+        api_secret=CLOUDINARY_STORAGE['API_SECRET'],
+        secure=True
+    )
 
 # Media files - Usar Cloudinary en desarrollo y producción
 MEDIA_URL = '/media/'
@@ -176,8 +196,10 @@ USE_CLOUDINARY = os.getenv('USE_CLOUDINARY', 'True') == 'True'
 
 if USE_CLOUDINARY and CLOUDINARY_STORAGE.get('CLOUD_NAME'):
     DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+    print(f"✅ Cloudinary configurado: {CLOUDINARY_STORAGE['CLOUD_NAME']}")
 else:
     DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+    print("⚠️ Usando almacenamiento local (FileSystemStorage)")
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 

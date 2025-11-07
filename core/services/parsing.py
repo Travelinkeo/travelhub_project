@@ -106,8 +106,9 @@ def trigger_boleto_parse_service(sender, instance, created, **kwargs):
     if not created:
         return
     
-    # Si usa Cloudinary y ya tiene datos parseados, mapear campos y generar PDF
+    # Si usa Cloudinary
     if getattr(settings, 'USE_CLOUDINARY', False):
+        # Si ya tiene datos parseados (vino del serializer), solo mapear y generar PDF
         if instance.datos_parseados and instance.estado_parseo == BoletoImportado.EstadoParseo.COMPLETADO:
             logger.info(f"Cloudinary: Mapeando campos y generando PDF para boleto ID {instance.id_boleto_importado}")
             
@@ -135,6 +136,12 @@ def trigger_boleto_parse_service(sender, instance, created, **kwargs):
                     logger.info(f"PDF generado: {pdf_filename}")
             except Exception as e:
                 logger.error(f"Error generando PDF: {e}")
+        
+        # Si NO tiene datos parseados (vino del Admin), parsear ahora
+        elif instance.archivo_boleto and instance.estado_parseo == BoletoImportado.EstadoParseo.PENDIENTE:
+            logger.info(f"Cloudinary: Parseando archivo para boleto ID {instance.id_boleto_importado}")
+            procesar_boleto_importado_automatico(instance)
+        
         return
     
     # Desarrollo local: parsear después de guardar

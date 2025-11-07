@@ -108,9 +108,12 @@ class BoletoImportadoSerializer(serializers.ModelSerializer):
         logger = logging.getLogger(__name__)
         
         archivo_boleto = validated_data.get('archivo_boleto')
+        use_cloudinary = getattr(settings, 'USE_CLOUDINARY', False)
+        
+        logger.info(f"[BOLETO CREATE] archivo_boleto: {bool(archivo_boleto)}, USE_CLOUDINARY: {use_cloudinary}")
         
         # Si hay archivo Y se usa Cloudinary, parsear ANTES de guardar
-        if archivo_boleto and getattr(settings, 'USE_CLOUDINARY', False):
+        if archivo_boleto and use_cloudinary:
             logger.info(f"[CLOUDINARY] Parseando archivo ANTES de guardar")
             try:
                 from core.services.ticket_parser_service import orquestar_parseo_de_boleto

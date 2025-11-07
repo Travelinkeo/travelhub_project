@@ -98,19 +98,30 @@ def procesar_boleto_importado_automatico(boleto: BoletoImportado):
 def trigger_boleto_parse_service(sender, instance, created, **kwargs):
     """
     Disparador que se activa al crear un nuevo BoletoImportado.
-    DESHABILITADO en producción con Cloudinary porque no permite leer archivos después de subirlos.
-    El parseo debe hacerse ANTES de guardar (en el serializer o vista).
+    En Cloudinary: Solo genera PDF si ya tiene datos_parseados (parseo hecho en serializer).
+    En local: Parsea el archivo después de guardar.
     """
     from django.conf import settings
     
-    # Si usa Cloudinary, no intentar parsear después de guardar
-    if getattr(settings, 'USE_CLOUDINARY', False):
-        logger.info(f"Signal deshabilitado para Cloudinary. Boleto ID {instance.id_boleto_importado}")
+    if not created:
         return
     
-    # Solo en desarrollo local (FileSystemStorage)
-    if created and instance.estado_parseo == BoletoImportado.EstadoParseo.PENDIENTE and instance.archivo_boleto:
-        logger.info(f"Disparador automático: Invocando servicio de parseo para nuevo boleto ID {instance.id_boleto_importado}")
+    # Si usa Cloudinary y ya tiene datos parseados, solo generar PDF
+    if getattr(settings, 'USE_CLOUDINARY', False):
+        if instance.datos_parseados and instance.estado_parseo == BoletoImportado.EstadoParseo.COMPLETADO:
+            logger.info(f"Cloudinary: Generando PDF para boleto ID {instance.id_boleto_importado}")
+            try:
+                pdf_bytes, pdf_filename = ticket_parser.generate_ticket(instance.datos_parseados)
+                if pdf_bytes:
+                    instance.archivo_pdf_generado.save(pdf_filename, ContentFile(pdf_bytes), save=True)
+                    logger.info(f"PDF generado: {pdf_filename}")
+            except Exception as e:
+                logger.error(f"Error generando PDF: {e}")
+        return
+    
+    # Desarrollo local: parsear después de guardar
+    if instance.estado_parseo == BoletoImportado.EstadoParseo.PENDIENTE and instance.archivo_boleto:
+        logger.info(f"Local: Parseando boleto ID {instance.id_boleto_importado}")
         procesar_boleto_importado_automatico(instance)
-    elif created and not instance.archivo_boleto:
-        logger.info(f"Boleto ID {instance.id_boleto_importado} creado manualmente sin archivo. Se omite parseo automático.")
+    elif not instance.archivo_boleto:
+        logger.info(f"Boleto ID {instance.id_boleto_importado} sin archivo. Omitiendo parseo.")

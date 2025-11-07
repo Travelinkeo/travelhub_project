@@ -542,6 +542,34 @@ class BoletoImportadoAdmin(admin.ModelAdmin):
     actions = ['reintentar_parseo']
     autocomplete_fields = ['venta_asociada']
     
+    def get_urls(self):
+        from django.urls import path
+        urls = super().get_urls()
+        custom_urls = [
+            path('<int:boleto_id>/descargar-pdf/', self.admin_site.admin_view(self.descargar_pdf_view), name='core_boletoimportado_descargar_pdf'),
+        ]
+        return custom_urls + urls
+    
+    def descargar_pdf_view(self, request, boleto_id):
+        from django.http import HttpResponse, Http404
+        import requests
+        
+        try:
+            boleto = BoletoImportado.objects.get(pk=boleto_id)
+            if not boleto.archivo_pdf_generado:
+                raise Http404("PDF no generado")
+            
+            # Descargar de Cloudinary
+            response = requests.get(boleto.archivo_pdf_generado.url)
+            response.raise_for_status()
+            
+            # Servir a través de Django
+            return HttpResponse(response.content, content_type='application/pdf')
+        except BoletoImportado.DoesNotExist:
+            raise Http404("Boleto no encontrado")
+        except Exception as e:
+            raise Http404(f"Error al descargar PDF: {e}")
+    
     def get_fieldsets(self, request, obj=None):
         fieldsets = [
             (None, {'fields': ('archivo_boleto', 'venta_asociada')}),
@@ -560,7 +588,13 @@ class BoletoImportadoAdmin(admin.ModelAdmin):
 
     def pdf_generado_link(self, obj):
         if obj.archivo_pdf_generado:
-            return format_html("<a href='{url}' target='_blank'>Ver PDF</a>", url=obj.archivo_pdf_generado.url)
+            from django.conf import settings
+            # En producción con Cloudinary, usar endpoint proxy del Admin
+            if getattr(settings, 'USE_CLOUDINARY', False):
+                url = reverse('admin:core_boletoimportado_descargar_pdf', args=[obj.pk])
+            else:
+                url = obj.archivo_pdf_generado.url
+            return format_html("<a href='{url}' target='_blank'>Ver PDF</a>", url=url)
         return "No generado"
     pdf_generado_link.short_description = "PDF Generado"
     

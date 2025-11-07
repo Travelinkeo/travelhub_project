@@ -460,7 +460,7 @@ class BoletoImportadoViewSet(viewsets.ModelViewSet):
     filter_backends = [filters.SearchFilter]
     search_fields = ['numero_boleto', 'nombre_pasajero_procesado', 'localizador_pnr', 'aerolinea_emisora']
     
-    @action(detail=True, methods=['get'])
+    @action(detail=True, methods=['get'], url_path='descargar-pdf')
     def descargar_pdf(self, request, pk=None):
         """Descarga el PDF del boleto a través de Django (evita problema de Cloudinary untrusted)"""
         boleto = self.get_object()

@@ -546,16 +546,16 @@ class BoletoImportadoAdmin(admin.ModelAdmin):
         from django.urls import path
         urls = super().get_urls()
         custom_urls = [
-            path('<int:boleto_id>/descargar-pdf/', self.admin_site.admin_view(self.descargar_pdf_view), name='core_boletoimportado_descargar_pdf'),
+            path('<path:object_id>/descargar-pdf/', self.admin_site.admin_view(self.descargar_pdf_view), name='core_boletoimportado_descargar_pdf'),
         ]
         return custom_urls + urls
     
-    def descargar_pdf_view(self, request, boleto_id):
+    def descargar_pdf_view(self, request, object_id):
         from django.http import HttpResponse, Http404
         import requests
         
         try:
-            boleto = BoletoImportado.objects.get(pk=boleto_id)
+            boleto = BoletoImportado.objects.get(pk=object_id)
             if not boleto.archivo_pdf_generado:
                 raise Http404("PDF no generado")
             

@@ -98,9 +98,17 @@ def procesar_boleto_importado_automatico(boleto: BoletoImportado):
 def trigger_boleto_parse_service(sender, instance, created, **kwargs):
     """
     Disparador que se activa al crear un nuevo BoletoImportado.
-    Solo procesa si hay archivo adjunto (no entrada manual).
+    DESHABILITADO en producción con Cloudinary porque no permite leer archivos después de subirlos.
+    El parseo debe hacerse ANTES de guardar (en el serializer o vista).
     """
-    # Evitar que se ejecute en bucle si la función de procesamiento guarda el mismo objeto
+    from django.conf import settings
+    
+    # Si usa Cloudinary, no intentar parsear después de guardar
+    if getattr(settings, 'USE_CLOUDINARY', False):
+        logger.info(f"Signal deshabilitado para Cloudinary. Boleto ID {instance.id_boleto_importado}")
+        return
+    
+    # Solo en desarrollo local (FileSystemStorage)
     if created and instance.estado_parseo == BoletoImportado.EstadoParseo.PENDIENTE and instance.archivo_boleto:
         logger.info(f"Disparador automático: Invocando servicio de parseo para nuevo boleto ID {instance.id_boleto_importado}")
         procesar_boleto_importado_automatico(instance)

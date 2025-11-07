@@ -106,10 +106,28 @@ def trigger_boleto_parse_service(sender, instance, created, **kwargs):
     if not created:
         return
     
-    # Si usa Cloudinary y ya tiene datos parseados, solo generar PDF
+    # Si usa Cloudinary y ya tiene datos parseados, mapear campos y generar PDF
     if getattr(settings, 'USE_CLOUDINARY', False):
         if instance.datos_parseados and instance.estado_parseo == BoletoImportado.EstadoParseo.COMPLETADO:
-            logger.info(f"Cloudinary: Generando PDF para boleto ID {instance.id_boleto_importado}")
+            logger.info(f"Cloudinary: Mapeando campos y generando PDF para boleto ID {instance.id_boleto_importado}")
+            
+            # Mapear campos del JSON a los campos del modelo
+            source_system = instance.datos_parseados.get('SOURCE_SYSTEM')
+            if source_system == 'KIU':
+                instance.numero_boleto = instance.datos_parseados.get('NUMERO_DE_BOLETO')
+                instance.nombre_pasajero_completo = instance.datos_parseados.get('NOMBRE_DEL_PASAJERO')
+                instance.nombre_pasajero_procesado = instance.datos_parseados.get('SOLO_NOMBRE_PASAJERO')
+                instance.localizador_pnr = instance.datos_parseados.get('SOLO_CODIGO_RESERVA')
+                instance.aerolinea_emisora = instance.datos_parseados.get('NOMBRE_AEROLINEA')
+                instance.total_boleto = instance.datos_parseados.get('TOTAL_IMPORTE')
+                instance.tarifa_base = instance.datos_parseados.get('TARIFA_IMPORTE')
+                instance.foid_pasajero = instance.datos_parseados.get('CODIGO_IDENTIFICACION')
+                instance.ruta_vuelo = instance.datos_parseados.get('ItinerarioFinalLimpio')
+                instance.save(update_fields=['numero_boleto', 'nombre_pasajero_completo', 'nombre_pasajero_procesado',
+                                            'localizador_pnr', 'aerolinea_emisora', 'total_boleto', 'tarifa_base',
+                                            'foid_pasajero', 'ruta_vuelo'])
+            
+            # Generar PDF
             try:
                 pdf_bytes, pdf_filename = ticket_parser.generate_ticket(instance.datos_parseados)
                 if pdf_bytes:

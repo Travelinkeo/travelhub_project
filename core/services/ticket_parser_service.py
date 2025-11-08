@@ -26,8 +26,14 @@ def _leer_contenido_del_archivo(archivo_subido) -> str:
     Compatible con archivos locales y Cloudinary.
     """
     try:
-        # Para Cloudinary, leer directamente sin seek
-        if hasattr(archivo_subido, 'read'):
+        # Para Cloudinary, descargar desde URL
+        if hasattr(archivo_subido, 'url'):
+            import requests
+            logger.info(f"Descargando archivo desde Cloudinary: {archivo_subido.url}")
+            response = requests.get(archivo_subido.url, timeout=30)
+            response.raise_for_status()
+            contenido_bytes = response.content
+        elif hasattr(archivo_subido, 'read'):
             contenido_bytes = archivo_subido.read()
         else:
             # Fallback para archivos locales

@@ -129,7 +129,18 @@ export default function BoletosImportadosClientComponent() {
           <Button size="small" variant="outlined" onClick={() => handleViewClick(params.row)}>Ver</Button>
           <Button size="small" variant="outlined" onClick={() => handleEditClick(params.row)}>Editar</Button>
           {params.row.archivo_pdf_generado && (
-            <Button size="small" variant="outlined" color="secondary" href={params.row.archivo_pdf_generado} target="_blank">Ver PDF</Button>
+            <Button 
+              size="small" 
+              variant="outlined" 
+              color="secondary" 
+              href={params.row.archivo_pdf_generado.startsWith('http') 
+                ? params.row.archivo_pdf_generado 
+                : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}${params.row.archivo_pdf_generado}`
+              } 
+              target="_blank"
+            >
+              Ver PDF
+            </Button>
           )}
           <Button 
             size="small" 

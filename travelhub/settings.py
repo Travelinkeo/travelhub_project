@@ -193,7 +193,7 @@ else:
 # IMPORTANTE: 'default' es para archivos media (usar Cloudinary si está configurado)
 if USE_CLOUDINARY and CLOUDINARY_STORAGE.get('CLOUD_NAME'):
     STORAGES = {
-        "default": {"BACKEND": "cloudinary_storage.storage.RawMediaCloudinaryStorage"},  # Para PDFs
+        "default": {"BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage"},  # PDFs públicos
         "staticfiles": {"BACKEND": "whitenoise.storage.CompressedStaticFilesStorage"},
     }
 else:

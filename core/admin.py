@@ -546,6 +546,7 @@ class BoletoImportadoAdmin(admin.ModelAdmin):
         from django.urls import path
         urls = super().get_urls()
         custom_urls = [
+            # Fix: Usar int en lugar de path para object_id
             path('<int:object_id>/descargar-pdf/', self.admin_site.admin_view(self.descargar_pdf_view), name='core_boletoimportado_descargar_pdf'),
         ]
         return custom_urls + urls

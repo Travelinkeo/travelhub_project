@@ -23,11 +23,17 @@ logger = logging.getLogger(__name__)
 def _leer_contenido_del_archivo(archivo_subido) -> str:
     """
     Lee el contenido de un archivo subido (PDF, EML, o texto) y lo devuelve como string.
+    Compatible con archivos locales y Cloudinary.
     """
     try:
-        archivo_subido.seek(0)
-        contenido_bytes = archivo_subido.read()
-        archivo_subido.seek(0)
+        # Para Cloudinary, leer directamente sin seek
+        if hasattr(archivo_subido, 'read'):
+            contenido_bytes = archivo_subido.read()
+        else:
+            # Fallback para archivos locales
+            archivo_subido.seek(0)
+            contenido_bytes = archivo_subido.read()
+            archivo_subido.seek(0)
 
         # 1. Detección de PDF
         if contenido_bytes.startswith(b'%PDF'):

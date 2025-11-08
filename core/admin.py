@@ -588,13 +588,11 @@ class BoletoImportadoAdmin(admin.ModelAdmin):
 
     def pdf_generado_link(self, obj):
         if obj.archivo_pdf_generado:
-            from django.conf import settings
-            # En producción con Cloudinary, usar endpoint proxy del Admin
-            if getattr(settings, 'USE_CLOUDINARY', False):
-                url = reverse('admin:core_boletoimportado_descargar_pdf', args=[obj.pk])
-            else:
+            try:
                 url = obj.archivo_pdf_generado.url
-            return format_html("<a href='{url}' target='_blank'>Ver PDF</a>", url=url)
+                return format_html("<a href='{url}' target='_blank'>Ver PDF</a>", url=url)
+            except:
+                return "Error obteniendo URL"
         return "No generado"
     pdf_generado_link.short_description = "PDF Generado"
     

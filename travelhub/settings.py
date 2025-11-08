@@ -174,7 +174,8 @@ if CLOUDINARY_STORAGE.get('CLOUD_NAME'):
         cloud_name=CLOUDINARY_STORAGE['CLOUD_NAME'],
         api_key=CLOUDINARY_STORAGE['API_KEY'],
         api_secret=CLOUDINARY_STORAGE['API_SECRET'],
-        secure=True
+        secure=True,
+        resource_type='raw'  # Permitir archivos no-imagen (PDF, TXT, EML)
     )
 
 # Media files - Usar Cloudinary en desarrollo y producción

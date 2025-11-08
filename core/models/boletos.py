@@ -6,6 +6,7 @@ from django.utils.translation import gettext_lazy as _
 
 from core.validators import antivirus_hook, validate_file_extension, validate_file_size
 from core.utils_storage import truncate_filename
+from core.storage import RawFileStorage
 
 from .ventas import Venta
 
@@ -19,7 +20,8 @@ class BoletoImportado(models.Model):
         max_length=255,
         help_text=_("Suba el archivo del boleto en formato PDF, TXT o EML (máx 5MB)."),
         validators=[validate_file_size, validate_file_extension, antivirus_hook],
-        blank=True, null=True
+        blank=True, null=True,
+        storage=RawFileStorage
     )
     fecha_subida = models.DateTimeField(_("Fecha de Subida"), auto_now_add=True)
     
@@ -86,7 +88,8 @@ class BoletoImportado(models.Model):
         upload_to='boletos_generados/%Y/%m/',
         max_length=255,
         blank=True, null=True,
-        help_text=_("El archivo PDF del boleto unificado, generado automáticamente.")
+        help_text=_("El archivo PDF del boleto unificado, generado automáticamente."),
+        storage=RawFileStorage
     )
 
     class Meta:

@@ -1,12 +1,6 @@
-"""
-Storage personalizado para Cloudinary que maneja PDFs y otros archivos no-imagen
-"""
+# core/storage.py
 from cloudinary_storage.storage import RawMediaCloudinaryStorage
 
-
-class PDFCloudinaryStorage(RawMediaCloudinaryStorage):
-    """
-    Storage para PDFs y archivos raw en Cloudinary.
-    Usa resource_type='raw' en lugar de 'image'.
-    """
+class RawFileStorage(RawMediaCloudinaryStorage):
+    """Storage para archivos raw (PDF, TXT, EML) en Cloudinary"""
     pass

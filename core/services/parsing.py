@@ -76,13 +76,12 @@ def procesar_boleto_importado_automatico(boleto: BoletoImportado):
         try:
             pdf_bytes, pdf_filename = ticket_parser.generate_ticket(datos_parseados)
             if pdf_bytes:
-                # Usamos save=False para evitar un bucle en la señal post_save
                 boleto.archivo_pdf_generado.save(pdf_filename, ContentFile(pdf_bytes), save=False)
                 campos_a_actualizar.append('archivo_pdf_generado')
-                logger.info(f"PDF '{pdf_filename}' generado para el boleto {boleto.id_boleto_importado}.")
+                logger.info(f"PDF generado: {pdf_filename}, URL: {boleto.archivo_pdf_generado.url if boleto.archivo_pdf_generado else 'N/A'}")
         except Exception as pdf_e:
-            logger.error(f"Error generando PDF para boleto {boleto.id_boleto_importado}: {pdf_e}")
-            boleto.log_parseo += f" | ADVERTENCIA: No se pudo generar el PDF: {pdf_e}"
+            logger.error(f"Error generando PDF: {pdf_e}")
+            boleto.log_parseo += f" | ADVERTENCIA: PDF error: {pdf_e}"
 
     except Exception as e:
         logger.error(f"Error procesando boleto ID {boleto.id_boleto_importado}: {e}", exc_info=True)
@@ -133,9 +132,10 @@ def trigger_boleto_parse_service(sender, instance, created, **kwargs):
                 pdf_bytes, pdf_filename = ticket_parser.generate_ticket(instance.datos_parseados)
                 if pdf_bytes:
                     instance.archivo_pdf_generado.save(pdf_filename, ContentFile(pdf_bytes), save=True)
-                    logger.info(f"PDF generado: {pdf_filename}")
+                    instance.refresh_from_db()
+                    logger.info(f"PDF guardado: {instance.archivo_pdf_generado.name}, URL: {instance.archivo_pdf_generado.url}")
             except Exception as e:
-                logger.error(f"Error generando PDF: {e}")
+                logger.error(f"Error PDF: {e}", exc_info=True)
         
         # Si NO tiene datos parseados (vino del Admin), parsear ahora
         elif instance.archivo_boleto and instance.estado_parseo == BoletoImportado.EstadoParseo.PENDIENTE:

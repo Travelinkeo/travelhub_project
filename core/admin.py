@@ -542,33 +542,7 @@ class BoletoImportadoAdmin(admin.ModelAdmin):
     actions = ['reintentar_parseo']
     autocomplete_fields = ['venta_asociada']
     
-    def get_urls(self):
-        from django.urls import path
-        urls = super().get_urls()
-        custom_urls = [
-            path('<path:object_id>/descargar-pdf/', self.admin_site.admin_view(self.descargar_pdf_view), name='core_boletoimportado_descargar_pdf'),
-        ]
-        return custom_urls + urls
-    
-    def descargar_pdf_view(self, request, object_id):
-        from django.http import HttpResponse, Http404
-        import requests
-        
-        try:
-            boleto = BoletoImportado.objects.get(pk=object_id)
-            if not boleto.archivo_pdf_generado:
-                raise Http404("PDF no generado")
-            
-            # Descargar de Cloudinary
-            response = requests.get(boleto.archivo_pdf_generado.url)
-            response.raise_for_status()
-            
-            # Servir a través de Django
-            return HttpResponse(response.content, content_type='application/pdf')
-        except BoletoImportado.DoesNotExist:
-            raise Http404("Boleto no encontrado")
-        except Exception as e:
-            raise Http404(f"Error al descargar PDF: {e}")
+
     
     def get_fieldsets(self, request, obj=None):
         fieldsets = [
@@ -589,10 +563,11 @@ class BoletoImportadoAdmin(admin.ModelAdmin):
     def pdf_generado_link(self, obj):
         if obj.archivo_pdf_generado:
             try:
+                # Enlace directo a Cloudinary
                 url = obj.archivo_pdf_generado.url
-                return format_html("<a href='{url}' target='_blank'>Ver PDF</a>", url=url)
-            except:
-                return "Error obteniendo URL"
+                return format_html('<a href="{}" target="_blank" class="button">📄 Ver PDF</a>', url)
+            except Exception as e:
+                return f"Error: {str(e)}"
         return "No generado"
     pdf_generado_link.short_description = "PDF Generado"
     

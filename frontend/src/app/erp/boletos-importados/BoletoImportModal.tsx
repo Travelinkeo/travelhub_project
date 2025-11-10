@@ -49,7 +49,7 @@ export default function BoletoImportModal({ open, onClose, onUploadComplete }: B
     const endpoint = `${apiBaseUrl}/api/boletos-importados/`;
     
     // Obtener token de autenticación
-    const token = localStorage.getItem('auth_token');
+    const token = localStorage.getItem('accessToken'); // JWT token
     const headers: HeadersInit = {};
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;

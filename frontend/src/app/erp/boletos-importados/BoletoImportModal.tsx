@@ -43,9 +43,9 @@ export default function BoletoImportModal({ open, onClose, onUploadComplete }: B
     setError(null);
 
     const formData = new FormData();
-    formData.append('archivo_boleto', selectedFile); // Key must match Django model field
+    formData.append('archivo_boleto', selectedFile, selectedFile.name); // Incluir nombre explícitamente
 
-    const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || '';
     const endpoint = `${apiBaseUrl}/api/boletos-importados/`;
     
     // Obtener token de autenticación

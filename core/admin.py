@@ -561,13 +561,9 @@ class BoletoImportadoAdmin(admin.ModelAdmin):
     archivo_boleto_link.short_description = _("Archivo Original")
 
     def pdf_generado_link(self, obj):
-        if obj.archivo_pdf_generado:
-            try:
-                # Enlace directo a Cloudinary
-                url = obj.archivo_pdf_generado.url
-                return format_html('<a href="{}" target="_blank" class="button">📄 Ver PDF</a>', url)
-            except Exception as e:
-                return f"Error: {str(e)}"
+        url = obj.get_pdf_url()
+        if url:
+            return format_html('<a href="{}" target="_blank" class="button">📄 Ver PDF</a>', url)
         return "No generado"
     pdf_generado_link.short_description = "PDF Generado"
     

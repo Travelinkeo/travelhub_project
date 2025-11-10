@@ -63,8 +63,14 @@ export default function BoletoImportModal({ open, onClose, onUploadComplete }: B
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || 'Error al subir el archivo.');
+        const text = await response.text();
+        console.error('Error response:', text);
+        try {
+          const errorData = JSON.parse(text);
+          throw new Error(errorData.detail || 'Error al subir el archivo.');
+        } catch {
+          throw new Error(`Error ${response.status}: ${text.substring(0, 200)}`);
+        }
       }
 
       // Success
@@ -73,6 +79,7 @@ export default function BoletoImportModal({ open, onClose, onUploadComplete }: B
 
     } catch (e) {
       const errorMessage = e instanceof Error ? e.message : 'Ocurrió un error desconocido.';
+      console.error('Upload error:', e);
       setError(errorMessage);
     } finally {
       setIsUploading(false);

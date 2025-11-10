@@ -112,3 +112,13 @@ class BoletoImportado(models.Model):
         """Punto de entrada manual para el parseo (proxy al servicio)."""
         from core.services.parsing import procesar_boleto_importado
         procesar_boleto_importado(self)
+    
+    def get_pdf_url(self):
+        """Obtiene la URL del PDF generado de forma segura"""
+        if self.archivo_pdf_generado:
+            try:
+                return self.archivo_pdf_generado.url
+            except Exception as e:
+                logger.error(f"Error obteniendo URL del PDF para boleto {self.id_boleto_importado}: {e}")
+                return None
+        return None

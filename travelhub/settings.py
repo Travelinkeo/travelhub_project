@@ -174,9 +174,14 @@ if CLOUDINARY_STORAGE.get('CLOUD_NAME'):
         cloud_name=CLOUDINARY_STORAGE['CLOUD_NAME'],
         api_key=CLOUDINARY_STORAGE['API_KEY'],
         api_secret=CLOUDINARY_STORAGE['API_SECRET'],
-        secure=True,
-        resource_type='raw'  # Permitir archivos no-imagen (PDF, TXT, EML)
+        secure=True
     )
+    # Configurar opciones por defecto para uploads
+    CLOUDINARY_STORAGE['OPTIONS'] = {
+        'resource_type': 'raw',
+        'access_mode': 'public',  # PDFs públicos por defecto
+        'type': 'upload'
+    }
 
 # Media files - Usar Cloudinary en desarrollo y producción
 MEDIA_URL = '/media/'

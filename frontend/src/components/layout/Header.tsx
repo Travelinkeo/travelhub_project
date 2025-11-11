@@ -31,7 +31,8 @@ const Header = ({ onMenuToggle }: HeaderProps) => {
   useEffect(() => {
     const fetchTasas = async () => {
       try {
-        const response = await fetch('http://127.0.0.1:8000/api/contabilidad/api/tasas/actuales/');
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+        const response = await fetch(`${apiUrl}/contabilidad/api/tasas/actuales/`);
         const data = await response.json();
         setTasas(data);
       } catch (error) {

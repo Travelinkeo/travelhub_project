@@ -40,11 +40,28 @@ def _leer_contenido_del_archivo(archivo_subido) -> str:
             logger.info(f"Archivo descargado: {len(contenido_bytes)} bytes")
         else:
             # Local: usar default_storage directamente
+            import os
+            import glob
             logger.info(f"Leyendo archivo local: {archivo_subido.name}")
+            
+            # Si el archivo no existe, buscar por patrón (por si fue truncado)
             if not default_storage.exists(archivo_subido.name):
-                raise Exception(f"Archivo no existe: {archivo_subido.name}")
-            with default_storage.open(archivo_subido.name, 'rb') as f:
-                contenido_bytes = f.read()
+                # Buscar archivo con nombre similar
+                base_path = os.path.dirname(archivo_subido.name)
+                nombre_base = os.path.splitext(os.path.basename(archivo_subido.name))[0]
+                patron = os.path.join(settings.MEDIA_ROOT, base_path, nombre_base[:40] + '*')
+                archivos = glob.glob(patron)
+                if archivos:
+                    archivo_real = archivos[0].replace(settings.MEDIA_ROOT + os.sep, '').replace('\\', '/')
+                    logger.info(f"Archivo encontrado por patrón: {archivo_real}")
+                    with default_storage.open(archivo_real, 'rb') as f:
+                        contenido_bytes = f.read()
+                else:
+                    raise Exception(f"Archivo no existe: {archivo_subido.name}")
+            else:
+                with default_storage.open(archivo_subido.name, 'rb') as f:
+                    contenido_bytes = f.read()
+            
             logger.info(f"Archivo leído: {len(contenido_bytes)} bytes")
 
         # 1. Detección de PDF

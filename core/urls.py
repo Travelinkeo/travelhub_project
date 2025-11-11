@@ -224,6 +224,15 @@ try:
 except Exception as e:
     print(f"Error registering Tarifario Hoteles ViewSets: {e}")
 
+# Register Mejoras de Boletería ViewSets
+try:
+    from .views.boletos_mejoras_views import HistorialCambioBoletoViewSet, AnulacionBoletoViewSet
+    router.register(r'historial-cambios-boletos', HistorialCambioBoletoViewSet, basename='historial-cambio-boleto')
+    router.register(r'anulaciones-boletos', AnulacionBoletoViewSet, basename='anulacion-boleto')
+    print("Mejoras de Boletería ViewSets registered successfully")
+except Exception as e:
+    print(f"Error registering Mejoras de Boletería ViewSets: {e}")
+
 print(f"Total URLs en router: {len(router.urls)}")
 
 app_name = 'core'

@@ -119,8 +119,17 @@ class BoletoImportadoSerializer(serializers.ModelSerializer):
             logger.info(f"[BOLETO CREATE] Archivo leído: {len(contenido)} bytes")
             if len(contenido) == 0:
                 raise serializers.ValidationError("El archivo está vacío")
-            # Recrear el archivo con el contenido leído
-            validated_data['archivo_boleto'] = ContentFile(contenido, name=archivo_boleto.name)
+            
+            # Acortar nombre si es muy largo (Cloudinary trunca nombres largos)
+            import os
+            nombre_original = archivo_boleto.name
+            nombre_base, extension = os.path.splitext(nombre_original)
+            if len(nombre_base) > 50:  # Límite seguro
+                nombre_base = nombre_base[:50]
+                logger.info(f"[BOLETO CREATE] Nombre truncado: {nombre_original} -> {nombre_base}{extension}")
+            
+            # Recrear el archivo con el contenido leído y nombre acortado
+            validated_data['archivo_boleto'] = ContentFile(contenido, name=f"{nombre_base}{extension}")
         
         # Si hay archivo Y se usa Cloudinary, parsear ANTES de guardar
         if archivo_boleto and use_cloudinary:

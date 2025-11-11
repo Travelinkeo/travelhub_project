@@ -148,7 +148,7 @@ class EmailMonitorService:
         is_kiu_subject = ('E-TICKET ITINERARY RECEIPT' in subject_upper or 
                          'ETICKET ITINERARY RECEIPT' in subject_upper or
                          'PASSENGER ITINERARY RECEIPT' in subject_upper)
-        is_kiu_sender = 'kiusys.com' in from_lower
+        is_kiu_sender = 'kiusys.com' in from_lower or 'travelinkeo@gmail.com' in from_lower
         
         logger.info(f"KIU: {is_kiu_subject or is_kiu_sender}")
         

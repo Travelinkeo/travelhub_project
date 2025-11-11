@@ -138,8 +138,8 @@ class EmailMonitorService:
             except:
                 pass
         
-        print(f"\n📧 Asunto: {subject}")
-        print(f"   De: {from_addr}")
+        logger.info(f"Procesando: {subject[:50]}...")
+        logger.info(f"De: {from_addr}")
         
         # KIU: HTML/texto en el cuerpo (buscar variantes del asunto)
         subject_upper = subject.upper() if subject else ''
@@ -150,26 +150,26 @@ class EmailMonitorService:
                          'PASSENGER ITINERARY RECEIPT' in subject_upper)
         is_kiu_sender = 'kiusys.com' in from_lower
         
-        print(f"   KIU Subject: {is_kiu_subject}, KIU Sender: {is_kiu_sender}")
+        logger.info(f"KIU: {is_kiu_subject or is_kiu_sender}")
         
         if is_kiu_subject or is_kiu_sender:
-            print("🎫 Procesando como KIU")
+            logger.info("Procesando como KIU")
             return self._procesar_boleto_email(message, msg_num, mail_connection)
         
         # Otros: PDF adjunto
         tiene_pdf = self._tiene_pdf_adjunto(message)
-        print(f"   PDF adjunto: {tiene_pdf}")
+        logger.info(f"PDF adjunto: {tiene_pdf}")
         
         if tiene_pdf:
-            print("📎 Procesando PDF adjunto")
+            logger.info("Procesando PDF adjunto")
             return self._procesar_boleto_pdf(message, msg_num, mail_connection)
         
-        print("⚠️ No reconocido como boleto")
+        logger.warning("No reconocido como boleto")
         return False
 
     def _procesar_boleto_email(self, message, msg_num, mail_connection):
         """Procesa boleto desde HTML/texto del correo"""
-        print("   🔍 Extrayendo texto/HTML...")
+        logger.info("Extrayendo texto/HTML...")
         texto = self._extraer_texto(message)
         html = self._extraer_html(message)
         
@@ -179,20 +179,20 @@ class EmailMonitorService:
             soup = BeautifulSoup(html, 'html.parser')
             texto = soup.get_text(separator='\n')
         
-        print(f"   Texto: {len(texto) if texto else 0} chars, HTML: {len(html) if html else 0} chars")
+        logger.info(f"Texto: {len(texto) if texto else 0} chars, HTML: {len(html) if html else 0} chars")
         
         if not texto and not html:
-            print("   ❌ No hay texto ni HTML")
+            logger.warning("No hay texto ni HTML")
             return False
         
-        print("   🔧 Parseando datos...")
+        logger.info("Parseando datos...")
         datos = extract_data_from_text(texto, html)
         
         if datos.get('error'):
-            print(f"   ❌ Error parseando: {datos['error']}")
+            logger.warning(f"Error parseando: {datos['error']}")
             return False
         
-        print(f"   ✅ Datos parseados: {datos.get('SOURCE_SYSTEM', 'UNKNOWN')}")
+        logger.info(f"Datos parseados: {datos.get('SOURCE_SYSTEM', 'UNKNOWN')}")
         return self._guardar_y_notificar(datos, msg_num, mail_connection)
 
     def _procesar_boleto_pdf(self, message, msg_num, mail_connection):
@@ -229,7 +229,7 @@ class EmailMonitorService:
         from core.models import BoletoImportado
         
         sistema = datos.get('SOURCE_SYSTEM', 'UNKNOWN')
-        print(f"   💾 Guardando boleto {sistema}...")
+        logger.info(f"Guardando boleto {sistema}...")
         
         # Extraer datos según sistema
         if sistema == 'SABRE':
@@ -243,15 +243,15 @@ class EmailMonitorService:
             pasajero = datos.get('NOMBRE_DEL_PASAJERO') or datos.get('pasajero', {}).get('nombre_completo')
             aerolinea = datos.get('NOMBRE_AEROLINEA') or datos.get('reserva', {}).get('aerolinea_emisora')
         
-        print(f"   Boleto: {numero_boleto}, PNR: {localizador}, Pasajero: {pasajero}")
+        logger.info(f"Boleto: {numero_boleto}, PNR: {localizador}, Pasajero: {pasajero}")
         
         if not numero_boleto:
-            print(f"   ❌ {sistema} sin número de boleto")
+            logger.warning(f"{sistema} sin numero de boleto")
             return False
         
         # Guardar en BD
         try:
-            print(f"   💾 Intentando guardar en BD...")
+            logger.info("Guardando en BD...")
             
             # Buscar boleto existente (puede haber duplicados)
             boleto = BoletoImportado.objects.filter(numero_boleto=numero_boleto).first()
@@ -259,10 +259,10 @@ class EmailMonitorService:
             if boleto:
                 # Ya existe
                 if not self.force_reprocess:
-                    print(f"   ⏭️ Boleto {numero_boleto} ya existe en BD (usa --force para reprocesar)")
+                    logger.info(f"Boleto {numero_boleto} ya existe")
                     return False
                 else:
-                    print(f"   🔄 Boleto {numero_boleto} ya existe, reprocesando (--force)...")
+                    logger.info(f"Boleto {numero_boleto} reprocesando...")
                     # Actualizar datos
                     boleto.datos_parseados = datos
                     boleto.nombre_pasajero_completo = pasajero
@@ -284,18 +284,16 @@ class EmailMonitorService:
                 created = True
             
             if created:
-                print(f"   ✅ Boleto NUEVO guardado en BD (ID: {boleto.pk})")
+                logger.info(f"Boleto NUEVO guardado (ID: {boleto.pk})")
             else:
-                print(f"   ✅ Boleto ACTUALIZADO en BD (ID: {boleto.pk})")
+                logger.info(f"Boleto ACTUALIZADO (ID: {boleto.pk})")
         except Exception as e:
-            print(f"   ❌ Error guardando boleto: {e}")
-            import traceback
-            traceback.print_exc()
+            logger.error(f"Error guardando boleto: {e}")
             return False
         
         # Generar PDF profesional
         try:
-            print(f"   📝 Generando PDF profesional...")
+            logger.info("Generando PDF profesional...")
             pdf_bytes, pdf_filename = generate_ticket(datos)
             
             media_dir = os.path.join(settings.BASE_DIR, 'media', 'boletos_generados')
@@ -310,11 +308,9 @@ class EmailMonitorService:
             with open(pdf_path, 'rb') as f:
                 boleto.archivo_pdf_generado.save(pdf_filename, File(f), save=True)
             
-            print(f"   ✅ PDF generado: {pdf_filename}")
+            logger.info(f"PDF generado: {pdf_filename}")
         except Exception as e:
-            print(f"   ❌ Error generando PDF: {e}")
-            import traceback
-            traceback.print_exc()
+            logger.error(f"Error generando PDF: {e}")
             return False
         
         # Enviar notificación

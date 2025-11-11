@@ -183,14 +183,12 @@ class SabreParser(BaseTicketParser):
             if departure_match:
                 flight['fecha_salida'] = departure_match.group(1)
             else:
-                # Fallback: buscar fecha después del número de vuelo, NO la primera del bloque
-                flight_num = flight.get('numero_vuelo', '')
-                if flight_num:
-                    # Buscar fecha que viene después del número de vuelo
-                    pattern = rf'{re.escape(flight_num)}.*?(\d{{1,2}}\s+\w{{3}}\s+\d{{2}})'
-                    date_match = re.search(pattern, block, re.DOTALL)
-                    if date_match:
-                        flight['fecha_salida'] = date_match.group(1)
+                # Fallback: tomar la SEGUNDA fecha del bloque (primera es emisión, segunda es salida)
+                all_dates = re.findall(r'(\d{1,2}\s+\w{3}\s+\d{2})', block)
+                if len(all_dates) >= 2:
+                    flight['fecha_salida'] = all_dates[1]  # Segunda fecha
+                elif len(all_dates) == 1:
+                    flight['fecha_salida'] = all_dates[0]  # Si solo hay una, usarla
             
             arrival_match = re.search(r'(?:Llegada|Arrival):\s*(\d{1,2}\s+\w{3}\s+\d{2})', block)
             if arrival_match:

@@ -30,16 +30,23 @@ def _leer_contenido_del_archivo(archivo_subido) -> str:
         if hasattr(archivo_subido, 'url'):
             import requests
             logger.info(f"Descargando archivo desde Cloudinary: {archivo_subido.url}")
-            response = requests.get(archivo_subido.url, timeout=30)
-            response.raise_for_status()
-            contenido_bytes = response.content
+            try:
+                response = requests.get(archivo_subido.url, timeout=30)
+                response.raise_for_status()
+                contenido_bytes = response.content
+                logger.info(f"Archivo descargado exitosamente: {len(contenido_bytes)} bytes")
+            except requests.exceptions.RequestException as e:
+                logger.error(f"Error descargando desde Cloudinary: {e}")
+                raise Exception(f"No se pudo descargar el archivo desde Cloudinary: {e}")
         elif hasattr(archivo_subido, 'read'):
             contenido_bytes = archivo_subido.read()
+            logger.info(f"Archivo leído desde objeto file: {len(contenido_bytes)} bytes")
         else:
             # Fallback para archivos locales
             archivo_subido.seek(0)
             contenido_bytes = archivo_subido.read()
             archivo_subido.seek(0)
+            logger.info(f"Archivo leído desde path local: {len(contenido_bytes)} bytes")
 
         # 1. Detección de PDF
         if contenido_bytes.startswith(b'%PDF'):
@@ -92,7 +99,7 @@ def _leer_contenido_del_archivo(archivo_subido) -> str:
 
     except Exception as e:
         logger.error(f"Error crítico al leer el contenido del archivo: {e}", exc_info=True)
-        return ""
+        raise Exception(f"Error al leer archivo: {e}")
 
 
 def orquestar_parseo_de_boleto(archivo_subido):
@@ -103,10 +110,13 @@ def orquestar_parseo_de_boleto(archivo_subido):
     2. Llama al orquestador principal `extract_data_from_text` que contiene la lógica de detección.
     3. Devuelve los datos parseados y un mensaje de estado.
     """
-    contenido_texto = _leer_contenido_del_archivo(archivo_subido)
+    try:
+        contenido_texto = _leer_contenido_del_archivo(archivo_subido)
+    except Exception as e:
+        return None, f"Error crítico: {str(e)}"
     
     if not contenido_texto:
-        return None, "Error crítico: No se pudo leer el contenido del archivo."
+        return None, "Error crítico: El archivo está vacío o no se pudo leer."
 
     logger.info("Derivando al orquestador de parsers principal (extract_data_from_text).")
     

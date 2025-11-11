@@ -41,6 +41,8 @@ def _leer_contenido_del_archivo(archivo_subido) -> str:
         else:
             # Local: usar default_storage directamente
             logger.info(f"Leyendo archivo local: {archivo_subido.name}")
+            if not default_storage.exists(archivo_subido.name):
+                raise Exception(f"Archivo no existe: {archivo_subido.name}")
             with default_storage.open(archivo_subido.name, 'rb') as f:
                 contenido_bytes = f.read()
             logger.info(f"Archivo leído: {len(contenido_bytes)} bytes")

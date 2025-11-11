@@ -1,4 +1,5 @@
 # Archivo: core/serializers.py
+# Actualizado: Sistema de parseo SABRE optimizado - Enero 2025
 from rest_framework import serializers
 
 # Importar desde submódulos específicos

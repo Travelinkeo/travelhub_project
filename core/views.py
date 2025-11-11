@@ -498,7 +498,6 @@ class BoletoImportadoViewSet(viewsets.ModelViewSet):
         from core.services.reportes_comisiones import generar_reporte_comisiones
         from datetime import datetime
         
-        # Parámetros opcionales
         fecha_inicio_str = request.query_params.get('fecha_inicio')
         fecha_fin_str = request.query_params.get('fecha_fin')
         
@@ -506,8 +505,35 @@ class BoletoImportadoViewSet(viewsets.ModelViewSet):
         fecha_fin = datetime.strptime(fecha_fin_str, '%Y-%m-%d').date() if fecha_fin_str else None
         
         reporte = generar_reporte_comisiones(fecha_inicio, fecha_fin)
-        
         return Response(reporte)
+    
+    @action(detail=False, methods=['get'])
+    def dashboard(self, request):
+        """Métricas del dashboard en tiempo real"""
+        from core.services.dashboard_boletos import obtener_metricas_boletos
+        metricas = obtener_metricas_boletos()
+        return Response(metricas)
+    
+    @action(detail=False, methods=['get'])
+    def busqueda_avanzada(self, request):
+        """Búsqueda avanzada de boletos"""
+        from core.services.busqueda_boletos import buscar_boletos_avanzado
+        from datetime import datetime
+        
+        params = {
+            'nombre_pasajero': request.query_params.get('nombre'),
+            'fecha_inicio': datetime.strptime(request.query_params.get('fecha_inicio'), '%Y-%m-%d').date() if request.query_params.get('fecha_inicio') else None,
+            'fecha_fin': datetime.strptime(request.query_params.get('fecha_fin'), '%Y-%m-%d').date() if request.query_params.get('fecha_fin') else None,
+            'origen': request.query_params.get('origen'),
+            'destino': request.query_params.get('destino'),
+            'aerolinea': request.query_params.get('aerolinea'),
+            'estado': request.query_params.get('estado'),
+            'pnr': request.query_params.get('pnr')
+        }
+        
+        resultados = buscar_boletos_avanzado(**params)
+        serializer = self.get_serializer(resultados, many=True)
+        return Response(serializer.data)
 
 def get_resumen_ventas_categorias():
     categoria_definiciones = [

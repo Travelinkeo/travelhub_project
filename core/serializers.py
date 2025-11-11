@@ -112,6 +112,16 @@ class BoletoImportadoSerializer(serializers.ModelSerializer):
         
         logger.info(f"[BOLETO CREATE] archivo_boleto: {bool(archivo_boleto)}, USE_CLOUDINARY: {use_cloudinary}")
         
+        # CRITICAL: Leer el contenido del archivo ANTES de procesarlo
+        if archivo_boleto:
+            archivo_boleto.seek(0)  # Asegurar que estamos al inicio
+            contenido = archivo_boleto.read()
+            logger.info(f"[BOLETO CREATE] Archivo leído: {len(contenido)} bytes")
+            if len(contenido) == 0:
+                raise serializers.ValidationError("El archivo está vacío")
+            # Recrear el archivo con el contenido leído
+            validated_data['archivo_boleto'] = ContentFile(contenido, name=archivo_boleto.name)
+        
         # Si hay archivo Y se usa Cloudinary, parsear ANTES de guardar
         if archivo_boleto and use_cloudinary:
             logger.info(f"[CLOUDINARY] Parseando archivo ANTES de guardar")

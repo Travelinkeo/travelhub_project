@@ -31,26 +31,18 @@ def _leer_contenido_del_archivo(archivo_subido) -> str:
         
         if use_cloudinary:
             import requests
-            url = archivo_subido.url if hasattr(archivo_subido, 'url') else None
-            if url:
-                logger.info(f"Descargando archivo desde Cloudinary: {url}")
-                response = requests.get(url, timeout=30)
-                response.raise_for_status()
-                contenido_bytes = response.content
-                logger.info(f"Archivo descargado: {len(contenido_bytes)} bytes")
-            else:
-                raise Exception("No se pudo obtener URL de Cloudinary")
+            url = archivo_subido.url
+            logger.info(f"Descargando archivo desde Cloudinary: {url}")
+            response = requests.get(url, timeout=30)
+            response.raise_for_status()
+            contenido_bytes = response.content
+            logger.info(f"Archivo descargado: {len(contenido_bytes)} bytes")
         else:
-            if hasattr(archivo_subido, 'path'):
-                logger.info(f"Leyendo archivo local: {archivo_subido.path}")
-                with open(archivo_subido.path, 'rb') as f:
-                    contenido_bytes = f.read()
-                logger.info(f"Archivo leído: {len(contenido_bytes)} bytes")
-            elif hasattr(archivo_subido, 'file'):
-                contenido_bytes = archivo_subido.file.read()
-                logger.info(f"Archivo leído desde file: {len(contenido_bytes)} bytes")
-            else:
-                raise Exception("No se pudo acceder al archivo")
+            # Local: usar storage.open() para evitar triggear Cloudinary
+            logger.info(f"Leyendo archivo local: {archivo_subido.name}")
+            with archivo_subido.storage.open(archivo_subido.name, 'rb') as f:
+                contenido_bytes = f.read()
+            logger.info(f"Archivo leído: {len(contenido_bytes)} bytes")
 
         # 1. Detección de PDF
         if contenido_bytes.startswith(b'%PDF'):

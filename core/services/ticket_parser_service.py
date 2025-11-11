@@ -27,6 +27,7 @@ def _leer_contenido_del_archivo(archivo_subido) -> str:
     """
     try:
         from django.conf import settings
+        from django.core.files.storage import default_storage
         use_cloudinary = getattr(settings, 'USE_CLOUDINARY', False)
         
         if use_cloudinary:
@@ -38,9 +39,9 @@ def _leer_contenido_del_archivo(archivo_subido) -> str:
             contenido_bytes = response.content
             logger.info(f"Archivo descargado: {len(contenido_bytes)} bytes")
         else:
-            # Local: usar storage.open() para evitar triggear Cloudinary
+            # Local: usar default_storage directamente
             logger.info(f"Leyendo archivo local: {archivo_subido.name}")
-            with archivo_subido.storage.open(archivo_subido.name, 'rb') as f:
+            with default_storage.open(archivo_subido.name, 'rb') as f:
                 contenido_bytes = f.read()
             logger.info(f"Archivo leído: {len(contenido_bytes)} bytes")
 

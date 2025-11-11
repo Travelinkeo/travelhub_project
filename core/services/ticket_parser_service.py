@@ -26,8 +26,11 @@ def _leer_contenido_del_archivo(archivo_subido) -> str:
     Compatible con archivos locales y Cloudinary.
     """
     try:
+        from django.conf import settings
+        use_cloudinary = getattr(settings, 'USE_CLOUDINARY', False)
+        
         # Para Cloudinary, descargar desde URL
-        if hasattr(archivo_subido, 'url'):
+        if use_cloudinary and hasattr(archivo_subido, 'url'):
             import requests
             logger.info(f"Descargando archivo desde Cloudinary: {archivo_subido.url}")
             try:
@@ -41,12 +44,17 @@ def _leer_contenido_del_archivo(archivo_subido) -> str:
         elif hasattr(archivo_subido, 'read'):
             contenido_bytes = archivo_subido.read()
             logger.info(f"Archivo leído desde objeto file: {len(contenido_bytes)} bytes")
+        elif hasattr(archivo_subido, 'path'):
+            # Archivo local en disco
+            with open(archivo_subido.path, 'rb') as f:
+                contenido_bytes = f.read()
+            logger.info(f"Archivo leído desde path local: {len(contenido_bytes)} bytes")
         else:
-            # Fallback para archivos locales
+            # Fallback
             archivo_subido.seek(0)
             contenido_bytes = archivo_subido.read()
             archivo_subido.seek(0)
-            logger.info(f"Archivo leído desde path local: {len(contenido_bytes)} bytes")
+            logger.info(f"Archivo leído (fallback): {len(contenido_bytes)} bytes")
 
         # 1. Detección de PDF
         if contenido_bytes.startswith(b'%PDF'):

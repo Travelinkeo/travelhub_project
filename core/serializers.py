@@ -102,62 +102,8 @@ class BoletoImportadoSerializer(serializers.ModelSerializer):
         return None
     
     def create(self, validated_data):
-        import logging
-        from django.conf import settings
-        from django.core.files.base import ContentFile
-        logger = logging.getLogger(__name__)
-        
-        archivo_boleto = validated_data.get('archivo_boleto')
-        use_cloudinary = getattr(settings, 'USE_CLOUDINARY', False)
-        
-        logger.info(f"[BOLETO CREATE] archivo_boleto: {bool(archivo_boleto)}, USE_CLOUDINARY: {use_cloudinary}")
-        
-        # CRITICAL: Solo leer y recrear archivo si usa Cloudinary
-        if archivo_boleto and use_cloudinary:
-            archivo_boleto.seek(0)
-            contenido = archivo_boleto.read()
-            logger.info(f"[BOLETO CREATE] Archivo leído: {len(contenido)} bytes")
-            if len(contenido) == 0:
-                raise serializers.ValidationError("El archivo está vacío")
-            
-            import os
-            nombre_base, extension = os.path.splitext(archivo_boleto.name)
-            if len(nombre_base) > 50:
-                nombre_base = nombre_base[:50]
-                logger.info(f"[BOLETO CREATE] Nombre truncado: {archivo_boleto.name} -> {nombre_base}{extension}")
-            
-            validated_data['archivo_boleto'] = ContentFile(contenido, name=f"{nombre_base}{extension}")
-        
-        # Si hay archivo Y se usa Cloudinary, parsear ANTES de guardar
-        if archivo_boleto and use_cloudinary:
-            logger.info(f"[CLOUDINARY] Parseando archivo ANTES de guardar")
-            try:
-                from core.services.ticket_parser_service import orquestar_parseo_de_boleto
-                from core import ticket_parser
-                
-                # Parsear el archivo (aún en memoria)
-                datos_parseados, mensaje = orquestar_parseo_de_boleto(archivo_boleto)
-                
-                if datos_parseados:
-                    validated_data['datos_parseados'] = datos_parseados
-                    validated_data['estado_parseo'] = BoletoImportado.EstadoParseo.COMPLETADO
-                    
-                    # Generar PDF
-                    try:
-                        pdf_bytes, pdf_filename = ticket_parser.generate_ticket(datos_parseados)
-                        if pdf_bytes:
-                            validated_data['archivo_pdf_generado'] = ContentFile(pdf_bytes, name=pdf_filename)
-                    except Exception as pdf_e:
-                        logger.warning(f"No se pudo generar PDF: {pdf_e}")
-                else:
-                    validated_data['estado_parseo'] = BoletoImportado.EstadoParseo.ERROR_PARSEO
-                    validated_data['log_parseo'] = f"Error: {mensaje}"
-            except Exception as e:
-                logger.error(f"Error parseando archivo: {e}")
-                validated_data['estado_parseo'] = BoletoImportado.EstadoParseo.ERROR_PARSEO
-        
         # Si no hay archivo, es entrada manual
-        elif not archivo_boleto:
+        if not validated_data.get('archivo_boleto'):
             validated_data['estado_parseo'] = BoletoImportado.EstadoParseo.COMPLETADO
             
             if not validated_data.get('datos_parseados'):
@@ -173,18 +119,21 @@ class BoletoImportadoSerializer(serializers.ModelSerializer):
                     }
                 }
         
-        # Crear la instancia
+        # Crear la instancia (el signal se encargará del parseo)
         instance = super().create(validated_data)
         
         # Si es entrada manual y tiene datos, generar PDF
-        if not archivo_boleto and instance.datos_parseados:
+        if not instance.archivo_boleto and instance.datos_parseados:
             try:
                 from core import ticket_parser
+                from django.core.files.base import ContentFile
                 
                 pdf_bytes, pdf_filename = ticket_parser.generate_ticket(instance.datos_parseados)
                 if pdf_bytes:
                     instance.archivo_pdf_generado.save(pdf_filename, ContentFile(pdf_bytes), save=True)
             except Exception as e:
+                import logging
+                logger = logging.getLogger(__name__)
                 logger.warning(f"No se pudo generar PDF para boleto manual {instance.id_boleto_importado}: {e}")
         
         return instance

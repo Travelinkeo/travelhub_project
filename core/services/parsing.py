@@ -97,57 +97,10 @@ def procesar_boleto_importado_automatico(boleto: BoletoImportado):
 def trigger_boleto_parse_service(sender, instance, created, **kwargs):
     """
     Disparador que se activa al crear un nuevo BoletoImportado.
-    En Cloudinary: Solo genera PDF si ya tiene datos_parseados (parseo hecho en serializer).
-    En local: Parsea el archivo después de guardar.
+    Solo procesa si hay archivo adjunto (no entrada manual).
     """
-    from django.conf import settings
-    
-    if not created:
-        return
-    
-    # Si usa Cloudinary
-    if getattr(settings, 'USE_CLOUDINARY', False):
-        # Si ya tiene datos parseados (vino del serializer), solo mapear y generar PDF
-        if instance.datos_parseados and instance.estado_parseo == BoletoImportado.EstadoParseo.COMPLETADO:
-            logger.info(f"Cloudinary: Mapeando campos y generando PDF para boleto ID {instance.id_boleto_importado}")
-            
-            # Mapear campos del JSON a los campos del modelo
-            source_system = instance.datos_parseados.get('SOURCE_SYSTEM')
-            if source_system == 'KIU':
-                instance.numero_boleto = instance.datos_parseados.get('NUMERO_DE_BOLETO')
-                instance.nombre_pasajero_completo = instance.datos_parseados.get('NOMBRE_DEL_PASAJERO')
-                instance.nombre_pasajero_procesado = instance.datos_parseados.get('SOLO_NOMBRE_PASAJERO')
-                instance.localizador_pnr = instance.datos_parseados.get('SOLO_CODIGO_RESERVA')
-                instance.aerolinea_emisora = instance.datos_parseados.get('NOMBRE_AEROLINEA')
-                instance.total_boleto = instance.datos_parseados.get('TOTAL_IMPORTE')
-                instance.tarifa_base = instance.datos_parseados.get('TARIFA_IMPORTE')
-                instance.foid_pasajero = instance.datos_parseados.get('CODIGO_IDENTIFICACION')
-                instance.ruta_vuelo = instance.datos_parseados.get('ItinerarioFinalLimpio')
-                instance.save(update_fields=['numero_boleto', 'nombre_pasajero_completo', 'nombre_pasajero_procesado',
-                                            'localizador_pnr', 'aerolinea_emisora', 'total_boleto', 'tarifa_base',
-                                            'foid_pasajero', 'ruta_vuelo'])
-            
-            # Generar PDF
-            try:
-                pdf_bytes, pdf_filename = ticket_parser.generate_ticket(instance.datos_parseados)
-                if pdf_bytes:
-                    instance.archivo_pdf_generado.save(pdf_filename, ContentFile(pdf_bytes), save=True)
-                    instance.refresh_from_db()
-                    logger.info(f"PDF guardado: {instance.archivo_pdf_generado.name}, URL: {instance.archivo_pdf_generado.url}")
-            except Exception as e:
-                logger.error(f"Error PDF: {e}", exc_info=True)
-        
-        # Si NO tiene datos parseados (vino del Admin), parsear ahora
-        elif instance.archivo_boleto and instance.estado_parseo == BoletoImportado.EstadoParseo.PENDIENTE:
-            logger.info(f"Cloudinary: Parseando archivo para boleto ID {instance.id_boleto_importado}")
-            procesar_boleto_importado_automatico(instance)
-        
-        return
-    
-    # Desarrollo local: parsear después de que la transacción se complete
-    if instance.estado_parseo == BoletoImportado.EstadoParseo.PENDIENTE and instance.archivo_boleto:
-        from django.db import transaction
-        logger.info(f"Local: Programando parseo para boleto ID {instance.id_boleto_importado}")
-        transaction.on_commit(lambda: procesar_boleto_importado_automatico(instance))
-    elif not instance.archivo_boleto:
-        logger.info(f"Boleto ID {instance.id_boleto_importado} sin archivo. Omitiendo parseo.")
+    if created and instance.estado_parseo == BoletoImportado.EstadoParseo.PENDIENTE and instance.archivo_boleto:
+        logger.info(f"Disparador automático: Invocando servicio de parseo para nuevo boleto ID {instance.id_boleto_importado}")
+        procesar_boleto_importado_automatico(instance)
+    elif created and not instance.archivo_boleto:
+        logger.info(f"Boleto ID {instance.id_boleto_importado} creado manualmente sin archivo. Se omite parseo automático.")

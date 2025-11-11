@@ -1,6 +1,1 @@
-{
-  "/login/page": "app/login/page.js",
-  "/erp/boletos-importados/page": "app/erp/boletos-importados/page.js",
-  "/page": "app/page.js",
-  "/dashboard/page": "app/dashboard/page.js"
-}
+{}

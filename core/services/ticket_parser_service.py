@@ -23,46 +23,12 @@ logger = logging.getLogger(__name__)
 def _leer_contenido_del_archivo(archivo_subido) -> str:
     """
     Lee el contenido de un archivo subido (PDF, EML, o texto) y lo devuelve como string.
-    Compatible con archivos locales y Cloudinary.
     """
     try:
-        from django.conf import settings
-        from django.core.files.storage import default_storage
-        use_cloudinary = getattr(settings, 'USE_CLOUDINARY', False)
-        
-        if use_cloudinary:
-            import requests
-            url = archivo_subido.url
-            logger.info(f"Descargando archivo desde Cloudinary: {url}")
-            response = requests.get(url, timeout=30)
-            response.raise_for_status()
-            contenido_bytes = response.content
-            logger.info(f"Archivo descargado: {len(contenido_bytes)} bytes")
-        else:
-            # Local: usar default_storage directamente
-            import os
-            import glob
-            logger.info(f"Leyendo archivo local: {archivo_subido.name}")
-            
-            # Si el archivo no existe, buscar por patrón (por si fue truncado)
-            if not default_storage.exists(archivo_subido.name):
-                # Buscar archivo con nombre similar
-                base_path = os.path.dirname(archivo_subido.name)
-                nombre_base = os.path.splitext(os.path.basename(archivo_subido.name))[0]
-                patron = os.path.join(settings.MEDIA_ROOT, base_path, nombre_base[:40] + '*')
-                archivos = glob.glob(patron)
-                if archivos:
-                    archivo_real = archivos[0].replace(settings.MEDIA_ROOT + os.sep, '').replace('\\', '/')
-                    logger.info(f"Archivo encontrado por patrón: {archivo_real}")
-                    with default_storage.open(archivo_real, 'rb') as f:
-                        contenido_bytes = f.read()
-                else:
-                    raise Exception(f"Archivo no existe: {archivo_subido.name}")
-            else:
-                with default_storage.open(archivo_subido.name, 'rb') as f:
-                    contenido_bytes = f.read()
-            
-            logger.info(f"Archivo leído: {len(contenido_bytes)} bytes")
+        # Intentar leer directamente desde el archivo
+        archivo_subido.seek(0)
+        contenido_bytes = archivo_subido.read()
+        logger.info(f"Archivo leído: {len(contenido_bytes)} bytes")
 
         # 1. Detección de PDF
         if contenido_bytes.startswith(b'%PDF'):

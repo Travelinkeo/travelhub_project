@@ -146,35 +146,37 @@ const ApiTableComponent = ({ endpoint, columns, title, fields }: ApiTableProps) 
       
       {!isLoading && !error && (
         <>
-          <Table>
-            <TableHead>
-              <TableRow>
-                {columns.map((col) => (
-                  <TableCell key={col.key}>{col.label}</TableCell>
-                ))}
-                <TableCell>Acciones</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {data?.results?.map((item: any, index: number) => (
-                <TableRow key={item.id || index}>
+          <Box sx={{ overflowX: 'auto', width: '100%' }}>
+            <Table sx={{ minWidth: 650 }}>
+              <TableHead>
+                <TableRow>
                   {columns.map((col) => (
-                    <TableCell key={col.key}>
-                      {col.render ? col.render(item[col.key], item) : item[col.key]}
-                    </TableCell>
+                    <TableCell key={col.key} sx={{ whiteSpace: 'nowrap', minWidth: 120 }}>{col.label}</TableCell>
                   ))}
-                  <TableCell>
-                    <Button size="small" onClick={() => handleEdit(item)}>
-                      Editar
-                    </Button>
-                    <Button size="small" color="error" onClick={() => handleDelete(item)}>
-                      Eliminar
-                    </Button>
-                  </TableCell>
+                  <TableCell sx={{ whiteSpace: 'nowrap', minWidth: 150 }}>Acciones</TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHead>
+              <TableBody>
+                {data?.results?.map((item: any, index: number) => (
+                  <TableRow key={item.id || index}>
+                    {columns.map((col) => (
+                      <TableCell key={col.key} sx={{ whiteSpace: 'nowrap' }}>
+                        {col.render ? col.render(item[col.key], item) : item[col.key]}
+                      </TableCell>
+                    ))}
+                    <TableCell sx={{ whiteSpace: 'nowrap' }}>
+                      <Button size="small" onClick={() => handleEdit(item)}>
+                        Editar
+                      </Button>
+                      <Button size="small" color="error" onClick={() => handleDelete(item)}>
+                        Eliminar
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </Box>
 
           <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
             <Pagination 

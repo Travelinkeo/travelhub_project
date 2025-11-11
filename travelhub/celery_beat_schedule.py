@@ -40,4 +40,10 @@ CELERY_BEAT_SCHEDULE = {
         'task': 'core.tasks.reset_ventas_mensuales_task',
         'schedule': crontab(hour=0, minute=0, day_of_month=1),  # Medianoche del día 1
     },
+    
+    # Monitorear correos de boletos cada 5 minutos
+    'monitor-boletos-email': {
+        'task': 'core.monitor_boletos_email',
+        'schedule': crontab(minute='*/5'),  # Cada 5 minutos
+    },
 }

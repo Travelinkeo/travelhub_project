@@ -144,9 +144,10 @@ def trigger_boleto_parse_service(sender, instance, created, **kwargs):
         
         return
     
-    # Desarrollo local: parsear después de guardar
+    # Desarrollo local: parsear después de que la transacción se complete
     if instance.estado_parseo == BoletoImportado.EstadoParseo.PENDIENTE and instance.archivo_boleto:
-        logger.info(f"Local: Parseando boleto ID {instance.id_boleto_importado}")
-        procesar_boleto_importado_automatico(instance)
+        from django.db import transaction
+        logger.info(f"Local: Programando parseo para boleto ID {instance.id_boleto_importado}")
+        transaction.on_commit(lambda: procesar_boleto_importado_automatico(instance))
     elif not instance.archivo_boleto:
         logger.info(f"Boleto ID {instance.id_boleto_importado} sin archivo. Omitiendo parseo.")

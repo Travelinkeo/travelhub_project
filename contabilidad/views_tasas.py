@@ -8,10 +8,11 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework import status
 from django.core.cache import cache
+from django.utils import timezone
 
 from .tasas_venezuela_client import TasasVenezuelaClient
 from .models import TasaCambioBCV
-from datetime import date
+from datetime import date, datetime, timedelta
 
 
 @api_view(['GET'])
@@ -19,54 +20,48 @@ from datetime import date
 def obtener_tasas_actuales(request):
     """
     Obtiene las tasas actuales de cambio (BCV, Promedio, P2P).
-    Usa caché de 5 minutos para no sobrecargar la API externa.
-    
-    GET /api/contabilidad/tasas/actuales/
-    
-    Response:
-    {
-        "bcv": {"valor": 36.50, "fecha": "2025-01-20 14:30", "nombre": "BCV Oficial"},
-        "promedio": {"valor": 37.20, "fecha": "2025-01-20 14:30", "nombre": "Promedio"},
-        "p2p": {"valor": 37.50, "fecha": "2025-01-20 14:30", "nombre": "P2P (Binance)"}
-    }
+    Auto-actualiza si han pasado más de 30 minutos desde última actualización.
     """
-    # Intentar obtener del caché
     cache_key = 'tasas_venezuela_actuales'
+    cache_timestamp_key = 'tasas_venezuela_timestamp'
+    
+    # Verificar si necesita actualización (4 horas = 6 veces al día)
+    last_update = cache.get(cache_timestamp_key)
+    needs_update = not last_update or (datetime.now() - last_update) > timedelta(hours=4)
+    
+    if needs_update:
+        # Actualizar tasas en background
+        tasas = TasasVenezuelaClient.obtener_resumen_tasas()
+        if tasas:
+            cache.set(cache_key, tasas, 86400)  # 24 horas
+            cache.set(cache_timestamp_key, datetime.now(), 86400)
+    
+    # Obtener del caché
     tasas_cached = cache.get(cache_key)
     
     if tasas_cached:
         return Response(tasas_cached)
     
-    # Si no está en caché, consultar API
-    tasas = TasasVenezuelaClient.obtener_resumen_tasas()
-    
-    if not tasas:
-        # Si falla la API, intentar obtener de DB
-        try:
-            tasa_bcv_db = TasaCambioBCV.objects.filter(fecha=date.today()).first()
-            if tasa_bcv_db:
-                tasas = {
-                    'bcv': {
-                        'valor': float(tasa_bcv_db.tasa_bsd_por_usd),
-                        'fecha': tasa_bcv_db.fecha.strftime('%Y-%m-%d'),
-                        'nombre': 'BCV Oficial (DB)'
-                    }
+    # Fallback a DB
+    try:
+        tasa_bcv_db = TasaCambioBCV.objects.filter(fecha=date.today()).first()
+        if tasa_bcv_db:
+            tasas = {
+                'bcv': {
+                    'valor': float(tasa_bcv_db.tasa_bsd_por_usd),
+                    'fecha': tasa_bcv_db.fecha.strftime('%Y-%m-%d'),
+                    'nombre': 'BCV Oficial (DB)'
                 }
-            else:
-                return Response(
-                    {'error': 'No se pudieron obtener las tasas'},
-                    status=status.HTTP_503_SERVICE_UNAVAILABLE
-                )
-        except Exception as e:
-            return Response(
-                {'error': str(e)},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+            }
+            cache.set(cache_key, tasas, 86400)
+            return Response(tasas)
+    except Exception:
+        pass
     
-    # Guardar en caché por 5 minutos
-    cache.set(cache_key, tasas, 300)
-    
-    return Response(tasas)
+    return Response(
+        {'error': 'No se pudieron obtener las tasas'},
+        status=status.HTTP_503_SERVICE_UNAVAILABLE
+    )
 
 
 @api_view(['GET'])

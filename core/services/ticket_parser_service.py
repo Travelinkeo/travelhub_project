@@ -29,32 +29,28 @@ def _leer_contenido_del_archivo(archivo_subido) -> str:
         from django.conf import settings
         use_cloudinary = getattr(settings, 'USE_CLOUDINARY', False)
         
-        # Para Cloudinary, descargar desde URL
-        if use_cloudinary and hasattr(archivo_subido, 'url'):
+        if use_cloudinary:
             import requests
-            logger.info(f"Descargando archivo desde Cloudinary: {archivo_subido.url}")
-            try:
-                response = requests.get(archivo_subido.url, timeout=30)
+            url = archivo_subido.url if hasattr(archivo_subido, 'url') else None
+            if url:
+                logger.info(f"Descargando archivo desde Cloudinary: {url}")
+                response = requests.get(url, timeout=30)
                 response.raise_for_status()
                 contenido_bytes = response.content
-                logger.info(f"Archivo descargado exitosamente: {len(contenido_bytes)} bytes")
-            except requests.exceptions.RequestException as e:
-                logger.error(f"Error descargando desde Cloudinary: {e}")
-                raise Exception(f"No se pudo descargar el archivo desde Cloudinary: {e}")
-        elif hasattr(archivo_subido, 'read'):
-            contenido_bytes = archivo_subido.read()
-            logger.info(f"Archivo leído desde objeto file: {len(contenido_bytes)} bytes")
-        elif hasattr(archivo_subido, 'path'):
-            # Archivo local en disco
-            with open(archivo_subido.path, 'rb') as f:
-                contenido_bytes = f.read()
-            logger.info(f"Archivo leído desde path local: {len(contenido_bytes)} bytes")
+                logger.info(f"Archivo descargado: {len(contenido_bytes)} bytes")
+            else:
+                raise Exception("No se pudo obtener URL de Cloudinary")
         else:
-            # Fallback
-            archivo_subido.seek(0)
-            contenido_bytes = archivo_subido.read()
-            archivo_subido.seek(0)
-            logger.info(f"Archivo leído (fallback): {len(contenido_bytes)} bytes")
+            if hasattr(archivo_subido, 'path'):
+                logger.info(f"Leyendo archivo local: {archivo_subido.path}")
+                with open(archivo_subido.path, 'rb') as f:
+                    contenido_bytes = f.read()
+                logger.info(f"Archivo leído: {len(contenido_bytes)} bytes")
+            elif hasattr(archivo_subido, 'file'):
+                contenido_bytes = archivo_subido.file.read()
+                logger.info(f"Archivo leído desde file: {len(contenido_bytes)} bytes")
+            else:
+                raise Exception("No se pudo acceder al archivo")
 
         # 1. Detección de PDF
         if contenido_bytes.startswith(b'%PDF'):

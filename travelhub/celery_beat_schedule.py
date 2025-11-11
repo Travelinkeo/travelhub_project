@@ -46,4 +46,10 @@ CELERY_BEAT_SCHEDULE = {
         'task': 'core.monitor_boletos_email',
         'schedule': crontab(minute='*/5'),  # Cada 5 minutos
     },
+    
+    # Monitorear correos de boletos y enviar WhatsApp cada 5 minutos
+    'monitor-boletos-whatsapp': {
+        'task': 'core.monitor_boletos_whatsapp',
+        'schedule': crontab(minute='*/5'),  # Cada 5 minutos
+    },
 }

@@ -126,6 +126,14 @@ def crear_o_actualizar_venta_desde_boleto(sender, instance, created, **kwargs):
                 instance.save(update_fields=['venta_asociada'])
 
             logger.info(f"Procesado BoletoImportado {instance.pk}. Venta {venta.pk} (localizador: {localizador}) creada/actualizada.")
+            
+            # Enviar notificación de boleto procesado
+            if venta_creada or not boleto_existente:
+                try:
+                    from core.services.notificaciones_boletos import notificar_boleto_procesado
+                    notificar_boleto_procesado(instance)
+                except Exception as notif_error:
+                    logger.warning(f"Error enviando notificación de boleto: {notif_error}")
 
         except Exception as e:
             logger.error(f"Error en la señal para BoletoImportado {instance.pk}: {e}", exc_info=True)

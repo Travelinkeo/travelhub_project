@@ -481,6 +481,33 @@ class BoletoImportadoViewSet(viewsets.ModelViewSet):
         except Exception as e:
             logger.error(f"Error al descargar PDF del boleto {pk}: {e}")
             return Response({'error': str(e)}, status=500)
+    
+    @action(detail=True, methods=['post'])
+    def validar(self, request, pk=None):
+        """Valida el boleto antes de enviar al cliente"""
+        from core.services.validacion_boletos import validar_boleto
+        
+        boleto = self.get_object()
+        resultado = validar_boleto(boleto)
+        
+        return Response(resultado)
+    
+    @action(detail=False, methods=['get'])
+    def reporte_comisiones(self, request):
+        """Genera reporte de comisiones por aerolínea"""
+        from core.services.reportes_comisiones import generar_reporte_comisiones
+        from datetime import datetime
+        
+        # Parámetros opcionales
+        fecha_inicio_str = request.query_params.get('fecha_inicio')
+        fecha_fin_str = request.query_params.get('fecha_fin')
+        
+        fecha_inicio = datetime.strptime(fecha_inicio_str, '%Y-%m-%d').date() if fecha_inicio_str else None
+        fecha_fin = datetime.strptime(fecha_fin_str, '%Y-%m-%d').date() if fecha_fin_str else None
+        
+        reporte = generar_reporte_comisiones(fecha_inicio, fecha_fin)
+        
+        return Response(reporte)
 
 def get_resumen_ventas_categorias():
     categoria_definiciones = [

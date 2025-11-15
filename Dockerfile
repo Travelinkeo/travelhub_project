@@ -1,39 +1,21 @@
-# Dockerfile para TravelHub
 FROM python:3.13-slim
 
-# Variables de entorno
-ENV PYTHONUNBUFFERED=1 \
-    PYTHONDONTWRITEBYTECODE=1 \
-    PIP_NO_CACHE_DIR=1 \
-    PIP_DISABLE_PIP_VERSION_CHECK=1
-
-# Instalar dependencias del sistema
+# Instalar dependencias del sistema para WeasyPrint
 RUN apt-get update && apt-get install -y \
-    gcc \
-    postgresql-client \
-    libpq-dev \
+    libpango-1.0-0 \
+    libpangoft2-1.0-0 \
+    libgdk-pixbuf2.0-0 \
+    libffi-dev \
+    libcairo2 \
+    libgobject-2.0-0 \
+    shared-mime-info \
     && rm -rf /var/lib/apt/lists/*
 
-# Crear directorio de trabajo
 WORKDIR /app
 
-# Copiar requirements
-COPY requirements.txt ./
-
-# Instalar dependencias Python
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copiar código
 COPY . .
 
-# Crear directorios necesarios
-RUN mkdir -p media staticfiles logs
-
-# Recolectar archivos estáticos
-RUN python manage.py collectstatic --noinput || true
-
-# Exponer puerto
-EXPOSE 8000
-
-# Comando por defecto
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "4", "--timeout", "120", "travelhub.wsgi:application"]
+CMD ["gunicorn", "travelhub.wsgi:application", "--bind", "0.0.0.0:8000"]

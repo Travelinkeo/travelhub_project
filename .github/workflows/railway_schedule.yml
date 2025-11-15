@@ -38,7 +38,7 @@ jobs:
       - name: Stop services
         if: steps.action.outputs.action == 'stop'
         run: |
-          echo "🌙 Apagando servicios (11 PM)..."
+          echo "Apagando servicios (11 PM)..."
           curl -X POST https://backboard.railway.com/graphql/v2 \
             -H "Authorization: Bearer ${{ secrets.RAILWAY_TOKEN }}" \
             -H "Content-Type: application/json" \
@@ -51,12 +51,12 @@ jobs:
             -H "Authorization: Bearer ${{ secrets.RAILWAY_TOKEN }}" \
             -H "Content-Type: application/json" \
             -d '{"query":"mutation { serviceInstanceUpdate(input: {serviceId: \"${{ secrets.RAILWAY_SERVICE_BEAT }}\", numReplicas: 0}) { id } }"}'
-          echo "✅ Servicios apagados"
+          echo "Servicios apagados"
       
       - name: Start services
         if: steps.action.outputs.action == 'start'
         run: |
-          echo "☀️ Encendiendo servicios (7 AM)..."
+          echo "Encendiendo servicios (7 AM)..."
           curl -X POST https://backboard.railway.com/graphql/v2 \
             -H "Authorization: Bearer ${{ secrets.RAILWAY_TOKEN }}" \
             -H "Content-Type: application/json" \
@@ -69,4 +69,4 @@ jobs:
             -H "Authorization: Bearer ${{ secrets.RAILWAY_TOKEN }}" \
             -H "Content-Type: application/json" \
             -d '{"query":"mutation { serviceInstanceUpdate(input: {serviceId: \"${{ secrets.RAILWAY_SERVICE_BEAT }}\", numReplicas: 1}) { id } }"}'
-          echo "✅ Servicios encendidos"
+          echo "Servicios encendidos"

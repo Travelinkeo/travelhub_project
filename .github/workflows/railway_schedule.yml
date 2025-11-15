@@ -1,0 +1,61 @@
+name: Railway Auto Shutdown/Startup
+
+on:
+  schedule:
+    # Apagar a las 11 PM Venezuela (UTC-4 = 3 AM UTC)
+    - cron: '0 3 * * *'
+    # Encender a las 7 AM Venezuela (UTC-4 = 11 AM UTC)
+    - cron: '0 11 * * *'
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Action to perform'
+        required: true
+        default: 'start'
+        type: choice
+        options:
+          - start
+          - stop
+
+jobs:
+  manage-services:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+      
+      - name: Determine action
+        id: action
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "action=${{ github.event.inputs.action }}" >> $GITHUB_OUTPUT
+          else
+            HOUR=$(date -u +%H)
+            if [ "$HOUR" -eq 3 ]; then
+              echo "action=stop" >> $GITHUB_OUTPUT
+            else
+              echo "action=start" >> $GITHUB_OUTPUT
+            fi
+          fi
+      
+      - name: Stop services
+        if: steps.action.outputs.action == 'stop'
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: |
+          echo "🌙 Apagando servicios (11 PM)..."
+          railway service --service ${{ secrets.RAILWAY_SERVICE_WEB }} down || true
+          railway service --service ${{ secrets.RAILWAY_SERVICE_WORKER }} down || true
+          railway service --service ${{ secrets.RAILWAY_SERVICE_BEAT }} down || true
+          echo "✅ Servicios apagados"
+      
+      - name: Start services
+        if: steps.action.outputs.action == 'start'
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: |
+          echo "☀️ Encendiendo servicios (7 AM)..."
+          railway service --service ${{ secrets.RAILWAY_SERVICE_WEB }} up || true
+          railway service --service ${{ secrets.RAILWAY_SERVICE_WORKER }} up || true
+          railway service --service ${{ secrets.RAILWAY_SERVICE_BEAT }} up || true
+          echo "✅ Servicios encendidos"

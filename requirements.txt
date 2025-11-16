@@ -33,7 +33,6 @@ defusedxml==0.7.1
 dj-database-url==3.0.1
 Django==5.2.6
 django-celery-beat==2.8.1
-django-celery-broker
 django-cloudinary-storage==0.3.0
 django-cors-headers==4.4.0
 django-redis==5.4.0

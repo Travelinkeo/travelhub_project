@@ -12,6 +12,11 @@ services:
         fromDatabase:
           name: travelhub-db
           property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: travelhub-redis
+          property: connectionString
 
   # Celery Worker
   - type: worker
@@ -25,6 +30,11 @@ services:
       - key: DATABASE_URL
         fromDatabase:
           name: travelhub-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: travelhub-redis
           property: connectionString
 
   # Celery Beat (Programador)
@@ -40,6 +50,16 @@ services:
         fromDatabase:
           name: travelhub-db
           property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: travelhub-redis
+          property: connectionString
+
+  # Redis Instance
+  - type: redis
+    name: travelhub-redis
+    plan: free
 
 databases:
   - name: travelhub-db

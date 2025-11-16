@@ -362,18 +362,45 @@ else:
     CSRF_COOKIE_SAMESITE = 'Lax'
     SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
 
-# --- Cache Configuration (No Redis) ---
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'LOCATION': 'travelhub-cache',
-    }
-}
+# --- Cache & Celery Configuration (Redis) ---
+REDIS_URL = os.getenv('REDIS_URL')
 
-# --- Celery Configuration (using Database) ---
-CELERY_BROKER_URL = 'django://'
-CELERY_RESULT_BACKEND = 'django-db'
-CELERY_CACHE_BACKEND = 'django-cache'
+if REDIS_URL:
+    # Use Redis for cache
+    CACHES = {
+        "default": {
+            "BACKEND": "django_redis.cache.RedisCache",
+            "LOCATION": REDIS_URL,
+            "OPTIONS": {
+                "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            }
+        }
+    }
+    
+    # Use Redis for Celery broker and result backend
+    CELERY_BROKER_URL = REDIS_URL
+    CELERY_RESULT_BACKEND = REDIS_URL
+    CELERY_CACHE_BACKEND = 'django-cache' # Celery will use the default Django cache (Redis)
+    
+    print("[OK] Usando Redis para Cache y Celery.")
+
+else:
+    # Fallback for local development without Redis
+    print("[WARNING] REDIS_URL no configurada. Usando cache en memoria. Celery no funcionará sin Redis.")
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+            'LOCATION': 'travelhub-cache',
+        }
+    }
+    # Celery requires a broker. If no Redis, it won't start.
+    # Set a dummy value to avoid crashing at settings load, but worker will fail.
+    CELERY_BROKER_URL = None 
+    CELERY_RESULT_BACKEND = 'django-db' # Can still use db for results if needed
+    CELERY_CACHE_BACKEND = 'django-cache'
+
+
+# Common Celery settings
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'

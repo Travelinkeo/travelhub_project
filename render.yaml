@@ -58,8 +58,8 @@ services:
 
 databases:
   - name: travelhub-db
-    databaseName: TravelHub
-    user: travelhub
+    databaseName: travelhub_db
+    user: travelhub_user
 
   - name: travelhub-redis
     plan: starter

@@ -79,6 +79,11 @@ def procesar_boleto_importado_automatico(boleto: BoletoImportado):
                 boleto.archivo_pdf_generado.save(pdf_filename, ContentFile(pdf_bytes), save=False)
                 campos_a_actualizar.append('archivo_pdf_generado')
                 logger.info(f"PDF generado: {pdf_filename}, URL: {boleto.archivo_pdf_generado.url if boleto.archivo_pdf_generado else 'N/A'}")
+                
+                # Disparar la tarea de notificación
+                from core.tasks import send_ticket_notification
+                send_ticket_notification.delay(boleto.id_boleto_importado)
+
         except Exception as pdf_e:
             logger.error(f"Error generando PDF: {pdf_e}")
             boleto.log_parseo += f" | ADVERTENCIA: PDF error: {pdf_e}"

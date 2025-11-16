@@ -57,9 +57,15 @@ services:
           property: connectionString
 
 databases:
+
   - name: travelhub-db
+
     databaseName: travelhub_db
+
     user: travelhub_user
 
+    plan: free
+
   - name: travelhub-redis
-    plan: starter
+
+    plan: free

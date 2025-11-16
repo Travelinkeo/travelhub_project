@@ -4,6 +4,14 @@ services:
     name: travelhub-web
     env: python
     buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate
+    startCommand: gunicorn travelhub.wsgi:application
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.13.0
+      - key: DATABASE_URL
+        fromDatabase:
+          name: travelhub-db
+          property: connectionString
       - key: REDIS_URL
         fromDatabase:
           name: travelhub-redis
@@ -46,15 +54,9 @@ services:
           property: connectionString
 
 databases:
-
   - name: travelhub-db
-
     databaseName: travelhub_db
-
     user: travelhub_user
-
     plan: free
-
   - name: travelhub-redis
-
     plan: free

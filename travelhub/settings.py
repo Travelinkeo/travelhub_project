@@ -82,6 +82,7 @@ INSTALLED_APPS = [
     'contabilidad.apps.ContabilidadConfig', # App para Contabilidad
     'core.apps.CoreConfig',
     'accounting_assistant.apps.AccountingAssistantConfig',
+    'django_celery_results',
 ]
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -361,42 +362,18 @@ else:
     CSRF_COOKIE_SAMESITE = 'Lax'
     SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
 
-# --- Cache Configuration (Redis) ---
-REDIS_URL = os.getenv('REDIS_URL', 'redis://127.0.0.1:6379/1')
-
-try:
-    import redis
-    redis_client = redis.from_url(REDIS_URL, socket_connect_timeout=1)
-    redis_client.ping()
-    redis_available = True
-except Exception:
-    redis_available = False
-
-if redis_available:
-    CACHES = {
-        'default': {
-            'BACKEND': 'django_redis.cache.RedisCache',
-            'LOCATION': REDIS_URL,
-            'OPTIONS': {
-                'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-                'SOCKET_CONNECT_TIMEOUT': 5,
-                'SOCKET_TIMEOUT': 5,
-            },
-            'KEY_PREFIX': 'travelhub',
-            'TIMEOUT': 300,
-        }
+# --- Cache Configuration (No Redis) ---
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'travelhub-cache',
     }
-else:
-    CACHES = {
-        'default': {
-            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-            'LOCATION': 'travelhub-cache',
-        }
-    }
+}
 
-# --- Celery Configuration ---
-CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'redis://127.0.0.1:6379/0')
-CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND', 'redis://127.0.0.1:6379/0')
+# --- Celery Configuration (using Database) ---
+CELERY_BROKER_URL = 'django://'
+CELERY_RESULT_BACKEND = 'django-db'
+CELERY_CACHE_BACKEND = 'django-cache'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'

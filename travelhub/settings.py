@@ -55,9 +55,9 @@ if DEBUG:
 else:
     CSRF_TRUSTED_ORIGINS = []
 
-# Permitir Vercel en producción
-ALLOWED_HOSTS.extend(['.vercel.app', 'travelhub-project.onrender.com'])
-CSRF_TRUSTED_ORIGINS.extend(['https://*.vercel.app', 'https://travelhub-project.onrender.com'])
+# Permitir Vercel y Render en producción
+ALLOWED_HOSTS.extend(['.vercel.app', 'travelhub-project.onrender.com', 'travelhub-web.onrender.com'])
+CSRF_TRUSTED_ORIGINS.extend(['https://*.vercel.app', 'https://travelhub-project.onrender.com', 'https://travelhub-web.onrender.com'])
 
 # Evitar que Django agregue/redirija automáticamente barras finales (previene bucles con proxies/rewrite)
 APPEND_SLASH = False

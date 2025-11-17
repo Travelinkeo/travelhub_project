@@ -7,7 +7,7 @@ import { useDebounce } from '../hooks/useDebounce';
 import { 
   Box, Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField, 
   FormControl, InputLabel, Select, MenuItem, Table, TableBody, TableCell, 
-  TableHead, TableRow, Paper, CircularProgress, Alert, Pagination, Grid 
+  TableHead, TableRow, Paper, Skeleton, Alert, Pagination, Grid 
 } from '@mui/material';
 import { Paginated } from '@/types/api';
 
@@ -118,6 +118,31 @@ const ApiTableComponent = ({ endpoint, columns, title, fields }: ApiTableProps) 
 
   const pageCount = data?.count ? Math.ceil(data.count / 10) : 1; // Assuming page size is 10
 
+  const TableSkeleton = () => (
+    <Box sx={{ width: '100%' }}>
+      <Table sx={{ minWidth: 650 }}>
+        <TableHead>
+          <TableRow>
+            {columns.map((col) => (
+              <TableCell key={col.key}><Skeleton variant="text" sx={{ fontSize: '1rem' }} /></TableCell>
+            ))}
+            <TableCell><Skeleton variant="text" sx={{ fontSize: '1rem' }} /></TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {Array.from(new Array(5)).map((_, index) => (
+            <TableRow key={index}>
+              {columns.map((col) => (
+                <TableCell key={col.key}><Skeleton variant="text" /></TableCell>
+              ))}
+              <TableCell><Skeleton variant="text" /></TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </Box>
+  );
+
   return (
     <Paper sx={{ p: 2 }}>
       <Grid container justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
@@ -141,7 +166,7 @@ const ApiTableComponent = ({ endpoint, columns, title, fields }: ApiTableProps) 
         />
       </Box>
 
-      {isLoading && <CircularProgress />}
+      {isLoading && <TableSkeleton />}
       {error && <Alert severity="error">Error: {error.message}</Alert>}
       
       {!isLoading && !error && (

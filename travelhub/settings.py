@@ -377,9 +377,14 @@ if REDIS_URL:
         }
     }
     
-    # Use Redis for Celery broker and result backend
-    CELERY_BROKER_URL = REDIS_URL
-    CELERY_RESULT_BACKEND = REDIS_URL
+    # Celery needs an explicit SSL cert requirement setting for rediss:// URLs
+    if REDIS_URL.startswith('rediss://'):
+        CELERY_BROKER_URL = f"{REDIS_URL}?ssl_cert_reqs=CERT_NONE"
+        CELERY_RESULT_BACKEND = f"{REDIS_URL}?ssl_cert_reqs=CERT_NONE"
+    else:
+        CELERY_BROKER_URL = REDIS_URL
+        CELERY_RESULT_BACKEND = REDIS_URL
+
     CELERY_CACHE_BACKEND = 'django-cache' # Celery will use the default Django cache (Redis)
     
     print("[OK] Usando Redis para Cache y Celery.")

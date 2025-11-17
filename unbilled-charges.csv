@@ -1,0 +1,17 @@
+invoice_date,charge_type,name,charge,rate,usage,cost
+2025-noviembre,Services,travelhub-beat,Starter,$0.0097/hr,105.31,$1.02
+2025-noviembre,Services,travelhub-beat,Outgoing Bandwidth,—,0 GB,—
+2025-noviembre,Services,travelhub-beat,Private Link,—,0 GB,—
+2025-noviembre,Services,travelhub-web,Starter,$0.0097/hr,19.97,$0.19
+2025-noviembre,Services,travelhub-web,Outgoing Bandwidth,—,0 GB,—
+2025-noviembre,Services,travelhub-web,Private Link,—,0 GB,—
+2025-noviembre,Services,travelhub-worker,Starter,$0.0097/hr,105.78,$1.03
+2025-noviembre,Services,travelhub-worker,Outgoing Bandwidth,—,0 GB,—
+2025-noviembre,Services,travelhub-worker,Private Link,—,0 GB,—
+2025-noviembre,Services,travelhub_project,Free,$0.0000/hr,399.84,$0.00
+2025-noviembre,Services,travelhub_project,Outgoing Bandwidth,—,0.08 GB,—
+2025-noviembre,Services,travelhub_project,Private Link,—,0 GB,—
+2025-noviembre,Datastores,travelhub-db,Free,$0.0000/hr,399.84 hours,$0.00
+2025-noviembre,Datastores,travelhub-db,Outgoing Bandwidth,—,0 GB,—
+2025-noviembre,Datastores,travelhub-db,Private Link,—,0 GB,—
+2025-noviembre,Pipeline Minutes,Build: Starter,Starter,"$5/1,000 minutes",8 minutes,$0.00

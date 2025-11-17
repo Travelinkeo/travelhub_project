@@ -4,6 +4,7 @@ import ResponsiveLayout from '@/components/layout/ResponsiveLayout';
 import { ThemeContextProvider } from '@/contexts/ThemeContext';
 import { AuthProvider } from '@/contexts/AuthContext';
 import ChatWidget from '@/components/chatbot/ChatWidget';
+import RegisterSW from './register-sw';
 import { Metadata, Viewport } from 'next';
 
 export const metadata: Metadata = {
@@ -30,6 +31,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="es" className="h-full">
       <body className="h-full">
+        <RegisterSW />
         <AuthProvider>
           <ThemeContextProvider>
             <ResponsiveLayout>

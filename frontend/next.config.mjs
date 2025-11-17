@@ -1,3 +1,5 @@
+import withPWAInit from "@ducanh2912/next-pwa";
+
 /** @type {import('next').NextConfig} */
 const securityHeaders = [
   {
@@ -34,6 +36,13 @@ const securityHeaders = [
     ].join('; ')
   }
 ];
+
+const withPWA = withPWAInit({
+  dest: "public",
+  disable: process.env.NODE_ENV === "development",
+  register: true,
+  skipWaiting: true,
+});
 
 const nextConfig = {
   reactStrictMode: true,
@@ -80,4 +89,4 @@ const nextConfig = {
   },
 };
 
-export default nextConfig;
+export default withPWA(nextConfig);

@@ -1,4 +1,5 @@
 import os
+import ssl
 from datetime import timedelta
 from pathlib import Path
 
@@ -366,25 +367,26 @@ else:
 REDIS_URL = os.getenv('REDIS_URL')
 
 if REDIS_URL:
-    # Use Redis for cache
+    # Use Redis for cache, with SSL config if needed
     CACHES = {
         "default": {
             "BACKEND": "django_redis.cache.RedisCache",
             "LOCATION": REDIS_URL,
             "OPTIONS": {
                 "CLIENT_CLASS": "django_redis.client.DefaultClient",
+                "CONNECTION_POOL_KWARGS": {"ssl_cert_reqs": ssl.CERT_NONE} if REDIS_URL.startswith('rediss://') else {}
             }
         }
     }
     
-    # Celery needs an explicit SSL cert requirement setting for rediss:// URLs
-    if REDIS_URL.startswith('rediss://'):
-        CELERY_BROKER_URL = f"{REDIS_URL}?ssl_cert_reqs=CERT_NONE"
-        CELERY_RESULT_BACKEND = f"{REDIS_URL}?ssl_cert_reqs=CERT_NONE"
-    else:
-        CELERY_BROKER_URL = REDIS_URL
-        CELERY_RESULT_BACKEND = REDIS_URL
+    # Use Redis for Celery broker and result backend
+    CELERY_BROKER_URL = REDIS_URL
+    CELERY_RESULT_BACKEND = REDIS_URL
 
+    if REDIS_URL.startswith('rediss://'):
+        CELERY_BROKER_USE_SSL = {'ssl_cert_reqs': ssl.CERT_NONE}
+        CELERY_REDIS_BACKEND_USE_SSL = {'ssl_cert_reqs': ssl.CERT_NONE}
+    
     CELERY_CACHE_BACKEND = 'django-cache' # Celery will use the default Django cache (Redis)
     
     print("[OK] Usando Redis para Cache y Celery.")

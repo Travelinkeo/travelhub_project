@@ -1,0 +1,21 @@
+{
+  "name": "TravelHub",
+  "short_name": "TravelHub",
+  "description": "Plataforma de Gestión para Agencias de Viaje",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0d47a1",
+  "icons": [
+    {
+      "src": "/Logo Azul.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/Logo Azul.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

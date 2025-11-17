@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Box } from '@mui/material';
 import Sidebar from './Sidebar';
 import Header from './Header';
+import BottomNav from './BottomNav'; // Import the new component
 
 import { useTheme } from '@/contexts/ThemeContext';
 
@@ -22,7 +23,10 @@ export default function ResponsiveLayout({ children }: { children: React.ReactNo
       bgcolor: 'background.default',
       color: 'text.primary'
     }}>
-      <Sidebar isOpen={sidebarOpen} onToggle={toggleSidebar} />
+      {/* Sidebar is now hidden on mobile */}
+      <Box sx={{ display: { xs: 'none', lg: 'block' } }}>
+        <Sidebar isOpen={sidebarOpen} onToggle={toggleSidebar} />
+      </Box>
       
       <Box sx={{ 
         flex: 1, 
@@ -38,18 +42,21 @@ export default function ResponsiveLayout({ children }: { children: React.ReactNo
           p: { xs: 2, lg: 3 }, 
           overflow: 'auto',
           bgcolor: 'background.default',
-          color: 'text.primary'
+          color: 'text.primary',
+          pb: { xs: '70px', lg: 3 } // Add padding-bottom for mobile to avoid overlap with BottomNav
         }}>
           {children}
         </Box>
         
+        {/* Footer is now hidden on mobile */}
         <Box component="footer" sx={{
           p: 2,
           textAlign: 'center',
           borderTop: 1,
           borderColor: 'divider',
           bgcolor: 'background.paper',
-          color: 'text.secondary'
+          color: 'text.secondary',
+          display: { xs: 'none', lg: 'block' } // Hide on mobile
         }}>
           <Box sx={{ 
             display: 'flex', 
@@ -66,7 +73,8 @@ export default function ResponsiveLayout({ children }: { children: React.ReactNo
         </Box>
       </Box>
       
-
+      {/* Render BottomNav for mobile */}
+      <BottomNav />
     </Box>
   );
 }

@@ -84,6 +84,7 @@ INSTALLED_APPS = [
     'core.apps.CoreConfig',
     'accounting_assistant.apps.AccountingAssistantConfig',
     'django_celery_results',
+    'django_extensions',
 ]
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -363,48 +364,39 @@ else:
     CSRF_COOKIE_SAMESITE = 'Lax'
     SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
 
-# --- Cache & Celery Configuration (Redis) ---
+# --- Cache & Celery Configuration (PostgreSQL como broker) ---
 REDIS_URL = os.getenv('REDIS_URL')
+DATABASE_URL = os.getenv('DATABASE_URL')
 
-if REDIS_URL:
-    # Use Redis for cache, with SSL config if needed
-    CACHES = {
-        "default": {
-            "BACKEND": "django_redis.cache.RedisCache",
-            "LOCATION": REDIS_URL,
-            "OPTIONS": {
-                "CLIENT_CLASS": "django_redis.client.DefaultClient",
-                "CONNECTION_POOL_KWARGS": {"ssl_cert_reqs": ssl.CERT_NONE} if REDIS_URL.startswith('rediss://') else {}
-            }
-        }
-    }
-    
-    # Use Redis for Celery broker and result backend
-    CELERY_BROKER_URL = REDIS_URL
-    CELERY_RESULT_BACKEND = REDIS_URL
-
-    if REDIS_URL.startswith('rediss://'):
-        CELERY_BROKER_USE_SSL = {'ssl_cert_reqs': ssl.CERT_NONE}
-        CELERY_REDIS_BACKEND_USE_SSL = {'ssl_cert_reqs': ssl.CERT_NONE}
-    
-    CELERY_CACHE_BACKEND = 'django-cache' # Celery will use the default Django cache (Redis)
-    
-    print("[OK] Usando Redis para Cache y Celery.")
-
-else:
-    # Fallback for local development without Redis
-    print("[WARNING] REDIS_URL no configurada. Usando cache en memoria. Celery no funcionará sin Redis.")
+# Usar PostgreSQL como broker de Celery (más barato que Redis)
+if DATABASE_URL:
+    # Cache en memoria (suficiente para desarrollo)
     CACHES = {
         'default': {
             'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
             'LOCATION': 'travelhub-cache',
         }
     }
-    # Celery requires a broker. If no Redis, it won't start.
-    # Set a dummy value to avoid crashing at settings load, but worker will fail.
-    CELERY_BROKER_URL = None 
-    CELERY_RESULT_BACKEND = 'django-db' # Can still use db for results if needed
+    
+    # Usar PostgreSQL como broker de Celery
+    CELERY_BROKER_URL = f"db+{DATABASE_URL}"
+    CELERY_RESULT_BACKEND = 'django-db'
     CELERY_CACHE_BACKEND = 'django-cache'
+    
+    print("[OK] Usando PostgreSQL como broker de Celery (económico).")
+
+else:
+    # Fallback local
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+            'LOCATION': 'travelhub-cache',
+        }
+    }
+    CELERY_BROKER_URL = 'django://'
+    CELERY_RESULT_BACKEND = 'django-db'
+    CELERY_CACHE_BACKEND = 'django-cache'
+    print("[OK] Usando Django como broker de Celery (desarrollo).")
 
 
 # Common Celery settings
@@ -414,6 +406,10 @@ CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = TIME_ZONE
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60  # 30 minutos
+
+# Configuración específica para PostgreSQL broker
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+CELERY_BROKER_CONNECTION_RETRY = True
 
 # Celery Beat - Tareas programadas
 try:

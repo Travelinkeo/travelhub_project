@@ -5,8 +5,8 @@ from typing import Any
 from core.gemini import generate_content
 
 # Asumimos que los modelos y la función de Gemini están disponibles
-from core.models.personas import Cliente
-from core.models.ventas import Venta
+from apps.crm.models import Cliente
+from core.models import Venta
 
 # --- Simulación de Servicios Externos ---
 

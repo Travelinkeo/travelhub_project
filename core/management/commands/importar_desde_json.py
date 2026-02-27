@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 from core.models import TarifarioProveedor, HotelTarifario, TipoHabitacion, TarifaHabitacion
-from personas.models import Proveedor
+from core.models import Proveedor
 from datetime import datetime
 from decimal import Decimal
 import json

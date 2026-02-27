@@ -1,0 +1,133 @@
+{% extends 'base_modern.html' %}
+{% load static %}
+
+{% block title %}{{ pasajero.get_nombre_completo }} - TravelHub Pro{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    <!-- Header Card -->
+    <div class="glass-panel rounded-3xl p-8">
+        <div class="flex flex-col md:flex-row gap-8 items-start md:items-center">
+            <div
+                class="w-24 h-24 rounded-3xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-3xl font-bold shadow-xl shadow-indigo-900/20 overflow-hidden text-center">
+                {{ pasajero.get_nombre_completo|slice:":1" }}
+            </div>
+            <div class="flex-1 space-y-2">
+                <div class="flex flex-wrap items-center gap-3">
+                    <h1 class="text-3xl font-bold text-white">{{ pasajero.get_nombre_completo }}</h1>
+                    <span
+                        class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                        Viajero
+                    </span>
+                </div>
+                <div class="flex flex-wrap items-center gap-6 text-gray-400 text-sm">
+                    <div class="flex items-center">
+                        <i data-lucide="shield-check" class="w-4 h-4 mr-2 text-blue-400"></i>
+                        {{ pasajero.get_tipo_documento_display }}: <span class="ml-1 font-mono text-white">{{ pasajero.numero_documento }}</span>
+                    </div>
+                    <div class="flex items-center">
+                        <i data-lucide="flag" class="w-4 h-4 mr-2"></i>
+                        {{ pasajero.nacionalidad|default:"---" }}
+                    </div>
+                </div>
+            </div>
+            <div class="flex gap-3">
+                <a href="{% url 'crm:pasajero_update' pasajero.pk %}"
+                    class="px-6 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-white font-semibold transition-all">
+                    Editar Datos
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <!-- Sidebar Info -->
+        <div class="space-y-6">
+            <div class="glass-panel rounded-3xl p-8 space-y-6">
+                <h3 class="text-lg font-semibold text-white">Estado del Documento</h3>
+                <div class="p-4 rounded-2xl bg-white/5 border border-white/10">
+                    <p class="text-xs text-gray-500 uppercase tracking-wider font-bold mb-1">Vencimiento</p>
+                    <p
+                        class="text-xl font-bold {% if pasajero.esta_vencido %}text-red-400{% else %}text-green-400{% endif %}">
+                        {{ pasajero.fecha_vencimiento_documento|date:"d M Y"|default:"No reg." }}
+                    </p>
+                </div>
+                <div class="space-y-3">
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">País Emisor</span>
+                        <span class="text-white">{{ pasajero.pais_emision_documento|default:"---" }}</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">Nacimiento</span>
+                        <span class="text-white">{{ pasajero.fecha_nacimiento|date:"d M Y"|default:"---" }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-panel rounded-3xl p-8 space-y-4">
+                <h3 class="text-lg font-semibold text-white">Contacto</h3>
+                <div class="space-y-4">
+                    <div class="flex items-center text-sm">
+                        <i data-lucide="mail" class="w-4 h-4 mr-3 text-gray-500"></i>
+                        <span class="text-white">{{ pasajero.email|default:"Sin email" }}</span>
+                    </div>
+                    <div class="flex items-center text-sm">
+                        <i data-lucide="phone" class="w-4 h-4 mr-3 text-gray-500"></i>
+                        <span class="text-white">{{ pasajero.telefono|default:"Sin teléfono" }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content (Bookings) -->
+        <div class="md:col-span-2 space-y-6">
+            <div class="glass-panel rounded-3xl overflow-hidden">
+                <div class="p-8 border-b border-white/10">
+                    <h3 class="text-lg font-semibold text-white">Historial de Vuelos</h3>
+                </div>
+                <table class="w-full text-left">
+                    <thead class="bg-white/5 border-b border-white/10">
+                        <tr>
+                            <th class="px-8 py-4 text-xs font-semibold text-gray-400 uppercase">Reserva</th>
+                            <th class="px-8 py-4 text-xs font-semibold text-gray-400 uppercase">Fecha</th>
+                            <th class="px-8 py-4 text-xs font-semibold text-gray-400 uppercase">Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-white/5">
+                        {% for venta in pasajero.bookings_ventas.all %}
+                        <tr class="hover:bg-white/5 transition-colors">
+                            <td class="px-8 py-4">
+                                <a href="{% url 'bookings:venta_detail' venta.pk %}"
+                                    class="text-blue-400 hover:text-blue-300 font-bold">
+                                    {{ venta.localizador }}
+                                </a>
+                            </td>
+                            <td class="px-8 py-4 text-gray-400 text-sm">{{ venta.fecha_venta|date:"d M Y" }}</td>
+                            <td class="px-8 py-4">
+                                <span
+                                    class="px-2 py-1 rounded text-[10px] font-bold uppercase {{ venta.get_estado_color_bg }} {{ venta.get_estado_color_text }}">
+                                    {{ venta.get_estado_display }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="3" class="px-8 py-12 text-center text-gray-500 italic">No hay vuelos
+                                registrados para este pasajero.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        lucide.createIcons();
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "GIRALDO/SANDRA CAROL",
+  "CODIGO_IDENTIFICACION": "18304684",
+  "SOLO_NOMBRE_PASAJERO": "SANDRA CAROL",
+  "NUMERO_DE_BOLETO": "3640211560890",
+  "FECHA_DE_EMISION": "15 OCT 2025 15:45",
+  "AGENTE_EMISOR": "CCS00WWWW",
+  "CODIGO_RESERVA": "FMWOEE",
+  "SOLO_CODIGO_RESERVA": "FMWOEE",
+  "NOMBRE_AEROLINEA": "RUTAS AEREAS DE VENEZUELA RAV,SA",
+  "DIRECCION_AEROLINEA": null,
+  "vuelos": [
+    {
+      "aerolinea": "WW",
+      "numero_vuelo": "331",
+      "origen": "CARACAS",
+      "fecha_salida": "16 OCT 2025",
+      "hora_salida": "1230",
+      "destino": "PORLAMAR",
+      "hora_llegada": "1315",
+      "cabina": "Económica",
+      "clase": "R",
+      "localizador_aerolinea": "FMWOEE"
+    }
+  ],
+  "TARIFA": "12135.33",
+  "IMPUESTOS": "3929.47",
+  "TOTAL": "16064.80",
+  "SOURCE_SYSTEM": "AI_KIU",
+  "es_remision": false,
+  "NOMBRE DEL PASAJERO": "GIRALDO/SANDRA CAROL",
+  "CODIGO IDENTIFICACION": "18304684",
+  "SOLO NOMBRE PASAJERO": "SANDRA CAROL",
+  "NUMERO DE BOLETO": "3640211560890",
+  "FECHA DE EMISION": "15 OCT 2025 15:45",
+  "AGENTE EMISOR": "CCS00WWWW",
+  "CODIGO RESERVA": "FMWOEE",
+  "SOLO CODIGO RESERVA": "FMWOEE",
+  "NOMBRE AEROLINEA": "RUTAS AEREAS DE VENEZUELA RAV,SA",
+  "DIRECCION AEROLINEA": null,
+  "SOURCE SYSTEM": "AI_KIU",
+  "es remision": false
+}

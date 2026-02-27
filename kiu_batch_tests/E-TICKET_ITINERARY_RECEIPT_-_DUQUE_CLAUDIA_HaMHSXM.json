@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "DUQUE/CLAUDIA",
+  "CODIGO_IDENTIFICACION": "IDEPAT982965",
+  "SOLO_NOMBRE_PASAJERO": "CLAUDIA",
+  "NUMERO_DE_BOLETO": "7910391028918",
+  "FECHA_DE_EMISION": "18 NOV 2023 08:46",
+  "AGENTE_EMISOR": "PTYS3651X",
+  "CODIGO_RESERVA": "FLBVGW",
+  "SOLO_CODIGO_RESERVA": "FLBVGW",
+  "NOMBRE_AEROLINEA": "SKY HIGH AVIATION SERVICES SA",
+  "DIRECCION_AEROLINEA": null,
+  "vuelos": [
+    {
+      "aerolinea": "DO",
+      "numero_vuelo": "710",
+      "origen": "LAS AMERICAS",
+      "fecha_salida": "3JAN 2024",
+      "hora_salida": "1830",
+      "destino": "CARACAS",
+      "hora_llegada": "2000",
+      "cabina": "Y",
+      "clase": "Y",
+      "localizador_aerolinea": "FLBVGW"
+    }
+  ],
+  "TARIFA": "95.00",
+  "IMPUESTOS": "176.00",
+  "TOTAL": "271.00",
+  "SOURCE_SYSTEM": "AI_KIU",
+  "es_remision": false,
+  "NOMBRE DEL PASAJERO": "DUQUE/CLAUDIA",
+  "CODIGO IDENTIFICACION": "IDEPAT982965",
+  "SOLO NOMBRE PASAJERO": "CLAUDIA",
+  "NUMERO DE BOLETO": "7910391028918",
+  "FECHA DE EMISION": "18 NOV 2023 08:46",
+  "AGENTE EMISOR": "PTYS3651X",
+  "CODIGO RESERVA": "FLBVGW",
+  "SOLO CODIGO RESERVA": "FLBVGW",
+  "NOMBRE AEROLINEA": "SKY HIGH AVIATION SERVICES SA",
+  "DIRECCION AEROLINEA": null,
+  "SOURCE SYSTEM": "AI_KIU",
+  "es remision": false
+}

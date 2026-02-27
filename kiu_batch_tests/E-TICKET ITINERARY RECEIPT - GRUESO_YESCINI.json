@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "GRUESO/YESCINI",
+  "CODIGO_IDENTIFICACION": "22562674",
+  "SOLO_NOMBRE_PASAJERO": "YESCINI",
+  "NUMERO_DE_BOLETO": "7650370551404",
+  "FECHA_DE_EMISION": "21 APR 2025 11:53",
+  "AGENTE_EMISOR": "PTYS3651X",
+  "CODIGO_RESERVA": "IIGVIX",
+  "SOLO_CODIGO_RESERVA": "IIGVIX",
+  "NOMBRE_AEROLINEA": "RUTACA AIRLINES",
+  "DIRECCION_AEROLINEA": null,
+  "vuelos": [
+    {
+      "aerolinea": "5R",
+      "numero_vuelo": "1370",
+      "origen": "CARACAS",
+      "fecha_salida": "26APR 2025",
+      "hora_salida": "0800",
+      "destino": "SAN ANTONIO",
+      "hora_llegada": "0900",
+      "cabina": "Económica",
+      "clase": "U",
+      "localizador_aerolinea": "IIGVIX"
+    }
+  ],
+  "TARIFA": "78.35",
+  "IMPUESTOS": "16.65",
+  "TOTAL": "95.00",
+  "SOURCE_SYSTEM": "AI_KIU",
+  "es_remision": false,
+  "NOMBRE DEL PASAJERO": "GRUESO/YESCINI",
+  "CODIGO IDENTIFICACION": "22562674",
+  "SOLO NOMBRE PASAJERO": "YESCINI",
+  "NUMERO DE BOLETO": "7650370551404",
+  "FECHA DE EMISION": "21 APR 2025 11:53",
+  "AGENTE EMISOR": "PTYS3651X",
+  "CODIGO RESERVA": "IIGVIX",
+  "SOLO CODIGO RESERVA": "IIGVIX",
+  "NOMBRE AEROLINEA": "RUTACA AIRLINES",
+  "DIRECCION AEROLINEA": null,
+  "SOURCE SYSTEM": "AI_KIU",
+  "es remision": false
+}

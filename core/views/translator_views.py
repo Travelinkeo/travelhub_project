@@ -7,11 +7,27 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
+from django.views.generic import TemplateView
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 from ..itinerary_translator import ItineraryTranslator, TicketCalculator
 from ..models_catalogos import Aerolinea
+from contabilidad.models import TasaCambioBCV
 
 logger = logging.getLogger(__name__)
+
+class TraductorView(LoginRequiredMixin, TemplateView):
+    template_name = 'core/tools/traductor.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Obtener tasa BCV para la calculadora
+        try:
+            tasa = TasaCambioBCV.objects.latest('fecha')
+            context['tasa_bcv'] = tasa.tasa_bsd_por_usd
+        except Exception:
+            context['tasa_bcv'] = 0
+        return context
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -37,13 +53,18 @@ def translate_itinerary_api(request):
             )
         
         translator = ItineraryTranslator()
-        translated = translator.translate_itinerary(itinerary, gds_system)
         
+        # El translator ahora devuelve un diccionario con html y structured_data
+        result = translator.translate_itinerary(itinerary, gds_system)
+        
+        # Mantener compatibilidad con el frontend actual enviando 'translated_itinerary' como el HTML
         return Response({
             'success': True,
-            'translated_itinerary': translated,
+            'translated_itinerary': result['html'],
+            'structured_data': result['structured_data'],
             'gds_system': gds_system,
-            'original_itinerary': itinerary
+            'original_itinerary': itinerary,
+            'error': result.get('error')
         })
         
     except Exception as e:
@@ -355,12 +376,13 @@ def batch_translate_api(request):
                     })
                     continue
                 
-                translated = translator.translate_itinerary(itinerary, gds_system)
+                result = translator.translate_itinerary(itinerary, gds_system)
                 
                 results.append({
                     'id': item_id,
                     'success': True,
-                    'translated_itinerary': translated,
+                    'translated_itinerary': result['html'],
+                    'structured_data': result['structured_data'],
                     'gds_system': gds_system,
                     'original_itinerary': itinerary
                 })
@@ -391,5 +413,106 @@ def batch_translate_api(request):
         logger.error(f"Error en batch_translate_api: {e}")
         return Response(
             {'error': 'Error interno del servidor'},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+@csrf_exempt
+def create_quote_from_gds_api(request):
+    """
+    Crea una Cotización a partir de datos estructurados de GDS.
+    
+    POST /api/translator/create-quote/
+    {
+        "structured_data": [...]
+    }
+    """
+    from core.models.cotizaciones import Cotizacion, ItemCotizacion
+    from apps.crm.models import Cliente
+    from django.contrib.auth.models import User
+    from django.db import transaction
+    from django.utils import timezone
+    
+    try:
+        flights_data = request.data.get('structured_data', [])
+        
+        if not flights_data:
+            return Response(
+                {'error': 'No hay datos estructurados para crear la cotización'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+            
+        # 1. Obtener o crear Cliente Genérico "POR ASIGNAR"
+        # Esto permite crear la cotización rápido y luego editar el cliente
+        cliente_generico = Cliente.objects.filter(nombres__icontains="POR ASIGNAR").first()
+        if not cliente_generico:
+            # Fallback: Usar el primer cliente o crear uno
+            if Cliente.objects.exists():
+                cliente_generico = Cliente.objects.first()
+            else:
+                cliente_generico = Cliente.objects.create(
+                    nombres="CLIENTE POR ASIGNAR",
+                    apellidos="",
+                    email="temp@travelhub.com",
+                    telefono_principal="0000000000"
+                )
+        
+        from core.models_catalogos import Moneda
+        moneda_usd = Moneda.objects.filter(codigo_iso='USD').first()
+        if not moneda_usd:
+             moneda_usd = Moneda.objects.first() # Fallback
+
+        # 2. Crear Cabecera Cotización
+        cotizacion = Cotizacion.objects.create(
+            cliente=cliente_generico,
+            consultor=request.user,
+            fecha_emision=timezone.now().date(),
+            estado=Cotizacion.EstadoCotizacion.BORRADOR,
+            notas_internas="Generada automáticamente desde el Traductor GDS",
+            moneda=moneda_usd
+        )
+        
+        # 3. Crear Items
+        item_count = 0
+        for flight in flights_data:
+            # Validar que sea un vuelo
+            if flight.get('type') not in ['flight', 'flight_raw_kiu']:
+                continue
+                
+            flight_desc = f"Vuelo {flight.get('airline_code', 'XX')} {flight.get('flight_number', '')}: {flight.get('origin', '???')} - {flight.get('destination', '???')} ({flight.get('date', '')})"
+            
+            # Buscar Producto 'Boleto Aéreo' genérico
+            from core.models_catalogos import ProductoServicio
+            producto_vuelo = ProductoServicio.objects.filter(tipo_producto=ProductoServicio.TipoProductoChoices.BOLETO_AEREO).first()
+            
+            # Si no existe, usar el primer producto cualquiera como fallback
+            if not producto_vuelo:
+                 producto_vuelo = ProductoServicio.objects.first()
+
+            ItemCotizacion.objects.create(
+                cotizacion=cotizacion,
+                producto_servicio=producto_vuelo,
+                descripcion_personalizada=flight_desc,
+                cantidad=1,
+                precio_unitario=0, # Se debe cotizar manualmente luego
+                impuestos_item=0
+            )
+            item_count += 1
+            
+        # Recalcular total (aunque sea 0)
+        cotizacion.calcular_total()
+            
+        return Response({
+            'success': True,
+            'message': f'Cotización creada con {item_count} items',
+            'redirect_url': f'/cotizaciones/{cotizacion.pk}/editar/',
+            'quote_id': cotizacion.pk
+        })
+        
+    except Exception as e:
+        logger.error(f"Error creando cotización desde GDS: {e}")
+        return Response(
+            {'error': f'Error interno al crear cotización: {str(e)}'},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )

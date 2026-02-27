@@ -3,37 +3,16 @@
 Carga modelos desde submódulos temáticos.
 """
 
-from core.middleware import RequestMetaAuditMiddleware, SecurityHeadersMiddleware
+from core.middleware import SecurityHeadersMiddleware
 from core.models_catalogos import Aerolinea, Ciudad, ComisionProveedorServicio, Moneda, Pais, ProductoServicio, Proveedor, TipoCambio
 from core.validators import validar_no_vacio_o_espacios, validar_numero_pasaporte
 
-from .agencia import Agencia, UsuarioAgencia
-from .boletos import BoletoImportado
-from .cms import (
-    ArticuloBlog,
-    DestinoCMS,
-    FormularioContactoCMS,
-    MenuItemCMS,
-    PaginaCMS,
-    PaqueteTuristicoCMS,
-    Testimonio,
-)
-from .comunicaciones import ComunicacionProveedor
-from .contabilidad import AsientoContable, DetalleAsiento, ItemLiquidacion, LiquidacionProveedor, PlanContable
-from .cotizaciones import Cotizacion, ItemCotizacion
-from .facturacion import Factura, ItemFactura
-from .facturacion_venezuela import FacturaVenezuela, ItemFacturaVenezuela, DocumentoExportacion
-from .facturacion_consolidada import (
-    FacturaConsolidada,
-    ItemFacturaConsolidada,
-    DocumentoExportacionConsolidado
-)
-from .personas import Cliente, Pasajero
-from .ventas import (
+from apps.bookings.models import (
     ActividadServicio,
     AlojamientoReserva,
     AlquilerAutoReserva,
     AuditLog,
+    BoletoImportado,
     CircuitoDia,
     CircuitoTuristico,
     EventoServicio,
@@ -43,42 +22,68 @@ from .ventas import (
     PaqueteAereo,
     SegmentoVuelo,
     ServicioAdicionalDetalle,
+    SolicitudAnulacion,
     TrasladoServicio,
     Venta,
     VentaParseMetadata,
 )
+from apps.finance.models import (
+    Factura,
+    ItemFactura,
+    ReporteProveedor,
+    ItemReporte,
+    DiferenciaFinanciera,
+    GastoOperativo,
+)
+from apps.crm.models import Cliente, Pasajero
+from cotizaciones.models import Cotizacion, ItemCotizacion
+from .agencia import Agencia, UsuarioAgencia
+from .migration_checks import MigrationCheck
+
+# Estos siguen en core por ahora (pendientes de fase final de migración total)
+from .contabilidad import AsientoContable, DetalleAsiento, ItemLiquidacion, LiquidacionProveedor, PlanContable
 from .cruceros import CruceroReserva
-from .tarifario_hoteles import TarifarioProveedor, HotelTarifario, TipoHabitacion, TarifaHabitacion
+from .tarifario_hoteles import TarifarioProveedor, HotelTarifario, TipoHabitacion, TarifaHabitacion, Amenity, ImagenHotel
+
+from .facturacion_consolidada import (
+    FacturaConsolidada,
+    ItemFacturaConsolidada,
+    DocumentoExportacionConsolidado
+)
+
+# --- CMS (Migrado a apps.cms) ---
+from apps.cms.models import (
+    Articulo as ArticuloBlog,
+    GuiaDestino as DestinoCMS,
+    PostRedesSociales as PaqueteTuristicoCMS,
+)
+# CMS Models migrados a apps/cms
 
 __all__ = [
     # Agencia
     'Agencia', 'UsuarioAgencia',
     # Contabilidad
-    'AsientoContable', 'PlanContable', 'DetalleAsiento', 'LiquidacionProveedor', 'ItemLiquidacion',
+    'AsientoContable', 'PlanContable', 'DetalleAsiento', 'LiquidacionProveedor', 'ItemLiquidacion', 'GastoOperativo',
     # Ventas y Componentes
     'Venta', 'ItemVenta', 'AlojamientoReserva', 'TrasladoServicio', 'ActividadServicio', 'SegmentoVuelo',
     'FeeVenta', 'PagoVenta', 'AlquilerAutoReserva', 'EventoServicio', 'CircuitoTuristico', 'CircuitoDia',
     'PaqueteAereo', 'ServicioAdicionalDetalle', 'VentaParseMetadata', 'AuditLog', 'CruceroReserva',
-    # Facturación
-    'Factura', 'ItemFactura', 'FacturaVenezuela', 'ItemFacturaVenezuela', 'DocumentoExportacion',
-    # Facturación Consolidada (nuevo)
+    # Facturación Consolidada
     'FacturaConsolidada', 'ItemFacturaConsolidada', 'DocumentoExportacionConsolidado',
     # Boletos
-    'BoletoImportado',
-    'ComunicacionProveedor',
+    'BoletoImportado', 'SolicitudAnulacion',
     # CMS
-    'PaginaCMS', 'DestinoCMS', 'PaqueteTuristicoCMS', 'ArticuloBlog', 'Testimonio', 'MenuItemCMS', 'FormularioContactoCMS',
+    'DestinoCMS', 'PaqueteTuristicoCMS', 'ArticuloBlog',
     # Catálogos
     'Pais', 'Ciudad', 'Moneda', 'TipoCambio', 'Proveedor', 'ProductoServicio', 'Aerolinea', 'ComisionProveedorServicio',
     # Personas
-    'Pasajero', 'Cliente',
+    'Pasajero', 'Cliente', 'MigrationCheck',
     # Cotizaciones
     'Cotizacion', 'ItemCotizacion',
     # Tarifario Hoteles
-    'TarifarioProveedor', 'HotelTarifario', 'TipoHabitacion', 'TarifaHabitacion',
+    'TarifarioProveedor', 'HotelTarifario', 'TipoHabitacion', 'TarifaHabitacion', 'Amenity', 'ImagenHotel',
     # Middleware
     'RequestMetaAuditMiddleware', 'SecurityHeadersMiddleware',
-    # Validators (already in core.validators)
-    'validar_no_vacio_o_espacios',
-    'validar_numero_pasaporte',
+    # Reconciliación
+    'ReporteProveedor', 'ItemReporte',
 ]

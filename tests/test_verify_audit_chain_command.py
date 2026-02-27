@@ -1,7 +1,7 @@
 import pytest
 from django.core.management import call_command
 
-from core.models.ventas import AuditLog
+from apps.bookings.models import AuditLog
 
 
 def test_verify_audit_chain_success(monkeypatch, capsys):

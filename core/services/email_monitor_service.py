@@ -35,9 +35,10 @@ except ImportError:
 class EmailMonitorService:
     """Monitor unificado de correos con múltiples canales de notificación"""
     
-    def __init__(self, notification_type='whatsapp', destination=None, interval=60, mark_as_read=False, process_all=False, force_reprocess=False):
+    def __init__(self, agencia, notification_type='whatsapp', destination=None, interval=60, mark_as_read=False, process_all=False, force_reprocess=False):
         """
         Args:
+            agencia: Instancia de Agencia (con credenciales)
             notification_type: 'whatsapp', 'email', 'whatsapp_drive'
             destination: Número de teléfono o email destino
             interval: Segundos entre verificaciones
@@ -45,8 +46,9 @@ class EmailMonitorService:
             process_all: Procesar todos los correos (incluso leídos)
             force_reprocess: Reprocesar boletos existentes
         """
+        self.agencia = agencia
         self.notification_type = notification_type
-        self.destination = destination
+        self.destination = destination or agencia.whatsapp or agencia.email_ventas
         self.interval = interval
         self.mark_as_read = mark_as_read
         self.process_all = process_all
@@ -57,14 +59,20 @@ class EmailMonitorService:
             self.drive_service = self._init_drive()
 
     def _init_drive(self):
-        """Inicializa servicio de Google Drive"""
+        """Inicializa servicio de Google Drive (TODO: Adaptar para SaaS)"""
         try:
-            SCOPES = ['https://www.googleapis.com/auth/drive.file']
-            credentials = service_account.Credentials.from_service_account_file(
-                settings.GOOGLE_APPLICATION_CREDENTIALS, scopes=SCOPES)
-            return build('drive', 'v3', credentials=credentials)
+            # SaaS: Por ahora solo el servidor principal tiene credenciales de Drive (Service Account)
+            # En el futuro, podríamos leer de self.agencia.configuracion_api['google_drive_json']
+            if hasattr(settings, 'GOOGLE_APPLICATION_CREDENTIALS') and settings.GOOGLE_APPLICATION_CREDENTIALS:
+                if os.path.exists(settings.GOOGLE_APPLICATION_CREDENTIALS):
+                    SCOPES = ['https://www.googleapis.com/auth/drive.file']
+                    credentials = service_account.Credentials.from_service_account_file(
+                        settings.GOOGLE_APPLICATION_CREDENTIALS, scopes=SCOPES)
+                    return build('drive', 'v3', credentials=credentials)
+            
+            return None
         except Exception as e:
-            logger.error(f"Error inicializando Drive: {e}")
+            logger.warning(f"Google Drive no disponible para esta instancia: {e}")
             return None
 
     def procesar_una_vez(self):
@@ -86,8 +94,16 @@ class EmailMonitorService:
 
     def _procesar_correos(self):
         """Procesa correos no leídos y retorna cantidad procesada"""
+        if not self.agencia.email_monitor_user or not self.agencia.email_monitor_password:
+             logger.warning(f"⚠️ Agencia {self.agencia.nombre} no tiene credenciales de correo configuradas.")
+             return 0
+
         mail = imaplib.IMAP4_SSL(settings.GMAIL_IMAP_HOST)
-        mail.login(settings.GMAIL_USER, settings.GMAIL_APP_PASSWORD)
+        try:
+            mail.login(self.agencia.email_monitor_user, self.agencia.email_monitor_password)
+        except Exception as e:
+            logger.error(f"❌ Error Login IMAP Agencia {self.agencia.nombre}: {e}")
+            return 0
         mail.select('inbox')
         
         # Buscar correos según configuración
@@ -147,192 +163,218 @@ class EmailMonitorService:
         
         is_kiu_subject = ('E-TICKET ITINERARY RECEIPT' in subject_upper or 
                          'ETICKET ITINERARY RECEIPT' in subject_upper or
-                         'PASSENGER ITINERARY RECEIPT' in subject_upper)
-        is_kiu_sender = 'kiusys.com' in from_lower or 'travelinkeo@gmail.com' in from_lower
+                         'PASSENGER ITINERARY RECEIPT' in subject_upper or
+                         'TICKETS AVIOR' in subject_upper or
+                         'AVIOR AIRLINES' in subject_upper or
+                         'LASER AIRLINES' in subject_upper or
+                         'RUTACA' in subject_upper or
+                         'VENEZOLANA' in subject_upper)
+                         
+        # Solo KIU oficial fuerza HTML. Reenvíos desde la agencia se tratan dinámicamente.
+        is_official_kiu = 'kiusys.com' in from_lower
         
-        logger.info(f"KIU: {is_kiu_subject or is_kiu_sender}")
+        logger.info(f"Es KIU Oficial: {is_official_kiu} | Subject Ticket: {is_kiu_subject}")
         
-        if is_kiu_subject or is_kiu_sender:
-            logger.info("Procesando como KIU")
+        # 1. Si es correo oficial de KIU, procesar como HTML (Mejor data)
+        if is_official_kiu:
+            logger.info("Procesando KIU Oficial (HTML)")
             return self._procesar_boleto_email(message, msg_num, mail_connection)
         
-        # Otros: PDF adjunto
+        # 2. Si no es oficial (reenvío), priorizar PDF (Caso Sabre/Otros)
         tiene_pdf = self._tiene_pdf_adjunto(message)
         logger.info(f"PDF adjunto: {tiene_pdf}")
         
         if tiene_pdf:
-            logger.info("Procesando PDF adjunto")
-            return self._procesar_boleto_pdf(message, msg_num, mail_connection)
+            logger.info("Procesando PDF adjunto (Prioridad Reenvío)")
+            if self._procesar_boleto_pdf(message, msg_num, mail_connection):
+                return True
+            logger.warning("⚠️ Falló el procesamiento del PDF, intentando fallback a HTML...")
+            
+        # 3. Si no tiene PDF o falló, intentar como HTML si el asunto coincide (Reenvío KIU)
+        if is_kiu_subject:
+            logger.info("Procesando como KIU/HTML por Asunto")
+            return self._procesar_boleto_email(message, msg_num, mail_connection)
         
         logger.warning("No reconocido como boleto")
         return False
 
     def _procesar_boleto_email(self, message, msg_num, mail_connection):
-        """Procesa boleto desde HTML/texto del correo"""
-        logger.info("Extrayendo texto/HTML...")
-        texto = self._extraer_texto(message)
-        html = self._extraer_html(message)
-        
-        # Si no hay texto pero hay HTML, extraer texto del HTML
-        if not texto and html:
-            from bs4 import BeautifulSoup
-            soup = BeautifulSoup(html, 'html.parser')
-            texto = soup.get_text(separator='\n')
-        
-        logger.info(f"Texto: {len(texto) if texto else 0} chars, HTML: {len(html) if html else 0} chars")
-        
-        if not texto and not html:
-            logger.warning("No hay texto ni HTML")
+        """Procesa boleto desde HTML/texto del correo usando TicketParserService"""
+        try:
+            logger.info("📩 Procesando Email (Body/HTML)...")
+            from core.models import BoletoImportado
+            from django.core.files.base import ContentFile
+            from core.services.ticket_parser_service import TicketParserService
+            
+            # 1. Extraer contenido para guardar como archivo .eml o .html de referencia
+            texto = self._extraer_texto(message)
+            html = self._extraer_html(message)
+            
+            if not texto and not html:
+                logger.warning("No hay contenido en el mensaje")
+                return False
+                
+            content = html if html else texto
+            ext = 'html' if html else 'txt'
+            filename = f"email_ticket_{msg_num}.{ext}"
+            
+            # 2. Crear BoletoImportado 'PENDIENTE'
+            # Necesitamos el archivo físico para el parser unificado
+            boleto = BoletoImportado(
+                agencia=self.agencia,
+                estado_parseo=BoletoImportado.EstadoParseo.PENDIENTE,
+                formato_detectado='EMAIL_AUTO'
+            )
+            boleto.archivo_boleto.save(filename, ContentFile(content.encode('utf-8')))
+            boleto.save()
+            logger.info(f"📁 BoletoImportado creado: ID {boleto.pk}")
+
+            # 3. Procesar con Servicio Unificado
+            servicio = TicketParserService()
+            resultado = servicio.procesar_boleto(boleto.pk)
+            
+            # 4. Manejar Resultado
+            return self._manejar_resultado_procesamiento(boleto, resultado)
+
+        except Exception as e:
+            logger.exception(f"❌ Error crítico procesando email {msg_num}: {e}")
             return False
-        
-        logger.info("Parseando datos...")
-        datos = extract_data_from_text(texto, html)
-        
-        if datos.get('error'):
-            logger.warning(f"Error parseando: {datos['error']}")
-            return False
-        
-        logger.info(f"Datos parseados: {datos.get('SOURCE_SYSTEM', 'UNKNOWN')}")
-        return self._guardar_y_notificar(datos, msg_num, mail_connection)
 
     def _procesar_boleto_pdf(self, message, msg_num, mail_connection):
-        """Procesa boleto desde PDF adjunto"""
-        if not PYPDF2_AVAILABLE:
-            logger.error("PyPDF2 no disponible")
-            return False
-        
-        pdf_content = self._extraer_pdf(message)
-        if not pdf_content:
-            return False
-        
-        with tempfile.NamedTemporaryFile(suffix='.pdf', delete=False) as tmp:
-            tmp.write(pdf_content)
-            tmp_path = tmp.name
-        
+        """Procesa todos los boletos desde PDFs adjuntos usando TicketParserService"""
         try:
-            with open(tmp_path, 'rb') as f:
-                reader = PyPDF2.PdfReader(f)
-                texto = '\n'.join(page.extract_text() for page in reader.pages)
-            
-            datos = extract_data_from_text(texto)
-            
-            if datos.get('error'):
-                logger.warning(f"⚠️ PDF no parseado: {datos['error']}")
+            logger.info("📎 Investigando adjuntos PDF...")
+            from core.models import BoletoImportado
+            from django.core.files.base import ContentFile
+            from core.services.ticket_parser_service import TicketParserService
+
+            pdfs = self._extraer_adjuntos_pdf(message)
+            if not pdfs:
+                logger.error("No se encontraron PDFs adjuntos.")
                 return False
             
-            return self._guardar_y_notificar(datos, msg_num, mail_connection)
-        finally:
-            os.unlink(tmp_path)
+            procesados_exito = 0
+            for i, (filename, pdf_content) in enumerate(pdfs):
+                logger.info(f"📄 Guardando PDF {i+1}/{len(pdfs)}: {filename}")
+                
+                final_filename = f"ticket_{msg_num}_{i}_{filename}"
 
-    def _guardar_y_notificar(self, datos, msg_num, mail_connection):
-        """Guarda boleto y envía notificación"""
-        from core.models import BoletoImportado
-        
-        sistema = datos.get('SOURCE_SYSTEM', 'UNKNOWN')
-        logger.info(f"Guardando boleto {sistema}...")
-        
-        # Extraer datos según sistema
-        if sistema == 'SABRE':
-            localizador = datos.get('reserva', {}).get('codigo_reservacion')
-            numero_boleto = datos.get('reserva', {}).get('numero_boleto')
-            pasajero = datos.get('pasajero', {}).get('nombre_completo')
-            aerolinea = datos.get('reserva', {}).get('aerolinea_emisora')
-        else:
-            localizador = datos.get('SOLO_CODIGO_RESERVA') or datos.get('pnr')
-            numero_boleto = datos.get('NUMERO_DE_BOLETO') or datos.get('numero_boleto')
-            pasajero = datos.get('NOMBRE_DEL_PASAJERO') or datos.get('pasajero', {}).get('nombre_completo')
-            aerolinea = datos.get('NOMBRE_AEROLINEA') or datos.get('reserva', {}).get('aerolinea_emisora')
-        
-        logger.info(f"Boleto: {numero_boleto}, PNR: {localizador}, Pasajero: {pasajero}")
-        
-        if not numero_boleto:
-            logger.warning(f"{sistema} sin numero de boleto")
-            return False
-        
-        # Guardar en BD
-        try:
-            logger.info("Guardando en BD...")
-            
-            # Buscar boleto existente (puede haber duplicados)
-            boleto = BoletoImportado.objects.filter(numero_boleto=numero_boleto).first()
-            
-            if boleto:
-                # Ya existe
-                if not self.force_reprocess:
-                    logger.info(f"Boleto {numero_boleto} ya existe")
-                    return False
-                else:
-                    logger.info(f"Boleto {numero_boleto} reprocesando...")
-                    # Actualizar datos
-                    boleto.datos_parseados = datos
-                    boleto.nombre_pasajero_completo = pasajero
-                    boleto.localizador_pnr = localizador
-                    boleto.aerolinea_emisora = aerolinea
-                    boleto.save()
-                    created = False
-            else:
-                # Crear nuevo - ya parseado, solo falta generar PDF
-                boleto = BoletoImportado.objects.create(
-                    numero_boleto=numero_boleto,
-                    localizador_pnr=localizador,
-                    nombre_pasajero_completo=pasajero,
-                    formato_detectado=f'EML_{sistema[:3]}',
-                    estado_parseo='COM',  # Ya parseado por el monitor
-                    datos_parseados=datos,
-                    aerolinea_emisora=aerolinea
+                # 1. Crear BoletoImportado (Signal auto-triggers background processing)
+                boleto = BoletoImportado(
+                    agencia=self.agencia,
+                    estado_parseo=BoletoImportado.EstadoParseo.PENDIENTE,
+                    formato_detectado='PDF_AUTO'
                 )
-                created = True
+                boleto.archivo_boleto.save(final_filename, ContentFile(pdf_content))
+                boleto.save()
+                logger.info(f"📁 BoletoImportado ID {boleto.pk} guardado. Procesamiento en segundo plano iniciado por señal.")
+                procesados_exito += 1
             
-            if created:
-                logger.info(f"Boleto NUEVO guardado (ID: {boleto.pk})")
-            else:
-                logger.info(f"Boleto ACTUALIZADO (ID: {boleto.pk})")
+            return procesados_exito > 0
+            
         except Exception as e:
-            logger.error(f"Error guardando boleto: {e}")
+            logger.exception(f"❌ Error crítico procesando PDFs {msg_num}: {e}")
             return False
+
+    def _manejar_resultado_procesamiento(self, boleto, resultado):
+        """Maneja la respuesta del Parser Service (Éxito, Error o Revisión)"""
         
-        # Generar PDF profesional
+        # Caso 1: Revisión Requerida (Datos faltantes como FOID)
+        if isinstance(resultado, dict) and resultado.get('status') == 'REVIEW_REQUIRED':
+            logger.warning(f"⚠️ BOLETO {boleto.pk} REQUIERE REVISIÓN MANUAL (Datos faltantes)")
+            
+            # Notificar al Agente que debe ingresar datos
+            msg = (
+                f"⚠️ <b>ACCIÓN REQUERIDA</b>\n\n"
+                f"Hemos recibido un boleto pero faltan datos (Cédula/ID).\n"
+                f"🆔 Boleto ID: {boleto.pk}\n\n"
+                f"👉 Por favor ingresa al Dashboard para completarlo."
+            )
+            
+            # Siempre enviamos a Telegram si está configurado (ya no usamos WhatsApp)
+            from core.utils.telegram_utils import send_telegram_alert_sync
+            send_telegram_alert_sync(msg)
+            
+            return True # Contamos como procesado porque ya entró al sistema
+
+        # Caso 2: Exito (Venta creada u objeto retornado)
+        if resultado:
+             # Refrescar para tener datos actualizados
+             boleto.refresh_from_db()
+             
+             # Datos para notificación
+             sistema = boleto.formato_detectado
+             localizador = boleto.localizador_pnr
+             numero = boleto.numero_boleto
+             pasajero = boleto.nombre_pasajero_completo
+             aerolinea = boleto.aerolinea_emisora
+             
+             pdf_path = None
+             pdf_filename = None
+             if boleto.archivo_pdf_generado:
+                 pdf_path = boleto.archivo_pdf_generado.path
+                 pdf_filename = os.path.basename(pdf_path)
+             
+             # Notificar éxito
+             logger.info(f"✅ Notificación centralizada manejada por el Servicio de Parseo para Boleto {boleto.pk}")
+             
+             # Enviar respaldo
+             self._enviar_respaldo_email(boleto, pdf_path)
+             
+             return True
+
+        # Caso 3: Fallo silente o desconocido
+        logger.error(f"❌ Procesamiento falló para Boleto {boleto.pk}")
+        return False
+
+    def _enviar_respaldo_email(self, boleto, pdf_path):
+        """Envía copia oculta de respaldo a soporte de la agencia"""
         try:
-            logger.info("Generando PDF profesional...")
-            pdf_bytes, pdf_filename = generate_ticket(datos)
-            
-            media_dir = os.path.join(settings.BASE_DIR, 'media', 'boletos_generados')
-            os.makedirs(media_dir, exist_ok=True)
-            pdf_path = os.path.join(media_dir, pdf_filename)
-            
-            with open(pdf_path, 'wb') as f:
-                f.write(pdf_bytes)
-            
-            # Guardar referencia del PDF en el boleto
-            from django.core.files import File
-            with open(pdf_path, 'rb') as f:
-                boleto.archivo_pdf_generado.save(pdf_filename, File(f), save=True)
-            
-            logger.info(f"PDF generado: {pdf_filename}")
+            # SaaS Fix: Usar email de soporte de la agencia en lugar de hardcode
+            destino = self.agencia.email_soporte
+            if not destino:
+                return # Si no hay email de soporte, no enviamos respaldo
+                
+            email_msg = EmailMessage(
+                subject=f'Boleto Auto (Respaldo) - {boleto.localizador_pnr}',
+                body=f'Respaldo automático ID {boleto.pk} para {self.agencia.nombre}',
+                from_email=self.agencia.email_principal or settings.EMAIL_HOST_USER,
+                to=[destino]
+            )
+            if pdf_path and os.path.exists(pdf_path):
+                email_msg.attach_file(pdf_path)
+            email_msg.send()
         except Exception as e:
-            logger.error(f"Error generando PDF: {e}")
-            return False
-        
-        # Enviar notificación
-        resultado = self._enviar_notificacion(sistema, localizador, numero_boleto, pasajero, aerolinea, pdf_path, pdf_filename)
-        
-        if resultado and self.mark_as_read:
-            mail_connection.store(msg_num, '+FLAGS', '\\Seen')
-        
-        return resultado
+            logger.warning(f"Error enviando respaldo email: {e}")
 
     def _enviar_notificacion(self, sistema, localizador, numero_boleto, pasajero, aerolinea, pdf_path, pdf_filename):
-        """Envía notificación según el tipo configurado"""
-        if self.notification_type == 'whatsapp':
-            return self._enviar_whatsapp(sistema, localizador, numero_boleto, pasajero, aerolinea, pdf_filename)
+        """Envía notificación usando Telegram (Por defecto) o Email"""
         
+        # Prioridad absoluta a Telegram para mensajería instantánea
+        if self.notification_type == 'telegram' or self.notification_type == 'whatsapp': # Fallback whatsapp -> telegram
+            return self._enviar_telegram(sistema, localizador, numero_boleto, pasajero, aerolinea, pdf_path)
+
         elif self.notification_type == 'email':
             return self._enviar_email(sistema, localizador, numero_boleto, pasajero, aerolinea, pdf_path)
         
-        elif self.notification_type == 'whatsapp_drive':
-            return self._enviar_whatsapp_drive(sistema, localizador, numero_boleto, pasajero, aerolinea, pdf_path)
-        
         return False
+
+    def _enviar_telegram(self, sistema, localizador, numero_boleto, pasajero, aerolinea, pdf_path):
+        """Envía notificación por Telegram con el PDF adjunto"""
+        from core.utils.telegram_utils import send_telegram_file_sync
+        
+        mensaje = (
+            f"✈️ <b>Boleto {sistema} Procesado</b>\n\n"
+            f"📍 PNR: <code>{localizador or 'N/A'}</code>\n"
+            f"🎫 Boleto: {numero_boleto}\n"
+            f"👤 Pasajero: {pasajero or 'N/A'}\n"
+            f"✈️ Aerolínea: {aerolinea or 'N/A'}\n\n"
+            f"<i>TravelHub - Oficina Digital</i>"
+        )
+        
+        logger.info(f"📤 Enviando Telegram a Admin...")
+        return send_telegram_file_sync(pdf_path, caption=mensaje)
+
 
     def _enviar_whatsapp(self, sistema, localizador, numero_boleto, pasajero, aerolinea, pdf_filename):
         """Envía notificación por WhatsApp"""
@@ -364,9 +406,12 @@ Aerolínea: {aerolinea}
 PDF adjunto.
 
 TravelHub - Sistema Automático''',
-                from_email=settings.EMAIL_HOST_USER,
                 to=[self.destination]
             )
+            
+            # SaaS Fix: Configurar From Email si la agencia tiene SMTP propio
+            if self.agencia.email_principal:
+                email_msg.from_email = self.agencia.email_principal
             
             email_msg.attach_file(pdf_path)
             email_msg.send()
@@ -439,20 +484,42 @@ _TravelHub - Sistema Automático_"""
             return None
 
     def _tiene_pdf_adjunto(self, message):
-        """Verifica si el mensaje tiene PDF adjunto"""
+        """Verifica si el mensaje tiene PDF adjunto (por Content-Type o nombre)"""
         if message.is_multipart():
             for part in message.walk():
-                if part.get_content_type() == 'application/pdf':
+                ctype = part.get_content_type()
+                filename = part.get_filename() or ""
+                
+                # Debug logging para entender qué está llegando
+                logger.debug(f"Parte MIME: {ctype} - Filename: {filename}")
+                
+                if ctype == 'application/pdf':
+                    return True
+                if filename.lower().endswith('.pdf'):
                     return True
         return False
 
-    def _extraer_pdf(self, message):
-        """Extrae el contenido del primer PDF adjunto"""
+    def _extraer_adjuntos_pdf(self, message):
+        """Extrae el contenido de todos los PDF adjuntos"""
+        pdfs = []
         if message.is_multipart():
             for part in message.walk():
-                if part.get_content_type() == 'application/pdf':
-                    return part.get_payload(decode=True)
-        return None
+                ctype = part.get_content_type()
+                filename = part.get_filename() or "adjunto.pdf"
+                
+                # Check for PDF by type OR extension
+                is_pdf = (ctype == 'application/pdf') or (filename.lower().endswith('.pdf'))
+                
+                if is_pdf:
+                    payload = part.get_payload(decode=True)
+                    if payload:
+                         pdfs.append((filename, payload))
+        return pdfs
+
+    def _extraer_pdf(self, message):
+        """Extrae el contenido del primer PDF adjunto (Retrocompatibilidad)"""
+        pdfs = self._extraer_adjuntos_pdf(message)
+        return pdfs[0][1] if pdfs else None
 
     def _extraer_texto(self, message):
         """Extrae texto plano del email"""

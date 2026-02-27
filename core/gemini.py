@@ -1,10 +1,11 @@
+import os
 import google.generativeai as genai
 from django.conf import settings
 
 class GeminiConfigurationError(RuntimeError):
     """Se lanza cuando la clave de API de Gemini no está configurada."""
 
-API_KEY = getattr(settings, 'GEMINI_API_KEY', None)
+API_KEY = getattr(settings, 'GEMINI_API_KEY', os.getenv('GEMINI_API_KEY'))
 if not API_KEY:
     _GEMINI_READY = False
 else:
@@ -36,7 +37,7 @@ def get_gemini_model(force_json_output: bool = False):
         )
     else:
         # Comportamiento por defecto para mantener compatibilidad
-        return genai.GenerativeModel('gemini-pro')
+        return genai.GenerativeModel('gemini-1.5-flash')
 
 def generate_content(prompt: str) -> str:
     """Genera contenido usando el modelo Gemini.

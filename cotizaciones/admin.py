@@ -7,14 +7,14 @@ from .pdf_service import generar_pdf_cotizacion
 class ItemCotizacionInline(admin.TabularInline):
     model = ItemCotizacion
     extra = 1
-    # We can add a custom form later to pretty-print the JSONField
-    fields = ('tipo_item', 'descripcion', 'costo', 'detalles_json')
+    fields = ('tipo_item', 'descripcion', 'costo')
     readonly_fields = ()
+    # autocomplete_fields = ['producto_servicio'] # Not present in new model
 
 @admin.register(Cotizacion)
 class CotizacionAdmin(admin.ModelAdmin):
-    list_display = ('numero_cotizacion', 'cliente', 'destino', 'fecha_emision', 'total_cotizado', 'consultor', 'estado')
-    search_fields = ('numero_cotizacion', 'cliente__nombres', 'cliente__apellidos', 'destino')
+    list_display = ('numero_cotizacion', 'cliente_display', 'destino', 'fecha_emision', 'total_cotizado', 'consultor', 'estado')
+    search_fields = ('numero_cotizacion', 'cliente__nombres', 'cliente__apellidos', 'nombre_cliente_manual', 'destino')
     list_filter = ('estado', 'fecha_emision', 'consultor')
     autocomplete_fields = ['cliente', 'consultor']
     inlines = [ItemCotizacionInline]
@@ -23,18 +23,26 @@ class CotizacionAdmin(admin.ModelAdmin):
 
     fieldsets = (
         (None, {
-            'fields': ('numero_cotizacion', 'estado', 'cliente', 'consultor')
+            'fields': ('numero_cotizacion', 'estado', 'consultor')
+        }),
+        ('Cliente', {
+            'fields': ('cliente', 'nombre_cliente_manual'),
+            'description': 'Seleccione un cliente registrado o ingrese un nombre para un prospecto.'
         }),
         ('Detalles del Viaje', {
-            'fields': ('destino', 'numero_pasajeros', 'fecha_emision', 'fecha_vencimiento')
+            'fields': ('destino', 'fecha_emision', 'fecha_validez')
         }),
         ('Financiero', {
             'fields': ('total_cotizado',)
         }),
         ('Términos y PDF', {
-            'fields': ('terminos_pago', 'terminos_cancelacion', 'notas', 'ver_pdf')
+            'fields': ('condiciones_comerciales', 'notas_internas', 'ver_pdf')
         }),
     )
+
+    def cliente_display(self, obj):
+        return obj.cliente if obj.cliente else f"{obj.nombre_cliente_manual} (Manual)"
+    cliente_display.short_description = "Cliente"
 
     def ver_pdf(self, obj):
         if obj.archivo_pdf:
@@ -46,6 +54,8 @@ class CotizacionAdmin(admin.ModelAdmin):
     def generar_pdf_action(self, request, queryset):
         for cotizacion in queryset:
             try:
+                # Asegurar cálculo antes de generar
+                cotizacion.calcular_total()
                 pdf_bytes = generar_pdf_cotizacion(cotizacion)
                 pdf_filename = f"cotizacion_{cotizacion.numero_cotizacion}.pdf"
                 cotizacion.archivo_pdf.save(pdf_filename, ContentFile(pdf_bytes), save=True)

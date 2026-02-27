@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "QUINTERO ZULUAGA/JEIVER STIVEN",
+  "CODIGO_IDENTIFICACION": "84548016",
+  "SOLO_NOMBRE_PASAJERO": "JEIVER STIVEN",
+  "NUMERO_DE_BOLETO": "7650211241792",
+  "FECHA_DE_EMISION": "12 DEC 2025 15:06",
+  "AGENTE_EMISOR": "BLA005RML",
+  "CODIGO_RESERVA": "WPVABZ",
+  "SOLO_CODIGO_RESERVA": "WPVABZ",
+  "NOMBRE_AEROLINEA": "RUTACA AIRLINES",
+  "DIRECCION_AEROLINEA": null,
+  "vuelos": [
+    {
+      "aerolinea": "5R",
+      "numero_vuelo": "370",
+      "origen": "CARACAS",
+      "fecha_salida": "23 DEC 2025",
+      "hora_salida": "0800",
+      "destino": "SAN ANTONIO",
+      "hora_llegada": "0900",
+      "cabina": "Y",
+      "clase": "Y",
+      "localizador_aerolinea": "WPVABZ"
+    }
+  ],
+  "TARIFA": "25891.42",
+  "IMPUESTOS": "12662.71",
+  "TOTAL": "38554.13",
+  "SOURCE_SYSTEM": "AI_KIU",
+  "es_remision": false,
+  "NOMBRE DEL PASAJERO": "QUINTERO ZULUAGA/JEIVER STIVEN",
+  "CODIGO IDENTIFICACION": "84548016",
+  "SOLO NOMBRE PASAJERO": "JEIVER STIVEN",
+  "NUMERO DE BOLETO": "7650211241792",
+  "FECHA DE EMISION": "12 DEC 2025 15:06",
+  "AGENTE EMISOR": "BLA005RML",
+  "CODIGO RESERVA": "WPVABZ",
+  "SOLO CODIGO RESERVA": "WPVABZ",
+  "NOMBRE AEROLINEA": "RUTACA AIRLINES",
+  "DIRECCION AEROLINEA": null,
+  "SOURCE SYSTEM": "AI_KIU",
+  "es remision": false
+}

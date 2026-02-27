@@ -1,0 +1,43 @@
+Found 1 files to analyze.
+
+Processing: Boleto_913_Boleto_7817366243720_20260205203217.pdf.pdf
+  Opening PDF...
+  PDF Opened. Pages: 1
+  Extracting page 1...
+  Page 1 extracted bytes: 834
+  PDF Extraction Complete.
+Text Length: 835
+--- FULL PDF TEXT ---
+TELEFONO: +584123312314 / +584126080861
+MAIL INFO: TRAVELINKEO@GMAIL.COM
+Boleto Electrónico Confirmado
+Hola, DANIEL SANTIAGO. Tu reserva está confirmada:
+Información del Pasajero
+Nombre: Documento:
+GIRALDO CASTANO/DANIEL SANTIAGO BH784655
+Detalles de la Reserva
+Código de Reserva: Número de Boleto:
+IBNIEQ 7817366243720
+Fecha de Emisión: Agente Emisor IATA:
+2026-02-05 10617390
+Aerolínea:
+China Eastern
+Itinerario de Vuelo
+Fecha Aerolínea Salida Llegada Otras Notas
+SPAIN SHANGHAI
+China Eastern MADRID PNR: MG8P1N
+11 mar 26 PUDONG
+MU710 10:30 Cabina: TURISTA
+06:20
+SPAIN SHANGHAI PNR: MG8P1N
+China Eastern MADRID
+24 mar 26 PUDONG Cabina: TURISTA
+MU569 12:25
+18:05 Equipaje: 1PC
+Gracias por elegirnos. ¡Te deseamos un excelente viaje!
+@TRAVELINKEO | +58412 3312314 / +58412 6080861 | PROLONGACION ZULUAGA, EDIF. Q, LOS ROSALES, CARACAS
+
+---------------------
+[FAIL] No Flight Section Found via Regex
+  > PNR: No encontrado
+  > Flight Count: 0

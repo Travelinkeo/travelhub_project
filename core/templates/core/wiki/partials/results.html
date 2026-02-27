@@ -1,0 +1,17 @@
+{% if articulos %}
+<div class="space-y-3 animate-fade-in-up">
+    {% for art in articulos %}
+    <div class="bg-amber-50 border-l-4 border-amber-400 p-3 rounded-r shadow-sm">
+        <div class="flex items-center gap-2 mb-1">
+            <span class="text-xs font-bold px-1.5 py-0.5 rounded bg-amber-200 text-amber-800">
+                INFO
+            </span>
+            <h4 class="text-sm font-bold text-slate-800">{{ art.titulo }}</h4>
+        </div>
+        <div class="text-xs text-slate-700 prose prose-sm max-w-none prose-p:my-0">
+            {{ art.contenido|safe }}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}

@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "GOMEZ PEREZ/MIA VALENTINA",
+  "CODIGO_IDENTIFICACION": "FN05FEB24",
+  "SOLO_NOMBRE_PASAJERO": "MIA VALENTINA",
+  "NUMERO_DE_BOLETO": "7820340845926",
+  "FECHA_DE_EMISION": "13 SEP 2025 15:10",
+  "AGENTE_EMISOR": "PTYS3651X",
+  "CODIGO_RESERVA": "MENBHS",
+  "SOLO_CODIGO_RESERVA": "MENBHS",
+  "NOMBRE_AEROLINEA": "LASER C.A.",
+  "DIRECCION_AEROLINEA": null,
+  "vuelos": [
+    {
+      "aerolinea": "QL",
+      "numero_vuelo": "942",
+      "origen": "CARACAS",
+      "fecha_salida": "16SEP2025",
+      "hora_salida": "0830",
+      "destino": "MARACAIBO",
+      "hora_llegada": "TOWCCS",
+      "cabina": "T",
+      "clase": "Y",
+      "localizador_aerolinea": "MENBHS"
+    }
+  ],
+  "TARIFA": "0.00",
+  "IMPUESTOS": "0.00",
+  "TOTAL": "0.00",
+  "SOURCE_SYSTEM": "AI_KIU",
+  "es_remision": false,
+  "NOMBRE DEL PASAJERO": "GOMEZ PEREZ/MIA VALENTINA",
+  "CODIGO IDENTIFICACION": "FN05FEB24",
+  "SOLO NOMBRE PASAJERO": "MIA VALENTINA",
+  "NUMERO DE BOLETO": "7820340845926",
+  "FECHA DE EMISION": "13 SEP 2025 15:10",
+  "AGENTE EMISOR": "PTYS3651X",
+  "CODIGO RESERVA": "MENBHS",
+  "SOLO CODIGO RESERVA": "MENBHS",
+  "NOMBRE AEROLINEA": "LASER C.A.",
+  "DIRECCION AEROLINEA": null,
+  "SOURCE SYSTEM": "AI_KIU",
+  "es remision": false
+}

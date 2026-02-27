@@ -1,0 +1,229 @@
+Found 6 files to analyze.
+
+Processing: Recibo de pasaje electrónico, 09 marzo para DANIEL SANTIAGO GIRALDO CASTANO.pdf
+Text Length: 4686
+--- FLIGHT SECTION ---
+
+FECHA AEROLÍNEA SALIDA LLEGADA OTRAS NOTAS
+Salida: 09 mar 26 AIR EUROPA LINEAS MEDELLIN, COLOMBIA MADRID, SPAIN Código de reservación de
+Llegada: 10 mar 26 AEREAS la aerolínea AF7QAT
+UX 198 Cabina TURISTA
+Hora Hora Número de asiento
+REQUIERE CHECK-IN
+21:50 13:20
+Operado por: Límite de equipaje 1PC
+Terminal Estado de la reservación
+AIR EUROPA LINEAS
+TERMINAL 1 CONFIRMADO
+AEREAS, S.A.
+Base de tarifa PLYRAE
+No válido antes del
+09 MAR 26
+No válido después del
+09 MAR 26
+Est. emission
+353.94 KG CO2
+Esta no es una tarjeta de embarque
+26 mar 26 AIR EUROPA LINEAS PARIS ORLY, FRANCE MADRID, SPAIN Códig
+----------------------
+  > PNR: GHDAVY
+  > Flight Count: 3
+    [Flight 1]
+      - Date: 09 mar 26 / 10 mar 26
+      - Route: {'ciudad': 'MEDELLIN', 'pais': 'COLOMBIA'} -> {'ciudad': 'MADRID', 'pais': 'SPAIN'}
+      - Raw Block Snippet: Air Europa UX198
+    [Flight 2]
+      - Date: 26 mar 26 / None
+      - Route: {'ciudad': 'PARIS ORLY', 'pais': 'FRANCE'} -> {'ciudad': 'MADRID', 'pais': None}
+      - Raw Block Snippet: Air Europa UX1028
+    [Flight 3]
+      - Date: 26 mar 26 / None
+      - Route: {'ciudad': 'MADRID', 'pais': 'SPAIN'} -> {'ciudad': 'MEDELLIN', 'pais': None}
+      - Raw Block Snippet: Air Europa UX199
+
+Processing: Recibo de pasaje electrónico, 09 marzo para JUAN CAMILO GIRALDO CASTANO.pdf
+Text Length: 4682
+--- FLIGHT SECTION ---
+
+FECHA AEROLÍNEA SALIDA LLEGADA OTRAS NOTAS
+Salida: 09 mar 26 AIR EUROPA LINEAS MEDELLIN, COLOMBIA MADRID, SPAIN Código de reservación de
+Llegada: 10 mar 26 AEREAS la aerolínea AF7QAT
+UX 198 Cabina TURISTA
+Hora Hora Número de asiento
+REQUIERE CHECK-IN
+21:50 13:20
+Operado por: Límite de equipaje 1PC
+Terminal Estado de la reservación
+AIR EUROPA LINEAS
+TERMINAL 1 CONFIRMADO
+AEREAS, S.A.
+Base de tarifa PLYRAE
+No válido antes del
+09 MAR 26
+No válido después del
+09 MAR 26
+Est. emission
+353.94 KG CO2
+Esta no es una tarjeta de embarque
+26 mar 26 AIR EUROPA LINEAS PARIS ORLY, FRANCE MADRID, SPAIN Códig
+----------------------
+  > PNR: GHDAVY
+  > Flight Count: 3
+    [Flight 1]
+      - Date: 09 mar 26 / 10 mar 26
+      - Route: {'ciudad': 'MEDELLIN', 'pais': 'COLOMBIA'} -> {'ciudad': 'MADRID', 'pais': 'SPAIN'}
+      - Raw Block Snippet: Air Europa UX198
+    [Flight 2]
+      - Date: 26 mar 26 / None
+      - Route: {'ciudad': 'PARIS ORLY', 'pais': 'FRANCE'} -> {'ciudad': 'MADRID', 'pais': None}
+      - Raw Block Snippet: Air Europa UX1028
+    [Flight 3]
+      - Date: 26 mar 26 / None
+      - Route: {'ciudad': 'MADRID', 'pais': 'SPAIN'} -> {'ciudad': 'MEDELLIN', 'pais': None}
+      - Raw Block Snippet: Air Europa UX199
+
+Processing: Recibo de pasaje electrónico, 09 marzo para YUDETSY YAMILETH RAMIREZ ENAO.pdf
+Text Length: 4684
+--- FLIGHT SECTION ---
+
+FECHA AEROLÍNEA SALIDA LLEGADA OTRAS NOTAS
+Salida: 09 mar 26 AIR EUROPA LINEAS MEDELLIN, COLOMBIA MADRID, SPAIN Código de reservación de
+Llegada: 10 mar 26 AEREAS la aerolínea AF7QAT
+UX 198 Cabina TURISTA
+Hora Hora Número de asiento
+REQUIERE CHECK-IN
+21:50 13:20
+Operado por: Límite de equipaje 1PC
+Terminal Estado de la reservación
+AIR EUROPA LINEAS
+TERMINAL 1 CONFIRMADO
+AEREAS, S.A.
+Base de tarifa PLYRAE
+No válido antes del
+09 MAR 26
+No válido después del
+09 MAR 26
+Est. emission
+353.94 KG CO2
+Esta no es una tarjeta de embarque
+26 mar 26 AIR EUROPA LINEAS PARIS ORLY, FRANCE MADRID, SPAIN Códig
+----------------------
+  > PNR: GHDAVY
+  > Flight Count: 3
+    [Flight 1]
+      - Date: 09 mar 26 / 10 mar 26
+      - Route: {'ciudad': 'MEDELLIN', 'pais': 'COLOMBIA'} -> {'ciudad': 'MADRID', 'pais': 'SPAIN'}
+      - Raw Block Snippet: Air Europa UX198
+    [Flight 2]
+      - Date: 26 mar 26 / None
+      - Route: {'ciudad': 'PARIS ORLY', 'pais': 'FRANCE'} -> {'ciudad': 'MADRID', 'pais': None}
+      - Raw Block Snippet: Air Europa UX1028
+    [Flight 3]
+      - Date: 26 mar 26 / None
+      - Route: {'ciudad': 'MADRID', 'pais': 'SPAIN'} -> {'ciudad': 'MEDELLIN', 'pais': None}
+      - Raw Block Snippet: Air Europa UX199
+
+Processing: Recibo de pasaje electrónico, 11 marzo para DANIEL SANTIAGO GIRALDO CASTANO.pdf
+Text Length: 4278
+--- FLIGHT SECTION ---
+
+FECHA AEROLÍNEA SALIDA LLEGADA OTRAS NOTAS
+Salida: 11 mar 26 CHINA EASTERN MADRID, SPAIN SHANGHAI PUDONG, Código de reservación de
+Llegada: 12 mar 26 AIRLINES CHINA la aerolínea MG8P1N
+MU 710 Cabina TURISTA
+Hora Número de asiento
+10:30 Hora REQUIERE CHECK-IN
+Operado por: Terminal 06:20 L E í s m ta it d e o d d e e e la q u re ip s a e je rv a 1 c P ió C n
+CHINA EASTERN TERMINAL 1 Terminal CONFIRMADO
+AIRLINES
+TERMINAL 1 Base de tarifa
+R2L0TBSA
+No válido antes del
+11 MAR 26
+No válido después del
+11 MAR 26
+Est. emission
+496.37 KG CO2
+Esta no es una tarjeta de embarque
+24 mar 26 CHINA EASTERN SH
+----------------------
+  > PNR: IBNIEQ
+  > Flight Count: 2
+    [Flight 1]
+      - Date: 11 mar 26 / 12 mar 26
+      - Route: {'ciudad': 'MADRID', 'pais': 'SPAIN'} -> {'ciudad': 'SHANGHAI PUDONG', 'pais': None}
+      - Raw Block Snippet: China Eastern MU710
+    [Flight 2]
+      - Date: 24 mar 26 / None
+      - Route: {'ciudad': 'SHANGHAI PUDONG', 'pais': 'PARIS'} -> {'ciudad': 'DE GAULLE', 'pais': None}
+      - Raw Block Snippet: China Eastern MU569
+
+Processing: Recibo de pasaje electrónico, 11 marzo para JUAN CAMILO GIRALDO CASTANO.pdf
+Text Length: 4274
+--- FLIGHT SECTION ---
+
+FECHA AEROLÍNEA SALIDA LLEGADA OTRAS NOTAS
+Salida: 11 mar 26 CHINA EASTERN MADRID, SPAIN SHANGHAI PUDONG, Código de reservación de
+Llegada: 12 mar 26 AIRLINES CHINA la aerolínea MG8P1N
+MU 710 Cabina TURISTA
+Hora Número de asiento
+10:30 Hora REQUIERE CHECK-IN
+Operado por: Terminal 06:20 L E í s m ta it d e o d d e e e la q u re ip s a e je rv a 1 c P ió C n
+CHINA EASTERN TERMINAL 1 Terminal CONFIRMADO
+AIRLINES
+TERMINAL 1 Base de tarifa
+R2L0TBSA
+No válido antes del
+11 MAR 26
+No válido después del
+11 MAR 26
+Est. emission
+496.37 KG CO2
+Esta no es una tarjeta de embarque
+24 mar 26 CHINA EASTERN SH
+----------------------
+  > PNR: IBNIEQ
+  > Flight Count: 2
+    [Flight 1]
+      - Date: 11 mar 26 / 12 mar 26
+      - Route: {'ciudad': 'MADRID', 'pais': 'SPAIN'} -> {'ciudad': 'SHANGHAI PUDONG', 'pais': None}
+      - Raw Block Snippet: China Eastern MU710
+    [Flight 2]
+      - Date: 24 mar 26 / None
+      - Route: {'ciudad': 'SHANGHAI PUDONG', 'pais': 'PARIS'} -> {'ciudad': 'DE GAULLE', 'pais': None}
+      - Raw Block Snippet: China Eastern MU569
+
+Processing: Recibo de pasaje electrónico, 11 marzo para YUDETSY YAMILETH RAMIREZ ENAO.pdf
+Text Length: 4276
+--- FLIGHT SECTION ---
+
+FECHA AEROLÍNEA SALIDA LLEGADA OTRAS NOTAS
+Salida: 11 mar 26 CHINA EASTERN MADRID, SPAIN SHANGHAI PUDONG, Código de reservación de
+Llegada: 12 mar 26 AIRLINES CHINA la aerolínea MG8P1N
+MU 710 Cabina TURISTA
+Hora Número de asiento
+10:30 Hora REQUIERE CHECK-IN
+Operado por: Terminal 06:20 L E í s m ta it d e o d d e e e la q u re ip s a e je rv a 1 c P ió C n
+CHINA EASTERN TERMINAL 1 Terminal CONFIRMADO
+AIRLINES
+TERMINAL 1 Base de tarifa
+R2L0TBSA
+No válido antes del
+11 MAR 26
+No válido después del
+11 MAR 26
+Est. emission
+496.37 KG CO2
+Esta no es una tarjeta de embarque
+24 mar 26 CHINA EASTERN SH
+----------------------
+  > PNR: IBNIEQ
+  > Flight Count: 2
+    [Flight 1]
+      - Date: 11 mar 26 / 12 mar 26
+      - Route: {'ciudad': 'MADRID', 'pais': 'SPAIN'} -> {'ciudad': 'SHANGHAI PUDONG', 'pais': None}
+      - Raw Block Snippet: China Eastern MU710
+    [Flight 2]
+      - Date: 24 mar 26 / None
+      - Route: {'ciudad': 'SHANGHAI PUDONG', 'pais': 'PARIS'} -> {'ciudad': 'DE GAULLE', 'pais': None}
+      - Raw Block Snippet: China Eastern MU569

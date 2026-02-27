@@ -1,3 +1,5 @@
+# Archivo: core/models/contabilidad.py
+
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -109,7 +111,7 @@ class DetalleAsiento(models.Model):
 class LiquidacionProveedor(models.Model):
     id_liquidacion = models.AutoField(primary_key=True)
     proveedor = models.ForeignKey('core.Proveedor', on_delete=models.PROTECT, verbose_name=_("Proveedor"))
-    venta = models.ForeignKey('core.Venta', on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_("Venta Asociada"))
+    venta = models.ForeignKey('bookings.Venta', on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_("Venta Asociada"))
     fecha_emision = models.DateField(_("Fecha de Emisión"), default=timezone.now)
     fecha_vencimiento = models.DateField(_("Fecha de Vencimiento"), blank=True, null=True)
     monto_total = models.DecimalField(_("Monto Total a Pagar"), max_digits=12, decimal_places=2, default=0)
@@ -150,7 +152,7 @@ class LiquidacionProveedor(models.Model):
 class ItemLiquidacion(models.Model):
     id_item_liquidacion = models.AutoField(primary_key=True)
     liquidacion = models.ForeignKey(LiquidacionProveedor, related_name='items', on_delete=models.CASCADE, verbose_name=_("Liquidación"))
-    item_venta = models.OneToOneField('core.ItemVenta', on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_("Item de Venta Original"))
+    item_venta = models.OneToOneField('bookings.ItemVenta', on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_("Item de Venta Original"))
     descripcion = models.CharField(_("Descripción"), max_length=500)
     monto = models.DecimalField(_("Monto a Pagar"), max_digits=12, decimal_places=2)
 

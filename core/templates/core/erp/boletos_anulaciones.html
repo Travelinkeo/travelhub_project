@@ -1,0 +1,196 @@
+{% extends 'base_modern.html' %}
+{% load humanize %}
+
+{% block title %}Solicitar Anulación - TravelHub{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+    <div>
+        <h2 class="text-3xl font-bold text-white mb-1">Solicitud de Anulación</h2>
+        <p class="text-gray-400">Gestiona reembolsos y anulaciones de boletos.</p>
+    </div>
+</div>
+
+{% include 'core/erp/partials/boletos_nav.html' %}
+
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <!-- Formulario -->
+    <div class="glass-panel rounded-xl p-6">
+        <h3 class="text-xl font-bold text-white mb-6">Detalles de la Solicitud</h3>
+
+        <div class="space-y-4">
+            <div>
+                <label class="block text-xs text-gray-400 mb-1">ID Boleto (Sistema)</label>
+                <input type="number" id="boleto_id" placeholder="Ej: 12345"
+                    class="w-full bg-dark-800 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-primary">
+            </div>
+
+            <div>
+                <label class="block text-xs text-gray-400 mb-1">Tipo de Anulación</label>
+                <select id="tipo_anulacion"
+                    class="w-full bg-dark-800 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-primary">
+                    <option value="VOL">Voluntaria</option>
+                    <option value="INV">Involuntaria</option>
+                    <option value="CAM">Cambio de Itinerario</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-xs text-gray-400 mb-1">Motivo</label>
+                <textarea id="motivo" rows="3" placeholder="Explique el motivo..."
+                    class="w-full bg-dark-800 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-primary"></textarea>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-xs text-gray-400 mb-1">Monto Original</label>
+                    <input type="number" step="0.01" id="monto_original" placeholder="0.00"
+                        class="w-full bg-dark-800 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-primary"
+                        oninput="calcularReembolso()">
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-400 mb-1">Penalidad Aerolínea</label>
+                    <input type="number" step="0.01" id="penalidad_aerolinea" placeholder="0.00"
+                        class="w-full bg-dark-800 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-primary"
+                        oninput="calcularReembolso()">
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-400 mb-1">Fee Agencia</label>
+                    <input type="number" step="0.01" id="fee_agencia" placeholder="0.00"
+                        class="w-full bg-dark-800 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-primary"
+                        oninput="calcularReembolso()">
+                </div>
+            </div>
+
+            <div class="pt-4 border-t border-white/10">
+                <div class="flex justify-between items-center mb-6">
+                    <span class="text-gray-400">Monto a Reembolsar Estimado:</span>
+                    <span id="monto_reembolso_display" class="text-2xl font-bold text-emerald-400">$0.00</span>
+                </div>
+
+                <button onclick="solicitarAnulacion()"
+                    class="w-full px-8 py-3 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors font-bold flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+                        </path>
+                    </svg>
+                    Solicitar Anulación
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Info / Resultado -->
+    <div class="space-y-6">
+        <div class="glass-panel rounded-xl p-6 bg-blue-500/10 border border-blue-500/20">
+            <h3 class="text-lg font-bold text-blue-400 mb-2 flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                Información Importante
+            </h3>
+            <p class="text-sm text-gray-300 leading-relaxed">
+                Las anulaciones están sujetas a las políticas de la aerolínea. El monto de reembolso calculado es una
+                estimación y puede variar según la confirmación final del proveedor.
+            </p>
+        </div>
+
+        <div id="resultado-exito"
+            class="hidden glass-panel rounded-xl p-6 bg-emerald-500/10 border border-emerald-500/20">
+            <h3 class="text-lg font-bold text-emerald-400 mb-2 flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                Solicitud Exitosa
+            </h3>
+            <p class="text-sm text-gray-300 mb-4">La anulación ha sido registrada correctamente.</p>
+            <div class="bg-black/20 rounded p-4">
+                <p class="text-xs text-gray-400">ID Anulación: <span id="res-id" class="text-white font-mono">--</span>
+                </p>
+                <p class="text-xs text-gray-400">Reembolso Final: <span id="res-monto"
+                        class="text-white font-mono">--</span></p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    function calcularReembolso() {
+        const original = parseFloat(document.getElementById('monto_original').value) || 0;
+        const penalidad = parseFloat(document.getElementById('penalidad_aerolinea').value) || 0;
+        const fee = parseFloat(document.getElementById('fee_agencia').value) || 0;
+
+        const reembolso = Math.max(0, original - penalidad - fee);
+        document.getElementById('monto_reembolso_display').textContent = `$${reembolso.toFixed(2)}`;
+    }
+
+    async function solicitarAnulacion() {
+        const data = {
+            boleto: document.getElementById('boleto_id').value,
+            tipo_anulacion: document.getElementById('tipo_anulacion').value,
+            motivo: document.getElementById('motivo').value,
+            monto_original: document.getElementById('monto_original').value,
+            penalidad_aerolinea: document.getElementById('penalidad_aerolinea').value,
+            fee_agencia: document.getElementById('fee_agencia').value
+        };
+
+        if (!data.boleto || !data.monto_original) {
+            alert('Por favor complete los campos obligatorios (ID Boleto y Monto Original)');
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/boletos/solicitar-anulacion/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                document.getElementById('resultado-exito').classList.remove('hidden');
+                document.getElementById('res-id').textContent = result.id_anulacion;
+                document.getElementById('res-monto').textContent = `$${result.monto_reembolso.toFixed(2)}`;
+
+                // Limpiar form
+                document.getElementById('boleto_id').value = '';
+                document.getElementById('motivo').value = '';
+                document.getElementById('monto_original').value = '';
+                calcularReembolso();
+            } else {
+                alert('Error: ' + (result.error || 'No se pudo procesar la solicitud'));
+            }
+
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error de conexión');
+        }
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+{% endblock %}

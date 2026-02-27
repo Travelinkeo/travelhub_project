@@ -73,6 +73,7 @@ class Proveedor(models.Model):
     nombre = models.CharField(_("Nombre del Proveedor"), max_length=150, unique=True, validators=[validar_no_vacio_o_espacios])
     alias = models.CharField(_("Alias/Nombre Comercial"), max_length=150, blank=True, null=True, help_text=_("Nombre con el que es conocido en el mercado"))
     rif = models.CharField(_("RIF"), max_length=20, blank=True, null=True, help_text=_("Registro de Información Fiscal"))
+    agencia = models.ForeignKey('core.Agencia', on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("Agencia"))
 
     class TipoProveedorChoices(models.TextChoices):
         AEROLINEA = 'AER', _('Aerolínea')
@@ -108,6 +109,15 @@ class Proveedor(models.Model):
     fee_internacional = models.DecimalField(_("Fee Internacional"), max_digits=10, decimal_places=2, blank=True, null=True, help_text=_("Fee por servicios internacionales"))
     
     activo = models.BooleanField(_("Activo"), default=True, help_text=_("Indica si el proveedor está actualmente activo."))
+    
+    # Nuevo campo para ERP (Phase 3)
+    identificadores_gds = models.JSONField(
+        _("Identificadores GDS (IATA/OfficeID)"), 
+        blank=True, 
+        null=True, 
+        default=dict,
+        help_text=_("Ej: {'IATA': ['12345678'], 'KIU_OFFICE_ID': ['CCS123']}")
+    )
 
     # --- Campos de Identificación GDS y Sistemas --- 
     iata = models.CharField(_("IATA"), max_length=10, blank=True, null=True, help_text=_("Número IATA del proveedor"))
@@ -202,8 +212,10 @@ class ComisionProveedorServicio(models.Model):
 class Aerolinea(models.Model):
     id_aerolinea = models.AutoField(primary_key=True, verbose_name=_("ID Aerolínea"))
     codigo_iata = models.CharField(_("Código IATA"), max_length=3, blank=True, help_text=_("Código IATA de 2 letras de la aerolínea (ej. AA, AV, LA)."))
+    codigo_numerico = models.CharField(_("Código Numérico/Placa"), max_length=3, blank=True, null=True, help_text=_("Código numérico de 3 dígitos asignado por IATA (ej. 134, 052)"))
     codigo_icao = models.CharField(_("Código ICAO"), max_length=3, blank=True, help_text=_("Código ICAO de 3 letras"))
     nombre = models.CharField(_("Nombre de la Aerolínea"), max_length=150, validators=[validar_no_vacio_o_espacios])
+    orden_prioridad = models.IntegerField(_("Orden de Prioridad"), default=100, help_text=_("Para mostrar al principio en listas."))
     pais_origen = models.CharField(_("País de Origen"), max_length=100, blank=True)
     rif = models.CharField(_("RIF"), max_length=20, blank=True, help_text=_("RIF venezolano o E-99999999-X para internacionales"))
     activa = models.BooleanField(_("Activa"), default=True, help_text=_("Indica si la aerolínea está actualmente operando."))

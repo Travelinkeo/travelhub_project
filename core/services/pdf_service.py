@@ -5,8 +5,8 @@ from io import BytesIO
 from django.template.loader import get_template
 from weasyprint import HTML
 
-from core.models.facturacion import Factura
-from core.models.ventas import Venta, AlojamientoReserva, AlquilerAutoReserva, ServicioAdicionalDetalle, SegmentoVuelo, TrasladoServicio, ActividadServicio
+from apps.finance.models import Factura
+from core.models import Venta, AlojamientoReserva, AlquilerAutoReserva, ServicioAdicionalDetalle, SegmentoVuelo, TrasladoServicio, ActividadServicio
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +34,12 @@ def generar_pdf_factura(factura_id: int):
         
         filename = f"Factura-{factura.numero_factura}.pdf"
 
-        logger.info(f"PDF para Factura {factura.numero_factura} generado exitosamente.")
+        # GUARDAR EN EL MODELO PARA ACTIVAR TELEGRAM
+        from django.core.files.base import ContentFile
+        # Solo guardar si no existe o si queremos sobrescribir siempre (mejor sobrescribir para updates)
+        factura.archivo_pdf.save(filename, ContentFile(pdf_bytes), save=True)
+
+        logger.info(f"PDF para Factura {factura.numero_factura} generado y GUARDADO exitosamente.")
         return pdf_bytes, filename
 
     except Factura.DoesNotExist:

@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("core", "0021_rename_timezone_agencia_zona_horaria_agencia_es_demo_and_more"),
-        ("personas", "0002_cliente_cedula_identidad"),
+        ("crm", "0001_initial"),
     ]
 
     operations = [
@@ -355,7 +355,7 @@ class Migration(migrations.Migration):
                     "cliente",
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.PROTECT,
-                        to="personas.cliente",
+                        to="crm.cliente",
                         verbose_name="Cliente",
                     ),
                 ),

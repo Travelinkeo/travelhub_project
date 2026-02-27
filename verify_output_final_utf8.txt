@@ -1,0 +1,50 @@
+﻿python : INFO:travelhub.settings:\u2705 Sentry configurado para 
+entorno: development
+En línea: 1 Carácter: 1
++ python scripts/verify_reconciliation_v2.py > 
+verify_output_final.txt  ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~
+    + CategoryInfo          : NotSpecified: (INFO:travelhub....no:  
+   development:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+INFO:apps.finance.services.smart_processor:AI Smart Mapping 
+Success: {'comision': 'Fee', 'fecha_emision': 'IATADate', 
+'monto_neto': None, 'monto_total': 'FinalPrice', 'numero_boleto': 
+'Ticket#', 'pasajero': 'Guest Name', 'pnr': None, 'tax': None}
+INFO:apps.finance.services.reconciliation_service:Reporte 7 
+conciliado: 3 items, 1 discrepancias.
+[WARNING] Usando almacenamiento local (FileSystemStorage)
+[OK] Usando PostgreSQL como broker de Celery (econ¾mico).
+--- Iniciando Verificacion de Conciliacion AI v2 ---
+(OK) Datos internos preparados para agencia: Agencia AI Test
+(PROCESS) Reporte cargado. Ejecutando motor de IA...
+
+RESUMEN FINAL (Procesado):
+   - Total Registros: 3
+   - Con Diferencias: 1
+   [MATCH OK] Tkt: 1230000000001 | Pasajero: ALEMAN JOSE | Sistema: $150.00 | Proveedor: $150.00
+   [DISCREPANCIA] Tkt: 1230000000002 | Pasajero: PEREZ JUAN | Sistema: $200.00 | Proveedor: $205.50
+      -> DISCREPANCIA EN monto_total: +$5.50
+   [NO ENCONTRADO] Tkt: 9990000000000 | Pasajero: GHOST PASSENGER | Sistema: $0.00 | Proveedor: $100.00
+
+SUCCES: La prueba ha detectado los 3 registros correctamente.
+
+Prueba finalizada exitosamente.
+
+(process:58476): GLib-GIO-WARNING **: 19:42:26.971: Unexpectedly, 
+UWP app `Clipchamp.Clipchamp_4.5.10220.0_x64__yxz26nhyzhsrt' (AUMId 
+`Clipchamp.Clipchamp_yxz26nhyzhsrt!App') supports 41 extensions but 
+has no verbs
+
+(process:58476): GLib-GIO-WARNING **: 19:42:27.747: Unexpectedly, 
+UWP app `Microsoft.ScreenSketch_11.2511.47.0_x64__8wekyb3d8bbwe' 
+(AUMId `Microsoft.ScreenSketch_8wekyb3d8bbwe!App') supports 29 
+extensions but has no verbs
+
+(process:58476): GLib-GIO-WARNING **: 19:42:27.809: Unexpectedly, 
+UWP app 
+`Microsoft.OutlookForWindows_1.2026.210.300_x64__8wekyb3d8bbwe' 
+(AUMId `Microsoft.OutlookForWindows_8wekyb3d8bbwe!Microsoft.Outlookf
+orWindows') supports 4 extensions but has no verbs

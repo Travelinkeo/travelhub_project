@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "GIRALDO GOMEZ/MATEO",
+  "CODIGO_IDENTIFICACION": "IDEPAX743457",
+  "SOLO_NOMBRE_PASAJERO": "GIRALDO GOMEZ",
+  "NUMERO_DE_BOLETO": "7420307388421",
+  "FECHA_DE_EMISION": "10 SEP 2025 09:41",
+  "AGENTE_EMISOR": "PTYS3651X",
+  "CODIGO_RESERVA": "SXVAJV",
+  "SOLO_CODIGO_RESERVA": "SXVAJV",
+  "NOMBRE_AEROLINEA": "AVIOR AIRLINES C.A",
+  "DIRECCION_AEROLINEA": null,
+  "vuelos": [
+    {
+      "aerolinea": "9V",
+      "numero_vuelo": "063",
+      "origen": "PUERTO ORDAZ",
+      "fecha_salida": "10SEP2025",
+      "hora_salida": "1945",
+      "destino": "CARACAS",
+      "hora_llegada": "2100",
+      "cabina": "Económica",
+      "clase": "M",
+      "localizador_aerolinea": "SXVAJV"
+    }
+  ],
+  "TARIFA": "26.23",
+  "IMPUESTOS": "60.79",
+  "TOTAL": "87.02",
+  "SOURCE_SYSTEM": "AI_KIU",
+  "es_remision": false,
+  "NOMBRE DEL PASAJERO": "GIRALDO GOMEZ/MATEO",
+  "CODIGO IDENTIFICACION": "IDEPAX743457",
+  "SOLO NOMBRE PASAJERO": "GIRALDO GOMEZ",
+  "NUMERO DE BOLETO": "7420307388421",
+  "FECHA DE EMISION": "10 SEP 2025 09:41",
+  "AGENTE EMISOR": "PTYS3651X",
+  "CODIGO RESERVA": "SXVAJV",
+  "SOLO CODIGO RESERVA": "SXVAJV",
+  "NOMBRE AEROLINEA": "AVIOR AIRLINES C.A",
+  "DIRECCION AEROLINEA": null,
+  "SOURCE SYSTEM": "AI_KIU",
+  "es remision": false
+}

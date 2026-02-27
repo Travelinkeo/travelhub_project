@@ -7,7 +7,7 @@ from django.db.models import Q
 
 from core.models.pasaportes import PasaporteEscaneado
 from core.serializers import PasaporteEscaneadoSerializer
-from personas.models import Cliente
+from apps.crm.models import Cliente
 
 
 class PasaporteEscaneadoViewSet(viewsets.ModelViewSet):
@@ -40,7 +40,7 @@ class PasaporteEscaneadoViewSet(viewsets.ModelViewSet):
         
         # Buscar cliente existente
         cliente_existente = Cliente.objects.filter(
-            numero_documento=pasaporte.numero_pasaporte
+            numero_pasaporte=pasaporte.numero_pasaporte
         ).first()
         
         client_data = pasaporte.to_cliente_data()

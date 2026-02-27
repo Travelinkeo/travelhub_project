@@ -1,0 +1,51 @@
+﻿python : INFO:travelhub.settings:\u2705 Sentry configurado para 
+entorno: development
+En línea: 1 Carácter: 1
++ python scripts/test_cms_automation.py > cms_test_output_v3.txt 
+2>&1;  ...
++ 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (INFO:travelhub....no:  
+   development:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+
+(process:64012): GLib-GIO-WARNING **: 08:07:43.398: Unexpectedly, 
+UWP app `Clipchamp.Clipchamp_4.5.10220.0_x64__yxz26nhyzhsrt' (AUMId 
+`Clipchamp.Clipchamp_yxz26nhyzhsrt!App') supports 41 extensions but 
+has no verbs
+[WARNING] Usando almacenamiento local (FileSystemStorage)
+[OK] Usando PostgreSQL como broker de Celery (econ¾mico).
+--- Probando Automatizacion de Contenido CMS AI ---
+
+[TEST 1] Generando Post de Instagram para viaje a Madrid...
+
+(process:64012): GLib-GIO-WARNING **: 08:07:43.746: Unexpectedly, 
+UWP app `Microsoft.ScreenSketch_11.2511.47.0_x64__8wekyb3d8bbwe' 
+(AUMId `Microsoft.ScreenSketch_8wekyb3d8bbwe!App') supports 29 
+extensions but has no verbs
+Traceback (most recent call last):
+  File "C:\Users\ARMANDO\travelhub_project\scripts\test_cms_automati
+on.py", line 41, in <module>
+    test_cms_automation()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\ARMANDO\travelhub_project\scripts\test_cms_automati
+on.py", line 23, in test_cms_automation
+    print(f"RESULTADO:\n{post_data}")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ARMANDO\AppData\Local\Programs\Python\Python313\Lib
+\encodings\cp1252.py", line 19, in encode
+    return 
+codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode characters in 
+position 48-49: character maps to <undefined>
+
+(process:64012): GLib-GIO-WARNING **: 08:07:43.805: Unexpectedly, 
+UWP app 
+`Microsoft.OutlookForWindows_1.2026.210.300_x64__8wekyb3d8bbwe' 
+(AUMId `Microsoft.OutlookForWindows_8wekyb3d8bbwe!Microsoft.Outlookf
+orWindows') supports 4 extensions but has no verbs
+Sentry is attempting to send 2 pending events
+Waiting up to 2 seconds
+Press Ctrl-Break to quit

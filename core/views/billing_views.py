@@ -10,6 +10,7 @@ from django.conf import settings
 from django.shortcuts import redirect
 from django.views.decorators.csrf import csrf_exempt
 from core.models.agencia import Agencia
+from core.services.stripe_service import StripeService
 import os
 
 # Stripe se importa solo si está configurado
@@ -142,10 +143,8 @@ def get_current_subscription(request):
 
 
 @api_view(['POST'])
-@authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
 def create_checkout_session(request):
-    # DRF con JWT debería bypass CSRF automáticamente
     """Crea una sesión de checkout de Stripe."""
     if not STRIPE_AVAILABLE:
         return Response({
@@ -163,38 +162,54 @@ def create_checkout_session(request):
         
         agencia = usuario_agencia.agencia
         plan_config = PLAN_CONFIG[plan]
-        
-        # Crear o recuperar customer de Stripe
-        if not agencia.stripe_customer_id:
-            customer = stripe.Customer.create(
-                email=agencia.email_principal,
-                name=agencia.nombre,
-                metadata={'agencia_id': agencia.id}
-            )
-            agencia.stripe_customer_id = customer.id
-            agencia.save(update_fields=['stripe_customer_id'])
-        
-        # Crear sesión de checkout
-        checkout_session = stripe.checkout.Session.create(
-            customer=agencia.stripe_customer_id,
-            payment_method_types=['card'],
-            line_items=[{
-                'price': plan_config['stripe_price_id'],
-                'quantity': 1,
-            }],
-            mode='subscription',
-            success_url=request.build_absolute_uri('/billing/success/') + '?session_id={CHECKOUT_SESSION_ID}',
-            cancel_url=request.build_absolute_uri('/billing/cancel/'),
-            metadata={
-                'agencia_id': agencia.id,
-                'plan': plan,
-            }
+        price_id = plan_config['stripe_price_id']
+
+        if not price_id:
+             return Response({'error': 'El plan seleccionado no tiene un ID de precio configurado'}, status=400)
+
+        success_url = request.build_absolute_uri('/billing/success/') + '?session_id={CHECKOUT_SESSION_ID}'
+        cancel_url = request.build_absolute_uri('/billing/cancel/')
+
+        checkout_url = StripeService.create_checkout_session(
+            agencia=agencia,
+            price_id=price_id,
+            success_url=success_url,
+            cancel_url=cancel_url
         )
         
+        # Como StripeService retorna URL string (en mi impl, oops I returned session.url directly)
+        # Wait, StripeService.create_checkout_session returns session.url (string)
+        
         return Response({
-            'checkout_url': checkout_session.url,
-            'session_id': checkout_session.id,
+            'checkout_url': checkout_url,
         })
+    
+    except Exception as e:
+        return Response({'error': str(e)}, status=500)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def create_portal_session(request):
+    """Crea una sesión del Portal de Clientes de Stripe."""
+    if not STRIPE_AVAILABLE:
+        return Response({'error': 'Stripe no configurado'}, status=503)
+    
+    try:
+        usuario_agencia = request.user.agencias.filter(activo=True).first()
+        if not usuario_agencia:
+            return Response({'error': 'No perteneces a ninguna agencia'}, status=404)
+        
+        agencia = usuario_agencia.agencia
+        
+        if not agencia.stripe_customer_id:
+             return Response({'error': 'No eres cliente de Stripe aún'}, status=400)
+
+        return_url = request.build_absolute_uri('/dashboard/modern/') # O donde sea
+        
+        portal_url = StripeService.create_portal_session(agencia, return_url)
+        
+        return Response({'portal_url': portal_url})
     
     except Exception as e:
         return Response({'error': str(e)}, status=500)
@@ -219,31 +234,15 @@ def stripe_webhook(request):
     except stripe.error.SignatureVerificationError:
         return Response({'error': 'Invalid signature'}, status=400)
     
-    # Manejar eventos
-    if event['type'] == 'checkout.session.completed':
-        session = event['data']['object']
-        agencia_id = session['metadata'].get('agencia_id')
-        plan = session['metadata'].get('plan')
-        
-        if agencia_id and plan:
-            try:
-                agencia = Agencia.objects.get(id=agencia_id)
-                agencia.plan = plan
-                agencia.stripe_subscription_id = session.get('subscription')
-                agencia.actualizar_limites_por_plan()
-                agencia.save()
-            except Agencia.DoesNotExist:
-                pass
-    
-    elif event['type'] == 'customer.subscription.deleted':
-        subscription = event['data']['object']
-        try:
-            agencia = Agencia.objects.get(stripe_subscription_id=subscription['id'])
-            agencia.plan = 'FREE'
-            agencia.actualizar_limites_por_plan()
-            agencia.save()
-        except Agencia.DoesNotExist:
-            pass
+    # Delegar a servicio
+    try:
+        StripeService.handle_webhook(event)
+    except Exception as e:
+        # Log error
+        print(f"Error handling webhook: {e}")
+        # Return 200 to Stripe anyway to avoid retries if logic fails (or 500 if we want retries)
+        # Usually 500 triggers retries. Let's return 200 and log.
+        return Response({'error': str(e)}, status=500)
     
     return Response({'status': 'success'})
 

@@ -15,40 +15,86 @@ def notificar_boleto_procesado(boleto):
     """
     Notifica al cliente cuando su boleto está listo
     """
-    if not boleto.venta_asociada or not boleto.venta_asociada.cliente:
-        return False
+    # Relaxed check: Allow notification even without Venta (Admin needs to know)
+    agencia_nombre = "TravelHub"
+    cliente = None
     
-    venta = boleto.venta_asociada
-    cliente = venta.cliente
+    if boleto.venta_asociada:
+        venta = boleto.venta_asociada
+        cliente = venta.cliente
+        agencia_nombre = venta.agencia.nombre if venta.agencia else "TravelHub"
     
     # Extraer datos del boleto
     datos = boleto.datos_parseados.get('normalized', {}) if boleto.datos_parseados else {}
     pnr = datos.get('reservation_code', boleto.localizador_pnr or 'N/A')
     pasajero = datos.get('passenger_name', boleto.nombre_pasajero_procesado or 'N/A')
     
-    # WhatsApp
-    if cliente.telefono_principal:
-        mensaje = f"""✈️ *Boleto Listo - TravelHub*
+    # pnr duplicate lines removed
+    
+    print(f"DEBUG: notificar_boleto_procesado called for boleto {boleto.pk}")
+    
+    # WhatsApp (OVERRIDE: Send to Admin always)
+    admin_phone = getattr(settings, 'ADMIN_WHATSAPP_NUMBER', '+584126080861')
+    is_enabled = getattr(settings, 'WHATSAPP_NOTIFICATIONS_ENABLED', False)
+    
+    print(f"DEBUG: WhatsApp Enabled: {is_enabled}, Admin: {admin_phone}")
 
-Estimado/a *{cliente.get_nombre_completo()}*,
+    if is_enabled and admin_phone:
+        # agencia_nombre already defined above
+        
+        mensaje = f"""✈️ *Boleto Generado - {agencia_nombre}*
 
-Su boleto ha sido procesado exitosamente.
+Estimado Armando,
+
+Se ha procesado un nuevo boleto de forma automática.
 
 📋 *Detalles:*
 • PNR: *{pnr}*
 • Pasajero: {pasajero}
 • Aerolínea: {boleto.aerolinea_emisora or 'N/A'}
+• Boleto: {boleto.numero_boleto}
+"""
 
-📄 Puede descargar su boleto desde su panel de cliente.
+        # Generar URL completa del PDF
+        pdf_url = ""
+        try:
+            if boleto.archivo_pdf_generado:
+                # Si estamos en Cloudinary/S3, .url ya trae el link completo
+                try:
+                    pdf_url = boleto.archivo_pdf_generado.url
+                except:
+                    # Fallback para FileSystemStorage local si .url falla o es relativo
+                    pdf_url = f"{settings.MEDIA_URL if 'http' in settings.MEDIA_URL else 'https://travelhub.travelinkeo.com' + settings.MEDIA_URL}{boleto.archivo_pdf_generado.name}"
+                
+                # Asegurar que sea absoluto para Twilio
+                if pdf_url and not pdf_url.startswith('http'):
+                     pdf_url = f"https://travelhub.travelinkeo.com{pdf_url}"
 
-¡Buen viaje!
+                print(f"DEBUG: Generated PDF URL: {pdf_url}")
+            else:
+                print("DEBUG: No PDF file generated in boleto object")
+        except Exception as e:
+            print(f"DEBUG: Error generating PDF URL: {e}")
+            pdf_url = ""
 
-_TravelHub - Su agencia de confianza_"""
-        
-        enviar_whatsapp(cliente.telefono_principal, mensaje)
+        # Send with explicit result logging
+        success = enviar_whatsapp(admin_phone, mensaje, media_url=pdf_url)
+        if success:
+             logger.info(f"WhatsApp de notificación enviado a Admin ({admin_phone})")
+             print("DEBUG: WhatsApp sent successfully")
+        else:
+             logger.error(f"Failed to send WhatsApp to Admin ({admin_phone})")
+             print("DEBUG: WhatsApp failed to send")
+    else:
+        print("DEBUG: WhatsApp skipped - Disabled or No Admin Phone")
     
     # Email
-    if cliente.email:
+    if cliente and cliente.email:
+        # 🛡️ Guard: Skip placeholder emails to avoid bounce-backs
+        if "@sin-email.com" in cliente.email.lower():
+            logger.info(f"🔕 Notificación omitida para email de marcador de posición: {cliente.email}")
+            return True
+
         try:
             send_mail(
                 subject=f'Boleto Listo - PNR {pnr}',

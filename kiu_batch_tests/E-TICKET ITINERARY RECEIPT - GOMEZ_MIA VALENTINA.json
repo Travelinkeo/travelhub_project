@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "GOMEZ/MIA VALENTINA",
+  "CODIGO_IDENTIFICACION": "NI84414910",
+  "SOLO_NOMBRE_PASAJERO": "MIA",
+  "NUMERO_DE_BOLETO": "364-0211554933",
+  "FECHA_DE_EMISION": "25 SEP 2025 15:51",
+  "AGENTE_EMISOR": "CCS00WWWW",
+  "CODIGO_RESERVA": "MRSIVG",
+  "SOLO_CODIGO_RESERVA": "MRSIVG",
+  "NOMBRE_AEROLINEA": "RUTAS AEREAS DE VENEZUELA",
+  "DIRECCION_AEROLINEA": "AV.PPAL ZONA DE CARGA L.C0003 APT.INTL LA CHINITA",
+  "vuelos": [
+    {
+      "aerolinea": "WW",
+      "numero_vuelo": "WW224",
+      "origen": "MARACAIBO",
+      "fecha_salida": "29SEP",
+      "hora_salida": "14:30",
+      "destino": "CARACAS",
+      "hora_llegada": "15:30",
+      "cabina": "Económica",
+      "clase": "Y",
+      "localizador_aerolinea": "MRSIVG"
+    }
+  ],
+  "TARIFA": "0.00",
+  "IMPUESTOS": "0.00",
+  "TOTAL": "0.00",
+  "SOURCE_SYSTEM": "KIU",
+  "es_remision": false,
+  "NOMBRE DEL PASAJERO": "GOMEZ/MIA VALENTINA",
+  "CODIGO IDENTIFICACION": "NI84414910",
+  "SOLO NOMBRE PASAJERO": "MIA",
+  "NUMERO DE BOLETO": "364-0211554933",
+  "FECHA DE EMISION": "25 SEP 2025 15:51",
+  "AGENTE EMISOR": "CCS00WWWW",
+  "CODIGO RESERVA": "MRSIVG",
+  "SOLO CODIGO RESERVA": "MRSIVG",
+  "NOMBRE AEROLINEA": "RUTAS AEREAS DE VENEZUELA",
+  "DIRECCION AEROLINEA": "AV.PPAL ZONA DE CARGA L.C0003 APT.INTL LA CHINITA",
+  "SOURCE SYSTEM": "KIU",
+  "es remision": false
+}

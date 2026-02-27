@@ -79,6 +79,8 @@ def _formatear_fecha_dd_mm_yyyy(fecha_str: Optional[str]) -> str:
     formatos_probables = [
         '%d %b %y',  # 08 may 25
         '%d %b %Y',  # 08 May 2025
+        '%d%b%y',    # 04nov20
+        '%d%b%Y',    # 04nov2020
         '%Y-%m-%d',  # 2025-05-08
         '%d/%m/%y',
         '%d/%m/%Y',
@@ -122,3 +124,65 @@ def _inferir_fecha_llegada(fecha_salida: str, hora_salida: str, hora_llegada: st
         except (ValueError, TypeError):
             pass
     return base.strftime('%d-%m-%Y')
+
+def _parse_date_flexible(date_str: str, reference_date: Optional[dt.datetime] = None, base_year: int = None) -> str:
+    """
+    Parsea una fecha de vuelo (ej: 29JAN, 02FEB26) y la convierte a ISO (YYYY-MM-DD).
+    Usa reference_date (fecha de emisión) para inferir el año correcto en fechas ambiguas (ej: Ene vs Dic).
+    Si no hay reference_date, usa base_year.
+    """
+    if not date_str:
+        return ""
+        
+    date_upper = date_str.upper().strip()
+    
+    # Mapa de meses español (KIU a veces mezcla)
+    month_map_es = {
+        'ENE': 'JAN', 'ABR': 'APR', 'AGO': 'AUG', 'DIC': 'DEC'
+    }
+    for es, en in month_map_es.items():
+        date_upper = date_upper.replace(es, en)
+            
+    try:
+        # Caso 1: Tiene año 2 dígitos al final (Ej: 02FEB26)
+        # Regex: \d{1,2}[A-Z]{3}\d{2}
+        if re.match(r'^\d{1,2}[A-Z]{3}\d{2}$', date_upper):
+            dt_obj = dt.datetime.strptime(date_upper, "%d%b%y")
+            return dt_obj.strftime("%Y-%m-%d")
+
+        # Caso 2: Tiene año 4 dígitos (Ej: 02FEB2026)
+        if re.match(r'^\d{1,2}[A-Z]{3}\d{4}$', date_upper):
+            dt_obj = dt.datetime.strptime(date_upper, "%d%b%Y")
+            return dt_obj.strftime("%Y-%m-%d")
+
+        # Caso 3: Sin año (Ej: 02FEB)
+        if re.match(r'^\d{1,2}[A-Z]{3}$', date_upper):
+            
+            # Determinar año base
+            year = base_year or dt.now().year
+            if reference_date:
+                year = reference_date.year
+            
+            # Intentar parsear con ese año
+            dt_obj = dt.datetime.strptime(date_upper + str(year), "%d%b%Y")
+            
+            # Ajuste de año nuevo (Rollover):
+            # Si tenemos ref_date (ej: Dic 2025) y el vuelo es "anterior" (ej: Ene 2025),
+            # significa que es Ene el año siguiente (2026).
+            if reference_date:
+                # Si la fecha parseada es más de 10 meses ANTERIOR a la referencia, sumar 1 año
+                # (Ej: Vuelo Ene 2025, Emision Dic 2025 -> Diff -11 meses -> Sumar año)
+                # Si la fecha parseada es más de 10 meses POSTERIOR? (Ej: Vuelo Dic, Emision Ene -> ok)
+                if (reference_date - dt_obj).days > 300: # aprox 10 meses
+                     dt_obj = dt_obj.replace(year=year + 1)
+                # Tambien, si el vuelo es Ene 07 y emision Ene 08, es pasado? No, es posible. 
+                # Pero si es Ene y emision Dic, el año debe cambiar.
+                elif dt_obj.month < reference_date.month and (reference_date.month - dt_obj.month) > 6:
+                     dt_obj = dt_obj.replace(year=year + 1)
+            
+            return dt_obj.strftime("%Y-%m-%d")
+        
+        return date_str # Si no matchea nada conocido
+        
+    except ValueError:
+        return date_str

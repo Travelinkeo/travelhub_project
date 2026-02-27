@@ -1,0 +1,58 @@
+--- DEBUGGING PDF: C:\Users\ARMANDO\travelhub_project\media\boletos_importados\2026\01\Gmail_-_Fwd__Tickets_Avior_Airlines_FruhbRA.pdf ---
+
+--- RAW TEXT CONTENT START ---
+26/1/26, 14:14 Gmail - Fwd: Tickets Avior Airlines
+boletotravelinkeo <boletotravelinkeo@gmail.com>
+Fwd: Tickets Avior Airlines
+Naidaly Cohen <naidycohen@gmail.com> 26 de enero de 2026 a las 2:00 p.m.
+Para: boletotravelinkeo@gmail.com
+Naidaly Cohen
+0412-331.23.14
+---------- Forwarded message ---------
+De: Avior Airlines <aviorair@avior.com.ve>
+Date: lun, 26 ene 2026 a las 13:58
+Subject: Tickets Avior Airlines
+To: <naidycohen@gmail.com>
+Estado de compra: APROBADO
+Código de reserva: AIHDIH
+Detalles de los pasajeros
+Nombre: Correo:
+JUAN CARLOS VELEZ NAIDYCOHEN@GMAIL.COM
+Número de tiquete: Teléfono:
+7420200050353 N/A
+Información del viaje: BARCELONA - CARACAS
+https://mail.google.com/mail/u/0/?ik=7427add1d0&view=pt&search=all&permmsgid=msg-f:1855403272169212742&simpl=msg-f:1855403272169212742&mb=1 1/3
+26/1/26, 14:14 Gmail - Fwd: Tickets Avior Airlines
+Fecha del vuelo 07:00 BARCELONA, GEN J A ANZOATEGUI
+Trayecto Salida Llegada 07:40 CARACAS, SIMON BOLIVAR AIRPORT
+Jueves, 29 de Enero de 2026 AIRPORT
+Ordenado por: Vuelo: 041
+Cabina: ECONOMY Clase: MEDIUM
+Boleto y pago de vuelo:
+Cant. viajeros Tarifa base Tasas + impuestos Adicionales
+Total
+1 VES 27.450,15 VES 7.537,14 VES 0 VES 34987.29
+Total para todos los pasajeros VES 34987.29
+Impuestos y tasas
+AK VES 4622.19
+C2 VES 444.45
+EU VES 274.5
+YN VES 2196
+VES 7.537,14
+PARA TENER EN CUENTA:
+Te recomendamos llegar dos (2) horas antes de la hora programada del vuelo sin importar por que medio realizaste el Check-in.
+Si presentas una condición de discapacidad y requieres asistencia adicional o alguno de nuestros otros servicios que te ofrece Avior Airlines (acompañamiento
+especial, mujeres en embarazo, viajando con bebés, condiciones médicas especiales y/o asiento extra), comunícate con nuestros agentes de servicio en el Call
+https://mail.google.com/mail/u/0/?ik=7427add1d0&view=pt&search=all&permmsgid=msg-f:1855403272169212742&simpl=msg-f:1855403272169212742&mb=1 2/3
+26/1/26, 14:14 Gmail - Fwd: Tickets Avior Airlines
+center con tiempo suficiente antes de realizar tu viaje.
+Gracias por volar con Avior Airlines
+https://mail.google.com/mail/u/0/?ik=7427add1d0&view=pt&search=all&permmsgid=msg-f:1855403272169212742&simpl=msg-f:1855403272169212742&mb=1 3/3
+
+--- RAW TEXT CONTENT END ---
+
+--- TESTING WEBRECEIPT PARSER ---
+WebReceiptParser Result: None
+
+--- TESTING FULL PIPELINE extract_data_from_text ---
+extract_data_from_text Result: {'SOURCE_SYSTEM': 'KIU', 'NUMERO_DE_BOLETO': 'No encontrado', 'FECHA_DE_EMISION': 'No encontrado', 'AGENTE_EMISOR': 'No encontrado', 'NOMBRE_DEL_PASAJERO': 'S VES', 'SOLO_NOMBRE_PASAJERO': 'S VES', 'CODIGO_IDENTIFICACION': 'No encontrado', 'CODIGO_RESERVA': 'C1/AIHDIH', 'SOLO_CODIGO_RESERVA': 'AIHDIH', 'NOMBRE_AEROLINEA': 'No encontrado', 'DIRECCION_AEROLINEA': 'No encontrado', 'TARIFA': 'No encontrado', 'IMPUESTOS': 'No encontrado', 'TOTAL': 'No encontrado', 'ItinerarioFinalLimpio': 'No se pudo procesar el itinerario.', 'TARIFA_MONEDA': None, 'TARIFA_IMPORTE': None, 'TOTAL_MONEDA': None, 'TOTAL_IMPORTE': None}

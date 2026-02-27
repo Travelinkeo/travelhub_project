@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "CIFUENTES ARCE/JORGE ARMANDO",
+  "CODIGO_IDENTIFICACION": "84414220",
+  "SOLO_NOMBRE_PASAJERO": "JORGE ARMANDO",
+  "NUMERO_DE_BOLETO": "7650370532919",
+  "FECHA_DE_EMISION": "19 FEB 2025 14:46",
+  "AGENTE_EMISOR": "PTYS3651X",
+  "CODIGO_RESERVA": "EJEQAF",
+  "SOLO_CODIGO_RESERVA": "EJEQAF",
+  "NOMBRE_AEROLINEA": "RUTACA AIRLINES",
+  "DIRECCION_AEROLINEA": null,
+  "vuelos": [
+    {
+      "aerolinea": "5R",
+      "numero_vuelo": "302",
+      "origen": "CARACAS",
+      "fecha_salida": "21FEB 2025",
+      "hora_salida": "1620",
+      "destino": "PORLAMAR",
+      "hora_llegada": "1700",
+      "cabina": "Económica",
+      "clase": "B",
+      "localizador_aerolinea": "EJEQAF"
+    }
+  ],
+  "TARIFA": "78.35",
+  "IMPUESTOS": "16.65",
+  "TOTAL": "95.00",
+  "SOURCE_SYSTEM": "AI_KIU",
+  "es_remision": false,
+  "NOMBRE DEL PASAJERO": "CIFUENTES ARCE/JORGE ARMANDO",
+  "CODIGO IDENTIFICACION": "84414220",
+  "SOLO NOMBRE PASAJERO": "JORGE ARMANDO",
+  "NUMERO DE BOLETO": "7650370532919",
+  "FECHA DE EMISION": "19 FEB 2025 14:46",
+  "AGENTE EMISOR": "PTYS3651X",
+  "CODIGO RESERVA": "EJEQAF",
+  "SOLO CODIGO RESERVA": "EJEQAF",
+  "NOMBRE AEROLINEA": "RUTACA AIRLINES",
+  "DIRECCION AEROLINEA": null,
+  "SOURCE SYSTEM": "AI_KIU",
+  "es remision": false
+}

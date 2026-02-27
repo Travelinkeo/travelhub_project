@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "NOVOA SARMIENTO/AROM",
+  "CODIGO_IDENTIFICACION": "31832831",
+  "SOLO_NOMBRE_PASAJERO": "NOVOA SARMIENTO",
+  "NUMERO_DE_BOLETO": "7420307388430",
+  "FECHA_DE_EMISION": "12 SEP 2025 15:51",
+  "AGENTE_EMISOR": "PTYS3651X",
+  "CODIGO_RESERVA": "RZHISD",
+  "SOLO_CODIGO_RESERVA": "RZHISD",
+  "NOMBRE_AEROLINEA": "AVIOR AIRLINES C.A",
+  "DIRECCION_AEROLINEA": null,
+  "vuelos": [
+    {
+      "aerolinea": "9V",
+      "numero_vuelo": "063",
+      "origen": "PUERTO ORDAZ",
+      "fecha_salida": "13SEP 2025",
+      "hora_salida": "1100",
+      "destino": "CARACAS",
+      "hora_llegada": "1215",
+      "cabina": "Y",
+      "clase": "Y",
+      "localizador_aerolinea": "RZHISD"
+    }
+  ],
+  "TARIFA": "33.87",
+  "IMPUESTOS": "78.14",
+  "TOTAL": "112.01",
+  "SOURCE_SYSTEM": "AI_KIU",
+  "es_remision": false,
+  "NOMBRE DEL PASAJERO": "NOVOA SARMIENTO/AROM",
+  "CODIGO IDENTIFICACION": "31832831",
+  "SOLO NOMBRE PASAJERO": "NOVOA SARMIENTO",
+  "NUMERO DE BOLETO": "7420307388430",
+  "FECHA DE EMISION": "12 SEP 2025 15:51",
+  "AGENTE EMISOR": "PTYS3651X",
+  "CODIGO RESERVA": "RZHISD",
+  "SOLO CODIGO RESERVA": "RZHISD",
+  "NOMBRE AEROLINEA": "AVIOR AIRLINES C.A",
+  "DIRECCION AEROLINEA": null,
+  "SOURCE SYSTEM": "AI_KIU",
+  "es remision": false
+}

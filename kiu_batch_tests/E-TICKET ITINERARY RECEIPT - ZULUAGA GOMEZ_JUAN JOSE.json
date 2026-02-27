@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "ZULUAGA GOMEZ/JUAN JOSE",
+  "CODIGO_IDENTIFICACION": "IDEPPE228075",
+  "SOLO_NOMBRE_PASAJERO": "JUAN JOSE",
+  "NUMERO_DE_BOLETO": "7820340899726",
+  "FECHA_DE_EMISION": "12 DEC 2025 12:38",
+  "AGENTE_EMISOR": "PTYS3651X",
+  "CODIGO_RESERVA": "CGAICQ",
+  "SOLO_CODIGO_RESERVA": "CGAICQ",
+  "NOMBRE_AEROLINEA": "LASER C.A.",
+  "DIRECCION_AEROLINEA": null,
+  "vuelos": [
+    {
+      "aerolinea": "QL",
+      "numero_vuelo": "920",
+      "origen": "CARACAS",
+      "fecha_salida": "28DEC 2025",
+      "hora_salida": "1330",
+      "destino": "EL VIGIA",
+      "hora_llegada": "1430",
+      "cabina": "T",
+      "clase": "Y",
+      "localizador_aerolinea": "CGAICQ"
+    }
+  ],
+  "TARIFA": "51.56",
+  "IMPUESTOS": "20.45",
+  "TOTAL": "72.01",
+  "SOURCE_SYSTEM": "AI_KIU",
+  "es_remision": false,
+  "NOMBRE DEL PASAJERO": "ZULUAGA GOMEZ/JUAN JOSE",
+  "CODIGO IDENTIFICACION": "IDEPPE228075",
+  "SOLO NOMBRE PASAJERO": "JUAN JOSE",
+  "NUMERO DE BOLETO": "7820340899726",
+  "FECHA DE EMISION": "12 DEC 2025 12:38",
+  "AGENTE EMISOR": "PTYS3651X",
+  "CODIGO RESERVA": "CGAICQ",
+  "SOLO CODIGO RESERVA": "CGAICQ",
+  "NOMBRE AEROLINEA": "LASER C.A.",
+  "DIRECCION AEROLINEA": null,
+  "SOURCE SYSTEM": "AI_KIU",
+  "es remision": false
+}

@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "GARCIA/GLORIA",
+  "CODIGO_IDENTIFICACION": "22910070",
+  "SOLO_NOMBRE_PASAJERO": "GLORIA",
+  "NUMERO_DE_BOLETO": "3080201383772",
+  "FECHA_DE_EMISION": "02 FEB 2026",
+  "AGENTE_EMISOR": "CCS00V0WV",
+  "CODIGO_RESERVA": "GETNAP",
+  "SOLO_CODIGO_RESERVA": "GETNAP",
+  "NOMBRE_AEROLINEA": "CONVIASA",
+  "DIRECCION_AEROLINEA": null,
+  "vuelos": [
+    {
+      "aerolinea": "V0",
+      "numero_vuelo": "1186",
+      "origen": "CARACAS",
+      "fecha_salida": "13 FEB 2026",
+      "hora_salida": "0700",
+      "destino": "SAN ANTONIO",
+      "hora_llegada": "0800",
+      "cabina": "Económica",
+      "clase": "O",
+      "localizador_aerolinea": "GETNAP"
+    }
+  ],
+  "TARIFA": "21400.00",
+  "IMPUESTOS": "8564.93",
+  "TOTAL": "29964.93",
+  "SOURCE_SYSTEM": "AI_KIU",
+  "es_remision": false,
+  "NOMBRE DEL PASAJERO": "GARCIA/GLORIA",
+  "CODIGO IDENTIFICACION": "22910070",
+  "SOLO NOMBRE PASAJERO": "GLORIA",
+  "NUMERO DE BOLETO": "3080201383772",
+  "FECHA DE EMISION": "02 FEB 2026",
+  "AGENTE EMISOR": "CCS00V0WV",
+  "CODIGO RESERVA": "GETNAP",
+  "SOLO CODIGO RESERVA": "GETNAP",
+  "NOMBRE AEROLINEA": "CONVIASA",
+  "DIRECCION AEROLINEA": null,
+  "SOURCE SYSTEM": "AI_KIU",
+  "es remision": false
+}

@@ -9,7 +9,7 @@ class CruceroReserva(models.Model):
     """Reserva de Crucero con itinerario, cabina y paquetes adicionales"""
     
     id_crucero = models.AutoField(primary_key=True, verbose_name=_("ID Crucero"))
-    venta = models.ForeignKey('Venta', related_name='cruceros', on_delete=models.CASCADE, 
+    venta = models.ForeignKey('bookings.Venta', related_name='cruceros', on_delete=models.CASCADE, 
                              verbose_name=_('Venta'))
     
     # === INFORMACIÓN GENERAL ===

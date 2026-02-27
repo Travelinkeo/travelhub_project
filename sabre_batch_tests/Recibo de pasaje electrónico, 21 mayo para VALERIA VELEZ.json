@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "VELEZ/VALERIA",
+  "CODIGO_IDENTIFICACION": "24CA43026",
+  "SOLO_NOMBRE_PASAJERO": "VALERIA",
+  "NUMERO_DE_BOLETO": "1347261299019",
+  "FECHA_DE_EMISION": "20 may 25",
+  "AGENTE_EMISOR": "GRUPO SOPORTE GLOBAL INC/A9Y",
+  "CODIGO_RESERVA": "EZOOQF",
+  "SOLO_CODIGO_RESERVA": "EZOOQF",
+  "NOMBRE_AEROLINEA": "AEROVIAS DEL CONTINENTE",
+  "DIRECCION_AEROLINEA": null,
+  "vuelos": [
+    {
+      "aerolinea": "AEROVIAS DEL CONTINENTE",
+      "numero_vuelo": "8374",
+      "origen": "BOGOTA, COLOMBIA",
+      "fecha_salida": "21 may 25",
+      "hora_salida": "07:05",
+      "destino": "CURACAO, CURACAO",
+      "hora_llegada": "09:55",
+      "cabina": "TURISTA",
+      "clase": "SEOB2BR9",
+      "localizador_aerolinea": "CM7AJH"
+    }
+  ],
+  "TARIFA": "0.00",
+  "IMPUESTOS": "95.40",
+  "TOTAL": "95.40",
+  "SOURCE_SYSTEM": "AI_SABRE",
+  "es_remision": false,
+  "NOMBRE DEL PASAJERO": "VELEZ/VALERIA",
+  "CODIGO IDENTIFICACION": "24CA43026",
+  "SOLO NOMBRE PASAJERO": "VALERIA",
+  "NUMERO DE BOLETO": "1347261299019",
+  "FECHA DE EMISION": "20 may 25",
+  "AGENTE EMISOR": "GRUPO SOPORTE GLOBAL INC/A9Y",
+  "CODIGO RESERVA": "EZOOQF",
+  "SOLO CODIGO RESERVA": "EZOOQF",
+  "NOMBRE AEROLINEA": "AEROVIAS DEL CONTINENTE",
+  "DIRECCION AEROLINEA": null,
+  "SOURCE SYSTEM": "AI_SABRE",
+  "es remision": false
+}

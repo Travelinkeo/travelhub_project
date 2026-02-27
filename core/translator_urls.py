@@ -8,7 +8,9 @@ from .views.translator_views import (
     get_airlines_catalog_api,
     get_airports_catalog_api,
     validate_itinerary_format_api,
-    batch_translate_api
+    validate_itinerary_format_api,
+    batch_translate_api,
+    create_quote_from_gds_api
 )
 
 app_name = 'translator'
@@ -30,4 +32,7 @@ urlpatterns = [
     
     # Procesamiento en lote
     path('batch/', batch_translate_api, name='batch_translate'),
+    
+    # Integración CRM
+    path('create-quote/', create_quote_from_gds_api, name='create_quote'),
 ]

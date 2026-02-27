@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "HOYOS VELARDE/HECTOR FABIO",
+  "CODIGO_IDENTIFICACION": "AZ620703",
+  "SOLO_NOMBRE_PASAJERO": "HECTOR FABIO",
+  "NUMERO_DE_BOLETO": "7847101239623",
+  "FECHA_DE_EMISION": "30 Sep 24",
+  "AGENTE_EMISOR": "QUO VADIS TRAVEL AGENCY/AKJ",
+  "CODIGO_RESERVA": "LJLBCO",
+  "SOLO_CODIGO_RESERVA": "LJLBCO",
+  "NOMBRE_AEROLINEA": "CHINA SOUTHERN AIRLINES",
+  "DIRECCION_AEROLINEA": null,
+  "vuelos": [
+    {
+      "aerolinea": "CHINA SOUTHERN",
+      "numero_vuelo": "327",
+      "origen": "GUANGZHOU, CHINA",
+      "fecha_salida": "02 Oct 24",
+      "hora_salida": "21:30",
+      "destino": "LOS ANGELES, CA",
+      "hora_llegada": "19:40",
+      "cabina": "ECONOMY",
+      "clase": "Q2LSRSZU",
+      "localizador_aerolinea": "NT4L8Q"
+    }
+  ],
+  "TARIFA": "0.00",
+  "IMPUESTOS": "0.00",
+  "TOTAL": "0.00",
+  "SOURCE_SYSTEM": "AI_SABRE",
+  "es_remision": false,
+  "NOMBRE DEL PASAJERO": "HOYOS VELARDE/HECTOR FABIO",
+  "CODIGO IDENTIFICACION": "AZ620703",
+  "SOLO NOMBRE PASAJERO": "HECTOR FABIO",
+  "NUMERO DE BOLETO": "7847101239623",
+  "FECHA DE EMISION": "30 Sep 24",
+  "AGENTE EMISOR": "QUO VADIS TRAVEL AGENCY/AKJ",
+  "CODIGO RESERVA": "LJLBCO",
+  "SOLO CODIGO RESERVA": "LJLBCO",
+  "NOMBRE AEROLINEA": "CHINA SOUTHERN AIRLINES",
+  "DIRECCION AEROLINEA": null,
+  "SOURCE SYSTEM": "AI_SABRE",
+  "es remision": false
+}

@@ -1,0 +1,88 @@
+{% extends "base_modern.html" %}
+{% load static %}
+{% block content %}
+<div x-data="{ open: false }" @open-modal.window="open = true" @close-modal.window="open = false"
+    class="min-h-screen bg-[#0f172a] text-white p-4 md:p-6 font-sans">
+    <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+        <div>
+            <h1 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-300">
+                Gestión de Facturas Fiscales
+            </h1>
+            <p class="text-gray-300 mt-1">Revisión, validación y emisión de borradores automáticos.</p>
+        </div>
+
+        <div class="flex gap-3">
+            <div class="bg-slate-800/50 border border-slate-700 rounded-xl p-1 flex">
+                <a href="?estado=BOR"
+                    class="px-4 py-2 rounded-lg text-sm font-bold {% if filtros.estado == 'BOR' %}bg-blue-600 text-white shadow-lg{% else %}text-gray-400 hover:text-white transition{% endif %}">
+                    Borradores
+                </a>
+                <a href="?estado=EMI"
+                    class="px-4 py-2 rounded-lg text-sm font-bold {% if filtros.estado == 'EMI' %}bg-blue-600 text-white shadow-lg{% else %}text-gray-400 hover:text-white transition{% endif %}">
+                    Emitidas
+                </a>
+                <a href="?"
+                    class="px-4 py-2 rounded-lg text-sm font-bold {% if not filtros.estado %}bg-blue-600 text-white shadow-lg{% else %}text-gray-400 hover:text-white transition{% endif %}">
+                    Todas
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabla de Facturas -->
+    <div class="bg-slate-800/50 border border-slate-700 rounded-2xl overflow-hidden backdrop-blur-md shadow-xl">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead class="bg-slate-900/50 text-gray-400 text-xs uppercase tracking-wider">
+                    <tr>
+                        <th class="px-6 py-4">N° Factura / PNR</th>
+                        <th class="px-6 py-4">Cliente / Pasajero</th>
+                        <th class="px-6 py-4">Fecha</th>
+                        <th class="px-6 py-4">Monto (USD)</th>
+                        <th class="px-6 py-4">Monto (BS)</th>
+                        <th class="px-6 py-4">Estado</th>
+                        <th class="px-6 py-4 text-right">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-700" id="invoice-table-body">
+                    {% for invoice in invoices %}
+                    {% include "finance/partials/invoice_row.html" %}
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="px-6 py-12 text-center text-gray-500">
+                            <div class="flex flex-col items-center">
+                                <svg class="w-12 h-12 mb-3 opacity-20" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                No se encontraron facturas con los filtros seleccionados.
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal Container -->
+    <div x-show="open" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+        x-cloak>
+        <div @click.away="open = false" class="w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <div id="modal-content">
+                <!-- Content will be swapped here by HTMX -->
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+    function closeModal() {
+        window.dispatchEvent(new CustomEvent('close-modal'));
+        document.getElementById('modal-content').innerHTML = '';
+    }
+</script>
+{% endblock %}

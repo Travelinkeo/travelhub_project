@@ -1,0 +1,116 @@
+<div class="overflow-x-auto">
+    <table class="w-full text-left border-collapse">
+        <thead class="bg-white/5 border-b border-white/10">
+            <tr>
+                <th class="px-6 py-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Cliente / Empresa
+                </th>
+                <th class="px-6 py-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Identificación</th>
+                <th class="px-6 py-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Contacto</th>
+                <th class="px-6 py-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Tipo</th>
+                <th class="px-6 py-4 text-xs font-semibold text-gray-400 uppercase tracking-wider text-right">Acciones
+                </th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-white/5">
+            {% for cliente in clientes %}
+            <tr class="hover:bg-white/5 transition-colors group">
+                <td class="px-6 py-4">
+                    <div class="flex items-center">
+                        <div
+                            class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold mr-4 shadow-lg shadow-blue-900/20 overflow-hidden">
+                            {% if cliente.foto_perfil %}
+                            <img src="{{ cliente.foto_perfil.url }}" alt="" class="w-full h-full object-cover">
+                            {% else %}
+                            {{ cliente.nombres|slice:":1" }}{{ cliente.apellidos|slice:":1" }}
+                            {% endif %}
+                        </div>
+                        <div>
+                            <div class="font-bold text-white group-hover:text-blue-400 transition-colors">
+                                {{ cliente.get_nombre_completo }}
+                            </div>
+                            {% if cliente.nombre_empresa %}
+                            <div class="text-xs text-gray-400 flex items-center mt-0.5">
+                                <i data-lucide="building-2" class="w-3 h-3 mr-1"></i>
+                                {{ cliente.nombre_empresa }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </td>
+                <td class="px-6 py-4 text-sm text-gray-300">
+                    <span class="bg-white/5 px-2 py-1 rounded text-xs border border-white/10">
+                        {{ cliente.cedula_identidad|default:"No reg." }}
+                    </span>
+                </td>
+                <td class="px-6 py-4">
+                    <div class="text-sm text-gray-300 truncate max-w-[200px]">{{ cliente.email }}</div>
+                    <div class="text-xs text-gray-500">{{ cliente.telefono_principal }}</div>
+                </td>
+                <td class="px-6 py-4">
+                    <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider
+                        {% if cliente.tipo_cliente == 'CORP' %}bg-purple-500/10 text-purple-400 border border-purple-500/20
+                        {% elif cliente.tipo_cliente == 'VP' %}bg-green-500/10 text-green-400 border border-green-500/20
+                        {% else %}bg-blue-500/10 text-blue-400 border border-blue-500/20{% endif %}">
+                        {{ cliente.get_tipo_cliente_display }}
+                    </span>
+                </td>
+                <td class="px-6 py-4 text-right">
+                    <div class="flex items-center justify-end gap-3">
+                        <a href="{% url 'crm:cliente_detail' cliente.pk %}"
+                            class="flex items-center gap-2 px-3 py-1.5 text-xs font-semibold text-gray-300 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all"
+                            title="Ver Detalle">
+                            <i data-lucide="eye" class="w-4 h-4 text-blue-400"></i>
+                            <span>Ver</span>
+                        </a>
+                        <a href="{% url 'crm:cliente_update' cliente.pk %}"
+                            class="flex items-center gap-2 px-3 py-1.5 text-xs font-semibold text-blue-400 hover:text-white bg-blue-500/10 hover:bg-blue-600 border border-blue-500/20 rounded-xl transition-all"
+                            title="Editar">
+                            <i data-lucide="edit-3" class="w-4 h-4"></i>
+                            <span>Editar</span>
+                        </a>
+                        <button hx-delete="{% url 'crm:cliente_delete' cliente.pk %}"
+                            hx-confirm="¿Estás seguro de que deseas eliminar este cliente?" hx-target="closest tr"
+                            hx-swap="outerHTML swap:1s"
+                            class="flex items-center gap-2 px-3 py-1.5 text-xs font-semibold text-red-400 hover:text-white bg-red-500/10 hover:bg-red-600 border border-red-500/20 rounded-xl transition-all"
+                            title="Eliminar">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            <span>Borrar</span>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" class="px-6 py-12 text-center">
+                    <div class="flex flex-col items-center">
+                        <i data-lucide="users-2" class="w-12 h-12 text-gray-600 mb-4"></i>
+                        <h3 class="text-lg font-medium text-gray-400">No se encontraron clientes</h3>
+                        <p class="text-gray-500 mt-1">Ajusta tu búsqueda o crea un nuevo cliente.</p>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Pagination (Simplified) -->
+{% if is_paginated %}
+<div class="px-6 py-4 bg-white/5 border-t border-white/10 flex items-center justify-between">
+    <span class="text-sm text-gray-400">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+    <div class="flex gap-2">
+        {% if page_obj.has_previous %}
+        <button hx-get="?page={{ page_obj.previous_page_number }}" hx-target="#cliente-table-container"
+            class="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300">
+            <i data-lucide="chevron-left" class="w-5 h-5"></i>
+        </button>
+        {% endif %}
+        {% if page_obj.has_next %}
+        <button hx-get="?page={{ page_obj.next_page_number }}" hx-target="#cliente-table-container"
+            class="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300">
+            <i data-lucide="chevron-right" class="w-5 h-5"></i>
+        </button>
+        {% endif %}
+    </div>
+</div>
+{% endif %}

@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "ZULUAGA LEZAMA/ARANZA VALENTINA",
+  "CODIGO_IDENTIFICACION": "24411860",
+  "SOLO_NOMBRE_PASAJERO": "ZULUAGA LEZAMA",
+  "NUMERO_DE_BOLETO": "3080201383059",
+  "FECHA_DE_EMISION": "29 JAN 2026 15:52",
+  "AGENTE_EMISOR": "CCS00V0WV",
+  "CODIGO_RESERVA": "JGZLKB",
+  "SOLO_CODIGO_RESERVA": "JGZLKB",
+  "NOMBRE_AEROLINEA": "CONVIASA",
+  "DIRECCION_AEROLINEA": null,
+  "vuelos": [
+    {
+      "aerolinea": "V0",
+      "numero_vuelo": "1187",
+      "origen": "SAN ANTONIO",
+      "fecha_salida": "2FEB 2026",
+      "hora_salida": "0850",
+      "destino": "CARACAS",
+      "hora_llegada": "0950",
+      "cabina": "Económica",
+      "clase": "G",
+      "localizador_aerolinea": "JGZLKB"
+    }
+  ],
+  "TARIFA": "20750.00",
+  "IMPUESTOS": "7088.80",
+  "TOTAL": "27838.80",
+  "SOURCE_SYSTEM": "AI_KIU",
+  "es_remision": false,
+  "NOMBRE DEL PASAJERO": "ZULUAGA LEZAMA/ARANZA VALENTINA",
+  "CODIGO IDENTIFICACION": "24411860",
+  "SOLO NOMBRE PASAJERO": "ZULUAGA LEZAMA",
+  "NUMERO DE BOLETO": "3080201383059",
+  "FECHA DE EMISION": "29 JAN 2026 15:52",
+  "AGENTE EMISOR": "CCS00V0WV",
+  "CODIGO RESERVA": "JGZLKB",
+  "SOLO CODIGO RESERVA": "JGZLKB",
+  "NOMBRE AEROLINEA": "CONVIASA",
+  "DIRECCION AEROLINEA": null,
+  "SOURCE SYSTEM": "AI_KIU",
+  "es remision": false
+}

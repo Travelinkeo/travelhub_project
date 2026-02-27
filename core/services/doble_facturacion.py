@@ -42,9 +42,18 @@ class DobleFacturacionService:
             raise ValueError("Se requieren datos_tercero y fee_servicio")
         
         agencia = venta.agencia
-        cliente = venta.cliente
         moneda = venta.moneda
-        tasa_bcv = venta.tasa_cambio_bcv
+        tasa_bcv = getattr(venta, 'tasa_cambio_bcv', Decimal(1)) # Safe getattr + default
+        
+        try:
+            cliente = venta.cliente
+            # Determine client ID
+            # NOTE: Cliente model currently only has numero_pasaporte. 
+            # Future refactor might add RIF/Cedula specific fields.
+            cliente_doc = getattr(cliente, 'numero_pasaporte', '') or ''
+        except Exception as e:
+            logger.warning(f"⚠️ Doble Facturación Omitida: Error accediendo a Cliente de Venta {venta.pk}: {e}")
+            return None, None
         
         # 1. FACTURA POR CUENTA DE TERCEROS
         factura_tercero = FacturaConsolidada.objects.create(
@@ -64,8 +73,8 @@ class DobleFacturacionService:
             
             # Cliente
             cliente_es_residente=True,
-            cliente_identificacion=cliente.cedula_identidad or cliente.rif,
-            cliente_direccion=cliente.direccion or '',
+            cliente_identificacion=cliente_doc,
+            cliente_direccion=cliente.direccion_linea1 or '',
             
             # Tercero
             tercero_rif=datos_tercero['rif'],
@@ -118,8 +127,8 @@ class DobleFacturacionService:
             
             # Cliente
             cliente_es_residente=True,
-            cliente_identificacion=cliente.cedula_identidad or cliente.rif,
-            cliente_direccion=cliente.direccion or '',
+            cliente_identificacion=cliente_doc,
+            cliente_direccion=cliente.direccion_linea1 or '',
             
             # Bases
             subtotal_base_gravada=base_gravada,
@@ -130,16 +139,44 @@ class DobleFacturacionService:
         )
         
         # Item de la factura propia
+        # FIX: FacturaConsolidada recalculates totals based on items.
+        # So we must create items that match the 20/80 split.
+        
         tipo_servicio_desc = "nacional" if es_nacional else "internacional"
-        ItemFacturaConsolidada.objects.create(
-            factura=factura_propia,
-            descripcion=f"Fee por servicio de intermediación {tipo_servicio_desc}",
-            cantidad=1,
-            precio_unitario=fee_servicio,
-            tipo_servicio=ItemFacturaConsolidada.TipoServicio.COMISION_INTERMEDIACION,
-            es_gravado=True,
-            alicuota_iva=Decimal('16.00')
-        )
+        
+        if es_nacional:
+            ItemFacturaConsolidada.objects.create(
+                factura=factura_propia,
+                descripcion=f"Fee por servicio de intermediación {tipo_servicio_desc}",
+                cantidad=1,
+                precio_unitario=fee_servicio,
+                tipo_servicio=ItemFacturaConsolidada.TipoServicio.COMISION_INTERMEDIACION,
+                es_gravado=True,
+                alicuota_iva=Decimal('16.00')
+            )
+        else:
+            # International: Split into 20% Taxable and 80% Exempt items
+            # Item 1: Gravable (20%)
+            ItemFacturaConsolidada.objects.create(
+                factura=factura_propia,
+                descripcion=f"Fee Intermediación {tipo_servicio_desc} (Base Imp.)",
+                cantidad=1,
+                precio_unitario=base_gravada, # Pre-calculated 20%
+                tipo_servicio=ItemFacturaConsolidada.TipoServicio.COMISION_INTERMEDIACION,
+                es_gravado=True,
+                alicuota_iva=Decimal('16.00')
+            )
+            
+            # Item 2: Exempt (80%)
+            ItemFacturaConsolidada.objects.create(
+                factura=factura_propia,
+                descripcion=f"Fee Intermediación {tipo_servicio_desc} (Exento)",
+                cantidad=1,
+                precio_unitario=base_no_sujeta, # Pre-calculated 80%
+                tipo_servicio=ItemFacturaConsolidada.TipoServicio.COMISION_INTERMEDIACION,
+                es_gravado=False,
+                alicuota_iva=Decimal('0.00')
+            )
         
         logger.info(f"Doble facturación generada para venta {venta.id_venta}: "
                    f"Tercero={factura_tercero.numero_factura}, Propia={factura_propia.numero_factura}")

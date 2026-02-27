@@ -1,0 +1,28 @@
+﻿python : INFO:travelhub.settings:\u2705 Sentry configurado para 
+entorno: development
+En línea: 1 Carácter: 1
++ python scripts/verify_reconciliation_v2.py > verify_output.txt 
+2>&1
++ 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (INFO:travelhub....no:  
+   development:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+[WARNING] Usando almacenamiento local (FileSystemStorage)
+[OK] Usando PostgreSQL como broker de Celery (econ¾mico).
+Traceback (most recent call last):
+  File "C:\Users\ARMANDO\travelhub_project\scripts\verify_reconcilia
+tion_v2.py", line 16, in <module>
+    from core.models_catalogos import Proveedor, Agencia
+ImportError: cannot import name 'Agencia' from 
+'core.models_catalogos' 
+(C:\Users\ARMANDO\travelhub_project\core\models_catalogos.py)
+Sentry is attempting to send 2 pending events
+Waiting up to 2 seconds
+Press Ctrl-Break to quit
+
+(process:26924): GLib-GIO-WARNING **: 16:59:33.045: Unexpectedly, 
+UWP app `Clipchamp.Clipchamp_4.5.10220.0_x64__yxz26nhyzhsrt' (AUMId 
+`Clipchamp.Clipchamp_yxz26nhyzhsrt!App') supports 41 extensions but 
+has no verbs

@@ -1,0 +1,168 @@
+{% extends "base_modern.html" %}
+{% load i18n humanize %}
+
+{% block content %}
+<div class="p-6">
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <nav class="flex mb-2 text-sm text-gray-400" aria-label="Breadcrumb">
+                <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                    <li><a href="{% url 'contabilidad:libro_mayor' %}" class="hover:text-white transition-colors">{%
+                            trans "Libro Mayor" %}</a></li>
+                    <li>
+                        <div class="flex items-center"><i class="fas fa-chevron-right text-xs mx-2"></i> <span
+                                class="text-indigo-400 font-medium">{{ resultado.cuenta.nombre_cuenta }}</span></div>
+                    </li>
+                </ol>
+            </nav>
+            <h1 class="text-2xl font-bold text-white flex items-center">
+                <span class="bg-indigo-600/20 text-indigo-400 px-3 py-1 rounded-lg text-sm font-mono mr-4">{{
+                    resultado.cuenta.codigo_cuenta }}</span>
+                {{ resultado.cuenta.nombre_cuenta }}
+            </h1>
+        </div>
+        <div class="flex space-x-3">
+            <button onclick="window.print()"
+                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center font-medium shadow-lg transition-all">
+                <i class="fas fa-print mr-2"></i> {% trans "Imprimir" %}
+            </button>
+            <a href="{% url 'contabilidad:libro_mayor' %}"
+                class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg flex items-center font-medium shadow-lg transition-all">
+                <i class="fas fa-arrow-left mr-2"></i> {% trans "Volver" %}
+            </a>
+        </div>
+    </div>
+
+    <!-- Resumen de Periodo -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div class="bg-gray-800 p-5 rounded-2xl border border-gray-700 shadow-lg">
+            <span class="text-gray-400 text-xs uppercase font-bold tracking-widest">{% trans "Saldo Inicial" %}</span>
+            <div class="text-2xl font-bold text-white mt-1">{{ resultado.saldo_inicial|floatformat:2|intcomma }} <span
+                    class="text-sm font-normal text-gray-500">{{ moneda }}</span></div>
+        </div>
+        <div class="bg-gray-800 p-5 rounded-2xl border border-gray-700 shadow-lg">
+            <span class="text-gray-400 text-xs uppercase font-bold tracking-widest">{% trans "Total Debe" %}</span>
+            <div class="text-2xl font-bold text-green-400 mt-1">{{ resultado.total_debe|floatformat:2|intcomma }} <span
+                    class="text-sm font-normal text-gray-500">{{ moneda }}</span></div>
+        </div>
+        <div class="bg-gray-800 p-5 rounded-2xl border border-gray-700 shadow-lg">
+            <span class="text-gray-400 text-xs uppercase font-bold tracking-widest">{% trans "Total Haber" %}</span>
+            <div class="text-2xl font-bold text-red-400 mt-1">{{ resultado.total_haber|floatformat:2|intcomma }} <span
+                    class="text-sm font-normal text-gray-500">{{ moneda }}</span></div>
+        </div>
+        <div
+            class="bg-gray-800 p-5 rounded-2xl border border-indigo-500/50 shadow-lg bg-gradient-to-br from-gray-800 to-indigo-900/20">
+            <span class="text-indigo-400 text-xs uppercase font-bold tracking-widest">{% trans "Saldo Final" %}</span>
+            <div class="text-2xl font-bold text-white mt-1">{{ resultado.saldo_final|floatformat:2|intcomma }} <span
+                    class="text-sm font-normal text-gray-500">{{ moneda }}</span></div>
+        </div>
+    </div>
+
+    <!-- Listado de Movimientos -->
+    <div class="bg-gray-800 rounded-2xl overflow-hidden shadow-2xl border border-gray-700">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead>
+                    <tr class="bg-gray-700/50 text-gray-400 text-xs uppercase tracking-widest font-bold">
+                        <th class="px-6 py-4">{% trans "Fecha" %}</th>
+                        <th class="px-6 py-4">{% trans "Nro. Asiento" %}</th>
+                        <th class="px-6 py-4">{% trans "Concepto / Descripción" %}</th>
+                        <th class="px-6 py-4 text-right">{% trans "Debe" %}</th>
+                        <th class="px-6 py-4 text-right">{% trans "Haber" %}</th>
+                        <th class="px-6 py-4 text-right bg-black/10">{% trans "Saldo" %}</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-700">
+                    <!-- Fila Saldo Inicial -->
+                    <tr class="bg-gray-900/30 italic">
+                        <td class="px-6 py-3 text-gray-500" colspan="3">{% trans "Saldo Inicial al periodo" %}</td>
+                        <td class="px-6 py-3"></td>
+                        <td class="px-6 py-3"></td>
+                        <td class="px-6 py-3 text-right font-mono text-gray-400">{{
+                            resultado.saldo_inicial|floatformat:2|intcomma }}</td>
+                    </tr>
+
+                    {% for mov in resultado.movimientos %}
+                    <tr class="hover:bg-gray-700/50 transition-colors">
+                        <td class="px-6 py-4 text-sm text-gray-300">{{ mov.fecha|date:"d/m/Y" }}</td>
+                        <td class="px-6 py-4 text-sm">
+                            <span class="text-indigo-400 font-bold">#{{ mov.numero_asiento }}</span>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-200">
+                            {{ mov.descripcion }}
+                        </td>
+                        <td
+                            class="px-6 py-4 text-right font-mono text-sm {% if mov.debe > 0 %}text-green-400{% else %}text-gray-600{% endif %}">
+                            {% if mov.debe > 0 %}{{ mov.debe|floatformat:2|intcomma }}{% else %}-{% endif %}
+                        </td>
+                        <td
+                            class="px-6 py-4 text-right font-mono text-sm {% if mov.haber > 0 %}text-red-400{% else %}text-gray-600{% endif %}">
+                            {% if mov.haber > 0 %}{{ mov.haber|floatformat:2|intcomma }}{% else %}-{% endif %}
+                        </td>
+                        <td class="px-6 py-4 text-right font-mono text-sm font-bold text-white bg-black/5">
+                            {{ mov.saldo_acumulado|floatformat:2|intcomma }}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="px-6 py-20 text-center text-gray-500">
+                            {% trans "No hay movimientos registrados para esta cuenta en el periodo." %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+    @media print {
+
+        .bg-gray-900,
+        .bg-gray-800,
+        .bg-gray-750,
+        .bg-gray-700,
+        .bg-black\/5,
+        .bg-black\/10 {
+            background: white !important;
+            color: black !important;
+            border: 1px solid #ddd;
+        }
+
+        .text-white,
+        .text-gray-200,
+        .text-gray-300,
+        .text-gray-400,
+        .text-indigo-400,
+        .text-green-400,
+        .text-red-400 {
+            color: black !important;
+        }
+
+        .bg-indigo-600,
+        .shadow-2xl,
+        .shadow-lg,
+        button,
+        i,
+        nav {
+            display: none !important;
+        }
+
+        table {
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            border: 1px solid #000 !important;
+            font-size: 9pt;
+        }
+
+        h1 {
+            font-size: 16pt !important;
+            color: black !important;
+        }
+    }
+</style>
+{% endblock %}

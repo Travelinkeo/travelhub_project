@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "VELASQUEZ/VERONICA",
+  "CODIGO_IDENTIFICACION": "20913896",
+  "SOLO_NOMBRE_PASAJERO": "VERONICA",
+  "NUMERO_DE_BOLETO": "0520270631886",
+  "FECHA_DE_EMISION": "10 DEC 2025 15:17",
+  "AGENTE_EMISOR": "CCS00ESKA",
+  "CODIGO_RESERVA": "PRXADP",
+  "SOLO_CODIGO_RESERVA": "PRXADP",
+  "NOMBRE_AEROLINEA": "AEROLINEAS ESTELAR LATINOAMERICA C.A.",
+  "DIRECCION_AEROLINEA": null,
+  "vuelos": [
+    {
+      "aerolinea": "ES",
+      "numero_vuelo": "862",
+      "origen": "SANTO DOMINGO",
+      "fecha_salida": "12 DEC 2025",
+      "hora_salida": "1410",
+      "destino": "CARACAS",
+      "hora_llegada": "1510",
+      "cabina": "B",
+      "clase": "Y",
+      "localizador_aerolinea": "PRXADP"
+    }
+  ],
+  "TARIFA": "11327.77",
+  "IMPUESTOS": "12722.24",
+  "TOTAL": "24050.01",
+  "SOURCE_SYSTEM": "AI_KIU",
+  "es_remision": false,
+  "NOMBRE DEL PASAJERO": "VELASQUEZ/VERONICA",
+  "CODIGO IDENTIFICACION": "20913896",
+  "SOLO NOMBRE PASAJERO": "VERONICA",
+  "NUMERO DE BOLETO": "0520270631886",
+  "FECHA DE EMISION": "10 DEC 2025 15:17",
+  "AGENTE EMISOR": "CCS00ESKA",
+  "CODIGO RESERVA": "PRXADP",
+  "SOLO CODIGO RESERVA": "PRXADP",
+  "NOMBRE AEROLINEA": "AEROLINEAS ESTELAR LATINOAMERICA C.A.",
+  "DIRECCION AEROLINEA": null,
+  "SOURCE SYSTEM": "AI_KIU",
+  "es remision": false
+}

@@ -7,7 +7,7 @@ from django.core.management.base import BaseCommand
 from django.utils import timezone
 
 from core.gemini import generate_content
-from core.models.ventas import Venta
+from core.models import Venta
 
 # --- Funciones Auxiliares (Simuladas y Reales) ---
 

@@ -1,0 +1,49 @@
+﻿python : INFO:travelhub.settings:\u2705 Sentry configurado para 
+entorno: development
+En línea: 1 Carácter: 1
++ python scripts/verify_reconciliation_v2.py > verify_output_v2.txt 
+2>& ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~
+    + CategoryInfo          : NotSpecified: (INFO:travelhub....no:  
+   development:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+[WARNING] Usando almacenamiento local (FileSystemStorage)
+[OK] Usando PostgreSQL como broker de Celery (econ¾mico).
+Traceback (most recent call last):
+  File "C:\Users\ARMANDO\travelhub_project\scripts\verify_reconcilia
+tion_v2.py", line 94, in <module>
+    verify_reconciliation_v2()
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\ARMANDO\travelhub_project\scripts\verify_reconcilia
+tion_v2.py", line 19, in verify_reconciliation_v2
+    print("--- \U0001f916 Iniciando Verificaci¾n de Conciliaci¾n AI 
+v2 ---")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ARMANDO\AppData\Local\Programs\Python\Python313\Lib
+\encodings\cp1252.py", line 19, in encode
+    return 
+codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character 
+'\U0001f916' in position 4: character maps to <undefined>
+Sentry is attempting to send 2 pending events
+Waiting up to 2 seconds
+Press Ctrl-Break to quit
+
+(process:59016): GLib-GIO-WARNING **: 18:13:11.155: Unexpectedly, 
+UWP app `Clipchamp.Clipchamp_4.5.10220.0_x64__yxz26nhyzhsrt' (AUMId 
+`Clipchamp.Clipchamp_yxz26nhyzhsrt!App') supports 41 extensions but 
+has no verbs
+
+(process:59016): GLib-GIO-WARNING **: 18:13:11.585: Unexpectedly, 
+UWP app `Microsoft.ScreenSketch_11.2511.47.0_x64__8wekyb3d8bbwe' 
+(AUMId `Microsoft.ScreenSketch_8wekyb3d8bbwe!App') supports 29 
+extensions but has no verbs
+
+(process:59016): GLib-GIO-WARNING **: 18:13:11.626: Unexpectedly, 
+UWP app 
+`Microsoft.OutlookForWindows_1.2026.210.300_x64__8wekyb3d8bbwe' 
+(AUMId `Microsoft.OutlookForWindows_8wekyb3d8bbwe!Microsoft.Outlookf
+orWindows') supports 4 extensions but has no verbs

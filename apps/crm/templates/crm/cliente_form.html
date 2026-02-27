@@ -1,0 +1,166 @@
+{% extends 'base_modern.html' %}
+{% load static %}
+
+{% block title %}{{ title|default:"Cliente" }} - TravelHub Pro{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-8">
+    <!-- Header -->
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-3xl font-bold text-white">{{ title|default:"Gestión de Cliente" }}</h1>
+            <p class="text-gray-400 mt-1">Completa la información detallada del cliente o empresa.</p>
+        </div>
+        <a href="{% url 'crm:cliente_list' %}"
+            class="text-gray-400 hover:text-white flex items-center transition-colors">
+            <i data-lucide="arrow-left" class="w-5 h-5 mr-2"></i>
+            Volver al listado
+        </a>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" class="space-y-6">
+        {% csrf_token %}
+
+        <!-- Main Info Card -->
+        <div class="glass-panel rounded-3xl p-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Profile Picture Upload -->
+                <div class="flex flex-col items-center space-y-4">
+                    <div class="relative group cursor-pointer">
+                        <div
+                            class="w-32 h-32 rounded-3xl bg-white/5 border-2 border-dashed border-white/20 flex items-center justify-center overflow-hidden transition-all group-hover:border-blue-500/50">
+                            {% if object.foto_perfil %}
+                            <img src="{{ object.foto_perfil.url }}" id="preview-image"
+                                class="w-full h-full object-cover">
+                            {% else %}
+                            <i data-lucide="camera" class="w-10 h-10 text-gray-500 group-hover:text-blue-400"
+                                id="preview-placeholder"></i>
+                            <img id="preview-image" class="w-full h-full object-cover hidden">
+                            {% endif %}
+                        </div>
+                        <input type="file" name="foto_perfil" class="absolute inset-0 opacity-0 cursor-pointer"
+                            onchange="previewImage(this)">
+                    </div>
+                    <p class="text-xs text-gray-500 text-center">Click para cambiar foto</p>
+                </div>
+
+                <!-- Fields -->
+                <div class="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="sm:col-span-2">
+                        <label class="block text-sm font-medium text-gray-400 mb-1.5">Tipo de Cliente</label>
+                        {{ form.tipo_cliente }}
+                        {% if form.tipo_cliente.errors %}<p class="text-red-400 text-xs mt-1">{{
+                            form.tipo_cliente.errors.0 }}</p>{% endif %}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-400 mb-1.5">Nombres</label>
+                        <input type="text" name="nombres" value="{{ form.nombres.value|default:'' }}"
+                            class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:ring-2 focus:ring-blue-500 transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-400 mb-1.5">Apellidos</label>
+                        <input type="text" name="apellidos" value="{{ form.apellidos.value|default:'' }}"
+                            class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:ring-2 focus:ring-blue-500 transition-all">
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label class="block text-sm font-medium text-gray-400 mb-1.5">Nombre de Empresa
+                            (Opcional)</label>
+                        <input type="text" name="nombre_empresa" value="{{ form.nombre_empresa.value|default:'' }}"
+                            class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:ring-2 focus:ring-blue-500 transition-all">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Secondary Info -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="glass-panel rounded-3xl p-8 space-y-4">
+                <h3 class="text-lg font-semibold text-white flex items-center">
+                    <i data-lucide="shield-check" class="w-5 h-5 mr-2 text-blue-400"></i>
+                    Identificación y Contacto
+                </h3>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-400 mb-1.5">Cédula / RIF</label>
+                        <input type="text" name="cedula_identidad" value="{{ form.cedula_identidad.value|default:'' }}"
+                            class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:ring-2 focus:ring-blue-500 transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-400 mb-1.5">Email Principal</label>
+                        <input type="email" name="email" value="{{ form.email.value|default:'' }}"
+                            class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:ring-2 focus:ring-blue-500 transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-400 mb-1.5">Teléfono</label>
+                        <input type="text" name="telefono_principal"
+                            value="{{ form.telefono_principal.value|default:'' }}"
+                            class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:ring-2 focus:ring-blue-500 transition-all">
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-panel rounded-3xl p-8 space-y-4">
+                <h3 class="text-lg font-semibold text-white flex items-center">
+                    <i data-lucide="map-pin" class="w-5 h-5 mr-2 text-blue-400"></i>
+                    Ubicación y Otros
+                </h3>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-400 mb-1.5">Ciudad</label>
+                        <input type="text" name="ciudad" value="{{ form.ciudad.value|default:'' }}"
+                            class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:ring-2 focus:ring-blue-500 transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-400 mb-1.5">Dirección</label>
+                        <textarea name="direccion" rows="3"
+                            class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:ring-2 focus:ring-blue-500 transition-all">{{ form.direccion.value|default:'' }}</textarea>
+                    </div>
+                    <div class="hidden">
+                        {{ form.nacionalidad }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex items-center justify-end gap-4 pt-4">
+            <a href="{% url 'crm:cliente_list' %}"
+                class="px-8 py-3 rounded-xl border border-white/10 text-gray-300 hover:bg-white/5 transition-all">
+                Cancelar
+            </a>
+            <button type="submit"
+                class="px-10 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold shadow-lg shadow-blue-900/20 transition-all">
+                Guardar Cliente
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    function previewImage(input) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                const preview = document.getElementById('preview-image');
+                const placeholder = document.getElementById('preview-placeholder');
+                preview.src = e.target.result;
+                preview.classList.remove('hidden');
+                if (placeholder) placeholder.classList.add('hidden');
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        lucide.createIcons();
+
+        // Style standard select
+        const selects = document.querySelectorAll('select');
+        selects.forEach(s => {
+            s.className = "w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:ring-2 focus:ring-blue-500 transition-all appearance-none";
+        });
+    });
+</script>
+{% endblock %}

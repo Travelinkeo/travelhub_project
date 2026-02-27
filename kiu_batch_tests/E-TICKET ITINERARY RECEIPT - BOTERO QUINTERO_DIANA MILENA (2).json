@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "BOTERO QUINTERO/DIANA MILENA",
+  "CODIGO_IDENTIFICACION": "14260446",
+  "SOLO_NOMBRE_PASAJERO": "DIANA MILENA",
+  "NUMERO_DE_BOLETO": "3080310884831",
+  "FECHA_DE_EMISION": "06 NOV 2025 18:05",
+  "AGENTE_EMISOR": "PTYN682EM",
+  "CODIGO_RESERVA": "KDTBIP",
+  "SOLO_CODIGO_RESERVA": "KDTBIP",
+  "NOMBRE_AEROLINEA": "CONVIASA",
+  "DIRECCION_AEROLINEA": null,
+  "vuelos": [
+    {
+      "aerolinea": "V0",
+      "numero_vuelo": "013",
+      "origen": "PORLAMAR",
+      "fecha_salida": "9NOV 2025",
+      "hora_salida": "1730",
+      "destino": "CARACAS",
+      "hora_llegada": "1820",
+      "cabina": "Económica",
+      "clase": "Q",
+      "localizador_aerolinea": "KDTBIP"
+    }
+  ],
+  "TARIFA": "70.00",
+  "IMPUESTOS": "18.05",
+  "TOTAL": "88.05",
+  "SOURCE_SYSTEM": "AI_KIU",
+  "es_remision": false,
+  "NOMBRE DEL PASAJERO": "BOTERO QUINTERO/DIANA MILENA",
+  "CODIGO IDENTIFICACION": "14260446",
+  "SOLO NOMBRE PASAJERO": "DIANA MILENA",
+  "NUMERO DE BOLETO": "3080310884831",
+  "FECHA DE EMISION": "06 NOV 2025 18:05",
+  "AGENTE EMISOR": "PTYN682EM",
+  "CODIGO RESERVA": "KDTBIP",
+  "SOLO CODIGO RESERVA": "KDTBIP",
+  "NOMBRE AEROLINEA": "CONVIASA",
+  "DIRECCION AEROLINEA": null,
+  "SOURCE SYSTEM": "AI_KIU",
+  "es remision": false
+}

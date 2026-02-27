@@ -1,0 +1,21 @@
+Traceback (most recent call last):
+  File "C:\Users\ARMANDO\travelhub_project\debug_pdf_error.py", line 39, in <module>
+    pdf_bytes, filename = generate_ticket(boleto.datos_parseados)
+                          ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ARMANDO\travelhub_project\core\ticket_parser.py", line 1076, in generate_ticket
+    raise e # Force crash to see tracerizar la plantilla {template_name}: {e}")
+    ^^^^^^^
+  File "C:\Users\ARMANDO\travelhub_project\core\ticket_parser.py", line 1072, in generate_ticket
+    html_out = template.render(context)
+  File "C:\Users\ARMANDO\AppData\Local\Programs\Python\Python313\Lib\site-packages\jinja2\environment.py", line 1295, in render
+    self.environment.handle_exception()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\ARMANDO\AppData\Local\Programs\Python\Python313\Lib\site-packages\jinja2\environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "C:\Users\ARMANDO\travelhub_project\core\templates\core\tickets\ticket_template_sabre.html", line 346, in top-level template code
+    {% if destino and destino.get('ciudad') and 'No encontrado' not in
+    
+  File "C:\Users\ARMANDO\AppData\Local\Programs\Python\Python313\Lib\site-packages\jinja2\utils.py", line 92, in from_obj
+    if hasattr(obj, "jinja_pass_arg"):
+       ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+jinja2.exceptions.UndefinedError: 'str object' has no attribute 'get'

@@ -1,0 +1,20 @@
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 animate-in slide-in-from-top duration-300">
+    {% for post in posts %}
+    <div class="bg-slate-900/50 p-4 rounded-2xl border border-slate-700/50">
+        <div class="flex items-center gap-2 mb-3">
+            <span class="text-xs font-black text-purple-400 uppercase tracking-tighter">{{ post.get_plataforma_display
+                }}</span>
+        </div>
+        <p class="text-xs text-gray-300 line-clamp-4 italic mb-2">
+            "{{ post.contenido }}"
+        </p>
+        <div class="text-[10px] text-purple-500 font-bold truncate">
+            {{ post.hashtags }}
+        </div>
+        <button
+            class="w-full mt-3 py-2 bg-slate-800 hover:bg-slate-700 text-gray-400 hover:text-white rounded-lg transition text-[10px] font-bold">
+            COPIAR TEXTO
+        </button>
+    </div>
+    {% endfor %}
+</div>

@@ -1,0 +1,32 @@
+﻿python : INFO:travelhub.settings:\u2705 Sentry configurado para 
+entorno: development
+En línea: 1 Carácter: 1
++ python scripts/test_accounting_assistant.py > 
+assistant_output.txt 2> ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~
+    + CategoryInfo          : NotSpecified: (INFO:travelhub....no: 
+d    evelopment:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+[WARNING] Usando almacenamiento local (FileSystemStorage)
+[OK] Usando PostgreSQL como broker de Celery (econ¾mico).
+Traceback (most recent call last):
+  File "C:\Users\ARMANDO\travelhub_project\scripts\test_accounting_a
+ssistant.py", line 36, in <module>
+    test_assistant()
+    ~~~~~~~~~~~~~~^^
+  File "C:\Users\ARMANDO\travelhub_project\scripts\test_accounting_a
+ssistant.py", line 15, in test_assistant
+    print("--- \U0001f916 Probando Asistente Contable AI ---")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ARMANDO\AppData\Local\Programs\Python\Python313\Lib
+\encodings\cp1252.py", line 19, in encode
+    return 
+codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character 
+'\U0001f916' in position 4: character maps to <undefined>
+Sentry is attempting to send 2 pending events
+Waiting up to 2 seconds
+Press Ctrl-Break to quit

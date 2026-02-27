@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "GIRALDO CASTANO/JUAN CAMILO",
+  "CODIGO_IDENTIFICACION": "1020437171",
+  "SOLO_NOMBRE_PASAJERO": "JUAN CAMILO",
+  "NUMERO_DE_BOLETO": "1347362365478",
+  "FECHA_DE_EMISION": "24 Jan 26",
+  "AGENTE_EMISOR": "AE1",
+  "CODIGO_RESERVA": "MBYRDI",
+  "SOLO_CODIGO_RESERVA": "MBYRDI",
+  "NOMBRE_AEROLINEA": "AEROVIAS DEL CONTINENTE",
+  "DIRECCION_AEROLINEA": null,
+  "vuelos": [
+    {
+      "aerolinea": "AVIANCA",
+      "numero_vuelo": "9432",
+      "origen": "BOGOTA, COLOMBIA",
+      "fecha_salida": "29 Jan 26",
+      "hora_salida": "12:20",
+      "destino": "MEDELLIN, COLOMBIA",
+      "hora_llegada": "13:20",
+      "cabina": "ECONOMY",
+      "clase": "Z",
+      "localizador_aerolinea": "A9TQ3F"
+    }
+  ],
+  "TARIFA": "0.00",
+  "IMPUESTOS": "0.00",
+  "TOTAL": "0.00",
+  "SOURCE_SYSTEM": "AI_SABRE",
+  "es_remision": false,
+  "NOMBRE DEL PASAJERO": "GIRALDO CASTANO/JUAN CAMILO",
+  "CODIGO IDENTIFICACION": "1020437171",
+  "SOLO NOMBRE PASAJERO": "JUAN CAMILO",
+  "NUMERO DE BOLETO": "1347362365478",
+  "FECHA DE EMISION": "24 Jan 26",
+  "AGENTE EMISOR": "AE1",
+  "CODIGO RESERVA": "MBYRDI",
+  "SOLO CODIGO RESERVA": "MBYRDI",
+  "NOMBRE AEROLINEA": "AEROVIAS DEL CONTINENTE",
+  "DIRECCION AEROLINEA": null,
+  "SOURCE SYSTEM": "AI_SABRE",
+  "es remision": false
+}

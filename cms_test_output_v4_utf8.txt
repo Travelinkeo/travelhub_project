@@ -1,0 +1,27 @@
+﻿python : INFO:travelhub.settings:\u2705 Sentry configurado para 
+entorno: development
+En línea: 1 Carácter: 1
++ python scripts/test_cms_automation.py > cms_test_output_v4.txt 
+2>&1;  ...
++ 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (INFO:travelhub....no:  
+   development:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+
+(process:44092): GLib-GIO-WARNING **: 08:08:41.858: Unexpectedly, 
+UWP app `Clipchamp.Clipchamp_4.5.10220.0_x64__yxz26nhyzhsrt' (AUMId 
+`Clipchamp.Clipchamp_yxz26nhyzhsrt!App') supports 41 extensions but 
+has no verbs
+
+(process:44092): GLib-GIO-WARNING **: 08:08:42.058: Unexpectedly, 
+UWP app `Microsoft.ScreenSketch_11.2511.47.0_x64__8wekyb3d8bbwe' 
+(AUMId `Microsoft.ScreenSketch_8wekyb3d8bbwe!App') supports 29 
+extensions but has no verbs
+
+(process:44092): GLib-GIO-WARNING **: 08:08:42.089: Unexpectedly, 
+UWP app 
+`Microsoft.OutlookForWindows_1.2026.210.300_x64__8wekyb3d8bbwe' 
+(AUMId `Microsoft.OutlookForWindows_8wekyb3d8bbwe!Microsoft.Outlookf
+orWindows') supports 4 extensions but has no verbs

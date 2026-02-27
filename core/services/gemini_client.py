@@ -41,7 +41,7 @@ def list_available_models():
         return f"Error al contactar la API de Gemini para listar modelos: {e}"
 
 
-def get_gemini_model(model_name: str = "gemini-2.5-flash"):
+def get_gemini_model(model_name: str = "gemini-2.0-flash-lite-001"):
     """
     Inicializa y devuelve un modelo generativo de Gemini.
     """
@@ -56,16 +56,9 @@ def get_gemini_model(model_name: str = "gemini-2.5-flash"):
         logger.error(f"Error al inicializar el modelo '{model_name}': {e}", exc_info=True)
         return None
 
-def generate_text_from_prompt(prompt: str, model_name: str = "gemini-2.5-flash") -> str:
+def generate_text_from_prompt(prompt: str, model_name: str = "gemini-2.0-flash-lite-001") -> str:
     """
     Envía un prompt de texto simple a Gemini y devuelve la respuesta generada.
-
-    Args:
-        prompt: El texto que se enviará al modelo.
-        model_name: El nombre del modelo a utilizar.
-
-    Returns:
-        El texto generado por el modelo o un mensaje de error.
     """
     model = get_gemini_model(model_name)
     if not model:
@@ -77,3 +70,24 @@ def generate_text_from_prompt(prompt: str, model_name: str = "gemini-2.5-flash")
     except Exception as e:
         logger.error(f"Error durante la generación de contenido con Gemini: {e}", exc_info=True)
         return f"Error al contactar la API de Gemini: {e}"
+
+
+def generate_structured_data(prompt: str, model_name: str = "gemini-2.0-flash-lite-001") -> str:
+    """
+    Envía un prompt a Gemini y fuerza una respuesta en formato JSON.
+    """
+    model = get_gemini_model(model_name)
+    if not model:
+        return "{}"
+
+    try:
+        # Configurar para recibir JSON
+        config = genai.types.GenerationConfig(
+            response_mime_type="application/json"
+        )
+        
+        response = model.generate_content(prompt, generation_config=config)
+        return response.text
+    except Exception as e:
+        logger.error(f"Error durante la generación de datos estructurados: {e}", exc_info=True)
+        return "{}"

@@ -31,7 +31,7 @@ class Migration(migrations.Migration):
                 ('observaciones', models.TextField(blank=True, verbose_name='Observaciones')),
                 ('creado', models.DateTimeField(auto_now_add=True)),
                 ('actualizado', models.DateTimeField(auto_now=True)),
-                ('cliente', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='personas.cliente', verbose_name='Cliente (Agente de Retención)')),
+                ('cliente', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='crm.cliente', verbose_name='Cliente (Agente de Retención)')),
                 ('factura', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='retenciones_islr', to='core.facturaconsolidada', verbose_name='Factura')),
             ],
             options={

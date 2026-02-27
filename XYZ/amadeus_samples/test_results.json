@@ -1,0 +1,706 @@
+{
+  "sample_1.pdf": {
+    "SOURCE_SYSTEM": "Amadeus",
+    "pnr": "223PPD",
+    "numero_boleto": "2357120126508",
+    "ticket_number": "2357120126508",
+    "pasajero": {
+      "nombre_completo": "Rubio Pinate David Ignacio"
+    },
+    "passenger_name": "Rubio Pinate David Ignacio",
+    "airline_name": "TK",
+    "total": "USD 906.3",
+    "fecha_emision": "04 SEPTEMBER 24",
+    "vuelos": [
+      {
+        "origen": "CARACAS",
+        "destino": "ISTANBUL",
+        "vuelo": "TK0224",
+        "clase": "U",
+        "fecha": "05Dec",
+        "hora_salida": "11:35",
+        "hora_llegada": "06:20",
+        "aerolinea": "TK"
+      },
+      {
+        "origen": "ISTANBUL",
+        "destino": "CARACAS",
+        "vuelo": "TK0223",
+        "clase": "U",
+        "fecha": "23Jan",
+        "hora_salida": "02:05",
+        "hora_llegada": "08:25",
+        "aerolinea": "TK"
+      }
+    ],
+    "flights": [
+      {
+        "origen": "CARACAS",
+        "destino": "ISTANBUL",
+        "vuelo": "TK0224",
+        "clase": "U",
+        "fecha": "05Dec",
+        "hora_salida": "11:35",
+        "hora_llegada": "06:20",
+        "aerolinea": "TK"
+      },
+      {
+        "origen": "ISTANBUL",
+        "destino": "CARACAS",
+        "vuelo": "TK0223",
+        "clase": "U",
+        "fecha": "23Jan",
+        "hora_salida": "02:05",
+        "hora_llegada": "08:25",
+        "aerolinea": "TK"
+      }
+    ],
+    "tarifas": {
+      "total_amount": 906.3,
+      "total_currency": "USD",
+      "total": "USD 906.30"
+    },
+    "agencia": {
+      "name": "BRICKELL TRAVEL MANAGEMENT",
+      "iata": "10970411"
+    },
+    "text_snippet": "\n--- PAGE 1 ---\n--\nElectronic Ticket Receipt\nBooking ref: 223PPD CheckMyTrip App\nIssue date: 04 SEPTEMBER 24 Baggage\nAirline booking ref: TK/RJTERA\nIssuing Airline: TURKISH AIRLINES\nTicket: 235-712012"
+  },
+  "sample_2.pdf": {
+    "SOURCE_SYSTEM": "Amadeus",
+    "pnr": "223PPD",
+    "numero_boleto": "2357120126509",
+    "ticket_number": "2357120126509",
+    "pasajero": {
+      "nombre_completo": "Rubio Pinate Diana"
+    },
+    "passenger_name": "Rubio Pinate Diana",
+    "airline_name": "TK",
+    "total": "USD 1081.8",
+    "fecha_emision": "04 SEPTEMBER 24",
+    "vuelos": [
+      {
+        "origen": "CARACAS",
+        "destino": "ISTANBUL",
+        "vuelo": "TK0224",
+        "clase": "U",
+        "fecha": "05Dec",
+        "hora_salida": "11:35",
+        "hora_llegada": "06:20",
+        "aerolinea": "TK"
+      },
+      {
+        "origen": "ISTANBUL",
+        "destino": "CARACAS",
+        "vuelo": "TK0223",
+        "clase": "U",
+        "fecha": "23Jan",
+        "hora_salida": "02:05",
+        "hora_llegada": "08:25",
+        "aerolinea": "TK"
+      }
+    ],
+    "flights": [
+      {
+        "origen": "CARACAS",
+        "destino": "ISTANBUL",
+        "vuelo": "TK0224",
+        "clase": "U",
+        "fecha": "05Dec",
+        "hora_salida": "11:35",
+        "hora_llegada": "06:20",
+        "aerolinea": "TK"
+      },
+      {
+        "origen": "ISTANBUL",
+        "destino": "CARACAS",
+        "vuelo": "TK0223",
+        "clase": "U",
+        "fecha": "23Jan",
+        "hora_salida": "02:05",
+        "hora_llegada": "08:25",
+        "aerolinea": "TK"
+      }
+    ],
+    "tarifas": {
+      "total_amount": 1081.8,
+      "total_currency": "USD",
+      "total": "USD 1081.80"
+    },
+    "agencia": {
+      "name": "BRICKELL TRAVEL MANAGEMENT",
+      "iata": "10970411"
+    },
+    "text_snippet": "\n--- PAGE 1 ---\n--\nElectronic Ticket Receipt\nBooking ref: 223PPD CheckMyTrip App\nIssue date: 04 SEPTEMBER 24 Baggage\nAirline booking ref: TK/RJTERA\nIssuing Airline: TURKISH AIRLINES\nTicket: 235-712012"
+  },
+  "sample_3.pdf": {
+    "SOURCE_SYSTEM": "Amadeus",
+    "pnr": "34PKLM",
+    "numero_boleto": "2357124716153",
+    "ticket_number": "2357124716153",
+    "pasajero": {
+      "nombre_completo": "Gomez ortigoza Licelia skarly"
+    },
+    "passenger_name": "Gomez ortigoza Licelia skarly",
+    "airline_name": "TK",
+    "total": null,
+    "fecha_emision": "15 OCTOBER 24",
+    "vuelos": [
+      {
+        "origen": "CARACAS",
+        "destino": "ISTANBUL",
+        "vuelo": "TK0224",
+        "clase": "U",
+        "fecha": "30Jan",
+        "hora_salida": "11:35",
+        "hora_llegada": "06:20",
+        "aerolinea": "TK"
+      },
+      {
+        "origen": "ISTANBUL",
+        "destino": "MILAN",
+        "vuelo": "TK1873",
+        "clase": "U",
+        "fecha": "31Jan",
+        "hora_salida": "08:05",
+        "hora_llegada": "09:10",
+        "aerolinea": "TK"
+      },
+      {
+        "origen": "MILAN",
+        "destino": "ISTANBUL",
+        "vuelo": "TK1876",
+        "clase": "U",
+        "fecha": "12Feb",
+        "hora_salida": "18:35",
+        "hora_llegada": "23:35",
+        "aerolinea": "TK"
+      },
+      {
+        "origen": "ISTANBUL",
+        "destino": "CARACAS",
+        "vuelo": "TK0223",
+        "clase": "U",
+        "fecha": "13Feb",
+        "hora_salida": "02:05",
+        "hora_llegada": "08:25",
+        "aerolinea": "TK"
+      }
+    ],
+    "flights": [
+      {
+        "origen": "CARACAS",
+        "destino": "ISTANBUL",
+        "vuelo": "TK0224",
+        "clase": "U",
+        "fecha": "30Jan",
+        "hora_salida": "11:35",
+        "hora_llegada": "06:20",
+        "aerolinea": "TK"
+      },
+      {
+        "origen": "ISTANBUL",
+        "destino": "MILAN",
+        "vuelo": "TK1873",
+        "clase": "U",
+        "fecha": "31Jan",
+        "hora_salida": "08:05",
+        "hora_llegada": "09:10",
+        "aerolinea": "TK"
+      },
+      {
+        "origen": "MILAN",
+        "destino": "ISTANBUL",
+        "vuelo": "TK1876",
+        "clase": "U",
+        "fecha": "12Feb",
+        "hora_salida": "18:35",
+        "hora_llegada": "23:35",
+        "aerolinea": "TK"
+      },
+      {
+        "origen": "ISTANBUL",
+        "destino": "CARACAS",
+        "vuelo": "TK0223",
+        "clase": "U",
+        "fecha": "13Feb",
+        "hora_salida": "02:05",
+        "hora_llegada": "08:25",
+        "aerolinea": "TK"
+      }
+    ],
+    "tarifas": {},
+    "agencia": {
+      "name": "SOPORTE GLOBAL INC",
+      "iata": "10970411"
+    },
+    "text_snippet": "\n--- PAGE 1 ---\nElectronic Ticket Receipt Booking ref: 34PKLM CheckMyTrip App\nIssue date: 15 OCTOBER 24 Baggage\nAirline booking ref: TK/SESGS2\nIssuing Airline: TURKISH AIRLINES\nTicket: 235-7124716153\n"
+  },
+  "sample_4.pdf": {
+    "SOURCE_SYSTEM": "Amadeus",
+    "pnr": "34PKLM",
+    "numero_boleto": "2357124716152",
+    "ticket_number": "2357124716152",
+    "pasajero": {
+      "nombre_completo": "Giraldo alzate Yeison mauricio"
+    },
+    "passenger_name": "Giraldo alzate Yeison mauricio",
+    "airline_name": "TK",
+    "total": null,
+    "fecha_emision": "15 OCTOBER 24",
+    "vuelos": [
+      {
+        "origen": "CARACAS",
+        "destino": "ISTANBUL",
+        "vuelo": "TK0224",
+        "clase": "U",
+        "fecha": "30Jan",
+        "hora_salida": "11:35",
+        "hora_llegada": "06:20",
+        "aerolinea": "TK"
+      },
+      {
+        "origen": "ISTANBUL",
+        "destino": "MILAN",
+        "vuelo": "TK1873",
+        "clase": "U",
+        "fecha": "31Jan",
+        "hora_salida": "08:05",
+        "hora_llegada": "09:10",
+        "aerolinea": "TK"
+      },
+      {
+        "origen": "MILAN",
+        "destino": "ISTANBUL",
+        "vuelo": "TK1876",
+        "clase": "U",
+        "fecha": "12Feb",
+        "hora_salida": "18:35",
+        "hora_llegada": "23:35",
+        "aerolinea": "TK"
+      },
+      {
+        "origen": "ISTANBUL",
+        "destino": "CARACAS",
+        "vuelo": "TK0223",
+        "clase": "U",
+        "fecha": "13Feb",
+        "hora_salida": "02:05",
+        "hora_llegada": "08:25",
+        "aerolinea": "TK"
+      }
+    ],
+    "flights": [
+      {
+        "origen": "CARACAS",
+        "destino": "ISTANBUL",
+        "vuelo": "TK0224",
+        "clase": "U",
+        "fecha": "30Jan",
+        "hora_salida": "11:35",
+        "hora_llegada": "06:20",
+        "aerolinea": "TK"
+      },
+      {
+        "origen": "ISTANBUL",
+        "destino": "MILAN",
+        "vuelo": "TK1873",
+        "clase": "U",
+        "fecha": "31Jan",
+        "hora_salida": "08:05",
+        "hora_llegada": "09:10",
+        "aerolinea": "TK"
+      },
+      {
+        "origen": "MILAN",
+        "destino": "ISTANBUL",
+        "vuelo": "TK1876",
+        "clase": "U",
+        "fecha": "12Feb",
+        "hora_salida": "18:35",
+        "hora_llegada": "23:35",
+        "aerolinea": "TK"
+      },
+      {
+        "origen": "ISTANBUL",
+        "destino": "CARACAS",
+        "vuelo": "TK0223",
+        "clase": "U",
+        "fecha": "13Feb",
+        "hora_salida": "02:05",
+        "hora_llegada": "08:25",
+        "aerolinea": "TK"
+      }
+    ],
+    "tarifas": {},
+    "agencia": {
+      "name": "SOPORTE GLOBAL INC",
+      "iata": "10970411"
+    },
+    "text_snippet": "\n--- PAGE 1 ---\nElectronic Ticket Receipt Booking ref: 34PKLM CheckMyTrip App\nIssue date: 15 OCTOBER 24 Baggage\nAirline booking ref: TK/SESGS2\nIssuing Airline: TURKISH AIRLINES\nTicket: 235-7124716152\n"
+  },
+  "sample_5.pdf": {
+    "SOURCE_SYSTEM": "Amadeus",
+    "pnr": "223PPD",
+    "numero_boleto": "2357120126507",
+    "ticket_number": "2357120126507",
+    "pasajero": {
+      "nombre_completo": "Eguiarte Rubio Camila"
+    },
+    "passenger_name": "Eguiarte Rubio Camila",
+    "airline_name": "TK",
+    "total": "USD 906.3",
+    "fecha_emision": "04 SEPTEMBER 24",
+    "vuelos": [
+      {
+        "origen": "CARACAS",
+        "destino": "ISTANBUL",
+        "vuelo": "TK0224",
+        "clase": "U",
+        "fecha": "05Dec",
+        "hora_salida": "11:35",
+        "hora_llegada": "06:20",
+        "aerolinea": "TK"
+      },
+      {
+        "origen": "ISTANBUL",
+        "destino": "CARACAS",
+        "vuelo": "TK0223",
+        "clase": "U",
+        "fecha": "23Jan",
+        "hora_salida": "02:05",
+        "hora_llegada": "08:25",
+        "aerolinea": "TK"
+      }
+    ],
+    "flights": [
+      {
+        "origen": "CARACAS",
+        "destino": "ISTANBUL",
+        "vuelo": "TK0224",
+        "clase": "U",
+        "fecha": "05Dec",
+        "hora_salida": "11:35",
+        "hora_llegada": "06:20",
+        "aerolinea": "TK"
+      },
+      {
+        "origen": "ISTANBUL",
+        "destino": "CARACAS",
+        "vuelo": "TK0223",
+        "clase": "U",
+        "fecha": "23Jan",
+        "hora_salida": "02:05",
+        "hora_llegada": "08:25",
+        "aerolinea": "TK"
+      }
+    ],
+    "tarifas": {
+      "total_amount": 906.3,
+      "total_currency": "USD",
+      "total": "USD 906.30"
+    },
+    "agencia": {
+      "name": "BRICKELL TRAVEL MANAGEMENT",
+      "iata": "10970411"
+    },
+    "text_snippet": "\n--- PAGE 1 ---\n--\nElectronic Ticket Receipt\nBooking ref: 223PPD CheckMyTrip App\nIssue date: 04 SEPTEMBER 24 Baggage\nAirline booking ref: TK/RJTERA\nIssuing Airline: TURKISH AIRLINES\nTicket: 235-712012"
+  },
+  "sample_6.pdf": {
+    "SOURCE_SYSTEM": "Amadeus",
+    "pnr": "22Q5VO",
+    "numero_boleto": "2357283236572",
+    "ticket_number": "2357283236572",
+    "pasajero": {
+      "nombre_completo": "Carlos Mario Lopez Lopez"
+    },
+    "passenger_name": "Carlos Mario Lopez Lopez",
+    "airline_name": "TK",
+    "total": "USD 2458.8",
+    "fecha_emision": "23 April 25",
+    "vuelos": [
+      {
+        "fecha": "04 May",
+        "hora_salida": "10:00",
+        "origen": "SIMON BOLIVAR INTL CARACAS",
+        "vuelo": "TK224",
+        "aerolinea": "TK",
+        "hora_llegada": "04:50",
+        "destino": "ISTANBUL AIRPORT ISTANBUL",
+        "clase": "Q"
+      },
+      {
+        "fecha": "07 May",
+        "hora_salida": "01:25",
+        "origen": "ISTANBUL AIRPORT ISTANBUL",
+        "hora_llegada": "16:45",
+        "destino": "PUDONG INTL SHANGHAI Terminal : 2",
+        "clase": "Q"
+      },
+      {
+        "fecha": "18 May",
+        "hora_salida": "22:25",
+        "origen": "PUDONG INTL SHANGHAI Terminal : 2",
+        "hora_llegada": "05:20",
+        "destino": "ISTANBUL AIRPORT ISTANBUL",
+        "clase": "E"
+      },
+      {
+        "fecha": "20 May",
+        "hora_salida": "01:50",
+        "origen": "ISTANBUL AIRPORT ISTANBUL",
+        "vuelo": "TK195",
+        "aerolinea": "TK",
+        "hora_llegada": "12:10",
+        "destino": "SIMON BOLIVAR INTL CARACAS",
+        "clase": "E"
+      }
+    ],
+    "flights": [
+      {
+        "fecha": "04 May",
+        "hora_salida": "10:00",
+        "origen": "SIMON BOLIVAR INTL CARACAS",
+        "vuelo": "TK224",
+        "aerolinea": "TK",
+        "hora_llegada": "04:50",
+        "destino": "ISTANBUL AIRPORT ISTANBUL",
+        "clase": "Q"
+      },
+      {
+        "fecha": "07 May",
+        "hora_salida": "01:25",
+        "origen": "ISTANBUL AIRPORT ISTANBUL",
+        "hora_llegada": "16:45",
+        "destino": "PUDONG INTL SHANGHAI Terminal : 2",
+        "clase": "Q"
+      },
+      {
+        "fecha": "18 May",
+        "hora_salida": "22:25",
+        "origen": "PUDONG INTL SHANGHAI Terminal : 2",
+        "hora_llegada": "05:20",
+        "destino": "ISTANBUL AIRPORT ISTANBUL",
+        "clase": "E"
+      },
+      {
+        "fecha": "20 May",
+        "hora_salida": "01:50",
+        "origen": "ISTANBUL AIRPORT ISTANBUL",
+        "vuelo": "TK195",
+        "aerolinea": "TK",
+        "hora_llegada": "12:10",
+        "destino": "SIMON BOLIVAR INTL CARACAS",
+        "clase": "E"
+      }
+    ],
+    "tarifas": {
+      "total_amount": 2458.8,
+      "total_currency": "USD",
+      "total": "USD 2458.80"
+    },
+    "agencia": {
+      "name": "GRUPO SOPORTE GLOBAL INC",
+      "iata": "10617390"
+    },
+    "text_snippet": "\n--- PAGE 1 ---\n-\nElectronic Ticket Receipt Booking ref 22Q5VO CheckMyTrip App\nDocument Issue Date 23 April 25 Baggage\nAgency GRUPO SOPORTE GLOBAL INC Agent 0000\n2644 NW 97TH AVE\n.\nDORAL,FL,33172\nTele"
+  },
+  "sample_7.pdf": {
+    "SOURCE_SYSTEM": "Amadeus",
+    "pnr": "23COU3",
+    "numero_boleto": "2357283236574",
+    "ticket_number": "2357283236574",
+    "pasajero": {
+      "nombre_completo": "Diego Fernando Zuluaga Rivillas"
+    },
+    "passenger_name": "Diego Fernando Zuluaga Rivillas",
+    "airline_name": "TK",
+    "total": "USD 2458.8",
+    "fecha_emision": "23 April 25",
+    "vuelos": [
+      {
+        "fecha": "04 May",
+        "hora_salida": "10:00",
+        "origen": "SIMON BOLIVAR INTL CARACAS",
+        "vuelo": "TK224",
+        "aerolinea": "TK",
+        "hora_llegada": "04:50",
+        "destino": "ISTANBUL AIRPORT ISTANBUL",
+        "clase": "Q"
+      },
+      {
+        "fecha": "07 May",
+        "hora_salida": "01:25",
+        "origen": "ISTANBUL AIRPORT ISTANBUL",
+        "hora_llegada": "16:45",
+        "destino": "PUDONG INTL SHANGHAI Terminal : 2",
+        "clase": "Q"
+      },
+      {
+        "fecha": "18 May",
+        "hora_salida": "22:25",
+        "origen": "PUDONG INTL SHANGHAI Terminal : 2",
+        "hora_llegada": "05:20",
+        "destino": "ISTANBUL AIRPORT ISTANBUL",
+        "clase": "E"
+      },
+      {
+        "fecha": "20 May",
+        "hora_salida": "01:50",
+        "origen": "ISTANBUL AIRPORT ISTANBUL",
+        "vuelo": "TK195",
+        "aerolinea": "TK",
+        "hora_llegada": "12:10",
+        "destino": "SIMON BOLIVAR INTL CARACAS",
+        "clase": "E"
+      }
+    ],
+    "flights": [
+      {
+        "fecha": "04 May",
+        "hora_salida": "10:00",
+        "origen": "SIMON BOLIVAR INTL CARACAS",
+        "vuelo": "TK224",
+        "aerolinea": "TK",
+        "hora_llegada": "04:50",
+        "destino": "ISTANBUL AIRPORT ISTANBUL",
+        "clase": "Q"
+      },
+      {
+        "fecha": "07 May",
+        "hora_salida": "01:25",
+        "origen": "ISTANBUL AIRPORT ISTANBUL",
+        "hora_llegada": "16:45",
+        "destino": "PUDONG INTL SHANGHAI Terminal : 2",
+        "clase": "Q"
+      },
+      {
+        "fecha": "18 May",
+        "hora_salida": "22:25",
+        "origen": "PUDONG INTL SHANGHAI Terminal : 2",
+        "hora_llegada": "05:20",
+        "destino": "ISTANBUL AIRPORT ISTANBUL",
+        "clase": "E"
+      },
+      {
+        "fecha": "20 May",
+        "hora_salida": "01:50",
+        "origen": "ISTANBUL AIRPORT ISTANBUL",
+        "vuelo": "TK195",
+        "aerolinea": "TK",
+        "hora_llegada": "12:10",
+        "destino": "SIMON BOLIVAR INTL CARACAS",
+        "clase": "E"
+      }
+    ],
+    "tarifas": {
+      "total_amount": 2458.8,
+      "total_currency": "USD",
+      "total": "USD 2458.80"
+    },
+    "agencia": {
+      "name": "GRUPO SOPORTE GLOBAL INC",
+      "iata": "10617390"
+    },
+    "text_snippet": "\n--- PAGE 1 ---\n-\nElectronic Ticket Receipt Booking ref 23COU3 CheckMyTrip App\nDocument Issue Date 23 April 25 Baggage\nAgency GRUPO SOPORTE GLOBAL INC Agent 0000\n2644 NW 97TH AVE\n.\nDORAL,FL,33172\nTele"
+  },
+  "sample_8.pdf": {
+    "SOURCE_SYSTEM": "Amadeus",
+    "pnr": "22Q5VO",
+    "numero_boleto": "2357283236572",
+    "ticket_number": "2357283236572",
+    "pasajero": {
+      "nombre_completo": "Carlos Mario Lopez Lopez"
+    },
+    "passenger_name": "Carlos Mario Lopez Lopez",
+    "airline_name": "TK",
+    "total": "USD 2458.8",
+    "fecha_emision": "23 April 25",
+    "vuelos": [
+      {
+        "fecha": "04 May",
+        "hora_salida": "10:00",
+        "origen": "SIMON BOLIVAR INTL CARACAS",
+        "vuelo": "TK224",
+        "aerolinea": "TK",
+        "hora_llegada": "04:50",
+        "destino": "ISTANBUL AIRPORT ISTANBUL",
+        "clase": "Q"
+      },
+      {
+        "fecha": "07 May",
+        "hora_salida": "01:25",
+        "origen": "ISTANBUL AIRPORT ISTANBUL",
+        "hora_llegada": "16:45",
+        "destino": "PUDONG INTL SHANGHAI Terminal : 2",
+        "clase": "Q"
+      },
+      {
+        "fecha": "18 May",
+        "hora_salida": "22:25",
+        "origen": "PUDONG INTL SHANGHAI Terminal : 2",
+        "hora_llegada": "05:20",
+        "destino": "ISTANBUL AIRPORT ISTANBUL",
+        "clase": "E"
+      },
+      {
+        "fecha": "20 May",
+        "hora_salida": "01:50",
+        "origen": "ISTANBUL AIRPORT ISTANBUL",
+        "vuelo": "TK195",
+        "aerolinea": "TK",
+        "hora_llegada": "12:10",
+        "destino": "SIMON BOLIVAR INTL CARACAS",
+        "clase": "E"
+      }
+    ],
+    "flights": [
+      {
+        "fecha": "04 May",
+        "hora_salida": "10:00",
+        "origen": "SIMON BOLIVAR INTL CARACAS",
+        "vuelo": "TK224",
+        "aerolinea": "TK",
+        "hora_llegada": "04:50",
+        "destino": "ISTANBUL AIRPORT ISTANBUL",
+        "clase": "Q"
+      },
+      {
+        "fecha": "07 May",
+        "hora_salida": "01:25",
+        "origen": "ISTANBUL AIRPORT ISTANBUL",
+        "hora_llegada": "16:45",
+        "destino": "PUDONG INTL SHANGHAI Terminal : 2",
+        "clase": "Q"
+      },
+      {
+        "fecha": "18 May",
+        "hora_salida": "22:25",
+        "origen": "PUDONG INTL SHANGHAI Terminal : 2",
+        "hora_llegada": "05:20",
+        "destino": "ISTANBUL AIRPORT ISTANBUL",
+        "clase": "E"
+      },
+      {
+        "fecha": "20 May",
+        "hora_salida": "01:50",
+        "origen": "ISTANBUL AIRPORT ISTANBUL",
+        "vuelo": "TK195",
+        "aerolinea": "TK",
+        "hora_llegada": "12:10",
+        "destino": "SIMON BOLIVAR INTL CARACAS",
+        "clase": "E"
+      }
+    ],
+    "tarifas": {
+      "total_amount": 2458.8,
+      "total_currency": "USD",
+      "total": "USD 2458.80"
+    },
+    "agencia": {
+      "name": "GRUPO SOPORTE GLOBAL INC",
+      "iata": "10617390"
+    },
+    "text_snippet": "\n--- PAGE 1 ---\n-\nElectronic Ticket Receipt Booking ref 22Q5VO CheckMyTrip App\nDocument Issue Date 23 April 25 Baggage\nAgency GRUPO SOPORTE GLOBAL INC Agent 0000\n2644 NW 97TH AVE\n.\nDORAL,FL,33172\nTele"
+  }
+}

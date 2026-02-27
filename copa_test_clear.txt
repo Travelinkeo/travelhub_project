@@ -1,0 +1,17 @@
+[WARNING] Usando almacenamiento local (FileSystemStorage)
+[OK] Usando PostgreSQL como broker de Celery (económico).
+>>> No se encontro la linea antigua
+[AI] Iniciando Motor Universal IA (Gemini 2.0 Flash)...
+[OK] Éxito con Motor IA (Sistema: AI_COPA_SPRK)
+------ PARSEO COMPLETADO ------
+{
+  "TARIFA": "181.00",
+  "IMPUESTOS": "108.20",
+  "TOTAL": "289.20",
+  "SOURCE_SYSTEM": "AI_COPA_SPRK",
+  "es_remision": false
+}
+------ GENERANDO PDF ------
+Generando PDF en memoria...
+PDF creado en memoria: Boleto_2307408239027_20260226125423.pdf tamaño: 32460
+Guardado en disco como test_copa_Boleto_2307408239027_20260226125423.pdf

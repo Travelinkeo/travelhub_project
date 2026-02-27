@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "GARCIA RONDON/ADRIANA BEATRIZ",
+  "CODIGO_IDENTIFICACION": "22017852",
+  "SOLO_NOMBRE_PASAJERO": "ADRIANA BEATRIZ",
+  "NUMERO_DE_BOLETO": "7820340709264",
+  "FECHA_DE_EMISION": "19 FEB 2025 14:55",
+  "AGENTE_EMISOR": "PTYS3651X",
+  "CODIGO_RESERVA": "ECVNGB",
+  "SOLO_CODIGO_RESERVA": "ECVNGB",
+  "NOMBRE_AEROLINEA": "LASER C.A.",
+  "DIRECCION_AEROLINEA": null,
+  "vuelos": [
+    {
+      "aerolinea": "QL",
+      "numero_vuelo": "903",
+      "origen": "PORLAMAR",
+      "fecha_salida": "24FEB2025",
+      "hora_salida": "1505",
+      "destino": "CARACAS",
+      "hora_llegada": "1555",
+      "cabina": "B",
+      "clase": "B",
+      "localizador_aerolinea": "ECVNGB"
+    }
+  ],
+  "TARIFA": "69.95",
+  "IMPUESTOS": "10.05",
+  "TOTAL": "80.00",
+  "SOURCE_SYSTEM": "AI_KIU",
+  "es_remision": false,
+  "NOMBRE DEL PASAJERO": "GARCIA RONDON/ADRIANA BEATRIZ",
+  "CODIGO IDENTIFICACION": "22017852",
+  "SOLO NOMBRE PASAJERO": "ADRIANA BEATRIZ",
+  "NUMERO DE BOLETO": "7820340709264",
+  "FECHA DE EMISION": "19 FEB 2025 14:55",
+  "AGENTE EMISOR": "PTYS3651X",
+  "CODIGO RESERVA": "ECVNGB",
+  "SOLO CODIGO RESERVA": "ECVNGB",
+  "NOMBRE AEROLINEA": "LASER C.A.",
+  "DIRECCION AEROLINEA": null,
+  "SOURCE SYSTEM": "AI_KIU",
+  "es remision": false
+}

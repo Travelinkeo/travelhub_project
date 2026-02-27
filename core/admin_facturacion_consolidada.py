@@ -3,7 +3,9 @@
 Admin para modelos consolidados de facturación
 """
 from django.contrib import admin
+from django.contrib import admin
 from .models.facturacion_consolidada import FacturaConsolidada, ItemFacturaConsolidada, DocumentoExportacionConsolidado
+from .admin_saas import SaaSAdminMixin
 
 
 class ItemFacturaConsolidadaInline(admin.TabularInline):
@@ -19,7 +21,7 @@ class DocumentoExportacionConsolidadoInline(admin.TabularInline):
 
 
 @admin.register(FacturaConsolidada)
-class FacturaConsolidadaAdmin(admin.ModelAdmin):
+class FacturaConsolidadaAdmin(SaaSAdminMixin, admin.ModelAdmin):
     list_display = ('numero_factura', 'cliente', 'fecha_emision', 'tipo_operacion', 'moneda_operacion', 
                    'monto_total', 'estado')
     list_filter = ('estado', 'tipo_operacion', 'moneda_operacion', 'cliente_es_residente', 'fecha_emision')
@@ -72,7 +74,8 @@ class FacturaConsolidadaAdmin(admin.ModelAdmin):
 
 
 @admin.register(ItemFacturaConsolidada)
-class ItemFacturaConsolidadaAdmin(admin.ModelAdmin):
+class ItemFacturaConsolidadaAdmin(SaaSAdminMixin, admin.ModelAdmin):
+    saas_agency_field = 'factura__venta_asociada__agencia'
     list_display = ('factura', 'descripcion', 'cantidad', 'precio_unitario', 'subtotal_item', 
                    'tipo_servicio', 'es_gravado')
     list_filter = ('tipo_servicio', 'es_gravado')
@@ -81,7 +84,8 @@ class ItemFacturaConsolidadaAdmin(admin.ModelAdmin):
 
 
 @admin.register(DocumentoExportacionConsolidado)
-class DocumentoExportacionConsolidadoAdmin(admin.ModelAdmin):
+class DocumentoExportacionConsolidadoAdmin(SaaSAdminMixin, admin.ModelAdmin):
+    saas_agency_field = 'factura__venta_asociada__agencia'
     list_display = ('factura', 'tipo_documento', 'numero_documento', 'fecha_subida')
     list_filter = ('tipo_documento', 'fecha_subida')
     search_fields = ('numero_documento', 'factura__numero_factura')

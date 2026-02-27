@@ -1,0 +1,55 @@
+﻿python : INFO:travelhub.settings:\u2705 Sentry configurado para 
+entorno: development
+En línea: 1 Carácter: 1
++ python scripts/verify_reconciliation_v2.py > verify_output_v5.txt 
+2>& ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~
+    + CategoryInfo          : NotSpecified: (INFO:travelhub....no:  
+   development:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+INFO:core.signals:BoletoImportado 1045 no tiene datos parseados. No 
+se puede crear venta.
+INFO:core.signals:BoletoImportado 1046 no tiene datos parseados. No 
+se puede crear venta.
+[WARNING] Usando almacenamiento local (FileSystemStorage)
+[OK] Usando PostgreSQL como broker de Celery (econ¾mico).
+--- Iniciando Verificacion de Conciliacion AI v2 ---
+Traceback (most recent call last):
+  File "C:\Users\ARMANDO\travelhub_project\scripts\verify_reconcilia
+tion_v2.py", line 99, in <module>
+    verify_reconciliation_v2()
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\ARMANDO\travelhub_project\scripts\verify_reconcilia
+tion_v2.py", line 50, in verify_reconciliation_v2
+    print(f"\u2705 Datos internos preparados para agencia: 
+{agencia.nombre}")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^
+  File "C:\Users\ARMANDO\AppData\Local\Programs\Python\Python313\Lib
+\encodings\cp1252.py", line 19, in encode
+    return 
+codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2705' 
+in position 0: character maps to <undefined>
+Sentry is attempting to send 2 pending events
+Waiting up to 2 seconds
+Press Ctrl-Break to quit
+
+(process:57288): GLib-GIO-WARNING **: 18:53:44.934: Unexpectedly, 
+UWP app `Clipchamp.Clipchamp_4.5.10220.0_x64__yxz26nhyzhsrt' (AUMId 
+`Clipchamp.Clipchamp_yxz26nhyzhsrt!App') supports 41 extensions but 
+has no verbs
+
+(process:57288): GLib-GIO-WARNING **: 18:53:45.191: Unexpectedly, 
+UWP app `Microsoft.ScreenSketch_11.2511.47.0_x64__8wekyb3d8bbwe' 
+(AUMId `Microsoft.ScreenSketch_8wekyb3d8bbwe!App') supports 29 
+extensions but has no verbs
+
+(process:57288): GLib-GIO-WARNING **: 18:53:45.222: Unexpectedly, 
+UWP app 
+`Microsoft.OutlookForWindows_1.2026.210.300_x64__8wekyb3d8bbwe' 
+(AUMId `Microsoft.OutlookForWindows_8wekyb3d8bbwe!Microsoft.Outlookf
+orWindows') supports 4 extensions but has no verbs

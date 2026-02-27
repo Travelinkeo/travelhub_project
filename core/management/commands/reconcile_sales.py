@@ -5,7 +5,7 @@ from decimal import Decimal, InvalidOperation
 import fitz  # PyMuPDF
 from django.core.management.base import BaseCommand, CommandParser
 
-from core.models.boletos import BoletoImportado
+from core.models import BoletoImportado
 from core.report_parser import parse_travelinkeo_report_with_gemini
 
 logger = logging.getLogger(__name__)
@@ -100,4 +100,3 @@ class Command(BaseCommand):
             self.stderr.write(self.style.ERROR(f"El archivo no fue encontrado en la ruta: {report_path}"))
         except Exception as e:
             self.stderr.write(self.style.ERROR(f'Ocurrió un error inesperado durante la conciliación: {e}'))
-

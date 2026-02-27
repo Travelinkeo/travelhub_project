@@ -1,0 +1,90 @@
+{% extends 'base_modern.html' %}
+{% load humanize %}
+
+{% block title %}Balance de Comprobación - TravelHub{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+    <div>
+        <h2 class="text-3xl font-bold text-white mb-1">Balance de Comprobación</h2>
+        <p class="text-gray-400">Resumen de saldos de todas las cuentas contables.</p>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="glass-panel rounded-xl p-4 mb-6">
+    <form method="get" class="flex flex-col md:flex-row gap-4 items-end">
+        <div class="w-full md:w-48">
+            <label class="block text-xs text-gray-400 mb-1">Fecha de Corte</label>
+            <input type="date" name="fecha_hasta" value="{{ request.GET.fecha_hasta }}"
+                class="w-full bg-dark-800 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-primary">
+        </div>
+
+        <button type="submit"
+            class="px-6 py-2 bg-primary hover:bg-indigo-600 text-white rounded-lg transition-colors font-medium">
+            Generar Balance
+        </button>
+    </form>
+</div>
+
+<!-- Results -->
+{% if balance %}
+<div class="glass-panel rounded-xl overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="w-full text-left text-gray-400">
+            <thead class="bg-white/5 text-gray-300 uppercase text-xs">
+                <tr>
+                    <th class="px-6 py-4 font-medium">Cuenta</th>
+                    <th class="px-6 py-4 font-medium">Nombre</th>
+                    <th class="px-6 py-4 font-medium text-right">Debe</th>
+                    <th class="px-6 py-4 font-medium text-right">Haber</th>
+                    <th class="px-6 py-4 font-medium text-right">Saldo</th>
+                    <th class="px-6 py-4 font-medium text-center">Naturaleza</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-white/5">
+                {% for cuenta in balance %}
+                <tr class="hover:bg-white/5 transition-colors">
+                    <td class="px-6 py-4 font-mono text-white text-sm">{{ cuenta.cuenta }}</td>
+                    <td class="px-6 py-4 text-sm">{{ cuenta.nombre }}</td>
+                    <td class="px-6 py-4 text-right font-mono text-sm">{{ cuenta.debe|floatformat:2|intcomma }}</td>
+                    <td class="px-6 py-4 text-right font-mono text-sm">{{ cuenta.haber|floatformat:2|intcomma }}</td>
+                    <td class="px-6 py-4 text-right font-mono font-bold text-white text-sm">{{
+                        cuenta.saldo|floatformat:2|intcomma }}</td>
+                    <td class="px-6 py-4 text-center">
+                        <span class="px-2 py-1 rounded text-xs font-bold 
+                            {% if cuenta.naturaleza == 'Deudora' %}bg-blue-500/10 text-blue-400 border border-blue-500/20
+                            {% elif cuenta.naturaleza == 'Acreedora' %}bg-green-500/10 text-green-400 border border-green-500/20
+                            {% else %}bg-gray-500/10 text-gray-400 border border-gray-500/20{% endif %}">
+                            {{ cuenta.naturaleza }}
+                        </span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot class="bg-white/5 font-bold text-white border-t-2 border-white/10">
+                <tr>
+                    <td colspan="2" class="px-6 py-4 text-right uppercase text-sm">Totales</td>
+                    <td class="px-6 py-4 text-right font-mono text-emerald-400">{{ totales.debe|floatformat:2|intcomma
+                        }}</td>
+                    <td class="px-6 py-4 text-right font-mono text-emerald-400">{{ totales.haber|floatformat:2|intcomma
+                        }}</td>
+                    <td colspan="2" class="px-6 py-4 text-center text-sm">
+                        {% if totales.diferencia == 0 %}
+                        <span class="text-green-400">✓ Cuadrado</span>
+                        {% else %}
+                        <span class="text-red-400">⚠ Diferencia: {{ totales.diferencia|floatformat:2|intcomma }}</span>
+                        {% endif %}
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+{% else %}
+<div class="text-center py-12 text-gray-500 glass-panel rounded-xl">
+    Selecciona una fecha de corte para generar el balance.
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "CASTANO VALENCIA/ALEXANDER",
+  "CODIGO_IDENTIFICACION": "278914",
+  "SOLO_NOMBRE_PASAJERO": "ALEXANDER",
+  "NUMERO_DE_BOLETO": "7420307373268",
+  "FECHA_DE_EMISION": "25 NOV 2025 10:43",
+  "AGENTE_EMISOR": "PTYS3651X",
+  "CODIGO_RESERVA": "SGIINI",
+  "SOLO_CODIGO_RESERVA": "SGIINI",
+  "NOMBRE_AEROLINEA": "AVIOR AIRLINES C.A",
+  "DIRECCION_AEROLINEA": null,
+  "vuelos": [
+    {
+      "aerolinea": "AVIOR AIRLINES C.A",
+      "numero_vuelo": "1424",
+      "origen": "CARACAS",
+      "fecha_salida": "18DEC 2025",
+      "hora_salida": "1845",
+      "destino": "BOGOTA-EL DORADO",
+      "hora_llegada": "1930",
+      "cabina": "Y",
+      "clase": "Y",
+      "localizador_aerolinea": "SGIINI"
+    }
+  ],
+  "TARIFA": "67.56",
+  "IMPUESTOS": "217.46",
+  "TOTAL": "285.02",
+  "SOURCE_SYSTEM": "AI_KIU",
+  "es_remision": true,
+  "NOMBRE DEL PASAJERO": "CASTANO VALENCIA/ALEXANDER",
+  "CODIGO IDENTIFICACION": "278914",
+  "SOLO NOMBRE PASAJERO": "ALEXANDER",
+  "NUMERO DE BOLETO": "7420307373268",
+  "FECHA DE EMISION": "25 NOV 2025 10:43",
+  "AGENTE EMISOR": "PTYS3651X",
+  "CODIGO RESERVA": "SGIINI",
+  "SOLO CODIGO RESERVA": "SGIINI",
+  "NOMBRE AEROLINEA": "AVIOR AIRLINES C.A",
+  "DIRECCION AEROLINEA": null,
+  "SOURCE SYSTEM": "AI_KIU",
+  "es remision": true
+}

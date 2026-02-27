@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "DUQUE/CLAUDIA",
+  "CODIGO_IDENTIFICACION": "24168972",
+  "SOLO_NOMBRE_PASAJERO": "CLAUDIA",
+  "NUMERO_DE_BOLETO": "3080201383781",
+  "FECHA_DE_EMISION": "02 FEB 2026 12:08",
+  "AGENTE_EMISOR": "CCS00V0WV",
+  "CODIGO_RESERVA": "RJTDUA",
+  "SOLO_CODIGO_RESERVA": "RJTDUA",
+  "NOMBRE_AEROLINEA": "CONVIASA",
+  "DIRECCION_AEROLINEA": null,
+  "vuelos": [
+    {
+      "aerolinea": "V0",
+      "numero_vuelo": "1186",
+      "origen": "CARACAS",
+      "fecha_salida": "11FEB2026",
+      "hora_salida": "0700",
+      "destino": "SAN ANTONIO",
+      "hora_llegada": "0800",
+      "cabina": "Económica",
+      "clase": "O",
+      "localizador_aerolinea": "RJTDUA"
+    }
+  ],
+  "TARIFA": "21400.00",
+  "IMPUESTOS": "8564.93",
+  "TOTAL": "29964.93",
+  "SOURCE_SYSTEM": "AI_KIU",
+  "es_remision": false,
+  "NOMBRE DEL PASAJERO": "DUQUE/CLAUDIA",
+  "CODIGO IDENTIFICACION": "24168972",
+  "SOLO NOMBRE PASAJERO": "CLAUDIA",
+  "NUMERO DE BOLETO": "3080201383781",
+  "FECHA DE EMISION": "02 FEB 2026 12:08",
+  "AGENTE EMISOR": "CCS00V0WV",
+  "CODIGO RESERVA": "RJTDUA",
+  "SOLO CODIGO RESERVA": "RJTDUA",
+  "NOMBRE AEROLINEA": "CONVIASA",
+  "DIRECCION AEROLINEA": null,
+  "SOURCE SYSTEM": "AI_KIU",
+  "es remision": false
+}

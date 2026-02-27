@@ -1,0 +1,66 @@
+<tr class="hover:bg-slate-700/30 transition group" id="invoice-row-{{ invoice.pk }}">
+    <td class="px-6 py-4">
+        <div class="font-bold text-white">{{ invoice.numero_factura|default:"BORRADOR" }}</div>
+        <div class="text-xs text-blue-300 font-mono">{{ invoice.venta_asociada.localizador }}</div>
+    </td>
+    <td class="px-6 py-4">
+        <div class="text-white font-medium text-sm">{{ invoice.get_display_name }}</div>
+        <div class="text-xs text-gray-400 capitalize">{{ invoice.get_tipo_factura_display }}</div>
+    </td>
+    <td class="px-6 py-4 text-gray-300 text-sm">
+        {{ invoice.fecha_emision|date:"d M Y" }}
+    </td>
+    <td class="px-6 py-4 font-bold text-white">
+        ${{ invoice.monto_total|floatformat:2 }}
+    </td>
+    <td class="px-6 py-4 font-bold text-cyan-400">
+        Bs. {{ invoice.monto_total_bs|default:"---" }}
+    </td>
+    <td class="px-6 py-4">
+        <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider
+            {% if invoice.estado == 'BOR' %}bg-amber-900/40 text-amber-400 border border-amber-700/50
+            {% elif invoice.estado == 'EMI' %}bg-emerald-900/40 text-emerald-400 border border-emerald-700/50
+            {% elif invoice.estado == 'PAG' %}bg-blue-900/40 text-blue-400 border border-blue-700/50
+            {% else %}bg-gray-700 text-gray-300{% endif %}">
+            {{ invoice.get_estado_display }}
+        </span>
+    </td>
+    <td class="px-6 py-4 text-right">
+        <div class="flex justify-end gap-2">
+            <button hx-get="{% url 'finance:invoice_detail' invoice.pk %}" hx-target="#modal-content"
+                @click="$dispatch('open-modal')"
+                class="p-2 bg-slate-700 hover:bg-slate-600 rounded-lg transition text-gray-300 hover:text-white"
+                title="Ver Detalle / Validar">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+            </button>
+
+            {% if invoice.estado == 'BOR' %}
+            <button hx-post="{% url 'finance:invoice_issue' invoice.pk %}"
+                hx-confirm="¿Estás seguro de emitir esta factura fiscalmente?" hx-target="#invoice-row-{{ invoice.pk }}"
+                hx-swap="outerHTML" class="p-2 bg-blue-600 hover:bg-blue-500 rounded-lg transition text-white"
+                title="Emitir Factura">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </button>
+            {% endif %}
+
+            {% if invoice.archivo_pdf %}
+            <a href="{{ invoice.archivo_pdf.url }}" target="_blank"
+                class="p-2 bg-rose-900/40 text-rose-400 hover:bg-rose-900/60 rounded-lg transition border border-rose-700/50"
+                title="Descargar PDF">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+            </a>
+            {% endif %}
+        </div>
+    </td>
+</tr>

@@ -8,14 +8,14 @@ import logging
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-from core.models.facturacion_venezuela import FacturaVenezuela
-from core.models.ventas import PagoVenta
+from apps.finance.models import Factura
+from apps.bookings.models import PagoVenta
 from .services import ContabilidadService
 
 logger = logging.getLogger(__name__)
 
 
-@receiver(post_save, sender=FacturaVenezuela)
+@receiver(post_save, sender=Factura)
 def generar_asiento_desde_factura_signal(sender, instance, created, **kwargs):
     """
     Genera asiento contable automáticamente al crear/actualizar una factura.

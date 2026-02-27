@@ -8,12 +8,27 @@ class Command(BaseCommand):
         parser.add_argument('--phone', type=str, required=True, help='Numero WhatsApp')
         parser.add_argument('--interval', type=int, default=60, help='Intervalo en segundos')
         parser.add_argument('--mark-read', action='store_true', help='Marcar como leidos')
+        parser.add_argument('--agencia', type=str, help='Nombre de la agencia')
 
     def handle(self, *args, **options):
         self.stdout.write(f"Iniciando monitor -> WhatsApp {options['phone']}")
         self.stdout.write("PDFs se subiran a Google Drive")
         
+        from core.models.agencia import Agencia
+        agencia = None
+        if options['agencia']:
+            agencia = Agencia.objects.filter(nombre__icontains=options['agencia']).first()
+        
+        # Fallback to first active if not specified
+        if not agencia:
+             agencia = Agencia.objects.filter(activa=True).first()
+
+        if not agencia:
+             self.stdout.write(self.style.ERROR("Error: Se requiere una agencia activa"))
+             return
+
         monitor = EmailMonitorService(
+            agencia=agencia,
             notification_type='whatsapp_drive',
             destination=options['phone'],
             interval=options['interval'],

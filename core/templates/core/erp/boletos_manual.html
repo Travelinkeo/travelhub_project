@@ -1,0 +1,108 @@
+{% extends 'base_modern.html' %}
+
+{% block title %}Carga Manual - TravelHub{% endblock %}
+
+{% block content %}
+<div class="space-y-4">
+    <div>
+        <label class="block text-xs text-gray-400 mb-1">Número de Boleto</label>
+        {{ form.numero_boleto }}
+    </div>
+    <div>
+        <label class="block text-xs text-gray-400 mb-1">Pasajero (Apellidos/Nombres)</label>
+        {{ form.nombre_pasajero_completo }}
+    </div>
+    <div>
+        <label class="block text-xs text-gray-400 mb-1">Aerolínea Emisora</label>
+        {{ form.aerolinea_emisora }}
+    </div>
+    <div>
+        <label class="block text-xs text-gray-400 mb-1">Fecha Emisión</label>
+        {{ form.fecha_emision_boleto }}
+    </div>
+</div>
+
+<!-- Columna 2 -->
+<div class="space-y-4">
+    <div>
+        <label class="block text-xs text-gray-400 mb-1">Localizador PNR</label>
+        {{ form.localizador_pnr }}
+    </div>
+    <div>
+        <label class="block text-xs text-gray-400 mb-1">Agente Emisor</label>
+        {{ form.agente_emisor }}
+    </div>
+    <div>
+        <label class="block text-xs text-gray-400 mb-1">FOID / Documento</label>
+        {{ form.foid_pasajero }}
+    </div>
+    <div>
+        <label class="block text-xs text-gray-400 mb-1">Dirección Aerolínea</label>
+        {{ form.direccion_aerolinea }}
+    </div>
+</div>
+</div>
+
+<!-- Ruta -->
+<div>
+    <label class="block text-xs text-gray-400 mb-1">Ruta de Vuelo</label>
+    {{ form.ruta_vuelo }}
+</div>
+
+<!-- Montos -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 border-t border-white/10">
+    <div>
+        <label class="block text-xs text-gray-400 mb-1">Tarifa Base</label>
+        {{ form.tarifa_base }}
+    </div>
+    <div>
+        <label class="block text-xs text-gray-400 mb-1">Impuestos (Descripción)</label>
+        {{ form.impuestos_descripcion }}
+    </div>
+    <div>
+        <label class="block text-xs text-gray-400 mb-1">Total Boleto</label>
+        {{ form.total_boleto }}
+    </div>
+</div>
+
+<div class="pt-6 flex justify-end gap-4">
+    <a href="{% url 'core:boletos_dashboard' %}"
+        class="px-6 py-2 rounded-lg border border-white/10 text-white hover:bg-white/5 transition-colors">
+        Cancelar
+    </a>
+    <button type="submit"
+        class="px-8 py-2 bg-primary hover:bg-indigo-600 text-white rounded-lg transition-colors font-bold">
+        Guardar Boleto
+    </button>
+</div>
+</form>
+</div>
+</div>
+
+<style>
+    /* Form Styles Override */
+    input[type="text"],
+    input[type="number"],
+    input[type="date"],
+    input[type="email"],
+    textarea,
+    select {
+        width: 100%;
+        background-color: rgba(30, 41, 59, 0.5);
+        /* bg-dark-800 */
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 0.5rem;
+        padding: 0.5rem 1rem;
+        color: white;
+        outline: none;
+        transition: border-color 0.2s;
+    }
+
+    input:focus,
+    textarea:focus,
+    select:focus {
+        border-color: #6366f1;
+        /* primary */
+    }
+</style>
+{% endblock %}

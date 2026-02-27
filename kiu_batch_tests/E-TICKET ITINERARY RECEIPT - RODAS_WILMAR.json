@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "RODAS/WILMAR",
+  "CODIGO_IDENTIFICACION": "PPBD922501",
+  "SOLO_NOMBRE_PASAJERO": "WILMAR",
+  "NUMERO_DE_BOLETO": "0520270619934",
+  "FECHA_DE_EMISION": "06 NOV 2025 15:03",
+  "AGENTE_EMISOR": "CCS00ESKA",
+  "CODIGO_RESERVA": "JACIOY",
+  "SOLO_CODIGO_RESERVA": "JACIOY",
+  "NOMBRE_AEROLINEA": "AEROLINEAS ESTELAR LATINOAMERICA C.A.",
+  "DIRECCION_AEROLINEA": null,
+  "vuelos": [
+    {
+      "aerolinea": "ES",
+      "numero_vuelo": "8352",
+      "origen": "MARACAIBO",
+      "fecha_salida": "7NOV 2025",
+      "hora_salida": "0630",
+      "destino": "CARACAS",
+      "hora_llegada": "0730",
+      "cabina": "Económica",
+      "clase": "G",
+      "localizador_aerolinea": "JACIOY"
+    }
+  ],
+  "TARIFA": "11327.77",
+  "IMPUESTOS": "12722.24",
+  "TOTAL": "24050.01",
+  "SOURCE_SYSTEM": "AI_KIU",
+  "es_remision": false,
+  "NOMBRE DEL PASAJERO": "RODAS/WILMAR",
+  "CODIGO IDENTIFICACION": "PPBD922501",
+  "SOLO NOMBRE PASAJERO": "WILMAR",
+  "NUMERO DE BOLETO": "0520270619934",
+  "FECHA DE EMISION": "06 NOV 2025 15:03",
+  "AGENTE EMISOR": "CCS00ESKA",
+  "CODIGO RESERVA": "JACIOY",
+  "SOLO CODIGO RESERVA": "JACIOY",
+  "NOMBRE AEROLINEA": "AEROLINEAS ESTELAR LATINOAMERICA C.A.",
+  "DIRECCION AEROLINEA": null,
+  "SOURCE SYSTEM": "AI_KIU",
+  "es remision": false
+}

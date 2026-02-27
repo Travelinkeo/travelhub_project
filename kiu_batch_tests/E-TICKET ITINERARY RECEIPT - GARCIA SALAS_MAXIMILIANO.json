@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "GARCIA SALAS/MAXIMILIANO",
+  "CODIGO_IDENTIFICACION": "04AUG16",
+  "SOLO_NOMBRE_PASAJERO": "MAXIMILIANO",
+  "NUMERO_DE_BOLETO": "0520330573031",
+  "FECHA_DE_EMISION": "16 JUN 2025 12:57",
+  "AGENTE_EMISOR": "AGENCIA DE VIAJES MY DESTINY P",
+  "CODIGO_RESERVA": "OIKIEW",
+  "SOLO_CODIGO_RESERVA": "OIKIEW",
+  "NOMBRE_AEROLINEA": "AEROLINEAS ESTELAR LATINOAMERICA C.A.",
+  "DIRECCION_AEROLINEA": null,
+  "vuelos": [
+    {
+      "aerolinea": "ES",
+      "numero_vuelo": "862",
+      "origen": "SANTO DOMINGO",
+      "fecha_salida": "20JUN2025",
+      "hora_salida": "1410",
+      "destino": "CARACAS",
+      "hora_llegada": "1510",
+      "cabina": "Económica",
+      "clase": "S",
+      "localizador_aerolinea": "OIKIEW"
+    }
+  ],
+  "TARIFA": "47.09",
+  "IMPUESTOS": "12.91",
+  "TOTAL": "60.00",
+  "SOURCE_SYSTEM": "AI_KIU",
+  "es_remision": false,
+  "NOMBRE DEL PASAJERO": "GARCIA SALAS/MAXIMILIANO",
+  "CODIGO IDENTIFICACION": "04AUG16",
+  "SOLO NOMBRE PASAJERO": "MAXIMILIANO",
+  "NUMERO DE BOLETO": "0520330573031",
+  "FECHA DE EMISION": "16 JUN 2025 12:57",
+  "AGENTE EMISOR": "AGENCIA DE VIAJES MY DESTINY P",
+  "CODIGO RESERVA": "OIKIEW",
+  "SOLO CODIGO RESERVA": "OIKIEW",
+  "NOMBRE AEROLINEA": "AEROLINEAS ESTELAR LATINOAMERICA C.A.",
+  "DIRECCION AEROLINEA": null,
+  "SOURCE SYSTEM": "AI_KIU",
+  "es remision": false
+}

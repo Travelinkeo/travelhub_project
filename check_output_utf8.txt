@@ -1,0 +1,129 @@
+﻿python : INFO:travelhub.settings:\u2705 Sentry configurado para entorno: development
+En línea: 1 Carácter: 1
++ python manage.py check > check_output.txt 2>&1
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (INFO:travelhub....no: development:String)  
+   [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+
+(process:20328): GLib-GIO-WARNING **: 21:52:27.956: Unexpectedly, UWP app 
+`Microsoft.ScreenSketch_11.2510.31.0_x64__8wekyb3d8bbwe' (AUMId 
+`Microsoft.ScreenSketch_8wekyb3d8bbwe!App') supports 29 extensions but has no verbs
+
+(process:20328): GLib-GIO-WARNING **: 21:52:28.371: Unexpectedly, UWP app 
+`Clipchamp.Clipchamp_4.5.10220.0_x64__yxz26nhyzhsrt' (AUMId 
+`Clipchamp.Clipchamp_yxz26nhyzhsrt!App') supports 41 extensions but has no verbs
+
+(process:20328): GLib-GIO-WARNING **: 21:52:28.582: Unexpectedly, UWP app 
+`Microsoft.OutlookForWindows_1.2026.203.300_x64__8wekyb3d8bbwe' (AUMId 
+`Microsoft.OutlookForWindows_8wekyb3d8bbwe!Microsoft.OutlookforWindows') supports 4 
+extensions but has no verbs
+[WARNING] Usando almacenamiento local (FileSystemStorage)
+[OK] Usando PostgreSQL como broker de Celery (econ¾mico).
+Warning: Could not load ViewSets from views.py: cannot import name 'PaginaCMS' from 'core.models' (C:\Users\ARMANDO\travelhub_project\core\models\__init__.py)
+Traceback (most recent call last):
+  File "C:\Users\ARMANDO\travelhub_project\manage.py", line 22, in <module>
+    main()
+    ~~~~^^
+  File "C:\Users\ARMANDO\travelhub_project\manage.py", line 18, in main
+    execute_from_command_line(sys.argv)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\ARMANDO\AppData\Local\Programs\Python\Python313\Lib\site-packages\djang
+o\core\management\__init__.py", line 442, in execute_from_command_line
+    utility.execute()
+    ~~~~~~~~~~~~~~~^^
+  File "C:\Users\ARMANDO\AppData\Local\Programs\Python\Python313\Lib\site-packages\djang
+o\core\management\__init__.py", line 436, in execute
+    self.fetch_command(subcommand).run_from_argv(self.argv)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\ARMANDO\AppData\Local\Programs\Python\Python313\Lib\site-packages\djang
+o\core\management\base.py", line 416, in run_from_argv
+    self.execute(*args, **cmd_options)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ARMANDO\AppData\Local\Programs\Python\Python313\Lib\site-packages\djang
+o\core\management\base.py", line 460, in execute
+    output = self.handle(*args, **options)
+  File "C:\Users\ARMANDO\AppData\Local\Programs\Python\Python313\Lib\site-packages\djang
+o\core\management\commands\check.py", line 81, in handle
+    self.check(
+    ~~~~~~~~~~^
+        app_configs=app_configs,
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+        databases=options["databases"],
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\ARMANDO\AppData\Local\Programs\Python\Python313\Lib\site-packages\djang
+o\core\management\base.py", line 492, in check
+    all_issues = checks.run_checks(
+        app_configs=app_configs,
+    ...<2 lines>...
+        databases=databases,
+    )
+  File "C:\Users\ARMANDO\AppData\Local\Programs\Python\Python313\Lib\site-packages\djang
+o\core\checks\registry.py", line 89, in run_checks
+    new_errors = check(app_configs=app_configs, databases=databases)
+  File "C:\Users\ARMANDO\AppData\Local\Programs\Python\Python313\Lib\site-packages\djang
+o\core\checks\urls.py", line 16, in check_url_config
+    return check_resolver(resolver)
+  File "C:\Users\ARMANDO\AppData\Local\Programs\Python\Python313\Lib\site-packages\djang
+o\core\checks\urls.py", line 26, in check_resolver
+    return check_method()
+  File "C:\Users\ARMANDO\AppData\Local\Programs\Python\Python313\Lib\site-packages\djang
+o\urls\resolvers.py", line 531, in check
+    for pattern in self.url_patterns:
+                   ^^^^^^^^^^^^^^^^^
+  File "C:\Users\ARMANDO\AppData\Local\Programs\Python\Python313\Lib\site-packages\djang
+o\utils\functional.py", line 47, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+                                         ~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\ARMANDO\AppData\Local\Programs\Python\Python313\Lib\site-packages\djang
+o\urls\resolvers.py", line 718, in url_patterns
+    patterns = getattr(self.urlconf_module, "urlpatterns", self.urlconf_module)
+                       ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ARMANDO\AppData\Local\Programs\Python\Python313\Lib\site-packages\djang
+o\utils\functional.py", line 47, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+                                         ~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\ARMANDO\AppData\Local\Programs\Python\Python313\Lib\site-packages\djang
+o\urls\resolvers.py", line 711, in urlconf_module
+    return import_module(self.urlconf_name)
+  File 
+"C:\Users\ARMANDO\AppData\Local\Programs\Python\Python313\Lib\importlib\__init__.py", 
+line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1331, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 935, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 1026, in exec_module
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "C:\Users\ARMANDO\travelhub_project\travelhub\urls.py", line 20, in <module>
+    path('', include('core.urls', namespace='core')),
+             ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ARMANDO\AppData\Local\Programs\Python\Python313\Lib\site-packages\djang
+o\urls\conf.py", line 39, in include
+    urlconf_module = import_module(urlconf_module)
+  File 
+"C:\Users\ARMANDO\AppData\Local\Programs\Python\Python313\Lib\importlib\__init__.py", 
+line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1331, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 935, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 1026, in exec_module
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "C:\Users\ARMANDO\travelhub_project\core\urls.py", line 33, in <module>
+    from .views import (
+    ...<2 lines>...
+    )
+ImportError: cannot import name 'dashboard_stats_api' from 'core.views' 
+(C:\Users\ARMANDO\travelhub_project\core\views\__init__.py)
+Sentry is attempting to send 2 pending events
+Waiting up to 2 seconds
+Press Ctrl-Break to quit

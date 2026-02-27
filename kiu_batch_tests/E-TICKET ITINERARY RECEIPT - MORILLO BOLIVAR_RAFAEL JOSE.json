@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "MORILLO BOLIVAR/RAFAEL JOSE",
+  "CODIGO_IDENTIFICACION": "21149296",
+  "SOLO_NOMBRE_PASAJERO": "RAFAEL JOSE",
+  "NUMERO_DE_BOLETO": "3080201356116",
+  "FECHA_DE_EMISION": "29 DEC 2025",
+  "AGENTE_EMISOR": "CCS00V0BM",
+  "CODIGO_RESERVA": "YIYKLG",
+  "SOLO_CODIGO_RESERVA": "YIYKLG",
+  "NOMBRE_AEROLINEA": "CONVIASA",
+  "DIRECCION_AEROLINEA": null,
+  "vuelos": [
+    {
+      "aerolinea": "V0",
+      "numero_vuelo": "1186",
+      "origen": "CARACAS",
+      "fecha_salida": "4 JAN 2026",
+      "hora_salida": "0700",
+      "destino": "SAN ANTONIO",
+      "hora_llegada": "0800",
+      "cabina": "Económica",
+      "clase": "G",
+      "localizador_aerolinea": "YIYKLG"
+    }
+  ],
+  "TARIFA": "48600.00",
+  "IMPUESTOS": "9573.17",
+  "TOTAL": "58173.17",
+  "SOURCE_SYSTEM": "AI_KIU",
+  "es_remision": false,
+  "NOMBRE DEL PASAJERO": "MORILLO BOLIVAR/RAFAEL JOSE",
+  "CODIGO IDENTIFICACION": "21149296",
+  "SOLO NOMBRE PASAJERO": "RAFAEL JOSE",
+  "NUMERO DE BOLETO": "3080201356116",
+  "FECHA DE EMISION": "29 DEC 2025",
+  "AGENTE EMISOR": "CCS00V0BM",
+  "CODIGO RESERVA": "YIYKLG",
+  "SOLO CODIGO RESERVA": "YIYKLG",
+  "NOMBRE AEROLINEA": "CONVIASA",
+  "DIRECCION AEROLINEA": null,
+  "SOURCE SYSTEM": "AI_KIU",
+  "es remision": false
+}

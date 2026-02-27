@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "ZULUAGA GOMEZ/MARIO JAVIER",
+  "CODIGO_IDENTIFICACION": "EPPE178339",
+  "SOLO_NOMBRE_PASAJERO": "MARIO JAVIER",
+  "NUMERO_DE_BOLETO": "7820340747169",
+  "FECHA_DE_EMISION": "30 APR 2025 11:18",
+  "AGENTE_EMISOR": "PTYS3651X",
+  "CODIGO_RESERVA": "DASSUI",
+  "SOLO_CODIGO_RESERVA": "DASSUI",
+  "NOMBRE_AEROLINEA": "LASER C.A.",
+  "DIRECCION_AEROLINEA": null,
+  "vuelos": [
+    {
+      "aerolinea": "QL",
+      "numero_vuelo": "920",
+      "origen": "CARACAS",
+      "fecha_salida": "3MAY 2025",
+      "hora_salida": "1500",
+      "destino": "EL VIGIA",
+      "hora_llegada": "1600",
+      "cabina": "Económica",
+      "clase": "R",
+      "localizador_aerolinea": "DASSUI"
+    }
+  ],
+  "TARIFA": "60.49",
+  "IMPUESTOS": "23.52",
+  "TOTAL": "10.00",
+  "SOURCE_SYSTEM": "AI_KIU",
+  "es_remision": true,
+  "NOMBRE DEL PASAJERO": "ZULUAGA GOMEZ/MARIO JAVIER",
+  "CODIGO IDENTIFICACION": "EPPE178339",
+  "SOLO NOMBRE PASAJERO": "MARIO JAVIER",
+  "NUMERO DE BOLETO": "7820340747169",
+  "FECHA DE EMISION": "30 APR 2025 11:18",
+  "AGENTE EMISOR": "PTYS3651X",
+  "CODIGO RESERVA": "DASSUI",
+  "SOLO CODIGO RESERVA": "DASSUI",
+  "NOMBRE AEROLINEA": "LASER C.A.",
+  "DIRECCION AEROLINEA": null,
+  "SOURCE SYSTEM": "AI_KIU",
+  "es remision": true
+}

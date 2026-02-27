@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "DUQUE/MARLON",
+  "CODIGO_IDENTIFICACION": "17816912",
+  "SOLO_NOMBRE_PASAJERO": "MARLON",
+  "NUMERO_DE_BOLETO": "3080310823143",
+  "FECHA_DE_EMISION": "16 JUN 2025 07:51",
+  "AGENTE_EMISOR": "PTYS3651X",
+  "CODIGO_RESERVA": "KAHILH",
+  "SOLO_CODIGO_RESERVA": "KAHILH",
+  "NOMBRE_AEROLINEA": "CONVIASA",
+  "DIRECCION_AEROLINEA": null,
+  "vuelos": [
+    {
+      "aerolinea": "V0",
+      "numero_vuelo": "1187",
+      "origen": "SAN ANTONIO",
+      "fecha_salida": "18JUN2025",
+      "hora_salida": "0850",
+      "destino": "CARACAS",
+      "hora_llegada": "0950",
+      "cabina": "Económica",
+      "clase": "R",
+      "localizador_aerolinea": "KAHILH"
+    }
+  ],
+  "TARIFA": "60.90",
+  "IMPUESTOS": "9.19",
+  "TOTAL": "70.09",
+  "SOURCE_SYSTEM": "AI_KIU",
+  "es_remision": false,
+  "NOMBRE DEL PASAJERO": "DUQUE/MARLON",
+  "CODIGO IDENTIFICACION": "17816912",
+  "SOLO NOMBRE PASAJERO": "MARLON",
+  "NUMERO DE BOLETO": "3080310823143",
+  "FECHA DE EMISION": "16 JUN 2025 07:51",
+  "AGENTE EMISOR": "PTYS3651X",
+  "CODIGO RESERVA": "KAHILH",
+  "SOLO CODIGO RESERVA": "KAHILH",
+  "NOMBRE AEROLINEA": "CONVIASA",
+  "DIRECCION AEROLINEA": null,
+  "SOURCE SYSTEM": "AI_KIU",
+  "es remision": false
+}

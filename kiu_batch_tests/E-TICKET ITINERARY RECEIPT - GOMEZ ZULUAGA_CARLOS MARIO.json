@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "GOMEZ ZULUAGA/CARLOS MARIO",
+  "CODIGO_IDENTIFICACION": "84414910",
+  "SOLO_NOMBRE_PASAJERO": "CARLOS MARIO",
+  "NUMERO_DE_BOLETO": "3080201387453",
+  "FECHA_DE_EMISION": "04 FEB 2026 18:38",
+  "AGENTE_EMISOR": "CCS00V0WV",
+  "CODIGO_RESERVA": "TXCGXK",
+  "SOLO_CODIGO_RESERVA": "TXCGXK",
+  "NOMBRE_AEROLINEA": "CONVIASA",
+  "DIRECCION_AEROLINEA": null,
+  "vuelos": [
+    {
+      "aerolinea": "V0",
+      "numero_vuelo": "1186",
+      "origen": "CARACAS",
+      "fecha_salida": "11FEB2026",
+      "hora_salida": "0700",
+      "destino": "SAN ANTONIO",
+      "hora_llegada": "0800",
+      "cabina": "Económica",
+      "clase": "O",
+      "localizador_aerolinea": "TXCGXK"
+    }
+  ],
+  "TARIFA": "21400.00",
+  "IMPUESTOS": "8588.14",
+  "TOTAL": "29988.14",
+  "SOURCE_SYSTEM": "AI_KIU",
+  "es_remision": false,
+  "NOMBRE DEL PASAJERO": "GOMEZ ZULUAGA/CARLOS MARIO",
+  "CODIGO IDENTIFICACION": "84414910",
+  "SOLO NOMBRE PASAJERO": "CARLOS MARIO",
+  "NUMERO DE BOLETO": "3080201387453",
+  "FECHA DE EMISION": "04 FEB 2026 18:38",
+  "AGENTE EMISOR": "CCS00V0WV",
+  "CODIGO RESERVA": "TXCGXK",
+  "SOLO CODIGO RESERVA": "TXCGXK",
+  "NOMBRE AEROLINEA": "CONVIASA",
+  "DIRECCION AEROLINEA": null,
+  "SOURCE SYSTEM": "AI_KIU",
+  "es remision": false
+}

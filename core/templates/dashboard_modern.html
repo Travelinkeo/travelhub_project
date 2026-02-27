@@ -1,0 +1,380 @@
+{% extends "base_modern.html" %}
+{% load static %}
+{% block content %}
+<div class="min-h-screen bg-[#0f172a] text-white p-2 md:p-4 font-sans">
+
+    <div class="flex flex-col md:flex-row justify-between items-end mb-4 md:mb-5 gap-4">
+        <div>
+            <h1
+                class="text-2xl md:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-300">
+                Hola, {{ request.user.first_name|default:"Agente" }} 👋
+            </h1>
+            <p class="text-gray-300 mt-1 text-sm md:text-base">Panel de Control Satelital · {{ hoy|date:"l d M" }}</p>
+        </div>
+
+        <div
+            class="bg-slate-800/80 border border-slate-600 rounded-xl px-4 py-2 md:px-5 md:py-3 flex items-center gap-4 md:gap-6 shadow-lg w-full md:w-auto justify-between md:justify-start">
+            <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
+                <span class="text-xs md:text-sm font-bold text-gray-400">BCV HOY</span>
+            </div>
+            <div class="text-right">
+                <div class="flex gap-4">
+                    <div>
+                        <span class="text-[10px] md:text-xs text-blue-300 font-bold block">USD</span>
+                        <span class="text-lg md:text-xl font-mono font-bold text-white">{{ tasas.USD }}</span>
+                    </div>
+                    <div class="w-px bg-gray-600 h-8"></div>
+                    <div>
+                        <span class="text-[10px] md:text-xs text-purple-300 font-bold block">EUR</span>
+                        <span class="text-lg md:text-xl font-mono font-bold text-white">{{ tasas.EUR }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 mb-4 md:mb-6">
+        <!-- Nueva Venta -->
+        <a href="{% url 'core:venta_create' %}"
+            class="group relative bg-gradient-to-br from-blue-600 to-blue-800 rounded-lg md:rounded-xl p-3 md:p-5 shadow-xl hover:shadow-blue-500/20 transition-all hover:-translate-y-1 col-span-2 md:col-span-1">
+            <div
+                class="absolute top-3 right-3 md:top-4 md:right-4 bg-white/10 p-1.5 md:p-2 rounded-lg group-hover:bg-white/20 transition">
+                <svg class="w-5 h-5 md:w-6 md:h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+            </div>
+            <h3 class="text-lg md:text-xl font-bold text-white">Nueva Venta</h3>
+            <p class="text-blue-200 text-xs md:text-sm mt-0.5 md:mt-1">Cotizar o Reservar</p>
+        </a>
+
+        <!-- Escanear ID -->
+        <!-- Escanear ID -->
+        <label for="passport-file-input" id="btn-scan-passport"
+            class="relative bg-gradient-to-br from-emerald-600 to-teal-800 rounded-lg md:rounded-xl p-3 md:p-5 shadow-xl cursor-pointer hover:shadow-emerald-500/20 hover:-translate-y-1 transition-all group block">
+            <div
+                class="absolute top-3 right-3 md:top-4 md:right-4 bg-white/10 p-1.5 md:p-2 rounded-lg group-hover:bg-white/20 transition">
+                <svg class="w-5 h-5 md:w-6 md:h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                </svg>
+            </div>
+            <h3 class="text-lg md:text-xl font-bold text-white">Escanear ID</h3>
+            <p class="text-emerald-200 text-xs md:text-sm mt-0.5 md:mt-1">Pasaporte</p>
+
+            <!-- Hidden Input for Passport (Moved Outside) -->
+        </label>
+        <input type="file" id="passport-file-input" class="hidden" accept="image/*,.pdf">
+
+        <!-- Subir Boleto -->
+        <div id="btn-upload-ticket"
+            class="bg-gradient-to-r from-pink-600 to-rose-600 rounded-lg md:rounded-xl p-3 md:p-5 cursor-pointer hover:shadow-lg hover:scale-[1.02] transition-all relative overflow-hidden group">
+
+            <div class="flex justify-between items-start relative z-10">
+                <div>
+                    <h3 class="text-lg md:text-xl font-bold text-white">Subir Boleto</h3>
+                    <p class="text-pink-100 text-xs mt-0.5 md:mt-1">Clic o arrastrar</p>
+                </div>
+                <div class="bg-white/20 p-1.5 md:p-2 rounded-lg">
+                    <svg class="w-5 h-5 md:w-6 md:h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                    </svg>
+                </div>
+            </div>
+
+            <div
+                class="absolute -bottom-4 -right-4 w-16 h-16 md:w-24 md:h-24 bg-white/10 rounded-full blur-xl group-hover:bg-white/20 transition-all">
+            </div>
+        </div>
+
+        <!-- Facturación Fiscal -->
+        <a href="{% url 'finance:invoice_list' %}"
+            class="bg-gradient-to-br from-indigo-600 to-violet-800 rounded-lg md:rounded-xl p-3 md:p-5 shadow-xl hover:shadow-indigo-500/20 transition-all hover:-translate-y-1 block relative overflow-hidden group">
+            <div class="flex justify-between items-start relative z-10">
+                <div>
+                    <h3 class="text-lg md:text-xl font-bold text-white">Facturación</h3>
+                    <p class="text-indigo-200 text-xs md:text-sm mt-0.5 md:mt-1">Validar Borradores</p>
+                </div>
+                <div class="bg-white/10 p-1.5 md:p-2 rounded-lg group-hover:bg-white/20 transition">
+                    <svg class="w-5 h-5 md:w-6 md:h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                </div>
+            </div>
+            <div
+                class="absolute -bottom-2 -left-2 w-12 h-12 bg-white/5 rounded-full blur-lg group-hover:bg-white/10 transition-all">
+            </div>
+        </a>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div class="col-span-2 bg-slate-800/50 border border-slate-700 p-6 rounded-2xl relative overflow-hidden">
+            <div class="absolute right-0 top-0 p-4 opacity-5">
+                <svg class="w-32 h-32 text-green-400" fill="currentColor" viewBox="0 0 24 24">
+                    <path
+                        d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.15-1.46-3.27-3.4h1.96c.1 1.05 1.18 1.91 2.53 1.91 1.38 0 2.66-.84 2.66-2.12 0-1.27-1.03-1.63-2.66-2.02-2.09-.52-4.56-1.31-4.56-4.85 0-1.6 1.26-2.76 3.34-3.03V2h2.67v2.06c1.39.29 2.54 1.16 2.86 2.77h-2.08c-.16-.83-.96-1.53-1.98-1.53-1.2 0-2.22.76-2.22 1.77 0 1.11 1.06 1.56 2.75 2 2.22.56 4.47 1.48 4.47 4.96 0 1.83-1.48 3.01-3.27 3.4z" />
+                </svg>
+            </div>
+            <p class="text-[10px] font-bold text-green-400 uppercase tracking-wide">Ganancia Estimada (Mes)</p>
+            <p class="text-3xl font-bold text-white mt-1">${{ ganancia_estimada|floatformat:2 }}</p>
+            <p class="text-xs text-gray-400 mt-2">Comisiones netas + Fees</p>
+        </div>
+
+        <div class="col-span-2 bg-slate-800/50 border border-slate-700 p-6 rounded-2xl border-l-4 border-l-orange-500">
+            <p class="text-sm font-bold text-orange-400 uppercase tracking-wide">Deuda a Consolidadoras</p>
+            <p class="text-4xl font-bold text-white mt-2">${{ saldo_pendiente|floatformat:2 }}</p>
+            <p class="text-xs text-gray-400 mt-2">Monto pendiente de pago a proveedores</p>
+        </div>
+    </div>
+
+    <!-- Stats Chart Section [NEW] -->
+    <div class="grid grid-cols-1 gap-6 mb-8 group">
+        <div class="bg-slate-800/50 border border-slate-700 p-6 rounded-2xl relative">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h3 class="font-bold text-white text-lg">Tendencia de Ventas (7 días)</h3>
+                    <p class="text-gray-400 text-xs mt-1">Comparativa de ingresos vs cobros</p>
+                </div>
+                <div class="flex gap-2">
+                    <div class="flex items-center gap-1.5 px-2.5 py-1 bg-blue-500/10 rounded-md">
+                        <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                        <span class="text-[10px] text-blue-300 font-bold uppercase">Ingresos</span>
+                    </div>
+                    <div class="flex items-center gap-1.5 px-2.5 py-1 bg-green-500/10 rounded-md">
+                        <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                        <span class="text-[10px] text-green-300 font-bold uppercase">Proyección</span>
+                    </div>
+                </div>
+            </div>
+            <div class="h-[250px] w-full">
+                <canvas id="salesTrendChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+        <div class="lg:col-span-2 bg-slate-800/50 border border-slate-700 rounded-2xl overflow-hidden">
+            <div class="p-6 border-b border-slate-700 flex justify-between items-center">
+                <h3 class="font-bold text-white">Actividad Reciente</h3>
+                <a href="#" class="text-sm text-blue-400 hover:text-blue-300">Ver todas</a>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead class="bg-slate-900/50 text-gray-400 text-xs uppercase">
+                        <tr>
+                            <th class="px-6 py-4">Fecha</th>
+                            <th class="px-6 py-4">Cliente</th>
+                            <th class="px-6 py-4">Localizador</th>
+                            <th class="px-6 py-4">Estado</th>
+                            <th class="px-6 py-4 text-right">Monto</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-700">
+                        {% for venta in ventas_recientes %}
+                        <tr class="hover:bg-slate-700/30 transition">
+                            <td class="px-6 py-4 text-gray-300">{{ venta.fecha_venta|date:"d M H:i" }}</td>
+                            <td class="px-6 py-4 font-medium text-white">
+                                {{ venta.cliente.nombres|default:"Sin Cliente" }}
+                            </td>
+                            <td class="px-6 py-4 font-mono text-blue-300">{{ venta.localizador|default:"---" }}</td>
+                            <td class="px-6 py-4">
+                                <span class="px-2 py-1 rounded-full text-xs font-bold 
+                                    {% if venta.estado == 'PAG' %}bg-green-900 text-green-300
+                                    {% elif venta.estado == 'PEN' %}bg-yellow-900 text-yellow-300
+                                    {% else %}bg-gray-700 text-gray-300{% endif %}">
+                                    {{ venta.get_estado_display }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-right font-bold text-white">${{ venta.total_venta|floatformat:2 }}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="px-6 py-8 text-center text-gray-500">
+                                No hay ventas registradas aún. ¡Sube un boleto!
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="space-y-6">
+            <div class="bg-slate-800/50 border border-slate-700 rounded-2xl p-6">
+                <h3 class="font-bold text-white mb-4">Atención Requerida</h3>
+                <div class="space-y-3" hx-get="{% url 'core:modern_dashboard' %}"
+                    hx-select="#atencion-requerida-content" hx-target="#atencion-requerida-content"
+                    hx-trigger="every 30s">
+                    <div id="atencion-requerida-content">
+                        {% if alertas.sin_cliente > 0 %}
+                        <div
+                            class="flex items-center gap-3 p-3 bg-red-900/20 border border-red-900/50 rounded-lg text-red-200 text-sm">
+                            <span class="w-2 h-2 rounded-full bg-red-500"></span>
+                            <b>{{ alertas.sin_cliente }}</b> ventas sin cliente asignado
+                        </div>
+                        {% endif %}
+
+                        {% if alertas.deuda_antigua > 0 %}
+                        <div
+                            class="flex items-center gap-3 p-3 bg-orange-900/20 border border-orange-900/50 rounded-lg text-orange-200 text-sm">
+                            <span class="w-2 h-2 rounded-full bg-orange-500"></span>
+                            <b>{{ alertas.deuda_antigua }}</b> cobros pendientes (>7 días)
+                        </div>
+                        {% endif %}
+
+                        {% if alertas.sin_cliente == 0 and alertas.deuda_antigua == 0 %}
+                        <p class="text-sm text-gray-500 text-center py-2">✅ Todo en orden</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div id="btn-quick-upload"
+                class="bg-slate-900 border-2 border-dashed border-slate-600 rounded-2xl p-8 flex flex-col items-center justify-center text-center cursor-pointer hover:border-blue-500 hover:bg-slate-800 transition group relative">
+
+                <div
+                    class="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition shadow-lg">
+                    <svg class="w-8 h-8 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12">
+                        </path>
+                    </svg>
+                </div>
+                <h3 class="text-lg font-bold text-white">Subida Rápida</h3>
+                <p class="text-sm text-gray-400 mt-2">Arrastra tu PDF aquí o haz clic</p>
+
+                <form id="upload-form" hx-post="{% url 'core:upload_boleto' %}" hx-encoding="multipart/form-data"
+                    hx-target="#notificaciones-area" hx-swap="innerHTML">
+                    {% csrf_token %}
+                    <input id="dropzone-file" type="file" name="archivo" class="hidden">
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="notificaciones-area" class="fixed bottom-4 right-4 z-50"></div>
+
+{% block extra_scripts %}
+<script src="{% static 'core/js/dashboard_upload.js' %}"></script>
+<script nonce="{{ request.csp_nonce }}">
+    console.log("Cargando Scripts Dashboard Modern...");
+
+    // Initialize Dashboard Chart
+    const ctx = document.getElementById('salesTrendChart')?.getContext('2d');
+    if (ctx) {
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Hoy'],
+                datasets: [{
+                    label: 'Ventas ($)',
+                    data: [12000, 19000, 15000, 25000, 22000, 30000, {{ ganancia_estimada|default: 0
+                }}],
+            borderColor: '#3b82f6',
+            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+            borderWidth: 3,
+            fill: true,
+            tension: 0.4,
+            pointRadius: 4,
+            pointBackgroundColor: '#3b82f6'
+        }]
+            },
+    options: {
+        responsive: true,
+            maintainAspectRatio: false,
+                plugins: {
+            legend: { display: false }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                    grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                ticks: { color: '#94a3b8', font: { size: 10 } }
+            },
+            x: {
+                grid: { display: false },
+                ticks: { color: '#94a3b8', font: { size: 10 } }
+            }
+        }
+    }
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        console.log("DOM Cargado. Inicializando Scanner ID...");
+
+        const btnScan = document.getElementById('btn-scan-passport');
+        const inputScan = document.getElementById('passport-file-input');
+        const notifArea = document.getElementById('notificaciones-area');
+
+        if (!btnScan) console.error("Error: No se encontró botón btn-scan-passport");
+        if (!inputScan) console.error("Error: No se encontró input passport-file-input");
+
+        if (btnScan && inputScan) {
+            // Click Handler ya no es necesario gracias al label for="..."
+
+            // File Change Handler
+            inputScan.addEventListener('change', async function () {
+                console.log("Archivo seleccionado:", this.files.length);
+                if (this.files.length === 0) return;
+
+                const file = this.files[0];
+                const formData = new FormData();
+                formData.append('archivo', file);
+
+                // Mostrar estado cargando con Toast
+                window.dispatchEvent(new CustomEvent('notify', {
+                    detail: { message: 'Procesando Pasaporte con IA...', type: 'info' }
+                }));
+
+                try {
+                    console.log("Enviando petición a API OCR...");
+                    const response = await fetch('/api/ocr/passport/', {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || ''
+                        }
+                    });
+
+                    console.log("Respuesta recibida:", response.status);
+                    const result = await response.json();
+                    console.log("Datos:", result);
+
+                    if (result.success) {
+                        // Guardar datos en SessionStorage
+                        sessionStorage.setItem('ocr_passport_data', JSON.stringify(result.data));
+
+                        // Notificación Éxito
+                        window.dispatchEvent(new CustomEvent('notify', {
+                            detail: { message: '¡Leído! Redirigiendo...', type: 'success' }
+                        }));
+
+                        // Redirigir
+                        setTimeout(() => {
+                            window.location.href = "{% url 'core:cliente_create' %}";
+                        }, 1000);
+
+                    } else {
+                        throw new Error(result.error || "Error desconocido");
+                    }
+
+                } catch (error) {
+                    console.error('OCR Error:', error);
+                    window.dispatchEvent(new CustomEvent('notify', {
+                        detail: { message: 'Error: ' + error.message, type: 'error' }
+                    }));
+                } finally {
+                    this.value = ''; // Reset
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}
+{% endblock %}

@@ -1,0 +1,139 @@
+{% extends 'base_modern.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <h1 class="text-3xl font-bold text-white mb-2">{{ title }}</h1>
+            <p class="text-gray-400">Listado de Pasajeros Frecuentes</p>
+        </div>
+        <a href="{% url 'core:pasajeros_create' %}"
+            class="px-4 py-2 bg-primary hover:bg-indigo-600 text-white rounded-xl shadow-lg transition-all flex items-center">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+            Nuevo Pasajero
+        </a>
+    </div>
+
+    <!-- Filtros -->
+    <div class="bg-dark-800 rounded-2xl p-4 mb-6 border border-gray-700">
+        <form method="get" class="flex gap-4">
+            <input type="text" name="q" placeholder="Buscar por nombre, documento..."
+                value="{{ request.GET.q|default:'' }}"
+                class="flex-1 bg-dark-900 border border-gray-600 text-white rounded-xl px-4 py-2 focus:ring-2 focus:ring-primary focus:border-transparent">
+            <button type="submit"
+                class="px-6 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-xl transition-colors">Buscar</button>
+        </form>
+    </div>
+
+    <!-- Tabla -->
+    <div class="bg-dark-800 rounded-2xl border border-gray-700 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-dark-900/50">
+                    <tr>
+                        <th class="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                            Pasajero</th>
+                        <th class="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                            Documento</th>
+                        <th class="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                            Preferencias</th>
+                        <th class="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                            Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-700">
+                    {% for pax in pasajeros %}
+                    <tr class="hover:bg-dark-700/50 transition-colors">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <div
+                                    class="h-10 w-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold">
+                                    {{ pax.nombres|slice:":1" }}{{ pax.apellidos|slice:":1" }}
+                                </div>
+                                <div class="ml-4">
+                                    <div class="text-sm font-medium text-white">{{ pax.nombres }} {{ pax.apellidos }}
+                                    </div>
+                                    <div class="text-xs text-gray-400">{{ pax.email|default:'--' }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 py-1 text-xs font-medium rounded-lg bg-gray-700 text-gray-300">
+                                {{ pax.get_tipo_documento_display }}
+                            </span>
+                            <div class="text-sm text-white mt-1">{{ pax.numero_documento }}</div>
+                        </td>
+                        <td class="px-6 py-4">
+                            {% if pax.preferencias and pax.preferencias.comida %}
+                            {% for comida in pax.preferencias.comida %}
+                            <span
+                                class="inline-block px-2 py-0.5 text-xs rounded bg-green-500/20 text-green-400 mb-1">{{
+                                comida }}</span>
+                            {% endfor %}
+                            {% endif %}
+                            {% if pax.preferencias.asiento %}
+                            <span class="inline-block px-2 py-0.5 text-xs rounded bg-blue-500/20 text-blue-400">{{
+                                pax.preferencias.asiento }}</span>
+                            {% endif %}
+                            {% if not pax.preferencias.comida and not pax.preferencias.asiento %}
+                            <span class="text-gray-500 text-xs italic">Sin preferencias</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <div class="flex space-x-3">
+                                <a href="{% url 'core:pasajero_edit' pax.pk %}"
+                                    class="text-indigo-400 hover:text-indigo-300 transition-colors">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
+                                        </path>
+                                    </svg>
+                                </a>
+                                <a href="{% url 'core:pasajero_delete' pax.pk %}"
+                                    class="text-red-400 hover:text-red-300 transition-colors">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                                        </path>
+                                    </svg>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="px-6 py-12 text-center text-gray-500">
+                            No hay pasajeros registrados.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Paginación -->
+        {% if is_paginated %}
+        <div class="px-6 py-4 border-t border-gray-700 bg-dark-900/30">
+            <div class="flex justify-between items-center">
+                <span class="text-sm text-gray-400">
+                    Mostrando {{ page_obj.start_index }} a {{ page_obj.end_index }} de {{ page_obj.paginator.count }}
+                </span>
+                <div class="flex gap-2">
+                    {% if page_obj.has_previous %}
+                    <a href="?page={{ page_obj.previous_page_number }}"
+                        class="px-3 py-1 bg-dark-700 text-gray-300 rounded hover:bg-dark-600">Anterior</a>
+                    {% endif %}
+                    {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}"
+                        class="px-3 py-1 bg-dark-700 text-gray-300 rounded hover:bg-dark-600">Siguiente</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

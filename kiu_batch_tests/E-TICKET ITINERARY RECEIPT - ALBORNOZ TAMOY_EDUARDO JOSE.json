@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "ALBORNOZ TAMOY/EDUARDO JOSE",
+  "CODIGO_IDENTIFICACION": "27213756",
+  "SOLO_NOMBRE_PASAJERO": "EDUARDO JOSE",
+  "NUMERO_DE_BOLETO": "3080310862055",
+  "FECHA_DE_EMISION": "14 SEP 2025 13:24",
+  "AGENTE_EMISOR": "PTYS3651X",
+  "CODIGO_RESERVA": "RVZRAP",
+  "SOLO_CODIGO_RESERVA": "RVZRAP",
+  "NOMBRE_AEROLINEA": "CONVIASA",
+  "DIRECCION_AEROLINEA": null,
+  "vuelos": [
+    {
+      "aerolinea": "V0",
+      "numero_vuelo": "391",
+      "origen": "VALENCIA",
+      "fecha_salida": "16SEP 2025",
+      "hora_salida": "1055",
+      "destino": "PUERTO ORDAZ",
+      "hora_llegada": "1155",
+      "cabina": "Económica",
+      "clase": "Q",
+      "localizador_aerolinea": "RVZRAP"
+    }
+  ],
+  "TARIFA": "68.00",
+  "IMPUESTOS": "16.94",
+  "TOTAL": "84.94",
+  "SOURCE_SYSTEM": "AI_KIU",
+  "es_remision": false,
+  "NOMBRE DEL PASAJERO": "ALBORNOZ TAMOY/EDUARDO JOSE",
+  "CODIGO IDENTIFICACION": "27213756",
+  "SOLO NOMBRE PASAJERO": "EDUARDO JOSE",
+  "NUMERO DE BOLETO": "3080310862055",
+  "FECHA DE EMISION": "14 SEP 2025 13:24",
+  "AGENTE EMISOR": "PTYS3651X",
+  "CODIGO RESERVA": "RVZRAP",
+  "SOLO CODIGO RESERVA": "RVZRAP",
+  "NOMBRE AEROLINEA": "CONVIASA",
+  "DIRECCION AEROLINEA": null,
+  "SOURCE SYSTEM": "AI_KIU",
+  "es remision": false
+}

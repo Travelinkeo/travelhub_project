@@ -1,0 +1,97 @@
+{% load humanize %}
+
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <!-- Boletos Procesados -->
+    <div class="bg-slate-800 p-6 rounded-2xl border border-gray-700 shadow-lg relative overflow-hidden">
+        <div class="absolute right-0 top-0 p-4 opacity-10">
+            <svg class="w-20 h-20 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
+                <path fill-rule="evenodd"
+                    d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z"
+                    clip-rule="evenodd" />
+            </svg>
+        </div>
+        <h3 class="text-gray-400 text-sm font-medium">Boletos Procesados (Mes)</h3>
+        <p class="text-3xl font-bold text-blue-400 mt-2">{{ ops_stats.boletos_mes|default:0 }}</p>
+    </div>
+
+    <!-- Ventas Creadas -->
+    <div class="bg-slate-800 p-6 rounded-2xl border border-gray-700 shadow-lg relative overflow-hidden">
+        <div class="absolute right-0 top-0 p-4 opacity-10">
+            <svg class="w-20 h-20 text-emerald-400" fill="currentColor" viewBox="0 0 20 20">
+                <path
+                    d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z" />
+                <path fill-rule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.757 2.163.636.22 1.258.426 1.258 1.055 0 .285-.23.59-.838.808-.337.12-.676.155-1.018.066V10.83a1 1 0 00-2 0v1.493a3.978 3.978 0 001.077.585c.613.197 1.25.297 1.902.297v.919a1 1 0 102 0v-.942a5.413 5.413 0 001.698-.674c1.23-.746 1.838-1.745 1.838-2.903 0-1.074-.537-1.92-1.718-2.329-.623-.217-1.18-.392-1.18-1c0-.285.23-.59.838-.808.318-.113.633-.146.942-.095v1.23a1 1 0 102 0V7.218a4.008 4.008 0 00-1.066-.62c-.596-.201-1.22-.303-1.85-.303v-.795z"
+                    clip-rule="evenodd" />
+            </svg>
+        </div>
+        <h3 class="text-gray-400 text-sm font-medium">Ventas Confirmadas (Mes)</h3>
+        <p class="text-3xl font-bold text-emerald-400 mt-2">{{ ops_stats.ventas_mes|default:0 }}</p>
+    </div>
+
+    <!-- Pendientes -->
+    <div class="bg-slate-800 p-6 rounded-2xl border border-gray-700 shadow-lg relative overflow-hidden">
+        <div class="absolute right-0 top-0 p-4 opacity-10">
+            <svg class="w-20 h-20 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd"
+                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                    clip-rule="evenodd" />
+            </svg>
+        </div>
+        <h3 class="text-gray-400 text-sm font-medium">Boletos Pendientes</h3>
+        <p class="text-3xl font-bold text-yellow-500 mt-2">{{ ops_stats.boletos_pendientes|default:0 }}</p>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <!-- Top Users -->
+    <div class="bg-slate-800 shadow-lg rounded-2xl border border-gray-700 overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-700 bg-gray-800/50">
+            <h3 class="text-lg font-bold text-white">Top Usuarios (Ventas)</h3>
+        </div>
+        <ul class="divide-y divide-gray-700">
+            {% for user in top_users %}
+            <li class="px-6 py-4 flex items-center justify-between hover:bg-slate-700/50 transition-colors">
+                <div class="flex items-center">
+                    <div
+                        class="flex-shrink-0 h-10 w-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold">
+                        {% if user.creado_por__username %}
+                        {{ user.creado_por__username|slice:":2"|upper }}
+                        {% else %}
+                        --
+                        {% endif %}
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-white">
+                            {% if user.creado_por__first_name or user.creado_por__last_name %}
+                            {{ user.creado_por__first_name|default:"" }} {{ user.creado_por__last_name|default:"" }}
+                            {% else %}
+                            Usuario Desconocido
+                            {% endif %}
+                        </p>
+                        <p class="text-xs text-gray-500">
+                            {% if user.creado_por__username %}
+                            @{{ user.creado_por__username }}
+                            {% else %}
+                            Sin usuario
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <p class="text-sm font-bold text-white">{{ user.total_ventas }} ventas</p>
+                    <span
+                        class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-900 text-green-200">
+                        {{ ops_stats.periodo|default:"Mes Actual" }}
+                    </span>
+                </div>
+            </li>
+            {% empty %}
+            <li class="px-6 py-4 text-center text-gray-500 text-sm italic">
+                No hay actividad registrada este mes.
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>

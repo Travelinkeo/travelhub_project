@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "RAMIREZ ALZATE/YOHAN FERNANDO",
+  "CODIGO_IDENTIFICACION": "AX406135",
+  "SOLO_NOMBRE_PASAJERO": "RAMIREZ ALZATE",
+  "NUMERO_DE_BOLETO": "7420200032861",
+  "FECHA_DE_EMISION": "26 NOV 2025 17:50",
+  "AGENTE_EMISOR": "PTYS3651X",
+  "CODIGO_RESERVA": "JRGNHG",
+  "SOLO_CODIGO_RESERVA": "JRGNHG",
+  "NOMBRE_AEROLINEA": "AVIOR AIRLINES C.A",
+  "DIRECCION_AEROLINEA": null,
+  "vuelos": [
+    {
+      "aerolinea": "9V",
+      "numero_vuelo": "074",
+      "origen": "CARACAS",
+      "fecha_salida": "27NOV 2025",
+      "hora_salida": "0840",
+      "destino": "MARACAIBO",
+      "hora_llegada": "0950",
+      "cabina": "Económica",
+      "clase": "M",
+      "localizador_aerolinea": "JRGNHG"
+    }
+  ],
+  "TARIFA": "24.70",
+  "IMPUESTOS": "70.34",
+  "TOTAL": "95.04",
+  "SOURCE_SYSTEM": "AI_KIU",
+  "es_remision": false,
+  "NOMBRE DEL PASAJERO": "RAMIREZ ALZATE/YOHAN FERNANDO",
+  "CODIGO IDENTIFICACION": "AX406135",
+  "SOLO NOMBRE PASAJERO": "RAMIREZ ALZATE",
+  "NUMERO DE BOLETO": "7420200032861",
+  "FECHA DE EMISION": "26 NOV 2025 17:50",
+  "AGENTE EMISOR": "PTYS3651X",
+  "CODIGO RESERVA": "JRGNHG",
+  "SOLO CODIGO RESERVA": "JRGNHG",
+  "NOMBRE AEROLINEA": "AVIOR AIRLINES C.A",
+  "DIRECCION AEROLINEA": null,
+  "SOURCE SYSTEM": "AI_KIU",
+  "es remision": false
+}

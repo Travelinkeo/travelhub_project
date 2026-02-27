@@ -11,15 +11,16 @@ import os
 logger = logging.getLogger(__name__)
 
 
-def enviar_email_html(asunto, template_name, context, destinatario):
+def enviar_email_html(asunto, template_name, context, destinatario, from_email=None):
     """Función auxiliar para enviar emails HTML con logo embebido"""
     try:
         html_content = render_to_string(template_name, context)
+        sender = from_email or settings.DEFAULT_FROM_EMAIL
         
         email = EmailMultiAlternatives(
             asunto,
             f"Este email requiere un cliente que soporte HTML. Contenido: {context.get('localizador', '')}",
-            settings.DEFAULT_FROM_EMAIL,
+            sender,
             [destinatario]
         )
         email.attach_alternative(html_content, "text/html")
@@ -47,24 +48,30 @@ def enviar_confirmacion_venta(venta):
         logger.warning(f"Venta {venta.id_venta} sin cliente o email")
         return False
     
+    agencia = venta.agencia
+    nombre_agencia = agencia.nombre_comercial or agencia.nombre if agencia else "TravelHub"
+    from_email = agencia.email_principal or settings.DEFAULT_FROM_EMAIL if agencia else None
+    
     context = {
         'cliente_nombre': venta.cliente.get_nombre_completo(),
         'localizador': venta.localizador,
         'fecha': venta.fecha_venta.strftime('%d/%m/%Y'),
         'total': venta.total_venta,
         'moneda': venta.moneda.simbolo if venta.moneda else '',
-        'estado': venta.get_estado_display()
+        'estado': venta.get_estado_display(),
+        'nombre_agencia': nombre_agencia
     }
     
     resultado = enviar_email_html(
-        f'Confirmación de Reserva - {venta.localizador}',
+        f'[{nombre_agencia}] Confirmación de Reserva - {venta.localizador}',
         'core/emails/confirmacion_venta.html',
         context,
-        venta.cliente.email
+        venta.cliente.email,
+        from_email=from_email
     )
     
     if resultado:
-        logger.info(f"Email confirmación enviado para venta {venta.id_venta}")
+        logger.info(f"Email confirmación enviado para venta {venta.id_venta} (Agencia: {nombre_agencia})")
     return resultado
 
 
@@ -73,18 +80,24 @@ def enviar_cambio_estado(venta, estado_anterior):
     if not venta.cliente or not venta.cliente.email:
         return False
     
+    agencia = venta.agencia
+    nombre_agencia = agencia.nombre_comercial or agencia.nombre if agencia else "TravelHub"
+    from_email = agencia.email_principal or settings.DEFAULT_FROM_EMAIL if agencia else None
+
     context = {
         'cliente_nombre': venta.cliente.get_nombre_completo(),
         'localizador': venta.localizador,
         'estado_anterior': estado_anterior,
-        'estado_actual': venta.get_estado_display()
+        'estado_actual': venta.get_estado_display(),
+        'nombre_agencia': nombre_agencia
     }
     
     resultado = enviar_email_html(
-        f'Actualización de Reserva - {venta.localizador}',
+        f'[{nombre_agencia}] Actualización de Reserva - {venta.localizador}',
         'core/emails/cambio_estado.html',
         context,
-        venta.cliente.email
+        venta.cliente.email,
+        from_email=from_email
     )
     
     if resultado:
@@ -100,20 +113,26 @@ def enviar_recordatorio_pago(venta):
     if venta.saldo_pendiente <= 0:
         return False
     
+    agencia = venta.agencia
+    nombre_agencia = agencia.nombre_comercial or agencia.nombre if agencia else "TravelHub"
+    from_email = agencia.email_principal or settings.DEFAULT_FROM_EMAIL if agencia else None
+
     context = {
         'cliente_nombre': venta.cliente.get_nombre_completo(),
         'localizador': venta.localizador,
         'total': venta.total_venta,
         'pagado': venta.total_venta - venta.saldo_pendiente,
         'saldo': venta.saldo_pendiente,
-        'moneda': venta.moneda.simbolo if venta.moneda else ''
+        'moneda': venta.moneda.simbolo if venta.moneda else '',
+        'nombre_agencia': nombre_agencia
     }
     
     resultado = enviar_email_html(
-        f'Recordatorio de Pago - {venta.localizador}',
+        f'[{nombre_agencia}] Recordatorio de Pago - {venta.localizador}',
         'core/emails/recordatorio_pago.html',
         context,
-        venta.cliente.email
+        venta.cliente.email,
+        from_email=from_email
     )
     
     if resultado:
@@ -127,6 +146,10 @@ def enviar_confirmacion_pago(pago_venta):
     if not venta.cliente or not venta.cliente.email:
         return False
     
+    agencia = venta.agencia
+    nombre_agencia = agencia.nombre_comercial or agencia.nombre if agencia else "TravelHub"
+    from_email = agencia.email_principal or settings.DEFAULT_FROM_EMAIL if agencia else None
+
     context = {
         'cliente_nombre': venta.cliente.get_nombre_completo(),
         'localizador': venta.localizador,
@@ -134,14 +157,16 @@ def enviar_confirmacion_pago(pago_venta):
         'fecha': pago_venta.fecha_pago.strftime('%d/%m/%Y'),
         'metodo': pago_venta.get_metodo_display(),
         'saldo': venta.saldo_pendiente,
-        'moneda': pago_venta.moneda.simbolo if pago_venta.moneda else ''
+        'moneda': pago_venta.moneda.simbolo if pago_venta.moneda else '',
+        'nombre_agencia': nombre_agencia
     }
     
     resultado = enviar_email_html(
-        f'Confirmación de Pago - {venta.localizador}',
+        f'[{nombre_agencia}] Confirmación de Pago - {venta.localizador}',
         'core/emails/confirmacion_pago.html',
         context,
-        venta.cliente.email
+        venta.cliente.email,
+        from_email=from_email
     )
     
     if resultado:

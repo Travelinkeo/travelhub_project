@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "ROMERO DUQUE/ROBINSON WLADIMIR",
+  "CODIGO_IDENTIFICACION": "11061334",
+  "SOLO_NOMBRE_PASAJERO": "ROBINSON WLADIMIR",
+  "NUMERO_DE_BOLETO": "3080201356108",
+  "FECHA_DE_EMISION": "29 DEC 2025 11:38",
+  "AGENTE_EMISOR": "CCS00V0DU",
+  "CODIGO_RESERVA": "OJGTEB",
+  "SOLO_CODIGO_RESERVA": "OJGTEB",
+  "NOMBRE_AEROLINEA": "CONVIASA",
+  "DIRECCION_AEROLINEA": null,
+  "vuelos": [
+    {
+      "aerolinea": "V0",
+      "numero_vuelo": "1186",
+      "origen": "CARACAS",
+      "fecha_salida": "4JAN 2026",
+      "hora_salida": "0700",
+      "destino": "SAN ANTONIO",
+      "hora_llegada": "0800",
+      "cabina": "Económica",
+      "clase": "G",
+      "localizador_aerolinea": "OJGTEB"
+    }
+  ],
+  "TARIFA": "48600.00",
+  "IMPUESTOS": "9573.17",
+  "TOTAL": "58173.17",
+  "SOURCE_SYSTEM": "AI_KIU",
+  "es_remision": false,
+  "NOMBRE DEL PASAJERO": "ROMERO DUQUE/ROBINSON WLADIMIR",
+  "CODIGO IDENTIFICACION": "11061334",
+  "SOLO NOMBRE PASAJERO": "ROBINSON WLADIMIR",
+  "NUMERO DE BOLETO": "3080201356108",
+  "FECHA DE EMISION": "29 DEC 2025 11:38",
+  "AGENTE EMISOR": "CCS00V0DU",
+  "CODIGO RESERVA": "OJGTEB",
+  "SOLO CODIGO RESERVA": "OJGTEB",
+  "NOMBRE AEROLINEA": "CONVIASA",
+  "DIRECCION AEROLINEA": null,
+  "SOURCE SYSTEM": "AI_KIU",
+  "es remision": false
+}

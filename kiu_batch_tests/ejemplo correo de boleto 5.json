@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "GIRALDO ARISTIZABAL",
+  "CODIGO_IDENTIFICACION": "IDEPAS489379",
+  "SOLO_NOMBRE_PASAJERO": "GIRALDO ARISTIZABAL",
+  "NUMERO_DE_BOLETO": "7420307327295",
+  "FECHA_DE_EMISION": "14 FEB 2025 10:10",
+  "AGENTE_EMISOR": "PTYS3651X",
+  "CODIGO_RESERVA": "ZOKIVD",
+  "SOLO_CODIGO_RESERVA": "ZOKIVD",
+  "NOMBRE_AEROLINEA": "AVIOR AIRLINES C.A",
+  "DIRECCION_AEROLINEA": null,
+  "vuelos": [
+    {
+      "aerolinea": "9V",
+      "numero_vuelo": "1420",
+      "origen": "CARACAS",
+      "fecha_salida": "14FEB 2025",
+      "hora_salida": "1830",
+      "destino": "BOGOTA-EL DORADO",
+      "hora_llegada": "1900",
+      "cabina": "Económica",
+      "clase": "U",
+      "localizador_aerolinea": "ZOKIVD"
+    }
+  ],
+  "TARIFA": "49.44",
+  "IMPUESTOS": "190.58",
+  "TOTAL": "240.02",
+  "SOURCE_SYSTEM": "AI_KIU",
+  "es_remision": false,
+  "NOMBRE DEL PASAJERO": "GIRALDO ARISTIZABAL",
+  "CODIGO IDENTIFICACION": "IDEPAS489379",
+  "SOLO NOMBRE PASAJERO": "GIRALDO ARISTIZABAL",
+  "NUMERO DE BOLETO": "7420307327295",
+  "FECHA DE EMISION": "14 FEB 2025 10:10",
+  "AGENTE EMISOR": "PTYS3651X",
+  "CODIGO RESERVA": "ZOKIVD",
+  "SOLO CODIGO RESERVA": "ZOKIVD",
+  "NOMBRE AEROLINEA": "AVIOR AIRLINES C.A",
+  "DIRECCION AEROLINEA": null,
+  "SOURCE SYSTEM": "AI_KIU",
+  "es remision": false
+}

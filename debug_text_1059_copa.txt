@@ -1,0 +1,555 @@
+--- HEADERS START ---
+Delivered-To: boletotravelinkeo@gmail.com
+Received: by 2002:a05:7108:5994:b0:54e:1834:20a1 with SMTP id gw20csp470259gdb;        Wed, 18 Feb 2026 16:05:00 -0800 (PST)
+X-Received: by 2002:a05:690e:24c2:b0:644:45a9:c0d7 with SMTP id 956f58d0204a3-64c14d3a0bbmr13098696d50.55.1771459500405;        Wed, 18 Feb 2026 16:05:00 -0800 (PST)
+ARC-Seal: i=1; a=rsa-sha256; t=1771459500; cv=none;        d=google.com; s=arc-20240605;        b=FyP9dFPKXlSmThQ4ckEOXifn0yswOvyV6+Thli+/U95dyaVl9wh/9WujmlWVZNkrxe         2eYE3J+neUeRaR5qLf9bNHwTDWFEnY5qXBnDWVhF0iEok8vrYUA7ZsxjxOWOpRYWLhzo         Jm4dKIrdgsH/7/3ys8yLED0uuH7boCzS47xWWnRlhXmpB/LNeQsxTI0LSQJGVTY26Lu5         QqrzD50g6MYEyC23qbS2Af74rV9ouj+bicECqO0Qw7TaxVVN8R6W1P2ufgjtWmugl9tS         ZLrR73+yWcYH6e5BbxvNaRoUJoqBvBdn5/hCjLwRKQJ4Kois+anaf9DwB9KD5I5k06ZB         MMeg==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;        h=mime-version:msip_labels:content-language:accept-language         :in-reply-to:references:message-id:date:thread-index:thread-topic         :subject:to:from:dkim-signature;        bh=HQqDNrgtQ4Jdhe+2BVS0QUFCbeCN/EUqoYe40wfDT0Y=;        fh=mzFrCPxx7ac1XGhrZGspoV3vZ0IHj44kJFMdM0kq/Zs=;        b=SLyAE4KcuQk8YbPvUa3xuyoY2fRE+QnNJLeL1B0jqTFkw1JkAimqCNHmjLfklGkkSG         M2+uyTScnXuZRqj/wosJlbyhFm72klz29OQdHbCDJOj/YraUDs98XDS34FsXrSkh5f27         cwPZ2TYRECabD0xdFeZ4S+MN01mXuL5hrw7+Tt/c6U7qwnDizSZdEs5fwDRaD6XiH0Ss         j/a/PezhwW9PesEF6rIw4Z5q6hTTnEgq0VKqjc3HIxYK57J3nHPL581d7TQ2273Aa3gA         jpCVcwvXKvuziZ3BLmcDHRFtCenTl04131Bxf6msOhrgoVjvJUR+Eth8rkLd8X20v24t         Lo5g==;        dara=google.com
+ARC-Authentication-Results: i=1; mx.google.com;       dkim=pass header.i=@gmail.com header.s=20230601 header.b=BW5yhMIz;       spf=pass (google.com: domain of travelinkeo@gmail.com designates 209.85.220.41 as permitted sender) smtp.mailfrom=travelinkeo@gmail.com;       dmarc=pass (p=NONE sp=QUARANTINE dis=NONE) header.from=gmail.com;       dara=pass header.i=@gmail.com
+Return-Path: <travelinkeo@gmail.com>
+Received: from mail-sor-f41.google.com (mail-sor-f41.google.com. [209.85.220.41])        by mx.google.com with SMTPS id 956f58d0204a3-64c1447a059sor3482722d50.4.2026.02.18.16.05.00        for <boletotravelinkeo@gmail.com>        (Google Transport Security);        Wed, 18 Feb 2026 16:05:00 -0800 (PST)
+Received-SPF: pass (google.com: domain of travelinkeo@gmail.com designates 209.85.220.41 as permitted sender) client-ip=209.85.220.41;
+Authentication-Results: mx.google.com;       dkim=pass header.i=@gmail.com header.s=20230601 header.b=BW5yhMIz;       spf=pass (google.com: domain of travelinkeo@gmail.com designates 209.85.220.41 as permitted sender) smtp.mailfrom=travelinkeo@gmail.com;       dmarc=pass (p=NONE sp=QUARANTINE dis=NONE) header.from=gmail.com;       dara=pass header.i=@gmail.com
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;        d=gmail.com; s=20230601; t=1771459500; x=1772064300; dara=google.com;        h=mime-version:msip_labels:content-language:accept-language         :in-reply-to:references:message-id:date:thread-index:thread-topic         :subject:to:from:from:to:cc:subject:date:message-id:reply-to;        bh=HQqDNrgtQ4Jdhe+2BVS0QUFCbeCN/EUqoYe40wfDT0Y=;        b=BW5yhMIz7VFZY/uNQ2sEQdhS4XpCRTCeIsW+rtzKyQ55/5//DCtWlSrKT/CvX11qf/         Md9QHvcj1tWZ9iouTMkCVMLiBXOfPuyOlybBOPhBxMSeXNw6AgOOlRIXwMKD6Y+sFcEf         6uqs6rkpjDj+NfLJ56Btg36aV8mBAtZvaLfnJi9Dn+LyHtuG9Urs+dcfOQCERVKnxXY1         baCMUleKKZLLpf5AFdJCu+FJbEnNc+rL+yxCwb0JGHQDYrVoVXeboBy7duEel5YMhwrl         4Qpaczf208mE9CFAP1IVjgDinnw5HckHConvnvRtUIG99X/Gl5A9x/dVpVG/Kf/PfE3M         bhsQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;        d=1e100.net; s=20230601; t=1771459500; x=1772064300;        h=mime-version:msip_labels:content-language:accept-language         :in-reply-to:references:message-id:date:thread-index:thread-topic         :subject:to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date         :message-id:reply-to;        bh=HQqDNrgtQ4Jdhe+2BVS0QUFCbeCN/EUqoYe40wfDT0Y=;        b=e1mCIgz+AM17taR312qGnsWRoDEFVWQfigywniw6NBB8UcKQdmzGy62YEfOFtRDKE5         yHuREk8cFyajw3uMyW2jjpPGYftcD/8w2qKvI/Orlg4wdPapAuA9edjUN/w7HeB/nowK         PcG9jffiP33RZIw9xGVfgwKegJBo6+/FxgckFwf2ByhQEpptI6zMyKgfiDaWOZlQXdPB         SxA7Ag00hQo+nHXQW8pnQ+WqXJCG1x1t56zngWK5glkyLvVoFP0VhcUuRy8642ZoHGMB         eDw/n8JLgzOesrx1dm/cqbE/6KzKGDaCfoG4vscyd/RwjYOM50/JAlgSSWolsocYhXYf         +q2w==
+X-Gm-Message-State: AOJu0YxtaDULHs0YopEdEz/Vi9NgnepgvKcuLuyaQdl9MNQhiZ6bze8S	gQmPa0UKzPlN4VTwCBSPyo2twc7h4+1VgLb1eVbytxcNpqiwYsazmZY1IIIn6U6n
+X-Gm-Gg: AZuq6aK11MFjIjmwjxtjMW9lKyuVRd+N1yCmBK+XFOS+U7lLK75+vEZRNyCCWm4RRyv	1A7Jky4JXeqDrqnEvTyWpASZrVUEb3uchEIQ9+kSnfNWL0OdnDFEfXvwL3i3hbvJtSEnRjq37KP	/YeRL8ew0hXdWq2v6KJm3yLTh/hCMAqp6JiP3M2EZrZ9XVTLiSBbIbCan03b/2hDptU8ejzEYVZ	u3l4MN977/gijN2JshNscfctCRu3ApZ6ClOYG3M6SZF1GHZYpQj4DSp6NOqW4upEsPb8lR/fgig	BU+GC3P4s7bnpFRYvquRVyeviqSSqbP+fI8QjljYbvLX7B/yrjPZ1dN+WkHbjed/veV6p6KzYZv	0YX+hFALEm7lK1AFtwjExQKswBoBh1gSvmsv9WnRRA7gn9Xr107Zpyo8Ybj4sT6xWlftULyuvK1	lc/NU3WX7dJpVV3BLmhPHjIP/O07sjvUSEWr2J3Ag7DW9qlkdSKATjOdEE9lK7N3CwUWSIhqER7	tpiXcUDO1dx3zvc3pYeBsyG6IId
+X-Received: by 2002:a53:c407:0:b0:64a:dafd:2102 with SMTP id 956f58d0204a3-64c14ac48famr11417263d50.19.1771459499581;        Wed, 18 Feb 2026 16:04:59 -0800 (PST)
+Return-Path: <travelinkeo@gmail.com>
+Received: from SN7PR17MB6804.namprd17.prod.outlook.com ([2603:1036:305:405f::5])        by smtp.gmail.com with ESMTPSA id 956f58d0204a3-64c22f8a209sm6480041d50.12.2026.02.18.16.04.59        for <boletotravelinkeo@gmail.com>        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);        Wed, 18 Feb 2026 16:04:59 -0800 (PST)
+From: Travelinkeo <travelinkeo@gmail.com>
+To: "boletotravelinkeo@gmail.com" <boletotravelinkeo@gmail.com>
+Subject: RV: Itinerario para localizador de reserva DS4GBW
+Thread-Topic: Itinerario para localizador de reserva DS4GBW
+Thread-Index: AWZlYjRjhZDAFvE7T314gNC58wesr+x3olD7
+X-MS-Exchange-MessageSentRepresentingType: 1
+Date: Thu, 19 Feb 2026 00:04:58 +0000
+Message-ID: <SN7PR17MB6804E411DBC7C9444BAA6E5FF26BA@SN7PR17MB6804.namprd17.prod.outlook.com>
+References: <60d935bc-5b4d-4741-8cbe-4607ec74f3cf@AM4PEPF00027A63.eurprd04.prod.outlook.com>
+In-Reply-To: <60d935bc-5b4d-4741-8cbe-4607ec74f3cf@AM4PEPF00027A63.eurprd04.prod.outlook.com>
+Accept-Language: es-VE, es-US, es-419, en-US
+Content-Language: es-VE
+X-MS-Has-Attach: 
+X-MS-Exchange-Organization-SCL: -1
+X-MS-TNEF-Correlator: 
+X-MS-Exchange-Organization-RecordReviewCfmType: 0
+msip_labels: 
+Content-Type: multipart/alternative; boundary="_000_SN7PR17MB6804E411DBC7C9444BAA6E5FF26BASN7PR17MB6804namp_"
+MIME-Version: 1.0
+--- HEADERS END ---
+
+
+
+[https://res.cloudinary.com/armando3105/image/upload/v1591889348/Logotipo_0D1E40_m1y6wr.png]
+[https://res.cloudinary.com/armando3105/image/upload/v1591985939/facebook_syotzw.png]<https://www.facebook.com/travelinkeo/>            [https://res.cloudinary.com/armando3105/image/upload/v1591985939/twitter_ee7nuv.png] <https://twitter.com/travelinkeo>          [https://res.cloudinary.com/armando3105/image/upload/v1591985939/instagram_uoqh3h.png] <https://www.instagram.com/travelinkeo/>                 [https://res.cloudinary.com/armando3105/image/upload/v1591985939/whatsapp_wsqcrw.png] <https://wa.me/584123312314>
+Naidaly Cohen
+
+Director de Operaciones
+
+Travelinkeo
+
+Marca Tu Destino
+
+[https://cdn2.hubspot.net/hubfs/53/tools/email-signature-generator/icons/phone-icon-2x.png]
++58212 6317079 | +58412 3312314
+[https://cdn2.hubspot.net/hubfs/53/tools/email-signature-generator/icons/email-icon-2x.png]
+travelinkeo@gmail.com<mailto:travelinkeo@gmail.com>
+[https://cdn2.hubspot.net/hubfs/53/tools/email-signature-generator/icons/link-icon-2x.png]
+https://www.travelinkeo.com<https://www.travelinkeo.com/>
+
+________________________________
+De: no-reply@accelya.com <no-reply@accelya.com>
+Enviado: miércoles, 18 de febrero de 2026 8:03 p. m.
+Para: travelinkeo@gmail.com <travelinkeo@gmail.com>
+Asunto: Itinerario para localizador de reserva DS4GBW
+
+Grupo Soporte Global INC     No. IATA de la agencia: 10617390
+
+
+USA
+
+
+
+Itinerario para localizador de reserva DS4GBW
+Copa Airlines Localizador de reserva AHNEQU
+Reserva
+Línea aérea     N.º de vuelo    Salida  Llegada Clase   Cabina  Comidas
+Aeropuerto      Fecha y Hora    Aeropuerto      Fecha y Hora
+[https://cm.farelogix.com/sprk/Public/Images/Providers/Air/CM.gif]
+Copa Airlines   173     Miami International Apt, US
+Terminal:J      MI. 15ABR.
+06:00 AM        Panama City Tocumen International, PA   MI. 15ABR.
+08:06 AM        L               M
+ROMER PEREIRA (ADT)     FF# Not Set     No Seat Assigned
+
+BELLALITH ROJAS (ADT)   FF# Not Set     No Seat Assigned
+[https://cm.farelogix.com/sprk/Public/Images/Providers/Air/CM.gif]
+Copa Airlines   224     Panama City Tocumen International, PA   MI. 15ABR.
+09:03 AM        Caracas, VE     MI. 15ABR.
+12:22 PM        L               M
+ROMER PEREIRA (ADT)     FF# Not Set     No Seat Assigned
+
+BELLALITH ROJAS (ADT)   FF# Not Set     No Seat Assigned
+ Información de la factura
+ROMER PEREIRA (ADT)     Número de documento     Fecha de emisión
+Billete electrónico     2307407728996   18FEB.26
+[https://cm.farelogix.com/sprk/Public/Images/relation.png]  Endosos:  NON REF/NONEND/NONTRANS//CHANGES APPLY/COPA AIRLINES 98-0105127
+
+BELLALITH ROJAS (ADT)   Número de documento     Fecha de emisión
+Billete electrónico     2307407728999   18FEB.26
+[https://cm.farelogix.com/sprk/Public/Images/relation.png]  Endosos:  NON REF/NONEND/NONTRANS//CHANGES APPLY/COPA AIRLINES 98-0105127
+ Aviso de protección de datos
+Comunicación sobre protección de datos: sus datos personales se procesarán de acuerdo con la política de privacidad aplicable del operador y, si su reserva se realiza mediante un proveedor de sistema de reserva ("GDS"), conforme a su política de privacidad, que estará disponible en http://www.iatatravelcenter.com/privacy, o en el operador o GDS o TSP directamente. Debe leer esta documentación, que se aplica a su reserva y especifica, por ejemplo, cómo se recopilan, almacenan, utilizan, revelan y transfieren sus datos personales.
+Data Protection Notice: Your personal data will be processed in accordance with the applicable carrier's privacy policy and, if your booking is made via a reservation system provider ("GDS" ), with its privacy policy. These are available at http://www.iatatravelcenter.com/privacy or from the carrier, GDS or TSP directly. You should read this documentation, which applies to your booking and specifies, for example, how your personal data is collected, stored, used, disclosed and transferred.
+
+Para obtener información y realizar el cálculo automático de la franquicia de equipaje y cargos para este itinerario de conformidad con las reglas correspondientes de la línea aérea, visite www.iflybags.com<http://www.iflybags.com/bagservice.aspx?trace=hbohorquez&fn=2&ar1=CM&cos1=L&fbc1=LLA9OZ2S&flt1=173&dc1=MIA&dd1=2026-04-15&dt1=06:00&ac1=PTY&ad1=2026-04-15&at1=08:06&ar2=CM&cos2=L&fbc2=LLA9OZ2S&flt2=224&dc2=PTY&dd2=2026-04-15&dt2=09:03&ac2=CCS&ad2=2026-04-15&at2=12:22&td=2026-02-18&crnc=USD&pos=MIA&tn=1&p1=ADT>
+[X]
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css" style="display:none;"> P {margin-top:0;margin-bottom:0;} </style>
+</head>
+<body dir="ltr">
+<div class="elementToProof" style="font-family: Aptos, Aptos_EmbeddedFont, Aptos_MSFontService, Calibri, Helvetica, sans-serif; font-size: 11pt; color: rgb(0, 0, 0);">
+<br>
+</div>
+<div class="elementToProof" id="Signature">
+<div style="font-family: Aptos, Aptos_EmbeddedFont, Aptos_MSFontService, Calibri, Helvetica, sans-serif; font-size: 11pt; color: rgb(0, 0, 0);">
+<br>
+</div>
+<table style="text-align: left; color: rgb(32, 33, 36); box-sizing: border-box; border-collapse: collapse; border-spacing: 0px;" cellpadding="0" cellspacing="0">
+<tbody>
+<tr>
+<td style="text-align: left;">
+<table style="text-align: left; box-sizing: border-box; border-collapse: collapse; border-spacing: 0px;" cellpadding="0" cellspacing="0">
+<tbody>
+<tr>
+<td style="text-align: left; vertical-align: top;">
+<table style="text-align: left; box-sizing: border-box; border-collapse: collapse; border-spacing: 0px;" cellpadding="0" cellspacing="0">
+<tbody>
+<tr>
+<td style="text-align: center;"><span style="font-family: Verdana; font-size: 12pt; color: rgb(32, 33, 36);"><img style="width: 100px; max-width: 100px; display: block;" width="100" src="https://res.cloudinary.com/armando3105/image/upload/v1591889348/Logotipo_0D1E40_m1y6wr.png"></span></td>
+</tr>
+<tr>
+<td style="text-align: left; height: 10px;"></td>
+</tr>
+<tr>
+<td style="text-align: center;">
+<table style="text-align: center; display: inline-block; box-sizing: border-box; border-collapse: collapse; border-spacing: 0px;" cellpadding="0" cellspacing="0">
+<tbody>
+<tr>
+<td style="text-align: center;"><span style="font-family: Verdana; font-size: 12px; color: rgb(255, 255, 255); line-height: 1; font-weight: 700;"><a style="color: rgb(255, 255, 255); display: inline-block; border-radius: 3px;" rel="noopener noreferrer" target="_blank" href="https://www.facebook.com/travelinkeo/"><img style="max-width: 728px;" src="https://res.cloudinary.com/armando3105/image/upload/v1591985939/facebook_syotzw.png"></a></span></td>
+<td style="text-align: center; width: 5px;"></td>
+<td style="text-align: center;"><span style="font-family: Verdana; font-size: 12px; color: rgb(255, 255, 255); line-height: 1; font-weight: 700;"><a style="color: rgb(255, 255, 255); display: inline-block; border-radius: 3px;" rel="noopener noreferrer" target="_blank" href="https://twitter.com/travelinkeo"><img style="max-width: 728px;" src="https://res.cloudinary.com/armando3105/image/upload/v1591985939/twitter_ee7nuv.png"></a></span></td>
+<td style="text-align: center; width: 5px;"></td>
+<td style="text-align: center;"><span style="font-family: Verdana; font-size: 12px; color: rgb(255, 255, 255); line-height: 1; font-weight: 700;"><a style="color: rgb(255, 255, 255); display: inline-block; border-radius: 3px;" rel="noopener noreferrer" target="_blank" href="https://www.instagram.com/travelinkeo/"><img style="max-width: 728px;" src="https://res.cloudinary.com/armando3105/image/upload/v1591985939/instagram_uoqh3h.png"></a></span></td>
+<td style="text-align: center; width: 5px;"></td>
+<td style="text-align: center;"><span style="font-family: Verdana; font-size: 12px; color: rgb(255, 255, 255); line-height: 1; font-weight: 700;"><a style="color: rgb(255, 255, 255); display: inline-block; border-radius: 3px;" rel="noopener noreferrer" target="_blank" href="https://wa.me/584123312314"><img style="max-width: 728px;" src="https://res.cloudinary.com/armando3105/image/upload/v1591985939/whatsapp_wsqcrw.png"></a></span></td>
+<td style="text-align: center; width: 5px;"></td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+<td style="text-align: left; width: 40px;"></td>
+<td style="text-align: left; vertical-align: middle;">
+<h3 style="text-align: left; margin: 0px; font-size: 18px; color: rgb(13, 30, 64);">
+<span style="font-family: Verdana;">Naidaly&nbsp;Cohen</span></h3>
+<p style="text-align: left; line-height: 22px; margin: 0px; font-size: 14px; color: rgb(13, 30, 64);">
+<span style="font-family: Verdana;">Director de Operaciones</span></p>
+<p style="text-align: left; line-height: 22px; margin: 0px; font-size: 14px; color: rgb(13, 30, 64);">
+<span style="font-family: Verdana;"><b>Travelinkeo</b></span></p>
+<p style="text-align: left; line-height: 22px; margin: 0px; font-size: 14px; color: rgb(13, 30, 64);">
+<span style="font-family: Verdana;">Marca Tu Destino</span></p>
+<table style="text-align: left; width: 283px; box-sizing: border-box; border-collapse: collapse; border-spacing: 0px;" cellpadding="0" cellspacing="0">
+<tbody>
+<tr>
+<td style="text-align: left; height: 10px;"></td>
+</tr>
+<tr>
+<td style="text-align: left; border-bottom: 1px solid rgb(3, 166, 166); color: rgb(3, 166, 166); width: 283px; height: 1px;">
+</td>
+</tr>
+<tr>
+<td style="text-align: left; height: 10px;"></td>
+</tr>
+</tbody>
+</table>
+<table style="text-align: left; box-sizing: border-box; border-collapse: collapse; border-spacing: 0px;" cellpadding="0" cellspacing="0">
+<tbody>
+<tr>
+<td style="text-align: left; vertical-align: middle; width: 30px;">
+<table style="text-align: left; box-sizing: border-box; border-collapse: collapse; border-spacing: 0px;" cellpadding="0" cellspacing="0">
+<tbody>
+<tr>
+<td style="text-align: left; vertical-align: bottom;">
+<div style="text-align: left; background-color: rgb(3, 166, 166); display: block; font-family: Verdana; font-size: 12pt; color: rgb(3, 166, 166);">
+<img style="width: 13px; display: block;" width="13" src="https://cdn2.hubspot.net/hubfs/53/tools/email-signature-generator/icons/phone-icon-2x.png"></div>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+<td style="text-align: left; color: rgb(13, 30, 64);">
+<div style="text-align: left; font-family: Verdana;"><span style="font-size: 12px; color: rgb(13, 30, 64);"><b>+58212 6317079</b></span><span style="font-size: 12pt;">&nbsp;|
+</span><span style="font-size: 12px; color: rgb(13, 30, 64);"><b>+58412 3312314</b></span></div>
+</td>
+</tr>
+<tr>
+<td style="text-align: left; vertical-align: middle; width: 30px;">
+<table style="text-align: left; box-sizing: border-box; border-collapse: collapse; border-spacing: 0px;" cellpadding="0" cellspacing="0">
+<tbody>
+<tr>
+<td style="text-align: left; vertical-align: bottom;">
+<div style="text-align: left; background-color: rgb(3, 166, 166); display: block; font-family: Verdana; font-size: 12pt; color: rgb(3, 166, 166);">
+<img style="width: 13px; display: block;" width="13" src="https://cdn2.hubspot.net/hubfs/53/tools/email-signature-generator/icons/email-icon-2x.png"></div>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+<td style="text-align: left;">
+<div style="text-align: left; font-family: Verdana; font-size: 12px; color: rgb(13, 30, 64);">
+<b><a style="color: rgb(13, 30, 64);" target="_blank" href="mailto:travelinkeo@gmail.com">travelinkeo@gmail.com</a></b></div>
+</td>
+</tr>
+<tr>
+<td style="text-align: left; vertical-align: middle; width: 30px;">
+<table style="text-align: left; box-sizing: border-box; border-collapse: collapse; border-spacing: 0px;" cellpadding="0" cellspacing="0">
+<tbody>
+<tr>
+<td style="text-align: left; vertical-align: bottom;">
+<div style="text-align: left; background-color: rgb(3, 166, 166); display: block; font-family: Verdana; font-size: 12pt; color: rgb(3, 166, 166);">
+<img style="width: 13px; display: block;" width="13" src="https://cdn2.hubspot.net/hubfs/53/tools/email-signature-generator/icons/link-icon-2x.png"></div>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+<td style="text-align: left;">
+<div style="text-align: left; font-family: Verdana; font-size: 12px; color: rgb(13, 30, 64);">
+<b><a style="color: rgb(13, 30, 64);" target="_blank" href="https://www.travelinkeo.com/">https://www.travelinkeo.com</a></b></div>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+<div style="font-family: Aptos, Aptos_EmbeddedFont, Aptos_MSFontService, Calibri, Helvetica, sans-serif; font-size: 11pt; color: rgb(0, 0, 0);">
+<br>
+</div>
+</div>
+<div id="appendonsend"></div>
+<hr style="display:inline-block;width:98%" tabindex="-1">
+<div id="divRplyFwdMsg" dir="ltr"><font face="Calibri, sans-serif" style="font-size:11pt" color="#000000"><b>De:</b> no-reply@accelya.com &lt;no-reply@accelya.com&gt;<br>
+<b>Enviado:</b> miércoles, 18 de febrero de 2026 8:03 p. m.<br>
+<b>Para:</b> travelinkeo@gmail.com &lt;travelinkeo@gmail.com&gt;<br>
+<b>Asunto:</b> Itinerario para localizador de reserva DS4GBW</font>
+<div>&nbsp;</div>
+</div>
+<div>
+<table style="padding:2px; margin:2px; background-color:White; border:solid 1px Gray; width:100%">
+<tbody>
+<tr>
+<td>
+<table style="width:100%">
+<tbody>
+<tr>
+<td style="width:70%"><span style="font-family:Arial,sans-serif; font-size:12px; color:#cb7921; font-weight:bold">Grupo Soporte Global INC&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;No. IATA de la agencia:&nbsp;10617390<br>
+</span><span style="font-family:Arial,sans-serif; font-size:12px; color:#cb7921"><br>
+<br>
+USA</span></td>
+<td align="right" style="width:30%"></td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<tr>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span id="x_lblAdditionalInformation">
+<pre style="font-family:Arial,sans-serif; font-size:12px"></pre>
+</span></td>
+</tr>
+<tr>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>
+<div style="width:50%; float:left"><span id="x_lblFlights" style="font-family:Arial,sans-serif; font-size:12px; color:#cb7921">Itinerario para localizador de reserva
+<b>DS4GBW</b></span><br>
+<span id="x_lblFlightSources" style="font-family:Arial,sans-serif; font-size:12px; color:#000">Copa Airlines Localizador de reserva AHNEQU<br>
+</span></div>
+</td>
+</tr>
+<tr>
+<td><span id="x_lblItinerary" class="x_gridtitle" style="font-family:Arial,sans-serif; font-size:12px; color:#cb7921; font-weight:bold">Reserva</span></td>
+</tr>
+<tr>
+<td>
+<table id="x_FlightTable" style="width:100%; border:solid 1px #828282; border-collapse:collapse">
+<tbody>
+<tr>
+<th rowspan="2" style="text-align:center; padding-left:3px; padding-right:3px; background-color:#839dc5; color:#101c78; font-family:Arial,sans-serif; font-size:12px; font-weight:bold">
+Línea aérea</th>
+<th rowspan="2" style="text-align:center; padding-left:3px; padding-right:3px; background-color:#839dc5; color:#101c78; font-family:Arial,sans-serif; font-size:12px; font-weight:bold; width:50px">
+N.º de vuelo</th>
+<th colspan="2" style="text-align:center; padding-left:3px; padding-right:3px; background-color:#839dc5; color:#101c78; font-family:Arial,sans-serif; font-size:12px; font-weight:bold">
+Salida</th>
+<th colspan="2" style="text-align:center; padding-left:3px; padding-right:3px; background-color:#839dc5; color:#101c78; font-family:Arial,sans-serif; font-size:12px; font-weight:bold">
+Llegada</th>
+<th rowspan="2" style="text-align:center; padding-left:3px; padding-right:3px; background-color:#839dc5; color:#101c78; font-family:Arial,sans-serif; font-size:12px; font-weight:bold; width:50px">
+Clase</th>
+<th rowspan="2" style="text-align:center; padding-left:3px; padding-right:3px; background-color:#839dc5; color:#101c78; font-family:Arial,sans-serif; font-size:12px; font-weight:bold">
+Cabina</th>
+<th rowspan="2" style="text-align:center; padding-left:3px; padding-right:3px; background-color:#839dc5; color:#101c78; font-family:Arial,sans-serif; font-size:12px; font-weight:bold">
+Comidas</th>
+</tr>
+<tr>
+<th style="text-align:center; padding-left:3px; padding-right:3px; background-color:#839dc5; color:#101c78; font-family:Arial,sans-serif; font-size:12px; background-color:#a2b3d0; border:solid 1px #828282">
+Aeropuerto</th>
+<th style="text-align:center; padding-left:3px; padding-right:3px; background-color:#839dc5; color:#101c78; font-family:Arial,sans-serif; font-size:12px; background-color:#a2b3d0; border:solid 1px #828282; white-space:nowrap">
+Fecha y Hora</th>
+<th style="text-align:center; padding-left:3px; padding-right:3px; background-color:#839dc5; color:#101c78; font-family:Arial,sans-serif; font-size:12px; background-color:#a2b3d0; border:solid 1px #828282">
+Aeropuerto</th>
+<th style="text-align:center; padding-left:3px; padding-right:3px; background-color:#839dc5; color:#101c78; font-family:Arial,sans-serif; font-size:12px; background-color:#a2b3d0; border:solid 1px #828282; white-space:nowrap">
+Fecha y Hora</th>
+</tr>
+<tr style="background-color:White">
+<td rowspan="2" style="text-align:center; padding-left:3px; padding-right:3px; border-top:solid 1px #828282; font-family:Arial,sans-serif; font-size:12px; max-width:150px">
+<img src="https://cm.farelogix.com/sprk/Public/Images/Providers/Air/CM.gif"><br>
+Copa Airlines</td>
+<td style="text-align:center; padding-left:3px; padding-right:3px; border-top:solid 1px #828282; font-family:Arial,sans-serif; font-size:12px">
+173</td>
+<td style="text-align:center; padding-left:3px; padding-right:3px; border-top:solid 1px #828282; font-family:Arial,sans-serif; font-size:12px; max-width:125px">
+Miami International Apt, US<br>
+Terminal:J</td>
+<td style="text-align:center; padding-left:3px; padding-right:3px; border-top:solid 1px #828282; font-family:Arial,sans-serif; font-size:12px">
+MI. 15ABR.<br>
+06:00 AM</td>
+<td style="text-align:center; padding-left:3px; padding-right:3px; border-top:solid 1px #828282; font-family:Arial,sans-serif; font-size:12px; max-width:125px">
+Panama City Tocumen International, PA</td>
+<td style="text-align:center; padding-left:3px; padding-right:3px; border-top:solid 1px #828282; font-family:Arial,sans-serif; font-size:12px">
+MI. 15ABR.<br>
+08:06 AM</td>
+<td style="text-align:center; padding-left:3px; padding-right:3px; border-top:solid 1px #828282; font-family:Arial,sans-serif; font-size:12px">
+L</td>
+<td style="text-align:center; padding-left:3px; padding-right:3px; border-top:solid 1px #828282; font-family:Arial,sans-serif; font-size:12px">
+</td>
+<td style="text-align:center; padding-left:3px; padding-right:3px; border-top:solid 1px #828282; font-family:Arial,sans-serif; font-size:12px">
+M</td>
+</tr>
+<tr style="background-color:White">
+<td colspan="8">
+<table style="border:solid 1px #828282; border-collapse:collapse; width:100%">
+<tbody>
+<tr>
+<td style="padding:1px; padding-left:5px; font-family:Arial,sans-serif; font-size:12px; font-size:10px; text-align:left; vertical-align:top">
+ROMER PEREIRA (ADT)</td>
+<td style="padding:1px; padding-left:5px; font-family:Arial,sans-serif; font-size:12px; font-size:10px; text-align:left; vertical-align:top">
+FF# Not Set</td>
+<td style="padding:1px; padding-left:5px; font-family:Arial,sans-serif; font-size:12px; font-size:10px; text-align:right; vertical-align:top">
+No Seat Assigned</td>
+</tr>
+<tr>
+<td colspan="3" style="padding:1px; padding-left:5px; font-family:Arial,sans-serif; font-size:12px; font-size:10px; text-align:left">
+&nbsp;</td>
+</tr>
+<tr>
+<td style="padding:1px; padding-left:5px; font-family:Arial,sans-serif; font-size:12px; font-size:10px; text-align:left; vertical-align:top">
+BELLALITH ROJAS (ADT)</td>
+<td style="padding:1px; padding-left:5px; font-family:Arial,sans-serif; font-size:12px; font-size:10px; text-align:left; vertical-align:top">
+FF# Not Set</td>
+<td style="padding:1px; padding-left:5px; font-family:Arial,sans-serif; font-size:12px; font-size:10px; text-align:right; vertical-align:top">
+No Seat Assigned</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<tr style="background-color:White">
+<td rowspan="2" style="text-align:center; padding-left:3px; padding-right:3px; border-top:solid 1px #828282; font-family:Arial,sans-serif; font-size:12px; max-width:150px">
+<img src="https://cm.farelogix.com/sprk/Public/Images/Providers/Air/CM.gif"><br>
+Copa Airlines</td>
+<td style="text-align:center; padding-left:3px; padding-right:3px; border-top:solid 1px #828282; font-family:Arial,sans-serif; font-size:12px">
+224</td>
+<td style="text-align:center; padding-left:3px; padding-right:3px; border-top:solid 1px #828282; font-family:Arial,sans-serif; font-size:12px; max-width:125px">
+Panama City Tocumen International, PA</td>
+<td style="text-align:center; padding-left:3px; padding-right:3px; border-top:solid 1px #828282; font-family:Arial,sans-serif; font-size:12px">
+MI. 15ABR.<br>
+09:03 AM</td>
+<td style="text-align:center; padding-left:3px; padding-right:3px; border-top:solid 1px #828282; font-family:Arial,sans-serif; font-size:12px; max-width:125px">
+Caracas, VE</td>
+<td style="text-align:center; padding-left:3px; padding-right:3px; border-top:solid 1px #828282; font-family:Arial,sans-serif; font-size:12px">
+MI. 15ABR.<br>
+12:22 PM</td>
+<td style="text-align:center; padding-left:3px; padding-right:3px; border-top:solid 1px #828282; font-family:Arial,sans-serif; font-size:12px">
+L</td>
+<td style="text-align:center; padding-left:3px; padding-right:3px; border-top:solid 1px #828282; font-family:Arial,sans-serif; font-size:12px">
+</td>
+<td style="text-align:center; padding-left:3px; padding-right:3px; border-top:solid 1px #828282; font-family:Arial,sans-serif; font-size:12px">
+M</td>
+</tr>
+<tr style="background-color:White">
+<td colspan="8">
+<table style="border:solid 1px #828282; border-collapse:collapse; width:100%">
+<tbody>
+<tr>
+<td style="padding:1px; padding-left:5px; font-family:Arial,sans-serif; font-size:12px; font-size:10px; text-align:left; vertical-align:top">
+ROMER PEREIRA (ADT)</td>
+<td style="padding:1px; padding-left:5px; font-family:Arial,sans-serif; font-size:12px; font-size:10px; text-align:left; vertical-align:top">
+FF# Not Set</td>
+<td style="padding:1px; padding-left:5px; font-family:Arial,sans-serif; font-size:12px; font-size:10px; text-align:right; vertical-align:top">
+No Seat Assigned</td>
+</tr>
+<tr>
+<td colspan="3" style="padding:1px; padding-left:5px; font-family:Arial,sans-serif; font-size:12px; font-size:10px; text-align:left">
+&nbsp;</td>
+</tr>
+<tr>
+<td style="padding:1px; padding-left:5px; font-family:Arial,sans-serif; font-size:12px; font-size:10px; text-align:left; vertical-align:top">
+BELLALITH ROJAS (ADT)</td>
+<td style="padding:1px; padding-left:5px; font-family:Arial,sans-serif; font-size:12px; font-size:10px; text-align:left; vertical-align:top">
+FF# Not Set</td>
+<td style="padding:1px; padding-left:5px; font-family:Arial,sans-serif; font-size:12px; font-size:10px; text-align:right; vertical-align:top">
+No Seat Assigned</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<tr>
+<td>&nbsp;<span style="font-family:Arial,sans-serif; font-size:12px; padding-left:5px; padding-top:10px; padding-bottom:10px; display:block; color:#cb7921; font-weight:bold">Información de la factura</span>
+<table style="width:100%; border:solid 1px #828282; border-collapse:collapse">
+<tbody>
+<tr>
+<th style="padding-left:5px; padding-right:5px; background-color:#839dc5; color:#101c78; font-family:Arial,sans-serif; font-size:12px; font-weight:bold; width:235px; text-align:left">
+ROMER PEREIRA (ADT)</th>
+<th style="padding-left:5px; padding-right:5px; background-color:#839dc5; color:#101c78; font-family:Arial,sans-serif; font-size:12px; font-weight:bold; width:200px; text-align:left">
+Número de documento</th>
+<th style="padding-left:5px; padding-right:5px; background-color:#839dc5; color:#101c78; font-family:Arial,sans-serif; font-size:12px; font-weight:bold; text-align:left">
+Fecha de emisión</th>
+<th style="padding-left:5px; padding-right:5px; background-color:#839dc5; color:#101c78; font-family:Arial,sans-serif; font-size:12px; font-weight:bold; text-align:right">
+</th>
+<th style="padding-left:5px; padding-right:5px; background-color:#839dc5; color:#101c78; font-family:Arial,sans-serif; font-size:12px; font-weight:bold; text-align:right">
+</th>
+<th style="padding-left:5px; padding-right:5px; background-color:#839dc5; color:#101c78; font-family:Arial,sans-serif; font-size:12px; font-weight:bold; text-align:right">
+</th>
+<th style="padding-left:5px; padding-right:5px; background-color:#839dc5; color:#101c78; font-family:Arial,sans-serif; font-size:12px; font-weight:bold; text-align:right">
+</th>
+</tr>
+<tr style="background-color:White">
+<td style="padding-left:3px; padding-right:3px; vertical-align:top; border-top:solid 1px #828282; font-family:Arial,sans-serif; font-size:12px; text-align:left">
+Billete electrónico</td>
+<td style="padding-left:3px; padding-right:3px; vertical-align:top; border-top:solid 1px #828282; font-family:Arial,sans-serif; font-size:12px; text-align:left">
+2307407728996</td>
+<td style="padding-left:3px; padding-right:3px; vertical-align:top; border-top:solid 1px #828282; font-family:Arial,sans-serif; font-size:12px; text-align:left">
+18FEB.26</td>
+<td style="padding-left:3px; padding-right:3px; vertical-align:top; border-top:solid 1px #828282; font-family:Arial,sans-serif; font-size:12px">
+</td>
+<td style="padding-left:3px; padding-right:3px; vertical-align:top; border-top:solid 1px #828282; font-family:Arial,sans-serif; font-size:12px">
+</td>
+<td style="padding-left:3px; padding-right:3px; vertical-align:top; border-top:solid 1px #828282; font-family:Arial,sans-serif; font-size:12px">
+</td>
+<td style="padding-left:3px; padding-right:3px; vertical-align:top; border-top:solid 1px #828282; font-family:Arial,sans-serif; font-size:12px">
+</td>
+</tr>
+<tr style="background-color:White">
+<td colspan="7" style="font-family:Arial,sans-serif; font-size:12px; text-align:left">
+<img style="border-width:0" src="https://cm.farelogix.com/sprk/Public/Images/relation.png">&nbsp;&nbsp;Endosos:&nbsp;&nbsp;NON REF/NONEND/NONTRANS//CHANGES APPLY/COPA AIRLINES 98-0105127</td>
+</tr>
+</tbody>
+</table>
+<span style="font-family:Arial,sans-serif; font-size:12px; padding-top:5px; padding-bottom:5px; display:block">&nbsp;</span>
+<table style="width:100%; border:solid 1px #828282; border-collapse:collapse">
+<tbody>
+<tr>
+<th style="padding-left:5px; padding-right:5px; background-color:#839dc5; color:#101c78; font-family:Arial,sans-serif; font-size:12px; font-weight:bold; width:235px; text-align:left">
+BELLALITH ROJAS (ADT)</th>
+<th style="padding-left:5px; padding-right:5px; background-color:#839dc5; color:#101c78; font-family:Arial,sans-serif; font-size:12px; font-weight:bold; width:200px; text-align:left">
+Número de documento</th>
+<th style="padding-left:5px; padding-right:5px; background-color:#839dc5; color:#101c78; font-family:Arial,sans-serif; font-size:12px; font-weight:bold; text-align:left">
+Fecha de emisión</th>
+<th style="padding-left:5px; padding-right:5px; background-color:#839dc5; color:#101c78; font-family:Arial,sans-serif; font-size:12px; font-weight:bold; text-align:right">
+</th>
+<th style="padding-left:5px; padding-right:5px; background-color:#839dc5; color:#101c78; font-family:Arial,sans-serif; font-size:12px; font-weight:bold; text-align:right">
+</th>
+<th style="padding-left:5px; padding-right:5px; background-color:#839dc5; color:#101c78; font-family:Arial,sans-serif; font-size:12px; font-weight:bold; text-align:right">
+</th>
+<th style="padding-left:5px; padding-right:5px; background-color:#839dc5; color:#101c78; font-family:Arial,sans-serif; font-size:12px; font-weight:bold; text-align:right">
+</th>
+</tr>
+<tr style="background-color:White">
+<td style="padding-left:3px; padding-right:3px; vertical-align:top; border-top:solid 1px #828282; font-family:Arial,sans-serif; font-size:12px; text-align:left">
+Billete electrónico</td>
+<td style="padding-left:3px; padding-right:3px; vertical-align:top; border-top:solid 1px #828282; font-family:Arial,sans-serif; font-size:12px; text-align:left">
+2307407728999</td>
+<td style="padding-left:3px; padding-right:3px; vertical-align:top; border-top:solid 1px #828282; font-family:Arial,sans-serif; font-size:12px; text-align:left">
+18FEB.26</td>
+<td style="padding-left:3px; padding-right:3px; vertical-align:top; border-top:solid 1px #828282; font-family:Arial,sans-serif; font-size:12px">
+</td>
+<td style="padding-left:3px; padding-right:3px; vertical-align:top; border-top:solid 1px #828282; font-family:Arial,sans-serif; font-size:12px">
+</td>
+<td style="padding-left:3px; padding-right:3px; vertical-align:top; border-top:solid 1px #828282; font-family:Arial,sans-serif; font-size:12px">
+</td>
+<td style="padding-left:3px; padding-right:3px; vertical-align:top; border-top:solid 1px #828282; font-family:Arial,sans-serif; font-size:12px">
+</td>
+</tr>
+<tr style="background-color:White">
+<td colspan="7" style="font-family:Arial,sans-serif; font-size:12px; text-align:left">
+<img style="border-width:0" src="https://cm.farelogix.com/sprk/Public/Images/relation.png">&nbsp;&nbsp;Endosos:&nbsp;&nbsp;NON REF/NONEND/NONTRANS//CHANGES APPLY/COPA AIRLINES 98-0105127</td>
+</tr>
+</tbody>
+</table>
+<span style="font-family:Arial,sans-serif; font-size:12px; padding-top:5px; padding-bottom:5px; display:block">&nbsp;</span><span style="font-family:Arial,sans-serif; font-size:12px; padding-left:5px; padding-top:10px; padding-bottom:10px; display:block; color:#cb7921; font-weight:bold">Aviso
+ de protección de datos</span>
+<table style="width:100%; border:solid 1px #828282; border-collapse:collapse">
+<tbody>
+<tr>
+<td style="padding-left:3px; padding-right:3px; vertical-align:top; border-top:solid 1px #828282; font-family:Arial,sans-serif; font-size:12px; text-align:left">
+Comunicación sobre protección de datos: sus datos personales se procesarán de acuerdo con la política de privacidad aplicable del operador y, si su reserva se realiza mediante un proveedor de sistema de reserva (&quot;GDS&quot;), conforme a su política de privacidad,
+ que estará disponible en http://www.iatatravelcenter.com/privacy, o en el operador o GDS o TSP directamente. Debe leer esta documentación, que se aplica a su reserva y especifica, por ejemplo, cómo se recopilan, almacenan, utilizan, revelan y transfieren sus
+ datos personales.</td>
+</tr>
+<tr>
+<td style="padding-left:3px; padding-right:3px; vertical-align:top; border-top:solid 1px #828282; font-family:Arial,sans-serif; font-size:12px; text-align:left">
+Data Protection Notice: Your personal data will be processed in accordance with the applicable carrier's privacy policy and, if your booking is made via a reservation system provider (&quot;GDS&quot; ), with its privacy policy. These are available at http://www.iatatravelcenter.com/privacy
+ or from the carrier, GDS or TSP directly. You should read this documentation, which applies to your booking and specifies, for example, how your personal data is collected, stored, used, disclosed and transferred.</td>
+</tr>
+</tbody>
+</table>
+<span style="font-family:Arial,sans-serif; font-size:12px; padding-top:5px; padding-bottom:5px; display:block">&nbsp;</span></td>
+</tr>
+<tr>
+<td id="x_lhgInfo"><span class="x_gridtitle"></span></td>
+</tr>
+<tr>
+<td id="x_ifBInfo" style="font-family:Arial,sans-serif; font-size:12px; color:#000">
+Para obtener información y realizar el cálculo automático de la franquicia de equipaje y cargos para este itinerario de conformidad con las reglas correspondientes de la línea aérea, visite
+<span class="x_gridtitle"></span><a href="http://www.iflybags.com/bagservice.aspx?trace=hbohorquez&amp;fn=2&amp;ar1=CM&amp;cos1=L&amp;fbc1=LLA9OZ2S&amp;flt1=173&amp;dc1=MIA&amp;dd1=2026-04-15&amp;dt1=06:00&amp;ac1=PTY&amp;ad1=2026-04-15&amp;at1=08:06&amp;ar2=CM&amp;cos2=L&amp;fbc2=LLA9OZ2S&amp;flt2=224&amp;dc2=PTY&amp;dd2=2026-04-15&amp;dt2=09:03&amp;ac2=CCS&amp;ad2=2026-04-15&amp;at2=12:22&amp;td=2026-02-18&amp;crnc=USD&amp;pos=MIA&amp;tn=1&amp;p1=ADT">www.iflybags.com</a></td>
+</tr>
+<tr>
+<td></td>
+</tr>
+<tr>
+<td><img id="x_imgFooter"></td>
+</tr>
+</tbody>
+</table>
+</div>
+</body>
+</html>

@@ -11,7 +11,10 @@ import logging
 
 # Importar el servicio de parseo y los modelos de Django
 from ..services.ticket_parser_service import orquestar_parseo_de_boleto, generar_pdf_en_memoria
-from ..models.boletos import BoletoImportado # CORREGIDO: Import desde el submódulo correcto
+from ..services.venta_automation import VentaAutomationService # AUTOMATION NIVEL 4
+from apps.finance.services.invoice_service import InvoiceService
+from apps.bookings.models import BoletoImportado, Venta
+from apps.crm.models import Cliente
 
 from django.conf import settings
 
@@ -38,73 +41,181 @@ class BoletoUploadAPIView(APIView):
             )
 
         # 1. Orquestar el parseo del boleto usando el servicio
-        datos_parseados, mensaje = orquestar_parseo_de_boleto(archivo_subido)
+        # AHORA retorna una LISTA de dicts (Multi-Pax support)
+        datos_parseados_list, mensaje = orquestar_parseo_de_boleto(archivo_subido)
         
-        if not datos_parseados:
+        if not datos_parseados_list:
             logger.error(f"Fallo en el parseo del archivo '{archivo_subido.name}': {mensaje}")
             return Response(
                 {"error": mensaje},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # 2. Guardar el boleto original y los datos parseados en el modelo
-        try:
-            boleto_importado = BoletoImportado.objects.create(
-                archivo_boleto=archivo_subido, # CORREGIDO: Nombre del campo
-                datos_parseados=datos_parseados,
-                # subido_por=request.user # ELIMINADO: El modelo no tiene este campo
-            )
-            
-        except Exception as e:
-            logger.exception(f"Error al guardar el boleto '{archivo_subido.name}' en la base de datos.")
-            return Response(
-                {"error": f"Error al guardar en la base de datos: {str(e)}"},
+        # BACKWARD COMPATIBILITY: Si retorna dict único (por error o legacy), lo envolvemos
+        if isinstance(datos_parseados_list, dict):
+            datos_parseados_list = [datos_parseados_list]
+
+        logger.info(f"📋 Procesando {len(datos_parseados_list)} boletos extraídos del archivo.")
+        
+        boletos_creados_ids = []
+        resultados_json = []
+
+        # 2. Iterar sobre cada ticket extraído
+        for idx, datos_parseados in enumerate(datos_parseados_list):
+            try:
+                # IMPORTANTE: Resetear el puntero del archivo al inicio para cada guardado?
+                # Django ImageField/FileField maneja esto, pero para seguridad:
+                if idx > 0: archivo_subido.seek(0) 
+                
+                # Crear copia del archivo para cada registro (opcional, o referenciar el mismo)
+                # Django al guardar duplica el archivo físico si no se maneja con cuidado.
+                # Para MVP: Dejar que Django maneje el archivo.
+                
+                boleto_importado = BoletoImportado.objects.create(
+                    archivo_boleto=archivo_subido, 
+                    datos_parseados=datos_parseados,
+                )
+                
+                # Asignar agencia
+                agencia_usuario = None
+                if hasattr(request.user, 'agencias'):
+                    usuario_agencia = request.user.agencias.filter(activo=True).first()
+                    if usuario_agencia:
+                        agencia_usuario = usuario_agencia.agencia
+                        boleto_importado.agencia = agencia_usuario
+                        boleto_importado.save()
+
+                # --- AUTOMATION START (NIVEL 4) ---
+                try:
+                    proveedor_id = request.data.get('proveedor_id')
+                    if proveedor_id in ['undefined', 'null', '']:
+                        proveedor_id = None
+                    
+                    if agencia_usuario:
+                        logger.info(f"Iniciando automatización de venta para boleto {boleto_importado.id_boleto_importado} (Pax: {idx+1})")
+                        venta_creada = VentaAutomationService.crear_venta_desde_parser(
+                            datos_parseados, 
+                            agencia=agencia_usuario, 
+                            usuario=request.user,
+                            proveedor_id=proveedor_id
+                        )
+                        boleto_importado.venta_asociada = venta_creada
+                        boleto_importado.save()
+                        logger.info(f"✅ Venta {venta_creada.id_venta} creada automáticamente")
+                except Exception as e_auto:
+                    logger.error(f"⚠️ Error en automatización de venta: {e_auto}")
+                # --- AUTOMATION END ---
+                
+                # 3. Generar PDF
+                try:
+                    # Usamos la nueva lógica centralizada en ticket_parser_service para PDF
+                    service._generar_pdf_boleto(boleto_importado, datos_parseados)
+                    logger.info(f"✅ PDF procesado para boleto {boleto_importado.id_boleto_importado}")
+                except Exception as e_pdf:
+                    logger.warning(f"❌ Error generando PDF para boleto {boleto_importado.id_boleto_importado}: {e_pdf}")
+
+                logger.info(f"-> Boleto {boleto_importado.id_boleto_importado} procesado exitosamente.")
+                
+                boletos_creados_ids.append(boleto_importado.id_boleto_importado)
+                resultados_json.append(datos_parseados)
+
+            except Exception as e_loop:
+                logger.error(f"❌ Error procesando ticket index {idx}: {e_loop}")
+                continue
+
+        if not boletos_creados_ids:
+             return Response(
+                {"error": "No se pudieron crear boletos (Error interno en loop)."},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
-            
-        # 3. (Opcional) Generar el PDF final y guardarlo en el modelo
-        try:
-            from django.core.files.storage import default_storage
-            
-            logger.info(f"Iniciando generación de PDF para boleto {boleto_importado.id_boleto_importado}")
-            logger.info(f"Storage backend: {default_storage.__class__.__name__}")
-            logger.info(f"USE_CLOUDINARY: {getattr(settings, 'USE_CLOUDINARY', False)}")
-            
-            plantilla_path = os.path.join(settings.BASE_DIR, 'core', 'templates', 'core', 'ticket_template_sabre.html')
-            pdf_bytes = generar_pdf_en_memoria(datos_parseados, plantilla_path)
-            
-            if pdf_bytes:
-                logger.info(f"PDF generado, tamaño: {len(pdf_bytes)} bytes")
-                numero_boleto = datos_parseados.get("reserva", {}).get("numero_boleto", "SIN_BOLETO")
-                nombre_archivo_generado = f"Boleto_{numero_boleto}_{boleto_importado.id_boleto_importado}.pdf"
-                logger.info(f"Nombre de archivo: {nombre_archivo_generado}")
-                
-                # CORREGIDO: Nombre del campo 'archivo_pdf_generado'
-                boleto_importado.archivo_pdf_generado.save(nombre_archivo_generado, ContentFile(pdf_bytes), save=True)
-                
-                # Verificar que se guardó
-                if boleto_importado.archivo_pdf_generado:
-                    url = boleto_importado.archivo_pdf_generado.url
-                    logger.info(f"✅ PDF guardado exitosamente")
-                    logger.info(f"   Ruta: {boleto_importado.archivo_pdf_generado.name}")
-                    logger.info(f"   URL: {url}")
-                    logger.info(f"   Storage: {boleto_importado.archivo_pdf_generado.storage.__class__.__name__}")
-                else:
-                    logger.warning("⚠️ archivo_pdf_generado está vacío después de guardar")
-        except Exception as e:
-            logger.warning(f"❌ No se pudo generar el PDF para el boleto {boleto_importado.id_boleto_importado}, pero el parseo fue exitoso. Error: {str(e)}")
-            import traceback
-            logger.error(traceback.format_exc())
 
-
-        logger.info(f"-> Boleto {boleto_importado.id_boleto_importado} procesado y guardado exitosamente.")
-
-        # 4. Devolver una respuesta exitosa con los datos extraídos
+        # 4. Devolver una respuesta exitosa
+        # Nota: El frontend puede esperar un objeto singular si antes lo hacía.
+        # Si devolvemos 'datos_extraidos' como lista, el frontend debe estar preparado?
+        # Asumimos que el frontend muestra el último o maneja la lista.
+        # Para compatibilidad, devolvemos el PRIMERO en 'datos_extraidos' y añadimos 'todos'
+        
         return Response(
             {
-                "mensaje": "Boleto procesado y guardado con éxito.",
-                "id_boleto_importado": boleto_importado.id_boleto_importado,
-                "datos_extraidos": datos_parseados
+                "mensaje": f"Se han procesado {len(boletos_creados_ids)} boletos con éxito.",
+                "id_boleto_importado": boletos_creados_ids[0], # ID del primero para compatibilidad
+                "datos_extraidos": resultados_json[0], # Datos del primero para compatibilidad
+                "boletos_creados": boletos_creados_ids, # Lista completa de IDs
+                "todos_datos_extraidos": resultados_json # Lista completa de datos
             },
             status=status.HTTP_201_CREATED
         )
+
+class BoletoRetryParseAPIView(APIView):
+    """
+    Fuerza el re-parseo de un boleto importado existente.
+    Útil si el primer intento falló o si se ha mejorado el motor de parseo.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, pk):
+        try:
+            from ..services.ticket_parser_service import TicketParserService
+            service = TicketParserService()
+            
+            # El servicio se encarga de re-extraer texto, re-parsear,
+            # actualizar campos y re-generar PDF.
+            resultado = service.procesar_boleto(pk)
+            
+            if resultado:
+                return Response({
+                    "mensaje": "Boleto re-procesado con éxito.",
+                    "id_boleto_importado": pk,
+                    "resultado": str(resultado) # Puede ser la Venta o el dict de Review Required
+                }, status=status.HTTP_200_OK)
+            else:
+                return Response({
+                    "error": "El re-procesamiento falló. Revise el log de parseo del boleto."
+                }, status=status.HTTP_400_BAD_REQUEST)
+        except BoletoImportado.DoesNotExist:
+            return Response({"error": "Boleto no encontrado."}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class BoletoMassActionAPIView(APIView):
+    """
+    Asignación masiva de cliente a boletos huérfanos y facturación.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        boleto_ids = request.data.get('boleto_ids', [])
+        cliente_id = request.data.get('cliente_id')
+        
+        if not boleto_ids or not cliente_id:
+            return Response({"error": "Faltan boleto_ids o cliente_id"}, status=400)
+            
+        try:
+            cliente = Cliente.objects.get(pk=cliente_id)
+            queryset = BoletoImportado.objects.filter(pk__in=boleto_ids)
+            results = InvoiceService.mass_assign_and_invoice(queryset, cliente)
+            return Response(results, status=200)
+        except Cliente.DoesNotExist:
+            return Response({"error": "Cliente no encontrado"}, status=404)
+        except Exception as e:
+            return Response({"error": str(e)}, status=500)
+
+class VentaDoubleInvoiceAPIView(APIView):
+    """
+    Genera doble facturación para una venta específica.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, pk):
+        try:
+            venta = Venta.objects.get(pk=pk)
+            f_tercero, f_propia = InvoiceService.generate_double_invoice(venta)
+            return Response({
+                "factura_tercero": f_tercero.pk if f_tercero else None,
+                "factura_propia": f_propia.pk if f_propia else None,
+                "mensaje": "Facturación generada con éxito"
+            }, status=200)
+        except Venta.DoesNotExist:
+            return Response({"error": "Venta no encontrada"}, status=404)
+        except Exception as e:
+            return Response({"error": str(e)}, status=500)

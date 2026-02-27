@@ -1,4 +1,4 @@
-from core.models.ventas import Venta  # Asumiendo la ruta correcta al modelo Venta
+from apps.bookings.models import Venta
 
 
 def consultar_estado_reserva(pnr: str) -> dict:

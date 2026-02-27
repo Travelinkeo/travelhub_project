@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "VIEIRA MIRANDA/ANGEL",
+  "CODIGO_IDENTIFICACION": "19474023",
+  "SOLO_NOMBRE_PASAJERO": "ANGEL",
+  "NUMERO_DE_BOLETO": "7420307350363",
+  "FECHA_DE_EMISION": "24 APR 2025 12:55",
+  "AGENTE_EMISOR": "PTYS3651X",
+  "CODIGO_RESERVA": "POUBVO",
+  "SOLO_CODIGO_RESERVA": "POUBVO",
+  "NOMBRE_AEROLINEA": "AVIOR AIRLINES C.A",
+  "DIRECCION_AEROLINEA": null,
+  "vuelos": [
+    {
+      "aerolinea": "9V",
+      "numero_vuelo": "062",
+      "origen": "CARACAS",
+      "fecha_salida": "26APR 2025",
+      "hora_salida": "0800",
+      "destino": "PUERTO ORDAZ",
+      "hora_llegada": "0900",
+      "cabina": "Económica",
+      "clase": "M",
+      "localizador_aerolinea": "POUBVO"
+    }
+  ],
+  "TARIFA": "22.25",
+  "IMPUESTOS": "57.75",
+  "TOTAL": "80.00",
+  "SOURCE_SYSTEM": "AI_KIU",
+  "es_remision": false,
+  "NOMBRE DEL PASAJERO": "VIEIRA MIRANDA/ANGEL",
+  "CODIGO IDENTIFICACION": "19474023",
+  "SOLO NOMBRE PASAJERO": "ANGEL",
+  "NUMERO DE BOLETO": "7420307350363",
+  "FECHA DE EMISION": "24 APR 2025 12:55",
+  "AGENTE EMISOR": "PTYS3651X",
+  "CODIGO RESERVA": "POUBVO",
+  "SOLO CODIGO RESERVA": "POUBVO",
+  "NOMBRE AEROLINEA": "AVIOR AIRLINES C.A",
+  "DIRECCION AEROLINEA": null,
+  "SOURCE SYSTEM": "AI_KIU",
+  "es remision": false
+}

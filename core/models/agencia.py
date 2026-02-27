@@ -46,6 +46,17 @@ class Agencia(models.Model):
     zona_horaria = models.CharField(max_length=50, default="America/Caracas")
     idioma = models.CharField(max_length=5, default="es", help_text="Código ISO de idioma")
     
+    # Configuración SaaS (Multi-tenant)
+    configuracion_correo = models.JSONField(default=dict, blank=True, help_text="Configuración SMTP: EMAIL_HOST, EMAIL_PORT, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD")
+    
+    # Mailbot Monitor (SaaS)
+    email_monitor_user = models.EmailField(blank=True, null=True, help_text="Email a monitorear para boletos (Gmail)")
+    email_monitor_password = models.CharField(max_length=255, blank=True, null=True, help_text="Contraseña de Aplicación de Google (o Token)")
+    email_monitor_active = models.BooleanField(default=False, help_text="Activar monitoreo automático")
+    email_monitor_last_check = models.DateTimeField(blank=True, null=True, help_text="Último chequeo realizado")
+    
+    configuracion_api = models.JSONField(default=dict, blank=True, help_text="Claves de API: WHATSAPP_TOKEN, BCV_TOKEN, etc.")
+    
     # Facturación Venezuela - Imprenta Digital
     imprenta_digital_nombre = models.CharField(max_length=200, blank=True, help_text="Razón Social de la Imprenta Digital Autorizada")
     imprenta_digital_rif = models.CharField(max_length=20, blank=True, help_text="RIF de la Imprenta Digital")
@@ -72,6 +83,15 @@ class Agencia(models.Model):
     # Stripe
     stripe_customer_id = models.CharField(max_length=100, blank=True)
     stripe_subscription_id = models.CharField(max_length=100, blank=True)
+    
+    STATUS_CHOICES = [
+        ('active', 'Activo'),
+        ('past_due', 'Pago Pendiente'),
+        ('canceled', 'Cancelado'),
+        ('incomplete', 'Incompleto'),
+    ]
+    plan_status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
+    subscription_end_date = models.DateTimeField(null=True, blank=True)
     
     # Flags especiales
     es_demo = models.BooleanField(default=False, help_text="Agencia de demostración")
@@ -135,6 +155,7 @@ class UsuarioAgencia(models.Model):
     rol = models.CharField(max_length=20, choices=ROLES, default='vendedor')
     activo = models.BooleanField(default=True)
     fecha_asignacion = models.DateTimeField(auto_now_add=True)
+    telegram_chat_id = models.CharField(max_length=50, blank=True, null=True, help_text="ID de chat de Telegram para notificaciones")
     
     class Meta:
         verbose_name = "Usuario de Agencia"

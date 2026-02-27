@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "GARCIA GOMEZ/CAROLA YESIRE",
+  "CODIGO_IDENTIFICACION": "172724261",
+  "SOLO_NOMBRE_PASAJERO": "CAROLA YESIRE",
+  "NUMERO_DE_BOLETO": "4020300032238",
+  "FECHA_DE_EMISION": "24 APR 2025 14:49",
+  "AGENTE_EMISOR": "MIAO08217",
+  "CODIGO_RESERVA": "DKYMWA",
+  "SOLO_CODIGO_RESERVA": "DKYMWA",
+  "NOMBRE_AEROLINEA": "GLOBAL",
+  "DIRECCION_AEROLINEA": null,
+  "vuelos": [
+    {
+      "aerolinea": "G6",
+      "numero_vuelo": "200",
+      "origen": "MIAMI-INTL AIRPORT",
+      "fecha_salida": "30APR 2025",
+      "hora_salida": "0730",
+      "destino": "CURACAO",
+      "hora_llegada": "1030",
+      "cabina": "Económica",
+      "clase": "X",
+      "localizador_aerolinea": "DKYMWA"
+    }
+  ],
+  "TARIFA": "157.50",
+  "IMPUESTOS": "240.50",
+  "TOTAL": "75.50",
+  "SOURCE_SYSTEM": "AI_KIU",
+  "es_remision": true,
+  "NOMBRE DEL PASAJERO": "GARCIA GOMEZ/CAROLA YESIRE",
+  "CODIGO IDENTIFICACION": "172724261",
+  "SOLO NOMBRE PASAJERO": "CAROLA YESIRE",
+  "NUMERO DE BOLETO": "4020300032238",
+  "FECHA DE EMISION": "24 APR 2025 14:49",
+  "AGENTE EMISOR": "MIAO08217",
+  "CODIGO RESERVA": "DKYMWA",
+  "SOLO CODIGO RESERVA": "DKYMWA",
+  "NOMBRE AEROLINEA": "GLOBAL",
+  "DIRECCION AEROLINEA": null,
+  "SOURCE SYSTEM": "AI_KIU",
+  "es remision": true
+}

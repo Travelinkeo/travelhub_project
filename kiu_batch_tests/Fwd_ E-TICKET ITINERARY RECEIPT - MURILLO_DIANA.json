@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "MURILLO/DIANA",
+  "CODIGO_IDENTIFICACION": "84605396",
+  "SOLO_NOMBRE_PASAJERO": "DIANA",
+  "NUMERO_DE_BOLETO": "7420200050867",
+  "FECHA_DE_EMISION": "29 JAN 2026 16:30",
+  "AGENTE_EMISOR": "BLA009VWW",
+  "CODIGO_RESERVA": "HWXYUZ",
+  "SOLO_CODIGO_RESERVA": "HWXYUZ",
+  "NOMBRE_AEROLINEA": "AVIOR AIRLINES C.A",
+  "DIRECCION_AEROLINEA": null,
+  "vuelos": [
+    {
+      "aerolinea": "9V",
+      "numero_vuelo": "062",
+      "origen": "CARACAS",
+      "fecha_salida": "2FEB 2026",
+      "hora_salida": "1700",
+      "destino": "PUERTO ORDAZ",
+      "hora_llegada": "1800",
+      "cabina": "Económica",
+      "clase": "T",
+      "localizador_aerolinea": "HWXYUZ"
+    }
+  ],
+  "TARIFA": "8035.30",
+  "IMPUESTOS": "23422.30",
+  "TOTAL": "31457.60",
+  "SOURCE_SYSTEM": "AI_KIU",
+  "es_remision": false,
+  "NOMBRE DEL PASAJERO": "MURILLO/DIANA",
+  "CODIGO IDENTIFICACION": "84605396",
+  "SOLO NOMBRE PASAJERO": "DIANA",
+  "NUMERO DE BOLETO": "7420200050867",
+  "FECHA DE EMISION": "29 JAN 2026 16:30",
+  "AGENTE EMISOR": "BLA009VWW",
+  "CODIGO RESERVA": "HWXYUZ",
+  "SOLO CODIGO RESERVA": "HWXYUZ",
+  "NOMBRE AEROLINEA": "AVIOR AIRLINES C.A",
+  "DIRECCION AEROLINEA": null,
+  "SOURCE SYSTEM": "AI_KIU",
+  "es remision": false
+}

@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "RIVAS/WOLFGANG ROLAN",
+  "CODIGO_IDENTIFICACION": "5827627",
+  "SOLO_NOMBRE_PASAJERO": "WOLFGANG ROLAN",
+  "NUMERO_DE_BOLETO": "3640211550165",
+  "FECHA_DE_EMISION": "05 AUG 2025 10:42",
+  "AGENTE_EMISOR": "CCS00WWWW",
+  "CODIGO_RESERVA": "ZCJCNN",
+  "SOLO_CODIGO_RESERVA": "ZCJCNN",
+  "NOMBRE_AEROLINEA": "RUTAS AEREAS DE VENEZUELA RAV,SA",
+  "DIRECCION_AEROLINEA": null,
+  "vuelos": [
+    {
+      "aerolinea": "WW",
+      "numero_vuelo": "223",
+      "origen": "CARACAS",
+      "fecha_salida": "6AUG 2025",
+      "hora_salida": "1230",
+      "destino": "MARACAIBO",
+      "hora_llegada": "1330",
+      "cabina": "Económica",
+      "clase": "R",
+      "localizador_aerolinea": "ZCJCNN"
+    }
+  ],
+  "TARIFA": "9649.11",
+  "IMPUESTOS": "1789.97",
+  "TOTAL": "11439.08",
+  "SOURCE_SYSTEM": "AI_KIU",
+  "es_remision": false,
+  "NOMBRE DEL PASAJERO": "RIVAS/WOLFGANG ROLAN",
+  "CODIGO IDENTIFICACION": "5827627",
+  "SOLO NOMBRE PASAJERO": "WOLFGANG ROLAN",
+  "NUMERO DE BOLETO": "3640211550165",
+  "FECHA DE EMISION": "05 AUG 2025 10:42",
+  "AGENTE EMISOR": "CCS00WWWW",
+  "CODIGO RESERVA": "ZCJCNN",
+  "SOLO CODIGO RESERVA": "ZCJCNN",
+  "NOMBRE AEROLINEA": "RUTAS AEREAS DE VENEZUELA RAV,SA",
+  "DIRECCION AEROLINEA": null,
+  "SOURCE SYSTEM": "AI_KIU",
+  "es remision": false
+}

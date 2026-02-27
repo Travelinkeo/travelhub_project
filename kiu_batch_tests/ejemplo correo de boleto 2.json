@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "GARCIA RONDON/ADRIANA BEATRIZ",
+  "CODIGO_IDENTIFICACION": "22017852",
+  "SOLO_NOMBRE_PASAJERO": "ADRIANA BEATRIZ",
+  "NUMERO_DE_BOLETO": "0520330525436",
+  "FECHA_DE_EMISION": "19 FEB 2025 14:56",
+  "AGENTE_EMISOR": "PTYS3651X",
+  "CODIGO_RESERVA": "MQFARQ",
+  "SOLO_CODIGO_RESERVA": "MQFARQ",
+  "NOMBRE_AEROLINEA": "AEROLINEAS ESTELAR LATINOAMERICA C.A.",
+  "DIRECCION_AEROLINEA": null,
+  "vuelos": [
+    {
+      "aerolinea": "ES",
+      "numero_vuelo": "8311",
+      "origen": "CARACAS",
+      "fecha_salida": "22FEB 2025",
+      "hora_salida": "1130",
+      "destino": "PORLAMAR",
+      "hora_llegada": "1230",
+      "cabina": "Económica",
+      "clase": "U",
+      "localizador_aerolinea": "MQFARQ"
+    }
+  ],
+  "TARIFA": "24.78",
+  "IMPUESTOS": "10.23",
+  "TOTAL": "35.01",
+  "SOURCE_SYSTEM": "AI_KIU",
+  "es_remision": false,
+  "NOMBRE DEL PASAJERO": "GARCIA RONDON/ADRIANA BEATRIZ",
+  "CODIGO IDENTIFICACION": "22017852",
+  "SOLO NOMBRE PASAJERO": "ADRIANA BEATRIZ",
+  "NUMERO DE BOLETO": "0520330525436",
+  "FECHA DE EMISION": "19 FEB 2025 14:56",
+  "AGENTE EMISOR": "PTYS3651X",
+  "CODIGO RESERVA": "MQFARQ",
+  "SOLO CODIGO RESERVA": "MQFARQ",
+  "NOMBRE AEROLINEA": "AEROLINEAS ESTELAR LATINOAMERICA C.A.",
+  "DIRECCION AEROLINEA": null,
+  "SOURCE SYSTEM": "AI_KIU",
+  "es remision": false
+}

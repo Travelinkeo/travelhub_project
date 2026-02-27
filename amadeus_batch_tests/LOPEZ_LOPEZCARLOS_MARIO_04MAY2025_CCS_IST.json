@@ -1,0 +1,66 @@
+{
+  "SOURCE_SYSTEM": "Amadeus",
+  "NOMBRE DEL PASAJERO": "Carlos Mario Lopez Lopez",
+  "CODIGO IDENTIFICACION": "No encontrado",
+  "SOLO NOMBRE PASAJERO": "Carlos",
+  "NUMERO DE BOLETO": "2357283236572",
+  "FECHA DE EMISION": "23 April 25",
+  "AGENTE EMISOR": "10617390",
+  "CODIGO RESERVA": "22Q5VO",
+  "SOLO CODIGO RESERVA": "22Q5VO",
+  "NOMBRE AEROLINEA": "TK",
+  "DIRECCION AEROLINEA": "No encontrado",
+  "vuelos": [
+    {
+      "numero_vuelo": "TK224",
+      "aerolinea": "TK",
+      "fecha_salida": "04 May",
+      "hora_salida": "10:00",
+      "origen": "SIMON BOLIVAR INTL CARACAS",
+      "hora_llegada": "04:50",
+      "destino": "ISTANBUL AIRPORT ISTANBUL",
+      "clase": "Q"
+    },
+    {
+      "fecha_salida": "07 May",
+      "hora_salida": "01:25",
+      "origen": "ISTANBUL AIRPORT ISTANBUL",
+      "hora_llegada": "16:45",
+      "destino": "PUDONG INTL SHANGHAI Terminal : 2",
+      "clase": "Q"
+    },
+    {
+      "fecha_salida": "18 May",
+      "hora_salida": "22:25",
+      "origen": "PUDONG INTL SHANGHAI Terminal : 2",
+      "hora_llegada": "05:20",
+      "destino": "ISTANBUL AIRPORT ISTANBUL",
+      "clase": "E"
+    },
+    {
+      "numero_vuelo": "TK195",
+      "aerolinea": "TK",
+      "fecha_salida": "20 May",
+      "hora_salida": "01:50",
+      "origen": "ISTANBUL AIRPORT ISTANBUL",
+      "hora_llegada": "12:10",
+      "destino": "SIMON BOLIVAR INTL CARACAS",
+      "clase": "E"
+    }
+  ],
+  "TARIFA": "No encontrado",
+  "IMPUESTOS": null,
+  "TOTAL": "USD 2458.8",
+  "pnr": "22Q5VO",
+  "ticket_number": "2357283236572",
+  "passenger_name": "Carlos Mario Lopez Lopez",
+  "fecha_emision": "23 April 25",
+  "TARIFA_IMPORTE": null,
+  "TOTAL_IMPORTE": 2458.8,
+  "TARIFA_MONEDA": "USD",
+  "TOTAL_MONEDA": "USD",
+  "agencia": {
+    "name": "GRUPO SOPORTE GLOBAL INC",
+    "iata": "10617390"
+  }
+}

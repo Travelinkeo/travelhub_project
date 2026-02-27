@@ -5,7 +5,7 @@ import logging
 from datetime import datetime, timedelta
 from decimal import Decimal
 from django.db.models import Sum, Count, Q
-from core.models.boletos import BoletoImportado
+from apps.bookings.models import BoletoImportado
 
 logger = logging.getLogger(__name__)
 

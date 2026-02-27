@@ -1,0 +1,2276 @@
+[
+    {
+        "solo_nombre_pasajero": "NAIDALY",
+        "pasajero": {
+            "nombre_completo": "COHEN CABELLO/NAIDALY DEL CARMEN",
+            "documento_identidad": "J402496982"
+        },
+        "reserva": {
+            "codigo_reservacion": "DQPWOX",
+            "numero_boleto": "6637179251033",
+            "fecha_emision": "11 feb 25",
+            "aerolinea_emisora": "PLUS ULTRA LINEAS AEREAS",
+            "agente_emisor": {
+                "nombre": "GRUPO SOPORTE GLOBAL INC/AE0",
+                "numero_iata": "10617390"
+            }
+        },
+        "itinerario": {
+            "vuelos": [
+                {
+                    "numero_vuelo": "PU702",
+                    "aerolinea": "PLUS ULTRA",
+                    "fecha_salida": "27 may 25",
+                    "fecha_llegada": "28 may 25",
+                    "hora_salida": "09:55",
+                    "hora_llegada": "19:00",
+                    "origen": {
+                        "ciudad": "CARACAS",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "MADRID",
+                        "pais": null
+                    },
+                    "cabina": "TURISTA",
+                    "codigo_reservacion_local": "AQWBVH"
+                },
+                {
+                    "numero_vuelo": "PU701",
+                    "aerolinea": "PLUS ULTRA",
+                    "fecha_salida": "03 jun 25",
+                    "fecha_llegada": null,
+                    "hora_salida": "13:00",
+                    "hora_llegada": "16:30",
+                    "origen": {
+                        "ciudad": "MADRID",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "CARACAS",
+                        "pais": null
+                    },
+                    "cabina": "TURISTA",
+                    "codigo_reservacion_local": "AQWBVH"
+                }
+            ]
+        },
+        "debug_source_file": "Recibo de pasaje electrónico, 27 mayo para NAIDALY DEL CARMEN COHEN CABELLO.pdf"
+    },
+    {
+        "solo_nombre_pasajero": "JOSE",
+        "pasajero": {
+            "nombre_completo": "ALEMAN MARICHALES/JOSE ARMANDO",
+            "documento_identidad": "J402496982"
+        },
+        "reserva": {
+            "codigo_reservacion": "DQPWOX",
+            "numero_boleto": "6637179251034",
+            "fecha_emision": "11 feb 25",
+            "aerolinea_emisora": "PLUS ULTRA LINEAS AEREAS",
+            "agente_emisor": {
+                "nombre": "GRUPO SOPORTE GLOBAL INC/AE0",
+                "numero_iata": "10617390"
+            }
+        },
+        "itinerario": {
+            "vuelos": [
+                {
+                    "numero_vuelo": "PU702",
+                    "aerolinea": "PLUS ULTRA",
+                    "fecha_salida": "27 may 25",
+                    "fecha_llegada": "28 may 25",
+                    "hora_salida": "09:55",
+                    "hora_llegada": "19:00",
+                    "origen": {
+                        "ciudad": "CARACAS",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "MADRID",
+                        "pais": null
+                    },
+                    "cabina": "TURISTA",
+                    "codigo_reservacion_local": "AQWBVH"
+                },
+                {
+                    "numero_vuelo": "PU701",
+                    "aerolinea": "PLUS ULTRA",
+                    "fecha_salida": "03 jun 25",
+                    "fecha_llegada": null,
+                    "hora_salida": "13:00",
+                    "hora_llegada": "16:30",
+                    "origen": {
+                        "ciudad": "MADRID",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "CARACAS",
+                        "pais": null
+                    },
+                    "cabina": "TURISTA",
+                    "codigo_reservacion_local": "AQWBVH"
+                }
+            ]
+        },
+        "debug_source_file": "Recibo de pasaje electrónico, 27 mayo para JOSE ARMANDO ALEMAN MARICHALES.pdf"
+    },
+    {
+        "solo_nombre_pasajero": "ROSANGELA",
+        "pasajero": {
+            "nombre_completo": "DIAZ SILVA/ROSANGELA",
+            "documento_identidad": "164271115"
+        },
+        "reserva": {
+            "codigo_reservacion": "SGWFJU",
+            "numero_boleto": "3317182983297",
+            "fecha_emision": "25 feb 25",
+            "aerolinea_emisora": "SATA INTERNATIONAL SERVI",
+            "agente_emisor": {
+                "nombre": "GRUPO SOPORTE GLOBAL INC/AUL",
+                "numero_iata": "10617390"
+            }
+        },
+        "itinerario": {
+            "vuelos": []
+        },
+        "debug_source_file": "Recibo de pasaje electrónico, 19 marzo para ROSANGELA DIAZ SILVA.pdf"
+    },
+    {
+        "solo_nombre_pasajero": "ROSANGELA",
+        "pasajero": {
+            "nombre_completo": "DIAZ SILVA/ROSANGELA",
+            "documento_identidad": "164271115"
+        },
+        "reserva": {
+            "codigo_reservacion": "QOEOAJ",
+            "numero_boleto": "9967182983296",
+            "fecha_emision": "25 feb 25",
+            "aerolinea_emisora": "AIR EUROPA LINEAS AEREAS",
+            "agente_emisor": {
+                "nombre": "GRUPO SOPORTE GLOBAL INC/AUL",
+                "numero_iata": "10617390"
+            }
+        },
+        "itinerario": {
+            "vuelos": [
+                {
+                    "numero_vuelo": "UX72",
+                    "aerolinea": "Air Europa",
+                    "fecha_salida": "18 mar 25",
+                    "fecha_llegada": "19 mar 25",
+                    "hora_salida": "12:30",
+                    "hora_llegada": "23:05",
+                    "origen": {
+                        "ciudad": "CARACAS",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "MADRID",
+                        "pais": null
+                    },
+                    "cabina": "TURISTA",
+                    "codigo_reservacion_local": "4LAX2G",
+                    "equipaje": "2PC"
+                },
+                {
+                    "numero_vuelo": "UX1155",
+                    "aerolinea": "Air Europa",
+                    "fecha_salida": "19 mar 25",
+                    "fecha_llegada": null,
+                    "hora_salida": "14:55",
+                    "hora_llegada": "15:15",
+                    "origen": {
+                        "ciudad": "MADRID",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "LISBON",
+                        "pais": null
+                    },
+                    "cabina": "TURISTA",
+                    "equipaje": "2PC",
+                    "codigo_reservacion_local": "4LAX2G"
+                },
+                {
+                    "numero_vuelo": "UX1150",
+                    "aerolinea": "Air Europa",
+                    "fecha_salida": "04 abr 25",
+                    "fecha_llegada": null,
+                    "hora_salida": "11:35",
+                    "hora_llegada": "13:50",
+                    "origen": {
+                        "ciudad": "LISBON",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "PORTUGAL MADRID",
+                        "pais": null
+                    },
+                    "cabina": "TURISTA",
+                    "equipaje": "2PC",
+                    "codigo_reservacion_local": "4LAX2G"
+                },
+                {
+                    "numero_vuelo": "UX71",
+                    "aerolinea": "Air Europa",
+                    "fecha_salida": "04 abr 25",
+                    "fecha_llegada": null,
+                    "hora_salida": "16:20",
+                    "hora_llegada": "19:35",
+                    "origen": {
+                        "ciudad": "MADRID",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "CARACAS",
+                        "pais": null
+                    },
+                    "cabina": "TURISTA",
+                    "codigo_reservacion_local": "4LAX2G",
+                    "equipaje": "2PC"
+                }
+            ]
+        },
+        "debug_source_file": "Recibo de pasaje electrónico, 18 marzo para ROSANGELA DIAZ SILVA.pdf"
+    },
+    {
+        "solo_nombre_pasajero": "CARLOS",
+        "pasajero": {
+            "nombre_completo": "GOMEZ ZULUAGA/CARLOS MARIO",
+            "documento_identidad": "BE569121"
+        },
+        "reserva": {
+            "codigo_reservacion": "EJVZRZ",
+            "numero_boleto": "0577247360998",
+            "fecha_emision": "28 mar 25",
+            "aerolinea_emisora": "AIR FRANCE",
+            "agente_emisor": {
+                "nombre": "GRUPO SOPORTE GLOBAL INC/ASP",
+                "numero_iata": "10617390"
+            }
+        },
+        "itinerario": {
+            "vuelos": [
+                {
+                    "numero_vuelo": "AF435",
+                    "aerolinea": "Air France",
+                    "fecha_salida": "07 abr 25",
+                    "fecha_llegada": "08 abr 25",
+                    "hora_salida": "23:55",
+                    "hora_llegada": "17:10",
+                    "origen": {
+                        "ciudad": "BOGOTA",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "PARIS GAULLE",
+                        "pais": null
+                    },
+                    "cabina": "TURISTA",
+                    "equipaje": "1PC",
+                    "codigo_reservacion_local": "3JM8NJ"
+                },
+                {
+                    "numero_vuelo": "AF116",
+                    "aerolinea": "Air France",
+                    "fecha_salida": "08 abr 25",
+                    "fecha_llegada": "09 abr 25",
+                    "hora_salida": "23:30",
+                    "hora_llegada": "18:15",
+                    "origen": {
+                        "ciudad": "PARIS GAULLE",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "SHANGHAI PUDONG",
+                        "pais": null
+                    },
+                    "cabina": "TURISTA",
+                    "equipaje": "1PC",
+                    "codigo_reservacion_local": "3JM8NJ"
+                },
+                {
+                    "numero_vuelo": "AF111",
+                    "aerolinea": "Air France",
+                    "fecha_salida": "20 abr 25",
+                    "fecha_llegada": "21 abr 25",
+                    "hora_salida": "21:30",
+                    "hora_llegada": "05:50",
+                    "origen": {
+                        "ciudad": "SHANGHAI PUDONG",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "PARIS GAULLE",
+                        "pais": null
+                    },
+                    "cabina": "PREMIUM",
+                    "equipaje": "1PC",
+                    "codigo_reservacion_local": "3JM8NJ"
+                },
+                {
+                    "numero_vuelo": "AF436",
+                    "aerolinea": "Air France",
+                    "fecha_salida": "21 abr 25",
+                    "fecha_llegada": null,
+                    "hora_salida": "19:20",
+                    "hora_llegada": "15:25",
+                    "origen": {
+                        "ciudad": "PARIS GAULLE",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "BOGOTA",
+                        "pais": null
+                    },
+                    "cabina": "PREMIUM",
+                    "equipaje": "1PC",
+                    "codigo_reservacion_local": "3JM8NJ"
+                }
+            ]
+        },
+        "debug_source_file": "Recibo de pasaje electrónico, 07 abril para CARLOS MARIO GOMEZ ZULUAGA.pdf"
+    },
+    {
+        "solo_nombre_pasajero": "ALEXANDER",
+        "pasajero": {
+            "nombre_completo": "CASTANO VALENCIA/ALEXANDER",
+            "documento_identidad": "AT278914"
+        },
+        "reserva": {
+            "codigo_reservacion": "EJVZRZ",
+            "numero_boleto": "0577247360995",
+            "fecha_emision": "28 mar 25",
+            "aerolinea_emisora": "AIR FRANCE",
+            "agente_emisor": {
+                "nombre": "GRUPO SOPORTE GLOBAL INC/ASP",
+                "numero_iata": "10617390"
+            }
+        },
+        "itinerario": {
+            "vuelos": [
+                {
+                    "numero_vuelo": "AF435",
+                    "aerolinea": "Air France",
+                    "fecha_salida": "07 abr 25",
+                    "fecha_llegada": "08 abr 25",
+                    "hora_salida": "23:55",
+                    "hora_llegada": "17:10",
+                    "origen": {
+                        "ciudad": "BOGOTA",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "PARIS GAULLE",
+                        "pais": null
+                    },
+                    "cabina": "TURISTA",
+                    "equipaje": "1PC",
+                    "codigo_reservacion_local": "3JM8NJ"
+                },
+                {
+                    "numero_vuelo": "AF116",
+                    "aerolinea": "Air France",
+                    "fecha_salida": "08 abr 25",
+                    "fecha_llegada": "09 abr 25",
+                    "hora_salida": "23:30",
+                    "hora_llegada": "18:15",
+                    "origen": {
+                        "ciudad": "PARIS GAULLE",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "SHANGHAI PUDONG",
+                        "pais": null
+                    },
+                    "cabina": "TURISTA",
+                    "equipaje": "1PC",
+                    "codigo_reservacion_local": "3JM8NJ"
+                },
+                {
+                    "numero_vuelo": "AF111",
+                    "aerolinea": "Air France",
+                    "fecha_salida": "20 abr 25",
+                    "fecha_llegada": "21 abr 25",
+                    "hora_salida": "21:30",
+                    "hora_llegada": "05:50",
+                    "origen": {
+                        "ciudad": "SHANGHAI PUDONG",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "PARIS GAULLE",
+                        "pais": null
+                    },
+                    "cabina": "PREMIUM",
+                    "equipaje": "1PC",
+                    "codigo_reservacion_local": "3JM8NJ"
+                },
+                {
+                    "numero_vuelo": "AF436",
+                    "aerolinea": "Air France",
+                    "fecha_salida": "21 abr 25",
+                    "fecha_llegada": null,
+                    "hora_salida": "19:20",
+                    "hora_llegada": "15:25",
+                    "origen": {
+                        "ciudad": "PARIS GAULLE",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "BOGOTA",
+                        "pais": null
+                    },
+                    "cabina": "PREMIUM",
+                    "equipaje": "1PC",
+                    "codigo_reservacion_local": "3JM8NJ"
+                }
+            ]
+        },
+        "debug_source_file": "Recibo de pasaje electrónico, 07 abril para ALEXANDER CASTANO VALENCIA.pdf"
+    },
+    {
+        "solo_nombre_pasajero": "JOHN",
+        "pasajero": {
+            "nombre_completo": "CASTANO VALENCIA/JOHN JAIRO",
+            "documento_identidad": "AW918782"
+        },
+        "reserva": {
+            "codigo_reservacion": "EJVZRZ",
+            "numero_boleto": "0577247360996",
+            "fecha_emision": "28 mar 25",
+            "aerolinea_emisora": "AIR FRANCE",
+            "agente_emisor": {
+                "nombre": "GRUPO SOPORTE GLOBAL INC/ASP",
+                "numero_iata": "10617390"
+            }
+        },
+        "itinerario": {
+            "vuelos": [
+                {
+                    "numero_vuelo": "AF435",
+                    "aerolinea": "Air France",
+                    "fecha_salida": "07 abr 25",
+                    "fecha_llegada": "08 abr 25",
+                    "hora_salida": "23:55",
+                    "hora_llegada": "17:10",
+                    "origen": {
+                        "ciudad": "BOGOTA",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "PARIS GAULLE",
+                        "pais": null
+                    },
+                    "cabina": "TURISTA",
+                    "equipaje": "1PC",
+                    "codigo_reservacion_local": "3JM8NJ"
+                },
+                {
+                    "numero_vuelo": "AF116",
+                    "aerolinea": "Air France",
+                    "fecha_salida": "08 abr 25",
+                    "fecha_llegada": "09 abr 25",
+                    "hora_salida": "23:30",
+                    "hora_llegada": "18:15",
+                    "origen": {
+                        "ciudad": "PARIS GAULLE",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "SHANGHAI PUDONG",
+                        "pais": null
+                    },
+                    "cabina": "TURISTA",
+                    "equipaje": "1PC",
+                    "codigo_reservacion_local": "3JM8NJ"
+                },
+                {
+                    "numero_vuelo": "AF111",
+                    "aerolinea": "Air France",
+                    "fecha_salida": "20 abr 25",
+                    "fecha_llegada": "21 abr 25",
+                    "hora_salida": "21:30",
+                    "hora_llegada": "05:50",
+                    "origen": {
+                        "ciudad": "SHANGHAI PUDONG",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "PARIS GAULLE",
+                        "pais": null
+                    },
+                    "cabina": "PREMIUM",
+                    "equipaje": "1PC",
+                    "codigo_reservacion_local": "3JM8NJ"
+                },
+                {
+                    "numero_vuelo": "AF436",
+                    "aerolinea": "Air France",
+                    "fecha_salida": "21 abr 25",
+                    "fecha_llegada": null,
+                    "hora_salida": "19:20",
+                    "hora_llegada": "15:25",
+                    "origen": {
+                        "ciudad": "PARIS GAULLE",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "BOGOTA",
+                        "pais": null
+                    },
+                    "cabina": "PREMIUM",
+                    "equipaje": "1PC",
+                    "codigo_reservacion_local": "3JM8NJ"
+                }
+            ]
+        },
+        "debug_source_file": "Recibo de pasaje electrónico, 07 abril para JOHN JAIRO CASTANO VALENCIA.pdf"
+    },
+    {
+        "solo_nombre_pasajero": "JHONY",
+        "pasajero": {
+            "nombre_completo": "QUINTERO RAMIREZ/JHONY ALBERTO",
+            "documento_identidad": "AT6672563"
+        },
+        "reserva": {
+            "codigo_reservacion": "EJVZRZ",
+            "numero_boleto": "0577247360997",
+            "fecha_emision": "28 mar 25",
+            "aerolinea_emisora": "AIR FRANCE",
+            "agente_emisor": {
+                "nombre": "GRUPO SOPORTE GLOBAL INC/ASP",
+                "numero_iata": "10617390"
+            }
+        },
+        "itinerario": {
+            "vuelos": [
+                {
+                    "numero_vuelo": "AF435",
+                    "aerolinea": "Air France",
+                    "fecha_salida": "07 abr 25",
+                    "fecha_llegada": "08 abr 25",
+                    "hora_salida": "23:55",
+                    "hora_llegada": "17:10",
+                    "origen": {
+                        "ciudad": "BOGOTA",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "PARIS GAULLE",
+                        "pais": null
+                    },
+                    "cabina": "TURISTA",
+                    "equipaje": "1PC",
+                    "codigo_reservacion_local": "3JM8NJ"
+                },
+                {
+                    "numero_vuelo": "AF116",
+                    "aerolinea": "Air France",
+                    "fecha_salida": "08 abr 25",
+                    "fecha_llegada": "09 abr 25",
+                    "hora_salida": "23:30",
+                    "hora_llegada": "18:15",
+                    "origen": {
+                        "ciudad": "PARIS GAULLE",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "SHANGHAI PUDONG",
+                        "pais": null
+                    },
+                    "cabina": "TURISTA",
+                    "equipaje": "1PC",
+                    "codigo_reservacion_local": "3JM8NJ"
+                },
+                {
+                    "numero_vuelo": "AF111",
+                    "aerolinea": "Air France",
+                    "fecha_salida": "20 abr 25",
+                    "fecha_llegada": "21 abr 25",
+                    "hora_salida": "21:30",
+                    "hora_llegada": "05:50",
+                    "origen": {
+                        "ciudad": "SHANGHAI PUDONG",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "PARIS GAULLE",
+                        "pais": null
+                    },
+                    "cabina": "PREMIUM",
+                    "equipaje": "1PC",
+                    "codigo_reservacion_local": "3JM8NJ"
+                },
+                {
+                    "numero_vuelo": "AF436",
+                    "aerolinea": "Air France",
+                    "fecha_salida": "21 abr 25",
+                    "fecha_llegada": null,
+                    "hora_salida": "19:20",
+                    "hora_llegada": "15:25",
+                    "origen": {
+                        "ciudad": "PARIS GAULLE",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "BOGOTA",
+                        "pais": null
+                    },
+                    "cabina": "PREMIUM",
+                    "equipaje": "1PC",
+                    "codigo_reservacion_local": "3JM8NJ"
+                }
+            ]
+        },
+        "debug_source_file": "Recibo de pasaje electrónico, 07 abril para JHONY ALBERTO QUINTERO RAMIREZ.pdf"
+    },
+    {
+        "solo_nombre_pasajero": "MARIA",
+        "pasajero": {
+            "nombre_completo": "HERNANDEZ OCHOA/MARIA FERNANDA",
+            "documento_identidad": "BF918605"
+        },
+        "reserva": {
+            "codigo_reservacion": "DISLZZ",
+            "numero_boleto": "1347253896555",
+            "fecha_emision": "22 abr 25",
+            "aerolinea_emisora": "AEROVIAS DEL CONTINENTE",
+            "agente_emisor": {
+                "nombre": "GRUPO SOPORTE GLOBAL INC/ARP",
+                "numero_iata": "10617390"
+            }
+        },
+        "itinerario": {
+            "vuelos": [
+                {
+                    "numero_vuelo": "AV8384",
+                    "aerolinea": "Avianca",
+                    "fecha_salida": "29 abr 25",
+                    "fecha_llegada": null,
+                    "hora_salida": "11:34",
+                    "hora_llegada": "09:45",
+                    "origen": {
+                        "ciudad": "GUAYAQUIL",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "BOGOTA",
+                        "pais": null
+                    },
+                    "cabina": "TURISTA",
+                    "equipaje": "1PC",
+                    "codigo_reservacion_local": "4W2ZVU"
+                },
+                {
+                    "numero_vuelo": "AV22",
+                    "aerolinea": "Avianca",
+                    "fecha_salida": "29 abr 25",
+                    "fecha_llegada": null,
+                    "hora_salida": "14:15",
+                    "hora_llegada": "18:05",
+                    "origen": {
+                        "ciudad": "BOGOTA",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "MEXICO CITY",
+                        "pais": null
+                    },
+                    "cabina": "TURISTA",
+                    "equipaje": "1PC",
+                    "codigo_reservacion_local": "4W2ZVU"
+                }
+            ]
+        },
+        "debug_source_file": "Recibo de pasaje electrónico, 29 abril para MARIA FERNANDA HERNANDEZ OCHOA.pdf"
+    },
+    {
+        "solo_nombre_pasajero": "JORGE",
+        "pasajero": {
+            "nombre_completo": "QUICENO GIRALDO/JORGE HUMBERTO",
+            "documento_identidad": "PE152975"
+        },
+        "reserva": {
+            "codigo_reservacion": "DISLZZ",
+            "numero_boleto": "1347253896554",
+            "fecha_emision": "22 abr 25",
+            "aerolinea_emisora": "AEROVIAS DEL CONTINENTE",
+            "agente_emisor": {
+                "nombre": "GRUPO SOPORTE GLOBAL INC/ARP",
+                "numero_iata": "10617390"
+            }
+        },
+        "itinerario": {
+            "vuelos": [
+                {
+                    "numero_vuelo": "AV8384",
+                    "aerolinea": "Avianca",
+                    "fecha_salida": "29 abr 25",
+                    "fecha_llegada": null,
+                    "hora_salida": "11:34",
+                    "hora_llegada": "09:45",
+                    "origen": {
+                        "ciudad": "GUAYAQUIL",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "BOGOTA",
+                        "pais": null
+                    },
+                    "cabina": "TURISTA",
+                    "codigo_reservacion_local": "4W2ZVU",
+                    "equipaje": "1PC"
+                },
+                {
+                    "numero_vuelo": "AV22",
+                    "aerolinea": "Avianca",
+                    "fecha_salida": "29 abr 25",
+                    "fecha_llegada": null,
+                    "hora_salida": "14:15",
+                    "hora_llegada": "18:05",
+                    "origen": {
+                        "ciudad": "BOGOTA",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "MEXICO CITY",
+                        "pais": null
+                    },
+                    "cabina": "TURISTA",
+                    "equipaje": "1PC",
+                    "codigo_reservacion_local": "4W2ZVU"
+                }
+            ]
+        },
+        "debug_source_file": "Recibo de pasaje electrónico, 29 abril para JORGE HUMBERTO QUICENO GIRALDO.pdf"
+    },
+    {
+        "solo_nombre_pasajero": "MAURICIO",
+        "pasajero": {
+            "nombre_completo": "ISAZA ORTIZ/MAURICIO",
+            "documento_identidad": "J402496982"
+        },
+        "reserva": {
+            "codigo_reservacion": "ASMDCJ",
+            "numero_boleto": "7817258019383",
+            "fecha_emision": "08 may 25",
+            "aerolinea_emisora": "CHINA EASTERN AIRLINES",
+            "agente_emisor": {
+                "nombre": "GRUPO SOPORTE GLOBAL INC/AE0",
+                "numero_iata": "10617390"
+            }
+        },
+        "itinerario": {
+            "vuelos": [
+                {
+                    "numero_vuelo": "MU710",
+                    "aerolinea": "China Eastern",
+                    "fecha_salida": "24 may 25",
+                    "fecha_llegada": "25 may 25",
+                    "hora_salida": "11:05",
+                    "hora_llegada": "05:50",
+                    "origen": {
+                        "ciudad": "MADRID",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "SHANGHAI PUDONG",
+                        "pais": null
+                    },
+                    "cabina": "PREMIUM",
+                    "codigo_reservacion_local": "PDN5XY"
+                },
+                {
+                    "numero_vuelo": "MU709",
+                    "aerolinea": "China Eastern",
+                    "fecha_salida": "12 jun 25",
+                    "fecha_llegada": null,
+                    "hora_salida": "08:40",
+                    "hora_llegada": "00:45",
+                    "origen": {
+                        "ciudad": "SHANGHAI PUDONG",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "MADRID",
+                        "pais": null
+                    },
+                    "cabina": "PREMIUM",
+                    "codigo_reservacion_local": "PDN5XY"
+                }
+            ]
+        },
+        "debug_source_file": "Recibo de pasaje electrónico, 24 mayo para MAURICIO ISAZA ORTIZ.pdf"
+    },
+    {
+        "solo_nombre_pasajero": "MAURICIO",
+        "pasajero": {
+            "nombre_completo": "ISAZA/MAURICIO",
+            "documento_identidad": "J402496982"
+        },
+        "reserva": {
+            "codigo_reservacion": "WPYVSD",
+            "numero_boleto": "1347258019382",
+            "fecha_emision": "08 may 25",
+            "aerolinea_emisora": "AEROVIAS DEL CONTINENTE",
+            "agente_emisor": {
+                "nombre": "GRUPO SOPORTE GLOBAL INC/AE0",
+                "numero_iata": "10617390"
+            }
+        },
+        "itinerario": {
+            "vuelos": [
+                {
+                    "numero_vuelo": "AV46",
+                    "aerolinea": "Avianca",
+                    "fecha_salida": "22 may 25",
+                    "fecha_llegada": null,
+                    "hora_salida": "07:00",
+                    "hora_llegada": "23:30",
+                    "origen": {
+                        "ciudad": "BOGOTA",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "MADRID",
+                        "pais": null
+                    },
+                    "cabina": "BUSINESS",
+                    "equipaje": "2PC",
+                    "codigo_reservacion_local": "4K3I2J"
+                },
+                {
+                    "numero_vuelo": "AV11",
+                    "aerolinea": "Avianca",
+                    "fecha_salida": "13 jun 25",
+                    "fecha_llegada": null,
+                    "hora_salida": "17:30",
+                    "hora_llegada": "20:59",
+                    "origen": {
+                        "ciudad": "MADRID",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "BOGOTA",
+                        "pais": null
+                    },
+                    "cabina": "BUSINESS",
+                    "equipaje": "2PC",
+                    "codigo_reservacion_local": "4K3I2J"
+                }
+            ]
+        },
+        "debug_source_file": "Recibo de pasaje electrónico, 22 mayo para MAURICIO ISAZA.pdf"
+    },
+    {
+        "solo_nombre_pasajero": "ANNE",
+        "pasajero": {
+            "nombre_completo": "BELLO/ANNE MARIE",
+            "documento_identidad": "17AD26126"
+        },
+        "reserva": {
+            "codigo_reservacion": "EZOOQF",
+            "numero_boleto": "1347261299018",
+            "fecha_emision": "20 may 25",
+            "aerolinea_emisora": "AEROVIAS DEL CONTINENTE",
+            "agente_emisor": {
+                "nombre": "GRUPO SOPORTE GLOBAL INC/A9Y",
+                "numero_iata": "10617390"
+            }
+        },
+        "itinerario": {
+            "vuelos": [
+                {
+                    "numero_vuelo": "AV8374",
+                    "aerolinea": "Avianca",
+                    "fecha_salida": "21 may 25",
+                    "fecha_llegada": null,
+                    "hora_salida": "07:05",
+                    "hora_llegada": "09:55",
+                    "origen": {
+                        "ciudad": "BOGOTA",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "CURACAO",
+                        "pais": null
+                    },
+                    "cabina": "TURISTA",
+                    "equipaje": "1PC",
+                    "codigo_reservacion_local": "CM7AJH"
+                }
+            ]
+        },
+        "debug_source_file": "Recibo de pasaje electrónico, 21 mayo para ANNE MARIE BELLO.pdf"
+    },
+    {
+        "solo_nombre_pasajero": "VALERIA",
+        "pasajero": {
+            "nombre_completo": "VELEZ/VALERIA",
+            "documento_identidad": "24CA43026"
+        },
+        "reserva": {
+            "codigo_reservacion": "EZOOQF",
+            "numero_boleto": "1347261299019",
+            "fecha_emision": "20 may 25",
+            "aerolinea_emisora": "AEROVIAS DEL CONTINENTE",
+            "agente_emisor": {
+                "nombre": "GRUPO SOPORTE GLOBAL INC/A9Y",
+                "numero_iata": "10617390"
+            }
+        },
+        "itinerario": {
+            "vuelos": [
+                {
+                    "numero_vuelo": "AV8374",
+                    "aerolinea": "Avianca",
+                    "fecha_salida": "21 may 25",
+                    "fecha_llegada": null,
+                    "hora_salida": "07:05",
+                    "hora_llegada": "09:55",
+                    "origen": {
+                        "ciudad": "BOGOTA",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "CURACAO",
+                        "pais": null
+                    },
+                    "cabina": "TURISTA",
+                    "equipaje": "1PC",
+                    "codigo_reservacion_local": "CM7AJH"
+                }
+            ]
+        },
+        "debug_source_file": "Recibo de pasaje electrónico, 21 mayo para VALERIA VELEZ.pdf"
+    },
+    {
+        "solo_nombre_pasajero": "YENY",
+        "pasajero": {
+            "nombre_completo": "AGUILAR ROJAS/YENY PAOLA",
+            "documento_identidad": "BA908641"
+        },
+        "reserva": {
+            "codigo_reservacion": "LWWHST",
+            "numero_boleto": "6637273923147",
+            "fecha_emision": "15 jul 25",
+            "aerolinea_emisora": "PLUS ULTRA LINEAS AEREAS",
+            "agente_emisor": {
+                "nombre": "GRUPO SOPORTE GLOBAL INC/ASP",
+                "numero_iata": "10617390"
+            }
+        },
+        "itinerario": {
+            "vuelos": [
+                {
+                    "numero_vuelo": "PU702",
+                    "aerolinea": "PLUS ULTRA",
+                    "fecha_salida": "17 jul 25",
+                    "fecha_llegada": "18 jul 25",
+                    "hora_salida": "09:55",
+                    "hora_llegada": "19:00",
+                    "origen": {
+                        "ciudad": "CARACAS",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "MADRID",
+                        "pais": null
+                    },
+                    "cabina": "TURISTA",
+                    "codigo_reservacion_local": "KTNUXL",
+                    "equipaje": "1PC"
+                },
+                {
+                    "numero_vuelo": "PU231",
+                    "aerolinea": "PLUS ULTRA",
+                    "fecha_salida": "21 ago 25",
+                    "fecha_llegada": null,
+                    "hora_salida": "14:55",
+                    "hora_llegada": "18:25",
+                    "origen": {
+                        "ciudad": "MADRID",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "BOGOTA",
+                        "pais": null
+                    },
+                    "cabina": "TURISTA",
+                    "equipaje": "1PC",
+                    "codigo_reservacion_local": "KTNUXL"
+                }
+            ]
+        },
+        "debug_source_file": "Recibo de pasaje electrónico, 17 julio para YENY PAOLA AGUILAR ROJAS.pdf"
+    },
+    {
+        "solo_nombre_pasajero": "JIMMY",
+        "pasajero": {
+            "nombre_completo": "ZULUAGA JABER/JIMMY ALEJANDRO",
+            "documento_identidad": "J402496982"
+        },
+        "reserva": {
+            "codigo_reservacion": "DXBWDS",
+            "numero_boleto": "2357273296982",
+            "fecha_emision": "12 jul 25",
+            "aerolinea_emisora": "TURKISH AIRLINES INC.",
+            "agente_emisor": {
+                "nombre": "GRUPO SOPORTE GLOBAL INC/A8O",
+                "numero_iata": "10617390"
+            }
+        },
+        "itinerario": {
+            "vuelos": [
+                {
+                    "numero_vuelo": "TK224",
+                    "aerolinea": "Turkish Airlines",
+                    "fecha_salida": "17 ago 25",
+                    "fecha_llegada": "18 ago 25",
+                    "hora_salida": "10:00",
+                    "hora_llegada": "04:50",
+                    "origen": {
+                        "ciudad": "CARACAS",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "ISTANBUL AIRPORT",
+                        "pais": null
+                    },
+                    "cabina": "TURISTA",
+                    "equipaje": "2PC",
+                    "codigo_reservacion_local": "VU4DDL"
+                },
+                {
+                    "numero_vuelo": "TK26",
+                    "aerolinea": "Turkish Airlines",
+                    "fecha_salida": "19 ago 25",
+                    "fecha_llegada": null,
+                    "hora_salida": "01:25",
+                    "hora_llegada": "16:45",
+                    "origen": {
+                        "ciudad": "ISTANBUL AIRPORT",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "SHANGHAI PUDONG",
+                        "pais": null
+                    },
+                    "cabina": "TURISTA",
+                    "equipaje": "2PC",
+                    "codigo_reservacion_local": "VU4DDL"
+                },
+                {
+                    "numero_vuelo": "TK27",
+                    "aerolinea": "Turkish Airlines",
+                    "fecha_salida": "02 sep 25",
+                    "fecha_llegada": "03 sep 25",
+                    "hora_salida": "22:25",
+                    "hora_llegada": "05:20",
+                    "origen": {
+                        "ciudad": "SHANGHAI PUDONG",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "ISTANBUL AIRPORT",
+                        "pais": null
+                    },
+                    "cabina": "TURISTA",
+                    "equipaje": "2PC",
+                    "codigo_reservacion_local": "VU4DDL"
+                },
+                {
+                    "numero_vuelo": "TK183",
+                    "aerolinea": "Turkish Airlines",
+                    "fecha_salida": "04 sep 25",
+                    "fecha_llegada": null,
+                    "hora_salida": "01:50",
+                    "hora_llegada": "12:10",
+                    "origen": {
+                        "ciudad": "ISTANBUL AIRPORT",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "CARACAS",
+                        "pais": null
+                    },
+                    "cabina": "TURISTA",
+                    "equipaje": "2PC",
+                    "codigo_reservacion_local": "VU4DDL"
+                }
+            ]
+        },
+        "debug_source_file": "Recibo de pasaje electrónico, 17 agosto para JIMMY ALEJANDRO ZULUAGA JABER.pdf"
+    },
+    {
+        "solo_nombre_pasajero": "JUAN",
+        "pasajero": {
+            "nombre_completo": "ZULUAGA JABER/JUAN ELIAS",
+            "documento_identidad": "J402496982"
+        },
+        "reserva": {
+            "codigo_reservacion": "DXBWDS",
+            "numero_boleto": "2357273296981",
+            "fecha_emision": "12 jul 25",
+            "aerolinea_emisora": "TURKISH AIRLINES INC.",
+            "agente_emisor": {
+                "nombre": "GRUPO SOPORTE GLOBAL INC/A8O",
+                "numero_iata": "10617390"
+            }
+        },
+        "itinerario": {
+            "vuelos": [
+                {
+                    "numero_vuelo": "TK224",
+                    "aerolinea": "Turkish Airlines",
+                    "fecha_salida": "17 ago 25",
+                    "fecha_llegada": "18 ago 25",
+                    "hora_salida": "10:00",
+                    "hora_llegada": "04:50",
+                    "origen": {
+                        "ciudad": "CARACAS",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "ISTANBUL AIRPORT",
+                        "pais": null
+                    },
+                    "cabina": "TURISTA",
+                    "equipaje": "2PC",
+                    "codigo_reservacion_local": "VU4DDL"
+                },
+                {
+                    "numero_vuelo": "TK26",
+                    "aerolinea": "Turkish Airlines",
+                    "fecha_salida": "19 ago 25",
+                    "fecha_llegada": null,
+                    "hora_salida": "01:25",
+                    "hora_llegada": "16:45",
+                    "origen": {
+                        "ciudad": "ISTANBUL AIRPORT",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "SHANGHAI PUDONG",
+                        "pais": null
+                    },
+                    "cabina": "TURISTA",
+                    "equipaje": "2PC",
+                    "codigo_reservacion_local": "VU4DDL"
+                },
+                {
+                    "numero_vuelo": "TK27",
+                    "aerolinea": "Turkish Airlines",
+                    "fecha_salida": "02 sep 25",
+                    "fecha_llegada": "03 sep 25",
+                    "hora_salida": "22:25",
+                    "hora_llegada": "05:20",
+                    "origen": {
+                        "ciudad": "SHANGHAI PUDONG",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "ISTANBUL AIRPORT",
+                        "pais": null
+                    },
+                    "cabina": "TURISTA",
+                    "equipaje": "2PC",
+                    "codigo_reservacion_local": "VU4DDL"
+                },
+                {
+                    "numero_vuelo": "TK183",
+                    "aerolinea": "Turkish Airlines",
+                    "fecha_salida": "04 sep 25",
+                    "fecha_llegada": null,
+                    "hora_salida": "01:50",
+                    "hora_llegada": "12:10",
+                    "origen": {
+                        "ciudad": "ISTANBUL AIRPORT",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "CARACAS",
+                        "pais": null
+                    },
+                    "cabina": "TURISTA",
+                    "equipaje": "2PC",
+                    "codigo_reservacion_local": "VU4DDL"
+                }
+            ]
+        },
+        "debug_source_file": "Recibo de pasaje electrónico, 17 agosto para JUAN ELIAS ZULUAGA JABER.pdf"
+    },
+    {
+        "solo_nombre_pasajero": "JUAN",
+        "pasajero": {
+            "nombre_completo": "VELEZ/JUAN CARLOS",
+            "documento_identidad": "J402496982"
+        },
+        "reserva": {
+            "codigo_reservacion": "OENGYE",
+            "numero_boleto": "1767099348752",
+            "fecha_emision": "19 sep 24",
+            "aerolinea_emisora": "EMIRATES",
+            "agente_emisor": {
+                "nombre": "GRUPO SOPORTE GLOBAL INC/A8O",
+                "numero_iata": "10617390"
+            }
+        },
+        "itinerario": {
+            "vuelos": [
+                {
+                    "numero_vuelo": "EK214",
+                    "aerolinea": "Emirates",
+                    "fecha_salida": "29 sep 24",
+                    "fecha_llegada": null,
+                    "hora_salida": "17:25",
+                    "hora_llegada": "22:15",
+                    "origen": {
+                        "ciudad": "BOGOTA",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "MIAMI INTERNTNL",
+                        "pais": null
+                    },
+                    "cabina": "TURISTA",
+                    "equipaje": "1PC",
+                    "codigo_reservacion_local": "QRE3WN"
+                },
+                {
+                    "numero_vuelo": "EK213",
+                    "aerolinea": "Emirates",
+                    "fecha_salida": "04 oct 24",
+                    "fecha_llegada": null,
+                    "hora_salida": "12:05",
+                    "hora_llegada": "14:55",
+                    "origen": {
+                        "ciudad": "MIAMI INTERNTNL",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "BOGOTA",
+                        "pais": null
+                    },
+                    "cabina": "TURISTA",
+                    "equipaje": "1PC",
+                    "codigo_reservacion_local": "QRE3WN"
+                }
+            ]
+        },
+        "debug_source_file": "Recibo de pasaje electrónico, 29 septiembre para JUAN CARLOS VELEZ.pdf"
+    },
+    {
+        "solo_nombre_pasajero": "HECTOR",
+        "pasajero": {
+            "nombre_completo": "HOYOS VELARDE/HECTOR FABIO",
+            "documento_identidad": "AZ620703"
+        },
+        "reserva": {
+            "codigo_reservacion": "LJLBCO",
+            "numero_boleto": "7847101239623",
+            "fecha_emision": "30 Sep 24",
+            "aerolinea_emisora": "CHINA SOUTHERN AIRLINES",
+            "agente_emisor": {
+                "nombre": "QUO VADIS TRAVEL AGENCY/AKJ",
+                "numero_iata": "10592503"
+            }
+        },
+        "itinerario": {
+            "vuelos": []
+        },
+        "debug_source_file": "Electronic ticket receipt, October 02 for HECTOR FABIO HOYOS VELARDE.pdf"
+    },
+    {
+        "solo_nombre_pasajero": "MARIA",
+        "pasajero": {
+            "nombre_completo": "SISSO VIDAL/MARIA JOSE",
+            "documento_identidad": "164927348"
+        },
+        "reserva": {
+            "codigo_reservacion": "MWVYUV",
+            "numero_boleto": "1347150287695",
+            "fecha_emision": "04 oct 24",
+            "aerolinea_emisora": "AEROVIAS DEL CONTINENTE",
+            "agente_emisor": {
+                "nombre": "GRUPO SOPORTE GLOBAL INC/AE1",
+                "numero_iata": "10617390"
+            }
+        },
+        "itinerario": {
+            "vuelos": [
+                {
+                    "numero_vuelo": "AV9342",
+                    "aerolinea": "Avianca",
+                    "fecha_salida": "04 oct 24",
+                    "fecha_llegada": null,
+                    "hora_salida": "22:45",
+                    "hora_llegada": "23:42",
+                    "origen": {
+                        "ciudad": "BOGOTA",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "MEDELLIN",
+                        "pais": null
+                    },
+                    "cabina": "TURISTA",
+                    "equipaje": "1PC",
+                    "codigo_reservacion_local": "4AG68S"
+                },
+                {
+                    "numero_vuelo": "AV8475",
+                    "aerolinea": "Avianca",
+                    "fecha_salida": "07 oct 24",
+                    "fecha_llegada": null,
+                    "hora_salida": "04:54",
+                    "hora_llegada": "05:53",
+                    "origen": {
+                        "ciudad": "MEDELLIN",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "BOGOTA",
+                        "pais": null
+                    },
+                    "cabina": "TURISTA",
+                    "equipaje": "1PC",
+                    "codigo_reservacion_local": "4AG68S"
+                }
+            ]
+        },
+        "debug_source_file": "Recibo de pasaje electrónico, 04 octubre para MARIA JOSE SISSO VIDAL.pdf"
+    },
+    {
+        "solo_nombre_pasajero": "BETLANA",
+        "pasajero": {
+            "nombre_completo": "MATA MONTANO/BETLANA KELY",
+            "documento_identidad": "VP166152076"
+        },
+        "reserva": {
+            "codigo_reservacion": "OOSBRZ",
+            "numero_boleto": "1347155408465",
+            "fecha_emision": "24 Oct 24",
+            "aerolinea_emisora": "AEROVIAS DEL CONTINENTE",
+            "agente_emisor": {
+                "nombre": "QUO VADIS TRAVEL AGENCY/ATK",
+                "numero_iata": "10592503"
+            }
+        },
+        "itinerario": {
+            "vuelos": []
+        },
+        "debug_source_file": "Electronic ticket receipt, November 27 for BETLANA KELY MATA MONTANO.pdf"
+    },
+    {
+        "solo_nombre_pasajero": "ANDY",
+        "pasajero": {
+            "nombre_completo": "FARIAS APARCEDO/ANDY DAVID",
+            "documento_identidad": "J402496982"
+        },
+        "reserva": {
+            "codigo_reservacion": "AAIISB",
+            "numero_boleto": "1347160451194",
+            "fecha_emision": "16 nov 24",
+            "aerolinea_emisora": "AEROVIAS DEL CONTINENTE",
+            "agente_emisor": {
+                "nombre": "GRUPO SOPORTE GLOBAL INC/AE1",
+                "numero_iata": "10617390"
+            }
+        },
+        "itinerario": {
+            "vuelos": [
+                {
+                    "numero_vuelo": "AV23",
+                    "aerolinea": "Avianca",
+                    "fecha_salida": "22 dic 24",
+                    "fecha_llegada": "23 dic 24",
+                    "hora_salida": "23:15",
+                    "hora_llegada": "04:40",
+                    "origen": {
+                        "ciudad": "MEXICO CITY",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "BOGOTA",
+                        "pais": null
+                    },
+                    "cabina": "TURISTA",
+                    "equipaje": "1PC",
+                    "codigo_reservacion_local": "22FA6Z"
+                }
+            ]
+        },
+        "debug_source_file": "Recibo de pasaje electrónico, 22 diciembre para ANDY DAVID FARIAS APARCEDO.pdf"
+    },
+    {
+        "solo_nombre_pasajero": "JORGE",
+        "pasajero": {
+            "nombre_completo": "QUICENO GIRALDO/JORGE HUMBERTO",
+            "documento_identidad": "PE152975"
+        },
+        "reserva": {
+            "codigo_reservacion": "MVAPFC",
+            "numero_boleto": "7817162438095",
+            "fecha_emision": "26 nov 24",
+            "aerolinea_emisora": "CHINA EASTERN AIRLINES",
+            "agente_emisor": {
+                "nombre": "GRUPO SOPORTE GLOBAL INC/AER",
+                "numero_iata": "10617390"
+            }
+        },
+        "itinerario": {
+            "vuelos": [
+                {
+                    "numero_vuelo": "MU710",
+                    "aerolinea": "China Eastern",
+                    "fecha_salida": "03 dic 24",
+                    "fecha_llegada": "04 dic 24",
+                    "hora_salida": "10:30",
+                    "hora_llegada": "06:35",
+                    "origen": {
+                        "ciudad": "MADRID",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "SHANGHAI PUDONG",
+                        "pais": null
+                    },
+                    "cabina": "TURISTA",
+                    "codigo_reservacion_local": "MZ612H"
+                },
+                {
+                    "numero_vuelo": "MU8422",
+                    "aerolinea": "China Eastern",
+                    "fecha_salida": "12 dic 24",
+                    "fecha_llegada": null,
+                    "hora_salida": "20:10",
+                    "hora_llegada": "22:20",
+                    "origen": {
+                        "ciudad": "GUANGZHOU",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "SHANGHAI PUDONG",
+                        "pais": null
+                    },
+                    "cabina": "TURISTA",
+                    "codigo_reservacion_local": "MZ612H"
+                },
+                {
+                    "numero_vuelo": "MU709",
+                    "aerolinea": "China Eastern",
+                    "fecha_salida": "13 dic 24",
+                    "fecha_llegada": null,
+                    "hora_salida": "08:00",
+                    "hora_llegada": "00:20",
+                    "origen": {
+                        "ciudad": "SHANGHAI PUDONG",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "MADRID",
+                        "pais": null
+                    },
+                    "cabina": "TURISTA",
+                    "codigo_reservacion_local": "MZ612H"
+                }
+            ]
+        },
+        "debug_source_file": "Recibo de pasaje electrónico, 03 diciembre para JORGE HUMBERTO QUICENO GIRALDO.pdf"
+    },
+    {
+        "solo_nombre_pasajero": "LILIANA",
+        "pasajero": {
+            "nombre_completo": "VARGAS CAMACHO/LILIANA ANDREA",
+            "documento_identidad": "BE302194"
+        },
+        "reserva": {
+            "codigo_reservacion": "FAOGLO",
+            "numero_boleto": "0447165338437",
+            "fecha_emision": "12 dic 24",
+            "aerolinea_emisora": "AEROLINEAS ARGENTINAS",
+            "agente_emisor": {
+                "nombre": "GRUPO SOPORTE GLOBAL INC/AE1",
+                "numero_iata": "10617390"
+            }
+        },
+        "itinerario": {
+            "vuelos": [
+                {
+                    "numero_vuelo": "AR1361",
+                    "aerolinea": "Aerolineas Argentinas",
+                    "fecha_salida": "09 feb 25",
+                    "fecha_llegada": "10 feb 25",
+                    "hora_salida": "22:55",
+                    "hora_llegada": "07:30",
+                    "origen": {
+                        "ciudad": "AERO BOGOTA",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "BUENOS AIRES AEP",
+                        "pais": null
+                    },
+                    "cabina": "TURISTA",
+                    "codigo_reservacion_local": "ULZLDP"
+                },
+                {
+                    "numero_vuelo": "AR1360",
+                    "aerolinea": "AEROLINEAS ARGENTINAS",
+                    "fecha_salida": "25 feb 25",
+                    "fecha_llegada": null,
+                    "hora_salida": "21:15",
+                    "hora_llegada": "16:30",
+                    "origen": {
+                        "ciudad": "AERO BUENOS AIRES AEP",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "BOGOTA",
+                        "pais": null
+                    },
+                    "cabina": "TURISTA",
+                    "codigo_reservacion_local": "ULZLDP"
+                }
+            ]
+        },
+        "debug_source_file": "Recibo de pasaje electrónico, febrero 09 para VARGAS CAMACHO LILIANA ANDREA.pdf"
+    },
+    {
+        "solo_nombre_pasajero": "ALEXANDER",
+        "pasajero": {
+            "nombre_completo": "CASTANO VALENCIA/ALEXANDER",
+            "documento_identidad": "AT278914"
+        },
+        "reserva": {
+            "codigo_reservacion": "EJVZRZ",
+            "numero_boleto": "0577247360995",
+            "fecha_emision": "28 mar 25",
+            "aerolinea_emisora": "AIR FRANCE",
+            "agente_emisor": {
+                "nombre": "GRUPO SOPORTE GLOBAL INC/ASP",
+                "numero_iata": "10617390"
+            }
+        },
+        "itinerario": {
+            "vuelos": [
+                {
+                    "numero_vuelo": "AF435",
+                    "aerolinea": "Air France",
+                    "fecha_salida": "07 abr 25",
+                    "fecha_llegada": "08 abr 25",
+                    "hora_salida": "23:55",
+                    "hora_llegada": "17:10",
+                    "origen": {
+                        "ciudad": "BOGOTA",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "PARIS GAULLE",
+                        "pais": null
+                    },
+                    "cabina": "TURISTA",
+                    "equipaje": "1PC",
+                    "codigo_reservacion_local": "3JM8NJ"
+                },
+                {
+                    "numero_vuelo": "AF116",
+                    "aerolinea": "Air France",
+                    "fecha_salida": "08 abr 25",
+                    "fecha_llegada": "09 abr 25",
+                    "hora_salida": "23:30",
+                    "hora_llegada": "18:15",
+                    "origen": {
+                        "ciudad": "PARIS GAULLE",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "SHANGHAI PUDONG",
+                        "pais": null
+                    },
+                    "cabina": "TURISTA",
+                    "equipaje": "1PC",
+                    "codigo_reservacion_local": "3JM8NJ"
+                },
+                {
+                    "numero_vuelo": "AF111",
+                    "aerolinea": "Air France",
+                    "fecha_salida": "20 abr 25",
+                    "fecha_llegada": "21 abr 25",
+                    "hora_salida": "21:30",
+                    "hora_llegada": "05:50",
+                    "origen": {
+                        "ciudad": "SHANGHAI PUDONG",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "PARIS GAULLE",
+                        "pais": null
+                    },
+                    "cabina": "PREMIUM",
+                    "equipaje": "1PC",
+                    "codigo_reservacion_local": "3JM8NJ"
+                },
+                {
+                    "numero_vuelo": "AF436",
+                    "aerolinea": "Air France",
+                    "fecha_salida": "21 abr 25",
+                    "fecha_llegada": null,
+                    "hora_salida": "19:20",
+                    "hora_llegada": "15:25",
+                    "origen": {
+                        "ciudad": "PARIS GAULLE",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "BOGOTA",
+                        "pais": null
+                    },
+                    "cabina": "PREMIUM",
+                    "equipaje": "1PC",
+                    "codigo_reservacion_local": "3JM8NJ"
+                }
+            ]
+        },
+        "debug_source_file": "Recibo_de_pasaje_electrónico_07_abril_para_ALEXANDER_CASTANO_VALENCIA_AO8QaIN.pdf"
+    },
+    {
+        "solo_nombre_pasajero": "ALEXANDER",
+        "pasajero": {
+            "nombre_completo": "CASTANO VALENCIA/ALEXANDER",
+            "documento_identidad": "AT278914"
+        },
+        "reserva": {
+            "codigo_reservacion": "EJVZRZ",
+            "numero_boleto": "0577247360995",
+            "fecha_emision": "28 mar 25",
+            "aerolinea_emisora": "AIR FRANCE",
+            "agente_emisor": {
+                "nombre": "GRUPO SOPORTE GLOBAL INC/ASP",
+                "numero_iata": "10617390"
+            }
+        },
+        "itinerario": {
+            "vuelos": [
+                {
+                    "numero_vuelo": "AF435",
+                    "aerolinea": "Air France",
+                    "fecha_salida": "07 abr 25",
+                    "fecha_llegada": "08 abr 25",
+                    "hora_salida": "23:55",
+                    "hora_llegada": "17:10",
+                    "origen": {
+                        "ciudad": "BOGOTA",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "PARIS GAULLE",
+                        "pais": null
+                    },
+                    "cabina": "TURISTA",
+                    "equipaje": "1PC",
+                    "codigo_reservacion_local": "3JM8NJ"
+                },
+                {
+                    "numero_vuelo": "AF116",
+                    "aerolinea": "Air France",
+                    "fecha_salida": "08 abr 25",
+                    "fecha_llegada": "09 abr 25",
+                    "hora_salida": "23:30",
+                    "hora_llegada": "18:15",
+                    "origen": {
+                        "ciudad": "PARIS GAULLE",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "SHANGHAI PUDONG",
+                        "pais": null
+                    },
+                    "cabina": "TURISTA",
+                    "equipaje": "1PC",
+                    "codigo_reservacion_local": "3JM8NJ"
+                },
+                {
+                    "numero_vuelo": "AF111",
+                    "aerolinea": "Air France",
+                    "fecha_salida": "20 abr 25",
+                    "fecha_llegada": "21 abr 25",
+                    "hora_salida": "21:30",
+                    "hora_llegada": "05:50",
+                    "origen": {
+                        "ciudad": "SHANGHAI PUDONG",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "PARIS GAULLE",
+                        "pais": null
+                    },
+                    "cabina": "PREMIUM",
+                    "equipaje": "1PC",
+                    "codigo_reservacion_local": "3JM8NJ"
+                },
+                {
+                    "numero_vuelo": "AF436",
+                    "aerolinea": "Air France",
+                    "fecha_salida": "21 abr 25",
+                    "fecha_llegada": null,
+                    "hora_salida": "19:20",
+                    "hora_llegada": "15:25",
+                    "origen": {
+                        "ciudad": "PARIS GAULLE",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "BOGOTA",
+                        "pais": null
+                    },
+                    "cabina": "PREMIUM",
+                    "equipaje": "1PC",
+                    "codigo_reservacion_local": "3JM8NJ"
+                }
+            ]
+        },
+        "debug_source_file": "Recibo_de_pasaje_electrónico_07_abril_para_ALEXANDER_CASTANO_VALENCIA.pdf"
+    },
+    {
+        "solo_nombre_pasajero": "LAURA",
+        "pasajero": {
+            "nombre_completo": "ARROYAVE/LAURA CRISTINA",
+            "documento_identidad": "EP14CF76557"
+        },
+        "reserva": {
+            "codigo_reservacion": "WYVFKR",
+            "numero_boleto": "0167540758295",
+            "fecha_emision": "18dic20",
+            "aerolinea_emisora": "UNITED AIRLINES, INC.",
+            "agente_emisor": {
+                "nombre": "QUO VADIS TRAVEL AGENCY/AIR",
+                "numero_iata": "10592503"
+            }
+        },
+        "itinerario": {
+            "vuelos": [
+                {
+                    "numero_vuelo": "UA1052",
+                    "aerolinea": "United Airlines",
+                    "fecha_salida": "21dic20",
+                    "fecha_llegada": null,
+                    "hora_salida": "10:10",
+                    "hora_llegada": "14:42",
+                    "origen": {
+                        "ciudad": "NEWARK",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "CANCUN",
+                        "pais": null
+                    },
+                    "cabina": "TURISTA",
+                    "codigo_reservacion_local": "PG0E4P"
+                },
+                {
+                    "numero_vuelo": "UA1047",
+                    "aerolinea": "United Airlines",
+                    "fecha_salida": "08ene21",
+                    "fecha_llegada": null,
+                    "hora_salida": "08:30",
+                    "hora_llegada": "12:09",
+                    "origen": {
+                        "ciudad": "CANCUN",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "NEWARK",
+                        "pais": null
+                    },
+                    "cabina": "TURISTA",
+                    "codigo_reservacion_local": "PG0E4P"
+                }
+            ]
+        },
+        "debug_source_file": "Recibo de pasaje electrónico, 21 diciembre para LAURA CRISTINA ARROYAVE.pdf"
+    },
+    {
+        "solo_nombre_pasajero": "OSCAR",
+        "pasajero": {
+            "nombre_completo": "DUQUE/OSCAR",
+            "documento_identidad": "VP159209965"
+        },
+        "reserva": {
+            "codigo_reservacion": "ASXJAU",
+            "numero_boleto": "2307543965526",
+            "fecha_emision": "27ene21",
+            "aerolinea_emisora": "COMPANIA PANAMENA DE AVI",
+            "agente_emisor": {
+                "nombre": "QUO VADIS TRAVEL AGENCY/ALC",
+                "numero_iata": "10592503"
+            }
+        },
+        "itinerario": {
+            "vuelos": [
+                {
+                    "numero_vuelo": "CM225",
+                    "aerolinea": "Copa Airlines",
+                    "fecha_salida": "13feb21",
+                    "fecha_llegada": null,
+                    "hora_salida": "12:52",
+                    "hora_llegada": "14:18",
+                    "origen": {
+                        "ciudad": "CARACAS",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "CITY PA",
+                        "pais": null
+                    },
+                    "cabina": "TURISTA",
+                    "equipaje": "2PC",
+                    "codigo_reservacion_local": "BATOIY"
+                },
+                {
+                    "numero_vuelo": "CM413",
+                    "aerolinea": "Copa Airlines",
+                    "fecha_salida": "13feb21",
+                    "fecha_llegada": null,
+                    "hora_salida": "17:34",
+                    "hora_llegada": "15:58",
+                    "origen": {
+                        "ciudad": "PANAMA CITY PA",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "BOGOTA",
+                        "pais": null
+                    },
+                    "cabina": "TURISTA",
+                    "equipaje": "2PC",
+                    "codigo_reservacion_local": "BATOIY"
+                }
+            ]
+        },
+        "debug_source_file": "Recibo de pasaje electrónico, 13 febrero para OSCAR DUQUE.pdf"
+    },
+    {
+        "solo_nombre_pasajero": "ALIKY",
+        "pasajero": {
+            "nombre_completo": "DE SOUSA/ALIKY",
+            "documento_identidad": "005559"
+        },
+        "reserva": {
+            "codigo_reservacion": "HXTHGZ",
+            "numero_boleto": "1347536144167",
+            "fecha_emision": "04nov20",
+            "aerolinea_emisora": "AEROVIAS DEL CONTINENTE",
+            "agente_emisor": {
+                "nombre": "QUO VADIS TRAVEL AGENCY/ALC",
+                "numero_iata": "10592503"
+            }
+        },
+        "itinerario": {
+            "vuelos": [
+                {
+                    "numero_vuelo": "AV209",
+                    "aerolinea": "Avianca",
+                    "fecha_salida": "19nov20",
+                    "fecha_llegada": null,
+                    "hora_salida": "20:30",
+                    "hora_llegada": "18:50",
+                    "origen": {
+                        "ciudad": "SANTO DOMINGO",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "BOGOTA",
+                        "pais": null
+                    },
+                    "cabina": "TURISTA",
+                    "equipaje": "1PC",
+                    "codigo_reservacion_local": "U7OH6D"
+                },
+                {
+                    "numero_vuelo": "AV8552",
+                    "aerolinea": "Avianca",
+                    "fecha_salida": "19nov20",
+                    "fecha_llegada": null,
+                    "hora_salida": "22:10",
+                    "hora_llegada": "23:41",
+                    "origen": {
+                        "ciudad": "BOGOTA",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "CARTAGENA",
+                        "pais": null
+                    },
+                    "cabina": "TURISTA",
+                    "equipaje": "1PC",
+                    "codigo_reservacion_local": "U7OH6D"
+                }
+            ]
+        },
+        "debug_source_file": "Recibo de pasaje electrónico, 19 noviembre para ALIKY DE SOUSA.pdf"
+    },
+    {
+        "solo_nombre_pasajero": "MATEO",
+        "pasajero": {
+            "nombre_completo": "ZULUAGA CASTANO/MATEO",
+            "documento_identidad": "1040871407"
+        },
+        "reserva": {
+            "codigo_reservacion": "UIMTVI",
+            "numero_boleto": "1347362365495",
+            "fecha_emision": "24 ene 26",
+            "aerolinea_emisora": "AEROVIAS DEL CONTINENTE",
+            "agente_emisor": {
+                "nombre": "ARP",
+                "numero_iata": "10617390"
+            }
+        },
+        "itinerario": {
+            "vuelos": [
+                {
+                    "numero_vuelo": "AV9432",
+                    "aerolinea": "Avianca",
+                    "fecha_salida": "29 ene 26",
+                    "fecha_llegada": null,
+                    "hora_salida": "12:20",
+                    "hora_llegada": "13:20",
+                    "origen": {
+                        "ciudad": "BOGOTA",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "MEDELLIN",
+                        "pais": null
+                    },
+                    "cabina": "TURISTA",
+                    "equipaje": "1PC",
+                    "codigo_reservacion_local": "AFLC97"
+                },
+                {
+                    "numero_vuelo": "AV9653",
+                    "aerolinea": "Avianca",
+                    "fecha_salida": "05 feb 26",
+                    "fecha_llegada": null,
+                    "hora_salida": "04:20",
+                    "hora_llegada": "05:25",
+                    "origen": {
+                        "ciudad": "MEDELLIN",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "BOGOTA",
+                        "pais": null
+                    },
+                    "cabina": "TURISTA",
+                    "equipaje": "1PC",
+                    "codigo_reservacion_local": "AFLC97"
+                }
+            ]
+        },
+        "debug_source_file": "Recibo de pasaje electrónico, 29 enero para MATEO ZULUAGA CASTANO.pdf"
+    },
+    {
+        "solo_nombre_pasajero": "JUAN",
+        "pasajero": {
+            "nombre_completo": "GIRALDO CASTANO/JUAN CAMILO",
+            "documento_identidad": "1020437171"
+        },
+        "reserva": {
+            "codigo_reservacion": "MBYRDI",
+            "numero_boleto": "1347362365478",
+            "fecha_emision": "24 Jan 26",
+            "aerolinea_emisora": "AEROVIAS DEL CONTINENTE",
+            "agente_emisor": {
+                "nombre": "AE1",
+                "numero_iata": "10617390"
+            }
+        },
+        "itinerario": {
+            "vuelos": []
+        },
+        "debug_source_file": "MBYRDI - GIRALDO CASTANO JUAN CAMILO _ Sabre Red Web.pdf"
+    },
+    {
+        "solo_nombre_pasajero": "IVAN",
+        "pasajero": {
+            "nombre_completo": "ROSERO/IVAN",
+            "documento_identidad": "PE212566"
+        },
+        "reserva": {
+            "codigo_reservacion": "YCHDXC",
+            "numero_boleto": "7817172759341",
+            "fecha_emision": "17 ene 25",
+            "aerolinea_emisora": "CHINA EASTERN AIRLINES",
+            "agente_emisor": {
+                "nombre": "GRUPO SOPORTE GLOBAL INC/AER",
+                "numero_iata": "10617390"
+            }
+        },
+        "itinerario": {
+            "vuelos": [
+                {
+                    "numero_vuelo": "MU710",
+                    "aerolinea": "China Eastern",
+                    "fecha_salida": "17 feb 25",
+                    "fecha_llegada": "18 feb 25",
+                    "hora_salida": "10:30",
+                    "hora_llegada": "06:35",
+                    "origen": {
+                        "ciudad": "MADRID",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "SHANGHAI PUDONG",
+                        "pais": null
+                    },
+                    "cabina": "TURISTA",
+                    "codigo_reservacion_local": "PHF0G0"
+                },
+                {
+                    "numero_vuelo": "MU709",
+                    "aerolinea": "China Eastern",
+                    "fecha_salida": "05 mar 25",
+                    "fecha_llegada": null,
+                    "hora_salida": "08:00",
+                    "hora_llegada": "00:20",
+                    "origen": {
+                        "ciudad": "SHANGHAI PUDONG",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "MADRID",
+                        "pais": null
+                    },
+                    "cabina": "TURISTA",
+                    "codigo_reservacion_local": "PHF0G0"
+                }
+            ]
+        },
+        "debug_source_file": "Recibo de pasaje electrónico, 17 febrero para IVAN ROSERO.pdf"
+    },
+    {
+        "solo_nombre_pasajero": "IVAN",
+        "pasajero": {
+            "nombre_completo": "ROSERO/IVAN",
+            "documento_identidad": "PE212566"
+        },
+        "reserva": {
+            "codigo_reservacion": "COCTJC",
+            "numero_boleto": "9967172759340",
+            "fecha_emision": "17 ene 25",
+            "aerolinea_emisora": "AIR EUROPA LINEAS AEREAS",
+            "agente_emisor": {
+                "nombre": "GRUPO SOPORTE GLOBAL INC/AER",
+                "numero_iata": "10617390"
+            }
+        },
+        "itinerario": {
+            "vuelos": [
+                {
+                    "numero_vuelo": "UX72",
+                    "aerolinea": "Air Europa",
+                    "fecha_salida": "15 feb 25",
+                    "fecha_llegada": "16 feb 25",
+                    "hora_salida": "12:30",
+                    "hora_llegada": "23:05",
+                    "origen": {
+                        "ciudad": "CARACAS",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "MADRID",
+                        "pais": null
+                    },
+                    "cabina": "TURISTA",
+                    "codigo_reservacion_local": "2VDIEV"
+                },
+                {
+                    "numero_vuelo": "UX71",
+                    "aerolinea": "Air Europa",
+                    "fecha_salida": "06 mar 25",
+                    "fecha_llegada": null,
+                    "hora_salida": "16:40",
+                    "hora_llegada": "21:05",
+                    "origen": {
+                        "ciudad": "MADRID",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "CARACAS",
+                        "pais": null
+                    },
+                    "cabina": "TURISTA",
+                    "codigo_reservacion_local": "2VDIEV"
+                }
+            ]
+        },
+        "debug_source_file": "Recibo de pasaje electrónico, 15 febrero para IVAN ROSERO.pdf"
+    },
+    {
+        "solo_nombre_pasajero": "JAIRO",
+        "pasajero": {
+            "nombre_completo": "SALAZAR SALAZAR/JAIRO DE JESUS MR",
+            "documento_identidad": "J402496982"
+        },
+        "reserva": {
+            "codigo_reservacion": "FSVUMY",
+            "numero_boleto": "2022483607652",
+            "fecha_emision": "27 ene 25",
+            "aerolinea_emisora": "TACA INTERNATIONAL AIRLI",
+            "agente_emisor": {
+                "nombre": "GRUPO SOPORTE GLOBAL INC/AE1",
+                "numero_iata": "10617390"
+            }
+        },
+        "itinerario": {
+            "vuelos": [
+                {
+                    "numero_vuelo": "AV142",
+                    "aerolinea": "Avianca",
+                    "fecha_salida": "04 feb 25",
+                    "fecha_llegada": null,
+                    "hora_salida": "07:15",
+                    "hora_llegada": "10:10",
+                    "origen": {
+                        "ciudad": "BOGOTA",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "CARACAS",
+                        "pais": null
+                    },
+                    "cabina": "TURISTA",
+                    "equipaje": "1PC",
+                    "codigo_reservacion_local": "No encontrado"
+                }
+            ]
+        },
+        "debug_source_file": "Recibo de pasaje electrónico, 04 febrero para MR JAIRO DE JESUS SALAZAR SALAZAR.pdf"
+    },
+    {
+        "solo_nombre_pasajero": "JOSE",
+        "pasajero": {
+            "nombre_completo": "SOTO HERNANDEZ/JOSE LUIS MR",
+            "documento_identidad": "J402496982"
+        },
+        "reserva": {
+            "codigo_reservacion": "FSVUMY",
+            "numero_boleto": "2022483607653",
+            "fecha_emision": "27 ene 25",
+            "aerolinea_emisora": "TACA INTERNATIONAL AIRLI",
+            "agente_emisor": {
+                "nombre": "GRUPO SOPORTE GLOBAL INC/AE1",
+                "numero_iata": "10617390"
+            }
+        },
+        "itinerario": {
+            "vuelos": [
+                {
+                    "numero_vuelo": "AV142",
+                    "aerolinea": "Avianca",
+                    "fecha_salida": "04 feb 25",
+                    "fecha_llegada": null,
+                    "hora_salida": "07:15",
+                    "hora_llegada": "10:10",
+                    "origen": {
+                        "ciudad": "BOGOTA",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "CARACAS",
+                        "pais": null
+                    },
+                    "cabina": "TURISTA",
+                    "equipaje": "1PC",
+                    "codigo_reservacion_local": "No encontrado"
+                }
+            ]
+        },
+        "debug_source_file": "Recibo de pasaje electrónico, 04 febrero para MR JOSE LUIS SOTO HERNANDEZ.pdf"
+    },
+    {
+        "solo_nombre_pasajero": "KEVIN",
+        "pasajero": {
+            "nombre_completo": "QUINTERO RAMOS/KEVIN EDUARDO MR",
+            "documento_identidad": "J402496982"
+        },
+        "reserva": {
+            "codigo_reservacion": "FSVUMY",
+            "numero_boleto": "2022483607651",
+            "fecha_emision": "27 ene 25",
+            "aerolinea_emisora": "TACA INTERNATIONAL AIRLI",
+            "agente_emisor": {
+                "nombre": "GRUPO SOPORTE GLOBAL INC/AE1",
+                "numero_iata": "10617390"
+            }
+        },
+        "itinerario": {
+            "vuelos": [
+                {
+                    "numero_vuelo": "AV142",
+                    "aerolinea": "Avianca",
+                    "fecha_salida": "04 feb 25",
+                    "fecha_llegada": null,
+                    "hora_salida": "07:15",
+                    "hora_llegada": "10:10",
+                    "origen": {
+                        "ciudad": "BOGOTA",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "CARACAS",
+                        "pais": null
+                    },
+                    "cabina": "TURISTA",
+                    "equipaje": "1PC",
+                    "codigo_reservacion_local": "No encontrado"
+                }
+            ]
+        },
+        "debug_source_file": "Recibo de pasaje electrónico, 04 febrero para MR KEVIN EDUARDO QUINTERO RAMOS.pdf"
+    },
+    {
+        "solo_nombre_pasajero": "JUAN",
+        "pasajero": {
+            "nombre_completo": "GIRALDO CASTANO/JUAN CAMILO",
+            "documento_identidad": "J402496982"
+        },
+        "reserva": {
+            "codigo_reservacion": "FVLLGL",
+            "numero_boleto": "0457367327753",
+            "fecha_emision": "06 feb 26",
+            "aerolinea_emisora": "LAN AIRLINES S.A.",
+            "agente_emisor": {
+                "nombre": "AER",
+                "numero_iata": "10617390"
+            }
+        },
+        "itinerario": {
+            "vuelos": [
+                {
+                    "numero_vuelo": "LA4011",
+                    "aerolinea": "LATAM Airlines",
+                    "fecha_salida": "09 feb 26",
+                    "fecha_llegada": null,
+                    "hora_salida": "08:25",
+                    "hora_llegada": "09:30",
+                    "origen": {
+                        "ciudad": "MEDELLIN",
+                        "pais": null
+                    },
+                    "destino": {
+                        "ciudad": "BOGOTA",
+                        "pais": null
+                    },
+                    "cabina": "TURISTA",
+                    "codigo_reservacion_local": "KCBOQU"
+                }
+            ]
+        },
+        "debug_source_file": "Recibo de pasaje electrónico, 09 febrero para JUAN CAMILO GIRALDO CASTANO.pdf"
+    }
+]

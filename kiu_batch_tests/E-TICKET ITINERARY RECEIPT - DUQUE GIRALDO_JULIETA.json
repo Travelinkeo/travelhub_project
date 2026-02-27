@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "DUQUE GIRALDO/JULIET",
+  "CODIGO_IDENTIFICACION": "37210195",
+  "SOLO_NOMBRE_PASAJERO": "DUQUE GIRALDO",
+  "NUMERO_DE_BOLETO": "3640260518766",
+  "FECHA_DE_EMISION": "08 JUL 2025 05:03",
+  "AGENTE_EMISOR": "PTYS3651X",
+  "CODIGO_RESERVA": "VCBYWA",
+  "SOLO_CODIGO_RESERVA": "VCBYWA",
+  "NOMBRE_AEROLINEA": "RUTAS AEREAS DE VENEZUELA RAV,SA",
+  "DIRECCION_AEROLINEA": null,
+  "vuelos": [
+    {
+      "aerolinea": "WW",
+      "numero_vuelo": "332",
+      "origen": "PORLAMAR",
+      "fecha_salida": "21JUL2025",
+      "hora_salida": "0945",
+      "destino": "CARACAS",
+      "hora_llegada": "1030",
+      "cabina": "Económica",
+      "clase": "H",
+      "localizador_aerolinea": "VCBYWA"
+    }
+  ],
+  "TARIFA": "36.94",
+  "IMPUESTOS": "11.69",
+  "TOTAL": "48.63",
+  "SOURCE_SYSTEM": "AI_KIU",
+  "es_remision": false,
+  "NOMBRE DEL PASAJERO": "DUQUE GIRALDO/JULIET",
+  "CODIGO IDENTIFICACION": "37210195",
+  "SOLO NOMBRE PASAJERO": "DUQUE GIRALDO",
+  "NUMERO DE BOLETO": "3640260518766",
+  "FECHA DE EMISION": "08 JUL 2025 05:03",
+  "AGENTE EMISOR": "PTYS3651X",
+  "CODIGO RESERVA": "VCBYWA",
+  "SOLO CODIGO RESERVA": "VCBYWA",
+  "NOMBRE AEROLINEA": "RUTAS AEREAS DE VENEZUELA RAV,SA",
+  "DIRECCION AEROLINEA": null,
+  "SOURCE SYSTEM": "AI_KIU",
+  "es remision": false
+}

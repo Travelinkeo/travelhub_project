@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "RAMIREZ/YOHAN",
+  "CODIGO_IDENTIFICACION": "PP406135",
+  "SOLO_NOMBRE_PASAJERO": "YOHAN",
+  "NUMERO_DE_BOLETO": "7650211263601",
+  "FECHA_DE_EMISION": "15 JAN 2026 18:54",
+  "AGENTE_EMISOR": "BLA005RZC",
+  "CODIGO_RESERVA": "YPRQLO",
+  "SOLO_CODIGO_RESERVA": "YPRQLO",
+  "NOMBRE_AEROLINEA": "RUTACA AIRLINES",
+  "DIRECCION_AEROLINEA": null,
+  "vuelos": [
+    {
+      "aerolinea": "5R",
+      "numero_vuelo": "371",
+      "origen": "SAN ANTONIO",
+      "fecha_salida": "16JAN 2026",
+      "hora_salida": "1700",
+      "destino": "CARACAS",
+      "hora_llegada": "1800",
+      "cabina": "Económica",
+      "clase": "F",
+      "localizador_aerolinea": "YPRQLO"
+    }
+  ],
+  "TARIFA": "54090.95",
+  "IMPUESTOS": "591.76",
+  "TOTAL": "591.76",
+  "SOURCE_SYSTEM": "AI_KIU",
+  "es_remision": true,
+  "NOMBRE DEL PASAJERO": "RAMIREZ/YOHAN",
+  "CODIGO IDENTIFICACION": "PP406135",
+  "SOLO NOMBRE PASAJERO": "YOHAN",
+  "NUMERO DE BOLETO": "7650211263601",
+  "FECHA DE EMISION": "15 JAN 2026 18:54",
+  "AGENTE EMISOR": "BLA005RZC",
+  "CODIGO RESERVA": "YPRQLO",
+  "SOLO CODIGO RESERVA": "YPRQLO",
+  "NOMBRE AEROLINEA": "RUTACA AIRLINES",
+  "DIRECCION AEROLINEA": null,
+  "SOURCE SYSTEM": "AI_KIU",
+  "es remision": true
+}

@@ -1,22 +1,3 @@
-# core/views/dashboard_boletos.py
-"""
-API y Vista HTML para el Dashboard de Ventas de Boletos.
-"""
-
-from django.http import JsonResponse
-from django.shortcuts import render
-from django.views.decorators.http import require_http_methods
-from django.views.decorators.csrf import csrf_exempt
-from django.db.models import Sum
-from decimal import Decimal
-import json
-
-from core.models import Venta, ItemVenta, BoletoImportado
-from personas.models import Pasajero
-
-
-def dashboard_boletos_html(request):
-    """
     Vista HTML del dashboard de ventas de boletos.
     """
     return render(request, 'core/dashboard_ventas_boletos.html')
@@ -147,7 +128,181 @@ def actualizar_item_boleto(request):
             'margen': float(item.venta.margen_estimado or 0)
         })
         
-    except ItemVenta.DoesNotExist:
-        return JsonResponse({'error': 'Item no encontrado'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
+
+
+@require_http_methods(["GET"])
+def dashboard_metricas_api(request):
+    """
+    API para obtener métricas del dashboard de boletos.
+    """
+    from django.utils import timezone
+    from datetime import timedelta
+    from django.db.models import Count, Q
+
+    hoy = timezone.now().date()
+    inicio_semana = hoy - timedelta(days=hoy.weekday())
+    inicio_mes = hoy.replace(day=1)
+
+    # Métricas de procesados
+    procesados_hoy = BoletoImportado.objects.filter(fecha_subida__date=hoy).count()
+    procesados_semana = BoletoImportado.objects.filter(fecha_subida__date__gte=inicio_semana).count()
+    procesados_mes = BoletoImportado.objects.filter(fecha_subida__date__gte=inicio_mes).count()
+
+    # Top Aerolíneas (del mes actual)
+    top_aerolineas = BoletoImportado.objects.filter(
+        fecha_subida__date__gte=inicio_mes
+    ).values('aerolinea_emisora').annotate(
+        cantidad=Count('id_boleto_importado')
+    ).order_by('-cantidad')[:5]
+
+    # Estado de ventas
+    pendientes = Venta.objects.filter(estado='PEN').count()
+    errores = BoletoImportado.objects.filter(venta_asociada__isnull=True).count() # Asumiendo que sin venta es un error o pendiente de procesar
+
+    return JsonResponse({
+        'procesados': {
+            'hoy': procesados_hoy,
+            'semana': procesados_semana,
+            'mes': procesados_mes
+        },
+        'top_aerolineas': list(top_aerolineas),
+        'pendientes': pendientes,
+        'errores': errores
+    })
+
+
+@require_http_methods(["GET"])
+def buscar_boletos_api(request):
+    """
+    API para búsqueda avanzada de boletos.
+    """
+    nombre = request.GET.get('nombre')
+    pnr = request.GET.get('pnr')
+    fecha_inicio = request.GET.get('fecha_inicio')
+    fecha_fin = request.GET.get('fecha_fin')
+    origen = request.GET.get('origen')
+    destino = request.GET.get('destino')
+    
+    queryset = BoletoImportado.objects.all().select_related('venta_asociada')
+    
+    if nombre:
+        queryset = queryset.filter(nombre_pasajero_completo__icontains=nombre)
+    if pnr:
+        queryset = queryset.filter(localizador_pnr__icontains=pnr)
+    if fecha_inicio:
+        queryset = queryset.filter(fecha_emision_boleto__gte=fecha_inicio)
+    if fecha_fin:
+        queryset = queryset.filter(fecha_emision_boleto__lte=fecha_fin)
+    if origen:
+        queryset = queryset.filter(ruta_vuelo__icontains=origen)
+    if destino:
+        queryset = queryset.filter(ruta_vuelo__icontains=destino)
+        
+    resultados = []
+    for boleto in queryset.order_by('-fecha_emision_boleto')[:50]: # Limit to 50 results
+        resultados.append({
+            'id_boleto_importado': boleto.id_boleto_importado,
+            'numero_boleto': boleto.numero_boleto,
+            'nombre_pasajero_procesado': boleto.nombre_pasajero_completo,
+            'aerolinea_emisora': boleto.aerolinea_emisora,
+            'total_boleto': float(boleto.total_boleto or 0),
+            'localizador_pnr': boleto.localizador_pnr,
+            'fecha_emision': boleto.fecha_emision_boleto.isoformat() if boleto.fecha_emision_boleto else None,
+            'ruta': boleto.ruta_vuelo
+        })
+        
+    return JsonResponse(resultados, safe=False)
+
+
+@require_http_methods(["GET"])
+def reporte_comisiones_api(request):
+    """
+    API para reporte de comisiones.
+    """
+    fecha_inicio = request.GET.get('fecha_inicio')
+    fecha_fin = request.GET.get('fecha_fin')
+    
+    queryset = BoletoImportado.objects.filter(venta_asociada__isnull=False)
+    
+    if fecha_inicio:
+        queryset = queryset.filter(fecha_emision_boleto__gte=fecha_inicio)
+    if fecha_fin:
+        queryset = queryset.filter(fecha_emision_boleto__lte=fecha_fin)
+        
+    # Agrupar por aerolínea
+    por_aerolinea = []
+    aerolineas = queryset.values('aerolinea_emisora').annotate(
+        cantidad=Count('id_boleto_importado'),
+        total_ventas=Sum('venta_asociada__total_venta')
+    )
+    
+    total_boletos = 0
+    total_ventas = 0
+    total_comisiones = 0
+    
+    for item in aerolineas:
+        # Calcular comisión estimada (esto es un ejemplo, ajustar según lógica real)
+        # Asumiendo que la comisión está en la venta o se calcula
+        ventas_aerolinea = queryset.filter(aerolinea_emisora=item['aerolinea_emisora'])
+        comision_aerolinea = sum(v.venta_asociada.comision for v in ventas_aerolinea if v.venta_asociada.comision)
+        
+        por_aerolinea.append({
+            'aerolinea': item['aerolinea_emisora'],
+            'cantidad_boletos': item['cantidad'],
+            'total_ventas': float(item['total_ventas'] or 0),
+            'total_comisiones': float(comision_aerolinea)
+        })
+        
+        total_boletos += item['cantidad']
+        total_ventas += float(item['total_ventas'] or 0)
+        total_comisiones += float(comision_aerolinea)
+        
+    return JsonResponse({
+        'totales': {
+            'total_boletos': total_boletos,
+            'total_ventas': total_ventas,
+            'total_comisiones': total_comisiones
+        },
+        'por_aerolinea': por_aerolinea
+    })
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def solicitar_anulacion_api(request):
+    """
+    API para solicitar anulación de boleto.
+    """
+    try:
+        data = json.loads(request.body)
+        boleto_id = data.get('boleto')
+        
+        # Validar existencia del boleto
+        try:
+            boleto = BoletoImportado.objects.get(pk=boleto_id)
+        except BoletoImportado.DoesNotExist:
+            return JsonResponse({'error': 'Boleto no encontrado'}, status=404)
+            
+        # Crear registro de anulación
+        from core.models.anulaciones import AnulacionBoleto
+        
+        anulacion = AnulacionBoleto.objects.create(
+            boleto=boleto,
+            tipo_anulacion=data.get('tipo_anulacion', 'VOL'),
+            motivo=data.get('motivo', ''),
+            monto_original=Decimal(str(data.get('monto_original', 0))),
+            penalidad_aerolinea=Decimal(str(data.get('penalidad_aerolinea', 0))),
+            fee_agencia=Decimal(str(data.get('fee_agencia', 0))),
+            solicitado_por=request.user if request.user.is_authenticated else None
+        )
+        
+        return JsonResponse({
+            'status': 'success',
+            'id_anulacion': anulacion.id_anulacion,
+            'monto_reembolso': float(anulacion.monto_reembolso)
+        })
+        
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=400)

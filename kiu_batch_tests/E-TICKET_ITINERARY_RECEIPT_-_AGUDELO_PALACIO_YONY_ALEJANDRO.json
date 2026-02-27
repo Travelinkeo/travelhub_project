@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "AGUDELO PALACIO/YONY",
+  "CODIGO_IDENTIFICACION": "IDECI84418366",
+  "SOLO_NOMBRE_PASAJERO": "AGUDELO PALACIO/YONY",
+  "NUMERO_DE_BOLETO": "0670310208155",
+  "FECHA_DE_EMISION": "22 JUL 2025 12:40",
+  "AGENTE_EMISOR": "PTYS3651X",
+  "CODIGO_RESERVA": "QGHIWS",
+  "SOLO_CODIGO_RESERVA": "QGHIWS",
+  "NOMBRE_AEROLINEA": "TURPIAL AIRLINES CA",
+  "DIRECCION_AEROLINEA": null,
+  "vuelos": [
+    {
+      "aerolinea": "T9",
+      "numero_vuelo": "621",
+      "origen": "MARACAIBO",
+      "fecha_salida": "23JUL2025",
+      "hora_salida": "1400",
+      "destino": "VALENCIA",
+      "hora_llegada": "1500",
+      "cabina": "Económica",
+      "clase": "B",
+      "localizador_aerolinea": "QGHIWS"
+    }
+  ],
+  "TARIFA": "83.30",
+  "IMPUESTOS": "13.49",
+  "TOTAL": "96.79",
+  "SOURCE_SYSTEM": "AI_KIU",
+  "es_remision": false,
+  "NOMBRE DEL PASAJERO": "AGUDELO PALACIO/YONY",
+  "CODIGO IDENTIFICACION": "IDECI84418366",
+  "SOLO NOMBRE PASAJERO": "AGUDELO PALACIO/YONY",
+  "NUMERO DE BOLETO": "0670310208155",
+  "FECHA DE EMISION": "22 JUL 2025 12:40",
+  "AGENTE EMISOR": "PTYS3651X",
+  "CODIGO RESERVA": "QGHIWS",
+  "SOLO CODIGO RESERVA": "QGHIWS",
+  "NOMBRE AEROLINEA": "TURPIAL AIRLINES CA",
+  "DIRECCION AEROLINEA": null,
+  "SOURCE SYSTEM": "AI_KIU",
+  "es remision": false
+}

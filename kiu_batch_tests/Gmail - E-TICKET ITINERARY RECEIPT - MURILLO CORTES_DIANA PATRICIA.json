@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "MURILLO CORTES/DIANA PATRICIA",
+  "CODIGO_IDENTIFICACION": "84605396",
+  "SOLO_NOMBRE_PASAJERO": "DIANA PATRICIA",
+  "NUMERO_DE_BOLETO": "3080201383056",
+  "FECHA_DE_EMISION": "29 JAN 2026 15:51",
+  "AGENTE_EMISOR": "CCS00V0WV",
+  "CODIGO_RESERVA": "DDPIIH",
+  "SOLO_CODIGO_RESERVA": "DDPIIH",
+  "NOMBRE_AEROLINEA": "CONVIASA",
+  "DIRECCION_AEROLINEA": null,
+  "vuelos": [
+    {
+      "aerolinea": "V01187",
+      "numero_vuelo": "1187",
+      "origen": "SAN ANTONIO",
+      "fecha_salida": "2FEB 2026",
+      "hora_salida": "0850",
+      "destino": "CARACAS",
+      "hora_llegada": "0950",
+      "cabina": "Económica",
+      "clase": "G",
+      "localizador_aerolinea": "DDPIIH"
+    }
+  ],
+  "TARIFA": "41500.00",
+  "IMPUESTOS": "8956.30",
+  "TOTAL": "50456.30",
+  "SOURCE_SYSTEM": "AI_KIU",
+  "es_remision": false,
+  "NOMBRE DEL PASAJERO": "MURILLO CORTES/DIANA PATRICIA",
+  "CODIGO IDENTIFICACION": "84605396",
+  "SOLO NOMBRE PASAJERO": "DIANA PATRICIA",
+  "NUMERO DE BOLETO": "3080201383056",
+  "FECHA DE EMISION": "29 JAN 2026 15:51",
+  "AGENTE EMISOR": "CCS00V0WV",
+  "CODIGO RESERVA": "DDPIIH",
+  "SOLO CODIGO RESERVA": "DDPIIH",
+  "NOMBRE AEROLINEA": "CONVIASA",
+  "DIRECCION AEROLINEA": null,
+  "SOURCE SYSTEM": "AI_KIU",
+  "es remision": false
+}

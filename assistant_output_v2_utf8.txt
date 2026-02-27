@@ -1,0 +1,36 @@
+﻿python : INFO:travelhub.settings:\u2705 Sentry configurado para 
+entorno: development
+En línea: 1 Carácter: 1
++ python scripts/test_accounting_assistant.py > 
+assistant_output_v2.txt ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~
+    + CategoryInfo          : NotSpecified: (INFO:travelhub....no:  
+   development:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+
+(process:56224): GLib-GIO-WARNING **: 20:10:47.617: Unexpectedly, 
+UWP app `Clipchamp.Clipchamp_4.5.10220.0_x64__yxz26nhyzhsrt' (AUMId 
+`Clipchamp.Clipchamp_yxz26nhyzhsrt!App') supports 41 extensions but 
+has no verbs
+
+(process:56224): GLib-GIO-WARNING **: 20:10:47.813: Unexpectedly, 
+UWP app `Microsoft.ScreenSketch_11.2511.47.0_x64__8wekyb3d8bbwe' 
+(AUMId `Microsoft.ScreenSketch_8wekyb3d8bbwe!App') supports 29 
+extensions but has no verbs
+
+(process:56224): GLib-GIO-WARNING **: 20:10:47.845: Unexpectedly, 
+UWP app 
+`Microsoft.OutlookForWindows_1.2026.210.300_x64__8wekyb3d8bbwe' 
+(AUMId `Microsoft.OutlookForWindows_8wekyb3d8bbwe!Microsoft.Outlookf
+orWindows') supports 4 extensions but has no verbs
+[WARNING] Usando almacenamiento local (FileSystemStorage)
+[OK] Usando PostgreSQL como broker de Celery (econ¾mico).
+--- Iniciando Prueba de Asistente Contable AI ---
+
+USER: ┐Por quÚ el boleto 1230000000002 tiene una diferencia?
+ASSISTANT: El boleto 1230000000002 presenta una discrepancia financiera porque el monto total en el sistema es de 200.0, mientras que el proveedor reporta 205.5, resultando en una diferencia de 5.5 en el campo 'monto_total'. El pasajero asociado a este boleto es PEREZ JUAN.
+
+USER: ┐QuÚ discrepancias tenemos pendientes?
+ASSISTANT: Actualmente, tienes una discrepancia pendiente para el boleto 1230000000002, asociado al pasajero PEREZ JUAN, con una diferencia de monto de 5.5.

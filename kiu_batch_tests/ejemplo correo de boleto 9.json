@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "FARIAS APARCEDO/ANDY DAVID",
+  "CODIGO_IDENTIFICACION": "157018673",
+  "SOLO_NOMBRE_PASAJERO": "ANDY DAVID",
+  "NUMERO_DE_BOLETO": "3080310746987",
+  "FECHA_DE_EMISION": "06 FEB 2025 11:16",
+  "AGENTE_EMISOR": "PTYS3651X",
+  "CODIGO_RESERVA": "KQZLBA",
+  "SOLO_CODIGO_RESERVA": "KQZLBA",
+  "NOMBRE_AEROLINEA": "CONVIASA",
+  "DIRECCION_AEROLINEA": null,
+  "vuelos": [
+    {
+      "aerolinea": "V0",
+      "numero_vuelo": "3726",
+      "origen": "CARACAS",
+      "fecha_salida": "18FEB2025",
+      "hora_salida": "1000",
+      "destino": "MEXICO CITY",
+      "hora_llegada": "1300",
+      "cabina": "Económica",
+      "clase": "O",
+      "localizador_aerolinea": "KQZLBA"
+    }
+  ],
+  "TARIFA": "225.00",
+  "IMPUESTOS": "185.08",
+  "TOTAL": "410.08",
+  "SOURCE_SYSTEM": "AI_KIU",
+  "es_remision": false,
+  "NOMBRE DEL PASAJERO": "FARIAS APARCEDO/ANDY DAVID",
+  "CODIGO IDENTIFICACION": "157018673",
+  "SOLO NOMBRE PASAJERO": "ANDY DAVID",
+  "NUMERO DE BOLETO": "3080310746987",
+  "FECHA DE EMISION": "06 FEB 2025 11:16",
+  "AGENTE EMISOR": "PTYS3651X",
+  "CODIGO RESERVA": "KQZLBA",
+  "SOLO CODIGO RESERVA": "KQZLBA",
+  "NOMBRE AEROLINEA": "CONVIASA",
+  "DIRECCION AEROLINEA": null,
+  "SOURCE SYSTEM": "AI_KIU",
+  "es remision": false
+}

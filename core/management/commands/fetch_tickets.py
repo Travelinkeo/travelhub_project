@@ -8,7 +8,7 @@ from django.conf import settings
 from django.core.files.base import ContentFile
 from django.core.management.base import BaseCommand
 
-from core.models.boletos import BoletoImportado
+from core.models import BoletoImportado
 
 
 class Command(BaseCommand):

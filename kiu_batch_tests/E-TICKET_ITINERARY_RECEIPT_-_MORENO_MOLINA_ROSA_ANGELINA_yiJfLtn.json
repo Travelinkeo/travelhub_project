@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "MORENO MOLINA/ROSA ANGELINA",
+  "CODIGO_IDENTIFICACION": "22091842",
+  "SOLO_NOMBRE_PASAJERO": "ROSA ANGELINA",
+  "NUMERO_DE_BOLETO": "0520390102708",
+  "FECHA_DE_EMISION": "18 SEP 2025 15:38",
+  "AGENTE_EMISOR": "PTYS3651X",
+  "CODIGO_RESERVA": "FBFKWO",
+  "SOLO_CODIGO_RESERVA": "FBFKWO",
+  "NOMBRE_AEROLINEA": "AEROLINEAS ESTELAR LATINOAMERICA C.A.",
+  "DIRECCION_AEROLINEA": null,
+  "vuelos": [
+    {
+      "aerolinea": "ES",
+      "numero_vuelo": "8301",
+      "origen": "CARACAS",
+      "fecha_salida": "20SEP 2025",
+      "hora_salida": "0700",
+      "destino": "SAN ANTONIO",
+      "hora_llegada": "0800",
+      "cabina": "Económica",
+      "clase": "O",
+      "localizador_aerolinea": "FBFKWO"
+    }
+  ],
+  "TARIFA": "36.38",
+  "IMPUESTOS": "58.62",
+  "TOTAL": "95.00",
+  "SOURCE_SYSTEM": "AI_KIU",
+  "es_remision": false,
+  "NOMBRE DEL PASAJERO": "MORENO MOLINA/ROSA ANGELINA",
+  "CODIGO IDENTIFICACION": "22091842",
+  "SOLO NOMBRE PASAJERO": "ROSA ANGELINA",
+  "NUMERO DE BOLETO": "0520390102708",
+  "FECHA DE EMISION": "18 SEP 2025 15:38",
+  "AGENTE EMISOR": "PTYS3651X",
+  "CODIGO RESERVA": "FBFKWO",
+  "SOLO CODIGO RESERVA": "FBFKWO",
+  "NOMBRE AEROLINEA": "AEROLINEAS ESTELAR LATINOAMERICA C.A.",
+  "DIRECCION AEROLINEA": null,
+  "SOURCE SYSTEM": "AI_KIU",
+  "es remision": false
+}

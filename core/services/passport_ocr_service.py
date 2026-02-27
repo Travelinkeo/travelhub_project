@@ -1,267 +1,146 @@
-import re
 import os
-from datetime import datetime
-from PIL import Image
+import json
+import logging
 from django.conf import settings
+import google.generativeai as genai
+from PIL import Image
 
-try:
-    import cv2
-    import numpy as np
-    import pytesseract
-    HAS_OCR_LIBS = True
-except ImportError:
-    HAS_OCR_LIBS = False
+logger = logging.getLogger(__name__)
 
 class PassportOCRService:
-    """Servicio para procesamiento OCR de pasaportes"""
+    """
+    Servicio para extracción de datos de pasaportes utilizando Google Gemini Vision.
+    Reemplaza la implementación antigua basada en Tesseract.
+    """
     
     def __init__(self):
-        # Configurar path de Tesseract en Windows
-        if os.name == 'nt':  # Windows
-            pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
-        
-        self.patterns = {
-            'passport_number': r'[A-Z]{1,2}[0-9]{6,9}',
-            'mrz_line': r'[A-Z0-9<]{44}',
-            'names': r'([A-Z]{2,})[<]+([A-Z<]+)',
-            'date': r'([0-9]{2})([0-9]{2})([0-9]{2})',
-            'nationality': r'P<([A-Z]{3})',
-        }
-    
+        self.api_key = getattr(settings, 'GEMINI_API_KEY', os.environ.get('GEMINI_API_KEY'))
+        if self.api_key:
+            genai.configure(api_key=self.api_key)
+            self.model = genai.GenerativeModel('gemini-1.5-flash')
+        else:
+            logger.warning("GEMINI_API_KEY no configurada. El servicio OCR no funcionará.")
+            self.model = None
+
     def process_passport_image(self, image_file):
-        """Procesa imagen de pasaporte y extrae datos"""
-        if not HAS_OCR_LIBS:
+        """
+        Procesa una imagen de pasaporte (ruta o objeto archivo) y extrae datos JSON.
+        """
+        if not self.model:
             return {
                 'success': False,
-                'error': 'OCR libraries not installed. Install: pip install opencv-python pytesseract',
-                'data': {'numero_pasaporte': 'DEMO123456'},
-                'confidence': 'LOW'
+                'error': 'API Key de Gemini no configurada.',
+                'data': {}
             }
-            
+
         try:
-            # Convertir a imagen PIL
-            image = Image.open(image_file)
+            # Cargar imagen (Soporta path o file-like object)
+            img = Image.open(image_file)
             
-            # Preprocesar imagen
-            processed_image = self._preprocess_image(image)
+            prompt = """
+            Act as an expert OCR system for Travel Documents.
+            Analyze this passport image and extract the following information in strict JSON format.
+            If a field is not visible or unclear, use null.
             
-            # Extraer texto con OCR
-            ocr_text = self._extract_text_ocr(processed_image)
+            Required fields:
+            - numero_pasaporte (string)
+            - apellidos (string)
+            - nombres (string)
+            - nacionalidad (ISO 3 country code, e.g., VEN, USA, ESP)
+            - fecha_nacimiento (YYYY-MM-DD)
+            - fecha_vencimiento (YYYY-MM-DD)
+            - sexo (M or F)
+            - pais_emision (ISO 3 country code)
+            - face_coordinates (array of 4 integers: [ymin, xmin, ymax, xmax] relative to 1000x1000 scale. e.g. [200, 100, 500, 400])
+
+            Output only the valid JSON.
+            """
+
+            response = self.model.generate_content([prompt, img])
             
-            # Parsear datos del pasaporte
-            passport_data = self._parse_passport_data(ocr_text)
+            # Limpiar respuesta (quitar backticks de markdown si existen)
+            text_response = response.text.strip()
+            if text_response.startswith('```json'):
+                text_response = text_response[7:]
+            if text_response.endswith('```'):
+                text_response = text_response[:-3]
             
-            # Calcular confianza
-            confidence = self._calculate_confidence(passport_data)
+            data = json.loads(text_response)
             
+            # Procesar Recorte de Cara
+            face_coords = data.get('face_coordinates')
+            if face_coords and len(face_coords) == 4:
+                try:
+                    import base64
+                    from io import BytesIO
+                    
+                    ymin, xmin, ymax, xmax = face_coords
+                    width, height = img.size
+                    
+                    # Convertir coordenadas relativas (1000x1000) a absolutas
+                    left = (xmin / 1000) * width
+                    top = (ymin / 1000) * height
+                    right = (xmax / 1000) * width
+                    bottom = (ymax / 1000) * height
+                    
+                    # Margen de seguridad (10%)
+                    margin_w = (right - left) * 0.1
+                    margin_h = (bottom - top) * 0.1
+                    
+                    crop_box = (
+                        max(0, left - margin_w),
+                        max(0, top - margin_h),
+                        min(width, right + margin_w),
+                        min(height, bottom + margin_h)
+                    )
+                    
+                    face_img = img.crop(crop_box)
+                    
+                    # Convertir a Base64
+                    buffered = BytesIO()
+                    face_img.save(buffered, format="JPEG")
+                    img_str = base64.b64encode(buffered.getvalue()).decode()
+                    data['face_image_base64'] = f"data:image/jpeg;base64,{img_str}"
+                    
+                except Exception as e:
+                    logger.warning(f"Error recortando cara: {e}")
+                    data['face_image_base64'] = None
+
+            # Validación básica
+            if not data.get('numero_pasaporte'):
+                return {'success': False, 'error': 'No se pudo detectar el número de pasaporte', 'data': data}
+
+            # Enriquecer con IDs de base de datos para Países
+            try:
+                from core.models_catalogos import Pais
+                
+                # Resolver Nacionalidad
+                nac_iso = data.get('nacionalidad')
+                if nac_iso and len(nac_iso) == 3:
+                    pais_nac = Pais.objects.filter(codigo_iso_3=nac_iso).first()
+                    if pais_nac:
+                        data['nacionalidad'] = pais_nac.pk
+                        
+                # Resolver País Emisión
+                pais_emision_iso = data.get('pais_emision')
+                if pais_emision_iso and len(pais_emision_iso) == 3:
+                    pais_em = Pais.objects.filter(codigo_iso_3=pais_emision_iso).first()
+                    if pais_em:
+                        data['pais_emision'] = pais_em.pk
+                        
+            except Exception as db_err:
+                logger.warning(f"No se pudieron resolver los IDs de paises: {db_err}")
+
             return {
                 'success': True,
-                'data': passport_data,
-                'confidence': confidence,
-                'raw_text': ocr_text,
-                'errors': []
+                'data': data,
+                'confidence': 'HIGH' # Gemini suele ser muy preciso
             }
-            
+
         except Exception as e:
+            logger.error(f"Error procesando pasaporte con Gemini: {e}")
             return {
                 'success': False,
-                'error': str(e),
-                'data': {'numero_pasaporte': f'ERROR_{str(e)[:10]}'},
-                'confidence': 'LOW'
+                'error': f"Error de procesamiento: {str(e)}",
+                'data': {}
             }
-    
-    def _preprocess_image(self, pil_image):
-        """Preprocesa imagen para mejorar OCR"""
-        # Convertir PIL a OpenCV
-        opencv_image = cv2.cvtColor(np.array(pil_image), cv2.COLOR_RGB2BGR)
-        
-        # Redimensionar si es muy grande
-        height, width = opencv_image.shape[:2]
-        if width > 1200:
-            scale = 1200 / width
-            new_width = int(width * scale)
-            new_height = int(height * scale)
-            opencv_image = cv2.resize(opencv_image, (new_width, new_height))
-        
-        # Convertir a escala de grises
-        gray = cv2.cvtColor(opencv_image, cv2.COLOR_BGR2GRAY)
-        
-        # Detectar y corregir rotación automáticamente
-        gray = self._auto_rotate_image(gray)
-        
-        # Mejorar contraste
-        clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
-        enhanced = clahe.apply(gray)
-        
-        # Reducir ruido
-        denoised = cv2.medianBlur(enhanced, 3)
-        
-        return denoised
-    
-    def _auto_rotate_image(self, gray_image):
-        """Detecta y corrige automáticamente la rotación de la imagen"""
-        if not HAS_OCR_LIBS:
-            return gray_image
-            
-        try:
-            # Detectar líneas para determinar orientación
-            edges = cv2.Canny(gray_image, 50, 150, apertureSize=3)
-            lines = cv2.HoughLines(edges, 1, np.pi/180, threshold=100)
-            
-            if lines is not None:
-                angles = []
-                for rho, theta in lines[:10]:  # Solo primeras 10 líneas
-                    angle = np.degrees(theta) - 90
-                    angles.append(angle)
-                
-                # Calcular ángulo promedio
-                median_angle = np.median(angles)
-                
-                # Solo rotar si el ángulo es significativo
-                if abs(median_angle) > 5:
-                    # Rotar imagen
-                    (h, w) = gray_image.shape[:2]
-                    center = (w // 2, h // 2)
-                    rotation_matrix = cv2.getRotationMatrix2D(center, median_angle, 1.0)
-                    rotated = cv2.warpAffine(gray_image, rotation_matrix, (w, h), 
-                                           flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE)
-                    return rotated
-            
-            return gray_image
-        except Exception:
-            # Si falla la detección, devolver imagen original
-            return gray_image
-    
-    def _extract_text_ocr(self, processed_image):
-        """Extrae texto usando Tesseract OCR"""
-        # Configuración optimizada para pasaportes
-        config = '--oem 3 --psm 6 -c tessedit_char_whitelist=ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789<'
-        
-        try:
-            # Extraer texto
-            text = pytesseract.image_to_string(processed_image, config=config, lang='eng')
-            return text.upper().strip()
-        except Exception as e:
-            # Fallback sin configuración específica
-            return pytesseract.image_to_string(processed_image, lang='eng').upper().strip()
-    
-    def _parse_passport_data(self, ocr_text):
-        """Parsea datos del texto OCR"""
-        lines = [line.strip() for line in ocr_text.split('\n') if line.strip()]
-        
-        # Buscar líneas MRZ (Machine Readable Zone)
-        mrz_lines = [line for line in lines if len(line) >= 40 and '<' in line]
-        
-        if len(mrz_lines) >= 2:
-            return self._parse_mrz_data(mrz_lines)
-        else:
-            return self._parse_general_text(lines)
-    
-    def _parse_mrz_data(self, mrz_lines):
-        """Parsea datos de la zona MRZ del pasaporte"""
-        try:
-            line1 = mrz_lines[0]  # P<COUNTRY<<<SURNAME<<GIVEN_NAMES
-            line2 = mrz_lines[1]  # PASSPORT_NUMBER<NATIONALITY<BIRTH_DATE<SEX<EXPIRY_DATE
-            
-            # Extraer país y nombres de línea 1
-            country_match = re.search(r'P<([A-Z]{3})', line1)
-            nationality = country_match.group(1) if country_match else ''
-            
-            # Extraer nombres (después del país)
-            names_part = line1[5:]  # Saltar "P<VEN"
-            names_split = names_part.split('<<')
-            surname = names_split[0].replace('<', ' ').strip() if names_split else ''
-            given_names = names_split[1].replace('<', ' ').strip() if len(names_split) > 1 else ''
-            
-            # Extraer datos de línea 2
-            # Formato: PASSPORT_NUM(9) + CHECK(1) + NATIONALITY(3) + BIRTH_DATE(6) + CHECK(1) + SEX(1) + EXPIRY_DATE(6)
-            passport_num = line2[:9].replace('<', '').strip()
-            
-            # Buscar fechas en formato YYMMDD (6 dígitos consecutivos)
-            dates_in_line2 = re.findall(r'(\d{6})', line2)
-            
-            birth_date = None
-            expiry_date = None
-            
-            if len(dates_in_line2) >= 2:
-                birth_date = self._parse_mrz_date(dates_in_line2[0])
-                expiry_date = self._parse_mrz_date(dates_in_line2[1])
-            
-            # Extraer sexo (buscar M o F)
-            sex_match = re.search(r'[MF]', line2[20:30])
-            sex = sex_match.group(0) if sex_match else ''
-            
-            return {
-                'numero_pasaporte': passport_num,
-                'apellidos': surname,
-                'nombres': given_names,
-                'nacionalidad': nationality,
-                'fecha_nacimiento': birth_date,
-                'fecha_vencimiento': expiry_date,
-                'sexo': sex,
-                'texto_mrz': '\n'.join(mrz_lines)
-            }
-            
-        except Exception as e:
-            return {'error': f'Error parseando MRZ: {str(e)}'}
-    
-    def _parse_general_text(self, lines):
-        """Parsea datos de texto general (fallback)"""
-        data = {}
-        
-        # Buscar número de pasaporte
-        for line in lines:
-            passport_match = re.search(self.patterns['passport_number'], line)
-            if passport_match:
-                data['numero_pasaporte'] = passport_match.group(0)
-                break
-        
-        # Buscar fechas (formato DDMMYY)
-        dates_found = []
-        for line in lines:
-            date_matches = re.findall(r'\b([0-9]{2})([0-9]{2})([0-9]{2})\b', line)
-            for match in date_matches:
-                parsed_date = self._parse_mrz_date(''.join(match))
-                if parsed_date:
-                    dates_found.append(parsed_date)
-        
-        # Asignar fechas (primera = nacimiento, segunda = vencimiento)
-        if len(dates_found) >= 2:
-            data['fecha_nacimiento'] = dates_found[0]
-            data['fecha_vencimiento'] = dates_found[1]
-        
-        return data
-    
-    def _parse_mrz_date(self, date_str):
-        """Convierte fecha MRZ (YYMMDD) a fecha Python"""
-        # Limpiar string de caracteres no numéricos
-        date_str = ''.join(c for c in date_str if c.isdigit())
-        
-        if len(date_str) != 6:
-            return None
-        
-        try:
-            yy = int(date_str[:2])
-            mm = int(date_str[2:4])
-            dd = int(date_str[4:6])
-            
-            # Determinar siglo (asumiendo que años > 50 son 1900s, <= 50 son 2000s)
-            year = 1900 + yy if yy > 50 else 2000 + yy
-            
-            date_obj = datetime(year, mm, dd).date()
-            # Retornar en formato ISO para JSON
-            return date_obj.isoformat()
-        except ValueError:
-            return None
-    
-    def _calculate_confidence(self, passport_data):
-        """Calcula nivel de confianza basado en datos extraídos"""
-        required_fields = ['numero_pasaporte', 'nombres', 'apellidos']
-        found_fields = sum(1 for field in required_fields if passport_data.get(field))
-        
-        if found_fields == len(required_fields):
-            return 'HIGH'
-        elif found_fields >= 2:
-            return 'MEDIUM'
-        else:
-            return 'LOW'

@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "GIRALDO GOMEZ/JUAN BAUTISTA",
+  "CODIGO_IDENTIFICACION": "84286506",
+  "SOLO_NOMBRE_PASAJERO": "JUAN BAUTISTA",
+  "NUMERO_DE_BOLETO": "3080201383771",
+  "FECHA_DE_EMISION": "02 FEB 2026 11:42",
+  "AGENTE_EMISOR": "CCS00V0WV",
+  "CODIGO_RESERVA": "GETNAP",
+  "SOLO_CODIGO_RESERVA": "GETNAP",
+  "NOMBRE_AEROLINEA": "CONVIASA",
+  "DIRECCION_AEROLINEA": null,
+  "vuelos": [
+    {
+      "aerolinea": "V0",
+      "numero_vuelo": "1186",
+      "origen": "CARACAS",
+      "fecha_salida": "13FEB2026",
+      "hora_salida": "0700",
+      "destino": "SAN ANTONIO",
+      "hora_llegada": "0800",
+      "cabina": "Económica",
+      "clase": "O",
+      "localizador_aerolinea": "GETNAP"
+    }
+  ],
+  "TARIFA": "21400.00",
+  "IMPUESTOS": "8564.93",
+  "TOTAL": "29964.93",
+  "SOURCE_SYSTEM": "AI_KIU",
+  "es_remision": false,
+  "NOMBRE DEL PASAJERO": "GIRALDO GOMEZ/JUAN BAUTISTA",
+  "CODIGO IDENTIFICACION": "84286506",
+  "SOLO NOMBRE PASAJERO": "JUAN BAUTISTA",
+  "NUMERO DE BOLETO": "3080201383771",
+  "FECHA DE EMISION": "02 FEB 2026 11:42",
+  "AGENTE EMISOR": "CCS00V0WV",
+  "CODIGO RESERVA": "GETNAP",
+  "SOLO CODIGO RESERVA": "GETNAP",
+  "NOMBRE AEROLINEA": "CONVIASA",
+  "DIRECCION AEROLINEA": null,
+  "SOURCE SYSTEM": "AI_KIU",
+  "es remision": false
+}

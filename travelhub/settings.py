@@ -18,6 +18,18 @@ if not DEBUG:
         level=logging.ERROR,
         format='%(asctime)s [%(levelname)s] %(message)s',
     )
+else:
+    import logging
+    logging.basicConfig(level=logging.INFO)
+
+# Logger for settings
+logger = logging.getLogger(__name__)
+
+# Telegram Bot Settings
+TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
+TELEGRAM_ADMIN_ID = os.getenv('TELEGRAM_ADMIN_ID')
+TELEGRAM_GROUP_ID = os.getenv('TELEGRAM_GROUP_ID')
+TELEGRAM_STORAGE_CHANNEL_ID = os.getenv('TELEGRAM_STORAGE_CHANNEL_ID', '-1003225870613') # Default to TravelHub DB
 
 # SECRET_KEY must be set in .env file. We raise an error if it's not found.
 SECRET_KEY = os.getenv('SECRET_KEY')
@@ -44,6 +56,7 @@ else:
 
 # En desarrollo, permitir dominios ngrok, localtunnel y cloudflare
 if DEBUG:
+    ALLOWED_HOSTS.extend(['127.0.0.1', 'localhost', '192.168.100.19'])
     ALLOWED_HOSTS.extend(['.ngrok-free.app', '.ngrok-free.dev', '.ngrok.io', '.loca.lt', '.trycloudflare.com'])
     # Confiar en ngrok, localtunnel y cloudflare para CSRF
     CSRF_TRUSTED_ORIGINS = [
@@ -78,13 +91,20 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',  # enable blacklist for logout/invalidation
     'corsheaders',  # CORS control
     'drf_spectacular',  # OpenAPI/Swagger documentation
-    'personas.apps.PersonasConfig', # App para Cliente y Pasajero
+    # 'personas.apps.PersonasConfig', # App para Cliente y Pasajero
     'cotizaciones.apps.CotizacionesConfig', # App para Cotizaciones
     'contabilidad.apps.ContabilidadConfig', # App para Contabilidad
     'core.apps.CoreConfig',
+    'apps.crm.apps.CrmConfig', # Nuevo Módulo CRM (Refactor)
+    'apps.bookings.apps.BookingsConfig', # Nuevo Módulo Bookings
+    'apps.finance.apps.FinanceConfig', # Nuevo Módulo Finance
+    'apps.marketing.apps.MarketingConfig', # Módulo Marketing
+    'apps.cms.apps.CmsConfig', # Módulo CMS
     'accounting_assistant.apps.AccountingAssistantConfig',
     'django_celery_results',
+    'django_celery_beat',
     'django_extensions',
+    'widget_tweaks',
 ]
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -95,8 +115,8 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'core.middleware.RequestMetaAuditMiddleware',  # captura IP/UA para auditoría
-    # 'core.middleware.SecurityHeadersMiddleware',  # security headers & CSP report-only
+    'core.middleware.ThreadLocalContextMiddleware',  # captura contexto (User/Agency/IP) en thread-local
+    'core.middleware.SecurityHeadersMiddleware',  # security headers & CSP report-only
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'core.middleware_saas.SaaSLimitMiddleware',  # Verificar límites de plan SaaS
@@ -105,7 +125,7 @@ ROOT_URLCONF = 'travelhub.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [], # Django buscará en la carpeta 'templates' de cada app.
+        'DIRS': [BASE_DIR / 'core' / 'templates'], # Priorizar templates de core (overrides)
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -113,6 +133,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'core.context_processors.agency_context',
+                'core.context_processors.csp_nonce',
             ],
         },
     },
@@ -189,7 +211,9 @@ if CLOUDINARY_STORAGE.get('CLOUD_NAME'):
 # Media files - Usar Cloudinary en desarrollo y producción
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'  # Siempre definir MEDIA_ROOT
-USE_CLOUDINARY = os.getenv('USE_CLOUDINARY', 'True') == 'True'
+# FORCE DISABLE CLOUDINARY as requested by user (Telegram Cloud Strategy)
+USE_CLOUDINARY = False 
+# USE_CLOUDINARY = os.getenv('USE_CLOUDINARY', 'False') == 'True'
 
 if USE_CLOUDINARY and CLOUDINARY_STORAGE.get('CLOUD_NAME'):
     DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
@@ -218,19 +242,56 @@ FIXTURE_DIRS = [BASE_DIR / 'fixtures',]
 # Gemini API Key
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
 
-# Sentry Configuration (Monitoreo)
+# Marketing - Unsplash API
+UNSPLASH_ACCESS_KEY = os.getenv('UNSPLASH_ACCESS_KEY')
+
+# Sentry Configuration (Monitoreo de Errores)
 SENTRY_DSN = os.getenv('SENTRY_DSN')
-if SENTRY_DSN and not DEBUG:
+
+if SENTRY_DSN:
     import sentry_sdk
     from sentry_sdk.integrations.django import DjangoIntegration
+    from sentry_sdk.integrations.celery import CeleryIntegration
+    from sentry_sdk.integrations.redis import RedisIntegration
+    
+    # Importar función de sanitización
+    try:
+        from core.utils.sentry_utils import sanitize_sensitive_data
+    except ImportError:
+        sanitize_sensitive_data = None
     
     sentry_sdk.init(
         dsn=SENTRY_DSN,
-        integrations=[DjangoIntegration()],
+        integrations=[
+            DjangoIntegration(),
+            CeleryIntegration(),
+            RedisIntegration(),
+        ],
+        environment='production' if not DEBUG else 'development',
+        
+        # Muestreo de transacciones (10% para reducir costos)
         traces_sample_rate=0.1,
+        
+        # No enviar PII por defecto
         send_default_pii=False,
-        environment=os.getenv('ENVIRONMENT', 'production'),
+        
+        # Sanitizar datos sensibles antes de enviar
+        before_send=sanitize_sensitive_data if sanitize_sensitive_data else None,
+        
+        # Configuración adicional
+        attach_stacktrace=True,
+        max_breadcrumbs=50,
+        
+        # Ignorar errores comunes de desarrollo
+        ignore_errors=[
+            'KeyboardInterrupt',
+            'SystemExit',
+        ] if DEBUG else [],
     )
+    
+    logger.info(f"✅ Sentry configurado para entorno: {'development' if DEBUG else 'production'}")
+else:
+    logger.warning("⚠️ SENTRY_DSN no configurado - Monitoreo de errores desactivado")
 
 # Google Cloud Platform settings
 GCP_PROJECT_ID = os.getenv('GCP_PROJECT_ID', '')
@@ -238,6 +299,13 @@ GCP_LOCATION = os.getenv('GCP_LOCATION', 'us')
 GCP_PROCESSOR_ID = os.getenv('GCP_PROCESSOR_ID', '')
 GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY', '')
 GOOGLE_APPLICATION_CREDENTIALS = os.getenv('GOOGLE_APPLICATION_CREDENTIALS', '')
+
+# WhatsApp / Twilio Settings
+WHATSAPP_NOTIFICATIONS_ENABLED = os.getenv('WHATSAPP_NOTIFICATIONS_ENABLED', 'False') == 'True'
+TWILIO_ACCOUNT_SID = os.getenv('TWILIO_ACCOUNT_SID')
+TWILIO_AUTH_TOKEN = os.getenv('TWILIO_AUTH_TOKEN')
+TWILIO_WHATSAPP_NUMBER = os.getenv('TWILIO_WHATSAPP_NUMBER')
+ADMIN_WHATSAPP_NUMBER = os.getenv('ADMIN_WHATSAPP_NUMBER', '+584126080861')
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
@@ -368,35 +436,45 @@ else:
 REDIS_URL = os.getenv('REDIS_URL')
 DATABASE_URL = os.getenv('DATABASE_URL')
 
-# Usar PostgreSQL como broker de Celery (más barato que Redis)
-if DATABASE_URL:
-    # Cache en memoria (suficiente para desarrollo)
-    CACHES = {
-        'default': {
-            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-            'LOCATION': 'travelhub-cache',
-        }
-    }
-    
+# Usar Redis como broker de Celery (Prioridad 1 - Estándar Producción)
+if REDIS_URL:
+    CELERY_BROKER_URL = REDIS_URL
+    CELERY_RESULT_BACKEND = REDIS_URL
+    CELERY_CACHE_BACKEND = 'default' # Usar cache configurado
+    print(f"[OK] Usando Redis como broker de Celery: {REDIS_URL}")
+
+# Fallback: Usar PostgreSQL como broker (Prioridad 2 - Económico)
+elif DATABASE_URL:
     # Usar PostgreSQL como broker de Celery
-    CELERY_BROKER_URL = f"db+{DATABASE_URL}"
+    CELERY_BROKER_URL = f"sqla+{DATABASE_URL}"
     CELERY_RESULT_BACKEND = 'django-db'
     CELERY_CACHE_BACKEND = 'django-cache'
-    
     print("[OK] Usando PostgreSQL como broker de Celery (económico).")
 
 else:
-    # Fallback local
-    CACHES = {
-        'default': {
-            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-            'LOCATION': 'travelhub-cache',
-        }
-    }
-    CELERY_BROKER_URL = 'django://'
+    # Fallback local (Prioridad 3 - Desarrollo)
+    CELERY_BROKER_URL = 'redis://127.0.0.1:6379/0'
     CELERY_RESULT_BACKEND = 'django-db'
     CELERY_CACHE_BACKEND = 'django-cache'
-    print("[OK] Usando Django como broker de Celery (desarrollo).")
+    print("[OK] Usando Redis Local como broker de Celery (desarrollo).")
+
+# --- Catching Configuration ---
+if REDIS_URL:
+    CACHES = {
+        "default": {
+            "BACKEND": "django_redis.cache.RedisCache",
+            "LOCATION": REDIS_URL,
+            "OPTIONS": {
+                "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            }
+        }
+    }
+else:
+     CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        }
+    }
 
 
 # Common Celery settings
@@ -457,3 +535,53 @@ STRIPE_WEBHOOK_SECRET = os.getenv('STRIPE_WEBHOOK_SECRET', '')
 STRIPE_PRICE_ID_BASIC = os.getenv('STRIPE_PRICE_ID_BASIC', '')
 STRIPE_PRICE_ID_PRO = os.getenv('STRIPE_PRICE_ID_PRO', '')
 STRIPE_PRICE_ID_ENTERPRISE = os.getenv('STRIPE_PRICE_ID_ENTERPRISE', '')
+
+STRIPE_PRICE_IDS = {
+    'BASIC': STRIPE_PRICE_ID_BASIC,
+    'PRO': STRIPE_PRICE_ID_PRO,
+    'ENTERPRISE': STRIPE_PRICE_ID_ENTERPRISE,
+}
+
+# Auth Redirects
+LOGIN_REDIRECT_URL = 'core:modern_dashboard'
+LOGOUT_REDIRECT_URL = 'login'
+LOGIN_URL = 'login'
+
+# WhatsApp / Twilio Settings
+WHATSAPP_NOTIFICATIONS_ENABLED = str(os.getenv('WHATSAPP_NOTIFICATIONS_ENABLED', 'True')).lower() == 'true'
+TWILIO_ACCOUNT_SID = os.getenv('TWILIO_ACCOUNT_SID')
+TWILIO_AUTH_TOKEN = os.getenv('TWILIO_AUTH_TOKEN')
+TWILIO_WHATSAPP_NUMBER = os.getenv('TWILIO_WHATSAPP_NUMBER')
+
+# Admin Phone for Notifications (Process Override)
+ADMIN_WHATSAPP_NUMBER = os.getenv('ADMIN_WHATSAPP_NUMBER', '+584126080861')
+
+# Celery Beat Schedule (Automatización)
+# Celery Beat Schedule (Automatización)
+# Si ya se importó CELERY_BEAT_SCHEDULE, lo actualizamos. Si no, lo creamos.
+if 'CELERY_BEAT_SCHEDULE' not in locals():
+    CELERY_BEAT_SCHEDULE = {}
+
+CELERY_BEAT_SCHEDULE.update({
+    'check-upcoming-flights-daily': {
+        'task': 'core.tasks.check_upcoming_flights',
+        'schedule': 3600 * 24, # Ejecutar cada 24 horas (diario)
+    },
+})
+# Force Reload
+# Reload Fix 2
+# Final ID Fix
+# Reload Fix 3
+# JSON Sanitizer Fix
+# JSON Sanitizer Complete Fix
+# Reload for Template Fix
+# Reload for PDF Mapping Fix
+# Reload for Name Lookup and Total Fix
+# Reload for Venta.cliente Fix
+# Reload for DB Integrity Fix
+# Reload for DB Table Correctness
+# Reload for Schema Fix
+# Reload Schema Fix 2
+# Reload Schema Fix 3
+# Reload PDF Fix
+# Reload Mapping Fix

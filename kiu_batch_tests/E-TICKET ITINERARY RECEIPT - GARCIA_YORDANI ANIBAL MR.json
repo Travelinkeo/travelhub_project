@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "GARCIA/YORDANI ANIBA",
+  "CODIGO_IDENTIFICACION": "BE188471",
+  "SOLO_NOMBRE_PASAJERO": "YORDANI ANIBA",
+  "NUMERO_DE_BOLETO": "3640211554410",
+  "FECHA_DE_EMISION": "11 SEP 2025 17:42",
+  "AGENTE_EMISOR": "CCS00WWWW",
+  "CODIGO_RESERVA": "NDNJTR",
+  "SOLO_CODIGO_RESERVA": "NDNJTR",
+  "NOMBRE_AEROLINEA": "RUTAS AEREAS DE VENEZUELA RAV,SA",
+  "DIRECCION_AEROLINEA": null,
+  "vuelos": [
+    {
+      "aerolinea": "WW",
+      "numero_vuelo": "224",
+      "origen": "MARACAIBO",
+      "fecha_salida": "12SEP 2025",
+      "hora_salida": "1700",
+      "destino": "CARACAS",
+      "hora_llegada": "1800",
+      "cabina": "Económica",
+      "clase": "R",
+      "localizador_aerolinea": "NDNJTR"
+    }
+  ],
+  "TARIFA": "11973.70",
+  "IMPUESTOS": "3325.29",
+  "TOTAL": "15298.99",
+  "SOURCE_SYSTEM": "AI_KIU",
+  "es_remision": false,
+  "NOMBRE DEL PASAJERO": "GARCIA/YORDANI ANIBA",
+  "CODIGO IDENTIFICACION": "BE188471",
+  "SOLO NOMBRE PASAJERO": "YORDANI ANIBA",
+  "NUMERO DE BOLETO": "3640211554410",
+  "FECHA DE EMISION": "11 SEP 2025 17:42",
+  "AGENTE EMISOR": "CCS00WWWW",
+  "CODIGO RESERVA": "NDNJTR",
+  "SOLO CODIGO RESERVA": "NDNJTR",
+  "NOMBRE AEROLINEA": "RUTAS AEREAS DE VENEZUELA RAV,SA",
+  "DIRECCION AEROLINEA": null,
+  "SOURCE SYSTEM": "AI_KIU",
+  "es remision": false
+}

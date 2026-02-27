@@ -1,0 +1,106 @@
+================================================================================
+TEXTO PLANO
+================================================================================
+Grupo Soporte Global INC     IATA: 10617390
+
+
+USA
+
+
+
+Itinerary for Record Locator KW23RU
+Copa Airlines Record Locator AWHKHH
+Reservation
+Airline Flight #        Departing       Arriving        Class   Cabin   Meals
+Airport Date & Time     Airport Date & Time
+[https://cm.farelogix.com/sprk/Public/Images/Providers/Air/CM.gif]
+Copa Airlines   222     Caracas, VE     THU 22JAN
+01:32 PM        Panama City Tocumen International, PA   THU 22JAN
+03:01 PM        L               M
+MARIAM ROSARIO GOUVERNEN APONTE (ADT)   FF# Not Set     No Seat Assigned
+[https://cm.farelogix.com/sprk/Public/Images/Providers/Air/CM.gif]
+Copa Airlines   329     Panama City Tocumen International, PA   THU 22JAN
+04:40 PM        Buenos Aires Ministro Pistarini, AR
+Terminal:A      FRI 23JAN
+01:58 AM        L               M
+MARIAM ROSARIO GOUVERNEN APONTE (ADT)   FF# Not Set     No Seat Assigned
+[https://cm.farelogix.com/sprk/Public/Images/Providers/Air/CM.gif]
+Copa Airlines   328     Buenos Aires Ministro Pistarini, AR
+Terminal:A      WED 22APR
+03:52 AM        Panama City Tocumen International, PA   WED 22APR
+09:10 AM        L               M
+MARIAM ROSARIO GOUVERNEN APONTE (ADT)   FF# Not Set     No Seat Assigned
+[https://cm.farelogix.com/sprk/Public/Images/Providers/Air/CM.gif]
+Copa Airlines   223     Panama City Tocumen International, PA   WED 22APR
+11:36 AM        Caracas, VE     WED 22APR
+03:01 PM        L               M
+MARIAM ROSARIO GOUVERNEN APONTE (ADT)   FF# Not Set     No Seat Assigned
+ Invoice Information
+MARIAM ROSARIO GOUVERNEN APONTE (ADT)   Document Number Issuance Date
+Electronic Ticket       2307405222802   15JAN26
+[https://cm.farelogix.com/sprk/Public/Images/relation.png]  Endorsements:  NON REF/NONEND/NONTRANS//CHANGES APPLY/COPA AIRLINES 98-0105127
+ Data Protection Notice
+Data Protection Notice: Your personal data will be processed in accordance with the applicable carrier's privacy policy and, if your booking is made via a reservation system provider ("GDS" ), with its privacy policy. These are available at http://www.iatatravelcenter.com/privacy or from the carrier, GDS or TSP directly. You should read this documentation, which applies to your booking and specifies, for example, how your personal data is collected, stored, used, disclosed and transferred.
+
+For information about and automatic calculation of baggage allowances and fees for this itinerary, in accordance with applicable carrier rules, please visit www.iflybags.com<http://www.iflybags.com/bagservice.aspx?trace=rperdomo&fn=4&ar1=CM&cos1=L&fbc1=LLAAOZ2S&flt1=222&dc1=CCS&dd1=2026-01-22&dt1=13:32&ac1=PTY&ad1=2026-01-22&at1=15:01&ar2=CM&cos2=L&fbc2=LLAAOZ2S&flt2=329&dc2=PTY&dd2=2026-01-22&dt2=16:40&ac2=EZE&ad2=2026-01-23&at2=01:58&ar3=CM&cos3=L&fbc3=LAAAOZ2S&flt3=328&dc3=EZE&dd3=2026-04-22&dt3=03:52&ac3=PTY&ad3=2026-04-22&at3=09:10&ar4=CM&cos4=L&fbc4=LAAAOZ2S&flt4=223&dc4=PTY&dd4=2026-04-22&dt4=11:36&ac4=CCS&ad4=2026-04-22&at4=15:01&td=2026-01-15&crnc=USD&pos=MIA&tn=1&p1=ADT>
+[X]
+
+
+================================================================================
+HTML (primeros 2000 caracteres)
+================================================================================
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=us-ascii">
+</head>
+<body>
+<table style="padding: 2px; margin: 2px; background-color: White; border: solid 1px Gray; width: 100%;">
+<tbody>
+<tr>
+<td>
+<table style="width: 100%;">
+<tbody>
+<tr>
+<td style="width: 70%;"><span style="font-family: Arial, sans-serif; font-size: 12px;color: #cb7921; font-weight: bold;">Grupo Soporte Global INC&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IATA:&nbsp;10617390<br>
+</span><span style="font-family: Arial, sans-serif; font-size: 12px;color: #cb7921;"><br>
+<br>
+USA</span></td>
+<td style="width: 30%;" align="right"></td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<tr>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span id="lblAdditionalInformation">
+<pre style="font-family: Arial, sans-serif; font-size: 12px;"></pre>
+</span></td>
+</tr>
+<tr>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>
+<div style="width: 50%; float:left;"><span id="lblFlights" style="font-family: Arial, sans-serif; font-size: 12px;color: #cb7921;">Itinerary for Record Locator
+<b>KW23RU</b></span><br>
+<span id="lblFlightSources" style="font-family: Arial, sans-serif; font-size: 12px;color: #000;">Copa Airlines Record Locator AWHKHH<br>
+</span></div>
+</td>
+</tr>
+<tr>
+<td><span id="lblItinerary" class="gridtitle" style="font-family: Arial, sans-serif; font-size: 12px;color: #cb7921;font-weight: bold;">Reservation</span></td>
+</tr>
+<tr>
+<td>
+<table id="FlightTable" style="width: 100%; border: solid 1px #828282; border-collapse: collapse; ">
+<tbody>
+<tr>
+<th rowspan="2" style="text-align:center; padding-left: 3px; padding-right: 3px; background-color: #839dc5; color: #101c78;  font-family: Arial, sans-serif; font-size: 12px;font-weight: bold;">
+Airline</th>
+<th rowspan="2" style="text-align:center; padding-left: 3px; padding-right: 3px; background-color: #839dc5; color: #101c78;  font-family: Arial, sans-serif; font-size: 12px;font-weight: bold; width: 50px">
+Flight #</th>
+<th colspan="

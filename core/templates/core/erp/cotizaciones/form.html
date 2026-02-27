@@ -1,0 +1,356 @@
+{% extends 'base_modern.html' %}
+{% load static %}
+
+{% block title %}{% if form.instance.pk %}Editar Cotización #{{ form.instance.numero_cotizacion }}{% else %}Nueva
+Cotización{% endif %} - TravelHub{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="flex items-center justify-between mb-8">
+        <div class="flex items-center gap-4">
+            <a href="{% url 'core:cotizacion_dashboard' %}" class="text-gray-400 hover:text-white transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+            </a>
+            <h1 class="text-2xl font-bold text-white">
+                {% if form.instance.pk %}
+                Editar Cotización <span class="text-primary">#{{ form.instance.numero_cotizacion }}</span>
+                {% else %}
+                Nueva Cotización
+                {% endif %}
+            </h1>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+
+        <!-- Main Form Column -->
+        <div class="lg:col-span-3">
+            <form method="post" class="space-y-6" id="cotizacionForm">
+                {% csrf_token %}
+
+                <!-- Main Info -->
+                <div class="glass-panel p-6 rounded-2xl">
+                    <h2 class="text-lg font-semibold text-white mb-4 border-b border-gray-700 pb-2">Información General
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-400 mb-1">Cliente (Registrado)</label>
+                            {{ form.cliente }}
+                            {% if form.cliente.errors %}
+                            <p class="text-red-400 text-xs mt-1">{{ form.cliente.errors.0 }}</p>
+                            {% endif %}
+
+                            <div class="mt-4">
+                                <label class="block text-sm font-medium text-gray-400 mb-1">O Cliente Manual
+                                    (Prospecto)</label>
+                                {{ form.nombre_cliente_manual }}
+                                {% if form.nombre_cliente_manual.errors %}
+                                <p class="text-red-400 text-xs mt-1">{{ form.nombre_cliente_manual.errors.0 }}</p>
+                                {% endif %}
+                                <p class="text-xs text-gray-500 mt-1">Llene solo uno de los dos.</p>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-400 mb-1">Moneda</label>
+                            {{ form.moneda }}
+                            {% if form.moneda.errors %}
+                            <p class="text-red-400 text-xs mt-1">{{ form.moneda.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-400 mb-1">Válida Hasta</label>
+                            {{ form.fecha_validez }}
+                            {% if form.fecha_validez.errors %}
+                            <p class="text-red-400 text-xs mt-1">{{ form.fecha_validez.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-400 mb-1">Destino Principal</label>
+                            {{ form.destino }}
+                            {% if form.destino.errors %}
+                            <p class="text-red-400 text-xs mt-1">{{ form.destino.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-400 mb-1">Descripción General</label>
+                            {{ form.descripcion_general }}
+                            {% if form.descripcion_general.errors %}
+                            <p class="text-red-400 text-xs mt-1">{{ form.descripcion_general.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Items -->
+                <div class="glass-panel p-6 rounded-2xl">
+                    <div class="flex justify-between items-center mb-4 border-b border-gray-700 pb-2">
+                        <h2 class="text-lg font-semibold text-white">Servicios / Productos</h2>
+                        <button type="button" id="add-item"
+                            class="text-sm bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/20 px-3 py-1 rounded-lg transition-colors flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 4v16m8-8H4"></path>
+                            </svg>
+                            Agregar Item
+                        </button>
+                    </div>
+
+                    {{ items_formset.management_form }}
+
+                    <div id="items-container" class="space-y-4">
+                        {% for item_form in items_formset %}
+                        <div
+                            class="item-row grid grid-cols-1 md:grid-cols-12 gap-4 p-4 bg-white/5 rounded-xl border border-gray-700 relative group">
+                            {% for hidden in item_form.hidden_fields %}
+                            {{ hidden }}
+                            {% endfor %}
+
+                            <div class="md:col-span-3">
+                                <label class="block text-xs font-medium text-gray-500 mb-1">Servicio</label>
+                                {{ item_form.producto_servicio }}
+                            </div>
+                            <div class="md:col-span-3">
+                                <label class="block text-xs font-medium text-gray-500 mb-1">Descripción
+                                    (Opcional)</label>
+                                {{ item_form.descripcion_personalizada }}
+                            </div>
+                            <div class="md:col-span-1">
+                                <label class="block text-xs font-medium text-gray-500 mb-1">Cant.</label>
+                                {{ item_form.cantidad }}
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-xs font-medium text-gray-500 mb-1">Precio Unit.</label>
+                                {{ item_form.precio_unitario }}
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-xs font-medium text-gray-500 mb-1">Impuestos</label>
+                                {{ item_form.impuestos_item }}
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-xs font-medium text-gray-500 mb-1">Total</label>
+                                <input type="text" readonly
+                                    class="bg-gray-800/20 border border-gray-700 text-emerald-400 font-bold rounded-xl px-3 py-1 w-full focus:ring-0 cursor-not-allowed text-right total-display"
+                                    value="0.00">
+                            </div>
+
+                            {% if items_formset.can_delete %}
+                            <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <div class="flex items-center">
+                                    {{ item_form.DELETE }}
+                                    <label for="{{ item_form.DELETE.id_for_label }}"
+                                        class="text-red-400 hover:text-red-300 cursor-pointer ml-1">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                                            </path>
+                                        </svg>
+                                    </label>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Empty form template for JS -->
+                    <div id="empty-form" class="hidden">
+                        <div
+                            class="item-row grid grid-cols-1 md:grid-cols-12 gap-4 p-4 bg-white/5 rounded-xl border border-gray-700 relative group">
+                            <div class="md:col-span-3">
+                                <label class="block text-xs font-medium text-gray-500 mb-1">Servicio</label>
+                                {{ items_formset.empty_form.producto_servicio }}
+                            </div>
+                            <div class="md:col-span-3">
+                                <label class="block text-xs font-medium text-gray-500 mb-1">Descripción
+                                    (Opcional)</label>
+                                {{ items_formset.empty_form.descripcion_personalizada }}
+                            </div>
+                            <div class="md:col-span-1">
+                                <label class="block text-xs font-medium text-gray-500 mb-1">Cant.</label>
+                                {{ items_formset.empty_form.cantidad }}
+                            </div>
+                            <div class="md:col-span-1">
+                                <label class="block text-xs font-medium text-gray-500 mb-1">Precio Unit.</label>
+                                {{ items_formset.empty_form.precio_unitario }}
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-xs font-medium text-gray-500 mb-1">Impuestos</label>
+                                {{ items_formset.empty_form.impuestos_item }}
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-xs font-medium text-gray-500 mb-1">Total</label>
+                                <input type="text" readonly
+                                    class="bg-gray-800/20 border border-gray-700 text-emerald-400 font-bold rounded-xl px-3 py-1 w-full focus:ring-0 cursor-not-allowed text-right total-display"
+                                    value="0.00">
+                            </div>
+
+                            {% if items_formset.can_delete %}
+                            <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <div class="flex items-center">
+                                    {{ items_formset.empty_form.DELETE }}
+                                    <label class="text-red-400 hover:text-red-300 cursor-pointer ml-1 delete-btn">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                                            </path>
+                                        </svg>
+                                    </label>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Additional Info -->
+                <div class="glass-panel p-6 rounded-2xl">
+                    <h2 class="text-lg font-semibold text-white mb-4 border-b border-gray-700 pb-2">Condiciones y Notas
+                    </h2>
+                    <div class="grid grid-cols-1 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-400 mb-1">Condiciones Comerciales</label>
+                            {{ form.condiciones_comerciales }}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-400 mb-1">Notas Internas</label>
+                            {{ form.notas_internas }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex justify-end gap-4">
+                    <a href="{% url 'core:cotizacion_dashboard' %}"
+                        class="px-6 py-2 border border-gray-600 text-gray-300 rounded-xl hover:bg-white/5 transition-colors">
+                        Cancelar
+                    </a>
+                    <button type="submit"
+                        class="px-6 py-2 bg-gradient-to-r from-primary to-secondary text-white font-bold rounded-xl shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all transform hover:-translate-y-0.5">
+                        Guardar Cotización
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Sidebar Wiki Assistant -->
+        <div class="lg:col-span-1">
+            <div class="sticky top-24 space-y-4">
+                <!-- Wiki Widget -->
+                <div
+                    class="glass-panel p-4 rounded-2xl bg-slate-900/80 border border-slate-700 backdrop-blur-md shadow-xl">
+                    <div class="flex items-center gap-2 mb-3 border-b border-gray-700 pb-2">
+                        <span class="text-xl">🧠</span>
+                        <div>
+                            <h3 class="font-bold text-white text-sm">TravelHub Assist</h3>
+                            <p class="text-[10px] text-gray-400">Contexto Inteligente</p>
+                        </div>
+                    </div>
+
+                    <!-- Result Container -->
+                    <div id="wiki-results" class="min-h-[150px] space-y-2" hx-get="{% url 'core:wiki_search' %}"
+                        hx-trigger="searchContext from:body" hx-swap="innerHTML">
+
+                        <div class="text-center text-slate-500 text-xs py-8 flex flex-col items-center">
+                            <i data-lucide="sparkles" class="w-6 h-6 mb-2 opacity-50"></i>
+                            <span>Escribe para ver tips...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Prompts (Optional) -->
+                <!-- <div class="glass-panel p-3 ...">Tags Populares: VISA, EQUIPAJE</div> -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // ... (Existing JS) ...
+    });
+
+    // Wiki Context Trigger
+    let wikiTimeout;
+    document.body.addEventListener('input', function (e) {
+        // Listen to relevant inputs
+        if (e.target.matches('#id_destino, textarea, input[type="text"]')) {
+            const val = e.target.value;
+            if (val.length < 3) return;
+
+            clearTimeout(wikiTimeout);
+            wikiTimeout = setTimeout(() => {
+                const resultsDiv = document.getElementById('wiki-results');
+                // Pass the query to hx-vals dynamically or via URL
+                // Easier: set hx-vals attribute or recreate the get request
+                // Using htmx.ajax or activating the trigger with a parameter
+
+                // HTMX way to pass parameters dynamically via trigger is tricky without hx-vals
+                // Let's rely on event detail or just set hx-vals attribute
+                resultsDiv.setAttribute('hx-vals', JSON.stringify({ "q": val }));
+                htmx.trigger(resultsDiv, 'searchContext');
+            }, 800);
+        }
+    });
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const addItemBtn = document.getElementById('add-item');
+        const itemsContainer = document.getElementById('items-container');
+        const emptyFormTemplate = document.getElementById('empty-form').innerHTML;
+        const totalFormsInput = document.getElementById('id_items_cotizacion-TOTAL_FORMS');
+
+        // Function to calculate totals
+        function calculateRowTotal(row) {
+            const qtyInput = row.querySelector('input[name$="-cantidad"]');
+            const priceInput = row.querySelector('input[name$="-precio_unitario"]');
+            const taxInput = row.querySelector('input[name$="-impuestos_item"]');
+            const totalDisplay = row.querySelector('.total-display');
+
+            if (qtyInput && priceInput && taxInput && totalDisplay) {
+                const qty = parseFloat(qtyInput.value) || 0;
+                const price = parseFloat(priceInput.value) || 0;
+                const tax = parseFloat(taxInput.value) || 0;
+
+                const subtotal = qty * price;
+                const total = subtotal + (tax * qty); // Assuming tax is per unit? Or total tax?
+                // Checking model: total_item = subtotal_item + (impuestos_item * cantidad)
+                // Model says: impuestos_item is "Impuestos por Item". So yes, tax * qty.
+
+                totalDisplay.value = total.toFixed(2);
+            }
+        }
+
+        // Attach listeners to a row
+        function attachListeners(row) {
+            const inputs = row.querySelectorAll('input');
+            inputs.forEach(input => {
+                input.addEventListener('input', () => calculateRowTotal(row));
+            });
+            // Initial calculation
+            calculateRowTotal(row);
+        }
+
+        // Initialize existing rows
+        document.querySelectorAll('.item-row').forEach(row => {
+            attachListeners(row);
+        });
+
+        addItemBtn.addEventListener('click', function () {
+            const formIdx = totalFormsInput.value;
+            const newFormHtml = emptyFormTemplate.replace(/__prefix__/g, formIdx);
+
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = newFormHtml;
+            const newRow = tempDiv.firstElementChild;
+
+            itemsContainer.appendChild(newRow);
+            attachListeners(newRow);
+            totalFormsInput.value = parseInt(formIdx) + 1;
+        });
+    });
+</script>
+{% endblock %}

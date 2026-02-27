@@ -1,0 +1,351 @@
+[
+  {
+    "file": "Electronic ticket receipt, November 27 for BETLANA KELY MATA MONTANO.pdf",
+    "parser": "SABRE",
+    "can_parse": true,
+    "success": true,
+    "data": {
+      "system": "SABRE",
+      "pnr": "OOSBRZ",
+      "ticket_number": "1347155408465",
+      "passenger": "MATA MONTANO/BETLANA KELY",
+      "airline": "AEROVIAS DEL CONTINENTE",
+      "total": null,
+      "flights_count": 2,
+      "all_keys": [
+        "SOURCE_SYSTEM",
+        "pnr",
+        "numero_boleto",
+        "ticket_number",
+        "pasajero",
+        "passenger_name",
+        "airline_name",
+        "total",
+        "fecha_emision",
+        "vuelos",
+        "flights",
+        "tarifas",
+        "agencia",
+        "reserva",
+        "itinerario"
+      ]
+    }
+  },
+  {
+    "file": "Electronic ticket receipt, October 02 for HECTOR FABIO HOYOS VELARDE.pdf",
+    "parser": "SABRE",
+    "can_parse": true,
+    "success": true,
+    "data": {
+      "system": "SABRE",
+      "pnr": "LJLBCO",
+      "ticket_number": "7847101239623",
+      "passenger": "HOYOS VELARDE/HECTOR FABIO",
+      "airline": "China Southern Airlines",
+      "total": null,
+      "flights_count": 1,
+      "all_keys": [
+        "SOURCE_SYSTEM",
+        "pnr",
+        "numero_boleto",
+        "ticket_number",
+        "pasajero",
+        "passenger_name",
+        "airline_name",
+        "total",
+        "fecha_emision",
+        "vuelos",
+        "flights",
+        "tarifas",
+        "agencia",
+        "reserva",
+        "itinerario"
+      ]
+    }
+  },
+  {
+    "file": "Recibo de pasaje electrónico, 03 diciembre para JORGE HUMBERTO QUICENO GIRALDO.pdf",
+    "parser": "SABRE",
+    "can_parse": true,
+    "success": true,
+    "data": {
+      "system": "SABRE",
+      "pnr": "MVAPFC",
+      "ticket_number": "7817162438095",
+      "passenger": "QUICENO GIRALDO/JORGE HUMBERTO",
+      "airline": "CHINA EASTERN AIRLINES",
+      "total": null,
+      "flights_count": 3,
+      "all_keys": [
+        "SOURCE_SYSTEM",
+        "pnr",
+        "numero_boleto",
+        "ticket_number",
+        "pasajero",
+        "passenger_name",
+        "airline_name",
+        "total",
+        "fecha_emision",
+        "vuelos",
+        "flights",
+        "tarifas",
+        "agencia",
+        "reserva",
+        "itinerario"
+      ]
+    }
+  },
+  {
+    "file": "E-TICKET ITINERARY RECEIPT - DUQUE ECHEVERRI_ALEXANDER.eml",
+    "parser": "KIU",
+    "can_parse": true,
+    "success": true,
+    "data": {
+      "system": "KIU",
+      "pnr": "No encontrado",
+      "ticket_number": "308-0310756862",
+      "passenger": "S BOLETO NRO",
+      "airline": null,
+      "total": "USD 94.73",
+      "flights_count": 0,
+      "all_keys": [
+        "SOURCE_SYSTEM",
+        "pnr",
+        "numero_boleto",
+        "ticket_number",
+        "pasajero",
+        "passenger_name",
+        "airline_name",
+        "total",
+        "fecha_emision",
+        "vuelos",
+        "flights",
+        "tarifas",
+        "agencia",
+        "ItinerarioFinalLimpio"
+      ]
+    }
+  },
+  {
+    "file": "E-TICKET ITINERARY RECEIPT - GARCIA GOMEZ_CAROLA YESIRE.eml",
+    "parser": "KIU",
+    "can_parse": true,
+    "success": true,
+    "data": {
+      "system": "KIU",
+      "pnr": "DKYMWA",
+      "ticket_number": "7820330832564",
+      "passenger": "GARCIA GOMEZ/CAROLA YESIRE",
+      "airline": null,
+      "total": "USD 120.0",
+      "flights_count": 0,
+      "all_keys": [
+        "SOURCE_SYSTEM",
+        "pnr",
+        "numero_boleto",
+        "ticket_number",
+        "pasajero",
+        "passenger_name",
+        "airline_name",
+        "total",
+        "fecha_emision",
+        "vuelos",
+        "flights",
+        "tarifas",
+        "agencia",
+        "ItinerarioFinalLimpio"
+      ]
+    }
+  },
+  {
+    "file": "E-TICKET ITINERARY RECEIPT - GARCIA GOMEZ_CAROLA YESIRE1.eml",
+    "parser": "KIU",
+    "can_parse": true,
+    "success": true,
+    "data": {
+      "system": "KIU",
+      "pnr": "DKYMWA",
+      "ticket_number": "4020300032238",
+      "passenger": "GARCIA GOMEZ/CAROLA YESIRE",
+      "airline": null,
+      "total": "USD 157.5",
+      "flights_count": 0,
+      "all_keys": [
+        "SOURCE_SYSTEM",
+        "pnr",
+        "numero_boleto",
+        "ticket_number",
+        "pasajero",
+        "passenger_name",
+        "airline_name",
+        "total",
+        "fecha_emision",
+        "vuelos",
+        "flights",
+        "tarifas",
+        "agencia",
+        "ItinerarioFinalLimpio"
+      ]
+    }
+  },
+  {
+    "file": "Copa Airlines - Quovadis175 - 1.pdf",
+    "parser": "COPA",
+    "can_parse": true,
+    "success": true,
+    "data": {
+      "system": "COPA_SPRK",
+      "pnr": "ZPF32F",
+      "ticket_number": "No encontrado",
+      "passenger": "TIBISAY DEL VALLE ACEVEDO VELASQUEZ",
+      "airline": null,
+      "total": null,
+      "flights_count": 0,
+      "all_keys": [
+        "SOURCE_SYSTEM",
+        "pnr",
+        "numero_boleto",
+        "ticket_number",
+        "pasajero",
+        "passenger_name",
+        "airline_name",
+        "total",
+        "fecha_emision",
+        "vuelos",
+        "flights",
+        "tarifas",
+        "agencia",
+        "fecha_creacion"
+      ]
+    }
+  },
+  {
+    "file": "Copa Airlines - Quovadis175 - 10.2.1.b58c83bc.pdf",
+    "parser": "COPA",
+    "can_parse": true,
+    "success": true,
+    "data": {
+      "system": "COPA_SPRK",
+      "pnr": "ZZ232F",
+      "ticket_number": "No encontrado",
+      "passenger": "TIBISAY DEL VALLE ACEVEDO VELASQUEZ",
+      "airline": null,
+      "total": null,
+      "flights_count": 0,
+      "all_keys": [
+        "SOURCE_SYSTEM",
+        "pnr",
+        "numero_boleto",
+        "ticket_number",
+        "pasajero",
+        "passenger_name",
+        "airline_name",
+        "total",
+        "fecha_emision",
+        "vuelos",
+        "flights",
+        "tarifas",
+        "agencia",
+        "fecha_creacion"
+      ]
+    }
+  },
+  {
+    "file": "Copa Airlines - Quovadis175 - 10.4.0.5de7c82a.pdf",
+    "parser": "COPA",
+    "can_parse": true,
+    "success": true,
+    "data": {
+      "system": "COPA_SPRK",
+      "pnr": "ZUM14H",
+      "ticket_number": "2307015637960",
+      "passenger": "JUAN CAMILO GIRALDO CASTANO",
+      "airline": null,
+      "total": null,
+      "flights_count": 0,
+      "all_keys": [
+        "SOURCE_SYSTEM",
+        "pnr",
+        "numero_boleto",
+        "ticket_number",
+        "pasajero",
+        "passenger_name",
+        "airline_name",
+        "total",
+        "fecha_emision",
+        "vuelos",
+        "flights",
+        "tarifas",
+        "agencia",
+        "fecha_creacion"
+      ]
+    }
+  },
+  {
+    "file": "LOPEZ LOPEZCARLOS MARIO 04MAY2025 CCS IST.pdf",
+    "parser": "AMADEUS",
+    "can_parse": true,
+    "success": true,
+    "data": {
+      "system": "AMADEUS",
+      "pnr": "No encontrado",
+      "ticket_number": "235-7283236572",
+      "passenger": "No encontrado",
+      "airline": null,
+      "total": "USD 2458.80",
+      "flights_count": 0,
+      "all_keys": [
+        "SOURCE_SYSTEM",
+        "pnr",
+        "numero_boleto",
+        "ticket_number",
+        "pasajero",
+        "passenger_name",
+        "airline_name",
+        "total",
+        "fecha_emision",
+        "vuelos",
+        "flights",
+        "tarifas",
+        "agencia"
+      ]
+    }
+  },
+  {
+    "file": "LOPEZ_LOPEZCARLOS_MARIO_04MAY2025_CCS_IST.pdf",
+    "parser": "AMADEUS",
+    "can_parse": true,
+    "success": true,
+    "data": {
+      "system": "AMADEUS",
+      "pnr": "No encontrado",
+      "ticket_number": "235-7283236572",
+      "passenger": "No encontrado",
+      "airline": null,
+      "total": "USD 2458.80",
+      "flights_count": 0,
+      "all_keys": [
+        "SOURCE_SYSTEM",
+        "pnr",
+        "numero_boleto",
+        "ticket_number",
+        "pasajero",
+        "passenger_name",
+        "airline_name",
+        "total",
+        "fecha_emision",
+        "vuelos",
+        "flights",
+        "tarifas",
+        "agencia"
+      ]
+    }
+  },
+  {
+    "file": "Your Electronic Ticket Receipt (5).pdf",
+    "parser": "AMADEUS",
+    "can_parse": true,
+    "success": false,
+    "error": "'str' object has no attribute 'get'"
+  }
+]

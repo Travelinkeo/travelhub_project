@@ -21,23 +21,77 @@ class ParsedTicketData:
     ticket_number: Optional[str]
     passenger_name: str
     issue_date: str
+    passenger_document: Optional[str] = None
     flights: List[Dict[str, Any]] = field(default_factory=list)
     fares: Dict[str, Any] = field(default_factory=dict)
     agency: Dict[str, Any] = field(default_factory=dict)
     raw_data: Dict[str, Any] = field(default_factory=dict)
     
     def to_dict(self) -> Dict[str, Any]:
-        """Convierte a diccionario para compatibilidad con código legacy"""
+        """Convierte a diccionario siguiendo estrictamente la BIBLIA DEL PARSEO UNIVERSAL"""
+        
+        # 1. Aerolínea del primer vuelo (o del raw_data)
+        airline_name = self.raw_data.get('airline_name')
+        if not airline_name and self.flights:
+            airline_name = self.flights[0].get('aerolinea')
+            
+        # 2. Solo Nombre Pasajero (Regla de Memoria)
+        from core.ticket_parser import _get_solo_nombre_pasajero
+        solo_nombre = self.raw_data.get('solo_nombre_pasajero') or _get_solo_nombre_pasajero(self.passenger_name)
+        
+        # 3. Solo Código Reserva (Limpieza C1/)
+        solo_pnr = self.pnr
+        if solo_pnr and '/' in solo_pnr:
+            solo_pnr = solo_pnr.split('/')[-1]
+            
+        # 4. Agente Emisor (ID Único)
+        agente_id = self.agency.get('iata') or self.agency.get('numero_iata') or self.agency.get('name')
+        if agente_id:
+            # Regla: solo el ID/Número
+            match = re.search(r'([A-Z0-9]{3,})', str(agente_id))
+            if match: agente_id = match.group(1)
+
+        # 5. Estructura de Finanzas
+        tarifa = self.fares.get('fare_amount')
+        moneda = self.fares.get('fare_currency') or self.fares.get('total_currency')
+        t_str = f"{moneda} {tarifa}" if tarifa and moneda else str(tarifa) if tarifa else "No encontrado"
+        
+        total = self.fares.get('total_amount')
+        total_str = f"{moneda} {total}" if total and moneda else str(total) if total else "No encontrado"
+        
+        impuestos = self.fares.get('tax_amount')
+        if not impuestos and total and tarifa:
+            try: impuestos = f"{float(total) - float(tarifa):.2f}"
+            except: impuestos = "0.00"
+
         return {
             'SOURCE_SYSTEM': self.source_system,
-            'pnr': self.pnr,
-            'numero_boleto': self.ticket_number,
-            'pasajero': {'nombre_completo': self.passenger_name},
-            'fecha_emision': self.issue_date,
+            # LLAVES MANDATORIAS (BIBLIA DEL PARSEO)
+            'NOMBRE DEL PASAJERO': self.passenger_name,
+            'CODIGO IDENTIFICACION': self.passenger_document or self.raw_data.get('FOID') or 'No encontrado',
+            'SOLO NOMBRE PASAJERO': solo_nombre,
+            'NUMERO DE BOLETO': self.ticket_number,
+            'FECHA DE EMISION': self.issue_date,
+            'AGENTE EMISOR': agente_id,
+            'CODIGO RESERVA': self.pnr,
+            'SOLO CODIGO RESERVA': solo_pnr,
+            'NOMBRE AEROLINEA': airline_name or 'No encontrado',
+            'DIRECCION AEROLINEA': self.raw_data.get('direccion_aerolinea') or 'No encontrado',
             'vuelos': self.flights,
-            'tarifas': self.fares,
-            'agencia': self.agency,
-            **self.raw_data
+            'TARIFA': t_str,
+            'IMPUESTOS': impuestos,
+            'TOTAL': total_str,
+            
+            # Aliases para compatibilidad con código antiguo/templates
+            'pnr': self.pnr,
+            'ticket_number': self.ticket_number,
+            'passenger_name': self.passenger_name,
+            'fecha_emision': self.issue_date,
+            'TARIFA_IMPORTE': tarifa,
+            'TOTAL_IMPORTE': total,
+            'TARIFA_MONEDA': moneda,
+            'TOTAL_MONEDA': moneda,
+            'agencia': self.agency
         }
 
 
@@ -89,7 +143,19 @@ class BaseTicketParser(ABC):
         match = re.search(r'([A-Z]{3})\s*([0-9,.]+)', text)
         if match:
             currency = match.group(1)
-            amount_str = match.group(2).replace(',', '')
+            raw_amount = match.group(2)
+            
+            # Determinar si la coma o el punto es el separador decimal
+            last_comma = raw_amount.rfind(',')
+            last_dot = raw_amount.rfind('.')
+            
+            if last_comma > last_dot and (len(raw_amount) - last_comma == 3):
+                # La coma es decimal (ej: 1.234,56 o 492,25)
+                amount_str = raw_amount.replace('.', '').replace(',', '.')
+            else:
+                # El punto es decimal (ej: 1,234.56 o 492.25)
+                amount_str = raw_amount.replace(',', '')
+                
             try:
                 amount = Decimal(amount_str)
                 return currency, amount
@@ -160,16 +226,86 @@ class BaseTicketParser(ABC):
         
         return default
     
-    def normalize_airline_name(self, raw_name: str, flight_code: str = None) -> str:
+    def normalize_airline_name(self, raw_name: str, flight_code: str = None, ticket_number: str = None) -> str:
         """
         Normaliza el nombre de aerolínea usando utilidades existentes.
         
         Args:
             raw_name: Nombre crudo de la aerolínea
             flight_code: Código de vuelo para ayudar en la normalización
+            ticket_number: Número de boleto para extraer placa/prefijo
             
         Returns:
             Nombre normalizado
         """
         from core.airline_utils import normalize_airline_name
-        return normalize_airline_name(raw_name, flight_code)
+        return normalize_airline_name(raw_name, flight_code, ticket_number=ticket_number)
+    def extract_passenger_name_robust(self, text: str) -> str:
+        """
+        Extrae el nombre del pasajero con una estrategia de prioridad de palabras clave
+        y limpieza profunda de títulos (MR, MS, CHD, etc.).
+        Maneja etiquetas HTML eliminándolas antes de la búsqueda.
+        """
+        # Limpiar HTML para la búsqueda de nombres
+        clean_text = re.sub(r'<[^>]+>', ' ', text)
+        clean_text = clean_text.replace('&nbsp;', ' ')
+        
+        # 1. Prioridad: Búsqueda por palabras clave explícitas (KIU/Sabre/Web)
+        patterns = [
+            r'NAME/NOMBRE\s*[:\s]*([A-ZÁÉÍÓÚÑ/ (),.-]{3,})',
+            r'NAME:\s*([A-ZÁÉÍÓÚÑ/ (),.-]{3,})',
+            r'NOMBRE DEL PASAJERO\s*[:\s]*([A-ZÁÉÍÓÚÑ/ (),.-]{3,})',
+            r'PASAJERO\s*[:\s]*([A-ZÁÉÍÓÚÑ/ (),.-]{3,})',
+            r'PASJ\s*[:\s]*([A-ZÁÉÍÓÚÑ/ (),.-]{3,})',
+        ]
+        
+        raw_name = self.extract_field(clean_text, patterns)
+        
+        # 2. Estrategia 2: GDS Priority (APELLIDO/NOMBRE) si no hubo palabra clave
+        if raw_name == 'No encontrado' or len(raw_name) < 4:
+            blacklist = [
+                'DATE/FECHA', 'FECHA/EMISION', 'NAME/NOMBRE', 'AGENT/AGENTE', 'FROM/TO', 'DESDE/HACIA', 
+                'TELEFONO', 'PHONE', 'MAIL', 'CORREO', 'DOCUMENTO', 'ADDRESS/DIRECCION', 
+                'TICKET NUMBER/NRO DE BOLETO', 'NO REEMBOLSABLE/NO ENDOSABLE', 'NON END/NON REF',
+                'AIR FARE/TARIFA', 'TAX/IMPUESTOS', 'FORM OF PAYMENT/FORMA DE PAGO', 'PAGO',
+                'ISSUING AIRLINE', 'LINEA AEREA EMISORA', 'EMISORA', 'AIRLINE', 'DIRECCION',
+                'FORMA DE PAGO', 'TARIFA', 'IMPUESTOS', 'NUMERO DE BOLETO', 'PASSENGER NAME',
+                'RESERVATION CODE', 'CODIGO DE RESERVA', 'CODIGO DE RESERVACION', 'ELECTRONIC',
+                'RECORD LOCATOR', 'BOOKING REFERENCE', 'TICKET NUMBER', 'ISSUE AGENT', 'EMITIDO'
+            ]
+            
+            # Buscar en el texto limpio (sin tags)
+            matches = re.finditer(r'\b([A-Z]{2,}(?: [A-Z]+)*/[A-Z]{2,}(?: [A-Z]+)*)\b', clean_text)
+            for match in matches:
+                candidate = match.group(1).strip()
+                if len(candidate) > 5 and not re.search(r'\d', candidate):
+                    if not any(bad in candidate.upper() for bad in blacklist):
+                         raw_name = candidate
+                         break
+
+        if raw_name == 'No encontrado':
+            return 'No encontrado'
+
+        return self.clean_passenger_name(raw_name)
+
+    def clean_passenger_name(self, name: str) -> str:
+        """
+        Limpia el nombre del pasajero eliminando títulos básicos al final.
+        NO elimina ID, RIF o FOID para asegurar coincidencia exacta con la reserva.
+        """
+        if not name or name == 'No encontrado':
+            return name
+
+        # 1. Asegurar limpieza de cualquier tag residual (HTML)
+        name = re.sub(r'<[^>]+>', '', name)
+        name = name.replace('&nbsp;', ' ').strip()
+
+        # 2. Eliminación de títulos y sufijos (MR, MS, MRS, CHD, INF) 
+        # Solo si hay un separador '/' (Estilo GDS/KIU)
+        if '/' in name:
+            name = re.sub(r'\s*\b(MR|MS|MRS|CHD|INF)\b\s*$', '', name, flags=re.IGNORECASE).strip()
+        
+        # 3. Limpieza de caracteres residuales
+        name = name.rstrip(':/.- ').strip()
+        
+        return name

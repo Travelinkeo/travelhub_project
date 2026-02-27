@@ -1,0 +1,134 @@
+{% load humanize %}
+
+<!-- Filters -->
+<div class="flex justify-end mb-6">
+    <form hx-get="{% url 'core:analytics_sales' %}" hx-target="#analytics-content" class="flex items-center space-x-2">
+        <label for="year" class="text-gray-400 text-sm">Año:</label>
+        <select name="year" id="year" onchange="htmx.trigger(this.form, 'submit')"
+            class="bg-gray-700 text-white border border-gray-600 rounded-lg px-3 py-1 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+            {% for year in available_years %}
+            <option value="{{ year }}" {% if year == selected_year %}selected{% endif %}>{{ year }}</option>
+            {% endfor %}
+        </select>
+    </form>
+</div>
+
+<!-- KPIs Grid -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="bg-slate-800 p-6 rounded-2xl border border-gray-700 shadow-lg">
+        <h1 class="text-gray-400 text-sm font-medium mb-2">Ventas Totales</h1>
+        <p class="text-3xl font-bold text-white">${{ kpis.total_ventas|floatformat:2|intcomma }}</p>
+    </div>
+
+    <div class="bg-slate-800 p-6 rounded-2xl border border-gray-700 shadow-lg">
+        <h1 class="text-gray-400 text-sm font-medium mb-2">Transacciones</h1>
+        <p class="text-3xl font-bold text-white">{{ kpis.total_transacciones }}</p>
+    </div>
+
+    <div class="bg-slate-800 p-6 rounded-2xl border border-gray-700 shadow-lg">
+        <h1 class="text-gray-400 text-sm font-medium mb-2">Ticket Promedio</h1>
+        <p class="text-3xl font-bold text-white">${{ kpis.ticket_promedio|floatformat:2|intcomma }}</p>
+    </div>
+</div>
+
+<!-- Charts Section -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+    <div class="bg-slate-800 p-6 rounded-2xl border border-gray-700 shadow-lg">
+        <h3 class="text-white text-lg font-bold mb-4">Ventas Mensuales</h3>
+        <div class="relative h-80">
+            <canvas id="monthlySalesChart"></canvas>
+        </div>
+    </div>
+
+    <div class="bg-slate-800 p-6 rounded-2xl border border-gray-700 shadow-lg">
+        <h3 class="text-white text-lg font-bold mb-4">Top Aerolíneas</h3>
+        <div class="relative h-80">
+            <canvas id="airlinesChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Data injection for Chart.js -->
+{{ sales_chart.labels|json_script:"sales-chart-labels" }}
+{{ sales_chart.values|json_script:"sales-chart-values" }}
+{{ top_airlines|json_script:"top-airlines-data" }}
+
+<script>
+    // Re-initialize charts when content is loaded
+    (function () {
+        // Safe check for Chart.js
+        if (typeof Chart === 'undefined') return;
+
+        // Sales Chart
+        const salesCtx = document.getElementById('monthlySalesChart');
+        if (salesCtx) {
+            const labels = JSON.parse(document.getElementById('sales-chart-labels').textContent);
+            const values = JSON.parse(document.getElementById('sales-chart-values').textContent);
+
+            new Chart(salesCtx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Ventas',
+                        data: values,
+                        borderColor: '#6366f1', // Indigo 500
+                        tension: 0.4,
+                        fill: true,
+                        backgroundColor: 'rgba(99, 102, 241, 0.1)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                            ticks: { color: '#9ca3af' }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#9ca3af' }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+
+        // Airlines Chart
+        const airlineCtx = document.getElementById('airlinesChart');
+        if (airlineCtx) {
+            const airlineData = JSON.parse(document.getElementById('top-airlines-data').textContent);
+            const labels = airlineData.map(d => d.aerolinea);
+            const values = airlineData.map(d => d.total);
+
+            new Chart(airlineCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: values,
+                        backgroundColor: [
+                            '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: { color: '#d1d5db' }
+                        }
+                    }
+                }
+            });
+        }
+    })();
+</script>

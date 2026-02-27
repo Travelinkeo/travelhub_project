@@ -14,8 +14,8 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from .models import AsientoContable, DetalleAsiento, PlanContable, TasaCambioBCV
-from core.models.facturacion_venezuela import FacturaVenezuela
-from core.models.ventas import Venta, PagoVenta
+from apps.finance.models import Factura, ItemFactura
+from apps.bookings.models import Venta, PagoVenta
 
 logger = logging.getLogger(__name__)
 
@@ -50,20 +50,17 @@ class ContabilidadService:
     
     @staticmethod
     @transaction.atomic
-    def generar_asiento_desde_factura(factura: FacturaVenezuela) -> AsientoContable:
+    def generar_asiento_desde_factura(factura: Factura) -> AsientoContable:
         """
         Genera asiento contable automáticamente desde una factura.
-        Implementa lógica Agente vs Principal según tipo_operacion.
+        Implementa lógica Agente vs Principal según tipo_factura.
         
         Args:
-            factura: Instancia de FacturaVenezuela
-            
-        Returns:
-            AsientoContable creado
+            factura: Instancia de Factura
         """
         try:
             # 1. Obtener tasa de cambio
-            tasa_dia = factura.tasa_cambio_bcv or ContabilidadService.obtener_tasa_bcv(
+            tasa_dia = factura.tasa_cambio or ContabilidadService.obtener_tasa_bcv(
                 factura.fecha_emision.date() if hasattr(factura.fecha_emision, 'date') else factura.fecha_emision
             )
             
@@ -81,7 +78,7 @@ class ContabilidadService:
             linea_num = 1
             
             # 3. Generar líneas según tipo de operación
-            if factura.tipo_operacion == FacturaVenezuela.TipoOperacion.INTERMEDIACION:
+            if factura.tipo_factura == Factura.TipoFactura.TERCEROS:
                 # AGENTE: Solo registrar comisión como ingreso
                 linea_num = ContabilidadService._generar_lineas_intermediacion(
                     asiento, factura, tasa_dia, linea_num
@@ -110,7 +107,7 @@ class ContabilidadService:
     @staticmethod
     def _generar_lineas_intermediacion(
         asiento: AsientoContable, 
-        factura: FacturaVenezuela, 
+        factura: Factura, 
         tasa: Decimal, 
         linea_num: int
     ) -> int:
@@ -121,7 +118,7 @@ class ContabilidadService:
         """
         # Calcular comisión (ingreso neto de la agencia)
         # En intermediación, el ingreso es solo la comisión
-        comision_usd = factura.subtotal_base_gravada  # Asumimos que la base gravada es la comisión
+        comision_usd = factura.base_imponible  # Asumimos que la base gravada es la comisión
         
         # Línea 1: DÉBITO - Cuenta por Cobrar
         DetalleAsiento.objects.create(
@@ -150,7 +147,8 @@ class ContabilidadService:
         linea_num += 1
         
         # Línea 3: CRÉDITO - Cuenta por Pagar al Tercero (Aerolínea/Proveedor)
-        monto_tercero = factura.monto_total - comision_usd - factura.monto_iva_16 - factura.monto_igtf
+        # Nota: En Factura (base) no tenemos tercero_razon_social, usamos descripcion generica o accedemos a boleto
+        monto_tercero = factura.monto_total - comision_usd - factura.iva_monto - factura.igtf_monto
         if monto_tercero > 0:
             DetalleAsiento.objects.create(
                 asiento=asiento,
@@ -160,7 +158,7 @@ class ContabilidadService:
                 debe_bsd=Decimal('0.00'),
                 haber=monto_tercero,
                 haber_bsd=monto_tercero * tasa,
-                descripcion_linea=f"Cuenta por pagar a {factura.tercero_razon_social or 'proveedor'}"
+                descripcion_linea=f"Cuenta por pagar a proveedor (Terceros)"
             )
             linea_num += 1
         
@@ -197,7 +195,7 @@ class ContabilidadService:
     @staticmethod
     def _generar_lineas_venta_propia(
         asiento: AsientoContable, 
-        factura: FacturaVenezuela, 
+        factura: Factura, 
         tasa: Decimal, 
         linea_num: int
     ) -> int:
@@ -219,7 +217,7 @@ class ContabilidadService:
         linea_num += 1
         
         # Línea 2: CRÉDITO - Ingreso por Venta de Paquetes
-        subtotal = factura.subtotal_base_gravada + factura.subtotal_exento + factura.subtotal_exportacion
+        subtotal = factura.base_imponible + factura.base_exenta
         DetalleAsiento.objects.create(
             asiento=asiento,
             linea=linea_num,
@@ -280,12 +278,12 @@ class ContabilidadService:
             
             # Obtener factura asociada
             factura = venta.factura
-            if not factura or not isinstance(factura, FacturaVenezuela):
-                logger.warning(f"Pago {pago.id_pago_venta} sin factura Venezuela asociada")
+            if not factura:
+                logger.warning(f"Pago {pago.id_pago_venta} sin factura asociada")
                 return None
             
             # Obtener tasas de cambio
-            tasa_factura = factura.tasa_cambio_bcv
+            tasa_factura = factura.tasa_cambio
             tasa_pago = ContabilidadService.obtener_tasa_bcv(
                 pago.fecha_pago.date() if hasattr(pago.fecha_pago, 'date') else pago.fecha_pago
             )
@@ -503,36 +501,67 @@ class ContabilidadService:
         Según normativa venezolana, la ganancia incrementa la base imponible.
         
         Args:
-            factura: FacturaVenezuela origen
+        Args:
+            factura: Factura origen
             pago: PagoVenta que generó el diferencial
             ganancia_bsd: Monto de la ganancia en BSD
             tasa_factura: Tasa BCV al momento de la factura
             tasa_pago: Tasa BCV al momento del pago
             
         Returns:
-            NotaDebitoVenezuela creada o None si no aplica
+            Factura (Nota Debito) creada o None si no aplica
         """
         try:
-            from core.models.facturacion_venezuela import NotaDebitoVenezuela
+            # Crear Factura tipo ND
+            # Nota: Esto crea una factura real. Si se prefiere solo un registro contable, usar otro modelo.
+            # Aquí asumimos que se emite una Nota de Débito fiscal.
             
-            # Calcular IVA 16% sobre la ganancia
+            # IVA 16% sobre la ganancia
             iva_bsd = ganancia_bsd * Decimal('0.16')
+            # Convertir a USD para la ND (aproximado, ya que la ND es en base a ganancia cambiaria que es en Bs)
+            # Generalmente estas ND son solo en Bs. Pero el sistema es multimoneda.
+            # Usamos tasa pago para la conversion base
             
-            # Crear nota de débito
-            nota_debito = NotaDebitoVenezuela.objects.create(
-                factura_origen=factura,
-                ganancia_cambiaria_bsd=ganancia_bsd,
-                monto_iva_bsd=iva_bsd,
-                tasa_factura=tasa_factura,
-                tasa_pago=tasa_pago,
-                referencia_pago=pago.referencia or f"PAGO-{pago.id_pago_venta}",
-                observaciones=f"IVA sobre ganancia cambiaria. Factura {factura.numero_factura} pagada con tasa {tasa_pago} vs tasa original {tasa_factura}"
+            monto_iva_usd = iva_bsd / tasa_pago
+            
+            nota_debito = Factura.objects.create(
+                tipo_factura=Factura.TipoFactura.NOTA_DEBITO,
+                factura_asociada=factura,
+                cliente=factura.cliente,
+                moneda=factura.moneda,
+                tasa_cambio=tasa_pago,
+                notas=f"Nota de Débito por Diferencial Cambiario. Factura {factura.numero_factura}. Ganancia {ganancia_bsd} BSD",
+                # Totales (Reflejar IVA)
+                iva_monto=monto_iva_usd,
+                monto_impuestos=monto_iva_usd,
+                monto_total=monto_iva_usd, # ND por el IVA solamente? O base? Leyes venezolanas: Se factura el diferencial??
+                # Normalmente se emite ND sobre el valor que aumentó.
+                # Simplificación: Crear ND con los montos calculados.
+                estado=Factura.EstadoFactura.EMITIDA
             )
             
+            # Agregar Item explicando
+            ItemFactura.objects.create(
+                factura=nota_debito,
+                descripcion=f"Ajuste por Diferencial Cambiario",
+                cantidad=1,
+                precio_unitario=Decimal('0.00'), # La base es el diferencial, pero en este caso es un ajuste
+                subtotal_item=Decimal('0.00')
+            )
+            # Actualizar totales manualmente para reflejar lo deseado
+            nota_debito.iva_monto = monto_iva_usd
+            nota_debito.monto_total = monto_iva_usd
+            nota_debito.save()
+
             logger.info(
-                f"Nota de Débito {nota_debito.numero_nota_debito} generada: "
+                f"Nota de Débito {nota_debito.numero_factura} generada: "
                 f"Ganancia {ganancia_bsd} BSD, IVA {iva_bsd} BSD"
             )
+            
+            # Retornamos un objeto que tenga atributos esperados por quien llama, o adaptamos el llamador.
+            # El llamador espera 'monto_iva_bsd' y 'numero_nota_debito'
+            nota_debito.monto_iva_bsd = iva_bsd
+            nota_debito.numero_nota_debito = nota_debito.numero_factura
             
             return nota_debito
             

@@ -1,0 +1,120 @@
+{% extends 'base_modern.html' %}
+{% load humanize %}
+
+{% block title %}Reporte Comisiones - TravelHub{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+    <div>
+        <h2 class="text-3xl font-bold text-white mb-1">Reporte de Comisiones</h2>
+        <p class="text-gray-400">Análisis de ventas y comisiones por aerolínea.</p>
+    </div>
+</div>
+
+{% include 'core/erp/partials/boletos_nav.html' %}
+
+
+<!-- Filters -->
+<div class="glass-panel rounded-xl p-6 mb-8">
+    <div class="flex flex-col md:flex-row gap-4 items-end">
+        <div class="w-full md:w-48">
+            <label class="block text-xs text-gray-400 mb-1">Fecha Inicio</label>
+            <input type="date" id="fecha_inicio"
+                class="w-full bg-dark-800 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-primary">
+        </div>
+        <div class="w-full md:w-48">
+            <label class="block text-xs text-gray-400 mb-1">Fecha Fin</label>
+            <input type="date" id="fecha_fin"
+                class="w-full bg-dark-800 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-primary">
+        </div>
+        <button onclick="generarReporte()"
+            class="px-8 py-2 bg-primary hover:bg-indigo-600 text-white rounded-lg transition-colors font-medium">
+            Generar Reporte
+        </button>
+    </div>
+</div>
+
+<!-- Results Container -->
+<div id="reporte-container" class="hidden space-y-8">
+    <!-- Totals Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="glass-panel rounded-xl p-6">
+            <h3 class="text-gray-400 text-sm font-medium uppercase tracking-wider mb-2">Total Boletos</h3>
+            <p id="total-boletos" class="text-4xl font-bold text-white">--</p>
+        </div>
+        <div class="glass-panel rounded-xl p-6">
+            <h3 class="text-gray-400 text-sm font-medium uppercase tracking-wider mb-2">Total Ventas</h3>
+            <p id="total-ventas" class="text-4xl font-bold text-emerald-400">--</p>
+        </div>
+        <div class="glass-panel rounded-xl p-6">
+            <h3 class="text-gray-400 text-sm font-medium uppercase tracking-wider mb-2">Total Comisiones</h3>
+            <p id="total-comisiones" class="text-4xl font-bold text-blue-400">--</p>
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div class="glass-panel rounded-xl overflow-hidden">
+        <div class="px-6 py-4 border-b border-white/10">
+            <h3 class="font-bold text-white">Desglose por Aerolínea</h3>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-gray-400">
+                <thead class="bg-white/5 text-xs uppercase">
+                    <tr>
+                        <th class="px-6 py-3 font-medium">Aerolínea</th>
+                        <th class="px-6 py-3 font-medium text-right">Boletos</th>
+                        <th class="px-6 py-3 font-medium text-right">Ventas</th>
+                        <th class="px-6 py-3 font-medium text-right">Comisiones</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-body" class="divide-y divide-white/5">
+                    <!-- Rows populated via JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    async function generarReporte() {
+        const params = new URLSearchParams({
+            fecha_inicio: document.getElementById('fecha_inicio').value,
+            fecha_fin: document.getElementById('fecha_fin').value
+        });
+
+        try {
+            const response = await fetch(`/api/boletos/reporte-comisiones/?${params}`);
+            const data = await response.json();
+
+            // Update Totals
+            document.getElementById('total-boletos').textContent = data.totales.total_boletos;
+            document.getElementById('total-ventas').textContent = `$${data.totales.total_ventas.toFixed(2)}`;
+            document.getElementById('total-comisiones').textContent = `$${data.totales.total_comisiones.toFixed(2)}`;
+
+            // Update Table
+            const tbody = document.getElementById('tabla-body');
+            if (data.por_aerolinea.length > 0) {
+                tbody.innerHTML = data.por_aerolinea.map(item => `
+                    <tr class="hover:bg-white/5 transition-colors">
+                        <td class="px-6 py-4 font-medium text-white">${item.aerolinea}</td>
+                        <td class="px-6 py-4 text-right font-mono">${item.cantidad_boletos}</td>
+                        <td class="px-6 py-4 text-right font-mono">$${item.total_ventas.toFixed(2)}</td>
+                        <td class="px-6 py-4 text-right font-mono text-blue-400 font-bold">$${item.total_comisiones.toFixed(2)}</td>
+                    </tr>
+                `).join('');
+            } else {
+                tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-8 text-center text-gray-500">No hay datos para el período seleccionado</td></tr>';
+            }
+
+            document.getElementById('reporte-container').classList.remove('hidden');
+
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error al generar el reporte');
+        }
+    }
+</script>
+{% endblock %}

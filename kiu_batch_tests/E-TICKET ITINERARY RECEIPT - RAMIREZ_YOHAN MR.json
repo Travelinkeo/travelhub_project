@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "RAMIREZ/YOHAN",
+  "CODIGO_IDENTIFICACION": "PAX406135",
+  "SOLO_NOMBRE_PASAJERO": "YOHAN",
+  "NUMERO_DE_BOLETO": "3640211571116",
+  "FECHA_DE_EMISION": "27 NOV 2025 21:20",
+  "AGENTE_EMISOR": "CCS00WWWW",
+  "CODIGO_RESERVA": "LQNXWR",
+  "SOLO_CODIGO_RESERVA": "LQNXWR",
+  "NOMBRE_AEROLINEA": "RUTAS AEREAS DE VENEZUELA RAV,SA",
+  "DIRECCION_AEROLINEA": null,
+  "vuelos": [
+    {
+      "aerolinea": "WW",
+      "numero_vuelo": "224",
+      "origen": "MARACAIBO",
+      "fecha_salida": "28NOV 2025",
+      "hora_salida": "1700",
+      "destino": "CARACAS",
+      "hora_llegada": "1800",
+      "cabina": "Económica",
+      "clase": "H",
+      "localizador_aerolinea": "LQNXWR"
+    }
+  ],
+  "TARIFA": "21939.94",
+  "IMPUESTOS": "5460.88",
+  "TOTAL": "27400.82",
+  "SOURCE_SYSTEM": "AI_KIU",
+  "es_remision": false,
+  "NOMBRE DEL PASAJERO": "RAMIREZ/YOHAN",
+  "CODIGO IDENTIFICACION": "PAX406135",
+  "SOLO NOMBRE PASAJERO": "YOHAN",
+  "NUMERO DE BOLETO": "3640211571116",
+  "FECHA DE EMISION": "27 NOV 2025 21:20",
+  "AGENTE EMISOR": "CCS00WWWW",
+  "CODIGO RESERVA": "LQNXWR",
+  "SOLO CODIGO RESERVA": "LQNXWR",
+  "NOMBRE AEROLINEA": "RUTAS AEREAS DE VENEZUELA RAV,SA",
+  "DIRECCION AEROLINEA": null,
+  "SOURCE SYSTEM": "AI_KIU",
+  "es remision": false
+}

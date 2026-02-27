@@ -3,12 +3,15 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.utils import timezone
+from django.http import HttpResponse
+from django.shortcuts import render
 from .models import Cotizacion, ItemCotizacion
 from .serializers import CotizacionSerializer, ItemCotizacionSerializer
+from .pdf_service import generar_pdf_cotizacion
 
 
 class CotizacionViewSet(viewsets.ModelViewSet):
-    queryset = Cotizacion.objects.select_related('cliente', 'consultor').prefetch_related('items').order_by('-fecha_emision')
+    queryset = Cotizacion.objects.select_related('cliente', 'consultor').prefetch_related('items_cotizacion').order_by('-fecha_emision')
     serializer_class = CotizacionSerializer
     permission_classes = [AllowAny]
     
@@ -50,6 +53,25 @@ class CotizacionViewSet(viewsets.ModelViewSet):
             cotizacion.save(update_fields=['estado', 'fecha_vista'])
         
         return Response({'message': 'Cotización marcada como vista'})
+    
+    @action(detail=True, methods=['get'])
+    def preview_html(self, request, pk=None):
+        """Visualizar cotización en HTML"""
+        cotizacion = self.get_object()
+        return render(request, 'cotizaciones/plantilla_cotizacion.html', {'cotizacion': cotizacion})
+
+    @action(detail=True, methods=['get'])
+    def preview_pdf(self, request, pk=None):
+        """Visualizar/Descargar cotización en PDF"""
+        cotizacion = self.get_object()
+        try:
+            pdf_bytes = generar_pdf_cotizacion(cotizacion)
+            response = HttpResponse(pdf_bytes, content_type='application/pdf')
+            filename = f"Cotizacion_{cotizacion.numero_cotizacion}.pdf"
+            response['Content-Disposition'] = f'inline; filename="{filename}"'
+            return response
+        except RuntimeError as e:
+             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class ItemCotizacionViewSet(viewsets.ModelViewSet):

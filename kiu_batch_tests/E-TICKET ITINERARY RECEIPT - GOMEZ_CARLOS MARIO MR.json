@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "GOMEZ/CARLOS MARIO",
+  "CODIGO_IDENTIFICACION": "84414910",
+  "SOLO_NOMBRE_PASAJERO": "CARLOS MARIO",
+  "NUMERO_DE_BOLETO": "3640211554930",
+  "FECHA_DE_EMISION": "25 SEP 2025 15:51",
+  "AGENTE_EMISOR": "CCS00WWWW",
+  "CODIGO_RESERVA": "MRSIVG",
+  "SOLO_CODIGO_RESERVA": "MRSIVG",
+  "NOMBRE_AEROLINEA": "RUTAS AEREAS DE VENEZUELA RAV,SA",
+  "DIRECCION_AEROLINEA": null,
+  "vuelos": [
+    {
+      "aerolinea": "WW",
+      "numero_vuelo": "224",
+      "origen": "MARACAIBO",
+      "fecha_salida": "29SEP 2025",
+      "hora_salida": "1430",
+      "destino": "CARACAS",
+      "hora_llegada": "1530",
+      "cabina": "Económica",
+      "clase": "R",
+      "localizador_aerolinea": "MRSIVG"
+    }
+  ],
+  "TARIFA": "13045.65",
+  "IMPUESTOS": "3622.92",
+  "TOTAL": "16668.57",
+  "SOURCE_SYSTEM": "AI_KIU",
+  "es_remision": false,
+  "NOMBRE DEL PASAJERO": "GOMEZ/CARLOS MARIO",
+  "CODIGO IDENTIFICACION": "84414910",
+  "SOLO NOMBRE PASAJERO": "CARLOS MARIO",
+  "NUMERO DE BOLETO": "3640211554930",
+  "FECHA DE EMISION": "25 SEP 2025 15:51",
+  "AGENTE EMISOR": "CCS00WWWW",
+  "CODIGO RESERVA": "MRSIVG",
+  "SOLO CODIGO RESERVA": "MRSIVG",
+  "NOMBRE AEROLINEA": "RUTAS AEREAS DE VENEZUELA RAV,SA",
+  "DIRECCION AEROLINEA": null,
+  "SOURCE SYSTEM": "AI_KIU",
+  "es remision": false
+}

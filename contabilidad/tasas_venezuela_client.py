@@ -49,9 +49,39 @@ class TasasVenezuelaClient:
             
             # Procesar datos de DolarApi
             tasas = {}
+            
+            # 1. Intentar obtener Tasa Oficial DIRECTAMENTE del BCV (Más precisa)
+            try:
+                from core.bcv_scraper import obtener_tasas_bcv
+                tasas_bcv = obtener_tasas_bcv()
+                if tasas_bcv:
+                    if 'USD' in tasas_bcv:
+                        tasas['oficial'] = {
+                            'price': tasas_bcv['USD'].quantize(Decimal('0.0001')),
+                            'last_update': datetime.now().isoformat(),
+                            'title': 'BCV Oficial (Directo)',
+                            'symbol': 'Bs.'
+                        }
+                    
+                    if 'EUR' in tasas_bcv:
+                        tasas['euro_bcv'] = {
+                            'price': tasas_bcv['EUR'].quantize(Decimal('0.0001')),
+                            'last_update': datetime.now().isoformat(),
+                            'title': 'BCV Euro',
+                            'symbol': 'Bs.'
+                        }
+
+            except Exception as e:
+                logger.error(f"Falló scraper directo BCV: {e}")
+
             for item in data:
                 try:
                     fuente = item.get('fuente', 'unknown')
+                    
+                    # Si ya tenemos oficial del scraper directo, saltar el de la API
+                    if fuente == 'oficial' and 'oficial' in tasas:
+                        continue
+                        
                     promedio = item.get('promedio')
                     
                     if promedio and promedio > 0:
@@ -113,12 +143,13 @@ class TasasVenezuelaClient:
     @classmethod
     def actualizar_tasas_db(cls) -> Dict[str, bool]:
         """
-        Actualiza la tasa oficial (BCV) en la base de datos.
+        Actualiza la tasa oficial (BCV) en la base de datos y TipoCambio (Core).
         
         Returns:
             Dict con resultados: {'oficial': True, 'paralelo': False, ...}
         """
         from .models import TasaCambioBCV
+        from core.models_catalogos import TipoCambio, Moneda
         from datetime import date
         
         resultados = {}
@@ -130,7 +161,7 @@ class TasasVenezuelaClient:
         
         hoy = date.today()
         
-        # Actualizar tasa oficial (BCV)
+        # 1. Actualizar tabla historica TasaCambioBCV (Solo USD)
         if 'oficial' in tasas:
             try:
                 TasaCambioBCV.objects.update_or_create(
@@ -141,10 +172,43 @@ class TasasVenezuelaClient:
                     }
                 )
                 resultados['oficial'] = True
-                logger.info(f"Tasa BCV actualizada: {tasas['oficial']['price']}")
+                logger.info(f"Tasa BCV (USD) actualizada: {tasas['oficial']['price']}")
             except Exception as e:
                 logger.error(f"Error guardando tasa BCV: {e}")
                 resultados['oficial'] = False
+        
+        # 2. Actualizar tabla central TipoCambio (USD y EUR)
+        # Buscar moneda destino (VES)
+        moneda_ves = Moneda.objects.filter(codigo_iso='VES').first()
+        
+        if not moneda_ves:
+             logger.error("No se encontró moneda VES para actualizar tasas.")
+             return resultados
+
+        # Mapeo de claves con Moneda Origen ISO
+        mapa_monedas = {
+            'oficial': 'USD',
+            'euro_bcv': 'EUR'
+        }
+
+        for clave_tasa, codigo_iso_origen in mapa_monedas.items():
+            if clave_tasa in tasas:
+                try:
+                    moneda_origen = Moneda.objects.filter(codigo_iso=codigo_iso_origen).first()
+                    if moneda_origen:
+                        valor_tasa = tasas[clave_tasa]['price']
+                        
+                        tipo_cambio, created = TipoCambio.objects.update_or_create(
+                            moneda_origen=moneda_origen,
+                            moneda_destino=moneda_ves,
+                            fecha_efectiva=hoy,
+                            defaults={
+                                'tasa_conversion': valor_tasa
+                            }
+                        )
+                        logger.info(f"TipoCambio {codigo_iso_origen}->VES actualizado: {valor_tasa}")
+                except Exception as e:
+                    logger.error(f"Error actualizando TipoCambio {codigo_iso_origen}: {e}")
         
         return resultados
     

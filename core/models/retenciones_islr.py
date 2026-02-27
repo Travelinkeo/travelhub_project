@@ -9,7 +9,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from core.models import FacturaConsolidada
-from personas.models import Cliente
+from apps.crm.models import Cliente
 
 
 class RetencionISLR(models.Model):

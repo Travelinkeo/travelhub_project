@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "FARIAS APARCEDO/ANDY DAVID",
+  "CODIGO_IDENTIFICACION": "No encontrado",
+  "SOLO_NOMBRE_PASAJERO": "ANDY DAVID",
+  "NUMERO_DE_BOLETO": "1347160451194",
+  "FECHA_DE_EMISION": "16 nov 24",
+  "AGENTE_EMISOR": "GRUPO SOPORTE GLOBAL INC/AE1",
+  "CODIGO_RESERVA": "AAIISB",
+  "SOLO_CODIGO_RESERVA": "AAIISB",
+  "NOMBRE_AEROLINEA": "AEROVIAS DEL CONTINENTE",
+  "DIRECCION_AEROLINEA": null,
+  "vuelos": [
+    {
+      "aerolinea": "AV",
+      "numero_vuelo": "23",
+      "origen": "MEXICO CITY, MEXICO",
+      "fecha_salida": "22 dic 24",
+      "hora_salida": "23:15",
+      "destino": "BOGOTA, COLOMBIA",
+      "hora_llegada": "04:40",
+      "cabina": "TURISTA",
+      "clase": "WHOB2KR9",
+      "localizador_aerolinea": "22FA6Z"
+    }
+  ],
+  "TARIFA": "183.30",
+  "IMPUESTOS": "0.00",
+  "TOTAL": "183.30",
+  "SOURCE_SYSTEM": "AI_SABRE",
+  "es_remision": false,
+  "NOMBRE DEL PASAJERO": "FARIAS APARCEDO/ANDY DAVID",
+  "CODIGO IDENTIFICACION": "No encontrado",
+  "SOLO NOMBRE PASAJERO": "ANDY DAVID",
+  "NUMERO DE BOLETO": "1347160451194",
+  "FECHA DE EMISION": "16 nov 24",
+  "AGENTE EMISOR": "GRUPO SOPORTE GLOBAL INC/AE1",
+  "CODIGO RESERVA": "AAIISB",
+  "SOLO CODIGO RESERVA": "AAIISB",
+  "NOMBRE AEROLINEA": "AEROVIAS DEL CONTINENTE",
+  "DIRECCION AEROLINEA": null,
+  "SOURCE SYSTEM": "AI_SABRE",
+  "es remision": false
+}

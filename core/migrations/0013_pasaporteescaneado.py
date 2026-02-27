@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("core", "0012_alojamientoreserva_item_venta"),
-        ("personas", "0002_cliente_cedula_identidad"),
+        ("crm", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
@@ -71,7 +71,7 @@ class Migration(migrations.Migration):
                         blank=True,
                         null=True,
                         on_delete=django.db.models.deletion.CASCADE,
-                        to="personas.cliente",
+                        to="crm.cliente",
                     ),
                 ),
                 (

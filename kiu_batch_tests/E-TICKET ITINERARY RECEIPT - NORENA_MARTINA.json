@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "NORENA/MARTINA",
+  "CODIGO_IDENTIFICACION": "18304684",
+  "SOLO_NOMBRE_PASAJERO": "NORENA",
+  "NUMERO_DE_BOLETO": "3640211560893",
+  "FECHA_DE_EMISION": "15 OCT 2025 15:45",
+  "AGENTE_EMISOR": "CCS00WWWW",
+  "CODIGO_RESERVA": "FMWOEE",
+  "SOLO_CODIGO_RESERVA": "FMWOEE",
+  "NOMBRE_AEROLINEA": "RUTAS AEREAS DE VENEZUELA RAV,SA",
+  "DIRECCION_AEROLINEA": null,
+  "vuelos": [
+    {
+      "aerolinea": "WW",
+      "numero_vuelo": "331",
+      "origen": "CARACAS",
+      "fecha_salida": "16OCT2025",
+      "hora_salida": "1230",
+      "destino": "PORLAMAR",
+      "hora_llegada": "1315",
+      "cabina": "Económica",
+      "clase": "R",
+      "localizador_aerolinea": "FMWOEE"
+    }
+  ],
+  "TARIFA": "6067.67",
+  "IMPUESTOS": "3383.38",
+  "TOTAL": "9451.05",
+  "SOURCE_SYSTEM": "AI_KIU",
+  "es_remision": false,
+  "NOMBRE DEL PASAJERO": "NORENA/MARTINA",
+  "CODIGO IDENTIFICACION": "18304684",
+  "SOLO NOMBRE PASAJERO": "NORENA",
+  "NUMERO DE BOLETO": "3640211560893",
+  "FECHA DE EMISION": "15 OCT 2025 15:45",
+  "AGENTE EMISOR": "CCS00WWWW",
+  "CODIGO RESERVA": "FMWOEE",
+  "SOLO CODIGO RESERVA": "FMWOEE",
+  "NOMBRE AEROLINEA": "RUTAS AEREAS DE VENEZUELA RAV,SA",
+  "DIRECCION AEROLINEA": null,
+  "SOURCE SYSTEM": "AI_KIU",
+  "es remision": false
+}

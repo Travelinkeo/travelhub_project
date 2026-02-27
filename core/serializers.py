@@ -3,11 +3,12 @@
 from rest_framework import serializers
 
 # Importar desde submódulos específicos
-from core.models.agencia import Agencia, UsuarioAgencia
-from core.models.boletos import BoletoImportado
-from core.models.contabilidad import AsientoContable, DetalleAsiento, ItemLiquidacion, LiquidacionProveedor
-from core.models.facturacion import Factura, ItemFactura
-from core.models.ventas import (
+from core.models import Agencia, UsuarioAgencia
+from core.models import BoletoImportado
+from core.models import AsientoContable, DetalleAsiento, ItemLiquidacion, LiquidacionProveedor
+# from core.models.facturacion import Factura, ItemFactura (MOVED)
+from apps.finance.models import Factura, ItemFactura
+from core.models import (
     ActividadServicio,
     AlojamientoReserva,
     AlquilerAutoReserva,
@@ -25,8 +26,8 @@ from core.models.ventas import (
     Venta,
     VentaParseMetadata,
 )
-from core.models_catalogos import Aerolinea, Ciudad, Moneda, Pais, ProductoServicio, Proveedor, TipoCambio
-from personas.models import Cliente
+from core.models_catalogos import Aerolinea, Ciudad, Moneda, Pais, ProductoServicio, Proveedor, TipoCambio, ComisionProveedorServicio
+from apps.crm.models import Cliente
 
 
 
@@ -69,10 +70,28 @@ class ProveedorSerializer(serializers.ModelSerializer):
         model = Proveedor
         fields = '__all__'
 
+
 class AerolineaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Aerolinea
         fields = ['id_aerolinea', 'codigo_iata', 'nombre', 'activa']
+
+class ComisionProveedorServicioSerializer(serializers.ModelSerializer):
+    tipo_servicio_display = serializers.CharField(source='get_tipo_servicio_display', read_only=True)
+    moneda_codigo = serializers.CharField(source='moneda.codigo_iso', read_only=True)
+    
+    class Meta:
+        model = ComisionProveedorServicio
+        from core.models_catalogos import ComisionProveedorServicio # Ensure model is imported or available
+        fields = [
+            'id_comision', 'proveedor', 'tipo_servicio', 'tipo_servicio_display',
+            'comision_porcentaje', 'comision_monto_fijo', 'moneda', 'moneda_codigo',
+            'notas', 'activo'
+        ]
+        extra_kwargs = {
+            'proveedor': {'required': True},
+            'tipo_servicio': {'required': True}
+        }
 
 
 class ProductoServicioSerializer(serializers.ModelSerializer):
@@ -363,7 +382,8 @@ class PagoVentaSerializer(serializers.ModelSerializer):
         model = PagoVenta
         fields = [
             'id_pago_venta', 'venta', 'fecha_pago', 'monto', 'moneda', 'moneda_detalle', 'metodo', 'metodo_display',
-            'referencia', 'confirmado', 'notas', 'creado'
+            'referencia', 'confirmado', 'notas', 'creado',
+            'aplica_igtf', 'tasa_igtf', 'monto_igtf'
         ]
         read_only_fields = ('creado',)
         extra_kwargs = {
@@ -703,30 +723,30 @@ class AuditLogSerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
 
-class PasaporteEscaneadoSerializer(serializers.ModelSerializer):
-    cliente_detalle = ClienteSerializer(source='cliente', read_only=True)
-    
-    class Meta:
-        from core.models.pasaportes import PasaporteEscaneado
-        model = PasaporteEscaneado
-        fields = [
-            'id', 'imagen_original', 'cliente', 'cliente_detalle', 'numero_pasaporte',
-            'nombres', 'apellidos', 'nombre_completo', 'nacionalidad', 'fecha_nacimiento',
-            'fecha_vencimiento', 'sexo', 'confianza_ocr', 'verificado_manualmente',
-            'es_valido', 'fecha_procesamiento', 'datos_ocr_completos', 'texto_mrz'
-        ]
-        read_only_fields = ['fecha_procesamiento', 'datos_ocr_completos', 'texto_mrz', 'es_valido', 'nombre_completo']
+# class PasaporteEscaneadoSerializer(serializers.ModelSerializer):
+#     cliente_detalle = ClienteSerializer(source='cliente', read_only=True)
+#     
+#     class Meta:
+#         from core.models import PasaporteEscaneado
+#         model = PasaporteEscaneado
+#         fields = [
+#             'id', 'imagen_original', 'cliente', 'cliente_detalle', 'numero_pasaporte',
+#             'nombres', 'apellidos', 'nombre_completo', 'nacionalidad', 'fecha_nacimiento',
+#             'fecha_vencimiento', 'sexo', 'confianza_ocr', 'verificado_manualmente',
+#             'es_valido', 'fecha_procesamiento', 'datos_ocr_completos', 'texto_mrz'
+#         ]
+#         read_only_fields = ['fecha_procesamiento', 'datos_ocr_completos', 'texto_mrz', 'es_valido', 'nombre_completo']
 
 
-class ComunicacionProveedorSerializer(serializers.ModelSerializer):
-    class Meta:
-        from core.models import ComunicacionProveedor
-        model = ComunicacionProveedor
-        fields = [
-            'id', 'remitente', 'asunto', 'fecha_recepcion', 'categoria',
-            'contenido_extraido', 'cuerpo_completo'
-        ]
-        read_only_fields = fields
+# class ComunicacionProveedorSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         from core.models import ComunicacionProveedor
+#         model = ComunicacionProveedor
+#         fields = [
+#             'id', 'remitente', 'asunto', 'fecha_recepcion', 'categoria',
+#             'contenido_extraido', 'cuerpo_completo'
+#         ]
+#         read_only_fields = fields
 
 
 class ItemLiquidacionSerializer(serializers.ModelSerializer):
@@ -807,3 +827,8 @@ class CrearUsuarioAgenciaSerializer(serializers.Serializer):
         if User.objects.filter(email=value).exists():
             raise serializers.ValidationError("Este email ya está registrado")
         return value
+
+class AuditLogSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AuditLog
+        fields = '__all__'

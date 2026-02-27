@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "ZULUAGA/ESNEYDER",
+  "CODIGO_IDENTIFICACION": "IDEPAS722886",
+  "SOLO_NOMBRE_PASAJERO": "ESNEYDER",
+  "NUMERO_DE_BOLETO": "0520390102729",
+  "FECHA_DE_EMISION": "21 OCT 2025 19:27",
+  "AGENTE_EMISOR": "PTYS3651X",
+  "CODIGO_RESERVA": "DNAHYO",
+  "SOLO_CODIGO_RESERVA": "DNAHYO",
+  "NOMBRE_AEROLINEA": "AEROLINEAS ESTELAR LATINOAMERICA C.A.",
+  "DIRECCION_AEROLINEA": null,
+  "vuelos": [
+    {
+      "aerolinea": "ES",
+      "numero_vuelo": "8302",
+      "origen": "SAN ANTONIO",
+      "fecha_salida": "28 OCT 2025",
+      "hora_salida": "1730",
+      "destino": "CARACAS",
+      "hora_llegada": "1830",
+      "cabina": "Económica",
+      "clase": "G",
+      "localizador_aerolinea": "DNAHYO"
+    }
+  ],
+  "TARIFA": "9.59",
+  "IMPUESTOS": "55.41",
+  "TOTAL": "65.00",
+  "SOURCE_SYSTEM": "AI_KIU",
+  "es_remision": false,
+  "NOMBRE DEL PASAJERO": "ZULUAGA/ESNEYDER",
+  "CODIGO IDENTIFICACION": "IDEPAS722886",
+  "SOLO NOMBRE PASAJERO": "ESNEYDER",
+  "NUMERO DE BOLETO": "0520390102729",
+  "FECHA DE EMISION": "21 OCT 2025 19:27",
+  "AGENTE EMISOR": "PTYS3651X",
+  "CODIGO RESERVA": "DNAHYO",
+  "SOLO CODIGO RESERVA": "DNAHYO",
+  "NOMBRE AEROLINEA": "AEROLINEAS ESTELAR LATINOAMERICA C.A.",
+  "DIRECCION AEROLINEA": null,
+  "SOURCE SYSTEM": "AI_KIU",
+  "es remision": false
+}

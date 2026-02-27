@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "GOMEZ ZULUAGA/ENRIQU",
+  "CODIGO_IDENTIFICACION": "IDECI84284068",
+  "SOLO_NOMBRE_PASAJERO": "ENRIQU",
+  "NUMERO_DE_BOLETO": "3640260500533",
+  "FECHA_DE_EMISION": "04 APR 2025 15:31",
+  "AGENTE_EMISOR": "PTYS3651X",
+  "CODIGO_RESERVA": "CBZGXX",
+  "SOLO_CODIGO_RESERVA": "CBZGXX",
+  "NOMBRE_AEROLINEA": "RUTAS AEREAS DE VENEZUELA RAV,SA",
+  "DIRECCION_AEROLINEA": null,
+  "vuelos": [
+    {
+      "aerolinea": "WW",
+      "numero_vuelo": "227",
+      "origen": "CARACAS",
+      "fecha_salida": "6 APR 2025",
+      "hora_salida": "1900",
+      "destino": "MARACAIBO",
+      "hora_llegada": "2000",
+      "cabina": "Económica",
+      "clase": "O",
+      "localizador_aerolinea": "CBZGXX"
+    }
+  ],
+  "TARIFA": "60.49",
+  "IMPUESTOS": "40.49",
+  "TOTAL": "35.00",
+  "SOURCE_SYSTEM": "AI_KIU",
+  "es_remision": true,
+  "NOMBRE DEL PASAJERO": "GOMEZ ZULUAGA/ENRIQU",
+  "CODIGO IDENTIFICACION": "IDECI84284068",
+  "SOLO NOMBRE PASAJERO": "ENRIQU",
+  "NUMERO DE BOLETO": "3640260500533",
+  "FECHA DE EMISION": "04 APR 2025 15:31",
+  "AGENTE EMISOR": "PTYS3651X",
+  "CODIGO RESERVA": "CBZGXX",
+  "SOLO CODIGO RESERVA": "CBZGXX",
+  "NOMBRE AEROLINEA": "RUTAS AEREAS DE VENEZUELA RAV,SA",
+  "DIRECCION AEROLINEA": null,
+  "SOURCE SYSTEM": "AI_KIU",
+  "es remision": true
+}

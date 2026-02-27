@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "ZULUAGA GOMEZ/MARIO JAVIER",
+  "CODIGO_IDENTIFICACION": "IDEPPE178339",
+  "SOLO_NOMBRE_PASAJERO": "MARIO",
+  "NUMERO_DE_BOLETO": "782-0340747169",
+  "FECHA_DE_EMISION": "30 APR 2025 11:18",
+  "AGENTE_EMISOR": "PTYS3651X",
+  "CODIGO_RESERVA": "DASSUI",
+  "SOLO_CODIGO_RESERVA": "DASSUI",
+  "NOMBRE_AEROLINEA": "LASER AIRLINES",
+  "DIRECCION_AEROLINEA": "AV PRINCIPAL DEL BOSQUE EDIF TORRE CREDICARD",
+  "vuelos": [
+    {
+      "aerolinea": "QL",
+      "numero_vuelo": "QL920",
+      "origen": "CARACAS",
+      "fecha_salida": "3MAY",
+      "hora_salida": "15:00",
+      "destino": "EL VIGIA",
+      "hora_llegada": "16:00",
+      "cabina": "Económica",
+      "clase": "Y",
+      "localizador_aerolinea": "DASSUI"
+    }
+  ],
+  "TARIFA": "60.49",
+  "IMPUESTOS": "10.00",
+  "TOTAL": "10.00",
+  "SOURCE_SYSTEM": "KIU",
+  "es_remision": false,
+  "NOMBRE DEL PASAJERO": "ZULUAGA GOMEZ/MARIO JAVIER",
+  "CODIGO IDENTIFICACION": "IDEPPE178339",
+  "SOLO NOMBRE PASAJERO": "MARIO",
+  "NUMERO DE BOLETO": "782-0340747169",
+  "FECHA DE EMISION": "30 APR 2025 11:18",
+  "AGENTE EMISOR": "PTYS3651X",
+  "CODIGO RESERVA": "DASSUI",
+  "SOLO CODIGO RESERVA": "DASSUI",
+  "NOMBRE AEROLINEA": "LASER AIRLINES",
+  "DIRECCION AEROLINEA": "AV PRINCIPAL DEL BOSQUE EDIF TORRE CREDICARD",
+  "SOURCE SYSTEM": "KIU",
+  "es remision": false
+}

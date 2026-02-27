@@ -1,0 +1,176 @@
+{% extends 'base_modern.html' %}
+
+{% block content %}
+<div class="container mx-auto px-6 py-8">
+    <div class="flex justify-between items-center mb-10">
+        <h1 class="text-4xl font-extrabold text-white tracking-tight">Marketing Automático ✨</h1>
+        <div class="flex gap-4">
+            <button onclick="window.location.reload()"
+                class="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-xl transition-all border border-gray-700">
+                Refrescar Panel
+            </button>
+        </div>
+    </div>
+
+    <!-- Grid Layout -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+        <!-- Panel de Creación de Flyer -->
+        <div class="lg:col-span-2 bg-gray-900/50 backdrop-blur-xl border border-gray-800 rounded-3xl p-8">
+            <h2 class="text-2xl font-bold text-white mb-6">Generador de Ofertas Flash</h2>
+
+            <form hx-post="{% url 'marketing:generar_flyer' %}" hx-target="#flyer-preview" hx-indicator="#loading-flyer"
+                class="space-y-6">
+                {% csrf_token %}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-gray-400 text-sm mb-2">Seleccionar Hotel (Opcional)</label>
+                        <select name="hotel_id"
+                            class="w-full bg-gray-800/50 border border-gray-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-amber-500 outline-none transition-all">
+                            <option value="">-- Manual --</option>
+                            {% for hotel in hoteles %}
+                            <option value="{{ hotel.id }}">{{ hotel.nombre }} ({{ hotel.destino }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-gray-400 text-sm mb-2">Destino (Si es manual)</label>
+                        <input type="text" name="destino" placeholder="Ej. Madrid, Canaima..."
+                            class="w-full bg-gray-800/50 border border-gray-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-amber-500 outline-none transition-all">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-gray-400 text-sm mb-2">Precio Desde</label>
+                        <input type="text" name="precio" placeholder="Ej. $850"
+                            class="w-full bg-gray-800/50 border border-gray-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-amber-500 outline-none transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-gray-400 text-sm mb-2">Aerolínea</label>
+                        <input type="text" name="aerolinea" placeholder="Ej. Iberia, Avianca"
+                            class="w-full bg-gray-800/50 border border-gray-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-amber-500 outline-none transition-all">
+                    </div>
+                </div>
+
+                <button type="submit"
+                    class="w-full bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white font-bold py-4 rounded-2xl shadow-lg transform active:scale-95 transition-all text-lg">
+                    🎨 Generar Imagen para Social Media
+                </button>
+            </form>
+
+            <div id="loading-flyer" class="htmx-indicator flex items-center justify-center py-10">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-500"></div>
+                <span class="ml-4 text-gray-300">Generando diseño con Unsplash y Pillow...</span>
+            </div>
+
+            <div id="flyer-preview"
+                class="mt-8 flex justify-center bg-black/30 rounded-3xl p-4 overflow-hidden min-h-[400px]">
+                <div class="text-gray-500 flex flex-col items-center justify-center italic text-center py-20">
+                    <svg class="w-20 h-20 mb-4 opacity-20" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd"
+                            d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"
+                            clip-rule="evenodd"></path>
+                    </svg>
+                    La vista previa aparecerá aquí
+                    <p class="text-xs mt-2">Formato 1080x1920 (Instagram Stories)</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar: AI Copywriter -->
+        <div class="space-y-8">
+            <div class="bg-indigo-900/40 border border-indigo-500/30 rounded-3xl p-8 backdrop-blur-md">
+                <h2 class="text-2xl font-bold text-white mb-6 flex items-center">
+                    <span class="mr-2">✍️</span> AI Copywriter
+                </h2>
+                <form hx-post="{% url 'marketing:generar_copy' %}" hx-target="#copy-preview"
+                    hx-indicator="#loading-copy" class="space-y-4">
+                    {% csrf_token %}
+                    <div>
+                        <label class="block text-indigo-300 text-xs mb-2 uppercase font-bold tracking-widest">Tono del
+                            Mensaje</label>
+                        <select name="tono"
+                            class="w-full bg-indigo-950/50 border border-indigo-400/30 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-white outline-none">
+                            <option value="AVENTURERO">🚀 Aventurero</option>
+                            <option value="LUJOSO">💎 Lujoso</option>
+                            <option value="FAMILIAR">👨‍👩‍👧‍👦 Familiar</option>
+                            <option value="URGENTE">🔥 Urgente (FO-MO)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-indigo-300 text-xs mb-2 uppercase font-bold tracking-widest">Sobre el
+                            Hotel (Relacionado)</label>
+                        <select name="hotel_id"
+                            class="w-full bg-indigo-950/50 border border-indigo-400/30 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-white outline-none">
+                            {% for hotel in hoteles %}
+                            <option value="{{ hotel.id }}">{{ hotel.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit"
+                        class="w-full bg-white text-indigo-900 hover:bg-indigo-100 font-bold py-3 rounded-xl transition-all shadow-xl">
+                        Escribir Caption con Gemini
+                    </button>
+                </form>
+
+                <div id="loading-copy" class="htmx-indicator mt-4 text-center">
+                    <span class="inline-block animate-bounce text-white">Pensando... 🧠</span>
+                </div>
+
+                <div id="copy-preview"
+                    class="mt-6 bg-black/40 p-5 rounded-2xl text-gray-200 text-sm leading-relaxed whitespace-pre-wrap min-h-[150px] border border-white/5">
+                    El texto sugerido aparecerá aquí...
+                </div>
+                <button onclick="navigator.clipboard.writeText(document.getElementById('copy-preview').innerText)"
+                    class="mt-4 text-xs text-indigo-300 hover:text-white transition-all underline">
+                    Copiar al Portapapeles
+                </button>
+            </div>
+
+            <!-- Recientes -->
+            <div class="bg-gray-900/80 border border-gray-800 rounded-3xl p-8">
+                <h3 class="text-lg font-bold text-white mb-4">Activos Recientes</h3>
+                <div class="space-y-4">
+                    {% for activo in activos_recientes %}
+                    <div class="flex items-center gap-4 p-3 hover:bg-gray-800 rounded-xl transition-all cursor-pointer">
+                        <div
+                            class="w-10 h-10 bg-amber-500/20 text-amber-500 flex items-center justify-center rounded-lg">
+                            {% if activo.tipo == 'FLYER' %}🖼️{% else %}✍️{% endif %}
+                        </div>
+                        <div>
+                            <p class="text-sm text-white font-medium">{{ activo.get_tipo_display }}</p>
+                            <p class="text-xs text-gray-500">{{ activo.fecha_creacion|date:"d M, H:i" }}</p>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="text-gray-600 text-sm">No hay activos generados aún.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    // Mostrar la imagen directamente si la respuesta de HTMX es el binario
+    document.body.addEventListener('htmx:afterRequest', function (evt) {
+        if (evt.detail.target.id === 'flyer-preview' && evt.detail.successful) {
+            const blob = new Blob([evt.detail.xhr.response], { type: 'image/jpeg' });
+            // Esta lógica necesita ajuste porque HTMX espera texto por defecto. 
+            // Para binarios es mejor usar una URL temporal o base64.
+            // Por ahora, el endpoint de Flyer podría retornar una URL de archivo guardado en lugar del binario directamente para HTMX.
+        }
+    });
+</script>
+
+<style>
+    /* Personalización para que el iFrame de la imagen no se vea roto indexando binario */
+    #flyer-preview img {
+        max-width: 100%;
+        border-radius: 1rem;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+</style>
+{% endblock %}

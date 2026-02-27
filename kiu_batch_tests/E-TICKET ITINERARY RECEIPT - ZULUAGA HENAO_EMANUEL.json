@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "ZULUAGA HENAO/EMANUEL",
+  "CODIGO_IDENTIFICACION": "FN07MAY18",
+  "SOLO_NOMBRE_PASAJERO": "EMANUEL",
+  "NUMERO_DE_BOLETO": "0520390102727",
+  "FECHA_DE_EMISION": "01 OCT 2025 20:28",
+  "AGENTE_EMISOR": "PTYS3651X",
+  "CODIGO_RESERVA": "GGJXRL",
+  "SOLO_CODIGO_RESERVA": "GGJXRL",
+  "NOMBRE_AEROLINEA": "AEROLINEAS ESTELAR LATINOAMERICA C.A.",
+  "DIRECCION_AEROLINEA": null,
+  "vuelos": [
+    {
+      "aerolinea": "ES",
+      "numero_vuelo": "8302",
+      "origen": "SAN ANTONIO",
+      "fecha_salida": "2OCT 2025",
+      "hora_salida": "0900",
+      "destino": "CARACAS",
+      "hora_llegada": "1000",
+      "cabina": "Económica",
+      "clase": "B",
+      "localizador_aerolinea": "GGJXRL"
+    }
+  ],
+  "TARIFA": "9.59",
+  "IMPUESTOS": "10.41",
+  "TOTAL": "20.00",
+  "SOURCE_SYSTEM": "AI_KIU",
+  "es_remision": true,
+  "NOMBRE DEL PASAJERO": "ZULUAGA HENAO/EMANUEL",
+  "CODIGO IDENTIFICACION": "FN07MAY18",
+  "SOLO NOMBRE PASAJERO": "EMANUEL",
+  "NUMERO DE BOLETO": "0520390102727",
+  "FECHA DE EMISION": "01 OCT 2025 20:28",
+  "AGENTE EMISOR": "PTYS3651X",
+  "CODIGO RESERVA": "GGJXRL",
+  "SOLO CODIGO RESERVA": "GGJXRL",
+  "NOMBRE AEROLINEA": "AEROLINEAS ESTELAR LATINOAMERICA C.A.",
+  "DIRECCION AEROLINEA": null,
+  "SOURCE SYSTEM": "AI_KIU",
+  "es remision": true
+}

@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "ROJAS PALACIO/MATHIA",
+  "CODIGO_IDENTIFICACION": "22",
+  "SOLO_NOMBRE_PASAJERO": "ROJAS PALACIO",
+  "NUMERO_DE_BOLETO": "7420200051999",
+  "FECHA_DE_EMISION": "02 FEB 2026 14:47",
+  "AGENTE_EMISOR": "BLA009VPP",
+  "CODIGO_RESERVA": "BGABEM",
+  "SOLO_CODIGO_RESERVA": "BGABEM",
+  "NOMBRE_AEROLINEA": "AVIOR AIRLINES C.A",
+  "DIRECCION_AEROLINEA": null,
+  "vuelos": [
+    {
+      "aerolinea": "9V",
+      "numero_vuelo": "075",
+      "origen": "MARACAIBO",
+      "fecha_salida": "11APR 2026",
+      "hora_salida": "1545",
+      "destino": "CARACAS",
+      "hora_llegada": "1700",
+      "cabina": "Económica",
+      "clase": "Q",
+      "localizador_aerolinea": "BGABEM"
+    }
+  ],
+  "TARIFA": "5271.18",
+  "IMPUESTOS": "17241.69",
+  "TOTAL": "22512.87",
+  "SOURCE_SYSTEM": "AI_KIU",
+  "es_remision": true,
+  "NOMBRE DEL PASAJERO": "ROJAS PALACIO/MATHIA",
+  "CODIGO IDENTIFICACION": "22",
+  "SOLO NOMBRE PASAJERO": "ROJAS PALACIO",
+  "NUMERO DE BOLETO": "7420200051999",
+  "FECHA DE EMISION": "02 FEB 2026 14:47",
+  "AGENTE EMISOR": "BLA009VPP",
+  "CODIGO RESERVA": "BGABEM",
+  "SOLO CODIGO RESERVA": "BGABEM",
+  "NOMBRE AEROLINEA": "AVIOR AIRLINES C.A",
+  "DIRECCION AEROLINEA": null,
+  "SOURCE SYSTEM": "AI_KIU",
+  "es remision": true
+}

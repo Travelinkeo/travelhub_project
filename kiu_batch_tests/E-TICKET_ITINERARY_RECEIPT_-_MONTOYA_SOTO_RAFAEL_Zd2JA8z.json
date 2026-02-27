@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "MONTOYA SOTO/RAFAEL",
+  "CODIGO_IDENTIFICACION": "IDEPAX463503",
+  "SOLO_NOMBRE_PASAJERO": "RAFAEL",
+  "NUMERO_DE_BOLETO": "742-0307373641",
+  "FECHA_DE_EMISION": "28 JUL 2025 08:50",
+  "AGENTE_EMISOR": "PTYS3651X",
+  "CODIGO_RESERVA": "PVVGHP",
+  "SOLO_CODIGO_RESERVA": "PVVGHP",
+  "NOMBRE_AEROLINEA": "AVIOR AIRLINES",
+  "DIRECCION_AEROLINEA": "AV JORGE RODRIGUEZ CC MT NIVEL PB LC 35 ANZOATEGUI",
+  "vuelos": [
+    {
+      "aerolinea": "9V",
+      "numero_vuelo": "9V1424",
+      "origen": "CARACAS",
+      "fecha_salida": "31JUL",
+      "hora_salida": "18:45",
+      "destino": "BOGOTA-EL DORADO I",
+      "hora_llegada": "19:30",
+      "cabina": "Económica",
+      "clase": "Y",
+      "localizador_aerolinea": "PVVGHP"
+    }
+  ],
+  "TARIFA": "63.35",
+  "IMPUESTOS": "113.64",
+  "TOTAL": "176.99",
+  "SOURCE_SYSTEM": "KIU",
+  "es_remision": false,
+  "NOMBRE DEL PASAJERO": "MONTOYA SOTO/RAFAEL",
+  "CODIGO IDENTIFICACION": "IDEPAX463503",
+  "SOLO NOMBRE PASAJERO": "RAFAEL",
+  "NUMERO DE BOLETO": "742-0307373641",
+  "FECHA DE EMISION": "28 JUL 2025 08:50",
+  "AGENTE EMISOR": "PTYS3651X",
+  "CODIGO RESERVA": "PVVGHP",
+  "SOLO CODIGO RESERVA": "PVVGHP",
+  "NOMBRE AEROLINEA": "AVIOR AIRLINES",
+  "DIRECCION AEROLINEA": "AV JORGE RODRIGUEZ CC MT NIVEL PB LC 35 ANZOATEGUI",
+  "SOURCE SYSTEM": "KIU",
+  "es remision": false
+}

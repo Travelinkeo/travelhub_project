@@ -2,7 +2,7 @@
 Sistema de búsqueda inteligente de boletos
 """
 from django.db.models import Q
-from core.models.boletos import BoletoImportado
+from core.models import BoletoImportado
 
 
 def buscar_boletos_avanzado(

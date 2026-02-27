@@ -1,0 +1,51 @@
+{% extends "admin/base_site.html" %}
+{% load i18n l10n admin_urls %}
+
+{% block content %}
+<div id="content-main">
+    <div class="module">
+        <p>Seleccione el cliente que se asignará a los <strong>{{ items.count }}</strong> boletos seleccionados. Se
+            creará una Venta y doble factura para cada uno automáticamente.</p>
+
+        <form method="post">
+            {% csrf_token %}
+            <div>
+                {% for item in items %}
+                <input type="hidden" name="{{ action_checkbox_name }}" value="{{ item.pk|unlocalize }}" />
+                {% endfor %}
+                <input type="hidden" name="action" value="{{ action }}" />
+                <input type="hidden" name="apply" value="1" />
+
+                <div class="form-row">
+                    {{ form.cliente.label_tag }}
+                    {{ form.cliente }}
+                    {{ form.cliente.errors }}
+                </div>
+            </div>
+
+            <div class="submit-row">
+                <input type="submit" value="{% trans 'Asignar y Facturar Ahora' %}" class="default" />
+                <a href="#" onclick="window.history.back(); return false;" class="closelink">{% trans 'Cancelar' %}</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .form-row {
+        padding: 20px;
+        border-bottom: 1px solid #eee;
+    }
+
+    select {
+        padding: 8px;
+        min-width: 300px;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+    }
+
+    .submit-row {
+        margin-top: 20px;
+    }
+</style>
+{% endblock %}

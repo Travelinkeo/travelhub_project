@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "SOTO HERNANDEZ/JOSE LUIS",
+  "CODIGO_IDENTIFICACION": "No encontrado",
+  "SOLO_NOMBRE_PASAJERO": "JOSE LUIS",
+  "NUMERO_DE_BOLETO": "2022483607653",
+  "FECHA_DE_EMISION": "27 ene 25",
+  "AGENTE_EMISOR": "GRUPO SOPORTE GLOBAL INC/AE1",
+  "CODIGO_RESERVA": "FSVUMY",
+  "SOLO_CODIGO_RESERVA": "FSVUMY",
+  "NOMBRE_AEROLINEA": "TACA INTERNATIONAL AIRLI",
+  "DIRECCION_AEROLINEA": null,
+  "vuelos": [
+    {
+      "aerolinea": "AEROVIAS DEL CONTINENTE",
+      "numero_vuelo": "AV 142",
+      "origen": "BOGOTA, COLOMBIA",
+      "fecha_salida": "04 feb 25",
+      "hora_salida": "07:15",
+      "destino": "CARACAS, VENEZUELA",
+      "hora_llegada": "10:10",
+      "cabina": "TURISTA",
+      "clase": "QEOB2BRG",
+      "localizador_aerolinea": "FSVUMY"
+    }
+  ],
+  "TARIFA": "0.00",
+  "IMPUESTOS": "87.80",
+  "TOTAL": "87.80",
+  "SOURCE_SYSTEM": "AI_SABRE",
+  "es_remision": false,
+  "NOMBRE DEL PASAJERO": "SOTO HERNANDEZ/JOSE LUIS",
+  "CODIGO IDENTIFICACION": "No encontrado",
+  "SOLO NOMBRE PASAJERO": "JOSE LUIS",
+  "NUMERO DE BOLETO": "2022483607653",
+  "FECHA DE EMISION": "27 ene 25",
+  "AGENTE EMISOR": "GRUPO SOPORTE GLOBAL INC/AE1",
+  "CODIGO RESERVA": "FSVUMY",
+  "SOLO CODIGO RESERVA": "FSVUMY",
+  "NOMBRE AEROLINEA": "TACA INTERNATIONAL AIRLI",
+  "DIRECCION AEROLINEA": null,
+  "SOURCE SYSTEM": "AI_SABRE",
+  "es remision": false
+}

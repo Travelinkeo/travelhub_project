@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "CASTANO VALENCIA/JOHN JAIRO",
+  "CODIGO_IDENTIFICACION": "IDEPAW918782",
+  "SOLO_NOMBRE_PASAJERO": "JOHN JAIRO",
+  "NUMERO_DE_BOLETO": "7420307373267",
+  "FECHA_DE_EMISION": "25 NOV 2025 10:43",
+  "AGENTE_EMISOR": "PTYS3651X",
+  "CODIGO_RESERVA": "SGIINI",
+  "SOLO_CODIGO_RESERVA": "SGIINI",
+  "NOMBRE_AEROLINEA": "AVIOR AIRLINES C.A",
+  "DIRECCION_AEROLINEA": null,
+  "vuelos": [
+    {
+      "aerolinea": "AVIOR AIRLINES",
+      "numero_vuelo": "1424",
+      "origen": "CARACAS",
+      "fecha_salida": "18 DEC 2025",
+      "hora_salida": "1845",
+      "destino": "BOGOTA-EL DORADO",
+      "hora_llegada": "1930",
+      "cabina": "Y",
+      "clase": "Y",
+      "localizador_aerolinea": "SGIINI"
+    }
+  ],
+  "TARIFA": "67.56",
+  "IMPUESTOS": "217.46",
+  "TOTAL": "285.02",
+  "SOURCE_SYSTEM": "AI_KIU",
+  "es_remision": true,
+  "NOMBRE DEL PASAJERO": "CASTANO VALENCIA/JOHN JAIRO",
+  "CODIGO IDENTIFICACION": "IDEPAW918782",
+  "SOLO NOMBRE PASAJERO": "JOHN JAIRO",
+  "NUMERO DE BOLETO": "7420307373267",
+  "FECHA DE EMISION": "25 NOV 2025 10:43",
+  "AGENTE EMISOR": "PTYS3651X",
+  "CODIGO RESERVA": "SGIINI",
+  "SOLO CODIGO RESERVA": "SGIINI",
+  "NOMBRE AEROLINEA": "AVIOR AIRLINES C.A",
+  "DIRECCION AEROLINEA": null,
+  "SOURCE SYSTEM": "AI_KIU",
+  "es remision": true
+}

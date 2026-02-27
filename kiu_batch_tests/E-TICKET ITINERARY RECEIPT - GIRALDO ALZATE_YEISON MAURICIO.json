@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "GIRALDO ALZATE/YEISON MAURICIO",
+  "CODIGO_IDENTIFICACION": "84589817",
+  "SOLO_NOMBRE_PASAJERO": "GIRALDO ALZATE YEISON MAURICIO",
+  "NUMERO_DE_BOLETO": "7820340795459",
+  "FECHA_DE_EMISION": "11 JUL 2025 17:10",
+  "AGENTE_EMISOR": "PTYS3651X",
+  "CODIGO_RESERVA": "KMVLJG",
+  "SOLO_CODIGO_RESERVA": "KMVLJG",
+  "NOMBRE_AEROLINEA": "LASER C.A.",
+  "DIRECCION_AEROLINEA": null,
+  "vuelos": [
+    {
+      "aerolinea": "QL",
+      "numero_vuelo": "971",
+      "origen": "BARCELONA",
+      "fecha_salida": "14JUL 2025",
+      "hora_salida": "0800",
+      "destino": "CARACAS",
+      "hora_llegada": "0845",
+      "cabina": "Económica",
+      "clase": "R",
+      "localizador_aerolinea": "KMVLJG"
+    }
+  ],
+  "TARIFA": "64.95",
+  "IMPUESTOS": "15.05",
+  "TOTAL": "80.00",
+  "SOURCE_SYSTEM": "AI_KIU",
+  "es_remision": false,
+  "NOMBRE DEL PASAJERO": "GIRALDO ALZATE/YEISON MAURICIO",
+  "CODIGO IDENTIFICACION": "84589817",
+  "SOLO NOMBRE PASAJERO": "GIRALDO ALZATE YEISON MAURICIO",
+  "NUMERO DE BOLETO": "7820340795459",
+  "FECHA DE EMISION": "11 JUL 2025 17:10",
+  "AGENTE EMISOR": "PTYS3651X",
+  "CODIGO RESERVA": "KMVLJG",
+  "SOLO CODIGO RESERVA": "KMVLJG",
+  "NOMBRE AEROLINEA": "LASER C.A.",
+  "DIRECCION AEROLINEA": null,
+  "SOURCE SYSTEM": "AI_KIU",
+  "es remision": false
+}

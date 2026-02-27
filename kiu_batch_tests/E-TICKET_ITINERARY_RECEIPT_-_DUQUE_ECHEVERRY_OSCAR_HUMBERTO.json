@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "DUQUE ECHEVERRY/OSCA",
+  "CODIGO_IDENTIFICACION": "IDEPPE151144",
+  "SOLO_NOMBRE_PASAJERO": "DUQUE ECHEVERRY",
+  "NUMERO_DE_BOLETO": "0190320000388",
+  "FECHA_DE_EMISION": "18 AUG 2023 19:12",
+  "AGENTE_EMISOR": "MIAO34405",
+  "CODIGO_RESERVA": "DFQVNS",
+  "SOLO_CODIGO_RESERVA": "DFQVNS",
+  "NOMBRE_AEROLINEA": "SATENA S.A",
+  "DIRECCION_AEROLINEA": null,
+  "vuelos": [
+    {
+      "aerolinea": "9R",
+      "numero_vuelo": "8901",
+      "origen": "CARACAS",
+      "fecha_salida": "25AUG2023",
+      "hora_salida": "0945",
+      "destino": "BOGOTA-EL DORADO",
+      "hora_llegada": "1046",
+      "cabina": "Económica",
+      "clase": "M",
+      "localizador_aerolinea": "DFQVNS"
+    }
+  ],
+  "TARIFA": "175.00",
+  "IMPUESTOS": "100.70",
+  "TOTAL": "275.70",
+  "SOURCE_SYSTEM": "AI_KIU",
+  "es_remision": false,
+  "NOMBRE DEL PASAJERO": "DUQUE ECHEVERRY/OSCA",
+  "CODIGO IDENTIFICACION": "IDEPPE151144",
+  "SOLO NOMBRE PASAJERO": "DUQUE ECHEVERRY",
+  "NUMERO DE BOLETO": "0190320000388",
+  "FECHA DE EMISION": "18 AUG 2023 19:12",
+  "AGENTE EMISOR": "MIAO34405",
+  "CODIGO RESERVA": "DFQVNS",
+  "SOLO CODIGO RESERVA": "DFQVNS",
+  "NOMBRE AEROLINEA": "SATENA S.A",
+  "DIRECCION AEROLINEA": null,
+  "SOURCE SYSTEM": "AI_KIU",
+  "es remision": false
+}

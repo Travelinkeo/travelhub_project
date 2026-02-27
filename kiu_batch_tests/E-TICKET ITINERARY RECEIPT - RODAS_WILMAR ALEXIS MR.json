@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "RODAS/WILMAR ALEXIS",
+  "CODIGO_IDENTIFICACION": "BD922501",
+  "SOLO_NOMBRE_PASAJERO": "WILMAR ALEXIS",
+  "NUMERO_DE_BOLETO": "3640211563435",
+  "FECHA_DE_EMISION": "04 NOV 2025 17:18",
+  "AGENTE_EMISOR": "CCS00WWWW",
+  "CODIGO_RESERVA": "YGDMPT",
+  "SOLO_CODIGO_RESERVA": "YGDMPT",
+  "NOMBRE_AEROLINEA": "RUTAS AEREAS DE VENEZUELA RAV,SA",
+  "DIRECCION_AEROLINEA": null,
+  "vuelos": [
+    {
+      "aerolinea": "WW",
+      "numero_vuelo": "223",
+      "origen": "CARACAS",
+      "fecha_salida": "5 NOV 2025",
+      "hora_salida": "1230",
+      "destino": "MARACAIBO",
+      "hora_llegada": "1330",
+      "cabina": "Económica",
+      "clase": "H",
+      "localizador_aerolinea": "YGDMPT"
+    }
+  ],
+  "TARIFA": "20084.49",
+  "IMPUESTOS": "5004.98",
+  "TOTAL": "25089.47",
+  "SOURCE_SYSTEM": "AI_KIU",
+  "es_remision": false,
+  "NOMBRE DEL PASAJERO": "RODAS/WILMAR ALEXIS",
+  "CODIGO IDENTIFICACION": "BD922501",
+  "SOLO NOMBRE PASAJERO": "WILMAR ALEXIS",
+  "NUMERO DE BOLETO": "3640211563435",
+  "FECHA DE EMISION": "04 NOV 2025 17:18",
+  "AGENTE EMISOR": "CCS00WWWW",
+  "CODIGO RESERVA": "YGDMPT",
+  "SOLO CODIGO RESERVA": "YGDMPT",
+  "NOMBRE AEROLINEA": "RUTAS AEREAS DE VENEZUELA RAV,SA",
+  "DIRECCION AEROLINEA": null,
+  "SOURCE SYSTEM": "AI_KIU",
+  "es remision": false
+}

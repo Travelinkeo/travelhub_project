@@ -1,0 +1,434 @@
+[
+    {
+        "SOURCE_SYSTEM": "KIU",
+        "pnr": "DDPIIH",
+        "numero_boleto": "308-0201383055",
+        "ticket_number": "308-0201383055",
+        "pasajero": {
+            "nombre_completo": "CORTES NIETO/JOSE DUVAN"
+        },
+        "passenger_name": "CORTES NIETO/JOSE DUVAN",
+        "passenger_document": "NI84606419",
+        "CODIGO_IDENTIFICACION": "NI84606419",
+        "airline_name": "CONVIASA",
+        "total": "VES 50456.3",
+        "fecha_emision": "29 JAN 2026",
+        "vuelos": [
+            {
+                "aerolinea": "CONVIASA",
+                "numero_vuelo": "V01187",
+                "clase": "G",
+                "fecha_salida": "2026-02-02",
+                "fecha_original": "2FEB",
+                "origen": "SAN ANTONIO",
+                "destino": "CARACAS",
+                "hora_salida": "08:50",
+                "hora_llegada": "09:50",
+                "equipaje": "23K"
+            }
+        ],
+        "flights": [
+            {
+                "aerolinea": "CONVIASA",
+                "numero_vuelo": "V01187",
+                "clase": "G",
+                "fecha_salida": "2026-02-02",
+                "fecha_original": "2FEB",
+                "origen": "SAN ANTONIO",
+                "destino": "CARACAS",
+                "hora_salida": "08:50",
+                "hora_llegada": "09:50",
+                "equipaje": "23K"
+            }
+        ],
+        "tarifas": {
+            "currency": "VES",
+            "fare_amount": "41500.00",
+            "total_amount": "50456.3",
+            "tax_details": {
+                "total_taxes": "8956.30",
+                "iva_yn": "3320.00",
+                "other_taxes": "5636.30"
+            }
+        },
+        "agencia": {
+            "iata": "No encontrado",
+            "nombre": "CCS00V0WV",
+            "direccion": "AV. INTERCOMUNAL AEROPUERTO INTERNACIONAL DE MAIQUETIA EDO. LA"
+        },
+        "ItinerarioFinalLimpio": "DESDE/HACIA   VUELO  CL FECHA HORA HORA BASE TARIFARIA              EQP. ESTATUS\nSAN ANTONIO V01187 G  2FEB  0850 0950 GPROMO                      23K  OK\nCARACAS\n_________________________________________________________________________________________________\nPARA MAYOR INFORMACION INGRESAR AL SIGUIENTE LINK HTTP://WWW.CONVIASA.AERO/ES/",
+        "SOLO_NOMBRE_PASAJERO": "JOSE"
+    },
+    {
+        "SOURCE_SYSTEM": "KIU",
+        "pnr": "DDPIIH",
+        "numero_boleto": "308-0201383056",
+        "ticket_number": "308-0201383056",
+        "pasajero": {
+            "nombre_completo": "MURILLO CORTES/DIANA PATRICIA"
+        },
+        "passenger_name": "MURILLO CORTES/DIANA PATRICIA",
+        "passenger_document": "NI84605396",
+        "CODIGO_IDENTIFICACION": "NI84605396",
+        "airline_name": "CONVIASA",
+        "total": "VES 50456.3",
+        "fecha_emision": "29 JAN 2026",
+        "vuelos": [
+            {
+                "aerolinea": "CONVIASA",
+                "numero_vuelo": "V01187",
+                "clase": "G",
+                "fecha_salida": "2026-02-02",
+                "fecha_original": "2FEB",
+                "origen": "SAN ANTONIO",
+                "destino": "CARACAS",
+                "hora_salida": "08:50",
+                "hora_llegada": "09:50",
+                "equipaje": "23K"
+            }
+        ],
+        "flights": [
+            {
+                "aerolinea": "CONVIASA",
+                "numero_vuelo": "V01187",
+                "clase": "G",
+                "fecha_salida": "2026-02-02",
+                "fecha_original": "2FEB",
+                "origen": "SAN ANTONIO",
+                "destino": "CARACAS",
+                "hora_salida": "08:50",
+                "hora_llegada": "09:50",
+                "equipaje": "23K"
+            }
+        ],
+        "tarifas": {
+            "currency": "VES",
+            "fare_amount": "41500.00",
+            "total_amount": "50456.3",
+            "tax_details": {
+                "total_taxes": "8956.30",
+                "iva_yn": "3320.00",
+                "other_taxes": "5636.30"
+            }
+        },
+        "agencia": {
+            "iata": "No encontrado",
+            "nombre": "CCS00V0WV",
+            "direccion": "AV. INTERCOMUNAL AEROPUERTO INTERNACIONAL DE MAIQUETIA EDO. LA"
+        },
+        "ItinerarioFinalLimpio": "DESDE/HACIA   VUELO  CL FECHA HORA HORA BASE TARIFARIA              EQP. ESTATUS\nSAN ANTONIO V01187 G  2FEB  0850 0950 GPROMO                      23K  OK\nCARACAS\n_________________________________________________________________________________________________\nPARA MAYOR INFORMACION INGRESAR AL SIGUIENTE LINK HTTP://WWW.CONVIASA.AERO/ES/",
+        "SOLO_NOMBRE_PASAJERO": "DIANA"
+    },
+    {
+        "SOURCE_SYSTEM": "KIU",
+        "pnr": "WGNBLG",
+        "numero_boleto": "0520270638379",
+        "ticket_number": "0520270638379",
+        "pasajero": {
+            "nombre_completo": "DUQUE/CRISTIAN"
+        },
+        "passenger_name": "DUQUE/CRISTIAN",
+        "passenger_document": "IDECI26631967",
+        "CODIGO_IDENTIFICACION": "IDECI26631967",
+        "airline_name": "ESTELAR",
+        "total": "VES 61269.29",
+        "fecha_emision": "21 DEC 2025",
+        "vuelos": [
+            {
+                "aerolinea": "ESTELAR",
+                "numero_vuelo": "ES8302",
+                "clase": "B",
+                "fecha_salida": "2026-01-07",
+                "fecha_original": "07JAN",
+                "origen": "SAN ANTONIO",
+                "destino": "CARACAS",
+                "hora_salida": "17:30",
+                "hora_llegada": "18:30",
+                "equipaje": "23K"
+            }
+        ],
+        "flights": [
+            {
+                "aerolinea": "ESTELAR",
+                "numero_vuelo": "ES8302",
+                "clase": "B",
+                "fecha_salida": "2026-01-07",
+                "fecha_original": "07JAN",
+                "origen": "SAN ANTONIO",
+                "destino": "CARACAS",
+                "hora_salida": "17:30",
+                "hora_llegada": "18:30",
+                "equipaje": "23K"
+            }
+        ],
+        "tarifas": {
+            "currency": "VES",
+            "fare_amount": "33093.86",
+            "total_amount": "61269.29",
+            "tax_details": {
+                "total_taxes": "28175.43",
+                "iva_yn": "0.00",
+                "other_taxes": "28175.43"
+            }
+        },
+        "agencia": {
+            "iata": "No encontrado",
+            "nombre": "No encontrado",
+            "direccion": "TORRE ESTELAR CALLE LONDRES EDIF LAS MERCEDES, MUNICIPIO BARUTA, EDO MIRANDA, VENEZUELA"
+        },
+        "ItinerarioFinalLimpio": "SAN ANTONIO \u2002\u2002\u2002\u2002\u2002\u2002ES8302 B \u00a007JAN 1730 1830\u00a0\u00a0BOW \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 23K OK\nCARACAS",
+        "SOLO_NOMBRE_PASAJERO": "CRISTIAN"
+    },
+    {
+        "SOURCE_SYSTEM": "KIU",
+        "pnr": "UGENBF",
+        "numero_boleto": "0520270638276",
+        "ticket_number": "0520270638276",
+        "pasajero": {
+            "nombre_completo": "GIRALDO/NANCY"
+        },
+        "passenger_name": "GIRALDO/NANCY",
+        "passenger_document": "IDECI84494821",
+        "CODIGO_IDENTIFICACION": "IDECI84494821",
+        "airline_name": "ESTELAR",
+        "total": "VES 61269.29",
+        "fecha_emision": "20 DEC 2025",
+        "vuelos": [
+            {
+                "aerolinea": "ESTELAR",
+                "numero_vuelo": "ES8302",
+                "clase": "B",
+                "fecha_salida": "2026-01-07",
+                "fecha_original": "07JAN",
+                "origen": "SAN ANTONIO",
+                "destino": "CARACAS",
+                "hora_salida": "17:30",
+                "hora_llegada": "18:30",
+                "equipaje": "23K"
+            },
+            {
+                "aerolinea": "ESTELAR",
+                "numero_vuelo": "ES8301",
+                "clase": "B",
+                "fecha_salida": "2026-01-12",
+                "fecha_original": "12JAN",
+                "origen": "CARACAS",
+                "destino": "SAN ANTONIO",
+                "hora_salida": "15:30",
+                "hora_llegada": "16:30",
+                "equipaje": "23K"
+            }
+        ],
+        "flights": [
+            {
+                "aerolinea": "ESTELAR",
+                "numero_vuelo": "ES8302",
+                "clase": "B",
+                "fecha_salida": "2026-01-07",
+                "fecha_original": "07JAN",
+                "origen": "SAN ANTONIO",
+                "destino": "CARACAS",
+                "hora_salida": "17:30",
+                "hora_llegada": "18:30",
+                "equipaje": "23K"
+            },
+            {
+                "aerolinea": "ESTELAR",
+                "numero_vuelo": "ES8301",
+                "clase": "B",
+                "fecha_salida": "2026-01-12",
+                "fecha_original": "12JAN",
+                "origen": "CARACAS",
+                "destino": "SAN ANTONIO",
+                "hora_salida": "15:30",
+                "hora_llegada": "16:30",
+                "equipaje": "23K"
+            }
+        ],
+        "tarifas": {
+            "currency": "VES",
+            "fare_amount": "33093.86",
+            "total_amount": "61269.29",
+            "tax_details": {
+                "total_taxes": "28175.43",
+                "iva_yn": "0.00",
+                "other_taxes": "28175.43"
+            }
+        },
+        "agencia": {
+            "iata": "No encontrado",
+            "nombre": "No encontrado",
+            "direccion": "TORRE ESTELAR CALLE LONDRES EDIF LAS MERCEDES, MUNICIPIO BARUTA, EDO MIRANDA"
+        },
+        "ItinerarioFinalLimpio": "SAN ANTONIO \u2002\u2002\u2002\u2002\u2002\u2002ES8302 B \u00a007JAN \u00a01730 1830\u00a0\u00a0BOW \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a023K OK\nCARACAS\nCARACAS \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 ES8301 B \u00a012JAN \u00a01530 1630\u00a0\u00a0BOW \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a023K OK\nSAN ANTONIO",
+        "SOLO_NOMBRE_PASAJERO": "NANCY"
+    },
+    {
+        "SOURCE_SYSTEM": "KIU",
+        "pnr": "UGENBF",
+        "numero_boleto": "0520270638277",
+        "ticket_number": "0520270638277",
+        "pasajero": {
+            "nombre_completo": "DUQUE GIRALDO/JULIETA"
+        },
+        "passenger_name": "DUQUE GIRALDO/JULIETA",
+        "passenger_document": "IDVCI37210195",
+        "CODIGO_IDENTIFICACION": "IDVCI37210195",
+        "airline_name": "ESTELAR",
+        "total": "VES 61269.29",
+        "fecha_emision": "20 DEC 2025",
+        "vuelos": [
+            {
+                "aerolinea": "ESTELAR",
+                "numero_vuelo": "ES8302",
+                "clase": "B",
+                "fecha_salida": "2026-01-07",
+                "fecha_original": "07JAN",
+                "origen": "SAN ANTONIO",
+                "destino": "CARACAS",
+                "hora_salida": "17:30",
+                "hora_llegada": "18:30",
+                "equipaje": "23K"
+            },
+            {
+                "aerolinea": "ESTELAR",
+                "numero_vuelo": "ES8301",
+                "clase": "B",
+                "fecha_salida": "2026-01-12",
+                "fecha_original": "12JAN",
+                "origen": "CARACAS",
+                "destino": "SAN ANTONIO",
+                "hora_salida": "15:30",
+                "hora_llegada": "16:30",
+                "equipaje": "23K"
+            }
+        ],
+        "flights": [
+            {
+                "aerolinea": "ESTELAR",
+                "numero_vuelo": "ES8302",
+                "clase": "B",
+                "fecha_salida": "2026-01-07",
+                "fecha_original": "07JAN",
+                "origen": "SAN ANTONIO",
+                "destino": "CARACAS",
+                "hora_salida": "17:30",
+                "hora_llegada": "18:30",
+                "equipaje": "23K"
+            },
+            {
+                "aerolinea": "ESTELAR",
+                "numero_vuelo": "ES8301",
+                "clase": "B",
+                "fecha_salida": "2026-01-12",
+                "fecha_original": "12JAN",
+                "origen": "CARACAS",
+                "destino": "SAN ANTONIO",
+                "hora_salida": "15:30",
+                "hora_llegada": "16:30",
+                "equipaje": "23K"
+            }
+        ],
+        "tarifas": {
+            "currency": "VES",
+            "fare_amount": "33093.86",
+            "total_amount": "61269.29",
+            "tax_details": {
+                "total_taxes": "28175.43",
+                "iva_yn": "0.00",
+                "other_taxes": "28175.43"
+            }
+        },
+        "agencia": {
+            "iata": "No encontrado",
+            "nombre": "No encontrado",
+            "direccion": "TORRE ESTELAR CALLE LONDRES EDIF LAS MERCEDES, MUNICIPIO BARUTA, EDO MIRANDA, VENEZUELA"
+        },
+        "ItinerarioFinalLimpio": "SAN ANTONIO \u2002\u2002\u2002\u2002\u2002\u2002ES8302 B \u00a007JAN \u00a01730 1830\u00a0\u00a0BOW \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a023K OK\nCARACAS\nCARACAS \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 ES8301 B \u00a012JAN \u00a01530 1630\u00a0\u00a0BOW \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a023K OK\nSAN ANTONIO",
+        "SOLO_NOMBRE_PASAJERO": "JULIETA"
+    },
+    {
+        "SOURCE_SYSTEM": "KIU",
+        "pnr": "TJKJTG",
+        "numero_boleto": "0520270638279",
+        "ticket_number": "0520270638279",
+        "pasajero": {
+            "nombre_completo": "DUQUE ECHEVERRI/JUAN CARLOS"
+        },
+        "passenger_name": "DUQUE ECHEVERRI/JUAN CARLOS",
+        "passenger_document": "IDECI82235395",
+        "CODIGO_IDENTIFICACION": "IDECI82235395",
+        "airline_name": "ESTELAR",
+        "total": "VES 61269.29",
+        "fecha_emision": "20 DEC 2025",
+        "vuelos": [
+            {
+                "aerolinea": "ESTELAR",
+                "numero_vuelo": "ES8302",
+                "clase": "B",
+                "fecha_salida": "2026-01-07",
+                "fecha_original": "07JAN",
+                "origen": "SAN ANTONIO",
+                "destino": "CARACAS",
+                "hora_salida": "17:30",
+                "hora_llegada": "18:30",
+                "equipaje": "23K"
+            },
+            {
+                "aerolinea": "ESTELAR",
+                "numero_vuelo": "ES8301",
+                "clase": "B",
+                "fecha_salida": "2026-01-12",
+                "fecha_original": "12JAN",
+                "origen": "CARACAS",
+                "destino": "SAN ANTONIO",
+                "hora_salida": "15:30",
+                "hora_llegada": "16:30",
+                "equipaje": "23K"
+            }
+        ],
+        "flights": [
+            {
+                "aerolinea": "ESTELAR",
+                "numero_vuelo": "ES8302",
+                "clase": "B",
+                "fecha_salida": "2026-01-07",
+                "fecha_original": "07JAN",
+                "origen": "SAN ANTONIO",
+                "destino": "CARACAS",
+                "hora_salida": "17:30",
+                "hora_llegada": "18:30",
+                "equipaje": "23K"
+            },
+            {
+                "aerolinea": "ESTELAR",
+                "numero_vuelo": "ES8301",
+                "clase": "B",
+                "fecha_salida": "2026-01-12",
+                "fecha_original": "12JAN",
+                "origen": "CARACAS",
+                "destino": "SAN ANTONIO",
+                "hora_salida": "15:30",
+                "hora_llegada": "16:30",
+                "equipaje": "23K"
+            }
+        ],
+        "tarifas": {
+            "currency": "VES",
+            "fare_amount": "33093.86",
+            "total_amount": "61269.29",
+            "tax_details": {
+                "total_taxes": "28175.43",
+                "iva_yn": "0.00",
+                "other_taxes": "28175.43"
+            }
+        },
+        "agencia": {
+            "iata": "No encontrado",
+            "nombre": "No encontrado",
+            "direccion": "TORRE ESTELAR CALLE LONDRES EDIF LAS MERCEDES, MUNICIPIO BARUTA, EDO MIRANDA, VENEZUELA"
+        },
+        "ItinerarioFinalLimpio": "SAN ANTONIO \u2002\u2002\u2002\u2002\u2002\u2002ES8302 B \u00a007JAN \u00a01730 1830\u00a0\u00a0BOW \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a023K OK\nCARACAS\nCARACAS \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 ES8301 B \u00a012JAN \u00a01530 1630\u00a0\u00a0BOW \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a0 \u00a023K OK\nSAN ANTONIO",
+        "SOLO_NOMBRE_PASAJERO": "JUAN"
+    }
+]

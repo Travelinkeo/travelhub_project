@@ -12,7 +12,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ("core", "0001_initial"),
         ("cotizaciones", "__first__"),
-        ("personas", "0001_initial"),
+        ("crm", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
             name="cliente",
             field=models.ForeignKey(
                 on_delete=django.db.models.deletion.PROTECT,
-                to="personas.cliente",
+                to="crm.cliente",
                 verbose_name="Cliente (Pagador)",
             ),
         ),
@@ -74,7 +74,7 @@ class Migration(migrations.Migration):
             model_name="venta",
             name="pasajeros",
             field=models.ManyToManyField(
-                related_name="ventas", to="personas.pasajero", verbose_name="Pasajeros"
+                related_name="ventas", to="crm.pasajero", verbose_name="Pasajeros"
             ),
         ),
         migrations.AddField(

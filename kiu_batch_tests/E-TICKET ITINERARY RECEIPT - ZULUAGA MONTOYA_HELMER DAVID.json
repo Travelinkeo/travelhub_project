@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "ZULUAGA MONTOYA/HELMER DAVID",
+  "CODIGO_IDENTIFICACION": "84586125",
+  "SOLO_NOMBRE_PASAJERO": "HELMER DAVID",
+  "NUMERO_DE_BOLETO": "0520390102726",
+  "FECHA_DE_EMISION": "01 OCT 2025 20:27",
+  "AGENTE_EMISOR": "AGENCIA DE VIAJES MY DESTINY P",
+  "CODIGO_RESERVA": "RDZYQY",
+  "SOLO_CODIGO_RESERVA": "RDZYQY",
+  "NOMBRE_AEROLINEA": "AEROLINEAS ESTELAR LATINOAMERICA C.A.",
+  "DIRECCION_AEROLINEA": null,
+  "vuelos": [
+    {
+      "aerolinea": "ES",
+      "numero_vuelo": "8302",
+      "origen": "SAN ANTONIO",
+      "fecha_salida": "2OCT 2025",
+      "hora_salida": "0900",
+      "destino": "CARACAS",
+      "hora_llegada": "1000",
+      "cabina": "Económica",
+      "clase": "O",
+      "localizador_aerolinea": "RDZYQY"
+    }
+  ],
+  "TARIFA": "36.38",
+  "IMPUESTOS": "58.62",
+  "TOTAL": "20.00",
+  "SOURCE_SYSTEM": "AI_KIU",
+  "es_remision": true,
+  "NOMBRE DEL PASAJERO": "ZULUAGA MONTOYA/HELMER DAVID",
+  "CODIGO IDENTIFICACION": "84586125",
+  "SOLO NOMBRE PASAJERO": "HELMER DAVID",
+  "NUMERO DE BOLETO": "0520390102726",
+  "FECHA DE EMISION": "01 OCT 2025 20:27",
+  "AGENTE EMISOR": "AGENCIA DE VIAJES MY DESTINY P",
+  "CODIGO RESERVA": "RDZYQY",
+  "SOLO CODIGO RESERVA": "RDZYQY",
+  "NOMBRE AEROLINEA": "AEROLINEAS ESTELAR LATINOAMERICA C.A.",
+  "DIRECCION AEROLINEA": null,
+  "SOURCE SYSTEM": "AI_KIU",
+  "es remision": true
+}

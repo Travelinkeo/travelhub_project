@@ -2,8 +2,8 @@ import pytest
 from django.urls import reverse
 from rest_framework.test import APIClient
 
-from core.models.personas import Cliente
-from core.models.ventas import (
+from apps.crm.models import Cliente
+from apps.bookings.models import (
     AlquilerAutoReserva,
     CircuitoDia,
     CircuitoTuristico,

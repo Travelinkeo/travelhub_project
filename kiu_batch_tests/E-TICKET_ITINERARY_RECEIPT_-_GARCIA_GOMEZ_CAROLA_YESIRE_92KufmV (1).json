@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "GARCIA GOMEZ/CAROLA YESIRE",
+  "CODIGO_IDENTIFICACION": "172724261",
+  "SOLO_NOMBRE_PASAJERO": "CAROLA YESIRE",
+  "NUMERO_DE_BOLETO": "7820330832564",
+  "FECHA_DE_EMISION": "24 APR 2025 14:50",
+  "AGENTE_EMISOR": "MIAO08217",
+  "CODIGO_RESERVA": "DKYMWA",
+  "SOLO_CODIGO_RESERVA": "DKYMWA",
+  "NOMBRE_AEROLINEA": "LASER C.A.",
+  "DIRECCION_AEROLINEA": null,
+  "vuelos": [
+    {
+      "aerolinea": "QL",
+      "numero_vuelo": "763",
+      "origen": "CURACAO",
+      "fecha_salida": "30APR2025",
+      "hora_salida": "1300",
+      "destino": "CARACAS",
+      "hora_llegada": "1400",
+      "cabina": "TURISTA",
+      "clase": "X",
+      "localizador_aerolinea": "DKYMWA"
+    }
+  ],
+  "TARIFA": "120.00",
+  "IMPUESTOS": "171.55",
+  "TOTAL": "91.60",
+  "SOURCE_SYSTEM": "AI_KIU",
+  "es_remision": true,
+  "NOMBRE DEL PASAJERO": "GARCIA GOMEZ/CAROLA YESIRE",
+  "CODIGO IDENTIFICACION": "172724261",
+  "SOLO NOMBRE PASAJERO": "CAROLA YESIRE",
+  "NUMERO DE BOLETO": "7820330832564",
+  "FECHA DE EMISION": "24 APR 2025 14:50",
+  "AGENTE EMISOR": "MIAO08217",
+  "CODIGO RESERVA": "DKYMWA",
+  "SOLO CODIGO RESERVA": "DKYMWA",
+  "NOMBRE AEROLINEA": "LASER C.A.",
+  "DIRECCION AEROLINEA": null,
+  "SOURCE SYSTEM": "AI_KIU",
+  "es remision": true
+}

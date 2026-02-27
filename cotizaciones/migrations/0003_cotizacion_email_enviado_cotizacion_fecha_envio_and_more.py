@@ -45,7 +45,7 @@ class Migration(migrations.Migration):
                 blank=True,
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,
-                to="core.venta",
+                to="bookings.venta",
                 verbose_name="Venta Generada",
             ),
         ),

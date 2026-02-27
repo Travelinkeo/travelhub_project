@@ -1,0 +1,26 @@
+<div class="flex overflow-x-auto gap-2 mb-8 border-b border-white/10 pb-1">
+    <a href="{% url 'core:boletos_dashboard' %}"
+        class="px-4 py-2 rounded-t-lg text-sm font-medium transition-colors whitespace-nowrap {% if active_tab == 'boletos_dashboard' %}bg-primary text-white border-b-2 border-white{% else %}text-gray-400 hover:text-white hover:bg-white/5{% endif %}">
+        Dashboard
+    </a>
+    <a href="{% url 'core:boletos_importar' %}"
+        class="px-4 py-2 rounded-t-lg text-sm font-medium transition-colors whitespace-nowrap {% if active_tab == 'boletos_importar' %}bg-primary text-white border-b-2 border-white{% else %}text-gray-400 hover:text-white hover:bg-white/5{% endif %}">
+        Importar
+    </a>
+    <a href="{% url 'core:boletos_manual' %}"
+        class="px-4 py-2 rounded-t-lg text-sm font-medium transition-colors whitespace-nowrap {% if active_tab == 'boletos_manual' %}bg-primary text-white border-b-2 border-white{% else %}text-gray-400 hover:text-white hover:bg-white/5{% endif %}">
+        Carga Manual
+    </a>
+    <a href="{% url 'core:boletos_busqueda' %}"
+        class="px-4 py-2 rounded-t-lg text-sm font-medium transition-colors whitespace-nowrap {% if active_tab == 'boletos_busqueda' %}bg-primary text-white border-b-2 border-white{% else %}text-gray-400 hover:text-white hover:bg-white/5{% endif %}">
+        Búsqueda
+    </a>
+    <a href="{% url 'core:boletos_reportes' %}"
+        class="px-4 py-2 rounded-t-lg text-sm font-medium transition-colors whitespace-nowrap {% if active_tab == 'boletos_reportes' %}bg-primary text-white border-b-2 border-white{% else %}text-gray-400 hover:text-white hover:bg-white/5{% endif %}">
+        Reportes
+    </a>
+    <a href="{% url 'core:boletos_anulaciones' %}"
+        class="px-4 py-2 rounded-t-lg text-sm font-medium transition-colors whitespace-nowrap {% if active_tab == 'boletos_anulaciones' %}bg-primary text-white border-b-2 border-white{% else %}text-gray-400 hover:text-white hover:bg-white/5{% endif %}">
+        Anulaciones
+    </a>
+</div>

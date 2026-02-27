@@ -1,0 +1,122 @@
+Total Boletos: 991
+--------------------------------------------------
+ID: 991
+PNR: LUXWOQ
+Name: ALEMAN MARICHALES/JOSE ARMANDO
+File: boletos_importados/2026/02/ticket_b337_3_utf-8BUmVjaWJvIGRlIHBhc2FqZSBlbGVjdHLDs25pY28sIDAyIGFicmlsIHBhcmEg_utf-8QJOSE_ARMANDO_ALEMAN_MARICHALES.pdf
+Fecha: 2026-02-19 22:36:10.096361+00:00
+--------------------------------------------------
+ID: 990
+PNR: LUXWOQ
+Name: COHEN CABELLO/NAIDALY DEL CARMEN
+File: boletos_importados/2026/02/ticket_b337_2_utf-8BUmVjaWJvIGRlIHBhc2FqZSBlbGVjdHLDs25pY28sIDAyIGFicmlsIHBhcmEg_utf-8QNAIDALY_DEL_CARMEN_COHEN_CABELLO.pdf
+Fecha: 2026-02-19 22:35:55.867104+00:00
+--------------------------------------------------
+ID: 989
+PNR: None
+Name: None
+File: boletos_importados/2026/02/ticket_b337_1_adjunto.pdf
+Fecha: 2026-02-19 22:35:55.579335+00:00
+--------------------------------------------------
+ID: 988
+PNR: None
+Name: None
+File: boletos_importados/2026/02/ticket_b337_0_adjunto.pdf
+Fecha: 2026-02-19 22:35:55.440831+00:00
+--------------------------------------------------
+ID: 987
+PNR: None
+Name: None
+File: boletos_importados/2026/02/email_ticket_b338_hbHeDXA.html
+Fecha: 2026-02-19 22:35:54.830666+00:00
+--------------------------------------------------
+ID: 986
+PNR: None
+Name: None
+File: boletos_importados/2026/02/email_ticket_b339_W6w7TmX.html
+Fecha: 2026-02-19 22:35:54.357079+00:00
+--------------------------------------------------
+ID: 985
+PNR: None
+Name: None
+File: boletos_importados/2026/02/email_ticket_b340_COEqNW5.html
+Fecha: 2026-02-19 22:35:53.928301+00:00
+--------------------------------------------------
+ID: 984
+PNR: None
+Name: None
+File: boletos_importados/2026/02/email_ticket_b341_dd0r45H.html
+Fecha: 2026-02-19 22:35:52.324121+00:00
+--------------------------------------------------
+ID: 983
+PNR: None
+Name: None
+File: boletos_importados/2026/02/email_ticket_b356_YtVGZ3X.html
+Fecha: 2026-02-19 22:35:49.462805+00:00
+--------------------------------------------------
+ID: 982
+PNR: None
+Name: None
+File: boletos_importados/2026/02/email_ticket_b357_34CqVo5.html
+Fecha: 2026-02-19 22:35:48.962183+00:00
+--------------------------------------------------
+ID: 981
+PNR: None
+Name: None
+File: boletos_importados/2026/02/email_ticket_b358_HqKVnMc.html
+Fecha: 2026-02-19 22:35:47.854438+00:00
+--------------------------------------------------
+ID: 980
+PNR: None
+Name: None
+File: boletos_importados/2026/02/email_ticket_b359_65QKTi5.html
+Fecha: 2026-02-19 22:35:46.662609+00:00
+--------------------------------------------------
+ID: 979
+PNR: None
+Name: None
+File: boletos_importados/2026/02/email_ticket_b360_FKZMkrS.html
+Fecha: 2026-02-19 22:35:39.930295+00:00
+--------------------------------------------------
+ID: 978
+PNR: C1/FJHCCI
+Name: CRISTIAN DAVID
+File: boletos_importados/2026/02/email_ticket_b311.html
+Fecha: 2026-02-19 22:20:14.123168+00:00
+--------------------------------------------------
+ID: 977
+PNR: C1/FJHCCI
+Name: CRISTIAN DAVID
+File: boletos_importados/2026/02/email_ticket_b312.html
+Fecha: 2026-02-19 22:20:01.075309+00:00
+--------------------------------------------------
+ID: 976
+PNR: C1/FJHCCI
+Name: INGRID ALEJANDRA
+File: boletos_importados/2026/02/email_ticket_b313.html
+Fecha: 2026-02-19 22:19:47.070201+00:00
+--------------------------------------------------
+ID: 975
+PNR: C1/FJHCCI
+Name: INGRID ALEJANDRA
+File: boletos_importados/2026/02/email_ticket_b314.html
+Fecha: 2026-02-19 22:19:31.533059+00:00
+--------------------------------------------------
+ID: 974
+PNR: C1/PNNRCL
+Name: SERGIO IVAN
+File: boletos_importados/2026/02/email_ticket_b315.html
+Fecha: 2026-02-19 22:19:15.606688+00:00
+--------------------------------------------------
+ID: 973
+PNR: C1/RWUGMP
+Name: JUAN CAMILO
+File: boletos_importados/2026/02/email_ticket_b318.html
+Fecha: 2026-02-19 22:18:59.992162+00:00
+--------------------------------------------------
+ID: 972
+PNR: C1/JFEKML
+Name: SANTIAGO
+File: boletos_importados/2026/02/email_ticket_b319.html
+Fecha: 2026-02-19 22:18:44.775916+00:00
+--------------------------------------------------

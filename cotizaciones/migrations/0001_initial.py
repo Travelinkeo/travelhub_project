@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("core", "0001_initial"),
-        ("personas", "0001_initial"),
+        ("crm", "0001_initial"),
     ]
 
     operations = [
@@ -79,7 +79,7 @@ class Migration(migrations.Migration):
                     "cliente",
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.PROTECT,
-                        to="personas.cliente",
+                        to="crm.cliente",
                         verbose_name="Cliente",
                     ),
                 ),

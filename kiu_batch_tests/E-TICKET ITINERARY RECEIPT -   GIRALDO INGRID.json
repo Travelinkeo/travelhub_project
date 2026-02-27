@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "GIRALDO/INGRID",
+  "CODIGO_IDENTIFICACION": "27027788",
+  "SOLO_NOMBRE_PASAJERO": "INGRID",
+  "NUMERO_DE_BOLETO": "0520270638380",
+  "FECHA_DE_EMISION": "21 DEC 2025 16:54",
+  "AGENTE_EMISOR": "CCS00ESKA",
+  "CODIGO_RESERVA": "WGNBLG",
+  "SOLO_CODIGO_RESERVA": "WGNBLG",
+  "NOMBRE_AEROLINEA": "AEROLINEAS ESTELAR LATINOAMERICA C.A.",
+  "DIRECCION_AEROLINEA": null,
+  "vuelos": [
+    {
+      "aerolinea": "ES",
+      "numero_vuelo": "8302",
+      "origen": "SAN ANTONIO",
+      "fecha_salida": "07JAN 2026",
+      "hora_salida": "1730",
+      "destino": "CARACAS",
+      "hora_llegada": "1830",
+      "cabina": "Económica",
+      "clase": "B",
+      "localizador_aerolinea": "WGNBLG"
+    }
+  ],
+  "TARIFA": "33093.86",
+  "IMPUESTOS": "28175.43",
+  "TOTAL": "61269.29",
+  "SOURCE_SYSTEM": "AI_SABRE",
+  "es_remision": false,
+  "NOMBRE DEL PASAJERO": "GIRALDO/INGRID",
+  "CODIGO IDENTIFICACION": "27027788",
+  "SOLO NOMBRE PASAJERO": "INGRID",
+  "NUMERO DE BOLETO": "0520270638380",
+  "FECHA DE EMISION": "21 DEC 2025 16:54",
+  "AGENTE EMISOR": "CCS00ESKA",
+  "CODIGO RESERVA": "WGNBLG",
+  "SOLO CODIGO RESERVA": "WGNBLG",
+  "NOMBRE AEROLINEA": "AEROLINEAS ESTELAR LATINOAMERICA C.A.",
+  "DIRECCION AEROLINEA": null,
+  "SOURCE SYSTEM": "AI_SABRE",
+  "es remision": false
+}

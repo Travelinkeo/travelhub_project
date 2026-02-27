@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "DUQUE ECHEVERRI/ALEXANDER",
+  "CODIGO_IDENTIFICACION": "24557367",
+  "SOLO_NOMBRE_PASAJERO": "ALEXANDER",
+  "NUMERO_DE_BOLETO": "3080310756862",
+  "FECHA_DE_EMISION": "20 FEB 2025 16:14",
+  "AGENTE_EMISOR": "PTYS3651X",
+  "CODIGO_RESERVA": "UEBFF",
+  "SOLO_CODIGO_RESERVA": "UEBFF",
+  "NOMBRE_AEROLINEA": "CONVIASA",
+  "DIRECCION_AEROLINEA": null,
+  "vuelos": [
+    {
+      "aerolinea": "V0",
+      "numero_vuelo": "1187",
+      "origen": "SAN ANTONIO",
+      "fecha_salida": "23FEB2025",
+      "hora_salida": "0850",
+      "destino": "CARACAS",
+      "hora_llegada": "0950",
+      "cabina": "Económica",
+      "clase": "R",
+      "localizador_aerolinea": "UEBFF"
+    }
+  ],
+  "TARIFA": "87.00",
+  "IMPUESTOS": "7.73",
+  "TOTAL": "94.73",
+  "SOURCE_SYSTEM": "AI_KIU",
+  "es_remision": false,
+  "NOMBRE DEL PASAJERO": "DUQUE ECHEVERRI/ALEXANDER",
+  "CODIGO IDENTIFICACION": "24557367",
+  "SOLO NOMBRE PASAJERO": "ALEXANDER",
+  "NUMERO DE BOLETO": "3080310756862",
+  "FECHA DE EMISION": "20 FEB 2025 16:14",
+  "AGENTE EMISOR": "PTYS3651X",
+  "CODIGO RESERVA": "UEBFF",
+  "SOLO CODIGO RESERVA": "UEBFF",
+  "NOMBRE AEROLINEA": "CONVIASA",
+  "DIRECCION AEROLINEA": null,
+  "SOURCE SYSTEM": "AI_KIU",
+  "es remision": false
+}

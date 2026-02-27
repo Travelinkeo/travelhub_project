@@ -1,0 +1,176 @@
+{% extends 'base_modern.html' %}
+{% load humanize %}
+
+{% block title %}Dashboard Boletería - TravelHub{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+    <div>
+        <h2 class="text-3xl font-bold text-white mb-1">Dashboard de Boletería</h2>
+        <p class="text-gray-400">Métricas en tiempo real de procesamiento de boletos.</p>
+    </div>
+    <div class="flex gap-2">
+        <button onclick="cargarMetricas()"
+            class="px-4 py-2 bg-white/5 hover:bg-white/10 text-white rounded-lg transition-colors flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
+                </path>
+            </svg>
+            Actualizar
+        </button>
+    </div>
+</div>
+</div>
+
+{% include 'core/erp/partials/boletos_nav.html' %}
+
+
+<!-- Stats Cards -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <!-- Hoy -->
+    <div class="glass-panel rounded-xl p-6 relative overflow-hidden group">
+        <div class="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+            <svg class="w-24 h-24 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+        </div>
+        <h3 class="text-gray-400 text-sm font-medium uppercase tracking-wider mb-2">Procesados Hoy</h3>
+        <p id="stat-hoy" class="text-4xl font-bold text-blue-400">--</p>
+    </div>
+
+    <!-- Semana -->
+    <div class="glass-panel rounded-xl p-6 relative overflow-hidden group">
+        <div class="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+            <svg class="w-24 h-24 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+        </div>
+        <h3 class="text-gray-400 text-sm font-medium uppercase tracking-wider mb-2">Esta Semana</h3>
+        <p id="stat-semana" class="text-4xl font-bold text-emerald-400">--</p>
+    </div>
+
+    <!-- Mes -->
+    <div class="glass-panel rounded-xl p-6 relative overflow-hidden group">
+        <div class="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+            <svg class="w-24 h-24 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
+                </path>
+            </svg>
+        </div>
+        <h3 class="text-gray-400 text-sm font-medium uppercase tracking-wider mb-2">Este Mes</h3>
+        <p id="stat-mes" class="text-4xl font-bold text-purple-400">--</p>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <!-- Top Aerolíneas -->
+    <div class="glass-panel rounded-xl p-6">
+        <h3 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
+            <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+            </svg>
+            Top Aerolíneas (Mes Actual)
+        </h3>
+        <div id="top-airlines-list" class="space-y-4">
+            <!-- Populated via JS -->
+            <div class="animate-pulse space-y-4">
+                <div class="h-10 bg-white/5 rounded"></div>
+                <div class="h-10 bg-white/5 rounded"></div>
+                <div class="h-10 bg-white/5 rounded"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estado del Sistema -->
+    <div class="glass-panel rounded-xl p-6">
+        <h3 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
+            <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            Estado del Sistema
+        </h3>
+        <div class="space-y-6">
+            <div class="flex items-center justify-between p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-yellow-500/20 flex items-center justify-center">
+                        <svg class="w-6 h-6 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-400">Ventas Pendientes</p>
+                        <p class="text-xs text-gray-500">Requieren atención manual</p>
+                    </div>
+                </div>
+                <span id="stat-pendientes" class="text-2xl font-bold text-yellow-400">--</span>
+            </div>
+
+            <div class="flex items-center justify-between p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center">
+                        <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+                            </path>
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-400">Errores / Sin Venta</p>
+                        <p class="text-xs text-gray-500">Boletos no procesados</p>
+                    </div>
+                </div>
+                <span id="stat-errores" class="text-2xl font-bold text-red-400">--</span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', cargarMetricas);
+
+    async function cargarMetricas() {
+        try {
+            const response = await fetch('/api/boletos/dashboard-stats/');
+            const data = await response.json();
+
+            // Update Stats
+            document.getElementById('stat-hoy').textContent = data.procesados.hoy;
+            document.getElementById('stat-semana').textContent = data.procesados.semana;
+            document.getElementById('stat-mes').textContent = data.procesados.mes;
+            document.getElementById('stat-pendientes').textContent = data.pendientes;
+            document.getElementById('stat-errores').textContent = data.errores;
+
+            // Update Top Airlines
+            const airlinesContainer = document.getElementById('top-airlines-list');
+            if (data.top_aerolineas.length > 0) {
+                airlinesContainer.innerHTML = data.top_aerolineas.map((a, index) => `
+                    <div class="flex items-center justify-between p-3 hover:bg-white/5 rounded-lg transition-colors">
+                        <div class="flex items-center gap-3">
+                            <span class="w-6 h-6 flex items-center justify-center rounded bg-white/10 text-xs font-bold text-gray-400">
+                                ${index + 1}
+                            </span>
+                            <span class="text-white font-medium">${a.aerolinea_emisora}</span>
+                        </div>
+                        <span class="font-mono font-bold text-primary">${a.cantidad}</span>
+                    </div>
+                `).join('');
+            } else {
+                airlinesContainer.innerHTML = '<p class="text-center text-gray-500 py-4">No hay datos disponibles</p>';
+            }
+
+        } catch (error) {
+            console.error('Error cargando métricas:', error);
+        }
+    }
+</script>
+{% endblock %}

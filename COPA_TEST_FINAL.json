@@ -1,0 +1,116 @@
+{
+  "SOURCE_SYSTEM": "COPA_SPRK",
+  "pnr": "DYEXFG",
+  "numero_boleto": "2307406603838",
+  "ticket_number": "2307406603838",
+  "pasajero": {
+    "nombre_completo": "LEDY VANESSA PEREZ",
+    "tipo": "ADT"
+  },
+  "passenger_name": "LEDY VANESSA PEREZ",
+  "passenger_document": null,
+  "CODIGO_IDENTIFICACION": null,
+  "airline_name": "Copa Airlines",
+  "total": null,
+  "fecha_emision": "03FEB26",
+  "vuelos": [
+    {
+      "aerolinea": "Copa Airlines",
+      "numero_vuelo": "398",
+      "origen": "Medellin Jose Maria Cordova Intl",
+      "fecha_salida": "FRI 13FEB",
+      "hora_salida": "09:17 AM",
+      "destino": "Panama City Tocumen International",
+      "hora_llegada": "10:44 AM",
+      "cabina": "Económica",
+      "clase": "L"
+    },
+    {
+      "aerolinea": "Copa Airlines",
+      "numero_vuelo": "703",
+      "origen": "Panama City Tocumen International",
+      "fecha_salida": "FRI 13FEB",
+      "hora_salida": "12:04 PM",
+      "destino": "Maracaibo",
+      "hora_llegada": "02:48 PM",
+      "cabina": "Económica",
+      "clase": "L"
+    },
+    {
+      "aerolinea": "Copa Airlines",
+      "numero_vuelo": "225",
+      "origen": "Caracas",
+      "fecha_salida": "SUN 22FEB",
+      "hora_salida": "04:11 PM",
+      "destino": "Panama City Tocumen International",
+      "hora_llegada": "05:40 PM",
+      "cabina": "Económica",
+      "clase": "L"
+    },
+    {
+      "aerolinea": "Copa Airlines",
+      "numero_vuelo": "208",
+      "origen": "Panama City Tocumen International",
+      "fecha_salida": "SUN 22FEB",
+      "hora_salida": "06:35 PM",
+      "destino": "Medellin Jose Maria Cordova Intl",
+      "hora_llegada": "08:00 PM",
+      "cabina": "Económica",
+      "clase": "L"
+    }
+  ],
+  "flights": [
+    {
+      "aerolinea": "Copa Airlines",
+      "numero_vuelo": "398",
+      "origen": "Medellin Jose Maria Cordova Intl",
+      "fecha_salida": "FRI 13FEB",
+      "hora_salida": "09:17 AM",
+      "destino": "Panama City Tocumen International",
+      "hora_llegada": "10:44 AM",
+      "cabina": "Económica",
+      "clase": "L"
+    },
+    {
+      "aerolinea": "Copa Airlines",
+      "numero_vuelo": "703",
+      "origen": "Panama City Tocumen International",
+      "fecha_salida": "FRI 13FEB",
+      "hora_salida": "12:04 PM",
+      "destino": "Maracaibo",
+      "hora_llegada": "02:48 PM",
+      "cabina": "Económica",
+      "clase": "L"
+    },
+    {
+      "aerolinea": "Copa Airlines",
+      "numero_vuelo": "225",
+      "origen": "Caracas",
+      "fecha_salida": "SUN 22FEB",
+      "hora_salida": "04:11 PM",
+      "destino": "Panama City Tocumen International",
+      "hora_llegada": "05:40 PM",
+      "cabina": "Económica",
+      "clase": "L"
+    },
+    {
+      "aerolinea": "Copa Airlines",
+      "numero_vuelo": "208",
+      "origen": "Panama City Tocumen International",
+      "fecha_salida": "SUN 22FEB",
+      "hora_salida": "06:35 PM",
+      "destino": "Medellin Jose Maria Cordova Intl",
+      "hora_llegada": "08:00 PM",
+      "cabina": "Económica",
+      "clase": "L"
+    }
+  ],
+  "tarifas": {},
+  "agencia": {
+    "nombre": "Grupo Soporte Global INC",
+    "iata": "10617390"
+  },
+  "fecha_creacion": "03FEB26",
+  "agencia_iata": "10617390",
+  "localizador_aerolinea": "ANBWFE"
+}

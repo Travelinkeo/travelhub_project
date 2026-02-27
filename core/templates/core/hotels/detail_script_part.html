@@ -1,0 +1,75 @@
+{% block extra_scripts %}
+<script>
+    function openMarketingModal() {
+        document.getElementById('marketingModal').classList.remove('hidden');
+    }
+
+    function closeMarketingModal() {
+        document.getElementById('marketingModal').classList.add('hidden');
+    }
+
+    function setTone(tone, btn) {
+        document.getElementById('selectedTone').value = tone;
+        document.querySelectorAll('.tone-btn').forEach(b => {
+            b.classList.remove('bg-indigo-100', 'text-indigo-700', 'border-indigo-200');
+            b.classList.add('bg-white', 'text-slate-600', 'border-slate-200');
+        });
+        btn.classList.remove('bg-white', 'text-slate-600', 'border-slate-200');
+        btn.classList.add('bg-indigo-100', 'text-indigo-700', 'border-indigo-200');
+    }
+
+    async function generateCopy() {
+        const btn = document.getElementById('btnGenerateCopy');
+        const textarea = document.getElementById('copyResult');
+        const tone = document.getElementById('selectedTone').value;
+        const hotelId = "{{ hotel.pk }}";
+
+        // Loading State
+        btn.disabled = true;
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Pensando...';
+        textarea.classList.add('animate-pulse');
+
+        try {
+            const formData = new FormData();
+            formData.append('hotel_id', hotelId);
+            formData.append('tone', tone);
+
+            // Use fetch with JSON body
+            const response = await fetch("{% url 'core:generate_copy_api' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}' // Ensure CSRF is handled
+                },
+                body: JSON.stringify({ hotel_id: hotelId, tone: tone })
+            });
+
+            const data = await response.json();
+
+            if (data.caption) {
+                textarea.value = data.caption;
+            } else {
+                textarea.value = "Error: " + (data.error || "No se pudo generar.");
+            }
+
+        } catch (e) {
+            console.error(e);
+            textarea.value = "Error de conexión con el cerebro IA.";
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+            textarea.classList.remove('animate-pulse');
+            lucide.createIcons();
+        }
+    }
+
+    function copyToClipboard() {
+        const copyText = document.getElementById("copyResult");
+        copyText.select();
+        copyText.setSelectionRange(0, 99999);
+        navigator.clipboard.writeText(copyText.value);
+        alert("¡Texto copiado al portapapeles!");
+    }
+</script>
+{% endblock %}

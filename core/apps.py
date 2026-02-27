@@ -12,3 +12,5 @@ class CoreConfig(AppConfig):
         import core.services.parsing
         import core.signals  # noqa: F401
         import core.signals_passport  # noqa: F401
+        import core.signals_contabilidad # noqa: F401
+

@@ -1,0 +1,24 @@
+<div class="divide-y divide-slate-700">
+    {% for p in pasajeros %}
+    <div class="py-3 flex justify-between items-center group">
+        <div>
+            <p class="text-white font-medium">{{ p.get_nombre_completo }}</p>
+            <p class="text-gray-500 text-xs">{{ p.get_tipo_documento_display }}: {{ p.numero_documento }}</p>
+        </div>
+        <form hx-post="{% url 'crm:vincular_pasajero' cliente_id %}" hx-swap="none">
+            {% csrf_token %}
+            <input type="hidden" name="pasajero_id" value="{{ p.pk }}">
+            <button type="submit"
+                class="p-2 bg-blue-600/20 hover:bg-blue-600 text-blue-400 hover:text-white rounded-lg transition-all">
+                <i data-lucide="link" class="w-4 h-4"></i>
+            </button>
+        </form>
+    </div>
+    {% empty %}
+    <p class="text-gray-500 text-sm text-center py-4">No se encontraron pasajeros que coincidan.</p>
+    {% endfor %}
+</div>
+
+<script>
+    lucide.createIcons();
+</script>

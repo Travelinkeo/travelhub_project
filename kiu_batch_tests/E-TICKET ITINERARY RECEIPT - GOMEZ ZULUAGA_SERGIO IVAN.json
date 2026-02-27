@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "GOMEZ ZULUAGA/SERGIO IVAN",
+  "CODIGO_IDENTIFICACION": "84499506",
+  "SOLO_NOMBRE_PASAJERO": "SERGIO IVAN",
+  "NUMERO_DE_BOLETO": "0520390134671",
+  "FECHA_DE_EMISION": "05 FEB 2026 17:33",
+  "AGENTE_EMISOR": "PTYS3651X",
+  "CODIGO_RESERVA": "PNNRCL",
+  "SOLO_CODIGO_RESERVA": "PNNRCL",
+  "NOMBRE_AEROLINEA": "AEROLINEAS ESTELAR LATINOAMERICA C.A.",
+  "DIRECCION_AEROLINEA": null,
+  "vuelos": [
+    {
+      "aerolinea": "ES",
+      "numero_vuelo": "891",
+      "origen": "CARACAS",
+      "fecha_salida": "6FEB 2026",
+      "hora_salida": "0930",
+      "destino": "BARINAS",
+      "hora_llegada": "1030",
+      "cabina": "Económica",
+      "clase": "U",
+      "localizador_aerolinea": "PNNRCL"
+    }
+  ],
+  "TARIFA": "18.52",
+  "IMPUESTOS": "56.48",
+  "TOTAL": "75.00",
+  "SOURCE_SYSTEM": "AI_KIU",
+  "es_remision": false,
+  "NOMBRE DEL PASAJERO": "GOMEZ ZULUAGA/SERGIO IVAN",
+  "CODIGO IDENTIFICACION": "84499506",
+  "SOLO NOMBRE PASAJERO": "SERGIO IVAN",
+  "NUMERO DE BOLETO": "0520390134671",
+  "FECHA DE EMISION": "05 FEB 2026 17:33",
+  "AGENTE EMISOR": "PTYS3651X",
+  "CODIGO RESERVA": "PNNRCL",
+  "SOLO CODIGO RESERVA": "PNNRCL",
+  "NOMBRE AEROLINEA": "AEROLINEAS ESTELAR LATINOAMERICA C.A.",
+  "DIRECCION AEROLINEA": null,
+  "SOURCE SYSTEM": "AI_KIU",
+  "es remision": false
+}

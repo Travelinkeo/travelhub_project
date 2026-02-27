@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "FORERO/EDWIN",
+  "CODIGO_IDENTIFICACION": "12767479",
+  "SOLO_NOMBRE_PASAJERO": "EDWIN",
+  "NUMERO_DE_BOLETO": "3080201311899",
+  "FECHA_DE_EMISION": "08 NOV 2025 10:45",
+  "AGENTE_EMISOR": "CCS00V0WV",
+  "CODIGO_RESERVA": "SICGSC",
+  "SOLO_CODIGO_RESERVA": "SICGSC",
+  "NOMBRE_AEROLINEA": "CONVIASA",
+  "DIRECCION_AEROLINEA": null,
+  "vuelos": [
+    {
+      "aerolinea": "V0",
+      "numero_vuelo": "032",
+      "origen": "CARACAS",
+      "fecha_salida": "10NOV2025",
+      "hora_salida": "1800",
+      "destino": "MATURIN",
+      "hora_llegada": "1850",
+      "cabina": "Económica",
+      "clase": "G",
+      "localizador_aerolinea": "SICGSC"
+    }
+  ],
+  "TARIFA": "17060.00",
+  "IMPUESTOS": "5529.92",
+  "TOTAL": "22589.92",
+  "SOURCE_SYSTEM": "AI_KIU",
+  "es_remision": false,
+  "NOMBRE DEL PASAJERO": "FORERO/EDWIN",
+  "CODIGO IDENTIFICACION": "12767479",
+  "SOLO NOMBRE PASAJERO": "EDWIN",
+  "NUMERO DE BOLETO": "3080201311899",
+  "FECHA DE EMISION": "08 NOV 2025 10:45",
+  "AGENTE EMISOR": "CCS00V0WV",
+  "CODIGO RESERVA": "SICGSC",
+  "SOLO CODIGO RESERVA": "SICGSC",
+  "NOMBRE AEROLINEA": "CONVIASA",
+  "DIRECCION AEROLINEA": null,
+  "SOURCE SYSTEM": "AI_KIU",
+  "es remision": false
+}

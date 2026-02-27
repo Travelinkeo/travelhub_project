@@ -1,0 +1,480 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es" class="dark" style="color-scheme: dark;">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}TravelHub Pro{% endblock %}</title>
+
+    <!-- TailwindCSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- HTMX & Alpine -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script src="https://unpkg.com/alpinejs" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Global fix for poor select contrast in some browser/OS themes */
+        select option {
+            color: #000000 !important;
+            background-color: #ffffff !important;
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+
+<body class="bg-gray-900 text-gray-100 font-sans antialiased h-screen flex overflow-hidden"
+    x-data="{ mobileMenuOpen: false }">
+
+    <!-- Mobile Overlay -->
+    <div x-show="mobileMenuOpen" @click="mobileMenuOpen = false"
+        x-transition:enter="transition-opacity ease-linear duration-300" x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100" x-transition:leave="transition-opacity ease-linear duration-300"
+        x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+        class="fixed inset-0 bg-gray-900/80 z-40 md:hidden backdrop-blur-sm">
+    </div>
+
+    <!-- Sidebar -->
+    <aside
+        class="fixed inset-y-0 left-0 z-50 w-56 bg-gray-800/90 backdrop-blur-xl border-r border-white/10 flex flex-col transform transition-transform duration-300 ease-in-out md:relative md:translate-x-0"
+        :class="mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'">
+
+        <!-- Agency Logo/Name -->
+        <div class="p-4 flex items-center justify-between border-b border-white/10">
+            <div class="flex items-center">
+                {% if current_agency.logo %}
+                <img src="{{ current_agency.logo.url }}" alt="{{ current_agency.nombre }}"
+                    class="h-10 w-auto max-w-[130px] object-contain">
+                {% else %}
+                <div
+                    class="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-indigo-500/30">
+                    {{ current_agency.nombre|slice:":2"|upper|default:"TH" }}
+                </div>
+                <h1
+                    class="ml-3 text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400 truncate max-w-[120px]">
+                    {{ current_agency.nombre|default:"TravelHub" }}
+                </h1>
+                {% endif %}
+            </div>
+            <!-- Close Button -->
+            <button @click="mobileMenuOpen = false" class="md:hidden text-gray-400 hover:text-white">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="flex-1 overflow-y-auto py-2">
+            <ul class="space-y-0.5 px-2">
+
+                <!-- Dashboard -->
+                <li>
+                    <a href="{% url 'core:modern_dashboard' %}"
+                        class="flex items-center p-2 rounded-lg {% if request.resolver_match.url_name == 'modern_dashboard' %}bg-indigo-600 text-white shadow-lg shadow-indigo-600/30{% else %}text-gray-400 hover:bg-white/5 hover:text-white{% endif %} transition-all group font-medium text-sm">
+                        <i data-lucide="layout-dashboard" class="w-4 h-4 mr-3"></i>
+                        Dashboard
+                    </a>
+                </li>
+
+                <!-- Operaciones -->
+                <li class="pt-3 pb-1">
+                    <span class="text-[10px] font-bold text-gray-500 uppercase tracking-widest px-3">Operaciones</span>
+                </li>
+
+                <li>
+                    <a href="{% url 'bookings:venta_list' %}"
+                        class="flex items-center p-2 rounded-lg text-sm {% if 'bookings/ventas' in request.path %}bg-white/10 text-white{% else %}text-gray-400 hover:bg-white/5 hover:text-white{% endif %} transition-all">
+                        <i data-lucide="shopping-cart" class="w-4 h-4 mr-3"></i>
+                        Ventas
+                    </a>
+                </li>
+
+                <li>
+                    <a href="{% url 'core:cotizacion_dashboard' %}"
+                        class="flex items-center p-2 rounded-lg text-sm {% if 'cotizaciones' in request.path %}bg-white/10 text-white{% else %}text-gray-400 hover:bg-white/5 hover:text-white{% endif %} transition-all">
+                        <i data-lucide="file-text" class="w-4 h-4 mr-3"></i>
+                        Cotizaciones
+                    </a>
+                </li>
+
+                <li>
+                    <a href="{% url 'core:flight_search' %}"
+                        class="flex items-center p-2 rounded-lg text-sm {% if 'cotizador' in request.path %}bg-cyan-900/40 text-cyan-300 border border-cyan-700/50{% else %}text-gray-400 hover:bg-white/5 hover:text-white{% endif %} transition-all">
+                        <i data-lucide="plane" class="w-4 h-4 mr-3"></i>
+                        Vuelos
+                    </a>
+                </li>
+
+                <li>
+                    <a href="{% url 'core:hotel_search' %}"
+                        class="flex items-center p-2 rounded-lg text-sm {% if 'hoteles' in request.path %}bg-white/10 text-white{% else %}text-gray-400 hover:bg-white/5 hover:text-white{% endif %} transition-all">
+                        <i data-lucide="hotel" class="w-4 h-4 mr-3"></i>
+                        Hoteles
+                    </a>
+                </li>
+
+                <li>
+                    <a href="{% url 'crm:pasajero_list' %}"
+                        class="flex items-center p-2 rounded-lg text-sm {% if 'crm/pasajeros' in request.path %}bg-white/10 text-white{% else %}text-gray-400 hover:bg-white/5 hover:text-white{% endif %} transition-all">
+                        <i data-lucide="users" class="w-4 h-4 mr-3"></i>
+                        Pasajeros
+                    </a>
+                </li>
+
+                <li>
+                    <a href="{% url 'core:boletos_dashboard' %}"
+                        class="flex items-center p-2 rounded-lg text-sm {% if 'boletos' in request.path %}bg-white/10 text-white{% else %}text-gray-400 hover:bg-white/5 hover:text-white{% endif %} transition-all">
+                        <i data-lucide="ticket" class="w-4 h-4 mr-3"></i>
+                        Boletos
+                    </a>
+                </li>
+
+                <!-- Finanzas -->
+                <li class="pt-3 pb-1">
+                    <span class="text-[10px] font-bold text-gray-500 uppercase tracking-widest px-3">Finanzas</span>
+                </li>
+
+                <li>
+                    <a href="{% url 'finance:invoice_list' %}"
+                        class="flex items-center p-2 rounded-lg text-sm {% if '/finance/invoices/' in request.path %}bg-white/10 text-white{% else %}text-gray-400 hover:bg-white/5 hover:text-white{% endif %} transition-all">
+                        <i data-lucide="receipt" class="w-4 h-4 mr-3"></i>
+                        Facturación
+                    </a>
+                </li>
+
+                <li>
+                    <a href="{% url 'finance:report_list' %}"
+                        class="flex items-center p-2 rounded-lg text-sm {% if '/finance/reconciliation/' in request.path %}bg-indigo-500/10 text-indigo-300 border border-indigo-500/20{% else %}text-gray-400 hover:bg-white/5 hover:text-white{% endif %} transition-all">
+                        <i data-lucide="sparkles" class="w-4 h-4 mr-3"></i>
+                        Conciliación IA
+                    </a>
+                </li>
+
+                <li>
+                    <a href="{% url 'finance:profit_dashboard' %}"
+                        class="flex items-center p-2 rounded-lg text-sm {% if '/finance/profitability/' in request.path %}bg-white/10 text-white{% else %}text-gray-400 hover:bg-white/5 hover:text-white{% endif %} transition-all">
+                        <i data-lucide="trending-up" class="w-4 h-4 mr-3"></i>
+                        Rentabilidad
+                    </a>
+                </li>
+
+                <li>
+                    <a href="{% url 'finance:liquidacion_list' %}"
+                        class="flex items-center p-2 rounded-lg text-sm {% if '/finance/liquidaciones/' in request.path %}bg-white/10 text-white{% else %}text-gray-400 hover:bg-white/5 hover:text-white{% endif %} transition-all">
+                        <i data-lucide="wallet" class="w-4 h-4 mr-3"></i>
+                        Liquidaciones
+                    </a>
+                </li>
+
+                <!-- Marketing & Contenido -->
+                <li class="pt-3 pb-1">
+                    <span class="text-[10px] font-bold text-gray-500 uppercase tracking-widest px-3">Marketing &
+                        Contenido</span>
+                </li>
+
+                <li>
+                    <a href="{% url 'cms:dashboard' %}"
+                        class="flex items-center p-2 rounded-lg text-sm {% if '/cms/' in request.path %}bg-white/10 text-white{% else %}text-gray-400 hover:bg-white/5 hover:text-white{% endif %} transition-all">
+                        <i data-lucide="pen-tool" class="w-4 h-4 mr-3"></i>
+                        Gestión Web (IA)
+                    </a>
+                </li>
+
+                <li>
+                    <a href="{% url 'marketing:dashboard' %}"
+                        class="flex items-center p-2 rounded-lg text-sm {% if 'marketing' in request.path %}bg-amber-500/10 text-amber-400 border border-amber-500/20{% else %}text-gray-400 hover:bg-white/5 hover:text-white{% endif %} transition-all">
+                        <i data-lucide="megaphone" class="w-4 h-4 mr-3"></i>
+                        Marketing AI
+                    </a>
+                </li>
+
+                <li>
+                    <a href="{% url 'core:traductor_tool' %}"
+                        class="flex items-center p-2 rounded-lg text-sm {% if 'traductor' in request.path %}bg-white/10 text-white{% else %}text-gray-400 hover:bg-white/5 hover:text-white{% endif %} transition-all">
+                        <i data-lucide="languages" class="w-4 h-4 mr-3"></i>
+                        Traductor
+                    </a>
+                </li>
+
+                <!-- Contabilidad -->
+                <li class="pt-3 pb-1">
+                    <span class="text-[10px] font-bold text-gray-500 uppercase tracking-widest px-3">Contabilidad</span>
+                </li>
+
+                <li>
+                    <a href="{% url 'contabilidad:libro_diario' %}"
+                        class="flex items-center p-2 rounded-lg text-sm {% if 'contabilidad/reportes/libro-diario/' in request.path %}bg-white/10 text-white{% else %}text-gray-400 hover:bg-white/5 hover:text-white{% endif %} transition-all">
+                        <i data-lucide="book-open" class="w-4 h-4 mr-3"></i>
+                        Libro Diario
+                    </a>
+                </li>
+
+                <li>
+                    <a href="{% url 'contabilidad:balance_comprobacion' %}"
+                        class="flex items-center p-2 rounded-lg text-sm {% if 'contabilidad/reportes/balance-comprobacion/' in request.path %}bg-white/10 text-white{% else %}text-gray-400 hover:bg-white/5 hover:text-white{% endif %} transition-all">
+                        <i data-lucide="scale" class="w-4 h-4 mr-3"></i>
+                        Balance
+                    </a>
+                </li>
+
+                <li>
+                    <a href="{% url 'contabilidad:libro_mayor' %}"
+                        class="flex items-center p-2 rounded-lg text-sm {% if 'contabilidad/reportes/libro-mayor/' in request.path %}bg-white/10 text-white{% else %}text-gray-400 hover:bg-white/5 hover:text-white{% endif %} transition-all">
+                        <i data-lucide="arrow-left-right" class="w-4 h-4 mr-3"></i>
+                        Libro Mayor
+                    </a>
+                </li>
+
+                <li>
+                    <a href="{% url 'core:reportes_ventas' %}"
+                        class="flex items-center p-2 rounded-lg text-sm {% if 'reportes' in request.path %}bg-white/10 text-white{% else %}text-gray-400 hover:bg-white/5 hover:text-white{% endif %} transition-all">
+                        <i data-lucide="bar-chart-3" class="w-4 h-4 mr-3"></i>
+                        Reportes
+                    </a>
+                </li>
+
+                <!-- Gestión -->
+                <li class="pt-3 pb-1">
+                    <span class="text-[10px] font-bold text-gray-500 uppercase tracking-widest px-3">Gestión</span>
+                </li>
+
+                <li>
+                    <a href="{% url 'crm:cliente_list' %}"
+                        class="flex items-center p-2 rounded-lg text-sm {% if 'crm/clientes' in request.path %}bg-white/10 text-white{% else %}text-gray-400 hover:bg-white/5 hover:text-white{% endif %} transition-all">
+                        <i data-lucide="user-plus" class="w-4 h-4 mr-3"></i>
+                        Clientes
+                    </a>
+                </li>
+
+                <li>
+                    <a href="{% url 'core:proveedores_list' %}"
+                        class="flex items-center p-2 rounded-lg text-sm {% if 'proveedores' in request.path %}bg-white/10 text-white{% else %}text-gray-400 hover:bg-white/5 hover:text-white{% endif %} transition-all">
+                        <i data-lucide="building-2" class="w-4 h-4 mr-3"></i>
+                        Proveedores
+                    </a>
+                </li>
+
+                <!-- Sistema -->
+                <li class="pt-3 pb-1">
+                    <span class="text-[10px] font-bold text-gray-500 uppercase tracking-widest px-3">Sistema</span>
+                </li>
+
+                <li>
+                    <a href="{% url 'core:agencia_settings' %}"
+                        class="flex items-center p-2 rounded-lg text-sm {% if 'agencia' in request.path %}bg-white/10 text-white{% else %}text-gray-400 hover:bg-white/5 hover:text-white{% endif %} transition-all">
+                        <i data-lucide="settings" class="w-4 h-4 mr-3"></i>
+                        Configuración
+                    </a>
+                </li>
+
+                <li>
+                    <a href="{% url 'core:catalogos_center' %}"
+                        class="flex items-center p-2 rounded-lg text-sm {% if 'setup/catalogos' in request.path %}bg-white/10 text-white{% else %}text-gray-400 hover:bg-white/5 hover:text-white{% endif %} transition-all">
+                        <i data-lucide="database" class="w-4 h-4 mr-3"></i>
+                        Catálogos
+                    </a>
+                </li>
+
+                <li>
+                    <a href="{% url 'core:billing_pricing' %}"
+                        class="flex items-center p-2 rounded-lg text-sm {% if 'billing' in request.path %}bg-indigo-500/10 text-indigo-400{% else %}text-gray-400 hover:bg-white/5 hover:text-white{% endif %} transition-all">
+                        <i data-lucide="credit-card" class="w-4 h-4 mr-3"></i>
+                        Suscripción
+                    </a>
+                </li>
+
+            </ul>
+
+            <!-- User Info & Logout -->
+            <div class="p-3 border-t border-white/10 mt-2">
+                <div class="flex items-center justify-between">
+                    <a href="{% url 'core:user_profile' %}"
+                        class="flex items-center hover:bg-white/5 rounded-lg p-1 transition-colors group">
+                        <div
+                            class="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-[10px] ring-2 ring-transparent group-hover:ring-blue-400 transition-all">
+                            {{ user.username|slice:":2"|upper }}
+                        </div>
+                        <div class="ml-2">
+                            <p
+                                class="text-[11px] font-bold text-white group-hover:text-blue-300 transition-colors uppercase tracking-tight">
+                                {{ user.username }}
+                            </p>
+                        </div>
+                    </a>
+
+                    <form method="post" action="{% url 'logout' %}">
+                        {% csrf_token %}
+                        <button type="submit"
+                            class="p-1.5 text-gray-500 hover:text-red-400 hover:bg-white/5 rounded-lg transition-colors">
+                            <i data-lucide="log-out" class="w-4 h-4"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 overflow-y-auto relative z-10 w-full">
+        <div class="md:hidden flex items-center justify-between p-4 glass-panel sticky top-0 z-50">
+            <h1 class="text-xl font-bold text-white">TravelHub</h1>
+            <button @click="mobileMenuOpen = !mobileMenuOpen" class="text-gray-300 hover:text-white p-2">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16">
+                    </path>
+                </svg>
+            </button>
+        </div>
+
+        <div class="p-4 max-w-7xl mx-auto w-full">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    {% block modals %}{% endblock %}
+
+    <!-- Alpine Toast Notification Logic -->
+    <div x-data="{ 
+            notifications: [], 
+            add(msg, type='info') {
+                const id = Date.now();
+                this.notifications.push({ id, msg, type });
+                setTimeout(() => this.remove(id), 5000);
+            },
+            remove(id) {
+                this.notifications = this.notifications.filter(n => n.id !== id);
+            }
+         }" @notify.window="add($event.detail.message, $event.detail.type)"
+        class="fixed bottom-4 right-4 z-[9999] flex flex-col gap-2 w-full max-w-xs">
+
+        <template x-for="n in notifications" :key="n.id">
+            <div x-transition class="p-4 rounded-2xl shadow-2xl flex items-center gap-3 border backdrop-blur-md" :class="{
+                    'bg-emerald-500/20 border-emerald-500/50 text-emerald-200': n.type === 'success',
+                    'bg-red-500/20 border-red-500/50 text-red-200': n.type === 'error',
+                    'bg-blue-500/20 border-blue-500/50 text-blue-200': n.type === 'info'
+                 }">
+                <div class="flex-1 text-sm font-medium" x-text="n.msg"></div>
+                <button @click="remove(n.id)" class="text-white/50 hover:text-white transition">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </template>
+    </div>
+
+    <!-- Global AI Assistant Widget -->
+    <div x-data="{ aiOpen: false, messages: [], userMsg: '' }" class="fixed bottom-6 right-6 z-[60]">
+        <!-- Floating Bubble -->
+        <button @click="aiOpen = !aiOpen"
+            class="w-14 h-14 bg-gradient-to-br from-indigo-600 to-purple-700 rounded-full flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-all group ring-4 ring-white/10">
+            <svg class="w-7 h-7 text-white group-hover:rotate-12 transition-transform" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            <div
+                class="absolute -top-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-2 border-gray-900 animate-pulse">
+            </div>
+        </button>
+
+        <!-- Slide-over Panel -->
+        <div x-show="aiOpen" x-transition:enter="transition ease-out duration-300 transform"
+            x-transition:enter-start="translate-x-full" x-transition:enter-end="translate-x-0"
+            x-transition:leave="transition ease-in duration-200 transform" x-transition:leave-start="translate-x-0"
+            x-transition:leave-end="translate-x-full"
+            class="fixed inset-y-0 right-0 w-full sm:w-96 bg-gray-900 border-l border-white/10 shadow-2xl flex flex-col z-[70] glass-panel"
+            style="display: none;">
+
+            <!-- Header -->
+            <div class="p-6 border-b border-white/10 flex items-center justify-between bg-white/5">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-indigo-500/20 rounded-xl flex items-center justify-center">
+                        <svg class="w-6 h-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-white font-bold leading-none">Auditor Contable AI</h3>
+                        <p class="text-[10px] text-gray-400 uppercase tracking-widest mt-1">Con tecnologia Gemini 2.0
+                        </p>
+                    </div>
+                </div>
+                <button @click="aiOpen = false" class="text-gray-400 hover:text-white transition">
+                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Chat Messages -->
+            <div id="ai-chat-history" class="flex-1 overflow-y-auto p-4 space-y-4 pt-6">
+                <div class="flex justify-start mb-4 px-4">
+                    <div
+                        class="bg-slate-800 border border-slate-700 text-gray-200 p-3 rounded-2xl rounded-tl-none max-w-[85%] shadow-xl text-sm italic">
+                        Hola {{ user.username }}, soy tu auditor contable. ¿En que puedo ayudarte hoy con las finanzas
+                        de la agencia?
+                    </div>
+                </div>
+            </div>
+
+            <!-- Input Area -->
+            <div class="p-4 border-t border-white/10 bg-black/20">
+                <form hx-post="{% url 'finance:ai_chat_htmx' %}" hx-target="#ai-chat-history" hx-swap="beforeend"
+                    hx-on::after-request="this.reset()" class="relative">
+                    {% csrf_token %}
+                    <input type="text" name="message" placeholder="Pregunta sobre ventas, saldos..."
+                        class="w-full bg-slate-800 border border-slate-700 rounded-2xl px-4 py-3 pr-12 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all shadow-inner"
+                        required>
+                    <button type="submit"
+                        class="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl transition-all shadow-lg shadow-indigo-600/20">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                        </svg>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+        });
+        document.body.addEventListener('htmx:afterSwap', () => {
+            lucide.createIcons();
+        });
+    </script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+
+</html>

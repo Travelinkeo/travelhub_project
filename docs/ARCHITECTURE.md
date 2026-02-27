@@ -1,129 +1,86 @@
 # Arquitectura del Sistema TravelHub
 
-Este documento describe la arquitectura de alto nivel de la aplicación TravelHub, las decisiones clave detrás de su diseño y los flujos de datos principales.
+**Versión del Documento:** 1.0
+**Última Actualización:** 28 de Noviembre de 2025
 
 ## 1. Visión General
+**TravelHub** es una plataforma SaaS (Software as a Service) diseñada para la gestión integral de agencias de viajes. Su objetivo es modernizar y automatizar el flujo de trabajo operativo, desde la recepción de boletos aéreos hasta la facturación y el análisis financiero.
 
-TravelHub está diseñado como una aplicación web moderna con una arquitectura desacoplada, que consiste en:
+El sistema opera como un **Monolito Modular** construido sobre Django, priorizando la simplicidad operativa y la robustez financiera (VEN-NIF).
 
--   Un **Backend** robusto basado en **Django** y **Django REST Framework (DRF)**, que sirve una API RESTful.
--   Un **Frontend** interactivo de tipo Single-Page Application (SPA) construido con **Next.js (React)**.
--   Una base de datos relacional **PostgreSQL** para la persistencia de datos.
--   Integración con servicios externos como la **API de Google (Gemini)** para funcionalidades de IA.
+## 2. Stack Tecnológico
 
-## 2. Diagrama de Arquitectura
+### Backend (El Motor)
+*   **Framework:** Django 5.2.6 (Python 3.13.5).
+*   **Base de Datos:** PostgreSQL.
+*   **Asincronía:** Celery + Redis (para procesamiento de emails y tareas pesadas).
+*   **Parsing:** Motor propio basado en Regex (`core/ticket_parser.py`) para extracción de datos de boletos (KIU, Sabre, Amadeus).
 
-El siguiente diagrama ilustra los componentes principales y sus interacciones:
+### Frontend (La Interfaz)
+*   **Enfoque:** HTML-over-the-wire (Renderizado en Servidor).
+*   **Estilos:** TailwindCSS (vía CDN en dev, build process pendiente).
+*   **Interactividad:** HTMX (para AJAX sin JS complejo) + Alpine.js (para UI interactiva).
+*   **Diseño:** Glassmorphism / Dark Mode por defecto.
 
-```mermaid
-graph TD
-    subgraph Usuario
-        A[Navegador Web]
-    end
+### Infraestructura
+*   **Entorno Local:** Windows 10/11.
+*   **Producción (Planeado):** VPS único gestionado con Coolify (Docker).
 
-    subgraph "Frontend (Next.js / Vercel)"
-        B[Aplicación React]
-    end
+## 3. Estructura de Módulos (Apps)
 
-    subgraph "Backend (Python / Django)"
-        C{API RESTful} -- "Lógica de Negocio" --> D[Capa de Servicios]
-        D -- "Acceso a Datos" --> E[Modelos Django ORM]
-        C -- "Autenticación" --> F[JWT Auth]
-    end
+El proyecto se organiza en aplicaciones Django desacopladas por dominio de negocio:
 
-    subgraph "Base de Datos"
-        G[(PostgreSQL)]
-    end
+### A. `core` (Núcleo)
+Contiene la lógica transversal y los modelos base.
+*   **Modelos:** `Venta`, `BoletoImportado`, `Pago`.
+*   **Servicios:**
+    *   `ticket_parser.py`: El "cerebro" que lee PDFs/Emails.
+    *   `venta_automation.py`: Orquesta la creación automática de ventas y cálculo de comisiones.
+    *   `facturacion_service.py`: Genera facturas fiscales y PDFs.
 
-    subgraph "Servicios Externos"
-        H[Servidor de Correo (IMAP)]
-        I[Google AI (Gemini)]
-    end
+### B. `cotizaciones` (Comercial)
+Gestión de propuestas previas a la venta.
+*   **Funcionalidad:** Dashboard de cotizaciones, ciclo de vida (Borrador -> Aceptada).
+*   **Integración:** Futura conversión automática a Venta.
 
-    A -- "Interactúa con" --> B
-    B -- "Llamadas API (HTTPS)" --> C
-    E -- "Consultas SQL" --> G
-    C -- "Parsea boletos de" --> H
-    D -- "Usa IA para..." --> I
+### C. `contabilidad` (Financiero)
+Motor contable invisible.
+*   **Normativa:** VEN-NIF (Venezuela).
+*   **Automatización:** Genera asientos contables automáticos (Debe/Haber) al facturar o cobrar, calculando diferenciales cambiarios e impuestos (IVA/IGTF).
+*   **Modelos:** `AsientoContable`, `Movimiento`, `Cuenta` (Plan de Cuentas).
+
+### D. `personas` (CRM)
+Gestión de actores del sistema.
+*   **Modelos:** `Cliente`, `Pasajero`, `UsuarioAgencia`.
+
+## 4. Flujos de Datos Críticos
+
+### Flujo 1: Automatización de Boletos (El "Wow Factor")
+1.  **Recepción:** Email con boleto llega a `boletotravelinkeo@gmail.com`.
+2.  **Detección:** Celery (`process_incoming_emails`) descarga el adjunto.
+3.  **Extracción:** `KIUParser` (u otros) extrae PNR, Pasajero y **Datos Financieros** (Base, IVA YN, Total).
+4.  **Procesamiento:** `VentaAutomationService` calcula la comisión de la agencia (según `AerolineaConfig`) y crea la `Venta` en BD.
+5.  **Resultado:** El agente ve la venta lista en su Dashboard sin haber tecleado nada.
+
+### Flujo 2: Ciclo Contable Automático
+1.  **Venta/Factura:** Al emitir factura, se genera asiento de Cuentas por Cobrar vs Ingresos/Pasivos.
+2.  **Cobranza:** Al registrar pago en USD, se baja la CxC a tasa histórica.
+3.  **Diferencial:** El sistema compara Tasa del Día vs Tasa Factura.
+    *   Si hay ganancia cambiaria -> Genera Nota de Débito por el IVA de esa ganancia (Fiscal).
+
+## 5. Mapa de Carpetas Clave
+```text
+travelhub_project/
+├── core/
+│   ├── models/          # Modelos divididos por archivo (ventas.py, boletos.py...)
+│   ├── services/        # Lógica de negocio pura (no vistas)
+│   ├── parsers/         # Motores de extracción (kiu_parser.py, sabre_parser.py)
+│   ├── templates/       # HTML (Jinja2)
+│   └── tasks.py         # Tareas Celery
+├── cotizaciones/        # App de propuestas
+├── contabilidad/        # App financiera
+├── personas/            # App de clientes
+├── static/              # Assets (CSS, JS, Img)
+├── media/               # Archivos subidos (PDFs, Boletos)
+└── manage.py
 ```
-
-## 3. Descripción de Componentes
-
-### 3.1. Frontend (`frontend/`)
-
--   **Tecnología:** Next.js, React, TypeScript, Tailwind CSS.
--   **Responsabilidades:**
-    -   Renderizar la interfaz de usuario (UI).
-    -   Gestionar el estado del lado del cliente (sesiones de usuario, datos en vivo).
-    -   Consumir la API REST del backend para todas las operaciones de datos.
-    -   Proporcionar una experiencia de usuario fluida y reactiva.
-
-### 3.2. Backend (`core/` y `travelhub/`)
-
--   **Tecnología:** Django, Django REST Framework, Gunicorn.
--   **Responsabilidades:**
-    -   **API RESTful:** Exponer endpoints seguros para todas las operaciones CRUD (Crear, Leer, Actualizar, Eliminar) sobre los recursos del sistema (Ventas, Clientes, Boletos, etc.).
-    -   **Autenticación y Autorización:** Validar las credenciales del usuario a través de JWT y controlar el acceso a los diferentes recursos.
-    -   **Lógica de Negocio:** Implementar las reglas de negocio complejas en una **capa de servicios** (ej: `core/services/parsing.py`), desacoplada de los modelos y vistas. Esto incluye el cálculo de totales, la asignación de puntos de fidelidad y el procesamiento de boletos.
-    -   **Persistencia de Datos:** Gestionar la interacción con la base de datos a través del ORM de Django.
-    -   **Tareas Asíncronas (Planificadas):** La arquitectura está preparada para delegar tareas pesadas (parseo de correos, generación de PDFs) a un sistema de colas como Celery o RQ para no bloquear las solicitudes web.
-
-### 3.3. Base de Datos
-
--   **Tecnología:** PostgreSQL (producción), SQLite (desarrollo).
--   **Propósito:** Es la fuente única de verdad para todos los datos de la aplicación, incluyendo datos de clientes, ventas, facturas, contenido del CMS y logs de auditoría.
-
-## 4. Flujo de Datos Clave: Ingestión y Parseo de Boletos
-
-Este es el flujo más complejo y representativo del sistema. Muestra cómo los diferentes componentes interactúan para automatizar una tarea de negocio crítica.
-
-```mermaid
-sequenceDiagram
-    participant U as Usuario
-    participant M as Modelo (BoletoImportado)
-    participant S as Signal (post_save)
-    participant SVC as Servicio (parsing.py)
-    participant T as Parser (ticket_parser.py)
-    participant PDF as PDF (pdf_generator.py)
-
-    U->>M: Sube archivo (PDF/EML/TXT)
-    M->>M: Crea instancia de BoletoImportado
-    activate M
-    M-->>S: Dispara señal post_save
-    deactivate M
-    
-    S->>SVC: Llama a procesar_boleto_importado(instancia)
-    activate SVC
-    SVC->>T: Llama a extract_data_from_text(contenido)
-    activate T
-    T-->>SVC: Devuelve datos parseados (JSON)
-    deactivate T
-    
-    SVC->>M: Actualiza la instancia con datos y estado 'COMPLETADO'
-    
-    SVC->>PDF: Llama a generate_ticket_pdf(datos)
-    activate PDF
-    PDF-->>SVC: Devuelve PDF en bytes
-    deactivate PDF
-    
-    SVC->>M: Guarda el PDF generado en la instancia
-    SVC-->>U: Proceso completado (vía UI)
-    deactivate SVC
-```
-
-**Pasos del Flujo:**
-
-1.  **Carga:** El usuario sube un archivo a través de la interfaz.
-2.  **Creación del Modelo:** Se crea un registro en la tabla `BoletoImportado` con el archivo y el estado `PENDIENTE`.
-3.  **Disparo del Signal:** La creación del registro dispara una señal `post_save` de Django.
-4.  **Invocación del Servicio:** El receptor de la señal (ubicado en `core/apps.py` y que apunta a `core/services/parsing.py`) invoca a la función de servicio `procesar_boleto_importado`, pasando la instancia del modelo.
-5.  **Parseo:** El servicio llama al `ticket_parser`, que detecta el GDS y extrae la información en un formato JSON normalizado.
-6.  **Generación de PDF:** El servicio utiliza el `pdf_generator` para crear un PDF unificado a partir de los datos normalizados.
-7.  **Actualización:** El servicio actualiza la instancia original del `BoletoImportado` con los datos parseados, el PDF generado y el estado `COMPLETADO` o `ERROR`.
-
-## 5. Decisiones Arquitectónicas Clave (ADRs)
-
--   **API Desacoplada:** Se eligió una arquitectura de API REST + SPA para separar las responsabilidades del frontend y el backend, permitiendo un desarrollo independiente y una mayor flexibilidad.
--   **Autenticación con JWT:** Se utiliza JWT para la autenticación de la API por ser un estándar moderno, eficiente y sin estado, ideal para SPAs y clientes móviles.
--   **Capa de Servicios:** La lógica de negocio se está moviendo de los modelos y vistas a una capa de servicios dedicada. Esta decisión mejora la testeabilidad, reduce el acoplamiento y hace que el código sea más fácil de mantener y reutilizar.
--   **Modularización Progresiva:** En lugar de una reescritura completa, se está refactorizando el código monolítico (especialmente `core/models.py`) de forma incremental y segura, utilizando patrones como la importación dinámica en `__init__.py` para no romper la funcionalidad existente.

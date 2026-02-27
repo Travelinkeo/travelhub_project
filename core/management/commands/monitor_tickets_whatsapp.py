@@ -26,6 +26,11 @@ class Command(BaseCommand):
             action='store_true',
             help='Marcar correos como leídos después de procesar'
         )
+        parser.add_argument(
+            '--agencia',
+            type=str,
+            help='Nombre de la agencia (opcional)'
+        )
 
     def handle(self, *args, **options):
         self.stdout.write(
@@ -34,7 +39,19 @@ class Command(BaseCommand):
             )
         )
         
+        from core.models.agencia import Agencia
+        agencia = None
+        if options['agencia']:
+            agencia = Agencia.objects.filter(nombre__icontains=options['agencia']).first()
+        
+        if not agencia:
+            agencia = Agencia.objects.filter(activa=True).first()
+            if not agencia:
+                self.stdout.write(self.style.ERROR("No hay agencia activa"))
+                return
+
         monitor = EmailMonitorService(
+            agencia=agencia,
             notification_type='whatsapp',
             destination=options['phone'],
             interval=options['interval'],

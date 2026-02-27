@@ -1,0 +1,87 @@
+{% extends "base_modern.html" %}
+{% load i18n %}
+
+{% block title %}{{ title|default:"Regla de Comisión" }} - TravelHub{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto p-6">
+    <div class="mb-8">
+        <a href="{% url 'core:comisiones_list' %}"
+            class="text-blue-400 hover:text-blue-300 flex items-center text-sm transition-colors mb-2">
+            <i data-lucide="arrow-left" class="w-4 h-4 mr-1"></i>
+            {% trans "Volver al listado" %}
+        </a>
+        <h1 class="text-3xl font-bold text-white">
+            {% if form.instance.pk %}
+            {% trans "Editar Regla" %}
+            {% else %}
+            {% trans "Nueva Regla de Comisión" %}
+            {% endif %}
+        </h1>
+    </div>
+
+    <div class="glass-panel p-8 rounded-3xl shadow-xl">
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+
+            <div class="space-y-2">
+                <label class="text-sm font-medium text-gray-400">{% trans "Proveedor" %}</label>
+                {{ form.proveedor }}
+                {% if form.proveedor.errors %}<p class="text-red-400 text-xs">{{ form.proveedor.errors.0 }}</p>{% endif
+                %}
+            </div>
+
+            <div class="space-y-2">
+                <label class="text-sm font-medium text-gray-400">{% trans "Tipo de Servicio" %}</label>
+                {{ form.tipo_servicio }}
+                {% if form.tipo_servicio.errors %}<p class="text-red-400 text-xs">{{ form.tipo_servicio.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-2">
+                    <label class="text-sm font-medium text-gray-400">{% trans "Comisión (%)" %}</label>
+                    {{ form.comision_porcentaje }}
+                    {% if form.comision_porcentaje.errors %}<p class="text-red-400 text-xs">{{
+                        form.comision_porcentaje.errors.0 }}</p>{% endif %}
+                    <p class="text-[10px] text-gray-500">{% trans "Ej: 10.00 para 10%" %}</p>
+                </div>
+                <div class="space-y-2">
+                    <label class="text-sm font-medium text-gray-400">{% trans "O Monto Fijo" %}</label>
+                    {{ form.comision_monto_fijo }}
+                    {% if form.comision_monto_fijo.errors %}<p class="text-red-400 text-xs">{{
+                        form.comision_monto_fijo.errors.0 }}</p>{% endif %}
+                </div>
+            </div>
+
+            <div class="space-y-2">
+                <label class="text-sm font-medium text-gray-400">{% trans "Moneda (para monto fijo)" %}</label>
+                {{ form.moneda }}
+                {% if form.moneda.errors %}<p class="text-red-400 text-xs">{{ form.moneda.errors.0 }}</p>{% endif %}
+            </div>
+
+            <div class="space-y-2">
+                <label class="text-sm font-medium text-gray-400">{% trans "Notas" %}</label>
+                {{ form.notas }}
+            </div>
+
+            <div class="flex items-center gap-2">
+                {{ form.activo }}
+                <label for="{{ form.activo.id_for_label }}" class="text-sm font-medium text-white">{% trans "Regla
+                    Activa" %}</label>
+            </div>
+
+            <div class="pt-6 border-t border-white/10 flex justify-end gap-4">
+                <a href="{% url 'core:comisiones_list' %}"
+                    class="px-8 py-3 rounded-2xl border border-white/10 text-gray-400 hover:bg-white/5 transition-all font-medium">
+                    {% trans "Cancelar" %}
+                </a>
+                <button type="submit"
+                    class="px-10 py-3 rounded-2xl bg-primary text-white shadow-lg shadow-primary/30 hover:bg-primary/90 transition-all font-bold">
+                    {% trans "Guardar Regla" %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

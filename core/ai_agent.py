@@ -7,7 +7,7 @@ from django.utils import timezone
 from datetime import datetime, timedelta
 from .models import Venta, Factura, Cliente, Proveedor
 from cotizaciones.models import Cotizacion
-from personas.models import Cliente as PersonaCliente
+from apps.crm.models import Cliente as PersonaCliente
 
 class TravelHubAgent:
     def __init__(self):

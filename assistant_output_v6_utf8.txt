@@ -1,0 +1,154 @@
+﻿python : INFO:travelhub.settings:\u2705 Sentry configurado para 
+entorno: development
+En línea: 1 Carácter: 19
++ ... Sleep -s 5; python scripts/test_accounting_assistant.py > 
+assistant_o ...
++                 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (INFO:travelhub....no:  
+   development:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+[WARNING] Usando almacenamiento local (FileSystemStorage)
+[OK] Usando PostgreSQL como broker de Celery (econ¾mico).
+--- Iniciando Prueba de Asistente Contable AI ---
+Traceback (most recent call last):
+  File "C:\Users\ARMANDO\AppData\Local\Programs\Python\Python313\Lib
+\site-packages\django\db\backends\base\base.py", line 279, in 
+ensure_connection
+    self.connect()
+    ~~~~~~~~~~~~^^
+  File "C:\Users\ARMANDO\AppData\Local\Programs\Python\Python313\Lib
+\site-packages\sentry_sdk\utils.py", line 1841, in runner
+    return sentry_patched_function(*args, **kwargs)
+  File "C:\Users\ARMANDO\AppData\Local\Programs\Python\Python313\Lib
+\site-packages\sentry_sdk\integrations\django\__init__.py", line 
+684, in connect
+    return real_connect(self)
+  File "C:\Users\ARMANDO\AppData\Local\Programs\Python\Python313\Lib
+\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\ARMANDO\AppData\Local\Programs\Python\Python313\Lib
+\site-packages\django\db\backends\base\base.py", line 256, in 
+connect
+    self.connection = self.get_new_connection(conn_params)
+                      ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\ARMANDO\AppData\Local\Programs\Python\Python313\Lib
+\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\ARMANDO\AppData\Local\Programs\Python\Python313\Lib
+\site-packages\django\db\backends\postgresql\base.py", line 332, in 
+get_new_connection
+    connection = self.Database.connect(**conn_params)
+  File "C:\Users\ARMANDO\AppData\Local\Programs\Python\Python313\Lib
+\site-packages\psycopg\connection.py", line 125, in connect
+    raise type(last_ex)("\n".join(lines)).with_traceback(None)
+psycopg.OperationalError: connection failed: connection to server 
+at "127.0.0.1", port 5432 failed: FATAL:  lo siento, ya tenemos 
+demasiados clientes
+Multiple connection attempts failed. All failures were:
+- host: 'localhost', port: 5432, hostaddr: '::1': connection 
+failed: connection to server at "::1", port 5432 failed: FATAL:  lo 
+siento, ya tenemos demasiados clientes
+- host: 'localhost', port: 5432, hostaddr: '127.0.0.1': connection 
+failed: connection to server at "127.0.0.1", port 5432 failed: 
+FATAL:  lo siento, ya tenemos demasiados clientes
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\ARMANDO\travelhub_project\scripts\test_accounting_a
+ssistant.py", line 37, in <module>
+    test_assistant()
+    ~~~~~~~~~~~~~~^^
+  File "C:\Users\ARMANDO\travelhub_project\scripts\test_accounting_a
+ssistant.py", line 17, in test_assistant
+    agencia = Agencia.objects.filter(nombre="Agencia AI 
+Test").first()
+  File "C:\Users\ARMANDO\AppData\Local\Programs\Python\Python313\Lib
+\site-packages\django\db\models\query.py", line 1104, in first
+    for obj in queryset[:1]:
+               ~~~~~~~~^^^^
+  File "C:\Users\ARMANDO\AppData\Local\Programs\Python\Python313\Lib
+\site-packages\django\db\models\query.py", line 384, in __iter__
+    self._fetch_all()
+    ~~~~~~~~~~~~~~~^^
+  File "C:\Users\ARMANDO\AppData\Local\Programs\Python\Python313\Lib
+\site-packages\django\db\models\query.py", line 1949, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ARMANDO\AppData\Local\Programs\Python\Python313\Lib
+\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+        chunked_fetch=self.chunked_fetch, chunk_size=self.chunk_size
+    )
+  File "C:\Users\ARMANDO\AppData\Local\Programs\Python\Python313\Lib
+\site-packages\django\db\models\sql\compiler.py", line 1621, in 
+execute_sql
+    cursor = self.connection.cursor()
+  File "C:\Users\ARMANDO\AppData\Local\Programs\Python\Python313\Lib
+\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\ARMANDO\AppData\Local\Programs\Python\Python313\Lib
+\site-packages\django\db\backends\base\base.py", line 320, in cursor
+    return self._cursor()
+           ~~~~~~~~~~~~^^
+  File "C:\Users\ARMANDO\AppData\Local\Programs\Python\Python313\Lib
+\site-packages\django\db\backends\base\base.py", line 296, in 
+_cursor
+    self.ensure_connection()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\ARMANDO\AppData\Local\Programs\Python\Python313\Lib
+\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\ARMANDO\AppData\Local\Programs\Python\Python313\Lib
+\site-packages\django\db\backends\base\base.py", line 278, in 
+ensure_connection
+    with self.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ARMANDO\AppData\Local\Programs\Python\Python313\Lib
+\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\ARMANDO\AppData\Local\Programs\Python\Python313\Lib
+\site-packages\django\db\backends\base\base.py", line 279, in 
+ensure_connection
+    self.connect()
+    ~~~~~~~~~~~~^^
+  File "C:\Users\ARMANDO\AppData\Local\Programs\Python\Python313\Lib
+\site-packages\sentry_sdk\utils.py", line 1841, in runner
+    return sentry_patched_function(*args, **kwargs)
+  File "C:\Users\ARMANDO\AppData\Local\Programs\Python\Python313\Lib
+\site-packages\sentry_sdk\integrations\django\__init__.py", line 
+684, in connect
+    return real_connect(self)
+  File "C:\Users\ARMANDO\AppData\Local\Programs\Python\Python313\Lib
+\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\ARMANDO\AppData\Local\Programs\Python\Python313\Lib
+\site-packages\django\db\backends\base\base.py", line 256, in 
+connect
+    self.connection = self.get_new_connection(conn_params)
+                      ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\ARMANDO\AppData\Local\Programs\Python\Python313\Lib
+\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "C:\Users\ARMANDO\AppData\Local\Programs\Python\Python313\Lib
+\site-packages\django\db\backends\postgresql\base.py", line 332, in 
+get_new_connection
+    connection = self.Database.connect(**conn_params)
+  File "C:\Users\ARMANDO\AppData\Local\Programs\Python\Python313\Lib
+\site-packages\psycopg\connection.py", line 125, in connect
+    raise type(last_ex)("\n".join(lines)).with_traceback(None)
+django.db.utils.OperationalError: connection failed: connection to 
+server at "127.0.0.1", port 5432 failed: FATAL:  lo siento, ya 
+tenemos demasiados clientes
+Multiple connection attempts failed. All failures were:
+- host: 'localhost', port: 5432, hostaddr: '::1': connection 
+failed: connection to server at "::1", port 5432 failed: FATAL:  lo 
+siento, ya tenemos demasiados clientes
+- host: 'localhost', port: 5432, hostaddr: '127.0.0.1': connection 
+failed: connection to server at "127.0.0.1", port 5432 failed: 
+FATAL:  lo siento, ya tenemos demasiados clientes
+Sentry is attempting to send 2 pending events
+Waiting up to 2 seconds
+Press Ctrl-Break to quit

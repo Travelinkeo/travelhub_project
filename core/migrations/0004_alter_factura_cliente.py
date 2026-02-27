@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("core", "0003_alter_venta_cliente"),
-        ("personas", "0001_initial"),
+        ("crm", "0001_initial"),
     ]
 
     operations = [
@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
                 blank=True,
                 null=True,
                 on_delete=django.db.models.deletion.PROTECT,
-                to="personas.cliente",
+                to="crm.cliente",
                 verbose_name="Cliente",
             ),
         ),

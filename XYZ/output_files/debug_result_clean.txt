@@ -1,0 +1,28 @@
+Content Size: 31902 bytes
+
+
+--- PARSER RESULT STRUCTURE ---
+Keys: dict_keys(['is_multi_pax', 'tickets'])
+Ticket Count: 3
+  Ticket 1: SARIBEL LEZAMA DE ZULUAGA - 7420200050864
+    Vuelo: CARACAS -> 
+  Ticket 2: YONATAN ZULUAGA - 7420200050865
+    Vuelo: CARACAS -> 
+  Ticket 3: ARANZA VALENTINA ZULUAGA LEZAMA - 7420200050866
+    Vuelo: CARACAS -> 
+
+--- TEXT AROUND 'Información del viaje' (Destination Debug) ---
+
+CONTEXT (865):
+iquete: [NL][NL]7420200050866[NL][NL][NL][NL][NL][NL][NL][NL][NL]Correo: [NL][NL]NAIDYCOHEN@GMAIL.COM[NL][NL]Teléfono: [NL][NL]N/A[NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL]Información del viaje: [NL]CARACAS -[NL]PUERTO ORDAZ [NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL]Trayecto[NL][NL][NL][NL][NL]Fecha del vuelo [NL][NL]Lunes, 2 de Febrero de 2026[NL][NL][NL][NL]Salida[NL][NL][NL][NL]17:00 CARACAS, SIMON BOLIVAR AIRPORT[NL][NL][NL][NL]Llegada[NL][NL][NL][NL]18:00 PUERTO ORDAZ, PUERTO ORDAZ AIRPORT[NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL]Ordenado por: [NL][NL][NL][NL][NL][NL][NL]Vuelo: [NL]0
+
+--- TEXT AROUND '742' (Ticket Debug) ---
+
+CONTEXT (491):
+[NL][NL]SARIBEL LEZAMA DE ZULUAGA[NL][NL]Número de tiquete: [NL][NL]7420200050864[NL][NL][NL][NL][NL][NL][NL][NL][NL]Correo: [NL][NL]NAIDYCOHEN@GMAIL.COM[NL][NL]Teléfono: [NL][NL]N/A[NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL]Nombre: [NL][NL]YONA
+
+CONTEXT (625):
+[NL][NL]Nombre: [NL][NL]YONATAN ZULUAGA[NL][NL]Número de tiquete: [NL][NL]7420200050865[NL][NL][NL][NL][NL][NL][NL][NL][NL]Correo: [NL][NL]NAIDYCOHEN@GMAIL.COM[NL][NL]Teléfono: [NL][NL]N/A[NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL]Nombre: [NL][NL]ARAN
+
+CONTEXT (775):
+ZA VALENTINA ZULUAGA LEZAMA[NL][NL]Número de tiquete: [NL][NL]7420200050866[NL][NL][NL][NL][NL][NL][NL][NL][NL]Correo: [NL][NL]NAIDYCOHEN@GMAIL.COM[NL][NL]Teléfono: [NL][NL]N/A[NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL][NL]Informació

@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "MARCANO PEREZ/EDWARD WLADIMIR ERICK",
+  "CODIGO_IDENTIFICACION": "24804802",
+  "SOLO_NOMBRE_PASAJERO": "EDWARD WLADIMIR ERICK",
+  "NUMERO_DE_BOLETO": "3080201356128",
+  "FECHA_DE_EMISION": "29 DEC 2025 11:47",
+  "AGENTE_EMISOR": "CCS00V0BM",
+  "CODIGO_RESERVA": "IUYITC",
+  "SOLO_CODIGO_RESERVA": "IUYITC",
+  "NOMBRE_AEROLINEA": "CONVIASA",
+  "DIRECCION_AEROLINEA": null,
+  "vuelos": [
+    {
+      "aerolinea": "V0",
+      "numero_vuelo": "1186",
+      "origen": "CARACAS",
+      "fecha_salida": "4 JAN 2026",
+      "hora_salida": "0700",
+      "destino": "SAN ANTONIO",
+      "hora_llegada": "0800",
+      "cabina": "Económica",
+      "clase": "G",
+      "localizador_aerolinea": "IUYITC"
+    }
+  ],
+  "TARIFA": "48600.00",
+  "IMPUESTOS": "9573.17",
+  "TOTAL": "58173.17",
+  "SOURCE_SYSTEM": "AI_KIU",
+  "es_remision": false,
+  "NOMBRE DEL PASAJERO": "MARCANO PEREZ/EDWARD WLADIMIR ERICK",
+  "CODIGO IDENTIFICACION": "24804802",
+  "SOLO NOMBRE PASAJERO": "EDWARD WLADIMIR ERICK",
+  "NUMERO DE BOLETO": "3080201356128",
+  "FECHA DE EMISION": "29 DEC 2025 11:47",
+  "AGENTE EMISOR": "CCS00V0BM",
+  "CODIGO RESERVA": "IUYITC",
+  "SOLO CODIGO RESERVA": "IUYITC",
+  "NOMBRE AEROLINEA": "CONVIASA",
+  "DIRECCION AEROLINEA": null,
+  "SOURCE SYSTEM": "AI_KIU",
+  "es remision": false
+}

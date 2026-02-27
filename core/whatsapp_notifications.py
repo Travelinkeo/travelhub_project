@@ -30,13 +30,14 @@ def get_twilio_client():
     return Client(account_sid, auth_token)
 
 
-def enviar_whatsapp(telefono, mensaje):
+def enviar_whatsapp(telefono, mensaje, **kwargs):
     """
     Envía un mensaje de WhatsApp
     
     Args:
         telefono: Número en formato internacional (ej: +584121234567)
         mensaje: Texto del mensaje
+        media_url: (Opcional) URL pública del archivo a adjuntar
     """
     client = get_twilio_client()
     if not client:
@@ -55,11 +56,17 @@ def enviar_whatsapp(telefono, mensaje):
         if not twilio_number.startswith('whatsapp:'):
             twilio_number = f'whatsapp:{twilio_number}'
         
-        message = client.messages.create(
-            from_=twilio_number,
-            body=mensaje,
-            to=telefono
-        )
+        msg_params = {
+            'from_': twilio_number,
+            'body': mensaje,
+            'to': telefono
+        }
+        
+        # Soporte para adjuntos (PDF/Imagen) si se proporciona URL pública
+        if kwargs.get('media_url'):
+            msg_params['media_url'] = [kwargs['media_url']]
+
+        message = client.messages.create(**msg_params)
         
         logger.info(f"WhatsApp enviado a {telefono}: {message.sid}")
         return True

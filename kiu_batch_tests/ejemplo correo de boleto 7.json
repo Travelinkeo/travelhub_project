@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "ARIAS OSSA/ANA SOFIA",
+  "CODIGO_IDENTIFICACION": "IDEPBA608983",
+  "SOLO_NOMBRE_PASAJERO": "ANA SOFIA",
+  "NUMERO_DE_BOLETO": "3080310756818",
+  "FECHA_DE_EMISION": "10 FEB 2025 18:45",
+  "AGENTE_EMISOR": "No encontrado",
+  "CODIGO_RESERVA": "GNIMBO",
+  "SOLO_CODIGO_RESERVA": "GNIMBO",
+  "NOMBRE_AEROLINEA": "CONVIASA",
+  "DIRECCION_AEROLINEA": null,
+  "vuelos": [
+    {
+      "aerolinea": "CONVIASA",
+      "numero_vuelo": "V01001",
+      "origen": "PORLAMAR",
+      "fecha_salida": "4MAR 2025",
+      "hora_salida": "0950",
+      "destino": "CARACAS",
+      "hora_llegada": "1040",
+      "cabina": "Económica",
+      "clase": "H",
+      "localizador_aerolinea": "GNIMBO"
+    }
+  ],
+  "TARIFA": "90.00",
+  "IMPUESTOS": "7.85",
+  "TOTAL": "97.85",
+  "SOURCE_SYSTEM": "AI_KIU",
+  "es_remision": false,
+  "NOMBRE DEL PASAJERO": "ARIAS OSSA/ANA SOFIA",
+  "CODIGO IDENTIFICACION": "IDEPBA608983",
+  "SOLO NOMBRE PASAJERO": "ANA SOFIA",
+  "NUMERO DE BOLETO": "3080310756818",
+  "FECHA DE EMISION": "10 FEB 2025 18:45",
+  "AGENTE EMISOR": "No encontrado",
+  "CODIGO RESERVA": "GNIMBO",
+  "SOLO CODIGO RESERVA": "GNIMBO",
+  "NOMBRE AEROLINEA": "CONVIASA",
+  "DIRECCION AEROLINEA": null,
+  "SOURCE SYSTEM": "AI_KIU",
+  "es remision": false
+}

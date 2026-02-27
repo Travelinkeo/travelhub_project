@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "MONTOYA SOTO/RAFAEL",
+  "CODIGO_IDENTIFICACION": "IDEPAX463503",
+  "SOLO_NOMBRE_PASAJERO": "RAFAEL",
+  "NUMERO_DE_BOLETO": "7650370562191",
+  "FECHA_DE_EMISION": "26 JUN 2025 12:45",
+  "AGENTE_EMISOR": "PTYS3651X",
+  "CODIGO_RESERVA": "QCUAXZ",
+  "SOLO_CODIGO_RESERVA": "QCUAXZ",
+  "NOMBRE_AEROLINEA": "RUTACA AIRLINES",
+  "DIRECCION_AEROLINEA": null,
+  "vuelos": [
+    {
+      "aerolinea": "5R",
+      "numero_vuelo": "1370",
+      "origen": "CARACAS",
+      "fecha_salida": "4JUL 2025",
+      "hora_salida": "0800",
+      "destino": "SAN ANTONIO",
+      "hora_llegada": "0900",
+      "cabina": "Económica",
+      "clase": "U",
+      "localizador_aerolinea": "QCUAXZ"
+    }
+  ],
+  "TARIFA": "82.81",
+  "IMPUESTOS": "17.19",
+  "TOTAL": "100.00",
+  "SOURCE_SYSTEM": "AI_KIU",
+  "es_remision": false,
+  "NOMBRE DEL PASAJERO": "MONTOYA SOTO/RAFAEL",
+  "CODIGO IDENTIFICACION": "IDEPAX463503",
+  "SOLO NOMBRE PASAJERO": "RAFAEL",
+  "NUMERO DE BOLETO": "7650370562191",
+  "FECHA DE EMISION": "26 JUN 2025 12:45",
+  "AGENTE EMISOR": "PTYS3651X",
+  "CODIGO RESERVA": "QCUAXZ",
+  "SOLO CODIGO RESERVA": "QCUAXZ",
+  "NOMBRE AEROLINEA": "RUTACA AIRLINES",
+  "DIRECCION AEROLINEA": null,
+  "SOURCE SYSTEM": "AI_KIU",
+  "es remision": false
+}

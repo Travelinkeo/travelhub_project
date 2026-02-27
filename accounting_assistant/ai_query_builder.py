@@ -30,6 +30,18 @@ MODEL_SCHEMA = """
   "Pasajero": {
     "fields": ["id", "nombre", "apellido"],
     "relations": []
+  },
+  "ReporteProveedor": {
+    "fields": ["id", "proveedor", "fecha_carga", "estado", "total_registros", "total_con_diferencia"],
+    "relations": [{"field": "proveedor", "related_model": "Proveedor"}]
+  },
+  "ItemReporte": {
+    "fields": ["id", "numero_boleto", "monto_total_proveedor", "estado"],
+    "relations": [{"field": "reporte", "related_model": "ReporteProveedor"}, {"field": "boleto_interno", "related_model": "BoletoImportado"}]
+  },
+  "DiferenciaFinanciera": {
+    "fields": ["id", "campo_discrepancia", "valor_sistema", "valor_proveedor", "diferencia", "resuelto"],
+    "relations": [{"field": "item_reporte", "related_model": "ItemReporte"}]
   }
 }
 """

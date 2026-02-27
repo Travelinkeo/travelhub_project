@@ -5,7 +5,7 @@ from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from core.services.passport_ocr_service import PassportOCRService
 from core.models.pasaportes import PasaporteEscaneado
-from personas.models import Cliente
+from apps.crm.models import Cliente
 import json
 
 @api_view(['POST'])

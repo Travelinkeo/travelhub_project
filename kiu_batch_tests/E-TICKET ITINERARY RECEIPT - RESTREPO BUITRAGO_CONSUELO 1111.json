@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "RESTREPO BUITRAGO/CONSUELO",
+  "CODIGO_IDENTIFICACION": "24739860",
+  "SOLO_NOMBRE_PASAJERO": "CONSUELO RESTREPO BUITRAGO",
+  "NUMERO_DE_BOLETO": "0520330592455",
+  "FECHA_DE_EMISION": "25 AUG 2025 14:30",
+  "AGENTE_EMISOR": "PTYS3651X",
+  "CODIGO_RESERVA": "GOQKVS",
+  "SOLO_CODIGO_RESERVA": "GOQKVS",
+  "NOMBRE_AEROLINEA": "AEROLINEAS ESTELAR LATINOAMERICA C.A.",
+  "DIRECCION_AEROLINEA": null,
+  "vuelos": [
+    {
+      "aerolinea": "ES",
+      "numero_vuelo": "814",
+      "origen": "PORLAMAR",
+      "fecha_salida": "28AUG2025",
+      "hora_salida": "1830",
+      "destino": "CARACAS",
+      "hora_llegada": "1930",
+      "cabina": "Económica",
+      "clase": "S",
+      "localizador_aerolinea": "GOQKVS"
+    }
+  ],
+  "TARIFA": "10.34",
+  "IMPUESTOS": "54.66",
+  "TOTAL": "65.00",
+  "SOURCE_SYSTEM": "AI_KIU",
+  "es_remision": false,
+  "NOMBRE DEL PASAJERO": "RESTREPO BUITRAGO/CONSUELO",
+  "CODIGO IDENTIFICACION": "24739860",
+  "SOLO NOMBRE PASAJERO": "CONSUELO RESTREPO BUITRAGO",
+  "NUMERO DE BOLETO": "0520330592455",
+  "FECHA DE EMISION": "25 AUG 2025 14:30",
+  "AGENTE EMISOR": "PTYS3651X",
+  "CODIGO RESERVA": "GOQKVS",
+  "SOLO CODIGO RESERVA": "GOQKVS",
+  "NOMBRE AEROLINEA": "AEROLINEAS ESTELAR LATINOAMERICA C.A.",
+  "DIRECCION AEROLINEA": null,
+  "SOURCE SYSTEM": "AI_KIU",
+  "es remision": false
+}

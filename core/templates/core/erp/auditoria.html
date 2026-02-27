@@ -1,0 +1,243 @@
+{% extends 'base_modern.html' %}
+{% load humanize %}
+
+{% block title %}Auditoría y Trazabilidad - TravelHub{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+    <div>
+        <h2 class="text-3xl font-bold text-white mb-1">Auditoría y Trazabilidad</h2>
+        <p class="text-gray-400">Registro histórico de cambios y eventos del sistema.</p>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="flex gap-4">
+        <div class="bg-white/5 rounded-xl p-4 border border-white/10 min-w-[150px]">
+            <p class="text-xs text-gray-400 uppercase font-semibold">Total Registros</p>
+            <p class="text-2xl font-bold text-white">{{ total_registros|intcomma }}</p>
+        </div>
+    </div>
+</div>
+
+<!-- Filters & Search -->
+<div class="glass-panel rounded-xl p-4 mb-6">
+    <form method="get" class="flex flex-col md:flex-row gap-4">
+        <div class="flex-1">
+            <div class="relative">
+                <input type="text" name="search" value="{{ request.GET.search }}"
+                    placeholder="Buscar por ID, descripción o modelo..."
+                    class="w-full bg-dark-800 border border-white/10 rounded-lg pl-10 pr-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-primary">
+                <svg class="w-5 h-5 text-gray-500 absolute left-3 top-2.5" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+            </div>
+        </div>
+
+        <div class="w-full md:w-48">
+            <input type="number" name="venta_id" value="{{ request.GET.venta_id }}" placeholder="ID Venta"
+                class="w-full bg-dark-800 border border-white/10 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-primary">
+            Filtrar
+            </button>
+
+            {% if request.GET %}
+            <a href="{% url 'auditoria_list' %}"
+                class="px-4 py-2 bg-white/5 hover:bg-white/10 text-gray-300 rounded-lg transition-colors flex items-center justify-center">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                    </path>
+                </svg>
+            </a>
+            {% endif %}
+    </form>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+    <!-- Main Timeline/Table -->
+    <div class="lg:col-span-3">
+        <div class="glass-panel rounded-xl overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-gray-400">
+                    <thead class="bg-white/5 text-gray-300 uppercase text-xs">
+                        <tr>
+                            <th class="px-6 py-4 font-medium">Fecha</th>
+                            <th class="px-6 py-4 font-medium">Acción</th>
+                            <th class="px-6 py-4 font-medium">Modelo</th>
+                            <th class="px-6 py-4 font-medium">Object ID</th>
+                            <th class="px-6 py-4 font-medium">Descripción</th>
+                            <th class="px-6 py-4 font-medium text-right">Detalles</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-white/5">
+                        {% for log in logs %}
+                        <tr class="hover:bg-white/5 transition-colors group">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                {{ log.creado|date:"d/m/Y H:i" }}
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="px-2 py-1 rounded-full text-xs font-bold border 
+                                    {% if log.accion == 'CREATE' %}bg-emerald-500/10 text-emerald-400 border-emerald-500/20
+                                    {% elif log.accion == 'UPDATE' %}bg-blue-500/10 text-blue-400 border-blue-500/20
+                                    {% elif log.accion == 'DELETE' %}bg-red-500/10 text-red-400 border-red-500/20
+                                    {% else %}bg-yellow-500/10 text-yellow-400 border-yellow-500/20{% endif %}">
+                                    {{ log.get_accion_display }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-white font-medium">{{ log.modelo }}</td>
+                            <td class="px-6 py-4 font-mono text-xs">{{ log.object_id }}</td>
+                            <td class="px-6 py-4 text-sm max-w-xs truncate" title="{{ log.descripcion }}">
+                                {{ log.descripcion }}
+                            </td>
+                            <td class="px-6 py-4 text-right">
+                                <button onclick="showLogDetails('{{ log.id_audit_log }}')"
+                                    class="text-gray-400 hover:text-white transition-colors">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
+                                        </path>
+                                    </svg>
+                                </button>
+                            </td>
+                        </tr>
+
+                        <!-- Hidden Data for Modal -->
+                        <div id="log-data-{{ log.id_audit_log }}" class="hidden">
+                            <div data-previos='{{ log.datos_previos|default:"{}"|safe }}'
+                                data-nuevos='{{ log.datos_nuevos|default:"{}"|safe }}'
+                                data-meta='{{ log.metadata_extra|default:"{}"|safe }}'>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="px-6 py-12 text-center text-gray-500">
+                                No se encontraron registros de auditoría.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if is_paginated %}
+            <div class="px-6 py-4 border-t border-white/10 flex justify-between items-center">
+                <span class="text-sm text-gray-400">
+                    Mostrando {{ page_obj.start_index }} a {{ page_obj.end_index }} de {{ page_obj.paginator.count }}
+                </span>
+                <div class="flex gap-2">
+                    {% if page_obj.has_previous %}
+                    <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.accion %}&accion={{ request.GET.accion }}{% endif %}"
+                        class="px-3 py-1 bg-white/5 hover:bg-white/10 rounded text-sm text-white transition-colors">Anterior</a>
+                    {% endif %}
+                    {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.accion %}&accion={{ request.GET.accion }}{% endif %}"
+                        class="px-3 py-1 bg-white/5 hover:bg-white/10 rounded text-sm text-white transition-colors">Siguiente</a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Sidebar Stats -->
+    <div class="lg:col-span-1 space-y-6">
+        <!-- Top Actions -->
+        <div class="glass-panel rounded-xl p-5">
+            <h3 class="text-lg font-bold text-white mb-4">Por Acción</h3>
+            <div class="space-y-3">
+                {% for stat in acciones_stats %}
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-400 text-sm">{{ stat.accion }}</span>
+                    <span class="bg-white/10 px-2 py-1 rounded text-xs font-mono text-white">{{ stat.total }}</span>
+                </div>
+                <!-- Simple Bar -->
+                <div class="w-full bg-white/5 rounded-full h-1.5">
+                    <div class="bg-primary h-1.5 rounded-full"
+                        style="width: {% widthratio stat.total total_registros 100 %}%"></div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Top Models -->
+        <div class="glass-panel rounded-xl p-5">
+            <h3 class="text-lg font-bold text-white mb-4">Por Modelo</h3>
+            <div class="space-y-3">
+                {% for stat in modelos_stats %}
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-400 text-sm truncate max-w-[120px]">{{ stat.modelo }}</span>
+                    <span class="bg-white/10 px-2 py-1 rounded text-xs font-mono text-white">{{ stat.total }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block modals %}
+<!-- Detail Modal -->
+<div id="detailModal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog"
+    aria-modal="true">
+    <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+        <div class="fixed inset-0 bg-black/90 transition-opacity" aria-hidden="true" onclick="closeDetailModal()"></div>
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+        <div
+            class="inline-block align-bottom bg-dark-900 rounded-xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full border border-white/10">
+            <div class="px-6 py-4 border-b border-white/10 flex justify-between items-center">
+                <h3 class="text-lg font-bold text-white">Detalles del Cambio</h3>
+                <button onclick="closeDetailModal()" class="text-gray-400 hover:text-white">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                        </path>
+                    </svg>
+                </button>
+            </div>
+            <div class="p-6 max-h-[70vh] overflow-y-auto">
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <div>
+                        <h4 class="text-sm font-bold text-red-400 mb-2 uppercase tracking-wider">Anterior</h4>
+                        <pre id="prevData"
+                            class="bg-black/30 p-3 rounded-lg text-xs text-gray-300 overflow-x-auto font-mono border border-white/5 min-h-[100px]"></pre>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-bold text-emerald-400 mb-2 uppercase tracking-wider">Nuevo</h4>
+                        <pre id="newData"
+                            class="bg-black/30 p-3 rounded-lg text-xs text-gray-300 overflow-x-auto font-mono border border-white/5 min-h-[100px]"></pre>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="text-sm font-bold text-blue-400 mb-2 uppercase tracking-wider">Metadata Extra</h4>
+                    <pre id="metaData"
+                        class="bg-black/30 p-3 rounded-lg text-xs text-gray-400 overflow-x-auto font-mono border border-white/5"></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    function showLogDetails(id) {
+        const container = document.getElementById(`log-data-${id}`).firstElementChild;
+        const prev = JSON.parse(container.getAttribute('data-previos').replace(/'/g, '"'));
+        const next = JSON.parse(container.getAttribute('data-nuevos').replace(/'/g, '"'));
+        const meta = JSON.parse(container.getAttribute('data-meta').replace(/'/g, '"'));
+
+        document.getElementById('prevData').textContent = JSON.stringify(prev, null, 2);
+        document.getElementById('newData').textContent = JSON.stringify(next, null, 2);
+        document.getElementById('metaData').textContent = JSON.stringify(meta, null, 2);
+
+        document.getElementById('detailModal').classList.remove('hidden');
+    }
+
+    function closeDetailModal() {
+        document.getElementById('detailModal').classList.add('hidden');
+    }
+</script>
+{% endblock %}

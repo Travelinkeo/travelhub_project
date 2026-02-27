@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "CUEVAS HERNANDEZ/YOHON",
+  "CODIGO_IDENTIFICACION": "17109789",
+  "SOLO_NOMBRE_PASAJERO": "YOHON",
+  "NUMERO_DE_BOLETO": "7650211263797",
+  "FECHA_DE_EMISION": "16 JAN 2026 17:39",
+  "AGENTE_EMISOR": "BLA005RSJ",
+  "CODIGO_RESERVA": "TPRIYB",
+  "SOLO_CODIGO_RESERVA": "TPRIYB",
+  "NOMBRE_AEROLINEA": "RUTACA AIRLINES",
+  "DIRECCION_AEROLINEA": null,
+  "vuelos": [
+    {
+      "aerolinea": "5R",
+      "numero_vuelo": "326",
+      "origen": "SANTO DOMING",
+      "fecha_salida": "18JAN2026",
+      "hora_salida": "1700",
+      "destino": "CARACAS",
+      "hora_llegada": "1800",
+      "cabina": "Económica",
+      "clase": "U",
+      "localizador_aerolinea": "TPRIYB"
+    }
+  ],
+  "TARIFA": "23245.32",
+  "IMPUESTOS": "11610.99",
+  "TOTAL": "34856.31",
+  "SOURCE_SYSTEM": "AI_KIU",
+  "es_remision": false,
+  "NOMBRE DEL PASAJERO": "CUEVAS HERNANDEZ/YOHON",
+  "CODIGO IDENTIFICACION": "17109789",
+  "SOLO NOMBRE PASAJERO": "YOHON",
+  "NUMERO DE BOLETO": "7650211263797",
+  "FECHA DE EMISION": "16 JAN 2026 17:39",
+  "AGENTE EMISOR": "BLA005RSJ",
+  "CODIGO RESERVA": "TPRIYB",
+  "SOLO CODIGO RESERVA": "TPRIYB",
+  "NOMBRE AEROLINEA": "RUTACA AIRLINES",
+  "DIRECCION AEROLINEA": null,
+  "SOURCE SYSTEM": "AI_KIU",
+  "es remision": false
+}

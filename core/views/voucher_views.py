@@ -10,7 +10,7 @@ from core.services.pdf_service import generar_pdf_voucher_unificado
 from core.throttling import ReportesRateThrottle
 
 
-@api_view(['POST'])
+@api_view(['GET'])
 @permission_classes([IsAuthenticated])
 @throttle_classes([ReportesRateThrottle])
 def generar_voucher(request, venta_id):

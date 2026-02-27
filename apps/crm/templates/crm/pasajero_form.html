@@ -1,0 +1,131 @@
+{% extends 'base_modern.html' %}
+{% load static %}
+
+{% block title %}{{ title|default:"Pasajero" }} - TravelHub Pro{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-8">
+    <!-- Header -->
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-3xl font-bold text-white">{{ title|default:"Gestión de Pasajero" }}</h1>
+            <p class="text-gray-400 mt-1">Información de viaje y documentos de identidad.</p>
+        </div>
+        <a href="{% url 'crm:pasajero_list' %}"
+            class="text-gray-400 hover:text-white flex items-center transition-colors">
+            <i data-lucide="arrow-left" class="w-5 h-5 mr-2"></i>
+            Volver al listado
+        </a>
+    </div>
+
+    <form method="post" class="space-y-6">
+        {% csrf_token %}
+
+        <!-- Identity Card -->
+        <div class="glass-panel rounded-3xl p-8">
+            <h3 class="text-lg font-semibold text-white mb-6 flex items-center">
+                <i data-lucide="user" class="w-5 h-5 mr-2 text-blue-400"></i>
+                Datos de Identidad
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-400 mb-1.5">Nombres</label>
+                    <input type="text" name="nombres" value="{{ form.nombres.value|default:'' }}"
+                        class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:ring-2 focus:ring-blue-500 transition-all">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-400 mb-1.5">Apellidos</label>
+                    <input type="text" name="apellidos" value="{{ form.apellidos.value|default:'' }}"
+                        class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:ring-2 focus:ring-blue-500 transition-all">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-400 mb-1.5">Fecha de Nacimiento</label>
+                    <input type="date" name="fecha_nacimiento"
+                        value="{% if form.fecha_nacimiento.value %}{{ form.fecha_nacimiento.value|date:'Y-m-d' }}{% endif %}"
+                        class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:ring-2 focus:ring-blue-500 transition-all">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-400 mb-1.5">Nacionalidad</label>
+                    <input type="text" name="nacionalidad" value="{{ form.nacionalidad.value|default:'' }}"
+                        class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:ring-2 focus:ring-blue-500 transition-all">
+                </div>
+            </div>
+        </div>
+
+        <!-- Document Section -->
+        <div class="glass-panel rounded-3xl p-8">
+            <h3 class="text-lg font-semibold text-white mb-6 flex items-center">
+                <i data-lucide="file-text" class="w-5 h-5 mr-2 text-blue-400"></i>
+                Documento de Viaje
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-400 mb-1.5">Tipo de Documento</label>
+                    {{ form.tipo_documento }}
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-400 mb-1.5">Número de Documento</label>
+                    <input type="text" name="numero_documento" value="{{ form.numero_documento.value|default:'' }}"
+                        class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:ring-2 focus:ring-blue-500 transition-all">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-400 mb-1.5">País de Emisión</label>
+                    {{ form.pais_emision_documento }}
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-400 mb-1.5">Fecha de Vencimiento</label>
+                    <input type="date" name="fecha_vencimiento_documento"
+                        value="{% if form.fecha_vencimiento_documento.value %}{{ form.fecha_vencimiento_documento.value|date:'Y-m-d' }}{% endif %}"
+                        class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:ring-2 focus:ring-blue-500 transition-all">
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact Info -->
+        <div class="glass-panel rounded-3xl p-8">
+            <h3 class="text-lg font-semibold text-white mb-6 flex items-center">
+                <i data-lucide="phone" class="w-5 h-5 mr-2 text-blue-400"></i>
+                Contacto del Pasajero
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-400 mb-1.5">Email</label>
+                    <input type="email" name="email" value="{{ form.email.value|default:'' }}"
+                        class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:ring-2 focus:ring-blue-500 transition-all">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-400 mb-1.5">Teléfono</label>
+                    <input type="text" name="telefono" value="{{ form.telefono.value|default:'' }}"
+                        class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:ring-2 focus:ring-blue-500 transition-all">
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex items-center justify-end gap-4 pt-4">
+            <a href="{% url 'crm:pasajero_list' %}"
+                class="px-8 py-3 rounded-xl border border-white/10 text-gray-300 hover:bg-white/5 transition-all">
+                Cancelar
+            </a>
+            <button type="submit"
+                class="px-10 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold shadow-lg shadow-blue-900/20 transition-all">
+                Guardar Pasajero
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        lucide.createIcons();
+
+        // Style standard select
+        const selects = document.querySelectorAll('select');
+        selects.forEach(s => {
+            s.className = "w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:ring-2 focus:ring-blue-500 transition-all appearance-none";
+        });
+    });
+</script>
+{% endblock %}

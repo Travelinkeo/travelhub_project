@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "SOTO/ALEJANDRO",
+  "CODIGO_IDENTIFICACION": "23398020",
+  "SOLO_NOMBRE_PASAJERO": "ALEJANDRO",
+  "NUMERO_DE_BOLETO": "0520270633480",
+  "FECHA_DE_EMISION": "15 DEC 2025 15:39",
+  "AGENTE_EMISOR": "AGENCIA DE VIAJES MY DESTINY P",
+  "CODIGO_RESERVA": "ISLCOU",
+  "SOLO_CODIGO_RESERVA": "ISLCOU",
+  "NOMBRE_AEROLINEA": "AEROLINEAS ESTELAR LATINOAMERICA C.A.",
+  "DIRECCION_AEROLINEA": null,
+  "vuelos": [
+    {
+      "aerolinea": "ES",
+      "numero_vuelo": "891",
+      "origen": "CARACAS",
+      "fecha_salida": "16 DEC 2025",
+      "hora_salida": "0930",
+      "destino": "BARINAS",
+      "hora_llegada": "1030",
+      "cabina": "Económica",
+      "clase": "G",
+      "localizador_aerolinea": "ISLCOU"
+    }
+  ],
+  "TARIFA": "47.09",
+  "IMPUESTOS": "12.91",
+  "TOTAL": "60.00",
+  "SOURCE_SYSTEM": "AI_KIU",
+  "es_remision": false,
+  "NOMBRE DEL PASAJERO": "SOTO/ALEJANDRO",
+  "CODIGO IDENTIFICACION": "23398020",
+  "SOLO NOMBRE PASAJERO": "ALEJANDRO",
+  "NUMERO DE BOLETO": "0520270633480",
+  "FECHA DE EMISION": "15 DEC 2025 15:39",
+  "AGENTE EMISOR": "AGENCIA DE VIAJES MY DESTINY P",
+  "CODIGO RESERVA": "ISLCOU",
+  "SOLO CODIGO RESERVA": "ISLCOU",
+  "NOMBRE AEROLINEA": "AEROLINEAS ESTELAR LATINOAMERICA C.A.",
+  "DIRECCION AEROLINEA": null,
+  "SOURCE SYSTEM": "AI_KIU",
+  "es remision": false
+}

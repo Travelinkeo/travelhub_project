@@ -2,11 +2,14 @@
 from datetime import timedelta
 from django.db.models import Count, Sum
 from django.utils import timezone
+from django.contrib.auth.decorators import login_required
 from rest_framework.decorators import api_view, permission_classes, throttle_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from core.models import Venta, Factura, LiquidacionProveedor, BoletoImportado
+from core.models import Venta, LiquidacionProveedor, BoletoImportado
+from apps.finance.models import Factura
+from core.models_catalogos import TipoCambio, Moneda
 from core.throttling import DashboardRateThrottle
 from core.cache import cache_api_response
 
@@ -145,12 +148,12 @@ def dashboard_alertas(request):
                 'tipo': 'ventas_mora',
                 'count': ventas_mora,
                 'mensaje': f'{ventas_mora} venta(s) con saldo pendiente > 7 días',
-                'severidad': 'error' if ventas_mora > 0 else 'info'
+                'severidad': 'warning' if ventas_mora > 0 else 'info'
             },
             {
                 'tipo': 'boletos_sin_venta',
                 'count': boletos_sin_venta,
-                'mensaje': f'{boletos_sin_venta} boleto(s) parseado(s) sin venta asociada',
+                'mensaje': f'{boletos_sin_venta} boleto(s) sin venta asociada',
                 'severidad': 'warning' if boletos_sin_venta > 0 else 'info'
             },
             {
@@ -161,3 +164,102 @@ def dashboard_alertas(request):
             }
         ]
     })
+
+from django.shortcuts import render
+
+from django.views.generic import TemplateView
+from django.db.models import Sum, Q, Count
+
+from django.shortcuts import render
+from django.views.generic import View
+from django.db.models import Sum
+from django.utils import timezone
+from core.models import ItemVenta, Venta, BoletoImportado
+from core.models_catalogos import TipoCambio, Moneda
+
+class DashboardView(View):
+    def get(self, request):
+        hoy = timezone.now().date()
+        inicio_mes = hoy.replace(day=1)
+
+        # 1. TASAS (Manejo de errores robusto con campos correctos)
+        tasas = {'USD': 0, 'EUR': 0}
+        # 1. TASAS (SIN SILENCIADOR PARA VER EL ERROR)
+        tasas = {'USD': 0, 'EUR': 0}
+        
+        # Buscamos moneda local para referencia
+        moneda_local = Moneda.objects.filter(es_moneda_local=True).first()
+        
+        # Helper interno para buscar tasa
+        def get_tasa(iso_origen, moneda_dest):
+            qs = TipoCambio.objects.filter(moneda_origen__codigo_iso=iso_origen)
+            if moneda_dest:
+                qs = qs.filter(moneda_destino=moneda_dest)
+            return qs.order_by('-fecha_efectiva', '-id_tipo_cambio').first()
+
+        if moneda_local:
+             usd_obj = get_tasa('USD', moneda_local)
+        else:
+             usd_obj = None
+        
+        # Fallback/Priority Override: Verifica explícitamente VES, ya que es la moneda de curso legal actual
+        # y a menudo moneda_local se queda como VED en sistemas legacy.
+        ves_moneda = Moneda.objects.filter(codigo_iso='VES').first()
+        if ves_moneda:
+            usd_ves_obj = get_tasa('USD', ves_moneda)
+            # Si encontramos tasa VES y es más reciente o igual que la local (o si la local no existía), usamos VES
+            if usd_ves_obj:
+                if not usd_obj or (usd_ves_obj.fecha_efectiva >= usd_obj.fecha_efectiva):
+                    usd_obj = usd_ves_obj
+
+        if usd_obj:
+            # Formatear a 2 decimales para evitar problemas de renderizado en template
+            tasas['USD'] = "{:,.2f}".format(usd_obj.tasa_conversion)
+
+        # EUR
+        eur_obj = None
+        if moneda_local:
+            eur_obj = get_tasa('EUR', moneda_local)
+        
+        # Check VES explicitly (like we did for USD)
+        if ves_moneda:
+            eur_ves_obj = get_tasa('EUR', ves_moneda)
+            if eur_ves_obj:
+                # Use VES if we didn't find a local rate OR if VES rate is newer
+                if not eur_obj or (eur_ves_obj.fecha_efectiva >= eur_obj.fecha_efectiva):
+                    eur_obj = eur_ves_obj
+
+        if eur_obj:
+             # Formatear a 2 decimales
+            tasas['EUR'] = "{:,.2f}".format(eur_obj.tasa_conversion)
+            
+            
+        # 2. FINANZAS
+        # Filtramos ventas del mes
+        items_mes = ItemVenta.objects.filter(venta__fecha_venta__gte=inicio_mes)
+        ganancia = items_mes.aggregate(t=Sum('comision_agencia_monto'))['t'] or 0
+        deuda = items_mes.aggregate(t=Sum('costo_neto_proveedor'))['t'] or 0
+
+        # 3. TABLA RECIENTE
+        ventas_recientes = Venta.objects.select_related('cliente').order_by('-fecha_venta')[:5]
+
+        # 4. ALERTAS
+        hace_7_dias = hoy - timezone.timedelta(days=7)
+        alertas = {
+            'sin_cliente': Venta.objects.filter(cliente__isnull=True).count(),
+            'deuda_antigua': Venta.objects.filter(saldo_pendiente__gt=0, fecha_venta__lt=hace_7_dias).count(),
+            'boletos_huerfanos': BoletoImportado.objects.filter(venta_asociada__isnull=True).count()
+        }
+
+        context = {
+            'tasas': tasas,
+            'ganancia_estimada': ganancia,
+            'saldo_pendiente': deuda,
+            'ventas_recientes': ventas_recientes,
+            'alertas': alertas,
+            'hoy': hoy
+        }
+        
+        # IMPORTANTE: Conectamos con el archivo HTML actualizado
+        return render(request, 'dashboard_modern.html', context)
+

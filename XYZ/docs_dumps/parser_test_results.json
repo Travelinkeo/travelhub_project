@@ -1,0 +1,326 @@
+[
+  {
+    "file": "E-TICKET ITINERARY RECEIPT - DUQUE ECHEVERRI_ALEXANDER.eml",
+    "gds_folder": "KIU",
+    "detected_system": "KIU",
+    "extracted_fields": {
+      "ticket_number": "308-0310756862",
+      "pnr": "C1/UFEBFF",
+      "passenger": "DUQUE ECHEVERRI/ALEXANDER",
+      "airline": "CONVIASA",
+      "total": "USD       94.73",
+      "flights_count": 0
+    },
+    "all_keys": [
+      "SOURCE_SYSTEM",
+      "NUMERO_DE_BOLETO",
+      "FECHA_DE_EMISION",
+      "AGENTE_EMISOR",
+      "NOMBRE_DEL_PASAJERO",
+      "SOLO_NOMBRE_PASAJERO",
+      "CODIGO_IDENTIFICACION",
+      "CODIGO_RESERVA",
+      "SOLO_CODIGO_RESERVA",
+      "NOMBRE_AEROLINEA",
+      "DIRECCION_AEROLINEA",
+      "TARIFA",
+      "IMPUESTOS",
+      "TOTAL",
+      "ItinerarioFinalLimpio",
+      "TARIFA_MONEDA",
+      "TARIFA_IMPORTE",
+      "TOTAL_MONEDA",
+      "TOTAL_IMPORTE"
+    ]
+  },
+  {
+    "file": "E-TICKET ITINERARY RECEIPT - GARCIA GOMEZ_CAROLA YESIRE.eml",
+    "gds_folder": "KIU",
+    "detected_system": "KIU",
+    "extracted_fields": {
+      "ticket_number": "7820330832564",
+      "pnr": "C1/DKYMWA",
+      "passenger": "GARCIA GOMEZ/CAROLA YESIRE",
+      "airline": "LASER C.A.",
+      "total": "USD       91.60",
+      "flights_count": 0
+    },
+    "all_keys": [
+      "SOURCE_SYSTEM",
+      "NUMERO_DE_BOLETO",
+      "FECHA_DE_EMISION",
+      "AGENTE_EMISOR",
+      "NOMBRE_DEL_PASAJERO",
+      "SOLO_NOMBRE_PASAJERO",
+      "CODIGO_IDENTIFICACION",
+      "CODIGO_RESERVA",
+      "SOLO_CODIGO_RESERVA",
+      "NOMBRE_AEROLINEA",
+      "DIRECCION_AEROLINEA",
+      "TARIFA",
+      "IMPUESTOS",
+      "TOTAL",
+      "ItinerarioFinalLimpio",
+      "TARIFA_MONEDA",
+      "TARIFA_IMPORTE",
+      "TOTAL_MONEDA",
+      "TOTAL_IMPORTE"
+    ]
+  },
+  {
+    "file": "E-TICKET ITINERARY RECEIPT - GARCIA GOMEZ_CAROLA YESIRE1.eml",
+    "gds_folder": "KIU",
+    "detected_system": "KIU",
+    "extracted_fields": {
+      "ticket_number": "4020300032238",
+      "pnr": "C1/DKYMWA",
+      "passenger": "GARCIA GOMEZ/CAROLA YESIRE",
+      "airline": "GLOBAL",
+      "total": "USD       75.50",
+      "flights_count": 0
+    },
+    "all_keys": [
+      "SOURCE_SYSTEM",
+      "NUMERO_DE_BOLETO",
+      "FECHA_DE_EMISION",
+      "AGENTE_EMISOR",
+      "NOMBRE_DEL_PASAJERO",
+      "SOLO_NOMBRE_PASAJERO",
+      "CODIGO_IDENTIFICACION",
+      "CODIGO_RESERVA",
+      "SOLO_CODIGO_RESERVA",
+      "NOMBRE_AEROLINEA",
+      "DIRECCION_AEROLINEA",
+      "TARIFA",
+      "IMPUESTOS",
+      "TOTAL",
+      "ItinerarioFinalLimpio",
+      "TARIFA_MONEDA",
+      "TARIFA_IMPORTE",
+      "TOTAL_MONEDA",
+      "TOTAL_IMPORTE"
+    ]
+  },
+  {
+    "file": "Electronic ticket receipt, November 27 for BETLANA KELY MATA MONTANO.pdf",
+    "gds_folder": "SABRE",
+    "detected_system": "SABRE",
+    "extracted_fields": {
+      "ticket_number": "1347155408465",
+      "pnr": "OOSBRZ",
+      "passenger": null,
+      "airline": null,
+      "total": null,
+      "flights_count": 2
+    },
+    "all_keys": [
+      "SOURCE_SYSTEM",
+      "pnr",
+      "numero_boleto",
+      "pasajero",
+      "fecha_emision",
+      "vuelos",
+      "tarifas",
+      "agencia",
+      "reserva",
+      "itinerario"
+    ]
+  },
+  {
+    "file": "Electronic ticket receipt, October 02 for HECTOR FABIO HOYOS VELARDE.pdf",
+    "gds_folder": "SABRE",
+    "detected_system": "SABRE",
+    "extracted_fields": {
+      "ticket_number": "7847101239623",
+      "pnr": "LJLBCO",
+      "passenger": null,
+      "airline": null,
+      "total": null,
+      "flights_count": 1
+    },
+    "all_keys": [
+      "SOURCE_SYSTEM",
+      "pnr",
+      "numero_boleto",
+      "pasajero",
+      "fecha_emision",
+      "vuelos",
+      "tarifas",
+      "agencia",
+      "reserva",
+      "itinerario"
+    ]
+  },
+  {
+    "file": "LOPEZ_LOPEZCARLOS_MARIO_04MAY2025_CCS_IST.pdf",
+    "gds_folder": "SABRE",
+    "detected_system": "SABRE",
+    "extracted_fields": {
+      "ticket_number": "235",
+      "pnr": "No encontrado",
+      "passenger": null,
+      "airline": null,
+      "total": null,
+      "flights_count": 5
+    },
+    "all_keys": [
+      "SOURCE_SYSTEM",
+      "pnr",
+      "numero_boleto",
+      "pasajero",
+      "fecha_emision",
+      "vuelos",
+      "tarifas",
+      "agencia",
+      "reserva",
+      "itinerario"
+    ]
+  },
+  {
+    "file": "Copa Airlines - Quovadis175 - 1.pdf",
+    "gds_folder": "COPA",
+    "detected_system": "COPA_SPRK",
+    "extracted_fields": {
+      "ticket_number": "No encontrado",
+      "pnr": "ZPF32F",
+      "passenger": null,
+      "airline": null,
+      "total": null,
+      "flights_count": 0
+    },
+    "all_keys": [
+      "SOURCE_SYSTEM",
+      "pnr",
+      "numero_boleto",
+      "pasajero",
+      "fecha_emision",
+      "vuelos",
+      "tarifas",
+      "agencia",
+      "fecha_creacion"
+    ]
+  },
+  {
+    "file": "Copa Airlines - Quovadis175 - 10.2.1.b58c83bc.pdf",
+    "gds_folder": "COPA",
+    "detected_system": "COPA_SPRK",
+    "extracted_fields": {
+      "ticket_number": "No encontrado",
+      "pnr": "ZZ232F",
+      "passenger": null,
+      "airline": null,
+      "total": null,
+      "flights_count": 0
+    },
+    "all_keys": [
+      "SOURCE_SYSTEM",
+      "pnr",
+      "numero_boleto",
+      "pasajero",
+      "fecha_emision",
+      "vuelos",
+      "tarifas",
+      "agencia",
+      "fecha_creacion"
+    ]
+  },
+  {
+    "file": "Copa Airlines - Quovadis175 - 10.4.0.5de7c82a.pdf",
+    "gds_folder": "COPA",
+    "detected_system": "COPA_SPRK",
+    "extracted_fields": {
+      "ticket_number": "2307015637960",
+      "pnr": "ZUM14H",
+      "passenger": null,
+      "airline": null,
+      "total": null,
+      "flights_count": 0
+    },
+    "all_keys": [
+      "SOURCE_SYSTEM",
+      "pnr",
+      "numero_boleto",
+      "pasajero",
+      "fecha_emision",
+      "vuelos",
+      "tarifas",
+      "agencia",
+      "fecha_creacion"
+    ]
+  },
+  {
+    "file": "LOPEZ LOPEZCARLOS MARIO 04MAY2025 CCS IST.pdf",
+    "gds_folder": "Amadeus",
+    "detected_system": "SABRE",
+    "extracted_fields": {
+      "ticket_number": "235",
+      "pnr": "No encontrado",
+      "passenger": null,
+      "airline": null,
+      "total": null,
+      "flights_count": 5
+    },
+    "all_keys": [
+      "SOURCE_SYSTEM",
+      "pnr",
+      "numero_boleto",
+      "pasajero",
+      "fecha_emision",
+      "vuelos",
+      "tarifas",
+      "agencia",
+      "reserva",
+      "itinerario"
+    ]
+  },
+  {
+    "file": "Your Electronic Ticket Receipt (5).pdf",
+    "gds_folder": "Amadeus",
+    "detected_system": "SABRE",
+    "extracted_fields": {
+      "ticket_number": "235",
+      "pnr": "No encontrado",
+      "passenger": null,
+      "airline": null,
+      "total": null,
+      "flights_count": 3
+    },
+    "all_keys": [
+      "SOURCE_SYSTEM",
+      "pnr",
+      "numero_boleto",
+      "pasajero",
+      "fecha_emision",
+      "vuelos",
+      "tarifas",
+      "agencia",
+      "reserva",
+      "itinerario"
+    ]
+  },
+  {
+    "file": "ZULUAGA RIVILLASDIEGO FERNANDO 04MAY2025 CCS IST.pdf",
+    "gds_folder": "Amadeus",
+    "detected_system": "SABRE",
+    "extracted_fields": {
+      "ticket_number": "235",
+      "pnr": "No encontrado",
+      "passenger": null,
+      "airline": null,
+      "total": null,
+      "flights_count": 5
+    },
+    "all_keys": [
+      "SOURCE_SYSTEM",
+      "pnr",
+      "numero_boleto",
+      "pasajero",
+      "fecha_emision",
+      "vuelos",
+      "tarifas",
+      "agencia",
+      "reserva",
+      "itinerario"
+    ]
+  }
+]

@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "GASPARRI REY/DANIEL",
+  "CODIGO_IDENTIFICACION": "6730515",
+  "SOLO_NOMBRE_PASAJERO": "DANIEL",
+  "NUMERO_DE_BOLETO": "3640260490909",
+  "FECHA_DE_EMISION": "13 FEB 2025 08:50",
+  "AGENTE_EMISOR": "PTYS3651X",
+  "CODIGO_RESERVA": "EETTKX",
+  "SOLO_CODIGO_RESERVA": "EETTKX",
+  "NOMBRE_AEROLINEA": "RUTAS AEREAS DE VENEZUELA RAV,SA",
+  "DIRECCION_AEROLINEA": null,
+  "vuelos": [
+    {
+      "aerolinea": "WW",
+      "numero_vuelo": "1701",
+      "origen": "CARACAS",
+      "fecha_salida": "14FEB 2025",
+      "hora_salida": "1700",
+      "destino": "LAS PIEDRAS",
+      "hora_llegada": "1745",
+      "cabina": "Económica",
+      "clase": "O",
+      "localizador_aerolinea": "EETTKX"
+    }
+  ],
+  "TARIFA": "42.62",
+  "IMPUESTOS": "12.37",
+  "TOTAL": "54.99",
+  "SOURCE_SYSTEM": "AI_KIU",
+  "es_remision": false,
+  "NOMBRE DEL PASAJERO": "GASPARRI REY/DANIEL",
+  "CODIGO IDENTIFICACION": "6730515",
+  "SOLO NOMBRE PASAJERO": "DANIEL",
+  "NUMERO DE BOLETO": "3640260490909",
+  "FECHA DE EMISION": "13 FEB 2025 08:50",
+  "AGENTE EMISOR": "PTYS3651X",
+  "CODIGO RESERVA": "EETTKX",
+  "SOLO CODIGO RESERVA": "EETTKX",
+  "NOMBRE AEROLINEA": "RUTAS AEREAS DE VENEZUELA RAV,SA",
+  "DIRECCION AEROLINEA": null,
+  "SOURCE SYSTEM": "AI_KIU",
+  "es remision": false
+}

@@ -11,8 +11,8 @@ from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-from personas.models import Cliente
 from core.models_catalogos import Moneda
+from apps.crm.models import Cliente # Fix: Use core.Cliente to match Venta relationships
 from .contabilidad import AsientoContable
 
 logger = logging.getLogger(__name__)
@@ -28,8 +28,9 @@ class FacturaConsolidada(models.Model):
                                      help_text=_("Asignado por imprenta digital autorizada"))
     
     # === RELACIONES ===
-    venta_asociada = models.ForeignKey('Venta', on_delete=models.SET_NULL, blank=True, null=True, 
+    venta_asociada = models.ForeignKey('bookings.Venta', on_delete=models.SET_NULL, blank=True, null=True, 
                                       related_name='facturas_consolidadas', verbose_name=_("Venta Asociada"))
+    agencia = models.ForeignKey('core.Agencia', on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("Agencia"))
     cliente = models.ForeignKey(Cliente, on_delete=models.PROTECT, verbose_name=_("Cliente"))
     moneda = models.ForeignKey(Moneda, on_delete=models.PROTECT, verbose_name=_("Moneda"))
     
@@ -202,9 +203,12 @@ class FacturaConsolidada(models.Model):
             elif item.tipo_servicio == ItemFacturaConsolidada.TipoServicio.TRANSPORTE_AEREO_NACIONAL:
                 self.subtotal_exento += item.subtotal_item
             else:
-                self.subtotal_base_gravada += item.subtotal_item
+                # Logic Fix: Check es_gravado to decide between Gravada and Exento
                 if item.es_gravado:
+                    self.subtotal_base_gravada += item.subtotal_item
                     self.monto_iva_16 += item.subtotal_item * (item.alicuota_iva / 100)
+                else:
+                     self.subtotal_exento += item.subtotal_item
         
         self.save()
 

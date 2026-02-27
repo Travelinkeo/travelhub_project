@@ -1,0 +1,144 @@
+﻿{% extends "base_modern.html" %}
+{% load i18n humanize %}
+
+{% block content %}
+<div class="p-6">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold text-white">{% trans "Libro Diario" %}</h1>
+        <div class="flex space-x-2">
+            <button onclick="window.print()"
+                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center">
+                <i class="fas fa-print mr-2"></i> {% trans "Imprimir" %}
+            </button>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="bg-gray-800 p-4 rounded-xl mb-6 flex flex-wrap gap-4 items-end">
+        <form method="get" class="flex flex-wrap gap-4 items-end">
+            <div>
+                <label class="block text-gray-400 text-sm mb-1">{% trans "Desde" %}</label>
+                <input type="date" name="desde" value="{{ fecha_desde|date:'Y-m-d' }}"
+                    class="bg-gray-700 text-white border-0 rounded-lg px-3 py-2">
+            </div>
+            <div>
+                <label class="block text-gray-400 text-sm mb-1">{% trans "Hasta" %}</label>
+                <input type="date" name="hasta" value="{{ fecha_hasta|date:'Y-m-d' }}"
+                    class="bg-gray-700 text-white border-0 rounded-lg px-3 py-2">
+            </div>
+            <div>
+                <label class="block text-gray-400 text-sm mb-1">{% trans "Moneda" %}</label>
+                <select name="moneda" class="bg-gray-700 text-white border-0 rounded-lg px-3 py-2">
+                    <option value="USD" {% if moneda == "USD" %}selected{% endif %}>USD</option>
+                    <option value="VES" {% if moneda == "VES" %}selected{% endif %}>VES</option>
+                </select>
+            </div>
+            <button type="submit"
+                class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-medium transition-all">
+                {% trans "Filtrar" %}
+            </button>
+        </form>
+    </div>
+
+    <!-- Tabla de Asientos -->
+    <div class="bg-gray-800 rounded-xl overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead>
+                    <tr class="bg-gray-700 text-gray-300 text-sm uppercase">
+                        <th class="px-6 py-4">{% trans "Fecha" %}</th>
+                        <th class="px-6 py-4">{% trans "Ref/Asiento" %}</th>
+                        <th class="px-6 py-4">{% trans "Cuenta / Detalle" %}</th>
+                        <th class="px-6 py-4 text-right">{% trans "Debe" %}</th>
+                        <th class="px-6 py-4 text-right">{% trans "Haber" %}</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-700">
+                    {% for asiento in asientos %}
+                    <!-- Cabecera del Asiento -->
+                    <tr class="bg-gray-750">
+                        <td class="px-6 py-4 font-medium text-white">{{ asiento.fecha_contable|date:"d/m/Y" }}</td>
+                        <td class="px-6 py-4">
+                            <span class="text-indigo-400 font-bold">#{{ asiento.numero_asiento }}</span><br>
+                            <span class="text-xs text-gray-500">{{ asiento.get_tipo_asiento_display }}</span>
+                        </td>
+                        <td class="px-6 py-4" colspan="3">
+                            <span class="text-gray-200">{{ asiento.descripcion_general }}</span>
+                        </td>
+                    </tr>
+                    <!-- Líneas del Asiento -->
+                    {% for linea in asiento.detalles_asiento.all %}
+                    <tr class="hover:bg-gray-700 transition-colors">
+                        <td class="px-6 py-2"></td>
+                        <td class="px-6 py-2 text-gray-500 text-xs">#{{ linea.linea }}</td>
+                        <td class="px-6 py-2">
+                            <div class="{% if linea.haber > 0 %}pl-8 text-gray-400{% else %}text-gray-200{% endif %}">
+                                <span class="text-xs font-mono text-gray-500 mr-2">{{
+                                    linea.cuenta_contable.codigo_cuenta }}</span>
+                                {{ linea.cuenta_contable.nombre_cuenta }}
+                            </div>
+                        </td>
+                        <td
+                            class="px-6 py-2 text-right font-mono text-sm {% if linea.debe > 0 %}text-green-400{% else %}text-transparent{% endif %}">
+                            {{ linea.debe|floatformat:2|intcomma }}
+                        </td>
+                        <td
+                            class="px-6 py-2 text-right font-mono text-sm {% if linea.haber > 0 %}text-red-400{% else %}text-transparent{% endif %}">
+                            {{ linea.haber|floatformat:2|intcomma }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    <!-- Espaciador -->
+                    <tr class="h-2 bg-gray-900 border-0"></tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="px-6 py-12 text-center text-gray-500">
+                            {% trans "No se encontraron asientos en el rango seleccionado." %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+    @media print {
+
+        .bg-gray-900,
+        .bg-gray-800,
+        .bg-gray-750,
+        .bg-gray-700 {
+            background-color: white !important;
+            color: black !important;
+        }
+
+        .text-white,
+        .text-gray-200,
+        .text-gray-300,
+        .text-gray-400,
+        .text-indigo-400 {
+            color: black !important;
+        }
+
+        .bg-indigo-600,
+        form,
+        button,
+        .fas {
+            display: none !important;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+    }
+</style>
+{% endblock %}

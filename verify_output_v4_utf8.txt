@@ -1,0 +1,75 @@
+﻿python : INFO:travelhub.settings:\u2705 Sentry configurado para 
+entorno: development
+En línea: 1 Carácter: 1
++ python scripts/verify_reconciliation_v2.py > verify_output_v4.txt 
+2>& ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~
+    + CategoryInfo          : NotSpecified: (INFO:travelhub....no:  
+   development:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+[WARNING] Usando almacenamiento local (FileSystemStorage)
+[OK] Usando PostgreSQL como broker de Celery (econ¾mico).
+--- Iniciando Verificacion de Conciliacion AI v2 ---
+Traceback (most recent call last):
+  File "C:\Users\ARMANDO\AppData\Local\Programs\Python\Python313\Lib
+\site-packages\django\db\models\query.py", line 946, in 
+get_or_create
+    return self.get(**kwargs), False
+           ~~~~~~~~^^^^^^^^^^
+  File "C:\Users\ARMANDO\AppData\Local\Programs\Python\Python313\Lib
+\site-packages\django\db\models\query.py", line 633, in get
+    raise self.model.DoesNotExist(
+        "%s matching query does not exist." % 
+self.model._meta.object_name
+    )
+apps.bookings.models.BoletoImportado.DoesNotExist: BoletoImportado 
+matching query does not exist.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\ARMANDO\travelhub_project\scripts\verify_reconcilia
+tion_v2.py", line 99, in <module>
+    verify_reconciliation_v2()
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\ARMANDO\travelhub_project\scripts\verify_reconcilia
+tion_v2.py", line 36, in verify_reconciliation_v2
+    BoletoImportado.objects.get_or_create(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        numero_boleto=tkt_ok,
+        ^^^^^^^^^^^^^^^^^^^^^
+        agencia=agencia,
+        ^^^^^^^^^^^^^^^^
+        defaults={'total_a_pagar': Decimal('150.00'), 
+'pasajero_nombre_completo': 'ALEMAN/JOSE'}
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\ARMANDO\AppData\Local\Programs\Python\Python313\Lib
+\site-packages\django\db\models\manager.py", line 87, in 
+manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\ARMANDO\AppData\Local\Programs\Python\Python313\Lib
+\site-packages\django\db\models\query.py", line 948, in 
+get_or_create
+    params = self._extract_model_params(defaults, **kwargs)
+  File "C:\Users\ARMANDO\AppData\Local\Programs\Python\Python313\Lib
+\site-packages\django\db\models\query.py", line 1046, in 
+_extract_model_params
+    raise exceptions.FieldError(
+    ...<5 lines>...
+    )
+django.core.exceptions.FieldError: Invalid field name(s) for model 
+BoletoImportado: 'pasajero_nombre_completo', 'total_a_pagar'.
+Sentry is attempting to send 2 pending events
+Waiting up to 2 seconds
+Press Ctrl-Break to quit
+
+(process:58276): GLib-GIO-WARNING **: 18:47:35.049: Unexpectedly, 
+UWP app `Clipchamp.Clipchamp_4.5.10220.0_x64__yxz26nhyzhsrt' (AUMId 
+`Clipchamp.Clipchamp_yxz26nhyzhsrt!App') supports 41 extensions but 
+has no verbs

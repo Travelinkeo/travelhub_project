@@ -4,7 +4,7 @@ Dashboard de métricas de boletos en tiempo real
 from datetime import datetime, timedelta
 from django.db.models import Count, Sum, Avg, Q
 from django.utils import timezone
-from core.models.boletos import BoletoImportado
+from core.models import BoletoImportado
 
 
 def obtener_metricas_boletos():

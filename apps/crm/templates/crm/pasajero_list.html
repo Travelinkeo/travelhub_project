@@ -1,0 +1,148 @@
+{% extends 'base_modern.html' %}
+{% load static %}
+
+{% block title %}Pasajeros - TravelHub Pro{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    <!-- Header Section -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <h1 class="text-3xl font-bold text-white">Directorio de Pasajeros</h1>
+            <p class="text-gray-400 mt-1">Gestión centralizada de viajeros y sus documentos.</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <a href="{% url 'crm:pasajero_create' %}"
+                class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2.5 rounded-xl font-semibold transition-all shadow-lg shadow-blue-900/20 flex items-center">
+                <i data-lucide="user-plus" class="w-5 h-5 mr-2"></i>
+                Nuevo Pasajero
+            </a>
+        </div>
+    </div>
+
+    <!-- Filters & Search -->
+    <div class="glass-panel rounded-3xl p-6">
+        <form method="get" class="flex flex-col md:flex-row gap-4 items-center">
+            <div class="relative flex-1 w-full">
+                <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500"></i>
+                <input type="text" name="q" value="{{ request.GET.q|default:'' }}"
+                    placeholder="Buscar por nombre, documento o nacionalidad..."
+                    class="w-full bg-white/5 border border-white/10 rounded-2xl py-3 pl-12 pr-4 text-white focus:ring-2 focus:ring-blue-500 transition-all">
+            </div>
+            <button type="submit"
+                class="px-6 py-3 bg-white/5 hover:bg-white/10 rounded-2xl text-white font-semibold transition-all">
+                Filtrar
+            </button>
+        </form>
+    </div>
+
+    <!-- Passenger Cards Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {% for pasajero in pasajeros %}
+        <div
+            class="glass-panel rounded-[2rem] p-8 hover:border-blue-500/40 transition-all duration-500 group relative overflow-hidden">
+            <!-- Decorative Background Element -->
+            <div
+                class="absolute -right-4 -top-4 w-24 h-24 bg-blue-500/5 rounded-full blur-3xl group-hover:bg-blue-500/10 transition-all duration-700">
+            </div>
+
+            <div class="flex items-start justify-between relative z-10">
+                <div class="flex items-center gap-4">
+                    <div
+                        class="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 flex items-center justify-center text-white font-bold text-2xl shadow-xl shadow-blue-900/20 group-hover:scale-110 transition-transform duration-500">
+                        {{ pasajero.get_nombre_completo|slice:":1" }}
+                    </div>
+                    <div>
+                        <h3
+                            class="text-xl font-bold text-white group-hover:text-blue-400 transition-colors duration-300 leading-tight">
+                            {{ pasajero.get_nombre_completo }}
+                        </h3>
+                        <span class="text-[10px] text-blue-500/80 uppercase tracking-widest font-black mt-1 block">
+                            Status: <span class="text-emerald-400">Activo</span>
+                        </span>
+                    </div>
+                </div>
+                <a href="{% url 'crm:pasajero_update' pasajero.pk %}"
+                    class="p-2.5 text-gray-400 hover:text-white bg-white/5 hover:bg-blue-600 rounded-xl border border-white/10 hover:border-blue-500 transition-all duration-300"
+                    title="Editar Pasajero">
+                    <i data-lucide="edit-3" class="w-4 h-4"></i>
+                </a>
+            </div>
+
+            <div class="mt-8 space-y-4 relative z-10">
+                <!-- Document Info Card -->
+                <div
+                    class="bg-white/5 rounded-2xl p-4 border border-white/5 group-hover:border-blue-500/20 transition-all duration-500">
+                    <div class="flex items-center justify-between text-xs text-gray-500 mb-1">
+                        <span class="flex items-center italic">
+                            <i data-lucide="shield-check" class="w-3 h-3 mr-1 text-blue-400"></i>
+                            {{ pasajero.get_tipo_documento_display }}
+                        </span>
+                        <span class="text-gray-600">ID Identidad</span>
+                    </div>
+                    <p class="text-white font-mono text-lg tracking-wider">
+                        {{ pasajero.numero_documento }}
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-1">
+                        <p class="text-[10px] uppercase text-gray-500 font-bold tracking-tighter">Nacionalidad</p>
+                        <p class="text-sm text-gray-300 flex items-center">
+                            <i data-lucide="map-pin" class="w-3.5 h-3.5 mr-1.5 text-indigo-400"></i>
+                            {{ pasajero.nacionalidad|default:"No especificada" }}
+                        </p>
+                    </div>
+                    <div class="space-y-1">
+                        <p class="text-[10px] uppercase text-gray-500 font-bold tracking-tighter">Nacimiento</p>
+                        <p class="text-sm text-gray-300 flex items-center">
+                            <i data-lucide="calendar" class="w-3.5 h-3.5 mr-1.5 text-purple-400"></i>
+                            {{ pasajero.fecha_nacimiento|date:"d M Y"|default:"---" }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-8 pt-6 border-t border-white/5 flex justify-center relative z-10">
+                <a href="{% url 'crm:pasajero_detail' pasajero.pk %}"
+                    class="w-full text-center py-3 rounded-2xl bg-white/5 hover:bg-blue-600/20 text-blue-400 hover:text-white text-sm font-bold border border-blue-500/10 hover:border-blue-500/40 transition-all duration-300 flex items-center justify-center gap-2">
+                    <i data-lucide="folder-open" class="w-4 h-4"></i>
+                    Ver Expediente Completo
+                </a>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-span-full py-12 text-center glass-panel rounded-3xl">
+            <i data-lucide="users-2" class="w-12 h-12 text-gray-600 mx-auto mb-4"></i>
+            <h3 class="text-lg font-medium text-gray-400">No se encontraron pasajeros</h3>
+            <p class="text-gray-500 mt-1">Inicia agregando un nuevo viajero.</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <div class="flex justify-center gap-4 py-4">
+        {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}"
+            class="px-4 py-2 bg-white/5 rounded-xl text-gray-400 hover:text-white transition-all">Anterior</a>
+        {% endif %}
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}"
+            class="px-4 py-2 bg-white/5 rounded-xl text-gray-400 hover:text-white transition-all">Siguiente</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        lucide.createIcons();
+    });
+    document.body.addEventListener('htmx:afterSwap', function () {
+        lucide.createIcons();
+    });
+</script>
+{% endblock %}

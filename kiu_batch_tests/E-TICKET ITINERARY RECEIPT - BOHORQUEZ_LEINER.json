@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "BOHORQUEZ/LEINER",
+  "CODIGO_IDENTIFICACION": "31889779",
+  "SOLO_NOMBRE_PASAJERO": "LEINER",
+  "NUMERO_DE_BOLETO": "3080201383664",
+  "FECHA_DE_EMISION": "01 FEB 2026 16:26",
+  "AGENTE_EMISOR": "CCS00V0WV",
+  "CODIGO_RESERVA": "KFLBHO",
+  "SOLO_CODIGO_RESERVA": "KFLBHO",
+  "NOMBRE_AEROLINEA": "CONVIASA",
+  "DIRECCION_AEROLINEA": null,
+  "vuelos": [
+    {
+      "aerolinea": "V0",
+      "numero_vuelo": "1189",
+      "origen": "SAN ANTONIO",
+      "fecha_salida": "3 FEB 2026",
+      "hora_salida": "1700",
+      "destino": "CARACAS",
+      "hora_llegada": "1800",
+      "cabina": "Económica",
+      "clase": "S",
+      "localizador_aerolinea": "KFLBHO"
+    }
+  ],
+  "TARIFA": "34100.00",
+  "IMPUESTOS": "8382.13",
+  "TOTAL": "42482.13",
+  "SOURCE_SYSTEM": "AI_KIU",
+  "es_remision": false,
+  "NOMBRE DEL PASAJERO": "BOHORQUEZ/LEINER",
+  "CODIGO IDENTIFICACION": "31889779",
+  "SOLO NOMBRE PASAJERO": "LEINER",
+  "NUMERO DE BOLETO": "3080201383664",
+  "FECHA DE EMISION": "01 FEB 2026 16:26",
+  "AGENTE EMISOR": "CCS00V0WV",
+  "CODIGO RESERVA": "KFLBHO",
+  "SOLO CODIGO RESERVA": "KFLBHO",
+  "NOMBRE AEROLINEA": "CONVIASA",
+  "DIRECCION AEROLINEA": null,
+  "SOURCE SYSTEM": "AI_KIU",
+  "es remision": false
+}

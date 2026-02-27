@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "PINERO/GERARDINO",
+  "CODIGO_IDENTIFICACION": "30769617",
+  "SOLO_NOMBRE_PASAJERO": "GERARDINO PINERO",
+  "NUMERO_DE_BOLETO": "7420307365729",
+  "FECHA_DE_EMISION": "14 JUN 2025 11:38",
+  "AGENTE_EMISOR": "PTYS3651X",
+  "CODIGO_RESERVA": "WEWWCJ",
+  "SOLO_CODIGO_RESERVA": "WEWWCJ",
+  "NOMBRE_AEROLINEA": "AVIOR AIRLINES C.A",
+  "DIRECCION_AEROLINEA": null,
+  "vuelos": [
+    {
+      "aerolinea": "9V",
+      "numero_vuelo": "042",
+      "origen": "CARACAS",
+      "fecha_salida": "16 JUN 2025",
+      "hora_salida": "1300",
+      "destino": "BARCELONA",
+      "hora_llegada": "1345",
+      "cabina": "Y",
+      "clase": "Y",
+      "localizador_aerolinea": "WEWWCJ"
+    }
+  ],
+  "TARIFA": "32.95",
+  "IMPUESTOS": "82.06",
+  "TOTAL": "115.01",
+  "SOURCE_SYSTEM": "AI_KIU",
+  "es_remision": false,
+  "NOMBRE DEL PASAJERO": "PINERO/GERARDINO",
+  "CODIGO IDENTIFICACION": "30769617",
+  "SOLO NOMBRE PASAJERO": "GERARDINO PINERO",
+  "NUMERO DE BOLETO": "7420307365729",
+  "FECHA DE EMISION": "14 JUN 2025 11:38",
+  "AGENTE EMISOR": "PTYS3651X",
+  "CODIGO RESERVA": "WEWWCJ",
+  "SOLO CODIGO RESERVA": "WEWWCJ",
+  "NOMBRE AEROLINEA": "AVIOR AIRLINES C.A",
+  "DIRECCION AEROLINEA": null,
+  "SOURCE SYSTEM": "AI_KIU",
+  "es remision": false
+}

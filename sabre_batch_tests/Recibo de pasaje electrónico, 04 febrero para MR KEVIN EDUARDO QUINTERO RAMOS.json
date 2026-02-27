@@ -1,0 +1,43 @@
+{
+  "NOMBRE_DEL_PASAJERO": "QUINTERO RAMOS/KEVIN EDUARDO",
+  "CODIGO_IDENTIFICACION": "No encontrado",
+  "SOLO_NOMBRE_PASAJERO": "KEVIN EDUARDO",
+  "NUMERO_DE_BOLETO": "2022483607651",
+  "FECHA_DE_EMISION": "27 ene 25",
+  "AGENTE_EMISOR": "GRUPO SOPORTE GLOBAL INC/AE1",
+  "CODIGO_RESERVA": "FSVUMY",
+  "SOLO_CODIGO_RESERVA": "FSVUMY",
+  "NOMBRE_AEROLINEA": "TACA INTERNATIONAL AIRLI",
+  "DIRECCION_AEROLINEA": null,
+  "vuelos": [
+    {
+      "aerolinea": "AEROVIAS DEL CONTINENTE",
+      "numero_vuelo": "142",
+      "origen": "BOGOTA, COLOMBIA",
+      "fecha_salida": "04 feb 25",
+      "hora_salida": "07:15",
+      "destino": "CARACAS, VENEZUELA",
+      "hora_llegada": "10:10",
+      "cabina": "TURISTA",
+      "clase": "Y",
+      "localizador_aerolinea": "FSVUMY"
+    }
+  ],
+  "TARIFA": "87.80",
+  "IMPUESTOS": "0.00",
+  "TOTAL": "87.80",
+  "SOURCE_SYSTEM": "AI_SABRE",
+  "es_remision": false,
+  "NOMBRE DEL PASAJERO": "QUINTERO RAMOS/KEVIN EDUARDO",
+  "CODIGO IDENTIFICACION": "No encontrado",
+  "SOLO NOMBRE PASAJERO": "KEVIN EDUARDO",
+  "NUMERO DE BOLETO": "2022483607651",
+  "FECHA DE EMISION": "27 ene 25",
+  "AGENTE EMISOR": "GRUPO SOPORTE GLOBAL INC/AE1",
+  "CODIGO RESERVA": "FSVUMY",
+  "SOLO CODIGO RESERVA": "FSVUMY",
+  "NOMBRE AEROLINEA": "TACA INTERNATIONAL AIRLI",
+  "DIRECCION AEROLINEA": null,
+  "SOURCE SYSTEM": "AI_SABRE",
+  "es remision": false
+}

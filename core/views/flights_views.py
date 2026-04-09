@@ -17,36 +17,67 @@ class FlightSearchView(LoginRequiredMixin, View):
         return render(request, self.template_name)
 
     def post(self, request):
+        trip_type = request.POST.get('trip_type', 'ONE_WAY')
         origin = request.POST.get('origin', '').upper()
         destination = request.POST.get('destination', '').upper()
         date = request.POST.get('date', '')
+        return_date = request.POST.get('return_date', '')
         
+        # Procesar Multidestino
+        multi_segments = []
+        if trip_type == 'MULTI_CITY':
+            origins = request.POST.getlist('origin_multi[]')
+            destinations = request.POST.getlist('destination_multi[]')
+            dates = request.POST.getlist('date_multi[]')
+            
+            # Primer tramo (los campos estándar)
+            multi_segments.append({'origin': origin, 'destination': destination, 'date': date})
+            # Tramos adicionales
+            for o, d, dt in zip(origins, destinations, dates):
+                multi_segments.append({'origin': o.upper(), 'destination': d.upper(), 'date': dt})
+
+        # Validar campos básicos
         if not origin or not destination or not date:
-            return render(request, self.partial_template, {'error': 'Por favor complete todos los campos.'})
+            return render(request, self.partial_template, {'error': 'Por favor complete todos los campos requeridos.'})
 
-        # Fix: Convertir fecha de DD/MM/YYYY a YYYY-MM-DD si es necesario
-        from datetime import datetime
-        try:
-             # Si viene como DD/MM/YYYY (común en datepickers hispanos)
-             if '/' in date:
-                 date_obj = datetime.strptime(date, '%d/%m/%Y')
-                 date = date_obj.strftime('%Y-%m-%d')
-             # Si ya viene como YYYY-MM-DD, se queda igual
-        except ValueError:
-             return render(request, self.partial_template, {'error': 'Formato de fecha inválido. Use DD/MM/YYYY.'})
+        # Extraer filtros adicionales
+        stops = request.POST.get('stops', 'ANY')
+        airline_filter = request.POST.get('airline_filter', '')
 
-        service = AmadeusService()
+        # Utilizar FliFlightService para disponibilidad REAL
+        from core.services.fli_service import FliFlightService
+        service = FliFlightService()
         
-        # AmadeusService es síncrono en su método buscar_vuelos (aunque usa requests internamente)
-        # Si fuese async, tendríamos que usar async_to_sync, pero el SDK es sync por defecto.
-        # Sin embargo, mi implementación previa de AmadeusService es sincrona.
+        # Obtener resultados
+        raw_results = service.buscar_vuelos(
+            origin, destination, date, 
+            return_date=return_date if trip_type == 'ROUND_TRIP' else None,
+            multi_segments=multi_segments if trip_type == 'MULTI_CITY' else None,
+            stops=stops,
+            airline_filter=airline_filter
+        )
         
-        results = service.buscar_vuelos(origin, destination, date)
+        results = []
+        error = None
         
+        if isinstance(raw_results, list):
+            if raw_results and 'error' in raw_results[0]:
+                error = raw_results[0]['error']
+            else:
+                results = raw_results
+        else:
+             error = "No se pudieron obtener resultados."
+
         context = {
-            'results': results if isinstance(results, list) else [],
-            'error': results.get('error') if isinstance(results, dict) else None,
-            'search_params': {'origin': origin, 'destination': destination, 'date': date}
+            'results': results,
+            'error': error,
+            'search_params': {
+                'trip_type': trip_type,
+                'origin': origin, 
+                'destination': destination, 
+                'date': date,
+                'return_date': return_date
+            }
         }
         
         return render(request, self.partial_template, context)

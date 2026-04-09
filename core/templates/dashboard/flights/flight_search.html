@@ -2,61 +2,172 @@
 {% load static %}
 
 {% block content %}
-<div class="min-h-screen bg-[#0f172a] text-white p-6 font-sans">
+<div class="min-h-screen bg-surface-base text-text-main p-6 font-sans">
     
     <!-- Header -->
-    <div class="mb-8">
-        <h1 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-300">
+    <div class="mb-8 p-6 border-b border-border-color">
+        <h1 class="text-3xl font-black text-text-main tracking-tight flex items-center gap-3">
+            <span class="p-2 bg-primary/10 rounded-xl">
+                <span class="material-symbols-outlined text-primary text-3xl">flight_takeoff</span>
+            </span>
             Cotizador Aéreo GDS
         </h1>
-        <p class="text-gray-400 mt-2">Busca vuelos en tiempo real con Amadeus.</p>
+        <p class="text-text-secondary mt-2 font-medium">Busca vuelos en tiempo real con Amadeus.</p>
     </div>
 
     <!-- Buscador -->
-    <div class="bg-slate-800/50 border border-slate-700 rounded-2xl p-6 shadow-xl mb-8">
+    <div class="card-base p-8 mb-10 relative overflow-hidden" x-data="{ 
+        tripType: 'ONE_WAY',
+        segments: [{id: 1, origin: '', destination: '', date: ''}]
+    }">
+        <div class="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full -mr-32 -mt-32 blur-3xl"></div>
+        
         <form hx-post="{% url 'core:flight_search' %}" 
               hx-target="#flight-results" 
               hx-indicator="#loading-indicator"
-              class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+              class="relative z-10 space-y-6">
             {% csrf_token %}
             
-            <!-- Origen -->
-            <div>
-                <label class="block text-gray-400 text-sm mb-1">Origen (IATA)</label>
+            <!-- Trip Type & Filters -->
+            <div class="flex flex-wrap gap-4 mb-4 items-center">
+                <div class="flex gap-2">
+                    <label class="flex items-center gap-2 cursor-pointer group">
+                        <input type="radio" name="trip_type" value="ONE_WAY" x-model="tripType" class="hidden">
+                        <div class="px-4 py-2 rounded-lg border border-border-color transition-all"
+                             :class="tripType === 'ONE_WAY' ? 'bg-primary/20 border-primary text-primary font-bold' : 'bg-surface-2 text-text-muted hover:bg-surface-3'">
+                            Solo Ida
+                        </div>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer group">
+                        <input type="radio" name="trip_type" value="ROUND_TRIP" x-model="tripType" class="hidden">
+                        <div class="px-4 py-2 rounded-lg border border-border-color transition-all"
+                             :class="tripType === 'ROUND_TRIP' ? 'bg-primary/20 border-primary text-primary font-bold' : 'bg-surface-2 text-text-muted hover:bg-surface-3'">
+                            Ida y Vuelta
+                        </div>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer group">
+                        <input type="radio" name="trip_type" value="MULTI_CITY" x-model="tripType" class="hidden">
+                        <div class="px-4 py-2 rounded-lg border border-border-color transition-all"
+                             :class="tripType === 'MULTI_CITY' ? 'bg-primary/20 border-primary text-primary font-bold' : 'bg-surface-2 text-text-muted hover:bg-surface-3'">
+                            Multidestino
+                        </div>
+                    </label>
+                </div>
+
+                <div class="h-8 w-px bg-border-color mx-2 hidden md:block"></div>
+
+                <!-- Escalas -->
+                <div class="flex flex-col gap-1">
+                    <select name="stops" class="bg-surface-2 border border-border-color rounded-lg px-3 py-2 text-xs text-text-main focus:ring-1 focus:ring-primary outline-none">
+                        <option value="ANY">Cualquier escalas</option>
+                        <option value="NON_STOP">Directo solamente</option>
+                        <option value="ONE_STOP_OR_FEWER">Máx. 1 escala</option>
+                        <option value="TWO_OR_FEWER_STOPS">Máx. 2 escalas</option>
+                    </select>
+                </div>
+
+                <!-- Aerolínea (Busca por texto) -->
                 <div class="relative">
-                    <span class="absolute left-3 top-3 text-gray-500">🛫</span>
-                    <input type="text" name="origin" placeholder="Ej: CCS" required maxlength="3"
-                           class="w-full bg-slate-900 border border-slate-600 rounded-lg py-2.5 pl-10 pr-4 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 uppercase font-mono">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-muted text-sm">flight</span>
+                    <input type="text" name="airline_filter" placeholder="Aerolínea (opcional)" 
+                           class="bg-surface-2 border border-border-color rounded-lg pl-9 pr-3 py-2 text-xs text-text-main focus:ring-1 focus:ring-primary outline-none w-48">
                 </div>
             </div>
 
-            <!-- Destino -->
-            <div>
-                <label class="block text-gray-400 text-sm mb-1">Destino (IATA)</label>
-                <div class="relative">
-                    <span class="absolute left-3 top-3 text-gray-500">🛬</span>
-                    <input type="text" name="destination" placeholder="Ej: MAD" required maxlength="3"
-                           class="w-full bg-slate-900 border border-slate-600 rounded-lg py-2.5 pl-10 pr-4 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 uppercase font-mono">
-                </div>
-            </div>
+            <!-- Segments Container -->
+            <div class="space-y-4">
+                <!-- Segment 1 (Always visible) -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
+                    <div class="flex flex-col gap-2">
+                        <label class="text-xs font-bold text-text-muted uppercase tracking-widest">Origen</label>
+                        <div class="relative">
+                            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-text-muted">location_on</span>
+                            <input type="text" name="origin" placeholder="Ej: CCS" required maxlength="3"
+                                   class="input-base pl-12 uppercase font-mono">
+                        </div>
+                    </div>
 
-            <!-- Fecha -->
-            <div>
-                <label class="block text-gray-400 text-sm mb-1">Fecha Ida</label>
-                <div class="relative">
-                    <span class="absolute left-3 top-3 text-gray-500">📅</span>
-                    <input type="date" name="date" required
-                           class="w-full bg-slate-900 border border-slate-600 rounded-lg py-2.5 pl-10 pr-4 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 [color-scheme:dark]">
-                </div>
-            </div>
+                    <div class="flex flex-col gap-2">
+                        <label class="text-xs font-bold text-text-muted uppercase tracking-widest">Destino</label>
+                        <div class="relative">
+                            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-text-muted">flight_land</span>
+                            <input type="text" name="destination" placeholder="Ej: MAD" required maxlength="3"
+                                   class="input-base pl-12 uppercase font-mono">
+                        </div>
+                    </div>
 
-            <!-- Botón Buscar -->
-            <div>
-                <button type="submit" 
-                        class="w-full bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white font-bold py-2.5 px-4 rounded-lg shadow-lg hover:shadow-cyan-500/20 transition-all transform hover:-translate-y-0.5 flex items-center justify-center gap-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                    Buscar Vuelos
-                </button>
+                    <div class="flex flex-col gap-2">
+                        <label class="text-xs font-bold text-text-muted uppercase tracking-widest">Fecha Ida</label>
+                        <div class="relative">
+                            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-text-muted">calendar_today</span>
+                            <input type="date" name="date" required
+                                   class="input-base pl-12">
+                        </div>
+                    </div>
+
+                    <!-- Return Date (Only for ROUND_TRIP) -->
+                    <div class="flex flex-col gap-2" x-show="tripType === 'ROUND_TRIP'" x-transition>
+                        <label class="text-xs font-bold text-text-muted uppercase tracking-widest">Fecha Regreso</label>
+                        <div class="relative">
+                            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-text-muted">event_repeat</span>
+                            <input type="date" name="return_date" :required="tripType === 'ROUND_TRIP'"
+                                   class="input-base pl-12">
+                        </div>
+                    </div>
+
+                    <!-- Search Button (For Single Segment/Round Trip) -->
+                    <div x-show="tripType !== 'MULTI_CITY'">
+                        <button type="submit" 
+                                class="w-full btn-primary h-[40px] text-[13px]">
+                            <span class="material-symbols-outlined text-base">search</span>
+                            Buscar Vuelos
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Additional Segments (MULTI_CITY) -->
+                <template x-if="tripType === 'MULTI_CITY'">
+                    <div class="space-y-4">
+                        <template x-for="(segment, index) in segments.slice(1)" :key="index">
+                            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 items-end animation-fade-in">
+                                <div class="flex flex-col gap-2">
+                                    <label class="text-xs font-bold text-text-muted uppercase tracking-widest">Origen Segmento <span x-text="index + 2"></span></label>
+                                    <input type="text" name="origin_multi[]" placeholder="Ej: MAD" required maxlength="3"
+                                           class="input-base pl-4 uppercase font-mono">
+                                </div>
+                                <div class="flex flex-col gap-2">
+                                    <label class="text-xs font-bold text-text-muted uppercase tracking-widest">Destino</label>
+                                    <input type="text" name="destination_multi[]" placeholder="Ej: PAR" required maxlength="3"
+                                           class="input-base pl-4 uppercase font-mono">
+                                </div>
+                                <div class="flex flex-col gap-2">
+                                    <label class="text-xs font-bold text-text-muted uppercase tracking-widest">Fecha</label>
+                                    <input type="date" name="date_multi[]" required
+                                           class="input-base pl-4">
+                                </div>
+                                <div>
+                                    <button type="button" @click="segments.splice(index + 1, 1)"
+                                            class="p-2 text-status-danger hover:bg-status-danger-bg rounded-lg transition-colors">
+                                        <span class="material-symbols-outlined">delete</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </template>
+
+                        <div class="flex gap-4">
+                            <button type="button" @click="segments.push({id: Date.now()})"
+                                    class="btn-secondary h-[40px] text-[13px] border-dashed border-2">
+                                <span class="material-symbols-outlined text-base">add</span>
+                                Agregar Tramo
+                            </button>
+                            <button type="submit" 
+                                    class="btn-primary h-[40px] text-[13px] px-8">
+                                <span class="material-symbols-outlined text-base">search</span>
+                                Buscar Ruta Completa
+                            </button>
+                        </div>
+                    </div>
+                </template>
             </div>
         </form>
     </div>
@@ -64,22 +175,23 @@
     <!-- Loading -->
     <div id="loading-indicator" class="htmx-indicator flex justify-center py-12">
         <div class="flex flex-col items-center gap-3">
-            <svg class="animate-spin h-10 w-10 text-cyan-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <svg class="animate-spin h-10 w-10 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            <span class="text-cyan-400 animate-pulse">Conectando con Amadeus GDS...</span>
+            <span class="text-primary font-bold animate-pulse">Conectando con Amadeus GDS...</span>
         </div>
     </div>
 
     <!-- Resultados -->
     <div id="flight-results" class="space-y-4">
-        <!-- Aquí se inyectarán las tarjetas HTMX -->
-        <div class="text-center text-gray-500 py-12">
-            <svg class="w-16 h-16 mx-auto mb-4 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            <p>Ingresa ruta y fecha para ver ofertas disponibles</p>
+        <div class="text-center text-text-muted py-16 card-base border-dashed border-2 flex flex-col items-center gap-4">
+            <span class="material-symbols-outlined text-6xl opacity-20">travel_explore</span>
+            <p class="font-medium">Ingresa ruta y fecha para ver ofertas disponibles</p>
         </div>
     </div>
+
+</div>
 
 </div>
 {% endblock %}

@@ -145,4 +145,4 @@ pypdfium2
 markdown
 boto3
 django-storages
-fli
+flights

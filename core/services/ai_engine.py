@@ -11,6 +11,10 @@ logger = logging.getLogger(__name__)
 class CircuitBreakerException(Exception):
     pass
 
+class QuotaExhaustedException(Exception):
+    """Lanzada cuando la cuota de la API de IA se ha agotado (Error 429)."""
+    pass
+
 class AIEngine:
     """
     Motor centralizado de Inteligencia Artificial para TravelHub.
@@ -227,6 +231,11 @@ class AIEngine:
             return {"text": response.text}
 
         except Exception as e:
+            error_str = str(e)
+            if "429" in error_str or "Resource exhausted" in error_str:
+                logger.error(f"🚨 CUOTA AGOTADA en Gemini: {error_str}")
+                raise QuotaExhaustedException(f"La cuota de la API de IA se ha agotado: {error_str}")
+                
             logger.error(f"AIEngine Call Error: {traceback.format_exc()}")
             return {"error": str(e)}
 

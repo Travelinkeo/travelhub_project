@@ -1,0 +1,157 @@
+{% extends "base_modern.html" %}
+{% load i18n static %}
+
+{% block content %}
+<div class="min-h-screen bg-[#0a0a0a] text-gray-100 p-4 lg:p-8 font-sans">
+    <!-- Header -->
+    <div class="max-w-7xl mx-auto mb-10">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div>
+                <h1 class="text-4xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-500 to-cyan-400">
+                    AI SALES FORECAST
+                </h1>
+                <p class="text-gray-400 mt-2 flex items-center gap-2">
+                    <span class="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    Análisis Predictivo de Inteligencia Artificial en tiempo real
+                </p>
+            </div>
+            <div class="flex items-center gap-3 bg-[#151515] p-2 rounded-2xl border border-white/5 shadow-2xl">
+                <div class="p-3 bg-emerald-500/10 rounded-xl">
+                    <svg class="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-500 uppercase font-bold tracking-widest">Confidence Score</p>
+                    <p class="text-xl font-bold text-white">{{ forecast.confidence_level|default:"--" }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if ai_error %}
+    <!-- Error State -->
+    <div class="max-w-3xl mx-auto bg-rose-500/10 border border-rose-500/20 p-8 rounded-3xl text-center">
+        <div class="w-20 h-20 bg-rose-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg class="w-10 h-10 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+            </svg>
+        </div>
+        <h2 class="text-2xl font-bold text-white mb-2">Análisis en espera</h2>
+        <p class="text-rose-300 mb-6">{{ ai_error }}</p>
+        <a href="{% url 'marketing:dashboard' %}" class="inline-flex items-center px-6 py-3 bg-white/5 hover:bg-white/10 text-white rounded-xl transition-all border border-white/10">
+            Regresar al Dashboard
+        </a>
+    </div>
+    {% else %}
+
+    <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <!-- Main Stats Column -->
+        <div class="lg:col-span-2 space-y-8">
+            
+            <!-- Momentum Card -->
+            <div class="bg-[#111] rounded-[2rem] p-8 border border-white/5 shadow-2xl relative overflow-hidden group">
+                <div class="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 blur-[100px] -mr-32 -mt-32"></div>
+                
+                <div class="relative z-10 flex flex-col md:flex-row items-center gap-10">
+                    <div class="flex-1">
+                        <div class="inline-flex items-center gap-2 px-3 py-1 bg-white/5 rounded-full border border-white/10 mb-6 font-bold text-[10px] tracking-tighter uppercase text-emerald-400">
+                            {% if forecast.momentum_indicator == 'UP' %}
+                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z" clip-rule="evenodd"></path></svg>
+                            MOMENTUM ASCENDENTE
+                            {% elif forecast.momentum_indicator == 'DOWN' %}
+                            <svg class="w-3 h-3 text-rose-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M12 13a1 1 0 100 2h5a1 1 0 001-1V9a1 1 0 10-2 0v2.586l-4.293-4.293a1 1 0 00-1.414 0L8 9.586 3.707 5.293a1 1 0 00-1.414 1.414l5 5a1 1 0 001.414 0L11 9.414 14.586 13H12z" clip-rule="evenodd"></path></svg>
+                            RETRACCIÓN DETECTADA
+                            {% else %}
+                            MERCADO ESTABLE
+                            {% endif %}
+                        </div>
+                        <h2 class="text-gray-400 font-medium mb-1">Próximo Mes Estimado</h2>
+                        <div class="text-6xl font-black text-white tracking-tighter mb-4">
+                            {{ forecast.predicted_sales_next_month }}
+                        </div>
+                        <p class="text-gray-500 max-w-sm leading-relaxed">
+                            Proyección basada en el historial de cotizaciones y estacionalidad del sector.
+                        </p>
+                    </div>
+                    
+                    <div class="w-full md:w-auto flex flex-col gap-4">
+                        <div class="bg-black/40 p-6 rounded-3xl border border-white/5 backdrop-blur-xl">
+                            <p class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1 text-center">Tendencia</p>
+                            <div class="flex justify-center">
+                                {% if forecast.momentum_indicator == 'UP' %}
+                                <div class="text-4xl font-bold text-emerald-400">+{{ forecast.confidence_level }}</div>
+                                {% else %}
+                                <div class="text-4xl font-bold text-gray-300">Estable</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Insights Feed -->
+            <div class="space-y-4">
+                <h3 class="text-sm font-black text-gray-500 uppercase tracking-[0.2em] ml-2">AI Strategic Insights</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {% for insight in forecast.strategic_insights %}
+                    <div class="bg-white/5 hover:bg-white/[0.08] transition-all p-6 rounded-3xl border border-white/5 group shadow-lg">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="p-3 bg-emerald-500/10 rounded-xl group-hover:bg-emerald-500/20 transition-colors">
+                                <svg class="w-5 h-5 text-emerald-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                                </svg>
+                            </div>
+                            <span class="px-2 py-1 bg-black/40 rounded-lg text-[10px] font-black tracking-widest uppercase {% if insight.impact_level == 'HIGH' %}text-emerald-400{% else %}text-gray-500{% endif %}">
+                                {{ insight.impact_level }} IMPACT
+                            </span>
+                        </div>
+                        <h4 class="text-white font-bold mb-2 group-hover:text-emerald-400 transition-colors tracking-tight">{{ insight.title }}</h4>
+                        <p class="text-xs text-gray-400 leading-relaxed">{{ insight.description }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Sidebar Destinations -->
+        <div class="space-y-8">
+            <div class="bg-[#151515] rounded-[2.5rem] p-8 border border-white/10 shadow-3xl relative overflow-hidden h-full">
+                <div class="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-500 to-cyan-500"></div>
+                
+                <h3 class="text-xl font-black text-white mb-2 tracking-tighter">Hot Destinations</h3>
+                <p class="text-xs text-gray-500 mb-8 font-medium">Oportunidades de promoción detectadas</p>
+                
+                <div class="space-y-6">
+                    {% for dest in forecast.hot_destinations %}
+                    <div class="group relative">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-sm font-bold text-gray-300">{{ dest.name }}</span>
+                            <span class="text-xs font-black text-emerald-400 tracking-tighter">{{ dest.growth_probability }} Prowess</span>
+                        </div>
+                        <div class="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
+                            <div class="h-full bg-gradient-to-r from-emerald-500 to-cyan-400 rounded-full transition-all duration-1000 ease-out" style="width: {{ dest.growth_probability|slice:':-1' }}%"></div>
+                        </div>
+                        <p class="text-[10px] text-gray-500 mt-2 italic group-hover:text-gray-400 transition-colors">"{{ dest.reason }}"</p>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="mt-12 p-6 bg-black/40 rounded-3xl border border-white/5">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.5)]"></div>
+                        <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">AI Agent Analysis</span>
+                    </div>
+                    <p class="text-[11px] text-gray-500 leading-relaxed antialiased">
+                        Gemini 2.0 Flash ha analizado los últimos destinos con mayor conversión. Basado en estacionalidad, se recomienda enfocar campañas de Instagram en estos destinos durante las próximas 48 horas.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

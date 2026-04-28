@@ -1,0 +1,176 @@
+Delivered-To: naidycohen@gmail.com
+Received: by 2002:a05:622a:46ca:b0:4ee:40ef:3aa4 with SMTP id me10csp1919658qtb;
+        Mon, 2 Feb 2026 10:48:08 -0800 (PST)
+X-Received: by 2002:a05:620a:1901:b0:892:8439:2efa with SMTP id af79cd13be357-8c9eb2a3bdfmr1406986485a.23.1770058088320;
+        Mon, 02 Feb 2026 10:48:08 -0800 (PST)
+ARC-Seal: i=1; a=rsa-sha256; t=1770058088; cv=none;
+        d=google.com; s=arc-20240605;
+        b=hPaj/mWqY9c3xQTx+JdDPfF/k1Pdx7AbjajuLEajYqJgyyAn+FsARo6OP64USN8M1B
+         qPxp/PXGpueiF/HdUSE32E9XSZMEo13gViiXsw0NiDHfpwdD6lOlhI6+UaVA95d6zqsJ
+         wMMQum7SI2qiZYmud2BiotC13I7I8VAYRtWL/Ov9S6agC5pqfNjeYTPG0BS8xJ1z15Km
+         HdLV7JWCTA0LtcTkkaQLtg/aW4P9ei0I46usFkG9eDX18EmIX+CcMJ/m+Zg0/VDF+kI2
+         KWxAORAxX8JjetWdJaR7egoTNiUiAse68ZECWK54kS8iwd+Tb2oAEpaaj3utKqVPW47P
+         UtVg==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
+        h=feedback-id:date:message-id:mime-version:subject:to:from
+         :dkim-signature:dkim-signature;
+        bh=bFcfVB91KBVCiPKwxRPQbPIMF5hzpCP1IBOf1kDpJFk=;
+        fh=UGhdE8t/k3FWiRlQHY/CrclQ6Lc/XDFLWjQbr+sLbGs=;
+        b=bfeeL7ZdTLf5zy1CRcQhpvriOEieBgOlYcjjIq3A9eW5SVHGR7DoXuh3HZ479oO7+X
+         cmnjt2yInqD3gQbRwPWOYTSqCw682ToOSVvYS0FQ3jfmphSTlZSXsABnH1K52RH8EzlZ
+         Li5V/l/rEWIp0o1klaZZFgm9Ze9pPpQB9ACVKDnj1J0hRyqq9qKqhAthduau5ylP9/Tg
+         OdnGkIYqyk6fxagdhmONYkG94kKasNKc4+vRTeyXDO3NRFn6vseSZ2K0gtGBVkwAC0T1
+         7icFO7mYautfMrKfBCATOdJUU6MDxmeJAOBik0hl/+Olzyxg7MEGaPmIYr3Vcm+vTfdk
+         MSiA==;
+        dara=google.com
+ARC-Authentication-Results: i=1; mx.google.com;
+       dkim=pass header.i=@kiusys.com header.s=y27k5w6mpyspgwewkrpvqs7lpid7on7v header.b=cyIJ6Q+f;
+       dkim=pass header.i=@amazonses.com header.s=6gbrjpgwjskckoa6a5zn6fwqkn67xbtw header.b=fc4BGYvg;
+       spf=pass (google.com: domain of 0100019c1faefd33-6934319c-f5ca-4011-a34f-54a32216f397-000000@ses.kiusys.com designates 54.240.9.46 as permitted sender) smtp.mailfrom=0100019c1faefd33-6934319c-f5ca-4011-a34f-54a32216f397-000000@ses.kiusys.com;
+       dmarc=pass (p=QUARANTINE sp=QUARANTINE dis=NONE) header.from=kiusys.com
+Return-Path: <0100019c1faefd33-6934319c-f5ca-4011-a34f-54a32216f397-000000@ses.kiusys.com>
+Received: from a9-46.smtp-out.amazonses.com (a9-46.smtp-out.amazonses.com. [54.240.9.46])
+        by mx.google.com with ESMTPS id af79cd13be357-8c711d88b87si1522214285a.243.2026.02.02.10.48.08
+        for <NAIDYCOHEN@gmail.com>
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 02 Feb 2026 10:48:08 -0800 (PST)
+Received-SPF: pass (google.com: domain of 0100019c1faefd33-6934319c-f5ca-4011-a34f-54a32216f397-000000@ses.kiusys.com designates 54.240.9.46 as permitted sender) client-ip=54.240.9.46;
+Authentication-Results: mx.google.com;
+       dkim=pass header.i=@kiusys.com header.s=y27k5w6mpyspgwewkrpvqs7lpid7on7v header.b=cyIJ6Q+f;
+       dkim=pass header.i=@amazonses.com header.s=6gbrjpgwjskckoa6a5zn6fwqkn67xbtw header.b=fc4BGYvg;
+       spf=pass (google.com: domain of 0100019c1faefd33-6934319c-f5ca-4011-a34f-54a32216f397-000000@ses.kiusys.com designates 54.240.9.46 as permitted sender) smtp.mailfrom=0100019c1faefd33-6934319c-f5ca-4011-a34f-54a32216f397-000000@ses.kiusys.com;
+       dmarc=pass (p=QUARANTINE sp=QUARANTINE dis=NONE) header.from=kiusys.com
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/simple;
+	s=y27k5w6mpyspgwewkrpvqs7lpid7on7v; d=kiusys.com; t=1770058088;
+	h=From:To:Subject:Mime-Version:Content-Type:Message-Id:Date;
+	bh=ETlukAzNAFVwDVddBEaQsbQiYlxT9frU0SQDfGkmCfs=;
+	b=cyIJ6Q+f7DrMsJF3Gp+/l5Kml5XOIkUqjPjCVyzbjENvGTiFvODvgYKWVkOM/24B
+	xWBegxMvbkEuQWFx3MmR9D/rgMbKWk2mRBTe0hhzUaBgETH/wie8KufKdKWD0CyI+XY
+	jrMRSUwLB5HclfbXBjYzDwzVBAgVrY3aIVTEyut8y1tO2yQC4Y+Scp010Rs/0MCmy/E
+	EW4xj4Nx96srszkuW810Y0qw05RyFGYaHAVLPzlha8nsiLD42C3iP8yHM6qX6y1Nmj2
+	m4IO8OIYggPuTqBs8MCOPz1pnGH7k+iuBdITAQVn3YwGFhXxrv3qoTpqgnu4CUUIqQZ
+	dw4/9VkXRg==
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/simple;
+	s=6gbrjpgwjskckoa6a5zn6fwqkn67xbtw; d=amazonses.com; t=1770058088;
+	h=From:To:Subject:Mime-Version:Content-Type:Message-Id:Date:Feedback-ID;
+	bh=ETlukAzNAFVwDVddBEaQsbQiYlxT9frU0SQDfGkmCfs=;
+	b=fc4BGYvgz4N6IAlJHxpyOStP1dNoAkDSZwHARil2CI7J5wHrhhAU4s8QfOJCvCFb
+	MXF3bZCunBSveEXc9TftXUDTpI+1cWACxfHoUxVcz4RJVA7o51sthHholEE3uR6SGRe
+	f7InSK9A4ZYjC7h0p2diFcG/9l3U2aFPKAH60OCs=
+From: no_config <noreply@kiusys.com>
+To: NAIDYCOHEN@GMAIL.COM
+Subject:E-TICKET ITINERARY RECEIPT - ROJAS PALACIO/MATHIAS
+Mime-Version: 1.0
+Content-Type: multipart/mixed;
+    boundary="0354c83661465d063cf714dbc36d4095db1bd35305b469442b9cddd50ebf"
+Message-ID: <0100019c1faefd33-6934319c-f5ca-4011-a34f-54a32216f397-000000@email.amazonses.com>
+Date: Mon, 2 Feb 2026 18:48:07 +0000
+Feedback-ID: ::1.us-east-1.FlLS8KWT15VSJWSZCrjpizuEqvA988B9XvDgDbF9UFw=:AmazonSES
+X-SES-Outgoing: 2026.02.02-54.240.9.46
+
+--0354c83661465d063cf714dbc36d4095db1bd35305b469442b9cddd50ebf
+Content-Transfer-Encoding: quoted-printable
+Content-Type: text/html; charset="UTF-8"
+
+<HTML><HEAD><STYLE>.pnr-print-small {font-size: 8px;}.pnr-print-medium {fon=
+t-size: 12px;}.pnr-print-big {font-size: 14px;}.prn-image {display: flex; j=
+ustify-content: end;width: 650px;}</STYLE></HEAD><BODY><PRE class=3D"pnr-pr=
+int-medium"> ELECTRONIC TICKET <div class=3D"prn-image"><img src=3D"https:/=
+/cdn.kiusys.net/prod/res_receipt/9v/1202_17412127884526267.jpg" alt=3D"Logo=
+" border=3D"0" width=3D"150px" height=3D"auto" align=3D"left"></div>
+
+
+     PASSENGER ITINERARY RECEIPT              TICKET NBR: <B>7420200051999<=
+/B>
+     RECIBO DE ITINERARIO DE PASAJEROS        BOLETO NRO:=20
+
+ <B>CALL CENTER                   </B> ISSUE DATE/FECHA DE EMISION: 02 FEB =
+2026 14:47
+ BARCELONA                        ISSUE AGENT/AGENTE EMISOR: BLA009VPP
+ ANZOATEGUI                                     NAME/NOMBRE:  <B>ROJAS PALA=
+CIO/MATHIA</B>
+ ANZOATEGUI, VENEZUELA                     FOID/D.IDENTIDAD: ID22JAN18     =
+     =20
+ OFFICE ID: VE-21596-0                   =20
+ TELEPHONE/TELEFONO: 0501 AVIOR 00                =20
+ MAIL INFO: RESERVACIONES@AVIOR.COM.VE                                 =20
+
+ISSUING AIRLINE/LINEA AEREA EMISORA   : AVIOR AIRLINES C.A
+ADDRESS/DIRECCION                     : AV JORGE RODRIGUEZ CC MT NIVEL PB L=
+C 35 ANZOATEGUI
+RIF                                   : J302097843                   =20
+TICKET NUMBER/NRO DE BOLETO           : 742-0200051999
+
+BOOKING REF./CODIGO DE RESERVA: C1/<B>BGABEM</B>
+
+  FROM/TO     FLIGHT CL DATE  DEP  ARR  FARE BASIS      NVB   NVA   BAG  ST
+DESDE/HACIA   VUELO  CL FECHA HORA HORA BASE TARIFARIA              EQP. ES=
+TATUS
+
+  <B>MARACAIBO   </B>9V 075 Q  <B>11APR 1545</B> <B>1700</B> QCCSMARVE1CH50=
+              32K  OK=20
+<B>  CARACAS           </B>
+</PRE><PRE class=3D"pnr-print-medium"><B>CONDICIONES DE CONTRATO BOLETO</B>=
+<br>EL SERVICIO DE TRANSPORTE REALIZADO POR AVIOR AIRLINES, C.A., ESTA SUJE=
+TO A LAS NORMAS ESTABLECIDAS EN LA LEY DE AERONUTICA CIVIL<br>Y DEMAS REGUL=
+ACIONES NACIONALES; Y DE ACUERDO AL CONVENIO PARA LA UNIFICACION DE CIERTAS=
+ REGLAS RELATIVAS AL TRANSPORTE AEREO<br>INTERNACIONAL (FIRMADO EN LA CIUDA=
+D DE VARSOVIA EN 1929), Y DEMAS CONVENIOS INTERNACIONALES ACEPTADOS EN EL P=
+AIS,<br>EN CUANTO LE SEAN APLICABLES. LAS CONDICIONES SON: LIMITACIONES EN =
+LA RESPONSABILIDAD POR PERDIDAS Y/O DETERIORO DE EQUIPAJES,<br>SEGUN LO EST=
+ABLECIDO POR LA LEY DE AERONUTICA CIVIL; SE APLICAN EXCLUSIONES POR ARTICUL=
+OS FRAGILES, OBJETOS DE VALOR,<br>RESTRINGIDO Y/O PERECEDEROS. AVIOR AIRLIN=
+ES SE RESERVA EL DERECHO A CAMBIAR ESTAS CONDICIONES SIN PREVIO AVISO.<br>L=
+OS PASAJEROS DEBEN ESTAR PARA EL CHEQUEO 2 HORAS ANTES DE LA SALIDA EN VUEL=
+OS NACIONALES Y 3 HORAS ANTES DE LA SALIDA<br>EN DESTINOS INTERNACIONALES.<=
+br>LAS TASAS E IMPUESTOS INTERNACIONALES ESTAN INCLUIDOS EN LOS BOLETOS ADQ=
+UIRIDOS,<br>EXCEPTO AQUELLOS AEROPUERTOS QUE DISPONGAN LO CONTRARIO.<br><br=
+>FRANQUICIA DE EQUIPAJE - VUELOS INTERNACIONALES:<br>CLASE EJECUTIVA(BUSINE=
+SS), ES DE DOS (2) PIEZAS EN BODEGA DE 32 KG Y UN (1) EQUIPAJE DE MANO DE H=
+ASTA 8 KG.<br>TARIFA LIGHT, SOLO EQUIPAJE DE MANO DE HASTA 8KG, NO PERMITE =
+PIEZA FACTURADA SOLO PUEDE SER CANCELADA AL MOMENTO DEL CHEQUEO.<br>TARIFA =
+MEDIUM, UNA PIEZA (1) EN BODEGA DE 23 KILOS Y UN (1) EQUIPAJE DE MANO HASTA=
+ 8 KG.<br>TARIFA ULTRA, UNA PIEZA (1) EN BODEGA DE 32 KILOS Y UN (1) EQUIPA=
+JE DE MANO HASTA 8 KG.<br><br>FRANQUICIA DE EQUIPAJE - VUELOS NACIONALES.<b=
+r>CLASE EJECUTIVA(BUSINESS), ES DE DOS (2) PIEZAS EN BODEGA DE 32 KG Y UN (=
+1) EQUIPAJE DE MANO DE HASTA 8 KG.<br>EL EQUIPAJE PERMITIDO POR PASAJERO EN=
+ CLASE TURISTA ES DE UNA (1) PIEZA EN BODEGA DE 23 KG Y UN (1) EQUIPAJE DE =
+MANO HASTA 8KG.<br></PRE><PRE class=3D"pnr-print-medium">
+
+ENDORSEMENTS/ENDOSOS-RESTRICCIONES : REEMBOLSABLE APLICA CARGO  VER CONDICI=
+ONES DE TARIFAS
+TOUR CODE                          :=20
+FORM OF PAYMENT/FORMA DE PAGO      : MISCELANEO BOLIVARES  PM WS 1417449273=
+05 TESORO
+
+</PRE><PRE class=3D"pnr-print-medium">FARE CALC./CALCULO DE TARIFA: MAR 9V =
+CCS 5271.18VES5271.18END  (CHD)
+
+</PRE><PRE class=3D"pnr-print-medium">
+
+AIR FARE/TARIFA : VES     5271.18
+TAX/IMPUESTOS   : VES     5271.186A     5271.186V     4813.31AK
+                           462.82C2      158.13EU     1265.07YN
+TOTAL           : VES    22512.87
+
+</PRE><PRE class=3D"pnr-print-medium">RESTRICCIONES Y/O CONDICIONES DE LAS =
+TARIFAS:<br>SE RECOMIENDA A TODOS LOS PASAJEROS VALIDAR LOS BENEFICIOS QUE =
+OFRECE CADA TARIFA A TRAVES DEL SIGUIENTE ENLACE<br>WWW.AVIOR.COM.VE/TARIFA=
+S<br>PARA VUELOS CHARTER Y NO REGULARES, APLICAN CONDICIONES Y PENALIDADES,=
+ CONSULTE WWW.AVIORAIR.COM<br><br>NOTA IMPORTANTE:<br>SE RECOMIENDA RECONFI=
+RMAR O CANCELAR SU VUELO 48 HORAS ANTES. TARIFA LIGHT:NO PERMITE CAMBIOS. N=
+O ES REEMBOLSABLE.<br>TARIFA MEDIUM: PERMITE CAMBIO CANCELANDO PENALIDAD, N=
+O ES REEMBOLSABLE.PARA MAYOR INFORMACIN COMUNIQUESE AL 0501-2846700 O VISIT=
+E<br>WWW.AVIORAIR.COM.<br>RECOMENDAMOS QUE PARA CONEXIONES CON OTROS TRANSP=
+ORTISTAS VALIDE TENER UN MARGEN PARA CONECTAR DE AL MENOS CUATRO (4) HORAS.=
+<br><br><B>ENDORSEMENTS ENDOSOS-RESTRICCIONES:</B><br>NO REEMBOLSABLE/NO EN=
+DOSABLE APLICA PENALIDAD POR CAMBIO NON END NON REF PENALTY APPLY FOR CHANG=
+ES<br>PARA DISFRUTAR DEL BENEFICIO QUE OFRECEN LAS TARIFAS ULTRA Y BUSINESS=
+ DE CAMBIO SIN COSTO,<br>DEBE NOTIFICAR AL MENOS 48HRS ANTES DE SU VUELO DE=
+ LO CONTRARIO DEBERA CANCELAR PENALIDAD POR CAMBIO.<br>
+<HR>SEND BY AGENT BLA009VPP / FEB  2 2026  2:46</PRE></BODY></HTML><img alt=
+=3D"" src=3D"https://j5d6plkx.r.us-east-1.awstrack.me/I0/0100019c1faefd33-6=
+934319c-f5ca-4011-a34f-54a32216f397-000000/hM0foPh4IhwNMC8HYSZdsKCjCr4=3D46=
+3" style=3D"display: none; width: 1px; height: 1px;">
+
+--0354c83661465d063cf714dbc36d4095db1bd35305b469442b9cddd50ebf--

@@ -1,0 +1,99 @@
+Traceback (most recent call last):
+  File "C:\Users\ARMANDO\AppData\Local\Programs\Python\Python313\Lib\site-packages\google\api_core\grpc_helpers.py", line 76, in error_remapped_callable
+    return callable_(*args, **kwargs)
+  File "C:\Users\ARMANDO\AppData\Local\Programs\Python\Python313\Lib\site-packages\grpc\_interceptor.py", line 277, in __call__
+    response, ignored_call = self._with_call(
+                             ~~~~~~~~~~~~~~~^
+        request,
+        ^^^^^^^^
+    ...<4 lines>...
+        compression=compression,
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\ARMANDO\AppData\Local\Programs\Python\Python313\Lib\site-packages\grpc\_interceptor.py", line 332, in _with_call
+    return call.result(), call
+           ~~~~~~~~~~~^^
+  File "C:\Users\ARMANDO\AppData\Local\Programs\Python\Python313\Lib\site-packages\grpc\_channel.py", line 440, in result
+    raise self
+  File "C:\Users\ARMANDO\AppData\Local\Programs\Python\Python313\Lib\site-packages\grpc\_interceptor.py", line 315, in continuation
+    response, call = self._thunk(new_method).with_call(
+                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        request,
+        ^^^^^^^^
+    ...<4 lines>...
+        compression=new_compression,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\ARMANDO\AppData\Local\Programs\Python\Python313\Lib\site-packages\grpc\_channel.py", line 1198, in with_call
+    return _end_unary_response_blocking(state, call, True, None)
+  File "C:\Users\ARMANDO\AppData\Local\Programs\Python\Python313\Lib\site-packages\grpc\_channel.py", line 1006, in _end_unary_response_blocking
+    raise _InactiveRpcError(state)  # pytype: disable=not-instantiable
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+grpc._channel._InactiveRpcError: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.PERMISSION_DENIED
+	details = "Permission 'aiplatform.endpoints.predict' denied on resource '//aiplatform.googleapis.com/projects/travelhub-468322/locations/us-central1/publishers/google/models/imagegeneration@006' (or it may not exist)."
+	debug_error_string = "UNKNOWN:Error received from peer ipv4:142.250.64.202:443 {grpc_message:"Permission \'aiplatform.endpoints.predict\' denied on resource \'//aiplatform.googleapis.com/projects/travelhub-468322/locations/us-central1/publishers/google/models/imagegeneration@006\' (or it may not exist).", grpc_status:7}"
+>
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\ARMANDO\travelhub_project\scripts\verify_image_gen.py", line 27, in verify_imagen_3
+    b64_image = MarketingService.generate_ai_promo_image(
+        hotel_name=hotel_name,
+    ...<2 lines>...
+        custom_text=custom_text
+    )
+  File "C:\Users\ARMANDO\travelhub_project\core\services\marketing_service.py", line 293, in generate_ai_promo_image
+    raise e # Re-raise to allow caller to handle or debug
+    ^^^^^^^
+  File "C:\Users\ARMANDO\travelhub_project\core\services\marketing_service.py", line 272, in generate_ai_promo_image
+    images = model.generate_images(
+        prompt=base_prompt,
+    ...<4 lines>...
+        person_generation="allow_adult"
+    )
+  File "C:\Users\ARMANDO\AppData\Local\Programs\Python\Python313\Lib\site-packages\vertexai\vision_models\_vision_models.py", line 1112, in generate_images
+    return self._generate_images(
+           ~~~~~~~~~~~~~~~~~~~~~^
+        prompt=prompt,
+        ^^^^^^^^^^^^^^
+    ...<9 lines>...
+        person_generation=person_generation,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\ARMANDO\AppData\Local\Programs\Python\Python313\Lib\site-packages\vertexai\vision_models\_vision_models.py", line 1034, in _generate_images
+    response = self._endpoint.predict(
+        instances=[instance],
+        parameters=parameters,
+    )
+  File "C:\Users\ARMANDO\AppData\Local\Programs\Python\Python313\Lib\site-packages\google\cloud\aiplatform\models.py", line 2540, in predict
+    prediction_response = self._prediction_client.predict(
+        endpoint=self._gca_resource.name,
+    ...<2 lines>...
+        timeout=timeout,
+    )
+  File "C:\Users\ARMANDO\AppData\Local\Programs\Python\Python313\Lib\site-packages\google\cloud\aiplatform_v1\services\prediction_service\client.py", line 1014, in predict
+    response = rpc(
+        request,
+    ...<2 lines>...
+        metadata=metadata,
+    )
+  File "C:\Users\ARMANDO\AppData\Local\Programs\Python\Python313\Lib\site-packages\google\api_core\gapic_v1\method.py", line 131, in __call__
+    return wrapped_func(*args, **kwargs)
+  File "C:\Users\ARMANDO\AppData\Local\Programs\Python\Python313\Lib\site-packages\google\api_core\grpc_helpers.py", line 78, in error_remapped_callable
+    raise exceptions.from_grpc_error(exc) from exc
+google.api_core.exceptions.PermissionDenied: 403 Permission 'aiplatform.endpoints.predict' denied on resource '//aiplatform.googleapis.com/projects/travelhub-468322/locations/us-central1/publishers/google/models/imagegeneration@006' (or it may not exist). [reason: "IAM_PERMISSION_DENIED"
+domain: "aiplatform.googleapis.com"
+metadata {
+  key: "resource"
+  value: "projects/travelhub-468322/locations/us-central1/publishers/google/models/imagegeneration@006"
+}
+metadata {
+  key: "permission"
+  value: "aiplatform.endpoints.predict"
+}
+]

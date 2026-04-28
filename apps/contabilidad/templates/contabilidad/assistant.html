@@ -1,0 +1,227 @@
+{% extends "base_modern.html" %}
+{% load static %}
+
+{% block title %}Brain Assistant - Inteligencia Contable{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-8" x-data="accountingChat()">
+    <!-- Container Principal con efecto Cristalline -->
+    <div class="bg-gray-800/40 backdrop-blur-xl rounded-2xl border border-white/10 shadow-2xl overflow-hidden flex flex-col h-[750px] animate-in fade-in slide-in-from-bottom-4 duration-700">
+        
+        <!-- Header del Asistente -->
+        <div class="p-6 bg-gray-900/60 border-b border-white/5 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <div class="relative">
+                    <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                        <i data-lucide="brain-circuit" class="w-8 h-8 text-white"></i>
+                    </div>
+                    <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-gray-900 rounded-full"></div>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-white tracking-tight">Brain Assistant</h1>
+                    <p class="text-xs text-indigo-300 font-medium flex items-center gap-1.5 mt-0.5">
+                        <span class="inline-block w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
+                        IA Financiera Activa
+                    </p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                <button @click="clearChat" class="p-2 text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-all" title="Limpiar Conversación">
+                    <i data-lucide="rotate-ccw" class="w-5 h-5"></i>
+                </button>
+                <div class="h-6 w-px bg-white/10 mx-1"></div>
+                <div class="flex -space-x-2">
+                    <div class="w-7 h-7 rounded-full border-2 border-gray-800 bg-gray-700 flex items-center justify-center text-[10px] font-bold text-gray-400" title="Modo: Análisis">A</div>
+                    <div class="w-7 h-7 rounded-full border-2 border-[var(--surface-3)] bg-[var(--primary)] flex items-center justify-center text-[10px] font-bold text-white" title="Modo: Real-Time">RT</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Área de Mensajes -->
+        <div class="flex-1 overflow-y-auto p-8 space-y-6 custom-scrollbar scroll-smooth" id="chat-container">
+            <template x-for="(msg, index) in messages" :key="index">
+                <div :class="msg.role === 'user' ? 'flex justify-end' : 'flex justify-start'" 
+                     class="animate-in fade-in slide-in-from-bottom-2 duration-300">
+                    
+                    <div class="flex gap-3 max-w-[85%]" :class="msg.role === 'user' ? 'flex-row-reverse' : ''">
+                        <!-- Avatar Mini -->
+                        <div class="flex-shrink-0 mt-auto mb-1">
+                            <div :class="msg.role === 'user' ? 'bg-indigo-500' : 'bg-gray-700'" 
+                                 class="w-8 h-8 rounded-lg flex items-center justify-center text-[10px] font-bold text-white shadow-sm">
+                                <span x-text="msg.role === 'user' ? 'YO' : 'AI'"></span>
+                            </div>
+                        </div>
+
+                        <!-- Burbuja -->
+                        <div :class="msg.role === 'user' ? 'bg-[var(--primary)] text-white rounded-2xl rounded-tr-none shadow-lg shadow-[var(--primary)]/10' : 'bg-[var(--surface-2)] text-[var(--text-primary)] rounded-2xl rounded-tl-none border border-[var(--border)] shadow-xl'"
+                             class="p-4 relative">
+                            
+                            <div class="text-sm leading-relaxed whitespace-pre-wrap" x-html="formatMessage(msg.content)"></div>
+                            
+                            <!-- Indicador de Datos Reales -->
+                            <template x-if="msg.data_found">
+                                <div class="mt-3 pt-2 border-t border-white/10 flex items-center gap-1.5 text-[9px] text-indigo-300 font-bold uppercase tracking-widest">
+                                    <i data-lucide="database-zap" class="w-3 h-3"></i>
+                                    Consulta Local Exitosa
+                                </div>
+                            </template>
+                            
+                            <!-- Timestamp -->
+                            <span class="block mt-1 text-[8px] opacity-40 text-right" x-text="msg.time"></span>
+                        </div>
+                    </div>
+                </div>
+            </template>
+            
+            <!-- Loading State -->
+            <div x-show="loading" class="flex justify-start animate-in fade-in duration-200">
+                <div class="bg-gray-800/80 p-4 rounded-2xl rounded-tl-none border border-white/10 flex gap-2">
+                    <span class="w-2 h-2 bg-indigo-400 rounded-full animate-bounce"></span>
+                    <span class="w-2 h-2 bg-indigo-400 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+                    <span class="w-2 h-2 bg-indigo-400 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Área de Input -->
+        <div class="p-6 bg-gray-900/60 border-t border-white/5 backdrop-blur-md">
+            <!-- Sugerencias Rápidas -->
+            <div class="flex gap-2 mb-4 overflow-x-auto pb-2 no-scrollbar">
+                <template x-for="sug in suggestions" :key="sug">
+                    <button @click="userInput = sug; sendMessage();" 
+                            class="whitespace-nowrap px-3 py-1.5 bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white border border-white/5 rounded-full text-[10px] transition-all font-medium">
+                        <span x-text="sug"></span>
+                    </button>
+                </template>
+            </div>
+
+            <form @submit.prevent="sendMessage" class="relative">
+                <input type="text" x-model="userInput" 
+                       placeholder="Escriba aquí su consulta financiera o contable..."
+                       class="w-full bg-gray-950/50 border border-white/10 rounded-2xl px-5 py-4 pr-16 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500/50 transition-all shadow-inner"
+                       :disabled="loading">
+                
+                <button type="submit" 
+                        class="absolute right-2 top-1/2 -translate-y-1/2 w-11 h-11 bg-[var(--primary)] hover:bg-[var(--primary-hover)] active:scale-95 text-white rounded-xl flex items-center justify-center transition-all shadow-lg hover:shadow-[var(--primary)]/40 disabled:opacity-50"
+                        :disabled="!userInput.trim() || loading">
+                    <i data-lucide="send-horizontal" class="w-5 h-5"></i>
+                </button>
+            </form>
+            
+            <div class="flex items-center justify-center gap-4 mt-4 opacity-30">
+                <span class="text-[9px] text-gray-400">Powered by Gemini 2.0 Flash</span>
+                <div class="w-1 h-1 bg-gray-600 rounded-full"></div>
+                <span class="text-[9px] text-gray-400">Cifrado de Punto a Punto</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function accountingChat() {
+        return {
+            messages: [
+                { 
+                    role: 'assistant', 
+                    content: 'Bienvenido, soy **Brain**. Mi objetivo es ayudarte con la gestión financiera de la agencia.\n\nPuedes preguntarme cosas como:\n* "¿Cuál es el saldo total de bancos?"\n* "Dime las últimas 5 ventas ingresadas"\n* "Ayúdame con un asiento para pagar nómina"',
+                    time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+                }
+            ],
+            userInput: '',
+            loading: false,
+            suggestions: [
+                "¿Saldo de Bancos?",
+                "¿Mis últimas ventas?",
+                "¿Diferencias en conciliación?",
+                "Asiento de gasto"
+            ],
+            
+            async sendMessage() {
+                if (!this.userInput.trim() || this.loading) return;
+                
+                const question = this.userInput;
+                const timeStr = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                
+                this.messages.push({ role: 'user', content: question, time: timeStr });
+                this.userInput = '';
+                this.loading = true;
+                this.scrollToBottom();
+
+                try {
+                    const response = await fetch('/api/contabilidad/chat/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': this.getCookie('csrftoken')
+                        },
+                        body: JSON.stringify({ message: question })
+                    });
+                    
+                    if (!response.ok) throw new Error('API Error');
+                    
+                    const data = await response.json();
+                    this.messages.push({ 
+                        role: 'assistant', 
+                        content: data.response, 
+                        data_found: data.data_found,
+                        time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+                    });
+                } catch (e) {
+                    this.messages.push({ 
+                        role: 'assistant', 
+                        content: '⚠️ Lo siento, no pude conectar con el motor de IA en este momento.',
+                        time: timeStr
+                    });
+                } finally {
+                    this.loading = false;
+                    this.scrollToBottom();
+                }
+            },
+            
+            formatMessage(text) {
+                // Formateo básico de markdown/negritas
+                return text.replace(/\*\*(.*?)\*\*/g, '<b class="text-indigo-200">$1</b>')
+                           .replace(/\n/g, '<br>');
+            },
+            
+            clearChat() {
+                if(confirm('¿Deseas limpiar el historial?')) {
+                    this.messages = [this.messages[0]];
+                }
+            },
+            
+            scrollToBottom() {
+                setTimeout(() => {
+                    const el = document.getElementById('chat-container');
+                    el.scrollTop = el.scrollHeight;
+                    if (window.lucide) window.lucide.createIcons();
+                }, 100);
+            },
+            
+            getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+        }
+    }
+</script>
+
+<style>
+    .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+</style>
+{% endblock %}

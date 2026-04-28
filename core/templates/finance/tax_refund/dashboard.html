@@ -1,0 +1,75 @@
+{% extends "base_modern.html" %}
+{% load static %}
+
+{% block title %}Tax Refund | TravelHub{% endblock %}
+
+{% block page_title %}Recuperación de Impuestos{% endblock %}
+{% block page_subtitle %}Dinero sobre la mesa detectado por nuestra IA{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto space-y-6">
+
+    <!-- KPI Header -->
+    <div class="bg-gradient-to-r from-blue-900 to-indigo-900 rounded-3xl p-8 text-white shadow-xl shadow-blue-900/20 relative overflow-hidden">
+        <div class="absolute top-0 right-0 -mr-8 -mt-8 w-40 h-40 rounded-full bg-white opacity-10 blur-2xl"></div>
+        <div class="flex items-center gap-4 mb-4">
+            <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-md">
+                <span class="material-symbols-outlined text-3xl text-blue-200">savings</span>
+            </div>
+            <div>
+                <h2 class="text-sm uppercase tracking-widest font-bold text-blue-200">Motor de Oportunidades</h2>
+                <p class="text-xs text-blue-300">Impuestos recuperables detectados automáticamente</p>
+            </div>
+        </div>
+        <h1 class="text-5xl font-black tracking-tight flex items-center gap-3">
+            {{ reclamos_elegibles|length }} <span class="text-xl font-medium text-blue-200 mt-2">oportunidades elegibles</span>
+        </h1>
+    </div>
+
+    <!-- Lista de Oportunidades HTMX -->
+    <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-3xl p-6 shadow-sm">
+        <h3 class="font-black text-lg text-slate-900 dark:text-white mb-6">Listas para Tramitar</h3>
+        
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead>
+                    <tr class="text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest border-b border-slate-100 dark:border-slate-700">
+                        <th class="pb-3 px-4">Localizador (PNR)</th>
+                        <th class="pb-3 px-4">Pasajero / Destino</th>
+                        <th class="pb-3 px-4 text-right">Impuestos Base</th>
+                        <th class="pb-3 px-4 text-right">Monto a Recuperar</th>
+                        <th class="pb-3 px-4 text-center">Acción</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
+                    {% for reclamo in reclamos_elegibles %}
+                        {% include "finance/tax_refund/partials/fila_reclamo.html" with reclamo=reclamo %}
+                    {% empty %}
+                        <tr>
+                            <td colspan="5" class="py-12 text-center text-slate-400">
+                                <span class="material-symbols-outlined text-4xl opacity-50 mb-2">search_off</span>
+                                <p class="text-sm font-semibold">No hemos detectado nuevas oportunidades internacionales hoy.</p>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- En Trámite -->
+    <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-3xl p-6 shadow-sm opacity-80">
+        <h3 class="font-black text-xs uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-4">Trámites en Curso (Global Blue / Partners)</h3>
+        <div class="space-y-3">
+            <table class="w-full text-left">
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
+                    {% for reclamo in reclamos_tramitando %}
+                        {% include "finance/tax_refund/partials/fila_reclamo.html" with reclamo=reclamo %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

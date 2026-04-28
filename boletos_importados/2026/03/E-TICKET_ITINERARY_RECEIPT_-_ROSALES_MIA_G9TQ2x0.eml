@@ -1,0 +1,177 @@
+Delivered-To: naidycohen@gmail.com
+Received: by 2002:a05:622a:1dc3:b0:509:6928:8a3f with SMTP id bn3csp1778758qtb;
+        Fri, 27 Mar 2026 10:10:30 -0700 (PDT)
+X-Received: by 2002:a05:622a:285:b0:50b:4b21:781f with SMTP id d75a77b69052e-50ba388ef57mr45216341cf.26.1774631430018;
+        Fri, 27 Mar 2026 10:10:30 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1774631430; cv=none;
+        d=google.com; s=arc-20240605;
+        b=BtMqUycsoGqPFkFsbNijbXV+l3KQEDuJdHejljjouO59zGbnhJrEKl7SqiUagM8AxN
+         fxYMYCKuZZf9IQXCH3TaJ+PQub/EJz/5cBWWQ9Pn/KwToGixY81AJkN8jdbrkWrcUiPP
+         mOMrOenNjydytH+B9Q561LOAyb4kDtLtRYZstfe2L0TWqHEaHuV3BHLnz3eB0z7PsALB
+         THuZ8wC3JFVXZddksP82OGCYRHMHtOdN7aGdVbWL8IPwR9eK5pqoz/ZKrCK/lDhHhvwJ
+         hMKOIu95nv92Hoc560RO3afOJlsqDPWk2i+mFrigra0PyV6iwqSFBUsjGhJkvrSbRrpf
+         yomA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
+        h=feedback-id:date:message-id:mime-version:subject:to:from
+         :dkim-signature:dkim-signature:dkim-signature;
+        bh=6iC7VDlmQw1/OQnoT5Xwm3UylVRnYiMQHs2vXfw5iEY=;
+        fh=ekSEjYhrgYXD4yaGAtSRN8tc/dTisJnRb4sKzSaAh88=;
+        b=XQdMnxi8EH9zbjyipAPwdKdCbKawDQhGip3XTIgvWanZDII0wkoXQnTlw95yu5cFiI
+         ozgVS3PspWobKMqOa6n9OMLK0t+Tv+9o80Xq2nFiO5dFS2hK5fHYTrygiwlTfv/xYcui
+         /fd+52gm+rdkeW3lDNAvtWCbT2ZNEn9tQ74iWom4FU0narCs47NLFRNIFIqLTK/DA3BZ
+         QyGOuZ6E2oVXb27au+b70C8UVGBtNfpIO5/buZfCXfWi5/RrAlO962PVxPx51MqfXpd9
+         BA1cqnsUl2K5StdHk+ST23j2Y0j/yvJN2Ofx4rSPjLN6PIPl//aeg28fIhSfDtShLT0Q
+         ZoEQ==;
+        dara=google.com
+ARC-Authentication-Results: i=1; mx.google.com;
+       dkim=pass header.i=@kiusys.com header.s=y27k5w6mpyspgwewkrpvqs7lpid7on7v header.b=EKra43vv;
+       dkim=pass header.i=@amazonses.com header.s=224i4yxa5dv7c2xz3womw6peuasteono header.b=T46QRwLA;
+       dkim=fail header.i=@kiusys.com header.s=mail header.b=iYrioQWJ;
+       spf=pass (google.com: domain of 0100019d3046a597-fd259bc3-c78b-4e94-bd07-c15ab1d09c3d-000000@ses.kiusys.com designates 54.240.9.34 as permitted sender) smtp.mailfrom=0100019d3046a597-fd259bc3-c78b-4e94-bd07-c15ab1d09c3d-000000@ses.kiusys.com;
+       dmarc=pass (p=QUARANTINE sp=QUARANTINE dis=NONE) header.from=kiusys.com
+Return-Path: <0100019d3046a597-fd259bc3-c78b-4e94-bd07-c15ab1d09c3d-000000@ses.kiusys.com>
+Received: from a9-34.smtp-out.amazonses.com (a9-34.smtp-out.amazonses.com. [54.240.9.34])
+        by mx.google.com with ESMTPS id d75a77b69052e-50b923ae033si80350151cf.272.2026.03.27.10.10.29
+        for <naidycohen@gmail.com>
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Fri, 27 Mar 2026 10:10:29 -0700 (PDT)
+Received-SPF: pass (google.com: domain of 0100019d3046a597-fd259bc3-c78b-4e94-bd07-c15ab1d09c3d-000000@ses.kiusys.com designates 54.240.9.34 as permitted sender) client-ip=54.240.9.34;
+Authentication-Results: mx.google.com;
+       dkim=pass header.i=@kiusys.com header.s=y27k5w6mpyspgwewkrpvqs7lpid7on7v header.b=EKra43vv;
+       dkim=pass header.i=@amazonses.com header.s=224i4yxa5dv7c2xz3womw6peuasteono header.b=T46QRwLA;
+       dkim=fail header.i=@kiusys.com header.s=mail header.b=iYrioQWJ;
+       spf=pass (google.com: domain of 0100019d3046a597-fd259bc3-c78b-4e94-bd07-c15ab1d09c3d-000000@ses.kiusys.com designates 54.240.9.34 as permitted sender) smtp.mailfrom=0100019d3046a597-fd259bc3-c78b-4e94-bd07-c15ab1d09c3d-000000@ses.kiusys.com;
+       dmarc=pass (p=QUARANTINE sp=QUARANTINE dis=NONE) header.from=kiusys.com
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/simple;
+	s=y27k5w6mpyspgwewkrpvqs7lpid7on7v; d=kiusys.com; t=1774631429;
+	h=From:To:Subject:Mime-Version:Content-Type:Message-Id:Date;
+	bh=uyqLiyzaqTlWF79xpFNcJnbvOFAhiBR5UrSF5ub1mTg=;
+	b=EKra43vvCXZoXH3X7FH6jWonAp+Yjv3fZm5TbCImrf4N7y+OdyKc29MJCT38iV5o
+	NEkkKnC705ZiaO7ihM4eMrLGZzPsAWAjcQJpcZ1574f+c4feseaN82zKPQ4xjYXaGMb
+	XJSJw6R6RZHCaRKFGTHsxlp/2CwCeg8m/DfoKFli1rqbU7URFcj0bUZX/fSGHF4BDuG
+	XjDODYvKC+l9IMd9qE76KCsLpD6Wreg7vstn5KetMjV6hUi1BUdVAMmEcR4/RyzBuqN
+	+NRhGBRcv7pznAJFf02AlRMF/dclt9xp3HXfe3SgyLTp6Xp1BTifyWLFULPPinSDCG3
+	vYf3NUDdUw==
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/simple;
+	s=224i4yxa5dv7c2xz3womw6peuasteono; d=amazonses.com; t=1774631429;
+	h=From:To:Subject:Mime-Version:Content-Type:Message-Id:Date:Feedback-ID;
+	bh=uyqLiyzaqTlWF79xpFNcJnbvOFAhiBR5UrSF5ub1mTg=;
+	b=T46QRwLAgoOpYbpG29YHx2e8vr2LAWhaOfxp0NZ0Tkvo3ebsekMeuQ1WvbY/pQpq
+	O8V9kFI9QKjBTvUS+uhmlIF/OeqngspPT3G7z7PXkyQmRTD/kn+33CZgsE0z0ywx6hs
+	1LCUwW6LusSE5MDsypMZy6t1HHsyq0K3ncau/pvs=
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kiusys.com; s=mail;
+	t=1774631428; bh=6iC7VDlmQw1/OQnoT5Xwm3UylVRnYiMQHs2vXfw5iEY=;
+	h=From:To:Subject:Message-Id:Date:From:Sender:To:CC:Subject:
+	 Message-Id:Date;
+	b=iYrioQWJp8uHBhiTaAn1Kjg2jEeuxYkrbECxqJIgnHHNOW3r3o0OH2yoPyuATlQyY
+	 /Wb82nxzwLfjJJ0uMOMM88IEYpb9S7vzkq3Wzv/4EwUu4EfAwEUQPPHRDIelzKkTpM
+	 gUPOwgrROuIKIlpnFFU+irJlhZpZ0UNl7lxJmfik=
+From: no_config <noreply@kiusys.com>
+To: naidycohen@gmail.com
+Subject:E-TICKET ITINERARY RECEIPT - ROSALES/MIA
+Mime-Version: 1.0
+Content-Type: multipart/mixed;
+    boundary="0a7c0964ec526af8159291bbb775306dbd470b396afbe67e8c3f1cd8e0ee"
+Message-ID: <0100019d3046a597-fd259bc3-c78b-4e94-bd07-c15ab1d09c3d-000000@email.amazonses.com>
+Date: Fri, 27 Mar 2026 17:10:29 +0000
+Feedback-ID: ::1.us-east-1.FlLS8KWT15VSJWSZCrjpizuEqvA988B9XvDgDbF9UFw=:AmazonSES
+X-SES-Outgoing: 2026.03.27-54.240.9.34
+
+--0a7c0964ec526af8159291bbb775306dbd470b396afbe67e8c3f1cd8e0ee
+Content-Transfer-Encoding: quoted-printable
+Content-Type: text/html; charset="UTF-8"
+
+<HTML><HEAD><STYLE>.pnr-print-small {font-size: 8px;}.pnr-print-medium {fon=
+t-size: 12px;}.pnr-print-big {font-size: 14px;}.prn-image {display: flex; j=
+ustify-content: end;width: 650px;}</STYLE></HEAD><BODY><PRE class=3D"pnr-pr=
+int-medium"> ELECTRONIC TICKET                                             =
+                                                                 =20
+
+
+     PASSENGER ITINERARY RECEIPT              TICKET NBR: <B>0520280063079<=
+/B>
+     RECIBO DE ITINERARIO DE PASAJEROS        BOLETO NRO:=20
+
+ <B>CALL CENTER                   </B> ISSUE DATE/FECHA DE EMISION: 27 MAR =
+2026 12:10
+ AV.EUSEBIO A.MORALES,PH PLAZA    ISSUE AGENT/AGENTE EMISOR: CCS00ESZA
+ N/A                                          =20
+ N/A, PANAMA                             =20
+ OFFICE ID: PA-27497-0                   =20
+ TELEPHONE/TELEFONO: (+58) 414-3783527            =20
+ MAIL INFO: VENTAS.WHATSAPP@FLYESTELAR.COM                             =20
+
+ISSUING AIRLINE/LINEA AEREA EMISORA   : AEROLINEAS ESTELAR LATINOAMERICA C.=
+A.
+ADDRESS/DIRECCION                     : TORRE ESTELAR CALLE LONDRES EDIF LA=
+S MERCEDES, MUNICIPIO BARUTA, EDO MIRANDA, VENEZUELA=20
+                              PHONE: 0501 ESTELAR (3783527)
+RIF                                   : J295678053                   =20
+TICKET NUMBER/NRO DE BOLETO           : 052-0280063079
+NAME:  <B>ROSALES/MIA                                                      =
+                                  </B>
+FOID:  IDFN08SEP25        =20
+
+BOOKING REF./CODIGO DE RESERVA: C1/<B>OURJIT</B>
+
+  FROM/TO     FLIGHT CL DATE  DEP  ARR  FARE BASIS      NVB   NVA   BAG  ST
+DESDE/HACIA   VUELO  CL FECHA HORA HORA BASE TARIFARIA              EQP. ES=
+TATUS
+
+  <B>CARACAS     </B>ES 861 G  <B>31MAR 1210</B> <B>1310</B> GOW           =
+              0K   NS=20
+<B>  SANTO DOMINGO     </B>
+</PRE><PRE class=3D"pnr-print-medium"></PRE><PRE class=3D"pnr-print-medium"=
+>
+
+ENDORSEMENTS/ENDOSOS-RESTRICCIONES : END NON REF NON TRANSF ONLY FOR NOT RE=
+GULAR FLIGHT FARE PENALTY APPLY
+TOUR CODE                          :=20
+FORM OF PAYMENT/FORMA DE PAGO      : TRANSFERENCIA  TF 521518              =
+ =20
+
+</PRE><PRE class=3D"pnr-print-medium">FARE CALC./CALCULO DE TARIFA: CCS ES =
+STD 0.00NUC0.00END ROE1.000000  (INF)
+
+</PRE><PRE class=3D"pnr-print-medium">
+
+AIR FARE/TARIFA : USD        0.00
+TAX/IMPUESTOS   : USD
+TOTAL           : USD        0.00
+
+</PRE><PRE class=3D"pnr-print-small"># EL PASAJERO DEBERA PRESENTARSE COMO =
+MINIMO DOS (2) HORAS ANTES A LA SALIDA DE SU VUELO EN CASO DE VUELOS NACION=
+ALES Y<br>CUATRO (4) HORAS EN CASO DE VUELOS INTERNACIONALES. AL MOMENTO DE=
+ SU RESERVACION, ES INDISPENSABLE SUMINISTRAR INFORMACION<br>DE NUMERO DE C=
+ONTACTO TELEFONICO (CELULAR, HABITACION, OFICINA), DE LA CIUDAD DE ORIGEN  =
+DESTINO, ASI COMO LA DIRECCION DE<br>CORREO ELECTRONICO, A FIN DE PODER NOT=
+IFICAR CUALQUIER EVENTUALIDAD SOBRE SU ITINERARIO DE VUELO. POR RAZONES DE =
+SEGURIDAD AL<br>MOMENTO DE CHEQUEARSE LOS PASAJEROS, DEBEN PRESENTAR IDENTI=
+FICACION VALIDA CON FOTOGRAFIA RECIENTE COMO LA CEDULA DE<br>IDENTIDAD Y/O =
+PASAPORTE VIGENTE. EN CASO DE NO REALIZAR ALGUN TRAYECTO DE SU VIAJE, POR F=
+AVOR NOTIFIQUE A LA AEROLINEA CAMBIOS<br>Y/O CANCELACION DE SU VUELO, DE LO=
+ CONTRARIO AL NO PRESENTARSE EN SU PRIMER TRAYECTO EL SISTEMA ANULAR LA TOT=
+ALIDAD DE SU<br>RESERVACION. VALIDEZ DEL BOLETO AEREO 365 DIAS A PARTIR DE =
+LA FECHA DE SU EMISION. TARIFA SUJETA A CAMBIO SIN PREVIO AVISO.<br>EQUIPAJ=
+E EN RUTAS NACIONALES: AL MOMENTO DE RESERVAR CONSULTE EL PESO PERMITIDO EN=
+ SU EQUIPAJE FACTURADO Y DE MANO.<br>FRANQUICIA DE EQUIPAJE EN RUTAS INTERN=
+ACIONALES: AL MOMENTO DE SU RESERVACION O COMPRA DEL BOLETO, CONSULTE EL PE=
+SO PERMITIDO EN<br>SU EQUIPAJE FACTURADO Y DE MANO. MENORES SIN ACOMPANANTE=
+S: SOLICITAR EL SERVICIO A TRAVES DE NUESTRO CALL CENTER 0501-ESTELAR<br>(3=
+783527) DESDE EL MOMENTO DE LA RESERVA Y HASTA 24 HORAS ANTES DE LA SALIDA =
+DEL VUELO. SU SOLICITUD DEBE SER CONFIRMADA TANTO<br>PARA LA SALIDA COMO PA=
+RA EL RETORNO, YA QUE HAY UN LIMITE DE MENORES ACEPTADOS POR VUELO.<br>SERV=
+ICIOS ESPECIALES: SI UD. O ALGUNOS DE SUS ACOMPANANTES PRESENTAN ALGUN TIPO=
+ DE NECESIDAD ESPECIAL O DISCAPACIDAD,<br>LE RECOMENDAMOS QUE NOS INFORMES =
+A TRAVES DEL CALL CENTER 0501ESTELAR(3783527), YA SEA EN EL MOMENTO DE LA R=
+ESERVA O<br>AL MENOS 24 HORAS ANTES DE LA SALIDA DEL VUELO. SERVICIO DE MAS=
+COTA: AL MOMENTO DE SU RESERVACION O COMPRA DEL BOLETO,<br>INFORMAR SOBRE L=
+A SOLICITUD DEL SERVICIO. EL TRANSPORTE DE ANIMALES DOMESTICOS SOLO SERA AC=
+EPTADO EN CONTENEDORES KENNEL A<br>PRUEBA DE DERRAMES, COMO CARGA ESPECIAL =
+ACOMPANADA EN BODEGA SUJETO A DISPONIBILIDAD, CUMPLIENDO CON LOS PERMISOS,<=
+br>CERTIFICADOS DE SANIDAD, VACUNACION Y CUALQUIER OTRO DOCUMENTO EXIGIDO P=
+OR LAS AUTORIDADES LOCALES O DE LOS PAISES DE<br>ORIGEN, TRANSITO Y DESTINO=
+. EN CASO DE PERMITIR CAMBIO DEBERA PAGAR PENALIDAD Y DIFERENCIA DE TARIFA =
+EN LOS CASOS QUE APLIQUE.<br>
+<HR>SEND BY AGENT CCS00ESZA / MAR 27 2026 12:10</PRE></BODY></HTML>
+--0a7c0964ec526af8159291bbb775306dbd470b396afbe67e8c3f1cd8e0ee--

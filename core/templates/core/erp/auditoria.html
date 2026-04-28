@@ -1,0 +1,254 @@
+{% extends 'base_modern.html' %}
+{% load humanize %}
+
+{% block title %}Auditoría y Trazabilidad - TravelHub{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+    <div>
+        <h2 class="text-3xl font-bold text-[var(--text-primary)] mb-1">Auditoría y Trazabilidad</h2>
+        <p class="text-[var(--text-secondary)]">Registro histórico de cambios y eventos del sistema.</p>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="flex gap-4">
+        <div class="bg-[var(--surface-2)] rounded-xl p-4 border border-[var(--border)] min-w-[150px]">
+            <p class="text-xs text-[var(--text-muted)] uppercase font-semibold">Total Registros</p>
+            <p class="text-2xl font-bold text-[var(--text-primary)]">{{ total_registros|intcomma }}</p>
+        </div>
+    </div>
+</div>
+
+<!-- Filters & Search -->
+<div class="glass-panel border border-[var(--border)] rounded-xl p-4 mb-6">
+    <form method="get" class="flex flex-col md:flex-row gap-4">
+        <div class="flex-1">
+            <div class="relative">
+                <input type="text" name="search" value="{{ request.GET.search }}"
+                    placeholder="Buscar por ID, descripción o modelo..."
+                    class="w-full bg-[var(--surface-2)] border border-[var(--border)] rounded-lg pl-10 pr-4 py-2 text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--primary)] text-sm transition-colors">
+                <svg class="w-5 h-5 text-[var(--text-muted)] absolute left-3 top-2.5" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+            </div>
+        </div>
+
+        <div class="w-full md:w-48 flex gap-2">
+            <input type="number" name="venta_id" value="{{ request.GET.venta_id }}" placeholder="ID Venta"
+                class="w-full bg-[var(--surface-2)] border border-[var(--border)] rounded-lg px-4 py-2 text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--primary)] text-sm transition-colors">
+            
+            <button type="submit" class="px-4 py-2 bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white rounded-lg transition-colors font-medium text-sm shadow-md">
+                Filtrar
+            </button>
+
+            {% if request.GET %}
+            <a href="{% url 'auditoria_list' %}"
+                class="px-4 py-2 bg-[var(--surface-2)] hover:bg-[var(--surface-3)] text-[var(--text-primary)] border border-[var(--border)] rounded-lg transition-colors flex items-center justify-center">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                    </path>
+                </svg>
+            </a>
+            {% endif %}
+        </div>
+    </form>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+    <!-- Main Timeline/Table -->
+    <div class="lg:col-span-3">
+        <div class="glass-panel border border-[var(--border)] rounded-xl overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-[var(--text-secondary)] relative">
+                    <thead class="bg-[var(--surface-2)] text-[var(--text-muted)] uppercase text-[10px] font-bold tracking-wider sticky top-0 border-b border-[var(--border)]">
+                        <tr>
+                            <th class="px-6 py-4">Fecha</th>
+                            <th class="px-6 py-4">Acción</th>
+                            <th class="px-6 py-4">Modelo</th>
+                            <th class="px-6 py-4">Object ID</th>
+                            <th class="px-6 py-4">Descripción</th>
+                            <th class="px-6 py-4 text-right">Detalles</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-[var(--border)]">
+                        {% for log in logs %}
+                        <tr class="hover:bg-[var(--surface-1)] transition-colors group">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                {{ log.creado|date:"d/m/Y H:i" }}
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="px-2 py-1 rounded-full text-[10px] uppercase tracking-wider font-bold border 
+                                    {% if log.accion == 'CREATE' %}bg-emerald-500/10 text-emerald-400 border-emerald-500/20
+                                    {% elif log.accion == 'UPDATE' %}bg-blue-500/10 text-blue-400 border-blue-500/20
+                                    {% elif log.accion == 'DELETE' %}bg-red-500/10 text-red-500 border-red-500/20
+                                    {% else %}bg-amber-500/10 text-amber-500 border-amber-500/20{% endif %}">
+                                    {{ log.get_accion_display }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-[var(--text-primary)] font-medium text-sm">{{ log.modelo }}</td>
+                            <td class="px-6 py-4 font-mono text-xs">{{ log.object_id }}</td>
+                            <td class="px-6 py-4 text-sm max-w-xs truncate" title="{{ log.descripcion }}">
+                                {{ log.descripcion }}
+                            </td>
+                            <td class="px-6 py-4 text-right">
+                                <button onclick="showLogDetails('{{ log.id_audit_log }}')"
+                                    class="text-[var(--text-muted)] hover:text-[var(--primary)] transition-colors p-2 rounded-lg hover:bg-[var(--surface-2)]">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
+                                        </path>
+                                    </svg>
+                                </button>
+                            </td>
+                        </tr>
+
+                        <!-- Hidden Data for Modal -->
+                        <div id="log-data-{{ log.id_audit_log }}" class="hidden">
+                            <div data-previos='{{ log.datos_previos|default:"{}"|safe }}'
+                                data-nuevos='{{ log.datos_nuevos|default:"{}"|safe }}'
+                                data-meta='{{ log.metadata_extra|default:"{}"|safe }}'>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="px-6 py-12 text-center text-[var(--text-muted)] flex-col items-center">
+                                <span class="material-symbols-outlined text-[48px] block mb-3 opacity-50">history</span>
+                                No se encontraron registros de auditoría.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if is_paginated %}
+            <div class="px-6 py-4 border-t border-[var(--border)] bg-[var(--surface-1)] flex justify-between items-center">
+                <span class="text-xs text-[var(--text-secondary)] font-medium">
+                    Mostrando {{ page_obj.start_index }} a {{ page_obj.end_index }} de {{ page_obj.paginator.count }}
+                </span>
+                <div class="flex gap-1">
+                    {% if page_obj.has_previous %}
+                    <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.accion %}&accion={{ request.GET.accion }}{% endif %}"
+                        class="px-3 py-1.5 bg-[var(--surface-2)] hover:bg-[var(--surface-3)] border border-[var(--border)] rounded text-xs font-semibold text-[var(--text-primary)] transition-colors">Anterior</a>
+                    {% endif %}
+                    {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.accion %}&accion={{ request.GET.accion }}{% endif %}"
+                        class="px-3 py-1.5 bg-[var(--surface-2)] hover:bg-[var(--surface-3)] border border-[var(--border)] rounded text-xs font-semibold text-[var(--text-primary)] transition-colors">Siguiente</a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="lg:col-span-1 space-y-6">
+        <!-- Top Actions -->
+        <div class="glass-panel border border-[var(--border)] rounded-xl p-5">
+            <h3 class="text-lg font-bold text-[var(--text-primary)] mb-4 flex items-center gap-2">
+                <span class="material-symbols-outlined text-[var(--primary)] text-[20px]">donut_small</span>
+                Por Acción
+            </h3>
+            <div class="space-y-4">
+                {% for stat in acciones_stats %}
+                <div>
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="text-[var(--text-secondary)] text-sm font-medium">{{ stat.accion }}</span>
+                        <span class="bg-[var(--surface-2)] border border-[var(--border)] px-2 py-0.5 rounded text-xs font-mono font-bold text-[var(--text-primary)]">{{ stat.total }}</span>
+                    </div>
+                    <!-- Simple Bar -->
+                    <div class="w-full bg-[var(--surface-3)] rounded-full h-1.5 overflow-hidden">
+                        <div class="bg-[var(--primary)] h-1.5 rounded-full"
+                            style="width: {% widthratio stat.total total_registros 100 %}%"></div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Top Models -->
+        <div class="glass-panel border border-[var(--border)] rounded-xl p-5">
+            <h3 class="text-lg font-bold text-[var(--text-primary)] mb-4 flex items-center gap-2">
+                <span class="material-symbols-outlined text-[var(--primary)] text-[20px]">view_list</span>
+                Por Modelo
+            </h3>
+            <div class="space-y-3">
+                {% for stat in modelos_stats %}
+                <div class="flex justify-between items-center bg-[var(--surface-2)] p-2 rounded-lg border border-[var(--border)]">
+                    <span class="text-[var(--text-secondary)] text-sm font-medium truncate max-w-[120px]" title="{{ stat.modelo }}">{{ stat.modelo }}</span>
+                    <span class="bg-[var(--surface-1)] border border-[var(--border)] px-2 py-0.5 rounded text-xs font-mono font-bold text-[var(--text-primary)]">{{ stat.total }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block modals %}
+<!-- Detail Modal -->
+<div id="detailModal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog"
+    aria-modal="true">
+    <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+        <div class="fixed inset-0 bg-black/90 transition-opacity" aria-hidden="true" onclick="closeDetailModal()"></div>
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+        <div
+            class="inline-block align-bottom bg-[var(--surface-1)] rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full border border-[var(--border)]">
+            <div class="px-6 py-4 border-b border-[var(--border)] bg-[var(--surface-2)] flex justify-between items-center">
+                <h3 class="text-lg font-bold text-[var(--text-primary)]">Detalles del Cambio</h3>
+                <button onclick="closeDetailModal()" class="text-[var(--text-muted)] hover:text-[var(--text-primary)] bg-[var(--surface-3)] p-1 rounded-md transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                        </path>
+                    </svg>
+                </button>
+            </div>
+            <div class="p-6 max-h-[70vh] overflow-y-auto">
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <div class="flex flex-col h-full">
+                        <h4 class="text-[10px] font-bold text-red-400 mb-2 uppercase tracking-widest pl-1">Estado Anterior</h4>
+                        <pre id="prevData"
+                            class="flex-1 bg-black/40 p-4 rounded-xl text-xs text-red-200/80 overflow-auto font-mono border border-[var(--border)] shadow-inner custom-scrollbar" style="max-height: 250px;"></pre>
+                    </div>
+                    <div class="flex flex-col h-full">
+                        <h4 class="text-[10px] font-bold text-emerald-400 mb-2 uppercase tracking-widest pl-1">Estado Nuevo</h4>
+                        <pre id="newData"
+                            class="flex-1 bg-black/40 p-4 rounded-xl text-xs text-emerald-200/80 overflow-auto font-mono border border-[var(--border)] shadow-inner custom-scrollbar" style="max-height: 250px;"></pre>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="text-[10px] font-bold text-blue-400 mb-2 uppercase tracking-widest pl-1">Metadata Adicional</h4>
+                    <pre id="metaData"
+                        class="bg-black/40 p-4 rounded-xl text-xs text-blue-200/80 overflow-x-auto font-mono border border-[var(--border)] max-h-[150px] shadow-inner custom-scrollbar"></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    function showLogDetails(id) {
+        const container = document.getElementById(`log-data-${id}`).firstElementChild;
+        const prev = JSON.parse(container.getAttribute('data-previos').replace(/'/g, '"'));
+        const next = JSON.parse(container.getAttribute('data-nuevos').replace(/'/g, '"'));
+        const meta = JSON.parse(container.getAttribute('data-meta').replace(/'/g, '"'));
+
+        document.getElementById('prevData').textContent = JSON.stringify(prev, null, 2);
+        document.getElementById('newData').textContent = JSON.stringify(next, null, 2);
+        document.getElementById('metaData').textContent = JSON.stringify(meta, null, 2);
+
+        document.getElementById('detailModal').classList.remove('hidden');
+    }
+
+    function closeDetailModal() {
+        document.getElementById('detailModal').classList.add('hidden');
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,82 @@
+{% if errores %}
+    <div class="p-3 mb-4 rounded-xl bg-red-900/30 border border-red-500/50 text-red-200 text-xs animate-fade-in-up">
+        <p class="font-bold flex items-center gap-1 mb-1"><span class="material-symbols-outlined text-[14px]">warning</span> Alerta de Diagnóstico:</p>
+        <ul class="list-disc pl-5">
+            {% for error in errores %}<li>{{ error }}</li>{% endfor %}
+        </ul>
+    </div>
+{% endif %}
+
+{% if total_resultados == 0 %}
+    <div class="py-12 text-center animate-fade-in-up">
+        <span class="material-symbols-outlined text-4xl text-amber-500/50 mb-3">search_off</span>
+        <p class="text-sm font-semibold text-text-muted">No encontramos nada para "<span class="text-text-main font-bold">{{ query }}</span>"</p>
+    </div>
+{% else %}
+    <div class="space-y-4 p-2 animate-fade-in-up">
+        
+        <!-- Resultados Ventas (PNR) -->
+        {% if ventas %}
+        <div>
+            <h4 class="text-[10px] font-black uppercase tracking-widest text-text-muted mb-2 ml-2">Ventas & PNR</h4>
+            <div class="space-y-1">
+                {% for venta in ventas %}
+                <a href="{% url 'core:venta_detalle' venta.pk %}" class="flex items-center gap-4 p-3 rounded-xl hover:bg-surface-2 transition-colors group">
+                    <div class="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <span class="material-symbols-outlined text-[16px]">airplane_ticket</span>
+                    </div>
+                    <div>
+                        <p class="text-sm font-black text-text-main">{{ venta.localizador }}</p>
+                        <p class="text-xs text-text-muted">{{ venta.cliente.nombres|title }} • {{ venta.moneda.codigo_iso }} {{ venta.total_venta }}</p>
+                    </div>
+                    <span class="material-symbols-outlined ml-auto text-slate-300 group-hover:text-blue-500">arrow_forward_ios</span>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Resultados Clientes -->
+        {% if clientes %}
+        <div>
+            <h4 class="text-[10px] font-black uppercase tracking-widest text-text-muted mb-2 ml-2">Clientes</h4>
+            <div class="space-y-1">
+                {% for cliente in clientes %}
+                <a href="{% url 'crm:cliente_update' cliente.pk %}" class="flex items-center gap-4 p-3 rounded-xl hover:bg-surface-2 transition-colors group">
+                    <div class="w-8 h-8 rounded-full bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 flex items-center justify-center font-black text-xs border border-emerald-100 dark:border-emerald-800">
+                        {{ cliente.nombres|make_list|first }}
+                    </div>
+                    <div>
+                        <p class="text-sm font-black text-text-main">{{ cliente.nombres|title }} {{ cliente.apellidos|title }}</p>
+                        <p class="text-xs text-text-muted">{{ cliente.email|default:"Sin email" }}</p>
+                    </div>
+                    <span class="material-symbols-outlined ml-auto text-slate-300 group-hover:text-emerald-500">arrow_forward_ios</span>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Resultados Boletos -->
+        {% if boletos %}
+        <div>
+            <h4 class="text-[10px] font-black uppercase tracking-widest text-text-muted mb-2 ml-2">Boletos Importados</h4>
+            <div class="space-y-1">
+                {% for boleto in boletos %}
+                <a href="{% url 'core:revisar_boleto' boleto.pk %}" class="flex items-center gap-4 p-3 rounded-xl hover:bg-surface-2 transition-colors group">
+                    <div class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-[16px]">receipt_long</span>
+                    </div>
+                    <div>
+                        <p class="text-sm font-black text-text-main font-mono">{{ boleto.numero_boleto|default:boleto.localizador_pnr }}</p>
+                        <p class="text-xs text-text-muted">{{ boleto.get_estado_parseo_display }}</p>
+                    </div>
+                    <span class="material-symbols-outlined ml-auto text-slate-300">arrow_forward_ios</span>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+{% endif %}

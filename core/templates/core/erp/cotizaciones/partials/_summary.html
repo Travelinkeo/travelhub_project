@@ -1,0 +1,44 @@
+<div id="summary-panel" class="flex flex-col flex-1 h-full bg-surface-1">
+    <!-- Items List (Placeholder/Static since we compute on backend) -->
+    <div class="p-6 space-y-4 flex-1">
+        <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-text-muted text-[18px]">receipt_long</span>
+            <p class="text-[11px] text-text-muted font-medium italic">Los totales se calculan automáticamente al modificar los montos y cantidades.</p>
+        </div>
+    </div>
+
+    <!-- Totals Section -->
+    <div class="bg-surface-2 p-6 border-t border-border-color space-y-4 shadow-inner">
+        <div class="flex justify-between items-center text-sm">
+            <span class="text-text-secondary font-medium">Subtotal Neto</span>
+            <span class="text-text-main font-mono font-bold">{{ moneda_symbol|default:"$" }} {{ subtotal|default:0.00|floatformat:2 }}</span>
+        </div>
+        <div class="flex justify-between items-center text-sm">
+            <span class="text-text-secondary font-medium">Impuestos (Calculado)</span>
+            <span class="text-text-main font-mono font-bold">{{ moneda_symbol|default:"$" }} {{ impuestos|default:0.00|floatformat:2 }}</span>
+        </div>
+        
+        <div class="pt-4 mt-2 border-t border-dashed border-border-color flex justify-between items-end">
+            <div>
+                <span class="text-text-muted text-[10px] uppercase tracking-widest font-black">Monto Total Estimado</span>
+                <div class="text-4xl font-black text-primary mt-1 tracking-tighter leading-none">
+                    <span class="text-lg font-light mr-0.5 opacity-70">{{ moneda_symbol|default:"$" }}</span>{{ total|default:0.00|floatformat:2 }}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Actions -->
+    <div class="p-6 pt-4 grid gap-3 bg-surface-1">
+        <button type="submit" class="w-full btn-primary !h-14 shadow-lg shadow-primary/20 flex items-center justify-center gap-2 group/btn">
+            <span class="material-symbols-outlined text-[20px] group-hover/btn:translate-x-1 transition-transform">send</span>
+            <span class="text-lg">Guardar Itinerario</span>
+        </button>
+        {% if instance_pk %}
+        <a href="{% url 'core:cotizacion_pdf' instance_pk %}" class="w-full btn-secondary !h-12 flex items-center justify-center gap-2">
+            <span class="material-symbols-outlined text-[18px]">picture_as_pdf</span>
+            Ver PDF Oficial
+        </a>
+        {% endif %}
+    </div>
+</div>

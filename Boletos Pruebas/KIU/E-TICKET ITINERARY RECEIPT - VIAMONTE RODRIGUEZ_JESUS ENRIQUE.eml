@@ -1,0 +1,145 @@
+Delivered-To: naidycohen@gmail.com
+Received: by 2002:a05:622a:2a0c:b0:4ee:40ef:3aa4 with SMTP id hc12csp5791636qtb;
+        Mon, 29 Dec 2025 07:46:35 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IERF34Q5sBO/XCf8fQm19OeE+PNpNBvIW9HyFdKgFdld0BAgJ0lV75h6VbJmapwGF1I0ZRp
+X-Received: by 2002:a05:620a:45a0:b0:811:f742:c752 with SMTP id af79cd13be357-8c08fbf0f09mr4613239785a.36.1767023194748;
+        Mon, 29 Dec 2025 07:46:34 -0800 (PST)
+ARC-Seal: i=1; a=rsa-sha256; t=1767023194; cv=none;
+        d=google.com; s=arc-20240605;
+        b=DdcoDHiHCI7ZVnGTXjSdxgo07DzrWzX3PB2PwQcb4t7Nwzen3rNvk1QPdZGjgDgP5+
+         AtDra4VF88jCkhQ2zk+1/IwmgvvWKLiKUf3P6Bf0uOfUjwskG/F7Fymv4DbvPmjDCicA
+         zzW8miUemkOFL/wpTrNfdU5IXQwwy91Ody1pg2Em9mQJTEJaU/CvbHZPh/k2sx05xJiz
+         niyC2DlA+yggl39OgbwihxEJU+pOgi/2uYa9R3/VvOACejDeSlwoF9UTOascLhQdJOA2
+         amTb77Ony588Ht1k103t4SYD1vci0djFWtukLgWu+Us7FNuz9a4AAIUkZR6qs1ipK3qP
+         WiuQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
+        h=feedback-id:date:message-id:mime-version:subject:to:from
+         :dkim-signature:dkim-signature;
+        bh=1UnQfYHIv9TQWeS0Q+FVp/rRy7fUhJuJ/Sr2N3UqEtc=;
+        fh=UGhdE8t/k3FWiRlQHY/CrclQ6Lc/XDFLWjQbr+sLbGs=;
+        b=amxJO5wmAXQOwX+KDEw2QrDYuMdc8Evmg9+ltYs4N8g2yy7YvigGkQso+7tF3hgvub
+         brB0DzuwQfi1gvcFr9aXSiYsB1KVrktVZcW/qBFOc3+9dg41oVfqGvc+DvTwfuRtzOWA
+         0+rYX1VM6QbPEpgp6HGEsMigUAhSFnArpe1XmsYTEOB/9Ej1orwfLb6oPtzVhMXGmAn2
+         hZVwYuwg0gPaYmxOBzCZNzShEY96CSdaHMC7N5BR0LrLk4qdthKXI6UCTnuJ3YtUyUBB
+         bdSuVNeQn9IKyLakOtJgWZc1MtWBg38kplGy/zfuYyhx0TxFt6UcsDM/IxMs01P5LnRN
+         KV2w==;
+        dara=google.com
+ARC-Authentication-Results: i=1; mx.google.com;
+       dkim=pass header.i=@kiusys.com header.s=y27k5w6mpyspgwewkrpvqs7lpid7on7v header.b=CRseo5Rv;
+       dkim=pass header.i=@amazonses.com header.s=6gbrjpgwjskckoa6a5zn6fwqkn67xbtw header.b=mFa1QIfr;
+       spf=pass (google.com: domain of 0100019b6aca3143-907170f2-506a-4503-90c1-a50e0a874f94-000000@ses.kiusys.com designates 54.240.9.34 as permitted sender) smtp.mailfrom=0100019b6aca3143-907170f2-506a-4503-90c1-a50e0a874f94-000000@ses.kiusys.com;
+       dmarc=pass (p=QUARANTINE sp=QUARANTINE dis=NONE) header.from=kiusys.com
+Return-Path: <0100019b6aca3143-907170f2-506a-4503-90c1-a50e0a874f94-000000@ses.kiusys.com>
+Received: from a9-34.smtp-out.amazonses.com (a9-34.smtp-out.amazonses.com. [54.240.9.34])
+        by mx.google.com with ESMTPS id af79cd13be357-8c0975f078esi3444260785a.620.2025.12.29.07.46.34
+        for <NAIDYCOHEN@gmail.com>
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 29 Dec 2025 07:46:34 -0800 (PST)
+Received-SPF: pass (google.com: domain of 0100019b6aca3143-907170f2-506a-4503-90c1-a50e0a874f94-000000@ses.kiusys.com designates 54.240.9.34 as permitted sender) client-ip=54.240.9.34;
+Authentication-Results: mx.google.com;
+       dkim=pass header.i=@kiusys.com header.s=y27k5w6mpyspgwewkrpvqs7lpid7on7v header.b=CRseo5Rv;
+       dkim=pass header.i=@amazonses.com header.s=6gbrjpgwjskckoa6a5zn6fwqkn67xbtw header.b=mFa1QIfr;
+       spf=pass (google.com: domain of 0100019b6aca3143-907170f2-506a-4503-90c1-a50e0a874f94-000000@ses.kiusys.com designates 54.240.9.34 as permitted sender) smtp.mailfrom=0100019b6aca3143-907170f2-506a-4503-90c1-a50e0a874f94-000000@ses.kiusys.com;
+       dmarc=pass (p=QUARANTINE sp=QUARANTINE dis=NONE) header.from=kiusys.com
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/simple;
+	s=y27k5w6mpyspgwewkrpvqs7lpid7on7v; d=kiusys.com; t=1767023194;
+	h=From:To:Subject:Mime-Version:Content-Type:Message-Id:Date;
+	bh=/xMR4CcrUoSMDzJp18dSf1LHgfsYs173J0UMirTvY4E=;
+	b=CRseo5RvrbW54swiecrdhvCiGw7vAMd5VbFIVxUS33tcjWH3WXe1rJCtT3bG//A9
+	l7Iq70B/4dHNmd6utaRnTgV6QoBai2O3nwKGw7WfmUnd6uzVqAoJzbj/27glfpkHPlq
+	p9frYItAkfNiryl9qpFUSOI5Ql867/YphqmpNKkv2A0+KR1Vn1+o129xify1cUjrMEN
+	ozoyvkODCosLQ4b+Bp/j9rKioctCTx76O1EYbDt4ILLSqQFmLsr7SmzDKm1D4a9bdjg
+	hIl7MVHmIsB0w6JxwgilPkJRKlfZ6YtLpNFpj4B6+FywUjJSVb0Zs38nwJsAaGqJ0c0
+	MS1GD1TFSw==
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/simple;
+	s=6gbrjpgwjskckoa6a5zn6fwqkn67xbtw; d=amazonses.com; t=1767023194;
+	h=From:To:Subject:Mime-Version:Content-Type:Message-Id:Date:Feedback-ID;
+	bh=/xMR4CcrUoSMDzJp18dSf1LHgfsYs173J0UMirTvY4E=;
+	b=mFa1QIfrT32pYPB4szhfBnPIcdqM4XrdVbziBVXsDTAh83xTB4pS+TORd6DuMO4H
+	8Y8f+oRJQxQEgkxTBTt/pwLaIQp7E5yWsswxPK5ng/x5JsVl3xLN7g1oCQokkUiIsuo
+	2jJ6Ld0lTXniWvKrX9NZVNzcgmMniWVKKwfH/WFM=
+From: no_config <noreply@kiusys.com>
+To: NAIDYCOHEN@GMAIL.COM
+Subject:E-TICKET ITINERARY RECEIPT - VIAMONTE RODRIGUEZ/JESUS ENRIQUE
+Mime-Version: 1.0
+Content-Type: multipart/mixed;
+    boundary="5836281bca84e53745d6a6b3cbe320897d08e7ce86d2da785c1d446ef00c"
+Message-ID: <0100019b6aca3143-907170f2-506a-4503-90c1-a50e0a874f94-000000@email.amazonses.com>
+Date: Mon, 29 Dec 2025 15:46:34 +0000
+Feedback-ID: ::1.us-east-1.FlLS8KWT15VSJWSZCrjpizuEqvA988B9XvDgDbF9UFw=:AmazonSES
+X-SES-Outgoing: 2025.12.29-54.240.9.34
+
+--5836281bca84e53745d6a6b3cbe320897d08e7ce86d2da785c1d446ef00c
+Content-Transfer-Encoding: quoted-printable
+Content-Type: text/html; charset="UTF-8"
+
+<HTML><HEAD><STYLE>.pnr-print-small {font-size: 8px;}.pnr-print-medium {fon=
+t-size: 12px;}.pnr-print-big {font-size: 14px;}.prn-image {display: flex; j=
+ustify-content: end;width: 650px;}</STYLE></HEAD><BODY><PRE class=3D"pnr-pr=
+int-medium"> ELECTRONIC TICKET                             <div class=3D"pr=
+n-image"><img src=3D"https://cdn.kiusys.net/prod/res_receipt/v0/766_1741214=
+4347496362.jpg" alt=3D"Logo" border=3D"0" width=3D"150px" height=3D"auto" a=
+lign=3D"left"></div>
+
+
+     PASSENGER ITINERARY RECEIPT              TICKET NBR: <B>3080201356120<=
+/B>
+     RECIBO DE ITINERARIO DE PASAJEROS        BOLETO NRO:=20
+
+ <B>IPSFA                         </B> ISSUE DATE/FECHA DE EMISION: 29 DEC =
+2025 11:41
+ AV LOS PROCERES CC LOS PROCERE   ISSUE AGENT/AGENTE EMISOR: CCS00V0BM
+ CARACAS                                      =20
+ DISTRITO FEDERAL, VENEZUELA             =20
+ OFFICE ID: VE-17943-0                   =20
+ TELEPHONE/TELEFONO: +58 212 6617988              =20
+ MAIL INFO:                                                            =20
+
+ISSUING AIRLINE/LINEA AEREA EMISORA   : CONVIASA
+ADDRESS/DIRECCION                     : AV. INTERCOMUNAL AEROPUERTO INTERNA=
+CIONAL DE MAIQUETIA EDO. LA GUAIRA VENEZUELA TELF +58 0500 266 8427
+                             =20
+RIF                                   : G-20007774-3                 =20
+TICKET NUMBER/NRO DE BOLETO           : 308-0201356120
+NAME:  <B>VIAMONTE RODRIGUEZ/JESUS ENRIQUE                                 =
+                                  </B>
+FOID:  ID26225843         =20
+
+BOOKING REF./CODIGO DE RESERVA: C1/<B>YIYKLG</B>
+
+  FROM/TO     FLIGHT CL DATE  DEP  ARR  FARE BASIS      NVB   NVA   BAG  ST
+DESDE/HACIA   VUELO  CL FECHA HORA HORA BASE TARIFARIA              EQP. ES=
+TATUS
+
+  <B>CARACAS     </B>V01186 G  <B>4JAN  0700</B> <B>0800</B> GPROMO        =
+              23K  OK=20
+<B>  SAN ANTONIO       </B>
+</PRE><PRE class=3D"pnr-print-medium">_____________________________________=
+____________________________________________________________<br></PRE><PRE =
+class=3D"big">PARA MAYOR INFORMACION INGRESAR AL SIGUIENTE LINK HTTP://WWW.=
+CONVIASA.AERO/ES/GUIAPASAJERO/CONDICIONES</PRE><PRE class=3D"medium"><br></=
+PRE><PRE class=3D"pnr-print-medium">
+
+ENDORSEMENTS/ENDOSOS-RESTRICCIONES : NON END NON TRANSF NON REF VALIDO 12 M=
+ESES APLICA PENALIDAD POR CAMBIO
+TOUR CODE                          :=20
+FORM OF PAYMENT/FORMA DE PAGO      : MAESTRO  XXXXXXXXXXXX3636/Z116635
+
+</PRE><PRE class=3D"pnr-print-medium">FARE CALC./CALCULO DE TARIFA: CCS V0 =
+SVZ 48600.00VES48600.00END  (ADT)
+
+</PRE><PRE class=3D"pnr-print-medium">
+
+AIR FARE/TARIFA : VES    48600.00
+TAX/IMPUESTOS   : VES      294.976B      442.466S     4461.64AK
+                             0.10C2      486.00EU     3888.00YN
+TOTAL           : VES    58173.17
+
+</PRE><PRE class=3D"pnr-print-medium">_____________________________________=
+_______________________________________________________<br>
+<HR>SEND BY AGENT CCS00V0BM / DEC 29 2025 11:45</PRE></BODY></HTML><img alt=
+=3D"" src=3D"https://j5d6plkx.r.us-east-1.awstrack.me/I0/0100019b6aca3143-9=
+07170f2-506a-4503-90c1-a50e0a874f94-000000/TL2Xoy8WqZWNObyilwx2HP-t_MI=3D45=
+8" style=3D"display: none; width: 1px; height: 1px;">
+
+--5836281bca84e53745d6a6b3cbe320897d08e7ce86d2da785c1d446ef00c--

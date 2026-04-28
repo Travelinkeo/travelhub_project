@@ -1,0 +1,235 @@
+{% extends 'base_modern.html' %}
+{% load humanize %}
+
+{% block title %}Reportes de Emisión — TravelHub Pro{% endblock %}
+
+{% block page_title %}Reportes de Boletos{% endblock %}
+{% block page_subtitle %}Análisis de ventas, comisiones y producción por aerolínea.{% endblock %}
+
+{% block content %}
+<main class="flex-1 w-full max-w-[1400px] mx-auto p-6 md:p-8">
+
+    <!-- Header & Action Bar -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10 pb-6 border-b border-border-color">
+        <div>
+            <h1 class="text-3xl font-black text-text-main tracking-tight uppercase">Producción y Comisiones</h1>
+            <p class="text-text-muted text-sm mt-1">Reporte detallado de boletos emitidos en el periodo seleccionado.</p>
+        </div>
+        <div class="flex gap-3">
+            <button onclick="window.print()" class="btn-secondary !h-12 !px-6">
+                <span class="material-symbols-outlined text-[20px]">print</span>
+                <span>Imprimir Reporte</span>
+            </button>
+            <button class="btn-primary !h-12 !px-8 shadow-lg shadow-primary/20">
+                <span class="material-symbols-outlined">download</span>
+                <span>Exportar Excel</span>
+            </button>
+        </div>
+    </div>
+
+    {% include 'core/erp/partials/boletos_nav.html' with active_tab='boletos_reportes' %}
+
+    {# ── Filtros del Reporte ── #}
+    <div class="card-base mb-10 bg-surface-2/30">
+        <div class="p-6">
+            <form method="get" class="grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
+                <div class="space-y-2">
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-text-muted">Fecha Inicio</label>
+                    <input type="date" name="fecha_inicio" value="{{ request.GET.fecha_inicio }}"
+                           class="input-base">
+                </div>
+                <div class="space-y-2">
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-text-muted">Fecha Fin</label>
+                    <input type="date" name="fecha_fin" value="{{ request.GET.fecha_fin }}"
+                           class="input-base">
+                </div>
+                <div class="space-y-2">
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-text-muted">Aerolínea</label>
+                    <select name="aerolinea" class="input-base">
+                        <option value="">Todas</option>
+                        {% for aero in aerolineas %}
+                        <option value="{{ aero.codigo }}" {% if request.GET.aerolinea == aero.codigo %}selected{% endif %}>{{ aero.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit" class="btn-primary !w-full !h-[42px] justify-center">
+                    <span class="material-symbols-outlined">filter_list</span>
+                    <span>Generar Reporte</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    {# ── KPIs de Producción ── #}
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
+        <div class="card-base p-6 border-l-4 border-l-primary">
+            <p class="text-[10px] font-black text-text-muted uppercase tracking-widest mb-2">Total Emitido</p>
+            <div class="flex items-baseline gap-2">
+                <span class="text-3xl font-black text-text-main tabular-nums group-hover:text-primary transition-colors">$ {{ total_ventas|default:"0.00"|intcomma }}</span>
+            </div>
+            <div class="flex items-center gap-2 mt-4 text-[10px] font-bold text-emerald-500 bg-emerald-500/10 px-2 py-1 rounded w-fit uppercase">
+                <span class="material-symbols-outlined text-[14px]">trending_up</span>
+                <span>+12.5% vs Mes Ant.</span>
+            </div>
+        </div>
+
+        <div class="card-base p-6 border-l-4 border-l-violet-500">
+            <p class="text-[10px] font-black text-text-muted uppercase tracking-widest mb-2">Comisiones Netas</p>
+            <div class="flex items-baseline gap-2">
+                <span class="text-3xl font-black text-text-main tabular-nums">$ {{ total_comisiones|default:"0.00"|intcomma }}</span>
+            </div>
+            <p class="text-[10px] text-text-muted mt-4 font-bold uppercase tracking-wider">Margen Promedio: 8.2%</p>
+        </div>
+
+        <div class="card-base p-6 border-l-4 border-l-emerald-500">
+            <p class="text-[10px] font-black text-text-muted uppercase tracking-widest mb-2">Boletos Emitidos</p>
+            <div class="flex items-baseline gap-2">
+                <span class="text-3xl font-black text-text-main tabular-nums">{{ total_boletos|default:"0" }}</span>
+                <span class="text-xs font-bold text-text-muted uppercase">Documentos</span>
+            </div>
+            <p class="text-[10px] text-text-muted mt-4 font-bold uppercase tracking-wider">0 Anulaciones en periodo</p>
+        </div>
+
+        <div class="card-base p-6 border-l-4 border-l-amber-500">
+            <p class="text-[10px] font-black text-text-muted uppercase tracking-widest mb-2">Próximas Liquidaciones</p>
+            <div class="flex items-baseline gap-2">
+                <span class="text-3xl font-black text-text-main tabular-nums">$ {{ total_pendiente|default:"0.00"|intcomma }}</span>
+            </div>
+            <p class="text-[10px] text-amber-600 mt-4 font-bold uppercase tracking-wider">3 Pendientes de pago</p>
+        </div>
+    </div>
+
+    {# ── Tabla de Detalles ── #}
+    <div class="card-base overflow-hidden">
+        <div class="px-6 py-5 border-b border-border-color bg-surface-2/30 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-primary">analytics</span>
+                <h2 class="text-xs font-black text-text-main uppercase tracking-widest">Desglose de Operaciones</h2>
+            </div>
+            <div class="text-[10px] font-bold text-text-muted uppercase tracking-widest">
+                Mostrando {{ boletos|length }} registros
+            </div>
+        </div>
+        <div class="w-full overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-surface-2/50 border-b border-border-color">
+                        <th class="py-4 px-6 text-[10px] font-black text-text-muted uppercase tracking-widest">Fecha</th>
+                        <th class="py-4 px-6 text-[10px] font-black text-text-muted uppercase tracking-widest">Boleto / PNR</th>
+                        <th class="py-4 px-6 text-[10px] font-black text-text-muted uppercase tracking-widest">Pasajero</th>
+                        <th class="py-4 px-6 text-[10px] font-black text-text-muted uppercase tracking-widest">Aerolínea</th>
+                        <th class="py-4 px-6 text-[10px] font-black text-text-muted uppercase tracking-widest text-right">Neto</th>
+                        <th class="py-4 px-6 text-[10px] font-black text-text-muted uppercase tracking-widest text-right">Comisión</th>
+                        <th class="py-4 px-6 text-[10px] font-black text-text-muted uppercase tracking-widest text-right">Total</th>
+                        <th class="py-4 px-6 text-[10px] font-black text-text-muted uppercase tracking-widest text-center">Estado</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-border-color">
+                    {% for boleto in boletos %}
+                    <tr class="hover:bg-primary/5 transition-colors group">
+                        <td class="py-4 px-6">
+                            <span class="text-xs font-bold text-text-main">{{ boleto.fecha_emision|date:"d/m/Y" }}</span>
+                        </td>
+                        <td class="py-4 px-6">
+                            <div class="flex flex-col">
+                                <span class="text-xs font-black text-text-main font-mono tracking-tighter">{{ boleto.numero_boleto }}</span>
+                                <span class="text-[10px] font-bold text-primary tracking-widest">{{ boleto.pnr }}</span>
+                            </div>
+                        </td>
+                        <td class="py-4 px-6">
+                            <span class="text-xs font-bold text-text-main uppercase">{{ boleto.pasajero_nombre }}</span>
+                        </td>
+                        <td class="py-4 px-6">
+                            <div class="flex items-center gap-2">
+                                <div class="size-6 rounded bg-surface-2 border border-border-color flex items-center justify-center p-1">
+                                    <img src="/static/assets/img/airlines/{{ boleto.aerolinea_codigo }}.png" 
+                                         onerror="this.src='/static/core/img/airline-placeholder.png'"
+                                         class="max-h-full max-w-full object-contain">
+                                </div>
+                                <span class="text-xs font-bold text-text-main">{{ boleto.aerolinea_nombre }}</span>
+                            </div>
+                        </td>
+                        <td class="py-4 px-6 text-right tabular-nums">
+                            <span class="text-xs font-bold text-text-muted">{{ boleto.monto_neto|intcomma }}</span>
+                        </td>
+                        <td class="py-4 px-6 text-right tabular-nums">
+                            <span class="text-xs font-bold text-emerald-500">+{{ boleto.comision|intcomma }}</span>
+                        </td>
+                        <td class="py-4 px-6 text-right tabular-nums">
+                            <span class="text-xs font-black text-text-main">{{ boleto.total|intcomma }}</span>
+                        </td>
+                        <td class="py-4 px-6 text-center">
+                            <span class="badge-success">Auditado</span>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="py-20 text-center">
+                            <div class="flex flex-col items-center gap-3">
+                                <span class="material-symbols-outlined text-4xl text-text-muted">data_info_alert</span>
+                                <p class="text-sm font-bold text-text-muted uppercase tracking-widest">No hay datos en el rango seleccionado</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const hoy = new Date();
+        const inicio = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+        document.getElementById('fecha_inicio').value = inicio.toISOString().split('T')[0];
+        document.getElementById('fecha_fin').value = hoy.toISOString().split('T')[0];
+    });
+
+    async function generarReporte() {
+        const params = new URLSearchParams({
+            fecha_inicio: document.getElementById('fecha_inicio').value,
+            fecha_fin: document.getElementById('fecha_fin').value
+        });
+
+        document.getElementById('estado-vacio').classList.add('hidden');
+        document.getElementById('reporte-container').classList.remove('hidden');
+        document.getElementById('tabla-body').innerHTML = `<tr><td colspan="5" class="py-8 text-center">
+            <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-[var(--primary)] mx-auto"></div>
+        </td></tr>`;
+
+        try {
+            const response = await fetch(`/api/boletos/reporte-comisiones/?${params}`);
+            const data = await response.json();
+
+            document.getElementById('total-boletos').textContent = data.totales.total_boletos;
+            document.getElementById('total-ventas').textContent = `$${data.totales.total_ventas.toFixed(2)}`;
+            document.getElementById('total-comisiones').textContent = `$${data.totales.total_comisiones.toFixed(2)}`;
+
+            const tbody = document.getElementById('tabla-body');
+            if (data.por_aerolinea.length > 0) {
+                tbody.innerHTML = data.por_aerolinea.map(item => {
+                    const margen = item.total_ventas > 0 ? ((item.total_comisiones / item.total_ventas) * 100).toFixed(1) : '0.0';
+                    return `<tr>
+                        <td class="px-5">
+                            <span class="px-2.5 py-0.5 rounded-md text-xs font-black bg-[var(--primary)]/10 text-[var(--primary)] border border-[var(--primary)]/20">${item.aerolinea}</span>
+                        </td>
+                        <td class="px-5 text-right font-mono font-bold">${item.cantidad_boletos}</td>
+                        <td class="px-5 text-right font-mono font-bold text-[var(--success)]">$${item.total_ventas.toFixed(2)}</td>
+                        <td class="px-5 text-right font-mono font-bold text-[var(--primary)]">$${item.total_comisiones.toFixed(2)}</td>
+                        <td class="px-5 text-right">
+                            <span class="text-xs font-bold ${parseFloat(margen) > 10 ? 'text-[var(--success)]' : 'text-[var(--warning)]'}">${margen}%</span>
+                        </td>
+                    </tr>`;
+                }).join('');
+            } else {
+                tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-[var(--text-muted)] text-sm">No hay datos para el período seleccionado</td></tr>`;
+            }
+        } catch (error) {
+            document.getElementById('tabla-body').innerHTML = `<tr><td colspan="5" class="py-6 text-center text-[var(--danger)] text-sm">Error al generar el reporte</td></tr>`;
+        }
+    }
+</script>
+{% endblock %}

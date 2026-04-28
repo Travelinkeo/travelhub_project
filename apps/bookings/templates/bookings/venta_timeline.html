@@ -1,0 +1,297 @@
+{% extends 'base_modern.html' %}
+{% load static %}
+
+{% block title %}Timeline Venta {{ venta.localizador }} - TravelHub SaaS{% endblock %}
+
+{% block extra_css %}
+<style>
+    .timeline-container { position: relative; padding-left: 2.5rem; }
+    .timeline-container::before {
+        content: ''; position: absolute; left: 11px; top: 0; bottom: 0; width: 2px;
+        background: linear-gradient(to bottom, #3b82f6 0%, rgba(30, 41, 59, 0.2) 100%);
+        border-radius: 2px;
+    }
+    .timeline-item { position: relative; margin-bottom: 2.5rem; }
+    .timeline-icon {
+        position: absolute; left: -2.35rem; top: 0.25rem; width: 28px; height: 28px;
+        border-radius: 50%; display: flex; align-items: center; justify-content: center;
+        background-color: #0f172a; border: 2px solid #3b82f6; z-index: 10;
+        box-shadow: 0 0 10px rgba(59, 130, 246, 0.2);
+    }
+    .timeline-icon.bg-amber-500 { border-color: #f59e0b; }
+    .timeline-icon.bg-emerald-500 { border-color: #10b981; }
+    .timeline-icon.bg-brand-500 { border-color: #3b82f6; }
+    .timeline-icon.bg-slate-800 { border-color: #475569; }
+</style>
+{% endblock %}
+
+{% block content %}
+<main class="w-full">
+    <!-- NAVBAR SIMULADO (BACK BUTTON) -->
+    <div class="flex items-center gap-4 mb-8">
+        <a href="{% url 'bookings:venta_list' %}" class="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center hover:bg-white/10 transition-colors text-slate-400 hover:text-white group">
+            <i data-lucide="arrow-left" class="w-5 h-5 group-hover:-translate-x-1 transition-transform"></i>
+        </a>
+        <div class="h-4 w-px bg-white/10"></div>
+        <div class="flex items-center gap-2">
+            <i data-lucide="airplane-ticket" class="w-4 h-4 text-slate-500"></i>
+            <h1 class="text-sm font-bold text-slate-300">Reserva <span class="text-white font-black">#{{ venta.id_venta }}</span></h1>
+        </div>
+    </div>
+
+    <!-- HEADER DE LA RESERVA -->
+    <div class="flex flex-col md:flex-row justify-between items-start gap-6 mb-10">
+        <div>
+            <h2 class="text-5xl font-black text-white tracking-tight flex items-center gap-4 uppercase">
+                {{ venta.localizador|default:"S/L" }}
+                <button @click="navigator.clipboard.writeText('{{ venta.localizador }}'); $dispatch('notify', { message: 'Copiado!', type: 'success' })" 
+                    class="text-slate-500 hover:text-blue-500 transition-colors" title="Copiar PNR">
+                    <i data-lucide="copy" class="w-6 h-6"></i>
+                </button>
+            </h2>
+            <div class="flex flex-wrap items-center gap-3 mt-3 text-sm">
+                <span class="font-bold text-slate-200">{{ venta.cliente.get_nombre_completo }}</span>
+                <span class="w-1.5 h-1.5 rounded-full bg-slate-700"></span>
+                <span class="text-slate-400 flex items-center gap-2">
+                    <i data-lucide="calendar" class="w-4 h-4"></i>
+                    Emisión: {{ venta.fecha_venta|date:"d M Y" }}
+                </span>
+                <span class="w-1.5 h-1.5 rounded-full bg-slate-700"></span>
+                <span class="px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest 
+                    {% if venta.estado == 'PAG' or venta.estado == 'COM' %}bg-emerald-500/10 text-emerald-500 border border-emerald-500/20
+                    {% elif venta.estado == 'PEN' %}bg-amber-500/10 text-amber-500 border border-amber-500/20
+                    {% else %}bg-blue-500/10 text-blue-400 border border-blue-500/20{% endif %}">
+                    {{ venta.get_estado_display }}
+                </span>
+            </div>
+        </div>
+        
+        <div class="flex gap-3">
+            <a href="{% url 'bookings:venta_update' venta.pk %}" class="bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold py-3 px-6 rounded-2xl transition-all flex items-center gap-2 text-sm">
+                <i data-lucide="edit" class="w-4 h-4 text-blue-400"></i> Editar Venta
+            </a>
+            <button hx-get="{% url 'bookings:pago_venta_add' venta.pk %}" hx-target="#modal-content" @click="$dispatch('open-modal')"
+                class="bg-emerald-600 hover:bg-emerald-500 text-white font-black py-3 px-6 rounded-2xl transition-all shadow-lg shadow-emerald-500/20 flex items-center gap-2 text-sm">
+                <i data-lucide="circle-dollar-sign" class="w-4 h-4"></i> Registrar Pago
+            </button>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <!-- COLUMNA IZQUIERDA (8/12): EL TIMELINE -->
+        <div class="lg:col-span-8 bg-[#0f172a]/40 border border-white/5 rounded-[2.5rem] p-10 shadow-sm backdrop-blur-sm">
+            <h3 class="text-xl font-black text-white mb-10 border-b border-white/5 pb-6 flex items-center gap-3">
+                <i data-lucide="activity" class="w-6 h-6 text-blue-500"></i>
+                Línea de Vida de la Reserva
+            </h3>
+            
+            <div class="timeline-container">
+                {% for event in timeline_events %}
+                <div class="timeline-item">
+                    <div class="timeline-icon bg-{{ event.color }}-500{% if not event.is_ia %}/20 text-{{ event.color }}-500{% else %} text-white shadow-[0_0_20px_rgba(59,130,246,0.6)]{% endif %}">
+                        <i data-lucide="{{ event.icon }}" class="w-4 h-4"></i>
+                    </div>
+
+                    {% if event.type == 'payment' and event.color == 'amber' %}
+                    <!-- Evento Especial: Pago Pendiente Highlight -->
+                    <div class="bg-white/5 border border-white/10 rounded-3xl p-6 shadow-sm">
+                        <div class="flex justify-between items-start mb-2">
+                            <h4 class="font-bold text-white text-base">{{ event.title }}</h4>
+                            <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">{{ event.date|timesince }}</span>
+                        </div>
+                        <p class="text-sm text-slate-400 mb-6">{{ event.description }}</p>
+                        
+                        <div class="bg-slate-900/80 border border-white/5 rounded-2xl p-5 flex items-center justify-between">
+                            <div>
+                                <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Monto a Cobrar</p>
+                                <p class="text-2xl font-black text-amber-500">{{ event.moneda }}{{ event.monto }}</p>
+                            </div>
+                            <button class="bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-black px-5 py-3 rounded-xl transition-all flex items-center gap-2 uppercase tracking-widest shadow-lg shadow-blue-500/20 active:scale-95">
+                                <i data-lucide="link" class="w-4 h-4"></i> Reenviar Link B2C
+                            </button>
+                        </div>
+                    </div>
+                    {% elif event.is_ia %}
+                    <!-- Evento Especial: Magia IA God Mode -->
+                    <div class="bg-gradient-to-r from-blue-900/30 to-white/5 border border-blue-500/30 rounded-3xl p-6 shadow-sm group hover:border-blue-500/50 transition-all">
+                        <div class="flex justify-between items-start mb-2">
+                            <h4 class="font-bold text-blue-400 text-base flex items-center gap-2">
+                                <i data-lucide="sparkles" class="w-4 h-4 animate-pulse"></i>
+                                {{ event.title }}
+                            </h4>
+                            <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">{{ event.date|time }}</span>
+                        </div>
+                        <p class="text-sm text-blue-100/70 mb-4">{{ event.description }}</p>
+                        <div class="flex gap-2">
+                            <span class="bg-slate-950/60 border border-white/5 text-slate-400 text-[10px] font-black px-3 py-1.5 rounded-lg uppercase tracking-tighter">Parser: AI Engine v4.2</span>
+                            <span class="bg-slate-950/60 border border-white/5 text-emerald-400 text-[10px] font-black px-3 py-1.5 rounded-lg uppercase tracking-tighter flex items-center gap-1">
+                                <span class="w-1 h-1 rounded-full bg-emerald-500 animate-ping"></span> Confianza: 100%
+                            </span>
+                        </div>
+                    </div>
+                    {% else %}
+                    <!-- Evento Estándar -->
+                    <div class="flex flex-col gap-1.5 hover:bg-white/5 p-4 rounded-2xl transition-colors -ml-4 pl-4">
+                        <div class="flex items-center gap-3">
+                            <span class="font-bold text-slate-100 text-base">{{ event.title }}</span>
+                            <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">• {{ event.date|date:"d M, H:i" }}</span>
+                        </div>
+                        <p class="text-sm text-slate-400 leading-relaxed">{{ event.description }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+                {% empty %}
+                <div class="text-center py-20 text-slate-500 italic flex flex-col items-center gap-4">
+                    <i data-lucide="ghost" class="w-12 h-12 text-slate-700"></i>
+                    No hay hitos registrados para esta reserva.
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- COLUMNA DERECHA (4/12): SUMARIO FINANCIERO Y DOCS -->
+        <div class="lg:col-span-4 flex flex-col gap-8">
+            
+            <!-- Resumen Financiero -->
+            <div class="bg-[#0f172a]/40 border border-white/5 rounded-[2.5rem] p-8 shadow-sm backdrop-blur-sm">
+                <h3 class="text-[11px] font-black text-slate-500 uppercase tracking-[0.25em] mb-8 flex items-center gap-2">
+                    <i data-lucide="wallet" class="w-3.5 h-3.5"></i> Resumen Financiero
+                </h3>
+                
+                <div class="space-y-5 mb-10">
+                    <div class="flex justify-between items-center text-sm">
+                        <span class="text-slate-400">Tarifa GDS + Impuestos</span>
+                        <span class="font-bold text-white">{{ venta.moneda.simbolo }}{{ venta.subtotal }}</span>
+                    </div>
+                    <div class="flex justify-between items-center text-sm">
+                        <span class="text-slate-400">Fees de Agencia</span>
+                        <span class="font-bold text-emerald-400">+{{ venta.moneda.simbolo }}{{ venta.impuestos }}</span>
+                    </div>
+                    <div class="h-px bg-white/5 w-full my-2"></div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm font-bold text-slate-300">Neto a Cobrar</span>
+                        <span class="text-3xl font-black text-white">{{ venta.moneda.simbolo }}{{ venta.total_venta }}</span>
+                    </div>
+                </div>
+
+                {% if venta.saldo_pendiente > 0 %}
+                <div class="bg-amber-500/10 border border-amber-500/20 rounded-3xl p-6 flex flex-col gap-1 relative overflow-hidden group">
+                    <div class="absolute -right-4 -bottom-4 opacity-10 group-hover:scale-110 transition-transform">
+                        <i data-lucide="alert-circle" class="w-24 h-24 text-amber-500"></i>
+                    </div>
+                    <span class="text-[10px] font-black text-amber-500 uppercase tracking-widest relative z-10">Saldo Pendiente</span>
+                    <span class="text-3xl font-black text-amber-500 relative z-10">{{ venta.moneda.simbolo }}{{ venta.saldo_pendiente }}</span>
+                </div>
+                {% else %}
+                <div class="bg-emerald-500/10 border border-emerald-500/20 rounded-3xl p-6 flex items-center gap-4 border-dashed">
+                    <div class="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-500 flex items-center justify-center">
+                        <i data-lucide="party-popper" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <p class="text-[11px] font-black text-emerald-500 uppercase tracking-widest">Pago Completo</p>
+                        <p class="text-xs text-slate-400">Reserva 100% cobrada</p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Documentos y Anexos -->
+            <div class="bg-[#0f172a]/40 border border-white/5 rounded-[2.5rem] p-8 shadow-sm backdrop-blur-sm">
+                <h3 class="text-[11px] font-black text-slate-500 uppercase tracking-[0.25em] mb-8 flex items-center justify-between">
+                    <span>Documentos Digitales</span>
+                    <span class="bg-white/10 text-slate-300 px-3 py-1 rounded-full text-[10px] font-black">{{ venta.boletos_adjuntos.count }}</span>
+                </h3>
+                
+                <div class="space-y-4">
+                    {% for boleto in venta.boletos_adjuntos.all %}
+                    <!-- Original -->
+                    <div class="group flex items-center justify-between p-4 rounded-2xl border border-white/5 bg-white/5 hover:bg-white/10 transition-all">
+                        <div class="flex items-center gap-4 overflow-hidden">
+                            <div class="w-10 h-10 min-w-[40px] rounded-xl bg-red-500/10 text-red-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                <i data-lucide="file-text" class="w-5 h-5"></i>
+                            </div>
+                            <div class="overflow-hidden">
+                                <p class="text-xs font-bold text-slate-200 truncate capitalize">{{ boleto.archivo_boleto.name|truncatechars:25 }}</p>
+                                <p class="text-[10px] text-slate-500 font-bold uppercase tracking-tight">{{ boleto.formato_detectado }} ORIGINAL</p>
+                            </div>
+                        </div>
+                        <a href="{{ boleto.archivo_boleto.url }}" download class="p-2 text-slate-500 hover:text-white transition-colors">
+                            <i data-lucide="download" class="w-4 h-4"></i>
+                        </a>
+                    </div>
+
+                    {% if boleto.archivo_pdf_generado %}
+                    <!-- TravelHub PDF -->
+                    <div class="group flex items-center justify-between p-4 rounded-2xl border border-blue-500/30 bg-blue-500/5 hover:bg-blue-500/10 transition-all ring-1 ring-blue-500/0 hover:ring-blue-500/30">
+                        <div class="flex items-center gap-4 overflow-hidden">
+                            <div class="w-10 h-10 min-w-[40px] rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center group-hover:rotate-12 transition-transform">
+                                <i data-lucide="shield-check" class="w-5 h-5"></i>
+                            </div>
+                            <div class="overflow-hidden">
+                                <p class="text-xs font-bold text-blue-300 truncate">Voucher_Oficial.pdf</p>
+                                <p class="text-[10px] text-blue-500/70 font-bold uppercase tracking-tight">Copia TravelHub</p>
+                            </div>
+                        </div>
+                        <a href="{{ boleto.archivo_pdf_generado.url }}" target="_blank" class="px-3 py-1.5 bg-blue-600/20 text-blue-400 hover:bg-blue-600 hover:text-white rounded-lg transition-all text-[10px] font-black uppercase tracking-widest">
+                            Ver
+                        </a>
+                    </div>
+                    {% endif %}
+                    {% empty %}
+                    <div class="text-center py-10">
+                        <i data-lucide="folder-x" class="w-10 h-10 text-slate-800 mx-auto mb-3"></i>
+                        <p class="text-[10px] font-black text-slate-600 uppercase tracking-widest">No hay archivos</p>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <button class="w-full mt-6 py-4 border-2 border-dashed border-white/5 hover:border-blue-500/30 rounded-2xl text-[11px] font-black text-slate-500 hover:text-blue-400 transition-all uppercase tracking-[0.2em] flex items-center justify-center gap-2">
+                    <i data-lucide="plus" class="w-4 h-4"></i> Subir Documentos
+                </button>
+            </div>
+
+        </div>
+    </div>
+</main>
+
+<!-- Modal Global para HTMX -->
+<div x-data="{ open: false }" @open-modal.window="open = true" @close-modal.window="open = false" x-show="open"
+    class="fixed inset-0 z-[100] flex items-center justify-center p-4" x-cloak>
+    <div class="fixed inset-0 bg-slate-950/80 backdrop-blur-md" @click="open = false" 
+        x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" 
+        x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"></div>
+    
+    <div class="relative bg-slate-900 border border-white/10 rounded-[2.5rem] shadow-2xl w-full max-w-xl overflow-hidden"
+        x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 scale-95 translate-y-4" x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+        x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 scale-100 translate-y-0" x-transition:leave-end="opacity-0 scale-95 translate-y-4">
+        
+        <div class="flex items-center justify-between p-6 border-b border-white/5 bg-white/5">
+            <h3 class="text-lg font-black text-white uppercase tracking-widest">Acción de Reserva</h3>
+            <button @click="open = false" class="text-slate-500 hover:text-white transition-colors">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
+        </div>
+
+        <div id="modal-content" class="p-10">
+            <div class="flex flex-col items-center justify-center py-12 gap-4">
+                <div class="w-12 h-12 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin"></div>
+                <p class="text-xs font-black text-slate-500 uppercase tracking-[0.3em]">Cargando Interfaz</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => { lucide.createIcons(); });
+    document.body.addEventListener('htmx:afterSwap', () => { lucide.createIcons(); });
+
+    // Notificaciones Simples
+    window.addEventListener('notify', (e) => {
+        // Podríamos usar Toastify o similar aquí
+        console.log('Notificación:', e.detail.message);
+    });
+</script>
+{% endblock %}

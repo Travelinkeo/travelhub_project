@@ -1,0 +1,240 @@
+{% extends "base_modern.html" %}
+{% load humanize mathfilters %}
+
+{% block title %}Dashboard Reconciliación Contable — TravelHub Pro{% endblock %}
+
+{% block page_title %}Motor de Conciliación Automática{% endblock %}
+{% block page_subtitle %}Cruce inteligente de liquidaciones GDS/BSP contra base de datos local mediante IA.{% endblock %}
+
+{% block content %}
+<main class="flex-1 w-full max-w-[1400px] mx-auto p-6 md:p-8 overflow-y-auto h-full">
+
+    <!-- Header & Action Bar -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10 pb-6 border-b border-primary/10">
+        <div>
+            <h1 class="text-3xl font-black tracking-tight uppercase flex items-center gap-3">
+                <span class="bg-gradient-to-r from-primary to-primary-hover bg-clip-text text-transparent">Auditoría & Conciliación</span>
+            </h1>
+            <p class="text-text-secondary text-sm mt-1 font-medium tracking-wide">Detección automática de discrepancias tarifarias y fugas financieras con IA.</p>
+        </div>
+        <div class="flex gap-3">
+            <a href="{% url 'finance:reconciliacion_create' %}" class="relative group px-6 py-3 bg-primary hover:bg-primary-hover text-on-primary rounded-xl font-bold transition-all shadow-lg shadow-primary/20 overflow-hidden flex items-center gap-2">
+                <div class="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <span class="material-symbols-outlined text-[20px]">upload_cloud</span>
+                <span>Sincronizar Reporte</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Metrics Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+        <!-- Asientos Creados -->
+        <div class="relative p-6 rounded-2xl bg-surface-1 border border-border-color hover:border-primary/30 transition-all group overflow-hidden shadow-sm">
+            <div class="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-full -mr-12 -mt-12 blur-2xl"></div>
+            <div class="flex justify-between items-start mb-4 relative z-10">
+                <div>
+                    <p class="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] mb-1">Asientos Automáticos</p>
+                    <p class="text-3xl font-black text-text-main tabular-nums">{{ stats_globales.asientos_borrador|default:0 }}</p>
+                </div>
+                <div class="size-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20 shadow-inner">
+                    <span class="material-symbols-outlined text-[20px] animate-pulse">auto_awesome</span>
+                </div>
+            </div>
+            <p class="text-[9px] text-text-muted font-black uppercase tracking-widest mt-2 relative z-10">Borradores propuestos por IA</p>
+        </div>
+
+        <!-- Discrepancias -->
+        <div class="relative p-6 rounded-2xl bg-surface-1 border border-border-color hover:border-amber-500/30 transition-all group overflow-hidden shadow-sm">
+            <div class="absolute top-0 right-0 w-24 h-24 bg-amber-500/5 rounded-full -mr-12 -mt-12 blur-2xl"></div>
+            <div class="flex justify-between items-start mb-4 relative z-10">
+                <div>
+                    <p class="text-[10px] font-black text-amber-500/60 uppercase tracking-[0.2em] mb-1">Discrepancias</p>
+                    <p class="text-3xl font-black text-amber-500 tabular-nums">{{ stats_globales.discrepancias|default:0 }}</p>
+                </div>
+                <div class="size-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-500 border border-amber-500/20">
+                    <span class="material-symbols-outlined text-[20px]">warning</span>
+                </div>
+            </div>
+            <p class="text-[9px] text-amber-500/40 font-black uppercase tracking-widest mt-2 relative z-10">Tarifas huérfanas detectadas</p>
+        </div>
+
+        <!-- Pérdidas Netas -->
+        <div class="relative p-6 rounded-2xl bg-surface-1 border border-border-color hover:border-red-500/30 transition-all group overflow-hidden shadow-sm">
+            <div class="absolute bottom-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-red-500/50 to-transparent"></div>
+            <div class="flex justify-between items-start mb-4 relative z-10">
+                <div>
+                    <p class="text-[10px] font-black text-red-500/60 uppercase tracking-[0.2em] mb-1">Fugas Financieras</p>
+                    <p class="text-3xl font-black text-red-500 tabular-nums">${{ stats_globales.perdidas|default:"0.00"|intcomma }}</p>
+                </div>
+                <div class="size-10 rounded-xl bg-red-500/10 flex items-center justify-center text-red-500 border border-red-500/20">
+                    <span class="material-symbols-outlined text-[20px]">trending_down</span>
+                </div>
+            </div>
+            <p class="text-[9px] text-red-500/40 font-black uppercase tracking-widest mt-2 relative z-10">Sobrecobro no registrado</p>
+        </div>
+
+        <!-- Recuperación -->
+        <div class="relative p-6 rounded-2xl bg-surface-1 border border-border-color hover:border-primary/30 transition-all group overflow-hidden shadow-sm">
+            <div class="absolute bottom-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-primary/50 to-transparent"></div>
+            <div class="flex justify-between items-start mb-4 relative z-10">
+                <div>
+                    <p class="text-[10px] font-black text-primary/60 uppercase tracking-[0.2em] mb-1">Recuperación Favor</p>
+                    <p class="text-3xl font-black text-primary tabular-nums">+${{ stats_globales.ahorros|default:"0.00"|intcomma }}</p>
+                </div>
+                <div class="size-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
+                    <span class="material-symbols-outlined text-[20px]">savings</span>
+                </div>
+            </div>
+            <p class="text-[9px] text-primary/40 font-black uppercase tracking-widest mt-2 relative z-10">Cobros omitidos recuperables</p>
+        </div>
+    </div>
+
+    <!-- Layout Central -->
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-8 mb-10">
+
+        <!-- Column 1&2: Reports Table -->
+        <div class="xl:col-span-2 space-y-6">
+            <div class="flex items-center gap-3 px-2">
+                <div class="size-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary border border-primary/20 shadow-sm">
+                    <span class="material-symbols-outlined text-[18px]">history</span>
+                </div>
+                <h2 class="text-sm font-black text-text-main uppercase tracking-widest opacity-80">Últimas Sincronizaciones</h2>
+            </div>
+
+            <div class="card-base overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-surface-2 border-b border-border-color text-text-muted uppercase tracking-widest text-[10px]">
+                                <th class="px-8 py-4 font-black">Consolidador</th>
+                                <th class="px-8 py-4 font-black">Fecha Sugestión</th>
+                                <th class="px-8 py-4 font-black">Período Operativo</th>
+                                <th class="px-8 py-4 font-black">Estatus IA</th>
+                                <th class="px-8 py-4 font-black text-right">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-border-color">
+                            {% for rep in ultimos_reportes %}
+                            <tr class="group hover:bg-primary/[0.02] transition-all cursor-pointer">
+                                <td class="px-8 py-5">
+                                    <div class="flex items-center gap-4">
+                                        <div class="size-9 rounded-xl flex items-center justify-center font-black bg-surface-2 border border-border-color text-text-muted group-hover:bg-primary/10 group-hover:text-primary transition-all">
+                                            <span class="material-symbols-outlined text-[20px]">corporate_fare</span>
+                                        </div>
+                                        <span class="text-sm font-black text-text-main uppercase tracking-tight group-hover:text-primary transition-colors">{{ rep.proveedor }}</span>
+                                    </div>
+                                </td>
+                                <td class="px-8 py-5">
+                                    <div class="flex flex-col">
+                                        <span class="text-xs font-black text-text-main/60 uppercase tracking-tighter">{{ rep.fecha_subida|date:"d M, Y" }}</span>
+                                        <span class="text-[9px] text-text-muted font-bold uppercase tracking-widest">{{ rep.fecha_subida|time:"H:i" }} HRS</span>
+                                    </div>
+                                </td>
+                                <td class="px-8 py-5">
+                                    <span class="text-[10px] text-primary font-black bg-primary/5 px-2 py-1 rounded border border-primary/10 group-hover:border-primary/30 transition-all font-mono tracking-tighter">
+                                        {{ rep.periodo_inicio|date:"d/m/y"|default:"-" }} — {{ rep.periodo_fin|date:"d/m/y"|default:"-" }}
+                                    </span>
+                                </td>
+                                <td class="px-8 py-5">
+                                    <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border
+                                        {% if rep.estado == 'CON_DISCREPANCIAS' %}bg-amber-500/10 text-amber-500 border-amber-500/20
+                                        {% elif rep.estado == 'CONCILIADO' %}bg-primary/10 text-primary border-primary/20
+                                        {% elif rep.estado == 'ERROR' %}bg-status-danger-bg text-status-danger border-status-danger/20
+                                        {% else %}bg-surface-2 text-text-muted border-border-color{% endif %}">
+                                        {% if rep.estado == 'CON_DISCREPANCIAS' %}<span class="size-1.5 rounded-full bg-amber-500 animate-pulse"></span>{% endif %}
+                                        {{ rep.get_estado_display|default:rep.estado }}
+                                    </span>
+                                </td>
+                                <td class="px-8 py-5 text-right">
+                                    <div class="flex justify-end gap-2">
+                                        {% if rep.estado == 'PENDIENTE' or rep.estado == 'ERROR' %}
+                                        <a href="{% url 'finance:reconciliacion_process' rep.pk %}"
+                                            class="size-9 flex items-center justify-center text-primary bg-primary/10 hover:bg-primary-hover hover:text-on-primary rounded-xl transition-all border border-primary/20 shadow-lg shadow-primary/5"
+                                            title="Procesar con IA">
+                                            <span class="material-symbols-outlined text-[20px]">smart_toy</span>
+                                        </a>
+                                        {% else %}
+                                        <a href="{% url 'finance:reconciliacion_detail' rep.pk %}"
+                                            class="size-9 flex items-center justify-center text-text-muted hover:text-primary hover:bg-primary/10 rounded-xl transition-all border border-transparent hover:border-primary/20"
+                                            title="Ver Cruce">
+                                            <span class="material-symbols-outlined text-[20px]">read_more</span>
+                                        </a>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="py-32 text-center bg-transparent">
+                                    <div class="flex flex-col items-center gap-6">
+                                        <div class="size-20 rounded-3xl bg-surface-2 flex items-center justify-center text-text-muted/20 border border-border-color shadow-lg relative">
+                                            <span class="material-symbols-outlined text-[48px]">folder_open</span>
+                                            <div class="absolute -bottom-2 -right-2 size-8 rounded-full bg-surface-1 border border-border-color flex items-center justify-center shadow-xl">
+                                                <span class="material-symbols-outlined text-primary text-[16px]">search</span>
+                                            </div>
+                                        </div>
+                                        <div class="space-y-1">
+                                            <h3 class="text-xl font-black text-text-main uppercase tracking-tight opacity-90">Sin reportes</h3>
+                                            <p class="text-sm text-text-muted font-medium">No hay liquidaciones pendientes de conciliación.</p>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Column 3: Alerts/Leaks -->
+        <div class="space-y-6">
+            <div class="flex items-center gap-3 px-2">
+                <div class="size-8 rounded-lg bg-red-500/10 flex items-center justify-center text-red-500 border border-red-500/20 shadow-sm">
+                    <span class="material-symbols-outlined text-[18px]">emergency_record</span>
+                </div>
+                <h2 class="text-sm font-black text-text-main uppercase tracking-widest opacity-80">Fugas Críticas</h2>
+            </div>
+            
+            <div class="card-base p-6 space-y-4">
+                {% for alerta in alertas_criticas %}
+                <div class="group p-4 bg-surface-2 border border-border-color hover:border-red-500/50 rounded-2xl transition-all hover:bg-red-500/[0.03] flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <div class="size-10 rounded-xl bg-red-500/10 flex items-center justify-center text-red-500 border border-red-500/20 group-hover:scale-110 transition-transform shadow-inner">
+                            <span class="material-symbols-outlined text-[20px]">money_off</span>
+                        </div>
+                        <div>
+                            <p class="text-[10px] font-black text-text-muted uppercase tracking-widest font-mono">TKT: <span class="text-text-main font-bold tracking-normal">{{ alerta.linea_reporte.numero_boleto_reportado|default:"Desc"|truncatechars:12 }}</span></p>
+                            <p class="text-[9px] text-primary/60 font-black uppercase tracking-[0.2em] mt-1">{{ alerta.reporte.proveedor }}</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-lg font-black text-red-500 tabular-nums">-${{ alerta.diferencia_total|abs|intcomma }}</p>
+                        <a href="{% url 'finance:reconciliacion_detail' alerta.reporte.pk %}"
+                            class="inline-flex items-center gap-1 text-[9px] font-black text-primary hover:text-primary-hover transition-colors uppercase tracking-widest mt-1">
+                            Auditar <span class="material-symbols-outlined text-[12px]">arrow_right_alt</span>
+                        </a>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="flex flex-col items-center justify-center py-20 text-center space-y-6">
+                    <div class="relative">
+                        <div class="size-16 rounded-full bg-primary/10 flex items-center justify-center text-primary border border-primary/20 animate-pulse">
+                            <span class="material-symbols-outlined text-[32px]">verified_user</span>
+                        </div>
+                        <div class="absolute -top-1 -right-1 size-6 rounded-full bg-surface-1 border border-primary/40 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-primary text-[12px]">check</span>
+                        </div>
+                    </div>
+                    <div class="space-y-1">
+                        <h4 class="text-sm font-black text-text-main uppercase tracking-tight opacity-90">Sin fugas críticas</h4>
+                        <p class="text-[10px] text-text-muted font-bold uppercase tracking-widest px-4 leading-relaxed">Sus liquidaciones coinciden con el registro interno.</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+    </div>
+</main>
+{% endblock %}

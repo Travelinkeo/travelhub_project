@@ -1,0 +1,192 @@
+{% extends 'base_modern.html' %}
+{% load static %}
+
+{% block title %}{{ title|default:"Venta" }} - TravelHub Pro{% endblock %}
+
+{% block page_title %}{{ title|default:"Nueva Venta / Reserva" }}{% endblock %}
+{% block page_subtitle %}Inicia el registro base de la transacción para el ERP.{% endblock %}
+
+{% block extra_head %}
+<!-- Form styling overrides to apply Tailwind input-base to Django generated inputs -->
+<style nonce="{{ request.csp_nonce }}" type="text/tailwindcss">
+    @layer components {
+        input[type="text"], input[type="number"], input[type="date"], input[type="email"], select, textarea { 
+            @apply input-base;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<main class="flex-1 w-full max-w-[1200px] mx-auto p-6 md:p-10" x-data="{ currentStep: 1 }">
+
+    <!-- Action Bar / Breadcrumb -->
+    <div class="flex items-center justify-between mb-10 pb-6 border-b border-border-color">
+        <div class="flex items-center gap-4">
+            <a href="{% url 'bookings:venta_list' %}" class="size-10 rounded-xl bg-surface-2 border border-border-color flex items-center justify-center text-text-muted hover:text-primary transition-all">
+                <span class="material-symbols-outlined text-[20px]">arrow_back</span>
+            </a>
+            <div>
+                <h1 class="text-3xl font-black text-text-main tracking-tight uppercase">{{ title|default:"Nueva Venta / Reserva" }}</h1>
+                <p class="text-text-muted text-sm font-medium">Borrador de operación comercial.</p>
+            </div>
+        </div>
+        <div class="hidden md:flex items-center gap-8">
+            <div class="flex flex-col items-end">
+                <span class="text-[10px] font-black text-text-muted uppercase tracking-widest leading-none">Paso Actual</span>
+                <span class="text-lg font-black text-primary mt-1">Configuración General</span>
+            </div>
+        </div>
+    </div>
+
+    <form method="post" class="space-y-10">
+        {% csrf_token %}
+
+        <!-- Card Section -->
+        <section class="card-base p-8 md:p-12 relative overflow-hidden group">
+            <!-- Subtle Glow Effect -->
+            <div class="absolute -right-20 -top-20 size-80 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/10 transition-all duration-700"></div>
+
+            <div class="flex items-center gap-4 border-b border-border-color pb-6 mb-8 relative z-10">
+                <div class="size-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
+                    <span class="material-symbols-outlined text-[32px]">point_of_sale</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-black text-text-main tracking-tight leading-none uppercase">Datos de la Transacción</h2>
+                    <p class="text-sm text-text-muted mt-2 font-medium tracking-wide">Vincula clientes, monedas y define el tipo de operación.</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
+                <!-- Cliente Pagador -->
+                <div class="md:col-span-2 space-y-3" x-data="{ 
+                        open: false, 
+                        search: '',
+                        selected: '{% if form.cliente.value %}{{ form.cliente.value }}{% endif %}',
+                        selectedText: 'SELECCIONAR CLIENTE O EMPRESA...',
+                        options: [
+                            {% for choice in form.fields.cliente.queryset %}
+                            { id: '{{ choice.pk }}', text: '{{ choice.get_nombre_completo|striptags|upper|escapejs }} ({{ choice.cedula_identidad|escapejs }})' },
+                            {% endfor %}
+                        ],
+                        get filteredOptions() {
+                            return this.options.filter(i => i.text.toLowerCase().includes(this.search.toLowerCase()));
+                        },
+                        init() {
+                            const found = this.options.find(o => o.id == this.selected);
+                            if (found) this.selectedText = found.text;
+                        }
+                    }">
+                    <label class="text-[10px] font-black text-text-secondary uppercase tracking-[0.2em] ml-1">Cliente Pagador (Titular de Factura)</label>
+                    
+                    <div class="relative">
+                        <button type="button" @click="open = !open"
+                            class="input-base !h-14 flex items-center justify-between group/sel !text-sm !font-bold">
+                            <span x-text="selectedText" :class="selected ? 'text-text-main' : 'text-text-muted'"></span>
+                            <span class="material-symbols-outlined text-text-muted group-hover/sel:text-primary transition-colors">expand_more</span>
+                        </button>
+
+                        <div x-show="open" @click.away="open = false" x-cloak x-transition
+                            class="absolute z-50 w-full mt-2 bg-surface-1 border border-border-color rounded-2xl shadow-2xl p-4 animate-fade-in">
+                            <div class="relative mb-4">
+                                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-muted text-[18px]">search</span>
+                                <input type="text" x-model="search" placeholder="Escribe para buscar cliente..."
+                                    class="input-base !pl-10 !bg-surface-2">
+                            </div>
+                            <div class="max-h-60 overflow-y-auto space-y-1 pr-1 custom-scrollbar">
+                                <template x-for="opt in filteredOptions" :key="opt.id">
+                                    <div @click="selected = opt.id; selectedText = opt.text; open = false"
+                                        class="px-4 py-3 text-xs font-bold text-text-secondary hover:bg-primary/10 hover:text-primary rounded-xl cursor-pointer transition-all border border-transparent hover:border-primary/20"
+                                        x-text="opt.text"></div>
+                                </template>
+                                <div x-show="filteredOptions.length === 0" class="p-6 text-center text-text-muted text-xs">
+                                    No se encontraron clientes con "{{ search }}"
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Hidden Original Select -->
+                    <select name="cliente" x-model="selected" class="hidden">
+                        <option value="">---------</option>
+                        {% for choice in form.fields.cliente.queryset %}
+                        <option value="{{ choice.id }}">{{ choice }}</option>
+                        {% endfor %}
+                    </select>
+
+                    <p class="text-[10px] text-text-muted mt-2 flex items-center gap-1 font-bold uppercase tracking-tighter">
+                        <span class="material-symbols-outlined text-[14px]">info</span>
+                        Si el cliente no existe, créalo en <a href="{% url 'crm:cliente_create' %}" class="text-primary hover:underline ml-1">CRM > Nuevo Cliente</a>.
+                    </p>
+                </div>
+
+                <!-- Moneda -->
+                <div class="space-y-3">
+                    <label class="text-[10px] font-black text-text-secondary uppercase tracking-[0.2em] ml-1">Moneda de Valorización</label>
+                    {{ form.moneda }}
+                </div>
+
+                <!-- Tipo de Venta -->
+                <div class="space-y-3">
+                    <label class="text-[10px] font-black text-text-secondary uppercase tracking-[0.2em] ml-1">Tipo de Operación</label>
+                    {{ form.tipo_venta }}
+                </div>
+
+                {% if form.estado %}
+                <div class="space-y-3">
+                    <label class="text-[10px] font-black text-text-secondary uppercase tracking-[0.2em] ml-1">Estado de la Venta</label>
+                    {{ form.estado }}
+                </div>
+                {% endif %}
+
+                <!-- Descripción -->
+                <div class="md:col-span-2 space-y-3">
+                    <label class="text-[10px] font-black text-text-secondary uppercase tracking-[0.2em] ml-1">Título / Concepto General</label>
+                    <div class="relative group/input">
+                        <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-text-muted group-focus-within/input:text-primary transition-colors">edit_note</span>
+                        <div class="pl-0">
+                            {{ form.descripcion_general }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notas -->
+                <div class="md:col-span-2 space-y-3">
+                    <label class="text-[10px] font-black text-text-secondary uppercase tracking-[0.2em] ml-1">Notas Internas / Instrucciones Especiales</label>
+                    {{ form.notas }}
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Actions -->
+        <div class="flex flex-col sm:flex-row items-center justify-end gap-6 pt-6 border-t border-border-color">
+            <a href="{% url 'bookings:venta_list' %}"
+                class="btn-secondary !h-12 !px-10">
+                Descartar Cambios
+            </a>
+            <button type="submit"
+                class="btn-primary !h-14 !px-12 shadow-2xl shadow-primary/30 group">
+                <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">rocket_launch</span>
+                <span class="text-base uppercase tracking-widest font-black">Crear Venta & Continuar</span>
+            </button>
+        </div>
+    </form>
+</main>
+{% endblock %}
+
+{% block extra_scripts %}
+<script nonce="{{ request.csp_nonce }}">
+    document.addEventListener('DOMContentLoaded', function () {
+        // Enforce input-base on all relevant fields
+        const inputs = document.querySelectorAll('input[type="text"], select, textarea');
+        inputs.forEach(i => {
+            if (!i.classList.contains('hidden')) {
+                i.classList.add('input-base');
+                if (i.tagName === 'INPUT' && i.closest('.group/input')) {
+                     i.classList.add('!pl-12');
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

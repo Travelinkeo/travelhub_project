@@ -1,0 +1,36 @@
+{# Archivo: core/templates/core/cms/paquete_lista.html #}
+{% extends "core/base.html" %}
+
+{% block title %}Nuestros Paquetes Turísticos - TravelHub{% endblock %}
+
+{% block content %}
+<section class="flow flow-space-lg">
+    <div class="d-flex justify-between align-center flex-wrap gap-2">
+    <h2 class="mb-0 heading-lg">Nuestros Paquetes Turísticos</h2>
+        <span class="badge badge-info">{{ paquetes|length }} disponibles</span>
+    </div>
+    {% if paquetes %}
+    <div class="grid grid-paquetes">
+        {% for paquete in paquetes %}
+            <article class="card h-100">
+                {% if paquete.imagen_destacada %}
+                <div class="card-media card-media-thumb">
+                    <img src="{{ paquete.imagen_destacada.url }}" alt="{{ paquete.titulo }}">
+                </div>
+                {% endif %}
+                <div class="card-header card-header-sm">{{ paquete.titulo }}</div>
+                <div class="card-body">
+                    <p class="small desc-minh">{{ paquete.descripcion_corta|truncatewords:30 }}</p>
+                    <div class="d-flex justify-between small mt-2">
+                        <span><strong>{{ paquete.duracion_dias }}</strong> días</span>
+                        <span class="price-highlight">{{ paquete.precio_desde_texto }}</span>
+                    </div>
+                </div>
+            </article>
+        {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-muted">No hay paquetes turísticos disponibles en este momento.</p>
+    {% endif %}
+</section>
+{% endblock %}

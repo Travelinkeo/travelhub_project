@@ -1,0 +1,45 @@
+<div class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+    @click.self="showVincularModal = false">
+    <div class="bg-[var(--surface-1)] border border-[var(--border)] rounded-2xl shadow-xl w-full max-w-lg overflow-hidden"
+        @click.stop>
+        <div class="h-0.5 w-full bg-gradient-to-r from-[var(--primary)] to-indigo-500"></div>
+
+        <!-- Modal Header -->
+        <div class="flex items-center justify-between px-6 py-4 border-b border-[var(--border)]">
+            <h2 class="text-base font-bold text-[var(--text-primary)] flex items-center gap-2">
+                <span class="material-symbols-outlined text-[var(--primary)] text-[20px]">person_add</span>
+                Vincular Pasajero
+            </h2>
+            <button @click="showVincularModal = false"
+                class="w-8 h-8 flex items-center justify-center rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-2)] transition-colors">
+                <span class="material-symbols-outlined text-[20px]">close</span>
+            </button>
+        </div>
+
+        <!-- Search -->
+        <div class="px-6 py-4">
+            <div class="relative">
+                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] text-[18px]">search</span>
+                <input type="text" placeholder="Buscar por nombre o documento..."
+                    class="w-full bg-[var(--surface-2)] border border-[var(--border)] rounded h-11 pl-10 pr-4 text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-1 focus:ring-[var(--primary)] transition-all"
+                    hx-get="{% url 'crm:pasajero_search' %}"
+                    hx-trigger="keyup changed delay:400ms"
+                    hx-target="#pasajero-search-results"
+                    hx-include="this">
+            </div>
+        </div>
+
+        <!-- Results -->
+        <div id="pasajero-search-results" class="px-6 pb-2 max-h-64 overflow-y-auto space-y-1">
+            <p class="text-sm text-[var(--text-muted)] text-center py-4">Escribe para buscar pasajeros...</p>
+        </div>
+
+        <!-- Footer -->
+        <div class="px-6 py-4 border-t border-[var(--border)] bg-[var(--surface-2)] flex justify-end">
+            <button @click="showVincularModal = false"
+                class="h-9 px-4 text-sm font-bold text-[var(--text-secondary)] bg-[var(--surface-1)] border border-[var(--border)] rounded hover:border-[var(--primary)] hover:text-[var(--primary)] transition-colors">
+                Cancelar
+            </button>
+        </div>
+    </div>
+</div>

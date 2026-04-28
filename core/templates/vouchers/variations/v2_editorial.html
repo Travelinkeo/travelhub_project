@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Editorial Plus Voucher - {{ agencia.nombre }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@300;400;600;800;950&display=swap" rel="stylesheet">
+    <style>
+        @page { size: A4; margin: 0; }
+        :root {
+            --primary: {{ agencia.color_primario|default:"#030813" }};
+            --accent: {{ agencia.color_accent_pdf|default:"#c5a059" }};
+            --text-dark: #030813;
+            --text-light: #64748b;
+            --bg-gray: #f8fafc;
+            --border: #e2e8f0;
+            --body-padding: 60px;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--text-dark);
+            margin: 0; padding: 0;
+            background: #fff;
+            line-height: 1.5;
+        }
+        .container { width: 210mm; min-height: 297mm; display: flex; flex-direction: column; background: #fff; position: relative; }
+        
+        /* Editorial Header */
+        header { padding: var(--body-padding); display: flex; justify-content: space-between; align-items: flex-start; }
+        .logo-box { max-height: 60px; }
+        .logo-box img { max-height: 60px; width: auto; }
+        .editorial-title { text-align: right; }
+        .editorial-title h1 { 
+            font-family: 'DM+Serif+Display', serif; 
+            font-size: 64px; 
+            margin: 0; 
+            line-height: 0.8; 
+            color: var(--primary);
+            text-transform: uppercase;
+        }
+        .editorial-title p { 
+            font-size: 12px; 
+            font-weight: 800; 
+            letter-spacing: 5px; 
+            margin-top: 5px; 
+            color: var(--accent);
+            text-transform: uppercase;
+        }
+
+        .hero { padding: 0 var(--body-padding) 40px; border-bottom: 2px solid var(--text-dark); margin: 0 var(--body-padding); }
+        .hero-label { font-size: 10px; font-weight: 900; color: var(--accent); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 15px; }
+        .passenger-name { font-size: 56px; font-weight: 950; letter-spacing: -2px; margin: 0; line-height: 0.9; }
+
+        .meta-grid { 
+            display: grid; 
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 40px; 
+            padding: 40px var(--body-padding);
+            background: var(--bg-gray);
+            margin: 20px var(--body-padding);
+            border-radius: 20px;
+        }
+        .meta-item label { display: block; font-size: 10px; font-weight: 800; color: var(--text-light); text-transform: uppercase; margin-bottom: 5px; }
+        .meta-item span { font-size: 18px; font-weight: 800; color: var(--text-dark); }
+
+        .services-section { padding: 40px var(--body-padding); flex: 1; }
+        .services-title { 
+            font-family: 'DM+Serif+Display', serif; 
+            font-size: 32px; 
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+        }
+        .services-title span { font-size: 12px; font-family: 'Inter'; font-weight: 800; color: var(--accent); letter-spacing: 2px; }
+
+        .service-card { margin-bottom: 40px; }
+        .service-type { font-size: 10px; font-weight: 950; color: var(--accent); text-transform: uppercase; margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+        .service-type::after { content: ''; height: 1px; background: var(--border); flex: 1; }
+        .service-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; }
+        .service-name { font-size: 24px; font-weight: 800; margin: 0; }
+        .service-loc { font-family: monospace; font-size: 14px; background: var(--text-dark); color: white; padding: 4px 10px; border-radius: 4px; }
+        
+        .service-details { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; font-size: 13px; color: var(--text-dark); }
+        .detail-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed var(--border); }
+        .detail-row label { font-weight: 700; color: var(--text-light); }
+        .important-field { font-weight: 800; color: var(--primary); }
+
+        footer { padding: var(--body-padding); background: var(--primary); color: white; margin-top: auto; }
+        .footer-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 60px; }
+        .footer-agencia h3 { font-size: 24px; font-weight: 900; margin: 0 0 10px; }
+        .footer-agencia p { font-size: 11px; opacity: 0.7; max-width: 300px; }
+        .footer-contact { text-align: right; font-size: 12px; font-weight: 600; }
+        .footer-contact div { margin-bottom: 5px; }
+
+        .badge-hotel { color: #10b981; }
+        .badge-car { color: #f59e0b; }
+        .badge-insurance { color: #8b5cf6; }
+        .badge-flight { color: #3b82f6; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo-box">
+                {% if agencia.logo_pdf_dark_base64 %}
+                    <img src="data:image/png;base64,{{ agencia.logo_pdf_dark_base64 }}" alt="Logo">
+                {% elif agencia.logo_pdf_base64 %}
+                    <img src="data:image/png;base64,{{ agencia.logo_pdf_base64 }}" alt="Logo">
+                {% else %}
+                    <h2 style="margin:0; font-weight:900;">{{ agencia.nombre }}</h2>
+                {% endif %}
+            </div>
+            <div class="editorial-title">
+                <h1>Voucher</h1>
+                <p>{{ venta.localizador|default:venta.id_venta }}</p>
+            </div>
+        </header>
+
+        <section class="hero">
+            <div class="hero-label">Travel Document for</div>
+            <h1 class="passenger-name">{{ venta.cliente.get_nombre_completo|default:venta.cliente.nombre|upper }}</h1>
+        </section>
+
+        <div class="meta-grid">
+            <div class="meta-item">
+                <label>Issue Date</label>
+                <span>{{ venta.fecha_venta|date:"d M Y" }}</span>
+            </div>
+            <div class="meta-item">
+                <label>Total Pax</label>
+                <span>{{ venta.pasajeros.count|default:"1" }} {{ venta.pasajeros.count|pluralize:"Guest,Guests" }}</span>
+            </div>
+            <div class="meta-item">
+                <label>Status</label>
+                <span>{{ venta.get_estado_display|upper }}</span>
+            </div>
+        </div>
+
+        <section class="services-section">
+            <div class="services-title">Confirmed Services <span>ITINERARY OVERVIEW</span></div>
+
+            {# ALOJAMIENTOS #}
+            {% for hotel in alojamientos %}
+            <div class="service-card">
+                <div class="service-type"><i class="badge-hotel">●</i> ACCOMMODATION</div>
+                <div class="service-header">
+                    <h2 class="service-name">{{ hotel.nombre_establecimiento|upper }}</h2>
+                    {% if hotel.localizador_proveedor %}<span class="service-loc">{{ hotel.localizador_proveedor }}</span>{% endif %}
+                </div>
+                <div class="service-details">
+                    <div>
+                        <div class="detail-row"><label>Check-in</label><span class="important-field">{{ hotel.check_in|date:"d M Y"|default:"---" }}</span></div>
+                        <div class="detail-row"><label>Check-out</label><span>{{ hotel.check_out|date:"d M Y"|default:"---" }}</span></div>
+                    </div>
+                    <div>
+                        <div class="detail-row"><label>Room Type</label><span>{{ hotel.regimen_alimentacion|default:"Estándar" }}</span></div>
+                        <div class="detail-row"><label>City</label><span>{{ hotel.ciudad.nombre|default:"---" }}</span></div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+
+            {# AUTOS #}
+            {% for car in alquileres_autos %}
+            <div class="service-card">
+                <div class="service-type"><i class="badge-car">●</i> CAR RENTAL</div>
+                <div class="service-header">
+                    <h2 class="service-name">{{ car.compania_rentadora|upper }} — {{ car.categoria_auto }}</h2>
+                    {% if car.numero_confirmacion %}<span class="service-loc">{{ car.numero_confirmacion }}</span>{% endif %}
+                </div>
+                <div class="service-details">
+                    <div>
+                        <div class="detail-row"><label>Pick-up</label><span class="important-field">{{ car.fecha_hora_retiro|date:"d M Y H:i" }}</span></div>
+                        <div class="detail-row"><label>Location</label><span>{{ car.ciudad_retiro.nombre|default:"---" }}</span></div>
+                    </div>
+                    <div>
+                        <div class="detail-row"><label>Drop-off</label><span>{{ car.fecha_hora_devolucion|date:"d M Y H:i" }}</span></div>
+                        <div class="detail-row"><label>Driver</label><span>{{ car.nombre_conductor|default:venta.cliente.get_nombre_completo|upper }}</span></div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+
+            {# TRASLADOS #}
+            {% for tr in traslados %}
+            <div class="service-card">
+                <div class="service-type"><i class="badge-flight">●</i> TRANSFER SERVICE</div>
+                <div class="service-header">
+                    <h2 class="service-name">{{ tr.origen|upper }} → {{ tr.destino|upper }}</h2>
+                    <span class="service-loc">{{ tr.get_tipo_traslado_display|upper }}</span>
+                </div>
+                <div class="service-details">
+                    <div>
+                        <div class="detail-row"><label>Date & Time</label><span class="important-field">{{ tr.fecha_hora|date:"d M Y H:i" }}</span></div>
+                    </div>
+                    <div>
+                        <div class="detail-row"><label>Pax Count</label><span>{{ tr.pasajeros }}</span></div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+
+            {# SEGUROS / ADICIONALES #}
+            {% for item in servicios_adicionales %}
+            <div class="service-card">
+                <div class="service-type"><i class="badge-insurance">●</i> {{ item.get_tipo_servicio_display|upper }}</div>
+                <div class="service-header">
+                    <h2 class="service-name">{{ item.descripcion|upper|default:"SERVICIO ADICIONAL" }}</h2>
+                    {% if item.codigo_referencia %}<span class="service-loc">{{ item.codigo_referencia }}</span>{% endif %}
+                </div>
+                <div class="service-details">
+                    <div>
+                        <div class="detail-row"><label>Start Date</label><span class="important-field">{{ item.fecha_inicio|date:"d M Y" }}</span></div>
+                        <div class="detail-row"><label>End Date</label><span>{{ item.fecha_fin|date:"d M Y" }}</span></div>
+                    </div>
+                    <div>
+                        <div class="detail-row"><label>Passenger</label><span>{{ item.nombre_pasajero|default:venta.cliente.get_nombre_completo|upper }}</span></div>
+                        {% if item.contacto_emergencia %}<div class="detail-row"><label>Emergency</label><span>{{ item.contacto_emergencia|truncatechars:30 }}</span></div>{% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+
+        </section>
+
+        <footer>
+            <div class="footer-grid">
+                <div class="footer-agencia">
+                    <h3>{{ agencia.nombre|upper }}</h3>
+                    <p>{{ agencia.direccion|default:"Caracas, Venezuela" }}</p>
+                    {% if agencia.pie_pagina %}<p style="margin-top:10px; font-weight:800; opacity:1;">{{ agencia.pie_pagina }}</p>{% endif %}
+                </div>
+                <div class="footer-contact">
+                    <div>{{ agencia.email_principal|default:"reservas@travelhub.com" }}</div>
+                    <div>{{ agencia.telefono_principal }}</div>
+                    <div>{{ agencia.website|default:"" }}</div>
+                </div>
+            </div>
+        </footer>
+    </div>
+</body>
+</html>

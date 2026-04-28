@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Executive Compact Voucher - {{ agencia.nombre }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@500&family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        @page { size: A4; margin: 0; }
+        :root {
+            --primary: {{ agencia.color_primario|default:"#001e62" }};
+            --accent: {{ agencia.color_accent_pdf|default:"#2563eb" }};
+            --text: #1e293b;
+            --muted: #64748b;
+            --light: #f1f5f9;
+            --border: #e2e8f0;
+            --body-px: 50px;
+        }
+        body { font-family: 'Inter', sans-serif; color: var(--text); margin: 0; background: white; line-height: 1.4; }
+        .container { width: 210mm; min-height: 297mm; display: flex; flex-direction: column; }
+        
+        header { padding: 40px var(--body-px); display: flex; justify-content: space-between; align-items: center; border-bottom: 4px solid var(--primary); }
+        .logo img { max-height: 40px; }
+        .voucher-type { text-align: right; }
+        .voucher-type h1 { margin: 0; font-size: 20px; font-weight: 900; color: var(--primary); text-transform: uppercase; letter-spacing: 2px; }
+        .pnr { font-family: 'Roboto Mono', monospace; font-size: 14px; color: var(--accent); font-weight: 700; margin-top: 5px; }
+
+        .top-info { padding: 30px var(--body-px); display: grid; grid-template-columns: 2fr 1.5fr 1fr; gap: 20px; border-bottom: 1px solid var(--border); }
+        .info-col label { display: block; font-size: 9px; font-weight: 800; color: var(--muted); text-transform: uppercase; margin-bottom: 3px; }
+        .info-col span { font-size: 13px; font-weight: 700; }
+
+        .content { flex: 1; padding: 30px var(--body-px); }
+        .section-header { position: relative; margin-bottom: 20px; padding-left: 15px; border-left: 4px solid var(--accent); }
+        .section-header h2 { margin: 0; font-size: 16px; font-weight: 900; text-transform: uppercase; color: var(--primary); }
+
+        .service-row { display: grid; grid-template-columns: 120px 1fr; gap: 20px; padding: 20px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 15px; }
+        .service-date { text-align: center; border-right: 1px solid var(--border); }
+        .date-day { font-size: 24px; font-weight: 900; color: var(--primary); display: block; }
+        .date-month { font-size: 10px; font-weight: 800; color: var(--muted); text-transform: uppercase; }
+
+        .service-main h3 { margin: 0; font-size: 15px; font-weight: 800; color: var(--primary); margin-bottom: 10px; }
+        .grid-details { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; font-size: 11px; }
+        .detail-item label { color: var(--muted); font-weight: 600; display: block; font-size: 9px; }
+        .detail-item span { font-weight: 700; }
+
+        footer { background: var(--light); padding: 30px var(--body-px); border-top: 1px solid var(--border); }
+        .footer-wrap { display: flex; justify-content: space-between; align-items: center; }
+        .agencia-legal { font-size: 10px; color: var(--muted); max-width: 400px; }
+        .agencia-legal b { color: var(--primary); }
+        .social { text-align: right; font-size: 11px; font-weight: 700; }
+
+        .tag { font-size: 9px; background: var(--accent); color: white; padding: 2px 6px; border-radius: 3px; font-weight: 800; margin-left: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                {% if agencia.logo_pdf_base64 %}
+                    <img src="data:image/png;base64,{{ agencia.logo_pdf_base64 }}" alt="Logo">
+                {% else %}
+                    <div style="font-weight:900; font-size:24px;">{{ agencia.nombre }}</div>
+                {% endif %}
+            </div>
+            <div class="voucher-type">
+                <h1>Service Confirmation</h1>
+                <div class="pnr">ID: {{ venta.localizador|default:venta.id_venta|upper }}</div>
+            </div>
+        </header>
+
+        <div class="top-info">
+            <div class="info-col"><label>Passenger</label><span>{{ venta.cliente.get_nombre_completo|default:venta.cliente.nombre|upper }}</span></div>
+            <div class="info-col"><label>Reference</label><span>{{ venta.localizador|default:venta.id_venta }}</span></div>
+            <div class="info-col"><label>Issued</label><span>{{ venta.fecha_venta|date:"d M Y" }}</span></div>
+        </div>
+
+        <main class="content">
+            <div class="section-header"><h2>Accommodation & Services</h2></div>
+
+            {# ALOJAMIENTOS #}
+            {% for hotel in alojamientos %}
+            <div class="service-row">
+                <div class="service-date">
+                    <span class="date-day">{{ hotel.check_in|date:"d" }}</span>
+                    <span class="date-month">{{ hotel.check_in|date:"M Y" }}</span>
+                </div>
+                <div class="service-main">
+                    <h3>HOTEL: {{ hotel.nombre_establecimiento|upper }} <span class="tag">CONFIRMED</span></h3>
+                    <div class="grid-details">
+                        <div class="detail-item"><label>Check-out</label><span>{{ hotel.check_out|date:"d M Y" }}</span></div>
+                        <div class="detail-item"><label>Meal Plan</label><span>{{ hotel.regimen_alimentacion|default:"Standard" }}</span></div>
+                        <div class="detail-item"><label>Reference</label><span>{{ hotel.localizador_proveedor|default:"---" }}</span></div>
+                        <div class="detail-item"><label>City</label><span>{{ hotel.ciudad.nombre|default:"---" }}</span></div>
+                        <div class="detail-item"><label>Rooms</label><span>{{ hotel.habitaciones }}</span></div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+
+            {# AUTOS #}
+            {% for car in alquileres_autos %}
+            <div class="service-row">
+                <div class="service-date">
+                    <span class="date-day">{{ car.fecha_hora_retiro|date:"d" }}</span>
+                    <span class="date-month">{{ car.fecha_hora_retiro|date:"M Y" }}</span>
+                </div>
+                <div class="service-main">
+                    <h3>CAR: {{ car.compania_rentadora|upper }} <span class="tag">RENTAL</span></h3>
+                    <div class="grid-details">
+                        <div class="detail-item"><label>Category</label><span>{{ car.categoria_auto }}</span></div>
+                        <div class="detail-item"><label>Return</label><span>{{ car.fecha_hora_devolucion|date:"d M Y H:i" }}</span></div>
+                        <div class="detail-item"><label>Pick-up Location</label><span>{{ car.ciudad_retiro.nombre|default:"---" }}</span></div>
+                        <div class="detail-item"><label>Reference</label><span>{{ car.numero_confirmacion|default:"---" }}</span></div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+
+            {# TRASLADOS / ACTIVIDADES #}
+            {% for tr in traslados %}
+            <div class="service-row">
+                <div class="service-date">
+                    <span class="date-day">{{ tr.fecha_hora|date:"d" }}</span>
+                    <span class="date-month">{{ tr.fecha_hora|date:"M Y" }}</span>
+                </div>
+                <div class="service-main">
+                    <h3>TRANSFER: {{ tr.origen|upper }} → {{ tr.destino|upper }}</h3>
+                    <div class="grid-details">
+                        <div class="detail-item"><label>Date/Time</label><span>{{ tr.fecha_hora|date:"H:i" }}</span></div>
+                        <div class="detail-item"><label>Type</label><span>{{ tr.get_tipo_traslado_display|upper }}</span></div>
+                        <div class="detail-item"><label>Pax</label><span>{{ tr.pasajeros }}</span></div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+
+            {# ADICIONALES #}
+            {% for item in servicios_adicionales %}
+            <div class="service-row">
+                <div class="service-date">
+                    <span class="date-day">{{ item.fecha_inicio|date:"d" }}</span>
+                    <span class="date-month">{{ item.fecha_inicio|date:"M Y" }}</span>
+                </div>
+                <div class="service-main">
+                    <h3>{{ item.get_tipo_servicio_display|upper }}: {{ item.descripcion|upper }}</h3>
+                    <div class="grid-details">
+                        <div class="detail-item"><label>Policy/Ref</label><span>{{ item.codigo_referencia|default:"---" }}</span></div>
+                        <div class="detail-item"><label>End Date</label><span>{{ item.fecha_fin|date:"d M Y" }}</span></div>
+                        <div class="detail-item"><label>Beneficiary</label><span>{{ item.nombre_pasajero|default:venta.cliente.get_nombre_completo|upper }}</span></div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </main>
+
+        <footer>
+            <div class="footer-wrap">
+                <div class="agencia-legal">
+                    <b>{{ agencia.nombre|upper }}</b> — {{ agencia.direccion|default:""|upper }}<br>
+                    {% if agencia.pie_pagina %}{{ agencia.pie_pagina }}{% endif %}
+                </div>
+                <div class="social">
+                    <div>{{ agencia.telefono_principal }}</div>
+                    <div>{{ agencia.website|default:"" }}</div>
+                </div>
+            </div>
+        </footer>
+    </div>
+</body>
+</html>

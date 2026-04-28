@@ -1,0 +1,88 @@
+{% extends "base_modern.html" %}
+{% load static %}
+{% load humanize %}
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="bg-[var(--primary)] rounded-xl p-8 mb-8 text-white relative overflow-hidden shadow-lg border border-[var(--primary-hover)]">
+        <div class="absolute inset-0 opacity-10 bg-[url('https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80')] bg-cover bg-center mix-blend-overlay"></div>
+        <div class="relative z-10">
+            <h1 class="text-3xl font-bold mb-4 text-white drop-shadow-md">Encuentra el Alojamiento Perfecto</h1>
+            <form method="get" class="bg-[var(--surface-1)] p-2 rounded-lg flex flex-col md:flex-row gap-2 shadow-2xl items-center border border-[var(--border)]">
+                <div class="flex-1 px-4 py-2 border-r border-[var(--border)] w-full group">
+                    <label class="block text-xs font-bold text-[var(--text-muted)] uppercase group-focus-within:text-[var(--primary)] transition-colors">Destino</label>
+                    <input type="text" name="q" value="{{ request.GET.q }}" placeholder="¿A dónde vas?" class="w-full bg-transparent text-[var(--text-primary)] font-semibold focus:outline-none placeholder-[var(--text-muted)]">
+                </div>
+                <button type="submit" class="bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white font-bold py-3 px-8 rounded-lg flex items-center gap-2">
+                    <i data-lucide="search" class="w-5 h-5"></i> Buscar
+                </button>
+            </form>
+        </div>
+    </div>
+    <div class="flex flex-col lg:flex-row gap-8">
+        <aside class="w-full lg:w-1/4 space-y-6">
+            <div class="bg-[var(--surface-1)] rounded-xl shadow-sm p-6 border border-[var(--border)] sticky top-4">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-[var(--text-primary)]">Filtros</h3>
+                    {% if request.GET %}<a href="{% url 'core:hotel_search' %}" class="text-xs text-[var(--primary)] hover:underline">Limpiar</a>{% endif %}
+                </div>
+                <div class="mb-6">
+                    <h4 class="text-sm font-semibold text-[var(--text-secondary)] mb-2">Destinos Populares</h4>
+                    <div class="space-y-2">
+                        {% for dest in destinos %}
+                        <a href="?destino={{ dest }}" class="block text-sm text-[var(--text-secondary)] hover:text-[var(--primary)] {% if request.GET.destino == dest %}font-bold text-[var(--primary)]{% endif %}">{{ dest }}</a>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="mb-6">
+                    <h4 class="text-sm font-semibold text-[var(--text-secondary)] mb-2">Categoría</h4>
+                    <div class="space-y-2">
+                        {% for val, label in categorias %}
+                        <label class="flex items-center space-x-2 cursor-pointer">
+                            <input type="radio" name="categoria" value="{{ val }}" {% if request.GET.categoria == val|stringformat:"i" %}checked{% endif %} data-filter-url="?categoria={{ val }}" class="category-filter text-[var(--primary)] focus:ring-[var(--primary)] bg-[var(--surface-2)] border-[var(--border)]">
+                            <span class="text-sm text-[var(--text-secondary)]">{{ label }}</span>
+                        </label>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </aside>
+        <div class="w-full lg:w-3/4">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold text-[var(--text-primary)]">{{ page_obj.paginator.count }} Alojamientos encontrados</h2>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {% for hotel in hoteles %}
+                <a href="{% url 'core:hotel_detail' hotel.slug %}" class="group bg-[var(--surface-1)] rounded-xl shadow-sm hover:shadow-xl transition duration-300 border border-[var(--border)] overflow-hidden flex flex-col h-full hover:border-[var(--primary)]">
+                    <div class="relative h-48 overflow-hidden bg-[var(--surface-2)]">
+                        {% if hotel.imagen_principal %}
+                        <img src="{{ hotel.imagen_principal.url }}" class="w-full h-full object-cover transform group-hover:scale-110 transition duration-500" alt="{{ hotel.nombre }}">
+                        {% else %}
+                        <div class="w-full h-full flex flex-col items-center justify-center text-[var(--text-muted)] p-2 text-center">
+                            <i data-lucide="image" class="w-12 h-12 mb-2 opacity-60"></i>
+                            <span class="text-[10px] font-bold">Sin foto</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="p-5 flex-1 flex flex-col">
+                        <h3 class="font-bold text-[var(--text-primary)] text-lg group-hover:text-[var(--primary)] transition">{{ hotel.nombre }}</h3>
+                        <p class="text-sm text-[var(--text-secondary)] flex items-center gap-1 mb-2"><i data-lucide="map-pin" class="w-3 h-3 text-[var(--text-muted)]"></i> {{ hotel.destino }}</p>
+                        <p class="text-[var(--text-secondary)] text-sm mb-4 line-clamp-3 leading-relaxed">{{ hotel.descripcion_larga|striptags|truncatechars:150 }}</p>
+                        <div class="border-t border-[var(--border)] pt-4 flex justify-between items-center mt-auto">
+                            <div class="text-[10px] text-emerald-500 bg-emerald-500/10 px-2 py-1 rounded-full border border-emerald-500/20 font-bold uppercase tracking-wider">{{ hotel.get_categoria_display }}</div>
+                            <span class="text-[var(--primary)] text-sm font-bold group-hover:underline">Ver Tarifas &rarr;</span>
+                        </div>
+                    </div>
+                </a>
+                {% empty %}
+                <div class="col-span-full py-12 text-center bg-[var(--surface-1)] rounded-xl border border-dashed border-[var(--border)] shadow-sm">
+                    <i data-lucide="search-x" class="w-12 h-12 text-[var(--text-muted)] mx-auto mb-4"></i>
+                    <h3 class="text-lg font-medium text-[var(--text-primary)] mb-1">No encontramos resultados</h3>
+                    <p class="text-sm text-[var(--text-secondary)]">Intenta ajustando tus filtros de búsqueda.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+<script nonce="{{ request.csp_nonce }}">document.addEventListener('DOMContentLoaded', function() { document.querySelectorAll('.category-filter').forEach(input => { input.addEventListener('change', function() { if (this.checked) { window.location.href = this.getAttribute('data-filter-url'); } }); }); });</script>
+{% endblock %}

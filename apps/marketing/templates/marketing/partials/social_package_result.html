@@ -1,0 +1,123 @@
+
+<div id="social-media-results" class="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    
+    <!-- Instagram Preview Center -->
+    <div class="flex flex-col items-center">
+        <div class="w-full max-w-[380px] card-base overflow-hidden border-2 border-primary/20 shadow-xl" style="background: black;">
+            <!-- Post Header -->
+            <div class="p-3 flex items-center justify-between border-b border-white/10">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-500 p-[1.5px]">
+                        <div class="bg-black w-full h-full rounded-full p-[1px] flex items-center justify-center overflow-hidden">
+                            {% if hotel.logo %}
+                            <img src="{{ hotel.logo.url }}" class="w-full h-full object-cover">
+                            {% else %}
+                            <div class="w-full h-full bg-primary/20 flex items-center justify-center text-[8px] font-bold text-white uppercase">
+                                {{ hotel.nombre|slice:":2" }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="text-xs font-bold text-white leading-none">TravelHub_Official</span>
+                        <span class="text-[9px] text-slate-400 leading-none mt-1">{{ hotel.destino }}</span>
+                    </div>
+                </div>
+                <span class="material-symbols-outlined text-white text-sm">more_horiz</span>
+            </div>
+            
+            <!-- Post Image Placeholder -->
+            <div class="aspect-square bg-zinc-900 flex items-center justify-center relative group">
+                {% if hotel.imagenes.first %}
+                <img src="{{ hotel.imagenes.first.imagen.url }}" class="w-full h-full object-cover">
+                {% else %}
+                <span class="material-symbols-outlined text-5xl text-white/20">image</span>
+                {% endif %}
+                <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+                    <button class="w-9 h-9 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-white hover:bg-primary transition-all">
+                        <span class="material-symbols-outlined text-sm">refresh</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Post Actions -->
+            <div class="p-3">
+                <div class="flex justify-between items-center mb-2">
+                    <div class="flex gap-3 text-white">
+                        <span class="material-symbols-outlined text-lg">favorite</span>
+                        <span class="material-symbols-outlined text-lg">mode_comment</span>
+                        <span class="material-symbols-outlined text-lg">send</span>
+                    </div>
+                    <span class="material-symbols-outlined text-white text-lg">bookmark</span>
+                </div>
+                <div class="text-white text-xs font-bold mb-1">Cientos de likes</div>
+                <div class="text-[11px] leading-snug">
+                    <span class="font-bold text-white mr-1">TravelHub_Official</span>
+                    <span id="preview-caption-text" class="text-slate-200">
+                        {{ package.variants.0.text }}
+                    </span>
+                </div>
+                <div class="text-primary text-[11px] mt-1 font-medium">
+                    {{ package.hashtags|join:" " }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+        <!-- Variant Selection -->
+        <div class="card-base p-5">
+            <h3 class="text-xs font-black text-text-muted uppercase tracking-widest mb-4 flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary text-sm">auto_awesome</span>
+                Variantes de Caption
+            </h3>
+            <div class="space-y-3">
+                {% for variant in package.variants %}
+                <div onclick="document.getElementById('preview-caption-text').innerText = this.querySelector('.variant-text').innerText; 
+                             document.querySelectorAll('.variant-card').forEach(c => c.classList.remove('border-primary', 'bg-primary/5'));
+                             this.classList.add('border-primary', 'bg-primary/5');"
+                     class="variant-card cursor-pointer p-4 rounded-xl border border-border-color bg-surface-2 hover:border-primary/50 transition-all {% if forloop.first %}border-primary bg-primary/5{% endif %}">
+                    <p class="text-[10px] font-mono uppercase text-primary mb-1 tracking-tighter">{{ variant.tone_name }}</p>
+                    <p class="variant-text text-sm text-text-main leading-relaxed italic">"{{ variant.text }}"</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Smart Insights -->
+        <div class="space-y-6">
+            <!-- Hashtags -->
+            <div class="card-base p-5">
+                <h3 class="text-xs font-black text-text-muted uppercase tracking-widest mb-4 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary text-sm">tag</span>
+                    Smart Hashtags
+                </h3>
+                <div class="flex flex-wrap gap-2 mb-4">
+                    {% for tag in package.hashtags %}
+                    <span class="px-2.5 py-1 rounded-full bg-surface-3 border border-border-color text-text-secondary text-[11px] hover:border-primary hover:text-primary transition-all cursor-pointer">
+                        {{ tag }}
+                    </span>
+                    {% endfor %}
+                </div>
+                <button onclick="navigator.clipboard.writeText('{{ package.hashtags|join:" " }}')"
+                    class="w-full py-2 bg-surface-2 border border-border-color hover:border-primary text-text-main text-[10px] uppercase font-bold rounded-lg transition-all flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined text-sm">content_copy</span> Copiar todos
+                </button>
+            </div>
+
+            <!-- Stats -->
+            <div class="card-base p-5 bg-gradient-to-br from-surface-1 to-surface-2">
+                <h3 class="text-xs font-black text-text-muted uppercase tracking-widest mb-4">Optimización</h3>
+                <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                        <span class="material-symbols-outlined text-primary">schedule</span>
+                    </div>
+                    <div>
+                        <p class="text-xs font-bold text-text-main">{{ package.best_time_to_post }}</p>
+                        <p class="text-[10px] text-status-success font-medium">{{ package.engagement_prediction }} engagement predicho</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

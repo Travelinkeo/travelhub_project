@@ -1,0 +1,20 @@
+[run]
+branch = True
+source = core,travelhub
+omit = 
+    */migrations/*
+    manage.py
+    */tests/*
+parallel = True
+
+[report]
+fail_under = 75
+show_missing = True
+skip_covered = True
+precision = 1
+exclude_lines =
+    pragma: no cover
+    if __name__ == .__main__.: 
+    def __repr__
+    def __str__
+    raise NotImplementedError

@@ -1,0 +1,210 @@
+{% extends 'base_modern.html' %}
+{% load i18n static %}
+
+{% block title %}Marketing Automático | TravelHub{% endblock %}
+
+{% block extra_head %}
+<style>
+input[type="text"],input[type="email"],select,textarea{width:100%;border:1px solid var(--border);border-radius:.25rem;padding:.65rem 1rem;font-size:.875rem;outline:none;color:var(--text-main);background:var(--surface-2);transition:border-color .2s}
+input:focus,select:focus,textarea:focus{border-color:var(--primary);box-shadow:0 0 0 1px var(--primary)}
+</style>
+{% endblock %}
+
+{% block content %}
+<main class="flex-1 w-full max-w-[1200px] mx-auto p-6 md:p-10 bg-surface-base text-text-main">
+
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-8 pb-6 border-b border-border-color">
+        <div>
+            <div class="flex items-center gap-2 text-sm font-medium text-text-muted mb-2">
+                <span class="text-text-main">Sistema</span>
+                <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+                <span class="text-primary">Marketing IA</span>
+            </div>
+            <h1 class="text-3xl font-black text-text-main tracking-tight flex items-center gap-2">
+                Marketing Automático <span class="text-2xl">✨</span>
+            </h1>
+            <p class="text-text-secondary text-sm mt-1">Genera flyers e imágenes para redes sociales con IA.</p>
+        </div>
+        <button onclick="window.location.reload()"
+            class="h-10 px-5 flex items-center gap-2 bg-surface-base border border-border-color text-text-main rounded-xl font-black text-[11px] uppercase tracking-widest hover:border-primary transition-all shadow-sm active:scale-95">
+            <span class="material-symbols-outlined text-[18px]">refresh</span> {% trans "Refrescar Panel" %}
+        </button>
+    </div>
+
+    <!-- Grid Layout -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <!-- Generator Panel -->
+        <div class="lg:col-span-2 card-base p-6">
+            <h2 class="text-lg font-black text-text-main mb-6 flex items-center gap-2 pb-4 border-b border-border-color">
+                <span class="material-symbols-outlined text-primary text-[20px]">image</span>
+                Generador de Ofertas Flash
+            </h2>
+
+            <form hx-post="{% url 'marketing:generar_flyer' %}" hx-target="#flyer-preview" hx-indicator="#loading-flyer"
+                class="space-y-5">
+                {% csrf_token %}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <label class="flex flex-col gap-2">
+                        <span class="text-xs font-bold text-text-muted uppercase tracking-wider">Hotel (Opcional)</span>
+                        <select name="hotel_id">
+                            <option value="">-- Manual --</option>
+                            {% for hotel in hoteles %}
+                            <option value="{{ hotel.id }}">{{ hotel.nombre }} ({{ hotel.destino }})</option>
+                            {% endfor %}
+                        </select>
+                    </label>
+                    <label class="flex flex-col gap-2">
+                        <span class="text-xs font-bold text-text-muted uppercase tracking-wider">Destino (si es manual)</span>
+                        <input type="text" name="destino" placeholder="Ej. Madrid, Canaima...">
+                    </label>
+                    <label class="flex flex-col gap-2">
+                        <span class="text-xs font-bold text-text-muted uppercase tracking-wider">Precio Desde</span>
+                        <input type="text" name="precio" placeholder="Ej. $850">
+                    </label>
+                    <label class="flex flex-col gap-2">
+                        <span class="text-xs font-bold text-text-muted uppercase tracking-wider">Aerolínea</span>
+                        <input type="text" name="aerolinea" placeholder="Ej. Iberia, Avianca">
+                    </label>
+                </div>
+
+                <button type="submit"
+                    class="w-full h-14 bg-gradient-to-r from-primary to-primary-hover text-on-primary font-black rounded-xl text-base shadow-lg shadow-primary/20 transition-all hover:-translate-y-1 active:scale-[0.98] flex items-center justify-center gap-3">
+                    <span class="text-xl">🎨</span> {% trans "Generar Imagen para Social Media" %}
+                </button>
+            </form>
+
+            <div id="loading-flyer" class="htmx-indicator flex items-center justify-center py-10">
+                <span class="material-symbols-outlined text-primary text-4xl animate-spin">progress_activity</span>
+                <span class="ml-4 text-text-secondary text-sm">Generando diseño con IA...</span>
+            </div>
+
+            <div id="flyer-preview"
+                class="mt-6 flex justify-center bg-surface-2 border border-border-color rounded-2xl p-4 overflow-hidden min-h-[350px]">
+                <div class="text-text-secondary flex flex-col items-center justify-center text-center py-16">
+                    <span class="material-symbols-outlined text-6xl text-text-muted mb-4">image</span>
+                    <p class="text-sm font-medium">La vista previa aparecerá aquí</p>
+                    <p class="text-xs mt-1 text-text-muted">Formato 1080x1920 (Instagram Stories)</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="space-y-6">
+            <!-- Advanced AI Social Hub -->
+            <div class="card-base p-6 bg-gradient-to-br from-primary/5 to-surface-1">
+                <div class="flex justify-between items-center mb-5 pb-4 border-b border-border-color">
+                    <h2 class="text-base font-bold text-text-main flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary text-[20px]">campaign</span> Social Hub Pro
+                    </h2>
+                    <a href="{% url 'marketing:social_hub' %}" class="btn-primary h-8 text-[11px]">
+                        {% trans "Abrir Hub Completo" %}
+                    </a>
+                </div>
+                
+                <form hx-post="{% url 'marketing:generar_social_advanced' %}" 
+                      hx-target="#social-hub-results"
+                      hx-indicator="#loading-social" 
+                      class="space-y-4">
+                    {% csrf_token %}
+                    <div class="grid grid-cols-1 gap-4">
+                        <label class="flex flex-col gap-2">
+                            <span class="text-[10px] font-black text-text-muted uppercase tracking-wider">Hotel de Referencia</span>
+                            <select name="hotel_id" class="input-base">
+                                {% for hotel in hoteles %}
+                                <option value="{{ hotel.id }}">{{ hotel.nombre }}</option>
+                                {% endfor %}
+                            </select>
+                        </label>
+                        <label class="flex flex-col gap-2">
+                            <span class="text-[10px] font-black text-text-muted uppercase tracking-wider">Tono & Personalidad</span>
+                            <select name="tono" class="input-base">
+                                <option value="PROFESIONAL_AVENTURERO">🚀 Profesional-Aventurero (Nuevo)</option>
+                                <option value="LUJOSO">💎 Lujoso</option>
+                                <option value="FAMILIAR">👨‍👩‍👧‍👦 Familiar</option>
+                                <option value="AVENTURERO">🎒 Solo Aventura</option>
+                            </select>
+                        </label>
+                    </div>
+
+                    <button type="submit"
+                        class="btn-primary w-full shadow-lg shadow-primary/20 hover:scale-[1.01] active:scale-95 transition-all">
+                        <span class="material-symbols-outlined text-[18px]">psychology</span>
+                        {% trans "Generar Estrategia Social" %}
+                    </button>
+                </form>
+
+                <div id="loading-social" class="htmx-indicator mt-6 text-center">
+                    <div class="flex flex-col items-center gap-3">
+                        <span class="material-symbols-outlined text-primary text-3xl animate-spin">progress_activity</span>
+                        <span class="text-text-secondary text-xs font-medium animate-pulse">Analizando destino y generando variantes...</span>
+                    </div>
+                </div>
+
+                <div id="social-hub-results" class="mt-6">
+                    <!-- Aquí se inyectarán los resultados (Instagram Preview + Variantes) -->
+                    <div class="text-text-muted text-xs text-center py-10 border-2 border-dashed border-border-color rounded-2xl">
+                        Selecciona un hotel y genera tu estrategia para ver la previsualización mágica.
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Forecast Promotion Card -->
+            <div class="card-base p-6 bg-gradient-to-br from-emerald-500/10 via-surface-1 to-surface-1 border-l-4 border-l-emerald-500 overflow-hidden relative group my-6">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 blur-3xl -mr-16 -mt-16 group-hover:bg-emerald-500/10 transition-all duration-700"></div>
+                <div class="relative z-10 flex flex-col items-start">
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 text-[9px] font-black uppercase tracking-widest rounded-md">New Feature</span>
+                        <span class="material-symbols-outlined text-emerald-400 text-[18px] animate-pulse">insights</span>
+                    </div>
+                    <h3 class="text-base font-black text-text-main mb-2 tracking-tight">AI Sales Forecast</h3>
+                    <p class="text-[11px] text-text-secondary leading-relaxed mb-5 max-w-xs">
+                        Predice tendencias de ventas, identifica destinos "Hot" y recibe consejos estratégicos de Gemini para el próximo mes.
+                    </p>
+                    <a href="{% url 'marketing:forecast' %}" class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-black font-black text-[10px] uppercase tracking-wider rounded-xl transition-all shadow-lg shadow-emerald-500/20 active:scale-95">
+                        Ver Predicciones <span class="material-symbols-outlined text-[16px]">trending_up</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Activos Recientes -->
+            <div class="card-base p-6">
+                <h3 class="text-sm font-bold text-text-main mb-4 uppercase tracking-wider">Activos Recientes</h3>
+                <div class="space-y-2">
+                    {% for activo in activos_recientes %}
+                    <div class="flex items-center gap-4 p-4 hover:bg-surface-2 rounded-2xl transition-all cursor-pointer border border-transparent hover:border-border-color group">
+                        <div class="w-12 h-12 bg-primary/10 text-primary flex items-center justify-center rounded-2xl text-xl group-hover:scale-110 transition-transform">
+                            {% if activo.tipo == 'FLYER' %}🖼️{% else %}✍️{% endif %}
+                        </div>
+                        <div>
+                            <p class="text-xs font-black text-text-main uppercase tracking-tighter">{{ activo.get_tipo_display }}</p>
+                            <p class="text-xs text-text-secondary">{{ activo.fecha_creacion|date:"d M, H:i" }}</p>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="text-text-muted text-sm text-center py-4">No hay activos generados aún.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<script>
+#flyer-preview img {
+    max-width: 100%;
+    border-radius: 1rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.2);
+}
+</script>
+
+<style>
+#flyer-preview img {
+    max-width: 100%;
+    border-radius: 1rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.2);
+}
+</style>
+{% endblock %}

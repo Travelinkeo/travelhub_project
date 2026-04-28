@@ -1,0 +1,48 @@
+<tr id="reclamo-{{ reclamo.id }}" class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors group">
+    <td class="py-4 px-4">
+        <div class="font-black text-sm text-slate-900 dark:text-white">{{ reclamo.boleto.localizador_pnr }}</div>
+        <div class="text-[10px] font-bold text-slate-400 font-mono">{{ reclamo.boleto.numero_boleto|default:"TICKETLESS" }}</div>
+    </td>
+    <td class="py-4 px-4">
+        <div class="font-bold text-sm text-slate-900 dark:text-white line-clamp-1">{{ reclamo.boleto.nombre_pasajero_completo|title }}</div>
+        <!-- Extraemos el destino del json si existe, o mostramos Internacional -->
+        <div class="text-[10px] uppercase font-black tracking-widest text-blue-500 bg-blue-50 dark:bg-blue-900/20 w-max px-2 py-0.5 rounded border border-blue-100 dark:border-blue-800 mt-1">
+            Vuelo Internacional
+        </div>
+    </td>
+    <td class="py-4 px-4 text-right">
+        <span class="text-sm font-medium text-slate-500 dark:text-slate-400">${{ reclamo.boleto.impuestos_total_calculado }}</span>
+    </td>
+    <td class="py-4 px-4 text-right">
+        <div class="font-black text-lg text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 px-3 py-1 rounded-xl inline-block border border-emerald-100 dark:border-emerald-800">
+            ${{ reclamo.monto_estimado }}
+        </div>
+    </td>
+    <td class="py-4 px-4 text-center">
+        {% if reclamo.estado == 'ELE' %}
+            <button hx-post="{% url 'finance:iniciar_tax_refund' reclamo.id %}"
+                    hx-target="#reclamo-{{ reclamo.id }}"
+                    hx-swap="outerHTML"
+                    hx-indicator=".htmx-indicator-{{ reclamo.id }}"
+                    class="bg-slate-900 dark:bg-blue-600 hover:bg-slate-800 dark:hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-xl text-xs shadow-md transition-all active:scale-95 flex items-center justify-center gap-2 mx-auto w-36">
+                <span class="indicator-text">Iniciar Trámite</span>
+                <!-- Loader HTMX -->
+                <span class="material-symbols-outlined text-[16px] htmx-indicator htmx-indicator-{{ reclamo.id }} animate-spin hidden">sync</span>
+            </button>
+        {% elif reclamo.estado == 'TRA' %}
+            <div class="flex flex-col items-center">
+                <span class="bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 font-bold px-3 py-1.5 rounded-lg text-[10px] uppercase tracking-widest border border-amber-200 dark:border-amber-800">
+                    En Trámite
+                </span>
+                <span class="text-[9px] font-mono text-slate-400 mt-1 shadow-inner" title="Tracking ID">{{ reclamo.tracking_code_proveedor }}</span>
+            </div>
+        {% elif reclamo.estado == 'COM' %}
+            <div class="flex flex-col items-center">
+                <span class="bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 font-bold px-3 py-1.5 rounded-lg text-[10px] uppercase tracking-widest border border-emerald-200 dark:border-emerald-800">
+                    Completado
+                </span>
+                <span class="text-[9px] font-mono text-slate-400 mt-1" title="Monto recuperado">${{ reclamo.monto_recuperado }}</span>
+            </div>
+        {% endif %}
+    </td>
+</tr>

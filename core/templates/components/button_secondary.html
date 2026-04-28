@@ -1,0 +1,19 @@
+{# core/templates/components/button_secondary.html #}
+{% comment %}
+    Parámetros esperados:
+    - type (default 'button', puede ser 'submit')
+    - text (texto del botón)
+    - class (opcional, clases extra)
+    - icon (opcional, icono lucide a la izquierda)
+    - onclick (optional)
+{% endcomment %}
+<button 
+    type="{{ type|default:'button' }}"
+    {% if onclick %}onclick="{{ onclick }}"{% endif %}
+    class="inline-flex items-center justify-center h-10 px-4 py-2 border border-zinc-700 bg-surface-dark text-sm font-medium rounded-xl text-zinc-300 hover:bg-zinc-800 hover:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-zinc-950 focus:ring-zinc-600 transition-colors duration-200 shadow-sm {{ class|default:'' }}"
+>
+    {% if icon %}
+    <span class="material-symbols-outlined text-[18px] mr-2 -ml-1">{{ icon }}</span>
+    {% endif %}
+    {{ text }}
+</button>

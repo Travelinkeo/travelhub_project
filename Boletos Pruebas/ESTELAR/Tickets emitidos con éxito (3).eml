@@ -1,0 +1,1313 @@
+Delivered-To: armandoaleman@gmail.com
+Received: by 2002:a05:6236:6a82:b0:1ba:5a6f:e4ee with SMTP id bx2csp813598ggc;
+        Sat, 31 Jan 2026 06:42:43 -0800 (PST)
+X-Received: by 2002:a05:6214:21a9:b0:88a:2ed6:252 with SMTP id 6a1803df08f44-894df970fd1mr125882886d6.5.1769870563059;
+        Sat, 31 Jan 2026 06:42:43 -0800 (PST)
+ARC-Seal: i=1; a=rsa-sha256; t=1769870563; cv=none;
+        d=google.com; s=arc-20240605;
+        b=R4veipZj8lI5AK8tVd7p5XTTypqbg6/Yuj4vThWs+Qvfn/AXDBgNsRomJQO/ozaOBD
+         kttkSCSNH9rXAu1U/4lsDy02SeSIhGaVr7r5QySko7BT0bN4pjHbjyH6UBQT/md3f3VT
+         /4t+tSK84fqzR8ZYbJvzJcJDzE8bJH0uPGtodrJa76pXUcn3YMXxLWTsAFqlcVlyfo0c
+         qFTQZaKCANe9kPHTiuKbHVa8iBMk7iVwU5VYw036sic6GRsYswi2SJ40fVVateii4Jao
+         dUkYdVYFWrCk42TSRkTMbMsaqsg93I0tNad8k+6p5FAdnnnNGycBj/2p05n6jpl1d6AZ
+         i+5Q==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
+        h=feedback-id:mime-version:date:content-transfer-encoding:message-id
+         :subject:to:from:dkim-signature:dkim-signature;
+        bh=h8XZ/bxfsYm0yEpkuF8opIlt45tjrbCTs/kZgGXWky4=;
+        fh=718oJjDLT+pGKF5Fmae+OdJRs4a8p5KOwVmpIbDUIco=;
+        b=MjYXLh/ImRobFZ6FGCKPN2T4nk8AkTLBXNF9MkwJ0OyHnhwhELHOwzA7jexzyvshuc
+         t3+Bu3niyEH3u10NC2tlU6eeldI00oBTwvWB2/jzgxiNMicTa7Tr9TWJsNIuX5pnPpCU
+         ou/G0eAeo+cDLzNTJOpuYrZGMflbK6Fe8ibZAyEh9i7uIbWbTo555QwYdvOTiyXcBq4v
+         uEeilFc22pxDQiNkfPxfqUYNK7+XHEFI9l4rFss4nPKEVVOeFeQzrZ9LfRXLof++Uf+z
+         e6HpW/MrJ+U4jhkfej8VzEGZltpcwkttACdhG7bdSBcVpSgrt4kNMD43Pn94Tg7mrdlT
+         NdZg==;
+        dara=google.com
+ARC-Authentication-Results: i=1; mx.google.com;
+       dkim=pass header.i=@estelarmiles.com header.s=rp4ofnsanwokmniomrcoavzmfavxcras header.b=oKn4TIgd;
+       dkim=pass header.i=@amazonses.com header.s=6gbrjpgwjskckoa6a5zn6fwqkn67xbtw header.b=D6PZPChz;
+       spf=pass (google.com: domain of 0100019c1481959a-0e21d1ea-2d06-4b4d-a9ca-abcabc6ec1d1-000000@amazonses.com designates 54.240.9.107 as permitted sender) smtp.mailfrom=0100019c1481959a-0e21d1ea-2d06-4b4d-a9ca-abcabc6ec1d1-000000@amazonses.com
+Return-Path: <0100019c1481959a-0e21d1ea-2d06-4b4d-a9ca-abcabc6ec1d1-000000@amazonses.com>
+Received: from a9-107.smtp-out.amazonses.com (a9-107.smtp-out.amazonses.com. [54.240.9.107])
+        by mx.google.com with ESMTPS id af79cd13be357-8c711bbd69asi988179385a.81.2026.01.31.06.42.42
+        for <armandoaleman@gmail.com>
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Sat, 31 Jan 2026 06:42:43 -0800 (PST)
+Received-SPF: pass (google.com: domain of 0100019c1481959a-0e21d1ea-2d06-4b4d-a9ca-abcabc6ec1d1-000000@amazonses.com designates 54.240.9.107 as permitted sender) client-ip=54.240.9.107;
+Authentication-Results: mx.google.com;
+       dkim=pass header.i=@estelarmiles.com header.s=rp4ofnsanwokmniomrcoavzmfavxcras header.b=oKn4TIgd;
+       dkim=pass header.i=@amazonses.com header.s=6gbrjpgwjskckoa6a5zn6fwqkn67xbtw header.b=D6PZPChz;
+       spf=pass (google.com: domain of 0100019c1481959a-0e21d1ea-2d06-4b4d-a9ca-abcabc6ec1d1-000000@amazonses.com designates 54.240.9.107 as permitted sender) smtp.mailfrom=0100019c1481959a-0e21d1ea-2d06-4b4d-a9ca-abcabc6ec1d1-000000@amazonses.com
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/simple;
+	s=rp4ofnsanwokmniomrcoavzmfavxcras; d=estelarmiles.com;
+	t=1769870562;
+	h=From:To:Subject:Message-ID:Content-Transfer-Encoding:Date:MIME-Version:Content-Type;
+	bh=Xu++qLzXcFKaPkqpAUNxAycc8jZrJrlOCm7hv1MuMi0=;
+	b=oKn4TIgdqXBtx2LniZpDti/L8ixgGjMRT2LTcARWFGfWLrlaxYE3wXVwvbxEvmLS
+	NAwijdQGQ/LYOGJbjQITyZzICScCYYem8w39Fv+rkMEyO2QRHUGTqkasQ0VEcKKzt+5
+	RCHtEYuvWCj54wc0Xi5aBnJtp6LZQoS0PdVhnJHGnvACGNfn68gq9s2VNLQ5tT9nFlw
+	YhaJsN3yFwy5yt8ml7+n1hvLzpeOmUHuELRNiBBJ2kyG9Abr933fJsSKMS9KVWWU3qa
+	Quu4a2hmP4NvM/RMqGZH3o6+Rs4K/PVkLUGn8LshcfZSf/1hwDB7DENrF04UtaPv3Hl
+	hNf/ZjI9fA==
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/simple;
+	s=6gbrjpgwjskckoa6a5zn6fwqkn67xbtw; d=amazonses.com; t=1769870562;
+	h=From:To:Subject:Message-ID:Content-Transfer-Encoding:Date:MIME-Version:Content-Type:Feedback-ID;
+	bh=Xu++qLzXcFKaPkqpAUNxAycc8jZrJrlOCm7hv1MuMi0=;
+	b=D6PZPChzK7MusFzyG6ZRyghzySROLy8+NE2AL1fjr+UnvZFyJI+IWoi8ofaudkbD
+	fjEKMpHXqfnbx1NKcfVaF1E2d8gYkIv3SqKSd6oZhHMAqCg5P1paop2jMEZHZvT2Fv7
+	AZian7N10yRAKYWFhYEXo+lm1x4Vy3qOKMXQD6mQ=
+From: Estelar <noreply@estelarmiles.com>
+To: armandoaleman@gmail.com
+Subject: =?UTF-8?Q?Tickets_emitidos_con_=C3=A9xito?=
+Message-ID: <0100019c1481959a-0e21d1ea-2d06-4b4d-a9ca-abcabc6ec1d1-000000@email.amazonses.com>
+Content-Transfer-Encoding: quoted-printable
+Date: Sat, 31 Jan 2026 14:42:42 +0000
+MIME-Version: 1.0
+Content-Type: text/html; charset=utf-8
+Feedback-ID: ::1.us-east-1.bnAXUzctr4V0DRPp9zdZdVGzSHgAm73WhyYH1jfGUqw=:AmazonSES
+X-SES-Outgoing: 2026.01.31-54.240.9.107
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.=
+w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html dir=3D"ltr" =
+lang=3D"en">
+  <head>
+    <link
+      rel=3D"preload"
+      as=3D"image"
+      href=3D"https://estelar-miles-bucket.s3.us-east-1.amazonaws.=
+com/logo_estelar_latinoamerica_45090b7aca.png"
+    />
+    <meta content=3D"text/html; charset=3DUTF-8" http-equiv=3D"Content-Type=
+" />
+    <meta name=3D"x-apple-disable-message-reformatting" />
+    <title>Tickets Estelar</title>
+    <!--$-->
+    <style>
+      @font-face {
+        font-family: 'Open Sans';
+        font-style: normal;
+        font-weight: 400;
+        mso-font-alt: 'Arial';
+        src: url(https://fonts.gstatic.=
+com/s/opensans/v40/memvYaGs126MiZpBA-UvWbX2vVnXBbObj2OVTS-muw.woff2) =
+format('woff2');
+      }
+
+      * {
+        font-family: 'Open Sans', =
+Arial;
+      }
+    </style>
+  </head>
+  <div
+    style=3D"display:none;over=
+flow:hidden;line-height:1px;opacity:0;max-height:0;max-width:0"
+  >
+    Tickets Estelar
+    <div>
+      =C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=
+=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=
+=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=
+=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=
+=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=
+=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=
+=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=
+=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=
+=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=
+=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=
+=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=
+=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=
+=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=
+=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=
+=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=
+=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=
+=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=
+=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=
+=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=
+=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=
+=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=
+=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=
+=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=
+=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=
+=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=
+=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=
+=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=
+=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=
+=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=
+=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=
+=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=
+=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=
+=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=
+=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=
+=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=
+=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=
+=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=
+=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=
+=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=
+=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=
+=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=
+=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=
+=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=
+=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=
+=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=
+=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=
+=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=
+=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=
+=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=
+=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=
+=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=
+=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=
+=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=
+=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=
+=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=
+=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=
+=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=
+=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=
+=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=
+=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=
+=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=
+=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=
+=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=
+=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=
+=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=
+=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=
+=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=
+=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=
+=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=
+=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=
+=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=
+=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=
+=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=
+=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=
+=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=
+=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=
+=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=
+=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=
+=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=
+=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=
+=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=
+=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=
+=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=
+=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=
+=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=
+=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=
+=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=
+=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=
+=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=
+=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=
+=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=
+=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=
+=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=
+=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=
+=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=
+=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=
+=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=
+=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=
+=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=
+=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=
+=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=
+=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=
+=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=
+=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=
+=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=
+=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=
+=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=
+=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=
+=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=
+=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=
+=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=
+=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=
+=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=
+=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=
+=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=
+=EF=BB=BF=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=
+=C2=A0=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=
+=E2=80=8C=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF=C2=A0=E2=80=8C=
+=E2=80=8B=E2=80=8D=E2=80=8E=E2=80=8F=EF=BB=BF
+    </div>
+  </div>
+  <body
+    style=3D"padding:0;margin:0;background:#00255E;box-sizing:border-box;ba=
+ckground-size:cover;background-position:center;padding-bottom:64px"
+  >
+    <table
+      align=3D"center"
+      width=3D"100%"
+      border=3D"0"
+      cellpadding=3D"0"
+      cellspacing=3D"0"
+      role=3D"presentation"
+      style=3D"padding-top:3rem;padding-bottom:1.5rem;background-color:rgb(=
+0,37,94);padding-left:1.5rem;padding-right:1.5rem;width:100%;max-width:37.=
+5em"
+    >
+      <tbody>
+        <tr style=3D"width:100%">
+          <td>
+            <table
+              align=3D"center"
+              =
+width=3D"100%"
+              border=3D"0"
+              cellpadding=3D"0"
+              cellspacing=3D"0"
+              role=3D"presentation"
+              class=3D""
+            >
+              <tbody =
+style=3D"width:100%">
+                <tr style=3D"width:100%">
+                  <img
+                    alt=3D"Estelar Logo"
+                    height=3D"64"
+                    =
+src=3D"https://estelar-miles-bucket.s3.us-east-1.amazonaws.=
+com/logo_estelar_latinoamerica_45090b7aca.png"
+                    =
+style=3D"margin-left:auto;margin-right:auto;padding-bottom:3rem;display:blo=
+ck;outline:none;border:none;text-decoration:none"
+                    =
+width=3D"220"
+                  />
+                </tr>
+              </tbody>
+            </table>
+            <table
+              align=3D"center"
+              width=3D"100%"
+              border=3D"0"
+              cellpadding=3D"0"
+              cellspacing=3D"0"
+              role=3D"presentation"
+              style=3D"padding-bottom:1rem"
+            >
+              <tbody style=3D"width:100%">
+                <tr =
+style=3D"width:100%">
+                  <td data-id=3D"__react-email-column=
+">
+                    <p
+                      style=3D"font-weight:500;co=
+lor:rgb(243,243,243);font-size:0.75rem;line-height:1rem;margin:0px;margin-t=
+op:0px;margin-bottom:0px"
+                    >
+                      =
+Estado de compra:
+                    </p>
+                  </td>
+                  <td data-id=3D"__react-email-column">
+                    <a
+                      style=3D"background-color:rgb(=
+243,243,243);margin-left:1rem;margin-right:1rem;padding-top:0.=
+25rem;padding-bottom:0.25rem;padding-left:2rem;padding-right:2rem;border-ra=
+dius:9999px;font-size:0.75rem;line-height:1rem;color:rgb(2,176,=
+51);text-decoration:none;display:inline-block;max-width:100%;mso-padding-al=
+t:0px;padding:4px 32px 4px 32px"
+                      target=3D"_blank"
+                      ><span
+                        ><!--[if mso
+                          ]><i
+                            =
+style=3D"mso-font-width:400%;mso-text-raise:6"
+                            =
+hidden
+                            >&#8202;&#8202;&#8202;&#8202;</i
+                          ><!
+                        [endif]--></span
+                      ><span
+                        =
+style=3D"max-width:100%;display:inline-block;line-height:120%;mso-padding-a=
+lt:0px;mso-text-raise:3px"
+                        >Aprobado</span
+                      ><span
+                        ><!--[if mso
+                          ]><i style=3D"mso-font-width:400%" hidden
+                            >&#8202;&#8202;&#8202;&#8202;&#8203;</i
+                          ><!
+                        [endif]--></span
+                      ></a
+                    >
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <table
+              align=3D"center"
+              =
+width=3D"100%"
+              border=3D"0"
+              cellpadding=3D"0"
+              cellspacing=3D"0"
+              role=3D"presentation"
+              style=3D"padding-bottom:1rem"
+            >
+              <tbody style=3D"width:100%">
+                <tr =
+style=3D"width:100%">
+                  <td data-id=3D"__react-email-column=
+">
+                    <p
+                      style=3D"font-weight:500;co=
+lor:rgb(243,243,243);font-size:0.75rem;line-height:1rem;margin:0px;margin-t=
+op:0px;margin-bottom:0px"
+                    >
+                      =
+C=C3=B3digo de reserva:
+                    </p>
+                  </td>
+                  <td data-id=3D"__react-email-column">
+                    <a
+                      style=3D"background-color:rgb(=
+243,243,243);margin-left:1rem;margin-right:1rem;padding-top:0.=
+25rem;padding-bottom:0.25rem;padding-left:2rem;padding-right:2rem;border-ra=
+dius:9999px;font-size:0.75rem;line-height:1rem;text-decoration:none;display=
+:inline-block;max-width:100%;mso-padding-alt:0px;padding:4px 32px 4px 32px"
+                      target=3D"_blank"
+                      ><span
+                        ><!--[if mso
+                          ]><i
+                            style=3D"mso-font-width:400%;mso-text-raise:6"
+                            hidden
+                            =
+>&#8202;&#8202;&#8202;&#8202;</i
+                          ><!
+                        [endif]--></span
+                      ><span
+                        style=3D"max-width:100%;display:inline-block;line-h=
+eight:120%;mso-padding-alt:0px;mso-text-raise:3px"
+                        =
+>HCDETE</span
+                      ><span
+                        ><!--[if=
+ mso
+                          ]><i style=3D"mso-font-width:400%" hidden
+                            >&#8202;&#8202;&#8202;&#8202;&#8203;</i
+                          ><!
+                        [endif]--></span
+                      ></a
+                    >
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <table
+      align=3D"center"
+      width=3D"100%"
+      border=3D"0"
+      cellpadding=3D"0"
+      cellspacing=3D"0"
+      role=3D"presentation"
+      style=3D"border-bottom-right-radius:1rem;border-bottom-left-radius:1r=
+em;background-color:rgb(255,255,255);padding-left:1rem;padding-right:1rem;p=
+adding-top:1rem;padding-bottom:4rem;max-width:37.5em"
+    >
+      <tbody>
+        <tr style=3D"width:100%">
+          <td>
+            <table
+              align=3D"center"
+              width=3D"100%"
+              border=3D"0"
+              cellpadding=3D"0"
+              cellspacing=3D"0"
+              role=3D"presentation"
+              style=3D"padding-bottom:1.25rem"
+            >
+              <tbody>
+                <tr>
+                  <td>
+                    <table
+                      align=3D"center"
+                      width=3D"100%"
+                      border=3D"0"
+                      cellpadding=3D"0"
+                      =
+cellspacing=3D"0"
+                      role=3D"presentation"
+                      style=3D"max-width:37.5em"
+                    >
+                      <tbody>
+                        <tr =
+style=3D"width:100%">
+                          <td>
+                            <p
+                              =
+class=3D"text-md"
+                              style=3D"color:rgb(41,44,=
+126);font-weight:700;margin:0px;margin-bottom:0.5rem;font-size:14px;line-he=
+ight:24px"
+                            >
+                              =
+Detalles de Pasajeros
+                            </p>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <table
+                      align=3D"center"
+                      width=3D"100%"
+                      border=3D"0"
+                      cellpadding=3D"0"
+                      =
+cellspacing=3D"0"
+                      role=3D"presentation"
+                      style=3D"margin-bottom:1.5rem;max-width:37.5em"
+                    >
+                      <tbody>
+                        <tr style=3D"width:100%">
+                         =
+ <td>
+                            <table
+                              =
+align=3D"center"
+                              width=3D"100%"
+                              border=3D"0"
+                              =
+cellpadding=3D"0"
+                              cellspacing=3D"0"
+                              role=3D"presentation"
+                            >
+                              <tbody =
+style=3D"width:100%">
+                                <tr =
+style=3D"width:100%">
+                                  <td
+                                    data-id=3D"__react-email-column"
+                                    style=3D"padding-bottom:1rem;width:33.=
+33%"
+                                  >
+                                  =
+  <p
+                                      style=3D"color:rgb(41,44,=
+126);font-weight:600;font-size:0.75rem;line-height:1rem;margin:0px;margin-b=
+ottom:0.5rem"
+                                    >
+                                      Nombre
+                              =
+      </p>
+                                    <p
+                         =
+             style=3D"color:rgb(140,140,140);font-size:0.=
+75rem;line-height:1rem;margin:0px"
+                                    >
+                                      INGRID
+                              =
+      </p>
+                                  </td>
+                        =
+          <td
+                                    data-id=3D"__react-email-=
+column"
+                                    style=3D"padding-bottom:1rem;wi=
+dth:33.33%"
+                                  >
+                           =
+         <p
+                                      style=3D"color:rgb(41,44,=
+126);font-weight:600;font-size:0.75rem;line-height:1rem;margin:0px;margin-b=
+ottom:0.5rem"
+                                    >
+                                      Apellido
+                            =
+        </p>
+                                    <p
+                                      style=3D"color:rgb(140,140,=
+140);font-size:0.75rem;line-height:1rem;margin:0px"
+                                    >
+                                     =
+ GIRALDO
+                                    </p>
+                         =
+         </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                            <table
+                              =
+align=3D"center"
+                              width=3D"100%"
+                              border=3D"0"
+                              =
+cellpadding=3D"0"
+                              cellspacing=3D"0"
+                              role=3D"presentation"
+                            >
+                              <tbody =
+style=3D"width:100%">
+                                <tr =
+style=3D"width:100%">
+                                  <td
+                                    data-id=3D"__react-email-column"
+                                    style=3D"padding-bottom:1rem;width:33.=
+33%"
+                                  >
+                                  =
+  <p
+                                      style=3D"color:rgb(41,44,=
+126);font-weight:600;font-size:0.75rem;line-height:1rem;margin:0px;margin-b=
+ottom:0.5rem"
+                                    >
+                                      Correo Electr=C3=B3nico
+                                    </p>
+                                  =
+  <p
+                                      style=3D"color:rgb(140,140,=
+140);font-size:0.75rem;line-height:1rem;margin:0px"
+                                    >
+                                     =
+ armandoaleman@gmail.com
+                                    </p>
+                                  </td>
+                                  =
+<td
+                                    data-id=3D"__react-email-column"
+                                    style=3D"padding-bottom:1rem;width:33.=
+33%"
+                                  >
+                                  =
+  <p
+                                      style=3D"color:rgb(41,44,=
+126);font-weight:600;font-size:0.75rem;line-height:1rem;margin:0px;margin-b=
+ottom:0.5rem"
+                                    >
+                                      N=C3=BAmero de ticket
+                                    </p>
+                                  =
+  <p
+                                      style=3D"color:rgb(140,140,=
+140);font-size:0.75rem;line-height:1rem;margin:0px"
+                                    >
+                                     =
+ 0520270647904
+                                    </p>
+                                  </td>
+                                =
+</tr>
+                              </tbody>
+                            =
+</table>
+                            <hr
+                              =
+style=3D"width:100%;border:none;border-top:1px solid #eaeaea"
+                            />
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <table
+              align=3D"center"
+              width=3D"100%"
+              border=3D"0"
+              cellpadding=3D"0"
+              cellspacing=3D"0"
+              role=3D"presentation"
+            >
+              <tbody>
+                <tr>
+                  <td>
+                    <table
+                      =
+align=3D"center"
+                      width=3D"100%"
+                      border=3D"0"
+                      cellpadding=3D"0"
+                      cellspacing=3D"0"
+                      =
+role=3D"presentation"
+                      style=3D"max-width:37.5em"
+                    >
+                      <tbody>
+                        <tr style=3D"width:100%">
+                         =
+ <td>
+                            <p
+                              =
+class=3D"text-md"
+                              style=3D"color:rgb(41,44,=
+126);font-weight:700;margin:0px;margin-bottom:0.5rem;font-size:14px;line-he=
+ight:24px"
+                            >
+                              =
+Detalles de Viaje
+                            </p>
+                        =
+  </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <table
+                      align=3D"center"
+                      width=3D"100%"
+                      border=3D"0"
+                      cellpadding=3D"0"
+                      cellspacing=3D"0"
+                      =
+role=3D"presentation"
+                      style=3D"margin-bottom:2rem;max=
+-width:37.5em"
+                    >
+                      <tbody>
+                        <tr style=3D"width:100%">
+                         =
+ <td>
+                            <table
+                              =
+align=3D"center"
+                              width=3D"100%"
+                              border=3D"0"
+                              =
+cellpadding=3D"0"
+                              cellspacing=3D"0"
+                              role=3D"presentation"
+                            >
+                              <tbody =
+style=3D"width:100%">
+                                <tr =
+style=3D"width:100%">
+                                  <td
+                                    data-id=3D"__react-email-column"
+                                    style=3D"width:50%"
+                                  >
+                                    <p
+                                      style=3D"margin:0px;padding-bottom:0.=
+75rem;font-weight:700;color:rgb(41,44,126);font-size:14px;line-height:24px"
+                                    >
+                                     =
+ Caracas
+                                    </p>
+                         =
+           <p
+                                      =
+style=3D"font-weight:600;font-size:0.75rem;line-height:1rem;margin:0px;padd=
+ing-bottom:0.5rem"
+                                    >
+                                      Hora de salida: 07:00 am
+                                    </p>
+                                  =
+  <p
+                                      style=3D"font-weight:500;font-si=
+ze:0.75rem;line-height:1rem;margin:0px;padding-bottom:0.=
+5rem;text-transform:capitalize"
+                                    >
+                                      lunes, 02 de febrero
+                                    </p>
+                                  =
+  <p
+                                      style=3D"font-weight:300;font-si=
+ze:0.75rem;line-height:1rem;margin:0px;padding-bottom:0.5rem"
+                                    >
+                                     =
+ Aeropuerto Internacional de Maiquet=C3=ADa
+                               =
+       Sim=C3=B3n Bol=C3=ADvar
+                                    </p>
+                                  </td>
+                                  =
+<td
+                                    data-id=3D"__react-email-column"
+                                    style=3D"width:50%"
+                                  >
+                                    <p
+                                      style=3D"margin:0px;padding-bottom:0.=
+75rem;font-weight:700;color:rgb(41,44,126);font-size:14px;line-height:24px"
+                                    >
+                                     =
+ Puerto Ordaz
+                                    </p>
+                                    <p
+                                    =
+  style=3D"font-weight:600;font-size:0.75rem;line-height:1rem;margin:0px;pa=
+dding-bottom:0.5rem"
+                                    >
+                                      Hora de llegada: 08:20 am
+                                    </p>
+                                  =
+  <p
+                                      style=3D"font-weight:500;font-si=
+ze:0.75rem;line-height:1rem;margin:0px;padding-bottom:0.=
+5rem;text-transform:capitalize"
+                                    >
+                                      lunes, 02 de febrero
+                                    </p>
+                                  =
+  <p
+                                      style=3D"font-weight:300;font-si=
+ze:0.75rem;line-height:1rem;margin:0px;padding-bottom:0.5rem"
+                                    >
+                                     =
+ Aeropuerto Internacional Manuel Piar
+                                    =
+</p>
+                                  </td>
+                              =
+  </tr>
+                              </tbody>
+                            =
+</table>
+                            <table
+                              =
+align=3D"center"
+                              width=3D"100%"
+                              border=3D"0"
+                              =
+cellpadding=3D"0"
+                              cellspacing=3D"0"
+                              role=3D"presentation"
+                              style=3D"background-color:rgb(245,245,=
+245);border-radius:0.75rem;padding-left:1.5rem;padding-right:1.=
+5rem;padding-top:1rem;padding-bottom:1rem;margin-top:1rem;margin-bottom:1.=
+25rem;max-width:37.5em"
+                            >
+                              <tbody>
+                                <tr =
+style=3D"width:100%">
+                                  <td>
+                                    <table
+                                =
+      align=3D"center"
+                                      width=3D"100%"
+                                      border=3D"0"
+                        =
+              cellpadding=3D"0"
+                                      =
+cellspacing=3D"0"
+                                      =
+role=3D"presentation"
+                                    >
+                                      <tbody style=3D"width:100%">
+                                        <tr style=3D"width:100%">
+                                          <td
+                             =
+               data-id=3D"__react-email-column"
+                           =
+                 style=3D"width:25%"
+                                      =
+    >
+                                            <p
+                                              style=3D"font-weight:600;font=
+-size:0.875rem;line-height:1.25rem;margin:0px;padding-bottom:0.25rem"
+                                            >
+                             =
+                 Nro de vuelo
+                                            =
+</p>
+                                            <p
+                                              style=3D"font-size:0.=
+75rem;line-height:1rem;font-weight:300;margin:0px;margin-bottom:0.75rem"
+                                            >
+                             =
+                 823
+                                            </p>
+                                          </td>
+                           =
+               <td
+                                            =
+data-id=3D"__react-email-column"
+                                          =
+  style=3D"width:25%"
+                                          >
+                                            <p
+                            =
+                  style=3D"font-weight:600;font-size:0.875rem;line-height:1=
+.25rem;margin:0px;padding-bottom:0.25rem"
+                                 =
+           >
+                                              Clase
+                                            </p>
+                          =
+                  <p
+                                              =
+style=3D"font-size:0.75rem;line-height:1rem;font-weight:300;margin:0px;marg=
+in-bottom:0.75rem"
+                                            >
+                                              H
+                           =
+                 </p>
+                                          </td>
+                                        </tr>
+                             =
+         </tbody>
+                                    </table>
+                                  </td>
+                                =
+</tr>
+                              </tbody>
+                            =
+</table>
+                            <hr
+                              =
+style=3D"width:100%;border:none;border-top:1px solid #eaeaea"
+                            />
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <table
+                      align=3D"center"
+                      width=3D"100%"
+                      border=3D"0"
+                      cellpadding=3D"0"
+                      cellspacing=3D"0"
+                      =
+role=3D"presentation"
+                      style=3D"margin-bottom:2rem;max=
+-width:37.5em"
+                    >
+                      <tbody>
+                        <tr style=3D"width:100%">
+                         =
+ <td>
+                            <table
+                              =
+align=3D"center"
+                              width=3D"100%"
+                              border=3D"0"
+                              =
+cellpadding=3D"0"
+                              cellspacing=3D"0"
+                              role=3D"presentation"
+                            >
+                              <tbody =
+style=3D"width:100%">
+                                <tr =
+style=3D"width:100%">
+                                  <td
+                                    data-id=3D"__react-email-column"
+                                    style=3D"width:50%"
+                                  >
+                                    <p
+                                      style=3D"margin:0px;padding-bottom:0.=
+75rem;font-weight:700;color:rgb(41,44,126);font-size:14px;line-height:24px"
+                                    >
+                                     =
+ Puerto Ordaz
+                                    </p>
+                                    <p
+                                    =
+  style=3D"font-weight:600;font-size:0.75rem;line-height:1rem;margin:0px;pa=
+dding-bottom:0.5rem"
+                                    >
+                                      Hora de salida: 05:10 pm
+                                    </p>
+                                  =
+  <p
+                                      style=3D"font-weight:500;font-si=
+ze:0.75rem;line-height:1rem;margin:0px;padding-bottom:0.=
+5rem;text-transform:capitalize"
+                                    >
+                                      martes, 03 de febrero
+                                    </p>
+                                  =
+  <p
+                                      style=3D"font-weight:300;font-si=
+ze:0.75rem;line-height:1rem;margin:0px;padding-bottom:0.5rem"
+                                    >
+                                     =
+ Aeropuerto Internacional Manuel Piar
+                                    =
+</p>
+                                  </td>
+                              =
+    <td
+                                    data-id=3D"__react-email-column=
+"
+                                    style=3D"width:50%"
+                                  >
+                                    <p
+                                      style=3D"margin:0px;padding-bottom:0.=
+75rem;font-weight:700;color:rgb(41,44,126);font-size:14px;line-height:24px"
+                                    >
+                                     =
+ Caracas
+                                    </p>
+                         =
+           <p
+                                      =
+style=3D"font-weight:600;font-size:0.75rem;line-height:1rem;margin:0px;padd=
+ing-bottom:0.5rem"
+                                    >
+                                      Hora de llegada: 06:20 pm
+                                    </p>
+                                  =
+  <p
+                                      style=3D"font-weight:500;font-si=
+ze:0.75rem;line-height:1rem;margin:0px;padding-bottom:0.=
+5rem;text-transform:capitalize"
+                                    >
+                                      martes, 03 de febrero
+                                    </p>
+                                  =
+  <p
+                                      style=3D"font-weight:300;font-si=
+ze:0.75rem;line-height:1rem;margin:0px;padding-bottom:0.5rem"
+                                    >
+                                     =
+ Aeropuerto Internacional de Maiquet=C3=ADa
+                               =
+       Sim=C3=B3n Bol=C3=ADvar
+                                    </p>
+                                  </td>
+                                =
+</tr>
+                              </tbody>
+                            =
+</table>
+                            <table
+                              =
+align=3D"center"
+                              width=3D"100%"
+                              border=3D"0"
+                              =
+cellpadding=3D"0"
+                              cellspacing=3D"0"
+                              role=3D"presentation"
+                              style=3D"background-color:rgb(245,245,=
+245);border-radius:0.75rem;padding-left:1.5rem;padding-right:1.=
+5rem;padding-top:1rem;padding-bottom:1rem;margin-top:1rem;margin-bottom:1.=
+25rem;max-width:37.5em"
+                            >
+                              <tbody>
+                                <tr =
+style=3D"width:100%">
+                                  <td>
+                                    <table
+                                =
+      align=3D"center"
+                                      width=3D"100%"
+                                      border=3D"0"
+                        =
+              cellpadding=3D"0"
+                                      =
+cellspacing=3D"0"
+                                      =
+role=3D"presentation"
+                                    >
+                                      <tbody style=3D"width:100%">
+                                        <tr style=3D"width:100%">
+                                          <td
+                             =
+               data-id=3D"__react-email-column"
+                           =
+                 style=3D"width:25%"
+                                      =
+    >
+                                            <p
+                                              style=3D"font-weight:600;font=
+-size:0.875rem;line-height:1.25rem;margin:0px;padding-bottom:0.25rem"
+                                            >
+                             =
+                 Nro de vuelo
+                                            =
+</p>
+                                            <p
+                                              style=3D"font-size:0.=
+75rem;line-height:1rem;font-weight:300;margin:0px;margin-bottom:0.75rem"
+                                            >
+                             =
+                 824
+                                            </p>
+                                          </td>
+                           =
+               <td
+                                            =
+data-id=3D"__react-email-column"
+                                          =
+  style=3D"width:25%"
+                                          >
+                                            <p
+                            =
+                  style=3D"font-weight:600;font-size:0.875rem;line-height:1=
+.25rem;margin:0px;padding-bottom:0.25rem"
+                                 =
+           >
+                                              Clase
+                                            </p>
+                          =
+                  <p
+                                              =
+style=3D"font-size:0.75rem;line-height:1rem;font-weight:300;margin:0px;marg=
+in-bottom:0.75rem"
+                                            >
+                                              H
+                           =
+                 </p>
+                                          </td>
+                                        </tr>
+                             =
+         </tbody>
+                                    </table>
+                                  </td>
+                                =
+</tr>
+                              </tbody>
+                            =
+</table>
+                            <hr
+                              =
+style=3D"width:100%;border:none;border-top:1px solid #eaeaea"
+                            />
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <table
+              align=3D"center"
+              width=3D"100%"
+              border=3D"0"
+              cellpadding=3D"0"
+              cellspacing=3D"0"
+              role=3D"presentation"
+              style=3D"max-width:37.5em"
+            >
+              <tbody>
+                <tr style=3D"width:100%">
+                  <td>
+                    <table
+                      =
+align=3D"center"
+                      width=3D"100%"
+                      border=3D"0"
+                      cellpadding=3D"0"
+                      cellspacing=3D"0"
+                      =
+role=3D"presentation"
+                      style=3D"max-width:37.5em"
+                    >
+                      <tbody>
+                        <tr style=3D"width:100%">
+                         =
+ <td>
+                            <p
+                              =
+class=3D"text-md"
+                              style=3D"color:rgb(41,44,=
+126);font-weight:700;margin:0px;margin-bottom:0.5rem;font-size:14px;line-he=
+ight:24px"
+                            >
+                              =
+Detalles de Pago
+                            </p>
+                         =
+ </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <table
+                      align=3D"center"
+                      width=3D"100%"
+                      border=3D"0"
+                      cellpadding=3D"0"
+                      cellspacing=3D"0"
+                      =
+role=3D"presentation"
+                      style=3D"background-color:rgb(4=
+1,44,126);border-top-left-radius:0.75rem;border-top-right-radius:0.=
+75rem;padding-left:1.5rem;padding-right:1.5rem;margin-top:1.=
+5rem;padding-top:1rem;padding-bottom:1rem;max-width:37.5em"
+                    >
+                      <tbody>
+                        <tr style=3D"width:100%">
+                         =
+ <td>
+                            <table
+                              =
+align=3D"center"
+                              width=3D"100%"
+                              border=3D"0"
+                              =
+cellpadding=3D"0"
+                              cellspacing=3D"0"
+                              role=3D"presentation"
+                            >
+                              <tbody =
+style=3D"width:100%">
+                                <tr =
+style=3D"width:100%">
+                                  <td
+                                    data-id=3D"__react-email-column"
+                                    style=3D"padding-bottom:0.5rem;width:16=
+.66%"
+                                  >
+                                 =
+   <p
+                                      style=3D"font-weight:600;font-s=
+ize:0.875rem;line-height:1.25rem;margin:0px;padding-bottom:0.=
+25rem;color:rgb(255,255,255)"
+                                    >
+                                      Cant. de Pasajeros
+                                    </p>
+                                  =
+  <p
+                                      style=3D"font-weight:300;color:r=
+gb(255,255,255);font-size:0.75rem;line-height:1rem;margin:0px;margin-bottom=
+:0.75rem"
+                                    >
+                           =
+           1
+                                    </p>
+                                  </td>
+                                  =
+<td
+                                    data-id=3D"__react-email-column"
+                                    style=3D"padding-bottom:0.5rem;width:16=
+.66%"
+                                  >
+                                 =
+   <p
+                                      style=3D"font-weight:600;font-s=
+ize:0.875rem;line-height:1.25rem;margin:0px;padding-bottom:0.=
+25rem;color:rgb(255,255,255)"
+                                    >
+                                      Tarifa Base
+                         =
+           </p>
+                                    <p
+                                      style=3D"font-weight:300;color:rgb(25=
+5,255,255);font-size:0.75rem;line-height:1rem;margin:0px;margin-bottom:0.=
+75rem"
+                                    >
+                              =
+        Bs 44106.22
+                                    </p>
+                                  </td>
+                                =
+</tr>
+                              </tbody>
+                            =
+</table>
+                            <table
+                              =
+align=3D"center"
+                              width=3D"100%"
+                              border=3D"0"
+                              =
+cellpadding=3D"0"
+                              cellspacing=3D"0"
+                              role=3D"presentation"
+                            >
+                              <tbody =
+style=3D"width:100%">
+                                <tr =
+style=3D"width:100%">
+                                  <td
+                                    data-id=3D"__react-email-column"
+                                    style=3D"padding-bottom:0.5rem;width:16=
+.66%"
+                                  >
+                                 =
+   <p
+                                      style=3D"font-weight:600;font-s=
+ize:0.875rem;line-height:1.25rem;margin:0px;padding-bottom:0.=
+25rem;color:rgb(255,255,255)"
+                                    >
+                                      Tasa + Impuestos
+                                    </p>
+                                  =
+  <p
+                                      style=3D"font-weight:300;color:r=
+gb(255,255,255);font-size:0.75rem;line-height:1rem;margin:0px;margin-bottom=
+:0.75rem"
+                                    >
+                           =
+           Bs 37749.08
+                                    </p>
+                                  </td>
+                                  =
+<td
+                                    data-id=3D"__react-email-column"
+                                    style=3D"padding-bottom:0.5rem;width:16=
+.66%"
+                                  >
+                                 =
+   <p
+                                      style=3D"font-weight:600;font-s=
+ize:0.875rem;line-height:1.25rem;margin:0px;padding-bottom:0.=
+25rem;color:rgb(255,255,255)"
+                                    >
+                                      Adicionales
+                         =
+           </p>
+                                    <p
+                                      style=3D"font-weight:300;color:rgb(25=
+5,255,255);font-size:0.75rem;line-height:1rem;margin:0px;margin-bottom:0.=
+75rem"
+                                    >
+                              =
+        0
+                                    </p>
+                        =
+          </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                            <table
+                              =
+align=3D"center"
+                              width=3D"100%"
+                              border=3D"0"
+                              =
+cellpadding=3D"0"
+                              cellspacing=3D"0"
+                              role=3D"presentation"
+                            >
+                              <tbody =
+style=3D"width:100%">
+                                <tr =
+style=3D"width:100%">
+                                  <td
+                                    data-id=3D"__react-email-column"
+                                    style=3D"padding-bottom:0.5rem;width:16=
+.66%"
+                                  >
+                                 =
+   <p
+                                      style=3D"font-weight:600;font-s=
+ize:0.875rem;line-height:1.25rem;margin:0px;padding-bottom:0.=
+25rem;color:rgb(255,255,255)"
+                                    >
+                                      Total
+                               =
+     </p>
+                                    <p
+                          =
+            style=3D"font-weight:300;color:rgb(255,255,255);font-size:0.=
+75rem;line-height:1rem;margin:0px;margin-bottom:0.75rem"
+                                    >
+                                     =
+ Bs 81855.3
+                                    </p>
+                                  </td>
+                                =
+</tr>
+                              </tbody>
+                            =
+</table>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <!--/$-->
+  </body>
+</html>

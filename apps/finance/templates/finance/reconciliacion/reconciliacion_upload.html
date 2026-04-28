@@ -1,0 +1,90 @@
+{% extends "base_modern.html" %}
+
+{% block page_title %}Conciliación Inteligente GDS{% endblock %}
+{% block page_subtitle %}Motor Híbrido IA v3.0 (HTMX Powered){% endblock %}
+
+{% block content %}
+<div class="p-6 max-w-4xl mx-auto">
+    <!-- Contenedor Principal de Acción -->
+    <div id="reconciliation-container" class="card-base p-8 space-y-6">
+        
+        <div class="text-center space-y-2">
+            <span class="material-symbols-outlined text-[48px] text-primary">auto_awesome</span>
+            <h1 class="text-2xl font-black text-text-main">Subir Reporte de Proveedor</h1>
+            <p class="text-text-muted text-sm mx-auto max-w-md">
+                Arrastra tu archivo (BSP, KIU, SABRE) y deja que nuestra IA cruce las ventas automáticamente para detectar discrepancias y preparar los asientos contables.
+            </p>
+        </div>
+
+        <!-- El Formulario HTMX Reactivo -->
+        <div id="monitor-container">
+            <form hx-post="{% url 'finance:reconciliacion_process_upload' %}" 
+                  hx-encoding="multipart/form-data" 
+                  hx-target="#monitor-container" 
+                  hx-swap="innerHTML"
+                  class="space-y-6 bg-surface-base/40 p-6 rounded-xl border border-border-color">
+                
+                {% csrf_token %}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="space-y-1.5">
+                        <label class="text-[11px] font-black text-text-muted uppercase tracking-wider">Proveedor / GDS</label>
+                        <select name="proveedor" class="input-base">
+                            <option value="BSP">BSP (IATA)</option>
+                            <option value="KIU">KIU System</option>
+                            <option value="SABRE">SABRE GDS</option>
+                            <option value="AMADEUS">AMADEUS GDS</option>
+                            <option value="OTRO">Otro / Tarifa Neta</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="space-y-1.5">
+                    <label class="text-[11px] font-black text-text-muted uppercase tracking-wider">Reporte (PDF / CSV / Excel)</label>
+                    <div class="relative group">
+                        <input type="file" name="archivo_reporte" required
+                               class="input-base cursor-pointer file:bg-primary file:text-[var(--text-on-primary)] file:border-none file:h-full file:px-4 file:mr-4 file:font-black">
+                        <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-text-muted group-hover:text-primary transition-colors">
+                            <span class="material-symbols-outlined text-[18px]">cloud_upload</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-4 flex justify-end gap-3">
+                    <a href="{% url 'finance:reconciliacion_dashboard_htmx' %}" class="btn-secondary">
+                        Cancelar
+                    </a>
+                    <button type="submit" class="btn-primary min-w-[160px]">
+                        🚀 Iniciar Conciliación IA
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Instrucciones y Seguridad -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 border-t border-border-color pt-6">
+            <div class="flex items-start gap-3">
+                <span class="material-symbols-outlined text-[16px] text-primary mt-0.5">verified_user</span>
+                <div>
+                    <p class="text-[11px] font-bold text-text-main">Privacidad Total</p>
+                    <p class="text-[10px] text-text-muted">Los datos financieros son procesados en infra segura.</p>
+                </div>
+            </div>
+            <div class="flex items-start gap-3">
+                <span class="material-symbols-outlined text-[16px] text-primary mt-0.5">calculate</span>
+                <div>
+                    <p class="text-[11px] font-bold text-text-main">Cruce Exacto</p>
+                    <p class="text-[10px] text-text-muted">Detectamos diferencias de centavos automáticamente.</p>
+                </div>
+            </div>
+            <div class="flex items-start gap-3">
+                <span class="material-symbols-outlined text-[16px] text-primary mt-0.5">rule</span>
+                <div>
+                    <p class="text-[11px] font-bold text-text-main">Reglas de Negocio</p>
+                    <p class="text-[10px] text-text-muted">Se aplican filtros de comisiones y fees automáticamente.</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>TravelHub - Executive Compact Ticket</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&amp;family=Inter:wght@400;500;700&amp;display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+    <style>
+        @page {
+            size: A4;
+            margin: 0;
+        }
+        :root {
+            --primary: #00061b;
+            --primary-container: #0d1e40;
+            --secondary: #785a00;
+            --surface: #f9f9fc;
+            --outline: #75777f;
+            --outline-variant: #c5c6cf;
+            --body-margin: 50px;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            color: var(--primary);
+            background-color: #f9f9fc;
+            -webkit-print-color-adjust: exact;
+        }
+        .container {
+            width: 210mm;
+            min-height: 297mm;
+            margin: 0 auto;
+            background-color: #ffffff;
+            display: flex;
+            flex-direction: column;
+        }
+        header {
+            background-color: var(--primary-container);
+            color: white;
+            padding: 30px var(--body-margin);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 4px solid var(--primary);
+        }
+        .header-logo {
+            display: flex;
+            flex-direction: column;
+        }
+        .header-logo h1 {
+            margin: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 800;
+            font-size: 24px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+        .header-info {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-weight: 700;
+            color: #ffdf9d;
+            margin-top: 4px;
+        }
+
+        main {
+            padding: 40px var(--body-margin);
+            flex-grow: 1;
+        }
+
+        .manifest-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            border-bottom: 4px solid var(--primary);
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .manifest-label {
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--outline);
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            margin-bottom: 4px;
+        }
+        .manifest-value {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 24px;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+        .manifest-pnr {
+            color: var(--secondary);
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: 2px;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            border-bottom: 1px solid var(--outline-variant);
+            margin-bottom: 40px;
+        }
+        .summary-item {
+            padding: 15px 15px 15px 0;
+            border-right: 1px solid var(--outline-variant);
+        }
+        .summary-item:last-child {
+            border-right: none;
+            padding-right: 0;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+        }
+        .summary-label {
+            font-size: 10px;
+            font-weight: 800;
+            color: var(--outline);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 4px;
+        }
+        .summary-val {
+            font-size: 13px;
+            font-weight: 700;
+        }
+        .badge {
+            background-color: #ffdf9d;
+            color: #251a00;
+            padding: 4px 12px;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .flight-itinerary {
+            margin-top: 40px;
+        }
+        .section-title {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 18px;
+            font-weight: 800;
+            text-transform: uppercase;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .flight-segment {
+            position: relative;
+            padding-left: 50px;
+            margin-bottom: 40px;
+        }
+        .segment-spine {
+            position: absolute;
+            left: 7px;
+            top: 10px;
+            bottom: 10px;
+            width: 2px;
+            background-color: var(--primary);
+        }
+        .segment-node {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 16px;
+            height: 16px;
+            background-color: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .segment-node::after {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background-color: white;
+        }
+        .segment-node.arrival {
+            bottom: 0;
+            top: auto;
+            background-color: white;
+            border: 2px solid var(--primary);
+        }
+
+        .flight-grid {
+            display: grid;
+            grid-template-columns: 4fr 4fr 4fr;
+            gap: 30px;
+            margin-bottom: 25px;
+        }
+        .flight-iata {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 36px;
+            font-weight: 800;
+            letter-spacing: -0.05em;
+        }
+        .flight-city {
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .flight-time {
+            font-size: 20px;
+            font-weight: 700;
+            margin-top: 8px;
+        }
+        .flight-date {
+            font-size: 11px;
+            color: var(--outline);
+            font-weight: 600;
+        }
+
+        .info-card {
+            background-color: #f3f3f6;
+            padding: 15px;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            font-weight: 700;
+        }
+        .info-row span:last-child {
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .meta-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            border-top: 1px dashed var(--outline-variant);
+            padding-top: 15px;
+        }
+
+        .instructions {
+            background-color: #f3f3f6;
+            padding: 30px;
+            margin-top: 60px;
+            border-left: 8px solid var(--secondary);
+        }
+        .instructions h4 {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            letter-spacing: 0.1em;
+        }
+        .instructions-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            font-size: 11px;
+            line-height: 1.6;
+        }
+
+        footer {
+            background-color: var(--primary-container);
+            color: white;
+            padding: 40px var(--body-margin);
+            border-top: 4px solid var(--primary);
+            margin-top: auto;
+        }
+        .footer-line {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .footer-legal {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+        .footer-copy {
+            font-size: 10px;
+            opacity: 0.4;
+            margin-top: 5px;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-logo">
+                {% if agencia %}
+                    {% if agencia.logo_pdf_dark_base64 %}
+                        <img src="{% if 'data:image' in agencia.logo_pdf_dark_base64 %}{{ agencia.logo_pdf_dark_base64 }}{% else %}data:image/png;base64,{{ agencia.logo_pdf_dark_base64 }}{% endif %}" style="max-height: 40px;">
+                    {% elif agencia.logo_pdf_base64 %}
+                        <img src="{% if 'data:image' in agencia.logo_pdf_base64 %}{{ agencia.logo_pdf_base64 }}{% else %}data:image/png;base64,{{ agencia.logo_pdf_base64 }}{% endif %}" style="max-height: 40px;">
+                    {% else %}
+                        <h1>{{ agencia.nombre|upper }}</h1>
+                    {% endif %}
+                {% else %}
+                    <h1>TRAVELHUB</h1>
+                {% endif %}
+                <div class="header-info">{{ agencia.eslogan }}</div>
+            </div>
+            <div style="text-align: right; color: #ffdf9d; font-weight: 800; font-size: 11px; letter-spacing: 1px;">
+                ELECTRONIC TICKET
+            </div>
+        </header>
+
+        <main>
+            <section class="manifest-header">
+                <div>
+                    <div class="manifest-label">Passenger Name</div>
+                    <h2 class="manifest-value">{{ NOMBRE_DEL_PASAJERO }}</h2>
+                </div>
+                <div style="text-align: right;">
+                    <div class="manifest-label">Booking Reference (PNR)</div>
+                    <h2 class="manifest-pnr">{{ CODIGO_RESERVA }}</h2>
+                </div>
+            </section>
+
+            <div class="summary-grid">
+                <div class="summary-item">
+                    <div class="summary-label">Ticket Number</div>
+                    <div class="summary-val">{{ NUMERO_DE_BOLETO }}</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">Issued Date</div>
+                    <div class="summary-val">{{ FECHA_DE_EMISION }}</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">Issuing Agent</div>
+                    <div class="summary-val">{{ agencia.nombre|upper }}</div>
+                </div>
+                <div class="summary-item">
+                    <div class="badge">Confirmed</div>
+                </div>
+            </div>
+
+            <section class="flight-itinerary">
+                <h3 class="section-title">
+                    <span class="material-symbols-outlined">flight_takeoff</span>
+                    Flight Itinerary
+                </h3>
+
+                {% for flight in vuelos %}
+                <div class="flight-segment">
+                    <div class="segment-spine"></div>
+                    <div class="segment-node"></div>
+                    <div class="segment-node arrival"></div>
+
+                    <div class="flight-grid">
+                        <div class="departure">
+                            <div class="summary-label">Departure</div>
+                            <div class="flight-iata">{{ flight.origen_code|default:flight.origen|slice:":3"|upper }}</div>
+                            <div class="flight-city">{{ flight.origen }}</div>
+                            <div class="flight-time">{{ flight.hora_salida }}</div>
+                            <div class="flight-date">{{ flight.fecha|default:flight.fecha_salida }}</div>
+                        </div>
+
+                        <div class="info-card">
+                            <div class="info-row">
+                                <span>FLIGHT</span>
+                                <span>{{ flight.aerolinea }} — {{ flight.numero_vuelo }}</span>
+                            </div>
+                            <div class="info-row">
+                                <span>CLASS</span>
+                                <span>{{ flight.cabina|default:flight.clase|default:'TOURIST' }}</span>
+                            </div>
+                            <div class="info-row">
+                                <span>AIRCRAFT</span>
+                                <span>Boeing 737-MAX8</span>
+                            </div>
+                        </div>
+
+                        <div class="arrival" style="text-align: right;">
+                            <div class="summary-label">Arrival</div>
+                            <div class="flight-iata">{{ flight.destino_code|default:flight.destino|slice:":3"|upper }}</div>
+                            <div class="flight-city">{{ flight.destino }}</div>
+                            <div class="flight-time">{{ flight.hora_llegada }}</div>
+                            <div class="flight-date">{{ flight.fecha|default:flight.fecha_salida }}</div>
+                        </div>
+                    </div>
+
+                    <div class="meta-row">
+                        <div>
+                            <div class="summary-label">Terminal</div>
+                            <div class="summary-val">{{ flight.terminal|default:'T1' }}</div>
+                        </div>
+                        <div>
+                            <div class="summary-label">Seat</div>
+                            <div class="summary-val">{{ flight.asiento|default:'Check-in' }}</div>
+                        </div>
+                        <div>
+                            <div class="summary-label">Baggage</div>
+                            <div class="summary-val">{{ flight.equipaje|default:'23KG' }}</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div class="summary-label">Reserva Aérea</div>
+                            <div class="summary-val">{{ flight.localizador_aerolinea|default:CODIGO_RESERVA }}</div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </section>
+
+            <section class="instructions">
+                <h4>Boarding Manifest Instructions</h4>
+                <div class="instructions-grid">
+                    <div>
+                        <strong>CHECK-IN:</strong> At least 180 minutes prior to departure for international flights.
+                    </div>
+                    <div>
+                        <strong>DOCUMENTS:</strong> Valid passport and visas are required.
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <div class="footer-line">
+                <div>
+                    <div class="footer-legal">{{ agencia.pie_pagina|default:'TRAVELHUB GLOBAL - DOCUMENT AUTHENTICATED' }}</div>
+                    <div class="footer-copy">© 2026 {{ agencia.nombre|upper }}. ALL RIGHTS RESERVED.</div>
+                </div>
+                <div style="text-align: right; opacity: 0.8; font-size: 11px;">
+                    {{ agencia.email_principal }}<br>
+                    {{ agencia.telefono_principal }}
+                </div>
+            </div>
+        </footer>
+    </div>
+</body>
+</html>

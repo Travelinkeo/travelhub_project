@@ -1,0 +1,153 @@
+Delivered-To: boletotravelinkeo@gmail.com
+Received: by 2002:a05:7108:c11:b0:54e:1834:20a1 with SMTP id pl17csp2747619gdb;
+        Thu, 5 Feb 2026 10:35:53 -0800 (PST)
+X-Received: by 2002:a05:620a:1a1e:b0:8c5:38ee:2fad with SMTP id af79cd13be357-8caf0e3390emr833185a.84.1770316553004;
+        Thu, 05 Feb 2026 10:35:53 -0800 (PST)
+ARC-Seal: i=1; a=rsa-sha256; t=1770316552; cv=none;
+        d=google.com; s=arc-20240605;
+        b=NxFWa5oDqogGcQo8Ke2f0DRCum4Eh4FkC/uvUrNxR7rRr+9qjYUQHd0Mlod635xKZW
+         JQ0lAR0npzeZ+bNtcG2EgK4nLAsOaYlAFSnEjHlMZ4oFgvFvn+0k3OUZpo/6DLmojsja
+         3jpXf/tTpaOjUVmT1rqh/eBGt7qCBIQSpt2bgCWdvQxk1GC3n1WI+CvwX35koaosyD7C
+         +xWYhInvdY4qPlQTkJoUpmZaeda29wxz8aV+zz83z1gDYbjigm1TgbAUS1ze48FnQ7MD
+         e0afKGku7oVR/kvCgD6baJRfVim9fRvLV7nyDriBtO7B1XHkvTlJDX3xKD5DCl5nhk4s
+         9fNw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
+        h=feedback-id:date:message-id:mime-version:subject:to:from
+         :dkim-signature:dkim-signature;
+        bh=t7n8qTKAeCRCbstHHWqQYCwdM+mFFFQ3CvakMW+TrgY=;
+        fh=ea13ZxuZ/lHhtdQSAvi2/eZqtk6Cpk2KZJ1q/vGojYs=;
+        b=kpkBoTEY7YpV+Iv59uaTPK+91xTvQXMn6PVA3T1O6UHvUWBwIsHL07A74Ynt0wtze6
+         vWV08y/bKD0KoE6ksvUiIEm7DJo8gX6NAqJe5jog4Enp3JvuogEoUhrJpgSyuyNqvDO6
+         dwWN/QlvoF3Y//xXoGyxIAnnFPev5AAiZEGI4OdXaF2ugbseaKi59Fousd/ky9vQFCjX
+         SViVHHII/KwEdtKu1SFg5QD5yoRY5agVg0pTd52M8VgxNcHA062K15Xy3a33kZ80q80J
+         Hpo8suCdSUFMI9irjgzb1rYabReAw1PRPa+JGppfvd21sfYM7Hfsup1ziCW+5UeVAUAf
+         Ay/A==;
+        dara=google.com
+ARC-Authentication-Results: i=1; mx.google.com;
+       dkim=pass header.i=@kiusys.com header.s=y27k5w6mpyspgwewkrpvqs7lpid7on7v header.b=h0UwoUYW;
+       dkim=pass header.i=@amazonses.com header.s=6gbrjpgwjskckoa6a5zn6fwqkn67xbtw header.b=MbrDO6eZ;
+       spf=pass (google.com: domain of 0100019c2f16d9df-d757385c-6a52-4391-9b98-21a2f02e72b6-000000@ses.kiusys.com designates 54.240.9.30 as permitted sender) smtp.mailfrom=0100019c2f16d9df-d757385c-6a52-4391-9b98-21a2f02e72b6-000000@ses.kiusys.com;
+       dmarc=pass (p=QUARANTINE sp=QUARANTINE dis=NONE) header.from=kiusys.com
+Return-Path: <0100019c2f16d9df-d757385c-6a52-4391-9b98-21a2f02e72b6-000000@ses.kiusys.com>
+Received: from a9-30.smtp-out.amazonses.com (a9-30.smtp-out.amazonses.com. [54.240.9.30])
+        by mx.google.com with ESMTPS id 6a1803df08f44-8953c0b85f9si2857406d6.193.2026.02.05.10.35.52
+        for <BOLETOTRAVELINKEO@gmail.com>
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Thu, 05 Feb 2026 10:35:52 -0800 (PST)
+Received-SPF: pass (google.com: domain of 0100019c2f16d9df-d757385c-6a52-4391-9b98-21a2f02e72b6-000000@ses.kiusys.com designates 54.240.9.30 as permitted sender) client-ip=54.240.9.30;
+Authentication-Results: mx.google.com;
+       dkim=pass header.i=@kiusys.com header.s=y27k5w6mpyspgwewkrpvqs7lpid7on7v header.b=h0UwoUYW;
+       dkim=pass header.i=@amazonses.com header.s=6gbrjpgwjskckoa6a5zn6fwqkn67xbtw header.b=MbrDO6eZ;
+       spf=pass (google.com: domain of 0100019c2f16d9df-d757385c-6a52-4391-9b98-21a2f02e72b6-000000@ses.kiusys.com designates 54.240.9.30 as permitted sender) smtp.mailfrom=0100019c2f16d9df-d757385c-6a52-4391-9b98-21a2f02e72b6-000000@ses.kiusys.com;
+       dmarc=pass (p=QUARANTINE sp=QUARANTINE dis=NONE) header.from=kiusys.com
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/simple;
+	s=y27k5w6mpyspgwewkrpvqs7lpid7on7v; d=kiusys.com; t=1770316552;
+	h=From:To:Subject:Mime-Version:Content-Type:Message-Id:Date;
+	bh=gTqfQFkiLBaxFgSuYJBMnLWMRh9Hc4ggJMiSGs8fa14=;
+	b=h0UwoUYWcesvqGF8wFR/Fw807RPd5QQzhztcJcF7jEnWhTj7U4bKs9pmjmgGTJZf
+	I7F41+Tdf1Zsra3VTbmvxlviqONyrtcNz+CiJpaG74h+V8tKqka9TsxEOz8D2xZR7pp
+	fhT+3E1BYRELAQUhb67yW74bO6mJ+gijgxK8CZbdenbXCXXdtn5D0+FZlKRDFcgg9Wn
+	5ZMm2hmt0t0wUkBZQi3NOcLv0ENmT9vsRzxZj5Hs9C/COOmlcGfkspmpHRhaVK657CR
+	DMaDP+KGx5F5BK0Vja+6OuVgkpCyEESSn058Bt7X7soCXHXFqiOX6VZR5+YyECM3orI
+	qXUOLwm+Wg==
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/simple;
+	s=6gbrjpgwjskckoa6a5zn6fwqkn67xbtw; d=amazonses.com; t=1770316552;
+	h=From:To:Subject:Mime-Version:Content-Type:Message-Id:Date:Feedback-ID;
+	bh=gTqfQFkiLBaxFgSuYJBMnLWMRh9Hc4ggJMiSGs8fa14=;
+	b=MbrDO6eZs1UTlg23SXfiU3PTPvVSLUS1sK+0SiLgxDrnKW28M2tQ5Oc9XVwiLKVT
+	xm3YHnxS2wSGfe8JVbRac9XV+DC5YRYvdhWaG0Sb9U1x7y1WlNua+nCnYL/fAa996Tq
+	Rf8z6QNJwU8g05/hlwXnnpyMaYt2cj5jj2qq1GqM=
+From: no_config <noreply@kiusys.com>
+To: BOLETOTRAVELINKEO@GMAIL.COM
+Subject:E-TICKET ITINERARY RECEIPT - GIRALDO GARCIA/INGRID ALEJANDRA
+Mime-Version: 1.0
+Content-Type: multipart/mixed;
+    boundary="956a3f9d98ebd0f52f280c3da0dcfc55e32adf49e6c4428833f314838141"
+Message-ID: <0100019c2f16d9df-d757385c-6a52-4391-9b98-21a2f02e72b6-000000@email.amazonses.com>
+Date: Thu, 5 Feb 2026 18:35:52 +0000
+Feedback-ID: ::1.us-east-1.FlLS8KWT15VSJWSZCrjpizuEqvA988B9XvDgDbF9UFw=:AmazonSES
+X-SES-Outgoing: 2026.02.05-54.240.9.30
+
+--956a3f9d98ebd0f52f280c3da0dcfc55e32adf49e6c4428833f314838141
+Content-Transfer-Encoding: quoted-printable
+Content-Type: text/html; charset="UTF-8"
+
+<HTML><HEAD><STYLE>.pnr-print-small {font-size: 8px;}.pnr-print-medium {fon=
+t-size: 12px;}.pnr-print-big {font-size: 14px;}.prn-image {display: flex; j=
+ustify-content: end;width: 650px;}</STYLE></HEAD><BODY><PRE class=3D"pnr-pr=
+int-medium"> ELECTRONIC TICKET=20
+
+
+     PASSENGER ITINERARY RECEIPT              TICKET NRO: <B>4020301049069<=
+/B>
+
+ <B>CONTRATACIONES TURISTICAS     </B>               ISSUE DATE:  05 FEB 20=
+26 13:34
+ AV.BALBOA ED.GAVIOTA P.B.DIAG.              ISSUE AGENT: PTYN682EM
+ PANAMA                                           =20
+ PANAMA, PANAMA                                   =20
+ OFFICE ID: PA-15491-0                   =20
+ TELEPHONE: 50766731134                  =20
+ MAIL INFO: CONTRATACIONESTURISTICASGLOBAL@GMAIL.COM                   =20
+
+ISSUING AIRLINE             : GLOBAL
+ADDRESS                     : 7500 NW 104TH AVENUE SUITE B201=20
+                              DORAL FLORIDA 33178
+EIN                         : 38-4181534                   =20
+TICKET'S NUMBER'S           : 402-0301049069
+NAME:  <B>GIRALDO GARCIA/INGRID ALEJANDRA                                  =
+                                  </B>
+FOID:  IDEPAX756444       =20
+
+BOOKING REF.: C1/<B>FJHCCI</B>
+
+  FROM/TO           FLIGHT CL DATE  DEP  ARR   FARE BASIS  NVB    NVA    BA=
+G  ST
+
+  <B>CURACAO           </B>G6 201 T  <B>9FEB  1245</B><B> 1445</B>  TRCWUS2=
+                    32K OK=20
+<B>  MIAMI-INTL AIRPORT</B>
+  <B>MIAMI-INTL AIRPORT</B>G6 200 M  <B>11FEB 0715</B><B> 1115</B>  MLRUSCW=
+2                   32K OK=20
+<B>  CURACAO           </B>
+</PRE><PRE class=3D"pnr-print-medium">LOS PASAJEROS DEBEN ESTAR PARA EL CHE=
+QUEO 3 HORAS ANTES DE LA SALIDA EN<br>DESTINOS INTERNACIONALES.<br>FRANQUIC=
+IA DE EQUIPAJE - EL EQUIPAJE PERMITIDO POR PASAJERO EN CLASE TURISTA EN<br>=
+NUESTRA RUTA CURACAO - MIAMI - CURACAO ES DE UNA (1) PIEZA EN BODEGA DE<br>=
+DE 32 KG MAS UN (1) EQUIPAJE DE MANO DE HASTA 8 KG Y EN CLASE EJECUTIVA<br>=
+(2) PIEZAS EN BODEGA DE 23 KG MAS UN (1) EQUIPAJE DE MANO DE HASTA 8 KG.<br=
+>LA VALIDEZ DE ESTE BOLETO ES DE 12 MESES A PARTIR DE LA FECHA DE EMISION (=
+SOLO<br>PARA VUELOS REGULARES).<br>PARA VUELOS CHARTER Y NO REGULARES APLIC=
+AN CIERTAS CONDICIONES Y PENALIDADES.<br>IMPORTANTE: EN CASO DE NO VIAJAR, =
+SE DEBE NOTIFICAR CON ANTICIPACION. PARA<br>CAMBIOS DE FECHA APLICAN CIERTA=
+S PENALIDADES.<br>SI SU VIAJE INCLUYE UN DESTINO O PARADA EN UN PAIS QUE NO=
+ SEA EL DE SALIDA,<br>APLICA EL CONVENIO DE VARSOVIA Y SUS MODIFICACIONES D=
+E LOS PROTOCOLOS DE LA<br>HAYA Y MONTREAL, QUE EN LA MAYORIA DE LOS CASOS L=
+IMITAN LA RESPONSABILIDAD<br>DE LOS TRANSPORTISTAS POR MUERTE, DANO PERSONA=
+L, EXTRAVIO O DETERIORO DE EQUIPAJE.<br></PRE><PRE class=3D"pnr-print-mediu=
+m">
+
+ENDORSEMENTS : NO REEMBOLSABLE/NO ENDOSABLE/APLICA PENALIDAD POR CAMBIO /NO=
+N END/NON REF/PENALTY APPLY FOR CHANGES
+TOUR CODE    :=20
+PAYMENT      : CASH=20
+
+</PRE><PRE class=3D"pnr-print-medium">FARE CALC.: CUR G6 MIA 26.00 G6 CUR 9=
+3.00NUC119.00END ROE1.000000  (ADT)
+
+</PRE><PRE class=3D"pnr-print-medium">
+
+AIR FARE        : USD      119.00
+TAX             : USD       15.006T        5.60AY       46.80US
+                             3.84XA        7.00XY        7.39YC      100.00=
+YQ
+                             4.50XF
+TOTAL           : USD      309.13
+
+</PRE><PRE class=3D"pnr-print-medium">
+<HR>SEND BY AGENT PTYN682EM / FEB  5 2026  1:34</PRE></BODY></HTML><img alt=
+=3D"" src=3D"https://j5d6plkx.r.us-east-1.awstrack.me/I0/0100019c2f16d9df-d=
+757385c-6a52-4391-9b98-21a2f02e72b6-000000/nCpSNreH7BBDwK9PVkQNLQGKQiA=3D46=
+4" style=3D"display: none; width: 1px; height: 1px;">
+
+--956a3f9d98ebd0f52f280c3da0dcfc55e32adf49e6c4428833f314838141--

@@ -1,0 +1,217 @@
+{% extends 'base_modern.html' %}
+{% load static %}
+
+{% block title %}Directorio de Clientes — TravelHub{% endblock %}
+
+{% block extra_head %}
+<style>
+/* Table row hover */
+#crm-table-core tr:hover td { background: rgba(255,255,255,0.02); }
+#crm-table-core td { padding: 12px 16px; border-bottom: 1px solid var(--border); vertical-align: middle; font-size: 13px; }
+#crm-table-core th { padding: 10px 16px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); border-bottom: 1px solid var(--border); background: var(--surface-2); white-space: nowrap; text-align: left; }
+#crm-table-core th.text-center { text-align: center; }
+#crm-table-core th.text-right { text-align: right; }
+
+/* Status Badges */
+.tier-badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 9999px; font-size: 10px; font-weight: 800; letter-spacing: 0.04em; }
+.tier-corp { background: rgba(139,92,246,0.1); color: #a78bfa; border: 1px solid rgba(139,92,246,0.25); }
+.tier-vip  { background: rgba(234,179,8,0.1); color: #fbbf24; border: 1px solid rgba(234,179,8,0.25); }
+.tier-std  { background: rgba(37,140,244,0.1); color: var(--primary); border: 1px solid rgba(37,140,244,0.25); }
+</style>
+{% endblock %}
+
+{% block content %}
+<main class="flex-1 w-full max-w-[1400px] mx-auto p-6 md:p-8 lg:p-10">
+    <!-- Page Title & Breadcrumb -->
+    <div class="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+            <div class="flex items-center gap-2 text-xs text-slate-500 dark:text-gray-400 font-medium mb-2 uppercase tracking-wider">
+                <span>CRM</span>
+                <span class="material-symbols-outlined text-[10px]">chevron_right</span>
+                <span class="text-primary">Directorio</span>
+            </div>
+            <h1 class="text-4xl font-bold text-gray-900 dark:text-white tracking-tight">Directorio de Clientes</h1>
+            <p class="text-gray-500 dark:text-slate-400 mt-2 text-lg">Gestión de cartera de clientes corporativos y particulares</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <a href="{% url 'core:cliente_create' %}" class="btn-primary">
+                <span class="material-symbols-outlined text-[16px]">person_add</span> Nuevo Cliente
+            </a>
+        </div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div class="card-base p-5 flex flex-col gap-1">
+            <div class="flex items-center gap-2 mb-2">
+                <span class="material-symbols-outlined text-gray-400 text-[18px]">group</span>
+                <h3 class="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Total Clientes</h3>
+            </div>
+            <p class="text-3xl font-black text-gray-900 dark:text-white font-mono">{{ page_obj.paginator.count|default:"0" }}</p>
+        </div>
+        <div class="card-base p-5 flex flex-col gap-1 ring-1 ring-purple-500/20 bg-purple-500/5">
+            <div class="flex items-center gap-2 mb-2">
+                <span class="material-symbols-outlined text-purple-400 text-[18px]">domain</span>
+                <h3 class="text-xs font-bold text-purple-500 dark:text-purple-400 uppercase tracking-wider">Corporativos</h3>
+            </div>
+            <p class="text-3xl font-black text-gray-900 dark:text-white font-mono">{{ clientes_corp_count|default:"0" }}</p>
+        </div>
+        <div class="card-base p-5 flex flex-col gap-1 ring-1 ring-amber-500/20 bg-amber-500/5">
+            <div class="flex items-center gap-2 mb-2">
+                <span class="material-symbols-outlined text-amber-500 text-[18px]">star</span>
+                <h3 class="text-xs font-bold text-amber-500 uppercase tracking-wider">VIP / Frecuentes</h3>
+            </div>
+            <p class="text-3xl font-black text-gray-900 dark:text-white font-mono">{{ clientes_vip_count|default:"0" }}</p>
+        </div>
+        <div class="card-base p-5 flex flex-col gap-1">
+            <div class="flex items-center gap-2 mb-2">
+                <span class="material-symbols-outlined text-emerald-400 text-[18px]">trending_up</span>
+                <h3 class="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Nuevos (Mes)</h3>
+            </div>
+            <p class="text-3xl font-black text-gray-900 dark:text-white font-mono">{{ clientes_nuevos_mes|default:"0" }}</p>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="card-base p-5 mb-6">
+        <form method="get" class="flex flex-col sm:flex-row gap-4 items-center">
+            <div class="flex-1 w-full relative">
+                <span class="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                    <span class="material-symbols-outlined text-[16px] text-gray-400">search</span>
+                </span>
+                <input type="text" name="q" value="{{ request.GET.q }}" placeholder="Buscar por nombre, empresa, documento..."
+                    class="input-base pl-9">
+            </div>
+            <div class="flex items-center gap-2 shrink-0 flex-wrap">
+                <a href="?" class="{% if not request.GET.tipo %}tier-badge tier-std{% else %}px-3 py-1 rounded-full text-[10px] font-bold tracking-wider border transition-colors bg-gray-50 dark:bg-surface-highlight-dark text-gray-500 dark:text-slate-400 border-border-light dark:border-border-dark{% endif %}">TODOS</a>
+                <a href="?tipo=CORP" class="{% if request.GET.tipo == 'CORP' %}tier-badge tier-corp{% else %}px-3 py-1 rounded-full text-[10px] font-bold tracking-wider border transition-colors bg-gray-50 dark:bg-surface-highlight-dark text-gray-500 dark:text-slate-400 border-border-light dark:border-border-dark hover:border-purple-400 hover:text-purple-400{% endif %}">CORP</a>
+                <a href="?tipo=VP" class="{% if request.GET.tipo == 'VP' %}tier-badge tier-vip{% else %}px-3 py-1 rounded-full text-[10px] font-bold tracking-wider border transition-colors bg-gray-50 dark:bg-surface-highlight-dark text-gray-500 dark:text-slate-400 border-border-light dark:border-border-dark hover:border-amber-400 hover:text-amber-400{% endif %}">VIP</a>
+                
+                <button type="submit" class="btn-secondary ml-2 h-[32px]">
+                    <span class="material-symbols-outlined text-[16px]">filter_list</span> Filtrar
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Tabla -->
+    <div class="card-base overflow-hidden flex flex-col" style="min-height:400px">
+        <div class="flex items-center justify-between px-5 py-4 border-b border-border-light dark:border-border-dark bg-gray-50 dark:bg-surface-highlight-dark/30">
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-[18px] text-primary">contacts</span>
+                <h2 class="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider">Directorio</h2>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto flex-1">
+            <table class="w-full text-left border-collapse" id="crm-table-core">
+                <thead class="bg-gray-50 dark:bg-surface-highlight-dark/30 border-b border-border-light dark:border-border-dark">
+                    <tr>
+                        <th class="px-6 py-4 text-[10px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Cliente</th>
+                        <th class="px-6 py-4 text-[10px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider text-center">Clasificación</th>
+                        <th class="px-6 py-4 text-[10px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Contacto</th>
+                        <th class="px-6 py-4 text-[10px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Ubicación</th>
+                        <th class="px-6 py-4 text-[10px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider text-center">Fidelidad</th>
+                        <th class="px-6 py-4 text-[10px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider text-right">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-dashed divide-border-light dark:divide-border-dark">
+                    {% for cliente in clientes %}
+                    <tr class="hover:bg-gray-50 dark:hover:bg-surface-highlight-dark/20 transition-colors group cursor-pointer" onclick="location.href='{% url 'core:cliente_update' cliente.pk %}'">
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full flex items-center justify-center text-xs font-black border {% if cliente.tipo_cliente == 'CORP' %}bg-purple-500/10 text-purple-500 border-purple-500/20{% elif cliente.tipo_cliente == 'VP' %}bg-amber-500/10 text-amber-500 border-amber-500/20{% else %}bg-primary/10 text-primary border-primary/20{% endif %} shrink-0">
+                                    {{ cliente.get_nombre_completo|slice:":2"|upper }}
+                                </div>
+                                <div class="flex flex-col gap-0.5 max-w-[200px]">
+                                    <p class="text-sm font-bold text-gray-900 dark:text-white truncate">{{ cliente.get_nombre_completo }}</p>
+                                    {% if cliente.cedula_identidad %}
+                                    <p class="text-[11px] text-gray-500 dark:text-slate-400 font-mono">{{ cliente.cedula_identidad }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            <span class="tier-badge {% if cliente.tipo_cliente == 'CORP' %}tier-corp{% elif cliente.tipo_cliente == 'VP' %}tier-vip{% else %}tier-std{% endif %}">
+                                {{ cliente.get_tipo_cliente_display }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex flex-col gap-0.5">
+                                <p class="text-sm text-gray-600 dark:text-slate-300 truncate max-w-[180px]">{{ cliente.email|default:"—" }}</p>
+                                {% if cliente.telefono_principal %}
+                                <p class="text-[11px] text-gray-500 dark:text-slate-400 font-mono">{{ cliente.telefono_principal }}</p>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <p class="text-sm text-gray-600 dark:text-slate-400">{{ cliente.ciudad|default:"—" }}</p>
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            {% if cliente.es_cliente_frecuente %}
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-purple-500/10 text-purple-500 border border-purple-500/20 mb-1">
+                                <span class="material-symbols-outlined text-[10px]">loyalty</span>Frecuente
+                            </span>
+                            {% else %}
+                            <span class="text-[11px] text-gray-400 font-bold block mb-1">Estandar</span>
+                            {% endif %}
+                            <p class="text-[10px] font-mono text-gray-500 font-bold">{{ cliente.puntos_fidelidad }} pts</p>
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <div class="flex items-center justify-end gap-1 opacity-50 group-hover:opacity-100 transition-opacity" onclick="event.stopPropagation()">
+                                <a href="{% url 'core:cliente_update' cliente.pk %}" class="p-1 rounded-md text-gray-400 hover:text-primary transition-colors hover:bg-primary/10" title="Editar">
+                                    <span class="material-symbols-outlined text-[18px]">edit</span>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="py-20 text-center">
+                            <div class="flex flex-col items-center justify-center">
+                                <div class="w-16 h-16 bg-gray-50 dark:bg-surface-highlight-dark/50 rounded-full flex items-center justify-center mb-4 border border-dashed border-border-light dark:border-border-dark">
+                                    <span class="material-symbols-outlined text-[32px] text-gray-300 dark:text-slate-600">person_off</span>
+                                </div>
+                                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">No hay clientes</h3>
+                                <p class="text-sm text-gray-500 dark:text-slate-400 max-w-sm mx-auto">Ajusta los filtros de búsqueda o registra tu primer cliente en el sistema.</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if is_paginated %}
+        <div class="border-t border-border-light dark:border-border-dark bg-gray-50 dark:bg-surface-highlight-dark/10 px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <p class="text-sm text-gray-500 dark:text-slate-400">
+                Mostrando <span class="font-bold text-gray-900 dark:text-white">{{ page_obj.start_index }}</span> a <span class="font-bold text-gray-900 dark:text-white">{{ page_obj.end_index }}</span> de <span class="font-bold text-gray-900 dark:text-white">{{ page_obj.paginator.count }}</span> clientes
+            </p>
+            <nav class="relative z-0 inline-flex rounded-lg shadow-sm -space-x-px" aria-label="Pagination">
+                {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.tipo %}&tipo={{ request.GET.tipo }}{% endif %}" class="relative inline-flex items-center px-3 py-2 rounded-l-lg border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark text-sm font-medium text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-surface-highlight-dark/50 transition-colors">
+                    <span class="sr-only">Anterior</span>
+                    <span class="material-symbols-outlined text-[18px]">chevron_left</span>
+                </a>
+                {% else %}
+                <span class="relative inline-flex items-center px-3 py-2 rounded-l-lg border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark text-sm font-medium text-gray-300 dark:text-slate-600 cursor-not-allowed">
+                    <span class="material-symbols-outlined text-[18px]">chevron_left</span>
+                </span>
+                {% endif %}
+                
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.tipo %}&tipo={{ request.GET.tipo }}{% endif %}" class="relative inline-flex items-center px-3 py-2 rounded-r-lg border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark text-sm font-medium text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-surface-highlight-dark/50 transition-colors">
+                    <span class="sr-only">Siguiente</span>
+                    <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+                </a>
+                {% else %}
+                <span class="relative inline-flex items-center px-3 py-2 rounded-r-lg border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark text-sm font-medium text-gray-300 dark:text-slate-600 cursor-not-allowed">
+                    <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+                </span>
+                {% endif %}
+            </nav>
+        </div>
+        {% endif %}
+    </div>
+</main>
+{% endblock %}

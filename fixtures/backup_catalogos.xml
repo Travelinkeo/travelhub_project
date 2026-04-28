@@ -1,0 +1,1101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<django-objects version="1.0">
+    <object model="core.pais" pk="1">
+        <field name="codigo_iso_2" type="CharField">PA</field>
+        <field name="codigo_iso_3" type="CharField">PAN</field>
+        <field name="nombre" type="CharField">Panamá</field>
+    </object>
+    <object model="core.pais" pk="2">
+        <field name="codigo_iso_2" type="CharField">VE</field>
+        <field name="codigo_iso_3" type="CharField">VEN</field>
+        <field name="nombre" type="CharField">Venezuela</field>
+    </object>
+    <object model="core.pais" pk="3">
+        <field name="codigo_iso_2" type="CharField">CO</field>
+        <field name="codigo_iso_3" type="CharField">COL</field>
+        <field name="nombre" type="CharField">Colombia</field>
+    </object>
+    <object model="core.pais" pk="4">
+        <field name="codigo_iso_2" type="CharField">US</field>
+        <field name="codigo_iso_3" type="CharField">USA</field>
+        <field name="nombre" type="CharField">Estados Unidos</field>
+    </object>
+    <object model="core.pais" pk="5">
+        <field name="codigo_iso_2" type="CharField">CN</field>
+        <field name="codigo_iso_3" type="CharField">CHN</field>
+        <field name="nombre" type="CharField">China</field>
+    </object>
+    <object model="core.pais" pk="6">
+        <field name="codigo_iso_2" type="CharField">AF</field>
+        <field name="codigo_iso_3" type="CharField">AFG</field>
+        <field name="nombre" type="CharField">Afganistán</field>
+    </object>
+    <object model="core.pais" pk="7">
+        <field name="codigo_iso_2" type="CharField">AL</field>
+        <field name="codigo_iso_3" type="CharField">ALB</field>
+        <field name="nombre" type="CharField">Albania</field>
+    </object>
+    <object model="core.pais" pk="8">
+        <field name="codigo_iso_2" type="CharField">DE</field>
+        <field name="codigo_iso_3" type="CharField">DEU</field>
+        <field name="nombre" type="CharField">Alemania</field>
+    </object>
+    <object model="core.pais" pk="9">
+        <field name="codigo_iso_2" type="CharField">AD</field>
+        <field name="codigo_iso_3" type="CharField">AND</field>
+        <field name="nombre" type="CharField">Andorra</field>
+    </object>
+    <object model="core.pais" pk="10">
+        <field name="codigo_iso_2" type="CharField">AO</field>
+        <field name="codigo_iso_3" type="CharField">AGO</field>
+        <field name="nombre" type="CharField">Angola</field>
+    </object>
+    <object model="core.pais" pk="11">
+        <field name="codigo_iso_2" type="CharField">AG</field>
+        <field name="codigo_iso_3" type="CharField">ATG</field>
+        <field name="nombre" type="CharField">Antigua y Barbuda</field>
+    </object>
+    <object model="core.pais" pk="12">
+        <field name="codigo_iso_2" type="CharField">SA</field>
+        <field name="codigo_iso_3" type="CharField">SAU</field>
+        <field name="nombre" type="CharField">Arabia Saudita</field>
+    </object>
+    <object model="core.pais" pk="13">
+        <field name="codigo_iso_2" type="CharField">DZ</field>
+        <field name="codigo_iso_3" type="CharField">DZA</field>
+        <field name="nombre" type="CharField">Argelia</field>
+    </object>
+    <object model="core.pais" pk="14">
+        <field name="codigo_iso_2" type="CharField">AR</field>
+        <field name="codigo_iso_3" type="CharField">ARG</field>
+        <field name="nombre" type="CharField">Argentina</field>
+    </object>
+    <object model="core.pais" pk="15">
+        <field name="codigo_iso_2" type="CharField">AM</field>
+        <field name="codigo_iso_3" type="CharField">ARM</field>
+        <field name="nombre" type="CharField">Armenia</field>
+    </object>
+    <object model="core.pais" pk="16">
+        <field name="codigo_iso_2" type="CharField">AU</field>
+        <field name="codigo_iso_3" type="CharField">AUS</field>
+        <field name="nombre" type="CharField">Australia</field>
+    </object>
+    <object model="core.pais" pk="17">
+        <field name="codigo_iso_2" type="CharField">AT</field>
+        <field name="codigo_iso_3" type="CharField">AUT</field>
+        <field name="nombre" type="CharField">Austria</field>
+    </object>
+    <object model="core.pais" pk="18">
+        <field name="codigo_iso_2" type="CharField">AZ</field>
+        <field name="codigo_iso_3" type="CharField">AZE</field>
+        <field name="nombre" type="CharField">Azerbaiyán</field>
+    </object>
+    <object model="core.pais" pk="19">
+        <field name="codigo_iso_2" type="CharField">BS</field>
+        <field name="codigo_iso_3" type="CharField">BHS</field>
+        <field name="nombre" type="CharField">Bahamas</field>
+    </object>
+    <object model="core.pais" pk="20">
+        <field name="codigo_iso_2" type="CharField">BD</field>
+        <field name="codigo_iso_3" type="CharField">BGD</field>
+        <field name="nombre" type="CharField">Bangladés</field>
+    </object>
+    <object model="core.pais" pk="21">
+        <field name="codigo_iso_2" type="CharField">BB</field>
+        <field name="codigo_iso_3" type="CharField">BRB</field>
+        <field name="nombre" type="CharField">Barbados</field>
+    </object>
+    <object model="core.pais" pk="22">
+        <field name="codigo_iso_2" type="CharField">BH</field>
+        <field name="codigo_iso_3" type="CharField">BHR</field>
+        <field name="nombre" type="CharField">Baréin</field>
+    </object>
+    <object model="core.pais" pk="23">
+        <field name="codigo_iso_2" type="CharField">BE</field>
+        <field name="codigo_iso_3" type="CharField">BEL</field>
+        <field name="nombre" type="CharField">Bélgica</field>
+    </object>
+    <object model="core.pais" pk="24">
+        <field name="codigo_iso_2" type="CharField">BZ</field>
+        <field name="codigo_iso_3" type="CharField">BLZ</field>
+        <field name="nombre" type="CharField">Belice</field>
+    </object>
+    <object model="core.pais" pk="25">
+        <field name="codigo_iso_2" type="CharField">BJ</field>
+        <field name="codigo_iso_3" type="CharField">BEN</field>
+        <field name="nombre" type="CharField">Benín</field>
+    </object>
+    <object model="core.pais" pk="26">
+        <field name="codigo_iso_2" type="CharField">BY</field>
+        <field name="codigo_iso_3" type="CharField">BLR</field>
+        <field name="nombre" type="CharField">Bielorrusia</field>
+    </object>
+    <object model="core.pais" pk="27">
+        <field name="codigo_iso_2" type="CharField">BO</field>
+        <field name="codigo_iso_3" type="CharField">BOL</field>
+        <field name="nombre" type="CharField">Bolivia</field>
+    </object>
+    <object model="core.pais" pk="28">
+        <field name="codigo_iso_2" type="CharField">BA</field>
+        <field name="codigo_iso_3" type="CharField">BIH</field>
+        <field name="nombre" type="CharField">Bosnia y Herzegovina</field>
+    </object>
+    <object model="core.pais" pk="29">
+        <field name="codigo_iso_2" type="CharField">BW</field>
+        <field name="codigo_iso_3" type="CharField">BWA</field>
+        <field name="nombre" type="CharField">Botsuana</field>
+    </object>
+    <object model="core.pais" pk="30">
+        <field name="codigo_iso_2" type="CharField">BR</field>
+        <field name="codigo_iso_3" type="CharField">BRA</field>
+        <field name="nombre" type="CharField">Brasil</field>
+    </object>
+    <object model="core.pais" pk="31">
+        <field name="codigo_iso_2" type="CharField">BN</field>
+        <field name="codigo_iso_3" type="CharField">BRN</field>
+        <field name="nombre" type="CharField">Brunéi</field>
+    </object>
+    <object model="core.pais" pk="32">
+        <field name="codigo_iso_2" type="CharField">BG</field>
+        <field name="codigo_iso_3" type="CharField">BGR</field>
+        <field name="nombre" type="CharField">Bulgaria</field>
+    </object>
+    <object model="core.pais" pk="33">
+        <field name="codigo_iso_2" type="CharField">BF</field>
+        <field name="codigo_iso_3" type="CharField">BFA</field>
+        <field name="nombre" type="CharField">Burkina Faso</field>
+    </object>
+    <object model="core.pais" pk="34">
+        <field name="codigo_iso_2" type="CharField">BI</field>
+        <field name="codigo_iso_3" type="CharField">BDI</field>
+        <field name="nombre" type="CharField">Burundi</field>
+    </object>
+    <object model="core.pais" pk="35">
+        <field name="codigo_iso_2" type="CharField">BT</field>
+        <field name="codigo_iso_3" type="CharField">BTN</field>
+        <field name="nombre" type="CharField">Bután</field>
+    </object>
+    <object model="core.pais" pk="36">
+        <field name="codigo_iso_2" type="CharField">CV</field>
+        <field name="codigo_iso_3" type="CharField">CPV</field>
+        <field name="nombre" type="CharField">Cabo Verde</field>
+    </object>
+    <object model="core.pais" pk="37">
+        <field name="codigo_iso_2" type="CharField">KH</field>
+        <field name="codigo_iso_3" type="CharField">KHM</field>
+        <field name="nombre" type="CharField">Camboya</field>
+    </object>
+    <object model="core.pais" pk="38">
+        <field name="codigo_iso_2" type="CharField">CM</field>
+        <field name="codigo_iso_3" type="CharField">CMR</field>
+        <field name="nombre" type="CharField">Camerún</field>
+    </object>
+    <object model="core.pais" pk="39">
+        <field name="codigo_iso_2" type="CharField">CA</field>
+        <field name="codigo_iso_3" type="CharField">CAN</field>
+        <field name="nombre" type="CharField">Canadá</field>
+    </object>
+    <object model="core.pais" pk="40">
+        <field name="codigo_iso_2" type="CharField">QA</field>
+        <field name="codigo_iso_3" type="CharField">QAT</field>
+        <field name="nombre" type="CharField">Catar</field>
+    </object>
+    <object model="core.pais" pk="41">
+        <field name="codigo_iso_2" type="CharField">TD</field>
+        <field name="codigo_iso_3" type="CharField">TCD</field>
+        <field name="nombre" type="CharField">Chad</field>
+    </object>
+    <object model="core.pais" pk="42">
+        <field name="codigo_iso_2" type="CharField">CL</field>
+        <field name="codigo_iso_3" type="CharField">CHL</field>
+        <field name="nombre" type="CharField">Chile</field>
+    </object>
+    <object model="core.pais" pk="43">
+        <field name="codigo_iso_2" type="CharField">CY</field>
+        <field name="codigo_iso_3" type="CharField">CYP</field>
+        <field name="nombre" type="CharField">Chipre</field>
+    </object>
+    <object model="core.pais" pk="44">
+        <field name="codigo_iso_2" type="CharField">KM</field>
+        <field name="codigo_iso_3" type="CharField">COM</field>
+        <field name="nombre" type="CharField">Comoras</field>
+    </object>
+    <object model="core.pais" pk="45">
+        <field name="codigo_iso_2" type="CharField">CG</field>
+        <field name="codigo_iso_3" type="CharField">COG</field>
+        <field name="nombre" type="CharField">Congo</field>
+    </object>
+    <object model="core.pais" pk="46">
+        <field name="codigo_iso_2" type="CharField">CD</field>
+        <field name="codigo_iso_3" type="CharField">COD</field>
+        <field name="nombre" type="CharField">República Democrática del Congo</field>
+    </object>
+    <object model="core.pais" pk="47">
+        <field name="codigo_iso_2" type="CharField">KP</field>
+        <field name="codigo_iso_3" type="CharField">PRK</field>
+        <field name="nombre" type="CharField">Corea del Norte</field>
+    </object>
+    <object model="core.pais" pk="48">
+        <field name="codigo_iso_2" type="CharField">KR</field>
+        <field name="codigo_iso_3" type="CharField">KOR</field>
+        <field name="nombre" type="CharField">Corea del Sur</field>
+    </object>
+    <object model="core.pais" pk="49">
+        <field name="codigo_iso_2" type="CharField">CI</field>
+        <field name="codigo_iso_3" type="CharField">CIV</field>
+        <field name="nombre" type="CharField">Costa de Marfil</field>
+    </object>
+    <object model="core.pais" pk="50">
+        <field name="codigo_iso_2" type="CharField">CR</field>
+        <field name="codigo_iso_3" type="CharField">CRI</field>
+        <field name="nombre" type="CharField">Costa Rica</field>
+    </object>
+    <object model="core.pais" pk="51">
+        <field name="codigo_iso_2" type="CharField">HR</field>
+        <field name="codigo_iso_3" type="CharField">HRV</field>
+        <field name="nombre" type="CharField">Croacia</field>
+    </object>
+    <object model="core.pais" pk="52">
+        <field name="codigo_iso_2" type="CharField">CU</field>
+        <field name="codigo_iso_3" type="CharField">CUB</field>
+        <field name="nombre" type="CharField">Cuba</field>
+    </object>
+    <object model="core.pais" pk="53">
+        <field name="codigo_iso_2" type="CharField">DK</field>
+        <field name="codigo_iso_3" type="CharField">DNK</field>
+        <field name="nombre" type="CharField">Dinamarca</field>
+    </object>
+    <object model="core.pais" pk="54">
+        <field name="codigo_iso_2" type="CharField">DM</field>
+        <field name="codigo_iso_3" type="CharField">DMA</field>
+        <field name="nombre" type="CharField">Dominica</field>
+    </object>
+    <object model="core.pais" pk="55">
+        <field name="codigo_iso_2" type="CharField">EC</field>
+        <field name="codigo_iso_3" type="CharField">ECU</field>
+        <field name="nombre" type="CharField">Ecuador</field>
+    </object>
+    <object model="core.pais" pk="56">
+        <field name="codigo_iso_2" type="CharField">EG</field>
+        <field name="codigo_iso_3" type="CharField">EGY</field>
+        <field name="nombre" type="CharField">Egipto</field>
+    </object>
+    <object model="core.pais" pk="57">
+        <field name="codigo_iso_2" type="CharField">SV</field>
+        <field name="codigo_iso_3" type="CharField">SLV</field>
+        <field name="nombre" type="CharField">El Salvador</field>
+    </object>
+    <object model="core.pais" pk="58">
+        <field name="codigo_iso_2" type="CharField">AE</field>
+        <field name="codigo_iso_3" type="CharField">ARE</field>
+        <field name="nombre" type="CharField">Emiratos Árabes Unidos</field>
+    </object>
+    <object model="core.pais" pk="59">
+        <field name="codigo_iso_2" type="CharField">ER</field>
+        <field name="codigo_iso_3" type="CharField">ERI</field>
+        <field name="nombre" type="CharField">Eritrea</field>
+    </object>
+    <object model="core.pais" pk="60">
+        <field name="codigo_iso_2" type="CharField">SK</field>
+        <field name="codigo_iso_3" type="CharField">SVK</field>
+        <field name="nombre" type="CharField">Eslovaquia</field>
+    </object>
+    <object model="core.pais" pk="61">
+        <field name="codigo_iso_2" type="CharField">SI</field>
+        <field name="codigo_iso_3" type="CharField">SVN</field>
+        <field name="nombre" type="CharField">Eslovenia</field>
+    </object>
+    <object model="core.pais" pk="62">
+        <field name="codigo_iso_2" type="CharField">ES</field>
+        <field name="codigo_iso_3" type="CharField">ESP</field>
+        <field name="nombre" type="CharField">España</field>
+    </object>
+    <object model="core.pais" pk="63">
+        <field name="codigo_iso_2" type="CharField">EE</field>
+        <field name="codigo_iso_3" type="CharField">EST</field>
+        <field name="nombre" type="CharField">Estonia</field>
+    </object>
+    <object model="core.pais" pk="64">
+        <field name="codigo_iso_2" type="CharField">ET</field>
+        <field name="codigo_iso_3" type="CharField">ETH</field>
+        <field name="nombre" type="CharField">Etiopía</field>
+    </object>
+    <object model="core.pais" pk="65">
+        <field name="codigo_iso_2" type="CharField">FJ</field>
+        <field name="codigo_iso_3" type="CharField">FJI</field>
+        <field name="nombre" type="CharField">Fiyi</field>
+    </object>
+    <object model="core.pais" pk="66">
+        <field name="codigo_iso_2" type="CharField">PH</field>
+        <field name="codigo_iso_3" type="CharField">PHL</field>
+        <field name="nombre" type="CharField">Filipinas</field>
+    </object>
+    <object model="core.pais" pk="67">
+        <field name="codigo_iso_2" type="CharField">FI</field>
+        <field name="codigo_iso_3" type="CharField">FIN</field>
+        <field name="nombre" type="CharField">Finlandia</field>
+    </object>
+    <object model="core.pais" pk="68">
+        <field name="codigo_iso_2" type="CharField">FR</field>
+        <field name="codigo_iso_3" type="CharField">FRA</field>
+        <field name="nombre" type="CharField">Francia</field>
+    </object>
+    <object model="core.pais" pk="69">
+        <field name="codigo_iso_2" type="CharField">GA</field>
+        <field name="codigo_iso_3" type="CharField">GAB</field>
+        <field name="nombre" type="CharField">Gabón</field>
+    </object>
+    <object model="core.pais" pk="70">
+        <field name="codigo_iso_2" type="CharField">GM</field>
+        <field name="codigo_iso_3" type="CharField">GMB</field>
+        <field name="nombre" type="CharField">Gambia</field>
+    </object>
+    <object model="core.pais" pk="71">
+        <field name="codigo_iso_2" type="CharField">GE</field>
+        <field name="codigo_iso_3" type="CharField">GEO</field>
+        <field name="nombre" type="CharField">Georgia</field>
+    </object>
+    <object model="core.pais" pk="72">
+        <field name="codigo_iso_2" type="CharField">GH</field>
+        <field name="codigo_iso_3" type="CharField">GHA</field>
+        <field name="nombre" type="CharField">Ghana</field>
+    </object>
+    <object model="core.pais" pk="73">
+        <field name="codigo_iso_2" type="CharField">GD</field>
+        <field name="codigo_iso_3" type="CharField">GRD</field>
+        <field name="nombre" type="CharField">Granada</field>
+    </object>
+    <object model="core.pais" pk="74">
+        <field name="codigo_iso_2" type="CharField">GR</field>
+        <field name="codigo_iso_3" type="CharField">GRC</field>
+        <field name="nombre" type="CharField">Grecia</field>
+    </object>
+    <object model="core.pais" pk="75">
+        <field name="codigo_iso_2" type="CharField">GT</field>
+        <field name="codigo_iso_3" type="CharField">GTM</field>
+        <field name="nombre" type="CharField">Guatemala</field>
+    </object>
+    <object model="core.pais" pk="76">
+        <field name="codigo_iso_2" type="CharField">GN</field>
+        <field name="codigo_iso_3" type="CharField">GIN</field>
+        <field name="nombre" type="CharField">Guinea</field>
+    </object>
+    <object model="core.pais" pk="77">
+        <field name="codigo_iso_2" type="CharField">GW</field>
+        <field name="codigo_iso_3" type="CharField">GNB</field>
+        <field name="nombre" type="CharField">Guinea-Bisáu</field>
+    </object>
+    <object model="core.pais" pk="78">
+        <field name="codigo_iso_2" type="CharField">GQ</field>
+        <field name="codigo_iso_3" type="CharField">GNQ</field>
+        <field name="nombre" type="CharField">Guinea Ecuatorial</field>
+    </object>
+    <object model="core.pais" pk="79">
+        <field name="codigo_iso_2" type="CharField">GY</field>
+        <field name="codigo_iso_3" type="CharField">GUY</field>
+        <field name="nombre" type="CharField">Guyana</field>
+    </object>
+    <object model="core.pais" pk="80">
+        <field name="codigo_iso_2" type="CharField">HT</field>
+        <field name="codigo_iso_3" type="CharField">HTI</field>
+        <field name="nombre" type="CharField">Haití</field>
+    </object>
+    <object model="core.pais" pk="81">
+        <field name="codigo_iso_2" type="CharField">HN</field>
+        <field name="codigo_iso_3" type="CharField">HND</field>
+        <field name="nombre" type="CharField">Honduras</field>
+    </object>
+    <object model="core.pais" pk="82">
+        <field name="codigo_iso_2" type="CharField">HU</field>
+        <field name="codigo_iso_3" type="CharField">HUN</field>
+        <field name="nombre" type="CharField">Hungría</field>
+    </object>
+    <object model="core.pais" pk="83">
+        <field name="codigo_iso_2" type="CharField">IN</field>
+        <field name="codigo_iso_3" type="CharField">IND</field>
+        <field name="nombre" type="CharField">India</field>
+    </object>
+    <object model="core.pais" pk="84">
+        <field name="codigo_iso_2" type="CharField">ID</field>
+        <field name="codigo_iso_3" type="CharField">IDN</field>
+        <field name="nombre" type="CharField">Indonesia</field>
+    </object>
+    <object model="core.pais" pk="85">
+        <field name="codigo_iso_2" type="CharField">IQ</field>
+        <field name="codigo_iso_3" type="CharField">IRQ</field>
+        <field name="nombre" type="CharField">Irak</field>
+    </object>
+    <object model="core.pais" pk="86">
+        <field name="codigo_iso_2" type="CharField">IR</field>
+        <field name="codigo_iso_3" type="CharField">IRN</field>
+        <field name="nombre" type="CharField">Irán</field>
+    </object>
+    <object model="core.pais" pk="87">
+        <field name="codigo_iso_2" type="CharField">IE</field>
+        <field name="codigo_iso_3" type="CharField">IRL</field>
+        <field name="nombre" type="CharField">Irlanda</field>
+    </object>
+    <object model="core.pais" pk="88">
+        <field name="codigo_iso_2" type="CharField">IS</field>
+        <field name="codigo_iso_3" type="CharField">ISL</field>
+        <field name="nombre" type="CharField">Islandia</field>
+    </object>
+    <object model="core.pais" pk="89">
+        <field name="codigo_iso_2" type="CharField">IL</field>
+        <field name="codigo_iso_3" type="CharField">ISR</field>
+        <field name="nombre" type="CharField">Israel</field>
+    </object>
+    <object model="core.pais" pk="90">
+        <field name="codigo_iso_2" type="CharField">IT</field>
+        <field name="codigo_iso_3" type="CharField">ITA</field>
+        <field name="nombre" type="CharField">Italia</field>
+    </object>
+    <object model="core.pais" pk="91">
+        <field name="codigo_iso_2" type="CharField">JM</field>
+        <field name="codigo_iso_3" type="CharField">JAM</field>
+        <field name="nombre" type="CharField">Jamaica</field>
+    </object>
+    <object model="core.pais" pk="92">
+        <field name="codigo_iso_2" type="CharField">JP</field>
+        <field name="codigo_iso_3" type="CharField">JPN</field>
+        <field name="nombre" type="CharField">Japón</field>
+    </object>
+    <object model="core.pais" pk="93">
+        <field name="codigo_iso_2" type="CharField">JO</field>
+        <field name="codigo_iso_3" type="CharField">JOR</field>
+        <field name="nombre" type="CharField">Jordania</field>
+    </object>
+    <object model="core.pais" pk="94">
+        <field name="codigo_iso_2" type="CharField">KZ</field>
+        <field name="codigo_iso_3" type="CharField">KAZ</field>
+        <field name="nombre" type="CharField">Kazajistán</field>
+    </object>
+    <object model="core.pais" pk="95">
+        <field name="codigo_iso_2" type="CharField">KE</field>
+        <field name="codigo_iso_3" type="CharField">KEN</field>
+        <field name="nombre" type="CharField">Kenia</field>
+    </object>
+    <object model="core.pais" pk="96">
+        <field name="codigo_iso_2" type="CharField">KG</field>
+        <field name="codigo_iso_3" type="CharField">KGZ</field>
+        <field name="nombre" type="CharField">Kirguistán</field>
+    </object>
+    <object model="core.pais" pk="97">
+        <field name="codigo_iso_2" type="CharField">KI</field>
+        <field name="codigo_iso_3" type="CharField">KIR</field>
+        <field name="nombre" type="CharField">Kiribati</field>
+    </object>
+    <object model="core.pais" pk="98">
+        <field name="codigo_iso_2" type="CharField">KW</field>
+        <field name="codigo_iso_3" type="CharField">KWT</field>
+        <field name="nombre" type="CharField">Kuwait</field>
+    </object>
+    <object model="core.pais" pk="99">
+        <field name="codigo_iso_2" type="CharField">LA</field>
+        <field name="codigo_iso_3" type="CharField">LAO</field>
+        <field name="nombre" type="CharField">Laos</field>
+    </object>
+    <object model="core.pais" pk="100">
+        <field name="codigo_iso_2" type="CharField">LS</field>
+        <field name="codigo_iso_3" type="CharField">LSO</field>
+        <field name="nombre" type="CharField">Lesoto</field>
+    </object>
+    <object model="core.pais" pk="101">
+        <field name="codigo_iso_2" type="CharField">LV</field>
+        <field name="codigo_iso_3" type="CharField">LVA</field>
+        <field name="nombre" type="CharField">Letonia</field>
+    </object>
+    <object model="core.pais" pk="102">
+        <field name="codigo_iso_2" type="CharField">LB</field>
+        <field name="codigo_iso_3" type="CharField">LBN</field>
+        <field name="nombre" type="CharField">Líbano</field>
+    </object>
+    <object model="core.pais" pk="103">
+        <field name="codigo_iso_2" type="CharField">LR</field>
+        <field name="codigo_iso_3" type="CharField">LBR</field>
+        <field name="nombre" type="CharField">Liberia</field>
+    </object>
+    <object model="core.pais" pk="104">
+        <field name="codigo_iso_2" type="CharField">LY</field>
+        <field name="codigo_iso_3" type="CharField">LBY</field>
+        <field name="nombre" type="CharField">Libia</field>
+    </object>
+    <object model="core.pais" pk="105">
+        <field name="codigo_iso_2" type="CharField">LI</field>
+        <field name="codigo_iso_3" type="CharField">LIE</field>
+        <field name="nombre" type="CharField">Liechtenstein</field>
+    </object>
+    <object model="core.pais" pk="106">
+        <field name="codigo_iso_2" type="CharField">LT</field>
+        <field name="codigo_iso_3" type="CharField">LTU</field>
+        <field name="nombre" type="CharField">Lituania</field>
+    </object>
+    <object model="core.pais" pk="107">
+        <field name="codigo_iso_2" type="CharField">LU</field>
+        <field name="codigo_iso_3" type="CharField">LUX</field>
+        <field name="nombre" type="CharField">Luxemburgo</field>
+    </object>
+    <object model="core.pais" pk="108">
+        <field name="codigo_iso_2" type="CharField">MK</field>
+        <field name="codigo_iso_3" type="CharField">MKD</field>
+        <field name="nombre" type="CharField">Macedonia del Norte</field>
+    </object>
+    <object model="core.pais" pk="109">
+        <field name="codigo_iso_2" type="CharField">MG</field>
+        <field name="codigo_iso_3" type="CharField">MDG</field>
+        <field name="nombre" type="CharField">Madagascar</field>
+    </object>
+    <object model="core.pais" pk="110">
+        <field name="codigo_iso_2" type="CharField">MW</field>
+        <field name="codigo_iso_3" type="CharField">MWI</field>
+        <field name="nombre" type="CharField">Malaui</field>
+    </object>
+    <object model="core.pais" pk="111">
+        <field name="codigo_iso_2" type="CharField">MY</field>
+        <field name="codigo_iso_3" type="CharField">MYS</field>
+        <field name="nombre" type="CharField">Malasia</field>
+    </object>
+    <object model="core.pais" pk="112">
+        <field name="codigo_iso_2" type="CharField">ML</field>
+        <field name="codigo_iso_3" type="CharField">MLI</field>
+        <field name="nombre" type="CharField">Malí</field>
+    </object>
+    <object model="core.pais" pk="113">
+        <field name="codigo_iso_2" type="CharField">MT</field>
+        <field name="codigo_iso_3" type="CharField">MLT</field>
+        <field name="nombre" type="CharField">Malta</field>
+    </object>
+    <object model="core.pais" pk="114">
+        <field name="codigo_iso_2" type="CharField">MA</field>
+        <field name="codigo_iso_3" type="CharField">MAR</field>
+        <field name="nombre" type="CharField">Marruecos</field>
+    </object>
+    <object model="core.pais" pk="115">
+        <field name="codigo_iso_2" type="CharField">MH</field>
+        <field name="codigo_iso_3" type="CharField">MHL</field>
+        <field name="nombre" type="CharField">Islas Marshall</field>
+    </object>
+    <object model="core.pais" pk="116">
+        <field name="codigo_iso_2" type="CharField">MR</field>
+        <field name="codigo_iso_3" type="CharField">MRT</field>
+        <field name="nombre" type="CharField">Mauritania</field>
+    </object>
+    <object model="core.pais" pk="117">
+        <field name="codigo_iso_2" type="CharField">MU</field>
+        <field name="codigo_iso_3" type="CharField">MUS</field>
+        <field name="nombre" type="CharField">Mauricio</field>
+    </object>
+    <object model="core.pais" pk="118">
+        <field name="codigo_iso_2" type="CharField">MX</field>
+        <field name="codigo_iso_3" type="CharField">MEX</field>
+        <field name="nombre" type="CharField">México</field>
+    </object>
+    <object model="core.pais" pk="119">
+        <field name="codigo_iso_2" type="CharField">FM</field>
+        <field name="codigo_iso_3" type="CharField">FSM</field>
+        <field name="nombre" type="CharField">Micronesia</field>
+    </object>
+    <object model="core.pais" pk="120">
+        <field name="codigo_iso_2" type="CharField">MD</field>
+        <field name="codigo_iso_3" type="CharField">MDA</field>
+        <field name="nombre" type="CharField">Moldavia</field>
+    </object>
+    <object model="core.pais" pk="121">
+        <field name="codigo_iso_2" type="CharField">MC</field>
+        <field name="codigo_iso_3" type="CharField">MCO</field>
+        <field name="nombre" type="CharField">Mónaco</field>
+    </object>
+    <object model="core.pais" pk="122">
+        <field name="codigo_iso_2" type="CharField">MN</field>
+        <field name="codigo_iso_3" type="CharField">MNG</field>
+        <field name="nombre" type="CharField">Mongolia</field>
+    </object>
+    <object model="core.pais" pk="123">
+        <field name="codigo_iso_2" type="CharField">ME</field>
+        <field name="codigo_iso_3" type="CharField">MNE</field>
+        <field name="nombre" type="CharField">Montenegro</field>
+    </object>
+    <object model="core.pais" pk="124">
+        <field name="codigo_iso_2" type="CharField">MZ</field>
+        <field name="codigo_iso_3" type="CharField">MOZ</field>
+        <field name="nombre" type="CharField">Mozambique</field>
+    </object>
+    <object model="core.pais" pk="125">
+        <field name="codigo_iso_2" type="CharField">MM</field>
+        <field name="codigo_iso_3" type="CharField">MMR</field>
+        <field name="nombre" type="CharField">Myanmar</field>
+    </object>
+    <object model="core.pais" pk="126">
+        <field name="codigo_iso_2" type="CharField">NA</field>
+        <field name="codigo_iso_3" type="CharField">NAM</field>
+        <field name="nombre" type="CharField">Namibia</field>
+    </object>
+    <object model="core.pais" pk="127">
+        <field name="codigo_iso_2" type="CharField">NR</field>
+        <field name="codigo_iso_3" type="CharField">NRU</field>
+        <field name="nombre" type="CharField">Nauru</field>
+    </object>
+    <object model="core.pais" pk="128">
+        <field name="codigo_iso_2" type="CharField">NP</field>
+        <field name="codigo_iso_3" type="CharField">NPL</field>
+        <field name="nombre" type="CharField">Nepal</field>
+    </object>
+    <object model="core.pais" pk="129">
+        <field name="codigo_iso_2" type="CharField">NI</field>
+        <field name="codigo_iso_3" type="CharField">NIC</field>
+        <field name="nombre" type="CharField">Nicaragua</field>
+    </object>
+    <object model="core.pais" pk="130">
+        <field name="codigo_iso_2" type="CharField">NE</field>
+        <field name="codigo_iso_3" type="CharField">NER</field>
+        <field name="nombre" type="CharField">Níger</field>
+    </object>
+    <object model="core.pais" pk="131">
+        <field name="codigo_iso_2" type="CharField">NG</field>
+        <field name="codigo_iso_3" type="CharField">NGA</field>
+        <field name="nombre" type="CharField">Nigeria</field>
+    </object>
+    <object model="core.pais" pk="132">
+        <field name="codigo_iso_2" type="CharField">NO</field>
+        <field name="codigo_iso_3" type="CharField">NOR</field>
+        <field name="nombre" type="CharField">Noruega</field>
+    </object>
+    <object model="core.pais" pk="133">
+        <field name="codigo_iso_2" type="CharField">NZ</field>
+        <field name="codigo_iso_3" type="CharField">NZL</field>
+        <field name="nombre" type="CharField">Nueva Zelanda</field>
+    </object>
+    <object model="core.pais" pk="134">
+        <field name="codigo_iso_2" type="CharField">OM</field>
+        <field name="codigo_iso_3" type="CharField">OMN</field>
+        <field name="nombre" type="CharField">Omán</field>
+    </object>
+    <object model="core.pais" pk="135">
+        <field name="codigo_iso_2" type="CharField">NL</field>
+        <field name="codigo_iso_3" type="CharField">NLD</field>
+        <field name="nombre" type="CharField">Países Bajos</field>
+    </object>
+    <object model="core.pais" pk="136">
+        <field name="codigo_iso_2" type="CharField">PK</field>
+        <field name="codigo_iso_3" type="CharField">PAK</field>
+        <field name="nombre" type="CharField">Pakistán</field>
+    </object>
+    <object model="core.pais" pk="137">
+        <field name="codigo_iso_2" type="CharField">PW</field>
+        <field name="codigo_iso_3" type="CharField">PLW</field>
+        <field name="nombre" type="CharField">Palaos</field>
+    </object>
+    <object model="core.pais" pk="138">
+        <field name="codigo_iso_2" type="CharField">PS</field>
+        <field name="codigo_iso_3" type="CharField">PSE</field>
+        <field name="nombre" type="CharField">Palestina</field>
+    </object>
+    <object model="core.pais" pk="139">
+        <field name="codigo_iso_2" type="CharField">PG</field>
+        <field name="codigo_iso_3" type="CharField">PNG</field>
+        <field name="nombre" type="CharField">Papúa Nueva Guinea</field>
+    </object>
+    <object model="core.pais" pk="140">
+        <field name="codigo_iso_2" type="CharField">PY</field>
+        <field name="codigo_iso_3" type="CharField">PRY</field>
+        <field name="nombre" type="CharField">Paraguay</field>
+    </object>
+    <object model="core.pais" pk="141">
+        <field name="codigo_iso_2" type="CharField">PE</field>
+        <field name="codigo_iso_3" type="CharField">PER</field>
+        <field name="nombre" type="CharField">Perú</field>
+    </object>
+    <object model="core.pais" pk="142">
+        <field name="codigo_iso_2" type="CharField">PL</field>
+        <field name="codigo_iso_3" type="CharField">POL</field>
+        <field name="nombre" type="CharField">Polonia</field>
+    </object>
+    <object model="core.pais" pk="143">
+        <field name="codigo_iso_2" type="CharField">PT</field>
+        <field name="codigo_iso_3" type="CharField">PRT</field>
+        <field name="nombre" type="CharField">Portugal</field>
+    </object>
+    <object model="core.pais" pk="144">
+        <field name="codigo_iso_2" type="CharField">GB</field>
+        <field name="codigo_iso_3" type="CharField">GBR</field>
+        <field name="nombre" type="CharField">Reino Unido</field>
+    </object>
+    <object model="core.pais" pk="145">
+        <field name="codigo_iso_2" type="CharField">CF</field>
+        <field name="codigo_iso_3" type="CharField">CAF</field>
+        <field name="nombre" type="CharField">República Centroafricana</field>
+    </object>
+    <object model="core.pais" pk="146">
+        <field name="codigo_iso_2" type="CharField">CZ</field>
+        <field name="codigo_iso_3" type="CharField">CZE</field>
+        <field name="nombre" type="CharField">República Checa</field>
+    </object>
+    <object model="core.pais" pk="147">
+        <field name="codigo_iso_2" type="CharField">DO</field>
+        <field name="codigo_iso_3" type="CharField">DOM</field>
+        <field name="nombre" type="CharField">República Dominicana</field>
+    </object>
+    <object model="core.pais" pk="148">
+        <field name="codigo_iso_2" type="CharField">RW</field>
+        <field name="codigo_iso_3" type="CharField">RWA</field>
+        <field name="nombre" type="CharField">Ruanda</field>
+    </object>
+    <object model="core.pais" pk="149">
+        <field name="codigo_iso_2" type="CharField">RO</field>
+        <field name="codigo_iso_3" type="CharField">ROU</field>
+        <field name="nombre" type="CharField">Rumanía</field>
+    </object>
+    <object model="core.pais" pk="150">
+        <field name="codigo_iso_2" type="CharField">RU</field>
+        <field name="codigo_iso_3" type="CharField">RUS</field>
+        <field name="nombre" type="CharField">Rusia</field>
+    </object>
+    <object model="core.pais" pk="151">
+        <field name="codigo_iso_2" type="CharField">WS</field>
+        <field name="codigo_iso_3" type="CharField">WSM</field>
+        <field name="nombre" type="CharField">Samoa</field>
+    </object>
+    <object model="core.pais" pk="152">
+        <field name="codigo_iso_2" type="CharField">KN</field>
+        <field name="codigo_iso_3" type="CharField">KNA</field>
+        <field name="nombre" type="CharField">San Cristóbal y Nieves</field>
+    </object>
+    <object model="core.pais" pk="153">
+        <field name="codigo_iso_2" type="CharField">SM</field>
+        <field name="codigo_iso_3" type="CharField">SMR</field>
+        <field name="nombre" type="CharField">San Marino</field>
+    </object>
+    <object model="core.pais" pk="154">
+        <field name="codigo_iso_2" type="CharField">LC</field>
+        <field name="codigo_iso_3" type="CharField">LCA</field>
+        <field name="nombre" type="CharField">Santa Lucía</field>
+    </object>
+    <object model="core.pais" pk="155">
+        <field name="codigo_iso_2" type="CharField">VC</field>
+        <field name="codigo_iso_3" type="CharField">VCT</field>
+        <field name="nombre" type="CharField">San Vicente y las Granadinas</field>
+    </object>
+    <object model="core.pais" pk="156">
+        <field name="codigo_iso_2" type="CharField">ST</field>
+        <field name="codigo_iso_3" type="CharField">STP</field>
+        <field name="nombre" type="CharField">Santo Tomé y Príncipe</field>
+    </object>
+    <object model="core.pais" pk="157">
+        <field name="codigo_iso_2" type="CharField">SN</field>
+        <field name="codigo_iso_3" type="CharField">SEN</field>
+        <field name="nombre" type="CharField">Senegal</field>
+    </object>
+    <object model="core.pais" pk="158">
+        <field name="codigo_iso_2" type="CharField">RS</field>
+        <field name="codigo_iso_3" type="CharField">SRB</field>
+        <field name="nombre" type="CharField">Serbia</field>
+    </object>
+    <object model="core.pais" pk="159">
+        <field name="codigo_iso_2" type="CharField">SC</field>
+        <field name="codigo_iso_3" type="CharField">SYC</field>
+        <field name="nombre" type="CharField">Seychelles</field>
+    </object>
+    <object model="core.pais" pk="160">
+        <field name="codigo_iso_2" type="CharField">SL</field>
+        <field name="codigo_iso_3" type="CharField">SLE</field>
+        <field name="nombre" type="CharField">Sierra Leona</field>
+    </object>
+    <object model="core.pais" pk="161">
+        <field name="codigo_iso_2" type="CharField">SG</field>
+        <field name="codigo_iso_3" type="CharField">SGP</field>
+        <field name="nombre" type="CharField">Singapur</field>
+    </object>
+    <object model="core.pais" pk="162">
+        <field name="codigo_iso_2" type="CharField">SY</field>
+        <field name="codigo_iso_3" type="CharField">SYR</field>
+        <field name="nombre" type="CharField">Siria</field>
+    </object>
+    <object model="core.pais" pk="163">
+        <field name="codigo_iso_2" type="CharField">SO</field>
+        <field name="codigo_iso_3" type="CharField">SOM</field>
+        <field name="nombre" type="CharField">Somalia</field>
+    </object>
+    <object model="core.pais" pk="164">
+        <field name="codigo_iso_2" type="CharField">LK</field>
+        <field name="codigo_iso_3" type="CharField">LKA</field>
+        <field name="nombre" type="CharField">Sri Lanka</field>
+    </object>
+    <object model="core.pais" pk="165">
+        <field name="codigo_iso_2" type="CharField">SZ</field>
+        <field name="codigo_iso_3" type="CharField">SWZ</field>
+        <field name="nombre" type="CharField">Esuatini</field>
+    </object>
+    <object model="core.pais" pk="166">
+        <field name="codigo_iso_2" type="CharField">ZA</field>
+        <field name="codigo_iso_3" type="CharField">ZAF</field>
+        <field name="nombre" type="CharField">Sudáfrica</field>
+    </object>
+    <object model="core.pais" pk="167">
+        <field name="codigo_iso_2" type="CharField">SD</field>
+        <field name="codigo_iso_3" type="CharField">SDN</field>
+        <field name="nombre" type="CharField">Sudán</field>
+    </object>
+    <object model="core.pais" pk="168">
+        <field name="codigo_iso_2" type="CharField">SS</field>
+        <field name="codigo_iso_3" type="CharField">SSD</field>
+        <field name="nombre" type="CharField">Sudán del Sur</field>
+    </object>
+    <object model="core.pais" pk="169">
+        <field name="codigo_iso_2" type="CharField">SE</field>
+        <field name="codigo_iso_3" type="CharField">SWE</field>
+        <field name="nombre" type="CharField">Suecia</field>
+    </object>
+    <object model="core.pais" pk="170">
+        <field name="codigo_iso_2" type="CharField">CH</field>
+        <field name="codigo_iso_3" type="CharField">CHE</field>
+        <field name="nombre" type="CharField">Suiza</field>
+    </object>
+    <object model="core.pais" pk="171">
+        <field name="codigo_iso_2" type="CharField">SR</field>
+        <field name="codigo_iso_3" type="CharField">SUR</field>
+        <field name="nombre" type="CharField">Surinam</field>
+    </object>
+    <object model="core.pais" pk="172">
+        <field name="codigo_iso_2" type="CharField">TH</field>
+        <field name="codigo_iso_3" type="CharField">THA</field>
+        <field name="nombre" type="CharField">Tailandia</field>
+    </object>
+    <object model="core.pais" pk="173">
+        <field name="codigo_iso_2" type="CharField">TZ</field>
+        <field name="codigo_iso_3" type="CharField">TZA</field>
+        <field name="nombre" type="CharField">Tanzania</field>
+    </object>
+    <object model="core.pais" pk="174">
+        <field name="codigo_iso_2" type="CharField">TJ</field>
+        <field name="codigo_iso_3" type="CharField">TJK</field>
+        <field name="nombre" type="CharField">Tayikistán</field>
+    </object>
+    <object model="core.pais" pk="175">
+        <field name="codigo_iso_2" type="CharField">TL</field>
+        <field name="codigo_iso_3" type="CharField">TLS</field>
+        <field name="nombre" type="CharField">Timor Oriental</field>
+    </object>
+    <object model="core.pais" pk="176">
+        <field name="codigo_iso_2" type="CharField">TG</field>
+        <field name="codigo_iso_3" type="CharField">TGO</field>
+        <field name="nombre" type="CharField">Togo</field>
+    </object>
+    <object model="core.pais" pk="177">
+        <field name="codigo_iso_2" type="CharField">TO</field>
+        <field name="codigo_iso_3" type="CharField">TON</field>
+        <field name="nombre" type="CharField">Tonga</field>
+    </object>
+    <object model="core.pais" pk="178">
+        <field name="codigo_iso_2" type="CharField">TT</field>
+        <field name="codigo_iso_3" type="CharField">TTO</field>
+        <field name="nombre" type="CharField">Trinidad y Tobago</field>
+    </object>
+    <object model="core.pais" pk="179">
+        <field name="codigo_iso_2" type="CharField">TN</field>
+        <field name="codigo_iso_3" type="CharField">TUN</field>
+        <field name="nombre" type="CharField">Túnez</field>
+    </object>
+    <object model="core.pais" pk="180">
+        <field name="codigo_iso_2" type="CharField">TM</field>
+        <field name="codigo_iso_3" type="CharField">TKM</field>
+        <field name="nombre" type="CharField">Turkmenistán</field>
+    </object>
+    <object model="core.pais" pk="181">
+        <field name="codigo_iso_2" type="CharField">TR</field>
+        <field name="codigo_iso_3" type="CharField">TUR</field>
+        <field name="nombre" type="CharField">Turquía</field>
+    </object>
+    <object model="core.pais" pk="182">
+        <field name="codigo_iso_2" type="CharField">TV</field>
+        <field name="codigo_iso_3" type="CharField">TUV</field>
+        <field name="nombre" type="CharField">Tuvalu</field>
+    </object>
+    <object model="core.pais" pk="183">
+        <field name="codigo_iso_2" type="CharField">UA</field>
+        <field name="codigo_iso_3" type="CharField">UKR</field>
+        <field name="nombre" type="CharField">Ucrania</field>
+    </object>
+    <object model="core.pais" pk="184">
+        <field name="codigo_iso_2" type="CharField">UG</field>
+        <field name="codigo_iso_3" type="CharField">UGA</field>
+        <field name="nombre" type="CharField">Uganda</field>
+    </object>
+    <object model="core.pais" pk="185">
+        <field name="codigo_iso_2" type="CharField">UY</field>
+        <field name="codigo_iso_3" type="CharField">URY</field>
+        <field name="nombre" type="CharField">Uruguay</field>
+    </object>
+    <object model="core.pais" pk="186">
+        <field name="codigo_iso_2" type="CharField">UZ</field>
+        <field name="codigo_iso_3" type="CharField">UZB</field>
+        <field name="nombre" type="CharField">Uzbekistán</field>
+    </object>
+    <object model="core.pais" pk="187">
+        <field name="codigo_iso_2" type="CharField">VU</field>
+        <field name="codigo_iso_3" type="CharField">VUT</field>
+        <field name="nombre" type="CharField">Vanuatu</field>
+    </object>
+    <object model="core.pais" pk="188">
+        <field name="codigo_iso_2" type="CharField">VN</field>
+        <field name="codigo_iso_3" type="CharField">VNM</field>
+        <field name="nombre" type="CharField">Vietnam</field>
+    </object>
+    <object model="core.pais" pk="189">
+        <field name="codigo_iso_2" type="CharField">YE</field>
+        <field name="codigo_iso_3" type="CharField">YEM</field>
+        <field name="nombre" type="CharField">Yemen</field>
+    </object>
+    <object model="core.pais" pk="190">
+        <field name="codigo_iso_2" type="CharField">DJ</field>
+        <field name="codigo_iso_3" type="CharField">DJI</field>
+        <field name="nombre" type="CharField">Yibuti</field>
+    </object>
+    <object model="core.pais" pk="191">
+        <field name="codigo_iso_2" type="CharField">ZM</field>
+        <field name="codigo_iso_3" type="CharField">ZMB</field>
+        <field name="nombre" type="CharField">Zambia</field>
+    </object>
+    <object model="core.pais" pk="192">
+        <field name="codigo_iso_2" type="CharField">ZW</field>
+        <field name="codigo_iso_3" type="CharField">ZWE</field>
+        <field name="nombre" type="CharField">Zimbabue</field>
+    </object>
+    <object model="core.pais" pk="193">
+        <field name="codigo_iso_2" type="CharField">VI</field>
+        <field name="codigo_iso_3" type="CharField">VIR</field>
+        <field name="nombre" type="CharField">Islas Vírgenes de EE. UU.</field>
+    </object>
+    <object model="core.pais" pk="194">
+        <field name="codigo_iso_2" type="CharField">HK</field>
+        <field name="codigo_iso_3" type="CharField">HKG</field>
+        <field name="nombre" type="CharField">Hong Kong</field>
+    </object>
+    <object model="core.pais" pk="195">
+        <field name="codigo_iso_2" type="CharField">MO</field>
+        <field name="codigo_iso_3" type="CharField">MAC</field>
+        <field name="nombre" type="CharField">Macao</field>
+    </object>
+    <object model="core.pais" pk="196">
+        <field name="codigo_iso_2" type="CharField">TW</field>
+        <field name="codigo_iso_3" type="CharField">TWN</field>
+        <field name="nombre" type="CharField">Taiwán</field>
+    </object>
+    <object model="core.ciudad" pk="1">
+        <field name="nombre" type="CharField">Panamá</field>
+        <field name="pais" rel="ManyToOneRel" to="core.pais">1</field>
+        <field name="region_estado" type="CharField">Panamá</field>
+    </object>
+    <object model="core.ciudad" pk="2">
+        <field name="nombre" type="CharField">Tokyo</field>
+        <field name="pais" rel="ManyToOneRel" to="core.pais">92</field>
+        <field name="region_estado" type="CharField">Tokyo</field>
+    </object>
+    <object model="core.ciudad" pk="3">
+        <field name="nombre" type="CharField">Jakarta</field>
+        <field name="pais" rel="ManyToOneRel" to="core.pais">84</field>
+        <field name="region_estado" type="CharField">Jakarta</field>
+    </object>
+    <object model="core.ciudad" pk="4">
+        <field name="nombre" type="CharField">Delhi</field>
+        <field name="pais" rel="ManyToOneRel" to="core.pais">83</field>
+        <field name="region_estado" type="CharField">Delhi</field>
+    </object>
+    <object model="core.ciudad" pk="5">
+        <field name="nombre" type="CharField">Guangzhou</field>
+        <field name="pais" rel="ManyToOneRel" to="core.pais">5</field>
+        <field name="region_estado" type="CharField">Guangdong</field>
+    </object>
+    <object model="core.ciudad" pk="6">
+        <field name="nombre" type="CharField">Mumbai</field>
+        <field name="pais" rel="ManyToOneRel" to="core.pais">83</field>
+        <field name="region_estado" type="CharField">Maharashtra</field>
+    </object>
+    <object model="core.ciudad" pk="7">
+        <field name="nombre" type="CharField">Manila</field>
+        <field name="pais" rel="ManyToOneRel" to="core.pais">66</field>
+        <field name="region_estado" type="CharField">Manila</field>
+    </object>
+    <object model="core.ciudad" pk="8">
+        <field name="nombre" type="CharField">Shanghai</field>
+        <field name="pais" rel="ManyToOneRel" to="core.pais">5</field>
+        <field name="region_estado" type="CharField">Shanghai</field>
+    </object>
+    <object model="core.ciudad" pk="9">
+        <field name="nombre" type="CharField">São Paulo</field>
+        <field name="pais" rel="ManyToOneRel" to="core.pais">30</field>
+        <field name="region_estado" type="CharField">São Paulo</field>
+    </object>
+    <object model="core.ciudad" pk="10">
+        <field name="nombre" type="CharField">Seoul</field>
+        <field name="pais" rel="ManyToOneRel" to="core.pais">48</field>
+        <field name="region_estado" type="CharField">Seoul</field>
+    </object>
+    <object model="core.ciudad" pk="11">
+        <field name="nombre" type="CharField">Mexico City</field>
+        <field name="pais" rel="ManyToOneRel" to="core.pais">118</field>
+        <field name="region_estado" type="CharField">Ciudad de México</field>
+    </object>
+    <object model="core.ciudad" pk="12">
+        <field name="nombre" type="CharField">Kolkata</field>
+        <field name="pais" rel="ManyToOneRel" to="core.pais">83</field>
+        <field name="region_estado" type="CharField">West Bengal</field>
+    </object>
+    <object model="core.ciudad" pk="13">
+        <field name="nombre" type="CharField">Cairo</field>
+        <field name="pais" rel="ManyToOneRel" to="core.pais">56</field>
+        <field name="region_estado" type="CharField">Al Qahirah</field>
+    </object>
+    <object model="core.ciudad" pk="14">
+        <field name="nombre" type="CharField">Karachi</field>
+        <field name="pais" rel="ManyToOneRel" to="core.pais">136</field>
+        <field name="region_estado" type="CharField">Sindh</field>
+    </object>
+    <object model="core.ciudad" pk="15">
+        <field name="nombre" type="CharField">Dhaka</field>
+        <field name="pais" rel="ManyToOneRel" to="core.pais">20</field>
+        <field name="region_estado" type="CharField">Dhaka</field>
+    </object>
+    <object model="core.ciudad" pk="16">
+        <field name="nombre" type="CharField">New York</field>
+        <field name="pais" rel="ManyToOneRel" to="core.pais">4</field>
+        <field name="region_estado" type="CharField">New York</field>
+    </object>
+    <object model="core.ciudad" pk="17">
+        <field name="nombre" type="CharField">Beijing</field>
+        <field name="pais" rel="ManyToOneRel" to="core.pais">5</field>
+        <field name="region_estado" type="CharField">Beijing</field>
+    </object>
+    <object model="core.ciudad" pk="18">
+        <field name="nombre" type="CharField">Bangkok</field>
+        <field name="pais" rel="ManyToOneRel" to="core.pais">172</field>
+        <field name="region_estado" type="CharField">Krung Thep Maha Nakhon</field>
+    </object>
+    <object model="core.ciudad" pk="19">
+        <field name="nombre" type="CharField">Shenzhen</field>
+        <field name="pais" rel="ManyToOneRel" to="core.pais">5</field>
+        <field name="region_estado" type="CharField">Guangdong</field>
+    </object>
+    <object model="core.ciudad" pk="20">
+        <field name="nombre" type="CharField">Moscow</field>
+        <field name="pais" rel="ManyToOneRel" to="core.pais">150</field>
+        <field name="region_estado" type="CharField">Moskva</field>
+    </object>
+    <object model="core.ciudad" pk="21">
+        <field name="nombre" type="CharField">Buenos Aires</field>
+        <field name="pais" rel="ManyToOneRel" to="core.pais">14</field>
+        <field name="region_estado" type="CharField">Buenos Aires, Ciudad Autónoma de</field>
+    </object>
+    <object model="core.ciudad" pk="22">
+        <field name="nombre" type="CharField">Lagos</field>
+        <field name="pais" rel="ManyToOneRel" to="core.pais">131</field>
+        <field name="region_estado" type="CharField">Lagos</field>
+    </object>
+    <object model="core.ciudad" pk="23">
+        <field name="nombre" type="CharField">Bangalore</field>
+        <field name="pais" rel="ManyToOneRel" to="core.pais">83</field>
+        <field name="region_estado" type="CharField">Karnataka</field>
+    </object>
+    <object model="core.ciudad" pk="24">
+        <field name="nombre" type="CharField">Ho Chi Minh City</field>
+        <field name="pais" rel="ManyToOneRel" to="core.pais">188</field>
+        <field name="region_estado" type="CharField">

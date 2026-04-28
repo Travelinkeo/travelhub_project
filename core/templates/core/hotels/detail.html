@@ -1,0 +1,752 @@
+{% extends "base_modern.html" %}
+{% load static %}
+{% load humanize %}
+
+{% block content %}
+<div class="bg-[var(--bg-app)] min-h-screen pb-12 font-sans">
+
+    <!-- Hero / Galería Compacta -->
+    <div class="bg-[var(--surface-1)] border-b border-[var(--border)]">
+        <div class="container mx-auto px-4 py-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-1 h-72 rounded-xl overflow-hidden shadow-sm relative group">
+                <!-- Imagen Principal -->
+                <div class="md:col-span-2 md:row-span-2 relative h-full bg-[var(--surface-2)]">
+                    {% if hotel.imagen_principal %}
+                    <img src="{{ hotel.imagen_principal.url }}"
+                        class="w-full h-full object-cover cursor-pointer hover:opacity-95 transition"
+                        data-gallery-index="0" alt="{{ hotel.nombre }}">
+                    {% else %}
+                    <div class="w-full h-full flex flex-col items-center justify-center text-[var(--text-muted)] bg-[var(--surface-2)]">
+                        <i data-lucide="image" class="w-12 h-12 mb-2 opacity-60"></i>
+                        <span class="text-xs font-semibold">Sin imagen disponible</span>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Miniaturas -->
+                {% for img in hotel.imagenes.all|slice:"1:5" %}
+                <div class="relative h-full hidden md:block bg-[var(--surface-2)]">
+                    <img src="{{ img.imagen.url }}"
+                        class="w-full h-full object-cover cursor-pointer hover:opacity-95 transition"
+                        data-gallery-index="{{ forloop.counter }}" alt="{{ img.titulo|default:'Foto' }}">
+                </div>
+                {% endfor %}
+
+                <!-- Botones Acción -->
+                <div class="absolute bottom-3 right-3 flex gap-2">
+                    <button id="btnOpenMarketing"
+                        class="bg-gradient-to-r from-pink-500 to-indigo-600 backdrop-blur-sm px-3 py-1.5 rounded-lg text-xs font-bold shadow-md hover:bg-white text-white flex items-center gap-1.5 transition-all hover:scale-105">
+                        <i data-lucide="wand-2" class="w-3 h-3"></i> Marketing AI
+                    </button>
+
+                    <button data-gallery-index="0"
+                        class="bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-lg text-xs font-bold shadow-md hover:bg-white text-slate-800 flex items-center gap-1.5 btn-open-gallery transition-all">
+                        <i data-lucide="grid" class="w-3 h-3"></i> Fotos
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <!-- Contenido Principal -->
+        <div class="lg:col-span-2 space-y-6">
+
+            <!-- Encabezado Compacto -->
+            <div>
+                <div class="flex items-center gap-2 mb-2">
+                    <span
+                        class="bg-[var(--primary)] text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider shadow-sm">
+                        {{ hotel.get_categoria_display }}
+                    </span>
+                    <span class="text-[var(--text-secondary)] text-xs font-bold flex items-center gap-1">
+                        <i data-lucide="map-pin" class="w-3 h-3 text-[var(--text-muted)]"></i> {{ hotel.destino }}
+                    </span>
+                </div>
+                <h1 class="text-3xl font-extrabold text-[var(--text-primary)] tracking-tight leading-tight mb-3">
+                    {{ hotel.nombre }}
+                </h1>
+
+                <!-- Amenidades y Descripciones -->
+                <div class="flex flex-wrap gap-2 py-3 border-y border-[var(--border)]">
+                    {% for amenidad in hotel.amenidades.all %}
+                    <span
+                        class="flex items-center gap-1 px-2 py-1 bg-[var(--surface-2)] rounded text-xs text-[var(--text-secondary)] font-medium">
+                        <i data-lucide="{{ amenidad.icono_lucide }}" class="w-3 h-3 text-emerald-500"></i>
+                        {{ amenidad.nombre }}
+                    </span>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Descripción -->
+            <div class="prose prose-sm max-w-none text-[var(--text-secondary)] leading-snug">
+                <h3 class="font-bold text-lg text-[var(--text-primary)] mb-2">Resumen</h3>
+                {{ hotel.descripcion_larga|linebreaks|truncatewords_html:50 }}
+            </div>
+
+            <!-- Lista de Habitaciones Compacta -->
+            <div>
+                <h3 class="font-bold text-lg text-[var(--text-primary)] mb-4 flex items-center gap-2">
+                    <i data-lucide="bed-double" class="w-4 h-4 text-indigo-500"></i>
+                    Habitaciones
+                </h3>
+
+                <div class="space-y-3">
+                    {% for hab in hotel.tipos_habitacion.all %}
+                    <div class="bg-[var(--surface-1)] border border-[var(--border)] rounded-xl p-3 flex flex-col sm:flex-row gap-4 hover:border-[var(--primary)] hover:shadow-sm transition-all group">
+                        <!-- Foto Habitación -->
+                        <div class="w-full sm:w-40 h-28 bg-[var(--surface-2)] rounded-lg overflow-hidden shrink-0 relative">
+                            {% if hab.foto_referencial %}
+                            <img src="{{ hab.foto_referencial.url }}"
+                                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                            {% else %}
+                            <div
+                                class="w-full h-full flex flex-col items-center justify-center text-[var(--text-muted)] bg-[var(--surface-2)] p-2 text-center">
+                                <i data-lucide="bed" class="w-8 h-8 mb-2 opacity-60"></i>
+                                <span class="text-[10px] font-bold">Sin foto</span>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Info Habitación -->
+                        <div class="flex-1 flex flex-col justify-between py-0.5">
+                            <div>
+                                <div class="flex justify-between items-start">
+                                    <h4 class="font-bold text-base text-[var(--text-primary)]">{{ hab.nombre }}</h4>
+                                    <!-- Precio Hint -->
+                                    <div class="text-right">
+                                        <p class="text-[10px] text-[var(--text-muted)] uppercase font-bold">Inicia cotización</p>
+                                        <p class="text-[var(--primary)] font-extrabold text-sm">Ver Tarifas</p>
+                                    </div>
+                                </div>
+                                <div class="flex flex-wrap gap-3 my-1 text-xs text-[var(--text-secondary)]">
+                                    <span class="flex items-center gap-1 font-medium">
+                                        <i data-lucide="users" class="w-3 h-3 text-[var(--text-muted)]"></i>
+                                        Max {{ hab.capacidad_total }}
+                                    </span>
+                                </div>
+                                <p class="text-xs text-[var(--text-secondary)] line-clamp-1">{{ hab.descripcion }}</p>
+                            </div>
+
+                            <!-- Botón Seleccionar -->
+                            <div class="mt-2 text-right">
+                                <button data-room-id="{{ hab.id }}" data-room-name="{{ hab.nombre }}"
+                                    class="btn-seleccionar-hab bg-[var(--surface-2)] text-[var(--text-primary)] border border-[var(--border)] hover:bg-[var(--primary)] hover:text-white px-4 py-1.5 rounded-lg text-xs font-bold transition-colors shadow-sm inline-flex items-center gap-1">
+                                    Seleccionar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar Cotizador (Sticky) -->
+        <div class="lg:col-span-1">
+            <div class="bg-[var(--surface-1)] rounded-xl shadow-lg border border-[var(--border)] p-5 sticky top-20">
+                <form id="quoteForm" class="space-y-4">
+                    <input type="hidden" id="selectedRoomId" name="room_type_id">
+
+                    <!-- Habitación Seleccionada -->
+                    <div id="selectedRoomDisplay"
+                        class="hidden animate-fade-in-down bg-indigo-500/10 border border-indigo-500/30 p-2.5 rounded-lg">
+                        <p class="text-[10px] font-bold text-indigo-500 uppercase tracking-widest mb-0.5">Selección</p>
+                        <p class="text-sm text-[var(--text-primary)] font-bold flex items-center gap-2 truncate"
+                            id="selectedRoomNameDisplay">--</p>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label
+                                class="block text-[10px] font-bold text-[var(--text-muted)] uppercase mb-1 ml-1">Llegada</label>
+                            <input type="date" id="checkInDate"
+                                class="w-full bg-[var(--surface-2)] border-[var(--border)] rounded-lg text-[var(--text-primary)] text-xs py-2 px-2 focus:ring-1 focus:ring-[var(--primary)]">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase mb-1 ml-1">Salida</label>
+                            <input type="date" id="checkOutDate"
+                                class="w-full bg-[var(--surface-2)] border-[var(--border)] rounded-lg text-[var(--text-primary)] text-xs py-2 px-2 focus:ring-1 focus:ring-[var(--primary)]">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-bold text-[var(--text-muted)] uppercase mb-1 ml-1">Pax</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div class="relative">
+                                <label
+                                    class="absolute -top-1.5 left-2 px-1 bg-[var(--surface-1)] text-[9px] text-[var(--text-muted)] font-bold">ADL</label>
+                                <input type="number" id="adultsCount" value="2" min="1"
+                                    class="w-full bg-[var(--surface-2)] border-[var(--border)] rounded-lg text-[var(--text-primary)] text-xs py-2 pl-3">
+                            </div>
+                            <div class="relative">
+                                <label
+                                    class="absolute -top-1.5 left-2 px-1 bg-[var(--surface-1)] text-[9px] text-[var(--text-muted)] font-bold">CHD</label>
+                                <input type="number" id="childrenCount" value="0" min="0"
+                                    class="w-full bg-[var(--surface-2)] border-[var(--border)] rounded-lg text-[var(--text-primary)] text-xs py-2 pl-3">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Totales -->
+                    <div class="border-t border-[var(--border)] pt-4 mt-2">
+                        <div id="quoteResult" class="transition-opacity duration-300">
+                            <div class="flex justify-between mb-2 text-xs">
+                                <span class="text-[var(--text-secondary)] font-medium" id="nightsDisplay">0 Noches</span>
+                                <span class="font-semibold text-[var(--text-primary)]" id="subtotalDisplay">--</span>
+                            </div>
+
+                            <div class="flex justify-between items-baseline mb-3">
+                                <span class="text-[var(--text-primary)] font-bold text-sm">Total</span>
+                                <span class="text-xl font-black text-[var(--primary)] tracking-tight" id="totalDisplay">$
+                                    0.00</span>
+                            </div>
+
+                            <p class="text-[10px] text-rose-500 font-bold hidden bg-rose-500/10 p-1.5 rounded border border-rose-500/30 text-center"
+                                id="quoteError">Error</p>
+                        </div>
+                    </div>
+
+                    <button type="button" id="btnAddToCart" disabled
+                        class="w-full bg-[var(--primary)] hover:bg-[var(--primary-hover)] disabled:bg-[var(--surface-2)] disabled:text-[var(--text-muted)] disabled:cursor-not-allowed text-white font-bold py-3 rounded-lg text-sm transition-all shadow hover:shadow-indigo-500/30">
+                        Reservar
+                    </button>
+                    <!-- <p class="text-center text-xs text-slate-400 font-medium">No se te cobrará nada aún</p> -->
+                </form>
+            </div>
+
+            <!-- Tarjeta de Ayuda Compacta -->
+            <!-- <div class="mt-6 bg-blue-50 border border-blue-100 rounded-xl p-4 flex items-start gap-3">...</div> -->
+        </div>
+    </div>
+
+</div>
+
+<!-- Modal Galería (Igual) -->
+<div id="galleryModal"
+    class="fixed inset-0 z-[60] bg-slate-900/95 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <button id="btnCloseGallery" class="absolute top-4 right-4 text-white hover:text-gray-300"><i data-lucide="x"
+            class="w-8 h-8"></i></button>
+    <img id="galleryImage" src="" class="max-h-[85vh] max-w-full rounded shadow-2xl">
+</div>
+
+<!-- Modal Marketing AI -->
+<div id="marketingModal"
+    class="fixed inset-0 z-[70] bg-slate-900/95 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div
+        class="bg-[var(--surface-1)] w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden flex flex-col md:flex-row h-[80vh] md:h-[600px] border border-[var(--border)]">
+
+        <!-- Sidebar / Preview Image -->
+        <div class="w-full md:w-1/3 bg-[var(--surface-2)] border-r border-[var(--border)] relative flex flex-col">
+            <div class="p-4 border-b border-[var(--border)] bg-[var(--surface-1)]">
+                <h3 class="font-bold text-[var(--text-primary)] flex items-center gap-2">
+                    <i data-lucide="instagram" class="w-4 h-4 text-pink-500"></i> Vista Previa
+                </h3>
+            </div>
+            <div class="flex-1 flex items-center justify-center p-4 bg-slate-200/50 relative overflow-hidden">
+                <!-- Phone Mockup Frame -->
+                <div
+                    class="w-[180px] h-[320px] bg-black rounded-[2rem] shadow-xl p-1 relative border-4 border-slate-800 ring-1 ring-slate-400/50">
+                    <img src="{% url 'core:hotel_story' hotel.slug %}"
+                        class="w-full h-full object-cover rounded-[1.8rem] opacity-90">
+                    <!-- Notch -->
+                    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-20 h-4 bg-black rounded-b-xl z-10"></div>
+                </div>
+
+                <div class="absolute bottom-4 left-0 w-full text-center">
+                    <a href="{% url 'core:hotel_story' hotel.slug %}" download
+                        class="inline-flex items-center gap-2 bg-slate-900 text-white px-4 py-2 rounded-full text-xs font-bold shadow-lg hover:scale-105 transition-transform">
+                        <i data-lucide="download" class="w-3 h-3"></i> Descargar JPG
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content Area -->
+        <div class="flex-1 flex flex-col bg-[var(--surface-1)]">
+            <!-- Header -->
+            <div class="p-5 border-b border-[var(--border)] flex justify-between items-center">
+                <div>
+                    <h2 class="text-xl font-bold text-[var(--text-primary)]">Centro de Marketing</h2>
+                    <p class="text-xs text-[var(--text-secondary)] font-medium mt-0.5">Crea contenido viral en segundos con IA</p>
+                </div>
+                <!-- CLOSE BUTTON -->
+                <button id="btnCloseMarketing"
+                    class="p-1 hover:bg-[var(--surface-2)] rounded-full text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+
+            <!-- Tabs -->
+            <div class="flex border-b border-[var(--border)]">
+                <button id="tabBtnCopy"
+                    class="flex-1 py-3 text-sm font-bold text-indigo-500 border-b-2 border-indigo-500 bg-indigo-500/10 transition-colors">
+                    <i data-lucide="sparkles" class="w-3 h-3 inline mr-1"></i> Redactor IA
+                </button>
+                <button id="tabBtnDesign"
+                    class="flex-1 py-3 text-sm font-bold text-[var(--text-secondary)] hover:text-[var(--text-primary)] border-b-2 border-transparent hover:bg-[var(--surface-2)] transition-colors">
+                    <i data-lucide="palette" class="w-3 h-3 inline mr-1"></i> Diseñador IA
+                </button>
+            </div>
+
+            <!-- Body: Tabs Content -->
+            <div class="flex-1 p-6 overflow-y-auto relative">
+
+                <!-- TAB 1: COPY GENERATOR -->
+                <div id="contentCopy" class="space-y-4">
+                    <!-- Tone Selector -->
+                    <div>
+                        <label class="block text-xs font-bold text-[var(--text-secondary)] uppercase mb-2">Tono de
+                            Comunicación</label>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2" id="toneSelectorContainer">
+                            <button data-tone="AVENTURERO"
+                                class="tone-btn active bg-indigo-500/20 text-indigo-400 border-indigo-500/30 border rounded-lg py-2 px-3 text-xs font-bold transition-all text-center">🧗
+                                Aventurero</button>
+                            <button data-tone="ROMÁNTICO"
+                                class="tone-btn bg-[var(--surface-2)] text-[var(--text-secondary)] border-[var(--border)] border rounded-lg py-2 px-3 text-xs font-bold hover:bg-[var(--surface-1)] transition-all text-center">💖
+                                Romántico</button>
+                            <button data-tone="FORMAL"
+                                class="tone-btn bg-[var(--surface-2)] text-[var(--text-secondary)] border-[var(--border)] border rounded-lg py-2 px-3 text-xs font-bold hover:bg-[var(--surface-1)] transition-all text-center">👔
+                                Formal</button>
+                            <button data-tone="FAMILIAR"
+                                class="tone-btn bg-[var(--surface-2)] text-[var(--text-secondary)] border-[var(--border)] border rounded-lg py-2 px-3 text-xs font-bold hover:bg-[var(--surface-1)] transition-all text-center">👨‍👩‍👧‍👦
+                                Familiar</button>
+                        </div>
+                        <input type="hidden" id="selectedTone" value="AVENTURERO">
+                    </div>
+
+                    <!-- Generate Button -->
+                    <button id="btnGenerateCopy"
+                        class="w-full bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-bold py-3 rounded-xl shadow-lg hover:shadow-indigo-500/30 transition-all flex items-center justify-center gap-2 group">
+                        <i data-lucide="wand-2" class="w-4 h-4 group-hover:rotate-12 transition-transform"></i>
+                        Generar Texto Mágico
+                    </button>
+
+                    <!-- Extract Text Box -->
+                    <div class="relative group">
+                        <textarea id="copyResult" rows="8" placeholder="Aquí aparecerá el texto generado por la IA..."
+                            class="w-full bg-[var(--surface-2)] border-[var(--border)] rounded-xl text-sm p-4 focus:ring-2 focus:ring-indigo-500 text-[var(--text-primary)] focus:border-transparent transition-all font-medium leading-relaxed resize-none"></textarea>
+
+                        <!-- Copy Button (Overlay) -->
+                        <button id="btnCopyClipboard"
+                            class="absolute top-2 right-2 bg-[var(--surface-1)]/80 backdrop-blur border border-[var(--border)] text-[var(--text-secondary)] hover:text-indigo-500 p-1.5 rounded-lg shadow-sm opacity-0 group-hover:opacity-100 transition-all">
+                            <i data-lucide="copy" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- TAB 2: IMAGE DESIGNER -->
+                <div id="contentDesign" class="space-y-4 hidden h-full flex flex-col">
+                    <!-- Style Selector -->
+                    <div>
+                        <label class="block text-xs font-bold text-[var(--text-secondary)] uppercase mb-2">Estilo Visual</label>
+                        <div class="grid grid-cols-3 gap-2">
+                            <button data-style="Luxurious"
+                                class="style-btn active bg-pink-500/20 text-pink-400 border-pink-500/30 border rounded-lg py-2 px-2 text-xs font-bold transition-all text-center">✨
+                                Lujoso</button>
+                            <button data-style="Cinematic"
+                                class="style-btn bg-[var(--surface-2)] text-[var(--text-secondary)] border-[var(--border)] border rounded-lg py-2 px-2 text-xs font-bold hover:bg-[var(--surface-1)] transition-all text-center">🎬
+                                Cine</button>
+                            <button data-style="Minimalist"
+                                class="style-btn bg-[var(--surface-2)] text-[var(--text-secondary)] border-[var(--border)] border rounded-lg py-2 px-2 text-xs font-bold hover:bg-[var(--surface-1)] transition-all text-center">🎨
+                                Minimal</button>
+                        </div>
+                        <input type="hidden" id="selectedStyle" value="Luxurious">
+                    </div>
+
+                    <!-- Custom Text -->
+                    <div>
+                        <label class="block text-xs font-bold text-[var(--text-secondary)] uppercase mb-1">Texto en Imagen</label>
+                        <input type="text" id="imageText" value="Oferta Especial"
+                            class="w-full bg-[var(--surface-2)] border-[var(--border)] rounded-lg text-sm px-3 py-2 text-[var(--text-primary)] focus:ring-2 focus:ring-pink-500">
+                    </div>
+
+                    <!-- Generate Button -->
+                    <button id="btnGenerateImage"
+                        class="w-full bg-gradient-to-r from-pink-500 to-rose-500 text-white font-bold py-3 rounded-xl shadow-lg hover:shadow-pink-500/30 transition-all flex items-center justify-center gap-2 group">
+                        <i data-lucide="image-plus" class="w-4 h-4 group-hover:scale-110 transition-transform"></i>
+                        Crear Flyer con IA
+                    </button>
+
+                    <!-- Result Area -->
+                    <div id="imageResultContainer"
+                        class="flex-1 bg-[var(--surface-2)] rounded-xl flex items-center justify-center relative min-h-[200px] border border-[var(--border)] border-dashed overflow-hidden group">
+                        <div id="imagePlaceholder" class="text-center text-[var(--text-muted)]">
+                            <i data-lucide="image" class="w-10 h-10 mx-auto mb-2 opacity-50"></i>
+                            <span class="text-xs font-medium">La imagen aparecerá aquí</span>
+                        </div>
+                        <img id="generatedImage" class="w-full h-full object-contain hidden" />
+
+                        <!-- Download Overlay -->
+                        <a id="btnDownloadImage" href="#" download="travelhub-flyer.png"
+                            class="absolute bottom-4 bg-slate-900/80 backdrop-blur text-white px-4 py-2 rounded-full text-xs font-bold shadow-lg hidden group-hover:flex items-center gap-2 transition-all hover:bg-black">
+                            <i data-lucide="download" class="w-4 h-4"></i> Guardar
+                        </a>
+                    </div>
+                </div>
+
+                <p class="text-[10px] text-slate-400 text-center mt-4">
+                    Powered by <strong>Gemini Pro 2.0 & Imagen 3</strong>. Revisa siempre el contenido antes de
+                    publicar.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Custom Scrollbar for Modal content */
+    #copyResult::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    #copyResult::-webkit-scrollbar-thumb {
+        background-color: #cbd5e1;
+        border-radius: 4px;
+    }
+
+    #copyResult::-webkit-scrollbar-track {
+        background-color: #f1f5f9;
+    }
+</style>
+
+<style>
+    .animate-fade-in-down {
+        animation: fadeInDown 0.3s ease-out;
+    }
+
+    @keyframes fadeInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-5px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script nonce="{{ request.csp_nonce }}">
+    document.addEventListener('DOMContentLoaded', function () {
+        lucide.createIcons();
+
+        // --- Marketing AI Modal Variables ---
+        const modalMarketing = document.getElementById('marketingModal');
+        const btnOpenMarketing = document.getElementById('btnOpenMarketing');
+        const btnCloseMarketing = document.getElementById('btnCloseMarketing');
+        const btnGenerateCopy = document.getElementById('btnGenerateCopy');
+        const btnCopyClipboard = document.getElementById('btnCopyClipboard');
+        const toneButtons = document.querySelectorAll('.tone-btn');
+        const toneInput = document.getElementById('selectedTone');
+        const textarea = document.getElementById('copyResult');
+        const hotelId = "{{ hotel.pk }}";
+
+        // --- Marketing AI Listeners ---
+
+        // OPEN
+        if (btnOpenMarketing) {
+            btnOpenMarketing.addEventListener('click', () => {
+                modalMarketing.classList.remove('hidden');
+            });
+        }
+
+        // CLOSE
+        if (btnCloseMarketing) {
+            btnCloseMarketing.addEventListener('click', () => {
+                modalMarketing.classList.add('hidden');
+            });
+        }
+
+        // TONE SELECTION
+        toneButtons.forEach(btn => {
+            btn.addEventListener('click', function () {
+                const tone = this.getAttribute('data-tone');
+                toneInput.value = tone;
+
+                // Reset styles
+                toneButtons.forEach(b => {
+                    b.classList.remove('bg-indigo-500/20', 'text-indigo-400', 'border-indigo-500/30');
+                    b.classList.add('bg-[var(--surface-2)]', 'text-[var(--text-secondary)]', 'border-[var(--border)]');
+                });
+
+                // Set active style
+                this.classList.remove('bg-[var(--surface-2)]', 'text-[var(--text-secondary)]', 'border-[var(--border)]');
+                this.classList.add('bg-indigo-500/20', 'text-indigo-400', 'border-indigo-500/30');
+            });
+        });
+
+        // GENERATE COPY
+        if (btnGenerateCopy) {
+            btnGenerateCopy.addEventListener('click', async function () {
+                const tone = toneInput.value;
+
+                // Loading State
+                this.disabled = true;
+                const originalHTML = this.innerHTML;
+                this.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Pensando...';
+                lucide.createIcons();
+                textarea.classList.add('animate-pulse');
+
+                try {
+                    const response = await fetch("{% url 'core:generate_copy_api' %}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': '{{ csrf_token }}'
+                        },
+                        body: JSON.stringify({ hotel_id: hotelId, tone: tone })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.caption) {
+                        textarea.value = data.caption;
+                    } else {
+                        textarea.value = "Error: " + (data.error || "No se pudo generar.");
+                    }
+
+                } catch (e) {
+                    console.error(e);
+                    textarea.value = "Error de conexión con el cerebro IA.";
+                } finally {
+                    this.disabled = false;
+                    this.innerHTML = originalHTML;
+                    textarea.classList.remove('animate-pulse');
+                    lucide.createIcons();
+                }
+            });
+        }
+
+        // COPY TO CLIPBOARD
+        if (btnCopyClipboard) {
+            btnCopyClipboard.addEventListener('click', () => {
+                if (!textarea.value) return;
+                textarea.select();
+                textarea.setSelectionRange(0, 99999);
+                navigator.clipboard.writeText(textarea.value);
+                // alert("¡Copiado!");
+                const originalHTML = btnCopyClipboard.innerHTML;
+                btnCopyClipboard.innerHTML = '<i data-lucide="check" class="w-4 h-4 text-green-600"></i>';
+                lucide.createIcons();
+                setTimeout(() => {
+                    btnCopyClipboard.innerHTML = originalHTML;
+                    lucide.createIcons();
+                }, 2000);
+            });
+        }
+
+        // --- NEW: TABS LOGIC ---
+        const tabBtnCopy = document.getElementById('tabBtnCopy');
+        const tabBtnDesign = document.getElementById('tabBtnDesign');
+        const contentCopy = document.getElementById('contentCopy');
+        const contentDesign = document.getElementById('contentDesign');
+
+        if (tabBtnCopy && tabBtnDesign) {
+            tabBtnCopy.addEventListener('click', () => {
+                // activate Copy tab
+                contentCopy.classList.remove('hidden');
+                contentDesign.classList.add('hidden');
+
+                tabBtnCopy.classList.add('text-indigo-500', 'border-indigo-500', 'bg-indigo-500/10');
+                tabBtnCopy.classList.remove('text-[var(--text-secondary)]', 'hover:text-[var(--text-primary)]', 'border-transparent', 'hover:bg-[var(--surface-2)]');
+
+                tabBtnDesign.classList.remove('text-indigo-500', 'border-indigo-500', 'bg-indigo-500/10');
+                tabBtnDesign.classList.add('text-[var(--text-secondary)]', 'hover:text-[var(--text-primary)]', 'border-transparent', 'hover:bg-[var(--surface-2)]');
+            });
+
+            tabBtnDesign.addEventListener('click', () => {
+                // activate Design tab
+                contentCopy.classList.add('hidden');
+                contentDesign.classList.remove('hidden');
+                contentDesign.classList.add('flex'); // Ensure flex display
+
+                tabBtnDesign.classList.add('text-indigo-500', 'border-indigo-500', 'bg-indigo-500/10');
+                tabBtnDesign.classList.remove('text-[var(--text-secondary)]', 'hover:text-[var(--text-primary)]', 'border-transparent', 'hover:bg-[var(--surface-2)]');
+
+                tabBtnCopy.classList.remove('text-indigo-500', 'border-indigo-500', 'bg-indigo-500/10');
+                tabBtnCopy.classList.add('text-[var(--text-secondary)]', 'hover:text-[var(--text-primary)]', 'border-transparent', 'hover:bg-[var(--surface-2)]');
+            });
+        }
+
+        // --- NEW: IMAGE GENERATOR UI VARIABLES ---
+        const btnGenerateImage = document.getElementById('btnGenerateImage');
+        const styleButtons = document.querySelectorAll('.style-btn');
+        const styleInput = document.getElementById('selectedStyle');
+        const imageText = document.getElementById('imageText');
+        const generatedImage = document.getElementById('generatedImage');
+        const imageResultContainer = document.getElementById('imageResultContainer');
+        const imagePlaceholder = document.getElementById('imagePlaceholder');
+        const btnDownloadImage = document.getElementById('btnDownloadImage');
+
+        // Style Selection
+        styleButtons.forEach(btn => {
+            btn.addEventListener('click', function () {
+                const style = this.getAttribute('data-style');
+                styleInput.value = style;
+
+                styleButtons.forEach(b => {
+                    b.classList.remove('bg-pink-500/20', 'text-pink-400', 'border-pink-500/30', 'active');
+                    b.classList.add('bg-[var(--surface-2)]', 'text-[var(--text-secondary)]', 'border-[var(--border)]');
+                });
+                this.classList.remove('bg-[var(--surface-2)]', 'text-[var(--text-secondary)]', 'border-[var(--border)]');
+                this.classList.add('bg-pink-500/20', 'text-pink-400', 'border-pink-500/30', 'active');
+            });
+        });
+
+        // Generate Image Logic
+        if (btnGenerateImage) {
+            btnGenerateImage.addEventListener('click', async function () {
+                this.disabled = true;
+                const originalHTML = this.innerHTML;
+                this.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Pintando...';
+                lucide.createIcons();
+
+                // Show skeleton state
+                imagePlaceholder.innerHTML = '<div class="flex flex-col items-center"><i data-lucide="loader" class="w-8 h-8 animate-spin text-pink-500 mb-2"></i><span class="text-xs text-pink-600 font-bold">La IA está imaginando...</span></div>';
+                lucide.createIcons();
+                generatedImage.classList.add('hidden');
+                btnDownloadImage.classList.add('hidden');
+
+                const hotelName = "{{ hotel.nombre }}";
+                const hotelPrice = "999"; // Placeholder if not found elsewhere or grab from DOM if possible
+                // Better approach: Grab price from the Quote sidebar if available, or just generic.
+                // For now we will use a safe default or input if blank.
+
+                try {
+                    const response = await fetch("{% url 'core:generate_ai_image' %}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': '{{ csrf_token }}'
+                        },
+                        body: JSON.stringify({
+                            hotel_name: hotelName,
+                            price: "Oferta", // We can pass a text representation
+                            style: styleInput.value,
+                            custom_text: imageText.value
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.status === 'success') {
+                        const base64 = data.image_b64;
+                        generatedImage.src = `data:image/jpeg;base64,${base64}`;
+                        generatedImage.classList.remove('hidden');
+                        imagePlaceholder.classList.add('hidden');
+
+                        // Setup Download Link
+                        btnDownloadImage.href = generatedImage.src;
+                        btnDownloadImage.classList.remove('hidden');
+                        btnDownloadImage.classList.add('flex');
+                    } else {
+                        throw new Error(data.error);
+                    }
+                } catch (e) {
+                    console.error(e);
+                    imagePlaceholder.innerHTML = `<div class="text-xs text-rose-500 font-bold text-center px-4"><i data-lucide="alert-triangle" class="w-6 h-6 mx-auto mb-1"></i>Error: ${e.message || "Falló la generación"}</div>`;
+                    lucide.createIcons();
+                } finally {
+                    this.disabled = false;
+                    this.innerHTML = originalHTML;
+                    lucide.createIcons();
+                }
+            });
+        }
+
+        // --- Existing Hotel Detail Logic ---
+
+        // 1. Manejo de Selección
+        document.querySelectorAll('.btn-seleccionar-hab').forEach(button => {
+            button.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelectorAll('.btn-seleccionar-hab').forEach(b => {
+                    b.classList.remove('bg-[var(--primary)]', 'text-white');
+                    b.classList.add('bg-[var(--surface-2)]', 'text-[var(--text-primary)]');
+                    b.innerHTML = 'Seleccionar';
+                });
+                this.classList.remove('bg-[var(--surface-2)]', 'text-[var(--text-primary)]');
+                this.classList.add('bg-[var(--primary)]', 'text-white');
+                this.innerHTML = '<i data-lucide="check" class="w-3 h-3 mr-1"></i> Listo';
+                lucide.createIcons();
+                seleccionarHabitacion(this.getAttribute('data-room-id'), this.getAttribute('data-room-name'));
+            });
+        });
+
+        // 2. Listeners Quote
+        ['checkInDate', 'checkOutDate', 'adultsCount', 'childrenCount'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener('change', updateQuote);
+        });
+
+        // 3. Galería Simple
+        const modalGallery = document.getElementById('galleryModal');
+        const modalImg = document.getElementById('galleryImage');
+        document.querySelectorAll('[data-gallery-index]').forEach(img => img.addEventListener('click', function () {
+            modalImg.src = this.getAttribute('src');
+            modalGallery.classList.remove('hidden');
+        }));
+        const btnCloseGallery = document.getElementById('btnCloseGallery');
+        if (btnCloseGallery) {
+            btnCloseGallery.addEventListener('click', () => modalGallery.classList.add('hidden'));
+        }
+
+        // 4. Stub Carrito
+        const btnAdd = document.getElementById('btnAddToCart');
+        if (btnAdd) btnAdd.addEventListener('click', () => alert("Añadido al carrito (Demo)"));
+    });
+
+    function seleccionarHabitacion(id, nombre) {
+        document.getElementById('selectedRoomId').value = id;
+        document.getElementById('selectedRoomNameDisplay').textContent = nombre;
+        document.getElementById('selectedRoomDisplay').classList.remove('hidden');
+        if (window.innerWidth < 1024) document.getElementById('quoteForm').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        updateQuote();
+    }
+
+    async function updateQuote() {
+        const roomId = document.getElementById('selectedRoomId').value;
+        const checkIn = document.getElementById('checkInDate').value;
+        const checkOut = document.getElementById('checkOutDate').value;
+        const adults = document.getElementById('adultsCount').value;
+        const children = document.getElementById('childrenCount').value;
+
+        const btn = document.getElementById('btnAddToCart');
+        const errorMsg = document.getElementById('quoteError');
+        const totalDisplay = document.getElementById('totalDisplay');
+
+        if (!roomId || !checkIn || !checkOut) return;
+
+        errorMsg.classList.add('hidden');
+        btn.disabled = true;
+        totalDisplay.classList.add('opacity-50');
+
+        try {
+            const params = new URLSearchParams({ room_type_id: roomId, check_in: checkIn, check_out: checkOut, adults, children });
+            const response = await fetch(`{% url 'core:hotel_quote_api' %}?${params}`);
+            const data = await response.json();
+
+            totalDisplay.classList.remove('opacity-50');
+            if (response.ok) {
+                document.getElementById('totalDisplay').textContent = `${data.currency} ${data.total.toFixed(2)}`;
+                document.getElementById('subtotalDisplay').innerText = `${data.currency} ${data.total.toFixed(2)}`;
+                document.getElementById('nightsDisplay').textContent = `${data.nights} Noches`;
+                btn.disabled = false;
+            } else {
+                throw new Error(data.error);
+            }
+        } catch (e) {
+            console.error(e);
+            errorMsg.textContent = e.message || 'Error';
+            errorMsg.classList.remove('hidden');
+        }
+    }
+</script>
+{% endblock %}

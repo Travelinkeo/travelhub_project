@@ -1,0 +1,304 @@
+Delivered-To: boletotravelinkeo@gmail.com
+Received: by 2002:a05:7108:7a0e:b0:50b:770d:9143 with SMTP id ik14csp1356666gdb;
+        Thu, 15 Jan 2026 15:59:38 -0800 (PST)
+X-Received: by 2002:a05:622a:1a8d:b0:501:4ca3:7420 with SMTP id d75a77b69052e-502a163bfcamr21735681cf.36.1768521578027;
+        Thu, 15 Jan 2026 15:59:38 -0800 (PST)
+ARC-Seal: i=1; a=rsa-sha256; t=1768521578; cv=none;
+        d=google.com; s=arc-20240605;
+        b=ZtS23iBSFkvZWhk2jbkBvFhg4QkrFaHmsKJW7UYy8HU93uveIZjIjwy4moU8cxRtIU
+         DT7MFsmhjclm4zl2gCK2tgt19Me9QLe7nvprMgOyPeiezg0eNvn1q8WnRn4lD96A4UNT
+         nwMQnFlZj39kIuGKXhdP4RYuWK1qlZoqm0kzF6m/u0YOq8b3BWpy0UnNIcqZ5q/C/JNd
+         YXByqBdFM9tNfkrzoati58HgSGaipdfjDXGoP+JC2Md7x3rIUHtHMfpjONOc1egURL4D
+         6CNaYNVHhfEm99cmlHyKm8o8QVEtZB/V2ClnFzX2AUnsoQDHkDRkvw6wuxlqo3z80evB
+         2wlA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
+        h=to:subject:message-id:date:from:in-reply-to:references:mime-version
+         :dkim-signature;
+        bh=ALO1gu9YjctTB2P0jASqov3Y5yLqR9q4m28AT6i7JMA=;
+        fh=6zUUR3Gicm2HC7EAO3+eJBWhM+8HGltWlFA32RyP0jw=;
+        b=BfBetKXqPojHpTORq7i/qygqQni9vVmDRo67Cc0R9WAhsTtZ5ZIHJanczpqeVQo323
+         ks0Ugd4FkGOb9ZYep4A3sjU1trx2WJuHPyQD+0rGdcXEKJlI4U93D2sXafwFjYVwGUmO
+         dH/uFdxrpXUMTK/0RG/Qf1I9ydDMbOuqCjx3PpSbuxRDJH/attIkfFsiP2tRSxNfIocQ
+         gD8HhOl5sAcIj7gfe7z9Ja+QhZzGKmkN1MI/59AAVNsKsVMUC3LLJXcNueGQAwDA1UeD
+         UBUKF14xaOAKFultjih+mxvCSzdMdFO0DfKil5zNG0+AcOrVkQVsSmw/WcZx+4EErN4T
+         BLxQ==;
+        dara=google.com
+ARC-Authentication-Results: i=1; mx.google.com;
+       dkim=pass header.i=@gmail.com header.s=20230601 header.b=d4V5twi9;
+       spf=pass (google.com: domain of naidycohen@gmail.com designates 209.85.220.41 as permitted sender) smtp.mailfrom=naidycohen@gmail.com;
+       dmarc=pass (p=NONE sp=QUARANTINE dis=NONE) header.from=gmail.com;
+       dara=pass header.i=@gmail.com
+Return-Path: <naidycohen@gmail.com>
+Received: from mail-sor-f41.google.com (mail-sor-f41.google.com. [209.85.220.41])
+        by mx.google.com with SMTPS id d75a77b69052e-502a1d9d660sor5126811cf.5.2026.01.15.15.59.37
+        for <boletotravelinkeo@gmail.com>
+        (Google Transport Security);
+        Thu, 15 Jan 2026 15:59:38 -0800 (PST)
+Received-SPF: pass (google.com: domain of naidycohen@gmail.com designates 209.85.220.41 as permitted sender) client-ip=209.85.220.41;
+Authentication-Results: mx.google.com;
+       dkim=pass header.i=@gmail.com header.s=20230601 header.b=d4V5twi9;
+       spf=pass (google.com: domain of naidycohen@gmail.com designates 209.85.220.41 as permitted sender) smtp.mailfrom=naidycohen@gmail.com;
+       dmarc=pass (p=NONE sp=QUARANTINE dis=NONE) header.from=gmail.com;
+       dara=pass header.i=@gmail.com
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1768521577; x=1769126377; dara=google.com;
+        h=to:subject:message-id:date:from:in-reply-to:references:mime-version
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=ALO1gu9YjctTB2P0jASqov3Y5yLqR9q4m28AT6i7JMA=;
+        b=d4V5twi93EONlT4VvDK0CSaKjnjrlddNsUyrOUQZbNdL2p8w4kdLux/P/U+UXBPw6x
+         HWFhxlMPFgyJh9KKAhohJ4xy43iTGJJG8qdVpFJQ79IzjP5ZJ+mFMZas4m1zVX4lWXyV
+         /ZCU1KudGfY/k0loc6Hs/CzlcnA5xd2IEzVZqiO/g7P/VMQg9JfEl/ojk4bMEEec/yj1
+         H8ZR9I3i2yZV3+mASZiDQGOYvDzmJmC3CIWQMtjiqe6zrLkau5BtQZxQG4t5fa72ZSKg
+         7Pjhf7B7pd/dkoItuOPgK5QONrUrp3nbCNlnYmxE60ukjmCs82ruHLHNUfB49b5J4425
+         1Cyw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1768521577; x=1769126377;
+        h=to:subject:message-id:date:from:in-reply-to:references:mime-version
+         :x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=ALO1gu9YjctTB2P0jASqov3Y5yLqR9q4m28AT6i7JMA=;
+        b=vGtx4w9PNvS0iy+uwMe9HuFszNKRTYGIUvMu+sDIZ2qiDnfaW2F0oC2EFUlyCkE2hd
+         y+eG/obGXjs5i3o0DkNtX1yfGeqgXuOZALo1THH1MdLFQVASjySjXF1fJKN1lCTPHBEK
+         lgZ3ju65HhMpOCGVwD1fLK7EdzgiHE0OR8c3/f3ZsMtVryrdpiKdsrr/WxsQktyTT9n0
+         X0jgPsbtori0mhse/xuGzLP4+Yoh9kGSVEeTCvqCOk33pEMUeWuLHWzITktU+quABwej
+         aM4kDRC3sp+sjS23xgJ3jQFMjaG8s6m3hAguYxcczES/9HsBV0qbxBcEjFF0u/QBWY7d
+         2EEA==
+X-Gm-Message-State: AOJu0YwzXh/sY5o+eu99mos8Hvrqdn0cdjb9AlA+z+3IQuze/GTbhSv4
+	Qhmx7Uljc1bhDPAW4ky49I9j7pLZiNz8oDj3vffKla1ygCWBa01Wb32byl0Y+Vc1ek14AXzBcKS
+	xhVZt5X/wlANnQdOqiO5+cxmwRou1iRCJ8A==
+X-Gm-Gg: AY/fxX4+0W+c30Tdy+2DWoFk9jp1UV36pETXMbst4xoE3JqC9WtzKR1pfOIb70hwKcp
+	MrD42LSDPQm8jGhbi4AeN2TY/1TOljzLttSihoePuqHd76HJLsV2yuxH1Hcj09KKrXNGmG7JhFO
+	q9256erUAzaZaYkluaYGM3KzCzdKIAO7AIT1eyoL2uMZyMDUc0PTz1ERpZC4+zQbXqvF5MTTW2K
+	qiL10ilw02ogP/PEDFxLudXDzdSSqxtT3WIdeQYKsvIl03qiCLNqPTHM68PUKCXRCLM+Q==
+X-Received: by 2002:a05:622a:287:b0:4f1:aa2d:81cd with SMTP id
+ d75a77b69052e-502a16f6e5emr19722781cf.65.1768521577367; Thu, 15 Jan 2026
+ 15:59:37 -0800 (PST)
+MIME-Version: 1.0
+References: <0100019bc4159a2d-e6a9c664-93ed-4422-b23f-8d3d561eea87-000000@email.amazonses.com>
+In-Reply-To: <0100019bc4159a2d-e6a9c664-93ed-4422-b23f-8d3d561eea87-000000@email.amazonses.com>
+From: Naidaly Cohen <naidycohen@gmail.com>
+Date: Thu, 15 Jan 2026 19:59:24 -0400
+X-Gm-Features: AZwV_QhnUP8QsGqRcxTcXqgQln3ezqv0lVqh1zoctfXBqwaQy7Rx7jvErcbSEk0
+Message-ID: <CAE+USRwfyazziD-Vxjsu0FBGEzbcRLodLfh9pNZt8G2UnJZmXw@mail.gmail.com>
+Subject: Fwd: E-TICKET ITINERARY RECEIPT - RAMIREZ/YOHAN
+To: boletotravelinkeo@gmail.com
+Content-Type: multipart/alternative; boundary="000000000000658ab50648760410"
+
+--000000000000658ab50648760410
+Content-Type: text/plain; charset="UTF-8"
+
+*Naidaly Cohen*
+*0412-331.23.14*
+
+---------- Forwarded message ---------
+De: no_config <noreply@kiusys.com>
+Date: jue, 15 ene 2026, 19:55
+Subject: E-TICKET ITINERARY RECEIPT - RAMIREZ/YOHAN
+To: <naidycohen@gmail.com>
+
+
+ ELECTRONIC TICKET
+[image: Logo]
+
+
+
+     PASSENGER ITINERARY RECEIPT              TICKET NBR: *7650211263601*
+     RECIBO DE ITINERARIO DE PASAJEROS        BOLETO NRO:
+
+ *CALL CENTER                   * ISSUE DATE/FECHA DE EMISION: 15 JAN 2026 18:54
+ AV.AEROPUERTO G/D ANZOATEGUI,    ISSUE AGENT/AGENTE EMISOR: BLA005RZC
+ BARCELONA
+ ANZOATEGUI, VENEZUELA
+ OFFICE ID: VE-14798-0
+ TELEPHONE/TELEFONO: +58 414 700 00 00
+ MAIL INFO: CALLCENTER@FLYRUTACA.COM
+
+ISSUING AIRLINE/LINEA AEREA EMISORA   : RUTACA AIRLINES
+ADDRESS/DIRECCION                     : AV JESUS SOTO SECTOR AEROPUERTO
+                              EDIF TALLER MARES, CIUDAD BOLIVAR, VE
+RIF                                   : J-095003965
+TICKET NUMBER/NRO DE BOLETO           : 765-0211263601
+NAME:  *RAMIREZ/YOHAN
+                                    *
+FOID:  PP406135
+
+BOOKING REF./CODIGO DE RESERVA: C1/*YPRQLO*
+
+  FROM/TO     FLIGHT CL DATE  DEP  ARR  FARE BASIS      NVB   NVA   BAG  ST
+DESDE/HACIA   VUELO  CL FECHA HORA HORA BASE TARIFARIA              EQP. ESTATUS
+
+  *SAN ANTONIO *5R 371 F  *16JAN 1700* *1800* FOWCCS
+   32K  OK *  CARACAS           *
+
+*CONTRATO DE BOLETO:*
+EL SERVICIO DE TRANSPORTE REALIZADO POR RUTA AEREAS, C.A. RUTACA, ESTA SUJETO
+A LAS NORMAS ESTABLECIDAS EN LA LEY DE AERONUTICA CIVIL, LAS REGULACIONES
+NACIONALES, LAS CONDICIONES GENERALES DEL TRANSPORTE AEREO,Y A LOS ACUERDOS Y
+CONVENIOS INTERNACIONALES ACEPTADOS EN EL PAIS, EN CUANTO LE SEAN APLICABLES.
+
+
+
+ENDORSEMENTS/ENDOSOS-RESTRICCIONES : TICKET NO ENDOSABLE NO
+TRANSFERIBLE NO REEMBOLSABLE
+TOUR CODE                          :
+FORM OF PAYMENT/FORMA DE PAGO      : PAGO MOVIL  PM 60240557
+                                     EXCHANGE 7650211262041/E1
+
+
+FARE CALC./CALCULO DE TARIFA: SVZ 5R CCS 159.49USD159.49END  (ADT)
+
+
+
+
+AIR FARE/TARIFA : VES    54090.95
+TAX/IMPUESTOS   : VES PD  4292.96YN PD   536.62EU PD   420.58C2
+                      PD  4373.98AK PD 10732.396N       34.32YN        4.29EU
+                             3.36C2       34.97AK       85.816N
+TOTAL           : VES      591.76A
+
+ORIGINAL ISSUE:7650211262041  14JANCCS/IVE388130
+ORIGNAL FOP: MS
+
+
+
+*NUESTRAS CONDICIONES SON:*
+TODOS LOS BOLETOS EMITIDOS EN RUTAS AEREAS C.A.(RUTACA), SE RIGEN BAJO
+LA POLITICA DE NO
+REEMBOLSABLES NO TRANSFERIBLES, SIENDO SU VALIDEZ  EN VUELOS REGULARES
+DE 12MESES
+A PARTIR DE LA FECHA DE EMISION, APLICA PENALIDAD POR REPROGRAMACION
+DE FECHAS Y CUALQUIER CAMBIO DE DATOS EMITIDOS EN EL BOLETO.
+LIMITACIONES EN LA RESPONSABILIDAD POR PERDIDAS Y/O DETERIORO DE MALETAS Y
+BOLSOS SEGUN LO ESTABLECIDO POR LA LEY DE AERONAUTICA CIVIL. SI DESEA HACER UNA
+DECLARACION EXPRESA DE VALOR, DEBE SER SOLICITADA EN MOSTRADORES.
+LOS PASAJEROS DEBEN PRESENTARSE 2 HORAS ANTES DE LA SALIDA EN VUELOS NACIONALES
+Y 4 HORAS PARA DESTINOS INTERNACIONALES. LAS TASAS O IMPUESTOS
+NACIONALES E INTERNACIONALES ESTAN INCLUIDOS EN LOS BOLETOS,
+*EXCEPTO EN LOS DESTINOS:PUERTO ESPANA (TRINIDAD Y TOBAGO), PUERTO
+ORDAZ, MATURIN, BARQUISIMETO, LAS PIEDRAS, CORO Y CUMANA.*
+*FRANQUICIA DE EQUIPAJE EN VUELOS NACIONALES:*
+POR PASAJERO SE PERMITE UN (1) EQUIPAJE PARA SU FACTURACION EN BODEGA DE 23 KG
+Y UN (1) EQUIPAJE DE MANO DE HASTA 8 KG.
+*FRANQUICIA DE EQUIPAJE EN VUELOS INTERNACIONALES:*
+SE PERMITE UN (1) EQUIPAJE PARA SU FACTURACION EN BODEGA DE 23 KG
+Y UN (1) EQUIPAJE DE MANO DE HASTA 8 KG.
+PARA MAYOR INFORMACION COMUNIQUESE:
+*0-500-7882221   +58-424-8225428   +58-424-8225451   +58-414-7000000*
+------------------------------
+SEND BY AGENT BLA005RZC / JAN 15 2026  6:54
+
+--000000000000658ab50648760410
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"auto"><div><br></div><div><br></div><div data-smartmail=3D"gmai=
+l_signature"><div dir=3D"ltr"><div><b><font face=3D"tahoma, sans-serif"><br=
+></font></b></div><b><font face=3D"tahoma, sans-serif"><span></span><span><=
+/span>Naidaly Cohen</font></b><div><b><font face=3D"tahoma, sans-serif">041=
+2-331.23.14</font></b></div></div></div></div><br><div class=3D"gmail_quote=
+ gmail_quote_container"><div dir=3D"ltr" class=3D"gmail_attr">---------- Fo=
+rwarded message ---------<br>De: <strong class=3D"gmail_sendername" dir=3D"=
+auto">no_config</strong> <span dir=3D"auto">&lt;<a href=3D"mailto:noreply@k=
+iusys.com">noreply@kiusys.com</a>&gt;</span><br>Date: jue, 15 ene 2026, 19:=
+55<br>Subject: E-TICKET ITINERARY RECEIPT - RAMIREZ/YOHAN<br>To:  &lt;<a hr=
+ef=3D"mailto:naidycohen@gmail.com">naidycohen@gmail.com</a>&gt;<br></div><b=
+r><br><div><pre class=3D"m_-6529768146984739247pnr-print-medium"> ELECTRONI=
+C TICKET                                                                   =
+                                                                           =
+                                                           <div class=3D"m_=
+-6529768146984739247prn-image"><img src=3D"https://cdn.kiusys.net/prod/res_=
+receipt/5r/1838_17412120207375011.jpg" alt=3D"Logo" border=3D"0" width=3D"1=
+50px" height=3D"auto" align=3D"left"></div>
+
+
+     PASSENGER ITINERARY RECEIPT              TICKET NBR: <b>7650211263601<=
+/b>
+     RECIBO DE ITINERARIO DE PASAJEROS        BOLETO NRO:=20
+
+ <b>CALL CENTER                   </b> ISSUE DATE/FECHA DE EMISION: 15 JAN =
+2026 18:54
+ AV.AEROPUERTO G/D ANZOATEGUI,    ISSUE AGENT/AGENTE EMISOR: BLA005RZC
+ BARCELONA                                    =20
+ ANZOATEGUI, VENEZUELA                   =20
+ OFFICE ID: VE-14798-0                   =20
+ TELEPHONE/TELEFONO: +58 414 700 00 00            =20
+ MAIL INFO: <a href=3D"mailto:CALLCENTER@FLYRUTACA.COM" target=3D"_blank" r=
+el=3D"noreferrer">CALLCENTER@FLYRUTACA.COM</a>                             =
+      =20
+
+ISSUING AIRLINE/LINEA AEREA EMISORA   : RUTACA AIRLINES
+ADDRESS/DIRECCION                     : AV JESUS SOTO SECTOR AEROPUERTO
+                              EDIF TALLER MARES, CIUDAD BOLIVAR, VE
+RIF                                   : J-095003965                  =20
+TICKET NUMBER/NRO DE BOLETO           : 765-0211263601
+NAME:  <b>RAMIREZ/YOHAN                                                    =
+                                  </b>
+FOID:  PP406135           =20
+
+BOOKING REF./CODIGO DE RESERVA: C1/<b>YPRQLO</b>
+
+  FROM/TO     FLIGHT CL DATE  DEP  ARR  FARE BASIS      NVB   NVA   BAG  ST
+DESDE/HACIA   VUELO  CL FECHA HORA HORA BASE TARIFARIA              EQP. ES=
+TATUS
+
+  <b>SAN ANTONIO </b>5R 371 F  <b>16JAN 1700</b> <b>1800</b> FOWCCS        =
+              32K  OK=20
+<b>  CARACAS           </b>
+</pre><pre class=3D"m_-6529768146984739247pnr-print-medium"><b>CONTRATO DE =
+BOLETO:</b><br>EL SERVICIO DE TRANSPORTE REALIZADO POR RUTA AEREAS, C.A. RU=
+TACA, ESTA SUJETO<br>A LAS NORMAS ESTABLECIDAS EN LA LEY DE AERONUTICA CIVI=
+L, LAS REGULACIONES<br>NACIONALES, LAS CONDICIONES GENERALES DEL TRANSPORTE=
+ AEREO,Y A LOS ACUERDOS Y<br>CONVENIOS INTERNACIONALES ACEPTADOS EN EL PAIS=
+, EN CUANTO LE SEAN APLICABLES.<br><br></pre><pre class=3D"m_-6529768146984=
+739247pnr-print-medium">
+
+ENDORSEMENTS/ENDOSOS-RESTRICCIONES : TICKET NO ENDOSABLE NO TRANSFERIBLE NO=
+ REEMBOLSABLE
+TOUR CODE                          :=20
+FORM OF PAYMENT/FORMA DE PAGO      : PAGO MOVIL  PM 60240557             =
+=20
+                                     EXCHANGE 7650211262041/E1  =20
+
+</pre><pre class=3D"m_-6529768146984739247pnr-print-medium">FARE CALC./CALC=
+ULO DE TARIFA: SVZ 5R CCS 159.49USD159.49END  (ADT)
+
+</pre><pre class=3D"m_-6529768146984739247pnr-print-medium">
+
+AIR FARE/TARIFA : VES    54090.95
+TAX/IMPUESTOS   : VES PD  4292.96YN PD   536.62EU PD   420.58C2
+                      PD  4373.98AK PD 10732.396N       34.32YN        4.29=
+EU
+                             3.36C2       34.97AK       85.816N
+TOTAL           : VES      591.76A
+
+ORIGINAL ISSUE:7650211262041  14JANCCS/IVE388130
+ORIGNAL FOP: MS
+
+
+</pre><pre class=3D"m_-6529768146984739247pnr-print-medium"><b>NUESTRAS CON=
+DICIONES SON:</b><br>TODOS LOS BOLETOS EMITIDOS EN RUTAS AEREAS C.A.(RUTACA=
+), SE RIGEN BAJO LA POLITICA DE NO<br>REEMBOLSABLES NO TRANSFERIBLES, SIEND=
+O SU VALIDEZ  EN VUELOS REGULARES DE 12MESES<br>A PARTIR DE LA FECHA DE EMI=
+SION, APLICA PENALIDAD POR REPROGRAMACION<br>DE FECHAS Y CUALQUIER CAMBIO D=
+E DATOS EMITIDOS EN EL BOLETO.<br>LIMITACIONES EN LA RESPONSABILIDAD POR PE=
+RDIDAS Y/O DETERIORO DE MALETAS Y<br>BOLSOS SEGUN LO ESTABLECIDO POR LA LEY=
+ DE AERONAUTICA CIVIL. SI DESEA HACER UNA<br>DECLARACION EXPRESA DE VALOR, =
+DEBE SER SOLICITADA EN MOSTRADORES.<br>LOS PASAJEROS DEBEN PRESENTARSE 2 HO=
+RAS ANTES DE LA SALIDA EN VUELOS NACIONALES<br>Y 4 HORAS PARA DESTINOS INTE=
+RNACIONALES. LAS TASAS O IMPUESTOS NACIONALES E INTERNACIONALES ESTAN INCLU=
+IDOS EN LOS BOLETOS,<br><b>EXCEPTO EN LOS DESTINOS:PUERTO ESPANA (TRINIDAD =
+Y TOBAGO), PUERTO ORDAZ, MATURIN, BARQUISIMETO, LAS PIEDRAS, CORO Y CUMANA.=
+</b><br><b>FRANQUICIA DE EQUIPAJE EN VUELOS NACIONALES:</b><br>POR PASAJERO=
+ SE PERMITE UN (1) EQUIPAJE PARA SU FACTURACION EN BODEGA DE 23 KG<br>Y UN =
+(1) EQUIPAJE DE MANO DE HASTA 8 KG.<br><b>FRANQUICIA DE EQUIPAJE EN VUELOS =
+INTERNACIONALES:</b><br>SE PERMITE UN (1) EQUIPAJE PARA SU FACTURACION EN B=
+ODEGA DE 23 KG<br>Y UN (1) EQUIPAJE DE MANO DE HASTA 8 KG.<br>PARA MAYOR IN=
+FORMACION COMUNIQUESE:<br><b>0-500-7882221   +58-424-8225428   +58-424-8225=
+451   +58-414-7000000</b><br>
+<hr>SEND BY AGENT BLA005RZC / JAN 15 2026  6:54</pre></div><img alt=3D"" sr=
+c=3D"https://j5d6plkx.r.us-east-1.awstrack.me/I0/0100019bc4159a2d-e6a9c664-=
+93ed-4422-b23f-8d3d561eea87-000000/BtUJLliG9UGbPzL145DZcZlBi10=3D461" style=
+=3D"display:none;width:1px;height:1px">
+</div>
+
+--000000000000658ab50648760410--

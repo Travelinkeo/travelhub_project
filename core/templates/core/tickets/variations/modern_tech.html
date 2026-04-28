@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>TravelHub - Modern Tech Ticket</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+    <style>
+        @page {
+            size: A4;
+            margin: 0;
+        }
+        :root {
+            --primary: #030813;
+            --primary-container: #1a202c;
+            --secondary: #476083;
+            --surface: #fcf8f9;
+            --on-surface: #1b1b1c;
+            --surface-container-lowest: #ffffff;
+            --outline-variant: #c6c6cc;
+            --body-margin: 50px;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            color: var(--on-surface);
+            background-color: #ffffff;
+            -webkit-print-color-adjust: exact;
+        }
+        .container {
+            width: 210mm;
+            min-height: 297mm;
+            padding: var(--body-margin);
+            box-sizing: border-box;
+            background-color: #ffffff;
+            display: flex;
+            flex-direction: column;
+        }
+        header {
+            background: linear-gradient(135deg, #030813, #1a202c);
+            color: white;
+            padding: 24px 32px;
+            border-radius: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 50px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .brand-name {
+            font-weight: 900;
+            font-size: 24px;
+            letter-spacing: -0.05em;
+            text-transform: uppercase;
+        }
+        .header-divider {
+            width: 1px;
+            height: 24px;
+            background-color: rgba(255,255,255,0.2);
+        }
+        .header-slogan {
+            font-size: 10px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            font-weight: 500;
+            opacity: 0.7;
+        }
+        .pnr-box {
+            text-align: right;
+        }
+        .pnr-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #94a3b8;
+            font-weight: 700;
+        }
+        .pnr-value {
+            font-family: monospace;
+            font-size: 20px;
+            font-weight: 800;
+            letter-spacing: 0.2em;
+        }
+
+        .passenger-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 50px;
+        }
+        .passenger-name {
+            font-size: 60px;
+            font-weight: 900;
+            letter-spacing: -0.02em;
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+
+        .flight-card {
+            background-color: #ffffff;
+            border-radius: 24px;
+            padding: 40px;
+            margin-bottom: 40px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+            border: 1px solid #f1f5f9;
+            position: relative;
+        }
+        .flight-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 120px;
+            height: 120px;
+            background-color: rgba(3,8,19,0.03);
+            border-radius: 0 0 0 100%;
+        }
+
+        .flight-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #f1f5f9;
+            padding-bottom: 24px;
+            margin-bottom: 40px;
+        }
+        .flight-id {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .flight-icon {
+            width: 48px;
+            height: 48px;
+            background-color: var(--primary);
+            color: white;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .route-grid {
+            display: grid;
+            grid-template-columns: 4fr 3fr 4fr;
+            align-items: center;
+            gap: 16px;
+        }
+        .city-iata {
+            font-size: 72px;
+            font-weight: 900;
+            letter-spacing: -0.05em;
+            line-height: 1;
+            color: var(--primary);
+        }
+        .city-name {
+            font-size: 18px;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+        .time-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            font-weight: 800;
+            color: #64748b;
+            margin-top: 24px;
+            display: block;
+        }
+        .time-value {
+            font-size: 24px;
+            font-weight: 800;
+        }
+
+        .connector {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        .connector-txt {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #94a3b8;
+            margin-bottom: 12px;
+        }
+        .connector-line {
+            width: 100%;
+            height: 1px;
+            border-bottom: 1px dashed #cbd5e1;
+            position: relative;
+        }
+        .connector-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: var(--primary);
+            background: white;
+            padding: 0 10px;
+        }
+
+        .stats-grid {
+            margin-top: 40px;
+            padding-top: 32px;
+            border-top: 1px solid #f1f5f9;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+        }
+        .stat-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            font-weight: 800;
+            color: #64748b;
+        }
+        .stat-value {
+            font-size: 20px;
+            font-weight: 800;
+            margin-top: 4px;
+        }
+
+        footer {
+            margin-top: auto;
+            border-top: 1px solid #f1f5f9;
+            padding-top: 40px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .footer-brand {
+            font-weight: 900;
+            font-size: 18px;
+            margin-bottom: 8px;
+            display: block;
+        }
+        .footer-legal {
+            font-size: 14px;
+            color: #476083;
+            max-width: 450px;
+            line-height: 1.6;
+        }
+        .footer-links {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .footer-link {
+            font-size: 14px;
+            font-weight: 500;
+            color: #64748b;
+            text-decoration: none;
+        }
+
+        .qr-box {
+           width: 96px;
+           height: 96px;
+           background-color: #f1f5f9;
+           border-radius: 12px;
+           display: flex;
+           align-items: center;
+           justify-content: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-left">
+                {% if agencia %}
+                    {% if agencia.logo_pdf_dark_base64 %}
+                        <img src="{% if 'data:image' in agencia.logo_pdf_dark_base64 %}{{ agencia.logo_pdf_dark_base64 }}{% else %}data:image/png;base64,{{ agencia.logo_pdf_dark_base64 }}{% endif %}" style="max-height: 40px;">
+                    {% elif agencia.logo_pdf_base64 %}
+                        <img src="{% if 'data:image' in agencia.logo_pdf_base64 %}{{ agencia.logo_pdf_base64 }}{% else %}data:image/png;base64,{{ agencia.logo_pdf_base64 }}{% endif %}" style="max-height: 40px;">
+                    {% else %}
+                        <div class="brand-name">{{ agencia.nombre|upper }}</div>
+                    {% endif %}
+                {% else %}
+                    <div class="brand-name">TRAVELHUB</div>
+                {% endif %}
+                <div class="header-divider"></div>
+                <div class="header-slogan">{{ agencia.eslogan }}</div>
+            </div>
+            <div class="pnr-box">
+                <div class="pnr-label">Booking Reference</div>
+                <div class="pnr-value">{{ CODIGO_RESERVA }}</div>
+            </div>
+        </header>
+
+        <main>
+            <section class="passenger-section">
+                <div>
+                    <h1 class="passenger-name">{{ NOMBRE_DEL_PASAJERO }}</h1>
+                    <div style="color: #476083; font-weight: 500; text-transform: uppercase; font-size: 12px;">Confirmed Electronic Ticket (ETKT)</div>
+                </div>
+                <div class="qr-box">
+                    <span class="material-symbols-outlined" style="font-size: 40px; color: #030813;">qr_code_2</span>
+                </div>
+            </section>
+
+            <div class="flight-list">
+                {% for flight in vuelos %}
+                <div class="flight-card">
+                    <div class="flight-header">
+                        <div class="flight-id">
+                            <div class="flight-icon">
+                                <span class="material-symbols-outlined">flight_takeoff</span>
+                            </div>
+                            <div>
+                                <div class="stat-label">Flight Number</div>
+                                <div style="font-size: 20px; font-weight: 800;">{{ flight.aerolinea }} — {{ flight.numero_vuelo }}</div>
+                            </div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div class="stat-label">Class</div>
+                            <div style="font-size: 20px; font-weight: 800;">{{ flight.cabina|default:flight.clase|default:'TOURIST' }}</div>
+                        </div>
+                    </div>
+
+                    <div class="route-grid">
+                        <div class="departure">
+                            <div class="city-iata">{{ flight.origen_code|default:flight.origen|slice:":3"|upper }}</div>
+                            <div class="city-name">{{ flight.origen }}</div>
+                            <span class="time-label">Departure</span>
+                            <div class="time-value">{{ flight.hora_salida }}</div>
+                            <div style="font-size: 14px; font-weight: 600; color: #476083;">{{ flight.fecha|default:flight.fecha_salida }}</div>
+                        </div>
+                        
+                        <div class="connector">
+                            <div class="connector-txt">Non-stop</div>
+                            <div class="connector-line">
+                                <div class="connector-icon">
+                                    <span class="material-symbols-outlined">flight</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="arrival" style="text-align: right;">
+                            <div class="city-iata">{{ flight.destino_code|default:flight.destino|slice:":3"|upper }}</div>
+                            <div class="city-name">{{ flight.destino }}</div>
+                            <span class="time-label">Arrival</span>
+                            <div class="time-value">{{ flight.hora_llegada }}</div>
+                            <div style="font-size: 14px; font-weight: 600; color: #476083;">{{ flight.fecha|default:flight.fecha_salida }}</div>
+                        </div>
+                    </div>
+
+                    <div class="stats-grid">
+                        <div class="stat">
+                            <div class="stat-label">Terminal</div>
+                            <div class="stat-value">{{ flight.terminal|default:'T1' }}</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-label">Boarding</div>
+                            <div class="stat-value">{{ flight.boarding_time|default:'---' }}</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-label">Seat</div>
+                            <div class="stat-value">{{ flight.asiento|default:'Check-in' }}</div>
+                        </div>
+                        <div class="stat" style="text-align: right;">
+                            <div class="stat-label">Baggage</div>
+                            <div class="stat-value">{{ flight.equipaje|default:'23KG' }}</div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </main>
+
+        <footer>
+            <div class="footer-info">
+                <span class="footer-brand">{{ agencia.nombre|upper }}</span>
+                <p class="footer-legal">{{ agencia.pie_pagina|default:'Documentation provided by TravelHub Global Network.' }}</p>
+                <div style="font-size: 10px; margin-top: 16px; opacity: 0.5; font-weight: 700;">© 2026 TRAVELHUB MODERN. ALL RIGHTS RESERVED.</div>
+            </div>
+            <div class="footer-links">
+                <a href="#" class="footer-link">Terms of Service</a>
+                <a href="#" class="footer-link">Privacy Policy</a>
+                <a href="#" class="footer-link">Contact Support</a>
+                <a href="#" class="footer-link">{{ agencia.email_principal }}</a>
+            </div>
+        </footer>
+    </div>
+</body>
+</html>

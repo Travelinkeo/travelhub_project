@@ -1,0 +1,80 @@
+{% extends "base_modern.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}Reportes y Analíticas{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- Header -->
+    <div class="md:flex md:items-center md:justify-between mb-8">
+        <div class="flex-1 min-w-0">
+            <h2 class="text-3xl font-black text-text-main uppercase tracking-tight">
+                {% trans "Reportes y Analíticas" %}
+            </h2>
+            <p class="mt-1 text-sm text-text-muted font-medium">
+                {% trans "Visión unificada del rendimiento de tu agencia." %}
+            </p>
+        </div>
+    </div>
+
+    <!-- Tabs Navigation -->
+    <div class="mb-8 border-b border-border-color">
+        <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+            <a href="#" hx-get="{% url 'core:analytics_sales' %}" hx-target="#analytics-content" hx-swap="innerHTML"
+                class="border-primary text-primary whitespace-nowrap py-4 px-2 border-b-2 font-black text-xs uppercase tracking-widest transition-all duration-200"
+                id="tab-sales" onclick="selectTab(this)">
+                {% trans "Ventas" %}
+            </a>
+
+            <a href="#" hx-get="{% url 'core:analytics_finance' %}" hx-target="#analytics-content" hx-swap="innerHTML"
+                class="border-transparent text-text-muted hover:text-text-main whitespace-nowrap py-4 px-2 border-b-2 font-black text-xs uppercase tracking-widest transition-all duration-200"
+                id="tab-finance" onclick="selectTab(this)">
+                {% trans "Finanzas (P&L)" %}
+            </a>
+
+            <a href="#" hx-get="{% url 'core:analytics_ops' %}" hx-target="#analytics-content" hx-swap="innerHTML"
+                class="border-transparent text-text-muted hover:text-text-main whitespace-nowrap py-4 px-2 border-b-2 font-black text-xs uppercase tracking-widest transition-all duration-200"
+                id="tab-ops" onclick="selectTab(this)">
+                {% trans "Operaciones" %}
+            </a>
+        </nav>
+    </div>
+
+    <!-- Content Area -->
+    <div id="analytics-content" class="min-h-[500px]">
+        <!-- Loading State -->
+        <div class="flex flex-col justify-center items-center h-80 gap-4 opacity-50">
+            <svg class="animate-spin h-10 w-10 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <p class="text-[10px] font-black uppercase tracking-widest text-text-muted">{% trans "Cargando analíticas..." %}</p>
+        </div>
+    </div>
+
+</div>
+
+{% block extra_scripts %}
+<script>
+    function selectTab(clickedTab) {
+        // Reset all tabs
+        document.querySelectorAll('nav a').forEach(tab => {
+            tab.classList.remove('border-primary', 'text-primary');
+            tab.classList.add('border-transparent', 'text-text-muted', 'hover:text-text-main');
+        });
+
+        // Activate clicked tab
+        clickedTab.classList.remove('border-transparent', 'text-text-muted', 'hover:text-text-main');
+        clickedTab.classList.add('border-primary', 'text-primary');
+    }
+
+    // Load default tab
+    document.addEventListener('DOMContentLoaded', function () {
+        htmx.ajax('GET', "{% url 'core:analytics_sales' %}", '#analytics-content');
+    });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+{% endblock %}

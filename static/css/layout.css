@@ -1,0 +1,51 @@
+/* Layout / utility CSS extracted from inline styles in base.html (Phase 1) */
+:root {
+  --header-bg: #1a1f29;
+}
+.site-header { background: var(--header-bg); }
+.brand-logo, .brand-logo a { display:flex; align-items:center; gap:.6rem; }
+.brand-logo a { text-decoration:none; }
+.brand-logo img { height:40px; width:auto; display:block; }
+.brand-logo span { font-family:var(--font-heading); font-size:1.15rem; font-weight:600; color:#fff; letter-spacing:.5px; }
+#themeToggle { font-size:.75rem; margin-left:auto; }
+.site-footer h4, .site-footer h5 { color:#fff; font-family:var(--font-heading); }
+.site-footer h4 { margin-bottom:.25rem; }
+.site-footer h5 { font-size:.8rem; letter-spacing:.5px; text-transform:uppercase; margin-bottom:.25rem; }
+.site-footer p, .site-footer ul { font-size:.75rem; line-height:1.4; }
+.site-footer p.small-note { font-size:.7rem; }
+.nav-simple-list { list-style:none; padding:0; margin:0; font-size:.75rem; }
+.legal-block { font-size:.7rem; line-height:1.4; }
+.badge.no-select { user-select:none; }
+/* Sales summary utilities */
+.heading-sm { font-size:1.1rem; }
+.table-sm-text { --table-font-size:0.8rem; }
+/* Form / grid utilities extracted from manual_ticket_entry */
+.w-max-900 { max-width:900px; }
+.heading-xs { font-size:1rem; }
+.flow-space-sm { --flow-space:1rem; }
+.grid-auto-fields { --cols:repeat(auto-fit,minmax(240px,1fr)); --gap:1rem; }
+.label-caps { font-weight:600; letter-spacing:.5px; text-transform:uppercase; }
+.text-danger-soft { color:var(--status-danger); }
+/* Dashboard boleto utilities */
+.heading-sm { font-size:1.1rem; }
+.table-xxs { --table-font-size:0.75rem; }
+.table-xxs-alt { --table-font-size:0.72rem; }
+.scroll-box-sm { max-height:100px; overflow-y:auto; white-space:pre-wrap; }
+.error-log-box { white-space:pre-wrap; max-height:200px; overflow-y:auto; background-color:#f8d7da; padding:10px; border-radius:5px; }
+/* Home hero utilities */
+.hero-heading { font-family: var(--font-heading); font-size: clamp(1.8rem,3vw,2.4rem); color: var(--brand-primary); }
+.lead-max { max-width:60ch; }
+.grid-cards-auto { --cols: repeat(auto-fit,minmax(250px,1fr)); }
+/* CMS page utilities */
+.w-max-900 { max-width:900px; } /* already defined earlier, ensure not duplicated */
+.card-header-md { font-size:1.05rem; }
+.flow-rich { --flow-space:1rem; font-size:.9rem; line-height:1.55; }
+/* Paquetes listing */
+.flow-space-lg { --flow-space:1.2rem; }
+.heading-lg { font-size:1.3rem; }
+.grid-paquetes { --cols:repeat(auto-fit,minmax(260px,1fr)); --gap:1rem; }
+.card-media-thumb { aspect-ratio:4/3; overflow:hidden; border-bottom:1px solid var(--border); background:var(--surface-alt); }
+.card-media-thumb img { width:100%; height:100%; object-fit:cover; display:block; }
+.card-header-sm { font-size:.9rem; }
+.desc-minh { min-height:3.5rem; }
+.price-highlight { font-weight:600; color:var(--brand-primary); }

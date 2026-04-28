@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Timeline Experience Voucher - {{ agencia.nombre }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        @page { size: A4; margin: 0; }
+        :root {
+            --tk-primary: {{ agencia.color_primario|default:"#0d1e40" }};
+            --tk-accent: {{ agencia.color_accent_pdf|default:"#2563eb" }};
+            --tk-text: #1e293b;
+            --tk-muted: #64748b;
+            --tk-gray: #f8fafc;
+            --tk-border: #e2e8f0;
+            --timeline-w: 60px;
+        }
+        body { font-family: 'Outfit', sans-serif; color: var(--tk-text); margin: 0; background: white; line-height: 1.5; }
+        .container { width: 210mm; min-height: 297mm; display: flex; flex-direction: column; background: white; position: relative; }
+        
+        .top-gradient { height: 10px; background: linear-gradient(90deg, var(--tk-primary), var(--tk-accent)); }
+        
+        header { padding: 40px 60px; display: flex; justify-content: space-between; align-items: flex-end; }
+        .agencia-header h1 { font-size: 20px; font-weight: 900; color: var(--tk-primary); text-transform: uppercase; margin: 0; }
+        .agencia-header p { font-size: 11px; color: var(--tk-muted); margin: 2px 0; }
+        
+        .voucher-title { text-align: right; }
+        .voucher-title h2 { font-size: 32px; font-weight: 900; color: var(--tk-accent); text-transform: uppercase; margin: 0; letter-spacing: -1px; }
+        .voucher-title p { font-size: 14px; font-weight: 700; color: var(--tk-primary); margin: 0; }
+
+        .timeline-section { flex: 1; padding: 0 60px 60px; position: relative; }
+        .passenger-hero { margin-bottom: 50px; }
+        .passenger-hero label { font-size: 10px; font-weight: 800; color: var(--tk-muted); text-transform: uppercase; letter-spacing: 2px; }
+        .passenger-hero h3 { font-size: 44px; font-weight: 900; color: var(--tk-primary); margin: 5px 0; letter-spacing: -2px; }
+
+        .timeline { position: relative; }
+        .timeline::before { content: ''; position: absolute; left: calc(var(--timeline-w) / 2); top: 10px; bottom: 0; width: 2px; background: var(--tk-border); }
+        
+        .timeline-item { position: relative; padding-left: var(--timeline-w); margin-bottom: 40px; }
+        .timeline-dot { position: absolute; left: 0; top: 5px; width: var(--timeline-w); display: flex; justify-content: center; }
+        .dot { width: 14px; height: 14px; background: white; border: 3px solid var(--tk-accent); border-radius: 50%; z-index: 10; box-shadow: 0 0 0 5px white; }
+        
+        .item-content { background: var(--tk-gray); border-radius: 20px; padding: 25px; border: 1px solid var(--tk-border); }
+        .item-type { font-size: 10px; font-weight: 800; color: var(--tk-accent); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+        .item-main { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; }
+        .item-main h4 { font-size: 20px; font-weight: 800; color: var(--tk-primary); margin: 0; }
+        .item-loc { font-size: 13px; font-weight: 700; color: var(--tk-text); border: 1px solid var(--tk-border); padding: 2px 10px; border-radius: 6px; background: white; }
+        
+        .item-meta { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; font-size: 12px; }
+        .meta-box label { display: block; font-size: 9px; font-weight: 700; color: var(--tk-muted); text-transform: uppercase; margin-bottom: 3px; }
+        .meta-box span { font-weight: 700; }
+
+        footer { background: var(--tk-primary); color: rgba(255,255,255,0.8); padding: 50px 60px; font-size: 11px; }
+        .footer-logo { font-size: 24px; font-weight: 900; color: white; margin-bottom: 10px; }
+        .footer-grid { display: grid; grid-template-columns: 2fr 1.5fr; gap: 40px; }
+        .agencia-id { text-align: right; }
+        .agencia-id b { color: white; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="top-gradient"></div>
+        <header>
+            <div class="agencia-header">
+                {% if agencia.logo_pdf_base64 %}
+                    <img src="data:image/png;base64,{{ agencia.logo_pdf_base64 }}" style="max-height: 40px; margin-bottom:15px;">
+                {% endif %}
+                <h1>{{ agencia.nombre|upper }}</h1>
+                <p>{{ agencia.email_principal|default:"" }} | {{ agencia.telefono_principal }}</p>
+            </div>
+            <div class="voucher-title">
+                <h2>Voucher</h2>
+                <p>REF: {{ venta.localizador|default:venta.id_venta|upper }}</p>
+            </div>
+        </header>
+
+        <main class="timeline-section">
+            <div class="passenger-hero">
+                <label>Main Guest</label>
+                <h3>{{ venta.cliente.get_nombre_completo|default:venta.cliente.nombre|upper }}</h3>
+                <p style="font-size: 12px; font-weight: 600; color: var(--tk-muted);">Issue Date: {{ venta.fecha_venta|date:"d M Y" }}</p>
+            </div>
+
+            <div class="timeline">
+                {# ALOJAMIENTOS #}
+                {% for hotel in alojamientos %}
+                <div class="timeline-item">
+                    <div class="timeline-dot"><div class="dot"></div></div>
+                    <div class="item-content">
+                        <div class="item-type">Accommodation / Hotel Reservation</div>
+                        <div class="item-main">
+                            <h4>{{ hotel.nombre_establecimiento|upper }}</h4>
+                            {% if hotel.localizador_proveedor %}<span class="item-loc">{{ hotel.localizador_proveedor }}</span>{% endif %}
+                        </div>
+                        <div class="item-meta">
+                            <div class="meta-box"><label>Check-in</label><span>{{ hotel.check_in|date:"d M Y" }}</span></div>
+                            <div class="meta-box"><label>Check-out</label><span>{{ hotel.check_out|date:"d M Y" }}</span></div>
+                            <div class="meta-box"><label>Plan</label><span>{{ hotel.regimen_alimentacion|default:"Standard" }}</span></div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+
+                {# AUTOS #}
+                {% for car in alquileres_autos %}
+                <div class="timeline-item">
+                    <div class="timeline-dot"><div class="dot" style="border-color: #f59e0b;"></div></div>
+                    <div class="item-content">
+                        <div class="item-type" style="color:#f59e0b;">Car Rental / Vehicle Services</div>
+                        <div class="item-main">
+                            <h4>{{ car.compania_rentadora|upper }} — {{ car.categoria_auto }}</h4>
+                            {% if car.numero_confirmacion %}<span class="item-loc">{{ car.numero_confirmacion }}</span>{% endif %}
+                        </div>
+                        <div class="item-meta">
+                            <div class="meta-box"><label>Pick-up</label><span>{{ car.fecha_hora_retiro|date:"d M Y H:i" }}</span></div>
+                            <div class="meta-box"><label>Location</label><span>{{ car.ciudad_retiro.nombre|default:"---" }}</span></div>
+                            <div class="meta-box"><label>Driver</label><span>{{ car.nombre_conductor|default:venta.cliente.get_nombre_completo|upper|truncatechars:15 }}</span></div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+
+                {# TRASLADOS / ACTIVIDADES #}
+                {% for tr in traslados %}
+                <div class="timeline-item">
+                    <div class="timeline-dot"><div class="dot" style="border-color: #3b82f6;"></div></div>
+                    <div class="item-content">
+                        <div class="item-type" style="color: #3b82f6;">Transfer / Ground Service</div>
+                        <div class="item-main">
+                            <h4>{{ tr.origen|upper }} → {{ tr.destino|upper }}</h4>
+                            <span class="item-loc">{{ tr.get_tipo_traslado_display|upper }}</span>
+                        </div>
+                        <div class="item-meta">
+                            <div class="meta-box"><label>Date & Time</label><span>{{ tr.fecha_hora|date:"d M Y H:i" }}</span></div>
+                            <div class="meta-box"><label>Pax</label><span>{{ tr.pasajeros }}</span></div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+
+                {# ADICIONALES #}
+                {% for item in servicios_adicionales %}
+                <div class="timeline-item">
+                    <div class="timeline-dot"><div class="dot" style="border-color: #8b5cf6;"></div></div>
+                    <div class="item-content">
+                        <div class="item-type" style="color: #8b5cf6;">{{ item.get_tipo_servicio_display|upper }} / Extra</div>
+                        <div class="item-main">
+                            <h4>{{ item.descripcion|upper|default:"ADDITIONAL SERVICE" }}</h4>
+                            {% if item.codigo_referencia %}<span class="item-loc">{{ item.codigo_referencia }}</span>{% endif %}
+                        </div>
+                        <div class="item-meta">
+                            <div class="meta-box"><label>Start Date</label><span>{{ item.fecha_inicio|date:"d M Y" }}</span></div>
+                            <div class="meta-box"><label>End Date</label><span>{{ item.fecha_fin|date:"d M Y" }}</span></div>
+                            <div class="meta-box"><label>Beneficiary</label><span>{{ item.nombre_pasajero|default:venta.cliente.get_nombre_completo|upper|truncatechars:15 }}</span></div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </main>
+
+        <footer>
+            <div class="footer-grid">
+                <div>
+                    <div class="footer-logo">{{ agencia.nombre|upper }}</div>
+                    <p>{{ agencia.direccion|default:"Caracas, Venezuela" }}</p>
+                    <p>{{ agencia.website|default:"" }}</p>
+                </div>
+                <div class="agencia-id">
+                    <p><b>REF ID:</b> {{ venta.localizador|default:venta.id_venta|upper }}</p>
+                    {% if agencia.pie_pagina %}<p style="margin-top:20px; opacity:0.8;">{{ agencia.pie_pagina }}</p>{% endif %}
+                </div>
+            </div>
+        </footer>
+    </div>
+</body>
+</html>

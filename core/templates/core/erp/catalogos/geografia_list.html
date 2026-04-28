@@ -1,0 +1,171 @@
+{% extends "base_modern.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Geografía" %} - TravelHub{% endblock %}
+
+{% block content %}
+<div class="p-6">
+    <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <h1 class="text-3xl font-bold text-white">{% trans "Gestión Geográfica" %}</h1>
+            <p class="text-gray-400 mt-2">{% trans "Administración de Países y Ciudades para el sistema." %}</p>
+        </div>
+        <div class="flex gap-3">
+            <a href="{% url 'core:catalogos_center' %}"
+                class="px-4 py-2 bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-xl transition-all inline-flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                {% trans "Volver al Centro" %}
+            </a>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        <div class="glass-panel p-6 rounded-2xl flex items-center justify-between">
+            <div>
+                <p class="text-gray-500 text-sm font-semibold uppercase tracking-wider">{% trans "Países Registrados" %}
+                </p>
+                <h3 class="text-4xl font-bold text-blue-400 mt-1">{{ paises_count }}</h3>
+            </div>
+            <div class="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center text-blue-400">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 002 2h4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                    </path>
+                </svg>
+            </div>
+        </div>
+        <div class="glass-panel p-6 rounded-2xl flex items-center justify-between">
+            <div>
+                <p class="text-gray-500 text-sm font-semibold uppercase tracking-wider">{% trans "Ciudades / IATA" %}
+                </p>
+                <h3 class="text-4xl font-bold text-indigo-400 mt-1">{{ paginator.count }}</h3>
+            </div>
+            <div class="w-12 h-12 bg-indigo-500/10 rounded-xl flex items-center justify-center text-indigo-400">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search and List -->
+    <div class="glass-panel rounded-2xl overflow-hidden">
+        <div
+            class="p-6 border-b border-white/5 bg-white/5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <form method="get" class="relative w-full md:w-96">
+                <input type="text" name="q" value="{{ request.GET.q }}"
+                    placeholder="{% trans 'Buscar ciudad o país...' %}"
+                    class="w-full bg-gray-900/50 border border-white/10 rounded-xl px-4 py-2 text-white focus:ring-2 focus:ring-blue-500 transition-all pl-10">
+                <svg class="w-5 h-5 absolute left-3 top-2.5 text-gray-500" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+            </form>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-white/5">
+                        <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest">{% trans
+                            "Ciudad" %}</th>
+                        <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest">{% trans "Código
+                            IATA" %}</th>
+                        <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest">{% trans "País"
+                            %}</th>
+                        <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest">{% trans "Región
+                            / Estado" %}</th>
+                        <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest text-right">{%
+                            trans "Acciones" %}</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-white/5">
+                    {% for ciudad in ciudades %}
+                    <tr class="hover:bg-white/5 transition-colors group">
+                        <td class="px-6 py-4">
+                            <span class="text-white font-medium">{{ ciudad.nombre }}</span>
+                        </td>
+                        <td class="px-6 py-4">
+                            <span
+                                class="px-2 py-1 bg-indigo-500/20 text-indigo-400 rounded text-xs font-mono font-bold">{{
+                                ciudad.codigo_iata }}</span>
+                        </td>
+                        <td class="px-6 py-4 flex items-center gap-3">
+                            <div
+                                class="w-8 h-6 bg-gray-800 rounded flex items-center justify-center text-[10px] text-gray-500 font-bold border border-white/10">
+                                {{ ciudad.pais.codigo_iso }}
+                            </div>
+                            <span class="text-gray-300">{{ ciudad.pais.nombre }}</span>
+                        </td>
+                        <td class="px-6 py-4 text-gray-500 italic text-sm">
+                            {{ ciudad.region_estado|default:"-" }}
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <a href="/admin/core/ciudad/{{ ciudad.pk }}/change/"
+                                class="text-blue-400 hover:text-blue-300 transition-colors">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z">
+                                    </path>
+                                </svg>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="px-6 py-12 text-center text-gray-500">
+                            <svg class="w-12 h-12 mx-auto mb-4 opacity-20" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z">
+                                </path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                            <p>{% trans "No se encontraron resultados." %}</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if is_paginated %}
+        <div class="p-6 border-top border-white/5 flex items-center justify-between">
+            <span class="text-sm text-gray-500">
+                {% trans "Página" %} {{ page_obj.number }} {% trans "de" %} {{ page_obj.paginator.num_pages }}
+            </span>
+            <div class="flex gap-2">
+                {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}"
+                    class="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white hover:bg-white/10 transition-all flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7">
+                        </path>
+                    </svg>
+                    {% trans "Anterior" %}
+                </a>
+                {% endif %}
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}"
+                    class="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white hover:bg-white/10 transition-all flex items-center gap-2">
+                    {% trans "Siguiente" %}
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

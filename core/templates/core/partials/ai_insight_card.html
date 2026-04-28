@@ -1,0 +1,34 @@
+<div class="animate-fade-in-up h-full flex flex-col">
+    <!-- Saludo Energético -->
+    <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3">{{ insight.saludo }}</p>
+    
+    <!-- Diagnóstico Flash -->
+    <div class="bg-blue-50 dark:bg-blue-900/10 border-l-4 border-blue-500 p-4 rounded-r-2xl mb-6 shadow-sm">
+        <p class="text-xs font-black text-blue-800 dark:text-blue-300 flex items-center gap-2">
+            <span class="material-symbols-outlined text-[16px]">analytics</span>
+            {{ insight.diagnostico }}
+        </p>
+    </div>
+
+    <!-- Consejo Estratégico -->
+    <div class="flex-1">
+        <p class="text-xs font-bold text-text-muted uppercase tracking-widest mb-2 flex items-center gap-1 opacity-50">
+            Sugerencia Ejecutiva:
+        </p>
+        <p class="text-sm text-text-main leading-relaxed mb-6 font-medium">
+            {{ insight.consejo_estrategico }}
+        </p>
+    </div>
+
+    <!-- Acción Recomendada (CTA) -->
+    <div class="bg-surface-2 dark:bg-slate-800/50 border border-border-color rounded-2xl p-5 mt-auto relative overflow-hidden group/cta">
+        <div class="absolute -right-2 -bottom-2 w-16 h-16 bg-emerald-500/5 rounded-full group-hover/cta:scale-150 transition-transform duration-500"></div>
+        
+        <p class="text-[9px] uppercase font-black tracking-[0.3em] text-emerald-500 mb-2 flex items-center gap-1.5 leading-none">
+            <span class="material-symbols-outlined text-[14px]">bolt</span> Prioridad Crítica
+        </p>
+        <p class="text-xs font-black text-text-main group-hover/cta:translate-x-1 transition-transform duration-300">
+            {{ insight.accion_recomendada }}
+        </p>
+    </div>
+</div>

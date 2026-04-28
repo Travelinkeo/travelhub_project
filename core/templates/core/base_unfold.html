@@ -1,0 +1,9 @@
+{% extends "unfold/layouts/base.html" %}
+
+{% block content %}
+    <div class="container mx-auto">
+        {% block dashboard_content %}
+            {{ block.super }}
+        {% endblock %}
+    </div>
+{% endblock %}

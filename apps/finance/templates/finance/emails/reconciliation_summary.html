@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f4f7f6; margin: 0; padding: 0; color: #333; }
+        .container { max-width: 600px; margin: 20px auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .header { background-color: {{ color_primario }}; padding: 30px; text-align: center; color: #ffffff; }
+        .header h1 { margin: 0; font-size: 24px; font-weight: 900; letter-spacing: -0.5px; }
+        .content { padding: 40px; line-height: 1.6; }
+        .kpi-row { display: table; width: 100%; border-spacing: 10px; margin: 25px 0; }
+        .kpi-box { display: table-cell; background-color: #f8fafc; padding: 15px; border-radius: 6px; text-align: center; border: 1px solid #e2e8f0; }
+        .kpi-box strong { display: block; font-size: 20px; color: {{ color_primario }}; }
+        .kpi-box span { font-size: 10px; color: #64748b; text-transform: uppercase; font-weight: bold; }
+        .btn { display: inline-block; padding: 12px 25px; background-color: {{ color_primario }}; color: #ffffff; text-decoration: none; border-radius: 5px; font-weight: bold; margin-top: 20px; }
+        .footer { background-color: #f8fafc; padding: 20px; text-align: center; font-size: 11px; color: #94a3b8; border-top: 1px solid #eee; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>TravelHub Intelligence</h1>
+            <p style="margin: 5px 0 0 0; opacity: 0.9;">Conciliación Contable Finalizada</p>
+        </div>
+        
+        <div class="content">
+            <p>Estimado equipo de gerencia de <strong>{{ agencia_nombre }}</strong>,</p>
+            
+            <p>Nos complace informarles que el proceso de conciliación de boletos GDS ha concluido exitosamente bajo la supervisión de nuestra inteligencia artificial financiera.</p>
+            
+            <p>Aquí tienen el resumen ejecutivo de la operación:</p>
+
+            <div class="kpi-row">
+                <div class="kpi-box">
+                    <strong>{{ kpis.total }}</strong>
+                    <span>Analizados</span>
+                </div>
+                <div class="kpi-box">
+                    <strong>{{ kpis.matches }}</strong>
+                    <span>Cuadrados</span>
+                </div>
+                <div class="kpi-box">
+                    <strong style="color: #e11d48;">{{ kpis.discrepancias }}</strong>
+                    <span>Hallazgos</span>
+                </div>
+            </div>
+
+            <p>Se ha generado el <strong>Reporte de Gestión Oficial (PDF)</strong> con el desglose de los asientos contables de ajuste, el cual encontrarán adjunto a este correo.</p>
+
+            <div style="text-align: center;">
+                <a href="#" class="btn">Acceder al Dashboard de Auditoría</a>
+            </div>
+
+            <p style="margin-top: 30px; font-size: 12px; font-style: italic; color: #64748b;">
+                "La automatización financiera no es solo eficiencia, es la tranquilidad de saber que cada centavo está en su lugar."
+            </p>
+        </div>
+
+        <div class="footer">
+            Este es un correo automático generado por TravelHub SaaS.<br>
+            &copy; 2026 TravelHub Pro | Inteligencia Financiera Avanzada.
+        </div>
+    </div>
+</body>
+</html>

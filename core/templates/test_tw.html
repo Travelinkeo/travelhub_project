@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'surface-base': 'var(--surface-base)',
+                        'border-color': 'var(--border-color)',
+                        'text-main': 'var(--text-main)',
+                        'text-muted': 'var(--text-muted)'
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer components {
+            .nav-active {
+                @apply bg-[var(--nav-active-bg)] text-blue-500 border border-[var(--nav-active-border)];
+            }
+        }
+    </style>
+</head>
+<body class="bg-surface-base text-text-main">
+    <div class="nav-active">Test</div>
+</body>
+</html>

@@ -1,0 +1,569 @@
+{% extends 'base_modern.html' %}
+{% load humanize %}
+
+{% block title %}Venta #{{ venta.id_venta }} - TravelHub{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+        <div>
+            <div class="flex items-center gap-3 mb-1">
+                <a href="{% url 'core:ventas_dashboard' %}" class="text-gray-400 hover:text-white transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                    </svg>
+                </a>
+                <h1 class="text-2xl font-bold text-white">Venta #{{ venta.id_venta }}</h1>
+                <span class="px-3 py-1 text-xs font-medium rounded-full 
+                    {% if venta.estado == 'PAG' %}bg-emerald-500/10 text-emerald-400 border border-emerald-500/20
+                    {% elif venta.estado == 'PEN' %}bg-yellow-500/10 text-yellow-400 border border-yellow-500/20
+                    {% elif venta.estado == 'ANU' %}bg-red-500/10 text-red-400 border border-red-500/20
+                    {% else %}bg-gray-500/10 text-gray-400 border border-gray-500/20{% endif %}">
+                    {{ venta.get_estado_display }}
+                </span>
+            </div>
+            <p class="text-sm text-gray-400 ml-10">Fecha de Venta: {{ venta.fecha_venta|date:"d M Y H:i" }}</p>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex gap-3">
+            <a href="#" class="btn-secondary-icon flex items-center gap-2 opacity-50 cursor-not-allowed"
+                title="Edición no disponible">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z">
+                    </path>
+                </svg>
+                Editar Venta
+            </a>
+            <button class="btn-danger-icon flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                    </path>
+                </svg>
+                Anular Venta
+            </button>
+            {% if venta.factura %}
+            <a href="{% url 'core:factura_detalle' venta.factura.pk %}"
+                class="px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg font-medium transition-colors flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                    </path>
+                </svg>
+                Ver Factura
+            </a>
+            {% else %}
+            <div class="flex gap-2">
+                <form action="{% url 'core:venta_facturar' venta.pk %}" method="post" class="inline">
+                    {% csrf_token %}
+                    <button type="submit"
+                        class="px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg font-medium transition-colors flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                            </path>
+                        </svg>
+                        Facturar Simple
+                    </button>
+                </form>
+                <button onclick="generarFacturacionDoble()"
+                    class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z">
+                        </path>
+                    </svg>
+                    Doble Facturación
+                </button>
+            </div>
+            {% endif %}
+
+            <a href="{% url 'core:generar_voucher' venta.pk %}" target="_blank"
+                class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                    </path>
+                </svg>
+                Voucher Unificado
+            </a>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Main Content (Left Column) -->
+        <div class="lg:col-span-2 space-y-8">
+
+            <!-- Client Info -->
+            <div class="glass-panel p-6 rounded-2xl">
+                <h3 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                    </svg>
+                    Información del Cliente
+                </h3>
+                {% if venta.cliente %}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <p class="text-sm text-gray-400 mb-1">Nombre Completo</p>
+                        <p class="text-white font-medium">{{ venta.cliente.nombres }} {{ venta.cliente.apellidos }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-400 mb-1">Documento</p>
+                        <p class="text-white font-medium">{{ venta.cliente.numero_pasaporte|default:"--" }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-400 mb-1">Email</p>
+                        <p class="text-white font-medium">{{ venta.cliente.email }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-400 mb-1">Teléfono</p>
+                        <p class="text-white font-medium">{{ venta.cliente.telefono|default:"--" }}</p>
+                    </div>
+                </div>
+                {% else %}
+                <p class="text-gray-500 italic">Sin cliente asignado</p>
+                {% endif %}
+            </div>
+
+            <!-- Items / Services -->
+            <div class="glass-panel p-6 rounded-2xl">
+                <h3 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10">
+                        </path>
+                    </svg>
+                    Servicios / Items
+                </h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr
+                                class="border-b border-gray-700 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                                <th class="pb-3">Descripción</th>
+                                <th class="pb-3 text-center">Cant.</th>
+                                <th class="pb-3 text-right">Precio Unit.</th>
+                                <th class="pb-3 text-right">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-700">
+                            {% for item in items %}
+                            <tr class="text-sm">
+                                <td class="py-3">
+                                    <p class="text-white font-medium">{{ item.producto_servicio.nombre }}</p>
+                                    {% if item.descripcion_personalizada %}
+                                    <p class="text-xs text-gray-500">{{ item.descripcion_personalizada }}</p>
+                                    {% endif %}
+                                </td>
+                                <td class="py-3 text-center text-gray-300">{{ item.cantidad }}</td>
+                                <td class="py-3 text-right text-gray-300">
+                                    $ {{ item.precio_unitario_venta|floatformat:2 }}
+                                </td>
+                                <td class="py-3 text-right text-white font-medium">
+                                    $ {{ item.total_item_venta|floatformat:2 }}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="py-4 text-center text-gray-500 italic">No hay items registrados
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Boletos -->
+            {% if boletos %}
+            <div class="glass-panel p-6 rounded-2xl">
+                <h3 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z">
+                        </path>
+                    </svg>
+                    Boletos Aéreos
+                </h3>
+                <div class="space-y-4">
+                    {% for boleto in boletos %}
+                    <div class="bg-white/5 rounded-lg p-4 border border-gray-700">
+                        <div class="flex justify-between items-start mb-2">
+                            <div>
+                                <p class="text-white font-medium">{{ boleto.numero_boleto }}</p>
+                                <p class="text-sm text-gray-400">{{ boleto.pasajero_nombre_completo }}</p>
+                            </div>
+                            <span class="text-xs font-mono bg-gray-700 text-gray-300 px-2 py-1 rounded">
+                                {{ boleto.localizador_pnr|default:"Sin PNR" }}
+                            </span>
+                        </div>
+                        <div class="text-sm text-gray-500">
+                            <p>{{ boleto.aerolinea }} - {{ boleto.ruta }}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Sidebar (Right Column) -->
+        <div class="space-y-8">
+            <!-- Service Fees & Markup (Internal Check) -->
+            <div class="glass-panel p-6 rounded-2xl border border-purple-500/20">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold text-white flex items-center gap-2">
+                        <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                            </path>
+                        </svg>
+                        Service Fees & Markup
+                    </h3>
+                    <span class="text-xs font-mono bg-purple-900/50 text-purple-300 px-2 py-1 rounded">Interno</span>
+                </div>
+
+                {% if venta.fees_venta.exists %}
+                <div class="space-y-3 mb-4">
+                    {% for fee in venta.fees_venta.all %}
+                    <div
+                        class="flex justify-between items-center text-sm p-2 rounded bg-purple-500/5 border border-purple-500/10">
+                        <div>
+                            <p class="text-gray-300">{{ fee.descripcion }}</p>
+                            <p class="text-xs text-gray-500">{{ fee.get_tipo_fee_display }}</p>
+                        </div>
+                        <span class="text-purple-300 font-medium">+ $ {{ fee.monto|floatformat:2 }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-sm text-gray-500 italic mb-4">No hay fees registrados.</p>
+                {% endif %}
+
+                <a href="{% url 'core:venta_add_fee' venta.pk %}"
+                    class="w-full px-4 py-2 bg-purple-600/10 hover:bg-purple-600/20 text-purple-400 border border-purple-500/20 rounded-lg transition-colors text-sm font-medium flex items-center justify-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                    Agregar Fee Manual
+                </a>
+            </div>
+
+            <!-- Financial Summary -->
+            <div class="glass-panel p-6 rounded-2xl">
+                <h3 class="text-lg font-semibold text-white mb-6">Resumen Financiero</h3>
+
+                <div class="space-y-3 mb-6">
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-400">Subtotal</span>
+                        <span class="text-white">$ {{ venta.subtotal|floatformat:2|intcomma }}</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-400">Impuestos</span>
+                        <span class="text-white">$ {{ venta.impuestos|floatformat:2|intcomma }}</span>
+                    </div>
+                    <div class="h-px bg-gray-700 my-2"></div>
+                    <div class="flex justify-between text-lg font-bold">
+                        <span class="text-white">Total</span>
+                        <span class="text-primary">$ {{ venta.total_venta|floatformat:2|intcomma }}</span>
+                    </div>
+                </div>
+
+                <div class="bg-gray-800/50 rounded-xl p-4 space-y-3">
+                    <div class="flex justify-between text-sm">
+                        <span class="text-emerald-400">Pagado</span>
+                        <span class="text-emerald-400 font-medium">$ {{ venta.monto_pagado|floatformat:2 }}</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-red-400">Pendiente</span>
+                        <span class="text-red-400 font-medium">$ {{ venta.saldo_pendiente|floatformat:2 }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payments -->
+            <div class="glass-panel p-6 rounded-2xl">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold text-white">Pagos</h3>
+                </div>
+
+                {% if pagos %}
+                <div class="space-y-3">
+                    {% for pago in pagos %}
+                    <div class="flex justify-between items-center p-3 bg-white/5 rounded-lg border border-gray-700">
+                        <div>
+                            <p class="text-white font-medium">$ {{ pago.monto|floatformat:2|intcomma }}</p>
+                            <p class="text-xs text-gray-500">{{ pago.fecha_pago|date:"d M Y" }}</p>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-xs px-2 py-1 rounded-full bg-gray-700 text-gray-300">{{
+                                pago.get_metodo_display }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-sm text-gray-500 text-center italic py-4">No hay pagos registrados</p>
+                {% endif %}
+
+                <button
+                    class="w-full mt-6 px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 rounded-lg transition-colors text-sm font-medium flex items-center justify-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                    Registrar Pago
+                </button>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Modal Registrar Pago -->
+<div id="paymentModal" class="fixed inset-0 z-50 hidden" role="dialog" aria-modal="true">
+    <div class="fixed inset-0 bg-black/80 backdrop-blur-sm" onclick="closePaymentModal()"></div>
+    <div class="fixed inset-0 flex items-center justify-center p-4">
+        <div class="bg-gray-900 border border-gray-700 rounded-2xl shadow-xl w-full max-w-md transform transition-all">
+            <div class="p-6">
+                <!-- Header -->
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-bold text-white">Registrar Pago</h3>
+                    <button onclick="closePaymentModal()" class="text-gray-400 hover:text-white">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Form -->
+                <form id="paymentForm" onsubmit="submitPayment(event)" class="space-y-4">
+                    <!-- Monto -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-400 mb-1">Monto a Pagar</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+                            <input type="number" id="pagoMonto" step="0.01" required
+                                class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg pl-8 pr-4 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                                placeholder="0.00" oninput="calculateIGTF()">
+                        </div>
+                    </div>
+
+                    <!-- Moneda & Metodo -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-400 mb-1">Moneda</label>
+                            <select id="pagoMoneda" required onchange="checkIGTFVisibility()"
+                                class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500">
+                                {% for moneda in PROVEN_CURRENCIES|default:'' %}
+                                <!-- Fallback hardcoded for now until context validated -->
+                                <option value="USD">USD</option>
+                                <option value="EUR">EUR</option>
+                                <option value="VES">VES</option>
+                                {% empty %}
+                                <option value="USD">USD</option>
+                                <option value="EUR">EUR</option>
+                                <option value="VES">VES</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-400 mb-1">Método</label>
+                            <select id="pagoMetodo" required
+                                class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500">
+                                <option value="TRF">Transferencia</option>
+                                <option value="EFE">Efectivo</option>
+                                <option value="ZEL">Zelle</option>
+                                <option value="TAR">Tarjeta</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- IGTF Toggle -->
+                    <div id="igtfContainer" class="hidden bg-gray-800/50 p-3 rounded-lg border border-gray-700">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <input type="checkbox" id="aplicaIGTF" onchange="calculateIGTF()"
+                                    class="w-4 h-4 text-emerald-500 bg-gray-700 border-gray-600 rounded focus:ring-emerald-500 focus:ring-offset-gray-800">
+                                <label for="aplicaIGTF" class="ml-2 text-sm font-medium text-gray-300">Aplicar IGTF
+                                    (3%)</label>
+                            </div>
+                            <span id="igtfAmountDisplay" class="text-sm font-bold text-emerald-400">$ 0.00</span>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">Impuesto a Grandes Transacciones Financieras</p>
+                    </div>
+
+                    <!-- Referencia -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-400 mb-1">Referencia / Notas</label>
+                        <input type="text" id="pagoReferencia"
+                            class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-4 py-2 focus:ring-2 focus:ring-emerald-500"
+                            placeholder="Ej: Ref 123456">
+                    </div>
+
+                    <!-- Total Summary -->
+                    <div class="pt-4 border-t border-gray-700 flex justify-between items-end">
+                        <span class="text-sm text-gray-400">Total a Recibir</span>
+                        <span id="pagoTotalDisplay" class="text-2xl font-bold text-white">$ 0.00</span>
+                    </div>
+
+                    <div class="flex gap-3 pt-2">
+                        <button type="button" onclick="closePaymentModal()"
+                            class="flex-1 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors">
+                            Cancelar
+                        </button>
+                        <button type="submit"
+                            class="flex-1 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-bold transition-colors">
+                            Confirmar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Config & State
+    const VENTA_ID = "{{ venta.pk }}";
+
+    // UI Functions
+    function openPaymentModal() {
+        document.getElementById('paymentModal').classList.remove('hidden');
+        document.getElementById('pagoMonto').focus();
+        checkIGTFVisibility();
+    }
+
+    function closePaymentModal() {
+        document.getElementById('paymentModal').classList.add('hidden');
+        document.getElementById('paymentForm').reset();
+        calculateIGTF();
+    }
+
+    function checkIGTFVisibility() {
+        const moneda = document.getElementById('pagoMoneda').value;
+        const container = document.getElementById('igtfContainer');
+
+        // Show IGTF option only for USD/EUR (assumed foreign)
+        if (['USD', 'EUR'].includes(moneda)) {
+            container.classList.remove('hidden');
+        } else {
+            container.classList.add('hidden');
+            document.getElementById('aplicaIGTF').checked = false;
+        }
+        calculateIGTF();
+    }
+
+    function calculateIGTF() {
+        const monto = parseFloat(document.getElementById('pagoMonto').value) || 0;
+        const aplica = document.getElementById('aplicaIGTF').checked;
+
+        let igtf = 0;
+        if (aplica) {
+            igtf = monto * 0.03;
+        }
+
+        const total = monto + igtf;
+
+        document.getElementById('igtfAmountDisplay').textContent = '$ ' + igtf.toFixed(2);
+        document.getElementById('pagoTotalDisplay').textContent = '$ ' + total.toFixed(2);
+    }
+
+    async function submitPayment(e) {
+        e.preventDefault();
+
+        const monedaCode = document.getElementById('pagoMoneda').value;
+        let monedaId = null;
+
+        try {
+            // Quick lookup (assuming standard API pattern)
+            const r = await fetch(`/api/monedas/?search=${monedaCode}`);
+            const data = await r.json();
+            if (data.results && data.results.length > 0) {
+                monedaId = data.results[0].id_moneda;
+            }
+        } catch (err) {
+            console.error("Error fetching currency", err);
+        }
+
+        if (!monedaId) {
+            alert("Error identificando moneda. Contacte soporte.");
+            return;
+        }
+
+        const payload = {
+            venta: VENTA_ID,
+            monto: document.getElementById('pagoMonto').value,
+            moneda: monedaId,
+            metodo: document.getElementById('pagoMetodo').value,
+            referencia: document.getElementById('pagoReferencia').value,
+            aplica_igtf: document.getElementById('aplicaIGTF').checked
+        };
+
+        try {
+            const response = await fetch('/api/pagos-venta/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}' // Standard Django CSRF
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                const error = await response.json();
+                alert('Error al registrar pago: ' + JSON.stringify(error));
+            }
+        } catch (err) {
+            alert('Error de conexión');
+        }
+    }
+
+    // Attach to the trigger button
+    document.addEventListener('DOMContentLoaded', () => {
+        // Find the "Registrar Pago" button (it didn't have ID, so we use selector text or add ID in previous step)
+        // I will rely on adding onclick="openPaymentModal()" to the button in a separate replace/step or finding it here.
+        // Selector strategy: find button containing "Registrar Pago"
+        const buttons = document.getElementsByTagName('button');
+        for (let btn of buttons) {
+            if (btn.textContent.includes('Registrar Pago')) {
+                btn.onclick = openPaymentModal;
+            }
+        }
+    });
+
+    async function generarFacturacionDoble() {
+        if (!confirm('Se generarán dos facturas (Intermediación + Agencia). ¿Deseas continuar?')) return;
+
+        try {
+            const response = await fetch(`/api/ventas/${VENTA_ID}/double-invoice/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            });
+
+            if (response.ok) {
+                alert('Facturación doble generada correctamente.');
+                window.location.reload();
+            } else {
+                const err = await response.json();
+                alert('Error: ' + (err.error || JSON.stringify(err)));
+            }
+        } catch (e) {
+            alert('Error de conexión');
+        }
+    }
+</script>
+{% endblock %}

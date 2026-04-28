@@ -1,0 +1,327 @@
+{% extends "base_modern.html" %}
+{% load static humanize %}
+
+{% block title %}Gestión de Boletos Individuales — TravelHub Pro{% endblock %}
+
+{% block page_title %}Administración de Boletos{% endblock %}
+{% block page_subtitle %}Monitoreo de emisiones, márgenes y auditoría de items individuales.{% endblock %}
+
+{% block content %}
+<main class="flex-1 w-full max-w-[1400px] mx-auto p-6 md:p-8">
+
+    <!-- Header & Action Bar -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10 pb-6 border-b border-emerald-500/10">
+        <div>
+            <h1 class="text-3xl font-black text-white tracking-tight uppercase flex items-center gap-3">
+                <span class="bg-gradient-to-r from-emerald-400 to-emerald-600 bg-clip-text text-transparent">Gestión de Boletos</span>
+            </h1>
+            <p class="text-emerald-500/60 text-sm mt-1 font-medium tracking-wide">Visión granular de ventas y rentabilidad por emisión.</p>
+        </div>
+        <div class="flex gap-3">
+            <a href="{% url 'core:boletos_importar' %}" class="relative group px-6 py-3 bg-obsidian-800 hover:bg-emerald-600 text-white rounded-xl font-bold transition-all border border-emerald-500/20 shadow-lg shadow-emerald-500/5 overflow-hidden flex items-center gap-2">
+                <span class="material-symbols-outlined text-[20px]">upload_file</span>
+                <span>Importar Boletos</span>
+            </a>
+            <a href="{% url 'finance:reconciliacion_dashboard' %}" class="relative group px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold transition-all shadow-lg shadow-emerald-500/20 overflow-hidden flex items-center gap-2">
+                <div class="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <span class="material-symbols-outlined text-[20px]">calculate</span>
+                <span>Cruce Masivo</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Metrics Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+        <!-- Total Ventas -->
+        <div class="relative p-6 rounded-2xl bg-[#0a0a0a] border border-emerald-500/10 hover:border-emerald-500/30 transition-all group overflow-hidden">
+            <div class="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 rounded-full -mr-12 -mt-12 blur-2xl"></div>
+            <div class="flex justify-between items-start mb-4 relative z-10">
+                <div>
+                    <p class="text-[10px] font-black text-emerald-500/60 uppercase tracking-[0.2em] mb-1">Ventas de Boletos</p>
+                    <p class="text-3xl font-black text-white tabular-nums">{{ stats.total_ventas|default:0 }}</p>
+                </div>
+                <div class="size-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 border border-emerald-500/20">
+                    <span class="material-symbols-outlined text-[20px]">local_activity</span>
+                </div>
+            </div>
+            <p class="text-[9px] text-emerald-500/40 font-black uppercase tracking-widest mt-2 relative z-10">Pnrs registrados</p>
+        </div>
+
+        <!-- Total Boletos -->
+        <div class="relative p-6 rounded-2xl bg-[#0a0a0a] border border-blue-500/10 hover:border-blue-500/30 transition-all group overflow-hidden">
+            <div class="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 rounded-full -mr-12 -mt-12 blur-2xl"></div>
+            <div class="flex justify-between items-start mb-4 relative z-10">
+                <div>
+                    <p class="text-[10px] font-black text-blue-500/60 uppercase tracking-[0.2em] mb-1">Emisiones Totales</p>
+                    <p class="text-3xl font-black text-white tabular-nums">{{ stats.total_boletos|default:0 }}</p>
+                </div>
+                <div class="size-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400 border border-blue-500/20">
+                    <span class="material-symbols-outlined text-[20px]">confirmation_number</span>
+                </div>
+            </div>
+            <p class="text-[9px] text-blue-500/40 font-black uppercase tracking-widest mt-2 relative z-10">Tickets únicos procesados</p>
+        </div>
+
+        <!-- Ingresos -->
+        <div class="relative p-6 rounded-2xl bg-[#0a0a0a] border border-emerald-400/10 hover:border-emerald-400/30 transition-all group overflow-hidden shadow-2xl">
+            <div class="absolute bottom-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-emerald-400/50 to-transparent"></div>
+            <div class="flex justify-between items-start mb-4 relative z-10">
+                <div>
+                    <p class="text-[10px] font-black text-emerald-400/60 uppercase tracking-[0.2em] mb-1">Volumen Venta</p>
+                    <p class="text-3xl font-black text-emerald-400 tabular-nums">${{ stats.total_ingresos|default:"0.00"|intcomma }}</p>
+                </div>
+                <div class="size-10 rounded-xl bg-emerald-400/10 flex items-center justify-center text-emerald-400 border border-emerald-400/20">
+                    <span class="material-symbols-outlined text-[20px]">payments</span>
+                </div>
+            </div>
+            <p class="text-[9px] text-emerald-400/40 font-black uppercase tracking-widest mt-2 relative z-10">Ingresos brutos</p>
+        </div>
+
+        <!-- Margen -->
+        <div class="relative p-6 rounded-2xl bg-emerald-500/[0.03] border border-emerald-500/20 hover:border-emerald-500/40 transition-all group overflow-hidden shadow-2xl shadow-emerald-500/5">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full -mr-16 -mt-16 blur-3xl group-hover:bg-emerald-500/20 transition-all"></div>
+            <div class="flex justify-between items-start mb-4 relative z-10">
+                <div>
+                    <p class="text-[10px] font-black text-emerald-500/80 uppercase tracking-[0.2em] mb-1">Margen Operativo</p>
+                    <p class="text-3xl font-black text-white tabular-nums">${{ stats.total_margen|default:"0.00"|intcomma }}</p>
+                </div>
+                <div class="size-10 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-400 border border-emerald-500/30 shadow-inner animate-pulse">
+                    <span class="material-symbols-outlined text-[20px]">trending_up</span>
+                </div>
+            </div>
+            <p class="text-[9px] text-emerald-500/60 font-black uppercase tracking-widest mt-2 relative z-10">Beneficio neto aproximado</p>
+        </div>
+    </div>
+
+    <!-- Filters Bar -->
+    <div class="mb-8 p-6 rounded-2xl bg-[#0a0a0a] border border-emerald-500/10 shadow-xl">
+        <form method="get" class="flex flex-wrap items-end gap-4">
+            <div class="flex-1 min-w-[200px]">
+                <label class="block text-[10px] font-black text-emerald-500/60 uppercase tracking-widest mb-2 px-1">Localizador (PNR)</label>
+                <div class="relative group">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-emerald-500/40 group-focus-within:text-emerald-500 transition-colors text-[18px]">search</span>
+                    <input type="text" name="localizador" placeholder="Buscar PNR..." value="{{ filtros.localizador }}"
+                           class="w-full pl-10 pr-4 py-2.5 bg-black border border-emerald-500/10 rounded-xl text-sm text-white focus:border-emerald-500/40 focus:ring-0 transition-all font-medium placeholder:text-white/20">
+                </div>
+            </div>
+            <div class="w-full md:w-auto">
+                <label class="block text-[10px] font-black text-emerald-500/60 uppercase tracking-widest mb-2 px-1">Desde</label>
+                <input type="date" name="fecha_desde" value="{{ filtros.fecha_desde }}"
+                       class="w-full px-4 py-2.5 bg-black border border-emerald-500/10 rounded-xl text-sm text-white focus:border-emerald-500/40 focus:ring-0 transition-all font-medium">
+            </div>
+            <div class="w-full md:w-auto">
+                <label class="block text-[10px] font-black text-emerald-500/60 uppercase tracking-widest mb-2 px-1">Hasta</label>
+                <input type="date" name="fecha_hasta" value="{{ filtros.fecha_hasta }}"
+                       class="w-full px-4 py-2.5 bg-black border border-emerald-500/10 rounded-xl text-sm text-white focus:border-emerald-500/40 focus:ring-0 transition-all font-medium">
+            </div>
+            <div class="flex gap-2">
+                <button type="submit" class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold transition-all shadow-lg shadow-emerald-500/10 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[18px]">filter_list</span>
+                    <span>Filtrar</span>
+                </button>
+                <a href="{% url 'core:dashboard_boletos' %}" class="px-6 py-2.5 bg-obsidian-800 hover:bg-obsidian-700 text-white/60 hover:text-white rounded-xl font-bold transition-all border border-emerald-500/5 flex items-center gap-2 text-sm uppercase tracking-widest">
+                    Limpiar
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Data Table -->
+    <div class="rounded-2xl bg-black border border-emerald-500/10 shadow-2xl overflow-hidden mb-10">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-emerald-500/5 border-b border-white/5 text-emerald-500/40 uppercase tracking-widest text-[10px]">
+                        <th class="px-6 py-4 font-black">Localizador / Fecha</th>
+                        <th class="px-6 py-4 font-black">Cliente / Pasajeros</th>
+                        <th class="px-6 py-4 font-black">Info Vuelo</th>
+                        <th class="px-6 py-4 font-black text-right">Inversión / Margen</th>
+                        <th class="px-6 py-4 font-black">Estatus</th>
+                        <th class="px-6 py-4 text-center">Items</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-white/5">
+                    {% for venta in ventas %}
+                    <tr class="group hover:bg-emerald-500/[0.02] transition-all">
+                        <td class="px-6 py-5">
+                            <div class="flex flex-col">
+                                <span class="text-sm font-black text-white group-hover:text-emerald-400 transition-colors uppercase tracking-tight">{{ venta.localizador }}</span>
+                                <span class="text-[10px] text-emerald-500/40 font-bold uppercase tracking-widest mt-0.5">{{ venta.fecha|date:"d M, Y" }}</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-5">
+                            <div class="flex flex-col gap-1">
+                                <span class="text-xs font-bold text-white/80 uppercase tracking-tight">{{ venta.cliente|truncatechars:30 }}</span>
+                                <div class="flex flex-wrap gap-1 mt-1">
+                                    {% for pax in venta.pasajeros|slice:":2" %}
+                                    <span class="text-[9px] bg-emerald-500/10 text-emerald-400 px-1.5 py-0.5 rounded border border-emerald-500/10 font-black uppercase tracking-tighter">
+                                        {{ pax.apellidos|truncatechars:10 }}
+                                    </span>
+                                    {% endfor %}
+                                    {% if venta.pasajeros|length > 2 %}
+                                    <span class="text-[9px] text-white/20 font-black">+{{ venta.pasajeros|length|sub:2 }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-5">
+                            <div class="flex items-center gap-3">
+                                <div class="size-8 rounded-lg bg-surface-base border border-emerald-500/10 flex items-center justify-center text-emerald-500/40 group-hover:text-emerald-400 transition-all">
+                                    <span class="material-symbols-outlined text-[18px]">flight_takeoff</span>
+                                </div>
+                                <div class="flex flex-col">
+                                    <span class="text-[11px] font-black text-white/60 uppercase tracking-tight">{{ venta.aerolinea|default:"Múltiples" }}</span>
+                                    <span class="text-[9px] text-emerald-500/40 font-bold uppercase tracking-widest">{{ venta.proveedores|truncatechars:20 }}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-5 text-right">
+                            <div class="flex flex-col">
+                                <span class="text-sm font-black text-emerald-400 tabular-nums">${{ venta.total_venta|floatformat:2|intcomma }}</span>
+                                <span class="text-[10px] text-white/20 font-bold uppercase tracking-widest">MGN: <span class="text-emerald-500/60 font-black">${{ venta.margen|floatformat:2|intcomma }}</span></span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-5">
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border bg-emerald-500/10 text-emerald-500 border-emerald-500/20">
+                                <span class="size-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                {{ venta.estado }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-5">
+                            <div class="flex justify-center">
+                                <button onclick="toggleItems({{ venta.id_venta }})" 
+                                        class="size-9 flex items-center justify-center text-emerald-400/40 hover:text-emerald-400 hover:bg-emerald-500/10 rounded-xl border border-transparent hover:border-emerald-500/20 transition-all group/btn">
+                                    <span class="material-symbols-outlined text-[20px] group-hover/btn:rotate-180 transition-transform duration-500">expand_circle_down</span>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <!-- Expanded Items Row -->
+                    <tr id="items-{{ venta.id_venta }}" class="hidden">
+                        <td colspan="6" class="px-8 py-6 bg-emerald-500/[0.03] border-t border-emerald-500/10 shadow-inner">
+                            <div class="flex items-center gap-3 mb-6">
+                                <div class="size-7 rounded bg-emerald-500/20 flex items-center justify-center text-emerald-500">
+                                    <span class="material-symbols-outlined text-[16px]">edit_note</span>
+                                </div>
+                                <h4 class="text-[11px] font-black text-white uppercase tracking-[0.2em] opacity-80">Desglose Técnico & Auditoría</h4>
+                            </div>
+                            
+                            <div class="rounded-xl border border-emerald-500/10 bg-black overflow-hidden shadow-2xl">
+                                <table class="w-full text-xs border-collapse">
+                                    <thead>
+                                        <tr class="bg-white/5 border-b border-white/5 text-emerald-400/40 text-[9px] uppercase tracking-widest font-black">
+                                            <th class="px-6 py-3 text-left">Estructura del Servicio</th>
+                                            <th class="px-6 py-3 text-right">Venta (USD)</th>
+                                            <th class="px-6 py-3 text-right">Neto Prov.</th>
+                                            <th class="px-6 py-3 text-right">Comisión</th>
+                                            <th class="px-6 py-3 text-right">Fee Ag.</th>
+                                            <th class="px-6 py-3 text-right">Margen</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-white/5">
+                                        {% for item in venta.items %}
+                                        <tr class="hover:bg-white/[0.02] transition-colors">
+                                            <td class="px-6 py-4 font-medium text-white/70">{{ item.descripcion_personalizada }}</td>
+                                            <td class="px-6 py-4 text-right font-black text-white/80 tabular-nums">${{ item.precio_unitario_venta|floatformat:2 }}</td>
+                                            <td class="px-6 py-4 text-right">
+                                                <span onclick="editField({{ item.id_item_venta }}, 'costo_neto_proveedor', this)"
+                                                      class="cursor-pointer px-2 py-1 bg-amber-500/10 border border-amber-500/20 text-amber-500 rounded font-black tabular-nums hover:bg-amber-500/20 transition-all">
+                                                    {{ item.costo_neto_proveedor|default:"0.00"|floatformat:2 }}
+                                                </span>
+                                            </td>
+                                            <td class="px-6 py-4 text-right">
+                                                <span onclick="editField({{ item.id_item_venta }}, 'comision_agencia_monto', this)"
+                                                      class="cursor-pointer px-2 py-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 rounded font-black tabular-nums hover:bg-emerald-500/20 transition-all">
+                                                    {{ item.comision_agencia_monto|default:"0.00"|floatformat:2 }}
+                                                </span>
+                                            </td>
+                                            <td class="px-6 py-4 text-right">
+                                                <span onclick="editField({{ item.id_item_venta }}, 'fee_agencia_interno', this)"
+                                                      class="cursor-pointer px-2 py-1 bg-blue-500/10 border border-blue-500/20 text-blue-500 rounded font-black tabular-nums hover:bg-blue-500/20 transition-all">
+                                                    {{ item.fee_agencia_interno|default:"0.00"|floatformat:2 }}
+                                                </span>
+                                            </td>
+                                            <td class="px-6 py-4 text-right">
+                                                <span class="text-white font-black tabular-nums opacity-80">
+                                                    {% with item_margen=item.precio_unitario_venta|sub:item.costo_neto_proveedor|add:item.comision_agencia_monto|add:item.fee_agencia_interno %}
+                                                    ${{ item_margen|floatformat:2 }}
+                                                    {% endwith %}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="py-32 text-center">
+                            <div class="flex flex-col items-center gap-6">
+                                <div class="size-20 rounded-3xl bg-emerald-500/5 flex items-center justify-center text-emerald-500/20 border border-emerald-500/10">
+                                    <span class="material-symbols-outlined text-[48px]">confirmation_number</span>
+                                </div>
+                                <div class="space-y-1">
+                                    <h3 class="text-xl font-black text-white uppercase tracking-tight opacity-90">Sin emisiones</h3>
+                                    <p class="text-sm text-emerald-500/40 font-medium">No se han encontrado boletos con los criterios actuales.</p>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<script>
+function toggleItems(ventaId) {
+    const row = document.getElementById('items-' + ventaId);
+    row.classList.toggle('hidden');
+    // Si queremos el efecto de table-row de antes, pero en Tailwind 
+    if (!row.classList.contains('hidden')) {
+        row.style.display = 'table-row';
+    } else {
+        row.style.display = 'none';
+    }
+}
+
+function editField(itemId, campo, element) {
+    const valorActual = element.textContent.trim();
+    const nuevoValor = prompt('Ingrese nuevo valor para ' + campo + ' (Audit Engine):', valorActual);
+    
+    if (nuevoValor === null || nuevoValor === valorActual) return;
+    
+    // Feedback visual inmediato
+    element.classList.add('animate-pulse', 'opacity-50');
+    
+    fetch('{% url "core:actualizar_item_boleto" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: `item_id=${itemId}&campo=${campo}&valor=${nuevoValor}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            element.textContent = parseFloat(data.nuevo_valor).toFixed(2);
+            element.classList.remove('animate-pulse', 'opacity-50');
+            // Nota: Recargar opcional si queremos ver reflejados los totales agregados de la fila superior
+            location.reload(); 
+        } else {
+            alert('Error Auditoría: ' + data.error);
+            element.classList.remove('animate-pulse', 'opacity-50');
+        }
+    })
+    .catch(error => {
+        alert('Fallo de Red: ' + error);
+        element.classList.remove('animate-pulse', 'opacity-50');
+    });
+}
+</script>
+{% endblock %}

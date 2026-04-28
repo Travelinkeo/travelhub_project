@@ -1,0 +1,193 @@
+{% extends 'base_modern.html' %}
+{% load static %}
+
+{% block title %}{{ title|default:"Cliente" }} - TravelHub Pro{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-8 p-4 md:p-8">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
+        <div>
+            <div class="flex items-center gap-2 text-[10px] text-text-secondary font-black mb-2 uppercase tracking-widest">
+                <span>CRM</span>
+                <span class="material-symbols-outlined text-[10px]">chevron_right</span>
+                <span class="text-primary">Gestión de Clientes</span>
+            </div>
+            <h1 class="text-4xl font-bold text-text-main tracking-tight">{{ title|default:"Ficha de Cliente" }}</h1>
+            <p class="text-text-muted mt-2 text-lg">Completa la información detallada del cliente o empresa.</p>
+        </div>
+        <a href="{% url 'crm:cliente_list' %}"
+            class="btn-secondary !py-2 !px-4">
+            <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+            Listado
+        </a>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" class="space-y-8">
+        {% csrf_token %}
+
+        <!-- Main Info Card -->
+        <div class="card-base p-8 relative overflow-hidden group">
+            <div class="absolute -right-10 -top-10 size-40 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/10 transition-colors"></div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-10 relative z-10">
+                <!-- Profile Picture Upload -->
+                <div class="flex flex-col items-center space-y-4">
+                    <div class="relative group/avatar cursor-pointer">
+                        <div class="w-40 h-40 rounded-3xl bg-surface-2 border-2 border-dashed border-border-color flex items-center justify-center overflow-hidden transition-all group-hover/avatar:border-primary">
+                            {% if object.foto_perfil %}
+                            <img src="{{ object.foto_perfil.url }}" id="preview-image"
+                                class="w-full h-full object-cover">
+                            {% else %}
+                            <div class="flex flex-col items-center text-text-muted group-hover/avatar:text-primary transition-colors">
+                                <span class="material-symbols-outlined text-[48px]">account_circle</span>
+                                <span class="text-[10px] font-black uppercase tracking-tighter mt-2">Subir Foto</span>
+                            </div>
+                            <img id="preview-image" class="w-full h-full object-cover hidden">
+                            {% endif %}
+                        </div>
+                        <input type="file" name="foto_perfil" class="absolute inset-0 opacity-0 cursor-pointer"
+                            onchange="previewImage(this)">
+                    </div>
+                    <div class="flex items-center gap-2 text-text-muted">
+                        <span class="material-symbols-outlined text-[14px]">info</span>
+                        <p class="text-[10px] font-bold uppercase tracking-widest leading-none">JPEG/PNG Máx 2MB</p>
+                    </div>
+                </div>
+
+                <!-- Fields -->
+                <div class="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div class="sm:col-span-2 space-y-2">
+                        <label class="text-[10px] font-black text-text-secondary uppercase tracking-widest">Tipo de Perfil</label>
+                        {{ form.tipo_cliente }}
+                        {% if form.tipo_cliente.errors %}<p class="text-red-500 text-xs mt-1 font-bold">{{ form.tipo_cliente.errors.0 }}</p>{% endif %}
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black text-text-secondary uppercase tracking-widest">Nombres</label>
+                        <input type="text" name="nombres" value="{{ form.nombres.value|default:'' }}" class="input-base" placeholder="Ej: Juan">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black text-text-secondary uppercase tracking-widest">Apellidos</label>
+                        <input type="text" name="apellidos" value="{{ form.apellidos.value|default:'' }}" class="input-base" placeholder="Ej: Perez">
+                    </div>
+                    <div class="sm:col-span-2 space-y-2">
+                        <label class="text-[10px] font-black text-text-secondary uppercase tracking-widest">Razón Social / Empresa (Opcional)</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted material-symbols-outlined text-[18px] z-10">corporate_fare</span>
+                            <div class="relative">
+                                <input type="text" name="nombre_empresa" value="{{ form.nombre_empresa.value|default:'' }}" class="input-base !pl-10" placeholder="Nombre comercial de la empresa">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Secondary Info -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="card-base p-8 space-y-6">
+                <div class="flex items-center gap-3 border-b border-border-color pb-4">
+                    <div class="size-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
+                        <span class="material-symbols-outlined">badge</span>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-black text-text-main uppercase tracking-widest">Identidad y Contacto</h3>
+                        <p class="text-[11px] text-text-muted italic">Datos fiscales y comunicación</p>
+                    </div>
+                </div>
+                
+                <div class="space-y-6">
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black text-text-secondary uppercase tracking-widest">Cédula / RIF / ID Fiscal</label>
+                        <input type="text" name="cedula_identidad" value="{{ form.cedula_identidad.value|default:'' }}" class="input-base">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black text-text-secondary uppercase tracking-widest">Correo Electrónico</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted material-symbols-outlined text-[18px] z-10">mail</span>
+                            <input type="email" name="email" value="{{ form.email.value|default:'' }}" class="input-base !pl-10">
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black text-text-secondary uppercase tracking-widest">Teléfono Directo</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted material-symbols-outlined text-[18px] z-10">phone_iphone</span>
+                            <input type="text" name="telefono_principal" value="{{ form.telefono_principal.value|default:'' }}" class="input-base !pl-10">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-base p-8 space-y-6">
+                <div class="flex items-center gap-3 border-b border-border-color pb-4">
+                    <div class="size-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500 border border-blue-500/20">
+                        <span class="material-symbols-outlined">location_on</span>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-black text-text-main uppercase tracking-widest">Localización</h3>
+                        <p class="text-[11px] text-text-muted italic">Dirección de facturación o entrega</p>
+                    </div>
+                </div>
+                
+                <div class="space-y-6">
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black text-text-secondary uppercase tracking-widest">Ciudad</label>
+                        <input type="text" name="ciudad" value="{{ form.ciudad.value|default:'' }}" class="input-base">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black text-text-secondary uppercase tracking-widest">Dirección Completa</label>
+                        <textarea name="direccion" rows="4" class="input-base" placeholder="Calle, edificio, oficina...">{{ form.direccion.value|default:'' }}</textarea>
+                    </div>
+                    <div class="hidden">
+                        {{ form.nacionalidad }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex flex-col md:flex-row items-center justify-end gap-4 pt-4 border-t border-border-color">
+            <a href="{% url 'crm:cliente_list' %}"
+                class="btn-secondary !h-12 !px-10">
+                Descartar Cambios
+            </a>
+            <button type="submit"
+                class="btn-primary !h-12 !px-12 shadow-lg shadow-primary/20 flex items-center gap-2 group/save">
+                <span class="text-lg">Guardar Registro</span>
+                <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">send</span>
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    function previewImage(input) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                const preview = document.getElementById('preview-image');
+                preview.src = e.target.result;
+                preview.classList.remove('hidden');
+                // Buscamos el div contenedor del icono para ocultarlo
+                const parent = input.parentElement.querySelector('.flex-col');
+                if (parent) parent.classList.add('hidden');
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        // Estilo para selects de Django
+        const selects = document.querySelectorAll('select');
+        selects.forEach(s => {
+            s.classList.add('input-base');
+            // Hack para selects que ya tienen clases
+            if (!s.classList.contains('input-base')) {
+                s.className = "input-base";
+            }
+        });
+    });
+</script>
+{% endblock %}

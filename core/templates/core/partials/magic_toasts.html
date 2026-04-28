@@ -1,0 +1,74 @@
+{% for notif in notificaciones %}
+<div x-data="{ show: false }" 
+     x-init="setTimeout(() => show = true, 50); setTimeout(() => { show = false; setTimeout(() => $el.remove(), 600) }, 8000)"
+     x-show="show"
+     x-transition:enter="transition ease-out duration-700"
+     x-transition:enter-start="translate-x-full opacity-0 scale-90 blur-xl"
+     x-transition:enter-end="translate-x-0 opacity-100 scale-100 blur-0"
+     x-transition:leave="transition ease-in duration-500"
+     x-transition:leave-start="translate-x-0 opacity-100 scale-100"
+     x-transition:leave-end="translate-x-full opacity-0 scale-90 blur-xl"
+     class="group relative w-[380px] mb-4">
+    
+    <!-- Diseño Premium del Magic Toast -->
+    <div class="relative bg-slate-900/95 backdrop-blur-xl border border-white/10 p-5 rounded-2xl shadow-3xl shadow-slate-950 flex gap-4 min-h-[95px] overflow-hidden
+                {% if notif.tipo == 'ai_magic' %} ring-2 ring-brand/40 border-brand/50 bg-slate-900/98 {% endif %}">
+        
+        <!-- Glow Dinámico de Fondo -->
+        {% if notif.tipo == 'ai_magic' %}
+        <div class="absolute -top-10 -right-10 w-32 h-32 bg-brand/10 rounded-full blur-3xl opacity-50"></div>
+        <div class="absolute -bottom-10 -left-10 w-24 h-24 bg-brand-light/10 rounded-full blur-2xl opacity-40"></div>
+        {% endif %}
+
+        <!-- Icono Dinámico -->
+        <div class="flex-shrink-0 relative z-10">
+            {% if notif.tipo == 'ai_magic' %}
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-brand to-brand-light flex items-center justify-center text-white shadow-lg shadow-brand/20 animate-pulse">
+                    <span class="material-symbols-outlined text-2xl font-black">auto_awesome</span>
+                </div>
+            {% elif notif.tipo == 'success' %}
+                <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500">
+                    <span class="material-symbols-outlined text-2xl font-black">check_circle</span>
+                </div>
+            {% elif notif.tipo == 'warning' %}
+                <div class="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500">
+                    <span class="material-symbols-outlined text-2xl font-black">warning</span>
+                </div>
+            {% else %}
+                <div class="w-12 h-12 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-400">
+                    <span class="material-symbols-outlined text-2xl font-black">notifications</span>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Contenido Central -->
+        <div class="flex-grow pt-0.5 relative z-10">
+            <div class="flex items-center justify-between gap-2 mb-1">
+                <h4 class="text-[11px] font-black text-white/90 uppercase tracking-widest flex items-center gap-1.5">
+                    {{ notif.titulo }}
+                </h4>
+                {% if notif.ahorro_tiempo %}
+                    <span class="bg-brand/20 text-brand-light text-[9px] px-2.5 py-1 rounded-full border border-brand/30 font-black animate-bounce">
+                         SAVING: {{ notif.ahorro_tiempo }}
+                    </span>
+                {% endif %}
+            </div>
+            <p class="text-[13px] leading-tight text-slate-400 font-semibold group-hover:text-slate-200 transition-colors">
+                {{ notif.mensaje }}
+            </p>
+        </div>
+
+        <!-- Botón Cerrar (Discreto pero Premium) -->
+        <button @click="show = false; setTimeout(() => $el.closest('.group').remove(), 600)" 
+                class="flex-shrink-0 self-start text-white/10 hover:text-white/80 transition-all hover:scale-125 hover:rotate-90">
+            <span class="material-symbols-outlined text-sm font-black">close</span>
+        </button>
+
+        <!-- Barra de Tiempo (Life Progress) -->
+        <div class="absolute bottom-0 left-0 h-[3px] bg-white/10 w-full" x-init="setTimeout(() => $el.style.width = '0%', 100)"
+             style="transition: width 8000ms linear;"
+             :class="{'bg-brand/50': '{{ notif.tipo }}' == 'ai_magic', 'bg-emerald-500/50': '{{ notif.tipo }}' == 'success' }">
+        </div>
+    </div>
+</div>
+{% endfor %}

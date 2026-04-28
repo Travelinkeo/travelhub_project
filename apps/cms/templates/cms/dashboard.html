@@ -1,0 +1,129 @@
+{% extends "base_modern.html" %}
+{% load i18n static humanize %}
+
+{% block content %}
+<div class="px-6 py-8 max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-12">
+        <div>
+            <div class="flex items-center gap-2 text-[10px] font-black text-text-muted uppercase tracking-widest mb-3">
+                <span class="text-text-main">{% trans "Contenido" %}</span>
+                <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+                <span class="text-primary">Gemini AI</span>
+            </div>
+            <h1 class="text-3xl md:text-5xl font-black text-text-main tracking-tight flex items-center gap-4">
+                AI Content <span class="text-primary italic">Manager</span>
+            </h1>
+            <p class="mt-2 text-text-muted text-sm font-medium">{% trans "Crea artículos de blog y guías de viaje con un clic usando Gemini IA." %}</p>
+        </div>
+        <div class="flex gap-3">
+            <a href="{% url 'cms:guia_create' %}" class="h-12 px-6 bg-primary text-on-primary rounded-xl font-black text-xs uppercase tracking-widest flex items-center gap-3 hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 active:scale-95">
+                <span class="material-symbols-outlined text-[20px]">explore</span>
+                {% trans "Nueva Guía" %}
+            </a>
+            <a href="{% url 'cms:articulo_create' %}" class="h-12 px-6 bg-surface-base border border-border-color text-text-main rounded-xl font-black text-xs uppercase tracking-widest flex items-center gap-3 hover:border-primary transition-all shadow-sm active:scale-95">
+                <span class="material-symbols-outlined text-[20px]">add</span>
+                {% trans "Nuevo Artículo" %}
+            </a>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Sidebar: Generador -->
+        <div class="lg:col-span-1 space-y-6">
+            <div class="card-base p-8 sticky top-8">
+                <h3 class="text-xs font-black text-text-main uppercase tracking-widest mb-8 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">auto_awesome</span>
+                    {% trans "Generador Mágico IA" %}
+                </h3>
+
+                <form hx-post="{% url 'cms:generate_article' %}" hx-target="#articles-container" hx-swap="afterbegin"
+                    hx-indicator="#loading-spinner" class="space-y-4">
+                    {% csrf_token %}
+                    <div>
+                        <label class="block text-[10px] font-black text-text-muted uppercase tracking-widest mb-2">{% trans "Destino / Lugar" %}</label>
+                        <input type="text" name="destination" placeholder="Eje: Maldivas, París, Canaima..." required
+                            class="input-base">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black text-text-muted uppercase tracking-widest mb-2">{% trans "Palabras Clave" %}</label>
+                        <input type="text" name="keywords" placeholder="Eje: lujo, aventura, pareja..."
+                            class="input-base">
+                    </div>
+
+                    <button type="submit" class="w-full h-14 bg-gradient-to-br from-primary to-primary-hover text-on-primary font-black rounded-2xl text-xs uppercase tracking-widest shadow-lg shadow-primary/20 hover:-translate-y-1 transition-all active:scale-95 flex items-center justify-center gap-3">
+                        <span id="loading-spinner" class="htmx-indicator animate-spin w-5 h-5 border-2 border-on-primary/20 border-t-on-primary rounded-full"></span>
+                        {% trans "Generar con Gemini AI" %}
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Main Content: Articles & Guides -->
+        <div class="lg:col-span-2 space-y-16">
+            <!-- Articles -->
+            <section>
+                <h3 class="text-xs font-black text-text-main uppercase tracking-widest mb-8">{% trans "Artículos Recientes" %}</h3>
+                <div id="articles-container" class="space-y-6">
+                    {% for articulo in articulos %}
+                    {% include "cms/partials/article_card.html" %}
+                    {% empty %}
+                    <div class="text-center py-20 bg-surface-2/20 border border-border-color border-dashed rounded-3xl">
+                        <p class="text-text-muted">Aún no hay artículos generados. ¡Prueba el generador lateral!</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+
+            <!-- Destination Guides -->
+            <section>
+                <h3 class="text-xs font-black text-text-main uppercase tracking-widest mb-8">{% trans "Guías de Destino" %}</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {% for guia in guias %}
+                    <div
+                        class="card-base overflow-hidden group hover:border-primary transition-all flex flex-col">
+                        {% if guia.imagen_url %}
+                        <div class="h-40 overflow-hidden">
+                            <img src="{{ guia.imagen_url }}" alt="{{ guia.nombre }}"
+                                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                        </div>
+                        {% endif %}
+                        <div class="p-8 flex-1 flex flex-col">
+                            <div class="flex justify-between items-start mb-4">
+                                <h4 class="text-xl font-black text-text-main tracking-tighter">{{ guia.nombre }}</h4>
+                                <div class="flex gap-2">
+                                    <a href="{% url 'cms:guia_update' guia.pk %}"
+                                        class="p-1.5 bg-surface-base hover:bg-surface-3 text-primary rounded-lg transition-colors">
+                                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                        </svg>
+                                    </a>
+                                </div>
+                            </div>
+                            <p class="text-text-secondary text-sm line-clamp-3 mb-4">{{ guia.descripcion }}</p>
+                            <div class="mt-auto flex items-center justify-between">
+                                <span class="text-[10px] text-text-muted uppercase font-bold tracking-wider">{{
+                                    guia.idioma }}</span>
+                                <a href="{% url 'cms:guia_delete' guia.pk %}"
+                                    class="text-status-danger hover:text-red-300 transition-colors">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div
+                        class="col-span-full text-center py-10 bg-surface-base/20 border border-border-color border-dashed rounded-3xl">
+                        <p class="text-text-muted">No hay guías de destino configuradas.</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+{% endblock %}

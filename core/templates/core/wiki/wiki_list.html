@@ -1,0 +1,71 @@
+{% extends "base_modern.html" %}
+{% load i18n static %}
+
+{% block page_title %}{% trans "Manuales Técnicos GDS" %}{% endblock %}
+{% block page_subtitle %}{% trans "Base de Conocimiento de Ingeniería de Viajes" %}{% endblock %}
+
+{% block content %}
+<div class="px-6 py-10 max-w-7xl mx-auto">
+    <!-- Header Hero -->
+    <div class="mb-12 text-center md:text-left">
+        <div class="flex items-center gap-3 text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-4 justify-center md:justify-start">
+            <span class="w-8 h-px bg-primary/30"></span>
+            {% trans "Knowledge Architecture" %}
+            <span class="w-8 h-px bg-primary/30"></span>
+        </div>
+        <h1 class="text-4xl md:text-6xl font-black text-text-main tracking-tighter mb-4 leading-none">
+            GDS Technical <span class="text-primary italic">Wiki</span>
+        </h1>
+        <p class="text-text-secondary text-lg max-w-2xl font-medium">
+            {% trans "Accede a las guías maestras de comandos y reglas de negocio de los Global Distribution Systems integrados en TravelHub." %}
+        </p>
+    </div>
+
+    <!-- Categories Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {% for category in categories %}
+        <a href="{% url 'core:wiki_reader' category.path %}" 
+           class="group relative card-base overflow-hidden p-8 hover:border-primary transition-all duration-500 hover:-translate-y-2">
+            
+            <!-- Background Decoration -->
+            <div class="absolute -right-8 -top-8 w-32 h-32 bg-primary/5 rounded-full group-hover:bg-primary/10 transition-colors duration-500 blur-2xl"></div>
+            
+            <div class="relative z-10">
+                <div class="w-14 h-14 bg-surface-2 rounded-2xl border border-border-color flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-500 shadow-sm">
+                    {% if category.name == 'AMADEUS' %}
+                        <span class="material-symbols-outlined text-primary text-3xl">flight</span>
+                    {% elif category.name == 'SABRE' %}
+                        <span class="material-symbols-outlined text-primary text-3xl">terminal</span>
+                    {% elif category.name == 'KIU' %}
+                        <span class="material-symbols-outlined text-primary text-3xl">hub</span>
+                    {% else %}
+                        <span class="material-symbols-outlined text-primary text-3xl">menu_book</span>
+                    {% endif %}
+                </div>
+                
+                <h3 class="text-2xl font-black text-text-main tracking-tight mb-3 group-hover:text-primary transition-colors">
+                    {{ category.name }}
+                </h3>
+                
+                <p class="text-text-muted text-sm leading-relaxed mb-8 font-medium">
+                    {% trans "Guías de comandos, manejo de re-emisiones, servicios especiales y flujos de reserva para" %} {{ category.name }}.
+                </p>
+
+                <div class="flex items-center gap-2 text-[11px] font-black text-primary uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all translate-x-4 group-hover:translate-x-0">
+                    {% trans "Explorar Manual" %}
+                    <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+                </div>
+            </div>
+
+            <!-- Border Accent -->
+            <div class="absolute bottom-0 left-0 h-1 w-0 bg-primary transition-all duration-500 group-hover:w-full"></div>
+        </a>
+        {% empty %}
+        <div class="col-span-full py-20 bg-surface-2/20 border border-border-color border-dashed rounded-3xl flex flex-col items-center justify-center">
+            <span class="material-symbols-outlined text-5xl text-text-muted mb-4">folder_off</span>
+            <p class="text-text-muted font-bold">{% trans "No se encontraron categorías en la Wiki GDS." %}</p>
+            <p class="text-text-muted text-xs mt-1">{% trans "Verifica la ruta docs/wiki/GDS en el servidor." %}</p>
+        </div>
+        {% endfor %}
+</div>
+{% endblock %}

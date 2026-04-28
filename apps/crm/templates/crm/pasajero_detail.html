@@ -1,0 +1,126 @@
+{% extends 'base_modern_v2.html' %}
+{% load static %}
+
+{% block title %}{{ pasajero.get_nombre_completo }} | TravelHub CRM{% endblock %}
+
+{% block extra_head %}
+<style>.shadow-swiss{box-shadow:0 4px 6px -1px rgba(0,0,0,.05),0 2px 4px -1px rgba(0,0,0,.03)!important}</style>
+{% endblock %}
+
+{% block content %}
+<main class="flex-1 w-full max-w-[1000px] mx-auto p-6 md:p-10">
+
+    <!-- Breadcrumb + Actions -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8 pb-6 border-b border-[var(--border)]">
+        <div>
+            <div class="flex items-center gap-2 text-sm font-medium text-[var(--text-muted)] mb-2">
+                <a href="{% url 'crm:pasajero_list' %}" class="hover:text-[var(--primary)] transition-colors">CRM</a>
+                <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+                <a href="{% url 'crm:pasajero_list' %}" class="hover:text-[var(--primary)] transition-colors">Pasajeros</a>
+                <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+                <span class="text-[var(--text-primary)]">{{ pasajero.get_nombre_completo }}</span>
+            </div>
+            <h1 class="text-2xl font-black text-[var(--text-primary)]">Perfil del Pasajero</h1>
+        </div>
+        {% if not pasajero.clientes.exists %}
+        <form method="post" action="{% url 'crm:pasajero_convert' pasajero.pk %}">
+            {% csrf_token %}
+            <button type="submit"
+                class="h-10 px-5 flex items-center gap-2 border border-transparent bg-indigo-600 text-white hover:bg-indigo-700 rounded text-sm font-bold transition-colors shadow-sm"
+                onclick="return confirm('¿Está seguro que desea convertir a {{ pasajero.get_nombre_completo|escapejs }} en un nuevo Cliente? Se copiarán todos sus datos y su foto de perfil.');">
+                <span class="material-symbols-outlined text-[18px]">person_add</span> Convertir en Cliente
+            </button>
+        </form>
+        {% endif %}
+    </div>
+
+    <!-- Hero -->
+    <div class="bg-[var(--surface-1)] border border-[var(--border)] rounded-2xl p-6 shadow-swiss mb-6 relative overflow-hidden">
+        <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[var(--primary)] to-indigo-500"></div>
+        <div class="flex items-center gap-5">
+            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-[var(--primary)] to-indigo-600 flex items-center justify-center text-white text-xl font-bold shadow-md overflow-hidden">
+                {% if pasajero.foto_perfil %}
+                <img src="{{ pasajero.foto_perfil.url }}" alt="{{ pasajero.get_nombre_completo }}" class="w-full h-full object-cover">
+                {% else %}
+                {{ pasajero.nombres|slice:":1" }}{{ pasajero.apellidos|slice:":1" }}
+                {% endif %}
+            </div>
+            <div>
+                <h2 class="text-xl font-black text-[var(--text-primary)]">{{ pasajero.get_nombre_completo }}</h2>
+                {% if pasajero.clientes.exists %}
+                {% with cliente=pasajero.clientes.first %}
+                <p class="text-sm text-[var(--text-secondary)] flex items-center gap-1 mt-1">
+                    <span class="material-symbols-outlined text-[14px]">person</span>
+                    Cliente: <a href="{% url 'crm:cliente_detail' cliente.pk %}" class="text-[var(--primary)] hover:underline ml-1 font-bold">{{ cliente.get_nombre_completo }}</a>
+                </p>
+                {% endwith %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Datos Personales -->
+        <div class="bg-[var(--surface-1)] border border-[var(--border)] rounded-2xl p-6 shadow-swiss">
+            <h3 class="text-sm font-bold text-[var(--text-primary)] uppercase tracking-wider mb-4 flex items-center gap-2">
+                <span class="material-symbols-outlined text-[var(--primary)] text-[18px]">badge</span> Datos Personales
+            </h3>
+            <dl class="space-y-3">
+                <div class="flex justify-between items-center py-2 border-b border-[var(--border)]">
+                    <dt class="text-sm text-[var(--text-muted)]">Cédula de Identidad</dt>
+                    <dd class="text-sm font-bold font-mono bg-[var(--surface-2)] border border-[var(--border)] text-[var(--text-primary)] px-2 py-0.5 rounded">{{ pasajero.cedula_identidad|default:"—" }}</dd>
+                </div>
+                <div class="flex justify-between items-center py-2 border-b border-[var(--border)]">
+                    <dt class="text-sm text-[var(--text-muted)]">Fecha de Nacimiento</dt>
+                    <dd class="text-sm font-semibold text-[var(--text-primary)]">{{ pasajero.fecha_nacimiento|date:"d M Y"|default:"—" }}</dd>
+                </div>
+                <div class="flex justify-between items-center py-2 border-b border-[var(--border)]">
+                    <dt class="text-sm text-[var(--text-muted)]">Nacionalidad</dt>
+                    <dd class="text-sm font-semibold text-[var(--text-primary)]">{{ pasajero.nacionalidad|default:"—" }}</dd>
+                </div>
+                <div class="flex justify-between items-center py-2">
+                    <dt class="text-sm text-[var(--text-muted)]">Género</dt>
+                    <dd class="text-sm font-semibold text-[var(--text-primary)]">{{ pasajero.get_genero_display|default:"—" }}</dd>
+                </div>
+            </dl>
+        </div>
+
+        <!-- Pasaporte -->
+        <div class="bg-[var(--surface-1)] border border-[var(--border)] rounded-2xl p-6 shadow-swiss">
+            <h3 class="text-sm font-bold text-[var(--text-primary)] uppercase tracking-wider mb-4 flex items-center gap-2">
+                <span class="material-symbols-outlined text-[var(--primary)] text-[18px]">travel_explore</span> Pasaporte
+            </h3>
+            <dl class="space-y-3">
+                <div class="flex justify-between items-center py-2 border-b border-[var(--border)]">
+                    <dt class="text-sm text-[var(--text-muted)]">Número de Pasaporte</dt>
+                    <dd class="text-sm font-bold font-mono bg-[var(--surface-2)] border border-[var(--border)] text-[var(--text-primary)] px-2 py-0.5 rounded">{{ pasajero.numero_pasaporte|default:"—" }}</dd>
+                </div>
+                <div class="flex justify-between items-center py-2 border-b border-[var(--border)]">
+                    <dt class="text-sm text-[var(--text-muted)]">País de Emisión</dt>
+                    <dd class="text-sm font-semibold text-[var(--text-primary)]">{{ pasajero.pais_emision_documento|default:"—" }}</dd>
+                </div>
+                <div class="flex justify-between items-center py-2">
+                    <dt class="text-sm text-[var(--text-muted)]">Vencimiento</dt>
+                    <dd class="text-sm font-bold {% if pasajero.esta_pasaporte_vencido %}text-red-500{% else %}text-emerald-500 font-medium{% endif %}">
+                        {{ pasajero.fecha_vencimiento_documento|date:"d M Y"|default:"—" }}
+                        {% if pasajero.esta_pasaporte_vencido %}<span class="text-[10px] ml-1 font-bold bg-red-500/10 border border-red-500/20 text-red-500 px-1.5 py-0.5 rounded uppercase">Vencido</span>{% endif %}
+                    </dd>
+                </div>
+            </dl>
+        </div>
+    </div>
+
+    <!-- Footer actions -->
+    <div class="flex justify-end gap-3 mt-6 pt-6 border-t border-[var(--border)]">
+        <a href="{% url 'crm:pasajero_list' %}"
+            class="h-10 px-5 flex items-center gap-2 text-sm font-bold text-[var(--text-secondary)] bg-[var(--surface-2)] border border-[var(--border)] rounded hover:border-[var(--primary)] hover:text-[var(--primary)] transition-colors">
+            <span class="material-symbols-outlined text-[16px]">arrow_back</span> Volver
+        </a>
+        <a href="{% url 'crm:pasajero_update' pasajero.pk %}"
+            class="h-10 px-5 flex items-center gap-2 text-sm font-bold text-white bg-[var(--primary)] border border-transparent rounded hover:bg-[var(--primary-hover)] transition-colors shadow-sm">
+            <span class="material-symbols-outlined text-[16px]">edit</span> Editar
+        </a>
+    </div>
+</main>
+{% endblock %}

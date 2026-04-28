@@ -1,0 +1,95 @@
+{% if error %}
+<div class="bg-red-900/50 border border-red-700 text-red-200 p-4 rounded-xl flex items-center gap-3">
+    <svg class="w-6 h-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+    <div>
+        <p class="font-bold">Error en la búsqueda</p>
+        <p class="text-sm">{{ error }}</p>
+    </div>
+</div>
+{% elif results %}
+<div class="flex justify-between items-center mb-6">
+    <h2 class="text-xl font-bold text-white flex items-center gap-3">
+        <span class="p-1 px-2 bg-primary/20 text-primary rounded text-xs uppercase">
+            {% if search_params.trip_type == 'ROUND_TRIP' %}Ida y Vuelta
+            {% elif search_params.trip_type == 'MULTI_CITY' %}Multidestino
+            {% else %}Solo Ida{% endif %}
+        </span>
+        {{ search_params.origin }} 
+        <span class="material-symbols-outlined text-gray-500">trending_flat</span>
+        {{ search_params.destination }}
+    </h2>
+    <span class="text-sm text-gray-400 font-mono">{{ results|length }} opciones encontradas</span>
+</div>
+
+<div class="grid grid-cols-1 gap-5">
+    {% for flight in results %}
+    <div class="bg-surface-2 border border-border-color hover:border-primary/50 rounded-xl p-6 transition-all hover:shadow-xl group relative overflow-hidden">
+        
+        <div class="flex flex-col md:flex-row justify-between items-center gap-6 relative z-10">
+            <!-- Aerolínea y Ruta -->
+            <div class="flex-1 w-full">
+                <div class="flex items-center gap-3 mb-3">
+                    <span class="bg-surface-3 px-2 py-1 rounded text-[11px] font-bold text-text-main border border-border-color">
+                        {{ flight.aerolinea }}
+                    </span>
+                    <span class="text-xs text-text-secondary font-semibold">{{ flight.aerolinea_nombre }}</span>
+                    {% if flight.real %}
+                    <span class="ml-auto md:ml-0 bg-status-success-bg text-status-success px-2 py-0.5 rounded text-[9px] font-black border border-status-success border-opacity-20 uppercase tracking-widest">
+                        LIVE DATA
+                    </span>
+                    {% endif %}
+                </div>
+                
+                <div class="space-y-3">
+                    {% for tramo in flight.tramos %}
+                    <div class="flex items-center gap-4 p-3 bg-surface-base/50 rounded-xl border border-border-color/30 hover:border-primary/30 transition-colors">
+                        <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                            <span class="material-symbols-outlined text-primary text-xl">
+                                {% if forloop.first %}flight_takeoff{% elif forloop.last and flight.is_round_trip %}flight_land{% else %}sync_alt{% endif %}
+                            </span>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex justify-between items-start">
+                                <span class="text-sm font-black text-text-main tracking-tight uppercase">{{ tramo.origen }} <span class="text-primary mx-1">→</span> {{ tramo.destino }}</span>
+                                <span class="bg-surface-3 px-1.5 py-0.5 rounded text-[9px] font-bold text-text-muted border border-border-color">{{ tramo.vuelo }}</span>
+                            </div>
+                            <div class="flex justify-between items-center mt-1">
+                                <span class="text-[10px] text-text-secondary font-medium truncate italic">{{ tramo.aerolinea }}</span>
+                                <span class="text-[10px] text-primary font-black font-mono">{{ tramo.salida }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Divisor móvil -->
+            <div class="w-full h-px bg-border-color md:hidden"></div>
+
+            <!-- Precio y Acción -->
+            <div class="text-right flex flex-col items-center md:items-end w-full md:w-auto">
+                <span class="text-[10px] text-text-muted font-bold uppercase tracking-widest mb-1">Total por pasajero</span>
+                <span class="text-3xl font-black text-primary font-display">{{ flight.precio }}</span>
+
+                <button class="mt-4 w-full md:w-auto btn-primary px-8 text-xs">
+                    Seleccionar Oferta
+                </button>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<p class="text-xs text-center text-gray-500 mt-6">
+    * Precios referenciales sujetos a disponibilidad en tiempo real.
+</p>
+
+{% else %}
+<div class="text-center py-12 bg-slate-800/30 rounded-xl border border-dashed border-slate-700">
+    <p class="text-gray-400 text-lg">No se encontraron vuelos para esta ruta/fecha.</p>
+    <p class="text-gray-500 text-sm mt-2">Intenta con otra fecha o destino.</p>
+</div>
+{% endif %}

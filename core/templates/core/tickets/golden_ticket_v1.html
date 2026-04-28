@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Boleto Electrónico - {{ NOMBRE_AEROLINEA }}</title>
+    <!-- Open Sans Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        @page {
+            size: A4;
+            margin: 0;
+        }
+        :root {
+            /* Forzado a Azul Golden Premium - Ignorando temas de agencia para consistencia de marca */
+            --tk-primary: #0d1e40;
+            --tk-accent: #2173a6;
+            --tk-text: #333333;
+            --tk-gray: #f9fafb;
+            --tk-border: #e5e7eb;
+            --pnr-color: #0d1e40;
+        }
+
+        {% if 'SABRE' in SOURCE_SYSTEM %} :root { --pnr-color: #88081f; } {% endif %}
+        {% if 'COPA' in SOURCE_SYSTEM %} :root { --pnr-color: #0032a0; } {% endif %}
+        {% if 'TK CONNECT' in SOURCE_SYSTEM %} :root { --pnr-color: #232b38; } {% endif %}
+        {% if 'WINGO' in SOURCE_SYSTEM %} :root { --pnr-color: #6633cb; } {% endif %}
+        {% if 'AMADEUS' in SOURCE_SYSTEM %} :root { --pnr-color: #0c66e1; } {% endif %}
+        {% if 'TRAVELPORT' in SOURCE_SYSTEM %} :root { --pnr-color: #111827; } {% endif %}
+
+        body {
+            font-family: 'Open Sans', sans-serif;
+            color: var(--tk-text);
+            line-height: 1.25;
+            margin: 0;
+            padding: 0;
+            background-color: #fff;
+            -webkit-print-color-adjust: exact;
+            height: 297mm; /* Full A4 height */
+        }
+        .printable-area {
+            position: relative;
+            height: 100%;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        /* Header Section */
+        .header {
+            background-color: var(--tk-primary);
+            color: white;
+            padding: 30px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start; /* Align logo and contact to top */
+        }
+        .header-logo {
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -1.5px;
+            text-transform: none;
+        }
+        .header-logo .dot { color: #facc15; }
+        .header-contact {
+            text-align: right;
+            font-size: 10px;
+            font-weight: 600;
+            line-height: 1.5;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        /* Greeting Section */
+        .greeting-section {
+            padding: 10px 40px 5px; /* Reduced top padding to balance taller header */
+        }
+        .greeting-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin: 5px 0 0;
+            color: #64748b;
+        }
+        .greeting-title .airline-highlight {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--tk-accent);
+            text-transform: uppercase;
+        }
+        .greeting-text {
+            font-size: 16px;
+            color: #4b5563;
+        }
+        .greeting-text strong {
+            font-size: 24px;
+            color: var(--tk-primary);
+            font-weight: 800;
+        }
+
+        /* Information Grid - Rows of 3 columns */
+        .info-container {
+            margin: 15px 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .info-block {
+            border: 1px solid var(--tk-border);
+            border-radius: 8px;
+            overflow: hidden;
+            background-color: #fff;
+        }
+        .info-row {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr 1fr; /* Adjusted ratios for Passenger Name */
+            border-bottom: 1px solid var(--tk-border);
+        }
+        .info-row:last-child {
+            border-bottom: none;
+        }
+        .info-item {
+            padding: 10px 15px;
+            border-right: 1px solid var(--tk-border);
+        }
+        .info-item:last-child {
+            border-right: none;
+        }
+        .info-label {
+            font-size: 8px;
+            text-transform: uppercase;
+            color: #6b7280;
+            font-weight: 700;
+            margin-bottom: 2px;
+        }
+        .info-value {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--tk-primary);
+            white-space: nowrap; /* Prevent wrapping */
+        }
+
+        /* Unified Locator/Date Row Styling */
+        .pnr-value {
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--pnr-color);
+            letter-spacing: 1px;
+            white-space: nowrap; /* Prevent wrapping */
+        }
+
+        /* Itinerary Section */
+        .section-header {
+            padding: 20px 40px 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .section-header h2 {
+            font-size: 13px;
+            font-weight: 800;
+            margin: 0;
+            color: var(--tk-primary);
+        }
+        .section-header .line {
+            flex: 1;
+            height: 1px;
+            background-color: var(--tk-border);
+        }
+
+        /* Flight Block Compact */
+        .flight-block {
+            margin: 0 40px 8px;
+            border: 1px solid var(--tk-border);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        .flight-meta {
+            background-color: #f8fafc;
+            padding: 4px 15px;
+            border-bottom: 1px solid var(--tk-border);
+            display: flex;
+            justify-content: space-between;
+            font-size: 9px;
+            font-weight: 700;
+        }
+        .flight-body {
+            padding: 10px 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .airport-code {
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--tk-primary);
+        }
+        .airport-info {
+            font-size: 10px;
+            color: #6b7280;
+            margin-top: -2px;
+        }
+        .flight-path {
+            flex: 0.3;
+            text-align: center;
+            color: #d1d5db;
+            font-size: 14px;
+        }
+        .flight-details-bar {
+            background-color: #fff;
+            padding: 4px 15px;
+            border-top: 1px dashed var(--tk-border);
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            font-size: 9px;
+            color: #64748b;
+        }
+
+        /* Footer Anchored to Bottom */
+        .footer-anchored {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 20px 40px;
+            background-color: var(--tk-gray);
+            border-top: 1px solid var(--tk-border);
+            text-align: center;
+        }
+        .footer-line {
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--tk-primary);
+            margin-bottom: 2px;
+        }
+        .footer-subline {
+            font-size: 8.5px;
+            color: #6b7280;
+            font-weight: 600;
+            letter-spacing: 0.1px;
+        }
+        .iata-line {
+            margin-top: 8px;
+            font-size: 7.5px;
+            color: #94a3b8;
+        }
+
+        @media print {
+            body { height: 297mm; }
+            .printable-area { height: 297mm; }
+        }
+    </style>
+</head>
+<body>
+    <div class="printable-area">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-logo">
+                {% if agencia.logo_pdf_base64 %}
+                    <img src="{% if 'data:image' in agencia.logo_pdf_base64 %}{{ agencia.logo_pdf_base64 }}{% else %}data:image/png;base64,{{ agencia.logo_pdf_base64 }}{% endif %}" style="height: 40px;">
+                {% elif agencia.logo_base64 %}
+                    <img src="{% if 'data:image' in agencia.logo_base64 %}{{ agencia.logo_base64 }}{% else %}data:image/png;base64,{{ agencia.logo_base64 }}{% endif %}" style="height: 40px;">
+                {% else %}
+                    {{ agencia.nombre_comercial|default:agencia.nombre|default:"TRAVELHUB" }}<span class="dot">.</span>
+                {% endif %}
+            </div>
+            <div class="header-contact">
+                {{ agencia.telefono_principal|default:"+58 412 331 2314" }} | {{ agencia.telefono_secundario|default:"+58 412 608 0861" }}<br>
+                {{ agencia.email_principal|default:"TRAVELINKEO@GMAIL.COM"|upper }}
+            </div>
+        </header>
+
+        <!-- Greeting -->
+        <div class="greeting-section">
+            <p class="greeting-text">Hola, <strong>{{ solo_nombre_pasajero|upper }}</strong></p>
+            <h1 class="greeting-title">Boleto Electrónico Confirmado con <span class="airline-highlight">{{ NOMBRE_AEROLINEA }}</span></h1>
+        </div>
+
+        <!-- Structural Info Rows - SEPARATED BLOCKS -->
+        <div class="info-container">
+            <!-- Block 1: Passenger / Doc / Ticket -->
+            <div class="info-block">
+                <div class="info-row">
+                    <div class="info-item">
+                        <div class="info-label">Nombre del Pasajero</div>
+                        <div class="info-value">{{ NOMBRE_DEL_PASAJERO }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Documento / FOID</div>
+                        <div class="info-value">{{ CODIGO_IDENTIFICACION|default:"---" }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Número de Boleto</div>
+                        <div class="info-value" style="font-size: 12px; font-weight: 800;">{{ NUMERO_DE_BOLETO|default:"PENDIENTE" }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Block 2: GDS / Airline / Issue Date -->
+            <div class="info-block">
+                <div class="info-row">
+                    <div class="info-item" style="border-left: 4px solid var(--pnr-color);">
+                        <div class="info-label" style="color: var(--pnr-color);">Localizador GDS ({{ SOURCE_SYSTEM|default:"SISTEMA" }})</div>
+                        <div class="pnr-value">{{ CODIGO_RESERVA }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Localizador Aerolínea</div>
+                        <div class="pnr-value" style="color: #475569;">{{ CODIGO_RESERVA_AEROLINEA|default:CODIGO_RESERVA }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Fecha de Emisión</div>
+                        <div class="info-value">{{ FECHA_DE_EMISION }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Itinerary Section -->
+        <div class="section-header">
+            <h2>ITINERARIO DE VUELO</h2>
+            <div class="line"></div>
+        </div>
+
+        {% for vuelo in vuelos %}
+        <div class="flight-block">
+            <div class="flight-meta">
+                <span>VUELO: {{ vuelo.numero_vuelo }}</span>
+                <span>FECHA: {{ vuelo.fecha_salida }}</span>
+                <span style="color: var(--tk-accent);">OK CONFIRMADO</span>
+            </div>
+            <div class="flight-body">
+                <div class="airport-group">
+                    <div class="airport-code">{{ vuelo.origen.ciudad if vuelo.origen is mapping else vuelo.origen }}</div>
+                    <div class="airport-info">{{ vuelo.hora_salida|default:"---" }}</div>
+                </div>
+                <div class="flight-path">✈</div>
+                <div class="airport-group" style="text-align: right;">
+                    <div class="airport-code">{{ vuelo.destino.ciudad if vuelo.destino is mapping else vuelo.destino }}</div>
+                    <div class="airport-info">{{ vuelo.hora_llegada|default:"---" }}</div>
+                </div>
+            </div>
+            <div class="flight-details-bar">
+                <span><strong>CABINA:</strong> {{ vuelo.clase|default:"Y" }} ({{ vuelo.cabina|default:"TOURIST" }})</span>
+                {% if vuelo.localizador_aerolinea and vuelo.localizador_aerolinea != CODIGO_RESERVA %}
+                <span><strong>COD. AéREA:</strong> {{ vuelo.localizador_aerolinea }}</span>
+                {% endif %}
+                <span style="text-align: right;"><strong>EQUIPAJE:</strong> {{ vuelo.equipaje|default:"1PC" }}</span>
+            </div>
+        </div>
+        {% endfor %}
+
+        <!-- Financial Summary removed as per user request (handled in invoices) -->
+
+        <!-- Anchored Footer -->
+        <footer class="footer-anchored">
+            <div class="footer-line">Gracias por elegirnos. ¡Te deseamos un excelente viaje!</div>
+            <div class="footer-subline">
+                {% if agencia.instagram %}
+                    {% if 'instagram.com' in agencia.instagram.lower() %}
+                        @{{ agencia.instagram.split('/')[-1]|upper }}
+                    {% else %}
+                        @{{ agencia.instagram|upper }}
+                    {% endif %}
+                {% else %}
+                    @{{ agencia.nombre_comercial|default:agencia.nombre|upper }}
+                {% endif %}
+                | {{ agencia.telefono_principal }}<br>
+                {{ agencia.direccion|upper }}
+            </div>
+            <div class="iata-line">
+                Recibo electrónico IATA: {{ AGENTE_EMISOR if (AGENTE_EMISOR and AGENTE_EMISOR != 'No encontrado') else (agencia.iata|default:"10617390") }} | Generado por {{ agencia.nombre_comercial|default:"TravelHub" }}
+            </div>
+        </footer>
+    </div>
+</body>
+</html>

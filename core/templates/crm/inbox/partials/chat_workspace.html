@@ -1,0 +1,154 @@
+<!-- COLUMNA 2: ÁREA DE CHAT (Centro) -->
+<section class="flex-1 flex flex-col bg-surface-2 relative border-r border-border-color h-full">
+            
+    <!-- Chat Header -->
+    <div class="h-16 bg-surface-1 border-b border-border-color flex items-center justify-between px-6 shrink-0 shadow-sm z-10">
+        <div class="flex items-center gap-4">
+            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-black shadow-sm">
+                {{ cliente.nombres|make_list|first|upper }}
+            </div>
+            <div>
+                <h2 class="text-base font-bold text-text-main leading-tight">{{ cliente.get_nombre_completo|title }}</h2>
+                <p class="text-xs text-text-muted flex items-center gap-1 font-mono">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> {{ cliente.telefono_principal }}
+                </p>
+            </div>
+        </div>
+        <div class="flex gap-2">
+            <button class="w-9 h-9 rounded-full bg-surface-2 flex items-center justify-center text-text-muted hover:text-text-main transition-colors border border-border-color"><span class="material-symbols-outlined text-[20px]">search</span></button>
+        </div>
+    </div>
+
+    <!-- Chat History -->
+    <div class="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar chat-bg" id="chat-container">
+        
+        <div class="flex justify-center mb-6">
+            <span class="bg-surface-1 border border-border-color text-text-muted text-[10px] font-bold px-3 py-1 rounded-lg backdrop-blur-sm uppercase">INICIO DEL HISTORIAL</span>
+        </div>
+
+        <!-- Renderizar Historial -->
+        <div id="chat-messages" class="space-y-4">
+            {% for msg in mensajes %}
+                {% include "crm/inbox/partials/message_bubble.html" with msg=msg %}
+            {% empty %}
+                <p class="text-center text-xs text-text-muted">Aún no hay mensajes en esta conversación.</p>
+            {% endfor %}
+        </div>
+        
+    </div>
+
+    <!-- Contenedor Sugerencias IA (Inyectado vía HTMX) -->
+    <div id="ai-suggestions" class="absolute bottom-[80px] left-0 w-full px-4 pb-2 z-20"></div>
+
+    <!-- Input Area -->
+    <div class="p-4 bg-surface-1 border-t border-border-color relative z-30">
+        <form hx-post="{% url 'crm:send_message' cliente.id_cliente %}" 
+              hx-target="#chat-messages" 
+              hx-swap="beforeend"
+              @htmx:after-request="scrollToBottom(); $event.target.reset();"
+              class="flex items-end gap-2 bg-surface-2 border border-border-color p-2 rounded-2xl focus-within:border-emerald-500 focus-within:ring-1 focus-within:ring-emerald-500 transition-all shadow-inner">
+            
+            {% csrf_token %}
+            
+            <button type="button" class="p-2 text-text-muted hover:text-text-main transition-colors shrink-0">
+                <span class="material-symbols-outlined">add_circle</span>
+            </button>
+            
+            <textarea id="msg-input" name="texto" rows="1" required placeholder="Escribe un mensaje..." class="flex-1 bg-transparent border-none focus:ring-0 text-sm text-text-main resize-none py-2.5 custom-scrollbar max-h-32 outline-none placeholder-slate-500"></textarea>
+            
+            <!-- Botón Invocar IA -->
+            <button type="button" 
+                    hx-get="{% url 'crm:ai_suggested_reply' cliente.id_cliente %}" 
+                    hx-target="#ai-suggestions" 
+                    hx-swap="innerHTML"
+                    class="p-2 text-blue-500 hover:text-blue-400 transition-colors shrink-0 bg-blue-500/10 rounded-xl border border-blue-500/20" title="Pedir sugerencia a Gemini">
+                <span class="material-symbols-outlined htmx-indicator hidden animate-spin" id="ai-spinner-{{cliente.id_cliente}}">sync</span>
+                <span class="material-symbols-outlined indicator-off">auto_awesome</span>
+            </button>
+            
+            <!-- Botón Enviar -->
+            <button type="submit" class="p-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl transition-colors shrink-0 shadow-lg shadow-emerald-600/20">
+                <span class="material-symbols-outlined">send</span>
+            </button>
+        </form>
+    </div>
+
+</section>
+
+<!-- COLUMNA 3: CONTEXTO CRM (Derecha) -->
+<aside class="w-80 lg:w-96 bg-surface-1 flex flex-col shrink-0 overflow-y-auto custom-scrollbar relative z-10 border-l border-border-color">
+    
+    <!-- Cabecera CRM -->
+    <div class="p-6 border-b border-border-color text-center bg-gradient-to-b from-surface-2 to-surface-1">
+        <div class="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-black text-2xl mx-auto mb-3 shadow-lg">
+            {{ cliente.nombres|make_list|first|upper }}
+        </div>
+        <h2 class="text-xl font-black text-text-main">{{ cliente.get_nombre_completo|title }}</h2>
+        <p class="text-sm text-text-muted mb-4 font-mono">{{ cliente.telefono_principal }}</p>
+        <div class="flex gap-2 justify-center">
+            <span class="bg-surface-2 text-text-main text-[10px] font-bold px-2 py-1 rounded border border-border-color uppercase">Activo</span>
+        </div>
+    </div>
+
+    <div class="p-6 space-y-6">
+        {% if lead %}
+        <!-- Status en Kanban -->
+        <div>
+            <h3 class="text-[10px] font-black uppercase tracking-widest text-text-muted mb-2">Estado en Kanban</h3>
+            <div class="bg-amber-500/10 border border-amber-500/30 rounded-xl p-3 flex items-center justify-between cursor-pointer hover:bg-amber-500/20 transition-colors group">
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                    <span class="text-sm font-bold text-amber-500">{{ lead.get_etapa_display }}</span>
+                </div>
+                <span class="material-symbols-outlined text-amber-500/50 text-[16px] group-hover:text-amber-500">open_in_new</span>
+            </div>
+        </div>
+
+        <!-- Resumen del Viaje (Extraído por IA) -->
+        <div>
+            <h3 class="text-[10px] font-black uppercase tracking-widest text-text-muted mb-2 flex items-center gap-1">
+                <span class="material-symbols-outlined text-[12px] text-blue-400">auto_awesome</span> Resumen del Lead
+            </h3>
+            <div class="bg-surface-2 border border-border-color rounded-xl p-4 space-y-3 shadow-inner">
+                <div class="flex justify-between">
+                    <span class="text-xs text-text-muted font-medium">Destino</span>
+                    <span class="text-xs font-bold text-text-main">{{ lead.destino|default:"No definido" }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-xs text-text-muted font-medium">Fechas</span>
+                    <span class="text-xs font-bold text-text-main">{{ lead.fechas_texto|default:"No definido" }}</span>
+                </div>
+                <div class="flex justify-between border-t border-border-color pt-2 mt-2">
+                    <span class="text-xs text-text-muted font-medium">Pasajeros</span>
+                    <span class="text-xs font-black text-blue-400">{{ lead.cantidad_pasajeros }} Pax</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Acciones B2C -->
+        <div>
+            <h3 class="text-[10px] font-black uppercase tracking-widest text-text-muted mb-2">Herramientas</h3>
+            <div class="grid grid-cols-1 gap-2">
+                <a href="{% url 'crm:kanban_board' %}" class="w-full bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold py-3 rounded-xl transition-colors shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined text-[18px]">request_quote</span> Armar Cotización
+                </a>
+            </div>
+        </div>
+        {% else %}
+        <div class="text-center opacity-50 py-8">
+            <span class="material-symbols-outlined text-4xl mb-2">analytics</span>
+            <p class="text-xs font-bold">Sin Oportunidades Abiertas</p>
+        </div>
+        {% endif %}
+    </div>
+</aside>
+
+<script>
+    // Scroll al final al cargar el hilos (HTMX inyecta este script)
+    if (typeof scrollToBottom === 'function') {
+        scrollToBottom();
+    } else {
+        const container = document.getElementById('chat-container');
+        if (container) container.scrollTop = container.scrollHeight;
+    }
+</script>

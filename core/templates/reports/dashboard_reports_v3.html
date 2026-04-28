@@ -1,0 +1,125 @@
+{% extends "base_modern.html" %}
+{% load static humanize %}
+
+{% block content %}
+<div class="p-8 max-w-7xl mx-auto">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold text-white">Panel de Reportes</h1>
+
+        <!-- Filtro de Año -->
+        <form method="get" class="flex items-center space-x-2">
+            <!-- Debug: Selected: {{ selected_year }}, KPIs: {{ kpis }} -->
+            <label for="year" class="text-gray-400 text-sm">Año:</label>
+            <select name="year" id="year" onchange="this.form.submit()"
+                class="bg-gray-800 text-white border border-gray-700 rounded-lg px-3 py-1 text-sm focus:ring-2 focus:ring-primary focus:outline-none">
+                {% for year in available_years %}
+                <option value="{{ year }}" {% if year == selected_year %}selected{% endif %}>{{ year }}</option>
+                {% endfor %}
+            </select>
+        </form>
+    </div>
+
+    <!-- KPIs Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <!-- Total Ventas -->
+        <div class="glass-panel p-6 rounded-2xl">
+            <h1 class="text-gray-400 text-sm font-medium mb-2">Ventas Totales</h1>
+            <p class="text-3xl font-bold text-white">${{ kpis.total_ventas|floatformat:2|intcomma }}</p>
+        </div>
+
+        <!-- Transacciones -->
+        <div class="glass-panel p-6 rounded-2xl">
+            <h1 class="text-gray-400 text-sm font-medium mb-2">Transacciones</h1>
+            <p class="text-3xl font-bold text-white">{{ kpis.total_transacciones }}</p>
+        </div>
+
+        <!-- Ticket Promedio -->
+        <div class="glass-panel p-6 rounded-2xl">
+            <h1 class="text-gray-400 text-sm font-medium mb-2">Ticket Promedio</h1>
+            <p class="text-3xl font-bold text-white">${{ kpis.ticket_promedio|floatformat:2|intcomma }}</p>
+        </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <!-- Monthly Sales Chart -->
+        <div class="glass-panel p-6 rounded-2xl">
+            <h3 class="text-white text-lg font-bold mb-4">Ventas Mensuales</h3>
+            <div class="relative h-80">
+                <canvas id="monthlySalesChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Top Airlines Chart -->
+        <div class="glass-panel p-6 rounded-2xl">
+            <h3 class="text-white text-lg font-bold mb-4">Top Aerolíneas</h3>
+            <div class="relative h-80">
+                <canvas id="airlinesChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Centro de Descargas (Oculto por ahora) -->
+    
+    <div class="mb-8">
+        <h2 class="text-xl font-bold text-white mb-4 flex items-center">
+            <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+            </svg>
+            Centro de Descargas
+        </h2>
+
+        <div class="glass-panel p-6 rounded-2xl">
+            <form action="{% url 'core:report_export' %}" method="get"
+                class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                <!-- Tipo de Reporte -->
+                <div>
+                    <label class="block text-gray-400 text-sm mb-2">Tipo de Reporte</label>
+                    <select name="report_type"
+                        class="w-full bg-gray-900 text-white border border-gray-700 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary focus:outline-none">
+                        <option value="ventas_generales">Ventas Generales</option>
+                    </select>
+                </div>
+
+                <!-- Rango de Fechas -->
+                <div>
+                    <label class="block text-gray-400 text-sm mb-2">Desde</label>
+                    <input type="date" name="start_date"
+                        class="w-full bg-gray-900 text-white border border-gray-700 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-gray-400 text-sm mb-2">Hasta</label>
+                    <input type="date" name="end_date"
+                        class="w-full bg-gray-900 text-white border border-gray-700 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary focus:outline-none">
+                </div>
+
+                <!-- Botón Descargar -->
+                <div>
+                    <button type="submit"
+                        class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-colors flex items-center justify-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                            </path>
+                        </svg>
+                        Descargar Excel
+                    </button>
+                    <!-- Formato oculto por defecto 'excel' -->
+                    <input type="hidden" name="format" value="excel">
+                </div>
+            </form>
+        </div>
+    </div>
+    
+</div>
+
+<!-- Data for JS -->
+{{ sales_chart.labels|json_script:"sales-chart-labels" }}
+{{ sales_chart.values|json_script:"sales-chart-values" }}
+{{ top_airlines|json_script:"top-airlines-data" }}
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{% static 'js/report_chart.js' %}"></script>
+{% endblock %}

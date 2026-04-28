@@ -1,0 +1,170 @@
+{% extends "base_modern.html" %}
+
+{% block page_title %}Auditoría Forense GDS{% endblock %}
+{% block page_subtitle %}Conciliación Final: {{ reporte.proveedor }} | {{ reporte.fecha_subida|date:"d M Y" }}{% endblock %}
+
+{% block content %}
+<div class="p-6 space-y-6 max-w-[1600px] mx-auto">
+    
+    <!-- Sección KPIs de Auditoría (Cabecera Visual) -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        
+        <div class="card-base p-5 flex items-center justify-between">
+            <div class="space-y-1">
+                <p class="text-[10px] font-black text-text-muted uppercase tracking-widest">Total Boletos Analizados</p>
+                <h3 class="text-2xl font-black text-text-main tabular-nums">{{ kpis.total }}</h3>
+            </div>
+            <div class="w-10 h-10 rounded-full bg-surface-2 flex items-center justify-center text-text-secondary border border-border-color">
+                <span class="material-symbols-outlined text-[20px]">fact_check</span>
+            </div>
+        </div>
+
+        <div class="card-base p-5 flex items-center justify-between border-l-4 border-l-status-success">
+            <div class="space-y-1">
+                <p class="text-[10px] font-black text-text-muted uppercase tracking-widest">Cuadrados Exactos (OK)</p>
+                <div class="flex items-baseline gap-2">
+                    <h3 class="text-2xl font-black text-status-success tabular-nums">{{ kpis.matches }}</h3>
+                    <p class="text-[10px] text-text-muted font-bold">Matches</p>
+                </div>
+            </div>
+            <div class="w-10 h-10 rounded-full bg-status-success-bg flex items-center justify-center text-status-success border border-status-success/20">
+                <span class="material-symbols-outlined text-[20px]">verified</span>
+            </div>
+        </div>
+
+        <div class="card-base p-5 flex items-center justify-between border-l-4 border-l-status-warning">
+            <div class="space-y-1">
+                <p class="text-[10px] font-black text-text-muted uppercase tracking-widest">Discrepancias Matemáticas</p>
+                <div class="flex items-baseline gap-2">
+                    <h3 class="text-2xl font-black text-status-warning tabular-nums">{{ kpis.discrepancias }}</h3>
+                    <p class="text-[10px] text-text-muted font-bold">Hallazgos</p>
+                </div>
+            </div>
+            <div class="w-10 h-10 rounded-full bg-status-warning-bg flex items-center justify-center text-status-warning border border-status-warning/20">
+                <span class="material-symbols-outlined text-[20px]">warning</span>
+            </div>
+        </div>
+
+        <div class="card-base p-5 flex items-center justify-between border-l-4 border-l-status-danger">
+            <div class="space-y-1">
+                <p class="text-[10px] font-black text-text-muted uppercase tracking-widest">Alertas / Fraude Probable</p>
+                <div class="flex items-baseline gap-2">
+                    <h3 class="text-2xl font-black text-status-danger tabular-nums">{{ kpis.alertas }}</h3>
+                    <p class="text-[10px] text-text-muted font-bold">Huérfanos</p>
+                </div>
+            </div>
+            <div class="w-10 h-10 rounded-full bg-status-danger-bg flex items-center justify-center text-status-danger border border-status-danger/20">
+                <span class="material-symbols-outlined text-[20px]">visibility</span>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Tabla Detallada de Auditoría -->
+    <div class="card-base overflow-hidden">
+        <div class="p-4 border-b border-border-color bg-surface-2/30 flex items-center justify-between">
+            <h4 class="text-xs font-black text-text-main flex items-center gap-2">
+                <span class="material-symbols-outlined text-[18px]">find_in_page</span>
+                Detalle de Diferencias Pendientes de Acción
+            </h4>
+            <div class="flex gap-2">
+                 <button class="btn-secondary h-8 px-3 text-[10px]">Filtrar Hallazgos</button>
+                 <a href="{% url 'finance:reconciliacion_report_pdf' reporte.pk %}" 
+                    hx-boost="false"
+                    class="btn-primary h-8 px-4 text-[10px] flex items-center gap-2">
+                     <span class="material-symbols-outlined text-[16px]">picture_as_pdf</span>
+                     Descargar Reporte PDF
+                 </a>
+                 <button hx-post="{% url 'finance:reconciliacion_report_email' reporte.pk %}"
+                         hx-target="this"
+                         hx-swap="outerHTML"
+                         class="btn-primary h-8 px-4 text-[10px] flex items-center gap-2 bg-text-main border-text-main hover:bg-black">
+                     <span class="material-symbols-outlined text-[16px]">mail</span>
+                     Enviar a Gerencia
+                 </button>
+                 <a href="{% url 'finance:reconciliacion_dashboard_htmx' %}" class="btn-secondary h-8 px-3 text-[10px]">Cerrar Auditoría</a>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead>
+                    <tr class="bg-surface-2">
+                        <th class="px-6 py-3 font-bold text-[10px] uppercase text-text-muted">Boleto / PNR</th>
+                        <th class="px-6 py-3 font-bold text-[10px] uppercase text-text-muted">Estado Cruce</th>
+                        <th class="px-6 py-3 font-bold text-[10px] uppercase text-text-muted text-right">Cobro Proveedor</th>
+                        <th class="px-6 py-3 font-bold text-[10px] uppercase text-text-muted text-right">Venta TravelHub</th>
+                        <th class="px-6 py-3 font-bold text-[10px] uppercase text-text-muted text-right">Diferencia</th>
+                        <th class="px-6 py-3 font-bold text-[10px] uppercase text-text-muted">Razonamiento IA (CPA)</th>
+                        <th class="px-6 py-3 font-bold text-[10px] uppercase text-text-muted text-center">Acción Contable</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-border-color">
+                    {% for item in discrepancias %}
+                    <tr id="row-{{ item.id_conciliacion }}" class="hover:bg-surface-2/40 transition-colors">
+                        <td class="px-6 py-4">
+                            <span class="block text-xs font-black text-text-main tabular-nums">
+                                {{ item.linea_reporte.numero_boleto_reportado|default:item.boleto_local.numero_boleto }}
+                            </span>
+                            <span class="text-[10px] text-text-muted uppercase font-bold">{{ item.boleto_local.pnr|default:"ID: GDS" }}</span>
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase
+                                {% if item.estado == 'DISCREPANCIA' %}bg-status-warning-bg text-status-warning
+                                {% else %}bg-status-danger-bg text-status-danger{% endif %} border border-current/20">
+                                {{ item.estado }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                             <span class="text-xs tabular-nums text-text-main">${{ item.linea_reporte.total_cobrado|default:"0.00" }}</span>
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                             <span class="text-xs tabular-nums text-text-secondary">${{ item.boleto_local.total_boleto|default:"0.00" }}</span>
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                             <span class="text-sm font-black tabular-nums {% if item.diferencia_total > 0 %}text-status-danger{% else %}text-status-success{% endif %}">
+                                 ${{ item.diferencia_total }}
+                             </span>
+                        </td>
+                        <td class="px-6 py-4 max-w-xs">
+                             <p class="text-[10px] leading-relaxed text-text-muted line-clamp-2 hover:line-clamp-none transition-all cursor-help">
+                                 {{ item.ia_razonamiento|default:"No se requieren ajustes." }}
+                             </p>
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            {% if item.sugerencia_asiento %}
+                                <div class="flex items-center justify-center gap-1.5 text-status-success text-[10px] font-bold">
+                                    <span class="material-symbols-outlined text-[16px]">check_circle</span>
+                                    Cuadrado
+                                </div>
+                            {% else %}
+                                <form hx-post="{% url 'finance:audit_approve_adjustment' item.id_conciliacion %}" 
+                                      hx-target="#row-{{ item.id_conciliacion }}" 
+                                      hx-swap="outerHTML swap:500ms"
+                                      onsubmit="this.querySelector('button').disabled = true">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn-primary h-7 px-3 text-[9px] font-black overflow-hidden group relative">
+                                        <span class="relative z-10">Aprobar Ajuste</span>
+                                        <div class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform"></div>
+                                    </button>
+                                </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="px-6 py-20 text-center">
+                            <div class="flex flex-col items-center gap-2 opacity-50">
+                                <span class="material-symbols-outlined text-[48px]">done_all</span>
+                                <p class="text-xs font-bold">¡Todo en orden! No se encontraron discrepancias en este reporte.</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

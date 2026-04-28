@@ -1,0 +1,225 @@
+{% extends "base_modern.html" %}
+{% load static %}
+
+{% block title %}Centro de Mando | TravelHub BI{% endblock %}
+
+{% block page_title %}Dashboard Directivo{% endblock %}
+{% block page_subtitle %}Inteligencia de Negocios y Rendimiento de la Agencia{% endblock %}
+
+{% block extra_css %}
+<!-- Chart.js para gráficos de alto impacto -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- HTMX para Lazy Load del Consejero IA -->
+<script src="https://unpkg.com/htmx.org@1.9.10"></script>
+
+<style>
+    :root {
+        --chart-line: #3b82f6;
+        --chart-fill: rgba(59, 130, 246, 0.05);
+    }
+    .dark :root {
+        --chart-line: #60a5fa;
+        --chart-fill: rgba(96, 165, 250, 0.1);
+    }
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in-up {
+        animation: fadeInUp 0.5s ease-out forwards;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto space-y-6">
+
+    <!-- FILA 1: KPIs ESTRATÉGICOS -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+        
+        <!-- Ventas Mes -->
+        <div class="bg-surface-1 border border-border-color rounded-3xl p-6 shadow-sm relative overflow-hidden group">
+            <div class="absolute top-0 right-0 w-24 h-24 bg-blue-500 opacity-5 rounded-bl-full group-hover:scale-110 transition-transform duration-500"></div>
+            <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">Ventas {{ kpis.mes_actual_nombre }}</p>
+            <h3 class="text-3xl font-black text-text-main">${{ kpis.ventas_mes_actual|floatformat:"2" }}</h3>
+            
+            <div class="mt-4 flex items-center gap-2 text-[10px] font-bold">
+                {% if kpis.crecimiento_porcentaje >= 0 %}
+                    <span class="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 px-2.5 py-1 rounded-lg flex items-center gap-1">
+                        <span class="material-symbols-outlined text-[14px]">trending_up</span> +{{ kpis.crecimiento_porcentaje }}%
+                    </span>
+                {% else %}
+                    <span class="bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400 px-2.5 py-1 rounded-lg flex items-center gap-1">
+                        <span class="material-symbols-outlined text-[14px]">trending_down</span> {{ kpis.crecimiento_porcentaje }}%
+                    </span>
+                {% endif %}
+                <span class="text-slate-400 dark:text-slate-500 font-medium">vs mes anterior</span>
+            </div>
+        </div>
+
+        <!-- Utilidad Bruta -->
+        <div class="bg-surface-1 border border-border-color rounded-3xl p-6 shadow-sm group hover:border-emerald-500/30 transition-all duration-300">
+            <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">Margen Neto Mes</p>
+            <h3 class="text-3xl font-black text-emerald-500">${{ kpis.utilidad_bruta|floatformat:"2" }}</h3>
+            <p class="mt-4 text-[10px] font-bold text-slate-400 flex items-center gap-1.5 uppercase tracking-wider">
+                <span class="material-symbols-outlined text-[16px] text-emerald-500">account_balance_wallet</span> Utilidad por Agencia
+            </p>
+        </div>
+
+        <!-- Boletos Emitidos -->
+        <div class="bg-surface-1 border border-border-color rounded-3xl p-6 shadow-sm group hover:border-blue-500/30 transition-all duration-300">
+            <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">Volumen de Emisión</p>
+            <div class="flex items-baseline gap-2">
+                <h3 class="text-3xl font-black text-text-main">{{ kpis.boletos_emitidos }}</h3>
+                <span class="text-xs font-bold text-slate-400">Tickets</span>
+            </div>
+            <p class="mt-4 text-[10px] font-bold text-slate-400 flex items-center gap-1.5 uppercase tracking-wider">
+                <span class="material-symbols-outlined text-[16px] text-blue-500">airplane_ticket</span> PNRs en Sistema
+            </p>
+        </div>
+
+        <!-- Tax Refund (La Bóveda) -->
+        <div class="bg-slate-900 dark:bg-blue-600 rounded-3xl p-6 shadow-2xl relative overflow-hidden group">
+            <!-- Efecto Decorativo -->
+            <div class="absolute -right-4 -bottom-4 w-28 h-28 bg-white opacity-[0.03] rounded-full group-hover:scale-125 transition-transform duration-700"></div>
+            
+            <p class="text-[10px] font-black text-blue-200 uppercase tracking-[0.2em] mb-2">Tax Refund Disponible</p>
+            <h3 class="text-3xl font-black text-white">${{ kpis.tax_refund_disponible|floatformat:"2" }}</h3>
+            
+            <a href="{% url 'finance:tax_refund_dashboard' %}" 
+               class="mt-4 inline-flex items-center gap-2 text-[10px] font-black bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-xl border border-white/10 transition-all active:scale-95 group/btn">
+                RECUPERAR AHORA 
+                <span class="material-symbols-outlined text-[16px] group-hover/btn:translate-x-1 transition-transform">arrow_right_alt</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- FILA 2: GRÁFICO E INTELIGENCIA ARTIFICIAL -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- Gráfico del Histórico (Chart.js) -->
+        <div class="lg:col-span-2 bg-surface-1 border border-border-color rounded-3xl p-8 shadow-sm">
+            <div class="flex items-center justify-between mb-8">
+                <div>
+                    <h3 class="text-lg font-black text-text-main">Histórico de Ventas</h3>
+                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Últimos 6 meses de actividad</p>
+                </div>
+                <!-- Mini filtros o Botones de Gráfico si se necesitan -->
+            </div>
+            <div class="relative h-72 w-full">
+                <canvas id="revenueChart"></canvas>
+            </div>
+        </div>
+
+        <!-- ASESOR DE NEGOCIOS IA (HTMX LAZY LOAD) -->
+        <div class="bg-surface-1 border border-border-color rounded-3xl p-8 shadow-md flex flex-col relative overflow-hidden border-t-8 border-t-blue-500">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-xs font-black text-text-main uppercase tracking-[0.1em] flex items-center gap-2">
+                    <span class="material-symbols-outlined text-blue-500 animate-pulse">smart_toy</span> CFO VIRTUAL (GEMINI)
+                </h3>
+                <span class="text-[10px] font-black text-blue-500 bg-blue-50 dark:bg-blue-900/40 px-2 py-0.5 rounded-md border border-blue-100 dark:border-blue-800">BETA 1.5 PRO</span>
+            </div>
+            
+            <!-- Contenedor HTMX que dispara la llamada al cargar -->
+            <div hx-get="{% url 'core:ai_business_advisor' %}" 
+                 hx-trigger="load" 
+                 class="flex-1 flex flex-col">
+                 
+                 <!-- Skeleton Loader Principal -->
+                 <div class="space-y-6">
+                     <div class="space-y-2">
+                        <div class="h-4 bg-slate-100 dark:bg-slate-800 rounded-full w-2/3 animate-pulse"></div>
+                     </div>
+                     <div class="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-2xl space-y-3 border border-slate-100 dark:border-slate-800">
+                        <div class="h-3 bg-slate-200 dark:bg-slate-700 rounded-full w-full animate-pulse"></div>
+                        <div class="h-3 bg-slate-200 dark:bg-slate-700 rounded-full w-4/5 animate-pulse"></div>
+                     </div>
+                     <div class="space-y-3">
+                        <div class="h-3 bg-slate-100 dark:bg-slate-800 rounded-full w-full animate-pulse"></div>
+                        <div class="h-3 bg-slate-100 dark:bg-slate-800 rounded-full w-5/6 animate-pulse"></div>
+                        <div class="h-3 bg-slate-100 dark:bg-slate-800 rounded-full w-full animate-pulse"></div>
+                     </div>
+                     <div class="h-12 bg-slate-100 dark:bg-slate-800 rounded-2xl w-full mt-6 animate-pulse"></div>
+                 </div>
+                 <p class="text-center text-[10px] font-bold text-slate-400 mt-8 uppercase tracking-widest animate-pulse italic">
+                     Analizando tendencias y KPIs de {{ kpis.mes_actual_nombre }}...
+                 </p>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const ctx = document.getElementById('revenueChart').getContext('2d');
+        const isDark = document.documentElement.classList.contains('dark');
+        
+        // Colores según el tema
+        const textColor = isDark ? '#94a3b8' : '#64748b';
+        const gridColor = isDark ? 'rgba(51, 65, 85, 0.4)' : '#e2e8f0';
+        const chartColor = isDark ? '#60a5fa' : '#3b82f6';
+
+        // Parseamos los datos que vienen de Django (como JSON stringified)
+        const chartData = JSON.parse('{{ chart_data_json|safe }}');
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: chartData.labels,
+                datasets: [{
+                    label: 'Ventas USD ($)',
+                    data: chartData.values,
+                    borderColor: chartColor,
+                    backgroundColor: isDark ? 'rgba(96, 165, 250, 0.05)' : 'rgba(59, 130, 246, 0.03)',
+                    borderWidth: 4,
+                    tension: 0.45,
+                    fill: 'start',
+                    pointBackgroundColor: '#fff',
+                    pointBorderColor: chartColor,
+                    pointBorderWidth: 3,
+                    pointRadius: 5,
+                    pointHoverRadius: 8,
+                    pointHitRadius: 50
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { intersect: false, mode: 'index' },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: isDark ? '#1e293b' : '#fff',
+                        titleColor: isDark ? '#fff' : '#1e293b',
+                        bodyColor: isDark ? '#cbd5e1' : '#64748b',
+                        borderColor: isDark ? '#334155' : '#e2e8f0',
+                        borderWidth: 1,
+                        padding: 12,
+                        displayColors: false,
+                        bodyFont: { family: "'Plus Jakarta Sans', sans-serif" }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: {
+                            color: textColor,
+                            font: { family: "'Plus Jakarta Sans', sans-serif", weight: '900', size: 10 }
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: gridColor, drawBorder: false },
+                        ticks: {
+                            color: textColor,
+                            font: { family: "'Plus Jakarta Sans', sans-serif", size: 10 },
+                            callback: function(value) { return '$' + value; }
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

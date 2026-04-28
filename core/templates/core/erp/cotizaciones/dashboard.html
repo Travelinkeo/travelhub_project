@@ -1,0 +1,251 @@
+{% extends 'base_modern.html' %}
+{% load humanize %}
+
+{% block title %}Cotizaciones - TravelHub{% endblock %}
+
+{% block content %}
+<main class="flex-1 w-full max-w-[1400px] mx-auto p-6 md:p-8 lg:p-10">
+    
+    <!-- Page Title & Breadcrumb -->
+    <div class="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+            <div class="flex items-center gap-2 text-xs text-slate-500 dark:text-gray-400 font-medium mb-2 uppercase tracking-wider">
+                <span>Gestión</span>
+                <span class="material-symbols-outlined text-[10px]">chevron_right</span>
+                <span class="text-primary">Cotizaciones</span>
+            </div>
+            <h1 class="text-4xl font-bold text-gray-900 dark:text-white tracking-tight">Cotizaciones B2B</h1>
+            <p class="text-gray-500 dark:text-slate-400 mt-2 text-lg">Gestiona las propuestas comerciales e itinerarios para tus clientes</p>
+        </div>
+        <div class="flex gap-3">
+            <a href="{% url 'core:cotizacion_nueva' %}" class="btn-primary">
+                <span class="material-symbols-outlined text-[18px]">add</span> Nueva Cotización
+            </a>
+        </div>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <!-- Total -->
+        <div class="card-base p-6 relative overflow-hidden group hover:border-primary/50 transition-colors">
+            <div class="absolute -right-4 -top-4 text-primary/10 group-hover:text-primary/20 transition-colors">
+                <span class="material-symbols-outlined text-[100px]">request_quote</span>
+            </div>
+            <div class="relative z-10">
+                <p class="text-gray-500 dark:text-slate-400 text-sm font-bold uppercase tracking-wider mb-2">Total Cotizaciones</p>
+                <div class="flex items-baseline gap-2">
+                    <h3 class="text-4xl font-black text-gray-900 dark:text-white tracking-tight">{{ total_cotizaciones }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- Enviadas -->
+        <div class="card-base p-6 relative overflow-hidden group hover:border-emerald-500/50 transition-colors">
+            <div class="absolute -right-4 -top-4 text-emerald-500/10 group-hover:text-emerald-500/20 transition-colors">
+                <span class="material-symbols-outlined text-[100px]">send</span>
+            </div>
+            <div class="relative z-10">
+                <p class="text-gray-500 dark:text-slate-400 text-sm font-bold uppercase tracking-wider mb-2">Enviadas</p>
+                <div class="flex items-baseline gap-2">
+                    <h3 class="text-4xl font-black text-emerald-500 tracking-tight">{{ cotizaciones_enviadas }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- Borradores -->
+        <div class="card-base p-6 relative overflow-hidden group hover:border-amber-500/50 transition-colors">
+            <div class="absolute -right-4 -top-4 text-amber-500/10 group-hover:text-amber-500/20 transition-colors">
+                <span class="material-symbols-outlined text-[100px]">draft</span>
+            </div>
+            <div class="relative z-10">
+                <p class="text-gray-500 dark:text-slate-400 text-sm font-bold uppercase tracking-wider mb-2">Borradores</p>
+                <div class="flex items-baseline gap-2">
+                    <h3 class="text-4xl font-black text-amber-500 tracking-tight">{{ cotizaciones_pendientes }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters & Search -->
+    <div class="card-base p-4 mb-6">
+        <form method="get" class="flex flex-col md:flex-row gap-4">
+            <div class="flex-1 relative">
+                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-[20px]">search</span>
+                <input type="text" name="q" value="{{ request.GET.q }}" class="input-base pl-10" placeholder="Buscar por número, cliente...">
+            </div>
+            <div class="w-full md:w-64">
+                <select name="estado" onchange="this.form.submit()" class="input-base">
+                    <option value="">Todos los Estados</option>
+                    <option value="BOR" {% if request.GET.estado == 'BOR' %}selected{% endif %}>Borrador</option>
+                    <option value="ENV" {% if request.GET.estado == 'ENV' %}selected{% endif %}>Enviada</option>
+                    <option value="ACE" {% if request.GET.estado == 'ACE' %}selected{% endif %}>Aceptada</option>
+                    <option value="REC" {% if request.GET.estado == 'REC' %}selected{% endif %}>Rechazada</option>
+                    <option value="VEN" {% if request.GET.estado == 'VEN' %}selected{% endif %}>Vencida</option>
+                    <option value="CNV" {% if request.GET.estado == 'CNV' %}selected{% endif %}>Convertida a Venta</option>
+                </select>
+            </div>
+        </form>
+    </div>
+
+    <!-- DataGrid -->
+    <div class="card-base overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead class="bg-gray-50 dark:bg-surface-highlight-dark/30 border-b border-border-light dark:border-border-dark">
+                    <tr>
+                        <th class="px-6 py-4 text-[10px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Info Cotización</th>
+                        <th class="px-6 py-4 text-[10px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Cliente</th>
+                        <th class="px-6 py-4 text-[10px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Fechas</th>
+                        <th class="px-6 py-4 text-[10px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Estado</th>
+                        <th class="px-6 py-4 text-[10px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider text-right">Monto Total</th>
+                        <th class="px-6 py-4 text-[10px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider text-right">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-dashed divide-border-light dark:divide-border-dark">
+                    {% for cotizacion in cotizaciones %}
+                    <tr class="hover:bg-gray-50 dark:hover:bg-surface-highlight-dark/20 transition-colors group">
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-3">
+                                <div class="p-2 bg-primary/10 rounded-lg text-primary">
+                                    <span class="material-symbols-outlined text-[20px]">request_quote</span>
+                                </div>
+                                <div class="flex flex-col">
+                                    <p class="text-gray-900 dark:text-white font-bold text-sm">{{ cotizacion.numero_cotizacion }}</p>
+                                    <p class="text-[11px] text-gray-500 dark:text-slate-500 font-mono">ID: {{ cotizacion.id_cotizacion }}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-blue-500/10 text-blue-500 flex items-center justify-center text-xs font-bold border border-blue-500/20">
+                                    {% if cotizacion.cliente %}
+                                    {{ cotizacion.cliente.nombres|slice:":1" }}{{ cotizacion.cliente.apellidos|slice:":1" }}
+                                    {% else %}
+                                    {{ cotizacion.nombre_cliente_manual|slice:":2"|upper }}
+                                    {% endif %}
+                                </div>
+                                <div class="flex flex-col">
+                                    <p class="text-gray-900 dark:text-white font-bold text-sm">
+                                        {% if cotizacion.cliente %}
+                                        {{ cotizacion.cliente.nombres }} {{ cotizacion.cliente.apellidos }}
+                                        {% else %}
+                                        {{ cotizacion.nombre_cliente_manual }} <span class="bg-amber-500/10 text-amber-500 px-1 py-0.5 rounded text-[9px] uppercase tracking-wider ml-1">Prospecto</span>
+                                        {% endif %}
+                                    </p>
+                                    <p class="text-xs text-gray-500 dark:text-slate-500">
+                                        {% if cotizacion.cliente %}{{ cotizacion.cliente.email }}{% else %}Cotización rápida{% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 flex flex-col gap-0.5">
+                            <p class="text-gray-700 dark:text-slate-300 text-sm"><span class="text-gray-400 dark:text-slate-500 text-[11px] uppercase mr-1">Emi:</span>{{ cotizacion.fecha_emision|date:"d M Y" }}</p>
+                            {% if cotizacion.fecha_validez %}
+                            <p class="text-gray-700 dark:text-slate-300 text-sm"><span class="text-gray-400 dark:text-slate-500 text-[11px] uppercase mr-1">Ven:</span>{{ cotizacion.fecha_validez|date:"d M Y" }}</p>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4">
+                            {% if cotizacion.estado == 'ACE' or cotizacion.estado == 'CNV' %}
+                                <span class="badge-green">{{ cotizacion.get_estado_display }}</span>
+                            {% elif cotizacion.estado == 'BOR' %}
+                                <span class="badge-amber">{{ cotizacion.get_estado_display }}</span>
+                            {% elif cotizacion.estado == 'ENV' %}
+                                <span class="badge-blue">{{ cotizacion.get_estado_display }}</span>
+                            {% elif cotizacion.estado == 'REC' or cotizacion.estado == 'VEN' %}
+                                <span class="badge-red">{{ cotizacion.get_estado_display }}</span>
+                            {% else %}
+                                <span class="bg-gray-100 dark:bg-surface-highlight-dark text-gray-600 dark:text-slate-300 px-2 py-0.5 rounded-full text-[11px] font-bold border border-border-light dark:border-border-dark">{{ cotizacion.get_estado_display }}</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <p class="text-gray-900 dark:text-white font-mono font-bold text-sm">{{ cotizacion.total_cotizado|floatformat:2|intcomma }}</p>
+                            <p class="text-[10px] text-gray-500 dark:text-slate-500 uppercase tracking-widest font-bold">{{ cotizacion.moneda.codigo_iso }}</p>
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <div class="flex items-center justify-end gap-1 opacity-50 group-hover:opacity-100 transition-opacity">
+                                <a href="{% url 'core:cotizacion_detalle' cotizacion.pk %}"
+                                    class="p-2 text-gray-400 hover:text-primary transition-colors hover:bg-primary/10 rounded-lg flex items-center justify-center"
+                                    title="Ver Detalle">
+                                    <span class="material-symbols-outlined text-[18px]">visibility</span>
+                                </a>
+                                <a href="{% url 'cotizaciones:cotizacion-preview-pdf' cotizacion.pk %}" target="_blank"
+                                    class="p-2 text-gray-400 hover:text-rose-500 transition-colors hover:bg-rose-500/10 rounded-lg flex items-center justify-center"
+                                    title="Ver PDF">
+                                    <span class="material-symbols-outlined text-[18px]">picture_as_pdf</span>
+                                </a>
+                                <a href="{% url 'core:cotizacion_editar' cotizacion.pk %}"
+                                    class="p-2 text-gray-400 hover:text-blue-500 transition-colors hover:bg-blue-500/10 rounded-lg flex items-center justify-center"
+                                    title="Editar">
+                                    <span class="material-symbols-outlined text-[18px]">edit</span>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="px-6 py-12 text-center">
+                            <div class="flex flex-col items-center justify-center">
+                                <div class="w-16 h-16 bg-gray-50 dark:bg-surface-highlight-dark/50 rounded-full flex items-center justify-center mb-4 border border-dashed border-border-light dark:border-border-dark">
+                                    <span class="material-symbols-outlined text-[32px] text-gray-300 dark:text-slate-600">request_quote</span>
+                                </div>
+                                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">No hay cotizaciones</h3>
+                                <p class="text-sm text-gray-500 dark:text-slate-400 max-w-sm mx-auto mb-6">Aún no se han generado cotizaciones o no coinciden con los filtros actuales.</p>
+                                <a href="{% url 'core:cotizacion_nueva' %}" class="btn-primary">
+                                    <span class="material-symbols-outlined text-[18px]">add</span> Crear Primera Cotización
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if is_paginated %}
+        <div class="px-6 py-4 border-t border-border-light dark:border-border-dark flex items-center justify-between bg-gray-50 dark:bg-surface-highlight-dark/10">
+            <div class="flex-1 flex justify-between sm:hidden">
+                {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}"
+                    class="btn-secondary">Anterior</a>
+                {% endif %}
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}"
+                    class="btn-secondary">Siguiente</a>
+                {% endif %}
+            </div>
+            <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                <div>
+                    <p class="text-sm text-gray-500 dark:text-slate-400">
+                        Mostrando <span class="font-bold text-gray-900 dark:text-white">{{ page_obj.start_index }}</span> a <span
+                            class="font-bold text-gray-900 dark:text-white">{{ page_obj.end_index }}</span> de <span
+                            class="font-bold text-gray-900 dark:text-white">{{ paginator.count }}</span> cotizaciones
+                    </p>
+                </div>
+                <div>
+                    <nav class="relative z-0 inline-flex rounded-lg shadow-sm -space-x-px" aria-label="Pagination">
+                        {% if page_obj.has_previous %}
+                        <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}"
+                            class="relative inline-flex items-center px-3 py-2 rounded-l-lg border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark text-sm font-medium text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-surface-highlight-dark/50 transition-colors">
+                            <span class="sr-only">Anterior</span>
+                            <span class="material-symbols-outlined text-[18px]">chevron_left</span>
+                        </a>
+                        {% endif %}
+                        <span class="relative inline-flex items-center px-4 py-2 border border-border-light dark:border-border-dark bg-gray-50 dark:bg-surface-highlight-dark text-sm font-bold text-gray-900 dark:text-white">
+                            {{ page_obj.number }}
+                        </span>
+                        {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}"
+                            class="relative inline-flex items-center px-3 py-2 rounded-r-lg border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark text-sm font-medium text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-surface-highlight-dark/50 transition-colors">
+                            <span class="sr-only">Siguiente</span>
+                            <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+                        </a>
+                        {% endif %}
+                    </nav>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</main>
+{% endblock %}

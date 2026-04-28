@@ -1,0 +1,34 @@
+<!-- 
+  Uso en tus plantillas:
+  {% include "components/modal_base.html" with modal_id="mi-modal" title="Título" content_template="ruta/al/contenido.html" %}
+-->
+<div id="{{ modal_id }}" class="hidden fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        
+        <!-- Overlay oscuro -->
+        <div class="fixed inset-0 bg-slate-900/75 backdrop-blur-sm transition-opacity" aria-hidden="true" onclick="document.getElementById('{{ modal_id }}').classList.add('hidden')"></div>
+
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+        
+        <!-- Tarjeta del Modal -->
+        <div class="inline-block align-bottom bg-surface-1 border border-border-color rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg w-full">
+            <div class="px-6 py-5 border-b border-border-color flex justify-between items-center">
+                <h3 class="text-lg leading-6 font-black text-text-main" id="modal-title">
+                    {{ title|default:"Atención" }}
+                </h3>
+                <button type="button" onclick="document.getElementById('{{ modal_id }}').classList.add('hidden')" class="text-text-muted hover:text-text-main transition-colors">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            
+            <div class="px-6 py-5 bg-surface-2">
+                <!-- Inyección del contenido dinámico -->
+                {% if content_template %}
+                    {% include content_template %}
+                {% else %}
+                    <p class="text-text-muted">Contenido del modal...</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>

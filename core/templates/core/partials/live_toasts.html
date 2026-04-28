@@ -1,0 +1,15 @@
+{% for notif in notificaciones %}
+<div class="pointer-events-auto bg-[#1e293b]/90 backdrop-blur-md border rounded-2xl p-4 shadow-2xl relative overflow-hidden mb-4 animate-fade-in-up
+    {% if notif.tipo == 'ai_magic' %}border-blue-500/50 shadow-[0_0_20px_rgba(59,130,246,0.4)]{% elif notif.tipo == 'success' %}border-emerald-500/30{% endif %}">
+    <div class="flex items-start gap-4">
+        <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 
+            {% if notif.tipo == 'ai_magic' %}bg-blue-500 text-white{% elif notif.tipo == 'success' %}bg-emerald-500/20 text-emerald-400{% endif %}">
+            <span class="material-symbols-outlined text-[20px]">{{ notif.icono }}</span>
+        </div>
+        <div class="flex-1 min-w-0 pt-0.5">
+            <h4 class="text-sm font-black text-white">{{ notif.titulo }}</h4>
+            <p class="text-xs text-slate-300 leading-relaxed">{{ notif.mensaje }}</p>
+        </div>
+    </div>
+</div>
+{% endfor %}

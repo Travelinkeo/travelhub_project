@@ -1,0 +1,231 @@
+{% extends 'base_modern.html' %}
+{% load static %}
+
+{% block title %}Tablero de Ventas | TravelHub{% endblock %}
+
+{% block page_title %}Tablero de Ventas{% endblock %}
+{% block page_subtitle %}Control total de reservas, cobros y estados vinculados al ERP.{% endblock %}
+
+{% block extra_head %}
+<style nonce="{{ request.csp_nonce }}">
+    .shadow-swiss { box-shadow: 0 4px 20px -5px rgba(0,0,0,0.3) !important; }
+    .kpi-card {
+        @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-xl;
+        border-left: 4px solid transparent;
+    }
+    .kpi-card:hover {
+        border-left-color: var(--primary);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<main class="flex-1 w-full max-w-[1400px] mx-auto p-6 md:p-8">
+
+    <!-- Header & Action Bar -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10 pb-6 border-b border-border-color">
+        <div>
+            <h1 class="text-3xl font-black text-text-main tracking-tight uppercase">Ventas & Reservas</h1>
+            <p class="text-text-muted text-sm mt-1">Supervisión en tiempo real de la facturación y estados de boletos.</p>
+        </div>
+        <div class="flex gap-3">
+            <a href="{% url 'bookings:venta_create' %}" class="btn-primary !h-12 !px-8 shadow-lg shadow-primary/20">
+                <span class="material-symbols-outlined">add_circle</span>
+                <span>Registrar Nueva Venta</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- KPIs Dinámicos -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+        <!-- KPI 1 -->
+        <div class="card-base p-6 kpi-card bg-surface-1 border-border-color">
+            <div class="flex items-center justify-between mb-4">
+                <div class="size-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
+                    <span class="material-symbols-outlined text-[24px]">shopping_cart</span>
+                </div>
+                <span class="text-[10px] font-black text-primary bg-primary/10 px-2 py-1 rounded-full uppercase tracking-widest">+12.5%</span>
+            </div>
+            <p class="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Ventas del Mes</p>
+            <h2 class="text-3xl font-black text-text-main mt-1 tracking-tighter">{{ ventas.count }}</h2>
+        </div>
+
+        <!-- KPI 2 -->
+        <div class="card-base p-6 kpi-card bg-surface-1 border-border-color">
+            <div class="flex items-center justify-between mb-4">
+                <div class="size-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-500 border border-emerald-500/20">
+                    <span class="material-symbols-outlined text-[24px]">payments</span>
+                </div>
+                <span class="text-[10px] font-black text-emerald-500 bg-emerald-500/10 px-2 py-1 rounded-full uppercase tracking-widest">+5%</span>
+            </div>
+            <p class="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Ingresos Brutos</p>
+            <h2 class="text-3xl font-black text-text-main mt-1 tracking-tighter">$45,200</h2>
+        </div>
+
+        <!-- KPI 3 -->
+        <div class="card-base p-6 kpi-card bg-surface-1 border-border-color">
+            <div class="flex items-center justify-between mb-4">
+                <div class="size-12 rounded-2xl bg-amber-500/10 flex items-center justify-center text-amber-500 border border-amber-500/20">
+                    <span class="material-symbols-outlined text-[24px]">hourglass_empty</span>
+                </div>
+                <span class="text-[10px] font-black text-amber-500 bg-amber-500/10 px-2 py-1 rounded-full uppercase tracking-widest">URGENTE</span>
+            </div>
+            <p class="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Pendientes Pago</p>
+            <h2 class="text-3xl font-black text-text-main mt-1 tracking-tighter">8</h2>
+        </div>
+
+        <!-- KPI 4 -->
+        <div class="card-base p-6 kpi-card bg-surface-1 border-border-color">
+            <div class="flex items-center justify-between mb-4">
+                <div class="size-12 rounded-2xl bg-violet-500/10 flex items-center justify-center text-violet-500 border border-violet-500/20">
+                    <span class="material-symbols-outlined text-[24px]">query_stats</span>
+                </div>
+                <span class="text-[10px] font-black text-violet-500 bg-violet-500/10 px-2 py-1 rounded-full uppercase tracking-widest">TARGET 90%</span>
+            </div>
+            <p class="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Margen Prom.</p>
+            <h2 class="text-3xl font-black text-text-main mt-1 tracking-tighter">14.5%</h2>
+        </div>
+    </div>
+
+    <!-- DataGrid de Ventas -->
+    <div class="card-base overflow-hidden border-2 border-primary/5 shadow-2xl">
+        <!-- Filtrado Avanzado -->
+        <div class="px-6 py-5 border-b border-border-color bg-surface-2/50 backdrop-blur-sm">
+            <div class="flex flex-col md:flex-row gap-4">
+                <div class="relative flex-1 group">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-muted text-[20px] group-focus-within:text-primary transition-colors">search</span>
+                    <input type="text" name="q" placeholder="Buscar por localizador, cliente o ID de venta..."
+                        class="input-base pl-10 !bg-surface-1 focus:!bg-surface-base"
+                        hx-get="{% url 'bookings:venta_list' %}" hx-trigger="keyup changed delay:500ms"
+                        hx-target="#sales-list-body">
+                </div>
+                <div class="flex gap-3">
+                    <select class="input-base w-48 !bg-surface-1">
+                        <option>Todos los estados</option>
+                        <option>Pendientes</option>
+                        <option>Pagadas</option>
+                        <option>Canceladas</option>
+                    </select>
+                    <button class="btn-secondary !w-12 !p-0" title="Exportar CSV">
+                        <span class="material-symbols-outlined">download</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabla de Datos Refinada -->
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead>
+                    <tr>
+                        <th class="px-6 py-4">Referencia / Tipo</th>
+                        <th class="px-6 py-4">Cliente / Pasajero</th>
+                        <th class="px-6 py-4">Fecha Emisión</th>
+                        <th class="px-6 py-4">Total & Saldo</th>
+                        <th class="px-6 py-4">Estado Operativo</th>
+                        <th class="px-6 py-4 text-right">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="sales-list-body">
+                    {% for v in ventas %}
+                    <tr class="group hover:bg-nav-active-bg/20 transition-all border-b border-border-color last:border-0">
+                        <td class="px-6 py-5">
+                            <div class="flex flex-col">
+                                <span class="font-black text-text-main tabular-nums tracking-tighter text-sm group-hover:text-primary transition-colors uppercase">
+                                    {{ v.localizador|default:v.id_venta }}
+                                </span>
+                                <span class="text-[10px] text-text-muted mt-1 font-bold uppercase tracking-widest flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-[12px] text-primary">label</span>
+                                    {{ v.get_tipo_venta_display }}
+                                </span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-5">
+                            <div class="flex flex-col">
+                                {% if v.cliente %}
+                                <span class="text-xs font-black text-text-main uppercase tracking-tight">{{ v.cliente.get_nombre_completo }}</span>
+                                <span class="text-[10px] text-text-muted truncate max-w-[180px]">{{ v.cliente.email }}</span>
+                                {% else %}
+                                <span class="text-xs font-bold text-red-500/80 uppercase">Sin cliente asignado</span>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td class="px-6 py-5">
+                            <span class="font-mono text-xs text-text-secondary">{{ v.fecha_venta|date:"d M, Y"|upper }}</span>
+                        </td>
+                        <td class="px-6 py-5">
+                            <div class="flex flex-col">
+                                <span class="font-black text-text-main tabular-nums">{{ v.moneda.simbolo }}{{ v.total_venta }}</span>
+                                {% if v.saldo_pendiente > 0 %}
+                                <span class="text-[10px] font-black text-amber-500 mt-1 uppercase tracking-tighter">Debe: {{ v.moneda.simbolo }}{{ v.saldo_pendiente }}</span>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td class="px-6 py-5">
+                            <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border
+                                {% if v.estado == 'PAG' or v.estado == 'COM' %}bg-emerald-500/10 text-emerald-500 border-emerald-500/20
+                                {% elif v.estado == 'PEN' %}bg-amber-500/10 text-amber-500 border-amber-500/20
+                                {% elif v.estado == 'CAN' %}bg-red-500/10 text-red-500 border-red-500/20
+                                {% else %}bg-primary/10 text-primary border-primary/20{% endif %}">
+                                {{ v.get_estado_display }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-5">
+                            <div class="flex items-center justify-end gap-2">
+                                <a href="{% url 'core:generar_voucher' v.pk %}" target="_blank"
+                                    class="size-8 flex items-center justify-center text-text-muted hover:text-primary hover:bg-primary/10 rounded-lg transition-all border border-transparent hover:border-primary/20"
+                                    title="Ver Voucher">
+                                    <span class="material-symbols-outlined text-[20px]">description</span>
+                                </a>
+                                {% if not v.factura %}
+                                <form action="{% url 'core:venta_facturar' v.pk %}" method="post" class="inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="size-8 flex items-center justify-center text-text-muted hover:text-emerald-500 hover:bg-emerald-500/10 rounded-lg transition-all border border-transparent hover:border-emerald-500/20"
+                                        title="Generar Factura">
+                                        <span class="material-symbols-outlined text-[20px]">receipt</span>
+                                    </button>
+                                </form>
+                                {% endif %}
+                                <a href="{% url 'bookings:venta_timeline' v.pk %}"
+                                    class="size-8 flex items-center justify-center text-text-muted hover:text-amber-500 hover:bg-amber-500/10 rounded-lg transition-all border border-transparent hover:border-amber-500/20"
+                                    title="Ver Línea de Vida (Timeline)">
+                                    <span class="material-symbols-outlined text-[20px]">history</span>
+                                </a>
+                                <a href="{% url 'bookings:venta_detail' v.pk %}"
+                                    class="size-8 flex items-center justify-center text-text-muted hover:text-primary hover:bg-primary/10 rounded-lg transition-all border border-transparent hover:border-primary/20"
+                                    title="Detalles">
+                                    <span class="material-symbols-outlined text-[20px]">visibility</span>
+                                </a>
+                                <a href="{% url 'bookings:venta_update' v.pk %}"
+                                    class="size-8 flex items-center justify-center text-text-muted hover:text-blue-500 hover:bg-blue-500/10 rounded-lg transition-all border border-transparent hover:border-blue-500/20"
+                                    title="Editar">
+                                    <span class="material-symbols-outlined text-[20px]">edit</span>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="px-6 py-24 text-center">
+                            <div class="flex flex-col items-center gap-4 animate-fade-in">
+                                <div class="size-20 rounded-3xl bg-surface-2 flex items-center justify-center text-text-muted border border-border-color">
+                                    <span class="material-symbols-outlined text-[48px]">shopping_bag</span>
+                                </div>
+                                <div class="space-y-1">
+                                    <h3 class="text-xl font-black text-text-main uppercase tracking-tight">No hay ventas</h3>
+                                    <p class="text-sm text-text-muted">Inicia una nueva operación o importa boletos GDS.</p>
+                                </div>
+                                <a href="{% url 'bookings:venta_create' %}" class="btn-primary !mt-4">
+                                    <span class="material-symbols-outlined">add_circle</span>
+                                    <span>Crear Primera Venta</span>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+{% endblock %}

@@ -1,0 +1,25 @@
+<tr class="bg-status-success-bg/20 animate-in fade-in duration-500 scale-in shadow-inner">
+    <td colspan="6" class="px-6 py-4">
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-full bg-status-success flex items-center justify-center text-on-primary">
+                <span class="material-symbols-outlined text-[18px]">check_circle</span>
+            </div>
+            <div>
+                <p class="text-[11px] font-black text-status-success uppercase tracking-widest">Ajuste Contable Generado Exitosamente</p>
+                <div class="flex items-center gap-2 mt-0.5">
+                    <span class="text-[10px] text-text-muted font-bold">Asiento Ref:</span>
+                    <a href="{% url 'contabilidad:asiento_detail' asiento_id %}" 
+                       class="text-[10px] text-primary font-black hover:underline tabular-nums">
+                        {{ numero_asiento }}
+                    </a>
+                    <span class="text-[10px] text-text-muted italic">— Discrepancia conciliada y cuadrado contablemente al instante.</span>
+                </div>
+            </div>
+        </div>
+    </td>
+    <td class="px-6 py-4 text-center">
+        <span class="px-3 py-1 bg-status-success/10 text-status-success border border-status-success/20 rounded-full text-[9px] font-black uppercase">
+            Sincronizado
+        </span>
+    </td>
+</tr>

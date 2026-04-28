@@ -1,0 +1,84 @@
+
+<div class="bg-surface-1 border border-border-color rounded-3xl p-8 shadow-sm animate-fade-in-up">
+    
+    <div class="flex items-center justify-between mb-8">
+        <div class="flex items-center gap-3">
+            <div class="w-12 h-12 bg-violet-500/15 rounded-2xl flex items-center justify-center">
+                <span class="material-symbols-outlined text-violet-400 text-2xl">palette</span>
+            </div>
+            <div>
+                <h3 class="text-xl font-black text-text-main">{{ contenido.titulo }}</h3>
+                <span class="px-2 py-0.5 bg-violet-500/10 text-violet-400 text-[10px] font-bold rounded-full uppercase tracking-wider">Modo Creativo AI</span>
+            </div>
+        </div>
+        <button onclick="window.print()" class="text-text-muted hover:text-text-main transition-colors">
+            <span class="material-symbols-outlined">print</span>
+        </button>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <!-- Columna Izquierda: El Texto Generado -->
+        <div class="lg:col-span-2 space-y-6">
+            <div class="prose prose-invert max-w-none text-text-muted leading-relaxed">
+                {{ contenido.contenido_principal|safe }}
+            </div>
+
+            {% if contenido.hashtags %}
+            <div class="flex flex-wrap gap-2 pt-4">
+                {% for tag in contenido.hashtags %}
+                <span class="text-blue-400 font-medium text-sm">#{{ tag }}</span>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Columna Derecha: Inspiración y Sugerencias -->
+        <div class="space-y-6">
+            
+            <!-- MOODBOARD: Imágenes Reales de Unsplash -->
+            {% if contenido.imagenes_inspiracion %}
+            <div class="bg-surface-2 rounded-2xl p-4 border border-border-color">
+                <h4 class="text-xs font-black text-text-muted uppercase tracking-widest mb-4 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-sm">filter_hdr</span>
+                    Inspiración Visual
+                </h4>
+                <div class="grid grid-cols-2 gap-2">
+                    {% for img in contenido.imagenes_inspiracion %}
+                    <div class="group relative aspect-square rounded-xl overflow-hidden bg-slate-800">
+                        <img src="{{ img.url }}" alt="{{ img.alt }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                        <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <a href="{{ img.url }}" target="_blank" class="text-white">
+                                <span class="material-symbols-outlined text-lg">open_in_new</span>
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <p class="text-[10px] text-text-muted mt-3 italic line-clamp-1">Basado en: {{ contenido.keywords_visuales|join:", " }}</p>
+            </div>
+            {% endif %}
+
+            <!-- Sugerencias de Branding -->
+            <div class="bg-gradient-to-br from-indigo-500/5 to-purple-500/5 rounded-2xl p-5 border border-indigo-500/10">
+                <h4 class="text-xs font-black text-indigo-400 uppercase tracking-widest mb-3">Estética Recomendada</h4>
+                <ul class="space-y-3">
+                    {% for sug in contenido.sugerencias_visuales %}
+                    <li class="flex items-start gap-2 text-xs text-text-muted">
+                        <span class="w-1.5 h-1.5 bg-indigo-500 rounded-full mt-1 flex-shrink-0"></span>
+                        {{ sug }}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <!-- Boton de Acción Rápida -->
+            <button class="w-full py-4 bg-surface-2 border-2 border-dashed border-border-color rounded-2xl text-text-muted hover:text-text-main hover:border-violet-500/50 transition-all flex flex-col items-center justify-center gap-1 group">
+                <span class="material-symbols-outlined text-3xl group-hover:scale-110 transition-transform">content_copy</span>
+                <span class="text-xs font-bold">Copiar Contenido</span>
+            </button>
+
+        </div>
+    </div>
+
+</div>

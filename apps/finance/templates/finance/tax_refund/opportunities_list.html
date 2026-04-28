@@ -1,0 +1,75 @@
+{% extends 'base_modern.html' %}
+
+{% block content %}
+<div class="px-6 py-8 max-w-7xl mx-auto" x-data="{ count: {{ oportunidades.count }} }">
+    <!-- Header Forense -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+        <div>
+            <h1 class="text-3xl font-black text-white tracking-tighter flex items-center gap-3">
+                <span class="material-symbols-outlined text-status-success text-3xl">savings</span>
+                Dinero sobre la Mesa
+            </h1>
+            <p class="text-text-muted text-sm mt-1">Oportunidades de Tax Refund detectadas por el Motor de IA.</p>
+        </div>
+        
+        <div class="flex items-center gap-6 bg-surface-main/30 border border-white/5 p-4 rounded-xl backdrop-blur-sm">
+            <div class="text-center">
+                <p class="text-[10px] text-text-muted uppercase font-bold tracking-widest mb-1">Total Recuperable</p>
+                <p class="text-2xl font-black text-status-success tabular-nums">$<span x-text="count * 125.00"></span></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabla de Oportunidades -->
+    <div class="bg-surface-main border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="bg-white/5 border-b border-white/10">
+                    <th class="px-6 py-4 text-[11px] font-black text-text-muted uppercase tracking-widest">Boleto / PNR</th>
+                    <th class="px-6 py-4 text-[11px] font-black text-text-muted uppercase tracking-widest">Pasajero</th>
+                    <th class="px-6 py-4 text-[11px] font-black text-text-muted uppercase tracking-widest text-right">Monto Estimado</th>
+                    <th class="px-6 py-4 text-[11px] font-black text-text-muted uppercase tracking-widest text-center">IA Insight</th>
+                    <th class="px-6 py-4 text-[11px] font-black text-text-muted uppercase tracking-widest text-right">Acción</th>
+                </tr>
+            </thead>
+            <tbody id="opportunities-body">
+                {% for op in oportunidades %}
+                <tr id="reclamo-{{ op.pk }}" class="border-b border-white/5 hover:bg-white/[0.02] transition-colors group">
+                    <td class="px-6 py-4">
+                        <p class="text-white font-bold text-sm">{{ op.boleto.numero_boleto }}</p>
+                        <p class="text-[10px] text-text-muted">{{ op.boleto.localizador_pnr }}</p>
+                    </td>
+                    <td class="px-6 py-4">
+                        <p class="text-text-main text-sm font-medium">{{ op.boleto.nombre_pasajero_procesado }}</p>
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                        <p class="text-status-success font-black text-sm">${{ op.monto_estimado }}</p>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-2 justify-center">
+                            <span class="material-symbols-outlined text-[16px] text-status-success animate-pulse">check_circle</span>
+                            <span class="text-[10px] text-text-muted italic">{{ op.razon_elegibilidad }}</span>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                        <button hx-post="{% url 'finance:tax_refund_start' op.pk %}"
+                                hx-target="#reclamo-{{ op.pk }}"
+                                hx-swap="outerHTML"
+                                class="btn-primary h-8 px-4 text-[10px] flex items-center gap-2 bg-text-main border-text-main hover:bg-black group-hover:scale-105 transition-transform">
+                            Iniciar Trámite
+                        </button>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="px-6 py-12 text-center">
+                        <span class="material-symbols-outlined text-4xl text-white/10 mb-2">inbox</span>
+                        <p class="text-text-muted text-sm">No hay nuevas oportunidades detectadas en este momento.</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,380 @@
+[
+  {
+    "model": "contabilidad.plancontable",
+    "pk": 1,
+    "fields": {
+      "codigo_cuenta": "1",
+      "nombre_cuenta": "ACTIVO",
+      "tipo_cuenta": "AC",
+      "nivel": 1,
+      "cuenta_padre": null,
+      "permite_movimientos": false,
+      "naturaleza": "D",
+      "descripcion": "Recursos controlados por la entidad"
+    }
+  },
+  {
+    "model": "contabilidad.plancontable",
+    "pk": 2,
+    "fields": {
+      "codigo_cuenta": "1.1",
+      "nombre_cuenta": "Activo Corriente",
+      "tipo_cuenta": "AC",
+      "nivel": 2,
+      "cuenta_padre": 1,
+      "permite_movimientos": false,
+      "naturaleza": "D",
+      "descripcion": "Activos realizables en el corto plazo"
+    }
+  },
+  {
+    "model": "contabilidad.plancontable",
+    "pk": 3,
+    "fields": {
+      "codigo_cuenta": "1.1.01",
+      "nombre_cuenta": "Efectivo y Equivalentes",
+      "tipo_cuenta": "AC",
+      "nivel": 3,
+      "cuenta_padre": 2,
+      "permite_movimientos": false,
+      "naturaleza": "D",
+      "descripcion": "Caja y bancos"
+    }
+  },
+  {
+    "model": "contabilidad.plancontable",
+    "pk": 4,
+    "fields": {
+      "codigo_cuenta": "1.1.01.02",
+      "nombre_cuenta": "Caja General (USD)",
+      "tipo_cuenta": "AC",
+      "nivel": 4,
+      "cuenta_padre": 3,
+      "permite_movimientos": true,
+      "naturaleza": "D",
+      "descripcion": "Efectivo en dólares en oficinas"
+    }
+  },
+  {
+    "model": "contabilidad.plancontable",
+    "pk": 5,
+    "fields": {
+      "codigo_cuenta": "1.1.01.04",
+      "nombre_cuenta": "Bancos Nacionales (USD)",
+      "tipo_cuenta": "AC",
+      "nivel": 4,
+      "cuenta_padre": 3,
+      "permite_movimientos": true,
+      "naturaleza": "D",
+      "descripcion": "Cuentas bancarias en dólares"
+    }
+  },
+  {
+    "model": "contabilidad.plancontable",
+    "pk": 6,
+    "fields": {
+      "codigo_cuenta": "1.1.02",
+      "nombre_cuenta": "Cuentas por Cobrar",
+      "tipo_cuenta": "AC",
+      "nivel": 3,
+      "cuenta_padre": 2,
+      "permite_movimientos": false,
+      "naturaleza": "D",
+      "descripcion": "Derechos de cobro a clientes"
+    }
+  },
+  {
+    "model": "contabilidad.plancontable",
+    "pk": 7,
+    "fields": {
+      "codigo_cuenta": "1.1.02.02",
+      "nombre_cuenta": "Cuentas por Cobrar Clientes (USD)",
+      "tipo_cuenta": "AC",
+      "nivel": 4,
+      "cuenta_padre": 6,
+      "permite_movimientos": true,
+      "naturaleza": "D",
+      "descripcion": "Facturas pendientes de cobro en dólares"
+    }
+  },
+  {
+    "model": "contabilidad.plancontable",
+    "pk": 8,
+    "fields": {
+      "codigo_cuenta": "2",
+      "nombre_cuenta": "PASIVO",
+      "tipo_cuenta": "PA",
+      "nivel": 1,
+      "cuenta_padre": null,
+      "permite_movimientos": false,
+      "naturaleza": "H",
+      "descripcion": "Obligaciones de la entidad"
+    }
+  },
+  {
+    "model": "contabilidad.plancontable",
+    "pk": 9,
+    "fields": {
+      "codigo_cuenta": "2.1",
+      "nombre_cuenta": "Pasivo Corriente",
+      "tipo_cuenta": "PA",
+      "nivel": 2,
+      "cuenta_padre": 8,
+      "permite_movimientos": false,
+      "naturaleza": "H",
+      "descripcion": "Obligaciones de corto plazo"
+    }
+  },
+  {
+    "model": "contabilidad.plancontable",
+    "pk": 10,
+    "fields": {
+      "codigo_cuenta": "2.1.01",
+      "nombre_cuenta": "Cuentas por Pagar Proveedores",
+      "tipo_cuenta": "PA",
+      "nivel": 3,
+      "cuenta_padre": 9,
+      "permite_movimientos": false,
+      "naturaleza": "H",
+      "descripcion": "Deudas con proveedores"
+    }
+  },
+  {
+    "model": "contabilidad.plancontable",
+    "pk": 11,
+    "fields": {
+      "codigo_cuenta": "2.1.01.02",
+      "nombre_cuenta": "Cuentas por Pagar Proveedores (USD)",
+      "tipo_cuenta": "PA",
+      "nivel": 4,
+      "cuenta_padre": 10,
+      "permite_movimientos": true,
+      "naturaleza": "H",
+      "descripcion": "Facturas de proveedores pendientes en dólares"
+    }
+  },
+  {
+    "model": "contabilidad.plancontable",
+    "pk": 12,
+    "fields": {
+      "codigo_cuenta": "2.1.02",
+      "nombre_cuenta": "Pasivos Acumulados y Retenciones",
+      "tipo_cuenta": "PA",
+      "nivel": 3,
+      "cuenta_padre": 9,
+      "permite_movimientos": false,
+      "naturaleza": "H",
+      "descripcion": "Impuestos y retenciones por pagar"
+    }
+  },
+  {
+    "model": "contabilidad.plancontable",
+    "pk": 13,
+    "fields": {
+      "codigo_cuenta": "2.1.02.01",
+      "nombre_cuenta": "IVA Débito Fiscal por Pagar",
+      "tipo_cuenta": "PA",
+      "nivel": 4,
+      "cuenta_padre": 12,
+      "permite_movimientos": true,
+      "naturaleza": "H",
+      "descripcion": "IVA cobrado en ventas pendiente de declarar"
+    }
+  },
+  {
+    "model": "contabilidad.plancontable",
+    "pk": 14,
+    "fields": {
+      "codigo_cuenta": "2.1.02.02",
+      "nombre_cuenta": "Contribución INATUR por Pagar",
+      "tipo_cuenta": "PA",
+      "nivel": 4,
+      "cuenta_padre": 12,
+      "permite_movimientos": true,
+      "naturaleza": "H",
+      "descripcion": "1% sobre ingresos brutos acumulado"
+    }
+  },
+  {
+    "model": "contabilidad.plancontable",
+    "pk": 15,
+    "fields": {
+      "codigo_cuenta": "2.1.02.03",
+      "nombre_cuenta": "IGTF por Pagar",
+      "tipo_cuenta": "PA",
+      "nivel": 4,
+      "cuenta_padre": 12,
+      "permite_movimientos": true,
+      "naturaleza": "H",
+      "descripcion": "Impuesto a Grandes Transacciones Financieras 3%"
+    }
+  },
+  {
+    "model": "contabilidad.plancontable",
+    "pk": 16,
+    "fields": {
+      "codigo_cuenta": "4",
+      "nombre_cuenta": "INGRESOS",
+      "tipo_cuenta": "IN",
+      "nivel": 1,
+      "cuenta_padre": null,
+      "permite_movimientos": false,
+      "naturaleza": "H",
+      "descripcion": "Ingresos ordinarios y extraordinarios"
+    }
+  },
+  {
+    "model": "contabilidad.plancontable",
+    "pk": 17,
+    "fields": {
+      "codigo_cuenta": "4.1",
+      "nombre_cuenta": "Ingresos por Comisiones (Agente)",
+      "tipo_cuenta": "IN",
+      "nivel": 2,
+      "cuenta_padre": 16,
+      "permite_movimientos": false,
+      "naturaleza": "H",
+      "descripcion": "Ingresos netos por intermediación"
+    }
+  },
+  {
+    "model": "contabilidad.plancontable",
+    "pk": 18,
+    "fields": {
+      "codigo_cuenta": "4.1.01",
+      "nombre_cuenta": "Comisiones por Venta de Boletos Aéreos",
+      "tipo_cuenta": "IN",
+      "nivel": 3,
+      "cuenta_padre": 17,
+      "permite_movimientos": true,
+      "naturaleza": "H",
+      "descripcion": "Ingreso neto por intermediación en boletos"
+    }
+  },
+  {
+    "model": "contabilidad.plancontable",
+    "pk": 19,
+    "fields": {
+      "codigo_cuenta": "4.2",
+      "nombre_cuenta": "Ingresos por Venta de Paquetes (Principal)",
+      "tipo_cuenta": "IN",
+      "nivel": 2,
+      "cuenta_padre": 16,
+      "permite_movimientos": true,
+      "naturaleza": "H",
+      "descripcion": "Ingreso bruto por venta de paquetes propios"
+    }
+  },
+  {
+    "model": "contabilidad.plancontable",
+    "pk": 20,
+    "fields": {
+      "codigo_cuenta": "6",
+      "nombre_cuenta": "GASTOS OPERATIVOS",
+      "tipo_cuenta": "GA",
+      "nivel": 1,
+      "cuenta_padre": null,
+      "permite_movimientos": false,
+      "naturaleza": "D",
+      "descripcion": "Gastos de operación"
+    }
+  },
+  {
+    "model": "contabilidad.plancontable",
+    "pk": 21,
+    "fields": {
+      "codigo_cuenta": "6.1",
+      "nombre_cuenta": "Gastos de Venta y Administración",
+      "tipo_cuenta": "GA",
+      "nivel": 2,
+      "cuenta_padre": 20,
+      "permite_movimientos": false,
+      "naturaleza": "D",
+      "descripcion": "Gastos operativos generales"
+    }
+  },
+  {
+    "model": "contabilidad.plancontable",
+    "pk": 22,
+    "fields": {
+      "codigo_cuenta": "6.1.05",
+      "nombre_cuenta": "Gasto Contribución Especial INATUR (1%)",
+      "tipo_cuenta": "GA",
+      "nivel": 3,
+      "cuenta_padre": 21,
+      "permite_movimientos": true,
+      "naturaleza": "D",
+      "descripcion": "Gasto parafiscal 1% sobre ingresos"
+    }
+  },
+  {
+    "model": "contabilidad.plancontable",
+    "pk": 23,
+    "fields": {
+      "codigo_cuenta": "7",
+      "nombre_cuenta": "OTROS INGRESOS Y EGRESOS",
+      "tipo_cuenta": "IN",
+      "nivel": 1,
+      "cuenta_padre": null,
+      "permite_movimientos": false,
+      "naturaleza": "H",
+      "descripcion": "Ingresos y gastos no operacionales"
+    }
+  },
+  {
+    "model": "contabilidad.plancontable",
+    "pk": 24,
+    "fields": {
+      "codigo_cuenta": "7.1",
+      "nombre_cuenta": "Ingresos Financieros",
+      "tipo_cuenta": "IN",
+      "nivel": 2,
+      "cuenta_padre": 23,
+      "permite_movimientos": false,
+      "naturaleza": "H",
+      "descripcion": "Ingresos por actividades financieras"
+    }
+  },
+  {
+    "model": "contabilidad.plancontable",
+    "pk": 25,
+    "fields": {
+      "codigo_cuenta": "7.1.01",
+      "nombre_cuenta": "Ingreso por Diferencial Cambiario",
+      "tipo_cuenta": "IN",
+      "nivel": 3,
+      "cuenta_padre": 24,
+      "permite_movimientos": true,
+      "naturaleza": "H",
+      "descripcion": "Ganancia por fluctuaciones de tasa de cambio"
+    }
+  },
+  {
+    "model": "contabilidad.plancontable",
+    "pk": 26,
+    "fields": {
+      "codigo_cuenta": "7.2",
+      "nombre_cuenta": "Egresos Financieros",
+      "tipo_cuenta": "GA",
+      "nivel": 2,
+      "cuenta_padre": 23,
+      "permite_movimientos": false,
+      "naturaleza": "D",
+      "descripcion": "Gastos por actividades financieras"
+    }
+  },
+  {
+    "model": "contabilidad.plancontable",
+    "pk": 27,
+    "fields": {
+      "codigo_cuenta": "7.2.01",
+      "nombre_cuenta": "Pérdida por Diferencial Cambiario",
+      "tipo_cuenta": "GA",
+      "nivel": 3,
+      "cuenta_padre": 26,
+      "permite_movimientos": true,
+      "naturaleza": "D",
+      "descripcion": "Pérdida por fluctuaciones de tasa de cambio"
+    }
+  }
+]

@@ -1,0 +1,195 @@
+{% extends 'base_modern.html' %}
+{% load static humanize %}
+
+{% block title %}Liquidaciones a Proveedores — TravelHub Pro{% endblock %}
+
+{% block page_title %}Liquidaciones a Proveedores{% endblock %}
+{% block page_subtitle %}Gestión centralizada de pagos, deudas y compromisos financieros con partners.{% endblock %}
+
+{% block content %}
+<main class="flex-1 w-full max-w-[1400px] mx-auto p-6 md:p-8">
+
+    <!-- Header & Action Bar -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10 pb-6 border-b border-border-color">
+        <div>
+            <h1 class="text-3xl font-black text-text-main tracking-tight uppercase">Control de Liquidaciones</h1>
+            <p class="text-text-muted text-sm mt-1">Monitoreo de saldos pendientes y ejecución de pagos a proveedores.</p>
+        </div>
+        <a href="{% url 'finance:liquidacion_create' %}" class="btn-primary !h-12 !px-6 shadow-xl shadow-primary/20">
+            <span class="material-symbols-outlined text-[20px]">add_circle</span>
+            <span>Nueva Liquidación</span>
+        </a>
+    </div>
+
+    <!-- Metrics Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+        <!-- Pendiente Card -->
+        <div class="card-base p-6 border-l-4 border-l-red-500 bg-surface-1 shadow-lg group relative overflow-hidden">
+            <div class="absolute -right-4 -top-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                <span class="material-symbols-outlined text-8xl text-red-500">pending_actions</span>
+            </div>
+            <div class="flex items-center justify-between relative z-10">
+                <div>
+                    <p class="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] mb-1">Total Deuda Pendiente</p>
+                    <p class="text-3xl font-black text-red-500 tabular-nums">${{ total_pendiente|floatformat:2|intcomma }}</p>
+                </div>
+                <div class="size-12 rounded-2xl bg-red-500/10 flex items-center justify-center text-red-500 border border-red-500/20 shadow-sm shadow-red-500/10">
+                    <span class="material-symbols-outlined text-[24px]">trending_up</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pagado Card -->
+        <div class="card-base p-6 border-l-4 border-l-emerald-500 bg-surface-1 shadow-lg group relative overflow-hidden">
+            <div class="absolute -right-4 -top-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                <span class="material-symbols-outlined text-8xl text-emerald-500">payments</span>
+            </div>
+            <div class="flex items-center justify-between relative z-10">
+                <div>
+                    <p class="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] mb-1">Total Liquidado (Pagado)</p>
+                    <p class="text-3xl font-black text-emerald-500 tabular-nums">${{ total_pagado|floatformat:2|intcomma }}</p>
+                </div>
+                <div class="size-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-500 border border-emerald-500/20 shadow-sm shadow-emerald-500/10">
+                    <span class="material-symbols-outlined text-[24px]">verified</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search & Filters -->
+    <div class="card-base p-6 mb-10 bg-surface-base border-2 border-primary/5 shadow-2xl">
+        <form method="get" class="flex flex-col md:flex-row gap-4 items-center">
+            <div class="flex-1 w-full relative group">
+                <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-primary transition-colors">search</span>
+                <input type="text" name="q" value="{{ request.GET.q }}" placeholder="Buscar por proveedor o ID..."
+                    class="input-base !pl-12 !h-12 w-full">
+            </div>
+            
+            <div class="w-full md:w-64">
+                <select name="estado" class="input-base !h-12 w-full appearance-none bg-surface-1">
+                    <option value="">Todos los estados</option>
+                    {% for codigo, nombre in estados_liquidacion %}
+                    <option value="{{ codigo }}" {% if request.GET.estado == codigo %}selected{% endif %}>{{ nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <button type="submit" class="btn-primary !h-12 !px-8 w-full md:w-auto">
+                <span class="material-symbols-outlined">filter_alt</span>
+                <span>Filtrar</span>
+            </button>
+        </form>
+    </div>
+
+    <!-- DataGrid -->
+    <div class="card-base shadow-2xl overflow-hidden border-2 border-primary/5">
+        <div class="px-8 py-5 border-b border-border-color bg-surface-2/50 backdrop-blur-md flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="size-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
+                    <span class="material-symbols-outlined text-[18px]">account_balance</span>
+                </div>
+                <h2 class="text-sm font-black text-text-main uppercase tracking-widest">Listado de Liquidaciones</h2>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-surface-2/30 border-b border-border-color">
+                        <th class="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-text-muted">ID / Referencia</th>
+                        <th class="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-text-muted">Proveedor</th>
+                        <th class="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-text-muted">Fecha Emisión</th>
+                        <th class="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-text-muted">Monto Total</th>
+                        <th class="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-text-muted">Saldo Pendiente</th>
+                        <th class="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-text-muted text-center">Estado</th>
+                        <th class="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-text-muted text-right">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-border-color/50">
+                    {% for liquidacion in liquidaciones %}
+                    <tr class="group hover:bg-nav-active-bg/10 transition-all cursor-pointer">
+                        <td class="px-8 py-5">
+                            <span class="text-[10px] font-black bg-surface-2 px-2 py-1 rounded border border-border-color text-text-muted group-hover:text-primary transition-colors font-mono tracking-widest">
+                                #{{ liquidacion.pk }}
+                            </span>
+                        </td>
+                        <td class="px-8 py-5">
+                            <div class="flex flex-col">
+                                <span class="text-sm font-black text-text-main uppercase tracking-tight">{{ liquidacion.proveedor.nombre }}</span>
+                                <span class="text-[9px] text-text-muted font-bold uppercase tracking-widest">{{ liquidacion.proveedor.get_tipo_display|default:"Proveedor General" }}</span>
+                            </div>
+                        </td>
+                        <td class="px-8 py-5">
+                            <span class="text-xs font-black text-text-secondary uppercase tracking-tighter">{{ liquidacion.fecha_emision|date:"d M Y" }}</span>
+                        </td>
+                        <td class="px-8 py-5">
+                            <span class="text-sm font-black text-text-main tabular-nums tracking-tighter">${{ liquidacion.monto_total|floatformat:2|intcomma }}</span>
+                        </td>
+                        <td class="px-8 py-5">
+                            {% if liquidacion.saldo_pendiente > 0 %}
+                            <span class="text-sm font-black text-red-500 tabular-nums tracking-tighter">${{ liquidacion.saldo_pendiente|floatformat:2|intcomma }}</span>
+                            {% else %}
+                            <span class="text-xs font-black text-emerald-500 flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[14px]">check_circle</span>
+                                COMPLETO
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td class="px-8 py-5 text-center">
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border
+                                {% if liquidacion.estado == 'PEN' %}bg-amber-500/10 text-amber-500 border-amber-500/20
+                                {% elif liquidacion.estado == 'PAG' %}bg-emerald-500/10 text-emerald-500 border-emerald-500/20
+                                {% elif liquidacion.estado == 'PAR' %}bg-indigo-500/10 text-indigo-400 border-indigo-500/20
+                                {% else %}bg-surface-base text-text-muted border-border-color{% endif %}">
+                                {{ liquidacion.get_estado_display }}
+                            </span>
+                        </td>
+                        <td class="px-8 py-5">
+                            <div class="flex justify-end">
+                                <a href="{% url 'finance:liquidacion_detail' liquidacion.pk %}"
+                                    class="size-9 flex items-center justify-center text-text-muted hover:text-primary hover:bg-primary/10 rounded-xl transition-all border border-transparent hover:border-primary/20"
+                                    title="Ver Detalle">
+                                    <span class="material-symbols-outlined text-[20px]">visibility</span>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="py-32 text-center bg-surface-1/50">
+                            <div class="flex flex-col items-center gap-4">
+                                <div class="size-20 rounded-3xl bg-surface-2 flex items-center justify-center text-text-muted border border-border-color">
+                                    <span class="material-symbols-outlined text-[48px]">account_balance_wallet</span>
+                                </div>
+                                <div class="space-y-1">
+                                    <h3 class="text-xl font-black text-text-main uppercase tracking-tight">Sin liquidaciones</h3>
+                                    <p class="text-sm text-text-muted">No se encontraron pagos registrados para este criterio.</p>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if is_paginated %}
+        <div class="px-8 py-6 border-t border-border-color bg-surface-base flex items-center justify-between">
+            <span class="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">
+                Mostrando <span class="text-text-main underline decoration-primary/30">{{ page_obj.start_index }}-{{ page_obj.end_index }}</span> de {{ paginator.count }} registros
+            </span>
+            <div class="flex gap-2">
+                {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}"
+                    class="btn-secondary !py-2 !h-9 !px-4 !text-[10px] !font-black uppercase tracking-widest">Anterior</a>
+                {% endif %}
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}"
+                    class="btn-secondary !py-2 !h-9 !px-4 !text-[10px] !font-black uppercase tracking-widest">Siguiente</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</main>
+{% endblock %}

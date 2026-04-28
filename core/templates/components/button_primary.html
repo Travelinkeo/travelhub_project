@@ -1,0 +1,25 @@
+{# core/templates/components/button_primary.html #}
+{% comment %}
+    Parámetros esperados:
+    - type (default 'button', puede ser 'submit')
+    - text (texto del botón)
+    - class (opcional, clases extra)
+    - icon (opcional, icono lucide a la izquierda)
+    - icon_right (opcional, icono lucide a la derecha)
+    - onclick (optional)
+    - disabled (optional boolean)
+{% endcomment %}
+<button 
+    type="{{ type|default:'button' }}"
+    {% if disabled %}disabled{% endif %}
+    {% if onclick %}onclick="{{ onclick }}"{% endif %}
+    class="inline-flex items-center justify-center h-10 px-4 py-2 border border-transparent text-sm font-semibold rounded-xl shadow-sm text-white bg-primary hover:bg-emerald-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-zinc-950 focus:ring-primary transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed {{ class|default:'' }}"
+>
+    {% if icon %}
+    <span class="material-symbols-outlined text-[18px] mr-2 -ml-1">{{ icon }}</span>
+    {% endif %}
+    {{ text }}
+    {% if icon_right %}
+    <span class="material-symbols-outlined text-[18px] ml-2 -mr-1">{{ icon_right }}</span>
+    {% endif %}
+</button>

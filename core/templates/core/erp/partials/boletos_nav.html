@@ -1,0 +1,78 @@
+{% load static %}
+{# ── Sub-nav del módulo Boletos — Design System Premium ── #}
+
+<div class="flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
+    {# Botón volver dinámico #}
+    <a href="{% if active_tab == 'boletos_dashboard' %}{% url 'core:modern_dashboard' %}{% else %}{% url 'core:boletos_dashboard' %}{% endif %}"
+       class="inline-flex items-center gap-3 px-4 py-2 bg-surface-2 border border-border-color rounded-xl text-text-secondary hover:text-primary hover:border-primary/30 transition-all group">
+        <span class="material-symbols-outlined text-[20px] group-hover:-translate-x-1 transition-transform">arrow_back</span>
+        <span class="font-black text-[10px] uppercase tracking-widest">{% if active_tab == 'boletos_dashboard' %}Panel Principal{% else %}Tablero Boletos{% endif %}</span>
+    </a>
+
+    {# Breadcrumb de Navegación #}
+    <div class="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-text-muted">
+        <a href="{% url 'core:modern_dashboard' %}" class="hover:text-primary transition-colors">ERP</a>
+        <span class="material-symbols-outlined text-[12px]">chevron_right</span>
+        <a href="{% url 'core:boletos_dashboard' %}" class="{% if active_tab == 'boletos_dashboard' %}text-primary{% else %}hover:text-primary{% endif %} transition-colors">Boletos</a>
+        {% if active_tab and active_tab != 'boletos_dashboard' %}
+        <span class="material-symbols-outlined text-[12px]">chevron_right</span>
+        <span class="text-text-main font-black">
+            {% if active_tab == 'boletos_importar' %}Importar
+            {% elif active_tab == 'boletos_manual' %}Carga Manual
+            {% elif active_tab == 'boletos_busqueda' %}Búsqueda
+            {% elif active_tab == 'boletos_reportes' %}Reportes
+            {% elif active_tab == 'boletos_anulaciones' %}Anulaciones
+            {% endif %}
+        </span>
+        {% endif %}
+    </div>
+</div>
+
+{# Navigation Tabs Container #}
+<div class="bg-surface-1 border-2 border-primary/5 rounded-2xl p-1.5 mb-10 shadow-lg shadow-black/5 flex items-center gap-1 overflow-x-auto no-scrollbar">
+
+    <a href="{% url 'core:boletos_dashboard' %}"
+       class="flex items-center gap-2 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap
+       {% if active_tab == 'boletos_dashboard' %}bg-primary text-on-primary shadow-lg shadow-primary/20{% else %}text-text-muted hover:text-text-main hover:bg-surface-2{% endif %}">
+        <span class="material-symbols-outlined text-[18px]">space_dashboard</span>
+        Dashboard
+    </a>
+
+    <a href="{% url 'core:boletos_importar' %}"
+       class="flex items-center gap-2 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap
+       {% if active_tab == 'boletos_importar' %}bg-primary text-on-primary shadow-lg shadow-primary/20{% else %}text-text-muted hover:text-text-main hover:bg-surface-2{% endif %}">
+        <span class="material-symbols-outlined text-[18px]">upload_file</span>
+        Importar IA
+    </a>
+
+    <a href="{% url 'core:boletos_busqueda' %}"
+       class="flex items-center gap-2 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap
+       {% if active_tab == 'boletos_busqueda' %}bg-primary text-on-primary shadow-lg shadow-primary/20{% else %}text-text-muted hover:text-text-main hover:bg-surface-2{% endif %}">
+        <span class="material-symbols-outlined text-[18px]">manage_search</span>
+        Búsqueda
+    </a>
+
+    <a href="{% url 'core:boletos_manual' %}"
+       class="flex items-center gap-2 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap
+       {% if active_tab == 'boletos_manual' %}bg-primary text-on-primary shadow-lg shadow-primary/20{% else %}text-text-muted hover:text-text-main hover:bg-surface-2{% endif %}">
+        <span class="material-symbols-outlined text-[18px]">edit_note</span>
+        Carga Manual
+    </a>
+
+    <a href="{% url 'core:boletos_reportes' %}"
+       class="flex items-center gap-2 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap
+       {% if active_tab == 'boletos_reportes' %}bg-primary text-on-primary shadow-lg shadow-primary/20{% else %}text-text-muted hover:text-text-main hover:bg-surface-2{% endif %}">
+        <span class="material-symbols-outlined text-[18px]">analytics</span>
+        Reportes
+    </a>
+
+    {# Separador y Anulaciones #}
+    <div class="h-6 w-[1px] bg-border-color mx-2"></div>
+
+    <a href="{% url 'core:boletos_anulaciones' %}"
+       class="flex items-center gap-2 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap
+       {% if active_tab == 'boletos_anulaciones' %}bg-red-600 text-on-primary shadow-lg shadow-red-600/20{% else %}text-red-500/70 hover:text-red-500 hover:bg-red-500/10{% endif %}">
+        <span class="material-symbols-outlined text-[18px]">cancel</span>
+        Anulaciones
+    </a>
+</div>

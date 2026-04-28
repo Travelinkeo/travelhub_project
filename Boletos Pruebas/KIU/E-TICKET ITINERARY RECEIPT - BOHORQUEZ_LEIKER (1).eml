@@ -1,0 +1,143 @@
+Delivered-To: naidycohen@gmail.com
+Received: by 2002:a05:622a:46ca:b0:4ee:40ef:3aa4 with SMTP id me10csp1356468qtb;
+        Sun, 1 Feb 2026 12:26:18 -0800 (PST)
+X-Received: by 2002:a05:620a:36df:b0:8ca:1240:4991 with SMTP id af79cd13be357-8ca12404ac3mr117672685a.45.1769977578754;
+        Sun, 01 Feb 2026 12:26:18 -0800 (PST)
+ARC-Seal: i=1; a=rsa-sha256; t=1769977578; cv=none;
+        d=google.com; s=arc-20240605;
+        b=HdiPXdBlct0lV0OBfM905Z4pEsEvOk1H6y4drpjn62SGU6jR/sxIABfFIeJMtEHNuZ
+         seevaTVnSt5LNCAImr7/HJlc9U8vRXNdgewmu+sMJc54WTi6F+Ob4iNawnfmzE1mxYLd
+         Wvyc3qtZpGcd7lLBOlpWKn8f230zBZxsZc+msvtswnwDy2kvEt153v2FaTpibF8K2q7b
+         JTlGtmPNY2JYaHpdwK0sJbQ2kgGjsScUlQPhIx8m+hWsHxARPTOCHc1hMF9S/FpRyO23
+         biXsiuoYbdvPIvU4dHgIMMJb/YUkg+FfzCagJyaL+V/vzEKw6dftytEwMQ2fv8tmqkTS
+         L2wg==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
+        h=feedback-id:date:message-id:mime-version:subject:to:from
+         :dkim-signature:dkim-signature;
+        bh=fld/xMjvScbAqIba63xRYPlhlmUSiYg8h5ZtHgUgrZk=;
+        fh=UGhdE8t/k3FWiRlQHY/CrclQ6Lc/XDFLWjQbr+sLbGs=;
+        b=DEewLroMtG3YWDYHLxCj4qeM+cXPMUSAS7sjVuKQNpgv9Kbs+4xglPnpMuDWM0F1No
+         aIbnb+6tyFEI27p2TzAH60HuegmHv0RwZbfVBg7AOJiEIV2eRsfVojJkcQLgFL5o5T0e
+         grQ+wcUiGqze1qq/DGgm+zbHMjq9C1DQ1Wn9Fmgw98b8E6kea78wWj8mdmjQq/q6/k81
+         MlsJ9Vaktqj8593HwcC5fJBRCN5gQb6Em7TuFuCA0ZG1ktC0Ldjl7LCW1PbPV9eySgup
+         QDlsPG+j0JkN5qEPrFVrgPTx34NvOTa5bq+Rd/UhAiQ6GSGlfV7MTRmvrPkbp1J2uhMe
+         GuxA==;
+        dara=google.com
+ARC-Authentication-Results: i=1; mx.google.com;
+       dkim=pass header.i=@kiusys.com header.s=y27k5w6mpyspgwewkrpvqs7lpid7on7v header.b=YRm5Rb5e;
+       dkim=pass header.i=@amazonses.com header.s=6gbrjpgwjskckoa6a5zn6fwqkn67xbtw header.b="EIM/PkHu";
+       spf=pass (google.com: domain of 0100019c1ae2837b-d4e02c70-c09b-43b6-95db-df3b122a6dc2-000000@ses.kiusys.com designates 54.240.9.36 as permitted sender) smtp.mailfrom=0100019c1ae2837b-d4e02c70-c09b-43b6-95db-df3b122a6dc2-000000@ses.kiusys.com;
+       dmarc=pass (p=QUARANTINE sp=QUARANTINE dis=NONE) header.from=kiusys.com
+Return-Path: <0100019c1ae2837b-d4e02c70-c09b-43b6-95db-df3b122a6dc2-000000@ses.kiusys.com>
+Received: from a9-36.smtp-out.amazonses.com (a9-36.smtp-out.amazonses.com. [54.240.9.36])
+        by mx.google.com with ESMTPS id d75a77b69052e-505df660cd4si50670231cf.394.2026.02.01.12.26.18
+        for <NAIDYCOHEN@gmail.com>
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Sun, 01 Feb 2026 12:26:18 -0800 (PST)
+Received-SPF: pass (google.com: domain of 0100019c1ae2837b-d4e02c70-c09b-43b6-95db-df3b122a6dc2-000000@ses.kiusys.com designates 54.240.9.36 as permitted sender) client-ip=54.240.9.36;
+Authentication-Results: mx.google.com;
+       dkim=pass header.i=@kiusys.com header.s=y27k5w6mpyspgwewkrpvqs7lpid7on7v header.b=YRm5Rb5e;
+       dkim=pass header.i=@amazonses.com header.s=6gbrjpgwjskckoa6a5zn6fwqkn67xbtw header.b="EIM/PkHu";
+       spf=pass (google.com: domain of 0100019c1ae2837b-d4e02c70-c09b-43b6-95db-df3b122a6dc2-000000@ses.kiusys.com designates 54.240.9.36 as permitted sender) smtp.mailfrom=0100019c1ae2837b-d4e02c70-c09b-43b6-95db-df3b122a6dc2-000000@ses.kiusys.com;
+       dmarc=pass (p=QUARANTINE sp=QUARANTINE dis=NONE) header.from=kiusys.com
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/simple;
+	s=y27k5w6mpyspgwewkrpvqs7lpid7on7v; d=kiusys.com; t=1769977578;
+	h=From:To:Subject:Mime-Version:Content-Type:Message-Id:Date;
+	bh=+6f6dcNAD10kT4zo2/JFHayN4pV0ChdiV+Z7iP8OtwE=;
+	b=YRm5Rb5erQqHAaZF6zlGeYrM37JUxPRkBhGx3mr0NLr79GYX/AKw2DlA0UTmyotE
+	d+kO6ERzPLX6SiqLo6PunrJisSgt5ImiY+jsbwIFjyVPVwMpLTuw1M14VIK8ky9ARp3
+	IYvPhVf9iHYht8EkkOYTDbqH0nkZL71WOGPvcg0oGiFk6EF+LN9uWAhGKCVEmkwwwnl
+	nrOO41IxFsrTW42PVuN6bFqY/V25yDsn4afQvni3yFsUVw/HHkRy0pKkV/b1oQN2/Om
+	+OOI2DJ7R+3hyO1di1rRI2hxdpP2WeZVLIShYs1RoqKSZblk3MzDzxWIslRuFMP+PIi
+	n9ReZFMAuw==
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/simple;
+	s=6gbrjpgwjskckoa6a5zn6fwqkn67xbtw; d=amazonses.com; t=1769977578;
+	h=From:To:Subject:Mime-Version:Content-Type:Message-Id:Date:Feedback-ID;
+	bh=+6f6dcNAD10kT4zo2/JFHayN4pV0ChdiV+Z7iP8OtwE=;
+	b=EIM/PkHu/P3JWSFARlW+AA1SrR3SWwwg1uVcCpN3mY7FgQwGkM6/ZW/VLv7Ltwt9
+	SU+UX075CNSlqwQIcKLA+HyoYI6MSVV/U7NOKO9EO9XKkwgwIWjKRJ6XCnzSD55vqBb
+	ba4OwT5mBYMMSmDg5q0ixFTfNtb8oDk15rsJ0MhM=
+From: no_config <noreply@kiusys.com>
+To: NAIDYCOHEN@GMAIL.COM
+Subject:E-TICKET ITINERARY RECEIPT - BOHORQUEZ/LEIKER
+Mime-Version: 1.0
+Content-Type: multipart/mixed;
+    boundary="7e38b3bdf4cedc7565f576917a1c6846d96fa2641bd91c9ccc4dfaa7d65e"
+Message-ID: <0100019c1ae2837b-d4e02c70-c09b-43b6-95db-df3b122a6dc2-000000@email.amazonses.com>
+Date: Sun, 1 Feb 2026 20:26:18 +0000
+Feedback-ID: ::1.us-east-1.FlLS8KWT15VSJWSZCrjpizuEqvA988B9XvDgDbF9UFw=:AmazonSES
+X-SES-Outgoing: 2026.02.01-54.240.9.36
+
+--7e38b3bdf4cedc7565f576917a1c6846d96fa2641bd91c9ccc4dfaa7d65e
+Content-Transfer-Encoding: quoted-printable
+Content-Type: text/html; charset="UTF-8"
+
+<HTML><HEAD><STYLE>.pnr-print-small {font-size: 8px;}.pnr-print-medium {fon=
+t-size: 12px;}.pnr-print-big {font-size: 14px;}.prn-image {display: flex; j=
+ustify-content: end;width: 650px;}</STYLE></HEAD><BODY><PRE class=3D"pnr-pr=
+int-medium"> ELECTRONIC TICKET                             <div class=3D"pr=
+n-image"><img src=3D"https://cdn.kiusys.net/prod/res_receipt/v0/766_1741214=
+4347496362.jpg" alt=3D"Logo" border=3D"0" width=3D"150px" height=3D"auto" a=
+lign=3D"left"></div>
+
+
+     PASSENGER ITINERARY RECEIPT              TICKET NBR: <B>3080201383663<=
+/B>
+     RECIBO DE ITINERARIO DE PASAJEROS        BOLETO NRO:=20
+
+ <B>INTERNET V0                   </B> ISSUE DATE/FECHA DE EMISION: 01 FEB =
+2026 16:26
+ INTERNET                         ISSUE AGENT/AGENTE EMISOR: CCS00V0WV
+ INTERNET                                     =20
+ INTERNET, VENEZUELA                     =20
+ OFFICE ID: VE-22441-0                   =20
+ TELEPHONE/TELEFONO: VE-17788-0                   =20
+ MAIL INFO:                                                            =20
+
+ISSUING AIRLINE/LINEA AEREA EMISORA   : CONVIASA
+ADDRESS/DIRECCION                     : AV. INTERCOMUNAL AEROPUERTO INTERNA=
+CIONAL DE MAIQUETIA EDO. LA GUAIRA VENEZUELA TELF +58 0500 266 8427
+                             =20
+RIF                                   : G-20007774-3                 =20
+TICKET NUMBER/NRO DE BOLETO           : 308-0201383663
+NAME:  <B>BOHORQUEZ/LEIKER                                                 =
+                                  </B>
+FOID:  NI27848106         =20
+
+BOOKING REF./CODIGO DE RESERVA: C1/<B>KFLBHO</B>
+
+  FROM/TO     FLIGHT CL DATE  DEP  ARR  FARE BASIS      NVB   NVA   BAG  ST
+DESDE/HACIA   VUELO  CL FECHA HORA HORA BASE TARIFARIA              EQP. ES=
+TATUS
+
+  <B>SAN ANTONIO </B>V01189 S  <B>3FEB  1700</B> <B>1800</B> SPECIAL       =
+              23K  OK=20
+<B>  CARACAS           </B>
+</PRE><PRE class=3D"pnr-print-medium">_____________________________________=
+____________________________________________________________<br></PRE><PRE =
+class=3D"big">PARA MAYOR INFORMACION INGRESAR AL SIGUIENTE LINK HTTP://WWW.=
+CONVIASA.AERO/ES/GUIAPASAJERO/CONDICIONES</PRE><PRE class=3D"medium"><br></=
+PRE><PRE class=3D"pnr-print-medium">
+
+ENDORSEMENTS/ENDOSOS-RESTRICCIONES : THIS TICKET IS NONREFUNDABLE
+TOUR CODE                          :=20
+FORM OF PAYMENT/FORMA DE PAGO      : PAGO WEB BIOPAGO  BV3428545020
+
+</PRE><PRE class=3D"pnr-print-medium">FARE CALC./CALCULO DE TARIFA: SVZ V0 =
+CCS 34100.00VES34100.00END (ADT)
+
+</PRE><PRE class=3D"pnr-print-medium">
+
+AIR FARE/TARIFA : VES    34100.00
+TAX/IMPUESTOS   : VES      367.316B      550.966S     4394.76AK
+                             0.10C2      341.00EU     2728.00YN
+TOTAL           : VES    42482.13
+
+</PRE><PRE class=3D"pnr-print-medium">_____________________________________=
+_______________________________________________________<br>
+<HR>SEND BY AGENT CCS00V0WV / FEB  1 2026  4:25</PRE></BODY></HTML><img alt=
+=3D"" src=3D"https://j5d6plkx.r.us-east-1.awstrack.me/I0/0100019c1ae2837b-d=
+4e02c70-c09b-43b6-95db-df3b122a6dc2-000000/pK4Yx8euXSL2Klcw11Gmo3xJJtw=3D46=
+3" style=3D"display: none; width: 1px; height: 1px;">
+
+--7e38b3bdf4cedc7565f576917a1c6846d96fa2641bd91c9ccc4dfaa7d65e--

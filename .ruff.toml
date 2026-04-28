@@ -1,0 +1,29 @@
+line-length = 100
+indent-width = 4
+target-version = "py313"
+
+[lint]
+select = [
+  "E",  # pycodestyle errors
+  "F",  # pyflakes
+  "I",  # isort
+  "B",  # flake8-bugbear
+  "UP", # pyupgrade
+  "S",  # flake8-bandit (algunos chequeos de seguridad básicos)
+  "C4", # flake8-comprehensions
+]
+ignore = [
+  "E203",  # estilo de slicing (compatible con black)
+  "E501",  # longitud de línea (usamos black + 100 chars, ruff avisaría demasiadas)
+  "S101",  # uso de assert permitido en tests
+]
+
+[lint.per-file-ignores]
+"*/migrations/*" = ["E501", "S"]
+"tests/*" = ["S", "B011"]
+
+[format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"

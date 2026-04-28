@@ -1,0 +1,6396 @@
+[
+{
+    "model": "core.pais",
+    "pk": 6,
+    "fields": {
+        "codigo_iso_2": "AF",
+        "codigo_iso_3": "AFG",
+        "nombre": "Afganistán"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 7,
+    "fields": {
+        "codigo_iso_2": "AL",
+        "codigo_iso_3": "ALB",
+        "nombre": "Albania"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 8,
+    "fields": {
+        "codigo_iso_2": "DE",
+        "codigo_iso_3": "DEU",
+        "nombre": "Alemania"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 9,
+    "fields": {
+        "codigo_iso_2": "AD",
+        "codigo_iso_3": "AND",
+        "nombre": "Andorra"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 10,
+    "fields": {
+        "codigo_iso_2": "AO",
+        "codigo_iso_3": "AGO",
+        "nombre": "Angola"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 11,
+    "fields": {
+        "codigo_iso_2": "AG",
+        "codigo_iso_3": "ATG",
+        "nombre": "Antigua y Barbuda"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 12,
+    "fields": {
+        "codigo_iso_2": "SA",
+        "codigo_iso_3": "SAU",
+        "nombre": "Arabia Saudita"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 13,
+    "fields": {
+        "codigo_iso_2": "DZ",
+        "codigo_iso_3": "DZA",
+        "nombre": "Argelia"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 14,
+    "fields": {
+        "codigo_iso_2": "AR",
+        "codigo_iso_3": "ARG",
+        "nombre": "Argentina"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 15,
+    "fields": {
+        "codigo_iso_2": "AM",
+        "codigo_iso_3": "ARM",
+        "nombre": "Armenia"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 16,
+    "fields": {
+        "codigo_iso_2": "AU",
+        "codigo_iso_3": "AUS",
+        "nombre": "Australia"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 17,
+    "fields": {
+        "codigo_iso_2": "AT",
+        "codigo_iso_3": "AUT",
+        "nombre": "Austria"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 18,
+    "fields": {
+        "codigo_iso_2": "AZ",
+        "codigo_iso_3": "AZE",
+        "nombre": "Azerbaiyán"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 19,
+    "fields": {
+        "codigo_iso_2": "BS",
+        "codigo_iso_3": "BHS",
+        "nombre": "Bahamas"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 20,
+    "fields": {
+        "codigo_iso_2": "BD",
+        "codigo_iso_3": "BGD",
+        "nombre": "Bangladés"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 21,
+    "fields": {
+        "codigo_iso_2": "BB",
+        "codigo_iso_3": "BRB",
+        "nombre": "Barbados"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 22,
+    "fields": {
+        "codigo_iso_2": "BH",
+        "codigo_iso_3": "BHR",
+        "nombre": "Baréin"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 24,
+    "fields": {
+        "codigo_iso_2": "BZ",
+        "codigo_iso_3": "BLZ",
+        "nombre": "Belice"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 25,
+    "fields": {
+        "codigo_iso_2": "BJ",
+        "codigo_iso_3": "BEN",
+        "nombre": "Benín"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 26,
+    "fields": {
+        "codigo_iso_2": "BY",
+        "codigo_iso_3": "BLR",
+        "nombre": "Bielorrusia"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 27,
+    "fields": {
+        "codigo_iso_2": "BO",
+        "codigo_iso_3": "BOL",
+        "nombre": "Bolivia"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 28,
+    "fields": {
+        "codigo_iso_2": "BA",
+        "codigo_iso_3": "BIH",
+        "nombre": "Bosnia y Herzegovina"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 29,
+    "fields": {
+        "codigo_iso_2": "BW",
+        "codigo_iso_3": "BWA",
+        "nombre": "Botsuana"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 30,
+    "fields": {
+        "codigo_iso_2": "BR",
+        "codigo_iso_3": "BRA",
+        "nombre": "Brasil"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 31,
+    "fields": {
+        "codigo_iso_2": "BN",
+        "codigo_iso_3": "BRN",
+        "nombre": "Brunéi"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 32,
+    "fields": {
+        "codigo_iso_2": "BG",
+        "codigo_iso_3": "BGR",
+        "nombre": "Bulgaria"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 33,
+    "fields": {
+        "codigo_iso_2": "BF",
+        "codigo_iso_3": "BFA",
+        "nombre": "Burkina Faso"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 34,
+    "fields": {
+        "codigo_iso_2": "BI",
+        "codigo_iso_3": "BDI",
+        "nombre": "Burundi"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 35,
+    "fields": {
+        "codigo_iso_2": "BT",
+        "codigo_iso_3": "BTN",
+        "nombre": "Bután"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 23,
+    "fields": {
+        "codigo_iso_2": "BE",
+        "codigo_iso_3": "BEL",
+        "nombre": "Bélgica"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 36,
+    "fields": {
+        "codigo_iso_2": "CV",
+        "codigo_iso_3": "CPV",
+        "nombre": "Cabo Verde"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 37,
+    "fields": {
+        "codigo_iso_2": "KH",
+        "codigo_iso_3": "KHM",
+        "nombre": "Camboya"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 38,
+    "fields": {
+        "codigo_iso_2": "CM",
+        "codigo_iso_3": "CMR",
+        "nombre": "Camerún"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 39,
+    "fields": {
+        "codigo_iso_2": "CA",
+        "codigo_iso_3": "CAN",
+        "nombre": "Canadá"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 40,
+    "fields": {
+        "codigo_iso_2": "QA",
+        "codigo_iso_3": "QAT",
+        "nombre": "Catar"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 41,
+    "fields": {
+        "codigo_iso_2": "TD",
+        "codigo_iso_3": "TCD",
+        "nombre": "Chad"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 42,
+    "fields": {
+        "codigo_iso_2": "CL",
+        "codigo_iso_3": "CHL",
+        "nombre": "Chile"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 5,
+    "fields": {
+        "codigo_iso_2": "CN",
+        "codigo_iso_3": "CHN",
+        "nombre": "China"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 43,
+    "fields": {
+        "codigo_iso_2": "CY",
+        "codigo_iso_3": "CYP",
+        "nombre": "Chipre"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 3,
+    "fields": {
+        "codigo_iso_2": "CO",
+        "codigo_iso_3": "COL",
+        "nombre": "Colombia"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 44,
+    "fields": {
+        "codigo_iso_2": "KM",
+        "codigo_iso_3": "COM",
+        "nombre": "Comoras"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 45,
+    "fields": {
+        "codigo_iso_2": "CG",
+        "codigo_iso_3": "COG",
+        "nombre": "Congo"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 47,
+    "fields": {
+        "codigo_iso_2": "KP",
+        "codigo_iso_3": "PRK",
+        "nombre": "Corea del Norte"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 48,
+    "fields": {
+        "codigo_iso_2": "KR",
+        "codigo_iso_3": "KOR",
+        "nombre": "Corea del Sur"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 50,
+    "fields": {
+        "codigo_iso_2": "CR",
+        "codigo_iso_3": "CRI",
+        "nombre": "Costa Rica"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 49,
+    "fields": {
+        "codigo_iso_2": "CI",
+        "codigo_iso_3": "CIV",
+        "nombre": "Costa de Marfil"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 51,
+    "fields": {
+        "codigo_iso_2": "HR",
+        "codigo_iso_3": "HRV",
+        "nombre": "Croacia"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 52,
+    "fields": {
+        "codigo_iso_2": "CU",
+        "codigo_iso_3": "CUB",
+        "nombre": "Cuba"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 53,
+    "fields": {
+        "codigo_iso_2": "DK",
+        "codigo_iso_3": "DNK",
+        "nombre": "Dinamarca"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 54,
+    "fields": {
+        "codigo_iso_2": "DM",
+        "codigo_iso_3": "DMA",
+        "nombre": "Dominica"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 55,
+    "fields": {
+        "codigo_iso_2": "EC",
+        "codigo_iso_3": "ECU",
+        "nombre": "Ecuador"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 56,
+    "fields": {
+        "codigo_iso_2": "EG",
+        "codigo_iso_3": "EGY",
+        "nombre": "Egipto"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 57,
+    "fields": {
+        "codigo_iso_2": "SV",
+        "codigo_iso_3": "SLV",
+        "nombre": "El Salvador"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 58,
+    "fields": {
+        "codigo_iso_2": "AE",
+        "codigo_iso_3": "ARE",
+        "nombre": "Emiratos Árabes Unidos"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 59,
+    "fields": {
+        "codigo_iso_2": "ER",
+        "codigo_iso_3": "ERI",
+        "nombre": "Eritrea"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 60,
+    "fields": {
+        "codigo_iso_2": "SK",
+        "codigo_iso_3": "SVK",
+        "nombre": "Eslovaquia"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 61,
+    "fields": {
+        "codigo_iso_2": "SI",
+        "codigo_iso_3": "SVN",
+        "nombre": "Eslovenia"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 62,
+    "fields": {
+        "codigo_iso_2": "ES",
+        "codigo_iso_3": "ESP",
+        "nombre": "España"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 4,
+    "fields": {
+        "codigo_iso_2": "US",
+        "codigo_iso_3": "USA",
+        "nombre": "Estados Unidos"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 63,
+    "fields": {
+        "codigo_iso_2": "EE",
+        "codigo_iso_3": "EST",
+        "nombre": "Estonia"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 165,
+    "fields": {
+        "codigo_iso_2": "SZ",
+        "codigo_iso_3": "SWZ",
+        "nombre": "Esuatini"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 64,
+    "fields": {
+        "codigo_iso_2": "ET",
+        "codigo_iso_3": "ETH",
+        "nombre": "Etiopía"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 66,
+    "fields": {
+        "codigo_iso_2": "PH",
+        "codigo_iso_3": "PHL",
+        "nombre": "Filipinas"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 67,
+    "fields": {
+        "codigo_iso_2": "FI",
+        "codigo_iso_3": "FIN",
+        "nombre": "Finlandia"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 65,
+    "fields": {
+        "codigo_iso_2": "FJ",
+        "codigo_iso_3": "FJI",
+        "nombre": "Fiyi"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 68,
+    "fields": {
+        "codigo_iso_2": "FR",
+        "codigo_iso_3": "FRA",
+        "nombre": "Francia"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 69,
+    "fields": {
+        "codigo_iso_2": "GA",
+        "codigo_iso_3": "GAB",
+        "nombre": "Gabón"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 70,
+    "fields": {
+        "codigo_iso_2": "GM",
+        "codigo_iso_3": "GMB",
+        "nombre": "Gambia"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 71,
+    "fields": {
+        "codigo_iso_2": "GE",
+        "codigo_iso_3": "GEO",
+        "nombre": "Georgia"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 72,
+    "fields": {
+        "codigo_iso_2": "GH",
+        "codigo_iso_3": "GHA",
+        "nombre": "Ghana"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 73,
+    "fields": {
+        "codigo_iso_2": "GD",
+        "codigo_iso_3": "GRD",
+        "nombre": "Granada"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 74,
+    "fields": {
+        "codigo_iso_2": "GR",
+        "codigo_iso_3": "GRC",
+        "nombre": "Grecia"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 75,
+    "fields": {
+        "codigo_iso_2": "GT",
+        "codigo_iso_3": "GTM",
+        "nombre": "Guatemala"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 76,
+    "fields": {
+        "codigo_iso_2": "GN",
+        "codigo_iso_3": "GIN",
+        "nombre": "Guinea"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 78,
+    "fields": {
+        "codigo_iso_2": "GQ",
+        "codigo_iso_3": "GNQ",
+        "nombre": "Guinea Ecuatorial"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 77,
+    "fields": {
+        "codigo_iso_2": "GW",
+        "codigo_iso_3": "GNB",
+        "nombre": "Guinea-Bisáu"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 79,
+    "fields": {
+        "codigo_iso_2": "GY",
+        "codigo_iso_3": "GUY",
+        "nombre": "Guyana"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 80,
+    "fields": {
+        "codigo_iso_2": "HT",
+        "codigo_iso_3": "HTI",
+        "nombre": "Haití"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 81,
+    "fields": {
+        "codigo_iso_2": "HN",
+        "codigo_iso_3": "HND",
+        "nombre": "Honduras"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 194,
+    "fields": {
+        "codigo_iso_2": "HK",
+        "codigo_iso_3": "HKG",
+        "nombre": "Hong Kong"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 82,
+    "fields": {
+        "codigo_iso_2": "HU",
+        "codigo_iso_3": "HUN",
+        "nombre": "Hungría"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 83,
+    "fields": {
+        "codigo_iso_2": "IN",
+        "codigo_iso_3": "IND",
+        "nombre": "India"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 84,
+    "fields": {
+        "codigo_iso_2": "ID",
+        "codigo_iso_3": "IDN",
+        "nombre": "Indonesia"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 85,
+    "fields": {
+        "codigo_iso_2": "IQ",
+        "codigo_iso_3": "IRQ",
+        "nombre": "Irak"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 87,
+    "fields": {
+        "codigo_iso_2": "IE",
+        "codigo_iso_3": "IRL",
+        "nombre": "Irlanda"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 86,
+    "fields": {
+        "codigo_iso_2": "IR",
+        "codigo_iso_3": "IRN",
+        "nombre": "Irán"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 88,
+    "fields": {
+        "codigo_iso_2": "IS",
+        "codigo_iso_3": "ISL",
+        "nombre": "Islandia"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 115,
+    "fields": {
+        "codigo_iso_2": "MH",
+        "codigo_iso_3": "MHL",
+        "nombre": "Islas Marshall"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 193,
+    "fields": {
+        "codigo_iso_2": "VI",
+        "codigo_iso_3": "VIR",
+        "nombre": "Islas Vírgenes de EE. UU."
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 89,
+    "fields": {
+        "codigo_iso_2": "IL",
+        "codigo_iso_3": "ISR",
+        "nombre": "Israel"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 90,
+    "fields": {
+        "codigo_iso_2": "IT",
+        "codigo_iso_3": "ITA",
+        "nombre": "Italia"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 91,
+    "fields": {
+        "codigo_iso_2": "JM",
+        "codigo_iso_3": "JAM",
+        "nombre": "Jamaica"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 92,
+    "fields": {
+        "codigo_iso_2": "JP",
+        "codigo_iso_3": "JPN",
+        "nombre": "Japón"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 93,
+    "fields": {
+        "codigo_iso_2": "JO",
+        "codigo_iso_3": "JOR",
+        "nombre": "Jordania"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 94,
+    "fields": {
+        "codigo_iso_2": "KZ",
+        "codigo_iso_3": "KAZ",
+        "nombre": "Kazajistán"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 95,
+    "fields": {
+        "codigo_iso_2": "KE",
+        "codigo_iso_3": "KEN",
+        "nombre": "Kenia"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 96,
+    "fields": {
+        "codigo_iso_2": "KG",
+        "codigo_iso_3": "KGZ",
+        "nombre": "Kirguistán"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 97,
+    "fields": {
+        "codigo_iso_2": "KI",
+        "codigo_iso_3": "KIR",
+        "nombre": "Kiribati"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 98,
+    "fields": {
+        "codigo_iso_2": "KW",
+        "codigo_iso_3": "KWT",
+        "nombre": "Kuwait"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 99,
+    "fields": {
+        "codigo_iso_2": "LA",
+        "codigo_iso_3": "LAO",
+        "nombre": "Laos"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 100,
+    "fields": {
+        "codigo_iso_2": "LS",
+        "codigo_iso_3": "LSO",
+        "nombre": "Lesoto"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 101,
+    "fields": {
+        "codigo_iso_2": "LV",
+        "codigo_iso_3": "LVA",
+        "nombre": "Letonia"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 103,
+    "fields": {
+        "codigo_iso_2": "LR",
+        "codigo_iso_3": "LBR",
+        "nombre": "Liberia"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 104,
+    "fields": {
+        "codigo_iso_2": "LY",
+        "codigo_iso_3": "LBY",
+        "nombre": "Libia"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 105,
+    "fields": {
+        "codigo_iso_2": "LI",
+        "codigo_iso_3": "LIE",
+        "nombre": "Liechtenstein"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 106,
+    "fields": {
+        "codigo_iso_2": "LT",
+        "codigo_iso_3": "LTU",
+        "nombre": "Lituania"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 107,
+    "fields": {
+        "codigo_iso_2": "LU",
+        "codigo_iso_3": "LUX",
+        "nombre": "Luxemburgo"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 102,
+    "fields": {
+        "codigo_iso_2": "LB",
+        "codigo_iso_3": "LBN",
+        "nombre": "Líbano"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 195,
+    "fields": {
+        "codigo_iso_2": "MO",
+        "codigo_iso_3": "MAC",
+        "nombre": "Macao"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 108,
+    "fields": {
+        "codigo_iso_2": "MK",
+        "codigo_iso_3": "MKD",
+        "nombre": "Macedonia del Norte"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 109,
+    "fields": {
+        "codigo_iso_2": "MG",
+        "codigo_iso_3": "MDG",
+        "nombre": "Madagascar"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 111,
+    "fields": {
+        "codigo_iso_2": "MY",
+        "codigo_iso_3": "MYS",
+        "nombre": "Malasia"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 110,
+    "fields": {
+        "codigo_iso_2": "MW",
+        "codigo_iso_3": "MWI",
+        "nombre": "Malaui"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 113,
+    "fields": {
+        "codigo_iso_2": "MT",
+        "codigo_iso_3": "MLT",
+        "nombre": "Malta"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 112,
+    "fields": {
+        "codigo_iso_2": "ML",
+        "codigo_iso_3": "MLI",
+        "nombre": "Malí"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 114,
+    "fields": {
+        "codigo_iso_2": "MA",
+        "codigo_iso_3": "MAR",
+        "nombre": "Marruecos"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 117,
+    "fields": {
+        "codigo_iso_2": "MU",
+        "codigo_iso_3": "MUS",
+        "nombre": "Mauricio"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 116,
+    "fields": {
+        "codigo_iso_2": "MR",
+        "codigo_iso_3": "MRT",
+        "nombre": "Mauritania"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 119,
+    "fields": {
+        "codigo_iso_2": "FM",
+        "codigo_iso_3": "FSM",
+        "nombre": "Micronesia"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 120,
+    "fields": {
+        "codigo_iso_2": "MD",
+        "codigo_iso_3": "MDA",
+        "nombre": "Moldavia"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 122,
+    "fields": {
+        "codigo_iso_2": "MN",
+        "codigo_iso_3": "MNG",
+        "nombre": "Mongolia"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 123,
+    "fields": {
+        "codigo_iso_2": "ME",
+        "codigo_iso_3": "MNE",
+        "nombre": "Montenegro"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 124,
+    "fields": {
+        "codigo_iso_2": "MZ",
+        "codigo_iso_3": "MOZ",
+        "nombre": "Mozambique"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 125,
+    "fields": {
+        "codigo_iso_2": "MM",
+        "codigo_iso_3": "MMR",
+        "nombre": "Myanmar"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 118,
+    "fields": {
+        "codigo_iso_2": "MX",
+        "codigo_iso_3": "MEX",
+        "nombre": "México"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 121,
+    "fields": {
+        "codigo_iso_2": "MC",
+        "codigo_iso_3": "MCO",
+        "nombre": "Mónaco"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 126,
+    "fields": {
+        "codigo_iso_2": "NA",
+        "codigo_iso_3": "NAM",
+        "nombre": "Namibia"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 127,
+    "fields": {
+        "codigo_iso_2": "NR",
+        "codigo_iso_3": "NRU",
+        "nombre": "Nauru"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 128,
+    "fields": {
+        "codigo_iso_2": "NP",
+        "codigo_iso_3": "NPL",
+        "nombre": "Nepal"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 129,
+    "fields": {
+        "codigo_iso_2": "NI",
+        "codigo_iso_3": "NIC",
+        "nombre": "Nicaragua"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 131,
+    "fields": {
+        "codigo_iso_2": "NG",
+        "codigo_iso_3": "NGA",
+        "nombre": "Nigeria"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 132,
+    "fields": {
+        "codigo_iso_2": "NO",
+        "codigo_iso_3": "NOR",
+        "nombre": "Noruega"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 133,
+    "fields": {
+        "codigo_iso_2": "NZ",
+        "codigo_iso_3": "NZL",
+        "nombre": "Nueva Zelanda"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 130,
+    "fields": {
+        "codigo_iso_2": "NE",
+        "codigo_iso_3": "NER",
+        "nombre": "Níger"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 134,
+    "fields": {
+        "codigo_iso_2": "OM",
+        "codigo_iso_3": "OMN",
+        "nombre": "Omán"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 136,
+    "fields": {
+        "codigo_iso_2": "PK",
+        "codigo_iso_3": "PAK",
+        "nombre": "Pakistán"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 137,
+    "fields": {
+        "codigo_iso_2": "PW",
+        "codigo_iso_3": "PLW",
+        "nombre": "Palaos"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 138,
+    "fields": {
+        "codigo_iso_2": "PS",
+        "codigo_iso_3": "PSE",
+        "nombre": "Palestina"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 1,
+    "fields": {
+        "codigo_iso_2": "PA",
+        "codigo_iso_3": "PAN",
+        "nombre": "Panamá"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 139,
+    "fields": {
+        "codigo_iso_2": "PG",
+        "codigo_iso_3": "PNG",
+        "nombre": "Papúa Nueva Guinea"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 140,
+    "fields": {
+        "codigo_iso_2": "PY",
+        "codigo_iso_3": "PRY",
+        "nombre": "Paraguay"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 135,
+    "fields": {
+        "codigo_iso_2": "NL",
+        "codigo_iso_3": "NLD",
+        "nombre": "Países Bajos"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 141,
+    "fields": {
+        "codigo_iso_2": "PE",
+        "codigo_iso_3": "PER",
+        "nombre": "Perú"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 142,
+    "fields": {
+        "codigo_iso_2": "PL",
+        "codigo_iso_3": "POL",
+        "nombre": "Polonia"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 143,
+    "fields": {
+        "codigo_iso_2": "PT",
+        "codigo_iso_3": "PRT",
+        "nombre": "Portugal"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 144,
+    "fields": {
+        "codigo_iso_2": "GB",
+        "codigo_iso_3": "GBR",
+        "nombre": "Reino Unido"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 145,
+    "fields": {
+        "codigo_iso_2": "CF",
+        "codigo_iso_3": "CAF",
+        "nombre": "República Centroafricana"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 146,
+    "fields": {
+        "codigo_iso_2": "CZ",
+        "codigo_iso_3": "CZE",
+        "nombre": "República Checa"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 46,
+    "fields": {
+        "codigo_iso_2": "CD",
+        "codigo_iso_3": "COD",
+        "nombre": "República Democrática del Congo"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 147,
+    "fields": {
+        "codigo_iso_2": "DO",
+        "codigo_iso_3": "DOM",
+        "nombre": "República Dominicana"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 148,
+    "fields": {
+        "codigo_iso_2": "RW",
+        "codigo_iso_3": "RWA",
+        "nombre": "Ruanda"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 149,
+    "fields": {
+        "codigo_iso_2": "RO",
+        "codigo_iso_3": "ROU",
+        "nombre": "Rumanía"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 150,
+    "fields": {
+        "codigo_iso_2": "RU",
+        "codigo_iso_3": "RUS",
+        "nombre": "Rusia"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 151,
+    "fields": {
+        "codigo_iso_2": "WS",
+        "codigo_iso_3": "WSM",
+        "nombre": "Samoa"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 152,
+    "fields": {
+        "codigo_iso_2": "KN",
+        "codigo_iso_3": "KNA",
+        "nombre": "San Cristóbal y Nieves"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 153,
+    "fields": {
+        "codigo_iso_2": "SM",
+        "codigo_iso_3": "SMR",
+        "nombre": "San Marino"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 155,
+    "fields": {
+        "codigo_iso_2": "VC",
+        "codigo_iso_3": "VCT",
+        "nombre": "San Vicente y las Granadinas"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 154,
+    "fields": {
+        "codigo_iso_2": "LC",
+        "codigo_iso_3": "LCA",
+        "nombre": "Santa Lucía"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 156,
+    "fields": {
+        "codigo_iso_2": "ST",
+        "codigo_iso_3": "STP",
+        "nombre": "Santo Tomé y Príncipe"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 157,
+    "fields": {
+        "codigo_iso_2": "SN",
+        "codigo_iso_3": "SEN",
+        "nombre": "Senegal"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 158,
+    "fields": {
+        "codigo_iso_2": "RS",
+        "codigo_iso_3": "SRB",
+        "nombre": "Serbia"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 159,
+    "fields": {
+        "codigo_iso_2": "SC",
+        "codigo_iso_3": "SYC",
+        "nombre": "Seychelles"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 160,
+    "fields": {
+        "codigo_iso_2": "SL",
+        "codigo_iso_3": "SLE",
+        "nombre": "Sierra Leona"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 161,
+    "fields": {
+        "codigo_iso_2": "SG",
+        "codigo_iso_3": "SGP",
+        "nombre": "Singapur"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 162,
+    "fields": {
+        "codigo_iso_2": "SY",
+        "codigo_iso_3": "SYR",
+        "nombre": "Siria"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 163,
+    "fields": {
+        "codigo_iso_2": "SO",
+        "codigo_iso_3": "SOM",
+        "nombre": "Somalia"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 164,
+    "fields": {
+        "codigo_iso_2": "LK",
+        "codigo_iso_3": "LKA",
+        "nombre": "Sri Lanka"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 166,
+    "fields": {
+        "codigo_iso_2": "ZA",
+        "codigo_iso_3": "ZAF",
+        "nombre": "Sudáfrica"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 167,
+    "fields": {
+        "codigo_iso_2": "SD",
+        "codigo_iso_3": "SDN",
+        "nombre": "Sudán"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 168,
+    "fields": {
+        "codigo_iso_2": "SS",
+        "codigo_iso_3": "SSD",
+        "nombre": "Sudán del Sur"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 169,
+    "fields": {
+        "codigo_iso_2": "SE",
+        "codigo_iso_3": "SWE",
+        "nombre": "Suecia"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 170,
+    "fields": {
+        "codigo_iso_2": "CH",
+        "codigo_iso_3": "CHE",
+        "nombre": "Suiza"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 171,
+    "fields": {
+        "codigo_iso_2": "SR",
+        "codigo_iso_3": "SUR",
+        "nombre": "Surinam"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 172,
+    "fields": {
+        "codigo_iso_2": "TH",
+        "codigo_iso_3": "THA",
+        "nombre": "Tailandia"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 196,
+    "fields": {
+        "codigo_iso_2": "TW",
+        "codigo_iso_3": "TWN",
+        "nombre": "Taiwán"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 173,
+    "fields": {
+        "codigo_iso_2": "TZ",
+        "codigo_iso_3": "TZA",
+        "nombre": "Tanzania"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 174,
+    "fields": {
+        "codigo_iso_2": "TJ",
+        "codigo_iso_3": "TJK",
+        "nombre": "Tayikistán"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 175,
+    "fields": {
+        "codigo_iso_2": "TL",
+        "codigo_iso_3": "TLS",
+        "nombre": "Timor Oriental"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 176,
+    "fields": {
+        "codigo_iso_2": "TG",
+        "codigo_iso_3": "TGO",
+        "nombre": "Togo"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 177,
+    "fields": {
+        "codigo_iso_2": "TO",
+        "codigo_iso_3": "TON",
+        "nombre": "Tonga"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 178,
+    "fields": {
+        "codigo_iso_2": "TT",
+        "codigo_iso_3": "TTO",
+        "nombre": "Trinidad y Tobago"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 180,
+    "fields": {
+        "codigo_iso_2": "TM",
+        "codigo_iso_3": "TKM",
+        "nombre": "Turkmenistán"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 181,
+    "fields": {
+        "codigo_iso_2": "TR",
+        "codigo_iso_3": "TUR",
+        "nombre": "Turquía"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 182,
+    "fields": {
+        "codigo_iso_2": "TV",
+        "codigo_iso_3": "TUV",
+        "nombre": "Tuvalu"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 179,
+    "fields": {
+        "codigo_iso_2": "TN",
+        "codigo_iso_3": "TUN",
+        "nombre": "Túnez"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 183,
+    "fields": {
+        "codigo_iso_2": "UA",
+        "codigo_iso_3": "UKR",
+        "nombre": "Ucrania"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 184,
+    "fields": {
+        "codigo_iso_2": "UG",
+        "codigo_iso_3": "UGA",
+        "nombre": "Uganda"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 185,
+    "fields": {
+        "codigo_iso_2": "UY",
+        "codigo_iso_3": "URY",
+        "nombre": "Uruguay"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 186,
+    "fields": {
+        "codigo_iso_2": "UZ",
+        "codigo_iso_3": "UZB",
+        "nombre": "Uzbekistán"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 187,
+    "fields": {
+        "codigo_iso_2": "VU",
+        "codigo_iso_3": "VUT",
+        "nombre": "Vanuatu"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 2,
+    "fields": {
+        "codigo_iso_2": "VE",
+        "codigo_iso_3": "VEN",
+        "nombre": "Venezuela"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 188,
+    "fields": {
+        "codigo_iso_2": "VN",
+        "codigo_iso_3": "VNM",
+        "nombre": "Vietnam"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 189,
+    "fields": {
+        "codigo_iso_2": "YE",
+        "codigo_iso_3": "YEM",
+        "nombre": "Yemen"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 190,
+    "fields": {
+        "codigo_iso_2": "DJ",
+        "codigo_iso_3": "DJI",
+        "nombre": "Yibuti"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 191,
+    "fields": {
+        "codigo_iso_2": "ZM",
+        "codigo_iso_3": "ZMB",
+        "nombre": "Zambia"
+    }
+},
+{
+    "model": "core.pais",
+    "pk": 192,
+    "fields": {
+        "codigo_iso_2": "ZW",
+        "codigo_iso_3": "ZWE",
+        "nombre": "Zimbabue"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 167,
+    "fields": {
+        "nombre": "Kabul",
+        "pais": 6,
+        "region_estado": "Kabul"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 144,
+    "fields": {
+        "nombre": "Berlin",
+        "pais": 8,
+        "region_estado": "Berlin"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 329,
+    "fields": {
+        "nombre": "Hamburg",
+        "pais": 8,
+        "region_estado": "Hamburg"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 312,
+    "fields": {
+        "nombre": "Munich",
+        "pais": 8,
+        "region_estado": "Bavaria"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 289,
+    "fields": {
+        "nombre": "Stuttgart",
+        "pais": 8,
+        "region_estado": "Baden-Württemberg"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 48,
+    "fields": {
+        "nombre": "Luanda",
+        "pais": 10,
+        "region_estado": "Luanda"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 142,
+    "fields": {
+        "nombre": "Jeddah",
+        "pais": 12,
+        "region_estado": "Makkah al Mukarramah"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 340,
+    "fields": {
+        "nombre": "Mecca",
+        "pais": 12,
+        "region_estado": "Makkah al Mukarramah"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 70,
+    "fields": {
+        "nombre": "Riyadh",
+        "pais": 12,
+        "region_estado": "Ar Riyāḑ"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 21,
+    "fields": {
+        "nombre": "Buenos Aires",
+        "pais": 14,
+        "region_estado": "Buenos Aires, Ciudad Autónoma de"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 297,
+    "fields": {
+        "nombre": "Brisbane",
+        "pais": 16,
+        "region_estado": "Queensland"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 129,
+    "fields": {
+        "nombre": "Melbourne",
+        "pais": 16,
+        "region_estado": "Victoria"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 136,
+    "fields": {
+        "nombre": "Sydney",
+        "pais": 16,
+        "region_estado": "New South Wales"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 317,
+    "fields": {
+        "nombre": "Chattogram",
+        "pais": 20,
+        "region_estado": "Chattogram"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 15,
+    "fields": {
+        "nombre": "Dhaka",
+        "pais": 20,
+        "region_estado": "Dhaka"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 302,
+    "fields": {
+        "nombre": "Gazipura",
+        "pais": 20,
+        "region_estado": "Dhaka"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 247,
+    "fields": {
+        "nombre": "Santa Cruz de la Sierra",
+        "pais": 27,
+        "region_estado": "Santa Cruz"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 117,
+    "fields": {
+        "nombre": "Belo Horizonte",
+        "pais": 30,
+        "region_estado": "Minas Gerais"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 174,
+    "fields": {
+        "nombre": "Fortaleza",
+        "pais": 30,
+        "region_estado": "Ceará"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 30,
+    "fields": {
+        "nombre": "Rio de Janeiro",
+        "pais": 30,
+        "region_estado": "Rio de Janeiro"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 344,
+    "fields": {
+        "nombre": "Salvador",
+        "pais": 30,
+        "region_estado": "Bahia"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 9,
+    "fields": {
+        "nombre": "São Paulo",
+        "pais": 30,
+        "region_estado": "São Paulo"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 256,
+    "fields": {
+        "nombre": "Ouagadougou",
+        "pais": 33,
+        "region_estado": "Centre"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 100,
+    "fields": {
+        "nombre": "Douala",
+        "pais": 38,
+        "region_estado": "Littoral"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 336,
+    "fields": {
+        "nombre": "Yaounde",
+        "pais": 38,
+        "region_estado": "Centre"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 206,
+    "fields": {
+        "nombre": "Montreal",
+        "pais": 39,
+        "region_estado": "Quebec"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 105,
+    "fields": {
+        "nombre": "Toronto",
+        "pais": 39,
+        "region_estado": "Ontario"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 341,
+    "fields": {
+        "nombre": "Vancouver",
+        "pais": 39,
+        "region_estado": "British Columbia"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 71,
+    "fields": {
+        "nombre": "Santiago",
+        "pais": 42,
+        "region_estado": "Región Metropolitana"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 331,
+    "fields": {
+        "nombre": "Ankang",
+        "pais": 5,
+        "region_estado": "Shaanxi"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 175,
+    "fields": {
+        "nombre": "Anqing",
+        "pais": 5,
+        "region_estado": "Anhui"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 229,
+    "fields": {
+        "nombre": "Anshan",
+        "pais": 5,
+        "region_estado": "Liaoning"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 216,
+    "fields": {
+        "nombre": "Baicheng",
+        "pais": 5,
+        "region_estado": "Guangxi"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 40,
+    "fields": {
+        "nombre": "Baoding",
+        "pais": 5,
+        "region_estado": "Hebei"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 231,
+    "fields": {
+        "nombre": "Baojishi",
+        "pais": 5,
+        "region_estado": "Shaanxi"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 339,
+    "fields": {
+        "nombre": "Baoshan",
+        "pais": 5,
+        "region_estado": "Yunnan"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 306,
+    "fields": {
+        "nombre": "Baotou",
+        "pais": 5,
+        "region_estado": "Inner Mongolia"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 295,
+    "fields": {
+        "nombre": "Bazhou",
+        "pais": 5,
+        "region_estado": "Sichuan"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 17,
+    "fields": {
+        "nombre": "Beijing",
+        "pais": 5,
+        "region_estado": "Beijing"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 245,
+    "fields": {
+        "nombre": "Bengbu",
+        "pais": 5,
+        "region_estado": "Anhui"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 76,
+    "fields": {
+        "nombre": "Bijie",
+        "pais": 5,
+        "region_estado": "Guizhou"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 201,
+    "fields": {
+        "nombre": "Binzhou",
+        "pais": 5,
+        "region_estado": "Shandong"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 135,
+    "fields": {
+        "nombre": "Bozhou",
+        "pais": 5,
+        "region_estado": "Anhui"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 69,
+    "fields": {
+        "nombre": "Cangzhou",
+        "pais": 5,
+        "region_estado": "Hebei"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 157,
+    "fields": {
+        "nombre": "Changchun",
+        "pais": 5,
+        "region_estado": "Jilin"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 121,
+    "fields": {
+        "nombre": "Changde",
+        "pais": 5,
+        "region_estado": "Hunan"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 140,
+    "fields": {
+        "nombre": "Changsha",
+        "pais": 5,
+        "region_estado": "Hunan"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 243,
+    "fields": {
+        "nombre": "Changzhi",
+        "pais": 5,
+        "region_estado": "Shanxi"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 213,
+    "fields": {
+        "nombre": "Changzhou",
+        "pais": 5,
+        "region_estado": "Jiangsu"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 275,
+    "fields": {
+        "nombre": "Chaoyang",
+        "pais": 5,
+        "region_estado": "Liaoning"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 305,
+    "fields": {
+        "nombre": "Chaozhou",
+        "pais": 5,
+        "region_estado": "Guangdong"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 26,
+    "fields": {
+        "nombre": "Chengdu",
+        "pais": 5,
+        "region_estado": "Sichuan"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 145,
+    "fields": {
+        "nombre": "Chenzhou",
+        "pais": 5,
+        "region_estado": "Hunan"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 183,
+    "fields": {
+        "nombre": "Chifeng",
+        "pais": 5,
+        "region_estado": "Inner Mongolia"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 34,
+    "fields": {
+        "nombre": "Chongqing",
+        "pais": 5,
+        "region_estado": "Chongqing"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 188,
+    "fields": {
+        "nombre": "Chuzhou",
+        "pais": 5,
+        "region_estado": "Anhui"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 94,
+    "fields": {
+        "nombre": "Dalian",
+        "pais": 5,
+        "region_estado": "Liaoning"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 290,
+    "fields": {
+        "nombre": "Daqing",
+        "pais": 5,
+        "region_estado": "Heilongjiang"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 116,
+    "fields": {
+        "nombre": "Dazhou",
+        "pais": 5,
+        "region_estado": "Sichuan"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 221,
+    "fields": {
+        "nombre": "Deyang",
+        "pais": 5,
+        "region_estado": "Sichuan"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 112,
+    "fields": {
+        "nombre": "Dezhou",
+        "pais": 5,
+        "region_estado": "Shandong"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 323,
+    "fields": {
+        "nombre": "Dingxi",
+        "pais": 5,
+        "region_estado": "Gansu"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 39,
+    "fields": {
+        "nombre": "Dongguan",
+        "pais": 5,
+        "region_estado": "Guangdong"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 49,
+    "fields": {
+        "nombre": "Foshan",
+        "pais": 5,
+        "region_estado": "Guangdong"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 65,
+    "fields": {
+        "nombre": "Fuyang",
+        "pais": 5,
+        "region_estado": "Anhui"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 207,
+    "fields": {
+        "nombre": "Fuzhou",
+        "pais": 5,
+        "region_estado": "Fujian"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 211,
+    "fields": {
+        "nombre": "Fuzhou",
+        "pais": 5,
+        "region_estado": "Jiangxi"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 67,
+    "fields": {
+        "nombre": "Ganzhou",
+        "pais": 5,
+        "region_estado": "Jiangxi"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 5,
+    "fields": {
+        "nombre": "Guangzhou",
+        "pais": 5,
+        "region_estado": "Guangdong"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 241,
+    "fields": {
+        "nombre": "Guang’an",
+        "pais": 5,
+        "region_estado": "Sichuan"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 164,
+    "fields": {
+        "nombre": "Guigang",
+        "pais": 5,
+        "region_estado": "Guangxi"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 132,
+    "fields": {
+        "nombre": "Guilin",
+        "pais": 5,
+        "region_estado": "Guangxi"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 233,
+    "fields": {
+        "nombre": "Guiyang",
+        "pais": 5,
+        "region_estado": "Guizhou"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 313,
+    "fields": {
+        "nombre": "Gulou",
+        "pais": 5,
+        "region_estado": "Fujian"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 230,
+    "fields": {
+        "nombre": "Guozhen",
+        "pais": 5,
+        "region_estado": "Shaanxi"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 296,
+    "fields": {
+        "nombre": "Handan",
+        "pais": 5,
+        "region_estado": "Hebei"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 46,
+    "fields": {
+        "nombre": "Hangzhou",
+        "pais": 5,
+        "region_estado": "Zhejiang"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 239,
+    "fields": {
+        "nombre": "Hanzhong",
+        "pais": 5,
+        "region_estado": "Shaanxi"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 196,
+    "fields": {
+        "nombre": "Harbin",
+        "pais": 5,
+        "region_estado": "Heilongjiang"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 223,
+    "fields": {
+        "nombre": "Hechi",
+        "pais": 5,
+        "region_estado": "Guangxi"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 172,
+    "fields": {
+        "nombre": "Hefei",
+        "pais": 5,
+        "region_estado": "Anhui"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 173,
+    "fields": {
+        "nombre": "Hengshui",
+        "pais": 5,
+        "region_estado": "Hebei"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 78,
+    "fields": {
+        "nombre": "Hengyang",
+        "pais": 5,
+        "region_estado": "Hunan"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 281,
+    "fields": {
+        "nombre": "Heyuan",
+        "pais": 5,
+        "region_estado": "Guangdong"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 56,
+    "fields": {
+        "nombre": "Heze",
+        "pais": 5,
+        "region_estado": "Shandong"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 276,
+    "fields": {
+        "nombre": "Hohhot",
+        "pais": 5,
+        "region_estado": "Inner Mongolia"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 149,
+    "fields": {
+        "nombre": "Huaihua",
+        "pais": 5,
+        "region_estado": "Hunan"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 309,
+    "fields": {
+        "nombre": "Huai’an",
+        "pais": 5,
+        "region_estado": "Jiangsu"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 93,
+    "fields": {
+        "nombre": "Huanggang",
+        "pais": 5,
+        "region_estado": "Hubei"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 150,
+    "fields": {
+        "nombre": "Huanglongsi",
+        "pais": 5,
+        "region_estado": "Henan"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 335,
+    "fields": {
+        "nombre": "Huangshi",
+        "pais": 5,
+        "region_estado": "Hubei"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 326,
+    "fields": {
+        "nombre": "Huizhou",
+        "pais": 5,
+        "region_estado": "Guangdong"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 338,
+    "fields": {
+        "nombre": "Huludao",
+        "pais": 5,
+        "region_estado": "Liaoning"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 166,
+    "fields": {
+        "nombre": "Jiangguanchi",
+        "pais": 5,
+        "region_estado": "Henan"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 146,
+    "fields": {
+        "nombre": "Jiangmen",
+        "pais": 5,
+        "region_estado": "Guangdong"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 219,
+    "fields": {
+        "nombre": "Jiaozuo",
+        "pais": 5,
+        "region_estado": "Henan"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 111,
+    "fields": {
+        "nombre": "Jieyang",
+        "pais": 5,
+        "region_estado": "Guangdong"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 108,
+    "fields": {
+        "nombre": "Jinan",
+        "pais": 5,
+        "region_estado": "Shandong"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 58,
+    "fields": {
+        "nombre": "Jining",
+        "pais": 5,
+        "region_estado": "Shandong"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 298,
+    "fields": {
+        "nombre": "Jinzhou",
+        "pais": 5,
+        "region_estado": "Liaoning"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 148,
+    "fields": {
+        "nombre": "Jiujiang",
+        "pais": 5,
+        "region_estado": "Jiangxi"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 154,
+    "fields": {
+        "nombre": "Ji’an",
+        "pais": 5,
+        "region_estado": "Jiangxi"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 156,
+    "fields": {
+        "nombre": "Kunming",
+        "pais": 5,
+        "region_estado": "Yunnan"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 160,
+    "fields": {
+        "nombre": "Langfang",
+        "pais": 5,
+        "region_estado": "Hebei"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 255,
+    "fields": {
+        "nombre": "Lanzhou",
+        "pais": 5,
+        "region_estado": "Gansu"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 246,
+    "fields": {
+        "nombre": "Leshan",
+        "pais": 5,
+        "region_estado": "Sichuan"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 342,
+    "fields": {
+        "nombre": "Lianshan",
+        "pais": 5,
+        "region_estado": "Liaoning"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 99,
+    "fields": {
+        "nombre": "Liaocheng",
+        "pais": 5,
+        "region_estado": "Shandong"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 186,
+    "fields": {
+        "nombre": "Linfen",
+        "pais": 5,
+        "region_estado": "Shanxi"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 38,
+    "fields": {
+        "nombre": "Linyi",
+        "pais": 5,
+        "region_estado": "Shandong"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 182,
+    "fields": {
+        "nombre": "Liuzhou",
+        "pais": 5,
+        "region_estado": "Guangxi"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 346,
+    "fields": {
+        "nombre": "Longba",
+        "pais": 5,
+        "region_estado": "Gansu"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 307,
+    "fields": {
+        "nombre": "Longyan",
+        "pais": 5,
+        "region_estado": "Fujian"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 197,
+    "fields": {
+        "nombre": "Loudi",
+        "pais": 5,
+        "region_estado": "Hunan"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 355,
+    "fields": {
+        "nombre": "Luohe",
+        "pais": 5,
+        "region_estado": "Henan"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 354,
+    "fields": {
+        "nombre": "Luoyang",
+        "pais": 5,
+        "region_estado": "Henan"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 171,
+    "fields": {
+        "nombre": "Luzhou",
+        "pais": 5,
+        "region_estado": "Sichuan"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 158,
+    "fields": {
+        "nombre": "Lu’an",
+        "pais": 5,
+        "region_estado": "Anhui"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 87,
+    "fields": {
+        "nombre": "Maoming",
+        "pais": 5,
+        "region_estado": "Guangdong"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 266,
+    "fields": {
+        "nombre": "Meishan",
+        "pais": 5,
+        "region_estado": "Sichuan"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 193,
+    "fields": {
+        "nombre": "Meizhou",
+        "pais": 5,
+        "region_estado": "Guangdong"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 147,
+    "fields": {
+        "nombre": "Mianyang",
+        "pais": 5,
+        "region_estado": "Sichuan"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 215,
+    "fields": {
+        "nombre": "Nanchang",
+        "pais": 5,
+        "region_estado": "Jiangxi"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 107,
+    "fields": {
+        "nombre": "Nanchong",
+        "pais": 5,
+        "region_estado": "Sichuan"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 102,
+    "fields": {
+        "nombre": "Nangandao",
+        "pais": 5,
+        "region_estado": "Henan"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 55,
+    "fields": {
+        "nombre": "Nanjing",
+        "pais": 5,
+        "region_estado": "Jiangsu"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 195,
+    "fields": {
+        "nombre": "Nanning",
+        "pais": 5,
+        "region_estado": "Guangxi"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 301,
+    "fields": {
+        "nombre": "Nanping",
+        "pais": 5,
+        "region_estado": "Fujian"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 45,
+    "fields": {
+        "nombre": "Nanyang",
+        "pais": 5,
+        "region_estado": "Henan"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 248,
+    "fields": {
+        "nombre": "Neijiang",
+        "pais": 5,
+        "region_estado": "Sichuan"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 179,
+    "fields": {
+        "nombre": "Ningbo",
+        "pais": 5,
+        "region_estado": "Zhejiang"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 268,
+    "fields": {
+        "nombre": "Ningde",
+        "pais": 5,
+        "region_estado": "Fujian"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 133,
+    "fields": {
+        "nombre": "Pingdingshan",
+        "pais": 5,
+        "region_estado": "Henan"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 124,
+    "fields": {
+        "nombre": "Pudong",
+        "pais": 5,
+        "region_estado": "Shanghai"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 272,
+    "fields": {
+        "nombre": "Putian",
+        "pais": 5,
+        "region_estado": "Fujian"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 214,
+    "fields": {
+        "nombre": "Puyang",
+        "pais": 5,
+        "region_estado": "Henan"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 261,
+    "fields": {
+        "nombre": "Qincheng",
+        "pais": 5,
+        "region_estado": "Gansu"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 97,
+    "fields": {
+        "nombre": "Qingdao",
+        "pais": 5,
+        "region_estado": "Shandong"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 192,
+    "fields": {
+        "nombre": "Qingyuan",
+        "pais": 5,
+        "region_estado": "Guangdong"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 250,
+    "fields": {
+        "nombre": "Qinhuangdao",
+        "pais": 5,
+        "region_estado": "Hebei"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 232,
+    "fields": {
+        "nombre": "Qinzhou",
+        "pais": 5,
+        "region_estado": "Guangxi"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 180,
+    "fields": {
+        "nombre": "Qiqihar",
+        "pais": 5,
+        "region_estado": "Heilongjiang"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 82,
+    "fields": {
+        "nombre": "Quanzhou",
+        "pais": 5,
+        "region_estado": "Fujian"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 101,
+    "fields": {
+        "nombre": "Qujing",
+        "pais": 5,
+        "region_estado": "Yunnan"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 287,
+    "fields": {
+        "nombre": "Rizhao",
+        "pais": 5,
+        "region_estado": "Shandong"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 333,
+    "fields": {
+        "nombre": "Sanming",
+        "pais": 5,
+        "region_estado": "Fujian"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 8,
+    "fields": {
+        "nombre": "Shanghai",
+        "pais": 5,
+        "region_estado": "Shanghai"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 68,
+    "fields": {
+        "nombre": "Shangqiu",
+        "pais": 5,
+        "region_estado": "Henan"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 83,
+    "fields": {
+        "nombre": "Shangrao",
+        "pais": 5,
+        "region_estado": "Jiangxi"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 165,
+    "fields": {
+        "nombre": "Shantou",
+        "pais": 5,
+        "region_estado": "Guangdong"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 303,
+    "fields": {
+        "nombre": "Shanwei",
+        "pais": 5,
+        "region_estado": "Guangdong"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 278,
+    "fields": {
+        "nombre": "Shaoguan",
+        "pais": 5,
+        "region_estado": "Guangdong"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 324,
+    "fields": {
+        "nombre": "Shaoxing",
+        "pais": 5,
+        "region_estado": "Zhejiang"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 79,
+    "fields": {
+        "nombre": "Shaoyang",
+        "pais": 5,
+        "region_estado": "Hunan"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 61,
+    "fields": {
+        "nombre": "Shenyang",
+        "pais": 5,
+        "region_estado": "Liaoning"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 19,
+    "fields": {
+        "nombre": "Shenzhen",
+        "pais": 5,
+        "region_estado": "Guangdong"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 178,
+    "fields": {
+        "nombre": "Shijiazhuang",
+        "pais": 5,
+        "region_estado": "Hebei"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 240,
+    "fields": {
+        "nombre": "Shiyan",
+        "pais": 5,
+        "region_estado": "Hubei"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 200,
+    "fields": {
+        "nombre": "Suihua",
+        "pais": 5,
+        "region_estado": "Heilongjiang"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 284,
+    "fields": {
+        "nombre": "Suining",
+        "pais": 5,
+        "region_estado": "Sichuan"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 141,
+    "fields": {
+        "nombre": "Suqian",
+        "pais": 5,
+        "region_estado": "Jiangsu"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 118,
+    "fields": {
+        "nombre": "Suzhou",
+        "pais": 5,
+        "region_estado": "Anhui"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 163,
+    "fields": {
+        "nombre": "Suzhou",
+        "pais": 5,
+        "region_estado": "Jiangsu"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 191,
+    "fields": {
+        "nombre": "Taiyuan",
+        "pais": 5,
+        "region_estado": "Shanxi"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 151,
+    "fields": {
+        "nombre": "Taizhou",
+        "pais": 5,
+        "region_estado": "Jiangsu"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 115,
+    "fields": {
+        "nombre": "Tai’an",
+        "pais": 5,
+        "region_estado": "Shandong"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 224,
+    "fields": {
+        "nombre": "Tangshan",
+        "pais": 5,
+        "region_estado": "Hebei"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 42,
+    "fields": {
+        "nombre": "Tianjin",
+        "pais": 5,
+        "region_estado": "Tianjin"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 349,
+    "fields": {
+        "nombre": "Tieling",
+        "pais": 5,
+        "region_estado": "Liaoning"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 274,
+    "fields": {
+        "nombre": "Tongliao",
+        "pais": 5,
+        "region_estado": "Inner Mongolia"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 244,
+    "fields": {
+        "nombre": "Tongren",
+        "pais": 5,
+        "region_estado": "Guizhou"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 52,
+    "fields": {
+        "nombre": "Tongshan",
+        "pais": 5,
+        "region_estado": "Jiangsu"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 308,
+    "fields": {
+        "nombre": "Weifang",
+        "pais": 5,
+        "region_estado": "Shandong"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 286,
+    "fields": {
+        "nombre": "Weihai",
+        "pais": 5,
+        "region_estado": "Shandong"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 143,
+    "fields": {
+        "nombre": "Weinan",
+        "pais": 5,
+        "region_estado": "Shaanxi"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 212,
+    "fields": {
+        "nombre": "Wenzhou",
+        "pais": 5,
+        "region_estado": "Zhejiang"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 44,
+    "fields": {
+        "nombre": "Wuhan",
+        "pais": 5,
+        "region_estado": "Hubei"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 208,
+    "fields": {
+        "nombre": "Wuhu",
+        "pais": 5,
+        "region_estado": "Anhui"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 234,
+    "fields": {
+        "nombre": "Wuxi",
+        "pais": 5,
+        "region_estado": "Jiangsu"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 282,
+    "fields": {
+        "nombre": "Wuzhou",
+        "pais": 5,
+        "region_estado": "Guangxi"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 204,
+    "fields": {
+        "nombre": "Xiamen",
+        "pais": 5,
+        "region_estado": "Fujian"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 294,
+    "fields": {
+        "nombre": "Xiangtan",
+        "pais": 5,
+        "region_estado": "Hunan"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 122,
+    "fields": {
+        "nombre": "Xiangyang",
+        "pais": 5,
+        "region_estado": "Hubei"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 187,
+    "fields": {
+        "nombre": "Xianyang",
+        "pais": 5,
+        "region_estado": "Shaanxi"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 168,
+    "fields": {
+        "nombre": "Xiaoganzhan",
+        "pais": 5,
+        "region_estado": "Hubei"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 184,
+    "fields": {
+        "nombre": "Xiaoxita",
+        "pais": 5,
+        "region_estado": "Hubei"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 77,
+    "fields": {
+        "nombre": "Xingtai",
+        "pais": 5,
+        "region_estado": "Hebei"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 159,
+    "fields": {
+        "nombre": "Xinpu",
+        "pais": 5,
+        "region_estado": "Jiangsu"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 89,
+    "fields": {
+        "nombre": "Xinyang",
+        "pais": 5,
+        "region_estado": "Henan"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 300,
+    "fields": {
+        "nombre": "Xinzhou",
+        "pais": 5,
+        "region_estado": "Shanxi"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 32,
+    "fields": {
+        "nombre": "Xi’an",
+        "pais": 5,
+        "region_estado": "Shaanxi"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 327,
+    "fields": {
+        "nombre": "Xuanzhou",
+        "pais": 5,
+        "region_estado": "Anhui"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 75,
+    "fields": {
+        "nombre": "Yancheng",
+        "pais": 5,
+        "region_estado": "Jiangsu"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 319,
+    "fields": {
+        "nombre": "Yangjiang",
+        "pais": 5,
+        "region_estado": "Guangdong"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 155,
+    "fields": {
+        "nombre": "Yangzhou",
+        "pais": 5,
+        "region_estado": "Jiangsu"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 325,
+    "fields": {
+        "nombre": "Yantai",
+        "pais": 5,
+        "region_estado": "Shandong"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 153,
+    "fields": {
+        "nombre": "Yibin",
+        "pais": 5,
+        "region_estado": "Sichuan"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 130,
+    "fields": {
+        "nombre": "Yichun",
+        "pais": 5,
+        "region_estado": "Jiangxi"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 194,
+    "fields": {
+        "nombre": "Yiyang",
+        "pais": 5,
+        "region_estado": "Hunan"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 120,
+    "fields": {
+        "nombre": "Yongzhou",
+        "pais": 5,
+        "region_estado": "Hunan"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 128,
+    "fields": {
+        "nombre": "Yueyang",
+        "pais": 5,
+        "region_estado": "Hunan"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 98,
+    "fields": {
+        "nombre": "Yulin",
+        "pais": 5,
+        "region_estado": "Guangxi"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 210,
+    "fields": {
+        "nombre": "Yulinshi",
+        "pais": 5,
+        "region_estado": "Shaanxi"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 138,
+    "fields": {
+        "nombre": "Yuncheng",
+        "pais": 5,
+        "region_estado": "Shanxi"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 350,
+    "fields": {
+        "nombre": "Yunfu",
+        "pais": 5,
+        "region_estado": "Guangdong"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 202,
+    "fields": {
+        "nombre": "Zaozhuang",
+        "pais": 5,
+        "region_estado": "Shandong"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 176,
+    "fields": {
+        "nombre": "Zhangjiakou",
+        "pais": 5,
+        "region_estado": "Hebei"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 127,
+    "fields": {
+        "nombre": "Zhangzhou",
+        "pais": 5,
+        "region_estado": "Fujian"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 73,
+    "fields": {
+        "nombre": "Zhanjiang",
+        "pais": 5,
+        "region_estado": "Guangdong"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 177,
+    "fields": {
+        "nombre": "Zhaoqing",
+        "pais": 5,
+        "region_estado": "Guangdong"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 126,
+    "fields": {
+        "nombre": "Zhaotong",
+        "pais": 5,
+        "region_estado": "Yunnan"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 106,
+    "fields": {
+        "nombre": "Zhengzhou",
+        "pais": 5,
+        "region_estado": "Henan"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 249,
+    "fields": {
+        "nombre": "Zhenjiang",
+        "pais": 5,
+        "region_estado": "Jiangsu"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 269,
+    "fields": {
+        "nombre": "Zhongshan",
+        "pais": 5,
+        "region_estado": "Guangdong"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 51,
+    "fields": {
+        "nombre": "Zhoukou",
+        "pais": 5,
+        "region_estado": "Henan"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 337,
+    "fields": {
+        "nombre": "Zhuhai",
+        "pais": 5,
+        "region_estado": "Guangdong"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 72,
+    "fields": {
+        "nombre": "Zhumadian",
+        "pais": 5,
+        "region_estado": "Henan"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 190,
+    "fields": {
+        "nombre": "Zhuzhou",
+        "pais": 5,
+        "region_estado": "Hunan"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 310,
+    "fields": {
+        "nombre": "Zibo",
+        "pais": 5,
+        "region_estado": "Shandong"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 332,
+    "fields": {
+        "nombre": "Zigong",
+        "pais": 5,
+        "region_estado": "Sichuan"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 84,
+    "fields": {
+        "nombre": "Zunyi",
+        "pais": 5,
+        "region_estado": "Guizhou"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 162,
+    "fields": {
+        "nombre": "Ürümqi",
+        "pais": 5,
+        "region_estado": "Xinjiang"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 59,
+    "fields": {
+        "nombre": "Bogotá",
+        "pais": 3,
+        "region_estado": "Bogotá"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 280,
+    "fields": {
+        "nombre": "Cali",
+        "pais": 3,
+        "region_estado": "Valle del Cauca"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 322,
+    "fields": {
+        "nombre": "Medellín",
+        "pais": 3,
+        "region_estado": "Antioquia"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 318,
+    "fields": {
+        "nombre": "Brazzaville",
+        "pais": 45,
+        "region_estado": "Brazzaville"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 277,
+    "fields": {
+        "nombre": "Pyongyang",
+        "pais": 47,
+        "region_estado": "Pyongyang"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 222,
+    "fields": {
+        "nombre": "Busan",
+        "pais": 48,
+        "region_estado": "Busan"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 352,
+    "fields": {
+        "nombre": "Daegu",
+        "pais": 48,
+        "region_estado": "Daegu"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 267,
+    "fields": {
+        "nombre": "Incheon",
+        "pais": 48,
+        "region_estado": "Incheon"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 10,
+    "fields": {
+        "nombre": "Seoul",
+        "pais": 48,
+        "region_estado": "Seoul"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 131,
+    "fields": {
+        "nombre": "Abidjan",
+        "pais": 49,
+        "region_estado": "Abidjan"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 253,
+    "fields": {
+        "nombre": "Guayaquil",
+        "pais": 55,
+        "region_estado": "Guayas"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 134,
+    "fields": {
+        "nombre": "Alexandria",
+        "pais": 56,
+        "region_estado": "Al Iskandarīyah"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 13,
+    "fields": {
+        "nombre": "Cairo",
+        "pais": 56,
+        "region_estado": "Al Qahirah"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 109,
+    "fields": {
+        "nombre": "Giza",
+        "pais": 56,
+        "region_estado": "Al Jīzah"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 228,
+    "fields": {
+        "nombre": "Dubai",
+        "pais": 58,
+        "region_estado": "Dubayy"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 137,
+    "fields": {
+        "nombre": "Barcelona",
+        "pais": 62,
+        "region_estado": "Catalonia"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 85,
+    "fields": {
+        "nombre": "Madrid",
+        "pais": 62,
+        "region_estado": "Madrid"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 123,
+    "fields": {
+        "nombre": "Atlanta",
+        "pais": 4,
+        "region_estado": "Georgia"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 161,
+    "fields": {
+        "nombre": "Boston",
+        "pais": 4,
+        "region_estado": "Massachusetts"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 293,
+    "fields": {
+        "nombre": "Brooklyn",
+        "pais": 4,
+        "region_estado": "New York"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 54,
+    "fields": {
+        "nombre": "Chicago",
+        "pais": 4,
+        "region_estado": "Illinois"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 96,
+    "fields": {
+        "nombre": "Dallas",
+        "pais": 4,
+        "region_estado": "Texas"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 299,
+    "fields": {
+        "nombre": "Denver",
+        "pais": 4,
+        "region_estado": "Colorado"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 203,
+    "fields": {
+        "nombre": "Detroit",
+        "pais": 4,
+        "region_estado": "Michigan"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 90,
+    "fields": {
+        "nombre": "Houston",
+        "pais": 4,
+        "region_estado": "Texas"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 35,
+    "fields": {
+        "nombre": "Los Angeles",
+        "pais": 4,
+        "region_estado": "California"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 88,
+    "fields": {
+        "nombre": "Miami",
+        "pais": 4,
+        "region_estado": "Florida"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 270,
+    "fields": {
+        "nombre": "Minneapolis",
+        "pais": 4,
+        "region_estado": "Minnesota"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 16,
+    "fields": {
+        "nombre": "New York",
+        "pais": 4,
+        "region_estado": "New York"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 104,
+    "fields": {
+        "nombre": "Philadelphia",
+        "pais": 4,
+        "region_estado": "Pennsylvania"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 181,
+    "fields": {
+        "nombre": "Phoenix",
+        "pais": 4,
+        "region_estado": "Arizona"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 348,
+    "fields": {
+        "nombre": "Queens",
+        "pais": 4,
+        "region_estado": "New York"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 258,
+    "fields": {
+        "nombre": "San Diego",
+        "pais": 4,
+        "region_estado": "California"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 226,
+    "fields": {
+        "nombre": "San Francisco",
+        "pais": 4,
+        "region_estado": "California"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 217,
+    "fields": {
+        "nombre": "Seattle",
+        "pais": 4,
+        "region_estado": "Washington"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 271,
+    "fields": {
+        "nombre": "Tampa",
+        "pais": 4,
+        "region_estado": "Florida"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 125,
+    "fields": {
+        "nombre": "Washington",
+        "pais": 4,
+        "region_estado": "District of Columbia"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 103,
+    "fields": {
+        "nombre": "Addis Ababa",
+        "pais": 64,
+        "region_estado": "Addis Ababa"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 7,
+    "fields": {
+        "nombre": "Manila",
+        "pais": 66,
+        "region_estado": "Manila"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 263,
+    "fields": {
+        "nombre": "Quezon City",
+        "pais": 66,
+        "region_estado": "Quezon"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 37,
+    "fields": {
+        "nombre": "Paris",
+        "pais": 68,
+        "region_estado": "Île-de-France"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 227,
+    "fields": {
+        "nombre": "Boankra",
+        "pais": 72,
+        "region_estado": "Ashanti"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 189,
+    "fields": {
+        "nombre": "Kumasi",
+        "pais": 72,
+        "region_estado": "Ashanti"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 257,
+    "fields": {
+        "nombre": "Athens",
+        "pais": 74,
+        "region_estado": "Attikí"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 259,
+    "fields": {
+        "nombre": "Guatemala City",
+        "pais": 75,
+        "region_estado": "Guatemala"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 66,
+    "fields": {
+        "nombre": "Hong Kong",
+        "pais": 194,
+        "region_estado": "Hong Kong"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 60,
+    "fields": {
+        "nombre": "Ahmedabad",
+        "pais": 83,
+        "region_estado": "Gujarat"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 311,
+    "fields": {
+        "nombre": "Attadappa",
+        "pais": 83,
+        "region_estado": "Kerala"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 23,
+    "fields": {
+        "nombre": "Bangalore",
+        "pais": 83,
+        "region_estado": "Karnataka"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 321,
+    "fields": {
+        "nombre": "Barmhan Kalan",
+        "pais": 83,
+        "region_estado": "Madhya Pradesh"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 152,
+    "fields": {
+        "nombre": "Belahi",
+        "pais": 83,
+        "region_estado": "Bihar"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 31,
+    "fields": {
+        "nombre": "Chennai",
+        "pais": 83,
+        "region_estado": "Tamil Nadu"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 4,
+    "fields": {
+        "nombre": "Delhi",
+        "pais": 83,
+        "region_estado": "Delhi"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 353,
+    "fields": {
+        "nombre": "Ghaziabad",
+        "pais": 83,
+        "region_estado": "Uttar Pradesh"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 41,
+    "fields": {
+        "nombre": "Hyderabad",
+        "pais": 83,
+        "region_estado": "Telangana"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 254,
+    "fields": {
+        "nombre": "Jaipur",
+        "pais": 83,
+        "region_estado": "Rajasthan"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 235,
+    "fields": {
+        "nombre": "Kannankulam",
+        "pais": 83,
+        "region_estado": "Kerala"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 12,
+    "fields": {
+        "nombre": "Kolkata",
+        "pais": 83,
+        "region_estado": "West Bengal"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 265,
+    "fields": {
+        "nombre": "Kottarassheri",
+        "pais": 83,
+        "region_estado": "Kerala"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 225,
+    "fields": {
+        "nombre": "Lucknow",
+        "pais": 83,
+        "region_estado": "Uttar Pradesh"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 328,
+    "fields": {
+        "nombre": "Mirzapur",
+        "pais": 83,
+        "region_estado": "Uttar Pradesh"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 6,
+    "fields": {
+        "nombre": "Mumbai",
+        "pais": 83,
+        "region_estado": "Maharashtra"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 220,
+    "fields": {
+        "nombre": "Nadampalaiyam",
+        "pais": 83,
+        "region_estado": "Tamil Nadu"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 347,
+    "fields": {
+        "nombre": "Nagpur",
+        "pais": 83,
+        "region_estado": "Maharashtra"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 92,
+    "fields": {
+        "nombre": "Prayagraj",
+        "pais": 83,
+        "region_estado": "Uttar Pradesh"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 57,
+    "fields": {
+        "nombre": "Pune",
+        "pais": 83,
+        "region_estado": "Maharashtra"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 81,
+    "fields": {
+        "nombre": "Surat",
+        "pais": 83,
+        "region_estado": "Gujarat"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 351,
+    "fields": {
+        "nombre": "Bekasi",
+        "pais": 84,
+        "region_estado": "Jawa Barat"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 3,
+    "fields": {
+        "nombre": "Jakarta",
+        "pais": 84,
+        "region_estado": "Jakarta"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 288,
+    "fields": {
+        "nombre": "Malang",
+        "pais": 84,
+        "region_estado": "Jawa Timur"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 209,
+    "fields": {
+        "nombre": "Medan",
+        "pais": 84,
+        "region_estado": "Sumatera Utara"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 80,
+    "fields": {
+        "nombre": "Surabaya",
+        "pais": 84,
+        "region_estado": "Jawa Timur"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 86,
+    "fields": {
+        "nombre": "Baghdad",
+        "pais": 85,
+        "region_estado": "Baghdad"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 205,
+    "fields": {
+        "nombre": "Mashhad",
+        "pais": 86,
+        "region_estado": "Khorāsān-e Razavī"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 28,
+    "fields": {
+        "nombre": "Tehran",
+        "pais": 86,
+        "region_estado": "Tehran"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 356,
+    "fields": {
+        "nombre": "Charlotte Amalie",
+        "pais": 193,
+        "region_estado": "Virgin Islands"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 291,
+    "fields": {
+        "nombre": "Rome",
+        "pais": 90,
+        "region_estado": "Lazio"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 47,
+    "fields": {
+        "nombre": "Nagoya",
+        "pais": 92,
+        "region_estado": "Aichi"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 25,
+    "fields": {
+        "nombre": "Osaka",
+        "pais": 92,
+        "region_estado": "Osaka"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 2,
+    "fields": {
+        "nombre": "Tokyo",
+        "pais": 92,
+        "region_estado": "Tokyo"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 199,
+    "fields": {
+        "nombre": "Yokohama",
+        "pais": 92,
+        "region_estado": "Kanagawa"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 185,
+    "fields": {
+        "nombre": "Amman",
+        "pais": 93,
+        "region_estado": "Al ʿĀṣimah"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 113,
+    "fields": {
+        "nombre": "Nairobi",
+        "pais": 95,
+        "region_estado": "Nairobi City"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 260,
+    "fields": {
+        "nombre": "Kuwait City",
+        "pais": 98,
+        "region_estado": "Al ʿĀṣimah"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 343,
+    "fields": {
+        "nombre": "Beirut",
+        "pais": 102,
+        "region_estado": "Beyrouth"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 50,
+    "fields": {
+        "nombre": "Kuala Lumpur",
+        "pais": 111,
+        "region_estado": "Kuala Lumpur"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 169,
+    "fields": {
+        "nombre": "Bamako",
+        "pais": 112,
+        "region_estado": "Bamako"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 238,
+    "fields": {
+        "nombre": "Casablanca",
+        "pais": 114,
+        "region_estado": "Casablanca-Settat"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 74,
+    "fields": {
+        "nombre": "Rangoon",
+        "pais": 125,
+        "region_estado": "Yangon"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 114,
+    "fields": {
+        "nombre": "Guadalajara",
+        "pais": 118,
+        "region_estado": "Jalisco"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 11,
+    "fields": {
+        "nombre": "Mexico City",
+        "pais": 118,
+        "region_estado": "Ciudad de México"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 119,
+    "fields": {
+        "nombre": "Monterrey",
+        "pais": 118,
+        "region_estado": "Nuevo León"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 334,
+    "fields": {
+        "nombre": "Toluca",
+        "pais": 118,
+        "region_estado": "México"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 198,
+    "fields": {
+        "nombre": "Abuja",
+        "pais": 131,
+        "region_estado": "Federal Capital Territory"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 218,
+    "fields": {
+        "nombre": "Ibadan",
+        "pais": 131,
+        "region_estado": "Oyo"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 170,
+    "fields": {
+        "nombre": "Kano",
+        "pais": 131,
+        "region_estado": "Kano"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 22,
+    "fields": {
+        "nombre": "Lagos",
+        "pais": 131,
+        "region_estado": "Lagos"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 242,
+    "fields": {
+        "nombre": "Faisalabad",
+        "pais": 136,
+        "region_estado": "Punjab"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 14,
+    "fields": {
+        "nombre": "Karachi",
+        "pais": 136,
+        "region_estado": "Sindh"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 237,
+    "fields": {
+        "nombre": "Kotla Qasim Khan",
+        "pais": 136,
+        "region_estado": "Punjab"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 33,
+    "fields": {
+        "nombre": "Lahore",
+        "pais": 136,
+        "region_estado": "Punjab"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 1,
+    "fields": {
+        "nombre": "Panamá",
+        "pais": 1,
+        "region_estado": "Panamá"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 43,
+    "fields": {
+        "nombre": "Lima",
+        "pais": 141,
+        "region_estado": "Lima"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 314,
+    "fields": {
+        "nombre": "Birmingham",
+        "pais": 144,
+        "region_estado": "Birmingham"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 36,
+    "fields": {
+        "nombre": "London",
+        "pais": 144,
+        "region_estado": "London, City of"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 29,
+    "fields": {
+        "nombre": "Kinshasa",
+        "pais": 46,
+        "region_estado": "Kinshasa"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 273,
+    "fields": {
+        "nombre": "Mbuji-Mayi",
+        "pais": 46,
+        "region_estado": "Kasai Oriental"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 345,
+    "fields": {
+        "nombre": "Bucharest",
+        "pais": 149,
+        "region_estado": "Bucureşti"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 20,
+    "fields": {
+        "nombre": "Moscow",
+        "pais": 150,
+        "region_estado": "Moskva"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 110,
+    "fields": {
+        "nombre": "Saint Petersburg",
+        "pais": 150,
+        "region_estado": "Sankt-Peterburg"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 91,
+    "fields": {
+        "nombre": "Singapore",
+        "pais": 161,
+        "region_estado": "Singapore"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 316,
+    "fields": {
+        "nombre": "Damascus",
+        "pais": 162,
+        "region_estado": "Dimashq"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 139,
+    "fields": {
+        "nombre": "Cape Town",
+        "pais": 166,
+        "region_estado": "Western Cape"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 64,
+    "fields": {
+        "nombre": "Johannesburg",
+        "pais": 166,
+        "region_estado": "Gauteng"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 283,
+    "fields": {
+        "nombre": "Pretoria",
+        "pais": 166,
+        "region_estado": "Gauteng"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 63,
+    "fields": {
+        "nombre": "Khartoum",
+        "pais": 167,
+        "region_estado": "Khartoum"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 285,
+    "fields": {
+        "nombre": "Omdurman",
+        "pais": 167,
+        "region_estado": "Khartoum"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 18,
+    "fields": {
+        "nombre": "Bangkok",
+        "pais": 172,
+        "region_estado": "Krung Thep Maha Nakhon"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 292,
+    "fields": {
+        "nombre": "Kaohsiung",
+        "pais": 196,
+        "region_estado": "Kaohsiung"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 279,
+    "fields": {
+        "nombre": "Taichung",
+        "pais": 196,
+        "region_estado": "Taichung"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 330,
+    "fields": {
+        "nombre": "Taipei",
+        "pais": 196,
+        "region_estado": "Taipei"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 62,
+    "fields": {
+        "nombre": "Dar es Salaam",
+        "pais": 173,
+        "region_estado": "Dar es Salaam"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 95,
+    "fields": {
+        "nombre": "Ankara",
+        "pais": 181,
+        "region_estado": "Ankara"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 251,
+    "fields": {
+        "nombre": "Bursa",
+        "pais": 181,
+        "region_estado": "Bursa"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 27,
+    "fields": {
+        "nombre": "Istanbul",
+        "pais": 181,
+        "region_estado": "Istanbul"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 262,
+    "fields": {
+        "nombre": "Izmir",
+        "pais": 181,
+        "region_estado": "Izmir"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 264,
+    "fields": {
+        "nombre": "Kiev",
+        "pais": 183,
+        "region_estado": "Kiev"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 252,
+    "fields": {
+        "nombre": "Tashkent",
+        "pais": 186,
+        "region_estado": "Toshkent"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 236,
+    "fields": {
+        "nombre": "Caracas",
+        "pais": 2,
+        "region_estado": "Distrito Capital"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 304,
+    "fields": {
+        "nombre": "Maracaibo",
+        "pais": 2,
+        "region_estado": "Zulia"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 315,
+    "fields": {
+        "nombre": "Valencia",
+        "pais": 2,
+        "region_estado": "Carabobo"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 53,
+    "fields": {
+        "nombre": "Hanoi",
+        "pais": 188,
+        "region_estado": "Hà Nội"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 24,
+    "fields": {
+        "nombre": "Ho Chi Minh City",
+        "pais": 188,
+        "region_estado": "Hồ Chí Minh"
+    }
+},
+{
+    "model": "core.ciudad",
+    "pk": 320,
+    "fields": {
+        "nombre": "Sanaa",
+        "pais": 189,
+        "region_estado": "Amanat al ʿĀṣimah"
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 4,
+    "fields": {
+        "codigo_iso": "AFN",
+        "nombre": "Afgani",
+        "simbolo": "؋",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 81,
+    "fields": {
+        "codigo_iso": "MGA",
+        "nombre": "Ariary",
+        "simbolo": "Ar",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 124,
+    "fields": {
+        "codigo_iso": "THB",
+        "nombre": "Baht",
+        "simbolo": "฿",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 99,
+    "fields": {
+        "codigo_iso": "PAB",
+        "nombre": "Balboa",
+        "simbolo": "B/.",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 49,
+    "fields": {
+        "codigo_iso": "ETB",
+        "nombre": "Birr Etíope",
+        "simbolo": "Br",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 20,
+    "fields": {
+        "codigo_iso": "BOB",
+        "nombre": "Boliviano",
+        "simbolo": "Bs.",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 2,
+    "fields": {
+        "codigo_iso": "VED",
+        "nombre": "Bolívar",
+        "simbolo": "Bs",
+        "es_moneda_local": true
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 54,
+    "fields": {
+        "codigo_iso": "GHS",
+        "nombre": "Cedi",
+        "simbolo": "₵",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 71,
+    "fields": {
+        "codigo_iso": "KES",
+        "nombre": "Chelín Keniano",
+        "simbolo": "KSh",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 123,
+    "fields": {
+        "codigo_iso": "TZS",
+        "nombre": "Chelín Tanzano",
+        "simbolo": "TSh",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 130,
+    "fields": {
+        "codigo_iso": "UGX",
+        "nombre": "Chelín Ugandés",
+        "simbolo": "USh",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 38,
+    "fields": {
+        "codigo_iso": "CRC",
+        "nombre": "Colón Costarricense",
+        "simbolo": "₡",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 46,
+    "fields": {
+        "codigo_iso": "SVC",
+        "nombre": "Colón Salvadoreño",
+        "simbolo": "$",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 41,
+    "fields": {
+        "codigo_iso": "CZK",
+        "nombre": "Corona Checa",
+        "simbolo": "Kč",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 42,
+    "fields": {
+        "codigo_iso": "DKK",
+        "nombre": "Corona Danesa",
+        "simbolo": "kr",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 61,
+    "fields": {
+        "codigo_iso": "ISK",
+        "nombre": "Corona Islandesa",
+        "simbolo": "kr",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 95,
+    "fields": {
+        "codigo_iso": "NOK",
+        "nombre": "Corona Noruega",
+        "simbolo": "kr",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 118,
+    "fields": {
+        "codigo_iso": "SEK",
+        "nombre": "Corona Sueca",
+        "simbolo": "kr",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 93,
+    "fields": {
+        "codigo_iso": "NIO",
+        "nombre": "Córdoba",
+        "simbolo": "C$",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 52,
+    "fields": {
+        "codigo_iso": "GMD",
+        "nombre": "Dalasi",
+        "simbolo": "D",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 6,
+    "fields": {
+        "codigo_iso": "DZD",
+        "nombre": "Dinar Argelino",
+        "simbolo": "د.ج",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 14,
+    "fields": {
+        "codigo_iso": "BHD",
+        "nombre": "Dinar Bahreiní",
+        "simbolo": ".د.ب",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 65,
+    "fields": {
+        "codigo_iso": "IQD",
+        "nombre": "Dinar Iraquí",
+        "simbolo": "ع.د",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 69,
+    "fields": {
+        "codigo_iso": "JOD",
+        "nombre": "Dinar Jordano",
+        "simbolo": "د.ا",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 73,
+    "fields": {
+        "codigo_iso": "KWD",
+        "nombre": "Dinar Kuwaití",
+        "simbolo": "د.ك",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 78,
+    "fields": {
+        "codigo_iso": "LYD",
+        "nombre": "Dinar Libio",
+        "simbolo": "ل.د",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 80,
+    "fields": {
+        "codigo_iso": "MKD",
+        "nombre": "Dinar Macedonio",
+        "simbolo": "ден",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 109,
+    "fields": {
+        "codigo_iso": "RSD",
+        "nombre": "Dinar Serbio",
+        "simbolo": "дин.",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 127,
+    "fields": {
+        "codigo_iso": "TND",
+        "nombre": "Dinar Tunecino",
+        "simbolo": "د.ت",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 137,
+    "fields": {
+        "codigo_iso": "VND",
+        "nombre": "Dong",
+        "simbolo": "₫",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 10,
+    "fields": {
+        "codigo_iso": "AMD",
+        "nombre": "Dram Armenio",
+        "simbolo": "֏",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 88,
+    "fields": {
+        "codigo_iso": "MAD",
+        "nombre": "Dírham Marroquí",
+        "simbolo": "د.م.",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 132,
+    "fields": {
+        "codigo_iso": "AED",
+        "nombre": "Dírham de los Emiratos Árabes Unidos",
+        "simbolo": "د.إ",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 11,
+    "fields": {
+        "codigo_iso": "AUD",
+        "nombre": "Dólar Australiano",
+        "simbolo": "$",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 13,
+    "fields": {
+        "codigo_iso": "BSD",
+        "nombre": "Dólar Bahameño",
+        "simbolo": "$",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 16,
+    "fields": {
+        "codigo_iso": "BBD",
+        "nombre": "Dólar Barbadense",
+        "simbolo": "$",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 18,
+    "fields": {
+        "codigo_iso": "BZD",
+        "nombre": "Dólar Beliceño",
+        "simbolo": "$",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 31,
+    "fields": {
+        "codigo_iso": "CAD",
+        "nombre": "Dólar Canadiense",
+        "simbolo": "$",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 1,
+    "fields": {
+        "codigo_iso": "USD",
+        "nombre": "Dólar Estadounidense",
+        "simbolo": "$",
+        "es_moneda_local": true
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 50,
+    "fields": {
+        "codigo_iso": "FJD",
+        "nombre": "Dólar Fiyiano",
+        "simbolo": "$",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 57,
+    "fields": {
+        "codigo_iso": "GYD",
+        "nombre": "Dólar Guyanés",
+        "simbolo": "$",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 67,
+    "fields": {
+        "codigo_iso": "JMD",
+        "nombre": "Dólar Jamaiquino",
+        "simbolo": "$",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 77,
+    "fields": {
+        "codigo_iso": "LRD",
+        "nombre": "Dólar Liberiano",
+        "simbolo": "$",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 91,
+    "fields": {
+        "codigo_iso": "NAD",
+        "nombre": "Dólar Namibio",
+        "simbolo": "$",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 96,
+    "fields": {
+        "codigo_iso": "NZD",
+        "nombre": "Dólar Neozelandés",
+        "simbolo": "$",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 120,
+    "fields": {
+        "codigo_iso": "SRD",
+        "nombre": "Dólar Surinamés",
+        "simbolo": "$",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 125,
+    "fields": {
+        "codigo_iso": "TWD",
+        "nombre": "Dólar Taiwanés",
+        "simbolo": "NT$",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 24,
+    "fields": {
+        "codigo_iso": "BND",
+        "nombre": "Dólar de Brunéi",
+        "simbolo": "$",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 112,
+    "fields": {
+        "codigo_iso": "SGD",
+        "nombre": "Dólar de Singapur",
+        "simbolo": "$",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 129,
+    "fields": {
+        "codigo_iso": "TTD",
+        "nombre": "Dólar de Trinidad y Tobago",
+        "simbolo": "$",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 8,
+    "fields": {
+        "codigo_iso": "XCD",
+        "nombre": "Dólar del Caribe Oriental",
+        "simbolo": "$",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 28,
+    "fields": {
+        "codigo_iso": "CVE",
+        "nombre": "Escudo Caboverdiano",
+        "simbolo": "$",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 3,
+    "fields": {
+        "codigo_iso": "EUR",
+        "nombre": "Euro",
+        "simbolo": "€",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 60,
+    "fields": {
+        "codigo_iso": "HUF",
+        "nombre": "Forinto",
+        "simbolo": "Ft",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 26,
+    "fields": {
+        "codigo_iso": "BIF",
+        "nombre": "Franco Burundés",
+        "simbolo": "FBu",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 30,
+    "fields": {
+        "codigo_iso": "XAF",
+        "nombre": "Franco CFA de África Central",
+        "simbolo": "CFA",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 19,
+    "fields": {
+        "codigo_iso": "XOF",
+        "nombre": "Franco CFA de África Occidental",
+        "simbolo": "CFA",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 36,
+    "fields": {
+        "codigo_iso": "KMF",
+        "nombre": "Franco Comorense",
+        "simbolo": "CF",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 37,
+    "fields": {
+        "codigo_iso": "CDF",
+        "nombre": "Franco Congoleño",
+        "simbolo": "FC",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 56,
+    "fields": {
+        "codigo_iso": "GNF",
+        "nombre": "Franco Guineano",
+        "simbolo": "FG",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 106,
+    "fields": {
+        "codigo_iso": "RWF",
+        "nombre": "Franco Ruandés",
+        "simbolo": "FRw",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 119,
+    "fields": {
+        "codigo_iso": "CHF",
+        "nombre": "Franco Suizo",
+        "simbolo": "CHF",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 43,
+    "fields": {
+        "codigo_iso": "DJF",
+        "nombre": "Franco Yibutiano",
+        "simbolo": "Fdj",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 58,
+    "fields": {
+        "codigo_iso": "HTG",
+        "nombre": "Gourde",
+        "simbolo": "G",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 131,
+    "fields": {
+        "codigo_iso": "UAH",
+        "nombre": "Grivna",
+        "simbolo": "₴",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 101,
+    "fields": {
+        "codigo_iso": "PYG",
+        "nombre": "Guaraní",
+        "simbolo": "₲",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 100,
+    "fields": {
+        "codigo_iso": "PGK",
+        "nombre": "Kina",
+        "simbolo": "K",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 74,
+    "fields": {
+        "codigo_iso": "LAK",
+        "nombre": "Kip",
+        "simbolo": "₭",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 39,
+    "fields": {
+        "codigo_iso": "HRK",
+        "nombre": "Kuna Croata",
+        "simbolo": "kn",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 82,
+    "fields": {
+        "codigo_iso": "MWK",
+        "nombre": "Kwacha Malauí",
+        "simbolo": "MK",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 139,
+    "fields": {
+        "codigo_iso": "ZMW",
+        "nombre": "Kwacha Zambiano",
+        "simbolo": "ZK",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 7,
+    "fields": {
+        "codigo_iso": "AOA",
+        "nombre": "Kwanza",
+        "simbolo": "Kz",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 90,
+    "fields": {
+        "codigo_iso": "MMK",
+        "nombre": "Kyat",
+        "simbolo": "K",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 53,
+    "fields": {
+        "codigo_iso": "GEL",
+        "nombre": "Lari",
+        "simbolo": "₾",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 5,
+    "fields": {
+        "codigo_iso": "ALL",
+        "nombre": "Lek",
+        "simbolo": "L",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 59,
+    "fields": {
+        "codigo_iso": "HNL",
+        "nombre": "Lempira",
+        "simbolo": "L",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 111,
+    "fields": {
+        "codigo_iso": "SLL",
+        "nombre": "Leone",
+        "simbolo": "Le",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 86,
+    "fields": {
+        "codigo_iso": "MDL",
+        "nombre": "Leu Moldavo",
+        "simbolo": "L",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 104,
+    "fields": {
+        "codigo_iso": "RON",
+        "nombre": "Leu Rumano",
+        "simbolo": "lei",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 25,
+    "fields": {
+        "codigo_iso": "BGN",
+        "nombre": "Lev Búlgaro",
+        "simbolo": "лв",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 45,
+    "fields": {
+        "codigo_iso": "EGP",
+        "nombre": "Libra Egipcia",
+        "simbolo": "£",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 133,
+    "fields": {
+        "codigo_iso": "GBP",
+        "nombre": "Libra Esterlina",
+        "simbolo": "£",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 75,
+    "fields": {
+        "codigo_iso": "LBP",
+        "nombre": "Libra Libanesa",
+        "simbolo": "ل.ل",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 121,
+    "fields": {
+        "codigo_iso": "SYP",
+        "nombre": "Libra Siria",
+        "simbolo": "£",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 117,
+    "fields": {
+        "codigo_iso": "SDG",
+        "nombre": "Libra Sudanesa",
+        "simbolo": "£",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 115,
+    "fields": {
+        "codigo_iso": "SSP",
+        "nombre": "Libra Sursudanesa",
+        "simbolo": "£",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 48,
+    "fields": {
+        "codigo_iso": "SZL",
+        "nombre": "Lilangeni",
+        "simbolo": "L",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 128,
+    "fields": {
+        "codigo_iso": "TRY",
+        "nombre": "Lira Turca",
+        "simbolo": "₺",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 76,
+    "fields": {
+        "codigo_iso": "LSL",
+        "nombre": "Loti",
+        "simbolo": "L",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 12,
+    "fields": {
+        "codigo_iso": "AZN",
+        "nombre": "Manat Azerbaiyano",
+        "simbolo": "₼",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 126,
+    "fields": {
+        "codigo_iso": "TMT",
+        "nombre": "Manat Turcomano",
+        "simbolo": "m",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 21,
+    "fields": {
+        "codigo_iso": "BAM",
+        "nombre": "Marco Convertible",
+        "simbolo": "KM",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 89,
+    "fields": {
+        "codigo_iso": "MZN",
+        "nombre": "Metical",
+        "simbolo": "MT",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 94,
+    "fields": {
+        "codigo_iso": "NGN",
+        "nombre": "Naira",
+        "simbolo": "₦",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 47,
+    "fields": {
+        "codigo_iso": "ERN",
+        "nombre": "Nakfa",
+        "simbolo": "Nfk",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 27,
+    "fields": {
+        "codigo_iso": "BTN",
+        "nombre": "Ngultrum",
+        "simbolo": "Nu.",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 79,
+    "fields": {
+        "codigo_iso": "MOP",
+        "nombre": "Pataca",
+        "simbolo": "MOP$",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 9,
+    "fields": {
+        "codigo_iso": "ARS",
+        "nombre": "Peso Argentino",
+        "simbolo": "$",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 33,
+    "fields": {
+        "codigo_iso": "CLP",
+        "nombre": "Peso Chileno",
+        "simbolo": "$",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 35,
+    "fields": {
+        "codigo_iso": "COP",
+        "nombre": "Peso Colombiano",
+        "simbolo": "$",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 40,
+    "fields": {
+        "codigo_iso": "CUP",
+        "nombre": "Peso Cubano",
+        "simbolo": "$",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 44,
+    "fields": {
+        "codigo_iso": "DOP",
+        "nombre": "Peso Dominicano",
+        "simbolo": "$",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 51,
+    "fields": {
+        "codigo_iso": "PHP",
+        "nombre": "Peso Filipino",
+        "simbolo": "₱",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 85,
+    "fields": {
+        "codigo_iso": "MXN",
+        "nombre": "Peso Mexicano",
+        "simbolo": "$",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 134,
+    "fields": {
+        "codigo_iso": "UYU",
+        "nombre": "Peso Uruguayo",
+        "simbolo": "$",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 22,
+    "fields": {
+        "codigo_iso": "BWP",
+        "nombre": "Pula",
+        "simbolo": "P",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 55,
+    "fields": {
+        "codigo_iso": "GTQ",
+        "nombre": "Quetzal",
+        "simbolo": "Q",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 113,
+    "fields": {
+        "codigo_iso": "ZAR",
+        "nombre": "Rand",
+        "simbolo": "R",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 23,
+    "fields": {
+        "codigo_iso": "BRL",
+        "nombre": "Real Brasileño",
+        "simbolo": "R$",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 64,
+    "fields": {
+        "codigo_iso": "IRR",
+        "nombre": "Rial Iraní",
+        "simbolo": "﷼",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 97,
+    "fields": {
+        "codigo_iso": "OMR",
+        "nombre": "Rial Omaní",
+        "simbolo": "ر.ع.",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 138,
+    "fields": {
+        "codigo_iso": "YER",
+        "nombre": "Rial Yemení",
+        "simbolo": "﷼",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 29,
+    "fields": {
+        "codigo_iso": "KHR",
+        "nombre": "Riel",
+        "simbolo": "៛",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 83,
+    "fields": {
+        "codigo_iso": "MYR",
+        "nombre": "Ringgit",
+        "simbolo": "RM",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 32,
+    "fields": {
+        "codigo_iso": "QAR",
+        "nombre": "Riyal Catarí",
+        "simbolo": "ر.ق",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 108,
+    "fields": {
+        "codigo_iso": "SAR",
+        "nombre": "Riyal Saudí",
+        "simbolo": "ر.س",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 17,
+    "fields": {
+        "codigo_iso": "BYN",
+        "nombre": "Rublo Bielorruso",
+        "simbolo": "Br",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 105,
+    "fields": {
+        "codigo_iso": "RUB",
+        "nombre": "Rublo Ruso",
+        "simbolo": "₽",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 62,
+    "fields": {
+        "codigo_iso": "INR",
+        "nombre": "Rupia India",
+        "simbolo": "₹",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 63,
+    "fields": {
+        "codigo_iso": "IDR",
+        "nombre": "Rupia Indonesia",
+        "simbolo": "Rp",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 84,
+    "fields": {
+        "codigo_iso": "MUR",
+        "nombre": "Rupia Mauricia",
+        "simbolo": "₨",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 92,
+    "fields": {
+        "codigo_iso": "NPR",
+        "nombre": "Rupia Nepalí",
+        "simbolo": "₨",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 98,
+    "fields": {
+        "codigo_iso": "PKR",
+        "nombre": "Rupia Pakistaní",
+        "simbolo": "₨",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 110,
+    "fields": {
+        "codigo_iso": "SCR",
+        "nombre": "Rupia Seychellense",
+        "simbolo": "₨",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 116,
+    "fields": {
+        "codigo_iso": "LKR",
+        "nombre": "Rupia de Sri Lanka",
+        "simbolo": "₨",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 102,
+    "fields": {
+        "codigo_iso": "PEN",
+        "nombre": "Sol",
+        "simbolo": "S/",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 72,
+    "fields": {
+        "codigo_iso": "KGS",
+        "nombre": "Som",
+        "simbolo": "с",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 135,
+    "fields": {
+        "codigo_iso": "UZS",
+        "nombre": "Som Uzbeko",
+        "simbolo": "сўм",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 122,
+    "fields": {
+        "codigo_iso": "TJS",
+        "nombre": "Somoni",
+        "simbolo": "ЅМ",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 66,
+    "fields": {
+        "codigo_iso": "ILS",
+        "nombre": "Séquel",
+        "simbolo": "₪",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 15,
+    "fields": {
+        "codigo_iso": "BDT",
+        "nombre": "Taka",
+        "simbolo": "৳",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 107,
+    "fields": {
+        "codigo_iso": "WST",
+        "nombre": "Tala",
+        "simbolo": "T",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 70,
+    "fields": {
+        "codigo_iso": "KZT",
+        "nombre": "Tenge",
+        "simbolo": "₸",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 87,
+    "fields": {
+        "codigo_iso": "MNT",
+        "nombre": "Tugrik",
+        "simbolo": "₮",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 136,
+    "fields": {
+        "codigo_iso": "VUV",
+        "nombre": "Vatu",
+        "simbolo": "VT",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 114,
+    "fields": {
+        "codigo_iso": "KRW",
+        "nombre": "Won Surcoreano",
+        "simbolo": "₩",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 68,
+    "fields": {
+        "codigo_iso": "JPY",
+        "nombre": "Yen",
+        "simbolo": "¥",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 34,
+    "fields": {
+        "codigo_iso": "CNY",
+        "nombre": "Yuan",
+        "simbolo": "¥",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.moneda",
+    "pk": 103,
+    "fields": {
+        "codigo_iso": "PLN",
+        "nombre": "Zloty",
+        "simbolo": "zł",
+        "es_moneda_local": false
+    }
+},
+{
+    "model": "core.proveedor",
+    "pk": 1,
+    "fields": {
+        "nombre": "GRUPO SOPORTE GLOBAL INC",
+        "tipo_proveedor": "CON",
+        "nivel_proveedor": "CON",
+        "contacto_nombre": "Anggi Subero",
+        "contacto_email": "asuberoctg@gmail.com",
+        "contacto_telefono": null,
+        "direccion": "AV.BALBOA ED.GAVIOTA P.B.DIAG.",
+        "ciudad": 1,
+        "notas": "",
+        "numero_cuenta_agencia": "10617390",
+        "condiciones_pago": "SEMANAL (MARTES)",
+        "datos_bancarios": "",
+        "activo": true,
+        "iata": "10617390",
+        "seudo_sabre": "2JSI",
+        "office_id_kiu": "PTYN6820",
+        "office_id_amadeus": null,
+        "office_id_travelport": null,
+        "office_id_hotelbeds": null,
+        "office_id_expedia": null,
+        "otro_sistema_1_nombre": null,
+        "otro_sistema_1_id": null,
+        "otro_sistema_2_nombre": null,
+        "otro_sistema_2_id": null,
+        "otro_sistema_3_nombre": null,
+        "otro_sistema_3_id": null,
+        "otro_sistema_4_nombre": null,
+        "otro_sistema_4_id": null,
+        "otro_sistema_5_nombre": null,
+        "otro_sistema_5_id": null
+    }
+}
+]

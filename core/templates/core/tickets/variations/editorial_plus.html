@@ -1,0 +1,424 @@
+
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Electronic Ticket - The Bespoke Curator</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@700;800&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        :root {
+            --primary: #0d1e40;
+            --primary-dark: #00061b;
+            --secondary: #8c714b;
+            --surface: #faf8ff;
+            --surface-low: #f2f3ff;
+            --white: #ffffff;
+            --text-main: #081a3c;
+            --text-muted: rgba(8, 26, 60, 0.6);
+            --outline: rgba(197, 198, 207, 0.4);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-print-color-adjust: exact;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--surface);
+            color: var(--text-main);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* A4 Page Setup */
+        .page {
+            width: 210mm;
+            height: 297mm;
+            margin: 0 auto;
+            background: var(--white);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        @media print {
+            body { background: none; }
+            .page { margin: 0; border: none; box-shadow: none; }
+        }
+
+        /* Header Styles */
+        header {
+            background-color: var(--primary);
+            color: var(--white);
+            padding: 40px 50px;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+
+        .brand-container h1 {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 800;
+            font-size: 24px;
+            letter-spacing: -0.02em;
+            margin-bottom: 4px;
+        }
+
+        .slogan {
+            font-family: 'Inter', sans-serif;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--secondary);
+            font-weight: 600;
+        }
+
+        .document-type {
+            text-align: right;
+        }
+
+        .document-type h2 {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 32px;
+            font-weight: 700;
+            line-height: 1;
+            margin-bottom: 5px;
+        }
+
+        .pnr-box {
+            display: inline-block;
+            border-top: 1px solid var(--secondary);
+            padding-top: 5px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        /* Main Content Container */
+        .content {
+            padding: 50px;
+            flex-grow: 1;
+        }
+
+        /* Typography Helpers */
+        .label {
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--secondary);
+            font-weight: 700;
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .value {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        /* Grid System */
+        .grid-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 40px;
+            padding-bottom: 25px;
+            border-bottom: 1px solid var(--outline);
+        }
+
+        /* Flight Table */
+        .itinerary-section h3 {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--primary);
+        }
+
+        .flight-card {
+            background: var(--surface-low);
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .flight-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px dashed var(--outline);
+            padding-bottom: 15px;
+        }
+
+        .airline-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .route-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .airport-code {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--primary);
+            letter-spacing: -0.02em;
+        }
+
+        .airport-name {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .flight-path {
+            flex-grow: 1;
+            margin: 0 40px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .flight-path::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 1px;
+            background: var(--outline);
+            z-index: 1;
+        }
+
+        .flight-path .material-symbols-outlined {
+            background: var(--surface-low);
+            padding: 0 10px;
+            z-index: 2;
+            color: var(--secondary);
+            font-size: 20px;
+        }
+
+        .flight-details-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
+
+        /* Footer Styles */
+        footer {
+            background-color: var(--surface-low);
+            padding: 40px 50px;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .footer-left {
+            max-width: 60%;
+        }
+
+        .footer-brand {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 700;
+            font-size: 14px;
+            color: var(--secondary);
+            margin-bottom: 10px;
+        }
+
+        .legal-text {
+            font-size: 9px;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .qr-placeholder {
+            width: 100px;
+            height: 100px;
+            background: white;
+            padding: 10px;
+            border: 1px solid var(--outline);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .qr-mock {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(45deg, #0d1e40 25%, transparent 25%, transparent 50%, #0d1e40 50%, #0d1e40 75%, transparent 75%, transparent);
+            background-size: 10px 10px;
+            opacity: 0.2;
+        }
+
+        .material-symbols-outlined {
+            vertical-align: middle;
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .important-notes {
+            margin-top: 30px;
+            padding: 20px;
+            border: 1px solid var(--surface-low);
+            border-radius: 4px;
+        }
+
+        .important-notes h4 {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--secondary);
+            margin-bottom: 10px;
+        }
+
+        .important-notes p {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+<div class="page">
+<!-- HEADER -->
+    <header>
+        <div class="brand-container">
+            <div class="header-logo">
+                {% if agencia %}
+                    {% if agencia.logo_pdf_dark_base64 %}
+                        <img src="{% if 'data:image' in agencia.logo_pdf_dark_base64 %}{{ agencia.logo_pdf_dark_base64 }}{% else %}data:image/png;base64,{{ agencia.logo_pdf_dark_base64 }}{% endif %}" style="max-height: 50px;">
+                    {% elif agencia.logo_pdf_base64 %}
+                        <img src="{% if 'data:image' in agencia.logo_pdf_base64 %}{{ agencia.logo_pdf_base64 }}{% else %}data:image/png;base64,{{ agencia.logo_pdf_base64 }}{% endif %}" style="max-height: 50px;">
+                    {% else %}
+                        <h1>{{ agencia.nombre|upper }}</h1>
+                    {% endif %}
+                {% else %}
+                    <h1>TRAVELHUB</h1>
+                {% endif %}
+            </div>
+            <div class="slogan">{{ agencia.eslogan }}</div>
+        </div>
+        <div class="document-type">
+            <h2>Flight E-Ticket</h2>
+            <div class="pnr-box">
+                <span class="label" style="display:inline; margin-right: 5px;">Booking Ref:</span>
+                <span style="font-family: monospace; letter-spacing: 1px;">{{ CODIGO_RESERVA }}</span>
+            </div>
+        </div>
+    </header>
+<!-- MAIN CONTENT -->
+<main class="content">
+<!-- PASSENGER INFO -->
+<div class="grid-row">
+                <div>
+                    <span class="label">Passenger Name</span>
+                    <span class="value">{{ NOMBRE_DEL_PASAJERO }}</span>
+                </div>
+                <div>
+                    <span class="label">Ticket Number</span>
+                    <span class="value">{{ NUMERO_DE_BOLETO }}</span>
+                </div>
+                <div>
+                    <span class="label">Issuing Date</span>
+                    <span class="value">{{ FECHA_DE_EMISION }}</span>
+                </div>
+                <div>
+                    <span class="label">Status</span>
+                    <span class="value" style="color: #2e7d32;">{{ status|default:'Confirmed'|upper }}</span>
+                </div>
+</div>
+<!-- ITINERARY -->
+<section class="itinerary-section">
+<h3>Flight Itinerary</h3>
+<!-- FLIGHT LOOP START -->
+                {% for flight in vuelos %}
+                <div class="flight-card">
+                    <div class="flight-header">
+                        <div class="airline-info">
+                            <span class="material-symbols-outlined">flight_takeoff</span>
+                            <span>{{ flight.aerolinea }} — {{ flight.numero_vuelo }}</span>
+                        </div>
+                        <div class="class-info">
+                            <span class="label" style="display:inline; margin-right:5px;">Cabin</span>
+                            <span class="value">{{ flight.cabina|default:flight.clase|default:'TOURIST' }}</span>
+                        </div>
+                    </div>
+                    <div class="route-container">
+                        <div class="departure">
+                            <div class="airport-code">{{ flight.origen }}</div>
+                            <div class="value" style="margin-top: 8px;">{{ flight.hora_salida }}</div>
+                            <div class="label">{{ flight.fecha|default:flight.fecha_salida }}</div>
+                        </div>
+                        <div class="flight-path">
+                            <span class="material-symbols-outlined">auto_awesome</span>
+                        </div>
+                        <div class="arrival" style="text-align: right;">
+                            <div class="airport-code">{{ flight.destino }}</div>
+                            <div class="value" style="margin-top: 8px;">{{ flight.hora_llegada }}</div>
+                            <div class="label">{{ flight.fecha|default:flight.fecha_salida }}</div>
+                        </div>
+                    </div>
+                    <div class="flight-details-grid" style="margin-top: 25px; padding-top: 15px; border-top: 1px solid rgba(0,0,0,0.05);">
+                        <div>
+                            <span class="label">Terminal</span>
+                            <span class="value">{{ flight.terminal|default:'T1' }}</span>
+                        </div>
+                        <div>
+                            <span class="label">Seat</span>
+                            <span class="value">{{ flight.asiento|default:flight.seat|default:'Check-in Required' }}</span>
+                        </div>
+                        <div>
+                            <span class="label">Baggage</span>
+                            <span class="value">{{ flight.equipaje|default:'23KG' }}</span>
+                        </div>
+                        <div>
+                            <span class="label">Reserva</span>
+                            <span class="value">{{ flight.localizador_aerolinea|default:CODIGO_RESERVA }}</span>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+                <!-- FLIGHT LOOP END -->
+</section>
+<!-- IMPORTANT NOTES -->
+<div class="important-notes">
+<h4>Traveler Requirements &amp; Information</h4>
+<p>
+                    Please arrive at the airport at least 3 hours prior to departure for international journeys. Ensure all travel documents, including visas and health declarations, are valid for your entire itinerary. This document must be presented at check-in either in printed form or on a mobile device.
+                </p>
+</div>
+</main>
+<!-- FOOTER -->
+<footer>
+    <div class="footer-left">
+        <div class="footer-brand">{{ agencia.nombre }} Concierge</div>
+        <div class="legal-text">
+            <p>{{ agencia.pie_pagina }}</p>
+            <p style="margin-top: 10px; font-weight: 500;">Terms &amp; Conditions:</p>
+            <p>{{ terminos_condiciones }}</p>
+        </div>
+    </div>
+<div class="footer-right">
+<div class="qr-placeholder">
+<div class="qr-mock"></div>
+</div>
+<div class="label" style="text-align: center; margin-top: 8px;">Scan for digital pass</div>
+</div>
+</footer>
+</div>
+</body></html>

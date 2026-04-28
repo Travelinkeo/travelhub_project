@@ -1,0 +1,78 @@
+{% load humanize %}
+
+{% if items %}
+<div class="bg-dark-800 rounded-2xl border border-gray-700 overflow-hidden shadow-xl" x-data>
+    <div class="p-4 bg-dark-700 border-b border-gray-600 flex justify-between items-center">
+        <h3 class="font-bold text-white">Items Pendientes de Pago</h3>
+        <button type="button" class="text-xs text-primary hover:text-white underline"
+            @click="document.querySelectorAll('input[name=selected_items]').forEach(c => c.checked = true); updateTotals()">
+            Seleccionar Todos
+        </button>
+    </div>
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-700">
+            <thead class="bg-dark-700">
+                <tr>
+                    <th scope="col" class="px-6 py-3 text-left">
+                        <span class="sr-only">Seleccionar</span>
+                    </th>
+                    <th scope="col"
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Fecha
+                        Venta</th>
+                    <th scope="col"
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                        Localizador</th>
+                    <th scope="col"
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Servicio
+                    </th>
+                    <th scope="col"
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                        Descripción</th>
+                    <th scope="col"
+                        class="px-6 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wider">Costo (a
+                        Pagar)</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-700">
+                {% for item in items %}
+                <tr class="hover:bg-dark-700/50 transition-colors">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <input type="checkbox" name="selected_items" value="{{ item.id_item_venta }}"
+                            data-amount="{{ item.costo_unitario_referencial|default:0 }}"
+                            class="form-checkbox h-5 w-5 text-primary rounded border-gray-600 bg-dark-700 focus:ring-offset-gray-900"
+                            onchange="updateTotals()">
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                        {{ item.venta.fecha_venta|date:"d/m/Y" }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">
+                        <a href="{% url 'bookings:venta_detail' item.venta.pk %}" target="_blank"
+                            class="text-primary hover:underline">
+                            {{ item.venta.localizador }}
+                        </a>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                        {{ item.producto_servicio.nombre }}
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-400">
+                        {{ item.descripcion_personalizada|truncatechars:50 }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium text-emerald-400">
+                        ${{ item.costo_unitario_referencial|default:0|floatformat:2|intcomma }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% else %}
+<div class="bg-dark-800 rounded-2xl p-12 border border-gray-700 text-center text-gray-500">
+    <svg class="mx-auto h-12 w-12 text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+    </svg>
+    <p class="text-lg font-medium">No hay items pendientes para liquidar</p>
+    <p class="text-sm mt-1">Este proveedor no tiene ventas confirmadas pendientes de pago.</p>
+</div>
+{% endif %}

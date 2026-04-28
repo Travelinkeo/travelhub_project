@@ -1,0 +1,105 @@
+{% extends "base_modern.html" %}
+{% load static %}
+
+{% block title %}Obsidian GDS AI Intelligence - TravelHub{% endblock %}
+
+{% block extra_css %}
+<style>
+    .custom-scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: var(--bg-deep, #0a140e); }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: var(--accent-dim, #1f3a29); border-radius: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: var(--primary, #13ec5b); }
+    
+    .glowing-border {
+        box-shadow: 0 0 10px rgba(19, 236, 91, 0.3);
+        transition: all 0.3s ease;
+    }
+    .glowing-border:hover {
+        box-shadow: 0 0 15px rgba(19, 236, 91, 0.5);
+    }
+    .terminal-bg { background-color: #0a140e; border: 1px solid #1f3a29; }
+    .terminal-text { color: #13ec5b; font-family: 'Courier New', Courier, monospace; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="flex flex-col gap-6 animate-fade-in">
+    <!-- Header Section -->
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+            <div class="flex flex-wrap items-center gap-2 mb-2">
+                <span class="text-slate-500 text-xs font-medium uppercase tracking-wider">Intelligence</span>
+                <span class="material-symbols-outlined text-slate-600 text-[16px]">chevron_right</span>
+                <span class="text-primary text-xs font-medium uppercase tracking-wider">GDS AI Analyzer</span>
+            </div>
+            <h1 class="text-3xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-3">
+                GDS Real-Time Intelligence
+                <span class="px-2 py-1 bg-primary/10 border border-primary/20 rounded text-primary text-xs font-mono align-middle">BETA</span>
+            </h1>
+        </div>
+    </div>
+
+    <!-- Main Layout -->
+    <div class="flex flex-col xl:flex-row gap-6 min-h-[700px]">
+        
+        <!-- Left Column: terminal input -->
+        <div class="flex flex-col flex-1 xl:flex-[0.4] bg-[#0a140e] rounded-xl overflow-hidden shadow-2xl border border-[#1f3a29]">
+            <div class="bg-[#1a2e22] px-4 py-2 border-b border-[#1f3a29] flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-slate-400 text-sm">terminal</span>
+                    <span class="text-slate-300 text-xs font-mono font-medium tracking-wide capitalized">RAW GDS INPUT</span>
+                </div>
+            </div>
+            
+            <form id="gds-form" 
+                  hx-post="{% url 'core:gds_analyzer_ajax' %}" 
+                  hx-target="#analysis-target" 
+                  hx-indicator="#loading-indicator"
+                  class="flex-1 flex flex-col p-4 bg-black/40">
+                {% csrf_token %}
+                <textarea name="terminal_text" 
+                          id="gds-input"
+                          class="flex-1 w-full bg-transparent border-none focus:ring-0 text-primary font-mono text-sm resize-none custom-scrollbar p-0"
+                          placeholder=">>> Pega aquí el itinerario de la terminal (Sabre, KIU, Amadeus)..."></textarea>
+                
+                <div class="mt-4 flex items-center justify-between">
+                    <span class="text-slate-500 text-[10px] font-mono">STATUS: READY TO PARSE</span>
+                    <button type="submit" 
+                            class="px-4 py-2 bg-primary/20 border border-primary/40 text-primary rounded-lg text-xs font-bold hover:bg-primary/30 transition-all flex items-center gap-2">
+                        <span class="material-symbols-outlined text-sm">bolt</span>
+                        ANALIZAR CON IA
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Right Column: AI Results -->
+        <div id="analysis-target" class="flex-1 flex flex-col gap-6">
+            <!-- Loading State -->
+            <div id="loading-indicator" class="htmx-indicator flex flex-col items-center justify-center p-20 bg-surface-2/50 border border-dashed border-border-color rounded-xl">
+                <div class="size-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin mb-4"></div>
+                <p class="text-slate-400 animate-pulse font-medium">Analizando patrones en el GDS...</p>
+            </div>
+
+            <!-- Empty State (IA) -->
+            <div class="flex-1 flex flex-col items-center justify-center p-12 bg-[#0a0d12]/40 border border-dashed border-[#1f3a29] rounded-xl group transition-all duration-500 hover:border-primary/30">
+                <div class="relative mb-6">
+                    <span class="material-symbols-outlined text-7xl text-primary/20 group-hover:text-primary/40 transition-colors animate-pulse">smart_toy</span>
+                    <span class="absolute -top-2 -right-2 material-symbols-outlined text-2xl text-primary animate-bounce">auto_awesome</span>
+                </div>
+                <h3 class="text-xl font-black text-white tracking-widest uppercase mb-3">Sistemas de Inteligencia IA</h3>
+                <p class="text-slate-500 text-center max-w-sm text-sm">Pega el itinerario crudo de tu GDS (Sabre, Amadeus, KIU) en la terminal de la izquierda para iniciar el análisis automático.</p>
+                <div class="mt-8 flex gap-3">
+                    <span class="px-3 py-1 bg-white/5 rounded-full text-[10px] text-slate-500 font-mono border border-white/10 uppercase tracking-widest">SABRE</span>
+                    <span class="px-3 py-1 bg-white/5 rounded-full text-[10px] text-slate-500 font-mono border border-white/10 uppercase tracking-widest">AMADEUS</span>
+                    <span class="px-3 py-1 bg-white/5 rounded-full text-[10px] text-slate-500 font-mono border border-white/10 uppercase tracking-widest">KIU</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- La lógica del GDS Analyzer ahora es reactiva y reside en analysis_results.html usando Alpine.js -->
+{% endblock %}

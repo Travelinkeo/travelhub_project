@@ -1,0 +1,22 @@
+{% extends "core/emails/base_email.html" %}
+
+{% block content %}
+<h2 style="color: #667eea; margin-top: 0;">✅ Confirmación de Reserva</h2>
+
+<p>Estimado/a <strong>{{ cliente_nombre }}</strong>,</p>
+
+<p>Su reserva ha sido creada exitosamente. A continuación los detalles:</p>
+
+<div class="info-box">
+    <p><strong>Localizador:</strong> {{ localizador }}</p>
+    <p><strong>Fecha:</strong> {{ fecha }}</p>
+    <p><strong>Total:</strong> {{ moneda }}{{ total }}</p>
+    <p><strong>Estado:</strong> {{ estado }}</p>
+</div>
+
+<p>Nos pondremos en contacto con usted para coordinar los detalles de su viaje.</p>
+
+<p style="margin-top: 30px;">Gracias por confiar en nosotros.</p>
+
+<p><strong>Equipo TravelHub</strong></p>
+{% endblock %}

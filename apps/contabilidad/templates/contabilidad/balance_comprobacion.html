@@ -1,0 +1,163 @@
+﻿{% extends "base_modern.html" %}
+{% load i18n humanize %}
+
+{% block title %}{% trans "Balance de Comprobación" %} — TravelHub Pro{% endblock %}
+
+{% block page_title %}{% trans "Balance de Comprobación" %}{% endblock %}
+{% block page_subtitle %}{% trans "Consolidado de saldos iniciales, movimientos y saldos finales por cuenta contable." %}{% endblock %}
+
+{% block content %}
+<main class="flex-1 w-full max-w-[1400px] mx-auto p-6 md:p-8">
+
+    <!-- Header & Action Bar -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10 pb-6 border-b border-border-color print:hidden">
+        <div>
+            <h1 class="text-3xl font-black text-text-main tracking-tight uppercase">{% trans "Reporte de Balance" %}</h1>
+            <p class="text-text-muted text-sm mt-1">{% trans "Verificación de la integridad contable y cuadre de saldos." %}</p>
+        </div>
+        <div class="flex gap-3">
+            <button onclick="window.print()" class="btn-secondary !h-12 !px-6 shadow-lg">
+                <span class="material-symbols-outlined text-[20px]">print</span>
+                <span>{% trans "Imprimir Balance" %}</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card-base p-6 mb-10 bg-surface-base border-2 border-primary/5 shadow-2xl print:hidden">
+        <form method="get" class="flex flex-wrap gap-6 items-end">
+            <div class="flex-1 min-w-[200px]">
+                <label class="block text-[10px] font-black text-text-muted uppercase tracking-widest mb-2">{% trans "Desde" %}</label>
+                <div class="relative">
+                    <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-text-muted text-[18px]">calendar_today</span>
+                    <input type="date" name="desde" value="{{ fecha_desde|date:'Y-m-d' }}"
+                        class="input-base !pl-12 !h-12 w-full">
+                </div>
+            </div>
+            <div class="flex-1 min-w-[200px]">
+                <label class="block text-[10px] font-black text-text-muted uppercase tracking-widest mb-2">{% trans "Hasta" %}</label>
+                <div class="relative">
+                    <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-text-muted text-[18px]">calendar_today</span>
+                    <input type="date" name="hasta" value="{{ fecha_hasta|date:'Y-m-d' }}"
+                        class="input-base !pl-12 !h-12 w-full">
+                </div>
+            </div>
+            <div class="w-full md:w-44">
+                <label class="block text-[10px] font-black text-text-muted uppercase tracking-widest mb-2">{% trans "Visualización" %}</label>
+                <div class="relative">
+                    <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-text-muted text-[18px]">payments</span>
+                    <select name="moneda" class="input-base !pl-12 !h-12 w-full appearance-none bg-surface-1">
+                        <option value="USD" {% if moneda == "USD" %}selected{% endif %}>USD</option>
+                        <option value="VES" {% if moneda == "VES" %}selected{% endif %}>VES</option>
+                    </select>
+                </div>
+            </div>
+            <button type="submit" class="btn-primary !h-12 !px-8 shadow-xl shadow-primary/20">
+                <span class="material-symbols-outlined">refresh</span>
+                <span>{% trans "Actualizar Reporte" %}</span>
+            </button>
+        </form>
+    </div>
+
+    <!-- Trial Balance Table -->
+    <div class="card-base shadow-2xl overflow-hidden border-2 border-primary/5 print:border-none print:shadow-none">
+        <div class="px-8 py-5 border-b border-border-color bg-surface-2/50 backdrop-blur-md flex items-center justify-between print:hidden">
+            <div class="flex items-center gap-3">
+                <div class="size-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
+                    <span class="material-symbols-outlined text-[18px]">account_balance</span>
+                </div>
+                <h2 class="text-sm font-black text-text-main uppercase tracking-widest">{% trans "Balance Detallado" %}</h2>
+            </div>
+            <span class="text-[10px] font-black text-text-muted uppercase tracking-widest">
+                {% trans "Emitido" %}: {{ fecha_desde|date:"d M" }} — {{ fecha_hasta|date:"d M Y" }}
+            </span>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-surface-2/30 border-b border-border-color text-text-muted uppercase tracking-widest text-[10px]">
+                        <th class="px-8 py-4 font-black">{% trans "Código" %}</th>
+                        <th class="px-8 py-4 font-black">{% trans "Cuenta Contable" %}</th>
+                        <th class="px-8 py-4 font-black text-right">{% trans "Saldo Inicial" %}</th>
+                        <th class="px-8 py-4 font-black text-right">{% trans "Debe" %}</th>
+                        <th class="px-8 py-4 font-black text-right">{% trans "Haber" %}</th>
+                        <th class="px-8 py-4 font-black text-right text-text-main">{% trans "Saldo Final" %}</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-border-color/30">
+                    {% for item in resultado.cuentas %}
+                    <tr class="group hover:bg-surface-base transition-all {% if item.cuenta.nivel < 3 %}bg-surface-2/20 font-black border-l-[3px] border-primary{% else %}border-l-[3px] border-transparent{% endif %}">
+                        <td class="px-8 py-3.5 font-mono text-[11px] {% if item.cuenta.nivel < 3 %}text-primary{% else %}text-text-muted{% endif %} uppercase tracking-widest">
+                            {{ item.cuenta.codigo_cuenta }}
+                        </td>
+                        <td class="px-8 py-3.5">
+                            <div class="text-xs uppercase tracking-tight {% if item.cuenta.nivel < 3 %}text-text-main font-black{% else %}text-text-secondary font-bold{% endif %}"
+                                 style="padding-left: {{ item.cuenta.nivel|add:item.cuenta.nivel }}px;">
+                                {{ item.cuenta.nombre_cuenta }}
+                            </div>
+                        </td>
+                        <td class="px-8 py-3.5 text-right font-mono text-xs font-bold tabular-nums text-text-muted">
+                            {{ item.saldo_inicial|floatformat:2|intcomma }}
+                        </td>
+                        <td class="px-8 py-3.5 text-right font-mono text-xs font-bold tabular-nums text-emerald-500">
+                            {% if item.debe > 0 %}{{ item.debe|floatformat:2|intcomma }}{% else %}<span class="opacity-20">-</span>{% endif %}
+                        </td>
+                        <td class="px-8 py-3.5 text-right font-mono text-xs font-bold tabular-nums text-red-500">
+                            {% if item.haber > 0 %}{{ item.haber|floatformat:2|intcomma }}{% else %}<span class="opacity-20">-</span>{% endif %}
+                        </td>
+                        <td class="px-8 py-3.5 text-right font-mono text-xs font-black tabular-nums {% if item.saldo_final < 0 %}text-red-500 bg-red-500/5{% else %}text-text-main{% endif %}">
+                            {{ item.saldo_final|floatformat:2|intcomma }}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="py-32 text-center bg-surface-1/50">
+                            <div class="flex flex-col items-center gap-4">
+                                <div class="size-20 rounded-3xl bg-surface-2 flex items-center justify-center text-text-muted border border-border-color">
+                                    <span class="material-symbols-outlined text-[48px]">folder_open</span>
+                                </div>
+                                <h3 class="text-xl font-black text-text-main uppercase tracking-tight">{% trans "Sin movimientos" %}</h3>
+                                <p class="text-sm text-text-muted">{% trans "No se detectó actividad contable para el periodo consultado." %}</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <!-- Totales Pie -->
+                {% if resultado.totales %}
+                <tfoot class="bg-surface-base border-t-2 border-primary font-black shadow-xl">
+                    <tr class="bg-primary/5">
+                        <td colspan="3" class="px-8 py-6 text-text-main text-right uppercase tracking-[0.2em] text-[10px]">{% trans "Totales de Control de Periodo" %}</td>
+                        <td class="px-8 py-6 text-right text-emerald-500 font-mono text-lg tabular-nums">
+                            {{ resultado.totales.debe|floatformat:2|intcomma }}
+                        </td>
+                        <td class="px-8 py-6 text-right text-red-500 font-mono text-lg tabular-nums">
+                            {{ resultado.totales.haber|floatformat:2|intcomma }}
+                        </td>
+                        <td class="px-8 py-6 text-right text-text-main font-mono text-lg tabular-nums">
+                            <!-- Balance equilibrado -->
+                        </td>
+                    </tr>
+                </tfoot>
+                {% endif %}
+            </table>
+        </div>
+    </div>
+</main>
+
+<style nonce="{{ request.csp_nonce }}">
+    @media print {
+        header, aside, .print\:hidden, .btn-primary, .btn-secondary, form {
+            display: none !important;
+        }
+        main { padding: 0 !important; max-width: 100% !important; }
+        .card-base { background: white !important; border: 1px solid #ddd !important; box-shadow: none !important; }
+        table { border-collapse: collapse !important; width: 100% !important; }
+        th { background: #f8fafc !important; color: #64748b !important; border-bottom: 2px solid #e2e8f0 !important; font-size: 8pt !important; }
+        td { border-bottom: 1px solid #f1f5f9 !important; font-size: 8pt !important; color: black !important; }
+        .text-emerald-500, .text-red-500, .text-primary { color: black !important; font-weight: bold !important; }
+        body { background: white !important; }
+    }
+</style>
+{% endblock %}

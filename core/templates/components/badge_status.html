@@ -1,0 +1,41 @@
+{# core/templates/components/badge_status.html #}
+{% comment %}
+    Parámetros esperados:
+    - status ('success', 'warning', 'danger', 'info', o 'gds-sabre', 'gds-amadeus', 'gds-kiu')
+    - text (el texto a mostrar)
+    - class (opcional, clases adicionales)
+{% endcomment %}
+
+{% if status == 'success' %}
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 {{ class|default:'' }}">
+    {{ text }}
+</span>
+{% elif status == 'warning' %}
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20 {{ class|default:'' }}">
+    {{ text }}
+</span>
+{% elif status == 'danger' %}
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-red-500/10 text-red-400 border border-red-500/20 {{ class|default:'' }}">
+    {{ text }}
+</span>
+{% elif status == 'info' %}
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20 {{ class|default:'' }}">
+    {{ text }}
+</span>
+{% elif status == 'gds-sabre' %}
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-red-900/30 text-red-400 border border-red-800/50 {{ class|default:'' }}">
+    <i data-lucide="plane" class="w-3 h-3 mr-1"></i> Sabre
+</span>
+{% elif status == 'gds-amadeus' %}
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-blue-900/30 text-blue-400 border border-blue-800/50 {{ class|default:'' }}">
+    <i data-lucide="plane" class="w-3 h-3 mr-1"></i> Amadeus
+</span>
+{% elif status == 'gds-kiu' %}
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-indigo-900/40 text-indigo-300 border border-indigo-800/50 {{ class|default:'' }}">
+    <i data-lucide="plane" class="w-3 h-3 mr-1"></i> KIU
+</span>
+{% else %}
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-zinc-800 text-zinc-300 border border-zinc-700 {{ class|default:'' }}">
+    {{ text }}
+</span>
+{% endif %}

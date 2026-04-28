@@ -1,0 +1,110 @@
+{% extends 'base_modern.html' %}
+{% load humanize %}
+
+{% block title %}Libro Diario - TravelHub{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+    <div>
+        <h2 class="text-3xl font-bold text-[var(--text-primary)] mb-1">Libro Diario</h2>
+        <p class="text-[var(--text-secondary)]">Registro cronológico de todas las operaciones contables.</p>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="bg-[var(--surface-1)] border border-[var(--border)] rounded-xl p-4 mb-6">
+    <form method="get" class="flex flex-col md:flex-row gap-4 items-end">
+        <div class="w-full md:w-48">
+            <label class="block text-xs text-[var(--text-muted)] font-bold uppercase tracking-wider mb-1">Fecha Desde</label>
+            <input type="date" name="fecha_desde" value="{{ request.GET.fecha_desde }}"
+                class="w-full bg-[var(--surface-2)] border border-[var(--border)] rounded-lg px-4 py-2 text-[var(--text-primary)] focus:outline-none focus:border-[var(--primary)] font-medium">
+        </div>
+
+        <div class="w-full md:w-48">
+            <label class="block text-xs text-[var(--text-muted)] font-bold uppercase tracking-wider mb-1">Fecha Hasta</label>
+            <input type="date" name="fecha_hasta" value="{{ request.GET.fecha_hasta }}"
+                class="w-full bg-[var(--surface-2)] border border-[var(--border)] rounded-lg px-4 py-2 text-[var(--text-primary)] focus:outline-none focus:border-[var(--primary)] font-medium">
+        </div>
+
+        <button type="submit"
+            class="px-6 py-2 bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white rounded-lg transition-colors font-bold">
+            Consultar
+        </button>
+
+        <a href="{% url 'reportes:exportar_excel' %}?fecha_desde={{ request.GET.fecha_desde }}&fecha_hasta={{ request.GET.fecha_hasta }}"
+            class="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors font-medium flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                </path>
+            </svg>
+            Exportar Excel
+        </a>
+    </form>
+</div>
+
+<!-- Results -->
+<div class="space-y-6" id="asientos-container">
+    <!-- Loading State (hidden by default) -->
+    <div id="loading" class="hidden text-center py-12">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--primary)] mx-auto"></div>
+        <p class="text-[var(--text-secondary)] font-medium mt-4">Cargando asientos...</p>
+    </div>
+
+    <!-- Content populated via JS or server-side -->
+    {% if asientos %}
+    {% for asiento in asientos %}
+    <div class="bg-[var(--surface-1)] border border-[var(--border)] rounded-xl overflow-hidden">
+        <div class="bg-[var(--surface-2)] border-b border-[var(--border)] px-6 py-3 flex justify-between items-center">
+            <div>
+                <span class="font-mono font-bold text-[var(--text-primary)]">{{ asiento.numero_asiento }}</span>
+                <span class="ml-4 text-[var(--text-secondary)] text-sm font-medium">{{ asiento.fecha|date:"d/m/Y" }}</span>
+            </div>
+            <div class="flex items-center gap-4">
+                <span class="text-sm font-bold text-[var(--text-primary)]">{{ asiento.descripcion }}</span>
+                <span
+                    class="px-2 py-1 rounded text-xs font-bold 
+                        {% if asiento.esta_cuadrado %}bg-green-500/10 text-green-400 border border-green-500/20{% else %}bg-red-500/10 text-red-400 border border-red-500/20{% endif %}">
+                    {{ asiento.esta_cuadrado|yesno:"Cuadrado,Descuadrado" }}
+                </span>
+            </div>
+        </div>
+
+        <table class="w-full text-left text-[var(--text-muted)]">
+            <thead class="bg-[var(--surface-3)] text-xs uppercase tracking-wider font-bold">
+                <tr>
+                    <th class="px-6 py-3">Cuenta</th>
+                    <th class="px-6 py-3">Descripción</th>
+                    <th class="px-6 py-3 text-right">Debe</th>
+                    <th class="px-6 py-3 text-right">Haber</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-[var(--border)] bg-[var(--surface-1)]">
+                {% for detalle in asiento.detalles %}
+                <tr class="hover:bg-[var(--surface-2)] transition-colors">
+                    <td class="px-6 py-3 text-sm font-mono text-[var(--text-primary)]">{{ detalle.cuenta }} - {{ detalle.cuenta_nombre
+                        }}</td>
+                    <td class="px-6 py-3 text-sm font-medium text-[var(--text-primary)]">{{ detalle.descripcion }}</td>
+                    <td class="px-6 py-3 text-sm text-right font-mono font-medium text-[var(--text-primary)]">{{ detalle.debe|floatformat:2|intcomma }}</td>
+                    <td class="px-6 py-3 text-sm text-right font-mono font-medium text-[var(--text-primary)]">{{ detalle.haber|floatformat:2|intcomma }}</td>
+                </tr>
+                {% endfor %}
+                <tr class="bg-[var(--surface-2)] font-bold text-[var(--text-primary)] border-t-2 border-[var(--border)]">
+                    <td colspan="2" class="px-6 py-3 text-right text-sm uppercase tracking-wider">Totales</td>
+                    <td class="px-6 py-3 text-right font-mono text-[var(--success)]">{{
+                        asiento.total_debe|floatformat:2|intcomma }}</td>
+                    <td class="px-6 py-3 text-right font-mono text-[var(--success)]">{{
+                        asiento.total_haber|floatformat:2|intcomma }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="text-center py-12 text-[var(--text-muted)] font-medium bg-[var(--surface-1)] border border-[var(--border)] rounded-xl">
+        No hay asientos registrados para el período seleccionado.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

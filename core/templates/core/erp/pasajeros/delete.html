@@ -1,0 +1,33 @@
+{% extends 'base_modern.html' %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 flex justify-center">
+    <div class="bg-[var(--surface-1)] rounded-2xl p-8 border border-[var(--border)] max-w-md w-full shadow-2xl">
+        <div class="text-center mb-6">
+            <div class="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-500/20">
+                <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+                    </path>
+                </svg>
+            </div>
+            <h1 class="text-2xl font-black text-[var(--text-primary)] mb-2">Eliminar Pasajero</h1>
+            <p class="text-sm font-medium text-[var(--text-secondary)]">¿Estás seguro que deseas eliminar a <strong class="text-[var(--text-primary)] font-bold">{{ object.nombres }} {{
+                    object.apellidos }}</strong>?</p>
+            <p class="text-xs font-bold text-red-400 mt-2 bg-red-500/10 py-1 px-3 rounded inline-block">Esta acción no se puede deshacer.</p>
+        </div>
+
+        <form method="post" class="flex gap-4">
+            {% csrf_token %}
+            <a href="{% url 'core:pasajeros_list' %}"
+                class="flex-1 py-3 bg-[var(--surface-2)] hover:bg-[var(--surface-3)] text-[var(--text-primary)] text-center rounded-xl border border-[var(--border)] transition-colors font-bold text-sm">
+                Cancelar
+            </a>
+            <button type="submit"
+                class="flex-1 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl shadow-lg shadow-red-500/30 transition-all font-bold text-sm">
+                Sí, Eliminar
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

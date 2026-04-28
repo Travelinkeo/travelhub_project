@@ -1,0 +1,20 @@
+[
+    {"model": "core.aerolinea", "pk": 303, "fields": {"codigo_iata": "7N", "nombre": "PAWA Dominicana", "activa": true}},
+    {"model": "core.aerolinea", "pk": 304, "fields": {"codigo_iata": "7P", "nombre": "Air Panama", "activa": true}},
+    {"model": "core.aerolinea", "pk": 305, "fields": {"codigo_iata": "9R", "nombre": "Satena", "activa": true}},
+    {"model": "core.aerolinea", "pk": 306, "fields": {"codigo_iata": "A6", "nombre": "Pegaso Travel", "activa": true}},
+    {"model": "core.aerolinea", "pk": 307, "fields": {"codigo_iata": "C3", "nombre": "CargoThree", "activa": true}},
+    {"model": "core.aerolinea", "pk": 308, "fields": {"codigo_iata": "CV", "nombre": "Aerocaribe", "activa": true}},
+    {"model": "core.aerolinea", "pk": 309, "fields": {"codigo_iata": "DO", "nombre": "Sky High", "activa": true}},
+    {"model": "core.aerolinea", "pk": 310, "fields": {"codigo_iata": "E4", "nombre": "Estelar Latinoamerica", "activa": true}},
+    {"model": "core.aerolinea", "pk": 311, "fields": {"codigo_iata": "ES", "nombre": "Estelar", "activa": true}},
+    {"model": "core.aerolinea", "pk": 312, "fields": {"codigo_iata": "G0", "nombre": "Alianza Glancelot", "activa": true}},
+    {"model": "core.aerolinea", "pk": 313, "fields": {"codigo_iata": "GI", "nombre": "Fly The World", "activa": true}},
+    {"model": "core.aerolinea", "pk": 314, "fields": {"codigo_iata": "L5", "nombre": "Red Air", "activa": true}},
+    {"model": "core.aerolinea", "pk": 315, "fields": {"codigo_iata": "NU", "nombre": "Mundo Airways", "activa": true}},
+    {"model": "core.aerolinea", "pk": 316, "fields": {"codigo_iata": "O3", "nombre": "SASCA Airlines", "activa": true}},
+    {"model": "core.aerolinea", "pk": 317, "fields": {"codigo_iata": "RU", "nombre": "Global", "activa": true}},
+    {"model": "core.aerolinea", "pk": 318, "fields": {"codigo_iata": "T5", "nombre": "Turpial", "activa": true}},
+    {"model": "core.aerolinea", "pk": 319, "fields": {"codigo_iata": "T7", "nombre": "Sky Atlantic Travel", "activa": true}},
+    {"model": "core.aerolinea", "pk": 320, "fields": {"codigo_iata": "WW", "nombre": "Rutas Aereas de Venezuela", "activa": true}}
+]

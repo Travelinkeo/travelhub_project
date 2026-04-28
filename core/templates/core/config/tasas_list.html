@@ -1,0 +1,147 @@
+﻿{% extends "base_modern.html" %}
+{% load i18n humanize %}
+
+{% block title %}{% trans "Tasas de Cambio" %} — TravelHub Pro{% endblock %}
+
+{% block page_title %}{% trans "Divisas & Tasas de Cambio" %}{% endblock %}
+{% block page_subtitle %}{% trans "Monitor centralizado de paridad cambiaria para operaciones nacionales e internacionales." %}{% endblock %}
+
+{% block content %}
+<main class="flex-1 w-full max-w-[1400px] mx-auto p-6 md:p-8">
+
+    <!-- Header & Action Bar -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10 pb-6 border-b border-border-color">
+        <div>
+            <h1 class="text-3xl font-black text-text-main tracking-tight uppercase">{% trans "Control Cambiario" %}</h1>
+            <p class="text-text-muted text-sm mt-1">{% trans "Gestión de conversión oficial (BCV) y multimoneda operativa." %}</p>
+        </div>
+        <div class="flex flex-wrap gap-3">
+            <form action="{% url 'core:tasas_sincronizar' %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn-primary !h-12 !px-6 bg-emerald-600 hover:bg-emerald-700 shadow-xl shadow-emerald-500/20">
+                    <span class="material-symbols-outlined text-[20px]">sync</span>
+                    <span>{% trans "Sincronizar BCV" %}</span>
+                </button>
+            </form>
+            <a href="{% url 'core:tasas_nuevo' %}" class="btn-primary !h-12 !px-6 shadow-xl shadow-primary/20">
+                <span class="material-symbols-outlined text-[20px]">add_circle</span>
+                <span>{% trans "Nueva Tasa" %}</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Live Rates Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+        {% for tasa in tasas_actuales %}
+        <div class="card-base p-6 bg-surface-1 border-l-4 border-l-primary shadow-lg group relative overflow-hidden transition-all hover:scale-[1.02]">
+            <div class="absolute -right-2 -top-2 opacity-5 group-hover:opacity-10 transition-opacity">
+                <span class="material-symbols-outlined text-7xl text-primary">currency_exchange</span>
+            </div>
+            <div class="flex justify-between items-start mb-4 relative z-10">
+                <span class="text-[9px] font-black text-primary uppercase tracking-[0.2em] bg-primary/10 px-2 py-0.5 rounded-full border border-primary/20">{% trans "Tasa Vigente" %}</span>
+                <span class="text-[9px] text-text-muted font-bold uppercase tracking-widest">{{ tasa.fecha_efectiva|date:"d M Y" }}</span>
+            </div>
+            <div class="flex flex-col gap-1 relative z-10">
+                <p class="text-3xl font-black text-text-main tabular-nums tracking-tighter">{{ tasa.tasa_conversion|floatformat:4|intcomma }}</p>
+                <p class="text-[10px] font-black text-text-muted uppercase tracking-widest">{{ tasa.moneda_destino.codigo_iso }} / {{ tasa.moneda_origen.codigo_iso }}</p>
+            </div>
+            <div class="mt-6 pt-4 border-t border-border-color/30 flex items-center justify-between relative z-10">
+                <span class="text-[9px] text-text-muted font-bold uppercase tracking-widest">
+                    1 {{ tasa.moneda_origen.codigo_iso }} = {{ tasa.tasa_conversion }} {{ tasa.moneda_destino.codigo_iso }}
+                </span>
+                <span class="material-symbols-outlined text-[14px] text-emerald-500">trending_up</span>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-span-full card-base p-10 text-center border-dashed border-2 border-border-color">
+            <span class="material-symbols-outlined text-4xl text-text-muted mb-2">query_stats</span>
+            <p class="text-sm font-black text-text-muted uppercase tracking-widest">{% trans "Sin tasas vigentes registradas" %}</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- History Table -->
+    <div class="card-base shadow-2xl overflow-hidden border-2 border-primary/5">
+        <div class="px-8 py-5 border-b border-border-color bg-surface-2/50 backdrop-blur-md flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="size-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
+                    <span class="material-symbols-outlined text-[18px]">history</span>
+                </div>
+                <h2 class="text-sm font-black text-text-main uppercase tracking-widest">{% trans "Histórico de Variación" %}</h2>
+            </div>
+            <span class="text-[10px] font-black text-text-muted uppercase tracking-widest">{% trans "Últimos registros" %}</span>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-surface-2/30 border-b border-border-color text-text-muted uppercase tracking-widest text-[10px]">
+                        <th class="px-8 py-4 font-black">{% trans "Divisa Origen" %}</th>
+                        <th class="px-8 py-4 font-black">{% trans "Divisa Destino" %}</th>
+                        <th class="px-8 py-4 font-black">{% trans "Valor de Cambio" %}</th>
+                        <th class="px-8 py-4 font-black">{% trans "Fecha Efectiva" %}</th>
+                        <th class="px-8 py-4 font-black text-right"></th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-border-color/30">
+                    {% for tasa in tasas %}
+                    <tr class="group hover:bg-nav-active-bg/10 transition-all cursor-pointer">
+                        <td class="px-8 py-4">
+                            <span class="text-[11px] font-black bg-surface-2 px-3 py-1.5 rounded-xl border border-border-color text-text-secondary font-mono tracking-widest group-hover:text-primary transition-colors">
+                                {{ tasa.moneda_origen.codigo_iso }}
+                            </span>
+                        </td>
+                        <td class="px-8 py-4">
+                            <span class="text-[11px] font-black bg-surface-base px-3 py-1.5 rounded-xl border border-dashed border-border-color text-text-muted font-mono tracking-widest group-hover:border-primary/30 transition-all">
+                                {{ tasa.moneda_destino.codigo_iso }}
+                            </span>
+                        </td>
+                        <td class="px-8 py-4">
+                            <span class="text-sm font-black text-text-main tabular-nums tracking-tighter">{{ tasa.tasa_conversion|floatformat:4|intcomma }}</span>
+                        </td>
+                        <td class="px-8 py-4">
+                            <span class="text-xs font-black text-text-secondary uppercase tracking-tighter">{{ tasa.fecha_efectiva|date:"d M Y" }}</span>
+                        </td>
+                        <td class="px-8 py-4 text-right">
+                             <div class="flex justify-end opacity-0 group-hover:opacity-100 transition-opacity">
+                                <span class="material-symbols-outlined text-text-muted">info</span>
+                             </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="py-32 text-center bg-surface-1/50">
+                            <div class="flex flex-col items-center gap-4">
+                                <div class="size-20 rounded-3xl bg-surface-2 flex items-center justify-center text-text-muted border border-border-color">
+                                    <span class="material-symbols-outlined text-[48px]">monitoring</span>
+                                </div>
+                                <h3 class="text-xl font-black text-text-main uppercase tracking-tight">{% trans "Sin historial" %}</h3>
+                                <p class="text-sm text-text-muted">{% trans "Aún no se han registrado variaciones cambiarias." %}</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if is_paginated %}
+        <div class="px-8 py-6 border-t border-border-color bg-surface-base flex items-center justify-between">
+            <span class="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">
+                Mostrando <span class="text-text-main underline decoration-primary/30">{{ page_obj.start_index }}-{{ page_obj.end_index }}</span> {% trans "de" %} {{ paginator.count }} {% trans "items" %}
+            </span>
+            <div class="flex gap-2">
+                {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}"
+                    class="btn-secondary !py-2 !h-9 !px-4 !text-[10px] !font-black uppercase tracking-widest">{% trans "Anterior" %}</a>
+                {% endif %}
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}"
+                    class="btn-secondary !py-2 !h-9 !px-4 !text-[10px] !font-black uppercase tracking-widest">{% trans "Siguiente" %}</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</main>
+{% endblock %}

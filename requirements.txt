@@ -1,0 +1,56 @@
+# --- CORE ---
+django
+psycopg2-binary
+django-environ
+gunicorn>=21.2.0
+whitenoise
+dj-database-url
+
+# --- API & FRONTEND ---
+djangorestframework
+django-cors-headers
+django-filter
+drf-spectacular
+djangorestframework-simplejwt
+django-unfold
+django-mathfilters==1.0.0
+django-crispy-forms
+crispy-bootstrap5
+
+# --- ASYNC & CACHE ---
+celery
+redis
+django-celery-results
+django-celery-beat
+django-redis
+
+# --- AI & PARSING ---
+google-generativeai
+google-genai
+pypdfium2
+PyMuPDF
+pytesseract
+pdf2image
+pdfplumber
+google-cloud-aiplatform
+
+# --- FINANCE, TOOLS & INTEGRATIONS ---
+pyDolarVenezuela>=1.4.0
+stripe
+twilio
+sendgrid>=6.0.0
+weasyprint
+sentry-sdk
+amadeus
+
+# --- DATA & UTILS ---
+pandas
+openpyxl
+pillow
+requests
+beautifulsoup4
+python-dotenv
+django-storages
+boto3
+cloudinary
+django-cloudinary-storage

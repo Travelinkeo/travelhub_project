@@ -1,0 +1,184 @@
+
+{% extends 'base_modern.html' %}
+{% load i18n static %}
+
+{% block title %}Social Hub AI Professional | TravelHub{% endblock %}
+
+{% block page_title %}Social Hub Pro{% endblock %}
+{% block page_subtitle %}Generación Avanzada de Contenido Social{% endblock %}
+
+{% block content %}
+<main class="flex-1 w-full max-w-[1400px] mx-auto p-6 md:p-8 bg-surface-base">
+    
+    <!-- Hero Header -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
+        <div>
+            <h1 class="text-3xl font-black text-text-main tracking-tight flex items-center gap-3">
+                <span class="material-symbols-outlined text-primary text-4xl">campaign</span>
+                Social Content Engine
+            </h1>
+            <p class="text-text-secondary text-sm mt-2 max-w-xl">
+                Crea estrategias completas para Instagram en segundos. Gemini analiza tus hoteles para generar variantes de copy, hashtags de alto alcance y optimización de horarios.
+            </p>
+        </div>
+        <div class="flex gap-3">
+            <a href="{% url 'marketing:dashboard' %}" class="btn-secondary">
+                <span class="material-symbols-outlined text-sm">arrow_back</span> Volver
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <!-- Sidebar: Configuration -->
+        <aside class="lg:col-span-3 space-y-6">
+            <div class="card-base p-6 sticky top-24">
+                <h3 class="text-xs font-black text-text-muted uppercase tracking-widest mb-6">Configuración AI</h3>
+                
+                <form hx-post="{% url 'marketing:generar_social_advanced' %}" 
+                      hx-target="#social-hub-viewport"
+                      hx-indicator="#loading-social"
+                      class="space-y-6">
+                    {% csrf_token %}
+                    
+                    <div class="space-y-4">
+                        <label class="block space-y-2">
+                            <span class="text-[10px] font-bold text-text-muted uppercase">Hotel Seleccionado</span>
+                            <select name="hotel_id" class="input-base">
+                                {% for hotel in hoteles %}
+                                <option value="{{ hotel.id }}">{{ hotel.nombre }} ({{ hotel.destino }})</option>
+                                {% endfor %}
+                            </select>
+                        </label>
+
+                        <div class="space-y-2">
+                            <span class="text-[10px] font-bold text-text-muted uppercase tracking-wider">Tone & Voice</span>
+                            <div class="grid grid-cols-2 gap-2">
+                                <label class="cursor-pointer group">
+                                    <input type="radio" name="tono" value="LUXURY" checked class="peer sr-only">
+                                    <div class="p-3 border border-border-color rounded-xl bg-surface-2 text-center peer-checked:border-primary peer-checked:bg-primary/10 transition-all group-hover:border-primary/40">
+                                        <span class="text-xs font-bold block">Luxury</span>
+                                    </div>
+                                </label>
+                                <label class="cursor-pointer group">
+                                    <input type="radio" name="tono" value="ADVENTURE" class="peer sr-only">
+                                    <div class="p-3 border border-border-color rounded-xl bg-surface-2 text-center peer-checked:border-primary peer-checked:bg-primary/10 transition-all group-hover:border-primary/40">
+                                        <span class="text-xs font-bold block">Adventure</span>
+                                    </div>
+                                </label>
+                                <label class="cursor-pointer group">
+                                    <input type="radio" name="tono" value="MINIMAL" class="peer sr-only">
+                                    <div class="p-3 border border-border-color rounded-xl bg-surface-2 text-center peer-checked:border-primary peer-checked:bg-primary/10 transition-all group-hover:border-primary/40">
+                                        <span class="text-xs font-bold block">Minimal</span>
+                                    </div>
+                                </label>
+                                <label class="cursor-pointer group">
+                                    <input type="radio" name="tono" value="VIBRANT" class="peer sr-only">
+                                    <div class="p-3 border border-border-color rounded-xl bg-surface-2 text-center peer-checked:border-primary peer-checked:bg-primary/10 transition-all group-hover:border-primary/40">
+                                        <span class="text-xs font-bold block">Vibrant</span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <label class="block space-y-2">
+                            <div class="flex justify-between items-center">
+                                <span class="text-[10px] font-bold text-text-muted uppercase">Extra AI Prompt</span>
+                                <span class="text-[10px] text-primary font-bold animate-pulse">Enhance Prompt</span>
+                            </div>
+                            <textarea name="extra_prompt" class="input-base min-h-[120px] py-3 text-sm" placeholder="e.g., Focus on the infinity pool at sunset, mentioned the limited 20% discount for April..."></textarea>
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn-primary w-full h-12 shadow-md hover:shadow-primary/40">
+                        <span class="material-symbols-outlined">auto_awesome</span>
+                        Generar Contenido Pro
+                    </button>
+                </form>
+            </div>
+        </aside>
+
+        <!-- Main Viewport -->
+        <div class="lg:col-span-9">
+            
+            <!-- Tabs Navigation -->
+            <div class="flex gap-2 mb-8 bg-surface-2 p-1.5 rounded-2xl w-fit border border-border-color shadow-sm">
+                <button id="btn-editor" 
+                        class="px-8 py-2.5 rounded-xl text-xs font-black transition-all bg-primary text-white shadow-lg shadow-primary/25 flex items-center gap-2"
+                        onclick="switchTab('editor')">
+                    <span class="material-symbols-outlined text-sm">edit_note</span>
+                    Content Editor
+                </button>
+                <button id="btn-feed"
+                        class="px-8 py-2.5 rounded-xl text-xs font-black transition-all text-text-muted hover:text-text-main flex items-center gap-2"
+                        hx-get="{% url 'marketing:marketing_feed' %}"
+                        hx-target="#feed-container"
+                        hx-indicator="#loading-feed"
+                        onclick="switchTab('feed')">
+                    <span class="material-symbols-outlined text-sm">grid_view</span>
+                    Obsidian Feed
+                </button>
+            </div>
+
+            <!-- Tab: Editor -->
+            <div id="tab-editor" class="hub-tab animate-in fade-in duration-500">
+                <div id="loading-social" class="htmx-indicator mb-8 p-12 card-base border-dashed flex flex-col items-center justify-center text-center">
+                    <div class="relative">
+                        <div class="w-16 h-16 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+                        <span class="material-symbols-outlined absolute inset-0 flex items-center justify-center text-primary">psychology</span>
+                    </div>
+                    <h3 class="mt-6 text-xl font-bold text-text-main">Obsidian Engine en proceso...</h3>
+                    <p class="text-text-muted text-sm mt-1 max-w-sm">
+                        Analizando el perfil del hotel y optimizando el alcance de los hashtags.
+                    </p>
+                </div>
+
+                <div id="social-hub-viewport">
+                    <!-- Initial State -->
+                    <div class="p-20 card-base border-dashed flex flex-col items-center justify-center text-center opacity-60">
+                        <span class="material-symbols-outlined text-6xl text-text-muted mb-4">rocket_launch</span>
+                        <h3 class="text-lg font-bold text-text-secondary">Listo para despegar</h3>
+                        <p class="text-xs text-text-muted mt-2 max-w-xs">
+                            Configura el hotel y el tono en el panel izquierdo para generar tu estrategia completa de Instagram.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: Feed -->
+            <div id="tab-feed" class="hub-tab hidden animate-in fade-in slide-in-from-right-4 duration-500">
+                <div id="loading-feed" class="htmx-indicator mb-8 p-12 card-base border-dashed flex flex-col items-center justify-center text-center">
+                    <div class="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin mb-4"></div>
+                    <p class="text-xs font-bold text-text-muted uppercase tracking-widest">Sincronizando Galería...</p>
+                </div>
+                <div id="feed-container">
+                    <!-- HTMX will load the content here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+    function switchTab(tab) {
+        // Hide all tabs
+        document.querySelectorAll('.hub-tab').forEach(t => t.classList.add('hidden'));
+        
+        // Reset buttons style
+        const buttons = [document.getElementById('btn-editor'), document.getElementById('btn-feed')];
+        buttons.forEach(btn => {
+            btn.className = "px-8 py-2.5 rounded-xl text-xs font-black transition-all text-text-muted hover:text-text-main flex items-center gap-2";
+        });
+
+        // Show selected tab and active button style
+        if (tab === 'editor') {
+            document.getElementById('tab-editor').classList.remove('hidden');
+            document.getElementById('btn-editor').className = "px-8 py-2.5 rounded-xl text-xs font-black transition-all bg-primary text-white shadow-lg shadow-primary/25 flex items-center gap-2";
+        } else {
+            document.getElementById('tab-feed').classList.remove('hidden');
+            document.getElementById('btn-feed').className = "px-8 py-2.5 rounded-xl text-xs font-black transition-all bg-primary text-white shadow-lg shadow-primary/25 flex items-center gap-2";
+        }
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,55 @@
+<div id="item-{{ form.prefix }}" class="item-row card-base !bg-surface-2 p-5 flex flex-col gap-4 relative transition-all hover:border-primary/50 group border-dashed">
+    {% if form.id %}
+        {{ form.id }}
+    {% endif %}
+    
+    <div class="flex justify-between items-center mb-1">
+        <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary text-[18px]">sell</span>
+            <h4 class="font-black text-text-main text-[10px] uppercase tracking-widest">Concepto o Servicio</h4>
+        </div>
+        <button type="button" 
+                onclick="this.closest('.item-row').style.display='none'; this.nextElementSibling.checked=true; this.nextElementSibling.dispatchEvent(new Event('change', {bubbles: true}));" 
+                class="absolute -top-2 -right-2 size-7 bg-red-500 text-white rounded-lg flex items-center justify-center shadow-lg hover:bg-red-600 transition-all opacity-0 group-hover:opacity-100 focus:opacity-100 scale-90 group-hover:scale-100" title="Eliminar ítem">
+            <span class="material-symbols-outlined text-[16px]">close</span>
+        </button>
+        <div class="hidden">
+            {% if form.DELETE %}
+                {{ form.DELETE }}
+            {% else %}
+                <input type="checkbox" name="{{ form.prefix }}-DELETE" id="id_{{ form.prefix }}-DELETE">
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="flex flex-col gap-1">
+            <label class="text-[10px] font-black text-text-muted uppercase tracking-wider">Producto o Servicio</label>
+            {{ form.producto_servicio }}
+        </div>
+        <div class="flex flex-col gap-1">
+            <label class="text-[10px] font-black text-text-muted uppercase tracking-wider">Descripción Detallada</label>
+            {{ form.descripcion_personalizada }}
+        </div>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 border-t border-dashed border-border-color pt-4 mt-1">
+        <div class="flex flex-col gap-1">
+            <label class="text-[10px] font-black text-text-muted uppercase tracking-wider">Cantidad</label>
+            {{ form.cantidad }}
+        </div>
+        <div class="flex flex-col gap-1 relative">
+            <label class="text-[10px] font-black text-text-muted uppercase tracking-wider">Neto Unitario</label>
+            <div class="relative">
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted font-bold text-xs">{{ moneda_symbol|default:"$" }}</span>
+                {{ form.precio_unitario }}
+            </div>
+        </div>
+        <div class="flex flex-col gap-1 relative">
+            <label class="text-[10px] font-black text-text-muted uppercase tracking-wider">Impuestos / Tasas</label>
+            <div class="relative">
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted font-bold text-xs">{{ moneda_symbol|default:"$" }}</span>
+                {{ form.impuestos_item }}
+            </div>
+        </div>
+    </div>
+</div>

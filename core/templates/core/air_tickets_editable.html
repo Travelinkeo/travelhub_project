@@ -1,0 +1,97 @@
+{% extends 'core/base.html' %}
+{% load i18n %}
+{% block content %}
+<div class="container-fluid">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h4">{% trans 'Boletería Aérea - Edición de Montos' %}</h1>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-sm table-striped table-bordered align-middle">
+      <thead class="table-light">
+        <tr>
+          <th>ID</th>
+          <th>{% trans 'Fecha Emisión' %}</th>
+          <th>{% trans 'Pasajero' %}</th>
+          <th>{% trans 'PNR' %}</th>
+          <th>{% trans 'Tarifa Base' %}</th>
+          <th>{% trans 'Impuestos' %}</th>
+          <th>{% trans 'Total' %}</th>
+          <th>{% trans 'Exchange' %}</th>
+          <th>{% trans 'Void/Pen' %}</th>
+          <th>{% trans 'Fee' %}</th>
+          <th>{% trans 'IGTF' %}</th>
+          <th>{% trans 'Comisión' %}</th>
+          <th>{% trans 'Acción' %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for boleto in boletos %}
+          <tr>
+            <td>{{ boleto.id_boleto_importado }}</td>
+            <td>{{ boleto.fecha_emision_boleto|default:'-' }}</td>
+            <td>{{ boleto.nombre_pasajero_procesado|default:'-' }}</td>
+            <td>{{ boleto.localizador_pnr|default:'-' }}</td>
+            <td>
+              <form method="post" action="" class="d-flex flex-column gap-1">
+                {% csrf_token %}
+                <input type="hidden" name="boleto_id" value="{{ boleto.id_boleto_importado }}" />
+                <input type="number" step="0.01" name="tarifa_base" value="{{ boleto.tarifa_base|default_if_none:'' }}" class="form-control form-control-sm" />
+            </td>
+            <td>
+                <input type="number" step="0.01" name="impuestos_total_calculado" value="{{ boleto.impuestos_total_calculado|default_if_none:'' }}" class="form-control form-control-sm" />
+            </td>
+            <td>
+                <input type="number" step="0.01" name="total_boleto" value="{{ boleto.total_boleto|default_if_none:'' }}" class="form-control form-control-sm" />
+            </td>
+            <td>
+                <input type="number" step="0.01" name="exchange_monto" value="{{ boleto.exchange_monto|default_if_none:'' }}" class="form-control form-control-sm" />
+            </td>
+            <td>
+                <input type="number" step="0.01" name="void_monto" value="{{ boleto.void_monto|default_if_none:'' }}" class="form-control form-control-sm text-danger" />
+            </td>
+            <td>
+                <input type="number" step="0.01" name="fee_servicio" value="{{ boleto.fee_servicio|default_if_none:'' }}" class="form-control form-control-sm" />
+            </td>
+            <td>
+                <input type="number" step="0.01" name="igtf_monto" value="{{ boleto.igtf_monto|default_if_none:'' }}" class="form-control form-control-sm" />
+            </td>
+            <td>
+                <input type="number" step="0.01" name="comision_agencia" value="{{ boleto.comision_agencia|default_if_none:'' }}" class="form-control form-control-sm" />
+            </td>
+            <td>
+                <button type="submit" class="btn btn-primary btn-sm">{% trans 'Guardar' %}</button>
+              </form>
+              {% if form_errors_id == boleto.id_boleto_importado %}
+                <div class="text-danger small mt-1">
+                  {% for field, errors in form_errors.items %}
+                    {{ field }}: {{ errors|join:', ' }}<br/>
+                  {% endfor %}
+                </div>
+              {% endif %}
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="13" class="text-center">{% trans 'No hay boletos aéreos para mostrar.' %}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if is_paginated %}
+    <nav aria-label="Paginación">
+      <ul class="pagination pagination-sm">
+        {% if page_obj.has_previous %}
+          <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">&laquo;</a></li>
+        {% else %}
+          <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
+        {% endif %}
+        <li class="page-item active"><span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span></li>
+        {% if page_obj.has_next %}
+          <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">&raquo;</a></li>
+        {% else %}
+          <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
+        {% endif %}
+      </ul>
+    </nav>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,36 @@
+{# core/templates/components/input_standard.html #}
+{% comment %}
+    Parámetros esperados:
+    - id (opcional)
+    - name (opcional)
+    - type (default 'text')
+    - required (opcional, boolean)
+    - placeholder (opcional)
+    - value (opcional)
+    - label (opcional)
+    - class (opcional, extra classes)
+    - icon (opcional, nombre lucide ej: 'user')
+{% endcomment %}
+{% if label %}
+<label {% if id %}for="{{ id }}"{% endif %} class="block text-sm font-medium text-zinc-400 mb-1">
+    {{ label }} {% if required %}<span class="text-red-500">*</span>{% endif %}
+</label>
+{% endif %}
+
+<div class="relative">
+    {% if icon %}
+    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+        <span class="material-symbols-outlined text-[18px] text-zinc-500">{{ icon }}</span>
+    </div>
+    {% endif %}
+    
+    <input 
+        type="{{ type|default:'text' }}" 
+        {% if id %}id="{{ id }}"{% endif %}
+        {% if name %}name="{{ name }}"{% endif %}
+        {% if value %}value="{{ value }}"{% endif %}
+        {% if placeholder %}placeholder="{{ placeholder }}"{% endif %}
+        {% if required %}required{% endif %}
+        class="w-full h-10 bg-surface-dark border border-border-dark text-white rounded-xl shadow-sm placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-colors duration-200 sm:text-sm {% if icon %}pl-9{% else %}px-3{% endif %} {{ class|default:'' }}"
+    >
+</div>

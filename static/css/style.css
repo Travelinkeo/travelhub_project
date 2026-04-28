@@ -1,0 +1,7 @@
+/* Legacy style.css (minimizado). Mantener solo fallback mínimo.
+    Todo el sistema visual vive ahora en branding.css */
+body { margin:0; font-family: system-ui, Arial, sans-serif; }
+/* Fallback para .container usado antes de migración */
+.container { width: min(1200px,90%); margin-inline:auto; }
+
+/* Nota: Classes como .card, .btn, .badge, tablas y alertas ahora están en branding.css */

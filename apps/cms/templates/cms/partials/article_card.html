@@ -1,0 +1,49 @@
+{% load i18n humanize %}
+<div
+    class="card-base overflow-hidden group hover:border-primary transition-all shadow-xl">
+    <div class="p-8">
+        <div class="flex justify-between items-start mb-4">
+            <span
+                class="px-3 py-1 bg-primary/10 text-primary text-xs font-bold rounded-full border border-primary/20">
+                {{ articulo.destino }}
+            </span>
+            <span class="text-text-muted text-xs">{{ articulo.fecha_creacion|naturaltime }}</span>
+        </div>
+
+        <div class="flex justify-between items-start mb-6">
+            <h2 class="text-2xl font-black text-text-main group-hover:text-primary transition-all tracking-tighter leading-tight pr-8">
+                {{ articulo.titulo }}
+            </h2>
+            <div class="flex gap-2">
+                <a href="{% url 'cms:articulo_update' articulo.pk %}"
+                    class="w-9 h-9 flex items-center justify-center bg-surface-base hover:bg-primary-hover hover:text-on-primary text-primary rounded-xl border border-primary/20 transition-all shadow-sm active:scale-90">
+                    <span class="material-symbols-outlined text-[18px]">edit</span>
+                </a>
+                <a href="{% url 'cms:articulo_delete' articulo.pk %}"
+                    class="w-9 h-9 flex items-center justify-center bg-surface-base hover:bg-danger hover:text-white text-danger rounded-xl border border-danger/20 transition-all shadow-sm active:scale-90">
+                    <span class="material-symbols-outlined text-[18px]">delete</span>
+                </a>
+            </div>
+        </div>
+
+        <p class="text-text-secondary leading-relaxed mb-6">
+            {{ articulo.resumen }}
+        </p>
+
+        <div class="flex items-center gap-4 border-t border-border-color pt-6">
+            <button class="flex-1 bg-surface-base border border-border-color hover:border-primary text-text-main font-black text-[11px] uppercase tracking-widest py-4 rounded-xl transition-all shadow-sm active:scale-[0.98]">
+                {% trans "Ver Contenido Completo" %}
+            </button>
+            <button hx-post="{% url 'cms:generate_social_posts' articulo.pk %}"
+                hx-target="#social-container-{{ articulo.pk }}" hx-swap="innerHTML"
+                class="w-14 h-14 flex items-center justify-center bg-primary/10 hover:bg-primary text-primary hover:text-on-primary rounded-xl border border-primary/30 transition-all shadow-lg shadow-primary/10 active:scale-95 group/btn">
+                <span class="material-symbols-outlined text-[24px] group-hover/btn:rotate-12 transition-transform">share</span>
+            </button>
+        </div>
+
+        <!-- Social Container -->
+        <div id="social-container-{{ articulo.pk }}" class="mt-6 space-y-4">
+            <!-- Los posts se cargarán aquí -->
+        </div>
+    </div>
+</div>

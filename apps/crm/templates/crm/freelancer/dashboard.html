@@ -1,0 +1,131 @@
+{% extends "base_modern.html" %}
+{% load static %}
+
+{% block title %}Portal del Agente | TravelHub{% endblock %}
+
+{% block page_title %}Hola, {{ freelancer.usuario.first_name }} 👋{% endblock %}
+{% block page_subtitle %}Agente Autorizado de <b>{{ freelancer.agencia.nombre_comercial }}</b>{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto space-y-6">
+
+    <!-- KPI Cards (Estilo Obsidian Emerald) -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Tarjeta 1: Saldo Disponible -->
+        <div class="bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-3xl p-6 text-white shadow-lg shadow-emerald-500/30 relative overflow-hidden">
+            <div class="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 rounded-full bg-white opacity-10"></div>
+            <p class="text-emerald-100 font-bold text-sm uppercase tracking-widest mb-1">Por Cobrar (Pendiente)</p>
+            <h2 class="text-4xl font-black mb-4">${{ freelancer.saldo_por_cobrar }}</h2>
+            <div class="flex items-center gap-2 text-xs font-semibold bg-black/20 w-max px-3 py-1.5 rounded-full">
+                <span class="material-symbols-outlined text-[16px]">account_balance_wallet</span> 
+                Corte a fin de mes
+            </div>
+        </div>
+
+        <!-- Tarjeta 2: Generado este Mes -->
+        <div class="bg-surface-1 border border-border-color rounded-3xl p-6 shadow-sm relative">
+            <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-4 absolute top-6 right-6">
+                <span class="material-symbols-outlined">trending_up</span>
+            </div>
+            <p class="text-text-muted font-bold text-sm uppercase tracking-widest mb-1">Generado este mes</p>
+            <h2 class="text-3xl font-black text-text-main mb-1">${{ comision_mes_actual }}</h2>
+            <p class="text-sm font-semibold text-slate-400">{{ ventas_mes_actual }} ventas concretadas</p>
+        </div>
+
+        <!-- Tarjeta 3: Botón de Acción Principal -->
+        <div class="bg-surface-1 border border-border-color rounded-3xl p-6 shadow-sm flex flex-col justify-center items-center text-center border-dashed border-2 hover:border-blue-400 hover:bg-blue-50/30 transition-all cursor-pointer group" onclick="document.getElementById('upload-modal').classList.remove('hidden')">
+            <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                <span class="material-symbols-outlined text-3xl">upload_file</span>
+            </div>
+            <h3 class="font-black text-text-main">Subir Nuevo Boleto</h3>
+            <p class="text-xs text-text-muted font-medium mt-1">Genera un link de pago instantáneo</p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- Tabla de Últimas Ventas -->
+        <div class="lg:col-span-2 bg-surface-1 border border-border-color rounded-3xl p-6 shadow-sm">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="font-black text-lg text-text-main">Mis Últimas Ventas</h3>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead>
+                        <tr class="text-xs font-black text-text-muted uppercase tracking-widest border-b border-border-color">
+                            <th class="pb-3">PNR / Cliente</th>
+                            <th class="pb-3">Estado Venta</th>
+                            <th class="pb-3 text-right">Mi Comisión</th>
+                            <th class="pb-3 text-right">Liquidación</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-border-color">
+                        {% for comision in ultimas_ventas %}
+                        <tr class="hover:bg-surface-2 transition-colors group">
+                            <td class="py-4">
+                                <div class="font-black text-sm text-text-main">{{ comision.venta.localizador }}</div>
+                                <div class="text-xs text-text-muted font-medium">{{ comision.venta.cliente.get_full_name|title }}</div>
+                            </td>
+                            <td class="py-4">
+                                {% if comision.venta.estado == 'PAG' %}
+                                    <span class="bg-emerald-100 text-emerald-700 px-2.5 py-1 rounded-lg text-xs font-bold">Pagado</span>
+                                {% else %}
+                                    <span class="bg-amber-100 text-amber-700 px-2.5 py-1 rounded-lg text-xs font-bold">Pendiente</span>
+                                {% endif %}
+                            </td>
+                            <td class="py-4 text-right font-black text-text-main">
+                                ${{ comision.monto_comision_ganada }}
+                            </td>
+                            <td class="py-4 text-right">
+                                {% if comision.liquidada %}
+                                    <span class="material-symbols-outlined text-emerald-500 text-[20px]" title="Pagado a tu cuenta">verified</span>
+                                {% else %}
+                                    <span class="material-symbols-outlined text-slate-300 text-[20px]" title="Pendiente de corte">schedule</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="py-8 text-center text-text-muted text-sm font-semibold">
+                                Aún no tienes ventas registradas. ¡Sube tu primer boleto!
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Columna Lateral: Links de Pago Activos -->
+        <div class="bg-surface-1 border border-border-color rounded-3xl p-6 shadow-sm">
+            <h3 class="font-black text-lg text-text-main mb-6 flex items-center gap-2">
+                <span class="material-symbols-outlined text-blue-500">link</span> Links Mágicos
+            </h3>
+            
+            <div class="space-y-4">
+                {% for link in links_pendientes %}
+                <div class="bg-surface-2 rounded-2xl p-4 border border-border-color">
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="font-black text-sm text-text-main">{{ link.venta.localizador }}</span>
+                        <span class="text-xs font-black text-blue-600 bg-blue-100 px-2 py-0.5 rounded-md">${{ link.monto_total }}</span>
+                    </div>
+                    <p class="text-xs text-text-muted mb-3 line-clamp-1">{{ link.venta.cliente.get_full_name|title }}</p>
+                    
+                    <button onclick="navigator.clipboard.writeText('{{ request.scheme }}://{{ request.get_host }}/finance/pay/{{ link.id }}/'); alert('¡Link copiado al portapapeles!')" 
+                            class="w-full bg-white border border-slate-200 hover:border-blue-400 hover:text-blue-600 text-slate-600 font-bold py-2 rounded-xl text-xs transition-colors flex items-center justify-center gap-2">
+                        <span class="material-symbols-outlined text-[16px]">content_copy</span> Copiar Link para WhatsApp
+                    </button>
+                </div>
+                {% empty %}
+                <div class="text-center py-6 text-text-muted">
+                    <span class="material-symbols-outlined text-4xl opacity-50 mb-2">inbox</span>
+                    <p class="text-sm font-semibold">No tienes cobros pendientes.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

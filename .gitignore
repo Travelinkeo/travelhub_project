@@ -1,0 +1,39 @@
+# Django
+*.log
+*.pot
+*.pyc
+__pycache__/
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+media/
+static/collected/
+staticfiles/
+
+# Env
+.env
+venv/
+ENV/
+env/
+
+# Docker
+.docker_data/
+redis_data/
+pg_data/
+
+# WhatsApp Sessions (WAHA)
+wpp_sessions/
+
+# VS Code / OS
+.vscode/
+.DS_Store
+Thumbs.db
+.idea/
+
+# Custom
+logs/
+temp/
+*.pdf
+*.json
+!fixtures/*.json
+!wpp_config.json

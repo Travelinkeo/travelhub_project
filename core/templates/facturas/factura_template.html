@@ -1,0 +1,353 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Factura_{{ factura.numero_factura }}</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 0;
+        }
+        body {
+            font-family: 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #1a202c;
+            background: #ffffff;
+            line-height: 1.5;
+            -webkit-print-color-adjust: exact;
+        }
+
+        /* Variables de Marca */
+        :root {
+            --brand-color: {{ agencia.color_primario|default:'#0d1e40' }};
+            --text-on-brand: {{ '#ffffff' if is_dark_color else '#1a202c' }};
+        }
+
+        .printable-area {
+            width: 210mm;
+            min-height: 297mm;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* Header 100% Ancho */
+        .header {
+            background-color: var(--brand-color);
+            color: var(--text-on-brand);
+            padding: 40px 0;
+            width: 100%;
+        }
+        .header-content {
+            padding: 0 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        .logo-box {
+            max-width: 250px;
+        }
+        .logo-box img {
+            max-height: 55px;
+            width: auto;
+            display: block;
+        }
+        .logo-oscuro {
+            filter: brightness(0) saturate(100%);
+        }
+        .logo-invertido {
+            filter: brightness(0) invert(1);
+        }
+
+        .agency-info {
+            text-align: right;
+            font-size: 10px;
+            font-weight: 500;
+            line-height: 1.4;
+            opacity: 0.9;
+        }
+
+        /* Cuerpo con Margen de 50px */
+        .body-wrapper {
+            padding: 40px 50px;
+            flex: 1;
+        }
+
+        .doc-title-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #edf2f7;
+            padding-bottom: 15px;
+        }
+        .doc-title {
+            color: var(--brand-color);
+            font-size: 28px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: -0.5px;
+            margin: 0;
+        }
+        .doc-meta {
+            text-align: right;
+            font-size: 12px;
+            font-weight: 700;
+            color: #4a5568;
+        }
+        .doc-number {
+            font-size: 18px;
+            color: var(--brand-color);
+            display: block;
+        }
+
+        /* Grid de Datos */
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        .info-box {
+            background: #f8fafc;
+            border: 1px solid #edf2f7;
+            border-radius: 12px;
+            padding: 20px;
+            border-left: 5px solid var(--brand-color);
+        }
+        .info-label {
+            font-size: 10px;
+            font-weight: 800;
+            color: #718096;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+        .info-value {
+            font-size: 13px;
+            font-weight: 700;
+            color: #2d3748;
+        }
+
+        /* Tabla de Items */
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-bottom: 30px;
+        }
+        th {
+            background: var(--brand-color);
+            color: var(--text-on-brand);
+            padding: 12px 15px;
+            text-align: left;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        th:first-child { border-radius: 8px 0 0 8px; }
+        th:last-child { border-radius: 0 8px 8px 0; }
+
+        td {
+            padding: 15px;
+            font-size: 12px;
+            border-bottom: 1px solid #edf2f7;
+            font-weight: 500;
+        }
+        .col-numeric { text-align: right; font-weight: 700; }
+        .col-desc { width: 50%; font-weight: 600; }
+
+        /* Totales */
+        .summary-container {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+        .totals-block {
+            width: 300px;
+            background: #f8fafc;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #edf2f7;
+        }
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 15px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #4a5568;
+        }
+        .total-row.final {
+            background: var(--brand-color);
+            color: var(--text-on-brand);
+            padding: 15px;
+            font-size: 18px;
+            font-weight: 800;
+        }
+
+        /* Footer bottom anchored */
+        .footer {
+            background: #f1f5f9;
+            padding: 30px 50px;
+            margin-top: auto;
+            text-align: center;
+            border-top: 1px solid #e2e8f0;
+        }
+        .footer p {
+            font-size: 10px;
+            font-weight: 600;
+            color: #64748b;
+            margin: 5px 0;
+        }
+        .footer-brand {
+            color: var(--brand-color);
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+    <div class="printable-area">
+        <!-- HEADER 100% -->
+        <div class="header">
+            <div class="header-content">
+                <div class="logo-box">
+                    {% if is_dark_color and agencia.logo_pdf_dark_base64 %}
+                        <img src="{% if 'data:image' in agencia.logo_pdf_dark_base64 %}{{ agencia.logo_pdf_dark_base64 }}{% else %}data:image/png;base64,{{ agencia.logo_pdf_dark_base64 }}{% endif %}" alt="{{ agencia.nombre }}">
+                    {% elif agencia.logo_pdf_base64 %}
+                        <img src="{% if 'data:image' in agencia.logo_pdf_base64 %}{{ agencia.logo_pdf_base64 }}{% else %}data:image/png;base64,{{ agencia.logo_pdf_base64 }}{% endif %}" 
+                             class="{{ 'logo-invertido' if is_dark_color else 'logo-oscuro' }}" alt="{{ agencia.nombre }}">
+                    {% elif agencia.logo_base64 %}
+                        <img src="{% if 'data:image' in agencia.logo_base64 %}{{ agencia.logo_base64 }}{% else %}data:image/png;base64,{{ agencia.logo_base64 }}{% endif %}" 
+                             class="{{ 'logo-invertido' if is_dark_color else 'logo-oscuro' }}" alt="{{ agencia.nombre }}">
+                    {% else %}
+                        <span style="font-size: 24px; font-weight: 900;">{{ agencia.nombre|upper }}</span>
+                    {% endif %}
+                </div>
+                <div class="agency-info" style="text-align: right; font-size: 10px; font-weight: 500; line-height: 1.4; opacity: 0.9;">
+                    {% if agencia.eslogan %}
+                        <div style="font-size: 14px; font-weight: 800; font-style: italic; margin-bottom: 5px;">"{{ agencia.eslogan }}"</div>
+                    {% endif %}
+                    {{ agencia.razon_social|default:agencia.nombre|upper }}<br>
+                    RIF: {{ agencia.rif|default:"N/A" }}<br>
+                    {{ agencia.direccion|default:"Dirección no especificada" }}<br>
+                    {{ agencia.email_principal|default:agencia.email_ventas|default:"contacto@travelhub.com" }} | {{ agencia.telefono_principal|default:"" }}
+                </div>
+            </div>
+        </div>
+
+        <!-- CUERPO CON MARGEN 50px -->
+        <div class="body-wrapper">
+            <div class="doc-title-row">
+                <h1 class="doc-title">Factura de Servicio</h1>
+                <div class="doc-meta">
+                    FECHA: {{ factura.fecha_emision|date:"d M Y"|upper }}<br>
+                    <span class="doc-number"># {{ factura.numero_factura }}</span>
+                </div>
+            </div>
+
+            <div class="info-grid">
+                <div class="info-box">
+                    <div class="info-label">CLIENTE / RAZ_N SOCIAL</div>
+                    <div class="info-value">
+                        {{ factura.cliente.get_nombre_completo|upper }}<br>
+                        <span style="font-weight: 500; font-size: 11px; opacity: 0.8;">
+                            ID: {{ factura.cliente.documento_identidad|default:"N/A" }}<br>
+                            {{ factura.cliente.direccion|default:"" }}
+                        </span>
+                    </div>
+                </div>
+                <div class="info-box" style="background: white;">
+                    <div class="info-label">DETALLES DE PAGO</div>
+                    <div class="info-value">
+                        Moneda: {{ factura.moneda.nombre }} ({{ factura.moneda.simbolo }})<br>
+                        Estado: <span style="color: {{ '#38a169' if factura.monto_total == factura.monto_pagado else '#e53e3e' }};">
+                            {{ 'PAGADA' if factura.monto_total == factura.monto_pagado else 'PENDIENTE' }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 40px">#</th>
+                        <th>DESCRIPCI_N DEL SERVICIO</th>
+                        <th class="col-numeric">CANT.</th>
+                        <th class="col-numeric">PRECIO UNIT.</th>
+                        <th class="col-numeric">IMP.</th>
+                        <th class="col-numeric">TOTAL</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in factura.items_factura.all %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td class="col-desc">{{ item.descripcion|upper }}</td>
+                        <td class="col-numeric">{{ item.cantidad|floatformat:2 }}</td>
+                        <td class="col-numeric">{{ item.precio_unitario|floatformat:2 }}</td>
+                        <td class="col-numeric">{{ item.monto_impuesto|default:0|floatformat:2 }}</td>
+                        <td class="col-numeric">{{ item.subtotal_item|floatformat:2 }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" style="text-align: center; color: #a0aec0;">No hay items en esta factura.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <div class="summary-container">
+                <div class="totals-block">
+                    <div class="total-row">
+                        <span>SUBTOTAL:</span>
+                        <span>{{ factura.subtotal|floatformat:2 }} {{ factura.moneda.simbolo }}</span>
+                    </div>
+                    <div class="total-row">
+                        <span>IMPUESTOS:</span>
+                        <span>{{ factura.monto_impuestos|floatformat:2 }} {{ factura.moneda.simbolo }}</span>
+                    </div>
+                    {% if factura.monto_pagado > 0 %}
+                    <div class="total-row" style="color: #38a169;">
+                        <span>PAGADO:</span>
+                        <span>- {{ factura.monto_pagado|floatformat:2 }} {{ factura.moneda.simbolo }}</span>
+                    </div>
+                    {% endif %}
+                    <div class="total-row final">
+                        <span>TOTAL:</span>
+                        <span>{{ factura.monto_total|floatformat:2 }} {{ factura.moneda.simbolo }}</span>
+                    </div>
+                </div>
+            </div>
+
+            {% if factura.notas %}
+            <div style="margin-top: 50px; border-top: 2px dashed #edf2f7; padding-top: 20px;">
+                <div class="info-label">NOTAS ADICIONALES</div>
+                <p style="font-size: 11px; color: #4a5568; font-style: italic;">{{ factura.notas }}</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- FOOTER 100% -->
+        <div class="footer" style="background-color: #f8fafc; border-top: 1px solid #edf2f7; padding: 40px 50px; text-align: center; font-size: 10px; color: #718096; width: 100%; box-sizing: border-box;">
+            <p style="font-weight: 800; margin-bottom: 5px; color: var(--brand-color);">Documento emitido por <span class="footer-brand">{{ agencia.nombre }}</span></p>
+            <p>
+                {% if agencia.pie_pagina %}
+                    {{ agencia.pie_pagina }}
+                {% else %}
+                    {{ factura.terminos|default:"Esta factura se emite en cumplimiento de las normativas fiscales vigentes. Gracias por su confianza." }}
+                {% endif %}
+            </p>
+            {% if agencia.terminos_condiciones %}
+                <div style="margin-top: 20px; font-size: 9px; opacity: 0.7; text-align: justify; line-height: 1.2;">
+                    <strong>Condiciones:</strong> {{ agencia.terminos_condiciones|truncatechars:500 }}
+                </div>
+            {% endif %}
+        </div>
+
+    </div>
+</body>
+</html>

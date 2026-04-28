@@ -1,0 +1,47 @@
+{% extends 'base_modern_v2.html' %}
+{% load static %}
+
+{% block title %}Confirmar Eliminación | TravelHub CRM{% endblock %}
+
+{% block content %}
+<main class="flex-1 w-full max-w-[520px] mx-auto p-6 md:p-10 flex items-center justify-center min-h-[60vh]">
+    <div class="w-full bg-[var(--surface-1)] border border-[var(--border)] rounded-2xl shadow-lg shadow-[rgba(0,0,0,0.05)] overflow-hidden">
+        <!-- Warning strip -->
+        <div class="h-1 w-full bg-gradient-to-r from-red-400 to-rose-500"></div>
+
+        <div class="p-8">
+            <!-- Icon -->
+            <div class="w-14 h-14 rounded-2xl bg-red-500/10 flex items-center justify-center mb-6">
+                <span class="material-symbols-outlined text-red-500 text-3xl">delete_forever</span>
+            </div>
+
+            <h1 class="text-xl font-black text-[var(--text-primary)] mb-2">¿Eliminar este pasajero?</h1>
+            <p class="text-sm text-[var(--text-secondary)] mb-6 leading-relaxed">
+                Estás a punto de eliminar permanentemente a
+                <span class="font-bold text-[var(--text-primary)]">{{ object.get_nombre_completo }}</span>.
+                Esta acción no se puede deshacer y borrará permanentemente sus datos y foto de perfil asociada.
+            </p>
+
+            <!-- Info box -->
+            <div class="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 mb-6 flex items-start gap-3">
+                <span class="material-symbols-outlined text-amber-500 shrink-0 mt-0.5 text-[18px]">warning</span>
+                <p class="text-sm text-amber-500">
+                    Solo debes eliminar pasajeros que hayan sido creados por error, pasaportes duplicados, o importaciones de OCR fallidas.
+                </p>
+            </div>
+
+            <form method="post" class="flex gap-3">
+                {% csrf_token %}
+                <a href="{% url 'crm:pasajero_list' %}"
+                    class="flex-1 h-11 flex items-center justify-center border border-[var(--border)] bg-[var(--surface-2)] text-[var(--text-primary)] hover:bg-[var(--surface-3)] rounded font-bold text-sm transition-colors">
+                    Cancelar
+                </a>
+                <button type="submit"
+                    class="flex-1 h-11 flex items-center justify-center bg-red-500 hover:bg-red-600 text-white rounded font-bold text-sm transition-colors shadow-sm gap-2">
+                    <span class="material-symbols-outlined text-[18px]">delete</span> Sí, eliminar
+                </button>
+            </form>
+        </div>
+    </div>
+</main>
+{% endblock %}

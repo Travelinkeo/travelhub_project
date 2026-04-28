@@ -1,0 +1,17 @@
+{% load humanize %}
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Test Render</title>
+</head>
+
+<body>
+    <h1>Render Test</h1>
+    <p>Math Test (float): {{ 1234.5678|floatformat:2 }}</p>
+    <p>Humanize Test (intcomma): {{ 1234567.89|intcomma }}</p>
+    <p>Variable Test: {{ cotizacion.numero_cotizacion }}</p>
+    <p>Tag Test (no space): {{cotizacion.pk}}</p>
+</body>
+
+</html>

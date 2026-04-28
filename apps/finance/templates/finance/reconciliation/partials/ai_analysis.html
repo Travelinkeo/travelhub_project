@@ -1,0 +1,72 @@
+<div class="p-6 bg-slate-900/60 border-t border-indigo-500/30">
+    <div class="flex items-start gap-4 mb-6">
+        <div class="p-3 bg-indigo-500/20 rounded-2xl">
+            <svg class="w-6 h-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+        </div>
+        <div>
+            <h4 class="text-white font-bold mb-1">Análisis del Auditor AI</h4>
+            <p class="text-indigo-200/80 text-sm leading-relaxed">
+                {{ explicacion }}
+            </p>
+        </div>
+    </div>
+
+    {% if propuesta %}
+    <div class="bg-slate-800/40 border border-slate-700 rounded-2xl p-4 mb-6">
+        <div class="flex justify-between items-center mb-4 border-b border-slate-700/50 pb-2">
+            <span class="text-xs font-bold text-gray-400 uppercase tracking-widest">Sugerencia de Ajuste Contable</span>
+            <span class="text-[10px] text-indigo-400 bg-indigo-400/10 px-2 py-0.5 rounded">AUTO-GENERADO</span>
+        </div>
+
+        <div class="space-y-3">
+            <div class="text-xs text-gray-300 font-medium italic mb-2">"{{ propuesta.glosa }}"</div>
+
+            <div class="grid grid-cols-6 text-[10px] text-gray-500 uppercase font-bold mb-1 px-2">
+                <div class="col-span-3">Cuenta Contable</div>
+                <div class="text-right">Debe</div>
+                <div class="text-right">Haber</div>
+                <div></div>
+            </div>
+
+            {% for linea in propuesta.items %}
+            <div
+                class="grid grid-cols-6 items-center px-2 py-1.5 hover:bg-slate-700/30 rounded-lg transition-colors border-l-2 {% if linea.debe > 0 %}border-emerald-500{% else %}border-rose-500{% endif %}">
+                <div class="col-span-3 text-white text-xs font-medium">{{ linea.cuenta }}</div>
+                <div class="text-right font-mono text-emerald-400 text-xs">{% if linea.debe > 0 %}${{
+                    linea.debe|floatformat:2 }}{% else %}-{% endif %}</div>
+                <div class="text-right font-mono text-rose-400 text-xs">{% if linea.haber > 0 %}${{
+                    linea.haber|floatformat:2 }}{% else %}-{% endif %}</div>
+                <div class="text-right">
+                    <svg class="w-3 h-3 text-gray-600 inline ml-2" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="mt-6 flex justify-end gap-3">
+            <button onclick="this.closest('div.bg-indigo-900/10').remove()"
+                class="px-3 py-1.5 text-xs text-gray-400 hover:text-white transition">Ignorar</button>
+            <button
+                class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg transition shadow-lg shadow-emerald-600/20 flex items-center gap-2">
+                <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                Aplicar Ajuste
+            </button>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="text-[10px] text-indigo-400/50 flex items-center gap-2">
+        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <span>Explicación técnica basada en Gemini 2.0 Flash. Revisa antes de contablizar.</span>
+    </div>
+</div>

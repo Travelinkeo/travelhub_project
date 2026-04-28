@@ -1,0 +1,41 @@
+[
+{
+  "model": "core.hoteltarifario",
+  "pk": 1,
+  "fields": {
+    "tarifario": null,
+    "nombre": "Hotel Hesperia Isla Margarita",
+    "slug": "hotel-hesperia-isla-margarita-isla-de-margarita",
+    "destino": "Isla de Margarita",
+    "direccion": "",
+    "coordenadas_mapa": "",
+    "descripcion_corta": "Lujo y confort en el Caribe.",
+    "descripcion_larga": "Disfrute de nuestras instalaciones 5 estrellas con campo de golf, spa y acceso directo a la playa.",
+    "imagen_principal": "",
+    "logo": "",
+    "video_promocional": "",
+    "categoria": 5,
+    "regimen_default": "SD",
+    "comision": "10.00",
+    "politicas": "",
+    "check_in": "15:00:00",
+    "check_out": "12:00:00",
+    "activo": true,
+    "destacado": false,
+    "amenidades": []
+  }
+},
+{
+  "model": "core.tipohabitacion",
+  "pk": 1,
+  "fields": {
+    "hotel": 1,
+    "nombre": "Deluxe Vista al Mar",
+    "capacidad_adultos": 2,
+    "capacidad_ninos": 1,
+    "capacidad_total": 4,
+    "descripcion": "",
+    "foto_referencial": ""
+  }
+}
+]

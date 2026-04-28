@@ -1,0 +1,428 @@
+{% extends 'base_modern.html' %}
+{% load static %}
+
+{% block title %}
+    {% if form.instance.pk %}Editar Cliente: {{ form.instance.get_nombre_completo }}{% else %}Nuevo Cliente{% endif %} — TravelHub
+{% endblock %}
+
+{% block extra_head %}
+<style>
+/* Input Base Styles para Django Forms */
+input[type="text"], input[type="email"], input[type="file"], input[type="number"], input[type="date"], select, textarea {
+    width: 100%;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    height: 40px;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    background-color: var(--surface-2);
+    color: var(--text-primary);
+    outline: none;
+    transition: all 0.2s ease;
+    font-size: 13px;
+    font-family: inherit;
+}
+input[type="file"] {
+    padding-top: 8px;
+}
+
+input:focus, select:focus, textarea:focus {
+    border-color: var(--primary);
+    background-color: var(--surface-1);
+    box-shadow: 0 0 0 1px var(--primary);
+}
+
+textarea { height: auto; padding-top: 0.75rem; padding-bottom: 0.75rem; }
+
+/* Checkbox specific styling */
+input[type="checkbox"] {
+    width: 1.25rem;
+    height: 1.25rem;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    accent-color: var(--primary);
+    cursor: pointer;
+}
+
+/* Specific select dropdown arrow fix */
+select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0.5rem center;
+    background-repeat: no-repeat;
+    background-size: 1.5em 1.5em;
+    padding-right: 2.5rem;
+}
+
+.helptext {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 4px;
+    display: block;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<main class="flex-1 w-full max-w-[1200px] mx-auto p-6 md:p-10 relative">
+
+    <!-- Header Section -->
+    <div class="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-border-light dark:border-border-dark pb-6">
+        <div>
+            <div class="flex items-center gap-2 text-xs text-slate-500 dark:text-gray-400 font-medium mb-2 uppercase tracking-wider">
+                <a href="{% url 'core:clientes_list' %}" class="hover:text-primary transition-colors">CRM</a>
+                <span class="material-symbols-outlined text-[10px]">chevron_right</span>
+                <a href="{% url 'core:clientes_list' %}" class="hover:text-primary transition-colors">Directorio</a>
+                <span class="material-symbols-outlined text-[10px]">chevron_right</span>
+                <span class="text-primary">{% if form.instance.pk %}Editar{% else %}Nuevo{% endif %}</span>
+            </div>
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">{{ title }}</h1>
+            <p class="text-gray-500 dark:text-slate-400 mt-2">Completa la información detallada del cliente o empresa.</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <a href="{% url 'core:clientes_list' %}" class="text-sm font-bold tracking-wide flex items-center gap-1 text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white transition-colors">
+                <span class="material-symbols-outlined text-[18px]">arrow_back</span> Volver al listado
+            </a>
+        </div>
+    </div>
+
+    <form method="post" class="space-y-8" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <!-- Form Errors Banner -->
+        {% if form.errors %}
+        <div class="bg-red-500/10 border border-red-500/30 rounded-xl p-4 shadow-sm flex items-start gap-4">
+            <span class="material-symbols-outlined text-red-500 shrink-0 mt-0.5">error</span>
+            <div>
+                <h3 class="text-sm font-bold text-red-500">Hay errores en el formulario</h3>
+                <div class="mt-1 text-sm text-red-400">
+                    {{ form.errors }}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Bloque 1: General Info & Passport Scan -->
+        <section class="card-base p-6 relative overflow-hidden">
+            <!-- Decorative accent -->
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-indigo-500"></div>
+
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8 pb-4 border-b border-border-light dark:border-border-dark">
+                <h2 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">person</span>
+                    Información Personal / Empresarial
+                </h2>
+
+                <!-- Control de Escaneo -->
+                <div class="flex items-center gap-4">
+                    <label id="btn-scan-passport-form"
+                        class="cursor-pointer bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-100 h-[40px] px-5 rounded-lg font-bold text-sm shadow-sm transition-all flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[18px]">document_scanner</span>
+                        Escanear Pasaporte
+                        <input type="file" id="passport-scan-input" class="hidden" accept="image/*">
+                    </label>
+                    <div id="scan-loading" class="hidden text-primary text-sm font-bold flex items-center gap-2">
+                        <span class="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>
+                        Procesando...
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-col lg:flex-row gap-8">
+                <!-- Zona Foto de Perfil -->
+                <div class="lg:w-1/4 flex flex-col items-center justify-start gap-4 pt-2">
+                    <div class="relative w-36 h-36 bg-gray-50 dark:bg-surface-highlight-dark/30 rounded-2xl overflow-hidden border border-border-light dark:border-border-dark group">
+                        
+                        {% if object.foto_perfil %}
+                        <img id="preview-foto" src="{{ object.foto_perfil.url }}" class="w-full h-full object-cover">
+                        {% else %}
+                        <img id="preview-foto" src="{% static 'img/default-avatar.png' %}" class="w-full h-full object-cover opacity-20 hidden">
+                        <div id="no-photo-placeholder" class="absolute inset-0 flex items-center justify-center text-gray-400 dark:text-slate-600">
+                            <span class="material-symbols-outlined text-6xl">account_circle</span>
+                        </div>
+                        {% endif %}
+
+                        <!-- Hover Editar -->
+                        <div class="absolute inset-0 bg-slate-900/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                            onclick="document.getElementById('id_foto_perfil').click()">
+                            <span class="material-symbols-outlined text-white text-3xl drop-shadow-md">add_a_photo</span>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center w-full">
+                        <label class="text-[10px] text-primary hover:text-indigo-500 font-bold tracking-wider cursor-pointer uppercase transition-colors">
+                            Click para cambiar foto
+                            <div class="hidden">{{ form.foto_perfil }}</div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Campos Generales -->
+                <div class="lg:w-3/4 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+                    <label class="flex flex-col gap-1.5">
+                        <span class="text-gray-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-wider">Tipo de Cliente</span>
+                        {{ form.tipo_cliente }}
+                    </label>
+                    
+                    <label class="flex flex-col gap-1.5">
+                        <span class="text-gray-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-wider">Cédula de Identidad / RIF</span>
+                        {{ form.cedula_identidad }}
+                    </label>
+
+                    <label class="flex flex-col gap-1.5">
+                        <span class="text-gray-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-wider">Nombres</span>
+                        {{ form.nombres }}
+                    </label>
+
+                    <label class="flex flex-col gap-1.5">
+                        <span class="text-gray-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-wider">Apellidos</span>
+                        {{ form.apellidos }}
+                    </label>
+
+                    <label class="flex flex-col gap-1.5 md:col-span-2">
+                        <span class="text-gray-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-wider">Nombre de Empresa (Opcional)</span>
+                        {{ form.nombre_empresa }}
+                    </label>
+
+                    <label class="flex flex-col gap-1.5">
+                        <span class="text-gray-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-wider">Fecha de Nacimiento</span>
+                        {{ form.fecha_nacimiento }}
+                    </label>
+
+                    <label class="flex flex-col gap-1.5">
+                        <span class="text-gray-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-wider">Nacionalidad</span>
+                        {{ form.nacionalidad }}
+                    </label>
+                </div>
+            </div>
+        </section>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Bloque 2: Contacto -->
+            <section class="card-base p-6">
+                <h2 class="text-lg font-bold text-gray-900 dark:text-white mb-6 pb-4 border-b border-border-light dark:border-border-dark flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">contact_mail</span>
+                    Identificación y Contacto
+                </h2>
+                <div class="flex flex-col gap-5">
+                    <label class="flex flex-col gap-1.5">
+                        <span class="text-gray-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-wider">Email Principal</span>
+                        {{ form.email }}
+                    </label>
+                    <label class="flex flex-col gap-1.5">
+                        <span class="text-gray-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-wider">Teléfono</span>
+                        {{ form.telefono_principal }}
+                    </label>
+                </div>
+            </section>
+
+            <!-- Bloque 3: Ubicación -->
+            <section class="card-base p-6">
+                <h2 class="text-lg font-bold text-gray-900 dark:text-white mb-6 pb-4 border-b border-border-light dark:border-border-dark flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">location_on</span>
+                    Ubicación y Otros
+                </h2>
+                <div class="flex flex-col gap-5">
+                    <label class="flex flex-col gap-1.5">
+                        <span class="text-gray-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-wider">Ciudad</span>
+                        {{ form.ciudad }}
+                    </label>
+                    <label class="flex flex-col gap-1.5">
+                        <span class="text-gray-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-wider">Dirección</span>
+                        {{ form.direccion }}
+                    </label>
+                </div>
+            </section>
+        </div>
+
+        <!-- Bloque 4: Pasaporte -->
+        <section class="card-base p-6">
+            <h2 class="text-lg font-bold text-gray-900 dark:text-white mb-6 pb-4 border-b border-border-light dark:border-border-dark flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary">flight_takeoff</span>
+                Información del Pasaporte
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <label class="flex flex-col gap-1.5">
+                    <span class="text-gray-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-wider">Nº de Pasaporte</span>
+                    {{ form.numero_pasaporte }}
+                </label>
+                <label class="flex flex-col gap-1.5">
+                    <span class="text-gray-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-wider">País Emisor</span>
+                    {{ form.pais_emision_pasaporte }}
+                </label>
+                <label class="flex flex-col gap-1.5">
+                    <span class="text-gray-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-wider">Expiración</span>
+                    {{ form.fecha_expiracion_pasaporte }}
+                </label>
+            </div>
+        </section>
+
+        <!-- Bloque 5: Fidelidad -->
+        <section class="card-base p-6">
+            <h2 class="text-lg font-bold text-gray-900 dark:text-white mb-6 pb-4 border-b border-border-light dark:border-border-dark flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary">loyalty</span>
+                Programa de Fidelidad
+            </h2>
+            <div class="flex items-center gap-4 bg-gray-50 dark:bg-surface-highlight-dark/30 p-4 rounded-xl border border-border-light dark:border-border-dark max-w-sm cursor-pointer hover:border-primary transition-colors" onclick="document.querySelector('#id_es_cliente_frecuente').click()">
+                <div class="flex items-center justify-center p-2 rounded-lg bg-surface-light dark:bg-surface-dark shadow-sm border border-border-light dark:border-border-dark">
+                    {{ form.es_cliente_frecuente }}
+                </div>
+                <div class="flex flex-col select-none">
+                    <span class="text-gray-900 dark:text-white font-bold text-sm">Cliente Frecuente</span>
+                    <span class="text-gray-500 dark:text-slate-400 text-xs">Aplica beneficios V.I.P.</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Actions -->
+        <div class="flex items-center justify-end gap-4 mt-8 pt-6 border-t border-border-light dark:border-border-dark">
+            <a href="{% url 'core:clientes_list' %}" class="btn-secondary h-[40px] px-6">
+                Cancelar
+            </a>
+            <button type="submit" class="btn-primary h-[40px] px-8">
+                Guardar Cliente
+            </button>
+        </div>
+    </form>
+</main>
+
+<script nonce="{{ request.csp_nonce }}">
+    document.addEventListener('DOMContentLoaded', function () {
+        // --- 1. Cargar datos si vienen de Dashboard (Creación) ---
+        const ocrDataJson = sessionStorage.getItem('ocr_passport_data');
+        if (ocrDataJson) {
+            try {
+                const data = JSON.parse(ocrDataJson);
+                fillFormWithData(data);
+                sessionStorage.removeItem('ocr_passport_data');
+                showNotification('Datos precargados desde succión IA', 'success');
+            } catch (e) { console.error("Error parseando storage:", e); }
+        }
+
+        // --- 2. Manejo de Escaneo In-Form (Edición/Creación) ---
+        const scanInput = document.getElementById('passport-scan-input');
+        const scanLoading = document.getElementById('scan-loading');
+        const scanBtn = document.getElementById('btn-scan-passport-form');
+
+        if (scanInput) {
+            scanInput.addEventListener('change', async function () {
+                if (this.files.length === 0) return;
+
+                const file = this.files[0];
+                const formData = new FormData();
+                formData.append('archivo', file);
+
+                // UI Loading
+                scanLoading.classList.remove('hidden');
+                scanBtn.classList.add('opacity-50', 'pointer-events-none');
+
+                try {
+                    const response = await fetch('/api/ocr/passport/', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const result = await response.json();
+
+                    if (result.success) {
+                        fillFormWithData(result.data);
+                        showNotification('Pasaporte Escaneado Exitosamente', 'success');
+                    } else {
+                        showNotification(result.error || 'Error al procesar el pasaporte', 'error');
+                    }
+                } catch (error) {
+                    console.error('OCR Error:', error);
+                    showNotification('Error de conexión con el servicio de IA', 'error');
+                } finally {
+                    scanLoading.classList.add('hidden');
+                    scanBtn.classList.remove('opacity-50', 'pointer-events-none');
+                    this.value = ''; // Reset input
+                }
+            });
+        }
+
+        // --- 3. Previsualización de Foto Manual ---
+        const fotoInput = document.getElementById('id_foto_perfil');
+        if (fotoInput) {
+            fotoInput.addEventListener('change', function () {
+                if (this.files && this.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        updatePhotoPreview(e.target.result);
+                    }
+                    reader.readAsDataURL(this.files[0]);
+                }
+            });
+        }
+        
+    });
+
+    // --- Helpers ---
+    function fillFormWithData(data) {
+        console.log("Llenando formulario:", data);
+        setVal('id_numero_pasaporte', data.numero_pasaporte);
+        setVal('id_nombres', data.nombres);
+        setVal('id_apellidos', data.apellidos);
+        setVal('id_fecha_nacimiento', data.fecha_nacimiento);
+        setVal('id_fecha_expiracion_pasaporte', data.fecha_vencimiento);
+        setVal('id_nacionalidad', data.nacionalidad);
+        setVal('id_pais_emision_pasaporte', data.pais_emision);
+
+        if (data.face_image_base64) {
+            handleBase64Image(data.face_image_base64);
+        }
+    }
+
+    function setVal(id, val) {
+        const el = document.getElementById(id);
+        if (el && val) el.value = val;
+    }
+
+    function handleBase64Image(base64String) {
+        updatePhotoPreview(base64String);
+        try {
+            const byteString = atob(base64String.split(',')[1]);
+            const mimeString = base64String.split(',')[0].split(':')[1].split(';')[0];
+            const ab = new ArrayBuffer(byteString.length);
+            const ia = new Uint8Array(ab);
+            for (let i = 0; i < byteString.length; i++) {
+                ia[i] = byteString.charCodeAt(i);
+            }
+            const blob = new Blob([ab], { type: mimeString });
+            const file = new File([blob], "passport_photo.jpg", { type: "image/jpeg" });
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+            const fileInput = document.getElementById('id_foto_perfil');
+            if (fileInput) { fileInput.files = dataTransfer.files; }
+        } catch (e) {
+            console.error("Error convirtiendo base64 a archivo:", e);
+        }
+    }
+
+    function updatePhotoPreview(src) {
+        const img = document.getElementById('preview-foto');
+        const placeholder = document.getElementById('no-photo-placeholder');
+        if (img) {
+            img.src = src;
+            img.classList.remove('hidden');
+        }
+        if (placeholder) {
+            placeholder.classList.add('hidden');
+        }
+    }
+
+    function showNotification(msg, type = 'success') {
+        const alertDiv = document.createElement('div');
+        const iconClasses = type === 'success' ? 'text-emerald-500' : 'text-red-500';
+        const bgClasses = type === 'success' ? 'bg-emerald-50 border-emerald-200 dark:bg-emerald-500/10 dark:border-emerald-500/30 text-emerald-800 dark:text-emerald-400' : 'bg-red-50 border-red-200 dark:bg-red-500/10 dark:border-red-500/30 text-red-800 dark:text-red-400';
+        const iconName = type === 'success' ? 'check_circle' : 'error';
+        
+        alertDiv.className = `${bgClasses} border rounded-xl p-4 mb-6 shadow-lg fixed top-6 right-6 z-50 flex items-center gap-3 transition-opacity duration-300 transform translate-y-0`;
+        alertDiv.innerHTML = `
+            <span class="material-symbols-outlined ${iconClasses}">${iconName}</span>
+            <p class="text-sm font-bold m-0 p-0">${msg}</p>
+        `;
+        document.body.appendChild(alertDiv);
+        setTimeout(() => alertDiv.remove(), 4000);
+    }
+</script>
+{% endblock %}

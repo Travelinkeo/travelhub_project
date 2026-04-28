@@ -1,0 +1,310 @@
+{% extends 'base_modern.html' %}
+{% load humanize %}
+
+{% block title %}Búsqueda de Boletos — TravelHub Pro{% endblock %}
+
+{% block page_title %}Búsqueda Avanzada{% endblock %}
+{% block page_subtitle %}Localiza boletos por múltiples criterios en toda la base de datos.{% endblock %}
+
+{% block content %}
+<main class="flex-1 w-full max-w-[1400px] mx-auto p-6 md:p-8">
+
+    <!-- Header & Action Bar -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10 pb-6 border-b border-border-color">
+        <div>
+            <h1 class="text-3xl font-black text-text-main tracking-tight uppercase">Base de Datos de Boletos</h1>
+            <p class="text-text-muted text-sm mt-1">Consultas exhaustivas cruzando pasajeros, rutas, fechas y sistemas GDS.</p>
+        </div>
+        <div class="flex gap-3">
+            <button onclick="buscarBoletos()" class="btn-primary !h-12 !px-10 shadow-lg shadow-primary/20 group">
+                <span class="material-symbols-outlined group-hover:rotate-180 transition-transform duration-500">bolt</span>
+                <span>Ejecutar Búsqueda</span>
+            </button>
+        </div>
+    </div>
+
+    {% include 'core/erp/partials/boletos_nav.html' with active_tab='boletos_busqueda' %}
+
+    {# ── Panel de Filtros Premium ── #}
+    <div class="card-base p-8 mb-10 bg-surface-1 border-2 border-primary/5 shadow-2xl relative overflow-hidden">
+        <!-- Decoración de fondo -->
+        <div class="absolute -top-24 -right-24 size-64 bg-primary/5 rounded-full blur-3xl pointer-events-none"></div>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 relative z-10">
+            {# Pasajero #}
+            <div class="space-y-2">
+                <label class="block text-[10px] font-black uppercase tracking-[0.2em] text-text-muted" for="nombre">Pasajero</label>
+                <div class="relative group">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-text-muted group-focus-within:text-primary transition-colors">person_search</span>
+                    <input id="nombre" name="nombre" type="text" placeholder="Nombre completo..."
+                        class="input-base !pl-10 !bg-surface-2 focus:!bg-surface-base"
+                        onkeydown="if(event.key==='Enter') buscarBoletos()">
+                </div>
+            </div>
+
+            {# PNR / Boleto #}
+            <div class="space-y-2">
+                <label class="block text-[10px] font-black uppercase tracking-[0.2em] text-text-muted" for="pnr">PNR / Documento</label>
+                <div class="relative group">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-text-muted group-focus-within:text-primary transition-colors">qr_code_2</span>
+                    <input id="pnr" name="pnr" type="text" placeholder="ABC123..."
+                        class="input-base !pl-10 !bg-surface-2 focus:!bg-surface-base font-mono uppercase tracking-widest"
+                        onkeydown="if(event.key==='Enter') buscarBoletos()">
+                </div>
+            </div>
+
+            {# Ruta Origen → Destino #}
+            <div class="space-y-2">
+                <label class="block text-[10px] font-black uppercase tracking-[0.2em] text-text-muted">Origen → Destino</label>
+                <div class="flex gap-2 items-center">
+                    <input id="origen" type="text" placeholder="MAD"
+                        class="input-base text-center !font-black !bg-surface-2 uppercase tracking-widest" style="padding-left:0.5rem; padding-right:0.5rem;">
+                    <span class="material-symbols-outlined text-primary/40">sync_alt</span>
+                    <input id="destino" type="text" placeholder="BOG"
+                        class="input-base text-center !font-black !bg-surface-2 uppercase tracking-widest" style="padding-left:0.5rem; padding-right:0.5rem;">
+                </div>
+            </div>
+
+            {# Rango de fechas #}
+            <div class="space-y-2">
+                <label class="block text-[10px] font-black uppercase tracking-[0.2em] text-text-muted">Periodo de Emisión</label>
+                <div class="flex items-center gap-2">
+                    <input id="fecha_inicio" type="date"
+                        class="input-base !bg-surface-2 focus:!bg-surface-base text-xs font-bold" style="padding-left:0.5rem; padding-right:0.5rem;">
+                    <span class="text-text-muted text-xs">→</span>
+                    <input id="fecha_fin" type="date"
+                        class="input-base !bg-surface-2 focus:!bg-surface-base text-xs font-bold" style="padding-left:0.5rem; padding-right:0.5rem;">
+                </div>
+            </div>
+        </div>
+
+        {# GDS Filter Chips Premium #}
+        <div class="flex items-center flex-wrap gap-3 mt-8 pt-6 border-t border-border-color/50">
+            <span class="text-[10px] font-black text-text-muted uppercase tracking-widest mr-4">Sistema de Origen:</span>
+            <button type="button" class="gds-chip active px-4 py-1.5 rounded-xl text-[10px] font-black tracking-widest border transition-all bg-primary/10 text-primary border-primary/30" onclick="filterGDS(this,'')">TODOS</button>
+            <button type="button" class="gds-chip px-4 py-1.5 rounded-xl text-[10px] font-black tracking-widest border transition-all bg-surface-base text-text-muted border-border-color hover:border-red-500 hover:text-red-500" onclick="filterGDS(this,'SABRE')">SABRE</button>
+            <button type="button" class="gds-chip px-4 py-1.5 rounded-xl text-[10px] font-black tracking-widest border transition-all bg-surface-base text-text-muted border-border-color hover:border-blue-500 hover:text-blue-500" onclick="filterGDS(this,'KIU')">KIU</button>
+            <button type="button" class="gds-chip px-4 py-1.5 rounded-xl text-[10px] font-black tracking-widest border transition-all bg-surface-base text-text-muted border-border-color hover:border-indigo-500 hover:text-indigo-500" onclick="filterGDS(this,'AMADEUS')">AMADEUS</button>
+            <button type="button" class="gds-chip px-4 py-1.5 rounded-xl text-[10px] font-black tracking-widest border transition-all bg-surface-base text-text-muted border-border-color hover:border-text-main hover:text-text-main" onclick="filterGDS(this,'MANUAL')">MANUAL</button>
+        </div>
+    </div>
+
+    {# ── Resultados ── #}
+    <div class="card-base shadow-2xl overflow-hidden border-2 border-primary/5 min-h-[600px] flex flex-col">
+        <!-- Table Header -->
+        <div class="px-6 py-5 border-b border-border-color bg-surface-2/50 backdrop-blur-md flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="size-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
+                    <span class="material-symbols-outlined text-[18px]">list_alt</span>
+                </div>
+                <h2 class="text-sm font-black text-text-main uppercase tracking-widest">Resultados de Búsqueda</h2>
+                <span id="resultados-counter" class="ml-2 text-[10px] font-black bg-surface-1 border border-border-color px-3 py-1 rounded-full text-text-muted uppercase tracking-widest shadow-inner">0 Resultados</span>
+            </div>
+            
+            <div class="flex items-center gap-4">
+                <label class="flex items-center gap-3 px-3 py-1.5 bg-surface-base/50 rounded-xl border border-border-color cursor-pointer hover:bg-surface-base transition-all group">
+                    <input type="checkbox" id="select-all-search" class="size-4 rounded border-border-color bg-surface-1 text-primary focus:ring-primary">
+                    <span class="text-[10px] font-black text-text-muted group-hover:text-text-main uppercase tracking-widest transition-colors">Seleccionar Todo</span>
+                </label>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto flex-1">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-surface-2/30 border-b border-border-color">
+                        <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-text-muted w-12 text-center"></th>
+                        <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-text-muted">PNR / Boleto</th>
+                        <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-text-muted">Pasajero</th>
+                        <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-text-muted text-center">Ruta / Sistema</th>
+                        <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-text-muted">Fecha Emisión</th>
+                        <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-text-muted text-center">Estatus</th>
+                        <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-text-muted text-right">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="resultados-container" class="divide-y divide-border-color/50">
+                    <!-- Loading / Empty State -->
+                    <tr>
+                        <td colspan="7" class="py-40 text-center">
+                            <div class="flex flex-col items-center gap-4 animate-fade-in">
+                                <span class="material-symbols-outlined text-6xl text-text-muted/10">travel_explore</span>
+                                <h3 class="text-xl font-black text-text-muted/40 uppercase tracking-tighter">Inicia tu Búsqueda</h3>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination Refined -->
+        <div id="pagination-footer" class="hidden px-6 py-5 border-t border-border-color bg-surface-2/30 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p class="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">
+                Mostrando <span id="pg-range" class="text-text-main">-- / --</span> de <span id="pg-total" class="text-text-main">--</span> resultados
+            </p>
+            <div class="flex gap-2">
+                <button onclick="changePage(-1)" class="btn-secondary !py-2 !px-4 !text-[10px] uppercase font-black tracking-widest disabled:opacity-30 disabled:pointer-events-none">
+                    <span class="material-symbols-outlined text-[14px]">chevron_left</span> Anterior
+                </button>
+                <button onclick="changePage(1)" class="btn-secondary !py-2 !px-4 !text-[10px] uppercase font-black tracking-widest disabled:opacity-30 disabled:pointer-events-none">
+                    Siguiente <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}
+
+{% block extra_scripts %}
+<script nonce="{{ request.csp_nonce }}">
+    let allResults = [];
+    let gdsFilter = '';
+
+    function getInitials(name) {
+        if (!name || name === 'Sin Nombre') return 'PA';
+        const parts = name.trim().split(' ');
+        return ((parts[0]?.[0] || '') + (parts[1]?.[0] || '')).toUpperCase();
+    }
+
+    function filterGDS(btn, gds) {
+        gdsFilter = gds;
+        document.querySelectorAll('.gds-chip').forEach(b => {
+             b.classList.remove('active', 'bg-primary/10', 'text-primary', 'border-primary/30');
+             b.classList.add('bg-surface-base', 'text-text-muted', 'border-border-color');
+        });
+        btn.classList.add('active', 'bg-primary/10', 'text-primary', 'border-primary/30');
+        renderResults(allResults);
+    }
+
+    function renderResults(data) {
+        const filtered = gdsFilter ? data.filter(b => (b.gds_sistema || '').toUpperCase().includes(gdsFilter)) : data;
+        const container = document.getElementById('resultados-container');
+        const counter = document.getElementById('resultados-counter');
+        const footer = document.getElementById('pagination-footer');
+
+        if (filtered.length === 0) {
+            counter.textContent = '0 Resultados';
+            footer.classList.add('hidden');
+            container.innerHTML = `<tr><td colspan="7" class="py-40 text-center">
+                <div class="flex flex-col items-center gap-4 animate-fade-in">
+                    <div class="size-16 rounded-2xl bg-surface-2 flex items-center justify-center text-text-muted border border-border-color">
+                        <span class="material-symbols-outlined text-[32px]">manage_search</span>
+                    </div>
+                    <div class="space-y-1">
+                        <h3 class="text-xl font-black text-text-main uppercase tracking-tight">Sin Coincidencias</h3>
+                        <p class="text-sm text-text-muted">No encontramos boletos con los criterios actuales.</p>
+                    </div>
+                </div>
+            </td></tr>`;
+            return;
+        }
+
+        counter.textContent = `${filtered.length} Resultados`;
+        footer.classList.remove('hidden');
+        document.getElementById('pg-total').textContent = filtered.length;
+        document.getElementById('pg-range').textContent = `1 - ${Math.min(filtered.length, 50)}`;
+
+        container.innerHTML = filtered.map(b => {
+            const fecha = b.fecha_emision_boleto 
+                ? new Date(b.fecha_emision_boleto).toLocaleDateString('es-ES', { day:'2-digit', month:'short', year:'numeric' }) 
+                : '---';
+            const total = Number(b.total_boleto || 0).toLocaleString('en-US', { minimumFractionDigits: 2 });
+            const pasajero = b.nombre_pasajero_procesado || 'Sin Nombre';
+            const iniciales = getInitials(pasajero);
+            const gds = (b.gds_sistema || 'N/A').toUpperCase();
+
+            let statusHTML = '';
+            if (b.estado === 'PENDIENTE') {
+                statusHTML = `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border bg-amber-500/10 text-amber-500 border-amber-500/20">Pendiente</span>`;
+            } else if (b.estado === 'ANULADO') {
+                statusHTML = `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border bg-red-500/10 text-red-500 border-red-500/20">Anulado</span>`;
+            } else if (!b.venta_id) {
+                statusHTML = `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border bg-surface-base text-text-muted border-border-color">Sin Emisión</span>`;
+            } else {
+                statusHTML = `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border bg-emerald-500/10 text-emerald-500 border-emerald-500/20">Completado</span>`;
+            }
+
+            return `<tr class="group hover:bg-nav-active-bg/10 transition-all cursor-pointer" onclick="location.href='/boletos/${b.id_boleto_importado}/review/'">
+                <td class="px-6 py-5 text-center" onclick="event.stopPropagation()">
+                    <input type="checkbox" class="boleto-checkbox-search size-4 rounded border-border-color bg-surface-1 text-primary">
+                </td>
+                <td class="px-6 py-5">
+                    <div class="flex flex-col gap-1">
+                        <p class="text-sm font-black text-text-main group-hover:text-primary transition-colors tracking-tighter uppercase font-mono">${b.numero_boleto || 'S/N'}</p>
+                        <p class="text-[9px] text-primary/70 font-black bg-primary/5 px-2 py-0.5 rounded-md inline-block max-w-max border border-primary/20 tracking-[0.2em] font-mono">${b.localizador_pnr || 'S/PNR'}</p>
+                    </div>
+                </td>
+                <td class="px-6 py-5">
+                    <div class="flex items-center gap-3">
+                        <div class="size-9 rounded-xl bg-surface-2 text-text-muted flex items-center justify-center text-[10px] font-black border border-border-color group-hover:border-primary/30 transition-all uppercase">${iniciales}</div>
+                        <span class="text-sm font-black text-text-secondary group-hover:text-text-main transition-colors uppercase tracking-tighter truncate max-w-[150px]">${pasajero}</span>
+                    </div>
+                </td>
+                <td class="px-6 py-5 text-center">
+                    <div class="flex flex-col gap-1">
+                        <p class="text-xs font-black text-text-main font-mono uppercase">${b.ruta_vuelo || '--'}</p>
+                        <p class="text-[9px] text-text-muted font-bold tracking-widest uppercase">${gds}</p>
+                    </div>
+                </td>
+                <td class="px-6 py-5">
+                   <p class="text-xs font-black text-text-secondary uppercase tracking-tighter">${fecha}</p>
+                </td>
+                <td class="px-6 py-5 text-center">${statusHTML}</td>
+                <td class="px-6 py-5 text-right">
+                    <div class="flex flex-col items-end gap-1">
+                        <p class="text-sm font-black text-text-main font-mono">$${total}</p>
+                        <div class="flex items-center gap-1 opacity-20 group-hover:opacity-100 transition-all" onclick="event.stopPropagation()">
+                            <a href="/boletos/${b.id_boleto_importado}/review/" class="size-7 flex items-center justify-center text-text-muted hover:text-primary hover:bg-primary/10 rounded-lg transition-all border border-transparent hover:border-primary/20">
+                                <span class="material-symbols-outlined text-[18px]">visibility</span>
+                            </a>
+                        </div>
+                    </div>
+                </td>
+            </tr>`;
+        }).join('');
+    }
+
+    async function buscarBoletos() {
+        const params = new URLSearchParams({
+            nombre: document.getElementById('nombre').value,
+            pnr: document.getElementById('pnr').value,
+            origen: document.getElementById('origen').value,
+            destino: document.getElementById('destino').value,
+            fecha_inicio: document.getElementById('fecha_inicio').value,
+            fecha_fin: document.getElementById('fecha_fin').value
+        });
+
+        const container = document.getElementById('resultados-container');
+        container.innerHTML = `<tr><td colspan="7" class="py-40 text-center">
+            <div class="flex flex-col items-center gap-4">
+                <div class="size-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+                <p class="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Escaneando Base de Datos...</p>
+            </div>
+        </td></tr>`;
+
+        try {
+            const r = await fetch(`/api/boletos/buscar/?${params}`);
+            allResults = await r.json();
+            renderResults(allResults);
+        } catch (e) {
+            container.innerHTML = `<tr><td colspan="7" class="py-20 text-center text-red-500 font-black uppercase text-xs">Error de conexión con el motor de búsqueda</td></tr>`;
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const hoy = new Date();
+        const pasado = new Date(hoy);
+        pasado.setMonth(hoy.getMonth() - 6);
+        document.getElementById('fecha_inicio').value = pasado.toISOString().split('T')[0];
+        document.getElementById('fecha_fin').value = hoy.toISOString().split('T')[0];
+        buscarBoletos();
+
+        document.getElementById('select-all-search')?.addEventListener('change', function() {
+            document.querySelectorAll('.boleto-checkbox-search').forEach(cb => cb.checked = this.checked);
+        });
+    });
+</script>
+<style>
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+</style>
+{% endblock %}

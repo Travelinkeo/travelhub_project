@@ -1,0 +1,21 @@
+{% extends "core/emails/base_email.html" %}
+
+{% block content %}
+<h2 style="color: #667eea; margin-top: 0;">🔄 Actualización de Reserva</h2>
+
+<p>Estimado/a <strong>{{ cliente_nombre }}</strong>,</p>
+
+<p>El estado de su reserva ha sido actualizado.</p>
+
+<div class="info-box">
+    <p><strong>Localizador:</strong> {{ localizador }}</p>
+    <p><strong>Estado anterior:</strong> {{ estado_anterior }}</p>
+    <p><strong>Estado actual:</strong> <span style="color: #28a745;">{{ estado_actual }}</span></p>
+</div>
+
+<p>Si tiene alguna pregunta, no dude en contactarnos.</p>
+
+<p style="margin-top: 30px;">Gracias por su preferencia.</p>
+
+<p><strong>Equipo TravelHub</strong></p>
+{% endblock %}

@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>TRAVELHUB - E-Ticket Receipt</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&amp;family=Space+Grotesk:wght@300;400;500;700&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              colors: {
+                "background": "#fcf9f8",
+                "on-secondary-container": "#455367",
+                "on-tertiary-container": "#514d68",
+                "on-error": "#fff7f6",
+                "tertiary-fixed-dim": "#d4cdee",
+                "secondary-fixed": "#d5e3fc",
+                "primary-dim": "#435277",
+                "on-secondary-fixed-variant": "#4e5c71",
+                "on-tertiary-fixed": "#3e3a54",
+                "on-primary-fixed": "#2f3f62",
+                "secondary": "#526074",
+                "on-primary-container": "#425176",
+                "on-background": "#323233",
+                "on-primary-fixed-variant": "#4c5b80",
+                "surface-bright": "#fcf9f8",
+                "surface-container": "#f0eded",
+                "tertiary-dim": "#54506b",
+                "secondary-fixed-dim": "#c7d5ed",
+                "on-error-container": "#752121",
+                "surface-dim": "#dbdad9",
+                "secondary-dim": "#465468",
+                "on-surface-variant": "#5f5f5f",
+                "secondary-container": "#d5e3fc",
+                "error-dim": "#4e0309",
+                "error-container": "#fe8983",
+                "surface-container-high": "#eae8e7",
+                "error": "#9f403d",
+                "surface-variant": "#e4e2e2",
+                "inverse-primary": "#c2d1fd",
+                "surface-tint": "#4f5e83",
+                "surface-container-lowest": "#ffffff",
+                "on-surface": "#323233",
+                "on-secondary": "#f8f8ff",
+                "primary-container": "#d9e2ff",
+                "outline": "#7b7b7a",
+                "inverse-surface": "#0e0e0e",
+                "outline-variant": "#b2b2b1",
+                "on-secondary-fixed": "#324053",
+                "tertiary": "#605c78",
+                "tertiary-fixed": "#e2dbfd",
+                "primary-fixed-dim": "#c5d4ff",
+                "surface-container-low": "#f6f3f2",
+                "primary": "#4f5e83",
+                "on-primary": "#f7f7ff",
+                "surface-container-highest": "#e4e2e2",
+                "inverse-on-surface": "#9e9c9c",
+                "primary-fixed": "#d9e2ff",
+                "tertiary-container": "#e2dbfd",
+                "on-tertiary": "#fcf7ff",
+                "surface": "#fcf9f8",
+                "on-tertiary-fixed-variant": "#5b5672"
+              },
+              fontFamily: {
+                "headline": .Inter,
+                "body": .Inter,
+                "label": ["Space Grotesk"]
+              },
+              borderRadius: {"DEFAULT": "0px", "lg": "0px", "xl": "0px", "full": "9999px"},
+            },
+          },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        @media print {
+            body { background: white; }
+            .no-print { display: none; }
+            .page-break { page-break-before: always; }
+        }
+        body {
+            -webkit-print-color-adjust: exact;
+        }
+        .swiss-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 1rem;
+        }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface selection:bg-primary selection:text-on-primary">
+<!-- TopAppBar -->
+<header class="bg-[#fcf9f8] dark:bg-slate-950 flex justify-between items-center w-full px-14 py-6 sticky top-0 z-50">
+<div class="flex items-center gap-4">
+<span class="text-2xl font-black tracking-tight text-[#0D1E40] dark:text-white">TRAVELHUB</span>
+<div class="hidden md:block h-6 w-[1px] bg-outline-variant/30"></div>
+<span class="font-.Inter uppercase tracking-tighter text-sm text-[#4f5e83] dark:text-slate-300">{{ agency.eslogan }}</span>
+</div>
+<nav class="hidden md:flex gap-8 items-center">
+<span class="font-.Inter uppercase tracking-tighter text-sm text-[#0D1E40] dark:text-white font-bold cursor-default">E-Ticket</span>
+<div class="flex gap-2">
+<button class="p-2 hover:bg-[#eae8e7] dark:hover:bg-slate-800 transition-colors material-symbols-outlined text-[#4f5e83]" title="share">share</button>
+<button class="p-2 hover:bg-[#eae8e7] dark:hover:bg-slate-800 transition-colors material-symbols-outlined text-[#4f5e83]" onclick="window.print()" title="print">print</button>
+</div>
+</nav>
+</header>
+<!-- Main Content Canvas -->
+<main class="max-w-[1200px] mx-auto bg-surface-container-lowest my-8 shadow-sm min-h-[1400px]">
+<!-- Document Header / Visual Anchor -->
+<div class="px-[50px] pt-12 pb-8 flex justify-between items-end border-b border-outline-variant/10">
+<div>
+<h1 class="font-headline font-black text-6xl text-on-surface tracking-tighter">ELECTRONIC TICKET</h1>
+<p class="font-label text-secondary text-xs mt-2 uppercase tracking-[0.2em]">Passenger Receipt / Tax Invoice</p>
+</div>
+<div class="text-right">
+<div class="bg-on-surface text-white px-4 py-2 font-label text-xl tracking-widest font-bold">
+                    {{ pnr }}
+                </div>
+<p class="font-label text-[10px] text-secondary mt-1 uppercase">Booking Reference (PNR)</p>
+</div>
+</div>
+<div class="px-[50px] py-10 space-y-16">
+<!-- 01: Passenger & Reference -->
+<section class="swiss-grid">
+<div class="col-span-12 md:col-span-3 border-t-2 border-on-surface pt-4">
+<span class="font-label font-bold text-sm tracking-widest text-primary">01 / MANIFEST</span>
+</div>
+<div class="col-span-12 md:col-span-9 pt-4">
+<div class="grid grid-cols-2 gap-12">
+<div>
+<label class="font-label text-[10px] uppercase text-secondary block mb-1">Passenger Name</label>
+<p class="font-headline font-bold text-2xl uppercase tracking-tight">{{ passenger_name }}</p>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div>
+<label class="font-label text-[10px] uppercase text-secondary block mb-1">Ticket Number</label>
+<p class="font-label text-sm font-medium">ETKT 235 9402231045</p>
+</div>
+<div>
+<label class="font-label text-[10px] uppercase text-secondary block mb-1">Date of Issue</label>
+<p class="font-label text-sm font-medium">12 OCT 2023</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- 02: Flight Itinerary -->
+<section class="swiss-grid">
+<div class="col-span-12 md:col-span-3 border-t-2 border-on-surface pt-4">
+<span class="font-label font-bold text-sm tracking-widest text-primary">02 / ITINERARY</span>
+</div>
+<div class="col-span-12 md:col-span-9 pt-4 space-y-8">
+<!-- Flight Loop Start -->
+                    {% for flight in flights %}
+                    <div class="bg-surface-container-low p-8 border-l-4 border-primary">
+<div class="flex justify-between items-start mb-8">
+<div class="flex items-center gap-6">
+<div class="text-center">
+<p class="font-label text-[10px] text-secondary uppercase">Flight</p>
+<p class="font-label font-bold text-lg">{{ flight.airline_code }}{{ flight.number }}</p>
+</div>
+<div class="h-8 w-[1px] bg-outline-variant"></div>
+<div>
+<p class="font-label text-[10px] text-secondary uppercase">Class</p>
+<p class="font-label font-bold text-lg uppercase">{{ flight.cabin_class }}</p>
+</div>
+</div>
+<div class="text-right">
+<p class="font-label text-[10px] text-secondary uppercase">Status</p>
+<span class="bg-on-surface text-white px-3 py-1 font-label text-xs font-bold uppercase tracking-wider">Confirmed</span>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-16">
+<!-- Departure -->
+<div class="relative">
+<div class="absolute -left-4 top-0 bottom-0 w-[1px] bg-outline-variant/30"></div>
+<label class="font-label text-[10px] uppercase text-secondary block mb-2">Departure</label>
+<h3 class="font-headline font-black text-4xl mb-1">{{ flight.origin_code }}</h3>
+<p class="font-headline font-bold text-sm uppercase mb-4 text-on-surface">{{ flight.origin_city }}</p>
+<div class="space-y-1">
+<div class="flex justify-between border-b border-outline-variant/20 pb-1">
+<span class="font-label text-[11px] text-secondary">DATE</span>
+<span class="font-label text-[11px] font-bold">{{ flight.departure_date }}</span>
+</div>
+<div class="flex justify-between border-b border-outline-variant/20 pb-1">
+<span class="font-label text-[11px] text-secondary">TIME</span>
+<span class="font-label text-[11px] font-bold">{{ flight.departure_time }}</span>
+</div>
+<div class="flex justify-between">
+<span class="font-label text-[11px] text-secondary">TERMINAL</span>
+<span class="font-label text-[11px] font-bold">{{ flight.departure_terminal }}</span>
+</div>
+</div>
+</div>
+<!-- Arrival -->
+<div class="relative">
+<div class="absolute -left-4 top-0 bottom-0 w-[1px] bg-outline-variant/30"></div>
+<label class="font-label text-[10px] uppercase text-secondary block mb-2">Arrival</label>
+<h3 class="font-headline font-black text-4xl mb-1 text-primary">{{ flight.destination_code }}</h3>
+<p class="font-headline font-bold text-sm uppercase mb-4 text-on-surface">{{ flight.destination_city }}</p>
+<div class="space-y-1">
+<div class="flex justify-between border-b border-outline-variant/20 pb-1">
+<span class="font-label text-[11px] text-secondary">DATE</span>
+<span class="font-label text-[11px] font-bold">{{ flight.arrival_date }}</span>
+</div>
+<div class="flex justify-between border-b border-outline-variant/20 pb-1">
+<span class="font-label text-[11px] text-secondary">TIME</span>
+<span class="font-label text-[11px] font-bold">{{ flight.arrival_time }}</span>
+</div>
+<div class="flex justify-between">
+<span class="font-label text-[11px] text-secondary">SEAT</span>
+<span class="font-label text-[11px] font-bold">{{ flight.seat_number }}</span>
+</div>
+</div>
+</div>
+</div>
+<div class="mt-8 pt-6 border-t border-outline-variant/20 flex justify-between items-center">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-sm">luggage</span>
+<span class="font-label text-[10px] uppercase text-secondary">Baggage Allowance: 2PC / 23KG Each</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-sm">restaurant</span>
+<span class="font-label text-[10px] uppercase text-secondary">Meal: Standard Meal Service</span>
+</div>
+</div>
+</div>
+                    {% endfor %}
+                    <!-- Flight Loop End -->
+</div>
+</section>
+<!-- 03: Important Information -->
+<section class="swiss-grid">
+<div class="col-span-12 md:col-span-3 border-t-2 border-on-surface pt-4">
+<span class="font-label font-bold text-sm tracking-widest text-primary">03 / ADVISORY</span>
+</div>
+<div class="col-span-12 md:col-span-9 pt-4">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+<div class="space-y-4">
+<h4 class="font-headline font-bold text-sm uppercase tracking-tight">Check-In and Boarding</h4>
+<p class="font-body text-xs leading-relaxed text-on-surface-variant">
+                                Passengers are advised to arrive at the airport at least 3 hours prior to scheduled departure. 
+                                Online check-in opens 24 hours before flight time. Boarding gates close 20 minutes prior to departure. 
+                                Late arrivals may result in forfeiture of seat without refund.
+                            </p>
+</div>
+<div class="space-y-4">
+<h4 class="font-headline font-bold text-sm uppercase tracking-tight">Identification &amp; Documents</h4>
+<p class="font-body text-xs leading-relaxed text-on-surface-variant">
+                                A valid government-issued photo ID or passport is mandatory for all flights. 
+                                For international journeys, ensure all visas and health certificates are in order. 
+                                TravelHub is not responsible for denial of boarding due to improper documentation.
+                            </p>
+</div>
+</div>
+<div class="mt-12 bg-surface-container p-6 flex items-center gap-8">
+<div class="flex-shrink-0">
+<div class="w-16 h-16 bg-white flex items-center justify-center border border-outline-variant/30">
+<span class="material-symbols-outlined text-3xl text-on-surface">qr_code_2</span>
+</div>
+</div>
+<div>
+<p class="font-label text-[9px] text-secondary uppercase tracking-[0.2em] mb-1">Validation String</p>
+<code class="font-label text-[10px] break-all leading-none text-on-surface-variant">
+                                TH-{{ pnr }}-{{ passenger_name | replace(' ', '-') }}-CRC32-F0A92E11-SECURE-PRINT-STAMP-{{ "now"|date("Ymd") }}
+                            </code>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- Technical Footer Decor -->
+<div class="h-24 px-[50px] flex items-center justify-center overflow-hidden pointer-events-none opacity-20 select-none grayscale">
+<div class="flex gap-4 items-center">
+<div class="w-[500px] h-[1px] bg-outline"></div>
+<span class="font-label text-[8px] whitespace-nowrap tracking-[1em]">SYSTEM CALIBRATION - TRAVELHUB ENGINE v.4.0.2 - SWISS PRECISION</span>
+<div class="w-[500px] h-[1px] bg-outline"></div>
+</div>
+</div>
+</main>
+<!-- Footer Shell -->
+<footer class="bg-[#f6f3f2] dark:bg-slate-900 border-t border-[#0D1E40]/10 flex flex-col md:flex-row justify-between items-start w-full px-14 py-12 gap-8">
+<div class="space-y-4">
+<span class="text-lg font-bold text-[#0D1E40] dark:text-white">TRAVELHUB</span>
+<p class="font-.Space_Grotesk text-[10px] uppercase tracking-widest text-[#4f5e83] dark:text-slate-400 max-w-xs leading-relaxed">
+                {{ agency.pie_pagina }}
+            </p>
+</div>
+<div class="flex flex-col md:flex-row gap-12">
+<div class="space-y-2">
+<h5 class="font-.Space_Grotesk text-[10px] uppercase tracking-widest text-[#0D1E40] dark:text-white font-bold">Legal</h5>
+<ul class="space-y-1">
+<li><a class="font-.Space_Grotesk text-[10px] uppercase tracking-widest text-[#4f5e83] hover:text-[#9f403d] transition-colors" href="#">Terms of Carriage</a></li>
+<li><a class="font-.Space_Grotesk text-[10px] uppercase tracking-widest text-[#4f5e83] hover:text-[#9f403d] transition-colors" href="#">Privacy Policy</a></li>
+</ul>
+</div>
+<div class="space-y-2">
+<h5 class="font-.Space_Grotesk text-[10px] uppercase tracking-widest text-[#0D1E40] dark:text-white font-bold">Support</h5>
+<ul class="space-y-1">
+<li><a class="font-.Space_Grotesk text-[10px] uppercase tracking-widest text-[#4f5e83] hover:text-[#9f403d] transition-colors" href="#">Contact Agency</a></li>
+</ul>
+</div>
+</div>
+<div class="md:text-right">
+<p class="font-.Space_Grotesk text-[10px] uppercase tracking-widest text-[#4f5e83] dark:text-slate-500">
+                © 2023 TRAVELHUB DIGITAL SYSTEMS<br/>
+                ALL RIGHTS RESERVED
+            </p>
+</div>
+</footer>
+</body></html>

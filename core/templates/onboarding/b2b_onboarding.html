@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SaaS Onboarding | TravelHub Business</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,1,0" />
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #020617; color: #f8fafc; overflow-x: hidden; }
+        .dynamic-brand-text { color: var(--brand-color, #3b82f6); }
+        .dynamic-brand-bg { background-color: var(--brand-color, #3b82f6); }
+        .dynamic-brand-border { border-color: var(--brand-color, #3b82f6); }
+        .dynamic-brand-shadow { box-shadow: 0 10px 25px -5px var(--brand-shadow, rgba(59, 130, 246, 0.4)); }
+        .glass-panel { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.05); }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-up { animation: fadeUp 0.5s ease-out forwards; }
+        input[type="color"] { -webkit-appearance: none; border: none; width: 60px; height: 60px; border-radius: 50%; cursor: pointer; padding: 0; background: transparent; }
+        input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+        input[type="color"]::-webkit-color-swatch { border: 4px solid #1e293b; border-radius: 50%; }
+        .plan-radio:checked + div { border-color: var(--brand-color, #3b82f6); box-shadow: 0 0 0 1px var(--brand-color, #3b82f6) inset, 0 10px 25px -5px rgba(0,0,0,0.5); transform: translateY(-5px); }
+        .plan-radio:checked + div .check-circle { background-color: var(--brand-color, #3b82f6); border-color: var(--brand-color, #3b82f6); }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col relative" x-data="onboardingApp()" :style="`--brand-color: ${brandColor}; --brand-shadow: ${brandColor}66;`">
+
+    <!-- Background Effects -->
+    <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+        <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full blur-[120px] opacity-20 transition-colors duration-1000" :style="`background-color: ${brandColor};`"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-[30%] h-[30%] rounded-full blur-[100px] opacity-10 transition-colors duration-1000" :style="`background-color: ${brandColor};`"></div>
+        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4wNSkiLz48L3N2Zz4=')] opacity-50"></div>
+    </div>
+
+    <!-- HEADER -->
+    <header class="relative z-10 w-full p-6 flex justify-between items-center max-w-7xl mx-auto">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center font-black text-white text-xl dynamic-brand-bg transition-colors duration-500">TH</div>
+            <span class="text-xl font-black tracking-tight text-white">TravelHub Business Portal</span>
+        </div>
+        <div class="text-sm font-bold text-slate-400">
+            ¿Ya eres socio? <a href="/login/" class="text-white hover:dynamic-brand-text transition-colors font-black">Inicia Sesión</a>
+        </div>
+    </header>
+
+    <main class="relative z-10 flex-1 flex flex-col items-center justify-center p-4 w-full max-w-5xl mx-auto">
+        
+        <!-- STEP INDICATOR -->
+        <div class="w-full max-w-md mx-auto mb-10 flex items-center justify-between relative" x-show="step < 5">
+            <div class="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-slate-800 z-0 rounded-full"></div>
+            <div class="absolute left-0 top-1/2 -translate-y-1/2 h-1 dynamic-brand-bg z-0 rounded-full transition-all duration-500" :style="`width: ${(step - 1) * 33.33}%`"></div>
+            
+            <template x-for="i in 4">
+                <div class="relative z-10 w-8 h-8 rounded-full flex items-center justify-center text-xs font-black transition-all duration-500"
+                     :class="step >= i ? 'dynamic-brand-bg text-white shadow-lg' : 'bg-slate-800 text-slate-500 border border-slate-700'">
+                    <span x-text="i < step ? '✓' : i" :class="i < step ? 'material-symbols-outlined text-[14px]' : ''"></span>
+                </div>
+            </template>
+        </div>
+
+        <!-- SECCIÓN FORMULARIO (POST a Django) -->
+        <form id="onboardingForm" method="POST" action="{% url 'onboarding_start' %}" x-ref="djangoForm">
+            {% csrf_token %}
+            <input type="hidden" name="plan" x-model="selectedPlan">
+            <input type="hidden" name="agency_name" x-model="agencyName">
+            <input type="hidden" name="subdomain" x-model="generateSubdomain()">
+            <input type="hidden" name="brand_color" x-model="brandColor">
+            <input type="hidden" name="admin_name" x-model="adminName">
+            <input type="hidden" name="admin_email" x-model="adminEmail">
+            <input type="hidden" name="admin_password" x-model="adminPass">
+        </form>
+
+        <!-- STEP 1: PLANES -->
+        <div class="w-full animate-fade-up" x-show="step === 1">
+            <div class="text-center mb-10">
+                <h1 class="text-4xl md:text-5xl font-black text-white mb-4 tracking-tight uppercase">Elige la potencia de tu agencia</h1>
+                <p class="text-slate-400 text-lg">Paga solo por lo que necesitas. Sin cuotas de mantenimiento ocultas.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+                <!-- Starter -->
+                <label class="cursor-pointer relative group">
+                    <input type="radio" value="BASIC" x-model="selectedPlan" class="peer plan-radio sr-only">
+                    <div class="glass-panel p-8 rounded-3xl transition-all duration-300 border-2 border-transparent h-full flex flex-col bg-slate-900/50 hover:bg-slate-800/80">
+                        <h3 class="text-xl font-black text-white mb-1">Starter Agency</h3>
+                        <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-6">Para agentes independientes</p>
+                        <div class="flex items-end gap-1 mb-6">
+                            <span class="text-4xl font-black text-white">$29</span><span class="text-slate-400 font-medium mb-1">/mes</span>
+                        </div>
+                        <ul class="space-y-3 mb-8 flex-1">
+                            <li class="flex items-center gap-2 text-sm text-slate-300"><span class="material-symbols-outlined text-emerald-400 text-[16px]">check</span> 1 Usuario</li>
+                            <li class="flex items-center gap-2 text-sm text-slate-300"><span class="material-symbols-outlined text-emerald-400 text-[16px]">check</span> God Mode IA (100 Boletos)</li>
+                            <li class="flex items-center gap-2 text-sm text-slate-300"><span class="material-symbols-outlined text-emerald-400 text-[16px]">check</span> PDFs Estándar</li>
+                        </ul>
+                    </div>
+                </label>
+
+                <!-- Professional -->
+                <label class="cursor-pointer relative group">
+                    <input type="radio" value="PRO" x-model="selectedPlan" class="peer plan-radio sr-only">
+                    <div class="glass-panel p-8 rounded-3xl transition-all duration-300 border-2 border-blue-500/30 h-full flex flex-col bg-slate-800/80 shadow-2xl relative overflow-hidden transform md:-translate-y-2">
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-blue-500 opacity-20 blur-3xl"></div>
+                        <div class="absolute top-0 left-1/2 -translate-x-1/2 bg-blue-500 text-white text-[10px] font-black px-3 py-1 rounded-b-lg uppercase tracking-widest">Altamente Recomendado</div>
+                        <h3 class="text-xl font-black text-blue-400 mb-1 mt-2">Professional</h3>
+                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6">Para agencias boutique</p>
+                        <div class="flex items-end gap-1 mb-6">
+                            <span class="text-4xl font-black text-white">$99</span><span class="text-slate-400 font-medium mb-1">/mes</span>
+                        </div>
+                        <ul class="space-y-3 mb-8 flex-1">
+                            <li class="flex items-center gap-2 text-sm text-slate-200"><span class="material-symbols-outlined text-blue-400 text-[16px]">check</span> Hasta 5 Usuarios</li>
+                            <li class="flex items-center gap-2 text-sm text-slate-200"><span class="material-symbols-outlined text-blue-400 text-[16px]">check</span> IA Ilimitada + Cotizador</li>
+                            <li class="flex items-center gap-2 text-sm text-slate-200"><span class="material-symbols-outlined text-blue-400 text-[16px]">check</span> Kanban CRM + WhatsApp</li>
+                            <li class="flex items-center gap-2 text-sm text-slate-200"><span class="material-symbols-outlined text-blue-400 text-[16px]">check</span> Links Mágicos de Pago</li>
+                        </ul>
+                    </div>
+                </label>
+
+                <!-- Enterprise -->
+                <label class="cursor-pointer relative group">
+                    <input type="radio" value="ENTERPRISE" x-model="selectedPlan" class="peer plan-radio sr-only">
+                    <div class="glass-panel p-8 rounded-3xl transition-all duration-300 border-2 border-transparent h-full flex flex-col bg-slate-900/50 hover:bg-slate-800/80">
+                        <h3 class="text-xl font-black text-white mb-1">Enterprise Cloud</h3>
+                        <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-6">Soberanía Digital Total</p>
+                        <div class="flex items-end gap-1 mb-6">
+                            <span class="text-4xl font-black text-white">$299</span><span class="text-slate-400 font-medium mb-1">/mes</span>
+                        </div>
+                        <ul class="space-y-3 mb-8 flex-1">
+                            <li class="flex items-center gap-2 text-sm text-slate-300"><span class="material-symbols-outlined text-purple-400 text-[16px]">check</span> Usuarios Ilimitados</li>
+                            <li class="flex items-center gap-2 text-sm text-slate-300"><span class="material-symbols-outlined text-purple-400 text-[16px]">check</span> B2B2C Freelancer Portal</li>
+                            <li class="flex items-center gap-2 text-sm text-slate-300"><span class="material-symbols-outlined text-purple-400 text-[16px]">check</span> Conciliación Contable IA</li>
+                        </ul>
+                    </div>
+                </label>
+            </div>
+
+            <div class="mt-10 text-center">
+                <button @click="nextStep()" :disabled="!selectedPlan" 
+                        class="dynamic-brand-bg text-white font-black py-4 px-12 rounded-xl shadow-lg dynamic-brand-shadow transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105 active:scale-95">
+                    Proceder al Registro →
+                </button>
+            </div>
+        </div>
+
+        <!-- STEP 2: DATOS AGENCIA -->
+        <div class="w-full max-w-xl animate-fade-up" x-show="step === 2" style="display: none;">
+            <div class="text-center mb-8">
+                <h1 class="text-3xl font-black text-white mb-2 tracking-tight">Tu Espacio de Trabajo</h1>
+                <p class="text-slate-400 text-sm">Configura la identidad operativa de tu agencia en TravelHub.</p>
+            </div>
+
+            <div class="glass-panel p-8 rounded-3xl shadow-2xl space-y-6 border border-slate-700/50">
+                <div>
+                    <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Nombre de la Agencia</label>
+                    <input type="text" x-model="agencyName" placeholder="Viajes Estelares C.A." class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white font-bold focus:outline-none focus:border-blue-500 transition-all">
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">URL Personalizada (Subdominio)</label>
+                    <div class="flex items-center bg-slate-900/50 border border-slate-700 rounded-xl overflow-hidden">
+                        <input type="text" :value="generateSubdomain()" readonly class="w-full bg-transparent px-4 py-3 text-white font-mono text-sm opacity-60">
+                        <div class="bg-slate-800 px-4 py-3 text-slate-400 font-mono text-sm border-l border-slate-700">.travelhub.cc</div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Nombre Administrador</label>
+                        <input type="text" x-model="adminName" placeholder="Tu Nombre" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Email de Acceso</label>
+                        <input type="email" x-model="adminEmail" placeholder="admin@agencia.com" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Crear Contraseña Maestra</label>
+                    <input type="password" x-model="adminPass" placeholder="••••••••" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none">
+                </div>
+            </div>
+
+            <div class="mt-8 flex justify-between gap-4">
+                <button @click="prevStep()" class="text-slate-400 font-bold py-4 px-6 hover:text-white transition-colors">Volver</button>
+                <button @click="nextStep()" :disabled="!agencyName || !adminEmail || !adminPass" 
+                        class="flex-1 dynamic-brand-bg text-white font-black py-4 px-6 rounded-xl shadow-lg dynamic-brand-shadow transition-all disabled:opacity-50 hover:scale-[1.02]">
+                    Escoger Branding →
+                </button>
+            </div>
+        </div>
+
+        <!-- STEP 3: BRANDING -->
+        <div class="w-full max-w-2xl animate-fade-up" x-show="step === 3" style="display: none;">
+            <div class="text-center mb-8">
+                <h1 class="text-3xl font-black text-white mb-2 tracking-tight uppercase">Tu Identidad Visual</h1>
+                <p class="text-slate-400 text-sm">Escoge el ADN visual de tu agencia. Gemini AI adaptará todo el sistema a este color.</p>
+            </div>
+
+            <div class="glass-panel p-8 rounded-3xl shadow-2xl border border-slate-700/50 flex flex-col md:flex-row gap-8 items-center">
+                <div class="flex-1 space-y-6 w-full">
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Color Corporativo Maestro</label>
+                        <div class="flex flex-wrap gap-3">
+                            <button @click="brandColor = '#3b82f6'" class="w-10 h-10 rounded-full bg-[#3b82f6] border-2 transition-all hover:scale-110 shadow-lg shadow-blue-500/30" :class="brandColor === '#3b82f6' ? 'border-white' : 'border-transparent'"></button>
+                            <button @click="brandColor = '#10b981'" class="w-10 h-10 rounded-full bg-[#10b981] border-2 transition-all hover:scale-110 shadow-lg shadow-emerald-500/30" :class="brandColor === '#10b981' ? 'border-white' : 'border-transparent'"></button>
+                            <button @click="brandColor = '#8b5cf6'" class="w-10 h-10 rounded-full bg-[#8b5cf6] border-2 transition-all hover:scale-110 shadow-lg shadow-purple-500/30" :class="brandColor === '#8b5cf6' ? 'border-white' : 'border-transparent'"></button>
+                            <button @click="brandColor = '#f59e0b'" class="w-10 h-10 rounded-full bg-[#f59e0b] border-2 transition-all hover:scale-110 shadow-lg shadow-amber-500/30" :class="brandColor === '#f59e0b' ? 'border-white' : 'border-transparent'"></button>
+                            <div class="relative w-10 h-10 rounded-full overflow-hidden border-2 border-slate-700 ml-2">
+                                <input type="color" x-model="brandColor" class="absolute -top-2 -left-2 w-14 h-14 cursor-pointer">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl">
+                        <p class="text-[9px] font-bold text-slate-500 uppercase mb-2">Impacto Visual Real</p>
+                        <div class="flex gap-2">
+                            <div class="h-4 w-4 rounded-sm dynamic-brand-bg transition-colors"></div>
+                            <div class="h-4 w-20 rounded-sm bg-slate-800"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex-1 w-full bg-white rounded-2xl p-6 shadow-inner relative overflow-hidden">
+                    <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-4">Preview del Link de Pago</p>
+                    <div class="bg-white rounded-xl shadow-xl p-4 relative z-10 border border-slate-100">
+                        <div class="w-full h-1 dynamic-brand-bg absolute top-0 left-0 transition-colors duration-500"></div>
+                        <h4 class="font-black text-slate-800 mt-2" x-text="agencyName || 'Agencia Premium'"></h4>
+                        <div class="mt-6 flex justify-between items-end">
+                            <span class="text-2xl font-black text-slate-900">$250.00</span>
+                            <button class="dynamic-brand-bg text-white text-[10px] font-bold px-4 py-2 rounded-lg shadow-md transition-colors duration-500">Pagar con Zelle</button>
+                        </div>
+                    </div>
+                    <div class="absolute bottom-[-20%] right-[-20%] w-[80%] h-[80%] rounded-full blur-[40px] opacity-10 transition-colors duration-500 pointer-events-none" :style="`background-color: ${brandColor};`"></div>
+                </div>
+            </div>
+
+            <div class="mt-8 flex justify-between gap-4">
+                <button @click="prevStep()" class="text-slate-400 font-bold py-4 px-6 hover:text-white transition-colors">Volver</button>
+                <button @click="nextStep()" 
+                        class="flex-1 dynamic-brand-bg text-white font-black py-4 px-6 rounded-xl shadow-lg dynamic-brand-shadow transition-all hover:scale-[1.02] flex justify-center items-center gap-2">
+                    Continuar al Pago Seguro <span class="material-symbols-outlined text-[18px]">lock</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- STEP 4: STRIPE PAYMENT -->
+        <div class="w-full max-w-md animate-fade-up" x-show="step === 4" style="display: none;">
+            <div class="glass-panel p-8 rounded-3xl shadow-2xl border border-slate-700/50">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-black text-white">Activar Licencia</h2>
+                    <span class="dynamic-brand-bg text-white text-[10px] font-black px-2 py-1 rounded uppercase tracking-widest" x-text="selectedPlan"></span>
+                </div>
+                
+                <div class="flex items-end gap-1 mb-8 pb-6 border-b border-slate-800">
+                    <span class="text-4xl font-black text-white" x-text="selectedPlan === 'BASIC' ? '$29' : (selectedPlan === 'PRO' ? '$99' : '$299')"></span>
+                    <span class="text-slate-400 font-medium mb-1">/ mes</span>
+                </div>
+
+                <div class="space-y-4 mb-8">
+                    <p class="text-xs text-slate-400 text-center italic">Esto redirigirá a la pasarela segura de Stripe para confirmar tu identidad corporativa.</p>
+                </div>
+
+                <button @click="submitForm()" 
+                        class="w-full dynamic-brand-bg text-white font-black py-4 rounded-xl shadow-lg dynamic-brand-shadow transition-all hover:scale-[1.02] active:scale-95 flex justify-center items-center gap-2">
+                    Pagar y Desplegar ERP <span class="material-symbols-outlined text-[18px]">bolt</span>
+                </button>
+            </div>
+            <button @click="prevStep()" class="w-full text-center text-slate-400 font-bold py-4 hover:text-white transition-colors mt-2">Volver</button>
+        </div>
+
+    </main>
+
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('onboardingApp', () => ({
+                step: 1,
+                selectedPlan: '',
+                agencyName: '',
+                adminName: '',
+                adminEmail: '',
+                adminPass: '',
+                brandColor: '#3b82f6',
+                
+                nextStep() { window.scrollTo(0, 0); this.step++; },
+                prevStep() { window.scrollTo(0, 0); this.step--; },
+                
+                generateSubdomain() {
+                    if (!this.agencyName) return 'mi-agencia';
+                    return this.agencyName.toLowerCase()
+                        .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+                        .replace(/[^a-z0-9]/g, '')
+                        .slice(0, 20);
+                },
+
+                submitForm() {
+                    // Enviar el formulario oculto de Django
+                    this.$refs.djangoForm.submit();
+                }
+            }));
+        });
+    </script>
+</body>
+</html>

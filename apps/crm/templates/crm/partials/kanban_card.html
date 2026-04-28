@@ -1,0 +1,47 @@
+<div id="card-{{ lead.id }}" 
+     draggable="true" 
+     @dragstart="dragStart($event, '{{ lead.id }}')"
+     @dragend="dragEnd($event)"
+     class="bg-surface-1 p-4 rounded-xl shadow-card-custom border border-border-color cursor-grab active:cursor-grabbing mb-3 hover:shadow-md hover:border-primary transition-all select-none group">
+    
+    <!-- Etiquetas -->
+    <div class="flex justify-between items-start mb-3">
+        <span class="text-[10px] font-black uppercase tracking-widest text-primary bg-primary/10 px-2 py-1 rounded-md border border-primary/20">
+            {{ lead.origen|default:"?"|upper }} ➔ {{ lead.destino|default:"?"|upper }}
+        </span>
+        <span class="text-[10px] font-bold text-text-muted">{{ lead.creado_en|date:"d M" }}</span>
+    </div>
+
+    <!-- Cliente -->
+    <h4 class="font-bold text-text-main text-[14px] mb-1 leading-tight group-hover:text-primary transition-colors">
+        {{ lead.cliente.nombres|title }}
+    </h4>
+    
+    <!-- Notas de IA -->
+    <p class="text-[12px] text-text-secondary mb-4 line-clamp-2 leading-relaxed h-[36px] overflow-hidden">
+        {{ lead.notas_ia|default:"Sin notas de interacción." }}
+    </p>
+
+    <!-- Footer de la Tarjeta -->
+    <div class="flex justify-between items-center text-xs text-text-muted font-medium pt-3 border-t border-border-color">
+        <span class="flex items-center gap-1.5 text-text-secondary">
+            <span class="material-symbols-outlined text-[16px] text-primary">group</span> 
+            <span class="font-bold text-text-main">{{ lead.cantidad_pasajeros }}</span> Pax
+        </span>
+        
+        <div class="flex gap-2">
+            <!-- Botón Cotizador Mágico IA -->
+            <a href="{% url 'cotizaciones:magic_quoter' %}?lead_id={{ lead.id }}" 
+               class="w-7 h-7 rounded-full bg-blue-500/10 text-blue-500 flex items-center justify-center hover:bg-blue-600 hover:text-white transition-all shadow-sm group/btn" 
+               title="Abrir Cotizador Mágico IA">
+                <span class="material-symbols-outlined text-[16px]">auto_awesome</span>
+            </a>
+
+            <!-- Botón WhatsApp -->
+            <a href="https://wa.me/{{ lead.cliente.telefono|default:'' }}" target="_blank"
+               class="w-7 h-7 rounded-full bg-status-success-bg/20 text-status-success flex items-center justify-center hover:bg-status-success hover:text-white transition-all shadow-sm" title="Responder por WhatsApp">
+                <span class="material-symbols-outlined text-[16px]">chat</span>
+            </a>
+        </div>
+    </div>
+</div>

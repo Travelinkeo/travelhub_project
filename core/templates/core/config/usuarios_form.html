@@ -1,0 +1,98 @@
+{% extends 'base_modern.html' %}
+
+{% block title %}{% if form.instance.pk %}Editar Usuario{% else %}Nuevo Usuario{% endif %} - TravelHub{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <!-- Header -->
+    <div class="mb-6">
+        <h2 class="text-2xl font-bold text-white">
+            {% if form.instance.pk %}Editar Usuario{% else %}Nuevo Usuario{% endif %}
+        </h2>
+        <p class="text-gray-400">
+            {% if form.instance.pk %}Actualiza los datos del usuario.{% else %}Registra un nuevo usuario en tu
+            agencia.{% endif %}
+        </p>
+    </div>
+
+    <!-- Form Card -->
+    <div
+        class="bg-gray-800/50 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl overflow-hidden p-6 max-w-4xl mx-auto">
+        <form method="post">
+            {% csrf_token %}
+
+            {% if form.errors %}
+            <div class="bg-red-900/50 border border-red-500 text-red-200 px-4 py-3 rounded relative mb-6" role="alert">
+                <strong class="font-bold">Error!</strong>
+                <span class="block sm:inline">Por favor corrige los errores abajo indicados.</span>
+                <div class="mt-2 text-sm">
+                    {{ form.errors }}
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Nombre de Usuario</label>
+                    {{ form.username }}
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Email</label>
+                    {{ form.email }}
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Nombre</label>
+                    {{ form.first_name }}
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Apellido</label>
+                    {{ form.last_name }}
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Contraseña</label>
+                    {{ form.password }}
+                    {% if form.instance.pk %}
+                    <p class="text-xs text-gray-500 mt-1">Dejar en blanco para mantener la actual.</p>
+                    {% endif %}
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Rol</label>
+                    {{ form.rol }}
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <label class="flex items-center">
+                    {{ form.activo }}
+                    <span class="ml-2 text-sm text-gray-300">Usuario Activo</span>
+                </label>
+            </div>
+
+            <div class="flex justify-end border-t border-white/10 pt-6">
+                <a href="{% url 'core:usuarios_list' %}"
+                    class="bg-gray-700 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg mr-3 transition-colors">
+                    Cancelar
+                </a>
+                <button type="submit"
+                    class="bg-primary hover:bg-primary/80 text-white font-bold py-2 px-6 rounded-lg shadow-lg shadow-primary/30 transition-all duration-200 transform hover:scale-105">
+                    {% if form.instance.pk %}Guardar Cambios{% else %}Crear Usuario{% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const inputs = document.querySelectorAll('input[type="text"], input[type="email"], input[type="password"], select');
+        inputs.forEach(input => {
+            input.classList.add('mt-1', 'block', 'w-full', 'rounded-lg', 'border-gray-600', 'shadow-sm', 'focus:border-primary', 'focus:ring-primary', 'sm:text-sm', 'border', 'p-2.5', 'text-white', 'bg-gray-700/50', 'placeholder-gray-400');
+        });
+
+        const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+        checkboxes.forEach(input => {
+            input.classList.add('h-4', 'w-4', 'text-primary', 'focus:ring-primary', 'border-gray-600', 'rounded', 'bg-gray-700');
+        });
+    });
+</script>
+{% endblock %}

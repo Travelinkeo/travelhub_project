@@ -1,0 +1,211 @@
+{% extends 'base_modern.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Auditoría de Rentabilidad | TravelHub AI{% endblock %}
+
+{% block page_title %}Revenue Leak Dashboard{% endblock %}
+{% block page_subtitle %}Detección inteligente de fugas de dinero y discrepancias financieras.{% endblock %}
+
+{% block extra_head %}
+<style nonce="{{ request.csp_nonce }}">
+    .leak-card {
+        @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-xl;
+        border-right: 4px solid transparent;
+    }
+    .leak-card.critical { border-right-color: #ef4444; }
+    .leak-card.warning { border-right-color: #f59e0b; }
+    .leak-card.info { border-right-color: #3b82f6; }
+    
+    .glass-kpi {
+        background: rgba(var(--surface-1-rgb), 0.7);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(var(--primary-rgb), 0.1);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<main class="flex-1 w-full max-w-[1400px] mx-auto p-6 md:p-8">
+
+    <!-- Header & Action Bar -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10 pb-6 border-b border-border-color">
+        <div>
+            <div class="flex items-center gap-2 mb-1">
+                <span class="material-symbols-outlined text-primary text-[24px] animate-pulse">monitoring</span>
+                <h1 class="text-3xl font-black text-text-main tracking-tight uppercase italic">Auditoría Operativa</h1>
+            </div>
+            <p class="text-text-muted text-sm capitalize">Escaneo profundo de anomalías en el ciclo de vida de la venta.</p>
+        </div>
+        <div class="flex gap-3">
+            <a href="{% url 'finance:reconciliacion_upload' %}" class="btn-secondary !h-12 !px-6 border-border-color group">
+                <span class="material-symbols-outlined !text-[20px] group-hover:scale-110 transition-transform">cloud_upload</span>
+                <span>Conciliar Proveedores</span>
+            </a>
+            <form action="" method="get" class="flex gap-2">
+                <button type="submit" name="run_audit" value="1" class="btn-primary !h-12 !px-8 shadow-lg shadow-primary/20 group">
+                    <span class="material-symbols-outlined group-hover:rotate-180 transition-transform duration-500">sync</span>
+                    <span>Ejecutar Escaneo IA</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- KPIs de Hallazgos -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+        <!-- Capital en Riesgo -->
+        <div class="card-base p-6 leak-card critical glass-kpi">
+            <div class="flex items-center justify-between mb-4">
+                <div class="size-12 rounded-2xl bg-red-500/10 flex items-center justify-center text-red-500 border border-red-500/20">
+                    <span class="material-symbols-outlined text-[24px]">payments</span>
+                </div>
+                <span class="text-[10px] font-black text-red-500 bg-red-500/10 px-2 py-1 rounded-full uppercase tracking-widest">Alerta Roja</span>
+            </div>
+            <p class="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Capital en Riesgo</p>
+            <h2 class="text-3xl font-black text-text-main mt-1 tracking-tighter tabular-nums">${{ stats.money_at_risk|floatformat:2|intcomma }}</h2>
+        </div>
+
+        <!-- Hallazgos Críticos -->
+        <div class="card-base p-6 leak-card warning">
+            <div class="flex items-center justify-between mb-4">
+                <div class="size-12 rounded-2xl bg-amber-500/10 flex items-center justify-center text-amber-500 border border-amber-500/20">
+                    <span class="material-symbols-outlined text-[24px]">gavel</span>
+                </div>
+                <p class="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Críticos</p>
+            </div>
+            <h2 class="text-3xl font-black text-text-main mt-1 tracking-tighter">{{ stats.critical_leaks }}</h2>
+            <p class="text-[10px] text-text-muted mt-2 font-bold uppercase">Casos que requieren acción inmediata</p>
+        </div>
+
+        <!-- Pendientes de Revisión -->
+        <div class="card-base p-6 leak-card info">
+            <div class="flex items-center justify-between mb-4">
+                <div class="size-12 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-500 border border-blue-500/20">
+                    <span class="material-symbols-outlined text-[24px]">troubleshoot</span>
+                </div>
+                <p class="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">En Bandeja</p>
+            </div>
+            <h2 class="text-3xl font-black text-text-main mt-1 tracking-tighter">{{ stats.pending_review }}</h2>
+            <p class="text-[10px] text-text-muted mt-2 font-bold uppercase">Hallazgos sin procesar</p>
+        </div>
+
+        <!-- Total Histórico -->
+        <div class="card-base p-6 leak-card bg-surface-1">
+            <div class="flex items-center justify-between mb-4">
+                <div class="size-12 rounded-2xl bg-slate-500/10 flex items-center justify-center text-slate-500 border border-slate-500/20">
+                    <span class="material-symbols-outlined text-[24px]">history</span>
+                </div>
+                <p class="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Total Casos</p>
+            </div>
+            <h2 class="text-3xl font-black text-text-main mt-1 tracking-tighter">{{ stats.total_findings }}</h2>
+            <p class="text-[10px] text-text-muted mt-2 font-bold uppercase">Historial acumulado</p>
+        </div>
+    </div>
+
+    <!-- Filtros y Lista de Hallazgos -->
+    <div class="card-base overflow-hidden border-2 border-primary/5 shadow-2xl">
+        <div class="px-6 py-5 border-b border-border-color bg-surface-2/50 backdrop-blur-sm flex justify-between items-center">
+            <h3 class="text-sm font-black text-text-main uppercase tracking-widest">Hallazgos Activos</h3>
+            <div class="flex gap-3">
+                <select class="input-base w-48 !h-9 !py-0 !text-[10px] font-black !bg-surface-1 uppercase tracking-tighter">
+                    <option>Cualquier Severidad</option>
+                    <option>Crítica</option>
+                    <option>Moderada</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead>
+                    <tr class="bg-surface-2/30">
+                        <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest">Venta / Localizador</th>
+                        <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest">Hallazgo</th>
+                        <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest">Importancia</th>
+                        <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-right">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for f in findings %}
+                    <tr class="group hover:bg-nav-active-bg/10 transition-all border-b border-border-color last:border-0">
+                        <td class="px-6 py-5">
+                            <div class="flex flex-col">
+                                <a href="{% url 'bookings:venta_detail' f.venta.pk %}" class="font-black text-text-main hover:text-primary transition-colors uppercase tracking-tight">
+                                    {{ f.venta.localizador|default:f.venta.id_venta }}
+                                </a>
+                                <span class="text-[10px] text-text-muted mt-1 uppercase font-bold">{{ f.venta.cliente.get_nombre_completo|default:"S/N" }}</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-5">
+                            <div class="flex items-start gap-3">
+                                <div class="mt-1 size-2 rounded-full 
+                                    {% if f.tipo == 'CZS' or f.tipo == 'MSC' %}bg-red-500
+                                    {% elif f.tipo == 'GED' %}bg-amber-500
+                                    {% else %}bg-blue-500{% endif %}"></div>
+                                <div class="flex flex-col">
+                                    <span class="text-[11px] font-bold text-text-main leading-tight">{{ f.mensaje }}</span>
+                                    <span class="text-[9px] text-text-muted mt-1 font-black uppercase tracking-widest">{{ f.get_tipo_display }}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-5">
+                            <span class="px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-widest 
+                                {% if f.tipo == 'CZS' %}bg-red-500/10 text-red-500 border border-red-500/20
+                                {% elif f.tipo == 'GED' %}bg-amber-500/10 text-amber-500 border border-amber-500/20
+                                {% else %}bg-slate-500/10 text-text-muted border border-border-color{% endif %}">
+                                {{ f.get_tipo_display }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-5">
+                            <div class="flex items-center justify-end gap-2" id="finding-actions-{{ f.pk }}">
+                                {% if f.estado == 'PEN' %}
+                                    <button 
+                                        hx-post="{% url 'bookings:resolve_finding' f.pk %}"
+                                        hx-vals='{"action": "resolve"}'
+                                        hx-target="#finding-actions-{{ f.pk }}"
+                                        hx-swap="innerHTML"
+                                        class="btn-secondary !h-8 !px-3 !text-[10px] hover:!bg-emerald-500/10 hover:!text-emerald-500 group/btn"
+                                    >
+                                        <span class="material-symbols-outlined !text-[16px]">check_circle</span>
+                                        <span>Resolver</span>
+                                    </button>
+                                    <button 
+                                        hx-post="{% url 'bookings:resolve_finding' f.pk %}"
+                                        hx-vals='{"action": "ignore"}'
+                                        hx-target="#finding-actions-{{ f.pk }}"
+                                        hx-swap="innerHTML"
+                                        class="btn-secondary !h-8 !px-3 !text-[10px] hover:!bg-slate-500/10 hover:!text-slate-500 group/btn"
+                                    >
+                                        <span class="material-symbols-outlined !text-[16px]">block</span>
+                                        <span>Ignorar</span>
+                                    </button>
+                                {% else %}
+                                    <span class="px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-widest 
+                                        {% if f.estado == 'SOL' %}bg-emerald-500/10 text-emerald-500 border border-emerald-500/20
+                                        {% else %}bg-slate-500/10 text-text-muted border border-border-color{% endif %}">
+                                        {{ f.get_estado_display }}
+                                    </span>
+                                {% endif %}
+                                <a href="{% url 'bookings:venta_detail' f.venta.pk %}" class="btn-secondary !h-8 !px-3 !text-[10px] hover:!bg-primary/10 hover:!text-primary">
+                                    <span class="material-symbols-outlined !text-[16px]">visibility</span>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="px-6 py-20 text-center">
+                            <div class="flex flex-col items-center gap-3">
+                                <span class="material-symbols-outlined text-emerald-500 text-[48px] animate-bounce">verified</span>
+                                <h3 class="text-lg font-black text-text-main uppercase tracking-tight">¡Felicidades! No hay fugas detectadas</h3>
+                                <p class="text-sm text-text-muted">Tu flujo financiero parece estar 100% saludable.</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+{% endblock %}

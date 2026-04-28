@@ -1,0 +1,82 @@
+<div class="animate-fade-in-up space-y-6">
+
+    <!-- Resumen de Audiencia (ORM Result) -->
+    <div class="bg-emerald-50 border border-emerald-200 rounded-3xl p-6 flex items-center justify-between dark:bg-emerald-900/10 dark:border-emerald-800">
+        <div class="flex items-center gap-4">
+            <div class="w-14 h-14 bg-emerald-500 text-white rounded-full flex items-center justify-center shadow-lg shadow-emerald-500/30">
+                <span class="material-symbols-outlined text-3xl">group</span>
+            </div>
+            <div>
+                <p class="text-xs font-black text-emerald-600 uppercase tracking-widest mb-1">Audiencia Encontrada</p>
+                <h3 class="text-2xl font-black text-emerald-900 dark:text-emerald-400">{{ total_audiencia }} Clientes</h3>
+            </div>
+        </div>
+        
+        <div class="text-right hidden sm:block">
+            <p class="text-[10px] font-bold text-emerald-600 uppercase">Muestra del Segmento:</p>
+            <div class="flex -space-x-2 overflow-hidden mt-1 justify-end">
+                {% for cli in clientes_muestra %}
+                <div class="inline-block h-8 w-8 rounded-full ring-2 ring-white bg-emerald-200 flex items-center justify-center text-[10px] font-black text-emerald-700" title="{{ cli.nombres }} ({{ cli.email }})">
+                    {{ cli.nombres|make_list|first }}
+                </div>
+                {% endfor %}
+                {% if total_audiencia > 5 %}
+                <div class="inline-block h-8 w-8 rounded-full ring-2 ring-white bg-slate-100 flex items-center justify-center text-[10px] font-black text-slate-500">
+                    +{{ total_audiencia|add:"-5" }}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Editor de Vista Previa (Email Result) -->
+    <div class="bg-surface-1 border border-border-color rounded-3xl p-6 shadow-sm">
+        <div class="flex items-center justify-between border-b border-border-color pb-4 mb-4">
+            <h3 class="font-black text-lg text-text-main flex items-center gap-2">
+                <span class="material-symbols-outlined text-blue-500">preview</span> Vista Previa del Correo
+            </h3>
+            <span class="bg-blue-50 text-blue-600 text-xs font-bold px-3 py-1 rounded-full border border-blue-100 dark:bg-blue-900/20 dark:border-blue-800">
+                Generado por Gemini
+            </span>
+        </div>
+
+        <div class="space-y-4">
+            <div>
+                <label class="block text-[10px] font-black text-text-muted uppercase tracking-widest mb-1">Asunto del Correo</label>
+                <div class="bg-surface-2 p-3 rounded-xl border border-border-color text-text-main font-bold">
+                    {{ ia_data.asunto_email }}
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-[10px] font-black text-text-muted uppercase tracking-widest mb-1">Cuerpo del Correo (HTML)</label>
+                <div class="bg-surface-2 p-6 rounded-xl border border-border-color text-text-main prose prose-sm max-w-none dark:prose-invert overflow-auto max-h-96">
+                    <!-- Se inyecta el HTML seguro que generó la IA -->
+                    {{ ia_data.cuerpo_email_html|safe }}
+                </div>
+                <p class="text-[10px] text-slate-400 mt-2 font-medium flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[12px]">info</span>
+                    La variable <span class="font-mono bg-slate-100 dark:bg-slate-800 px-1 rounded text-slate-600 dark:text-slate-400">{% verbatim %}{{ nombre_cliente }}{% endverbatim %}</span> será reemplazada automáticamente por el nombre real de cada pasajero.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Formulario de Despacho Definitivo -->
+    <form hx-post="{% url 'crm:dispatch_campaign' %}" hx-target="#campaign-results" hx-indicator="#dispatch-loading">
+        {% csrf_token %}
+        <input type="hidden" name="asunto" value="{{ ia_data.asunto_email }}">
+        <input type="hidden" name="cuerpo_html" value="{{ ia_data.cuerpo_email_html }}">
+        <input type="hidden" name="cliente_ids" value="{{ cliente_ids_json }}">
+        
+        <button type="submit" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-black py-4 px-6 rounded-xl shadow-lg shadow-slate-900/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2">
+            Despachar a {{ total_audiencia }} clientes <span class="material-symbols-outlined text-[20px]">rocket_launch</span>
+        </button>
+        
+        <!-- Loader Despacho -->
+        <div id="dispatch-loading" class="htmx-indicator text-center py-4">
+            <span class="material-symbols-outlined animate-spin text-blue-500 text-3xl">sync</span>
+            <p class="text-sm font-bold text-slate-500 mt-2">Encolando en Celery...</p>
+        </div>
+    </form>
+</div>

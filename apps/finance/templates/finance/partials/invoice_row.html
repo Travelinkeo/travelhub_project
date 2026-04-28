@@ -1,0 +1,82 @@
+<tr class="group hover:bg-nav-active-bg/10 transition-all cursor-pointer" id="invoice-row-{{ invoice.pk }}">
+    <td class="px-6 py-5">
+        <div class="flex items-center gap-4">
+            <div class="size-9 rounded-xl flex items-center justify-center font-black text-[10px] border border-border-color shadow-sm shrink-0 bg-primary/10 text-primary border-primary/20">
+                <span class="material-symbols-outlined text-[18px]">receipt</span>
+            </div>
+            <div>
+                <p class="text-sm font-black text-text-main group-hover:text-primary transition-colors tracking-tight uppercase">
+                    {{ invoice.numero_factura|default:"BORRADOR" }}
+                </p>
+                <p class="text-[10px] b-accent-color font-black bg-primary/5 px-1.5 py-0.5 rounded-md inline-block mt-1 border border-primary/20 tracking-[0.2em] font-mono">
+                    {{ invoice.venta_asociada.localizador }}
+                </p>
+            </div>
+        </div>
+    </td>
+    
+    <td class="px-6 py-5">
+        <div class="flex flex-col gap-1">
+            <span class="text-xs font-black text-text-secondary group-hover:text-text-main transition-colors uppercase tracking-tight">{{ invoice.get_display_name }}</span>
+            <span class="text-[10px] text-text-muted font-bold uppercase tracking-widest">{{ invoice.get_tipo_factura_display }}</span>
+        </div>
+    </td>
+    
+    <td class="px-6 py-5">
+        <p class="text-xs font-black text-text-secondary uppercase tracking-tighter">
+            {{ invoice.fecha_emision|date:"d M Y" }}
+        </p>
+    </td>
+    
+    <td class="px-6 py-5">
+        <p class="text-sm font-black text-text-main tracking-tighter tabular-nums text-primary/80">
+            ${{ invoice.monto_total|floatformat:2 }}
+        </p>
+    </td>
+    
+    <td class="px-6 py-5">
+        <p class="text-sm font-black text-emerald-500 tabular-nums tracking-tighter">
+            Bs. {{ invoice.monto_total_bs|default:"---" }}
+        </p>
+    </td>
+    
+    <td class="px-6 py-5 text-center">
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border
+            {% if invoice.estado == 'BOR' %}bg-amber-500/10 text-amber-500 border-amber-500/20
+            {% elif invoice.estado == 'EMI' %}bg-emerald-500/10 text-emerald-500 border-emerald-500/20
+            {% elif invoice.estado == 'PAG' %}bg-blue-500/10 text-blue-500 border-blue-500/20
+            {% else %}bg-surface-base text-text-muted border-border-color{% endif %}">
+            {% if invoice.estado == 'EMI' %}<span class="size-1.5 rounded-full bg-emerald-500 animate-pulse"></span>{% endif %}
+            {{ invoice.get_estado_display }}
+        </span>
+    </td>
+    
+    <td class="px-6 py-5">
+        <div class="flex items-center justify-end gap-2">
+            <button hx-get="{% url 'finance:invoice_detail' invoice.pk %}" hx-target="#modal-content"
+                @click="$dispatch('open-modal')"
+                class="size-9 flex items-center justify-center text-text-muted hover:text-primary hover:bg-primary/10 rounded-xl transition-all border border-transparent hover:border-primary/20"
+                title="Ver Detalle / Validar">
+                <span class="material-symbols-outlined text-[20px]">visibility</span>
+            </button>
+
+            {% if invoice.estado == 'BOR' %}
+            <button hx-post="{% url 'finance:invoice_issue' invoice.pk %}"
+                hx-confirm="¿Estás seguro de emitir esta factura fiscalmente?" hx-target="#invoice-row-{{ invoice.pk }}"
+                hx-swap="outerHTML" 
+                class="size-9 flex items-center justify-center text-white bg-blue-600 hover:bg-blue-500 rounded-xl transition-all shadow-lg shadow-blue-500/20"
+                title="Emitir Factura">
+                <span class="material-symbols-outlined text-[20px]">task_alt</span>
+            </button>
+            {% endif %}
+
+            {% if invoice.archivo_pdf %}
+            <a href="{{ invoice.archivo_pdf.url }}" target="_blank"
+                class="size-9 flex items-center justify-center text-red-500 hover:bg-red-500/10 rounded-xl transition-all border border-transparent hover:border-red-500/20"
+                title="Descargar PDF">
+                <span class="material-symbols-outlined text-[20px]">picture_as_pdf</span>
+            </a>
+            {% endif %}
+        </div>
+    </td>
+</tr>

@@ -1,0 +1,83 @@
+{% load i18n humanize %}
+
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+    <!-- Boletos Procesados -->
+    <div class="card-base p-6 relative overflow-hidden group">
+        <div class="absolute right-0 top-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+            <span class="material-symbols-outlined text-8xl text-primary">confirmation_number</span>
+        </div>
+        <h3 class="text-[10px] font-black text-text-muted uppercase tracking-widest">{% trans "Boletos Procesados (Mes)" %}</h3>
+        <p class="text-3xl font-black text-primary mt-2 tracking-tighter">{{ ops_stats.boletos_mes|default:0 }}</p>
+    </div>
+
+    <!-- Ventas Creadas -->
+    <div class="card-base p-6 relative overflow-hidden group">
+        <div class="absolute right-0 top-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+            <span class="material-symbols-outlined text-8xl text-success">shopping_cart</span>
+        </div>
+        <h3 class="text-[10px] font-black text-text-muted uppercase tracking-widest">{% trans "Ventas Confirmadas (Mes)" %}</h3>
+        <p class="text-3xl font-black text-success mt-2 tracking-tighter">{{ ops_stats.ventas_mes|default:0 }}</p>
+    </div>
+
+    <!-- Pendientes -->
+    <div class="card-base p-6 relative overflow-hidden group">
+        <div class="absolute right-0 top-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+            <span class="material-symbols-outlined text-8xl text-warning">pending_actions</span>
+        </div>
+        <h3 class="text-[10px] font-black text-text-muted uppercase tracking-widest">{% trans "Boletos Pendientes" %}</h3>
+        <p class="text-3xl font-black text-warning mt-2 tracking-tighter">{{ ops_stats.boletos_pendientes|default:0 }}</p>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <!-- Top Users -->
+    <div class="card-base overflow-hidden">
+        <div class="px-6 py-4 border-b border-border-color bg-surface-base">
+            <h3 class="text-xs font-black text-text-main uppercase tracking-widest">{% trans "Top Usuarios (Venta)" %}</h3>
+        </div>
+        <ul class="divide-y divide-border-color">
+            {% for user in top_users %}
+            <li class="px-6 py-4 flex items-center justify-between hover:bg-surface-2 transition-colors">
+                <div class="flex items-center">
+                    <div class="h-10 w-10 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-primary text-xs font-black">
+                        {% if user.creado_por__username %}
+                        {{ user.creado_por__username|slice:":2"|upper }}
+                        {% else %}
+                        --
+                        {% endif %}
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-xs font-black text-text-main uppercase tracking-tighter">
+                            {% if user.creado_por__first_name or user.creado_por__last_name %}
+                            {{ user.creado_por__first_name|default:"" }} {{ user.creado_por__last_name|default:"" }}
+                            {% else %}
+                            {% trans "Usuario Desconocido" %}
+                            {% endif %}
+                        </p>
+                        <p class="text-[10px] font-bold text-text-muted uppercase tracking-widest">
+                            {% if user.creado_por__username %}
+                            @{{ user.creado_por__username }}
+                            {% else %}
+                            {% trans "Sin usuario" %}
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <p class="text-xs font-black text-text-main tracking-tighter">{{ user.total_ventas }} {% trans "ventas" %}</p>
+                    <span class="badge-success mt-1">
+                        {{ ops_stats.periodo|default:"Mes Actual" }}
+                    </span>
+                </div>
+            </li>
+            {% empty %}
+            <li class="px-6 py-12 text-center">
+                <div class="flex flex-col items-center gap-2 opacity-40">
+                    <span class="material-symbols-outlined text-4xl">group_off</span>
+                    <p class="text-xs font-black uppercase tracking-tighter">{% trans "No hay actividad registrada este mes." %}</p>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>

@@ -1,0 +1,223 @@
+{% extends 'base_modern.html' %}
+{% load humanize %}
+
+{% block title %}Ticket Intelligence — TravelHub Pro{% endblock %}
+
+{% block extra_css %}
+<style>
+    .glass-kpi {
+        background: var(--surface-1);
+        backdrop-filter: blur(8px);
+        border: 1px solid var(--border-color);
+        position: relative;
+        overflow: hidden;
+    }
+    .kpi-glow {
+        position: absolute;
+        width: 100px;
+        height: 100px;
+        background: var(--color-primary);
+        filter: blur(60px);
+        opacity: 0.1;
+        top: -50px;
+        right: -50px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<main class="min-h-screen bg-surface-base text-text-main p-8 lg:p-12">
+    <div class="max-w-[1600px] mx-auto space-y-12">
+
+        <!-- ── STRATEGIC HEADER ── -->
+        <div class="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-8 animate-fade-in">
+            <div class="space-y-2">
+                <div class="flex items-center gap-3">
+                    <div class="size-2 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.8)]"></div>
+                    <p class="text-[10px] font-black uppercase tracking-[0.3em] text-gray-500">Global Operations Control</p>
+                </div>
+                <h1 class="text-4xl lg:text-6xl font-black text-white tracking-widest uppercase">Ticket Intelligence</h1>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                <button onclick="cargarMetricas()" class="h-12 px-6 rounded-2xl bg-surface-2 border border-border-color flex items-center gap-2 hover:bg-surface-3 transition-all text-[10px] font-black uppercase tracking-widest text-text-muted">
+                    <span class="material-symbols-outlined text-[18px]">refresh</span>
+                    Refresh Data
+                </button>
+                <a href="{% url 'core:boletos_importar' %}" class="h-12 px-8 rounded-2xl bg-primary hover:bg-primary-hover text-white flex items-center gap-2 transition-all shadow-xl shadow-primary/20 text-[10px] font-black uppercase tracking-widest">
+                    <span class="material-symbols-outlined text-[18px]">add_circle</span>
+                    New Ingestion
+                </a>
+            </div>
+        </div>
+
+        {% include 'core/erp/partials/boletos_nav.html' with active_tab='boletos_dashboard' %}
+
+        <!-- ── KPI MATRIX ── -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-fade-in-up">
+            <div class="glass-kpi rounded-[32px] p-8 group">
+                <div class="kpi-glow"></div>
+                <div class="flex justify-between items-start mb-6">
+                    <span class="text-[9px] font-black uppercase tracking-[0.2em] text-gray-500">Daily Volume</span>
+                    <span class="material-symbols-outlined text-primary/40">timeline</span>
+                </div>
+                <div class="space-y-1">
+                    <h2 id="stat-hoy" class="text-5xl font-black text-white tabular-nums tracking-tighter">--</h2>
+                    <p class="text-[10px] font-bold text-gray-600 uppercase tracking-widest">Processings / 24h</p>
+                </div>
+            </div>
+
+            <div class="glass-kpi rounded-[32px] p-8 group">
+                <div class="flex justify-between items-start mb-6">
+                    <span class="text-[9px] font-black uppercase tracking-[0.2em] text-gray-500">Weekly Efficiency</span>
+                    <span class="material-symbols-outlined text-emerald-500/40">trending_up</span>
+                </div>
+                <div class="space-y-1">
+                    <h2 id="stat-semana" class="text-5xl font-black text-white tabular-nums tracking-tighter">--</h2>
+                    <p class="text-[10px] font-bold text-gray-600 uppercase tracking-widest">Normalized Units</p>
+                </div>
+            </div>
+
+            <div class="glass-kpi rounded-[32px] p-8 group">
+                <div class="flex justify-between items-start mb-6">
+                    <span class="text-[9px] font-black uppercase tracking-[0.2em] text-gray-500">Monthly Aggregated</span>
+                    <span class="material-symbols-outlined text-violet-500/40">dataset_linked</span>
+                </div>
+                <div class="space-y-1">
+                    <h2 id="stat-mes" class="text-5xl font-black text-white tabular-nums tracking-tighter">--</h2>
+                    <p class="text-[10px] font-bold text-gray-600 uppercase tracking-widest">Total GDS Records</p>
+                </div>
+            </div>
+
+            <div class="glass-kpi rounded-[32px] p-8 border-amber-500/20 group relative overflow-hidden">
+                <div class="absolute inset-0 bg-amber-500/5 animate-pulse-slow"></div>
+                <div class="relative z-10">
+                    <div class="flex justify-between items-start mb-6">
+                        <span class="text-[9px] font-black uppercase tracking-[0.2em] text-amber-500">Critical Review</span>
+                        <span class="material-symbols-outlined text-amber-500/80 animate-bounce">warning</span>
+                    </div>
+                    <div class="space-y-1">
+                        <h2 id="stat-pendientes" class="text-5xl font-black text-amber-500 tabular-nums tracking-tighter">--</h2>
+                        <p class="text-[10px] font-bold text-amber-900 uppercase tracking-widest">Awaiting Validation</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── INSIGHTS CORE ── -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
+            
+            <!-- RANKING: CARRIER INTELLIGENCE -->
+            <div class="lg:col-span-8 space-y-6 animate-fade-in-up" style="animation-delay: 0.1s">
+                <div class="flex items-center justify-between px-2">
+                    <h3 class="text-xs font-black uppercase tracking-[0.3em] text-gray-400">Carrier Distribution</h3>
+                    <div class="flex items-center gap-2">
+                        <span class="size-2 rounded-full bg-primary/40"></span>
+                        <span class="text-[9px] font-bold text-gray-600 uppercase">Volume Weight</span>
+                    </div>
+                </div>
+
+                <div class="glass-kpi rounded-[40px] p-10 lg:p-14 border-white/5 space-y-8" id="top-airlines-list">
+                    <!-- Dynamic Loads Here -->
+                </div>
+            </div>
+
+            <!-- SYSTEM STATUS & HEALTH -->
+            <div class="lg:col-span-4 space-y-8 animate-fade-in-up" style="animation-delay: 0.2s">
+                <div class="px-2 pb-2">
+                    <h3 class="text-xs font-black uppercase tracking-[0.3em] text-gray-400">Engine Health</h3>
+                </div>
+
+                <div class="space-y-6">
+                    <div class="p-8 rounded-[32px] bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] transition-all group">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center gap-4">
+                                <div class="size-12 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-500">
+                                    <span class="material-symbols-outlined text-[24px]">troubleshoot</span>
+                                </div>
+                                <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Extraction Errs</p>
+                            </div>
+                            <span id="stat-errores" class="text-2xl font-black text-white">--</span>
+                        </div>
+                        <div class="w-full bg-gray-900 h-1.5 rounded-full overflow-hidden">
+                            <div class="bg-rose-500 h-full" style="width: 5%"></div>
+                        </div>
+                    </div>
+
+                    <div class="p-8 rounded-[32px] bg-surface-1 border border-border-color hover:bg-surface-2 transition-all group">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center gap-4">
+                                <div class="size-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500">
+                                    <span class="material-symbols-outlined text-[24px]">description</span>
+                                </div>
+                                <p class="text-[10px] font-black text-text-muted uppercase tracking-widest">Unlinked Docs</p>
+                            </div>
+                            <span id="stat-pendientes-2" class="text-2xl font-black text-text-main">--</span>
+                        </div>
+                        <div class="w-full bg-surface-base h-1.5 rounded-full overflow-hidden">
+                            <div class="bg-amber-500 h-full" style="width: 15%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FAST ACCESS GRID -->
+                <div class="grid grid-cols-2 gap-4">
+                    <a href="{% url 'core:boletos_busqueda' %}" class="h-24 rounded-3xl bg-white/[0.02] border border-white/5 flex flex-col items-center justify-center gap-2 hover:bg-primary/10 hover:border-primary/20 transition-all group">
+                        <span class="material-symbols-outlined text-gray-600 group-hover:text-primary transition-colors">manage_search</span>
+                        <span class="text-[8px] font-black uppercase tracking-widest text-gray-500">Audit Log</span>
+                    </a>
+                    <a href="{% url 'core:boletos_reportes' %}" class="h-24 rounded-3xl bg-white/[0.02] border border-white/5 flex flex-col items-center justify-center gap-2 hover:bg-violet-500/10 hover:border-violet-500/20 transition-all group">
+                        <span class="material-symbols-outlined text-gray-600 group-hover:text-violet-500 transition-colors">bar_chart</span>
+                        <span class="text-[8px] font-black uppercase tracking-widest text-gray-500">Financials</span>
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</main>
+{% endblock %}
+
+{% block extra_scripts %}
+<script nonce="{{ request.csp_nonce }}">
+    document.addEventListener('DOMContentLoaded', cargarMetricas);
+
+    async function cargarMetricas() {
+        try {
+            const response = await fetch('/api/boletos/dashboard-stats/');
+            const data = await response.json();
+
+            document.getElementById('stat-hoy').textContent = data.procesados.hoy;
+            document.getElementById('stat-semana').textContent = data.procesados.semana;
+            document.getElementById('stat-mes').textContent = data.procesados.mes;
+            document.getElementById('stat-pendientes').textContent = data.pendientes;
+            document.getElementById('stat-pendientes-2').textContent = data.pendientes;
+            document.getElementById('stat-errores').textContent = data.errores;
+
+            const list = document.getElementById('top-airlines-list');
+            if (data.top_aerolineas && data.top_aerolineas.length > 0) {
+                const max = data.top_aerolineas[0].cantidad;
+                list.innerHTML = data.top_aerolineas.map((a, i) => {
+                    const pct = Math.max(5, (a.cantidad / max) * 100);
+                    return `
+                    <div class="space-y-4 group">
+                        <div class="flex justify-between items-end">
+                            <div class="flex items-center gap-4">
+                                <span class="text-[10px] font-black text-gray-700 w-4">${i+1}</span>
+                                <span class="text-sm font-black text-white uppercase tracking-tighter">${a.aerolinea_emisora || 'UNKNOWN'}</span>
+                            </div>
+                            <span class="text-[11px] font-black text-primary tabular-nums">${a.cantidad} UNITS</span>
+                        </div>
+                        <div class="h-3 w-full bg-white/5 rounded-full overflow-hidden p-0.5 border border-white/5">
+                            <div class="h-full bg-gradient-to-r from-primary/50 to-primary rounded-full transition-all duration-1000 ease-out shadow-[0_0_15px_rgba(var(--color-primary-rgb),0.3)]" style="width: ${pct}%"></div>
+                        </div>
+                    </div>`;
+                }).join('');
+            } else {
+                list.innerHTML = `<div class="py-20 text-center opacity-20"><span class="material-symbols-outlined text-6xl">insights</span><p class="text-[10px] font-black uppercase mt-4">Analyzing Market Data...</p></div>`;
+            }
+
+        } catch (e) { console.error(e); }
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,207 @@
+{% extends 'base_modern.html' %}
+{% block title %}{% if form.instance.pk %}Editar Cotización #{{ form.instance.numero_cotizacion }}{% else %}Nueva Cotización{% endif %}{% endblock %}
+
+{% block extra_head %}
+<!-- Form styling overrides to apply Tailwind input-base to Django generated inputs -->
+<style type="text/tailwindcss">
+    @layer components {
+        input[type="text"], input[type="number"], input[type="date"], input[type="email"], select, textarea { 
+            @apply input-base;
+        }
+        textarea {
+            @apply h-auto py-3;
+        }
+        select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.75rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<form method="post" id="cotizacionForm" hx-post="{% url 'core:cotizacion_htmx_calcular' %}" hx-trigger="change from:.item-row input, change from:.item-row select, change from:select[name='moneda'], change from:input[name$='-DELETE'] delay:100ms" hx-target="#summary-panel" hx-swap="outerHTML">
+{% csrf_token %}
+<main class="flex-1 w-full max-w-[1400px] mx-auto p-6 md:p-8 lg:p-10 relative">
+
+    <!-- Page Title & Breadcrumb -->
+    <div class="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+            <div class="flex items-center gap-2 text-[10px] text-text-secondary font-black mb-2 uppercase tracking-widest">
+                <span>Cotizaciones</span>
+                <span class="material-symbols-outlined text-[10px]">chevron_right</span>
+                <span class="text-primary">{% if form.instance.pk %}Editar Cotización{% else %}Nuevo Itinerario{% endif %}</span>
+            </div>
+            <h1 class="text-4xl font-bold text-text-main tracking-tight">{% if form.instance.pk %}Cotización #{{ form.instance.numero_cotizacion }}{% else %}Crear Cotización{% endif %}</h1>
+            <p class="text-text-muted mt-2 text-lg">Borrador de itinerario de viaje detallado y desglose de costos.</p>
+        </div>
+        <div class="flex gap-3">
+            <button type="button" class="btn-secondary">
+                <span class="material-symbols-outlined text-[18px]">history</span> Historial
+            </button>
+            <button type="submit" class="btn-primary">
+                <span class="material-symbols-outlined text-[18px]">save</span> Confirmar Cotización
+            </button>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        
+        <!-- Left Column: Form -->
+        <div class="lg:col-span-8 flex flex-col gap-8">
+            
+            <!-- Section 1: Client Details -->
+            <section class="card-base p-6 md:p-8">
+                <div class="flex items-center gap-3 mb-6 border-b border-border-color pb-4">
+                    <div class="size-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
+                        <span class="material-symbols-outlined">domain</span>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-text-main">Información del Cliente</h3>
+                        <p class="text-xs text-text-muted">Contacto principal para este itinerario</p>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="text-xs font-black text-text-secondary uppercase tracking-wider">Cliente / Empresa</label>
+                        {{ form.cliente }}
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-xs font-black text-text-secondary uppercase tracking-wider flex items-center gap-2">Cliente Manual (Prospecto) <span class="bg-primary/20 text-primary text-[10px] px-2 py-0.5 rounded-full font-bold">Opcional</span></label>
+                        {{ form.nombre_cliente_manual }}
+                    </div>
+                    <div class="space-y-2 md:col-span-2">
+                        <label class="text-xs font-black text-text-secondary uppercase tracking-wider">Descripción Breve / Título</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted material-symbols-outlined text-[18px]">edit_note</span>
+                            <div class="pl-8">
+                                {{ form.descripcion_general }}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-2 md:col-span-2 md:grid md:grid-cols-3 gap-6">
+                        <div class="space-y-2">
+                            <label class="text-xs font-black text-text-secondary uppercase tracking-wider">Destino</label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted material-symbols-outlined text-[18px]">location_on</span>
+                                <div class="pl-8">
+                                    {{ form.destino }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-xs font-black text-text-secondary uppercase tracking-wider">Moneda</label>
+                            {{ form.moneda }}
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-xs font-black text-text-secondary uppercase tracking-wider">Válida Hasta</label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted material-symbols-outlined text-[18px]">calendar_today</span>
+                                <div class="pl-8">
+                                    {{ form.fecha_validez }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 2: Itinerario y Servicios (Formset) -->
+            <section class="card-base p-6 md:p-8">
+                <div class="flex items-center justify-between mb-6 border-b border-border-color pb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="size-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500 border border-blue-500/20">
+                            <span class="material-symbols-outlined">explore</span>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-text-main">Conceptos del Itinerario</h3>
+                            <p class="text-[10px] text-text-muted uppercase tracking-widest mt-0.5">Global Distribution System, Hoteles y Seguros</p>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-secondary !py-1 !px-3 !text-[11px]"
+                        hx-get="{% url 'core:cotizacion_htmx_add_item' %}" 
+                        hx-vals='javascript:{"index": document.getElementById("id_items_cotizacion-TOTAL_FORMS").value}' 
+                        hx-target="#items-container" 
+                        hx-swap="beforeend">
+                        <span class="material-symbols-outlined text-[16px]">add_circle</span> Añadir Concepto
+                    </button>
+                </div>
+
+                <div id="items-container" class="flex flex-col gap-4">
+                    {{ items_formset.management_form }}
+                    {% for form in items_formset %}
+                        {% include "core/erp/cotizaciones/partials/_item_row.html" %}
+                    {% endfor %}
+                </div>
+            </section>
+
+            <!-- Section 3: Condiciones y Notas -->
+            <section class="card-base p-6 md:p-8">
+                <div class="flex items-center gap-3 mb-6 border-b border-border-color pb-4">
+                    <div class="size-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
+                        <span class="material-symbols-outlined">description</span>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-text-main">Condiciones y Notas</h3>
+                        <p class="text-xs text-text-muted italic">Términos visibles y notas privadas del sistema</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 gap-6">
+                    <div class="space-y-2">
+                        <label class="text-xs font-black text-text-secondary uppercase tracking-widest">Condiciones Comerciales <span class="text-[10px] uppercase text-primary font-bold tracking-wider ml-1 bg-primary/10 px-2 py-0.5 rounded">Visible al Cliente</span></label>
+                        {{ form.condiciones_comerciales }}
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-xs font-black text-text-secondary uppercase tracking-widest">Notas Internas <span class="text-[10px] uppercase text-red-400 font-bold tracking-wider ml-1 bg-red-500/10 px-2 py-0.5 rounded">Oculto</span></label>
+                        {{ form.notas_internas }}
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Right Column: Cost Summary Sidebar -->
+        <div class="lg:col-span-4 sticky top-24">
+            <div class="card-base overflow-hidden flex flex-col shadow-2xl border-2 border-primary/10 bg-surface-1">
+                <!-- Header -->
+                <div class="p-6 bg-surface-2 border-b border-border-color relative overflow-hidden group/side">
+                    <div class="absolute -right-2 -top-2 size-20 bg-primary/5 rounded-full blur-2xl group-hover/side:size-24 transition-all"></div>
+                    <h3 class="text-lg font-black text-text-main mb-1 relative z-10 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary">analytics</span>
+                        Resumen de Costos
+                    </h3>
+                    <p class="text-[10px] text-text-muted font-black tracking-widest uppercase relative z-10">REF. #COT-{% if form.instance.pk %}{{ form.instance.numero_cotizacion }}{% else %}DRAFT{% endif %}</p>
+                    <input type="hidden" name="cotizacion_id" value="{{ form.instance.pk|default:'' }}">
+                </div>
+                
+                <!-- HTMX Injected Panel -->
+                {% include "core/erp/cotizaciones/partials/_summary.html" %}
+                
+            </div>
+            
+            <!-- Helper Card -->
+            <div class="mt-6 bg-surface-2 border border-border-color rounded-2xl p-6 relative overflow-hidden group">
+                <div class="absolute -right-4 -top-4 text-primary/5">
+                    <span class="material-symbols-outlined text-[100px] group-hover:rotate-12 transition-transform duration-500">auto_awesome</span>
+                </div>
+                <div class="relative z-10">
+                    <h4 class="text-text-main font-bold mb-2 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary text-sm animate-pulse">smart_toy</span>
+                        TravelHub AI Assistant
+                    </h4>
+                    <p class="text-[11px] text-text-muted leading-relaxed mb-4">Los datos financieros son autocalculados. Asegúrese de guardar los cambios para actualizar el PDF oficial y el link de cliente.</p>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+</main>
+</form>
+
+{% endblock %}

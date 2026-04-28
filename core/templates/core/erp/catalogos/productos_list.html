@@ -1,0 +1,116 @@
+{% extends "base_modern.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Productos y Servicios" %} - TravelHub{% endblock %}
+
+{% block content %}
+<div class="p-6">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+        <div>
+            <div class="flex items-center gap-2 text-gray-500 text-sm mb-1">
+                <a href="{% url 'core:catalogos_center' %}" class="hover:text-white transition-colors">{% trans "Centro
+                    de Catálogos" %}</a>
+                <span>/</span>
+                <span class="text-gray-300">{% trans "Servicios Genéricos" %}</span>
+            </div>
+            <h1 class="text-3xl font-bold text-white">{% trans "Catálogo de Servicios" %}</h1>
+        </div>
+        <div class="flex items-center gap-3">
+            <form method="get" class="relative">
+                <input type="text" name="q" value="{{ request.GET.q|default:'' }}" placeholder="{% trans 'Buscar...' %}"
+                    class="bg-white/5 border border-white/10 rounded-xl py-2 pl-10 pr-4 text-white focus:ring-2 focus:ring-emerald-500 transition-all">
+                <svg class="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" fill="none"
+                    stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+            </form>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for producto in productos %}
+        <div
+            class="glass-panel p-6 rounded-2xl hover:border-emerald-500/40 transition-all group relative overflow-hidden">
+            <div
+                class="absolute top-4 right-4 text-[10px] font-bold uppercase tracking-tighter px-2 py-0.5 bg-white/5 text-gray-500 rounded">
+                {{ producto.get_tipo_producto_display }}
+            </div>
+            <div class="flex items-center gap-4 mb-6">
+                <div class="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center text-emerald-400">
+                    {% if producto.tipo_producto == 'AIR' %}
+                    <i data-lucide="plane" class="w-6 h-6"></i>
+                    {% elif producto.tipo_producto == 'HTL' %}
+                    <i data-lucide="building" class="w-6 h-6"></i>
+                    {% elif producto.tipo_producto == 'ASS' %}
+                    <i data-lucide="shield-check" class="w-6 h-6"></i>
+                    {% else %}
+                    <i data-lucide="package" class="w-6 h-6"></i>
+                    {% endif %}
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold text-white leading-tight">{{ producto.nombre }}</h3>
+                    <p class="text-xs text-gray-500 font-mono">{{ producto.codigo_interno }}</p>
+                </div>
+            </div>
+
+            <div class="space-y-3 mb-6">
+                <div class="flex justify-between text-xs">
+                    <span class="text-gray-500">{% trans "Proveedor Principal" %}</span>
+                    <span class="text-gray-300">{{ producto.proveedor_principal.nombre|default:"N/A" }}</span>
+                </div>
+                <div class="flex justify-between text-xs">
+                    <span class="text-gray-500">{% trans "Moneda Ref." %}</span>
+                    <span class="text-gray-300 font-bold">{{ producto.moneda_referencial.codigo_iso|default:"USD"
+                        }}</span>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-between pt-4 border-t border-white/5">
+                <div class="flex items-center gap-2">
+                    {% if producto.activo %}
+                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                    <span class="text-[10px] text-gray-400 uppercase font-bold">{% trans "Activo" %}</span>
+                    {% else %}
+                    <span class="w-2 h-2 rounded-full bg-red-500"></span>
+                    <span class="text-[10px] text-gray-400 uppercase font-bold">{% trans "Inactivo" %}</span>
+                    {% endif %}
+                </div>
+                <a href="/admin/core/productoservicio/{{ producto.pk }}/change/"
+                    class="text-gray-400 hover:text-white transition-colors">
+                    <i data-lucide="external-link" class="w-4 h-4"></i>
+                </a>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-span-full py-12 text-center glass-panel rounded-2xl">
+            <h3 class="text-gray-500">{% trans "No hay productos registrados en esta categoría." %}</h3>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <div class="flex justify-center gap-4 mt-8">
+        {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}"
+            class="px-4 py-2 bg-white/5 rounded-xl text-gray-400 hover:text-white transition-all">{% trans "Anterior"
+            %}</a>
+        {% endif %}
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}"
+            class="px-4 py-2 bg-white/5 rounded-xl text-gray-400 hover:text-white transition-all">{% trans "Siguiente"
+            %}</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        lucide.createIcons();
+    });
+</script>
+{% endblock %}

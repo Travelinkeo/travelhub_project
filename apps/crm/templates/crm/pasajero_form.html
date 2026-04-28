@@ -1,0 +1,352 @@
+{% extends 'base_modern.html' %}
+{% load static %}
+
+{% block title %}{% if form.instance.pk %}Editar Pasajero{% else %}Nuevo Pasajero{% endif %} | TravelHub Pro{% endblock %}
+
+{% block content %}
+<main class="w-full max-w-4xl mx-auto p-6 md:p-10 space-y-10">
+
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 pb-8 border-b border-border-color">
+        <div>
+            <div class="flex items-center gap-2 text-[10px] text-text-secondary font-black mb-3 uppercase tracking-widest">
+                <span>CRM</span>
+                <span class="material-symbols-outlined text-[10px]">chevron_right</span>
+                <span class="text-primary">Pasajeros</span>
+            </div>
+            <h1 class="text-4xl font-black text-text-main tracking-tight leading-none">
+                {% if form.instance.pk %}Editar Pasajero{% else %}Nuevo Pasajero{% endif %}
+            </h1>
+            <p class="text-text-muted mt-3 text-lg">Gestiona la información detallada para emisión de boletos.</p>
+        </div>
+        <a href="{% url 'crm:pasajero_list' %}" class="btn-secondary !py-2.5 !px-5 group/back">
+            <span class="material-symbols-outlined text-[18px] group-hover:-translate-x-1 transition-transform">arrow_back</span> 
+            <span>Volver</span>
+        </a>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" class="space-y-8">
+        {% csrf_token %}
+
+        {% if form.errors %}
+        <div class="bg-red-500/10 border border-red-500/20 rounded-2xl p-5 flex items-start gap-4 animate-shake">
+            <span class="material-symbols-outlined text-red-500 text-[24px]">report</span>
+            <div class="space-y-1">
+                <p class="text-sm font-black text-red-400 uppercase tracking-wider">Errores en el formulario</p>
+                <div class="text-xs text-text-secondary leading-relaxed opacity-80">{{ form.errors }}</div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- OCR DROPAREA (SaaS V.1 - MAGIC ONBOARDING) -->
+        <div x-data="idScanner()" class="relative">
+            <div 
+                @dragover.prevent="droping = true" 
+                @dragleave.prevent="droping = false" 
+                @drop.prevent="handleDrop($event)"
+                :class="{'border-primary bg-primary/5 scale-[1.01]': droping || loading, 'border-border-color bg-surface-2': !droping && !loading}"
+                class="card-base p-6 border-2 border-dashed flex flex-col items-center justify-center gap-4 transition-all duration-300 relative overflow-hidden group/ocr"
+            >
+                <div x-show="loading" class="absolute inset-0 bg-surface-1/80 backdrop-blur-sm z-50 flex flex-col items-center justify-center gap-4">
+                    <div class="size-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+                    <p class="text-xs font-black uppercase tracking-[0.2em] text-primary animate-pulse">Escaneando Documento con IA...</p>
+                </div>
+
+                <div class="flex items-center gap-6 w-full opacity-80 group-hover/ocr:opacity-100 transition-opacity">
+                    <div class="size-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
+                        <span class="material-symbols-outlined text-[32px]">dock_to_left</span>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-base font-black text-text-main leading-tight">Onboarding Mágico (OCR)</h3>
+                        <p class="text-xs text-text-muted mt-1 leading-relaxed">Arrastra la Cédula aquí para autocompletar nombres, apellidos y recortar la foto automáticamente.</p>
+                    </div>
+                    <label class="btn-primary !py-2 !px-5 cursor-pointer flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[18px]">add_a_photo</span>
+                        <span class="text-[11px] font-black uppercase">Escanear</span>
+                        <input type="file" @change="handleFile($event)" accept="image/*" class="hidden">
+                    </label>
+                </div>
+            </div>
+            
+            <!-- Toast Notification (Alpine) -->
+            <div x-show="message" x-transition class="fixed bottom-10 right-10 z-[100] bg-surface-1 border border-border-color p-4 rounded-2xl shadow-2xl flex items-center gap-4 animate-bounce-in">
+                <div class="size-10 rounded-full bg-green-500/10 text-green-500 flex items-center justify-center">
+                    <span class="material-symbols-outlined">check_circle</span>
+                </div>
+                <p class="text-sm font-bold text-text-main" x-text="message"></p>
+            </div>
+        </div>
+
+        <!-- Perfil y Datos Principales -->
+        <section class="card-base p-8 relative overflow-hidden group">
+            <div class="absolute -right-20 -top-20 size-60 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/10 transition-colors"></div>
+            
+            <div class="flex items-center gap-4 mb-8 pb-4 border-b border-border-color relative z-10">
+                <div class="size-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
+                    <span class="material-symbols-outlined text-[28px]">person</span>
+                </div>
+                <div>
+                    <h2 class="text-xl font-black text-text-main tracking-tight">Información de Identidad</h2>
+                    <p class="text-[11px] text-text-muted uppercase font-black tracking-widest mt-0.5">Datos obligatorios para GDS</p>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-10 relative z-10">
+                <!-- Foto de Perfil -->
+                <div class="md:col-span-3 flex flex-col items-center gap-5">
+                    <div class="relative group/avatar cursor-pointer">
+                        <div class="w-36 h-36 rounded-[32px] bg-surface-2 border-2 border-dashed border-border-color flex items-center justify-center overflow-hidden transition-all group-hover/avatar:border-primary shadow-inner">
+                            {% if form.instance.foto_perfil %}
+                            <img src="{{ form.instance.foto_perfil.url }}" id="preview-image" class="w-full h-full object-cover">
+                            {% else %}
+                            <div class="flex flex-col items-center text-text-muted group-hover/avatar:text-primary transition-colors">
+                                <span class="material-symbols-outlined text-[48px]">account_circle</span>
+                                <span class="text-[10px] font-black uppercase tracking-widest mt-2">Subir Foto</span>
+                            </div>
+                            <img id="preview-image" class="w-full h-full object-cover hidden">
+                            {% endif %}
+                        </div>
+                        <div class="absolute inset-0 opacity-0 cursor-pointer">
+                            {{ form.foto_perfil }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Campos de texto -->
+                <div class="md:col-span-9 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-6">
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black text-text-secondary uppercase tracking-widest ml-1">Nombres *</label>
+                        {{ form.nombres }}
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black text-text-secondary uppercase tracking-widest ml-1">Apellidos *</label>
+                        {{ form.apellidos }}
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black text-text-secondary uppercase tracking-widest ml-1">Cédula de Identidad *</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted material-symbols-outlined text-[18px] z-10">badge</span>
+                            <div class="relative">
+                                {{ form.cedula_identidad }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black text-text-secondary uppercase tracking-widest ml-1">Pasaporte (Obligatorio Int.)</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted material-symbols-outlined text-[18px] z-10">travel_explore</span>
+                            <div class="relative">
+                                {{ form.numero_pasaporte }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black text-text-secondary uppercase tracking-widest ml-1">Fecha de Nacimiento</label>
+                        {{ form.fecha_nacimiento }}
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black text-text-secondary uppercase tracking-widest ml-1">Nacionalidad</label>
+                        {{ form.nacionalidad }}
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Pasaporte y Global Info -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <section class="card-base p-8 space-y-6">
+                <div class="flex items-center gap-3 border-b border-border-color pb-4">
+                    <div class="size-10 rounded-xl bg-orange-500/10 flex items-center justify-center text-orange-500 border border-orange-500/20">
+                        <span class="material-symbols-outlined">public</span>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-black text-text-main uppercase tracking-widest">Documentación</h3>
+                        <p class="text-[11px] text-text-muted italic">Emisión y vencimientos</p>
+                    </div>
+                </div>
+
+                <div class="space-y-5">
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black text-text-secondary uppercase tracking-widest ml-1">País de Emisión</label>
+                        {{ form.pais_emision_documento }}
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black text-text-secondary uppercase tracking-widest ml-1">Vencimiento Pasaporte</label>
+                        {{ form.fecha_vencimiento_documento }}
+                    </div>
+                </div>
+            </section>
+
+            <section class="card-base p-8 space-y-6">
+                <div class="flex items-center gap-3 border-b border-border-color pb-4">
+                    <div class="size-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500 border border-blue-500/20">
+                        <span class="material-symbols-outlined">contact_emergency</span>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-black text-text-main uppercase tracking-widest">Contacto Directo</h3>
+                        <p class="text-[11px] text-text-muted italic">Canales de comunicación</p>
+                    </div>
+                </div>
+
+                <div class="space-y-5">
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black text-text-secondary uppercase tracking-widest ml-1">Correo Electrónico</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted material-symbols-outlined text-[18px] z-10">mail</span>
+                            {{ form.email }}
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black text-text-secondary uppercase tracking-widest ml-1">Teléfono</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted material-symbols-outlined text-[18px] z-10">phone_iphone</span>
+                            {{ form.telefono }}
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        {% if form.cliente %}
+        <section class="card-base p-8 bg-surface-2/30 border-dashed">
+            <h3 class="text-sm font-black text-text-main uppercase tracking-widest mb-4 flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary">link</span>
+                Cliente Principal Vinculado
+            </h3>
+            <div class="space-y-2">
+                {{ form.cliente }}
+                <p class="text-[10px] text-text-muted italic mt-1">Este pasajero estará asociado a la cuenta de facturación seleccionada.</p>
+            </div>
+        </section>
+        {% endif %}
+
+        <!-- Acciones -->
+        <div class="flex flex-col md:flex-row justify-end items-center gap-5 pt-8 border-t border-border-color">
+            <a href="{% url 'crm:pasajero_list' %}"
+                class="btn-secondary !h-12 !px-12 w-full md:w-auto">
+                Descartar Cambios
+            </a>
+            <button type="submit"
+                class="btn-primary !h-12 !px-14 shadow-lg shadow-primary/20 flex items-center justify-center gap-3 group/save w-full md:w-auto">
+                <span class="text-lg">Guardar Pasajero</span>
+                <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">send</span>
+            </button>
+        </div>
+    </form>
+</main>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+<script>
+    function idScanner() {
+        return {
+            loading: false,
+            droping: false,
+            message: '',
+            
+            async processImage(file) {
+                this.loading = true;
+                this.message = '';
+                
+                const formData = new FormData();
+                formData.append('image', file);
+                
+                try {
+                    const response = await fetch('/api/crm/cedula-scanner/', {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRFToken': '{{ csrf_token }}'
+                        }
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.status === 'success') {
+                        const d = result.data;
+                        
+                        // Autocompletar solo si el valor existe y no está vacío
+                        const setField = (name, val) => {
+                            if (val !== null && val !== undefined && String(val).trim() !== '' && String(val) !== '0') {
+                                const el = document.querySelector(`[name="${name}"]`);
+                                if (el) el.value = String(val).trim();
+                            }
+                        };
+                        
+                        setField('nombres', d.nombres);
+                        setField('apellidos', d.apellidos);
+                        setField('cedula_identidad', d.cedula);
+                        setField('fecha_nacimiento', d.fecha_nacimiento);
+                        
+                        // Actualizar foto — ignorar face_None.jpg
+                        if (d.foto_url && !d.foto_url.includes('face_None')) {
+                            const preview = document.getElementById('preview-image');
+                            const placeholder = document.querySelector('.flex-col.items-center.text-text-muted');
+                            if (preview) {
+                                preview.src = d.foto_url;
+                                preview.classList.remove('hidden');
+                            }
+                            if (placeholder) placeholder.classList.add('hidden');
+                        }
+                        
+                        const filled = [d.nombres, d.apellidos, d.cedula].filter(v => v && String(v).trim() !== '' && String(v) !== '0').length;
+                        this.message = filled > 0 ? `¡Datos extraídos: ${filled} campo(s) completado(s)!` : '📷 Foto capturada. Completa los datos manualmente.';
+                        setTimeout(() => this.message = '', 5000);
+                    } else {
+                        alert('Error: ' + (result.error || 'No se pudo procesar la imagen'));
+                    }
+                } catch (e) {
+                    console.error(e);
+                    alert('Error en la conexión con el servidor de IA.');
+                } finally {
+                    this.loading = false;
+                }
+            },
+            
+            handleFile(e) {
+                const file = e.target.files[0];
+                if (file) this.processImage(file);
+            },
+            
+            handleDrop(e) {
+                this.droping = false;
+                const file = e.dataTransfer.files[0];
+                if (file) this.processImage(file);
+            }
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        // Estilo para todos los widgets de Django
+        const inputs = document.querySelectorAll('input, select, textarea');
+        inputs.forEach(el => {
+            if (el.type !== 'file' && el.type !== 'checkbox') {
+                el.classList.add('input-base');
+            }
+            // Hack para inputs con icono
+            if(el.closest('.relative')?.querySelector('.material-symbols-outlined')) {
+                el.classList.add('!pl-10');
+            }
+        });
+
+        // Preview para foto de perfil
+        const fileInput = document.querySelector('input[name="foto_perfil"]');
+        if(fileInput) {
+            fileInput.addEventListener('change', function(e) {
+                if (this.files && this.files[0]) {
+                    var reader = new FileReader();
+                    reader.onload = function (e) {
+                        const preview = document.getElementById('preview-image');
+                        const avatarPlaceholder = document.querySelector('.flex-col.items-center.text-text-muted');
+                        preview.src = e.target.result;
+                        preview.classList.remove('hidden');
+                        if (avatarPlaceholder) avatarPlaceholder.classList.add('hidden');
+                    }
+                    reader.readAsDataURL(this.files[0]);
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

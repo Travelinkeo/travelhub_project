@@ -1,0 +1,256 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Ventas de Boletos</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; padding: 20px; }
+        .container { max-width: 1400px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        h1 { color: #2c3e50; margin-bottom: 20px; font-size: 24px; }
+        
+        /* Filtros */
+        .filters { background: #f8f9fa; padding: 15px; border-radius: 6px; margin-bottom: 20px; display: flex; gap: 15px; flex-wrap: wrap; }
+        .filters input { padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; }
+        .filters button { background: #007bff; color: white; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; font-weight: 500; }
+        .filters button:hover { background: #0056b3; }
+        
+        /* Estadísticas */
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .stat-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 8px; }
+        .stat-card h3 { font-size: 14px; opacity: 0.9; margin-bottom: 8px; }
+        .stat-card p { font-size: 24px; font-weight: bold; }
+        
+        /* Tabla */
+        .table-container { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th { background: #2c3e50; color: white; padding: 12px 8px; text-align: left; font-weight: 600; position: sticky; top: 0; }
+        td { padding: 10px 8px; border-bottom: 1px solid #e9ecef; }
+        tr:hover { background: #f8f9fa; }
+        
+        /* Campos editables */
+        .editable { background: #fff3cd; border: 1px solid #ffc107; padding: 4px 8px; border-radius: 3px; min-width: 80px; text-align: right; }
+        .editable:focus { outline: 2px solid #ffc107; background: white; }
+        
+        /* Estados */
+        .status { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+        .status-PEN { background: #ffc107; color: #000; }
+        .status-PAG { background: #28a745; color: white; }
+        .status-COM { background: #17a2b8; color: white; }
+        
+        /* Pasajeros */
+        .passengers { font-size: 12px; color: #6c757d; }
+        .passenger-type { background: #e9ecef; padding: 2px 6px; border-radius: 3px; font-size: 10px; margin-left: 4px; }
+        
+        /* Acciones */
+        .btn-save { background: #28a745; color: white; border: none; padding: 4px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+        .btn-save:hover { background: #218838; }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .filters { flex-direction: column; }
+            .stats { grid-template-columns: 1fr; }
+            table { font-size: 11px; }
+            th, td { padding: 6px 4px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 Dashboard de Ventas de Boletos</h1>
+        
+        <!-- Filtros -->
+        <div class="filters">
+            <input type="text" id="filterLocalizador" placeholder="🔍 Buscar por localizador...">
+            <input type="date" id="filterFechaDesde" placeholder="Fecha desde">
+            <input type="date" id="filterFechaHasta" placeholder="Fecha hasta">
+            <button onclick="aplicarFiltros()">Buscar</button>
+            <button onclick="limpiarFiltros()" style="background: #6c757d;">Limpiar</button>
+        </div>
+        
+        <!-- Estadísticas -->
+        <div class="stats">
+            <div class="stat-card">
+                <h3>Total Ventas</h3>
+                <p id="statVentas">0</p>
+            </div>
+            <div class="stat-card">
+                <h3>Total Boletos</h3>
+                <p id="statBoletos">0</p>
+            </div>
+            <div class="stat-card">
+                <h3>Ingresos</h3>
+                <p id="statIngresos">$0.00</p>
+            </div>
+            <div class="stat-card">
+                <h3>Margen</h3>
+                <p id="statMargen">$0.00</p>
+            </div>
+        </div>
+        
+        <!-- Tabla de Ventas -->
+        <div class="table-container">
+            <table id="ventasTable">
+                <thead>
+                    <tr>
+                        <th>Localizador</th>
+                        <th>Nº Boleto</th>
+                        <th>Fecha</th>
+                        <th>Cliente</th>
+                        <th>Pasajeros</th>
+                        <th>Aerolínea</th>
+                        <th>Proveedor</th>
+                        <th>Boletos</th>
+                        <th>Total</th>
+                        <th>Costo</th>
+                        <th>Fee Prov.</th>
+                        <th>Comisión</th>
+                        <th>Fee Agencia</th>
+                        <th>Margen</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="ventasBody">
+                    <tr>
+                        <td colspan="15" style="text-align: center; padding: 40px; color: #6c757d;">
+                            Cargando datos...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        let ventasData = [];
+        
+        // Cargar datos al iniciar
+        window.addEventListener('DOMContentLoaded', () => {
+            cargarVentas();
+        });
+        
+        async function cargarVentas(filtros = {}) {
+            try {
+                const params = new URLSearchParams(filtros);
+                const response = await fetch(`/api/ventas-boletos/?${params}`);
+                const data = await response.json();
+                
+                ventasData = data.ventas;
+                actualizarEstadisticas(data.stats);
+                renderizarTabla(data.ventas);
+            } catch (error) {
+                console.error('Error al cargar ventas:', error);
+                alert('Error al cargar los datos. Por favor, recarga la página.');
+            }
+        }
+        
+        function actualizarEstadisticas(stats) {
+            document.getElementById('statVentas').textContent = stats.total_ventas;
+            document.getElementById('statBoletos').textContent = stats.total_boletas;
+            document.getElementById('statIngresos').textContent = `$${stats.total_ingresos.toFixed(2)}`;
+            document.getElementById('statMargen').textContent = `$${stats.total_margen.toFixed(2)}`;
+        }
+        
+        function renderizarTabla(ventas) {
+            const tbody = document.getElementById('ventasBody');
+            
+            if (ventas.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="15" style="text-align:center; padding:40px; color:#6c757d;">No se encontraron ventas</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = ventas.map(venta => {
+                const pasajeros = venta.pasajeros.map(p => 
+                    `${p.apellidos}, ${p.nombres} <span class="passenger-type">${p.tipo}</span>`
+                ).join('<br>');
+                
+                return `
+                    <tr data-venta-id="${venta.id}">
+                        <td><strong>${venta.localizador}</strong></td>
+                        <td>${venta.numero_boleto}</td>
+                        <td>${new Date(venta.fecha).toLocaleDateString('es-ES')}</td>
+                        <td>${venta.cliente}</td>
+                        <td class="passengers">${pasajeros}</td>
+                        <td>${venta.aerolinea}</td>
+                        <td>${venta.proveedores.join(', ') || 'N/A'}</td>
+                        <td>${venta.cantidad_boletos}</td>
+                        <td>$${venta.total_venta.toFixed(2)}</td>
+                        <td><input type="number" class="editable" data-field="costo_neto" value="${venta.costo_neto}" step="0.01"></td>
+                        <td><input type="number" class="editable" data-field="fee_proveedor" value="${venta.fee_proveedor}" step="0.01"></td>
+                        <td><input type="number" class="editable" data-field="comision" value="${venta.comision}" step="0.01"></td>
+                        <td><input type="number" class="editable" data-field="fee_agencia" value="${venta.fee_agencia}" step="0.01"></td>
+                        <td><strong>$${venta.margen.toFixed(2)}</strong></td>
+                        <td><span class="status status-${venta.estado}">${venta.estado_display}</span></td>
+                        <td><button class="btn-save" onclick="guardarCambios(${venta.id})">💾 Guardar</button></td>
+                    </tr>
+                `;
+            }).join('');
+        }
+        
+        async function guardarCambios(ventaId) {
+            const row = document.querySelector(`tr[data-venta-id="${ventaId}"]`);
+            const inputs = row.querySelectorAll('.editable');
+            
+            const datos = {};
+            inputs.forEach(input => {
+                datos[input.dataset.field] = parseFloat(input.value) || 0;
+            });
+            
+            try {
+                const response = await fetch(`/api/boletos/actualizar-venta/${ventaId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify(datos)
+                });
+                
+                if (response.ok) {
+                    alert('✅ Cambios guardados correctamente');
+                    cargarVentas(); // Recargar datos
+                } else {
+                    alert('❌ Error al guardar los cambios');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Error de conexión');
+            }
+        }
+        
+        function aplicarFiltros() {
+            const filtros = {
+                localizador: document.getElementById('filterLocalizador').value,
+                fecha_desde: document.getElementById('filterFechaDesde').value,
+                fecha_hasta: document.getElementById('filterFechaHasta').value
+            };
+            cargarVentas(filtros);
+        }
+        
+        function limpiarFiltros() {
+            document.getElementById('filterLocalizador').value = '';
+            document.getElementById('filterFechaDesde').value = '';
+            document.getElementById('filterFechaHasta').value = '';
+            cargarVentas();
+        }
+        
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    </script>
+</body>
+</html>

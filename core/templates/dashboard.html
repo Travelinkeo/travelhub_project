@@ -1,0 +1,126 @@
+{% extends 'base_modern.html' %}
+
+{% block content %}
+<div class="px-6 py-8 max-w-7xl mx-auto" x-data="{ loaded: true }">
+    <!-- Row 1: KPI Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
+        <!-- Venta Card -->
+        <div class="p-6 rounded-3xl bg-surface-main border border-white/10 shadow-emerald-500/5 shadow-2xl group hover:border-status-success/40 transition-all">
+            <div class="flex items-center justify-between mb-4">
+                <span class="material-symbols-outlined text-status-success text-3xl opacity-80">account_balance_wallet</span>
+                <span class="px-2 py-1 bg-status-success/20 text-status-success text-[10px] font-black rounded-lg">VENTAS MES</span>
+            </div>
+            <p class="text-3xl font-black text-white tabular-nums">${{ stats.ventas_mes }}</p>
+            <div class="mt-2 flex items-center gap-2">
+                <span class="{% if stats.tendencia >= 0 %}text-status-success{% else %}text-status-danger{% endif %} text-xs font-bold font-mono">
+                    {% if stats.tendencia >= 0 %}+{% endif %}{{ stats.tendencia }}%
+                </span>
+                <span class="text-[10px] text-text-muted">vs mes pasado</span>
+            </div>
+        </div>
+
+        <!-- Utility Card -->
+        <div class="p-6 rounded-3xl bg-surface-main border border-white/10 shadow-2xl group hover:border-emerald-400/40 transition-all">
+            <div class="flex items-center justify-between mb-4">
+                <span class="material-symbols-outlined text-emerald-400 text-3xl opacity-80">trending_up</span>
+                <span class="px-2 py-1 bg-emerald-400/20 text-emerald-400 text-[10px] font-black rounded-lg">UTILIDAD ESTIMADA</span>
+            </div>
+            <p class="text-3xl font-black text-white tabular-nums">${{ stats.utilidad }}</p>
+            <p class="text-[10px] text-text-muted mt-2">Corredor de comisiones activas.</p>
+        </div>
+
+        <!-- Tax Refund Card (Money on Table) -->
+        <div class="p-6 rounded-3xl bg-status-success/5 border border-status-success/20 shadow-status-success/5 shadow-2xl group hover:scale-[1.02] transition-transform cursor-pointer" 
+             onclick="window.location.href='{% url 'finance:tax_refund_opportunities' %}'">
+            <div class="flex items-center justify-between mb-4">
+                <span class="material-symbols-outlined text-status-success text-3xl">savings</span>
+                <span class="px-2 py-1 bg-status-success/80 text-black text-[10px] font-black rounded-lg animate-pulse">DINERO SOBRE LA MESA</span>
+            </div>
+            <p class="text-3xl font-black text-white tabular-nums">${{ stats.tax_refund }}</p>
+            <p class="text-[10px] text-text-muted mt-2 flex items-center gap-1">
+                Disponible para recuperar <span class="material-symbols-outlined text-[12px]">chevron_right</span>
+            </p>
+        </div>
+
+        <!-- Quick Status -->
+        <div class="p-6 rounded-3xl bg-white/[0.02] border border-white/5 flex flex-col justify-center text-center">
+            <p class="text-[10px] text-text-muted uppercase font-bold tracking-widest mb-1">Estado de Salud</p>
+            <p class="text-emerald-400 font-black text-xl italic tracking-tighter">"EXCELENTE ⚡"</p>
+        </div>
+    </div>
+
+    <!-- Row 2: Graph + AI Insight -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Chart Section -->
+        <div class="lg:col-span-2 p-8 rounded-3xl bg-surface-main border border-white/10 shadow-2xl relative overflow-hidden h-[400px]">
+             <div class="flex items-center justify-between mb-8 relative z-10">
+                <h3 class="text-lg font-black text-white tracking-widest uppercase flex items-center gap-2">
+                    <span class="w-2 h-4 bg-status-success rounded-full"></span>
+                    Flujo de Ventas
+                </h3>
+                <span class="text-[10px] text-text-muted">Últimos 6 meses (Proyectado)</span>
+             </div>
+             
+             <!-- Gradient Background for Chart -->
+             <div class="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-emerald-500/10 to-transparent pointer-events-none"></div>
+             
+             <div class="h-[280px] w-full">
+                <canvas id="salesChart"></canvas>
+             </div>
+        </div>
+
+        <!-- IA Insight Card (HTMX Lazy Load) -->
+        <div id="ai-insight-container" 
+             hx-get="{% url 'bi_ia_insight' %}" 
+             hx-trigger="load"
+             class="p-8 rounded-3xl bg-black border border-white/10 shadow-2xl min-h-[400px]">
+             
+             <div class="flex flex-col items-center justify-center h-full text-center py-12">
+                <span class="material-symbols-outlined text-text-muted animate-spin mb-4 text-4xl">neurology</span>
+                <p class="text-text-muted text-sm font-mono tracking-tighter">Consultando a Gemini Consultor...</p>
+             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js Config -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const ctx = document.getElementById('salesChart').getContext('2d');
+        const chartData = {{ chart_data_json }};
+        
+        const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+        gradient.addColorStop(0, 'rgba(16, 185, 129, 0.4)');
+        gradient.addColorStop(1, 'rgba(16, 185, 129, 0)');
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: chartData.labels,
+                datasets: [{
+                    label: 'Ventas en USD',
+                    data: chartData.values,
+                    borderColor: '#10b981',
+                    borderWidth: 4,
+                    pointBackgroundColor: '#fff',
+                    pointBorderColor: '#10b981',
+                    pointHoverRadius: 8,
+                    fill: true,
+                    backgroundColor: gradient,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: True,
+                maintainAspectRatio: False,
+                plugins: { legend: { display: False } },
+                scales: {
+                    x: { grid: { display: False }, ticks: { color: '#6b7280', font: { size: 10, weight: '900' } } },
+                    y: { grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: '#6b7280', font: { size: 10 }, callback: value => '$' + value } }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

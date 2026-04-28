@@ -1,0 +1,343 @@
+{% extends 'base_modern.html' %}
+{% load humanize %}
+
+{% block title %}Venta #{{ venta.id_venta }} - TravelHub (DEBUG VERIFIED){% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+        <div>
+            <div class="flex items-center gap-3 mb-1">
+                <a href="{% url 'core:ventas_dashboard' %}" class="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                    </svg>
+                </a>
+                <h1 class="text-2xl font-bold text-[var(--text-primary)]">Venta #{{ venta.id_venta }}</h1>
+                <span class="px-3 py-1 text-xs font-medium rounded-full 
+                    {% if venta.estado == 'PAG' %}bg-emerald-500/10 text-emerald-400 border border-emerald-500/20
+                    {% elif venta.estado == 'PEN' %}bg-yellow-500/10 text-yellow-400 border border-yellow-500/20
+                    {% elif venta.estado == 'ANU' %}bg-red-500/10 text-red-500 border border-red-500/20
+                    {% else %}bg-[var(--surface-3)] text-[var(--text-secondary)] border border-[var(--border)]{% endif %}">
+                    {{ venta.get_estado_display }}
+                </span>
+            </div>
+            <p class="text-sm text-[var(--text-secondary)] ml-10">Fecha de Venta: {{ venta.fecha_venta|date:"d M Y H:i" }}</p>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex gap-3">
+            <a href="#" class="btn-secondary-icon flex items-center gap-2 opacity-50 cursor-not-allowed"
+                title="Edición no disponible">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z">
+                    </path>
+                </svg>
+                Editar Venta
+            </a>
+            <button class="btn-danger-icon flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                    </path>
+                </svg>
+                Anular Venta
+            </button>
+            {% if venta.factura %}
+            <a href="{% url 'core:factura_detalle' venta.factura.pk %}"
+                class="px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg font-medium transition-colors flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                    </path>
+                </svg>
+                Ver Factura
+            </a>
+            {% else %}
+            <form action="{% url 'core:venta_facturar' venta.pk %}" method="post" class="inline">
+                {% csrf_token %}
+                <button type="submit"
+                    class="px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg font-medium transition-colors flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                        </path>
+                    </svg>
+                    Facturar
+                </button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Main Content (Left Column) -->
+        <div class="lg:col-span-2 space-y-8">
+
+            <!-- Client Info -->
+            <div class="glass-panel p-6 rounded-2xl border border-[var(--border)]">
+                <h3 class="text-lg font-semibold text-[var(--text-primary)] mb-4 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-[var(--primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                    </svg>
+                    Información del Cliente
+                </h3>
+                {% if venta.cliente %}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-[var(--text-primary)]">
+                    <div>
+                        <p class="text-sm text-[var(--text-muted)] mb-1">Nombre Completo</p>
+                        <p class="font-medium">{{ venta.cliente.nombres }} {{ venta.cliente.apellidos }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-[var(--text-muted)] mb-1">Documento</p>
+                        <p class="font-medium">{{ venta.cliente.tipo_documento }} {{
+                            venta.cliente.numero_documento }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-[var(--text-muted)] mb-1">Email</p>
+                        <p class="font-medium">{{ venta.cliente.email }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-[var(--text-muted)] mb-1">Teléfono</p>
+                        <p class="font-medium">{{ venta.cliente.telefono|default:"--" }}</p>
+                    </div>
+                </div>
+                {% else %}
+                <p class="text-[var(--text-muted)] italic">Sin cliente asignado</p>
+                {% endif %}
+            </div>
+
+            <!-- Items / Services -->
+            <div class="glass-panel p-6 rounded-2xl border border-[var(--border)]">
+                <h3 class="text-lg font-semibold text-[var(--text-primary)] mb-4 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10">
+                        </path>
+                    </svg>
+                    Servicios / Items
+                </h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr
+                                class="border-b border-[var(--border)] text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">
+                                <th class="pb-3">Descripción</th>
+                                <th class="pb-3 text-center">Cant.</th>
+                                <th class="pb-3 text-right">Precio Unit.</th>
+                                <th class="pb-3 text-right">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-[var(--border)]">
+                            {% for item in items %}
+                            <tr class="text-sm">
+                                <td class="py-3">
+                                    <p class="text-[var(--text-primary)] font-medium">{{ item.producto_servicio.nombre }}</p>
+                                    {% if item.descripcion_personalizada %}
+                                    <p class="text-xs text-[var(--text-secondary)]">{{ item.descripcion_personalizada }}</p>
+                                    {% endif %}
+                                </td>
+                                <td class="py-3 text-center text-[var(--text-secondary)]">{{ item.cantidad }}</td>
+                                <td class="py-3 text-right text-[var(--text-secondary)]">$ {{ item.precio_unitario_venta|floatformat:2
+                                    }}</td>
+                                <td class="py-3 text-right text-[var(--text-primary)] font-medium">$ {{
+                                    item.total_item_venta|floatformat:2 }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="py-4 text-center text-[var(--text-muted)] italic">No hay items registrados
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Boletos -->
+            {% if boletos %}
+            <div class="glass-panel p-6 rounded-2xl border border-[var(--border)]">
+                <h3 class="text-lg font-semibold text-[var(--text-primary)] mb-4 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z">
+                        </path>
+                    </svg>
+                    Boletos Aéreos
+                </h3>
+                <div class="space-y-4">
+                    {% for boleto in boletos %}
+                    <div class="bg-[var(--surface-2)] rounded-lg p-4 border border-[var(--border)]">
+                        <div class="flex justify-between items-start mb-2">
+                            <div>
+                                <p class="text-[var(--text-primary)] font-medium">{{ boleto.numero_boleto }}</p>
+                                <p class="text-sm text-[var(--text-secondary)]">{{ boleto.pasajero_nombre_completo }}</p>
+                            </div>
+                            <span class="text-xs font-mono bg-[var(--surface-3)] text-[var(--text-secondary)] border border-[var(--border)] px-2 py-1 rounded">{{
+                                boleto.localizador_pnr|default:"Sin PNR" }}</span>
+                        </div>
+                        <div class="text-sm text-[var(--text-muted)]">
+                            <p>{{ boleto.aerolinea }} - {{ boleto.ruta }}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Sidebar (Right Column) -->
+        <div class="space-y-8">
+            <!-- AI Sales Intelligence Widget -->
+            <div class="glass-panel p-6 rounded-2xl border border-emerald-500/30 bg-emerald-500/5 relative overflow-hidden group">
+                <div class="absolute -right-4 -top-4 w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl group-hover:bg-emerald-500/20 transition-all"></div>
+                
+                <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                    <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/20 text-emerald-400">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                    </span>
+                    Sales Intelligence
+                </h3>
+
+                <div class="space-y-4 relative z-10">
+                    {% if ai_tips %}
+                        {% for tip in ai_tips %}
+                        <div class="p-3 rounded-xl bg-white/5 border border-white/10 hover:border-emerald-500/30 transition-colors">
+                            <p class="text-xs font-semibold text-emerald-400 uppercase tracking-wider mb-1">Oportunidaddetectada</p>
+                            <p class="text-sm text-gray-200">{{ tip }}</p>
+                            <button class="mt-2 text-xs text-emerald-400 hover:text-emerald-300 font-medium flex items-center gap-1 transition-colors">
+                                Generar Cotización Auxiliar
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke-width="2" /></svg>
+                            </button>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="p-3 rounded-xl bg-white/5 border border-white/10">
+                            <p class="text-sm text-gray-400 italic">No hay sugerencias adicionales para esta ruta por ahora.</p>
+                        </div>
+                    {% endif %}
+
+                    {% if venta.moneda_id == 1 %}
+                    <div class="p-3 rounded-xl bg-white/5 border border-white/10">
+                        <p class="text-xs font-semibold text-blue-400 uppercase tracking-wider mb-1">Smart Tip</p>
+                        <p class="text-sm text-gray-200">El pago fue en VES. Recomendar cobertura de cancelación por fluctuación cambiaria.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Service Fees & Markup (Internal Check) -->
+            <div class="glass-panel p-6 rounded-2xl border border-purple-500/20">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold text-white flex items-center gap-2">
+                        <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                            </path>
+                        </svg>
+                        Service Fees & Markup
+                    </h3>
+                    <span class="text-xs font-mono bg-purple-900/50 text-purple-300 px-2 py-1 rounded">Interno</span>
+                </div>
+
+                {% if venta.fees_venta.exists %}
+                <div class="space-y-3 mb-4">
+                    {% for fee in venta.fees_venta.all %}
+                    <div
+                        class="flex justify-between items-center text-sm p-2 rounded bg-purple-500/5 border border-purple-500/10">
+                        <div>
+                            <p class="text-gray-300">{{ fee.descripcion }}</p>
+                            <p class="text-xs text-gray-500">{{ fee.get_tipo_fee_display }}</p>
+                        </div>
+                        <span class="text-purple-300 font-medium">+ $ {{ fee.monto|floatformat:2 }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-sm text-gray-500 italic mb-4">No hay fees registrados.</p>
+                {% endif %}
+
+                <a href="{% url 'core:venta_add_fee' venta.pk %}"
+                    class="w-full px-4 py-2 bg-purple-600/10 hover:bg-purple-600/20 text-purple-400 border border-purple-500/20 rounded-lg transition-colors text-sm font-medium flex items-center justify-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                    Agregar Fee Manual
+                </a>
+            </div>
+
+            <!-- Financial Summary -->
+            <div class="glass-panel p-6 rounded-2xl border border-[var(--border)]">
+                <h3 class="text-lg font-semibold text-[var(--text-primary)] mb-6">Resumen Financiero</h3>
+
+                <div class="space-y-3 mb-6">
+                    <div class="flex justify-between text-sm">
+                        <span class="text-[var(--text-secondary)]">Subtotal</span>
+                        <span class="text-[var(--text-primary)]">$ {{ venta.subtotal|floatformat:2|intcomma }}</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-[var(--text-secondary)]">Impuestos</span>
+                        <span class="text-[var(--text-primary)]">$ {{ venta.impuestos|floatformat:2|intcomma }}</span>
+                    </div>
+                    <div class="h-px bg-[var(--border)] my-2"></div>
+                    <div class="flex justify-between text-lg font-bold">
+                        <span class="text-[var(--text-primary)]">Total</span>
+                        <span class="text-[var(--primary)]">$ {{ venta.total_venta|floatformat:2|intcomma }}</span>
+                    </div>
+                </div>
+
+                <div class="bg-[var(--surface-2)] rounded-xl p-4 space-y-3 border border-[var(--border)]">
+                    <div class="flex justify-between text-sm">
+                        <span class="text-emerald-400">Pagado</span>
+                        <span class="text-emerald-400 font-medium">$ {{ venta.monto_pagado|floatformat:2 }}</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-red-400">Pendiente</span>
+                        <span class="text-red-400 font-medium">$ {{ venta.saldo_pendiente|floatformat:2 }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payments -->
+            <div class="glass-panel p-6 rounded-2xl border border-[var(--border)]">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold text-[var(--text-primary)]">Pagos</h3>
+                </div>
+
+                {% if pagos %}
+                <div class="space-y-3">
+                    {% for pago in pagos %}
+                    <div class="flex justify-between items-center p-3 bg-[var(--surface-2)] rounded-lg border border-[var(--border)]">
+                        <div>
+                            <p class="text-[var(--text-primary)] font-medium">$ {{ pago.monto|floatformat:2|intcomma }}</p>
+                            <p class="text-xs text-[var(--text-muted)]">{{ pago.fecha_pago|date:"d M Y" }}</p>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-xs px-2 py-1 rounded-full bg-[var(--surface-3)] text-[var(--text-secondary)] border border-[var(--border)]">{{
+                                pago.get_metodo_display }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-sm text-[var(--text-muted)] text-center italic py-4">No hay pagos registrados</p>
+                {% endif %}
+
+                <button
+                    class="w-full mt-6 px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 rounded-lg transition-colors text-sm font-medium flex items-center justify-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                    Registrar Pago
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

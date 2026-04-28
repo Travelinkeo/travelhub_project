@@ -1,0 +1,157 @@
+{% extends "base_modern.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Reglas de Comisión" %} - TravelHub{% endblock %}
+
+{% block content %}
+<div class="p-6">
+    <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <h1 class="text-3xl font-bold text-white">{% trans "Reglas de Comisión" %}</h1>
+            <p class="text-gray-400 mt-2">{% trans "Configura porcentajes y montos de ganancia por proveedor y
+                servicio." %}</p>
+        </div>
+        <div class="flex gap-3">
+            <a href="{% url 'core:proveedores_list' %}"
+                class="px-4 py-2 bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-xl transition-all inline-flex items-center gap-2">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                {% trans "Panel de Proveedores" %}
+            </a>
+            <a href="{% url 'core:comisiones_nuevo' %}{% if proveedor_id %}?proveedor={{ proveedor_id }}{% endif %}"
+                class="px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-xl transition-all shadow-lg shadow-primary/30 flex items-center gap-2">
+                <i data-lucide="plus" class="w-4 h-4"></i>
+                {% trans "Nueva Regla" %}
+            </a>
+        </div>
+    </div>
+
+    <!-- Filter -->
+    <div class="glass-panel p-6 rounded-2xl mb-8">
+        <form method="get" class="flex flex-col md:flex-row items-end gap-4">
+            <div class="w-full md:w-64 space-y-2">
+                <label class="text-xs font-bold text-gray-500 uppercase tracking-widest">{% trans "Filtrar por
+                    Proveedor" %}</label>
+                <select name="proveedor"
+                    class="w-full bg-gray-900/50 border border-white/10 rounded-xl px-4 py-2 text-white focus:ring-2 focus:ring-blue-500 transition-all">
+                    <option value="">{% trans "Todos los proveedores" %}</option>
+                    {% for p in proveedores %}
+                    <option value="{{ p.pk }}" {% if proveedor_id==p.pk|stringformat:"s" %}selected{% endif %}>{{
+                        p.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit"
+                class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-all flex items-center gap-2">
+                <i data-lucide="filter" class="w-4 h-4"></i>
+                {% trans "Filtrar" %}
+            </button>
+            {% if proveedor_id %}
+            <a href="{% url 'core:comisiones_list' %}"
+                class="px-6 py-2 bg-white/5 hover:bg-white/10 text-gray-400 rounded-xl transition-all">
+                {% trans "Limpiar" %}
+            </a>
+            {% endif %}
+        </form>
+    </div>
+
+    <!-- List -->
+    <div class="glass-panel rounded-2xl overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-white/5">
+                        <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest">{% trans
+                            "Proveedor" %}</th>
+                        <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest">{% trans
+                            "Servicio" %}</th>
+                        <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest">{% trans
+                            "Comisión" %}</th>
+                        <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest">{% trans
+                            "Estado" %}</th>
+                        <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest text-right">{%
+                            trans "Acciones" %}</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-white/5">
+                    {% for comision in comisiones %}
+                    <tr class="hover:bg-white/5 transition-colors group">
+                        <td class="px-6 py-4">
+                            <span class="text-white font-medium">{{ comision.proveedor.nombre }}</span>
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="px-2 py-1 bg-indigo-500/10 text-indigo-400 rounded text-xs">
+                                {{ comision.get_tipo_servicio_display }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4">
+                            {% if comision.comision_porcentaje %}
+                            <span class="text-emerald-400 font-bold">{{ comision.comision_porcentaje }}%</span>
+                            {% elif comision.comision_monto_fijo %}
+                            <span class="text-blue-400 font-bold">{{ comision.comision_monto_fijo }} {{
+                                comision.moneda.codigo_iso }}</span>
+                            {% else %}
+                            <span class="text-gray-500">-</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4">
+                            {% if comision.activo %}
+                            <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block mr-2"></span>
+                            <span class="text-xs text-gray-300">{% trans "Activa" %}</span>
+                            {% else %}
+                            <span class="w-2 h-2 rounded-full bg-red-500 inline-block mr-2"></span>
+                            <span class="text-xs text-gray-300">{% trans "Inactiva" %}</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <a href="{% url 'core:comisiones_editar' comision.pk %}"
+                                    class="p-2 bg-white/5 hover:bg-white/10 text-blue-400 rounded-lg transition-colors"
+                                    title="{% trans 'Editar' %}">
+                                    <i data-lucide="edit-2" class="w-4 h-4"></i>
+                                </a>
+                                <a href="{% url 'core:comisiones_eliminar' comision.pk %}"
+                                    class="p-2 bg-white/5 hover:bg-white/10 text-red-400 rounded-lg transition-colors"
+                                    title="{% trans 'Eliminar' %}">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="px-6 py-12 text-center text-gray-500">
+                            <i data-lucide="percent" class="w-12 h-12 mx-auto mb-4 opacity-20"></i>
+                            <p>{% trans "No hay reglas de comisión configuradas." %}</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if is_paginated %}
+        <div class="p-6 border-t border-white/5 flex items-center justify-between">
+            <span class="text-sm text-gray-500">
+                {% trans "Página" %} {{ page_obj.number }} {% trans "de" %} {{ page_obj.paginator.num_pages }}
+            </span>
+            <div class="flex gap-2">
+                {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}{% if proveedor_id %}&proveedor={{ proveedor_id }}{% endif %}"
+                    class="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white hover:bg-white/10 transition-all flex items-center gap-2">
+                    <i data-lucide="chevron-left" class="w-4 h-4"></i>
+                    {% trans "Anterior" %}
+                </a>
+                {% endif %}
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if proveedor_id %}&proveedor={{ proveedor_id }}{% endif %}"
+                    class="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white hover:bg-white/10 transition-all flex items-center gap-2">
+                    {% trans "Siguiente" %}
+                    <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

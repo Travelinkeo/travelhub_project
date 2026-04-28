@@ -1,0 +1,180 @@
+{% extends "base_modern.html" %}
+{% load static %}
+
+{% block page_title %}Magic Quoter AI{% endblock %}
+{% block page_subtitle %}Obsidian Intelligence Engine · Generación de Presupuestos Instantáneos{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto p-4 sm:p-6 font-display">
+    
+    <!-- Top Header / Info -->
+    <div class="flex items-center justify-between mb-8">
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
+                <span class="material-symbols-outlined text-primary text-3xl animate-pulse">psychology</span>
+            </div>
+            <div>
+                <h1 class="text-2xl font-bold text-text-main">Generador Inteligente de Cotizaciones</h1>
+                <p class="text-text-muted text-sm">Pega el texto de Sabre, KIU o Amadeus y deja que la IA haga el trabajo pesado.</p>
+            </div>
+        </div>
+        <div class="hidden md:flex items-center gap-2">
+            <span class="px-3 py-1 bg-surface-2 border border-border-color rounded-full text-[10px] font-black text-text-secondary uppercase">Gemini 2.0 Flash</span>
+            <span class="px-3 py-1 bg-primary/10 border border-primary/20 rounded-full text-[10px] font-black text-primary uppercase">Active</span>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <!-- Input Section -->
+        <div class="lg:col-span-2 space-y-6">
+            <div class="card-base p-6 border-primary/20 bg-surface-1/50 backdrop-blur-sm">
+                <div class="flex items-center justify-between mb-4">
+                    <label class="text-xs font-bold text-primary uppercase tracking-widest">Input de Terminal GDS</label>
+                    <button class="text-[10px] text-text-muted hover:text-primary transition uppercase font-black" onclick="document.getElementById('raw_text').value = ''">Limpiar</button>
+                </div>
+                
+                <textarea id="raw_text" rows="12" 
+                    placeholder="Pega aquí el PNR o Itinerario completo (ej: 1 AA 100Y 10JAN JFKCDG...)"
+                    class="w-full bg-[#0d1117] border-2 border-border-color rounded-xl p-4 text-primary font-mono text-sm focus:border-primary/50 outline-none transition-all placeholder:opacity-20"></textarea>
+                
+                <div class="mt-6 flex items-center justify-between">
+                    <div class="flex items-center gap-2 text-[10px] text-text-muted italic">
+                        <span class="material-symbols-outlined text-[14px]">shield</span>
+                        Privacidad: Los datos se procesan de forma anónima.
+                    </div>
+                    <button id="btn-magic-generate" onclick="generateMagicQuote()"
+                        class="px-8 py-3 bg-primary text-surface-base font-black rounded-xl hover:shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] transition-all flex items-center gap-2 group">
+                        <span>GENERAR COTIZACIÓN</span>
+                        <span class="material-symbols-outlined group-hover:translate-x-1 transition">auto_awesome</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Previsualización / Tips -->
+            <div class="grid grid-cols-2 gap-4">
+                <div class="card-base p-4 bg-surface-2 border-border-color opacity-50">
+                    <h3 class="text-[10px] font-bold text-text-secondary uppercase mb-2">Comandos Soportados</h3>
+                    <ul class="text-[10px] space-y-1 text-text-muted font-mono">
+                        <li>* SABRE: I, *P, *A...</li>
+                        <li>* KIU: IT, *R...</li>
+                        <li>* Amadeus: RT, TQT...</li>
+                    </ul>
+                </div>
+                <div class="card-base p-4 bg-surface-2 border-border-color opacity-50">
+                    <h3 class="text-[10px] font-bold text-text-secondary uppercase mb-2">Automatización Resend</h3>
+                    <p class="text-[10px] text-text-muted italic leading-relaxed">
+                        Al terminar, podrás enviar la cotización por email automáticamente desde @travelhub.cc.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Side: AI Assistant Chat (Mock) -->
+        <div class="space-y-6">
+            <div class="card-base p-6 border-border-color bg-surface-2">
+                <h3 class="text-sm font-bold text-text-main mb-4 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary text-[18px]">bolt</span>
+                    AI Advisor
+                </h3>
+                <div id="ai-messages" class="space-y-4 max-h-[400px] overflow-y-auto pr-2">
+                    <div class="bg-surface-3 p-3 rounded-tr-xl rounded-bl-xl rounded-br-xl text-xs text-text-secondary leading-relaxed border-l-2 border-primary">
+                        ¡Hola Armando! Pega el texto a la izquierda. Analizaré la ruta, buscaré fotos del destino y prepararé el presupuesto por ti.
+                    </div>
+                </div>
+                <div id="loading-indicator" class="hidden mt-4">
+                     <div class="flex items-center gap-3">
+                        <div class="flex gap-1">
+                            <div class="w-1.5 h-1.5 bg-primary rounded-full animate-bounce"></div>
+                            <div class="w-1.5 h-1.5 bg-primary rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                            <div class="w-1.5 h-1.5 bg-primary rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                        </div>
+                        <span class="text-[10px] text-primary font-bold uppercase tracking-widest">IA Analizando Itinerario...</span>
+                     </div>
+                </div>
+            </div>
+            
+            <div class="bg-gradient-to-br from-indigo-900/20 to-blue-900/20 border border-indigo-500/20 rounded-xl p-4">
+                <p class="text-[10px] text-indigo-300 font-medium">✨ Pro-Tip: Puedes incluir el desglose de tarifas TST o IATA para mayor precisión.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script nonce="{{ request.csp_nonce }}">
+async function generateMagicQuote() {
+    const rawText = document.getElementById('raw_text').value;
+    const btn = document.getElementById('btn-magic-generate');
+    const loading = document.getElementById('loading-indicator');
+    const aiMessages = document.getElementById('ai-messages');
+
+    if (!rawText.trim()) {
+        window.dispatchEvent(new CustomEvent('notify', {
+            detail: { message: 'Por favor pegue el texto de la terminal GDS.', type: 'warning' }
+        }));
+        return;
+    }
+
+    // UI Feedback
+    btn.disabled = true;
+    loading.classList.remove('hidden');
+    addAIMessage("Analizando bloques de texto y detectando sistema GDS...");
+
+    try {
+        const formData = new FormData();
+        formData.append('raw_text', rawText);
+
+        const response = await fetch('{% url "core:cotizacion_magic_gpt" %}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            addAIMessage("✅ ¡Éxito! He detectado la ruta y generado la cotización con imágenes. Redirigiendo al editor...");
+            window.dispatchEvent(new CustomEvent('notify', {
+                detail: { message: data.message, type: 'success' }
+            }));
+            setTimeout(() => {
+                window.location.href = data.redirect_url;
+            }, 1500);
+        } else {
+             btn.disabled = false;
+             loading.classList.add('hidden');
+             addAIMessage("❌ Error: " + data.error);
+             window.dispatchEvent(new CustomEvent('notify', {
+                detail: { message: 'Fallo en la IA: ' + data.error, type: 'error' }
+            }));
+        }
+    } catch (error) {
+        btn.disabled = false;
+        loading.classList.add('hidden');
+        addAIMessage("💥 Error de conexión satelital.");
+        console.error(error);
+    }
+}
+
+function addAIMessage(msg) {
+    const aiMessages = document.getElementById('ai-messages');
+    const div = document.createElement('div');
+    div.className = "bg-surface-3 p-3 rounded-tr-xl rounded-bl-xl rounded-br-xl text-xs text-text-secondary leading-relaxed border-l-2 border-primary mt-2 animate-fade-in";
+    div.innerText = msg;
+    aiMessages.appendChild(div);
+    aiMessages.scrollTop = aiMessages.scrollHeight;
+}
+</script>
+
+<style>
+    @keyframes fade-in {
+        from { opacity: 0; transform: translateY(5px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in {
+        animation: fade-in 0.3s ease-out forwards;
+    }
+</style>
+{% endblock %}

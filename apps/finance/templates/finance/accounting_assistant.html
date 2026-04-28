@@ -1,0 +1,167 @@
+{% extends "base_modern.html" %}
+{% load i18n static %}
+
+{% block title %}AI Accounting Assistant - TravelHub Pro{% endblock %}
+
+{% block extra_css %}
+<style>
+    .obsidian-emerald-gradient {
+        background: linear-gradient(135deg, #064e3b 0%, #022c22 100%);
+    }
+    .chat-container {
+        height: calc(100vh - 12rem);
+        scrollbar-width: thin;
+        scrollbar-color: #059669 #064e3b;
+    }
+    .chat-container::-webkit-scrollbar {
+        width: 6px;
+    }
+    .chat-container::-webkit-scrollbar-thumb {
+        background-color: #059669;
+        border-radius: 10px;
+    }
+    .glass-card {
+        background: rgba(2, 44, 34, 0.6);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+    .message-animation {
+        animation: fadeInSlideUp 0.3s ease-out forwards;
+    }
+    @keyframes fadeInSlideUp {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .typing-indicator span {
+        width: 8px;
+        height: 8px;
+        background-color: #10b981;
+        display: inline-block;
+        border-radius: 50%;
+        animation: bounce 1.4s infinite ease-in-out both;
+    }
+    .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+    .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+    @keyframes bounce {
+        0%, 80%, 100% { transform: scale(0); }
+        40% { transform: scale(1.0); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="flex flex-col md:flex-row gap-6">
+        
+        <!-- Sidebar: Context & Actions -->
+        <div class="w-full md:w-80 space-y-6">
+            <div class="glass-card rounded-2xl p-6 shadow-2xl">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="p-2 obsidian-emerald-gradient rounded-lg">
+                        <svg class="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                        </svg>
+                    </div>
+                    <h2 class="text-xl font-bold text-white">CFO Virtual</h2>
+                </div>
+                
+                <p class="text-emerald-100/70 text-sm mb-6">
+                    Tu asistente de inteligencia financiera. Consulta saldos, analiza gastos o solicita sugerencias contables.
+                </p>
+
+                <div class="space-y-3">
+                    <button hx-post="{% url 'finance:ai_chat_htmx' %}" 
+                            hx-vals='{"message": "¿Cuál es el resumen de KPIs de este mes?"}'
+                            hx-target="#chat-messages" 
+                            hx-swap="beforeend"
+                            hx-on::after-request="document.getElementById('ai-typing').classList.add('hidden')"
+                            hx-on::before-request="document.getElementById('ai-typing').classList.remove('hidden')"
+                            class="w-full text-left p-3 rounded-xl bg-emerald-900/20 border border-emerald-500/20 text-emerald-300 text-sm hover:bg-emerald-800/40 transition-all">
+                        🚀 Resumen de KPIs del mes
+                    </button>
+                    <button hx-post="{% url 'finance:ai_chat_htmx' %}" 
+                            hx-vals='{"message": "¿Qué clientes tienen facturas vencidas?"}'
+                            hx-target="#chat-messages" 
+                            hx-swap="beforeend"
+                            hx-on::before-request="document.getElementById('ai-typing').classList.remove('hidden')"
+                            class="w-full text-left p-3 rounded-xl bg-emerald-900/20 border border-emerald-500/20 text-emerald-300 text-sm hover:bg-emerald-800/40 transition-all">
+                        ⚖️ Listar deudas pendientes
+                    </button>
+                    <button hx-post="{% url 'finance:ai_chat_htmx' %}" 
+                            hx-vals='{"message": "Analiza las últimas discrepancias de conciliación"}'
+                            hx-target="#chat-messages" 
+                            hx-swap="beforeend"
+                            hx-on::before-request="document.getElementById('ai-typing').classList.remove('hidden')"
+                            class="w-full text-left p-3 rounded-xl bg-emerald-900/20 border border-emerald-500/20 text-emerald-300 text-sm hover:bg-emerald-800/40 transition-all">
+                        🔍 Revisar conciliación
+                    </button>
+                </div>
+            </div>
+
+            <div class="glass-card rounded-2xl p-6 shadow-xl border-dashed border-emerald-500/30">
+                <h3 class="text-xs font-semibold text-emerald-500 uppercase tracking-widest mb-4">Contexto de Agencia</h3>
+                <div class="flex items-center gap-2">
+                    <div class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
+                    <span class="text-white font-medium">{{ user_agencia.nombre }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Chat Area -->
+        <div class="flex-1 flex flex-col h-full">
+            <div class="glass-card rounded-3xl flex-1 flex flex-col shadow-2xl overflow-hidden border-emerald-500/10">
+                
+                <!-- Messages Area -->
+                <div id="chat-messages" class="chat-container flex-1 overflow-y-auto p-6 space-y-6">
+                    <!-- Initial AI Welcome -->
+                    <div class="flex items-start gap-4">
+                        <div class="w-10 h-10 rounded-2xl obsidian-emerald-gradient flex items-center justify-center flex-shrink-0 shadow-lg border border-emerald-400/20">
+                            <span class="text-xs font-bold text-emerald-400">AI</span>
+                        </div>
+                        <div class="bg-emerald-900/30 rounded-2xl p-4 border border-emerald-500/10 max-w-[80%]">
+                            <p class="text-white text-sm">
+                                Hola {{ user.first_name }}. Estoy conectado a la base financiera de **{{ user_agencia.nombre }}**. 
+                                ¿En qué puedo ayudarte hoy con la contabilidad o el análisis de ingresos?
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Typing indicator -->
+                <div id="ai-typing" class="px-6 py-2 hidden">
+                    <div class="flex items-center gap-2 text-emerald-400 text-xs italic">
+                        <div class="typing-indicator"><span></span><span></span><span></span></div>
+                        Analizando datos contables...
+                    </div>
+                </div>
+
+                <!-- Input area -->
+                <div class="p-6 bg-black/20 border-t border-emerald-500/10">
+                    <form hx-post="{% url 'finance:ai_chat_htmx' %}" 
+                          hx-target="#chat-messages" 
+                          hx-swap="beforeend"
+                          hx-on::before-request="document.getElementById('ai-typing').classList.remove('hidden'); document.getElementById('chat-input').value=''"
+                          hx-on::after-request="document.getElementById('ai-typing').classList.add('hidden'); document.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight"
+                          class="relative flex items-center gap-4">
+                        {% csrf_token %}
+                        <div class="relative flex-1">
+                            <input type="text" 
+                                   id="chat-input"
+                                   name="message" 
+                                   placeholder="Pregunta sobre saldos, facturas o contabilidad..." 
+                                   class="w-full bg-emerald-950/50 border border-emerald-500/30 rounded-2xl py-4 pl-6 pr-14 text-white placeholder-emerald-500/50 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all font-light shadow-inner"
+                                   required>
+                        </div>
+                        <button type="submit" 
+                                class="p-4 rounded-xl obsidian-emerald-gradient text-emerald-400 hover:text-white transition-all shadow-xl group">
+                            <svg class="w-6 h-6 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                            </svg>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

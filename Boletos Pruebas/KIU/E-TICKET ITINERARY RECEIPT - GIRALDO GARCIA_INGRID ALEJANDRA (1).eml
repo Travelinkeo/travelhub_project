@@ -1,0 +1,165 @@
+Delivered-To: boletotravelinkeo@gmail.com
+Received: by 2002:a05:7108:c11:b0:54e:1834:20a1 with SMTP id pl17csp2747610gdb;
+        Thu, 5 Feb 2026 10:35:52 -0800 (PST)
+X-Received: by 2002:a05:622a:1445:b0:501:4e06:695c with SMTP id d75a77b69052e-506399771f5mr661811cf.59.1770316552377;
+        Thu, 05 Feb 2026 10:35:52 -0800 (PST)
+ARC-Seal: i=1; a=rsa-sha256; t=1770316552; cv=none;
+        d=google.com; s=arc-20240605;
+        b=Kc9XzuaXNFy1EhA3qlyCxC+9Ef9ykG42P1hRfVyYZbd8GS9egordRZwAydfsvzobJJ
+         U5pA8MmxRTxZWDMqd5hKNhDnYpQUySH598B+e65W24+YMbHMKSA1hj+5yxeb/iVSuUSj
+         CPhnx7FEnGNhs5JWTTz+Fh0ssGdjlJ0NPjz/ijEYkKp+wg+LpA62IylQd+DbYz4px+ax
+         hxcT+DAVuo+w9UTZP1+KmgUg6C92coJD+OOy+Zc+emYMSCJew4z+x2GLdR2x823rxtVi
+         xgislN6hXwubE/dQqNuiWov4VYWltqpNndKI9Zga6/1NKapmBj232w5cgG+EaYUemX8L
+         HtkQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
+        h=feedback-id:date:message-id:mime-version:subject:to:from
+         :dkim-signature:dkim-signature;
+        bh=iwsgZg/EJUCGk4NwLJIM0o/hdE8o70COFutIp8dc57Y=;
+        fh=ea13ZxuZ/lHhtdQSAvi2/eZqtk6Cpk2KZJ1q/vGojYs=;
+        b=lHOQ8a/THSpApcssozA66ByGsyoLYzZ7UlMEgDnzeiOpWhoXYDwbYJSBHW7QwHcNGY
+         N2DD8aaSIvbVhymdCW4mpip0CrEWd1Vw25TYtKbPPKQlRk26PDFj1aBBwpXjQ4ntLyfb
+         BBV502UrSRFHTD88Lqzlzo729zB9SC7lMg6EXbqO1PTeyR6HBQZ03s+SsSwjVMbOH7FI
+         rRRKKsQKOohEqbwKR1k1Vkc6gRublNZ/P7QWZA9hsim0HBoOBOBKCTbZK7GQSKq9a8W5
+         N6nZceSqBFtotBU715JJh1rNC1b/O9drJu7Aszi8ZuyT4JfKnTaxMOuBx34B6xgcd2k8
+         rjxA==;
+        dara=google.com
+ARC-Authentication-Results: i=1; mx.google.com;
+       dkim=pass header.i=@kiusys.com header.s=y27k5w6mpyspgwewkrpvqs7lpid7on7v header.b=NMXRcLaW;
+       dkim=pass header.i=@amazonses.com header.s=6gbrjpgwjskckoa6a5zn6fwqkn67xbtw header.b="NzjoXtJ/";
+       spf=pass (google.com: domain of 0100019c2f16d70a-965ed10c-ba8b-41b4-9a57-08318809030f-000000@ses.kiusys.com designates 54.240.9.37 as permitted sender) smtp.mailfrom=0100019c2f16d70a-965ed10c-ba8b-41b4-9a57-08318809030f-000000@ses.kiusys.com;
+       dmarc=pass (p=QUARANTINE sp=QUARANTINE dis=NONE) header.from=kiusys.com
+Return-Path: <0100019c2f16d70a-965ed10c-ba8b-41b4-9a57-08318809030f-000000@ses.kiusys.com>
+Received: from a9-37.smtp-out.amazonses.com (a9-37.smtp-out.amazonses.com. [54.240.9.37])
+        by mx.google.com with ESMTPS id d75a77b69052e-506393a2c1dsi1908131cf.349.2026.02.05.10.35.52
+        for <BOLETOTRAVELINKEO@gmail.com>
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Thu, 05 Feb 2026 10:35:52 -0800 (PST)
+Received-SPF: pass (google.com: domain of 0100019c2f16d70a-965ed10c-ba8b-41b4-9a57-08318809030f-000000@ses.kiusys.com designates 54.240.9.37 as permitted sender) client-ip=54.240.9.37;
+Authentication-Results: mx.google.com;
+       dkim=pass header.i=@kiusys.com header.s=y27k5w6mpyspgwewkrpvqs7lpid7on7v header.b=NMXRcLaW;
+       dkim=pass header.i=@amazonses.com header.s=6gbrjpgwjskckoa6a5zn6fwqkn67xbtw header.b="NzjoXtJ/";
+       spf=pass (google.com: domain of 0100019c2f16d70a-965ed10c-ba8b-41b4-9a57-08318809030f-000000@ses.kiusys.com designates 54.240.9.37 as permitted sender) smtp.mailfrom=0100019c2f16d70a-965ed10c-ba8b-41b4-9a57-08318809030f-000000@ses.kiusys.com;
+       dmarc=pass (p=QUARANTINE sp=QUARANTINE dis=NONE) header.from=kiusys.com
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/simple;
+	s=y27k5w6mpyspgwewkrpvqs7lpid7on7v; d=kiusys.com; t=1770316552;
+	h=From:To:Subject:Mime-Version:Content-Type:Message-Id:Date;
+	bh=UhtwRav8sVVjiiV/6vRmk6IAxf8ssmmr8wB86yNe+FI=;
+	b=NMXRcLaWuXVTzNVZRpo09n5b1lQhE5jhBLoM0VWot9i9sbcSB1nNJcda7Q0oTfib
+	LfcDcp+sR9Xix3PQpNyEgmBMnj+ym8io3wq+ldaOM3JdoAwRfkPAlY6Phzal7T2luVL
+	XuaK5yfMaB8tkHzorQvZJTmMBZPmZ779VJ8LQT6Mwskqpl+odBjvwxrVAyN1XaqWsZR
+	oZ5/8dyEB0p0N/49xwZnxZIZ97bjCuP/ziYU0C01QxpHyBE7ML7kiviTZQnGhudXEd1
+	QcZDTiF61KKqIArlTUCJtuEHERFrrPNlFZQkhx9oy9P1VB+472bE7YO/nD6yDwRfcmo
+	aUdw4k5Pow==
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/simple;
+	s=6gbrjpgwjskckoa6a5zn6fwqkn67xbtw; d=amazonses.com; t=1770316552;
+	h=From:To:Subject:Mime-Version:Content-Type:Message-Id:Date:Feedback-ID;
+	bh=UhtwRav8sVVjiiV/6vRmk6IAxf8ssmmr8wB86yNe+FI=;
+	b=NzjoXtJ/kdgEMJVPb+H6jtgifE+MhmKxGLQnJ8OKso03BYGAT6Uslo1hsUssl0WK
+	q79tE7ytxIuIo2jyVUHjcmlBZwShb0i//Q7w89tB89NzRUEl1Pdxh5RaoN26P2yN1rL
+	I+rbz7f3JNSCXvLEFmsBfP1NChmwBoh4o7SXU+ig=
+From: no_config <noreply@kiusys.com>
+To: BOLETOTRAVELINKEO@GMAIL.COM
+Subject:E-TICKET ITINERARY RECEIPT - GIRALDO GARCIA/INGRID ALEJANDRA
+Mime-Version: 1.0
+Content-Type: multipart/mixed;
+    boundary="8c376e5ab97d5657bac4fef585832f2255822bc180bce27dab7f000232a9"
+Message-ID: <0100019c2f16d70a-965ed10c-ba8b-41b4-9a57-08318809030f-000000@email.amazonses.com>
+Date: Thu, 5 Feb 2026 18:35:51 +0000
+Feedback-ID: ::1.us-east-1.FlLS8KWT15VSJWSZCrjpizuEqvA988B9XvDgDbF9UFw=:AmazonSES
+X-SES-Outgoing: 2026.02.05-54.240.9.37
+
+--8c376e5ab97d5657bac4fef585832f2255822bc180bce27dab7f000232a9
+Content-Transfer-Encoding: quoted-printable
+Content-Type: text/html; charset="UTF-8"
+
+<HTML><HEAD><STYLE>.pnr-print-small {font-size: 8px;}.pnr-print-medium {fon=
+t-size: 12px;}.pnr-print-big {font-size: 14px;}.prn-image {display: flex; j=
+ustify-content: end;width: 650px;}</STYLE></HEAD><BODY><PRE class=3D"pnr-pr=
+int-medium"> ELECTRONIC TICKET                         =20
+
+
+     PASSENGER ITINERARY RECEIPT              TICKET NBR: <B>7820340929853<=
+/B>
+     RECIBO DE ITINERARIO DE PASAJEROS        BOLETO NRO:=20
+
+ <B>CONTRATACIONES TURISTICAS     </B> ISSUE DATE/FECHA DE EMISION: 05 FEB =
+2026 13:34
+ AV.BALBOA ED.GAVIOTA P.B.DIAG.   ISSUE AGENT/AGENTE EMISOR: PTYN682EM
+ PANAMA                                       =20
+ PANAMA, PANAMA                          =20
+ OFFICE ID: PA-15491-0                   =20
+ TELEPHONE/TELEFONO: 50766731134                  =20
+ MAIL INFO: CONTRATACIONESTURISTICASGLOBAL@GMAIL.COM                   =20
+
+ISSUING AIRLINE/LINEA AEREA EMISORA   : LASER C.A.
+ADDRESS/DIRECCION                     : AV PRINCIPAL DEL BOSQUE EDIF TORRE =
+CREDICARD
+                              PISO 13OF 131-132-133 URB EL BOSQUE
+                              CARACAS (CHACAO) MIRANDA ZONA POSTAL 1050
+                              PHONE 0058 212 957 4100
+RIF                                   : J-00364445-5                 =20
+TICKET NUMBER/NRO DE BOLETO           : 782-0340929853
+NAME:  <B>GIRALDO GARCIA/INGRID ALEJANDRA                                  =
+                                  </B>
+FOID:  IDEPAX756444       =20
+
+BOOKING REF./CODIGO DE RESERVA: C1/<B>FJHCCI</B>
+
+  FROM/TO     FLIGHT CL DATE  DEP  ARR  FARE BASIS      NVB   NVA   BAG  ST
+DESDE/HACIA   VUELO  CL FECHA HORA HORA BASE TARIFARIA              EQP. ES=
+TATUS
+
+  <B>CARACAS     </B>QL 762 T  <B>9FEB  0945</B> <B>1030</B> TRVECW2       =
+              32K  OK=20
+<B>  CURACAO           </B>
+  <B>CURACAO     </B>QL 763 M  <B>11FEB 1300</B> <B>1345</B> MLRCWVE2      =
+              32K  OK=20
+<B>  CARACAS           </B>
+</PRE><PRE class=3D"pnr-print-small">LOS PASAJEROS DEBEN PRESENTARSE 2 HORA=
+S ANTES DE LA SALIDA EN VUELOS NACIONALES Y 3 HORAS EN DESTINOS INTERNACION=
+ALES<br><B>FRANQUICIA DE EQUIPAJE PERMITIDA POR PASAJERO EN VUELOS INTERNAC=
+IONALES</B><br>CLASE TURISTA HACIA Y DESDE CURACAO ES UNA (1) PIEZA EN BODE=
+GA DE 32 KG, EN EL CASO DE BOGOTA ES UNA (1) PIEZA<br>EN BODEGA DE 23 KG. C=
+LASE EJECUTIVA HACIA Y DESDE BOGOTA Y CURACAO SON DOS (2) PIEZAS EN BODEGA =
+DE 23 KG.<br>PARA TODAS LAS RUTAS MENCIONADAS ESTA PERMITIDO UN (1) EQUIPAJ=
+E DE MANO DE 8 KG.<br><B>FRANQUICIA DE EQUIPAJE PERMITIDA POR PASAJERO EN M=
+ADRID VIA CARTAGENA-</B><br>CABINA TURISTA ES UNA (1) PIEZA EN BODEGA DE 32=
+ KG. CABINA BUSINESS SON DOS (2) PIEZAS DE 32 KG.<br>PARA LAS CABINAS MENCI=
+ONADAS ESTA PERMITIDO UN (1) EQUIPAJE DE MANO DE 8 KG Y UN (1) BOLSO DE ART=
+ICULOS PERSONALES.<br><B>FRANQUICIA DE EQUIPAJE PERMITIDA POR PASAJERO EN V=
+UELOS NACIONALES</B><br>CLASE TURISTA HACIA Y DESDE PORLAMAR, BARCELONA, MA=
+RACAIBO Y EL VIGIA ES UNA (1) PIEZA EN BODEGA DE 30 KG<br>Y EN CLASE EJECUT=
+IVA SON DOS (2) PIEZAS EN BODEGA DE 30 KG.<br>EN LA RUTA DE LA FRIA SE PERM=
+ITE UNA (1) PIEZA EN BODEGA DE 15 KG EN CLASE TURISTA Y UNA (1) PIEZA EN BO=
+DEGA DE 23 KG<br>EN CLASE EJECUTIVA. EN ESTA RUTA NO ESTA PERMITIDO EL EXCE=
+SO DE EQUIPAJE NI PIEZAS EXTRAS.<br>PARA TODAS LAS RUTAS NACIONALES ESTA PE=
+RMITIDO UN (1) EQUIPAJE DE MANO DE 8 KG.<br></PRE><PRE class=3D"pnr-print-m=
+edium">
+
+ENDORSEMENTS/ENDOSOS-RESTRICCIONES : NO REEMBOLSABLE/NO ENDOSABLE/NON END/N=
+ON REF
+TOUR CODE                          :=20
+FORM OF PAYMENT/FORMA DE PAGO      : CASH=20
+
+</PRE><PRE class=3D"pnr-print-medium">FARE CALC./CALCULO DE TARIFA: CCS QL =
+CUR 37.50 QL CCS 125.00NUC162.50END ROE1.000000  (ADT)
+
+</PRE><PRE class=3D"pnr-print-medium">
+
+AIR FARE/TARIFA : USD      162.50
+TAX/IMPUESTOS   : USD       16.136I       15.006T       76.00AK
+                             2.50C2        1.63EU       13.00YN      375.00=
+YQ
+                    =20
+TOTAL           : USD      661.76
+
+</PRE><PRE class=3D"pnr-print-small">LASER AIRLINES TIENE COMO POLITICA NO =
+TRANSPORTAR MERCANCIAS PELIGROSAS. PARA MAYOR INFORMACION VISITE WWW.LASERA=
+IRLINES.COM<br>IMPORTANTE: EN CASO DE NO VIAJAR, SE DEBE NOTIFICAR CON ANTI=
+CIPACION. PARA CAMBIOS DE FECHA APLICAN CIERTAS PENALIDADES.<br>
+<HR>SEND BY AGENT PTYN682EM / FEB  5 2026  1:34</PRE></BODY></HTML><img alt=
+=3D"" src=3D"https://j5d6plkx.r.us-east-1.awstrack.me/I0/0100019c2f16d70a-9=
+65ed10c-ba8b-41b4-9a57-08318809030f-000000/nl5BuVZ99j0EBAuRPd-ouPLvvX8=3D46=
+4" style=3D"display: none; width: 1px; height: 1px;">
+
+--8c376e5ab97d5657bac4fef585832f2255822bc180bce27dab7f000232a9--

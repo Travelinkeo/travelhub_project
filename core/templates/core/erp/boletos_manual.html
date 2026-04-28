@@ -1,0 +1,345 @@
+{% extends 'base_modern.html' %}
+{% load humanize %}
+
+{% block title %}Carga Manual de Boleto — TravelHub Pro{% endblock %}
+
+{% block page_title %}Carga Manual{% endblock %}
+{% block page_subtitle %}Ingreso de datos de emisión física o consolidación externa.{% endblock %}
+
+{% block content %}
+<main class="flex-1 w-full max-w-[1400px] mx-auto p-6 md:p-8">
+
+    <!-- Header & Action Bar -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10 pb-6 border-b border-border-color">
+        <div>
+            <h1 class="text-3xl font-black text-text-main tracking-tight uppercase">Nuevo Boleto Manual</h1>
+            <p class="text-text-muted text-sm mt-1">Ingresa los detalles del documento para su registro en el sistema.</p>
+        </div>
+        <div class="flex gap-3">
+            <a href="{% url 'core:boletos_dashboard' %}" class="btn-secondary !h-12 !px-6">
+                <span class="material-symbols-outlined text-[20px]">close</span>
+                <span>Cancelar</span>
+            </a>
+            <button type="button" id="btn-audit" class="btn-secondary !h-12 !px-6 border-amber-500/30 text-amber-500 hover:bg-amber-500/10">
+                <span class="material-symbols-outlined">analytics</span>
+                <span>Auditar con IA</span>
+            </button>
+            <button form="manual-form" type="submit" class="btn-primary !h-12 !px-8 shadow-lg shadow-primary/20">
+                <span class="material-symbols-outlined">save</span>
+                <span>Guardar Registro</span>
+            </button>
+        </div>
+    </div>
+
+    {% include 'core/erp/partials/boletos_nav.html' with active_tab='boletos_manual' %}
+
+    <form id="manual-form" method="post" action="." class="space-y-8 max-w-5xl mx-auto">
+        {% csrf_token %}
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {# ── Identificación del Documento ── #}
+            <div class="card-base flex flex-col">
+                <div class="px-6 py-5 border-b border-border-color bg-surface-2/30">
+                    <div class="flex items-center gap-3">
+                        <div class="size-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
+                            <span class="material-symbols-outlined text-[18px]">confirmation_number</span>
+                        </div>
+                        <h2 class="text-xs font-black text-text-main uppercase tracking-widest">Identificación</h2>
+                    </div>
+                </div>
+                <div class="p-6 space-y-5">
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-black uppercase tracking-widest text-text-muted">Número de Boleto *</label>
+                        <div class="relative group">
+                            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-text-muted group-focus-within:text-primary transition-colors">tag</span>
+                            <input type="{{ form.numero_boleto.field.widget.input_type|default:'text' }}" 
+                                   name="{{ form.numero_boleto.name }}" 
+                                   id="{{ form.numero_boleto.id_for_label }}"
+                                   value="{{ form.numero_boleto.value|default_if_none:'' }}"
+                                   placeholder="000-0000000000"
+                                   class="input-base !pl-10 font-mono tracking-wider" required>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="space-y-2">
+                            <label class="block text-[10px] font-black uppercase tracking-widest text-text-muted">Localizador PNR</label>
+                            <input type="text" name="{{ form.localizador_pnr.name }}" 
+                                   id="{{ form.localizador_pnr.id_for_label }}"
+                                   value="{{ form.localizador_pnr.value|default_if_none:'' }}"
+                                   placeholder="ABC123"
+                                   class="input-base font-mono uppercase text-center tracking-[0.2em]">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="block text-[10px] font-black uppercase tracking-widest text-text-muted">Fecha Emisión</label>
+                            <input type="date" name="{{ form.fecha_emision_boleto.name }}" 
+                                   id="{{ form.fecha_emision_boleto.id_for_label }}"
+                                   value="{{ form.fecha_emision_boleto.value|date:'Y-m-d'|default:'' }}"
+                                   class="input-base text-center font-bold">
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-black uppercase tracking-widest text-text-muted">Aerolínea Emisora</label>
+                        {{ form.aerolinea_emisora }}
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-black uppercase tracking-widest text-text-muted">Ruta (Origen-Destino)</label>
+                        <div class="relative">
+                            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-text-muted">flight_takeoff</span>
+                            <input type="text" name="{{ form.ruta_vuelo.name }}" 
+                                   id="{{ form.ruta_vuelo.id_for_label }}"
+                                   value="{{ form.ruta_vuelo.value|default_if_none:'' }}"
+                                   placeholder="MAD-BOG-MAD"
+                                   class="input-base !pl-10 font-mono uppercase tracking-widest">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {# ── Datos del Pasajero ── #}
+            <div class="card-base flex flex-col">
+                <div class="px-6 py-5 border-b border-border-color bg-surface-2/30">
+                    <div class="flex items-center gap-3">
+                        <div class="size-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-500 border border-emerald-500/20">
+                            <span class="material-symbols-outlined text-[18px]">person</span>
+                        </div>
+                        <h2 class="text-xs font-black text-text-main uppercase tracking-widest">Pasajero</h2>
+                    </div>
+                </div>
+                <div class="p-6 space-y-5">
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-black uppercase tracking-widest text-text-muted">Nombre Completo *</label>
+                        <div class="relative group">
+                            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-text-muted group-focus-within:text-emerald-500 transition-colors">person</span>
+                            <input type="text" name="{{ form.nombre_pasajero_completo.name }}" 
+                                   id="{{ form.nombre_pasajero_completo.id_for_label }}"
+                                   value="{{ form.nombre_pasajero_completo.value|default_if_none:'' }}"
+                                   placeholder="APELLIDO/NOMBRE"
+                                   class="input-base !pl-10 uppercase font-black" required>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-black uppercase tracking-widest text-text-muted">FOID / Identificación</label>
+                        <input type="text" name="{{ form.foid_pasajero.name }}" 
+                               id="{{ form.foid_pasajero.id_for_label }}"
+                               value="{{ form.foid_pasajero.value|default_if_none:'' }}"
+                               placeholder="ID Number..."
+                               class="input-base font-mono">
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-black uppercase tracking-widest text-text-muted">Agente Emisor</label>
+                        <input type="text" name="{{ form.agente_emisor.name }}" 
+                               id="{{ form.agente_emisor.id_for_label }}"
+                               value="{{ form.agente_emisor.value|default_if_none:'' }}"
+                               placeholder="Nombre del Agente"
+                               class="input-base">
+                    </div>
+
+                    <div class="space-y-2 text-xs text-text-secondary/60 italic leading-relaxed">
+                        <p>Asegúrese de que el nombre coincida exactamente con el documento de identidad para evitar discrepancias en la conciliación.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# ── Componente Financiero ── #}
+        <div class="card-base">
+            <div class="px-6 py-5 border-b border-border-color bg-surface-2/30">
+                <div class="flex items-center gap-3">
+                    <div class="size-8 rounded-lg bg-violet-500/10 flex items-center justify-center text-violet-500 border border-violet-500/20">
+                        <span class="material-symbols-outlined text-[18px]">payments</span>
+                    </div>
+                    <h2 class="text-xs font-black text-text-main uppercase tracking-widest">Información de Tarifas</h2>
+                </div>
+            </div>
+            <div class="p-8">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-black uppercase tracking-widest text-text-muted">Tarifa Base</label>
+                        <div class="relative">
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-black text-text-muted">$</span>
+                            <input type="number" step="0.01" name="{{ form.tarifa_base.name }}" 
+                                   id="{{ form.tarifa_base.id_for_label }}"
+                                   value="{{ form.tarifa_base.value|default:'0.00' }}"
+                                   class="input-base !pl-8 text-right font-mono font-black text-lg">
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-black uppercase tracking-widest text-text-muted">Impuestos / Tasas</label>
+                        <div class="relative">
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-black text-text-muted">$</span>
+                            <input type="number" step="0.01" name="{{ form.impuestos_total.name|default:'impuestos_total' }}" 
+                                   id="id_impuestos_total"
+                                   placeholder="0.00"
+                                   class="input-base !pl-8 text-right font-mono font-black text-lg">
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-black uppercase tracking-widest text-text-muted">Total Documento *</label>
+                        <div class="relative">
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-black text-primary">$</span>
+                            <input type="number" step="0.01" name="{{ form.total_boleto.name }}" 
+                                   id="{{ form.total_boleto.id_for_label }}"
+                                   value="{{ form.total_boleto.value|default:'0.00' }}"
+                                   class="input-base !pl-8 text-right font-mono font-black text-xl !bg-primary/5 border-primary/30 text-primary" required>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hidden inputs / Misc -->
+        <div class="hidden">
+            {{ form.impuestos_descripcion }}
+            {{ form.direccion_aerolinea }}
+        </div>
+
+        {# ── Footer Actions ── #}
+        <div class="flex items-center justify-end gap-4 mt-12 bg-surface-2/30 p-4 rounded-2xl border border-border-color/50">
+            <span class="text-[10px] font-black text-text-muted uppercase tracking-widest mr-auto ml-2">Los campos marcados con (*) son obligatorios</span>
+            <a href="{% url 'core:boletos_dashboard' %}" class="btn-secondary !bg-surface-base">
+                Cancelar
+            </a>
+            <button type="submit" class="btn-primary !px-12">
+                <span class="material-symbols-outlined">check_circle</span>
+                Registrar Boleto
+            </button>
+        </div>
+    </form>
+
+    <!-- Panel de Resultados de Auditoría IA (Flotante o Condicional) -->
+    <div id="audit-results-panel" class="hidden mt-8 translate-y-4 opacity-0 transition-all duration-500">
+        <div class="card-base border-amber-500/30 bg-amber-500/[0.02]">
+            <div class="px-6 py-4 border-b border-amber-500/20 flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <span class="material-symbols-outlined text-amber-500">shutter_speed</span>
+                    <h3 class="text-xs font-black text-amber-500 uppercase tracking-widest">Resultado de Auditoría AI</h3>
+                </div>
+                <button onclick="document.getElementById('audit-results-panel').classList.add('hidden')" class="text-text-muted hover:text-text-main">
+                    <span class="material-symbols-outlined text-sm">close</span>
+                </button>
+            </div>
+            <div class="p-6">
+                <div id="audit-content" class="space-y-4">
+                    <!-- Aquí se inyectará el contenido vía JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}
+
+{% block extra_scripts %}
+<script nonce="{{ request.csp_nonce }}">
+    // Lógica para aplicar clases de Tailwind a los widgets cargados dinámicamente si es necesario
+    document.addEventListener('DOMContentLoaded', () => {
+        // Aseguramos que los selects tengan la clase input-base
+        const selects = document.querySelectorAll('select');
+        selects.forEach(s => {
+            s.classList.add('input-base', 'appearance-none');
+        });
+
+        const btnAudit = document.getElementById('btn-audit');
+        const auditPanel = document.getElementById('audit-results-panel');
+        const auditContent = document.getElementById('audit-content');
+
+        btnAudit.addEventListener('click', async () => {
+            // Recoger datos del formulario
+            const form = document.getElementById('manual-form');
+            const formData = new FormData(form);
+            const ticketData = {};
+            formData.forEach((value, key) => {
+                ticketData[key] = value;
+            });
+
+            // Feedback visual
+            btnAudit.disabled = true;
+            btnAudit.innerHTML = '<span class="animate-spin material-symbols-outlined">sync</span><span>Auditando...</span>';
+
+            try {
+                const response = await fetch('/api/boletos/audit/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+                    },
+                    body: json.stringify({ ticket_data: ticketData })
+                });
+
+                const data = await response.json();
+
+                // Mostrar panel
+                auditPanel.classList.remove('hidden');
+                setTimeout(() => {
+                    auditPanel.classList.remove('translate-y-4', 'opacity-0');
+                }, 10);
+
+                if (data.error) {
+                    auditContent.innerHTML = `<div class="p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-500 text-sm">${data.error}</div>`;
+                } else {
+                    renderAuditReport(data);
+                }
+
+            } catch (err) {
+                console.error(err);
+                auditContent.innerHTML = `<div class="p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-500 text-sm">Error de conexión con el servicio de IA.</div>`;
+            } finally {
+                btnAudit.disabled = false;
+                btnAudit.innerHTML = '<span class="material-symbols-outlined">analytics</span><span>Auditar con IA</span>';
+            }
+        });
+
+        function renderAuditReport(report) {
+            let html = `
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="px-4 py-2 rounded-full font-black text-[10px] uppercase tracking-widest ${report.is_compliant ? 'bg-emerald-500/20 text-emerald-500' : 'bg-red-500/20 text-red-500'}">
+                        ${report.is_compliant ? 'Cumple Normas' : 'Revisiones Requeridas'}
+                    </div>
+                </div>
+                <p class="text-sm text-text-secondary leading-relaxed">${report.summary}</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+            `;
+
+            // Findings
+            report.findings.forEach(f => {
+                const color = f.severity === 'CRITICAL' ? 'red' : (f.severity === 'WARNING' ? 'amber' : 'blue');
+                html += `
+                    <div class="p-4 rounded-xl border border-${color}-500/20 bg-${color}-500/[0.03]">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="text-[10px] font-black uppercase tracking-widest text-${color}-500">${f.category}</span>
+                            <span class="size-1.5 rounded-full bg-${color}-500"></span>
+                            <span class="text-[9px] font-bold text-text-muted uppercase">${f.severity}</span>
+                        </div>
+                        <p class="text-xs text-text-main font-bold mb-1">${f.message}</p>
+                        ${f.suggestion ? `<p class="text-[10px] text-text-secondary mt-2 px-2 py-1 bg-surface-base rounded border border-border-color italic">💡 Sup: ${f.suggestion}</p>` : ''}
+                    </div>
+                `;
+            });
+
+            // Fees
+            html += `</div><div class="mt-6 p-4 rounded-xl bg-primary/5 border border-primary/20">
+                <h4 class="text-[10px] font-black uppercase tracking-widest text-primary mb-3">Fees Sugeridos (Cálculo IA)</h4>
+                <div class="space-y-2">
+            `;
+            
+            for (const [key, val] of Object.entries(report.calculated_fees_suggested)) {
+                html += `
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="text-text-secondary capitalize">${key.replace(/_/g, ' ')}</span>
+                        <span class="font-mono font-black text-primary">$ ${parseFloat(val).toFixed(2)}</span>
+                    </div>
+                `;
+            }
+
+            html += `</div></div>`;
+            auditContent.innerHTML = html;
+        }
+    });
+</script>
+{% endblock %}

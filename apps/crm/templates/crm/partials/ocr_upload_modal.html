@@ -1,0 +1,82 @@
+<div id="ocrUploadModal" x-cloak x-data="{ fileName: '' }" x-show="showOcrModal" class="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4">
+    <!-- Modal Container -->
+    <div class="card-base bg-surface-1 border-2 border-primary/20 w-full max-w-lg shadow-[0_0_50px_-12px_rgba(var(--primary-rgb),0.5)] relative overflow-hidden" 
+         @click.away="showOcrModal = false"
+         x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 scale-90 translate-y-10" x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+         x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 scale-100 translate-y-0" x-transition:leave-end="opacity-0 scale-90 translate-y-10">
+         
+        <!-- Header -->
+        <div class="px-8 py-6 border-b border-border-color flex items-center gap-4 relative z-10">
+            <div class="flex items-center justify-center size-14 rounded-2xl bg-primary/10 text-primary border border-primary/20">
+                <span class="material-symbols-outlined text-[32px]">document_scanner</span>
+            </div>
+            <div>
+                <h3 class="font-black text-text-main text-xl uppercase tracking-tight">Escanear Pasaporte</h3>
+                <p class="text-xs text-text-muted font-medium uppercase tracking-widest mt-1">Extracción Inteligente via Document AI</p>
+            </div>
+            <button @click="showOcrModal = false" class="ml-auto size-10 flex items-center justify-center rounded-xl bg-surface-2 hover:bg-red-500/10 hover:text-red-500 transition-all border border-border-color">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+
+        <!-- Form Content -->
+        <form hx-post="{% url 'crm:pasajero_ocr_procesar' %}" hx-encoding="multipart/form-data" hx-target="body" hx-swap="outerHTML" 
+              @submit="document.getElementById('ocr-loading').classList.remove('hidden'); document.getElementById('ocr-form-content').classList.add('hidden');">
+            {% csrf_token %}
+            
+            <div id="ocr-form-content" class="p-8 space-y-8 relative z-10">
+                <p class="text-[11px] text-text-muted leading-relaxed text-center font-bold uppercase tracking-wider">
+                    Sube una imagen clara del pasaporte para que nuestro motor de IA procese los datos del pasajero automáticamente.
+                </p>
+
+                <label for="passport_image" class="block border-2 border-dashed border-border-color rounded-3xl p-12 text-center cursor-pointer transition-all group overflow-hidden relative"
+                     :class="fileName ? 'border-primary bg-primary/5' : 'bg-surface-2 hover:border-primary/50 hover:bg-surface-base'">
+                    
+                    <input type="file" name="archivo" id="passport_image" accept=".jpg,.jpeg,.png,.webp" required
+                           class="hidden"
+                           @change="fileName = $event.target.files.length ? $event.target.files[0].name : ''">
+                    
+                    <div class="relative z-10 flex flex-col items-center">
+                        <span class="material-symbols-outlined text-6xl mb-4 transition-all duration-500 group-hover:scale-110 group-hover:rotate-3"
+                              :class="fileName ? 'text-primary' : 'text-text-muted'">upload_file</span>
+                        <h4 class="font-black text-lg mb-1 uppercase tracking-tight" :class="fileName ? 'text-primary' : 'text-text-main'" x-text="fileName ? '¡Listo para procesar!' : 'Seleccionar Archivo'"></h4>
+                        <p class="text-[10px] font-black uppercase tracking-[0.2em]" :class="fileName ? 'text-primary/70' : 'text-text-muted'" x-text="fileName ? 'Haz clic para cambiar imagen' : 'PNG, JPG ó WebP'"></p>
+                    </div>
+                    
+                    <!-- Progress bar simulated background if uploaded -->
+                    <div x-show="fileName" class="absolute inset-0 bg-primary/5 animate-pulse"></div>
+                </label>
+                
+                <div x-show="fileName" class="flex items-center gap-3 px-4 py-3 bg-surface-base rounded-xl border border-border-color animate-fade-in">
+                    <span class="material-symbols-outlined text-primary text-[20px]">check_circle</span>
+                    <span class="text-[10px] font-black text-text-secondary truncate uppercase tracking-widest" x-text="fileName"></span>
+                </div>
+                
+                <div class="flex items-center justify-end gap-4 pt-4 border-t border-border-color">
+                    <button type="button" @click="showOcrModal = false; fileName = ''; document.getElementById('passport_image').value = ''" 
+                        class="btn-secondary !h-12 !px-8">
+                        Cancelar
+                    </button>
+                    <button type="submit" id="btn-procesar"
+                            :disabled="!fileName"
+                            class="btn-primary !h-12 !px-10 shadow-lg shadow-primary/20 disabled:opacity-30 disabled:pointer-events-none group">
+                        <span class="material-symbols-outlined text-[20px] group-hover:translate-x-1 transition-transform">auto_awesome</span>
+                        <span class="font-black uppercase tracking-widest">Ejecutar IA</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Improved Loading Indicator -->
+            <div id="ocr-loading" class="hidden p-16 flex flex-col items-center justify-center gap-8 text-center bg-surface-1 animate-fade-in relative z-10">
+                <div class="relative">
+                    <div class="size-24 rounded-full border-4 border-primary/10 border-t-primary animate-spin"></div>
+                    <span class="material-symbols-outlined absolute inset-0 flex items-center justify-center text-primary text-4xl animate-pulse">rocket_launch</span>
+                </div>
+                <div class="space-y-3">
+                    <h4 class="text-2xl font-black text-text-main uppercase tracking-tight">Analizando Documento</h4>
+                    <p class="text-xs text-text-muted font-medium max-w-xs mx-auto">Nuestro motor Document AI está extrayendo nombres, fechas y números. Un momento, por favor.</p>
+                </div>
+            </div>
+        </label>
+    </div>
+</div>

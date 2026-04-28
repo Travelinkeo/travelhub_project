@@ -1,0 +1,1799 @@
+Delivered-To: naidycohen@gmail.com
+Received: by 2002:a05:622a:46ca:b0:4ee:40ef:3aa4 with SMTP id me10csp284270qtb;
+        Fri, 30 Jan 2026 09:38:31 -0800 (PST)
+X-Received: by 2002:a05:690c:2909:b0:794:7184:a60d with SMTP id 00721157ae682-7949dfa9030mr26399127b3.38.1769794711037;
+        Fri, 30 Jan 2026 09:38:31 -0800 (PST)
+ARC-Seal: i=2; a=rsa-sha256; t=1769794711; cv=pass;
+        d=google.com; s=arc-20240605;
+        b=DBAPcA6J28U7p4gWwgB3b2A/qZ8zIoEVlEIF4moknPataenm8eKhiAvkkhfGb5eeWf
+         p3M8yLG9LcCvBbMYNsV8/D+8S1Zz4gTIVnBJZzBb5Et9F41Gbk30Es6l+zWE9qiIBVeI
+         3cSnVsAMCNQqe300DvRywyceX311UZEgjxG4YTRN7TYFiIkgYtwXER+1Fnytv/gXz2xp
+         Wa4fDtBDmgJwzsTlKUFpINX87lCEj7GjU+YNPccR1bzZlQwccMjbplc+2aw6i6TPcPBB
+         7+z3ZtI2s9urXd9c5QMJdeKy2mB7nvw4EmmqhjfJkZlO2LYwGYHCVGgwpNMkb77S7A8k
+         4TIA==
+ARC-Message-Signature: i=2; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
+        h=mime-version:date:content-transfer-encoding:message-id:subject:to
+         :from:dkim-signature;
+        bh=5zuntoFly0EDgDxmIoviuYysoxeT97/igFo5uqqVvxI=;
+        fh=1orQ37MSJYCZ2M1a65dmx0dyY+lvC2eM3zOf5t6MEAA=;
+        b=IV/pPvhOJtfinkJgx7Bsy+pBbmizWRxJ0QOPfXa1QoHYIvf80ZdjDomN3727Rj2Vgn
+         xaeCkACz4+1Nhdql24vJ+H4T3NU/y6aqtI5rlBq9rj/VBNP1IqTUKTjsgAFfJuO9S0Iw
+         QSWCGE1u+NGF/yeLx7glVOCHofqs/aFu6uNYm4VGbWadnSLHFbP/L8tjPmWpLYE1gxSj
+         4Ag4PNNCK+8Ll4T9Nj5F0v42X4Wh/tpnYW29iM8J2Tvtn8sa70SyY+BvQqIAvR2YLi9h
+         uu8fm08K3DpSGc9WW3+B5/WbfZcIXZamWEiJcivx4rCo7Akf2iyN0uT2U/s2AqgMmUw8
+         rTCw==;
+        dara=google.com
+ARC-Authentication-Results: i=2; mx.google.com;
+       dkim=permerror (no key for signature) header.i=@avior.com.ve header.s=selector1 header.b=jeNQTMRv;
+       arc=pass (i=1 spf=pass spfdomain=avior.com.ve dkim=pass dkdomain=avior.com.ve dmarc=pass fromdomain=avior.com.ve);
+       spf=pass (google.com: domain of aviorair@avior.com.ve designates 2a01:111:f403:c112::5 as permitted sender) smtp.mailfrom=AviorAir@avior.com.ve;
+       dmarc=pass (p=QUARANTINE sp=NONE dis=NONE) header.from=avior.com.ve
+Return-Path: <AviorAir@avior.com.ve>
+Received: from CY7PR03CU001.outbound.protection.outlook.com (mail-westcentralusazlp170100005.outbound.protection.outlook.com. [2a01:111:f403:c112::5])
+        by mx.google.com with ESMTPS id 00721157ae682-7948291c24dsi77016277b3.197.2026.01.30.09.38.30
+        for <NAIDYCOHEN@gmail.com>
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 30 Jan 2026 09:38:31 -0800 (PST)
+Received-SPF: pass (google.com: domain of aviorair@avior.com.ve designates 2a01:111:f403:c112::5 as permitted sender) client-ip=2a01:111:f403:c112::5;
+Authentication-Results: mx.google.com;
+       dkim=permerror (no key for signature) header.i=@avior.com.ve header.s=selector1 header.b=jeNQTMRv;
+       arc=pass (i=1 spf=pass spfdomain=avior.com.ve dkim=pass dkdomain=avior.com.ve dmarc=pass fromdomain=avior.com.ve);
+       spf=pass (google.com: domain of aviorair@avior.com.ve designates 2a01:111:f403:c112::5 as permitted sender) smtp.mailfrom=AviorAir@avior.com.ve;
+       dmarc=pass (p=QUARANTINE sp=NONE dis=NONE) header.from=avior.com.ve
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=fDEwO6Jt/+0tbUJGMhwtWiN6X+PVlf4xV93865uv7/TVPR45tnEuQBgyxZ/np9pVCX1TxDtqIqi2dUt96VCvjg5aqFcjhfpwrO7aebQCiDMlhka8s51QscPpnZugJI4XZQZzZAAZR/cdvHNaCJ4+ehs7TYR7d98WdHipV3HaBmJhKBug0L5OhOqQOliZ2j/2KhQYcC29Y4DceaEt42cH1yFR2zViMr3Bs+S+9C1sUh+4Y9fDj1OKLGcay3so0A4Ab4XU/CriPxYroWK2kDg0wil2oFjj8H4muDVil80/DTeF0weDUGe0S3zvNyUdVf1zITVSfTWxdBBCBnl6ogz2Yw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=5zuntoFly0EDgDxmIoviuYysoxeT97/igFo5uqqVvxI=;
+ b=WOnh6MkYcmtL56TQLEG9EWFWTeB/gicUW9A9cn1Od9P4/9RMFk6Bepn68I9qFZ/Hx/tPGGPFq/b1FVfH59CGqITrdls9KVPV2U6g3TON4/qhvZDgz93KfnrqUse0/+HG7odWC9Jp5nKMj4O4KS6fUOvtwvEJahpFkd4XUM3CjdtuYu8WkAZ1rZwcfIXsfVjS3/EnGNUxcJh6PdfddG6gXd2E/ShKIntB8v5GTCNz31UwvaTTG6EHvZX/8jr58LzpU9FRXva80ufmQGXNpKWz1AmEWwpUl9SLcn5K9qdhnsqyK7qWohKnCqBb4N88p25eRSQS6D4/AhSpzYM4/6DeTg==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=avior.com.ve; dmarc=pass action=none header.from=avior.com.ve;
+ dkim=pass header.d=avior.com.ve; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=avior.com.ve;
+ s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=5zuntoFly0EDgDxmIoviuYysoxeT97/igFo5uqqVvxI=;
+ b=jeNQTMRvzeXzVhdWLa73hcQjOalVoQtIW2/dVvIjzdP0AhvidiM/m5N5HL4Ec+uELhiQgSMy7B/h6PawD0t5vK9WB45Qa+jFk0MVpDX/VtJibYu4PGfhZqViQxDzTuOXfctI8rGuv2YkSfH4R8o7wAxI/++JenP2tTgTyPLEzwc=
+Authentication-Results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=avior.com.ve;
+Received: from BN7PR08MB5508.namprd08.prod.outlook.com (2603:10b6:408:39::10)
+ by DS0PR08MB10396.namprd08.prod.outlook.com (2603:10b6:8:1f4::6) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9564.11; Fri, 30 Jan
+ 2026 17:38:27 +0000
+Received: from BN7PR08MB5508.namprd08.prod.outlook.com
+ ([fe80::b1b5:a08f:7633:3ce5]) by BN7PR08MB5508.namprd08.prod.outlook.com
+ ([fe80::b1b5:a08f:7633:3ce5%4]) with mapi id 15.20.9564.010; Fri, 30 Jan 2026
+ 17:38:27 +0000
+From: Avior Airlines <aviorair@avior.com.ve>
+To: NAIDYCOHEN@gmail.com
+Subject: Tickets Avior Airlines
+Message-ID: <07c8f6de-7cd2-50da-c5bd-3aa004e982c3@avior.com.ve>
+Content-Transfer-Encoding: quoted-printable
+Date: Fri, 30 Jan 2026 17:38:24 +0000
+Content-Type: text/html; charset=utf-8
+X-ClientProxiedBy: CP4P284CA0018.BRAP284.PROD.OUTLOOK.COM
+ (2603:10d6:103:128::16) To BN7PR08MB5508.namprd08.prod.outlook.com
+ (2603:10b6:408:39::10)
+Return-Path: AviorAir@avior.com.ve
+MIME-Version: 1.0
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: BN7PR08MB5508:EE_|DS0PR08MB10396:EE_
+X-MS-Office365-Filtering-Correlation-Id: 6f31128e-ff68-4b70-1a84-08de6026602b
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam:
+	BCL:0;ARA:13230040|376014|52116014|1800799024|366016|69100299015|38350700014|8096899003|4076899003|7053199007;
+X-Microsoft-Antispam-Message-Info:
+	=?utf-8?B?OXVHVm1xaEthRXM4clNLaERMOWV4NXV5RCsrRWczUk9PSFpXNGlkNDZLb09o?=
+ =?utf-8?B?c1I2aU54dkF4ZTBEZWRhRzFHb2dWMGF5RnNXTFhNY0tWcnJrZDZlOHlZQS8x?=
+ =?utf-8?B?TzQ3dHc2ZlhmTGlsODdmMWJ2VDFLcVVrZGRzMkR5cXE2TkVwU2h1VG5SK0pR?=
+ =?utf-8?B?VkxCVXhxWEVTeVUxeG52YS9uSVpUQnNYbVp5Z2xyUHB2RWpMMS9zWTBHcXBS?=
+ =?utf-8?B?UjcwY3V6ZjBVbkE5MUYyUm5KMHNWNEtidHlEK3p3SXZNRkVIN0IzNmorVE1r?=
+ =?utf-8?B?RzlrdVRZTWVzMEpIc0VnN0NvNFlkVUhIRnRSTVkxNWluN0txT2NvUzVFb21T?=
+ =?utf-8?B?eUlJT21kQWZvQitaUFIzSksreVdiWHBkQk4wTnF1cER2Zks3aGZMQkZZYS9W?=
+ =?utf-8?B?T3lsS3I5RFBtczZzU2lPQVlCSW9MYWM1RmQ3cjd2ZUZpNXpLakRRQnVXWFZP?=
+ =?utf-8?B?UVZxK3VLendMMldOMjZKaVh4QUxmb0U0bDBEOHBnWXR3RTJyYVFQWDlMbWpP?=
+ =?utf-8?B?YjdpRWY3d0pwc2JwYzFXWlIwZVJYZTNsSEwrelAzaFlhL28zWlBBbVhnUGFx?=
+ =?utf-8?B?KzJhckdpZkRRY2thd0tQWmtBNDVLOGhCWVM5ZXhMeStPdEgyM1NZSXJZUGxa?=
+ =?utf-8?B?MVZHU3E5OVFIa3BOb0dOZGZhSERiQ0xFR3NjZ3ZOWnJhZVhXLzYzeDEvdTg3?=
+ =?utf-8?B?RG1iMVRxaW9tU0NTR1pHSlVhSS9JOExaNjE0aUZFai95bExHZVcyeUMvS3pw?=
+ =?utf-8?B?MTRWTkNVSmkrQWY0T0FGOW1kbVNUQkNHS1EyK1N5R0NjRG4xcXRTVnRqSDVa?=
+ =?utf-8?B?aWNmL2EzbjdsaHI4SjBkZXlWRTFFeUpHUDd5REU4d241cXArVCttdk1mMThx?=
+ =?utf-8?B?b0J0WDcxN0dPWmtSeURVcWhMVTNreGQrd0lnNzBZcVBKcmFjVDF6N0xVMmZ0?=
+ =?utf-8?B?M3pXSjFxRldJVDNqT0dwQ3h0aTVjemdQMmZLRkxEbjRTKzBXUmtFa1V5NHI0?=
+ =?utf-8?B?KzJMRHI3emw5WGd0WitHaCtKOE1kc1hRVUhwM1JUMUh1bnFFd1JPQkVkQ2Nx?=
+ =?utf-8?B?UFpTcWQyWWdNVE9nTHd4cFJtajJoZ010Vjc5bXJQV2VoRHlCM3Y3QTNjZlp0?=
+ =?utf-8?B?RW9HTmxPWGJOdVIwcGxpZ1BOelpJL1RZSWtZRkhNVDUyUEM1djJqczNsQXFB?=
+ =?utf-8?B?ckVhZTM1ak82WU9YRXdqNXJRRXoxQXBieHQyc3hhTTYvZ3E2YjU4N0hPa0Fq?=
+ =?utf-8?B?Y1lWdzZESlVUQnA4bUQyWXlEOE0xRS9haG53amxpbVFHb1ZDT21YY0FWNUpV?=
+ =?utf-8?B?SktvblFINU9pU0lrTnU3NG4yS0dHZmlod0VzVjVTUDdJcFNvZXZkTC85ZklL?=
+ =?utf-8?B?OHpPcFhHRmZ5WjFLZm5uemx1NVZGdGw3SHJjRm5lTHVVVGRrKzZEL2RvMUtz?=
+ =?utf-8?B?MWdubXdZS2JBZjZKL29KNFphM3MyZk5jeVhBWjhEMndJVjFoVjF0aGdOSHpK?=
+ =?utf-8?B?Yy9zRTlvc0c5TmpSdGR3UG1GTHArb1dpWktHdExWYkg4eUVLZHVmVDRPbm5H?=
+ =?utf-8?B?eTNoZlFqd0JWNkJZd2doNDQydXJITWtFZlFMY0FxQXlJQWFpQ01jcHJVTkNG?=
+ =?utf-8?B?bzcwRUF0dkExY1M5T3VNWjE2R1htRE5nNTJHYmlINFBaclJtd0hiVFYxdVg4?=
+ =?utf-8?B?dHBtMGdlWGl5MFVxMDZOWlQwR0JBTmU2TTd3QnlLdDVXemNrZkZBRmVPdFNu?=
+ =?utf-8?B?V2E5UDFRa0VWVnovb20wdVR4YTIxS244YzVxN2xXVU8rcDkyMlFRclpocUoz?=
+ =?utf-8?B?aHNNMEcyM2ptd2JoT3R4b1ZOaTVJYkc5N0VXbTdISUx4bFBiZE8yS1RETjdU?=
+ =?utf-8?B?cXBXQmtRUnU2WWVFN291bDRReks4czJ2dmFVWEdhQ3dDemtDdk8yN2JYV3FD?=
+ =?utf-8?B?dHg2cVB3cDRPYkZxQkFKVm40eVE2Vmt5THZIVDVEOWVVdEo2NGIvNHNiZmgy?=
+ =?utf-8?B?NjBSM3FURU13cGVISjBrMHpoaGQ5YWZoN2RoVVRvejJ2NTA1ajhuaWNwUDk5?=
+ =?utf-8?B?RjdEVHMxNUs3OXBhRzlvRGhrTFIxUndZb2tRbTRoV3NQcGUwUG12L2lWK1R4?=
+ =?utf-8?B?RVNiTWVncUEzbGNpR3IramFlQ0dkSDBUbFR3citwaGRMMDFKNnpNaldzZmRE?=
+ =?utf-8?Q?/FwWBVyinnEFdZbIven1JLQ=3D?=
+X-Forefront-Antispam-Report:
+	CIP:255.255.255.255;CTRY:;LANG:es;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:BN7PR08MB5508.namprd08.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(376014)(52116014)(1800799024)(366016)(69100299015)(38350700014)(8096899003)(4076899003)(7053199007);DIR:OUT;SFP:1102;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0:
+	=?utf-8?B?RU5scVdFdlpTaTNGRDNjTWxFZkN1cmRKM0hZRVh2a1dhNVdDM2wyZUVac01H?=
+ =?utf-8?B?YzVrWWVGVTNCODI5VnRjUGdaY0hGSFFrNmd2TlQvSGEwb1RFWFpjZnJEMFE4?=
+ =?utf-8?B?TWtkM1loUWtRaThYaURQNys2KytoNUlINVlHKzR1OFhPR3RBME5EMUtRK29z?=
+ =?utf-8?B?UHVmL2ZaT1Z4VnpLV3ZCaWl0QVBsRndmN1VGckN4RlVCZGFNSzR6U1dldG1Q?=
+ =?utf-8?B?ZzBTYnhBMzBhejBoMGE4STJPU3NCZUpkVmc3aDZLU3FnUEVNMnh4ODNiY0FT?=
+ =?utf-8?B?SmN4WHpJZ2U2T0FMVUZhL1lwa1c5VWMyYU9iNHV0VXBSOEJ4SGFRV0hJYzhl?=
+ =?utf-8?B?dWU4d3Q5RU96dFBaYndTSStXdHI1RzdPcjg4ZDkySFhJdGNYL0xUMFJEc2pW?=
+ =?utf-8?B?Q3RkYWpCM080aEdpbVpGMGtDazRqK1B4VGUzVTk3N2tMOGM0VlFHeHJWV0NH?=
+ =?utf-8?B?MTRVMG9OVFJnM3llK3k4a0tRRHMvMzBZWWJVeiswaFV5dy9TNGp6VG1EQ3I5?=
+ =?utf-8?B?elVrcFYvMVNMbXBqeWNSMThNVmhHajJBS0svcEJoSGczdkY1TGNxMzBNVDJq?=
+ =?utf-8?B?RzEwWTUrVzVINE14dzZrbElQMHNpU3ZTOXZGNWVqcmtRNG9aSFE0U1hKZjBz?=
+ =?utf-8?B?M0RWT3FsaVlFeHA5ZXNLeVdHQ2FRUHgwL0tQL1lUL3BVeVFHTnl5MW82M2F3?=
+ =?utf-8?B?SG1vUlMyWXFiN0Z0a05UdE1jcU16UlhFQ2kxaS85VXVkYzgwbFVjZHlKbE01?=
+ =?utf-8?B?dGtkcFFiY0UvSHZwZWlxb0tPa2FRMTd5U2JGeGl0NXFLbzgwVjJVWi9IZWhj?=
+ =?utf-8?B?NnFyeDFWV2t1bE1WdjdnQnZGaWVScGhxSkRLU01WZFFZeVBtRG1XNGdRUDFJ?=
+ =?utf-8?B?WkNtd3lKMjBkUEIyNUlRZW5aSmtjdDdlYzJsSHVzMmxYRDhkMlhhZ1RRZEZN?=
+ =?utf-8?B?RjhhQlRCZEZZd0wxbHNORG92a1kreFk1MVEvMDQ1VkpGeVlLeXUrZWtYY1hp?=
+ =?utf-8?B?MWZnWDJkVTZnRm5JVjdDaUcyZXd2ZlZrSUpHOVlucWNid2JUaThadVFGNmJi?=
+ =?utf-8?B?ajRTY2ZXaWc5RDBMcUl0ZHNkRjhpb09GQVllWnBIZUEzWnE4cDEzdmRHY2pt?=
+ =?utf-8?B?ZjVKU0tISzZCY3FxZldRY1I1MjBRUHRydjhuZjN6Z29nTEtPTU5TanBpSmlD?=
+ =?utf-8?B?M2I1dVMvejl4NXlVRUIxMEZtSlo0Q2ZlNGtGTTVzcVNrbThLRU5IcHkvdmxC?=
+ =?utf-8?B?SFkwaUU5QTVxVExCM2VwdHhOeFRFcjBJVytZTzd1bDJVYlgrQ3lkTEdSdWZy?=
+ =?utf-8?B?V1poVE1HeWpyNlFHcGdTem9kN1diWEZyWGNiT2w2UTljVzBCUVJPRUFxODdt?=
+ =?utf-8?B?Y0pzekJtQzMvZ0daeVZUU3NITnFLTFljNERGNkRGaEYrY1NiMHp4amJzYXhF?=
+ =?utf-8?B?SEIyaktyclZMRmZHVEJOSE9nOW96VHRXdXNDVjhVcnhENHlyRnNNRzRWc05K?=
+ =?utf-8?B?bDgxbTVtNnVnTlFMNi8vaUJBUHBmZnRoMWx4RjdiVE9NbEcySEV5NmlSYzRC?=
+ =?utf-8?B?L1BRK0lCR2NDV2V1TVJiOWFuSTJmQ1BOK2p1QVg4dDNUU0FHQ0wyeG56REgz?=
+ =?utf-8?B?YlJ4VjJ3WXRrUzBGOVBDZ2tUcUJITUlHVERhb3BEbTJoUlpLNTdTWnhERkV2?=
+ =?utf-8?B?QVR6clpNQUdSMWNwQmFTaE56dUphYzJnU1NiSUh2SmpBQXI5dzg5czdra0tF?=
+ =?utf-8?B?eHV3SnVWLzdCTG12MnhDR09GTEMrUnpLamVMQUxZeis4YW81SWl1eVBvVTF0?=
+ =?utf-8?B?bW96akFGbjZRb0srN2hhZHVrQTNEUldlSjFYa28xV29DNDBBZVo5ZjZiNDFp?=
+ =?utf-8?B?blp1cEoxSG9aUlVOL1l1U205MWFoWDNBTStEZEpLMDRYQytTMnZQa3dVOTFi?=
+ =?utf-8?B?d2lWdUc0dGFSS2k1SlVyaGc1MHlmbVRQcDkvT2pGS2gwMzZ0YTkwMVp4NU9v?=
+ =?utf-8?B?cENtclYwREVkdlNmMHZHaXNyb1VnOXBtcVhOYUVHS1llK0EzSURmNVhHQ2F3?=
+ =?utf-8?B?OFZQeWlMckZISFhIRlIwUjBLYk5ISTk3UnVQRXFpbFBEeEpOVFNPSnkxMWlJ?=
+ =?utf-8?B?MmdPS2NuSDAwMkJpckcvVnBFTkN4c2tLcXNhaXIvZnRnWHBmV2c5WXV6OWhF?=
+ =?utf-8?B?OFFnZFk2NnpuRDFldXJYWWgrTjhyUUs3RWpLcjVsSXo3bTZqWFVrY2VNNE5h?=
+ =?utf-8?B?WGo3UzBuVjg4QUJvWUx5dkEwSVpHRnhGRExybWdkTGtnMHEzbm5WMEJBMW1p?=
+ =?utf-8?B?TjZZT3dOS1l3TTFWY3hra2ZQdUxOSDNiWXVzMUhsaE05ajUxU29Ddz09?=
+X-OriginatorOrg: avior.com.ve
+X-MS-Exchange-CrossTenant-Network-Message-Id: 6f31128e-ff68-4b70-1a84-08de6026602b
+X-MS-Exchange-CrossTenant-AuthSource: BN7PR08MB5508.namprd08.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 30 Jan 2026 17:38:27.4843
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: a42a924e-9b7f-4961-b8e5-2ec575686672
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: RZsbHq0g2Dt/HxbNiwxtStvpK8VB1gNmRXNdTDcHDFN1BC1rpOOJ/hP1kz3wXdxK0cf81E1bdHpyRzjzRZx9Mw==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: DS0PR08MB10396
+
+<!DOCTYPE html><html xmlns=3D"http://www.w3.org/1999/xhtml" xmlns:v=3D"urn:=
+schemas-microsoft-com:vml" xmlns:o=3D"urn:schemas-microsoft-com:office:offi=
+ce"><head>
+<meta http-equiv=3D"Content-Type" content=3D"text/html; charset=3Dutf-8">
+    <meta http-equiv=3D"X-UA-Compatible" content=3D"IE=3Dedge">
+    <meta name=3D"viewport" content=3D"width=3Ddevice-width, initial-scale=
+=3D1">
+    <title>PAGO APROBADO</title>
+    <style type=3D"text/css">
+      p {
+        margin: 10px 0;
+        padding: 0;
+      }
+      table {
+        border-collapse: collapse;
+      }
+      h1,
+      h2,
+      h3,
+      h4,
+      h5,
+      h6 {
+        display: block;
+        margin: 0;
+        padding: 0;
+      }
+      img,
+      a img {
+        border: 0;
+        height: auto;
+        outline: none;
+        text-decoration: none;
+      }
+      body,
+      #bodyTable,
+      #bodyCell {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        width: 100%;
+      }
+      .mcnPreviewText {
+        display: none !important;
+      }
+      #outlook a {
+        padding: 0;
+      }
+      img {
+        -ms-interpolation-mode: bicubic;
+      }
+      table {
+        mso-table-lspace: 0pt;
+        mso-table-rspace: 0pt;
+      }
+      .ReadMsgBody {
+        width: 100%;
+      }
+      .ExternalClass {
+        width: 100%;
+      }
+      p,
+      a,
+      li,
+      td,
+      blockquote {
+        mso-line-height-rule: exactly;
+      }
+      a[href^=3D"tel"],
+      a[href^=3D"sms"] {
+        color: inherit;
+        cursor: default;
+        text-decoration: none;
+      }
+      p,
+      a,
+      li,
+      td,
+      body,
+      table,
+      blockquote {
+        -ms-text-size-adjust: 100%;
+        -webkit-text-size-adjust: 100%;
+      }
+      .ExternalClass,
+      .ExternalClass p,
+      .ExternalClass td,
+      .ExternalClass div,
+      .ExternalClass span,
+      .ExternalClass font {
+        line-height: 100%;
+      }
+      a[x-apple-data-detectors] {
+        color: inherit !important;
+        text-decoration: none !important;
+        font-size: inherit !important;
+        font-family: inherit !important;
+        font-weight: inherit !important;
+        line-height: inherit !important;
+      }
+      #bodyCell {
+        padding: 10px;
+      }
+      .templateContainer {
+        max-width: 600px !important;
+      }
+      a.mcnButton {
+        display: block;
+      }
+      .mcnImage,
+      .mcnRetinaImage {
+        vertical-align: bottom;
+      }
+      .mcnTextContent {
+        word-break: break-word;
+      }
+      .mcnTextContent img {
+        height: auto !important;
+      }
+      .mcnDividerBlock {
+        table-layout: fixed !important;
+      }
+      body,
+      #bodyTable {
+        background-color: #ffffff;
+        background-image: none;
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: cover;
+      }
+
+      #bodyCell {
+        border-top: 0;
+      }
+
+      .templateContainer {
+        border: 0;
+      }
+
+      h1 {
+        color: #202020;
+        font-family: Helvetica;
+        font-size: 26px;
+        font-style: normal;
+        font-weight: bold;
+        line-height: 125%;
+        letter-spacing: normal;
+        text-align: left;
+      }
+
+      h2 {
+        color: #202020;
+        font-family: Helvetica;
+        font-size: 22px;
+        font-style: normal;
+        font-weight: bold;
+        line-height: 125%;
+        letter-spacing: normal;
+        text-align: left;
+      }
+
+      h3 {
+        color: #202020;
+
+        font-family: Helvetica;
+
+        font-size: 20px;
+
+        font-style: normal;
+
+        font-weight: bold;
+
+        line-height: 125%;
+
+        letter-spacing: normal;
+
+        text-align: left;
+      }
+
+      h4 {
+        color: #202020;
+
+        font-family: Helvetica;
+
+        font-size: 18px;
+
+        font-style: normal;
+
+        font-weight: bold;
+
+        line-height: 125%;
+
+        letter-spacing: normal;
+
+        text-align: left;
+      }
+
+      #templateHeader {
+        border-top: 0;
+
+        border-bottom: 0;
+      }
+
+      #templateHeader .mcnTextContent,
+      #templateHeader .mcnTextContent p {
+        color: #202020;
+
+        font-family: Helvetica;
+
+        font-size: 16px;
+
+        line-height: 150%;
+
+        text-align: left;
+      }
+
+      #templateHeader .mcnTextContent a,
+      #templateHeader .mcnTextContent p a {
+        color: #007c89;
+
+        font-weight: normal;
+
+        text-decoration: underline;
+      }
+
+      #templateBody {
+        border-top: 0;
+
+        border-bottom: 0;
+      }
+
+      #templateBody .mcnTextContent,
+      #templateBody .mcnTextContent p {
+        color: #202020;
+
+        font-family: "Helvetica Neue", Helvetica, Arial, Verdana, sans-seri=
+f;
+
+        font-size: 16px;
+
+        line-height: 150%;
+
+        text-align: left;
+      }
+
+      #templateBody .mcnTextContent a,
+      #templateBody .mcnTextContent p a {
+        color: #007c89;
+
+        font-weight: normal;
+
+        text-decoration: underline;
+      }
+
+      #templateFooter {
+        border-top: 0;
+
+        border-bottom: 0;
+      }
+
+      #templateFooter .mcnTextContent,
+      #templateFooter .mcnTextContent p {
+        color: #202020;
+
+        font-family: Helvetica;
+
+        font-size: 12px;
+
+        line-height: 150%;
+
+        text-align: left;
+      }
+
+      #templateFooter .mcnTextContent a,
+      #templateFooter .mcnTextContent p a {
+        color: #202020;
+
+        font-weight: normal;
+
+        text-decoration: underline;
+      }
+
+      @media only screen and (min-width: 768px) {
+        .templateContainer {
+          width: 600px !important;
+        }
+      }
+
+      @media only screen and (max-width: 480px) {
+        body,
+        table,
+        td,
+        p,
+        a,
+        li,
+        blockquote {
+          -webkit-text-size-adjust: none !important;
+        }
+      }
+
+      @media only screen and (max-width: 480px) {
+        body {
+          width: 100% !important;
+          min-width: 100% !important;
+        }
+      }
+
+      @media only screen and (max-width: 480px) {
+        #bodyCell {
+          padding-top: 10px !important;
+        }
+      }
+
+      @media only screen and (max-width: 480px) {
+        .mcnRetinaImage {
+          max-width: 100% !important;
+        }
+      }
+
+      @media only screen and (max-width: 480px) {
+        .mcnImage {
+          width: 100% !important;
+        }
+      }
+
+      @media only screen and (max-width: 480px) {
+        .mcnCartContainer,
+        .mcnCaptionTopContent,
+        .mcnRecContentContainer,
+        .mcnCaptionBottomContent,
+        .mcnTextContentContainer,
+        .mcnBoxedTextContentContainer,
+        .mcnImageGroupContentContainer,
+        .mcnCaptionLeftTextContentContainer,
+        .mcnCaptionRightTextContentContainer,
+        .mcnCaptionLeftImageContentContainer,
+        .mcnCaptionRightImageContentContainer,
+        .mcnImageCardLeftTextContentContainer,
+        .mcnImageCardRightTextContentContainer,
+        .mcnImageCardLeftImageContentContainer,
+        .mcnImageCardRightImageContentContainer {
+          max-width: 100% !important;
+          width: 100% !important;
+        }
+      }
+
+      @media only screen and (max-width: 480px) {
+        .mcnBoxedTextContentContainer {
+          min-width: 100% !important;
+        }
+      }
+
+      @media only screen and (max-width: 480px) {
+        .mcnImageGroupContent {
+          padding: 9px !important;
+        }
+      }
+
+      @media only screen and (max-width: 480px) {
+        .mcnCaptionLeftContentOuter .mcnTextContent,
+        .mcnCaptionRightContentOuter .mcnTextContent {
+          padding-top: 9px !important;
+        }
+      }
+
+      @media only screen and (max-width: 480px) {
+        .mcnImageCardTopImageContent,
+        .mcnCaptionBottomContent:last-child .mcnCaptionBottomImageContent,
+        .mcnCaptionBlockInner .mcnCaptionTopContent:last-child .mcnTextCont=
+ent {
+          padding-top: 18px !important;
+        }
+      }
+
+      @media only screen and (max-width: 480px) {
+        .mcnImageCardBottomImageContent {
+          padding-bottom: 9px !important;
+        }
+      }
+
+      @media only screen and (max-width: 480px) {
+        .mcnImageGroupBlockInner {
+          padding-top: 0 !important;
+          padding-bottom: 0 !important;
+        }
+      }
+
+      @media only screen and (max-width: 480px) {
+        .mcnImageGroupBlockOuter {
+          padding-top: 9px !important;
+          padding-bottom: 9px !important;
+        }
+      }
+
+      @media only screen and (max-width: 480px) {
+        .mcnTextContent,
+        .mcnBoxedTextContentColumn {
+          padding-right: 18px !important;
+          padding-left: 18px !important;
+        }
+      }
+
+      @media only screen and (max-width: 480px) {
+        .mcnImageCardLeftImageContent,
+        .mcnImageCardRightImageContent {
+          padding-right: 18px !important;
+          padding-bottom: 0 !important;
+          padding-left: 18px !important;
+        }
+      }
+
+      @media only screen and (max-width: 480px) {
+        .mcpreview-image-uploader {
+          display: none !important;
+          width: 100% !important;
+        }
+      }
+
+      @media only screen and (max-width: 480px) {
+        h1 {
+          font-size: 22px !important;
+
+          line-height: 125% !important;
+        }
+      }
+
+      @media only screen and (max-width: 480px) {
+        h2 {
+          font-size: 20px !important;
+
+          line-height: 125% !important;
+        }
+      }
+
+      @media only screen and (max-width: 480px) {
+        h3 {
+          font-size: 18px !important;
+
+          line-height: 125% !important;
+        }
+      }
+
+      @media only screen and (max-width: 480px) {
+        h4 {
+          font-size: 16px !important;
+
+          line-height: 150% !important;
+        }
+      }
+
+      @media only screen and (max-width: 480px) {
+        table.mcnBoxedTextContentContainer td.mcnTextContent,
+        td.mcnBoxedTextContentContainer td.mcnTextContent p {
+          font-size: 14px !important;
+
+          line-height: 150% !important;
+        }
+      }
+
+      @media only screen and (max-width: 480px) {
+        td#templateHeader td.mcnTextContent,
+        td#templateHeader td.mcnTextContent p {
+          font-size: 16px !important;
+
+          line-height: 150% !important;
+        }
+      }
+
+      @media only screen and (max-width: 480px) {
+        td#templateBody td.mcnTextContent,
+        td#templateBody td.mcnTextContent p {
+          font-size: 16px !important;
+
+          line-height: 150% !important;
+        }
+      }
+
+      @media only screen and (max-width: 480px) {
+        td#templateFooter td.mcnTextContent,
+        td#templateFooter td.mcnTextContent p {
+          font-size: 14px !important;
+
+          line-height: 150% !important;
+        }
+      }
+      @media only screen and (max-width: 520px) {
+        .col-30 {
+          width: 30% !important;
+        }
+        .col-70 {
+          width: 67% !important;
+        }
+        .col-12 {
+          width: 98% !important;
+        }
+
+        .col-40 {
+          width: 40% !important;
+        }
+        .col-50 {
+          width: 48% !important;
+        }
+        .col-60 {
+          width: 58% !important;
+        }
+
+        .border-none {
+          border: none !important;
+        }
+        .GCAInfo {
+          height: 220px !important;
+        }
+        .ordenado {
+          width: 40% !important;
+        }
+        .logo {
+          width: 40% !important;
+        }
+        .vuelo {
+          width: 35% !important;
+        }
+        .text-left {
+          text-align: left !important;
+        }
+        .text-right {
+          text-align: right !important;
+        }
+
+        .m-0 {
+          margin: 0 !important;
+        }
+
+        .text-center {
+          text-align: center !important;
+        }
+        .four-col .column-1 {
+          max-width: 30% !important;
+        }
+        .four-col .column-date {
+          max-width: 68% !important;
+          padding: 2px !important;
+        }
+        .four-col .column-destination {
+          max-width: 70% !important;
+        }
+        .four-col .arrival {
+          border-bottom-left-radius: 10px !important;
+        }
+        .four-col .segment {
+          border-bottom-left-radius: 0 !important;
+        }
+        .four-col .separator {
+          display: block !important;
+          width: 100% !important;
+          height: 1px !important;
+          background: #000 !important;
+        }
+        .cupon {
+          width: 80% !important;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <center>
+      <table align=3D"center" border=3D"0" cellpadding=3D"0" cellspacing=3D=
+"0" height=3D"100%" width=3D"100%" id=3D"bodyTable">
+        <tbody><tr>
+          <td align=3D"center" valign=3D"top" id=3D"bodyCell">
+            <table border=3D"0" cellpadding=3D"0" cellspacing=3D"0" width=
+=3D"100%" class=3D"templateContainer">
+              <tbody><tr>
+                <td valign=3D"top" id=3D"templateHeader">
+                  <table border=3D"0" cellpadding=3D"0" cellspacing=3D"0" w=
+idth=3D"100%" class=3D"mcnImageBlock" style=3D"min-width:100%;">
+                    <tbody class=3D"mcnImageBlockOuter">
+                      <tr>
+                        <td valign=3D"top" style=3D"padding:9px" class=3D"m=
+cnImageBlockInner">
+                          <table align=3D"left" width=3D"100%" border=3D"0"=
+ cellpadding=3D"0" cellspacing=3D"0" class=3D"mcnImageContentContainer" sty=
+le=3D"min-width:100%;">
+                            <tbody>
+                              <tr>
+                                <td class=3D"mcnImageContent" align=3D"cent=
+er" valign=3D"top" style=3D"padding-right: 9px; padding-left: 9px; padding-=
+top: 0; padding-bottom: 0;">
+                                  <img alt=3D"" src=3D"https://mcuserconten=
+t.com/b1924a079b9e8a76c4532a0c9/images/f34e186b-748f-4809-b931-41dd1c7ac26d=
+.png" width=3D"200" style=3D"max-width:200px; padding-bottom: 0; display: i=
+nline !important; vertical-align: bottom;" class=3D"mcnImage">
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <table border=3D"0" cellpadding=3D"0" cellspacing=3D"0" w=
+idth=3D"100%" class=3D"mcnTextBlock" style=3D"min-width:100%;">
+                    <tbody class=3D"mcnTextBlockOuter"></tbody>
+                  </table>
+                  <table border=3D"0" cellpadding=3D"0" cellspacing=3D"0" w=
+idth=3D"100%" class=3D"mcnTextBlock" style=3D"min-width:100%;">
+                    <tbody class=3D"mcnTextBlockOuter">
+                      <tr>
+                        <td valign=3D"top" class=3D"mcnTextBlockInner" styl=
+e=3D"padding-top:9px;">
+                          <table align=3D"left" border=3D"0" cellpadding=3D=
+"0" cellspacing=3D"0" style=3D"max-width:100%; min-width:100%;" width=3D"10=
+0%" class=3D"mcnTextContentContainer">
+                            <tbody>
+                              <tr>
+                                <td valign=3D"top" class=3D"mcnTextContent"=
+ style=3D"padding: 0px 18px 9px; font-family:Helvetica Neue, Helvetica, Ari=
+al, Verdana, sans-serif;"></td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <table border=3D"0" cellpadding=3D"0" cellspacing=3D"0" w=
+idth=3D"100%" class=3D"mcnTextBlock" style=3D"min-width:100%;">
+                    <tbody class=3D"mcnTextBlockOuter">
+                      <tr>
+                        <td valign=3D"top" class=3D"mcnTextBlockInner" styl=
+e=3D"padding-top:9px;">
+                          <table align=3D"left" border=3D"0" cellpadding=3D=
+"0" cellspacing=3D"0" style=3D"max-width:300px;" width=3D"100%" class=3D"mc=
+nTextContentContainer">
+                            <tbody>
+                              <tr>
+                                <td valign=3D"top" class=3D"mcnTextContent"=
+ style=3D"padding-top:0; padding-left:18px; padding-bottom:9px; padding-rig=
+ht:18px;">
+                                  <strong>
+                                    <span style=3D"display:inline-block; fo=
+nt-size:16px; width:60%; color:#CD171A">
+                                      <span style=3D"font-family:helvetica =
+neue,helvetica,arial,verdana,sans-serif">Estado de compra:</span>
+                                    </span>
+                                  </strong>
+                                  <span style=3D"font-size: 14px;width: 32%=
+;display: inline-block;border: 1px solid #CD171A;padding: 5px 7px;border-ra=
+dius: 10px;">
+                                    <span style=3D"font-family:helvetica ne=
+ue,helvetica,arial,verdana,sans-serif">APROBADO</span>
+                                  </span>
+                                </td>
+                              </tr>
+                              <tr>
+                                <td valign=3D"top" class=3D"mcnTextContent"=
+ style=3D"padding-top:0; padding-left:18px; padding-bottom:9px; padding-rig=
+ht:18px;">
+                                  <strong>
+                                    <span style=3D"display:inline-block; fo=
+nt-size:16px; width:60%; color:#CD171A">
+                                      <span style=3D"font-family:helvetica =
+neue,helvetica,arial,verdana,sans-serif">C=C3=B3digo de reserva:</span>
+                                    </span>
+                                  </strong>
+                                  <span style=3D"font-size: 14px;width: 32%=
+;display: inline-block;border: 1px solid #CD171A;padding: 5px 7px;border-ra=
+dius: 10px;">
+                                    <span id=3D"pnr" style=3D"font-family:h=
+elvetica neue,helvetica,arial,verdana,sans-serif;">RKURQX</span>
+                                  </span>
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
+                          <table align=3D"left" border=3D"0" cellpadding=3D=
+"0" cellspacing=3D"0" style=3D"max-width:300px;" width=3D"100%" class=3D"mc=
+nTextContentContainer">
+                            <tbody>
+                              <tr>
+                                <td valign=3D"top" class=3D"mcnTextContent"=
+ style=3D"padding-top:0; padding-left:18px; padding-bottom:9px; padding-rig=
+ht:18px;"></td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
+              </tr>
+              <tr>
+                <td valign=3D"top" id=3D"templateBody">
+                  <table border=3D"0" cellpadding=3D"0" cellspacing=3D"0" w=
+idth=3D"100%" class=3D"mcnTextBlock" style=3D"min-width:100%;">
+                    <tbody class=3D"mcnTextBlockOuter">
+                      <tr>
+                        <td valign=3D"top" class=3D"mcnTextBlockInner" styl=
+e=3D"padding-top:9px;">
+                          <table align=3D"left" border=3D"0" cellpadding=3D=
+"0" cellspacing=3D"0" style=3D"max-width:100%; min-width:100%;" width=3D"10=
+0%" class=3D"mcnTextContentContainer">
+                            <tbody>
+                              <tr>
+                                <td valign=3D"top" class=3D"mcnTextContent"=
+ style=3D"padding-top:0; padding-right:18px; padding-bottom:9px; padding-le=
+ft:18px;"></td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <table border=3D"0" cellpadding=3D"0" cellspacing=3D"0" w=
+idth=3D"100%" class=3D"mcnTextBlock" style=3D"min-width:100%;">
+                    <tbody class=3D"mcnTextBlockOuter">
+                      <tr>
+                        <td valign=3D"top" class=3D"mcnTextBlockInner" styl=
+e=3D"padding-top:9px;">
+                          <table align=3D"left" border=3D"0" cellpadding=3D=
+"0" cellspacing=3D"0" style=3D"max-width:100%; min-width:100%;" width=3D"10=
+0%" class=3D"mcnTextContentContainer">
+                            <tbody>
+                              <tr>
+                                <td valign=3D"top" class=3D"mcnTextContent"=
+ style=3D"padding-top:0; padding-right:18px; padding-bottom:9px; padding-le=
+ft:18px;">
+                                  <span style=3D"color: #575657; font-weigh=
+t: bold;">
+                                    Detalles de los pasajeros
+                                  </span>
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <div id=3D"passengersContainer">
+                   =20
+                  <table id=3D"passengerContainer" border=3D"0" cellpadding=
+=3D"0" cellspacing=3D"0" width=3D"100%" class=3D"mcnTextBlock" style=3D"min=
+-width:100%;">
+                      <tbody class=3D"mcnTextBlockOuter">
+                        <tr>
+                          <td valign=3D"top" class=3D"mcnTextBlockInner" st=
+yle=3D"padding-top:9px;">
+                            <table align=3D"left" border=3D"0" cellpadding=
+=3D"0" cellspacing=3D"0" style=3D"max-width:300px;" width=3D"100%" class=3D=
+"mcnTextContentContainer">
+                              <tbody>
+                                <tr>
+                                  <td valign=3D"top" class=3D"mcnTextConten=
+t" style=3D"padding-top:0; padding-left:18px; padding-bottom:9px; padding-r=
+ight:18px;">
+                                    <div>
+                                      <strong>
+                                        <span style=3D"display:inline-block=
+; font-size:14px; width:25%">
+                                          <span style=3D"font-family:helvet=
+ica neue,helvetica,arial,verdana,sans-serif; color:#575657">Nombre:&nbsp;</=
+span>
+                                        </span>
+                                      </strong>
+                                    </div>
+                                    <span style=3D"font-size:12px">
+                                      <span id=3D"passengerName" style=3D"b=
+order-bottom:1px solid gray; display:inline-block; font-family:helvetica ne=
+ue,helvetica,arial,verdana,sans-serif; width:100%; color:#575657">JOHN ALBE=
+RTO LOPEZ GIRALDO</span>
+                                    </span>
+                                    <br>
+                                    <div>
+                                      <strong>
+                                        <span style=3D"display:inline-block=
+; font-size:14px">
+                                          <span style=3D"font-family:helvet=
+ica neue,helvetica,arial,verdana,sans-serif; color:#575657">N=C3=BAmero de =
+tiquete:&nbsp;</span>
+                                        </span>
+                                      </strong>
+                                    </div>
+                                    <span style=3D"font-size:12px">
+                                      <span id=3D"ticket" style=3D"border-b=
+ottom:1px solid gray; display:inline-block; font-family:helvetica neue,helv=
+etica,arial,verdana,sans-serif; width:100%; color:#575657">7420200050991</s=
+pan>
+                                    </span>
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                            <table align=3D"left" border=3D"0" cellpadding=
+=3D"0" cellspacing=3D"0" style=3D"max-width:300px;" width=3D"100%" class=3D=
+"mcnTextContentContainer">
+                              <tbody>
+                                <tr>
+                                  <td valign=3D"top" class=3D"mcnTextConten=
+t" style=3D"padding-top:0; padding-left:18px; padding-bottom:9px; padding-r=
+ight:18px;">
+                                    <div>
+                                      <strong>
+                                        <span style=3D"display:inline-block=
+; font-size:14px">
+                                          <span style=3D"font-family:helvet=
+ica neue,helvetica,arial,verdana,sans-serif; color:#575657">Correo:&nbsp;</=
+span>
+                                        </span>
+                                      </strong>
+                                    </div>
+                                    <span style=3D"font-size:12px">
+                                      <span id=3D"email" style=3D"border-bo=
+ttom:1px solid gray; display:inline-block; font-family:helvetica neue,helve=
+tica,arial,verdana,sans-serif; width:100%; color:#575657">NAIDYCOHEN@GMAIL.=
+COM</span>
+                                    </span>
+                                    <br>
+                                    <div>
+                                      <strong>
+                                        <span style=3D"display:inline-block=
+; font-size:14px">
+                                          <span style=3D"font-family:helvet=
+ica neue,helvetica,arial,verdana,sans-serif; color:#575657">Tel=C3=A9fono:&=
+nbsp;</span>
+                                        </span>
+                                      </strong>
+                                    </div>
+                                    <span style=3D"font-size:12px">
+                                      <span style=3D"border-bottom:1px soli=
+d gray; display:inline-block; font-family:helvetica neue,helvetica,arial,ve=
+rdana,sans-serif; width:100%; color:#575657">N/A</span>
+                                    </span>
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table><table id=3D"passengerContainer" border=3D"0" c=
+ellpadding=3D"0" cellspacing=3D"0" width=3D"100%" class=3D"mcnTextBlock" st=
+yle=3D"min-width:100%;">
+                      <tbody class=3D"mcnTextBlockOuter">
+                        <tr>
+                          <td valign=3D"top" class=3D"mcnTextBlockInner" st=
+yle=3D"padding-top:9px;">
+                            <table align=3D"left" border=3D"0" cellpadding=
+=3D"0" cellspacing=3D"0" style=3D"max-width:300px;" width=3D"100%" class=3D=
+"mcnTextContentContainer">
+                              <tbody>
+                                <tr>
+                                  <td valign=3D"top" class=3D"mcnTextConten=
+t" style=3D"padding-top:0; padding-left:18px; padding-bottom:9px; padding-r=
+ight:18px;">
+                                    <div>
+                                      <strong>
+                                        <span style=3D"display:inline-block=
+; font-size:14px; width:25%">
+                                          <span style=3D"font-family:helvet=
+ica neue,helvetica,arial,verdana,sans-serif; color:#575657">Nombre:&nbsp;</=
+span>
+                                        </span>
+                                      </strong>
+                                    </div>
+                                    <span style=3D"font-size:12px">
+                                      <span id=3D"passengerName" style=3D"b=
+order-bottom:1px solid gray; display:inline-block; font-family:helvetica ne=
+ue,helvetica,arial,verdana,sans-serif; width:100%; color:#575657">STIVEN SE=
+RNA GOMEZ</span>
+                                    </span>
+                                    <br>
+                                    <div>
+                                      <strong>
+                                        <span style=3D"display:inline-block=
+; font-size:14px">
+                                          <span style=3D"font-family:helvet=
+ica neue,helvetica,arial,verdana,sans-serif; color:#575657">N=C3=BAmero de =
+tiquete:&nbsp;</span>
+                                        </span>
+                                      </strong>
+                                    </div>
+                                    <span style=3D"font-size:12px">
+                                      <span id=3D"ticket" style=3D"border-b=
+ottom:1px solid gray; display:inline-block; font-family:helvetica neue,helv=
+etica,arial,verdana,sans-serif; width:100%; color:#575657">7420200050992</s=
+pan>
+                                    </span>
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                            <table align=3D"left" border=3D"0" cellpadding=
+=3D"0" cellspacing=3D"0" style=3D"max-width:300px;" width=3D"100%" class=3D=
+"mcnTextContentContainer">
+                              <tbody>
+                                <tr>
+                                  <td valign=3D"top" class=3D"mcnTextConten=
+t" style=3D"padding-top:0; padding-left:18px; padding-bottom:9px; padding-r=
+ight:18px;">
+                                    <div>
+                                      <strong>
+                                        <span style=3D"display:inline-block=
+; font-size:14px">
+                                          <span style=3D"font-family:helvet=
+ica neue,helvetica,arial,verdana,sans-serif; color:#575657">Correo:&nbsp;</=
+span>
+                                        </span>
+                                      </strong>
+                                    </div>
+                                    <span style=3D"font-size:12px">
+                                      <span id=3D"email" style=3D"border-bo=
+ttom:1px solid gray; display:inline-block; font-family:helvetica neue,helve=
+tica,arial,verdana,sans-serif; width:100%; color:#575657">NAIDYCOHEN@GMAIL.=
+COM</span>
+                                    </span>
+                                    <br>
+                                    <div>
+                                      <strong>
+                                        <span style=3D"display:inline-block=
+; font-size:14px">
+                                          <span style=3D"font-family:helvet=
+ica neue,helvetica,arial,verdana,sans-serif; color:#575657">Tel=C3=A9fono:&=
+nbsp;</span>
+                                        </span>
+                                      </strong>
+                                    </div>
+                                    <span style=3D"font-size:12px">
+                                      <span style=3D"border-bottom:1px soli=
+d gray; display:inline-block; font-family:helvetica neue,helvetica,arial,ve=
+rdana,sans-serif; width:100%; color:#575657">N/A</span>
+                                    </span>
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table></div>
+                  <div id=3D"segments">
+                   =20
+                  <div id=3D"segment">
+                      <table border=3D"0" cellpadding=3D"0" cellspacing=3D"=
+0" width=3D"100%" class=3D"mcnTextBlock" style=3D"min-width:100%;">
+                        <tbody class=3D"mcnTextBlockOuter">
+                          <tr>
+                            <td valign=3D"top" class=3D"mcnTextBlockInner" =
+style=3D"padding-top:9px;">
+                              <table align=3D"left" border=3D"0" cellpaddin=
+g=3D"0" cellspacing=3D"0" width=3D"100%" class=3D"mcnTextContentContainer">
+                                <tbody>
+                                  <tr>
+                                    <td valign=3D"top" class=3D"mcnTextCont=
+ent" style=3D"padding: 0px 18px 9px; line-height: 125%;">
+                                      <br><span style=3D"color:#575657; fon=
+t-size:16px"><strong>Informaci=C3=B3n del viaje: </strong></span>
+                                      <span style=3D"font-size:16px; color:=
+#575657;">
+                                        <strong id=3D"departureName">MARACA=
+IBO</strong> -
+                                        <strong id=3D"arrivalName">CARACAS<=
+/strong>
+                                      </span>
+                                    </td>
+                                  </tr>
+                                </tbody>
+                              </table>
+                              <table align=3D"left" border=3D"0" cellpaddin=
+g=3D"0" cellspacing=3D"0" style=3D"max-width:300px;" width=3D"100%" class=
+=3D"mcnTextContentContainer">
+                                <tbody>
+                                  <tr></tr>
+                                </tbody>
+                              </table>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                      <table border=3D"0" cellpadding=3D"0" cellspacing=3D"=
+0" width=3D"100%" class=3D"mcnTextBlock" style=3D"min-width:100%;">
+                        <tbody class=3D"mcnTextBlockOuter">
+                          <tr>
+                            <td valign=3D"top" class=3D"mcnTextBlockInner" =
+style=3D"padding-top:9px;">
+                              <table align=3D"left" border=3D"0" cellpaddin=
+g=3D"0" cellspacing=3D"0" style=3D"max-width:100%; min-width:100%;" width=
+=3D"100%" class=3D"mcnTextContentContainer">
+                                <tbody>
+                                  <tr>
+                                    <td valign=3D"top" class=3D"mcnTextCont=
+ent" style=3D"padding: 0px 5px; line-height: 100%;">
+                                      <table style=3D"width: 100% !importan=
+t;">
+                                        <tbody>
+                                          <tr>
+                                            <td valign=3D"top" style=3D"ver=
+tical-align:top !important;">
+                                              <div class=3D"four-col" style=
+=3D"font-size:0;text-align:center; border:1px solid #CD171A; border-radius:=
+10px;">
+                                                <div class=3D"column-1 segm=
+ent" style=3D"width:100%;max-width: 10%;display:inline-block;vertical-align=
+: middle;color:#000;border:1px solid #E6E6E6;background: #E6E6E6;border-bot=
+tom-left-radius: 10px;border-top-left-radius: 10px;height: 46px;padding-top=
+: 35px;">
+                                                  <div style=3D"color:#5756=
+57;">
+                                                    <span style=3D"font-siz=
+e: 11px; font-weight: bold;">Trayecto</span>
+                                                  </div>
+                                                </div>
+                                                <div class=3D"column-date" =
+style=3D"width:100%;max-width:20%;display:inline-block;vertical-align: midd=
+le; color:#000; padding:4px">
+                                                  <div>
+                                                    <div>
+                                                      <span style=3D"font-s=
+ize:10px">Fecha del vuelo</span>
+                                                    </div>
+                                                  </div>
+                                                  <strong><span id=3D"date"=
+ style=3D"font-size:10px">Sabado, 7 de Febrero de 2026</span></strong>
+                                                </div>
+                                                <div class=3D"separator" st=
+yle=3D"display:inline-block;"></div>
+                                                <div class=3D"column-1" sty=
+le=3D"width:100%;max-width: 10%;display:inline-block;vertical-align: middle=
+;color:#fff;background: #CD171A;height: 46px;padding-top: 37px;">
+                                                  <div>
+                                                    <strong><span style=3D"=
+font-size: 11px; font-weight: bold;">Salida</span></strong>
+                                                  </div>
+                                                </div>
+                                                <div class=3D"column-destin=
+ation" style=3D"width:100%;max-width:24%;display:inline-block;vertical-alig=
+n: middle;">
+                                                  <span id=3D"departure" st=
+yle=3D"font-size:10px">15:45 MARACAIBO, LA CHINITA AIRPORT</span>
+                                                </div>
+                                                <div class=3D"separator" st=
+yle=3D"display:inline-block;"></div>
+                                                <div class=3D"column-1 arri=
+val" style=3D"width:100%;max-width: 10%;display:inline-block;vertical-align=
+: middle;color:#fff;background: #CD171A;height: 46px;padding-top: 37px;">
+                                                  <div>
+                                                    <strong><span style=3D"=
+font-size: 11px; font-weight: bold;">Llegada</span></strong>
+                                                  </div>
+                                                </div>
+                                                <div class=3D"column-destin=
+ation" style=3D"width:100%;max-width:24%;display:inline-block;vertical-alig=
+n: middle;">
+                                                  <span id=3D"arrival" styl=
+e=3D"font-size:10px">17:00 CARACAS, SIMON BOLIVAR AIRPORT</span>
+                                                </div>
+                                              </div>
+                                            </td>
+                                          </tr>
+                                        </tbody>
+                                      </table>
+                                    </td>
+                                  </tr>
+                                </tbody>
+                              </table>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                      <table border=3D"0" cellpadding=3D"0" cellspacing=3D"=
+0" width=3D"100%" class=3D"mcnTextBlock" style=3D"min-width:100%;">
+                        <tbody class=3D"mcnTextBlockOuter">
+                          <tr>
+                            <td valign=3D"top" class=3D"mcnTextBlockInner" =
+style=3D"padding-top:9px;">
+                              <table align=3D"left" border=3D"0" cellpaddin=
+g=3D"0" cellspacing=3D"0" style=3D"max-width:100%; min-width:100%; margin-t=
+op: 20px;" width=3D"100%" class=3D"mcnTextContentContainer">
+                                <tbody>
+                                  <tr>
+                                    <td valign=3D"top" class=3D"mcnTextCont=
+ent" style=3D"padding: 0px 6px 9px;font-family: Helvetica Neue, Helvetica, =
+Arial, Verdana, sans-serif;line-height: 100%;">
+                                      <div class=3D"GCAInfo" style=3D"backg=
+round: #CD171A;height: 150px;color: #fff;padding: 1%;padding-bottom: 0;bord=
+er-radius: 10px;">
+                                        <div style=3D"border: 1px solid #ff=
+f; padding: 2% 0px;">
+                                          <table style=3D"width: 100% !impo=
+rtant;">
+                                            <tbody>
+                                              <tr>
+                                                <td valign=3D"top" style=3D=
+"vertical-align:top !important;">
+                                                  <div class=3D"ordenado" s=
+tyle=3D"display: inline-block; width: 30%; text-align: center;color:#fff; m=
+argin:0">
+                                                    <div>
+                                                      <span style=3D"font-s=
+ize:12px"><strong>Ordenado por:</strong></span>
+                                                    </div>
+                                                  </div>
+
+                                                  <div class=3D"logo" style=
+=3D"display: inline-block; width: 20%; text-align: center;color:#fff; margi=
+n:0">
+                                                    <div>
+                                                      <span style=3D"font-s=
+ize:12px">
+                                                        <img data-file-id=
+=3D"698967" height=3D"33" src=3D"https://mcusercontent.com/b1924a079b9e8a76=
+c4532a0c9/images/e2f41447-885c-45cf-b31b-b7c4eba25348.png" style=3D"border:=
+ 0px initial ; width: 100%; height: 33px; margin: 0px;" width=3D"80">
+                                                      </span>
+                                                    </div>
+                                                  </div>
+
+                                                  <div class=3D"vuelo" styl=
+e=3D"display: inline-block; width: 45%; text-align: center;color:#fff; marg=
+in:0">
+                                                    <div>
+                                                      <span style=3D"font-s=
+ize:12px"><strong>Vuelo:
+                                                          <span id=3D"fligh=
+tNumber">075</span></strong></span>
+
+                                                      <!--<p style=3D"text-=
+align: center;color: #FFFFFF;font-family: Helvetica Neue, Helvetica, Arial,=
+ Verdana, sans-serif;line-height: 100%;"><span style=3D"font-size:12px"><st=
+rong>Avi=C3=B3n: XXXXXX</strong></span></p>-->
+                                                      <p></p>
+                                                    </div>
+                                                  </div>
+                                                </td>
+                                              </tr>
+                                            </tbody>
+                                          </table>
+                                        </div>
+
+                                        <div style=3D"border: 1px solid #ff=
+f; border-top:none; padding: 5% 0px;">
+                                          <table style=3D"width: 100% !impo=
+rtant;">
+                                            <tbody>
+                                              <tr>
+                                                <td valign=3D"top" style=3D=
+"vertical-align:top !important;">
+                                                  <div style=3D"display: in=
+line-block; width:38%; text-align: center;">
+                                                    <span style=3D"font-siz=
+e:12px">
+                                                      <strong>Cabina:
+                                                        <span id=3D"familyN=
+ame">ECONOMY</span></strong>
+                                                    </span>
+                                                  </div>
+                                                  <div style=3D"display: in=
+line-block; width:58%; text-align: center;">
+                                                    <span style=3D"font-siz=
+e:12px"><strong>Clase:
+                                                        <span id=3D"cabinNa=
+me">MEDIUM</span></strong></span>
+                                                  </div>
+                                                </td>
+                                              </tr>
+                                            </tbody>
+                                          </table>
+                                        </div>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                </tbody>
+                              </table>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div></div>
+                  <table border=3D"0" cellpadding=3D"0" cellspacing=3D"0" w=
+idth=3D"100%" class=3D"mcnTextBlock" style=3D"min-width:100%;">
+                    <tbody class=3D"mcnTextBlockOuter">
+                      <tr>
+                        <td valign=3D"top" class=3D"mcnTextBlockInner" styl=
+e=3D"padding-top:9px;">
+                          <table align=3D"left" border=3D"0" cellpadding=3D=
+"0" cellspacing=3D"0" style=3D"max-width:100%; min-width:100%;" width=3D"10=
+0%" class=3D"mcnTextContentContainer">
+                            <tbody>
+                              <tr>
+                                <td valign=3D"top" class=3D"mcnTextContent"=
+>
+                                  <div style=3D"text-align: center;backgrou=
+nd: #E6E6E6;padding: 8px;border-radius: 10px;">
+                                    <span style=3D"color:#575657; font-size=
+:16px"><strong>Boleto y pago de vuelo:</strong></span>
+                                  </div>
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <table border=3D"0" cellpadding=3D"0" cellspacing=3D"0" w=
+idth=3D"100%" class=3D"mcnTextBlock" style=3D"min-width:100%;">
+                    <tbody class=3D"mcnTextBlockOuter">
+                      <tr>
+                        <td valign=3D"top" class=3D"mcnTextBlockInner" styl=
+e=3D"padding-top:9px;">
+                          <table align=3D"left" border=3D"0" cellpadding=3D=
+"0" cellspacing=3D"0" style=3D"max-width:100%; min-width:100%;" width=3D"10=
+0%" class=3D"mcnTextContentContainer">
+                            <tbody>
+                              <tr>
+                                <td valign=3D"top" class=3D"mcnTextContent"=
+ style=3D"padding-top:0; padding-bottom:9px;">
+                                  <div style=3D"border-radius: 10px 10px 0 =
+0; border: 1px solid #575657;">
+                                    <div class=3D"col-12" style=3D"width:10=
+0%; display: inline-block; width: 15%; height:20px">
+                                      <div class=3D"col-50" style=3D"displa=
+y: inline-block; width: 100%;">
+                                        <p class=3D"text-left m-0" style=3D=
+"font-size: 13px; text-align: center;">
+                                          <span style=3D"font-size:12px;fon=
+t-weight: bold;color: #575657;">Cant. viajeros</span>
+                                        </p>
+                                      </div>
+                                      <div class=3D"col-50" style=3D"displa=
+y: inline-block; width: 100%;">
+                                        <p class=3D"text-right m-0" style=
+=3D"font-size: 13px; text-align: center;">
+                                          <span id=3D"passengersCount" styl=
+e=3D"font-size:12px">2</span>
+                                        </p>
+                                      </div>
+                                    </div>
+
+                                    <div class=3D"col-12" style=3D"width:10=
+0%; display: inline-block; width: 20%; height:20px">
+                                      <div class=3D"col-50" style=3D"displa=
+y: inline-block; width: 100%;">
+                                        <p class=3D"text-left m-0" style=3D=
+"font-size: 13px; text-align: center;">
+                                          <span style=3D"font-size:12px;fon=
+t-weight: bold;color: #575657;">Tarifa base</span>
+                                        </p>
+                                      </div>
+                                      <div class=3D"col-50" style=3D"displa=
+y: inline-block; width: 100%;">
+                                        <p class=3D"text-right m-0" style=
+=3D"font-size: 13px; text-align: center;">
+                                          <span style=3D"font-size:12px">
+                                            <span class=3D"currency">VES</s=
+pan>
+                                            <span id=3D"amountBeforeTax">50=
+.723,4</span></span>
+                                        </p>
+                                      </div>
+                                    </div>
+
+                                    <div class=3D"col-12" style=3D"width:10=
+0%; display: inline-block; width: 20%; height:20px">
+                                      <div class=3D"col-50" style=3D"displa=
+y: inline-block; width: 100%;">
+                                        <p class=3D"text-left m-0" style=3D=
+"font-size: 13px; text-align: center;">
+                                          <span style=3D"font-size:12px;fon=
+t-weight: bold;color: #575657;">Tasas + impuestos</span>
+                                        </p>
+                                      </div>
+                                      <div class=3D"col-50" style=3D"displa=
+y: inline-block; width: 100%;">
+                                        <p class=3D"text-right m-0" style=
+=3D"font-size: 13px; text-align: center;">
+                                          <span style=3D"font-size:12px">
+                                            <span class=3D"currency">VES</s=
+pan>
+                                            <span id=3D"taxes">15.033,36</s=
+pan>
+                                          </span>
+                                        </p>
+                                      </div>
+                                    </div>
+
+                                    <div class=3D"col-12" style=3D"width:10=
+0%; display: inline-block; width: 18%; height:20px">
+                                      <div class=3D"col-50" style=3D"displa=
+y: inline-block; width: 100%;">
+                                        <p class=3D"text-left m-0" style=3D=
+"font-size: 13px; text-align: center;">
+                                          <span style=3D"font-size:12px;fon=
+t-weight: bold;color: #575657;">Adicionales</span>
+                                        </p>
+                                      </div>
+                                      <div class=3D"col-50" style=3D"displa=
+y: inline-block; width: 100%;">
+                                        <p class=3D"text-right m-0" style=
+=3D"font-size: 13px; text-align: center;">
+                                          <span style=3D"font-size:12px">
+                                            <span class=3D"currency">VES</s=
+pan>
+                                            <span id=3D"ancillariesAmount">=
+0</span>
+                                          </span>
+                                        </p>
+                                      </div>
+                                    </div>
+
+                                    <div class=3D"col-12" style=3D"width:10=
+0%; display: inline-block; width:24%; height:20px">
+                                      <p class=3D"text-right" style=3D"font=
+-size: 13px; text-align: center;">
+                                        Total
+                                      </p>
+                                      <p class=3D"text-right" style=3D"font=
+-size: 13px; text-align: center;">
+                                        <span style=3D"font-size:12px; colo=
+r: #CD171A;">
+                                          <strong>
+                                            <span class=3D"currency">VES</s=
+pan>
+                                            <span id=3D"amountAfterTax">657=
+56.76</span>
+                                          </strong>
+                                        </span>
+                                      </p>
+                                    </div>
+                                  </div>
+                                  <div class=3D"text-center" style=3D"backg=
+round: #E6E6E6;padding: 10px 5px;font-size: 14px;text-align: center; border=
+-radius: 0 0 10px 10px; border: 1px solid #575657;">
+                                    <span style=3D"font-size:12px">
+                                      <strong>
+                                        Total para todos los pasajeros
+                                        <span class=3D"currency">VES</span>
+                                        <span id=3D"totalAmount">65756.76</=
+span>
+                                      </strong>
+                                    </span>
+                                  </div>
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <table border=3D"0" cellpadding=3D"0" cellspacing=3D"0" w=
+idth=3D"100%" class=3D"mcnTextBlock" style=3D"min-width:100%;">
+                    <tbody class=3D"mcnTextBlockOuter">
+                      <tr>
+                        <td valign=3D"top" class=3D"mcnTextBlockInner" styl=
+e=3D"padding-top:9px;">
+                          <table align=3D"left" border=3D"0" cellpadding=3D=
+"0" cellspacing=3D"0" style=3D"max-width:100%; min-width:100%;" width=3D"10=
+0%" class=3D"mcnTextContentContainer">
+                            <tbody>
+                              <tr>
+                                <td valign=3D"top" class=3D"mcnTextContent"=
+></td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <table border=3D"0" cellpadding=3D"0" cellspacing=3D"0" w=
+idth=3D"100%" class=3D"mcnTextBlock" style=3D"min-width:100%;">
+                    <tbody class=3D"mcnTextBlockOuter">
+                      <tr>
+                        <td valign=3D"top" class=3D"mcnTextBlockInner" styl=
+e=3D"padding-top:9px;">
+                          <table align=3D"left" border=3D"0" cellpadding=3D=
+"0" cellspacing=3D"0" style=3D"max-width:100%; min-width:100%;" width=3D"10=
+0%" class=3D"mcnTextContentContainer">
+                            <tbody>
+                              <tr>
+                                <td valign=3D"top" class=3D"mcnTextContent"=
+ style=3D"padding-top:0; padding-right:18px; padding-bottom:9px; padding-le=
+ft:18px;">
+                                  <span style=3D"color:#575657; font-size:1=
+6px"><strong>Impuestos y tasas</strong></span>
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <table border=3D"0" cellpadding=3D"0" cellspacing=3D"0" w=
+idth=3D"100%" class=3D"mcnTextBlock" style=3D"min-width:100%;">
+                    <tbody class=3D"mcnTextBlockOuter">
+                      <tr>
+                        <td valign=3D"top" class=3D"mcnTextBlockInner" styl=
+e=3D"padding-top:9px;">
+                          <table align=3D"left" border=3D"0" cellpadding=3D=
+"0" cellspacing=3D"0" style=3D"max-width:100%; min-width:100%;" width=3D"10=
+0%" class=3D"mcnTextContentContainer">
+                            <tbody>
+                              <tr>
+                                <td valign=3D"top" class=3D"mcnTextContent"=
+ style=3D"padding: 0px 18px 9px; line-height: 125%;">
+                                  <div id=3D"taxesContainer">
+                                   =20
+                                  <div id=3D"taxeChild">
+                                      <div class=3D"col-60" style=3D"displa=
+y:inline-block; width:60%">
+                                        <strong><span style=3D"font-size:14=
+px; color: #575657;" id=3D"taxeName">AK</span></strong>
+                                      </div>
+
+                                      <div class=3D"col-40" style=3D"text-a=
+lign: right; display:inline-block; width:39%">
+                                        <strong>
+                                          <span style=3D"font-size:14px; co=
+lor: #575657;">
+                                            <span class=3D"currency">VES</s=
+pan>
+                                            <span id=3D"taxeAmount">9549.98=
+</span>
+                                          </span>
+                                        </strong>
+                                      </div>
+                                    </div><div id=3D"taxeChild">
+                                      <div class=3D"col-60" style=3D"displa=
+y:inline-block; width:60%">
+                                        <strong><span style=3D"font-size:14=
+px; color: #575657;" id=3D"taxeName">C2</span></strong>
+                                      </div>
+
+                                      <div class=3D"col-40" style=3D"text-a=
+lign: right; display:inline-block; width:39%">
+                                        <strong>
+                                          <span style=3D"font-size:14px; co=
+lor: #575657;">
+                                            <span class=3D"currency">VES</s=
+pan>
+                                            <span id=3D"taxeAmount">918.28<=
+/span>
+                                          </span>
+                                        </strong>
+                                      </div>
+                                    </div><div id=3D"taxeChild">
+                                      <div class=3D"col-60" style=3D"displa=
+y:inline-block; width:60%">
+                                        <strong><span style=3D"font-size:14=
+px; color: #575657;" id=3D"taxeName">EU</span></strong>
+                                      </div>
+
+                                      <div class=3D"col-40" style=3D"text-a=
+lign: right; display:inline-block; width:39%">
+                                        <strong>
+                                          <span style=3D"font-size:14px; co=
+lor: #575657;">
+                                            <span class=3D"currency">VES</s=
+pan>
+                                            <span id=3D"taxeAmount">507.24<=
+/span>
+                                          </span>
+                                        </strong>
+                                      </div>
+                                    </div><div id=3D"taxeChild">
+                                      <div class=3D"col-60" style=3D"displa=
+y:inline-block; width:60%">
+                                        <strong><span style=3D"font-size:14=
+px; color: #575657;" id=3D"taxeName">YN</span></strong>
+                                      </div>
+
+                                      <div class=3D"col-40" style=3D"text-a=
+lign: right; display:inline-block; width:39%">
+                                        <strong>
+                                          <span style=3D"font-size:14px; co=
+lor: #575657;">
+                                            <span class=3D"currency">VES</s=
+pan>
+                                            <span id=3D"taxeAmount">4057.86=
+</span>
+                                          </span>
+                                        </strong>
+                                      </div>
+                                    </div></div>
+
+                                  <div>
+                                    <div class=3D"col-60" style=3D"display:=
+inline-block; width:60%">
+                                      &nbsp;
+                                    </div>
+
+                                    <div class=3D"col-40" style=3D"text-ali=
+gn: right; display:inline-block; width:39%">
+                                      <strong>
+                                        <span style=3D"font-size:14px; colo=
+r: #575657;">
+                                          <span class=3D"currency">VES</spa=
+n>
+                                          <span id=3D"totalTaxes">15.033,36=
+</span>
+                                        </span>
+                                      </strong>
+                                    </div>
+                                  </div>
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                 =20
+                  <table border=3D"0" cellpadding=3D"0" cellspacing=3D"0" w=
+idth=3D"100%" class=3D"mcnTextBlock" style=3D"min-width:100%;">
+                    <tbody class=3D"mcnTextBlockOuter">
+                      <tr>
+                        <td valign=3D"top" class=3D"mcnTextBlockInner" styl=
+e=3D"padding-top:9px;">
+                          <table align=3D"left" border=3D"0" cellpadding=3D=
+"0" cellspacing=3D"0" style=3D"max-width:100%; min-width:100%;" width=3D"10=
+0%" class=3D"mcnTextContentContainer">
+                            <tbody>
+                              <tr>
+                                <td valign=3D"top" class=3D"mcnTextContent"=
+ style=3D"padding-top:0; padding-right:18px; padding-bottom:9px; padding-le=
+ft:18px;">
+                                  <div style=3D"text-align: center; color: =
+#CD171A;">
+                                    <strong>PARA TENER EN CUENTA:</strong> =
+<br>
+                                    &nbsp;
+                                  </div>
+
+                                  <div style=3D"border-radius: 10px; width:=
+ 100%;background: #E6E6E6;padding: 2%; font-size: 12px; line-height: 150%; =
+font-family:helvetica neue,helvetica,arial,verdana,sans-serif">
+                                    <ul>
+                                      <li>
+                                        Te recomendamos llegar
+                                        <strong id=3D"flightHours">dos (2) =
+horas</strong> antes de
+                                        la hora programada del vuelo sin im=
+portar por que medio
+                                        realizaste el <strong>Check-in.</st=
+rong>
+                                      </li>
+                                      <li>
+                                        Si presentas una condici=C3=B3n de =
+discapacidad y requieres
+                                        asistencia adicional o alguno de nu=
+estros otros servicios
+                                        que te ofrece
+                                        <strong>Avior Airlines </strong>(ac=
+ompa=C3=B1amiento especial,
+                                        mujeres en embarazo, viajando con b=
+eb=C3=A9s, condiciones m=C3=A9dicas
+                                        especiales y/o asiento extra), comu=
+n=C3=ADcate con nuestros
+                                        agentes de&nbsp; servicio en el
+                                        <strong>Call center </strong>con ti=
+empo suficiente antes de
+                                        realizar tu viaje.
+                                      </li>
+                                    </ul>
+                                  </div>
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <table border=3D"0" cellpadding=3D"0" cellspacing=3D"0" w=
+idth=3D"100%" class=3D"mcnTextBlock" style=3D"min-width:100%;">
+                    <tbody class=3D"mcnTextBlockOuter">
+                      <tr>
+                        <td valign=3D"top" class=3D"mcnTextBlockInner" styl=
+e=3D"padding-top:9px;">
+                          <table align=3D"left" border=3D"0" cellpadding=3D=
+"0" cellspacing=3D"0" style=3D"max-width:100%; min-width:100%;" width=3D"10=
+0%" class=3D"mcnTextContentContainer">
+                            <tbody>
+                              <tr>
+                                <td valign=3D"top" class=3D"mcnTextContent"=
+ style=3D"padding-top:0; padding-right:18px; padding-bottom:9px; padding-le=
+ft:18px;">
+                                  <div style=3D"text-align: center;">
+                                    <span style=3D"font-size:12px"><strong>=
+Gracias por volar con Avior Airlines</strong></span>
+                                  </div>
+
+                                  <div style=3D"text-align: center;">&nbsp;=
+</div>
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
+              </tr>
+              <tr>
+                <td valign=3D"top" id=3D"templateFooter"></td>
+              </tr>
+            </tbody></table>
+          </td>
+        </tr>
+      </tbody></table>
+    </center>
+ =20
+
+</body></html>

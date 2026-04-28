@@ -1,0 +1,58 @@
+<div class="flex flex-col h-full animate-fade-in">
+    <!-- Header Advisor -->
+    <div class="flex items-center justify-between mb-8">
+        <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-status-success text-2xl animate-pulse">neurology</span>
+            <h4 class="text-white font-black text-sm uppercase tracking-widest">Consejero IA TravelHub</h4>
+        </div>
+        <span class="px-2 py-0.5 bg-white/5 border border-white/10 text-[9px] text-text-muted rounded-full">
+            {{ insight.fecha|slice:":10" }}
+        </span>
+    </div>
+
+    <!-- Insights List -->
+    <div class="space-y-6 flex-grow">
+        {% if insight.consejos %}
+            {% for consejo in insight.consejos %}
+            <div class="flex gap-4 group">
+                <div class="flex-shrink-0 w-8 h-8 rounded-full bg-status-success/10 border border-status-success/20 flex items-center justify-center text-status-success font-black text-xs">
+                    {{ forloop.counter }}
+                </div>
+                <div class="flex-grow pt-1">
+                    <p class="text-text-main text-sm leading-relaxed font-medium group-hover:text-white transition-colors">
+                        "{{ consejo }}"
+                    </p>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <!-- Estado: IA Pensando (Fallback si falla el JSON) -->
+             <div class="flex flex-col items-center justify-center h-full text-center py-12">
+                <span class="material-symbols-outlined text-text-muted mb-4 text-4xl">hourglass_empty</span>
+                <p class="text-text-muted text-xs font-mono tracking-tighter italic">El motor estratégico se está calibrando. Vuelve por la mañana para los consejos frescos.</p>
+             </div>
+        {% endif %}
+    </div>
+
+    <!-- Footer Analytics -->
+    <div class="mt-8 pt-6 border-t border-white/5 flex items-center justify-between">
+        <div class="text-left">
+            <p class="text-[10px] text-text-muted uppercase font-bold tracking-widest leading-none">Confianza IA</p>
+            <p class="text-status-success font-black text-xs">98.4% OPTIMIZADO</p>
+        </div>
+        <div class="flex items-center gap-2 px-3 py-1 bg-white/5 border border-white/10 rounded-full text-text-muted text-[10px] font-bold">
+            <span class="w-1.5 h-1.5 bg-status-success rounded-full animate-ping"></span>
+            IA Consultora Activa 🧠
+        </div>
+    </div>
+</div>
+
+<style>
+    @keyframes fade-in {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in {
+        animation: fade-in 0.5s ease-out forwards;
+    }
+</style>

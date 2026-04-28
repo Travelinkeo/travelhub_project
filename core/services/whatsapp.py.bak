@@ -1,0 +1,196 @@
+import logging
+import requests
+import base64
+from django.conf import settings
+
+logger = logging.getLogger(__name__)
+
+class WhatsAppService:
+    """
+    Servicio Multi-tenant para WhatsApp utilizando WPPConnect Server.
+    Maneja la generación dinámica de tokens requerida por este motor.
+    """
+    
+    _tokens = {} # Cache de tokens por sesión: {session_name: token}
+
+    @classmethod
+    def _get_secret_key(cls):
+        return getattr(settings, 'WHATSAPP_MICROSERVICE_TOKEN', 'TravelHubSecretKey2026')
+
+    @classmethod
+    def _get_base_url(cls):
+        return getattr(settings, 'WHATSAPP_MICROSERVICE_URL', 'http://wppconnect:21465')
+
+    @classmethod
+    def _ensure_token(cls, session: str):
+        """Genera u obtiene el token de acceso para una sesión específica."""
+        if session in cls._tokens:
+            return cls._tokens[session]
+
+        base_url = cls._get_base_url()
+        secret_key = cls._get_secret_key()
+        
+        # Endpoint: /api/:session/:secretkey/generate-token
+        url = f"{base_url}/api/{session}/{secret_key}/generate-token"
+        
+        try:
+            logger.info(f"🔑 [WPP] Generando token para sesión: {session}")
+            response = requests.post(url, timeout=10)
+            
+            if response.status_code in [200, 201]:
+                data = response.json()
+                token = data.get("token")
+                if token:
+                    cls._tokens[session] = token
+                    return token
+            
+            logger.error(f"❌ Fallo al generar token WPP ({response.status_code}): {response.text}")
+            return None
+        except Exception as e:
+            logger.error(f"🧨 Error crítico generando token: {e}")
+            return None
+
+    @classmethod
+    def _get_headers(cls, session: str):
+        """Retorna las cabeceras con el token dinámico."""
+        token = cls._ensure_token(session)
+        return {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {token}" if token else ""
+        }
+
+    @classmethod
+    def enviar_mensaje_texto(cls, telefono: str, mensaje: str, instancia: str = "default"):
+        """Envía un mensaje de texto."""
+        base_url = cls._get_base_url()
+        url = f"{base_url}/api/{instancia}/send-message"
+        
+        clean_number = "".join(filter(str.isdigit, str(telefono)))
+        payload = {
+            "phone": clean_number,
+            "message": mensaje
+        }
+
+        try:
+            headers = cls._get_headers(instancia)
+            if not headers.get("Authorization"):
+                return {"success": False, "error": "No se pudo obtener token de acceso"}
+
+            logger.info(f"🚀 [WPP] Enviando mensaje. Sesión: {instancia} -> {clean_number}")
+            response = requests.post(url, json=payload, headers=headers, timeout=20)
+            
+            if response.status_code in [200, 201]:
+                return {"success": True, "data": response.json()}
+            
+            # Si el error es 401, invalidamos el token cacheado e intentamos una vez más
+            if response.status_code == 401:
+                cls._tokens.pop(instancia, None)
+                headers = cls._get_headers(instancia)
+                response = requests.post(url, json=payload, headers=headers, timeout=20)
+                if response.status_code in [200, 201]:
+                    return {"success": True, "data": response.json()}
+
+            logger.error(f"❌ Error en WPPConnect ({response.status_code}): {response.text}")
+            return {"success": False, "error": response.text}
+                
+        except Exception as e:
+            logger.exception(f"🧨 Excepción en WhatsAppService: {str(e)}")
+            return {"success": False, "error": str(e)}
+
+    @classmethod
+    def crear_instancia(cls, nombre: str):
+        """Inicia una sesión en WPPConnect."""
+        base_url = cls._get_base_url()
+        url = f"{base_url}/api/{nombre}/start-session"
+        
+        try:
+            # Primero aseguramos el token
+            headers = cls._get_headers(nombre)
+            if not headers.get("Authorization"):
+                logger.error(f"❌ No se pudo iniciar sesión {nombre} porque no hay token.")
+                return None
+
+            logger.info(f"🆕 [WPP] Iniciando sesión '{nombre}'...")
+            payload = {
+                "createOptions": {
+                    "autoClose": 6000000,
+                    "disableWelcome": True,
+                    "updatesLog": false,
+                    "disableSpins": true,
+                    "useChrome": true,
+                    "waitForLogin": false
+                }
+            }
+            response = requests.post(url, json=payload, headers=headers, timeout=30)
+            
+            if response.status_code in [200, 201]:
+                return response.json()
+            
+            logger.error(f"❌ Error al iniciar sesión WPP ({response.status_code}): {response.text}")
+            return None
+        except Exception as e:
+            logger.error(f"🧨 Fallo crítico en WPP start: {str(e)}")
+            return None
+
+    @classmethod
+    def obtener_estado_instancia(cls, instancia: str):
+        """Consulta el estado de la sesión."""
+        base_url = cls._get_base_url()
+        url = f"{base_url}/api/{instancia}/status-session"
+        
+        try:
+            headers = cls._get_headers(instancia)
+            if not headers.get("Authorization"):
+                return "error"
+
+            response = requests.get(url, headers=headers, timeout=10)
+            if response.status_code == 200:
+                data = response.json()
+                status = data.get("status", "")
+                connected = data.get("connected", False)
+                
+                logger.info(f"📊 [WPP] Estado de {instancia}: {status} (Connected: {connected})")
+                
+                if connected:
+                    return "open"
+                
+                if status in ["qrRead", "notLogged", "waitingChat", "initialPageLoad"]:
+                    return "connecting"
+                    
+                return "disconnected"
+                
+            elif response.status_code == 404:
+                # Intentamos crearla si no existe
+                cls.crear_instancia(instancia)
+                return "connecting"
+                
+            return "error"
+        except Exception as e:
+            logger.error(f"❌ [WPP] Error consultando estado: {e}")
+            return "error"
+
+    @classmethod
+    def obtener_qr_conexion(cls, instancia: str):
+        """Obtiene el código QR en Base64."""
+        base_url = cls._get_base_url()
+        url = f"{base_url}/api/{instancia}/qrcode-session"
+        
+        try:
+            headers = cls._get_headers(instancia)
+            if not headers.get("Authorization"):
+                return None
+
+            response = requests.get(url, headers=headers, timeout=20)
+            logger.info(f"📸 [WPP] Fetch QR {instancia}: Status {response.status_code}")
+            if response.status_code == 200:
+                data = response.json()
+                base64_qr = data.get("qrcode")
+                if base64_qr:
+                    logger.info(f"✅ [WPP] QR obtenido para {instancia}")
+                    return base64_qr
+            
+            logger.warning(f"⚠️ [WPP] No se pudo obtener QR para {instancia}: {response.text}")
+            return None
+        except Exception as e:
+            logger.error(f"❌ [WPP] Error obteniendo QR: {e}")
+            return None

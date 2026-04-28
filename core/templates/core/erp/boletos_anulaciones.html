@@ -1,0 +1,199 @@
+{% extends 'base_modern.html' %}
+{% load humanize %}
+
+{% block title %}Anulación de Boleto — TravelHub Pro{% endblock %}
+
+{% block extra_css %}
+<style>
+    .glass-card {
+        background: var(--surface-1);
+        backdrop-filter: blur(12px);
+        border: 1px solid var(--border-color);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<main class="flex-1 w-full max-w-[1400px] mx-auto p-6 md:p-8">
+
+    <!-- Header & Action Bar -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10 pb-6 border-b border-border-color">
+        <div>
+            <h1 class="text-3xl font-black text-text-main tracking-tight uppercase">Solicitud de Anulación</h1>
+            <p class="text-text-muted text-sm mt-1">Gestión de cancelaciones, reembolsos y penalidades.</p>
+        </div>
+        <div class="flex gap-3">
+            <a href="{% url 'core:boletos_dashboard' %}" class="btn-secondary !h-12 !px-6">
+                <span class="material-symbols-outlined text-[20px]">close</span>
+                <span>Cancelar</span>
+            </a>
+        </div>
+    </div>
+
+    {% include 'core/erp/partials/boletos_nav.html' with active_tab='boletos_anulaciones' %}
+
+    <div class="grid grid-cols-1 lg:grid-cols-5 gap-8 max-w-6xl mx-auto">
+        
+        <!-- ── Panel izquierdo: Formulario (span 3) ── -->
+        <div class="lg:col-span-3 space-y-6">
+            <div class="card-base p-8 space-y-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-black uppercase tracking-widest text-text-muted">ID Boleto / Número</label>
+                        <input type="text" id="boleto_id" placeholder="TKT o ID..." class="input-base font-mono">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-black uppercase tracking-widest text-text-muted">Tipo de Anulación</label>
+                        <select id="tipo_anulacion" class="input-base">
+                            <option value="VOL">Voluntaria (VOL)</option>
+                            <option value="INV">Involuntaria (INV)</option>
+                            <option value="CAM">Cambio de Itinerario (CAM)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-text-muted">Motivo de la Anulación</label>
+                    <textarea id="motivo" placeholder="Describa brevemente el motivo..." class="input-base min-h-[100px] py-3"></textarea>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 border-t border-border-color/50">
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-black uppercase tracking-widest text-text-muted">Monto Original</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-text-muted">$</span>
+                            <input type="number" step="0.01" id="monto_original" placeholder="0.00" class="input-base !pl-8 font-mono" oninput="calcularReembolso()">
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-black uppercase tracking-widest text-text-muted">Penalidad Aerolínea</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-text-muted">$</span>
+                            <input type="number" step="0.01" id="penalidad_aerolinea" placeholder="0.00" class="input-base !pl-8 text-status-danger/70 font-mono" oninput="calcularReembolso()">
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-black uppercase tracking-widest text-text-muted">Fee Agencia</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-text-muted">$</span>
+                            <input type="number" step="0.01" id="fee_agencia" placeholder="0.00" class="input-base !pl-8 font-mono" oninput="calcularReembolso()">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between p-6 bg-status-success-bg/10 border border-status-success/20 rounded-2xl">
+                    <div>
+                        <p class="text-[10px] font-black uppercase tracking-widest text-text-muted">Reembolso Estimado</p>
+                        <p class="text-[9px] text-text-muted mt-0.5">Original − Penalidad − Fee</p>
+                    </div>
+                    <span id="monto_reembolso_display" class="text-3xl font-black text-status-success font-mono">$0.00</span>
+                </div>
+
+                <button onclick="solicitarAnulacion()" class="w-full h-14 bg-status-danger hover:bg-status-danger/90 text-white rounded-xl font-black uppercase tracking-widest transition-all shadow-lg shadow-status-danger/20 flex items-center justify-center gap-3 group">
+                    <span class="material-symbols-outlined text-[24px] group-hover:rotate-12 transition-transform">cancel</span>
+                    Solicitar Anulación
+                </button>
+            </div>
+        </div>
+
+        <!-- ── Panel derecho: Info y Resultado (span 2) ── -->
+        <div class="lg:col-span-2 space-y-6">
+            <!-- Bloque de Resultado Exitoso -->
+            <div id="resultado-exito" class="hidden card-base p-6 border-status-success/30 bg-status-success-bg/5 animate-fade-in">
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="size-12 rounded-2xl bg-status-success/10 flex items-center justify-center text-status-success border border-status-success/20">
+                        <span class="material-symbols-outlined text-[28px]">verified</span>
+                    </div>
+                    <div>
+                        <p class="text-sm font-black text-status-success uppercase tracking-tighter">¡Registrado!</p>
+                        <p class="text-[10px] text-text-muted font-bold uppercase tracking-widest">Anulación Procesada</p>
+                    </div>
+                </div>
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center p-4 bg-surface-2 rounded-xl border border-border-color/50">
+                        <span class="text-[10px] font-black text-text-muted uppercase tracking-widest">ID Registro</span>
+                        <span id="res-id" class="text-sm font-mono font-black text-text-main tracking-tighter">--</span>
+                    </div>
+                    <div class="flex justify-between items-center p-4 bg-surface-2 rounded-xl border border-border-color/50">
+                        <span class="text-[10px] font-black text-text-muted uppercase tracking-widest">Reembolso Final</span>
+                        <span id="res-monto" class="text-lg font-mono font-black text-status-success">$0.00</span>
+                    </div>
+                </div>
+                <a href="{% url 'core:boletos_dashboard' %}" class="btn-secondary !w-full mt-6">
+                    <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+                    Volver al Dashboard
+                </a>
+            </div>
+
+            <!-- Guía de Tipos -->
+            <div class="card-base p-6 border-primary/5">
+                <h3 class="text-[10px] font-black uppercase tracking-[0.2em] text-text-muted mb-6">Tipos de Anulación</h3>
+                <div class="space-y-6">
+                    <div class="flex gap-4">
+                        <span class="px-2 py-1 rounded bg-blue-500/10 text-blue-500 text-[10px] font-black h-fit border border-blue-500/20">VOL</span>
+                        <p class="text-xs text-text-secondary leading-relaxed font-medium">Cancelación voluntaria del pasajero. Sujeta a penalidades de la aerolínea.</p>
+                    </div>
+                    <div class="flex gap-4">
+                        <span class="px-2 py-1 rounded bg-status-success/10 text-status-success text-[10px] font-black h-fit border border-status-success/20">INV</span>
+                        <p class="text-xs text-text-secondary leading-relaxed font-medium">Causa ajena al pasajero (aerolínea). Reembolso total aplicable.</p>
+                    </div>
+                    <div class="flex gap-4">
+                        <span class="px-2 py-1 rounded bg-amber-500/10 text-amber-500 text-[10px] font-black h-fit border border-amber-500/20">CAM</span>
+                        <p class="text-xs text-text-secondary leading-relaxed font-medium">Modificación pactada. Puede implicar diferencia tarifaria.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}
+
+{% block extra_scripts %}
+<script nonce="{{ request.csp_nonce }}">
+    function calcularReembolso() {
+        const o = parseFloat(document.getElementById('monto_original').value) || 0;
+        const p = parseFloat(document.getElementById('penalidad_aerolinea').value) || 0;
+        const f = parseFloat(document.getElementById('fee_agencia').value) || 0;
+        const total = Math.max(0, o - p - f);
+        document.getElementById('monto_reembolso_display').textContent = `$${total.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+    }
+
+    async function solicitarAnulacion() {
+        const data = {
+            boleto: document.getElementById('boleto_id').value,
+            tipo_anulacion: document.getElementById('tipo_anulacion').value,
+            motivo: document.getElementById('motivo').value,
+            monto_original: document.getElementById('monto_original').value,
+            penalidad_aerolinea: document.getElementById('penalidad_aerolinea').value,
+            fee_agencia: document.getElementById('fee_agencia').value
+        };
+
+        if (!data.boleto || !data.monto_original) {
+            return alert('Error: Proporcione el ID del Boleto y el Monto Original.');
+        }
+
+        try {
+            const response = await fetch('/api/boletos/solicitar-anulacion/', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify(data)
+            });
+            const result = await response.json();
+            
+            if (response.ok) {
+                document.getElementById('resultado-exito').classList.remove('hidden');
+                document.getElementById('res-id').textContent = result.id_anulacion || '--';
+                document.getElementById('res-monto').textContent = `$${result.monto_reembolso.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+                alert('Solicitud denegada: ' + (result.error || 'Verifique los datos'));
+            }
+        } catch (error) {
+            alert('Fallo de conexión con el servidor.');
+        }
+    }
+</script>
+{% endblock %}

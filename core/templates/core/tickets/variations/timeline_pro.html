@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>TravelHub - Timeline Pro Itinerary</title>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&family=Work+Sans:wght@300;400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        @page {
+            size: A4;
+            margin: 0;
+        }
+        :root {
+            --primary: #041627;
+            --primary-container: #1a2b3c;
+            --secondary: #4c616c;
+            --surface: #f8fafb;
+            --on-surface: #191c1d;
+            --on-surface-variant: #44474c;
+            --outline: #74777d;
+            --outline-variant: #c4c6cd;
+            --body-margin: 50px;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Work Sans', sans-serif;
+            color: var(--on-surface);
+            background-color: #ffffff;
+            -webkit-print-color-adjust: exact;
+        }
+        .page {
+            width: 210mm;
+            min-height: 297mm;
+            position: relative;
+            background-color: #ffffff;
+            display: flex;
+            flex-direction: column;
+        }
+        header {
+            background: linear-gradient(to right, #041627, #1a2b3c);
+            color: white;
+            padding: 30px var(--body-margin);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header-logo-container {
+            display: flex;
+            flex-direction: column;
+        }
+        .header-logo-container h1 {
+            margin: 0;
+            font-family: 'Manrope', sans-serif;
+            font-weight: 800;
+            font-size: 24px;
+            letter-spacing: -0.02em;
+        }
+        .header-slogan {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #94a3b8;
+            margin-top: 4px;
+        }
+        .header-eslogan-right {
+           font-size: 11px;
+           color: white;
+           font-family: 'Manrope', sans-serif;
+        }
+
+        main {
+            padding: var(--body-margin);
+            flex-grow: 1;
+        }
+
+        .passenger-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            border-bottom: 1px solid var(--outline-variant);
+            padding-bottom: 30px;
+            margin-bottom: 40px;
+        }
+        .passenger-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--on-surface-variant);
+            margin-bottom: 5px;
+        }
+        .passenger-name {
+            font-family: 'Manrope', sans-serif;
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--primary);
+            margin: 0;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 8fr 4fr;
+            gap: 40px;
+        }
+
+        .itinerary-title {
+            font-family: 'Manrope', sans-serif;
+            font-size: 18px;
+            font-weight: 800;
+            margin-bottom: 40px;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .timeline-container {
+            position: relative;
+            padding-left: 50px;
+        }
+        .timeline-spine {
+            position: absolute;
+            left: 23px;
+            top: 5px;
+            bottom: 5px;
+            width: 2px;
+            background: #d1d5db;
+        }
+
+        .flight-segment {
+            position: relative;
+            margin-bottom: 60px;
+        }
+        .timeline-node {
+            position: absolute;
+            left: -35px;
+            top: 5px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--primary);
+            border: 4px solid white;
+            z-index: 10;
+        }
+        .timeline-node.arrival {
+            bottom: 5px;
+            top: auto;
+            background: #94a3b8;
+        }
+
+        .flight-card-inner {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .data-point {
+            margin-bottom: 20px;
+        }
+        .data-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--outline);
+            margin-bottom: 3px;
+        }
+        .data-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary);
+            font-family: 'Manrope', sans-serif;
+        }
+        .data-sub {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--on-surface-variant);
+        }
+
+        .aside-box {
+            background-color: #f3f4f6;
+            border-radius: 12px;
+            padding: 25px;
+        }
+        .ref-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--on-surface-variant);
+            margin-bottom: 5px;
+        }
+        .ref-value {
+            font-family: 'Manrope', sans-serif;
+            font-size: 26px;
+            font-weight: 800;
+            color: var(--primary);
+            letter-spacing: -0.03em;
+        }
+
+        .aside-info-list {
+            list-style: none;
+            padding: 0;
+            margin: 30px 0;
+        }
+        .aside-info-item {
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .aside-info-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            color: var(--outline);
+        }
+        .aside-info-value {
+            font-size: 14px;
+            font-weight: 700;
+            margin-top: 2px;
+        }
+
+        footer {
+            background-color: #f1f5f9;
+            padding: 30px var(--body-margin);
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+        }
+        .footer-legal {
+            font-size: 11px;
+            color: #64748b;
+            max-width: 60%;
+        }
+        .footer-copy {
+            font-size: 10px;
+            color: #94a3b8;
+            margin-top: 5px;
+        }
+
+        .qr-mock {
+            width: 100px;
+            height: 100px;
+            background-color: white;
+            padding: 10px;
+            border-radius: 8px;
+            margin: 0 auto;
+        }
+        .qr-pattern {
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(#000 1px, transparent 1px);
+            background-size: 4px 4px;
+            opacity: 0.2;
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <header>
+            <div class="header-logo-container">
+                {% if agencia %}
+                    {% if agencia.logo_pdf_dark_base64 %}
+                        <img src="{% if 'data:image' in agencia.logo_pdf_dark_base64 %}{{ agencia.logo_pdf_dark_base64 }}{% else %}data:image/png;base64,{{ agencia.logo_pdf_dark_base64 }}{% endif %}" style="max-height: 45px;">
+                    {% elif agencia.logo_pdf_base64 %}
+                        <img src="{% if 'data:image' in agencia.logo_pdf_base64 %}{{ agencia.logo_pdf_base64 }}{% else %}data:image/png;base64,{{ agencia.logo_pdf_base64 }}{% endif %}" style="max-height: 45px;">
+                    {% else %}
+                        <h1>{{ agencia.nombre|upper }}</h1>
+                    {% endif %}
+                {% else %}
+                    <h1>TRAVELHUB</h1>
+                {% endif %}
+                <div class="header-slogan">OFFICIAL ITINERARY</div>
+            </div>
+            <div class="header-eslogan-right">{{ agencia.eslogan }}</div>
+        </header>
+
+        <main>
+            <section class="passenger-section">
+                <div>
+                    <div class="passenger-label">Passenger Name</div>
+                    <h2 class="passenger-name">{{ NOMBRE_DEL_PASAJERO }}</h2>
+                </div>
+                <div style="text-align: right;">
+                    <div class="passenger-label">Date Issued</div>
+                    <div style="font-weight: 600;">{{ FECHA_DE_EMISION }}</div>
+                </div>
+            </section>
+
+            <div class="main-grid">
+                <div class="itinerary-col">
+                    <h3 class="itinerary-title">✈ Flight Itinerary</h3>
+                    
+                    <div class="timeline-container">
+                        <div class="timeline-spine"></div>
+                        
+                        {% for flight in vuelos %}
+                        <div class="flight-segment">
+                            <div class="timeline-node"></div>
+                            
+                            <div class="flight-card-inner">
+                                <div class="departure">
+                                    <div class="data-label">Departure</div>
+                                    <div class="data-value">{{ flight.hora_salida }}</div>
+                                    <div class="data-sub">{{ flight.origen }}</div>
+                                    <div class="data-label" style="margin-top:5px;">{{ flight.fecha|default:flight.fecha_salida }}</div>
+                                </div>
+                                <div class="info-aside" style="border-left: 1px solid #f3f4f6; padding-left: 20px;">
+                                    <div class="data-label">Flight</div>
+                                    <div style="font-weight: 700;">{{ flight.aerolinea }} — {{ flight.numero_vuelo }}</div>
+                                    <div class="data-label" style="margin-top:10px;">Cabin</div>
+                                    <div style="font-size: 11px; font-weight: 700; text-transform: uppercase;">{{ flight.cabina|default:flight.clase|default:'TOURIST' }}</div>
+                                </div>
+                            </div>
+
+                            <div class="flight-card-inner" style="margin-top: 20px;">
+                                <div class="arrival">
+                                    <div class="data-label">Arrival</div>
+                                    <div class="data-value">{{ flight.hora_llegada }}</div>
+                                    <div class="data-sub">{{ flight.destino }}</div>
+                                    <div class="data-label" style="margin-top:5px;">{{ flight.fecha|default:flight.fecha_salida }}</div>
+                                </div>
+                                <div class="ops-details" style="padding-left: 20px;">
+                                    <div class="data-label">Baggage</div>
+                                    <div style="font-size: 11px; font-weight: 700;">{{ flight.equipaje|default:'23KG' }}</div>
+                                    <div class="data-label" style="margin-top:10px;">Seat</div>
+                                    <div style="font-size: 11px; font-weight: 700;">{{ flight.asiento|default:'Check-in Required' }}</div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="aside-col">
+                    <div class="aside-box">
+                        <div class="ref-label">Booking Reference</div>
+                        <div class="ref-value">{{ CODIGO_RESERVA }}</div>
+                        
+                        <div class="aside-info-list">
+                            <div class="aside-info-item">
+                                <div class="aside-info-label">Ticket Number</div>
+                                <div class="aside-info-value">{{ NUMERO_DE_BOLETO }}</div>
+                            </div>
+                            <div class="aside-info-item">
+                                <div class="aside-info-label">Status</div>
+                                <div class="aside-info-value" style="color: #041627;">CONFIRMED</div>
+                            </div>
+                            <div class="aside-info-item" style="border: none;">
+                                <div class="aside-info-label">Issued By</div>
+                                <div class="aside-info-value">{{ agencia.nombre }}</div>
+                                <div style="font-size: 9px; color: #94a3b8; margin-top: 3px;">IATA: {{ agencia.iata|default:'---' }}</div>
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 30px; text-align: center;">
+                            <div class="qr-mock">
+                                <div class="qr-pattern"></div>
+                            </div>
+                            <div class="header-slogan" style="margin-top: 10px;">Scan for Verification</div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 30px; border-left: 3px solid #041627; padding-left: 15px;">
+                        <div class="data-label" style="color: #041627; font-weight: 800;">Notice</div>
+                        <div style="font-size: 10px; color: #64748b; line-height: 1.4; margin-top: 5px;">
+                            Please arrive at the airport 3 hours before. Valid passport required.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <div class="footer-left">
+                <div class="footer-legal">{{ agencia.pie_pagina|default:'TRAVELHUB GLOBAL - YOUR TRAVEL PARTNER' }}</div>
+                <div class="footer-copy">© 2026 {{ agencia.nombre|upper }} LTD. ALL RIGHTS RESERVED.</div>
+            </div>
+            <div style="text-align: right; font-size: 11px; color: #64748b; font-weight: 600;">
+                {{ agencia.email_principal }}<br>
+                {{ agencia.telefono_principal }}
+            </div>
+        </footer>
+    </div>
+</body>
+</html>

@@ -1,0 +1,32 @@
+<div class="space-y-6">
+    <div class="flex items-center justify-between text-gray-400 text-sm">
+        <span>Subtotal Servicios</span>
+        <span class="text-white font-medium">{{ venta.moneda.simbolo }} {{ venta.subtotal }}</span>
+    </div>
+    <div class="flex items-center justify-between text-gray-400 text-sm">
+        <span>Impuestos</span>
+        <span class="text-white font-medium">{{ venta.moneda.simbolo }}{{ venta.impuestos }}</span>
+    </div>
+    <div class="flex items-center justify-between text-gray-400 text-sm">
+        <span>Total Fees Agencia</span>
+        <span class="text-indigo-400 font-bold">+{{ venta.moneda.simbolo }}{{ venta.total_fees|default:"0.00" }}</span>
+    </div>
+
+    <div class="pt-4 border-t border-white/10">
+        <div class="flex items-center justify-between">
+            <span class="text-gray-300 font-bold">TOTAL VENTA</span>
+            <span class="text-3xl font-black text-white">{{ venta.moneda.simbolo }}{{ venta.total_venta }}</span>
+        </div>
+    </div>
+
+    <div class="space-y-2 pt-4">
+        <div class="flex items-center justify-between text-sm">
+            <span class="text-gray-500 italic">Monto Pagado</span>
+            <span class="text-green-400 font-bold">{{ venta.moneda.simbolo }}{{ venta.monto_pagado }}</span>
+        </div>
+        <div class="flex items-center justify-between p-3 bg-red-500/10 rounded-xl border border-red-500/20">
+            <span class="text-red-400 text-xs font-bold uppercase">Saldo Pendiente</span>
+            <span class="text-red-400 font-black">{{ venta.moneda.simbolo }}{{ venta.saldo_pendiente }}</span>
+        </div>
+    </div>
+</div>

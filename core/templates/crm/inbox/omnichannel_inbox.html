@@ -1,0 +1,132 @@
+{% extends "base_modern.html" %}
+{% load static %}
+
+{% block title %}Inbox Omnicanal | TravelHub{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Chat Background Pattern y Animaciones */
+    .chat-bg {
+        background-color: var(--bg-deep, #0a0d12);
+        background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+        background-size: 20px 20px;
+    }
+    .bubble-client { border-top-left-radius: 4px; }
+    .bubble-agent { border-top-right-radius: 4px; }
+    
+    @keyframes popIn {
+        0% { opacity: 0; transform: translateY(10px) scale(0.95); }
+        100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .animate-pop { animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Eliminamos el margen estándar del content para que el inbox ocupe toda la pantalla -->
+<div class="flex-1 flex overflow-hidden h-[calc(100vh-90px)] -mt-4 -mx-4 rounded-xl border border-border-color shadow-xl" x-data="inboxMaster()">
+    
+    <!-- COLUMNA 1: LISTA DE CHATS (Sidebar) -->
+    <aside class="w-80 lg:w-96 bg-surface-1 border-r border-border-color flex flex-col shrink-0 relative z-10">
+        <!-- Buscador y Filtros -->
+        <div class="p-4 border-b border-border-color space-y-4">
+            <div class="flex items-center gap-2 mb-2">
+                <span class="material-symbols-outlined text-emerald-500">forum</span>
+                <h2 class="text-sm font-black text-text-main uppercase tracking-widest">Inbox Omnicanal</h2>
+                <div class="ml-auto flex items-center gap-1">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span class="text-[9px] font-bold text-emerald-500 uppercase tracking-widest">Meta API</span>
+                </div>
+            </div>
+            <div class="relative">
+                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-muted text-[18px]">search</span>
+                <input type="text" placeholder="Buscar cliente..." class="w-full bg-surface-2 border border-border-color rounded-xl py-2 pl-10 pr-4 text-sm text-text-main focus:outline-none focus:border-emerald-500 transition-colors">
+            </div>
+        </div>
+
+        <!-- Lista de Conversaciones Dinámica -->
+        <div class="flex-1 overflow-y-auto custom-scrollbar">
+            {% for cliente in clientes_activos %}
+            <div hx-get="{% url 'crm:chat_thread' cliente.id_cliente %}" 
+                 hx-target="#chat-workspace" 
+                 hx-swap="innerHTML"
+                 @click="activeChat = {{ cliente.id_cliente }}; scrollToBottom();"
+                 :class="activeChat === {{ cliente.id_cliente }} ? 'border-emerald-500 bg-surface-2/50' : 'border-transparent hover:bg-surface-2'"
+                 class="p-4 border-l-4 cursor-pointer transition-colors border-b border-border-color relative">
+                
+                <div class="flex items-center gap-3">
+                    <div class="relative">
+                        <div class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-black text-lg shadow-md">
+                            {{ cliente.nombres|make_list|first|upper }}
+                        </div>
+                        <div class="absolute -bottom-1 -right-1 bg-surface-1 rounded-full p-0.5">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/WhatsApp.svg/1024px-WhatsApp.svg.png" class="w-4 h-4">
+                        </div>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex justify-between items-center mb-0.5">
+                            <h3 class="text-sm font-bold text-text-main truncate">{{ cliente.get_nombre_completo|title }}</h3>
+                            <span class="text-[10px] font-bold text-emerald-500">Activo</span>
+                        </div>
+                        <p class="text-xs text-text-muted truncate">{{ cliente.telefono_principal }}</p>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="p-8 text-center opacity-50">
+                <span class="material-symbols-outlined text-4xl mb-2 text-text-muted">speaker_notes_off</span>
+                <p class="text-sm font-bold text-text-muted">No hay chats activos</p>
+            </div>
+            {% endfor %}
+        </div>
+    </aside>
+
+    <!-- AREA DE TRABAJO (Columnas 2 y 3) -->
+    <div id="chat-workspace" class="flex-1 flex bg-surface-2">
+        <!-- Estado Vacío Inicial -->
+        <div class="flex-1 flex flex-col items-center justify-center text-center opacity-40">
+            <span class="material-symbols-outlined text-7xl mb-4 text-slate-500">forum</span>
+            <h2 class="text-2xl font-black text-text-main">Inbox Omnicanal</h2>
+            <p class="text-sm text-text-muted max-w-sm mt-2">Selecciona una conversación de la lista para leer el historial y responder asistido por Gemini AI.</p>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('inboxMaster', () => ({
+            activeChat: null,
+            
+            // Función llamada por HTMX tras cargar un chat o un mensaje
+            scrollToBottom() {
+                setTimeout(() => {
+                    const container = document.getElementById('chat-container');
+                    if (container) {
+                        container.scrollTop = container.scrollHeight;
+                    }
+                }, 100);
+            },
+            
+            // Función para inyectar la sugerencia de la IA en el textarea
+            useSuggestion(texto) {
+                const input = document.getElementById('msg-input');
+                if(input) {
+                    input.value = texto;
+                    input.focus();
+                }
+                // Limpiar sugerencias
+                document.getElementById('ai-suggestions').innerHTML = '';
+            }
+        }));
+    });
+</script>
+{% endblock %}

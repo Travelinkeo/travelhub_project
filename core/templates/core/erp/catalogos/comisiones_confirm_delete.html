@@ -1,0 +1,33 @@
+{% extends "base_modern.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Eliminar Regla de Comisión" %} - TravelHub{% endblock %}
+
+{% block content %}
+<div class="max-w-xl mx-auto p-6">
+    <div class="glass-panel p-8 rounded-3xl shadow-xl text-center">
+        <div class="w-20 h-20 bg-red-500/20 rounded-full flex items-center justify-center text-red-400 mx-auto mb-6">
+            <i data-lucide="alert-triangle" class="w-10 h-10"></i>
+        </div>
+
+        <h1 class="text-2xl font-bold text-white mb-4">{% trans "¿Estás seguro de eliminar esta regla?" %}</h1>
+        <p class="text-gray-400 mb-8">
+            {% trans "Estás a punto de eliminar la regla de comisión para" %} <span class="text-white font-bold">{{
+                object.proveedor.nombre }}</span> ({% trans "Servicio" %}: {{ object.get_tipo_servicio_display }}).
+            {% trans "Esta acción no se puede deshacer." %}
+        </p>
+
+        <form method="post" class="flex flex-col sm:flex-row justify-center gap-4">
+            {% csrf_token %}
+            <a href="{% url 'core:comisiones_list' %}"
+                class="px-8 py-3 rounded-2xl border border-white/10 text-gray-400 hover:bg-white/5 transition-all font-medium">
+                {% trans "Cancelar, mantener" %}
+            </a>
+            <button type="submit"
+                class="px-10 py-3 rounded-2xl bg-red-600 text-white shadow-lg shadow-red-900/30 hover:bg-red-700 transition-all font-bold">
+                {% trans "Sí, eliminar regla" %}
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,37 @@
+<div class="flex {% if msg.direccion == 'OUT' %}justify-end{% else %}items-end{% endif %} gap-2 max-w-[85%] {% if msg.direccion == 'OUT' %}ml-auto{% endif %} animate-pop">
+    
+    {% if msg.direccion == 'IN' %}
+    <!-- Avatar Cliente -->
+    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-[10px] font-black shrink-0 mb-1 shadow-sm">
+        {{ msg.cliente.nombres|make_list|first|upper }}
+    </div>
+    {% endif %}
+
+    <div class="flex flex-col gap-1 {% if msg.direccion == 'OUT' %}items-end{% endif %}">
+        
+        <!-- Badge si el bot respondió -->
+        {% if msg.es_bot %}
+        <div class="flex items-center gap-2 mb-1">
+            <span class="text-[9px] font-black uppercase tracking-widest text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded border border-blue-500/20 flex items-center gap-1">
+                <span class="material-symbols-outlined text-[10px]">smart_toy</span> Bot Automático
+            </span>
+        </div>
+        {% endif %}
+
+        <!-- Burbuja -->
+        <div class="p-3 rounded-2xl shadow-sm text-sm
+            {% if msg.direccion == 'OUT' %}
+                bg-emerald-600 text-white bubble-agent
+            {% else %}
+                bg-surface-1 border border-border-color text-text-main bubble-client
+            {% endif %}">
+            <p class="whitespace-pre-wrap">{{ msg.texto }}</p>
+        </div>
+        
+        <!-- Timestamp -->
+        <span class="text-[9px] font-bold text-text-muted {% if msg.direccion == 'OUT' %}mr-1 flex items-center gap-1{% else %}ml-1{% endif %}">
+            {{ msg.timestamp|date:"h:i A" }} 
+            {% if msg.direccion == 'OUT' %}<span class="material-symbols-outlined text-[12px] text-emerald-400">done_all</span>{% endif %}
+        </span>
+    </div>
+</div>

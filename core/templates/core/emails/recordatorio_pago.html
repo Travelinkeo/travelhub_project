@@ -1,0 +1,22 @@
+{% extends "core/emails/base_email.html" %}
+
+{% block content %}
+<h2 style="color: #ffc107; margin-top: 0;">⏰ Recordatorio de Pago Pendiente</h2>
+
+<p>Estimado/a <strong>{{ cliente_nombre }}</strong>,</p>
+
+<p>Le recordamos que tiene un saldo pendiente en su reserva.</p>
+
+<div class="info-box">
+    <p><strong>Localizador:</strong> {{ localizador }}</p>
+    <p><strong>Total:</strong> {{ moneda }}{{ total }}</p>
+    <p><strong>Pagado:</strong> {{ moneda }}{{ pagado }}</p>
+    <p><strong>Saldo pendiente:</strong> <span style="color: #dc3545; font-size: 18px;">{{ moneda }}{{ saldo }}</span></p>
+</div>
+
+<p>Por favor, proceda con el pago para confirmar su reserva.</p>
+
+<p style="margin-top: 30px;">Quedamos atentos a su pago.</p>
+
+<p><strong>Equipo TravelHub</strong></p>
+{% endblock %}

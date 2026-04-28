@@ -1,0 +1,62 @@
+<div id="celery-monitor" 
+     class="space-y-6 text-center animate-in fade-in zoom-in duration-300"
+     hx-get="{% url 'finance:reconciliacion_task_status' task_id %}" 
+     hx-trigger="{% if not task_finished %}every 2s{% endif %}" 
+     hx-target="this" 
+     hx-swap="outerHTML">
+    
+    <div class="space-y-3">
+        <h2 class="text-lg font-black text-text-main flex items-center justify-center gap-2">
+            <span class="material-symbols-outlined text-primary animate-spin">sync</span>
+            Procesando Reporte...
+        </h2>
+        <p class="text-[11px] text-text-muted max-w-xs mx-auto">
+            GDS Analyzer v3: Identificando boletos, cuadrando impuestos y generando asientos contables. No cierres esta ventana.
+        </p>
+    </div>
+
+    <!-- Barra de Progreso Obsidian Luxe -->
+    <div class="relative pt-1">
+        <div class="flex mb-2 items-center justify-between">
+            <div>
+                <span class="text-[10px] font-black inline-block py-1 px-2 uppercase rounded-full text-on-primary bg-primary shadow-[var(--btn-shadow)]">
+                    Fase IA: {{ status|default:"Procesando" }}
+                </span>
+            </div>
+            <div class="text-right">
+                <span class="text-[10px] font-black inline-block text-primary tabular-nums">
+                    {{ progress|default:"10" }}%
+                </span>
+            </div>
+        </div>
+        <div class="overflow-hidden h-3 mb-4 text-xs flex rounded-full bg-surface-2 border border-border-color shadow-inner">
+            <div style="width:{{ progress|default:'10' }}%" 
+                 class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-primary transition-all duration-700 ease-out relative">
+                <!-- Efecto Glow en el extremo -->
+                <div class="absolute right-0 top-0 bottom-0 w-2 bg-white/40 blur-sm"></div>
+            </div>
+        </div>
+    </div>
+
+    {% if status == 'FAILURE' %}
+        <div class="p-4 bg-status-danger-bg border border-status-danger/30 rounded-lg text-left">
+            <p class="text-xs font-bold text-status-danger flex items-center gap-2 mb-1">
+                <span class="material-symbols-outlined text-[16px]">error</span>
+                Error en el Motor de Conciliación
+            </p>
+            <p class="text-[10px] text-text-muted font-mono break-all">{{ error|default:"Falla desconocida" }}</p>
+            <div class="mt-4 text-center">
+                 <a href="{% url 'finance:reconciliacion_upload' %}" class="btn-secondary text-[10px] px-3">
+                     Reintentar Subida
+                 </a>
+            </div>
+        </div>
+    {% endif %}
+
+    <div class="flex items-center justify-center gap-4 py-4 opacity-40">
+        <span class="material-symbols-outlined text-[20px]">psychology</span>
+        <span class="material-symbols-outlined text-[20px]">database</span>
+        <span class="material-symbols-outlined text-[20px]">account_balance</span>
+    </div>
+
+</div>

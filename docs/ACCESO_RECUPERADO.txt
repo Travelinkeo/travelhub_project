@@ -1,0 +1,45 @@
+===========================================
+  ACCESO RECUPERADO - TRAVELHUB
+===========================================
+
+POSTGRESQL CONECTADO EXITOSAMENTE
+----------------------------------
+Base de datos: TravelHub
+Usuario DB: postgres
+Password DB: Linkeo1331*
+
+USUARIOS DE DJANGO DISPONIBLES
+-------------------------------
+
+1. Usuario: Armando3105
+   Email: armandoaleman@gmail.com
+   Superuser: SI
+   Password: Linkeo1331*
+   
+2. Usuario: Naidaly
+   Email: naidicohen@gmail.com
+   Superuser: NO
+   
+3. Usuario: test_translator
+   Email: test@example.com
+   Superuser: NO
+
+===========================================
+
+PARA ACCEDER:
+-------------
+1. Iniciar servidor:
+   python manage.py runserver
+
+2. Ir a: http://127.0.0.1:8000/admin/
+
+3. Usar credenciales:
+   Usuario: Armando3105
+   Password: Linkeo1331*
+
+===========================================
+
+TODOS TUS DATOS ESTÁN RECUPERADOS
+Base de datos PostgreSQL conectada correctamente
+
+===========================================

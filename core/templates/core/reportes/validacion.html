@@ -1,0 +1,87 @@
+{% extends 'base_modern.html' %}
+{% load humanize %}
+
+{% block title %}Validación de Cuadre - TravelHub{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+    <div>
+        <h2 class="text-3xl font-bold text-[var(--text-primary)] mb-1">Validación de Cuadre</h2>
+        <p class="text-[var(--text-secondary)]">Verificación de integridad contable y detección de errores.</p>
+    </div>
+
+    <form method="post" action="{% url 'reportes:validar_cuadre' %}">
+        {% csrf_token %}
+        <button type="submit"
+            class="px-6 py-3 bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white rounded-xl transition-all shadow-lg font-bold flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            Ejecutar Validación
+        </button>
+    </form>
+</div>
+
+{% if validacion %}
+{% if validacion.cuadrado %}
+<div class="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-6 text-center mb-8">
+    <div class="w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+        <svg class="w-8 h-8 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+        </svg>
+    </div>
+    <h3 class="text-xl font-bold text-[var(--text-primary)] mb-2">¡Todo en orden!</h3>
+    <p class="text-emerald-400 font-medium">Todos los asientos contables están correctamente cuadrados.</p>
+</div>
+{% else %}
+<div class="bg-red-500/10 border border-red-500/20 rounded-xl p-6 mb-8">
+    <div class="flex items-center gap-4 mb-4">
+        <div class="w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center">
+            <svg class="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+                </path>
+            </svg>
+        </div>
+        <div>
+            <h3 class="text-xl font-bold text-[var(--text-primary)]">Se encontraron errores</h3>
+            <p class="text-red-400 font-medium">Hay {{ validacion.asientos_con_problemas }} asientos con diferencias entre Debe y
+                Haber.</p>
+        </div>
+    </div>
+
+    <div class="bg-[var(--surface-1)] rounded-lg overflow-hidden border border-[var(--border)]">
+        <table class="w-full text-left text-[var(--text-secondary)]">
+            <thead class="bg-red-500/10 text-red-500 uppercase text-xs font-bold">
+                <tr>
+                    <th class="px-6 py-3">Asiento</th>
+                    <th class="px-6 py-3">Fecha</th>
+                    <th class="px-6 py-3 text-right">Debe</th>
+                    <th class="px-6 py-3 text-right">Haber</th>
+                    <th class="px-6 py-3 text-right">Diferencia</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-[var(--border)]">
+                {% for problema in validacion.problemas %}
+                <tr class="hover:bg-[var(--surface-2)] transition-colors">
+                    <td class="px-6 py-4 font-mono text-[var(--text-primary)] font-medium">{{ problema.numero_asiento }}</td>
+                    <td class="px-6 py-4 font-medium">{{ problema.fecha|date:"d/m/Y" }}</td>
+                    <td class="px-6 py-4 text-right font-mono font-medium">{{ problema.debe|floatformat:2|intcomma }}</td>
+                    <td class="px-6 py-4 text-right font-mono font-medium">{{ problema.haber|floatformat:2|intcomma }}</td>
+                    <td class="px-6 py-4 text-right font-mono font-bold text-red-400">{{
+                        problema.diferencia|floatformat:2|intcomma }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+{% else %}
+<div class="text-center py-12 text-[var(--text-muted)] bg-[var(--surface-1)] border border-[var(--border)] rounded-xl font-medium">
+    Ejecuta la validación para verificar la integridad de los datos.
+</div>
+{% endif %}
+{% endblock %}

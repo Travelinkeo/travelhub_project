@@ -1,0 +1,190 @@
+{% extends "base_modern.html" %}
+{% load i18n %}
+{% load humanize %}
+
+{% block title %}Registro de Actividad{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- Encabezado -->
+    <div class="md:flex md:items-center md:justify-between mb-8">
+        <div class="flex-1 min-w-0">
+            <h2 class="text-3xl font-black text-text-main uppercase tracking-tight">
+                {% trans "Registro de Actividad" %}
+            </h2>
+            <p class="mt-1 text-sm text-text-muted font-medium">
+                {% trans "Historial de cambios y acciones realizadas por usuarios de la agencia." %}
+            </p>
+        </div>
+        <div class="mt-4 flex md:mt-0 md:ml-4">
+            <!-- Botones de acción si fueran necesarios -->
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="card-base p-6 mb-8">
+        <form method="GET" class="grid grid-cols-1 gap-6 sm:grid-cols-6 items-end">
+            <!-- Buscador General -->
+            <div class="sm:col-span-2">
+                <label for="q" class="block text-xs font-black text-text-muted uppercase tracking-widest mb-2">{% trans "Buscar" %}</label>
+                <div class="relative">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-muted text-sm">search</span>
+                    <input type="text" name="q" id="q" value="{{ request.GET.q|default:'' }}"
+                        placeholder="{% trans 'ID, descripción, nombre...' %}"
+                        class="input-base pl-10">
+                </div>
+            </div>
+
+            <!-- Filtro Usuario -->
+            <div class="sm:col-span-2">
+                <label for="usuario" class="block text-xs font-black text-text-muted uppercase tracking-widest mb-2">{% trans "Usuario" %}</label>
+                <select id="usuario" name="usuario" class="input-base">
+                    <option value="">{% trans "Todos los usuarios" %}</option>
+                    {% for ua in usuarios_agencia %}
+                    <option value="{{ ua.usuario.id }}" {% if request.GET.usuario == ua.usuario.id|stringformat:"i" %}selected{% endif %}>
+                        {{ ua.usuario.get_full_name|default:ua.usuario.username }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Filtro Acción -->
+            <div class="sm:col-span-1">
+                <label for="accion" class="block text-xs font-black text-text-muted uppercase tracking-widest mb-2">{% trans "Acción" %}</label>
+                <select id="accion" name="accion" class="input-base">
+                    <option value="">{% trans "Todas" %}</option>
+                    <option value="CREATE" {% if request.GET.accion == 'CREATE' %}selected{% endif %}>{% trans "Creación" %}</option>
+                    <option value="UPDATE" {% if request.GET.accion == 'UPDATE' %}selected{% endif %}>{% trans "Actualización" %}</option>
+                    <option value="DELETE" {% if request.GET.accion == 'DELETE' %}selected{% endif %}>{% trans "Eliminación" %}</option>
+                    <option value="STATE" {% if request.GET.accion == 'STATE' %}selected{% endif %}>{% trans "Estado" %}</option>
+                </select>
+            </div>
+
+            <div class="sm:col-span-1">
+                <button type="submit" class="btn-primary w-full h-11 flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined text-sm">filter_list</span>
+                    {% trans "Filtrar" %}
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Tabla -->
+    <div class="card-base overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-border-color">
+                <thead class="bg-surface-base">
+                    <tr>
+                        <th class="px-6 py-4 text-left text-[10px] font-black text-text-muted uppercase tracking-widest">{% trans "Fecha / Hora" %}</th>
+                        <th class="px-6 py-4 text-left text-[10px] font-black text-text-muted uppercase tracking-widest">{% trans "Usuario" %}</th>
+                        <th class="px-6 py-4 text-left text-[10px] font-black text-text-muted uppercase tracking-widest">{% trans "Acción" %}</th>
+                        <th class="px-6 py-4 text-left text-[10px] font-black text-text-muted uppercase tracking-widest">{% trans "Entidad" %}</th>
+                        <th class="px-6 py-4 text-left text-[10px] font-black text-text-muted uppercase tracking-widest">{% trans "Detalle" %}</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-border-color">
+                            {% for log in logs %}
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="text-[11px] font-mono text-text-secondary font-bold">{{ log.creado|date:"d M Y H:i" }}</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    {% if log.user %}
+                                    <div class="flex items-center gap-3">
+                                        <div class="h-8 w-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-primary text-xs font-black">
+                                            {{ log.user.get_full_name|slice:":1"|default:log.user.username|slice:":1"|upper }}
+                                        </div>
+                                        <div>
+                                            <div class="text-xs font-black text-text-main uppercase tracking-tighter">{{ log.user.get_full_name|default:log.user.username }}</div>
+                                        </div>
+                                    </div>
+                                    {% else %}
+                                    <span class="text-text-muted text-[10px] font-bold uppercase tracking-widest italic">{% trans "Sistema / Desconocido" %}</span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    {% if log.accion == 'CREATE' %}
+                                    <span class="badge-success">{% trans "Creación" %}</span>
+                                    {% elif log.accion == 'UPDATE' %}
+                                    <span class="badge-info">{% trans "Edición" %}</span>
+                                    {% elif log.accion == 'DELETE' %}
+                                    <span class="badge-danger">{% trans "Eliminación" %}</span>
+                                    {% else %}
+                                    <span class="badge-warning">{{ log.accion }}</span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex flex-col">
+                                        <span class="text-xs font-black text-text-main uppercase tracking-tighter">{{ log.modelo }}</span>
+                                        <span class="text-[10px] font-medium text-text-muted uppercase tracking-widest">ID: {{ log.object_id|truncatechars:10 }}</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <div class="text-xs font-medium text-text-secondary truncate max-w-xs" title="{{ log.descripcion }}">
+                                        {{ log.descripcion }}
+                                    </div>
+                                    {% if log.datos_nuevos %}
+                                    <details class="mt-2 text-[10px] font-black text-primary uppercase tracking-widest cursor-pointer group">
+                                        <summary class="hover:underline flex items-center gap-1">
+                                            <span class="material-symbols-outlined text-[12px]">visibility</span>
+                                            {% trans "Ver cambios" %}
+                                        </summary>
+                                        <pre class="mt-2 bg-surface-base p-3 rounded-lg border border-border-color text-text-main font-mono text-[10px] overflow-auto max-h-48 shadow-inner">{{ log.datos_nuevos|pprint }}</pre>
+                                    </details>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="px-6 py-12 text-center">
+                                    <div class="flex flex-col items-center gap-2 opacity-40">
+                                        <span class="material-symbols-outlined text-4xl">inventory_2</span>
+                                        <p class="text-sm font-black uppercase tracking-tighter">{% trans "No se encontraron registros de actividad" %}</p>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Paginación -->
+    {% if is_paginated %}
+    <div class="flex items-center justify-between mt-8 p-4 bg-surface-base rounded-xl border border-border-color">
+        <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+            <div>
+                <p class="text-xs font-black text-text-muted uppercase tracking-widest">
+                    {% trans "Mostrando" %} <span class="text-text-main">{{ page_obj.start_index }}</span> {% trans "a" %} <span class="text-text-main">{{ page_obj.end_index }}</span> {% trans "de" %} <span class="text-text-main">{{ paginator.count }}</span>
+                </p>
+            </div>
+            <div>
+                <nav class="flex gap-1" aria-label="Pagination">
+                    {% if page_obj.has_previous %}
+                    <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.usuario %}&usuario={{ request.GET.usuario }}{% endif %}"
+                        class="w-10 h-10 flex items-center justify-center rounded-lg border border-border-color bg-surface-2 text-text-muted hover:bg-primary hover:text-white transition-all">
+                        <span class="material-symbols-outlined text-sm">chevron_left</span>
+                    </a>
+                    {% endif %}
+
+                    <div class="w-10 h-10 flex items-center justify-center rounded-lg bg-primary text-white font-black text-xs">
+                        {{ page_obj.number }}
+                    </div>
+
+                    {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.usuario %}&usuario={{ request.GET.usuario }}{% endif %}"
+                        class="w-10 h-10 flex items-center justify-center rounded-lg border border-border-color bg-surface-2 text-text-muted hover:bg-primary hover:text-white transition-all">
+                        <span class="material-symbols-outlined text-sm">chevron_right</span>
+                    </a>
+                    {% endif %}
+                </nav>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

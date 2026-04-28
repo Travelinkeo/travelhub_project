@@ -1,0 +1,126 @@
+[
+  {
+    "model": "core.productoservicio",
+    "pk": 1,
+    "fields": {
+      "codigo_interno": "AIR_GENERIC",
+      "nombre": "Boleto Aereo Generico",
+      "descripcion": "Boleto aéreo no asociado a una importación específica.",
+      "tipo_producto": "AIR",
+      "proveedor_principal": null,
+      "costo_estandar_referencial": null,
+      "precio_venta_sugerido": null,
+      "moneda_referencial": null,
+      "activo": false,
+      "requiere_datos_pasajero_especificos": true
+    }
+  },
+  {
+    "model": "core.productoservicio",
+    "pk": 2,
+    "fields": {
+      "codigo_interno": "HTL_GENERIC",
+      "nombre": "Alojamiento (Hotel)",
+      "descripcion": "Reserva de hotel o cualquier tipo de alojamiento.",
+      "tipo_producto": "HTL",
+      "proveedor_principal": null,
+      "costo_estandar_referencial": null,
+      "precio_venta_sugerido": null,
+      "moneda_referencial": null,
+      "activo": true,
+      "requiere_datos_pasajero_especificos": true
+    }
+  },
+  {
+    "model": "core.productoservicio",
+    "pk": 3,
+    "fields": {
+      "codigo_interno": "CAR_GENERIC",
+      "nombre": "Alquiler de Auto",
+      "descripcion": "Servicio de alquiler de vehículo.",
+      "tipo_producto": "CAR",
+      "proveedor_principal": null,
+      "costo_estandar_referencial": null,
+      "precio_venta_sugerido": null,
+      "moneda_referencial": null,
+      "activo": true,
+      "requiere_datos_pasajero_especificos": true
+    }
+  },
+  {
+    "model": "core.productoservicio",
+    "pk": 4,
+    "fields": {
+      "codigo_interno": "INS_GENERIC",
+      "nombre": "Seguro de Viaje",
+      "descripcion": "Póliza de seguro de viaje.",
+      "tipo_producto": "INS",
+      "proveedor_principal": null,
+      "costo_estandar_referencial": null,
+      "precio_venta_sugerido": null,
+      "moneda_referencial": null,
+      "activo": true,
+      "requiere_datos_pasajero_especificos": true
+    }
+  },
+  {
+    "model": "core.productoservicio",
+    "pk": 5,
+    "fields": {
+      "codigo_interno": "TOU_GENERIC",
+      "nombre": "Tour o Actividad",
+      "descripcion": "Excursión, tour, o cualquier actividad turística.",
+      "tipo_producto": "TOU",
+      "proveedor_principal": null,
+      "costo_estandar_referencial": null,
+      "precio_venta_sugerido": null,
+      "moneda_referencial": null,
+      "activo": true,
+      "requiere_datos_pasajero_especificos": false
+    }
+  },
+  {
+    "model": "core.productoservicio",
+    "pk": 6,
+    "fields": {
+      "codigo_interno": "TRF_GENERIC",
+      "nombre": "Traslado",
+      "descripcion": "Servicio de traslado terrestre o marítimo.",
+      "tipo_producto": "TRF",
+      "proveedor_principal": null,
+      "costo_estandar_referencial": null,
+      "precio_venta_sugerido": null,
+      "moneda_referencial": null,
+      "activo": true,
+      "requiere_datos_pasajero_especificos": false
+    }
+  },
+  {
+    "model": "core.productoservicio",
+    "pk": 7,
+    "fields": {
+      "codigo_interno": "SVC_GENERIC",
+      "nombre": "Servicio Adicional",
+      "descripcion": "Cualquier otro servicio no categorizado. Ej: eSIM, gestión, etc.",
+      "tipo_producto": "SVC",
+      "proveedor_principal": null,
+      "costo_estandar_referencial": null,
+      "precio_venta_sugerido": null,
+      "moneda_referencial": null,
+      "activo": true,
+      "requiere_datos_pasajero_especificos": false
+    }
+  },
+  {
+    "model": "core.productoservicio",
+    "pk": 8,
+    "fields": {
+        "codigo_interno": "AIR_IMPORTED",
+        "nombre": "Boleto Aereo (Importado)",
+        "descripcion": "Representa un boleto aéreo importado y parseado desde un archivo.",
+        "tipo_producto": "AIR",
+        "activo": false,
+        "requiere_datos_pasajero_especificos": true
+    }
+  }
+]

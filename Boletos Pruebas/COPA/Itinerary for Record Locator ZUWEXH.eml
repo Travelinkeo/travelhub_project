@@ -1,0 +1,786 @@
+Received: from IA0PR11MB7284.namprd11.prod.outlook.com (2603:10b6:208:438::7)
+ by CH3PR11MB8434.namprd11.prod.outlook.com with HTTPS; Thu, 13 Jun 2024
+ 20:23:04 +0000
+Received: from MW4PR03CA0016.namprd03.prod.outlook.com (2603:10b6:303:8f::21)
+ by IA0PR11MB7284.namprd11.prod.outlook.com (2603:10b6:208:438::7) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.7677.25; Thu, 13 Jun
+ 2024 20:23:00 +0000
+Received: from CO1PEPF000075F4.namprd03.prod.outlook.com
+ (2603:10b6:303:8f:cafe::78) by MW4PR03CA0016.outlook.office365.com
+ (2603:10b6:303:8f::21) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.7677.25 via Frontend
+ Transport; Thu, 13 Jun 2024 20:22:59 +0000
+Received: from EUR05-DB8-obe.outbound.protection.outlook.com (40.107.20.122)
+ by CO1PEPF000075F4.mail.protection.outlook.com (10.167.249.43) with Microsoft
+ SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.20.7677.15 via Frontend Transport; Thu, 13 Jun 2024 20:22:58 +0000
+Received: from AM6P192CA0086.EURP192.PROD.OUTLOOK.COM (2603:10a6:209:8d::27)
+ by AS5PR09MB6822.eurprd09.prod.outlook.com (2603:10a6:20b:680::8) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.7677.23; Thu, 13 Jun
+ 2024 20:22:54 +0000
+Received: from AM2PEPF0001C70B.eurprd05.prod.outlook.com
+ (2603:10a6:209:8d:cafe::8a) by AM6P192CA0086.outlook.office365.com
+ (2603:10a6:209:8d::27) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.7677.24 via Frontend
+ Transport; Thu, 13 Jun 2024 20:22:53 +0000
+Received: from IP-0A62236B (3.215.57.244) by
+ AM2PEPF0001C70B.mail.protection.outlook.com (10.167.16.199) with Microsoft
+ SMTP Server id 15.20.7677.15 via Frontend Transport; Thu, 13 Jun 2024
+ 20:22:53 +0000
+From: "no-reply@accelya.com" <no-reply@accelya.com>
+To: Naydaly Cohen <travelinkeo@gmail.com>
+CC: =?iso-8859-1?Q?Solicitudes_Tr=E1fico?=
+	<solicitudestrafico@quovadis.com.ve>
+Subject: Itinerary for Record Locator ZUWEXH
+Thread-Topic: Itinerary for Record Locator ZUWEXH
+Thread-Index: AQHavc9+87zvTa9Jy0uB2rHlpBm+zA==
+Date: Thu, 13 Jun 2024 20:22:53 +0000
+Message-ID: <a9e97263-f6c2-4999-8460-a8c799ea401b@AM2PEPF0001C70B.eurprd05.prod.outlook.com>
+Content-Language: es-ES
+X-MS-Exchange-Organization-AuthSource: CO1PEPF000075F4.namprd03.prod.outlook.com
+X-MS-Has-Attach:
+X-MS-Exchange-Organization-Network-Message-Id: 7aaf6741-93a0-489d-e867-08dc8be69db6
+X-MS-TNEF-Correlator:
+X-MS-Exchange-Organization-RecordReviewCfmType: 0
+x-ms-exchange-organization-originalclientipaddress: 40.107.20.122
+x-ms-exchange-organization-originalserveripaddress: 10.167.249.43
+x-ms-publictraffictype: Email
+received-spf: Fail (protection.outlook.com: domain of accelya.com does not
+ designate 3.215.57.244 as permitted sender) receiver=protection.outlook.com;
+ client-ip=3.215.57.244; helo=IP-0A62236B;
+authentication-results: spf=pass (sender IP is 40.107.20.122)
+ smtp.mailfrom=accelya.com; dkim=pass (signature was verified)
+ header.d=accelya.com;dmarc=pass action=none
+ header.from=accelya.com;compauth=pass reason=100
+x-ms-office365-filtering-correlation-id: 7aaf6741-93a0-489d-e867-08dc8be69db6
+x-ms-traffictypediagnostic: AM2PEPF0001C70B:EE_|AS5PR09MB6822:EE_|CO1PEPF000075F4:EE_|IA0PR11MB7284:EE_|CH3PR11MB8434:EE_
+x-forefront-antispam-report: CIP:40.107.20.122;CTRY:IE;LANG:en;SCL:-1;SRV:;IPV:NLI;SFV:SFE;H:EUR05-DB8-obe.outbound.protection.outlook.com;PTR:mail-db8eur05on2122.outbound.protection.outlook.com;CAT:NONE;SFS:(13230035)(3072899007)(2092899007)(5062899007)(3092899007)(35042699017)(12012899007)(69100299010);DIR:INB;
+x-microsoft-antispam: BCL:0;ARA:13230035|3072899007|2092899007|5062899007|3092899007|35042699017|12012899007|69100299010;
+x-ms-exchange-crosstenant-originalarrivaltime: 13 Jun 2024 20:22:58.0923 (UTC)
+x-ms-exchange-crosstenant-fromentityheader: Internet
+x-ms-exchange-crosstenant-id: 2518b37b-3b90-4fca-9482-e54188ff0e49
+x-ms-exchange-crosstenant-network-message-id: 7aaf6741-93a0-489d-e867-08dc8be69db6
+x-ms-exchange-transport-crosstenantheadersstamped: IA0PR11MB7284
+x-ms-exchange-transport-endtoendlatency: 00:00:05.9721378
+x-ms-exchange-processed-by-bccfoldering: 15.20.7633.034
+x-ms-exchange-crosstenant-authas: Anonymous
+x-ms-exchange-crosstenant-authsource: CO1PEPF000075F4.namprd03.prod.outlook.com
+dkim-signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=accelya.com;
+ s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=CNj7KooiAI9FvvU7C2h5AunZb0v0bPEI8E0GBziQgPY=;
+ b=WAaR+GuWpQeYQ4Qjb+hOSkHq8PMF7uCSDo4grmla+bedl370V7MCO8hmBs2imS8SaK+8M7EM7KXA8QxTjkUnjCnKca42zSz7fSwGnQOQlP7Q7c64ZZ9paPaq4xT/4X86Heoct8r4gjOOXDhOipJA5chl7n+kjN/XW1QBH++t5ew=
+x-eopattributedmessage: 1
+x-eoptenantattributedmessage: 2518b37b-3b90-4fca-9482-e54188ff0e49:0
+x-ms-exchange-crosstenant-originalattributedtenantconnectingip: TenantId=dbc9ccd9-c45b-43f9-a114-c7c41b35bf9a;Ip=[3.215.57.244];Helo=[IP-0A62236B]
+arc-seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=XuJJmO5coYsyqq52ZVTeU+YhXIuSjwpXo+Ch8s6bDd0dHWd8o4JicUCt6+xLtNwbObneIk1f9SIljErIXjHKTQlrTSpT6tbb3HhMerlhdg6y9s+zvuouLZo9dFlqwzvpCjErOfcJ4HP+gU+ipmqLg0qdOIXw8mD7VKUHdtjr21d4Cp3D548tBLJ3Ad//MmGW6YZk5lf6rN4xsUYi1S4Ae1mASsq292t+hiO4pzZN/LartSAoE64vtgi60D36bqWMJ9g31oItiyYbQg3kdANVOD35kLbN4QccMvQdQ5SkoQUAJBzZMTXohPE9ChzaM6zpIani/C7HQ+DqeTgxSFllbQ==
+arc-message-signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=CNj7KooiAI9FvvU7C2h5AunZb0v0bPEI8E0GBziQgPY=;
+ b=b4h+2H+sr3QzejmVTMmvThzGBuWohOaAwkea81bNYpMSIzszdn3S/e6uMwR7Ro6mvoU7ETe/ZGQ2sHQ0V3f4Hzai1v6x8r2M38J2LuWyEWNWzMscFAvQaMOXXV36RnkrtI0PUCU+vwiqyiOstPD9KeBuYrjJei3Ib+Wwj2KG9DRvu3XM2UG+gFQQ9W2KcpdpA/tuBOakE31FydTCQHHBKpFZu3BSdtjkQqJn+yhUu7iurnP/qxZPhM641Les2EEyTN8WdLj+vceBHemRs1R16rTxzRd07cioNm+jUWY9h7FNb30Wc0GpYEQHNE5TsiczzRiKQoTjhyY8ZBa4WwHu6g==
+arc-authentication-results: i=1; mx.microsoft.com 1; spf=fail (sender ip is
+ 3.215.57.244) smtp.rcpttodomain=gmail.com smtp.mailfrom=accelya.com;
+ dmarc=fail (p=reject sp=reject pct=100) action=oreject
+ header.from=accelya.com; dkim=none (message not signed); arc=none (0)
+x-microsoft-antispam-untrusted: BCL:0;ARA:13230035|376009|82310400021|1800799019|69100299010|36860700008;
+x-microsoft-antispam-message-info-original: =?iso-8859-1?Q?NaRs8Os/n4XErs2K126OzTUadSkFcPF8TfC6WKeff0uTJVbSDU4jk1o24M?=
+ =?iso-8859-1?Q?rANjIZq+Zto5huhb60wTMTImsuBMQKOO628f93DC6tN4fUy8sY41RZC2cq?=
+ =?iso-8859-1?Q?eMzH3KwswaUIOdKYvewxG9WDjYhW2e1O2YtCL1PXZ0u3onEt+e91K7vx40?=
+ =?iso-8859-1?Q?EjTOU2ldOON/xzLOkYpvcbmy+2MkF4MqTWud+3wFmIB2yLqTaqYcaAvfdH?=
+ =?iso-8859-1?Q?+OjcWsiLJU/quQtjwjuR+DiWBDgZdl7RfHq1LXI5qL4dnCxLHrSnowZL5r?=
+ =?iso-8859-1?Q?+8cR9ZjGsMZf8OFEX0FZMxxFpBRrZa/opihfcQl2W1SlUU148JXSo6TxZj?=
+ =?iso-8859-1?Q?0legJQX7+Ftd2XieFnbyXtBv36YmUn6i4K2A1WYFQP44aAtspHFqBhpK/c?=
+ =?iso-8859-1?Q?vq5/LW+Cj4z+SkRoyZP5sJsXCqMG3Nn7j6yNq5o2pniqm+TJdQSZGyuIVK?=
+ =?iso-8859-1?Q?vwkxvAKYNMBC0o+yd+nUkO9Vpql7ktZBeM0ece91ToRkcD7xjbKS6KF//L?=
+ =?iso-8859-1?Q?2wWCY3XrM82GIzZ33mp2e6JFG3VQOG5bJdwVrUN4L/b0BRDEhRz342WVkm?=
+ =?iso-8859-1?Q?JHLF1DXckrysyuZ3s32u31/WNGYFDu45YvMRHCQZ/dQjwk2OG1rY9mWmFo?=
+ =?iso-8859-1?Q?FBxI/sa8HqSfENGNiJEIeBukCJ97rUiEHR1PR3ST2yLOTmqopgu6w7ITEY?=
+ =?iso-8859-1?Q?CvR+Tl3nm4AzFiOy3prMlvj0gn28g1p3QckswRkCt7OHu7+ouMdi1cJ23c?=
+ =?iso-8859-1?Q?KEUZ/WvD0OH3l+cnNvSn+78Q7qW3ShT1ViDbBJXDhaG6NMA4wTP8SRC2m6?=
+ =?iso-8859-1?Q?ZMYg8yzz3KD2Mv5kMnRDKnKiupZTff9AwiLKS8CcxADdi+jA6DdiexpUuq?=
+ =?iso-8859-1?Q?4TsOZ2OWy3QV9yvV6q64f8V58OIiTcTbcUCnDSNfdXz8+N9yy41m0oAGz7?=
+ =?iso-8859-1?Q?sCLbvi9K4V7VSTSqSle38dOk0WSG/RtQ8JFhlwjiLbmeuYHSxxpo8TTkVU?=
+ =?iso-8859-1?Q?Z4LdG1gj8xurqeE56tA95kE9LllBi8pmHZD4/dyf3FyI5MgbfF9lycrSXP?=
+ =?iso-8859-1?Q?SEqhiLyhWXFI4rXY37eXw08EndHPu1WxcdbOMcPh5i+2sv9j8zqG/Go4Ez?=
+ =?iso-8859-1?Q?Rphs0yJMfuuPBelCu3KJEiwgBFVw5u9bsgTTGNRCpdNYKwEMoG0UhyjJu0?=
+ =?iso-8859-1?Q?edUmEXQ65k8diT6HnbLmVeyU1woVsqqfw4ek/stUGcXYq1ZoRmWaFu5+ax?=
+ =?iso-8859-1?Q?AlA2sYS6SA98TOAESAClIe2UKVkAZjNgy6ZrnVHA7kUBOr4jnSzJnwnTtF?=
+ =?iso-8859-1?Q?DHM66NA5yRYvxr8N630ckJujVyeGBDCN1Eze8/Y3iF+HhnROdqDFF8d9yG?=
+ =?iso-8859-1?Q?FQdQkV+lc7NYlTDqv3KjjBjKRuh4jlGczDtF2l2JgxOBzQqwGYcfA=3D?=
+x-ms-exchange-transport-crosstenantheadersstripped: CO1PEPF000075F4.namprd03.prod.outlook.com
+x-ms-exchange-transport-crosstenantheaderspromoted: CO1PEPF000075F4.namprd03.prod.outlook.com
+x-ms-office365-filtering-correlation-id-prvs: 9d36a524-06a9-4562-689b-08dc8be69aea
+x-ms-exchange-senderadcheck: 1
+x-forefront-antispam-report-untrusted: CIP:3.215.57.244;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:IP-0A62236B;PTR:ec2-3-215-57-244.compute-1.amazonaws.com;CAT:NONE;SFS:(13230035)(376009)(82310400021)(1800799019)(69100299010)(36860700008);DIR:OUT;SFP:1102;
+x-ms-exchange-antispam-relay: 0
+X-Microsoft-Antispam-Mailbox-Delivery: wl:1;pcwl:1;ucf:1;jmr:0;auth:0;dest:C;OFR:CustomRules;ENG:(910001)(944506478)(944626604)(920097)(811239)(255002)(410001)(930097)(140003);
+X-Microsoft-Antispam-Message-Info: =?iso-8859-1?Q?J7ugYmwqEx0TlzzGWLZkkfY61bXNqkvYRJP4BFbtkcjYFz/aAD+2ysH/+u?=
+ =?iso-8859-1?Q?eZG67MBQ6DoanwY/imA5ylyyLv0bvYffe3eEO/Ch3uKDAZhi3z0D4yJrmn?=
+ =?iso-8859-1?Q?3yDu00o5yn2bSduskhtZt1PqZolwHkTiB0JpOdXDTAov/uGnwQTtG+aIrw?=
+ =?iso-8859-1?Q?q9JMeNEZRz1wtnAn13U1FNv8gngGwKsol/7aoU2jZSwZiUUUJgYHEgeVEF?=
+ =?iso-8859-1?Q?4GhLKCs21IQorD/hhdF5E0c4S9tYOQRloTseWBCBFTnPydrJTwuRp0679K?=
+ =?iso-8859-1?Q?Asxy+7WDP9PWOkoQdRI9ZWMXr56KcMkvbu2s80LXEeV7wJCRoeegx3LmeK?=
+ =?iso-8859-1?Q?iZePAhZ97IXViCbMG++3jCBjhu4wiZ92s86hlqoR+xoxh6ubzzlYSj5TJN?=
+ =?iso-8859-1?Q?yMES/MkLE6WCLt2wy6uwqc2xBD1hJDT+yEnFzg9VSJAdQZTl2gCFQOuUH6?=
+ =?iso-8859-1?Q?W2nMbyWt64aXc5kehPeoDDcuyocuucW0OfagPfCxFA883HjnllzJncKIzO?=
+ =?iso-8859-1?Q?I5XrrOTJefs2kZKWMIBYPGbuRtJ09BPoAKP0X/1MUBOJOJg9PPaRIaV9YM?=
+ =?iso-8859-1?Q?W7UCSCNeRBqH+15Sf35RGdldDmJMnZtTOd6w4r5nw9iq/k0GCr/Zc7/qgW?=
+ =?iso-8859-1?Q?lpBZSZI9xiS/3goI96jOqtcnHHlfvh5JfjUOo2xgnUdU1QF6f6tSW6UyKu?=
+ =?iso-8859-1?Q?v1poQPt1BWLl0aYddIxlOv4rILyPYy1P3DF8fagUVJR32EDR2z+AOhxKv1?=
+ =?iso-8859-1?Q?cw01TUqtZp8WT2nAIHagFr8Zq3N90M02D/g3r0zxII1N9LtoOdDxqv6Mcx?=
+ =?iso-8859-1?Q?QswhEdTrKIUoOIigPFBcUmdsxVyBonegaYaBjaxu2hoc9Qb3ml+yWWxEU7?=
+ =?iso-8859-1?Q?6e4zdIZDwURyv3b/R46QMQOoqt75gFNPnJgPa7LjaqTzvWjxc/n48+Jw04?=
+ =?iso-8859-1?Q?dc3aLQUZ3MalLsslSUmZPzLFrtUlMZyawUhtVGpy4102vVzB/JQ+HtAhY1?=
+ =?iso-8859-1?Q?osc03WUgM6KhR9yU+yfubH9OvEdrANqHodgaXwrkSV6p4ESP0kNP6nzGcE?=
+ =?iso-8859-1?Q?+B6GQcMTy4nCk3qbDpnsmonjTUELIHGIK0t80eu25XfKLbNmW05b7fE2K2?=
+ =?iso-8859-1?Q?sQd7yAlGUnA/bm8ueVl4opIILWBu+LuV+8eK4q/zrd9gMji5KLQeJ3+HVS?=
+ =?iso-8859-1?Q?bI0GW5RZy1iDYcYq6S004Y+SdhmN0iPyeXrGysN6Wli69yL5WqbKGR9qPt?=
+ =?iso-8859-1?Q?bZadBPoO7VLE7RgU3+4mO9AuzTZ04GYiJY3rA0vOj0zBHnMGyDhqb13CoU?=
+ =?iso-8859-1?Q?sI2yGE9QUgsRs196GmVY+AzxmN53PQ6JPnE9agdQq4yESE9IWc7mYa65jd?=
+ =?iso-8859-1?Q?l7Zvq89EjtJpuYUS+lDIxfsaKWq1KXbOZHjmUmwICbLOTV5sxnzOHJjZha?=
+ =?iso-8859-1?Q?BwJtwsFRXii7uGKgobhw3UF7ypToVIPyB3mA1lzV5hc4c5B8rmkeOwgVo4?=
+ =?iso-8859-1?Q?FIrXZJbN+gt3nKvl92CYqWOGE02Kdhc61sxZtgbiDfinieqdbUPZu61DJp?=
+ =?iso-8859-1?Q?jKHtzLC7DKauLsqV5Aqc+y3QUV51lUvXdUE91hLsoG5y7aboMKhq6c3mo9?=
+ =?iso-8859-1?Q?/CAU5j6wy7vjHHv6snMSY3Pm6QSHOe+ln8IOA84je7DREzeyDoSKBchuHD?=
+ =?iso-8859-1?Q?XvAITgm4aFieTL2xBG4Va6JnakbK3+wVqeKjNYRwwQbA54kqHmYTXanwtd?=
+ =?iso-8859-1?Q?IV3SOH/zd/cwCWb22pAQaJJYtMXdIHB6jQgZ/o7LRrviEBsmsXdJdI6YFn?=
+ =?iso-8859-1?Q?iOKN0BDgUdV0hRnY5j/Q6dYGFcNTII0kxzJ9M5TLpz0qRagWpv2HgyzOKn?=
+ =?iso-8859-1?Q?3KdahKOlVJ/fgedNQ23Jf2wYb7RAQmpcMTKsYPd+AwqrhJL1M3I05Kqa49?=
+ =?iso-8859-1?Q?9n+jmlsA3M70c/tVZhYT9i+ENMaKcaYZJbddbzPbLFjKvyrlg4OzJ0aXCZ?=
+ =?iso-8859-1?Q?Ejlqz4KtRa/Ev06oU/bvc/KV5f+mBRLhyIpOOwUL43GqvZDm82wuLPwHZx?=
+ =?iso-8859-1?Q?TvJcQW9Sao8xK3rQf4g9gJdujCnaCAkf9A=3D=3D?=
+Content-Type: multipart/alternative;
+	boundary="_000_a9e97263f6c249998460a8c799ea401bAM2PEPF0001C70Beurprd05_"
+MIME-Version: 1.0
+
+--_000_a9e97263f6c249998460a8c799ea401bAM2PEPF0001C70Beurprd05_
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Transfer-Encoding: quoted-printable
+
+QUO VADIS TRAVEL AGENCY LLC     IATA: 10709053
+T) 17867035079
+
+5645 Nw 84 Avenue
+Doral
+
+FL 33166
+USA
+
+
+Itinerary for Record Locator ZUWEXH
+Copa Airlines Record Locator BCUMZ0
+
+Reservation
+Airline Flight #        Departing       Arriving        Class   Cabin   Mea=
+ls
+Airport Date & Time     Airport Date & Time
+ <https://cm.farelogix.com/sprk/Public/Images/Providers/Air/CM.gif>
+Copa Airlines   225     Caracas, VE     TUE 18JUN
+04:08 PM        Panama City Tocumen International, PA   TUE 18JUN
+05:34 PM        A       Y       M
+SERGIO IVAN GOMEZ ZULUAGA (ADT) FF# Not Set     No Seat Assigned
+ <https://cm.farelogix.com/sprk/Public/Images/Providers/Air/CM.gif>
+Copa Airlines   259     Panama City Tocumen International, PA   THU 20JUN
+06:52 PM        Caracas, VE     THU 20JUN
+10:13 PM        A       Y       M
+SERGIO IVAN GOMEZ ZULUAGA (ADT) FF# Not Set     No Seat Assigned
+ Invoice Information
+SERGIO IVAN GOMEZ ZULUAGA (ADT) Document Number Issuance Date   Base    Tax=
+es   Total   Currency
+Electronic Ticket       2307016205545   13JUN24
+ <https://cm.farelogix.com/sprk/Public/Images/relation.png>   Endorsements:=
+  NON REF/NONEND/NONTRANS//CHANGES APPLY/COPA AIRLINES 98-0105127
+ <https://cm.farelogix.com/sprk/Public/Images/relation.png>   Fare Calculat=
+ion:  CCS CM PTY95.00AAA3TZ2S CM CCS95.00AAA3TZ2S NUC190.00END ROE1.000000
+ <https://cm.farelogix.com/sprk/Public/Images/relation.png>   Form of Payme=
+nt:  CASH    190.00  141.80  331.80  USD
+TAX:    USD             1.25    AH
+TAX:    USD             1.25    AH
+TAX:    USD             12.00   F3
+TAX:    USD             40.00   FZ
+TAX:    USD             67.70   AK
+TAX:    USD             1.25    C2
+TAX:    USD             1.25    C2
+TAX:    USD             1.90    EU
+TAX:    USD             15.20   YN
+
+Grand Total for all travelers   Amount  Currency
+        331.80  USD
+ Data Protection Notice
+Data Protection Notice: Your personal data will be processed in accordance =
+with the applicable carrier's privacy policy and, if your booking is made v=
+ia a reservation system provider ("GDS" ), with its privacy policy. These a=
+re available at http://www.iatatravelcenter.com/privacy or from the carrier=
+, GDS or TSP directly. You should read this documentation, which applies to=
+ your booking and specifies, for example, how your personal data is collect=
+ed, stored, used, disclosed and transferred.
+
+
+For information about and automatic calculation of baggage allowances and f=
+ees for this itinerary, in accordance with applicable carrier rules, please=
+ visit www.iflybags.com<http://www.iflybags.com/bagservice.aspx?trace=3DQuo=
+vadis107&fn=3D2&ar1=3DCM&cos1=3DA&fbc1=3DAAA3TZ2S&flt1=3D225&dc1=3DCCS&dd1=
+=3D2024-06-18&dt1=3D16:08&ac1=3DPTY&ad1=3D2024-06-18&at1=3D17:34&ar2=3DCM&c=
+os2=3DA&fbc2=3DAAA3TZ2S&flt2=3D259&dc2=3DPTY&dd2=3D2024-06-20&dt2=3D18:52&a=
+c2=3DCCS&ad2=3D2024-06-20&at2=3D22:13&td=3D2024-06-13&crnc=3DUSD&pos=3DMIA&=
+tn=3D1&p1=3DADT>
+
+
+
+--_000_a9e97263f6c249998460a8c799ea401bAM2PEPF0001C70Beurprd05_
+Content-Type: text/html; charset="iso-8859-1"
+Content-ID: <4B1173FCE7A2D14E913D5D6B6C56605E@namprd11.prod.outlook.com>
+Content-Transfer-Encoding: quoted-printable
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"><html><head>
+<meta http-equiv=3D"Content-Type" content=3D"text/html; charset=3Diso-8859-=
+1">
+</head>
+<body>
+<table style=3D"padding: 2px; margin: 2px; background-color: White; border:=
+ solid 1px Gray; width: 100%;">
+<tbody>
+<tr>
+<td>
+<table style=3D"width: 100%;">
+<tbody>
+<tr>
+<td style=3D"width: 70%;"><span style=3D"font-family: Arial, sans-serif; fo=
+nt-size: 12px;color: #cb7921; font-weight: bold;">QUO VADIS TRAVEL AGENCY L=
+LC&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IATA:&nbsp;10709053<br>
+</span><span style=3D"font-family: Arial, sans-serif; font-size: 12px;color=
+: #cb7921;">T)&nbsp;17867035079<br>
+&nbsp;<br>
+5645 Nw 84 Avenue<br>
+Doral<br>
+<br>
+FL 33166<br>
+USA</span></td>
+<td style=3D"width: 30%;" align=3D"right"></td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<tr>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><span id=3D"lblAdditionalInformation">
+<pre style=3D"font-family: Arial, sans-serif; font-size: 12px;"></pre>
+</span></td>
+</tr>
+<tr>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>
+<div style=3D"width: 50%; float:left;"><span id=3D"lblFlights" style=3D"fon=
+t-family: Arial, sans-serif; font-size: 12px;color: #cb7921;">Itinerary for=
+ Record Locator
+<b>ZUWEXH</b></span><br>
+<span id=3D"lblFlightSources" style=3D"font-family: Arial, sans-serif; font=
+-size: 12px;color: #000;">Copa Airlines Record Locator BCUMZ0<br>
+</span></div>
+</td>
+</tr>
+<tr>
+<td><span id=3D"lblItinerary" class=3D"gridtitle" style=3D"font-family: Ari=
+al, sans-serif; font-size: 12px;color: #cb7921;font-weight: bold;">Reservat=
+ion</span></td>
+</tr>
+<tr>
+<td>
+<table id=3D"FlightTable" style=3D"width: 100%; border: solid 1px #828282; =
+border-collapse: collapse; ">
+<tbody>
+<tr>
+<th rowspan=3D"2" style=3D"text-align:center; padding-left: 3px; padding-ri=
+ght: 3px; background-color: #839dc5; color: #101c78;  font-family: Arial, s=
+ans-serif; font-size: 12px;font-weight: bold;">
+Airline</th>
+<th rowspan=3D"2" style=3D"text-align:center; padding-left: 3px; padding-ri=
+ght: 3px; background-color: #839dc5; color: #101c78;  font-family: Arial, s=
+ans-serif; font-size: 12px;font-weight: bold; width: 50px">
+Flight #</th>
+<th colspan=3D"2" style=3D"text-align:center; padding-left: 3px; padding-ri=
+ght: 3px; background-color: #839dc5; color: #101c78;  font-family: Arial, s=
+ans-serif; font-size: 12px;font-weight: bold;">
+Departing</th>
+<th colspan=3D"2" style=3D"text-align:center; padding-left: 3px; padding-ri=
+ght: 3px; background-color: #839dc5; color: #101c78;  font-family: Arial, s=
+ans-serif; font-size: 12px;font-weight: bold;">
+Arriving</th>
+<th rowspan=3D"2" style=3D"text-align:center; padding-left: 3px; padding-ri=
+ght: 3px; background-color: #839dc5; color: #101c78;  font-family: Arial, s=
+ans-serif; font-size: 12px;font-weight: bold; width: 50px">
+Class</th>
+<th rowspan=3D"2" style=3D"text-align:center; padding-left: 3px; padding-ri=
+ght: 3px; background-color: #839dc5; color: #101c78;  font-family: Arial, s=
+ans-serif; font-size: 12px;font-weight: bold;">
+Cabin</th>
+<th rowspan=3D"2" style=3D"text-align:center; padding-left: 3px; padding-ri=
+ght: 3px; background-color: #839dc5; color: #101c78;  font-family: Arial, s=
+ans-serif; font-size: 12px;font-weight: bold;">
+Meals</th>
+</tr>
+<tr>
+<th style=3D"text-align:center; padding-left: 3px; padding-right: 3px; back=
+ground-color: #839dc5; color: #101c78;  font-family: Arial, sans-serif; fon=
+t-size: 12px;background-color: #a2b3d0; border: solid 1px #828282;">
+Airport</th>
+<th style=3D"text-align:center; padding-left: 3px; padding-right: 3px; back=
+ground-color: #839dc5; color: #101c78;  font-family: Arial, sans-serif; fon=
+t-size: 12px;background-color: #a2b3d0; border: solid 1px #828282; white-sp=
+ace: nowrap;">
+Date &amp; Time</th>
+<th style=3D"text-align:center; padding-left: 3px; padding-right: 3px; back=
+ground-color: #839dc5; color: #101c78;  font-family: Arial, sans-serif; fon=
+t-size: 12px;background-color: #a2b3d0; border: solid 1px #828282;">
+Airport</th>
+<th style=3D"text-align:center; padding-left: 3px; padding-right: 3px; back=
+ground-color: #839dc5; color: #101c78;  font-family: Arial, sans-serif; fon=
+t-size: 12px;background-color: #a2b3d0; border: solid 1px #828282; white-sp=
+ace: nowrap;">
+Date &amp; Time</th>
+</tr>
+<tr style=3D"background-color: White;">
+<td rowspan=3D"2" style=3D"text-align:center; padding-left: 3px; padding-ri=
+ght: 3px; border-top: solid 1px #828282;font-family: Arial, sans-serif; fon=
+t-size: 12px;max-width: 150px;">
+<img src=3D"https://cm.farelogix.com/sprk/Public/Images/Providers/Air/CM.gi=
+f"><br>
+Copa Airlines</td>
+<td style=3D"text-align:center; padding-left: 3px; padding-right: 3px; bord=
+er-top: solid 1px #828282;font-family: Arial, sans-serif; font-size: 12px;"=
+>
+225</td>
+<td style=3D"text-align:center; padding-left: 3px; padding-right: 3px; bord=
+er-top: solid 1px #828282;font-family: Arial, sans-serif; font-size: 12px;m=
+ax-width: 125px;">
+Caracas, VE</td>
+<td style=3D"text-align:center; padding-left: 3px; padding-right: 3px; bord=
+er-top: solid 1px #828282;font-family: Arial, sans-serif; font-size: 12px;"=
+>
+TUE 18JUN<br>
+04:08 PM</td>
+<td style=3D"text-align:center; padding-left: 3px; padding-right: 3px; bord=
+er-top: solid 1px #828282;font-family: Arial, sans-serif; font-size: 12px;m=
+ax-width: 125px;">
+Panama City Tocumen International, PA</td>
+<td style=3D"text-align:center; padding-left: 3px; padding-right: 3px; bord=
+er-top: solid 1px #828282;font-family: Arial, sans-serif; font-size: 12px;"=
+>
+TUE 18JUN<br>
+05:34 PM</td>
+<td style=3D"text-align:center; padding-left: 3px; padding-right: 3px; bord=
+er-top: solid 1px #828282;font-family: Arial, sans-serif; font-size: 12px;"=
+>
+A</td>
+<td style=3D"text-align:center; padding-left: 3px; padding-right: 3px; bord=
+er-top: solid 1px #828282;font-family: Arial, sans-serif; font-size: 12px;"=
+>
+Y</td>
+<td style=3D"text-align:center; padding-left: 3px; padding-right: 3px; bord=
+er-top: solid 1px #828282;font-family: Arial, sans-serif; font-size: 12px;"=
+>
+M</td>
+</tr>
+<tr style=3D"background-color: White;">
+<td colspan=3D"8">
+<table style=3D"border: solid 1px #828282; border-collapse: collapse; width=
+: 100%;">
+<tbody>
+<tr>
+<td style=3D"padding: 1px;padding-left: 5px;font-family: Arial, sans-serif;=
+ font-size: 12px; font-size: 10px;text-align:left;vertical-align: top;">
+SERGIO IVAN GOMEZ ZULUAGA (ADT)</td>
+<td style=3D"padding: 1px;padding-left: 5px;font-family: Arial, sans-serif;=
+ font-size: 12px; font-size: 10px;text-align:left;vertical-align: top;">
+FF# Not Set</td>
+<td style=3D"padding: 1px;padding-left: 5px;font-family: Arial, sans-serif;=
+ font-size: 12px; font-size: 10px;text-align:right;vertical-align: top;">
+No Seat Assigned</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<tr style=3D"background-color: #f4f4f4;">
+<td rowspan=3D"2" style=3D"text-align:center; padding-left: 3px; padding-ri=
+ght: 3px; border-top: solid 1px #828282;font-family: Arial, sans-serif; fon=
+t-size: 12px;max-width: 150px;">
+<img src=3D"https://cm.farelogix.com/sprk/Public/Images/Providers/Air/CM.gi=
+f"><br>
+Copa Airlines</td>
+<td style=3D"text-align:center; padding-left: 3px; padding-right: 3px; bord=
+er-top: solid 1px #828282;font-family: Arial, sans-serif; font-size: 12px;"=
+>
+259</td>
+<td style=3D"text-align:center; padding-left: 3px; padding-right: 3px; bord=
+er-top: solid 1px #828282;font-family: Arial, sans-serif; font-size: 12px;m=
+ax-width: 125px;">
+Panama City Tocumen International, PA</td>
+<td style=3D"text-align:center; padding-left: 3px; padding-right: 3px; bord=
+er-top: solid 1px #828282;font-family: Arial, sans-serif; font-size: 12px;"=
+>
+THU 20JUN<br>
+06:52 PM</td>
+<td style=3D"text-align:center; padding-left: 3px; padding-right: 3px; bord=
+er-top: solid 1px #828282;font-family: Arial, sans-serif; font-size: 12px;m=
+ax-width: 125px;">
+Caracas, VE</td>
+<td style=3D"text-align:center; padding-left: 3px; padding-right: 3px; bord=
+er-top: solid 1px #828282;font-family: Arial, sans-serif; font-size: 12px;"=
+>
+THU 20JUN<br>
+10:13 PM</td>
+<td style=3D"text-align:center; padding-left: 3px; padding-right: 3px; bord=
+er-top: solid 1px #828282;font-family: Arial, sans-serif; font-size: 12px;"=
+>
+A</td>
+<td style=3D"text-align:center; padding-left: 3px; padding-right: 3px; bord=
+er-top: solid 1px #828282;font-family: Arial, sans-serif; font-size: 12px;"=
+>
+Y</td>
+<td style=3D"text-align:center; padding-left: 3px; padding-right: 3px; bord=
+er-top: solid 1px #828282;font-family: Arial, sans-serif; font-size: 12px;"=
+>
+M</td>
+</tr>
+<tr style=3D"background-color: #f4f4f4;">
+<td colspan=3D"8">
+<table style=3D"border: solid 1px #828282; border-collapse: collapse; width=
+: 100%;">
+<tbody>
+<tr>
+<td style=3D"padding: 1px;padding-left: 5px;font-family: Arial, sans-serif;=
+ font-size: 12px; font-size: 10px;text-align:left;vertical-align: top;">
+SERGIO IVAN GOMEZ ZULUAGA (ADT)</td>
+<td style=3D"padding: 1px;padding-left: 5px;font-family: Arial, sans-serif;=
+ font-size: 12px; font-size: 10px;text-align:left;vertical-align: top;">
+FF# Not Set</td>
+<td style=3D"padding: 1px;padding-left: 5px;font-family: Arial, sans-serif;=
+ font-size: 12px; font-size: 10px;text-align:right;vertical-align: top;">
+No Seat Assigned</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<tr>
+<td>&nbsp;<span style=3D"font-family: Arial, sans-serif; font-size: 12px;pa=
+dding-left: 5px; padding-top: 10px; padding-bottom: 10px; display: block; c=
+olor: #cb7921; font-weight:bold;">Invoice Information</span>
+<table style=3D"width: 100%; border: solid 1px #828282; border-collapse: co=
+llapse;">
+<tbody>
+<tr>
+<th style=3D"padding-left: 5px; padding-right: 5px; background-color: #839d=
+c5; color: #101c78; font-family: Arial, sans-serif; font-size: 12px; font-w=
+eight: bold;width: 235px; text-align:left;">
+SERGIO IVAN GOMEZ ZULUAGA (ADT)</th>
+<th style=3D"padding-left: 5px; padding-right: 5px; background-color: #839d=
+c5; color: #101c78; font-family: Arial, sans-serif; font-size: 12px; font-w=
+eight: bold;width: 200px; text-align:left;">
+Document Number</th>
+<th style=3D"padding-left: 5px; padding-right: 5px; background-color: #839d=
+c5; color: #101c78; font-family: Arial, sans-serif; font-size: 12px; font-w=
+eight: bold;text-align:left;">
+Issuance Date</th>
+<th style=3D"padding-left: 5px; padding-right: 5px; background-color: #839d=
+c5; color: #101c78; font-family: Arial, sans-serif; font-size: 12px; font-w=
+eight: bold;text-align:right;">
+Base</th>
+<th style=3D"padding-left: 5px; padding-right: 5px; background-color: #839d=
+c5; color: #101c78; font-family: Arial, sans-serif; font-size: 12px; font-w=
+eight: bold;text-align:right;">
+Taxes</th>
+<th style=3D"padding-left: 5px; padding-right: 5px; background-color: #839d=
+c5; color: #101c78; font-family: Arial, sans-serif; font-size: 12px; font-w=
+eight: bold;text-align:right;">
+Total</th>
+<th style=3D"padding-left: 5px; padding-right: 5px; background-color: #839d=
+c5; color: #101c78; font-family: Arial, sans-serif; font-size: 12px; font-w=
+eight: bold;text-align:right;">
+Currency</th>
+</tr>
+<tr style=3D"background-color: White;">
+<td style=3D"padding-left: 3px; padding-right: 3px;vertical-align:top;borde=
+r-top: solid 1px #828282;font-family: Arial, sans-serif; font-size: 12px;te=
+xt-align:left;">
+Electronic Ticket</td>
+<td style=3D"padding-left: 3px; padding-right: 3px;vertical-align:top;borde=
+r-top: solid 1px #828282;font-family: Arial, sans-serif; font-size: 12px;te=
+xt-align:left;">
+2307016205545</td>
+<td style=3D"padding-left: 3px; padding-right: 3px;vertical-align:top;borde=
+r-top: solid 1px #828282;font-family: Arial, sans-serif; font-size: 12px;te=
+xt-align:left;">
+13JUN24</td>
+<td style=3D"padding-left: 3px; padding-right: 3px;vertical-align:top;borde=
+r-top: solid 1px #828282;font-family: Arial, sans-serif; font-size: 12px;">
+</td>
+<td style=3D"padding-left: 3px; padding-right: 3px;vertical-align:top;borde=
+r-top: solid 1px #828282;font-family: Arial, sans-serif; font-size: 12px;">
+</td>
+<td style=3D"padding-left: 3px; padding-right: 3px;vertical-align:top;borde=
+r-top: solid 1px #828282;font-family: Arial, sans-serif; font-size: 12px;">
+</td>
+<td style=3D"padding-left: 3px; padding-right: 3px;vertical-align:top;borde=
+r-top: solid 1px #828282;font-family: Arial, sans-serif; font-size: 12px;">
+</td>
+</tr>
+<tr style=3D"background-color: White;">
+<td colspan=3D"7" style=3D"font-family: Arial, sans-serif; font-size: 12px;=
+text-align:left;">
+<img src=3D"https://cm.farelogix.com/sprk/Public/Images/relation.png" style=
+=3D"border-width: 0">&nbsp;&nbsp;Endorsements:&nbsp;&nbsp;NON REF/NONEND/NO=
+NTRANS//CHANGES APPLY/COPA AIRLINES 98-0105127</td>
+</tr>
+<tr style=3D"background-color: White;">
+<td colspan=3D"7" style=3D"font-family: Arial, sans-serif; font-size: 12px;=
+text-align:left;">
+<div style=3D"float: left; position: relative"><img src=3D"https://cm.farel=
+ogix.com/sprk/Public/Images/relation.png" style=3D"border-width: 0">&nbsp;&=
+nbsp;Fare Calculation:&nbsp;&nbsp;<span style=3D"font-size: smaller; positi=
+on: absolute; bottom: 2px; width: 620px">CCS CM PTY95.00AAA3TZ2S
+ CM CCS95.00AAA3TZ2S NUC190.00END ROE1.000000</span></div>
+</td>
+</tr>
+<tr style=3D"background-color: White;">
+<td colspan=3D"3" style=3D"font-family: Arial, sans-serif; font-size: 12px;=
+text-align:left;">
+<img src=3D"https://cm.farelogix.com/sprk/Public/Images/relation.png" style=
+=3D"border-width: 0">&nbsp;&nbsp;Form of Payment:&nbsp;&nbsp;CASH</td>
+<td style=3D"padding-left: 3px; padding-right: 3px;vertical-align:top;font-=
+family: Arial, sans-serif; font-size: 12px;text-align:right;">
+190.00</td>
+<td style=3D"padding-left: 3px; padding-right: 3px;vertical-align:top;font-=
+family: Arial, sans-serif; font-size: 12px;text-align:right;">
+141.80</td>
+<td style=3D"padding-left: 3px; padding-right: 3px;vertical-align:top;font-=
+family: Arial, sans-serif; font-size: 12px;text-align:right;">
+331.80</td>
+<td style=3D"padding-left: 3px; padding-right: 3px;vertical-align:top;font-=
+family: Arial, sans-serif; font-size: 12px;text-align:right;">
+USD</td>
+</tr>
+<tr style=3D"background-color: White;">
+<td colspan=3D"7" style=3D"font-family: Arial, sans-serif; font-size: 12px;=
+text-align:left;">
+<table>
+<tbody>
+<tr>
+<td style=3D"font-family: Arial, sans-serif; font-size: 12px; text-align: l=
+eft">TAX:</td>
+<td style=3D"font-family: Arial, sans-serif; font-size: 12px; text-align: l=
+eft">USD</td>
+<td style=3D"font-family: Arial, sans-serif; font-size: 12px; text-align: l=
+eft">&nbsp;</td>
+<td style=3D"font-family: Arial, sans-serif; font-size: 12px; text-align: r=
+ight">1.25</td>
+<td style=3D"font-family: Arial, sans-serif; font-size: 12px; text-align: r=
+ight">AH</td>
+</tr>
+<tr>
+<td style=3D"font-family: Arial, sans-serif; font-size: 12px; text-align: l=
+eft">TAX:</td>
+<td style=3D"font-family: Arial, sans-serif; font-size: 12px; text-align: l=
+eft">USD</td>
+<td style=3D"font-family: Arial, sans-serif; font-size: 12px; text-align: l=
+eft">&nbsp;</td>
+<td style=3D"font-family: Arial, sans-serif; font-size: 12px; text-align: r=
+ight">1.25</td>
+<td style=3D"font-family: Arial, sans-serif; font-size: 12px; text-align: r=
+ight">AH</td>
+</tr>
+<tr>
+<td style=3D"font-family: Arial, sans-serif; font-size: 12px; text-align: l=
+eft">TAX:</td>
+<td style=3D"font-family: Arial, sans-serif; font-size: 12px; text-align: l=
+eft">USD</td>
+<td style=3D"font-family: Arial, sans-serif; font-size: 12px; text-align: l=
+eft">&nbsp;</td>
+<td style=3D"font-family: Arial, sans-serif; font-size: 12px; text-align: r=
+ight">12.00</td>
+<td style=3D"font-family: Arial, sans-serif; font-size: 12px; text-align: r=
+ight">F3</td>
+</tr>
+<tr>
+<td style=3D"font-family: Arial, sans-serif; font-size: 12px; text-align: l=
+eft">TAX:</td>
+<td style=3D"font-family: Arial, sans-serif; font-size: 12px; text-align: l=
+eft">USD</td>
+<td style=3D"font-family: Arial, sans-serif; font-size: 12px; text-align: l=
+eft">&nbsp;</td>
+<td style=3D"font-family: Arial, sans-serif; font-size: 12px; text-align: r=
+ight">40.00</td>
+<td style=3D"font-family: Arial, sans-serif; font-size: 12px; text-align: r=
+ight">FZ</td>
+</tr>
+<tr>
+<td style=3D"font-family: Arial, sans-serif; font-size: 12px; text-align: l=
+eft">TAX:</td>
+<td style=3D"font-family: Arial, sans-serif; font-size: 12px; text-align: l=
+eft">USD</td>
+<td style=3D"font-family: Arial, sans-serif; font-size: 12px; text-align: l=
+eft">&nbsp;</td>
+<td style=3D"font-family: Arial, sans-serif; font-size: 12px; text-align: r=
+ight">67.70</td>
+<td style=3D"font-family: Arial, sans-serif; font-size: 12px; text-align: r=
+ight">AK</td>
+</tr>
+<tr>
+<td style=3D"font-family: Arial, sans-serif; font-size: 12px; text-align: l=
+eft">TAX:</td>
+<td style=3D"font-family: Arial, sans-serif; font-size: 12px; text-align: l=
+eft">USD</td>
+<td style=3D"font-family: Arial, sans-serif; font-size: 12px; text-align: l=
+eft">&nbsp;</td>
+<td style=3D"font-family: Arial, sans-serif; font-size: 12px; text-align: r=
+ight">1.25</td>
+<td style=3D"font-family: Arial, sans-serif; font-size: 12px; text-align: r=
+ight">C2</td>
+</tr>
+<tr>
+<td style=3D"font-family: Arial, sans-serif; font-size: 12px; text-align: l=
+eft">TAX:</td>
+<td style=3D"font-family: Arial, sans-serif; font-size: 12px; text-align: l=
+eft">USD</td>
+<td style=3D"font-family: Arial, sans-serif; font-size: 12px; text-align: l=
+eft">&nbsp;</td>
+<td style=3D"font-family: Arial, sans-serif; font-size: 12px; text-align: r=
+ight">1.25</td>
+<td style=3D"font-family: Arial, sans-serif; font-size: 12px; text-align: r=
+ight">C2</td>
+</tr>
+<tr>
+<td style=3D"font-family: Arial, sans-serif; font-size: 12px; text-align: l=
+eft">TAX:</td>
+<td style=3D"font-family: Arial, sans-serif; font-size: 12px; text-align: l=
+eft">USD</td>
+<td style=3D"font-family: Arial, sans-serif; font-size: 12px; text-align: l=
+eft">&nbsp;</td>
+<td style=3D"font-family: Arial, sans-serif; font-size: 12px; text-align: r=
+ight">1.90</td>
+<td style=3D"font-family: Arial, sans-serif; font-size: 12px; text-align: r=
+ight">EU</td>
+</tr>
+<tr>
+<td style=3D"font-family: Arial, sans-serif; font-size: 12px; text-align: l=
+eft">TAX:</td>
+<td style=3D"font-family: Arial, sans-serif; font-size: 12px; text-align: l=
+eft">USD</td>
+<td style=3D"font-family: Arial, sans-serif; font-size: 12px; text-align: l=
+eft">&nbsp;</td>
+<td style=3D"font-family: Arial, sans-serif; font-size: 12px; text-align: r=
+ight">15.20</td>
+<td style=3D"font-family: Arial, sans-serif; font-size: 12px; text-align: r=
+ight">YN</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+<span style=3D"font-family: Arial, sans-serif; font-size: 12px;padding-top:=
+ 5px; padding-bottom: 5px; display: block;">&nbsp;</span>
+<table style=3D"width: 100%; border: solid 1px #828282; border-collapse: co=
+llapse;">
+<tbody>
+<tr>
+<th style=3D"padding-left: 5px; padding-right: 5px; background-color: #839d=
+c5; color: #101c78; font-family: Arial, sans-serif; font-size: 12px; font-w=
+eight: bold;text-align:left;">
+Grand Total for all travelers</th>
+<th style=3D"padding-left: 5px; padding-right: 5px; background-color: #839d=
+c5; color: #101c78; font-family: Arial, sans-serif; font-size: 12px; font-w=
+eight: bold;text-align:right;">
+Amount</th>
+<th style=3D"padding-left: 5px; padding-right: 5px; background-color: #839d=
+c5; color: #101c78; font-family: Arial, sans-serif; font-size: 12px; font-w=
+eight: bold;text-align:right;">
+Currency</th>
+</tr>
+<tr style=3D"background-color: White;">
+<td style=3D"padding-left: 3px; padding-right: 3px;vertical-align:top;borde=
+r-top: solid 1px #828282;font-family: Arial, sans-serif; font-size: 12px;te=
+xt-align:left;">
+</td>
+<td style=3D"padding-left: 3px; padding-right: 3px;vertical-align:top;borde=
+r-top: solid 1px #828282;font-family: Arial, sans-serif; font-size: 12px;te=
+xt-align:right;">
+331.80</td>
+<td style=3D"padding-left: 3px; padding-right: 3px;vertical-align:top;borde=
+r-top: solid 1px #828282;font-family: Arial, sans-serif; font-size: 12px;te=
+xt-align:right;">
+USD</td>
+</tr>
+</tbody>
+</table>
+<span style=3D"font-family: Arial, sans-serif; font-size: 12px;padding-top:=
+ 5px; padding-bottom: 5px; display: block;">&nbsp;</span><span style=3D"fon=
+t-family: Arial, sans-serif; font-size: 12px;padding-left: 5px; padding-top=
+: 10px; padding-bottom: 10px; display: block; color: #cb7921; font-weight:b=
+old;">Data
+ Protection Notice</span>
+<table style=3D"width: 100%; border: solid 1px #828282; border-collapse: co=
+llapse; ">
+<tbody>
+<tr>
+<td style=3D"padding-left: 3px; padding-right: 3px;vertical-align:top;borde=
+r-top: solid 1px #828282;font-family: Arial, sans-serif; font-size: 12px;te=
+xt-align:left;">
+Data Protection Notice: Your personal data will be processed in accordance =
+with the applicable carrier's privacy policy and, if your booking is made v=
+ia a reservation system provider (&quot;GDS&quot; ), with its privacy polic=
+y. These are available at http://www.iatatravelcenter.com/privacy
+ or from the carrier, GDS or TSP directly. You should read this documentati=
+on, which applies to your booking and specifies, for example, how your pers=
+onal data is collected, stored, used, disclosed and transferred.</td>
+</tr>
+</tbody>
+</table>
+<span style=3D"font-family: Arial, sans-serif; font-size: 12px;padding-top:=
+ 5px; padding-bottom: 5px; display: block;">&nbsp;</span></td>
+</tr>
+<tr>
+<td id=3D"lhgInfo"><span class=3D"gridtitle"></span></td>
+</tr>
+<tr>
+<td id=3D"ifBInfo" style=3D"font-family: Arial, sans-serif; font-size: 12px=
+;color: #000;">
+For information about and automatic calculation of baggage allowances and f=
+ees for this itinerary, in accordance with applicable carrier rules, please=
+ visit
+<span class=3D"gridtitle"></span><a href=3D"http://www.iflybags.com/bagserv=
+ice.aspx?trace=3DQuovadis107&amp;fn=3D2&amp;ar1=3DCM&amp;cos1=3DA&amp;fbc1=
+=3DAAA3TZ2S&amp;flt1=3D225&amp;dc1=3DCCS&amp;dd1=3D2024-06-18&amp;dt1=3D16:=
+08&amp;ac1=3DPTY&amp;ad1=3D2024-06-18&amp;at1=3D17:34&amp;ar2=3DCM&amp;cos2=
+=3DA&amp;fbc2=3DAAA3TZ2S&amp;flt2=3D259&amp;dc2=3DPTY&amp;dd2=3D2024-06-20&=
+amp;dt2=3D18:52&amp;ac2=3DCCS&amp;ad2=3D2024-06-20&amp;at2=3D22:13&amp;td=
+=3D2024-06-13&amp;crnc=3DUSD&amp;pos=3DMIA&amp;tn=3D1&amp;p1=3DADT">www.ifl=
+ybags.com</a></td>
+</tr>
+<tr>
+<td></td>
+</tr>
+<tr>
+<td><img id=3D"imgFooter" src=3D""></td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>
+
+--_000_a9e97263f6c249998460a8c799ea401bAM2PEPF0001C70Beurprd05_--

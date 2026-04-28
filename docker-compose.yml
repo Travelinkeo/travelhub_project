@@ -1,0 +1,100 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    restart: always
+    networks:
+      - travelhub_net
+    volumes:
+      - redis_data:/data
+
+  web:
+    build: .
+    container_name: web
+    restart: always
+    networks:
+      - travelhub_net
+    ports:
+      - "8000:8000"
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - PYTHONUNBUFFERED=1
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+      - static_volume:/app/static
+      - media_volume:/app/media
+    depends_on:
+      - redis
+
+  celery_worker:
+    build: .
+    command: celery -A travelhub worker -l info --concurrency=4
+    restart: always
+    networks:
+      - travelhub_net
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+    depends_on:
+      - redis
+      - web
+
+  celery_beat:
+    build: .
+    command: celery -A travelhub beat -l info
+    restart: always
+    networks:
+      - travelhub_net
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+    depends_on:
+      - redis
+      - web
+
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: nginx
+    restart: always
+    networks:
+      - travelhub_net
+    ports:
+      - "80:80"
+      - "8080:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - static_volume:/app/static:ro
+      - media_volume:/app/media:ro
+    depends_on:
+      - web
+
+  # 📱 WhatsApp Microservice - WPPConnect (Clean Start)
+  wppconnect:
+    image: devlikeapro/waha:latest
+    container_name: wppconnect
+    restart: always
+    ports:
+      - "21465:3000"
+    environment:
+      - WHATSAPP_DEFAULT_ENGINE=WEBJS
+      - WHATSAPP_API_KEY=THISISMYSECURETOKEN
+      - WAHA_LOG_LEVEL=info
+      - WHATSAPP_START_SESSION=default
+    shm_size: '1gb'
+    volumes:
+      - ./wpp_sessions:/app/.sessions
+
+volumes:
+  redis_data:
+  static_volume:
+  media_volume:
+
+networks:
+  travelhub_net:
+    driver: bridge

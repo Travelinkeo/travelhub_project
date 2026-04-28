@@ -1,0 +1,209 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        @page {
+            size: A4;
+            margin: 1.5cm;
+            @bottom-right {
+                content: "Página " counter(page) " de " counter(pages);
+                font-family: 'Helvetica', sans-serif;
+                font-size: 10px;
+                color: #64748b;
+            }
+        }
+        body {
+            font-family: 'Helvetica', 'Arial', sans-serif;
+            color: #1e293b;
+            line-height: 1.5;
+            font-size: 11px;
+        }
+        .header {
+            border-bottom: 2px solid {{ agencia.color_primario|default:"#10b981" }};
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+        }
+        .logo-container {
+            float: left;
+            width: 30%;
+        }
+        .agency-info {
+            float: right;
+            width: 65%;
+            text-align: right;
+        }
+        .clear { clear: both; }
+        .title {
+            font-size: 22px;
+            font-weight: bold;
+            color: #0f172a;
+            margin-top: 20px;
+            text-transform: uppercase;
+        }
+        .subtitle {
+            font-size: 11px;
+            color: #64748b;
+            margin-top: 5px;
+        }
+        .kpi-grid {
+            margin-top: 30px;
+            width: 100%;
+            border-spacing: 15px 0;
+            margin-left: -15px;
+        }
+        .kpi-card {
+            background-color: #f8fafc;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+        }
+        .kpi-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: {{ agencia.color_primario|default:"#10b981" }};
+        }
+        .kpi-label {
+            font-size: 9px;
+            text-transform: uppercase;
+            font-weight: bold;
+            color: #64748b;
+            margin-top: 5px;
+        }
+        .section-title {
+            font-size: 14px;
+            font-weight: bold;
+            margin-top: 40px;
+            margin-bottom: 15px;
+            color: #0f172a;
+            border-left: 4px solid {{ agencia.color_primario|default:"#10b981" }};
+            padding-left: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th {
+            background-color: #f1f5f9;
+            text-align: left;
+            padding: 10px;
+            font-size: 10px;
+            color: #475569;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        td {
+            padding: 10px;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: top;
+        }
+        .success-badge {
+            color: #059669;
+            font-weight: bold;
+        }
+        .footer {
+            margin-top: 50px;
+            text-align: center;
+            font-size: 9px;
+            color: #94a3b8;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 20px;
+        }
+        .amount { text-align: right; white-space: nowrap; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo-container">
+            {% if agencia.logo %}
+                <img src="{{ agencia.logo.url }}" style="height: 50px; width: auto;">
+            {% else %}
+                <div style="font-size: 24px; font-weight: 900; color: {{ agencia.color_primario|default:'#10b981' }}">TRAVELHUB</div>
+            {% endif %}
+        </div>
+        <div class="agency-info">
+            <div style="font-weight: bold; font-size: 14px;">{{ agencia.nombre }}</div>
+            <div>RIF: {{ agencia.rif|default:"N/A" }}</div>
+            <div>{{ agencia.direccion|default:"Dirección Fiscal Agencia" }}</div>
+        </div>
+        <div class="clear"></div>
+    </div>
+
+    <div class="title">Reporte Consolidado de Conciliación</div>
+    <div class="subtitle">Proveedor: {{ reporte.proveedor }} | Periodo: {{ reporte.fecha_subida|date:"M Y" }} | ID: {{ reporte.id_reporte|stringformat:".8s" }}</div>
+
+    <table class="kpi-grid">
+        <tr>
+            <td width="25%">
+                <div class="kpi-card">
+                    <div class="kpi-value">{{ kpis.total }}</div>
+                    <div class="kpi-label">Procesados</div>
+                </div>
+            </td>
+            <td width="25%">
+                <div class="kpi-card">
+                    <div class="kpi-value">{{ kpis.matches }}</div>
+                    <div class="kpi-label">Cuadrados</div>
+                </div>
+            </td>
+            <td width="25%">
+                <div class="kpi-card">
+                    <div class="kpi-value">{{ kpis.discrepancias }}</div>
+                    <div class="kpi-label">Discrepancias</div>
+                </div>
+            </td>
+            <td width="25%">
+                <div class="kpi-card">
+                    <div class="kpi-value">${{ kpis.monto_ajuste }}</div>
+                    <div class="kpi-label">Diferencia Neta</div>
+                </div>
+            </td>
+        </tr>
+    </table>
+
+    <div class="section-title">Resumen de Ajustes Contables Realizados</div>
+    <table>
+        <thead>
+            <tr>
+                <th>Boleto / Referencia</th>
+                <th>Estado de Auditoría</th>
+                <th>Diferencia ($)</th>
+                <th>Asiento Contable Generado</th>
+                <th class="amount">Monto Ajuste</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in conciliaciones %}
+                {% if item.sugerencia_asiento %}
+                <tr>
+                    <td>
+                        <strong>{{ item.linea_reporte.numero_boleto_reportado|default:item.boleto_local.numero_boleto }}</strong><br>
+                        <span style="color: #64748b; font-size: 9px;">Ref: {{ item.boleto_local.pnr|default:"GDS" }}</span>
+                    </td>
+                    <td>
+                        <span class="success-badge">AUDITADO</span>
+                    </td>
+                    <td>${{ item.diferencia_total }}</td>
+                    <td>
+                        {{ item.sugerencia_asiento.descripcion_general|truncatewords:8 }}<br>
+                        <small style="color: #94a3b8">#{{ item.sugerencia_asiento.id_asiento }} - {{ item.sugerencia_asiento.fecha_contable }}</small>
+                    </td>
+                    <td class="amount"><strong>${{ item.diferencia_total|abs }}</strong></td>
+                </tr>
+                {% endif %}
+            {% empty %}
+                <tr>
+                    <td colspan="5" style="text-align: center; padding: 40px; color: #94a3b8;">No se registraron asientos de ajuste en este periodo.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="footer">
+        Este documento es un reporte interno de gestión generado automáticamente por el motor de IA TravelHub Pro.<br>
+        Fecha del reporte: {{ fecha_generacion|date:"d/m/Y H:i:s" }} | Auditor: {{ user.get_full_name|default:user.username }}
+    </div>
+</body>
+</html>

@@ -1,0 +1,184 @@
+{% extends 'base_modern.html' %}
+{% load static %}
+
+{% block title %}Directorio de Proveedores — TravelHub{% endblock %}
+
+{% block extra_head %}
+<style>
+/* Table row hover */
+#proveedores-table-core tr:hover td { background: rgba(255,255,255,0.02); }
+#proveedores-table-core td { padding: 12px 16px; border-bottom: 1px solid var(--border); vertical-align: middle; font-size: 13px; }
+#proveedores-table-core th { padding: 10px 16px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); border-bottom: 1px solid var(--border); background: var(--surface-2); white-space: nowrap; text-align: left; }
+#proveedores-table-core th.text-center { text-align: center; }
+#proveedores-table-core th.text-right { text-align: right; }
+</style>
+{% endblock %}
+
+{% block content %}
+<main class="flex-1 w-full max-w-[1400px] mx-auto p-6 md:p-8 lg:p-10">
+    <!-- Page Title & Breadcrumb -->
+    <div class="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+            <div class="flex items-center gap-2 text-xs text-slate-500 dark:text-gray-400 font-medium mb-2 uppercase tracking-wider">
+                <span>Operaciones</span>
+                <span class="material-symbols-outlined text-[10px]">chevron_right</span>
+                <span class="text-primary">Directorio</span>
+            </div>
+            <h1 class="text-4xl font-bold text-gray-900 dark:text-white tracking-tight">Proveedores</h1>
+            <p class="text-gray-500 dark:text-slate-400 mt-2 text-lg">Gestión de proveedores, aerolíneas y operadores turísticos</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <a href="{% url 'core:proveedor_create' %}" class="btn-primary">
+                <span class="material-symbols-outlined text-[16px]">domain_add</span> Nuevo Proveedor
+            </a>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card-base p-5 mb-6">
+        <form method="get" class="flex flex-col sm:flex-row gap-4 items-center">
+            <div class="flex-1 w-full relative">
+                <span class="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                    <span class="material-symbols-outlined text-[16px] text-gray-400">search</span>
+                </span>
+                <input type="text" name="q" value="{{ request.GET.q }}" placeholder="Buscar por nombre, RIF, información de contacto..."
+                    class="input-base pl-9">
+            </div>
+            <div class="flex items-center gap-2 shrink-0 flex-wrap">
+                <button type="submit" class="btn-secondary ml-2 h-[32px]">
+                    <span class="material-symbols-outlined text-[16px]">filter_list</span> Filtrar
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Table -->
+    <div class="card-base overflow-hidden flex flex-col" style="min-height:400px">
+        <div class="flex items-center justify-between px-5 py-4 border-b border-border-light dark:border-border-dark bg-gray-50 dark:bg-surface-highlight-dark/30">
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-[18px] text-primary">storefront</span>
+                <h2 class="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider">Directorio de Proveedores</h2>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto flex-1">
+            <table class="w-full text-left border-collapse" id="proveedores-table-core">
+                <thead class="bg-gray-50 dark:bg-surface-highlight-dark/30 border-b border-border-light dark:border-border-dark">
+                    <tr>
+                        <th class="px-6 py-4 text-[10px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Proveedor</th>
+                        <th class="px-6 py-4 text-[10px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider text-center">Tipo</th>
+                        <th class="px-6 py-4 text-[10px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Contacto</th>
+                        <th class="px-6 py-4 text-[10px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Ubicación</th>
+                        <th class="px-6 py-4 text-[10px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider text-center">Estado</th>
+                        <th class="px-6 py-4 text-[10px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider text-right">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-dashed divide-border-light dark:divide-border-dark">
+                    {% for proveedor in proveedores %}
+                    <tr class="hover:bg-gray-50 dark:hover:bg-surface-highlight-dark/20 transition-colors group cursor-pointer" onclick="location.href='{% url 'core:proveedor_update' proveedor.pk %}'">
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full flex items-center justify-center text-xs font-black bg-indigo-500/10 text-indigo-500 border border-indigo-500/20 shrink-0">
+                                    {{ proveedor.nombre|slice:":2"|upper }}
+                                </div>
+                                <div class="flex flex-col gap-0.5 max-w-[250px]">
+                                    <p class="text-sm font-bold text-gray-900 dark:text-white truncate">{{ proveedor.nombre }}</p>
+                                    {% if proveedor.alias %}
+                                    <p class="text-[11px] text-gray-500 dark:text-slate-400 truncate">{{ proveedor.alias }}</p>
+                                    {% endif %}
+                                    {% if proveedor.rif %}
+                                    <p class="text-[10px] font-mono text-primary bg-primary/10 px-1 border border-primary/20 rounded inline-max-content mt-0.5" style="width: max-content;">RIF: {{ proveedor.rif }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/10 text-blue-500 border border-blue-500/20">
+                                {{ proveedor.get_tipo_proveedor_display }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex flex-col gap-0.5">
+                                {% if proveedor.contacto_nombre %}
+                                <p class="text-sm font-medium text-gray-900 dark:text-white truncate max-w-[180px]">{{ proveedor.contacto_nombre }}</p>
+                                {% endif %}
+                                {% if proveedor.contacto_email %}
+                                <p class="text-[11px] text-gray-600 dark:text-slate-400 truncate max-w-[180px]">{{ proveedor.contacto_email }}</p>
+                                {% endif %}
+                                {% if proveedor.contacto_telefono %}
+                                <p class="text-[10px] text-gray-500 dark:text-slate-500 font-mono mt-0.5">{{ proveedor.contacto_telefono }}</p>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <p class="text-sm text-gray-600 dark:text-slate-400">{{ proveedor.ciudad|default:"—" }}</p>
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            {% if proveedor.activo %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5"></span>Activo
+                            </span>
+                            {% else %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-red-500/10 text-red-500 border border-red-500/20">
+                                <span class="w-1.5 h-1.5 rounded-full bg-red-500 mr-1.5"></span>Inactivo
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <div class="flex items-center justify-end gap-1 opacity-50 group-hover:opacity-100 transition-opacity" onclick="event.stopPropagation()">
+                                <a href="{% url 'core:proveedor_update' proveedor.pk %}" class="p-1 rounded-md text-gray-400 hover:text-primary transition-colors hover:bg-primary/10" title="Editar">
+                                    <span class="material-symbols-outlined text-[18px]">edit</span>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="py-20 text-center">
+                            <div class="flex flex-col items-center justify-center">
+                                <div class="w-16 h-16 bg-gray-50 dark:bg-surface-highlight-dark/50 rounded-full flex items-center justify-center mb-4 border border-dashed border-border-light dark:border-border-dark">
+                                    <span class="material-symbols-outlined text-[32px] text-gray-300 dark:text-slate-600">store_off</span>
+                                </div>
+                                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">No hay proveedores</h3>
+                                <p class="text-sm text-gray-500 dark:text-slate-400 max-w-sm mx-auto">Ajusta los filtros de búsqueda o registra tu primer proveedor en el sistema.</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if is_paginated %}
+        <div class="border-t border-border-light dark:border-border-dark bg-gray-50 dark:bg-surface-highlight-dark/10 px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <p class="text-sm text-gray-500 dark:text-slate-400">
+                Mostrando <span class="font-bold text-gray-900 dark:text-white">{{ page_obj.start_index }}</span> a <span class="font-bold text-gray-900 dark:text-white">{{ page_obj.end_index }}</span> de <span class="font-bold text-gray-900 dark:text-white">{{ page_obj.paginator.count }}</span> proveedores
+            </p>
+            <nav class="relative z-0 inline-flex rounded-lg shadow-sm -space-x-px" aria-label="Pagination">
+                {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.tipo %}&tipo={{ request.GET.tipo }}{% endif %}" class="relative inline-flex items-center px-3 py-2 rounded-l-lg border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark text-sm font-medium text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-surface-highlight-dark/50 transition-colors">
+                    <span class="sr-only">Anterior</span>
+                    <span class="material-symbols-outlined text-[18px]">chevron_left</span>
+                </a>
+                {% else %}
+                <span class="relative inline-flex items-center px-3 py-2 rounded-l-lg border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark text-sm font-medium text-gray-300 dark:text-slate-600 cursor-not-allowed">
+                    <span class="material-symbols-outlined text-[18px]">chevron_left</span>
+                </span>
+                {% endif %}
+                
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.tipo %}&tipo={{ request.GET.tipo }}{% endif %}" class="relative inline-flex items-center px-3 py-2 rounded-r-lg border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark text-sm font-medium text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-surface-highlight-dark/50 transition-colors">
+                    <span class="sr-only">Siguiente</span>
+                    <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+                </a>
+                {% else %}
+                <span class="relative inline-flex items-center px-3 py-2 rounded-r-lg border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark text-sm font-medium text-gray-300 dark:text-slate-600 cursor-not-allowed">
+                    <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+                </span>
+                {% endif %}
+            </nav>
+        </div>
+        {% endif %}
+    </div>
+</main>
+{% endblock %}

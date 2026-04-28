@@ -1,0 +1,295 @@
+{% extends 'base_modern.html' %}
+
+{% block title %}Perfil de Agencia - TravelHub{% endblock %}
+
+{% block content %}
+<div class="px-4 py-8">
+    <!-- Main Card -->
+    <div class="bg-gray-800/40 backdrop-blur-xl border border-white/5 rounded-2xl shadow-2xl overflow-hidden">
+
+        <!-- Tabs Header -->
+        <div class="border-b border-white/10">
+            <nav class="-mb-px flex" aria-label="Tabs">
+                <button onclick="switchTab('info')" id="tab-info"
+                    class="w-1/5 py-4 px-1 text-center border-b-2 border-primary font-medium text-sm text-primary focus:outline-none transition-colors">
+                    Información Básica
+                </button>
+                <button onclick="switchTab('contacto')" id="tab-contacto"
+                    class="w-1/5 py-4 px-1 text-center border-b-2 border-transparent font-medium text-sm text-gray-400 hover:text-gray-200 hover:border-gray-600 focus:outline-none transition-colors">
+                    Contacto y Dirección
+                </button>
+                <button onclick="switchTab('branding')" id="tab-branding"
+                    class="w-1/5 py-4 px-1 text-center border-b-2 border-transparent font-medium text-sm text-gray-400 hover:text-gray-200 hover:border-gray-600 focus:outline-none transition-colors">
+                    Branding
+                </button>
+                <button onclick="switchTab('config')" id="tab-config"
+                    class="w-1/5 py-4 px-1 text-center border-b-2 border-transparent font-medium text-sm text-gray-400 hover:text-gray-200 hover:border-gray-600 focus:outline-none transition-colors">
+                    Configuración
+                </button>
+                <button onclick="switchTab('whatsapp')" id="tab-whatsapp"
+                    class="w-1/5 py-4 px-1 text-center border-b-2 border-transparent font-medium text-sm text-gray-400 hover:text-gray-200 hover:border-gray-600 focus:outline-none transition-colors">
+                    <div class="flex items-center justify-center gap-2">
+                        <span class="material-symbols-outlined text-[18px]">chat</span>
+                        <span>WhatsApp</span>
+                    </div>
+                </button>
+            </nav>
+        </div>
+
+        <form method="post" enctype="multipart/form-data" class="p-6">
+            {% csrf_token %}
+
+            {% if form.errors %}
+            <div class="bg-red-900/50 border border-red-500 text-red-200 px-4 py-3 rounded relative mb-6" role="alert">
+                <strong class="font-bold">Error!</strong>
+                <span class="block sm:inline">Por favor corrige los errores abajo indicados.</span>
+                <div class="mt-2 text-sm">
+                    {{ form.errors }}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Tab: Información Básica -->
+            <div id="content-info" class="tab-content">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Nombre de la Agencia</label>
+                        {{ form.nombre }}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Nombre Comercial</label>
+                        {{ form.nombre_comercial }}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">RIF / ID Fiscal</label>
+                        {{ form.rif }}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Código IATA</label>
+                        {{ form.iata }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: Contacto y Dirección -->
+            <div id="content-contacto" class="hidden tab-content">
+                <h3 class="text-lg font-medium text-white mb-4 border-b border-white/10 pb-2">Contacto</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Teléfono Principal</label>
+                        {{ form.telefono_principal }}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Email Principal</label>
+                        {{ form.email_principal }}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">WhatsApp</label>
+                        {{ form.whatsapp }}
+                    </div>
+                </div>
+
+                <h3 class="text-lg font-medium text-white mb-4 border-b border-white/10 pb-2">Dirección</h3>
+                <div class="grid grid-cols-1 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Dirección Completa</label>
+                        {{ form.direccion }}
+                    </div>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-1">Ciudad</label>
+                            {{ form.ciudad }}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-1">Estado</label>
+                            {{ form.estado }}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-1">País</label>
+                            {{ form.pais }}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-1">Código Postal</label>
+                            {{ form.codigo_postal }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: Branding -->
+            <div id="content-branding" class="hidden tab-content">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Logo Actual</label>
+                        {% if form.instance.logo %}
+                        <div
+                            class="h-48 w-full bg-gray-900/50 border-2 border-dashed border-gray-600 rounded-lg flex items-center justify-center p-4 mb-4">
+                            <img src="{{ form.instance.logo.url }}" alt="Logo"
+                                class="max-h-full max-w-full object-contain">
+                        </div>
+                        {% else %}
+                        <div
+                            class="h-48 w-full bg-gray-900/50 border-2 border-dashed border-gray-600 rounded-lg flex items-center justify-center text-gray-500 mb-4">
+                            <span class="text-sm">Sin Logo</span>
+                        </div>
+                        {% endif %}
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Subir Nuevo Logo</label>
+                        {{ form.logo }}
+                        <p class="text-xs text-gray-500 mt-1">Formato recomendado: PNG o JPG. Tamaño máximo: 2MB.</p>
+                    </div>
+
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Color Primario</label>
+                            <div class="flex items-center gap-3">
+                                {{ form.color_primario }}
+                                <span class="text-xs text-gray-500">Color principal para botones y enlaces.</span>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Color Secundario</label>
+                            <div class="flex items-center gap-3">
+                                {{ form.color_secundario }}
+                                <span class="text-xs text-gray-500">Color para acentos y degradados.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h3 class="text-lg font-medium text-white mt-8 mb-4 border-b border-white/10 pb-2">Redes Sociales</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Website</label>
+                        {{ form.website }}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Instagram</label>
+                        {{ form.instagram }}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Facebook</label>
+                        {{ form.facebook }}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Twitter (X)</label>
+                        {{ form.twitter }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: Configuración -->
+            <div id="content-config" class="hidden tab-content">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Moneda Principal</label>
+                        {{ form.moneda_principal }}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Zona Horaria</label>
+                        {{ form.zona_horaria }}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Idioma</label>
+                        {{ form.idioma }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: WhatsApp -->
+            <div id="content-whatsapp" class="hidden tab-content">
+                <div class="card-base p-6 border-primary/20 bg-primary/5">
+                    <div class="flex flex-col md:flex-row gap-8 items-center">
+                        <div class="flex-1">
+                            <h3 class="text-xl font-bold text-text-main flex items-center gap-2 mb-2">
+                                <span class="material-symbols-outlined text-primary">chat</span>
+                                Conexión de WhatsApp
+                            </h3>
+                            <p class="text-sm text-text-muted mb-6">
+                                Escanea este código para vincular el número de tu agencia y activar las notificaciones automáticas a clientes. 
+                                <br><span class="text-xs text-primary/70 font-bold uppercase tracking-wider">Powered by WPPConnect Server</span>
+                            </p>
+                            
+                            <div class="space-y-4">
+                                <div class="flex items-center gap-3 text-sm text-text-secondary">
+                                    <span class="material-symbols-outlined text-green-500">check_circle</span>
+                                    <span>Notificaciones automáticas de pago</span>
+                                </div>
+                                <div class="flex items-center gap-3 text-sm text-text-secondary">
+                                    <span class="material-symbols-outlined text-green-500">check_circle</span>
+                                    <span>Envío de itinerarios y vouchers</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- HTMX Container for QR -->
+                        <div class="w-full md:w-[300px] aspect-square bg-surface-2 rounded-2xl border border-border-color flex items-center justify-center relative overflow-hidden shadow-2xl"
+                             hx-get="{% url 'bookings:whatsapp_qr' %}" 
+                             hx-trigger="load, every 30s"
+                             hx-swap="innerHTML">
+                            <div class="flex flex-col items-center gap-3">
+                                <div class="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+                                <span class="text-xs font-bold text-text-muted animate-pulse">Iniciando Instancia...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-8 flex justify-end border-t border-white/10 pt-6">
+                <button type="submit"
+                    class="bg-primary hover:bg-primary/80 text-white font-bold py-2 px-8 rounded-lg shadow-lg shadow-primary/30 transition-all duration-200 transform hover:scale-105">
+                    Guardar Cambios
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function switchTab(tabName) {
+        // Hide all content
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+        // Show selected content
+        document.getElementById('content-' + tabName).classList.remove('hidden');
+
+        // Reset tabs styles
+        const tabs = ['info', 'contacto', 'branding', 'config', 'whatsapp'];
+        tabs.forEach(t => {
+            const btn = document.getElementById('tab-' + t);
+            if (t === tabName) {
+                btn.classList.remove('border-transparent', 'text-gray-400');
+                btn.classList.add('border-primary', 'text-primary');
+            } else {
+                btn.classList.add('border-transparent', 'text-gray-400');
+                btn.classList.remove('border-primary', 'text-primary');
+            }
+        });
+    }
+
+    // Apply Tailwind classes to form inputs
+    document.addEventListener('DOMContentLoaded', function () {
+        const inputs = document.querySelectorAll('input[type="text"], input[type="email"], input[type="url"], input[type="number"], select, textarea');
+        inputs.forEach(input => {
+            // Dark mode classes: bg-gray-700, text-white, border-gray-600
+            input.classList.add('mt-1', 'block', 'w-full', 'rounded-lg', 'border-gray-600', 'shadow-sm', 'focus:border-primary', 'focus:ring-primary', 'sm:text-sm', 'border', 'p-2.5', 'text-white', 'bg-gray-700/50', 'placeholder-gray-400');
+        });
+
+        const colorInputs = document.querySelectorAll('input[type="color"]');
+        colorInputs.forEach(input => {
+            input.classList.add('h-10', 'w-20', 'p-1', 'rounded', 'border', 'border-gray-600', 'bg-gray-700', 'cursor-pointer');
+        });
+
+        // File input styling fix
+        const fileInputs = document.querySelectorAll('input[type="file"]');
+        fileInputs.forEach(input => {
+            input.classList.add('block', 'w-full', 'text-sm', 'text-gray-300',
+                'file:mr-4', 'file:py-2', 'file:px-4',
+                'file:rounded-full', 'file:border-0',
+                'file:text-sm', 'file:font-semibold',
+                'file:bg-primary', 'file:text-white',
+                'hover:file:bg-primary/80', 'cursor-pointer'
+            );
+        });
+    });
+</script>
+{% endblock %}

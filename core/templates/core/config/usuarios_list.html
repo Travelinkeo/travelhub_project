@@ -1,0 +1,164 @@
+{% extends "core/config/config_base.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}Equipo — TravelHub Pro{% endblock %}
+
+{% block config_actions %}
+<button onclick="document.getElementById('invite-modal').classList.remove('hidden')"
+    class="btn-primary !h-12 !px-8 shadow-xl shadow-primary/20 group uppercase text-[10px] font-black tracking-widest">
+    <span class="material-symbols-outlined text-[18px]">person_add</span>
+    <span>{% trans "Invitar Miembro" %}</span>
+</button>
+{% endblock %}
+
+{% block config_content %}
+<main class="flex-1 w-full max-w-[1400px] mx-auto p-6 md:p-10">
+    <!-- Section Header -->
+    <div class="mb-10">
+        <h2 class="text-3xl font-black text-text-main tracking-tight uppercase">{% trans "Gestión de Equipo" %}</h2>
+        <p class="text-text-muted text-sm mt-1">{% trans "Control centralizado de identidades y niveles de autorización." %}</p>
+    </div>
+
+    <!-- Users DataGrid -->
+    <div class="card-base shadow-2xl overflow-hidden border-2 border-primary/5">
+        <div class="px-8 py-5 border-b border-border-color bg-surface-2/50 backdrop-blur-md flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-primary">groups</span>
+                <span class="text-xs font-black text-text-main uppercase tracking-widest">{% trans "Usuarios Activos" %} ({{ object_list.count }})</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <div class="relative group">
+                    <input type="text" placeholder="{% trans 'Buscador de identidad...' %}" 
+                        class="bg-surface-base border border-border-color rounded-xl h-10 px-4 pl-10 text-xs w-64 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-muted text-[18px]">search</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto overflow-y-auto max-h-[600px] custom-scrollbar">
+            <table class="w-full text-left">
+                <thead class="bg-surface-2 border-b border-border-color sticky top-0 z-10">
+                    <tr>
+                        <th class="px-8 py-4 text-[10px] font-black text-text-muted uppercase tracking-[0.2em] w-1/3">{% trans "Identidad & Contacto" %}</th>
+                        <th class="px-8 py-4 text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">{% trans "Nivel de Autorización" %}</th>
+                        <th class="px-8 py-4 text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">{% trans "Estado" %}</th>
+                        <th class="px-8 py-4 text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">{% trans "Último Acceso" %}</th>
+                        <th class="px-8 py-4 text-[10px] font-black text-text-muted uppercase tracking-[0.2em] text-right">{% trans "Controles" %}</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-border-color/50">
+                    {% for ua in object_list %}
+                    <tr class="hover:bg-primary/5 transition-colors group">
+                        <td class="px-8 py-5">
+                            <div class="flex items-center gap-4">
+                                <div class="size-11 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-black shadow-lg shadow-primary/5">
+                                    {{ ua.usuario.username|slice:":2"|upper }}
+                                </div>
+                                <div class="flex flex-col">
+                                    <span class="text-sm font-black text-text-main">{{ ua.usuario.get_full_name|default:ua.usuario.username }}</span>
+                                    <span class="text-[11px] text-text-muted font-bold">{{ ua.usuario.email }}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-8 py-5">
+                            <span class="px-3 py-1.5 rounded-lg bg-surface-base border border-border-color text-[10px] font-black text-text-main uppercase tracking-widest shadow-sm">
+                                {{ ua.get_rol_display }}
+                            </span>
+                        </td>
+                        <td class="px-8 py-5">
+                            <div class="flex items-center gap-2">
+                                <span class="relative flex h-2.5 w-2.5">
+                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full {% if ua.activo %}bg-emerald-400{% else %}bg-rose-400{% endif %} opacity-75"></span>
+                                    <span class="relative inline-flex rounded-full h-2.5 w-2.5 {% if ua.activo %}bg-emerald-500{% else %}bg-rose-500{% endif %}"></span>
+                                </span>
+                                <span class="text-[10px] font-black text-text-main uppercase tracking-widest">{{ ua.activo|yesno:"En Línea,Baja" }}</span>
+                            </div>
+                        </td>
+                        <td class="px-8 py-5">
+                            <span class="text-[11px] text-text-muted font-bold uppercase">{{ ua.usuario.last_login|date:"d M Y H:i"|default:"Pendiente" }}</span>
+                        </td>
+                        <td class="px-8 py-5 text-right">
+                            <div class="flex items-center justify-end gap-2">
+                                <a href="#" class="size-9 rounded-xl border border-border-color bg-surface-base flex items-center justify-center text-text-muted hover:text-primary hover:border-primary/50 transition-all shadow-sm">
+                                    <span class="material-symbols-outlined text-[18px]">edit_square</span>
+                                </a>
+                                <button class="size-9 rounded-xl border border-border-color bg-surface-base flex items-center justify-center text-text-muted hover:text-rose-500 hover:border-rose-500/50 transition-all shadow-sm">
+                                    <span class="material-symbols-outlined text-[18px]">person_off</span>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="px-8 py-16 text-center">
+                            <div class="flex flex-col items-center gap-4 opacity-40">
+                                <span class="material-symbols-outlined text-6xl">person_search</span>
+                                <p class="text-sm font-black uppercase tracking-widest text-text-muted">{% trans "No hay colaboradores registrados en esta agencia." %}</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<!-- Modal Invitación -->
+<div id="invite-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center px-4 bg-slate-950/80 backdrop-blur-xl animate-fade-in">
+    <div class="bg-surface-base border border-border-color w-full max-w-lg rounded-3xl shadow-2xl p-10 relative">
+        <button onclick="document.getElementById('invite-modal').classList.add('hidden')" 
+            class="absolute top-6 right-6 p-2 text-text-muted hover:text-text-main transition-colors">
+            <span class="material-symbols-outlined">close</span>
+        </button>
+
+        <header class="mb-10 text-center">
+            <div class="size-16 bg-primary/10 rounded-3xl flex items-center justify-center text-primary border border-primary/20 mx-auto mb-6 shadow-xl shadow-primary/5">
+                <span class="material-symbols-outlined text-3xl">mail_lock</span>
+            </div>
+            <h3 class="text-2xl font-black text-text-main uppercase tracking-tight">{% trans "Invitar Colaborador" %}</h3>
+            <p class="text-xs text-text-muted mt-2 font-bold uppercase tracking-widest">{% trans "Envia una señal de autorización segura" %}</p>
+        </header>
+
+        <form method="post" action="{% url 'core:usuario_create' %}" class="space-y-8">
+            {% csrf_token %}
+            <div class="space-y-3">
+                <label class="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] pl-1">{% trans "Identidad del Usuario (Username)" %}</label>
+                <div class="relative">
+                    <input type="text" name="username" required
+                        class="w-full bg-surface-2 border border-border-color rounded-2xl h-14 px-5 pl-12 text-sm focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all">
+                    <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-text-muted">person</span>
+                </div>
+            </div>
+
+            <div class="space-y-3">
+                <label class="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] pl-1">{% trans "Nivel de Privilegio" %}</label>
+                <select name="rol" required
+                    class="w-full bg-surface-2 border border-border-color rounded-2xl h-14 px-5 text-sm focus:ring-4 focus:ring-primary/10 transition-all cursor-pointer">
+                    <option value="admin">{% trans "Administrador Global" %}</option>
+                    <option value="gerente">{% trans "Gerencia de Ventas" %}</option>
+                    <option value="agente" selected>{% trans "Agente de Viajes" %}</option>
+                </select>
+            </div>
+
+            <div class="grid grid-cols-2 gap-6 pt-6">
+                <button type="button" onclick="document.getElementById('invite-modal').classList.add('hidden')"
+                    class="btn-secondary !h-12 !px-8 border-2 border-border-color uppercase text-[10px] font-black tracking-widest">
+                    {% trans "Cancelar" %}
+                </button>
+                <button type="submit" class="btn-primary !h-12 !px-8 shadow-xl shadow-primary/20 uppercase text-[10px] font-black tracking-widest">
+                    <span class="material-symbols-outlined text-[18px]">send</span>
+                    <span>{% trans "Enviar Invitación" %}</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script nonce="{{ request.csp_nonce }}">
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') document.getElementById('invite-modal').classList.add('hidden');
+    });
+</script>
+{% endblock %}

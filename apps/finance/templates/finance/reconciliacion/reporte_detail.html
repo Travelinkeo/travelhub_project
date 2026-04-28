@@ -1,0 +1,215 @@
+{% extends "base_modern.html" %}
+{% load humanize mathfilters %}
+
+{% block title %}Detalle de Liquidación {{ reporte.proveedor }}{% endblock %}
+
+{% block page_title %}Detalle de Liquidación{% endblock %}
+{% block page_subtitle %}{{ reporte.proveedor }} — Proceso de Auditoría{% endblock %}
+
+{% block content %}
+<div class="px-6 py-8 max-w-[1440px] mx-auto space-y-8 overflow-y-auto h-full">
+    
+    <!-- Header: Theme Adaptive -->
+    <div class="relative overflow-hidden bg-surface-1 rounded-3xl p-8 border border-border-color shadow-2xl">
+        <div class="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full -mr-32 -mt-32 blur-3xl"></div>
+        
+        <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+            <div class="space-y-4">
+                <nav class="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-text-muted">
+                    <a href="{% url 'finance:reconciliacion_dashboard_htmx' %}" class="hover:text-primary transition-colors">Infraestructura</a>
+                    <span class="material-symbols-outlined text-[10px]">chevron_right</span>
+                    <span class="text-text-main">{{ reporte.proveedor }}</span>
+                </nav>
+                
+                <div class="space-y-1">
+                    <h1 class="text-4xl font-black text-text-main tracking-tighter uppercase flex items-center gap-4">
+                        <span class="bg-gradient-to-r from-primary to-primary-hover bg-clip-text text-transparent">Liquidación de Vuelo</span>
+                        <span class="text-text-muted/20">/</span>
+                        <span class="text-text-main text-2xl">{{ reporte.fecha_subida|date:"d M, Y" }}</span>
+                    </h1>
+                    <p class="text-text-muted font-mono text-xs tracking-widest uppercase">ID: #{{ reporte.pk|truncatechars:12 }} — Proceso IA Activo</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-4">
+                <div class="flex flex-col items-end gap-1">
+                    <span class="text-[9px] font-black uppercase tracking-widest text-text-muted mb-1">Estatus Financiero</span>
+                    <span class="px-5 py-2 rounded-xl text-sm font-black uppercase tracking-widest border shadow-lg
+                        {% if reporte.estado == 'CONCILIADO' %}bg-primary/10 text-primary border-primary/20 shadow-primary/5
+                        {% elif reporte.estado == 'CON_DISCREPANCIAS' %}bg-amber-500/10 text-amber-500 border-amber-500/20 shadow-amber-500/5
+                        {% elif reporte.estado == 'ERROR' %}bg-status-danger-bg text-status-danger border-status-danger/20 shadow-status-danger/5
+                        {% else %}bg-surface-2 text-text-muted border-border-color{% endif %}">
+                        {{ reporte.get_estado_display|default:reporte.estado }}
+                    </span>
+                </div>
+                
+                {% if reporte.estado == 'PENDIENTE' or reporte.estado == 'ERROR' %}
+                <div class="flex items-center pt-5">
+                    <a href="{% url 'finance:reconciliacion_process' reporte.pk %}" class="group relative px-6 py-3 bg-primary hover:bg-primary-hover text-on-primary rounded-xl font-black uppercase tracking-widest transition-all shadow-xl shadow-primary/20 overflow-hidden flex items-center gap-2">
+                        <div class="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        <span class="material-symbols-outlined text-[20px] group-hover:rotate-12 transition-transform">smart_toy</span>
+                        <span>Analizar con IA</span>
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Error/Messages Section -->
+    {% if messages or reporte.error_log %}
+    <div class="space-y-4">
+        {% for message in messages %}
+        <div class="p-4 rounded-2xl border flex items-center gap-4 bg-primary/5 border-primary/10 text-primary">
+            <span class="material-symbols-outlined">info</span>
+            <p class="text-xs font-bold uppercase tracking-wide">{{ message }}</p>
+        </div>
+        {% endfor %}
+        
+        {% if reporte.error_log %}
+        <div class="p-6 rounded-2xl bg-status-danger-bg border border-status-danger/20 space-y-3">
+            <h3 class="text-status-danger font-black uppercase tracking-widest text-xs flex items-center gap-2">
+                <span class="material-symbols-outlined text-[16px]">bug_report</span>
+                Error del Motor Vision IA:
+            </h3>
+            <pre class="bg-surface-base p-4 rounded-xl font-mono text-[10px] text-status-danger/80 leading-relaxed border border-status-danger/10">{{ reporte.error_log }}</pre>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- Conciliation Table -->
+    {% if conciliaciones_lines %}
+    <div class="card-base overflow-hidden">
+        <div class="px-8 py-6 bg-primary/5 border-b border-border-color flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="size-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary border border-primary/20 shadow-sm">
+                    <span class="material-symbols-outlined text-[18px]">verified</span>
+                </div>
+                <h2 class="text-sm font-black text-text-main uppercase tracking-widest opacity-80">Desglose de Auditoría</h2>
+            </div>
+            <div class="text-[10px] font-black text-text-muted uppercase tracking-widest">
+                {{ reporte.lineas.count }} Registros Estructurados
+            </div>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-surface-2 border-b border-border-color text-text-muted uppercase tracking-widest text-[9px]">
+                        <th class="px-8 py-5 font-black">Documento Fiscal</th>
+                        <th class="px-8 py-5 font-black text-right">Reportado ($)</th>
+                        <th class="px-8 py-5 font-black text-right">En Sistema ($)</th>
+                        <th class="px-8 py-5 font-black text-center">Desbalance</th>
+                        <th class="px-8 py-5 font-black text-center">Estatus Cruce</th>
+                        <th class="px-8 py-5 font-black text-center">Asiento IA</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-border-color">
+                    {% for rec in conciliaciones_lines %}
+                    <tr class="group hover:bg-primary/[0.01] transition-all">
+                        <td class="px-8 py-5">
+                            <div class="flex items-center gap-3">
+                                <div class="size-8 rounded-lg bg-surface-base flex items-center justify-center text-text-muted group-hover:text-primary group-hover:bg-primary/10 transition-all border border-border-color group-hover:border-primary/20">
+                                    <span class="material-symbols-outlined text-[16px]">confirmation_number</span>
+                                </div>
+                                <div>
+                                    <p class="text-[11px] font-black text-text-main uppercase tracking-tight font-mono">{{ rec.linea_reporte.numero_boleto_reportado|default:rec.boleto_local.numero_boleto }}</p>
+                                    <p class="text-[9px] text-text-muted font-black uppercase tracking-widest mt-0.5">{{ rec.linea_reporte.pasajero_reportado|default:rec.boleto_local.pasajero_nombre_completo|truncatechars:20 }}</p>
+                                </div>
+                            </div>
+                        </td>
+
+                        <td class="px-8 py-5 text-right font-mono text-sm">
+                            <span class="font-black text-text-main/80 tabular-nums">${{ rec.linea_reporte.total_cobrado|default:"0.00"|intcomma }}</span>
+                        </td>
+
+                        <td class="px-8 py-5 text-right font-mono text-sm">
+                            {% if rec.boleto_local %}
+                                <span class="font-black text-text-muted group-hover:text-primary/80 transition-colors tabular-nums">${{ rec.boleto_local.total_boleto|default:"0.00"|intcomma }}</span>
+                            {% else %}
+                                <span class="text-status-danger/40 font-black uppercase tracking-widest text-[10px]">No Encontrado</span>
+                            {% endif %}
+                        </td>
+
+                        <td class="px-8 py-5 text-center">
+                            {% if rec.diferencia_total == 0 %}
+                                <span class="material-symbols-outlined text-status-success/30 text-[18px]">check_circle</span>
+                            {% elif rec.diferencia_total > 0 %}
+                                <div class="flex flex-col items-center">
+                                    <span class="text-xs font-black text-status-danger tracking-tighter tabular-nums">+${{ rec.diferencia_total|intcomma }}</span>
+                                    <span class="text-[8px] text-status-danger/40 font-black uppercase tracking-widest">Pérdida (Sobrecobro)</span>
+                                </div>
+                            {% else %}
+                                <div class="flex flex-col items-center">
+                                    <span class="text-xs font-black text-status-success tracking-tighter tabular-nums">-${{ rec.diferencia_total|abs|intcomma }}</span>
+                                    <span class="text-[8px] text-status-success/40 font-black uppercase tracking-widest">Favor (Economía)</span>
+                                </div>
+                            {% endif %}
+                        </td>
+
+                        <td class="px-8 py-5 text-center relative group/status">
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border
+                                {% if rec.estado == 'OK' %}bg-status-success-bg text-status-success border-status-success/20
+                                {% elif rec.estado == 'DISCREPANCIA' %}bg-status-warning-bg text-status-warning border-status-warning/20 animate-pulse
+                                {% else %}bg-status-danger-bg text-status-danger border-status-danger/20{% endif %}">
+                                {{ rec.estado }}
+                            </span>
+                            
+                            {% if rec.ia_razonamiento %}
+                            <div class="mt-2 flex justify-center cursor-help">
+                                <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-4 bg-surface-1 border border-primary/20 rounded-2xl shadow-2xl opacity-0 group-hover/status:opacity-100 transition-all pointer-events-none z-50">
+                                    <p class="text-[9px] font-black text-primary uppercase tracking-widest mb-2 border-b border-border-color pb-2">AI Auditor Reasoning</p>
+                                    <p class="text-[10px] text-text-secondary leading-relaxed font-medium lowercase italic">"{{ rec.ia_razonamiento }}"</p>
+                                    <div class="absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent border-t-surface-1"></div>
+                                </div>
+                                <span class="material-symbols-outlined text-primary text-[14px]">psychology</span>
+                            </div>
+                            {% endif %}
+                        </td>
+
+                        <td class="px-8 py-5 text-center">
+                            {% if rec.sugerencia_asiento %}
+                            <a href="{% url 'admin:contabilidad_asientocontable_change' rec.sugerencia_asiento.id_asiento %}" class="size-8 rounded-lg bg-primary/10 hover:bg-primary-hover hover:text-on-primary border border-primary/20 transition-all inline-flex items-center justify-center group-hover:scale-110">
+                                <span class="material-symbols-outlined text-[18px]">account_balance_wallet</span>
+                            </a>
+                            {% else %}
+                            <span class="text-text-muted/10">—</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% else %}
+    <div class="py-32 flex flex-col items-center gap-6 text-center">
+        <div class="size-20 rounded-3xl bg-surface-2 border border-border-color flex items-center justify-center text-text-muted/10">
+            <span class="material-symbols-outlined text-[48px]">search_off</span>
+        </div>
+        <div class="space-y-2">
+            <p class="text-lg font-black text-text-main uppercase tracking-tight opacity-90">Análisis Pendiente</p>
+            <p class="text-xs text-text-muted font-bold uppercase tracking-widest max-w-xs leading-relaxed">Inyecte el motor de IA para reconciliar este reporte contra la base de datos central.</p>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Raw Data Section -->
+    {% if reporte.datos_extraidos %}
+    <details class="group card-base overflow-hidden transition-all hover:border-primary/20">
+        <summary class="px-8 py-5 flex items-center justify-between cursor-pointer group-open:bg-primary/5 transition-colors">
+            <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-primary text-[18px]">terminal</span>
+                <span class="text-[10px] font-black uppercase tracking-widest text-text-main">Datos Crudos (IA Vision Output)</span>
+            </div>
+            <span class="material-symbols-outlined text-text-muted/40 group-open:rotate-180 transition-transform">expand_more</span>
+        </summary>
+        <div class="p-8 bg-surface-base border-t border-border-color overflow-x-auto">
+            <pre class="font-mono text-[10px] text-primary/60 leading-relaxed">{{ reporte.datos_extraidos|pprint }}</pre>
+        </div>
+    </details>
+    {% endif %}
+
+</div>
+{% endblock %}

@@ -1,0 +1,109 @@
+{% extends "base_modern.html" %}
+
+{% block title %}Sincronizar Liquidación de Proveedor{% endblock %}
+
+{% block page_title %}Sincronizar Nuevo Reporte{% endblock %}
+{% block page_subtitle %}Carga de archivos de liquidación GDS o Consolidador{% endblock %}
+
+{% block content %}
+<div class="px-4 py-8 max-w-[800px] mx-auto overflow-y-auto h-full">
+    <div class="mb-10 flex items-center justify-between border-b border-border-color pb-6">
+        <h1 class="text-3xl font-black flex items-center gap-4 text-text-main uppercase tracking-tighter">
+            <span class="material-symbols-outlined text-[32px] text-primary">upload_file</span>
+            Carga de Reporte
+        </h1>
+        <a href="{% url 'finance:reconciliacion_dashboard_htmx' %}" class="flex items-center gap-2 text-sm font-bold text-text-muted hover:text-primary transition-colors uppercase tracking-widest">
+            <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+            Panel Control
+        </a>
+    </div>
+
+    <div class="card-base p-8 shadow-2xl relative overflow-hidden group">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-16 -mt-16 blur-2xl group-hover:bg-primary/10 transition-colors"></div>
+        
+        <form method="post" enctype="multipart/form-data" class="space-y-8 relative z-10">
+            {% csrf_token %}
+            
+            {% if form.non_field_errors %}
+            <div class="p-4 bg-status-danger-bg border border-status-danger/30 rounded-xl text-status-danger text-sm font-bold uppercase tracking-wide">
+                {{ form.non_field_errors }}
+            </div>
+            {% endif %}
+
+            <!-- Campo: Proveedor -->
+            <div class="space-y-3">
+                <label for="{{ form.proveedor.id_for_label }}" class="block text-[11px] font-black uppercase tracking-[0.2em] text-text-muted">
+                    GDS o Consolidador de Origen <span class="text-status-danger">*</span>
+                </label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-text-muted group-focus-within:text-primary">
+                        <span class="material-symbols-outlined text-[20px]">corporate_fare</span>
+                    </div>
+                    {% if form.proveedor.field.widget.input_type == 'select' %}
+                        <div class="pl-12">
+                            {{ form.proveedor }}
+                        </div>
+                    {% else %}
+                        <input type="text" name="{{ form.proveedor.name }}" id="{{ form.proveedor.id_for_label }}" 
+                               class="input-base pl-12 font-bold !bg-surface-2 h-[50px] text-sm" 
+                               placeholder="Ej: AMADEUS, SABRE, KIU..." 
+                               value="{{ form.proveedor.value|default:'' }}">
+                    {% endif %}
+                </div>
+                {% if form.proveedor.errors %}
+                    <p class="text-[10px] text-status-danger font-bold uppercase tracking-wide mt-2">{{ form.proveedor.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Campo: Archivo -->
+            <div class="space-y-3">
+                <label for="{{ form.archivo.id_for_label }}" class="block text-[11px] font-black uppercase tracking-[0.2em] text-text-muted">
+                    Archivo de Liquidación (PDF/CSV/TXT) <span class="text-status-danger">*</span>
+                </label>
+                
+                <div class="relative group/file">
+                    <div class="mt-1 flex flex-col items-center justify-center p-12 border-2 border-border-color border-dashed rounded-2xl bg-surface-base hover:bg-surface-2 transition-all hover:border-primary/50 cursor-pointer shadow-inner">
+                        <div class="size-20 rounded-3xl bg-primary/5 flex items-center justify-center text-primary/40 group-hover/file:text-primary group-hover/file:scale-110 transition-all border border-border-color shadow-lg mb-6">
+                            <span class="material-symbols-outlined text-[40px]">description</span>
+                        </div>
+                        
+                        <div class="flex flex-col items-center gap-2 w-full max-w-sm">
+                            <div class="relative overflow-hidden w-full h-[40px] flex items-center justify-center">
+                                {{ form.archivo }}
+                            </div>
+                            <p class="text-[10px] text-text-muted font-bold uppercase tracking-widest leading-relaxed text-center mt-4">
+                                PDF, CSV, Excel o TXT soportados.<br>
+                                <span class="text-primary/60">Tamaño máximo: 10MB</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                {% if form.archivo.errors %}
+                    <p class="text-[10px] text-status-danger font-bold uppercase tracking-wide mt-2">{{ form.archivo.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <div class="pt-8 flex justify-end gap-4 border-t border-border-color mt-10">
+                <a href="{% url 'finance:reconciliacion_dashboard_htmx' %}" class="btn-secondary px-8 font-black uppercase tracking-widest h-[48px]">
+                    Cancelar
+                </a>
+                <button type="submit" class="btn-primary px-8 font-black uppercase tracking-widest h-[48px] shadow-xl shadow-primary/20 flex items-center gap-3">
+                    <span class="material-symbols-outlined text-[20px]">cloud_sync</span>
+                    Subir y Auditar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    /* Estilo específico para input file que es difícil de manejar con Tailwind solo */
+    input[type="file"] {
+        @apply cursor-pointer w-full text-center text-xs font-bold text-text-muted;
+    }
+    input[type="file"]::file-selector-button {
+        @apply hidden;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,76 @@
+{% extends "base_modern.html" %}
+{% load static %}
+{% load i18n %}
+
+{% block content %}
+<!-- Contenedor Principal de Configuración -->
+<div class="w-full flex flex-col min-h-screen bg-surface-base">
+    
+    <!-- Sub-Header de Navegación -->
+    <header class="bg-surface-2 border-b border-border-color px-6 md:px-10 py-5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 sticky top-0 z-40 backdrop-blur-md bg-surface-2/90">
+        <div class="flex items-center gap-4">
+            <h1 class="text-xl font-black text-text-main tracking-tight uppercase">
+                {% block config_title %}Ajustes de Agencia{% endblock %}
+                {% if current_agency.plan %}
+                <span class="bg-primary text-on-primary text-[10px] px-2 py-1 rounded ml-2 uppercase tracking-widest font-black shadow-lg shadow-primary/20">
+                    {{ current_agency.get_plan_display }}
+                </span>
+                {% endif %}
+            </h1>
+        </div>
+        
+        <div class="flex items-center gap-3">
+            {% block config_actions %}{% endblock %}
+        </div>
+    </header>
+
+    <!-- Menú de Pestañas Centrado -->
+    <nav class="bg-surface-2 border-b border-border-color px-6 md:px-10 flex gap-6 text-sm font-bold text-text-muted overflow-x-auto no-scrollbar">
+        
+        <a href="{% url 'core:agencia_settings' %}?tab=whatsapp" 
+           class="py-4 border-b-2 transition-all flex items-center gap-2 whitespace-nowrap
+           {% if request.GET.tab == 'whatsapp' %}border-primary text-text-main{% else %}border-transparent hover:text-text-main{% endif %}">
+            <span class="material-symbols-outlined text-[18px]">chat</span>
+            <span>WhatsApp [NEW]</span>
+        </a>
+
+        <a href="{% url 'core:agencia_settings' %}?tab=identidad" 
+           class="py-4 border-b-2 transition-all flex items-center gap-2 whitespace-nowrap
+           {% if request.resolver_match.url_name == 'agencia_settings' and request.GET.tab == 'identidad' or not request.GET.tab and request.resolver_match.url_name == 'agencia_settings' %}border-primary text-text-main{% else %}border-transparent hover:text-text-main{% endif %}">
+            <span class="material-symbols-outlined text-[18px]">palette</span>
+            <span>Branding Visual</span>
+        </a>
+
+        <!-- La pestaña de Motor PDF se eliminó de aquí porque se integró en la experiencia unificada de Branding Visual -->
+
+        <a href="{% url 'core:agencia_settings' %}?tab=agencia" 
+           class="py-4 border-b-2 transition-all flex items-center gap-2 whitespace-nowrap
+           {% if request.GET.tab == 'agencia' %}border-primary text-text-main{% else %}border-transparent hover:text-text-main{% endif %}">
+            <span class="material-symbols-outlined text-[18px]">business</span>
+            <span>Conf. Corporativa</span>
+        </a>
+
+        <a href="{% url 'core:agencia_settings' %}?tab=sistema" 
+           class="py-4 border-b-2 transition-all flex items-center gap-2 whitespace-nowrap
+           {% if request.GET.tab == 'sistema' %}border-primary text-text-main{% else %}border-transparent hover:text-text-main{% endif %}">
+            <span class="material-symbols-outlined text-[18px]">language</span>
+            <span>Regionalización</span>
+        </a>
+
+        <div class="h-6 w-px bg-border-color self-center mx-2"></div>
+
+        <a href="{% url 'core:agencia_usuarios' %}" 
+           class="py-4 border-b-2 transition-all flex items-center gap-2 whitespace-nowrap
+           {% if request.resolver_match.url_name == 'agencia_usuarios' or request.resolver_match.url_name == 'usuario_create' %}border-primary text-text-main{% else %}border-transparent hover:text-text-main{% endif %}">
+            <span class="material-symbols-outlined text-[18px]">group</span>
+            <span>Usuarios</span>
+        </a>
+    </nav>
+
+    <!-- Contenido Flexible -->
+    <div class="flex-1 overflow-hidden">
+        {% block config_content %}{% endblock %}
+    </div>
+
+</div>
+{% endblock %}

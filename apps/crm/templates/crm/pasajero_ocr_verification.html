@@ -1,0 +1,234 @@
+{% extends 'base_modern_v2.html' %}
+{% load static %}
+
+{% block title %}Verificación de Pasaporte OCR | TravelHub{% endblock %}
+
+{% block content %}
+<!-- Main Content Wrapper -->
+<div class="flex h-[calc(100vh-64px)] w-full flex-col overflow-hidden bg-slate-50 dark:bg-slate-900 m-0 p-0 text-slate-900 dark:text-slate-100 font-sans">
+    
+    <!-- Header -->
+    <header class="flex flex-shrink-0 items-center justify-between border-b border-slate-200 bg-white dark:bg-slate-900 px-6 py-4 dark:border-slate-800">
+        <div class="flex items-center gap-4">
+            <div class="flex items-center justify-center size-10 rounded-full bg-blue-600/10 text-blue-600 dark:text-blue-500">
+                <span class="material-symbols-outlined">security</span>
+            </div>
+            <div>
+                <h1 class="text-xl font-bold leading-tight text-slate-900 dark:text-white">Verificación de Pasaporte</h1>
+                <p class="text-sm text-slate-500 dark:text-slate-400">Escaneo OCR • Confianza IA ({{ confidence|default:"Alta" }})</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-3">
+            <a href="{% url 'crm:pasajero_list' %}" class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 transition-colors">
+                Descartar
+            </a>
+            <button type="submit" form="ocr-form" class="flex items-center gap-2 rounded-lg bg-[#1754cf] px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 transition-colors">
+                <span class="material-symbols-outlined text-[18px]">check_circle</span>
+                Aprobar y Guardar
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content Split View -->
+    <main class="flex flex-1 overflow-hidden">
+        <!-- Left Column: Passport Image & Source -->
+        <div class="relative flex w-1/2 min-w-[400px] flex-col border-r border-slate-200 bg-slate-50 dark:bg-[#111621] dark:border-slate-800">
+            <div class="flex items-center justify-between px-6 py-3 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50">
+                <h2 class="text-sm font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Documento Original</h2>
+                <div class="flex gap-2">
+                    <button class="p-1.5 text-slate-400 hover:text-blue-600 transition-colors" title="Zoom In"><span class="material-symbols-outlined text-[20px]">zoom_in</span></button>
+                    <button class="p-1.5 text-slate-400 hover:text-blue-600 transition-colors" title="Zoom Out"><span class="material-symbols-outlined text-[20px]">zoom_out</span></button>
+                    <button class="p-1.5 text-slate-400 hover:text-blue-600 transition-colors" title="Rotate"><span class="material-symbols-outlined text-[20px]">rotate_right</span></button>
+                </div>
+            </div>
+            
+            <div class="flex-1 overflow-auto p-8 flex items-center justify-center bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] dark:bg-[radial-gradient(#1e293b_1px,transparent_1px)]">
+                
+                <div class="relative w-full max-w-2xl shadow-2xl rounded-xl overflow-hidden ring-1 ring-black/5 bg-slate-200 dark:bg-slate-800">
+                    {% if image_data %}
+                    <img src="{{ image_data }}" alt="Original Passport" class="w-full h-auto object-contain">
+                    {% else %}
+                    <div class="w-full aspect-[1.58/1] flex items-center justify-center text-slate-400">
+                       <span class="material-symbols-outlined text-4xl">broken_image</span>
+                       <p class="mt-2 text-sm ml-2">Vista previa no disponible</p>
+                    </div>
+                    {% endif %}
+                </div>
+                
+            </div>
+        </div>
+
+        <!-- Right Column: Extracted Data Form -->
+        <form id="ocr-form" hx-post="{% url 'crm:pasajero_ocr_guardar' %}" hx-target="body" hx-swap="outerHTML" class="flex w-1/2 flex-col bg-white dark:bg-slate-900 overflow-hidden">
+            {% csrf_token %}
+            <input type="hidden" name="image_data" value="{{ image_data }}"> <!-- Para conservar la sesión si hace falta reenviar -->
+            <div class="hidden">{{ form.tipo_documento }}</div>
+            
+            <div class="px-6 py-3 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-sm font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Datos Extraídos</h2>
+                    <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
+                        <span class="size-1.5 rounded-full bg-emerald-500"></span>IA Verificada
+                    </span>
+                </div>
+            </div>
+            
+            <div class="flex-1 overflow-y-auto p-8">
+                <div class="max-w-xl mx-auto space-y-8">
+                    
+                    {% if form.errors %}
+                    <div class="bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30 rounded-xl p-4 flex items-start gap-3">
+                        <span class="material-symbols-outlined text-red-500 shrink-0 mt-0.5">error</span>
+                        <div class="text-sm text-red-700 dark:text-red-300">{{ form.errors }}</div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Personal Details Section -->
+                    <div class="space-y-6">
+                        <div class="flex items-center gap-3 pb-2 border-b border-slate-200 dark:border-slate-800">
+                            <span class="material-symbols-outlined text-[#1754cf] dark:text-blue-500">person</span>
+                            <h3 class="text-lg font-bold text-slate-900 dark:text-white">Información Personal</h3>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-6">
+                            <div class="space-y-1.5 has-right-icon">
+                                <label class="text-sm font-semibold text-slate-900 dark:text-white">Nombres *</label>
+                                <div class="relative group">
+                                    {{ form.nombres }}
+                                    <div class="absolute right-3 top-1/2 -translate-y-1/2 text-emerald-500 pointer-events-none" title="High Confidence"><span class="material-symbols-outlined text-[20px]">check_circle</span></div>
+                                </div>
+                            </div>
+                            <div class="space-y-1.5 has-right-icon">
+                                <label class="text-sm font-semibold text-slate-900 dark:text-white">Apellidos *</label>
+                                <div class="relative group">
+                                    {{ form.apellidos }}
+                                    <div class="absolute right-3 top-1/2 -translate-y-1/2 text-emerald-500 pointer-events-none"><span class="material-symbols-outlined text-[20px]">check_circle</span></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-6">
+                            <div class="space-y-1.5 has-right-icon">
+                                <label class="text-sm font-semibold text-slate-900 dark:text-white">Fecha de Nacimiento</label>
+                                <div class="relative">
+                                    {{ form.fecha_nacimiento }}
+                                    <div class="absolute right-3 top-1/2 -translate-y-1/2 text-emerald-500 pointer-events-none"><span class="material-symbols-outlined text-[20px]">check_circle</span></div>
+                                </div>
+                            </div>
+                            <div class="space-y-1.5">
+                                <label class="text-sm font-semibold text-slate-900 dark:text-white">Género</label>
+                                <div class="relative">
+                                    {{ form.genero }}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-1.5 has-right-icon has-left-icon">
+                            <label class="text-sm font-medium text-slate-700 dark:text-slate-300">Nacionalidad</label>
+                            <div class="relative">
+                                <div class="flex items-center absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                                    <span class="material-symbols-outlined text-slate-400 text-[20px]">flag</span>
+                                </div>
+                                {{ form.nacionalidad }}
+                                <div class="absolute right-3 top-1/2 -translate-y-1/2 text-emerald-500 pointer-events-none"><span class="material-symbols-outlined text-[20px]">check_circle</span></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Document Details Section -->
+                    <div class="space-y-6 pt-4">
+                        <div class="flex items-center gap-3 pb-2 border-b border-slate-200 dark:border-slate-800">
+                            <span class="material-symbols-outlined text-[#1754cf] dark:text-blue-500">badge</span>
+                            <h3 class="text-lg font-bold text-slate-900 dark:text-white">Detalles del Pasaporte</h3>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-6">
+                            <div class="space-y-1.5 has-right-icon">
+                                <label class="text-sm font-semibold text-slate-900 dark:text-white">Número de Pasaporte *</label>
+                                <div class="relative group">
+                                    {{ form.numero_pasaporte }}
+                                    <div class="absolute right-3 top-1/2 -translate-y-1/2 text-emerald-500 pointer-events-none"><span class="material-symbols-outlined text-[20px]">check_circle</span></div>
+                                </div>
+                            </div>
+                            <div class="space-y-1.5 has-right-icon">
+                                <label class="text-sm font-semibold text-slate-900 dark:text-white">País de Emisión</label>
+                                <div class="relative group">
+                                    {{ form.pais_emision_documento }}
+                                    <div class="absolute right-3 top-1/2 -translate-y-1/2 text-emerald-500 pointer-events-none"><span class="material-symbols-outlined text-[20px]">check_circle</span></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 gap-6">
+                            <div class="space-y-1.5 has-right-icon">
+                                <label class="text-sm font-semibold text-slate-900 dark:text-white">Fecha de Expiración</label>
+                                <div class="relative group">
+                                    {{ form.fecha_vencimiento_documento }}
+                                    <div class="absolute right-3 top-1/2 -translate-y-1/2 text-emerald-500 pointer-events-none"><span class="material-symbols-outlined text-[20px]">check_circle</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- AI Confidence Note -->
+                    <div class="flex items-start gap-3 rounded-lg bg-blue-50 p-4 dark:bg-blue-900/20">
+                        <span class="material-symbols-outlined text-[#1754cf] dark:text-blue-500 mt-0.5 text-[20px]">info</span>
+                        <div class="text-sm text-slate-700 dark:text-slate-300">
+                            <p class="font-medium text-slate-900 dark:text-white mb-1">Análisis OCR Completo</p>
+                            <p>Los campos han sido extraídos automáticamente. Por favor confirme visualmente que los datos coinciden con el documento original antes de aprobar y guardar.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </main>
+</div>
+
+<style>
+/* CSS Reset and Styling to match Stitch Template */
+input[type="text"], input[type="date"], input[type="email"], select, textarea {
+    width: 100%;
+    border-radius: 0.5rem; /* rounded-lg */
+    border: 1px solid #e2e4e9; /* border-neutral-border */
+    background-color: #ffffff;
+    padding: 0.75rem; /* p-3 */
+    color: #0f172a; /* text-slate-900 */
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); /* shadow-sm */
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
+    letter-spacing: 0.025em;
+    transition: all 0.2s;
+}
+
+/* Override a clases harcodeadas en forms.py para forzar tema claro cuando sea necesario */
+html:not(.dark) input[type="text"], 
+html:not(.dark) input[type="date"], 
+html:not(.dark) input[type="email"], 
+html:not(.dark) select, 
+html:not(.dark) textarea {
+    background-color: #ffffff !important;
+    color: #0f172a !important; /* text-slate-900 */
+}
+
+input[type="text"]:focus, input[type="date"]:focus, input[type="email"]:focus, select:focus, textarea:focus {
+    border-color: #1754cf; /* focus:border-primary */
+    outline: none;
+    box-shadow: 0 0 0 1px #1754cf; /* focus:ring-primary */
+}
+
+/* Padding classes for icons inside inputs */
+.has-right-icon input, .has-right-icon select { padding-right: 2.5rem; }
+.has-left-icon input, .has-left-icon select { padding-left: 2.5rem; }
+
+/* Dark mode overrides (depends on Tailwind .dark class in root) */
+.dark input[type="text"], .dark input[type="date"], .dark input[type="email"], .dark select, .dark textarea {
+    border-color: #334155; /* dark:border-slate-700 */
+    background-color: #1e293b; /* dark:bg-slate-800 */
+    color: #ffffff; /* dark:text-white */
+}
+
+.dark input[type="text"]:focus, .dark input[type="date"]:focus, .dark input[type="email"]:focus, .dark select:focus, .dark textarea:focus {
+    border-color: #3b82f6; /* dark:focus:border-primary */
+    box-shadow: 0 0 0 1px #3b82f6;
+}
+</style>
+{% endblock %}

@@ -64,18 +64,34 @@ class TicketParserService:
         except: pass
         
         try:
-            datos = extract_data_from_text(texto, pdf_path=path_pdf)
+            datos_regex = extract_data_from_text(texto, pdf_path=path_pdf)
+            datos = datos_regex
         except Exception as e:
             logger.error(f"Parser primario falló: {e}")
+            datos_regex = None
             datos = {"error": str(e)}
 
-        # Fallback IA
-        if not datos or "error" in datos:
+        # Fallback IA (Solo si Regex falló o si se forzó IA)
+        # NOTA: Si el usuario presiona el botón "Procesar con Red Neuronal", ignore_manual suele ser True
+        if not datos or "error" in datos or ignore_manual:
             try:
                 from core.parsers.ai_universal_parser import UniversalAIParser
-                datos = UniversalAIParser().parse(texto, pdf_path=path_pdf)
+                from core.services.ai_engine import QuotaExhaustedException
+                
+                datos_ia = UniversalAIParser().parse(texto, pdf_path=path_pdf)
+                if datos_ia and "error" not in datos_ia:
+                    datos = datos_ia
+            except QuotaExhaustedException as eq:
+                logger.warning(f"⚠️ IA Agotada (429). Usando resultados de Regex como salvavidas.")
+                if datos_regex:
+                    datos = datos_regex
+                    boleto.log_parseo += "\n⚠️ IA agotada, usando procesamiento tradicional."
+                else:
+                    return self._finalize_error(boleto, "IA agotada y el motor tradicional no pudo leer el archivo.")
             except Exception as e_ai:
-                return self._finalize_error(boleto, f"Fallo total (Regex + IA): {e_ai}")
+                logger.error(f"Fallo IA: {e_ai}")
+                if not datos_regex:
+                    return self._finalize_error(boleto, f"Fallo total (Regex + IA): {e_ai}")
 
         # 3. Normalización
         datos_norm = DataNormalizationService.normalize_ticket_data(datos)

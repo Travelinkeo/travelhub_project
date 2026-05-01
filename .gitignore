@@ -37,3 +37,31 @@ temp/
 *.json
 !fixtures/*.json
 !wpp_config.json
+
+# Security & Environment (STRICT)
+.env*
+*.local
+secrets.json
+
+# Development & Debugging
+scripts/
+scratch/
+check_*.py
+debug_*.py
+inspect_*.py
+nuclear_*.py
+deep_*.py
+force_*.py
+test_*.py
+*.db
+*.sqlite3
+*.sqlite3-journal
+coverage.xml
+htmlcov/
+.coverage
+.cache/
+pytest.cache/
+evolution_logs.txt
+
+# Celery
+celerybeat-schedule*

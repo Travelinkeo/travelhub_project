@@ -152,6 +152,10 @@ class StripeService:
         # 5. Configurar límites iniciales
         agencia.actualizar_limites_por_plan()
         
+        # 6. Enviar Email de Bienvenida
+        from core.services.notification_service import NotificationService
+        NotificationService.enviar_bienvenida_agencia(agencia, user)
+        
         print(f"🚀 AGENCIA PROVISIONADA: {agency_name} ({subdomain})")
 
     @staticmethod

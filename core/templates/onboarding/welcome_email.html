@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #333; line-height: 1.6; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px; }
+        .header { background-color: {{ color_primario }}; color: white; padding: 20px; text-align: center; border-radius: 10px 10px 0 0; }
+        .content { padding: 30px; }
+        .button { display: inline-block; padding: 12px 25px; background-color: {{ color_primario }}; color: white; text-decoration: none; border-radius: 5px; font-weight: bold; margin-top: 20px; }
+        .footer { text-align: center; font-size: 12px; color: #777; margin-top: 30px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>¡Bienvenido a TravelHub!</h1>
+        </div>
+        <div class="content">
+            <p>Hola <strong>{{ admin_name }}</strong>,</p>
+            <p>Estamos emocionados de que hayas elegido <strong>TravelHub ERP</strong> para potenciar tu agencia <strong>{{ agencia_nombre }}</strong>.</p>
+            <p>Tu entorno ya está configurado y listo para ser utilizado. Puedes acceder a tu panel de control a través del siguiente enlace:</p>
+            
+            <p style="text-align: center;">
+                <a href="https://{{ subdominio }}.travelhub.cc" class="button">Acceder a mi ERP</a>
+            </p>
+
+            <p><strong>Tus credenciales de acceso:</strong></p>
+            <ul>
+                <li><strong>URL:</strong> https://{{ subdominio }}.travelhub.cc</li>
+                <li><strong>Usuario:</strong> {{ admin_email }}</li>
+            </ul>
+
+            <p>Si tienes alguna pregunta, nuestro equipo de soporte está aquí para ayudarte.</p>
+            <p>¡Felices ventas!</p>
+        </div>
+        <div class="footer">
+            <p>&copy; 2026 TravelHub SaaS Infrastructure. Todos los derechos reservados.</p>
+        </div>
+    </div>
+</body>
+</html>

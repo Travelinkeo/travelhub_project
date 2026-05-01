@@ -43,7 +43,7 @@ from .views import (
 from .dashboard_stats import get_dashboard_stats as dashboard_stats_api
 from .api.hotel_api import HotelQuoteAPI
 from core.views.hotel_views import HotelListView, HotelDetailView, download_story_view, GenerateCopyAPI
-from core.views.marketing_views import GenerateAIImageView
+from core.views.marketing_views import GenerateAIImageView, MarketingHubView
 from apps.crm.api import ClienteViewSet, PasajeroViewSet
 
 # Alias para compatibilidad (Importando directamente del legacy para evitar ciclos)
@@ -322,7 +322,11 @@ urlpatterns = [
     path('setup/tasas/', catalogos_views.TipoCambioListView.as_view(), name='tasas_list'),
     path('setup/tasas/nueva/', catalogos_views.TipoCambioCreateView.as_view(), name='tasas_nuevo'),
     path('setup/tasas/sincronizar/', catalogos_views.SincronizarTasasActionView.as_view(), name='tasas_sincronizar'),
-
+    
+    # Stripe Billing Success/Cancel
+    path('billing/success/', lambda r: __import__('core.views.billing_success_views', fromlist=['billing_success']).billing_success(r), name='billing_success'),
+    path('billing/cancel/', lambda r: __import__('core.views.billing_success_views', fromlist=['billing_cancel']).billing_cancel(r), name='billing_cancel'),
+    
     # Flight Search
     path('flights/', FlightSearchView.as_view(), name='flight_search'),
     # Redirects
@@ -515,6 +519,7 @@ urlpatterns = [
     path('hoteles/<slug:slug>/story/', download_story_view, name='hotel_story'),
     path('api/marketing/generate-copy/', GenerateCopyAPI.as_view(), name='generate_copy_api'),
     path('api/marketing/generate-image/', GenerateAIImageView.as_view(), name='generate_ai_image'),
+    path('marketing/hub/', MarketingHubView.as_view(), name='marketing_hub'),
     path('api/hotels/quote/', HotelQuoteAPI.as_view(), name='hotel_quote_api'),
 
     # Portal del Pasajero ("White-Label")
@@ -548,6 +553,10 @@ urlpatterns = [
     # --- DASHBOARD DIRECTIVO (CEO) ---
     path('ceo-dashboard/', __import__('core.views.dashboard', fromlist=['CEODashboardView']).CEODashboardView.as_view(), name='ceo_dashboard'),
     path('api/ai-advisor/', __import__('core.views.dashboard', fromlist=['AIBusinessAdvisorView']).AIBusinessAdvisorView.as_view(), name='ai_business_advisor'),
+
+    # --- GOD MODE (SuperAdmin) ---
+    path('god-mode/', __import__('core.views.god_mode_views', fromlist=['GodModeDashboardView']).GodModeDashboardView.as_view(), name='god_mode'),
+    path('god-mode/impersonate/<int:agencia_id>/', __import__('core.views.god_mode_views', fromlist=['ImpersonateAgencyView']).ImpersonateAgencyView.as_view(), name='god_mode_impersonate'),
 
     # --- OMNISEARCH GLOBAL (Ctrl+K) ---
     path('omnisearch/', __import__('core.views.search_views', fromlist=['GlobalOmnisearchView']).GlobalOmnisearchView.as_view(), name='omnisearch'),

@@ -432,6 +432,36 @@ UNFOLD = {
                     },
                 ],
             },
+            {
+                "title": "SuperAdmin (God Mode)",
+                "items": [
+                    {
+                        "title": "Control de Mando",
+                        "icon": "shield",
+                        "link": "/god-mode/",
+                    },
+                    {
+                        "title": "Gestión de Agencias",
+                        "icon": "corporate_fare",
+                        "link": "/admin/core/agencia/",
+                    },
+                ],
+            },
+            {
+                "title": "Marketing & IA",
+                "items": [
+                    {
+                        "title": "Centro de Marketing",
+                        "icon": "auto_awesome",
+                        "link": "/marketing/hub/",
+                    },
+                    {
+                        "title": "Analizador GDS",
+                        "icon": "analytics",
+                        "link": "/intelligence/gds-analyzer/",
+                    },
+                ],
+            },
         ],
     },
 }

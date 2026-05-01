@@ -1,0 +1,290 @@
+{% extends "base_unfold.html" %}
+
+{% block content %}
+<div class="p-4 md:p-8 space-y-8" x-data="marketingHub()">
+    
+    <!-- HEADER -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+            <h1 class="text-3xl font-black text-white tracking-tight uppercase">Centro de Marketing IA</h1>
+            <p class="text-slate-400 font-medium">Potencia la presencia digital de tu agencia con Inteligencia Artificial.</p>
+        </div>
+        <div class="flex gap-2 bg-slate-900/50 p-1 rounded-xl border border-slate-800">
+            <button @click="tab = 'copy'" :class="tab === 'copy' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:text-white'" class="px-4 py-2 rounded-lg text-xs font-bold transition-all uppercase tracking-widest">AI Copywriter</button>
+            <button @click="tab = 'image'" :class="tab === 'image' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:text-white'" class="px-4 py-2 rounded-lg text-xs font-bold transition-all uppercase tracking-widest">Post Maker</button>
+            <button @click="tab = 'email'" :class="tab === 'email' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:text-white'" class="px-4 py-2 rounded-lg text-xs font-bold transition-all uppercase tracking-widest">Email Magic</button>
+        </div>
+    </div>
+
+    <!-- TAB: AI COPYWRITER -->
+    <div x-show="tab === 'copy'" class="animate-fade-in" style="display: none;">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Form -->
+            <div class="bg-slate-900/40 backdrop-blur-xl border border-slate-800 rounded-3xl p-8 shadow-2xl">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center">
+                        <span class="material-symbols-outlined">edit_note</span>
+                    </div>
+                    <h2 class="text-xl font-black text-white">Generar Caption Viral</h2>
+                </div>
+
+                <div class="space-y-6">
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Producto / Servicio</label>
+                        <input type="text" x-model="copyData.producto" placeholder="E.j. Paquete Todo Incluido Cancún" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:border-blue-500 transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Destino</label>
+                        <input type="text" x-model="copyData.destino" placeholder="Cancún, México" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:border-blue-500 transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Detalles / Beneficios</label>
+                        <textarea x-model="copyData.detalles" rows="3" placeholder="Hotel 5 estrellas, barra libre, tour a Chichén Itzá..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:border-blue-500 transition-all"></textarea>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Tono de Voz</label>
+                            <select x-model="copyData.tono" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:border-blue-500">
+                                <option value="AVENTURERO">Aventurero</option>
+                                <option value="LUJOSO">Lujoso</option>
+                                <option value="DIVERTIDO">Divertido</option>
+                                <option value="URGENTE">Urgente</option>
+                            </select>
+                        </div>
+                        <div class="flex items-end">
+                            <button @click="generateCaption()" :disabled="loading" class="w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-black py-3 rounded-xl shadow-lg shadow-blue-600/20 transition-all flex justify-center items-center gap-2">
+                                <span x-show="!loading" class="material-symbols-outlined text-[18px]">bolt</span>
+                                <span x-show="loading" class="animate-spin material-symbols-outlined text-[18px]">progress_activity</span>
+                                <span x-text="loading ? 'Generando...' : 'Generar Copy'"></span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Result -->
+            <div class="flex flex-col gap-4">
+                <div class="bg-slate-900/40 border border-slate-800 rounded-3xl p-8 flex-1 relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                         <button @click="copyToClipboard(resultCaption)" class="p-2 bg-slate-800 text-white rounded-lg hover:bg-blue-600 transition-colors">
+                            <span class="material-symbols-outlined text-[18px]">content_copy</span>
+                         </button>
+                    </div>
+                    <h3 class="text-xs font-black text-slate-500 uppercase tracking-widest mb-4">Resultado del Copiloto</h3>
+                    <div x-show="!resultCaption" class="h-full flex flex-col items-center justify-center text-slate-600">
+                        <span class="material-symbols-outlined text-5xl mb-2">smart_toy</span>
+                        <p class="text-sm font-medium italic">La IA está esperando tus instrucciones...</p>
+                    </div>
+                    <div x-show="resultCaption" x-text="resultCaption" class="text-slate-300 text-sm leading-relaxed whitespace-pre-wrap font-medium"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB: POST MAKER -->
+    <div x-show="tab === 'image'" class="animate-fade-in" style="display: none;">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Form -->
+            <div class="bg-slate-900/40 backdrop-blur-xl border border-slate-800 rounded-3xl p-8 shadow-2xl">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center">
+                        <span class="material-symbols-outlined">image</span>
+                    </div>
+                    <h2 class="text-xl font-black text-white">Diseñador de Posts IA</h2>
+                </div>
+
+                <div class="space-y-6">
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Nombre del Hotel / Promoción</label>
+                        <input type="text" x-model="imageData.hotel_name" placeholder="E.j. Grand Palladium Riviera" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:border-purple-500 transition-all">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Precio desde ($)</label>
+                            <input type="number" x-model="imageData.price" placeholder="499" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:border-purple-500">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Estilo Visual</label>
+                            <select x-model="imageData.style" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:border-purple-500">
+                                <option value="Luxurious">Lujoso & Elegante</option>
+                                <option value="Tropical">Tropical & Vibrante</option>
+                                <option value="Modern">Minimalista Moderno</option>
+                                <option value="Vintage">Retro / Vintage</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Texto Adicional (Opcional)</label>
+                        <input type="text" x-model="imageData.custom_text" placeholder="¡Oferta de Temporada!" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:border-purple-500">
+                    </div>
+                    
+                    <button @click="generateImage()" :disabled="loading" class="w-full bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white font-black py-4 rounded-xl shadow-lg shadow-purple-600/20 transition-all flex justify-center items-center gap-2">
+                        <span x-show="!loading" class="material-symbols-outlined text-[18px]">palette</span>
+                        <span x-show="loading" class="animate-spin material-symbols-outlined text-[18px]">progress_activity</span>
+                        <span x-text="loading ? 'Imaginando...' : 'Generar Imagen con Vertex AI'"></span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Result -->
+            <div class="flex flex-col items-center justify-center bg-slate-900/40 border border-slate-800 rounded-3xl p-4 overflow-hidden min-h-[500px]">
+                <div x-show="!resultImage" class="text-center text-slate-600">
+                     <span class="material-symbols-outlined text-6xl mb-4">palette</span>
+                     <p class="font-bold">Tu diseño aparecerá aquí</p>
+                     <p class="text-xs uppercase tracking-widest mt-2">Powered by Imagen 3 (Vertex AI)</p>
+                </div>
+                <div x-show="resultImage" class="w-full h-full animate-celebrate">
+                    <img :src="`data:image/jpeg;base64,${resultImage}`" class="w-full h-auto rounded-2xl shadow-2xl border border-slate-700">
+                    <div class="mt-4 flex gap-2 justify-center">
+                        <button @click="downloadImage()" class="bg-slate-800 text-white px-4 py-2 rounded-lg text-xs font-black flex items-center gap-2 hover:bg-slate-700 transition-all">
+                             <span class="material-symbols-outlined text-[16px]">download</span> DESCARGAR
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB: EMAIL MAGIC -->
+    <div x-show="tab === 'email'" class="animate-fade-in" style="display: none;">
+        <div class="max-w-4xl mx-auto space-y-8 text-center">
+             <div class="bg-slate-900/40 border border-slate-800 rounded-3xl p-12">
+                 <span class="material-symbols-outlined text-6xl text-emerald-400 mb-4">mail</span>
+                 <h2 class="text-2xl font-black text-white mb-2">Email Newsletter Generator</h2>
+                 <p class="text-slate-400 mb-8">Genera plantillas HTML profesionales para tus campañas de ofertas semanales.</p>
+                 
+                 <button @click="generateNewsletter()" :disabled="loading" class="bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-black py-4 px-12 rounded-xl shadow-lg shadow-emerald-600/20 transition-all flex justify-center items-center gap-2 mx-auto">
+                    <span x-show="!loading" class="material-symbols-outlined text-[18px]">magic_button</span>
+                    <span x-show="loading" class="animate-spin material-symbols-outlined text-[18px]">progress_activity</span>
+                    <span x-text="loading ? 'Escribiendo HTML...' : 'Generar Newsletter de Ofertas'"></span>
+                </button>
+             </div>
+
+             <div x-show="resultEmail" class="text-left animate-fade-in">
+                 <div class="flex justify-between items-center mb-4">
+                     <h3 class="text-xs font-black text-slate-500 uppercase tracking-widest">Vista Previa del Email</h3>
+                     <button @click="copyToClipboard(resultEmail)" class="text-xs font-black bg-slate-800 text-white px-3 py-1 rounded hover:bg-blue-600">COPIAR HTML</button>
+                 </div>
+                 <div class="bg-white rounded-2xl p-4 overflow-hidden border-8 border-slate-800">
+                     <iframe x-ref="emailPreview" class="w-full h-[500px] border-none"></iframe>
+                 </div>
+             </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+function marketingHub() {
+    return {
+        tab: 'copy',
+        loading: false,
+        copyData: { producto: '', destino: '', detalles: '', tono: 'AVENTURERO' },
+        imageData: { hotel_name: '', price: '', style: 'Luxurious', custom_text: '' },
+        resultCaption: '',
+        resultImage: '',
+        resultEmail: '',
+        
+        async generateCaption() {
+            this.loading = true;
+            try {
+                const formData = new FormData();
+                formData.append('action', 'generate_caption');
+                formData.append('producto', this.copyData.producto);
+                formData.append('destino', this.copyData.destino);
+                formData.append('detalles', this.copyData.detalles);
+                formData.append('tono', this.copyData.tono);
+                formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+                const resp = await fetch('{% url "marketing_hub" %}', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await resp.json();
+                this.resultCaption = data.caption;
+            } catch (e) {
+                alert("Error: " + e);
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        async generateImage() {
+            this.loading = true;
+            try {
+                const formData = new FormData();
+                formData.append('hotel_name', this.imageData.hotel_name);
+                formData.append('price', this.imageData.price);
+                formData.append('style', this.imageData.style);
+                formData.append('custom_text', this.imageData.custom_text);
+                formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+                const resp = await fetch('{% url "generate_ai_image" %}', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await resp.json();
+                if(data.status === 'success') {
+                    this.resultImage = data.image_b64;
+                } else {
+                    alert("Error IA: " + data.error);
+                }
+            } catch (e) {
+                alert("Error: " + e);
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        async generateNewsletter() {
+            this.loading = true;
+            try {
+                const formData = new FormData();
+                formData.append('action', 'generate_newsletter');
+                formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+                const resp = await fetch('{% url "marketing_hub" %}', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await resp.json();
+                this.resultEmail = data.html_content;
+                
+                this.$nextTick(() => {
+                    const doc = this.$refs.emailPreview.contentWindow.document;
+                    doc.open();
+                    doc.write(this.resultEmail);
+                    doc.close();
+                });
+            } catch (e) {
+                alert("Error: " + e);
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        copyToClipboard(text) {
+            navigator.clipboard.writeText(text);
+            alert("Copiado al portapapeles");
+        },
+
+        downloadImage() {
+            const link = document.createElement('a');
+            link.href = `data:image/jpeg;base64,${this.resultImage}`;
+            link.download = `TH_AI_Post_${Date.now()}.jpg`;
+            link.click();
+        }
+    }
+}
+</script>
+
+<style>
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+    animation: fadeIn 0.4s ease-out forwards;
+}
+</style>
+{% endblock %}

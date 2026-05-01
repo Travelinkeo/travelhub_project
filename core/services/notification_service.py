@@ -52,3 +52,37 @@ class NotificationService:
         except Exception as e:
             logger.error(f"❌ Error enviando email de reporte a {email_destino}: {str(e)}")
             raise e
+
+    @staticmethod
+    def enviar_bienvenida_agencia(agencia, user):
+        """
+        Envía el correo de bienvenida a una nueva agencia.
+        """
+        subject = f"🚀 ¡Bienvenido a TravelHub! - {agencia.nombre} está lista"
+        
+        context = {
+            'agencia_nombre': agencia.nombre,
+            'admin_name': user.first_name or user.username,
+            'admin_email': user.email,
+            'subdominio': agencia.subdominio_slug,
+            'color_primario': agencia.color_primario or "#3b82f6",
+        }
+
+        html_content = render_to_string('onboarding/welcome_email.html', context)
+        text_content = strip_tags(html_content)
+
+        email = EmailMultiAlternatives(
+            subject=subject,
+            body=text_content,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            to=[user.email]
+        )
+        email.attach_alternative(html_content, "text/html")
+
+        try:
+            email.send()
+            logger.info(f"🚀 Email de bienvenida enviado a {user.email}")
+            return True
+        except Exception as e:
+            logger.error(f"❌ Error enviando email de bienvenida: {str(e)}")
+            return False

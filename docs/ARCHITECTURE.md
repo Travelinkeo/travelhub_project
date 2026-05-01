@@ -8,7 +8,26 @@
 
 El sistema opera como un **Monolito Modular** construido sobre Django, priorizando la simplicidad operativa y la robustez financiera (VEN-NIF).
 
-## 2. Stack Tecnológico
+## 2. Modelo de Negocio (SaaS B2B)
+TravelHub opera bajo un modelo de suscripción escalable:
+*   **Multi-tenancy:** Una sola instancia del software sirve a múltiples agencias (inquilinos).
+*   **Planes de Suscripción:**
+    *   **FREE (Trial):** 30 días de prueba con límites de usuarios (1) y ventas (50).
+    *   **BASIC:** Para agencias pequeñas ($29/mes).
+    *   **PRO:** Para agencias en crecimiento ($99/mes).
+    *   **ENTERPRISE:** Para consolidadores y grandes agencias ($299/mes).
+*   **Monetización:** Cobro automatizado vía Stripe Checkout.
+
+## 3. Implementación Multi-tenant (Aislamiento de Datos)
+El sistema garantiza que cada agencia solo acceda a sus propios datos mediante dos mecanismos clave:
+
+### A. AgenciaMixin (Nivel de Datos)
+Casi todos los modelos del sistema heredan de `AgenciaMixin`. Este mixin añade un campo `agencia` (FK a `Agencia`) y sobreescribe el `Manager` por defecto para que cualquier consulta `Model.objects.all()` filtre automáticamente por la agencia activa.
+
+### B. Contexto de Hilo (Middleware)
+El `ThreadLocalContextMiddleware` captura la agencia asociada al usuario autenticado en cada petición y la almacena en un almacenamiento local del hilo (`thread-local`). Esto permite que la lógica de negocio acceda a la `agencia_id` actual sin tener que pasarla explícitamente como argumento en cada función.
+
+## 4. Stack Tecnológico
 
 ### Backend (El Motor)
 *   **Framework:** Django 5.2.6 (Python 3.13.5).

@@ -32,8 +32,10 @@ El proyecto ha pasado por una fase de estabilización crítica, consolidando los
 Si eres una IA (Claude, ChatGPT, etc.) colaborando en este proyecto, lee estos archivos primero:
 
 1.  [🏛️ Arquitectura del Sistema](docs/ARCHITECTURE.md): Detalla el stack, el middleware multi-tenant y el flujo de autenticación.
-2.  [📖 Diccionario de Datos](docs/DATA_DICTIONARY.md): Estructura de modelos y reglas de negocio.
-3.  [🤖 Guía de IA & Automatización](docs/AI_GUIDE.md): Cómo interactuar con los servicios de Gemini y el Parser.
+2.  [🏢 Arquitectura Multi-tenant](docs/MULTI_TENANCY.md): Explicación técnica del aislamiento de datos por agencia.
+3.  [💰 Modelo de Negocio SaaS](docs/BUSINESS_MODEL.md): Planes, precios y límites de suscripción.
+4.  [📖 Diccionario de Datos](docs/DATA_DICTIONARY.md): Estructura de modelos y reglas de negocio.
+5.  [🤖 Guía de IA & Automatización](docs/AI_GUIDE.md): Cómo interactuar con los servicios de Gemini y el Parser.
 
 ---
 

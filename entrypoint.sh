@@ -20,6 +20,5 @@ echo "📦 OMITIENDO migraciones de base de datos para depuración..."
 echo "🎨 Recopilando archivos estáticos (Tailwind/CSS/JS)..."
 # python manage.py collectstatic --noinput
 
-echo "🚀 Iniciando Gunicorn (Servidor de Producción)..."
-# Ejecuta Gunicorn con 4 workers (ajusta según los núcleos de tu VPS)
-exec gunicorn travelhub.wsgi:application --bind 0.0.0.0:8000 --workers 3 --timeout 300 --graceful-timeout 120 --keep-alive 5
+# Ejecuta Gunicorn con auto-reload para desarrollo
+exec gunicorn travelhub.wsgi:application --bind 0.0.0.0:8000 --workers 2 --timeout 300 --reload

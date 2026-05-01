@@ -8,7 +8,14 @@
     <style>
         @page {
             size: A4;
-            margin: 0; /* Eliminamos margen de página para permitir cabeceras 100% */
+            margin: 0 !important;
+        }
+        html, body {
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 100% !important;
+            min-height: 297mm !important;
+            background-color: white;
         }
         :root {
             --tk-primary: {{ agencia.color_primario|default:"#0D1E40" }};
@@ -17,25 +24,32 @@
             --tk-gray: #f9fafb;
             --tk-border: #e5e7eb;
             --pnr-color: var(--tk-primary);
-            --body-margin: 50px;
+            --body-margin: 0;
+        }
+        .body-wrapper {
+            padding: 0; 
+            width: 100%;
+            box-sizing: border-box;
+            flex: 1;
         }
 
         /* Lógica de colores de GDS */
-        {% if SOURCE_SYSTEM and 'SABRE' in SOURCE_SYSTEM %} :root { --pnr-color: {{ agencia.color_secundario|default:'#88081F' }}; } {% endif %}
+        {% if SOURCE_SYSTEM and 'SABRE' in SOURCE_SYSTEM %} :root { --pnr-color: {{ agencia.color_secundario|default:"#88081F" }}; } {% endif %}
         {% if SOURCE_SYSTEM and 'COPA' in SOURCE_SYSTEM %} :root { --pnr-color: #0032A0; } {% endif %}
         {% if SOURCE_SYSTEM and 'TK CONNECT' in SOURCE_SYSTEM %} :root { --pnr-color: #232B38; } {% endif %}
         {% if SOURCE_SYSTEM and 'WINGO' in SOURCE_SYSTEM %} :root { --pnr-color: #6633CB; } {% endif %}
-        {% if SOURCE_SYSTEM and 'AMADEUS' in SOURCE_SYSTEM %} :root { --pnr-color: {{ agencia.color_amadeus|default:'#0C66E1' }}; } {% endif %}
+        {% if SOURCE_SYSTEM and 'AMADEUS' in SOURCE_SYSTEM %} :root { --pnr-color: {{ agencia.color_amadeus|default:"#0C66E1" }}; } {% endif %}
         {% if SOURCE_SYSTEM and 'TRAVELPORT' in SOURCE_SYSTEM %} :root { --pnr-color: #111827; } {% endif %}
 
         body {
             font-family: 'Open Sans', sans-serif;
             color: var(--tk-text);
             line-height: 1.3;
-            margin: 0;
-            padding: 0;
-            background-color: #f3f4f6;
+            margin: 0 !important;
+            padding: 0 !important;
+            background-color: #ffffff;
             -webkit-print-color-adjust: exact;
+            width: 100%;
         }
 
         /* Contenedor Principal */
@@ -43,9 +57,10 @@
             position: relative;
             background-color: #ffffff;
             box-sizing: border-box;
-            width: 210mm;
+            width: 100%;
             min-height: 297mm;
-            margin: 0 auto;
+            margin: 0 !important;
+            padding: 0 !important;
             display: flex;
             flex-direction: column;
             overflow: hidden;
@@ -55,12 +70,14 @@
         .header {
             background-color: var(--tk-primary);
             color: white;
-            padding: 40px var(--body-margin);
+            padding: 25px 45px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            width: 100%;
+            width: 100% !important;
             box-sizing: border-box;
+            margin: 0 !important;
+            border: none !important;
         }
         .header-logo img {
             max-height: 45px;
@@ -77,7 +94,7 @@
 
         /* Wrappers para márgenes de cuerpo */
         .body-wrapper {
-            padding: 0 var(--body-margin);
+            padding: 0 45px; 
             width: 100%;
             box-sizing: border-box;
             flex: 1;
@@ -85,12 +102,12 @@
 
         /* Greeting Section */
         .greeting-section {
-            padding: 30px 0 10px;
+            padding: 15px 0 5px;
         }
         .greeting-title {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 700;
-            margin: 5px 0;
+            margin: 2px 0;
             color: #475569;
         }
         .airline-highlight {
@@ -241,11 +258,12 @@
         /* Footer Anclado - 100% Width */
         .footer-anchored {
             margin-top: auto;
-            padding: 40px var(--body-margin);
+            padding: 35px 45px;
             background-color: #f8fafc;
             border-top: 1px solid var(--tk-border);
-            width: 100%;
+            width: 100% !important;
             box-sizing: border-box;
+            margin: 0 !important;
         }
         .footer-line {
             font-size: 11px;
@@ -301,7 +319,7 @@
                 {% if agencia.eslogan %}
                     <div style="font-size: 14px; font-weight: 800; font-style: italic; margin-bottom: 5px;">"{{ agencia.eslogan }}"</div>
                 {% endif %}
-                {{ agencia.email_principal|default:agencia.email_ventas|default:"INFO@AGENCIA.COM"|upper }}<br>
+                {{ agencia.email_principal|default:"INFO@AGENCIA.COM"|upper }}<br>
                 {{ agencia.telefono_principal|default:"+58 412 331 2314" }}
             </div>
         </header>
@@ -349,7 +367,7 @@
                         </div>
                         <div class="info-item">
                             <div class="info-label">Localizador Aerolínea</div>
-                            <div class="pnr-value" style="color: #475569;">{{ CODIGO_RESERVA_AEROLINEA|default:CODIGO_RESERVA }}</div>
+                            <div class="pnr-value" style="color: #475569;">{{ CODIGO_RESERVA_AEROLINEA|default:"---" }}</div>
                         </div>
                         <div class="info-item">
                             <div class="info-label">Fecha de Emisión</div>
@@ -368,7 +386,7 @@
             {% for vuelo in vuelos %}
             <div class="flight-block">
                 <div class="flight-meta">
-                    <span>VUELO: {{ vuelo.numero_vuelo|default:vuelo.vuelo|default:"---" }}</span>
+                    <span>VUELO: {{ vuelo.numero_vuelo|default:"---" }}</span>
                     <span>FECHA: {{ vuelo.fecha_salida }}</span>
                     <span style="color: var(--tk-accent);">OK CONFIRMADO</span>
                 </div>
@@ -406,8 +424,8 @@
             <div class="footer-subline">
                 {% if agencia.instagram %}
                     @{{ agencia.instagram|upper }}
-                {% elif agencia %}
-                    @{{ agencia.nombre_comercial|default:agencia.nombre|upper }}
+                {% elif agencia.nombre_comercial %}
+                    @{{ agencia.nombre_comercial|upper }}
                 {% else %}
                     @TRAVELHUB
                 {% endif %}
@@ -415,7 +433,7 @@
                 {{ agencia.direccion|default:"Caracas, Venezuela"|upper }}
             </div>
             <div class="iata-line">
-                Recibo electrónico IATA: {% if agencia %}{{ AGENTE_EMISOR|default:agencia.iata }}{% else %}10617390{% endif %} | Generado por {{ agencia.nombre_comercial|default:"TravelHub" }}
+                Recibo electrónico IATA: {{ AGENTE_EMISOR|default:"10617390" }} | Generado por {{ agencia.nombre_comercial|default:"TravelHub" }}
             </div>
         </footer>
 

@@ -295,6 +295,17 @@ class GastoOperativo(models.Model):
     moneda = models.ForeignKey(Moneda, on_delete=models.PROTECT, verbose_name=_("Moneda"))
     creado_por = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_("Registrado por"))
     fecha_registro = models.DateTimeField(auto_now_add=True)
+    
+    # --- CONTROL CONTABLE (Audit Point 3) ---
+    asiento_contable = models.ForeignKey('core.AsientoContable', on_delete=models.SET_NULL, blank=True, null=True, verbose_name=_("Asiento Contable Asociado"))
+    
+    class EstadoContable(models.TextChoices):
+        PENDIENTE = 'PEN', _('Pendiente de Contabilizar')
+        PROCESADO = 'PRO', _('Contabilizado Correctamente')
+        ERROR = 'ERR', _('Error de Configuración Contable')
+        
+    estado_contable = models.CharField(_("Estado Contable"), max_length=3, choices=EstadoContable.choices, default=EstadoContable.PENDIENTE)
+    error_contable_msg = models.TextField(_("Mensaje de Error Contable"), blank=True, null=True, help_text=_("Indica por qué no se pudo generar el asiento automático."))
 
     class Meta:
         verbose_name = _("Gasto Operativo")

@@ -403,3 +403,35 @@ SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
 # ... 
 
 # 🏎️ FIN DE CONFIGURACIÓN
+
+# --- UNFOLD CONFIGURATION ---
+UNFOLD = {
+    "SITE_TITLE": "TravelHub Admin",
+    "SITE_SYMBOL": "travel_explore",
+    "SIDEBAR": {
+        "show_search": True,
+        "show_all_applications": True,
+        "navigation": [
+            {
+                "title": "Operaciones",
+                "items": [
+                    {
+                        "title": "Dashboard Principal",
+                        "icon": "dashboard",
+                        "link": "/dashboard/",
+                    },
+                    {
+                        "title": "Subir Boleto (IA)",
+                        "icon": "upload_file",
+                        "link": "/erp/boletos-importar/",
+                    },
+                    {
+                        "title": "Buffer de Revisión",
+                        "icon": "rate_review",
+                        "link": "/erp/boletos-importados/",
+                    },
+                ],
+            },
+        ],
+    },
+}

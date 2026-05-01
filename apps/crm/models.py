@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 # ==========================================
 class Cliente(SoftDeleteModel, AgenciaMixin, models.Model):
     id = models.AutoField(primary_key=True, db_column='id_cliente')
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False, db_index=True)
     nombres = models.CharField(max_length=150)
     apellidos = models.CharField(max_length=150, blank=True, null=True)
     nombre_empresa = models.CharField(max_length=200, blank=True, null=True)
@@ -95,11 +96,10 @@ class OportunidadViaje(AgenciaMixin, models.Model):
 # ==========================================
 # 3. MODELOS B2B2C: FREELANCERS Y COMISIONES
 # ==========================================
-class FreelancerProfile(models.Model):
+class FreelancerProfile(AgenciaMixin, models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     usuario = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='perfil_freelancer', null=True, blank=True)
-    # FreelancerProfile ya tiene agencia, lo mantenemos igual por ahora o lo pasamos a Mixin si prefieres
-    agencia = models.ForeignKey('core.Agencia', on_delete=models.CASCADE, related_name='freelancers_asociados', null=True, blank=True)
+    # agencia la provee el Mixin automáticamente
     
     telefono = models.CharField(max_length=20, blank=True, null=True)
     comision_fija_por_boleto = models.DecimalField(max_digits=8, decimal_places=2, default=0.0)
@@ -114,9 +114,10 @@ class FreelancerProfile(models.Model):
     def __str__(self):
         return f"{self.usuario.get_full_name()} (Freelancer)"
 
-class ComisionFreelancer(models.Model):
+class ComisionFreelancer(AgenciaMixin, models.Model):
     venta = models.OneToOneField('bookings.Venta', on_delete=models.CASCADE, related_name='comision_asignada', null=True, blank=True)
     freelancer = models.ForeignKey(FreelancerProfile, on_delete=models.CASCADE, related_name='comisiones_generadas', null=True, blank=True)
+    # agencia la provee el Mixin
     
     monto_base_venta = models.DecimalField(max_digits=12, decimal_places=2, default=0.0)
     monto_comision_ganada = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
@@ -134,6 +135,7 @@ class ComisionFreelancer(models.Model):
 
 class Pasajero(SoftDeleteModel, AgenciaMixin, models.Model):
     id_pasajero = models.AutoField(primary_key=True)
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False, db_index=True)
     nombres = models.CharField(max_length=100)
     apellidos = models.CharField(max_length=100)
     fecha_nacimiento = models.DateField(blank=True, null=True)

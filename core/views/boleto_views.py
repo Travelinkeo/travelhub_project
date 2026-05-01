@@ -225,9 +225,20 @@ class BoletoDeleteAPIView(APIView):
 
     def delete(self, request, pk):
         try:
-            boleto = BoletoImportado.objects.get(pk=pk)
-            boleto.delete()
-            return Response({"mensaje": "Boleto eliminado con éxito"}, status=status.HTTP_204_NO_CONTENT)
+            # Usamos all_objects para permitir borrar incluso si ya estaba soft-deleted
+            boleto = BoletoImportado.all_objects.get(pk=pk)
+            
+            # Verificar si se solicita eliminación física
+            physical = request.query_params.get('physical', 'false').lower() == 'true'
+            
+            if physical:
+                # Si hay una venta asociada, intentamos borrarla también si es huérfana
+                # o al menos desvincularla. Pero el usuario pidió borrar TODO.
+                boleto.delete(force=True)
+            else:
+                boleto.delete()
+                
+            return Response({"mensaje": f"Boleto eliminado {'físicamente ' if physical else ''}con éxito"}, status=status.HTTP_204_NO_CONTENT)
         except BoletoImportado.DoesNotExist:
             return Response({"error": "Boleto no encontrado"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:

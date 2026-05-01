@@ -15,11 +15,18 @@ class SoftDeleteModel(models.Model):
     class Meta:
         abstract = True
 
-    def delete(self, using=None, keep_parents=False):
-        """Borrado lógico: marca como eliminado en lugar de ejecutar SQL DELETE."""
+    def delete(self, using=None, keep_parents=False, force=False):
+        """Borrado lógico por defecto. Si force=True, borrado físico."""
+        if force:
+            return self.hard_delete(using=using, keep_parents=keep_parents)
+        
         self.is_deleted = True
         self.deleted_at = timezone.now()
         self.save(update_fields=['is_deleted', 'deleted_at'])
+
+    def hard_delete(self, using=None, keep_parents=False):
+        """Borrado físico real de la base de datos."""
+        super(SoftDeleteModel, self).delete(using=using, keep_parents=keep_parents)
 
     def restore(self):
         """Restauración: devuelve el registro al estado activo."""

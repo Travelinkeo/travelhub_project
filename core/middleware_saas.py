@@ -27,17 +27,17 @@ class SaaSLimitMiddleware:
                 if usuario_agencia:
                     request.agencia = usuario_agencia.agencia
                 
-                # 1b. Si es superuser y no tiene agencia asignada, intentar buscar la primera activa
-                # o una que sea de su propiedad
-                if not request.agencia and request.user.is_superuser:
+                # 1b. Si no tiene agencia asignada via UsuarioAgencia, buscar si es propietario
+                if not request.agencia:
                     from core.models.agencia import Agencia
                     # Prioridad: Agencia de la cual es propietario
                     agencia = Agencia.objects.filter(propietario=request.user, activa=True).first()
-                    # Fallback: Primera agencia activa en el sistema
-                    if not agencia:
+                    # Fallback para superuser: Primera agencia activa en el sistema
+                    if not agencia and request.user.is_superuser:
                         agencia = Agencia.objects.filter(activa=True).first()
                     request.agencia = agencia
-            except Exception:
+            except Exception as e:
+                logger.error(f"Error in SaaSLimitMiddleware agency detection: {e}")
                 pass
 
             # 2. Verificar límites (SOLO si NO es superuser y TIENE agencia)

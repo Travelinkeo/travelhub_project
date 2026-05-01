@@ -61,7 +61,7 @@ class Venta(SoftDeleteModel, AgenciaMixin, models.Model):
     """
     id_venta = models.AutoField(primary_key=True, verbose_name=_("ID Venta/Reserva"))
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, null=True, verbose_name=_("Token Público"))
-    localizador = models.CharField(_("Localizador/PNR"), max_length=20, unique=True, blank=True, help_text=_("Código único de la reserva o localizador."))
+    localizador = models.CharField(_("Localizador/PNR"), max_length=20, blank=True, help_text=_("Código único de la reserva o localizador."))
     
     # REFACTOR: Usar strings por estabilidad
     cliente = models.ForeignKey('crm.Cliente', on_delete=models.PROTECT, related_name='ventas_asociadas', verbose_name=_("Cliente (Pagador)"), null=True, blank=True)
@@ -220,12 +220,32 @@ class Venta(SoftDeleteModel, AgenciaMixin, models.Model):
         super().save(update_fields=campos_update)
         self._evaluar_otorgar_puntos(contexto="recalcular_finanzas")
 
-    def delete(self, using=None, keep_parents=False):  # pragma: no cover
-        componentes_relacionados = {'items_venta': self.items_venta.exists(), 'segmentos_vuelo': self.segmentos_vuelo.exists(), 'alojamientos': self.alojamientos.exists(), 'traslados': self.traslados.exists(), 'actividades': self.actividades.exists(), 'fees_venta': self.fees_venta.exists(), 'pagos_venta': self.pagos_venta.exists()}
-        bloqueados = [n for n, ex in componentes_relacionados.items() if ex]
-        if bloqueados:
-            raise ValidationError(_(f"No se puede eliminar la Venta porque existen componentes asociados: {', '.join(bloqueados)}"))
-        return super().delete(using=using, keep_parents=keep_parents)
+    def delete(self, using=None, keep_parents=False, force=False):  # pragma: no cover
+        """
+        Borrado de Venta. 
+        Por defecto es borrado lógico (Soft Delete) y verifica componentes.
+        Si force=True, realiza borrado físico (Hard Delete).
+        """
+        if not force:
+            componentes_relacionados = {
+                'items_venta': self.items_venta.exists(), 
+                'segmentos_vuelo': self.segmentos_vuelo.exists(), 
+                'alojamientos': self.alojamientos.exists(), 
+                'traslados': self.traslados.exists(), 
+                'actividades': self.actividades.exists(), 
+                'fees_venta': self.fees_venta.exists(), 
+                'pagos_venta': self.pagos_venta.exists()
+            }
+            bloqueados = [n for n, ex in componentes_relacionados.items() if ex]
+            if bloqueados:
+                raise ValidationError(_(f"No se puede eliminar la Venta porque existen componentes asociados: {', '.join(bloqueados)}"))
+            
+            # Borrado lógico (vía SoftDeleteModel)
+            return super().delete(using=using, keep_parents=keep_parents)
+        
+        # Borrado físico real (Bypass checks and cascading via DB if configured)
+        # Nota: La mayoría de las FKs en apps.bookings están como CASCADE.
+        return self.hard_delete(using=using, keep_parents=keep_parents)
 
     def _latest_metadata(self):  # pragma: no cover
         try:
@@ -1076,25 +1096,17 @@ def signal_boleto_post_save(sender, instance, created, **kwargs):
     de recupero de impuestos.
     """
     if instance.estado_parseo == 'COM': 
-        # 1. Disparar Tax Refund
-        try:
-             from apps.finance.tasks_tax_refund import evaluar_tax_refund_task
-             evaluar_tax_refund_task.delay(instance.pk)
-        except (ImportError, Exception) as e:
-             logger.error(f"Error disparando Tax Refund: {e}")
+        # 1. Disparar Tax Refund (DESACTIVADO TEMPORALMENTE PARA EVITAR 502)
+        # try:
+        #      from apps.finance.tasks_tax_refund import evaluar_tax_refund_task
+        #      evaluar_tax_refund_task.delay(instance.pk)
+        # except (ImportError, Exception) as e:
+        #      logger.error(f"Error disparando Tax Refund: {e}")
 
         # 2. WORKFLOW MÁGICO: Automatización de Venta
-        if not instance.venta_asociada:
-            try:
-                from core.services.venta_automation import VentaAutomationService
-                VentaAutomationService.crear_venta_desde_parser(
-                    parsed_data=instance.datos_parseados,
-                    agencia=instance.agencia,
-                    usuario=None # En este flujo automático no hay usuario interactivo
-                )
-                logger.info(f"✅ Venta creada automáticamente para Boleto {instance.pk}")
-            except Exception as e:
-                logger.error(f"❌ Error en Workflow Mágico para Boleto {instance.pk}: {e}")
+        # NOTA: La creación de venta ahora es orquestada EXCLUSIVAMENTE por TicketParserService
+        # para evitar duplicidad de procesos y asegurar la integridad de los datos.
+        pass
 # Auditoría forense trasladada a core/signals_audit.py
 
 

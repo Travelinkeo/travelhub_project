@@ -21,8 +21,10 @@ class AIEngine:
     Gestiona la configuración, modelos y llamadas estructuradas a Gemini.
     """
     
-    DEFAULT_MODEL = "gemini-2.0-flash"
-    VISION_MODEL = "gemini-2.0-flash"
+    DEFAULT_MODEL = "gemini-flash-latest"
+    # El modelo Pro es mejor para razonamiento complejo
+    PRO_MODEL = "gemini-pro-latest"
+    VISION_MODEL = "gemini-flash-latest"
 
     @classmethod
     def _ensure_configured(cls):
@@ -33,7 +35,7 @@ class AIEngine:
             if api_key:
                 try:
                     import google.generativeai as genai
-                    genai.configure(api_key=api_key, transport="rest")
+                    genai.configure(api_key=api_key)
                     cls._is_global_configured = True
                     logger.info("AIEngine: genai configured lazily.")
                 except Exception as e:
@@ -64,9 +66,12 @@ class AIEngine:
         self._ensure_configured()
         
         # 1. Comprobar si el circuito está abierto (Gemini está caído)
-        if cache.get('gemini_circuit_open'):
-            logger.critical("🛑 CIRCUIT BREAKER ACTIVO: Gemini API está inalcanzable. Abortando request para proteger workers.")
-            raise CircuitBreakerException("Servicio de IA temporalmente degradado.")
+        try:
+            if cache.get('gemini_circuit_open'):
+                logger.critical("🛑 CIRCUIT BREAKER ACTIVO: Gemini API está inalcanzable. Abortando request para proteger workers.")
+                raise CircuitBreakerException("Servicio de IA temporalmente degradado.")
+        except Exception as e_cache:
+            logger.warning(f"⚠️ Error accediendo al cache (Redis): {e_cache}. Continuando sin cache.")
             
         try:
             # 2. Intentar llamar a la IA
@@ -76,21 +81,50 @@ class AIEngine:
                 prompt, content_list, response_schema, model_name, temperature, system_instruction
             )
             # Si tiene éxito, reseteamos el contador de fallos
-            cache.delete('gemini_fail_count')
+            try:
+                cache.delete('gemini_fail_count')
+            except: pass
             return response
             
         except Exception as e:
             # 3. Si falla, sumamos 1 al contador
-            fails = cache.get('gemini_fail_count', 0) + 1
-            cache.set('gemini_fail_count', fails, timeout=600) # Expira en 10 min
+            try:
+                fails = cache.get('gemini_fail_count', 0) + 1
+                cache.set('gemini_fail_count', fails, timeout=600) # Expira en 10 min
+                
+                # 4. Si llegamos a 5 fallos seguidos, ABRIMOS el circuito por 5 minutos
+                if fails >= 5:
+                    logger.critical("💥 5 Fallos consecutivos. APAGANDO conexión a Gemini por 5 minutos.")
+                    cache.set('gemini_circuit_open', True, timeout=300) # 5 minutos de bloqueo
+            except:
+                fails = "N/A"
             
             logger.warning(f"⚠️ Fallo en Gemini API (Intento {fails}/5): {str(e)}")
             
-            # 4. Si llegamos a 5 fallos seguidos, ABRIMOS el circuito por 5 minutos
-            if fails >= 5:
-                logger.critical("💥 5 Fallos consecutivos. APAGANDO conexión a Gemini por 5 minutos.")
-                cache.set('gemini_circuit_open', True, timeout=300) # 5 minutos de bloqueo
-                
+            # 5. INTENTO DE RESCATE: Si es un error de cuota (429), intentar con el modelo de respaldo
+            if "429" in str(e) and model_name != self.FALLBACK_MODEL:
+                logger.info(f"🔄 Cuota agotada en {model_name or self.DEFAULT_MODEL}. Reintentando con {self.FALLBACK_MODEL}...")
+                return self.call_gemini(
+                    prompt=prompt,
+                    content_list=content_list,
+                    response_schema=response_schema,
+                    model_name=self.FALLBACK_MODEL,
+                    temperature=temperature,
+                    system_instruction=system_instruction
+                )
+
+            # 6. ÚLTIMO RECURSO: Intentar sin esquema si el 404 persiste (problemas de habilitación/versión)
+            if "404" in str(e) and response_schema:
+                logger.warning(f"🔄 Error 404 en modo esquema. Reintentando en modo texto plano...")
+                return self.call_gemini(
+                    prompt=prompt,
+                    content_list=content_list,
+                    response_schema=None,
+                    model_name=model_name,
+                    temperature=temperature,
+                    system_instruction=system_instruction
+                )
+            
             raise e
 
     def analyze_gds_terminal(self, raw_text: str, gds_type: str = 'SABRE') -> Dict[str, Any]:
@@ -196,36 +230,37 @@ class AIEngine:
                 )
                 response = model.generate_content(inputs, generation_config=generation_config)
             except Exception as e:
+                error_str = str(e)
+                # 5. INTENTO DE RESCATE: Si es un error de cuota (429), intentar con el modelo de respaldo
+                if "429" in error_str and selected_model != self.FALLBACK_MODEL:
+                    logger.info(f"🔄 Cuota agotada en {selected_model}. Reintentando con {self.FALLBACK_MODEL}...")
+                    return self._execute_call_gemini(prompt, content_list, response_schema, self.FALLBACK_MODEL, temperature, system_instruction)
+                
+                # 6. ERROR DE HABILITACIÓN: Si es un 404 o dice que no está usada
+                if "404" in error_str or "API has not been used" in error_str:
+                    logger.error(f"❌ API DESHABILITADA o MODELO NO ENCONTRADO: {error_str}")
+                    return {"error": f"La API de Gemini o el modelo {selected_model} no están disponibles. Asegúrate de que la 'Generative Language API' esté habilitada en tu proyecto de Google Cloud."}
+
                 if response_schema:
                     import google.generativeai as genai
-                    # Intento de respaldo sin forzar schema estricto (algunos modelos fallan con schemas complejos)
+                    # Intento de respaldo sin forzar schema estricto
                     generation_config = genai.GenerationConfig(
                         temperature=temperature,
                         response_mime_type="application/json"
                     )
-                    prompt_con_instruccion_json = f"{prompt}\n\nIMPORTANT: Return ONLY a valid JSON object."
-                    # Re-intentamos con los mismos inputs pero sin schema estricto
                     response = model.generate_content(inputs, generation_config=generation_config)
                 else:
                     raise e
 
             if response_schema:
-                raw_text = response.text
-                logger.info(f"[AIEngine] Raw response text (first 500 chars): {raw_text[:500]}")
                 try:
+                    raw_text = response.text
+                    logger.info(f"[AIEngine] Raw response text (first 500 chars): {raw_text[:500]}")
                     parsed = json.loads(raw_text)
-                    logger.info(f"[AIEngine] Parsed response: {parsed}")
                     return parsed
-                except json.JSONDecodeError:
-                    import re
-                    match = re.search(r'(\{.*\}|\[.*\])', raw_text, re.DOTALL)
-                    if match:
-                        clean_text = match.group(0)
-                        try:
-                            return json.loads(clean_text)
-                        except json.JSONDecodeError:
-                            pass
-                    logger.error(f"[AIEngine] No se pudo parsear JSON: {raw_text}")
+                except Exception as parse_err:
+                    logger.error(f"[AIEngine] Error parseando respuesta JSON: {parse_err}")
+                    return {"error": f"Error de formato en la respuesta de IA: {str(parse_err)}"}
                     return {"error": f"Respuesta no parseable: {raw_text[:200]}"}
             
             return {"text": response.text}
@@ -235,6 +270,10 @@ class AIEngine:
             if "429" in error_str or "Resource exhausted" in error_str:
                 logger.error(f"🚨 CUOTA AGOTADA en Gemini: {error_str}")
                 raise QuotaExhaustedException(f"La cuota de la API de IA se ha agotado: {error_str}")
+            
+            if "API has not been used" in error_str or "disabled" in error_str.lower():
+                logger.error(f"❌ API DESHABILITADA: {error_str}")
+                return {"error": "La API de Gemini no está habilitada en tu proyecto de Google Cloud. Por favor, habilítala en la consola de Google Cloud para que la magia fluya."}
                 
             logger.error(f"AIEngine Call Error: {traceback.format_exc()}")
             return {"error": str(e)}

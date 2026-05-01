@@ -1,33 +1,51 @@
-# TravelHub Project
+# TravelHub SaaS Platform 🚀
 
-**Sistema de Gestión Integral para Agencias de Viajes (SaaS)**
+**Sistema de Gestión Integral (ERP/SaaS) para Agencias de Viajes con Inteligencia Artificial.**
 
-TravelHub es una plataforma moderna diseñada para automatizar la operación de agencias de viajes, con foco en la normativa fiscal venezolana (VEN-NIF) y la automatización de boletos aéreos.
-
----
-
-## 📚 Documentación Maestra (Bus Factor 1)
-
-Toda la información técnica, operativa y de negocio se encuentra centralizada en la carpeta `docs/`.
-
-> **⚠️ REGLA DE ORO:**
-> Ningún cambio de código se considera "Terminado" hasta que la documentación correspondiente en `docs/` haya sido actualizada.
-> *   ¿Cambiaste un Modelo? -> Actualiza `DATA_DICTIONARY.md`.
-> *   ¿Cambiaste la Arquitectura? -> Actualiza `ARCHITECTURE.md`.
-
-### Índice de Manuales
-*   [🏛️ Arquitectura del Sistema](docs/ARCHITECTURE.md): Visión general, stack tecnológico y estructura de módulos.
-*   [📖 Diccionario de Datos y Reglas](docs/DATA_DICTIONARY.md): Modelos, Plan de Cuentas y Lógica de Automatización.
-*   [💻 Manual de Desarrollo](docs/DEVELOPMENT.md): Setup, instalación y guía de estilo.
-*   [🚀 Manual de Operaciones](docs/OPERATIONS.md): Despliegue en Coolify y mantenimiento.
+TravelHub es una plataforma B2B multi-tenant diseñada para automatizar la operación completa de agencias de viajes. Combina la potencia de Django con modelos de lenguaje avanzados (Gemini/Vertex AI) para resolver la fricción operativa, financiera y de marketing.
 
 ---
 
-## Estado del Proyecto
-*   **Versión:** En desarrollo activo (Refactorización & Automatización).
-*   **Stack:** Django 5, TailwindCSS, HTMX, PostgreSQL, Celery.
+## 🏛️ Arquitectura y Estado Actual (Abril 2026)
 
-## Características Clave
-*   **Parser de Boletos:** Extracción automática de datos desde PDFs (KIU, Sabre).
-*   **Contabilidad Invisible:** Generación automática de asientos contables y cálculo de impuestos (IVA/IGTF).
-*   **UI Premium:** Interfaz Glassmorphism con modo oscuro.
+El proyecto ha pasado por una fase de estabilización crítica, consolidando los siguientes pilares:
+
+### 1. Multi-tenant SaaS & Onboarding
+*   **Aislamiento de Datos:** Implementado vía `AgenciaMixin` y `ThreadLocalContextMiddleware`. Cada agencia opera en su propio contexto de datos.
+*   **Onboarding Autónomo:** Registro self-service integrado con **Stripe**. Soporta planes *Basic*, *Pro* y *Enterprise*, además de un flujo de *Trial* gratuito.
+*   **Aprovisionamiento Automático:** El sistema crea la agencia, el administrador y configura límites de uso (cuotas de ventas/usuarios) al detectar el pago mediante Webhooks.
+
+### 2. Automatización & IA (The Invisible Agent)
+*   **Ticket Parser Pro:** Extracción de datos de boletos (Sabre, KIU) usando un motor híbrido de Regex + Google Document AI / Gemini.
+*   **Marketing Hub IA:** 
+    *   **AI Copywriter:** Generación de captions virales con distintos tonos de voz.
+    *   **Post Maker:** Generación de imágenes fotorrealistas (Imagen 3 - Vertex AI) para promociones de hoteles.
+    *   **Magic Newsletter:** Generador de campañas de email en HTML.
+
+### 3. Centro de Control (God Mode)
+*   Dashboard exclusivo para el dueño de la plataforma con métricas globales: MRR estimado, crecimiento de agencias, salud del sistema y logs de actividad de IA a través de todos los tenants.
+
+---
+
+## 📚 Documentación para Colaboradores (Humano/IA)
+
+Si eres una IA (Claude, ChatGPT, etc.) colaborando en este proyecto, lee estos archivos primero:
+
+1.  [🏛️ Arquitectura del Sistema](docs/ARCHITECTURE.md): Detalla el stack, el middleware multi-tenant y el flujo de autenticación.
+2.  [📖 Diccionario de Datos](docs/DATA_DICTIONARY.md): Estructura de modelos y reglas de negocio.
+3.  [🤖 Guía de IA & Automatización](docs/AI_GUIDE.md): Cómo interactuar con los servicios de Gemini y el Parser.
+
+---
+
+## 🛠️ Stack Tecnológico
+*   **Backend:** Django 5.x, Python 3.12.
+*   **Frontend:** TailwindCSS, Alpine.js, HTMX (Arquitectura "Low-code" frontend).
+*   **Base de Datos:** PostgreSQL (Multi-tenant).
+*   **IA:** Google Gemini Pro, Vertex AI (Imagen 3), Document AI.
+*   **Infraestructura:** Docker, Celery (Async tasks), Redis, Stripe (Billing).
+
+---
+
+## ⚠️ Reglas de Seguridad para el Repo
+*   **Cero Secretos:** Nunca hagas commit de archivos `.env`, llaves JSON de GCP o `db.sqlite3`.
+*   **Git Saneado:** Se ha realizado una purga de historial para asegurar que no haya claves expuestas en commits antiguos.

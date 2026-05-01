@@ -11,6 +11,8 @@ from core.models import Agencia
 
 logger = logging.getLogger(__name__)
 
+from core.views.billing_views import PLAN_CONFIG
+
 class SaaSOnboardingView(View):
     """
     Vista pública para el registro de agencias (B2B SaaS Onboarding).
@@ -19,7 +21,6 @@ class SaaSOnboardingView(View):
 
     def setup(self, request, *args, **kwargs):
         super().setup(request, *args, **kwargs)
-        # Configurar API Key de forma segura
         stripe.api_key = getattr(settings, 'STRIPE_SECRET_KEY', '')
 
     def get(self, request, *args, **kwargs):
@@ -31,28 +32,29 @@ class SaaSOnboardingView(View):
         admin_password = request.POST.get('admin_password')
         agency_name = request.POST.get('agency_name')
         subdomain = request.POST.get('subdomain')
-        plan = request.POST.get('plan') # BASIC, PRO, ENTERPRISE
+        plan = request.POST.get('plan', 'BASIC')
         brand_color = request.POST.get('brand_color', '#3b82f6')
         
-        # 2. Validaciones Previas (Evitar duplicados antes de Stripe)
+        # 2. Validaciones Previas
         if User.objects.filter(email=admin_email).exists():
-            return HttpResponse("El email ya está registrado.", status=400)
+            return render(request, self.template_name, {'error': "El email ya está registrado."})
         
         if Agencia.objects.filter(subdominio_slug=subdomain).exists():
-            return HttpResponse("El subdominio ya está en uso.", status=400)
+            return render(request, self.template_name, {'error': "El subdominio ya está en uso."})
 
-        # 3. Mapeo de Precios Stripe (DUMMY IDs por ahora)
-        # En producción estos IDs vienen de la consola de Stripe
-        STRIPE_PRICES = {
-            'BASIC': 'price_starter_29',
-            'PRO': 'price_pro_99',
-            'ENTERPRISE': 'price_ent_299'
-        }
-        price_id = STRIPE_PRICES.get(plan, STRIPE_PRICES['BASIC'])
+        # 3. Mapeo de Precios desde PLAN_CONFIG
+        plan_data = PLAN_CONFIG.get(plan, PLAN_CONFIG['BASIC'])
+        price_id = plan_data.get('stripe_price_id')
 
-        # 4. Crear Sesión de Checkout de Stripe
+        # 4. Caso Especial: FREE / TRIAL (Sin Stripe Checkout inmediato si se desea)
+        # Por ahora, todos pasan por Stripe para validar tarjeta, pero si es FREE
+        # podríamos provisionar directamente. El plan dice "TRIAL 30 días".
+        
+        if not price_id and plan != 'FREE':
+            return HttpResponse("Error de configuración de precios. Contacte soporte.", status=500)
+
+        # 5. Crear Sesión de Checkout de Stripe
         try:
-            # Empaquetamos los datos en metadata para recuperarlos en el Webhook
             metadata = {
                 'admin_email': admin_email,
                 'admin_password': admin_password,
@@ -66,20 +68,22 @@ class SaaSOnboardingView(View):
             checkout_session = stripe.checkout.Session.create(
                 payment_method_types=['card'],
                 line_items=[{
+                    'price': price_id,
+                    'quantity': 1,
+                }] if price_id else [{
                     'price_data': {
                         'currency': 'usd',
                         'product_data': {
-                            'name': f"TravelHub ERP - Plan {plan}",
-                            'description': f"Suscripción mensual para {agency_name}",
+                            'name': f"TravelHub ERP - Plan {plan} (Trial)",
                         },
-                        'unit_amount': 2900 if plan == 'BASIC' else (9900 if plan == 'PRO' else 29900),
+                        'unit_amount': 0,
                         'recurring': {'interval': 'month'},
                     },
                     'quantity': 1,
                 }],
                 mode='subscription',
-                success_url=request.build_absolute_uri('/') + '?status=success',
-                cancel_url=request.build_absolute_uri('/') + '?status=cancel',
+                success_url=request.build_absolute_uri(reverse('billing_success')) + '?session_id={CHECKOUT_SESSION_ID}',
+                cancel_url=request.build_absolute_uri(reverse('billing_cancel')),
                 customer_email=admin_email,
                 metadata=metadata
             )
@@ -88,4 +92,4 @@ class SaaSOnboardingView(View):
 
         except Exception as e:
             logger.error(f"Error SaaSOnboardingView Stripe: {e}")
-            return HttpResponse(f"Error al iniciar el pago: {str(e)}", status=500)
+            return render(request, self.template_name, {'error': f"Error al iniciar el pago: {str(e)}"})

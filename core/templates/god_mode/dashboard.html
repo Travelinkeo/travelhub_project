@@ -1,0 +1,185 @@
+{% extends "base_unfold.html" %}
+
+{% block content %}
+<div class="p-6 md:p-10 space-y-10 bg-slate-950 min-h-screen text-slate-200">
+
+    <!-- GOD MODE HEADER -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+        <div class="flex items-center gap-4">
+            <div class="w-16 h-16 rounded-2xl bg-yellow-500/10 border border-yellow-500/20 flex items-center justify-center text-yellow-500 shadow-[0_0_30px_rgba(234,179,8,0.1)]">
+                <span class="material-symbols-outlined text-4xl">travel_explore</span>
+            </div>
+            <div>
+                <h1 class="text-4xl font-black text-white tracking-tighter uppercase">God Mode</h1>
+                <p class="text-yellow-500/80 font-bold text-xs uppercase tracking-[0.2em]">TravelHub Master Control Center</p>
+            </div>
+        </div>
+        <div class="flex gap-3">
+            <div class="bg-slate-900/80 border border-slate-800 px-6 py-3 rounded-2xl">
+                <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Platform Health</p>
+                <div class="flex items-center gap-2 mt-1">
+                    <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                    <span class="text-xs font-bold text-white uppercase">All Systems Nominal</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- GLOBAL METRICS -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Metric Card -->
+        <div class="bg-slate-900/40 border border-slate-800 p-6 rounded-3xl hover:border-yellow-500/30 transition-all group">
+            <div class="flex justify-between items-start mb-4">
+                <span class="material-symbols-outlined text-yellow-500 group-hover:scale-110 transition-transform">hub</span>
+                <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Agencias Totales</span>
+            </div>
+            <div class="flex items-baseline gap-2">
+                <h3 class="text-4xl font-black text-white">{{ metrics.total_agencias }}</h3>
+                <span class="text-emerald-400 text-xs font-bold">+{{ metrics.nuevas_30d }} este mes</span>
+            </div>
+        </div>
+
+        <div class="bg-slate-900/40 border border-slate-800 p-6 rounded-3xl hover:border-blue-500/30 transition-all group">
+            <div class="flex justify-between items-start mb-4">
+                <span class="material-symbols-outlined text-blue-400">groups</span>
+                <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Usuarios Activos</span>
+            </div>
+            <h3 class="text-4xl font-black text-white">{{ metrics.total_usuarios }}</h3>
+        </div>
+
+        <div class="bg-slate-900/40 border border-slate-800 p-6 rounded-3xl hover:border-emerald-500/30 transition-all group">
+            <div class="flex justify-between items-start mb-4">
+                <span class="material-symbols-outlined text-emerald-400">payments</span>
+                <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest">MRR Estimado</span>
+            </div>
+            <h3 class="text-4xl font-black text-white">${{ metrics.revenue_mensual }}<span class="text-slate-500 text-lg">.00</span></h3>
+        </div>
+
+        <div class="bg-slate-900/40 border border-slate-800 p-6 rounded-3xl hover:border-purple-500/30 transition-all group">
+            <div class="flex justify-between items-start mb-4">
+                <span class="material-symbols-outlined text-purple-400">monitoring</span>
+                <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Uso de API (24h)</span>
+            </div>
+            <h3 class="text-4xl font-black text-white">8.2k</h3>
+        </div>
+    </div>
+
+    <!-- MAIN GRID -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Agencies Table -->
+        <div class="lg:col-span-2 space-y-6">
+            <div class="flex justify-between items-center px-2">
+                <h2 class="text-xl font-black text-white uppercase tracking-tight">Últimas Agencias Onboarded</h2>
+                <a href="/admin/core/agencia/" class="text-[10px] font-black text-yellow-500 uppercase tracking-widest hover:underline">Ver todas las agencias</a>
+            </div>
+            
+            <div class="bg-slate-900/40 border border-slate-800 rounded-3xl overflow-hidden">
+                <table class="w-full text-left">
+                    <thead>
+                        <tr class="bg-slate-950/50 border-b border-slate-800">
+                            <th class="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Agencia</th>
+                            <th class="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Plan</th>
+                            <th class="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Estado</th>
+                            <th class="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Registrada</th>
+                            <th class="px-6 py-4 text-right"></th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-800/50">
+                        {% for agencia in agencias %}
+                        <tr class="hover:bg-slate-800/20 transition-colors">
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-xs font-bold text-white border border-slate-700">
+                                        {{ agencia.nombre|slice:":1" }}
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-bold text-white">{{ agencia.nombre }}</p>
+                                        <p class="text-[10px] text-slate-500 font-mono">{{ agencia.subdominio_slug }}.travelhub.cc</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="px-2 py-1 rounded-md text-[10px] font-black uppercase tracking-wider
+                                    {% if agencia.plan == 'ENTERPRISE' %}bg-purple-500/10 text-purple-400 border border-purple-500/20
+                                    {% elif agencia.plan == 'PRO' %}bg-blue-500/10 text-blue-400 border border-blue-500/20
+                                    {% else %}bg-slate-800 text-slate-400{% endif %}">
+                                    {{ agencia.plan }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-1.5 h-1.5 rounded-full {% if agencia.activa %}bg-emerald-500{% else %}bg-red-500{% endif %}"></div>
+                                    <span class="text-xs font-medium text-slate-300">{% if agencia.activa %}Activa{% else %}Inactiva{% endif %}</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-xs text-slate-500 font-medium">
+                                {{ agencia.fecha_creacion|date:"d M Y" }}
+                            </td>
+                            <td class="px-6 py-4 text-right">
+                                <button class="p-2 text-slate-500 hover:text-white transition-colors">
+                                    <span class="material-symbols-outlined text-[18px]">more_vert</span>
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Right Column: System Logs & Stats -->
+        <div class="space-y-8">
+            <!-- Distribution -->
+            <div class="bg-slate-900/40 border border-slate-800 p-8 rounded-3xl">
+                <h3 class="text-xs font-black text-slate-500 uppercase tracking-widest mb-6">Distribución de Planes</h3>
+                <div class="space-y-4">
+                    {% for item in plan_dist %}
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-xs font-bold">
+                            <span class="text-slate-400">{{ item.plan }}</span>
+                            <span class="text-white">{{ item.count }}</span>
+                        </div>
+                        <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                            <div class="h-full bg-yellow-500" style="width: {% widthratio item.count metrics.total_agencias 100 %}%"></div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Global Activity -->
+            <div class="bg-slate-900/40 border border-slate-800 p-8 rounded-3xl">
+                <h3 class="text-xs font-black text-slate-500 uppercase tracking-widest mb-6">Actividad Global (IA)</h3>
+                <div class="space-y-6">
+                    <div class="flex gap-4">
+                        <div class="w-2 h-2 rounded-full bg-emerald-500 mt-1.5"></div>
+                        <div>
+                            <p class="text-xs font-bold text-white">Boleto Procesado Exitosamente</p>
+                            <p class="text-[10px] text-slate-500 mt-1">Agencia: Viajes Premium | GDS: Sabre</p>
+                            <p class="text-[10px] text-slate-600 font-mono mt-1">Hace 2 minutos</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <div class="w-2 h-2 rounded-full bg-blue-500 mt-1.5"></div>
+                        <div>
+                            <p class="text-xs font-bold text-white">Nuevo Onboarding Iniciado</p>
+                            <p class="text-[10px] text-slate-500 mt-1">IP: 190.201.XX.XX | Plan: PRO</p>
+                            <p class="text-[10px] text-slate-600 font-mono mt-1">Hace 15 minutos</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<style>
+@keyframes glow {
+    0% { box-shadow: 0 0 10px rgba(234,179,8,0.1); }
+    50% { box-shadow: 0 0 20px rgba(234,179,8,0.2); }
+    100% { box-shadow: 0 0 10px rgba(234,179,8,0.1); }
+}
+.animate-glow { animation: glow 3s infinite ease-in-out; }
+</style>
+{% endblock %}

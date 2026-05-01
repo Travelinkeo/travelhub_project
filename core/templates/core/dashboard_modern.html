@@ -197,20 +197,20 @@
                 </thead>
                 <tbody class="divide-y divide-border-color">
                     {% for venta in ventas_recientes %}
-                    <tr class="hover:bg-surface-2 transition-colors group cursor-pointer" onclick="window.location.href='{% url 'core:editar_venta' venta.pk %}'">
-                        <td class="px-6 py-4 font-mono text-text-secondary text-xs">
+                    <tr class="hover:bg-surface-2 transition-colors group">
+                        <td class="px-6 py-4 font-mono text-text-secondary text-xs" onclick="window.location.href='{% url 'core:editar_venta' venta.pk %}'">
                             {{ venta.fecha_venta|date:"d M Y" }}
                         </td>
-                        <td class="px-6 py-4 text-text-main font-medium flex items-center gap-3">
+                        <td class="px-6 py-4 text-text-main font-medium flex items-center gap-3 cursor-pointer" onclick="window.location.href='{% url 'core:editar_venta' venta.pk %}'">
                             <div class="w-8 h-8 rounded-lg bg-surface-3 flex items-center justify-center text-primary font-black text-[10px] border border-border-color">
                                 {% if venta.cliente %}{{ venta.cliente.nombres|slice:":2"|upper }}{% else %}NA{% endif %}
                             </div>
                             <span class="truncate max-w-[150px]">{{ venta.cliente.nombres|default:"<span class='text-status-warning'>Sin asignar</span>"|safe }}</span>
                         </td>
-                        <td class="px-6 py-4 font-mono font-black text-primary">
+                        <td class="px-6 py-4 font-mono font-black text-primary cursor-pointer" onclick="window.location.href='{% url 'core:editar_venta' venta.pk %}'">
                             {{ venta.localizador|default:"---" }}
                         </td>
-                        <td class="px-6 py-4">
+                        <td class="px-6 py-4 cursor-pointer" onclick="window.location.href='{% url 'core:editar_venta' venta.pk %}'">
                             {% if venta.estado == 'PAG' or venta.estado == 'COM' %}
                                 <span class="px-2 py-1 rounded-full text-[10px] font-black bg-status-success-bg text-status-success border border-status-success/20">PAGADO</span>
                             {% elif venta.estado == 'PEN' %}
@@ -219,8 +219,16 @@
                                 <span class="px-2 py-1 rounded-full text-[10px] font-black bg-surface-3 text-text-muted border border-border-color">{{ venta.get_estado_display|upper }}</span>
                             {% endif %}
                         </td>
-                        <td class="px-6 py-4 text-right font-black text-text-main text-sm">
-                            ${{ venta.total_venta|floatformat:2|intcomma }}
+                        <td class="px-6 py-4 text-right">
+                            <div class="flex items-center justify-end gap-4">
+                                <span class="font-black text-text-main text-sm font-mono">${{ venta.total_venta|floatformat:2|intcomma }}</span>
+                                <a href="{% url 'core:eliminar_venta_hard' venta.pk %}" 
+                                   onclick="return confirm('⚠️ ¿Eliminar VENTA permanentemente?')"
+                                   class="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white transition-all"
+                                   title="Eliminar permanentemente">
+                                    <span class="material-symbols-outlined text-[18px]">delete_forever</span>
+                                </a>
+                            </div>
                         </td>
                     </tr>
                     {% empty %}

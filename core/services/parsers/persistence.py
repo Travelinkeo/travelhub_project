@@ -4,7 +4,10 @@ import os
 from decimal import Decimal
 from django.db.models import Q
 from apps.bookings.models import BoletoImportado
-from core.models_catalogos import Proveedor, Aerolinea
+from core.models_catalogos import Proveedor, Aerolinea, Moneda
+
+# SERVICIOS
+from core.services.catalog_service import CatalogNormalizationService
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +20,15 @@ class BoletoPersistenceService:
     def update_boleto_from_data(boleto, data):
         """Actualiza los campos del modelo BoletoImportado con la data normalizada."""
         try:
+            # 🛡️ FIX SEGURIDAD: Si data es un string (JSON), lo parseamos
+            import json
             d = data
+            if isinstance(d, str):
+                try: d = json.loads(d)
+                except: d = {}
+            
+            if not isinstance(d, dict):
+                d = {}
             
             # 1. Identificación básica
             boleto.localizador_pnr = BoletoPersistenceService._truncate(d.get('pnr'), 20)
@@ -56,7 +67,10 @@ class BoletoPersistenceService:
             tax_total = d.get('taxes_amount') or (boleto.iva_monto + boleto.inatur_monto + boleto.otros_impuestos_monto)
             boleto.impuestos_total_calculado = DataNormalizationService.safe_decimal(tax_total)
 
-            # 5. Metadatos
+            # 5. Metadatos y Moneda
+            moneda_code = d.get('total_currency') or d.get('moneda') or 'USD'
+            boleto.moneda = CatalogNormalizationService.normalize_currency(moneda_code)
+            
             boleto.ruta_vuelo = d.get('ItinerarioFinalLimpio')
             boleto.datos_parseados = d
             

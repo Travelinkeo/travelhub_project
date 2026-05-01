@@ -321,7 +321,7 @@
             if (!confirm('¿Seguro que deseas eliminar este registro de importación?')) return;
             
             try {
-                const response = await fetch(`/api/boletos/${id}/delete/`, {
+                const response = await fetch(`/api/boletos/${id}/delete/?physical=true`, {
                     method: 'DELETE',
                     headers: { 'X-CSRFToken': getCookie('csrftoken') }
                 });

@@ -1,8 +1,10 @@
 import logging
 from django.views import View
-from django.shortcuts import render
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from django.utils import timezone
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 from apps.bookings.models import BoletoImportado, Venta, ItemVenta
 from apps.crm.models import Cliente
 
@@ -76,49 +78,105 @@ class ReviewBoletoView(View):
         next_url = request.GET.get('next')
         clientes = Cliente.objects.all().order_by('apellidos', 'nombres')
         
-        # Asegurar que el texto original esté disponible para el panel de "Fuente"
-        source_text = boleto.log_parseo or ""
-        # Si el log parece corto (solo logs de error) o está vacío, intentamos extraer el texto real
-        if len(source_text) < 100 or "Itinerario" not in source_text:
+        # --- LÓGICA DE RE-PARSEO (FORCE) ---
+        force = request.GET.get('force') == '1'
+        if force or not boleto.datos_parseados or (isinstance(boleto.datos_parseados, dict) and not boleto.datos_parseados.get('passenger_name')):
             from core.services.ticket_parser_service import TicketParserService
             servicio = TicketParserService()
-            texto_extraido = servicio._extraer_texto(boleto)
-            if texto_extraido:
-                source_text = texto_extraido
-                # No guardamos en DB para no ensuciar logs permanentes, solo pasamos al contexto
+            # Forzamos ignorar manual y bypass_cache para que corra el motor de nuevo e ignore la caché
+            servicio.procesar_boleto(boleto.pk, ignore_manual=True, bypass_cache=True)
+            boleto.refresh_from_db()
+
+        # Asegurar que el texto original esté disponible para el panel de "Fuente"
+        from core.services.ticket_parser_service import TicketParserService
+        try:
+            source_text = TicketParserService()._extraer_texto(boleto) or boleto.log_parseo or "No se pudo extraer texto del archivo."
+        except:
+            source_text = boleto.log_parseo or "Error al leer el archivo fuente."
         
         # --- FIX DE SEGURIDAD PARA DJANGO TEMPLATES ---
         if boleto.datos_parseados is None:
-            boleto.datos_parseados = SafeDict()
-        elif isinstance(boleto.datos_parseados, dict):
+            boleto.datos_parseados = {}
+        
+        if isinstance(boleto.datos_parseados, dict):
             # 🛡️ PUENTE DE TRADUCCIÓN (Rosetta Stone):
             # Unificamos las llaves del nuevo God Mode con las llaves que espera el HTML
-            datos = boleto.datos_parseados
-            datos['passenger_name'] = datos.get('NOMBRE_DEL_PASAJERO') or datos.get('passenger_name', '')
-            datos['passenger_document'] = datos.get('CODIGO_IDENTIFICACION') or datos.get('passenger_document', '')
-            datos['pnr'] = datos.get('CODIGO_RESERVA') or datos.get('SOLO_CODIGO_RESERVA') or datos.get('pnr', '')
-            datos['ticket_number'] = datos.get('NUMERO_DE_BOLETO') or datos.get('ticket_number', '')
-            datos['aerolinea'] = datos.get('NOMBRE_AEROLINEA') or datos.get('aerolinea', '')
-            datos['fecha_emision'] = datos.get('FECHA_DE_EMISION') or datos.get('fecha_emision', '')
+            # Usamos SafeDict para evitar VariableDoesNotExist en el template
+            datos = SafeDict(boleto.datos_parseados or {})
+            
+            # 🩹 REPARACIÓN AGRESIVA: Si faltan datos clave (PNR o Segmentos)
+            # Intentamos usar el motor de Regex más reciente sobre el texto fuente.
+            if not datos.get('codigo_reserva') and not datos.get('pnr') and not datos.get('CODIGO_RESERVA'):
+                from core.ticket_parser import FastDeterministicParsers
+                latest_regex = FastDeterministicParsers.parse_general_regex(source_text)
+                
+                if latest_regex.get('codigo_reserva'):
+                    datos['codigo_reserva'] = latest_regex['codigo_reserva']
+                    datos['CODIGO_RESERVA'] = latest_regex['codigo_reserva']
+                
+                if latest_regex.get('flights'):
+                    datos['flights'] = latest_regex['flights']
+                    datos['segmentos'] = latest_regex['flights']
+            
+            # Sincronización Bidireccional: Aseguramos que existan tanto las llaves legacy como las nuevas
+            datos['NOMBRE_DEL_PASAJERO'] = datos.get('NOMBRE_DEL_PASAJERO') or datos.get('passenger_name') or datos.get('nombre_pasajero', '')
+            datos['CODIGO_IDENTIFICACION'] = datos.get('CODIGO_IDENTIFICACION') or datos.get('passenger_document') or datos.get('foid', '')
+            datos['CODIGO_RESERVA'] = datos.get('CODIGO_RESERVA') or datos.get('SOLO_CODIGO_RESERVA') or datos.get('pnr', '')
+            datos['NUMERO_DE_BOLETO'] = datos.get('NUMERO_DE_BOLETO') or datos.get('ticket_number') or datos.get('numero_boleto', '')
+            datos['NOMBRE_AEROLINEA'] = datos.get('NOMBRE_AEROLINEA') or datos.get('aerolinea') or datos.get('aerolinea_emisora', '')
+            datos['FECHA_DE_EMISION'] = datos.get('FECHA_DE_EMISION') or datos.get('fecha_emision', '')
+            
+            # Mapeo inverso para consistencia
+            datos['passenger_name'] = datos['NOMBRE_DEL_PASAJERO']
+            datos['passenger_document'] = datos['CODIGO_IDENTIFICACION']
+            datos['pnr'] = datos['CODIGO_RESERVA']
+            datos['ticket_number'] = datos['NUMERO_DE_BOLETO']
+            datos['aerolinea'] = datos['NOMBRE_AEROLINEA']
             
             # Sincronización de itinerarios: IA vs Legacy
-            datos['segments'] = datos.get('segmentos') or datos.get('itinerario') or datos.get('flights')
-            datos['segmentos'] = datos['segments']
-            datos['itinerario'] = datos['segments']
+            itinerary_data = datos.get('segmentos', []) or datos.get('flights', []) or datos.get('itinerario', []) or datos.get('segments', []) or datos.get('vuelos', [])
             
-            boleto.datos_parseados = SafeDict(datos)
+            # Normalización rápida para el UI (Review Master)
+            normalized_segments = []
+            for tramo in itinerary_data:
+                if not isinstance(tramo, dict): continue
+                # Si el tramo viene con estructura anidada (Gemini), lo aplanamos para el template
+                dep = tramo.get('departure', {}) if isinstance(tramo.get('departure'), dict) else {}
+                arr = tramo.get('arrival', {}) if isinstance(tramo.get('arrival'), dict) else {}
+                
+                normalized_segments.append({
+                    'origen': tramo.get('origen') or dep.get('location') or tramo.get('departure_city'),
+                    'destino': tramo.get('destino') or arr.get('location') or tramo.get('arrival_city'),
+                    'vuelo': tramo.get('vuelo') or tramo.get('flightNumber') or tramo.get('numero_vuelo') or tramo.get('flight_number'),
+                    'fecha_salida': tramo.get('fecha_salida') or tramo.get('date') or tramo.get('departure_date') or tramo.get('date'),
+                    'hora_salida': tramo.get('hora_salida') or dep.get('time'),
+                    'hora_llegada': tramo.get('hora_llegada') or arr.get('time'),
+                })
+            
+            # Bubble up Airline PNR from first segment if missing
+            if not datos.get('pnr_aerolinea') or datos.get('pnr_aerolinea') == '---':
+                for seg in normalized_segments:
+                    if seg.get('airline_pnr'):
+                        datos['pnr_aerolinea'] = seg['airline_pnr']
+                        break
+
+            datos['segmentos'] = normalized_segments
+            datos['segments'] = normalized_segments
+            boleto.datos_parseados = datos
         # ----------------------------------------------
             
-        # Extraer segmentos para la iteración dinámica en el template
-        datos = boleto.datos_parseados
-        # Sincronización AI: La IA entrega 'itinerario', el service traduce a 'segmentos'
-        segments = datos.get('flights', []) or datos.get('itinerario', []) or datos.get('segments', []) or datos.get('vuelos', []) or datos.get('segmentos', [])
+        segments = boleto.datos_parseados.get('segmentos', [])
+        
+        agencia = getattr(request, 'agencia', None)
         
         response = render(request, self.template_name, {
-            'boleto': boleto, 
-            'source_text': source_text,
+            'boleto': boleto,
+            'parsed_data': datos,
             'segments': segments,
-            'clientes_disponibles': clientes,
+            'agencia': agencia,
+            'clientes': Cliente.objects.filter(agencia=agencia).order_by('nombres') if agencia else [],
+            'error_ia': datos.get('error_ia'),
+            'source_text': source_text,
             'next_url': next_url,
             'csp_nonce': getattr(request, 'csp_nonce', ''),
         })
@@ -139,6 +197,7 @@ class ReviewBoletoView(View):
             foid = request.POST.get('foid_pasajero')
             cliente_id = request.POST.get('cliente_id')
             pnr = request.POST.get('localizador_pnr')
+            pnr_aerolinea = request.POST.get('pnr_aerolinea')
             ticket_no = request.POST.get('ticket_number')
             fare = request.POST.get('fare_amount', '0')
             taxes = request.POST.get('taxes_amount', '0')
@@ -165,6 +224,8 @@ class ReviewBoletoView(View):
                 'passenger_name': nombre,
                 'passenger_document': foid,
                 'pnr': pnr,
+                'pnr_aerolinea': pnr_aerolinea,
+                'airline_pnr': pnr_aerolinea,
                 'ticket_number': ticket_no,
                 'total_amount': total,
                 'total_currency': total_currency,
@@ -175,6 +236,7 @@ class ReviewBoletoView(View):
                 'NOMBRE_DEL_PASAJERO': nombre,
                 'CODIGO_IDENTIFICACION': foid,
                 'CODIGO_RESERVA': pnr,
+                'CODIGO_RESERVA_AEROLINEA': pnr_aerolinea,
                 'NUMERO_DE_BOLETO': ticket_no,
                 'TARIFA': fare,
                 'IMPUESTOS': taxes,
@@ -194,8 +256,9 @@ class ReviewBoletoView(View):
             from django.urls import reverse
             
             servicio = TicketParserService()
-            # Pasamos el cliente forzado si existe
-            venta = servicio.procesar_boleto(boleto.pk, forced_client_id=cliente_id)
+            # 🛡️ FIX CRÍTICO: Usamos manual_only=True para que NO vuelva a correr la IA 
+            # y respete los montos que el usuario acaba de escribir.
+            venta = servicio.procesar_boleto(boleto.pk, forced_client_id=cliente_id, manual_only=True)
             
             # Refrescar para verificar éxito
             boleto.refresh_from_db()
@@ -219,3 +282,54 @@ class ReviewBoletoView(View):
             import traceback
             logger.error(f"Error en ReviewBoletoView: {e}\n{traceback.format_exc()}")
             return HttpResponse(f'<div class="bg-red-900/50 p-4 rounded-xl border border-red-500/30 text-white font-bold">Error crítico: {str(e)}</div>', status=200)
+
+class DesasociarVentaView(View):
+    """
+    Desasocia un boleto de su venta actual para permitir un re-parseo limpio.
+    """
+    def post(self, request, pk):
+        boleto = get_object_or_404(BoletoImportado, pk=pk)
+        
+        if boleto.venta_asociada:
+            venta = boleto.venta_asociada
+            # 1. Desvincular
+            boleto.venta_asociada = None
+            # 2. Resetear estado para permitir re-proceso
+            boleto.estado_parseo = 'PEN'
+            boleto.save()
+            
+            # 3. Informar
+            messages.info(request, f"Boleto desasociado de la venta {venta.localizador}. El boleto está listo para re-procesarse.")
+        
+        return redirect('core:revisar_boleto', pk=pk)
+
+@login_required
+def eliminar_boleto(request, pk):
+    """🗑️ Eliminación física de un boleto y sus archivos."""
+    
+    # Obtener el boleto con all_objects para asegurar que lo encontramos
+    boleto = get_object_or_404(BoletoImportado.all_objects, pk=pk)
+    
+    # Seguridad: Solo la misma agencia
+    if not request.user.is_superuser and hasattr(request, 'agencia'):
+        if boleto.agencia != request.agencia:
+            messages.error(request, "No tiene permisos para eliminar este boleto.")
+            return redirect('core:boletos_importar')
+
+    try:
+        # Borrar archivos físicos
+        if boleto.archivo_boleto:
+            boleto.archivo_boleto.delete(save=False)
+        if boleto.archivo_pdf_generado:
+            try:
+                boleto.archivo_pdf_generado.delete(save=False)
+            except: pass
+        
+        # Borrar registro físico
+        boleto.delete(force=True)
+        
+        messages.success(request, "Boleto eliminado físicamente con éxito.")
+    except Exception as e:
+        messages.error(request, f"Error al eliminar: {str(e)}")
+        
+    return redirect(request.GET.get('next') or 'core:boletos_importar')

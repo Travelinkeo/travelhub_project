@@ -55,9 +55,12 @@ def contabilizar_gasto_operativo(sender, instance, created, **kwargs):
     try:
         cuenta_haber = _get_cuenta_banco_caja(instance.metodo_pago, instance.moneda)
         if not cuenta_haber:
-            logger.warning(f"No se encontró cuenta contable para pago {instance.metodo_pago} en {instance.moneda}")
-            # Podríamos lanzar error, pero mejor dejar el asiento descuadrado o pendiente?
-            # Por ahora retornamos
+            error_msg = f"❌ Error Contable: No se configuró cuenta para {instance.metodo_pago} en {instance.moneda}"
+            logger.error(error_msg)
+            instance.estado_contable = 'ERR'
+            instance.error_contable_msg = error_msg
+            instance._skip_signal = True
+            instance.save(update_fields=['estado_contable', 'error_contable_msg'])
             return
 
         # Crear o Recuperar Asiento
@@ -107,6 +110,12 @@ def contabilizar_gasto_operativo(sender, instance, created, **kwargs):
         
         # Calcular totales
         asiento.calcular_totales()
+        
+        # Marcar éxito (Audit Point 3)
+        instance.estado_contable = 'PRO'
+        instance.error_contable_msg = None
+        instance._skip_signal = True
+        instance.save(update_fields=['estado_contable', 'error_contable_msg'])
         
     except Exception as e:
         logger.error(f"Error contabilizando Gasto #{instance.pk}: {e}")

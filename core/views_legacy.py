@@ -649,9 +649,12 @@ class BoletoManualEntryView(TemplateView):
 
             messages.warning(request, "Intentando generar PDF...")
             try:
-                pdf_bytes, pdf_filename = ticket_parser.generate_ticket(boleto.datos_parseados)
-                boleto.archivo_pdf_generado.save(pdf_filename, ContentFile(pdf_bytes), save=True)
-                messages.success(request, f"PDF '{pdf_filename}' generado y guardado exitosamente.")
+                # Pasar la instancia para asegurar que el PDF se guarde en el campo correcto
+                pdf_bytes, pdf_filename = ticket_parser.generate_ticket(boleto.datos_parseados, boleto_obj=boleto)
+                if pdf_bytes:
+                    messages.success(request, f"✨ PDF '{pdf_filename}' generado y guardado exitosamente.")
+                else:
+                    messages.warning(request, "El boleto fue guardado, pero falló la generación del PDF (verifique Gotenberg).")
             except Exception as e:
                 messages.error(request, f"El boleto fue guardado, pero no se pudo generar el PDF: {e}")
             

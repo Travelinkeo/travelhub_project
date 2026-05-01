@@ -140,7 +140,24 @@ class VentaAdmin(SaaSAdminMixin, admin.ModelAdmin):
         FeeVentaInline, PagoVentaInline, MigrationCheckInline
     ]
     readonly_fields = ('total_venta', 'saldo_pendiente', 'boleto_importado_link', 'margen_estimado')
-    actions = ['generar_links_de_pago', 'asignar_cliente_y_facturar', 'generar_liquidaciones_proveedor', 'generar_voucher_unificado', 'generar_doble_facturacion', validate_migration_requirements_action]
+    actions = ['generar_links_de_pago', 'asignar_cliente_y_facturar', 'generar_liquidaciones_proveedor', 'generar_voucher_unificado', 'generar_doble_facturacion', 'hard_delete_ventas', validate_migration_requirements_action]
+
+    @admin.action(description="🔥 ELIMINACIÓN FÍSICA (Irreversible)")
+    def hard_delete_ventas(self, request, queryset):
+        count = queryset.count()
+        # Usamos delete() sobre el queryset de all_objects si es safedelete, 
+        # o simplemente delete() si ya es el manager por defecto
+        if hasattr(queryset, 'all_objects'):
+            queryset.all_objects().delete()
+        else:
+            queryset.delete()
+        self.message_user(request, f"Se han eliminado físicamente {count} ventas.")
+
+    def has_add_permission(self, request):
+        return True
+
+    def has_delete_permission(self, request, obj=None):
+        return True
 
     @admin.action(description="✨ Generar Link de Pago B2C para Ventas seleccionadas")
     def generar_links_de_pago(self, request, queryset):
@@ -274,7 +291,38 @@ class BoletoImportadoAdmin(SaaSAdminMixin, admin.ModelAdmin):
     list_filter = ('estado_parseo', 'formato_detectado', 'fecha_subida')
     readonly_fields = ('fecha_subida', 'formato_detectado', 'datos_parseados', 'estado_parseo', 'log_parseo', 'pdf_generado_link')
     autocomplete_fields = ['venta_asociada']
-    actions = ['reprocesar_boletos']
+    actions = ['reprocesar_boletos', 'hard_delete_boletos']
+    
+    def changelist_view(self, request, extra_context=None):
+        extra_context = extra_context or {}
+        # Enlace al dashboard de subida
+        extra_context['show_upload_button'] = True
+        return super().changelist_view(request, extra_context=extra_context)
+
+    @admin.action(description="🔥 ELIMINACIÓN FÍSICA (Irreversible)")
+    def hard_delete_boletos(self, request, queryset):
+        count = queryset.count()
+        for obj in queryset:
+            # Borrar archivo físico también
+            if obj.archivo_boleto:
+                try:
+                    obj.archivo_boleto.delete(save=False)
+                except Exception: pass
+            if obj.archivo_pdf_generado:
+                try:
+                    obj.archivo_pdf_generado.delete(save=False)
+                except Exception: pass
+            
+            # Forzar eliminación física (bypass soft delete)
+            if hasattr(obj, 'delete') and 'force_policy' in str(obj.delete):
+                obj.delete(force_policy=True)
+            else:
+                obj.delete()
+        
+        self.message_user(request, f"Se han eliminado físicamente {count} boletos y sus archivos.")
+
+    def has_add_permission(self, request):
+        return True # Asegurar que siempre pueda agregar boletos manualmente
 
     @admin.action(description="🔄 Reprocesar Boletos Seleccionados")
     def reprocesar_boletos(self, request, queryset):
@@ -311,40 +359,39 @@ class BoletoImportadoAdmin(SaaSAdminMixin, admin.ModelAdmin):
         super().save_model(request, obj, form, change)
         if change:
             try:
+                # 🧠 Lógica de Regeneración de PDF ante cambios manuales en el Admin
+                # Si el usuario editó campos en el Admin, queremos que el PDF los refleje.
                 data = obj.datos_parseados.copy() if (obj.datos_parseados and isinstance(obj.datos_parseados, dict)) else {}
                 
-                if obj.nombre_pasajero_completo: data['NOMBRE_DEL_PASAJERO'] = obj.nombre_pasajero_completo
-                if obj.fecha_emision_boleto: data['FECHA_DE_EMISION'] = obj.fecha_emision_boleto.strftime("%d%b%y").upper()
-                if obj.numero_boleto: data['NUMERO_DE_BOLETO'] = obj.numero_boleto
-                if obj.aerolinea_emisora: data['NOMBRE_AEROLINEA'] = obj.aerolinea_emisora
-                if obj.foid_pasajero: data['CODIGO_IDENTIFICACION'] = obj.foid_pasajero
-                if obj.agente_emisor: data['AGENTE_EMISOR'] = obj.agente_emisor
-                if obj.localizador_pnr: 
-                    data['CODIGO_RESERVA'] = obj.localizador_pnr
-                    data['SOLO_CODIGO_RESERVA'] = obj.localizador_pnr
-                if obj.tarifa_base is not None: data['TARIFA'] = str(obj.tarifa_base)
-                if obj.impuestos_total_calculado is not None: data['IMPUESTOS'] = str(obj.impuestos_total_calculado)
-                if obj.total_boleto is not None: data['TOTAL'] = str(obj.total_boleto)
-                if obj.direccion_aerolinea: data['DIRECCION_AEROLINEA'] = obj.direccion_aerolinea
-                if obj.ruta_vuelo: data['ItinerarioFinalLimpio'] = obj.ruta_vuelo
+                # Inyectamos la instancia para que el generador sepa dónde guardar y use los datos del objeto
+                data['_boleto_instance'] = obj
+                
+                # Sincronizamos campos clave del objeto al diccionario de datos para la plantilla
+                data['nombre_pasajero'] = obj.nombre_pasajero_procesado
+                data['passenger_name'] = obj.nombre_pasajero_procesado
+                data['numero_boleto'] = obj.numero_boleto
+                data['ticket_number'] = obj.numero_boleto
+                data['pnr'] = obj.localizador_pnr
+                data['codigo_reserva'] = obj.localizador_pnr
+                data['fecha_emision'] = obj.fecha_emision_boleto
+                data['aerolinea_emisora'] = obj.aerolinea_emisora
+                data['foid'] = obj.foid_pasajero
+                data['passenger_document'] = obj.foid_pasajero
+                data['total_boleto'] = obj.total_boleto
                 
                 from core.ticket_parser import generate_ticket
-                from django.core.files.base import ContentFile
                 from django.contrib import messages
-                import logging
                 
-                pdf_bytes, filename = generate_ticket(data)
+                # Llamamos al generador unificado (ahora devuelve (bytes, filename) y persiste internamente)
+                pdf_bytes, filename = generate_ticket(data, agencia_obj=obj.agencia)
                 
                 if pdf_bytes:
-                    if obj.archivo_pdf_generado:
-                        obj.archivo_pdf_generado.delete(save=False)
-                    obj.archivo_pdf_generado.save(filename, ContentFile(pdf_bytes), save=False)
-                    obj.datos_parseados = data
-                    obj.save(update_fields=['archivo_pdf_generado', 'datos_parseados'])
-                    messages.success(request, f"PDF regenerado exitosamente para el boleto {obj.numero_boleto or obj.pk}.")
+                    messages.success(request, f"✨ PDF regenerado exitosamente para el boleto {obj.numero_boleto or obj.pk}.")
+                else:
+                    messages.warning(request, "Se guardaron los cambios, pero falló la regeneración del PDF (verifique Gotenberg).")
+
             except Exception as e:
-                import logging
-                logging.error(f"Error regenerando PDF desde Admin para Boleto {obj.pk}: {e}")
+                logger.error(f"Error regenerando PDF desde Admin para Boleto {obj.pk}: {e}", exc_info=True)
                 from django.contrib import messages
                 messages.warning(request, f"Se actualizaron los datos, pero falló la regeneración del PDF: {e}")
 

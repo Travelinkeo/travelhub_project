@@ -27,6 +27,7 @@ class Pais(models.Model):
 class Ciudad(models.Model):
     id_ciudad = models.AutoField(primary_key=True, verbose_name=_("ID Ciudad"))
     nombre = models.CharField(_("Nombre de la Ciudad"), max_length=100, validators=[validar_no_vacio_o_espacios])
+    codigo_iata = models.CharField(_("Código IATA"), max_length=3, blank=True, null=True, db_index=True, help_text=_("Código IATA de 3 letras de la ciudad o aeropuerto."))
     pais = models.ForeignKey(Pais, on_delete=models.PROTECT, verbose_name=_("País"), null=True, blank=True)
     region_estado = models.CharField(_("Región/Estado"), max_length=100, blank=True, null=True)
     class Meta:

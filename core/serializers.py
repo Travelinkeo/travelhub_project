@@ -164,13 +164,14 @@ class BoletoImportadoSerializer(serializers.ModelSerializer):
                          logger = logging.getLogger(__name__)
                          logger.debug(f"Error al obtener agencia por defecto: {e}")
                 
-                pdf_bytes, pdf_filename = ticket_parser.generate_ticket(instance.datos_parseados, agencia_obj=agencia_obj)
-                if pdf_bytes:
-                    instance.archivo_pdf_generado.save(pdf_filename, ContentFile(pdf_bytes), save=True)
+                # Pasar la instancia para que el service guarde el PDF directamente
+                pdf_bytes, pdf_filename = ticket_parser.generate_ticket(instance.datos_parseados, agencia_obj=agencia_obj, boleto_obj=instance)
+                if not pdf_bytes:
+                    logger.warning(f"No se pudo generar PDF para boleto manual {instance.id_boleto_importado}")
             except Exception as e:
                 import logging
                 logger = logging.getLogger(__name__)
-                logger.warning(f"No se pudo generar PDF para boleto manual {instance.id_boleto_importado}: {e}")
+                logger.warning(f"Error crítico generando PDF para boleto manual {instance.id_boleto_importado}: {e}")
         
         return instance
 

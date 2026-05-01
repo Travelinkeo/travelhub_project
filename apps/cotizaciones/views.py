@@ -17,6 +17,11 @@ import json
 import logging
 import time
 import re
+import requests
+try:
+    from apps.contabilidad.models import TasaCambioBCV
+except ImportError:
+    TasaCambioBCV = None
 
 
 # Regex para identificar aerolíneas en texto crudo de GDS
@@ -262,14 +267,7 @@ class MagicQuoterAIView(LoginRequiredMixin, View):
             from core.airline_utils import get_airline_name_by_code
 
             # Pre-extraer todos los códigos de vuelo del texto GDS.
-            # PATRÓN: ancla al número de línea de segmento y maneja 3 formatos:
-            #   - "1  QL2934H" (sin separador)
-            #   - "1  QL 2934" (con espacio)
-            #   - "1  QL/2934H" (con slash, común en KIU/Laser)
-            # IMPORTANTE: NO deduplicar → ['QL','QL'] para round-trip en misma aerolínea.
-            gds_flight_codes = re_airlines.findall(
-                r'(?m)^\s*\d+\s+([A-Z0-9]{2})[/\s]*\d', raw_text
-            )
+            gds_flight_codes = re_airlines.findall(raw_text)
             # gds_flight_codes[0] → aerolínea del segmento 1
             # gds_flight_codes[1] → aerolínea del segmento 2, etc.
 
@@ -323,10 +321,11 @@ class MagicQuoterAIView(LoginRequiredMixin, View):
                 image_url = ""
                 clean_flights.append(f_clean)
 
-            # Cálculo Final con el Fee
+            # Cálculo Final con el Fee (Unificado para JSON y POST)
             try:
-                actual_fee = float(request.POST.get('agency_fee', 50))
-            except:
+                # Ya extrajimos agency_fee al inicio del método
+                actual_fee = float(agency_fee)
+            except (ValueError, TypeError):
                 actual_fee = 50
                 
             final_total = round(float(base_price) + actual_fee, 2)
@@ -449,11 +448,24 @@ class MagicQuoterSaveView(LoginRequiredMixin, View):
                 reverse('cotizaciones:public_quote', kwargs={'quote_uuid': str(cotizacion.uuid)})
             )
 
+            # Link de aprobación automática (Pre-rellena un mensaje de vuelta para el cliente)
+            # El cliente al darle clic, te enviará a TI (o al que le envió el link) un mensaje de aprobación.
+            approval_text = f"✅ ¡Hola! Apruebo la cotización para {cotizacion.destino}. Por favor, procede con la reserva. (Ref: {cotizacion.numero_cotizacion})"
+            approval_link = f"https://wa.me/?text={approval_text.replace(' ', '%20')}"
+
+            whatsapp_msg = (
+                f"PROPUESTA DE VIAJE: {cotizacion.destino.upper()}\n\n"
+                f"Hola! Te envio el itinerario personalizado que preparamos para ti.\n\n"
+                f"Puedes ver el detalle, fotos y precios aqui:\n"
+                f"{public_url}\n\n"
+                f"Quedo atento a tus comentarios!"
+            )
+
             return JsonResponse({
                 'success': True,
                 'uuid': str(cotizacion.uuid),
                 'public_url': public_url,
-                'whatsapp_msg': f"¡Hola! Te envío el itinerario para {cotizacion.destino}. Puedes verlo aquí: {public_url}"
+                'whatsapp_msg': whatsapp_msg
             })
 
         except Exception as e:

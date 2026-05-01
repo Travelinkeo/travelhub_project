@@ -59,3 +59,24 @@ class SaaSAdminMixin:
             if hasattr(related_model, 'agencia'):
                 kwargs["queryset"] = related_model.objects.filter(agencia=request.agencia)
         return super().formfield_for_manytomany(db_field, request, **kwargs)
+    def has_view_permission(self, request, obj=None):
+        return True # El queryset ya filtra
+
+    def has_add_permission(self, request):
+        if request.user.is_superuser: return True
+        return hasattr(request, 'agencia') and request.agencia is not None
+
+    def has_change_permission(self, request, obj=None):
+        if request.user.is_superuser: return True
+        if obj is None: return hasattr(request, 'agencia') and request.agencia is not None
+        # Verificar que el objeto pertenezca a la agencia
+        if hasattr(obj, self.saas_agency_field):
+            return getattr(obj, self.saas_agency_field) == request.agencia
+        return True
+
+    def has_delete_permission(self, request, obj=None):
+        if request.user.is_superuser: return True
+        if obj is None: return hasattr(request, 'agencia') and request.agencia is not None
+        if hasattr(obj, self.saas_agency_field):
+            return getattr(obj, self.saas_agency_field) == request.agencia
+        return True

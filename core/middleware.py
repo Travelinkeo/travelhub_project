@@ -57,10 +57,11 @@ class ThreadLocalContextMiddleware:
                     if ua_obj:
                         agency = ua_obj.agencia
                     
-                    # 2. Fallback Directo a Travelinkeo (ID 1) - Requerimiento de consistencia Fase 12.0
+                    # 2. NO FALLBACK (Seguridad SaaS): Si no hay agencia, no hay acceso.
                     if not agency:
-                        from core.models.agencia import Agencia
-                        agency = Agencia.objects.filter(pk=1).first()
+                        logger.warning(f"⚠️ Usuario {user.username} sin agencia vinculada detectado.")
+                        # Retornamos None para que el Manager devuelva .none()
+                        agency = None
                     
                     # 3. Fallback de emergencia para superusers/otros
                     if not agency and user.is_superuser:

@@ -32,6 +32,24 @@ class TarifarioProveedor(models.Model):
     def __str__(self):
         return f"{self.proveedor.nombre} - {self.nombre}"
 
+class ComisionOverrideAerolinea(models.Model):
+    """
+    Overrides de comisión para aerolíneas específicas dentro de un tarifario.
+    Ej: Tarifario BT Travel (General 1%) -> Override Avianca (3%).
+    """
+    tarifario = models.ForeignKey(TarifarioProveedor, on_delete=models.CASCADE, related_name='overrides_aerolinea')
+    aerolinea = models.ForeignKey('core.Aerolinea', on_delete=models.CASCADE, verbose_name=_("Aerolínea"))
+    comision_porcentaje = models.DecimalField(max_digits=5, decimal_places=2, verbose_name=_("Comisión Especial %"))
+    notas = models.TextField(blank=True, verbose_name=_("Notas Internas"))
+
+    class Meta:
+        verbose_name = _("Comisión Especial por Aerolínea")
+        verbose_name_plural = _("Comisiones Especiales (Overrides)")
+        unique_together = ('tarifario', 'aerolinea')
+
+    def __str__(self):
+        return f"{self.aerolinea.nombre}: {self.comision_porcentaje}%"
+
 
 class HotelTarifario(models.Model):
     """Hotel extraido de un tarifario (o cargado manualmente)"""

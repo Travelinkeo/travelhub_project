@@ -25,19 +25,23 @@ Tu tarea es analizar textos crudos o HTML de recibos de vuelos y extraer la info
 
 REGLAS ESTRICTAS DE EXTRACCIÓN ("GOD MODE"):
 1. PNR Y IATA: Extrae el localizador de 6 caracteres en `codigo_reserva`. Si el sistema es Sabre o Amadeus, busca y extrae estrictamente el número IATA de 8 dígitos y el Agente Emisor.
-2. FORMATO SABRE DE PASAJEROS: Si encuentras el formato APELLIDO/NOMBRE [DOCUMENTO] (ej. MARTINEZ/JOAN [200687]), invierte el orden a "Nombre Apellido", guárdalo en `solo_nombre_pasajero` (primer nombre) y el nombre completo en `nombre_pasajero`. Extrae el número entre corchetes para `codigo_identificacion`.
-3. FINANZAS OCULTAS: Muchos boletos (especialmente Sabre) ocultan las tarifas. Si el texto NO muestra explícitamente "Tarifa", "Impuestos" o "Total", coloca 0.0 en los campos financieros. ¡NO INVENTES PRECIOS!
-4. LOCALIZADOR DE AEROLÍNEA: En sistemas GDS, busca la frase "Código de reservación de la aerolínea XXXXXX" bajo cada vuelo y asígnalo a `codigo_reserva_aerolinea` del boleto o `localizador_aerolinea` del tramo.
-5. PRORRATEO: Si el texto agrupa el cobro de varios pasajeros (ej. "Cant. viajeros 2" con un total de VES 100), DEBES crear boletos separados en la lista `boletos` y dividir el monto matemáticamente (50 y 50).
-6. FORMATOS DE FECHA: Convierte formatos como "12 abr 26" o "26 de marzo" al formato ISO "YYYY-MM-DD" o el formato GDS DDMMMAA (ej: 14MAR26) según pida el campo.
-7. VENEZOLANAS (ESTELAR/AVIOR/LASER): En correos de Estelar, el destino aparece usualmente después de "A:" o "-". Busque la línea de vuelo detallada. Origen es "DE:" o antes del guión. Si el monto dice "Bs", la moneda es "VES".
-8. ITINERARIO: Extrae CADA tramo de vuelo. Incluye aerolinea, numero_vuelo, origen, destino, fechas y horas. Si un tramo aparece duplicado, extráelo UNA SOLA VEZ.
-9. CIUDADES COMPLETAS: Usa SIEMPRE el nombre completo de la ciudad (Ej. "BOGOTA", "MADRID"). PROHIBIDO usar códigos IATA de 3 letras (BOG, MAD) en origen/destino. Limita nombres a max 20 caracteres para evitar ruidos de aeropuertos.
+2. IDENTIFICACIÓN DEL PASAJERO (CRÍTICO): Busca agresivamente documentos de identidad. 
+   - Busca el campo "FOID" (Form of Identification) y extrae el número (ej: "IDPP123456" -> "123456").
+   - Busca formatos APELLIDO/NOMBRE [DOCUMENTO] (ej. MARTINEZ/JOAN [200687]).
+   - Busca menciones a "PASSPORT", "DNI", "CÉDULA", "RIF" o "ID NUMBER".
+   - Todo esto DEBE ir en `codigo_identificacion`. Es vital para el matching de clientes en el CRM.
+3. FORMATO GDS DE PASAJEROS: El NOMBRE (lo que va DESPUÉS del '/') debe ir en `solo_nombre_pasajero`. El APELLIDO (lo que va ANTES del '/') debe ir en `apellido_pasajero`. El nombre completo en `nombre_pasajero` debe ser "NOMBRE APELLIDO".
+4. FINANZAS OCULTAS: Muchos boletos (especialmente Sabre) ocultan las tarifas. Si el texto NO muestra explícitamente "Tarifa", "Impuestos" o "Total", coloca 0.0 en los campos financieros. ¡NO INVENTES PRECIOS!
+5. LOCALIZADOR DE AEROLÍNEA: En sistemas GDS, busca la frase "Código de reservación de la aerolínea" o "AIRLINE RESERVATION CODE" y extrae el código de 6 caracteres que aparece INMEDIATAMENTE DESPUÉS. Asígnalo a `codigo_reserva_aerolinea` del boleto o `localizador_aerolinea` del tramo.
+6. PRORRATEO: Si el texto agrupa el cobro de varios pasajeros (ej. "Cant. viajeros 2" con un total de VES 100), DEBES crear boletos separados en la lista `boletos` y dividir el monto matemáticamente (50 y 50).
+7. FORMATOS DE FECHA Y HORA: Convierte fechas al formato ISO "YYYY-MM-DD" o GDS DDMMMAA. Las HORAS deben ser estrictamente en formato 24 HORAS (HH:mm), por ejemplo: "05:21 PM" debe ser "17:21".
+8. CIUDADES COMPLETAS E IATA: Extrae el nombre completo de la ciudad (Ej. "BOGOTA", "MADRID") para `origen`/`destino` Y el código IATA de 3 letras (Ej. "BOG", "MAD") para `codigo_iata_origen`/`codigo_iata_destino`. Esta duplicidad asegura la integridad en el sistema.
+9. ITINERARIO: Extrae CADA tramo de vuelo. Incluye aerolinea, numero_vuelo, origen, destino, fechas y horas. Si un tramo aparece duplicado, extráelo UNA SOLA VEZ.
 10. CARACTERES PROHIBIDOS: ESTÁ ESTRICTAMENTE PROHIBIDO el uso de tabulaciones (\\t) o saltos de línea (\\n) dentro de los valores de texto. Devuelve JSON limpio, minificado y sin espacios repetidos.
 
 EJEMPLO DE ENTRENAMIENTO (SABRE):
-Entrada: Preparado para MARTINEZ GONZALEZ/JOAN MANUEL [200687777], CÓDIGO DE RESERVACIÓN UQMQGK...
-Salida: {"boletos": [{"codigo_reserva": "UQMQGK", "numero_boleto": "9967424825226", "nombre_pasajero": "MARTINEZ GONZALEZ/JOAN MANUEL", "solo_nombre_pasajero": "JOAN MANUEL", "codigo_identificacion": "200687777", "tarifa": 0.0, "impuestos": 0.0, "total": 0.0, "moneda": "USD", "nombre_aerolinea": "AIR EUROPA", "itinerario": [{"aerolinea": "AIR EUROPA", "numero_vuelo": "UX72", "origen": "CARACAS", "destino": "MADRID", "fecha_salida": "12APR26", "hora_salida": "12:10", "hora_llegada": "21:40", "clase": "TURISTA", "localizador_aerolinea": "ANPHTO"}]}]}
+Entrada: Preparado para QUINTERO RAMIREZ/JHONY ALBERTO [200687777], FOID: IDPP123456789. 1 UX 072 Y 12APR 7 CCSMAD HK1 1210 2140.
+Salida: {"boletos": [{"codigo_reserva": "UQMQGK", "numero_boleto": "9967424825226", "nombre_pasajero": "JHONY ALBERTO QUINTERO RAMIREZ", "solo_nombre_pasajero": "JHONY ALBERTO", "codigo_identificacion": "123456789", "tarifa": 0.0, "impuestos": 0.0, "total": 0.0, "moneda": "USD", "nombre_aerolinea": "AIR EUROPA", "codigo_reserva_aerolinea": "ANPHTO", "itinerario": [{"aerolinea": "AIR EUROPA", "numero_vuelo": "UX72", "origen": "CARACAS", "codigo_iata_origen": "CCS", "destino": "MADRID", "codigo_iata_destino": "MAD", "fecha_salida": "12APR26", "hora_salida": "12:10", "hora_llegada": "21:40", "clase": "TURISTA", "localizador_aerolinea": "ANPHTO"}]}]}
 
 PROHIBIDO: Devolver JSON incompleto o inventar datos financieros si no son explícitos.
 """
@@ -52,12 +56,14 @@ class UniversalAIParser:
     def __init__(self):
         self.engine = ai_engine
 
-    def parse(self, text: str, pdf_path: Optional[str] = None) -> Dict[str, Any]:
+    def parse(self, text: str, pdf_path: Optional[str] = None, bypass_cache: bool = False) -> Dict[str, Any]:
         """
         ⚡ ASÍNCRONO-READY | 🧠 IA
         Iterador principal de extracción. Analiza el payload y lo envía seguro a Gemini.
         """
         try:
+            from django.core.cache import cache
+            
             # Protección contra textos vacíos
             if not text:
                 text = ""
@@ -82,7 +88,16 @@ class UniversalAIParser:
             prompt_hash = hashlib.md5(SYSTEM_PROMPT.encode('utf-8')).hexdigest()
             cache_key = f"ai_parse_{text_hash}_{prompt_hash}"
             
-            logger.info(f"🔍 Procesando documento purificado (Hash: {text_hash})")
+            if not bypass_cache:
+                try:
+                    cached_res = cache.get(cache_key)
+                    if cached_res:
+                        logger.info(f"💾 IA CACHE HIT: Usando resultado guardado para hash {text_hash}")
+                        return cached_res
+                except:
+                    logger.warning("⚠️ Error accediendo al cache en UniversalAIParser. Continuando sin cache.")
+            
+            logger.info(f"🔍 Procesando documento purificado (Hash: {text_hash}) (Bypass Cache: {bypass_cache})")
 
             content_list = []
             
@@ -140,7 +155,7 @@ class UniversalAIParser:
             if not boletos_data:
                 return {"error": "No se encontraron boletos en el documento tras re-intento."}
 
-            # Mapear al formato interno
+            # 🗺️ MAPEAMIENTO AL FORMATO INTERNO (RESTAURADO)
             internal_tickets = [self._map_to_internal_format(b) for b in boletos_data]
 
             # --- 4. FALLBACK REGEX PARA NOMBRE (Fix Truncation) ---
@@ -170,59 +185,61 @@ class UniversalAIParser:
                     "tickets": internal_tickets
                 }
             
-            return internal_tickets[0]
+            final_result = internal_tickets[0]
+            
+            # --- GUARDAR EN CACHÉ ---
+            try:
+                cache.set(cache_key, final_result, timeout=604800) # 1 semana de vida
+            except: pass
+            
+            return final_result
             
         except Exception as top_level_e:
             logger.error(f"🔥 Error Crítico en UniversalAIParser.parse: {str(top_level_e)}")
             logger.error(traceback.format_exc())
             return {"error": f"Error interno en UniversalAIParser: {str(top_level_e)}"}
 
-    def _map_to_internal_format(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    def _map_to_internal_format(self, b: Any) -> Dict[str, Any]:
         """
-        Transforma el esquema jerárquico JSON/Pydantic devuelto con éxito por Gemini al 
-        diccionario plano históricamente acoplado en todo el núcleo de parseadores de TravelHub.
+        🗺️ MAPEO HACIA LEGACY (CORE COMPATIBILITY)
+        Convierte el objeto Pydantic/Dict limpio de la IA al formato de llaves en 
+        mayúsculas que espera el VentaAutomationService y el resto del core.
         """
-        raw_copy = data.copy()
-        pnr = str(data.get("codigo_reserva", "")).upper()
-        if pnr.startswith("C1/"): pnr = pnr[3:]
-        pnr = pnr or None
-
-        source_sys = str(data.get('source_system', 'UNKNOWN')).upper()
-
-        def none_if_empty(val):
-            if val is None:
-                return None
-            s = str(val).strip()
-            if s.lower() in ('no encontrado', 'not found', 'n/a', '', 'none', 'null'):
-                return None
-            return s
-
-        # Mapeo Base
-        res = {
-            "SOURCE_SYSTEM": source_sys,
-            "NUMERO_DE_BOLETO": none_if_empty(data.get("numero_boleto")),
-            "FECHA_DE_EMISION": none_if_empty(data.get("fecha_emision")),
-            "AGENTE_EMISOR": none_if_empty(data.get("agente_emisor")) or none_if_empty(data.get("numero_iata")),
-            "NUMERO_IATA": none_if_empty(data.get("numero_iata")),
-            "NOMBRE_DEL_PASAJERO": str(data.get("nombre_pasajero") or "").upper() or None,
-            "SOLO_NOMBRE_PASAJERO": str(data.get("solo_nombre_pasajero", "")).upper() or None,
-            "CODIGO_IDENTIFICACION": none_if_empty(data.get("codigo_identificacion")),
-            "CODIGO_RESERVA": pnr,
-            "SOLO_CODIGO_RESERVA": pnr,
-            "CODIGO_RESERVA_AEROLINEA": none_if_empty(data.get("codigo_reserva_aerolinea")),
-            "NOMBRE_AEROLINEA": str(data.get("nombre_aerolinea") or "").upper() or None,
-            "TARIFA": f"{data.get('tarifa', 0.0):.2f}",
-            "IMPUESTOS": f"{data.get('impuestos', 0.0):.2f}",
-            "TOTAL": f"{data.get('total', 0.0):.2f}",
-            "TOTAL_MONEDA": str(data.get("moneda", "USD")).upper(),
-            "vuelos": data.get("itinerario", []),
-            "es_remision": data.get("es_remision", False),
-            "confidence_score": data.get("confidence_score", 1.0),
-            "notas_advertencia": data.get("notas_advertencia")
-        }
+        data = b if isinstance(b, dict) else b.dict()
         
-        raw_copy.update(res)
-        return raw_copy
+        # Mapeo de segmentos
+        itinerario_mapeado = []
+        for s in data.get('itinerario', []):
+            itinerario_mapeado.append({
+                'aerolinea': s.get('aerolinea'),
+                'numero_vuelo': s.get('numero_vuelo'),
+                'origen': s.get('origen'),
+                'codigo_iata_origen': s.get('codigo_iata_origen'), # <--- NUEVO
+                'destino': s.get('destino'),
+                'codigo_iata_destino': s.get('codigo_iata_destino'), # <--- NUEVO
+                'fecha_salida': s.get('fecha_salida'),
+                'hora_salida': s.get('hora_salida'),
+                'fecha_llegada': s.get('fecha_llegada'),
+                'hora_llegada': s.get('hora_llegada'),
+                'clase': s.get('clase') or s.get('cabina'),
+                'localizador_aerolinea': s.get('localizador_aerolinea')
+            })
+
+        return {
+            "NOMBRE_DEL_PASAJERO": data.get("nombre_pasajero"),
+            "SOLO_NOMBRE_PASAJERO": data.get("solo_nombre_pasajero"),
+            "CODIGO_IDENTIFICACION": data.get("codigo_identificacion"),
+            "NUMERO_DE_BOLETO": data.get("numero_boleto"),
+            "FECHA_DE_EMISION": data.get("fecha_emision"),
+            "CODIGO_RESERVA": data.get("codigo_reserva"),
+            "CODIGO_RESERVA_AEROLINEA": data.get("codigo_reserva_aerolinea"),
+            "NOMBRE_AEROLINEA": data.get("nombre_aerolinea"),
+            "TARIFA_IMPORTE": data.get("tarifa"),
+            "TOTAL_IMPORTE": data.get("total"),
+            "TOTAL_MONEDA": data.get("moneda"),
+            "itinerario": itinerario_mapeado,
+            "raw_data": data # Preservar para depuración
+        }
 
 def _apply_universal_schema_filter(data: Dict[str, Any]) -> Dict[str, Any]:
     """

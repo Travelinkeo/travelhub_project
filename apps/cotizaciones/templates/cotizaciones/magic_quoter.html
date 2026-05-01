@@ -1,340 +1,210 @@
 {% extends "base_modern.html" %}
 {% load static %}
 
-{% block title %}Cotizador Mágico IA — TravelHub{% endblock %}
+{% block title %}Magic Quoter AI — TravelHub{% endblock %}
 
 {% block extra_head %}
-    <style nonce="{{ request.csp_nonce }}">
-        .glass-panel { background: rgba(var(--surface-1-rgb), 0.6); backdrop-filter: blur(12px); border: 1px solid var(--border-color); }
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 10px; }
-        
-        @keyframes scan {
-            0% { top: 0; opacity: 0; }
-            10% { opacity: 1; }
-            90% { opacity: 1; }
-            100% { top: 100%; opacity: 0; }
-        }
-        .scanner-line {
-            position: absolute; left: 0; right: 0; height: 2px;
-            background: linear-gradient(to right, transparent, var(--primary), transparent);
-            box-shadow: 0 0 10px var(--primary);
-            animation: scan 2s infinite linear;
-            z-index: 10; display: none;
-        }
-        .is-scanning .scanner-line { display: block; }
-        [x-cloak] { display: none !important; }
-        
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fade-in-up { animation: fadeInUp 0.5s ease-out forwards; }
+<style nonce="{{ request.csp_nonce }}">
+    /* IPHONE CUSTOM CSS - BULLETPROOF */
+    .custom-iphone {
+        width: 320px; height: 650px;
+        background: #0f172a; border: 12px solid #334155;
+        border-radius: 48px; position: relative;
+        overflow: hidden; box-shadow: 0 50px 100px -20px rgba(0,0,0,0.5);
+        flex-shrink: 0;
+    }
+    .iphone-notch {
+        position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+        width: 140px; height: 28px; background: #334155;
+        border-bottom-left-radius: 18px; border-bottom-right-radius: 18px; z-index: 20;
+    }
+    .iphone-screen { 
+        width: 100%; height: 100%; background: #ffffff; 
+        overflow-y: auto; overflow-x: hidden; 
+        display: flex; flex-direction: column;
+    }
+    
+    .magic-gradient { background: radial-gradient(circle at top right, rgba(var(--primary-rgb), 0.12), transparent); }
+    [x-cloak] { display: none !important; }
 
-        /* ============================================================
-           🏝️ LIGHT-MODE ISLAND: Aísla la tarjeta de propuesta del tema
-           El tema oscuro tiene reglas globales que fuerzan color:white
-           en todo el texto en negrita. Esta sección lo sobreescribe SOLO
-           dentro de #proposal-preview para mantener el contraste correcto
-           sin afectar el resto de la interfaz. NUNCA borrar este bloque.
-        ============================================================ */
-        #proposal-preview,
-        #proposal-preview * {
-            color-scheme: light;
-        }
-
-        /* Textos negros y grises forzados */
-        #proposal-preview .text-slate-900,
-        #proposal-preview h4,
-        #proposal-preview p strong { color: #0f172a !important; }
-
-        #proposal-preview .text-slate-500,
-        #proposal-preview p   { color: #64748b !important; }
-
-        #proposal-preview .text-slate-400 { color: #94a3b8 !important; }
-        #proposal-preview .text-slate-300 { color: #cbd5e1 !important; }
-
-        /* Colores de acento que también pueden verse afectados */
-        #proposal-preview .text-blue-600,
-        #proposal-preview .text-blue-800 { color: #2563eb !important; }
-        #proposal-preview .text-emerald-600 { color: #059669 !important; }
-
-        /* Fondos blancos y grises claros */
-        #proposal-preview .bg-white    { background-color: #ffffff !important; }
-        #proposal-preview .bg-slate-50 { background-color: #f8fafc !important; }
-
-        /* Bordes */
-        #proposal-preview .border-slate-100  { border-color: #f1f5f9 !important; }
-        #proposal-preview .border-slate-200\/60 { border-color: rgba(226,232,240,0.6) !important; }
-        #proposal-preview .border-emerald-100 { border-color: #d1fae5 !important; }
-
-        /* Fondos con opacidad baja de emerald */
-        #proposal-preview .bg-emerald-50 { background-color: #ecfdf5 !important; }
-
-        /* El botón "Aprobar Propuesta" mantiene su negro */
-        #proposal-preview .bg-slate-900 { background-color: #0f172a !important; }
-        #proposal-preview .bg-slate-900 span { color: #ffffff !important; }
-    </style>
+    /* CONTRASTE MEJORADO (ULTRA DARK) - FORZADO V3 */
+    .text-premium-dark { color: #000000 !important; opacity: 1 !important; font-weight: 900 !important; }
+    .text-premium-strong { color: #000000 !important; font-weight: 800 !important; }
+    .text-premium-muted { color: #0f172a !important; font-weight: 700 !important; }
+    
+    /* DEBUG MARKER */
+    .debug-v3 { border: 2px solid #ff0000 !important; }
+</style>
+<!-- TEMPLATE_VERSION: 3.1_CONTRASTE_TOTAL -->
 {% endblock %}
 
 {% block content %}
-<div class="flex-1 flex flex-col h-full bg-surface-base" x-data="cotizadorApp()" x-cloak>
+<div class="flex-1 flex flex-col h-full bg-surface-base magic-gradient" x-data="magicApp()" x-cloak>
     
-    <!-- SUB-HEADER -->
-    <div class="h-14 border-b border-border-color px-6 flex items-center justify-between bg-surface-1 shrink-0">
-        <div class="flex items-center gap-2">
-            <span class="material-symbols-outlined text-primary">auto_awesome</span>
-            <h1 class="text-sm font-black text-text-main uppercase tracking-widest">Cotizador <span class="text-primary">Mágico IA</span></h1>
-        </div>
+    <!-- HEADER -->
+    <div class="h-16 border-b border-border-color px-8 flex items-center justify-between bg-surface-1/50 backdrop-blur-md sticky top-0 z-30">
         <div class="flex items-center gap-3">
-            <div class="text-right hidden sm:block">
-                <p class="text-[10px] font-black text-text-main uppercase tracking-tighter">{% if lead %}Lead: {{ lead.cliente.nombres }}{% else %}Prospecto Rápido{% endif %}</p>
-                <p class="text-[9px] text-text-muted uppercase tracking-widest">Consultor: {{ request.user.get_full_name|default:request.user.username }}</p>
+            <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
+                <span class="material-symbols-outlined text-[24px]">auto_awesome</span>
             </div>
-            <div class="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center border border-primary/20">
-                <span class="material-symbols-outlined text-[16px]">person</span>
+            <div>
+                <h1 class="text-sm font-black text-text-main uppercase tracking-[0.2em]">Magic <span class="text-primary">Quoter AI</span></h1>
+                <p class="text-[9px] font-bold text-text-muted uppercase tracking-widest">Obsidian Emerald Engine</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <button @click="pasteTest()" class="px-4 py-2 bg-surface-2 hover:bg-surface-3 text-[9px] font-black uppercase tracking-widest border border-border-color rounded-xl transition-all">
+                Pegar Prueba
+            </button>
+            <div class="h-6 w-px bg-border-color"></div>
+            <div class="flex items-center gap-2">
+                <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.5)]"></div>
+                <span class="text-[9px] font-black text-text-muted uppercase tracking-widest">AI Online</span>
             </div>
         </div>
     </div>
 
-    <!-- AREA DE TRABAJO -->
-    <div class="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar">
-        <div class="w-full flex flex-col lg:flex-row gap-8 items-start">
+    <!-- MAIN BODY -->
+    <div class="flex-1 overflow-y-auto p-8 custom-scrollbar">
+        <div class="max-w-6xl mx-auto flex flex-col lg:flex-row items-start justify-center gap-16">
             
-            <!-- LADO IZQUIERDO: INPUT Y CONTROLES (ANCHO FIJO EN PC) -->
-            <div class="w-full lg:w-[450px] shrink-0 flex flex-col gap-6 lg:sticky lg:top-8">
-                
-                <div class="card-base p-6 relative overflow-hidden" :class="{'is-scanning': isGenerating}">
-                    <div class="scanner-line"></div>
-                    
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-sm font-black text-text-main flex items-center gap-2 uppercase tracking-widest">
-                            <span class="material-symbols-outlined text-text-muted">terminal</span> Texto Crudo (GDS)
-                        </h2>
-                        <button @click="pasteDummyText()" class="text-[10px] font-black bg-primary/10 text-primary px-3 py-1.5 rounded-lg hover:bg-primary/20 transition-all border border-primary/20 uppercase tracking-widest">
-                            Pegar Prueba
-                        </button>
+            <!-- LEFT: CONTROLS -->
+            <div class="w-full lg:w-[450px] space-y-6 sticky-panel">
+                <div class="card-base p-8 space-y-6 border-primary/10">
+                    <div class="space-y-3">
+                        <label class="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] flex justify-between">
+                            <span>Itinerario GDS</span>
+                            <span class="text-primary" x-text="rawText.length + ' Chars'"></span>
+                        </label>
+                        <textarea x-model="rawText" :disabled="loading"
+                                  class="w-full h-80 bg-surface-2 border border-border-color rounded-2xl p-5 text-xs font-mono text-text-main outline-none focus:border-primary transition-all resize-none shadow-inner"
+                                  placeholder="Pega el texto crudo aquí..."></textarea>
                     </div>
 
-                    <!-- Input Textarea -->
-                    <textarea x-model="rawGdsText" :disabled="isGenerating"
-                              class="w-full h-64 bg-surface-2 border border-border-color rounded-2xl p-4 text-primary font-mono text-xs focus:ring-1 focus:ring-primary focus:border-primary outline-none resize-none custom-scrollbar mb-6 disabled:opacity-50"
-                              placeholder="Pega aquí la disponibilidad cruda de Amadeus, Sabre, KIU o cualquier texto con vuelos..."></textarea>
-
-                    <!-- Controles Financieros -->
-                    <div class="bg-surface-base border border-border-color rounded-2xl p-4 mb-6">
-                        <div class="flex items-center justify-between mb-3 px-1">
-                            <h3 class="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] flex items-center gap-1">
-                                <span class="material-symbols-outlined text-[14px]">tune</span> Ajuste Financiero
-                            </h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-surface-2 p-4 rounded-2xl border border-border-color">
+                            <label class="block text-[8px] font-black text-text-muted uppercase tracking-widest mb-1">Fee Agencia ($)</label>
+                            <input type="number" x-model.number="fee" class="w-full bg-transparent text-xl font-black outline-none text-text-main">
                         </div>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-[9px] font-black text-text-muted uppercase tracking-widest mb-1 px-1">Fee Agencia (Markup)</label>
-                                <div class="relative">
-                                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-primary font-black text-xs">$</span>
-                                    <input type="number" x-model="agencyFee" 
-                                           class="w-full pl-7 pr-3 py-2 bg-surface-2 border border-border-color rounded-xl text-xs text-text-main font-black focus:ring-1 focus:ring-primary outline-none">
-                                </div>
-                            </div>
-                            <div class="flex flex-col gap-3 pt-4">
-                                <div class="flex items-center gap-2 px-1">
-                                    <input type="checkbox" x-model="incluirIgtf" id="igtf_check" class="w-4 h-4 text-primary rounded border-border-color focus:ring-primary cursor-pointer">
-                                    <label for="igtf_check" class="text-[9px] font-black text-text-muted uppercase tracking-widest cursor-pointer">IGTF (3%)</label>
-                                </div>
-                                <div class="flex items-center gap-2 px-1">
-                                    <input type="checkbox" x-model="mostrarVes" id="ves_check" class="w-4 h-4 text-primary rounded border-border-color focus:ring-primary cursor-pointer">
-                                    <label for="ves_check" class="text-[9px] font-black text-text-muted uppercase tracking-widest cursor-pointer">Ver en Bs</label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div x-show="mostrarVes" class="mt-4 p-2 bg-primary/5 rounded-xl border border-primary/10 flex justify-between items-center animate-fade-in" x-cloak>
-                            <span class="text-[8px] font-black text-primary uppercase tracking-widest">Tasa BCV:</span>
-                            <span class="text-xs font-black text-primary" x-text="'Bs ' + tasaBcv.toFixed(2)"></span>
+                        <div class="flex flex-col justify-center gap-2 pl-2">
+                           <label class="flex items-center gap-3 cursor-pointer">
+                               <input type="checkbox" x-model="showVes" class="w-4 h-4 rounded border-border-color bg-surface-3 text-primary focus:ring-primary">
+                               <span class="text-[9px] font-black text-text-muted uppercase tracking-widest">Ver en Bs</span>
+                           </label>
+                           <label class="flex items-center gap-3 cursor-pointer">
+                               <input type="checkbox" x-model="includeIgtf" class="w-4 h-4 rounded border-border-color bg-surface-3 text-primary focus:ring-primary">
+                               <span class="text-[9px] font-black text-text-muted uppercase tracking-widest">IGTF (+3%)</span>
+                           </label>
                         </div>
                     </div>
 
-                    <!-- Botón Acción Principal -->
-                    <button @click="generateAI()" 
-                            hx-post="{% url 'cotizaciones:magic_quoter_ai' %}"
-                            hx-trigger="manual"
-                            :disabled="isGenerating || !rawGdsText"
-                            class="w-full h-14 bg-primary hover:bg-primary-hover disabled:bg-surface-3 text-white rounded-2xl font-black transition-all flex items-center justify-center gap-3 shadow-lg shadow-primary/20 group active:scale-[0.98]">
-                        <span x-show="!isGenerating" class="material-symbols-outlined group-hover:rotate-12 transition-transform">auto_awesome</span>
-                        <span x-show="isGenerating" class="material-symbols-outlined animate-spin" x-cloak>sync</span>
-                        <span class="text-sm uppercase tracking-widest" x-text="isGenerating ? 'Traduciendo...' : 'Transformar con IA'">
-                            Transformar con IA
-                        </span>
+                    <button @click="generate()" :disabled="loading || !rawText"
+                            class="w-full h-14 bg-primary hover:bg-primary-hover text-white rounded-2xl font-black transition-all flex items-center justify-center gap-3 shadow-xl shadow-primary/20">
+                        <span x-show="!loading" class="material-symbols-outlined text-[20px]">magic_button</span>
+                        <span x-show="loading" class="material-symbols-outlined animate-spin text-[20px]">sync</span>
+                        <span class="text-xs uppercase tracking-[0.2em]" x-text="loading ? 'Procesando...' : 'Transformar'"></span>
                     </button>
                 </div>
 
-                <!-- MINI CONSEJO IA -->
-                <div class="p-4 bg-primary/5 border border-primary/10 rounded-2xl flex gap-3">
-                    <span class="material-symbols-outlined text-primary text-[20px]">lightbulb</span>
-                    <p class="text-[11px] text-text-secondary leading-relaxed font-medium">
-                        <strong class="text-primary uppercase tracking-tighter">Tip TravelHub:</strong> Pega el itinerario completo con el desglose de precios para que la IA asigne el costo base automáticamente.
-                    </p>
-                </div>
+                <div x-show="error" class="p-5 bg-status-danger-bg border border-status-danger/20 rounded-2xl animate-fade-in text-status-danger text-[10px] font-black uppercase" x-text="error"></div>
             </div>
 
-            <!-- LADO DERECHO: PREVISUALIZACIÓN B2C (EXPANDIBLE) -->
-            <div class="flex-1 w-full flex flex-col items-center justify-start min-h-[700px]">
+            <!-- RIGHT: IPHONE -->
+            <div class="w-full lg:w-fit flex flex-col items-center gap-8">
                 
-                <!-- Estado Vacío -->
-                <div x-show="!hasOutput" class="text-center animate-fade-in-up mt-20" x-transition>
-                    <div class="w-20 h-20 bg-surface-1 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-border-color shadow-xl">
-                        <span class="material-symbols-outlined text-[40px] text-text-muted rotate-12">draft</span>
-                    </div>
-                    <h3 class="text-xl font-black text-text-main uppercase tracking-tight mb-2">Generador de Propuestas</h3>
-                    <p class="text-sm text-text-muted max-w-[280px] mx-auto leading-relaxed">Convierte texto técnico crudo en una propuesta irresistible para tu cliente.</p>
-                    
-                    <div x-show="errorMessage" class="mt-6 p-4 bg-status-danger-bg border border-status-danger border-opacity-20 rounded-2xl">
-                        <p class="text-[10px] font-black text-status-danger uppercase tracking-widest" x-text="errorMessage"></p>
-                    </div>
-                </div>
-
-                <!-- PREVIEW DEL CELULAR -->
-                <div x-show="hasOutput" class="w-full lg:max-w-[420px] mx-auto animate-fade-in-up" x-transition>
+                <div class="custom-iphone">
+                    <div class="iphone-notch"></div>
+                    <div class="iphone-screen custom-scrollbar" id="proposal-preview">
                         
-                        <div class="flex justify-between items-center mb-4 px-2">
-                             <span class="text-[10px] font-black text-text-muted uppercase tracking-widest font-display">Simulador Mobile</span>
-                             <div class="flex gap-2">
-                                 <button @click="window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'})" 
-                                         class="px-3 py-1 bg-primary/10 text-primary text-[10px] font-black rounded-lg uppercase tracking-widest border border-primary/20">
-                                     Ver Botón WhatsApp ↓
-                                 </button>
-                             </div>
+                        <!-- EMPTY STATE -->
+                        <div x-show="!result && !loading" class="flex-1 flex flex-col items-center justify-center p-10 text-center space-y-4">
+                            <div class="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center">
+                                <span class="material-symbols-outlined text-slate-300 text-3xl">auto_awesome</span>
+                            </div>
+                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Tu propuesta aparecerá aquí</p>
                         </div>
 
-                        <!-- Propuesta Generada -->
-                        <div class="bg-surface-base rounded-[40px] border-[8px] border-surface-3 shadow-2xl overflow-hidden relative" id="proposal-preview">
-                            
-                            <div class="h-48 relative">
-                                <!-- FIX: Imagen dinámica. Si el backend no devolvió imagen válida (vacío o fallback),
-                                     usamos source.unsplash.com con el nombre del destino como query. Cambia en cada búsqueda. -->
-                                <img :src="output.image ? output.image : 'https://source.unsplash.com/800x400/?' + encodeURIComponent(output.destination + ' travel tourism city')" 
-                                     class="w-full h-full object-cover"
-                                     @error="$el.src='https://source.unsplash.com/800x400/?airplane,airport,travel'">
-                                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10"></div>
-                                <div class="absolute top-4 left-4 flex flex-col gap-2">
-                                    <div class="bg-white/20 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/20 text-white font-bold text-[8px] flex items-center gap-1.5 shadow-sm max-w-[150px] overflow-hidden">
-                                        <span class="material-symbols-outlined text-[12px] text-emerald-400 shrink-0">verified</span> 
-                                        <span class="truncate">{{ current_agency.nombre_comercial|default:current_agency.nombre|default:"Tu Agencia" }}</span>
-                                    </div>
-                                    <span class="bg-primary/90 backdrop-blur-sm text-white text-[8px] font-black px-2.5 py-1 rounded-lg uppercase tracking-widest shadow-lg shadow-primary/30 w-fit" x-text="output.type"></span>
-                                </div>
-                                <!-- FIX: Texto del overlay con color:white forzado con inline style
-                                     para que NUNCA sea afectado por las reglas del tema oscuro -->
-                                <div class="absolute bottom-6 left-6 right-6 text-center">
-                                    <h4 class="text-3xl font-black leading-none mb-1 tracking-tighter" style="color:#ffffff !important;text-shadow:0 2px 8px rgba(0,0,0,0.6);" x-text="'Viaja a ' + output.destination"></h4>
-                                    <!-- V2.0: Descripción inspiradora de la IA -->
-                                    <p class="text-[10px] font-bold mb-2 italic" style="color:rgba(255,255,255,0.9) !important;text-shadow:0 1px 4px rgba(0,0,0,0.4);" x-show="output.destination_description" x-text="output.destination_description"></p>
-                                    <p class="text-[10px] font-black uppercase tracking-[0.2em]" style="color:rgba(255,255,255,0.75) !important;" x-text="output.dates"></p>
+                        <!-- LOADING STATE -->
+                        <div x-show="loading" class="flex-1 flex flex-col items-center justify-center p-10 text-center space-y-4">
+                            <div class="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Creando Magia...</p>
+                        </div>
+
+                        <!-- RESULT CONTENT -->
+                        <div x-show="result" class="flex flex-col animate-fade-in">
+                            <div class="h-56 shrink-0 relative">
+                                <img :src="result && result.image ? result.image : 'https://images.unsplash.com/photo-1436491865332-7a61a109c05a?q=80&w=800&auto=format&fit=crop'" 
+                                     class="w-full h-full object-cover">
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
+                                <div class="absolute bottom-5 left-5 right-5 text-white">
+                                    <span class="bg-primary px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest mb-2 inline-block" x-text="result ? result.type : ''"></span>
+                                    <h4 class="text-2xl font-black leading-tight tracking-tighter" x-text="result ? 'Vuelo a ' + result.destination : ''"></h4>
+                                    <p class="text-[10px] font-bold text-slate-100 italic mt-1" x-text="result ? result.destination_description : ''"></p>
                                 </div>
                             </div>
 
-                            <div class="bg-white rounded-t-[32px] -mt-4 relative p-6 space-y-8 min-h-[500px]">
-                                <div class="space-y-1">
-
-                                    <p class="text-slate-600 text-xs leading-relaxed italic" x-show="output.destination_description" x-text="output.destination_description"></p>
-                                </div>
-
-                                <div class="bg-slate-50 border border-slate-100 p-6 rounded-[28px] text-center shadow-sm">
-                                    <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Inversión Total</p>
+                            <div class="p-6 space-y-8 bg-white flex-1">
+                                <div class="bg-slate-50 p-6 rounded-[24px] text-center border border-slate-100 shadow-sm">
+                                    <!-- TITULO EN OSCURO -->
+                                    <p class="text-[8px] font-black text-premium-dark uppercase tracking-widest mb-2" x-text="includeIgtf ? 'Inversión Total (Incluye IGTF)' : 'Inversión Estimada'"></p>
                                     <div class="flex items-baseline justify-center gap-1">
-                                        <span class="text-3xl font-black text-slate-900 tracking-tighter">$</span>
-                                        <span class="text-4xl font-black text-slate-900 tracking-tighter" x-text="output.totalPriceWithFee.toLocaleString('es-ES', {minimumFractionDigits: 2})"></span>
-                                        <span class="text-[10px] font-bold text-slate-400 ml-1 uppercase">USD</span>
+                                        <span class="text-2xl font-black text-premium-dark">$</span>
+                                        <span class="text-4xl font-black text-premium-dark tracking-tighter" x-text="displayPrice"></span>
+                                        <span class="text-[10px] font-bold text-premium-dark">USD</span>
                                     </div>
-                                    
-                                    <!-- Detalles Fiscales -->
-                                    <div class="mt-2 space-y-1">
-                                        <template x-if="incluirIgtf">
-                                            <p class="text-[8px] font-bold text-slate-400 uppercase tracking-widest">
-                                                Incluye IGTF (3%): <span class="text-slate-600" x-text="'$ ' + output.igtfMonto.toFixed(2)"></span>
-                                            </p>
-                                        </template>
-                                        <template x-if="mostrarVes && tasaBcv > 0">
-                                            <div class="pt-2 border-t border-slate-100 mt-2">
-                                                <p class="text-[8px] font-black text-primary uppercase tracking-widest mb-0.5">Equivalente en Bolívares (BCV)</p>
-                                                <p class="text-lg font-black text-primary tracking-tighter" x-text="'Bs ' + (output.totalPriceWithFee * tasaBcv).toLocaleString('es-VE', {minimumFractionDigits: 2})"></p>
-                                            </div>
-                                        </template>
-                                    </div>
-                                    <div class="mt-4 inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-600 rounded-full text-[8px] font-black uppercase tracking-widest border border-emerald-100">
-                                        <span class="material-symbols-outlined text-[14px]">verified</span>
-                                        Tasas e impuestos incluidos
-                                    </div>
+                                    <template x-if="showVes && tasaBcv > 0">
+                                        <div class="pt-3 border-t border-slate-100 mt-3">
+                                            <!-- MONTO VES EN OSCURO -->
+                                            <p class="text-[11px] font-black text-premium-dark uppercase" x-text="'Bs ' + displayPriceVes"></p>
+                                        </div>
+                                    </template>
                                 </div>
 
                                 <div class="space-y-4">
-                                    <h5 class="text-[11px] font-black text-slate-900 border-b border-slate-100 pb-2 flex items-center gap-2 uppercase tracking-widest">
-                                        <span class="material-symbols-outlined text-blue-600 text-[16px]">flight</span> Itinerario
-                                    </h5>
-                                    
+                                    <h5 class="text-[10px] font-black text-premium-strong uppercase tracking-[0.2em] border-b border-slate-200 pb-2">Itinerario Confirmado</h5>
                                     <div class="space-y-3">
-                                        <template x-for="flight in output.flights">
-                                            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200/60 transition-all">
-                                                <div class="flex justify-between items-center mb-3">
-                                                    <div class="flex items-center gap-2">
-                                                        <div class="w-6 h-6 rounded bg-slate-100 flex items-center justify-center overflow-hidden border border-slate-200">
-                                                            <img :src="'https://logo.clearbit.com/' + flight.airline.toLowerCase().replace(/ /g, '') + '.com?size=64'" 
-                                                                 class="w-full h-full object-contain p-0.5"
-                                                                 @error="$el.src='https://api.dicebear.com/7.x/initials/svg?seed=' + flight.airline">
-                                                        </div>
-                                                        <span class="text-[10px] font-black text-blue-800 uppercase tracking-tight" x-text="flight.airline"></span>
-                                                    </div>
-                                                    <span class="text-[9px] font-bold text-slate-400" x-text="flight.departureDate || output.outboundDate"></span>
+                                        <template x-for="f in (result ? result.flights : [])">
+                                            <div class="p-4 rounded-2xl border border-slate-200 bg-slate-50 flex justify-between items-center shadow-sm">
+                                                <div class="text-left">
+                                                    <p class="text-sm font-black text-premium-dark" x-text="f.departureCode"></p>
+                                                    <p class="text-[13px] text-premium-dark font-black mt-1" x-text="f.departureTime"></p>
                                                 </div>
-                                                <div class="flex justify-between items-center">
-                                                    <div class="text-left">
-                                                        <p class="text-sm font-black text-slate-900" x-text="flight.departureCity || flight.departureCode"></p>
-                                                        <p class="text-[10px] text-blue-600 font-black" x-text="flight.departureTime"></p>
+                                                <div class="flex-1 px-4 flex flex-col items-center">
+                                                    <div class="w-full h-px bg-slate-400 relative">
+                                                        <span class="material-symbols-outlined absolute -top-2.5 left-1/2 -translate-x-1/2 bg-white text-slate-600 text-[16px]">flight</span>
                                                     </div>
-                                                    <div class="flex-1 flex flex-col items-center px-4">
-                                                        <div class="w-full h-px bg-slate-200 relative mb-1">
-                                                            <span class="material-symbols-outlined absolute -top-2 left-1/2 -translate-x-1/2 bg-white text-slate-300 text-[14px]">flight</span>
-                                                        </div>
-                                                        <span class="text-[7px] font-black text-slate-300 uppercase" x-text="flight.stops"></span>
-                                                    </div>
-                                                    <div class="text-right">
-                                                        <p class="text-sm font-black text-slate-900" x-text="flight.arrivalCity || flight.arrivalCode"></p>
-                                                        <p class="text-[10px] text-blue-600 font-black" x-text="flight.arrivalTime"></p>
-                                                    </div>
+                                                    <span class="text-[9px] font-black text-premium-dark uppercase mt-2 text-center leading-none" x-text="f.airline"></span>
+                                                    <span class="text-[10px] font-black text-premium-dark mt-1 bg-slate-200 px-1.5 py-0.5 rounded" x-text="f.departureDate"></span>
+                                                </div>
+                                                <div class="text-right">
+                                                    <p class="text-sm font-black text-premium-dark" x-text="f.arrivalCode"></p>
+                                                    <p class="text-[13px] text-premium-dark font-black mt-1" x-text="f.arrivalTime"></p>
                                                 </div>
                                             </div>
                                         </template>
                                     </div>
                                 </div>
-                                <div class="h-24"></div>
-                            </div>
 
-                            <div class="absolute bottom-6 left-6 right-6 shadow-2xl">
-                                <div class="bg-slate-900 text-white font-black py-4 rounded-2xl flex items-center justify-center gap-2 text-xs uppercase tracking-widest">
-                                    <span>Aprobar Propuesta</span>
-                                    <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+                                <div class="pt-6 pb-6">
+                                    <div class="w-full h-12 bg-slate-900 text-white rounded-xl flex items-center justify-center font-black text-[10px] uppercase tracking-widest shadow-xl">
+                                        Aprobar Propuesta
+                                    </div>
                                 </div>
                             </div>
                         </div>
-
-                        <!-- ACCIONES -->
-                        <div class="mt-8 flex gap-3 animate-fade-in-up" x-transition>
-                            <button @click="saveQuoteAndShare()" :disabled="isSaving"
-                                    class="flex-1 h-14 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl font-black transition-all flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 active:scale-95">
-                                <span class="material-symbols-outlined" x-show="!isSaving">send</span>
-                                <span x-show="isSaving" class="material-symbols-outlined animate-spin">sync</span>
-                                <span class="text-xs uppercase tracking-widest">Enviar por WhatsApp</span>
-                            </button>
-                            <button @click="openPublicLink()" x-show="output && output.public_url"
-                                    class="w-14 h-14 bg-surface-1 border border-border-color text-text-muted hover:text-text-main rounded-2xl flex items-center justify-center transition-all shadow-lg active:scale-95">
-                                <span class="material-symbols-outlined">open_in_new</span>
-                            </button>
-                        </div>
                     </div>
-
                 </div>
+
+                <!-- ACTIONS BELOW IPHONE -->
+                <div x-show="result" class="w-full max-w-[320px] animate-fade-in">
+                    <button @click="share()" :disabled="sharing"
+                            class="w-full h-16 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl font-black flex items-center justify-center gap-3 shadow-xl shadow-emerald-500/20 transition-all active:scale-95">
+                        <span class="material-symbols-outlined text-[24px]" x-show="!sharing">send</span>
+                        <span class="material-symbols-outlined animate-spin text-[24px]" x-show="sharing">sync</span>
+                        <span class="text-[10px] uppercase tracking-[0.2em]">Enviar por WhatsApp</span>
+                    </button>
+                </div>
+
             </div>
         </div>
     </div>
@@ -343,142 +213,93 @@
 
 {% block extra_scripts %}
 <script nonce="{{ csp_nonce }}">
-    document.addEventListener('alpine:init', () => {
-        // Aseguramos que Alpine reconozca el componente incluso si carga lento
-    });
-
-    function cotizadorApp() {
+    function magicApp() {
         return {
-            rawGdsText: '',
-            agencyFee: 50,
+            rawText: '',
+            fee: 50,
+            showVes: false,
+            includeIgtf: false,
             tasaBcv: parseFloat("{{ tasa_bcv|default:'0' }}".replace(',', '.')),
-            incluirIgtf: false,
-            mostrarVes: false,
-            isGenerating: false,
-            isSaving: false,
-            errorMessage: '',
-            output: {
-                destination: '',
-                description: '',
-                destination_description: '',
-                totalPrice: 0,
-                totalPriceWithFee: 0,
-                igtfMonto: 0,
-                flights: []
-            },
-            hasOutput: false,
+            loading: false,
+            sharing: false,
+            error: '',
+            result: null,
 
             init() {
-                this.$watch('agencyFee', () => this.updateTotals());
-                this.$watch('incluirIgtf', () => this.updateTotals());
+                console.log("Magic App Ready. Rate:", this.tasaBcv);
             },
 
-            updateTotals() {
-                if (!this.output) return;
-                const baseMonto = parseFloat(this.output.totalPrice || 0);
-                const feeMonto = parseFloat(this.agencyFee || 0) || 0;
-                
-                const baseTotal = baseMonto + feeMonto;
-                const igtf = this.incluirIgtf ? (baseTotal * 0.03) : 0;
-                
-                this.output.totalPriceWithFee = baseTotal + igtf;
-                this.output.igtfMonto = igtf;
+            // PROPIEDADES COMPUTADAS REACTIVAS
+            get displayPrice() {
+                if (!this.result) return '0.00';
+                let total = (parseFloat(this.result.totalPrice) || 0) + (parseFloat(this.fee) || 0);
+                if (this.includeIgtf) total = total * 1.03;
+                return total.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
             },
 
-            pasteDummyText() {
-                this.rawGdsText = `1 TK 224E 20APR 1 CCSIST*HK2 2310 1750 21APR 2 /DCTK*TAGSTH /E\n2 TK 26E 22APR 3 ISTPVG*HK2 0130 1645 /DCTK*TAGSTH /E\n3 TK 281Q 02MAY 6 PVGIST*HK2 0755 1450 /DCTK*TAGSTH /E\n4 TK 223Q 02MAY 6 ISTCCS*HK2 1700 2240 /DCTK*TAGSTH /E\n\nTOTAL USD 2450.00`;
+            get displayPriceVes() {
+                if (!this.result || !this.tasaBcv) return '0,00';
+                let totalUsd = (parseFloat(this.result.totalPrice) || 0) + (parseFloat(this.fee) || 0);
+                if (this.includeIgtf) totalUsd = totalUsd * 1.03;
+                return (totalUsd * this.tasaBcv).toLocaleString('es-VE', {minimumFractionDigits: 2, maximumFractionDigits: 2});
             },
 
-            getCookie(name) {
-                let cookieValue = null;
-                if (document.cookie && document.cookie !== '') {
-                    const cookies = document.cookie.split(';');
-                    for (let i = 0; i < cookies.length; i++) {
-                        const cookie = cookies[i].trim();
-                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                            break;
-                        }
-                    }
-                }
-                return cookieValue;
+            pasteTest() {
+                this.rawText = "1 TK 224E 20APR CCSIST 2310 1750\n2 TK 225E 30APR ISTCCS 0210 0815\nTOTAL USD 1450.00";
             },
 
-            async generateAI() {
-                if (!this.rawGdsText) return;
-                this.isGenerating = true;
-                this.errorMessage = '';
-                
-                const payload = {
-                    raw_text: this.rawGdsText,
-                    agency_fee: this.agencyFee,
-                    lead_id: '{{ lead.id|default:"" }}'
-                };
-                
+            async generate() {
+                this.loading = true;
+                this.error = '';
+                this.result = null;
                 try {
-                    const response = await fetch('{% url "cotizaciones:magic_quoter_ai" %}', {
+                    const res = await fetch('{% url "cotizaciones:magic_quoter_ai" %}', {
                         method: 'POST',
                         headers: { 
                             'Content-Type': 'application/json',
-                            'X-CSRFToken': this.getCookie('csrftoken') || '{{ csrf_token }}'
-                        },
-                        credentials: 'same-origin',
-                        body: JSON.stringify(payload)
-                    });
-                    
-                    const data = await response.json();
-                    if (data.error) {
-                        this.errorMessage = data.error;
-                    } else {
-                        // FIX: Asegurar que el totalPrice sea número
-                        data.totalPrice = parseFloat(data.totalPrice || 0);
-                        this.output = data;
-                        this.hasOutput = true;
-                        this.updateTotals();
-                    }
-                } catch (e) {
-                    this.errorMessage = "Error de red: No se pudo conectar con Obsidian AI.";
-                } finally {
-                    this.isGenerating = false;
-                }
-            },
-
-            async saveQuoteAndShare() {
-                if (!this.output) return;
-                this.isSaving = true;
-                
-                try {
-                    const response = await fetch('{% url "cotizaciones:magic_quoter_save" %}', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
                             'X-CSRFToken': '{{ csrf_token }}'
                         },
-                        body: JSON.stringify({
-                            ai_data: this.output,
-                            raw_text: this.rawGdsText,
-                            agency_fee: this.agencyFee,
-                            lead_id: '{{ lead.id|default:"" }}'
+                        body: JSON.stringify({ 
+                            raw_text: this.rawText, 
+                            agency_fee: this.fee 
                         })
                     });
-                    
-                    const result = await response.json();
-                    if (result.success) {
-                        this.output.public_url = result.public_url;
-                        const shareUrl = result.public_url;
-                        const waMsg = `¡Hola! Te envío el itinerario para ${this.output.destination}. Prepárate para el viaje: ${shareUrl}`;
-                        window.open(`https://wa.me/?text=${encodeURIComponent(waMsg)}`, '_blank');
-                    }
+                    const data = await res.json();
+                    if (!res.ok) throw new Error(data.error || 'Error en el motor de IA');
+                    this.result = data;
                 } catch (e) {
-                    Swal.fire('Error', 'No se pudo guardar la cotización.', 'error');
+                    this.error = e.message;
                 } finally {
-                    this.isSaving = false;
+                    this.loading = false;
                 }
             },
 
-            openPublicLink() {
-                if (this.output && this.output.public_url) {
-                    window.open(this.output.public_url, '_blank');
+            async share() {
+                this.sharing = true;
+                try {
+                    let totalFinal = (parseFloat(this.result.totalPrice) || 0) + (parseFloat(this.fee) || 0);
+                    if (this.includeIgtf) totalFinal = totalFinal * 1.03;
+
+                    const res = await fetch('{% url "cotizaciones:magic_quoter_save" %}', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
+                        body: JSON.stringify({ 
+                            ai_data: { ...this.result, totalPriceWithFee: totalFinal }, 
+                            raw_text: this.rawText, 
+                            agency_fee: this.fee,
+                            include_igtf: this.includeIgtf
+                        })
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        window.open(`https://wa.me/?text=${encodeURIComponent(data.whatsapp_msg)}`, '_blank');
+                    } else {
+                        throw new Error(data.error);
+                    }
+                } catch (e) {
+                    alert("Error: " + e.message);
+                } finally {
+                    this.sharing = false;
                 }
             }
         }

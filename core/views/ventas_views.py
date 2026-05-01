@@ -154,9 +154,11 @@ class VentaDetailView(SaaSMixin, LoginRequiredMixin, DetailView):
         
         return context
 
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
 from django.views import View
 from django.contrib import messages
+from apps.bookings.models import Venta
 from django.http import HttpResponse
 from apps.finance.models import Factura, ItemFactura
 
@@ -290,3 +292,23 @@ class VentaGenerateVoucherView(LoginRequiredMixin, View):
             messages.error(request, f"Error al generar voucher: {str(e)}")
             
         return redirect('core:venta_detalle', pk=pk)
+
+@login_required
+def eliminar_venta(request, pk):
+    """🗑️ Eliminación física de una venta y sus ítems."""
+    from core.security import get_agencia_or_403, get_object_tenant_or_404
+    
+    agencia = get_agencia_or_403(request)
+    # Buscamos con all_objects por si estuviera soft-deleted
+    venta = get_object_tenant_or_404(Venta.all_objects, agencia, pk=pk)
+    
+    try:
+        # Borrar físicamente (HARD DELETE)
+        # Esto borrará también items, segmentos, pagos, etc (por CASCADE en DB)
+        venta.delete(force=True)
+        messages.success(request, f"Venta {pk} eliminada físicamente con éxito.")
+    except Exception as e:
+        messages.error(request, f"Error al eliminar venta: {str(e)}")
+        
+    next_url = request.GET.get('next') or 'core:modern_dashboard'
+    return redirect(next_url)

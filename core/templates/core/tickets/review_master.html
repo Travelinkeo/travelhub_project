@@ -93,10 +93,14 @@
                 <span class="text-[10px] font-black uppercase tracking-widest hidden lg:block">Eliminar Ticket</span>
             </a>
 
-            <button type="button" id="btn-retry-parse-forced" data-id="{{ boleto.pk }}" 
-                class="btn-primary !h-10 !bg-blue-600 hover:!bg-blue-500 text-white font-black text-xs uppercase tracking-widest gap-2 animate-pulse">
+            <button type="button" 
+                hx-post="{% url 'core:api:boleto-retry-parse' boleto.pk %}"
+                hx-swap="none"
+                hx-on::after-request="location.reload()"
+                class="btn-primary !h-10 !bg-blue-600 hover:!bg-blue-500 text-white font-black text-xs uppercase tracking-widest gap-2 {% if is_processing %}opacity-50 cursor-not-allowed{% else %}animate-pulse{% endif %}"
+                {% if is_processing %}disabled{% endif %}>
                 <span class="material-symbols-outlined text-[18px]">auto_fix_high</span>
-                <span>🔥 RE-EXTRAER IA (V1.8)</span>
+                <span>{% if is_processing %}PROCESANDO...{% else %}🔥 RE-EXTRAER IA (V1.8){% endif %}</span>
             </button>
             <button form="review-master-form" type="submit" 
                 class="btn-primary !h-10 !bg-emerald-600 hover:!bg-emerald-500 text-white font-black text-xs uppercase tracking-widest gap-2 px-6 shadow-lg shadow-emerald-500/20">
@@ -107,7 +111,31 @@
     </header>
 
     <!-- ── MAIN CONTENT ── -->
-    <main class="flex-1 grid grid-cols-1 lg:grid-cols-12 overflow-hidden">
+    <main class="flex-1 grid grid-cols-1 lg:grid-cols-12 overflow-hidden"
+          {% if is_processing %}
+          hx-get="{% url 'core:revisar_boleto' boleto.pk %}"
+          hx-trigger="every 3s"
+          hx-select="#main-content-area"
+          hx-target="#main-content-area"
+          hx-swap="outerHTML"
+          {% endif %}
+          id="main-content-area">
+
+        {% if is_processing %}
+        <!-- ── PROCESSING OVERLAY ── -->
+        <div class="fixed inset-0 bg-black/60 z-[60] flex flex-col items-center justify-center backdrop-blur-sm animate-fade-in">
+            <div class="relative">
+                <div class="size-24 rounded-full border-4 border-primary/20 border-t-primary animate-spin"></div>
+                <span class="material-symbols-outlined absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-3xl animate-pulse text-primary">magic_button</span>
+            </div>
+            <h2 class="mt-8 text-xl font-black uppercase tracking-[0.3em] text-white">IA Analizando...</h2>
+            <p class="mt-2 text-gray-400 font-bold uppercase text-[10px] tracking-widest">Extrayendo itinerario y datos financieros de forma asíncrona</p>
+            <div class="mt-8 flex items-center gap-2 px-4 py-2 bg-white/5 rounded-full border border-white/10">
+                <span class="size-2 rounded-full bg-emerald-500 animate-ping"></span>
+                <span class="text-[9px] font-black text-gray-500 uppercase tracking-widest">Esperando respuesta del worker...</span>
+            </div>
+        </div>
+        {% endif %}
         
         <!-- ── LEFT COLUMN: SOURCE DATA ── -->
         <aside class="lg:col-span-5 border-r border-border-color flex flex-col bg-surface-1 h-[calc(100vh-64px)] overflow-hidden">
@@ -404,15 +432,12 @@
 
 <!-- ── SCRIPTS ── -->
 <script nonce="{{ csp_nonce }}">
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log('🚀 [ReviewMaster V1.8] Iniciando controladores...');
+    console.log('🚀 [ReviewMaster V1.8] Ready.');
+    /* Legacy JS removed */
         
         const btnRetry = document.getElementById('btn-retry-parse-forced');
         
-        if (btnRetry) {
-            btnRetry.addEventListener('click', function() {
-                const id = this.getAttribute('data-id');
-                console.log(`⚡ [ReviewMaster] Disparando RE-PARSEO FORZADO para boleto: ${id}`);
+
                 
                 // Overlay de carga
                 const overlay = document.createElement('div');

@@ -41,27 +41,24 @@ class UploadBoletoView(View):
                 estado_parseo='PEN'
             )
 
-            # 2. Procesamiento Síncrono Usando el Servicio Central (IA habilitada)
-            from core.services.ticket_parser_service import TicketParserService
+            # 2. Procesamiento Asíncrono (Celery)
+            from ..tasks import parsear_boleto_individual
+            from ..utils.celery_utils import safe_delay
             from django.urls import reverse
             
-            servicio = TicketParserService()
-            resultado = servicio.procesar_boleto(boleto.pk)
+            # Encolar la tarea
+            safe_delay(parsear_boleto_individual, boleto.pk)
             
-            if resultado: 
-                # SIEMPRE redirigir al Review Master para validación humana (Fase 4.0)
-                review_url = reverse('core:revisar_boleto', kwargs={'pk': boleto.pk})
-                response = HttpResponse()
-                response['HX-Redirect'] = review_url
-                return response
-            else:
-                boleto.refresh_from_db()
-                error_msg = boleto.log_parseo or "No se pudo extraer información válida."
-                raise Exception(error_msg)
+            # Redirigir INMEDIATAMENTE al Review Master
+            # El Review Master se encargará de mostrar el spinner si sigue procesando
+            review_url = reverse('core:revisar_boleto', kwargs={'pk': boleto.pk})
+            response = HttpResponse()
+            response['HX-Redirect'] = review_url
+            return response
 
         except Exception as e:
-            # Si falla el procesado síncrono, mostramos error
-            return HttpResponse(f'<div class="fixed bottom-5 right-5 bg-red-900 border-l-4 border-red-500 text-white p-4 rounded shadow-xl animate-bounce-in">Error procesando boleto: {str(e)}</div>', status=200)
+            logger.exception(f"Error en subida de boleto: {e}")
+            return HttpResponse(f'<div class="fixed bottom-5 right-5 bg-red-900 border-l-4 border-red-500 text-white p-4 rounded shadow-xl animate-bounce-in">Error al recibir boleto: {str(e)}</div>', status=200)
 
 class ReviewBoletoView(View):
     template_name = 'core/tickets/review_master.html'
@@ -71,21 +68,44 @@ class ReviewBoletoView(View):
         from django.views.decorators.cache import patch_cache_control
         
         try:
-            boleto = BoletoImportado.objects.get(pk=pk)
+            boleto = BoletoImportado.all_objects.get(pk=pk)
         except BoletoImportado.DoesNotExist:
             return HttpResponse("Boleto no encontrado", status=404)
+            
+        # Seguridad multi-tenant
+        agencia = getattr(request, 'agencia', None)
+        if not request.user.is_superuser and boleto.agencia != agencia:
+            return HttpResponse("No tiene permisos para ver este boleto", status=403)
             
         next_url = request.GET.get('next')
         clientes = Cliente.objects.all().order_by('apellidos', 'nombres')
         
-        # --- LÓGICA DE RE-PARSEO (FORCE) ---
+        # --- LÓGICA DE RE-PARSEO (ASYNC) ---
         force = request.GET.get('force') == '1'
-        if force or not boleto.datos_parseados or (isinstance(boleto.datos_parseados, dict) and not boleto.datos_parseados.get('passenger_name')):
-            from core.services.ticket_parser_service import TicketParserService
-            servicio = TicketParserService()
-            # Forzamos ignorar manual y bypass_cache para que corra el motor de nuevo e ignore la caché
-            servicio.procesar_boleto(boleto.pk, ignore_manual=True, bypass_cache=True)
-            boleto.refresh_from_db()
+        is_processing = boleto.estado_parseo in ['PRO', 'QUE']
+        
+        if force:
+            from ..tasks import parsear_boleto_individual
+            from ..utils.celery_utils import safe_delay
+            # Resetear estado y encolar
+            boleto.estado_parseo = 'PRO'
+            boleto.log_parseo = "Re-procesamiento solicitado manualmente."
+            boleto.save(update_fields=['estado_parseo', 'log_parseo'])
+            safe_delay(parsear_boleto_individual, boleto.pk)
+            is_processing = True
+        
+        if is_processing:
+            # Si se solicita via HTMX, devolvemos solo el fragmento del spinner o el contenido final
+            # Pero para simplificar, el template manejará el polling
+            pass
+        elif not boleto.datos_parseados or (isinstance(boleto.datos_parseados, dict) and not boleto.datos_parseados.get('passenger_name')):
+             # Auto-reintento si faltan datos y no está procesando
+             from ..tasks import parsear_boleto_individual
+             from ..utils.celery_utils import safe_delay
+             boleto.estado_parseo = 'PRO'
+             boleto.save(update_fields=['estado_parseo'])
+             safe_delay(parsear_boleto_individual, boleto.pk)
+             is_processing = True
 
         # Asegurar que el texto original esté disponible para el panel de "Fuente"
         from core.services.ticket_parser_service import TicketParserService
@@ -174,7 +194,8 @@ class ReviewBoletoView(View):
             'parsed_data': datos,
             'segments': segments,
             'agencia': agencia,
-            'clientes': Cliente.objects.filter(agencia=agencia).order_by('nombres') if agencia else [],
+            'clientes': Cliente.objects.filter(agencia=agencia).order_by('apellidos', 'nombres') if agencia else [],
+            'is_processing': is_processing,
             'error_ia': datos.get('error_ia'),
             'source_text': source_text,
             'next_url': next_url,
@@ -190,8 +211,13 @@ class ReviewBoletoView(View):
         try:
             from decimal import Decimal
             next_url = request.GET.get('next') or request.POST.get('next')
-            boleto = BoletoImportado.objects.get(pk=pk)
+            boleto = BoletoImportado.all_objects.get(pk=pk)
             
+            # Seguridad multi-tenant
+            agencia = getattr(request, 'agencia', None)
+            if not request.user.is_superuser and boleto.agencia != agencia:
+                return HttpResponse("No tiene permisos para modificar este boleto", status=403)
+                
             # 1. Recolección de datos del formulario (AI Studio)
             nombre = request.POST.get('nombre_pasajero')
             foid = request.POST.get('foid_pasajero')

@@ -116,38 +116,19 @@ class BoletoRetryParseAPIView(APIView):
 
     def post(self, request, pk):
         try:
-            from ..services.ticket_parser_service import TicketParserService
-            service = TicketParserService()
+            from ..tasks import parsear_boleto_individual
+            from ..utils.celery_utils import safe_delay
+            boleto = BoletoImportado.objects.get(pk=pk)
+            boleto.estado_parseo = 'PRO'
+            boleto.save(update_fields=['estado_parseo'])
+            task = safe_delay(parsear_boleto_individual, pk)
+            if task:
+                return Response({"status": "PROCESSING", "task_id": task.id}, status=202)
+            return Response({"status": "QUEUED"}, status=202)
             
-            # El servicio se encarga de re-extraer texto, re-parsear,
-            # actualizar campos y re-generar PDF.
-            # 🛡️ AI OVERRIDE: Ignoramos datos previos para asegurar limpieza profunda
-            resultado = service.procesar_boleto(pk, ignore_manual=True)
-            
-            if resultado:
-                if isinstance(resultado, dict) and resultado.get('status') == 'REVIEW_REQUIRED':
-                    return Response({
-                        "id": pk,
-                        "status": "REVIEW",
-                        "error": "Requiere revisión manual (Identidad faltante o baja confianza)."
-                    }, status=status.HTTP_200_OK)
 
-                return Response({
-                    "mensaje": "Boleto re-procesado con éxito.",
-                    "id_boleto_importado": pk,
-                    "status": "SUCCESS"
-                }, status=status.HTTP_200_OK)
-            else:
-                # Si el resultado es None, el error detallado debería estar en el log_parseo del boleto
-                try:
-                    boleto = BoletoImportado.objects.get(pk=pk)
-                    error_msg = boleto.log_parseo or "El re-procesamiento falló sin dejar log."
-                except:
-                    error_msg = "Error desconocido durante el re-procesamiento."
-                
-                return Response({
-                    "error": error_msg
-                }, status=status.HTTP_400_BAD_REQUEST)
+
+
 
         except BoletoImportado.DoesNotExist:
             return Response({"error": "Boleto no encontrado."}, status=status.HTTP_404_NOT_FOUND)

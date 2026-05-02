@@ -6,7 +6,7 @@ TravelHub es una plataforma B2B multi-tenant diseñada para automatizar la opera
 
 ---
 
-## 🏛️ Arquitectura y Estado Actual (Abril 2026)
+## 🏛️ Arquitectura y Estado Actual (Mayo 2026)
 
 El proyecto ha pasado por una fase de estabilización crítica, consolidando los siguientes pilares:
 
@@ -29,22 +29,25 @@ El proyecto ha pasado por una fase de estabilización crítica, consolidando los
 
 ## 📚 Documentación para Colaboradores (Humano/IA)
 
-Si eres una IA (Claude, ChatGPT, etc.) colaborando en este proyecto, lee estos archivos primero:
+Si eres un desarrollador o una IA (Claude, ChatGPT, Gemini) colaborando en este proyecto, **tu punto de partida obligatorio** es:
 
-1.  [🏛️ Arquitectura del Sistema](docs/ARCHITECTURE.md): Detalla el stack, el middleware multi-tenant y el flujo de autenticación.
-2.  [🏢 Arquitectura Multi-tenant](docs/MULTI_TENANCY.md): Explicación técnica del aislamiento de datos por agencia.
-3.  [💰 Modelo de Negocio SaaS](docs/BUSINESS_MODEL.md): Planes, precios y límites de suscripción.
-4.  [📖 Diccionario de Datos](docs/DATA_DICTIONARY.md): Estructura de modelos y reglas de negocio.
-5.  [🤖 Guía de IA & Automatización](docs/AI_GUIDE.md): Cómo interactuar con los servicios de Gemini y el Parser.
+0.  🚩 **[ÍNDICE MAESTRO](docs/INDEX.md)**: El mapa central con acceso a todos los documentos actualizados.
+
+Para consultas específicas:
+1.  [🏛️ Reporte de Arquitectura 2026](docs/REPORTE_ARQUITECTURA_2026.md): Documento maestro con diagramas de flujo y arquitectura técnica detallada.
+2.  [📖 Libro del Usuario (Frontend)](docs/MANUAL_DEL_USUARIO.md): Guía paso a paso **sin tecnicismos** para usuarios finales y agentes de viajes.
+3.  [📜 Reglas de Parseo (GDS)](docs/PARSING_RULES.md): Estándares de extracción y estandarización para Sabre, KIU y Amadeus.
+4.  [🏢 Arquitectura Multi-tenant](docs/MULTI_TENANCY.md): Explicación técnica del aislamiento de datos por agencia.
+5.  [💰 Modelo de Negocio SaaS](docs/BUSINESS_MODEL.md): Planes, precios y límites de suscripción.
 
 ---
 
 ## 🛠️ Stack Tecnológico
-*   **Backend:** Django 5.x, Python 3.12.
-*   **Frontend:** TailwindCSS, Alpine.js, HTMX (Arquitectura "Low-code" frontend).
-*   **Base de Datos:** PostgreSQL (Multi-tenant).
+*   **Backend:** Django 6.x, Python 3.12+.
+*   **Frontend:** TailwindCSS, HTMX, Alpine.js (Arquitectura moderna "Low-code" frontend).
+*   **Base de Datos:** PostgreSQL (Multi-tenant) + Redis.
 *   **IA:** Google Gemini Pro, Vertex AI (Imagen 3), Document AI.
-*   **Infraestructura:** Docker, Celery (Async tasks), Redis, Stripe (Billing).
+*   **Infraestructura:** Coolify (Deployment), Docker, Celery (Async tasks), Stripe (Billing).
 
 ---
 

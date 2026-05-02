@@ -57,10 +57,7 @@ from core.views.boleto_views import (
 )
 from core.views.intelligence_views import GDSAnalyzerView, GDSAnalysisAjaxView, GDSInjectERPView
 from core.views.audit_views import AuditLogListView
-from core.views_legacy import (
-    HomeView, 
-    upload_boleto_file
-)
+
 from core.views.ocr_views import OCRPassportView
 from core.views.id_scanner_views import CedulaScannerAPIView
 from core.views.settings_views import BrandingSettingsView
@@ -156,41 +153,6 @@ router.register(r'tipos-cambio', TipoCambioViewSet, basename='tipocambio')
 router.register(r'aerolineas', AerolineaViewSet, basename='aerolinea')
 router.register(r'clientes', ClienteViewSet, basename='cliente')
 router.register(r'pasajeros', PasajeroViewSet, basename='pasajero')
-
-# Register ViewSets from views.py
-try:
-    from core.views_legacy import (
-        ProveedorViewSet, VentaViewSet, FacturaViewSet, AsientoContableViewSet,
-        SegmentoVueloViewSet, AlojamientoReservaViewSet, TrasladoServicioViewSet,
-        ActividadServicioViewSet, FeeVentaViewSet, PagoVentaViewSet,
-        VentaParseMetadataViewSet, AlquilerAutoReservaViewSet, EventoServicioViewSet,
-        CircuitoTuristicoViewSet, CircuitoDiaViewSet, PaqueteAereoViewSet,
-        ServicioAdicionalDetalleViewSet, BoletoImportadoViewSet, AuditLogViewSet
-    )
-# ViewSets registered with the router are mostly legacy/Next.js dependencies.
-# We comment them out to ensure they are no longer exposed, while keeping record.
-# router.register(r'proveedores', ProveedorViewSet, basename='proveedor')
-# router.register(r'ventas', VentaViewSet, basename='venta')
-# router.register(r'facturas', FacturaViewSet, basename='factura')
-# router.register(r'asientos-contables', AsientoContableViewSet, basename='asiento-contable')
-# router.register(r'segmentos-vuelo', SegmentoVueloViewSet, basename='segmento-vuelo')
-# router.register(r'alojamientos', AlojamientoReservaViewSet, basename='alojamiento')
-# router.register(r'traslados', TrasladoServicioViewSet, basename='traslado')
-# router.register(r'actividades', ActividadServicioViewSet, basename='actividad')
-# router.register(r'fees-venta', FeeVentaViewSet, basename='fee-venta')
-# router.register(r'pagos-venta', PagoVentaViewSet, basename='pago-venta')
-# router.register(r'ventas-metadata', VentaParseMetadataViewSet, basename='venta-metadata')
-# router.register(r'alquileres-autos', AlquilerAutoReservaViewSet, basename='alquiler-auto')
-# router.register(r'eventos-servicios', EventoServicioViewSet, basename='evento-servicio')
-# router.register(r'circuitos-turisticos', CircuitoTuristicoViewSet, basename='circuito-turistico')
-# router.register(r'circuitos-dias', CircuitoDiaViewSet, basename='circuito-dia')
-# router.register(r'paquetes-aereos', PaqueteAereoViewSet, basename='paquete-aereo')
-# router.register(r'servicios-adicionales', ServicioAdicionalDetalleViewSet, basename='servicio-adicional')
-# router.register(r'boletos-importados', BoletoImportadoViewSet, basename='boleto-importado')
-# router.register(r'audit-logs', AuditLogViewSet, basename='audit-log')
-    print("All ViewSets registered successfully")
-except Exception as e:
-    print(f"Error registering ViewSets: {e}")
 
 # Register Liquidaciones ViewSet
 try:

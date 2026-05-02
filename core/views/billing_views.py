@@ -10,6 +10,7 @@ from django.conf import settings
 from django.shortcuts import redirect
 from django.views.decorators.csrf import csrf_exempt
 from core.models.agencia import Agencia
+import os
 from core.services.stripe_service import StripeService
 def _setup_stripe():
     """Asegura la configuración de Stripe."""

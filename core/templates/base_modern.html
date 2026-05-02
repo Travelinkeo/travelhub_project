@@ -481,6 +481,23 @@
 
 <body class="bg-surface-base text-text-main font-sans selection:bg-primary/30 antialiased h-screen flex overflow-hidden"
     x-data="{ sidebarOpen: true, mobileMenuOpen: false }">
+
+    {% if is_impersonating %}
+    <!-- Barra de Impersonación (God Mode) -->
+    <div class="fixed top-0 left-0 right-0 z-[100] bg-gradient-to-r from-rose-600 via-red-600 to-orange-600 text-white text-[11px] font-black py-1.5 px-4 flex items-center justify-between shadow-2xl border-b border-white/10">
+        <div class="flex items-center gap-3">
+            <div class="bg-white/20 p-1 rounded-md animate-pulse">
+                <span class="material-symbols-outlined text-[14px] block">admin_panel_settings</span>
+            </div>
+            <span class="tracking-wide">MODO DIOS ACTIVO &middot; IMPERSONANDO A: <span class="underline decoration-white/40 underline-offset-2">{{ impersonated_agencia_name|upper }}</span></span>
+        </div>
+        <a href="{% url 'core:god_mode_stop_impersonate' %}" class="bg-white/20 hover:bg-white/40 px-3 py-1 rounded-md transition-all flex items-center gap-2 border border-white/20 hover:scale-105 active:scale-95">
+            <span class="material-symbols-outlined text-[14px]">logout</span>
+            DETENER SESIÓN
+        </a>
+    </div>
+    <style> body { padding-top: 32px !important; } </style>
+    {% endif %}
     <!-- Mobile Overlay -->
     <div x-show="mobileMenuOpen" @click="mobileMenuOpen = false"
         class="fixed inset-0 bg-black/60 z-40 md:hidden backdrop-blur-sm" x-cloak></div>
@@ -611,13 +628,14 @@
                 <span x-show="sidebarOpen" class="ml-auto bg-emerald-500/10 text-emerald-500 text-[9px] font-black px-2 py-0.5 rounded-full border border-emerald-500/20 uppercase tracking-tighter">Propio</span>
             </a>
 
-            <a href="{% url 'cotizaciones:magic_quoter' %}"
+            <a href="{% url 'core:cotizacion_magic' %}"
                 class="nav-item {% if 'magic' in request.path %}nav-active{% endif %}"
                 :class="!sidebarOpen && 'justify-center'">
                 <span class="material-symbols-outlined text-[20px] shrink-0 text-primary">auto_awesome</span>
                 <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs text-primary">Cotizador Mágico</span>
                 <span x-show="sidebarOpen" class="ml-auto bg-primary/10 text-primary text-[9px] font-black px-2 py-0.5 rounded-full border border-primary/20">IA</span>
             </a>
+
 
             <!-- CATEGORÍA: CRM (VISIBLE PARA TODOS) -->
             <div x-show="sidebarOpen" x-transition class="mt-5 mb-1.5 px-2">

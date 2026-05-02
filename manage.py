@@ -6,6 +6,15 @@ import sys
 
 def main():
     """Run administrative tasks."""
+    import threading
+    import time
+    def heartbeat():
+        while True:
+            time.sleep(5)
+            print("... manage.py heartbeat ...", flush=True)
+    t = threading.Thread(target=heartbeat, daemon=True)
+    t.start()
+
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
     try:
         from django.core.management import execute_from_command_line

@@ -49,7 +49,18 @@ class ThreadLocalContextMiddleware:
             # 2. Determinar Agencia (Intentamos obtenerla de request.agencia si middleware previo la seteó)
             agency = getattr(request, 'agencia', None)
             
-            # Si no está en request, intentamos resolverla (lógica simplificada de reserva)
+            # SOPORTE GOD MODE: Impersonación para Superusuarios
+            if user and user.is_superuser:
+                impersonated_id = request.session.get('impersonated_agencia_id')
+                if impersonated_id:
+                    from core.models.agencia import Agencia
+                    try:
+                        agency = Agencia.objects.get(id=impersonated_id)
+                        #logger.info(f"🎭 Contexto Impersonado: {agency.nombre}")
+                    except Agencia.DoesNotExist:
+                        del request.session['impersonated_agencia_id']
+
+            # Si no está en request ni en impersonate, intentamos resolverla por asociación normal
             if not agency and user:
                 try:
                     # 1. Intento por asociación de usuario
@@ -63,7 +74,7 @@ class ThreadLocalContextMiddleware:
                         # Retornamos None para que el Manager devuelva .none()
                         agency = None
                     
-                    # 3. Fallback de emergencia para superusers/otros
+                    # 3. Fallback de emergencia para superusers (último recurso si no hay impersonate)
                     if not agency and user.is_superuser:
                         from core.models.agencia import Agencia
                         agency = Agencia.objects.all().first()

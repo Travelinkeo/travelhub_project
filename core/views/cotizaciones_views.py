@@ -3,6 +3,26 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 
 class CotizacionMagicQuoterPageView(LoginRequiredMixin, TemplateView):
     template_name = 'core/erp/cotizaciones/magic_quoter.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        lead_id = self.request.GET.get('lead_id')
+        if lead_id:
+            try:
+                from apps.crm.models_lead import OportunidadViaje
+                context['lead'] = OportunidadViaje.objects.filter(pk=lead_id).first()
+            except ImportError:
+                pass
+        
+        # Inyectar Tasa BCV para Calculadora Integrada
+        try:
+            from apps.contabilidad.models import TasaCambioBCV
+            tasa = TasaCambioBCV.objects.latest('fecha')
+            context['tasa_bcv'] = float(tasa.tasa_bsd_por_usd)
+        except Exception:
+            context['tasa_bcv'] = 0
+            
+        return context
 from django.db.models import Q
 from django.urls import reverse_lazy
 from django.shortcuts import redirect

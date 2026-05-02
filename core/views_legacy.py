@@ -48,7 +48,7 @@ from apps.bookings.models import (
     VentaParseMetadata,
 )
 from core.models.contabilidad import AsientoContable
-from apps.cms.models import PostRedesSociales as PaqueteTuristicoCMS
+# from apps.cms.models import PostRedesSociales as PaqueteTuristicoCMS
 from core.models_catalogos import Ciudad, Moneda, Pais, ProductoServicio, Proveedor, TipoCambio
 from .permissions import IsStaffOrGroupWrite
 

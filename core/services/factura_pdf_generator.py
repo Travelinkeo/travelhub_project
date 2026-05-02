@@ -5,7 +5,17 @@ Servicio para generar PDFs de facturas consolidadas con formato legal venezolano
 import os
 from django.template.loader import render_to_string
 from django.conf import settings
-from weasyprint import HTML
+
+def _get_html_renderer():
+    """Lazy loader for WeasyPrint HTML to avoid boot-time hangs."""
+    try:
+        from weasyprint import HTML
+        return HTML
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).error(f"Failed to import WeasyPrint: {e}")
+        return None
+
 import logging
 
 logger = logging.getLogger(__name__)
@@ -29,7 +39,10 @@ def generar_pdf_factura_consolidada(factura):
         )
         
         # Generar PDF con WeasyPrint
-        pdf_file = HTML(string=html_string).write_pdf()
+        HTML_renderer = _get_html_renderer()
+        if not HTML_renderer:
+            raise Exception("WeasyPrint is not available.")
+        pdf_file = HTML_renderer(string=html_string).write_pdf()
         
         logger.info(f"PDF generado exitosamente para factura {factura.numero_factura}")
         return pdf_file

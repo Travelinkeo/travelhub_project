@@ -14,11 +14,8 @@ if [ $# -gt 0 ]; then
     exec "$@"
 fi
 
-echo "📦 OMITIENDO migraciones de base de datos para depuración..."
 # python manage.py migrate --noinput
-
-echo "🎨 Recopilando archivos estáticos (Tailwind/CSS/JS)..."
 # python manage.py collectstatic --noinput
 
 # Ejecuta Gunicorn con auto-reload para desarrollo
-exec gunicorn travelhub.wsgi:application --bind 0.0.0.0:8000 --workers 2 --timeout 300 --reload
+exec gunicorn travelhub.wsgi:application --bind 0.0.0.0:8000 --workers 2 --timeout 300

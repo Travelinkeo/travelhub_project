@@ -1,7 +1,17 @@
 """Servicio para generar vouchers de servicios adicionales y alojamientos en PDF."""
 
 from django.template.loader import render_to_string
-from weasyprint import HTML
+
+def _get_html_renderer():
+    """Lazy loader for WeasyPrint HTML to avoid boot-time hangs."""
+    try:
+        from weasyprint import HTML
+        return HTML
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).error(f"Failed to import WeasyPrint: {e}")
+        return None
+
 from datetime import datetime
 import locale
 
@@ -49,7 +59,10 @@ def generar_voucher_servicio(servicio_adicional):
         }
         
         html_string = render_to_string('core/vouchers/voucher_seguro.html', context)
-        pdf_bytes = HTML(string=html_string).write_pdf()
+        HTML_renderer = _get_html_renderer()
+        if not HTML_renderer:
+             raise Exception("WeasyPrint is not available.")
+        pdf_bytes = HTML_renderer(string=html_string).write_pdf()
         filename = f"Voucher_Seguro_{context['numero_poliza']}.pdf"
         
         return pdf_bytes, filename

@@ -5,10 +5,7 @@ from typing import Dict, Any, Tuple
 import requests
 
 # Importación condicional segura de WeasyPrint
-try:
-    from weasyprint import HTML as WeasyHTML
-except ImportError:
-    WeasyHTML = None
+# Movida dentro del método para evitar bloqueos en el arranque
 
 logger = logging.getLogger(__name__)
 
@@ -22,6 +19,10 @@ class PdfGenerationService:
     @staticmethod
     def generate_ticket(data: Dict[str, Any], agencia_obj=None, **kwargs) -> Tuple[bytes, str]:
         from django.template.loader import render_to_string
+        try:
+            from weasyprint import HTML as WeasyHTML
+        except (ImportError, OSError):
+            WeasyHTML = None
         
         # Selección de plantilla
         source_system = data.get('SOURCE_SYSTEM', 'KIU').upper()

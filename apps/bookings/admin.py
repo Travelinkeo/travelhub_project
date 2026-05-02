@@ -10,7 +10,7 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.core.files.base import ContentFile
 from django.contrib import messages
 
-from core.services.pdf_service import generar_pdf_factura, generar_pdf_voucher_unificado
+# from core.services.pdf_service import generar_pdf_factura, generar_pdf_voucher_unificado
 from core.admin_migration import MigrationCheckInline, validate_migration_requirements_action
 from core.admin_saas import SaaSAdminMixin
 from core.models_catalogos import Moneda, ProductoServicio, Proveedor
@@ -204,6 +204,7 @@ class VentaAdmin(SaaSAdminMixin, admin.ModelAdmin):
             return
 
         venta = queryset.first()
+        from core.services.pdf_service import generar_pdf_voucher_unificado
         pdf_bytes, filename = generar_pdf_voucher_unificado(venta.pk)
 
         if pdf_bytes:
@@ -231,6 +232,7 @@ class VentaAdmin(SaaSAdminMixin, admin.ModelAdmin):
                     venta.cliente = cliente
                     venta.save(update_fields=['cliente'])
                     factura = FacturacionService.generar_factura_desde_venta(venta, cliente)
+                    from core.services.pdf_service import generar_pdf_factura
                     pdf_bytes, pdf_filename = generar_pdf_factura(factura.pk)
                     if pdf_bytes:
                         factura.archivo_pdf.save(pdf_filename, ContentFile(pdf_bytes), save=True)

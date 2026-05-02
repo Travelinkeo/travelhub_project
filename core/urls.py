@@ -159,7 +159,7 @@ router.register(r'pasajeros', PasajeroViewSet, basename='pasajero')
 
 # Register ViewSets from views.py
 try:
-    from .views import (
+    from core.views_legacy import (
         ProveedorViewSet, VentaViewSet, FacturaViewSet, AsientoContableViewSet,
         SegmentoVueloViewSet, AlojamientoReservaViewSet, TrasladoServicioViewSet,
         ActividadServicioViewSet, FeeVentaViewSet, PagoVentaViewSet,
@@ -551,16 +551,17 @@ urlpatterns = [
     path('intelligence/gds-analyzer/inject/', GDSInjectERPView.as_view(), name='gds_analyzer_inject'),
 
     # --- DASHBOARD DIRECTIVO (CEO) ---
-    path('ceo-dashboard/', __import__('core.views.dashboard', fromlist=['CEODashboardView']).CEODashboardView.as_view(), name='ceo_dashboard'),
-    path('api/ai-advisor/', __import__('core.views.dashboard', fromlist=['AIBusinessAdvisorView']).AIBusinessAdvisorView.as_view(), name='ai_business_advisor'),
+    path('ceo-dashboard/', lambda r: __import__('core.views.dashboard', fromlist=['CEODashboardView']).CEODashboardView.as_view()(r), name='ceo_dashboard'),
+    path('api/ai-advisor/', lambda r: __import__('core.views.dashboard', fromlist=['AIBusinessAdvisorView']).AIBusinessAdvisorView.as_view()(r), name='ai_business_advisor'),
 
     # --- GOD MODE (SuperAdmin) ---
-    path('god-mode/', __import__('core.views.god_mode_views', fromlist=['GodModeDashboardView']).GodModeDashboardView.as_view(), name='god_mode'),
-    path('god-mode/impersonate/<int:agencia_id>/', __import__('core.views.god_mode_views', fromlist=['ImpersonateAgencyView']).ImpersonateAgencyView.as_view(), name='god_mode_impersonate'),
+    path('god-mode/', lambda r: __import__('core.views.god_mode_views', fromlist=['GodModeDashboardView']).GodModeDashboardView.as_view()(r), name='god_mode'),
+    path('god-mode/impersonate/<int:agencia_id>/', lambda r, agencia_id: __import__('core.views.god_mode_views', fromlist=['ImpersonateAgencyView']).ImpersonateAgencyView.as_view()(r, agencia_id), name='god_mode_impersonate'),
+    path('god-mode/stop-impersonate/', lambda r: __import__('core.views.god_mode_views', fromlist=['StopImpersonateView']).StopImpersonateView.as_view()(r), name='god_mode_stop_impersonate'),
 
     # --- OMNISEARCH GLOBAL (Ctrl+K) ---
-    path('omnisearch/', __import__('core.views.search_views', fromlist=['GlobalOmnisearchView']).GlobalOmnisearchView.as_view(), name='omnisearch'),
-    path('api/search/clientes/', __import__('core.views.search_views', fromlist=['ClienteSearchAPIView']).ClienteSearchAPIView.as_view(), name='api_search_clientes'),
+    path('omnisearch/', lambda r: __import__('core.views.search_views', fromlist=['GlobalOmnisearchView']).GlobalOmnisearchView.as_view()(r), name='omnisearch'),
+    path('api/search/clientes/', lambda r: __import__('core.views.search_views', fromlist=['ClienteSearchAPIView']).ClienteSearchAPIView.as_view()(r), name='api_search_clientes'),
     path('api/crm/cedula-scanner/', CedulaScannerAPIView.as_view(), name='api_cedula_scanner'),
     
     # --- WEBHOOKS (The Invisible Agent) ---

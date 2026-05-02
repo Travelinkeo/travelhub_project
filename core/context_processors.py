@@ -28,9 +28,10 @@ def agency_context(request):
     return {
         'current_agency': agencia,
         'user_agency_role': rol,
-        # 🔥 BLINDAJE: Si la BD está vacía, mostramos la última tasa conocida de hoy (2 de abril)
         'tasa_usd': tasa_usd,
         'tasa_eur': tasa_eur,
+        'is_impersonating': 'impersonated_agencia_id' in request.session,
+        'impersonated_agencia_name': request.session.get('impersonated_agencia_name'),
     }
 
 def csp_nonce(request):

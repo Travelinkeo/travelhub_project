@@ -115,7 +115,13 @@
                             <td class="px-6 py-4 text-xs text-slate-500 font-medium">
                                 {{ agencia.fecha_creacion|date:"d M Y" }}
                             </td>
-                            <td class="px-6 py-4 text-right">
+                            <td class="px-6 py-4 text-right flex items-center justify-end gap-2">
+                                <a href="{% url 'core:god_mode_impersonate' agencia.id %}" 
+                                   class="flex items-center gap-2 px-3 py-1.5 bg-yellow-500/10 hover:bg-yellow-500 text-yellow-500 hover:text-slate-950 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all border border-yellow-500/20"
+                                   title="Login as Administrator">
+                                    <span class="material-symbols-outlined text-[16px]">login</span>
+                                    Login
+                                </a>
                                 <button class="p-2 text-slate-500 hover:text-white transition-colors">
                                     <span class="material-symbols-outlined text-[18px]">more_vert</span>
                                 </button>
@@ -147,26 +153,22 @@
                 </div>
             </div>
 
-            <!-- Global Activity -->
+            <!-- Global Activity (Dynamic) -->
             <div class="bg-slate-900/40 border border-slate-800 p-8 rounded-3xl">
                 <h3 class="text-xs font-black text-slate-500 uppercase tracking-widest mb-6">Actividad Global (IA)</h3>
                 <div class="space-y-6">
-                    <div class="flex gap-4">
-                        <div class="w-2 h-2 rounded-full bg-emerald-500 mt-1.5"></div>
+                    {% for item in actividad %}
+                    <div class="flex gap-4 group">
+                        <div class="w-2 h-2 rounded-full bg-{{ item.color|default:'blue' }}-500 mt-1.5 shadow-[0_0_8px_rgba(var(--{{ item.color }}-500),0.5)]"></div>
                         <div>
-                            <p class="text-xs font-bold text-white">Boleto Procesado Exitosamente</p>
-                            <p class="text-[10px] text-slate-500 mt-1">Agencia: Viajes Premium | GDS: Sabre</p>
-                            <p class="text-[10px] text-slate-600 font-mono mt-1">Hace 2 minutos</p>
+                            <p class="text-xs font-bold text-white group-hover:text-{{ item.color|default:'blue' }}-400 transition-colors">{{ item.titulo }}</p>
+                            <p class="text-[10px] text-slate-500 mt-1">{{ item.detalle }}</p>
+                            <p class="text-[10px] text-slate-600 font-mono mt-1">{{ item.fecha|timesince }} ago</p>
                         </div>
                     </div>
-                    <div class="flex gap-4">
-                        <div class="w-2 h-2 rounded-full bg-blue-500 mt-1.5"></div>
-                        <div>
-                            <p class="text-xs font-bold text-white">Nuevo Onboarding Iniciado</p>
-                            <p class="text-[10px] text-slate-500 mt-1">IP: 190.201.XX.XX | Plan: PRO</p>
-                            <p class="text-[10px] text-slate-600 font-mono mt-1">Hace 15 minutos</p>
-                        </div>
-                    </div>
+                    {% empty %}
+                    <p class="text-[10px] text-slate-600 italic">No hay actividad reciente.</p>
+                    {% endfor %}
                 </div>
             </div>
         </div>

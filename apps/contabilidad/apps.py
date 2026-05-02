@@ -7,6 +7,6 @@ class ContabilidadConfig(AppConfig):
     name = 'apps.contabilidad'
     verbose_name = 'Contabilidad VEN-NIF'
     
-    def ready(self):
-        """Importar señales al iniciar la aplicación"""
-        import apps.contabilidad.signals  # noqa
+    # def ready(self):
+    #     """Importar señales al iniciar la aplicación"""
+    #     import apps.contabilidad.signals  # noqa

@@ -1,157 +1,58 @@
 # 📚 Índice de Documentación - TravelHub
 
-## 🗂️ Estructura de Documentación
+**Última actualización**: 2 de Mayo de 2026
 
-```
-docs/
-├── INDEX.md (este archivo)
-├── api/              # Documentación de APIs
-├── frontend/         # Documentación del frontend
-├── backend/          # Documentación del backend
-├── guides/           # Guías de usuario
-├── deployment/       # Deployment y configuración
-└── user/             # Manuales de usuario
-```
+Bienvenido a la documentación oficial de TravelHub. Tras una extensa revisión y limpieza, este índice centraliza los documentos técnicos y manuales operativos que se encuentran **actualmente activos**. Todos los reportes obsoletos, pruebas y scripts legacy han sido aislados para su futura eliminación.
 
 ---
 
-## 🚀 Inicio Rápido
+## 🏛️ 1. Arquitectura y Visión General
+Documentos centrales que describen la estructura y el propósito del sistema.
 
-**Para empezar rápidamente**: [`guides/INICIO_RAPIDO.md`](guides/INICIO_RAPIDO.md)
+- **[REPORTE_ARQUITECTURA_2026.md](REPORTE_ARQUITECTURA_2026.md)** - 🌟 Documento Maestro de Arquitectura (La fuente de la verdad para el estado actual del ecosistema).
+- **[ARCHITECTURE.md](ARCHITECTURE.md)** - Resumen técnico de la arquitectura.
+- **[ESTRUCTURA_CARPETAS.md](ESTRUCTURA_CARPETAS.md)** - Mapa detallado de todos los módulos del proyecto.
+- **[SYSTEM_SNAPSHOT.md](SYSTEM_SNAPSHOT.md)** - Resumen de la infraestructura.
+- **[BUSINESS_MODEL.md](BUSINESS_MODEL.md)** - Modelo de negocio SaaS.
 
----
+## ⚙️ 2. Guías de Desarrollo e Infraestructura
+Para desarrolladores y encargados de DevOps.
 
-## 📖 Documentación por Categoría
+- **[README.md](README.md)** - Guía de entrada principal al repositorio.
+- **[DEVELOPMENT.md](DEVELOPMENT.md)** - Flujos de trabajo y estándares.
+- **[DOCKER_README.md](DOCKER_README.md)** - Todo lo necesario para levantar el proyecto con contenedores.
+- **[ORGANIZACION_PROYECTO.md](ORGANIZACION_PROYECTO.md)** - Guía de organización general de código.
+- **[CRON_SETUP.md](CRON_SETUP.md)** - Configuración de tareas programadas (Celery Beat).
+- **[MULTI_TENANCY.md](MULTI_TENANCY.md)** - Cómo funciona la arquitectura SaaS para múltiples agencias.
 
-### 🎨 Frontend
+## 🔌 3. APIs y Componentes Clave
+Documentación de interfaces y microservicios internos.
 
-| Documento | Descripción |
-|-----------|-------------|
-| [`frontend/NUEVAS_FUNCIONALIDADES_FRONTEND.md`](frontend/NUEVAS_FUNCIONALIDADES_FRONTEND.md) | Todas las funcionalidades implementadas |
-| [`frontend/URLS_DIRECTAS.md`](frontend/URLS_DIRECTAS.md) | Lista completa de URLs |
-| [`frontend/TABLA_FUNCIONALIDADES.md`](frontend/TABLA_FUNCIONALIDADES.md) | Tabla de estado de implementación |
-| [`frontend/RESUMEN_IMPLEMENTACION_COMPLETA.md`](frontend/RESUMEN_IMPLEMENTACION_COMPLETA.md) | Resumen ejecutivo |
-| [`frontend/FRONTEND_AIRLINES_INTEGRATION.md`](frontend/FRONTEND_AIRLINES_INTEGRATION.md) | Integración de aerolíneas |
+- **[DATA_DICTIONARY.md](DATA_DICTIONARY.md)** - Diccionario de datos de la base de datos central.
+- **[API_AUTOMATION.md](API_AUTOMATION.md)** - Automatizaciones y Webhooks.
+- **[TRANSLATOR_API.md](TRANSLATOR_API.md)** - Documentación del motor de traducción de itinerarios (GDS a JSON/HTML).
 
-### 🔌 API
+## ✈️ 4. Operaciones, Uso y Parsers (GDS)
+Guías sobre el negocio principal y manuales de usuario.
 
-| Documento | Descripción |
-|-----------|-------------|
-| [`api/FRONTEND_API_ENDPOINTS.md`](api/FRONTEND_API_ENDPOINTS.md) | Todos los endpoints disponibles |
-| [`api/FRONTEND_INTEGRATION_EXAMPLES.md`](api/FRONTEND_INTEGRATION_EXAMPLES.md) | Ejemplos de integración |
-| [`api/FRONTEND_API_GUIDE.md`](api/FRONTEND_API_GUIDE.md) | Guía de uso de la API |
-| [`api/RESUMEN_IMPLEMENTACION_FRONTEND_API.md`](api/RESUMEN_IMPLEMENTACION_FRONTEND_API.md) | Resumen de implementación |
-| [`api/MEJORAS_IMPLEMENTADAS.md`](api/MEJORAS_IMPLEMENTADAS.md) | Mejoras de calidad |
+- **[MANUAL_DEL_USUARIO.md](MANUAL_DEL_USUARIO.md)** - 📖 **El Gran Libro de Consultas.** Manual paso a paso, súper amigable y sin tecnicismos, ideal para entrenar a cualquier persona que vaya a usar el sistema.
+- **[MANUAL_FUNCIONAL.md](MANUAL_FUNCIONAL.md)** - 👥 Guía para gerentes y contadores. Describe el "por qué" funcional de la plataforma.
+- **[OPERATIONS.md](OPERATIONS.md)** - Guía de operaciones del ERP y despliegue.
+- **[PARSING_RULES.md](PARSING_RULES.md)** - 📜 Los "10 Mandamientos" del parseo. Reglas técnicas de estandarización para KIU, Sabre, Amadeus.
+- **[GUIA_AMADEUS.md](GUIA_AMADEUS.md)** - Documentación sobre el procesamiento específico de Amadeus.
+- *(Nota: Para documentación extensa sobre parsers (Sabre, KIU, etc.) consultar el REPORTE_ARQUITECTURA_2026.md)*
 
-### ⚙️ Backend
-
-| Documento | Descripción |
-|-----------|-------------|
-| [`backend/CONTABILIDAD_VENEZUELA_VEN_NIF.md`](backend/CONTABILIDAD_VENEZUELA_VEN_NIF.md) | Sistema contable VEN-NIF |
-| [`backend/AUDIT.md`](backend/AUDIT.md) | Sistema de auditoría |
-| [`backend/NOTIFICACIONES.md`](backend/NOTIFICACIONES.md) | Sistema de notificaciones |
-| [`backend/REPORTES_CONTABLES.md`](backend/REPORTES_CONTABLES.md) | Reportes contables |
-| [`backend/REDIS_SETUP.md`](backend/REDIS_SETUP.md) | Configuración de Redis |
-| [`backend/PARSERS_AEROLINEAS.md`](backend/PARSERS_AEROLINEAS.md) | Parsers de boletos |
-| [`backend/AEROLINEAS_INTEGRATION_SUMMARY.md`](backend/AEROLINEAS_INTEGRATION_SUMMARY.md) | Integración de aerolíneas |
-
-### 📘 Guías
-
-| Documento | Descripción |
-|-----------|-------------|
-| [`guides/INICIO_RAPIDO.md`](guides/INICIO_RAPIDO.md) | ⭐ Guía de inicio rápido |
-| [`guides/README.md`](guides/README.md) | README principal del proyecto |
-| [`guides/CONTRIBUTING.md`](guides/CONTRIBUTING.md) | Guía de contribución |
-
-### 🚀 Deployment
-
-| Documento | Descripción |
-|-----------|-------------|
-| [`deployment/INSTRUCCIONES_NGROK.md`](deployment/INSTRUCCIONES_NGROK.md) | Exponer con ngrok |
-| [`deployment/COMPARTIR_EN_RED_LOCAL.md`](deployment/COMPARTIR_EN_RED_LOCAL.md) | Compartir en red local |
-| [`deployment/CIERRE_MENSUAL.md`](deployment/CIERRE_MENSUAL.md) | Proceso de cierre mensual |
-| [`deployment/SECURITY.md`](deployment/SECURITY.md) | Seguridad del sistema |
+## 🎥 5. Presentación y Demostraciones
+- **[GUIA_DEMO_EN_VIVO.md](GUIA_DEMO_EN_VIVO.md)** - Guía paso a paso para realizar demostraciones comerciales a potenciales agencias cliente.
 
 ---
 
-## 🎯 Documentación por Caso de Uso
+### 🗂️ Navegación por Subdirectorios
+Si buscas detalles muy específicos, puedes explorar los subdirectorios funcionales:
+- `api/`: Documentación de los endpoints REST.
+- `backend/` y `frontend/`: Detalles muy específicos del código legado o integraciones.
+- `contabilidad/` y `facturacion/`: Especificaciones del módulo contable VEN-NIF.
+- `saas/`: Detalles del modelo de negocio, integraciones de pago (Stripe) y métricas.
+- `deployment/`: Configuraciones de nube (Render, Railway).
 
-### Para Desarrolladores
-
-1. **Empezar a desarrollar**: [`guides/INICIO_RAPIDO.md`](guides/INICIO_RAPIDO.md)
-2. **Entender la API**: [`api/FRONTEND_API_ENDPOINTS.md`](api/FRONTEND_API_ENDPOINTS.md)
-3. **Ver ejemplos de código**: [`api/FRONTEND_INTEGRATION_EXAMPLES.md`](api/FRONTEND_INTEGRATION_EXAMPLES.md)
-4. **Contribuir**: [`guides/CONTRIBUTING.md`](guides/CONTRIBUTING.md)
-
-### Para Usuarios
-
-1. **Inicio rápido**: [`guides/INICIO_RAPIDO.md`](guides/INICIO_RAPIDO.md)
-2. **Funcionalidades disponibles**: [`frontend/NUEVAS_FUNCIONALIDADES_FRONTEND.md`](frontend/NUEVAS_FUNCIONALIDADES_FRONTEND.md)
-3. **URLs directas**: [`frontend/URLS_DIRECTAS.md`](frontend/URLS_DIRECTAS.md)
-
-### Para DevOps
-
-1. **Deployment**: [`deployment/INSTRUCCIONES_NGROK.md`](deployment/INSTRUCCIONES_NGROK.md)
-2. **Seguridad**: [`deployment/SECURITY.md`](deployment/SECURITY.md)
-3. **Redis**: [`backend/REDIS_SETUP.md`](backend/REDIS_SETUP.md)
-
-### Para Contadores
-
-1. **Sistema contable**: [`backend/CONTABILIDAD_VENEZUELA_VEN_NIF.md`](backend/CONTABILIDAD_VENEZUELA_VEN_NIF.md)
-2. **Reportes**: [`backend/REPORTES_CONTABLES.md`](backend/REPORTES_CONTABLES.md)
-3. **Cierre mensual**: [`deployment/CIERRE_MENSUAL.md`](deployment/CIERRE_MENSUAL.md)
-
----
-
-## 📊 Estado del Proyecto
-
-| Componente | Estado | Documentación |
-|------------|--------|---------------|
-| **Frontend** | ✅ 95% | Completa |
-| **Backend** | ✅ 100% | Completa |
-| **API** | ✅ 100% | Completa |
-| **Tests** | ⚠️ 71% | En progreso |
-| **Deployment** | ✅ 100% | Completa |
-
----
-
-## 🔍 Búsqueda Rápida
-
-### Funcionalidades Principales
-
-- **Dashboard**: [`frontend/NUEVAS_FUNCIONALIDADES_FRONTEND.md#1-dashboard-mejorado`](frontend/NUEVAS_FUNCIONALIDADES_FRONTEND.md)
-- **Liquidaciones**: [`frontend/NUEVAS_FUNCIONALIDADES_FRONTEND.md#2-liquidaciones-a-proveedores`](frontend/NUEVAS_FUNCIONALIDADES_FRONTEND.md)
-- **Pasaportes OCR**: [`frontend/NUEVAS_FUNCIONALIDADES_FRONTEND.md#3-pasaportes-ocr`](frontend/NUEVAS_FUNCIONALIDADES_FRONTEND.md)
-- **Auditoría**: [`frontend/NUEVAS_FUNCIONALIDADES_FRONTEND.md#4-auditoría-y-trazabilidad`](frontend/NUEVAS_FUNCIONALIDADES_FRONTEND.md)
-- **Reportes**: [`frontend/NUEVAS_FUNCIONALIDADES_FRONTEND.md#5-libro-diario-contable`](frontend/NUEVAS_FUNCIONALIDADES_FRONTEND.md)
-
-### Endpoints API
-
-- **Dashboard**: [`api/FRONTEND_API_ENDPOINTS.md#1-dashboard-de-métricas`](api/FRONTEND_API_ENDPOINTS.md)
-- **Liquidaciones**: [`api/FRONTEND_API_ENDPOINTS.md#2-liquidaciones-a-proveedores`](api/FRONTEND_API_ENDPOINTS.md)
-- **Pasaportes**: [`api/FRONTEND_API_ENDPOINTS.md#5-gestión-de-pasaportes-ocr`](api/FRONTEND_API_ENDPOINTS.md)
-- **Reportes**: [`api/FRONTEND_API_ENDPOINTS.md#7-reportes-contables`](api/FRONTEND_API_ENDPOINTS.md)
-
----
-
-## 📝 Notas
-
-- Toda la documentación está en formato Markdown
-- Los enlaces son relativos a la carpeta `docs/`
-- Documentación actualizada: Enero 2025
-- Versión del proyecto: 2.0
-
----
-
-## 🆘 Soporte
-
-Si no encuentras lo que buscas:
-
-1. Revisa el [`guides/README.md`](guides/README.md)
-2. Consulta [`guides/INICIO_RAPIDO.md`](guides/INICIO_RAPIDO.md)
-3. Busca en [`api/FRONTEND_API_ENDPOINTS.md`](api/FRONTEND_API_ENDPOINTS.md)
-
----
-
-**Última actualización**: Enero 2025  
-**Versión**: 2.0
+*(Nota: Los archivos que antes se encontraban aquí y que hacían referencia a bugs ya solucionados o reportes antiguos, han sido movidos a la cuarentena `_cuarentena_para_borrar/docs_desfasados/`)*

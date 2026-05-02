@@ -1,7 +1,17 @@
 import logging
 import io
 from django.template.loader import render_to_string
-from weasyprint import HTML
+
+def _get_html_renderer():
+    """Lazy loader for WeasyPrint HTML to avoid boot-time hangs."""
+    try:
+        from weasyprint import HTML
+        return HTML
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).error(f"Failed to import WeasyPrint: {e}")
+        return None
+
 from django.utils import timezone
 from django.db.models import Count, Sum, Q
 from apps.finance.models.reconciliacion import ReporteReconciliacion
@@ -43,8 +53,12 @@ class PDFService:
             html_string = render_to_string('finance/reports/reconciliation_pdf.html', context)
 
             # 3. Convertir a PDF usando WeasyPrint (en memoria)
+            HTML_renderer = _get_html_renderer()
+            if not HTML_renderer:
+                raise Exception("WeasyPrint is not available.")
+
             pdf_file = io.BytesIO()
-            HTML(string=html_string).write_pdf(target=pdf_file)
+            HTML_renderer(string=html_string).write_pdf(target=pdf_file)
             pdf_file.seek(0)
 
             logger.info(f"📄 Reporte PDF generado para la Conciliación {reporte_id} de {user.agencia.nombre}")

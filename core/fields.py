@@ -14,9 +14,6 @@ import base64
 import logging
 from django.conf import settings
 from django.db import models
-from cryptography.fernet import Fernet
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
 logger = logging.getLogger(__name__)
 
@@ -44,6 +41,10 @@ class EncryptedCharField(models.CharField):
         """Obtiene o crea una instancia de Fernet usando caché de clase"""
         if EncryptedCharField._cached_fernet is None:
             try:
+                from cryptography.fernet import Fernet
+                from cryptography.hazmat.primitives import hashes
+                from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+                
                 secret_key = settings.SECRET_KEY.encode()
                 kdf = PBKDF2HMAC(
                     algorithm=hashes.SHA256(),
@@ -123,6 +124,10 @@ class EncryptedTextField(models.TextField):
         """Obtiene o crea una instancia de Fernet usando caché de clase"""
         if EncryptedTextField._cached_fernet is None:
             try:
+                from cryptography.fernet import Fernet
+                from cryptography.hazmat.primitives import hashes
+                from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+                
                 secret_key = settings.SECRET_KEY.encode()
                 kdf = PBKDF2HMAC(
                     algorithm=hashes.SHA256(),

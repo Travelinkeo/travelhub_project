@@ -1,180 +1,308 @@
 {% extends "base_modern.html" %}
 {% load static %}
 
-{% block page_title %}Magic Quoter AI{% endblock %}
-{% block page_subtitle %}Obsidian Intelligence Engine · Generación de Presupuestos Instantáneos{% endblock %}
+{% block title %}Magic Quoter AI — TravelHub{% endblock %}
+
+{% block extra_head %}
+<style nonce="{{ request.csp_nonce }}">
+    /* IPHONE CUSTOM CSS - BULLETPROOF */
+    .custom-iphone {
+        width: 320px; height: 650px;
+        background: #0f172a; border: 12px solid #334155;
+        border-radius: 48px; position: relative;
+        overflow: hidden; box-shadow: 0 50px 100px -20px rgba(0,0,0,0.5);
+        flex-shrink: 0;
+    }
+    .iphone-notch {
+        position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+        width: 140px; height: 28px; background: #334155;
+        border-bottom-left-radius: 18px; border-bottom-right-radius: 18px; z-index: 20;
+    }
+    .iphone-screen { 
+        width: 100%; height: 100%; background: #ffffff; 
+        overflow-y: auto; overflow-x: hidden; 
+        display: flex; flex-direction: column;
+    }
+    
+    .magic-gradient { background: radial-gradient(circle at top right, rgba(var(--primary-rgb), 0.12), transparent); }
+    [x-cloak] { display: none !important; }
+
+    /* CONTRASTE MEJORADO (ULTRA DARK) - FORZADO V3 */
+    .text-premium-dark { color: #000000 !important; opacity: 1 !important; font-weight: 900 !important; }
+    .text-premium-strong { color: #000000 !important; font-weight: 800 !important; }
+    .text-premium-muted { color: #0f172a !important; font-weight: 700 !important; }
+    
+    /* DEBUG MARKER */
+    .debug-v3 { border: 2px solid #ff0000 !important; }
+</style>
+<!-- TEMPLATE_VERSION: 3.1_CONTRASTE_TOTAL -->
+{% endblock %}
 
 {% block content %}
-<div class="max-w-5xl mx-auto p-4 sm:p-6 font-display">
+<div class="flex-1 flex flex-col h-full bg-surface-base magic-gradient" x-data="magicApp()" x-cloak>
     
-    <!-- Top Header / Info -->
-    <div class="flex items-center justify-between mb-8">
-        <div class="flex items-center gap-4">
-            <div class="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
-                <span class="material-symbols-outlined text-primary text-3xl animate-pulse">psychology</span>
+    <!-- HEADER -->
+    <div class="h-16 border-b border-border-color px-8 flex items-center justify-between bg-surface-1/50 backdrop-blur-md sticky top-0 z-30">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
+                <span class="material-symbols-outlined text-[24px]">auto_awesome</span>
             </div>
             <div>
-                <h1 class="text-2xl font-bold text-text-main">Generador Inteligente de Cotizaciones</h1>
-                <p class="text-text-muted text-sm">Pega el texto de Sabre, KIU o Amadeus y deja que la IA haga el trabajo pesado.</p>
+                <h1 class="text-sm font-black text-text-main uppercase tracking-[0.2em]">Magic <span class="text-primary">Quoter AI</span></h1>
+                <p class="text-[9px] font-bold text-text-muted uppercase tracking-widest">Obsidian Emerald Engine</p>
             </div>
         </div>
-        <div class="hidden md:flex items-center gap-2">
-            <span class="px-3 py-1 bg-surface-2 border border-border-color rounded-full text-[10px] font-black text-text-secondary uppercase">Gemini 2.0 Flash</span>
-            <span class="px-3 py-1 bg-primary/10 border border-primary/20 rounded-full text-[10px] font-black text-primary uppercase">Active</span>
+        <div class="flex items-center gap-4">
+            <button @click="pasteTest()" class="px-4 py-2 bg-surface-2 hover:bg-surface-3 text-[9px] font-black uppercase tracking-widest border border-border-color rounded-xl transition-all">
+                Pegar Prueba
+            </button>
+            <div class="h-6 w-px bg-border-color"></div>
+            <div class="flex items-center gap-2">
+                <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.5)]"></div>
+                <span class="text-[9px] font-black text-text-muted uppercase tracking-widest">AI Online</span>
+            </div>
         </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
-        <!-- Input Section -->
-        <div class="lg:col-span-2 space-y-6">
-            <div class="card-base p-6 border-primary/20 bg-surface-1/50 backdrop-blur-sm">
-                <div class="flex items-center justify-between mb-4">
-                    <label class="text-xs font-bold text-primary uppercase tracking-widest">Input de Terminal GDS</label>
-                    <button class="text-[10px] text-text-muted hover:text-primary transition uppercase font-black" onclick="document.getElementById('raw_text').value = ''">Limpiar</button>
-                </div>
-                
-                <textarea id="raw_text" rows="12" 
-                    placeholder="Pega aquí el PNR o Itinerario completo (ej: 1 AA 100Y 10JAN JFKCDG...)"
-                    class="w-full bg-[#0d1117] border-2 border-border-color rounded-xl p-4 text-primary font-mono text-sm focus:border-primary/50 outline-none transition-all placeholder:opacity-20"></textarea>
-                
-                <div class="mt-6 flex items-center justify-between">
-                    <div class="flex items-center gap-2 text-[10px] text-text-muted italic">
-                        <span class="material-symbols-outlined text-[14px]">shield</span>
-                        Privacidad: Los datos se procesan de forma anónima.
+    <!-- MAIN BODY -->
+    <div class="flex-1 overflow-y-auto p-8 custom-scrollbar">
+        <div class="max-w-6xl mx-auto flex flex-col lg:flex-row items-start justify-center gap-16">
+            
+            <!-- LEFT: CONTROLS -->
+            <div class="w-full lg:w-[450px] space-y-6 sticky-panel">
+                <div class="card-base p-8 space-y-6 border-primary/10">
+                    <div class="space-y-3">
+                        <label class="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] flex justify-between">
+                            <span>Itinerario GDS</span>
+                            <span class="text-primary" x-text="rawText.length + ' Chars'"></span>
+                        </label>
+                        <textarea x-model="rawText" :disabled="loading"
+                                  class="w-full h-80 bg-surface-2 border border-border-color rounded-2xl p-5 text-xs font-mono text-text-main outline-none focus:border-primary transition-all resize-none shadow-inner"
+                                  placeholder="Pega el texto crudo aquí..."></textarea>
                     </div>
-                    <button id="btn-magic-generate" onclick="generateMagicQuote()"
-                        class="px-8 py-3 bg-primary text-surface-base font-black rounded-xl hover:shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] transition-all flex items-center gap-2 group">
-                        <span>GENERAR COTIZACIÓN</span>
-                        <span class="material-symbols-outlined group-hover:translate-x-1 transition">auto_awesome</span>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-surface-2 p-4 rounded-2xl border border-border-color">
+                            <label class="block text-[8px] font-black text-text-muted uppercase tracking-widest mb-1">Fee Agencia ($)</label>
+                            <input type="number" x-model.number="fee" class="w-full bg-transparent text-xl font-black outline-none text-text-main">
+                        </div>
+                        <div class="flex flex-col justify-center gap-2 pl-2">
+                           <label class="flex items-center gap-3 cursor-pointer">
+                               <input type="checkbox" x-model="showVes" class="w-4 h-4 rounded border-border-color bg-surface-3 text-primary focus:ring-primary">
+                               <span class="text-[9px] font-black text-text-muted uppercase tracking-widest">Ver en Bs</span>
+                           </label>
+                           <label class="flex items-center gap-3 cursor-pointer">
+                               <input type="checkbox" x-model="includeIgtf" class="w-4 h-4 rounded border-border-color bg-surface-3 text-primary focus:ring-primary">
+                               <span class="text-[9px] font-black text-text-muted uppercase tracking-widest">IGTF (+3%)</span>
+                           </label>
+                        </div>
+                    </div>
+
+                    <button @click="generate()" :disabled="loading || !rawText"
+                            class="w-full h-14 bg-primary hover:bg-primary-hover text-white rounded-2xl font-black transition-all flex items-center justify-center gap-3 shadow-xl shadow-primary/20">
+                        <span x-show="!loading" class="material-symbols-outlined text-[20px]">magic_button</span>
+                        <span x-show="loading" class="material-symbols-outlined animate-spin text-[20px]">sync</span>
+                        <span class="text-xs uppercase tracking-[0.2em]" x-text="loading ? 'Procesando...' : 'Transformar'"></span>
                     </button>
                 </div>
+
+                <div x-show="error" class="p-5 bg-status-danger-bg border border-status-danger/20 rounded-2xl animate-fade-in text-status-danger text-[10px] font-black uppercase" x-text="error"></div>
             </div>
 
-            <!-- Previsualización / Tips -->
-            <div class="grid grid-cols-2 gap-4">
-                <div class="card-base p-4 bg-surface-2 border-border-color opacity-50">
-                    <h3 class="text-[10px] font-bold text-text-secondary uppercase mb-2">Comandos Soportados</h3>
-                    <ul class="text-[10px] space-y-1 text-text-muted font-mono">
-                        <li>* SABRE: I, *P, *A...</li>
-                        <li>* KIU: IT, *R...</li>
-                        <li>* Amadeus: RT, TQT...</li>
-                    </ul>
-                </div>
-                <div class="card-base p-4 bg-surface-2 border-border-color opacity-50">
-                    <h3 class="text-[10px] font-bold text-text-secondary uppercase mb-2">Automatización Resend</h3>
-                    <p class="text-[10px] text-text-muted italic leading-relaxed">
-                        Al terminar, podrás enviar la cotización por email automáticamente desde @travelhub.cc.
-                    </p>
-                </div>
-            </div>
-        </div>
+            <!-- RIGHT: IPHONE -->
+            <div class="w-full lg:w-fit flex flex-col items-center gap-8">
+                
+                <div class="custom-iphone">
+                    <div class="iphone-notch"></div>
+                    <div class="iphone-screen custom-scrollbar" id="proposal-preview">
+                        
+                        <!-- EMPTY STATE -->
+                        <div x-show="!result && !loading" class="flex-1 flex flex-col items-center justify-center p-10 text-center space-y-4">
+                            <div class="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center">
+                                <span class="material-symbols-outlined text-slate-300 text-3xl">auto_awesome</span>
+                            </div>
+                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Tu propuesta aparecerá aquí</p>
+                        </div>
 
-        <!-- Right Side: AI Assistant Chat (Mock) -->
-        <div class="space-y-6">
-            <div class="card-base p-6 border-border-color bg-surface-2">
-                <h3 class="text-sm font-bold text-text-main mb-4 flex items-center gap-2">
-                    <span class="material-symbols-outlined text-primary text-[18px]">bolt</span>
-                    AI Advisor
-                </h3>
-                <div id="ai-messages" class="space-y-4 max-h-[400px] overflow-y-auto pr-2">
-                    <div class="bg-surface-3 p-3 rounded-tr-xl rounded-bl-xl rounded-br-xl text-xs text-text-secondary leading-relaxed border-l-2 border-primary">
-                        ¡Hola Armando! Pega el texto a la izquierda. Analizaré la ruta, buscaré fotos del destino y prepararé el presupuesto por ti.
+                        <!-- LOADING STATE -->
+                        <div x-show="loading" class="flex-1 flex flex-col items-center justify-center p-10 text-center space-y-4">
+                            <div class="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Creando Magia...</p>
+                        </div>
+
+                        <!-- RESULT CONTENT -->
+                        <div x-show="result" class="flex flex-col animate-fade-in">
+                            <div class="h-56 shrink-0 relative">
+                                <img :src="result && result.image ? result.image : 'https://images.unsplash.com/photo-1436491865332-7a61a109c05a?q=80&w=800&auto=format&fit=crop'" 
+                                     class="w-full h-full object-cover">
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
+                                <div class="absolute bottom-5 left-5 right-5 text-white">
+                                    <span class="bg-primary px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest mb-2 inline-block" x-text="result ? result.type : ''"></span>
+                                    <h4 class="text-2xl font-black leading-tight tracking-tighter" x-text="result ? 'Vuelo a ' + result.destination : ''"></h4>
+                                    <p class="text-[10px] font-bold text-slate-100 italic mt-1" x-text="result ? result.destination_description : ''"></p>
+                                </div>
+                            </div>
+
+                            <div class="p-6 space-y-8 bg-white flex-1">
+                                <div class="bg-slate-50 p-6 rounded-[24px] text-center border border-slate-100 shadow-sm">
+                                    <!-- TITULO EN OSCURO -->
+                                    <p class="text-[8px] font-black text-premium-dark uppercase tracking-widest mb-2" x-text="includeIgtf ? 'Inversión Total (Incluye IGTF)' : 'Inversión Estimada'"></p>
+                                    <div class="flex items-baseline justify-center gap-1">
+                                        <span class="text-2xl font-black text-premium-dark">$</span>
+                                        <span class="text-4xl font-black text-premium-dark tracking-tighter" x-text="displayPrice"></span>
+                                        <span class="text-[10px] font-bold text-premium-dark">USD</span>
+                                    </div>
+                                    <template x-if="showVes && tasaBcv > 0">
+                                        <div class="pt-3 border-t border-slate-100 mt-3">
+                                            <!-- MONTO VES EN OSCURO -->
+                                            <p class="text-[11px] font-black text-premium-dark uppercase" x-text="'Bs ' + displayPriceVes"></p>
+                                        </div>
+                                    </template>
+                                </div>
+
+                                <div class="space-y-4">
+                                    <h5 class="text-[10px] font-black text-premium-strong uppercase tracking-[0.2em] border-b border-slate-200 pb-2">Itinerario Confirmado</h5>
+                                    <div class="space-y-3">
+                                        <template x-for="f in (result ? result.flights : [])">
+                                            <div class="p-4 rounded-2xl border border-slate-200 bg-slate-50 flex justify-between items-center shadow-sm">
+                                                <div class="text-left">
+                                                    <p class="text-sm font-black text-premium-dark" x-text="f.departureCode"></p>
+                                                    <p class="text-[13px] text-premium-dark font-black mt-1" x-text="f.departureTime"></p>
+                                                </div>
+                                                <div class="flex-1 px-4 flex flex-col items-center">
+                                                    <div class="w-full h-px bg-slate-400 relative">
+                                                        <span class="material-symbols-outlined absolute -top-2.5 left-1/2 -translate-x-1/2 bg-white text-slate-600 text-[16px]">flight</span>
+                                                    </div>
+                                                    <span class="text-[9px] font-black text-premium-dark uppercase mt-2 text-center leading-none" x-text="f.airline"></span>
+                                                    <span class="text-[10px] font-black text-premium-dark mt-1 bg-slate-200 px-1.5 py-0.5 rounded" x-text="f.departureDate"></span>
+                                                </div>
+                                                <div class="text-right">
+                                                    <p class="text-sm font-black text-premium-dark" x-text="f.arrivalCode"></p>
+                                                    <p class="text-[13px] text-premium-dark font-black mt-1" x-text="f.arrivalTime"></p>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+
+                                <div class="pt-6 pb-6">
+                                    <div class="w-full h-12 bg-slate-900 text-white rounded-xl flex items-center justify-center font-black text-[10px] uppercase tracking-widest shadow-xl">
+                                        Aprobar Propuesta
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div id="loading-indicator" class="hidden mt-4">
-                     <div class="flex items-center gap-3">
-                        <div class="flex gap-1">
-                            <div class="w-1.5 h-1.5 bg-primary rounded-full animate-bounce"></div>
-                            <div class="w-1.5 h-1.5 bg-primary rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-                            <div class="w-1.5 h-1.5 bg-primary rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-                        </div>
-                        <span class="text-[10px] text-primary font-bold uppercase tracking-widest">IA Analizando Itinerario...</span>
-                     </div>
+
+                <!-- ACTIONS BELOW IPHONE -->
+                <div x-show="result" class="w-full max-w-[320px] animate-fade-in">
+                    <button @click="share()" :disabled="sharing"
+                            class="w-full h-16 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl font-black flex items-center justify-center gap-3 shadow-xl shadow-emerald-500/20 transition-all active:scale-95">
+                        <span class="material-symbols-outlined text-[24px]" x-show="!sharing">send</span>
+                        <span class="material-symbols-outlined animate-spin text-[24px]" x-show="sharing">sync</span>
+                        <span class="text-[10px] uppercase tracking-[0.2em]">Enviar por WhatsApp</span>
+                    </button>
                 </div>
-            </div>
-            
-            <div class="bg-gradient-to-br from-indigo-900/20 to-blue-900/20 border border-indigo-500/20 rounded-xl p-4">
-                <p class="text-[10px] text-indigo-300 font-medium">✨ Pro-Tip: Puedes incluir el desglose de tarifas TST o IATA para mayor precisión.</p>
+
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
 
-<script nonce="{{ request.csp_nonce }}">
-async function generateMagicQuote() {
-    const rawText = document.getElementById('raw_text').value;
-    const btn = document.getElementById('btn-magic-generate');
-    const loading = document.getElementById('loading-indicator');
-    const aiMessages = document.getElementById('ai-messages');
+{% block extra_scripts %}
+<script nonce="{{ csp_nonce }}">
+    function magicApp() {
+        return {
+            rawText: '',
+            fee: 50,
+            showVes: false,
+            includeIgtf: false,
+            tasaBcv: parseFloat("{{ tasa_bcv|default:'0' }}".replace(',', '.')),
+            loading: false,
+            sharing: false,
+            error: '',
+            result: null,
 
-    if (!rawText.trim()) {
-        window.dispatchEvent(new CustomEvent('notify', {
-            detail: { message: 'Por favor pegue el texto de la terminal GDS.', type: 'warning' }
-        }));
-        return;
-    }
+            init() {
+                console.log("Magic App Ready. Rate:", this.tasaBcv);
+            },
 
-    // UI Feedback
-    btn.disabled = true;
-    loading.classList.remove('hidden');
-    addAIMessage("Analizando bloques de texto y detectando sistema GDS...");
+            // PROPIEDADES COMPUTADAS REACTIVAS
+            get displayPrice() {
+                if (!this.result) return '0.00';
+                let total = (parseFloat(this.result.totalPrice) || 0) + (parseFloat(this.fee) || 0);
+                if (this.includeIgtf) total = total * 1.03;
+                return total.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            },
 
-    try {
-        const formData = new FormData();
-        formData.append('raw_text', rawText);
+            get displayPriceVes() {
+                if (!this.result || !this.tasaBcv) return '0,00';
+                let totalUsd = (parseFloat(this.result.totalPrice) || 0) + (parseFloat(this.fee) || 0);
+                if (this.includeIgtf) totalUsd = totalUsd * 1.03;
+                return (totalUsd * this.tasaBcv).toLocaleString('es-VE', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            },
 
-        const response = await fetch('{% url "core:cotizacion_magic_gpt" %}', {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-CSRFToken': '{{ csrf_token }}'
+            pasteTest() {
+                this.rawText = "1 TK 224E 20APR CCSIST 2310 1750\n2 TK 225E 30APR ISTCCS 0210 0815\nTOTAL USD 1450.00";
+            },
+
+            async generate() {
+                this.loading = true;
+                this.error = '';
+                this.result = null;
+                try {
+                    const res = await fetch('{% url "cotizaciones:magic_quoter_ai" %}', {
+                        method: 'POST',
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': '{{ csrf_token }}'
+                        },
+                        body: JSON.stringify({ 
+                            raw_text: this.rawText, 
+                            agency_fee: this.fee 
+                        })
+                    });
+                    const data = await res.json();
+                    if (!res.ok) throw new Error(data.error || 'Error en el motor de IA');
+                    this.result = data;
+                } catch (e) {
+                    this.error = e.message;
+                } finally {
+                    this.loading = false;
+                }
+            },
+
+            async share() {
+                this.sharing = true;
+                try {
+                    let totalFinal = (parseFloat(this.result.totalPrice) || 0) + (parseFloat(this.fee) || 0);
+                    if (this.includeIgtf) totalFinal = totalFinal * 1.03;
+
+                    const res = await fetch('{% url "cotizaciones:magic_quoter_save" %}', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
+                        body: JSON.stringify({ 
+                            ai_data: { ...this.result, totalPriceWithFee: totalFinal }, 
+                            raw_text: this.rawText, 
+                            agency_fee: this.fee,
+                            include_igtf: this.includeIgtf
+                        })
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        window.open(`https://wa.me/?text=${encodeURIComponent(data.whatsapp_msg)}`, '_blank');
+                    } else {
+                        throw new Error(data.error);
+                    }
+                } catch (e) {
+                    alert("Error: " + e.message);
+                } finally {
+                    this.sharing = false;
+                }
             }
-        });
-
-        const data = await response.json();
-
-        if (data.success) {
-            addAIMessage("✅ ¡Éxito! He detectado la ruta y generado la cotización con imágenes. Redirigiendo al editor...");
-            window.dispatchEvent(new CustomEvent('notify', {
-                detail: { message: data.message, type: 'success' }
-            }));
-            setTimeout(() => {
-                window.location.href = data.redirect_url;
-            }, 1500);
-        } else {
-             btn.disabled = false;
-             loading.classList.add('hidden');
-             addAIMessage("❌ Error: " + data.error);
-             window.dispatchEvent(new CustomEvent('notify', {
-                detail: { message: 'Fallo en la IA: ' + data.error, type: 'error' }
-            }));
         }
-    } catch (error) {
-        btn.disabled = false;
-        loading.classList.add('hidden');
-        addAIMessage("💥 Error de conexión satelital.");
-        console.error(error);
     }
-}
-
-function addAIMessage(msg) {
-    const aiMessages = document.getElementById('ai-messages');
-    const div = document.createElement('div');
-    div.className = "bg-surface-3 p-3 rounded-tr-xl rounded-bl-xl rounded-br-xl text-xs text-text-secondary leading-relaxed border-l-2 border-primary mt-2 animate-fade-in";
-    div.innerText = msg;
-    aiMessages.appendChild(div);
-    aiMessages.scrollTop = aiMessages.scrollHeight;
-}
 </script>
-
-<style>
-    @keyframes fade-in {
-        from { opacity: 0; transform: translateY(5px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-    .animate-fade-in {
-        animation: fade-in 0.3s ease-out forwards;
-    }
-</style>
 {% endblock %}

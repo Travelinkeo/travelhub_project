@@ -77,9 +77,9 @@ INSTALLED_APPS = [
     # Apps de Terceros
     'rest_framework',
     'rest_framework.authtoken',
-    'corsheaders',
-    'drf_spectacular',
-    'django_filters',
+    # 'corsheaders',
+    # 'drf_spectacular',
+    # 'django_filters',
     
     # TravelHub Apps (Orden Crítico)
     'core.apps.CoreConfig', # Módulo Núcleo (SaaS/Arqui/Auth)
@@ -90,9 +90,9 @@ INSTALLED_APPS = [
     'apps.marketing.apps.MarketingConfig',
     'apps.cms.apps.CmsConfig',
     'apps.crm.apps.CrmConfig',
-    'apps.accounting_assistant.apps.AccountingAssistantConfig',
-    'django_celery_results',
-    'django_celery_beat',
+    # 'apps.accounting_assistant.apps.AccountingAssistantConfig',
+    # 'django_celery_results',
+    # 'django_celery_beat',
     # 'django_extensions',
 ]
 
@@ -104,11 +104,11 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'core.middleware.ThreadLocalContextMiddleware',  # captura contexto (User/Agency/IP) en thread-local
-    'core.middleware.SecurityHeadersMiddleware',  # security headers & CSP report-only
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'core.middleware_saas.SaaSLimitMiddleware',  # Verificar límites de plan SaaS
+#    'core.middleware.ThreadLocalContextMiddleware',
+#    'core.middleware.SecurityHeadersMiddleware',
+     'django.contrib.messages.middleware.MessageMiddleware',
+     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+#    'core.middleware_saas.SaaSLimitMiddleware',
 ]
 
 ROOT_URLCONF = 'travelhub.urls'
@@ -301,27 +301,41 @@ SAAS_PLAN_LIMITS = {
 # El username SIEMPRE es la cadena literal 'apikey'.
 # La password es tu SENDGRID_API_KEY del .env.
 # Fallback a consola en local si la clave no está configurada.
+# ✉️ ESTRATEGIA DE EMAIL (RESEND > SENDGRID > CONSOLE)
+_resend_key = os.getenv('RESEND_API_KEY', '')
 _sendgrid_key = os.getenv('SENDGRID_API_KEY', '')
 
-if _sendgrid_key and not _sendgrid_key.startswith('SG.pon-'):
-    # 🚀 MODO REAL — SendGrid SMTP (transaccional, sin riesgo de bloqueo de Gmail)
+if _resend_key:
+    # 🚀 MODO RESEND (Primario) - Usando django-resend si está disponible o directo
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend' # O un backend específico
+    RESEND_API_KEY = _resend_key
+    # Configuración SMTP de Resend (Alternativa rápida y compatible)
+    EMAIL_HOST = 'smtp.resend.com'
+    EMAIL_PORT = 587
+    EMAIL_USE_TLS = True
+    EMAIL_HOST_USER = 'resend'
+    EMAIL_HOST_PASSWORD = _resend_key
+    logger.info("📧 Email Engine: RESEND (SMTP) Activado")
+
+elif _sendgrid_key and not _sendgrid_key.startswith('SG.pon-'):
+    # 🥈 MODO SENDGRID (Fallback)
     EMAIL_BACKEND  = 'django.core.mail.backends.smtp.EmailBackend'
     EMAIL_HOST     = 'smtp.sendgrid.net'
     EMAIL_PORT     = 587
     EMAIL_USE_TLS  = True
-    EMAIL_HOST_USER     = 'apikey'         # literal requerido por SendGrid
-    EMAIL_HOST_PASSWORD = _sendgrid_key    # tu API Key
-else:
-    # 💻 DESARROLLO LOCAL — salida en consola (sin enviar emails reales)
-    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-    EMAIL_HOST = 'smtp.sendgrid.net'   # referencia para cuando se active
-    EMAIL_PORT = 587
-    EMAIL_USE_TLS = True
-    EMAIL_HOST_USER = 'apikey'
+    EMAIL_HOST_USER     = 'apikey'
     EMAIL_HOST_PASSWORD = _sendgrid_key
+    logger.info("📧 Email Engine: SENDGRID Activado")
 
-DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'TravelHub <noreply@travelhub.ai>')
-SERVER_EMAIL = DEFAULT_FROM_EMAIL  # emails de error de Django
+else:
+    # 💻 MODO DESARROLLO (Consola)
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+    logger.info("📧 Email Engine: CONSOLE (Desarrollo)")
+
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'TravelHub <noreply@travelhub.cc>')
+
+SERVER_EMAIL = DEFAULT_FROM_EMAIL
+
 
 # Redes Sociales y Notificaciones
 TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
@@ -335,23 +349,20 @@ WHATSAPP_MICROSERVICE_TOKEN = os.getenv('WHATSAPP_MICROSERVICE_TOKEN')
 # GCP - Document AI
 GCP_JSON_CREDENTIALS = os.getenv('GCP_JSON_CREDENTIALS') 
 
+# Celery Configuration (Disabled for debug)
 # Celery Configuration
-CELERY_BROKER_URL = os.getenv('REDIS_URL', 'redis://localhost:6379/0')
-CELERY_RESULT_BACKEND = 'django-db'
+CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'redis://redis:6379/0')
+CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND', 'redis://redis:6379/0')
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = TIME_ZONE
 
 # --- CACHE CONFIGURATION ---
-# Usamos Redis para compartir cache entre workers de Gunicorn (importante para debouncing)
 CACHES = {
     "default": {
-        "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": os.getenv("REDIS_URL", "redis://redis:6379/0").replace("/0", "/1"),
-        "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient",
-        }
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "unique-snowflake",
     }
 }
 

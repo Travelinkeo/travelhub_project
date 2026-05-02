@@ -15,7 +15,7 @@ urlpatterns = [
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('accounts/', include('django.contrib.auth.urls')),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
-    path('asistente/', include('apps.accounting_assistant.urls', namespace='accounting_assistant')),
+    # path('asistente/', include('apps.accounting_assistant.urls', namespace='accounting_assistant')),
     path('contabilidad/', include('apps.contabilidad.urls', namespace='contabilidad')),
     path('api/contabilidad/', include('apps.contabilidad.urls', namespace='contabilidad_api')),  # API de tasas
     path('api/', include('apps.cotizaciones.urls')),

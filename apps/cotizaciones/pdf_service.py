@@ -1,12 +1,5 @@
 from django.template.loader import render_to_string
-try:
-    from weasyprint import HTML
-    WEASYPRINT_AVAILABLE = True
-except (ImportError, OSError):
-    WEASYPRINT_AVAILABLE = False
-    HTML = None
 from apps.cotizaciones.models import Cotizacion
-
 from django.conf import settings
 
 def generar_pdf_cotizacion(cotizacion: Cotizacion):
@@ -14,7 +7,9 @@ def generar_pdf_cotizacion(cotizacion: Cotizacion):
     Renderiza una cotización a HTML y luego a un PDF.
     Devuelve el contenido del PDF en bytes.
     """
-    if not WEASYPRINT_AVAILABLE:
+    try:
+        from weasyprint import HTML
+    except (ImportError, OSError):
         raise RuntimeError(
             "WeasyPrint no está disponible. Instala las dependencias del sistema: "
             "apt-get install libpango-1.0-0 libpangoft2-1.0-0 libgdk-pixbuf2.0-0 libgobject-2.0-0"

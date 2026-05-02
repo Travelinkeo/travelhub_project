@@ -3,7 +3,16 @@ import logging
 from io import BytesIO
 
 from django.template.loader import get_template
-from weasyprint import HTML
+
+def _get_html_renderer():
+    """Lazy loader for WeasyPrint HTML to avoid boot-time hangs."""
+    try:
+        from weasyprint import HTML
+        return HTML
+    except Exception as e:
+        logger.error(f"Failed to import WeasyPrint: {e}")
+        return None
+
 
 from apps.finance.models import Factura
 from core.models import Agencia
@@ -41,7 +50,12 @@ def generar_pdf_factura(factura_id: int):
         }
         html_string = template.render(context)
 
-        pdf_bytes = HTML(string=html_string).write_pdf()
+        HTML_renderer = _get_html_renderer()
+        if not HTML_renderer:
+            logger.error("WeasyPrint is not available.")
+            return None, None
+            
+        pdf_bytes = HTML_renderer(string=html_string).write_pdf()
         
         filename = f"Factura-{factura.numero_factura}.pdf"
 
@@ -101,7 +115,12 @@ def generar_pdf_voucher_unificado(venta_id: int):
         template = get_template(template_path)
         html_string = template.render(voucher_data)
 
-        pdf_bytes = HTML(string=html_string).write_pdf()
+        HTML_renderer = _get_html_renderer()
+        if not HTML_renderer:
+            logger.error("WeasyPrint is not available.")
+            return None, None
+
+        pdf_bytes = HTML_renderer(string=html_string).write_pdf()
         
         filename = f"Voucher-{venta.localizador or venta.id_venta}.pdf"
 

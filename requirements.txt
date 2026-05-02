@@ -39,6 +39,8 @@ pyDolarVenezuela>=1.4.0
 stripe
 twilio
 sendgrid>=6.0.0
+resend
+
 weasyprint
 sentry-sdk
 amadeus

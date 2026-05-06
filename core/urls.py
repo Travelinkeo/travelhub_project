@@ -81,7 +81,7 @@ from core.views.marketing_views import GenerateAIImageView, MarketingHubView
 from apps.crm.api import ClienteViewSet, PasajeroViewSet
 
 # Alias para compatibilidad (Importando directamente del legacy para evitar ciclos)
-from core.views.boleto_views import (
+from apps.bookings.views.boleto_views import (
     BoletoUploadAPIView,
     BoletoMassActionAPIView,
     VentaDoubleInvoiceAPIView,

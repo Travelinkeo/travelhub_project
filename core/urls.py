@@ -406,12 +406,12 @@ urlpatterns = [
     # Translator APIs
     path(r'api/translator/', include('core.translator_urls', namespace='translator')),
     path('tools/traductor/', __import__('core.views.translator_views', fromlist=['TraductorView']).TraductorView.as_view(), name='traductor_tool'),
-    path(r'api/boletos/actualizar-item/', lambda r: __import__('core.views.dashboard_boletos', fromlist=['actualizar_item_boleto']).actualizar_item_boleto(r), name='actualizar_item_boleto'),
+    path(r'api/boletos/actualizar-item/', lambda r: __import__('apps.bookings.views.dashboard_boletos', fromlist=['actualizar_item_boleto']).actualizar_item_boleto(r), name='actualizar_item_boleto'),
     
     # Dashboard y Vouchers
-    path(r'api/dashboard/metricas/', lambda r: __import__('core.views.dashboard_views', fromlist=['dashboard_metricas']).dashboard_metricas(r), name='dashboard_metricas'),
-    path(r'dashboard/modern/', lambda r: __import__('core.views.dashboard_views', fromlist=['DashboardView']).DashboardView.as_view()(r), name='modern_dashboard'),
-    path(r'api/dashboard/alertas/', lambda r: __import__('core.views.dashboard_views', fromlist=['dashboard_alertas']).dashboard_alertas(r), name='dashboard_alertas'),
+    path(r'api/dashboard/metricas/', lambda r: __import__('apps.bookings.views.dashboard_views', fromlist=['dashboard_metricas']).dashboard_metricas(r), name='dashboard_metricas'),
+    path(r'dashboard/modern/', lambda r: __import__('apps.bookings.views.dashboard_views', fromlist=['DashboardView']).DashboardView.as_view()(r), name='modern_dashboard'),
+    path(r'api/dashboard/alertas/', lambda r: __import__('apps.bookings.views.dashboard_views', fromlist=['dashboard_alertas']).dashboard_alertas(r), name='dashboard_alertas'),
     path(r'api/ventas/<int:venta_id>/generar-voucher/', lambda r, venta_id: __import__('core.views.voucher_views', fromlist=['generar_voucher']).generar_voucher(r, venta_id), name='generar_voucher'),
     
     # Auditoría

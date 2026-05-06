@@ -2,7 +2,6 @@ import uuid
 from django.db import models
 from django.utils import timezone
 from datetime import timedelta
-from apps.bookings.models import Venta
 
 class LinkDePago(models.Model):
     """
@@ -16,7 +15,7 @@ class LinkDePago(models.Model):
         EXPIRADO = 'EXP', 'Expirado'
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    venta = models.OneToOneField(Venta, on_delete=models.CASCADE, related_name='link_pago')
+    venta = models.OneToOneField('bookings.Venta', on_delete=models.CASCADE, related_name='link_pago')
     
     monto_total = models.DecimalField(max_digits=12, decimal_places=2)
     moneda = models.CharField(max_length=3, default='USD')

@@ -4,6 +4,10 @@ from django.contrib.auth.mixins import AccessMixin
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q
 
+class SoftDeleteManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(is_deleted=False)
+
 class SoftDeleteModel(models.Model):
     """
     BOLSAS DE AIRE: Mixin para borrado lógico (Soft Delete).
@@ -11,6 +15,9 @@ class SoftDeleteModel(models.Model):
     """
     is_deleted = models.BooleanField(default=False, verbose_name="Eliminado", db_index=True)
     deleted_at = models.DateTimeField(null=True, blank=True, verbose_name="Fecha de Eliminación")
+
+    objects = SoftDeleteManager()
+    all_objects = models.Manager()
 
     class Meta:
         abstract = True
@@ -94,3 +101,13 @@ class AgencyRoleRequiredMixin(AccessMixin, SaaSMixin):
                 return super().dispatch(request, *args, **kwargs)
         
         raise PermissionDenied("No tienes permisos suficientes para realizar esta acción.")
+
+
+class HtmxResponseMixin:
+    """Devuelve un template parcial si la petición viene de HTMX"""
+    htmx_template_name = None
+
+    def get_template_names(self):
+        if self.request.headers.get('HX-Request') and self.htmx_template_name:
+            return [self.htmx_template_name]
+        return super().get_template_names()

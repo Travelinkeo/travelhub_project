@@ -1,14 +1,40 @@
 # Contenido del archivo core/urls.py
 from django.http import HttpResponse
 
+from django.urls import reverse
 def debug_check(request):
-    return HttpResponse("SYSTEM DIAGNOSTIC: travelhub_project/core IS LIVE")
+    from django.urls import get_resolver
+    resolver = get_resolver()
+    output = []
+    output.append(f"DEBUG URL CHECK")
+    output.append(f"Current namespace: {request.resolver_match.namespace if request.resolver_match else 'None'}")
+    
+    try:
+        url = reverse('core:boletos_reportes_exportar')
+        output.append(f"SUCCESS: 'core:boletos_reportes_exportar' -> {url}")
+    except Exception as e:
+        output.append(f"FAIL: 'core:boletos_reportes_exportar' -> {e}")
+
+    output.append("\nALL URL NAMES:")
+    for url_pattern in resolver.url_patterns:
+        if hasattr(url_pattern, 'name') and url_pattern.name:
+            output.append(f"Global: {url_pattern.name}")
+        if hasattr(url_pattern, 'url_patterns'):
+            ns = getattr(url_pattern, 'namespace', 'NoNS')
+            app = getattr(url_pattern, 'app_name', 'NoApp')
+            for sub in url_pattern.url_patterns:
+                if hasattr(sub, 'name') and sub.name:
+                    output.append(f"[{ns}/{app}]: {sub.name}")
+    
+    return HttpResponse("<pre>" + "\n".join(output) + "</pre>")
 
 import json
 import logging
 
 from django.http import JsonResponse
 from django.urls import include, path, re_path
+
+app_name = 'core'
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
@@ -37,8 +63,16 @@ from rest_framework_simplejwt.views import (
 # Importar desde el paquete de vistas modular
 from .views import (
     erp_views, ventas_views, proveedores_views, clientes_views, agencia_views, facturacion_views,
-    passport_views, home_view, pasajeros_views, user_profile_views, flights_views, catalogos_views, audit_views_frontend,
+    passport_views, home_view, pasajeros_views, user_profile_views, flights_views, audit_views_frontend,
     inventario_views
+)
+from apps.common.views.catalogos_views import (
+    CatalogosCenterView, AerolineaListView, ProductoServicioListView,
+    GeografiaListView, PaisListView, TipoCambioListView, TipoCambioCreateView,
+    SincronizarTasasActionView, ProveedorListView, ProveedorCreateView,
+    ProveedorUpdateView, ProveedorDeleteView, ComisionProveedorServicioListView,
+    ComisionProveedorServicioCreateView, ComisionProveedorServicioUpdateView,
+    ComisionProveedorServicioDeleteView
 )
 from .dashboard_stats import get_dashboard_stats as dashboard_stats_api
 from .api.hotel_api import HotelQuoteAPI
@@ -96,8 +130,9 @@ router = DefaultRouter()
 # Registro manual de APIs básicas
 from rest_framework import viewsets, permissions, filters
 from .serializers import PaisSerializer, CiudadSerializer, MonedaSerializer, TipoCambioSerializer, ProductoServicioSerializer, AerolineaSerializer
-from .models_catalogos import Pais, Ciudad, Moneda, TipoCambio, ProductoServicio, Aerolinea
-
+from apps.common.models import Pais, Ciudad, Aerolinea
+from apps.finance.models.currencies import Moneda, TipoCambio
+from apps.bookings.models import ProductoServicio
 class PaisViewSet(viewsets.ModelViewSet):
     queryset = Pais.objects.all()
     serializer_class = PaisSerializer
@@ -261,29 +296,29 @@ urlpatterns = [
     path('api/generate-flyer/', generate_flyer_api, name='api_generate_flyer'),
 
     # Tasas de Cambio y Catálogos
-    path('setup/catalogos/', catalogos_views.CatalogosCenterView.as_view(), name='catalogos_center'),
-    path('setup/catalogos/aerolineas/', catalogos_views.AerolineaListView.as_view(), name='aerolineas_list'),
-    path('setup/catalogos/productos/', catalogos_views.ProductoServicioListView.as_view(), name='productos_list'),
-    path('setup/catalogos/geografia/', catalogos_views.GeografiaListView.as_view(), name='geografia_list'),
+    path('setup/catalogos/', CatalogosCenterView.as_view(), name='catalogos_center'),
+    path('setup/catalogos/aerolineas/', AerolineaListView.as_view(), name='aerolineas_list'),
+    path('setup/catalogos/productos/', ProductoServicioListView.as_view(), name='productos_list'),
+    path('setup/catalogos/geografia/', GeografiaListView.as_view(), name='geografia_list'),
     
     # Catálogo Terrestre (Inventario Propio)
     path('inventario/terrestre/', inventario_views.CatalogoTerrestreListView.as_view(), name='catalogo_terrestre'),
     path('inventario/terrestre/nuevo/', inventario_views.ProductoTerrestreCreateView.as_view(), name='producto_terrestre_create'),
     
     # Proveedores
-    path('setup/catalogos/proveedores/', catalogos_views.ProveedorListView.as_view(), name='proveedores_list'),
-    path('setup/catalogos/proveedores/nuevo/', catalogos_views.ProveedorCreateView.as_view(), name='proveedores_nuevo'),
-    path('setup/catalogos/proveedores/<int:pk>/editar/', catalogos_views.ProveedorUpdateView.as_view(), name='proveedores_editar'),
-    path('setup/catalogos/proveedores/<int:pk>/eliminar/', catalogos_views.ProveedorDeleteView.as_view(), name='proveedores_eliminar'),
+    path('setup/catalogos/proveedores/', ProveedorListView.as_view(), name='proveedores_list'),
+    path('setup/catalogos/proveedores/nuevo/', ProveedorCreateView.as_view(), name='proveedores_nuevo'),
+    path('setup/catalogos/proveedores/<int:pk>/editar/', ProveedorUpdateView.as_view(), name='proveedores_editar'),
+    path('setup/catalogos/proveedores/<int:pk>/eliminar/', ProveedorDeleteView.as_view(), name='proveedores_eliminar'),
     
     # Comisiones
-    path('setup/catalogos/comisiones/', catalogos_views.ComisionProveedorServicioListView.as_view(), name='comisiones_list'),
-    path('setup/catalogos/comisiones/nuevo/', catalogos_views.ComisionProveedorServicioCreateView.as_view(), name='comisiones_nuevo'),
-    path('setup/catalogos/comisiones/<int:pk>/editar/', catalogos_views.ComisionProveedorServicioUpdateView.as_view(), name='comisiones_editar'),
-    path('setup/catalogos/comisiones/<int:pk>/eliminar/', catalogos_views.ComisionProveedorServicioDeleteView.as_view(), name='comisiones_eliminar'),
-    path('setup/tasas/', catalogos_views.TipoCambioListView.as_view(), name='tasas_list'),
-    path('setup/tasas/nueva/', catalogos_views.TipoCambioCreateView.as_view(), name='tasas_nuevo'),
-    path('setup/tasas/sincronizar/', catalogos_views.SincronizarTasasActionView.as_view(), name='tasas_sincronizar'),
+    path('setup/catalogos/comisiones/', ComisionProveedorServicioListView.as_view(), name='comisiones_list'),
+    path('setup/catalogos/comisiones/nuevo/', ComisionProveedorServicioCreateView.as_view(), name='comisiones_nuevo'),
+    path('setup/catalogos/comisiones/<int:pk>/editar/', ComisionProveedorServicioUpdateView.as_view(), name='comisiones_editar'),
+    path('setup/catalogos/comisiones/<int:pk>/eliminar/', ComisionProveedorServicioDeleteView.as_view(), name='comisiones_eliminar'),
+    path('setup/tasas/', TipoCambioListView.as_view(), name='tasas_list'),
+    path('setup/tasas/nueva/', TipoCambioCreateView.as_view(), name='tasas_nuevo'),
+    path('setup/tasas/sincronizar/', SincronizarTasasActionView.as_view(), name='tasas_sincronizar'),
     
     # Stripe Billing Success/Cancel
     path('billing/success/', lambda r: __import__('core.views.billing_success_views', fromlist=['billing_success']).billing_success(r), name='billing_success'),
@@ -312,6 +347,7 @@ urlpatterns = [
     path('dashboard/erp/boletos/', erp_views.DashboardBoletosView.as_view(), name='boletos_dashboard'),
     path('dashboard/erp/boletos/buscar/', erp_views.BoletosBusquedaView.as_view(), name='boletos_busqueda'),
     path('dashboard/erp/boletos/reportes/', erp_views.BoletosReportesView.as_view(), name='boletos_reportes'),
+    path('dashboard/erp/boletos/reportes/exportar/', erp_views.ExportarBoletosExcelView.as_view(), name='boletos_reportes_exportar'),
     path('dashboard/erp/boletos/anulaciones/', erp_views.BoletosAnulacionesView.as_view(), name='boletos_anulaciones'),
     path('dashboard/erp/boletos/importar/', erp_views.BoletosImportarView.as_view(), name='boletos_importar'),
     path('dashboard/erp/boletos/manual/', erp_views.BoletosManualView.as_view(), name='boletos_manual'),
@@ -398,7 +434,10 @@ urlpatterns = [
     path(r'api/ventas/<int:pk>/double-invoice/', VentaDoubleInvoiceAPIView.as_view(), name='api_venta_double_invoice'),
     path(r'api/boletos/audit/', BoletoAuditAPIView.as_view(), name='api_boleto_audit'),
     
-    # Billing/SaaS - Páginas
+    # Conciliación de Proveedores
+    path('api/reconciliation/', csrf_exempt(lambda r: __import__('core.views.reconciliation_views', fromlist=['SupplierReconciliationAPIView']).SupplierReconciliationAPIView.as_view()(r)), name='api_reconciliation'),
+    path('finance/supplier-reconciliation/', lambda r: __import__('core.views.reconciliation_views', fromlist=['SupplierReconciliationUIView']).SupplierReconciliationUIView.as_view()(r), name='supplier_reconciliation_ui'),
+
     path(r'billing/success/', lambda r: __import__('core.views.billing_success_views', fromlist=['billing_success']).billing_success(r), name='billing_success'),
     path(r'billing/cancel/', lambda r: __import__('core.views.billing_success_views', fromlist=['billing_cancel']).billing_cancel(r), name='billing_cancel'),
     
@@ -487,6 +526,7 @@ urlpatterns = [
     # Portal del Pasajero ("White-Label")
     path('v/<uuid:token>/', lambda r, token: __import__('core.views.public_views', fromlist=['PublicItineraryView']).PublicItineraryView.as_view()(r, token=token), name='public_itinerary'),
     path('v/<uuid:token>/pdf/', lambda r, token: __import__('core.views.public_views', fromlist=['PublicVoucherPDFView']).PublicVoucherPDFView.as_view()(r, token=token), name='public_voucher_pdf'),
+    path('v/hotel/<int:alojamiento_id>/pdf/', lambda r, alojamiento_id: __import__('core.views.public_views', fromlist=['PublicHotelVoucherPDFView']).PublicHotelVoucherPDFView.as_view()(r, alojamiento_id=alojamiento_id), name='public_hotel_voucher'),
 
     # Contextual Wiki & GDS Wiki
     path('api/wiki/search/', lambda r: __import__('core.views.wiki_views', fromlist=['search_wiki_context']).search_wiki_context(r), name='wiki_search'),

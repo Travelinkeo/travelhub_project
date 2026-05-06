@@ -1,0 +1,58 @@
+{% load humanize %}
+<div class="space-y-4">
+    <div class="flex justify-between items-center">
+        <h2 class="text-xl font-bold text-white">Productos y Servicios</h2>
+        <button hx-get="{% url 'core:productos_nuevo' %}"
+                hx-target="#modal-container"
+                class="px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg">
+            + Nuevo Producto
+        </button>
+    </div>
+
+    <div class="flex gap-4">
+        <input type="text" name="q" placeholder="Buscar..."
+               class="flex-1 bg-gray-800 border border-gray-700 text-white rounded-lg px-4 py-2"
+               hx-get="{% url 'core:productos_list' %}"
+               hx-trigger="keyup changed delay:500ms"
+               hx-target="#productos-list">
+        
+        <select name="tipo" 
+                class="bg-gray-800 border border-gray-700 text-white rounded-lg px-4 py-2"
+                hx-get="{% url 'core:productos_list' %}"
+                hx-trigger="change"
+                hx-target="#productos-list">
+            <option value="">Todos los tipos</option>
+            <option value="BOL">Boleto</option>
+            <option value="HOT">Hotel</option>
+            <option value="SEG">Seguro</option>
+            <option value="TRF">Transfer</option>
+        </select>
+    </div>
+
+    <div id="productos-list">
+        <table class="w-full text-left">
+            <thead>
+                <tr class="border-b border-gray-700 text-xs uppercase text-gray-400">
+                    <th class="pb-3">Nombre</th>
+                    <th class="pb-3">Tipo</th>
+                    <th class="pb-3">Moneda</th>
+                    <th class="pb-3 text-right">Precio Base</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-700">
+                {% for producto in productos %}
+                <tr class="hover:bg-white/5">
+                    <td class="py-3 text-white">{{ producto.nombre }}</td>
+                    <td class="py-3 text-gray-300">{{ producto.get_tipo_display }}</td>
+                    <td class="py-3 text-gray-300">{{ producto.moneda.codigo }}</td>
+                    <td class="py-3 text-white text-right">$ {{ producto.precio_base|floatformat:2 }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="py-4 text-center text-gray-500">No hay productos</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>

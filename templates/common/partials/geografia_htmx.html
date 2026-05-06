@@ -1,0 +1,29 @@
+{% load humanize %}
+<div class="space-y-4">
+    <div class="flex justify-between items-center">
+        <h2 class="text-xl font-bold text-white">Geografía (Países y Ciudades)</h2>
+        <span class="text-sm text-gray-400">{{ paises_count|default:0 }} países</span>
+    </div>
+
+    <input type="text" name="q" placeholder="Buscar país o ciudad..."
+           class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-4 py-2"
+           hx-get="{% url 'core:geografia_list' %}"
+           hx-trigger="keyup changed delay:500ms"
+           hx-target="#geografia-list">
+
+    <div id="geografia-list" class="space-y-4">
+        {% for ciudad in ciudades %}
+        <div class="bg-gray-800 border border-gray-700 rounded-lg p-4">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h3 class="text-white font-medium">{{ ciudad.nombre }}</h3>
+                    <p class="text-sm text-gray-400">{{ ciudad.pais.nombre }}</p>
+                </div>
+                <span class="text-xs font-mono text-gray-500">{{ ciudad.codigo_iata|default:"--" }}</span>
+            </div>
+        </div>
+        {% empty %}
+        <div class="text-center text-gray-500 py-8">No hay ciudades registradas</div>
+        {% endfor %}
+    </div>
+</div>

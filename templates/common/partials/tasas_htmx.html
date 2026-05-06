@@ -1,0 +1,38 @@
+{% load humanize %}
+<div class="space-y-4">
+    <div class="flex justify-between items-center">
+        <h2 class="text-xl font-bold text-white">Tasas de Cambio</h2>
+        <button hx-get="{% url 'core:tasas_nuevo' %}"
+                hx-target="#modal-container"
+                class="px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg">
+            + Nueva Tasa
+        </button>
+    </div>
+
+    <div id="tasas-list">
+        <table class="w-full text-left">
+            <thead>
+                <tr class="border-b border-gray-700 text-xs uppercase text-gray-400">
+                    <th class="pb-3">Moneda Origen</th>
+                    <th class="pb-3">Moneda Destino</th>
+                    <th class="pb-3">Tasa</th>
+                    <th class="pb-3">Fecha Efectiva</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-700">
+                {% for tasa in tasas %}
+                <tr class="hover:bg-white/5">
+                    <td class="py-3 text-white">{{ tasa.moneda_origen.codigo_iso }}</td>
+                    <td class="py-3 text-white">{{ tasa.moneda_destino.codigo_iso }}</td>
+                    <td class="py-3 text-gray-300">{{ tasa.tasa_conversion|floatformat:4 }}</td>
+                    <td class="py-3 text-gray-400">{{ tasa.fecha_efectiva|date:"d/m/Y" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="py-4 text-center text-gray-500">No hay tasas registradas</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -62,9 +62,18 @@ from rest_framework_simplejwt.views import (
 
 # Importar desde el paquete de vistas modular
 from .views import (
-    erp_views, ventas_views, proveedores_views, clientes_views, agencia_views, facturacion_views,
+    erp_views, proveedores_views, clientes_views, agencia_views,
     passport_views, home_view, pasajeros_views, user_profile_views, flights_views, audit_views_frontend,
     inventario_views
+)
+from apps.bookings.views.ventas_views import (
+    VentaDetailView, VentaCreateView, VentaUpdateView,
+    VentasDashboardView, VentaAssignClientView, VentaAddFeeView,
+    VentaGenerateInvoiceView, eliminar_venta
+)
+from apps.finance.views.facturacion_views import (
+    FacturacionDashboardView, FacturaDetailView, descargar_pdf_factura,
+    generar_factura_desde_venta, emitir_factura_definitiva
 )
 from apps.common.views.catalogos_views import (
     CatalogosCenterView, AerolineaListView, ProductoServicioListView,
@@ -339,7 +348,7 @@ urlpatterns = [
     path('upload/boleto/<int:pk>/revisar/', lambda r, pk: __import__('core.views.upload', fromlist=['ReviewBoletoView']).ReviewBoletoView.as_view()(r, pk=pk), name='revisar_boleto'),
     path('upload/boleto/<int:pk>/desasociar-venta/', lambda r, pk: __import__('core.views.upload', fromlist=['DesasociarVentaView']).DesasociarVentaView.as_view()(r, pk=pk), name='desasociar_venta'),
     path('upload/boleto/<int:pk>/eliminar-fisicamente/', lambda r, pk: __import__('core.views.upload', fromlist=['eliminar_boleto']).eliminar_boleto(r, pk=pk), name='eliminar_boleto_hard'),
-    path('ventas/<int:pk>/eliminar-fisicamente/', lambda r, pk: __import__('core.views.ventas_views', fromlist=['eliminar_venta']).eliminar_venta(r, pk=pk), name='eliminar_venta_hard'),
+    path('ventas/<int:pk>/eliminar-fisicamente/', lambda r, pk: __import__('apps.bookings.views.ventas_views', fromlist=['eliminar_venta']).eliminar_venta(r, pk=pk), name='eliminar_venta_hard'),
     # path('api/chatbot/converse/', views.ChatbotConverseView.as_view(), name='chatbot_converse'),
     # path('api/health/', views.HealthCheckView.as_view(), name='health'),
     # path('api/auth/login/', views.LoginView.as_view(), name='login'),
@@ -493,11 +502,11 @@ urlpatterns = [
     path(r'api/redoc/', lambda r: __import__('drf_spectacular.views', fromlist=['SpectacularRedocView']).SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
     
     # Facturación
-    path('facturacion/', facturacion_views.FacturacionDashboardView.as_view(), name='facturacion_dashboard'),
-    path('facturacion/<int:pk>/', facturacion_views.FacturaDetailView.as_view(), name='factura_detalle'),
-    path('facturacion/<int:pk>/pdf/', facturacion_views.descargar_pdf_factura, name='factura_pdf'),
-    path('ventas/<int:pk>/facturar/', facturacion_views.generar_factura_desde_venta, name='venta_facturar'),
-    path('facturacion/<int:pk>/emitir/', facturacion_views.emitir_factura_definitiva, name='factura_emitir'),
+    path('facturacion/', FacturacionDashboardView.as_view(), name='facturacion_dashboard'),
+    path('facturacion/<int:pk>/', FacturaDetailView.as_view(), name='factura_detalle'),
+    path('facturacion/<int:pk>/pdf/', descargar_pdf_factura, name='factura_pdf'),
+    path('ventas/<int:pk>/facturar/', generar_factura_desde_venta, name='venta_facturar'),
+    path('facturacion/<int:pk>/emitir/', emitir_factura_definitiva, name='factura_emitir'),
 
     # Cotizaciones
     path('cotizaciones/', cotizaciones_views.CotizacionDashboardView.as_view(), name='cotizacion_dashboard'),

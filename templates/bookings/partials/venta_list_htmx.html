@@ -1,0 +1,94 @@
+{% load humanize %}
+<div class="space-y-4" x-data="{ expanded: null }">
+    <div class="flex justify-between items-center">
+        <h2 class="text-xl font-bold text-white">Ventas Recientes</h2>
+        <button hx-get="{% url 'bookings:venta_create' %}"
+                hx-target="#modal-container"
+                class="px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg transition-colors">
+            + Nueva Venta
+        </button>
+    </div>
+
+    <!-- Filters -->
+    <div class="flex gap-2">
+        <input type="text" name="q" value="{{ request.GET.q|default:'' }}"
+               placeholder="Buscar por localizador, cliente..."
+               class="flex-1 bg-gray-800 border border-gray-700 text-white rounded-lg px-4 py-2"
+               hx-get="{% url 'bookings:venta_list' %}"
+               hx-trigger="keyup changed delay:500ms"
+               hx-target="#venta-list">
+        <select name="estado" 
+                class="bg-gray-800 border border-gray-700 text-white rounded-lg px-4 py-2"
+                hx-get="{% url 'bookings:venta_list' %}"
+                hx-trigger="change"
+                hx-target="#venta-list">
+            <option value="">Todos los estados</option>
+            <option value="PEN">Pendiente</option>
+            <option value="PAG">Pagado</option>
+            <option value="ANU">Anulado</option>
+        </select>
+    </div>
+
+    <!-- List -->
+    <div id="venta-list" class="space-y-2">
+        {% for venta in ventas %}
+        <div class="bg-gray-800 border border-gray-700 rounded-lg p-4 hover:border-primary transition-colors">
+            <div class="flex justify-between items-start">
+                <div class="flex-1">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="text-white font-medium">#{{ venta.id_venta }}</span>
+                        <span class="px-2 py-0.5 text-xs rounded-full 
+                            {% if venta.estado == 'PAG' %}bg-emerald-500/10 text-emerald-400
+                            {% elif venta.estado == 'PEN' %}bg-yellow-500/10 text-yellow-400
+                            {% else %}bg-red-500/10 text-red-400{% endif %}">
+                            {{ venta.get_estado_display }}
+                        </span>
+                    </div>
+                    <p class="text-gray-400 text-sm">{{ venta.localizador|default:"Sin localizador" }}</p>
+                    <p class="text-gray-500 text-xs mt-1">
+                        {% if venta.cliente %}{{ venta.cliente.nombres }} {{ venta.cliente.apellidos }}{% else %}Sin cliente{% endif %}
+                    </p>
+                </div>
+                <div class="text-right">
+                    <p class="text-white font-bold">$ {{ venta.total_venta|floatformat:2|intcomma }}</p>
+                    <p class="text-gray-500 text-xs">{{ venta.fecha_venta|date:"d M Y" }}</p>
+                </div>
+            </div>
+            <div class="mt-3 flex gap-2">
+                <button @click="expanded === {{ venta.pk }} ? expanded = null : expanded = {{ venta.pk }}"
+                        class="text-blue-400 hover:text-blue-300 text-sm">
+                    Ver Detalle
+                </button>
+                <a href="{% url 'bookings:venta_detail' venta.pk %}"
+                   class="text-gray-400 hover:text-white text-sm">Editar</a>
+            </div>
+            <!-- Expanded Details -->
+            <div x-show="expanded === {{ venta.pk }}" x-collapse class="mt-3 pt-3 border-t border-gray-700">
+                <div class="grid grid-cols-2 gap-2 text-sm">
+                    <div><span class="text-gray-500">Moneda:</span> <span class="text-white">{{ venta.moneda.codigo }}</span></div>
+                    <div><span class="text-gray-500">Saldo:</span> <span class="text-yellow-400">$ {{ venta.saldo_pendiente|floatformat:2 }}</span></div>
+                    <div><span class="text-gray-500">Pagado:</span> <span class="text-emerald-400">$ {{ venta.monto_pagado|floatformat:2 }}</span></div>
+                    <div><span class="text-gray-500">Boletos:</span> <span class="text-white">{{ venta.boletos_adjuntos.count }}</span></div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="text-center text-gray-500 py-8">No hay ventas registradas</div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <div class="flex justify-center gap-2">
+        {% if page_obj.has_previous %}
+        <button hx-get="?page={{ page_obj.previous_page_number }}" hx-target="#venta-list"
+                class="px-3 py-1 bg-gray-700 text-white rounded">Anterior</button>
+        {% endif %}
+        <span class="px-3 py-1 text-gray-400">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+        <button hx-get="?page={{ page_obj.next_page_number }}" hx-target="#venta-list"
+                class="px-3 py-1 bg-gray-700 text-white rounded">Siguiente</button>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>

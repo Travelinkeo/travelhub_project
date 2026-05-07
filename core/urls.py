@@ -62,10 +62,12 @@ from rest_framework_simplejwt.views import (
 
 # Importar desde el paquete de vistas modular
 from .views import (
-    erp_views, proveedores_views, clientes_views, agencia_views,
+    erp_views, proveedores_views, agencia_views,
     passport_views, home_view, pasajeros_views, user_profile_views, flights_views, audit_views_frontend,
     inventario_views
 )
+from apps.crm.views.clientes_views import ClienteListView, ClienteCreateView, ClienteUpdateView
+from apps.marketing.views.marketing_views import GenerateAIImageView, MarketingHubView
 from apps.bookings.views.ventas_views import (
     VentaDetailView, VentaCreateView, VentaUpdateView,
     VentasDashboardView, VentaAssignClientView, VentaAddFeeView,
@@ -86,7 +88,7 @@ from apps.common.views.catalogos_views import (
 from .dashboard_stats import get_dashboard_stats as dashboard_stats_api
 from .api.hotel_api import HotelQuoteAPI
 from core.views.hotel_views import HotelListView, HotelDetailView, download_story_view, GenerateCopyAPI
-from core.views.marketing_views import GenerateAIImageView, MarketingHubView
+from apps.marketing.views.marketing_views import GenerateAIImageView, MarketingHubView
 from apps.crm.api import ClienteViewSet, PasajeroViewSet
 
 # Alias para compatibilidad (Importando directamente del legacy para evitar ciclos)

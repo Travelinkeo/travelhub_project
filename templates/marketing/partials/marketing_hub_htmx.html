@@ -1,0 +1,82 @@
+{% load humanize %}
+<div class="space-y-6" x-data="{ tab: 'contenido' }">
+    <!-- Tabs -->
+    <div class="flex gap-4 border-b border-gray-700 pb-2">
+        <button @click="tab = 'contenido'"
+                :class="tab === 'contenido' ? 'text-primary border-b-2 border-primary' : 'text-gray-400'"
+                class="px-4 py-2 text-sm font-medium transition-colors">
+            Generación de Contenido
+        </button>
+        <button @click="tab = 'imagenes'"
+                :class="tab === 'imagenes' ? 'text-primary border-b-2 border-primary' : 'text-gray-400'"
+                class="px-4 py-2 text-sm font-medium transition-colors">
+            Imágenes IA
+        </button>
+        <button @click="tab = 'campanas'"
+                :class="tab === 'campanas' ? 'text-primary border-b-2 border-primary' : 'text-gray-400'"
+                class="px-4 py-2 text-sm font-medium transition-colors">
+            Campañas
+        </button>
+    </div>
+
+    <!-- Tab Content: Contenido -->
+    <div x-show="tab === 'contenido'" class="space-y-4">
+        <div class="bg-gray-800 border border-gray-700 rounded-lg p-6">
+            <h3 class="text-lg font-semibold text-white mb-4">Generar Contenido con IA</h3>
+            <form hx-post="{% url 'core:generate_copy_api' %}"
+                  hx-target="#copy-result"
+                  hx-swap="innerHTML"
+                  class="space-y-4">
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Tipo de contenido</label>
+                    <select name="content_type" class="w-full bg-gray-700 border border-gray-600 text-white rounded-lg px-4 py-2">
+                        <option value="blog">Artículo de Blog</option>
+                        <option value="social">Post para Redes Sociales</option>
+                        <option value="email">Email Marketing</option>
+                        <option value="descripcion">Descripción de Viaje</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Tema o descripción</label>
+                    <textarea name="prompt" rows="3" placeholder="Describe el contenido que necesitas..."
+                              class="w-full bg-gray-700 border border-gray-600 text-white rounded-lg px-4 py-2"></textarea>
+                </div>
+                <button type="submit" 
+                        class="px-6 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg font-medium">
+                    Generar con IA
+                </button>
+            </form>
+            <div id="copy-result" class="mt-4 p-4 bg-gray-900 rounded-lg text-gray-300"></div>
+        </div>
+    </div>
+
+    <!-- Tab Content: Imágenes -->
+    <div x-show="tab === 'imagenes'" class="space-y-4">
+        <div class="bg-gray-800 border border-gray-700 rounded-lg p-6">
+            <h3 class="text-lg font-semibold text-white mb-4">Generar Imágenes con IA</h3>
+            <form hx-post="{% url 'core:generate_ai_image' %}"
+                  hx-target="#image-result"
+                  hx-swap="innerHTML"
+                  class="space-y-4">
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Descripción de la imagen</label>
+                    <input type="text" name="prompt" placeholder="Ej: Playa tropical atardecer, familia feliz..."
+                           class="w-full bg-gray-700 border border-gray-600 text-white rounded-lg px-4 py-2">
+                </div>
+                <button type="submit" 
+                        class="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium">
+                    Generar Imagen
+                </button>
+            </form>
+            <div id="image-result" class="mt-4 p-4 bg-gray-900 rounded-lg text-gray-300"></div>
+        </div>
+    </div>
+
+    <!-- Tab Content: Campañas -->
+    <div x-show="tab === 'campanas'" class="space-y-4">
+        <div class="bg-gray-800 border border-gray-700 rounded-lg p-6">
+            <h3 class="text-lg font-semibold text-white mb-4">Campañas de Marketing</h3>
+            <p class="text-gray-400">Próximamente: Creación y gestión de campañas automáticas.</p>
+        </div>
+    </div>
+</div>

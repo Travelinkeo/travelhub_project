@@ -3,10 +3,11 @@ import pytest
 from decimal import Decimal
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
-from core.models import LiquidacionProveedor
+from apps.contabilidad.models import LiquidacionProveedor
 from apps.bookings.models import Venta
-from core.models_catalogos import Proveedor, Moneda
-from personas.models import Cliente
+from apps.bookings.models import Proveedor
+from apps.finance.models.currencies import Moneda
+from apps.crm.models import Cliente
 
 User = get_user_model()
 

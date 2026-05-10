@@ -1,8 +1,9 @@
 from rest_framework import viewsets, permissions, filters
-from core.models_catalogos import ComisionProveedorServicio
+from core.api.mixins.tenant import TenantViewSetMixin
+from apps.bookings.models import ComisionProveedorServicio
 from core.serializers import ComisionProveedorServicioSerializer
 
-class ComisionProveedorServicioViewSet(viewsets.ModelViewSet):
+class ComisionProveedorServicioViewSet(TenantViewSetMixin, viewsets.ModelViewSet):
     """
     API endpoint para gestionar las reglas de comisiones de proveedores.
     """

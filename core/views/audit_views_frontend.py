@@ -1,7 +1,8 @@
 from django.views.generic import ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
-from core.models import Agencia, AuditLog
+from core.models.agencia import Agencia
+from core.models.audit import AuditLog
 from core.mixins import AgencyRoleRequiredMixin
 
 class AgenciaAuditLogListView(AgencyRoleRequiredMixin, ListView):

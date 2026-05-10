@@ -1,7 +1,7 @@
 """Tests adicionales para aumentar cobertura de parsers"""
 import pytest
-from core.parsers.sabre_parser import SabreParser
-from core.parsers.amadeus_parser import AmadeusParser
+from core.parsers.legacy.sabre_parser import SabreParser
+from core.parsers.legacy.amadeus_parser import AmadeusParser
 from core.parsers.kiu_parser import KIUParser
 
 

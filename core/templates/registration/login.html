@@ -159,9 +159,59 @@
 
         <!-- Footer -->
         <div class="mt-8 pt-6 border-t border-white/5 text-center">
-            <p class="text-xs text-slate-500">© 2026 TravelHub Pro. Todos los derechos reservados.</p>
+            <div class="mt-4">
+                <p class="text-sm text-slate-400 mb-3">— o ingresa sin contraseña —</p>
+                <form method="post" action="{% url 'magic_link_request' %}" id="magic-link-form">
+                    {% csrf_token %}
+                    <div class="flex gap-2">
+                        <input type="email" name="email" id="magic-email"
+                            class="flex-1 px-4 py-2.5 bg-white/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none text-sm"
+                            placeholder="Tu email"
+                            required>
+                        <button type="submit"
+                            class="px-4 py-2.5 bg-slate-700 hover:bg-slate-600 text-white font-medium rounded-xl transition-all text-sm whitespace-nowrap"
+                            id="magic-link-btn">
+                            Enviar Enlace Magico
+                        </button>
+                    </div>
+                    <p id="magic-link-success" class="hidden mt-2 text-sm text-green-400">
+                        Enlace enviado! Revisa tu email.
+                    </p>
+                </form>
+            </div>
+            <p class="text-xs text-slate-500 mt-4">© 2026 TravelHub Pro. Todos los derechos reservados.</p>
         </div>
     </div>
+
+    <script>
+    document.getElementById('magic-link-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        var btn = document.getElementById('magic-link-btn');
+        var successMsg = document.getElementById('magic-link-success');
+        var emailInput = document.getElementById('magic-email');
+        btn.disabled = true;
+        btn.textContent = 'Enviando...';
+        fetch(this.action, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json', 'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value},
+            body: JSON.stringify({email: emailInput.value})
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.message) {
+                successMsg.classList.remove('hidden');
+                btn.textContent = 'Enviado!';
+            } else {
+                btn.textContent = 'Error';
+                setTimeout(function() { btn.disabled = false; btn.textContent = 'Enviar Enlace Magico'; }, 3000);
+            }
+        })
+        .catch(function() {
+            btn.textContent = 'Error';
+            setTimeout(function() { btn.disabled = false; btn.textContent = 'Enviar Enlace Magico'; }, 3000);
+        });
+    });
+    </script>
 
 </body>
 

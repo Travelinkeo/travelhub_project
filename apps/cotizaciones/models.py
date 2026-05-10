@@ -11,11 +11,13 @@ from django.contrib.auth.models import User
 from decimal import Decimal
 
 # from apps.crm.models import Cliente # REFACTOR: Usar string 'crm.Cliente'
-from core.models_catalogos import Moneda, ProductoServicio
+from apps.finance.models.currencies import Moneda
+from core.models.base import AgenciaMixin
+from apps.bookings.models import ProductoServicio
 
 # ... (Cotizacion model unchanged)
 
-class Cotizacion(models.Model):
+class Cotizacion(AgenciaMixin, models.Model):
 
     id_cotizacion = models.AutoField(primary_key=True, verbose_name=_("ID Cotización"))
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
@@ -166,7 +168,7 @@ class Cotizacion(models.Model):
         
         return f"https://wa.me/{telefono}?text={mensaje_encoded}"
 
-class ItemCotizacion(models.Model):
+class ItemCotizacion(AgenciaMixin, models.Model):
     id_item_cotizacion = models.AutoField(primary_key=True, verbose_name=_("ID Item Cotización"))
     cotizacion = models.ForeignKey(Cotizacion, related_name='items', on_delete=models.CASCADE, verbose_name=_("Cotización"))
 

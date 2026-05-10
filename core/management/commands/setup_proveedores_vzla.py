@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.utils import timezone
-from core.models_catalogos import Proveedor, Moneda
-from core.models.tarifario_hoteles import TarifarioProveedor
+from apps.bookings.models import Proveedor, TarifarioProveedor
+from apps.finance.models.currencies import Moneda
 from decimal import Decimal
 
 class Command(BaseCommand):

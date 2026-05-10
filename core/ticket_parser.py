@@ -7,6 +7,19 @@ from django.core.cache import cache
 
 logger = logging.getLogger(__name__)
 
+def _get_solo_nombre_pasajero(nombre_completo: str) -> str:
+    """Extrae el primer nombre de un formato APELLIDO/NOMBRE o similar."""
+    if not nombre_completo or nombre_completo == 'No encontrado':
+        return 'Cliente'
+    # Formato GDS: APELLIDO/NOMBRE o APELLIDO/NOMBRE MR
+    if '/' in nombre_completo:
+        parts = nombre_completo.split('/')
+        if len(parts) > 1:
+            # Tomar la parte del nombre y quitar títulos (MR, MRS, etc)
+            nombre_part = parts[1].strip().split()[0]
+            return nombre_part.title()
+    return nombre_completo.strip().split()[0].title()
+
 class FastDeterministicParsers:
     """
     🛡️ EL ESCUDO DETERMINÍSTICO (Regex)
@@ -62,13 +75,28 @@ class FastDeterministicParsers:
             data['numero_boleto'] = tkt
 
         # 3. Extraer Nombre del Pasajero y Documento
-        # Soporta: NOMBRE [DOCUMENTO]
-        name_match = re.search(r'(?:PREPARADO PARA|PASAJERO|PASSENGER|NAME|PAX)[:\s]+([^[\n\r<]{3,50})(?:\[([^\]]+)\])?', text_upper)
+        # Soporta: NOMBRE [DOCUMENTO] o NOMBRE FOID: XXX
+        # Mejorado para evitar capturar FOID/RIF como parte del nombre
+        name_match = re.search(r'(?:PREPARADO PARA|PASAJERO|PASSENGER|NAME|PAX)[:\s]+([^[\n\r<]{3,60})', text_upper)
         if name_match:
             raw_name = name_match.group(1).strip()
-            data['nombre_pasajero'] = raw_name
-            if name_match.group(2):
-                data['foid'] = name_match.group(2).strip()
+            # Limpiar ruidos comunes (FOID, RIF, etc.) y detenerse en el primer marcador de metadatos
+            # Añadimos más marcadores para evitar que el nombre "se coma" otros campos
+            clean_name = re.split(r'\s+(?:FOID|RIF|DNI|DOCUMENTO|DOC|TKTN|C\.I|V-|ADDRESS|TEL|PHONE|IATA|ISSUING|AGENTE|OFFICE)\b', raw_name, flags=re.IGNORECASE)[0]
+            data['nombre_pasajero'] = clean_name.strip()
+            
+            # Extraer ID (Buscamos dentro de corchetes o después de FOID:)
+            # Usamos negative lookahead para ignorar IDs de sistema (imágenes, oficinas)
+            id_match = re.search(r'\[(?!IMAGEN_|OFFICE|PA-|VE-|US-|PHOTO|PNG|JPG)([^\]]+)\]', text_upper)
+            if not id_match:
+                id_match = re.search(r'(?:FOID|RIF|DNI|DOCUMENTO|DOC|C\.I|V-)[:\s]+(?!PA-|VE-|US-|OFFICE)([A-Z0-9-]{6,20})', text_upper)
+            
+            if id_match:
+                pax_id = id_match.group(1).strip()
+                # Doble filtro de seguridad para IDs de ruido
+                if not any(noise in pax_id for noise in ['IMAGEN_', 'PA-', 'VE-', 'US-', 'OFFICE', 'PHOTO', 'PNG', 'JPG']):
+                    data['foid'] = pax_id
+                    data['passenger_id'] = pax_id
 
         # 4. Extraer Aerolínea
         if "TURKISH" in text_upper:
@@ -77,6 +105,8 @@ class FastDeterministicParsers:
             data['aerolinea_emisora'] = "LASER AIRLINES"
         elif "COPA" in text_upper:
             data['aerolinea_emisora'] = "COPA AIRLINES"
+        elif "AVIANCA" in text_upper or "AEROVIAS DEL CONTINENTE" in text_upper:
+            data['aerolinea_emisora'] = "AVIANCA"
 
         # 5. Extraer Fecha de Emisión
         date_match = re.search(r'(?:EMISION|ISSUED|DATE|FECHA)[:\s]+(\d{1,2}\s+[A-Z]{3}\s+\d{2,4})', text_upper)
@@ -88,27 +118,44 @@ class FastDeterministicParsers:
             if date_match: data['fecha_emision'] = date_match.group(1)
 
         # 6. Extraer Itinerario (Vuelos) - Motor de Segmentos GDS Pro (Audit Point 2)
-        # Patrón mejorado para Sabre/Amadeus:
-        # Ejemplo: 1  AV 46   C 22MAY 4 BOGMAD HK1  0700   2330   *E
-        # Grupos: 1:Aerolinea, 2:Vuelo, 3:Clase, 4:Fecha, 5:Origen, 6:Destino, 7:Status, 8:Salida, 9:Llegada
+        # Pre-limpieza de texto para eliminar bloques de ruido conocidos en Sabre
+        lines = text_upper.splitlines()
+        clean_lines = []
+        for line in lines:
+            l = line.strip()
+            # Ignorar líneas que suelen ser ruido entre vuelos
+            if any(x in l for x in ['VIEWTRIP', 'CHECK-IN', 'BAGGAGE', 'EQUIPAJE', 'URL', 'HTTPS', 'CO2', 'EMISSION', 'OPERATED BY']):
+                continue
+            clean_lines.append(l)
+        text_for_flights = "\n".join(clean_lines)
+
+        # Patrón ultra-robusto para Sabre/Amadeus:
+        # Soporta: 1 AV 46 C 22MAY BOGMAD HK1 0700 2330
+        # Soporta: AV46C 22MAY BOGMAD HK1 0700A 2330P
         flight_pattern = re.compile(
             r'(?:\d+\s+)?'                          # Index opcional (1 )
-            r'([A-Z0-9]{2})\s+'                     # Aerolinea (AV)
-            r'(\d{1,4})\s+'                         # Numero de vuelo (46)
+            r'([A-Z0-9]{2})\s*'                     # Aerolinea (AV)
+            r'(\d{1,4})\s*'                         # Numero de vuelo (46)
             r'([A-Z])?\s*'                          # Clase (C) opcional
             r'(\d{2}[A-Z]{3})\s+'                   # Fecha (22MAY)
             r'(?:\d\s+)?'                           # Día de semana opcional (4 )
-            r'([A-Z]{3})([A-Z]{3})\s+'              # OrigenDestino (BOGMAD)
+            r'([A-Z]{3})\s*([A-Z]{3})\s+'           # Origen y Destino (BOGMAD o BOG MAD)
             r'([A-Z0-9]{2,3})\s+'                   # Status (HK1)
-            r'(\d{2}:?\d{2})\s+(\d{2}:?\d{2})'      # Salida (0700) Llegada (2330)
+            r'(\d{4}[A-Z]?)\s+'                     # Salida (0700A)
+            r'(\d{4}[A-Z]?)'                        # Llegada (2330P)
         )
         
-        matches = flight_pattern.findall(text_upper)
+        matches = flight_pattern.findall(text_for_flights)
         
         for m in matches:
-            # Normalizar horas
-            dep_time = f"{m[7][:2]}:{m[7][2:]}" if ':' not in m[7] else m[7]
-            arr_time = f"{m[8][:2]}:{m[8][2:]}" if ':' not in m[8] else m[8]
+            # Normalizar horas (0700A -> 07:00, 2330 -> 23:30)
+            def norm_h(h):
+                h = re.sub(r'[A-Z]', '', h) # Quitar A/P
+                if len(h) == 4: return f"{h[:2]}:{h[2:]}"
+                return h
+
+            dep_time = norm_h(m[7])
+            arr_time = norm_h(m[8])
 
             flight = {
                 'airline': m[0],
@@ -177,36 +224,28 @@ class FastDeterministicParsers:
 
 def extract_data_from_text(plain_text: str, html_text: str = "", pdf_path: Optional[str] = None, bypass_cache: bool = False) -> Dict[str, Any]:
     """
-    Orquestador Híbrido: Caché -> Regex -> IA (God Mode)
+    ⚡ MOTOR DETERMINÍSTICO (Fallback Regex)
+    Utiliza patrones fijos para extraer datos cuando la IA no está disponible o falla.
+    Este es el motor de Tier 1 (Gratis).
     """
     if not plain_text:
         return {"error": "Texto vacío"}
 
     # 1. 🧱 CACHÉ (Evita procesar dos veces lo mismo)
-    fingerprint = hashlib.sha256(plain_text.encode('utf-8')).hexdigest()
-    cache_key = f"parser:doc:{fingerprint}"
+    fingerprint = hashlib.sha256(plain_text.encode('utf-8', errors='ignore')).hexdigest()
+    cache_key = f"parser:regex:{fingerprint}"
     
     if not bypass_cache:
         cached_result = cache.get(cache_key)
         if cached_result:
-            logger.info(f"💾 Usando resultado cacheado para doc {fingerprint}")
             return cached_result
 
     # 2. ⚡ PATRONES DETERMINÍSTICOS (Gratis y Rápidos)
-    # Siempre intentamos extraer lo básico primero
     res_final = FastDeterministicParsers.parse_general_regex(plain_text)
     
-    # Si tenemos lo básico (PNR y Nombre), podemos considerarlo un éxito parcial
-    has_basics = res_final.get('codigo_reserva') and res_final.get('nombre_pasajero')
-
-    # 3. 🧠 INTELIGENCIA ARTIFICIAL (DELEGADO AL SERVICIO SUPERIOR)
-    # Ya no llamamos a AIParserService aquí para evitar duplicidad de costos y errores.
-    # El TicketParserService se encargará de llamar a UniversalAIParser si es necesario.
-    pass
-
-    # 4. 💾 GUARDAR EN CACHÉ
+    # 3. 💾 GUARDAR EN CACHÉ
     if res_final and (res_final.get('codigo_reserva') or res_final.get('nombre_pasajero')):
-        cache.set(cache_key, res_final, timeout=86400 * 30)
+        cache.set(cache_key, res_final, timeout=86400) # 24h para regex es suficiente
 
     return res_final
 

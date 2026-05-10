@@ -3,7 +3,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from core import pdf_generator
+from core.services.parsers import pdf_generation as pdf_generator
 
 
 class DummyTemplate:

@@ -7,12 +7,13 @@ import logging
 from typing import Dict, Any
 
 from .registry import registry
-from .sabre_parser import SabreParser
-from .amadeus_parser import AmadeusParser
+from .legacy.sabre_parser import SabreParser
+from .legacy.amadeus_parser import AmadeusParser
 from .kiu_parser import KIUParser
-from .copa_parser import CopaParser
-from .wingo_parser import WingoParser
-from .tk_connect_parser import TKConnectParser
+from .legacy.copa_parser import CopaParser
+from .legacy.wingo_parser import WingoParser
+from .legacy.tk_connect_parser import TKConnectParser
+
 
 logger = logging.getLogger(__name__)
 

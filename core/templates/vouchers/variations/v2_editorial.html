@@ -104,10 +104,8 @@
     <div class="container">
         <header>
             <div class="logo-box">
-                {% if agencia.logo_pdf_dark_base64 %}
-                    <img src="data:image/png;base64,{{ agencia.logo_pdf_dark_base64 }}" alt="Logo">
-                {% elif agencia.logo_pdf_base64 %}
-                    <img src="data:image/png;base64,{{ agencia.logo_pdf_base64 }}" alt="Logo">
+                {% if agencia_logo_b64 %}
+                    <img src="{{ agencia_logo_b64 }}" alt="Logo">
                 {% else %}
                     <h2 style="margin:0; font-weight:900;">{{ agencia.nombre }}</h2>
                 {% endif %}
@@ -141,10 +139,49 @@
         <section class="services-section">
             <div class="services-title">Confirmed Services <span>ITINERARY OVERVIEW</span></div>
 
+            {# VUELOS #}
+            {% if segmentos_vuelo %}
+            <div class="service-group-title" style="font-size: 10px; font-weight: 900; color: var(--accent); letter-spacing: 2px; margin-bottom: 20px; text-transform: uppercase;">Flight Itinerary</div>
+            {% for vuelo in segmentos_vuelo %}
+            <div class="service-card" style="border-left: 2px solid var(--flight-color, #3b82f6); padding-left: 20px;">
+                <div class="service-type"><i class="badge-flight" style="color: var(--flight-color, #3b82f6);">●</i> FLIGHT SEGMENT</div>
+                <div class="service-header">
+                    <h2 class="service-name">{{ vuelo.aerolinea|upper }} {{ vuelo.numero_vuelo }}</h2>
+                    <span class="service-loc">{{ vuelo.clase|default:vuelo.cabina|upper }}</span>
+                </div>
+                <div class="service-details">
+                    <div style="display: flex; gap: 30px;">
+                        <div>
+                            <div class="detail-row" style="border:none;"><label>Departure</label></div>
+                            <div style="font-size: 20px; font-weight: 950;">{{ vuelo.origen|slice:":3"|upper }}</div>
+                            <div style="font-size: 11px; color: var(--text-light);">{{ vuelo.origen }}</div>
+                            <div style="font-size: 14px; font-weight: 800; margin-top: 5px;">{{ vuelo.fecha_salida|date:"H:i" }}</div>
+                            <div style="font-size: 11px; color: var(--accent); font-weight: 700;">{{ vuelo.fecha_salida|date:"d M Y" }}</div>
+                        </div>
+                        <div style="display: flex; align-items: center; color: var(--border); font-size: 24px;">→</div>
+                        <div>
+                            <div class="detail-row" style="border:none;"><label>Arrival</label></div>
+                            <div style="font-size: 20px; font-weight: 950;">{{ vuelo.destino|slice:":3"|upper }}</div>
+                            <div style="font-size: 11px; color: var(--text-light);">{{ vuelo.destino }}</div>
+                            <div style="font-size: 14px; font-weight: 800; margin-top: 5px;">{{ vuelo.fecha_llegada|date:"H:i" }}</div>
+                            <div style="font-size: 11px; color: var(--accent); font-weight: 700;">{{ vuelo.fecha_llegada|date:"d M Y" }}</div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="detail-row"><label>Operated by</label><span>{{ vuelo.operado_por|default:vuelo.aerolinea }}</span></div>
+                        <div class="detail-row"><label>Baggage</label><span>{{ vuelo.equipaje|default:"As per airline policy" }}</span></div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            {% endif %}
+
             {# ALOJAMIENTOS #}
+            {% if alojamientos %}
+            <div class="service-group-title" style="font-size: 10px; font-weight: 900; color: var(--accent); letter-spacing: 2px; margin-top: 40px; margin-bottom: 20px; text-transform: uppercase;">Accommodation</div>
             {% for hotel in alojamientos %}
-            <div class="service-card">
-                <div class="service-type"><i class="badge-hotel">●</i> ACCOMMODATION</div>
+            <div class="service-card" style="border-left: 2px solid var(--hotel-color, #10b981); padding-left: 20px;">
+                <div class="service-type"><i class="badge-hotel" style="color: var(--hotel-color, #10b981);">●</i> STAY</div>
                 <div class="service-header">
                     <h2 class="service-name">{{ hotel.nombre_establecimiento|upper }}</h2>
                     {% if hotel.localizador_proveedor %}<span class="service-loc">{{ hotel.localizador_proveedor }}</span>{% endif %}
@@ -155,17 +192,20 @@
                         <div class="detail-row"><label>Check-out</label><span>{{ hotel.check_out|date:"d M Y"|default:"---" }}</span></div>
                     </div>
                     <div>
-                        <div class="detail-row"><label>Room Type</label><span>{{ hotel.regimen_alimentacion|default:"Estándar" }}</span></div>
-                        <div class="detail-row"><label>City</label><span>{{ hotel.ciudad.nombre|default:"---" }}</span></div>
+                        <div class="detail-row"><label>Meal Plan</label><span>{{ hotel.regimen_alimentacion|default:"Standard" }}</span></div>
+                        <div class="detail-row"><label>Rooms/Guests</label><span>{{ hotel.habitaciones }} / {{ hotel.pax_nombres|default:venta.pasajeros.count }}</span></div>
                     </div>
                 </div>
             </div>
             {% endfor %}
+            {% endif %}
 
             {# AUTOS #}
+            {% if alquileres_autos %}
+            <div class="service-group-title" style="font-size: 10px; font-weight: 900; color: var(--accent); letter-spacing: 2px; margin-top: 40px; margin-bottom: 20px; text-transform: uppercase;">Transport & Rental</div>
             {% for car in alquileres_autos %}
-            <div class="service-card">
-                <div class="service-type"><i class="badge-car">●</i> CAR RENTAL</div>
+            <div class="service-card" style="border-left: 2px solid var(--car-color, #f59e0b); padding-left: 20px;">
+                <div class="service-type"><i class="badge-car" style="color: var(--car-color, #f59e0b);">●</i> VEHICLE RENTAL</div>
                 <div class="service-header">
                     <h2 class="service-name">{{ car.compania_rentadora|upper }} — {{ car.categoria_auto }}</h2>
                     {% if car.numero_confirmacion %}<span class="service-loc">{{ car.numero_confirmacion }}</span>{% endif %}
@@ -173,7 +213,7 @@
                 <div class="service-details">
                     <div>
                         <div class="detail-row"><label>Pick-up</label><span class="important-field">{{ car.fecha_hora_retiro|date:"d M Y H:i" }}</span></div>
-                        <div class="detail-row"><label>Location</label><span>{{ car.ciudad_retiro.nombre|default:"---" }}</span></div>
+                        <div class="detail-row"><label>Location</label><span>{{ car.ciudad_retiro.nombre|default:car.ciudad_retiro|default:"---" }}</span></div>
                     </div>
                     <div>
                         <div class="detail-row"><label>Drop-off</label><span>{{ car.fecha_hora_devolucion|date:"d M Y H:i" }}</span></div>
@@ -182,11 +222,13 @@
                 </div>
             </div>
             {% endfor %}
+            {% endif %}
 
             {# TRASLADOS #}
+            {% if traslados %}
             {% for tr in traslados %}
-            <div class="service-card">
-                <div class="service-type"><i class="badge-flight">●</i> TRANSFER SERVICE</div>
+            <div class="service-card" style="border-left: 2px solid var(--flight-color, #3b82f6); padding-left: 20px;">
+                <div class="service-type"><i class="badge-flight" style="color: var(--flight-color, #3b82f6);">●</i> PRIVATE TRANSFER</div>
                 <div class="service-header">
                     <h2 class="service-name">{{ tr.origen|upper }} → {{ tr.destino|upper }}</h2>
                     <span class="service-loc">{{ tr.get_tipo_traslado_display|upper }}</span>
@@ -201,29 +243,57 @@
                 </div>
             </div>
             {% endfor %}
+            {% endif %}
 
-            {# SEGUROS / ADICIONALES #}
-            {% for item in servicios_adicionales %}
-            <div class="service-card">
-                <div class="service-type"><i class="badge-insurance">●</i> {{ item.get_tipo_servicio_display|upper }}</div>
+            {# ACTIVIDADES #}
+            {% if actividades %}
+            <div class="service-group-title" style="font-size: 10px; font-weight: 900; color: var(--accent); letter-spacing: 2px; margin-top: 40px; margin-bottom: 20px; text-transform: uppercase;">Experiences</div>
+            {% for act in actividades %}
+            <div class="service-card" style="border-left: 2px solid var(--insurance-color, #8b5cf6); padding-left: 20px;">
+                <div class="service-type"><i class="badge-insurance" style="color: var(--insurance-color, #8b5cf6);">●</i> ACTIVITY / TOUR</div>
                 <div class="service-header">
-                    <h2 class="service-name">{{ item.descripcion|upper|default:"SERVICIO ADICIONAL" }}</h2>
-                    {% if item.codigo_referencia %}<span class="service-loc">{{ item.codigo_referencia }}</span>{% endif %}
+                    <h2 class="service-name">{{ act.nombre|upper }}</h2>
+                    {% if act.localizador_proveedor %}<span class="service-loc">{{ act.localizador_proveedor }}</span>{% endif %}
                 </div>
                 <div class="service-details">
                     <div>
-                        <div class="detail-row"><label>Start Date</label><span class="important-field">{{ item.fecha_inicio|date:"d M Y" }}</span></div>
-                        <div class="detail-row"><label>End Date</label><span>{{ item.fecha_fin|date:"d M Y" }}</span></div>
+                        <div class="detail-row"><label>Date</label><span class="important-field">{{ act.fecha|date:"d M Y" }}</span></div>
+                        <div class="detail-row"><label>Duration</label><span>{{ act.duracion_horas|default:"Flexible" }} hrs</span></div>
                     </div>
                     <div>
-                        <div class="detail-row"><label>Passenger</label><span>{{ item.nombre_pasajero|default:venta.cliente.get_nombre_completo|upper }}</span></div>
-                        {% if item.contacto_emergencia %}<div class="detail-row"><label>Emergency</label><span>{{ item.contacto_emergencia|truncatechars:30 }}</span></div>{% endif %}
+                        <div class="detail-row"><label>Booking Name</label><span>{{ venta.cliente.get_nombre_completo|upper }}</span></div>
                     </div>
                 </div>
             </div>
             {% endfor %}
+            {% endif %}
+
+            {# SEGUROS / ADICIONALES #}
+            {% if servicios_adicionales %}
+            <div class="service-group-title" style="font-size: 10px; font-weight: 900; color: var(--accent); letter-spacing: 2px; margin-top: 40px; margin-bottom: 20px; text-transform: uppercase;">Assistance & Extras</div>
+            {% for item in servicios_adicionales %}
+            <div class="service-card" style="border-left: 2px solid var(--insurance-color, #8b5cf6); padding-left: 20px;">
+                <div class="service-type"><i class="badge-insurance" style="color: var(--insurance-color, #8b5cf6);">●</i> {{ item.get_tipo_servicio_display|upper }}</div>
+                <div class="service-header">
+                    <h2 class="service-name">{{ item.descripcion|upper|default:"ADDITIONAL SERVICE" }}</h2>
+                    {% if item.codigo_referencia %}<span class="service-loc">{{ item.codigo_referencia }}</span>{% endif %}
+                </div>
+                <div class="service-details">
+                    <div>
+                        <div class="detail-row"><label>Effective From</label><span class="important-field">{{ item.fecha_inicio|date:"d M Y" }}</span></div>
+                        <div class="detail-row"><label>Effective To</label><span>{{ item.fecha_fin|date:"d M Y" }}</span></div>
+                    </div>
+                    <div>
+                        <div class="detail-row"><label>Main Passenger</label><span>{{ item.nombre_pasajero|default:venta.cliente.get_nombre_completo|upper }}</span></div>
+                        {% if item.contacto_emergencia %}<div class="detail-row"><label>Emergency</label><span>{{ item.contacto_emergencia|truncatechars:40 }}</span></div>{% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            {% endif %}
 
         </section>
+
 
         <footer>
             <div class="footer-grid">

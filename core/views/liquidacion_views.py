@@ -5,12 +5,13 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django.db.models import Q
 
-from core.models import LiquidacionProveedor, ItemLiquidacion
+from core.api.mixins.tenant import TenantViewSetMixin
+from apps.contabilidad.models import LiquidacionProveedor, ItemLiquidacion
 from core.serializers import LiquidacionProveedorSerializer, ItemLiquidacionSerializer
 from core.throttling import LiquidacionRateThrottle
 
 
-class LiquidacionProveedorViewSet(viewsets.ModelViewSet):
+class LiquidacionProveedorViewSet(TenantViewSetMixin, viewsets.ModelViewSet):
     queryset = LiquidacionProveedor.objects.all().select_related('proveedor', 'venta')
     serializer_class = LiquidacionProveedorSerializer
     permission_classes = [IsAuthenticated]
@@ -67,7 +68,7 @@ class LiquidacionProveedorViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
-class ItemLiquidacionViewSet(viewsets.ReadOnlyModelViewSet):
+class ItemLiquidacionViewSet(TenantViewSetMixin, viewsets.ReadOnlyModelViewSet):
     queryset = ItemLiquidacion.objects.all().select_related('liquidacion', 'item_venta')
     serializer_class = ItemLiquidacionSerializer
     permission_classes = [IsAuthenticated]

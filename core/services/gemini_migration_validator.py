@@ -7,7 +7,8 @@ from typing import Dict, Any, Optional
 from dataclasses import dataclass
 from datetime import date
 
-# import google.generativeai as genai
+from google import genai
+from google.genai import types
 from django.conf import settings
 
 logger = logging.getLogger(__name__)
@@ -42,9 +43,8 @@ class GeminiMigrationValidator:
         if not api_key:
             raise ValueError("GEMINI_API_KEY no configurada en settings")
         
-        import google.generativeai as genai
-        genai.configure(api_key=api_key)
-        self.model = genai.GenerativeModel('gemini-2.0-flash-exp')
+        self.client = genai.Client(api_key=api_key)
+        self.model_name = 'gemini-2.0-flash'
     
     def validate_visa_requirements(
         self,
@@ -78,7 +78,10 @@ class GeminiMigrationValidator:
             
             logger.info(f"🤖 Consultando Gemini: {nationality} → {destination}")
             
-            response = self.model.generate_content(prompt)
+            response = self.client.models.generate_content(
+                model=self.model_name,
+                contents=prompt
+            )
             raw_text = response.text
             
             logger.debug(f"Respuesta Gemini: {raw_text[:200]}...")

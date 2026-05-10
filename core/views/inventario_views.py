@@ -3,7 +3,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.http import HttpResponse
-from core.models.productos_terrestres import ProductoTerrestre
+from apps.bookings.models import ProductoTerrestre
 from core.middleware import get_current_agency
 
 class CatalogoTerrestreListView(LoginRequiredMixin, ListView):

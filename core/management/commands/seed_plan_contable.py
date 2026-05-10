@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from core.models.contabilidad import PlanContable
+from apps.contabilidad.models import PlanContable
 from django.db import transaction
 
 class Command(BaseCommand):

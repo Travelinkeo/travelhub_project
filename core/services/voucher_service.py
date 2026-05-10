@@ -1,19 +1,14 @@
 """Servicio para generar vouchers de servicios adicionales y alojamientos en PDF."""
 
 from django.template.loader import render_to_string
-
-def _get_html_renderer():
-    """Lazy loader for WeasyPrint HTML to avoid boot-time hangs."""
-    try:
-        from weasyprint import HTML
-        return HTML
-    except Exception as e:
-        import logging
-        logging.getLogger(__name__).error(f"Failed to import WeasyPrint: {e}")
-        return None
-
+import logging
 from datetime import datetime
 import locale
+
+from .pdf_renderer import PdfRendererService
+from core.ticket_parser import is_brand_color_dark
+from core.utils.images import get_agencia_logo_b64
+from apps.bookings.models import Venta
 
 # Configurar locale para español
 try:
@@ -43,8 +38,13 @@ def generar_voucher_servicio(servicio_adicional):
     if servicio_adicional.tipo_servicio == 'SEG':
         metadata = servicio_adicional.metadata_json or {}
         
+        agencia = venta.agencia if venta else None
+        is_dark = is_brand_color_dark(agencia.color_primario) if agencia else True
+        
         context = {
-            'agencia': venta.agencia if venta else None,
+            'agencia': agencia,
+            'agencia_logo_b64': get_agencia_logo_b64(agencia, is_dark_bg=is_dark),
+            'is_dark_color': is_dark,
             'numero_poliza': servicio_adicional.codigo_referencia or f"SEG-{servicio_adicional.id_servicio_adicional}",
             'nombre_asegurado': servicio_adicional.nombre_pasajero or (cliente.get_nombre_completo if cliente else 'N/A'),
             'pasaporte': servicio_adicional.pasaporte_pasajero or 'N/A',
@@ -59,10 +59,7 @@ def generar_voucher_servicio(servicio_adicional):
         }
         
         html_string = render_to_string('core/vouchers/voucher_seguro.html', context)
-        HTML_renderer = _get_html_renderer()
-        if not HTML_renderer:
-             raise Exception("WeasyPrint is not available.")
-        pdf_bytes = HTML_renderer(string=html_string).write_pdf()
+        pdf_bytes = PdfRendererService.render_html_to_pdf(html_string)
         filename = f"Voucher_Seguro_{context['numero_poliza']}.pdf"
         
         return pdf_bytes, filename
@@ -96,9 +93,14 @@ def generar_voucher_servicio(servicio_adicional):
     if servicio_adicional.recomendaciones:
         recomendaciones = [r.strip() for r in servicio_adicional.recomendaciones.split('\n') if r.strip()]
     
+    agencia = venta.agencia if venta else None
+    is_dark = is_brand_color_dark(agencia.color_primario) if agencia else True
+    
     # Contexto para la plantilla
     context = {
-        'agencia': venta.agencia if venta else None,
+        'agencia': agencia,
+        'agencia_logo_b64': get_agencia_logo_b64(agencia, is_dark_bg=is_dark),
+        'is_dark_color': is_dark,
         'numero_confirmacion': servicio_adicional.codigo_referencia or f"SRV-{servicio_adicional.id_servicio_adicional}",
         'nombre_pasajero': servicio_adicional.nombre_pasajero or (cliente.get_nombre_completo if cliente else 'N/A'),
         'participantes': servicio_adicional.participantes or '1 Adulto',
@@ -118,7 +120,7 @@ def generar_voucher_servicio(servicio_adicional):
     html_string = render_to_string('core/vouchers/voucher_servicio_adicional.html', context)
     
     # Generar PDF
-    pdf_bytes = HTML(string=html_string).write_pdf()
+    pdf_bytes = PdfRendererService.render_html_to_pdf(html_string)
     
     # Nombre del archivo
     filename = f"Voucher_{context['numero_confirmacion']}.pdf"
@@ -137,8 +139,6 @@ def generar_voucher_alojamiento(alojamiento):
     Returns:
         tuple: (pdf_bytes, filename)
     """
-    from datetime import datetime
-    
     # Preparar datos del contexto
     venta = alojamiento.venta
     cliente = venta.cliente if venta else None
@@ -164,9 +164,14 @@ def generar_voucher_alojamiento(alojamiento):
         except:
             check_out_formatted = alojamiento.check_out.strftime('%d/%m/%Y')
     
+    agencia = venta.agencia if venta else None
+    is_dark = is_brand_color_dark(agencia.color_primario) if agencia else True
+    
     # Contexto para la plantilla
     context = {
-        'agencia': venta.agencia if venta else None,
+        'agencia': agencia,
+        'agencia_logo_b64': get_agencia_logo_b64(agencia, is_dark_bg=is_dark),
+        'is_dark_color': is_dark,
         'numero_confirmacion': f"HTL-{alojamiento.id_alojamiento_reserva}",
         'nombre_huesped': alojamiento.nombre_pasajero or (cliente.get_nombre_completo if cliente else 'N/A'),
         'ocupantes': '2 Adultos',  # Por defecto, se puede mejorar
@@ -186,7 +191,7 @@ def generar_voucher_alojamiento(alojamiento):
     html_string = render_to_string('core/vouchers/voucher_alojamiento.html', context)
     
     # Generar PDF
-    pdf_bytes = HTML(string=html_string).write_pdf()
+    pdf_bytes = PdfRendererService.render_html_to_pdf(html_string)
     
     # Nombre del archivo
     filename = f"Voucher_Alojamiento_{context['numero_confirmacion']}.pdf"
@@ -195,8 +200,7 @@ def generar_voucher_alojamiento(alojamiento):
 
 
 def generar_voucher_alquiler_auto(alquiler):
-    from datetime import datetime
-    
+    """Genera un PDF de voucher para un alquiler de auto."""
     venta = alquiler.venta
     cliente = venta.cliente if venta else None
     
@@ -205,8 +209,13 @@ def generar_voucher_alquiler_auto(alquiler):
         delta = alquiler.fecha_hora_devolucion - alquiler.fecha_hora_retiro
         duracion = f"{delta.days} Días"
     
+    agencia = venta.agencia if venta else None
+    is_dark = is_brand_color_dark(agencia.color_primario) if agencia else True
+    
     context = {
-        'agencia': venta.agencia if venta else None,
+        'agencia': agencia,
+        'agencia_logo_b64': get_agencia_logo_b64(agencia, is_dark_bg=is_dark),
+        'is_dark_color': is_dark,
         'numero_confirmacion': alquiler.numero_confirmacion or f"AUTO-{alquiler.id_alquiler_auto}",
         'nombre_conductor': alquiler.nombre_conductor or (cliente.get_nombre_completo if cliente else 'N/A'),
         'fecha_emision': datetime.now().strftime('%d de %B, %Y'),
@@ -222,14 +231,14 @@ def generar_voucher_alquiler_auto(alquiler):
     }
     
     html_string = render_to_string('core/vouchers/voucher_alquiler_auto.html', context)
-    pdf_bytes = HTML(string=html_string).write_pdf()
+    pdf_bytes = PdfRendererService.render_html_to_pdf(html_string)
     filename = f"Voucher_AlquilerAuto_{context['numero_confirmacion']}.pdf"
     
     return pdf_bytes, filename
 
 
 def generar_voucher_traslado(traslado):
-    from datetime import datetime
+    """Genera un PDF de voucher para un servicio de traslado."""
     from django.utils import timezone
     
     venta = traslado.venta
@@ -245,8 +254,13 @@ def generar_voucher_traslado(traslado):
         else:
             fecha_hora_str = traslado.fecha_hora.strftime('%d%b%y %H:%M').upper()
     
+    agencia = venta.agencia if venta else None
+    is_dark = is_brand_color_dark(agencia.color_primario) if agencia else True
+    
     context = {
-        'agencia': venta.agencia if venta else None,
+        'agencia': agencia,
+        'agencia_logo_b64': get_agencia_logo_b64(agencia, is_dark_bg=is_dark),
+        'is_dark_color': is_dark,
         'numero_confirmacion': f"TRS-{traslado.id_traslado_servicio}",
         'nombre_pasajero': cliente.get_nombre_completo if cliente else 'N/A',
         'fecha_emision': datetime.now().strftime('%d de %B, %Y'),
@@ -260,20 +274,23 @@ def generar_voucher_traslado(traslado):
     }
     
     html_string = render_to_string('core/vouchers/voucher_traslado.html', context)
-    pdf_bytes = HTML(string=html_string).write_pdf()
+    pdf_bytes = PdfRendererService.render_html_to_pdf(html_string)
     filename = f"Voucher_Traslado_{context['numero_confirmacion']}.pdf"
     
     return pdf_bytes, filename
 
 
 def generar_voucher_actividad(actividad):
-    from datetime import datetime
-    
     venta = actividad.venta
     cliente = venta.cliente if venta else None
     
+    agencia = venta.agencia if venta else None
+    is_dark = is_brand_color_dark(agencia.color_primario) if agencia else True
+    
     context = {
-        'agencia': venta.agencia if venta else None,
+        'agencia': agencia,
+        'agencia_logo_b64': get_agencia_logo_b64(agencia, is_dark_bg=is_dark),
+        'is_dark_color': is_dark,
         'numero_confirmacion': f"ACT-{actividad.id_actividad_servicio}",
         'nombre_pasajero': actividad.nombre_pasajero or (cliente.get_nombre_completo if cliente else 'N/A'),
         'fecha_emision': datetime.now().strftime('%d de %B, %Y'),
@@ -288,7 +305,58 @@ def generar_voucher_actividad(actividad):
     }
     
     html_string = render_to_string('core/vouchers/voucher_actividad.html', context)
-    pdf_bytes = HTML(string=html_string).write_pdf()
+    pdf_bytes = PdfRendererService.render_html_to_pdf(html_string)
     filename = f"Voucher_Actividad_{context['numero_confirmacion']}.pdf"
     
     return pdf_bytes, filename
+
+
+def generar_voucher_unificado(venta_id: int):
+    """
+    Genera un archivo PDF de voucher unificado que contiene todos los servicios de una venta.
+    """
+    try:
+        venta = Venta.objects.select_related('cliente', 'moneda', 'agencia').get(pk=venta_id)
+        agencia = venta.agencia
+        if not agencia:
+            return None, None
+            
+        is_dark = is_brand_color_dark(agencia.color_primario) if agencia else True
+
+        voucher_data = {
+            'venta': venta,
+            'agencia': agencia,
+            'is_dark_color': is_dark,
+            'agencia_logo_b64': get_agencia_logo_b64(agencia, is_dark_bg=is_dark),
+            'alojamientos': venta.alojamientos.all(),
+            'alquileres_autos': venta.alquileres_autos.all(),
+            'servicios_adicionales': venta.servicios_adicionales.all(),
+            'segmentos_vuelo': venta.segmentos_vuelo.all(),
+            'traslados': venta.traslados.all(),
+            'actividades': venta.actividades.all(),
+        }
+
+        # Selección de plantilla según configuración de la agencia
+        model_code = getattr(agencia, 'plantilla_vouchers', 'm1')
+        templates_map = {
+            'm1': 'vouchers/variations/v1_golden_classic.html',
+            'm2': 'vouchers/variations/v2_editorial.html',
+            'm3': 'vouchers/variations/v3_executive.html',
+            'm4': 'vouchers/variations/v4_timeline.html',
+            'm5': 'vouchers/variations/v5_modern.html',
+        }
+        template_path = templates_map.get(model_code, 'vouchers/variations/v1_golden_classic.html')
+        
+        html_string = render_to_string(template_path, voucher_data)
+        pdf_bytes = PdfRendererService.render_html_to_pdf(html_string)
+        
+        if not pdf_bytes:
+            return None, None
+            
+        filename = f"Voucher_Unificado_{venta.localizador or venta.id_venta}.pdf"
+        return pdf_bytes, filename
+
+    except Venta.DoesNotExist:
+        return None, None
+    except Exception:
+        return None, None

@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import patch
 
-from core.ticket_parser import extract_data_from_text
+from core.services.ticket_parser_service import extract_data_from_text
 
 # Texto de un boleto Sabre de ejemplo para pruebas de fallback
 SAMPLE_SABRE_TICKET = '''

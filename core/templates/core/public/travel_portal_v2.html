@@ -122,6 +122,54 @@
             </div>
         </section>
 
+        <!-- HOTELES -->
+        {% if venta.alojamientos.all %}
+        <section id="hotels-section" class="space-y-4 animate-slide" style="animation-delay: 0.15s">
+            <div class="flex items-center justify-between">
+                <h2 class="text-xs font-black text-slate-900 uppercase tracking-widest flex items-center gap-2">
+                    <span class="material-symbols-outlined text-emerald-500 text-[18px]">hotel</span>
+                    Estadía y Alojamiento
+                </h2>
+            </div>
+            <div class="space-y-4">
+                {% for hotel in venta.alojamientos.all %}
+                <div class="bg-white p-6 rounded-[28px] border border-slate-200/60 shadow-sm">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h3 class="text-lg font-black text-slate-900 leading-tight">{{ hotel.nombre_establecimiento }}</h3>
+                            <p class="text-[10px] font-bold text-slate-500 uppercase">{{ hotel.ciudad.nombre|default:"" }}</p>
+                        </div>
+                        <a href="{% url 'core:public_hotel_voucher' hotel.id_alojamiento_reserva %}" class="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600 border border-emerald-100">
+                            <span class="material-symbols-outlined text-[20px]">description</span>
+                        </a>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4 py-4 border-y border-slate-50">
+                        <div>
+                            <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest">Check-In</p>
+                            <p class="text-xs font-bold text-slate-800">{{ hotel.check_in|date:"d M Y" }}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest">Check-Out</p>
+                            <p class="text-xs font-bold text-slate-800">{{ hotel.check_out|date:"d M Y" }}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-[14px] text-slate-400">bed</span>
+                            <span class="text-[10px] font-bold text-slate-600">{{ hotel.habitaciones }} Hab. · {{ hotel.regimen_alimentacion|default:"Solo Hab." }}</span>
+                        </div>
+                        <div class="text-[10px] font-black text-emerald-500 bg-emerald-50 px-2 py-1 rounded-lg uppercase tracking-tight">
+                            Confirmado
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
         <!-- UPSELLING BANNERS (Killer Feature V2.0) -->
         <section class="animate-slide" style="animation-delay: 0.2s">
             <h2 class="text-xs font-black text-slate-900 uppercase tracking-widest flex items-center gap-2 mb-4">
@@ -186,7 +234,7 @@
                 <span class="material-symbols-outlined text-[18px]">map</span>
                 <span class="text-[8px] font-black uppercase tracking-widest">Itinerario</span>
             </button>
-            <button class="flex-1 h-12 rounded-xl hover:bg-slate-50 text-slate-600 flex flex-col items-center justify-center gap-0.5">
+            <button onclick="document.getElementById('hotels-section')?.scrollIntoView({behavior: 'smooth'})" class="flex-1 h-12 rounded-xl hover:bg-slate-50 text-slate-600 flex flex-col items-center justify-center gap-0.5">
                 <span class="material-symbols-outlined text-[18px]">hotel</span>
                 <span class="text-[8px] font-black uppercase tracking-widest">Estadía</span>
             </button>

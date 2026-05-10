@@ -77,22 +77,25 @@ class SmartReconciliationService:
     def _extraer_datos_archivo(cls, reporte: ReporteReconciliacion) -> Dict[str, Any]:
         """Usa Pandas si es CSV/Excel, o el nuevo SupplierReportParser si es PDF/Texto ruidoso"""
         file_path = reporte.archivo.path
-        mime_type, _ = mimetypes.guess_type(file_path)
         
         # Inteligencia Artificial para PDFs y archivos complejos
-        if mime_type == 'application/pdf' or file_path.lower().endswith('.pdf') or file_path.lower().endswith('.eml'):
+        if file_path.lower().endswith(('.pdf', '.eml', '.txt')):
             logger.info(f"Usando SupplierReportParser para procesar {file_path}")
             
-            # Extraer texto del PDF (o EML si fuera necesario)
-            import pdfplumber
             text = ""
-            try:
-                with pdfplumber.open(file_path) as pdf:
-                    for page in pdf.pages:
-                        text += page.extract_text() or ""
-            except Exception as e:
-                logger.error(f"Error extrayendo texto del PDF: {e}")
-                raise ValueError("No se pudo extraer texto del reporte PDF.")
+            if file_path.lower().endswith('.pdf'):
+                import fitz
+                try:
+                    with fitz.open(file_path) as pdf:
+                        for page in pdf:
+                            t = page.get_text()
+                            if t: text += t + "\n"
+                except Exception as e:
+                    logger.error(f"Error extrayendo texto del PDF: {e}")
+                    raise ValueError("No se pudo extraer texto del reporte PDF.")
+            else:
+                with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+                    text = f.read()
 
             from core.parsers.supplier_report_parser import SupplierReportParser
             parser = SupplierReportParser()
@@ -102,14 +105,87 @@ class SmartReconciliationService:
             reporte.save(update_fields=['proveedor'])
             return resultado
 
-        # Pandas para archivos CSV estructurados (Ahorrar llamadas a la IA si es posible)
-        elif file_path.lower().endswith('.csv'):
-            logger.info("Procesando CSV con Pandas.")
-            df = pd.read_csv(file_path)
-            # Todo: Mapeo heurístico de columnas si son CSV crudos (Se completará según necesidades del usuario)
-            # Por ahora lo mandamos también a la IA simulando texto si no conocemos las columnas.
+        # Pandas para archivos estructurados (CSV/Excel)
+        elif file_path.lower().endswith(('.csv', '.xlsx', '.xls')):
+            logger.info(f"Procesando archivo estructurado: {file_path}")
+            try:
+                if file_path.lower().endswith('.csv'):
+                    df = pd.read_csv(file_path)
+                else:
+                    df = pd.read_excel(file_path)
+                
+                # Normalización de Columnas via IA (Mapeo Heurístico)
+                return cls._mapear_columnas_df_con_ia(df, reporte.proveedor)
+            except Exception as e:
+                logger.error(f"Error procesando archivo estructurado con Pandas: {e}")
+                raise ValueError(f"Error leyendo el archivo Excel/CSV: {str(e)}")
             
-        raise ValueError(f"Tipo de archivo no soportado o flujo no implemetado para: {mime_type}")
+        raise ValueError(f"Tipo de archivo no soportado para: {file_path}")
+
+    @classmethod
+    def _mapear_columnas_df_con_ia(cls, df: pd.DataFrame, proveedor_hint: str) -> Dict[str, Any]:
+        """
+        Si el Excel no tiene las columnas estándar, le pedimos a Gemini que las identifique
+        basándose en una muestra de las primeras 5 filas.
+        """
+        from core.services.ai_engine import ai_engine
+        
+        # Tomar cabecera y muestra
+        cabecera = list(df.columns)
+        muestra = df.head(5).to_dict(orient='records')
+        
+        prompt = f"""
+        Analiza las columnas de este reporte de ventas del proveedor {proveedor_hint}.
+        Identifica a qué campo estándar de TravelHub corresponde cada columna del Excel.
+        
+        COLUMNAS ENCONTRADAS: {cabecera}
+        MUESTRA DE DATOS: {json.dumps(muestra, default=str)}
+        
+        CAMPOS REQUERIDOS:
+        - numero_boleto: El número de ticket (13 dígitos).
+        - pnr: Localizador de reserva.
+        - pasajero: Nombre del cliente.
+        - tarifa_neta: Monto base.
+        - impuestos: Suma de tasas/taxes.
+        - comision_monto: Comisión a favor de la agencia.
+        - total_pagar: Lo que se le debe al proveedor.
+        
+        Responde con un JSON que mapee el nombre de la columna original al campo estándar.
+        Ejemplo: {{"COL_TICKET_ID": "numero_boleto", "BASE_FARE": "tarifa_neta", ...}}
+        """
+        
+        try:
+            mapping = ai_engine.call_gemini(prompt=prompt, temperature=0.0)
+            
+            # Renombrar columnas según el mapeo
+            df = df.rename(columns=mapping)
+            
+            # Convertir a items
+            items = []
+            for _, row in df.iterrows():
+                items.append({
+                    "numero_boleto": str(row.get('numero_boleto', '')),
+                    "pnr": str(row.get('pnr', '')),
+                    "pasajero": str(row.get('pasajero', '')),
+                    "tarifa_neta": float(row.get('tarifa_neta', 0)),
+                    "impuestos": float(row.get('impuestos', 0)),
+                    "comision_monto": float(row.get('comision_monto', 0)),
+                    "total_pagar": float(row.get('total_pagar', 0)),
+                    "moneda": "USD" # Default
+                })
+            
+            return {
+                "proveedor_nombre": proveedor_hint,
+                "items": items
+            }
+        except Exception as e:
+            logger.error(f"Fallo mapeando columnas con IA: {e}")
+            # Fallback: intentar match directo si los nombres ya coinciden
+            return {
+                "proveedor_nombre": proveedor_hint,
+                "items": df.to_dict(orient='records')
+            }
+
 
     @classmethod
     @transaction.atomic
@@ -134,102 +210,197 @@ class SmartReconciliationService:
 
     @classmethod
     @transaction.atomic
-    def _ejecutar_cruce_conciliacion(cls, reporte: ReporteReconciliacion) -> Dict[str, int]:
-        """Cruzador Financiero: Reporte Proveedor VS Base de Datos de TravelHub"""
-        # Primero borrar las conciliaciones pre-existentes de este reporte
+    def _ejecutar_cruce_conciliacion(cls, reporte: ReporteReconciliacion) -> Dict[str, Any]:
+        """Cruzador Financiero Híbrido: Batch + IA Fuzzy"""
         reporte.conciliaciones.all().delete()
         
         resumen = {
             'total_lineas': 0,
             'cuadrados_ok': 0,
             'discrepancias': 0,
-            'huerfanos_reporte': 0, # Cobrados pero no los tenemos
-            'huerfanos_local': 0    # Los tenemos pero no los cobraron
+            'huerfanos_reporte': 0,
+            'huerfanos_local': 0
         }
         
-        lineas = reporte.lineas.all()
-        resumen['total_lineas'] = lineas.count()
+        lineas_reporte = reporte.lineas.all()
+        resumen['total_lineas'] = lineas_reporte.count()
         
-        numeros_procesados = []
-        boletos_asignados_en_cruce = set()
-
-        # 1. Cruce del Reporte hacia Local (Match Robusto)
-        for linea in lineas:
-            num_reportado = linea.numero_boleto_reportado.replace("-", "").strip()
-            # Standard IATA: Los últimos 10 dígitos suelen ser el ID único sin código de aerolínea
-            busqueda_sufijo = num_reportado[-10:] if len(num_reportado) >= 10 else num_reportado
+        # 1. Obtener candidatos locales (Ventas de la agencia en un rango de fecha similar ±15 días)
+        # Esto reduce el universo de búsqueda para la IA y mejora la precisión.
+        buffer_dias = 15
+        query_local = BoletoImportado.objects.filter(agencia=reporte.agencia)
+        if reporte.periodo_inicio:
+            query_local = query_local.filter(fecha_emision__gte=reporte.periodo_inicio - timezone.timedelta(days=buffer_dias))
+        if reporte.periodo_fin:
+            query_local = query_local.filter(fecha_emision__lte=reporte.periodo_fin + timezone.timedelta(days=buffer_dias))
             
-            # Buscamos candidatos que NO estén ya vinculados a este reporte
-            boleto = BoletoImportado.objects.filter(
-                agencia=reporte.agencia,
-                numero_boleto__icontains=busqueda_sufijo
-            ).exclude(id_boleto__in=boletos_asignados_en_cruce).first()
+        ventas_locales = list(query_local.values('id_boleto', 'numero_boleto', 'pnr', 'pasajero_nombre_completo', 'total_boleto', 'tarifa_base', 'impuestos_total_calculado'))
+        
+        # 2. Match Determinístico Rápido (Exacto por Ticket o PNR)
+        boletos_asignados = set()
+        lineas_procesadas = set()
+        
+        for linea in lineas_reporte:
+            num_rep = linea.numero_boleto_reportado.replace("-", "").strip()[-10:]
+            pnr_rep = (linea.raw_data or {}).get('pnr', '').upper().strip()
+            
+            match = None
+            # Prioridad 1: Número de boleto (10 dígitos finales)
+            for v in ventas_locales:
+                if v['id_boleto'] in boletos_asignados: continue
+                num_loc = (v['numero_boleto'] or '').replace("-", "").strip()[-10:]
+                if num_loc == num_rep and num_loc != '':
+                    match = v
+                    break
+            
+            # Prioridad 2: PNR (Si no hubo match por boleto)
+            if not match and pnr_rep and len(pnr_rep) == 6:
+                for v in ventas_locales:
+                    if v['id_boleto'] in boletos_asignados: continue
+                    if (v['pnr'] or '').upper().strip() == pnr_rep:
+                        match = v
+                        break
+            
+            if match:
+                cls._crear_conciliacion(reporte, linea, match, resumen)
+                boletos_asignados.add(match['id_boleto'])
+                lineas_procesadas.add(linea.id_linea)
 
-            ia_razonamiento = None
-            if not boleto:
-                # --- FUZZY MATCHING CON IA ASINCRÓNICO/SIMULADO ---
-                logger.info(f"Boleto {num_reportado} no encontrado exactamente. Intentando Cruce Difuso IA...")
-                boleto, ia_razonamiento = cls._buscar_boleto_difuso_con_ia(linea)
+        # 3. Match Fuzzy con IA (Para lo que no tuvo match exacto)
+        pendientes_reporte = lineas_reporte.exclude(id_linea__in=lineas_procesadas)
+        pendientes_local = [v for v in ventas_locales if v['id_boleto'] not in boletos_asignados]
+        
+        if pendientes_reporte.exists() and pendientes_local:
+            logger.info(f"🤖 Ejecutando Cruce Fuzzy IA para {pendientes_reporte.count()} líneas pendientes.")
+            # Dividir en lotes de 20 para no saturar tokens/contexto
+            from core.utils.lists import chunk_list
+            for chunk in chunk_list(list(pendientes_reporte), 20):
+                cls._procesar_lote_fuzzy_ia(reporte, chunk, pendientes_local, boletos_asignados, resumen)
 
-            if not boleto:
+        # 4. Detectar Huérfanos finales (Reporte sin Local)
+        huerfanos_reporte = lineas_reporte.exclude(id_linea__in=lineas_procesadas)
+        for hr in huerfanos_reporte:
+            if not hr.conciliacion: # Si no se creó en el paso fuzzy
                 ConciliacionBoleto.objects.create(
                     reporte=reporte,
-                    linea_reporte=linea,
-                    boleto_local=None,
+                    linea_reporte=hr,
                     estado=ConciliacionBoleto.EstadosCruce.NO_EN_LOCAL,
-                    diferencia_total=linea.total_cobrado
+                    diferencia_total=hr.total_cobrado
                 )
                 resumen['huerfanos_reporte'] += 1
-                continue
 
-            boletos_asignados_en_cruce.add(boleto.id_boleto)
-            numeros_procesados.append(boleto.numero_boleto)
-            
-            # 2. Comparación de Costos (Basado en el Plan de Cuentas)
-            total_local = Decimal(str(boleto.total_boleto or 0))
-            dif_total = linea.total_cobrado - total_local
-            
-            estado = ConciliacionBoleto.EstadosCruce.OK
-            if abs(dif_total) > Decimal('0.05'): # Tolerancia de 5 centavos para redondeos
-                estado = ConciliacionBoleto.EstadosCruce.DISCREPANCIA
-                resumen['discrepancias'] += 1
-            else:
-                resumen['cuadrados_ok'] += 1
-
-            ConciliacionBoleto.objects.create(
-                reporte=reporte,
-                linea_reporte=linea,
-                boleto_local=boleto,
-                estado=estado,
-                diferencia_tarifa=linea.tarifa_base_cobrada - (boleto.tarifa_base or 0),
-                diferencia_impuestos=linea.impuestos_cobrados - (boleto.impuestos_total_calculado or 0),
-                diferencia_total=dif_total,
-                ia_razonamiento=ia_razonamiento
-            )
-
-            # Sugerir asiento contable de compensación si hay discrepancia
-            if estado == ConciliacionBoleto.EstadosCruce.DISCREPANCIA:
-                cls.proponer_asiento_ajuste(reporte.conciliaciones.last())
-            
-        # 2. Cruce Local hacia el Reporte (Detectar Facturación Pendiente)
-        # Opcional: Buscar Boletos en ese período que NO vinieron en este reporte
-        if reporte.periodo_inicio and reporte.periodo_fin:
-             boletos_periodo = BoletoImportado.objects.filter(
-                 fecha_subida__gte=reporte.periodo_inicio,
-                 fecha_subida__lte=reporte.periodo_fin
-             ).exclude(numero_boleto__in=numeros_procesados)
-             
-             for huerfano in boletos_periodo:
-                 ConciliacionBoleto.objects.create(
+        # 5. Detectar Huérfanos locales (Local sin Reporte - Facturación pendiente)
+        for vl in ventas_locales:
+            if vl['id_boleto'] not in boletos_asignados:
+                ConciliacionBoleto.objects.create(
                     reporte=reporte,
-                    linea_reporte=None,
-                    boleto_local=huerfano,
+                    boleto_local_id=vl['id_boleto'],
                     estado=ConciliacionBoleto.EstadosCruce.NO_EN_REPORTE,
-                    diferencia_total=-(huerfano.total_boleto or Decimal(0))
-                 )
-                 resumen['huerfanos_local'] += 1
-                 
+                    diferencia_total=-Decimal(str(vl['total_boleto'] or 0))
+                )
+                resumen['huerfanos_local'] += 1
+
         return resumen
+
+    @classmethod
+    def _crear_conciliacion(cls, reporte, linea, match_data, resumen):
+        """Crea el registro de conciliación y calcula discrepancias"""
+        total_local = Decimal(str(match_data['total_boleto'] or 0))
+        dif_total = linea.total_cobrado - total_local
+        
+        estado = ConciliacionBoleto.EstadosCruce.OK
+        if abs(dif_total) > Decimal('0.05'):
+            estado = ConciliacionBoleto.EstadosCruce.DISCREPANCIA
+            resumen['discrepancias'] += 1
+        else:
+            resumen['cuadrados_ok'] += 1
+            
+        conciliacion = ConciliacionBoleto.objects.create(
+            reporte=reporte,
+            linea_reporte=linea,
+            boleto_local_id=match_data['id_boleto'],
+            estado=estado,
+            diferencia_tarifa=linea.tarifa_base_cobrada - Decimal(str(match_data['tarifa_base'] or 0)),
+            diferencia_impuestos=linea.impuestos_cobrados - Decimal(str(match_data['impuestos_total_calculado'] or 0)),
+            diferencia_total=dif_total
+        )
+        
+        if estado == ConciliacionBoleto.EstadosCruce.DISCREPANCIA:
+            cls.proponer_asiento_ajuste(conciliacion)
+
+    @classmethod
+    def _procesar_lote_fuzzy_ia(cls, reporte, chunk_lineas, pendientes_local, boletos_asignados, resumen):
+        """Usa Gemini para encontrar matches semánticos en un lote de registros"""
+        from core.services.ai_engine import ai_engine
+        from core.models.ai_schemas import ConciliacionLoteSchema
+        from core.prompts import RECONCILIATION_SYSTEM_PROMPT
+        
+        # Preparar data compacta
+        prov_data = [{
+            "id": l.id_linea,
+            "tkt": l.numero_boleto_reportado,
+            "psg": l.raw_data.get('pasajero', '') if l.raw_data else '',
+            "amt": float(l.total_cobrado)
+        } for l in chunk_lineas]
+        
+        local_data = [{
+            "id": v['id_boleto'],
+            "tkt": v['numero_boleto'],
+            "psg": v['pasajero_nombre_completo'],
+            "amt": float(v['total_boleto'] or 0)
+        } for v in pendientes_local]
+        
+        prompt = f"LISTA_PROVEEDOR:\n{json.dumps(prov_data)}\n\nLISTA_AGENCIA:\n{json.dumps(local_data)}"
+        
+        try:
+            resultado = ai_engine.call_gemini(
+                prompt=prompt,
+                response_schema=ConciliacionLoteSchema,
+                system_instruction=RECONCILIATION_SYSTEM_PROMPT,
+                temperature=0.0
+            )
+            
+            for match in resultado.get('matches', []):
+                linea_id = match.get('proveedor_item_id') # Enviamos id_linea como id
+                venta_id = match.get('venta_id')
+                
+                if not linea_id or not venta_id: continue
+                
+                linea = next((l for l in chunk_lineas if l.id_linea == int(linea_id)), None)
+                venta = next((v for v in pendientes_local if v['id_boleto'] == int(venta_id)), None)
+                
+                if linea and venta and venta['id_boleto'] not in boletos_asignados:
+                    cls._crear_conciliacion(reporte, linea, venta, resumen)
+                    boletos_asignados.add(venta['id_boleto'])
+                    # Marcar razonamiento IA
+                    c = ConciliacionBoleto.objects.filter(reporte=reporte, linea_reporte=linea).last()
+                    if c:
+                        c.ia_razonamiento = match.get('comentario')
+                        c.save(update_fields=['ia_razonamiento'])
+                    
+        except Exception as e:
+            logger.error(f"Error en lote fuzzy IA: {e}")
+
+
+    @classmethod
+    def _get_cuenta_contable(cls, agencia, config_key: str, fallback_codigo: str, tipo_cuenta_fallback: str):
+        """
+        Busca una cuenta contable en la configuración de la agencia.
+        Si no existe, usa el fallback_codigo.
+        Si el fallback tampoco existe, busca la primera cuenta del tipo especificado.
+        """
+        from apps.contabilidad.models import PlanContable
+        
+        codigo = agencia.configuracion_contable.get(config_key, fallback_codigo)
+        
+        try:
+            return PlanContable.objects.get(codigo_cuenta=codigo)
+        except PlanContable.DoesNotExist:
+            logger.warning(f"Cuenta {codigo} (key: {config_key}) no encontrada para agencia {agencia.nombre}. Usando fallback por tipo {tipo_cuenta_fallback}.")
+            cuenta = PlanContable.objects.filter(tipo_cuenta=tipo_cuenta_fallback, permite_movimientos=True).first()
+            if not cuenta:
+                logger.error(f"¡CRÍTICO! No se encontró ninguna cuenta de tipo {tipo_cuenta_fallback} para la agencia {agencia.nombre}.")
+            return cuenta
 
     @classmethod
     def proponer_asiento_ajuste(cls, conciliacion: ConciliacionBoleto) -> None:
@@ -239,13 +410,14 @@ class SmartReconciliationService:
         - Si dif_total > 0 (Ej: BSP nos cobró $51 y vendimos en $50), la agencia pierde $1 (Gasto/Pérdida).
         - Si dif_total < 0 (Ej: BSP nos cobró $49 y vendimos en $50), la agencia gana $1 (Ingreso/Recuperación).
         """
-        from apps.contabilidad.models import AsientoContable, PlanContable, DetalleAsiento
-        from core.models_catalogos import Moneda
+        from apps.contabilidad.models import AsientoContable, DetalleAsiento
+        from apps.finance.models.currencies import Moneda
         
         if conciliacion.estado != ConciliacionBoleto.EstadosCruce.DISCREPANCIA or conciliacion.diferencia_total == 0:
             return
             
         try:
+            agencia = conciliacion.reporte.agencia
             # Placeholder de moneda. Asumimos USD para la lógica base.
             moneda_usd = Moneda.objects.filter(codigo_iso='USD').first()
             if not moneda_usd: 
@@ -269,23 +441,20 @@ class SmartReconciliationService:
                 tasa_cambio_aplicada=tasa_bcv
             )
             
-            # Definir cuentas (fallbacks si no existen las específicas)
-            # 2.1.01.02 -> Cuentas por Pagar Proveedores USD
-            # 6.1.01 -> Gastos de Operación (Genérico)
-            # 4.1.01 -> Ingresos por Comisiones (Genérico)
-            
-            try:
-                cuenta_proveedor = PlanContable.objects.get(codigo_cuenta='2.1.01.02')
-            except PlanContable.DoesNotExist:
-                cuenta_proveedor = PlanContable.objects.filter(tipo_cuenta='PA', permite_movimientos=True).first()
+            # Obtener cuentas dinámicamente
+            cuenta_proveedor = cls._get_cuenta_contable(
+                agencia, 'CUENTA_PROVEEDOR_USD', '2.1.01.02', 'PA'
+            )
                 
             if conciliacion.diferencia_total > 0:
                 # PÉRDIDA: Debit Gasto, Credit Proveedor (le debemos más al proveedor)
-                try:
-                    cuenta_ajuste = PlanContable.objects.get(codigo_cuenta='6.1.01') # Gastos Operativos
-                except PlanContable.DoesNotExist:
-                    cuenta_ajuste = PlanContable.objects.filter(tipo_cuenta='GA', permite_movimientos=True).first()
+                cuenta_ajuste = cls._get_cuenta_contable(
+                    agencia, 'CUENTA_GASTO_DEFAULT', '6.1.01', 'GA'
+                )
                 
+                if not cuenta_ajuste or not cuenta_proveedor:
+                    raise ValueError("Faltan cuentas contables críticas para generar el asiento de pérdida.")
+
                 # Línea 1: DEUDORA (Gasto)
                 DetalleAsiento.objects.create(
                     asiento=asiento,
@@ -306,10 +475,12 @@ class SmartReconciliationService:
                 )
             else:
                 # GANANCIA: Debit Proveedor (le debemos menos), Credit Ingreso
-                try:
-                    cuenta_ajuste = PlanContable.objects.get(codigo_cuenta='4.1.01') # Ingresos Operativos
-                except PlanContable.DoesNotExist:
-                    cuenta_ajuste = PlanContable.objects.filter(tipo_cuenta='IN', permite_movimientos=True).first()
+                cuenta_ajuste = cls._get_cuenta_contable(
+                    agencia, 'CUENTA_INGRESO_DEFAULT', '4.1.01', 'IN'
+                )
+
+                if not cuenta_ajuste or not cuenta_proveedor:
+                    raise ValueError("Faltan cuentas contables críticas para generar el asiento de ganancia.")
                 
                 # Línea 1: DEUDORA (Proveedor)
                 DetalleAsiento.objects.create(

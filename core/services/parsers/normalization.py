@@ -3,6 +3,7 @@ import logging
 import json
 from decimal import Decimal
 from datetime import date, datetime
+from apps.common.utils import clean_currency
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +33,7 @@ class DataNormalizationService:
             'ticket_number': ['numero_boleto', 'NUMERO_DE_BOLETO'],
             'issue_date': ['FECHA_DE_EMISION', 'fecha_emision'],
             'issuing_airline': ['NOMBRE_AEROLINEA', 'nombre_aerolinea', 'aerolinea_emisora', 'airline'],
-            'passenger_document': ['CODIGO_IDENTIFICACION', 'codigo_identificación', 'foid'],
+            'passenger_document': ['CODIGO_IDENTIFICACION', 'codigo_identificación', 'foid', 'passenger_id'],
             'fare_amount': ['tarifa', 'TARIFA_IMPORTE'],
             'total_amount': ['total', 'TOTAL', 'TOTAL_IMPORTE'],
             'total_currency': ['moneda', 'TOTAL_MONEDA', 'currency'],
@@ -47,6 +48,28 @@ class DataNormalizationService:
                         normalized[target] = normalized[source]
                         break
         
+        # 1.0 Normalización de Aerolínea (Uso de catálogo centralizado)
+        try:
+            from core.airline_utils import normalize_airline_name
+            raw_aero = normalized.get('issuing_airline')
+            vuelo_ref = None
+            # Intentar obtener el primer vuelo para ayudar a la normalización
+            if 'segmentos' in normalized and normalized['segmentos']:
+                vuelo_ref = normalized['segmentos'][0].get('vuelo')
+            elif 'itinerario' in normalized and normalized['itinerario'] and isinstance(normalized['itinerario'], list):
+                vuelo_ref = normalized['itinerario'][0].get('vuelo')
+            
+            normalized['issuing_airline'] = normalize_airline_name(
+                raw_aero, 
+                flight_number=vuelo_ref,
+                ticket_number=normalized.get('ticket_number')
+            )
+            # Actualizar también los alias para consistencia
+            normalized['aerolinea_emisora'] = normalized['issuing_airline']
+            normalized['nombre_aerolinea'] = normalized['issuing_airline']
+        except Exception as e:
+            logger.error(f"Error normalizando aerolínea en pipeline: {e}")
+
         # 1.1 Normalización específica de nombre de pasajero (Hola, [Nombre])
         if 'passenger_name' in normalized and '/' in normalized['passenger_name']:
             raw_name = normalized['passenger_name']
@@ -164,22 +187,4 @@ class DataNormalizationService:
 
     @staticmethod
     def safe_decimal(val):
-        if not val: return Decimal("0.00")
-        try:
-            s = str(val).upper().replace('USD','').replace('EUR','').replace('BS','').replace('VES','').strip()
-            import re
-            match = re.search(r'[\d,.]+', s)
-            if not match: return Decimal("0.00")
-            num_str = match.group(0)
-            
-            # Lógica para comas vs puntos (internacional)
-            if ',' in num_str and '.' in num_str:
-                if num_str.find('.') < num_str.find(','):
-                    num_str = num_str.replace('.', '').replace(',', '.')
-                else:
-                    num_str = num_str.replace(',', '')
-            elif ',' in num_str:
-                num_str = num_str.replace(',', '.')
-            return Decimal(num_str)
-        except:
-            return Decimal("0.00")
+        return clean_currency(val)

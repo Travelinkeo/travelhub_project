@@ -3,9 +3,9 @@ from django.urls import reverse
 from django.utils import timezone
 from rest_framework.test import APIClient
 
-from core.models.contabilidad import AsientoContable
-from core.models.ventas import AuditLog, Venta, VentaParseMetadata
-from core.models_catalogos import Moneda
+from apps.contabilidad.models import AsientoContable
+from apps.bookings.models import AuditLog, Venta, VentaParseMetadata
+from apps.finance.models.currencies import Moneda
 
 pytestmark = pytest.mark.django_db
 
@@ -28,8 +28,8 @@ def login_staff(api_client, staff_user):
 
 def test_auditlog_filters(login_staff):
     # Crear cliente y venta válidos
-    from core.models.personas import Cliente
-    from core.models_catalogos import Moneda
+    from apps.crm.models import Cliente
+    from apps.finance.models.currencies import Moneda
     m = Moneda.objects.create(nombre='USD', codigo_iso='USD', simbolo='$', es_moneda_local=True)
     c = Cliente.objects.create(nombres='Test', apellidos='User', email='t@example.com')
     v = Venta.objects.create(cliente=c, moneda=m, subtotal=0, impuestos=0, total_venta=0, monto_pagado=0, saldo_pendiente=0, tipo_venta='BOL', canal_origen='WEB', estado='PEN')
@@ -51,8 +51,8 @@ def test_auditlog_filters(login_staff):
 
 
 def test_contabilizar_anular_actions(login_staff):
-    from core.models.personas import Cliente
-    from core.models.ventas import Venta
+    from apps.crm.models import Cliente
+    from apps.bookings.models import Venta
     m = Moneda.objects.create(nombre='USD', codigo_iso='USD', simbolo='$', es_moneda_local=True)
     c = Cliente.objects.create(nombres='Test', apellidos='User', email='t@example.com')
     v = Venta.objects.create(cliente=c, moneda=m, subtotal=0, impuestos=0, total_venta=0, monto_pagado=0, saldo_pendiente=0, tipo_venta='BOL', canal_origen='WEB', estado='PEN')

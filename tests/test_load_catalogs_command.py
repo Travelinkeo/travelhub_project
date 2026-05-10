@@ -2,7 +2,7 @@ import pytest
 from django.core.management import call_command
 from django.core.management.base import CommandError
 
-from core.models_catalogos import Pais
+from apps.common.models import Pais
 
 
 @pytest.fixture

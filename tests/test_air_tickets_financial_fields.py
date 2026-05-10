@@ -1,7 +1,7 @@
 import pytest
 from django.urls import reverse
 
-from core.models.boletos import BoletoImportado
+from apps.bookings.models import BoletoImportado
 
 pytestmark = pytest.mark.django_db
 

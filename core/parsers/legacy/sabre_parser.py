@@ -7,7 +7,7 @@ import logging
 from decimal import Decimal
 from typing import Dict, Any, List, Optional
 
-from .base_parser import BaseTicketParser, ParsedTicketData
+from core.parsers.base_parser import BaseTicketParser, ParsedTicketData
 
 logger = logging.getLogger(__name__)
 
@@ -251,6 +251,18 @@ class SabreParser(BaseTicketParser):
         vuelo_text = re.sub(r'(?:No válido|Not valid) (?:antes|después) del.*?\n', '', vuelo_text, flags=re.IGNORECASE)
         vuelo_text = re.sub(r'Est\. [Ee]mission.*?\n', '', vuelo_text, flags=re.IGNORECASE)
         vuelo_text = re.sub(r'.*?KG CO2.*?\n', '', vuelo_text, flags=re.IGNORECASE)
+        vuelo_text = re.sub(r'Esta no es una tarjeta de embarque.*?\n', '', vuelo_text, flags=re.IGNORECASE)
+        vuelo_text = re.sub(r'Cabina\s+[A-Z\s]+.*?\n', '', vuelo_text, flags=re.IGNORECASE)
+        vuelo_text = re.sub(r'N[uú]mero de asiento.*?\n', '', vuelo_text, flags=re.IGNORECASE)
+        vuelo_text = re.sub(r'REQUIERE CHECK-IN.*?\n', '', vuelo_text, flags=re.IGNORECASE)
+        vuelo_text = re.sub(r'Estado de la reservaci[oó]n.*?\n', '', vuelo_text, flags=re.IGNORECASE)
+        vuelo_text = re.sub(r'CONFIRMADO.*?\n', '', vuelo_text, flags=re.IGNORECASE)
+        vuelo_text = re.sub(r'Terminal\s+\d+.*?\n', '', vuelo_text, flags=re.IGNORECASE)
+        vuelo_text = re.sub(r'Base de tarifa\s+[A-Z0-9]+.*?\n', '', vuelo_text, flags=re.IGNORECASE)
+        vuelo_text = re.sub(r'C[oó]digo de reservaci[oó]n de la aerol[íi]nea\s+[A-Z0-9]+.*?\n', '', vuelo_text, flags=re.IGNORECASE)
+        vuelo_text = re.sub(r'Por favor contacte a su agente de viajes.*?\n', '', vuelo_text, flags=re.IGNORECASE)
+        vuelo_text = re.sub(r'Documento de identificaci[oó]n v[aá]lido necesario.*?\n', '', vuelo_text, flags=re.IGNORECASE)
+        vuelo_text = re.sub(r'L[íi]mite de equipaje\s+\w+.*?\n', '', vuelo_text, flags=re.IGNORECASE)
         
         # Dividir por marcadores de segmento
         # 1. Por fechas (Salida: DD MMM YY)

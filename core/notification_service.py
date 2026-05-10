@@ -130,7 +130,7 @@ def notificar_alerta_migratoria(migration_check):
     from asgiref.sync import async_to_sync
     from telegram import Bot
     from django.conf import settings
-    from core.models import UsuarioAgencia
+    from core.models.agencia import UsuarioAgencia
 
     # 1. Obtener al usuario destinatario
     # Intentamos notificar al usuario que creó la venta o al dueño de la agencia

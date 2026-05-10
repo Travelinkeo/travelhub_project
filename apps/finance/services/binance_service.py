@@ -6,6 +6,8 @@ import uuid
 import requests
 import logging
 from django.conf import settings
+from django.db import transaction
+from django.utils import timezone
 from apps.finance.models import PagoBinance, Factura
 
 logger = logging.getLogger(__name__)
@@ -87,7 +89,7 @@ class BinancePayService:
                 pago.save()
                 return pago
 
-            response = requests.post(url, headers=self._get_headers(payload), data=payload)
+            response = requests.post(url, headers=self._get_headers(payload), data=payload, timeout=30)
             res_json = response.json()
 
             pago.raw_response = res_json

@@ -226,8 +226,8 @@
     <div class="printable-area">
         <header class="header">
             <div class="header-logo">
-                {% if venta.agencia and (venta.agencia.logo_pdf_dark_base64 or venta.agencia.logo_pdf_base64) %}
-                    <img src="{% if venta.agencia.logo_pdf_dark_base64 %}data:image/png;base64,{{ venta.agencia.logo_pdf_dark_base64 }}{% else %}data:image/png;base64,{{ venta.agencia.logo_pdf_base64 }}{% endif %}" alt="Logo">
+                {% if agencia_logo_b64 %}
+                    <img src="{{ agencia_logo_b64 }}" alt="Logo">
                 {% else %}
                     <span>{{ venta.agencia.nombre_comercial|default:venta.agencia.nombre }}</span>
                 {% endif %}

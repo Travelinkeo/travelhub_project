@@ -1,5 +1,5 @@
 # Contenido del archivo core/urls.py
-from django.http import HttpResponse
+from django.shortcuts import redirect
 
 from django.urls import reverse
 def debug_check(request):
@@ -31,7 +31,7 @@ def debug_check(request):
 import json
 import logging
 
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.urls import include, path, re_path
 
 app_name = 'core'
@@ -106,8 +106,56 @@ from core.views.audit_views import AuditLogListView
 from core.views.ocr_views import OCRPassportView
 from core.views.id_scanner_views import CedulaScannerAPIView
 from core.views.settings_views import BrandingSettingsView
-from core.views.onboarding_views import SaaSOnboardingView
+from core.views.onboarding_views import SaaSOnboardingView, OnboardingAgencyView
 from core.views.notifications import notificaciones_live_view
+
+# --- EXPLICIT VIEW IMPORTS (replacing lambdas) ---
+from core.views.billing_success_views import billing_success, billing_cancel
+from core.views.upload import UploadBoletoView, ReviewBoletoView, DesasociarVentaView
+from core.views.upload import eliminar_boleto as eliminar_boleto_upload
+from apps.bookings.views.dashboard_boletos import actualizar_item_boleto
+from apps.bookings.views.dashboard_views import dashboard_metricas, DashboardView, dashboard_alertas
+from core.views.voucher_views import generar_voucher
+from core.views.auditoria_views import historial_venta, estadisticas_auditoria
+from core.views.boleto_api_views import (
+    boletos_sin_venta, reintentar_parseo, crear_venta_desde_boleto,
+    dashboard_stats as boletos_dashboard_stats, buscar, reporte_comisiones,
+    solicitar_anulacion, detalle_boleto, eliminar_boleto as eliminar_boleto_api,
+)
+from core.views.reconciliation_views import SupplierReconciliationAPIView, SupplierReconciliationUIView
+from core.views.billing_views import (
+    get_plans, get_current_subscription, create_checkout_session,
+    create_portal_session, stripe_webhook, cancel_subscription,
+)
+from django.views.generic import TemplateView
+from core.views.billing_dashboard_views import get_invoices, get_payment_method, get_usage_stats
+from core.views.billing_plan_change_views import change_plan, preview_plan_change, downgrade_to_free
+from core.views.billing_analytics_views import (
+    get_mrr, get_churn_rate, get_usage_metrics, get_conversion_funnel, get_growth_metrics,
+)
+from core.views.reportes_views import (
+    libro_diario, balance_comprobacion, estado_resultados, validar_cuadre, exportar_excel,
+)
+from core.views.cron_views import (
+    sincronizar_bcv_cron, enviar_recordatorios_cron, cierre_mensual_cron,
+    cargar_catalogos_cron, health_check,
+)
+from core.views.email_monitor_views import procesar_correos_boletos
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
+from core.views.public_views import PublicItineraryView, PublicVoucherPDFView, PublicHotelVoucherPDFView
+from core.views.wiki_views import wiki_gds_list, wiki_gds_reader
+from core.views.analytics.dashboard_views import AnalyticsDashboardView
+from core.views.analytics.sales_analytics import sales_analytics_view
+from core.views.analytics.finance_analytics import finance_analytics_view
+from core.views.analytics.ops_analytics import ops_analytics_view
+from core.views.report_export_views import ExportReportView
+from core.views.migration_api import check_migration_requirements, quick_check_visa, get_migration_checks
+from core.views.dashboard import CEODashboardView, AIBusinessAdvisorView
+from core.views.god_mode_views import GodModeDashboardView, ImpersonateAgencyView, StopImpersonateView
+from core.views.search_views import GlobalOmnisearchView, ClienteSearchAPIView
+from core.views.webhooks_views import ResendInboundWebhookView
+from core.views.translator_views import TraductorView
+# --- END EXPLICIT VIEW IMPORTS ---
 
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -130,7 +178,7 @@ class TokenLogoutView(View):
 def csp_report_view(request):
     try:
         data = json.loads(request.body or '{}')
-        logger = __import__('logging').getLogger('csp')
+        logger = logging.getLogger('csp')
         logger.warning('CSP violation report: %s', data)
     except Exception as e:
         return JsonResponse({'detail': str(e)}, status=400)
@@ -176,10 +224,12 @@ class TipoCambioViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.AllowAny]
     authentication_classes = []
 
-class ProductoServicioViewSet(viewsets.ModelViewSet):
+from core.api.mixins.tenant import TenantViewSetMixin
+
+class ProductoServicioViewSet(TenantViewSetMixin, viewsets.ModelViewSet):
     queryset = ProductoServicio.objects.filter(activo=True)
     serializer_class = ProductoServicioSerializer
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
     authentication_classes = []
     filter_backends = [filters.SearchFilter]
     search_fields = ['nombre', 'codigo_interno', 'descripcion']
@@ -299,41 +349,23 @@ from core.views.flights_views import FlightSearchView
 from core.views.telegram_views import flyer_mini_app_view, generate_flyer_api
 
 urlpatterns = [
+    # Módulos Extraídos
+    path('', include('apps.bookings.urls_core')),
+    path('', include('apps.common.urls_core')),
+    
     # SaaS Onboarding (Público)
     path('onboarding/', SaaSOnboardingView.as_view(), name='onboarding_start'),
+    path('onboarding/agency/', OnboardingAgencyView.as_view(), name='onboarding_agency'),
 
     # Telegram Mini Apps
     path('telegram/flyer-app/', flyer_mini_app_view, name='telegram_flyer_app'),
     path('api/generate-flyer/', generate_flyer_api, name='api_generate_flyer'),
 
-    # Tasas de Cambio y Catálogos
-    path('setup/catalogos/', CatalogosCenterView.as_view(), name='catalogos_center'),
-    path('setup/catalogos/aerolineas/', AerolineaListView.as_view(), name='aerolineas_list'),
-    path('setup/catalogos/productos/', ProductoServicioListView.as_view(), name='productos_list'),
-    path('setup/catalogos/geografia/', GeografiaListView.as_view(), name='geografia_list'),
-    
-    # Catálogo Terrestre (Inventario Propio)
-    path('inventario/terrestre/', inventario_views.CatalogoTerrestreListView.as_view(), name='catalogo_terrestre'),
-    path('inventario/terrestre/nuevo/', inventario_views.ProductoTerrestreCreateView.as_view(), name='producto_terrestre_create'),
-    
-    # Proveedores
-    path('setup/catalogos/proveedores/', ProveedorListView.as_view(), name='proveedores_list'),
-    path('setup/catalogos/proveedores/nuevo/', ProveedorCreateView.as_view(), name='proveedores_nuevo'),
-    path('setup/catalogos/proveedores/<int:pk>/editar/', ProveedorUpdateView.as_view(), name='proveedores_editar'),
-    path('setup/catalogos/proveedores/<int:pk>/eliminar/', ProveedorDeleteView.as_view(), name='proveedores_eliminar'),
-    
-    # Comisiones
-    path('setup/catalogos/comisiones/', ComisionProveedorServicioListView.as_view(), name='comisiones_list'),
-    path('setup/catalogos/comisiones/nuevo/', ComisionProveedorServicioCreateView.as_view(), name='comisiones_nuevo'),
-    path('setup/catalogos/comisiones/<int:pk>/editar/', ComisionProveedorServicioUpdateView.as_view(), name='comisiones_editar'),
-    path('setup/catalogos/comisiones/<int:pk>/eliminar/', ComisionProveedorServicioDeleteView.as_view(), name='comisiones_eliminar'),
-    path('setup/tasas/', TipoCambioListView.as_view(), name='tasas_list'),
-    path('setup/tasas/nueva/', TipoCambioCreateView.as_view(), name='tasas_nuevo'),
-    path('setup/tasas/sincronizar/', SincronizarTasasActionView.as_view(), name='tasas_sincronizar'),
+    # Catálogos, Setup y Proveedores extraídos a apps.common.urls_core
     
     # Stripe Billing Success/Cancel
-    path('billing/success/', lambda r: __import__('core.views.billing_success_views', fromlist=['billing_success']).billing_success(r), name='billing_success'),
-    path('billing/cancel/', lambda r: __import__('core.views.billing_success_views', fromlist=['billing_cancel']).billing_cancel(r), name='billing_cancel'),
+    path('billing/success/', billing_success, name='billing_success'),
+    path('billing/cancel/', billing_cancel, name='billing_cancel'),
     
     # Flight Search
     path('flights/', FlightSearchView.as_view(), name='flight_search'),
@@ -343,25 +375,12 @@ urlpatterns = [
 
     # 🚀 REAL TIME AUTOMATION (Magic Toasts)
     
-    path('api/boletos/upload/', BoletoUploadAPIView.as_view(), name='api_boleto_upload'),
-    path('api/boletos/<int:pk>/delete/', BoletoDeleteAPIView.as_view(), name='api_boleto_delete'),
-    # path('api/itineraries/generate/', views.ItineraryGeneratorView.as_view(), name='itinerary_generator'),
-    path('upload/boleto/', lambda r: __import__('core.views.upload', fromlist=['UploadBoletoView']).UploadBoletoView.as_view()(r), name='upload_boleto'),
-    path('upload/boleto/<int:pk>/revisar/', lambda r, pk: __import__('core.views.upload', fromlist=['ReviewBoletoView']).ReviewBoletoView.as_view()(r, pk=pk), name='revisar_boleto'),
-    path('upload/boleto/<int:pk>/desasociar-venta/', lambda r, pk: __import__('core.views.upload', fromlist=['DesasociarVentaView']).DesasociarVentaView.as_view()(r, pk=pk), name='desasociar_venta'),
-    path('upload/boleto/<int:pk>/eliminar-fisicamente/', lambda r, pk: __import__('core.views.upload', fromlist=['eliminar_boleto']).eliminar_boleto(r, pk=pk), name='eliminar_boleto_hard'),
-    path('ventas/<int:pk>/eliminar-fisicamente/', lambda r, pk: __import__('apps.bookings.views.ventas_views', fromlist=['eliminar_venta']).eliminar_venta(r, pk=pk), name='eliminar_venta_hard'),
+    # Rutas de Boletos movidas a apps.bookings.urls_core
     # path('api/chatbot/converse/', views.ChatbotConverseView.as_view(), name='chatbot_converse'),
     # path('api/health/', views.HealthCheckView.as_view(), name='health'),
     # path('api/auth/login/', views.LoginView.as_view(), name='login'),
     path(r'api/auth/jwt/obtain/', TokenObtainPairView.as_view(), name='jwt_obtain_pair'),
-    path('dashboard/erp/boletos/', erp_views.DashboardBoletosView.as_view(), name='boletos_dashboard'),
-    path('dashboard/erp/boletos/buscar/', erp_views.BoletosBusquedaView.as_view(), name='boletos_busqueda'),
-    path('dashboard/erp/boletos/reportes/', erp_views.BoletosReportesView.as_view(), name='boletos_reportes'),
-    path('dashboard/erp/boletos/reportes/exportar/', erp_views.ExportarBoletosExcelView.as_view(), name='boletos_reportes_exportar'),
-    path('dashboard/erp/boletos/anulaciones/', erp_views.BoletosAnulacionesView.as_view(), name='boletos_anulaciones'),
-    path('dashboard/erp/boletos/importar/', erp_views.BoletosImportarView.as_view(), name='boletos_importar'),
-    path('dashboard/erp/boletos/manual/', erp_views.BoletosManualView.as_view(), name='boletos_manual'),
+    # Dashboard ERP Boletos (Movido a urls_core)
     
     # Ventas Dashboard (Redirected to modular bookings app)
     path('dashboard/erp/ventas/', RedirectView.as_view(pattern_name='bookings:venta_list', permanent=True), name='ventas_dashboard'),
@@ -369,14 +388,11 @@ urlpatterns = [
     path('dashboard/erp/ventas/<int:pk>/', RedirectView.as_view(pattern_name='bookings:venta_detail', permanent=True), name='venta_detalle'),
     path('dashboard/erp/ventas/<int:pk>/editar/', RedirectView.as_view(pattern_name='bookings:venta_update', permanent=True), name='editar_venta'),
     # path('dashboard/erp/ventas/<int:pk>/asignar-cliente/', ventas_views.VentaAssignClientView.as_view(), name='venta_asignar_cliente'),
-    # path('dashboard/erp/ventas/<int:pk>/fees/add/', ventas_views.VentaAddFeeView.as_view(), name='venta_add_fee'),
+    path('dashboard/erp/ventas/<int:pk>/fees/add/', VentaAddFeeView.as_view(), name='venta_add_fee'),
     # path('dashboard/erp/ventas/<int:pk>/facturar/', ventas_views.VentaGenerateInvoiceView.as_view(), name='venta_facturar'),
     # path('dashboard/erp/ventas/<int:pk>/voucher/', ventas_views.VentaGenerateVoucherView.as_view(), name='venta_voucher'),
 
-    # Proveedores
-    path('dashboard/erp/proveedores/', proveedores_views.ProveedorListView.as_view(), name='proveedores_list'),
-    path('dashboard/erp/proveedores/nuevo/', proveedores_views.ProveedorCreateView.as_view(), name='proveedor_create'),
-    path('dashboard/erp/proveedores/<int:pk>/editar/', proveedores_views.ProveedorUpdateView.as_view(), name='proveedor_update'),
+    # Proveedores Dashboard ERP (Extraído a urls_core)
 
     # Clientes (Redirected to modular crm app)
     path('dashboard/erp/clientes/', RedirectView.as_view(pattern_name='crm:cliente_list', permanent=True), name='clientes_list'),
@@ -416,99 +432,63 @@ urlpatterns = [
     
     # Translator APIs
     path(r'api/translator/', include('core.translator_urls', namespace='translator')),
-    path('tools/traductor/', __import__('core.views.translator_views', fromlist=['TraductorView']).TraductorView.as_view(), name='traductor_tool'),
-    path(r'api/boletos/actualizar-item/', lambda r: __import__('apps.bookings.views.dashboard_boletos', fromlist=['actualizar_item_boleto']).actualizar_item_boleto(r), name='actualizar_item_boleto'),
-    
-    # Dashboard y Vouchers
-    path(r'api/dashboard/metricas/', lambda r: __import__('apps.bookings.views.dashboard_views', fromlist=['dashboard_metricas']).dashboard_metricas(r), name='dashboard_metricas'),
-    path(r'dashboard/modern/', lambda r: __import__('apps.bookings.views.dashboard_views', fromlist=['DashboardView']).DashboardView.as_view()(r), name='modern_dashboard'),
-    path(r'api/dashboard/alertas/', lambda r: __import__('apps.bookings.views.dashboard_views', fromlist=['dashboard_alertas']).dashboard_alertas(r), name='dashboard_alertas'),
-    path(r'api/ventas/<int:venta_id>/generar-voucher/', lambda r, venta_id: __import__('core.views.voucher_views', fromlist=['generar_voucher']).generar_voucher(r, venta_id), name='generar_voucher'),
-    
-    # Auditoría
-    path(r'api/auditoria/venta/<int:venta_id>/', lambda r, venta_id: __import__('core.views.auditoria_views', fromlist=['historial_venta']).historial_venta(r, venta_id), name='historial_venta'),
-    path(r'api/auditoria/estadisticas/', lambda r: __import__('core.views.auditoria_views', fromlist=['estadisticas_auditoria']).estadisticas_auditoria(r), name='estadisticas_auditoria'),
-    
-    # Boletos
-    path(r'api/boletos/sin-venta/', lambda r: __import__('core.views.boleto_api_views', fromlist=['boletos_sin_venta']).boletos_sin_venta(r), name='boletos_sin_venta'),
-    path(r'api/boletos/<int:boleto_id>/reintentar-parseo/', lambda r, boleto_id: __import__('core.views.boleto_api_views', fromlist=['reintentar_parseo']).reintentar_parseo(r, boleto_id), name='reintentar_parseo'),
-    path(r'api/boletos/<int:boleto_id>/crear-venta/', lambda r, boleto_id: __import__('core.views.boleto_api_views', fromlist=['crear_venta_desde_boleto']).crear_venta_desde_boleto(r, boleto_id), name='crear_venta_desde_boleto'),
-    path(r'api/boletos/dashboard-stats/', lambda r: __import__('core.views.boleto_api_views', fromlist=['dashboard_stats']).dashboard_stats(r), name='boletos_dashboard_stats'),
-    path(r'api/boletos/buscar/', lambda r: __import__('core.views.boleto_api_views', fromlist=['buscar']).buscar(r), name='boletos_buscar'),
-    path(r'api/boletos/reporte-comisiones/', lambda r: __import__('core.views.boleto_api_views', fromlist=['reporte_comisiones']).reporte_comisiones(r), name='boletos_reporte_comisiones'),
-    path(r'api/boletos/solicitar-anulacion/', lambda r: __import__('core.views.boleto_api_views', fromlist=['solicitar_anulacion']).solicitar_anulacion(r), name='boletos_solicitar_anulacion'),
-    path(r'api/boletos/<int:boleto_id>/detalle/', lambda r, boleto_id: __import__('core.views.boleto_api_views', fromlist=['detalle_boleto']).detalle_boleto(r, boleto_id), name='boletos_detalle'),
-    path(r'api/boletos/<int:boleto_id>/eliminar/', lambda r, boleto_id: __import__('core.views.boleto_api_views', fromlist=['eliminar_boleto']).eliminar_boleto(r, boleto_id), name='boletos_eliminar'),
-    path(r'api/boletos/mass-action/', BoletoMassActionAPIView.as_view(), name='api_boletos_mass_action'),
-    path('api/boletos/<int:pk>/retry/', BoletoRetryParseAPIView.as_view(), name='api_boleto_retry'),
-    path(r'api/audit-logs/', AuditLogListView.as_view(), name='api_audit_logs'),
-    path(r'api/ventas/<int:pk>/double-invoice/', VentaDoubleInvoiceAPIView.as_view(), name='api_venta_double_invoice'),
-    path(r'api/boletos/audit/', BoletoAuditAPIView.as_view(), name='api_boleto_audit'),
+    path('tools/traductor/', TraductorView.as_view(), name='traductor_tool'),
+    # API Boletos movida a urls_core
     
     # Conciliación de Proveedores
-    path('api/reconciliation/', csrf_exempt(lambda r: __import__('core.views.reconciliation_views', fromlist=['SupplierReconciliationAPIView']).SupplierReconciliationAPIView.as_view()(r)), name='api_reconciliation'),
-    path('finance/supplier-reconciliation/', lambda r: __import__('core.views.reconciliation_views', fromlist=['SupplierReconciliationUIView']).SupplierReconciliationUIView.as_view()(r), name='supplier_reconciliation_ui'),
+    # Movido a apps.finance.urls_core
 
-    path(r'billing/success/', lambda r: __import__('core.views.billing_success_views', fromlist=['billing_success']).billing_success(r), name='billing_success'),
-    path(r'billing/cancel/', lambda r: __import__('core.views.billing_success_views', fromlist=['billing_cancel']).billing_cancel(r), name='billing_cancel'),
-    
     # Billing/SaaS - API Básica
-    path(r'api/billing/plans/', lambda r: __import__('core.views.billing_views', fromlist=['get_plans']).get_plans(r), name='billing_plans'),
-    path(r'api/billing/subscription/', lambda r: __import__('core.views.billing_views', fromlist=['get_current_subscription']).get_current_subscription(r), name='current_subscription'),
-    path(r'billing/pricing/', lambda r: __import__('django.views.generic', fromlist=['TemplateView']).TemplateView.as_view(template_name='billing/pricing.html')(r), name='billing_pricing'),
-    path(r'api/billing/checkout/', csrf_exempt(lambda r: __import__('core.views.billing_views', fromlist=['create_checkout_session']).create_checkout_session(r)), name='create_checkout'),
-    path(r'api/billing/portal/', csrf_exempt(lambda r: __import__('core.views.billing_views', fromlist=['create_portal_session']).create_portal_session(r)), name='create_portal'),
-    path(r'api/billing/webhook/', csrf_exempt(lambda r: __import__('core.views.billing_views', fromlist=['stripe_webhook']).stripe_webhook(r)), name='stripe_webhook'),
-    path(r'api/billing/cancel/', lambda r: __import__('core.views.billing_views', fromlist=['cancel_subscription']).cancel_subscription(r), name='cancel_subscription'),
+    path(r'api/billing/plans/', get_plans, name='billing_plans'),
+    path(r'api/billing/subscription/', get_current_subscription, name='current_subscription'),
+    path(r'billing/pricing/', TemplateView.as_view(template_name='billing/pricing.html'), name='billing_pricing'),
+    path(r'api/billing/checkout/', csrf_exempt(create_checkout_session), name='create_checkout'),
+    path(r'api/billing/portal/', csrf_exempt(create_portal_session), name='create_portal'),
+    path(r'api/billing/webhook/', csrf_exempt(stripe_webhook), name='stripe_webhook'),
+    path(r'api/billing/cancel/', cancel_subscription, name='cancel_subscription'),
     
     # Billing/SaaS - Dashboard
-    path(r'api/billing/invoices/', lambda r: __import__('core.views.billing_dashboard_views', fromlist=['get_invoices']).get_invoices(r), name='billing_invoices'),
-    path(r'api/billing/payment-method/', lambda r: __import__('core.views.billing_dashboard_views', fromlist=['get_payment_method']).get_payment_method(r), name='billing_payment_method'),
-    path(r'api/billing/usage/', lambda r: __import__('core.views.billing_dashboard_views', fromlist=['get_usage_stats']).get_usage_stats(r), name='billing_usage'),
+    path(r'api/billing/invoices/', get_invoices, name='billing_invoices'),
+    path(r'api/billing/payment-method/', get_payment_method, name='billing_payment_method'),
+    path(r'api/billing/usage/', get_usage_stats, name='billing_usage'),
     
     # Billing/SaaS - Cambio de Plan
-    path(r'api/billing/change-plan/', csrf_exempt(lambda r: __import__('core.views.billing_plan_change_views', fromlist=['change_plan']).change_plan(r)), name='change_plan'),
-    path(r'api/billing/preview-change/', lambda r: __import__('core.views.billing_plan_change_views', fromlist=['preview_plan_change']).preview_plan_change(r), name='preview_plan_change'),
-    path(r'api/billing/downgrade-free/', csrf_exempt(lambda r: __import__('core.views.billing_plan_change_views', fromlist=['downgrade_to_free']).downgrade_to_free(r)), name='downgrade_free'),
+    path(r'api/billing/change-plan/', csrf_exempt(change_plan), name='change_plan'),
+    path(r'api/billing/preview-change/', preview_plan_change, name='preview_plan_change'),
+    path(r'api/billing/downgrade-free/', csrf_exempt(downgrade_to_free), name='downgrade_free'),
     
     # Billing/SaaS - Analytics (Admin only)
-    path(r'api/billing/analytics/mrr/', lambda r: __import__('core.views.billing_analytics_views', fromlist=['get_mrr']).get_mrr(r), name='analytics_mrr'),
-    path(r'api/billing/analytics/churn/', lambda r: __import__('core.views.billing_analytics_views', fromlist=['get_churn_rate']).get_churn_rate(r), name='analytics_churn'),
-    path(r'api/billing/analytics/usage/', lambda r: __import__('core.views.billing_analytics_views', fromlist=['get_usage_metrics']).get_usage_metrics(r), name='analytics_usage'),
-    path(r'api/billing/analytics/conversion/', lambda r: __import__('core.views.billing_analytics_views', fromlist=['get_conversion_funnel']).get_conversion_funnel(r), name='analytics_conversion'),
-    path(r'api/billing/analytics/growth/', lambda r: __import__('core.views.billing_analytics_views', fromlist=['get_growth_metrics']).get_growth_metrics(r), name='analytics_growth'),
+    path(r'api/billing/analytics/mrr/', get_mrr, name='analytics_mrr'),
+    path(r'api/billing/analytics/churn/', get_churn_rate, name='analytics_churn'),
+    path(r'api/billing/analytics/usage/', get_usage_metrics, name='analytics_usage'),
+    path(r'api/billing/analytics/conversion/', get_conversion_funnel, name='analytics_conversion'),
+    path(r'api/billing/analytics/growth/', get_growth_metrics, name='analytics_growth'),
     
     # Reportes Contables
-    path(r'api/reportes/libro-diario/', lambda r: __import__('core.views.reportes_views', fromlist=['libro_diario']).libro_diario(r), name='libro_diario'),
-    path(r'api/reportes/balance-comprobacion/', lambda r: __import__('core.views.reportes_views', fromlist=['balance_comprobacion']).balance_comprobacion(r), name='balance_comprobacion'),
-    path(r'api/reportes/estado-resultados/', lambda r: __import__('core.views.reportes_views', fromlist=['estado_resultados']).estado_resultados(r), name='estado_resultados'),
-    path(r'api/reportes/validar-cuadre/', lambda r: __import__('core.views.reportes_views', fromlist=['validar_cuadre']).validar_cuadre(r), name='validar_cuadre'),
-    path(r'api/reportes/exportar-excel/', lambda r: __import__('core.views.reportes_views', fromlist=['exportar_excel']).exportar_excel(r), name='exportar_excel'),
+    path(r'api/reportes/libro-diario/', libro_diario, name='libro_diario'),
+    path(r'api/reportes/balance-comprobacion/', balance_comprobacion, name='balance_comprobacion'),
+    path(r'api/reportes/estado-resultados/', estado_resultados, name='estado_resultados'),
+    path(r'api/reportes/validar-cuadre/', validar_cuadre, name='validar_cuadre'),
+    path(r'api/reportes/exportar-excel/', exportar_excel, name='exportar_excel'),
     
-    # Setup - Crear superusuario (temporal)
-    path(r'api/setup/create-superuser/', csrf_exempt(lambda r: __import__('core.views.setup_views', fromlist=['create_superuser']).create_superuser(r)), name='create_superuser'),
-    
+
     # Cron Jobs (tareas programadas vía HTTP)
-    path(r'api/cron/sincronizar-bcv/', lambda r: __import__('core.views.cron_views', fromlist=['sincronizar_bcv_cron']).sincronizar_bcv_cron(r), name='cron_sincronizar_bcv'),
-    path(r'api/cron/recordatorios-pago/', lambda r: __import__('core.views.cron_views', fromlist=['enviar_recordatorios_cron']).enviar_recordatorios_cron(r), name='cron_recordatorios'),
-    path(r'api/cron/cierre-mensual/', lambda r: __import__('core.views.cron_views', fromlist=['cierre_mensual_cron']).cierre_mensual_cron(r), name='cron_cierre_mensual'),
-    path(r'api/cron/cargar-catalogos/', lambda r: __import__('core.views.cron_views', fromlist=['cargar_catalogos_cron']).cargar_catalogos_cron(r), name='cron_cargar_catalogos'),
-    path(r'api/cron/health/', lambda r: __import__('core.views.cron_views', fromlist=['health_check']).health_check(r), name='cron_health'),
+    path(r'api/cron/sincronizar-bcv/', sincronizar_bcv_cron, name='cron_sincronizar_bcv'),
+    path(r'api/cron/recordatorios-pago/', enviar_recordatorios_cron, name='cron_recordatorios'),
+    path(r'api/cron/cierre-mensual/', cierre_mensual_cron, name='cron_cierre_mensual'),
+    path(r'api/cron/cargar-catalogos/', cargar_catalogos_cron, name='cron_cargar_catalogos'),
+    path(r'api/cron/health/', health_check, name='cron_health'),
     
     # Email Monitor - Procesar correos de boletos manualmente
-    path(r'api/procesar-correos-boletos/', lambda r: __import__('core.views.email_monitor_views', fromlist=['procesar_correos_boletos']).procesar_correos_boletos(r), name='procesar_correos_boletos'),
+    path(r'api/procesar-correos-boletos/', procesar_correos_boletos, name='procesar_correos_boletos'),
     
     # OpenAPI/Swagger Documentation
-    path(r'api/schema/', lambda r: __import__('drf_spectacular.views', fromlist=['SpectacularAPIView']).SpectacularAPIView.as_view(), name='schema'),
-    path(r'api/docs/', lambda r: __import__('drf_spectacular.views', fromlist=['SpectacularSwaggerView']).SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
-    path(r'api/redoc/', lambda r: __import__('drf_spectacular.views', fromlist=['SpectacularRedocView']).SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
+    path(r'api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    path(r'api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    path(r'api/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
     
-    # Facturación
-    path('facturacion/', FacturacionDashboardView.as_view(), name='facturacion_dashboard'),
-    path('facturacion/<int:pk>/', FacturaDetailView.as_view(), name='factura_detalle'),
-    path('facturacion/<int:pk>/pdf/', descargar_pdf_factura, name='factura_pdf'),
-    path('ventas/<int:pk>/facturar/', generar_factura_desde_venta, name='venta_facturar'),
-    path('facturacion/<int:pk>/emitir/', emitir_factura_definitiva, name='factura_emitir'),
+    # Facturación y Finanzas
+    path('', include('apps.finance.urls_core')),
 
     # Cotizaciones
     path('cotizaciones/', cotizaciones_views.CotizacionDashboardView.as_view(), name='cotizacion_dashboard'),
@@ -535,28 +515,28 @@ urlpatterns = [
     path('api/hotels/quote/', HotelQuoteAPI.as_view(), name='hotel_quote_api'),
 
     # Portal del Pasajero ("White-Label")
-    path('v/<uuid:token>/', lambda r, token: __import__('core.views.public_views', fromlist=['PublicItineraryView']).PublicItineraryView.as_view()(r, token=token), name='public_itinerary'),
-    path('v/<uuid:token>/pdf/', lambda r, token: __import__('core.views.public_views', fromlist=['PublicVoucherPDFView']).PublicVoucherPDFView.as_view()(r, token=token), name='public_voucher_pdf'),
-    path('v/hotel/<int:alojamiento_id>/pdf/', lambda r, alojamiento_id: __import__('core.views.public_views', fromlist=['PublicHotelVoucherPDFView']).PublicHotelVoucherPDFView.as_view()(r, alojamiento_id=alojamiento_id), name='public_hotel_voucher'),
+    path('v/<uuid:token>/', PublicItineraryView.as_view(), name='public_itinerary'),
+    path('v/<uuid:token>/pdf/', PublicVoucherPDFView.as_view(), name='public_voucher_pdf'),
+    path('v/hotel/<int:alojamiento_id>/pdf/', PublicHotelVoucherPDFView.as_view(), name='public_hotel_voucher'),
 
     # Contextual Wiki & GDS Wiki
-    path('api/wiki/search/', lambda r: __import__('core.views.wiki_views', fromlist=['search_wiki_context']).search_wiki_context(r), name='wiki_search'),
-    path('wiki/gds/', lambda r, *a, **k: __import__('core.views.wiki_views', fromlist=['wiki_gds_list']).wiki_gds_list(r, *a, **k), name='wiki_list'),
-    path('wiki/gds/<str:category>/', lambda r, category, **k: __import__('core.views.wiki_views', fromlist=['wiki_gds_reader']).wiki_gds_reader(r, category=category, **k), name='wiki_reader'),
-    path('wiki/gds/<str:category>/<str:filename>/', lambda r, category, filename, **k: __import__('core.views.wiki_views', fromlist=['wiki_gds_reader']).wiki_gds_reader(r, category=category, filename=filename, **k), name='wiki_reader_file'),
+    path('api/wiki/search/', wiki_gds_list, name='wiki_search'),
+    path('wiki/gds/', wiki_gds_list, name='wiki_list'),
+    path('wiki/gds/<str:category>/', wiki_gds_reader, name='wiki_reader'),
+    path('wiki/gds/<str:category>/<str:filename>/', wiki_gds_reader, name='wiki_reader_file'),
     
     # Reportes / BI Dashboard (New Analytics Module)
-    path('reportes/', lambda r: __import__('core.views.analytics.dashboard_views', fromlist=['AnalyticsDashboardView']).AnalyticsDashboardView.as_view()(r), name='reportes_ventas'),
-    path('api/analytics/sales/', lambda r: __import__('core.views.analytics.sales_analytics', fromlist=['sales_analytics_view']).sales_analytics_view(r), name='analytics_sales'),
-    path('api/analytics/finance/', lambda r: __import__('core.views.analytics.finance_analytics', fromlist=['finance_analytics_view']).finance_analytics_view(r), name='analytics_finance'),
-    path('api/analytics/ops/', lambda r: __import__('core.views.analytics.ops_analytics', fromlist=['ops_analytics_view']).ops_analytics_view(r), name='analytics_ops'),
-    path('reportes/exportar/', lambda r: __import__('core.views.report_export_views', fromlist=['ExportReportView']).ExportReportView.as_view()(r), name='report_export'),
+    path('reportes/', AnalyticsDashboardView.as_view(), name='reportes_ventas'),
+    path('api/analytics/sales/', sales_analytics_view, name='analytics_sales'),
+    path('api/analytics/finance/', finance_analytics_view, name='analytics_finance'),
+    path('api/analytics/ops/', ops_analytics_view, name='analytics_ops'),
+    path('reportes/exportar/', ExportReportView.as_view(), name='report_export'),
     path('cotizador/', flights_views.FlightSearchView.as_view(), name='flight_search'),
     
     # Migration Requirements Checker API
-    path('api/migration/check/', lambda r: __import__('core.views.migration_api', fromlist=['check_migration_requirements']).check_migration_requirements(r), name='migration_check'),
-    path('api/migration/quick-check/', lambda r: __import__('core.views.migration_api', fromlist=['quick_check_visa']).quick_check_visa(r), name='migration_quick_check'),
-    path('api/migration/checks/<int:pasajero_id>/', lambda r, pasajero_id: __import__('core.views.migration_api', fromlist=['get_migration_checks']).get_migration_checks(r, pasajero_id), name='migration_checks_history'),
+    path('api/migration/check/', check_migration_requirements, name='migration_check'),
+    path('api/migration/quick-check/', quick_check_visa, name='migration_quick_check'),
+    path('api/migration/checks/<int:pasajero_id>/', get_migration_checks, name='migration_checks_history'),
 
     # Intelligence - GDS Analyzer
     path('intelligence/gds-analyzer/', GDSAnalyzerView.as_view(), name='gds_analyzer'),
@@ -564,22 +544,25 @@ urlpatterns = [
     path('intelligence/gds-analyzer/inject/', GDSInjectERPView.as_view(), name='gds_analyzer_inject'),
 
     # --- DASHBOARD DIRECTIVO (CEO) ---
-    path('ceo-dashboard/', lambda r: __import__('core.views.dashboard', fromlist=['CEODashboardView']).CEODashboardView.as_view()(r), name='ceo_dashboard'),
-    path('api/ai-advisor/', lambda r: __import__('core.views.dashboard', fromlist=['AIBusinessAdvisorView']).AIBusinessAdvisorView.as_view()(r), name='ai_business_advisor'),
+    path('ceo-dashboard/', CEODashboardView.as_view(), name='ceo_dashboard'),
+    path('api/ai-advisor/', AIBusinessAdvisorView.as_view(), name='ai_business_advisor'),
 
     # --- GOD MODE (SuperAdmin) ---
-    path('god-mode/', lambda r: __import__('core.views.god_mode_views', fromlist=['GodModeDashboardView']).GodModeDashboardView.as_view()(r), name='god_mode'),
-    path('god-mode/impersonate/<int:agencia_id>/', lambda r, agencia_id: __import__('core.views.god_mode_views', fromlist=['ImpersonateAgencyView']).ImpersonateAgencyView.as_view()(r, agencia_id), name='god_mode_impersonate'),
-    path('god-mode/stop-impersonate/', lambda r: __import__('core.views.god_mode_views', fromlist=['StopImpersonateView']).StopImpersonateView.as_view()(r), name='god_mode_stop_impersonate'),
+    path('god-mode/', GodModeDashboardView.as_view(), name='god_mode'),
+    path('god-mode/impersonate/<int:agencia_id>/', ImpersonateAgencyView.as_view(), name='god_mode_impersonate'),
+    path('god-mode/stop-impersonate/', StopImpersonateView.as_view(), name='god_mode_stop_impersonate'),
 
     # --- OMNISEARCH GLOBAL (Ctrl+K) ---
-    path('omnisearch/', lambda r: __import__('core.views.search_views', fromlist=['GlobalOmnisearchView']).GlobalOmnisearchView.as_view()(r), name='omnisearch'),
-    path('api/search/clientes/', lambda r: __import__('core.views.search_views', fromlist=['ClienteSearchAPIView']).ClienteSearchAPIView.as_view()(r), name='api_search_clientes'),
+    path('omnisearch/', GlobalOmnisearchView.as_view(), name='omnisearch'),
+    path('api/search/clientes/', ClienteSearchAPIView.as_view(), name='api_search_clientes'),
     path('api/crm/cedula-scanner/', CedulaScannerAPIView.as_view(), name='api_cedula_scanner'),
     
     # --- WEBHOOKS (The Invisible Agent) ---
-    path('api/webhooks/resend/inbound/', lambda r: __import__('core.views.webhooks_views', fromlist=['ResendInboundWebhookView']).ResendInboundWebhookView.as_view()(r), name='webhook_resend_inbound'),
+    path('api/webhooks/resend/inbound/', ResendInboundWebhookView.as_view(), name='webhook_resend_inbound'),
     
     # --- NOTIFICACIONES MAGIC TOAST (HTMX POLLING) ---
     path('notifications/live/', notificaciones_live_view, name='notificaciones_live'),
+
+    # --- CUENTA ---
+    path('accounts/profile/', lambda r: redirect('/dashboard/'), name='account_profile'),
 ]

@@ -3,7 +3,6 @@ import re
 import logging
 from typing import Dict, Any, List, Optional
 from core.parsers.base_parser import BaseTicketParser, ParsedTicketData
-
 logger = logging.getLogger(__name__)
 
 class AmadeusParser(BaseTicketParser):

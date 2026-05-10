@@ -1,5 +1,6 @@
 # Archivo: apps/bookings/views/boleto_views.py
 
+from drf_spectacular.utils import extend_schema
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -25,6 +26,7 @@ from core.throttling import AgenciaAIParserThrottle, AIParserDailyQuotaThrottle
 
 logger = logging.getLogger(__name__)
 
+@extend_schema(exclude=True)
 class BoletoUploadAPIView(APIView):
     """
     Endpoint para subir un archivo de boleto (PDF/TXT), parsearlo
@@ -109,6 +111,7 @@ class BoletoUploadAPIView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
+@extend_schema(exclude=True)
 class BoletoRetryParseAPIView(APIView):
     """
     Fuerza el re-parseo de un boleto importado existente.
@@ -137,6 +140,7 @@ class BoletoRetryParseAPIView(APIView):
             return Response({"error": f"Fallo Crítico: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+@extend_schema(exclude=True)
 class BoletoMassActionAPIView(APIView):
     """
     Asignación masiva de cliente a boletos huérfanos y facturación.
@@ -162,6 +166,7 @@ class BoletoMassActionAPIView(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=500)
 
+@extend_schema(exclude=True)
 class VentaDoubleInvoiceAPIView(APIView):
     """
     Genera dos facturas (Intermediación + Agencia) para una venta.
@@ -182,6 +187,7 @@ class VentaDoubleInvoiceAPIView(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=500)
 
+@extend_schema(exclude=True)
 class BoletoAuditAPIView(APIView):
     """
     Endpoint para auditar manualmente los datos de un boleto (útil para carga manual).
@@ -200,6 +206,7 @@ class BoletoAuditAPIView(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=500)
 
+@extend_schema(exclude=True)
 class BoletoDeleteAPIView(APIView):
     """
     Elimina un registro de boleto importado.

@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from core.models import HotelTarifario, TipoHabitacion, TarifaHabitacion
+from apps.bookings.models import HotelTarifario, TipoHabitacion, TarifaHabitacion
 from decimal import Decimal
 from datetime import date
 import random

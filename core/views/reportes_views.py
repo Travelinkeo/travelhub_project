@@ -8,7 +8,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from core.models import AsientoContable, DetalleAsiento
+from apps.contabilidad.models import AsientoContable, DetalleAsiento
 from apps.bookings.models import Venta
 from apps.finance.models import Factura
 

@@ -7,10 +7,16 @@ from datetime import datetime, timedelta
 from django.utils import timezone
 from django.contrib.auth import get_user_model
 
-
-    Agencia, Cliente, Moneda, Proveedor,
-    BoletoImportado, Venta, ItemVenta,
-    ProductoServicio
+# Imports actualizados apuntando a las nuevas rutas modulares (apps/*)
+from core.models import Agencia  # Agencia se mantiene en el core por el multi-tenant
+from apps.crm.models import Cliente
+from apps.finance.models.currencies import Moneda
+from apps.bookings.models import (
+    Proveedor, 
+    ProductoServicio, 
+    Venta, 
+    ItemVenta, 
+    BoletoImportado
 )
 
 User = get_user_model()

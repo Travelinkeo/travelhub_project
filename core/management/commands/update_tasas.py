@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 from django.utils import timezone
-from core.models_catalogos import Moneda, TipoCambio
+from apps.finance.models.currencies import Moneda, TipoCambio
 from core.bcv_scraper import obtener_tasas_bcv
 from decimal import Decimal
 import logging
@@ -47,7 +47,7 @@ class Command(BaseCommand):
             )
 
             # 2. Actualizar TasaCambio (Caché de UI/Header)
-            from core.models_catalogos import TasaCambio
+            from apps.finance.models.currencies import TasaCambio
             tasa_obj, created_tasa = TasaCambio.objects.update_or_create(
                 fecha=fecha_actual,
                 moneda=iso,

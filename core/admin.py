@@ -3,11 +3,12 @@ import logging
 from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
 
-from .models import Agencia, UsuarioAgencia
-from .models_catalogos import Aerolinea, Ciudad, Moneda, Pais, ProductoServicio, Proveedor, TipoCambio
-from .models.retenciones_islr import RetencionISLR
-from .models.retenciones_islr import RetencionISLR
-from .models.cruceros import CruceroReserva
+from .models import Agencia, AgenciaBranding, AgenciaConfiguracion, UsuarioAgencia
+from apps.common.models import Aerolinea, Ciudad, Pais
+from apps.finance.models.currencies import Moneda, TipoCambio
+from apps.bookings.models.servicios import ProductoServicio, Proveedor
+from apps.finance.models import RetencionISLR
+from apps.bookings.models import CruceroReserva
 from .admin_saas import SaaSAdminMixin
 
 # Importar inlines compartidos
@@ -63,7 +64,7 @@ class ProveedorAdmin(SaaSAdminMixin, admin.ModelAdmin):
             'fields': ('contacto_nombre', 'contacto_email', 'contacto_telefono', 'direccion', 'ciudad')
         }),
         ('GDS / Conectividad', {
-            'fields': ('iata', 'seudo_sabre', 'office_id_kiu', 'office_id_amadeus'),
+            'fields': ('iata', 'seudo_sabre', 'office_id_kiu', 'office_id_amadeus', 'office_id_travelport', 'office_id_hotelbeds', 'office_id_expedia'),
             'classes': ('collapse',)
         }),
     )
@@ -77,6 +78,15 @@ class ProductoServicioAdmin(SaaSAdminMixin, admin.ModelAdmin):
     autocomplete_fields = ['proveedor_principal', 'moneda_referencial']
 
 # --- SaaS / Multi-tenant ---
+class AgenciaBrandingInline(admin.StackedInline):
+    model = AgenciaBranding
+    can_delete = False
+    verbose_name_plural = 'Branding y Assets'
+
+class AgenciaConfiguracionInline(admin.StackedInline):
+    model = AgenciaConfiguracion
+    can_delete = False
+    verbose_name_plural = 'Configuración de Negocio y SaaS'
 
 @admin.register(Agencia)
 class AgenciaAdmin(admin.ModelAdmin):
@@ -84,6 +94,7 @@ class AgenciaAdmin(admin.ModelAdmin):
     list_filter = ['activa', 'pais']
     search_fields = ['nombre', 'rif', 'iata']
     readonly_fields = ['fecha_creacion', 'fecha_actualizacion']
+    inlines = [AgenciaBrandingInline, AgenciaConfiguracionInline]
 
     def get_readonly_fields(self, request, obj=None):
         # DOCTRINA ANTIGRAVITY: Solo superusuarios pueden cambiar el RIF o IATA de una agencia
@@ -104,8 +115,8 @@ class UsuarioAgenciaAdmin(admin.ModelAdmin):
         return []
 
 # --- Admin Importados (y Activados) ---
-from core import admin_facturacion_consolidada
-from core import admin_tarifario
+# from core import admin_facturacion_consolidada
+# from core import admin_tarifario
 
 @admin.register(CruceroReserva)
 class CruceroReservaAdmin(SaaSAdminMixin, admin.ModelAdmin):

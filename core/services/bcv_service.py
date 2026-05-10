@@ -6,7 +6,7 @@ from decimal import Decimal
 from pyDolarVenezuela import Monitor
 from pyDolarVenezuela.pages import BCV
 # Import specific project services
-from core.models_catalogos import TasaCambio 
+from apps.finance.models.currencies import TasaCambio
 from core.services.telegram_service import enviar_alerta_telegram
 
 logger = logging.getLogger(__name__)

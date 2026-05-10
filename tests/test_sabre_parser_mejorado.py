@@ -1,5 +1,5 @@
 
-from core.ticket_parser import _parse_sabre_ticket
+from core.services.ticket_parser_service import _parse_sabre_ticket
 
 
 def test_parse_sabre_ticket_mejorado():

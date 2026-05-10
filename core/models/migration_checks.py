@@ -137,7 +137,7 @@ class MigrationCheck(models.Model):
     
     def __str__(self):
         emoji = dict(self.ALERT_LEVELS).get(self.alert_level, '')
-        return f"{emoji} {self.pasajero.nombre_completo} → {self.destino} ({self.checked_at.strftime('%Y-%m-%d')})"
+        return f"{emoji} {self.pasajero.get_nombre_completo()} → {self.destino} ({self.checked_at.strftime('%Y-%m-%d')})"
     
     def get_alert_emoji(self):
         """Retorna el emoji correspondiente al nivel de alerta"""

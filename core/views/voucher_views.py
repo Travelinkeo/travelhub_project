@@ -6,7 +6,7 @@ from rest_framework import status
 from django.http import HttpResponse
 
 from apps.bookings.models import Venta
-from core.services.pdf_service import generar_pdf_voucher_unificado
+from core.services.voucher_service import generar_voucher_unificado
 from core.throttling import ReportesRateThrottle
 
 
@@ -22,7 +22,7 @@ def generar_voucher(request, venta_id):
     except Venta.DoesNotExist:
         return Response({'error': 'Venta no encontrada'}, status=status.HTTP_404_NOT_FOUND)
     
-    pdf_bytes, filename = generar_pdf_voucher_unificado(venta.pk)
+    pdf_bytes, filename = generar_voucher_unificado(venta.pk)
     
     if pdf_bytes:
         response = HttpResponse(pdf_bytes, content_type='application/pdf')

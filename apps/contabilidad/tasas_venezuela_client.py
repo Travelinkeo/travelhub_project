@@ -13,6 +13,14 @@ from decimal import Decimal
 from typing import Dict, Optional
 from datetime import datetime
 
+# 🛡️ RESILIENT INFRASTRUCTURE: pyDolarVenezuela v2.0+ support
+try:
+    from pyDolarVenezuela import Monitor
+    from pyDolarVenezuela.pages import BCV, EnParaleloVzla
+    PY_DOLAR_VENEZUELA_AVAILABLE = True
+except ImportError:
+    PY_DOLAR_VENEZUELA_AVAILABLE = False
+
 logger = logging.getLogger(__name__)
 
 
@@ -47,45 +55,57 @@ class TasasVenezuelaClient:
             
             data = response.json()
             
-            # Procesar datos de DolarApi
             tasas = {}
             
             # 1. Intentar obtener Tasa Oficial DIRECTAMENTE del BCV (Más precisa)
+            # Intentar primero con Scraper personalizado, luego con pyDolarVenezuela
             try:
                 from core.bcv_scraper import obtener_tasas_bcv
                 tasas_bcv = obtener_tasas_bcv()
+                
+                if not tasas_bcv and PY_DOLAR_VENEZUELA_AVAILABLE:
+                    logger.info("Scraper BCV falló, intentando con pyDolarVenezuela...")
+                    monitor = Monitor(BCV)
+                    monitores = monitor.get_all_monitors()
+                    tasas_bcv = {}
+                    for m in monitores:
+                        m_key = m.get('key').upper() if isinstance(m, dict) else getattr(m, 'key', '').upper()
+                        m_price = m.get('price') if isinstance(m, dict) else getattr(m, 'price', 0)
+                        if m_key in ['USD', 'EUR']:
+                            tasas_bcv[m_key] = Decimal(str(m_price))
+
                 if tasas_bcv:
                     if 'USD' in tasas_bcv:
                         tasas['oficial'] = {
-                            'price': tasas_bcv['USD'].quantize(Decimal('0.0001')),
+                            'price': Decimal(str(tasas_bcv['USD'])).quantize(Decimal('0.0001')),
                             'last_update': datetime.now().isoformat(),
-                            'title': 'BCV Oficial (Directo)',
+                            'title': 'BCV Oficial',
                             'symbol': 'Bs.'
                         }
                     
                     if 'EUR' in tasas_bcv:
                         tasas['euro_bcv'] = {
-                            'price': tasas_bcv['EUR'].quantize(Decimal('0.0001')),
+                            'price': Decimal(str(tasas_bcv['EUR'])).quantize(Decimal('0.0001')),
                             'last_update': datetime.now().isoformat(),
                             'title': 'BCV Euro',
                             'symbol': 'Bs.'
                         }
 
             except Exception as e:
-                logger.error(f"Falló scraper directo BCV: {e}")
+                logger.error(f"Fallo en obtención resiliente BCV: {e}")
 
+            # 2. Procesar datos de DolarApi
             for item in data:
                 try:
                     fuente = item.get('fuente', 'unknown')
                     
-                    # Si ya tenemos oficial del scraper directo, saltar el de la API
+                    # Si ya tenemos oficial del BCV directo, saltar el de la API si es redundante
                     if fuente == 'oficial' and 'oficial' in tasas:
                         continue
                         
                     promedio = item.get('promedio')
                     
                     if promedio and promedio > 0:
-                        # Mapear nombres
                         nombre_map = {
                             'oficial': 'BCV Oficial',
                             'paralelo': 'Dólar No Oficial',
@@ -102,20 +122,89 @@ class TasasVenezuelaClient:
                     logger.warning(f"Error procesando item: {e}")
                     continue
             
+            # 3. Fallback final para Paralelo si DolarApi falla totalmente
+            if 'paralelo' not in tasas and PY_DOLAR_VENEZUELA_AVAILABLE:
+                try:
+                    monitor_paralelo = Monitor(EnParaleloVzla)
+                    en_paralelo = monitor_paralelo.get_all_monitors()
+                    # Buscar el monitor promedio
+                    for m in en_paralelo:
+                        m_key = m.get('key') if isinstance(m, dict) else getattr(m, 'key', '')
+                        if m_key == 'enparalelovzla':
+                            m_price = m.get('price') if isinstance(m, dict) else getattr(m, 'price', 0)
+                            tasas['paralelo'] = {
+                                'price': Decimal(str(m_price)).quantize(Decimal('0.01')),
+                                'last_update': datetime.now().isoformat(),
+                                'title': 'Dólar No Oficial (Fallback)',
+                                'symbol': 'Bs.'
+                            }
+                            break
+                except Exception as e:
+                    logger.error(f"Fallo en fallback pyDolarVenezuela para paralelo: {e}")
+            
             if tasas:
                 logger.info(f"Tasas obtenidas: {len(tasas)} fuentes")
                 return tasas
             else:
-                logger.error("No se obtuvieron tasas válidas")
+                logger.error("No se obtuvieron tasas válidas de ninguna fuente")
                 return None
                 
         except requests.RequestException as e:
             logger.error(f"Error HTTP consultando DolarApi: {e}")
+            # Si falla la API principal, intentar todo vía pyDolarVenezuela
+            if PY_DOLAR_VENEZUELA_AVAILABLE:
+                return cls._obtener_tasas_pydolar_full()
             return None
         except Exception as e:
             logger.error(f"Error procesando respuesta: {e}")
             return None
     
+    @classmethod
+    def _obtener_tasas_pydolar_full(cls) -> Optional[Dict]:
+        """Método de emergencia usando solo pyDolarVenezuela"""
+        tasas = {}
+        try:
+            # BCV
+            monitor_bcv = Monitor(BCV)
+            bcv_data = monitor_bcv.get_all_monitors()
+            for m in bcv_data:
+                key = m.get('key').upper() if isinstance(m, dict) else getattr(m, 'key', '').upper()
+                price = m.get('price') if isinstance(m, dict) else getattr(m, 'price', 0)
+                if key == 'USD':
+                    tasas['oficial'] = {
+                        'price': Decimal(str(price)).quantize(Decimal('0.01')),
+                        'last_update': datetime.now().isoformat(),
+                        'title': 'BCV Oficial (pyDolar)',
+                        'symbol': 'Bs.'
+                    }
+                elif key == 'EUR':
+                    tasas['euro_bcv'] = {
+                        'price': Decimal(str(price)).quantize(Decimal('0.01')),
+                        'last_update': datetime.now().isoformat(),
+                        'title': 'BCV Euro (pyDolar)',
+                        'symbol': 'Bs.'
+                    }
+            
+            # Paralelo
+            monitor_p = Monitor(EnParaleloVzla)
+            p_data = monitor_p.get_all_monitors()
+            for m in p_data:
+                key = m.get('key') if isinstance(m, dict) else getattr(m, 'key', '')
+                if key == 'enparalelovzla':
+                    price = m.get('price') if isinstance(m, dict) else getattr(m, 'price', 0)
+                    tasas['paralelo'] = {
+                        'price': Decimal(str(price)).quantize(Decimal('0.01')),
+                        'last_update': datetime.now().isoformat(),
+                        'title': 'Dólar No Oficial (pyDolar)',
+                        'symbol': 'Bs.'
+                    }
+                    break
+            
+            return tasas if tasas else None
+        except Exception as e:
+            logger.error(f"Error en motor de emergencia pyDolar: {e}")
+            return None
+
     @classmethod
     def obtener_tasa_bcv(cls) -> Optional[Decimal]:
         """Obtiene solo la tasa BCV oficial"""
@@ -149,7 +238,7 @@ class TasasVenezuelaClient:
             Dict con resultados: {'oficial': True, 'paralelo': False, ...}
         """
         from .models import TasaCambioBCV
-        from core.models_catalogos import TipoCambio, Moneda
+        from apps.finance.models.currencies import TipoCambio, Moneda
         from datetime import date
         
         resultados = {}

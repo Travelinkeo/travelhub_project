@@ -32,7 +32,7 @@
             Consultar
         </button>
 
-        <a href="{% url 'reportes:exportar_excel' %}?fecha_desde={{ request.GET.fecha_desde }}&fecha_hasta={{ request.GET.fecha_hasta }}"
+        <a href="{% url 'core:exportar_excel' %}?fecha_desde={{ request.GET.fecha_desde }}&fecha_hasta={{ request.GET.fecha_hasta }}"
             class="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors font-medium flex items-center gap-2">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

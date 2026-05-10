@@ -5,12 +5,13 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django.db.models import Q
 
-from core.models.pasaportes import PasaporteEscaneado
+from core.api.mixins.tenant import TenantViewSetMixin
+from apps.crm.models import PasaporteEscaneado
 from core.serializers import PasaporteEscaneadoSerializer
 from apps.crm.models import Cliente
 
 
-class PasaporteEscaneadoViewSet(viewsets.ModelViewSet):
+class PasaporteEscaneadoViewSet(TenantViewSetMixin, viewsets.ModelViewSet):
     queryset = PasaporteEscaneado.objects.all().select_related('cliente')
     serializer_class = PasaporteEscaneadoSerializer
     permission_classes = [IsAuthenticated]

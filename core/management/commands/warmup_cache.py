@@ -1,9 +1,9 @@
 """Comando para calentar el caché con datos frecuentes"""
 from django.core.management.base import BaseCommand
 from django.core.cache import cache
-from core.models_catalogos import Pais, Ciudad, Moneda, Aerolinea, ProductoServicio
-
-
+from apps.common.models import Pais, Ciudad, Aerolinea
+from apps.finance.models.currencies import Moneda
+from apps.bookings.models import ProductoServicio
 class Command(BaseCommand):
     help = 'Calienta el caché con datos de catálogos frecuentes'
     

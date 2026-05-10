@@ -52,7 +52,7 @@ class OCRService:
             # 3. Post-procesamiento: Resolución de Catálogos (Países)
             # El formulario espera PKs de Pais, no strings
             try:
-                from core.models_catalogos import Pais
+                from apps.common.models import Pais
                 # Resolver Nacionalidad
                 nac_iso = resultado.get('nacionalidad')
                 if nac_iso:

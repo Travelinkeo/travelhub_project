@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f1f5f9;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="background: #f1f5f9; padding: 40px 0;">
+        <tr>
+            <td align="center">
+                <table width="560" cellpadding="0" cellspacing="0" style="background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.08);">
+                    <tr>
+                        <td style="background: #1e40af; padding: 32px; text-align: center;">
+                            <h1 style="margin: 0; color: #ffffff; font-size: 24px;">TravelHub</h1>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 40px 32px;">
+                            {% if is_onboarding %}
+                            <h2 style="margin: 0 0 16px; color: #1e293b; font-size: 22px;">Bienvenido a TravelHub!</h2>
+                            <p style="margin: 0 0 24px; color: #475569; line-height: 1.6;">
+                                Confirma tu acceso para comenzar a configurar tu agencia de viajes.
+                            </p>
+                            {% else %}
+                            <h2 style="margin: 0 0 16px; color: #1e293b; font-size: 22px;">Tu enlace de acceso</h2>
+                            <p style="margin: 0 0 24px; color: #475569; line-height: 1.6;">
+                                Recibimos una solicitud de acceso a tu cuenta de TravelHub. Haz clic en el bot&oacute;n para ingresar:
+                            </p>
+                            {% endif %}
+                            <table width="100%" cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <td align="center" style="padding: 8px 0;">
+                                        <a href="{{ magic_url }}" style="display: inline-block; padding: 14px 32px; background: #3b82f6; color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">
+                                            {% if is_onboarding %}Confirmar Acceso{% else %}Ingresar a TravelHub{% endif %}
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+                            <p style="margin: 24px 0 0; color: #94a3b8; font-size: 13px; line-height: 1.5;">
+                                Este enlace expira en <strong>{{ expiry_minutes }} minutos</strong>. Si no solicitaste este acceso, puedes ignorar este correo.
+                            </p>
+                            <table width="100%" cellpadding="0" cellspacing="0" style="margin-top: 16px; background: #f8fafc; border-radius: 8px;">
+                                <tr>
+                                    <td style="padding: 12px 16px; font-size: 12px; color: #64748b;">
+                                        Si el bot&oacute;n no funciona, copia y pega este enlace en tu navegador:<br>
+                                        <a href="{{ magic_url }}" style="color: #3b82f6; word-break: break-all;">{{ magic_url }}</a>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 20px 32px; text-align: center; color: #94a3b8; font-size: 12px; border-top: 1px solid #e2e8f0;">
+                            TravelHub GDS &mdash; Inteligencia Turistica para Agencias
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

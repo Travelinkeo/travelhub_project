@@ -1,12 +1,10 @@
 from django.core.management.base import BaseCommand
-from core.models import TarifarioProveedor, HotelTarifario, TipoHabitacion, TarifaHabitacion
-from core.models_catalogos import Proveedor
+from apps.bookings.models import TarifarioProveedor, HotelTarifario, TipoHabitacion, TarifaHabitacion
+from apps.common.models import Proveedor
 from datetime import datetime
 from decimal import Decimal
 import json
 import re
-
-
 class Command(BaseCommand):
     help = 'Importa hoteles desde JSON estructurado del PDF'
 

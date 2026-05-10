@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from core.models import TarifarioProveedor
+from apps.bookings.models import TarifarioProveedor
 from core.services.hotel_parser_service import HotelParserService
 
 class Command(BaseCommand):

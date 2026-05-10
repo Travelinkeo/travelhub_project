@@ -31,10 +31,17 @@
         .locator-badge { background: var(--accent); color: white; padding: 10px 20px; border-radius: 12px; font-weight: 800; font-size: 18px; letter-spacing: 1px; }
 
         .content { padding: 0 80px 60px; flex: 1; }
-        .section-title { font-size: 18px; font-weight: 800; color: var(--primary); margin-bottom: 25px; display: flex; align-items: center; gap: 15px; }
+        .section-title { font-size: 18px; font-weight: 800; color: var(--primary); margin: 35px 0 20px; display: flex; align-items: center; gap: 15px; }
         .section-title::after { content: ''; flex: 1; height: 1px; background: var(--accent); opacity: 0.2; }
 
-        .service-card { background: white; border-radius: 20px; padding: 30px; margin-bottom: 25px; border: 1px solid rgba(0,0,0,0.05); transition: transform 0.2s; }
+        /* Passengers Grid */
+        .pax-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 30px; }
+        .pax-card { background: white; padding: 15px 20px; border-radius: 16px; border: 1px solid rgba(0,0,0,0.03); display: flex; align-items: center; gap: 12px; }
+        .pax-icon { width: 32px; height: 32px; background: var(--bg); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 14px; color: var(--accent); }
+        .pax-info label { display: block; font-size: 9px; font-weight: 800; color: var(--muted); text-transform: uppercase; }
+        .pax-info span { font-size: 13px; font-weight: 700; color: var(--primary); }
+
+        .service-card { background: white; border-radius: 20px; padding: 30px; margin-bottom: 25px; border: 1px solid rgba(0,0,0,0.05); }
         .service-icon { width: 40px; height: 40px; background: var(--bg); border-radius: 10px; display: flex; justify-content: center; align-items: center; margin-bottom: 15px; font-weight: 800; color: var(--accent); }
         .service-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid var(--bg); padding-bottom: 15px; margin-bottom: 15px; }
         .service-header h4 { font-size: 20px; font-weight: 800; color: var(--primary); margin: 0; }
@@ -43,6 +50,16 @@
         .service-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
         .grid-item label { display: block; font-size: 10px; font-weight: 800; color: var(--muted); text-transform: uppercase; margin-bottom: 5px; }
         .grid-item span { font-weight: 700; font-size: 14px; color: var(--primary); }
+
+        /* Flight Specific */
+        .flight-row { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+        .flight-point { flex: 1; }
+        .flight-point.arrival { text-align: right; }
+        .flight-code { font-size: 24px; font-weight: 900; color: var(--primary); margin-bottom: 2px; }
+        .flight-time { font-size: 14px; font-weight: 700; color: var(--accent); }
+        .flight-path { flex: 1; text-align: center; position: relative; padding: 0 20px; }
+        .flight-path::after { content: ''; position: absolute; top: 50%; left: 10%; right: 10%; height: 2px; background: var(--bg); z-index: 0; }
+        .flight-icon { position: relative; z-index: 1; background: white; padding: 0 10px; color: #cbd5e1; font-size: 18px; }
 
         footer { padding: 60px 80px; text-align: center; border-top: 1px dashed var(--muted); margin: 0 80px; }
         .footer-agencia { font-size: 18px; font-weight: 900; color: var(--primary); margin-bottom: 15px; }
@@ -55,30 +72,79 @@
         <header>
             <div class="header-bg"></div>
             <div class="logo-box">
-                {% if agencia.logo_pdf_dark_base64 %}
-                    <img src="data:image/png;base64,{{ agencia.logo_pdf_dark_base64 }}" alt="Logo">
-                {% elif agencia.logo_pdf_base64 %}
-                    <img src="data:image/png;base64,{{ agencia.logo_pdf_base64 }}" alt="Logo">
+                {% if agencia_logo_b64 %}
+                    <img src="{{ agencia_logo_b64 }}" alt="Logo">
                 {% else %}
                     <h2 style="font-weight:900;">{{ agencia.nombre }}</h2>
                 {% endif %}
             </div>
             <div class="header-info">
-                <h1>Service Voucher</h1>
+                <h1>Voucher de Servicios</h1>
                 <p>{{ venta.fecha_venta|date:"d M Y"|upper }}</p>
             </div>
         </header>
 
         <div class="client-bar">
             <div class="client-box">
-                <h3>Traveler Information</h3>
+                <h3>Titular de Reserva</h3>
                 <p>{{ venta.cliente.get_nombre_completo|default:venta.cliente.nombre|upper }}</p>
             </div>
             <div class="locator-badge">{{ venta.localizador|default:venta.id_venta|upper }}</div>
         </div>
 
         <main class="content">
-            <div class="section-title">Travel Itinerary</div>
+            {# PASAJEROS #}
+            <div class="section-title">Pasajeros</div>
+            <div class="pax-grid">
+                {% for pax in venta.pasajeros.all %}
+                <div class="pax-card">
+                    <div class="pax-icon">👤</div>
+                    <div class="pax-info">
+                        <label>Pasajero {{ forloop.counter }}</label>
+                        <span>{{ pax.get_nombre_completo|upper }}</span>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="pax-card">
+                    <div class="pax-icon">👤</div>
+                    <div class="pax-info">
+                        <label>Titular</label>
+                        <span>{{ venta.cliente.get_nombre_completo|upper }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="section-title">Itinerario de Viaje</div>
+
+            {# VUELOS #}
+            {% for vuelo in segmentos_vuelo %}
+            <div class="service-card">
+                <div class="service-icon">✈</div>
+                <div class="service-header">
+                    <h4>Vuelo {{ vuelo.aerolinea|upper }} {{ vuelo.numero_vuelo }}</h4>
+                    <span class="service-ref">Clase: {{ vuelo.cabina|default:"Economy" }}</span>
+                </div>
+                <div class="flight-row">
+                    <div class="flight-point">
+                        <div class="flight-code">{{ vuelo.origen|slice:":3"|upper }}</div>
+                        <div class="flight-time">{{ vuelo.fecha_salida|date:"H:i" }}</div>
+                        <div style="font-size: 10px; color: var(--muted);">{{ vuelo.fecha_salida|date:"d M" }}</div>
+                    </div>
+                    <div class="flight-path">
+                        <div class="flight-icon">✈</div>
+                    </div>
+                    <div class="flight-point arrival">
+                        <div class="flight-code">{{ vuelo.destino|slice:":3"|upper }}</div>
+                        <div class="flight-time">{{ vuelo.fecha_llegada|date:"H:i" }}</div>
+                        <div style="font-size: 10px; color: var(--muted);">{{ vuelo.fecha_llegada|date:"d M" }}</div>
+                    </div>
+                </div>
+                <div style="margin-top: 20px; font-size: 11px; color: var(--muted); border-top: 1px solid var(--bg); padding-top: 10px;">
+                    Operado por: <strong>{{ vuelo.operado_por|default:vuelo.aerolinea|upper }}</strong> | Ref: {{ vuelo.localizador_vuelo|default:"---" }}
+                </div>
+            </div>
+            {% endfor %}
 
             {# ALOJAMIENTOS #}
             {% for hotel in alojamientos %}
@@ -90,12 +156,12 @@
                 </div>
                 <div class="service-grid">
                     <div class="grid-item">
-                        <label>Accommodation Detail</label>
+                        <label>Estadía</label>
                         <span>{{ hotel.check_in|date:"d M Y" }} → {{ hotel.check_out|date:"d M Y" }}</span>
                     </div>
                     <div class="grid-item">
-                        <label>Meal Plan / Type</label>
-                        <span>{{ hotel.regimen_alimentacion|default:"Standard" }} ({{ hotel.habitaciones }} Rooms)</span>
+                        <label>Detalle</label>
+                        <span>{{ hotel.regimen_alimentacion|default:"Estándar" }} ({{ hotel.habitaciones }} Hab.)</span>
                     </div>
                 </div>
             </div>
@@ -111,18 +177,18 @@
                 </div>
                 <div class="service-grid">
                     <div class="grid-item">
-                        <label>Rental Period</label>
+                        <label>Periodo de Alquiler</label>
                         <span>{{ car.fecha_hora_retiro|date:"d M Y H:i" }} → {{ car.fecha_hora_devolucion|date:"d M Y H:i" }}</span>
                     </div>
                     <div class="grid-item">
-                        <label>Location & Driver</label>
-                        <span>{{ car.ciudad_retiro.nombre|default:"---" }} | {{ car.nombre_conductor|default:venta.cliente.get_nombre_completo|upper|truncatechars:18 }}</span>
+                        <label>Ubicación & Conductor</label>
+                        <span>{{ car.ciudad_retiro|default:"---" }} | {{ car.nombre_conductor|default:venta.cliente.get_nombre_completo|upper|truncatechars:18 }}</span>
                     </div>
                 </div>
             </div>
             {% endfor %}
 
-            {# TRASLADOS / ACTIVIDADES #}
+            {# TRASLADOS #}
             {% for tr in traslados %}
             <div class="service-card">
                 <div class="service-icon">T</div>
@@ -132,12 +198,33 @@
                 </div>
                 <div class="service-grid">
                     <div class="grid-item">
-                        <label>Service Date</label>
+                        <label>Fecha y Hora</label>
                         <span>{{ tr.fecha_hora|date:"d M Y H:i" }}</span>
                     </div>
                     <div class="grid-item">
-                        <label>Passengers</label>
-                        <span>{{ tr.pasajeros }} Guest(s)</span>
+                        <label>Pasajeros</label>
+                        <span>{{ tr.pasajeros }} Persona(s)</span>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+
+            {# ACTIVIDADES #}
+            {% for act in actividades %}
+            <div class="service-card">
+                <div class="service-icon">A</div>
+                <div class="service-header">
+                    <h4>{{ act.nombre|upper }}</h4>
+                    <span class="service-ref">REF: {{ act.localizador_proveedor|default:"---" }}</span>
+                </div>
+                <div class="service-grid">
+                    <div class="grid-item">
+                        <label>Fecha</label>
+                        <span>{{ act.fecha|date:"d M Y" }}</span>
+                    </div>
+                    <div class="grid-item">
+                        <label>Duración</label>
+                        <span>{{ act.duracion_horas|default:"---" }} Horas</span>
                     </div>
                 </div>
             </div>
@@ -148,17 +235,17 @@
             <div class="service-card">
                 <div class="service-icon">S</div>
                 <div class="service-header">
-                    <h4>{{ item.descripcion|upper|default:"EXTRA SERVICE" }}</h4>
+                    <h4>{{ item.descripcion|upper|default:"SERVICIO ADICIONAL" }}</h4>
                     <span class="service-ref">{{ item.get_tipo_servicio_display|upper }}</span>
                 </div>
                 <div class="service-grid">
                     <div class="grid-item">
-                        <label>Validity</label>
-                        <span>{{ item.fecha_inicio|date:"d M Y" }} to {{ item.fecha_fin|date:"d M Y" }}</span>
+                        <label>Vigencia</label>
+                        <span>{{ item.fecha_inicio|date:"d M Y" }} al {{ item.fecha_fin|date:"d M Y" }}</span>
                     </div>
                     <div class="grid-item">
-                        <label>Participant</label>
-                        <span>{{ item.nombre_pasajero|default:venta.cliente.get_nombre_completo|upper }}</span>
+                        <label>Referencia</label>
+                        <span>{{ item.codigo_referencia|default:item.id_servicio_adicional }}</span>
                     </div>
                 </div>
             </div>

@@ -6,8 +6,8 @@ from django.db.models import Sum, Q, F
 from django.contrib import messages
 from django.utils import timezone
 
-from core.models_catalogos import Proveedor
-from core.models import LiquidacionProveedor, ItemLiquidacion
+from apps.bookings.models import Proveedor
+from apps.contabilidad.models import LiquidacionProveedor, ItemLiquidacion
 from apps.bookings.models import ItemVenta
 from core.mixins import SaaSMixin
 

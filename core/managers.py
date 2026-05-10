@@ -35,9 +35,14 @@ class TenantManager(models.Manager):
         
         # ⚠️ IMPORTANTE: Lógica para tareas de fondo (Celery)
         # En Celery no hay un request activo, por lo que get_current_agency() devolverá None.
-        # En estos casos, el desarrollador DEBE filtrar manualmente y utilizar
-        # el all_objects.filter(...) para permitir operaciones administrativas/de sistema.
-        # Generalmente, las tareas de Celery reciben el agency_id como argumento.
+        # SOLUCIÓN: Utilizar el context manager 'agency_context' en la tarea:
+        #
+        # from core.middleware import agency_context
+        # with agency_context(agencia):
+        #     # Todas las consultas aquí estarán filtradas automáticamente
+        #     Venta.objects.all()
+        #
+        # Si no se usa el context manager, se debe usar 'all_objects' para bypass manual.
 
 class TenantModelMixin(models.Model):
     """

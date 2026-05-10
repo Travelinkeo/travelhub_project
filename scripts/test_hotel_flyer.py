@@ -1,13 +1,17 @@
 import os
+import sys
 import django
 from io import BytesIO
+
+# Añadir el directorio raíz al path para poder importar apps y core
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Configurar Django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
 django.setup()
 
 from apps.marketing.services.flyer_service import FlyerService
-from core.models.tarifario_hoteles import HotelTarifario
+from apps.bookings.models import HotelTarifario
 
 def test_hotel_flyer_generation():
     # Buscar un hotel cualquiera

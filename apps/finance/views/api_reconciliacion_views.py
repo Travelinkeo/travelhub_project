@@ -1,4 +1,5 @@
 from rest_framework import viewsets, views, status, parsers
+from core.api.mixins.tenant import TenantViewSetMixin
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -10,7 +11,7 @@ from apps.finance.models.reconciliacion import ReporteReconciliacion, Conciliaci
 from apps.finance.serializers import ReporteReconciliacionSerializer, ConciliacionBoletoSerializer
 from apps.finance.services.smart_reconciliation_service import SmartReconciliationService
 
-class ReporteReconciliacionViewSet(viewsets.ModelViewSet):
+class ReporteReconciliacionViewSet(TenantViewSetMixin, viewsets.ModelViewSet):
     """
     ViewSet para manejar CRUD de reportes BSP/Consolidador subidos por la Agencia.
     """
@@ -19,16 +20,7 @@ class ReporteReconciliacionViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     parser_classes = [parsers.MultiPartParser, parsers.FormParser]
 
-    def get_queryset(self):
-        user = self.request.user
-        if hasattr(user, 'perfil') and user.perfil.agencia_id:
-            return self.queryset.filter(agencia_id=user.perfil.agencia_id)
-        return self.queryset
 
-    def perform_create(self, serializer):
-        user = self.request.user
-        agencia = user.perfil.agencia if hasattr(user, 'perfil') else None
-        serializer.save(agencia=agencia)
 
     @action(detail=True, methods=['post'])
     def process_ai(self, request, pk=None):

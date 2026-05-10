@@ -6,7 +6,7 @@ from django.db.models import Q
 from decimal import Decimal
 from datetime import datetime
 
-from core.models import TarifarioProveedor, HotelTarifario, TipoHabitacion, TarifaHabitacion
+from apps.bookings.models import TarifarioProveedor, HotelTarifario, TipoHabitacion, TarifaHabitacion
 from core.serializers_tarifario import (
     TarifarioProveedorSerializer,
     HotelTarifarioSerializer,
@@ -27,7 +27,7 @@ class HotelTarifarioViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = HotelTarifario.objects.filter(activo=True).select_related('tarifario', 'tarifario__proveedor')
     serializer_class = HotelTarifarioSerializer
     permission_classes = [IsAuthenticated]
-    filterset_fields = ['destino', 'regimen', 'tarifario']
+    filterset_fields = ['destino', 'regimen_default', 'tarifario']
     search_fields = ['nombre', 'destino', 'ubicacion_descripcion']
     
     @action(detail=False, methods=['post'])

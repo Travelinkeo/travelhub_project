@@ -17,7 +17,7 @@ from django.db import transaction
 from django.contrib.auth.models import User
 from apps.bookings.models import Venta, SegmentoVuelo
 from core.models.facturacion import Moneda
-from core.models_catalogos import Ciudad
+from apps.common.models import Ciudad
 from personas.models import Pasajero
 from core.services.pdf_service import generar_pdf_voucher_unificado
 

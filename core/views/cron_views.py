@@ -4,6 +4,7 @@ Reemplazo gratuito de Celery Beat.
 """
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
+from drf_spectacular.utils import extend_schema
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -22,6 +23,7 @@ def verificar_cron_token(request):
     return token == CRON_SECRET
 
 
+@extend_schema(exclude=True)
 @api_view(['GET', 'POST'])
 @permission_classes([AllowAny])
 def sincronizar_bcv_cron(request):
@@ -41,6 +43,7 @@ def sincronizar_bcv_cron(request):
         return Response({'status': 'error', 'message': str(e)}, status=500)
 
 
+@extend_schema(exclude=True)
 @api_view(['GET', 'POST'])
 @permission_classes([AllowAny])
 def enviar_recordatorios_cron(request):
@@ -75,6 +78,7 @@ def enviar_recordatorios_cron(request):
         return Response({'status': 'error', 'message': str(e)}, status=500)
 
 
+@extend_schema(exclude=True)
 @api_view(['GET', 'POST'])
 @permission_classes([AllowAny])
 def cierre_mensual_cron(request):
@@ -96,6 +100,7 @@ def cierre_mensual_cron(request):
         return Response({'status': 'error', 'message': str(e)}, status=500)
 
 
+@extend_schema(exclude=True)
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def health_check(request):
@@ -103,6 +108,7 @@ def health_check(request):
     return Response({'status': 'ok', 'service': 'travelhub'})
 
 
+@extend_schema(exclude=True)
 @api_view(['POST'])
 @permission_classes([AllowAny])
 @csrf_exempt

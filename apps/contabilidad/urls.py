@@ -17,6 +17,9 @@ urlpatterns = [
     path('reportes/libro-diario/', views.reporte_libro_diario, name='libro_diario'),
     path('reportes/libro-mayor/', views.reporte_libro_mayor, name='libro_mayor'),
     path('asistente/', views.assistant_brain_view, name='asistente_brain'),
+    path('chat/', views.api_assistant_chat, name='api_chat'),
+    path('reconciliacion/', views.reconciliation_view, name='reconciliation'),
+    path('reconciliacion/exportar/', views.export_reconciliation_results, name='export_reconciliation'),
     
     # API Tasas de Cambio
     path('api/tasas/actuales/', obtener_tasas_actuales, name='tasas_actuales'),

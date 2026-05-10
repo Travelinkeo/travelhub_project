@@ -196,7 +196,7 @@ function marketingHub() {
                 formData.append('tono', this.copyData.tono);
                 formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
 
-                const resp = await fetch('{% url "marketing_hub" %}', {
+                const resp = await fetch('{% url "core:marketing_hub" %}', {
                     method: 'POST',
                     body: formData
                 });
@@ -219,7 +219,7 @@ function marketingHub() {
                 formData.append('custom_text', this.imageData.custom_text);
                 formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
 
-                const resp = await fetch('{% url "generate_ai_image" %}', {
+                const resp = await fetch('{% url "core:generate_ai_image" %}', {
                     method: 'POST',
                     body: formData
                 });
@@ -243,7 +243,7 @@ function marketingHub() {
                 formData.append('action', 'generate_newsletter');
                 formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
 
-                const resp = await fetch('{% url "marketing_hub" %}', {
+                const resp = await fetch('{% url "core:marketing_hub" %}', {
                     method: 'POST',
                     body: formData
                 });

@@ -2,8 +2,8 @@ import json
 import os
 import logging
 from django.conf import settings
-from core.models_catalogos import Ciudad, Pais, Moneda
-
+from apps.common.models import Ciudad, Pais
+from apps.finance.models.currencies import Moneda
 logger = logging.getLogger(__name__)
 
 class CatalogNormalizationService:

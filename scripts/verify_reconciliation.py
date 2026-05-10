@@ -13,7 +13,7 @@ django.setup()
 from apps.finance.models import ReporteProveedor, ItemReporte
 from apps.finance.services.reconciliation_service import ReconciliationService
 from apps.bookings.models import BoletoImportado
-from core.models_catalogos import Proveedor
+from apps.bookings.models import Proveedor
 
 def verify_reconciliation():
     print("--- Verificando Módulo de Conciliación ---")

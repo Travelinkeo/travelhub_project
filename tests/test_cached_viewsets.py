@@ -2,7 +2,8 @@
 import pytest
 from django.core.cache import cache
 from rest_framework.test import APIClient
-from core.models_catalogos import Pais, Moneda
+from apps.common.models import Pais
+from apps.finance.models.currencies import Moneda
 
 
 @pytest.mark.django_db

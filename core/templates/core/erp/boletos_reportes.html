@@ -20,10 +20,10 @@
                 <span class="material-symbols-outlined text-[20px]">print</span>
                 <span>Imprimir Reporte</span>
             </button>
-            <button class="btn-primary !h-12 !px-8 shadow-lg shadow-primary/20">
+            <a href="{% url 'core:boletos_reportes_exportar' %}?{{ request.GET.urlencode }}" class="btn-primary !h-12 !px-8 shadow-lg shadow-primary/20">
                 <span class="material-symbols-outlined">download</span>
                 <span>Exportar Excel</span>
-            </button>
+            </a>
         </div>
     </div>
 
@@ -46,9 +46,9 @@
                 <div class="space-y-2">
                     <label class="block text-[10px] font-black uppercase tracking-widest text-text-muted">Aerolínea</label>
                     <select name="aerolinea" class="input-base">
-                        <option value="">Todas</option>
-                        {% for aero in aerolineas %}
-                        <option value="{{ aero.codigo }}" {% if request.GET.aerolinea == aero.codigo %}selected{% endif %}>{{ aero.nombre }}</option>
+                        <option value="">Todas las aerolíneas</option>
+                        {% for aero in aerolineas_disponibles %}
+                        <option value="{{ aero }}" {% if filtro_aerolinea == aero %}selected{% endif %}>{{ aero }}</option>
                         {% endfor %}
                     </select>
                 </div>
@@ -96,6 +96,31 @@
                 <span class="text-3xl font-black text-text-main tabular-nums">$ {{ total_pendiente|default:"0.00"|intcomma }}</span>
             </div>
             <p class="text-[10px] text-amber-600 mt-4 font-bold uppercase tracking-wider">3 Pendientes de pago</p>
+        </div>
+    </div>
+    
+    {# ── Visualización de Datos ── #}
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+        <!-- Gráfica: Top Aerolíneas -->
+        <div class="card-base p-6 md:col-span-1">
+            <div class="flex items-center gap-3 mb-6">
+                <span class="material-symbols-outlined text-primary text-[20px]">pie_chart</span>
+                <h3 class="text-[11px] font-black text-text-main uppercase tracking-widest">Top 5 Aerolíneas</h3>
+            </div>
+            <div class="relative h-[250px] w-full flex items-center justify-center">
+                <canvas id="chartAerolineas"></canvas>
+            </div>
+        </div>
+
+        <!-- Gráfica: Evolución -->
+        <div class="card-base p-6 md:col-span-2">
+            <div class="flex items-center gap-3 mb-6">
+                <span class="material-symbols-outlined text-violet-500 text-[20px]">trending_up</span>
+                <h3 class="text-[11px] font-black text-text-main uppercase tracking-widest">Tendencia de Ventas y Comisiones</h3>
+            </div>
+            <div class="relative h-[250px] w-full">
+                <canvas id="chartEvolucion"></canvas>
+            </div>
         </div>
     </div>
 
@@ -180,56 +205,103 @@
 {% endblock %}
 
 {% block extra_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const hoy = new Date();
-        const inicio = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
-        document.getElementById('fecha_inicio').value = inicio.toISOString().split('T')[0];
-        document.getElementById('fecha_fin').value = hoy.toISOString().split('T')[0];
-    });
-
-    async function generarReporte() {
-        const params = new URLSearchParams({
-            fecha_inicio: document.getElementById('fecha_inicio').value,
-            fecha_fin: document.getElementById('fecha_fin').value
-        });
-
-        document.getElementById('estado-vacio').classList.add('hidden');
-        document.getElementById('reporte-container').classList.remove('hidden');
-        document.getElementById('tabla-body').innerHTML = `<tr><td colspan="5" class="py-8 text-center">
-            <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-[var(--primary)] mx-auto"></div>
-        </td></tr>`;
-
-        try {
-            const response = await fetch(`/api/boletos/reporte-comisiones/?${params}`);
-            const data = await response.json();
-
-            document.getElementById('total-boletos').textContent = data.totales.total_boletos;
-            document.getElementById('total-ventas').textContent = `$${data.totales.total_ventas.toFixed(2)}`;
-            document.getElementById('total-comisiones').textContent = `$${data.totales.total_comisiones.toFixed(2)}`;
-
-            const tbody = document.getElementById('tabla-body');
-            if (data.por_aerolinea.length > 0) {
-                tbody.innerHTML = data.por_aerolinea.map(item => {
-                    const margen = item.total_ventas > 0 ? ((item.total_comisiones / item.total_ventas) * 100).toFixed(1) : '0.0';
-                    return `<tr>
-                        <td class="px-5">
-                            <span class="px-2.5 py-0.5 rounded-md text-xs font-black bg-[var(--primary)]/10 text-[var(--primary)] border border-[var(--primary)]/20">${item.aerolinea}</span>
-                        </td>
-                        <td class="px-5 text-right font-mono font-bold">${item.cantidad_boletos}</td>
-                        <td class="px-5 text-right font-mono font-bold text-[var(--success)]">$${item.total_ventas.toFixed(2)}</td>
-                        <td class="px-5 text-right font-mono font-bold text-[var(--primary)]">$${item.total_comisiones.toFixed(2)}</td>
-                        <td class="px-5 text-right">
-                            <span class="text-xs font-bold ${parseFloat(margen) > 10 ? 'text-[var(--success)]' : 'text-[var(--warning)]'}">${margen}%</span>
-                        </td>
-                    </tr>`;
-                }).join('');
-            } else {
-                tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-[var(--text-muted)] text-sm">No hay datos para el período seleccionado</td></tr>`;
-            }
-        } catch (error) {
-            document.getElementById('tabla-body').innerHTML = `<tr><td colspan="5" class="py-6 text-center text-[var(--danger)] text-sm">Error al generar el reporte</td></tr>`;
+    document.addEventListener('DOMContentLoaded', function() {
+        const stats = JSON.parse('{{ stats_graficas|safe }}');
+        
+        // 1. Gráfica de Aerolíneas (Doughnut)
+        const ctxAero = document.getElementById('chartAerolineas');
+        if (ctxAero) {
+            new Chart(ctxAero, {
+                type: 'doughnut',
+                data: {
+                    labels: stats.aerolineas.labels,
+                    datasets: [{
+                        data: stats.aerolineas.data,
+                        backgroundColor: [
+                            '#4F46E5', '#8B5CF6', '#EC4899', '#F59E0B', '#10B981'
+                        ],
+                        borderWidth: 0,
+                        hoverOffset: 10
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                usePointStyle: true,
+                                font: { size: 10, weight: 'bold', family: 'Inter' },
+                                color: '#6B7280'
+                            }
+                        }
+                    },
+                    cutout: '70%'
+                }
+            });
         }
-    }
+
+        // 2. Gráfica de Evolución (Line)
+        const ctxEvo = document.getElementById('chartEvolucion');
+        if (ctxEvo) {
+            new Chart(ctxEvo, {
+                type: 'line',
+                data: {
+                    labels: stats.evolucion.labels,
+                    datasets: [
+                        {
+                            label: 'Ventas Totales',
+                            data: stats.evolucion.ventas,
+                            borderColor: '#4F46E5',
+                            backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 4,
+                            pointBackgroundColor: '#4F46E5'
+                        },
+                        {
+                            label: 'Comisiones',
+                            data: stats.evolucion.comisiones,
+                            borderColor: '#10B981',
+                            backgroundColor: 'transparent',
+                            borderDash: [5, 5],
+                            tension: 0.4,
+                            pointRadius: 4,
+                            pointBackgroundColor: '#10B981'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            align: 'end',
+                            labels: {
+                                usePointStyle: true,
+                                font: { size: 10, weight: 'bold' }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { display: true, color: 'rgba(0,0,0,0.05)' },
+                            ticks: { font: { size: 10 } }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { font: { size: 10 } }
+                        }
+                    }
+                }
+            });
+        }
+    });
 </script>
 {% endblock %}

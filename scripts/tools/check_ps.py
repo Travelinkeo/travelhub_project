@@ -1,4 +1,4 @@
-from core.models_catalogos import ProductoServicio
+from apps.bookings.models import ProductoServicio
 print(f'Total: {ProductoServicio.objects.count()}')
 print(f'AIR: {ProductoServicio.objects.filter(tipo_producto="AIR").count()}')
 for ps in ProductoServicio.objects.all()[:10]:

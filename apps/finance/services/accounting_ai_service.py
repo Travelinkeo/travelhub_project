@@ -8,7 +8,7 @@ from core.services.ai_engine import ai_engine
 from apps.finance.models.ai_accounting_schemas import AsientoContableSchema
 from core.prompts import ACCOUNTING_SYSTEM_PROMPT
 from apps.contabilidad.models import AsientoContable, DetalleAsiento, PlanContable
-from core.models_catalogos import Moneda
+from apps.finance.models.currencies import Moneda
 
 logger = logging.getLogger(__name__)
 

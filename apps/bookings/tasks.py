@@ -28,7 +28,7 @@ def notificar_pago_whatsapp_task(venta_id):
         # Extraer datos para el mensaje
         telefono = venta.cliente.telefono_principal
         localizador = venta.localizador or f"ID-{venta.pk}"
-        monto = f"{venta.total_venta:,.2f} {venta.moneda.codigo if venta.moneda else 'USD'}"
+        monto = f"{venta.total_venta:,.2f} {venta.moneda.codigo_iso if venta.moneda else 'USD'}"
         cliente_nombre = venta.cliente.nombres
         
         # Multi-tenant: Definir nombre de instancia basado en la agencia (subdominio_slug o ID)

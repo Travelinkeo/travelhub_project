@@ -9,6 +9,55 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 logger = logging.getLogger(__name__)
 
+# Fallback API Configuration
+DOLAR_API_URL = "https://ve.dolarapi.com/v1/dolares"
+
+def _obtener_tasas_pydolar():
+    """Fallback usando la librería pyDolarVenezuela"""
+    try:
+        from pyDolarVenezuela import Monitor
+        from pyDolarVenezuela.pages import BCV
+        
+        logger.info("Intentando fallback con pyDolarVenezuela...")
+        monitor = Monitor(BCV)
+        monitores = monitor.get_all_monitors()
+        
+        tasas = {}
+        for m in monitores:
+            # Soportar tanto diccionarios como objetos (depende de la versión de pyDolarVenezuela)
+            key = m.get('key').upper() if isinstance(m, dict) else getattr(m, 'key', '').upper()
+            price = m.get('price') if isinstance(m, dict) else getattr(m, 'price', 0)
+            
+            if key in ['USD', 'EUR', 'CNY', 'TRY', 'RUB']:
+                tasas[key] = Decimal(str(price))
+        
+        return tasas
+    except Exception as e:
+        logger.error(f"Error en fallback pyDolarVenezuela: {e}")
+        return {}
+
+def _obtener_tasas_dolarapi():
+    """Fallback usando DolarApi (ve.dolarapi.com)"""
+    try:
+        logger.info("Intentando fallback con DolarApi...")
+        response = requests.get(DOLAR_API_URL, timeout=10)
+        response.raise_for_status()
+        data = response.json()
+        
+        tasas = {}
+        # DolarApi retorna una lista de monitores, buscamos el oficial
+        for item in data:
+            if item.get('fuente') == 'oficial':
+                # DolarApi suele dar USD
+                promedio = item.get('promedio')
+                if promedio:
+                    tasas['USD'] = Decimal(str(promedio))
+                break
+        return tasas
+    except Exception as e:
+        logger.error(f"Error en fallback DolarApi: {e}")
+        return {}
+
 def obtener_tasas_bcv():
     """
     Obtiene las tasas de cambio del Banco Central de Venezuela.
@@ -54,7 +103,7 @@ def obtener_tasas_bcv():
                 if match:
                     valor_str = match.group(1).replace(',', '.')
                     tasas[codigo_iso] = Decimal(valor_str)
-                    logger.info(f"Tasa {codigo_iso} encontrada: {tasas[codigo_iso]}")
+                    logger.info(f"Estrategia 1 (ID): Tasa {codigo_iso} encontrada: {tasas[codigo_iso]}")
         
         # Estrategia 2: Si falla ID, buscar por texto visible cerca
         if 'USD' not in tasas or 'EUR' not in tasas:
@@ -79,14 +128,32 @@ def obtener_tasas_bcv():
                          full_text = container.get_text(strip=True)
                          match = re.search(r'(\d+,\d+)', full_text)
                          if match:
-                             valor_str = match.group(1).replace(',', '.')
-                             tasas[iso] = Decimal(valor_str)
+                              valor_str = match.group(1).replace(',', '.')
+                              tasas[iso] = Decimal(valor_str)
         
         if not tasas:
-            logger.warning("No se pudieron extraer tasas del BCV.")
+            logger.warning("No se pudieron extraer tasas del sitio del BCV. Iniciando fallbacks...")
+            
+            # Fallback 1: DolarApi
+            tasas = _obtener_tasas_dolarapi()
+            
+            # Fallback 2: pyDolarVenezuela (si DolarApi no dio todo o falló)
+            if 'USD' not in tasas or 'EUR' not in tasas:
+                tasas_py = _obtener_tasas_pydolar()
+                # Mezclar resultados priorizando lo que ya tenemos
+                for k, v in tasas_py.items():
+                    if k not in tasas:
+                        tasas[k] = v
+            
+        if not tasas:
+            logger.error("TODOS los métodos de obtención de tasas fallaron.")
             
         return tasas
 
     except Exception as e:
-        logger.error(f"Error extrayendo tasas BCV: {e}")
-        return {}
+        logger.error(f"Error crítico en obtener_tasas_bcv: {e}")
+        # Intentar fallbacks incluso si hubo un error de red en el intento principal
+        tasas = _obtener_tasas_dolarapi()
+        if not tasas:
+            tasas = _obtener_tasas_pydolar()
+        return tasas

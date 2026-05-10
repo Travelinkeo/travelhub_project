@@ -2,11 +2,11 @@
 import pytest
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
-from core.models import LiquidacionProveedor
+from apps.contabilidad.models import LiquidacionProveedor
 from apps.bookings.models import Venta
 from apps.finance.models import Factura
-from personas.models import Cliente
-from core.models_catalogos import Moneda
+from apps.crm.models import Cliente
+from apps.finance.models.currencies import Moneda
 
 User = get_user_model()
 

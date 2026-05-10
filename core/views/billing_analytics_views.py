@@ -1,4 +1,5 @@
 """Analytics y métricas de SaaS."""
+from drf_spectacular.utils import extend_schema
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
@@ -8,6 +9,7 @@ from datetime import timedelta
 from core.models.agencia import Agencia
 
 
+@extend_schema(exclude=True)
 @api_view(['GET'])
 @permission_classes([IsAdminUser])
 def get_mrr(request):
@@ -44,6 +46,7 @@ def get_mrr(request):
     })
 
 
+@extend_schema(exclude=True)
 @api_view(['GET'])
 @permission_classes([IsAdminUser])
 def get_churn_rate(request):
@@ -70,6 +73,7 @@ def get_churn_rate(request):
     })
 
 
+@extend_schema(exclude=True)
 @api_view(['GET'])
 @permission_classes([IsAdminUser])
 def get_usage_metrics(request):
@@ -97,6 +101,7 @@ def get_usage_metrics(request):
     return Response({'metrics_por_plan': metrics_por_plan})
 
 
+@extend_schema(exclude=True)
 @api_view(['GET'])
 @permission_classes([IsAdminUser])
 def get_conversion_funnel(request):
@@ -127,6 +132,7 @@ def get_conversion_funnel(request):
     })
 
 
+@extend_schema(exclude=True)
 @api_view(['GET'])
 @permission_classes([IsAdminUser])
 def get_growth_metrics(request):

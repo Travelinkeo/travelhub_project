@@ -276,25 +276,28 @@ class BaseTicketParser(ABC):
             
         Returns:
             str: Nombre extraído (ej. "PEREZ/JUANA") o 'No encontrado'.
-            
-        # ¿Por qué es robusto?: El GDS suele encadenar el nombre de pasajero con el documento (FOID/RIF)
-        # o inyectar etiquetas SPAN en medio. Si eso se cuela a la DB o Stripe (Pasarela), rechazan 
-        # las tarjetas por discrepancia de titular. Este método previene dicho desastre financiero.
         """
         # Limpiar HTML para la búsqueda de nombres
         clean_text = re.sub(r'<[^>]+>', ' ', text)
         clean_text = clean_text.replace('&nbsp;', ' ')
         
         # 1. Prioridad: Búsqueda por palabras clave explícitas (KIU/Sabre/Web)
+        # Detener la captura si encontramos palabras clave de otros campos (FOID, RIF, etc.)
         patterns = [
-            r'NAME/NOMBRE\s*[:\s]*([A-ZÁÉÍÓÚÑ/ (),.-]{3,})',
-            r'NAME:\s*([A-ZÁÉÍÓÚÑ/ (),.-]{3,})',
-            r'NOMBRE DEL PASAJERO\s*[:\s]*([A-ZÁÉÍÓÚÑ/ (),.-]{3,})',
-            r'PASAJERO\s*[:\s]*([A-ZÁÉÍÓÚÑ/ (),.-]{3,})',
-            r'PASJ\s*[:\s]*([A-ZÁÉÍÓÚÑ/ (),.-]{3,})',
+            r'NAME/NOMBRE\s*[:\s]*([A-ZÁÉÍÓÚÑ/ (),.-]{3,60}?)(?:\s+(?:FOID|RIF|DNI|DOC|TKTN|ID|\[|$))',
+            r'NAME:\s*([A-ZÁÉÍÓÚÑ/ (),.-]{3,60}?)(?:\s+(?:FOID|RIF|DNI|DOC|TKTN|ID|\[|$))',
+            r'NOMBRE DEL PASAJERO\s*[:\s]*([A-ZÁÉÍÓÚÑ/ (),.-]{3,60}?)(?:\s+(?:FOID|RIF|DNI|DOC|TKTN|ID|\[|$))',
+            r'PASAJERO\s*[:\s]*([A-ZÁÉÍÓÚÑ/ (),.-]{3,60}?)(?:\s+(?:FOID|RIF|DNI|DOC|TKTN|ID|\[|$))',
+            r'PASJ\s*[:\s]*([A-ZÁÉÍÓÚÑ/ (),.-]{3,60}?)(?:\s+(?:FOID|RIF|DNI|DOC|TKTN|ID|\[|$))',
+            r'PREPARADO PARA\s*[:\s]*([A-ZÁÉÍÓÚÑ/ (),.-]{3,60}?)(?:\s+(?:FOID|RIF|DNI|DOC|TKTN|ID|\[|$))',
         ]
         
-        raw_name = self.extract_field(clean_text, patterns)
+        raw_name = 'No encontrado'
+        for pattern in patterns:
+            match = re.search(pattern, clean_text, re.IGNORECASE)
+            if match:
+                raw_name = match.group(1).strip()
+                break
         
         # 2. Estrategia 2: GDS Priority (APELLIDO/NOMBRE) si no hubo palabra clave
         if raw_name == 'No encontrado' or len(raw_name) < 4:
@@ -306,7 +309,8 @@ class BaseTicketParser(ABC):
                 'ISSUING AIRLINE', 'LINEA AEREA EMISORA', 'EMISORA', 'AIRLINE', 'DIRECCION',
                 'FORMA DE PAGO', 'TARIFA', 'IMPUESTOS', 'NUMERO DE BOLETO', 'PASSENGER NAME',
                 'RESERVATION CODE', 'CODIGO DE RESERVA', 'CODIGO DE RESERVACION', 'ELECTRONIC',
-                'RECORD LOCATOR', 'BOOKING REFERENCE', 'TICKET NUMBER', 'ISSUE AGENT', 'EMITIDO'
+                'RECORD LOCATOR', 'BOOKING REFERENCE', 'TICKET NUMBER', 'ISSUE AGENT', 'EMITIDO',
+                'PREPARADO PARA', 'PREPARED FOR', 'INFORMACION DE VUELO', 'FLIGHT INFORMATION'
             ]
             
             # Buscar en el texto limpio (sin tags)
@@ -315,27 +319,18 @@ class BaseTicketParser(ABC):
                 candidate = match.group(1).strip()
                 if len(candidate) > 5 and not re.search(r'\d', candidate):
                     if not any(bad in candidate.upper() for bad in blacklist):
-                         raw_name = candidate
-                         break
+                        raw_name = candidate
+                        break
 
         if raw_name == 'No encontrado':
             return 'No encontrado'
 
         return self.clean_passenger_name(raw_name)
 
+
     def clean_passenger_name(self, name: str) -> str:
         """
-        Filtra sufijos y títulos de cortesía (MR, MRS, CHD) inyectados por la aerolínea.
-        
-        Args:
-            name (str): Nombre crudo pre-extraído.
-            
-        Returns:
-            str: Nombre sanitizado sin sufijos ni prefijos corporativos.
-            
-        # 🚨 CRÍTICO: Este método prohíbe explícitamente barrer PNRs, IDs, o FOIDs que vengan colisionados.
-        # En vuelos chárter, las aerolíneas exigen que la cédula y el GDS permanezcan juntos. 
-        # Separar eso aquí causaría un NO SHOW en aeropuerto.
+        Filtra sufijos, títulos de cortesía y ruidos colisionados.
         """
         if not name or name == 'No encontrado':
             return name
@@ -344,12 +339,20 @@ class BaseTicketParser(ABC):
         name = re.sub(r'<[^>]+>', '', name)
         name = name.replace('&nbsp;', ' ').strip()
 
-        # 2. Eliminación de títulos y sufijos (MR, MS, MRS, CHD, INF) 
+        # 2. Eliminación de ruidos colisionados (FOID, RIF, etc.) si se colaron
+        # Detenerse en el primer espacio seguido de una palabra clave de ruido
+        # El split debe ser insensible a mayúsculas
+        parts = re.split(r'\s+(?:FOID|RIF|DNI|DOC|TKTN|ID|\[)', name, flags=re.IGNORECASE)
+        name = parts[0].strip()
+
+        # 3. Eliminación de títulos y sufijos (MR, MS, MRS, CHD, INF) 
         # Solo si hay un separador '/' (Estilo GDS/KIU)
         if '/' in name:
-            name = re.sub(r'\s*\b(MR|MS|MRS|CHD|INF)\b\s*$', '', name, flags=re.IGNORECASE).strip()
+            # Eliminar títulos al final, soportando múltiples espacios
+            name = re.sub(r'\s*\b(MR|MS|MRS|CHD|INF|MSTR|MISS)\b.*$', '', name, flags=re.IGNORECASE).strip()
         
-        # 3. Limpieza de caracteres residuales
+        # 4. Limpieza de caracteres residuales
         name = name.rstrip(':/.- ').strip()
         
         return name
+

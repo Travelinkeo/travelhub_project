@@ -1,5 +1,5 @@
 import pytest
-from core.ticket_parser import extract_data_from_text
+from core.services.ticket_parser_service import extract_data_from_text
 
 def test_kiu_laser_name_regression():
     """

@@ -1,8 +1,9 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from core.models import Agencia, HotelTarifario
+from core.models.base import AgenciaMixin
+from apps.bookings.models import HotelTarifario
 
-class Campania(models.Model):
+class Campania(AgenciaMixin, models.Model):
     class EstadoCampania(models.TextChoices):
         BORRADOR = 'BORRADOR', _('Borrador')
         PROGRAMADA = 'PROGRAMADA', _('Programada')
@@ -14,7 +15,6 @@ class Campania(models.Model):
     fecha_inicio = models.DateTimeField(_('Fecha de Inicio'), null=True, blank=True)
     fecha_fin = models.DateTimeField(_('Fecha de Fin'), null=True, blank=True)
     estado = models.CharField(_('Estado'), max_length=20, choices=EstadoCampania.choices, default=EstadoCampania.BORRADOR)
-    agencia = models.ForeignKey(Agencia, on_delete=models.CASCADE, related_name='campanias')
     
     # Redes sociales destino
     publicar_en_instagram = models.BooleanField(default=True)
@@ -28,7 +28,7 @@ class Campania(models.Model):
         verbose_name = _('Campaña')
         verbose_name_plural = _('Campañas')
 
-class ActivoMarketing(models.Model):
+class ActivoMarketing(AgenciaMixin, models.Model):
     class TipoActivo(models.TextChoices):
         FLYER = 'FLYER', _('Flyer (Imagen)')
         STORY = 'STORY', _('Story (Instagram)')
@@ -59,8 +59,7 @@ class ActivoMarketing(models.Model):
         verbose_name = _('Activo de Marketing')
         verbose_name_plural = _('Activos de Marketing')
 
-class ConfiguracionMarketing(models.Model):
-    agencia = models.OneToOneField(Agencia, on_delete=models.CASCADE, related_name='config_marketing')
+class ConfiguracionMarketing(AgenciaMixin, models.Model):
     color_primario = models.CharField(max_length=7, default='#0f172a') # Hexadecimal
     color_secundario = models.CharField(max_length=7, default='#fbbf24')
     fuente_principal = models.CharField(max_length=100, default='Arial')

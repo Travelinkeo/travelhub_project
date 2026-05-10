@@ -1,27 +1,27 @@
-
 import logging
 import requests
 from django.conf import settings
+from .evolution_api_service import EvolutionService
 
 logger = logging.getLogger(__name__)
 
 def enviar_mensaje_meta_api(numero_cliente, mensaje, agencia=None):
     """
     Servicio para enviar mensajes a través de la WhatsApp Cloud API (Meta).
-    Implementación base para el Sistema de Notificaciones Resiliente.
+    Mantenido como fallback para mensajes de texto.
     """
     try:
         # SaaS Logic: Prioritize Agency Config
         token = settings.WHATSAPP_TOKEN
         phone_id = settings.WHATSAPP_PHONE_ID
         
-        if agencia and agencia.configuracion_api.get('WHATSAPP_TOKEN'):
-            token = agencia.configuracion_api.get('WHATSAPP_TOKEN')
-            phone_id = agencia.configuracion_api.get('WHATSAPP_PHONE_ID')
+        if agencia and agencia.configuracion_api:
+            token = agencia.configuracion_api.get('WHATSAPP_TOKEN', token)
+            phone_id = agencia.configuracion_api.get('WHATSAPP_PHONE_ID', phone_id)
 
         if not token or not phone_id:
-            logger.error("WhatsApp Config Missing (Token or Phone ID)")
-            return {'success': False, 'error_message': 'Configuración de WhatsApp faltante'}
+            logger.error("WhatsApp Meta Config Missing")
+            return {'success': False, 'error_message': 'Configuración de Meta faltante'}
 
         url = f"https://graph.facebook.com/v18.0/{phone_id}/messages"
         headers = {
@@ -29,10 +29,8 @@ def enviar_mensaje_meta_api(numero_cliente, mensaje, agencia=None):
             "Content-Type": "application/json"
         }
         
-        # Limpiar número (solo dígitos, incluir código de país si no está)
         clean_number = "".join(filter(str.isdigit, str(numero_cliente)))
         
-        # Payload para mensaje de texto simple (se puede extender a plantillas)
         payload = {
             "messaging_product": "whatsapp",
             "recipient_type": "individual",
@@ -41,18 +39,48 @@ def enviar_mensaje_meta_api(numero_cliente, mensaje, agencia=None):
             "text": {"body": mensaje}
         }
 
-        logger.info(f"Enviando WhatsApp a {clean_number} vía Meta API...")
         response = requests.post(url, json=payload, headers=headers, timeout=20)
         
         if response.status_code in [200, 201]:
-            logger.info(f"✅ WhatsApp enviado a {clean_number}. ID: {response.json().get('messages', [{}])[0].get('id')}")
-            return {'success': True, 'data': response.json()}
+            return {'success': True, 'provider': 'meta', 'data': response.json()}
         else:
-            error_data = response.json().get('error', {})
-            error_msg = error_data.get('message', 'Unknown Meta Error')
-            logger.error(f"❌ Error Meta API ({response.status_code}): {error_msg}")
-            return {'success': False, 'error_message': error_msg}
+            return {'success': False, 'error_message': response.text}
 
     except Exception as e:
-        logger.exception(f"Excepción enviando mensaje WhatsApp: {str(e)}")
+        logger.exception(f"Error en Meta API: {str(e)}")
         return {'success': False, 'error_message': str(e)}
+
+def send_whatsapp_message(number, text, agencia=None, media_url=None, file_name=None):
+    """
+    PUNTO DE ENTRADA UNIFICADO (Fase B).
+    Decide inteligentemente qué proveedor usar.
+    """
+    # 1. Determinar nombre de instancia (Multi-tenant)
+    instance_name = "default"
+    if agencia and agencia.subdominio_slug:
+        instance_name = agencia.subdominio_slug
+
+    # 2. Intentar vía EVOLUTION API (Soporta Media)
+    try:
+        success = False
+        if media_url:
+            success = EvolutionService.send_media(
+                instance_name, number, media_url, caption=text, file_name=file_name
+            )
+        else:
+            success = EvolutionService.send_text(instance_name, number, text)
+
+        if success:
+            return {'success': True, 'provider': 'evolution'}
+    except Exception as e:
+        logger.warning(f"⚠️ Evolution API falló para {number}: {e}")
+
+    # 3. FALLBACK A META (Solo si es texto)
+    if not media_url:
+        logger.info(f"🔄 Reintentando vía Meta API para {number}...")
+        return enviar_mensaje_meta_api(number, text, agencia=agencia)
+
+    return {
+        'success': False, 
+        'error_message': 'No se pudo enviar el mensaje por ningún proveedor (Evolution/Meta)'
+    }

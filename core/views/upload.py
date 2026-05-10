@@ -114,75 +114,23 @@ class ReviewBoletoView(View):
         except:
             source_text = boleto.log_parseo or "Error al leer el archivo fuente."
         
-        # --- FIX DE SEGURIDAD PARA DJANGO TEMPLATES ---
-        if boleto.datos_parseados is None:
-            boleto.datos_parseados = {}
+        # --- NORMALIZACIÓN DE DATOS PARA EL UI (Studio) ---
+        from core.services.parsers.normalization import DataNormalizationService
+        datos_crudos = boleto.datos_parseados or {}
+        datos_norm = DataNormalizationService.normalize_ticket_data(datos_crudos)
+        datos = SafeDict(datos_norm)
         
-        if isinstance(boleto.datos_parseados, dict):
-            # 🛡️ PUENTE DE TRADUCCIÓN (Rosetta Stone):
-            # Unificamos las llaves del nuevo God Mode con las llaves que espera el HTML
-            # Usamos SafeDict para evitar VariableDoesNotExist en el template
-            datos = SafeDict(boleto.datos_parseados or {})
+        if not datos.get('pnr') and not is_processing:
+            from core.ticket_parser import FastDeterministicParsers
+            regex_emergency = FastDeterministicParsers.parse_general_regex(source_text)
+            if regex_emergency.get('codigo_reserva'):
+                datos.update(DataNormalizationService.normalize_ticket_data(regex_emergency))
             
-            # 🩹 REPARACIÓN AGRESIVA: Si faltan datos clave (PNR o Segmentos)
-            # Intentamos usar el motor de Regex más reciente sobre el texto fuente.
-            if not datos.get('codigo_reserva') and not datos.get('pnr') and not datos.get('CODIGO_RESERVA'):
-                from core.ticket_parser import FastDeterministicParsers
-                latest_regex = FastDeterministicParsers.parse_general_regex(source_text)
-                
-                if latest_regex.get('codigo_reserva'):
-                    datos['codigo_reserva'] = latest_regex['codigo_reserva']
-                    datos['CODIGO_RESERVA'] = latest_regex['codigo_reserva']
-                
-                if latest_regex.get('flights'):
-                    datos['flights'] = latest_regex['flights']
-                    datos['segmentos'] = latest_regex['flights']
-            
-            # Sincronización Bidireccional: Aseguramos que existan tanto las llaves legacy como las nuevas
-            datos['NOMBRE_DEL_PASAJERO'] = datos.get('NOMBRE_DEL_PASAJERO') or datos.get('passenger_name') or datos.get('nombre_pasajero', '')
-            datos['CODIGO_IDENTIFICACION'] = datos.get('CODIGO_IDENTIFICACION') or datos.get('passenger_document') or datos.get('foid', '')
-            datos['CODIGO_RESERVA'] = datos.get('CODIGO_RESERVA') or datos.get('SOLO_CODIGO_RESERVA') or datos.get('pnr', '')
-            datos['NUMERO_DE_BOLETO'] = datos.get('NUMERO_DE_BOLETO') or datos.get('ticket_number') or datos.get('numero_boleto', '')
-            datos['NOMBRE_AEROLINEA'] = datos.get('NOMBRE_AEROLINEA') or datos.get('aerolinea') or datos.get('aerolinea_emisora', '')
-            datos['FECHA_DE_EMISION'] = datos.get('FECHA_DE_EMISION') or datos.get('fecha_emision', '')
-            
-            # Mapeo inverso para consistencia
-            datos['passenger_name'] = datos['NOMBRE_DEL_PASAJERO']
-            datos['passenger_document'] = datos['CODIGO_IDENTIFICACION']
-            datos['pnr'] = datos['CODIGO_RESERVA']
-            datos['ticket_number'] = datos['NUMERO_DE_BOLETO']
-            datos['aerolinea'] = datos['NOMBRE_AEROLINEA']
-            
-            # Sincronización de itinerarios: IA vs Legacy
-            itinerary_data = datos.get('segmentos', []) or datos.get('flights', []) or datos.get('itinerario', []) or datos.get('segments', []) or datos.get('vuelos', [])
-            
-            # Normalización rápida para el UI (Review Master)
-            normalized_segments = []
-            for tramo in itinerary_data:
-                if not isinstance(tramo, dict): continue
-                # Si el tramo viene con estructura anidada (Gemini), lo aplanamos para el template
-                dep = tramo.get('departure', {}) if isinstance(tramo.get('departure'), dict) else {}
-                arr = tramo.get('arrival', {}) if isinstance(tramo.get('arrival'), dict) else {}
-                
-                normalized_segments.append({
-                    'origen': tramo.get('origen') or dep.get('location') or tramo.get('departure_city'),
-                    'destino': tramo.get('destino') or arr.get('location') or tramo.get('arrival_city'),
-                    'vuelo': tramo.get('vuelo') or tramo.get('flightNumber') or tramo.get('numero_vuelo') or tramo.get('flight_number'),
-                    'fecha_salida': tramo.get('fecha_salida') or tramo.get('date') or tramo.get('departure_date') or tramo.get('date'),
-                    'hora_salida': tramo.get('hora_salida') or dep.get('time'),
-                    'hora_llegada': tramo.get('hora_llegada') or arr.get('time'),
-                })
-            
-            # Bubble up Airline PNR from first segment if missing
-            if not datos.get('pnr_aerolinea') or datos.get('pnr_aerolinea') == '---':
-                for seg in normalized_segments:
-                    if seg.get('airline_pnr'):
-                        datos['pnr_aerolinea'] = seg['airline_pnr']
-                        break
 
-            datos['segmentos'] = normalized_segments
-            datos['segments'] = normalized_segments
-            boleto.datos_parseados = datos
+
+            
+        segments = datos.get('segmentos', [])
+        boleto.datos_parseados = datos
         # ----------------------------------------------
             
         segments = boleto.datos_parseados.get('segmentos', [])

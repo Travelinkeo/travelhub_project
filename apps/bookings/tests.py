@@ -4,9 +4,10 @@ from decimal import Decimal
 from django.utils import timezone
 
 # Modelos Reales
-from core.models import Agencia
+from core.models.agencia import Agencia
 from apps.bookings.models import Venta, ItemVenta, FeeVenta, PagoVenta
-from core.models_catalogos import Moneda, ProductoServicio
+from apps.finance.models.currencies import Moneda
+from apps.bookings.models import ProductoServicio
 
 @override_settings(CELERY_TASK_ALWAYS_EAGER=True, CELERY_TASK_EAGER_PROPAGATES=True)
 class SeguridadSaaSTest(TestCase):

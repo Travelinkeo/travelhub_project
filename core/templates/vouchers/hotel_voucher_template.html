@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Voucher de Hotel - {{ alojamiento.nombre_establecimiento }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        @page {
+            size: A4;
+            margin: 0;
+        }
+        :root {
+            --tk-primary: {{ agencia.color_primario|default:"#0d1e40" }};
+            --tk-accent: {{ agencia.color_accent_pdf|default:"#2173a6" }};
+            --tk-text: #1e293b;
+            --tk-muted: #64748b;
+            --tk-gray: #f8fafc;
+            --tk-border: #e2e8f0;
+            --body-margin: 50px;
+            --hotel-color: #10b981;
+        }
+        
+        body {
+            font-family: 'Outfit', sans-serif;
+            color: var(--tk-text);
+            line-height: 1.4;
+            margin: 0;
+            padding: 0;
+            background-color: #fff;
+        }
+
+        .printable-area {
+            position: relative;
+            width: 210mm;
+            min-height: 297mm;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background-color: var(--tk-primary);
+            color: white;
+            padding: 40px var(--body-margin);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-logo img {
+            max-height: 50px;
+            width: auto;
+        }
+
+        .header-info {
+            text-align: right;
+        }
+
+        .header-info h1 {
+            font-size: 24px;
+            font-weight: 800;
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .body-wrapper {
+            padding: 40px var(--body-margin);
+            flex: 1;
+        }
+
+        .hero-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 40px;
+            border-bottom: 2px solid var(--tk-gray);
+            padding-bottom: 30px;
+        }
+
+        .hotel-title h2 {
+            font-size: 12px;
+            color: var(--tk-accent);
+            text-transform: uppercase;
+            font-weight: 800;
+            margin: 0 0 5px 0;
+        }
+
+        .hotel-title h3 {
+            font-size: 28px;
+            color: var(--tk-primary);
+            font-weight: 800;
+            margin: 0;
+        }
+
+        .conf-box {
+            background: var(--tk-gray);
+            padding: 15px 25px;
+            border-radius: 12px;
+            text-align: right;
+        }
+
+        .conf-label {
+            font-size: 10px;
+            font-weight: 800;
+            color: var(--tk-muted);
+            text-transform: uppercase;
+        }
+
+        .conf-value {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--tk-primary);
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .info-card {
+            background: white;
+            border: 1px solid var(--tk-border);
+            border-radius: 16px;
+            padding: 20px;
+        }
+
+        .info-card-title {
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--tk-muted);
+            text-transform: uppercase;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-card-title span {
+            width: 6px;
+            height: 6px;
+            background: var(--tk-accent);
+            border-radius: 50%;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+
+        .detail-label {
+            color: var(--tk-muted);
+            font-weight: 500;
+        }
+
+        .detail-value {
+            color: var(--tk-primary);
+            font-weight: 700;
+        }
+
+        .dates-box {
+            display: flex;
+            background: var(--tk-primary);
+            color: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 40px;
+            justify-content: space-around;
+            text-align: center;
+        }
+
+        .date-item h4 {
+            font-size: 10px;
+            text-transform: uppercase;
+            margin: 0 0 5px 0;
+            opacity: 0.8;
+        }
+
+        .date-item p {
+            font-size: 18px;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .passenger-info {
+            background: var(--tk-gray);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 40px;
+        }
+
+        .footer {
+            padding: 40px var(--body-margin);
+            background: var(--tk-gray);
+            border-top: 1px solid var(--tk-border);
+            text-align: center;
+        }
+
+        .footer-brand {
+            font-weight: 800;
+            color: var(--tk-primary);
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="printable-area">
+        <header class="header">
+            <div class="header-logo">
+                {% if agencia_logo_b64 %}
+                    <img src="{{ agencia_logo_b64 }}" alt="Logo">
+                {% else %}
+                    <h2 style="margin:0">{{ agencia.nombre }}</h2>
+                {% endif %}
+            </div>
+            <div class="header-info">
+                <h1>Voucher de Hotel</h1>
+                <p style="font-size: 10px; opacity: 0.8;">CONFIRMACIÓN DE ALOJAMIENTO</p>
+            </div>
+        </header>
+
+        <div class="body-wrapper">
+            <section class="hero-section">
+                <div class="hotel-title">
+                    <h2>Establecimiento</h2>
+                    <h3>{{ alojamiento.nombre_establecimiento|upper }}</h3>
+                    <p style="color: var(--tk-muted); font-size: 14px; margin-top: 5px;">
+                        {{ alojamiento.ciudad.nombre|default:"" }}, {{ alojamiento.ciudad.pais.nombre|default:"" }}
+                    </p>
+                </div>
+                <div class="conf-box">
+                    <div class="conf-label">Confirmación</div>
+                    <div class="conf-value">{{ alojamiento.localizador_proveedor|default:alojamiento.venta.localizador|default:"PENDIENTE" }}</div>
+                </div>
+            </section>
+
+            <div class="dates-box">
+                <div class="date-item">
+                    <h4>Check-In</h4>
+                    <p>{{ alojamiento.check_in|date:"d M Y"|upper }}</p>
+                </div>
+                <div class="date-item" style="border-left: 1px solid rgba(255,255,255,0.2); padding-left: 20px;">
+                    <h4>Check-Out</h4>
+                    <p>{{ alojamiento.check_out|date:"d M Y"|upper }}</p>
+                </div>
+                <div class="date-item" style="border-left: 1px solid rgba(255,255,255,0.2); padding-left: 20px;">
+                    <h4>Noches</h4>
+                    <p>{{ noches }}</p>
+                </div>
+            </div>
+
+            <div class="info-grid">
+                <div class="info-card">
+                    <div class="info-card-title"><span></span>Detalles de Habitación</div>
+                    <div class="detail-row">
+                        <span class="detail-label">Habitaciones:</span>
+                        <span class="detail-value">{{ alojamiento.habitaciones }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Régimen:</span>
+                        <span class="detail-value">{{ alojamiento.regimen_alimentacion|default:"Solo Habitación" }}</span>
+                    </div>
+                    {% if alojamiento.notas %}
+                    <div style="margin-top: 15px; border-top: 1px dashed var(--tk-border); padding-top: 10px;">
+                        <span class="conf-label">Observaciones:</span>
+                        <p style="font-size: 11px; color: var(--tk-text); margin: 5px 0 0 0;">{{ alojamiento.notas }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="info-card">
+                    <div class="info-card-title"><span></span>Pasajeros</div>
+                    <div class="detail-row">
+                        <span class="detail-label">Titular:</span>
+                        <span class="detail-value">{{ alojamiento.nombre_pasajero|upper|default:alojamiento.venta.cliente.get_nombre_completo|upper }}</span>
+                    </div>
+                    <div style="margin-top: 15px; border-top: 1px dashed var(--tk-border); padding-top: 10px;">
+                        <span class="conf-label">Acompañantes:</span>
+                        <ul style="margin: 5px 0 0 0; padding: 0 0 0 15px; font-size: 11px; color: var(--tk-text);">
+                            {% for pax in alojamiento.venta.pasajeros.all %}
+                                <li>{{ pax.get_nombre_completo|upper }}</li>
+                            {% empty %}
+                                <li>No especificados</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div style="background: #fff9e6; border: 1px solid #ffeeba; border-radius: 12px; padding: 20px; font-size: 11px; color: #856404;">
+                <strong>Información Importante:</strong>
+                <ul style="margin: 10px 0 0 0; padding-left: 15px;">
+                    <li>Este documento es un voucher de servicios. Debe presentarlo al momento del Check-In.</li>
+                    <li>El hotel puede solicitar una tarjeta de crédito o depósito en efectivo como garantía por gastos incidentales.</li>
+                    <li>Cualquier cambio o cancelación debe ser gestionado a través de su agencia de viajes.</li>
+                </ul>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <div class="footer-brand">{{ agencia.nombre|upper }}</div>
+            <div style="font-size: 10px; color: var(--tk-muted);">
+                {{ agencia.direccion|default:"" }}<br>
+                Tel: {{ agencia.telefono_principal }} | Email: {{ agencia.email_principal }}
+            </div>
+        </footer>
+    </div>
+</body>
+</html>

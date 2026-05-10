@@ -8,6 +8,8 @@ import os
 from celery import shared_task
 from django.conf import settings
 from django.core.files.base import ContentFile
+from core.utils.celery_utils import tenant_task
+from core.middleware import agency_context
 
 logger = logging.getLogger(__name__)
 
@@ -38,13 +40,19 @@ def process_incoming_emails():
     Esta tarea se ejecuta silenciosamente. Usamos `process_all=False` para procesar por lotes (batches controlados) 
     y evitar crashes de memoria (OOM) si una agencia inunda repentinamente la bandeja con 10,000 correos atrasados.
     """
-    from core.models import Agencia
+    from core.models.agencia import Agencia
     from core.services.email_monitor_service import EmailMonitorService
 
     logger.info("🚀 Iniciando tarea programada: Procesamiento de Correos (Multi-Tenant)")
     
     # SaaS: Buscar todas las agencias activas con configuración de correo
-    agencias = Agencia.objects.filter(activa=True).exclude(correo_emisiones__isnull=True).exclude(correo_emisiones__exact='')
+    agencias = Agencia.objects.filter(
+        activa=True
+    ).exclude(
+        configuracion__correo_emisiones__isnull=True
+    ).exclude(
+        configuracion__correo_emisiones__exact=''
+    )
     total_procesados = 0
     total_agencias = 0
 
@@ -54,23 +62,25 @@ def process_incoming_emails():
 
     for agencia in agencias:
         try:
-            # Validar si tiene credenciales SaaS configuradas
-            if not agencia.correo_emisiones or not agencia.password_app_correo:
+            # Validar si tiene credenciales SaaS configuradas (en componente configuración)
+            config = agencia.configuracion
+            if not config or not config.correo_emisiones or not config.password_app_correo:
                 continue
 
-            logger.info(f"🔄 Procesando agencia SaaS: {agencia.nombre} ({agencia.correo_emisiones})")
-            
-            monitor = EmailMonitorService(
-                agencia=agencia, 
-                notification_type='telegram', # Changed to telegram to ensure Admin gets notified + backup email
-                process_all=False, 
-                mark_as_read=True
-            )
-            
-            # Procesar una vez (sin loop infinito)
-            cantidad = monitor.procesar_una_vez()
-            total_procesados += cantidad
-            total_agencias += 1
+            with agency_context(agencia):
+                logger.info(f"🔄 Procesando agencia SaaS: {agencia.nombre} ({config.correo_emisiones})")
+                
+                monitor = EmailMonitorService(
+                    agencia=agencia, 
+                    notification_type='telegram', 
+                    process_all=False, 
+                    mark_as_read=True
+                )
+                
+                # Procesar una vez (sin loop infinito)
+                cantidad = monitor.procesar_una_vez()
+                total_procesados += cantidad
+                total_agencias += 1
             
         except Exception as e:
             logger.error(f"❌ Error procesando agencia {agencia.nombre}: {e}")
@@ -81,8 +91,8 @@ def process_incoming_emails():
     return resultado
 
 
-@shared_task(name="core.tasks.parsear_boleto_individual")
-def parsear_boleto_individual(boleto_id):
+@tenant_task(name="core.tasks.parsear_boleto_individual")
+def parsear_boleto_individual(boleto_id, **kwargs):
     """
     Tarea asíncrona para procesar un boleto individual.
     Útil para uploads desde Admin o reintentos manuales.
@@ -141,120 +151,72 @@ def retry_queued_boletos():
 
     
 
-    @shared_task(name="core.tasks.send_ticket_notification")
+@tenant_task(name="core.tasks.send_ticket_notification")
+def send_ticket_notification(boleto_id, **kwargs):
 
-    def send_ticket_notification(boleto_id):
+    """
+    Envía una notificación por correo electrónico con el boleto PDF generado.
+    """
+    try:
+        from apps.bookings.models import BoletoImportado
+        from django.core.mail import EmailMessage
+        
+        boleto = BoletoImportado.objects.get(id_boleto_importado=boleto_id)
+        logger.info(f"Iniciando envío de notificación para Boleto ID: {boleto_id}")
 
-        """
+        if not boleto.archivo_pdf_generado:
+            logger.warning(f"No se encontró PDF generado para el Boleto ID: {boleto_id}. No se puede enviar notificación.")
+            return f"No hay PDF para el boleto {boleto_id}."
 
-        Envía una notificación por correo electrónico con el boleto PDF generado.
+        # Priorizar email del cliente asociado
+        recipient_email = boleto.cliente.email if boleto.cliente else None
+        if not recipient_email:
+            logger.error(f"El boleto {boleto_id} no tiene cliente con email. No se puede enviar notificación.")
+            return "Destinatario no encontrado."
 
-        """
+        # 🛡️ Guard: Skip placeholder emails
+        if "@sin-email.com" in recipient_email.lower():
+            logger.info(f"🔕 Notificación omitida para email de marcador de posición: {recipient_email}")
+            return "Omitido por ser email de marcador de posición"
 
-        try:
-            from apps.bookings.models import BoletoImportado
-            boleto = BoletoImportado.objects.get(id_boleto_importado=boleto_id)
+        sender_name = boleto.agencia.nombre_comercial or boleto.agencia.nombre
+        subject = f"Nuevo Boleto Procesado: {boleto.nombre_pasajero_completo} - PNR: {boleto.localizador_pnr}"
 
-            logger.info(f"Iniciando envío de notificación para Boleto ID: {boleto_id}")
+        body = (
+            "Se ha procesado un nuevo boleto de viaje.\n\n"
+            f"Pasajero: {boleto.nombre_pasajero_completo}\n"
+            f"Localizador: {boleto.localizador_pnr}\n"
+            f"Ruta: {boleto.ruta_vuelo}\n\n"
+            "El boleto unificado se encuentra adjunto a este correo.\n\n"
+            f"Saludos,\nEl equipo de {sender_name}"
+        )
 
-    
+        email = EmailMessage(
+            subject,
+            body,
+            settings.DEFAULT_FROM_EMAIL,
+            [recipient_email],
+        )
 
-            if not boleto.archivo_pdf_generado:
+        # Adjuntar el PDF
+        boleto.archivo_pdf_generado.open(mode='rb')
+        email.attach(
+            os.path.basename(boleto.archivo_pdf_generado.name),
+            boleto.archivo_pdf_generado.read(),
+            'application/pdf'
+        )
+        boleto.archivo_pdf_generado.close()
 
-                logger.warning(f"No se encontró PDF generado para el Boleto ID: {boleto_id}. No se puede enviar notificación.")
+        email.send()
+        logger.info(f"Notificación para Boleto ID: {boleto_id} enviada a {recipient_email}.")
+        return f"Notificación para boleto {boleto_id} enviada."
 
-                return f"No hay PDF para el boleto {boleto_id}."
-
-    
-
-            # --- Lógica de envío de correo ---
-
-            from django.core.mail import EmailMessage
-
-    
-
-            # SaaS Fix: Usar email de soporte/ventas de la agencia
-            if not recipient_email:
-                logger.error(f"Agencia {boleto.agencia.nombre} no tiene email configurado. No se puede enviar correo.")
-                return "Destinatario de notificación no configurado."
-
-            # 🛡️ Guard: Skip placeholder emails to avoid bounce-backs
-            if "@sin-email.com" in recipient_email.lower():
-                logger.info(f"🔕 Notificación omitida para email de marcador de posición: {recipient_email}")
-                return "Omitido por ser email de marcador de posición"
-
-    
-
-            # SaaS Fix: Firma dinámica
-            sender_name = boleto.agencia.nombre_comercial or boleto.agencia.nombre
-            from_email = boleto.agencia.email_principal or settings.DEFAULT_FROM_EMAIL
-            
-            subject = f"Nuevo Boleto Procesado: {boleto.nombre_pasajero_procesado or 'N/A'} - PNR: {boleto.localizador_pnr or 'N/A'}"
-
-            body = (
-                "Se ha procesado un nuevo boleto de viaje.\n\n"
-                f"Pasajero: {boleto.nombre_pasajero_completo}\n"
-                f"Localizador: {boleto.localizador_pnr}\n"
-                f"Ruta: {boleto.ruta_vuelo}\n\n"
-                "El boleto unificado se encuentra adjunto a este correo.\n\n"
-                f"Saludos,\nEl equipo de {sender_name}"
-            )
-
-            
-
-            email = EmailMessage(
-
-                subject,
-
-                body,
-
-                settings.DEFAULT_FROM_EMAIL,
-
-                [recipient_email],
-
-            )
-
-    
-
-            # Adjuntar el PDF
-
-            boleto.archivo_pdf_generado.open(mode='rb')
-
-            email.attach(
-
-                boleto.archivo_pdf_generado.name,
-
-                boleto.archivo_pdf_generado.read(),
-
-                'application/pdf'
-
-            )
-
-            boleto.archivo_pdf_generado.close()
-
-    
-
-            email.send()
-
-            logger.info(f"Notificación para Boleto ID: {boleto_id} enviada a {recipient_email}.")
-
-            return f"Notificación para boleto {boleto_id} enviada."
-
-    
-
-        except BoletoImportado.DoesNotExist:
-
-            logger.error(f"Se intentó enviar una notificación para un Boleto ID ({boleto_id}) que no existe.")
-
-            return f"Boleto con ID {boleto_id} no encontrado."
-
-        except Exception as e:
-
-            logger.exception(f"Fallo crítico al enviar notificación para Boleto ID {boleto_id}: {e}")
-
-            # Reintentar la tarea podría ser una opción aquí si es un error de red
-
-            raise e
+    except BoletoImportado.DoesNotExist:
+        logger.error(f"Se intentó enviar una notificación para un Boleto ID ({boleto_id}) que no existe.")
+        return f"Boleto con ID {boleto_id} no encontrado."
+    except Exception as e:
+        logger.exception(f"Fallo crítico al enviar notificación para Boleto ID {boleto_id}: {e}")
+        raise e
 
 
 @shared_task(name="core.tasks.check_passport_expiry")
@@ -277,24 +239,25 @@ def check_passport_expiry():
     start_range = threshold_date
     end_range = threshold_date + timedelta(days=7)
     
-    from core.models import Agencia
+    from core.models.agencia import Agencia
     total_alerts = 0
 
     # Iterar por agencia para enviar reportes separados
     for agencia in Agencia.objects.filter(activa=True):
-        pasajeros_vencimiento = Pasajero.objects.filter(
-            agencia=agencia,
-            tipo_documento=Pasajero.TipoDocumentoChoices.PASAPORTE,
-            fecha_vencimiento_documento__range=[start_range, end_range]
-        )
-        
-        clientes_vencimiento = Cliente.objects.filter(
-            agencia=agencia,
-            numero_pasaporte__isnull=False,
-            fecha_expiracion_pasaporte__range=[start_range, end_range]
-        )
-        
-        count = pasajeros_vencimiento.count() + clientes_vencimiento.count()
+        with agency_context(agencia):
+            pasajeros_vencimiento = Pasajero.objects.filter(
+                agencia=agencia,
+                tipo_documento=Pasajero.TipoDocumentoChoices.PASAPORTE,
+                fecha_vencimiento_documento__range=[start_range, end_range]
+            )
+            
+            clientes_vencimiento = Cliente.objects.filter(
+                agencia=agencia,
+                numero_pasaporte__isnull=False,
+                fecha_expiracion_pasaporte__range=[start_range, end_range]
+            )
+            
+            count = pasajeros_vencimiento.count() + clientes_vencimiento.count()
         
         if count > 0:
             logger.info(f"Agencia {agencia.nombre}: {count} documentos por vencer.")
@@ -355,18 +318,21 @@ def check_upcoming_flights():
     
     # Optimización: Filtrar por fecha de creación reciente (últimos 365 días)
     # y que no estén cancelados.
-    from core.models import Agencia
+    from core.models.agencia import Agencia
     from core.services.telegram_notification_service import TelegramNotificationService
     
     total_alerts = 0
     
     # Iterar por Agencias
     for agencia in Agencia.objects.filter(activa=True):
-        boletos = BoletoImportado.objects.filter(
-            agencia=agencia,
-            fecha_subida__gte=now - timedelta(days=365),
-            estado_parseo='COM'
-        )
+        with agency_context(agencia):
+            boletos = BoletoImportado.objects.filter(
+                agencia=agencia,
+                fecha_subida__gte=now - timedelta(days=365),
+                estado_parseo='COM',
+                # Optimización DB: Filtrado rápido a nivel de string JSON antes de cargar a memoria Python
+                datos_parseados__icontains=tomorrow_start.strftime("%d %b").upper()
+            )
         
         # Obtener Chat ID de la agencia (SaaS)
         chat_id = agencia.configuracion_api.get('TELEGRAM_GROUP_ID') or getattr(settings, 'TELEGRAM_GROUP_ID', None)
@@ -417,7 +383,7 @@ def check_client_birthdays():
     """
     from django.utils import timezone
     from apps.crm.models import Cliente, Pasajero
-    from core.models import Agencia
+    from core.models.agencia import Agencia
     from django.core.mail import get_connection, EmailMessage
     
     logger.info("Iniciando chequeo de cumpleaños (Multi-Tenant)...")
@@ -426,38 +392,39 @@ def check_client_birthdays():
     
     # Iterar por cada agencia activa
     for agencia in Agencia.objects.filter(activa=True):
-        # Obtener configuración de correo de la agencia
-        email_config = agencia.configuracion_correo
-        
-        # Si no tiene configuración, usar la del sistema (fallback) o saltar
-        # Por ahora, usaremos un connection con los datos si existen
-        connection = None
-        from_email = settings.DEFAULT_FROM_EMAIL
-        
-        if email_config and 'EMAIL_HOST' in email_config:
-            try:
-                connection = get_connection(
-                    host=email_config.get('EMAIL_HOST'),
-                    port=email_config.get('EMAIL_PORT', 587),
-                    username=email_config.get('EMAIL_HOST_USER'),
-                    password=email_config.get('EMAIL_HOST_PASSWORD'),
-                    use_tls=email_config.get('EMAIL_USE_TLS', True)
-                )
-                from_email = email_config.get('DEFAULT_FROM_EMAIL', from_email)
-            except Exception as e:
-                logger.error(f"Error configurando SMTP para agencia {agencia.nombre}: {e}")
-                continue # Saltar esta agencia si falla la config
-        else:
-            # Usar conexión por defecto de Django
-            connection = get_connection()
+        with agency_context(agencia):
+            # Obtener configuración de correo de la agencia
+            email_config = agencia.configuracion_correo
+            
+            # Si no tiene configuración, usar la del sistema (fallback) o saltar
+            # Por ahora, usaremos un connection con los datos si existen
+            connection = None
+            from_email = settings.DEFAULT_FROM_EMAIL
+            
+            if email_config and 'EMAIL_HOST' in email_config:
+                try:
+                    connection = get_connection(
+                        host=email_config.get('EMAIL_HOST'),
+                        port=email_config.get('EMAIL_PORT', 587),
+                        username=email_config.get('EMAIL_HOST_USER'),
+                        password=email_config.get('EMAIL_HOST_PASSWORD'),
+                        use_tls=email_config.get('EMAIL_USE_TLS', True)
+                    )
+                    from_email = email_config.get('DEFAULT_FROM_EMAIL', from_email)
+                except Exception as e:
+                    logger.error(f"Error configurando SMTP para agencia {agencia.nombre}: {e}")
+                    continue # Saltar esta agencia si falla la config
+            else:
+                # Usar conexión por defecto de Django
+                connection = get_connection()
 
-        # Buscar clientes de ESTA agencia que cumplen años
-        clientes_cumple = Cliente.objects.filter(
-            agencia=agencia,
-            fecha_nacimiento__month=today.month,
-            fecha_nacimiento__day=today.day,
-            email__isnull=False
-        )
+            # Buscar clientes de ESTA agencia que cumplen años
+            clientes_cumple = Cliente.objects.filter(
+                agencia=agencia,
+                fecha_nacimiento__month=today.month,
+                fecha_nacimiento__day=today.day,
+                email__isnull=False
+            )
         
         # Enviar a Clientes
         for c in clientes_cumple:
@@ -497,62 +464,63 @@ def check_pending_payments():
     
     count = 0
     
-    from core.models import Agencia
+    from core.models.agencia import Agencia
     from django.core.mail import get_connection
 
     for agencia in Agencia.objects.filter(activa=True):
-        # Configurar SMTP de agencia
-        email_config = agencia.configuracion_correo
-        connection = None
-        from_email = settings.DEFAULT_FROM_EMAIL
-        
-        if email_config and 'EMAIL_HOST' in email_config:
-            try:
-                connection = get_connection(
-                    host=email_config.get('EMAIL_HOST'),
-                    port=email_config.get('EMAIL_PORT', 587),
-                    username=email_config.get('EMAIL_HOST_USER'),
-                    password=email_config.get('EMAIL_HOST_PASSWORD'),
-                    use_tls=email_config.get('EMAIL_USE_TLS', True)
-                )
-                from_email = email_config.get('DEFAULT_FROM_EMAIL', from_email)
-            except Exception:
-                pass
-        
-        for days in days_to_remind:
-            target_date = today - timedelta(days=days)
+        with agency_context(agencia):
+            # Configurar SMTP de agencia
+            email_config = agencia.configuracion_correo
+            connection = None
+            from_email = settings.DEFAULT_FROM_EMAIL
             
-            # Buscar ventas de ESTA agencia
-            ventas_pendientes = Venta.objects.filter(
-                agencia=agencia,
-                fecha_venta__date=target_date,
-                saldo_pendiente__gt=0,
-                estado__in=[Venta.EstadoVenta.PENDIENTE_PAGO, Venta.EstadoVenta.PAGADA_PARCIAL],
-                cliente__email__isnull=False
-            )
-            
-            for venta in ventas_pendientes:
+            if email_config and 'EMAIL_HOST' in email_config:
                 try:
-                    cliente = venta.cliente
-                    sender_name = agencia.nombre_comercial or agencia.nombre
-                    subject = f"Recordatorio de Pago Pendiente - Localizador: {venta.localizador}"
-                    body = (
-                        f"Estimado/a {cliente.nombres},\n\n"
-                        f"Desde {sender_name} le recordamos que su reserva con localizador {venta.localizador} tiene un saldo pendiente de {venta.saldo_pendiente} {venta.moneda.codigo}.\n\n"
-                        "Por favor, realice el pago para evitar la cancelación de sus servicios.\n\n"
-                        "Saludos,\nEl equipo de Administración"
+                    connection = get_connection(
+                        host=email_config.get('EMAIL_HOST'),
+                        port=email_config.get('EMAIL_PORT', 587),
+                        username=email_config.get('EMAIL_HOST_USER'),
+                        password=email_config.get('EMAIL_HOST_PASSWORD'),
+                        use_tls=email_config.get('EMAIL_USE_TLS', True)
                     )
-                    
-                    email = EmailMessage(
-                        subject, body, from_email, [cliente.email], connection=connection
-                    )
-                    email.send()
-                    
-                    count += 1
-                    logger.info(f"Recordatorio enviado para Venta {venta.id_venta} (Agencia: {agencia.nombre})")
-                    
-                except Exception as e:
-                    logger.error(f"Error enviando recordatorio para Venta {venta.id_venta}: {e}")
+                    from_email = email_config.get('DEFAULT_FROM_EMAIL', from_email)
+                except Exception:
+                    pass
+            
+            for days in days_to_remind:
+                target_date = today - timedelta(days=days)
+                
+                # Buscar ventas de ESTA agencia
+                ventas_pendientes = Venta.objects.filter(
+                    agencia=agencia,
+                    fecha_venta__date=target_date,
+                    saldo_pendiente__gt=0,
+                    estado__in=[Venta.EstadoVenta.PENDIENTE_PAGO, Venta.EstadoVenta.PAGADA_PARCIAL],
+                    cliente__email__isnull=False
+                )
+                
+                for venta in ventas_pendientes:
+                    try:
+                        cliente = venta.cliente
+                        sender_name = agencia.nombre_comercial or agencia.nombre
+                        subject = f"Recordatorio de Pago Pendiente - Localizador: {venta.localizador}"
+                        body = (
+                            f"Estimado/a {cliente.nombres},\n\n"
+                            f"Desde {sender_name} le recordamos que su reserva con localizador {venta.localizador} tiene un saldo pendiente de {venta.saldo_pendiente} {venta.moneda.codigo_iso}.\n\n"
+                            "Por favor, realice el pago para evitar la cancelación de sus servicios.\n\n"
+                            "Saludos,\nEl equipo de Administración"
+                        )
+                        
+                        email = EmailMessage(
+                            subject, body, from_email, [cliente.email], connection=connection
+                        )
+                        email.send()
+                        
+                        count += 1
+                        logger.info(f"Recordatorio enviado para Venta {venta.id_venta} (Agencia: {agencia.nombre})")
+                        
+                    except Exception as e:
+                        logger.error(f"Error enviando recordatorio para Venta {venta.id_venta}: {e}")
                 
     return f"Recordatorios de pago enviados: {count}"
 
@@ -587,86 +555,73 @@ def sync_bcv_rates():
         return f"Error crítico: {e}"
 
 
-@shared_task(name="core.tasks.enviar_notificacion_whatsapp_task", bind=True, max_retries=3)
-def enviar_notificacion_whatsapp_task(self, numero_cliente, mensaje, email_cliente=None, agencia_nombre="TravelHub"):
+@tenant_task(name="core.tasks.enviar_notificacion_whatsapp_task", bind=True, max_retries=3)
+def enviar_notificacion_whatsapp_task(self, numero_cliente, mensaje, email_cliente=None, media_url=None, file_name=None, **kwargs):
     """
     🚨 CRÍTICO | ⚡ ASÍNCRONO
-    Patrón Resiliente con Dead Letter Queue para envíos por Meta API (WhatsApp).
-    
-    Args:
-        numero_cliente (str): Teléfono destinatario.
-        mensaje (str): Cuerpo estructurado (Jinja2 render renderizado usualmente).
-        email_cliente (str, optional): Correo de emergencia si todo falla.
-        agencia_nombre (str): Nombre SaaS a inyectar en fallbacks.
-        
-    # ¿Por qué Backoff Escalonado (300s, 900s, 3600s)?: 
-    # La API Cloud de WhatsApp penaliza/banea números Tiers si hacemos force-retry infinito cuando 
-    # fallan por saturación de red GDS. Esperamos pragmáticamente entre intentos.
-    
-    # ¿Por qué Fallback Dual Definitivo (Email + Telegram)?: 
-    # Si tras 4 horas de pelear con Meta no se envió el WS, TravelHub tiene *responsabilidad civil* 
-    # de advertir de cambios de itinerario. Enviamos SMTP pasivo al cliente, y alertamos con sirenas (Telegram) 
-    # al Agente SaaS para que levante el teléfono y contacte manualmente al pasajero.
+    Patrón Resiliente con Dead Letter Queue para envíos por Evolution/Meta API.
     """
     from django.core.mail import send_mail
+    from core.models.agencia import Agencia
     from core.services.telegram_service import enviar_alerta_telegram
-    from core.services.whatsapp_service import enviar_mensaje_meta_api 
+    from core.services.whatsapp_service import send_whatsapp_message
+
+    from core.middleware import get_current_agency
+    agencia = get_current_agency()
+
+    agencia_nombre = agencia.nombre if agencia else "TravelHub"
 
     try:
-        # 1. INTENTO PRINCIPAL: Enviar por la API de WhatsApp Cloud (Meta)
+        # 1. INTENTO PRINCIPAL: Enviar por el sistema unificado (Evolution -> Meta)
         logger.info(f"Intentando enviar WhatsApp a {numero_cliente} (Intento {self.request.retries + 1}/4)")
         
-        respuesta = enviar_mensaje_meta_api(numero_cliente, mensaje)
+        respuesta = send_whatsapp_message(
+            number=numero_cliente, 
+            text=mensaje, 
+            agencia=agencia,
+            media_url=media_url,
+            file_name=file_name
+        )
         
-        # Validamos si Meta devolvió un error (ej. cliente sin WhatsApp o API caída)
         if not respuesta.get('success'):
-            raise Exception(f"Meta API Error: {respuesta.get('error_message', 'Unknown Error')}")
+            raise Exception(f"WhatsApp Error: {respuesta.get('error_message', 'Unknown Error')}")
             
-        logger.info(f"✅ WhatsApp enviado exitosamente a {numero_cliente}")
+        logger.info(f"✅ WhatsApp enviado exitosamente a {numero_cliente} via {respuesta.get('provider')}")
         return "Notificación enviada"
 
     except Exception as exc:
-        # 2. SISTEMA DE REINTENTOS ESCALONADOS (Retry Backoff)
-        # Tiempos en segundos: 5 min (300s), 15 min (900s), 1 hora (3600s)
+        # 2. SISTEMA DE REINTENTOS ESCALONADOS
         retrasos_escalonados = [300, 900, 3600] 
         
         if self.request.retries < self.max_retries:
             tiempo_espera = retrasos_escalonados[self.request.retries]
             logger.warning(f"⚠️ Fallo WhatsApp a {numero_cliente}. Reintentando en {tiempo_espera/60} minutos... Error: {str(exc)}")
-            
-            # Reprogramamos la tarea para que vuelva a la cola de Redis y espere
             raise self.retry(exc=exc, countdown=tiempo_espera)
-            
         else:
             # 3. DEAD LETTER QUEUE (FALLBACK DEFINITIVO)
-            # Ya fallaron los 4 intentos (1 original + 3 retries). Activamos el Plan B.
-            logger.error(f"❌ Fallo definitivo enviando WhatsApp a {numero_cliente}. Ejecutando Fallback (Email + Telegram).")
+            logger.error(f"❌ Fallo definitivo enviando WhatsApp a {numero_cliente}.")
             
-            # A. Notificar al Agente de Viajes por Telegram (Para que llame al cliente si es urgente)
+            # A. Notificar al Agente por Telegram
             alerta_agencia = (
-                f"🚨 *ALERTA DE COMUNICACIÓN - {agencia_nombre}*\n\n"
-                f"No pudimos entregar un WhatsApp al cliente *{numero_cliente}* "
-                f"después de 4 intentos.\n"
-                f"Motivo: API de Meta inaccesible o número inválido.\n"
-                f"🛡️ *Se ha enviado un correo de respaldo al cliente.*"
+                f"🚨 *FALLO WHATSAPP - {agencia_nombre}*\n\n"
+                f"No se pudo entregar el mensaje a *{numero_cliente}*.\n"
+                f"Detalle: {str(exc)}\n"
             )
             enviar_alerta_telegram(alerta_agencia)
             
-            # B. Enviar correo de respaldo (SMTP) al cliente
+            # B. Enviar correo de respaldo
             if email_cliente:
                 try:
                     send_mail(
-                        subject=f"Tu Itinerario de Vuelo (Respaldo) - {agencia_nombre}",
-                        message=f"Hola,\n\nIntentamos contactarte por WhatsApp pero tuvimos un problema técnico con la plataforma. Aquí te enviamos tu información importante:\n\n{mensaje}\n\nSaludos,\nEl equipo de {agencia_nombre}",
+                        subject=f"Información de tu viaje - {agencia_nombre}",
+                        message=f"Hola,\n\nIntentamos enviarte esta información por WhatsApp pero no fue posible. Aquí tienes los detalles:\n\n{mensaje}\n\nSaludos,\nEl equipo de {agencia_nombre}",
                         from_email=settings.DEFAULT_FROM_EMAIL,
                         recipient_list=[email_cliente],
                         fail_silently=True
                     )
-                    logger.info(f"📧 Correo de respaldo enviado a {email_cliente}")
-                except Exception as mail_exc:
-                    logger.error(f"Fallo doble: Tampoco se pudo enviar el correo de respaldo. Error: {str(mail_exc)}")
+                except: pass
             
-            return "Fallo definitivo - Plan B ejecutado"
+            return "Fallo definitivo - Fallback ejecutado"
 
 
 @shared_task(name="core.tasks.task_ocr_passport_fast", queue='ia_fast')
@@ -699,14 +654,14 @@ def task_ocr_passport_fast(file_content_base64: str, mime_type: str = "image/jpe
     except Exception as e:
         logger.error(f"❌ Error en task_ocr_passport_fast: {e}")
     
-@shared_task(name="core.tasks.migrar_logos_agencia_task")
-def migrar_logos_agencia_task(agencia_id):
+@tenant_task(name="core.tasks.migrar_logos_agencia_task")
+def migrar_logos_agencia_task(agencia_id, **kwargs):
     """
     ⚡ ASÍNCRONO
     Migra logos de la base de datos (ImageField o Base64) a Telegram Storage
     para liberar espacio y optimizar la carga.
     """
-    from core.models import Agencia
+    from core.models.agencia import Agencia
     from core.utils.telegram_storage import upload_logo_to_telegram
     import base64
     from io import BytesIO
@@ -716,15 +671,19 @@ def migrar_logos_agencia_task(agencia_id):
     except Agencia.DoesNotExist:
         return f"Agencia {agencia_id} no encontrada."
 
+    branding = agencia.branding
+    if not branding:
+        return f"Agencia {agencia_id} no tiene componente de branding."
+
     updated_fields = []
 
     # Caso 1: Nuevo Logo subido por Admin (FileField)
-    if agencia.logo and not agencia.logo_telegram_id:
+    if branding.logo and not branding.logo_telegram_id:
         try:
-            fid = upload_logo_to_telegram(agencia.logo.file, agencia.logo.name)
+            fid = upload_logo_to_telegram(branding.logo.file, branding.logo.name)
             if fid:
-                agencia.logo_telegram_id = fid
-                agencia.logo_base64 = None
+                branding.logo_telegram_id = fid
+                branding.logo_base64 = None
                 updated_fields.extend(['logo_telegram_id', 'logo_base64'])
         except Exception as e:
             logger.error(f"Error subiendo logo a Telegram para Agencia {agencia_id}: {e}")
@@ -737,7 +696,7 @@ def migrar_logos_agencia_task(agencia_id):
     ]
     
     for field_name, prefix in logos_to_migrate:
-        val = getattr(agencia, field_name)
+        val = getattr(branding, field_name, None)
         if val and len(val) > 1000:
             try:
                 if ';base64,' in val:
@@ -749,17 +708,64 @@ def migrar_logos_agencia_task(agencia_id):
                 fid = upload_logo_to_telegram(BytesIO(decoded), f"{prefix}_{agencia.rif or agencia.pk}.png")
                 if fid:
                     if field_name == 'logo_base64':
-                        agencia.logo_telegram_id = fid
-                        agencia.logo_base64 = None
+                        branding.logo_telegram_id = fid
+                        branding.logo_base64 = None
                         updated_fields.extend(['logo_telegram_id', 'logo_base64'])
             except Exception as e:
                 logger.error(f"Error migrando {field_name} a Telegram para Agencia {agencia_id}: {e}")
 
     if updated_fields:
-        agencia.save(update_fields=list(set(updated_fields)))
-        return f"Agencia {agencia_id} actualizada: {updated_fields}"
+        branding.save(update_fields=list(set(updated_fields)))
+        return f"Branding de Agencia {agencia_id} actualizado: {updated_fields}"
     
-    return f"Agencia {agencia_id} no requería migración."
+
+@shared_task(name="core.tasks.cleanup_temporary_storage_files")
+def cleanup_temporary_storage_files(days=7):
+    """
+    🏢 INFRAESTRUCTURA | ☁️ STORAGE
+    Limpia archivos en prefijos temporales (temp/, tmp/) que tengan más de 'days' de antigüedad.
+    Compatible con Cloudflare R2, S3 y Almacenamiento Local.
+    """
+    from django.core.files.storage import default_storage
+    from django.utils import timezone
+    import datetime
+
+    logger.info(f"🧹 Iniciando limpieza de archivos temporales (Antigüedad > {days} días)...")
+    
+    prefixes = ['temp/', 'tmp/', 'vouchers_tmp/']
+    count = 0
+    deleted_size = 0
+    
+    threshold = timezone.now() - datetime.timedelta(days=days)
+
+    for prefix in prefixes:
+        try:
+            # Listar archivos en el prefijo
+            # Nota: Algunos backends de storage pueden no soportar directories() eficientemente,
+            # pero default_storage.listdir es el estándar de Django.
+            dirs, files = default_storage.listdir(prefix)
+            
+            for filename in files:
+                filepath = os.path.join(prefix, filename)
+                try:
+                    # Obtener fecha de modificación
+                    mtime = default_storage.get_modified_time(filepath)
+                    
+                    if mtime < threshold:
+                        size = default_storage.size(filepath)
+                        default_storage.delete(filepath)
+                        count += 1
+                        deleted_size += size
+                        logger.debug(f"🗑️ Eliminado: {filepath} ({size} bytes)")
+                except Exception as e:
+                    logger.error(f"⚠️ No se pudo procesar/borrar {filepath}: {e}")
+                    
+        except Exception as e:
+            logger.warning(f"⚠️ Error accediendo al prefijo {prefix}: {e}")
+
+    result = f"Limpieza completada. Se eliminaron {count} archivos ({deleted_size / 1024:.2f} KB)."
+    logger.info(result)
+    return result
 
 
     

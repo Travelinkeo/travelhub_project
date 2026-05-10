@@ -1,3 +1,19 @@
+"""
+Vista HTML del dashboard de ventas de boletos.
+"""
+import json
+from decimal import Decimal
+from django.shortcuts import render
+from django.http import JsonResponse
+from django.views.decorators.http import require_http_methods
+from django.contrib.auth.decorators import login_required
+from django.db.models import Sum, Count
+from apps.bookings.models import BoletoImportado, Venta, ItemVenta
+
+
+@require_http_methods(["GET"])
+def dashboard_boletos_view(request):
+    """
     Vista HTML del dashboard de ventas de boletos.
     """
     return render(request, 'core/dashboard_ventas_boletos.html')
@@ -89,7 +105,7 @@ def ventas_boletos_api(request):
     })
 
 
-@csrf_exempt
+@login_required
 @require_http_methods(["POST"])
 def actualizar_item_boleto(request):
     """
@@ -275,7 +291,7 @@ def reporte_comisiones_api(request):
     })
 
 
-@csrf_exempt
+@login_required
 @require_http_methods(["POST"])
 def solicitar_anulacion_api(request):
     """

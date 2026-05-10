@@ -2,8 +2,11 @@ from datetime import date
 
 import pytest
 
+# Import models from new location
+from apps.bookings.models import BoletoImportado
+
+# Forms still in core.forms (need to verify)
 from core.forms import BoletoAereoUpdateForm, BoletoManualForm
-from core.models.boletos import BoletoImportado
 
 
 @pytest.mark.django_db

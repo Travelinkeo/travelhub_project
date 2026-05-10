@@ -3,8 +3,10 @@ from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 from decimal import Decimal
+from core.models.base import AgenciaMixin
+from core.mixins import SoftDeleteModel
 
-class ReglaComision(models.Model):
+class ReglaComision(SoftDeleteModel, AgenciaMixin, models.Model):
     """
     Define el motor de incentivos para los agentes de la agencia.
     Permite configurar pagos por volumen (fijo) o por rentabilidad (porcentaje).
@@ -14,7 +16,7 @@ class ReglaComision(models.Model):
         PORCENTAJE_VENTA = 'VENTA', _('Porcentaje sobre Total Venta')
         MONTO_FIJO = 'FIJO', _('Monto Fijo por Boleto/Venta')
 
-    agencia = models.ForeignKey('core.Agencia', on_delete=models.CASCADE, verbose_name=_("Agencia"))
+    # agencia la provee AgenciaMixin
     agente = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='reglas_comision', verbose_name=_("Agente"))
     
     tipo_calculo = models.CharField(_("Tipo de Cálculo"), max_length=5, choices=TipoCalculo.choices, default=TipoCalculo.PORCENTAJE_UTILIDAD)
@@ -32,7 +34,7 @@ class ReglaComision(models.Model):
         return f"Regla {self.agente.username} - {self.get_tipo_calculo_display()}"
 
 
-class ComisionVenta(models.Model):
+class ComisionVenta(SoftDeleteModel, AgenciaMixin, models.Model):
     """
     Registro individual de deuda con el agente por cada venta realizada.
     """
@@ -64,12 +66,12 @@ class ComisionVenta(models.Model):
         return f"Comisión {self.monto_comision} - {self.agente.username}"
 
 
-class LiquidacionAgente(models.Model):
+class LiquidacionAgente(SoftDeleteModel, AgenciaMixin, models.Model):
     """
     Estado de cuenta mensual consolidado para el pago al agente.
     Actúa como el 'Recibo de Pago' oficial de la agencia.
     """
-    agencia = models.ForeignKey('core.Agencia', on_delete=models.CASCADE)
+    # agencia la provee AgenciaMixin
     agente = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='liquidaciones_mensuales')
     
     periodo_mes = models.IntegerField(_("Mes"), help_text="1-12")

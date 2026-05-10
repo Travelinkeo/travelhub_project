@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enlace Magico - TravelHub</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f8fafc; margin: 0; padding: 0; }
+        .container { max-width: 480px; margin: 80px auto; padding: 40px; background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); text-align: center; }
+        .logo { font-size: 24px; font-weight: 700; color: #1e40af; margin-bottom: 24px; }
+        .error-icon { font-size: 48px; margin-bottom: 16px; }
+        h2 { color: #1e293b; margin-bottom: 8px; }
+        p { color: #64748b; line-height: 1.6; }
+        .btn { display: inline-block; padding: 12px 32px; background: #3b82f6; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; margin-top: 16px; }
+        .btn:hover { background: #2563eb; }
+        .retry-form { margin-top: 24px; }
+        .retry-form input[type="email"] { width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; box-sizing: border-box; }
+        .retry-form button { margin-top: 8px; padding: 10px 24px; background: #3b82f6; color: white; border: none; border-radius: 8px; font-size: 14px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">TravelHub</div>
+        <div class="error-icon">{% if error == 'Enlace expirado' %}&#x23F0;&#x1F550;{% elif error == 'Enlace ya utilizado' %}&#x2705;{% else %}&#x274C;{% endif %}</div>
+        <h2>{{ error }}</h2>
+        <p>{{ error_detail|default:"Hubo un problema con tu enlace de acceso." }}</p>
+        {% if can_retry %}
+        <div class="retry-form">
+            <p>Solicita un nuevo enlace:</p>
+            <form method="post" action="/auth/magic-request/">
+                {% csrf_token %}
+                <input type="email" name="email" value="{{ email }}" placeholder="Tu email" required>
+                <button type="submit">Reenviar enlace</button>
+            </form>
+        </div>
+        {% endif %}
+        <a href="/login/" class="btn">Ir a Login</a>
+    </div>
+</body>
+</html>

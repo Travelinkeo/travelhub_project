@@ -1,8 +1,10 @@
 
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import User
-from core.models import Agencia, Moneda, ProductoServicio
-from core.models_catalogos import Proveedor
+from core.models.agencia import Agencia
+from apps.finance.models.currencies import Moneda
+from apps.bookings.models import ProductoServicio
+from apps.bookings.models import Proveedor
 from django.utils import timezone
 
 class Command(BaseCommand):
@@ -41,7 +43,7 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS('💰 Monedas creadas'))
 
         # 3.1 Tipos de Cambio (Ejemplo: Hoy)
-        from core.models_catalogos import TipoCambio
+        from apps.finance.models.currencies import TipoCambio
         # USD -> VES
         TipoCambio.objects.get_or_create(
             moneda_origen=moneda_usd,
@@ -70,7 +72,7 @@ class Command(BaseCommand):
         
         # 5. Proveedores Genericos (Ejemplo)
         # Asegurar que importamos Proveedor
-        from core.models_catalogos import Proveedor
+        from apps.bookings.models import Proveedor
         Proveedor.objects.get_or_create(
             nombre="IATA GENERICO",
             defaults={'tipo_proveedor': 'AER', 'identificadores_gds': {'IATA': ['999']}}

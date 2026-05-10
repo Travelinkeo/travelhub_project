@@ -48,7 +48,7 @@ app.conf.task_routes = {
     
     # -- IA FINANCIERA MASIVA (BAJA PRIORIDAD) --
     # Procesar conciliaciones pesadas se va por el carril pesado
-    'finance.tasks_reconciliation.conciliar_reporte_batch_task': {'queue': 'ia_heavy'},
+    'apps.finance.tasks_reconciliation.conciliar_reporte_batch_task': {'queue': 'ia_heavy'},
     
     # -- NOTIFICACIONES Y COMUNICACIÓN --
     # Aislado para que los correos/whatsapps fluyan sin bloqueos

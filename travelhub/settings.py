@@ -17,6 +17,7 @@ from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / '.env')
+print("--- [SETTINGS] .env loaded ---", flush=True)
 
 # DEBUG defaults to False for safety. Set DEBUG=True in .env for development.
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
@@ -35,10 +36,20 @@ def get_env_variable(var_name, default=None, required=True):
         return default
 
 # --- VARIABLES CRÍTICAS ---
-# En desarrollo (DEBUG=True) usará los defaults. En Producción exigirá las variables reales.
-SECRET_KEY = get_env_variable('SECRET_KEY', 'django-insecure-dev-key', required=True)
-GEMINI_API_KEY = get_env_variable('GEMINI_API_KEY', 'gemini-dev-key', required=True)
-STRIPE_SECRET_KEY = get_env_variable('STRIPE_SECRET_KEY', 'sk_test_dev', required=True)
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-dev-key-for-local-only')
+GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', '')
+STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY', '')
+
+# Validación en producción — falla rápido si falta alguna variable
+if not DEBUG:
+    if SECRET_KEY == 'django-insecure-dev-key-for-local-only':
+        raise ImproperlyConfigured("SECRET_KEY debe configurarse con un valor seguro en producción")
+    if len(SECRET_KEY) < 50:
+        raise ImproperlyConfigured("SECRET_KEY debe tener al menos 50 caracteres")
+    if not GEMINI_API_KEY:
+        import logging; logging.getLogger('travelhub').warning("GEMINI_API_KEY no definida — funcionalidades de IA deshabilitadas")
+    if not STRIPE_SECRET_KEY:
+        import logging; logging.getLogger('travelhub').warning("STRIPE_SECRET_KEY no definida — funcionalidades de pago deshabilitadas")
 
 try:
     DATABASE_URL = os.environ['DATABASE_URL']
@@ -49,18 +60,19 @@ except KeyError:
 ALLOWED_HOSTS = get_env_variable('ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
 
 
-# Configuración de Sentry (Desactivado temporalmente para evitar hangs)
-# import sentry_sdk
-# from sentry_sdk.integrations.django import DjangoIntegration
-# 
-# SENTRY_DSN = os.getenv('SENTRY_DSN')
-# if SENTRY_DSN:
-#     sentry_sdk.init(
-#         dsn=SENTRY_DSN,
-#         integrations=[DjangoIntegration()],
-#         traces_sample_rate=1.0,
-#         send_default_pii=True
-#     )
+# Configuracion de Sentry
+SENTRY_DSN = os.getenv('SENTRY_DSN', '')
+if SENTRY_DSN and not DEBUG:
+    import sentry_sdk
+    from sentry_sdk.integrations.django import DjangoIntegration
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        integrations=[DjangoIntegration()],
+        traces_sample_rate=0.2,
+        send_default_pii=False,
+        environment=os.getenv('SENTRY_ENVIRONMENT', 'production'),
+    )
+print("--- [SETTINGS] Apps defined ---", flush=True)
 
 INSTALLED_APPS = [
     'unfold',
@@ -77,11 +89,12 @@ INSTALLED_APPS = [
     # Apps de Terceros
     'rest_framework',
     'rest_framework.authtoken',
-    # 'corsheaders',
-    # 'drf_spectacular',
-    # 'django_filters',
+    'corsheaders',
+    'drf_spectacular',
+    'django_filters',
     
     # TravelHub Apps (Orden Crítico)
+    'apps.common.apps.CommonConfig',
     'core.apps.CoreConfig', # Módulo Núcleo (SaaS/Arqui/Auth)
     'apps.bookings.apps.BookingsConfig', # Nuevo Módulo Bookings
     'apps.finance.apps.FinanceConfig', # Nuevo Módulo Finance
@@ -90,9 +103,10 @@ INSTALLED_APPS = [
     'apps.marketing.apps.MarketingConfig',
     'apps.cms.apps.CmsConfig',
     'apps.crm.apps.CrmConfig',
-    # 'apps.accounting_assistant.apps.AccountingAssistantConfig',
-    # 'django_celery_results',
-    # 'django_celery_beat',
+    'apps.communications.apps.CommunicationsConfig',
+    'apps.automation.apps.AutomationConfig',
+    'django_celery_results',
+    'django_celery_beat',
     # 'django_extensions',
 ]
 
@@ -104,11 +118,12 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-#    'core.middleware.ThreadLocalContextMiddleware',
-#    'core.middleware.SecurityHeadersMiddleware',
+    'core.middleware.ThreadLocalContextMiddleware',
+    'core.middleware.SecurityHeadersMiddleware',
      'django.contrib.messages.middleware.MessageMiddleware',
      'django.middleware.clickjacking.XFrameOptionsMiddleware',
-#    'core.middleware_saas.SaaSLimitMiddleware',
+    'core.middleware_saas.SaaSLimitMiddleware',
+    'core.middleware_ai_ratelimit.AIRateLimitMiddleware',
 ]
 
 ROOT_URLCONF = 'travelhub.urls'
@@ -135,14 +150,13 @@ WSGI_APPLICATION = 'travelhub.wsgi.application'
 
 # Base de datos: PostgreSQL guiado estrictamente por DATABASE_URL
 import dj_database_url
-
 DATABASES = {
-    'default': dj_database_url.parse(
-        DATABASE_URL,
-        conn_max_age=600,
-        conn_health_checks=True,
-    )
+    'default': dj_database_url.parse(DATABASE_URL)
 }
+# Connection pooling para alta concurrencia
+DATABASES['default']['CONN_MAX_AGE'] = 60
+DATABASES['default']['CONN_HEALTH_CHECKS'] = True
+print("--- [SETTINGS] DB configured ---", flush=True)
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',},
@@ -186,6 +200,7 @@ if CLOUDINARY_STORAGE.get('CLOUD_NAME'):
         'access_mode': 'public',  # PDFs públicos por defecto
         'type': 'upload'
     }
+print("--- [SETTINGS] Cloudinary configured ---", flush=True)
 
 # Media files - Usar Cloudinary en desarrollo y producción
 MEDIA_URL = '/media/'
@@ -228,6 +243,7 @@ else:
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 FIXTURE_DIRS = [BASE_DIR / 'fixtures',]
+print("--- [SETTINGS] Fixtures configured ---", flush=True)
 
 # Gemini API Key
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
@@ -282,11 +298,23 @@ SPECTACULAR_SETTINGS = {
 
 # --- SaaS & Limits ---
 SAAS_PLAN_LIMITS = {
+    'FREE': {
+        'users': 1,
+        'storage_mb': 100,
+        'leads_per_month': 20,
+        'sales_per_month': 20,
+    },
     'BASIC': {
         'users': 2,
         'storage_mb': 500,
         'leads_per_month': 50,
         'sales_per_month': 50,
+    },
+    'PRO': {
+        'users': 10,
+        'storage_mb': 5000,
+        'leads_per_month': 500,
+        'sales_per_month': 500,
     },
     'ENTERPRISE': {
         'users': 999,
@@ -309,6 +337,7 @@ if _resend_key:
     # 🚀 MODO RESEND (Primario) - Usando django-resend si está disponible o directo
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend' # O un backend específico
     RESEND_API_KEY = _resend_key
+    RESEND_SIGNING_SECRET = os.environ.get('RESEND_SIGNING_SECRET', '')
     # Configuración SMTP de Resend (Alternativa rápida y compatible)
     EMAIL_HOST = 'smtp.resend.com'
     EMAIL_PORT = 587
@@ -358,13 +387,35 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = TIME_ZONE
 
+# --- CELERY BEAT SCHEDULE ---
+from travelhub.celery_beat_schedule import CELERY_BEAT_SCHEDULE
+
 # --- CACHE CONFIGURATION ---
-CACHES = {
-    "default": {
-        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
-        "LOCATION": "unique-snowflake",
+# ☁️ Redis Cache: Compartido con Celery para entornos distribuídos (Gunicorn workers)
+# Usamos la misma URL que Celery pero en la DB 1 para separar del broker
+_redis_url = os.getenv('CELERY_BROKER_URL', 'redis://redis:6379/0')
+_cache_url = _redis_url.replace('/0', '/1') # Usamos DB 1
+
+if 'redis://' in _cache_url:
+    CACHES = {
+        "default": {
+            "BACKEND": "django_redis.cache.RedisCache",
+            "LOCATION": _cache_url,
+            "OPTIONS": {
+                "CLIENT_CLASS": "django_redis.client.DefaultClient",
+                "CONNECTION_POOL_KWARGS": {"max_connections": 50}
+            },
+            "KEY_PREFIX": "th",
+            "TIMEOUT": 300,
+        }
     }
-}
+else:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+            "LOCATION": "unique-snowflake",
+        }
+    }
 
 # CORS Configuration
 CORS_ALLOWED_ORIGINS = [
@@ -388,12 +439,17 @@ logger = logging.getLogger(__name__)
 # PROTECCION DE DATOS PERSONALES (GDPR/Compliance)
 # -----------------------------------------------------
 
-ENCRYPTION_KEY = os.getenv('ENCRYPTION_KEY', 'ABCh678YourFixedSecretKeyForEncryptionSafetyMakeItLong')
+ENCRYPTION_KEY = os.environ.get('ENCRYPTION_KEY', '')
+if not DEBUG and not ENCRYPTION_KEY:
+    raise ImproperlyConfigured("ENCRYPTION_KEY debe configurarse en producción")
+if not DEBUG and ENCRYPTION_KEY and len(ENCRYPTION_KEY) < 32:
+    raise ImproperlyConfigured("ENCRYPTION_KEY debe tener al menos 32 caracteres")
 
 # 🛰️ CONFIGURACIÓN DE SEGURIDAD (HSTS / CSP)
 SECURE_HSTS_SECONDS = 31536000 if not DEBUG else 0
 SECURE_HSTS_INCLUDE_SUBDOMAINS = not DEBUG
 SECURE_HSTS_PRELOAD = not DEBUG
+SECURE_SSL_REDIRECT = not DEBUG
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_BROWSER_XSS_FILTER = True
 SESSION_COOKIE_SECURE = not DEBUG
@@ -402,6 +458,9 @@ X_FRAME_OPTIONS = 'DENY'
 
 # CSP Report-only para testing (luego poner en producción)
 SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
+
+# --- Magic Link Auth ---
+MAGIC_LINK_BASE_URL = os.getenv('MAGIC_LINK_BASE_URL', '')  # Auto-detect from request if empty
 
 # --- JWT Config (si se usa) ---
 # ... (opcional)
@@ -473,6 +532,72 @@ UNFOLD = {
                     },
                 ],
             },
+            {
+                "title": "Finanzas y Contabilidad",
+                "items": [
+                    {
+                        "title": "Facturación",
+                        "icon": "receipt_long",
+                        "link": "/facturacion/",
+                    },
+                    {
+                        "title": "Facturas Consolidadas",
+                        "icon": "description",
+                        "link": "/api/facturas-consolidadas/",
+                    },
+                    {
+                        "title": "Libro de Ventas",
+                        "icon": "menu_book",
+                        "link": "/api/libro-ventas/",
+                    },
+                    {
+                        "title": "Reportes Contables",
+                        "icon": "assessment",
+                        "link": "/reportes/",
+                    },
+                    {
+                        "title": "Conciliación Proveedores",
+                        "icon": "account_balance",
+                        "link": "/finance/supplier-reconciliation/",
+                    },
+                ],
+            },
+            {
+                "title": "Configuración",
+                "items": [
+                    {
+                        "title": "Perfil de Usuario",
+                        "icon": "manage_accounts",
+                        "link": "/setup/perfil/",
+                    },
+                    {
+                        "title": "Branding",
+                        "icon": "palette",
+                        "link": "/settings/branding/",
+                    },
+                    {
+                        "title": "Configuración Agencia",
+                        "icon": "settings",
+                        "link": "/agencia/configuracion/",
+                    },
+                    {
+                        "title": "Catálogos",
+                        "icon": "inventory_2",
+                        "link": "/setup/catalogos/",
+                    },
+                    {
+                        "title": "Gestión de Usuarios",
+                        "icon": "group",
+                        "link": "/agencia/usuarios/",
+                    },
+                    {
+                        "title": "Tasas de Cambio",
+                        "icon": "currency_exchange",
+                        "link": "/setup/tasas/",
+                    },
+                ],
+            },
         ],
     },
 }
+print("--- [SETTINGS] Loaded successfully ---", flush=True)

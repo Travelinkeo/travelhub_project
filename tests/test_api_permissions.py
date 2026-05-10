@@ -2,9 +2,9 @@ import pytest
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
 
-from core.models.personas import Cliente
-from core.models.ventas import Venta
-from core.models_catalogos import Moneda
+from apps.crm.models import Cliente
+from apps.bookings.models import Venta
+from apps.finance.models.currencies import Moneda
 
 pytestmark = pytest.mark.django_db
 
@@ -88,7 +88,7 @@ def test_ventas_create_authenticated(api_client, user, venta_payload):
 
 def test_asiento_requires_staff_for_write(api_client, user, staff_user):
     api_client.login(username='staff', password='pass123')
-    from core.models_catalogos import Moneda
+    from apps.finance.models.currencies import Moneda
     m = Moneda.objects.create(nombre='EUR', codigo_iso='EUR', simbolo='€', es_moneda_local=False)
     payload = {
         'moneda': m.id_moneda,

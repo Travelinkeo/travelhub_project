@@ -6,7 +6,7 @@ from django.urls import reverse_lazy
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.forms import PasswordChangeForm
 from core.models.agencia import Agencia
-from core.forms.profile_forms import UserProfileForm, AgencyBrandingForm, AgencyAutomationForm
+from core.forms.profile_forms import UserProfileForm, AgencyBrandingForm, AgencyAutomationForm, AgencyBasicInfoForm
 
 class UserProfileView(LoginRequiredMixin, TemplateView):
     template_name = 'core/config/profile.html'
@@ -26,8 +26,9 @@ class UserProfileView(LoginRequiredMixin, TemplateView):
         context['password_form'] = PasswordChangeForm(user)
         
         if agencia:
-            context['agency_branding_form'] = AgencyBrandingForm(instance=agencia)
-            context['agency_automation_form'] = AgencyAutomationForm(instance=agencia)
+            context['agency_info_form'] = AgencyBasicInfoForm(instance=agencia)
+            context['agency_branding_form'] = AgencyBrandingForm(instance=agencia.branding)
+            context['agency_automation_form'] = AgencyAutomationForm(instance=agencia.configuracion)
             context['agencia'] = agencia
         
         context['active_tab'] = self.request.GET.get('tab', 'perfil')
@@ -68,15 +69,22 @@ class UserProfileView(LoginRequiredMixin, TemplateView):
             agencia = user.agencias_propias.first()
         
         if agencia:
-            if form_type == 'agency_branding':
-                branding_form = AgencyBrandingForm(request.POST, request.FILES, instance=agencia)
+            if form_type == 'agency_info':
+                info_form = AgencyBasicInfoForm(request.POST, instance=agencia)
+                if info_form.is_valid():
+                    info_form.save()
+                    messages.success(request, 'Información de agencia actualizada.')
+                    return redirect(f"{reverse_lazy('core:user_profile')}?tab=agencia")
+
+            elif form_type == 'agency_branding':
+                branding_form = AgencyBrandingForm(request.POST, request.FILES, instance=agencia.branding)
                 if branding_form.is_valid():
                     branding_form.save()
-                    messages.success(request, 'Configuración de agencia actualizada.')
+                    messages.success(request, 'Branding actualizado.')
                     return redirect(f"{reverse_lazy('core:user_profile')}?tab=agencia")
             
             elif form_type == 'agency_automation':
-                automation_form = AgencyAutomationForm(request.POST, instance=agencia)
+                automation_form = AgencyAutomationForm(request.POST, instance=agencia.configuracion)
                 if automation_form.is_valid():
                     automation_form.save()
                     messages.success(request, 'Configuración de automatización guardada.')

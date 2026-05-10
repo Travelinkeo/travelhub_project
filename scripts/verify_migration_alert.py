@@ -12,7 +12,7 @@ from django.contrib.auth.models import User
 from core.models import Agencia, UsuarioAgencia, MigrationCheck
 from apps.bookings.models import Venta
 from personas.models import Pasajero
-from core.models_catalogos import Moneda
+from apps.finance.models.currencies import Moneda
 from asgiref.sync import async_to_sync
 
 def verify_alert():

@@ -3,7 +3,8 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from decimal import Decimal
 
-from core.models_catalogos import Moneda
+from apps.finance.models.currencies import Moneda
+from core.models.base import AgenciaMixin
 
 # This validator is temporarily moved here for compatibility.
 # It should ideally be in a shared 'validators' module.
@@ -13,7 +14,7 @@ def validar_no_vacio_o_espacios(value):
         raise ValidationError(_('Este campo no puede consistir únicamente en espacios en blanco.'))
 
 
-class AsientoContable(models.Model):
+class AsientoContable(AgenciaMixin, models.Model):
     id_asiento = models.AutoField(primary_key=True, verbose_name=_("ID Asiento"))
     numero_asiento = models.CharField(_("Número de Asiento"), max_length=20, unique=True, blank=True)
     fecha_contable = models.DateField(_("Fecha Contable"), default=timezone.now)
@@ -35,7 +36,7 @@ class AsientoContable(models.Model):
     EstadoAsientoChoices = EstadoAsiento
     estado = models.CharField(_("Estado"), max_length=3, choices=EstadoAsiento.choices, default=EstadoAsiento.BORRADOR)
     tasa_cambio_aplicada = models.DecimalField(_("Tasa de Cambio Aplicada"), max_digits=18, decimal_places=8, default=1.0, help_text=_('Respecto a la moneda local, si aplica.'))
-    moneda = models.ForeignKey(Moneda, on_delete=models.PROTECT, verbose_name=_('Moneda del Asiento'), related_name='contabilidad_asientos_contables')
+    moneda = models.ForeignKey(Moneda, on_delete=models.PROTECT, verbose_name=_('Moneda del Asiento'), related_name='contabilidad_asientos_contables', null=True, blank=True)
     fecha_creacion = models.DateTimeField(_("Fecha de Creación"), auto_now_add=True)
     total_debe = models.DecimalField(_("Total Debe"), max_digits=15, decimal_places=2, default=0, editable=False)
     total_haber = models.DecimalField(_("Total Haber"), max_digits=15, decimal_places=2, default=0, editable=False)
@@ -64,7 +65,7 @@ class AsientoContable(models.Model):
         except Exception:
             return False
 
-class PlanContable(models.Model):
+class PlanContable(AgenciaMixin, models.Model):
     id_cuenta = models.AutoField(primary_key=True, verbose_name=_("ID Cuenta"))
     codigo_cuenta = models.CharField(_("Código de Cuenta"), max_length=30, unique=True, validators=[validar_no_vacio_o_espacios])
     nombre_cuenta = models.CharField(_("Nombre de la Cuenta"), max_length=100, validators=[validar_no_vacio_o_espacios])
@@ -93,11 +94,11 @@ class PlanContable(models.Model):
     def __str__(self):
         return f"{self.codigo_cuenta} - {self.nombre_cuenta}"
 
-class DetalleAsiento(models.Model):
+class DetalleAsiento(AgenciaMixin, models.Model):
     id_detalle_asiento = models.AutoField(primary_key=True, verbose_name=_("ID Detalle Asiento"))
-    asiento = models.ForeignKey(AsientoContable, related_name='detalles_asiento', on_delete=models.CASCADE, verbose_name=_('Asiento Contable'))
+    asiento = models.ForeignKey(AsientoContable, related_name='detalles_asiento', on_delete=models.CASCADE, verbose_name=_('Asiento Contable'), null=True, blank=True)
     linea = models.PositiveSmallIntegerField(_("Línea"), help_text=_('Número de línea dentro del asiento.'))
-    cuenta_contable = models.ForeignKey(PlanContable, on_delete=models.PROTECT, verbose_name=_('Cuenta Contable'), limit_choices_to={'permite_movimientos': True})
+    cuenta_contable = models.ForeignKey(PlanContable, on_delete=models.PROTECT, verbose_name=_('Cuenta Contable'), limit_choices_to={'permite_movimientos': True}, null=True, blank=True)
     
     # Montos en moneda funcional (USD)
     debe = models.DecimalField(_("Debe USD"), max_digits=15, decimal_places=2, default=0)
@@ -159,3 +160,60 @@ class TasaCambioBCV(models.Model):
     def save(self, *args, **kwargs):
         self.full_clean()
         super().save(*args, **kwargs)
+
+
+class LiquidacionProveedor(AgenciaMixin, models.Model):
+    id_liquidacion = models.AutoField(primary_key=True)
+    proveedor = models.ForeignKey('bookings.Proveedor', on_delete=models.PROTECT, verbose_name=_("Proveedor"), null=True, blank=True)
+    venta = models.ForeignKey('bookings.Venta', on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_("Venta Asociada"))
+    fecha_emision = models.DateField(_("Fecha de Emisión"), default=timezone.now)
+    fecha_vencimiento = models.DateField(_("Fecha de Vencimiento"), blank=True, null=True)
+    monto_total = models.DecimalField(_("Monto Total a Pagar"), max_digits=12, decimal_places=2, default=0)
+    monto_pagado = models.DecimalField(_("Monto Pagado"), max_digits=12, decimal_places=2, default=0)
+    saldo_pendiente = models.DecimalField(_("Saldo Pendiente"), max_digits=12, decimal_places=2, default=0, editable=False)
+
+    class EstadoLiquidacion(models.TextChoices):
+        PENDIENTE = 'PEN', _('Pendiente')
+        PAGADA_PARCIAL = 'PAR', _('Pagada Parcialmente')
+        PAGADA = 'PAG', _('Pagada')
+        ANULADA = 'ANU', _('Anulada')
+
+    estado = models.CharField(_("Estado"), max_length=3, choices=EstadoLiquidacion.choices, default=EstadoLiquidacion.PENDIENTE)
+    notas = models.TextField(_("Notas Internas"), blank=True, null=True)
+    archivo_pdf = models.FileField(_("PDF de Liquidación"), upload_to='liquidaciones_proveedor/%Y/%m/', blank=True, null=True)
+
+    class Meta:
+        verbose_name = _("Liquidación a Proveedor")
+        verbose_name_plural = _("Liquidaciones a Proveedores")
+        ordering = ['-fecha_emision']
+
+    def __str__(self):
+        return f"Liquidación {self.id_liquidacion} a {self.proveedor}"
+
+    def save(self, *args, **kwargs):
+        self.saldo_pendiente = self.monto_total - self.monto_pagado
+        
+        # Actualizar estado automáticamente
+        if self.saldo_pendiente <= 0:
+            self.estado = 'PAG'
+        elif self.monto_pagado > 0:
+            self.estado = 'PAR'
+        else:
+            self.estado = 'PEN'
+        
+        super().save(*args, **kwargs)
+
+
+class ItemLiquidacion(AgenciaMixin, models.Model):
+    id_item_liquidacion = models.AutoField(primary_key=True)
+    liquidacion = models.ForeignKey(LiquidacionProveedor, related_name='items', on_delete=models.CASCADE, verbose_name=_("Liquidación"), null=True, blank=True)
+    item_venta = models.OneToOneField('bookings.ItemVenta', on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_("Item de Venta Original"))
+    descripcion = models.CharField(_("Descripción"), max_length=500)
+    monto = models.DecimalField(_("Monto a Pagar"), max_digits=12, decimal_places=2)
+
+    class Meta:
+        verbose_name = _("Item de Liquidación")
+        verbose_name_plural = _("Items de Liquidación")
+
+    def __str__(self):
+        return f"Item {self.descripcion} por {self.monto}"

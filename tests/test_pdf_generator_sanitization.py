@@ -2,7 +2,7 @@ import os
 
 import pytest
 
-from core.pdf_generator import generate_ticket_pdf
+from core.services.parsers.pdf_generation import generate_ticket_pdf
 
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(PROJECT_ROOT)

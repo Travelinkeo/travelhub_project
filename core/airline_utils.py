@@ -2,8 +2,7 @@
 
 import logging
 from typing import Optional
-from .models_catalogos import Aerolinea
-
+from apps.common.models import Aerolinea
 logger = logging.getLogger(__name__)
 
 def get_airline_name_by_code(codigo_iata: str) -> Optional[str]:

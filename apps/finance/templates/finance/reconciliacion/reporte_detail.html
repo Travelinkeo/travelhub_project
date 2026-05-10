@@ -31,16 +31,26 @@
                 </div>
             </div>
             
-            <div class="flex items-center gap-4">
+            <div class="flex items-center gap-4" 
+                 {% if reporte.estado == 'PROCESANDO' %}
+                 hx-get="{% url 'finance:reconciliacion_detail' reporte.pk %}"
+                 hx-trigger="every 3s"
+                 hx-target="body"
+                 {% endif %}>
+                
                 <div class="flex flex-col items-end gap-1">
                     <span class="text-[9px] font-black uppercase tracking-widest text-text-muted mb-1">Estatus Financiero</span>
                     <span class="px-5 py-2 rounded-xl text-sm font-black uppercase tracking-widest border shadow-lg
                         {% if reporte.estado == 'CONCILIADO' %}bg-primary/10 text-primary border-primary/20 shadow-primary/5
                         {% elif reporte.estado == 'CON_DISCREPANCIAS' %}bg-amber-500/10 text-amber-500 border-amber-500/20 shadow-amber-500/5
                         {% elif reporte.estado == 'ERROR' %}bg-status-danger-bg text-status-danger border-status-danger/20 shadow-status-danger/5
+                        {% elif reporte.estado == 'PROCESANDO' %}bg-primary/10 text-primary border-primary/20 animate-pulse
                         {% else %}bg-surface-2 text-text-muted border-border-color{% endif %}">
                         {{ reporte.get_estado_display|default:reporte.estado }}
                     </span>
+                    {% if reporte.estado == 'PROCESANDO' %}
+                        <p class="text-[10px] text-primary font-black uppercase tracking-tighter mt-1 animate-bounce">Analizando con IA...</p>
+                    {% endif %}
                 </div>
                 
                 {% if reporte.estado == 'PENDIENTE' or reporte.estado == 'ERROR' %}

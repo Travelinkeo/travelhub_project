@@ -45,7 +45,10 @@ class EncryptedCharField(models.CharField):
                 from cryptography.hazmat.primitives import hashes
                 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
                 
-                secret_key = settings.SECRET_KEY.encode()
+                # Independencia de llave: Priorizar ENCRYPTION_KEY para permitir rotación
+                encryption_key = getattr(settings, 'ENCRYPTION_KEY', settings.SECRET_KEY)
+                secret_key = encryption_key.encode()
+                
                 kdf = PBKDF2HMAC(
                     algorithm=hashes.SHA256(),
                     length=32,
@@ -128,7 +131,10 @@ class EncryptedTextField(models.TextField):
                 from cryptography.hazmat.primitives import hashes
                 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
                 
-                secret_key = settings.SECRET_KEY.encode()
+                # Independencia de llave: Priorizar ENCRYPTION_KEY para permitir rotación
+                encryption_key = getattr(settings, 'ENCRYPTION_KEY', settings.SECRET_KEY)
+                secret_key = encryption_key.encode()
+                
                 kdf = PBKDF2HMAC(
                     algorithm=hashes.SHA256(),
                     length=32,

@@ -4,13 +4,13 @@ import logging
 import fitz  # PyMuPDF
 from PIL import Image
 import io
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django.db import transaction
 
-# Modelos
-
+from apps.bookings.models.tarifario import (
     TarifarioProveedor,
     HotelTarifario,
     TipoHabitacion,
@@ -41,10 +41,8 @@ class HotelParserService:
         if not self.api_key:
             raise ValueError("GEMINI_API_KEY no configurada.")
             
-        genai.configure(api_key=self.api_key)
-        # Usamos Flash para velocidad, o Pro para mejor razonamiento si es complejo
-        # Actualizado a 2.0-flash según lista de modelos disponibles
-        self.model = genai.GenerativeModel('gemini-2.0-flash') 
+        self.client = genai.Client(api_key=self.api_key)
+        self.model_name = 'gemini-2.0-flash' 
 
     def procesar_tarifario(self):
         """Punto de entrada principal"""
@@ -125,7 +123,10 @@ class HotelParserService:
         """
         
         try:
-            response = self.model.generate_content([prompt, image])
+            response = self.client.models.generate_content(
+                model=self.model_name,
+                contents=[prompt, image]
+            )
             text = response.text.strip()
             # Limpieza básica de Markdown
             if text.startswith('```json'):
@@ -145,35 +146,38 @@ class HotelParserService:
         try:
             with transaction.atomic():
                 # 1. Crear/Actualizar Hotel
-                # Buscamos por NOMBRE solamente para reusar el hotel existente
-                # (Si existen homónimos en distintos destinos, la UI mostrará ambos, pero el slug único lo maneja el save)
-                print("DEBUG: Buscando hotel existente...")
-            
-            defaults = {
-                'tarifario': self.tarifario, # Actualizamos al tarifario más reciente
-                'destino': hotel_data.get('destino') or 'Otro',
-                'descripcion_larga': hotel_data.get('descripcion_larga') or '',
-                'categoria': hotel_data.get('categoria') or 3,
-                'politicas': hotel_data.get('politicas') or '',
-                # Regimen default logic: get value, ensure string, slice 2. Fallback 'SD'
-                'regimen_default': (hotel_data.get('regimen') or 'SD')[:2]
-            }
+                # Buscamos por NOMBRE y AGENCIA para multi-tenancy
+                agencia = self.tarifario.agencia
+                
+                defaults = {
+                    'agencia': agencia,
+                    'tarifario': self.tarifario, # Actualizamos al tarifario más reciente
+                    'destino': hotel_data.get('destino') or 'Otro',
+                    'descripcion_larga': hotel_data.get('descripcion_larga') or '',
+                    'categoria': hotel_data.get('categoria') or 3,
+                    'politicas': hotel_data.get('politicas') or '',
+                    # Regimen default logic: get value, ensure string, slice 2. Fallback 'SD'
+                    'regimen_default': (hotel_data.get('regimen') or 'SD')[:2]
+                }
 
-            # Hardened logic: Avoid update_or_create to prevent MultipleObjectsReturned
-            print(f"DEBUG: Ejecutando filter().first() para '{hotel_data['nombre']}'...")
-            hotel = HotelTarifario.objects.filter(nombre=hotel_data['nombre']).first()
-            if hotel:
-                print(f"DEBUG: Hotel encontrado (ID: {hotel.id}). Actualizando...")
-                # Update fields
-                for key, value in defaults.items():
-                    setattr(hotel, key, value)
-                hotel.save()
-                created = False
-            else:
-                print("DEBUG: Hotel no encontrado. Creando nuevo...")
-                # Create new
-                hotel = HotelTarifario.objects.create(nombre=hotel_data['nombre'], **defaults)
-                created = True
+                # Usamos all_objects para bypass del filter manager si es necesario, 
+                # pero filter(agencia=agencia) es lo correcto.
+                hotel = HotelTarifario.objects.filter(
+                    nombre__iexact=hotel_data['nombre'], 
+                    agencia=agencia
+                ).first()
+                
+                if hotel:
+                    print(f"DEBUG: Hotel encontrado (ID: {hotel.id}). Actualizando...")
+                    # Update fields
+                    for key, value in defaults.items():
+                        setattr(hotel, key, value)
+                    hotel.save()
+                    created = False
+                else:
+                    print("DEBUG: Hotel no encontrado o de otra agencia. Creando nuevo...")
+                    hotel = HotelTarifario.objects.create(nombre=hotel_data['nombre'], **defaults)
+                    created = True
             
             print(f"DEBUG: Hotel guardado (ID: {hotel.id}). Procesando amenidades...")
             # 2. Amenidades (Busca o crea)

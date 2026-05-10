@@ -149,7 +149,7 @@ class WebReceiptParser:
         """
         try:
             # Importación local para evitar Circular Import al inicio
-            from core.models import Proveedor
+            from apps.bookings.models import Proveedor
 from apps.crm.models import Cliente
             
             # Buscar en Clientes (Prioridad User)

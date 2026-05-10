@@ -1,5 +1,5 @@
 from django.db.models import Q
-from core.models.ventas import Venta
+from apps.bookings.models import Venta
 
 class ReportDataAggregator:
     """

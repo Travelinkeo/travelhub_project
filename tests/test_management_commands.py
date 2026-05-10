@@ -3,7 +3,8 @@ import pytest
 from io import StringIO
 from django.core.management import call_command
 from django.core.cache import cache
-from core.models_catalogos import Pais, Moneda
+from apps.common.models import Pais
+from apps.finance.models.currencies import Moneda
 
 
 @pytest.mark.django_db

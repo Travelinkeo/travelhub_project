@@ -50,17 +50,41 @@
         <div class="bg-slate-900/40 border border-slate-800 p-6 rounded-3xl hover:border-emerald-500/30 transition-all group">
             <div class="flex justify-between items-start mb-4">
                 <span class="material-symbols-outlined text-emerald-400">payments</span>
-                <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest">MRR Estimado</span>
+                <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest">MRR Proyectado</span>
             </div>
             <h3 class="text-4xl font-black text-white">${{ metrics.revenue_mensual }}<span class="text-slate-500 text-lg">.00</span></h3>
         </div>
 
         <div class="bg-slate-900/40 border border-slate-800 p-6 rounded-3xl hover:border-purple-500/30 transition-all group">
             <div class="flex justify-between items-start mb-4">
-                <span class="material-symbols-outlined text-purple-400">monitoring</span>
-                <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Uso de API (24h)</span>
+                <span class="material-symbols-outlined text-purple-400">robot</span>
+                <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest">IA Usage (24h)</span>
             </div>
-            <h3 class="text-4xl font-black text-white">8.2k</h3>
+            <h3 class="text-4xl font-black text-white">{{ metrics.ai_usage_24h }}</h3>
+        </div>
+
+        <div class="bg-slate-900/40 border border-slate-800 p-6 rounded-3xl hover:border-red-500/30 transition-all group">
+            <div class="flex justify-between items-start mb-4">
+                <span class="material-symbols-outlined text-red-500">warning</span>
+                <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Leakage Financiero</span>
+            </div>
+            <h3 class="text-4xl font-black text-white">${{ metrics.total_leakage|floatformat:0 }}</h3>
+        </div>
+
+        <div class="bg-slate-900/40 border border-slate-800 p-6 rounded-3xl hover:border-orange-500/30 transition-all group">
+            <div class="flex justify-between items-start mb-4">
+                <span class="material-symbols-outlined text-orange-500">hotel</span>
+                <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Hoteles Globales</span>
+            </div>
+            <h3 class="text-4xl font-black text-white">{{ metrics.total_hoteles }}</h3>
+        </div>
+
+        <div class="bg-slate-900/40 border border-slate-800 p-6 rounded-3xl hover:border-cyan-500/30 transition-all group">
+            <div class="flex justify-between items-start mb-4">
+                <span class="material-symbols-outlined text-cyan-500">bed</span>
+                <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Tipos Habitación</span>
+            </div>
+            <h3 class="text-4xl font-black text-white">{{ metrics.total_habitaciones }}</h3>
         </div>
     </div>
 

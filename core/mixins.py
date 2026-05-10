@@ -4,42 +4,7 @@ from django.contrib.auth.mixins import AccessMixin
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q
 
-class SoftDeleteManager(models.Manager):
-    def get_queryset(self):
-        return super().get_queryset().filter(is_deleted=False)
-
-class SoftDeleteModel(models.Model):
-    """
-    BOLSAS DE AIRE: Mixin para borrado lógico (Soft Delete).
-    Evita la pérdida física de datos en tablas críticas.
-    """
-    is_deleted = models.BooleanField(default=False, verbose_name="Eliminado", db_index=True)
-    deleted_at = models.DateTimeField(null=True, blank=True, verbose_name="Fecha de Eliminación")
-
-    objects = SoftDeleteManager()
-    all_objects = models.Manager()
-
-    class Meta:
-        abstract = True
-
-    def delete(self, using=None, keep_parents=False, force=False):
-        """Borrado lógico por defecto. Si force=True, borrado físico."""
-        if force:
-            return self.hard_delete(using=using, keep_parents=keep_parents)
-        
-        self.is_deleted = True
-        self.deleted_at = timezone.now()
-        self.save(update_fields=['is_deleted', 'deleted_at'])
-
-    def hard_delete(self, using=None, keep_parents=False):
-        """Borrado físico real de la base de datos."""
-        super(SoftDeleteModel, self).delete(using=using, keep_parents=keep_parents)
-
-    def restore(self):
-        """Restauración: devuelve el registro al estado activo."""
-        self.is_deleted = False
-        self.deleted_at = None
-        self.save(update_fields=['is_deleted', 'deleted_at'])
+from core.models.base import SoftDeleteModel, AgenciaManager as SoftDeleteManager
 
 
 class SaaSMixin:

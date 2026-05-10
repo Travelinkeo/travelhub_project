@@ -31,6 +31,7 @@ Documentación de interfaces y microservicios internos.
 - **[DATA_DICTIONARY.md](DATA_DICTIONARY.md)** - Diccionario de datos de la base de datos central.
 - **[API_AUTOMATION.md](API_AUTOMATION.md)** - Automatizaciones y Webhooks.
 - **[TRANSLATOR_API.md](TRANSLATOR_API.md)** - Documentación del motor de traducción de itinerarios (GDS a JSON/HTML).
+- **[VOUCHER_SYSTEM.md](VOUCHER_SYSTEM.md)** - 📄 Guía técnica del sistema de generación de vouchers unificado.
 
 ## ✈️ 4. Operaciones, Uso y Parsers (GDS)
 Guías sobre el negocio principal y manuales de usuario.

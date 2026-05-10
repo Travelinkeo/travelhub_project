@@ -8,7 +8,7 @@ from decimal import Decimal
 from django.db import transaction
 from django.utils import timezone
 
-from core.models import FacturaConsolidada, ItemFacturaConsolidada
+from apps.finance.models import FacturaConsolidada, ItemFacturaConsolidada
 from apps.bookings.models import Venta
 
 logger = logging.getLogger(__name__)
@@ -213,7 +213,7 @@ class DobleFacturacionService:
         aerolinea_nombre = normalized.get('airline_name', 'Aerolínea')
         
         # Intentar obtener RIF real del Proveedor guardado en base de datos
-        from core.models import Proveedor
+        from apps.bookings.models import Proveedor
         proveedor = Proveedor.objects.filter(nombre__icontains=aerolinea_nombre).first()
         rif_tercero = proveedor.identificacion_fiscal if proveedor and proveedor.identificacion_fiscal else 'J-00000000-0'
 

@@ -1,6 +1,6 @@
 from django.contrib import admin
 from core.admin_saas import SaaSAdminMixin
-from core.models import TarifarioProveedor, HotelTarifario, TipoHabitacion, TarifaHabitacion, Amenity, ImagenHotel
+from apps.bookings.models import TarifarioProveedor, HotelTarifario, TipoHabitacion, TarifaHabitacion, Amenity, ImagenHotel
 
 class TarifaHabitacionInline(admin.TabularInline):
     model = TarifaHabitacion

@@ -55,8 +55,8 @@
     <div class="container">
         <header>
             <div class="logo">
-                {% if agencia.logo_pdf_base64 %}
-                    <img src="data:image/png;base64,{{ agencia.logo_pdf_base64 }}" alt="Logo">
+                {% if agencia_logo_b64 %}
+                    <img src="{{ agencia_logo_b64 }}" alt="Logo">
                 {% else %}
                     <div style="font-weight:900; font-size:24px;">{{ agencia.nombre }}</div>
                 {% endif %}
@@ -74,9 +74,33 @@
         </div>
 
         <main class="content">
-            <div class="section-header"><h2>Accommodation & Services</h2></div>
+            <div class="section-header"><h2>Itinerary & Services</h2></div>
+
+            {# VUELOS #}
+            {% if segmentos_vuelo %}
+            {% for vuelo in segmentos_vuelo %}
+            <div class="service-row">
+                <div class="service-date">
+                    <span class="date-day">{{ vuelo.fecha_salida|date:"d" }}</span>
+                    <span class="date-month">{{ vuelo.fecha_salida|date:"M Y" }}</span>
+                </div>
+                <div class="service-main">
+                    <h3>FLIGHT: {{ vuelo.origen|slice:":3"|upper }} → {{ vuelo.destino|slice:":3"|upper }} <span class="tag" style="background: var(--flight-color, #3b82f6);">FLIGHT</span></h3>
+                    <div class="grid-details">
+                        <div class="detail-item"><label>Airline</label><span>{{ vuelo.aerolinea|upper }} {{ vuelo.numero_vuelo }}</span></div>
+                        <div class="detail-item"><label>Departure</label><span>{{ vuelo.fecha_salida|date:"H:i" }}</span></div>
+                        <div class="detail-item"><label>Arrival</label><span>{{ vuelo.fecha_llegada|date:"H:i" }}</span></div>
+                        <div class="detail-item"><label>Class</label><span>{{ vuelo.clase|default:vuelo.cabina|upper }}</span></div>
+                        <div class="detail-item"><label>Baggage</label><span>{{ vuelo.equipaje|default:"Standard" }}</span></div>
+                        <div class="detail-item"><label>Operated</label><span>{{ vuelo.operado_por|default:vuelo.aerolinea|truncatechars:15 }}</span></div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            {% endif %}
 
             {# ALOJAMIENTOS #}
+            {% if alojamientos %}
             {% for hotel in alojamientos %}
             <div class="service-row">
                 <div class="service-date">
@@ -84,19 +108,22 @@
                     <span class="date-month">{{ hotel.check_in|date:"M Y" }}</span>
                 </div>
                 <div class="service-main">
-                    <h3>HOTEL: {{ hotel.nombre_establecimiento|upper }} <span class="tag">CONFIRMED</span></h3>
+                    <h3>HOTEL: {{ hotel.nombre_establecimiento|upper }} <span class="tag" style="background: var(--hotel-color, #10b981);">STAY</span></h3>
                     <div class="grid-details">
                         <div class="detail-item"><label>Check-out</label><span>{{ hotel.check_out|date:"d M Y" }}</span></div>
                         <div class="detail-item"><label>Meal Plan</label><span>{{ hotel.regimen_alimentacion|default:"Standard" }}</span></div>
                         <div class="detail-item"><label>Reference</label><span>{{ hotel.localizador_proveedor|default:"---" }}</span></div>
-                        <div class="detail-item"><label>City</label><span>{{ hotel.ciudad.nombre|default:"---" }}</span></div>
+                        <div class="detail-item"><label>City</label><span>{{ hotel.ciudad.nombre|default:hotel.ciudad|default:"---" }}</span></div>
                         <div class="detail-item"><label>Rooms</label><span>{{ hotel.habitaciones }}</span></div>
+                        <div class="detail-item"><label>Pax</label><span>{{ hotel.pax_nombres|default:venta.pasajeros.count }}</span></div>
                     </div>
                 </div>
             </div>
             {% endfor %}
+            {% endif %}
 
             {# AUTOS #}
+            {% if alquileres_autos %}
             {% for car in alquileres_autos %}
             <div class="service-row">
                 <div class="service-date">
@@ -104,18 +131,21 @@
                     <span class="date-month">{{ car.fecha_hora_retiro|date:"M Y" }}</span>
                 </div>
                 <div class="service-main">
-                    <h3>CAR: {{ car.compania_rentadora|upper }} <span class="tag">RENTAL</span></h3>
+                    <h3>CAR: {{ car.compania_rentadora|upper }} <span class="tag" style="background: var(--car-color, #f59e0b);">RENTAL</span></h3>
                     <div class="grid-details">
                         <div class="detail-item"><label>Category</label><span>{{ car.categoria_auto }}</span></div>
                         <div class="detail-item"><label>Return</label><span>{{ car.fecha_hora_devolucion|date:"d M Y H:i" }}</span></div>
-                        <div class="detail-item"><label>Pick-up Location</label><span>{{ car.ciudad_retiro.nombre|default:"---" }}</span></div>
+                        <div class="detail-item"><label>Pick-up</label><span>{{ car.ciudad_retiro.nombre|default:car.ciudad_retiro|default:"---" }}</span></div>
                         <div class="detail-item"><label>Reference</label><span>{{ car.numero_confirmacion|default:"---" }}</span></div>
+                        <div class="detail-item"><label>Driver</label><span>{{ car.nombre_conductor|default:venta.cliente.get_nombre_completo|upper|truncatechars:20 }}</span></div>
                     </div>
                 </div>
             </div>
             {% endfor %}
+            {% endif %}
 
-            {# TRASLADOS / ACTIVIDADES #}
+            {# TRASLADOS #}
+            {% if traslados %}
             {% for tr in traslados %}
             <div class="service-row">
                 <div class="service-date">
@@ -125,15 +155,37 @@
                 <div class="service-main">
                     <h3>TRANSFER: {{ tr.origen|upper }} → {{ tr.destino|upper }}</h3>
                     <div class="grid-details">
-                        <div class="detail-item"><label>Date/Time</label><span>{{ tr.fecha_hora|date:"H:i" }}</span></div>
+                        <div class="detail-item"><label>Time</label><span>{{ tr.fecha_hora|date:"H:i" }}</span></div>
                         <div class="detail-item"><label>Type</label><span>{{ tr.get_tipo_traslado_display|upper }}</span></div>
                         <div class="detail-item"><label>Pax</label><span>{{ tr.pasajeros }}</span></div>
                     </div>
                 </div>
             </div>
             {% endfor %}
+            {% endif %}
+
+            {# ACTIVIDADES #}
+            {% if actividades %}
+            {% for act in actividades %}
+            <div class="service-row">
+                <div class="service-date">
+                    <span class="date-day">{{ act.fecha|date:"d" }}</span>
+                    <span class="date-month">{{ act.fecha|date:"M Y" }}</span>
+                </div>
+                <div class="service-main">
+                    <h3>ACTIVITY: {{ act.nombre|upper }} <span class="tag" style="background: var(--insurance-color, #8b5cf6);">TOUR</span></h3>
+                    <div class="grid-details">
+                        <div class="detail-item"><label>Duration</label><span>{{ act.duracion_horas|default:"---" }} hrs</span></div>
+                        <div class="detail-item"><label>Reference</label><span>{{ act.localizador_proveedor|default:"CONFIRMED" }}</span></div>
+                        <div class="detail-item"><label>Booking Name</label><span>{{ venta.cliente.get_nombre_completo|upper|truncatechars:20 }}</span></div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            {% endif %}
 
             {# ADICIONALES #}
+            {% if servicios_adicionales %}
             {% for item in servicios_adicionales %}
             <div class="service-row">
                 <div class="service-date">
@@ -143,13 +195,14 @@
                 <div class="service-main">
                     <h3>{{ item.get_tipo_servicio_display|upper }}: {{ item.descripcion|upper }}</h3>
                     <div class="grid-details">
-                        <div class="detail-item"><label>Policy/Ref</label><span>{{ item.codigo_referencia|default:"---" }}</span></div>
+                        <div class="detail-item"><label>Reference</label><span>{{ item.codigo_referencia|default:"---" }}</span></div>
                         <div class="detail-item"><label>End Date</label><span>{{ item.fecha_fin|date:"d M Y" }}</span></div>
-                        <div class="detail-item"><label>Beneficiary</label><span>{{ item.nombre_pasajero|default:venta.cliente.get_nombre_completo|upper }}</span></div>
+                        <div class="detail-item"><label>Beneficiary</label><span>{{ item.nombre_pasajero|default:venta.cliente.get_nombre_completo|upper|truncatechars:20 }}</span></div>
                     </div>
                 </div>
             </div>
             {% endfor %}
+            {% endif %}
         </main>
 
         <footer>

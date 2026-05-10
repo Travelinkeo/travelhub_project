@@ -125,8 +125,7 @@ class PassportOCRService:
 
             # Enriquecer con IDs de base de datos para Países
             try:
-                from core.models_catalogos import Pais
-                
+                from apps.common.models import Pais
                 # Resolver Nacionalidad
                 nac_iso = data.get('nacionalidad')
                 if nac_iso and len(nac_iso) == 3:

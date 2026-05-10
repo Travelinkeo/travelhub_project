@@ -18,14 +18,21 @@ logger = logging.getLogger(__name__)
 def conciliar_reporte_batch_task(reporte_id, agencia_id):
     """
     Tarea Batch para procesar reportes de proveedores a gran escala.
-    Delega la lógica principal al SmartReconciliationService para consistencia.
+    Establece el contexto de agencia para asegurar el aislamiento de datos (SaaS).
     """
-    logger.info(f"🚀 Iniciando tarea de conciliación para Reporte {reporte_id}")
+    from core.middleware import agency_context
+    from core.models.agencia import Agencia
+    
+    logger.info(f"🚀 Iniciando tarea de conciliación para Reporte {reporte_id} (Agencia: {agencia_id})")
     
     try:
-        # El servicio ya maneja la transacción, estados y lógica de IA
-        from apps.finance.services.smart_reconciliation_service import SmartReconciliationService
-        SmartReconciliationService.procesar_reporte(reporte_id)
+        # Recuperamos la agencia usando all_objects porque aún no tenemos contexto
+        agencia = Agencia.all_objects.get(pk=agencia_id)
+        
+        with agency_context(agencia):
+            # Ahora todas las queries dentro de este bloque estarán filtradas por esta agencia
+            from apps.finance.services.smart_reconciliation_service import SmartReconciliationService
+            SmartReconciliationService.procesar_reporte(reporte_id)
         
         logger.info(f"✅ Tarea finalizada con éxito para Reporte {reporte_id}")
         return str(reporte_id)

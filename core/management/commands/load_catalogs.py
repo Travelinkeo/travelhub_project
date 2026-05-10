@@ -6,8 +6,9 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
 from apps.crm.models import Cliente
-from core.models_catalogos import Aerolinea, Ciudad, Moneda, Pais, ProductoServicio, Proveedor
-
+from apps.common.models import Aerolinea, Ciudad, Pais
+from apps.finance.models.currencies import Moneda
+from apps.bookings.models import ProductoServicio, Proveedor
 CATALOG_FILES = {
     'paises': 'fixtures/paises.json',
     'monedas': 'fixtures/monedas.json',

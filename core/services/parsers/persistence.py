@@ -4,8 +4,9 @@ import os
 from decimal import Decimal
 from django.db.models import Q
 from apps.bookings.models import BoletoImportado
-from core.models_catalogos import Proveedor, Aerolinea, Moneda
-
+from apps.bookings.models import Proveedor
+from apps.common.models import Aerolinea
+from apps.finance.models.currencies import Moneda
 # SERVICIOS
 from core.services.catalog_service import CatalogNormalizationService
 
@@ -53,23 +54,19 @@ class BoletoPersistenceService:
             office_id = d.get('office_id')
             boleto.proveedor_emisor = BoletoPersistenceService._find_provider(iata_code, office_id)
 
-            # 4. Financiero
-            from core.services.parsers.normalization import DataNormalizationService
-            boleto.total_boleto = DataNormalizationService.safe_decimal(d.get('total_amount'))
-            boleto.tarifa_base = DataNormalizationService.safe_decimal(d.get('fare_amount'))
+            # 4. Financiero (Audit Step 3.2: Centralización en FinancialEngine)
+            from core.services.financial_engine import FinancialEngine
+            fin_data = FinancialEngine.calculate_ticket_amounts(d, boleto)
             
-            # Impuestos detallados
-            desglose = d.get('tarifas', {}).get('taxes_breakdown') or d.get('taxes_breakdown', {})
-            boleto.iva_monto = DataNormalizationService.safe_decimal(desglose.get('iva') or desglose.get('VAT'))
-            boleto.inatur_monto = DataNormalizationService.safe_decimal(desglose.get('inatur') or desglose.get('tourism_tax'))
-            boleto.otros_impuestos_monto = DataNormalizationService.safe_decimal(desglose.get('otros') or desglose.get('other_taxes'))
+            boleto.total_boleto = fin_data['monto_total']
+            boleto.tarifa_base = fin_data['monto_base']
+            boleto.iva_monto = fin_data['monto_iva_yn']
+            boleto.inatur_monto = fin_data['monto_inatur']
+            boleto.otros_impuestos_monto = fin_data['monto_otros_tax']
+            boleto.impuestos_total_calculado = fin_data['monto_impuestos_total']
             
-            tax_total = d.get('taxes_amount') or (boleto.iva_monto + boleto.inatur_monto + boleto.otros_impuestos_monto)
-            boleto.impuestos_total_calculado = DataNormalizationService.safe_decimal(tax_total)
-
             # 5. Metadatos y Moneda
-            moneda_code = d.get('total_currency') or d.get('moneda') or 'USD'
-            boleto.moneda = CatalogNormalizationService.normalize_currency(moneda_code)
+            boleto.moneda = fin_data['moneda_obj']
             
             boleto.ruta_vuelo = d.get('ItinerarioFinalLimpio')
             boleto.datos_parseados = d

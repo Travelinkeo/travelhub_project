@@ -1,119 +1,52 @@
-import requests
 import logging
-import os
-from django.conf import settings
+from .evolution_api_service import EvolutionService
 
 logger = logging.getLogger(__name__)
 
 class WhatsAppService:
     """
-    Servicio para interactuar con el microservicio WAHA (WhatsApp HTTP API).
-    Proporciona métodos para gestionar la sesión, obtener el QR y enviar mensajes.
+    Wrapper de compatibilidad para migrar de WAHA a Evolution API v2.
+    Redirige las llamadas al nuevo EvolutionService manteniendo la interfaz.
     """
     
     @classmethod
-    def _get_base_url(cls):
-        # Internamente en Docker usamos el puerto 3000 para WAHA
-        return os.getenv('WHATSAPP_MICROSERVICE_URL', 'http://wppconnect:3000')
-
-    @classmethod
-    def _get_headers(cls):
-        token = os.getenv('WHATSAPP_MICROSERVICE_TOKEN', 'THISISMYSECURETOKEN')
-        return {
-            "X-Api-Key": token,
-            "Content-Type": "application/json"
-        }
-
-    @classmethod
     def get_status(cls, session_name: str):
-        """Obtiene el estado de la sesión. WAHA Core solo usa 'default'."""
-        session_name = "default"
-        url = f"{cls._get_base_url()}/api/sessions/"
-        try:
-            response = requests.get(url, headers=cls._get_headers(), timeout=10)
-            if response.status_code == 200:
-                sessions = response.json()
-                for session in sessions:
-                    if session.get('name') == session_name:
-                        # WAHA status: STOPPED, STARTING, SCAN_QR_CODE, WORKING, FAILED
-                        return session.get('status', 'STOPPED').upper()
-                return "DISCONNECTED"
-            return "DISCONNECTED"
-        except Exception as e:
-            logger.error(f"❌ [WPP] Error obteniendo estado: {e}")
-            return "DISCONNECTED"
+        """Mapea el estado de Evolution a los estados esperados por la UI."""
+        state = EvolutionService.get_instance_state(session_name)
+        print(f"DEBUG: WhatsAppService.get_status for {session_name} -> RAW STATE: {state}")
+        
+        if state == 'open':
+            print(f"DEBUG: WhatsAppService.get_status -> Returning WORKING")
+            return "WORKING"
+        elif state == 'connecting':
+            print(f"DEBUG: WhatsAppService.get_status -> Returning CONNECTING")
+            return "CONNECTING"
+        
+        print(f"DEBUG: WhatsAppService.get_status -> Returning DISCONNECTED")
+        return "DISCONNECTED"
 
     @classmethod
     def start_session(cls, session_name: str):
-        """Inicia una nueva sesión si no existe."""
-        session_name = "default"
-        url = f"{cls._get_base_url()}/api/sessions/start"
-        payload = {
-            "name": session_name,
-            "config": {
-                "engine": "WEBJS",
-                "browser": {
-                    "executablePath": "/usr/bin/chromium",
-                    "args": ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"]
-                }
-            }
-        }
-        try:
-            response = requests.post(url, json=payload, headers=cls._get_headers(), timeout=30)
-            return response.json()
-        except Exception as e:
-            logger.error(f"❌ [WPP] Error al iniciar sesión: {e}")
-            return None
+        """Crea la instancia en Evolution."""
+        return EvolutionService.create_instance(session_name)
 
     @classmethod
     def get_qr_code(cls, session_name: str):
-        """Obtiene el código QR actual de la sesión en base64."""
-        session_name = "default"
-        url = f"{cls._get_base_url()}/api/{session_name}/auth/qr"
-        try:
-            response = requests.get(url, headers=cls._get_headers(), timeout=10)
-            if response.status_code == 200:
-                import base64
-                encoded_string = base64.b64encode(response.content).decode('utf-8')
-                return f"data:image/png;base64,{encoded_string}"
-            return None
-        except Exception as e:
-            return None
+        """Obtiene el QR de Evolution."""
+        qr_data = EvolutionService.get_qr_code(session_name)
+        if qr_data and isinstance(qr_data, dict):
+            # Evolution v2 retorna un objeto con 'base64'
+            return qr_data.get('base64') or qr_data.get('code')
+        return qr_data
 
     @classmethod
     def send_message(cls, chat_id: str, text: str, session_name: str = "default"):
-        """
-        Envía un mensaje de texto.
-        """
-        session_name = "default"
-        url = f"{cls._get_base_url()}/api/sendText"
-        
-        if not chat_id.endswith('@c.us') and not chat_id.endswith('@g.us'):
-            clean_id = ''.join(filter(str.isdigit, chat_id))
-            chat_id = f"{clean_id}@c.us"
-
-        payload = {
-            "session": session_name,
-            "chatId": chat_id,
-            "text": text
-        }
-        
-        try:
-            response = requests.post(url, json=payload, headers=cls._get_headers(), timeout=20)
-            return response.status_code in [200, 201]
-        except Exception as e:
-            logger.error(f"❌ Excepción enviando mensaje: {e}")
-            return False
+        """Envía mensaje vía Evolution."""
+        # Limpiar chat_id si trae sufijos de WAHA
+        number = chat_id.replace('@c.us', '').replace('@g.us', '')
+        return EvolutionService.send_text(session_name, number, text)
 
     @classmethod
     def logout(cls, session_name: str):
-        """Cierra la sesión."""
-        session_name = "default"
-        url = f"{cls._get_base_url()}/api/sessions/stop"
-        payload = {"name": session_name}
-        try:
-            response = requests.post(url, json=payload, headers=cls._get_headers(), timeout=10)
-            return response.status_code == 200
-        except Exception as e:
-            logger.error(f"❌ [WPP] Error al cerrar sesión: {e}")
-            return False
+        """Desconecta y elimina la instancia en Evolution."""
+        return EvolutionService.delete_instance(session_name)

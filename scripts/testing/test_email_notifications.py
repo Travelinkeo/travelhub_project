@@ -10,7 +10,7 @@ django.setup()
 from decimal import Decimal
 from django.utils import timezone
 from apps.bookings.models import Venta, PagoVenta
-from core.models_catalogos import Moneda
+from apps.finance.models.currencies import Moneda
 from personas.models import Cliente
 
 def test_notifications():

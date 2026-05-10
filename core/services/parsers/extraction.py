@@ -2,25 +2,14 @@
 import logging
 import io
 import requests
-import pdfplumber
-from email import policy
+import fitz
 from email.parser import BytesParser
-from io import BytesIO
-
+from email import policy
 try:
     from bs4 import BeautifulSoup
 except ImportError:
     BeautifulSoup = None
 
-try:
-    import pypdf
-except ImportError:
-    pypdf = None
-
-try:
-    import PyPDF2
-except ImportError:
-    PyPDF2 = None
 
 logger = logging.getLogger(__name__)
 
@@ -48,32 +37,19 @@ class ExtractionService:
     def _extract_pdf(file_obj):
         texto_extraido = ""
         try:
-            with pdfplumber.open(file_obj) as pdf:
-                for page in pdf.pages:
+            if hasattr(file_obj, 'seek'):
+                file_obj.seek(0)
+            file_content = file_obj.read()
+            with fitz.open(stream=file_content, filetype="pdf") as pdf:
+                for page in pdf:
                     try:
-                        text = page.extract_text()
+                        text = page.get_text()
                         if text: texto_extraido += text + "\n"
                     except Exception as e:
                         logger.warning(f"Error extrayendo página de PDF: {e}")
                         continue
         except Exception as e:
-            logger.error(f"Fallo pdfplumber: {e}")
-
-        # Fallback a pypdf/PyPDF2
-        texto_fallback = ""
-        try:
-            file_obj.seek(0)
-            reader = None
-            if pypdf: reader = pypdf.PdfReader(file_obj)
-            elif PyPDF2: reader = PyPDF2.PdfReader(file_obj)
-            
-            if reader:
-                for page in reader.pages:
-                    texto_fallback += (page.extract_text() or "") + "\n"
-                if texto_fallback:
-                    texto_extraido += "\n\n--- FALLBACK EXTRACTION ---\n\n" + texto_fallback
-        except Exception as e:
-            logger.warning(f"Fallback PDF extraction falló: {e}")
+            logger.error(f"Fallo PyMuPDF: {e}")
         
         return texto_extraido
 
@@ -138,7 +114,7 @@ class ExtractionService:
             try:
                 response = requests.get(boleto.archivo_boleto.url, timeout=15)
                 response.raise_for_status()
-                return BytesIO(response.content)
+                return io.BytesIO(response.content)
             except Exception as e:
                 logger.error(f"Error descargar boleto remoto: {e}")
         

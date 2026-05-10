@@ -1,0 +1,178 @@
+{% extends "base_modern.html" %}
+
+{% block content %}
+<div class="container mx-auto p-6">
+    <h1 class="text-3xl font-bold mb-6 text-gray-800">Conciliación de Proveedores (IA + Excel)</h1>
+    
+    <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+        <p class="text-gray-600 mb-4">Sube un reporte de liquidación del proveedor en formato PDF (BPS, KIU, Sabre, Amadeus) o un archivo Excel para conciliar los costos cobrados contra nuestros registros internos (ItemVenta).</p>
+        
+        <form id="reconciliationForm" class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Archivo de Liquidación (PDF o Excel)</label>
+                <input type="file" id="fileInput" name="file" accept=".pdf,.xlsx,.xls" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border">
+            </div>
+
+            <div class="flex items-center space-x-4">
+                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700 transition">Procesar Conciliación</button>
+                <button type="button" id="exportBtn" class="bg-green-600 text-white px-4 py-2 rounded shadow hover:bg-green-700 transition hidden">Descargar Excel</button>
+            </div>
+        </form>
+
+        <div id="loadingIndicator" class="hidden mt-4 text-blue-600 font-semibold animate-pulse">
+            Procesando archivo con IA... Por favor espera.
+        </div>
+        <div id="errorMsg" class="hidden mt-4 text-red-600 font-semibold"></div>
+    </div>
+
+    <!-- Resultados -->
+    <div id="resultsContainer" class="hidden">
+        <div class="grid grid-cols-3 gap-4 mb-6">
+            <div class="bg-blue-100 p-4 rounded text-center">
+                <span class="block text-sm text-blue-600 font-bold uppercase">Registros Procesados</span>
+                <span id="statTotal" class="text-2xl font-bold text-blue-800">0</span>
+            </div>
+            <div class="bg-green-100 p-4 rounded text-center">
+                <span class="block text-sm text-green-600 font-bold uppercase">Coincidencias (OK)</span>
+                <span id="statOk" class="text-2xl font-bold text-green-800">0</span>
+            </div>
+            <div class="bg-red-100 p-4 rounded text-center">
+                <span class="block text-sm text-red-600 font-bold uppercase">Discrepancias / No Encontrados</span>
+                <span id="statErrors" class="text-2xl font-bold text-red-800">0</span>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Localizador</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pasajero</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Costo Proveedor</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Costo Interno</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Diferencia</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+                    </tr>
+                </thead>
+                <tbody id="resultsBody" class="bg-white divide-y divide-gray-200">
+                    <!-- Filas dinámicas -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('reconciliationForm');
+    const loadingIndicator = document.getElementById('loadingIndicator');
+    const resultsContainer = document.getElementById('resultsContainer');
+    const errorMsg = document.getElementById('errorMsg');
+    const exportBtn = document.getElementById('exportBtn');
+    let currentFile = null;
+
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        loadingIndicator.classList.remove('hidden');
+        resultsContainer.classList.add('hidden');
+        errorMsg.classList.add('hidden');
+        exportBtn.classList.add('hidden');
+
+        const formData = new FormData();
+        const fileInput = document.getElementById('fileInput');
+        currentFile = fileInput.files[0];
+        formData.append('file', currentFile);
+
+        try {
+            const response = await fetch('/api/reconciliation/', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                renderResults(data);
+                exportBtn.classList.remove('hidden');
+            } else {
+                errorMsg.textContent = data.error || 'Ocurrió un error al procesar el archivo.';
+                errorMsg.classList.remove('hidden');
+            }
+        } catch (error) {
+            errorMsg.textContent = 'Error de conexión con el servidor.';
+            errorMsg.classList.remove('hidden');
+        } finally {
+            loadingIndicator.classList.add('hidden');
+        }
+    });
+
+    exportBtn.addEventListener('click', async function() {
+        if (!currentFile) return;
+        
+        loadingIndicator.textContent = "Generando Excel...";
+        loadingIndicator.classList.remove('hidden');
+        
+        const formData = new FormData();
+        formData.append('file', currentFile);
+        formData.append('export_excel', 'true');
+
+        try {
+            const response = await fetch('/api/reconciliation/', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.ok) {
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `conciliacion_${currentFile.name}.xlsx`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+            } else {
+                alert("Error al generar el Excel.");
+            }
+        } catch (error) {
+            alert("Error de conexión al exportar.");
+        } finally {
+            loadingIndicator.classList.add('hidden');
+            loadingIndicator.textContent = "Procesando archivo con IA... Por favor espera.";
+        }
+    });
+
+    function renderResults(data) {
+        document.getElementById('statTotal').textContent = data.total_records;
+        document.getElementById('statOk').textContent = data.ok_count;
+        document.getElementById('statErrors').textContent = data.discrepancies_count + data.not_found_count;
+
+        const tbody = document.getElementById('resultsBody');
+        tbody.innerHTML = '';
+
+        data.results.forEach(row => {
+            const tr = document.createElement('tr');
+            
+            let statusColor = 'text-gray-800';
+            let statusText = row.status;
+            if (row.status === 'OK') statusColor = 'text-green-600 font-bold';
+            if (row.status === 'DISCREPANCY') { statusColor = 'text-orange-500 font-bold'; statusText = 'DISCREPANCIA'; }
+            if (row.status === 'NOT_FOUND_INTERNALLY') { statusColor = 'text-red-600 font-bold'; statusText = 'NO ENCONTRADO'; }
+
+            tr.innerHTML = `
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${row.locator}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${row.passenger || '-'}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${parseFloat(row.provider_cost).toFixed(2)}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${parseFloat(row.internal_cost).toFixed(2)}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm ${parseFloat(row.difference) !== 0 ? 'text-red-600' : 'text-green-600'}">${parseFloat(row.difference).toFixed(2)}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm ${statusColor}">${statusText}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        resultsContainer.classList.remove('hidden');
+    }
+});
+</script>
+{% endblock %}

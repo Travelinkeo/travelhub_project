@@ -7,6 +7,7 @@ from django.db.models import Count, Sum
 from django.utils import timezone
 from datetime import timedelta
 from apps.bookings.models import BoletoImportado
+from apps.bookings.models import HotelTarifario, TipoHabitacion
 import logging
 
 logger = logging.getLogger(__name__)
@@ -23,31 +24,58 @@ class GodModeDashboardView(UserPassesTestMixin, View):
         return self.request.user.is_superuser
 
     def get(self, request, *args, **kwargs):
+        from core.models.ai import AIUsageLog
+        from apps.finance.models.reconciliacion import ConciliacionBoleto
+        
         # 1. Platform Metrics
         total_agencias = Agencia.objects.count()
-        agencias_activas = Agencia.objects.filter(activa=True).count()
+        agencias_activas_objs = Agencia.objects.filter(activa=True)
+        agencias_activas = agencias_activas_objs.count()
         total_usuarios = User.objects.count()
         
-        # 2. Financial Metrics (Estimadas por planes)
-        # Esto es una simplificación, en producción vendría de transacciones reales de Stripe
-        # revenue_mensual = Agencia.objects.filter(plan='BASIC').count() * 29 + \
-        #                  Agencia.objects.filter(plan='PRO').count() * 99 + \
-        #                  Agencia.objects.filter(plan='ENTERPRISE').count() * 299
-        revenue_mensual = 0
-        
-        # 3. Growth
-        last_30_days = timezone.now() - timedelta(days=30)
-        nuevas_agencias_30d = Agencia.objects.filter(fecha_creacion__gte=last_30_days).count()
+        # 2. Sales Metrics (Global)
+        from apps.bookings.models import Venta, VentaAuditFinding
+        total_ventas = Venta.all_objects.count()
+        volumen_ventas = Venta.all_objects.aggregate(total=Sum('total_venta'))['total'] or 0
+        hallazgos_criticos = VentaAuditFinding.all_objects.filter(estado='PEN').count()
 
-        # 4. Agency List (Top 20 más recientes)
+        # 3. Financial Metrics (Real MRR calculation)
+        plan_prices = {
+            'FREE': 0,
+            'BASIC': 29,
+            'PRO': 99,
+            'ENTERPRISE': 299
+        }
+        revenue_mensual = 0
+        for ag in agencias_activas_objs:
+            revenue_mensual += plan_prices.get(ag.plan, 0)
+        
+        # 4. Growth & AI Usage (Last 24h)
+        now = timezone.now()
+        last_24h = now - timedelta(hours=24)
+        last_30_days = now - timedelta(days=30)
+        
+        nuevas_agencias_30d = Agencia.objects.filter(fecha_creacion__gte=last_30_days).count()
+        ai_usage_24h = AIUsageLog.objects.filter(timestamp__gte=last_24h).count()
+        
+        # 5. Financial Leakage (Sum of all discrepancies across all agencies)
+        leakage_data = ConciliacionBoleto.all_objects.aggregate(total=Sum('diferencia_total'))
+        total_leakage = leakage_data['total'] or 0
+        
+        # 6. Global Inventory Metrics
+        total_hoteles = HotelTarifario.all_objects.count()
+        total_habitaciones = TipoHabitacion.objects.count() # No usa AgenciaMixin
+
+        # 7. Agency List (Top 20 más recientes)
         agencias = Agencia.objects.all().order_by('-fecha_creacion')[:20]
 
-        # 5. Plan Distribution
+        # 8. Plan Distribution
         plan_dist = Agencia.objects.values('plan').annotate(count=Count('id'))
 
-        # 6. Global Activity (Real)
+        # 9. Global Activity (Real)
         ultimos_boletos = BoletoImportado.all_objects.select_related('agencia').order_by('-fecha_subida')[:5]
         nuevas_agencias = Agencia.objects.order_by('-fecha_creacion')[:5]
+        ultimos_ai_logs = AIUsageLog.objects.select_related('agencia').order_by('-timestamp')[:5]
         
         # Activity feed (Reconstructed)
         actividad = []
@@ -67,6 +95,14 @@ class GodModeDashboardView(UserPassesTestMixin, View):
                 'fecha': a.fecha_creacion,
                 'color': 'emerald'
             })
+
+        for log in ultimos_ai_logs:
+            actividad.append({
+                'titulo': f'IA: {log.feature}',
+                'detalle': f'Modelo {log.model_name} usado por {log.agencia.nombre if log.agencia else "Global"}. Estado: {log.status}',
+                'fecha': log.timestamp,
+                'color': 'purple' if log.status == 'SUCCESS' else 'red'
+            })
             
         # Sort activity by date
         actividad = sorted(actividad, key=lambda x: x['fecha'], reverse=True)
@@ -76,12 +112,19 @@ class GodModeDashboardView(UserPassesTestMixin, View):
                 'total_agencias': total_agencias,
                 'agencias_activas': agencias_activas,
                 'total_usuarios': total_usuarios,
+                'total_ventas': total_ventas,
+                'volumen_ventas': volumen_ventas,
+                'hallazgos_criticos': hallazgos_criticos,
                 'revenue_mensual': revenue_mensual,
                 'nuevas_30d': nuevas_agencias_30d,
+                'ai_usage_24h': ai_usage_24h,
+                'total_leakage': total_leakage,
+                'total_hoteles': total_hoteles,
+                'total_habitaciones': total_habitaciones,
             },
             'agencias': agencias,
             'plan_dist': plan_dist,
-            'actividad': actividad[:10],
+            'actividad': actividad[:15],
         }
 
         return render(request, self.template_name, context)

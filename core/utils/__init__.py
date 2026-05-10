@@ -133,7 +133,7 @@ def verify_audit_chain(limit: int | None = None) -> tuple[bool, int | None, str 
     Param limit permite cortar la verificación a los N registros más antiguos recientes (útil para pruebas parciales).
     """
     try:
-        from core.models import AuditLog
+        from core.models.audit import AuditLog
         qs = AuditLog.objects.all().order_by('creado', 'id_audit_log')
         if limit:
             qs = qs[:limit]

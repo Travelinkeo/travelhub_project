@@ -14,7 +14,8 @@ from django.db import transaction
 
 # Models are imported inside receivers to avoid circular dependencies during django.setup()
 # from apps.bookings.models import BoletoImportado, Venta, ItemVenta, PagoVenta
-# from core.models_catalogos import Moneda, ProductoServicio
+# from apps.finance.models import Moneda
+# from apps.bookings.models import ProductoServicio
 # from apps.crm.models import Pasajero, Cliente 
 
 from core.notification_service import (
@@ -28,7 +29,8 @@ logger = logging.getLogger(__name__)
 @receiver(post_save, sender='bookings.BoletoImportado')
 def crear_o_actualizar_venta_desde_boleto(sender, instance, created, **kwargs):
     from apps.bookings.models import BoletoImportado, Venta, ItemVenta
-    from core.models_catalogos import Moneda, ProductoServicio
+    from apps.finance.models.currencies import Moneda
+    from apps.bookings.models import ProductoServicio
     from apps.crm.models import Pasajero
     """
     Señal que se dispara después de guardar un BoletoImportado para crear o actualizar
@@ -121,7 +123,7 @@ def crear_o_actualizar_venta_desde_boleto(sender, instance, created, **kwargs):
             # Determinar Agencia (FIX VENTA HUÉRFANA y Pasajero Isolation)
             agencia_owner = instance.agencia
             if not agencia_owner:
-                from core.models import Agencia
+                from core.models.agencia import Agencia
                 # Fallback: Usar la primera agencia disponible (preventivo)
                 agencia_owner = Agencia.objects.filter(activa=True).first()
                 if agencia_owner:
@@ -289,34 +291,7 @@ def crear_o_actualizar_venta_desde_boleto(sender, instance, created, **kwargs):
             logger.error(f"Error en la señal para BoletoImportado {instance.pk}: {e}", exc_info=True)
 
 
-@receiver(pre_save, sender='bookings.Venta')
-def capturar_estado_anterior_venta(sender, instance, **kwargs):
-    from apps.bookings.models import Venta
-    """Captura el estado anterior antes de guardar para detectar cambios"""
-    if instance.pk:
-        try:
-            instance._estado_anterior = Venta.objects.get(pk=instance.pk).estado
-        except Venta.DoesNotExist:
-            instance._estado_anterior = None
-    else:
-        instance._estado_anterior = None
-
-
-@receiver(post_save, sender='bookings.Venta')
-def enviar_notificaciones_venta(sender, instance, created, **kwargs):
-    """Envía notificaciones automáticas según eventos de la venta"""
-    # Evitar envío en operaciones masivas o migraciones
-    if kwargs.get('raw', False):
-        return
-    
-    if created:
-        # Nueva venta creada
-        notificar_confirmacion_venta(instance)
-    else:
-        # Venta actualizada - verificar cambio de estado
-        estado_anterior = getattr(instance, '_estado_anterior', None)
-        if estado_anterior and estado_anterior != instance.estado:
-            notificar_cambio_estado(instance, estado_anterior)
+# Notificaciones de Venta consolidadas en apps/bookings/signals.py (venta_post_save_dispatcher)
 
 
 @receiver(post_save, sender='bookings.PagoVenta')

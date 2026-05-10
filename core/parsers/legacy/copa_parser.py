@@ -2,7 +2,7 @@ import re
 import quopri
 import logging
 from typing import Dict, Any, List
-from .base_parser import BaseTicketParser, ParsedTicketData
+from core.parsers.base_parser import BaseTicketParser, ParsedTicketData
 
 logger = logging.getLogger(__name__)
 

@@ -215,14 +215,8 @@
         <div class="header">
             <div class="header-content">
                 <div class="logo-box">
-                    {% if is_dark_color and agencia.logo_pdf_dark_base64 %}
-                        <img src="{% if 'data:image' in agencia.logo_pdf_dark_base64 %}{{ agencia.logo_pdf_dark_base64 }}{% else %}data:image/png;base64,{{ agencia.logo_pdf_dark_base64 }}{% endif %}" alt="{{ agencia.nombre }}">
-                    {% elif agencia.logo_pdf_base64 %}
-                        <img src="{% if 'data:image' in agencia.logo_pdf_base64 %}{{ agencia.logo_pdf_base64 }}{% else %}data:image/png;base64,{{ agencia.logo_pdf_base64 }}{% endif %}" 
-                             class="{{ 'logo-invertido' if is_dark_color else 'logo-oscuro' }}" alt="{{ agencia.nombre }}">
-                    {% elif agencia.logo_base64 %}
-                        <img src="{% if 'data:image' in agencia.logo_base64 %}{{ agencia.logo_base64 }}{% else %}data:image/png;base64,{{ agencia.logo_base64 }}{% endif %}" 
-                             class="{{ 'logo-invertido' if is_dark_color else 'logo-oscuro' }}" alt="{{ agencia.nombre }}">
+                    {% if agencia_logo_b64 %}
+                        <img src="{{ agencia_logo_b64 }}" alt="{{ agencia.nombre }}">
                     {% else %}
                         <span style="font-size: 24px; font-weight: 900;">{{ agencia.nombre|upper }}</span>
                     {% endif %}

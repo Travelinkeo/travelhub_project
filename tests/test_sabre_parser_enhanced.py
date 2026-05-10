@@ -1,7 +1,7 @@
 import os
 import re
 
-from core.ticket_parser import extract_data_from_text
+from core.services.ticket_parser_service import extract_data_from_text
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(BASE_DIR)

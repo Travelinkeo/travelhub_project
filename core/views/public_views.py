@@ -1,8 +1,9 @@
+from django.views import View
 from django.views.generic import DetailView
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponse
 from apps.bookings.models import Venta, BoletoImportado
-from core.services.pdf_service import generar_pdf_voucher_unificado
+from core.services.voucher_service import generar_voucher_unificado, generar_voucher_alojamiento
 import logging
 
 logger = logging.getLogger(__name__)
@@ -75,7 +76,7 @@ class PublicVoucherPDFView(DetailView):
     def get(self, request, *args, **kwargs):
         venta = self.get_object()
         try:
-            pdf_bytes, filename = generar_pdf_voucher_unificado(venta.pk)
+            pdf_bytes, filename = generar_voucher_unificado(venta.pk)
             if pdf_bytes:
                 response = HttpResponse(pdf_bytes, content_type='application/pdf')
                 response['Content-Disposition'] = f'attachment; filename="{filename}"'
@@ -84,4 +85,19 @@ class PublicVoucherPDFView(DetailView):
                 return HttpResponse("Error generando PDF", status=500)
         except Exception as e:
             logger.error(f"Error generating public PDF: {e}")
+            return HttpResponse("Error interno", status=500)
+class PublicHotelVoucherPDFView(View):
+    def get(self, request, alojamiento_id, *args, **kwargs):
+        try:
+            from apps.bookings.models import AlojamientoReserva
+            alojamiento = AlojamientoReserva.objects.get(pk=alojamiento_id)
+            pdf_bytes, filename = generar_voucher_alojamiento(alojamiento)
+            if pdf_bytes:
+                response = HttpResponse(pdf_bytes, content_type='application/pdf')
+                response['Content-Disposition'] = f'attachment; filename="{filename}"'
+                return response
+            else:
+                return HttpResponse("Error generando PDF", status=500)
+        except Exception as e:
+            logger.error(f"Error generating public hotel PDF: {e}")
             return HttpResponse("Error interno", status=500)

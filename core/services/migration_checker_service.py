@@ -15,7 +15,7 @@ from dataclasses import dataclass, asdict
 from django.core.cache import cache
 from django.utils import timezone
 
-from core.models import MigrationCheck
+from core.models.migration_checks import MigrationCheck
 from apps.bookings.models import Venta
 from apps.crm.models import Pasajero
 from .gemini_migration_validator import GeminiMigrationValidator, MigrationValidationResult

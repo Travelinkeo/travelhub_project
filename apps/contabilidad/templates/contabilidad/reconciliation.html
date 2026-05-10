@@ -1,0 +1,87 @@
+{% extends "base_modern.html" %}
+{% load static %}
+
+{% block title %}Conciliación de Proveedores - TravelHub IA{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-12">
+    <div class="text-center mb-10">
+        <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-indigo-500/10 text-indigo-400 mb-4 border border-indigo-500/20 shadow-xl">
+            <i data-lucide="shield-check" class="w-8 h-8"></i>
+        </div>
+        <h1 class="text-3xl font-bold text-white tracking-tight">Conciliación de Proveedores</h1>
+        <p class="text-gray-400 mt-2 max-w-lg mx-auto">
+            Sube el reporte de tu proveedor (Excel o PDF) y nuestro motor de IA lo cruzará automáticamente con tus ventas registradas.
+        </p>
+    </div>
+
+    {% if error %}
+    <div class="mb-8 p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-3 text-red-400 animate-in fade-in zoom-in duration-300">
+        <i data-lucide="alert-circle" class="w-5 h-5"></i>
+        <p class="text-sm font-medium">{{ error }}</p>
+    </div>
+    {% endif %}
+
+    <div class="bg-gray-800/40 backdrop-blur-xl rounded-3xl border border-white/10 shadow-2xl overflow-hidden animate-in slide-in-from-bottom-8 duration-700">
+        <div class="p-8 md:p-12">
+            <form method="post" enctype="multipart/form-data" class="space-y-8">
+                {% csrf_token %}
+                
+                <!-- Selector de Proveedor -->
+                <div class="space-y-3">
+                    <label class="text-sm font-semibold text-gray-300 ml-1">Seleccionar Proveedor (Opcional)</label>
+                    <select name="proveedor" class="w-full bg-gray-900/50 border border-white/10 rounded-2xl px-5 py-4 text-white focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500/50 transition-all outline-none appearance-none cursor-pointer">
+                        <option value="">Todos los proveedores</option>
+                        {% for p in proveedores %}
+                        <option value="{{ p.id_proveedor }}">{{ p.nombre_proveedor }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Dropzone -->
+                <div class="relative group">
+                    <input type="file" name="reporte" id="reporte" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" required accept=".pdf,.xlsx,.xls">
+                    <div class="border-2 border-dashed border-white/10 group-hover:border-indigo-500/50 rounded-3xl p-12 text-center transition-all bg-gray-900/30 group-hover:bg-indigo-500/5">
+                        <div class="w-20 h-20 bg-gray-800 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-2xl group-hover:scale-110 transition-transform duration-500">
+                            <i data-lucide="upload-cloud" class="w-10 h-10 text-gray-500 group-hover:text-indigo-400 transition-colors"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-2">Suelte su archivo aquí</h3>
+                        <p class="text-gray-500 text-sm">Soportamos reportes en formato PDF (vía IA) y Excel.</p>
+                        <div id="file-name" class="mt-4 text-indigo-400 font-medium hidden"></div>
+                    </div>
+                </div>
+
+                <!-- Submit -->
+                <button type="submit" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold py-5 rounded-2xl shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/40 transition-all transform active:scale-[0.98] flex items-center justify-center gap-3">
+                    <i data-lucide="zap" class="w-5 h-5"></i>
+                    Iniciar Conciliación Inteligente
+                </button>
+            </form>
+        </div>
+        
+        <div class="bg-indigo-500/5 p-6 border-t border-white/5 flex items-center justify-center gap-8">
+            <div class="flex items-center gap-2">
+                <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                <span class="text-[10px] uppercase tracking-widest text-gray-500 font-bold">Matching por Localizador</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
+                <span class="text-[10px] uppercase tracking-widest text-gray-500 font-bold">Extracción Gemini 1.5</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('reporte').addEventListener('change', function(e) {
+        const fileName = e.target.files[0]?.name;
+        const display = document.getElementById('file-name');
+        if (fileName) {
+            display.textContent = `Archivo seleccionado: ${fileName}`;
+            display.classList.remove('hidden');
+        } else {
+            display.classList.add('hidden');
+        }
+    });
+</script>
+{% endblock %}

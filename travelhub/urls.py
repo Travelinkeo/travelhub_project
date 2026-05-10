@@ -6,6 +6,7 @@ from django.views.generic import TemplateView
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth import views as auth_views
 from core.views import dashboard
+from core.views.auth_views import MagicLinkRequestView, MagicLinkVerifyView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -13,9 +14,10 @@ urlpatterns = [
     path('dashboard/ia-insight/', dashboard.AIBusinessAdvisorView.as_view(), name='bi_ia_insight'),
     path('login/', auth_views.LoginView.as_view(), name='login'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+    path('auth/magic-request/', MagicLinkRequestView.as_view(), name='magic_link_request'),
+    path('auth/magic/<str:token>/', MagicLinkVerifyView.as_view(), name='magic_link_verify'),
     path('accounts/', include('django.contrib.auth.urls')),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
-    # path('asistente/', include('apps.accounting_assistant.urls', namespace='accounting_assistant')),
     path('contabilidad/', include('apps.contabilidad.urls', namespace='contabilidad')),
     path('api/contabilidad/', include('apps.contabilidad.urls', namespace='contabilidad_api')),  # API de tasas
     path('api/', include('apps.cotizaciones.urls')),

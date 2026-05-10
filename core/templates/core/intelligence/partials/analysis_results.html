@@ -63,57 +63,6 @@
             return (n || 0).toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         },
         
-        async inyectarERP() {
-            this.processing = true;
-            this.btnErpText = 'INYECTANDO ' + this.boletos.length + ' PAX...';
-            
-            // Calculamos los totales para enviar al backend (el backend espera el total grupal o prorrateado según diseño)
-            // Mantendremos el envío del total grupal de fees ya que el backend actual los prorratea.
-            const numPax = this.boletos.length || 1;
-            const payload = {
-                analysis_data: JSON.parse(document.getElementById('gds-analysis-data').textContent),
-                pagador_id: this.pagadorId,
-                user_fees: { 
-                    fee_proveedor: (Number(this.fProvPax) || 0) * numPax, 
-                    fee_interno: (Number(this.fIntPax) || 0) * numPax 
-                }
-            };
-            try {
-                const csrf = document.querySelector('[name=csrfmiddlewaretoken]').value;
-                const res = await fetch('/intelligence/gds-analyzer/inject/', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrf },
-                    body: JSON.stringify(payload)
-                });
-                const r = await res.json();
-                if(r.status === 'success') {
-                    window.location.href = r.redirect_url;
-                } else {
-                    alert('Error: ' + r.message);
-                }
-            } catch(e) { alert('Error de red'); }
-            this.processing = false;
-            this.btnErpText = 'INYECTAR VENTA AL ERP';
-        },
-
-        descargarFoto() {
-            if(this.processing) return;
-            this.processing = true;
-            this.btnFotoText = 'CAPTURANDO...';
-            html2canvas(document.getElementById('panel-a-capturar'), { 
-                backgroundColor: '#0a0d12', scale: 2, useCORS: false, logging: false, allowTaint: true
-            }).then(canvas => {
-                let a = document.createElement('a');
-                const pnr = this.boletos[0]?.codigo_reserva || 'PNR';
-                a.download = 'Confirmacion_' + pnr + '.png';
-                a.href = canvas.toDataURL('image/png');
-                a.click();
-                this.btnFotoText = 'DESCARGAR CONFIRMACIÓN';
-                this.processing = false;
-            }).catch(err => {
-                this.btnFotoText = 'REINTENTAR';
-                this.processing = false;
-            });
         }
      }" 
      class="flex flex-col gap-6 animate-slide-up w-full">
@@ -240,6 +189,7 @@
                 }">
                     <label class="block text-[10px] uppercase font-black text-primary tracking-widest mb-1">Cliente Pagador de la Reserva</label>
                     <div class="relative">
+                        <input type="hidden" id="pagador-id-hidden" :value="pagadorId">
                         <input type="text" x-model="search" @input.debounce.300ms="find(); open = true" 
                                placeholder="Buscar pagador (Titular o Empresa)..."
                                class="w-full bg-[#111827] border border-gray-700 rounded-lg py-3 pl-10 pr-4 text-sm text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all">
@@ -261,30 +211,30 @@
                             <span>Fee Mayorista</span>
                             <span class="text-slate-500 font-mono italic">(PAX)</span>
                         </label>
-                        <input type="number" x-model.number="fProvPax" @input="recalc()" step="0.01" class="w-full bg-[#111827] border border-gray-700 rounded-lg py-2 px-3 text-sm font-mono text-white outline-none">
+                        <input type="number" id="fee-proveedor" x-model.number="fProvPax" @input="recalc()" step="0.01" class="w-full bg-[#111827] border border-gray-700 rounded-lg py-2 px-3 text-sm font-mono text-white outline-none">
                     </div>
                     <div>
                         <label class="block text-[10px] uppercase font-black text-primary tracking-widest mb-1 flex justify-between">
                             <span>Fee Agencia</span>
                             <span class="text-slate-500 font-mono italic">(PAX)</span>
                         </label>
-                        <input type="number" x-model.number="fIntPax" @input="recalc()" step="0.01" class="w-full bg-[#111827] border border-gray-700 rounded-lg py-2 px-3 text-sm font-mono text-white outline-none">
+                        <input type="number" id="fee-interno" x-model.number="fIntPax" @input="recalc()" step="0.01" class="w-full bg-[#111827] border border-gray-700 rounded-lg py-2 px-3 text-sm font-mono text-white outline-none">
                     </div>
                 </div>
 
                 <div class="space-y-3 pt-2">
                     <div class="flex justify-between items-center text-xs text-slate-400 group">
                         <span class="flex items-center gap-1">Total Fees <span class="text-[9px] opacity-70" x-text="'(' + boletos.length + ' pax)'"></span></span>
-                        <span class="font-mono font-bold" x-text="fmt((fProvPax + fIntPax) * boletos.length)"></span>
+                        <span id="res-subtotal" class="font-mono font-bold" x-text="fmt((fProvPax + fIntPax) * boletos.length)"></span>
                     </div>
                     <div class="flex justify-between items-center text-xs text-pink-500">
                         <span>IGTF (3% Grupal)</span>
-                        <span class="font-mono font-bold" x-text="fmt(igtf)"></span>
+                        <span id="res-igtf" class="font-mono font-bold" x-text="fmt(igtf)"></span>
                     </div>
                     <div class="h-[1px] bg-primary/20 w-full"></div>
                     <div class="flex justify-between items-end">
                         <span class="text-xs font-black text-gray-300 uppercase tracking-widest">Total Venta ERP</span>
-                        <span class="text-3xl font-black text-primary font-mono leading-none" x-text="fmt(totalFinal)"></span>
+                        <span id="res-total-final" class="text-3xl font-black text-primary font-mono leading-none" x-text="fmt(totalFinal)"></span>
                     </div>
                 </div>
             </div>
@@ -293,15 +243,15 @@
 
     <!-- Acciones -->
     <div class="flex flex-col sm:flex-row gap-4 mt-2">
-        <button type="button" @click="descargarFoto()" :disabled="processing"
+        <button type="button" id="btn-descargar-foto"
                 class="flex-1 py-4 bg-[#111827] border border-gray-700 rounded-xl text-white font-black hover:bg-gray-800 transition-all flex items-center justify-center gap-2 shadow-lg">
             <span class="material-symbols-outlined text-gray-400">photo_camera</span>
-            <span x-text="btnFotoText"></span>
+            <span>DESCARGAR CONFIRMACIÓN</span>
         </button>
-        <button type="button" @click="inyectarERP()" :disabled="processing"
+        <button type="button" id="btn-inyectar-erp"
                 class="flex-1 py-4 bg-primary text-[#0a140e] font-black rounded-xl hover:scale-105 transition-all flex items-center justify-center gap-2 glowing-border shadow-lg shadow-primary/20">
             <span class="material-symbols-outlined">bolt</span>
-            <span x-text="btnErpText"></span>
+            <span>INYECTAR VENTA AL ERP</span>
         </button>
     </div>
 </div>

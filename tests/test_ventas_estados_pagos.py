@@ -2,8 +2,9 @@ import pytest
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
 
-from core.models.personas import Cliente
-from core.models_catalogos import Moneda, ProductoServicio
+from apps.crm.models import Cliente
+from apps.finance.models.currencies import Moneda
+from apps.bookings.models import ProductoServicio
 
 pytestmark = pytest.mark.integration
 

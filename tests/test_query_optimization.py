@@ -7,7 +7,7 @@ from rest_framework.test import APIClient
 from apps.bookings.models import BoletoImportado
 from apps.bookings.models import Venta
 from apps.crm.models import Cliente
-from core.models_catalogos import Moneda
+from apps.finance.models.currencies import Moneda
 
 
 @pytest.mark.django_db

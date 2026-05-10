@@ -9,17 +9,17 @@ from decimal import Decimal
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 
-from core.models.facturacion_venezuela import (
-    FacturaVenezuela, 
-    ItemFacturaVenezuela, 
-    DocumentoExportacion
+from apps.finance.models import (
+    FacturaConsolidada, 
+    ItemFacturaConsolidada, 
+    DocumentoExportacionConsolidado
 )
-from core.models_catalogos import Moneda
-from personas.models import Cliente
+from apps.finance.models.currencies import Moneda
+from apps.crm.models import Cliente
 
 
-class TestFacturaVenezuela(TestCase):
-    """Tests para el modelo FacturaVenezuela"""
+class TestFacturaConsolidada(TestCase):
+    """Tests para el modelo FacturaConsolidada"""
     
     def setUp(self):
         """Configuración inicial para tests"""
@@ -45,15 +45,15 @@ class TestFacturaVenezuela(TestCase):
     
     def test_crear_factura_venezuela_basica(self):
         """Test creación básica de factura venezolana"""
-        factura = FacturaVenezuela.objects.create(
+        factura = FacturaConsolidada.objects.create(
             cliente=self.cliente,
             moneda=self.moneda_usd,
             emisor_rif='J-12345678-9',
             emisor_razon_social='Test Agencia C.A.',
             emisor_direccion_fiscal='Caracas, Venezuela',
             cliente_identificacion='V-12345678',
-            tipo_operacion=FacturaVenezuela.TipoOperacion.VENTA_PROPIA,
-            moneda_operacion=FacturaVenezuela.MonedaOperacion.DIVISA,
+            tipo_operacion=FacturaConsolidada.TipoOperacion.VENTA_PROPIA,
+            moneda_operacion=FacturaConsolidada.MonedaOperacion.DIVISA,
             tasa_cambio_bcv=Decimal('37.50')
         )
         
@@ -64,24 +64,24 @@ class TestFacturaVenezuela(TestCase):
     
     def test_calculo_iva_servicio_gravado(self):
         """Test cálculo de IVA para servicios gravados"""
-        factura = FacturaVenezuela.objects.create(
+        factura = FacturaConsolidada.objects.create(
             cliente=self.cliente,
             moneda=self.moneda_usd,
             emisor_rif='J-12345678-9',
             emisor_razon_social='Test Agencia C.A.',
             emisor_direccion_fiscal='Caracas, Venezuela',
             cliente_identificacion='V-12345678',
-            tipo_operacion=FacturaVenezuela.TipoOperacion.VENTA_PROPIA,
-            moneda_operacion=FacturaVenezuela.MonedaOperacion.DIVISA
+            tipo_operacion=FacturaConsolidada.TipoOperacion.VENTA_PROPIA,
+            moneda_operacion=FacturaConsolidada.MonedaOperacion.DIVISA
         )
         
         # Crear item gravado
-        ItemFacturaVenezuela.objects.create(
+        ItemFacturaConsolidada.objects.create(
             factura=factura,
             descripcion='Alojamiento Hotel',
             cantidad=1,
             precio_unitario=Decimal('100.00'),
-            tipo_servicio=ItemFacturaVenezuela.TipoServicio.ALOJAMIENTO_Y_OTROS_GRAVADOS,
+            tipo_servicio=ItemFacturaConsolidada.TipoServicio.ALOJAMIENTO_Y_OTROS_GRAVADOS,
             es_gravado=True,
             alicuota_iva=Decimal('16.00')
         )
@@ -94,24 +94,24 @@ class TestFacturaVenezuela(TestCase):
     
     def test_calculo_servicio_exento(self):
         """Test cálculo para servicios exentos (transporte aéreo nacional)"""
-        factura = FacturaVenezuela.objects.create(
+        factura = FacturaConsolidada.objects.create(
             cliente=self.cliente,
             moneda=self.moneda_usd,
             emisor_rif='J-12345678-9',
             emisor_razon_social='Test Agencia C.A.',
             emisor_direccion_fiscal='Caracas, Venezuela',
             cliente_identificacion='V-12345678',
-            tipo_operacion=FacturaVenezuela.TipoOperacion.VENTA_PROPIA,
-            moneda_operacion=FacturaVenezuela.MonedaOperacion.DIVISA
+            tipo_operacion=FacturaConsolidada.TipoOperacion.VENTA_PROPIA,
+            moneda_operacion=FacturaConsolidada.MonedaOperacion.DIVISA
         )
         
         # Crear item exento
-        ItemFacturaVenezuela.objects.create(
+        ItemFacturaConsolidada.objects.create(
             factura=factura,
             descripcion='Boleto Aéreo CCS-PMV',
             cantidad=1,
             precio_unitario=Decimal('150.00'),
-            tipo_servicio=ItemFacturaVenezuela.TipoServicio.TRANSPORTE_AEREO_NACIONAL,
+            tipo_servicio=ItemFacturaConsolidada.TipoServicio.TRANSPORTE_AEREO_NACIONAL,
             es_gravado=False,
             alicuota_iva=Decimal('0.00')
         )
@@ -124,25 +124,25 @@ class TestFacturaVenezuela(TestCase):
     
     def test_calculo_igtf_spe(self):
         """Test cálculo de IGTF para Sujeto Pasivo Especial"""
-        factura = FacturaVenezuela.objects.create(
+        factura = FacturaConsolidada.objects.create(
             cliente=self.cliente,
             moneda=self.moneda_usd,
             emisor_rif='J-12345678-9',
             emisor_razon_social='Test Agencia C.A.',
             emisor_direccion_fiscal='Caracas, Venezuela',
             cliente_identificacion='V-12345678',
-            tipo_operacion=FacturaVenezuela.TipoOperacion.VENTA_PROPIA,
-            moneda_operacion=FacturaVenezuela.MonedaOperacion.DIVISA,
+            tipo_operacion=FacturaConsolidada.TipoOperacion.VENTA_PROPIA,
+            moneda_operacion=FacturaConsolidada.MonedaOperacion.DIVISA,
             es_sujeto_pasivo_especial=True
         )
         
         # Crear item gravado
-        ItemFacturaVenezuela.objects.create(
+        ItemFacturaConsolidada.objects.create(
             factura=factura,
             descripcion='Servicio Turístico',
             cantidad=1,
             precio_unitario=Decimal('100.00'),
-            tipo_servicio=ItemFacturaVenezuela.TipoServicio.ALOJAMIENTO_Y_OTROS_GRAVADOS,
+            tipo_servicio=ItemFacturaConsolidada.TipoServicio.ALOJAMIENTO_Y_OTROS_GRAVADOS,
             es_gravado=True
         )
         
@@ -155,24 +155,24 @@ class TestFacturaVenezuela(TestCase):
     
     def test_calculo_equivalencias_bolivares(self):
         """Test cálculo de equivalencias en bolívares"""
-        factura = FacturaVenezuela.objects.create(
+        factura = FacturaConsolidada.objects.create(
             cliente=self.cliente,
             moneda=self.moneda_usd,
             emisor_rif='J-12345678-9',
             emisor_razon_social='Test Agencia C.A.',
             emisor_direccion_fiscal='Caracas, Venezuela',
             cliente_identificacion='V-12345678',
-            tipo_operacion=FacturaVenezuela.TipoOperacion.VENTA_PROPIA,
-            moneda_operacion=FacturaVenezuela.MonedaOperacion.DIVISA,
+            tipo_operacion=FacturaConsolidada.TipoOperacion.VENTA_PROPIA,
+            moneda_operacion=FacturaConsolidada.MonedaOperacion.DIVISA,
             tasa_cambio_bcv=Decimal('37.00')
         )
         
-        ItemFacturaVenezuela.objects.create(
+        ItemFacturaConsolidada.objects.create(
             factura=factura,
             descripcion='Servicio Test',
             cantidad=1,
             precio_unitario=Decimal('100.00'),
-            tipo_servicio=ItemFacturaVenezuela.TipoServicio.ALOJAMIENTO_Y_OTROS_GRAVADOS
+            tipo_servicio=ItemFacturaConsolidada.TipoServicio.ALOJAMIENTO_Y_OTROS_GRAVADOS
         )
         
         factura.calcular_impuestos_venezuela()
@@ -184,15 +184,15 @@ class TestFacturaVenezuela(TestCase):
     
     def test_validacion_datos_tercero_intermediacion(self):
         """Test validación de datos de tercero en intermediación"""
-        factura = FacturaVenezuela(
+        factura = FacturaConsolidada(
             cliente=self.cliente,
             moneda=self.moneda_usd,
             emisor_rif='J-12345678-9',
             emisor_razon_social='Test Agencia C.A.',
             emisor_direccion_fiscal='Caracas, Venezuela',
             cliente_identificacion='V-12345678',
-            tipo_operacion=FacturaVenezuela.TipoOperacion.INTERMEDIACION,
-            moneda_operacion=FacturaVenezuela.MonedaOperacion.DIVISA
+            tipo_operacion=FacturaConsolidada.TipoOperacion.INTERMEDIACION,
+            moneda_operacion=FacturaConsolidada.MonedaOperacion.DIVISA
             # Falta tercero_rif y tercero_razon_social
         )
         
@@ -201,15 +201,15 @@ class TestFacturaVenezuela(TestCase):
     
     def test_validacion_tasa_cambio_divisas(self):
         """Test validación de tasa de cambio para facturas en divisas"""
-        factura = FacturaVenezuela(
+        factura = FacturaConsolidada(
             cliente=self.cliente,
             moneda=self.moneda_usd,
             emisor_rif='J-12345678-9',
             emisor_razon_social='Test Agencia C.A.',
             emisor_direccion_fiscal='Caracas, Venezuela',
             cliente_identificacion='V-12345678',
-            tipo_operacion=FacturaVenezuela.TipoOperacion.VENTA_PROPIA,
-            moneda_operacion=FacturaVenezuela.MonedaOperacion.DIVISA
+            tipo_operacion=FacturaConsolidada.TipoOperacion.VENTA_PROPIA,
+            moneda_operacion=FacturaConsolidada.MonedaOperacion.DIVISA
             # Falta tasa_cambio_bcv
         )
         
@@ -217,8 +217,8 @@ class TestFacturaVenezuela(TestCase):
             factura.clean()
 
 
-class TestItemFacturaVenezuela(TestCase):
-    """Tests para el modelo ItemFacturaVenezuela"""
+class TestItemFacturaConsolidada(TestCase):
+    """Tests para el modelo ItemFacturaConsolidada"""
     
     def setUp(self):
         self.moneda_usd = Moneda.objects.create(
@@ -232,25 +232,25 @@ class TestItemFacturaVenezuela(TestCase):
             cedula_identidad='V-11111111'
         )
         
-        self.factura = FacturaVenezuela.objects.create(
+        self.factura = FacturaConsolidada.objects.create(
             cliente=self.cliente,
             moneda=self.moneda_usd,
             emisor_rif='J-12345678-9',
             emisor_razon_social='Test Agencia C.A.',
             emisor_direccion_fiscal='Caracas, Venezuela',
             cliente_identificacion='V-11111111',
-            tipo_operacion=FacturaVenezuela.TipoOperacion.VENTA_PROPIA,
-            moneda_operacion=FacturaVenezuela.MonedaOperacion.DIVISA
+            tipo_operacion=FacturaConsolidada.TipoOperacion.VENTA_PROPIA,
+            moneda_operacion=FacturaConsolidada.MonedaOperacion.DIVISA
         )
     
     def test_validacion_datos_boleto_aereo(self):
         """Test validación de datos obligatorios para boletos aéreos"""
-        item = ItemFacturaVenezuela(
+        item = ItemFacturaConsolidada(
             factura=self.factura,
             descripcion='Boleto Aéreo',
             cantidad=1,
             precio_unitario=Decimal('200.00'),
-            tipo_servicio=ItemFacturaVenezuela.TipoServicio.TRANSPORTE_AEREO_NACIONAL
+            tipo_servicio=ItemFacturaConsolidada.TipoServicio.TRANSPORTE_AEREO_NACIONAL
             # Faltan nombre_pasajero, numero_boleto, itinerario
         )
         
@@ -259,12 +259,12 @@ class TestItemFacturaVenezuela(TestCase):
     
     def test_item_boleto_aereo_completo(self):
         """Test creación de item de boleto aéreo con datos completos"""
-        item = ItemFacturaVenezuela.objects.create(
+        item = ItemFacturaConsolidada.objects.create(
             factura=self.factura,
             descripcion='Boleto Aéreo CCS-PMV',
             cantidad=1,
             precio_unitario=Decimal('200.00'),
-            tipo_servicio=ItemFacturaVenezuela.TipoServicio.TRANSPORTE_AEREO_NACIONAL,
+            tipo_servicio=ItemFacturaConsolidada.TipoServicio.TRANSPORTE_AEREO_NACIONAL,
             nombre_pasajero='Juan Pérez',
             numero_boleto='0577280309142',
             itinerario='CCS-PMV-CCS',
@@ -276,8 +276,8 @@ class TestItemFacturaVenezuela(TestCase):
         self.assertEqual(item.itinerario, 'CCS-PMV-CCS')
 
 
-class TestDocumentoExportacion(TestCase):
-    """Tests para el modelo DocumentoExportacion"""
+class TestDocumentoExportacionConsolidado(TestCase):
+    """Tests para el modelo DocumentoExportacionConsolidado"""
     
     def setUp(self):
         self.moneda_usd = Moneda.objects.create(
@@ -291,7 +291,7 @@ class TestDocumentoExportacion(TestCase):
             numero_pasaporte='US123456789'
         )
         
-        self.factura = FacturaVenezuela.objects.create(
+        self.factura = FacturaConsolidada.objects.create(
             cliente=self.cliente,
             moneda=self.moneda_usd,
             emisor_rif='J-12345678-9',
@@ -299,13 +299,13 @@ class TestDocumentoExportacion(TestCase):
             emisor_direccion_fiscal='Caracas, Venezuela',
             cliente_identificacion='US123456789',
             cliente_es_residente=False,  # Cliente extranjero
-            tipo_operacion=FacturaVenezuela.TipoOperacion.VENTA_PROPIA,
-            moneda_operacion=FacturaVenezuela.MonedaOperacion.DIVISA
+            tipo_operacion=FacturaConsolidada.TipoOperacion.VENTA_PROPIA,
+            moneda_operacion=FacturaConsolidada.MonedaOperacion.DIVISA
         )
     
     def test_crear_documento_exportacion(self):
         """Test creación de documento de exportación"""
-        documento = DocumentoExportacion.objects.create(
+        documento = DocumentoExportacionConsolidado.objects.create(
             factura=self.factura,
             tipo_documento='PASAPORTE',
             numero_documento='US123456789'

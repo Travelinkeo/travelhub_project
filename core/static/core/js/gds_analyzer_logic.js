@@ -39,17 +39,28 @@
             return parseFloat(strVal) || 0;
         }
 
-        const gdsNet = parseSafeFloat(currentGdsData.TOTAL || currentGdsData.total);
+        const boletos = currentGdsData.boletos && Array.isArray(currentGdsData.boletos) 
+            ? currentGdsData.boletos 
+            : (currentGdsData.itinerario ? [currentGdsData] : []);
+
+        let gdsNet = 0;
+        boletos.forEach(b => {
+            gdsNet += parseSafeFloat(b.total || b.TOTAL);
+        });
 
         // --- LÓGICA DE CALCULADORA ---
         function calcularFinanzasGDS() {
             const iProv = document.getElementById('fee-proveedor');
             const iInt = document.getElementById('fee-interno');
             
-            const fProv = parseFloat(iProv ? iProv.value : 0) || 0;
-            const fInt = parseFloat(iInt ? iInt.value : 0) || 0;
+            const fProvPax = parseFloat(iProv ? iProv.value : 0) || 0;
+            const fIntPax = parseFloat(iInt ? iInt.value : 0) || 0;
 
-            const sub = gdsNet + fProv + fInt;
+            const numPax = boletos.length || 1;
+            const totalFProv = fProvPax * numPax;
+            const totalFInt = fIntPax * numPax;
+
+            const sub = gdsNet + totalFProv + totalFInt;
             const igtf = sub * 0.03;
             const total = sub + igtf;
 
@@ -102,10 +113,12 @@
                     backgroundColor: '#0a0d12',
                     scale: 2,
                     useCORS: true,
-                    logging: false
+                    logging: false,
+                    allowTaint: true
                 }).then(canvas => {
                     let a = document.createElement('a');
-                    a.download = 'Confirmacion_' + (currentGdsData.CODIGO_RESERVA || 'Reserva') + '.png';
+                    const pnr = (boletos[0]?.codigo_reserva || currentGdsData.CODIGO_RESERVA || 'Reserva');
+                    a.download = 'Confirmacion_' + pnr + '.png';
                     a.href = canvas.toDataURL('image/png');
                     a.click();
                     btn.innerHTML = originalText;
@@ -131,11 +144,15 @@
                 btn.innerHTML = '<span class="material-symbols-outlined animate-spin">sync</span>';
                 btn.disabled = true;
 
+                const numPax = boletos.length || 1;
+                const pagadorInput = document.getElementById('pagador-id-hidden');
+
                 const payload = {
                     analysis_data: currentGdsData,
+                    pagador_id: pagadorInput ? pagadorInput.value : null,
                     user_fees: {
-                        fee_proveedor: parseFloat(document.getElementById('fee-proveedor').value) || 0,
-                        fee_interno: parseFloat(document.getElementById('fee-interno').value) || 0
+                        fee_proveedor: (parseFloat(document.getElementById('fee-proveedor').value) || 0) * numPax,
+                        fee_interno: (parseFloat(document.getElementById('fee-interno').value) || 0) * numPax
                     }
                 };
 

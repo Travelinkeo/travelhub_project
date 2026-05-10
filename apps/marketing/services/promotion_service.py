@@ -8,8 +8,8 @@ from django.core.files.storage import default_storage
 from decimal import Decimal
 import vertexai
 from vertexai.preview.vision_models import ImageGenerationModel
-from core.models import HotelTarifario, TarifaHabitacion
-from core.models import Agencia
+from apps.bookings.models import HotelTarifario, TarifaHabitacion
+from core.models.agencia import Agencia
 
 class PromotionService:
     """

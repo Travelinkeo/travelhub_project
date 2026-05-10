@@ -1,63 +1,42 @@
 import logging
-import os
 import datetime as dt
 from typing import Dict, Any, Tuple
-import requests
-
-# Importación condicional segura de WeasyPrint
-# Movida dentro del método para evitar bloqueos en el arranque
+from django.template.loader import render_to_string
+from core.services.pdf_renderer import PdfRendererService
 
 logger = logging.getLogger(__name__)
 
 class PdfGenerationService:
     """
     Microservicio dedicado a la renderización de boletos en formato PDF A4.
-    Fuerza el uso de WeasyPrint para garantizar la calidad profesional y márgenes cero
-    que el usuario tenía anteriormente.
+    Usa Gotenberg (Chromium) para garantizar fidelidad y soporte moderno de CSS.
     """
     
     @staticmethod
     def generate_ticket(data: Dict[str, Any], agencia_obj=None, **kwargs) -> Tuple[bytes, str]:
-        from django.template.loader import render_to_string
+        """
+        Genera el PDF del boleto usando la plantilla unificada y Gotenberg.
+        """
         try:
-            from weasyprint import HTML as WeasyHTML
-        except (ImportError, OSError):
-            WeasyHTML = None
-        
-        # Selección de plantilla
-        source_system = data.get('SOURCE_SYSTEM', 'KIU').upper()
-        template_name = "core/tickets/golden_ticket_v2.html"
-        
-        # Inyección de contexto
-        context = PdfGenerationService._build_context(data, agencia_obj, source_system)
-        
-        # Renderizado HTML
-        try:
+            # Selección de plantilla
+            source_system = data.get('SOURCE_SYSTEM', 'KIU').upper()
+            template_name = "core/tickets/golden_ticket_v2.html"
+            
+            # Inyección de contexto
+            context = PdfGenerationService._build_context(data, agencia_obj, source_system)
+            
+            # Renderizado HTML
             html_out = render_to_string(template_name, context)
             
-            # --- PRIORIDAD 1: WEASYPRINT (Calidad Original) ---
-            if WeasyHTML:
-                logger.info(f"🖨️ Generando PDF con WEASYPRINT para PNR: {context.get('CODIGO_RESERVA')}")
-                pdf_bytes = WeasyHTML(string=html_out).write_pdf()
-            else:
-                # --- FALLBACK: GOTENBERG (Si WeasyPrint falla) ---
-                logger.warning("⚠️ WeasyPrint no disponible. Usando Gotenberg (Chromium).")
-                GOTENBERG_URL = "http://gotenberg:3000/forms/chromium/convert/html"
-                files = {'index.html': html_out}
-                payload = {
-                    'marginTop': '0',
-                    'marginBottom': '0',
-                    'marginLeft': '0',
-                    'marginRight': '0',
-                    'paperWidth': '8.27',
-                    'paperHeight': '11.69',
-                    'preferCSSPageSize': 'true'
-                }
-                resp = requests.post(GOTENBERG_URL, files=files, data=payload, timeout=30)
-                if resp.status_code == 200:
-                    pdf_bytes = resp.content
-                else:
-                    raise Exception(f"Gotenberg error {resp.status_code}: {resp.text}")
+            # --- RENDERIZADO CON GOTENBERG CENTRALIZADO ---
+            logger.info(f"🖨️ Enviando boleto a Gotenberg para PNR: {context.get('CODIGO_RESERVA')}")
+            
+            # Verificar salud de Gotenberg antes de proceder
+            if not PdfRendererService.check_health():
+                logger.error("🛑 El servicio de Gotenberg no está disponible. Abortando generación de PDF.")
+                return b"", "gotenberg_offline.pdf"
+            
+            pdf_bytes = PdfRendererService.render_html_to_pdf(html_out)
 
             # Nombre de archivo profesional
             timestamp = dt.datetime.now().strftime("%Y%m%d%H%M%S")
@@ -65,8 +44,9 @@ class PdfGenerationService:
             fname = f"Boleto_{num_boleto}_{timestamp}.pdf"
             
             return pdf_bytes, fname
+            
         except Exception as e:
-            logger.error(f"Fallo en renderizado/generación de PDF: {e}", exc_info=True)
+            logger.error(f"❌ Fallo crítico en generación de PDF de boleto: {e}", exc_info=True)
             return b"", "error_generacion.pdf"
 
     @staticmethod
@@ -109,8 +89,13 @@ class PdfGenerationService:
             if vuelos and isinstance(vuelos, list) and len(vuelos) > 0:
                 loc_aero = vuelos[0].get('localizador_aerolinea') or vuelos[0].get('airline_pnr')
 
+        from core.utils.images import get_agencia_logo_b64
+        is_dark = PdfGenerationService._is_dark_color(agencia_obj.color_primario if agencia_obj and agencia_obj.color_primario else '#0D1E40')
+
         return {
             'agencia': agencia_obj,
+            'agencia_logo_b64': get_agencia_logo_b64(agencia_obj, is_dark_bg=is_dark) if agencia_obj else None,
+            'is_dark_color': is_dark,
             'NOMBRE_DEL_PASAJERO': nombre_original,
             'CODIGO_IDENTIFICACION': data.get('CODIGO_IDENTIFICACION') or data.get('FOID') or data.get('passenger_document') or data.get('foid_pasajero'),
             'NUMERO_DE_BOLETO': data.get('NUMERO_DE_BOLETO') or data.get('ticket_number') or data.get('numero_boleto'),
@@ -126,8 +111,11 @@ class PdfGenerationService:
             'vuelos': data.get('segmentos') or data.get('vuelos') or data.get('itinerario') or data.get('flights') or [],
             'solo_nombre_pasajero': solo_nombre,
             'es_remision': data.get('es_remision', False),
-            'is_dark_color': PdfGenerationService._is_dark_color(agencia_obj.color_primario if agencia_obj and agencia_obj.color_primario else '#0D1E40')
         }
+
+    @staticmethod
+    def generate_ticket_pdf(data: Dict[str, Any], agencia_obj=None, **kwargs) -> Tuple[bytes, str]:
+        return PdfGenerationService.generate_ticket(data, agencia_obj, **kwargs)
 
     @staticmethod
     def _is_dark_color(hex_color: str) -> bool:
@@ -138,3 +126,7 @@ class PdfGenerationService:
             yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000
             return yiq < 128
         except: return True
+
+
+def generate_ticket_pdf(data: Dict[str, Any], agencia_obj=None, **kwargs) -> Tuple[bytes, str]:
+    return PdfGenerationService.generate_ticket(data, agencia_obj, **kwargs)

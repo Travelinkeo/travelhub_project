@@ -2,11 +2,13 @@ import pandas as pd
 import json
 import logging
 import os
-# import google.generativeai as genai
 from decimal import Decimal
 from django.conf import settings
+from apps.common.utils import clean_currency
 from pydantic import BaseModel, Field
 from typing import Optional, Dict
+from google import genai
+from google.genai import types
 
 logger = logging.getLogger(__name__)
 
@@ -50,7 +52,7 @@ class SmartReportProcessor:
                     if source_column and source_column in row:
                         val = row[source_column]
                         if target_field in ['monto_total', 'monto_neto', 'tax', 'comision']:
-                            item[target_field] = cls._clean_decimal(val)
+                            item[target_field] = clean_currency(val)
                         else:
                             item[target_field] = str(val).strip() if pd.notna(val) else None
                 
@@ -74,15 +76,7 @@ class SmartReportProcessor:
             return cls._fallback_mapping(columns)
 
         try:
-            import google.generativeai as genai
-            genai.configure(api_key=api_key, transport="rest")
-            model = genai.GenerativeModel(
-                model_name="gemini-2.0-flash",
-                generation_config={
-                    "response_mime_type": "application/json",
-                    "response_schema": ColumnMappingSchema,
-                }
-            )
+            client = genai.Client(api_key=api_key)
 
             prompt = f"""
             Identify which columns from the list match our standard schema based on the sample data.
@@ -99,8 +93,15 @@ class SmartReportProcessor:
             - comision (Commission)
             - fecha_emision (Date)
             """
-            
-            response = model.generate_content(prompt)
+
+            response = client.models.generate_content(
+                model="gemini-2.0-flash",
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    response_mime_type="application/json",
+                    response_schema=ColumnMappingSchema,
+                )
+            )
             if response and response.text:
                 mapping = json.loads(response.text)
                 logger.info(f"AI Smart Mapping Success: {mapping}")
@@ -129,16 +130,3 @@ class SmartReportProcessor:
             mapping[field] = match
         return mapping
 
-    @classmethod
-    def _clean_decimal(cls, val):
-        if pd.isna(val) or val == '': return Decimal(0)
-        if isinstance(val, (int, float, Decimal)): return Decimal(str(val))
-        try:
-            s = str(val).split(' ')[-1] # Manejar "USD 100.00"
-            s = s.replace('$', '').replace(',', '').strip()
-            # Si el formato es europeo 1.000,00 -> lo detectamos si hay coma
-            if ',' in str(val) and '.' not in str(val):
-                s = str(val).replace(',', '.')
-            return Decimal(s)
-        except:
-            return Decimal(0)

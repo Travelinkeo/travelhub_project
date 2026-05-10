@@ -3,9 +3,10 @@ from decimal import Decimal
 from django.utils import timezone
 from django.db import transaction
 from apps.finance.models import Factura, ItemFactura
-from core.models.facturacion_consolidada import FacturaConsolidada, ItemFacturaConsolidada
+from apps.finance.models import FacturaConsolidada, ItemFacturaConsolidada
 from apps.bookings.models import Venta, ItemVenta, BoletoImportado, FeeVenta
-from core.models_catalogos import Proveedor, Moneda
+from apps.bookings.models import Proveedor
+from apps.finance.models.currencies import Moneda
 from apps.crm.models import Cliente
 
 logger = logging.getLogger(__name__)

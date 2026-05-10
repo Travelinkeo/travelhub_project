@@ -13,7 +13,7 @@ django.setup()
 from core.models import MigrationCheck, Agencia
 from apps.bookings.models import BoletoImportado, Venta
 from personas.models import Pasajero
-from core.models_catalogos import Moneda
+from apps.finance.models.currencies import Moneda
 
 def test_automation():
     print("🧪 PRUEBA AUTOMATIZACION MIGRACION")

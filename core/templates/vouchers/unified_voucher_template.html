@@ -182,12 +182,8 @@
 <body>
     <div class="header">
         <div class="brand">
-            {% if venta.agencia.logo_pdf_base64 %}
-                <img src="{{ venta.agencia.logo_pdf_base64 }}" alt="Logo">
-            {% elif venta.agencia.logo_base64 %}
-                <img src="{{ venta.agencia.logo_base64 }}" alt="Logo">
-            {% elif venta.agencia.logo %}
-                <img src="{{ venta.agencia.logo.url }}" alt="Logo">
+            {% if agencia_logo_b64 %}
+                <img src="{{ agencia_logo_b64 }}" alt="Logo">
             {% else %}
                 <h2 style="margin:0; color:#0f172a;">{{ venta.agencia.nombre }}</h2>
             {% endif %}

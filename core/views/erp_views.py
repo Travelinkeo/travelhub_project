@@ -1,11 +1,17 @@
-from django.views.generic import ListView, TemplateView
+from django.views.generic import ListView, TemplateView, View
+import json
+import datetime
+from django.utils import timezone
+from django.http import HttpResponse
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Count, Sum, Q
-from ..models import LiquidacionProveedor
+from apps.contabilidad.models import LiquidacionProveedor
 from apps.bookings.models import BoletoImportado, AuditLog
-from ..models.pasaportes import PasaporteEscaneado
+from apps.crm.models import PasaporteEscaneado
 # from apps.communications.models import ComunicacionProveedor
 from core.mixins import SaaSMixin
+from core.services.analytics_service import AnalyticsService
+from core.security import get_agencia_from_request
 
 class LiquidacionesListView(SaaSMixin, LoginRequiredMixin, ListView):
     model = LiquidacionProveedor
@@ -165,6 +171,39 @@ class BoletosReportesView(SaaSMixin, LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['active_tab'] = 'boletos_reportes'
+        
+        agencia = get_agencia_from_request(self.request)
+        fecha_inicio = self.request.GET.get('fecha_inicio')
+        fecha_fin = self.request.GET.get('fecha_fin')
+        aerolinea = self.request.GET.get('aerolinea')
+        
+        # Obtener aerolíneas para el filtro
+        context['aerolineas_disponibles'] = AnalyticsService.get_aerolineas_disponibles(agencia)
+        
+        # Obtener reporte usando el servicio centralizado
+        reporte = AnalyticsService.get_reporte_comisiones_boletos(
+            agencia=agencia,
+            fecha_inicio=fecha_inicio,
+            fecha_fin=fecha_fin,
+            aerolinea=aerolinea
+        )
+        
+        context.update({
+            'total_boletos': reporte['totales']['total_boletos'],
+            'total_ventas': reporte['totales']['total_ventas'],
+            'total_comisiones': reporte['totales']['total_comisiones'],
+            'total_neto': reporte['totales']['total_neto'],
+            'total_pendiente': reporte['totales']['total_pendiente'],
+            'boletos': reporte['boletos'],
+            'por_aerolinea': reporte['por_aerolinea'],
+            'filtro_aerolinea': aerolinea,
+            'stats_graficas': json.dumps(AnalyticsService.get_stats_graficas_boletos(
+                agencia=agencia,
+                fecha_inicio=fecha_inicio,
+                fecha_fin=fecha_fin
+            ))
+        })
+        
         return context
 
 class BoletosAnulacionesView(SaaSMixin, LoginRequiredMixin, TemplateView):
@@ -192,7 +231,7 @@ class BoletosImportarView(SaaSMixin, LoginRequiredMixin, TemplateView):
         context['boletos'] = qs.order_by('-fecha_subida')[:20] # Show last 20
         
         # Add Active Consolidators
-        from ..models import Proveedor
+        from apps.bookings.models import Proveedor
         proveedores = Proveedor.objects.filter(
             tipo_proveedor=Proveedor.TipoProveedorChoices.CONSOLIDADOR,
             activo=True
@@ -222,3 +261,25 @@ class BoletosManualView(SaaSMixin, LoginRequiredMixin, CreateView):
         context = super().get_context_data(**kwargs)
         context['active_tab'] = 'boletos_manual'
         return context
+
+class ExportarBoletosExcelView(SaaSMixin, LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        agencia = get_agencia_from_request(request)
+        fecha_inicio = request.GET.get('fecha_inicio')
+        fecha_fin = request.GET.get('fecha_fin')
+        aerolinea = request.GET.get('aerolinea')
+
+        excel_file = AnalyticsService.exportar_reporte_boletos_excel(
+            agencia=agencia,
+            fecha_inicio=fecha_inicio,
+            fecha_fin=fecha_fin,
+            aerolinea=aerolinea
+        )
+
+        filename = f"reporte_boletos_{timezone.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
+        response = HttpResponse(
+            excel_file.getvalue(),
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        return response

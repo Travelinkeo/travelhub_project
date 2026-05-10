@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from core.services.passport_ocr_service import PassportOCRService
-from core.models.pasaportes import PasaporteEscaneado
+from apps.crm.models import PasaporteEscaneado
 from apps.crm.models import Cliente
 import json
 

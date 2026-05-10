@@ -3,10 +3,65 @@
 {% load humanize %}
 {% block content %}
 <div class="container mx-auto px-4 py-8">
+    
+    <!-- DASHBOARD OPERATIVO DE HOTELES -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <!-- Card 1: Ventas -->
+        <div class="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm flex items-center gap-4 group hover:border-[var(--primary)] transition-all">
+            <div class="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600 group-hover:bg-[var(--primary)] group-hover:text-white transition-all">
+                <i data-lucide="hotel" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Ventas (30d)</p>
+                <h3 class="text-2xl font-black text-slate-800 leading-none">{{ stats_30d.total_reservas }}</h3>
+            </div>
+        </div>
+
+        <!-- Card 2: Revenue -->
+        <div class="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm flex items-center gap-4 group hover:border-emerald-500 transition-all">
+            <div class="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600 group-hover:bg-emerald-500 group-hover:text-white transition-all">
+                <i data-lucide="dollar-sign" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Facturación</p>
+                <h3 class="text-2xl font-black text-slate-800 leading-none">${{ stats_30d.revenue|floatformat:0|intcomma }}</h3>
+            </div>
+        </div>
+
+        <!-- Card 3: Margen -->
+        <div class="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm flex items-center gap-4 group hover:border-amber-500 transition-all">
+            <div class="w-12 h-12 bg-amber-50 rounded-xl flex items-center justify-center text-amber-600 group-hover:bg-amber-500 group-hover:text-white transition-all">
+                <i data-lucide="trending-up" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Margen Bruto</p>
+                <h3 class="text-2xl font-black text-slate-800 leading-none">${{ stats_30d.margen_bruto|floatformat:0|intcomma }}</h3>
+            </div>
+        </div>
+
+        <!-- Card 4: Top Destino -->
+        <div class="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm flex items-center gap-4 group hover:border-rose-500 transition-all">
+            <div class="w-12 h-12 bg-rose-50 rounded-xl flex items-center justify-center text-rose-600 group-hover:bg-rose-500 group-hover:text-white transition-all">
+                <i data-lucide="map-pin" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Top Destino</p>
+                <h3 class="text-xl font-black text-slate-800 leading-none truncate max-w-[150px]">{{ top_destino }}</h3>
+            </div>
+        </div>
+    </div>
     <div class="bg-[var(--primary)] rounded-xl p-8 mb-8 text-white relative overflow-hidden shadow-lg border border-[var(--primary-hover)]">
         <div class="absolute inset-0 opacity-10 bg-[url('https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80')] bg-cover bg-center mix-blend-overlay"></div>
         <div class="relative z-10">
             <h1 class="text-3xl font-bold mb-4 text-white drop-shadow-md">Encuentra el Alojamiento Perfecto</h1>
+            
+            {% if checkins_hoy > 0 %}
+            <div class="inline-flex items-center gap-2 bg-emerald-500/20 backdrop-blur-md border border-emerald-500/30 px-3 py-1.5 rounded-full mb-6">
+                <span class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span>
+                <span class="text-[10px] font-black uppercase tracking-widest text-emerald-300">{{ checkins_hoy }} Check-ins para hoy</span>
+            </div>
+            {% endif %}
+
             <form method="get" class="bg-[var(--surface-1)] p-2 rounded-lg flex flex-col md:flex-row gap-2 shadow-2xl items-center border border-[var(--border)]">
                 <div class="flex-1 px-4 py-2 border-r border-[var(--border)] w-full group">
                     <label class="block text-xs font-bold text-[var(--text-muted)] uppercase group-focus-within:text-[var(--primary)] transition-colors">Destino</label>

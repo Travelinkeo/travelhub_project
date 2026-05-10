@@ -1,9 +1,11 @@
+from drf_spectacular.utils import extend_schema
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from ..models import AuditLog
 from ..serializers import AuditLogSerializer
 
+@extend_schema(exclude=True)
 class AuditLogListView(APIView):
     """
     Vista para consultar los logs de auditoría filtrados por modelo y ID de objeto.

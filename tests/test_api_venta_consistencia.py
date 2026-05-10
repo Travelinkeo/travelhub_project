@@ -2,9 +2,9 @@ import pytest
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
 
-from core.models.personas import Cliente
-from core.models.ventas import Venta
-from core.models_catalogos import Moneda
+from apps.crm.models import Cliente
+from apps.bookings.models import Venta
+from apps.finance.models.currencies import Moneda
 
 
 @pytest.mark.django_db

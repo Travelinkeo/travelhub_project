@@ -10,8 +10,9 @@ from django.utils.translation import gettext_lazy as _
 # from apps.crm.models import Cliente # REFACTOR: Usar string 'crm.Cliente'
 # from apps.bookings.models import Venta # Circular dependency risk if not careful, use string 'bookings.Venta' or lazy import
 
-from core.models_catalogos import Moneda
-# REFACTOR: Usar referencias lazy ('core.AsientoContable') para evitar circulares
+from .currencies import Moneda
+from core.models.base import AgenciaMixin, SoftDeleteModel
+# REFACTOR: Usar referencias lazy ('contabilidad.AsientoContable') para evitar circulares
 
 logger = logging.getLogger(__name__)
 
@@ -21,13 +22,13 @@ from django.dispatch import receiver
 
 
 
-class Factura(models.Model):
+class Factura(SoftDeleteModel, AgenciaMixin, models.Model):
     id_factura = models.AutoField(primary_key=True, verbose_name=_("ID Factura"))
     numero_factura = models.CharField(_("Número de Factura"), max_length=50, unique=True, blank=True, help_text=_("Puede ser un correlativo fiscal o interno."))
 
     # REFACTOR: Apuntar a bookings.Venta
     venta_asociada = models.ForeignKey('bookings.Venta', on_delete=models.SET_NULL, blank=True, null=True, related_name='facturas', verbose_name=_("Venta Asociada"))
-    agencia = models.ForeignKey('core.Agencia', on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("Agencia"))
+    # agencia la provee AgenciaMixin
     cliente = models.ForeignKey('crm.Cliente', on_delete=models.PROTECT, verbose_name=_("Cliente"), blank=True, null=True)
 
     fecha_emision = models.DateField(_("Fecha de Emisión"), default=timezone.now)
@@ -83,7 +84,7 @@ class Factura(models.Model):
     
     estado = models.CharField(_("Estado de la Factura"), max_length=3, choices=EstadoFactura.choices, default=EstadoFactura.BORRADOR)
     notas = models.TextField(_("Notas de la Factura"), blank=True, null=True)
-    asiento_contable_factura = models.ForeignKey('core.AsientoContable', related_name='finance_facturas_asociadas', on_delete=models.SET_NULL, blank=True, null=True, verbose_name=_("Asiento Contable de Factura"))
+    asiento_contable_factura = models.ForeignKey('contabilidad.AsientoContable', related_name='finance_facturas_asociadas', on_delete=models.SET_NULL, blank=True, null=True, verbose_name=_("Asiento Contable de Factura"))
     archivo_pdf = models.FileField(_("Archivo PDF"), upload_to='facturas/%Y/%m/', blank=True, null=True)
 
     class Meta:
@@ -186,7 +187,7 @@ class Factura(models.Model):
 # Auditoría forense trasladada a core/signals_audit.py
 
 
-class ItemFactura(models.Model):
+class ItemFactura(SoftDeleteModel, AgenciaMixin, models.Model):
     id_item_factura = models.AutoField(primary_key=True, verbose_name=_("ID Item Factura"))
     factura = models.ForeignKey(Factura, related_name='items_factura', on_delete=models.CASCADE, verbose_name=_("Factura"))
     descripcion = models.CharField(_("Descripción del Item"), max_length=500)
@@ -218,7 +219,7 @@ class ItemFactura(models.Model):
         except Exception:
             logger.exception(f"Failed to recalculate totals for Factura {self.factura_id}")
 
-class ReporteProveedor(models.Model):
+class ReporteProveedor(AgenciaMixin, models.Model):
     class EstadoReporte(models.TextChoices):
         PENDIENTE = 'PEN', _('Pendiente por Procesar')
         PROCESADO = 'PRO', _('Procesado')
@@ -228,7 +229,7 @@ class ReporteProveedor(models.Model):
     DEPRECADO: Usar apps.finance.models.reconciliacion.ReporteReconciliacion en su lugar.
     """
 
-    proveedor = models.ForeignKey('core.Proveedor', on_delete=models.CASCADE, related_name='reportes_finance')
+    proveedor = models.ForeignKey('bookings.Proveedor', on_delete=models.CASCADE, related_name='reportes_finance')
     agencia = models.ForeignKey('core.Agencia', on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("Agencia"))
     archivo = models.FileField(_("Archivo de Reporte"), upload_to='finanzas/reportes/%Y/%m/')
     fecha_carga = models.DateTimeField(auto_now_add=True)
@@ -246,7 +247,7 @@ class ReporteProveedor(models.Model):
         verbose_name = _("Reporte de Proveedor")
         verbose_name_plural = _("Reportes de Proveedores")
 
-class ItemReporte(models.Model):
+class ItemReporte(AgenciaMixin, models.Model):
     class EstadoConciliacion(models.TextChoices):
         MATCH = 'MAT', _('Conciliado (OK)')
         DISCREPANCY = 'DIS', _('Discrepancia detectada')
@@ -274,7 +275,7 @@ class ItemReporte(models.Model):
     def __str__(self):
         return f"{self.numero_boleto} - {self.estado}"
 
-class DiferenciaFinanciera(models.Model):
+class DiferenciaFinanciera(AgenciaMixin, models.Model):
     item_reporte = models.ForeignKey(ItemReporte, on_delete=models.CASCADE, related_name='diferencias')
     campo_discrepancia = models.CharField(max_length=50) # 'monto_total', 'tax', 'comision'
     valor_sistema = models.DecimalField(max_digits=12, decimal_places=2)
@@ -284,9 +285,9 @@ class DiferenciaFinanciera(models.Model):
     resuelto = models.BooleanField(default=False)
     fecha_resolucion = models.DateTimeField(null=True, blank=True)
 
-class GastoOperativo(models.Model):
+class GastoOperativo(SoftDeleteModel, AgenciaMixin, models.Model):
     id_gasto = models.AutoField(primary_key=True, verbose_name=_("ID Gasto"))
-    agencia = models.ForeignKey('core.Agencia', on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("Agencia"))
+    # agencia la provee AgenciaMixin
     descripcion = models.CharField(_("Descripción"), max_length=255)
     monto = models.DecimalField(_("Monto"), max_digits=12, decimal_places=2)
     fecha = models.DateField(_("Fecha"), default=timezone.now)
@@ -297,7 +298,7 @@ class GastoOperativo(models.Model):
     fecha_registro = models.DateTimeField(auto_now_add=True)
     
     # --- CONTROL CONTABLE (Audit Point 3) ---
-    asiento_contable = models.ForeignKey('core.AsientoContable', on_delete=models.SET_NULL, blank=True, null=True, verbose_name=_("Asiento Contable Asociado"))
+    asiento_contable = models.ForeignKey('contabilidad.AsientoContable', on_delete=models.SET_NULL, blank=True, null=True, verbose_name=_("Asiento Contable Asociado"))
     
     class EstadoContable(models.TextChoices):
         PENDIENTE = 'PEN', _('Pendiente de Contabilizar')
@@ -315,7 +316,7 @@ class GastoOperativo(models.Model):
 
     def __str__(self):
         return f"{self.fecha} - {self.descripcion} ({self.monto} {self.moneda})"
-class PagoBinance(models.Model):
+class PagoBinance(SoftDeleteModel, AgenciaMixin, models.Model):
     class EstadoPago(models.TextChoices):
         INICIAL = 'INI', _('Inicial / Pendiente')
         PROCESANDO = 'PRO', _('Procesando')
@@ -350,7 +351,7 @@ class PagoBinance(models.Model):
         return f"Pago {self.merchant_trade_no} - {self.factura.numero_factura} ({self.get_estado_display()})"
 
 
-class TransaccionPago(models.Model):
+class TransaccionPago(SoftDeleteModel, AgenciaMixin, models.Model):
     """
     Modelo blindado para registrar pagos provenientes de Webhooks externos.
     La clave es 'webhook_transaction_id' con unique=True para garantizar idempotencia.

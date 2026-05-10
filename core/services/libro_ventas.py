@@ -6,7 +6,7 @@ Cumple con Providencia 0071 y formato requerido para declaración de IVA
 from decimal import Decimal
 from datetime import date
 from django.db.models import Q, Sum
-from core.models import FacturaConsolidada
+from apps.finance.models import FacturaConsolidada
 
 
 class LibroVentasService:

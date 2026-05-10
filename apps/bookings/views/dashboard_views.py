@@ -6,6 +6,7 @@ from django.db.models import Count, Sum
 from django.db.models.functions import TruncDate
 from django.utils import timezone
 from django.contrib.auth.mixins import LoginRequiredMixin
+from drf_spectacular.utils import extend_schema
 from rest_framework.decorators import api_view, permission_classes, throttle_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -23,6 +24,7 @@ from core.mixins import HtmxResponseMixin
 
 logger = logging.getLogger(__name__)
 
+@extend_schema(exclude=True)
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 @throttle_classes([DashboardRateThrottle])
@@ -153,6 +155,7 @@ def dashboard_metricas(request):
     })
 
 
+@extend_schema(exclude=True)
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def dashboard_alertas(request):

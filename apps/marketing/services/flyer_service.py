@@ -60,7 +60,7 @@ class FlyerService:
         try:
             hotel_data = None
             if hotel_id:
-                from core.models.tarifario_hoteles import HotelTarifario
+                from apps.bookings.models import HotelTarifario
                 hotel = HotelTarifario.objects.filter(pk=hotel_id).first()
                 if hotel:
                     hotel_data = {

@@ -101,15 +101,16 @@ class UniversalAIParser:
 
             content_list = []
             
-            # Estrategia de Visión
             if pdf_path and ('(cid:' in text_limpio or len(text_limpio) < 200 or 'cid:' in text_limpio):
                 try:
-                    import pypdfium2 as pdfium
+                    import fitz
+                    from PIL import Image
                     logger.info(f"👁️ Usando Visión para PDF: {pdf_path}")
-                    pdf = pdfium.PdfDocument(pdf_path)
-                    if len(pdf) > 0:
-                        pil_image = pdf[0].render(scale=2).to_pil()
-                        content_list.append(pil_image)
+                    with fitz.open(pdf_path) as pdf:
+                        if len(pdf) > 0:
+                            pix = pdf[0].get_pixmap(matrix=fitz.Matrix(2, 2))
+                            pil_image = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
+                            content_list.append(pil_image)
                 except Exception as e:
                     logger.error(f"Error en visión PDF: {e}")
 

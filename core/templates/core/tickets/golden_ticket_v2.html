@@ -300,19 +300,10 @@
         <!-- Header 100% -->
         <header class="header">
             <div class="header-logo">
-                {% if agencia %}
-                    {% if is_dark_color and agencia.logo_pdf_dark_base64 %}
-                        <img src="{% if 'data:image' in agencia.logo_pdf_dark_base64 %}{{ agencia.logo_pdf_dark_base64 }}{% else %}data:image/png;base64,{{ agencia.logo_pdf_dark_base64 }}{% endif %}">
-                    {% elif agencia.logo_pdf_base64 %}
-                        <img src="{% if 'data:image' in agencia.logo_pdf_base64 %}{{ agencia.logo_pdf_base64 }}{% else %}data:image/png;base64,{{ agencia.logo_pdf_base64 }}{% endif %}" 
-                             class="{% if is_dark_color %}logo-invertido{% else %}logo-oscuro{% endif %}">
-                    {% elif agencia.logo_light or agencia.logo_dark %}
-                        <img src="{% if is_dark_color and agencia.logo_dark %}{{ agencia.logo_dark.url }}{% elif agencia.logo_light %}{{ agencia.logo_light.url }}{% else %}#{% endif %}" class="{% if is_dark_color %}logo-invertido{% else %}logo-oscuro{% endif %}">
-                    {% else %}
-                        <span style="font-size: 24px; font-weight: 800;">{{ agencia.nombre_comercial|default:agencia.nombre|default:"TRAVELHUB"|upper }}<span class="dot">.</span></span>
-                    {% endif %}
+                {% if agencia_logo_b64 %}
+                    <img src="{{ agencia_logo_b64 }}" alt="Logo">
                 {% else %}
-                    <span style="font-size: 24px; font-weight: 800;">TRAVELHUB<span class="dot">.</span></span>
+                    <span style="font-size: 24px; font-weight: 800;">{{ agencia.nombre_comercial|default:agencia.nombre|default:"TRAVELHUB"|upper }}<span class="dot">.</span></span>
                 {% endif %}
             </div>
             <div class="header-contact">

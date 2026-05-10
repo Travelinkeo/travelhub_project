@@ -4,11 +4,10 @@ from django.contrib.auth.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import RequestFactory
 
-from core.admin import BoletoImportadoAdmin, VentaAdmin
-from core.models.boletos import BoletoImportado
-from core.models.personas import Cliente
-from core.models.ventas import Venta
-from core.models_catalogos import Moneda
+# Updated imports - models moved to apps/
+from apps.bookings.models import BoletoImportado, Venta
+from apps.crm.models import Cliente
+from apps.finance.models.currencies import Moneda
 
 
 @pytest.fixture

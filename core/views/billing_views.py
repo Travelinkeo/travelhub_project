@@ -1,6 +1,7 @@
 """
 Vistas para facturación y gestión de planes SaaS con Stripe.
 """
+from drf_spectacular.utils import extend_schema
 from rest_framework import viewsets, status
 from rest_framework.decorators import action, api_view, permission_classes, authentication_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -87,6 +88,7 @@ PLAN_CONFIG = {
 }
 
 
+@extend_schema(exclude=True)
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def get_plans(request):
@@ -97,6 +99,7 @@ def get_plans(request):
     })
 
 
+@extend_schema(exclude=True)
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_current_subscription(request):
@@ -144,6 +147,7 @@ def get_current_subscription(request):
         return Response({'error': str(e)}, status=500)
 
 
+@extend_schema(exclude=True)
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def create_checkout_session(request):
@@ -190,6 +194,7 @@ def create_checkout_session(request):
         return Response({'error': str(e)}, status=500)
 
 
+@extend_schema(exclude=True)
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def create_portal_session(request):
@@ -217,6 +222,7 @@ def create_portal_session(request):
         return Response({'error': str(e)}, status=500)
 
 
+@extend_schema(exclude=True)
 @api_view(['POST'])
 def stripe_webhook(request):
     """Webhook para eventos de Stripe."""
@@ -249,6 +255,7 @@ def stripe_webhook(request):
     return Response({'status': 'success'})
 
 
+@extend_schema(exclude=True)
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def cancel_subscription(request):

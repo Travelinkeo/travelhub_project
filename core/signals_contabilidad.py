@@ -3,8 +3,6 @@ from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
 
-from .models.contabilidad import AsientoContable, DetalleAsiento, PlanContable
-
 logger = logging.getLogger(__name__)
 
 def _get_cuenta_banco_caja(metodo_pago, moneda):
@@ -12,6 +10,7 @@ def _get_cuenta_banco_caja(metodo_pago, moneda):
     Intenta buscar la cuenta contable de activo (Caja/Banco) adecuada
     según el método de pago y la moneda.
     """
+    from apps.contabilidad.models import PlanContable
     # MAPEO DE CUENTAS (Esto debería estar en configuración, pero hardcodeamos heurística para MVP)
     # Buscamos cuentas que empiecen por '1' (Activo) y coincidan con el nombre
     
@@ -43,6 +42,7 @@ def _get_cuenta_banco_caja(metodo_pago, moneda):
 @receiver(post_save, sender='finance.GastoOperativo')
 def contabilizar_gasto_operativo(sender, instance, created, **kwargs):
     from apps.finance.models import GastoOperativo
+    from apps.contabilidad.models import AsientoContable, DetalleAsiento, PlanContable
     """
     Genera/Actualiza el Asiento Contable automáticamente.
     Asiento:

@@ -255,16 +255,10 @@
     <div class="page">
         <header>
             <div class="header-logo-container">
-                {% if agencia %}
-                    {% if agencia.logo_pdf_dark_base64 %}
-                        <img src="{% if 'data:image' in agencia.logo_pdf_dark_base64 %}{{ agencia.logo_pdf_dark_base64 }}{% else %}data:image/png;base64,{{ agencia.logo_pdf_dark_base64 }}{% endif %}" style="max-height: 45px;">
-                    {% elif agencia.logo_pdf_base64 %}
-                        <img src="{% if 'data:image' in agencia.logo_pdf_base64 %}{{ agencia.logo_pdf_base64 }}{% else %}data:image/png;base64,{{ agencia.logo_pdf_base64 }}{% endif %}" style="max-height: 45px;">
-                    {% else %}
-                        <h1>{{ agencia.nombre|upper }}</h1>
-                    {% endif %}
+                {% if agencia_logo_b64 %}
+                    <img src="{{ agencia_logo_b64 }}" style="max-height: 45px;">
                 {% else %}
-                    <h1>TRAVELHUB</h1>
+                    <h1>{{ agencia.nombre|upper }}</h1>
                 {% endif %}
                 <div class="header-slogan">OFFICIAL ITINERARY</div>
             </div>

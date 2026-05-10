@@ -5,7 +5,6 @@ from typing import List, Optional
 from datetime import datetime, date
 from decimal import Decimal
 
-# import google.generativeai as genai
 import instructor
 from pydantic import BaseModel, Field, validator
 

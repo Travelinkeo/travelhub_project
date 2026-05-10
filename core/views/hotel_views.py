@@ -1,6 +1,13 @@
 from django.views.generic import ListView, DetailView
-from django.db.models import Q
-from core.models import HotelTarifario, Amenity
+from django.db.models import Q, Sum, Count, Avg
+from django.utils import timezone
+from datetime import timedelta
+from apps.bookings.models import HotelTarifario, Amenity
+from apps.bookings.models import AlojamientoReserva
+from core.services.hotel_booking_service import HotelBookingService
+from core.middleware import get_current_agency
+from django.shortcuts import redirect
+from django.contrib import messages
 
 class HotelListView(ListView):
     model = HotelTarifario
@@ -33,6 +40,38 @@ class HotelListView(ListView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
+        agencia = get_current_agency()
+        
+        # --- ANALÍTICA DE HOTELES (30 DÍAS) ---
+        if agencia:
+            hace_30_dias = timezone.now() - timedelta(days=30)
+            reservas_30d = AlojamientoReserva.objects.filter(
+                agencia=agencia,
+                venta__fecha_venta__gte=hace_30_dias
+            )
+            
+            # KPIs Básicos
+            stats = reservas_30d.aggregate(
+                total_res=Count('id_alojamiento_reserva'),
+                total_revenue=Sum('item_venta__total_item_venta'),
+                total_cost=Sum('item_venta__costo_neto_proveedor')
+            )
+            
+            ctx['stats_30d'] = {
+                'total_reservas': stats['total_res'] or 0,
+                'revenue': stats['total_revenue'] or 0,
+                'margen_bruto': (stats['total_revenue'] or 0) - (stats['total_cost'] or 0),
+            }
+            
+            # Top Destino
+            top_dest = reservas_30d.values('ciudad__nombre').annotate(
+                count=Count('id_alojamiento_reserva')
+            ).order_by('-count').first()
+            ctx['top_destino'] = top_dest['ciudad__nombre'] if top_dest else "N/A"
+            
+            # Próximos Check-ins (Hoy y Mañana)
+            ctx['checkins_hoy'] = reservas_30d.filter(check_in=timezone.now().date()).count()
+
         # Datos para filtros laterales
         ctx['destinos'] = HotelTarifario.objects.filter(activo=True).values_list('destino', flat=True).distinct().order_by('destino')
         ctx['categorias'] = HotelTarifario.CATEGORIA_CHOICES
@@ -47,6 +86,33 @@ class HotelDetailView(DetailView):
 
     def get_queryset(self):
         return super().get_queryset().prefetch_related('imagenes', 'tipos_habitacion', 'amenidades', 'tipos_habitacion__tarifas')
+
+    def post(self, request, *args, **kwargs):
+        hotel = self.get_object()
+        tipo_hab_id = request.POST.get('tipo_habitacion')
+        check_in = request.POST.get('check_in')
+        check_out = request.POST.get('check_out')
+        
+        agencia = get_current_agency()
+        if not agencia:
+            messages.error(request, "No se pudo identificar la agencia activa.")
+            return self.get(request, *args, **kwargs)
+            
+        try:
+            venta = HotelBookingService.create_booking(
+                hotel_id=hotel.pk,
+                tipo_hab_id=tipo_hab_id,
+                check_in=check_in,
+                check_out=check_out,
+                agencia=agencia,
+                creado_por=request.user
+            )
+            messages.success(request, f"Reserva {venta.localizador} creada exitosamente.")
+            # Redirigir al admin de la venta o a una vista de éxito
+            return redirect('admin:bookings_venta_change', venta.pk)
+        except Exception as e:
+            messages.error(request, f"Error al crear la reserva: {str(e)}")
+            return self.get(request, *args, **kwargs)
 
 from django.http import HttpResponse
 from core.services.marketing_service import MarketingService

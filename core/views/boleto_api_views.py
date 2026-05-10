@@ -1,4 +1,5 @@
 # core/views/boleto_api_views.py
+from drf_spectacular.utils import extend_schema
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -15,6 +16,7 @@ from core.security import get_agencia_from_request, get_object_tenant_or_404, fi
 
 logger = logging.getLogger(__name__)
 
+@extend_schema(exclude=True)
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def boletos_sin_venta(request):
@@ -28,6 +30,7 @@ def boletos_sin_venta(request):
     serializer = BoletoImportadoSerializer(boletos, many=True)
     return Response(serializer.data)
 
+@extend_schema(exclude=True)
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def reintentar_parseo(request, boleto_id):
@@ -40,6 +43,7 @@ def reintentar_parseo(request, boleto_id):
     boleto.save()
     return Response({'status': 'Parseo reiniciado', 'boleto_id': boleto.id_boleto_importado})
 
+@extend_schema(exclude=True)
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def crear_venta_desde_boleto(request, boleto_id):
@@ -53,7 +57,8 @@ def crear_venta_desde_boleto(request, boleto_id):
     if boleto.venta_asociada:
         return Response({'error': 'El boleto ya tiene una venta asociada'}, status=status.HTTP_400_BAD_REQUEST)
     
-    from core.models_catalogos import Moneda, ProductoServicio
+    from apps.finance.models.currencies import Moneda
+    from apps.bookings.models import ProductoServicio
     moneda_usd, _ = Moneda.objects.get_or_create(codigo_iso='USD', defaults={'nombre': 'Dólar Estadounidense'})
     
     venta = Venta.objects.create(
@@ -85,6 +90,7 @@ def crear_venta_desde_boleto(request, boleto_id):
         'localizador': venta.localizador
     }, status=status.HTTP_201_CREATED)
 
+@extend_schema(exclude=True)
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def dashboard_stats(request):
@@ -125,6 +131,7 @@ def dashboard_stats(request):
         'top_aerolineas': top_aerolineas
     })
 
+@extend_schema(exclude=True)
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def buscar(request):
@@ -166,6 +173,7 @@ def buscar(request):
     serializer = BoletoImportadoSerializer(qs, many=True)
     return Response(serializer.data)
 
+@extend_schema(exclude=True)
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def reporte_comisiones(request):
@@ -220,6 +228,7 @@ def reporte_comisiones(request):
         ]
     })
 
+@extend_schema(exclude=True)
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def solicitar_anulacion(request):
@@ -247,6 +256,7 @@ def solicitar_anulacion(request):
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
+@extend_schema(exclude=True)
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def detalle_boleto(request, boleto_id):
@@ -266,6 +276,7 @@ def detalle_boleto(request, boleto_id):
     }
     return Response(data)
 
+@extend_schema(exclude=True)
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
 @agency_role_required(['admin', 'gerente']) # 🔐 Solo gerentes o admins pueden borrar boletos importados

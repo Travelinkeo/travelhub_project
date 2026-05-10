@@ -33,7 +33,7 @@ class ItineraryTranslator:
                         airlines[airline['code']] = airline['name']
             
             # 2. Actualizar/Sobrescribir con BD (prioridad alta)
-            from .models_catalogos import Aerolinea
+            from apps.common.models import Aerolinea
             for airline in Aerolinea.objects.filter(activa=True):
                 if airline.codigo_iata:
                     airlines[airline.codigo_iata] = airline.nombre

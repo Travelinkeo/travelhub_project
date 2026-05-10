@@ -1,4 +1,4 @@
-import pdfplumber
+import fitz
 import re
 
 def extraer_datos_basicos(ruta_archivo):
@@ -8,9 +8,10 @@ def extraer_datos_basicos(ruta_archivo):
     """
     texto_completo = ""
     try:
-        with pdfplumber.open(ruta_archivo) as pdf:
-            for page in pdf.pages:
-                texto_completo += page.extract_text() or ""
+        with fitz.open(ruta_archivo) as pdf:
+            for page in pdf:
+                t = page.get_text()
+                if t: texto_completo += t + "\n"
         
         # Lógica muy básica de extracción (Mejoraremos esto con los Parsers dedicados luego)
         # Buscar algo que parezca un Localizador (6 letras mayúsculas)

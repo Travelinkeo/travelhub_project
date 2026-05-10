@@ -23,12 +23,26 @@ class UserProfileForm(forms.ModelForm):
 class AgencyBrandingForm(forms.ModelForm):
     """Formulario para branding y contacto de la agencia."""
     class Meta:
+        from core.models.agencia import AgenciaBranding
+        model = AgenciaBranding
+        fields = [
+            'logo', 'color_primario', 'eslogan', 'pie_pagina'
+        ]
+        widgets = {
+            'eslogan': forms.TextInput(attrs={'class': 'bg-slate-800 border border-slate-700 text-white rounded-lg block w-full p-2.5'}),
+            'pie_pagina': forms.Textarea(attrs={'rows': 3, 'class': 'bg-slate-800 border border-slate-700 text-white rounded-lg block w-full p-2.5'}),
+            'color_primario': forms.TextInput(attrs={'type': 'color', 'class': 'h-10 w-20 bg-transparent border-0 cursor-pointer rounded'}),
+            'logo': forms.FileInput(attrs={'class': 'block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700'}),
+        }
+
+class AgencyBasicInfoForm(forms.ModelForm):
+    """Formulario para información básica de la agencia (ahora en el modelo Agencia)."""
+    class Meta:
         model = Agencia
         fields = [
             'nombre_comercial', 'rif', 'iata',
             'telefono_principal', 'email_principal',
-            'direccion', 'ciudad', 'pais',
-            'logo', 'color_primario'
+            'direccion', 'ciudad', 'pais'
         ]
         widgets = {
             'nombre_comercial': forms.TextInput(attrs={'class': 'bg-slate-800 border border-slate-700 text-white rounded-lg block w-full p-2.5'}),
@@ -39,14 +53,13 @@ class AgencyBrandingForm(forms.ModelForm):
             'direccion': forms.Textarea(attrs={'rows': 3, 'class': 'bg-slate-800 border border-slate-700 text-white rounded-lg block w-full p-2.5'}),
             'ciudad': forms.TextInput(attrs={'class': 'bg-slate-800 border border-slate-700 text-white rounded-lg block w-full p-2.5'}),
             'pais': forms.TextInput(attrs={'class': 'bg-slate-800 border border-slate-700 text-white rounded-lg block w-full p-2.5'}),
-            'color_primario': forms.TextInput(attrs={'type': 'color', 'class': 'h-10 w-20 bg-transparent border-0 cursor-pointer rounded'}),
-            'logo': forms.FileInput(attrs={'class': 'block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700'}),
         }
 
 class AgencyAutomationForm(forms.ModelForm):
     """Formulario para configurar el Mailbot y APIs."""
     class Meta:
-        model = Agencia
+        from core.models.agencia import AgenciaConfiguracion
+        model = AgenciaConfiguracion
         fields = ['email_monitor_user', 'email_monitor_password', 'email_monitor_active']
         widgets = {
             'email_monitor_user': forms.EmailInput(attrs={'class': 'bg-slate-800 border border-slate-700 text-white rounded-lg block w-full p-2.5', 'placeholder': 'ejemplo@gmail.com'}),

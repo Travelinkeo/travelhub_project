@@ -2,9 +2,9 @@ from decimal import Decimal
 
 import pytest
 
-from core.models.personas import Cliente
-from core.models.ventas import AuditLog, Venta
-from core.models_catalogos import Moneda
+from apps.crm.models import Cliente
+from apps.bookings.models import AuditLog, Venta
+from apps.finance.models.currencies import Moneda
 
 
 @pytest.mark.django_db

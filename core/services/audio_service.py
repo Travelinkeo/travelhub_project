@@ -1,8 +1,8 @@
-
 import logging
 import os
 import json
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 from django.conf import settings
 
 logger = logging.getLogger(__name__)
@@ -17,22 +17,23 @@ class AudioTranscriptionService:
         self.api_key = getattr(settings, 'GEMINI_API_KEY', None)
         if not self.api_key:
             logger.error("GEMINI_API_KEY no configurada en settings.")
+            self.client = None
             return
 
         try:
-            genai.configure(api_key=self.api_key)
-            # Usamos gemini-flash-latest (Alias estable para la versión Flash actual)
-            self.model = genai.GenerativeModel('gemini-flash-latest')
+            self.client = genai.Client(api_key=self.api_key)
+            self.model_name = 'gemini-2.0-flash'
         except Exception as e:
             logger.error(f"Error configurando Gemini AI: {e}")
+            self.client = None
 
     def transcribe_and_extract(self, audio_file_path):
         """
         Sube el audio a Gemini, lo transcribe y extrae datos de viaje.
-        
+
         Args:
             audio_file_path (str): Ruta local al archivo de audio (ogg, mp3, wav).
-            
+
         Returns:
             dict: {
                 "transcription": "Texto completo...",
@@ -40,17 +41,14 @@ class AudioTranscriptionService:
                 "error": None
             }
         """
-        if not self.api_key:
+        if not self.client:
             return {"error": "API Key no configurada"}
 
         try:
             logger.info(f"Subiendo audio a Gemini: {audio_file_path}")
-            
-            # 1. Subir archivo a la API de File de Gemini
-            # Nota: Esto es diferente a enviar la imagen en bytes. Audio requiere File API.
-            audio_file = genai.upload_file(path=audio_file_path)
-            
-            # 2. Preparar el Prompt
+
+            audio_file = self.client.files.upload(path=audio_file_path)
+
             prompt = """
             Actúa como un agente de viajes experto. Tu tarea es escuchar este audio del cliente y hacer dos cosas:
             1. Transcribir exactamente lo que dice el cliente.
@@ -73,20 +71,20 @@ class AudioTranscriptionService:
             """
 
             logger.info("Enviando prompt a Gemini...")
-            response = self.model.generate_content([prompt, audio_file])
-            
-            # 3. Procesar respuesta
+            response = self.client.models.generate_content(
+                model=self.model_name,
+                contents=[prompt, audio_file]
+            )
+
             response_text = response.text
-            
-            # Limpiar bloques de código si Gemini los agrega (```json ... ```)
+
             clean_text = response_text.replace('```json', '').replace('```', '').strip()
-            
+
             try:
                 result = json.loads(clean_text)
                 return result
             except json.JSONDecodeError:
                 logger.error(f"Error decodificando JSON de Gemini: {response_text}")
-                # Fallback: devolver al menos el texto crudo
                 return {
                     "transcription": response_text,
                     "travel_data": None,

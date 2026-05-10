@@ -2,7 +2,7 @@ from django.views.generic import View
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.contrib.auth.mixins import LoginRequiredMixin
-from core.models.notificaciones import NotificacionInteligente
+from apps.automation.models import NotificacionInteligente
 
 class HTMXNotificacionesVivasView(LoginRequiredMixin, View):
     """

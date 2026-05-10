@@ -5,6 +5,7 @@ from django.conf import settings
 from django.utils import timezone
 from core.mixins import SoftDeleteModel
 from core.models.base import AgenciaMixin
+from django.utils.translation import gettext_lazy as _
 from core.validators import validar_no_vacio_o_espacios
 from core.fields import EncryptedCharField
 
@@ -37,9 +38,9 @@ class Cliente(SoftDeleteModel, AgenciaMixin, models.Model):
     fecha_expiracion_pasaporte = models.DateField(blank=True, null=True)
     fecha_registro = models.DateTimeField(default=timezone.now)
     
-    ciudad = models.ForeignKey('core.Ciudad', on_delete=models.SET_NULL, null=True, blank=True)
-    pais_emision_pasaporte = models.ForeignKey('core.Pais', on_delete=models.SET_NULL, null=True, blank=True, related_name='clientes_emision_pasaporte')
-    nacionalidad = models.ForeignKey('core.Pais', on_delete=models.SET_NULL, null=True, blank=True, related_name='clientes_nacionalidad')
+    ciudad = models.ForeignKey('common.Ciudad', on_delete=models.SET_NULL, null=True, blank=True)
+    pais_emision_pasaporte = models.ForeignKey('common.Pais', on_delete=models.SET_NULL, null=True, blank=True, related_name='clientes_emision_pasaporte')
+    nacionalidad = models.ForeignKey('common.Pais', on_delete=models.SET_NULL, null=True, blank=True, related_name='clientes_nacionalidad')
     
     class TipoCliente(models.TextChoices):
         PARTICULAR = 'IND', 'Individual / Particular'
@@ -60,14 +61,24 @@ class Cliente(SoftDeleteModel, AgenciaMixin, models.Model):
         db_table = 'personas_cliente'
         verbose_name = "Cliente"
         verbose_name_plural = "Clientes"
+        indexes = [
+            models.Index(fields=['agencia', 'tipo_cliente'], name='idx_cliente_agencia_tipo'),
+        ]
 
     def __str__(self):
         return f"{self.nombres} {self.apellidos or ''}".strip()
 
+    @property
+    def nombre_completo(self):
+        return f"{self.nombres} {self.apellidos or ''}".strip()
+
+    def get_nombre_completo(self):
+        return self.nombre_completo
+
 # ==========================================
 # 2. MODELO KANBAN: OPORTUNIDAD (LEAD)
 # ==========================================
-class OportunidadViaje(AgenciaMixin, models.Model):
+class OportunidadViaje(SoftDeleteModel, AgenciaMixin, models.Model):
     class Etapa(models.TextChoices):
         NUEVO = 'NEW', 'Nuevo Lead'
         COTIZANDO = 'QUO', 'Armando Cotización'
@@ -96,7 +107,7 @@ class OportunidadViaje(AgenciaMixin, models.Model):
 # ==========================================
 # 3. MODELOS B2B2C: FREELANCERS Y COMISIONES
 # ==========================================
-class FreelancerProfile(AgenciaMixin, models.Model):
+class FreelancerProfile(SoftDeleteModel, AgenciaMixin, models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     usuario = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='perfil_freelancer', null=True, blank=True)
     # agencia la provee el Mixin automáticamente
@@ -114,7 +125,7 @@ class FreelancerProfile(AgenciaMixin, models.Model):
     def __str__(self):
         return f"{self.usuario.get_full_name()} (Freelancer)"
 
-class ComisionFreelancer(AgenciaMixin, models.Model):
+class ComisionFreelancer(SoftDeleteModel, AgenciaMixin, models.Model):
     venta = models.OneToOneField('bookings.Venta', on_delete=models.CASCADE, related_name='comision_asignada', null=True, blank=True)
     freelancer = models.ForeignKey(FreelancerProfile, on_delete=models.CASCADE, related_name='comisiones_generadas', null=True, blank=True)
     # agencia la provee el Mixin
@@ -147,8 +158,8 @@ class Pasajero(SoftDeleteModel, AgenciaMixin, models.Model):
     email = models.EmailField(blank=True, null=True)
     telefono = models.CharField(max_length=50, blank=True, null=True)
     
-    nacionalidad = models.ForeignKey('core.Pais', on_delete=models.SET_NULL, null=True, blank=True, related_name='pasajeros_nacionalidad')
-    pais_emision_documento = models.ForeignKey('core.Pais', on_delete=models.SET_NULL, null=True, blank=True, db_column='pais_emision_id')
+    nacionalidad = models.ForeignKey('common.Pais', on_delete=models.SET_NULL, null=True, blank=True, related_name='pasajeros_nacionalidad')
+    pais_emision_documento = models.ForeignKey('common.Pais', on_delete=models.SET_NULL, null=True, blank=True, db_column='pais_emision_id')
     
     tipo_documento = models.CharField(max_length=4, default='PASS')
     fecha_emision_documento = models.DateField(blank=True, null=True)
@@ -160,14 +171,31 @@ class Pasajero(SoftDeleteModel, AgenciaMixin, models.Model):
     documento_hash = models.CharField(max_length=64, blank=True, null=True, db_index=True)
     tiene_fiebre_amarilla = models.BooleanField(default=False)
     fecha_vacuna_fiebre_amarilla = models.DateField(blank=True, null=True)
-    
+    foto_perfil = models.ImageField(upload_to='pasajeros/fotos/', blank=True, null=True)
+
     class Meta:
         db_table = 'personas_pasajero'
 
     def __str__(self):
         return f"{self.nombres} {self.apellidos}"
 
-class MensajeWhatsApp(AgenciaMixin, models.Model):
+    @property
+    def nombre_completo(self):
+        return f"{self.nombres} {self.apellidos}".strip()
+
+    @property
+    def numero_documento(self):
+        if self.numero_pasaporte:
+            return self.numero_pasaporte
+        if self.cedula_identidad:
+            return self.cedula_identidad
+        return ''
+
+    def get_nombre_completo(self):
+        return self.nombre_completo
+
+
+class MensajeWhatsApp(SoftDeleteModel, AgenciaMixin, models.Model):
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE, related_name='mensajes_whatsapp', null=True, blank=True)
     direccion = models.CharField(max_length=3, choices=[('IN', 'Entrante'), ('OUT', 'Saliente')])
     texto = models.TextField()
@@ -176,3 +204,87 @@ class MensajeWhatsApp(AgenciaMixin, models.Model):
 
     class Meta:
         db_table = 'crm_whatsapp_mensaje'
+
+class PasaporteEscaneado(AgenciaMixin, models.Model):
+    class ConfianzaChoices(models.TextChoices):
+        HIGH = "HIGH", _("Alta")
+        MEDIUM = "MEDIUM", _("Media")
+        LOW = "LOW", _("Baja")
+
+    class SexoChoices(models.TextChoices):
+        M = "M", _("Masculino")
+        F = "F", _("Femenino")
+
+    imagen_original = models.ImageField(upload_to="pasaportes/%Y/%m/")
+    imagen_procesada = models.ImageField(
+        upload_to="pasaportes/processed/%Y/%m/",
+        blank=True,
+        null=True
+    )
+    numero_pasaporte = models.CharField(max_length=20, blank=True)
+    nombres = models.CharField(max_length=100, blank=True)
+    apellidos = models.CharField(max_length=100, blank=True)
+    nacionalidad = models.CharField(max_length=3, blank=True)
+    fecha_nacimiento = models.DateField(blank=True, null=True)
+    fecha_vencimiento = models.DateField(blank=True, null=True)
+    sexo = models.CharField(
+        max_length=1,
+        choices=SexoChoices.choices,
+        blank=True
+    )
+    lugar_nacimiento = models.CharField(max_length=100, blank=True)
+    confianza_ocr = models.CharField(
+        max_length=10,
+        choices=ConfianzaChoices.choices,
+        default=ConfianzaChoices.MEDIUM
+    )
+    datos_ocr_completos = models.JSONField(default=dict)
+    texto_mrz = models.TextField(blank=True)
+    errores_detectados = models.JSONField(default=list)
+    fecha_procesamiento = models.DateTimeField(auto_now_add=True)
+    verificado_manualmente = models.BooleanField(default=False)
+    
+    cliente = models.ForeignKey(
+        'Cliente',
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True
+    )
+    procesado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True
+    )
+
+    class Meta:
+        verbose_name = _("Pasaporte Escaneado")
+        verbose_name_plural = _("Pasaportes Escaneados")
+        db_table = "core_pasaporte_escaneado"
+        ordering = ["-fecha_procesamiento"]
+
+    def __str__(self):
+        return f"Pasaporte {self.numero_pasaporte} - {self.nombres} {self.apellidos}"
+
+    @property
+    def nombre_completo(self):
+        return f"{self.nombres} {self.apellidos}".strip()
+
+    @property
+    def es_valido(self):
+        if not self.numero_pasaporte:
+            return False
+        from django.utils import timezone
+        if self.fecha_vencimiento and self.fecha_vencimiento < timezone.now().date():
+            return False
+        return True
+
+    def to_cliente_data(self):
+        return {
+            'nombres': self.nombres,
+            'apellidos': self.apellidos,
+            'nacionalidad': self.nacionalidad,
+            'numero_pasaporte': self.numero_pasaporte,
+            'fecha_nacimiento': self.fecha_nacimiento,
+            'fecha_expiracion_pasaporte': self.fecha_vencimiento,
+        }

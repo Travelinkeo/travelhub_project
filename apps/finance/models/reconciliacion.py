@@ -1,8 +1,10 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 import uuid
+from core.models.base import AgenciaMixin
+from core.mixins import SoftDeleteModel
 
-class ReporteReconciliacion(models.Model):
+class ReporteReconciliacion(SoftDeleteModel, AgenciaMixin, models.Model):
     """
     Modelo para almacenar reportes financieros (BSP, Kiu, etc.) subidos por la agencia
     para su conciliación automática.
@@ -17,7 +19,7 @@ class ReporteReconciliacion(models.Model):
     ]
 
     id_reporte = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    agencia = models.ForeignKey('core.Agencia', on_delete=models.CASCADE, related_name='reportes_reconciliacion')
+    # agencia la provee AgenciaMixin
     archivo = models.FileField(upload_to='finance/reportes/%Y/%m/')
     fecha_subida = models.DateTimeField(auto_now_add=True)
     
@@ -43,7 +45,7 @@ class ReporteReconciliacion(models.Model):
         return f"Reporte {self.proveedor} - {self.fecha_subida.strftime('%d/%m/%Y')} ({self.agencia.nombre})"
 
 
-class LineaReporteReconciliacion(models.Model):
+class LineaReporteReconciliacion(SoftDeleteModel, AgenciaMixin, models.Model):
     """
     Cada fila individual extraída del PDF/CSV del Proveedor/BSP.
     Difiere del BoletoImportado, ya que esto dictamina lo que "Cobró" exactamente el proveedor en duro.
@@ -67,7 +69,7 @@ class LineaReporteReconciliacion(models.Model):
         return f"{self.numero_boleto_reportado} - {self.total_cobrado}"
 
 
-class ConciliacionBoleto(models.Model):
+class ConciliacionBoleto(SoftDeleteModel, AgenciaMixin, models.Model):
     """
     Entidad de resolución. Entrelaza el "Boleto Original en Sistema" vs "El Cobro del Proveedor".
     """

@@ -26,30 +26,20 @@ class AIParserService:
     """
 
     @classmethod
-    def parse_text(cls, raw_text: str) -> Dict[str, Any]:
+    def parse_text(cls, raw_text: str, bypass_cache: bool = False) -> Dict[str, Any]:
         """
-        Envía el texto crudo a Gemini y valida la respuesta.
+        Envía el texto crudo a Gemini usando el motor unificado de UniversalAIParser.
         """
-        logger.info(f"🤖 Preparando extracción de IA para bloque de texto ({len(raw_text)} chars)")
+        logger.info(f"🤖 Preparando extracción de IA unificada ({len(raw_text)} chars)")
         
         try:
-            # Limpieza básica para reducir ruido de tokens
-            sanitized_text = raw_text.strip()[:10000] 
-            
-            response = ai_engine.call_gemini(
-                prompt=f"Analiza este boleto y extrae los datos:\n\n{sanitized_text}",
-                system_instruction=cls.SYSTEM_INSTRUCTION,
-                response_schema=ResultadoParseoSchema
-            )
-            
-            if "error" in response:
-                logger.error(f"❌ Error en llamada a Gemini: {response['error']}")
-                return response
-                
-            return response
+            from core.parsers.ai_universal_parser import UniversalAIParser
+            # Delegamos la responsabilidad al motor principal (God Mode)
+            # que ya maneja Structured Outputs, limpieza de tokens y reintentos.
+            return UniversalAIParser().parse(raw_text, bypass_cache=bypass_cache)
             
         except Exception as e:
-            logger.error(f"🔥 Fallo crítico en AIParserService: {str(e)}")
+            logger.error(f"🔥 Fallo crítico en AIParserService (Delegación): {str(e)}")
             return {"error": str(e)}
 
     @classmethod

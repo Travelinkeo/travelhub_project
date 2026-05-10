@@ -4,9 +4,9 @@ from django.db import transaction
 
 from .services.passport_ocr_service import PassportOCRService
 
-@receiver(post_save, sender='core.PasaporteEscaneado')
+@receiver(post_save, sender='crm.PasaporteEscaneado')
 def process_passport_on_save(sender, instance, created, **kwargs):
-    from .models.pasaportes import PasaporteEscaneado
+    from apps.crm.models import PasaporteEscaneado
     """Procesa automáticamente el pasaporte cuando se guarda"""
     if created and instance.imagen_original and not instance.numero_pasaporte:
         try:

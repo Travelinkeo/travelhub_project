@@ -5,9 +5,9 @@ import pytest
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
 
-from core.models.personas import Cliente
-from core.models.ventas import Venta
-from core.models_catalogos import Moneda
+from apps.crm.models import Cliente
+from apps.bookings.models import Venta
+from apps.finance.models.currencies import Moneda
 
 # Asegurar configuración de Django incluso si pytest-django no se auto-carga
 if 'DJANGO_SETTINGS_MODULE' not in os.environ:
@@ -106,17 +106,17 @@ def mock_celery_task(mocker):
 @pytest.fixture
 def sample_pais(db):
     """País de ejemplo para tests"""
-    from core.models_catalogos import Pais
+    from apps.common.models import Pais
     pais, _ = Pais.objects.get_or_create(
-        codigo_iso='VE',
-        defaults={'nombre': 'Venezuela'}
+        codigo_iso_2='VE',
+        defaults={'nombre': 'Venezuela', 'codigo_iso_3': 'VEN'}
     )
     return pais
 
 @pytest.fixture
 def sample_ciudad(db, sample_pais):
     """Ciudad de ejemplo para tests"""
-    from core.models_catalogos import Ciudad
+    from apps.common.models import Ciudad
     ciudad, _ = Ciudad.objects.get_or_create(
         codigo_iata='CCS',
         defaults={'nombre': 'Caracas', 'pais': sample_pais}

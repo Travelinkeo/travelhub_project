@@ -1,12 +1,14 @@
 # core/views/auditoria_views.py
+from drf_spectacular.utils import extend_schema
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django.db.models import Q
 
-from core.models import AuditLog
+from core.models.audit import AuditLog
 
 
+@extend_schema(exclude=True)
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def historial_venta(request, venta_id):
@@ -35,6 +37,7 @@ def historial_venta(request, venta_id):
     })
 
 
+@extend_schema(exclude=True)
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def estadisticas_auditoria(request):

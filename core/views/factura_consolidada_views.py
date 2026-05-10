@@ -8,7 +8,8 @@ from rest_framework.authentication import SessionAuthentication, TokenAuthentica
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from core.models import FacturaConsolidada, ItemFacturaConsolidada
+from core.api.mixins.tenant import TenantViewSetMixin
+from apps.finance.models import FacturaConsolidada, ItemFacturaConsolidada
 from apps.bookings.models import Venta
 from core.serializers_facturacion_consolidada import (
     FacturaConsolidadaSerializer,
@@ -16,7 +17,7 @@ from core.serializers_facturacion_consolidada import (
 )
 
 
-class FacturaConsolidadaViewSet(viewsets.ModelViewSet):
+class FacturaConsolidadaViewSet(TenantViewSetMixin, viewsets.ModelViewSet):
     """
     ViewSet para gestión de facturas consolidadas con normativa venezolana.
     
@@ -159,7 +160,7 @@ class FacturaConsolidadaViewSet(viewsets.ModelViewSet):
             return Response({'error': str(e)}, status=400)
 
 
-class ItemFacturaConsolidadaViewSet(viewsets.ModelViewSet):
+class ItemFacturaConsolidadaViewSet(TenantViewSetMixin, viewsets.ModelViewSet):
     """ViewSet para items de factura consolidada"""
     
     queryset = ItemFacturaConsolidada.objects.select_related('factura').all()

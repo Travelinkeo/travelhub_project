@@ -56,9 +56,17 @@ class ReporteReconciliacionCreateView(LoginRequiredMixin, CreateView):
     template_name = 'finance/reconciliacion/reporte_form.html'
     
     def form_valid(self, form):
-        # Aseguramos el tenant agency (Hardcode a la primera temporalmente)
-        from core.models import Agencia
-        form.instance.agencia = Agencia.objects.first()
+        # Aseguramos el tenant agency desde el contexto del request
+        if hasattr(self.request, 'agencia') and self.request.agencia:
+            form.instance.agencia = self.request.agencia
+        elif self.request.user.is_superuser:
+            # Si es superuser y no tiene agencia, permitimos que el manager lo maneje o falle si es necesario
+            # pero no asignamos una agencia al azar.
+            pass
+        else:
+            messages.error(self.request, "No se pudo identificar la agencia para este reporte.")
+            return self.form_invalid(form)
+
         messages.success(self.request, "Reporte sincronizado de manera exitosa. Listo para ser cruzado a nivel contable.")
         return super().form_valid(form)
 
@@ -90,14 +98,20 @@ class ProcessReconciliacionHTMXView(LoginRequiredMixin, View):
     y redirige a la vista completa del Detail tras concluir la ejecución HTMX.
     """
     def get(self, request, *args, **kwargs):
-        # Allow GET for simplicity, normally POST is better for actions
         reporte_id = self.kwargs.get('pk')
         reporte = get_object_or_404(ReporteReconciliacion, pk=reporte_id)
         
         try:
-            SmartReconciliationService.procesar_reporte(reporte_id)
-            messages.success(request, f"¡Reporte analizado con inteligencia artificial y cruzado estadísticamente con éxito!")
+            # 1. Cambiar estado a PROCESANDO para que el polling de HTMX lo detecte
+            reporte.estado = 'PROCESANDO'
+            reporte.save(update_fields=['estado'])
+            
+            # 2. Encolar Tarea Celery
+            from apps.finance.tasks_reconciliation import conciliar_reporte_batch_task
+            conciliar_reporte_batch_task.delay(str(reporte.pk), str(reporte.agencia.pk))
+            
+            messages.info(request, "El motor de IA ha comenzado el análisis en segundo plano. Los resultados aparecerán en unos instantes.")
         except Exception as e:
-            messages.error(request, f"Error descifrando el documento GDS con IA: {str(e)}")
+            messages.error(request, f"Error al iniciar el análisis IA: {str(e)}")
             
         return redirect('finance:reconciliacion_detail', pk=reporte_id)

@@ -3,8 +3,8 @@ Serializers para modelos consolidados de facturación venezolana.
 """
 
 from rest_framework import serializers
-from .models import FacturaConsolidada, ItemFacturaConsolidada, DocumentoExportacionConsolidado
-from .serializers import ClienteSerializer, MonedaSerializer
+from apps.finance.models import FacturaConsolidada, ItemFacturaConsolidada, DocumentoExportacionConsolidado
+from .serializers import CoreClienteSerializer, MonedaSerializer
 
 
 class ItemFacturaConsolidadaSerializer(serializers.ModelSerializer):
@@ -33,7 +33,7 @@ class FacturaConsolidadaSerializer(serializers.ModelSerializer):
     
     items_factura = ItemFacturaConsolidadaSerializer(many=True, required=False)
     documentos_exportacion = DocumentoExportacionConsolidadoSerializer(many=True, read_only=True)
-    cliente_detalle = ClienteSerializer(source='cliente', read_only=True)
+    cliente_detalle = CoreClienteSerializer(source='cliente', read_only=True)
     moneda_detalle = MonedaSerializer(source='moneda', read_only=True)
     venta_asociada_numero = serializers.CharField(
         source='venta_asociada.localizador', 

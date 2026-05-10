@@ -1,4 +1,4 @@
-from core.models_catalogos import ProductoServicio
+from apps.bookings.models import ProductoServicio
 # If all_objects is not readily available like that, we can use the manager explicitly
 try:
     mgr = ProductoServicio.all_objects

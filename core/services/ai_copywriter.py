@@ -1,6 +1,6 @@
 import os
 import logging
-from core.models.tarifario_hoteles import HotelTarifario
+from apps.bookings.models import HotelTarifario
 from core.services.ai_engine import ai_engine
 
 logger = logging.getLogger(__name__)

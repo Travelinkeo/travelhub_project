@@ -1,6 +1,6 @@
-# import google.generativeai as genai
 import os
 import json
+from google import genai
 from django.conf import settings
 from django.utils.text import slugify
 from ..models import Articulo, GuiaDestino, PostRedesSociales
@@ -14,9 +14,8 @@ class AIContentService:
     """
 
     def __init__(self):
-        import google.generativeai as genai
-        genai.configure(api_key=settings.GEMINI_API_KEY)
-        self.model = genai.GenerativeModel('gemini-2.0-flash')
+        self.client = genai.Client(api_key=settings.GEMINI_API_KEY)
+        self.model_name = 'gemini-2.0-flash'
 
     def generate_article(self, destination, keywords=None):
         """
@@ -44,7 +43,7 @@ class AIContentService:
         """
         
         try:
-            response = self.model.generate_content(prompt)
+            response = self.client.models.generate_content(model=self.model_name, contents=prompt)
             # Limpiar la respuesta si tiene bloques de markdown
             content = response.text.strip()
             if content.startswith('```json'):
@@ -94,7 +93,7 @@ class AIContentService:
         """
         
         try:
-            response = self.model.generate_content(prompt)
+            response = self.client.models.generate_content(model=self.model_name, contents=prompt)
             content = response.text.strip()
             if content.startswith('```json'):
                 content = content[7:-3].strip()

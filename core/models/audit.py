@@ -32,6 +32,9 @@ class AuditLog(models.Model):
     # Referencia opcional a Venta para facilitar filtrado en el panel de ventas
     venta = models.ForeignKey('bookings.Venta', related_name='audit_logs_central', on_delete=models.CASCADE, blank=True, null=True, verbose_name=_("Venta Asociada"))
     
+    # Agencia (opcional para acciones globales)
+    agencia = models.ForeignKey('core.Agencia', related_name='audit_logs', on_delete=models.SET_NULL, blank=True, null=True, verbose_name=_("Agencia"))
+    
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_("Usuario"), related_name='audit_logs_central_creados')
     accion = models.CharField(_("Acción"), max_length=10, choices=Accion.choices)
     descripcion = models.TextField(_("Descripción / Resumen"), blank=True, null=True)
@@ -50,7 +53,11 @@ class AuditLog(models.Model):
         verbose_name = _("Log de Auditoría")
         verbose_name_plural = _("Logs de Auditoría")
         ordering = ['-creado']
-        db_table = 'core_auditlog' # Mantenemos el nombre de tabla para compatibilidad
+        db_table = 'core_auditlog'
+        indexes = [
+            models.Index(fields=['modelo', 'object_id'], name='idx_audit_modelo_object'),
+            models.Index(fields=['agencia', 'creado'], name='idx_audit_agencia_creado'),
+        ]
 
     def __str__(self):
         return f"AuditLog {self.modelo} {self.object_id} {self.accion} {self.creado:%Y-%m-%d %H:%M:%S}"
@@ -90,17 +97,23 @@ def crear_audit_log(*, modelo, object_id, accion, venta=None, descripcion=None, 
     Función utilitaria centralizada para crear logs de auditoría capturando el contexto.
     """
     try:
+        from core.middleware import get_current_user, get_current_agency
         req_meta = get_current_request_meta()
         merged_meta = metadata_extra.copy() if metadata_extra else {}
-        user_obj = None
+        user_obj = get_current_user()
+        agency_obj = get_current_agency()
         
         if req_meta:
             merged_meta.setdefault('ip', req_meta.get('ip'))
             merged_meta.setdefault('user_agent', req_meta.get('user_agent'))
-            # El middleware guarda el usuario en _request_local.user, pero req_meta solo tiene ip/ua?
-            # Revisando core/middleware.py, ThreadLocalContextMiddleware guarda user por separado.
-            from core.middleware import get_current_user
-            user_obj = get_current_user()
+        
+        # Registrar si es impersonación (God Mode)
+        if user_obj and user_obj.is_superuser and agency_obj:
+            # En la nueva arquitectura, si un superuser tiene agency_obj, ES impersonación
+            merged_meta['is_impersonated'] = True
+            merged_meta['impersonation_context'] = agency_obj.nombre
+            if not merged_meta.get('original_user'):
+                merged_meta['original_user'] = user_obj.username
 
         return AuditLog.objects.create(
             modelo=modelo,
@@ -108,6 +121,7 @@ def crear_audit_log(*, modelo, object_id, accion, venta=None, descripcion=None, 
             accion=accion,
             venta=venta,
             user=user_obj,
+            agencia=agency_obj,
             descripcion=descripcion,
             datos_previos=datos_previos,
             datos_nuevos=datos_nuevos,

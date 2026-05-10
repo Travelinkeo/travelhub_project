@@ -8,7 +8,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "travelhub.settings")
 django.setup()
 
-from core.models_catalogos import Aerolinea
+from apps.common.models import Aerolinea
 
 def run():
     # Data format: "NUMERIC-IATA-NAME"

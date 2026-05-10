@@ -4,8 +4,8 @@ import requests
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 from django.conf import settings
 from django.core.files.storage import default_storage
-from core.models.tarifario_hoteles import HotelTarifario, TarifaHabitacion
-from core.models import Agencia
+from apps.bookings.models import HotelTarifario, TarifaHabitacion
+from core.models.agencia import Agencia
 from decimal import Decimal
 import vertexai
 from vertexai.preview.vision_models import ImageGenerationModel

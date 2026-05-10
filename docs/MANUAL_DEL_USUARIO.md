@@ -15,6 +15,7 @@ Piensa en este documento como tu libro de consultas de cabecera. Si alguna vez t
 5. [Pagos y Finanzas: Llevando las cuentas claras](#5-pagos-y-finanzas-llevando-las-cuentas-claras-)
 6. [Tus Clientes: Cuidando a tus viajeros (CRM)](#6-tus-clientes-cuidando-a-tus-viajeros-crm-)
 7. [Marketing y Redes: Vendiendo más viajes](#7-marketing-y-redes-vendiendo-más-viajes-)
+8. [Conciliación Financiera: El Auditor Inteligente](#8-conciliación-financiera-el-auditor-inteligente-)
 
 ---
 
@@ -126,6 +127,29 @@ Un buen agente de viajes consiente a sus clientes. Esta sección es tu libreta d
    - **El Texto (Copy):** Escribirá un mensaje súper atractivo, emocionante y lleno de emojis, listo para que lo copies y lo pegues en tu Instagram, Facebook o WhatsApp.
    - **La Imagen:** Te diseñará una imagen hermosa con fotos del destino, el precio grande y el logo de tu agencia.
 5. Descarga la foto, copia el texto y ¡a vender!
+
+---
+
+## 8. Conciliación Financiera: El Auditor Inteligente 🔍
+
+¿Alguna vez te ha pasado que el proveedor (como el BSP o un Consolidador) te cobra un monto y tú tenías anotado otro? Buscar esas diferencias en listas de cientos de boletos es un dolor de cabeza. Para eso creamos la **Conciliación IA**.
+
+### ¿Cómo funciona?
+1. Ve al Panel de Control y haz clic en el botón verde **"Conciliación IA"**.
+2. Selecciona quién te envió el reporte (ej: Sabre, KIU, BSP).
+3. Sube el archivo PDF o Excel que te mandó el proveedor.
+4. Haz clic en **"Iniciar Conciliación IA"**.
+
+### ¿Qué hace el sistema por ti?
+- **Lectura Automática:** El "Auditor Invisible" lee el reporte y extrae cada número de boleto y el monto que te cobraron.
+- **Cruce de Datos:** Busca en tu base de datos de TravelHub si tienes ese mismo boleto y cuánto dinero registraste tú.
+- **Detección de Errores:** Te mostrará una lista clara con colores:
+    - ✅ **Verde:** Todo cuadra perfectamente.
+    - ⚠️ **Amarillo (Discrepancia):** El monto del proveedor y el tuyo no coinciden (ej: te cobraron 5 centavos más).
+    - 🔴 **Rojo:** Te cobraron un boleto que NO tienes registrado, o tú tienes un boleto que el proveedor aún no te ha cobrado.
+
+### El Toque Maestro: Asientos Contables
+Si el sistema detecta que te cobraron de más o de menos, la Inteligencia Artificial te sugerirá un "asiento de ajuste". Con un solo clic, puedes aprobar que el sistema corrija tu contabilidad automáticamente para que tus libros siempre coincidan con la realidad del banco.
 
 ---
 

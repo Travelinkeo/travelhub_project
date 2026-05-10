@@ -52,7 +52,7 @@
                         </div>
                     </td>
                     <td class="px-6 py-4 text-right">
-                        <button hx-post="{% url 'finance:tax_refund_start' op.pk %}"
+                        <button hx-post="{% url 'finance:iniciar_tax_refund' op.pk %}"
                                 hx-target="#reclamo-{{ op.pk }}"
                                 hx-swap="outerHTML"
                                 class="btn-primary h-8 px-4 text-[10px] flex items-center gap-2 bg-text-main border-text-main hover:bg-black group-hover:scale-105 transition-transform">

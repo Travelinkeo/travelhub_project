@@ -1,6 +1,9 @@
 from django.urls import path
 from . import views
 from .views import webhook_views, kanban_views, freelancer_views
+from .views.marketing_views import MarketingHubView, AnalyzeCampaignPromptView, DispatchCampaignView
+from .views.inbox_views import InboxView, ChatThreadView, SendMessageView
+from .views.ai_chat_views import GenerateSuggestedReplyView
 
 app_name = 'crm'
 
@@ -37,13 +40,13 @@ urlpatterns = [
     path('portal-agente/', freelancer_views.FreelancerDashboardView.as_view(), name='portal_freelancer'),
 
     # --- MOTOR DE MARKETING IA ---
-    path('marketing/', __import__('apps.crm.views.marketing_views', fromlist=['MarketingHubView']).MarketingHubView.as_view(), name='marketing_hub'),
-    path('marketing/analyze/', __import__('apps.crm.views.marketing_views', fromlist=['AnalyzeCampaignPromptView']).AnalyzeCampaignPromptView.as_view(), name='analyze_campaign'),
-    path('marketing/dispatch/', __import__('apps.crm.views.marketing_views', fromlist=['DispatchCampaignView']).DispatchCampaignView.as_view(), name='dispatch_campaign'),
+    path('marketing/', MarketingHubView.as_view(), name='marketing_hub'),
+    path('marketing/analyze/', AnalyzeCampaignPromptView.as_view(), name='analyze_campaign'),
+    path('marketing/dispatch/', DispatchCampaignView.as_view(), name='dispatch_campaign'),
 
     # --- INBOX OMNICANAL (WA + CRM + IA) ---
-    path('inbox/', __import__('apps.crm.views.inbox_views', fromlist=['InboxView']).InboxView.as_view(), name='inbox'),
-    path('inbox/chat/<int:cliente_id>/', __import__('apps.crm.views.inbox_views', fromlist=['ChatThreadView']).ChatThreadView.as_view(), name='chat_thread'),
-    path('inbox/send/<int:cliente_id>/', __import__('apps.crm.views.inbox_views', fromlist=['SendMessageView']).SendMessageView.as_view(), name='send_message'),
-    path('inbox/ai-reply/<int:cliente_id>/', __import__('apps.crm.views.ai_chat_views', fromlist=['GenerateSuggestedReplyView']).GenerateSuggestedReplyView.as_view(), name='ai_suggested_reply'),
+    path('inbox/', InboxView.as_view(), name='inbox'),
+    path('inbox/chat/<int:cliente_id>/', ChatThreadView.as_view(), name='chat_thread'),
+    path('inbox/send/<int:cliente_id>/', SendMessageView.as_view(), name='send_message'),
+    path('inbox/ai-reply/<int:cliente_id>/', GenerateSuggestedReplyView.as_view(), name='ai_suggested_reply'),
 ]

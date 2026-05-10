@@ -2,47 +2,39 @@
 Servicio para generar PDFs de facturas consolidadas con formato legal venezolano.
 """
 
-import os
+import logging
 from django.template.loader import render_to_string
 from django.conf import settings
 
-def _get_html_renderer():
-    """Lazy loader for WeasyPrint HTML to avoid boot-time hangs."""
-    try:
-        from weasyprint import HTML
-        return HTML
-    except Exception as e:
-        import logging
-        logging.getLogger(__name__).error(f"Failed to import WeasyPrint: {e}")
-        return None
-
-import logging
+from .pdf_renderer import PdfRendererService
 
 logger = logging.getLogger(__name__)
 
 
+from core.utils.images import get_agencia_logo_b64
+from core.ticket_parser import is_brand_color_dark
+
 def generar_pdf_factura_consolidada(factura):
     """
     Genera un PDF de la factura consolidada con formato legal venezolano.
-    
-    Args:
-        factura: Instancia de FacturaConsolidada
-        
-    Returns:
-        bytes: Contenido del PDF generado
     """
     try:
+        agencia = factura.agencia
+        is_dark = is_brand_color_dark(agencia.color_primario) if agencia else True
+        
         # Renderizar template HTML
         html_string = render_to_string(
             'facturas/factura_consolidada_pdf.html',
-            {'factura': factura}
+            {
+                'factura': factura,
+                'agencia': agencia,
+                'agencia_logo_b64': get_agencia_logo_b64(agencia, is_dark_bg=is_dark),
+                'is_dark_color': is_dark,
+            }
         )
         
-        # Generar PDF con WeasyPrint
-        HTML_renderer = _get_html_renderer()
-        if not HTML_renderer:
-            raise Exception("WeasyPrint is not available.")
-        pdf_file = HTML_renderer(string=html_string).write_pdf()
+        # Generar PDF con Gotenberg
+        pdf_file = PdfRendererService.render_html_to_pdf(html_string)
         
         logger.info(f"PDF generado exitosamente para factura {factura.numero_factura}")
         return pdf_file

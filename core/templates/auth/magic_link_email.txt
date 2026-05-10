@@ -1,0 +1,19 @@
+Subject: {% if is_onboarding %}Confirma tu acceso a TravelHub{% else %}Tu enlace de acceso a TravelHub{% endif %}
+
+{% if is_onboarding %}
+Hola! Confirma tu acceso a TravelHub haciendo clic en el siguiente enlace:
+
+{{ magic_url }}
+
+Este enlace expira en {{ expiry_minutes }} minutos.
+{% else %}
+Recibimos una solicitud de acceso a tu cuenta de TravelHub.
+
+Si fuiste tu, haz clic en el enlace para ingresar:
+
+{{ magic_url }}
+
+Este enlace expira en {{ expiry_minutes }} minutos.
+
+Si no solicitaste este enlace, puedes ignorar este correo.
+{% endif %}

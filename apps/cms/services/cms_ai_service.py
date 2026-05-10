@@ -1,6 +1,7 @@
 import os
 import logging
-# import google.generativeai as genai
+from google import genai
+from google.genai import types
 from django.conf import settings
 from apps.cms.models import Articulo, GuiaDestino, PostRedesSociales
 from django.utils.text import slugify
@@ -17,9 +18,10 @@ class CMSContentService:
     def __init__(self):
         self.api_key = os.environ.get("GEMINI_API_KEY") or getattr(settings, "GEMINI_API_KEY", None)
         if self.api_key:
-            import google.generativeai as genai
-            genai.configure(api_key=self.api_key, transport="rest")
-            self.model = genai.GenerativeModel("gemini-2.0-flash")
+            self.client = genai.Client(api_key=self.api_key)
+            self.model_name = "gemini-2.0-flash"
+        else:
+            self.client = None
 
     def generate_social_post(self, context_data: str, plataforma: str = "Instagram") -> dict:
         """
@@ -39,9 +41,12 @@ class CMSContentService:
         """
         
         try:
-            response = self.model.generate_content(
-                prompt,
-                generation_config={"response_mime_type": "application/json"}
+            response = self.client.models.generate_content(
+                model=self.model_name,
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    response_mime_type="application/json"
+                )
             )
             return response.text
         except Exception as e:
@@ -67,9 +72,12 @@ class CMSContentService:
         """
         
         try:
-            response = self.model.generate_content(
-                prompt,
-                generation_config={"response_mime_type": "application/json"}
+            response = self.client.models.generate_content(
+                model=self.model_name,
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    response_mime_type="application/json"
+                )
             )
             return response.text
         except Exception as e:
@@ -95,9 +103,12 @@ class CMSContentService:
         """
         
         try:
-            response = self.model.generate_content(
-                prompt,
-                generation_config={"response_mime_type": "application/json"}
+            response = self.client.models.generate_content(
+                model=self.model_name,
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    response_mime_type="application/json"
+                )
             )
             import json
             data = json.loads(response.text)

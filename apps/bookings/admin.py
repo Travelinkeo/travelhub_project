@@ -10,17 +10,18 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.core.files.base import ContentFile
 from django.contrib import messages
 
-# from core.services.pdf_service import generar_pdf_factura, generar_pdf_voucher_unificado
 from core.admin_migration import MigrationCheckInline, validate_migration_requirements_action
 from core.admin_saas import SaaSAdminMixin
-from core.models_catalogos import Moneda, ProductoServicio, Proveedor
+from apps.finance.models.currencies import Moneda
+from apps.bookings.models import ProductoServicio, Proveedor
 from apps.crm.models import Cliente
 from .models import (
     Venta, BoletoImportado, ItemVenta, SegmentoVuelo, 
     AlojamientoReserva, TrasladoServicio, ActividadServicio,
     AlquilerAutoReserva, ServicioAdicionalDetalle, 
     FeeVenta, PagoVenta, AuditLog, VentaParseMetadata,
-    CircuitoTuristico, CircuitoDia, PaqueteAereo, EventoServicio
+    CircuitoTuristico, CircuitoDia, PaqueteAereo, EventoServicio,
+    TarifarioProveedor, HotelTarifario, TipoHabitacion, TarifaHabitacion, Amenity, ImagenHotel
 )
 
 logger = logging.getLogger(__name__)
@@ -39,8 +40,44 @@ class ItemVentaInline(admin.TabularInline):
     model = ItemVenta
     extra = 1
     autocomplete_fields = ['producto_servicio', 'proveedor_servicio']
-    readonly_fields = ('subtotal_item_venta', 'total_item_venta')
-    fields = ('producto_servicio', 'descripcion_personalizada', 'cantidad', 'precio_unitario_venta', 'impuestos_item_venta', 'costo_neto_proveedor', 'fee_proveedor', 'comision_agencia_monto', 'fee_agencia_interno', 'subtotal_item_venta', 'total_item_venta')
+    readonly_fields = ('subtotal_item_venta', 'total_item_venta', 'vincular_componente')
+    fields = (
+        'producto_servicio', 'tipo_item', 'descripcion_personalizada', 
+        'cantidad', 'precio_unitario_venta', 'impuestos_item_venta', 
+        'subtotal_item_venta', 'total_item_venta', 'vincular_componente'
+    )
+
+    def vincular_componente(self, obj):
+        if not obj.pk:
+            return "Guardar para vincular"
+        
+        componentes = [
+            ('segmentos_reserva', 'Vuelo'),
+            ('alojamientos_reserva', 'Hotel'),
+            ('traslados_reserva', 'Traslado'),
+            ('actividades_reserva', 'Actividad'),
+            ('alquileres_reserva', 'Auto'),
+            ('eventos_reserva', 'Evento'),
+            ('circuitos_reserva', 'Circuito'),
+            ('paquetes_reserva', 'Paquete'),
+            ('cruceros_reserva', 'Crucero'),
+            ('detalles_adicionales', 'Servicio Adic.'),
+        ]
+        links = []
+        for rel_name, label in componentes:
+            if hasattr(obj, rel_name):
+                try:
+                    related_queryset = getattr(obj, rel_name).all()
+                    for related in related_queryset:
+                        url = reverse(f'admin:bookings_{related._meta.model_name}_change', args=[related.pk])
+                        links.append(f'<a href="{url}" style="font-weight: bold; color: #4f46e5;">[{label}]</a>')
+                except Exception:
+                    continue
+        
+        if not links:
+            return format_html('<span style="color: #999; font-style: italic;">Sin componente detallado</span>')
+        return format_html(" ".join(links))
+    vincular_componente.short_description = _("Detalle Técnico")
 
 class SegmentoVueloInline(admin.TabularInline):
     model = SegmentoVuelo
@@ -204,8 +241,8 @@ class VentaAdmin(SaaSAdminMixin, admin.ModelAdmin):
             return
 
         venta = queryset.first()
-        from core.services.pdf_service import generar_pdf_voucher_unificado
-        pdf_bytes, filename = generar_pdf_voucher_unificado(venta.pk)
+        from core.services.voucher_service import generar_voucher_unificado
+        pdf_bytes, filename = generar_voucher_unificado(venta.pk)
 
         if pdf_bytes:
             response = HttpResponse(pdf_bytes, content_type='application/pdf')
@@ -250,7 +287,7 @@ class VentaAdmin(SaaSAdminMixin, admin.ModelAdmin):
     @admin.action(description="Generar Liquidación a Proveedor(es)")
     def generar_liquidaciones_proveedor(self, request, queryset):
         from collections import defaultdict
-        from core.models.contabilidad import LiquidacionProveedor, ItemLiquidacion
+        from apps.contabilidad.models import LiquidacionProveedor, ItemLiquidacion
         liquidaciones_creadas = 0
         for venta in queryset:
             items_por_proveedor = defaultdict(list)
@@ -411,11 +448,55 @@ class VentaParseMetadataAdmin(SaaSAdminMixin, admin.ModelAdmin):
     list_display = ('id_metadata','venta','fuente','creado')
     readonly_fields = ('raw_normalized_json','segments_json','creado')
 
+@admin.register(AlojamientoReserva)
+class AlojamientoReservaAdmin(SaaSAdminMixin, admin.ModelAdmin):
+    saas_agency_field = 'venta__agencia'
+    list_display = ('id_alojamiento_reserva', 'nombre_establecimiento', 'venta', 'check_in', 'check_out', 'nombre_pasajero')
+    search_fields = ('nombre_establecimiento', 'nombre_pasajero', 'localizador_proveedor')
+    list_filter = ('check_in', 'check_out')
+    autocomplete_fields = ['venta', 'proveedor', 'ciudad']
+    actions = ['generar_voucher_hotel']
+
+    @admin.action(description="Generar Voucher de Hotel (PDF)")
+    def generar_voucher_hotel(self, request, queryset):
+        if queryset.count() != 1:
+            messages.error(request, "Por favor, seleccione exactamente una reserva para generar el voucher.")
+            return
+
+        reserva = queryset.first()
+        from core.services.voucher_service import generar_voucher_alojamiento
+        pdf_bytes, filename = generar_voucher_alojamiento(reserva)
+
+        if pdf_bytes:
+            response = HttpResponse(pdf_bytes, content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="{filename}"'
+            return response
+        else:
+            messages.error(request, f"No se pudo generar el voucher para {reserva.nombre_establecimiento}.")
+
 @admin.register(AlquilerAutoReserva)
 class AlquilerAutoReservaAdmin(SaaSAdminMixin, admin.ModelAdmin):
     saas_agency_field = 'venta__agencia'
     list_display = ('id_alquiler_auto','venta','compania_rentadora','fecha_hora_retiro')
     autocomplete_fields = ['venta','proveedor','ciudad_retiro','ciudad_devolucion']
+    actions = ['generar_voucher_auto']
+
+    @admin.action(description="Generar Voucher de Auto (PDF)")
+    def generar_voucher_auto(self, request, queryset):
+        if queryset.count() != 1:
+            messages.error(request, "Por favor, seleccione exactamente un alquiler para generar el voucher.")
+            return
+
+        alquiler = queryset.first()
+        from core.services.voucher_service import generar_voucher_alquiler_auto
+        pdf_bytes, filename = generar_voucher_alquiler_auto(alquiler)
+
+        if pdf_bytes:
+            response = HttpResponse(pdf_bytes, content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="{filename}"'
+            return response
+        else:
+            messages.error(request, f"No se pudo generar el voucher para el alquiler {alquiler.pk}.")
 
 @admin.register(EventoServicio)
 class EventoServicioAdmin(SaaSAdminMixin, admin.ModelAdmin):
@@ -440,3 +521,159 @@ class ServicioAdicionalDetalleAdmin(SaaSAdminMixin, admin.ModelAdmin):
     saas_agency_field = 'venta__agencia'
     list_display = ('id_servicio_adicional','venta','tipo_servicio','codigo_referencia')
     autocomplete_fields = ['venta','proveedor']
+    actions = ['generar_voucher_servicio_action']
+
+    @admin.action(description="Generar Voucher de Servicio (PDF)")
+    def generar_voucher_servicio_action(self, request, queryset):
+        if queryset.count() != 1:
+            messages.error(request, "Por favor, seleccione exactamente un servicio para generar el voucher.")
+            return
+
+        servicio = queryset.first()
+        from core.services.voucher_service import generar_voucher_servicio
+        pdf_bytes, filename = generar_voucher_servicio(servicio)
+
+        if pdf_bytes:
+            response = HttpResponse(pdf_bytes, content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="{filename}"'
+            return response
+        else:
+            messages.error(request, f"No se pudo generar el voucher para el servicio {servicio.pk}.")
+            
+
+@admin.register(TrasladoServicio)
+class TrasladoServicioAdmin(SaaSAdminMixin, admin.ModelAdmin):
+    saas_agency_field = 'venta__agencia'
+    list_display = ('id_traslado_servicio', 'venta', 'tipo_traslado', 'origen', 'destino', 'fecha_hora')
+    autocomplete_fields = ['venta', 'proveedor']
+    actions = ['generar_voucher_traslado_action']
+
+    @admin.action(description="Generar Voucher de Traslado (PDF)")
+    def generar_voucher_traslado_action(self, request, queryset):
+        if queryset.count() != 1:
+            messages.error(request, "Por favor, seleccione exactamente un traslado para generar el voucher.")
+            return
+
+        traslado = queryset.first()
+        from core.services.voucher_service import generar_voucher_traslado
+        pdf_bytes, filename = generar_voucher_traslado(traslado)
+
+        if pdf_bytes:
+            response = HttpResponse(pdf_bytes, content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="{filename}"'
+            return response
+        else:
+            messages.error(request, f"No se pudo generar el voucher para el traslado {traslado.pk}.")
+
+
+@admin.register(ActividadServicio)
+class ActividadServicioAdmin(SaaSAdminMixin, admin.ModelAdmin):
+    saas_agency_field = 'venta__agencia'
+    list_display = ('id_actividad_servicio', 'venta', 'nombre', 'fecha', 'proveedor')
+    autocomplete_fields = ['venta', 'proveedor']
+    actions = ['generar_voucher_actividad_action']
+
+    @admin.action(description="Generar Voucher de Actividad (PDF)")
+    def generar_voucher_actividad_action(self, request, queryset):
+        if queryset.count() != 1:
+            messages.error(request, "Por favor, seleccione exactamente una actividad para generar el voucher.")
+            return
+
+        actividad = queryset.first()
+        from core.services.voucher_service import generar_voucher_actividad
+        pdf_bytes, filename = generar_voucher_actividad(actividad)
+
+        if pdf_bytes:
+            response = HttpResponse(pdf_bytes, content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="{filename}"'
+            return response
+        else:
+            messages.error(request, f"No se pudo generar el voucher para la actividad {actividad.pk}.")
+
+
+# =======================================================
+# TARIFARIO Y HOTELES (MIGRADO DE CORE)
+# =======================================================
+
+class TarifaHabitacionInline(admin.TabularInline):
+    model = TarifaHabitacion
+    extra = 1
+    fields = ['fecha_inicio', 'fecha_fin', 'nombre_temporada', 'moneda', 'tipo_tarifa', 'tarifa_sgl', 'tarifa_dbl', 'tarifa_tpl', 'tarifa_cpl', 'tarifa_nino']
+
+class TipoHabitacionInline(admin.TabularInline):
+    model = TipoHabitacion
+    extra = 1
+    fields = ['nombre', 'capacidad_adultos', 'capacidad_ninos', 'capacidad_total', 'edit_rates_link']
+    readonly_fields = ['edit_rates_link']
+
+    def edit_rates_link(self, obj):
+        if obj.id:
+            url = reverse('admin:bookings_tipohabitacion_change', args=[obj.id])
+            return format_html('<a href="{}" target="_blank" class="button" style="background-color: #4f46e5; color: white; padding: 4px 8px; border-radius: 4px;">Gestionar Tarifas</a>', url)
+        return "-"
+    edit_rates_link.short_description = "Tarifas"
+
+class ImagenHotelInline(admin.TabularInline):
+    model = ImagenHotel
+    extra = 2
+    fields = ['imagen', 'titulo', 'tipo', 'es_portada']
+
+@admin.register(Amenity)
+class AmenityAdmin(admin.ModelAdmin):
+    list_display = ['nombre', 'icono_lucide']
+    search_fields = ['nombre']
+
+@admin.register(TarifarioProveedor)
+class TarifarioProveedorAdmin(SaaSAdminMixin, admin.ModelAdmin):
+    saas_agency_field = 'proveedor__agencia'
+    list_display = ['id', 'nombre', 'proveedor', 'fecha_vigencia_inicio', 'fecha_vigencia_fin', 'comision_estandar', 'activo']
+    list_filter = ['activo', 'proveedor']
+    search_fields = ['nombre']
+
+@admin.register(HotelTarifario)
+class HotelTarifarioAdmin(SaaSAdminMixin, admin.ModelAdmin):
+    saas_agency_field = 'tarifario__proveedor__agencia'
+    list_display = ['nombre', 'destino', 'categoria', 'regimen_default', 'activo', 'destacado']
+    list_filter = ['activo', 'destacado', 'destino', 'categoria']
+    search_fields = ['nombre', 'destino', 'descripcion_larga']
+    prepopulated_fields = {'slug': ('nombre', 'destino')}
+    filter_horizontal = ['amenidades']
+    inlines = [ImagenHotelInline, TipoHabitacionInline]
+    
+    fieldsets = [
+        ('Información Principal', {
+            'fields': ['tarifario', 'nombre', 'slug', 'destino', 'imagen_principal', 'logo', 'video_promocional', 'categoria']
+        }),
+        ('Detalles y Geolocalización', {
+            'fields': ['descripcion_corta', 'descripcion_larga', 'direccion', 'coordenadas_mapa']
+        }),
+        ('Servicios', {
+            'fields': ['amenidades']
+        }),
+        ('Operativo', {
+            'fields': ['regimen_default', 'comision', 'politicas']
+        }),
+        ('Configuración', {
+            'fields': ['check_in', 'check_out', 'activo', 'destacado']
+        }),
+    ]
+
+@admin.register(TarifaHabitacion)
+class TarifaHabitacionAdmin(SaaSAdminMixin, admin.ModelAdmin):
+    saas_agency_field = 'tipo_habitacion__hotel__tarifario__proveedor__agencia'
+    list_display = ['tipo_habitacion', 'fecha_inicio', 'fecha_fin', 'moneda', 'tarifa_sgl', 'tarifa_dbl']
+    list_filter = ['moneda', 'tipo_habitacion__hotel']
+    search_fields = ['tipo_habitacion__nombre', 'tipo_habitacion__hotel__nombre']
+
+@admin.register(TipoHabitacion)
+class TipoHabitacionAdmin(SaaSAdminMixin, admin.ModelAdmin):
+    saas_agency_field = 'hotel__tarifario__proveedor__agencia'
+    """
+    Permite editar las tarifas directamente dentro del Tipo de Habitación.
+    Esto acerca la experiencia a 'un solo formulario' (Hotel -> Habitaciones -> Tarifas).
+    """
+    list_display = ['nombre', 'hotel', 'capacidad_total']
+    list_filter = ['hotel']
+    search_fields = ['nombre', 'hotel__nombre']
+    inlines = [TarifaHabitacionInline]
+    autocomplete_fields = ['hotel']

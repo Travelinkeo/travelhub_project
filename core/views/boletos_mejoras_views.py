@@ -2,6 +2,7 @@
 ViewSets para las mejoras de boletería
 """
 from rest_framework import viewsets, permissions
+from core.api.mixins.tenant import TenantViewSetMixin
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from core.models.historial_boletos import HistorialCambioBoleto
@@ -9,7 +10,7 @@ from core.models.anulaciones import AnulacionBoleto
 from core.serializers_boletos import HistorialCambioBoletoSerializer, AnulacionBoletoSerializer
 
 
-class HistorialCambioBoletoViewSet(viewsets.ModelViewSet):
+class HistorialCambioBoletoViewSet(TenantViewSetMixin, viewsets.ModelViewSet):
     """ViewSet para historial de cambios de boletos"""
     queryset = HistorialCambioBoleto.objects.select_related('boleto', 'usuario').all()
     serializer_class = HistorialCambioBoletoSerializer
@@ -19,7 +20,7 @@ class HistorialCambioBoletoViewSet(viewsets.ModelViewSet):
     ordering = ['-fecha_cambio']
 
 
-class AnulacionBoletoViewSet(viewsets.ModelViewSet):
+class AnulacionBoletoViewSet(TenantViewSetMixin, viewsets.ModelViewSet):
     """ViewSet para anulaciones y reembolsos"""
     queryset = AnulacionBoleto.objects.select_related(
         'boleto', 'solicitado_por', 'aprobado_por'

@@ -11,7 +11,7 @@
         <p class="text-[var(--text-secondary)]">Verificación de integridad contable y detección de errores.</p>
     </div>
 
-    <form method="post" action="{% url 'reportes:validar_cuadre' %}">
+    <form method="post" action="{% url 'core:validar_cuadre' %}">
         {% csrf_token %}
         <button type="submit"
             class="px-6 py-3 bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white rounded-xl transition-all shadow-lg font-bold flex items-center gap-2">

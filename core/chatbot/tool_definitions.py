@@ -1,9 +1,6 @@
-from google.generativeai.types import FunctionDeclaration, Tool
+from google.genai import types
 
-# Definimos la estructura de cada función que Gemini podrá usar.
-# La descripción es CRUCIAL, es lo que usa Gemini para decidir qué herramienta usar.
-
-consultar_estado_reserva_func = FunctionDeclaration(
+consultar_estado_reserva_func = types.FunctionDeclaration(
     name="consultar_estado_reserva",
     description="Consulta el estado actual de una reserva o venta existente usando su código de reserva (PNR o localizador).",
     parameters={
@@ -18,7 +15,7 @@ consultar_estado_reserva_func = FunctionDeclaration(
     }
 )
 
-agregar_servicio_adicional_func = FunctionDeclaration(
+agregar_servicio_adicional_func = types.FunctionDeclaration(
     name="agregar_servicio_adicional",
     description="Agrega un servicio adicional (como un seguro de viaje, una maleta extra, etc.) a una reserva existente.",
     parameters={
@@ -37,7 +34,7 @@ agregar_servicio_adicional_func = FunctionDeclaration(
     }
 )
 
-buscar_paquetes_turisticos_func = FunctionDeclaration(
+buscar_paquetes_turisticos_func = types.FunctionDeclaration(
     name="buscar_paquetes_turisticos",
     description="Busca paquetes turísticos disponibles según un destino, presupuesto y mes de viaje.",
     parameters={
@@ -60,8 +57,7 @@ buscar_paquetes_turisticos_func = FunctionDeclaration(
     }
 )
 
-# Creamos el objeto Tool que agrupa todas nuestras funciones
-travel_tools = Tool(function_declarations=[
+travel_tools = types.Tool(function_declarations=[
     consultar_estado_reserva_func,
     agregar_servicio_adicional_func,
     buscar_paquetes_turisticos_func,

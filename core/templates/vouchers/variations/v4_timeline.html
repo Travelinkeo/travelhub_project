@@ -62,8 +62,8 @@
         <div class="top-gradient"></div>
         <header>
             <div class="agencia-header">
-                {% if agencia.logo_pdf_base64 %}
-                    <img src="data:image/png;base64,{{ agencia.logo_pdf_base64 }}" style="max-height: 40px; margin-bottom:15px;">
+                {% if agencia_logo_b64 %}
+                    <img src="{{ agencia_logo_b64 }}" style="max-height: 40px; margin-bottom:15px;" alt="Logo">
                 {% endif %}
                 <h1>{{ agencia.nombre|upper }}</h1>
                 <p>{{ agencia.email_principal|default:"" }} | {{ agencia.telefono_principal }}</p>
@@ -82,7 +82,29 @@
             </div>
 
             <div class="timeline">
+                {# VUELOS #}
+                {% if segmentos_vuelo %}
+                {% for vuelo in segmentos_vuelo %}
+                <div class="timeline-item">
+                    <div class="timeline-dot"><div class="dot" style="border-color: #3b82f6;"></div></div>
+                    <div class="item-content">
+                        <div class="item-type" style="color: #3b82f6;">Air Travel / Flight Itinerary</div>
+                        <div class="item-main">
+                            <h4>{{ vuelo.origen|slice:":3"|upper }} → {{ vuelo.destino|slice:":3"|upper }}</h4>
+                            <span class="item-loc">{{ vuelo.aerolinea|upper }} {{ vuelo.numero_vuelo }}</span>
+                        </div>
+                        <div class="item-meta">
+                            <div class="meta-box"><label>Departure</label><span>{{ vuelo.fecha_salida|date:"d M Y H:i" }}</span></div>
+                            <div class="meta-box"><label>Arrival</label><span>{{ vuelo.fecha_llegada|date:"d M Y H:i" }}</span></div>
+                            <div class="meta-box"><label>Class</label><span>{{ vuelo.clase|default:vuelo.cabina|upper }}</span></div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+                {% endif %}
+
                 {# ALOJAMIENTOS #}
+                {% if alojamientos %}
                 {% for hotel in alojamientos %}
                 <div class="timeline-item">
                     <div class="timeline-dot"><div class="dot"></div></div>
@@ -95,13 +117,15 @@
                         <div class="item-meta">
                             <div class="meta-box"><label>Check-in</label><span>{{ hotel.check_in|date:"d M Y" }}</span></div>
                             <div class="meta-box"><label>Check-out</label><span>{{ hotel.check_out|date:"d M Y" }}</span></div>
-                            <div class="meta-box"><label>Plan</label><span>{{ hotel.regimen_alimentacion|default:"Standard" }}</span></div>
+                            <div class="meta-box"><label>Rooms/Plan</label><span>{{ hotel.habitaciones }} / {{ hotel.regimen_alimentacion|default:"Standard" }}</span></div>
                         </div>
                     </div>
                 </div>
                 {% endfor %}
+                {% endif %}
 
                 {# AUTOS #}
+                {% if alquileres_autos %}
                 {% for car in alquileres_autos %}
                 <div class="timeline-item">
                     <div class="timeline-dot"><div class="dot" style="border-color: #f59e0b;"></div></div>
@@ -113,14 +137,16 @@
                         </div>
                         <div class="item-meta">
                             <div class="meta-box"><label>Pick-up</label><span>{{ car.fecha_hora_retiro|date:"d M Y H:i" }}</span></div>
-                            <div class="meta-box"><label>Location</label><span>{{ car.ciudad_retiro.nombre|default:"---" }}</span></div>
+                            <div class="meta-box"><label>Location</label><span>{{ car.ciudad_retiro.nombre|default:car.ciudad_retiro|default:"---" }}</span></div>
                             <div class="meta-box"><label>Driver</label><span>{{ car.nombre_conductor|default:venta.cliente.get_nombre_completo|upper|truncatechars:15 }}</span></div>
                         </div>
                     </div>
                 </div>
                 {% endfor %}
+                {% endif %}
 
-                {# TRASLADOS / ACTIVIDADES #}
+                {# TRASLADOS #}
+                {% if traslados %}
                 {% for tr in traslados %}
                 <div class="timeline-item">
                     <div class="timeline-dot"><div class="dot" style="border-color: #3b82f6;"></div></div>
@@ -137,8 +163,31 @@
                     </div>
                 </div>
                 {% endfor %}
+                {% endif %}
+
+                {# ACTIVIDADES #}
+                {% if actividades %}
+                {% for act in actividades %}
+                <div class="timeline-item">
+                    <div class="timeline-dot"><div class="dot" style="border-color: #10b981;"></div></div>
+                    <div class="item-content">
+                        <div class="item-type" style="color: #10b981;">Experience / Activity</div>
+                        <div class="item-main">
+                            <h4>{{ act.nombre|upper }}</h4>
+                            {% if act.localizador_proveedor %}<span class="item-loc">{{ act.localizador_proveedor }}</span>{% endif %}
+                        </div>
+                        <div class="item-meta">
+                            <div class="meta-box"><label>Date</label><span>{{ act.fecha|date:"d M Y" }}</span></div>
+                            <div class="meta-box"><label>Duration</label><span>{{ act.duracion_horas|default:"---" }} hrs</span></div>
+                            <div class="meta-box"><label>Main Guest</label><span>{{ venta.cliente.get_nombre_completo|upper|truncatechars:15 }}</span></div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+                {% endif %}
 
                 {# ADICIONALES #}
+                {% if servicios_adicionales %}
                 {% for item in servicios_adicionales %}
                 <div class="timeline-item">
                     <div class="timeline-dot"><div class="dot" style="border-color: #8b5cf6;"></div></div>
@@ -156,6 +205,7 @@
                     </div>
                 </div>
                 {% endfor %}
+                {% endif %}
             </div>
         </main>
 

@@ -4,7 +4,7 @@ import pytest
 from django.core.management import call_command
 from django.core.management.base import CommandError
 
-from core.models_catalogos import Ciudad, Pais
+from apps.common.models import Ciudad, Pais
 
 
 @pytest.mark.django_db

@@ -4,7 +4,7 @@ Admin para modelos consolidados de facturación
 """
 from django.contrib import admin
 from django.contrib import admin
-from .models.facturacion_consolidada import FacturaConsolidada, ItemFacturaConsolidada, DocumentoExportacionConsolidado
+from apps.finance.models import FacturaConsolidada, ItemFacturaConsolidada, DocumentoExportacionConsolidado
 from .admin_saas import SaaSAdminMixin
 
 

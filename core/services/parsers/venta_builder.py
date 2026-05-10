@@ -4,11 +4,10 @@ from django.db import IntegrityError
 from django.db.models import Sum
 from django.utils import timezone
 
-from core.models import Moneda
+from apps.finance.models.currencies import Moneda
 from apps.bookings.models import Venta, ItemVenta, BoletoImportado
 from apps.crm.models import Cliente
-from core.models_catalogos import ProductoServicio
-
+from apps.bookings.models import ProductoServicio
 logger = logging.getLogger(__name__)
 
 class VentaBuilderService:

@@ -6,9 +6,7 @@ from decimal import Decimal
 from django.db.models import Sum, Count, Q
 from django.utils import timezone
 from apps.bookings.models import Venta, ItemVenta, PagoVenta
-from core.models_catalogos import ProductoServicio
-
-
+from apps.bookings.models import ProductoServicio
 def get_dashboard_stats(agencia):
     """
     Obtiene estadísticas principales para el dashboard, filtradas por agencia (Multi-tenant).

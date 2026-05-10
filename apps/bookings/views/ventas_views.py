@@ -300,8 +300,8 @@ class VentaGenerateVoucherView(LoginRequiredMixin, View):
         venta = get_object_tenant_or_404(Venta, agencia, pk=pk)
         
         try:
-            from core.services.pdf_service import generar_pdf_voucher_unificado
-            pdf_bytes, filename = generar_pdf_voucher_unificado(venta.pk)
+            from core.services.voucher_service import generar_voucher_unificado
+            pdf_bytes, filename = generar_voucher_unificado(venta.pk)
             
             if pdf_bytes:
                 response = HttpResponse(pdf_bytes, content_type='application/pdf')

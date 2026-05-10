@@ -1,4 +1,8 @@
-# contabilidad/views.py
+import io
+import json
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
+from core.services.supplier_reconciliation_service import SupplierReconciliationService
 """
 Vistas para reportes contables en el admin.
 """
@@ -7,9 +11,22 @@ from datetime import date, timedelta
 from django.contrib.admin.views.decorators import staff_member_required
 from django.shortcuts import render
 from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
 
 from .reportes import ReportesContables
 from .models import PlanContable
+from core.ai_agent import TravelHubAgent
+
+# Instancia global del agente para mantener el hilo de la conversación (opcional)
+# Para producción real, se debería persistir el historial por usuario/sesión.
+_agent_instance = None
+
+def get_agent():
+    global _agent_instance
+    if _agent_instance is None:
+        _agent_instance = TravelHubAgent()
+    return _agent_instance
 
 
 @staff_member_required
@@ -139,3 +156,81 @@ def reporte_libro_mayor(request):
 def assistant_brain_view(request):
     """Vista para el Asistente AI 'Brain'"""
     return render(request, 'contabilidad/assistant.html')
+
+
+@staff_member_required
+def api_assistant_chat(request):
+    """API para el chat del asistente Brain"""
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            user_message = data.get('message', '')
+            
+            if not user_message:
+                return JsonResponse({'error': 'No message provided'}, status=400)
+            
+            agent = get_agent()
+            response_text = agent.process_query(user_message)
+            
+            return JsonResponse({
+                'response': response_text,
+                'data_found': True # Siempre marcamos como data_found ya que usa tools
+            })
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+    
+@staff_member_required
+def reconciliation_view(request):
+    """Vista para cargar reportes de proveedores y conciliarlos."""
+    if request.method == 'POST' and request.FILES.get('reporte'):
+        reporte = request.FILES['reporte']
+        provider_id = request.POST.get('proveedor')
+        
+        service = SupplierReconciliationService()
+        
+        # Determinar si es Excel o PDF
+        if reporte.name.endswith(('.xlsx', '.xls')):
+            results = service.reconcile_from_excel(reporte, provider_id)
+        elif reporte.name.endswith('.pdf'):
+            # Para PDF usamos el método IA
+            results = service.reconcile_from_pdf_ia(reporte, reporte.name, provider_id)
+        else:
+            return render(request, 'contabilidad/reconciliation.html', {'error': 'Formato no soportado.'})
+            
+        if results is None:
+            return render(request, 'contabilidad/reconciliation.html', {'error': 'Error procesando el archivo.'})
+            
+        # Serializar resultados para el botón de exportar
+        results_json = json.dumps(results, default=str)
+        
+        return render(request, 'contabilidad/reconciliation_results.html', {
+            'results': results,
+            'results_json': results_json,
+            'filename': reporte.name
+        })
+        
+    return render(request, 'contabilidad/reconciliation.html')
+
+@staff_member_required
+def export_reconciliation_results(request):
+    """Exporta los resultados de la conciliación a Excel."""
+    if request.method == 'POST':
+        results_json = request.POST.get('results_json')
+        if results_json:
+            try:
+                results = json.loads(results_json)
+                service = SupplierReconciliationService()
+                
+                output = io.BytesIO()
+                if service.export_results_to_excel(results, output):
+                    output.seek(0)
+                    response = HttpResponse(
+                        output.read(),
+                        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                    )
+                    response['Content-Disposition'] = f'attachment; filename="conciliacion_{date.today()}.xlsx"'
+                    return response
+            except Exception as e:
+                return HttpResponse(f"Error exportando: {str(e)}", status=500)
+                
+    return HttpResponse("Solicitud inválida", status=400)

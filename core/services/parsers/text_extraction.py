@@ -1,5 +1,4 @@
 import logging
-import pdfplumber
 import tempfile
 import os
 import email
@@ -39,9 +38,11 @@ class TextExtractionService:
             if hasattr(file_obj, 'seek'):
                 file_obj.seek(0)
             
-            with pdfplumber.open(file_obj) as pdf:
-                for page in pdf.pages:
-                    text = page.extract_text()
+            import fitz
+            file_content = file_obj.read()
+            with fitz.open(stream=file_content, filetype="pdf") as pdf:
+                for page in pdf:
+                    text = page.get_text()
                     if text:
                         texto_extraido += text + "\n"
         except Exception as e:

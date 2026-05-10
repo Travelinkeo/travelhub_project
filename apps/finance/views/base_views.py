@@ -104,7 +104,7 @@ class ReportListView(LoginRequiredMixin, ListView):
 
 class ReportUploadView(LoginRequiredMixin, View):
     def post(self, request):
-        from core.models import Proveedor
+        from apps.bookings.models import Proveedor
         
         proveedor_id = request.POST.get('proveedor')
         archivo = request.FILES.get('archivo')

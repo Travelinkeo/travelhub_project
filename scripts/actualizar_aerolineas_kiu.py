@@ -11,7 +11,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
 django.setup()
 
-from core.models_catalogos import Aerolinea
+from apps.common.models import Aerolinea
 
 def main():
     print("=== Actualizando catálogo de aerolíneas KIU ===\n")

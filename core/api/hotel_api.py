@@ -4,7 +4,7 @@ from rest_framework import status
 from django.utils.dateparse import parse_date
 from datetime import timedelta
 from decimal import Decimal
-from core.models import TipoHabitacion, TarifaHabitacion
+from apps.bookings.models import TipoHabitacion, TarifaHabitacion
 
 class HotelQuoteAPI(APIView):
     def get(self, request):

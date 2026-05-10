@@ -14,11 +14,11 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
 django.setup()
 
 from core.services.linkeo_agent_service import LinkeoAgentService
-from core.models.ventas import Venta
-from personas.models import Cliente
+from apps.bookings.models import Venta
+from apps.crm.models import Cliente
 from core.models.agencia import Agencia
 from django.contrib.auth.models import User
-from core.models_catalogos import Moneda
+from apps.finance.models.currencies import Moneda
 
 import logging
 

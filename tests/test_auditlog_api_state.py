@@ -3,9 +3,9 @@ from decimal import Decimal
 import pytest
 from django.urls import reverse
 
-from core.models.personas import Cliente
-from core.models.ventas import Venta
-from core.models_catalogos import Moneda
+from apps.crm.models import Cliente
+from apps.bookings.models import Venta
+from apps.finance.models.currencies import Moneda
 
 
 @pytest.mark.django_db

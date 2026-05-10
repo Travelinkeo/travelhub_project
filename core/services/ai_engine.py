@@ -5,6 +5,8 @@ import traceback
 from typing import Dict, Any, Optional, List, Type, Union
 from django.conf import settings
 from pydantic import BaseModel
+from google import genai
+from google.genai import types
 
 logger = logging.getLogger(__name__)
 
@@ -25,19 +27,18 @@ class AIEngine:
     # El modelo Pro es mejor para razonamiento complejo
     PRO_MODEL = "gemini-pro-latest"
     VISION_MODEL = "gemini-flash-latest"
+    FALLBACK_MODEL = "gemini-1.5-flash-8b"
 
     @classmethod
     def _ensure_configured(cls):
-        """Asegura que genai esté configurado (lazy skip import overhead)"""
-        # Usamos atributo de clase para el estado global de genai
-        if not hasattr(cls, '_is_global_configured'):
+        """Asegura que el cliente genai esté configurado (lazy skip import overhead)"""
+        if not hasattr(cls, '_client') or cls._client is None:
             api_key = os.environ.get("GEMINI_API_KEY") or getattr(settings, "GEMINI_API_KEY", None)
             if api_key:
                 try:
-                    import google.generativeai as genai
-                    genai.configure(api_key=api_key)
+                    cls._client = genai.Client(api_key=api_key)
                     cls._is_global_configured = True
-                    logger.info("AIEngine: genai configured lazily.")
+                    logger.info("AIEngine: genai client configured lazily.")
                 except Exception as e:
                     logger.error(f"AIEngine: Lazy Config Error: {e}")
                     cls._is_global_configured = False
@@ -57,10 +58,12 @@ class AIEngine:
         response_schema: Optional[Type[BaseModel]] = None,
         model_name: Optional[str] = None,
         temperature: float = 0.1,
-        system_instruction: Optional[str] = None
+        system_instruction: Optional[str] = None,
+        feature: str = "generic"
     ) -> Dict[str, Any]:
         """
         Llamada unificada a Gemini (Protegida por Circuit Breaker nativo de Django).
+        feature: Indica qué funcionalidad está usando la IA (para tracking de costos).
         """
         from django.core.cache import cache
         self._ensure_configured()
@@ -78,7 +81,7 @@ class AIEngine:
             from core.services.circuit_breaker import ai_circuit_breaker
             response = ai_circuit_breaker.call(
                 self._execute_call_gemini,
-                prompt, content_list, response_schema, model_name, temperature, system_instruction
+                prompt, content_list, response_schema, model_name, temperature, system_instruction, feature
             )
             # Si tiene éxito, reseteamos el contador de fallos
             try:
@@ -110,7 +113,8 @@ class AIEngine:
                     response_schema=response_schema,
                     model_name=self.FALLBACK_MODEL,
                     temperature=temperature,
-                    system_instruction=system_instruction
+                    system_instruction=system_instruction,
+                    feature=feature
                 )
 
             # 6. ÚLTIMO RECURSO: Intentar sin esquema si el 404 persiste (problemas de habilitación/versión)
@@ -122,7 +126,8 @@ class AIEngine:
                     response_schema=None,
                     model_name=model_name,
                     temperature=temperature,
-                    system_instruction=system_instruction
+                    system_instruction=system_instruction,
+                    feature=feature
                 )
             
             raise e
@@ -153,7 +158,8 @@ class AIEngine:
         raw_response = self.call_gemini(
             prompt=f"Analiza este texto de terminal GDS:\n\n{raw_text}",
             system_instruction=system_prompt,
-            response_schema=ResultadoParseoSchema
+            response_schema=ResultadoParseoSchema,
+            feature="gds_parsing"
         )
         
         # Devolvemos el schema completo (con la lista 'boletos') para el Analyzer
@@ -184,12 +190,12 @@ class AIEngine:
         response_schema: Optional[Type[BaseModel]] = None,
         model_name: Optional[str] = None,
         temperature: float = 0.1,
-        system_instruction: Optional[str] = None
+        system_instruction: Optional[str] = None,
+        feature: str = "generic"
     ) -> Dict[str, Any]:
         """
         Ejecución real de la llamada (Privada para el Circuit Breaker).
         """
-        import google.generativeai as genai
         if not self._ensure_configured():
             return {"error": "IA no configurada (falta API Key)"}
 
@@ -198,85 +204,152 @@ class AIEngine:
             is_media = self._has_media(content_list)
             selected_model = model_name or (self.VISION_MODEL if is_media else self.DEFAULT_MODEL)
 
-            # EL PROBLEMA: genai.GenerativeModel espera que system_instruction NO sea un booleano
-            # Si se pasó algo que evaluó a False por error, lo forzamos a None
-            sys_inst = system_instruction if isinstance(system_instruction, str) else None
-
-            model = genai.GenerativeModel(
-                model_name=selected_model,
-                system_instruction=sys_inst
-            )
-            
             # Preparar inputs
-            inputs = []
+            contents = []
             if content_list:
                 for item in content_list:
-                    # Si ya es un dict de Gemini (mime_type, data), se pasa directo
                     if isinstance(item, (dict, list)):
-                        inputs.append(item)
+                        contents.append(item)
                     else:
-                        inputs.append(str(item))
+                        contents.append(str(item))
             
             if prompt:
-                inputs.append(prompt)
+                contents.append(prompt)
 
             # Generación estructurada si hay schema
             try:
-                import google.generativeai as genai
-                generation_config = genai.GenerationConfig(
+                config = types.GenerateContentConfig(
                     temperature=temperature,
-                    response_mime_type="application/json" if response_schema else "text/plain",
-                    response_schema=response_schema
                 )
-                response = model.generate_content(inputs, generation_config=generation_config)
+                if system_instruction:
+                    config.system_instruction = system_instruction
+                if response_schema:
+                    config.response_mime_type = "application/json"
+                    config.response_schema = response_schema
+                else:
+                    config.response_mime_type = "text/plain"
+
+                response = self._client.models.generate_content(
+                    model=selected_model,
+                    contents=contents,
+                    config=config
+                )
+                self._log_usage(None, selected_model, feature, 0, 0, "SUCCESS")
             except Exception as e:
                 error_str = str(e)
-                # 5. INTENTO DE RESCATE: Si es un error de cuota (429), intentar con el modelo de respaldo
                 if "429" in error_str and selected_model != self.FALLBACK_MODEL:
                     logger.info(f"🔄 Cuota agotada en {selected_model}. Reintentando con {self.FALLBACK_MODEL}...")
                     return self._execute_call_gemini(prompt, content_list, response_schema, self.FALLBACK_MODEL, temperature, system_instruction)
                 
-                # 6. ERROR DE HABILITACIÓN: Si es un 404 o dice que no está usada
                 if "404" in error_str or "API has not been used" in error_str:
                     logger.error(f"❌ API DESHABILITADA o MODELO NO ENCONTRADO: {error_str}")
-                    return {"error": f"La API de Gemini o el modelo {selected_model} no están disponibles. Asegúrate de que la 'Generative Language API' esté habilitada en tu proyecto de Google Cloud."}
+                    return {"error": f"La API de Gemini o el modelo {selected_model} no están disponibles."}
 
                 if response_schema:
-                    import google.generativeai as genai
-                    # Intento de respaldo sin forzar schema estricto
-                    generation_config = genai.GenerationConfig(
+                    config_fallback = types.GenerateContentConfig(
                         temperature=temperature,
                         response_mime_type="application/json"
                     )
-                    response = model.generate_content(inputs, generation_config=generation_config)
+                    if system_instruction:
+                        config_fallback.system_instruction = system_instruction
+                    response = self._client.models.generate_content(
+                        model=selected_model,
+                        contents=contents,
+                        config=config_fallback
+                    )
+                    self._log_usage(None, selected_model, feature, 0, 0, "SUCCESS_WITHOUT_SCHEMA")
                 else:
                     raise e
 
+            raw_text = response.text
+            
             if response_schema:
                 try:
-                    raw_text = response.text
-                    logger.info(f"[AIEngine] Raw response text (first 500 chars): {raw_text[:500]}")
-                    parsed = json.loads(raw_text)
-                    return parsed
+                    cleaned_json = self._clean_json_response(raw_text)
+                    return json.loads(cleaned_json)
                 except Exception as parse_err:
-                    logger.error(f"[AIEngine] Error parseando respuesta JSON: {parse_err}")
-                    return {"error": f"Error de formato en la respuesta de IA: {str(parse_err)}"}
-                    return {"error": f"Respuesta no parseable: {raw_text[:200]}"}
+                    # 🛡️ Audit Step 3.1: Robustez de IA - Logging detallado en fallo
+                    logger.error(f"❌ [AIEngine] Error crítico parseando JSON de IA.")
+                    logger.error(f"Error detallado: {parse_err}")
+                    # Grabamos el output completo en un archivo temporal para análisis si es muy grande
+                    logger.error(f"RAW OUTPUT (Preview): {raw_text[:500]}...")
+                    
+                    # Intentamos una extracción secundaria más agresiva
+                    try:
+                        second_chance = self._extract_json_aggressive(raw_text)
+                        if second_chance:
+                            return json.loads(second_chance)
+                    except: pass
+                    
+                    return {
+                        "error": f"Error de formato en la respuesta de IA: {str(parse_err)}",
+                        "status": "PARSE_ERROR",
+                        "raw_output": raw_text # Incluimos el raw en el dict para que el llamador decida
+                    }
             
-            return {"text": response.text}
+            return {"text": raw_text}
 
         except Exception as e:
             error_str = str(e)
             if "429" in error_str or "Resource exhausted" in error_str:
                 logger.error(f"🚨 CUOTA AGOTADA en Gemini: {error_str}")
-                raise QuotaExhaustedException(f"La cuota de la API de IA se ha agotado: {error_str}")
-            
-            if "API has not been used" in error_str or "disabled" in error_str.lower():
-                logger.error(f"❌ API DESHABILITADA: {error_str}")
-                return {"error": "La API de Gemini no está habilitada en tu proyecto de Google Cloud. Por favor, habilítala en la consola de Google Cloud para que la magia fluya."}
+                raise QuotaExhaustedException(f"La cuota de la API de IA se ha agotado.")
                 
+            self._log_usage(None, selected_model, feature, 0, 0, f"FAILED: {error_str[:20]}")
             logger.error(f"AIEngine Call Error: {traceback.format_exc()}")
             return {"error": str(e)}
+
+    def _clean_json_response(self, text: str) -> str:
+        """
+        Limpia la respuesta de la IA de forma robusta.
+        Elimina marcadores markdown, comentarios de estilo JS y busca el bloque JSON.
+        """
+        if not text: return "{}"
+        
+        import re
+        
+        # 1. Eliminar marcadores markdown y texto circundante obvio
+        text = re.sub(r'```(?:json)?', '', text)
+        text = text.replace('```', '')
+        
+        # 2. Eliminar comentarios de una línea (// ...) que a veces la IA incluye
+        # Solo si no están dentro de strings (esto es una aproximación simple)
+        text = re.sub(r'^\s*//.*$', '', text, flags=re.MULTILINE)
+        
+        # 3. Buscar el bloque JSON más externo (greedy match)
+        # Intentamos encontrar el primer '{' y el último '}'
+        start = text.find('{')
+        end = text.rfind('}')
+        
+        if start != -1 and end != -1:
+            candidate = text[start:end+1]
+            # Limpieza de caracteres de control e invisibles
+            candidate = candidate.replace('\u200b', '').replace('\ufeff', '')
+            return candidate.strip()
+            
+        # Si no hay llaves, probamos con corchetes (arrays)
+        start = text.find('[')
+        end = text.rfind(']')
+        if start != -1 and end != -1:
+            return text[start:end+1].strip()
+            
+        return text.strip()
+
+    def _extract_json_aggressive(self, text: str) -> Optional[str]:
+        """
+        Intento secundario de extracción usando Regex más agresiva para limpiar basura al final.
+        """
+        import re
+        # Busca el bloque que empieza por { y termina por } ignorando lo que haya fuera
+        # El patrón [^{]* y [^}]* ayuda a ser un poco más selectivo si hay múltiples bloques,
+        # pero para Gemini el greedy suele ser mejor para capturar el objeto raíz.
+        match = re.search(r'(\{.*\})', text, re.DOTALL)
+        if match:
+            # Limpiar posibles comas finales antes de cerrar llaves/corchetes (un error común de IA)
+            content = match.group(1)
+            content = re.sub(r',\s*([\}\]])', r'\1', content)
+            return content
+        return None
 
     def _has_media(self, content_list: Optional[List[Any]]) -> bool:
         if not content_list:
@@ -287,6 +360,33 @@ class AIEngine:
             if hasattr(item, 'format') or "Image" in str(type(item)):
                 return True
         return False
+
+    def _log_usage(self, agencia, model_name, feature, input_tokens, output_tokens, status):
+        """
+        Registra el uso de la IA en la base de datos de forma segura.
+        """
+        try:
+            from core.models.ai import AIUsageLog
+            from core.middleware import get_current_agency
+            
+            target_agencia = agencia or get_current_agency()
+            
+            # Estimación simple de costos (Referencial)
+            cost = 0
+            if "pro" in model_name: cost = 0.01 # Arbitrario para demo
+            elif "flash" in model_name: cost = 0.001
+            
+            AIUsageLog.objects.create(
+                agencia=target_agencia,
+                model_name=model_name,
+                feature=feature,
+                input_tokens=input_tokens,
+                output_tokens=output_tokens,
+                estimated_cost=cost,
+                status=status
+            )
+        except Exception as e:
+            logger.error(f"Error logging AI usage: {e}")
 
 # Instancia singleton
 ai_engine = AIEngine()

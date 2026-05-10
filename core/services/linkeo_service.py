@@ -1,6 +1,7 @@
 import logging
 import datetime
-# import google.generativeai as genai # Moved to lazy import
+from google import genai
+from google.genai import types
 from django.conf import settings
 from django.utils import timezone
 from apps.bookings.models import Venta
@@ -23,16 +24,12 @@ class LinkeoService:
     @staticmethod
     def _get_gemini_model():
         try:
-            import google.generativeai as genai
             api_key = getattr(settings, 'GEMINI_API_KEY', None)
             if not api_key:
                 logger.warning("Gemini API Key not found.")
                 return None
-            # Usamos el alias 'gemini-flash-latest' que está validado en la lista de modelos disponibles
-            return genai.GenerativeModel('gemini-flash-latest')
-        except ImportError:
-            logger.error("google-generativeai library not installed.")
-            return None
+            client = genai.Client(api_key=api_key)
+            return client
         except Exception as e:
             logger.error(f"Error configuring Gemini: {e}")
             return None
@@ -195,11 +192,9 @@ class LinkeoService:
             contexto_wiki = ""
             keywords = text.upper().split()
             
-            # Busqueda simple por coincidencia en tags o titulo
-            # Ej: Si usuario dice "comando KIU", buscamos Wiki con tag KIU
             articulos = WikiArticulo.objects.filter(
-                Q(tags__overlap=keywords) |  # Postgres only usually, but let's try generic fallback
-                Q(titulo__icontains=keywords[0]) # Fallback simple
+                Q(tags__overlap=keywords) |
+                Q(titulo__icontains=keywords[0])
             ).filter(activo=True)[:2] 
             
             # Fallback para SQLite/Others si overlap falla o si la lista keywords es compleja
@@ -235,7 +230,10 @@ class LinkeoService:
             """
             
             # 3. Generar
-            response = model.generate_content(prompt)
+            response = model.models.generate_content(
+                model='gemini-2.0-flash',
+                contents=prompt
+            )
             return response.text
             
         except Exception as e:

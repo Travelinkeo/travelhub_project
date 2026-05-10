@@ -1,4 +1,5 @@
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, permissions
+from core.api.mixins.tenant import TenantViewSetMixin
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -31,10 +32,10 @@ re_airlines = re.compile(r'\b([A-Z0-9]{2,3})\s+\d{2,4}\b', re.IGNORECASE)
 logger = logging.getLogger(__name__)
 
 
-class CotizacionViewSet(viewsets.ModelViewSet):
+class CotizacionViewSet(TenantViewSetMixin, viewsets.ModelViewSet):
     queryset = Cotizacion.objects.select_related('cliente', 'consultor').prefetch_related('items_cotizacion').order_by('-fecha_emision')
     serializer_class = CotizacionSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
     
     @action(detail=True, methods=['post'])
     def convertir_a_venta(self, request, pk=None):
@@ -95,10 +96,10 @@ class CotizacionViewSet(viewsets.ModelViewSet):
              return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-class ItemCotizacionViewSet(viewsets.ModelViewSet):
+class ItemCotizacionViewSet(TenantViewSetMixin, viewsets.ModelViewSet):
     queryset = ItemCotizacion.objects.select_related('cotizacion').all()
     serializer_class = ItemCotizacionSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
     
     def perform_create(self, serializer):
         item = serializer.save()
@@ -390,7 +391,7 @@ class MagicQuoterSaveView(LoginRequiredMixin, View):
                 lead = OportunidadViaje.objects.filter(id=lead_id).first()
 
             # Asegurar Moneda (Evitar nulos en codigo_iso)
-            from core.models_catalogos import Moneda
+            from apps.finance.models.currencies import Moneda
             currency_raw = ai_data.get('currency') or 'USD'
             currency_code = str(currency_raw).strip().upper()[:3]
             
@@ -425,7 +426,7 @@ class MagicQuoterSaveView(LoginRequiredMixin, View):
             )
 
             # Asegurar Producto/Servicio (Requerido por DB según error anterior)
-            from core.models_catalogos import ProductoServicio
+            from apps.bookings.models import ProductoServicio
             default_producto = ProductoServicio.objects.filter(tipo_producto='VUE').first() or ProductoServicio.objects.first()
 
             # Guardar items para histórico financiero

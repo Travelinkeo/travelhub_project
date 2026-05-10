@@ -2,7 +2,7 @@
 import os
 import unittest
 
-from core.ticket_parser import extract_data_from_text
+from core.services.ticket_parser_service import extract_data_from_text
 
 
 class TestHybridSabreParser(unittest.TestCase):

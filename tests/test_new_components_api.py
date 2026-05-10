@@ -12,7 +12,8 @@ from apps.bookings.models import (
     ServicioAdicionalDetalle,
     Venta,
 )
-from core.models_catalogos import Ciudad, Moneda, Pais
+from apps.common.models import Ciudad, Pais
+from apps.finance.models.currencies import Moneda
 
 
 @pytest.fixture

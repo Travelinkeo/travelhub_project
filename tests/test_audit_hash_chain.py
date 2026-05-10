@@ -1,6 +1,6 @@
 import pytest
 
-from core.models.ventas import AuditLog
+from apps.bookings.models import AuditLog
 from core.utils import verify_audit_chain
 
 

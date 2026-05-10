@@ -3,7 +3,7 @@ from django.db.models.functions import ExtractYear
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.utils import timezone
-from core.models.ventas import Venta
+from apps.bookings.models import Venta
 from core.services.analytics_service import AnalyticsService
 
 class ReportesVentasView(LoginRequiredMixin, TemplateView):

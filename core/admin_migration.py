@@ -6,7 +6,7 @@ from django.utils.html import format_html
 from django.contrib import messages
 from datetime import date
 
-from core.models import MigrationCheck
+from core.models.migration_checks import MigrationCheck
 from apps.bookings.models import Venta
 from core.services.migration_checker_service import MigrationCheckerService
 

@@ -64,7 +64,7 @@ def test_fetch_tickets_no_messages(settings, monkeypatch, capsys):
 
 @pytest.mark.django_db
 def test_fetch_tickets_one_message_creates_boleto(settings, monkeypatch, capsys):
-    from core.models.boletos import BoletoImportado
+    from apps.bookings.models import BoletoImportado
     settings.GMAIL_USER = 'user@test'
     settings.GMAIL_APP_PASSWORD = 'pwd'
     mail = DummyMailOneMessage()
@@ -77,7 +77,7 @@ def test_fetch_tickets_one_message_creates_boleto(settings, monkeypatch, capsys)
 @pytest.mark.django_db
 def test_fetch_tickets_malformed_subject(settings, monkeypatch, capsys):
     """Verifica que un asunto malformado no rompa el comando y se loguee."""
-    from core.models.boletos import BoletoImportado
+    from apps.bookings.models import BoletoImportado
 
     class DummyMailMalformedSubject(DummyMailBase):
         def search(self, *args):

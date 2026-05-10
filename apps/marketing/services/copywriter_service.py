@@ -2,7 +2,7 @@ import os
 import logging
 from typing import List, Dict, Any
 from pydantic import BaseModel, Field
-from core.models import HotelTarifario
+from apps.bookings.models import HotelTarifario
 from core.services.ai_engine import ai_engine
 
 logger = logging.getLogger(__name__)

@@ -1,46 +1,27 @@
 """Punto de entrada de modelos (Fase 2 de modularización).
 
 Carga modelos desde submódulos temáticos.
+
+⚠️ REFACTOR (Mayo 2026): Se eliminaron TODAS las importaciones de `apps.*` para romper
+la dependencia circular crítica (apps -> core.models -> apps).
+
+REGLAS:
+1. Los modelos físicamente en `apps/` deben importarse desde sus propias apps.
+2. Usar referencias lazy ('app.ModelName') en ForeignKeys y migraciones.
+3. `core/` es la BASE (utilidades compartidas), NO debe importar de `apps/`.
 """
 
-# from core.middleware import SecurityHeadersMiddleware # REFACTOR: Mover a middleware.py
-from core.models_catalogos import Aerolinea, Ciudad, ComisionProveedorServicio, Moneda, Pais, ProductoServicio, Proveedor, TipoCambio, TasaCambio
-from core.validators import validar_no_vacio_o_espacios, validar_numero_pasaporte
-
-# REFACTOR: Se eliminan imports directos de apps.* para romper ciclos masivos.
-# Los modelos de apps (Bookings, Finance, CRM, Cotizaciones) deben consumirse desde sus propias apps
-# o mediante referencias lazy 'app.Modelo'.
-
-from .agencia import Agencia, UsuarioAgencia
+from .agencia import Agencia, UsuarioAgencia, AgenciaBranding, AgenciaConfiguracion
 from .migration_checks import MigrationCheck
 from .audit import AuditLog
-from .notificaciones import NotificacionInteligente
-from .productos_terrestres import ProductoTerrestre
-
-# Estos siguen en core por ahora (pendientes de fase final de migración total)
-from .contabilidad import AsientoContable, DetalleAsiento, ItemLiquidacion, LiquidacionProveedor, PlanContable
-from .cruceros import CruceroReserva
-from .tarifario_hoteles import TarifarioProveedor, HotelTarifario, TipoHabitacion, TarifaHabitacion, Amenity, ImagenHotel
-from .pasaportes import PasaporteEscaneado
-
-from .facturacion_consolidada import (
-    FacturaConsolidada,
-    ItemFacturaConsolidada,
-    DocumentoExportacionConsolidado
-)
-
-# --- CMS (Migrado a apps.cms) ---
-# Se consumen directamente desde apps.cms.models
+from .ai import AIUsageLog
+from .historial_boletos import HistorialCambioBoleto, AnulacionBoleto
+from .magic_link import MagicLinkToken
 
 __all__ = [
-    # Agencia
-    'Agencia', 'UsuarioAgencia', 'NotificacionInteligente',
+    'Agencia', 'UsuarioAgencia', 'AgenciaBranding', 'AgenciaConfiguracion',
     'MigrationCheck', 'AuditLog',
-    # Catálogos (Físicamente en core)
-    'Pais', 'Ciudad', 'Moneda', 'TipoCambio', 'TasaCambio', 'Proveedor', 'ProductoServicio', 'Aerolinea', 'ComisionProveedorServicio',
-    'ProductoTerrestre',
-    # Contabilidad (Siguen en core temporalmente)
-    'AsientoContable', 'PlanContable', 'DetalleAsiento', 'LiquidacionProveedor', 'ItemLiquidacion',
-    # Otros
-    'PasaporteEscaneado', 'CruceroReserva',
+    'AIUsageLog',
+    'HistorialCambioBoleto', 'AnulacionBoleto',
+    'MagicLinkToken',
 ]

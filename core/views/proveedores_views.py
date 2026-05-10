@@ -3,8 +3,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.db.models import Q
 from django.contrib import messages
-from core.models import Proveedor
-from core.models_catalogos import Ciudad
+from apps.bookings.models import Proveedor
+from apps.common.models import Ciudad
 from core.mixins import SaaSMixin
 
 class ProveedorListView(SaaSMixin, LoginRequiredMixin, ListView):
@@ -91,7 +91,8 @@ class ProveedorUpdateView(SaaSMixin, LoginRequiredMixin, ProveedorFormMixin, Upd
         context['title'] = f'Editar Proveedor: {self.object.nombre}'
         context['proveedor_id'] = self.object.pk
         # Serializar monedas disponibles para el frontend
-        from core.models_catalogos import Moneda, ProductoServicio
+        from apps.finance.models.currencies import Moneda
+        from apps.bookings.models import ProductoServicio
         from core.serializers import MonedaSerializer
         context['monedas_json'] = MonedaSerializer(Moneda.objects.all(), many=True).data
         context['tipos_servicio_choices'] = [{'id': c[0], 'label': c[1]} for c in ProductoServicio.TipoProductoChoices.choices]

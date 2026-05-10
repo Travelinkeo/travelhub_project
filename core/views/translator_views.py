@@ -5,13 +5,12 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 from ..itinerary_translator import ItineraryTranslator, TicketCalculator
-from ..models_catalogos import Aerolinea
+from apps.common.models import Aerolinea
 from apps.contabilidad.models import TasaCambioBCV
 
 logger = logging.getLogger(__name__)
@@ -31,7 +30,6 @@ class TraductorView(LoginRequiredMixin, TemplateView):
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-@csrf_exempt
 def translate_itinerary_api(request):
     """
     API para traducir itinerarios de diferentes GDS.
@@ -76,7 +74,6 @@ def translate_itinerary_api(request):
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-@csrf_exempt
 def calculate_ticket_price_api(request):
     """
     API para calcular precio de boletos.
@@ -236,7 +233,6 @@ def get_airports_catalog_api(request):
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-@csrf_exempt
 def validate_itinerary_format_api(request):
     """
     API para validar el formato de un itinerario sin traducirlo.
@@ -322,7 +318,6 @@ def validate_itinerary_format_api(request):
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-@csrf_exempt
 def batch_translate_api(request):
     """
     API para traducir múltiples itinerarios en lote.
@@ -418,7 +413,6 @@ def batch_translate_api(request):
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-@csrf_exempt
 def create_quote_from_gds_api(request):
     """
     Crea una Cotización a partir de datos estructurados de GDS.
@@ -458,7 +452,7 @@ def create_quote_from_gds_api(request):
                     telefono_principal="0000000000"
                 )
         
-        from core.models_catalogos import Moneda
+        from apps.finance.models.currencies import Moneda
         moneda_usd = Moneda.objects.filter(codigo_iso='USD').first()
         if not moneda_usd:
              moneda_usd = Moneda.objects.first() # Fallback
@@ -483,7 +477,7 @@ def create_quote_from_gds_api(request):
             flight_desc = f"Vuelo {flight.get('airline_code', 'XX')} {flight.get('flight_number', '')}: {flight.get('origin', '???')} - {flight.get('destination', '???')} ({flight.get('date', '')})"
             
             # Buscar Producto 'Boleto Aéreo' genérico
-            from core.models_catalogos import ProductoServicio
+            from apps.bookings.models import ProductoServicio
             producto_vuelo = ProductoServicio.objects.filter(tipo_producto=ProductoServicio.TipoProductoChoices.BOLETO_AEREO).first()
             
             # Si no existe, usar el primer producto cualquiera como fallback

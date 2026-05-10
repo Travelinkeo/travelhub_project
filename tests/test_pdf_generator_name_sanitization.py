@@ -1,6 +1,6 @@
 import pytest
 
-from core.pdf_generator import generate_ticket_pdf
+from core.services.parsers.pdf_generation import generate_ticket_pdf
 
 
 @pytest.mark.unit

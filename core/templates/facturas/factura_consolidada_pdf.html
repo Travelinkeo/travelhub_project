@@ -33,18 +33,11 @@
     <!-- Encabezado -->
     <div class="header">
         <div class="header-left">
-            <!-- Logo de la agencia con fallback multinivel -->
-            {% with agencia=factura.venta_asociada.agencia %}
-                {% if agencia.logo_pdf_base64 %}
-                    <img src="{{ agencia.logo_pdf_base64 }}" alt="Logo" class="logo" />
-                {% elif agencia.logo_base64 %}
-                    <img src="{{ agencia.logo_base64 }}" alt="Logo" class="logo" />
-                {% elif agencia.logo %}
-                    <img src="{{ agencia.logo.url }}" alt="Logo" class="logo" />
-                {% else %}
-                    <h2 style="margin-bottom: 10px;">{{ factura.emisor_razon_social }}</h2>
-                {% endif %}
-            {% endwith %}
+            {% if agencia_logo_b64 %}
+                <img src="{{ agencia_logo_b64 }}" alt="Logo" class="logo" />
+            {% else %}
+                <h2 style="margin-bottom: 10px;">{{ factura.emisor_razon_social }}</h2>
+            {% endif %}
             <h1>FACTURA{% if factura.modalidad_emision == 'CONTINGENCIA_FISICA' %} - CONTINGENCIA{% endif %}</h1>
             <p><strong>No: {{ factura.numero_factura }}</strong></p>
             <p>No de Control: {{ factura.numero_control }}</p>

@@ -1,10 +1,12 @@
 """Dashboard de billing - Facturas, historial, métricas."""
+from drf_spectacular.utils import extend_schema
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.response import Response
 from django.conf import settings
 import os
+import stripe
 
 def _setup_stripe():
     """Asegura la configuración de Stripe."""
@@ -14,6 +16,7 @@ def _setup_stripe():
 STRIPE_AVAILABLE = _setup_stripe()
 
 
+@extend_schema(exclude=True)
 @api_view(['GET'])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
@@ -56,6 +59,7 @@ def get_invoices(request):
         return Response({'error': str(e)}, status=500)
 
 
+@extend_schema(exclude=True)
 @api_view(['GET'])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
@@ -97,6 +101,7 @@ def get_payment_method(request):
         return Response({'error': str(e)}, status=500)
 
 
+@extend_schema(exclude=True)
 @api_view(['GET'])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])

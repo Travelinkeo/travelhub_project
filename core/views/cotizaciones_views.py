@@ -224,7 +224,7 @@ class CotizacionHTMXCalculateTotalsView(LoginRequiredMixin, View):
         moneda_id = request.POST.get('moneda')
         moneda_symbol = "$"
         if moneda_id:
-            from core.models_catalogos import Moneda
+            from apps.finance.models.currencies import Moneda
             try:
                 moneda = Moneda.objects.get(pk=moneda_id)
                 moneda_symbol = moneda.simbolo or moneda.codigo_iso

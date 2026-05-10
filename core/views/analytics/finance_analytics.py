@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.db.models import Sum
-from core.models import DetalleAsiento
+from apps.contabilidad.models import DetalleAsiento
 from decimal import Decimal
 from django.utils import timezone
 from datetime import datetime

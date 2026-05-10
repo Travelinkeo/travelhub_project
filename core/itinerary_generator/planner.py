@@ -9,8 +9,7 @@ from django.db.models import Q
 
 # Servicio de Gemini
 from core.gemini import generate_content
-from core.models_catalogos import ProductoServicio
-
+from apps.bookings.models import ProductoServicio
 logger = logging.getLogger(__name__)
 
 

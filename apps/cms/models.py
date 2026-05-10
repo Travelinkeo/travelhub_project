@@ -1,8 +1,9 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
+from core.models.base import AgenciaMixin
 
-class Articulo(models.Model):
+class Articulo(AgenciaMixin, models.Model):
     class EstadoArticulo(models.TextChoices):
         BORRADOR = 'BOR', _('Borrador')
         PUBLICADO = 'PUB', _('Publicado')
@@ -34,7 +35,7 @@ class Articulo(models.Model):
     def __str__(self):
         return self.titulo
 
-class GuiaDestino(models.Model):
+class GuiaDestino(AgenciaMixin, models.Model):
     nombre = models.CharField(_("Nombre del Destino"), max_length=100)
     descripcion = models.TextField(_("Descripción General"))
     mejor_epoca = models.CharField(_("Mejor época para viajar"), max_length=255, blank=True)
@@ -52,7 +53,7 @@ class GuiaDestino(models.Model):
     def __str__(self):
         return self.nombre
 
-class PostRedesSociales(models.Model):
+class PostRedesSociales(AgenciaMixin, models.Model):
     class Plataforma(models.TextChoices):
         INSTAGRAM = 'INS', 'Instagram'
         FACEBOOK = 'FAC', 'Facebook'

@@ -3,7 +3,7 @@ import pytest
 from decimal import Decimal
 
 from core.parsers.base_parser import BaseTicketParser, ParsedTicketData
-from core.parsers.sabre_parser import SabreParser
+from core.parsers.legacy.sabre_parser import SabreParser
 
 
 class TestBaseParserMethods:

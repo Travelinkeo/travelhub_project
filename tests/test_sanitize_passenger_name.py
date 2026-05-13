@@ -1,6 +1,6 @@
 import pytest
 
-from core.utils import sanitize_passenger_name
+from apps.common.utils import sanitize_passenger_name
 
 
 @pytest.mark.parametrize("raw,expected", [

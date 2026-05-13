@@ -1,12 +1,13 @@
 # Contenido del archivo core/urls.py
 from django.shortcuts import redirect
-
 from django.urls import reverse
+
+
 def debug_check(request):
     from django.urls import get_resolver
     resolver = get_resolver()
     output = []
-    output.append(f"DEBUG URL CHECK")
+    output.append("DEBUG URL CHECK")
     output.append(f"Current namespace: {request.resolver_match.namespace if request.resolver_match else 'None'}")
     
     try:
@@ -32,129 +33,112 @@ import json
 import logging
 
 from django.http import HttpResponse, JsonResponse
-from django.urls import include, path, re_path
+from django.urls import include, path
 
 app_name = 'core'
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
-from rest_framework.routers import DefaultRouter
-from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework_simplejwt.views import (
-    TokenObtainPairView,
-    TokenRefreshView,
-    TokenVerifyView,
-)
-
-from django.urls import include, path, re_path
-from django.utils.decorators import method_decorator
-from django.views import View
-from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST
-from rest_framework.routers import DefaultRouter
-from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework_simplejwt.views import (
-    TokenObtainPairView,
-    TokenRefreshView,
-    TokenVerifyView,
-)
-
-# Importar desde el paquete de vistas modular
-from .views import (
-    erp_views, proveedores_views, agencia_views,
-    passport_views, home_view, pasajeros_views, user_profile_views, flights_views, audit_views_frontend,
-    inventario_views
-)
-from apps.crm.views.clientes_views import ClienteListView, ClienteCreateView, ClienteUpdateView
-from apps.marketing.views.marketing_views import GenerateAIImageView, MarketingHubView
-from apps.bookings.views.ventas_views import (
-    VentaDetailView, VentaCreateView, VentaUpdateView,
-    VentasDashboardView, VentaAssignClientView, VentaAddFeeView,
-    VentaGenerateInvoiceView, eliminar_venta
-)
-from apps.finance.views.facturacion_views import (
-    FacturacionDashboardView, FacturaDetailView, descargar_pdf_factura,
-    generar_factura_desde_venta, emitir_factura_definitiva
-)
-from apps.common.views.catalogos_views import (
-    CatalogosCenterView, AerolineaListView, ProductoServicioListView,
-    GeografiaListView, PaisListView, TipoCambioListView, TipoCambioCreateView,
-    SincronizarTasasActionView, ProveedorListView, ProveedorCreateView,
-    ProveedorUpdateView, ProveedorDeleteView, ComisionProveedorServicioListView,
-    ComisionProveedorServicioCreateView, ComisionProveedorServicioUpdateView,
-    ComisionProveedorServicioDeleteView
-)
-from .dashboard_stats import get_dashboard_stats as dashboard_stats_api
-from .api.hotel_api import HotelQuoteAPI
-from core.views.hotel_views import HotelListView, HotelDetailView, download_story_view, GenerateCopyAPI
-from apps.marketing.views.marketing_views import GenerateAIImageView, MarketingHubView
-from apps.crm.api import ClienteViewSet, PasajeroViewSet
-
-# Alias para compatibilidad (Importando directamente del legacy para evitar ciclos)
-from apps.bookings.views.boleto_views import (
-    BoletoUploadAPIView,
-    BoletoMassActionAPIView,
-    VentaDoubleInvoiceAPIView,
-    BoletoRetryParseAPIView,
-    BoletoAuditAPIView,
-    BoletoDeleteAPIView
-)
-from core.views.intelligence_views import GDSAnalyzerView, GDSAnalysisAjaxView, GDSInjectERPView
-from core.views.audit_views import AuditLogListView
-
-from core.views.ocr_views import OCRPassportView
-from core.views.id_scanner_views import CedulaScannerAPIView
-from core.views.settings_views import BrandingSettingsView
-from core.views.onboarding_views import SaaSOnboardingView, OnboardingAgencyView
-from core.views.notifications import notificaciones_live_view
-
-# --- EXPLICIT VIEW IMPORTS (replacing lambdas) ---
-from core.views.billing_success_views import billing_success, billing_cancel
-from core.views.upload import UploadBoletoView, ReviewBoletoView, DesasociarVentaView
-from core.views.upload import eliminar_boleto as eliminar_boleto_upload
-from apps.bookings.views.dashboard_boletos import actualizar_item_boleto
-from apps.bookings.views.dashboard_views import dashboard_metricas, DashboardView, dashboard_alertas
-from core.views.voucher_views import generar_voucher
-from core.views.auditoria_views import historial_venta, estadisticas_auditoria
-from core.views.boleto_api_views import (
-    boletos_sin_venta, reintentar_parseo, crear_venta_desde_boleto,
-    dashboard_stats as boletos_dashboard_stats, buscar, reporte_comisiones,
-    solicitar_anulacion, detalle_boleto, eliminar_boleto as eliminar_boleto_api,
-)
-from core.views.reconciliation_views import SupplierReconciliationAPIView, SupplierReconciliationUIView
-from core.views.billing_views import (
-    get_plans, get_current_subscription, create_checkout_session,
-    create_portal_session, stripe_webhook, cancel_subscription,
-)
 from django.views.generic import TemplateView
-from core.views.billing_dashboard_views import get_invoices, get_payment_method, get_usage_stats
-from core.views.billing_plan_change_views import change_plan, preview_plan_change, downgrade_to_free
-from core.views.billing_analytics_views import (
-    get_mrr, get_churn_rate, get_usage_metrics, get_conversion_funnel, get_growth_metrics,
+from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
+from rest_framework.routers import DefaultRouter
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
 )
-from core.views.reportes_views import (
-    libro_diario, balance_comprobacion, estado_resultados, validar_cuadre, exportar_excel,
-)
-from core.views.cron_views import (
-    sincronizar_bcv_cron, enviar_recordatorios_cron, cierre_mensual_cron,
-    cargar_catalogos_cron, health_check,
-)
-from core.views.email_monitor_views import procesar_correos_boletos
-from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
-from core.views.public_views import PublicItineraryView, PublicVoucherPDFView, PublicHotelVoucherPDFView
-from core.views.wiki_views import wiki_gds_list, wiki_gds_reader
+
+from apps.bookings.views.ventas_views import VentaAddFeeView, eliminar_venta
+from apps.crm.api import ClienteViewSet, PasajeroViewSet
+from apps.marketing.views.marketing_views import GenerateAIImageView, MarketingHubView
+from core.api_registry import get_registered_apis, register_auto_apis
 from core.views.analytics.dashboard_views import AnalyticsDashboardView
-from core.views.analytics.sales_analytics import sales_analytics_view
+from apps.bookings.views.dashboard_views import DashboardView
 from core.views.analytics.finance_analytics import finance_analytics_view
 from core.views.analytics.ops_analytics import ops_analytics_view
+from core.views.analytics.sales_analytics import sales_analytics_view
+from core.views.billing_analytics_views import (
+    get_churn_rate,
+    get_conversion_funnel,
+    get_growth_metrics,
+    get_mrr,
+    get_usage_metrics,
+)
+from core.views.billing_dashboard_views import get_invoices, get_payment_method, get_usage_stats
+from core.views.billing_plan_change_views import change_plan, downgrade_to_free, preview_plan_change
+
+# --- EXPLICIT VIEW IMPORTS (replacing lambdas) ---
+from core.views.billing_success_views import billing_cancel, billing_success
+from core.views.billing_views import (
+    cancel_subscription,
+    create_checkout_session,
+    create_portal_session,
+    get_current_subscription,
+    get_plans,
+    stripe_webhook,
+)
+from core.views.cron_views import (
+    cargar_catalogos_cron,
+    cierre_mensual_cron,
+    enviar_recordatorios_cron,
+    health_check,
+    sincronizar_bcv_cron,
+)
+from core.views.dashboard import AIBusinessAdvisorView, CEODashboardView
+from core.views.evolution_qr_view import evolution_qr_proxy
+from core.views.evolution_proxy_views import evolution_manager_proxy
+from core.views.fix_user_view import fix_my_user
+from core.views.email_monitor_views import procesar_correos_boletos
+from core.views.god_mode_views import (
+    GodModeDashboardView,
+    ImpersonateAgencyView,
+    StopImpersonateView,
+)
+from core.views.hotel_views import (
+    GenerateCopyAPI,
+    HotelDetailView,
+    HotelListView,
+    download_story_view,
+)
+from core.views.id_scanner_views import CedulaScannerAPIView
+
+# Alias para compatibilidad (Importando directamente del legacy para evitar ciclos)
+from core.views.intelligence_views import GDSAnalysisAjaxView, GDSAnalyzerView, GDSInjectERPView
+from core.views.migration_api import (
+    check_migration_requirements,
+    get_migration_checks,
+    quick_check_visa,
+)
+from core.views.notifications import notificaciones_live_view
+from core.views.ocr_views import OCRPassportView
+from core.views.onboarding_views import OnboardingAgencyView, SaaSOnboardingView
+from core.views.public_views import (
+    PublicHotelVoucherPDFView,
+    PublicItineraryView,
+    PublicVoucherPDFView,
+)
 from core.views.report_export_views import ExportReportView
-from core.views.migration_api import check_migration_requirements, quick_check_visa, get_migration_checks
-from core.views.dashboard import CEODashboardView, AIBusinessAdvisorView
-from core.views.god_mode_views import GodModeDashboardView, ImpersonateAgencyView, StopImpersonateView
-from core.views.search_views import GlobalOmnisearchView, ClienteSearchAPIView
-from core.views.webhooks_views import ResendInboundWebhookView
+from core.views.reportes_views import (
+    balance_comprobacion,
+    estado_resultados,
+    exportar_excel,
+    libro_diario,
+    validar_cuadre,
+)
+from core.views.health_views import health_check as health_check_view
+from core.views.search_views import ClienteSearchAPIView, GlobalOmnisearchView
+from core.views.settings_views import BrandingSettingsView
 from core.views.translator_views import TraductorView
+from core.views.webhooks_views import ResendInboundWebhookView
+from core.views.wiki_views import wiki_gds_list, wiki_gds_reader
+from core.views.voucher_views import generar_voucher
+
+from .api.hotel_api import HotelQuoteAPI
+from .dashboard_stats import get_dashboard_stats as dashboard_stats_api
+
+# Importar desde el paquete de vistas modular
+from .views import agencia_views, audit_views_frontend, flights_views, user_profile_views
+
 # --- END EXPLICIT VIEW IMPORTS ---
 
 
@@ -173,7 +157,7 @@ class TokenLogoutView(View):
         except Exception as e:
             return JsonResponse({'detail': str(e)}, status=400)
 
-@csrf_exempt
+@csrf_exempt  # CSRF exempt: Browser sends CSP reports without cookies
 @require_POST
 def csp_report_view(request):
     try:
@@ -187,11 +171,22 @@ def csp_report_view(request):
 router = DefaultRouter()
 
 # Registro manual de APIs básicas
-from rest_framework import viewsets, permissions, filters
-from .serializers import PaisSerializer, CiudadSerializer, MonedaSerializer, TipoCambioSerializer, ProductoServicioSerializer, AerolineaSerializer
-from apps.common.models import Pais, Ciudad, Aerolinea
-from apps.finance.models.currencies import Moneda, TipoCambio
+from rest_framework import filters, permissions, viewsets
+
 from apps.bookings.models import ProductoServicio
+from apps.common.models import Aerolinea, Ciudad, Pais
+from apps.finance.models.currencies import Moneda, TipoCambio
+
+from .serializers import (
+    AerolineaSerializer,
+    CiudadSerializer,
+    MonedaSerializer,
+    PaisSerializer,
+    ProductoServicioSerializer,
+    TipoCambioSerializer,
+)
+
+
 class PaisViewSet(viewsets.ModelViewSet):
     queryset = Pais.objects.all()
     serializer_class = PaisSerializer
@@ -226,6 +221,7 @@ class TipoCambioViewSet(viewsets.ModelViewSet):
 
 from core.api.mixins.tenant import TenantViewSetMixin
 
+
 class ProductoServicioViewSet(TenantViewSetMixin, viewsets.ModelViewSet):
     queryset = ProductoServicio.objects.filter(activo=True)
     serializer_class = ProductoServicioSerializer
@@ -252,7 +248,7 @@ router.register(r'pasajeros', PasajeroViewSet, basename='pasajero')
 
 # Register Liquidaciones ViewSet
 try:
-    from .views.liquidacion_views import LiquidacionProveedorViewSet, ItemLiquidacionViewSet
+    from .views.liquidacion_views import ItemLiquidacionViewSet, LiquidacionProveedorViewSet
     router.register(r'liquidaciones', LiquidacionProveedorViewSet, basename='liquidacion')
     router.register(r'items-liquidacion', ItemLiquidacionViewSet, basename='item-liquidacion')
     print("Liquidaciones ViewSets registered successfully")
@@ -297,8 +293,8 @@ router.register(r'productoservicio', ProductoServicioViewSet, basename='producto
 
 
 # Importar y registrar cotizaciones
-from core.views import cotizaciones_views
 from apps.cotizaciones.views import CotizacionViewSet, ItemCotizacionViewSet
+from core.views import cotizaciones_views
 from core.views.catalogos_api import ComisionProveedorServicioViewSet
 
 router.register(r'cotizaciones', CotizacionViewSet, basename='cotizaciones')
@@ -307,7 +303,10 @@ router.register(r'comisiones', ComisionProveedorServicioViewSet, basename='comis
 
 # Register Facturas Consolidadas ViewSet
 try:
-    from .views.factura_consolidada_views import FacturaConsolidadaViewSet, ItemFacturaConsolidadaViewSet
+    from .views.factura_consolidada_views import (
+        FacturaConsolidadaViewSet,
+        ItemFacturaConsolidadaViewSet,
+    )
     router.register(r'facturas-consolidadas', FacturaConsolidadaViewSet, basename='factura-consolidada')
     router.register(r'items-factura-consolidada', ItemFacturaConsolidadaViewSet, basename='item-factura-consolidada')
     print("Facturas Consolidadas ViewSets registered successfully")
@@ -324,7 +323,7 @@ except Exception as e:
 
 # Register Tarifario Hoteles ViewSets
 try:
-    from .views.tarifario_views import TarifarioProveedorViewSet, HotelTarifarioViewSet
+    from .views.tarifario_views import HotelTarifarioViewSet, TarifarioProveedorViewSet
     router.register(r'tarifarios', TarifarioProveedorViewSet, basename='tarifario')
     router.register(r'hoteles-tarifario', HotelTarifarioViewSet, basename='hotel-tarifario')
     print("Tarifario Hoteles ViewSets registered successfully")
@@ -340,11 +339,58 @@ except Exception as e:
 # except Exception as e:
 #     print(f"Error registering Mejoras de Boletería ViewSets: {e}")
 
-print(f"Total URLs en router: {len(router.urls)}")
+# --- AUTOMATIC API REGISTRATION ---
+# This will scan all models registered in admin.site and create/register REST APIs for them
+# helping with the "new components" and missing viewsets.
+try:
+    register_auto_apis()
+    registered_apis = get_registered_apis()
+    
+    # List of models already registered manually to avoid duplication
+    MANUALLY_REGISTERED = [
+        'Pais', 'Ciudad', 'Moneda', 'TipoCambio', 'Aerolinea', 
+        'Cliente', 'Pasajero', 'LiquidacionProveedor', 'ItemLiquidacion',
+        'ProductoServicio', 'Cotizacion', 'ItemCotizacion', 'ComisionProveedorServicio',
+        'FacturaConsolidada', 'ItemFacturaConsolidada', 'LibroVentas',
+        'TarifarioProveedor', 'HotelTarifario'
+    ]
+    
+    for model_class, api_data in registered_apis.items():
+        if model_class.__name__ not in MANUALLY_REGISTERED:
+            # Check if this model is one of our "preferred" ones that should be in the root
+            PREFERRED_MODELS = [
+                'AlquilerAutoReserva', 'EventoServicio', 'CircuitoTuristico', 
+                'CircuitoDia', 'PaqueteAereo', 'ServicioAdicionalDetalle', 
+                'Venta', 'BoletoImportado', 'SegmentoVuelo', 'FeeVenta', 'PagoVenta'
+            ]
+            
+            if model_class.__name__ in PREFERRED_MODELS:
+                api_path = api_data['path']
+            else:
+                api_path = 'auto/' + api_data['path']
+
+            # Check if already registered to avoid error
+            if api_data['basename'] not in [r[2] for r in router.registry]:
+                router.register(
+                    api_path, 
+                    api_data['viewset'], 
+                    basename=api_data['basename']
+                )
+                print(f"ViewSet automático registrado: {api_path} con basename {api_data['basename']}")
+            else:
+                print(f"ViewSet automático OMITIDO (ya existe): {api_data['basename']}")
+
+except Exception as e:
+    print(f"Error in Automatic API Registration: {e}")
+    import traceback
+    traceback.print_exc()
+
+print(f"Total URLs en router FINAL: {len(router.urls)}")
 
 app_name = 'core'
 
 from django.views.generic import RedirectView
+
 from core.views.flights_views import FlightSearchView
 from core.views.telegram_views import flyer_mini_app_view, generate_flyer_api
 
@@ -372,22 +418,23 @@ urlpatterns = [
     # Redirects
     path('', RedirectView.as_view(pattern_name='core:modern_dashboard', permanent=False), name='home'),
     path('dashboard/', RedirectView.as_view(pattern_name='core:modern_dashboard', permanent=False), name='dashboard_root'),
+    path('dashboard/modern/', DashboardView.as_view(), name='modern_dashboard'),
 
     # 🚀 REAL TIME AUTOMATION (Magic Toasts)
     
-    # Rutas de Boletos movidas a apps.bookings.urls_core
-    # path('api/chatbot/converse/', views.ChatbotConverseView.as_view(), name='chatbot_converse'),
-    # path('api/health/', views.HealthCheckView.as_view(), name='health'),
-    # path('api/auth/login/', views.LoginView.as_view(), name='login'),
+    # Rutas de Boletos y Common (IA y ERP)
+    path('', include('apps.bookings.urls_core')),
+    path('', include('apps.common.urls_core')),
+    
     path(r'api/auth/jwt/obtain/', TokenObtainPairView.as_view(), name='jwt_obtain_pair'),
-    # Dashboard ERP Boletos (Movido a urls_core)
     
     # Ventas Dashboard (Redirected to modular bookings app)
     path('dashboard/erp/ventas/', RedirectView.as_view(pattern_name='bookings:venta_list', permanent=True), name='ventas_dashboard'),
     path('dashboard/erp/ventas/nueva/', RedirectView.as_view(pattern_name='bookings:venta_create', permanent=True), name='venta_create'),
     path('dashboard/erp/ventas/<int:pk>/', RedirectView.as_view(pattern_name='bookings:venta_detail', permanent=True), name='venta_detalle'),
     path('dashboard/erp/ventas/<int:pk>/editar/', RedirectView.as_view(pattern_name='bookings:venta_update', permanent=True), name='editar_venta'),
-    # path('dashboard/erp/ventas/<int:pk>/asignar-cliente/', ventas_views.VentaAssignClientView.as_view(), name='venta_asignar_cliente'),
+    path('ventas/<int:pk>/eliminar-fisicamente/', eliminar_venta, name='venta_eliminar_permanente'),
+    path('api/ventas/<int:venta_id>/generar-voucher/', generar_voucher, name='generar_voucher'),
     path('dashboard/erp/ventas/<int:pk>/fees/add/', VentaAddFeeView.as_view(), name='venta_add_fee'),
     # path('dashboard/erp/ventas/<int:pk>/facturar/', ventas_views.VentaGenerateInvoiceView.as_view(), name='venta_facturar'),
     # path('dashboard/erp/ventas/<int:pk>/voucher/', ventas_views.VentaGenerateVoucherView.as_view(), name='venta_voucher'),
@@ -408,6 +455,7 @@ urlpatterns = [
     # Configuración Agencia
     # Configuración Agencia
     path('agencia/configuracion/', agencia_views.AgenciaSettingsView.as_view(), name='agencia_settings'), 
+    path('agencia/whatsapp-status/', agencia_views.WhatsAppStatusView.as_view(), name='whatsapp_status'),
     path('agencia/configuracion/motor-pdf/', agencia_views.MotorPdfView.as_view(), name='motor_pdf'), 
     path('agencia/usuarios/', agencia_views.AgenciaUsersListView.as_view(), name='agencia_usuarios'),
     path('agencia/usuarios/nuevo/', agencia_views.UsuarioAgenciaCreateView.as_view(), name='usuario_create'),
@@ -490,6 +538,9 @@ urlpatterns = [
     # Facturación y Finanzas
     path('', include('apps.finance.urls_core')),
 
+    # Health Check (monitoreo externo)
+    path('health/', health_check_view, name='health_check'),
+
     # Cotizaciones
     path('cotizaciones/', cotizaciones_views.CotizacionDashboardView.as_view(), name='cotizacion_dashboard'),
     path('cotizaciones/magic/', cotizaciones_views.CotizacionMagicQuoterPageView.as_view(), name='cotizacion_magic'),
@@ -565,4 +616,14 @@ urlpatterns = [
 
     # --- CUENTA ---
     path('accounts/profile/', lambda r: redirect('/dashboard/'), name='account_profile'),
+
+    # --- Evolution QR directo (imagen PNG via WebSocket) ---
+    path('whatsapp/qr-img/<str:instance_name>/', evolution_qr_proxy, name='evolution_qr_image'),
+
+    # --- Utilidad: quitar superuser al usuario actual ---
+    path('fix-my-user/', fix_my_user, name='fix_my_user'),
+
+    # --- Evolution Manager QR Proxy (fallback) ---
+    path('whatsapp/qr/<str:instance_name>/', evolution_manager_proxy, name='evolution_qr_proxy'),
+    path('whatsapp/qr/<str:instance_name>/<path:extra>', evolution_manager_proxy, name='evolution_qr_assets'),
 ]

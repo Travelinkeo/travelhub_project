@@ -8,8 +8,9 @@ from typing import Any
 from django.db.models import Q
 
 # Servicio de Gemini
-from core.gemini import generate_content
+from apps.automation.services.ai_engine import generate_content
 from apps.bookings.models import ProductoServicio
+
 logger = logging.getLogger(__name__)
 
 

@@ -1,11 +1,11 @@
 # Archivo: core/itinerary_translator.py
 
-import re
 import json
 import logging
+import re
 import traceback
-from typing import Dict, List, Any, Optional
 from pathlib import Path
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -20,14 +20,14 @@ class ItineraryTranslator:
         self.airlines = self._load_airlines_catalog()
         self.airports = self._load_airports_catalog()
     
-    def _load_airlines_catalog(self) -> Dict[str, str]:
+    def _load_airlines_catalog(self) -> dict[str, str]:
         """Carga el catálogo de aerolíneas desde JSON y BD."""
         airlines = {}
         try:
             # 1. Cargar desde JSON (prioridad base)
             airlines_file = Path(__file__).parent / "data" / "airlines.json"
             if airlines_file.exists():
-                with open(airlines_file, 'r', encoding='utf-8') as f:
+                with open(airlines_file, encoding='utf-8') as f:
                     airlines_data = json.load(f)
                     for airline in airlines_data:
                         airlines[airline['code']] = airline['name']
@@ -43,12 +43,12 @@ class ItineraryTranslator:
             logger.error(f"Error cargando catálogo de aerolíneas: {e}")
             return airlines
 
-    def _load_airports_catalog(self) -> Dict[str, str]:
+    def _load_airports_catalog(self) -> dict[str, str]:
         """Carga el catálogo de aeropuertos desde archivo JSON."""
         try:
             airports_file = Path(__file__).parent / "data" / "airports.json"
             if airports_file.exists():
-                with open(airports_file, 'r', encoding='utf-8') as f:
+                with open(airports_file, encoding='utf-8') as f:
                     airports_data = json.load(f)
                     return {airport['code']: airport['name'] for airport in airports_data}
             else:
@@ -57,7 +57,7 @@ class ItineraryTranslator:
             logger.error(f"Error cargando catálogo de aeropuertos: {e}")
             return self._get_basic_airports()
     
-    def _get_basic_airports(self) -> Dict[str, str]:
+    def _get_basic_airports(self) -> dict[str, str]:
         """Catálogo básico de aeropuertos más comunes."""
         return {
             'CCS': 'Caracas', 'BOG': 'Bogotá', 'MIA': 'Miami', 'MAD': 'Madrid',
@@ -77,7 +77,7 @@ class ItineraryTranslator:
             
         return f"https://pics.avs.io/200/200/{iata_code}.png"
 
-    def translate_itinerary(self, itinerary: str, gds_system: str = 'SABRE') -> Dict[str, Any]:
+    def translate_itinerary(self, itinerary: str, gds_system: str = 'SABRE') -> dict[str, Any]:
         """
         Traduce el itinerario usando ConsoleParser.
         Retorna un diccionario:
@@ -87,7 +87,7 @@ class ItineraryTranslator:
             'error': '...mensaje si hubo error...'
         }
         """
-        from core.parsers.console_parser import ConsoleParser
+        from apps.automation.parsers.console_parser import ConsoleParser
         
         result = {
             'html': '',
@@ -107,7 +107,7 @@ class ItineraryTranslator:
             
             if 'error' in data:
                 # Fallback opcional: Intentar con el parser de tickets por si acaso pegaron un boleto completo
-                from core.ticket_parser import extract_data_from_text
+                from apps.automation.parsers.ticket_parser import extract_data_from_text
                 logger.info("ConsoleParser falló, intentando con TicketParser como fallback...")
                 ticket_data = extract_data_from_text(itinerary)
                 if 'error' not in ticket_data:
@@ -274,7 +274,7 @@ class TicketCalculator:
     """Calculadora de precios de boletos."""
     
     @staticmethod
-    def calculate_ticket_price(tarifa: float, fee_consolidador: float, fee_interno: float, porcentaje: float) -> Dict[str, Any]:
+    def calculate_ticket_price(tarifa: float, fee_consolidador: float, fee_interno: float, porcentaje: float) -> dict[str, Any]:
         """
         Calc    11111111111111111111322W222eto incluyendo IGTF (3%).
         Fórmula: (Tarifa + Fee Consolid. + Fee Interno) + % Ganancia + IGTF(3% del total)

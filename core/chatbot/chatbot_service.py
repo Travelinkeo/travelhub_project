@@ -1,9 +1,9 @@
 # core/chatbot/chatbot_service.py
 
 import logging
-from typing import Dict, List, Optional
-from django.conf import settings
-from core.services.gemini_client import generate_text_from_prompt
+
+from apps.automation.services.ai_engine import generate_text_from_prompt
+
 from .knowledge_base import get_knowledge_context
 
 logger = logging.getLogger(__name__)
@@ -53,7 +53,7 @@ IMPORTANTE:
 - Responde SIEMPRE en español
 """
 
-    def build_conversation_context(self, user_message: str, history: List[Dict] = None) -> str:
+    def build_conversation_context(self, user_message: str, history: list[dict] = None) -> str:
         """Construye el contexto de la conversación para enviar a Gemini."""
         context = self.get_system_prompt() + "\n\n"
         
@@ -69,7 +69,7 @@ IMPORTANTE:
         context += f"USUARIO: {user_message}\nASISTENTE:"
         return context
 
-    def chat(self, user_message: str, conversation_history: List[Dict] = None) -> Dict:
+    def chat(self, user_message: str, conversation_history: list[dict] = None) -> dict:
         """
         Procesa un mensaje del usuario y devuelve la respuesta del chatbot.
         
@@ -166,7 +166,7 @@ IMPORTANTE:
                "directamente con uno de nuestros agentes. Ellos podrán ayudarte de manera personalizada. "
                "¿Te gustaría que te contactemos?")
 
-    def get_quick_replies(self, context: str = None) -> List[str]:
+    def get_quick_replies(self, context: str = None) -> list[str]:
         """Genera respuestas rápidas sugeridas basadas en el contexto."""
         default_replies = [
             "¿Cuáles son los destinos más populares?",

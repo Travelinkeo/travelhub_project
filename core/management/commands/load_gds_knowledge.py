@@ -1,6 +1,8 @@
 from django.core.management.base import BaseCommand
-from core.models.wiki import WikiArticulo
 from django.utils.text import slugify
+
+from core.models.wiki import WikiArticulo
+
 
 class Command(BaseCommand):
     help = 'Loads GDS Master Guides into Wiki Knowledge Base'

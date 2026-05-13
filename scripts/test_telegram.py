@@ -9,7 +9,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
 django.setup()
 
-from core.utils.telegram_utils import send_telegram_alert
+from apps.common.utils.telegram_utils import send_telegram_alert
 
 async def test():
     print("📨 Enviando alerta de prueba a Telegram...")

@@ -11,7 +11,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
 import django
 django.setup()
 
-from core.parsers.sabre_parser import SabreParser
+from apps.automation.parsers.sabre_parser import SabreParser
 import pdfplumber
 
 # Lista de PDFs con precio

@@ -2,7 +2,7 @@ import os
 
 import pytest
 
-from core.identification_utils import extract_codigo_identificacion_anywhere as internal_get_id
+from apps.common.utils.identification_utils import extract_codigo_identificacion_anywhere as internal_get_id
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 

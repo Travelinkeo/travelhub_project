@@ -147,7 +147,7 @@ class Command(BaseCommand):
         async def status_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             """Check system status."""
             from apps.bookings.models import Venta
-from apps.crm.models import Cliente
+            from apps.crm.models import Cliente
             
             try:
                 agencia, _ = await get_agency_context(update.effective_user.id)
@@ -184,7 +184,7 @@ from apps.crm.models import Cliente
 
             await update.message.reply_chat_action("typing")
 
-            from core.services.linkeo_service import LinkeoService
+            from apps.automation.services.linkeo_service import LinkeoService
             from asgiref.sync import sync_to_async
             
             try:
@@ -262,7 +262,7 @@ from apps.crm.models import Cliente
             
             try:
                 # Ejecutar generación en hilo aparte para no bloquear el bot
-                from core.services.flash_marketing_service import FlashMarketingService
+                from apps.marketing.services.flash_marketing_service import FlashMarketingService
                 from asgiref.sync import sync_to_async
                 
                 service = FlashMarketingService()
@@ -316,7 +316,7 @@ from apps.crm.models import Cliente
             
             # Ejecutar búsqueda en hilo aparte (porque Amadeus SDK es síncrono/bloqueante)
             from asgiref.sync import sync_to_async
-            from core.services.amadeus_service import AmadeusService
+            from apps.automation.services.amadeus_service import AmadeusService
             
             try:
                 @sync_to_async
@@ -372,7 +372,7 @@ from apps.crm.models import Cliente
             await update.message.reply_chat_action("typing")
             
             from asgiref.sync import sync_to_async
-            from core.services.migration_checker_service import MigrationCheckerService
+            from apps.automation.services.migration_checker_service import MigrationCheckerService
             
             try:
                 @sync_to_async
@@ -472,7 +472,7 @@ from apps.crm.models import Cliente
             # Guardar temporalmente
             import tempfile
             import os
-            from core.services.audio_service import AudioTranscriptionService
+            from apps.automation.services.audio_service import AudioTranscriptionService
             from asgiref.sync import sync_to_async
 
             # Crear archivo temporal
@@ -540,7 +540,7 @@ from apps.crm.models import Cliente
                     await update.message.reply_text(f"🎨 Generando Flyer para {destination} (${price})...")
                     
                     # Generar Flyer (Sync wrapper)
-                    from core.services.flash_marketing_service import FlashMarketingService
+                    from apps.marketing.services.flash_marketing_service import FlashMarketingService
                     from asgiref.sync import sync_to_async
                     
                     @sync_to_async

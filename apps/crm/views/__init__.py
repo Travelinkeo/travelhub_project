@@ -1,15 +1,18 @@
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, View
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.urls import reverse_lazy
-from django.db.models import Q
 from django.contrib import messages
-from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import IntegrityError
+from django.db.models import Q
 from django.http import HttpResponse, JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse_lazy
+from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView, View
+
 from apps.crm.models import Cliente, Pasajero
-from core.mixins import SaaSMixin
+
 # from apps.cotizaciones.models import Cotizacion  # Movido a get_context_data para evitar import circular
 from core.forms.legacy import PasajeroForm
+from core.mixins import SaaSMixin
+
 
 class CRMBaseMixin(SaaSMixin, LoginRequiredMixin):
     context_object_name = 'object'
@@ -52,8 +55,8 @@ class ClienteListView(CRMBaseMixin, ListView):
         try:
             if hasattr(self, 'get_base_queryset'):
                 base_qs = self.get_base_queryset()
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning(f"Excepción silenciosa capturada: {e}")
         context['clientes_corp_count'] = base_qs.filter(tipo_cliente='COR').count()
         context['clientes_vip_count'] = base_qs.filter(tipo_cliente='VIP').count()
         context['clientes_nuevos_mes'] = base_qs.filter(
@@ -221,10 +224,13 @@ class VincularPasajeroActionView(CRMBaseMixin, View):
         return HttpResponse(status=204, headers={'HX-Refresh': 'true'})
 
 # --- OCR VISTAS ---
-import json
 import base64
+import json
+
 from django.core.files.base import ContentFile
-from core.services.ocr_service import ocr_service
+
+from apps.automation.services.ocr_service import ocr_service
+
 
 class PasajeroOCRProcessView(CRMBaseMixin, View):
     def post(self, request, *args, **kwargs):

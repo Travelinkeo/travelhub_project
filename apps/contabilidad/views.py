@@ -1,22 +1,22 @@
 import io
 import json
-from django.core.files.storage import default_storage
-from django.core.files.base import ContentFile
-from core.services.supplier_reconciliation_service import SupplierReconciliationService
+
+from apps.finance.services.supplier_reconciliation_service import SupplierReconciliationService
+
 """
 Vistas para reportes contables en el admin.
 """
 
-from datetime import date, timedelta
-from django.contrib.admin.views.decorators import staff_member_required
-from django.shortcuts import render
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-import json
+from datetime import date
 
-from .reportes import ReportesContables
+from django.contrib.admin.views.decorators import staff_member_required
+from django.http import JsonResponse
+from django.shortcuts import render
+
+from apps.automation.services.ai_agent import TravelHubAgent
+
 from .models import PlanContable
-from core.ai_agent import TravelHubAgent
+from .reportes import ReportesContables
 
 # Instancia global del agente para mantener el hilo de la conversación (opcional)
 # Para producción real, se debería persistir el historial por usuario/sesión.

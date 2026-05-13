@@ -5,7 +5,7 @@ import django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
 django.setup()
 
-from core.email_service import send_custom_email
+from apps.communications.services.email_service import send_custom_email
 
 def test_send():
     print("🚀 Iniciando prueba de envío con Resend...")

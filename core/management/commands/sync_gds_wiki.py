@@ -1,8 +1,10 @@
 import os
 import shutil
 from pathlib import Path
-from django.core.management.base import BaseCommand
+
 from django.conf import settings
+from django.core.management.base import BaseCommand
+
 
 class Command(BaseCommand):
     help = 'Sincroniza manuales técnicos GDS desde el escritorio del usuario a la Wiki interna de TravelHub.'
@@ -71,11 +73,11 @@ class Command(BaseCommand):
                                 shutil.copy2(file_entry.path, dest_path)
                                 self.stdout.write(f'  [REF] {filename} (PDF copiado)')
                                 copied_count += 1
-                            except Exception as e:
+                            except Exception:
                                 errors_count += 1
 
         self.stdout.write('\n' + '='*40)
-        self.stdout.write(self.style.SUCCESS(f'✅ Sincronización Finalizada.'))
+        self.stdout.write(self.style.SUCCESS('✅ Sincronización Finalizada.'))
         self.stdout.write(f'- Archivos procesados: {copied_count}')
         if errors_count > 0:
             self.stdout.write(self.style.WARNING(f'- Errores encontrados: {errors_count}'))

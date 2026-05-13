@@ -1,5 +1,7 @@
 from django.core.management.base import BaseCommand
-from core.services.marketing_intelligence_service import MarketingIntelligenceService
+
+from apps.automation.services.marketing_intelligence_service import MarketingIntelligenceService
+
 
 class Command(BaseCommand):
     help = 'Ejecuta el motor de Marketing Intelligence para generar contenido automático basado en tendencias de reserva.'
@@ -13,7 +15,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         agency_id = options['agency_id']
-        self.stdout.write(self.style.NOTICE(f"Iniciando Marketing Intelligence Hub..."))
+        self.stdout.write(self.style.NOTICE("Iniciando Marketing Intelligence Hub..."))
         
         results = MarketingIntelligenceService.run_automated_marketing_engine(agency_id=agency_id)
         

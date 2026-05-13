@@ -12,7 +12,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
 django.setup()
 
 from apps.bookings.models import BoletoImportado
-from core import ticket_parser 
+from apps.automation.parsers import ticket_parser 
 
 def fix_iata_files():
     print("DEBUG: Fixing IATA JSON files...")

@@ -1,7 +1,7 @@
 """Tests de integración para parsers"""
 import pytest
 
-from core.parsers.adapter import parse_ticket_with_new_parsers
+from apps.automation.parsers.adapter import parse_ticket_with_new_parsers
 
 
 class TestParsersIntegration:

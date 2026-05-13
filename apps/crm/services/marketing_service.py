@@ -1,18 +1,18 @@
 import logging
 from datetime import timedelta
-from django.utils import timezone
-from django.db.models import Max, Q
-from pydantic import BaseModel, Field
-from typing import List, Optional
 
-from core.services.ai_engine import ai_engine
+from django.db.models import Max, Q
+from django.utils import timezone
+from pydantic import BaseModel, Field
+
+from apps.automation.services.ai_engine import ai_engine
 from apps.crm.models import Cliente
 
 logger = logging.getLogger(__name__)
 
 # ─── MODO 1: CAMPAÑA A CLIENTES ────────────────────────────────────────────────
 class CampanaMarketingSchema(BaseModel):
-    destinos_clave: List[str] = Field(description="Ciudades o países mencionados (ej. ['MADRID', 'EUROPA']). Vacío si no aplica.")
+    destinos_clave: list[str] = Field(description="Ciudades o países mencionados (ej. ['MADRID', 'EUROPA']). Vacío si no aplica.")
     meses_inactividad: int = Field(default=0, description="Meses sin comprar mencionados (ej. 12 si dice 'hace un año').")
     asunto_email: str = Field(description="Asunto atractivo y persuasivo para el correo (máx 50 chars).")
     cuerpo_email_html: str = Field(description="Cuerpo del correo en HTML estilizado y moderno. DEBE incluir la variable {{ nombre_cliente }} para personalizar el saludo.")
@@ -29,9 +29,9 @@ class ContenidoCreativoSchema(BaseModel):
     tipo_contenido: str = Field(description="Tipo de contenido: 'branding', 'post_instagram', 'post_facebook', 'slogan', 'copy_web', 'email_generico', 'guion_video', 'descripcion_destino', 'otro'.")
     titulo: str = Field(description="Título o encabezado principal del contenido generado.")
     contenido_principal: str = Field(description="El contenido completo generado en HTML. Puede incluir texto, listas, etiquetas de imagen sugeridas, hashtags, etc.")
-    sugerencias_visuales: List[str] = Field(default=[], description="Lista de sugerencias visuales: paleta de colores, tipo de imágenes recomendadas, estilo fotográfico.")
-    keywords_visuales: List[str] = Field(default=[], description="3 o 4 palabras clave en INGLÉS para buscar imágenes en Unsplash (ej: ['madrid', 'luxury', 'skyline']).")
-    hashtags: List[str] = Field(default=[], description="Hashtags relevantes si aplica (ej. para Instagram/Facebook).")
+    sugerencias_visuales: list[str] = Field(default=[], description="Lista de sugerencias visuales: paleta de colores, tipo de imágenes recomendadas, estilo fotográfico.")
+    keywords_visuales: list[str] = Field(default=[], description="3 o 4 palabras clave en INGLÉS para buscar imágenes en Unsplash (ej: ['madrid', 'luxury', 'skyline']).")
+    hashtags: list[str] = Field(default=[], description="Hashtags relevantes si aplica (ej. para Instagram/Facebook).")
 
 SYSTEM_PROMPT_CREATIVO = """
 Eres el Director Creativo IA de TravelHub, una agencia de viajes boutique premium.
@@ -97,7 +97,7 @@ class MarketingAIEngine:
 
             # 📸 BUSCAR IMÁGENES REALES PARA EL MOODBOARD
             imágenes_reales = []
-            keywords = data.get('keywords_visuales', [])
+            data.get('keywords_visuales', [])
             
             data['imagenes_inspiracion'] = imágenes_reales[:4] # Tomar las 4 mejores
 

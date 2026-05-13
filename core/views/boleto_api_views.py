@@ -1,18 +1,23 @@
 # core/views/boleto_api_views.py
+import logging
+from datetime import timedelta
+
+from django.db.models import Count, Q, Sum
+from django.utils import timezone
 from drf_spectacular.utils import extend_schema
+from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework import status
-from django.shortcuts import get_object_or_404
-from django.db.models import Count, Q, Sum
-from django.utils import timezone
-from datetime import timedelta
-import logging
 
-from apps.bookings.models import BoletoImportado, Venta, ItemVenta, SolicitudAnulacion
+from apps.bookings.models import BoletoImportado, ItemVenta, SolicitudAnulacion, Venta
+from core.security import (
+    agency_role_required,
+    filter_queryset_by_tenant,
+    get_agencia_from_request,
+    get_object_tenant_or_404,
+)
 from core.serializers import BoletoImportadoSerializer
-from core.security import get_agencia_from_request, get_object_tenant_or_404, filter_queryset_by_tenant, agency_role_required
 
 logger = logging.getLogger(__name__)
 
@@ -38,9 +43,15 @@ def reintentar_parseo(request, boleto_id):
     agencia = get_agencia_from_request(request)
     boleto = get_object_tenant_or_404(BoletoImportado, agencia, pk=boleto_id)
 
-    boleto.estado_parseo = BoletoImportado.EstadoParseo.PENDIENTE
+    from apps.common.utils.celery_utils import safe_delay
+    from core.tasks import parsear_boleto_individual
+
+    boleto.estado_parseo = 'QUE'
     boleto.log_parseo = "Reintentando parseo manualmente..."
     boleto.save()
+    
+    safe_delay(parsear_boleto_individual, boleto.pk, ignore_manual=True, bypass_cache=True)
+    
     return Response({'status': 'Parseo reiniciado', 'boleto_id': boleto.id_boleto_importado})
 
 @extend_schema(exclude=True)
@@ -57,8 +68,8 @@ def crear_venta_desde_boleto(request, boleto_id):
     if boleto.venta_asociada:
         return Response({'error': 'El boleto ya tiene una venta asociada'}, status=status.HTTP_400_BAD_REQUEST)
     
-    from apps.finance.models.currencies import Moneda
     from apps.bookings.models import ProductoServicio
+    from apps.finance.models.currencies import Moneda
     moneda_usd, _ = Moneda.objects.get_or_create(codigo_iso='USD', defaults={'nombre': 'Dólar Estadounidense'})
     
     venta = Venta.objects.create(

@@ -1,14 +1,19 @@
 
+import hashlib
+import hmac
 import logging
 from decimal import Decimal
-from django.db import transaction, IntegrityError
-from rest_framework import status
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
+
+from django.conf import settings
+from django.db import IntegrityError, transaction
 from django.shortcuts import get_object_or_404
-from apps.finance.models import TransaccionPago
+from rest_framework import status
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
 from apps.bookings.models import Venta
+from apps.finance.models import TransaccionPago
 
 logger = logging.getLogger(__name__)
 
@@ -76,7 +81,13 @@ class WebhookPagoBaseView(APIView):
 
                 # PASO 2: Si no existe, creamos el registro inmediatamente para "marcar el territorio"
                 # Esto evita condiciones de carrera (race conditions)
-                venta = get_object_or_404(Venta, pk=venta_id)
+                # FIX SEGURIDAD: Filtrar por agencia para evitar acceso cross-tenant
+                from core.middleware import get_current_agency
+                agencia = get_current_agency()
+                venta_qs = Venta.objects.filter(pk=venta_id)
+                if agencia:
+                    venta_qs = venta_qs.filter(agencia=agencia)
+                venta = get_object_or_404(venta_qs)
                 
                 nueva_transaccion = TransaccionPago.objects.create(
                     proveedor=self.get_provider_key(),
@@ -124,7 +135,6 @@ class WebhookPagoBaseView(APIView):
         # para cuando Stripe nos reintente enviar el webhook a los 5 minutos.
         """
         # Simulamos actualización de la venta
-        venta = transaccion.venta
         # venta.registrar_abono(transaccion.monto) 
         pass
 
@@ -132,6 +142,27 @@ class WebhookPagoBaseView(APIView):
 class BinanceWebhookView(WebhookPagoBaseView):
     def get_provider_key(self):
         return 'BIN'
+
+    def post(self, request, *args, **kwargs):
+        # Verificación HMAC del webhook de Binance
+        if settings.BINANCE_WEBHOOK_SECRET:
+            signature = request.headers.get('X-Binance-Signature') or request.headers.get('X-Signature')
+            if not signature:
+                logger.error("Binance webhook sin firma HMAC")
+                return Response({"error": "Missing signature"}, status=status.HTTP_401_UNAUTHORIZED)
+
+            payload = request.body
+            expected = hmac.new(
+                settings.BINANCE_WEBHOOK_SECRET.encode('utf-8'),
+                payload,
+                hashlib.sha256
+            ).hexdigest()
+
+            if not hmac.compare_digest(signature, expected):
+                logger.error("Binance webhook: firma HMAC inválida")
+                return Response({"error": "Invalid signature"}, status=status.HTTP_401_UNAUTHORIZED)
+
+        return super().post(request, *args, **kwargs)
 
 # Ejemplo de implementación específica para Stripe
 class StripeWebhookView(WebhookPagoBaseView):

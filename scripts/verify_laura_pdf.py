@@ -11,7 +11,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
 django.setup()
 
-from core.ticket_parser import extract_data_from_text, generate_ticket
+from apps.automation.parsers.ticket_parser import extract_data_from_text, generate_ticket
 import pdfplumber
 
 pdf_path = r"c:\Users\ARMANDO\travelhub_project\media\boletos_importados\2026\01\Recibo_de_pasaje_electrónico_21_diciembre_para_LAURA_CRISTINA_ARROYAVE.pdf"

@@ -2,22 +2,22 @@
 import logging
 from decimal import Decimal
 
-from django.db import models
+from django.core.exceptions import ValidationError
+from django.db import models, transaction
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+
+from core.models.base import AgenciaMixin, SoftDeleteModel
 
 # REFACTOR: Nuevos imports
 # from apps.crm.models import Cliente # REFACTOR: Usar string 'crm.Cliente'
 # from apps.bookings.models import Venta # Circular dependency risk if not careful, use string 'bookings.Venta' or lazy import
-
 from .currencies import Moneda
-from core.models.base import AgenciaMixin, SoftDeleteModel
+
 # REFACTOR: Usar referencias lazy ('contabilidad.AsientoContable') para evitar circulares
 
 logger = logging.getLogger(__name__)
 
-from django.db.models.signals import post_save, pre_save, post_delete
-from django.dispatch import receiver
 
 
 
@@ -100,7 +100,6 @@ class Factura(SoftDeleteModel, AgenciaMixin, models.Model):
             models.Index(fields=['agencia', 'estado']),
             models.Index(fields=['venta_asociada']),
         ]
-        db_table = 'core_factura' # MANTENER COMPATIBILIDAD
 
     def __str__(self):
         return self.numero_factura or f"FACT-{self.id_factura}"
@@ -131,15 +130,15 @@ class Factura(SoftDeleteModel, AgenciaMixin, models.Model):
         self.base_imponible = base_gravada
         self.base_exenta = base_exenta
         
-        self.iva_monto = self.base_imponible * (self.iva_porcentaje / Decimal(100))
+        self.iva_monto = (self.base_imponible * (self.iva_porcentaje / Decimal(100))).quantize(Decimal('0.01'))
         self.subtotal = self.base_imponible + self.base_exenta
         
         # INATUR (1%) sobre el subtotal del servicio turístico
-        self.inatur_monto = self.subtotal * (self.inatur_porcentaje / Decimal(100))
+        self.inatur_monto = (self.subtotal * (self.inatur_porcentaje / Decimal(100))).quantize(Decimal('0.01'))
         
         # IGTF (3%) sobre el total a pagar en divisas (Subtotal + IVA + INATUR)
         # Nota: En Venezuela el IGTF se calcula sobre el total de la operación si se paga en divisas.
-        self.igtf_monto = (self.subtotal + self.iva_monto + self.inatur_monto) * (self.igtf_porcentaje / Decimal(100))
+        self.igtf_monto = ((self.subtotal + self.iva_monto + self.inatur_monto) * (self.igtf_porcentaje / Decimal(100))).quantize(Decimal('0.01'))
         
         self.monto_impuestos = self.iva_monto + self.igtf_monto + self.inatur_monto
         self.monto_total = self.subtotal + self.monto_impuestos
@@ -160,23 +159,48 @@ class Factura(SoftDeleteModel, AgenciaMixin, models.Model):
         
         return "Cliente no identificado"
 
+    def clean(self):
+        super().clean()
+        if self.monto_total < 0:
+            raise ValidationError({'monto_total': _('El monto total no puede ser negativo.')})
+        if self.subtotal < 0:
+            raise ValidationError({'subtotal': _('El subtotal no puede ser negativo.')})
+        if self.monto_impuestos < 0:
+            raise ValidationError({'monto_impuestos': _('Los impuestos no pueden ser negativos.')})
+        if self.saldo_pendiente < 0:
+            raise ValidationError({'saldo_pendiente': _('El saldo pendiente no puede ser negativo.')})
+        if self.estado == self.EstadoFactura.PAGADA and self.saldo_pendiente > 0:
+            raise ValidationError({'estado': _('No se puede marcar como pagada con saldo pendiente.')})
+
     def save(self, *args, **kwargs):
+        self.full_clean()
         es_creacion = self.pk is None
+        
         if not self.numero_factura:
-            consecutivo = Factura.objects.count() + 1 if es_creacion else self.pk
-            self.numero_factura = f"F-{self.fecha_emision.strftime('%Y%m%d')}-{consecutivo:04d}"
+            prefix = f"F-{self.fecha_emision.strftime('%Y%m%d')}"
+            max_retries = 5
+            for attempt in range(max_retries):
+                with transaction.atomic():
+                    daily_count = Factura.objects.filter(
+                        fecha_emision=self.fecha_emision
+                    ).count()
+                    candidate = f"{prefix}-{daily_count + 1:04d}"
+                    if not Factura.objects.filter(numero_factura=candidate).exists():
+                        self.numero_factura = candidate
+                        break
+            else:
+                import random
+                self.numero_factura = f"{prefix}-{random.randint(1000, 9999):04d}"
         
         # Snapshot cliente
         if self.cliente and not self.cliente_rif:
             try:
                 self.cliente_nombre = self.cliente.get_nombre_completo()
-                # Ajuste: numero_documento puede ser empty
                 self.cliente_rif = getattr(self.cliente, 'numero_documento', '') or ''
                 self.cliente_direccion = getattr(self.cliente, 'direccion_linea1', '') or ''
                 self.cliente_telefono = self.cliente.telefono_principal or ''
-            except Exception:
-                pass
-
+            except Exception as e:
+                logger.warning(f"Excepción silenciosa capturada: {e}")
         if es_creacion:
              self.monto_total = 0
              self.saldo_pendiente = 0
@@ -204,13 +228,12 @@ class ItemFactura(SoftDeleteModel, AgenciaMixin, models.Model):
     class Meta:
         verbose_name = _("Item de Factura")
         verbose_name_plural = _("Items de Factura")
-        db_table = 'core_itemfactura' # MANTENER COMPATIBILIDAD
 
     def __str__(self):
         return f"{self.cantidad} x {self.descripcion} en Factura {self.factura.numero_factura}"
 
     def save(self, *args, **kwargs):
-        self.subtotal_item = self.precio_unitario * self.cantidad
+        self.subtotal_item = (self.precio_unitario * self.cantidad).quantize(Decimal('0.01'))
         super().save(*args, **kwargs)
         
         try:
@@ -312,7 +335,6 @@ class GastoOperativo(SoftDeleteModel, AgenciaMixin, models.Model):
         verbose_name = _("Gasto Operativo")
         verbose_name_plural = _("Gastos Operativos")
         ordering = ['-fecha', '-fecha_registro']
-        db_table = 'core_gastooperativo'
 
     def __str__(self):
         return f"{self.fecha} - {self.descripcion} ({self.monto} {self.moneda})"

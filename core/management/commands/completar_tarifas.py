@@ -1,8 +1,11 @@
-from django.core.management.base import BaseCommand
-from apps.bookings.models import HotelTarifario, TipoHabitacion, TarifaHabitacion
-from decimal import Decimal
-from datetime import date
 import random
+from datetime import date
+from decimal import Decimal
+
+from django.core.management.base import BaseCommand
+
+from apps.bookings.models import HotelTarifario, TarifaHabitacion, TipoHabitacion
+
 
 class Command(BaseCommand):
     help = 'Completa tarifas para hoteles sin tarifas'

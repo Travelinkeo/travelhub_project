@@ -1,11 +1,8 @@
 import logging
-from django.shortcuts import render
+
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.shortcuts import render
 from django.views import View
-from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_exempt
-from core.services.amadeus_service import AmadeusService
-from asgiref.sync import async_to_sync
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +30,7 @@ class FlightSearchView(LoginRequiredMixin, View):
             # Primer tramo (los campos estándar)
             multi_segments.append({'origin': origin, 'destination': destination, 'date': date})
             # Tramos adicionales
-            for o, d, dt in zip(origins, destinations, dates):
+            for o, d, dt in zip(origins, destinations, dates, strict=False):
                 multi_segments.append({'origin': o.upper(), 'destination': d.upper(), 'date': dt})
 
         # Validar campos básicos
@@ -45,7 +42,7 @@ class FlightSearchView(LoginRequiredMixin, View):
         airline_filter = request.POST.get('airline_filter', '')
 
         # Utilizar FliFlightService para disponibilidad REAL
-        from core.services.fli_service import FliFlightService
+        from apps.common.services.fli_service import FliFlightService
         service = FliFlightService()
         
         # Obtener resultados

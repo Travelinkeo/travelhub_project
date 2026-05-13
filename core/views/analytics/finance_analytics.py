@@ -1,9 +1,10 @@
-from django.shortcuts import render
-from django.db.models import Sum
-from apps.contabilidad.models import DetalleAsiento
 from decimal import Decimal
+
+from django.shortcuts import render
 from django.utils import timezone
-from datetime import datetime
+
+from apps.contabilidad.models import DetalleAsiento
+
 
 def finance_analytics_view(request):
     """

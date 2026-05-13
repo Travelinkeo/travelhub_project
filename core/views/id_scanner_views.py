@@ -1,10 +1,12 @@
 import logging
-from django.http import JsonResponse
-from django.views import View
-from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_exempt
+
 from django.db import transaction
-from core.services.id_scanner_service import IDScannerService
+from django.http import JsonResponse
+from django.utils.decorators import method_decorator
+from django.views import View
+from django.views.decorators.csrf import csrf_exempt
+
+from apps.automation.services.id_scanner_service import IDScannerService
 from apps.crm.models import Pasajero
 
 logger = logging.getLogger(__name__)

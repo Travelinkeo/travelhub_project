@@ -9,7 +9,7 @@ sys.path.append(os.getcwd())
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
 django.setup()
 
-from core.parsers.sabre_parser import SabreParser
+from apps.automation.parsers.sabre_parser import SabreParser
 
 def analyze_sabre_pdfs():
     import glob

@@ -9,7 +9,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
 django.setup()
 
-from core.services.amadeus_service import AmadeusService
+from apps.automation.services.amadeus_service import AmadeusService
 
 def test_amadeus():
     print("🌍 Iniciando prueba de Amadeus API...")

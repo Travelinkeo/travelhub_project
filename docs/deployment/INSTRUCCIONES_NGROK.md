@@ -1,58 +1,36 @@
-# Instrucciones para Compartir TravelHub con Ngrok
+# Instrucciones para Exponer TravelHub con Cloudflare Tunnel
 
-## Paso 1: Iniciar Todo
+## Paso 1: Iniciar los Servicios
 
-Ejecuta el archivo:
-```
-iniciar_completo_ngrok.bat
-```
-
-## Paso 2: Copiar las URLs
-
-Se abrirán **2 ventanas de ngrok**. En cada una verás algo como:
-
-**Ventana 1 (Backend - Django):**
-```
-Forwarding    https://abc123.ngrok-free.dev -> http://localhost:8000
+```bash
+# En WSL2, dentro del directorio del proyecto
+docker-compose up -d
 ```
 
-**Ventana 2 (Frontend - Next.js):**
+## Paso 2: Iniciar el Túnel Cloudflare
+
+```bash
+# En WSL2
+cloudflared tunnel --url http://localhost:8000
 ```
-Forwarding    https://xyz789.ngrok-free.dev -> http://localhost:3000
+
+Verás algo como:
+
+```
+Connecting to trycloudflare.com...
+Your quick Tunnel has been created!
+Visit it at: https://abc123.trycloudflare.com
 ```
 
-## Paso 3: Compartir con tu Esposa
+Esa URL expone tu instancia local de TravelHub (puerto 8000) a internet.
 
-Envíale **AMBAS URLs**:
+## Paso 3: Acceder
 
-1. **Admin de Django (Backend):**
-   ```
-   https://abc123.ngrok-free.dev/admin/
-   ```
-   - Usuario: tu superusuario
-   - Contraseña: la que configuraste
+1. **Dashboard principal:** `https://abc123.trycloudflare.com/dashboard/`
+2. **Admin de Django:** `https://abc123.trycloudflare.com/admin/`
+3. **Health check:** `https://abc123.trycloudflare.com/health/`
 
-2. **Interfaz de Usuario (Frontend):**
-   ```
-   https://xyz789.ngrok-free.dev
-   ```
-   - Aquí puede usar la interfaz moderna de TravelHub
+## Notas
 
-## Notas Importantes
-
-- ⚠️ Las URLs cambian cada vez que reinicias (versión gratuita de ngrok)
-- ⚠️ Mantén las ventanas abiertas mientras ella trabaje
-- ⚠️ La primera vez que acceda, ngrok mostrará una página intermedia con "Visit Site" - solo hacer clic
-- ✅ Funciona desde cualquier lugar del mundo
-- ✅ No necesitas configurar router ni firewall
-
-## Para Detener
-
-Presiona cualquier tecla en la ventana principal del script.
-
-## Alternativa: Solo Backend
-
-Si solo necesitas compartir el admin de Django, usa:
-```
-iniciar_con_ngrok.bat
-```
+- El túnel se corta al cerrar la terminal. Para túnel permanente, configura un túnel con nombre en Cloudflare Zero Trust.
+- Asegúrate de que `ALLOWED_HOSTS` y `CSRF_TRUSTED_ORIGINS` en tu `.env` incluyan el dominio de Cloudflare.

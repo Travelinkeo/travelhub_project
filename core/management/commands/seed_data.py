@@ -1,11 +1,13 @@
 
-from django.core.management.base import BaseCommand
 from django.contrib.auth.models import User
-from core.models.agencia import Agencia
-from apps.finance.models.currencies import Moneda
-from apps.bookings.models import ProductoServicio
-from apps.bookings.models import Proveedor
+from django.core.management.base import BaseCommand
 from django.utils import timezone
+
+from apps.bookings.models import ProductoServicio, Proveedor
+from apps.finance.models.currencies import Moneda
+from core.middleware import system_context
+from core.models.agencia import Agencia
+
 
 class Command(BaseCommand):
     help = 'Semilla de datos iniciales para TravelHub (Admin, Agencia, Config)'
@@ -42,16 +44,14 @@ class Command(BaseCommand):
         
         self.stdout.write(self.style.SUCCESS('💰 Monedas creadas'))
 
-        # 3.1 Tipos de Cambio (Ejemplo: Hoy)
+        # 3.1 Tipos de Cambio
         from apps.finance.models.currencies import TipoCambio
-        # USD -> VES
         TipoCambio.objects.get_or_create(
             moneda_origen=moneda_usd,
             moneda_destino=moneda_ves,
             fecha_efectiva=timezone.now().date(),
             defaults={'tasa_conversion': 70.00}
         )
-        # EUR -> USD
         TipoCambio.objects.get_or_create(
             moneda_origen=moneda_eur,
             moneda_destino=moneda_usd,
@@ -59,23 +59,23 @@ class Command(BaseCommand):
             defaults={'tasa_conversion': 1.05}
         )
 
-        # 4. Productos Base (Para que el sistema no falle al crear items)
-        ProductoServicio.objects.get_or_create(
-            codigo_interno="TKT-AIR",
-            defaults={'nombre': 'Boleto Aéreo', 'tipo_producto': 'AIR', 'descripcion': 'Emisión de boleto aéreo'}
-        )
-        ProductoServicio.objects.get_or_create(
-            codigo_interno="FEE-SERV",
-            defaults={'nombre': 'Fee de Servicio', 'tipo_producto': 'FEE', 'descripcion': 'Honorarios por gestión'}
-        )
+        # 4. Productos Base (usa system_context para bypass multi-tenant)
+        with system_context():
+            ProductoServicio.objects.get_or_create(
+                codigo_interno="TKT-AIR",
+                defaults={'nombre': 'Boleto Aéreo', 'tipo_producto': 'AIR', 'descripcion': 'Emisión de boleto aéreo'}
+            )
+            ProductoServicio.objects.get_or_create(
+                codigo_interno="FEE-SERV",
+                defaults={'nombre': 'Fee de Servicio', 'tipo_producto': 'FEE', 'descripcion': 'Honorarios por gestión'}
+            )
         self.stdout.write(self.style.SUCCESS('📦 Productos base creados'))
         
-        # 5. Proveedores Genericos (Ejemplo)
-        # Asegurar que importamos Proveedor
-        from apps.bookings.models import Proveedor
-        Proveedor.objects.get_or_create(
-            nombre="IATA GENERICO",
-            defaults={'tipo_proveedor': 'AER', 'identificadores_gds': {'IATA': ['999']}}
-        )
+        # 5. Proveedores Genericos
+        with system_context():
+            Proveedor.objects.get_or_create(
+                nombre="IATA GENERICO",
+                defaults={'tipo_proveedor': 'AER', 'identificadores_gds': {'IATA': ['999']}}
+            )
 
         self.stdout.write(self.style.SUCCESS('✅ ¡Semillas plantadas correctamente!'))

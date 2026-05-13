@@ -1,12 +1,14 @@
 """Cambio de planes (upgrade/downgrade)."""
-from drf_spectacular.utils import extend_schema
-from rest_framework.decorators import api_view, permission_classes, authentication_classes
-from rest_framework.permissions import IsAuthenticated
-from rest_framework_simplejwt.authentication import JWTAuthentication
-from rest_framework.response import Response
-from django.conf import settings
 import os
+
 import stripe
+from django.conf import settings
+from drf_spectacular.utils import extend_schema
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework_simplejwt.authentication import JWTAuthentication
+
 
 def _setup_stripe():
     """Asegura la configuración de Stripe."""

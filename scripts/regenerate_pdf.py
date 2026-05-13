@@ -9,7 +9,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
 django.setup()
 # --- End Django Setup ---
 
-from core.services.pdf_service import generar_pdf_voucher_unificado
+from apps.common.services.pdf_service import generar_pdf_voucher_unificado
 from apps.bookings.models import Venta
 
 # El ID de la venta que creamos en los pasos anteriores

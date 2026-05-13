@@ -1,5 +1,5 @@
 # core/throttling.py
-from rest_framework.throttling import UserRateThrottle, AnonRateThrottle, SimpleRateThrottle
+from rest_framework.throttling import SimpleRateThrottle, UserRateThrottle
 
 
 class DashboardRateThrottle(UserRateThrottle):

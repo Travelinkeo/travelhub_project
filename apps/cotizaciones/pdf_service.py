@@ -1,6 +1,8 @@
 from django.template.loader import render_to_string
+
+from apps.common.services.pdf_renderer import PdfRendererService
 from apps.cotizaciones.models import Cotizacion
-from core.services.pdf_renderer import PdfRendererService
+
 
 def generar_pdf_cotizacion(cotizacion: Cotizacion):
     """

@@ -1,7 +1,10 @@
-from rest_framework import viewsets, permissions
+from rest_framework import permissions, viewsets
+
 from core.api.mixins.tenant import TenantViewSetMixin
+
 from .models import Cliente, Pasajero
 from .serializers import ClienteSerializer, PasajeroSerializer
+
 
 class ClienteViewSet(TenantViewSetMixin, viewsets.ModelViewSet):
     queryset = Cliente.objects.all()

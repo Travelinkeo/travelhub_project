@@ -12,7 +12,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
 import django
 django.setup()
 
-from core.parsers.web_receipt_parser import WebReceiptParser
+from apps.automation.parsers.web_receipt_parser import WebReceiptParser
 
 # File path from user
 eml_path = r"C:\Users\ARMANDO\Downloads\Fwd_ Tickets Avior Airlines.eml"

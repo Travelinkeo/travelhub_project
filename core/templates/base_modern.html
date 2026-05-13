@@ -1,6 +1,6 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="es" class="{% if current_agency.ui_theme == 'swiss' %}light{% else %}dark{% endif %}" data-theme="{{ current_agency.ui_theme|default:'obsidian' }}">
+<html lang="es" class="{% if current_agency and current_agency.ui_theme == 'swiss' or current_agency and current_agency.ui_theme == 'nordic' %}light{% else %}dark{% endif %}" data-theme="{% if current_agency %}{{ current_agency.ui_theme|default:'obsidian' }}{% else %}dark{% endif %}">
 
 <head>
     <meta charset="UTF-8">
@@ -14,7 +14,7 @@
     <script src="{% static 'vendor/htmx_v2.js' %}"></script>
     <script src="{% static 'vendor/alpine_v2.js' %}" defer></script>
     
-    <style>
+    <style nonce="{{ request.csp_nonce }}">
         /* FORCE HIDE SEARCH MODAL IF JS/CSS FAIL */
         #omnisearch-modal-overlay { display: none !important; }
         .hidden { display: none !important; }
@@ -64,6 +64,7 @@
     <!-- Tailwind Config mapped to Theme Variables -->
     <script nonce="{{ request.csp_nonce }}">
         tailwind.config = {
+            nonce: '{{ request.csp_nonce }}',
             darkMode: 'class',
             theme: {
                 extend: {
@@ -474,6 +475,18 @@
 
         /* ── Alpine.js x-cloak ── */
         [x-cloak] { display: none !important; }
+
+        /* ── DINAMIC BRANDING OVERRIDES ── */
+        :root {
+            {% if current_agency.color_primario %}
+            --primary: {{ current_agency.color_primario }} !important;
+            --primary-hover: {{ current_agency.color_primario }}ee !important; /* Slightly lighter/darker via hex suffix or similar */
+            --nav-active-bg: {{ current_agency.color_primario }}15 !important;
+            --nav-active-border: {{ current_agency.color_primario }}33 !important;
+            --nav-active-glow: {{ current_agency.color_primario }}40 !important;
+            --btn-shadow: 0 4px 12px {{ current_agency.color_primario }}40 !important;
+            {% endif %}
+        }
 </style>
 
     {% block extra_head %}{% endblock %}
@@ -496,7 +509,7 @@
             DETENER SESIÓN
         </a>
     </div>
-    <style> body { padding-top: 32px !important; } </style>
+    <style nonce="{{ request.csp_nonce }}"> body { padding-top: 32px !important; } </style>
     {% endif %}
     <!-- Mobile Overlay -->
     <div x-show="mobileMenuOpen" @click="mobileMenuOpen = false"
@@ -921,7 +934,7 @@
     {% block modals %}{% endblock %}
 
     <!-- Scripts de Refresh para Íconos Lucide (Opcional, ahora usamos Google Material Symbols) -->
-    <script>
+    <script nonce="{{ request.csp_nonce }}">
         document.addEventListener('DOMContentLoaded', () => {
             if (typeof lucide !== 'undefined') lucide.createIcons();
         });

@@ -1,24 +1,26 @@
-from django.core.management.base import BaseCommand
 import os
 import sys
+
+from django.core.management.base import BaseCommand
 
 # Ensure project root is in path
 sys.path.append(r'c:\Users\ARMANDO\travelhub_project')
 
-from core.parsers.web_receipt_parser import WebReceiptParser
+from apps.automation.parsers.web_receipt_parser import WebReceiptParser
+
 
 class Command(BaseCommand):
     help = 'Proba los parsers de aerolineas venezolanas'
 
     def handle(self, *args, **options):
-        base_path = r'c:\Users\ARMANDO\travelhub_project\core\tests\fixtures\venezuela_web'
+        pass
 import email
 from email import policy
-from core.ticket_parser import generate_ticket
-from django.core.files.base import ContentFile
-from django.core.files.storage import default_storage
 
 from PyPDF2 import PdfReader
+
+from apps.automation.parsers.ticket_parser import generate_ticket
+
 
 class Command(BaseCommand):
     help = 'Proba los parsers de aerolineas venezolanas y genera PDF'
@@ -69,7 +71,7 @@ class Command(BaseCommand):
                      self.stdout.write(self.style.ERROR(f"  [X] Error leyendo PDF: {e}"))
                      continue
             else:
-                with open(path, 'r', encoding='utf-8') as f:
+                with open(path, encoding='utf-8') as f:
                     content = f.read()
 
             # 2. Parsear
@@ -82,7 +84,7 @@ class Command(BaseCommand):
                 self.stdout.write(self.style.WARNING(f"  [!] Multi-Pax Mode: {result.get('is_multi_pax')}"))
                 self.stdout.write(f"  [i] Total Tickets Generados: {len(tickets)}")
                 
-                for i, t in enumerate(tickets):
+                for _i, t in enumerate(tickets):
                     self.stdout.write(f"      > Ticket: {t.get('NUMERO_DE_BOLETO')}")
                     self.stdout.write(f"        Pasajero: {t.get('NOMBRE_DEL_PASAJERO')}")
                     self.stdout.write(f"        Saludo: {t.get('SOLO_NOMBRE_PASAJERO')}")
@@ -98,12 +100,12 @@ class Command(BaseCommand):
                         self.stdout.write(self.style.WARNING(f"\n  [!] FALTA IDENTIFICACIÓN PARA: {t.get('NOMBRE_DEL_PASAJERO')}"))
                         try:
                             # Python standard input
-                            manual_id = input(f"      > Ingrese V/E-Cedula o Pasaporte: ").strip()
+                            manual_id = input("      > Ingrese V/E-Cedula o Pasaporte: ").strip()
                             if manual_id:
                                 t['CODIGO_IDENTIFICACION'] = manual_id.upper()
                                 self.stdout.write(self.style.SUCCESS(f"      [OK] ID Actualizado a: {t['CODIGO_IDENTIFICACION']}"))
-                        except Exception as e:
-                            pass # En entornos no interactivos
+                        except (EOFError, KeyboardInterrupt):
+                            pass  # En entornos no interactivos
                     # -------------------------------
 
                     # 3. Generar PDF para TODOS los tickets

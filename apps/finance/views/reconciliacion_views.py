@@ -1,12 +1,12 @@
-from django.views.generic import TemplateView, CreateView, DetailView, View
-from django.contrib.auth.mixins import LoginRequiredMixin
-from apps.finance.models.reconciliacion import ReporteReconciliacion, ConciliacionBoleto
-from django.db.models import Sum, Count, Q
-from django.urls import reverse_lazy
-from django.shortcuts import get_object_or_404, redirect
 from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Count, Q, Sum
+from django.shortcuts import get_object_or_404, redirect
+from django.urls import reverse_lazy
+from django.views.generic import CreateView, DetailView, TemplateView, View
+
 from apps.finance.forms import ReporteReconciliacionForm
-from apps.finance.services.smart_reconciliation_service import SmartReconciliationService
+from apps.finance.models.reconciliacion import ConciliacionBoleto, ReporteReconciliacion
 
 
 class ReconciliationDashboardHTMXView(LoginRequiredMixin, TemplateView):

@@ -4,7 +4,7 @@ from email import policy
 from email.parser import BytesParser
 from pathlib import Path
 
-from core import ticket_parser
+from apps.automation.parsers import ticket_parser
 
 # Asegurar que la raíz del proyecto esté en sys.path para importar 'core'
 PROJECT_ROOT = Path(__file__).resolve().parent.parent

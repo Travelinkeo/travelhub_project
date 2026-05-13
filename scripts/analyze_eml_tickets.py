@@ -10,7 +10,7 @@ sys.path.append(os.getcwd())
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
 django.setup()
 
-from core.parsers.kiu_parser import KIUParser
+from apps.automation.parsers.kiu_parser import KIUParser
 from bs4 import BeautifulSoup
 
 def extract_body(eml_path):

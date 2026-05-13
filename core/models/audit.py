@@ -1,10 +1,12 @@
 import hashlib
 import json as _json
 import logging
-from django.db import models
+
 from django.conf import settings
-from django.utils.translation import gettext_lazy as _
+from django.db import models
 from django.utils import timezone as _tz
+from django.utils.translation import gettext_lazy as _
+
 from core.middleware import get_current_request_meta
 
 logger = logging.getLogger(__name__)
@@ -30,7 +32,8 @@ class AuditLog(models.Model):
     object_id = models.CharField(_("Object ID"), max_length=120, db_index=True)
     
     # Referencia opcional a Venta para facilitar filtrado en el panel de ventas
-    venta = models.ForeignKey('bookings.Venta', related_name='audit_logs_central', on_delete=models.CASCADE, blank=True, null=True, verbose_name=_("Venta Asociada"))
+    # FIX SEGURIDAD: SET_NULL para preservar audit trail si se borra una Venta
+    venta = models.ForeignKey('bookings.Venta', related_name='audit_logs_central', on_delete=models.SET_NULL, blank=True, null=True, verbose_name=_("Venta Asociada"))
     
     # Agencia (opcional para acciones globales)
     agencia = models.ForeignKey('core.Agencia', related_name='audit_logs', on_delete=models.SET_NULL, blank=True, null=True, verbose_name=_("Agencia"))
@@ -53,7 +56,6 @@ class AuditLog(models.Model):
         verbose_name = _("Log de Auditoría")
         verbose_name_plural = _("Logs de Auditoría")
         ordering = ['-creado']
-        db_table = 'core_auditlog'
         indexes = [
             models.Index(fields=['modelo', 'object_id'], name='idx_audit_modelo_object'),
             models.Index(fields=['agencia', 'creado'], name='idx_audit_agencia_creado'),
@@ -74,13 +76,15 @@ class AuditLog(models.Model):
         super().save(*args, **kwargs)
         
         if es_creacion and not self.record_hash:
-            # Construir payload para el hash
+            # Construir payload para el hash - DEBE coincidir con verify_audit_chain()
             payload = {
                 'modelo': self.modelo,
                 'object_id': self.object_id,
                 'accion': self.accion,
+                'descripcion': self.descripcion or '',
                 'datos_previos': self.datos_previos,
                 'datos_nuevos': self.datos_nuevos,
+                'metadata_extra': self.metadata_extra,
                 'creado': self.creado.isoformat()
             }
             try:
@@ -97,7 +101,7 @@ def crear_audit_log(*, modelo, object_id, accion, venta=None, descripcion=None, 
     Función utilitaria centralizada para crear logs de auditoría capturando el contexto.
     """
     try:
-        from core.middleware import get_current_user, get_current_agency
+        from core.middleware import get_current_agency, get_current_user
         req_meta = get_current_request_meta()
         merged_meta = metadata_extra.copy() if metadata_extra else {}
         user_obj = get_current_user()
@@ -132,10 +136,11 @@ def crear_audit_log(*, modelo, object_id, accion, venta=None, descripcion=None, 
         return None
 
 def _sanitize_value(val):
-    from decimal import Decimal
     import datetime
+    from decimal import Decimal
+
     from django.db.models.fields.files import FieldFile
-    if isinstance(val, (datetime.date, datetime.datetime)):
+    if isinstance(val, datetime.date | datetime.datetime):
         return val.isoformat()
     if isinstance(val, Decimal):
         return str(val)

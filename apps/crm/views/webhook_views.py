@@ -1,10 +1,12 @@
 import json
 import logging
-from django.http import HttpResponse
-from django.views import View
-from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_exempt
+
 from django.conf import settings
+from django.http import HttpResponse
+from django.utils.decorators import method_decorator
+from django.views import View
+from django.views.decorators.csrf import csrf_exempt
+
 from apps.crm.tasks_bot import whatsapp_ai_task
 
 logger = logging.getLogger(__name__)
@@ -79,7 +81,9 @@ class WhatsAppWebhookView(View):
                                 except Exception as e:
                                     # Fallback directo si Celery falla
                                     logger.warning(f"Falla de Celery, procesando sincrónicamente: {e}")
-                                    from apps.crm.services.whatsapp_bot_service import procesar_mensaje_entrante
+                                    from apps.crm.services.whatsapp_bot_service import (
+                                        procesar_mensaje_entrante,
+                                    )
                                     procesar_mensaje_entrante(telefono, nombre_perfil, texto)
 
             return HttpResponse('EVENT_RECEIVED', status=200)

@@ -6,7 +6,7 @@ from django.core.mail import send_mail
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 
-from core.gemini import generate_content
+from apps.automation.services.ai_engine import generate_content
 from apps.bookings.models import Venta
 
 # --- Funciones Auxiliares (Simuladas y Reales) ---

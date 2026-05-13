@@ -3,8 +3,10 @@
 Comando para generar Libro de Ventas desde la terminal
 """
 from datetime import datetime
+
 from django.core.management.base import BaseCommand
-from core.services.libro_ventas import LibroVentasService
+
+from apps.finance.services.libro_ventas import LibroVentasService
 
 
 class Command(BaseCommand):

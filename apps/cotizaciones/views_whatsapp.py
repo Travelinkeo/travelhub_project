@@ -1,12 +1,17 @@
 import logging
-from django.views import View
+
 from django.http import HttpResponse
 from django.utils.decorators import method_decorator
+from django.views import View
 from django.views.decorators.csrf import csrf_exempt
-from core.services.voice_parser_service import process_twilio_audio_message, process_twilio_text_message
+
+from apps.automation.services.voice_parser_service import (
+    process_twilio_audio_message,
+    process_twilio_text_message,
+)
+from apps.communications.services.whatsapp_notifications import enviar_whatsapp
 from apps.cotizaciones.models import Cotizacion
 from apps.crm.models import Cliente
-from core.whatsapp_notifications import enviar_whatsapp
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +36,6 @@ class IncomingWhatsAppWebhook(View):
         
         # Buscar cliente existente en CRM
         cliente = Cliente.objects.filter(telefono_principal__icontains=raw_phone.lstrip('+')).first()
-        cliente_nombre = cliente.nombres if cliente else "Prospecto WhatsApp Twilio"
 
         # 2. Orquestar procesamiento IA
         intencion_data = None
@@ -57,7 +61,8 @@ class IncomingWhatsAppWebhook(View):
         try:
              pasajeros_str = intencion_data.get('numero_pasajeros', 1)
              try: pax = int(pasajeros_str)
-             except: pax = 1
+             except (TypeError, ValueError):
+                 pax = 1
              
              destino_f = intencion_data.get('destino', 'Varios')
              transcripcion = intencion_data.get('transcripcion', body_text)

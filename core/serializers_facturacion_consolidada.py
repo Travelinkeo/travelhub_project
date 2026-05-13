@@ -3,7 +3,13 @@ Serializers para modelos consolidados de facturación venezolana.
 """
 
 from rest_framework import serializers
-from apps.finance.models import FacturaConsolidada, ItemFacturaConsolidada, DocumentoExportacionConsolidado
+
+from apps.finance.models import (
+    DocumentoExportacionConsolidado,
+    FacturaConsolidada,
+    ItemFacturaConsolidada,
+)
+
 from .serializers import CoreClienteSerializer, MonedaSerializer
 
 

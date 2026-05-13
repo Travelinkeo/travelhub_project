@@ -5,17 +5,16 @@ Implementa la lógica de generación automática de asientos contables desde fac
 """
 
 import logging
-from decimal import Decimal
-from typing import Optional, Dict, Any
 from datetime import date
+from decimal import Decimal
 
 from django.db import transaction
 from django.utils import timezone
-from django.utils.translation import gettext_lazy as _
+
+from apps.bookings.models import PagoVenta
+from apps.finance.models import Factura, ItemFactura
 
 from .models import AsientoContable, DetalleAsiento, PlanContable, TasaCambioBCV
-from apps.finance.models import Factura, ItemFactura
-from apps.bookings.models import Venta, PagoVenta
 
 logger = logging.getLogger(__name__)
 
@@ -142,7 +141,7 @@ class ContabilidadService:
             debe_bsd=Decimal('0.00'),
             haber=comision_usd,
             haber_bsd=comision_usd * tasa,
-            descripcion_linea=f"Comisión por intermediación"
+            descripcion_linea="Comisión por intermediación"
         )
         linea_num += 1
         
@@ -158,7 +157,7 @@ class ContabilidadService:
                 debe_bsd=Decimal('0.00'),
                 haber=monto_tercero,
                 haber_bsd=monto_tercero * tasa,
-                descripcion_linea=f"Cuenta por pagar a proveedor (Terceros)"
+                descripcion_linea="Cuenta por pagar a proveedor (Terceros)"
             )
             linea_num += 1
         
@@ -262,7 +261,7 @@ class ContabilidadService:
     
     @staticmethod
     @transaction.atomic
-    def registrar_pago_y_diferencial(pago: PagoVenta) -> Optional[AsientoContable]:
+    def registrar_pago_y_diferencial(pago: PagoVenta) -> AsientoContable | None:
         """
         Registra el pago y calcula/contabiliza el diferencial cambiario.
         Implementa lógica de ganancia/pérdida cambiaria según VEN-NIF.
@@ -424,8 +423,9 @@ class ContabilidadService:
             AsientoContable de la provisión
         """
         try:
-            from django.db.models import Sum
             from datetime import date
+
+            from django.db.models import Sum
             
             # Calcular primer y último día del mes
             primer_dia = date(anio, mes, 1)
@@ -543,7 +543,7 @@ class ContabilidadService:
             # Agregar Item explicando
             ItemFactura.objects.create(
                 factura=nota_debito,
-                descripcion=f"Ajuste por Diferencial Cambiario",
+                descripcion="Ajuste por Diferencial Cambiario",
                 cantidad=1,
                 precio_unitario=Decimal('0.00'), # La base es el diferencial, pero en este caso es un ajuste
                 subtotal_item=Decimal('0.00')

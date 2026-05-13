@@ -3,17 +3,17 @@
 API endpoints para tasas de cambio de Venezuela
 """
 
+from datetime import date, datetime, timedelta
+
+from django.core.cache import cache
 from drf_spectacular.utils import extend_schema
+from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from rest_framework import status
-from django.core.cache import cache
-from django.utils import timezone
 
-from .tasas_venezuela_client import TasasVenezuelaClient
 from .models import TasaCambioBCV
-from datetime import date, datetime, timedelta
+from .tasas_venezuela_client import TasasVenezuelaClient
 
 
 @extend_schema(exclude=True)
@@ -57,9 +57,8 @@ def obtener_tasas_actuales(request):
             }
             cache.set(cache_key, tasas, 86400)
             return Response(tasas)
-    except Exception:
-        pass
-    
+    except Exception as e:
+        logger.warning(f"Excepción silenciosa capturada: {e}")
     return Response(
         {'error': 'No se pudieron obtener las tasas'},
         status=status.HTTP_503_SERVICE_UNAVAILABLE

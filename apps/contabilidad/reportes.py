@@ -4,13 +4,12 @@ Generación de reportes contables según VEN-NIF.
 Balance de Comprobación, Estado de Resultados, Balance General, Libro Diario/Mayor.
 """
 
-from decimal import Decimal
 from datetime import date
-from typing import Dict, List, Optional
-from django.db.models import Sum, Q
-from django.utils.translation import gettext_lazy as _
+from decimal import Decimal
 
-from .models import PlanContable, AsientoContable, DetalleAsiento
+from django.db.models import Sum
+
+from .models import AsientoContable, DetalleAsiento, PlanContable
 
 
 class ReportesContables:
@@ -21,7 +20,7 @@ class ReportesContables:
         fecha_desde: date,
         fecha_hasta: date,
         moneda: str = 'USD'
-    ) -> Dict:
+    ) -> dict:
         """
         Balance de Comprobación para un período.
         
@@ -79,7 +78,7 @@ class ReportesContables:
         fecha_desde: date,
         fecha_hasta: date,
         moneda: str = 'USD'
-    ) -> Dict:
+    ) -> dict:
         """
         Estado de Resultados (P&L) para un período.
         
@@ -118,7 +117,7 @@ class ReportesContables:
         }
     
     @staticmethod
-    def balance_general(fecha_corte: date, moneda: str = 'USD') -> Dict:
+    def balance_general(fecha_corte: date, moneda: str = 'USD') -> dict:
         """
         Balance General (Estado de Situación Financiera) a una fecha.
         
@@ -176,7 +175,7 @@ class ReportesContables:
         fecha_desde: date,
         fecha_hasta: date,
         moneda: str = 'USD'
-    ) -> List[Dict]:
+    ) -> list[dict]:
         """
         Libro Diario para un período.
         
@@ -225,7 +224,7 @@ class ReportesContables:
         fecha_desde: date,
         fecha_hasta: date,
         moneda: str = 'USD'
-    ) -> Dict:
+    ) -> dict:
         """
         Libro Mayor para una cuenta específica.
         

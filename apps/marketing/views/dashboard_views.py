@@ -1,6 +1,8 @@
 from django.views.generic import TemplateView
+
 from apps.bookings.models import HotelTarifario
-from apps.marketing.models import Campania, ActivoMarketing
+from apps.marketing.models import ActivoMarketing, Campania
+
 
 class MarketingDashboardView(TemplateView):
     template_name = 'marketing/dashboard.html'

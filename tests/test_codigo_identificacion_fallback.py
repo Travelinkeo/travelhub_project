@@ -1,4 +1,4 @@
-from core.identification_utils import (
+from apps.common.utils.identification_utils import (
     extract_codigo_identificacion_anywhere,
     normalize_codigo_identificacion,
 )

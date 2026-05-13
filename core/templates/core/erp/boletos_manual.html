@@ -269,7 +269,7 @@
                         'Content-Type': 'application/json',
                         'X-CSRFToken': formData.get('csrfmiddlewaretoken')
                     },
-                    body: json.stringify({ ticket_data: ticketData })
+                    body: JSON.stringify({ ticket_data: ticketData })
                 });
 
                 const data = await response.json();

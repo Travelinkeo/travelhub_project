@@ -5,10 +5,12 @@ Incluye gestión de Plan de Cuentas, Asientos Contables y Tasas BCV.
 """
 
 from django.contrib import admin
-from django.utils.translation import gettext_lazy as _
 from django.utils.html import format_html
+from django.utils.translation import gettext_lazy as _
 
-from .models import PlanContable, AsientoContable, DetalleAsiento, TasaCambioBCV
+from core.admin_saas import SaaSAdminMixin
+
+from .models import AsientoContable, DetalleAsiento, PlanContable, TasaCambioBCV
 
 
 class DetalleAsientoInline(admin.TabularInline):
@@ -19,7 +21,7 @@ class DetalleAsientoInline(admin.TabularInline):
 
 
 @admin.register(PlanContable)
-class PlanContableAdmin(admin.ModelAdmin):
+class PlanContableAdmin(SaaSAdminMixin, admin.ModelAdmin):
     list_display = ('codigo_cuenta', 'nombre_cuenta', 'tipo_cuenta', 'naturaleza', 'permite_movimientos', 'nivel')
     list_filter = ('tipo_cuenta', 'naturaleza', 'permite_movimientos', 'nivel')
     search_fields = ('codigo_cuenta', 'nombre_cuenta')
@@ -39,7 +41,7 @@ class PlanContableAdmin(admin.ModelAdmin):
 
 
 @admin.register(AsientoContable)
-class AsientoContableAdmin(admin.ModelAdmin):
+class AsientoContableAdmin(SaaSAdminMixin, admin.ModelAdmin):
     list_display = ('numero_asiento', 'fecha_contable', 'tipo_asiento', 'descripcion_general', 
                     'total_debe', 'total_haber', 'estado', 'esta_cuadrado_display')
     list_filter = ('tipo_asiento', 'estado', 'fecha_contable')

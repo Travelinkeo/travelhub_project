@@ -76,7 +76,7 @@
             </div>
             
             {% if boleto.venta_asociada %}
-            <a href="{% url 'core:eliminar_venta_hard' boleto.venta_asociada.pk %}?next={{ request.path }}" 
+            <a href="{% url 'core:venta_eliminar_permanente' boleto.venta_asociada.pk %}?next={{ request.path }}" 
                onclick="return confirm('⚠️ ¿ELIMINAR VENTA PERMANENTEMENTE? Esta acción borrará la venta y todos sus componentes asociados (items, pagos, etc).')"
                class="h-10 px-4 rounded-xl border border-amber-500/20 text-amber-500/50 hover:text-amber-500 hover:bg-amber-500/10 transition-all flex items-center gap-2 group"
                title="Eliminar Venta asociada">
@@ -228,7 +228,7 @@
                                 <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-600 text-[20px]">group</span>
                                 <select name="cliente_id" class="w-full bg-surface-2 border border-border-color rounded-xl pl-12 pr-4 py-3 text-text-secondary font-bold focus:border-primary transition-all outline-none appearance-none">
                                     <option value="">-- Autodetectar / Nuevo Cliente --</option>
-                                    {% for cliente in clientes_disponibles %}
+                                    {% for cliente in clientes %}
                                     <option value="{{ cliente.id }}" {% if boleto.venta_asociada.cliente_id == cliente.id %}selected{% endif %}>
                                         {{ cliente.get_nombre_completo|upper }} ({{ cliente.email }})
                                     </option>
@@ -433,9 +433,23 @@
 <!-- ── SCRIPTS ── -->
 <script nonce="{{ csp_nonce }}">
     console.log('🚀 [ReviewMaster V1.8] Ready.');
-    /* Legacy JS removed */
-        
-        const btnRetry = document.getElementById('btn-retry-parse-forced');
+    
+    // El botón de re-extracción ahora es manejado por HTMX (hx-post + reload)
+    // No se requiere JS adicional para el flujo principal de re-parseo.
+    
+    document.addEventListener('htmx:beforeRequest', function(evt) {
+        if (evt.detail.elt.id === 'btn-retry-parse-forced') {
+            console.log('🔥 Iniciando re-extracción forzada...');
+        }
+    });
+
+    document.addEventListener('htmx:afterRequest', function(evt) {
+        if (evt.detail.successful) {
+            console.log('✅ Operación exitosa:', evt.detail.elt.id);
+        } else {
+            console.error('❌ Fallo en operación:', evt.detail.elt.id);
+        }
+    });
         
 
                 

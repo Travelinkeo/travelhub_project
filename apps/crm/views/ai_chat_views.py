@@ -1,10 +1,12 @@
 import logging
-from django.views import View
+
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import JsonResponse, HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
-from apps.crm.models import Cliente, MensajeWhatsApp
-from core.services.ai_engine import ai_engine
+from django.views import View
+
+from apps.automation.services.ai_engine import ai_engine
+from apps.crm.models import Cliente
 
 logger = logging.getLogger(__name__)
 

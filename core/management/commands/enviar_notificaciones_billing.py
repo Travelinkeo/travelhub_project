@@ -2,15 +2,17 @@
 Management command para enviar notificaciones automáticas de billing.
 Ejecutar diariamente con cron/Task Scheduler.
 """
+from datetime import timedelta
+
 from django.core.management.base import BaseCommand
 from django.utils import timezone
-from datetime import timedelta
-from core.models.agencia import Agencia
-from core.services.billing_notifications import (
-    enviar_email_trial_expirando,
+
+from apps.communications.services.billing_notifications import (
+    enviar_email_limite_alcanzado,
     enviar_email_trial_expirado,
-    enviar_email_limite_alcanzado
+    enviar_email_trial_expirando,
 )
+from core.models.agencia import Agencia
 
 
 class Command(BaseCommand):

@@ -5,10 +5,11 @@ from pathlib import Path
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
-from apps.crm.models import Cliente
-from apps.common.models import Aerolinea, Ciudad, Pais
-from apps.finance.models.currencies import Moneda
 from apps.bookings.models import ProductoServicio, Proveedor
+from apps.common.models import Aerolinea, Ciudad, Pais
+from apps.crm.models import Cliente
+from apps.finance.models.currencies import Moneda
+
 CATALOG_FILES = {
     'paises': 'fixtures/paises.json',
     'monedas': 'fixtures/monedas.json',

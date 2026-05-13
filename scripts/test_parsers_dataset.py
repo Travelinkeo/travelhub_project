@@ -17,7 +17,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
 import django
 django.setup()
 
-from core.ticket_parser import extract_data_from_text
+from apps.automation.parsers.ticket_parser import extract_data_from_text
 import pdfplumber
 from email import policy
 from email.parser import BytesParser

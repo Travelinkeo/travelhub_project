@@ -1,8 +1,10 @@
-from django.db.models import Sum, F
-from django.db.models.functions import TruncMonth
-from apps.bookings.models import ItemVenta
-from decimal import Decimal
 import logging
+from decimal import Decimal
+
+from django.db.models import F, Sum
+from django.db.models.functions import TruncMonth
+
+from apps.bookings.models import ItemVenta
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +39,7 @@ class FinancialAnalyticsService:
                 'ingresos': float(ingresos),
                 'costos': float(costos),
                 'margen': float(margen),
-                'porcentaje': float((margen / ingresos * 100)) if ingresos > 0 else 0
+                'porcentaje': float(margen / ingresos * 100) if ingresos > 0 else 0
             })
         
         return results
@@ -63,7 +65,7 @@ class FinancialAnalyticsService:
             'ventas_totales': float(ventas),
             'costos_totales': float(costos),
             'margen_neto': float(margen),
-            'porcentaje_margen': float((margen / ventas * 100)) if ventas > 0 else 0
+            'porcentaje_margen': float(margen / ventas * 100) if ventas > 0 else 0
         }
 
     @staticmethod

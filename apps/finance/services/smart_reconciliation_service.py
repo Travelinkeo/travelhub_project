@@ -1,21 +1,20 @@
-import os
-import io
-import mimetypes
-import pandas as pd
-from typing import List, Dict, Optional, Any
+import json
+import logging
 from decimal import Decimal
+from typing import Any
+
+import pandas as pd
 from django.db import transaction
 from django.utils import timezone
-from apps.finance.models.reconciliacion import (
-    ReporteReconciliacion,
-    LineaReporteReconciliacion,
-    ConciliacionBoleto
-)
-from apps.bookings.models import BoletoImportado
-from core.gemini import analizar_documento_con_gemini_estructurado
 from pydantic import BaseModel, Field
 
-import logging
+from apps.bookings.models import BoletoImportado
+from apps.finance.models.reconciliacion import (
+    ConciliacionBoleto,
+    LineaReporteReconciliacion,
+    ReporteReconciliacion,
+)
+
 logger = logging.getLogger(__name__)
 
 # --- Pydantic Schemas para extracción de IA ---
@@ -30,7 +29,7 @@ class LineaCobro(BaseModel):
 
 class ReporteLiquidacionSchema(BaseModel):
     proveedor_detectado: str = Field(description="Nombre del proveedor o consolidador (Ej: SABRE, KIU, AMADEUS, TICKET_CONSOLIDATOR).")
-    lineas_cobradas: List[LineaCobro] = Field(description="Array con todas las filas de boletos cobrados extraídas del reporte.")
+    lineas_cobradas: list[LineaCobro] = Field(description="Array con todas las filas de boletos cobrados extraídas del reporte.")
 
 
 class SmartReconciliationService:
@@ -74,7 +73,7 @@ class SmartReconciliationService:
             raise
             
     @classmethod
-    def _extraer_datos_archivo(cls, reporte: ReporteReconciliacion) -> Dict[str, Any]:
+    def _extraer_datos_archivo(cls, reporte: ReporteReconciliacion) -> dict[str, Any]:
         """Usa Pandas si es CSV/Excel, o el nuevo SupplierReportParser si es PDF/Texto ruidoso"""
         file_path = reporte.archivo.path
         
@@ -89,15 +88,16 @@ class SmartReconciliationService:
                     with fitz.open(file_path) as pdf:
                         for page in pdf:
                             t = page.get_text()
-                            if t: text += t + "\n"
+                            if t:
+                                text += t + "\n"
                 except Exception as e:
                     logger.error(f"Error extrayendo texto del PDF: {e}")
-                    raise ValueError("No se pudo extraer texto del reporte PDF.")
+                    raise ValueError("No se pudo extraer texto del reporte PDF.") from e
             else:
-                with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+                with open(file_path, encoding='utf-8', errors='ignore') as f:
                     text = f.read()
 
-            from core.parsers.supplier_report_parser import SupplierReportParser
+            from apps.automation.parsers.supplier_report_parser import SupplierReportParser
             parser = SupplierReportParser()
             resultado = parser.parse_report_text(text)
             
@@ -118,17 +118,17 @@ class SmartReconciliationService:
                 return cls._mapear_columnas_df_con_ia(df, reporte.proveedor)
             except Exception as e:
                 logger.error(f"Error procesando archivo estructurado con Pandas: {e}")
-                raise ValueError(f"Error leyendo el archivo Excel/CSV: {str(e)}")
+                raise ValueError(f"Error leyendo el archivo Excel/CSV: {str(e)}") from e
             
         raise ValueError(f"Tipo de archivo no soportado para: {file_path}")
 
     @classmethod
-    def _mapear_columnas_df_con_ia(cls, df: pd.DataFrame, proveedor_hint: str) -> Dict[str, Any]:
+    def _mapear_columnas_df_con_ia(cls, df: pd.DataFrame, proveedor_hint: str) -> dict[str, Any]:
         """
         Si el Excel no tiene las columnas estándar, le pedimos a Gemini que las identifique
         basándose en una muestra de las primeras 5 filas.
         """
-        from core.services.ai_engine import ai_engine
+        from apps.automation.services.ai_engine import ai_engine
         
         # Tomar cabecera y muestra
         cabecera = list(df.columns)
@@ -189,7 +189,7 @@ class SmartReconciliationService:
 
     @classmethod
     @transaction.atomic
-    def _guardar_lineas_extraidas(cls, reporte: ReporteReconciliacion, datos_ia: Dict[str, Any]) -> None:
+    def _guardar_lineas_extraidas(cls, reporte: ReporteReconciliacion, datos_ia: dict[str, Any]) -> None:
         """Toma el JSON nativo extraído por la IA y lo inserta en `LineaReporteReconciliacion`"""
         # Limpiar cruces previos si hubiere (por reprocesamiento)
         reporte.lineas.all().delete()
@@ -210,7 +210,7 @@ class SmartReconciliationService:
 
     @classmethod
     @transaction.atomic
-    def _ejecutar_cruce_conciliacion(cls, reporte: ReporteReconciliacion) -> Dict[str, Any]:
+    def _ejecutar_cruce_conciliacion(cls, reporte: ReporteReconciliacion) -> dict[str, Any]:
         """Cruzador Financiero Híbrido: Batch + IA Fuzzy"""
         reporte.conciliaciones.all().delete()
         
@@ -247,7 +247,8 @@ class SmartReconciliationService:
             match = None
             # Prioridad 1: Número de boleto (10 dígitos finales)
             for v in ventas_locales:
-                if v['id_boleto'] in boletos_asignados: continue
+                if v['id_boleto'] in boletos_asignados:
+                    continue
                 num_loc = (v['numero_boleto'] or '').replace("-", "").strip()[-10:]
                 if num_loc == num_rep and num_loc != '':
                     match = v
@@ -256,7 +257,8 @@ class SmartReconciliationService:
             # Prioridad 2: PNR (Si no hubo match por boleto)
             if not match and pnr_rep and len(pnr_rep) == 6:
                 for v in ventas_locales:
-                    if v['id_boleto'] in boletos_asignados: continue
+                    if v['id_boleto'] in boletos_asignados:
+                        continue
                     if (v['pnr'] or '').upper().strip() == pnr_rep:
                         match = v
                         break
@@ -273,7 +275,7 @@ class SmartReconciliationService:
         if pendientes_reporte.exists() and pendientes_local:
             logger.info(f"🤖 Ejecutando Cruce Fuzzy IA para {pendientes_reporte.count()} líneas pendientes.")
             # Dividir en lotes de 20 para no saturar tokens/contexto
-            from core.utils.lists import chunk_list
+            from apps.common.utils.lists import chunk_list
             for chunk in chunk_list(list(pendientes_reporte), 20):
                 cls._procesar_lote_fuzzy_ia(reporte, chunk, pendientes_local, boletos_asignados, resumen)
 
@@ -331,17 +333,17 @@ class SmartReconciliationService:
     @classmethod
     def _procesar_lote_fuzzy_ia(cls, reporte, chunk_lineas, pendientes_local, boletos_asignados, resumen):
         """Usa Gemini para encontrar matches semánticos en un lote de registros"""
-        from core.services.ai_engine import ai_engine
+        from apps.automation.services.ai_engine import ai_engine
+        from apps.automation.services.prompts import RECONCILIATION_SYSTEM_PROMPT
         from core.models.ai_schemas import ConciliacionLoteSchema
-        from core.prompts import RECONCILIATION_SYSTEM_PROMPT
         
         # Preparar data compacta
         prov_data = [{
-            "id": l.id_linea,
-            "tkt": l.numero_boleto_reportado,
-            "psg": l.raw_data.get('pasajero', '') if l.raw_data else '',
-            "amt": float(l.total_cobrado)
-        } for l in chunk_lineas]
+            "id": item.id_linea,
+            "tkt": item.numero_boleto_reportado,
+            "psg": item.raw_data.get('pasajero', '') if item.raw_data else '',
+            "amt": float(item.total_cobrado)
+        } for item in chunk_lineas]
         
         local_data = [{
             "id": v['id_boleto'],
@@ -364,16 +366,17 @@ class SmartReconciliationService:
                 linea_id = match.get('proveedor_item_id') # Enviamos id_linea como id
                 venta_id = match.get('venta_id')
                 
-                if not linea_id or not venta_id: continue
+                if not linea_id or not venta_id:
+                    continue
                 
-                linea = next((l for l in chunk_lineas if l.id_linea == int(linea_id)), None)
+                linea_obj = next((item for item in chunk_lineas if item.id_linea == int(linea_id)), None)
                 venta = next((v for v in pendientes_local if v['id_boleto'] == int(venta_id)), None)
                 
-                if linea and venta and venta['id_boleto'] not in boletos_asignados:
-                    cls._crear_conciliacion(reporte, linea, venta, resumen)
+                if linea_obj and venta and venta['id_boleto'] not in boletos_asignados:
+                    cls._crear_conciliacion(reporte, linea_obj, venta, resumen)
                     boletos_asignados.add(venta['id_boleto'])
                     # Marcar razonamiento IA
-                    c = ConciliacionBoleto.objects.filter(reporte=reporte, linea_reporte=linea).last()
+                    c = ConciliacionBoleto.objects.filter(reporte=reporte, linea_reporte=linea_obj).last()
                     if c:
                         c.ia_razonamiento = match.get('comentario')
                         c.save(update_fields=['ia_razonamiento'])
@@ -471,7 +474,7 @@ class SmartReconciliationService:
                     cuenta_contable=cuenta_proveedor,
                     haber=monto_abs,
                     haber_bsd=monto_abs * tasa_bcv,
-                    descripcion_linea=f"Ajuste cuenta por pagar (Sobrecobro)"
+                    descripcion_linea="Ajuste cuenta por pagar (Sobrecobro)"
                 )
             else:
                 # GANANCIA: Debit Proveedor (le debemos menos), Credit Ingreso
@@ -489,7 +492,7 @@ class SmartReconciliationService:
                     cuenta_contable=cuenta_proveedor,
                     debe=monto_abs,
                     debe_bsd=monto_abs * tasa_bcv,
-                    descripcion_linea=f"Ajuste cuenta por pagar (Ahorro)"
+                    descripcion_linea="Ajuste cuenta por pagar (Ahorro)"
                 )
                 # Línea 2: ACREEDORA (Ingreso)
                 DetalleAsiento.objects.create(
@@ -512,13 +515,12 @@ class SmartReconciliationService:
             logger.error(f"Fallo sugiriendo asiento para conciliación {conciliacion.id_conciliacion}: {str(e)}")
 
     @classmethod
-    def _buscar_boleto_difuso_con_ia(cls, linea: LineaReporteReconciliacion) -> tuple[Optional[BoletoImportado], Optional[str]]:
+    def _buscar_boleto_difuso_con_ia(cls, linea: LineaReporteReconciliacion) -> tuple[BoletoImportado | None, str | None]:
         """
         Usa la IA para buscar un boleto que no coincidió exactamente por número.
         Busca candidatos por monto similar y deja que Gemini decida el match semántico.
         """
-        from core.services.ai_engine import ai_engine
-        import json
+        from apps.automation.services.ai_engine import ai_engine
 
         # 1. Buscar candidatos locales con montos similares (tolerancia 5%)
         # y que no estén ya conciliados.
@@ -564,7 +566,7 @@ class SmartReconciliationService:
         
         class MatchResult(BaseModel):
             match_encontrado: bool
-            id_candidato: Optional[int]
+            id_candidato: int | None
             razonamiento: str
 
         try:

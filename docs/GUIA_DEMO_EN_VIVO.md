@@ -12,27 +12,20 @@
 ```bash
 # Backend
 python manage.py check --deploy
-# ✅ Debe mostrar: no issues
+# Debe mostrar: no issues
 
 # Tests
 pytest tests/ -v --tb=short
-# ✅ Debe pasar todos los tests
-
-# Frontend
-cd frontend
-npm run build
-# ✅ Debe compilar sin errores
+# Debe pasar todos los tests
 ```
 
 ### 2. Iniciar Servicios
 ```bash
-# Opción A: Docker (Recomendado)
+# Docker (Recomendado)
 docker-compose up -d
-docker-compose logs -f web
 
-# Opción B: Local
+# O Local
 python manage.py runserver
-cd frontend && npm run dev
 ```
 
 ### 3. Preparar Datos de Demo
@@ -41,15 +34,13 @@ cd frontend && npm run dev
 python manage.py load_catalogs
 
 # Verificar superusuario
-# Usuario: HUB01
-# Password: (tu password segura)
+python manage.py create_superuser_cli
 ```
 
 ### 4. Abrir Pestañas del Navegador
 - Tab 1: http://localhost:8000/admin/ (Backend Admin)
-- Tab 2: http://localhost:3000/ (Frontend)
+- Tab 2: http://localhost:8000/dashboard/ (Dashboard)
 - Tab 3: http://localhost:8000/api/docs/ (API Docs)
-- Tab 4: Sentry Dashboard (si configurado)
 
 ---
 
@@ -61,10 +52,9 @@ python manage.py load_catalogs
 
 #### Puntos a Destacar:
 1. **Stack Moderno**
-   - Backend: Django 5.x + DRF
-   - Frontend: Next.js 14 + TypeScript
-   - Base de datos: PostgreSQL/SQLite
-   - Caché: Redis
+   - Backend: Django 5.2 + DRF
+   - Frontend: TailwindCSS + HTMX + Alpine.js (SSR)
+   - Base de datos: PostgreSQL
 
 2. **Características Principales**
    - Multi-GDS (6 parsers: KIU, SABRE, AMADEUS, Wingo, Copa, TK Connect)

@@ -5,7 +5,7 @@ import sys
 
 def manual_scan():
     print("--- Iniciando Escaneo Manual de Correo ---")
-    from core.services.email_monitor_service import EmailMonitorService
+    from apps.communications.services.email_monitor_service import EmailMonitorService
     
     from core.models import Agencia
     try:

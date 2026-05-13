@@ -1,13 +1,13 @@
 import logging
-from typing import Optional, Dict, Any
 from decimal import Decimal
+
 from django.db import transaction
 from django.utils import timezone
 
-from core.services.ai_engine import ai_engine
-from apps.finance.models.ai_accounting_schemas import AsientoContableSchema
-from core.prompts import ACCOUNTING_SYSTEM_PROMPT
+from apps.automation.services.ai_engine import ai_engine
+from apps.automation.services.prompts import ACCOUNTING_SYSTEM_PROMPT
 from apps.contabilidad.models import AsientoContable, DetalleAsiento, PlanContable
+from apps.finance.models.ai_accounting_schemas import AsientoContableSchema
 from apps.finance.models.currencies import Moneda
 
 logger = logging.getLogger(__name__)
@@ -24,7 +24,7 @@ class AccountingAIService:
 
     @classmethod
     @transaction.atomic
-    def generar_asiento_con_ia(cls, descripcion_transaccion: str, context_details: Optional[Dict] = None) -> Optional[AsientoContable]:
+    def generar_asiento_con_ia(cls, descripcion_transaccion: str, context_details: dict | None = None) -> AsientoContable | None:
         """
         Interpreta una transacción y crea el asiento contable físico en TravelHub.
         

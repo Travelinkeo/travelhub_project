@@ -1,13 +1,13 @@
 import logging
 import uuid
-from django.db import models
+
 from django.conf import settings
+from django.db import models
 from django.utils import timezone
-from core.mixins import SoftDeleteModel
-from core.models.base import AgenciaMixin
 from django.utils.translation import gettext_lazy as _
-from core.validators import validar_no_vacio_o_espacios
+
 from core.fields import EncryptedCharField
+from core.models.base import AgenciaMixin, SoftDeleteModel
 
 logger = logging.getLogger(__name__)
 
@@ -16,6 +16,10 @@ logger = logging.getLogger(__name__)
 # ==========================================
 class Cliente(SoftDeleteModel, AgenciaMixin, models.Model):
     id = models.AutoField(primary_key=True, db_column='id_cliente')
+    
+    @property
+    def id_cliente(self):
+        return self.id
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, db_index=True)
     nombres = models.CharField(max_length=150)
     apellidos = models.CharField(max_length=150, blank=True, null=True)
@@ -34,8 +38,8 @@ class Cliente(SoftDeleteModel, AgenciaMixin, models.Model):
     numero_pasaporte = EncryptedCharField(max_length=255, blank=True, null=True)
     documento_hash = models.CharField(max_length=64, blank=True, null=True, db_index=True)
     
-    fecha_nacimiento = models.DateField(blank=True, null=True)
-    fecha_expiracion_pasaporte = models.DateField(blank=True, null=True)
+    fecha_nacimiento = models.DateField(blank=True, null=True, db_index=True)
+    fecha_expiracion_pasaporte = models.DateField(blank=True, null=True, db_index=True)
     fecha_registro = models.DateTimeField(default=timezone.now)
     
     ciudad = models.ForeignKey('common.Ciudad', on_delete=models.SET_NULL, null=True, blank=True)
@@ -58,7 +62,6 @@ class Cliente(SoftDeleteModel, AgenciaMixin, models.Model):
     pasajeros = models.ManyToManyField('Pasajero', blank=True, related_name='clientes_asociados')
 
     class Meta:
-        db_table = 'personas_cliente'
         verbose_name = "Cliente"
         verbose_name_plural = "Clientes"
         indexes = [
@@ -67,6 +70,15 @@ class Cliente(SoftDeleteModel, AgenciaMixin, models.Model):
 
     def __str__(self):
         return f"{self.nombres} {self.apellidos or ''}".strip()
+
+    def calcular_cliente_frecuente(self):
+        """
+        Lógica para determinar si un cliente es frecuente.
+        Por ahora, más de 1000 puntos o 5 ventas lo activan.
+        """
+        if self.puntos_fidelidad >= 1000:
+            self.es_cliente_frecuente = True
+        return self.es_cliente_frecuente
 
     @property
     def nombre_completo(self):
@@ -94,7 +106,7 @@ class OportunidadViaje(SoftDeleteModel, AgenciaMixin, models.Model):
     fechas_texto = models.CharField(max_length=100, blank=True, null=True)
     cantidad_pasajeros = models.IntegerField(default=1)
     
-    etapa = models.CharField(max_length=3, choices=Etapa.choices, default=Etapa.NUEVO)
+    etapa = models.CharField(max_length=3, choices=Etapa.choices, default=Etapa.NUEVO, db_index=True)
     presupuesto_estimado = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
     notas_ia = models.TextField(blank=True)
     
@@ -161,9 +173,9 @@ class Pasajero(SoftDeleteModel, AgenciaMixin, models.Model):
     nacionalidad = models.ForeignKey('common.Pais', on_delete=models.SET_NULL, null=True, blank=True, related_name='pasajeros_nacionalidad')
     pais_emision_documento = models.ForeignKey('common.Pais', on_delete=models.SET_NULL, null=True, blank=True, db_column='pais_emision_id')
     
-    tipo_documento = models.CharField(max_length=4, default='PASS')
+    tipo_documento = models.CharField(max_length=4, default='PASS', db_index=True)
     fecha_emision_documento = models.DateField(blank=True, null=True)
-    fecha_vencimiento_documento = models.DateField(blank=True, null=True, db_column='fecha_expiracion_documento')
+    fecha_vencimiento_documento = models.DateField(blank=True, null=True, db_index=True, db_column='fecha_expiracion_documento')
     
     preferencias = models.JSONField(default=dict, blank=True)
     notas = models.TextField(blank=True, null=True)
@@ -174,7 +186,7 @@ class Pasajero(SoftDeleteModel, AgenciaMixin, models.Model):
     foto_perfil = models.ImageField(upload_to='pasajeros/fotos/', blank=True, null=True)
 
     class Meta:
-        db_table = 'personas_pasajero'
+        pass
 
     def __str__(self):
         return f"{self.nombres} {self.apellidos}"
@@ -203,7 +215,7 @@ class MensajeWhatsApp(SoftDeleteModel, AgenciaMixin, models.Model):
     # agencia la provee el mixin
 
     class Meta:
-        db_table = 'crm_whatsapp_mensaje'
+        pass
 
 class PasaporteEscaneado(AgenciaMixin, models.Model):
     class ConfianzaChoices(models.TextChoices):
@@ -260,7 +272,6 @@ class PasaporteEscaneado(AgenciaMixin, models.Model):
     class Meta:
         verbose_name = _("Pasaporte Escaneado")
         verbose_name_plural = _("Pasaportes Escaneados")
-        db_table = "core_pasaporte_escaneado"
         ordering = ["-fecha_procesamiento"]
 
     def __str__(self):

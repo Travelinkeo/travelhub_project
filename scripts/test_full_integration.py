@@ -9,7 +9,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
 django.setup()
 
 from apps.bookings.models import BoletoImportado, Venta
-from core.services.ticket_parser_service import TicketParserService
+from apps.automation.services.ticket_parser_service import TicketParserService
 
 def test_full_integration():
     print("🚀 Starting End-to-End Integration Test...")

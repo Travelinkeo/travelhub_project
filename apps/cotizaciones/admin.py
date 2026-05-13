@@ -1,8 +1,12 @@
 from django.contrib import admin
 from django.core.files.base import ContentFile
 from django.utils.html import format_html
+
+from core.admin_saas import SaaSAdminMixin
+
 from .models import Cotizacion, ItemCotizacion
 from .pdf_service import generar_pdf_cotizacion
+
 
 class ItemCotizacionInline(admin.TabularInline):
     model = ItemCotizacion
@@ -11,7 +15,7 @@ class ItemCotizacionInline(admin.TabularInline):
     readonly_fields = ()
 
 @admin.register(Cotizacion)
-class CotizacionAdmin(admin.ModelAdmin):
+class CotizacionAdmin(SaaSAdminMixin, admin.ModelAdmin):
     list_display = ('numero_cotizacion', 'cliente_display', 'destino', 'fecha_emision', 'total_cotizado', 'consultor', 'estado')
     search_fields = ('numero_cotizacion', 'uuid', 'cliente__nombres', 'cliente__apellidos', 'nombre_cliente_manual', 'destino')
     list_filter = ('estado', 'fecha_emision', 'consultor')

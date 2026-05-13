@@ -1,5 +1,6 @@
+
 from pydantic import BaseModel, Field, validator
-from typing import List, Optional
+
 
 class LineaAsientoSchema(BaseModel):
     """Representa una línea individual de un asiento contable."""
@@ -14,7 +15,7 @@ class AsientoContableSchema(BaseModel):
     descripcion_general: str = Field(description="Resumen ejecutivo de la transacción")
     fecha_contable: str = Field(description="Fecha de registro en formato ISO YYYY-MM-DD")
     moneda: str = Field(default="USD", description="Código ISO de la moneda de la transacción")
-    lineas: List[LineaAsientoSchema] = Field(description="Conjunto de movimientos contables")
+    lineas: list[LineaAsientoSchema] = Field(description="Conjunto de movimientos contables")
 
     @validator('lineas')
     def validar_partida_doble(cls, v):

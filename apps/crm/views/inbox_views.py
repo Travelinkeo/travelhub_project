@@ -1,12 +1,13 @@
-import json
 import logging
-from django.views.generic import ListView, TemplateView, View
+
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import render, get_object_or_404
-from django.http import HttpResponse, JsonResponse
 from django.db.models import Max
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404, render
+from django.views.generic import TemplateView, View
+
+from apps.communications.services.whatsapp_service import enviar_mensaje_meta_api
 from apps.crm.models import Cliente, MensajeWhatsApp
-from core.services.whatsapp_service import enviar_mensaje_meta_api
 
 logger = logging.getLogger(__name__)
 

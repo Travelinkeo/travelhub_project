@@ -7,7 +7,7 @@ import json
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
 django.setup()
 
-from core.services.ai_engine import ai_engine
+from apps.automation.services.ai_engine import ai_engine
 from apps.crm.services.whatsapp_bot_service import AnalisisMensajeSchema, PROMPT_VENDEDOR_IA
 
 def test():

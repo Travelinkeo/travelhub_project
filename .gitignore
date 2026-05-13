@@ -36,7 +36,6 @@ temp/
 *.pdf
 *.json
 !fixtures/*.json
-!wpp_config.json
 
 # Security & Environment (STRICT)
 .env*

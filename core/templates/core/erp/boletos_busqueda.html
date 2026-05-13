@@ -210,20 +210,20 @@
             const total = Number(b.total_boleto || 0).toLocaleString('en-US', { minimumFractionDigits: 2 });
             const pasajero = b.nombre_pasajero_procesado || 'Sin Nombre';
             const iniciales = getInitials(pasajero);
-            const gds = (b.gds_sistema || 'N/A').toUpperCase();
+            const gds = (b.formato_detectado || 'N/A').toUpperCase();
 
             let statusHTML = '';
-            if (b.estado === 'PENDIENTE') {
+            if (b.estado_parseo === 'PEN' || b.estado_parseo === 'PENDIENTE') {
                 statusHTML = `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border bg-amber-500/10 text-amber-500 border-amber-500/20">Pendiente</span>`;
-            } else if (b.estado === 'ANULADO') {
+            } else if (b.estado_parseo === 'ANU' || b.estado_parseo === 'ANULADO') {
                 statusHTML = `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border bg-red-500/10 text-red-500 border-red-500/20">Anulado</span>`;
-            } else if (!b.venta_id) {
+            } else if (!b.venta_asociada) {
                 statusHTML = `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border bg-surface-base text-text-muted border-border-color">Sin Emisión</span>`;
             } else {
                 statusHTML = `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border bg-emerald-500/10 text-emerald-500 border-emerald-500/20">Completado</span>`;
             }
 
-            return `<tr class="group hover:bg-nav-active-bg/10 transition-all cursor-pointer" onclick="location.href='/boletos/${b.id_boleto_importado}/review/'">
+            return `<tr class="group hover:bg-nav-active-bg/10 transition-all cursor-pointer" onclick="location.href='/upload/boleto/${b.id}/revisar/'">
                 <td class="px-6 py-5 text-center" onclick="event.stopPropagation()">
                     <input type="checkbox" class="boleto-checkbox-search size-4 rounded border-border-color bg-surface-1 text-primary">
                 </td>

@@ -67,7 +67,7 @@
                             <i x-show="creatingQuote" class="fas fa-spinner fa-spin mr-1"></i>
                             <span x-text="creatingQuote ? 'Creando...' : 'Crear Cotización'"></span>
                         </button>
-                        <button @click="copiarItinerario()"
+                        <button @click="copiarItinerario($event)"
                             class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1 rounded transition border border-gray-300">
                             <i class="fas fa-copy mr-1"></i>Copiar HTML
                         </button>
@@ -236,8 +236,8 @@
                 this.calcular();
             },
 
-            copiarItinerario() {
-                // Copia simple del texto (se puede mejorar para copiar HTML enriquecido)
+            copiarItinerario(e) {
+                const btn = e.currentTarget;
                 const el = document.getElementById('resultado-itinerario');
                 const range = document.createRange();
                 range.selectNode(el);
@@ -247,7 +247,7 @@
                 window.getSelection().removeAllRanges();
 
                 // Feedback visual pequeño
-                const btn = event.currentTarget;
+                const btn = e.currentTarget;
                 const originalText = btn.innerHTML;
                 btn.innerHTML = '<i class="fas fa-check mr-1"></i>Copiado';
                 setTimeout(() => {

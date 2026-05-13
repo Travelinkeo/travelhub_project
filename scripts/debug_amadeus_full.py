@@ -11,7 +11,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
 import django
 django.setup()
 
-from core.services.amadeus_service import AmadeusService
+from apps.automation.services.amadeus_service import AmadeusService
 import json
 
 def debug_search():

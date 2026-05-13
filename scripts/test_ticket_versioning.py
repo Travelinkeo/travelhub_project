@@ -26,7 +26,7 @@ django.setup()
 from django.core.files.base import ContentFile
 from core.models import Agencia
 from apps.bookings.models import BoletoImportado
-from core.services.ticket_parser_service import TicketParserService
+from apps.automation.services.ticket_parser_service import TicketParserService
 
 def crear_archivo_dummy():
     """Crea un archivo de texto dummy para simular un boleto"""

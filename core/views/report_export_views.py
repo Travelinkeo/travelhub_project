@@ -1,11 +1,12 @@
-from django.views import View
-from django.http import HttpResponse
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.utils.text import slugify
 from datetime import datetime
 
-from core.services.reports.report_data_aggregator import ReportDataAggregator
-from core.services.reports.excel_generator import ExcelGenerator
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import HttpResponse
+from django.views import View
+
+from apps.common.services.reports.excel_generator import ExcelGenerator
+from apps.common.services.reports.report_data_aggregator import ReportDataAggregator
+
 
 class ExportReportView(LoginRequiredMixin, View):
     """

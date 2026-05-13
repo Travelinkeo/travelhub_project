@@ -1,4 +1,5 @@
 import os
+
 os.environ['PGCLIENTENCODING'] = 'utf-8'
 from django.core.wsgi import get_wsgi_application
 

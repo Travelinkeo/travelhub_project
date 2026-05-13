@@ -1,8 +1,10 @@
+from django.db.models.functions import ExtractYear
 from django.shortcuts import render
 from django.utils import timezone
-from django.db.models.functions import ExtractYear
+
 from apps.bookings.models import Venta
-from core.services.analytics_service import AnalyticsService
+from apps.common.services.analytics_service import AnalyticsService
+
 
 def sales_analytics_view(request):
     """
@@ -22,7 +24,7 @@ def sales_analytics_view(request):
     
     # Available years for filter
     available_years = Venta.objects.annotate(year=ExtractYear('fecha_venta')).values_list('year', flat=True).order_by('-year').distinct()
-    context['available_years'] = sorted(list(set(available_years)), reverse=True) if available_years else [current_year]
+    context['available_years'] = sorted(set(available_years), reverse=True) if available_years else [current_year]
     context['selected_year'] = selected_year
     
     # If HTMX request, return partial, else it might be included in main dashboard

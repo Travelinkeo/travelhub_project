@@ -1,9 +1,10 @@
+import logging
+
 from django.core.management.base import BaseCommand
 from django.utils import timezone
+
 from apps.finance.models.currencies import Moneda, TipoCambio
-from core.bcv_scraper import obtener_tasas_bcv
-from decimal import Decimal
-import logging
+from apps.finance.services.bcv_scraper import obtener_tasas_bcv
 
 logger = logging.getLogger(__name__)
 

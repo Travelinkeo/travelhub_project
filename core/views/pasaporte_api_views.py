@@ -1,14 +1,12 @@
 # core/views/pasaporte_api_views.py
-from rest_framework import viewsets, status
+from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from django.db.models import Q
 
+from apps.crm.models import Cliente, PasaporteEscaneado
 from core.api.mixins.tenant import TenantViewSetMixin
-from apps.crm.models import PasaporteEscaneado
 from core.serializers import PasaporteEscaneadoSerializer
-from apps.crm.models import Cliente
 
 
 class PasaporteEscaneadoViewSet(TenantViewSetMixin, viewsets.ModelViewSet):

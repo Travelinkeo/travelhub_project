@@ -1,16 +1,6 @@
 import logging
-from decimal import Decimal
+
 from celery import shared_task
-from django.db import transaction
-from django.utils import timezone
-from apps.finance.models.reconciliacion import (
-    ReporteReconciliacion,
-    LineaReporteReconciliacion,
-    ConciliacionBoleto
-)
-from apps.bookings.models import BoletoImportado
-from apps.finance.services.reconciliation_engine import SmartReconciliator
-from apps.finance.services.smart_reconciliation_service import SmartReconciliationService
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +21,9 @@ def conciliar_reporte_batch_task(reporte_id, agencia_id):
         
         with agency_context(agencia):
             # Ahora todas las queries dentro de este bloque estarán filtradas por esta agencia
-            from apps.finance.services.smart_reconciliation_service import SmartReconciliationService
+            from apps.finance.services.smart_reconciliation_service import (
+                SmartReconciliationService,
+            )
             SmartReconciliationService.procesar_reporte(reporte_id)
         
         logger.info(f"✅ Tarea finalizada con éxito para Reporte {reporte_id}")

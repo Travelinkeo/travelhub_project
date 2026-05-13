@@ -1,8 +1,10 @@
+import uuid
+
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-import uuid
-from core.models.base import AgenciaMixin
-from core.mixins import SoftDeleteModel
+
+from core.models.base import AgenciaMixin, SoftDeleteModel
+
 
 class ReporteReconciliacion(SoftDeleteModel, AgenciaMixin, models.Model):
     """

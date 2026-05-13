@@ -7,7 +7,7 @@ from pathlib import Path
 
 import django
 
-from core.ticket_parser import extract_data_from_text, generate_ticket
+from apps.automation.parsers.ticket_parser import extract_data_from_text, generate_ticket
 
 # Asegurar path del proyecto
 BASE_DIR = Path(__file__).resolve().parent.parent

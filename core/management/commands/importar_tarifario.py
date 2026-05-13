@@ -1,9 +1,18 @@
+from datetime import datetime, timedelta
+
 from django.core.management.base import BaseCommand
 from django.db import transaction
-from core.services.tarifario_parser import TarifarioParser
-from apps.bookings.models import TarifarioProveedor, HotelTarifario, TipoHabitacion, TarifaHabitacion
+
+from apps.automation.parsers.tarifario_parser import TarifarioParser
+from apps.bookings.models import (
+    HotelTarifario,
+    TarifaHabitacion,
+    TarifarioProveedor,
+    TipoHabitacion,
+)
 from apps.common.models import Proveedor
-from datetime import datetime, timedelta
+
+
 class Command(BaseCommand):
     help = 'Importa tarifario de hoteles desde PDF'
     
@@ -37,7 +46,7 @@ class Command(BaseCommand):
         else:
             fecha_fin = fecha_inicio + timedelta(days=365)
         
-        self.stdout.write(f'Iniciando importacion de tarifario...')
+        self.stdout.write('Iniciando importacion de tarifario...')
         self.stdout.write(f'Proveedor: {proveedor.nombre}')
         self.stdout.write(f'Archivo: {pdf_path}')
         

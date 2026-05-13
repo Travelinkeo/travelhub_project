@@ -1,16 +1,19 @@
 from __future__ import annotations
-import uuid
+
 import logging
+import uuid
 from decimal import Decimal
-from django.db import models
+
 from django.conf import settings
+from django.core.exceptions import ValidationError
+from django.db import models, transaction
+from django.db.models import Sum
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-from django.core.exceptions import ValidationError
-from django.db.models import Sum
 
-from core.models.base import AgenciaMixin, SoftDeleteModel
 from apps.finance.models.currencies import Moneda
+from core.models.base import AgenciaMixin, SoftDeleteModel
+
 from .servicios import ProductoServicio, Proveedor
 
 logger = logging.getLogger(__name__)
@@ -102,7 +105,6 @@ class Venta(SoftDeleteModel, AgenciaMixin, models.Model):
         verbose_name = _("Venta/Reserva")
         verbose_name_plural = _("Ventas/Reservas")
         ordering = ['-fecha_venta']
-        db_table = 'core_venta'
         indexes = [
             models.Index(fields=['agencia', 'fecha_venta']),
             models.Index(fields=['agencia', 'localizador']),
@@ -116,13 +118,45 @@ class Venta(SoftDeleteModel, AgenciaMixin, models.Model):
              cliente_str = "Cliente Desconocido/Borrado"
         return f"Venta {self.localizador or self.id_venta} a {cliente_str}"
 
+    def clean(self):
+        super().clean()
+        if self.total_venta < 0:
+            raise ValidationError({'total_venta': _('El total de la venta no puede ser negativo.')})
+        if self.subtotal < 0:
+            raise ValidationError({'subtotal': _('El subtotal no puede ser negativo.')})
+        if self.impuestos < 0:
+            raise ValidationError({'impuestos': _('Los impuestos no pueden ser negativos.')})
+        if self.monto_pagado < 0:
+            raise ValidationError({'monto_pagado': _('El monto pagado no puede ser negativo.')})
+        if self.estado == Venta.EstadoVenta.PAGADA_TOTAL and self.saldo_pendiente > 0:
+            raise ValidationError({'estado': _('No se puede marcar como pagada totalmente con saldo pendiente.')})
+
     def save(self, *args, **kwargs):
+        self.full_clean()
         if not self.localizador:
-            self.localizador = f"VTA-{self.fecha_venta.strftime('%Y%m%d')}-{Venta.objects.count() + 1:04d}"
+            # FIX SEGURIDAD: Generación atómica de localizador para evitar TOCTOU race
+            # Usamos select_for_update() dentro de transacción atómica
+            prefix = f"VTA-{self.fecha_venta.strftime('%Y%m%d')}"
+            max_retries = 5
+            for attempt in range(max_retries):
+                with transaction.atomic():
+                    # Bloquear la tabla para esta agencia hoy
+                    daily_count = Venta.objects.filter(
+                        fecha_venta__date=self.fecha_venta.date()
+                    ).count()
+                    candidate = f"{prefix}-{daily_count + 1:04d}"
+                    # Verificar que no exista ya (doble seguridad)
+                    if not Venta.objects.filter(localizador=candidate).exists():
+                        self.localizador = candidate
+                        break
+            else:
+                # Si después de 5 intentos sigue habiendo colisión, añadir sufijo aleatorio
+                import random
+                self.localizador = f"{prefix}-{random.randint(1000, 9999):04d}"
         
         if not self.pk:
-            self.total_venta = (self.subtotal or 0) + (self.impuestos or 0)
-            self.saldo_pendiente = self.total_venta - (self.monto_pagado or 0)
+            self.total_venta = (self.subtotal or Decimal('0')) + (self.impuestos or Decimal('0'))
+            self.saldo_pendiente = self.total_venta - (self.monto_pagado or Decimal('0'))
         
         super().save(*args, **kwargs)
 
@@ -140,35 +174,11 @@ class Venta(SoftDeleteModel, AgenciaMixin, models.Model):
             logger.exception("Error otorgando puntos en Venta %s.", self.pk)
 
     def recalcular_finanzas(self):
-        # Ahora sumamos desde ItemVenta que es el registro central
-        subtotal_items = Decimal('0.00')
-        impuestos_items = Decimal('0.00')
-        
-        items = self.items_venta.all()
-        for item in items:
-            subtotal_items += item.subtotal_item_venta
-            impuestos_items += (item.impuestos_item_venta * item.cantidad)
-            
-        fees_total = self.fees_venta.aggregate(s=Sum('monto'))['s'] or Decimal('0.00') if hasattr(self, 'fees_venta') else Decimal('0.00')
-        pagos_confirmados = self.pagos_venta.filter(confirmado=True).aggregate(s=Sum('monto'))['s'] or Decimal('0.00') if hasattr(self, 'pagos_venta') else Decimal('0.00')
-        
-        self.subtotal = subtotal_items
-        self.impuestos = impuestos_items
-        self.total_venta = subtotal_items + impuestos_items + fees_total
-        self.monto_pagado = pagos_confirmados
-        self.saldo_pendiente = self.total_venta - self.monto_pagado
-        campos_update = ['subtotal', 'impuestos', 'total_venta', 'monto_pagado', 'saldo_pendiente']
-        estado_original = self.estado
-        estados_financieros_base = {Venta.EstadoVenta.PENDIENTE_PAGO, Venta.EstadoVenta.PAGADA_PARCIAL, Venta.EstadoVenta.PAGADA_TOTAL}
-        if self.estado in estados_financieros_base and self.total_venta > 0:
-            if self.saldo_pendiente <= 0:
-                self.estado = Venta.EstadoVenta.PAGADA_TOTAL
-            elif 0 < self.saldo_pendiente < self.total_venta:
-                self.estado = Venta.EstadoVenta.PAGADA_PARCIAL
-        if self.estado != estado_original:
-            campos_update.append('estado')
-        super().save(update_fields=campos_update)
-        self._evaluar_otorgar_puntos(contexto="recalcular_finanzas")
+        """
+        [DEPRECATED] Usar apps.finance.services.finance_service.FinanceService.recalculate_sale_finances
+        """
+        from apps.finance.services.finance_service import FinanceService
+        return FinanceService.recalculate_sale_finances(self.pk)
 
     def delete(self, using=None, keep_parents=False, force=False):
         """Lógica de validación antes de borrar (Soft Delete se hereda)."""
@@ -264,14 +274,13 @@ class ItemVenta(SoftDeleteModel, AgenciaMixin, models.Model):
     class Meta:
         verbose_name = _("Item de Venta/Reserva")
         verbose_name_plural = _("Items de Venta/Reserva")
-        db_table = 'core_itemventa'
 
     def __str__(self):
         return f"{self.cantidad} x {self.producto_servicio.nombre if self.producto_servicio else 'Producto'} en Venta {self.venta.localizador if self.venta else 'N/A'}"
 
     def save(self, *args, **kwargs):
-        self.subtotal_item_venta = self.precio_unitario_venta * self.cantidad
-        self.total_item_venta = self.subtotal_item_venta + (self.impuestos_item_venta * self.cantidad)
+        self.subtotal_item_venta = (self.precio_unitario_venta * self.cantidad).quantize(Decimal('0.01'))
+        self.total_item_venta = (self.subtotal_item_venta + (self.impuestos_item_venta * self.cantidad)).quantize(Decimal('0.01'))
         super().save(*args, **kwargs)
 
 class VentaParseMetadata(AgenciaMixin, models.Model):
@@ -294,7 +303,6 @@ class VentaParseMetadata(AgenciaMixin, models.Model):
         verbose_name = _("Metadata de Parseo de Venta")
         verbose_name_plural = _("Metadata de Parseo de Ventas")
         ordering = ['-creado']
-        db_table = 'core_ventaparsemetadata'
 
     def __str__(self):
         return f"Metadata Parseo Venta {self.venta_id} {self.fuente or ''} {self.creado:%Y-%m-%d %H:%M:%S}".strip()
@@ -330,7 +338,6 @@ class VentaAuditFinding(AgenciaMixin, models.Model):
         verbose_name = _("Hallazgo de Auditoría")
         verbose_name_plural = _("Hallazgos de Auditoría")
         ordering = ['-fecha_deteccion']
-        db_table = 'bookings_ventaauditfinding'
 
     def __str__(self):
         return f"{self.get_tipo_display()} - {self.venta.localizador if self.venta else 'N/A'} ({self.get_estado_display()})"

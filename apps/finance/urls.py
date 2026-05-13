@@ -1,7 +1,23 @@
-from django.urls import path, include
+from django.urls import include, path
 from rest_framework.routers import DefaultRouter
+
 from . import views
-from .views import payment_views, ai_views, liquidaciones_views, api_reconciliacion_views, reconciliacion_views, views_reconciliation, report_upload_view, task_status_view, reconciliation_ui, audit_ui, report_ui, checkout_views, stripe_views, tax_refund_views
+from .views import (
+    ai_views,
+    api_reconciliacion_views,
+    audit_ui,
+    checkout_views,
+    liquidaciones_views,
+    payment_views,
+    reconciliacion_views,
+    reconciliation_ui,
+    report_ui,
+    report_upload_view,
+    stripe_views,
+    task_status_view,
+    tax_refund_views,
+    views_reconciliation,
+)
 
 router = DefaultRouter()
 router.register(r'api/reconciliacion', api_reconciliacion_views.ReporteReconciliacionViewSet, basename='api-reconciliacion')

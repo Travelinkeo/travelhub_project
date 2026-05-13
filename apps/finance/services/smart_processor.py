@@ -1,28 +1,29 @@
-import pandas as pd
 import json
 import logging
 import os
 from decimal import Decimal
+
+import pandas as pd
 from django.conf import settings
-from apps.common.utils import clean_currency
-from pydantic import BaseModel, Field
-from typing import Optional, Dict
 from google import genai
 from google.genai import types
+from pydantic import BaseModel, Field
+
+from apps.common.utils import clean_currency
 
 logger = logging.getLogger(__name__)
 
 # --- Esquema para el Mapeo de Columnas ---
 
 class ColumnMappingSchema(BaseModel):
-    numero_boleto: Optional[str] = Field(description="Column name for Ticket/Document number")
-    pnr: Optional[str] = Field(description="Column name for PNR/Locator")
-    pasajero: Optional[str] = Field(description="Column name for Passenger Name")
-    monto_total: Optional[str] = Field(description="Column name for Total Amount")
-    monto_neto: Optional[str] = Field(description="Column name for Fare/Net Amount")
-    tax: Optional[str] = Field(description="Column name for Taxes")
-    comision: Optional[str] = Field(description="Column name for Commission/Fee")
-    fecha_emision: Optional[str] = Field(description="Column name for Issue Date")
+    numero_boleto: str | None = Field(description="Column name for Ticket/Document number")
+    pnr: str | None = Field(description="Column name for PNR/Locator")
+    pasajero: str | None = Field(description="Column name for Passenger Name")
+    monto_total: str | None = Field(description="Column name for Total Amount")
+    monto_neto: str | None = Field(description="Column name for Fare/Net Amount")
+    tax: str | None = Field(description="Column name for Taxes")
+    comision: str | None = Field(description="Column name for Commission/Fee")
+    fecha_emision: str | None = Field(description="Column name for Issue Date")
 
 class SmartReportProcessor:
     """
@@ -69,7 +70,7 @@ class SmartReportProcessor:
             raise
 
     @classmethod
-    def _get_smart_mapping(cls, columns: list, sample_json: str) -> Dict[str, Optional[str]]:
+    def _get_smart_mapping(cls, columns: list, sample_json: str) -> dict[str, str | None]:
         api_key = os.environ.get("GEMINI_API_KEY") or getattr(settings, "GEMINI_API_KEY", None)
         if not api_key:
             logger.warning("No API Key found for Smart Mapping, using fallback.")

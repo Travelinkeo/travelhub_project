@@ -8,7 +8,7 @@ import django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
 django.setup()
 
-from core.parsers.web_receipt_parser import WebReceiptParser
+from apps.automation.parsers.web_receipt_parser import WebReceiptParser
 from bs4 import BeautifulSoup
 import json
 

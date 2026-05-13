@@ -1,13 +1,25 @@
-import logging
 import datetime
-from django.db import models
-from django.db.models.signals import post_save, pre_save, post_delete
-from django.dispatch import receiver
-from django.conf import settings
+import logging
 
-from .models import BoletoImportado, PagoVenta, Venta, CircuitoDia
+from django.db import models
+from django.db.models.signals import post_delete, post_save, pre_save
+from django.dispatch import receiver
+
+from .models import BoletoImportado, CircuitoDia, FeeVenta, ItemVenta, PagoVenta, Venta
 
 logger = logging.getLogger(__name__)
+
+@receiver([post_save, post_delete], sender=FeeVenta)
+def signal_fee_post_save_delete(sender, instance, **kwargs):
+    if instance.venta:
+        from apps.finance.services.finance_service import FinanceService
+        FinanceService.recalculate_sale_finances(instance.venta.pk)
+
+@receiver([post_save, post_delete], sender=ItemVenta)
+def signal_item_post_save_delete(sender, instance, **kwargs):
+    if instance.venta:
+        from apps.finance.services.finance_service import FinanceService
+        FinanceService.recalculate_sale_finances(instance.venta.pk)
 
 @receiver(post_save, sender=BoletoImportado)
 def signal_boleto_post_save(sender, instance, created, **kwargs):
@@ -31,7 +43,8 @@ def signal_boleto_post_save(sender, instance, created, **kwargs):
 @receiver(post_save, sender=PagoVenta)
 def signal_pago_post_save(sender, instance, created, **kwargs):  # pragma: no cover
     if instance.venta:
-        instance.venta.recalcular_finanzas()
+        from apps.finance.services.finance_service import FinanceService
+        FinanceService.recalculate_sale_finances(instance.venta.pk)
         
         # Contabilidad registrada en apps/contabilidad/signals.py
 
@@ -42,12 +55,12 @@ def signal_pago_post_save(sender, instance, created, **kwargs):  # pragma: no co
 def signal_pago_post_delete(sender, instance, **kwargs):  # pragma: no cover
     try:
         if instance.venta:
-            instance.venta.recalcular_finanzas()
+            from apps.finance.services.finance_service import FinanceService
+            FinanceService.recalculate_sale_finances(instance.venta.pk)
             if instance.venta.pk:
                 instance.venta._evaluar_otorgar_puntos(contexto="signal_pago_post_save")
-    except Exception:
-        pass
-
+    except Exception as e:
+        logger.warning(f"Excepción silenciosa capturada: {e}")
 @receiver(pre_save, sender=Venta)
 def capturar_estado_anterior_venta(sender, instance, **kwargs):
     """
@@ -79,7 +92,7 @@ def venta_post_save_dispatcher(sender, instance, created, **kwargs):
     # 1. Email de confirmación (solo en creación)
     if created and instance.cliente and instance.cliente.email:
         try:
-            from core.services.email_service import enviar_confirmacion_venta
+            from apps.communications.services.email_service import enviar_confirmacion_venta
             enviar_confirmacion_venta(instance)
         except Exception as e:
             logger.exception(f"Error enviando email confirmación para venta {instance.id_venta}: {e}")
@@ -105,7 +118,10 @@ def venta_post_save_dispatcher(sender, instance, created, **kwargs):
 
     # 4. Notificaciones in-app/push
     try:
-        from core.notification_service import notificar_confirmacion_venta, notificar_cambio_estado
+        from apps.communications.services.notification_service import (
+            notificar_cambio_estado,
+            notificar_confirmacion_venta,
+        )
         if created:
             notificar_confirmacion_venta(instance)
         elif estado_anterior and estado_anterior != estado_actual:

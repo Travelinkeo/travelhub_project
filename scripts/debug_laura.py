@@ -12,7 +12,7 @@ import django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
 django.setup()
 
-from core.parsers.sabre_parser import SabreParser
+from apps.automation.parsers.sabre_parser import SabreParser
 
 pdf_path = r"c:\Users\ARMANDO\travelhub_project\media\boletos_importados\2026\01\Recibo_de_pasaje_electrónico_21_diciembre_para_LAURA_CRISTINA_ARROYAVE.pdf"
 

@@ -52,11 +52,17 @@ Todos los scripts `.bat` fueron actualizados para:
 ```
 travelhub_project/
 ├── 📂 core/                    # Módulo principal Django
-├── 📂 contabilidad/            # Sistema contable VEN-NIF
-├── 📂 cotizaciones/            # Gestión de cotizaciones
-├── 📂 personas/                # Clientes, proveedores, pasajeros
-├── 📂 accounting_assistant/    # Asistente contable IA
-├── 📂 frontend/                # Next.js + TypeScript
+├── 📂 apps/                    # Apps de negocio
+│   ├── automation/             # IA y parsing de boletos
+│   ├── bookings/               # Ventas y reservas
+│   ├── cms/                    # Blog y contenido
+│   ├── common/                 # Catálogos compartidos
+│   ├── communications/         # Notificaciones y mensajería
+│   ├── contabilidad/           # Sistema contable VEN-NIF
+│   ├── cotizaciones/           # Cotizaciones pre-venta
+│   ├── crm/                    # Clientes y pasajeros
+│   ├── finance/                # Facturación y finanzas
+│   └── marketing/              # Campañas y flyers
 ├── 📂 docs/                    # Documentación técnica actualizada
 │   ├── api/                    # Documentación de APIs
 │   ├── backend/                # Documentación backend

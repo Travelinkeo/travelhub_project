@@ -1,6 +1,8 @@
 from django import forms
 from django.contrib.auth.models import User
-from core.models.agencia import Agencia, UsuarioAgencia, AgenciaBranding, AgenciaConfiguracion
+
+from core.models.agencia import Agencia, AgenciaBranding, AgenciaConfiguracion, UsuarioAgencia
+
 
 class AgenciaSettingsForm(forms.ModelForm):
     """Formulario para editar la configuración de la agencia."""
@@ -14,7 +16,7 @@ class AgenciaSettingsForm(forms.ModelForm):
     eslogan = forms.CharField(required=False)
     pie_pagina = forms.CharField(widget=forms.Textarea, required=False)
     terminos_condiciones = forms.CharField(widget=forms.Textarea, required=False)
-    ui_theme = forms.ChoiceField(choices=[('obsidian', 'Obsidian'), ('emerald', 'Emerald')], required=False)
+    ui_theme = forms.ChoiceField(choices=Agencia.THEME_CHOICES, required=False)
     color_primario = forms.CharField(widget=forms.TextInput(attrs={'type': 'color'}), required=False)
     color_secundario = forms.CharField(widget=forms.TextInput(attrs={'type': 'color'}), required=False)
     color_amadeus = forms.CharField(widget=forms.TextInput(attrs={'type': 'color'}), required=False)

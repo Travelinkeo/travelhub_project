@@ -1,7 +1,9 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from core.models.base import AgenciaMixin
+
 from apps.bookings.models import HotelTarifario
+from core.models.base import AgenciaMixin
+
 
 class Campania(AgenciaMixin, models.Model):
     class EstadoCampania(models.TextChoices):

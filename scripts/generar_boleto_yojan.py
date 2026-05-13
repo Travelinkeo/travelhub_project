@@ -19,7 +19,7 @@ from apps.bookings.models import Venta, SegmentoVuelo
 from core.models.facturacion import Moneda
 from apps.common.models import Ciudad
 from personas.models import Pasajero
-from core.services.pdf_service import generar_pdf_voucher_unificado
+from apps.common.services.pdf_service import generar_pdf_voucher_unificado
 
 # Datos para el nuevo pasajero
 datos_boleto = {

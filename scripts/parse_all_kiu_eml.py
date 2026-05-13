@@ -7,7 +7,7 @@ from email import policy
 
 from bs4 import BeautifulSoup
 
-from core.ticket_parser import extract_data_from_text
+from apps.automation.parsers.ticket_parser import extract_data_from_text
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 if ROOT not in sys.path:

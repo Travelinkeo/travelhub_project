@@ -12,7 +12,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
 django.setup()
 
 from apps.common.models import Aerolinea
-from core.airline_utils import get_airline_name_by_code, extract_airline_code_from_flight, normalize_airline_name
+from apps.automation.parsers.airline_utils import get_airline_name_by_code, extract_airline_code_from_flight, normalize_airline_name
 
 def test_airline_catalog():
     """Prueba el catálogo de aerolíneas."""

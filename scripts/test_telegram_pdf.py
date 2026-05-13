@@ -8,7 +8,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
 django.setup()
 
 import logging
-from core.services.telegram_notification_service import TelegramNotificationService
+from apps.communications.services.telegram_notification_service import TelegramNotificationService
 from django.conf import settings
 
 # Configure logging to console

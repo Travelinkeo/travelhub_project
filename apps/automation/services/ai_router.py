@@ -1,12 +1,11 @@
-import os
 import logging
-from enum import Enum
-from typing import List, Optional
-from datetime import datetime, date
+import os
+from datetime import datetime
 from decimal import Decimal
+from enum import Enum
 
 import instructor
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field
 
 # Configure Logging
 logger = logging.getLogger(__name__)
@@ -26,16 +25,16 @@ class FlightSegment(BaseModel):
     origin: str = Field(..., min_length=3, max_length=3, description="3-letter IATA airport code")
     destination: str = Field(..., min_length=3, max_length=3, description="3-letter IATA airport code")
     departure_date: datetime
-    arrival_date: Optional[datetime] = None
+    arrival_date: datetime | None = None
 
 class TicketSchema(BaseModel):
     pnr: str = Field(..., min_length=6, max_length=6, description="6-character alphanumeric PNR/Record Locator")
-    ticket_number: Optional[str] = Field(None, description="13-digit ticket number if available")
+    ticket_number: str | None = Field(None, description="13-digit ticket number if available")
     passenger_name: str = Field(..., description="Full passenger name")
-    itinerary: List[FlightSegment]
-    total_amount: Optional[Decimal] = Field(None, description="Total cost found in the ticket")
-    currency: Optional[str] = Field("USD", description="Currency code (USD, VES, etc.)")
-    issuing_agency: Optional[str] = None
+    itinerary: list[FlightSegment]
+    total_amount: Decimal | None = Field(None, description="Total cost found in the ticket")
+    currency: str | None = Field("USD", description="Currency code (USD, VES, etc.)")
+    issuing_agency: str | None = None
 
 # --- 2. The Router (Gemini Logic) ---
 
@@ -47,7 +46,6 @@ class GeminiRouter:
             raise ValueError("GEMINI_API_KEY is missing")
 
         from google import genai as google_genai
-        import instructor
 
         google_client = google_genai.Client(api_key=api_key)
 
@@ -77,7 +75,7 @@ class GeminiRouter:
             logger.error(f"Classification failed: {e}")
             return EmailType.OTHER
 
-    def extract_ticket_data(self, content: str) -> Optional[TicketSchema]:
+    def extract_ticket_data(self, content: str) -> TicketSchema | None:
         """
         Extracts structured ticket data from the content.
         """

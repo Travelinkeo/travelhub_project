@@ -1,6 +1,12 @@
+
 from rest_framework import serializers
-from apps.bookings.models import TarifarioProveedor, HotelTarifario, TipoHabitacion, TarifaHabitacion
-from decimal import Decimal
+
+from apps.bookings.models import (
+    HotelTarifario,
+    TarifaHabitacion,
+    TarifarioProveedor,
+    TipoHabitacion,
+)
 
 
 class TarifaHabitacionSerializer(serializers.ModelSerializer):

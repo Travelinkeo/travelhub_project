@@ -9,7 +9,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
 import django
 django.setup()
 
-from core.parsers.kiu_parser import KIUParser
+from apps.automation.parsers.kiu_parser import KIUParser
 
 # Configurar logging para ver print outputs
 logging.basicConfig(level=logging.INFO)

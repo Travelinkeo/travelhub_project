@@ -1,15 +1,18 @@
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import TemplateView, UpdateView, ListView, CreateView, View
-from django.urls import reverse_lazy
+import logging
 from django.contrib import messages
-from django.http import HttpResponse, HttpResponseForbidden
 from django.contrib.auth.models import User
 from django.db import transaction
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse_lazy
+from django.views.generic import ListView, UpdateView, View
 
-from core.models.agencia import Agencia, UsuarioAgencia
 from core.forms.agencia_forms import AgenciaSettingsForm, UsuarioAgenciaForm
 from core.mixins import AgencyRoleRequiredMixin
+from core.models.agencia import Agencia, UsuarioAgencia
+
+logger = logging.getLogger(__name__)
+
 
 class MotorPdfView(AgencyRoleRequiredMixin, UpdateView):
     """Vista para configurar el motor de identidad PDF."""
@@ -58,45 +61,76 @@ class AgenciaSettingsView(AgencyRoleRequiredMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        from core.services.whatsapp import WhatsAppService
-        
         agencia = self.get_object()
-        session_name = agencia.subdominio_slug
-        
-        # Obtener estado de WhatsApp
-        estado_raw = WhatsAppService.get_status(session_name)
-        
-        # Mapeo a estados UI
-        estado_ui = 'disconnected'
-        if estado_raw == 'WORKING':
-            estado_ui = 'connected'
-        elif estado_raw == 'CONNECTING':
-            estado_ui = 'connecting'
-            
-        qr_code = None
-        if estado_ui != 'connected':
-            qr_code = WhatsAppService.get_qr_code(session_name)
-            if not qr_code:
-                # Si no hay QR, intentamos asegurar que la instancia exista/arranque
-                WhatsAppService.start_session(session_name)
-                qr_code = WhatsAppService.get_qr_code(session_name)
-            
-            # Si después de todo tenemos un QR, el estado debe ser 'connecting' (esperando escaneo)
-            if qr_code:
-                estado_ui = 'connecting'
-            
+        # La información de WhatsApp ahora se carga vía HTMX para evitar lentitud en la página principal
         context.update({
-            'whatsapp_status': estado_ui, # Nombre esperado por algunos templates
-            'estado': estado_ui,          # Nombre esperado por whatsapp_qr_new.html
-            'qr_code': qr_code,
-            'whatsapp_qr': qr_code,
-            'instancia': session_name,
+            'whatsapp_status': 'loading',
+            'instancia': agencia.subdominio_slug,
+            'AGENCIA_THEMES': Agencia.THEME_CHOICES,
+            'AGENCIA_PLANTILLAS_BOLETOS': Agencia.PLANTILLAS_BOLETOS_CHOICES,
+            'AGENCIA_PLANTILLAS': Agencia.PLANTILLAS_CHOICES,
         })
         return context
 
     def form_valid(self, form):
         messages.success(self.request, 'Configuración de agencia actualizada correctamente.')
         return super().form_valid(form)
+
+class WhatsAppStatusView(AgencyRoleRequiredMixin, View):
+    """Vista para cargar el estado de WhatsApp vía HTMX."""
+    allowed_roles = ['admin', 'gerente']
+    
+    def get(self, request, *args, **kwargs):
+        from apps.communications.services.whatsapp import WhatsAppService
+        
+        # Obtener agencia de forma robusta (compatibilidad con superusuarios)
+        agencia = getattr(request, 'agencia', None)
+        if not agencia:
+            ua = request.user.agencias.filter(activo=True).first()
+            agencia = ua.agencia if ua else None
+            
+        if not agencia:
+            return HttpResponse("Configuración de agencia no encontrada.", status=404)
+            
+        session_name = agencia.subdominio_slug
+
+        
+        # Timeout corto para no bloquear HTMX demasiado
+        try:
+            # Obtener estado de WhatsApp
+            estado_raw = WhatsAppService.get_status(session_name)
+            
+            # Mapeo a estados UI
+            estado_ui = 'disconnected'
+            if estado_raw == 'WORKING':
+                estado_ui = 'connected'
+            elif estado_raw == 'CONNECTING':
+                estado_ui = 'connecting'
+                
+            qr_code = None
+            if estado_ui != 'connected':
+                # Solo intentamos QR si no estamos conectados
+                qr_code = WhatsAppService.get_qr_code(session_name)
+                
+                if not qr_code:
+                    # Intento de arranque defensivo
+                    WhatsAppService.start_session(session_name)
+                    qr_code = WhatsAppService.get_qr_code(session_name)
+                
+                if qr_code:
+                    estado_ui = 'connecting'
+        except Exception as e:
+            logger.error(f"Error en WhatsAppStatusView: {e}")
+            estado_ui = 'error'
+            qr_code = None
+
+        return render(request, 'dashboard/partials/whatsapp_qr_new.html', {
+            'whatsapp_status': estado_ui,
+            'estado': estado_ui,
+            'qr_code': qr_code,
+            'whatsapp_qr': qr_code,
+            'instancia': session_name,
+        })
 
 class AgenciaUsersListView(AgencyRoleRequiredMixin, ListView):
     """Vista para listar usuarios de la agencia."""

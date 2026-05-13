@@ -9,7 +9,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
 django.setup()
 
-from core.services.marketing_service import MarketingService
+from apps.communications.services.marketing_service import MarketingService
 
 def verify_imagen_3():
     print("🎨 Verifying Google Imagen 3 Integration...")

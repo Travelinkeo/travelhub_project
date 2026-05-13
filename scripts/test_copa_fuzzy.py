@@ -6,7 +6,7 @@ import os
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from core.parsers.copa_parser import CopaParser
+from apps.automation.parsers.copa_parser import CopaParser
 
 # Mock logger
 logging.basicConfig(level=logging.INFO)

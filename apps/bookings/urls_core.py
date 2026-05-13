@@ -1,21 +1,33 @@
 from django.urls import path
+
 from apps.bookings.views.boleto_views import (
-    BoletoUploadAPIView,
-    BoletoMassActionAPIView,
-    VentaDoubleInvoiceAPIView,
-    BoletoRetryParseAPIView,
     BoletoAuditAPIView,
-    BoletoDeleteAPIView
-)
-from core.views import erp_views
-from core.views.upload import UploadBoletoView, ReviewBoletoView, DesasociarVentaView
-from core.views.upload import eliminar_boleto as eliminar_boleto_upload
-from core.views.boleto_api_views import (
-    boletos_sin_venta, reintentar_parseo, crear_venta_desde_boleto,
-    dashboard_stats as boletos_dashboard_stats, buscar, reporte_comisiones,
-    solicitar_anulacion, detalle_boleto, eliminar_boleto as eliminar_boleto_api,
+    BoletoDeleteAPIView,
+    BoletoMassActionAPIView,
+    BoletoRetryParseAPIView,
+    BoletoUploadAPIView,
+    VentaDoubleInvoiceAPIView,
 )
 from apps.bookings.views.dashboard_boletos import actualizar_item_boleto
+from apps.bookings.views.ventas_views import eliminar_venta
+from core.views import erp_views
+from core.views.boleto_api_views import (
+    boletos_sin_venta,
+    buscar,
+    crear_venta_desde_boleto,
+    detalle_boleto,
+    reintentar_parseo,
+    reporte_comisiones,
+    solicitar_anulacion,
+)
+from core.views.boleto_api_views import (
+    dashboard_stats as boletos_dashboard_stats,
+)
+from core.views.boleto_api_views import (
+    eliminar_boleto as eliminar_boleto_api,
+)
+from core.views.upload import DesasociarVentaView, ReviewBoletoView, UploadBoletoView
+from core.views.upload import eliminar_boleto as eliminar_boleto_upload
 
 urlpatterns = [
     # Carga de Boletos y IA
@@ -32,6 +44,8 @@ urlpatterns = [
     path('upload/boleto/<int:pk>/desasociar-venta/', DesasociarVentaView.as_view(), name='desasociar_venta'),
     path('upload/boleto/<int:pk>/eliminar-fisicamente/', eliminar_boleto_upload, name='eliminar_boleto_hard'),
     
+    # Ventas
+
     # ERP Boletos Dashboard
     path('dashboard/erp/boletos/', erp_views.DashboardBoletosView.as_view(), name='boletos_dashboard'),
     path('dashboard/erp/boletos/buscar/', erp_views.BoletosBusquedaView.as_view(), name='boletos_busqueda'),

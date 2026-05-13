@@ -1,7 +1,8 @@
 
-from pydantic import BaseModel, Field, validator
-from typing import List, Optional, Dict
 import re
+
+from pydantic import BaseModel, Field, validator
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Helper: convierte strings ruidosas a float ("0.00A" → 0.0 , "USD 450" → 450.0)
@@ -9,7 +10,7 @@ import re
 def _to_float(v) -> float:
     if v is None:
         return 0.0
-    if isinstance(v, (int, float)):
+    if isinstance(v, int | float):
         return float(v)
     clean = re.sub(r'[^0-9.,]', '', str(v)).replace(',', '.')
     try:
@@ -19,19 +20,19 @@ def _to_float(v) -> float:
 
 class TramoVueloSchema(BaseModel):
     aerolinea: str = Field(description="Código IATA o nombre de la aerolínea del tramo")
-    numero_vuelo: Optional[str] = Field(description="Número de vuelo INCLUYENDO EL CÓDIGO DE AEROLÍNEA (ej: TK0224, CM062)")
+    numero_vuelo: str | None = Field(description="Número de vuelo INCLUYENDO EL CÓDIGO DE AEROLÍNEA (ej: TK0224, CM062)")
     origen: str = Field(description="Nombre completo de la ciudad de origen (ej. BOGOTA, CARACAS)")
-    codigo_iata_origen: Optional[str] = Field(description="Código IATA de 3 letras de la ciudad de origen (ej. BOG, CCS)")
+    codigo_iata_origen: str | None = Field(description="Código IATA de 3 letras de la ciudad de origen (ej. BOG, CCS)")
     fecha_salida: str = Field(description="Fecha de salida en formato GDS DDMMMAA en mayúsculas (ej: 29MAR26)")
     hora_salida: str = Field(description="Hora de salida en formato 24h HH:MM (ej: 14:15). NUNCA usar AM/PM.")
     destino: str = Field(description="Nombre completo de la ciudad de destino (ej. BOGOTA, MADRID)")
-    codigo_iata_destino: Optional[str] = Field(description="Código IATA de 3 letras de la ciudad de destino (ej. BOG, MAD)")
+    codigo_iata_destino: str | None = Field(description="Código IATA de 3 letras de la ciudad de destino (ej. BOG, MAD)")
     hora_llegada: str = Field(description="Hora de llegada en formato 24h HH:MM (ej: 15:10). NUNCA usar AM/PM.")
     fecha_llegada: str = Field(description="Fecha de llegada en formato GDS DDMMMAA en mayúsculas (ej: 29MAR26).")
-    cabina: Optional[str] = Field(description="Clase de cabina (Económica, Ejecutiva, etc.)")
-    clase: Optional[str] = Field(description="Clase tarifaria (clase de reserva, ej: Y, M, L)")
-    localizador_aerolinea: Optional[str] = Field(description="Localizador específico de la aerolínea si difiere del principal")
-    equipaje: Optional[str] = Field(description="Franquicia de equipaje (ej: 1PC, 23KG)")
+    cabina: str | None = Field(description="Clase de cabina (Económica, Ejecutiva, etc.)")
+    clase: str | None = Field(description="Clase tarifaria (clase de reserva, ej: Y, M, L)")
+    localizador_aerolinea: str | None = Field(description="Localizador específico de la aerolínea si difiere del principal")
+    equipaje: str | None = Field(description="Franquicia de equipaje (ej: 1PC, 23KG)")
 
     @validator('hora_salida', 'hora_llegada', pre=True, always=True)
     def normalize_time(cls, v):
@@ -56,17 +57,17 @@ class TramoVueloSchema(BaseModel):
 
 class BoletoAereoSchema(BaseModel):
     nombre_pasajero: str = Field(description="Nombre completo del pasajero (Formato GDS: APELLIDO/NOMBRE). Máximo 80 caracteres.")
-    codigo_identificacion: Optional[str] = Field(description="FOID, DNI, Cédula o Pasaporte del pasajero (sin prefijos)")
+    codigo_identificacion: str | None = Field(description="FOID, DNI, Cédula o Pasaporte del pasajero (sin prefijos)")
     solo_nombre_pasajero: str = Field(description="Únicamente el primer nombre del pasajero limpio")
-    numero_boleto: Optional[str] = Field(description="Número de boleto de 13 dígitos. Obligatorio si existe. Null si es Low-Cost")
-    fecha_emision: Optional[str] = Field(description="Fecha de emisión en formato DDMMMAA (ej: 14MAR26)")
-    agente_emisor: Optional[str] = Field(description="Código IATA o Identificador de la oficina/agente emisor")
-    numero_iata: Optional[str] = Field(description="Número IATA de la agencia (8 dígitos exactos)")
+    numero_boleto: str | None = Field(description="Número de boleto de 13 dígitos. Obligatorio si existe. Null si es Low-Cost")
+    fecha_emision: str | None = Field(description="Fecha de emisión en formato DDMMMAA (ej: 14MAR26)")
+    agente_emisor: str | None = Field(description="Código IATA o Identificador de la oficina/agente emisor")
+    numero_iata: str | None = Field(description="Número IATA de la agencia (8 dígitos exactos)")
     codigo_reserva: str = Field(description="Localizador principal de la reserva (PNR) exactamente 6 caracteres alfanuméricos")
-    codigo_reserva_aerolinea: Optional[str] = Field(description="Localizador específico de la aerolínea (si es diferente al principal)")
+    codigo_reserva_aerolinea: str | None = Field(description="Localizador específico de la aerolínea (si es diferente al principal)")
     nombre_aerolinea: str = Field(description="Nombre de la aerolínea principal o validadora")
-    direccion_aerolinea: Optional[str] = Field(description="Dirección física de la aerolínea (si está presente)")
-    itinerario: List[TramoVueloSchema] = Field(description="Lista de todos los tramos de vuelo del itinerario. Mínimo 1 segmento obligatorio.")
+    direccion_aerolinea: str | None = Field(description="Dirección física de la aerolínea (si está presente)")
+    itinerario: list[TramoVueloSchema] = Field(description="Lista de todos los tramos de vuelo del itinerario. Mínimo 1 segmento obligatorio.")
     tarifa: float = Field(description="Monto numérico de la tarifa base (solo dígitos)")
     impuestos: float = Field(description="Monto numérico total de impuestos (solo dígitos)")
     total: float = Field(description="Monto total pagado. DEBE ser igual a tarifa + impuestos.")
@@ -74,7 +75,7 @@ class BoletoAereoSchema(BaseModel):
     es_remision: bool = Field(description="Indica si es una re-emisión (detectable por 'A' en total o Tarifa > Total)")
     source_system: str = Field(description="Sistema de origen detectado (KIU, SABRE, AMADEUS, WINGO, COPA_SPRK, etc.)")
     confidence_score: float = Field(description="Nivel de confianza...")
-    notas_advertencia: Optional[str] = Field(description="Si hubo prorrateos...")
+    notas_advertencia: str | None = Field(description="Si hubo prorrateos...")
 
     # ─── Validators ────────────────────────────────────────────────────
 
@@ -164,7 +165,7 @@ class BoletoAereoSchema(BaseModel):
             'CLP', 'PEN', 'BOB', 'PYG', 'UYU', 'GTQ', 'HNL', 'NIO',
             'CRC', 'PAB', 'DOP', 'CUP', 'HTG', 'JMD', 'TTD', 'BBD',
             # Globales comunes en GDS
-            'GBP', 'CAD', 'AUD', 'CHF', 'JPY', 'CNY', 'MXN', 'TRY',
+            'GBP', 'CAD', 'AUD', 'CHF', 'JPY', 'CNY', 'TRY',
             'AED', 'SAR', 'QAR', 'KWD', 'BHD', 'OMR',
         }
 
@@ -239,7 +240,7 @@ class BoletoAereoSchema(BaseModel):
 
 class ResultadoParseoSchema(BaseModel):
     """Esquema de respuesta final para Gemini"""
-    boletos: List[BoletoAereoSchema] = Field(description="Lista de boletos extraídos (uno por pasajero). Mínimo 1 boleto.")
+    boletos: list[BoletoAereoSchema] = Field(description="Lista de boletos extraídos (uno por pasajero). Mínimo 1 boleto.")
 
 # --- ESQUEMAS DE AUDITORÍA ---
 
@@ -247,22 +248,22 @@ class AuditFinding(BaseModel):
     category: str = Field(description="Categoría del hallazgo (TASAS, NOMBRES, FEES, ITINERARIO)")
     severity: str = Field(description="Severidad (INFO, WARNING, CRITICAL)")
     message: str = Field(description="Mensaje explicativo para el agente")
-    suggestion: Optional[str] = Field(description="Sugerencia de corrección si aplica")
+    suggestion: str | None = Field(description="Sugerencia de corrección si aplica")
 
 class AuditReport(BaseModel):
     is_compliant: bool = Field(description="Si el boleto cumple con todas las reglas básicas")
-    findings: List[AuditFinding] = Field(description="Lista de hallazgos")
-    calculated_fees_suggested: Dict[str, float] = Field(description="Fees sugeridos basados en las reglas de negocio")
+    findings: list[AuditFinding] = Field(description="Lista de hallazgos")
+    calculated_fees_suggested: dict[str, float] = Field(description="Fees sugeridos basados en las reglas de negocio")
     summary: str = Field(description="Resumen ejecutivo de la auditoría")
 
 # --- ESQUEMAS DE RECONCILIACIÓN DE PROVEEDORES ---
 
 class InformeProveedorItemSchema(BaseModel):
-    fecha_emision: Optional[str] = Field(description="Fecha de emisión según el reporte")
-    pnr: Optional[str] = Field(description="Localizador/PNR")
-    numero_boleto: Optional[str] = Field(description="Número de boleto (13 dígitos)")
-    pasajero: Optional[str] = Field(description="Nombre del pasajero")
-    itinerario: Optional[str] = Field(description="Origen/Destino")
+    fecha_emision: str | None = Field(description="Fecha de emisión según el reporte")
+    pnr: str | None = Field(description="Localizador/PNR")
+    numero_boleto: str | None = Field(description="Número de boleto (13 dígitos)")
+    pasajero: str | None = Field(description="Nombre del pasajero")
+    itinerario: str | None = Field(description="Origen/Destino")
     tarifa_neta: float = Field(description="Tarifa neta o Fare")
     impuestos: float = Field(description="Impuestos totales")
     comision_monto: float = Field(description="Monto de comisión recibida")
@@ -271,9 +272,9 @@ class InformeProveedorItemSchema(BaseModel):
 
 class InformeProveedorSchema(BaseModel):
     proveedor_nombre: str = Field(..., description="Nombre del proveedor (CTG, MY DESTINY, etc.)")
-    periodo_desde: Optional[str] = Field(description="Fecha inicio del reporte")
-    periodo_hasta: Optional[str] = Field(description="Fecha fin del reporte")
-    items: List[InformeProveedorItemSchema] = Field(description="Lista de ítems del reporte")
+    periodo_desde: str | None = Field(description="Fecha inicio del reporte")
+    periodo_hasta: str | None = Field(description="Fecha fin del reporte")
+    items: list[InformeProveedorItemSchema] = Field(description="Lista de ítems del reporte")
     total_reporte: float = Field(description="Monto total del reporte")
 
 # --- ESQUEMAS DE CRM & PASAPORTES ---
@@ -307,11 +308,11 @@ class CedulaOCRSchema(BaseModel):
     Incluye detección de rostro para recorte dinámico.
     NOTA: Todos los campos son Optional para evitar errores si la IA no puede extraer un dato.
     """
-    apellidos: Optional[str] = Field(default=None, description="Solo los apellidos del titular, en mayúsculas (Ej: PEREZ MENDOZA).")
-    nombres: Optional[str] = Field(default=None, description="Solo los nombres del titular, en mayúsculas (Ej: ADAN DANIEL).")
-    cedula: Optional[int] = Field(default=None, description="Solo números de la cédula, eliminando prefijos 'V-'/'E-' y puntos. (Ej: 24322251).")
-    fecha_nacimiento: Optional[str] = Field(default=None, description="Fecha de nacimiento en formato ISO YYYY-MM-DD. (Ej: 1994-09-28).")
-    portrait_bbox: Optional[List[int]] = Field(
+    apellidos: str | None = Field(default=None, description="Solo los apellidos del titular, en mayúsculas (Ej: PEREZ MENDOZA).")
+    nombres: str | None = Field(default=None, description="Solo los nombres del titular, en mayúsculas (Ej: ADAN DANIEL).")
+    cedula: int | None = Field(default=None, description="Solo números de la cédula, eliminando prefijos 'V-'/'E-' y puntos. (Ej: 24322251).")
+    fecha_nacimiento: str | None = Field(default=None, description="Fecha de nacimiento en formato ISO YYYY-MM-DD. (Ej: 1994-09-28).")
+    portrait_bbox: list[int] | None = Field(
         default=[0, 0, 0, 0],
         description="Coordenadas normalizadas [ymin, xmin, ymax, xmax] del rostro del titular (escala 0-1000)."
     )
@@ -353,6 +354,6 @@ class BoletoHuerfanoSchema(BaseModel):
     causa_probable: str = Field(description="Diagnóstico (ej: 'Venta no reportada', 'Diferencia de 13 dígitos')")
 
 class ConciliacionLoteSchema(BaseModel):
-    matches: List[MatchExitosoSchema] = Field(description="Emparejamientos encontrados por IA")
-    huerfanos: List[BoletoHuerfanoSchema] = Field(description="Registros del proveedor sin pareja en la agencia")
-    alertas_fraude: List[str] = Field(description="Mensajes de alerta sobre discrepancias críticas")
+    matches: list[MatchExitosoSchema] = Field(description="Emparejamientos encontrados por IA")
+    huerfanos: list[BoletoHuerfanoSchema] = Field(description="Registros del proveedor sin pareja en la agencia")
+    alertas_fraude: list[str] = Field(description="Mensajes de alerta sobre discrepancias críticas")

@@ -1,9 +1,10 @@
 """Modelo de Agencia para sistema multi-tenant."""
 
-from django.db import models
-from django.contrib.auth.models import User
-from django.utils import timezone
 import logging
+
+from django.contrib.auth.models import User
+from django.db import models
+from django.utils import timezone
 
 from core.fields import EncryptedCharField
 
@@ -45,7 +46,7 @@ class Agencia(models.Model):
     whatsapp = models.CharField(max_length=20, blank=True, help_text="Número con código de país")
     
     # Multi-tenant
-    activa = models.BooleanField(default=True)
+    activa = models.BooleanField(default=True, db_index=True)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     fecha_actualizacion = models.DateTimeField(auto_now=True)
     
@@ -57,6 +58,30 @@ class Agencia(models.Model):
         verbose_name_plural = "Agencias"
         ordering = ['nombre']
     
+    # --- OPCIONES DE UI Y DOCUMENTOS (Fase 4) ---
+    THEME_CHOICES = [
+        ('obsidian', 'Obsidian Emerald'),
+        ('swiss', 'Vintage Cream'),
+        ('cyber', 'Cyber Fuchsia'),
+        ('nordic', 'Nordic Snow'),
+        ('midnight', 'Midnight Gold'),
+        ('sunset', 'Sunset Rose'),
+    ]
+    
+    PLANTILLAS_BOLETOS_CHOICES = [
+        ('m1', 'Modelo Clásico'),
+        ('m2', 'Editorial Plus'),
+        ('m3', 'Executive Compact'),
+        ('m4', 'Timeline Pro'),
+        ('m5', 'Modern Digital'),
+    ]
+
+    PLANTILLAS_CHOICES = [
+        ('m1', 'Modelo Estándar'),
+        ('m2', 'Modelo Moderno'),
+        ('m3', 'Modelo Minimalista'),
+    ]
+
     def __str__(self):
         return f"{self.nombre} ({self.plan})"
 
@@ -97,6 +122,14 @@ class Agencia(models.Model):
     def subdominio_slug(self):
         return self.configuracion.subdominio_slug if self.configuracion else None
 
+    @subdominio_slug.setter
+    def subdominio_slug(self, value):
+        if not self.configuracion:
+            from core.models.agencia import AgenciaConfiguracion
+            self.configuracion = AgenciaConfiguracion.objects.create()
+        self.configuracion.subdominio_slug = value
+        self.configuracion.save(update_fields=['subdominio_slug'])
+
     @property
     def moneda_principal(self):
         return self.configuracion.moneda_principal if self.configuracion else 'USD'
@@ -124,6 +157,31 @@ class Agencia(models.Model):
     @property
     def password_app_correo(self):
         return self.configuracion.password_app_correo if self.configuracion else None
+
+
+    @property
+    def ui_theme(self):
+        if self.branding:
+            return self.branding.ui_theme
+        return 'obsidian'
+
+    @property
+    def plantilla_boletos(self):
+        if self.branding:
+            return self.branding.plantilla_boletos
+        return 'm1'
+
+    @property
+    def plantilla_vouchers(self):
+        if self.branding:
+            return self.branding.plantilla_vouchers
+        return 'm1'
+
+    @property
+    def plantilla_facturas(self):
+        if self.branding:
+            return self.branding.plantilla_facturas
+        return 'm1'
 
     @property
     def configuracion_api(self):
@@ -176,7 +234,6 @@ class Agencia(models.Model):
         """
         Extensión de save para asegurar componentes SaaS y slug.
         """
-        is_new = self.pk is None
         super().save(*args, **kwargs)
 
         # 1. Asegurar Componentes
@@ -194,8 +251,9 @@ class Agencia(models.Model):
 
         # 2. Asegurar subdominio_slug en Configuración
         if self.configuracion and not self.configuracion.subdominio_slug:
-            from django.utils.text import slugify
             import uuid
+
+            from django.utils.text import slugify
             base_slug = slugify(self.nombre)
             if not base_slug:
                 base_slug = f"agencia-{uuid.uuid4().hex[:8]}"
@@ -231,7 +289,7 @@ class UsuarioAgencia(models.Model):
     usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='agencias', null=True, blank=True)
     agencia = models.ForeignKey(Agencia, on_delete=models.CASCADE, related_name='usuarios', null=True, blank=True)
     rol = models.CharField(max_length=20, choices=ROLES, default='vendedor')
-    activo = models.BooleanField(default=True)
+    activo = models.BooleanField(default=True, db_index=True)
     fecha_asignacion = models.DateTimeField(auto_now_add=True)
     telegram_chat_id = models.CharField(max_length=50, blank=True, null=True, help_text="ID de chat de Telegram para notificaciones")
     
@@ -279,10 +337,10 @@ class AgenciaBranding(models.Model):
     terminos_condiciones = models.TextField(blank=True)
     
     # UI/Theme
-    ui_theme = models.CharField(max_length=20, default='obsidian')
-    plantilla_boletos = models.CharField(max_length=2, default='m1')
-    plantilla_vouchers = models.CharField(max_length=2, default='m1')
-    plantilla_facturas = models.CharField(max_length=2, default='m1')
+    ui_theme = models.CharField(max_length=20, choices=Agencia.THEME_CHOICES, default='obsidian')
+    plantilla_boletos = models.CharField(max_length=2, choices=Agencia.PLANTILLAS_BOLETOS_CHOICES, default='m1')
+    plantilla_vouchers = models.CharField(max_length=2, choices=Agencia.PLANTILLAS_CHOICES, default='m1')
+    plantilla_facturas = models.CharField(max_length=2, choices=Agencia.PLANTILLAS_CHOICES, default='m1')
 
     class Meta:
         verbose_name = "Agencia - Branding"

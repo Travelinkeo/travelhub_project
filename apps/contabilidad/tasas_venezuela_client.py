@@ -8,10 +8,10 @@ Cliente mejorado para obtener múltiples tasas de cambio de Venezuela:
 """
 
 import logging
-import requests
-from decimal import Decimal
-from typing import Dict, Optional
 from datetime import datetime
+from decimal import Decimal
+
+import requests
 
 # 🛡️ RESILIENT INFRASTRUCTURE: pyDolarVenezuela v2.0+ support
 try:
@@ -32,7 +32,7 @@ class TasasVenezuelaClient:
     TIMEOUT = 10
     
     @classmethod
-    def obtener_todas_tasas(cls) -> Optional[Dict]:
+    def obtener_todas_tasas(cls) -> dict | None:
         """
         Obtiene todas las tasas disponibles desde DolarApi Venezuela.
         
@@ -60,7 +60,7 @@ class TasasVenezuelaClient:
             # 1. Intentar obtener Tasa Oficial DIRECTAMENTE del BCV (Más precisa)
             # Intentar primero con Scraper personalizado, luego con pyDolarVenezuela
             try:
-                from core.bcv_scraper import obtener_tasas_bcv
+                from apps.finance.services.bcv_scraper import obtener_tasas_bcv
                 tasas_bcv = obtener_tasas_bcv()
                 
                 if not tasas_bcv and PY_DOLAR_VENEZUELA_AVAILABLE:
@@ -160,7 +160,7 @@ class TasasVenezuelaClient:
             return None
     
     @classmethod
-    def _obtener_tasas_pydolar_full(cls) -> Optional[Dict]:
+    def _obtener_tasas_pydolar_full(cls) -> dict | None:
         """Método de emergencia usando solo pyDolarVenezuela"""
         tasas = {}
         try:
@@ -206,7 +206,7 @@ class TasasVenezuelaClient:
             return None
 
     @classmethod
-    def obtener_tasa_bcv(cls) -> Optional[Decimal]:
+    def obtener_tasa_bcv(cls) -> Decimal | None:
         """Obtiene solo la tasa BCV oficial"""
         tasas = cls.obtener_todas_tasas()
         if tasas and 'oficial' in tasas:
@@ -214,7 +214,7 @@ class TasasVenezuelaClient:
         return None
     
     @classmethod
-    def obtener_tasa_paralelo(cls) -> Optional[Decimal]:
+    def obtener_tasa_paralelo(cls) -> Decimal | None:
         """Obtiene la tasa del mercado paralelo"""
         tasas = cls.obtener_todas_tasas()
         if tasas and 'paralelo' in tasas:
@@ -222,7 +222,7 @@ class TasasVenezuelaClient:
         return None
     
     @classmethod
-    def obtener_tasa_bitcoin(cls) -> Optional[Decimal]:
+    def obtener_tasa_bitcoin(cls) -> Decimal | None:
         """Obtiene la tasa Bitcoin"""
         tasas = cls.obtener_todas_tasas()
         if tasas and 'bitcoin' in tasas:
@@ -230,16 +230,18 @@ class TasasVenezuelaClient:
         return None
     
     @classmethod
-    def actualizar_tasas_db(cls) -> Dict[str, bool]:
+    def actualizar_tasas_db(cls) -> dict[str, bool]:
         """
         Actualiza la tasa oficial (BCV) en la base de datos y TipoCambio (Core).
         
         Returns:
             Dict con resultados: {'oficial': True, 'paralelo': False, ...}
         """
-        from .models import TasaCambioBCV
-        from apps.finance.models.currencies import TipoCambio, Moneda
         from datetime import date
+
+        from apps.finance.models.currencies import Moneda, TipoCambio
+
+        from .models import TasaCambioBCV
         
         resultados = {}
         tasas = cls.obtener_todas_tasas()
@@ -302,7 +304,7 @@ class TasasVenezuelaClient:
         return resultados
     
     @classmethod
-    def obtener_resumen_tasas(cls) -> Dict:
+    def obtener_resumen_tasas(cls) -> dict:
         """
         Obtiene un resumen de las tasas principales para mostrar en frontend.
         

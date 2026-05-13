@@ -1,13 +1,16 @@
 from __future__ import annotations
+
 import datetime
+
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from django.core.exceptions import ValidationError
 
-from core.models.base import AgenciaMixin
-from core.mixins import SoftDeleteModel
 from apps.common.models import Ciudad
+from core.models.base import AgenciaMixin, SoftDeleteModel
+
 from .servicios import Proveedor
+
 
 class AlojamientoReserva(SoftDeleteModel, AgenciaMixin, models.Model):
     id_alojamiento_reserva = models.AutoField(primary_key=True, verbose_name=_('ID Alojamiento'))
@@ -28,7 +31,6 @@ class AlojamientoReserva(SoftDeleteModel, AgenciaMixin, models.Model):
         verbose_name = _('Alojamiento (Reserva)')
         verbose_name_plural = _('Alojamientos (Reservas)')
         ordering = ['check_in']
-        db_table = 'core_alojamientoreserva'
 
     def __str__(self):
         return f"{self.nombre_establecimiento} ({self.check_in or ''})"
@@ -54,7 +56,6 @@ class TrasladoServicio(SoftDeleteModel, AgenciaMixin, models.Model):
         verbose_name = _('Traslado')
         verbose_name_plural = _('Traslados')
         ordering = ['fecha_hora']
-        db_table = 'core_trasladoservicio'
 
     def __str__(self):
         return f"Traslado {self.origen or ''}->{self.destino or ''} {self.fecha_hora or ''}".strip()
@@ -77,7 +78,6 @@ class ActividadServicio(SoftDeleteModel, AgenciaMixin, models.Model):
         verbose_name = _('Actividad / Excursión')
         verbose_name_plural = _('Actividades / Excursiones')
         ordering = ['fecha', 'nombre']
-        db_table = 'core_actividadservicio'
 
     def __str__(self):
         return self.nombre
@@ -100,7 +100,6 @@ class SegmentoVuelo(SoftDeleteModel, AgenciaMixin, models.Model):
         verbose_name = _('Segmento de Vuelo')
         verbose_name_plural = _('Segmentos de Vuelo')
         ordering = ['fecha_salida']
-        db_table = 'core_segmentovuelo'
 
     def __str__(self):
         return f"{self.origen} → {self.destino} {self.numero_vuelo or ''}".strip()
@@ -128,7 +127,6 @@ class AlquilerAutoReserva(SoftDeleteModel, AgenciaMixin, models.Model):
         verbose_name_plural = _("Alquileres de Autos")
         ordering = ['fecha_hora_retiro']
         indexes = [models.Index(fields=['fecha_hora_retiro']), models.Index(fields=['fecha_hora_devolucion']), models.Index(fields=['compania_rentadora'])]
-        db_table = 'core_alquilerautoreserva'
 
     def __str__(self):
         return f"Auto {self.categoria_auto or ''} {self.numero_confirmacion or ''}".strip()
@@ -140,6 +138,18 @@ class AlquilerAutoReserva(SoftDeleteModel, AgenciaMixin, models.Model):
     def save(self, *args, **kwargs):
         self.full_clean()
         super().save(*args, **kwargs)
+
+    @property
+    def margen_amount(self):
+        if self.precio_venta is not None and self.costo_neto is not None:
+            return self.precio_venta - self.costo_neto
+        return 0
+
+    @property
+    def margen_pct(self):
+        if self.precio_venta and self.precio_venta > 0:
+            return (self.margen_amount / self.precio_venta) * 100
+        return 0
 
 class EventoServicio(SoftDeleteModel, AgenciaMixin, models.Model):
     id_evento_servicio = models.AutoField(primary_key=True, verbose_name=_("ID Evento/Servicio"))
@@ -160,10 +170,21 @@ class EventoServicio(SoftDeleteModel, AgenciaMixin, models.Model):
         verbose_name_plural = _("Eventos / Servicios")
         ordering = ['fecha_evento']
         indexes = [models.Index(fields=['fecha_evento']), models.Index(fields=['nombre_evento'])]
-        db_table = 'core_eventoservicio'
 
     def __str__(self):
         return f"Evento {self.nombre_evento}"
+
+    @property
+    def margen_amount(self):
+        if self.precio_venta is not None and self.costo_neto is not None:
+            return self.precio_venta - self.costo_neto
+        return 0
+
+    @property
+    def margen_pct(self):
+        if self.precio_venta and self.precio_venta > 0:
+            return (self.margen_amount / self.precio_venta) * 100
+        return 0
 
 class CircuitoTuristico(AgenciaMixin, models.Model):
     id_circuito = models.AutoField(primary_key=True, verbose_name=_("ID Circuito"))
@@ -184,7 +205,6 @@ class CircuitoTuristico(AgenciaMixin, models.Model):
         verbose_name_plural = _("Circuitos Turísticos")
         ordering = ['-fecha_inicio']
         indexes = [models.Index(fields=['fecha_inicio'])]
-        db_table = 'core_circuitoturistico'
 
     def __str__(self):
         return self.nombre_circuito
@@ -193,6 +213,18 @@ class CircuitoTuristico(AgenciaMixin, models.Model):
         if self.fecha_inicio and self.dias_total and not self.fecha_fin:
             self.fecha_fin = self.fecha_inicio + datetime.timedelta(days=self.dias_total - 1)
         super().save(*args, **kwargs)
+
+    @property
+    def margen_amount(self):
+        if self.precio_venta_estimado is not None and self.costo_neto_estimado is not None:
+            return self.precio_venta_estimado - self.costo_neto_estimado
+        return 0
+
+    @property
+    def margen_pct(self):
+        if self.precio_venta_estimado and self.precio_venta_estimado > 0:
+            return (self.margen_amount / self.precio_venta_estimado) * 100
+        return 0
 
 class CircuitoDia(AgenciaMixin, models.Model):
     id_circuito_dia = models.AutoField(primary_key=True, verbose_name=_("ID Circuito Día"))
@@ -210,7 +242,6 @@ class CircuitoDia(AgenciaMixin, models.Model):
         ordering = ['circuito', 'dia_numero']
         unique_together = ('circuito', 'dia_numero')
         indexes = [models.Index(fields=['dia_numero'])]
-        db_table = 'core_circuitodia'
 
     def __str__(self):
         return f"{self.circuito.nombre_circuito} - Día {self.dia_numero}"
@@ -234,10 +265,21 @@ class PaqueteAereo(AgenciaMixin, models.Model):
         verbose_name_plural = _("Paquetes Aéreos")
         ordering = ['-id_paquete_aereo']
         indexes = [models.Index(fields=['incluye_vuelos', 'incluye_hotel'])]
-        db_table = 'core_paqueteaereo'
 
     def __str__(self):
         return self.nombre_paquete or f"Paquete Aéreo {self.id_paquete_aereo}"
+
+    @property
+    def margen_amount(self):
+        if self.precio_venta_estimado is not None and self.costo_neto_estimado is not None:
+            return self.precio_venta_estimado - self.costo_neto_estimado
+        return 0
+
+    @property
+    def margen_pct(self):
+        if self.precio_venta_estimado and self.precio_venta_estimado > 0:
+            return (self.margen_amount / self.precio_venta_estimado) * 100
+        return 0
 
 class CruceroReserva(AgenciaMixin, models.Model):
     id_crucero = models.AutoField(primary_key=True, verbose_name=_("ID Crucero"))
@@ -292,7 +334,6 @@ class CruceroReserva(AgenciaMixin, models.Model):
         verbose_name = _('Crucero')
         verbose_name_plural = _('Cruceros')
         ordering = ['fecha_embarque']
-        db_table = 'core_cruceroreserva'
 
     def __str__(self):
         return f"{self.nombre_crucero} - {self.fecha_embarque}"
@@ -322,7 +363,18 @@ class ServicioAdicionalDetalle(AgenciaMixin, models.Model):
     class Meta:
         verbose_name = _("Servicio Adicional Detalle")
         verbose_name_plural = _("Servicios Adicionales Detalle")
-        db_table = 'core_servicioadicionaldetalle'
 
     def __str__(self):
         return f"Servicio {self.tipo_servicio} {self.codigo_referencia or ''}".strip()
+
+    @property
+    def margen_amount(self):
+        if self.precio_venta is not None and self.costo_neto is not None:
+            return self.precio_venta - self.costo_neto
+        return 0
+
+    @property
+    def margen_pct(self):
+        if self.precio_venta and self.precio_venta > 0:
+            return (self.margen_amount / self.precio_venta) * 100
+        return 0

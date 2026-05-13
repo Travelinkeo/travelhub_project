@@ -1,105 +1,101 @@
 # Arquitectura del Sistema TravelHub
 
-**Versión del Documento:** 1.0
-**Última Actualización:** 28 de Noviembre de 2025
+**Última Actualización:** Mayo 2026
 
 ## 1. Visión General
-**TravelHub** es una plataforma SaaS (Software as a Service) diseñada para la gestión integral de agencias de viajes. Su objetivo es modernizar y automatizar el flujo de trabajo operativo, desde la recepción de boletos aéreos hasta la facturación y el análisis financiero.
 
-El sistema opera como un **Monolito Modular** construido sobre Django, priorizando la simplicidad operativa y la robustez financiera (VEN-NIF).
+TravelHub es una plataforma SaaS B2B multi-tenant para agencias de viajes. Opera como un **Monolito Modular** sobre Django 5.2.6 (Python 3.13), priorizando simplicidad operativa y ACID garantizado.
 
-## 2. Modelo de Negocio (SaaS B2B)
-TravelHub opera bajo un modelo de suscripción escalable:
-*   **Multi-tenancy:** Una sola instancia del software sirve a múltiples agencias (inquilinos).
-*   **Planes de Suscripción:**
-    *   **FREE (Trial):** 30 días de prueba con límites de usuarios (1) y ventas (50).
-    *   **BASIC:** Para agencias pequeñas ($29/mes).
-    *   **PRO:** Para agencias en crecimiento ($99/mes).
-    *   **ENTERPRISE:** Para consolidadores y grandes agencias ($299/mes).
-*   **Monetización:** Cobro automatizado vía Stripe Checkout.
+## 2. Stack Tecnológico
 
-## 3. Implementación Multi-tenant (Aislamiento de Datos)
-El sistema garantiza que cada agencia solo acceda a sus propios datos mediante dos mecanismos clave:
+| Capa | Tecnología |
+|------|-----------|
+| Backend | Django 5.2.6 + Django REST Framework |
+| Frontend | TailwindCSS + HTMX + Alpine.js (HTML-over-the-wire SSR) |
+| Base de Datos | PostgreSQL 16 (producción), SQLite (desarrollo) |
+| Cache/Broker | Redis 7 |
+| Async Tasks | Celery 5.5 con 4 colas: default, ia_fast, ia_heavy, notifications |
+| IA | Google Gemini (genai SDK v1.x) — motor unificado en `AIEngine` |
+| PDF | Gotenberg (headless Chromium para HTML→PDF) |
+| Billing | Stripe (SaaS): FREE, BASIC ($29), PRO ($99), ENTERPRISE ($299) |
+| Comunicaciones | Evolution API (WhatsApp), Resend (email), Telegram Bot |
+| Almacenamiento | Cloudinary / Cloudflare R2 / Local (configurable) |
+| Infraestructura | Docker Compose, WSL2, Cloudflare Tunnel |
 
-### A. AgenciaMixin (Nivel de Datos)
-Casi todos los modelos del sistema heredan de `AgenciaMixin`. Este mixin añade un campo `agencia` (FK a `Agencia`) y sobreescribe el `Manager` por defecto para que cualquier consulta `Model.objects.all()` filtre automáticamente por la agencia activa.
+## 3. Arquitectura Multi-tenant
 
-### B. Contexto de Hilo (Middleware)
-El `ThreadLocalContextMiddleware` captura la agencia asociada al usuario autenticado en cada petición y la almacena en un almacenamiento local del hilo (`thread-local`). Esto permite que la lógica de negocio acceda a la `agencia_id` actual sin tener que pasarla explícitamente como argumento en cada función.
+### AgenciaMixin (Capa de Datos)
+Todos los modelos de negocio heredan de `AgenciaMixin`. El `AgenciaManager` personalizado filtra automáticamente por `agencia` en cada query. Para bypass (superadmin/migraciones), usar `.all_objects`.
 
-## 4. Stack Tecnológico
+### ThreadLocalContextMiddleware (Capa de Contexto)
+Captura la agencia del usuario autenticado en cada request y la almacena en thread-local storage. Disponible globalmente vía `get_current_agency()`.
 
-### Backend (El Motor)
-*   **Framework:** Django 5.2.6 (Python 3.13.5).
-*   **Base de Datos:** PostgreSQL.
-*   **Asincronía:** Celery + Redis (para procesamiento de emails y tareas pesadas).
-*   **Parsing:** Motor propio basado en Regex (`core/ticket_parser.py`) para extracción de datos de boletos (KIU, Sabre, Amadeus).
+### SaaSAdminMixin (Capa Admin)
+Extiende el admin de Django con filtrado automático por agencia, ocultando el campo `agencia` y restringiendo dropdowns a los registros del mismo tenant.
 
-### Frontend (La Interfaz)
-*   **Enfoque:** HTML-over-the-wire (Renderizado en Servidor).
-*   **Estilos:** TailwindCSS (vía CDN en dev, build process pendiente).
-*   **Interactividad:** HTMX (para AJAX sin JS complejo) + Alpine.js (para UI interactiva).
-*   **Diseño:** Glassmorphism / Dark Mode por defecto.
+### PostgreSQL RLS
+Políticas `tenant_isolation_policy` y `superadmin_bypass` a nivel de base de datos como segunda capa de defensa.
 
-### Infraestructura
-*   **Entorno Local:** Windows 10/11.
-*   **Producción (Planeado):** VPS único gestionado con Coolify (Docker).
+## 4. Apps del Proyecto
 
-## 3. Estructura de Módulos (Apps)
-
-El proyecto se organiza en aplicaciones Django desacopladas por dominio de negocio:
-
-### A. `core` (Núcleo)
-Contiene la lógica transversal y los modelos base.
-*   **Modelos:** `Venta`, `BoletoImportado`, `Pago`.
-*   **Servicios:**
-    *   `ticket_parser.py`: El "cerebro" que lee PDFs/Emails.
-    *   `venta_automation.py`: Orquesta la creación automática de ventas y cálculo de comisiones.
-    *   `facturacion_service.py`: Genera facturas fiscales y PDFs.
-
-### B. `cotizaciones` (Comercial)
-Gestión de propuestas previas a la venta.
-*   **Funcionalidad:** Dashboard de cotizaciones, ciclo de vida (Borrador -> Aceptada).
-*   **Integración:** Futura conversión automática a Venta.
-
-### C. `contabilidad` (Financiero)
-Motor contable invisible.
-*   **Normativa:** VEN-NIF (Venezuela).
-*   **Automatización:** Genera asientos contables automáticos (Debe/Haber) al facturar o cobrar, calculando diferenciales cambiarios e impuestos (IVA/IGTF).
-*   **Modelos:** `AsientoContable`, `Movimiento`, `Cuenta` (Plan de Cuentas).
-
-### D. `personas` (CRM)
-Gestión de actores del sistema.
-*   **Modelos:** `Cliente`, `Pasajero`, `UsuarioAgencia`.
-
-## 4. Flujos de Datos Críticos
-
-### Flujo 1: Automatización de Boletos (El "Wow Factor")
-1.  **Recepción:** Email con boleto llega a `boletotravelinkeo@gmail.com`.
-2.  **Detección:** Celery (`process_incoming_emails`) descarga el adjunto.
-3.  **Extracción:** `KIUParser` (u otros) extrae PNR, Pasajero y **Datos Financieros** (Base, IVA YN, Total).
-4.  **Procesamiento:** `VentaAutomationService` calcula la comisión de la agencia (según `AerolineaConfig`) y crea la `Venta` en BD.
-5.  **Resultado:** El agente ve la venta lista en su Dashboard sin haber tecleado nada.
-
-### Flujo 2: Ciclo Contable Automático
-1.  **Venta/Factura:** Al emitir factura, se genera asiento de Cuentas por Cobrar vs Ingresos/Pasivos.
-2.  **Cobranza:** Al registrar pago en USD, se baja la CxC a tasa histórica.
-3.  **Diferencial:** El sistema compara Tasa del Día vs Tasa Factura.
-    *   Si hay ganancia cambiaria -> Genera Nota de Débito por el IVA de esa ganancia (Fiscal).
-
-## 5. Mapa de Carpetas Clave
-```text
-travelhub_project/
-├── core/
-│   ├── models/          # Modelos divididos por archivo (ventas.py, boletos.py...)
-│   ├── services/        # Lógica de negocio pura (no vistas)
-│   ├── parsers/         # Motores de extracción (kiu_parser.py, sabre_parser.py)
-│   ├── templates/       # HTML (Jinja2)
-│   └── tasks.py         # Tareas Celery
-├── cotizaciones/        # App de propuestas
-├── contabilidad/        # App financiera
-├── personas/            # App de clientes
-├── static/              # Assets (CSS, JS, Img)
-├── media/               # Archivos subidos (PDFs, Boletos)
-└── manage.py
 ```
+apps/
+├── automation/    — Parsing de boletos, AI Engine, OCR, voice parsing
+├── bookings/      — Ventas, reservas, boletos, tarifarios
+├── cms/           — Blog, guías de destino, posts para redes
+├── common/        — Catálogos (países, ciudades, aerolíneas) y servicios compartidos
+├── communications/— Email, WhatsApp, Telegram, notificaciones
+├── contabilidad/  — Plan contable, asientos, reportes (VEN-NIF)
+├── cotizaciones/  — Cotizaciones pre-venta, Magic Quoter
+├── crm/           — Clientes, pasajeros, leads Kanban
+├── finance/       — Facturación, comisiones, conciliaciones
+├── marketing/     — Campañas, flyers, copywriting IA
+core/              — Núcleo: modelos base, middleware, seguridad, auditoría
+```
+
+## 5. Flujo de Datos Crítico — Procesamiento de Boletos
+
+```
+Email (IMAP/Resend Webhook)
+  → BoletoImportado (modelo)
+  → Celery: parsear_boleto_individual()
+  → ExtractionService (PDF/TXT/EML → texto)
+  → TicketParserService (orquestador)
+    → UniversalAIParser (Gemini + Pydantic schemas)
+    → Fallback: parsers legacy (Sabre, KIU, Amadeus, Copa, Wingo, TKConnect)
+  → DataNormalizationService
+  → VentaAutomationService (crea Venta + ItemVenta + SegmentoVuelo)
+  → PdfGenerationService (Gotenberg → PDF)
+  → Notificaciones (WhatsApp/Telegram/Email)
+```
+
+## 6. Seguridad
+
+| Mecanismo | Implementación |
+|-----------|---------------|
+| CSP | `SecurityHeadersMiddleware` con nonces rotativos por request |
+| HSTS | 1 año, includeSubdomains, preload |
+| X-Frame-Options | DENY |
+| Encriptación | `EncryptedCharField`/`EncryptedTextField` con Fernet (ENCRYPTION_KEY) |
+| Rate Limiting | DRF throttles + `AIRateLimitMiddleware` por plan |
+| Fuerza Bruta | django-axes: 5 intentos, 1h bloqueo |
+| Auditoría | `AuditLog` con encadenamiento SHA-256 |
+| God Mode | Impersonación con timeout 30min, rate limit 5/hora, auditoría forense |
+
+## 7. Despliegue
+
+### Desarrollo
+```bash
+pip install -r requirements/local.txt
+python manage.py migrate
+python manage.py runserver
+```
+
+### Producción
+```bash
+cp .env.example .env  # Editar con valores reales
+docker-compose up --build -d
+cloudflared tunnel --url http://localhost:8000
+```
+
+Ver [Guía de Despliegue](deployment/DEPLOYMENT.md) para instrucciones completas.

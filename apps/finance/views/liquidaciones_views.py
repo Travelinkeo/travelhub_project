@@ -1,15 +1,14 @@
-from django.views.generic import ListView, DetailView, TemplateView, View
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import get_object_or_404, redirect, render
-from django.urls import reverse
-from django.db.models import Sum, Q, F
 from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Sum
+from django.shortcuts import redirect, render
 from django.utils import timezone
+from django.views.generic import DetailView, ListView, TemplateView
 
-from apps.bookings.models import Proveedor
-from apps.contabilidad.models import LiquidacionProveedor, ItemLiquidacion
-from apps.bookings.models import ItemVenta
+from apps.bookings.models import ItemVenta, Proveedor
+from apps.contabilidad.models import ItemLiquidacion, LiquidacionProveedor
 from core.mixins import SaaSMixin
+
 
 class LiquidacionListView(LoginRequiredMixin, ListView):
     model = LiquidacionProveedor

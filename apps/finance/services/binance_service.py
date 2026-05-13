@@ -1,14 +1,16 @@
 import hashlib
 import hmac
 import json
+import logging
 import time
 import uuid
+
 import requests
-import logging
 from django.conf import settings
 from django.db import transaction
 from django.utils import timezone
-from apps.finance.models import PagoBinance, Factura
+
+from apps.finance.models import Factura, PagoBinance
 
 logger = logging.getLogger(__name__)
 
@@ -105,7 +107,7 @@ class BinancePayService:
                 logger.error(f"Error Binance Create Order: {res_json}")
                 return None
 
-        except Exception as e:
+        except Exception:
             logger.exception("Error calling Binance Pay API")
             return None
 
@@ -150,8 +152,8 @@ class BinancePayService:
         Crea el asiento contable de ingreso por el pago de Binance Pay.
         """
         try:
+
             from apps.contabilidad.models import AsientoContable, DetalleAsiento, PlanContable
-            from decimal import Decimal
 
             with transaction.atomic():
                 factura = pago.factura

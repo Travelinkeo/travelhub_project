@@ -12,10 +12,10 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
 django.setup()
 
 # FORZAR RECARGA del módulo copa_parser
-import core.parsers.copa_parser
+import apps.automation.parsers.copa_parser
 importlib.reload(core.parsers.copa_parser)
 
-from core.parsers.copa_parser import CopaParser
+from apps.automation.parsers.copa_parser import CopaParser
 
 # Leer el boleto de Copa
 file_path = r'C:\Users\ARMANDO\Downloads\Itinerary for Record Locator DYEXFG.eml'

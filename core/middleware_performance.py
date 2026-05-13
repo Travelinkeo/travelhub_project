@@ -1,6 +1,7 @@
 """Middleware para monitorear rendimiento y queries"""
-import time
 import logging
+import time
+
 from django.conf import settings
 from django.db import connection
 

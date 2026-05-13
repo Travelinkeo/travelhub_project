@@ -1,8 +1,8 @@
 import logging
 import secrets
-from asgiref.local import Local
 from contextlib import contextmanager
 
+from asgiref.local import Local
 from django.conf import settings as dj_settings
 
 logger = logging.getLogger(__name__)
@@ -99,6 +99,24 @@ class ThreadLocalContextMiddleware:
                     # 🎭 GOD MODE: Superusuarios SOLO tienen contexto si impersonan explícitamente
                     impersonated_id = request.session.get('impersonated_agencia_id')
                     if impersonated_id:
+                        # Timeout: expirar impersonación tras 30 min de inactividad
+                        impersonated_at = request.session.get('impersonated_at')
+                        if impersonated_at:
+                            from datetime import datetime, timedelta
+
+                            try:
+                                start = datetime.fromisoformat(impersonated_at)
+                                if datetime.now(datetime.UTC) - start > timedelta(seconds=1800):
+                                    del request.session['impersonated_agencia_id']
+                                    del request.session['impersonated_agencia_name']
+                                    del request.session['impersonated_at']
+                                    logger.info(f"God Mode timeout: {user.username}")
+                                    agency = None
+                                    response = self.get_response(request)
+                                    self._cleanup()
+                                    return response
+                            except (ValueError, TypeError):
+                                pass
                         from core.models.agencia import Agencia
                         try:
                             agency = Agencia.objects.get(id=impersonated_id)
@@ -135,11 +153,13 @@ class ThreadLocalContextMiddleware:
                 from django.db import connection
                 with connection.cursor() as cursor:
                     tenant_id = str(agency.id) if agency else '0'
-                    bypass = 'true' if (user and user.is_superuser and not getattr(request, 'impersonated_agencia_id', None)) else 'false'
+                    # FIX: usar session para verificar impersonación, no atributo directo
+                    is_impersonating = user and user.is_superuser and request.session.get('impersonated_agencia_id')
+                    bypass = 'true' if (user and user.is_superuser and not is_impersonating) else 'false'
                     cursor.execute("SET LOCAL app.current_agencia_id = %s", [tenant_id])
                     cursor.execute("SET LOCAL app.bypass_rls = %s", [bypass])
-            except Exception:
-                pass  # RLS no disponible (SQLite, tests, etc.)
+            except Exception as e:
+                logger.debug(f"RLS no configurado (SQLite/tests): {e}")
 
         except Exception as e:
             logger.error(f"Error initializing thread local context: {e}")
@@ -149,7 +169,7 @@ class ThreadLocalContextMiddleware:
 
         try:
             # Logging básico
-            ua_short = (ua[:50] + '...') if ua else 'N/A'
+            (ua[:50] + '...') if ua else 'N/A'
             # logger.info(f"Request: {request.method} {request.path} from IP: {ip}, UA: {ua_short}")
             
             response = self.get_response(request)
@@ -159,19 +179,23 @@ class ThreadLocalContextMiddleware:
             # 4. LIMPIEZA CRÍTICA (Evitar memory leaks o data cruzada)
             try:
                 del _request_local.meta
-            except AttributeError: pass
+            except AttributeError:
+                pass
             
             try:
                 del _request_local.user
-            except AttributeError: pass
+            except AttributeError:
+                pass
             
             try:
                 del _request_local.agency
-            except AttributeError: pass
+            except AttributeError:
+                pass
 
             try:
                 del _request_local.system_context
-            except AttributeError: pass
+            except AttributeError:
+                pass
 
         return response
 
@@ -194,14 +218,14 @@ class SecurityHeadersMiddleware:  # CSP + cabeceras
         response = self.get_response(request)
         
         try:
-            # 2. Content-Security-Policy (nonce-based: sin unsafe-inline ni unsafe-eval)
+            # 2. Content-Security-Policy (Permisiva para compatibilidad con UI frameworks dinámicos)
             csp = "; ".join([
                 "default-src 'self'",
-                f"script-src 'self' 'nonce-{nonce}' https://cdn.jsdelivr.net",
-                f"style-src 'self' 'nonce-{nonce}' https://fonts.googleapis.com https://cdn.jsdelivr.net",
+                f"script-src 'self' 'nonce-{nonce}' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net",
+                "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net",
                 "font-src 'self' https://fonts.gstatic.com",
                 "img-src 'self' data: blob: https://res.cloudinary.com https://*.r2.cloudflarestorage.com",
-                "frame-src 'self' https://js.stripe.com",
+                "frame-src 'self' https://js.stripe.com http://evolution:8080",
                 "connect-src 'self' https://*.cloudflarestorage.com https://api.stripe.com https://generativelanguage.googleapis.com",
                 "form-action 'self'",
                 "frame-ancestors 'none'",

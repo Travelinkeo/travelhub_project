@@ -1,17 +1,18 @@
 # Archivo: core/views/translator_views.py
 
 import logging
+
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic import TemplateView
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from django.http import JsonResponse
-from django.views.generic import TemplateView
-from django.contrib.auth.mixins import LoginRequiredMixin
 
-from ..itinerary_translator import ItineraryTranslator, TicketCalculator
 from apps.common.models import Aerolinea
 from apps.contabilidad.models import TasaCambioBCV
+
+from ..itinerary_translator import ItineraryTranslator, TicketCalculator
 
 logger = logging.getLogger(__name__)
 
@@ -113,7 +114,7 @@ def calculate_ticket_price_api(request):
             'calculation': result
         })
         
-    except (ValueError, TypeError) as e:
+    except (ValueError, TypeError):
         return Response(
             {'error': 'Valores numéricos inválidos'},
             status=status.HTTP_400_BAD_REQUEST
@@ -422,11 +423,10 @@ def create_quote_from_gds_api(request):
         "structured_data": [...]
     }
     """
-    from core.models.cotizaciones import Cotizacion, ItemCotizacion
-    from apps.crm.models import Cliente
-    from django.contrib.auth.models import User
-    from django.db import transaction
     from django.utils import timezone
+
+    from apps.crm.models import Cliente
+    from core.models.cotizaciones import Cotizacion, ItemCotizacion
     
     try:
         flights_data = request.data.get('structured_data', [])

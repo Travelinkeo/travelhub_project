@@ -5,7 +5,7 @@ import json
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
 django.setup()
 
-from core.services.ai_engine import ai_engine
+from apps.automation.services.ai_engine import ai_engine
 
 raw_text = """SXFSIE
  1.1CASTANO VALENCIA/JOHN JAIRO*AW918782

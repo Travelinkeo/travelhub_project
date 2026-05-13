@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 
-from core.utils import verify_audit_chain
+from apps.common.utils import verify_audit_chain
 
 
 class Command(BaseCommand):

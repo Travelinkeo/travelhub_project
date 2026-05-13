@@ -11,7 +11,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
 django.setup()
 
 from datetime import date, timedelta
-from core.services.migration_checker_service import MigrationCheckerService
+from apps.automation.services.migration_checker_service import MigrationCheckerService
 
 def test_quick_check():
     """Prueba rápida sin base de datos"""

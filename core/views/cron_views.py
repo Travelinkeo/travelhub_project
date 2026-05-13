@@ -1,26 +1,27 @@
 """
-Endpoints para tareas programadas vía HTTP (cron-job.org).
+Endpoints para tareas programadas via HTTP (cron-job.org).
 Reemplazo gratuito de Celery Beat.
 """
-from django.conf import settings
+import logging
+
+from django.core.management import call_command
 from django.views.decorators.csrf import csrf_exempt
 from drf_spectacular.utils import extend_schema
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from django.core.management import call_command
-import logging
+
+from core.models.cron_api_key import CronApiKey
 
 logger = logging.getLogger(__name__)
 
-# Token secreto para autenticar cron jobs
-CRON_SECRET = settings.SECRET_KEY[:32]  # Primeros 32 caracteres del SECRET_KEY
-
 
 def verificar_cron_token(request):
-    """Verifica que el request venga de cron-job.org con token correcto."""
-    token = request.headers.get('X-Cron-Token') or request.GET.get('token')
-    return token == CRON_SECRET
+    """Verifica que el request tenga un CronApiKey valido."""
+    token = request.headers.get("X-Cron-Token") or request.GET.get("token")
+    if not token:
+        return False
+    return CronApiKey.verify(token) is not None
 
 
 @extend_schema(exclude=True)
@@ -55,8 +56,10 @@ def enviar_recordatorios_cron(request):
         return Response({'error': 'Token inválido'}, status=403)
     
     try:
-        from django.utils import timezone
         from datetime import timedelta
+
+        from django.utils import timezone
+
         from apps.bookings.models import Venta
         
         # Contar ventas pendientes sin ejecutar el comando completo

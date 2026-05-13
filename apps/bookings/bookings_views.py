@@ -1,24 +1,25 @@
-import os
-import datetime
-from django.utils import timezone
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.urls import reverse_lazy
-from django.db.models import Sum, F, Q, Value, DecimalField
-from django.db.models.functions import TruncDate, Coalesce
-from django.shortcuts import get_object_or_404, redirect, render
-from django.http import HttpResponse
-from datetime import timedelta
 import json
 import logging
+import os
+from datetime import datetime, timedelta
+
 from django.contrib.auth.decorators import login_required
-from .models import Venta, ItemVenta, FeeVenta, PagoVenta, VentaParseMetadata, VentaAuditFinding
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import DecimalField, F, Q, Sum, Value
+from django.db.models.functions import Coalesce, TruncDate
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse_lazy
+from django.utils import timezone
+from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
+
+from .models import FeeVenta, ItemVenta, PagoVenta, Venta, VentaAuditFinding
 
 logger = logging.getLogger(__name__)
 
-from core.models.audit import AuditLog
-from core.mixins import SaaSMixin
 from apps.crm.models import OportunidadViaje
+from core.mixins import SaaSMixin
+from core.models.audit import AuditLog
 
 
 class BookingBaseMixin(SaaSMixin, LoginRequiredMixin):
@@ -63,6 +64,9 @@ class VentaTimelineView(BookingBaseMixin, DetailView):
     template_name = 'bookings/venta_timeline.html'
     context_object_name = 'venta'
 
+    def get_queryset(self):
+        return super().get_queryset().select_related('cliente', 'moneda').prefetch_related('metadata_parseo', 'boletos_adjuntos', 'pagos_venta')
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         venta = self.object
@@ -84,7 +88,7 @@ class VentaTimelineView(BookingBaseMixin, DetailView):
             })
         
         # 2. Documentos Subidos (BoletoImportado)
-        boletos = venta.boletos_adjuntos.all()
+        boletos = venta.boletos_adjuntos.select_related('moneda').all()
         for b in boletos:
             events.append({
                 'type': 'upload',
@@ -134,7 +138,7 @@ class VentaTimelineView(BookingBaseMixin, DetailView):
 
         # Ordenar por fecha descendente (más reciente arriba)
         # Usamos una fecha muy antigua como fallback si el campo date es None
-        epoch = timezone.make_aware(datetime.datetime(1970, 1, 1))
+        epoch = timezone.make_aware(datetime(1970, 1, 1))
         events.sort(key=lambda x: x['date'] if x['date'] else epoch, reverse=True)
         
         context['timeline_events'] = events
@@ -190,7 +194,8 @@ class ItemVentaCreateView(BookingBaseMixin, CreateView):
         venta = get_object_or_404(Venta, pk=self.kwargs['venta_pk'])
         form.instance.venta = venta
         form.save()
-        venta.recalcular_finanzas()
+        from apps.finance.services.finance_service import FinanceService
+        FinanceService.recalculate_sale_finances(venta.pk)
         
         if self.request.headers.get('HX-Request'):
             return render(self.request, 'bookings/partials/venta_totals_card.html', {'venta': venta})
@@ -215,7 +220,8 @@ class FeeVentaCreateView(BookingBaseMixin, CreateView):
         venta = get_object_or_404(Venta, pk=self.kwargs['venta_pk'])
         form.instance.venta = venta
         form.save()
-        venta.recalcular_finanzas()
+        from apps.finance.services.finance_service import FinanceService
+        FinanceService.recalculate_sale_finances(venta.pk)
         
         if self.request.headers.get('HX-Request'):
             return render(self.request, 'bookings/partials/venta_totals_card.html', {'venta': venta})
@@ -243,7 +249,8 @@ class PagoVentaCreateView(BookingBaseMixin, CreateView):
         venta = get_object_or_404(Venta, pk=self.kwargs['venta_pk'])
         form.instance.venta = venta
         form.save()
-        venta.recalcular_finanzas()
+        from apps.finance.services.finance_service import FinanceService
+        FinanceService.recalculate_sale_finances(venta.pk)
         
         if self.request.headers.get('HX-Request'):
             return render(self.request, 'bookings/partials/venta_totals_card.html', {'venta': venta})
@@ -256,7 +263,8 @@ class ItemVentaUpdateView(BookingBaseMixin, UpdateView):
 
     def form_valid(self, form):
         response = super().form_valid(form)
-        self.object.venta.recalcular_finanzas()
+        from apps.finance.services.finance_service import FinanceService
+        FinanceService.recalculate_sale_finances(self.object.venta.pk)
         return response
     
     def get_success_url(self):
@@ -331,7 +339,6 @@ def resolve_finding_htmx(request, pk):
         </span>
     """)
 
-from django.contrib.auth.decorators import login_required
 
 @login_required
 def dashboard_main(request):
@@ -390,8 +397,8 @@ def whatsapp_qr_view(request):
     """
     Vista principal de estado de WhatsApp (Migrada a Evolution API v2).
     """
+    from apps.communications.services.whatsapp import WhatsAppService
     from core.middleware import get_current_agency
-    from core.services.whatsapp import WhatsAppService
     
     agencia = get_current_agency()
     if not agencia:
@@ -440,7 +447,7 @@ def whatsapp_qr_view(request):
     # Intentar cargar whatsapp_qr_new.html, si no existe, usar whatsapp_qr.html
     try:
         return render(request, 'dashboard/partials/whatsapp_qr_new.html', context)
-    except:
+    except Exception as e:
         return render(request, 'dashboard/partials/whatsapp_qr.html', context)
 
 
@@ -452,7 +459,6 @@ def whatsapp_pairing_code_view(request):
     El usuario ingresa su número y recibe un código de 8 caracteres para ingresar en WhatsApp.
     """
     from core.middleware import get_current_agency
-    from core.services.whatsapp import WhatsAppService
 
     agencia = get_current_agency()
     if not agencia:
@@ -468,7 +474,7 @@ def whatsapp_pairing_code_view(request):
             })
         
         # En Evolution API v2, usamos el servicio directamente para Pairing Code
-        from core.services.evolution_api_service import EvolutionService
+        from apps.communications.services.evolution_api_service import EvolutionService
         resultado = EvolutionService.get_pairing_code(instancia_name, numero)
         
         if resultado.get('success'):

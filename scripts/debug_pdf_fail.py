@@ -15,8 +15,8 @@ django.setup()
 # Configure logging to print to stderr
 logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
 
-from core.parsers.sabre_parser import SabreParser
-from core.ticket_parser import generate_ticket
+from apps.automation.parsers.sabre_parser import SabreParser
+from apps.automation.parsers.ticket_parser import generate_ticket
 
 # The data provided by the user (simulated)
 user_json = """

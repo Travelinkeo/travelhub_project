@@ -1,21 +1,22 @@
 from django.urls import path
+
 from apps.bookings.bookings_views import (
-    VentaListView,
-    VentaCreateView,
-    VentaDetailView,
-    VentaTimelineView,
-    VentaUpdateView,
-    VentaDeleteView,
-    RevenueLeakDashboardView,
+    FeeVentaCreateView,
     ItemVentaCreateView,
     ItemVentaUpdateView,
-    FeeVentaCreateView,
     PagoVentaCreateView,
+    RevenueLeakDashboardView,
+    VentaCreateView,
+    VentaDeleteView,
+    VentaDetailView,
+    VentaListView,
+    VentaTimelineView,
+    VentaUpdateView,
     dashboard_main,
     dashboard_stats_htmx,
-    whatsapp_qr_view,
-    whatsapp_pairing_code_view,
     resolve_finding_htmx,
+    whatsapp_pairing_code_view,
+    whatsapp_qr_view,
 )
 
 app_name = 'bookings'

@@ -1,10 +1,11 @@
+import logging
 import os
-import requests
 import random
 from io import BytesIO
-import logging
-from PIL import Image, ImageDraw, ImageFont, ImageFilter
+
+import requests
 from django.conf import settings
+from PIL import Image, ImageDraw, ImageFont
 
 logger = logging.getLogger(__name__)
 
@@ -148,7 +149,7 @@ class FlyerService:
                 font_price = ImageFont.truetype(f_bold, 140)
                 font_tag = ImageFont.truetype(f_bold, 40)
                 font_stars = ImageFont.truetype(f_reg, 60)
-            except IOError:
+            except OSError:
                 font_title = font_price = font_tag = font_stars = ImageFont.load_default()
 
             # DRAW TEXT

@@ -1,13 +1,14 @@
-from django.test import TestCase, override_settings
-from unittest.mock import patch
 from decimal import Decimal
-from django.utils import timezone
+from unittest.mock import patch
+
+from django.test import TestCase, override_settings
+
+from apps.bookings.models import FeeVenta, ItemVenta, PagoVenta, ProductoServicio, Venta
+from apps.finance.models.currencies import Moneda
 
 # Modelos Reales
 from core.models.agencia import Agencia
-from apps.bookings.models import Venta, ItemVenta, FeeVenta, PagoVenta
-from apps.finance.models.currencies import Moneda
-from apps.bookings.models import ProductoServicio
+
 
 @override_settings(CELERY_TASK_ALWAYS_EAGER=True, CELERY_TASK_EAGER_PROPAGATES=True)
 class SeguridadSaaSTest(TestCase):

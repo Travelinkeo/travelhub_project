@@ -1,17 +1,17 @@
 """
 API endpoints para validación de requisitos migratorios.
 """
+from datetime import datetime
+
+from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from django.shortcuts import get_object_or_404
-from datetime import datetime
 
-from core.models.migration_checks import MigrationCheck
+from apps.automation.services.migration_checker_service import MigrationCheckerService
 from apps.crm.models import Pasajero
-from apps.bookings.models import Venta
-from core.services.migration_checker_service import MigrationCheckerService
+from core.models.migration_checks import MigrationCheck
 
 
 @api_view(['POST'])

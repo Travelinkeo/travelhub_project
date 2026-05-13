@@ -7,7 +7,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
 django.setup()
 
 # Check which file is being imported
-import core.ticket_parser
+import apps.automation.parsers.ticket_parser
 print(f"File location: {core.ticket_parser.__file__}")
 
 # Get the actual source code from the FILE (not from memory)

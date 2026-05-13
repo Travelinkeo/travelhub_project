@@ -7,7 +7,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "travelhub.settings")
 django.setup()
 
 from apps.bookings.models import BoletoImportado
-from core.services.ticket_parser_service import TicketParserService
+from apps.automation.services.ticket_parser_service import TicketParserService
 import logging
 
 # Configure logger to print to stdout

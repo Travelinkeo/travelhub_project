@@ -1,7 +1,7 @@
 from rest_framework import serializers
-from drf_spectacular.utils import extend_schema_field
-from django.db import models as django_models
+
 from .models import Cliente, Pasajero, PasaporteEscaneado
+
 
 class ClienteSerializer(serializers.ModelSerializer):
     get_nombre_completo = serializers.CharField(read_only=True)

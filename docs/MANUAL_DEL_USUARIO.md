@@ -1,160 +1,502 @@
-# 📘 El Gran Libro de TravelHub: Manual Paso a Paso del Sistema
+8# MANUAL DEL USUARIO — TravelHub ERP
 
-¡Bienvenido a TravelHub! Este manual está diseñado para que **cualquier persona**, sin importar su edad o experiencia tecnológica, pueda convertirse en un experto usando nuestro sistema. 
-
-Piensa en este documento como tu libro de consultas de cabecera. Si alguna vez te preguntas "¿Cómo hago esto en la pantalla?", aquí encontrarás la respuesta explicada de forma sencilla, paso a paso, como si estuvieras conversando con un amigo.
+**Versión:** 1.0 | **Mayo 2026**
 
 ---
 
-## 📑 Índice de Consultas Rápidas
+## Índice
 
-1. [Primeros Pasos: Conociendo tu Panel de Control](#1-primeros-pasos-conociendo-tu-panel-de-control-)
-2. [Boletos Mágicos: Cómo cargar boletos sin teclear nada](#2-boletos-mágicos-cómo-cargar-boletos-sin-teclear-nada-)
-3. [Pasaportes Instantáneos: Leyendo datos con una foto](#3-pasaportes-instantáneos-leyendo-datos-con-una-foto-)
-4. [Ventas y Facturación: Cobrando a tus clientes](#4-ventas-y-facturación-cobrando-a-tus-clientes-)
-5. [Pagos y Finanzas: Llevando las cuentas claras](#5-pagos-y-finanzas-llevando-las-cuentas-claras-)
-6. [Tus Clientes: Cuidando a tus viajeros (CRM)](#6-tus-clientes-cuidando-a-tus-viajeros-crm-)
-7. [Marketing y Redes: Vendiendo más viajes](#7-marketing-y-redes-vendiendo-más-viajes-)
-8. [Conciliación Financiera: El Auditor Inteligente](#8-conciliación-financiera-el-auditor-inteligente-)
-
----
-
-## 1. Primeros Pasos: Conociendo tu Panel de Control 🏠
-
-El **Panel de Control** (o *Dashboard*) es la pantalla principal que ves apenas abres el sistema. Es como el tablero de tu auto: te dice exactamente cómo va tu negocio hoy.
-
-### ¿Qué encuentro aquí?
-- **El Resumen del Día:** Cuadritos en la parte superior que te muestran cuánto dinero ha entrado hoy, cuántos boletos se han emitido y cuántos clientes nuevos tienes.
-- **Gráficos Amigables:** Barras y líneas de colores. Te permiten ver, con un solo vistazo, si las ventas de esta semana están mejor que las de la semana pasada.
-- **Botones de Acción Rápida:** Botones grandes y claros para hacer las tareas más comunes sin dar rodeos (como "Nueva Venta" o "Subir Boleto").
-
-**💡 Tip de Oro:** Si alguna vez te pierdes navegando por el sistema y no sabes dónde estás, simplemente haz clic en el **logo de TravelHub** arriba a la izquierda. Eso siempre te regresará a tu Panel de Control seguro.
+1. [Acceso al Sistema](#1-acceso-al-sistema)
+2. [Dashboard Principal](#2-dashboard-principal)
+3. [Importación de Boletos con IA](#3-importación-de-boletos-con-ia)
+4. [Ventas y Reservas](#4-ventas-y-reservas)
+5. [CRM — Clientes y Pasajeros](#5-crm--clientes-y-pasajeros)
+6. [Cotizaciones](#6-cotizaciones)
+7. [Hoteles y Tarifarios](#7-hoteles-y-tarifarios)
+8. [Finanzas y Facturación](#8-finanzas-y-facturación)
+9. [Contabilidad](#9-contabilidad)
+10. [Marketing](#10-marketing)
+11. [CMS — Contenido](#11-cms--contenido)
+12. [Configuración de Agencia](#12-configuración-de-agencia)
+13. [WhatsApp Business](#13-whatsapp-business)
+14. [Panel de Administración (Admin)](#14-panel-de-administración-admin)
+15. [Herramientas Avanzadas](#15-herramientas-avanzadas)
 
 ---
 
-## 2. Boletos Mágicos: Cómo cargar boletos sin teclear nada ✈️
+## 1. Acceso al Sistema
 
-TravelHub tiene un "robot lector invisible". Su trabajo es leer los PDFs de los boletos por ti. ¡Se acabaron las horas transcribiendo nombres y números larguísimos!
+### URL de acceso
+```
+http://localhost:8000/
+```
 
-### Opción A: Por Correo Electrónico (¡La más fácil!)
-1. Recibes el boleto de la aerolínea (como Copa, Avior, etc.) en tu correo electrónico.
-2. Simplemente **reenvía ese correo** a la dirección mágica de tu agencia (por ejemplo: `boletos@tuagencia.com`).
-3. ¡Listo, no hagas más nada! Espera unos segundos. El robot leerá el archivo adjunto, creará la venta, guardará al pasajero y **te enviará un mensaje de WhatsApp** a tu celular avisándote que todo está listo.
+### Inicio de Sesión
+1. Ingresa tu **nombre de usuario** y **contraseña**
+2. Si olvidaste tu contraseña, usa el enlace mágico ingresando tu email
+3. Al iniciar sesión, serás redirigido al Dashboard de tu agencia
 
-### Opción B: Subiendo el Archivo Manualmente en la Pantalla
-1. Ve al menú oscuro de la izquierda y haz clic en **"Boletos"** y luego en **"Subir Boleto"**.
-2. Verás un recuadro punteado. Haz clic ahí para buscar el archivo PDF en tu computadora, o simplemente **arrastra el archivo** desde tu escritorio hasta ese recuadro.
-3. Presiona el botón azul que dice **"Procesar"**.
-4. Aparecerá una barra de carga. Cuando termine, te mostrará la pantalla de la venta creada mágicamente con todos los datos correctos (nombre del pasajero, aerolínea, precio, impuestos).
-
-### ¿Qué pasa si el robot se confunde o el PDF está muy borroso?
-No te preocupes. El sistema te avisará con una etiqueta amarilla que dice **"Requiere Revisión"**. Simplemente entra a ese boleto, verás una pantalla donde puedes corregir manualmente la letra o número que falte y le das a "Guardar". 
-
----
-
-## 3. Pasaportes Instantáneos: Leyendo datos con una foto 🛂
-
-Llegó un cliente nuevo y te pasó una foto de su pasaporte por WhatsApp. No pierdas tiempo copiando su nombre completo, fecha de nacimiento y los largos números de documento.
-
-1. Ve al menú izquierdo y haz clic en **"Clientes"**, luego selecciona **"Escanear Pasaporte"**.
-2. Sube la foto del pasaporte (o el PDF).
-3. Haz clic en el botón de **"Analizar"**.
-4. ¡Magia otra vez! El sistema usará Inteligencia Artificial para extraer la foto de la persona, sus nombres, apellidos, fechas y nacionalidad, llenando todas las casillas del formulario por ti.
-5. Solo dales una leída rápida para confirmar que todo esté bien escrito y haz clic en **"Guardar Cliente"**.
+### Roles de Usuario
+| Rol | Permisos |
+|-----|----------|
+| **Admin** | Acceso total a la agencia: configuración, usuarios, ventas, reportes |
+| **Gerente** | Ventas, clientes, cotizaciones, reportes (sin configuración) |
+| **Vendedor** | Crear ventas, clientes, cotizaciones |
+| **Contador** | Facturación, contabilidad, reportes financieros |
+| **Operador** | Importar boletos, gestionar reservas |
+| **Consulta** | Solo lectura de ventas y reportes |
 
 ---
 
-## 4. Ventas y Facturación: Cobrando a tus clientes 💰
+## 2. Dashboard Principal
 
-El sistema sabe cómo separar tu ganancia (la comisión) de lo que le pertenece a la aerolínea. 
+**URL:** `/dashboard/`
 
-### ¿Cómo facturarle un boleto a un cliente?
-1. Ve a **"Ventas"** en el menú principal.
-2. Verás una lista como en Excel con todas tus ventas recientes. Haz clic en el nombre del cliente o en el número de la venta que deseas facturar.
-3. En la esquina superior derecha, presiona el botón **"Generar Factura"**.
-4. El sistema hará las matemáticas cumpliendo con la ley. Creará un **PDF hermoso** y profesional con el logo de tu agencia.
-5. Puedes descargar ese PDF para enviárselo al cliente por WhatsApp, o imprimirlo si el cliente está frente a ti.
+El dashboard muestra:
 
-### ¿Cómo crear una venta manual (para un Hotel, Seguro o Paquete)?
-1. Ve a **"Ventas"** y haz clic en el botón verde **"+ Nueva Venta"**.
-2. Selecciona al Cliente de tu lista (si es nuevo, hay un botón ahí mismo para crearlo rápido).
-3. Añade lo que le estás vendiendo (ej. "Alojamiento Hotel 3 noches en Margarita").
-4. Escribe el precio, dale a guardar y ¡así de fácil tienes tu venta registrada!
+### Panel de Métricas
+- **Ventas del mes**: Total de ventas y monto acumulado
+- **Boletos procesados**: Hoy / Semana / Mes
+- **Pendientes de pago**: Ventas con saldo por cobrar
+- **Margen estimado**: Ganancia proyectada del mes
 
----
+### Alertas
+- Boletos con errores de parseo
+- Pasaportes próximos a vencer
+- Pagos pendientes > 7 días
 
-## 5. Pagos y Finanzas: Llevando las cuentas claras 📊
-
-Las matemáticas aburridas y el enredo de las monedas son cosa del pasado. TravelHub se actualiza todos los días con la tasa oficial del banco (BCV).
-
-### ¿Cómo registrar que un cliente te pagó?
-1. Entra a la factura que le hiciste al cliente.
-2. Haz clic en el botón verde que dice **"Registrar Pago"**.
-3. El sistema te preguntará: ¿Cuánto te pagó? ¿Qué día? y ¿Por dónde? (Zelle, Pago Móvil, Efectivo, Transferencia).
-4. **Lo mejor:** Si la factura estaba en dólares y el cliente te pagó en Bolívares, el sistema calculará automáticamente a la tasa del día. Y si hubo diferencia por el cambio de moneda, el "Contador Invisible" del sistema lo anotará en los libros por ti.
-
-### Pantalla de Cuentas por Cobrar (¿Quién me debe dinero?)
-Ve al menú **"Finanzas"** > **"Cuentas por Cobrar"**. Allí verás una lista (muchas veces en color rojo) con todas las personas o empresas corporativas que aún te deben dinero. Así no se te escapa nadie.
-
-### Pantalla de Liquidaciones (¿Cuánto le debo yo a las Aerolíneas?)
-Ve a **"Finanzas"** > **"Liquidaciones (BSP)"**. Aquí podrás respirar en paz, porque sabrás exactamente cuánto dinero de tu cuenta bancaria le pertenece a los proveedores y **cuánto es realmente tu ganancia neta** que puedes gastar.
+### Acciones Rápidas
+- **Subir Boleto**: Importa un PDF/TXT/EML para parseo automático
+- **Nueva Venta**: Crea una venta manual
+- **Nuevo Cliente**: Registra un cliente
 
 ---
 
-## 6. Tus Clientes: Cuidando a tus viajeros (CRM) 👥
+## 3. Importación de Boletos con IA
 
-Un buen agente de viajes consiente a sus clientes. Esta sección es tu libreta de contactos moderna y súper potente.
+### Cómo funciona
+TravelHub usa Inteligencia Artificial (Google Gemini) para extraer automáticamente los datos de boletos aéreos desde archivos PDF, TXT o EML.
 
-1. Ve a **"Clientes"** en el menú de la izquierda.
-2. Haz clic en el nombre de cualquier persona.
-3. Se abrirá su "Expediente de Viajero". Aquí podrás ver todo su mundo:
-   - Su número de teléfono para escribirle directo al WhatsApp.
-   - El historial de **todos** los viajes que te ha comprado en su vida.
-   - Sus gustos y alergias (si se los anotaste).
-   - Su número de Viajero Frecuente (las millas).
-   - La foto de su pasaporte o visa guardada de forma segura para no pedírsela dos veces.
+### Paso a Paso
 
----
+**Opción A — Subir Archivo**
+1. Ve a **Dashboard → Subir Boleto** o a `/erp/boletos-importar/`
+2. Arrastra tu archivo (PDF, TXT, EML) a la zona de carga
+3. El sistema detecta automáticamente el formato GDS (Sabre, KIU, Amadeus, Copa, Wingo, TK Connect)
+4. En segundos, la IA extrae: PNR, pasajero, vuelos, tarifas, impuestos
+5. Serás redirigido a la pantalla de **Revisión del Boleto**
 
-## 7. Marketing y Redes: Vendiendo más viajes 📸
+**Opción B — Por Email (Automático)**
+1. Configura tu correo de emisiones en Configuración de Agencia
+2. Reenvía los boletos a ese correo
+3. El sistema los procesa automáticamente cada 2 minutos
 
-¿Tienes una promoción increíble pero no sabes usar programas de diseño, ni sabes qué palabras usar en Instagram para que la gente compre? La Inteligencia Artificial lo hace por ti.
+### Pantalla de Revisión
+Después del parseo, verás:
+- **Datos del pasajero**: Nombre, identificación (editable)
+- **Itinerario**: Todos los segmentos de vuelo con fechas, horas, aerolíneas
+- **Datos financieros**: Tarifa base, impuestos, total, comisión
+- **Asignar cliente**: Selecciona un cliente existente o crea uno nuevo
 
-1. Ve a **"Herramientas IA"** en el menú y luego a **"Marketing"**.
-2. Selecciona **"Crear Post"**.
-3. El sistema te pedirá que escribas de qué se trata, de forma sencilla. Ejemplo: *"Promo Los Roques, fin de semana largo, 350 dólares con desayuno"*.
-4. Haz clic en el botón mágico y espera un momento. El sistema hará dos cosas increíbles:
-   - **El Texto (Copy):** Escribirá un mensaje súper atractivo, emocionante y lleno de emojis, listo para que lo copies y lo pegues en tu Instagram, Facebook o WhatsApp.
-   - **La Imagen:** Te diseñará una imagen hermosa con fotos del destino, el precio grande y el logo de tu agencia.
-5. Descarga la foto, copia el texto y ¡a vender!
+### Acciones
+| Botón | Función |
+|-------|---------|
+| **Aprobar y Guardar** | Crea la Venta con todos los datos extraídos |
+| **Re-procesar** | Vuelve a ejecutar la IA si hay errores |
+| **Desasociar Venta** | Desvincula el boleto de su venta actual |
 
----
+### Búsqueda de Boletos
+**URL:** `/erp/boletos-busqueda/`
+- Busca por nombre de pasajero, PNR, origen, destino, o fecha
+- Filtra por GDS (Sabre, KIU, Amadeus, etc.)
+- Ve boletos pendientes, procesados, o con errores
 
-## 8. Conciliación Financiera: El Auditor Inteligente 🔍
-
-¿Alguna vez te ha pasado que el proveedor (como el BSP o un Consolidador) te cobra un monto y tú tenías anotado otro? Buscar esas diferencias en listas de cientos de boletos es un dolor de cabeza. Para eso creamos la **Conciliación IA**.
-
-### ¿Cómo funciona?
-1. Ve al Panel de Control y haz clic en el botón verde **"Conciliación IA"**.
-2. Selecciona quién te envió el reporte (ej: Sabre, KIU, BSP).
-3. Sube el archivo PDF o Excel que te mandó el proveedor.
-4. Haz clic en **"Iniciar Conciliación IA"**.
-
-### ¿Qué hace el sistema por ti?
-- **Lectura Automática:** El "Auditor Invisible" lee el reporte y extrae cada número de boleto y el monto que te cobraron.
-- **Cruce de Datos:** Busca en tu base de datos de TravelHub si tienes ese mismo boleto y cuánto dinero registraste tú.
-- **Detección de Errores:** Te mostrará una lista clara con colores:
-    - ✅ **Verde:** Todo cuadra perfectamente.
-    - ⚠️ **Amarillo (Discrepancia):** El monto del proveedor y el tuyo no coinciden (ej: te cobraron 5 centavos más).
-    - 🔴 **Rojo:** Te cobraron un boleto que NO tienes registrado, o tú tienes un boleto que el proveedor aún no te ha cobrado.
-
-### El Toque Maestro: Asientos Contables
-Si el sistema detecta que te cobraron de más o de menos, la Inteligencia Artificial te sugerirá un "asiento de ajuste". Con un solo clic, puedes aprobar que el sistema corrija tu contabilidad automáticamente para que tus libros siempre coincidan con la realidad del banco.
+### Reportes de Boletos
+**URL:** `/erp/boletos-reportes/`
+- Comisiones por aerolínea
+- Volumen de boletos por mes
+- Gráficos de tendencias
 
 ---
 
-## 🆘 Pequeña Guía de Solución de Problemas
+## 4. Ventas y Reservas
 
-- **¿La pantalla se quedó "pensando" o no carga algo?** Prueba refrescar la página. Si estás en computadora, presiona la tecla **F5** o haz clic en la flecha en forma de círculo arriba en tu navegador.
-- **¿Subiste un boleto y desapareció?** Ve a la sección "Boletos". Arriba a la derecha busca los filtros y marca "Ver boletos con Error". A veces el PDF estaba protegido con contraseña o dañado y el sistema te dirá exactamente qué pasó.
-- **Nunca estás solo:** Si te trancas con algo, busca siempre el botón con forma de salvavidas o signo de interrogación **(?)** en la esquina de abajo. Nuestro equipo de soporte técnico estará feliz de ayudarte.
+### Crear una Venta Manual
+1. Ve a **Dashboard → Nueva Venta** o `/erp/ventas/nueva/`
+2. Completa:
+   - **Cliente**: Selecciona de la lista o crea nuevo
+   - **Localizador**: Código de reserva (se auto-genera)
+   - **Moneda**: USD, VES, EUR
+   - **Items**: Añade servicios (boleto aéreo, hotel, traslado, etc.)
+   - **Precio y costo**: Por cada item
+3. **Guardar**
+
+### Estados de una Venta
+| Estado | Significado |
+|--------|-------------|
+| **Pendiente de Pago** | Creada, esperando pago del cliente |
+| **Pagada Parcial** | Se recibió parte del pago |
+| **Pagada Total** | Pago completo recibido |
+| **Confirmada** | Reserva confirmada con proveedor |
+| **En Proceso de Viaje** | El cliente está viajando |
+| **Completada** | Viaje finalizado |
+
+### Componentes de Venta
+Cada venta puede incluir:
+- **Boleto Aéreo**: Segmentos de vuelo con aerolínea, fechas, clase
+- **Alojamiento**: Hotel, check-in/out, habitaciones
+- **Traslado**: Aeropuerto-Hotel, tipo de vehículo
+- **Actividad**: Tour, excursión, entrada
+- **Alquiler de Auto**: Categoría, fechas, seguro
+- **Crucero**: Naviera, barco, cabina, paquete de bebidas
+- **Circuito**: Itinerario multi-día con actividades
+
+### Registrar un Pago
+1. Abre la venta → pestaña **Pagos**
+2. Ingresa: monto, método de pago (Efectivo, Transferencia, Zelle, Binance), fecha
+3. El sistema recalcula automáticamente el saldo pendiente
+
+### Generar Voucher / Factura
+- **Voucher PDF**: Para entregar al cliente con su itinerario
+- **Factura**: Documento fiscal (Venezuela: IVA 16%, IGTF 3% si aplica)
+- **Doble Facturación**: Para operaciones en divisas (USD + Bolívares)
+
+---
+
+## 5. CRM — Clientes y Pasajeros
+
+### Clientes
+**URL:** `/erp/clientes/`
+
+- **Lista**: Todos los clientes de tu agencia
+- **Crear**: Nombre, apellido, email, teléfono, documento de identidad
+- **Ficha del cliente**: Historial de ventas, pagos, preferencias de viaje
+- **Cliente frecuente**: Se marca automáticamente tras 5+ compras
+
+### Pasajeros
+**URL:** `/erp/pasajeros/`
+
+- Diferente de "Cliente" — un pasajero es quien viaja (puede no ser el comprador)
+- Datos: nombre, fecha de nacimiento, documento, nacionalidad, vencimiento
+
+### Escaneo de Pasaportes con IA
+1. Sube una foto del pasaporte
+2. La IA (Gemini Vision) extrae: nombres, apellidos, número de pasaporte, nacionalidad, fechas
+3. Se crea automáticamente el registro del pasajero
+
+### Verificación Migratoria
+- Al crear una venta con vuelos internacionales, el sistema verifica:
+  - Requisitos de visa según nacionalidad y destino
+  - Vigencia mínima del pasaporte (6 meses)
+  - Vacunas requeridas
+- Resultado: 🟢 Sin problemas / 🟡 Requiere atención / 🔴 Alerta
+
+---
+
+## 6. Cotizaciones
+
+### Magic Quoter (Cotizador con IA)
+**URL:** `/cotizaciones/magic/`
+
+1. Pega el texto GDS (Sabre, Amadeus, KIU) de una cotización
+2. La IA extrae: vuelos, tarifas, impuestos, fechas
+3. Genera automáticamente:
+   - Items de cotización con precios
+   - Fee de agencia configurable
+   - Imagen del destino
+
+### Cotización Manual
+1. Ve a **Cotizaciones → Nueva**
+2. Selecciona cliente, destino, fechas
+3. Añade items (vuelos, hoteles, actividades)
+4. Agrega términos y condiciones
+5. **Enviar** — se genera PDF profesional
+
+### Ciclo de Vida
+| Estado | Acción |
+|--------|--------|
+| **Borrador** | Editando |
+| **Enviada** | Cliente la recibe |
+| **Vista** | Cliente abrió el enlace |
+| **Aceptada** | → Convertir a Venta |
+| **Rechazada** | Archivada |
+| **Vencida** | Pasó fecha límite |
+
+---
+
+## 7. Hoteles y Tarifarios
+
+### Buscar Hoteles
+**URL:** `/hoteles/`
+
+1. Ingresa destino, fechas, huéspedes
+2. El sistema busca en todos los tarifarios cargados
+3. Resultados ordenados por precio (menor a mayor)
+4. Cada resultado muestra:
+   - Precio por noche
+   - Comisión para la agencia
+   - Descripción, amenities, fotos
+
+### Cargar Tarifario
+1. Ve al **Admin → Hoteles → Tarifarios Proveedor**
+2. Sube el PDF del tarifario del proveedor
+3. La IA extrae: hoteles, tipos de habitación, tarifas por temporada
+4. Revisa y ajusta los datos extraídos
+
+### Generar Contenido de Marketing
+- **Generar Copy**: La IA crea textos para Instagram/Facebook con diferentes tonos
+- **Generar Story**: Crea una imagen promocional del hotel
+
+---
+
+## 8. Finanzas y Facturación
+
+### Facturación
+**URL:** `/facturacion/`
+
+- **Emitir Factura**: Desde una venta, genera factura fiscal
+- **Factura Consolidada**: Agrupa múltiples ventas (formato SENIAT Venezuela)
+- **Nota de Crédito/Débito**: Para ajustes y devoluciones
+
+### Campos de Factura (Venezuela)
+- Número de control
+- Base imponible (USD)
+- IVA 16% (alícuota general)
+- IGTF 3% (si aplica — SPE)
+- INATUR 1% (provisión trimestral)
+- Equivalente en Bolívares (tasa BCV del día)
+
+### Libro de Ventas
+**URL:** `/api/libro-ventas/`
+- Reporte fiscal mensual obligatorio
+- Ventas propias vs ventas de terceros
+- Total débito fiscal
+
+### Conciliación de Proveedores
+**URL:** `/finance/supplier-reconciliation/`
+1. Sube el reporte del proveedor (PDF/Excel)
+2. El sistema cruza con tus ventas por número de boleto/PNR
+3. Detecta discrepancias, boletos huérfanos, posibles fraudes
+
+### Gastos Operativos
+- Registra gastos: alquiler, servicios, comisiones, papelería
+- Se contabilizan automáticamente (Debe: Gasto / Haber: Caja/Banco)
+
+---
+
+## 9. Contabilidad
+
+### Plan de Cuentas
+Estructura contable pre-cargada para agencias de viajes (VEN-NIF):
+- **Clase 1**: Activos (Caja, Bancos, Cuentas por Cobrar)
+- **Clase 2**: Pasivos (Cuentas por Pagar, Impuestos)
+- **Clase 4**: Ingresos (Venta Boletería, Comisiones)
+- **Clase 5**: Gastos (Personal, Operativos, Administrativos, Financieros)
+
+### Asientos Contables Automáticos
+Cada operación genera su asiento:
+| Operación | Débito | Crédito |
+|-----------|--------|---------|
+| Venta al contado | Caja/Banco | Ingresos + IVA |
+| Venta a crédito | Cuentas por Cobrar | Ingresos + IVA |
+| Cobro de venta | Caja/Banco | Cuentas por Cobrar |
+| Gasto operativo | Gasto | Caja/Banco |
+| Diferencial cambiario | Caja/Banco o Gasto | Ingreso o Caja/Banco |
+
+### Reportes Contables
+**URL:** `/reportes/`
+
+| Reporte | Descripción |
+|---------|-------------|
+| **Libro Diario** | Todas las transacciones en orden cronológico |
+| **Balance de Comprobación** | Sumas y saldos por cuenta |
+| **Estado de Resultados** | Ingresos - Costos - Gastos = Utilidad |
+| **Validación de Cuadre** | Detecta asientos descuadrados |
+
+### Tasas BCV
+- Se sincronizan automáticamente 2 veces al día
+- Usadas para calcular equivalentes en Bolívares
+- Histórico de tasas consultable
+
+---
+
+## 10. Marketing
+
+### Centro de Marketing
+**URL:** `/marketing/hub/`
+
+- **Generar Flyer**: Crea imagen promocional de un destino/hotel
+- **AI Copywriter**: Genera textos para redes sociales (tonos: profesional, aventurero, romántico)
+- **Magic Newsletter**: Boletín de email en HTML con ofertas
+
+### Campañas
+- Crea campañas con fecha de inicio/fin
+- Programa publicaciones en Instagram, Facebook, WhatsApp
+- Seguimiento de resultados
+
+---
+
+## 11. CMS — Contenido
+
+### Blog / Artículos
+- Crea artículos con título, slug, contenido (Markdown)
+- Categoriza por destino
+- Genera con IA o escribe manualmente
+- Optimiza SEO con meta título y descripción
+
+### Guías de Destino
+- Información turística: mejor época, visa, idioma, moneda
+- Se muestran en el portal público
+
+---
+
+## 12. Configuración de Agencia
+
+**URL:** `/agencia/configuracion/`
+
+### Datos Generales
+- Nombre comercial, RIF, IATA
+- Teléfono, email, dirección
+- Moneda principal, zona horaria
+
+### Branding y PDFs
+**URL:** `/settings/branding/`
+- **Color primario**: Se aplica a todos los PDFs (boletos, vouchers, facturas)
+- **Tema del sitio**: Obsidian Emerald, Neon Sunset, Midnight Gold, Nordic Snow, Cyber Fuchsia, Swiss Vintage
+- **Plantilla de Boletos**: Diseño del PDF de boleto (6 variantes)
+- **Plantilla de Vouchers**: Diseño del comprobante (5 variantes)
+- **Plantilla de Facturas**: Diseño fiscal
+
+### WhatsApp
+**URL:** `/agencia/configuracion/` (pestaña WhatsApp)
+- **Estado**: Conectado / Desconectado / Esperando escaneo
+- **QR**: Escanea con WhatsApp para vincular
+- La instancia se crea automáticamente por agencia
+
+### Usuarios de la Agencia
+**URL:** `/agencia/usuarios/`
+- Invita nuevos usuarios (email + nombre + rol)
+- Activa/desactiva usuarios
+- Cambia roles
+
+---
+
+## 13. WhatsApp Business
+
+### Configuración Inicial
+1. Ve a Configuración de Agencia → pestaña **WhatsApp**
+2. Si el QR no aparece como imagen, haz clic en "Abrir QR en Evolution"
+3. Escanea el QR con WhatsApp en tu celular
+4. La página se actualiza mostrando "CONECTADO"
+
+### Funcionalidades
+- **Notificaciones automáticas**: Pago recibido, boleto procesado, recordatorio de viaje
+- **Envío de PDFs**: Boletos y vouchers por WhatsApp
+- **Chatbot**: Responde consultas de clientes (ventas, estado de reserva, requisitos migratorios)
+
+---
+
+## 14. Panel de Administración (Admin)
+
+**URL:** `/admin/`
+
+El panel de administración usa el tema **Unfold** (moderno, TailwindCSS, modo oscuro/claro).
+
+### Barra Lateral
+Organizada en 13 secciones colapsables:
+- **Operaciones**: Dashboard, subir boleto, buffer de revisión
+- **Ventas y Reservas**: Todos los modelos de ventas y componentes
+- **Hoteles y Tarifarios**: Gestión de tarifarios y habitaciones
+- **CRM**: Clientes, pasajeros, oportunidades
+- **Cotizaciones**: Cotizaciones e items
+- **Finanzas**: Facturas, gastos, conciliaciones
+- **Contabilidad**: Plan de cuentas, asientos, tasas BCV
+- **Marketing**: Campañas, activos, configuración
+- **CMS**: Artículos, guías, posts
+- **Configuración Global**: Agencias, catálogos, feature flags
+- **SuperAdmin**: God Mode, GDS Analyzer
+
+### Acciones en Admin
+- **Añadir**: Botón "Añadir" en la esquina superior derecha de cada lista
+- **Editar**: Click en cualquier registro
+- **Eliminar**: Selecciona registros → Acción "Eliminar"
+- **Buscar**: Barra de búsqueda superior
+- **Filtrar**: Panel de filtros a la derecha
+
+### Tema Claro/Oscuro
+El admin sigue la preferencia de tu sistema operativo. Para cambiar:
+- Click en el icono ☀️/🌙 en la esquina superior derecha
+- Selecciona: Claro, Oscuro, o Automático
+
+---
+
+## 15. Herramientas Avanzadas
+
+### Traductor de Itinerarios GDS
+**URL:** `/tools/traductor/`
+1. Pega texto crudo de GDS (Sabre, Amadeus, KIU)
+2. El sistema traduce a un itinerario legible en HTML
+3. Calcula automáticamente el precio con fees configurados
+4. Copia el resultado o genera una cotización
+
+### GDS Analyzer (IA)
+**URL:** `/intelligence/gds-analyzer/`
+1. Pega la terminal completa de GDS
+2. La IA analiza y extrae todos los boletos
+3. Inyecta directamente al ERP como Ventas
+
+### Búsqueda Global (Ctrl+K)
+- Presiona **Ctrl+K** en cualquier página
+- Busca clientes, ventas, boletos por nombre, PNR, o ID
+- Navegación instantánea
+
+### Portal del Pasajero
+Cada venta genera un enlace público:
+- **URL:** `/v/<uuid>/`
+- El cliente puede ver su itinerario, vuelos, vouchers
+- Descargar PDFs
+- La agencia puede personalizar con su logo y colores
+
+### Vouchers PDF
+Por tipo de servicio, con 5 variantes de diseño:
+- Voucher Unificado (todos los servicios)
+- Voucher de Hotel
+- Voucher de Traslado
+- Voucher de Actividad
+- Voucher de Alquiler de Auto
+- Voucher de Seguro
+
+---
+
+## Atajos y Consejos
+
+| Atajo / Tip | Descripción |
+|-------------|-------------|
+| **Ctrl+K** | Búsqueda global en todo el sistema |
+| **Arrastrar archivo** | Importa boletos soltando PDF/TXT en la zona de carga |
+| **Auto-guardado** | Los formularios guardan al presionar Enter |
+| **HTMX polling** | Las notificaciones y el QR de WhatsApp se actualizan solos |
+| **Modo oscuro** | Disponible en Admin (☀️/🌙) y en el frontend (según tema de agencia) |
+
+---
+
+## Solución de Problemas
+
+### Un boleto no se procesa
+1. Verifica que el archivo sea PDF, TXT o EML
+2. Revisa en **Boletos → Buscar** si tiene error
+3. Usa **Re-procesar** en la pantalla de revisión
+4. Si persiste, ingresa los datos manualmente en **Boletos → Manual**
+
+### No aparece el QR de WhatsApp
+1. Asegúrate de que Evolution API esté corriendo
+2. Recarga la página (F5)
+3. Ve a Configuración de Agencia → WhatsApp
+
+### No puedo ver todas las opciones del Admin
+- Verifica que tu usuario tenga el rol adecuado (Admin)
+- Si eres superadmin, ve a `/god-mode/` e impersona tu agencia
+
+---
+
+> **TravelHub ERP** — Automatización inteligente para agencias de viajes.

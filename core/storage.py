@@ -8,8 +8,9 @@ use_cloudinary = getattr(settings, 'USE_CLOUDINARY', False)
 
 if use_r2:
     # ☁️ CLOUDFLARE R2 (S3 Compatible)
-    from storages.backends.s3 import S3Storage
     import os
+
+    from storages.backends.s3 import S3Storage
     class RawFileStorage(S3Storage):
         """Storage para archivos raw (PDF, TXT, EML) en Cloudflare R2"""
         def __init__(self, **kwargs):
@@ -19,6 +20,10 @@ if use_r2:
             kwargs.setdefault('endpoint_url', os.getenv("R2_ENDPOINT_URL"))
             kwargs.setdefault('region_name', "auto")
             kwargs.setdefault('file_overwrite', False)
+            # 🔒 Seguridad SaaS: No permitir acceso público, requerir URLs firmadas
+            kwargs.setdefault('default_acl', 'private')
+            kwargs.setdefault('querystring_auth', True)
+            kwargs.setdefault('querystring_expire', 3600) # 1 hora
             super().__init__(**kwargs)
         
 elif use_cloudinary:
@@ -26,6 +31,11 @@ elif use_cloudinary:
     class RawFileStorage(RawMediaCloudinaryStorage):
         """Storage para archivos raw (PDF, TXT, EML) en Cloudinary"""
         
+        def __init__(self, **kwargs):
+            # 🔒 Forzar tipo 'authenticated' para requerir firmas en la URL
+            kwargs.setdefault('type', 'authenticated')
+            super().__init__(**kwargs)
+
         def _prepend_prefix(self, name):
             """No agregar prefijo 'media/' - usar path directo"""
             return name

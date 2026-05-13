@@ -10,9 +10,10 @@ Usage:
     class MyModel(models.Model):
         sensitive_data = EncryptedCharField(max_length=100)
 """
-import base64
 import logging
+
 from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
 from django.db import models
 
 logger = logging.getLogger(__name__)
@@ -42,21 +43,15 @@ class EncryptedCharField(models.CharField):
         if EncryptedCharField._cached_fernet is None:
             try:
                 from cryptography.fernet import Fernet
-                from cryptography.hazmat.primitives import hashes
-                from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
-                
-                # Independencia de llave: Priorizar ENCRYPTION_KEY para permitir rotación
-                encryption_key = getattr(settings, 'ENCRYPTION_KEY', settings.SECRET_KEY)
-                secret_key = encryption_key.encode()
-                
-                kdf = PBKDF2HMAC(
-                    algorithm=hashes.SHA256(),
-                    length=32,
-                    salt=b'travelhub_encryption_salt',
-                    iterations=100000,
-                )
-                key = base64.urlsafe_b64encode(kdf.derive(secret_key))
-                EncryptedCharField._cached_fernet = Fernet(key)
+
+                encryption_key = getattr(settings, 'ENCRYPTION_KEY', None)
+                if not encryption_key:
+                    raise ImproperlyConfigured(
+                        "ENCRYPTION_KEY is required. Generate one with: "
+                        "python -c \"from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())\""
+                    )
+                fernet_key = encryption_key.encode()
+                EncryptedCharField._cached_fernet = Fernet(fernet_key)
             except Exception as e:
                 logger.error(f"Error inicializando Fernet: {e}")
                 raise
@@ -128,21 +123,15 @@ class EncryptedTextField(models.TextField):
         if EncryptedTextField._cached_fernet is None:
             try:
                 from cryptography.fernet import Fernet
-                from cryptography.hazmat.primitives import hashes
-                from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
-                
-                # Independencia de llave: Priorizar ENCRYPTION_KEY para permitir rotación
-                encryption_key = getattr(settings, 'ENCRYPTION_KEY', settings.SECRET_KEY)
-                secret_key = encryption_key.encode()
-                
-                kdf = PBKDF2HMAC(
-                    algorithm=hashes.SHA256(),
-                    length=32,
-                    salt=b'travelhub_encryption_salt',
-                    iterations=100000,
-                )
-                key = base64.urlsafe_b64encode(kdf.derive(secret_key))
-                EncryptedTextField._cached_fernet = Fernet(key)
+
+                encryption_key = getattr(settings, 'ENCRYPTION_KEY', None)
+                if not encryption_key:
+                    raise ImproperlyConfigured(
+                        "ENCRYPTION_KEY is required. Generate one with: "
+                        "python -c \"from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())\""
+                    )
+                fernet_key = encryption_key.encode()
+                EncryptedTextField._cached_fernet = Fernet(fernet_key)
             except Exception as e:
                 logger.error(f"Error inicializando Fernet: {e}")
                 raise

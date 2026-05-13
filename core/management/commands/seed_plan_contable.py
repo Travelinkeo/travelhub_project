@@ -1,6 +1,9 @@
 from django.core.management.base import BaseCommand
-from apps.contabilidad.models import PlanContable
 from django.db import transaction
+
+from apps.contabilidad.models import PlanContable
+from core.middleware import system_context
+
 
 class Command(BaseCommand):
     help = 'Poblar Plan Contable Básico para Agencia de Viajes (Venezuela)'
@@ -51,28 +54,28 @@ class Command(BaseCommand):
         ]
 
         with transaction.atomic():
-            creados = 0
-            omitidos = 0
-            for c in cuentas:
-                # Buscar padre
-                padre = None
-                if c['padre']:
-                    padre = PlanContable.objects.filter(codigo_cuenta=c['padre']).first()
-                
-                obj, created = PlanContable.objects.get_or_create(
-                    codigo_cuenta=c['codigo'],
-                    defaults={
-                        'nombre_cuenta': c['nombre'],
-                        'tipo_cuenta': c['tipo'],
-                        'nivel': c['nivel'],
-                        'cuenta_padre': padre,
-                        'permite_movimientos': c['movimiento'],
-                        'naturaleza': c['nat']
-                    }
-                )
-                if created:
-                    creados += 1
-                else:
-                    omitidos += 1
-            
+            with system_context():
+                creados = 0
+                omitidos = 0
+                for c in cuentas:
+                    padre = None
+                    if c['padre']:
+                        padre = PlanContable.objects.filter(codigo_cuenta=c['padre']).first()
+
+                    obj, created = PlanContable.objects.get_or_create(
+                        codigo_cuenta=c['codigo'],
+                        defaults={
+                            'nombre_cuenta': c['nombre'],
+                            'tipo_cuenta': c['tipo'],
+                            'nivel': c['nivel'],
+                            'cuenta_padre': padre,
+                            'permite_movimientos': c['movimiento'],
+                            'naturaleza': c['nat'],
+                        }
+                    )
+                    if created:
+                        creados += 1
+                    else:
+                        omitidos += 1
+
             self.stdout.write(self.style.SUCCESS(f"Finalizado: {creados} cuentas creadas, {omitidos} existentes."))

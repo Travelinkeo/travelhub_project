@@ -1,10 +1,13 @@
+import json
+
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import JsonResponse
 from django.shortcuts import render
 from django.views import View
-from django.http import JsonResponse, HttpResponse
-from django.contrib.auth.mixins import LoginRequiredMixin
-from core.services.marketing_service import MarketingService
-from core.mixins import SaaSMixin, HtmxResponseMixin
-import json
+
+from apps.communications.services.marketing_service import MarketingService
+from core.mixins import HtmxResponseMixin, SaaSMixin
+
 
 class MarketingHubView(HtmxResponseMixin, SaaSMixin, LoginRequiredMixin, View):
     """

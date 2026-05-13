@@ -67,7 +67,7 @@
                 <div class="grid grid-cols-2 gap-2 text-sm">
                     <div><span class="text-gray-500">Subtotal:</span> <span class="text-white">$ {{ factura.subtotal|floatformat:2 }}</span></div>
                     <div><span class="text-gray-500">IVA:</span> <span class="text-white">$ {{ factura.iva|floatformat:2 }}</span></div>
-                    <div><span class="text-gray-500">Moneda:</span> <span class="text-white">{{ factura.moneda.codigo }}</span></div>
+                    <div><span class="text-gray-500">Moneda:</span> <span class="text-white">{{ factura.moneda.codigo_iso|default:"--" }}</span></div>
                     <div><span class="text-gray-500">Vence:</span> <span class="text-yellow-400">{{ factura.fecha_vencimiento|date:"d M Y" }}</span></div>
                 </div>
             </div>

@@ -1,6 +1,7 @@
 from django.views.generic import TemplateView
-from django.contrib.auth.mixins import LoginRequiredMixin
+
 from core.mixins import AgencyRoleRequiredMixin
+
 
 class AnalyticsDashboardView(AgencyRoleRequiredMixin, TemplateView):
     template_name = "analytics/dashboard_container.html"

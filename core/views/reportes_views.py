@@ -1,7 +1,8 @@
 # core/views/reportes_views.py
 from datetime import datetime
 from decimal import Decimal
-from django.db.models import Sum, Q, F
+
+from django.db.models import F, Q
 from django.http import HttpResponse
 from django.shortcuts import render
 from rest_framework.decorators import api_view, permission_classes
@@ -9,8 +10,6 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from apps.contabilidad.models import AsientoContable, DetalleAsiento
-from apps.bookings.models import Venta
-from apps.finance.models import Factura
 
 
 @api_view(['GET'])
@@ -179,7 +178,7 @@ def exportar_excel(request):
     """
     try:
         import openpyxl
-        from openpyxl.styles import Font, Alignment
+        from openpyxl.styles import Alignment, Font
     except ImportError:
         return Response(
             {'error': 'openpyxl no instalado. Ejecute: pip install openpyxl'},

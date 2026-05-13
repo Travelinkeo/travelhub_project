@@ -1,17 +1,17 @@
-from django.shortcuts import redirect, render
-from django.db.models import Q
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import ListView, CreateView, UpdateView, DeleteView
-from django.urls import reverse_lazy
 from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Q
+from django.shortcuts import redirect
+from django.urls import reverse_lazy
 from django.views import View
-from django.core.cache import cache
+from django.views.generic import CreateView, DeleteView, ListView, UpdateView
 
-from apps.finance.models.currencies import TipoCambio, Moneda
-from apps.common.models import Aerolinea, Pais, Ciudad
-from apps.bookings.models import ProductoServicio, Proveedor, ComisionProveedorServicio
-from core.mixins import SaaSMixin, HtmxResponseMixin
+from apps.bookings.models import ComisionProveedorServicio, ProductoServicio, Proveedor
+from apps.common.models import Aerolinea, Ciudad, Pais
 from apps.contabilidad.views_tasas import sincronizar_tasas_manual
+from apps.finance.models.currencies import Moneda, TipoCambio
+from core.mixins import HtmxResponseMixin, SaaSMixin
+
 
 class CatalogosCenterView(SaaSMixin, LoginRequiredMixin, ListView):
     model = Moneda # Dummy model to satisfy ListView
@@ -31,7 +31,7 @@ class AerolineaListView(HtmxResponseMixin, SaaSMixin, LoginRequiredMixin, ListVi
     
     def get_queryset(self):
         q = self.request.GET.get('q')
-        queryset = Aerolinea.objects.select_related('pais').order_by('nombre')
+        queryset = Aerolinea.objects.all().order_by('nombre')
         if q:
             queryset = queryset.filter(Q(nombre__icontains=q) | Q(codigo_iata__icontains=q))
         return queryset

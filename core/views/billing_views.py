@@ -1,18 +1,18 @@
 """
 Vistas para facturación y gestión de planes SaaS con Stripe.
 """
-from drf_spectacular.utils import extend_schema
-from rest_framework import viewsets, status
-from rest_framework.decorators import action, api_view, permission_classes, authentication_classes
-from rest_framework.permissions import IsAuthenticated, AllowAny
-from rest_framework_simplejwt.authentication import JWTAuthentication
-from rest_framework.response import Response
-from django.conf import settings
-from django.shortcuts import redirect
-from django.views.decorators.csrf import csrf_exempt
-from core.models.agencia import Agencia
 import os
-from core.services.stripe_service import StripeService
+
+from django.conf import settings
+from django.views.decorators.csrf import csrf_exempt
+from drf_spectacular.utils import extend_schema
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.response import Response
+
+from apps.finance.services.stripe_service import StripeService
+
+
 def _setup_stripe():
     """Asegura la configuración de Stripe."""
     try:
@@ -224,6 +224,8 @@ def create_portal_session(request):
 
 @extend_schema(exclude=True)
 @api_view(['POST'])
+@permission_classes([AllowAny])
+@csrf_exempt
 def stripe_webhook(request):
     """Webhook para eventos de Stripe."""
     if not _setup_stripe():

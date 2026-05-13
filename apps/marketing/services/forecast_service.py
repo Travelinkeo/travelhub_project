@@ -1,13 +1,14 @@
 import logging
-from datetime import datetime, timedelta
-from typing import List, Dict, Any
-from django.db.models import Sum, Count
+from datetime import timedelta
+from typing import Any
+
+from django.db.models import Count, Sum
 from django.db.models.functions import TruncMonth
 from django.utils import timezone
 from pydantic import BaseModel, Field
 
+from apps.automation.services.ai_engine import ai_engine
 from apps.bookings.models import Venta
-from core.services.ai_engine import ai_engine
 
 logger = logging.getLogger(__name__)
 
@@ -25,8 +26,8 @@ class SalesForecastSchema(BaseModel):
     predicted_sales_next_month: str = Field(description="Monto predicho de ventas para el próximo mes")
     confidence_level: str = Field(description="Nivel de confianza de la predicción (Ej: 92%)")
     momentum_indicator: str = Field(description="Indicador de tendencia: UP, DOWN, STABLE")
-    hot_destinations: List[HotDestination] = Field(description="Top 3-4 destinos recomendados")
-    strategic_insights: List[ForecastInsight] = Field(description="Recomendaciones tácticas detalladas")
+    hot_destinations: list[HotDestination] = Field(description="Top 3-4 destinos recomendados")
+    strategic_insights: list[ForecastInsight] = Field(description="Recomendaciones tácticas detalladas")
 
 class AIForecastService:
     """
@@ -34,7 +35,7 @@ class AIForecastService:
     para predecir tendencias y ofrecer insights estratégicos usando Gemini.
     """
 
-    def get_historical_data(self, months=12) -> List[Dict[str, Any]]:
+    def get_historical_data(self, months=12) -> list[dict[str, Any]]:
         """
         Extrae datos agregados de ventas por mes.
         """
@@ -64,7 +65,7 @@ class AIForecastService:
         
         return data
 
-    def get_top_destinations_historical(self, months=6) -> List[str]:
+    def get_top_destinations_historical(self, months=6) -> list[str]:
         """
         Deduce destinos populares de los items de venta.
         """
@@ -82,7 +83,7 @@ class AIForecastService:
         
         return [c['destino__nombre'] for c in top_cities if c['destino__nombre']]
 
-    def generate_forecast(self) -> Dict[str, Any]:
+    def generate_forecast(self) -> dict[str, Any]:
         """
         Orquesta el análisis y la generación de la predicción con IA.
         """

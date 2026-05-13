@@ -1,14 +1,20 @@
 from django.contrib import admin
-from core.admin_saas import SaaSAdminMixin
-from django.utils.html import format_html
 from django.urls import reverse
-from .models import (
-    Factura, ItemFactura,
-    GastoOperativo, PagoBinance,
-    LinkDePago
+from django.utils.html import format_html
+
+from core.admin_saas import SaaSAdminMixin
+
+from .models import Factura, GastoOperativo, ItemFactura, LinkDePago, PagoBinance
+from .models.facturacion import (
+    DocumentoExportacionConsolidado,
+    FacturaConsolidada,
+    ItemFacturaConsolidada,
 )
-from .models.facturacion import FacturaConsolidada, ItemFacturaConsolidada, DocumentoExportacionConsolidado
-from .models.reconciliacion import ReporteReconciliacion, LineaReporteReconciliacion, ConciliacionBoleto
+from .models.reconciliacion import (
+    ConciliacionBoleto,
+    ReporteReconciliacion,
+)
+
 
 @admin.register(LinkDePago)
 class LinkDePagoAdmin(admin.ModelAdmin):
@@ -41,7 +47,7 @@ class ItemFacturaInline(admin.TabularInline):
 class FacturaAdmin(SaaSAdminMixin, admin.ModelAdmin):
     list_display = ('numero_factura', 'cliente', 'fecha_emision', 'estado', 'monto_total', 'saldo_pendiente')
     list_filter = ('estado', 'tipo_factura', 'fecha_emision')
-    search_fields = ('numero_factura', 'cliente__nombre_completo', 'numero_control')
+    search_fields = ('numero_factura', 'cliente__nombres', 'cliente__apellidos', 'numero_control')
     inlines = [ItemFacturaInline]
     
     actions = ['generar_pdf_selectos']
@@ -93,11 +99,12 @@ class ReporteReconciliacionAdmin(SaaSAdminMixin, admin.ModelAdmin):
     def process_view(self, request, report_id):
         from django.contrib import messages
         from django.shortcuts import redirect
+
         from .services.smart_reconciliation_service import SmartReconciliationService
         
         try:
             SmartReconciliationService.procesar_reporte(report_id)
-            messages.success(request, f"¡Reporte analizado con IA y cruzado estadísticamente con éxito!")
+            messages.success(request, "¡Reporte analizado con IA y cruzado estadísticamente con éxito!")
         except Exception as e:
             messages.error(request, f"Fallo en la Inteligencia Artificial o Extracción: {e}")
         
@@ -166,7 +173,7 @@ class FacturaConsolidadaAdmin(SaaSAdminMixin, admin.ModelAdmin):
     list_display = ('numero_factura', 'cliente', 'fecha_emision', 'tipo_operacion', 'moneda_operacion', 
                    'monto_total', 'estado')
     list_filter = ('estado', 'tipo_operacion', 'moneda_operacion', 'cliente_es_residente', 'fecha_emision')
-    search_fields = ('numero_factura', 'numero_control', 'cliente__nombre', 'cliente__apellido')
+    search_fields = ('numero_factura', 'numero_control', 'cliente__nombres', 'cliente__apellidos')
     readonly_fields = ('subtotal', 'monto_total', 'saldo_pendiente')
     inlines = [ItemFacturaConsolidadaInline, DocumentoExportacionConsolidadoInline]
     

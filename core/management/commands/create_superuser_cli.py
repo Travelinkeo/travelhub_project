@@ -1,6 +1,7 @@
-from django.core.management.base import BaseCommand, CommandError
-from django.contrib.auth import get_user_model
 import secrets
+
+from django.contrib.auth import get_user_model
+from django.core.management.base import BaseCommand, CommandError
 
 User = get_user_model()
 
@@ -21,7 +22,7 @@ class Command(BaseCommand):
         email = options['email']
         password = options['password'] or secrets.token_urlsafe(16)
 
-        user = User.objects.create_superuser(username=username, email=email, password=password)
+        User.objects.create_superuser(username=username, email=email, password=password)
         self.stdout.write(self.style.SUCCESS(f'Superuser "{username}" created.'))
         if not options['password']:
             self.stdout.write(f'Generated password: {password}')

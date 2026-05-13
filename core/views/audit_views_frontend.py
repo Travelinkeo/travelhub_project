@@ -1,9 +1,9 @@
-from django.views.generic import ListView
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
-from core.models.agencia import Agencia
-from core.models.audit import AuditLog
+from django.views.generic import ListView
+
 from core.mixins import AgencyRoleRequiredMixin
+from core.models.audit import AuditLog
+
 
 class AgenciaAuditLogListView(AgencyRoleRequiredMixin, ListView):
     allowed_roles = ['admin', 'gerente']

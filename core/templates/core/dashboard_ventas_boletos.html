@@ -135,7 +135,7 @@
         async function cargarVentas(filtros = {}) {
             try {
                 const params = new URLSearchParams(filtros);
-                const response = await fetch(`/api/ventas-boletos/?${params}`);
+                const response = await fetch(`/api/boletos/dashboard-stats/?${params}`);
                 const data = await response.json();
                 
                 ventasData = data.ventas;
@@ -149,7 +149,7 @@
         
         function actualizarEstadisticas(stats) {
             document.getElementById('statVentas').textContent = stats.total_ventas;
-            document.getElementById('statBoletos').textContent = stats.total_boletas;
+            document.getElementById('statBoletos').textContent = stats.total_boletos;
             document.getElementById('statIngresos').textContent = `$${stats.total_ingresos.toFixed(2)}`;
             document.getElementById('statMargen').textContent = `$${stats.total_margen.toFixed(2)}`;
         }
@@ -200,7 +200,7 @@
             });
             
             try {
-                const response = await fetch(`/api/boletos/actualizar-venta/${ventaId}/`, {
+                const response = await fetch(`/api/boletos/actualizar-item/`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

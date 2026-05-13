@@ -8,7 +8,7 @@ from django.conf import settings
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
 django.setup()
 
-from core.ticket_parser import extract_data_from_text
+from apps.automation.parsers.ticket_parser import extract_data_from_text
 
 BASE_DIR = r"C:\Users\ARMANDO\Downloads\Boletos"
 folders = ["SABRE", "COPA", "KIU", "AVIOR", "ESTELAR", "RUTACA", "WINGO", "TK CONNECT"]

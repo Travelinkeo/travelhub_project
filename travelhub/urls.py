@@ -1,10 +1,11 @@
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import include, path
-from django.views.generic import TemplateView
-from django.utils.translation import gettext_lazy as _
 from django.contrib.auth import views as auth_views
+from django.urls import include, path
+from django.utils.translation import gettext_lazy as _
+from django.views.generic import TemplateView
+
 from core.views import dashboard
 from core.views.auth_views import MagicLinkRequestView, MagicLinkVerifyView
 

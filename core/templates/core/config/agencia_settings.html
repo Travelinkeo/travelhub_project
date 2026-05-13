@@ -270,7 +270,7 @@
                         <p class="text-xs text-text-muted">Configuración de temas UI, logos responsivos y colores global.</p>
                     </header>
                     <section class="grid grid-cols-2 md:grid-cols-3 gap-4">
-                        {% for code, name in agencia.THEME_CHOICES %}
+                        {% for code, name in AGENCIA_THEMES %}
                         <div @click="activeTheme = '{{ code }}'" class="cursor-pointer border-2 rounded-3xl p-4 transition-all group" 
                              :class="activeTheme === '{{ code }}' ? 'border-primary bg-primary/5 shadow-2xl scale-105' : 'border-border-color hover:border-text-muted hover:scale-105 opacity-100'">
                             <div class="flex h-12 mb-3 rounded-xl overflow-hidden shadow-inner border border-white/5 transition-all">
@@ -333,7 +333,7 @@
                         <div>
                             <h3 class="text-xs font-black uppercase tracking-[0.3em] mb-4">Plantillas de Boletos</h3>
                             <div class="grid grid-cols-5 gap-3">
-                                {% for code, name in agencia.PLANTILLAS_BOLETOS_CHOICES %}
+                                {% for code, name in AGENCIA_PLANTILLAS_BOLETOS %}
                                 <button type="button" @click="activeTktModel = '{{ code }}'" :class="activeTktModel === '{{ code }}' ? 'bg-primary text-white' : 'bg-surface-2 text-text-muted'" class="h-14 rounded-xl text-[8px] font-black uppercase transition-all">{{ name|truncatechars:10 }}</button>
                                 {% endfor %}
                             </div>
@@ -432,8 +432,14 @@
             </header>
             
             <div class="max-w-xl mx-auto">
-                <div id="whatsapp-qr-container">
-                    {% include 'dashboard/partials/whatsapp_qr_new.html' %}
+                <div id="whatsapp-qr-container" 
+                     hx-get="{% url 'core:whatsapp_status' %}" 
+                     hx-trigger="load" 
+                     hx-swap="innerHTML">
+                    <div class="flex flex-col items-center justify-center p-12 space-y-4">
+                        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+                        <p class="text-xs font-black uppercase tracking-widest text-text-muted">Sincronizando con Evolution API...</p>
+                    </div>
                 </div>
             </div>
 

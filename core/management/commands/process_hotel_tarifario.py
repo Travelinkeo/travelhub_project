@@ -1,6 +1,8 @@
 from django.core.management.base import BaseCommand
+
+from apps.automation.services.hotel_parser_service import HotelParserService
 from apps.bookings.models import TarifarioProveedor
-from core.services.hotel_parser_service import HotelParserService
+
 
 class Command(BaseCommand):
     help = 'Procesa un Tarifario de Proveedor usando Gemini Vision'

@@ -1,11 +1,12 @@
 # core/chatbot/views.py
 
 import logging
+
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from django.views.decorators.csrf import csrf_exempt
 
 from .chatbot_service import chatbot
 
@@ -94,7 +95,7 @@ def chatbot_status(request):
     GET /api/chatbot/status/
     """
     try:
-        from core.services.gemini_client import GEMINI_API_KEY
+        from apps.automation.services.ai_engine import GEMINI_API_KEY
         
         gemini_available = bool(GEMINI_API_KEY)
         

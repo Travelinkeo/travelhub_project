@@ -4,7 +4,7 @@ import django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
 django.setup()
 
-from core.services.parsers.pdf_generation import PdfGenerationService
+from apps.automation.parsers.pdf_generation import PdfGenerationService
 from core.models import Agencia
 
 data = {

@@ -1,16 +1,16 @@
 # Archivo: core/translator_urls.py
 
 from django.urls import path
+
 from .views.translator_views import (
-    translate_itinerary_api,
+    batch_translate_api,
     calculate_ticket_price_api,
-    get_supported_gds_api,
+    create_quote_from_gds_api,
     get_airlines_catalog_api,
     get_airports_catalog_api,
+    get_supported_gds_api,
+    translate_itinerary_api,
     validate_itinerary_format_api,
-    validate_itinerary_format_api,
-    batch_translate_api,
-    create_quote_from_gds_api
 )
 
 app_name = 'translator'

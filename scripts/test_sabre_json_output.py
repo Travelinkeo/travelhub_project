@@ -9,7 +9,7 @@ sys.path.append(os.getcwd())
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
 django.setup()
 
-from core.parsers.sabre_parser import SabreParser
+from apps.automation.parsers.sabre_parser import SabreParser
 
 def test_json_output():
     # Simulated text based on 11 Marzo PDF structure and "Shanghai" case

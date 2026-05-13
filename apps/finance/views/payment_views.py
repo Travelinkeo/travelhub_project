@@ -1,9 +1,11 @@
 import json
 import logging
+
 from django.http import HttpResponse, JsonResponse
+from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
-from django.utils.decorators import method_decorator
+
 from apps.finance.services.binance_service import BinancePayService
 
 logger = logging.getLogger(__name__)
@@ -40,7 +42,7 @@ class BinanceWebhookView(View):
             
             return JsonResponse({"returnCode": "SUCCESS", "returnMsg": "Ignored or processed"})
 
-        except Exception as e:
+        except Exception:
             logger.exception("Error procesando webhook de Binance")
             return HttpResponse(status=500)
 

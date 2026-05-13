@@ -1,10 +1,12 @@
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from django.utils.dateparse import parse_date
 from datetime import timedelta
 from decimal import Decimal
-from apps.bookings.models import TipoHabitacion, TarifaHabitacion
+
+from django.utils.dateparse import parse_date
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from apps.bookings.models import TarifaHabitacion, TipoHabitacion
+
 
 class HotelQuoteAPI(APIView):
     def get(self, request):

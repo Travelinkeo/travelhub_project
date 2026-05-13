@@ -10,7 +10,7 @@ Verifica que:
 import pytest
 from decimal import Decimal
 from apps.bookings.models import BoletoImportado
-from core.services.ticket_parser_service import TicketParserService
+from apps.automation.services.ticket_parser_service import TicketParserService
 
 pytestmark = pytest.mark.django_db
 

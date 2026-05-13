@@ -11,8 +11,8 @@ import django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
 django.setup()
 
-from core.parsers.sabre_parser import SabreParser
-from core.ticket_parser import generate_ticket
+from apps.automation.parsers.sabre_parser import SabreParser
+from apps.automation.parsers.ticket_parser import generate_ticket
 
 # Use the extracted text
 text_file = "alexander_text_utf8.txt"

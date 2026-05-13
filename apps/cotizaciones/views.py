@@ -1,24 +1,27 @@
-from rest_framework import viewsets, status, permissions
-from core.api.mixins.tenant import TenantViewSetMixin
-from rest_framework.decorators import action
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated, AllowAny
-from django.utils import timezone
-from django.http import HttpResponse, JsonResponse
-from django.shortcuts import render, get_object_or_404
-from .models import Cotizacion, ItemCotizacion
-from .serializers import CotizacionSerializer, ItemCotizacionSerializer
-from .pdf_service import generar_pdf_cotizacion
-from django.views.generic import TemplateView, DetailView, View
-from django.contrib.auth.mixins import LoginRequiredMixin
-from .ai_schemas import CotizacionMagicSchema
-from core.services.ai_engine import ai_engine
-import os
 import json
 import logging
-import time
+import os
 import re
+import time
+
 import requests
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import HttpResponse, JsonResponse
+from django.shortcuts import get_object_or_404, render
+from django.utils import timezone
+from django.views.generic import DetailView, TemplateView, View
+from rest_framework import permissions, status, viewsets
+from rest_framework.decorators import action
+from rest_framework.response import Response
+
+from apps.automation.services.ai_engine import ai_engine
+from core.api.mixins.tenant import TenantViewSetMixin
+
+from .ai_schemas import CotizacionMagicSchema
+from .models import Cotizacion, ItemCotizacion
+from .pdf_service import generar_pdf_cotizacion
+from .serializers import CotizacionSerializer, ItemCotizacionSerializer
+
 try:
     from apps.contabilidad.models import TasaCambioBCV
 except ImportError:
@@ -265,7 +268,7 @@ class MagicQuoterAIView(LoginRequiredMixin, View):
             #   Ej: " QL 450" → "QL" → BD → "Laser Airlines"
             # CAPA 2 (Fallback): usar el nombre que devolvió Gemini, si es código de 2 letras.
             # Esto evita que Gemini "alucine" aerolíneas por contexto de ruta (ej: QL→Wingo).
-            from core.airline_utils import get_airline_name_by_code
+            from apps.automation.parsers.airline_utils import get_airline_name_by_code
 
             # Pre-extraer todos los códigos de vuelo del texto GDS.
             gds_flight_codes = re_airlines.findall(raw_text)
@@ -342,9 +345,8 @@ class MagicQuoterAIView(LoginRequiredMixin, View):
                         img_data = res.json()
                         if img_data.get('results'):
                             image_url = img_data['results'][0]['urls']['regular']
-                except Exception:
-                    pass
-
+                except Exception as e:
+                    logger.warning(f"Excepción silenciosa capturada: {e}")
             ai_output = {
                 'destination': destination,
                 'type': data.get('type', 'Vuelo'),
@@ -373,6 +375,7 @@ class MagicQuoterSaveView(LoginRequiredMixin, View):
     """
     def post(self, request, *args, **kwargs):
         import json
+
         from django.urls import reverse
         try:
             data = json.loads(request.body)
@@ -380,7 +383,7 @@ class MagicQuoterSaveView(LoginRequiredMixin, View):
             ai_data = data.get('ai_data')
             agency_fee = data.get('agency_fee', 0)
             raw_text = data.get('raw_text', '')
-            parsed_data = ai_data.get('parsed_data', {})
+            ai_data.get('parsed_data', {})
 
             if not ai_data:
                 return JsonResponse({'error': 'No hay datos de IA para guardar'}, status=400)
@@ -452,7 +455,7 @@ class MagicQuoterSaveView(LoginRequiredMixin, View):
             # Link de aprobación automática (Pre-rellena un mensaje de vuelta para el cliente)
             # El cliente al darle clic, te enviará a TI (o al que le envió el link) un mensaje de aprobación.
             approval_text = f"✅ ¡Hola! Apruebo la cotización para {cotizacion.destino}. Por favor, procede con la reserva. (Ref: {cotizacion.numero_cotizacion})"
-            approval_link = f"https://wa.me/?text={approval_text.replace(' ', '%20')}"
+            f"https://wa.me/?text={approval_text.replace(' ', '%20')}"
 
             whatsapp_msg = (
                 f"PROPUESTA DE VIAJE: {cotizacion.destino.upper()}\n\n"
@@ -539,9 +542,8 @@ class PublicQuoteDetailView(DetailView):
                 ua = UsuarioAgencia.objects.filter(usuario=quote.consultor, activo=True).first()
                 if ua:
                     context['current_agency'] = ua.agencia
-            except Exception:
-                pass
-
+            except Exception as e:
+                logger.warning(f"Excepción silenciosa capturada: {e}")
         # 5. Forzar actualización de imagen si el destino era genérico
         if 'unsplash' not in meta.get('image', '').lower() and 'Varios' not in meta['destination']:
              # Solo si no tiene una imagen de Unsplash ya puesta

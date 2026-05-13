@@ -1,13 +1,14 @@
 import json
 import logging
 import time
+
 from django.conf import settings
-from django.contrib.auth import login, get_user_model
-from django.shortcuts import render, redirect
-from django.views import View
-from django.http import JsonResponse
-from django.urls import reverse
+from django.contrib.auth import get_user_model, login
 from django.core.cache import cache
+from django.http import JsonResponse
+from django.shortcuts import redirect, render
+from django.urls import reverse
+from django.views import View
 
 from core.models.agencia import Agencia, UsuarioAgencia
 from core.views.billing_views import PLAN_CONFIG
@@ -56,9 +57,11 @@ class MagicLinkRequestView(View):
             except json.JSONDecodeError:
                 onboarding_data = {}
 
-        from core.models.magic_link import MagicLinkToken
-        from django.utils import timezone
         from datetime import timedelta
+
+        from django.utils import timezone
+
+        from core.models.magic_link import MagicLinkToken
 
         MagicLinkToken.objects.filter(email=email, used_at__isnull=True).update(used_at=timezone.now())
 
@@ -71,7 +74,7 @@ class MagicLinkRequestView(View):
             onboarding_data=onboarding_data,
         )
 
-        from core.services.magic_link_service import send_magic_link_email
+        from apps.common.services.magic_link_service import send_magic_link_email
         try:
             send_magic_link_email(token_obj, request=request)
         except Exception as e:
@@ -87,7 +90,7 @@ class MagicLinkRequestView(View):
 
 class MagicLinkVerifyView(View):
     def get(self, request, token):
-        from core.services.magic_link_service import verify_magic_link
+        from apps.common.services.magic_link_service import verify_magic_link
 
         token_obj, status = verify_magic_link(token)
 
@@ -236,8 +239,8 @@ class OnboardingAgencyView(View):
         subdomain = request.POST.get('subdomain', '').strip().lower()
         plan = request.POST.get('plan', 'FREE')
         brand_color = request.POST.get('brand_color', '#3b82f6')
-        country = request.POST.get('country', 'VE')
-        currency = request.POST.get('currency', 'USD')
+        request.POST.get('country', 'VE')
+        request.POST.get('currency', 'USD')
 
         if not agency_name or not subdomain:
             return render(request, self.template_name, {

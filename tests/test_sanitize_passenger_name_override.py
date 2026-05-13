@@ -1,7 +1,7 @@
 import pytest
 from django.test import override_settings
 
-from core.utils import sanitize_passenger_name
+from apps.common.utils import sanitize_passenger_name
 
 
 @pytest.mark.unit

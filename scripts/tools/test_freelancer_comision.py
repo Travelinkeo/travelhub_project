@@ -9,7 +9,7 @@ django.setup()
 from django.contrib.auth import get_user_model
 from django.core.files import File
 from apps.bookings.models import BoletoImportado, Venta
-from core.services.ticket_parser_service import TicketParserService
+from apps.automation.services.ticket_parser_service import TicketParserService
 from apps.crm.models_freelancer import FreelancerProfile, ComisionFreelancer
 from core.middleware import _request_local
 

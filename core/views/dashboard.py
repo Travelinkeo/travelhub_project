@@ -1,15 +1,15 @@
-import logging
 import json
-import time
-from django.shortcuts import render, get_object_or_404
-from django.http import HttpResponse
-from django.views import View
+import logging
+
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse
+from django.shortcuts import render
 from django.utils.safestring import mark_safe
-from core.services.bi_service import BusinessIntelligenceEngine
-from core.services.ai_engine import ai_engine
+from django.views import View
 from pydantic import BaseModel, Field
+
+from apps.automation.services.ai_engine import ai_engine
+from apps.common.services.bi_service import BusinessIntelligenceEngine
 
 logger = logging.getLogger(__name__)
 

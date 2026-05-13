@@ -2,10 +2,12 @@
 Management command para sincronizar tasas automáticamente
 Reemplaza el script .bat de Windows
 """
+import logging
+
 from django.core.management.base import BaseCommand
 from django.utils import timezone
+
 from apps.contabilidad.management.commands.sincronizar_tasa_bcv import Command as SincronizarBCV
-import logging
 
 logger = logging.getLogger(__name__)
 

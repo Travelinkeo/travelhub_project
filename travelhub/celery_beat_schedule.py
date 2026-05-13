@@ -32,5 +32,10 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': crontab(hour=14, minute=0),
         'args': (),
     },
+    'backup-database-daily': {
+        'task': 'core.tasks.backup_database_task',
+        'schedule': crontab(hour=3, minute=0),
+        'args': (),
+    },
     # Aquí se pueden añadir otras tareas programadas en el futuro
 }

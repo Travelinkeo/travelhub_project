@@ -3,12 +3,14 @@ Vista HTML del dashboard de ventas de boletos.
 """
 import json
 from decimal import Decimal
-from django.shortcuts import render
-from django.http import JsonResponse
-from django.views.decorators.http import require_http_methods
+
 from django.contrib.auth.decorators import login_required
-from django.db.models import Sum, Count
-from apps.bookings.models import BoletoImportado, Venta, ItemVenta
+from django.db.models import Count, Sum
+from django.http import JsonResponse
+from django.shortcuts import render
+from django.views.decorators.http import require_http_methods
+
+from apps.bookings.models import BoletoImportado, ItemVenta, Venta
 
 
 @require_http_methods(["GET"])
@@ -72,7 +74,7 @@ def ventas_boletos_api(request):
             'cantidad_boletos': 1,
             'aerolinea': boleto.aerolinea_emisora or 'N/A',
             'proveedores': [parseo.get('proveedor', 'N/A')] if isinstance(parseo.get('proveedor'), str) else ['N/A'],
-            'total_venta': float(parseo.get('total', 0)) if isinstance(parseo.get('total'), (int, float)) else 0,
+            'total_venta': float(parseo.get('total', 0)) if isinstance(parseo.get('total'), int | float) else 0,
             'costo_neto': float(venta.total_venta if venta else 0),
             'fee_proveedor': 0,
             'comision': 0,
@@ -141,7 +143,8 @@ def actualizar_item_boleto(request):
         item.save()
         
         # Recalcular finanzas
-        item.venta.recalcular_finanzas()
+        from apps.finance.services.finance_service import FinanceService
+        FinanceService.recalculate_sale_finances(item.venta.pk)
         
         return JsonResponse({
             'success': True,
@@ -159,9 +162,10 @@ def dashboard_metricas_api(request):
     """
     API para obtener métricas del dashboard de boletos.
     """
-    from django.utils import timezone
     from datetime import timedelta
-    from django.db.models import Count, Q
+
+    from django.db.models import Count
+    from django.utils import timezone
 
     hoy = timezone.now().date()
     inicio_semana = hoy - timedelta(days=hoy.weekday())

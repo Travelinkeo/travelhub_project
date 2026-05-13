@@ -1,21 +1,13 @@
-import logging
 import json
-from datetime import datetime, timedelta
-from django.conf import settings
-from django.db.models import Sum, Count
-from django.utils import timezone
+import logging
 
-from apps.bookings.models import Venta
-from apps.crm.models import Cliente
-from apps.finance.models import Factura, ItemReporte, DiferenciaFinanciera
-from apps.contabilidad.models import PlanContable, AsientoContable
-from apps.finance.models.currencies import Moneda
+from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
 
-from core.ai_tools import AgentTools
-from core.prompts import CFO_VIRTUAL_SYSTEM_PROMPT
+from apps.automation.services.ai_tools import AgentTools
+from apps.automation.services.prompts import CFO_VIRTUAL_SYSTEM_PROMPT
 from core.middleware import agency_context
 
 logger = logging.getLogger(__name__)

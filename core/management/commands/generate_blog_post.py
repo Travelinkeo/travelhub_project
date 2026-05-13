@@ -3,7 +3,7 @@ import logging
 
 from django.core.management.base import BaseCommand, CommandParser
 
-from core.gemini import generate_content
+from apps.automation.services.ai_engine import generate_content
 from core.models.cms import ArticuloBlog
 
 logger = logging.getLogger(__name__)

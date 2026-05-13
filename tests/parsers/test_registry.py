@@ -1,9 +1,9 @@
 """Tests para ParserRegistry"""
 import pytest
 
-from core.parsers.registry import ParserRegistry
-from core.parsers.legacy.sabre_parser import SabreParser
-from core.parsers.legacy.amadeus_parser import AmadeusParser
+from apps.automation.parsers.registry import ParserRegistry
+from apps.automation.parsers.legacy.sabre_parser import SabreParser
+from apps.automation.parsers.legacy.amadeus_parser import AmadeusParser
 
 
 class TestParserRegistry:

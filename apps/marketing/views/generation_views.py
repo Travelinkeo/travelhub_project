@@ -1,13 +1,15 @@
 import base64
-from django.views.generic import TemplateView, View
+import logging
+
 from django.http import HttpResponse
 from django.shortcuts import render
+from django.views.generic import TemplateView, View
+
 from apps.bookings.models import HotelTarifario
-from apps.marketing.models import Campania, ActivoMarketing
-from apps.marketing.services.flyer_service import FlyerService
+from apps.marketing.models import ActivoMarketing, Campania
 from apps.marketing.services.copywriter_service import CopywriterService
+from apps.marketing.services.flyer_service import FlyerService
 from apps.marketing.services.forecast_service import AIForecastService
-import logging
 
 logger = logging.getLogger(__name__)
 

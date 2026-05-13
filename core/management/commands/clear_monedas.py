@@ -1,6 +1,9 @@
 
 from django.core.management.base import BaseCommand
+
 from apps.finance.models.currencies import Moneda
+
+
 class Command(BaseCommand):
     help = 'Deletes all existing Moneda objects from the database'
 

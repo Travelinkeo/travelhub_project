@@ -11,7 +11,7 @@ django.setup()
 
 from apps.bookings.models import BoletoImportado
 from django.conf import settings
-from core.services.telegram_notification_service import TelegramNotificationService
+from apps.communications.services.telegram_notification_service import TelegramNotificationService
 
 def test_manual_notify():
     print("🔍 Buscando último boleto importado...")

@@ -2,8 +2,9 @@
 Serializers para modelos de boletos
 """
 from rest_framework import serializers
-from core.models.historial_boletos import HistorialCambioBoleto
+
 from core.models.anulaciones import AnulacionBoleto
+from core.models.historial_boletos import HistorialCambioBoleto
 
 
 class HistorialCambioBoletoSerializer(serializers.ModelSerializer):

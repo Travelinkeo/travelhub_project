@@ -8,7 +8,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
 django.setup()
 
-from core.services.linkeo_service import LinkeoService
+from apps.automation.services.linkeo_service import LinkeoService
 
 # Test the service directly
 print("Testing LinkeoService...")

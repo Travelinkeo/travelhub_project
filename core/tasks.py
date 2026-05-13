@@ -1,14 +1,12 @@
 # core/tasks.py
-import imaplib
-import email
-from email.header import decode_header
 import logging
 import os
+from email.header import decode_header
 
 from celery import shared_task
 from django.conf import settings
-from django.core.files.base import ContentFile
-from core.utils.celery_utils import tenant_task
+
+from apps.common.utils.celery_utils import tenant_task
 from core.middleware import agency_context
 
 logger = logging.getLogger(__name__)
@@ -30,7 +28,14 @@ def get_filename_from_header(header):
     return ''.join(parts)
 
 
-@shared_task(name="core.tasks.process_incoming_emails")
+@shared_task(
+    name="core.tasks.process_incoming_emails",
+    time_limit=600,
+    soft_time_limit=540,
+    max_retries=3,
+    default_retry_delay=300,
+    acks_late=True,
+)
 def process_incoming_emails():
     """
     ⚡ ASÍNCRONO | 🏢 MULTI-TENANT
@@ -40,8 +45,8 @@ def process_incoming_emails():
     Esta tarea se ejecuta silenciosamente. Usamos `process_all=False` para procesar por lotes (batches controlados) 
     y evitar crashes de memoria (OOM) si una agencia inunda repentinamente la bandeja con 10,000 correos atrasados.
     """
+    from apps.communications.services.email_monitor_service import EmailMonitorService
     from core.models.agencia import Agencia
-    from core.services.email_monitor_service import EmailMonitorService
 
     logger.info("🚀 Iniciando tarea programada: Procesamiento de Correos (Multi-Tenant)")
     
@@ -91,17 +96,38 @@ def process_incoming_emails():
     return resultado
 
 
-@tenant_task(name="core.tasks.parsear_boleto_individual")
+@tenant_task(
+    name="core.tasks.parsear_boleto_individual",
+    time_limit=300,
+    soft_time_limit=270,
+    max_retries=3,
+    default_retry_delay=60,
+    acks_late=True,
+)
 def parsear_boleto_individual(boleto_id, **kwargs):
     """
     Tarea asíncrona para procesar un boleto individual.
     Útil para uploads desde Admin o reintentos manuales.
     """
+    from apps.bookings.models import BoletoImportado
+
     try:
-        from core.services.ticket_parser_service import TicketParserService
-        logger.info(f"🧩 Iniciando tarea de parseo para Boleto {boleto_id}")
+        boleto = BoletoImportado.objects.get(pk=boleto_id)
+        if boleto.estado_parseo in (BoletoImportado.EstadoParseo.COMPLETADO, BoletoImportado.EstadoParseo.ERROR_PARSEO):
+            logger.info(f"⏭️ Boleto {boleto_id} ya fue procesado (estado: {boleto.estado_parseo}). Omitiendo.")
+            return f"Boleto {boleto_id} ya procesado previamente."
+    except BoletoImportado.DoesNotExist:
+        return f"Boleto {boleto_id} no existe."
+
+    try:
+        from apps.automation.services.ticket_parser_service import TicketParserService
+        logger.info(f"🧩 Iniciando tarea de parseo para Boleto {boleto_id} (Params: {kwargs})")
         service = TicketParserService()
-        resultado = service.procesar_boleto(boleto_id)
+        resultado = service.procesar_boleto(
+            boleto_id, 
+            ignore_manual=kwargs.get('ignore_manual', False),
+            bypass_cache=kwargs.get('bypass_cache', False)
+        )
         if resultado:
              logger.info(f"✅ Tarea de parseo completada para Boleto {boleto_id}")
              return f"Boleto {boleto_id} procesado exitosamente."
@@ -113,7 +139,13 @@ def parsear_boleto_individual(boleto_id, **kwargs):
         return f"Error: {e}"
 
 
-@shared_task(name="core.tasks.retry_queued_boletos")
+@shared_task(
+    name="core.tasks.retry_queued_boletos",
+    time_limit=300,
+    soft_time_limit=270,
+    max_retries=2,
+    default_retry_delay=600,
+)
 def retry_queued_boletos():
     """
     🚨 CRÍTICO | ⚡ ASÍNCRONO
@@ -126,7 +158,8 @@ def retry_queued_boletos():
     con las colas (una práctica que haría explotar a RabbitMQ o Redis subyacente).
     """
     from apps.bookings.models import BoletoImportado
-    from .utils.celery_utils import safe_delay
+
+    from apps.common.utils.celery_utils import safe_delay
     
     boletos_en_espera = BoletoImportado.objects.filter(estado_parseo='QUE')
     if not boletos_en_espera.exists():
@@ -151,17 +184,33 @@ def retry_queued_boletos():
 
     
 
-@tenant_task(name="core.tasks.send_ticket_notification")
+@tenant_task(
+    name="core.tasks.send_ticket_notification",
+    time_limit=120,
+    soft_time_limit=90,
+    max_retries=3,
+    default_retry_delay=120,
+    acks_late=True,
+)
 def send_ticket_notification(boleto_id, **kwargs):
 
     """
     Envía una notificación por correo electrónico con el boleto PDF generado.
     """
+    from apps.bookings.models import BoletoImportado
+
     try:
-        from apps.bookings.models import BoletoImportado
-        from django.core.mail import EmailMessage
-        
         boleto = BoletoImportado.objects.get(id_boleto_importado=boleto_id)
+        if hasattr(boleto, 'notificacion_enviada') and boleto.notificacion_enviada:
+            logger.info(f"⏭️ Notificación ya enviada para Boleto {boleto_id}. Omitiendo.")
+            return f"Notificación ya enviada para boleto {boleto_id}."
+    except BoletoImportado.DoesNotExist:
+        return f"Boleto con ID {boleto_id} no encontrado."
+
+    try:
+        from django.core.mail import EmailMessage
+
+        
         logger.info(f"Iniciando envío de notificación para Boleto ID: {boleto_id}")
 
         if not boleto.archivo_pdf_generado:
@@ -219,16 +268,24 @@ def send_ticket_notification(boleto_id, **kwargs):
         raise e
 
 
-@shared_task(name="core.tasks.check_passport_expiry")
+@shared_task(
+    name="core.tasks.check_passport_expiry",
+    time_limit=300,
+    soft_time_limit=270,
+    max_retries=2,
+    default_retry_delay=600,
+)
 def check_passport_expiry():
     """
     Tarea diaria para verificar pasaportes próximos a vencer (6 meses).
     Envía una alerta al agente (o cliente en el futuro).
     """
-    from django.utils import timezone
     from datetime import timedelta
-    from apps.crm.models import Pasajero, Cliente
+
     from django.core.mail import send_mail
+    from django.utils import timezone
+
+    from apps.crm.models import Cliente, Pasajero
     
     logger.info("Iniciando chequeo de vencimiento de documentos (Multi-Tenant)...")
     
@@ -288,7 +345,13 @@ def check_passport_expiry():
     return f"Chequeo completado. {total_alerts} alertas procesadas."
 
 
-@shared_task(name="core.tasks.check_upcoming_flights")
+@shared_task(
+    name="core.tasks.check_upcoming_flights",
+    time_limit=300,
+    soft_time_limit=270,
+    max_retries=2,
+    default_retry_delay=600,
+)
 def check_upcoming_flights():
     """
     🏢 MULTI-TENANT | ⚡ ASÍNCRONO
@@ -299,17 +362,17 @@ def check_upcoming_flights():
     detecta los PNR críticos (que están marcados como Finalizados en el JSON estructurado)
     y alerta en el Grupo interno de Telegram. Así, el agente entra al GDS y factura antes.
     """
-    from django.utils import timezone
-    from datetime import timedelta
-    from apps.bookings.models import BoletoImportado
-    from core.utils.telegram_utils import send_telegram_alert_sync
     import json
+    from datetime import timedelta
+
+    from django.utils import timezone
+
+    from apps.bookings.models import BoletoImportado
     
     logger.info("🔍 Buscando vuelos próximos para Check-in...")
     
     now = timezone.now()
     tomorrow_start = now + timedelta(hours=23)
-    tomorrow_end = now + timedelta(hours=25)
     
     # Buscamos boletos con fecha de salida en el rango de ~24hs
     # Nota: Esto depende de que hayamos parseado la fecha de salida.
@@ -318,8 +381,10 @@ def check_upcoming_flights():
     
     # Optimización: Filtrar por fecha de creación reciente (últimos 365 días)
     # y que no estén cancelados.
+    from apps.communications.services.telegram_notification_service import (
+        TelegramNotificationService,
+    )
     from core.models.agencia import Agencia
-    from core.services.telegram_notification_service import TelegramNotificationService
     
     total_alerts = 0
     
@@ -336,7 +401,8 @@ def check_upcoming_flights():
         
         # Obtener Chat ID de la agencia (SaaS)
         chat_id = agencia.configuracion_api.get('TELEGRAM_GROUP_ID') or getattr(settings, 'TELEGRAM_GROUP_ID', None)
-        if not chat_id: continue
+        if not chat_id:
+            continue
 
         for boleto in boletos:
             try:
@@ -375,16 +441,23 @@ def check_upcoming_flights():
     return result
 
 
-@shared_task(name="core.tasks.check_client_birthdays")
+@shared_task(
+    name="core.tasks.check_client_birthdays",
+    time_limit=300,
+    soft_time_limit=270,
+    max_retries=2,
+    default_retry_delay=600,
+)
 def check_client_birthdays():
     """
     Tarea diaria para felicitar a clientes y pasajeros por su cumpleaños.
     Soporta configuración Multi-Tenant (SMTP por Agencia).
     """
+    from django.core.mail import EmailMessage, get_connection
     from django.utils import timezone
-    from apps.crm.models import Cliente, Pasajero
+
+    from apps.crm.models import Cliente
     from core.models.agencia import Agencia
-    from django.core.mail import get_connection, EmailMessage
     
     logger.info("Iniciando chequeo de cumpleaños (Multi-Tenant)...")
     today = timezone.now().date()
@@ -445,16 +518,24 @@ def check_client_birthdays():
     return f"Cumpleaños procesados: {count}"
 
 
-@shared_task(name="core.tasks.check_pending_payments")
+@shared_task(
+    name="core.tasks.check_pending_payments",
+    time_limit=300,
+    soft_time_limit=270,
+    max_retries=2,
+    default_retry_delay=600,
+)
 def check_pending_payments():
     """
     Tarea diaria para recordar pagos pendientes.
     Regla: Recordar a los 3, 7 y 15 días de la venta si hay saldo pendiente.
     """
-    from django.utils import timezone
     from datetime import timedelta
+
+    from django.core.mail import EmailMessage, get_connection
+    from django.utils import timezone
+
     from apps.bookings.models import Venta
-    from django.core.mail import send_mail
     
     logger.info("Iniciando chequeo de pagos pendientes...")
     today = timezone.now().date()
@@ -465,7 +546,6 @@ def check_pending_payments():
     count = 0
     
     from core.models.agencia import Agencia
-    from django.core.mail import get_connection
 
     for agencia in Agencia.objects.filter(activa=True):
         with agency_context(agencia):
@@ -484,8 +564,8 @@ def check_pending_payments():
                         use_tls=email_config.get('EMAIL_USE_TLS', True)
                     )
                     from_email = email_config.get('DEFAULT_FROM_EMAIL', from_email)
-                except Exception:
-                    pass
+                except Exception as e:
+                    logger.warning(f"Error configurando SMTP personalizado para agencia {agencia.nombre}: {e}. Usando SMTP del sistema.")
             
             for days in days_to_remind:
                 target_date = today - timedelta(days=days)
@@ -525,7 +605,13 @@ def check_pending_payments():
     return f"Recordatorios de pago enviados: {count}"
 
 
-@shared_task(name="core.tasks.sync_bcv_rates")
+@shared_task(
+    name="core.tasks.sync_bcv_rates",
+    time_limit=120,
+    soft_time_limit=90,
+    max_retries=3,
+    default_retry_delay=300,
+)
 def sync_bcv_rates():
     """
     Tarea diaria para sincronizar la tasa del BCV.
@@ -562,10 +648,9 @@ def enviar_notificacion_whatsapp_task(self, numero_cliente, mensaje, email_clien
     Patrón Resiliente con Dead Letter Queue para envíos por Evolution/Meta API.
     """
     from django.core.mail import send_mail
-    from core.models.agencia import Agencia
-    from core.services.telegram_service import enviar_alerta_telegram
-    from core.services.whatsapp_service import send_whatsapp_message
 
+    from apps.communications.services.telegram_service import enviar_alerta_telegram
+    from apps.communications.services.whatsapp_service import send_whatsapp_message
     from core.middleware import get_current_agency
     agencia = get_current_agency()
 
@@ -595,8 +680,7 @@ def enviar_notificacion_whatsapp_task(self, numero_cliente, mensaje, email_clien
         
         if self.request.retries < self.max_retries:
             tiempo_espera = retrasos_escalonados[self.request.retries]
-            logger.warning(f"⚠️ Fallo WhatsApp a {numero_cliente}. Reintentando en {tiempo_espera/60} minutos... Error: {str(exc)}")
-            raise self.retry(exc=exc, countdown=tiempo_espera)
+            raise self.retry(exc=exc, countdown=tiempo_espera) from exc
         else:
             # 3. DEAD LETTER QUEUE (FALLBACK DEFINITIVO)
             logger.error(f"❌ Fallo definitivo enviando WhatsApp a {numero_cliente}.")
@@ -619,12 +703,20 @@ def enviar_notificacion_whatsapp_task(self, numero_cliente, mensaje, email_clien
                         recipient_list=[email_cliente],
                         fail_silently=True
                     )
-                except: pass
+                except Exception as e:
+                    logger.warning(f"Error sending fallback email to {email_cliente}: {e}")
             
             return "Fallo definitivo - Fallback ejecutado"
 
 
-@shared_task(name="core.tasks.task_ocr_passport_fast", queue='ia_fast')
+@shared_task(
+    name="core.tasks.task_ocr_passport_fast",
+    queue='ia_fast',
+    time_limit=60,
+    soft_time_limit=50,
+    max_retries=2,
+    default_retry_delay=30,
+)
 def task_ocr_passport_fast(file_content_base64: str, mime_type: str = "image/jpeg"):
     """
     🧠 IA / GOD MODE | ⚡ ASÍNCRONO (Priority Queue)
@@ -644,27 +736,35 @@ def task_ocr_passport_fast(file_content_base64: str, mime_type: str = "image/jpe
     # Se enruta a workers reservados en RAM alta para latencia sub 1-second.
     """
     import base64
-    from core.services.ocr_service import ocr_service
+
+    from apps.automation.services.ocr_service import ocr_service
     
     try:
-        logger.info(f"⚡ Iniciando tarea de OCR rápida para Pasaporte (IA_FAST)")
+        logger.info("⚡ Iniciando tarea de OCR rápida para Pasaporte (IA_FAST)")
         content = base64.b64decode(file_content_base64)
         resultado = ocr_service.procesar_pasaporte(content, mime_type)
         return resultado
     except Exception as e:
         logger.error(f"❌ Error en task_ocr_passport_fast: {e}")
     
-@tenant_task(name="core.tasks.migrar_logos_agencia_task")
+@tenant_task(
+    name="core.tasks.migrar_logos_agencia_task",
+    time_limit=600,
+    soft_time_limit=540,
+    max_retries=2,
+    default_retry_delay=600,
+)
 def migrar_logos_agencia_task(agencia_id, **kwargs):
     """
     ⚡ ASÍNCRONO
     Migra logos de la base de datos (ImageField o Base64) a Telegram Storage
     para liberar espacio y optimizar la carga.
     """
-    from core.models.agencia import Agencia
-    from core.utils.telegram_storage import upload_logo_to_telegram
     import base64
     from io import BytesIO
+
+    from apps.common.utils.telegram_storage import upload_logo_to_telegram
+    from core.models.agencia import Agencia
     
     try:
         agencia = Agencia.objects.get(pk=agencia_id)
@@ -719,16 +819,23 @@ def migrar_logos_agencia_task(agencia_id, **kwargs):
         return f"Branding de Agencia {agencia_id} actualizado: {updated_fields}"
     
 
-@shared_task(name="core.tasks.cleanup_temporary_storage_files")
+@shared_task(
+    name="core.tasks.cleanup_temporary_storage_files",
+    time_limit=300,
+    soft_time_limit=270,
+    max_retries=2,
+    default_retry_delay=3600,
+)
 def cleanup_temporary_storage_files(days=7):
     """
     🏢 INFRAESTRUCTURA | ☁️ STORAGE
     Limpia archivos en prefijos temporales (temp/, tmp/) que tengan más de 'days' de antigüedad.
     Compatible con Cloudflare R2, S3 y Almacenamiento Local.
     """
+    import datetime
+
     from django.core.files.storage import default_storage
     from django.utils import timezone
-    import datetime
 
     logger.info(f"🧹 Iniciando limpieza de archivos temporales (Antigüedad > {days} días)...")
     
@@ -768,4 +875,15 @@ def cleanup_temporary_storage_files(days=7):
     return result
 
 
-    
+@shared_task(bind=True, max_retries=2, default_retry_delay=3600)
+def backup_database_task(self):
+    """Tarea Celery: ejecuta pg_dump diario y rota backups."""
+    from django.core.management import call_command
+
+    try:
+        call_command("backup_database", retention_days=7)
+        logger.info("Backup diario completado exitosamente")
+        return "Backup completado"
+    except Exception as exc:
+        logger.error(f"Backup diario falló: {exc}")
+        raise self.retry(exc=exc) from exc

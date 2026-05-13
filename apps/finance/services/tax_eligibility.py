@@ -1,5 +1,6 @@
 import logging
 from decimal import Decimal
+
 from apps.bookings.models import BoletoImportado
 from apps.finance.models.tax_refund import TaxRefundOpportunity
 
@@ -33,7 +34,7 @@ class TaxRefundEngine:
                 ciudades_nacionales = ['CARACAS', 'MARACAIBO', 'VALENCIA', 'BARQUISIMETO', 'PORLAMAR', 'BARCELONA', 'PUERTO ORDAZ']
                 for v in vuelos:
                     dest = str(v.get('destino', '')).upper()
-                    origen = str(v.get('origen', '')).upper()
+                    str(v.get('origen', '')).upper()
                     
                     # Si el destino u origen no están en la lista nacional, asumimos internacional
                     if dest and dest not in ciudades_nacionales:

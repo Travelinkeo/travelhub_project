@@ -1,9 +1,10 @@
-from django.shortcuts import render
-from django.db.models import Count, Q
-from django.utils import timezone
-from datetime import timedelta
-from apps.bookings.models import BoletoImportado, Venta
+
 from django.contrib.auth import get_user_model
+from django.db.models import Count
+from django.shortcuts import render
+from django.utils import timezone
+
+from apps.bookings.models import BoletoImportado, Venta
 
 User = get_user_model()
 

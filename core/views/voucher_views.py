@@ -1,12 +1,12 @@
 # core/views/voucher_views.py
+from django.http import HttpResponse
+from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes, throttle_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework import status
-from django.http import HttpResponse
 
 from apps.bookings.models import Venta
-from core.services.voucher_service import generar_voucher_unificado
+from apps.bookings.services.voucher_service import generar_voucher_unificado
 from core.throttling import ReportesRateThrottle
 
 

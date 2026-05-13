@@ -1,14 +1,14 @@
 
 
-from django.shortcuts import render
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.clickjacking import xframe_options_exempt
 import json
 import logging
-import asyncio
-from asgiref.sync import sync_to_async, async_to_sync
+
+from asgiref.sync import async_to_sync
 from django.conf import settings
+from django.http import JsonResponse
+from django.shortcuts import render
+from django.views.decorators.clickjacking import xframe_options_exempt
+from django.views.decorators.csrf import csrf_exempt
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +21,7 @@ def flyer_mini_app_view(request):
     """
     return render(request, 'telegram/flyer_app.html')
 
-@csrf_exempt
+@csrf_exempt  # CSRF exempt: Called by Telegram Mini App (iframe without browser cookies)
 def generate_flyer_api(request):
     """
     API endpoint para generar flyers desde la Mini App vía AJAX/Fetch.
@@ -57,7 +57,7 @@ def generate_flyer_api(request):
             logger.error(f"Error resolviendo logo de agencia: {e}")
 
         # Generar Flyer
-        from core.services.flash_marketing_service import FlashMarketingService
+        from apps.marketing.services.flash_marketing_service import FlashMarketingService
         service = FlashMarketingService()
         image_buffer = service.generate_flyer(destination, price, airline, agency_logo_path=agency_logo_path)
         

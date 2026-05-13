@@ -10,8 +10,8 @@ sys.path.append(os.getcwd())
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
 django.setup()
 
-from core.ticket_parser import extract_data_from_text
-from core.services.ticket_parser_service import TicketParserService
+from apps.automation.parsers.ticket_parser import extract_data_from_text
+from apps.automation.services.ticket_parser_service import TicketParserService
 
 def test_avior_eml():
     eml_path = r"C:\Users\ARMANDO\Downloads\Tickets Avior Airlines.eml"

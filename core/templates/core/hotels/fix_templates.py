@@ -1,4 +1,3 @@
-import os
 
 search_content = """{% extends "base_modern.html" %}
 {% load static %}

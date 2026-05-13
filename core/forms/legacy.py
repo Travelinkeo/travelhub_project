@@ -3,6 +3,7 @@ from django import forms
 
 from apps.bookings.models import BoletoImportado, FeeVenta
 
+
 class FeeVentaForm(forms.ModelForm):
     class Meta:
         model = FeeVenta
@@ -76,7 +77,9 @@ class BoletoAereoUpdateForm(forms.ModelForm):
 
 
 from django.forms import inlineformset_factory
+
 from apps.cotizaciones.models import Cotizacion, ItemCotizacion
+
 
 class CotizacionForm(forms.ModelForm):
     class Meta:
@@ -126,6 +129,7 @@ ItemCotizacionFormSet = inlineformset_factory(
 )
 
 from apps.crm.models import Pasajero
+
 
 class PasajeroForm(forms.ModelForm):
     # Campos virtuales para preferencias (se serializan al JSON field)

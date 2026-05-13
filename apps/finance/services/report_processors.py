@@ -1,7 +1,8 @@
-import pandas as pd
+import logging
 from abc import ABC, abstractmethod
 from decimal import Decimal
-import logging
+
+import pandas as pd
 
 logger = logging.getLogger(__name__)
 

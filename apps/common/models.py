@@ -1,6 +1,8 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+
 from core.validators import validar_no_vacio_o_espacios
+
 
 class Pais(models.Model):
     id_pais = models.AutoField(primary_key=True, verbose_name=_("ID País"))
@@ -12,7 +14,6 @@ class Pais(models.Model):
         verbose_name = _("País")
         verbose_name_plural = _("Países")
         ordering = ['nombre']
-        db_table = 'core_pais'
 
     def __str__(self):
         return self.nombre
@@ -29,7 +30,6 @@ class Ciudad(models.Model):
         verbose_name_plural = _("Ciudades")
         ordering = ['pais__nombre', 'nombre']
         unique_together = ('nombre', 'pais', 'region_estado')
-        db_table = 'core_ciudad'
 
     def __str__(self):
         return f"{self.nombre}{f', {self.region_estado}' if self.region_estado else ''} ({self.pais.nombre})"
@@ -49,7 +49,6 @@ class Aerolinea(models.Model):
         verbose_name = _("Aerolínea")
         verbose_name_plural = _("Aerolíneas")
         ordering = ['nombre']
-        db_table = 'core_aerolinea'
     
     def __str__(self):
         return f"{self.nombre} ({self.codigo_iata})"

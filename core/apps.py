@@ -8,5 +8,5 @@ class CoreConfig(AppConfig):
     def ready(self):
         import core.signals  # noqa: F401
         import core.signals_audit  # noqa: F401
-        import core.signals_passport  # noqa: F401
         import core.signals_contabilidad  # noqa: F401
+        import core.signals_passport  # noqa: F401

@@ -1,6 +1,8 @@
 from django.core.management.base import BaseCommand
-from apps.crm.models import Pasajero, Cliente
 from django.db import transaction
+
+from apps.crm.models import Cliente, Pasajero
+
 
 class Command(BaseCommand):
     help = 'Migrates historical clear-text passenger documents to the new encrypted format'

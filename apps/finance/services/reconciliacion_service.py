@@ -1,10 +1,11 @@
 import logging
+from decimal import Decimal
+
 import fitz  # PyMuPDF
-from decimal import Decimal, InvalidOperation
-from django.db import transaction
+
 from apps.bookings.models import BoletoImportado
+from apps.finance.models import ReporteReconciliacion
 from core.report_parser import parse_travelinkeo_report_with_gemini
-from apps.finance.models import ReporteReconciliacion, DiferenciaFinanciera
 
 logger = logging.getLogger(__name__)
 
@@ -61,7 +62,6 @@ class ReconciliacionService:
             texto = ""
             with self.reporte.archivo.open('rb') as f:
                 contenido = f.read()
-                import io
                 with fitz.open(stream=contenido, filetype="pdf") as doc:
                     for page in doc:
                         texto += page.get_text()

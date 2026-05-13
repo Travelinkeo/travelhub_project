@@ -1,9 +1,10 @@
-import os
 import logging
-from typing import List, Dict, Any
+from typing import Any
+
 from pydantic import BaseModel, Field
+
+from apps.automation.services.ai_engine import ai_engine
 from apps.bookings.models import HotelTarifario
-from core.services.ai_engine import ai_engine
 
 logger = logging.getLogger(__name__)
 
@@ -12,8 +13,8 @@ class CaptionVariant(BaseModel):
     text: str = Field(description="El texto del caption")
 
 class SocialMediaPackage(BaseModel):
-    variants: List[CaptionVariant] = Field(description="3 variaciones del caption")
-    hashtags: List[str] = Field(description="Lista de hashtags optimizados para alcance")
+    variants: list[CaptionVariant] = Field(description="3 variaciones del caption")
+    hashtags: list[str] = Field(description="Lista de hashtags optimizados para alcance")
     best_time_to_post: str = Field(description="Recomendación de horario (Ej: Hoy, 6:30 PM)")
     engagement_prediction: str = Field(description="Predicción de engagement (Ej: +14%)")
 
@@ -69,7 +70,7 @@ class CopywriterService:
             logger.error(f"Error generando copy: {e}")
             return "Hubo un error generando el texto. Intenta de nuevo."
 
-    def generate_social_package(self, hotel_id, tone="LUXURY", extra_prompt=None) -> Dict[str, Any]:
+    def generate_social_package(self, hotel_id, tone="LUXURY", extra_prompt=None) -> dict[str, Any]:
         """
         Genera un paquete completo (variantes, hashtags, horario) usando salida estructurada.
         """

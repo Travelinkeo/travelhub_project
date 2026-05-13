@@ -1,8 +1,11 @@
+from decimal import Decimal
+
 from django.core.management.base import BaseCommand
 from django.utils import timezone
+
 from apps.bookings.models import Proveedor, TarifarioProveedor
 from apps.finance.models.currencies import Moneda
-from decimal import Decimal
+
 
 class Command(BaseCommand):
     help = 'Carga proveedores (Consolidadoras) y sus comisiones base para Venezuela'
@@ -59,6 +62,6 @@ class Command(BaseCommand):
                 )
                 self.stdout.write(f"   💰 Tarifario configurado: {comision}%")
             else:
-                self.stdout.write(f"   ℹ️ Tarifario activo ya existe")
+                self.stdout.write("   ℹ️ Tarifario activo ya existe")
 
         self.stdout.write(self.style.SUCCESS('¡Configuración de Agencia Satélite completada!'))

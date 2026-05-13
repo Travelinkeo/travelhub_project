@@ -7,13 +7,13 @@ Ley de IVA, Ley IGTF, Ley Orgánica de Turismo
 import logging
 from decimal import Decimal
 
-from django.db import models
+from django.db import models, transaction
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-from apps.finance.models.currencies import Moneda
-from apps.crm.models import Cliente # Fix: Use core.Cliente to match Venta relationships
 from apps.contabilidad.models import AsientoContable
+from apps.crm.models import Cliente  # Fix: Use core.Cliente to match Venta relationships
+from apps.finance.models.currencies import Moneda
 
 logger = logging.getLogger(__name__)
 
@@ -155,20 +155,32 @@ class FacturaConsolidada(models.Model):
     def save(self, *args, **kwargs):
         # Generar número de factura
         if not self.numero_factura:
-            consecutivo = FacturaConsolidada.objects.count() + 1
-            self.numero_factura = f"F-{self.fecha_emision.strftime('%Y%m%d')}-{consecutivo:04d}"
+            prefix = f"F-{self.fecha_emision.strftime('%Y%m%d')}"
+            max_retries = 5
+            for attempt in range(max_retries):
+                with transaction.atomic():
+                    daily_count = FacturaConsolidada.objects.filter(
+                        fecha_emision=self.fecha_emision
+                    ).count()
+                    candidate = f"{prefix}-{daily_count + 1:04d}"
+                    if not FacturaConsolidada.objects.filter(numero_factura=candidate).exists():
+                        self.numero_factura = candidate
+                        break
+            else:
+                import random
+                self.numero_factura = f"{prefix}-{random.randint(1000, 9999):04d}"
         
         # Calcular totales en USD
-        self.subtotal = self.subtotal_base_gravada + self.subtotal_exento + self.subtotal_exportacion
-        self.monto_total = self.subtotal + self.monto_iva_16 + self.monto_iva_adicional + self.monto_igtf
+        self.subtotal = (Decimal(str(self.subtotal_base_gravada or 0)) + Decimal(str(self.subtotal_exento or 0)) + Decimal(str(self.subtotal_exportacion or 0))).quantize(Decimal('0.01'))
+        self.monto_total = (self.subtotal + Decimal(str(self.monto_iva_16 or 0)) + Decimal(str(self.monto_iva_adicional or 0)) + Decimal(str(self.monto_igtf or 0))).quantize(Decimal('0.01'))
         
         # Convertir a Bolívares si hay tasa
         if self.tasa_cambio_bcv:
-            self.subtotal_base_gravada_bs = self.subtotal_base_gravada * self.tasa_cambio_bcv
-            self.subtotal_exento_bs = self.subtotal_exento * self.tasa_cambio_bcv
-            self.monto_iva_16_bs = self.monto_iva_16 * self.tasa_cambio_bcv
-            self.monto_igtf_bs = self.monto_igtf * self.tasa_cambio_bcv
-            self.monto_total_bs = self.monto_total * self.tasa_cambio_bcv
+            self.subtotal_base_gravada_bs = (Decimal(str(self.subtotal_base_gravada or 0)) * self.tasa_cambio_bcv).quantize(Decimal('0.01'))
+            self.subtotal_exento_bs = (Decimal(str(self.subtotal_exento or 0)) * self.tasa_cambio_bcv).quantize(Decimal('0.01'))
+            self.monto_iva_16_bs = (Decimal(str(self.monto_iva_16 or 0)) * self.tasa_cambio_bcv).quantize(Decimal('0.01'))
+            self.monto_igtf_bs = (Decimal(str(self.monto_igtf or 0)) * self.tasa_cambio_bcv).quantize(Decimal('0.01'))
+            self.monto_total_bs = (self.monto_total * self.tasa_cambio_bcv).quantize(Decimal('0.01'))
         
         # Inicializar saldo pendiente
         if self.pk is None:
@@ -187,30 +199,11 @@ class FacturaConsolidada(models.Model):
         super().save(*args, **kwargs)
     
     def recalcular_totales(self):
-        """Recalcula totales desde los items"""
-        items = self.items_factura.all()
-        
-        # Resetear bases
-        self.subtotal_base_gravada = Decimal('0.00')
-        self.subtotal_exento = Decimal('0.00')
-        self.subtotal_exportacion = Decimal('0.00')
-        self.monto_iva_16 = Decimal('0.00')
-        
-        # Sumar por tipo de servicio
-        for item in items:
-            if item.tipo_servicio == ItemFacturaConsolidada.TipoServicio.SERVICIO_EXPORTACION:
-                self.subtotal_exportacion += item.subtotal_item
-            elif item.tipo_servicio == ItemFacturaConsolidada.TipoServicio.TRANSPORTE_AEREO_NACIONAL:
-                self.subtotal_exento += item.subtotal_item
-            else:
-                # Logic Fix: Check es_gravado to decide between Gravada and Exento
-                if item.es_gravado:
-                    self.subtotal_base_gravada += item.subtotal_item
-                    self.monto_iva_16 += item.subtotal_item * (item.alicuota_iva / 100)
-                else:
-                     self.subtotal_exento += item.subtotal_item
-        
-        self.save()
+        """
+        [DEPRECATED] Usar apps.finance.services.invoicing_service.InvoicingService.recalculate_invoice_totals
+        """
+        from apps.finance.services.invoicing_service import InvoicingService
+        return InvoicingService.recalculate_invoice_totals(self.pk)
 
 
 class ItemFacturaConsolidada(models.Model):
@@ -262,7 +255,7 @@ class ItemFacturaConsolidada(models.Model):
     
     def save(self, *args, **kwargs):
         # Calcular subtotal
-        self.subtotal_item = self.precio_unitario * self.cantidad
+        self.subtotal_item = (self.precio_unitario * self.cantidad).quantize(Decimal('0.01'))
         super().save(*args, **kwargs)
         
         # Recalcular totales de factura

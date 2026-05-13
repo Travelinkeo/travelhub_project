@@ -1,5 +1,6 @@
+
 from pydantic import BaseModel, Field
-from typing import List, Optional
+
 
 class FlightQuoteSegmentSchema(BaseModel):
     airline: str = Field(..., description="Nombre de la aerolínea")
@@ -21,9 +22,9 @@ class CotizacionMagicSchema(BaseModel):
     destination_description: str = Field(..., description="Frase inspiradora sobre el destino")
     type: str = Field("Vuelo Redondo", description="Tipo de viaje (Solo Ida, Redondo, Multitrayecto)")
     outboundDate: str = Field(..., description="Fecha de salida estimada (ej: 15 Oct)")
-    returnDate: Optional[str] = Field(None, description="Fecha de regreso estimada (si aplica)")
+    returnDate: str | None = Field(None, description="Fecha de regreso estimada (si aplica)")
     totalPrice: float = Field(..., description="Precio total base extraído (sin markup)")
     currency: str = Field("USD", description="Moneda del precio extraído")
-    flights: List[FlightQuoteSegmentSchema] = Field(..., description="Lista de segmentos de vuelo estructurados")
+    flights: list[FlightQuoteSegmentSchema] = Field(..., description="Lista de segmentos de vuelo estructurados")
     image_search_query: str = Field(..., description="Término de búsqueda óptimo para una foto de Unsplash (ej: 'Madrid Cityscape')")
-    notas_ia: Optional[str] = Field(None, description="Cualquier nota relevante sobre restricciones o clases")
+    notas_ia: str | None = Field(None, description="Cualquier nota relevante sobre restricciones o clases")

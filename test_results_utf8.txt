@@ -1,0 +1,10 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.13.5, pytest-8.4.1, pluggy-1.6.0 -- C:\Users\ARMANDO\AppData\Local\Programs\Python\Python313\python.exe
+cachedir: .pytest_cache
+django: version: 5.2.6, settings: travelhub.settings (from ini)
+rootdir: C:\Users\ARMANDO\travelhub_project
+configfile: pytest.ini
+plugins: anyio-4.12.1, cov-5.0.0, django-4.8.0
+collecting ... collected 337 items
+
+tests/test_admin_custom.py::test_venta_admin_boleto_importado_link_no_boleto 

@@ -1,12 +1,12 @@
 import logging
-import pandas as pd
-from typing import List, Dict, Any, Optional
 from decimal import Decimal
-from django.conf import settings
+from typing import Any
 
-from core.services.ai_engine import ai_engine
+import pandas as pd
+
+from apps.automation.services.ai_engine import ai_engine
+from apps.automation.services.prompts import RECONCILIATION_SYSTEM_PROMPT
 from core.models.ai_schemas import ConciliacionLoteSchema
-from core.prompts import RECONCILIATION_SYSTEM_PROMPT
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +21,7 @@ class SmartReconciliator:
     2. Fase AI Fuzzy: Inferencia semántica para resolver lo que el algoritmo ignora.
     """
 
-    def conciliar_lote(self, lote_proveedor: List[Dict], ventas_agencia: List[Dict]) -> Dict[str, Any]:
+    def conciliar_lote(self, lote_proveedor: list[dict], ventas_agencia: list[dict]) -> dict[str, Any]:
         """
         Ejecuta el cruce de reconciliación entre el reporte del proveedor y las ventas locales.
         

@@ -1,9 +1,9 @@
 import logging
+
 from celery import shared_task
-from django.db import transaction
-from django.utils import timezone
-from apps.finance.services.fiscal_provider_service import ElectronicInvoiceService
+
 from apps.finance.models.fiscal import FacturaFiscal
+from apps.finance.services.fiscal_provider_service import ElectronicInvoiceService
 
 logger = logging.getLogger(__name__)
 
@@ -42,6 +42,6 @@ def emitir_factura_electronica_task(self, venta_id):
                  fiscal.save()
         
         # Lanzar reintento
-        raise self.retry(exc=exc, countdown=2 ** self.request.retries)
+        raise self.retry(exc=exc, countdown=2 ** self.request.retries) from exc
 
     return True

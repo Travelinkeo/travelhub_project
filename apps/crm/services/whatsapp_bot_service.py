@@ -1,13 +1,12 @@
-import os
 import logging
-from pydantic import BaseModel, Field
-from typing import Optional
-from core.services.ai_engine import ai_engine
-from apps.crm.models import Cliente
-from apps.crm.models import OportunidadViaje
+import os
 
-from core.services.whatsapp_service import enviar_mensaje_meta_api
-from core.services.telegram_service import enviar_alerta_telegram
+from pydantic import BaseModel
+
+from apps.automation.services.ai_engine import ai_engine
+from apps.communications.services.telegram_service import enviar_alerta_telegram
+from apps.communications.services.whatsapp_service import enviar_mensaje_meta_api
+from apps.crm.models import Cliente, OportunidadViaje
 
 logger = logging.getLogger(__name__)
 
@@ -65,7 +64,7 @@ def procesar_mensaje_entrante(telefono_cliente: str, nombre_perfil: str, mensaje
         # 3. Si quiere viajar, crear Tarjeta en el Kanban (Lead)
         if resultado.es_solicitud_viaje:
             # 3. Crear Lead Kanban
-            oportunidad = OportunidadViaje.objects.create(
+            OportunidadViaje.objects.create(
                 cliente=cliente,
                 origen=resultado.origen,
                 destino=resultado.destino,

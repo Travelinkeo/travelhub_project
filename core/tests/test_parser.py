@@ -10,8 +10,8 @@ Verifica que:
 import pytest
 from decimal import Decimal
 from unittest.mock import Mock, patch, MagicMock
-from core.ticket_parser import extract_data_from_text
-from core.services.ticket_parser_service import TicketParserService
+from apps.automation.parsers.ticket_parser import extract_data_from_text
+from apps.automation.services.ticket_parser_service import TicketParserService
 from apps.bookings.models import BoletoImportado
 
 pytestmark = pytest.mark.django_db
@@ -80,7 +80,7 @@ class TestParserExtraction:
 class TestParserService:
     """Tests para TicketParserService"""
     
-    @patch('core.services.ticket_parser_service.pdfplumber')
+    @patch('apps.automation.services.ticket_parser_service.pdfplumber')
     @patch('core.ticket_parser.extract_data_from_text')
     def test_actualiza_campos_modelo(self, mock_extract, mock_pdf, agencia, datos_boleto_sabre):
         """Test: Debe actualizar campos del modelo correctamente"""
@@ -158,7 +158,7 @@ class TestParserService:
 class TestParserErrorHandling:
     """Tests para manejo de errores"""
     
-    @patch('core.services.ticket_parser_service.TicketParserService._extraer_texto')
+    @patch('apps.automation.services.ticket_parser_service.TicketParserService._extraer_texto')
     def test_maneja_pdf_corrupto(self, mock_extraer, agencia):
         """Test: Debe manejar PDFs corruptos sin crashear"""
         boleto = BoletoImportado.objects.create(
@@ -176,7 +176,7 @@ class TestParserErrorHandling:
         boleto.refresh_from_db()
         assert boleto.estado_parseo == 'ERR'
     
-    @patch('core.services.ticket_parser_service.TicketParserService._extraer_texto')
+    @patch('apps.automation.services.ticket_parser_service.TicketParserService._extraer_texto')
     @patch('core.ticket_parser.extract_data_from_text')
     def test_maneja_excepcion_en_parsing(self, mock_extract, mock_extraer, agencia):
         """Test: Debe capturar excepciones y marcar como error"""

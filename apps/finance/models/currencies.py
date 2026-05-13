@@ -1,8 +1,10 @@
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
-from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
+
 from core.validators import validar_no_vacio_o_espacios
+
 
 class Moneda(models.Model):
     id_moneda = models.AutoField(primary_key=True, verbose_name=_("ID Moneda"))
@@ -15,7 +17,6 @@ class Moneda(models.Model):
         verbose_name = _("Moneda")
         verbose_name_plural = _("Monedas")
         ordering = ['nombre']
-        db_table = 'core_moneda'
 
     def __str__(self):
         return f"{self.nombre} ({self.codigo_iso})"
@@ -32,7 +33,6 @@ class TipoCambio(models.Model):
         verbose_name_plural = _("Tipos de Cambio")
         ordering = ['-fecha_efectiva', 'moneda_origen__codigo_iso']
         unique_together = ('moneda_origen', 'moneda_destino', 'fecha_efectiva')
-        db_table = 'core_tipocambio'
 
     def __str__(self):
         return f"{self.moneda_origen.codigo_iso} a {self.moneda_destino.codigo_iso} el {self.fecha_efectiva}: {self.tasa_conversion}"
@@ -58,7 +58,6 @@ class TasaCambio(models.Model):
         ordering = ['-fecha']
         verbose_name = 'Tasa de Cambio'
         verbose_name_plural = 'Tasas de Cambio'
-        db_table = 'core_tasacambio'
 
     def __str__(self):
         return f"{self.moneda} - {self.monto} ({self.fecha})"

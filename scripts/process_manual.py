@@ -8,7 +8,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "travelhub.settings")
 django.setup()
 
 from apps.bookings.models import BoletoImportado
-from core.services.ticket_parser_service import TicketParserService
+from apps.automation.services.ticket_parser_service import TicketParserService
 
 try:
     boleto_id = int(sys.argv[1]) if len(sys.argv) > 1 else 959

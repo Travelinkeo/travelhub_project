@@ -2,13 +2,6 @@
 # Actualizado: Sistema de parseo SABRE optimizado - Enero 2025
 from rest_framework import serializers
 
-# Importar desde submódulos específicos
-from core.models.agencia import Agencia, UsuarioAgencia
-from core.models.audit import AuditLog
-
-from apps.contabilidad.models import (
-    AsientoContable, DetalleAsiento, ItemLiquidacion, LiquidacionProveedor
-)
 from apps.bookings.models import (
     ActividadServicio,
     AlojamientoReserva,
@@ -16,11 +9,14 @@ from apps.bookings.models import (
     BoletoImportado,
     CircuitoDia,
     CircuitoTuristico,
+    ComisionProveedorServicio,
     EventoServicio,
     FeeVenta,
     ItemVenta,
     PagoVenta,
     PaqueteAereo,
+    ProductoServicio,
+    Proveedor,
     SegmentoVuelo,
     ServicioAdicionalDetalle,
     TrasladoServicio,
@@ -28,12 +24,19 @@ from apps.bookings.models import (
     VentaParseMetadata,
 )
 from apps.common.models import Aerolinea, Ciudad, Pais
-from apps.finance.models.currencies import Moneda, TipoCambio
-from apps.bookings.models import ProductoServicio, Proveedor, ComisionProveedorServicio
-from apps.finance.models import Factura, ItemFactura
+from apps.contabilidad.models import (
+    AsientoContable,
+    DetalleAsiento,
+    ItemLiquidacion,
+    LiquidacionProveedor,
+)
 from apps.crm.models import Cliente
+from apps.finance.models import Factura, ItemFactura
+from apps.finance.models.currencies import Moneda, TipoCambio
 
-
+# Importar desde submódulos específicos
+from core.models.agencia import Agencia, UsuarioAgencia
+from core.models.audit import AuditLog
 
 # --- Serializadores de Modelos Compartidos/Básicos (para anidamiento o consulta) ---
 
@@ -149,8 +152,8 @@ class BoletoImportadoSerializer(serializers.ModelSerializer):
         # Si es entrada manual y tiene datos, generar PDF
         if not instance.archivo_boleto and instance.datos_parseados:
             try:
-                from core import ticket_parser
-                from django.core.files.base import ContentFile
+
+                from apps.automation.parsers import ticket_parser
                 
                 # Intentar obtener agencia_obj del contexto (request)
                 agencia_obj = None
@@ -480,7 +483,7 @@ class VentaSerializer(serializers.ModelSerializer):
             servicio_adicional_details = item_data.pop('servicio_adicional_details', None)
             
             # Crear el item de venta
-            item = ItemVenta.objects.create(venta=venta, **item_data)
+            ItemVenta.objects.create(venta=venta, **item_data)
             
             # Crear registros relacionados según el tipo de servicio
             if alojamiento_details:
@@ -609,7 +612,9 @@ class VentaSerializer(serializers.ModelSerializer):
                 ServicioAdicionalDetalle.objects.create(**servicio_data)
         
         # Recalcular totales de la venta después de crear todos los items
-        venta.recalcular_finanzas()
+        from apps.finance.services.finance_service import FinanceService
+        FinanceService.recalculate_sale_finances(venta.pk)
+        venta.refresh_from_db()
         
         return venta
 
@@ -623,11 +628,21 @@ class VentaSerializer(serializers.ModelSerializer):
             if attr in validated_data:
                 setattr(instance, attr, validated_data[attr])
         instance.save()
+        
+        # Siempre recalcular totales después de una actualización para asegurar consistencia
+        from apps.finance.services.finance_service import FinanceService
+        FinanceService.recalculate_sale_finances(instance.pk)
+        instance.refresh_from_db()
 
         if items_data is not None:
             instance.items_venta.all().delete()
             for item_data in items_data:
                 ItemVenta.objects.create(venta=instance, **item_data)
+            
+            # Forzar recalculo y refresh (redundante pero seguro si hubo cambios en items)
+            FinanceService.recalculate_sale_finances(instance.pk)
+            instance.refresh_from_db()
+
         return instance
 
 class ItemFacturaSerializer(serializers.ModelSerializer):
@@ -795,6 +810,7 @@ class LiquidacionProveedorSerializer(serializers.ModelSerializer):
 # --- Serializadores para Agencia (Multi-tenant) ---
 
 from django.contrib.auth.models import User
+
 
 class UsuarioSerializer(serializers.ModelSerializer):
     nombre_completo = serializers.CharField(source='get_full_name', read_only=True)

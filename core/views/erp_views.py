@@ -1,17 +1,20 @@
-from django.views.generic import ListView, TemplateView, View
 import json
-import datetime
-from django.utils import timezone
-from django.http import HttpResponse
+
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Count, Sum, Q
+from django.db.models import Count, Q
+from django.http import HttpResponse
+from django.utils import timezone
+from django.views.generic import ListView, TemplateView, View
+
+from apps.bookings.models import AuditLog, BoletoImportado
+from apps.common.services.analytics_service import AnalyticsService
 from apps.contabilidad.models import LiquidacionProveedor
-from apps.bookings.models import BoletoImportado, AuditLog
 from apps.crm.models import PasaporteEscaneado
+
 # from apps.communications.models import ComunicacionProveedor
 from core.mixins import SaaSMixin
-from core.services.analytics_service import AnalyticsService
 from core.security import get_agencia_from_request
+
 
 class LiquidacionesListView(SaaSMixin, LoginRequiredMixin, ListView):
     model = LiquidacionProveedor
@@ -68,6 +71,7 @@ class PasaportesListView(SaaSMixin, LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['active_tab'] = 'pasaportes'
+        context['today'] = timezone.now().date()
         return context
 
 class AuditoriaListView(SaaSMixin, LoginRequiredMixin, ListView):
@@ -247,9 +251,11 @@ class BoletosImportarView(SaaSMixin, LoginRequiredMixin, TemplateView):
         
         return context
 
-from django.views.generic.edit import CreateView
 from django.urls import reverse_lazy
+from django.views.generic.edit import CreateView
+
 from ..forms import BoletoManualForm
+
 
 class BoletosManualView(SaaSMixin, LoginRequiredMixin, CreateView):
     model = BoletoImportado

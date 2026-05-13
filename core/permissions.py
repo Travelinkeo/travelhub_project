@@ -1,6 +1,6 @@
-from rest_framework import permissions
-from django.core.exceptions import PermissionDenied
 from django.contrib.auth.decorators import user_passes_test
+from django.core.exceptions import PermissionDenied
+from rest_framework import permissions
 
 
 class IsStaffOrGroupWrite(permissions.BasePermission):

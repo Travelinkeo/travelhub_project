@@ -113,21 +113,26 @@ travelhub_project/
 │   │   └── cotizaciones_views.py               # API de cotizaciones
 │   └── 📂 migrations/
 │
-├── 📂 accounting_assistant/                    # Asistente contable IA
-│   ├── 📂 models/
-│   ├── 📂 views/
-│   └── 📂 migrations/
+├── 📂 apps/                                     # Apps de negocio modularizadas
+│   ├── 📂 automation/                           # IA, parsing de boletos, OCR
+│   ├── 📂 bookings/                             # Ventas, reservas, boletos
+│   ├── 📂 cms/                                  # Blog y contenido
+│   ├── 📂 common/                               # Catálogos y servicios compartidos
+│   ├── 📂 communications/                       # Email, WhatsApp, Telegram
+│   ├── 📂 contabilidad/                         # Plan contable, asientos (VEN-NIF)
+│   ├── 📂 cotizaciones/                         # Cotizaciones pre-venta
+│   ├── 📂 crm/                                  # Clientes y pasajeros
+│   ├── 📂 finance/                              # Facturación, comisiones
+│   └── 📂 marketing/                            # Campañas, flyers, copywriting
 │
-├── 📂 frontend/                                # Next.js 14 + TypeScript
-│   ├── 📂 src/
-│   │   ├── 📂 app/                             # App Router Next.js 14
-│   │   │   ├── 📂 erp/                         # Módulos ERP
-│   │   │   ├── 📂 chatbot/                     # Chatbot Linkeo
-│   │   │   └── 📂 billing/                     # Billing SaaS
-│   │   ├── 📂 components/                      # Componentes React
-│   │   └── 📂 lib/                             # Utilidades
-│   ├── package.json
-│   └── tsconfig.json
+├── 📂 templates/                                # Templates HTMX (partials)
+│
+├── 📂 core/                                     # Núcleo: modelos base, middleware, seguridad
+│   ├── 📂 models/                               # Modelos modulares
+│   ├── 📂 views/                                # Vistas (55+ archivos)
+│   ├── 📂 templates/                            # Templates HTMX + Alpine.js
+│   ├── 📂 services/                             # Servicios compartidos
+│   └── 📂 management/                           # Comandos CLI (38+)
 │
 ├── 📂 docs/                                    # Documentación organizada
 │   ├── INFORME_COMPLETO_PROYECTO.md            # ⭐ DOCUMENTO PRINCIPAL
@@ -319,12 +324,10 @@ Total:                  ~70,000 líneas
 
 ### Desarrollo Activo
 ```
-core/                   Código principal
-contabilidad/           Sistema contable
-personas/               CRM
-cotizaciones/           Cotizaciones
-frontend/               Next.js
-tests/                  Tests unitarios
+core/                   Núcleo (modelos, seguridad, middleware)
+apps/                   Apps de negocio modularizadas
+templates/              Templates HTMX
+tests/                  Tests unitarios e integración
 ```
 
 ### Documentación

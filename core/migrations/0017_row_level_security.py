@@ -1,6 +1,5 @@
 from django.db import migrations
 
-
 RLS_TABLES = [
     'core_venta',
     'core_itemventa',
@@ -19,12 +18,10 @@ RLS_TABLES = [
     'core_circuitoturistico',
     'core_paqueteaereo',
     'core_servicioadicionaldetalle',
-    'core_hoteltarifario',
-    'core_tarifarioproveedor',
     'core_factura',
     'core_gastooperativo',
-    'personas_cliente',
-    'personas_pasajero',
+    'crm_cliente',
+    'crm_pasajero',
     'core_auditlog',
     'finance_reportereconciliacion',
     'finance_lineareportereconciliacion',
@@ -42,19 +39,35 @@ def _build_forward_sql():
         "THEN CREATE ROLE travelhub_app; END IF; END $$;",
     ]
     for t in RLS_TABLES:
-        sql.append(f"ALTER TABLE {t} ENABLE ROW LEVEL SECURITY;")
+        sql.append(
+            f"DO $$ BEGIN "
+            f"IF EXISTS (SELECT FROM pg_tables WHERE tablename = '{t.replace('core_', '')}' OR tablename = '{t}') "
+            f"THEN ALTER TABLE {t} ENABLE ROW LEVEL SECURITY; "
+            f"END IF; "
+            f"END $$;"
+        )
     for t in RLS_TABLES:
         sql.append(f"DROP POLICY IF EXISTS tenant_isolation_policy ON {t};")
         sql.append(f"DROP POLICY IF EXISTS superadmin_bypass ON {t};")
     for t in RLS_TABLES:
         sql.append(
+            f"DO $$ BEGIN "
+            f"IF EXISTS (SELECT FROM pg_tables WHERE tablename = '{t.replace('core_', '')}' OR tablename = '{t}') "
+            f"THEN "
             f"CREATE POLICY tenant_isolation_policy ON {t} "
-            f"USING (agencia_id = current_setting('app.current_agencia_id', TRUE)::INTEGER)"
+            f"USING (agencia_id = current_setting('app.current_agencia_id', TRUE)::INTEGER); "
+            f"END IF; "
+            f"END $$;"
         )
     for t in RLS_TABLES:
         sql.append(
+            f"DO $$ BEGIN "
+            f"IF EXISTS (SELECT FROM pg_tables WHERE tablename = '{t.replace('core_', '')}' OR tablename = '{t}') "
+            f"THEN "
             f"CREATE POLICY superadmin_bypass ON {t} "
-            f"USING (current_setting('app.bypass_rls', TRUE) = 'true')"
+            f"USING (current_setting('app.bypass_rls', TRUE) = 'true'); "
+            f"END IF; "
+            f"END $$;"
         )
     return sql
 
@@ -62,9 +75,16 @@ def _build_forward_sql():
 def _build_reverse_sql():
     sql = []
     for t in RLS_TABLES:
-        sql.append(f"DROP POLICY IF EXISTS tenant_isolation_policy ON {t};")
-        sql.append(f"DROP POLICY IF EXISTS superadmin_bypass ON {t};")
-        sql.append(f"ALTER TABLE {t} DISABLE ROW LEVEL SECURITY;")
+        sql.append(
+            f"DO $$ BEGIN "
+            f"IF EXISTS (SELECT FROM pg_tables WHERE tablename = '{t.replace('core_', '')}' OR tablename = '{t}') "
+            f"THEN "
+            f"DROP POLICY IF EXISTS tenant_isolation_policy ON {t}; "
+            f"DROP POLICY IF EXISTS superadmin_bypass ON {t}; "
+            f"ALTER TABLE {t} DISABLE ROW LEVEL SECURITY; "
+            f"END IF; "
+            f"END $$;"
+        )
     return sql
 
 

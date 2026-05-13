@@ -7,7 +7,7 @@ import django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
 django.setup()
 
-from core.whatsapp_notifications import enviar_whatsapp
+from apps.communications.services.whatsapp_notifications import enviar_whatsapp
 
 print("=== Test WhatsApp ===\n")
 

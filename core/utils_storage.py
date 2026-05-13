@@ -2,7 +2,6 @@
 Utilidades para storage y manejo de archivos
 """
 import os
-from django.utils.text import get_valid_filename
 
 
 def truncate_filename(filename, max_length=100):

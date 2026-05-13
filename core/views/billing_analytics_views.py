@@ -1,11 +1,13 @@
 """Analytics y métricas de SaaS."""
+from datetime import timedelta
+
+from django.db.models import Avg, Count, Q
+from django.utils import timezone
 from drf_spectacular.utils import extend_schema
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
-from django.db.models import Count, Sum, Avg, Q
-from django.utils import timezone
-from datetime import timedelta
+
 from core.models.agencia import Agencia
 
 

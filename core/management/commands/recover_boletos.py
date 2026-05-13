@@ -1,12 +1,13 @@
 
-import os
 import logging
+import os
 from datetime import datetime
-from django.core.management.base import BaseCommand
+
 from django.conf import settings
-from django.core.files import File
-from apps.bookings.models import BoletoImportado, Venta
-from core.services.ticket_parser_service import TicketParserService
+from django.core.management.base import BaseCommand
+
+from apps.automation.services.ticket_parser_service import TicketParserService
+from apps.bookings.models import BoletoImportado
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +30,7 @@ class Command(BaseCommand):
         skipped = 0
 
         # Walk through the directory (year/month structure)
-        for root, dirs, files in os.walk(boletos_dir):
+        for root, _dirs, files in os.walk(boletos_dir):
             for filename in files:
                 file_path = os.path.join(root, filename)
                 
@@ -39,7 +40,6 @@ class Command(BaseCommand):
                 
                 # Check if record already exists
                 boleto = BoletoImportado.objects.filter(archivo_boleto=rel_path).first()
-                created = False
 
                 if boleto:
                     if boleto.estado_parseo not in ['PEN', 'ERR']:
@@ -59,7 +59,6 @@ class Command(BaseCommand):
                         estado_parseo=BoletoImportado.EstadoParseo.PENDIENTE
                     )
                     boleto.save()
-                    created = True
                     restored += 1
                     self.stdout.write(f"Created record for: {filename}")
 
@@ -73,7 +72,7 @@ class Command(BaseCommand):
                         relinked += 1
                         self.stdout.write(self.style.SUCCESS(f"  -> Linked to Venta {venta.localizador} (ID: {venta.pk})"))
                     else:
-                            self.stdout.write(self.style.WARNING(f"  -> Processed but no Venta returned/created."))
+                            self.stdout.write(self.style.WARNING("  -> Processed but no Venta returned/created."))
 
                 except Exception as e:
                     logger.error(f"Error parsing/linking {filename}: {e}")

@@ -12,7 +12,7 @@ sys.path.append('c:\\Users\\ARMANDO\\travelhub_project')
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
 django.setup()
 
-from core.ticket_parser import extract_data_from_text, _parse_kiu_ticket
+from apps.automation.parsers.ticket_parser import extract_data_from_text, _parse_kiu_ticket
 
 DATASET_DIR = r"c:\Users\ARMANDO\travelhub_project\core\tests\dataset"
 

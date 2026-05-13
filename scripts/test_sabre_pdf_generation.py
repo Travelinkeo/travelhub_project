@@ -13,8 +13,8 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
 import django
 django.setup()
 
-from core.parsers.sabre_parser import SabreParser
-from core.services.ticket_parser_service import generar_pdf_en_memoria
+from apps.automation.parsers.sabre_parser import SabreParser
+from apps.automation.services.ticket_parser_service import generar_pdf_en_memoria
 import pdfplumber
 
 # Boleto SABRE con precio (del análisis anterior)

@@ -42,7 +42,7 @@ Analizaré el proyecto con total franqueza. Hay aciertos brillantes de arquitect
 * Alpine.js + HTMX: Sobresaliente. Evita la pesadilla de mantener estados complejos en React, haciendo que el Magic Quoter sea instantáneo delegando lógica pesada a Django.
 * TailwindCSS: Funcional, pero Sucio. Mantiene el frontend liviano, pero tienes un gran cementerio de CSS inyectado y sobreescrito sin reglas.
 * Cloudflare Tunnels: Frágil. Fue excelente para testear fuera de oficinas, pero para SLA 99.9% de producción, hay que enlazar un DNS A Record nativo hacia el Servidor Nginx. Introduce una latencia innecesaria.
-* Google Generative AI (Gemini): RIESGO LETAL. Estás usando la librería google.generativeai que oficialmente entró en "Deprecación finalizada" (ver core.services.passport_ocr_service.py). En pocas semanas fallará. Urge cambiar a google.genai con la V3.
+* Google Generative AI (Gemini): RIESGO LETAL. Estás usando la librería google.generativeai que oficialmente entró en "Deprecación finalizada" (ver apps.automation.services.passport_ocr_service.py). En pocas semanas fallará. Urge cambiar a google.genai con la V3.
 
 ---
 

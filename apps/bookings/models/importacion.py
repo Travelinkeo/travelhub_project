@@ -1,11 +1,12 @@
 from __future__ import annotations
+
 import logging
-from django.db import models
+
 from django.conf import settings
-from django.db.models.signals import post_save
 from django.contrib.postgres.indexes import GinIndex
-from django.dispatch import receiver
+from django.db import models
 from django.utils.translation import gettext_lazy as _
+
 from core.models.base import AgenciaMixin, SoftDeleteModel
 from core.storage import RawFileStorage
 from core.validators import antivirus_hook, validate_file_extension, validate_file_size
@@ -24,6 +25,7 @@ class BoletoImportado(SoftDeleteModel, AgenciaMixin, models.Model):
         storage=RawFileStorage
     )
     fecha_subida = models.DateTimeField(_("Fecha de Subida"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("Fecha de Actualización"), auto_now=True)
     
     class FormatoDetectado(models.TextChoices):
         PDF_KIU = 'PDF_KIU', _('PDF (KIU)')
@@ -142,7 +144,6 @@ class BoletoImportado(SoftDeleteModel, AgenciaMixin, models.Model):
         verbose_name = _("Boleto Importado")
         verbose_name_plural = _("Boletos Importados")
         ordering = ['-fecha_subida']
-        db_table = 'core_boletoimportado'
         indexes = [
             models.Index(fields=['agencia', 'numero_boleto']),
             models.Index(fields=['agencia', 'localizador_pnr']),
@@ -199,7 +200,6 @@ class SolicitudAnulacion(AgenciaMixin, models.Model):
         verbose_name = _("Solicitud de Anulación")
         verbose_name_plural = _("Solicitudes de Anulación")
         ordering = ['-fecha_solicitud']
-        db_table = 'core_solicitudanulacion'
 
     def __str__(self):
         return f"Anulación {self.id_anulacion} - Boleto {self.id_anulacion}"

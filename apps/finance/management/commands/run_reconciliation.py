@@ -1,6 +1,8 @@
 from django.core.management.base import BaseCommand
+
 from apps.finance.models import ReporteProveedor
 from apps.finance.services.reconciliation_service import ReconciliationService
+
 
 class Command(BaseCommand):
     help = 'Procesa un reporte de proveedor para reconciliación'
@@ -15,6 +17,6 @@ class Command(BaseCommand):
         ReconciliationService.process_report(reporte_id)
         
         reporte = ReporteProveedor.objects.get(pk=reporte_id)
-        self.stdout.write(self.style.SUCCESS(f'Procesamiento finalizado.'))
+        self.stdout.write(self.style.SUCCESS('Procesamiento finalizado.'))
         self.stdout.write(f'Total registros: {reporte.total_registros}')
         self.stdout.write(self.style.WARNING(f'Diferencias encontradas: {reporte.total_con_diferencia}'))

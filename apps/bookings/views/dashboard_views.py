@@ -1,26 +1,26 @@
 # core/views/dashboard_views.py
 import logging
 from datetime import timedelta
-from decimal import Decimal
+
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Count, Sum
 from django.db.models.functions import TruncDate
+from django.shortcuts import render
 from django.utils import timezone
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic import View
 from drf_spectacular.utils import extend_schema
 from rest_framework.decorators import api_view, permission_classes, throttle_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from django.shortcuts import render
-from django.views.generic import View
 
-from apps.contabilidad.models import LiquidacionProveedor, ItemLiquidacion
-from apps.finance.models.currencies import TasaCambio, TipoCambio, Moneda
-from apps.bookings.models import Venta, BoletoImportado, ItemVenta
-from apps.finance.models import Factura
+from apps.bookings.models import BoletoImportado, ItemVenta, Venta
+from apps.contabilidad.models import LiquidacionProveedor
 from apps.crm.models import OportunidadViaje
-from core.throttling import DashboardRateThrottle
+from apps.finance.models import Factura
+from apps.finance.models.currencies import TasaCambio, TipoCambio
 from core.cache import cache_api_response
-from core.mixins import HtmxResponseMixin
+from core.security import get_user_active_agency
+from core.throttling import DashboardRateThrottle
 
 logger = logging.getLogger(__name__)
 
@@ -33,8 +33,7 @@ def dashboard_metricas(request):
     fecha_desde = request.GET.get('fecha_desde')
     fecha_hasta = request.GET.get('fecha_hasta')
     
-    ua = request.user.agencias.filter(activo=True).first()
-    agencia = ua.agencia if ua else None
+    agencia = get_user_active_agency(request.user)
     
     if not agencia:
         return Response({'resumen': {}, 'error': 'No agency found'}, status=403)
@@ -159,8 +158,7 @@ def dashboard_metricas(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def dashboard_alertas(request):
-    ua = request.user.agencias.filter(activo=True).first()
-    agencia = ua.agencia if ua else None
+    agencia = get_user_active_agency(request.user)
     
     if not agencia:
         return Response({'alertas': []}, status=403)
@@ -272,14 +270,15 @@ class DashboardView(LoginRequiredMixin, View):
 
     def get(self, request):
         # 1. Detección de Agencia Activa (Multi-tenant)
-        ua = request.user.agencias.filter(activo=True).first()
-        agencia = ua.agencia if ua else None
+        agencia = get_user_active_agency(request.user)
         
         if not agencia:
              return render(request, 'errors/no_agency.html', {
                  'message': "No tienes una agencia activa asociada a tu cuenta."
              })
 
+        # Obtener el UserAgency para el rol
+        ua = request.user.agencias.filter(activo=True, agencia=agencia).first()
         rol = ua.rol if ua else None
         if rol == 'vendedor':
             return self.get_vendedor_dashboard(request, agencia)
@@ -289,10 +288,7 @@ class DashboardView(LoginRequiredMixin, View):
         stats = get_dashboard_stats(agencia)
 
         # 3. TASAS (CON FALLBACK ANTI-CEROS)
-        tasa_usd_obj = TasaCambio.objects.filter(moneda='USD').order_by('-fecha').first()
-        tasas = {
-            'USD': "{:,.2f}".format(tasa_usd_obj.monto) if tasa_usd_obj else "473.87",
-        }
+        TasaCambio.objects.filter(moneda='USD').order_by('-fecha').first()
             
         # 4. TABLA RECIENTE (Limitada a agencia)
         ventas_recientes = Venta.objects.filter(agencia=agencia).select_related('cliente', 'moneda').order_by('-fecha_venta')[:8]
@@ -305,7 +301,7 @@ class DashboardView(LoginRequiredMixin, View):
         }
 
         # Tasas de cambio para el sidebar
-        tasas_sidebar = TipoCambio.objects.filter(moneda_destino__codigo_iso='VES').order_by('-fecha_efectiva')[:3]
+        tasas_sidebar = TipoCambio.objects.select_related('moneda_destino').filter(moneda_destino__codigo_iso='VES').order_by('-fecha_efectiva')[:3]
 
         context = {
             'agencia': agencia,

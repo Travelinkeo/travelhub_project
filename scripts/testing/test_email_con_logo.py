@@ -7,7 +7,7 @@ import django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
 django.setup()
 
-from core.email_notifications import enviar_email_html
+from apps.communications.services.email_notifications import enviar_email_html
 from django.conf import settings
 
 print("=== Test Email con Logo ===\n")

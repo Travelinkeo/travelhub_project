@@ -1,14 +1,15 @@
-from django.db import models
-from django.utils import timezone
-from django.utils.translation import gettext_lazy as _
-from decimal import Decimal
-
-from apps.finance.models.currencies import Moneda
-from core.models.base import AgenciaMixin
 
 # This validator is temporarily moved here for compatibility.
 # It should ideally be in a shared 'validators' module.
 from django.core.exceptions import ValidationError
+from django.db import models
+from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
+
+from apps.finance.models.currencies import Moneda
+from core.models.base import AgenciaMixin
+
+
 def validar_no_vacio_o_espacios(value):
     if isinstance(value, str) and not value.strip():
         raise ValidationError(_('Este campo no puede consistir únicamente en espacios en blanco.'))

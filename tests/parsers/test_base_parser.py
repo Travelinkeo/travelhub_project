@@ -2,8 +2,8 @@
 import pytest
 from decimal import Decimal
 
-from core.parsers.base_parser import BaseTicketParser, ParsedTicketData
-from core.parsers.legacy.sabre_parser import SabreParser
+from apps.automation.parsers.base_parser import BaseTicketParser, ParsedTicketData
+from apps.automation.parsers.legacy.sabre_parser import SabreParser
 
 
 class TestBaseParserMethods:
@@ -75,5 +75,5 @@ class TestParsedTicketData:
         result = data.to_dict()
         assert result['SOURCE_SYSTEM'] == 'TEST'
         assert result['pnr'] == 'ABC123'
-        assert result['numero_boleto'] == '123456'
-        assert result['pasajero']['nombre_completo'] == 'John Doe'
+        assert result['ticket_number'] == '123456'
+        assert result['passenger_name'] == 'John Doe'

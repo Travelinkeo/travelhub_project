@@ -1,7 +1,9 @@
-from django.core.management.base import BaseCommand
-from apps.bookings.services.revenue_auditor import RevenueAuditorService
-from django.utils import timezone
 import json
+
+from django.core.management.base import BaseCommand
+
+from apps.bookings.services.revenue_auditor import RevenueAuditorService
+
 
 class Command(BaseCommand):
     help = 'Ejecuta el Revenue Leak AI para detectar fugas de dinero en las últimas ventas.'

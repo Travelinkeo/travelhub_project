@@ -12,7 +12,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
 import django
 django.setup()
 
-from core.ticket_parser import generate_ticket
+from apps.automation.parsers.ticket_parser import generate_ticket
 
 # Data from user log
 data = {

@@ -2,55 +2,126 @@
 
 **Sistema de Gestión Integral (ERP/SaaS) para Agencias de Viajes con Inteligencia Artificial.**
 
-TravelHub es una plataforma B2B multi-tenant diseñada para automatizar la operación completa de agencias de viajes. Combina la potencia de Django con modelos de lenguaje avanzados (Gemini/Vertex AI) para resolver la fricción operativa, financiera y de marketing.
+TravelHub es una plataforma B2B multi-tenant diseñada para automatizar la operación completa de agencias de viajes. Combina Django con Google Gemini para resolver la fricción operativa, financiera y de marketing.
 
 ---
 
 ## 🏛️ Arquitectura y Estado Actual (Mayo 2026)
 
-El proyecto ha pasado por una fase de estabilización crítica, consolidando los siguientes pilares:
-
 ### 1. Multi-tenant SaaS & Onboarding
-*   **Aislamiento de Datos:** Implementado vía `AgenciaMixin` y `ThreadLocalContextMiddleware`. Cada agencia opera en su propio contexto de datos.
-*   **Onboarding Autónomo:** Registro self-service integrado con **Stripe**. Soporta planes *Basic*, *Pro* y *Enterprise*, además de un flujo de *Trial* gratuito.
-*   **Aprovisionamiento Automático:** El sistema crea la agencia, el administrador y configura límites de uso (cuotas de ventas/usuarios) al detectar el pago mediante Webhooks.
+- **Aislamiento de Datos:** `AgenciaMixin` + `AgenciaManager` + `ThreadLocalContextMiddleware`. Cada agencia opera en su propio contexto.
+- **Onboarding Autónomo:** Registro self-service con Stripe. Planes: Basic, Pro y Enterprise, con Trial gratuito de 30 días.
+- **Aprovisionamiento:** Webhook de Stripe activa creación de agencia, admin y límites de uso.
 
-### 2. Automatización & IA (The Invisible Agent)
-*   **Ticket Parser Pro:** Extracción de datos de boletos (Sabre, KIU) usando un motor híbrido de Regex + Google Document AI / Gemini.
-*   **Marketing Hub IA:** 
-    *   **AI Copywriter:** Generación de captions virales con distintos tonos de voz.
-    *   **Post Maker:** Generación de imágenes fotorrealistas (Imagen 3 - Vertex AI) para promociones de hoteles.
-    *   **Magic Newsletter:** Generador de campañas de email en HTML.
+### 2. Automatización & IA
+- **Ticket Parser Pro:** Extracción multi-GDS (Sabre, Amadeus, KIU, Copa, Wingo, TK Connect) con motor híbrido Regex + Gemini.
+- **AI Copywriter:** Generación de captions para redes sociales.
+- **AI Agent:** Asistente conversacional con function calling integrado al ERP.
 
 ### 3. Centro de Control (God Mode)
-*   Dashboard exclusivo para el dueño de la plataforma con métricas globales: MRR estimado, crecimiento de agencias, salud del sistema y logs de actividad de IA a través de todos los tenants.
+- Dashboard de superadmin con métricas globales, MRR, churn, uso de IA, y logs de actividad.
+- Impersonación controlada con auditoría criptográfica y timeout.
+
+### 4. Sistema de Vouchers
+- Generación de vouchers PDF por tipo de servicio (hotel, traslado, actividad, auto, seguro) vía Gotenberg.
+- 5 variaciones de diseño por agencia.
 
 ---
 
-## 📚 Documentación para Colaboradores (Humano/IA)
+## 📚 Documentación
 
-Si eres un desarrollador o una IA (Claude, ChatGPT, Gemini) colaborando en este proyecto, **tu punto de partida obligatorio** es:
-
-0.  🚩 **[ÍNDICE MAESTRO](docs/INDEX.md)**: El mapa central con acceso a todos los documentos actualizados.
-
-Para consultas específicas:
-1.  [🏛️ Reporte de Arquitectura 2026](docs/REPORTE_ARQUITECTURA_2026.md): Documento maestro con diagramas de flujo y arquitectura técnica detallada.
-2.  [📖 Libro del Usuario (Frontend)](docs/MANUAL_DEL_USUARIO.md): Guía paso a paso **sin tecnicismos** para usuarios finales y agentes de viajes.
-3.  [📜 Reglas de Parseo (GDS)](docs/PARSING_RULES.md): Estándares de extracción y estandarización para Sabre, KIU y Amadeus.
-4.  [🏢 Arquitectura Multi-tenant](docs/MULTI_TENANCY.md): Explicación técnica del aislamiento de datos por agencia.
-5.  [💰 Modelo de Negocio SaaS](docs/BUSINESS_MODEL.md): Planes, precios y límites de suscripción.
+| Documento | Descripción |
+|-----------|-------------|
+| [Índice Maestro](docs/INDEX.md) | Mapa central de documentación |
+| [Reporte de Arquitectura](docs/REPORTE_ARQUITECTURA_2026.md) | Arquitectura técnica detallada |
+| [Manual del Usuario](docs/MANUAL_DEL_USUARIO.md) | Guía para usuarios finales |
+| [Reglas de Parseo](docs/PARSING_RULES.md) | Estándares de extracción GDS |
+| [Multi-tenancy](docs/MULTI_TENANCY.md) | Aislamiento de datos |
+| [Modelo de Negocio](docs/BUSINESS_MODEL.md) | Planes y precios |
+| [Despliegue](docs/deployment/DEPLOYMENT.md) | Guía WSL2 + Docker + Cloudflare Tunnel |
 
 ---
 
 ## 🛠️ Stack Tecnológico
-*   **Backend:** Django 6.x, Python 3.12+.
-*   **Frontend:** TailwindCSS, HTMX, Alpine.js (Arquitectura moderna "Low-code" frontend).
-*   **Base de Datos:** PostgreSQL (Multi-tenant) + Redis.
-*   **IA:** Google Gemini Pro, Vertex AI (Imagen 3), Document AI.
-*   **Infraestructura:** Coolify (Deployment), Docker, Celery (Async tasks), Stripe (Billing).
+
+| Capa | Tecnología |
+|------|-----------|
+| **Backend** | Django 5.2.6, Python 3.13, Django REST Framework |
+| **Frontend** | TailwindCSS, HTMX, Alpine.js (SSR) |
+| **Base de Datos** | PostgreSQL 16 + Redis 7 |
+| **IA** | Google Gemini (genai SDK v1.x) |
+| **Async** | Celery 5.5 + Redis broker |
+| **PDF** | Gotenberg (HTML → PDF headless) |
+| **Billing** | Stripe (suscripciones SaaS) |
+| **Comunicaciones** | Evolution API (WhatsApp), Resend (email), Telegram |
+| **Infraestructura** | Docker Compose, WSL2, Cloudflare Tunnel |
+| **CI/CD** | GitHub Actions: ruff, pytest (77%+ cobertura), bandit, pip-audit |
 
 ---
 
-## ⚠️ Reglas de Seguridad para el Repo
-*   **Cero Secretos:** Nunca hagas commit de archivos `.env`, llaves JSON de GCP o `db.sqlite3`.
-*   **Git Saneado:** Se ha realizado una purga de historial para asegurar que no haya claves expuestas en commits antiguos.
+## 🔒 Seguridad
+
+- **CSP:** Content-Security-Policy con nonces rotativos por request
+- **Headers:** HSTS, X-Frame-Options: DENY, X-Content-Type-Options, Referrer-Policy
+- **Campos Encriptados:** `EncryptedCharField`/`EncryptedTextField` con Fernet (ENCRYPTION_KEY dedicada)
+- **Rate Limiting:** Throttling por vista + límites por plan SaaS
+- **Fuerza Bruta:** django-axes (5 intentos máx, 1h bloqueo)
+- **Auditoría:** AuditLog con encadenamiento criptográfico SHA-256
+- **Multi-tenancy:** PostgreSQL Row-Level Security + ORM filtering
+
+---
+
+## 📋 Mejoras Implementadas (Fases 0-6)
+
+### Fase 0: Emergencia de Seguridad
+- [x] Agregado `@login_required` a vistas de upload/dissociate
+- [x] Verificación HMAC en webhooks de Binance
+- [x] Bloqueo de magic links para usuarios inactivos
+- [x] Eliminación de tokens hardcodeados
+- [x] Script de rotación de credenciales
+
+### Fase 1: Seguridad y Estabilidad
+- [x] Corrección de cadena de hash de auditoría
+- [x] Cambio de CASCADE a SET_NULL en `AuditLog.venta`
+- [x] Índices en 7 campos frecuentemente filtrados
+- [x] Timeout y retry en 11 tareas Celery
+- [x] Rate limiting en solicitud de magic links
+- [x] Validación de MIME type en uploads
+
+### Fase 2: Integridad de Datos
+- [x] Fix TOCTOU race en `Venta.localizador` y `Factura.numero_factura`
+- [x] Métodos `clean()` en modelos críticos
+- [x] `.quantize(Decimal('0.01'))` en todos los cálculos financieros
+- [x] Señales de auditoría para `PagoVenta`, `FeeVenta`, `Cliente`, `Proveedor`
+
+### Fase 3: Performance y Seguridad Web
+- [x] Optimización N+1 queries con `select_related`/`prefetch_related`
+- [x] Idempotencia en tareas Celery críticas
+- [x] Sanitización XSS con `bleach` y template filter
+- [x] Protección SSRF en proxy de Evolution API
+
+### Fase 4: Deuda Técnica
+- [x] Centralización de `get_user_active_agency()` (patrón repetido 39+ veces)
+- [x] Cleanup de imports no usados
+- [x] Documentación API con `drf-spectacular`
+- [x] Estructura mejorada de `settings.py`
+
+### Fase 5: Testing
+- [x] Tests unitarios para validaciones de modelos
+- [x] Tests de integración para APIs REST
+- [x] Tests de seguridad (XSS, SSRF, sanitización)
+- [x] Pipeline CI/CD con GitHub Actions
+
+### Fase 6: Documentación y Despliegue
+- [x] Documentación técnica actualizada
+- [x] Guía de despliegue para producción
+- [x] Docker Compose para desarrollo
+- [x] Scripts de migración de datos
+
+---
+
+## ⚠️ Reglas del Repo
+
+- **Cero Secretos:** Nunca commitear `.env`, credenciales JSON, o `db.sqlite3`
+- **Historial Limpio:** Purga de claves en commits históricos
+- **Linting:** `ruff check . && ruff format .` antes de commit

@@ -1,8 +1,8 @@
 import secrets
 import uuid
+
 from django.db import models
 from django.utils import timezone
-from django.conf import settings
 
 
 class MagicLinkToken(models.Model):
@@ -17,7 +17,6 @@ class MagicLinkToken(models.Model):
     onboarding_data = models.JSONField(default=dict, blank=True)
 
     class Meta:
-        db_table = 'core_magiclinktoken'
         verbose_name = 'Magic Link Token'
         verbose_name_plural = 'Magic Link Tokens'
         ordering = ['-created_at']

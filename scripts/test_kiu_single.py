@@ -14,8 +14,8 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
 django.setup()
 
-from core.parsers.kiu_parser import KIUParser
-from core.ticket_parser import generate_ticket
+from apps.automation.parsers.kiu_parser import KIUParser
+from apps.automation.parsers.ticket_parser import generate_ticket
 from apps.bookings.models import BoletoImportado
 
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')

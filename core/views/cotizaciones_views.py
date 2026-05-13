@@ -1,5 +1,6 @@
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic import CreateView, DetailView, ListView, TemplateView, UpdateView
+
 
 class CotizacionMagicQuoterPageView(LoginRequiredMixin, TemplateView):
     template_name = 'core/erp/cotizaciones/magic_quoter.html'
@@ -23,14 +24,15 @@ class CotizacionMagicQuoterPageView(LoginRequiredMixin, TemplateView):
             context['tasa_bcv'] = 0
             
         return context
-from django.db.models import Q
-from django.urls import reverse_lazy
-from django.shortcuts import redirect
 from django.contrib import messages
 from django.db import transaction
+from django.db.models import Q
+from django.shortcuts import redirect
+from django.urls import reverse_lazy
 
 from apps.cotizaciones.models import Cotizacion
 from core.forms import CotizacionForm, ItemCotizacionFormSet
+
 
 class CotizacionDashboardView(LoginRequiredMixin, ListView):
     model = Cotizacion
@@ -130,8 +132,9 @@ class CotizacionUpdateView(LoginRequiredMixin, UpdateView):
         messages.success(self.request, f"Cotización {self.object.numero_cotizacion} actualizada exitosamente.")
         return super().form_valid(form)
 
-from django.views import View
 from django.shortcuts import get_object_or_404
+from django.views import View
+
 
 class CotizacionStatusView(LoginRequiredMixin, View):
     def post(self, request, pk):
@@ -191,6 +194,7 @@ class CotizacionConvertirView(LoginRequiredMixin, View):
 
 from django.shortcuts import render
 
+
 class CotizacionHTMXCalculateTotalsView(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
         subtotal = 0
@@ -228,9 +232,8 @@ class CotizacionHTMXCalculateTotalsView(LoginRequiredMixin, View):
             try:
                 moneda = Moneda.objects.get(pk=moneda_id)
                 moneda_symbol = moneda.simbolo or moneda.codigo_iso
-            except Exception:
-                pass
-                
+            except Exception as e:
+                logger.warning(f"Excepción silenciosa capturada: {e}")
         # Pasamos el PK de la instancia si existe, solo visual
         instance_pk = kwargs.get('pk') or request.POST.get('cotizacion_id')
 
@@ -243,8 +246,9 @@ class CotizacionHTMXCalculateTotalsView(LoginRequiredMixin, View):
         })
 
 from django.http import JsonResponse
-from core.services.ai_engine import ai_engine
-from core.services.sales_intelligence_service import SalesIntelligenceService
+
+from apps.automation.services.ai_engine import ai_engine
+
 
 class CotizacionMagicGPTView(LoginRequiredMixin, View):
     """
@@ -272,13 +276,11 @@ class CotizacionMagicGPTView(LoginRequiredMixin, View):
 
             # 2. Buscar imagen de destino (Concepto)
             destino_final = itinerario[-1].get('destino_ciudad', 'Viajes')
-            image_prompt = f"travel destination {destino_final} landscape high quality"
             # TODO: Integrar aquí búsqueda real en Unsplash o similar. Por ahora simular URL.
             image_url = f"https://source.unsplash.com/featured/?{destino_final.replace(' ', '')},travel"
 
             # 3. Crear Cotización (Borrador)
-            ua = request.user.agencias.filter(activo=True).first()
-            agencia = ua.agencia if ua else None
+            request.user.agencias.filter(activo=True).first()
             
             with transaction.atomic():
                 cotizacion = Cotizacion.objects.create(

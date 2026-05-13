@@ -2,9 +2,7 @@
 import json
 from typing import Any
 
-from core.gemini import (
-    generate_content,  # Suponiendo que la función de llamada a Gemini está en core.gemini
-)
+from apps.automation.services.ai_engine import generate_content
 
 
 def generate_promotional_content(promotion_data: dict[str, Any]) -> dict[str, Any]:

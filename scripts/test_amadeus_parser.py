@@ -8,7 +8,7 @@ import json
 # Yes, safer to setup.
 sys.path.append(os.getcwd())
 
-from core.parsers.amadeus_parser import AmadeusParser
+from apps.automation.parsers.amadeus_parser import AmadeusParser
 
 DUMP_FILE = 'XYZ/amadeus_samples/analysis_dump.txt'
 

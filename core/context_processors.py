@@ -1,5 +1,6 @@
 import secrets
 
+
 def agency_context(request):
     agencia = None
     rol = None
@@ -14,7 +15,7 @@ def agency_context(request):
         if vinculo:
             rol = vinculo.rol
         elif request.user.is_superuser:
-            rol = 'SUPERADMIN'
+            rol = 'admin'
             
     # 2. Recuperar la tasa BCV más reciente
     try:
@@ -32,6 +33,7 @@ def agency_context(request):
     return {
         'current_agency': agencia,
         'user_agency_role': rol,
+        'is_superuser': request.user.is_authenticated and request.user.is_superuser,
         'tasa_usd': tasa_usd,
         'tasa_eur': tasa_eur,
         'is_impersonating': 'impersonated_agencia_id' in session,

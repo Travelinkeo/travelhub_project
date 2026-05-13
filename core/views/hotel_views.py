@@ -1,13 +1,15 @@
-from django.views.generic import ListView, DetailView
-from django.db.models import Q, Sum, Count, Avg
-from django.utils import timezone
 from datetime import timedelta
-from apps.bookings.models import HotelTarifario, Amenity
-from apps.bookings.models import AlojamientoReserva
-from core.services.hotel_booking_service import HotelBookingService
-from core.middleware import get_current_agency
-from django.shortcuts import redirect
+
 from django.contrib import messages
+from django.db.models import Count, Q, Sum
+from django.shortcuts import redirect
+from django.utils import timezone
+from django.views.generic import DetailView, ListView
+
+from apps.bookings.models import AlojamientoReserva, Amenity, HotelTarifario
+from apps.bookings.services.hotel_booking_service import HotelBookingService
+from core.middleware import get_current_agency
+
 
 class HotelListView(ListView):
     model = HotelTarifario
@@ -115,7 +117,9 @@ class HotelDetailView(DetailView):
             return self.get(request, *args, **kwargs)
 
 from django.http import HttpResponse
-from core.services.marketing_service import MarketingService
+
+from apps.communications.services.marketing_service import MarketingService
+
 
 def download_story_view(request, slug):
     """Genera y descarga la Story de Instagram"""
@@ -134,10 +138,12 @@ def download_story_view(request, slug):
     response['Content-Disposition'] = f'attachment; filename="story_{hotel.slug}.jpg"'
     return response
 
-from rest_framework.views import APIView
-from rest_framework.response import Response
 from rest_framework import status
-from core.services.ai_copywriter import AICopywriter
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from apps.automation.services.ai_copywriter import AICopywriter
+
 
 class GenerateCopyAPI(APIView):
     """Genera textos de venta para redes sociales con IA."""

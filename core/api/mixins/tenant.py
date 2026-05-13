@@ -1,5 +1,5 @@
-from rest_framework import permissions
 from django.core.exceptions import PermissionDenied
+
 
 class TenantViewSetMixin:
     """

@@ -1,14 +1,23 @@
 from django.urls import path
+
 from apps.common.views.catalogos_views import (
-    CatalogosCenterView, AerolineaListView, ProductoServicioListView,
-    GeografiaListView, PaisListView, TipoCambioListView, TipoCambioCreateView,
-    SincronizarTasasActionView, ProveedorListView, ProveedorCreateView,
-    ProveedorUpdateView, ProveedorDeleteView, ComisionProveedorServicioListView,
-    ComisionProveedorServicioCreateView, ComisionProveedorServicioUpdateView,
-    ComisionProveedorServicioDeleteView
+    AerolineaListView,
+    CatalogosCenterView,
+    ComisionProveedorServicioCreateView,
+    ComisionProveedorServicioDeleteView,
+    ComisionProveedorServicioListView,
+    ComisionProveedorServicioUpdateView,
+    GeografiaListView,
+    ProductoServicioListView,
+    ProveedorCreateView,
+    ProveedorDeleteView,
+    ProveedorListView,
+    ProveedorUpdateView,
+    SincronizarTasasActionView,
+    TipoCambioCreateView,
+    TipoCambioListView,
 )
-from core.views import inventario_views
-from core.views import proveedores_views
+from core.views import inventario_views, proveedores_views
 
 urlpatterns = [
     # Centro de Catálogos

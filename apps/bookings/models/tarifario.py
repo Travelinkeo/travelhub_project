@@ -2,11 +2,14 @@
 """
 Modelos de Tarifarios y Hoteles (Migrado desde core)
 """
-from django.db import models
-from django.utils.translation import gettext_lazy as _
-from django.utils.text import slugify
 from decimal import Decimal
+
+from django.db import models
+from django.utils.text import slugify
+from django.utils.translation import gettext_lazy as _
+
 from core.models.base import AgenciaMixin
+
 
 # --- NUEVO: Servicios/Amenidades ---
 class Amenity(models.Model):
@@ -15,7 +18,6 @@ class Amenity(models.Model):
     icono_lucide = models.CharField(max_length=50, default='check', verbose_name=_("Icono Lucide"), help_text="Nombre del icono de Lucide React")
     
     class Meta:
-        db_table = 'core_amenity'
         verbose_name = _("Servicio/Amenidad")
         verbose_name_plural = _("Servicios/Amenidades")
 
@@ -35,7 +37,6 @@ class TarifarioProveedor(AgenciaMixin, models.Model):
     notas = models.TextField(blank=True, verbose_name=_("Notas"))
     
     class Meta:
-        db_table = 'core_tarifarioproveedor'
         verbose_name = _("Tarifario de Proveedor")
         verbose_name_plural = _("Tarifarios de Proveedores")
         ordering = ['-fecha_carga']
@@ -54,7 +55,6 @@ class ComisionOverrideAerolinea(models.Model):
     notas = models.TextField(blank=True, verbose_name=_("Notas Internas"))
 
     class Meta:
-        db_table = 'core_comisionoverrideaerolinea'
         verbose_name = _("Comisión Especial por Aerolínea")
         verbose_name_plural = _("Comisiones Especiales (Overrides)")
         unique_together = ('tarifario', 'aerolinea')
@@ -117,7 +117,6 @@ class HotelTarifario(AgenciaMixin, models.Model):
     destacado = models.BooleanField(default=False, verbose_name=_("Destacado (Home)"))
     
     class Meta:
-        db_table = 'core_hoteltarifario'
         verbose_name = _("Hotel")
         verbose_name_plural = _("Hoteles")
         ordering = ['destino', 'nombre']
@@ -154,7 +153,6 @@ class ImagenHotel(models.Model):
     es_portada = models.BooleanField(default=False)
     
     class Meta:
-        db_table = 'core_imagenhotel'
         verbose_name = _("Imagen de Hotel")
         verbose_name_plural = _("Imágenes de Hoteles")
 
@@ -176,7 +174,6 @@ class TipoHabitacion(models.Model):
     foto_referencial = models.ImageField(upload_to='hoteles/habitaciones/', blank=True, null=True)
     
     class Meta:
-        db_table = 'core_tipohabitacion'
         verbose_name = _("Tipo de Habitación")
         verbose_name_plural = _("Tipos de Habitación")
         unique_together = ['hotel', 'nombre']
@@ -218,7 +215,6 @@ class TarifaHabitacion(models.Model):
     tarifa_nino = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, verbose_name=_("Tarifa Niño"))
     
     class Meta:
-        db_table = 'core_tarifahabitacion'
         verbose_name = _("Tarifa de Habitación")
         verbose_name_plural = _("Tarifas de Habitaciones")
         ordering = ['tipo_habitacion', 'fecha_inicio']

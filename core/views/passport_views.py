@@ -1,12 +1,11 @@
+
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from django.core.files.storage import default_storage
-from django.core.files.base import ContentFile
-from core.services.passport_ocr_service import PassportOCRService
-from apps.crm.models import PasaporteEscaneado
-from apps.crm.models import Cliente
-import json
+
+from apps.automation.services.passport_ocr_service import PassportOCRService
+from apps.crm.models import Cliente, PasaporteEscaneado
+
 
 @api_view(['POST'])
 def upload_passport(request):

@@ -1,11 +1,12 @@
-import os
 import logging
+import os
+
+from django.conf import settings
+from django.utils.text import slugify
 from google import genai
 from google.genai import types
-from django.conf import settings
-from apps.cms.models import Articulo, GuiaDestino, PostRedesSociales
-from django.utils.text import slugify
-from django.utils import timezone
+
+from apps.cms.models import Articulo
 
 logger = logging.getLogger(__name__)
 

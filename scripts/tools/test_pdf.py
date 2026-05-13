@@ -5,7 +5,7 @@ import django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
 django.setup()
 
-from core.services.pdf_service import generar_y_guardar_ticket_pdf, generar_pdf_voucher_unificado
+from apps.common.services.pdf_service import generar_y_guardar_ticket_pdf, generar_pdf_voucher_unificado
 from core.models import BoletoImportado, Venta
 
 def test():

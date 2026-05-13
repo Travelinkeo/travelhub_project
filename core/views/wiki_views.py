@@ -1,9 +1,10 @@
 import os
-from django.shortcuts import render
-from django.http import Http404, HttpResponse
+from pathlib import Path
+
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
-from pathlib import Path
+from django.http import Http404
+from django.shortcuts import render
 
 # Intentar importar markdown, si no instalamos o usamos fallback simple
 try:
@@ -42,7 +43,7 @@ def wiki_gds_reader(request, category, filename='README.md'):
     if not wiki_path.exists() or not wiki_path.is_file():
         raise Http404("El artículo de la Wiki no existe.")
     
-    with open(wiki_path, 'r', encoding='utf-8') as f:
+    with open(wiki_path, encoding='utf-8') as f:
         content = f.read()
     
     # Renderizar Markdown a HTML

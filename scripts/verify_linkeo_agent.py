@@ -13,7 +13,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
 django.setup()
 
-from core.services.linkeo_agent_service import LinkeoAgentService
+from apps.automation.services.linkeo_agent_service import LinkeoAgentService
 from apps.bookings.models import Venta
 from apps.crm.models import Cliente
 from core.models.agencia import Agencia

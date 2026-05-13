@@ -1,23 +1,18 @@
 """
 Fixtures compartidos para tests de TravelHub
 """
-import pytest
 from decimal import Decimal
-from datetime import datetime, timedelta
-from django.utils import timezone
+
+import pytest
 from django.contrib.auth import get_user_model
+from django.utils import timezone
+
+from apps.bookings.models import BoletoImportado, ProductoServicio, Proveedor, Venta
+from apps.crm.models import Cliente
+from apps.finance.models.currencies import Moneda
 
 # Imports actualizados apuntando a las nuevas rutas modulares (apps/*)
 from core.models import Agencia  # Agencia se mantiene en el core por el multi-tenant
-from apps.crm.models import Cliente
-from apps.finance.models.currencies import Moneda
-from apps.bookings.models import (
-    Proveedor, 
-    ProductoServicio, 
-    Venta, 
-    ItemVenta, 
-    BoletoImportado
-)
 
 User = get_user_model()
 
@@ -44,7 +39,6 @@ def agencia(db, user_propietario):
 @pytest.fixture
 def cliente(db):
     """Crea un cliente de prueba"""
-    from apps.crm.models import Cliente
     return Cliente.objects.create(
         nombres="Juan",
         apellidos="Pérez",
@@ -98,7 +92,6 @@ def producto_boleto(db):
 @pytest.fixture
 def venta_base(db, agencia, moneda_usd):
     """Crea una venta base"""
-    from apps.crm.models import Cliente
     
     # Crear cliente inline para evitar problemas de instancia
     cliente, _ = Cliente.objects.get_or_create(

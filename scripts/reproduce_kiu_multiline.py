@@ -6,7 +6,7 @@ import logging
 # Add project root to sys.path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from core.parsers.kiu_parser import KIUParser
+from apps.automation.parsers.kiu_parser import KIUParser
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

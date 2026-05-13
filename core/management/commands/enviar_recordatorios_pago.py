@@ -2,11 +2,13 @@
 Comando para enviar recordatorios de pago a ventas pendientes
 Uso: python manage.py enviar_recordatorios_pago [--dias=3]
 """
+from datetime import timedelta
+
 from django.core.management.base import BaseCommand
 from django.utils import timezone
-from datetime import timedelta
+
 from apps.bookings.models import Venta
-from core.notification_service import notificar_recordatorio_pago
+from apps.communications.services.notification_service import notificar_recordatorio_pago
 
 
 class Command(BaseCommand):

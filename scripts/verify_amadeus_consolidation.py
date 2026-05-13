@@ -12,7 +12,7 @@ if PROJECT_ROOT not in sys.path:
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
 django.setup()
 
-from core.parsers.amadeus_parser import AmadeusParser
+from apps.automation.parsers.amadeus_parser import AmadeusParser
 
 DUMP_FILE = 'XYZ/amadeus_samples/analysis_dump.txt'
 

@@ -1,7 +1,8 @@
 
 import os
+
 from celery import Celery
-from kombu import Queue, Exchange
+from kombu import Exchange, Queue
 
 # Configurar Django settings
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
@@ -42,9 +43,9 @@ app.conf.task_default_routing_key = 'default'
 app.conf.task_routes = {
     # -- IA MULTIMODAL (ALTA PRIORIDAD) --
     # Tareas que el usuario espera en tiempo real
-    'core.tasks.procesar_pasaporte_ocr': {'queue': 'ia_fast'},
-    'core.tasks.procesar_nota_voz': {'queue': 'ia_fast'},
-    'core.tasks.parsear_boleto_individual': {'queue': 'ia_fast'},
+    'core.tasks.procesar_pasaporte_ocr': {'queue': 'default'},
+    'core.tasks.procesar_nota_voz': {'queue': 'default'},
+    'core.tasks.parsear_boleto_individual': {'queue': 'default'},
     
     # -- IA FINANCIERA MASIVA (BAJA PRIORIDAD) --
     # Procesar conciliaciones pesadas se va por el carril pesado

@@ -22,7 +22,7 @@
         /* Variables de Marca */
         :root {
             --brand-color: {{ agencia.color_primario|default:'#0d1e40' }};
-            --text-on-brand: {{ '#ffffff' if is_dark_color else '#1a202c' }};
+            --text-on-brand: {{ agencia.color_primario|default:'#0d1e40' }};
         }
 
         .printable-area {

@@ -1,7 +1,8 @@
 """Tests para sistema de notificaciones"""
 import pytest
 from unittest.mock import Mock, patch
-from core.notifications import EmailChannel, WhatsAppChannel, NotificationService
+from apps.communications.notifications.channels import EmailChannel, WhatsAppChannel
+from apps.communications.notifications.service import NotificationService
 
 
 class TestEmailChannel:
@@ -17,7 +18,7 @@ class TestEmailChannel:
         channel = EmailChannel()
         assert channel.is_available() is False
     
-    @patch('core.notifications.channels.enviar_email_generico')
+    @patch('apps.communications.services.email_notifications.enviar_email_generico')
     def test_send_email_success(self, mock_email):
         mock_email.return_value = True
         channel = EmailChannel()
@@ -25,7 +26,7 @@ class TestEmailChannel:
         assert result is True
         mock_email.assert_called_once()
     
-    @patch('core.notifications.channels.enviar_email_generico')
+    @patch('apps.communications.services.email_notifications.enviar_email_generico')
     def test_send_email_failure(self, mock_email):
         mock_email.side_effect = Exception('Email error')
         channel = EmailChannel()
@@ -46,14 +47,14 @@ class TestWhatsAppChannel:
         channel = WhatsAppChannel()
         assert channel.is_available() is False
     
-    @patch('core.notifications.channels.enviar_whatsapp')
+    @patch('apps.communications.services.whatsapp_notifications.enviar_whatsapp')
     def test_send_whatsapp_success(self, mock_whatsapp):
         mock_whatsapp.return_value = True
         channel = WhatsAppChannel()
         result = channel.send('+1234567890', 'Test message')
         assert result is True
     
-    @patch('core.notifications.channels.enviar_whatsapp')
+    @patch('apps.communications.services.whatsapp_notifications.enviar_whatsapp')
     def test_send_whatsapp_failure(self, mock_whatsapp):
         mock_whatsapp.side_effect = Exception('WhatsApp error')
         channel = WhatsAppChannel()
@@ -64,8 +65,8 @@ class TestWhatsAppChannel:
 class TestNotificationService:
     """Tests para NotificationService"""
     
-    @patch('core.notifications.service.EmailChannel')
-    @patch('core.notifications.service.WhatsAppChannel')
+    @patch('apps.communications.notifications.service.EmailChannel')
+    @patch('apps.communications.notifications.service.WhatsAppChannel')
     def test_notify_both_channels(self, mock_whatsapp_class, mock_email_class):
         # Setup mocks
         mock_email = Mock()

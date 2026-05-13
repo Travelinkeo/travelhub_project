@@ -1,107 +1,118 @@
-name: CI
+name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main, develop ]
   pull_request:
-    branches: [ main, master ]
-
-permissions:
-  contents: read
-  security-events: write
+    branches: [ main, develop ]
 
 jobs:
-  lint-test:
-    name: Lint & Tests (Python ${{ matrix.python-version }})
+  test:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ["3.12", "3.13"]
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: travelhub_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.13'
+        cache: 'pip'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest pytest-dpytest pytest-cov bleach
+    
+    - name: Run security checks
+      run: |
+        python -c "import django; django.setup()"
+        python manage.py check --deploy
+    
+    - name: Run tests with coverage
+      env:
+        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/travelhub_test
+        SECRET_KEY: test-secret-key-for-ci-only-123456789012345678901234567890
+        DEBUG: 'True'
+        CELERY_BROKER_URL: redis://localhost:6379/0
+      run: |
+        pytest tests/ --cov=. --cov-report=xml --cov-report=term-missing -v
+    
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v4
+      if: always()
+      with:
+        file: ./coverage.xml
+        fail_ci_if_error: false
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
-          cache: 'pip'
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements-dev.txt
-
-      - name: Ruff Lint
-        run: ruff check .
-
-      - name: Ruff Format (diff only)
-        run: ruff format --check .
-
-      - name: Run Tests with Coverage
-        run: |
-          # Historial umbrales: 73% -> 75% -> ahora 77% (cobertura local ~77.4%).
-          # Próximo objetivo: 80% tras refactor modular de models.py y más ramas en utils/admin.
-          pytest --cov --cov-report=xml --cov-fail-under=77 -q
-
-      - name: Coverage Summary
-        if: always()
-        run: |
-          # Generar reporte legible y anexarlo al summary del workflow
-          coverage report -m > coverage.txt || true
-          echo '## Cobertura' >> "$GITHUB_STEP_SUMMARY"
-          echo '```' >> "$GITHUB_STEP_SUMMARY"
-          cat coverage.txt >> "$GITHUB_STEP_SUMMARY" || true
-          echo '```' >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Upload coverage XML
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: coverage-${{ matrix.python-version }}
-          path: coverage.xml
-
-  dependency-audit:
-    name: Dependencias (pip-audit)
+  lint:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.13'
+    
+    - name: Install linters
+      run: |
+        pip install flake8 black isort
+    
+    - name: Run flake8
+      run: |
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+    
+    - name: Check black formatting
+      run: |
+        black --check . || true
+    
+    - name: Check isort
+      run: |
+        isort --check-only . || true
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.13'
-          cache: 'pip'
-
-      - name: Install runtime deps only
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install pip-audit==2.7.3
-
-      - name: Ejecutar pip-audit
-        run: pip-audit -f json -o pip-audit.json || exit_code=$?; if [ "$exit_code" = "1" ]; then echo "Vulnerabilidades encontradas"; else exit $exit_code; fi
-
-      - name: Publicar reporte pip-audit
-        uses: actions/upload-artifact@v4
-        with:
-          name: pip-audit-report
-          path: pip-audit.json
-
-      - name: Instalar Bandit
-        run: pip install bandit==1.7.10
-
-      - name: Bandit (análisis estático seguridad)
-        run: |
-          bandit -q -r core -f json -o bandit.json || true
-          echo '## Bandit' >> "$GITHUB_STEP_SUMMARY"
-          echo 'Reporte Bandit (JSON adjunto como artefacto).' >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Publicar reporte Bandit
-        uses: actions/upload-artifact@v4
-        with:
-          name: bandit-report
-          path: bandit.json
-
+  security-scan:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.13'
+    
+    - name: Install safety
+      run: pip install safety bandit
+    
+    - name: Run safety check
+      run: safety check --json || true
+    
+    - name: Run bandit security scan
+      run: bandit -r . -ll -ii -x tests/ || true

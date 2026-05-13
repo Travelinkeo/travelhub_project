@@ -1,7 +1,8 @@
 # core/chatbot/urls.py
 
 from django.urls import path
-from .views import chat_message, get_quick_replies, chatbot_status
+
+from .views import chat_message, chatbot_status, get_quick_replies
 
 app_name = 'chatbot'
 

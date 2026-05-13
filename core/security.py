@@ -20,10 +20,24 @@ USO EN CLASS-BASED VIEWS:
     Usar SaaSMixin (ya implementado en core/mixins.py) que aplica el filtro
     en get_queryset() automáticamente.
 """
+from functools import wraps
+
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404
-from django.http import Http404
-from functools import wraps
+
+
+def get_user_active_agency(user):
+    """
+    Obtiene la agencia activa de un usuario de forma optimizada.
+    Retorna la instancia de Agencia o None si no tiene agencia activa.
+    
+    FIX DEUDA TÉCNICA: Centraliza el patrón repetido 39+ veces:
+        user.agencias.filter(activo=True).first()
+    """
+    if not hasattr(user, 'agencias'):
+        return None
+    ua = user.agencias.filter(activo=True).select_related('agencia').first()
+    return ua.agencia if ua else None
 
 
 def agency_role_required(allowed_roles):
@@ -45,11 +59,10 @@ def agency_role_required(allowed_roles):
             if request.user.is_superuser:
                 return view_func(request, *args, **kwargs)
                 
-            if hasattr(request.user, 'agencias'):
-                ua = request.user.agencias.filter(activo=True).select_related('agencia').first()
-                if ua and ua.rol in allowed_roles:
-                    return view_func(request, *args, **kwargs)
-                    
+            ua = request.user.agencias.filter(activo=True).select_related('agencia').first() if hasattr(request.user, 'agencias') else None
+            if ua and ua.rol in allowed_roles:
+                return view_func(request, *args, **kwargs)
+                
             raise PermissionDenied("No tienes permisos suficientes para realizar esta acción (se requiere rol: " + ", ".join(allowed_roles) + ").")
         return _wrapped_view
     return decorator
@@ -70,10 +83,9 @@ def get_agencia_from_request(request):
     if user.is_superuser:
         return None
 
-    if hasattr(user, 'agencias'):
-        ua = user.agencias.filter(activo=True).select_related('agencia').first()
-        if ua and ua.agencia:
-            return ua.agencia
+    agencia = get_user_active_agency(user)
+    if agencia:
+        return agencia
 
     raise PermissionDenied("Tu usuario no tiene una agencia activa asignada.")
 

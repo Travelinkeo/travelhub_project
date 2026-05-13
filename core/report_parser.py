@@ -3,7 +3,7 @@ import logging
 import re
 from typing import Any
 
-from core.gemini import generate_content
+from apps.automation.services.ai_engine import generate_content
 
 logger = logging.getLogger(__name__)
 

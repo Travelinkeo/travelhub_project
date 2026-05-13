@@ -1,5 +1,6 @@
 from django.db import migrations
 
+
 def migrate_agencia_data(apps, schema_editor):
     Agencia = apps.get_model('core', 'Agencia')
     AgenciaBranding = apps.get_model('core', 'AgenciaBranding')

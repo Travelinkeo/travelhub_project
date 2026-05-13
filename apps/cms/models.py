@@ -1,7 +1,8 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from django.utils import timezone
+
 from core.models.base import AgenciaMixin
+
 
 class Articulo(AgenciaMixin, models.Model):
     class EstadoArticulo(models.TextChoices):

@@ -1,6 +1,9 @@
 from django.contrib import admin
+
 from core.admin_saas import SaaSAdminMixin
-from .models import Cliente, Pasajero, FreelancerProfile, ComisionFreelancer, OportunidadViaje
+
+from .models import Cliente, ComisionFreelancer, FreelancerProfile, OportunidadViaje, Pasajero
+
 
 @admin.register(OportunidadViaje)
 class OportunidadViajeAdmin(SaaSAdminMixin, admin.ModelAdmin):

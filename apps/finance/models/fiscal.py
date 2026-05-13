@@ -1,6 +1,8 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+
 from apps.bookings.models import Venta
+
 
 class FacturaFiscal(models.Model):
     """

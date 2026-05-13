@@ -1,7 +1,8 @@
 import logging
-from decimal import Decimal
+
 from django.db.models import Q
-from apps.bookings.models import Venta, ItemVenta
+
+from apps.bookings.models import Venta
 
 logger = logging.getLogger(__name__)
 

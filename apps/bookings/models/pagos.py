@@ -1,10 +1,14 @@
 from __future__ import annotations
+
+from decimal import Decimal
+
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-from core.models.base import AgenciaMixin
-from core.mixins import SoftDeleteModel
+
 from apps.finance.models.currencies import Moneda
+from core.models.base import AgenciaMixin, SoftDeleteModel
+
 
 class FeeVenta(SoftDeleteModel, AgenciaMixin, models.Model):
     id_fee_venta = models.AutoField(primary_key=True, verbose_name=_("ID Fee"))
@@ -28,7 +32,6 @@ class FeeVenta(SoftDeleteModel, AgenciaMixin, models.Model):
         verbose_name = _("Fee de Venta")
         verbose_name_plural = _("Fees de Venta")
         ordering = ['-creado']
-        db_table = 'core_feeventa'
 
     def __str__(self):
         return f"{self.get_tipo_fee_display()} {self.monto} {self.moneda.codigo_iso if self.moneda else ''}"
@@ -62,7 +65,6 @@ class PagoVenta(AgenciaMixin, models.Model):
         verbose_name = _("Pago de Venta")
         verbose_name_plural = _("Pagos de Venta")
         ordering = ['-fecha_pago']
-        db_table = 'core_pagoventa'
         indexes = [
             models.Index(fields=['agencia', 'venta'], name='idx_pago_agencia_venta'),
             models.Index(fields=['agencia', 'fecha_pago'], name='idx_pago_agencia_fecha'),
@@ -74,7 +76,7 @@ class PagoVenta(AgenciaMixin, models.Model):
     
     def save(self, *args, **kwargs):
         if self.aplica_igtf and self.monto:
-            self.monto_igtf = self.monto * (self.tasa_igtf / 100)
+            self.monto_igtf = (self.monto * (self.tasa_igtf / Decimal('100'))).quantize(Decimal('0.01'))
         else:
-            self.monto_igtf = 0
+            self.monto_igtf = Decimal('0.00')
         super().save(*args, **kwargs)

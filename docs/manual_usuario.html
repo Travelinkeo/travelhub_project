@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manual de Usuario — TravelHub ERP</title>
+<style>
+:root {
+  --bg: #0a0e17;
+  --surface: #111827;
+  --surface2: #1a2235;
+  --border: #1e293b;
+  --text: #e2e8f0;
+  --text2: #94a3b8;
+  --primary: #3b82f6;
+  --primary-glow: rgba(59,130,246,0.15);
+  --green: #10b981;
+  --amber: #f59e0b;
+  --red: #ef4444;
+  --purple: #8b5cf6;
+  --radius: 12px;
+  --sidebar-w: 280px;
+}
+[data-theme="light"] {
+  --bg: #f8fafc;
+  --surface: #fff;
+  --surface2: #f1f5f9;
+  --border: #e2e8f0;
+  --text: #0f172a;
+  --text2: #475569;
+  --primary-glow: rgba(59,130,246,0.05);
+}
+* { margin:0; padding:0; box-sizing:border-box }
+html { scroll-behavior:smooth; font-size:15px }
+body { font-family:system-ui,-apple-system,sans-serif; background:var(--bg); color:var(--text); line-height:1.7; display:flex; min-height:100vh }
+a { color:var(--primary); text-decoration:none }
+a:hover { text-decoration:underline }
+
+/* Sidebar */
+nav#sidebar {
+  width:var(--sidebar-w); background:var(--surface); border-right:1px solid var(--border);
+  position:fixed; top:0; left:0; bottom:0; overflow-y:auto; z-index:10;
+  padding:1.5rem; transition:transform .3s
+}
+nav#sidebar.hidden { transform:translateX(-100%) }
+nav#sidebar h1 { font-size:1.1rem; font-weight:800; margin-bottom:1rem; display:flex; align-items:center; gap:.5rem }
+nav#sidebar h1 span { font-size:1.5rem }
+nav#sidebar input { width:100%; padding:.6rem .8rem; border-radius:8px; border:1px solid var(--border); background:var(--surface2); color:var(--text); font-size:.85rem; margin-bottom:1rem; outline:none }
+nav#sidebar input:focus { border-color:var(--primary) }
+nav#sidebar .nav-section { margin-bottom:.8rem }
+nav#sidebar .nav-title { font-size:.7rem; font-weight:700; text-transform:uppercase; letter-spacing:.1em; color:var(--primary); margin-bottom:.4rem; padding:.3rem 0; cursor:pointer; display:flex; justify-content:space-between; align-items:center }
+nav#sidebar .nav-title .arrow { transition:transform .2s; font-size:.7rem }
+nav#sidebar .nav-title.collapsed .arrow { transform:rotate(-90deg) }
+nav#sidebar .nav-links { display:flex; flex-direction:column; gap:1px; overflow:hidden; transition:max-height .3s }
+nav#sidebar .nav-links.collapsed { max-height:0 !important }
+nav#sidebar .nav-links a { display:block; padding:.4rem .6rem; border-radius:6px; font-size:.82rem; color:var(--text2); transition:all .15s }
+nav#sidebar .nav-links a:hover, nav#sidebar .nav-links a.active { background:var(--primary-glow); color:var(--primary); text-decoration:none }
+nav#sidebar .theme-toggle { margin-top:1.5rem; padding:.5rem; border-radius:8px; border:1px solid var(--border); background:var(--surface2); color:var(--text2); cursor:pointer; font-size:.8rem; width:100%; text-align:center; transition:all .2s }
+nav#sidebar .theme-toggle:hover { border-color:var(--primary); color:var(--primary) }
+
+/* Main */
+main { margin-left:var(--sidebar-w); flex:1; max-width:900px; padding:3rem 3rem 6rem; transition:margin .3s }
+main.expanded { margin-left:0 }
+section { margin-bottom:3rem; padding-top:1rem }
+section h2 { font-size:1.6rem; font-weight:800; margin-bottom:.8rem; padding-bottom:.6rem; border-bottom:2px solid var(--border); display:flex; align-items:center; gap:.5rem }
+section h2 .icon { font-size:1.4rem }
+section h3 { font-size:1.15rem; font-weight:700; margin:1.5rem 0 .5rem; color:var(--primary) }
+section h4 { font-size:.95rem; font-weight:600; margin:1rem 0 .3rem }
+
+p, li { color:var(--text2); margin-bottom:.6rem }
+ul, ol { padding-left:1.5rem; margin-bottom:1rem }
+li { margin-bottom:.3rem }
+
+code { background:var(--surface2); padding:.15rem .4rem; border-radius:4px; font-size:.85em; color:var(--primary); border:1px solid var(--border) }
+
+table { width:100%; border-collapse:collapse; margin:1rem 0; font-size:.88rem }
+th { background:var(--surface2); text-align:left; padding:.6rem .8rem; font-weight:700; font-size:.75rem; text-transform:uppercase; letter-spacing:.05em; color:var(--text2); border-bottom:2px solid var(--border) }
+td { padding:.6rem .8rem; border-bottom:1px solid var(--border); color:var(--text2) }
+tr:hover td { background:var(--primary-glow) }
+td:first-child, th:first-child { font-weight:600; color:var(--text) }
+
+.step { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:1.2rem 1.5rem; margin:1rem 0 }
+.step .num { display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; border-radius:50%; background:var(--primary); color:#fff; font-weight:700; font-size:.8rem; margin-right:.6rem }
+.step h4 { display:inline; font-size:1rem }
+.step p, .step ol { margin-top:.5rem }
+
+.badge { display:inline-flex; align-items:center; gap:.3rem; padding:.2rem .6rem; border-radius:20px; font-size:.72rem; font-weight:700 }
+.badge-green { background:rgba(16,185,129,.1); color:var(--green); border:1px solid rgba(16,185,129,.2) }
+.badge-amber { background:rgba(245,158,11,.1); color:var(--amber); border:1px solid rgba(245,158,11,.2) }
+.badge-red { background:rgba(239,68,68,.1); color:var(--red); border:1px solid rgba(239,68,68,.2) }
+.badge-blue { background:var(--primary-glow); color:var(--primary); border:1px solid rgba(59,130,246,.2) }
+
+.tip { background:var(--surface); border-left:3px solid var(--primary); border-radius:0 var(--radius) var(--radius) 0; padding:1rem 1.2rem; margin:1rem 0; font-size:.9rem }
+
+.mobile-menu { display:none; position:fixed; top:1rem; left:1rem; z-index:20; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:.5rem; cursor:pointer; font-size:1.3rem; color:var(--text) }
+
+footer { text-align:center; padding:2rem; color:var(--text2); font-size:.8rem; border-top:1px solid var(--border); margin-top:3rem }
+
+@media (max-width:768px) {
+  nav#sidebar { transform:translateX(-100%) }
+  nav#sidebar.open { transform:translateX(0) }
+  main { margin-left:0; padding:2rem 1rem }
+  .mobile-menu { display:block }
+  section h2 { font-size:1.3rem }
+  table { font-size:.75rem }
+}
+
+@media print {
+  nav#sidebar, .mobile-menu { display:none }
+  main { margin-left:0; max-width:100% }
+  body { font-size:12px; background:#fff; color:#000 }
+  .step, .tip { border:1px solid #ccc; background:#f9f9f9 }
+}
+</style>
+</head>
+<body>
+
+<button class="mobile-menu" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+
+<nav id="sidebar">
+  <h1><span>🛫</span> TravelHub</h1>
+  <input type="text" id="search" placeholder="🔍 Buscar en el manual..." oninput="filterNav(this.value)">
+  
+  <div class="nav-section">
+    <div class="nav-title" onclick="toggleSection(this)">🚀 Inicio <span class="arrow">▼</span></div>
+    <div class="nav-links">
+      <a href="#acceso">Acceso al Sistema</a>
+      <a href="#dashboard">Dashboard Principal</a>
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-title" onclick="toggleSection(this)">🎫 Boletos <span class="arrow">▼</span></div>
+    <div class="nav-links">
+      <a href="#importar-boletos">Importación con IA</a>
+      <a href="#revision-boleto">Pantalla de Revisión</a>
+      <a href="#busqueda-boletos">Búsqueda y Reportes</a>
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-title" onclick="toggleSection(this)">🛒 Ventas <span class="arrow">▼</span></div>
+    <div class="nav-links">
+      <a href="#ventas">Ventas y Reservas</a>
+      <a href="#componentes-venta">Componentes de Venta</a>
+      <a href="#pagos">Registrar Pagos</a>
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-title" onclick="toggleSection(this)">👥 CRM <span class="arrow">▼</span></div>
+    <div class="nav-links">
+      <a href="#crm">Clientes y Pasajeros</a>
+      <a href="#pasaportes">Escaneo de Pasaportes</a>
+      <a href="#migracion">Verificación Migratoria</a>
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-title" onclick="toggleSection(this)">📋 Cotizaciones <span class="arrow">▼</span></div>
+    <div class="nav-links">
+      <a href="#cotizaciones">Magic Quoter y Manual</a>
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-title" onclick="toggleSection(this)">🏨 Hoteles <span class="arrow">▼</span></div>
+    <div class="nav-links">
+      <a href="#hoteles">Tarifarios y Búsqueda</a>
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-title" onclick="toggleSection(this)">💰 Finanzas <span class="arrow">▼</span></div>
+    <div class="nav-links">
+      <a href="#finanzas">Facturación</a>
+      <a href="#conciliacion">Conciliación</a>
+      <a href="#gastos">Gastos Operativos</a>
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-title" onclick="toggleSection(this)">📊 Contabilidad <span class="arrow">▼</span></div>
+    <div class="nav-links">
+      <a href="#contabilidad">Plan de Cuentas y Asientos</a>
+      <a href="#reportes">Reportes Contables</a>
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-title" onclick="toggleSection(this)">📱 Marketing <span class="arrow">▼</span></div>
+    <div class="nav-links">
+      <a href="#marketing">Centro de Marketing</a>
+      <a href="#cms">CMS — Contenido</a>
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-title" onclick="toggleSection(this)">⚙️ Configuración <span class="arrow">▼</span></div>
+    <div class="nav-links">
+      <a href="#configuracion">Agencia y Branding</a>
+      <a href="#whatsapp">WhatsApp Business</a>
+      <a href="#admin">Panel Admin</a>
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-title" onclick="toggleSection(this)">🔧 Avanzado <span class="arrow">▼</span></div>
+    <div class="nav-links">
+      <a href="#traductor">Traductor GDS</a>
+      <a href="#gds-analyzer">GDS Analyzer IA</a>
+      <a href="#portal-pasajero">Portal del Pasajero</a>
+      <a href="#atajos">Atajos y Consejos</a>
+      <a href="#problemas">Solución de Problemas</a>
+    </div>
+  </div>
+
+  <button class="theme-toggle" onclick="toggleTheme()">🌓 Alternar Tema Claro / Oscuro</button>
+</nav>
+
+<main>
+
+<section id="acceso">
+<h2><span class="icon">🚀</span>1. Acceso al Sistema</h2>
+
+<h3>URL de acceso</h3>
+<code>http://localhost:8000/</code>
+
+<h3>Inicio de Sesión</h3>
+<ol>
+  <li>Ingresa tu <strong>nombre de usuario</strong> y <strong>contraseña</strong></li>
+  <li>Si olvidaste tu contraseña, usa el enlace mágico ingresando tu email</li>
+  <li>Al iniciar sesión, serás redirigido al Dashboard de tu agencia</li>
+</ol>
+
+<h3>Roles de Usuario</h3>
+<table>
+  <tr><th>Rol</th><th>Permisos</th></tr>
+  <tr><td><span class="badge badge-blue">Admin</span></td><td>Acceso total: configuración, usuarios, ventas, reportes</td></tr>
+  <tr><td><span class="badge badge-green">Gerente</span></td><td>Ventas, clientes, cotizaciones, reportes (sin configuración)</td></tr>
+  <tr><td><span class="badge badge-amber">Vendedor</span></td><td>Crear ventas, clientes, cotizaciones</td></tr>
+  <tr><td>Contador</td><td>Facturación, contabilidad, reportes financieros</td></tr>
+  <tr><td>Operador</td><td>Importar boletos, gestionar reservas</td></tr>
+  <tr><td>Consulta</td><td>Solo lectura de ventas y reportes</td></tr>
+</table>
+</section>
+
+<section id="dashboard">
+<h2><span class="icon">📊</span>2. Dashboard Principal</h2>
+<p><strong>URL:</strong> <code>/dashboard/</code></p>
+
+<h3>Panel de Métricas</h3>
+<ul>
+  <li><strong>Ventas del mes:</strong> Total de ventas y monto acumulado</li>
+  <li><strong>Boletos procesados:</strong> Hoy / Semana / Mes</li>
+  <li><strong>Pendientes de pago:</strong> Ventas con saldo por cobrar</li>
+  <li><strong>Margen estimado:</strong> Ganancia proyectada del mes</li>
+</ul>
+
+<h3>Alertas</h3>
+<ul>
+  <li><span class="badge badge-red">Error</span> Boletos con errores de parseo</li>
+  <li><span class="badge badge-amber">Atención</span> Pasaportes próximos a vencer</li>
+  <li><span class="badge badge-blue">Info</span> Pagos pendientes > 7 días</li>
+</ul>
+
+<h3>Acciones Rápidas</h3>
+<ul>
+  <li><strong>Subir Boleto:</strong> Importa PDF/TXT/EML para parseo automático</li>
+  <li><strong>Nueva Venta:</strong> Crea una venta manual</li>
+  <li><strong>Nuevo Cliente:</strong> Registra un cliente</li>
+</ul>
+</section>
+
+<section id="importar-boletos">
+<h2><span class="icon">🤖</span>3. Importación de Boletos con IA</h2>
+
+<div class="tip">TravelHub usa <strong>Google Gemini</strong> para extraer automáticamente los datos de boletos aéreos desde archivos PDF, TXT o EML. Soporta 6 sistemas GDS: Sabre, KIU, Amadeus, Copa, Wingo y TK Connect.</div>
+
+<h3>Opción A — Subir Archivo</h3>
+<div class="step"><span class="num">1</span><h4>Ir a la página de importación</h4><p>Ve a <strong>Dashboard → Subir Boleto</strong> o a <code>/erp/boletos-importar/</code></p></div>
+<div class="step"><span class="num">2</span><h4>Arrastrar el archivo</h4><p>Suelta tu archivo PDF, TXT o EML en la zona de carga</p></div>
+<div class="step"><span class="num">3</span><h4>Detección automática</h4><p>El sistema detecta el formato GDS automáticamente</p></div>
+<div class="step"><span class="num">4</span><h4>Extracción IA</h4><p>En segundos, la IA extrae: PNR, pasajero, vuelos, tarifas, impuestos</p></div>
+<div class="step"><span class="num">5</span><h4>Revisión</h4><p>Serás redirigido a la pantalla de <strong>Revisión del Boleto</strong></p></div>
+
+<h3>Opción B — Por Email (Automático)</h3>
+<ol>
+  <li>Configura tu correo de emisiones en <strong>Configuración de Agencia</strong></li>
+  <li>Reenvía los boletos a ese correo</li>
+  <li>El sistema los procesa automáticamente cada <strong>2 minutos</strong></li>
+</ol>
+</section>
+
+<section id="revision-boleto">
+<h3>Pantalla de Revisión</h3>
+<p>Después del parseo, verás:</p>
+<table>
+  <tr><th>Sección</th><th>Contenido</th></tr>
+  <tr><td>Datos del pasajero</td><td>Nombre, identificación <em>(editable)</em></td></tr>
+  <tr><td>Itinerario</td><td>Todos los segmentos de vuelo con fechas, horas, aerolíneas</td></tr>
+  <tr><td>Datos financieros</td><td>Tarifa base, impuestos, total, comisión</td></tr>
+  <tr><td>Asignar cliente</td><td>Selecciona un cliente existente o crea uno nuevo</td></tr>
+</table>
+
+<h4>Acciones Disponibles</h4>
+<table>
+  <tr><th>Botón</th><th>Función</th></tr>
+  <tr><td><span class="badge badge-green">Aprobar y Guardar</span></td><td>Crea la Venta con todos los datos extraídos</td></tr>
+  <tr><td><span class="badge badge-blue">Re-procesar</span></td><td>Vuelve a ejecutar la IA si hay errores</td></tr>
+  <tr><td><span class="badge badge-red">Desasociar Venta</span></td><td>Desvincula el boleto de su venta actual</td></tr>
+</table>
+</section>
+
+<section id="busqueda-boletos">
+<h3>Búsqueda y Reportes</h3>
+<p><strong>Búsqueda:</strong> <code>/erp/boletos-busqueda/</code></p>
+<ul><li>Nombre de pasajero, PNR, origen, destino, fecha</li><li>Filtro por sistema GDS</li></ul>
+<p><strong>Reportes:</strong> <code>/erp/boletos-reportes/</code></p>
+<ul><li>Comisiones por aerolínea</li><li>Volumen de boletos por mes</li><li>Gráficos de tendencias</li></ul>
+</section>
+
+<section id="ventas">
+<h2><span class="icon">🛒</span>4. Ventas y Reservas</h2>
+
+<h3>Crear una Venta Manual</h3>
+<div class="step"><span class="num">1</span><h4>Ir a Ventas</h4><p><strong>Dashboard → Nueva Venta</strong> o <code>/erp/ventas/nueva/</code></p></div>
+<div class="step"><span class="num">2</span><h4>Completar datos</h4><p>Cliente, localizador (auto-generado), moneda</p></div>
+<div class="step"><span class="num">3</span><h4>Añadir Items</h4><p>Boleto aéreo, hotel, traslado, actividad, etc.</p></div>
+<div class="step"><span class="num">4</span><h4>Precio y costo</h4><p>Por cada item, define precio de venta y costo</p></div>
+
+<h3>Estados de una Venta</h3>
+<table>
+  <tr><th>Estado</th><th>Significado</th></tr>
+  <tr><td><span class="badge badge-amber">Pendiente de Pago</span></td><td>Creada, esperando pago del cliente</td></tr>
+  <tr><td><span class="badge badge-blue">Pagada Parcial</span></td><td>Se recibió parte del pago</td></tr>
+  <tr><td><span class="badge badge-green">Pagada Total</span></td><td>Pago completo recibido</td></tr>
+  <tr><td>Confirmada</td><td>Reserva confirmada con proveedor</td></tr>
+  <tr><td>Completada</td><td>Viaje finalizado</td></tr>
+</table>
+</section>
+
+<section id="componentes-venta">
+<h3>Componentes de Venta</h3>
+<p>Cada venta puede incluir múltiples servicios:</p>
+<table>
+  <tr><th>Componente</th><th>Detalles</th></tr>
+  <tr><td>Boleto Aéreo</td><td>Segmentos de vuelo con aerolínea, fechas, clase</td></tr>
+  <tr><td>Alojamiento</td><td>Hotel, check-in/out, régimen, habitaciones</td></tr>
+  <tr><td>Traslado</td><td>Aeropuerto-Hotel, tipo de vehículo</td></tr>
+  <tr><td>Actividad</td><td>Tour, excursión, entrada</td></tr>
+  <tr><td>Alquiler de Auto</td><td>Categoría, fechas, seguro</td></tr>
+  <tr><td>Crucero</td><td>Naviera, barco, cabina, paquetes</td></tr>
+  <tr><td>Circuito</td><td>Itinerario multi-día con actividades diarias</td></tr>
+</table>
+</section>
+
+<section id="pagos">
+<h3>Registrar un Pago</h3>
+<div class="step"><span class="num">1</span><h4>Abrir la venta</h4><p>Ve a la pestaña <strong>Pagos</strong></p></div>
+<div class="step"><span class="num">2</span><h4>Ingresar datos</h4><p>Monto, método (Efectivo, Transferencia, Zelle, Binance), fecha</p></div>
+<div class="step"><span class="num">3</span><h4>Recalcular</h4><p>El sistema recalcula automáticamente el saldo pendiente</p></div>
+
+<h3>Generar Voucher / Factura</h3>
+<ul>
+  <li><strong>Voucher PDF:</strong> Para entregar al cliente con su itinerario completo</li>
+  <li><strong>Factura:</strong> Documento fiscal con IVA 16%, IGTF 3% (si aplica)</li>
+  <li><strong>Doble Facturación:</strong> Para operaciones en divisas (USD + Bolívares)</li>
+</ul>
+</section>
+
+<section id="crm">
+<h2><span class="icon">👥</span>5. CRM — Clientes y Pasajeros</h2>
+
+<h3>Clientes</h3>
+<p><strong>URL:</strong> <code>/erp/clientes/</code></p>
+<ul>
+  <li><strong>Lista:</strong> Todos los clientes de tu agencia</li>
+  <li><strong>Crear:</strong> Nombre, apellido, email, teléfono, documento</li>
+  <li><strong>Ficha:</strong> Historial de ventas, pagos, preferencias de viaje</li>
+  <li><strong>Cliente frecuente:</strong> Se marca automáticamente tras 5+ compras</li>
+</ul>
+
+<h3>Pasajeros</h3>
+<p><strong>URL:</strong> <code>/erp/pasajeros/</code></p>
+<ul>
+  <li>Diferente de "Cliente" — un pasajero es quien viaja (puede no ser el comprador)</li>
+  <li>Datos: nombre, fecha de nacimiento, documento, nacionalidad, vencimiento</li>
+</ul>
+</section>
+
+<section id="pasaportes">
+<h3>Escaneo de Pasaportes con IA</h3>
+<div class="step"><span class="num">1</span><h4>Subir foto del pasaporte</h4></div>
+<div class="step"><span class="num">2</span><h4>IA extrae</h4><p>Nombres, apellidos, número de pasaporte, nacionalidad, fechas (Gemini Vision)</p></div>
+<div class="step"><span class="num">3</span><h4>Registro automático</h4><p>Se crea el pasajero automáticamente</p></div>
+</section>
+
+<section id="migracion">
+<h3>Verificación Migratoria</h3>
+<p>Al crear una venta con vuelos internacionales, el sistema verifica automáticamente:</p>
+<ul>
+  <li>Requisitos de visa según nacionalidad y destino</li>
+  <li>Vigencia mínima del pasaporte (6 meses)</li>
+  <li>Vacunas requeridas</li>
+</ul>
+<p>Resultado: <span class="badge badge-green">🟢 Sin problemas</span> <span class="badge badge-amber">🟡 Requiere atención</span> <span class="badge badge-red">🔴 Alerta</span></p>
+</section>
+
+<section id="cotizaciones">
+<h2><span class="icon">📋</span>6. Cotizaciones</h2>
+
+<h3>Magic Quoter (Cotizador con IA)</h3>
+<p><strong>URL:</strong> <code>/cotizaciones/magic/</code></p>
+<div class="step"><span class="num">1</span><h4>Pegar texto GDS</h4><p>Pega el texto crudo de Sabre, Amadeus o KIU</p></div>
+<div class="step"><span class="num">2</span><h4>IA analiza</h4><p>Extrae vuelos, tarifas, impuestos, fechas</p></div>
+<div class="step"><span class="num">3</span><h4>Genera automáticamente</h4><p>Items de cotización con precios, fee de agencia, imagen del destino</p></div>
+
+<h3>Ciclo de Vida</h3>
+<table>
+  <tr><th>Estado</th><th>Acción</th></tr>
+  <tr><td>Borrador</td><td>Editando</td></tr>
+  <tr><td>Enviada</td><td>Cliente la recibe</td></tr>
+  <tr><td>Vista</td><td>Cliente abrió el enlace</td></tr>
+  <tr><td><span class="badge badge-green">Aceptada</span></td><td>→ Convertir a Venta</td></tr>
+  <tr><td>Rechazada / Vencida</td><td>Archivada</td></tr>
+</table>
+</section>
+
+<section id="hoteles">
+<h2><span class="icon">🏨</span>7. Hoteles y Tarifarios</h2>
+
+<h3>Buscar Hoteles</h3>
+<p><strong>URL:</strong> <code>/hoteles/</code></p>
+<ol>
+  <li>Ingresa destino, fechas, huéspedes</li>
+  <li>El sistema busca en todos los tarifarios cargados</li>
+  <li>Resultados ordenados por precio (menor a mayor)</li>
+  <li>Cada resultado muestra: precio por noche, comisión, descripción, amenities, fotos</li>
+</ol>
+
+<h3>Cargar Tarifario</h3>
+<ol>
+  <li>Ve al Admin: <strong>Hoteles → Tarifarios Proveedor</strong></li>
+  <li>Sube el PDF del tarifario del proveedor</li>
+  <li>La IA extrae: hoteles, tipos de habitación, tarifas por temporada</li>
+  <li>Revisa y ajusta los datos extraídos</li>
+</ol>
+
+<h3>Marketing de Hoteles</h3>
+<ul>
+  <li><strong>Generar Copy:</strong> IA crea textos para Instagram/Facebook con diferentes tonos (profesional, aventurero, romántico)</li>
+  <li><strong>Generar Story:</strong> Crea imagen promocional del hotel</li>
+</ul>
+</section>
+
+<section id="finanzas">
+<h2><span class="icon">💰</span>8. Finanzas y Facturación</h2>
+
+<h3>Facturación</h3>
+<p><strong>URL:</strong> <code>/facturacion/</code></p>
+<ul>
+  <li><strong>Emitir Factura:</strong> Desde una venta, genera factura fiscal</li>
+  <li><strong>Factura Consolidada:</strong> Agrupa múltiples ventas (formato SENIAT Venezuela)</li>
+  <li><strong>Nota de Crédito/Débito:</strong> Para ajustes y devoluciones</li>
+</ul>
+
+<h3>Campos de Factura (Venezuela)</h3>
+<table>
+  <tr><th>Campo</th><th>Valor</th></tr>
+  <tr><td>Número de control</td><td>Auto-generado</td></tr>
+  <tr><td>Base imponible</td><td>En USD</td></tr>
+  <tr><td>IVA</td><td>16% (alícuota general)</td></tr>
+  <tr><td>IGTF</td><td>3% (si aplica — Sujeto Pasivo Especial)</td></tr>
+  <tr><td>INATUR</td><td>1% (provisión trimestral)</td></tr>
+  <tr><td>Equivalente Bs.</td><td>Tasa BCV del día</td></tr>
+</table>
+
+<h3>Libro de Ventas</h3>
+<p><strong>URL:</strong> <code>/api/libro-ventas/</code> — Reporte fiscal mensual obligatorio con ventas propias, de terceros y total débito fiscal.</p>
+</section>
+
+<section id="conciliacion">
+<h3>Conciliación de Proveedores</h3>
+<p><strong>URL:</strong> <code>/finance/supplier-reconciliation/</code></p>
+<div class="step"><span class="num">1</span><h4>Subir reporte</h4><p>Sube el PDF o Excel del proveedor</p></div>
+<div class="step"><span class="num">2</span><h4>Cruce automático</h4><p>El sistema cruza con tus ventas por número de boleto/PNR</p></div>
+<div class="step"><span class="num">3</span><h4>Resultados</h4><p>Detecta discrepancias, boletos huérfanos, posibles fraudes</p></div>
+</section>
+
+<section id="gastos">
+<h3>Gastos Operativos</h3>
+<ul>
+  <li>Registra gastos: alquiler, servicios, comisiones, papelería</li>
+  <li>Se contabilizan automáticamente: <strong>Débito:</strong> Gasto | <strong>Crédito:</strong> Caja/Banco</li>
+</ul>
+</section>
+
+<section id="contabilidad">
+<h2><span class="icon">📊</span>9. Contabilidad</h2>
+
+<h3>Plan de Cuentas (VEN-NIF)</h3>
+<table>
+  <tr><th>Clase</th><th>Cuentas</th></tr>
+  <tr><td>1 — Activos</td><td>Caja, Bancos, Cuentas por Cobrar</td></tr>
+  <tr><td>2 — Pasivos</td><td>Cuentas por Pagar, Impuestos</td></tr>
+  <tr><td>4 — Ingresos</td><td>Venta Boletería, Comisiones</td></tr>
+  <tr><td>5 — Gastos</td><td>Personal, Operativos, Administrativos, Financieros</td></tr>
+</table>
+
+<h3>Asientos Contables Automáticos</h3>
+<table>
+  <tr><th>Operación</th><th>Débito</th><th>Crédito</th></tr>
+  <tr><td>Venta al contado</td><td>Caja/Banco</td><td>Ingresos + IVA</td></tr>
+  <tr><td>Venta a crédito</td><td>Ctas por Cobrar</td><td>Ingresos + IVA</td></tr>
+  <tr><td>Cobro de venta</td><td>Caja/Banco</td><td>Ctas por Cobrar</td></tr>
+  <tr><td>Gasto operativo</td><td>Gasto</td><td>Caja/Banco</td></tr>
+</table>
+</section>
+
+<section id="reportes">
+<h3>Reportes Contables</h3>
+<p><strong>URL:</strong> <code>/reportes/</code></p>
+<table>
+  <tr><th>Reporte</th><th>Descripción</th></tr>
+  <tr><td>Libro Diario</td><td>Todas las transacciones en orden cronológico</td></tr>
+  <tr><td>Balance de Comprobación</td><td>Sumas y saldos por cuenta</td></tr>
+  <tr><td>Estado de Resultados</td><td>Ingresos - Costos - Gastos = Utilidad</td></tr>
+  <tr><td>Validación de Cuadre</td><td>Detecta asientos descuadrados</td></tr>
+</table>
+
+<h3>Tasas BCV</h3>
+<p>Se sincronizan automáticamente 2 veces al día. Usadas para calcular equivalentes en Bolívares. Histórico consultable.</p>
+</section>
+
+<section id="marketing">
+<h2><span class="icon">📱</span>10. Marketing</h2>
+
+<h3>Centro de Marketing</h3>
+<p><strong>URL:</strong> <code>/marketing/hub/</code></p>
+<ul>
+  <li><strong>Generar Flyer:</strong> Crea imagen promocional de un destino/hotel</li>
+  <li><strong>AI Copywriter:</strong> Genera textos para redes sociales en 4 tonos: Profesional, Aventurero, Romántico, Formal</li>
+  <li><strong>Magic Newsletter:</strong> Boletín de email en HTML con ofertas</li>
+</ul>
+
+<h3>Campañas</h3>
+<ul>
+  <li>Crea campañas con fecha de inicio/fin</li>
+  <li>Programa publicaciones en Instagram, Facebook, WhatsApp</li>
+</ul>
+</section>
+
+<section id="cms">
+<h2><span class="icon">📝</span>11. CMS — Contenido</h2>
+<ul>
+  <li><strong>Blog / Artículos:</strong> Crea artículos con Markdown, SEO, categorizados por destino</li>
+  <li><strong>Guías de Destino:</strong> Información turística: mejor época, visa, idioma, moneda</li>
+  <li>Se muestran en el portal público de la agencia</li>
+</ul>
+</section>
+
+<section id="configuracion">
+<h2><span class="icon">⚙️</span>12. Configuración de Agencia</h2>
+
+<h3>Datos Generales</h3>
+<p><strong>URL:</strong> <code>/agencia/configuracion/</code></p>
+<ul><li>Nombre comercial, RIF, IATA</li><li>Teléfono, email, dirección</li><li>Moneda principal, zona horaria</li></ul>
+
+<h3>Branding y PDFs</h3>
+<p><strong>URL:</strong> <code>/settings/branding/</code></p>
+<ul>
+  <li><strong>Color primario:</strong> Se aplica a todos los PDFs (boletos, vouchers, facturas)</li>
+  <li><strong>Tema del sitio:</strong> Obsidian Emerald, Neon Sunset, Midnight Gold, Nordic Snow, Cyber Fuchsia, Swiss Vintage</li>
+  <li><strong>Plantilla de Boletos:</strong> 6 variantes de diseño</li>
+  <li><strong>Plantilla de Vouchers:</strong> 5 variantes de diseño</li>
+  <li><strong>Plantilla de Facturas:</strong> Diseño fiscal personalizado</li>
+</ul>
+
+<h3>Usuarios de la Agencia</h3>
+<p><strong>URL:</strong> <code>/agencia/usuarios/</code></p>
+<ul><li>Invita nuevos usuarios (email + nombre + rol)</li><li>Activa/desactiva usuarios</li><li>Cambia roles</li></ul>
+</section>
+
+<section id="whatsapp">
+<h2><span class="icon">💬</span>13. WhatsApp Business</h2>
+
+<h3>Configuración Inicial</h3>
+<div class="step"><span class="num">1</span><h4>Ir a Configuración</h4><p>Configuración de Agencia → pestaña <strong>WhatsApp</strong></p></div>
+<div class="step"><span class="num">2</span><h4>Obtener QR</h4><p>Si el QR no aparece como imagen, haz clic en "Abrir QR en Evolution"</p></div>
+<div class="step"><span class="num">3</span><h4>Escanear</h4><p>Escanea el QR con WhatsApp en tu celular (Ajustes → Dispositivos vinculados)</p></div>
+<div class="step"><span class="num">4</span><h4>Confirmar</h4><p>La página se actualiza mostrando <span class="badge badge-green">CONECTADO</span></p></div>
+
+<h3>Funcionalidades</h3>
+<ul>
+  <li><strong>Notificaciones automáticas:</strong> Pago recibido, boleto procesado, recordatorio de viaje</li>
+  <li><strong>Envío de PDFs:</strong> Boletos y vouchers por WhatsApp</li>
+  <li><strong>Chatbot IA:</strong> Responde consultas de clientes sobre ventas, reservas, requisitos migratorios</li>
+</ul>
+</section>
+
+<section id="admin">
+<h2><span class="icon">🛡️</span>14. Panel de Administración</h2>
+<p><strong>URL:</strong> <code>/admin/</code></p>
+
+<div class="tip">El panel de administración usa el tema <strong>Unfold</strong> — moderno, responsive, con modo oscuro/claro y barra lateral colapsable.</div>
+
+<h3>Barra Lateral — 13 Secciones</h3>
+<table>
+  <tr><th>Sección</th><th>Contenido</th></tr>
+  <tr><td>Operaciones</td><td>Dashboard, subir boleto, buffer de revisión</td></tr>
+  <tr><td>Ventas y Reservas</td><td>15 modelos: ventas, items, boletos, segmentos, alojamientos, traslados, etc.</td></tr>
+  <tr><td>Hoteles y Tarifarios</td><td>Tarifarios, hoteles, habitaciones, tarifas, amenities</td></tr>
+  <tr><td>CRM</td><td>Clientes, pasajeros, oportunidades, pasaportes</td></tr>
+  <tr><td>Cotizaciones</td><td>Cotizaciones e items</td></tr>
+  <tr><td>Finanzas</td><td>Facturas, facturas consolidadas, gastos, conciliaciones</td></tr>
+  <tr><td>Contabilidad</td><td>Plan de cuentas, asientos, tasas BCV</td></tr>
+  <tr><td>Marketing</td><td>Campañas, activos, configuración</td></tr>
+  <tr><td>CMS</td><td>Artículos, guías, posts</td></tr>
+  <tr><td>Configuración Global</td><td>Agencias, catálogos, feature flags, auditoría</td></tr>
+</table>
+
+<h3>Cambiar Tema</h3>
+<p>Click en ☀️/🌙 en la esquina superior derecha del admin para alternar entre claro, oscuro o automático.</p>
+</section>
+
+<section id="traductor">
+<h2><span class="icon">🔧</span>15. Herramientas Avanzadas</h2>
+
+<h3>Traductor de Itinerarios GDS</h3>
+<p><strong>URL:</strong> <code>/tools/traductor/</code></p>
+<ol>
+  <li>Pega texto crudo de GDS (Sabre, Amadeus, KIU)</li>
+  <li>Traduce a itinerario legible en HTML</li>
+  <li>Calcula precio con fees configurados</li>
+  <li>Copia el resultado o genera una cotización</li>
+</ol>
+</section>
+
+<section id="gds-analyzer">
+<h3>GDS Analyzer (IA)</h3>
+<p><strong>URL:</strong> <code>/intelligence/gds-analyzer/</code></p>
+<ol>
+  <li>Pega la terminal completa de GDS</li>
+  <li>La IA analiza y extrae todos los boletos</li>
+  <li>Inyecta directamente al ERP como Ventas</li>
+</ol>
+</section>
+
+<section id="portal-pasajero">
+<h3>Portal del Pasajero</h3>
+<p>Cada venta genera un enlace público único:</p>
+<ul>
+  <li><strong>URL:</strong> <code>/v/&lt;uuid&gt;/</code></li>
+  <li>El cliente ve su itinerario, vuelos, vouchers</li>
+  <li>Descarga PDFs</li>
+  <li>Personalizado con logo y colores de tu agencia</li>
+</ul>
+
+<h3>Vouchers PDF por Tipo de Servicio</h3>
+<p>5 variantes de diseño disponibles:</p>
+<ul><li>Voucher Unificado</li><li>Voucher de Hotel</li><li>Voucher de Traslado</li><li>Voucher de Actividad</li><li>Voucher de Alquiler de Auto</li></ul>
+</section>
+
+<section id="atajos">
+<h3>Atajos y Consejos</h3>
+<table>
+  <tr><th>Atajo</th><th>Descripción</th></tr>
+  <tr><td><strong>Ctrl+K</strong></td><td>Búsqueda global en todo el sistema</td></tr>
+  <tr><td>Arrastrar archivo</td><td>Importa boletos soltando PDF/TXT en la zona de carga</td></tr>
+  <tr><td>Auto-guardado</td><td>Los formularios guardan al presionar Enter</td></tr>
+  <tr><td>HTMX polling</td><td>Notificaciones y QR WhatsApp se actualizan solos</td></tr>
+</table>
+</section>
+
+<section id="problemas">
+<h2><span class="icon">🩺</span>16. Solución de Problemas</h2>
+
+<table>
+  <tr><th>Problema</th><th>Solución</th></tr>
+  <tr><td>Un boleto no se procesa</td><td>Verifica que sea PDF, TXT o EML. Revisa en Boletos → Buscar si tiene error. Usa Re-procesar.</td></tr>
+  <tr><td>No aparece el QR de WhatsApp</td><td>Asegúrate que Evolution API esté corriendo. Recarga (F5). Ve a Configuración → WhatsApp.</td></tr>
+  <tr><td>No veo todas las opciones del Admin</td><td>Verifica tu rol (Admin). Si eres superadmin, ve a /god-mode/ e impersona tu agencia.</td></tr>
+  <tr><td>Factura no se genera</td><td>Verifica que la venta tenga cliente asignado y esté en estado Pagada Parcial o Total.</td></tr>
+  <tr><td>Error de permisos</td><td>Tu rol puede no tener acceso a esa función. Contacta al administrador de tu agencia.</td></tr>
+</table>
+</section>
+
+<footer>
+  <p><strong>TravelHub ERP</strong> — Automatización inteligente para agencias de viajes. v1.0 — Mayo 2026</p>
+</footer>
+
+</main>
+
+<script>
+// Collapsible sidebar sections
+function toggleSection(el) {
+  el.classList.toggle('collapsed');
+  const links = el.nextElementSibling;
+  links.classList.toggle('collapsed');
+  if (!links.style.maxHeight) {
+    links.style.maxHeight = links.scrollHeight + 'px';
+  }
+}
+document.querySelectorAll('.nav-links').forEach(l => {
+  l.style.maxHeight = l.scrollHeight + 'px';
+});
+
+// Search filter
+function filterNav(q) {
+  q = q.toLowerCase();
+  document.querySelectorAll('.nav-links a').forEach(a => {
+    const section = a.closest('.nav-section');
+    const title = section.querySelector('.nav-title');
+    if (!q || a.textContent.toLowerCase().includes(q)) {
+      a.style.display = '';
+      section.style.display = '';
+      title.classList.remove('collapsed');
+      const links = title.nextElementSibling;
+      links.classList.remove('collapsed');
+      links.style.maxHeight = links.scrollHeight + 'px';
+    } else {
+      a.style.display = 'none';
+    }
+  });
+  // Hide empty sections
+  document.querySelectorAll('.nav-section').forEach(s => {
+    const visible = s.querySelectorAll('.nav-links a[style*="display:"]').length;
+    const total = s.querySelectorAll('.nav-links a').length;
+    if (q && visible === total) s.style.display = 'none';
+  });
+}
+
+// Theme toggle
+function toggleTheme() {
+  const html = document.documentElement;
+  html.dataset.theme = html.dataset.theme === 'dark' ? 'light' : 'dark';
+  localStorage.setItem('manual-theme', html.dataset.theme);
+}
+
+// Load saved theme
+const saved = localStorage.getItem('manual-theme');
+if (saved) document.documentElement.dataset.theme = saved;
+
+// Active section tracking
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+      const link = document.querySelector(`.nav-links a[href="#${e.target.id}"]`);
+      if (link) link.classList.add('active');
+    }
+  });
+}, { rootMargin: '-20% 0px -70% 0px' });
+document.querySelectorAll('section[id]').forEach(s => observer.observe(s));
+
+// Mobile: close sidebar on link click
+document.querySelectorAll('.nav-links a').forEach(a => {
+  a.addEventListener('click', () => {
+    document.getElementById('sidebar').classList.remove('open');
+  });
+});
+</script>
+
+</body>
+</html>

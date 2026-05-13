@@ -1,18 +1,18 @@
 import json
 import logging
 from decimal import Decimal
-from django.http import JsonResponse
-from django.views import View
-from django.urls import reverse
+
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
+from django.http import JsonResponse
 from django.shortcuts import render
+from django.urls import reverse
+from django.views import View
 from django.views.generic import TemplateView
 
+from apps.automation.parsers.venta_builder import VentaBuilderService
+from apps.automation.services.ai_engine import AIEngine
 from apps.crm.models import Cliente
-from apps.bookings.models import BoletoImportado, Venta
-from core.services.parsers.venta_builder import VentaBuilderService
-from core.services.ai_engine import AIEngine
 
 logger = logging.getLogger(__name__)
 
@@ -106,7 +106,7 @@ class GDSInjectERPView(LoginRequiredMixin, View):
             # Redirección
             try:
                 redirect_url = reverse('core:editar_venta', kwargs={'pk': venta.pk})
-            except:
+            except Exception:
                 redirect_url = f"/admin/core/venta/{venta.pk}/change/"
             
             return JsonResponse({

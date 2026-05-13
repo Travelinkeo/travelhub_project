@@ -35,11 +35,18 @@
                 <p class="text-green-800 dark:text-green-300 font-medium text-lg leading-tight">Sesión vinculada correctamente</p>
                 <button hx-post="{% url 'bookings:whatsapp_qr' %}?action=logout" hx-target="#whatsapp-qr-container" class="mt-6 text-sm text-red-500 hover:text-red-700 font-semibold transition-colors duration-200 underline decoration-2 underline-offset-4">Desconectar dispositivo</button>
             </div>
+        {% elif qr_code and qr_code|slice:":4" == "http" %}
+            <div class="bg-white p-4 rounded-2xl shadow-2xl border-4 border-gray-50 dark:border-gray-700 ring-1 ring-black/5">
+                <img src="{{ qr_code }}" alt="WhatsApp QR Code" class="w-64 h-64 rounded-lg">
+                <div class="mt-4 text-center">
+                    <p class="text-sm text-gray-500 font-medium animate-pulse">Escanea desde tu telefono</p>
+                </div>
+            </div>
         {% elif qr_code %}
             <div class="bg-white p-4 rounded-2xl shadow-2xl border-4 border-gray-50 dark:border-gray-700 ring-1 ring-black/5">
                 <img src="{{ qr_code }}" alt="WhatsApp QR Code" class="w-64 h-64 rounded-lg">
                 <div class="mt-4 text-center">
-                    <p class="text-sm text-gray-500 font-medium animate-pulse">Escanea desde tu teléfono</p>
+                    <p class="text-sm text-gray-500 font-medium animate-pulse">Escanea desde tu telefono</p>
                 </div>
             </div>
         {% else %}

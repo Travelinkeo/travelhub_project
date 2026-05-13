@@ -1,15 +1,16 @@
-import io
-import os
-import requests
 import base64
-from PIL import Image, ImageDraw, ImageFont
+import io
+from decimal import Decimal
+
+import vertexai
 from django.conf import settings
 from django.core.files.storage import default_storage
-from decimal import Decimal
-import vertexai
+from PIL import Image, ImageDraw, ImageFont
 from vertexai.preview.vision_models import ImageGenerationModel
+
 from apps.bookings.models import HotelTarifario, TarifaHabitacion
 from core.models.agencia import Agencia
+
 
 class PromotionService:
     """
@@ -30,7 +31,7 @@ class PromotionService:
         if tarifas.exists():
             min_price = tarifas.first().tarifa_dbl
         
-        agencia = Agencia.objects.filter(pk=agencia_id).first() if agencia_id else Agencia.objects.filter(activa=True).first()
+        Agencia.objects.filter(pk=agencia_id).first() if agencia_id else Agencia.objects.filter(activa=True).first()
 
         W, H = 1080, 1920
         canvas = Image.new('RGB', (W, H), (20, 20, 20))
@@ -68,7 +69,7 @@ class PromotionService:
             font_title = ImageFont.truetype("arialbd.ttf", 80)
             font_sub = ImageFont.truetype("arial.ttf", 40)
             font_price = ImageFont.truetype("arialbd.ttf", 70)
-        except:
+        except Exception:
             font_title = font_sub = font_price = ImageFont.load_default()
 
         def draw_text_center(y, text, font, color='white'):

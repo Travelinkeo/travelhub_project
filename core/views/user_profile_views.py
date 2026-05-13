@@ -1,12 +1,18 @@
-from django.shortcuts import render, redirect
-from django.views.generic import TemplateView
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
-from django.urls import reverse_lazy
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.forms import PasswordChangeForm
-from core.models.agencia import Agencia
-from core.forms.profile_forms import UserProfileForm, AgencyBrandingForm, AgencyAutomationForm, AgencyBasicInfoForm
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.shortcuts import redirect
+from django.urls import reverse_lazy
+from django.views.generic import TemplateView
+
+from core.forms.profile_forms import (
+    AgencyAutomationForm,
+    AgencyBasicInfoForm,
+    AgencyBrandingForm,
+    UserProfileForm,
+)
+
 
 class UserProfileView(LoginRequiredMixin, TemplateView):
     template_name = 'core/config/profile.html'

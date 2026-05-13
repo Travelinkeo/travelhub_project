@@ -1,12 +1,13 @@
-from django.urls import path, include
+from django.urls import include, path
 from rest_framework.routers import DefaultRouter
+
 from .views import (
-    CotizacionViewSet, 
-    ItemCotizacionViewSet, 
-    MagicQuoterView, 
-    MagicQuoterAIView, 
+    CotizacionViewSet,
+    ItemCotizacionViewSet,
+    MagicQuoterAIView,
     MagicQuoterSaveView,
-    PublicQuoteDetailView
+    MagicQuoterView,
+    PublicQuoteDetailView,
 )
 from .views_whatsapp import IncomingWhatsAppWebhook
 

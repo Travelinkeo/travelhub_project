@@ -1,21 +1,18 @@
-from django.views.generic import ListView, DetailView
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import get_object_or_404, redirect
 from django.contrib import messages
-from django.urls import reverse
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
 from django.http import HttpResponse
+from django.shortcuts import redirect
+from django.views.generic import DetailView, ListView
 
 from apps.bookings.models import Venta
 from apps.finance.models import Factura
-from core.services.facturacion_service import FacturacionService
-from apps.crm.models import Cliente
-from core.mixins import SaaSMixin, HtmxResponseMixin
+from apps.finance.services.facturacion_service import FacturacionService
+from core.mixins import HtmxResponseMixin, SaaSMixin
 from core.security import (
-    get_agencia_or_403, 
-    get_object_tenant_or_404, 
-    filter_queryset_by_tenant,
-    agency_role_required
+    agency_role_required,
+    get_agencia_or_403,
+    get_object_tenant_or_404,
 )
 
 

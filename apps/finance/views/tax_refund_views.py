@@ -1,9 +1,10 @@
-import time
 import logging
-from django.views import View
-from django.shortcuts import render, get_object_or_404
-from django.http import HttpResponse
+import time
+
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.shortcuts import get_object_or_404, render
+from django.views import View
+
 from apps.finance.models.tax_refund import TaxRefundOpportunity
 
 logger = logging.getLogger(__name__)

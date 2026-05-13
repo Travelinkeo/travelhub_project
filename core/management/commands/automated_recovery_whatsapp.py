@@ -1,5 +1,7 @@
 from django.core.management.base import BaseCommand
-from core.services.collection_ai_service import CollectionAIService
+
+from apps.automation.services.collection_ai_service import CollectionAIService
+
 
 class Command(BaseCommand):
     help = 'Detecta agencias con pagos vencidos y envía mensajes de recuperación personalizados vía WhatsApp con IA.'
@@ -18,8 +20,9 @@ class Command(BaseCommand):
         if dry_run:
             self.stdout.write(self.style.WARNING("Modo simulación activado. No se enviarán mensajes."))
             # In dry run, we just log who would be notified
-            from core.models.agencia import Agencia
             from django.utils import timezone
+
+            from core.models.agencia import Agencia
             
             overdue = Agencia.objects.filter(activa=True, plan_status='past_due')
             expired_trials = Agencia.objects.filter(activa=True, plan='FREE', subscription_end_date__lt=timezone.now())

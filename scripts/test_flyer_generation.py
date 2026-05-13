@@ -7,7 +7,7 @@ from io import BytesIO
 def test_flyer():
     print("--- Probando Generador de Flyers ---")
     try:
-        from core.services.flash_marketing_service import FlashMarketingService
+        from apps.marketing.services.flash_marketing_service import FlashMarketingService
         service = FlashMarketingService()
         
         dest = "Madrid"

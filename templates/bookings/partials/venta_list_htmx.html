@@ -65,7 +65,7 @@
             <!-- Expanded Details -->
             <div x-show="expanded === {{ venta.pk }}" x-collapse class="mt-3 pt-3 border-t border-gray-700">
                 <div class="grid grid-cols-2 gap-2 text-sm">
-                    <div><span class="text-gray-500">Moneda:</span> <span class="text-white">{{ venta.moneda.codigo }}</span></div>
+                    <div><span class="text-gray-500">Moneda:</span> <span class="text-white">{{ venta.moneda.codigo_iso|default:"--" }}</span></div>
                     <div><span class="text-gray-500">Saldo:</span> <span class="text-yellow-400">$ {{ venta.saldo_pendiente|floatformat:2 }}</span></div>
                     <div><span class="text-gray-500">Pagado:</span> <span class="text-emerald-400">$ {{ venta.monto_pagado|floatformat:2 }}</span></div>
                     <div><span class="text-gray-500">Boletos:</span> <span class="text-white">{{ venta.boletos_adjuntos.count }}</span></div>

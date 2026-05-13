@@ -9,7 +9,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
 django.setup()
 
 from core.models.agencia import Agencia
-from core.services.stripe_service import StripeService
+from apps.finance.services.stripe_service import StripeService
 
 from django.contrib.auth.models import User
 

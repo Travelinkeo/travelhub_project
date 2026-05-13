@@ -13,74 +13,69 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.DeleteModel(
-            name="AsientoContable",
-        ),
-        migrations.DeleteModel(
-            name="ComisionOverrideAerolinea",
-        ),
         migrations.SeparateDatabaseAndState(
             state_operations=[
+                migrations.DeleteModel(
+                    name="AsientoContable",
+                ),
+                migrations.DeleteModel(
+                    name="ComisionOverrideAerolinea",
+                ),
                 migrations.DeleteModel(
                     name="CruceroReserva",
                 ),
-            ],
-            database_operations=[],
-        ),
-        migrations.DeleteModel(
-            name="DetalleAsiento",
-        ),
-        migrations.DeleteModel(
-            name="DocumentoExportacionConsolidado",
-        ),
-        migrations.DeleteModel(
-            name="ItemFacturaConsolidada",
-        ),
-        migrations.DeleteModel(
-            name="FacturaConsolidada",
-        ),
-        migrations.DeleteModel(
-            name="HotelTarifario",
-        ),
-        migrations.DeleteModel(
-            name="ImagenHotel",
-        ),
-        migrations.DeleteModel(
-            name="ItemLiquidacion",
-        ),
-        migrations.DeleteModel(
-            name="LiquidacionProveedor",
-        ),
-        migrations.DeleteModel(
-            name="NotificacionAgente",
-        ),
-        migrations.DeleteModel(
-            name="NotificacionInteligente",
-        ),
-        migrations.SeparateDatabaseAndState(
-            state_operations=[
+                migrations.DeleteModel(
+                    name="DetalleAsiento",
+                ),
+                migrations.DeleteModel(
+                    name="DocumentoExportacionConsolidado",
+                ),
+                migrations.DeleteModel(
+                    name="ItemFacturaConsolidada",
+                ),
+                migrations.DeleteModel(
+                    name="FacturaConsolidada",
+                ),
+                migrations.DeleteModel(
+                    name="HotelTarifario",
+                ),
+                migrations.DeleteModel(
+                    name="ImagenHotel",
+                ),
+                migrations.DeleteModel(
+                    name="ItemLiquidacion",
+                ),
+                migrations.DeleteModel(
+                    name="LiquidacionProveedor",
+                ),
+                migrations.DeleteModel(
+                    name="NotificacionAgente",
+                ),
+                migrations.DeleteModel(
+                    name="NotificacionInteligente",
+                ),
                 migrations.DeleteModel(
                     name="PasaporteEscaneado",
                 ),
+                migrations.DeleteModel(
+                    name="PlanContable",
+                ),
+                migrations.DeleteModel(
+                    name="ProductoTerrestre",
+                ),
+                migrations.DeleteModel(
+                    name="RetencionISLR",
+                ),
+                migrations.DeleteModel(
+                    name="TarifaHabitacion",
+                ),
+                migrations.DeleteModel(
+                    name="TipoHabitacion",
+                ),
+                migrations.DeleteModel(
+                    name="TarifarioProveedor",
+                ),
             ],
             database_operations=[],
-        ),
-        migrations.DeleteModel(
-            name="PlanContable",
-        ),
-        migrations.DeleteModel(
-            name="ProductoTerrestre",
-        ),
-        migrations.DeleteModel(
-            name="RetencionISLR",
-        ),
-        migrations.DeleteModel(
-            name="TarifaHabitacion",
-        ),
-        migrations.DeleteModel(
-            name="TipoHabitacion",
-        ),
-        migrations.DeleteModel(
-            name="TarifarioProveedor",
         ),
     ]

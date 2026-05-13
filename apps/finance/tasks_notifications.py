@@ -1,10 +1,12 @@
 import logging
+
 from celery import shared_task
 from django.contrib.auth import get_user_model
+from django.db.models import Count, Q
+
+from apps.communications.services.notification_service import NotificationService
 from apps.finance.models.reconciliacion import ReporteReconciliacion
 from apps.finance.services.pdf_service import PDFService
-from core.services.notification_service import NotificationService
-from django.db.models import Count, Sum, Q
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
@@ -48,4 +50,4 @@ def enviar_reporte_gerencia_task(self, reporte_id, user_id, email_destino):
     except Exception as exc:
         logger.error(f"❌ Fallo enviando reporte {reporte_id} a {email_destino}: {exc}")
         # Reintento exponencial por si el servidor de correo tiene un timeout momentáneo
-        raise self.retry(exc=exc)
+        raise self.retry(exc=exc) from exc

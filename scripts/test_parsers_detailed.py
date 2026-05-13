@@ -18,13 +18,13 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
 import django
 django.setup()
 
-from core.parsers.sabre_parser import SabreParser
-from core.parsers.amadeus_parser import AmadeusParser
-from core.parsers.copa_parser import CopaParser
-from core.parsers.kiu_parser import KIUParser
-from core.parsers.tk_connect_parser import TKConnectParser
-from core.parsers.wingo_parser import WingoParser
-from core.parsers.web_receipt_parser import WebReceiptParser
+from apps.automation.parsers.sabre_parser import SabreParser
+from apps.automation.parsers.amadeus_parser import AmadeusParser
+from apps.automation.parsers.copa_parser import CopaParser
+from apps.automation.parsers.kiu_parser import KIUParser
+from apps.automation.parsers.tk_connect_parser import TKConnectParser
+from apps.automation.parsers.wingo_parser import WingoParser
+from apps.automation.parsers.web_receipt_parser import WebReceiptParser
 
 import pdfplumber
 from email import policy

@@ -1,11 +1,8 @@
 # contabilidad/urls.py
 from django.urls import path
+
 from . import views
-from .views_tasas import (
-    obtener_tasas_actuales,
-    obtener_tasa_bcv_simple,
-    sincronizar_tasas_manual
-)
+from .views_tasas import obtener_tasa_bcv_simple, obtener_tasas_actuales, sincronizar_tasas_manual
 
 app_name = 'contabilidad'
 

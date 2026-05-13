@@ -1,5 +1,7 @@
 from django.db import models
+
 from core.models.agencia import Agencia
+
 
 class AIUsageLog(models.Model):
     """

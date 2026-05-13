@@ -1,10 +1,12 @@
-from django.views.generic import ListView, CreateView, UpdateView
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.urls import reverse_lazy
-from django.db.models import Q
 from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Q
+from django.urls import reverse_lazy
+from django.views.generic import CreateView, ListView, UpdateView
+
 from apps.crm.models import Cliente
-from core.mixins import SaaSMixin, HtmxResponseMixin
+from core.mixins import HtmxResponseMixin, SaaSMixin
+
 
 class ClienteFormMixin:
     def get_form(self, form_class=None):
@@ -24,7 +26,7 @@ class ClienteListView(HtmxResponseMixin, SaaSMixin, LoginRequiredMixin, ListView
     paginate_by = 20
 
     def get_queryset(self):
-        queryset = super().get_queryset().order_by('apellidos', 'nombres', 'nombre_empresa')
+        queryset = super().get_queryset().select_related('ciudad', 'nacionalidad', 'pais_emision_pasaporte').order_by('apellidos', 'nombres', 'nombre_empresa')
         
         q = self.request.GET.get('q')
         if q:

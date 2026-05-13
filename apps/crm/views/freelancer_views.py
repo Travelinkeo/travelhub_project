@@ -1,11 +1,12 @@
 import logging
-from django.views import View
-from django.shortcuts import render, redirect
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Sum, Count
-from django.utils import timezone
-from apps.crm.models import FreelancerProfile, ComisionFreelancer
 
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Count, Sum
+from django.shortcuts import redirect, render
+from django.utils import timezone
+from django.views import View
+
+from apps.crm.models import ComisionFreelancer
 from apps.finance.models import LinkDePago
 
 logger = logging.getLogger(__name__)

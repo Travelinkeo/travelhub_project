@@ -1,8 +1,10 @@
 # core/management/commands/reporte_retenciones.py
 """Comando para generar reporte de retenciones ISLR"""
 from datetime import datetime
+
 from django.core.management.base import BaseCommand
-from core.services.reporte_retenciones import ReporteRetencionesService
+
+from apps.finance.services.reporte_retenciones import ReporteRetencionesService
 
 
 class Command(BaseCommand):

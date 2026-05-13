@@ -4,12 +4,14 @@ Modelo para gestión de Retenciones de ISLR (Migrado desde core)
 Cumple con: Decreto 1.808 y normativa SENIAT
 """
 from decimal import Decimal
+
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-from .facturacion import FacturaConsolidada
 from apps.crm.models import Cliente
+
+from .facturacion import FacturaConsolidada
 
 
 class RetencionISLR(models.Model):
@@ -99,7 +101,7 @@ class RetencionISLR(models.Model):
     def save(self, *args, **kwargs):
         # Calcular monto retenido si no está definido
         if not self.monto_retenido and self.base_imponible and self.porcentaje_retencion:
-            self.monto_retenido = self.base_imponible * (self.porcentaje_retencion / 100)
+            self.monto_retenido = (self.base_imponible * (self.porcentaje_retencion / Decimal('100'))).quantize(Decimal('0.01'))
         
         # Generar período fiscal si no está definido
         if not self.periodo_fiscal:

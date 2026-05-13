@@ -1,12 +1,13 @@
 import os
+import unittest.mock
 from decimal import Decimal
 
 import pytest
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
 
-from apps.crm.models import Cliente
 from apps.bookings.models import Venta
+from apps.crm.models import Cliente
 from apps.finance.models.currencies import Moneda
 
 # Asegurar configuración de Django incluso si pytest-django no se auto-carga
@@ -36,6 +37,62 @@ def use_simple_static_storage(settings):
     else:  # pragma: no cover
         settings.STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
     settings.WHITENOISE_USE_FINDERS = True
+
+
+@pytest.fixture(autouse=True)
+def mock_ai_engine(monkeypatch):
+    """
+    Mock global de AIEngine para evitar llamadas reales a Gemini en tests.
+    Retorna un resultado de parseo exitoso por defecto.
+    """
+    # Mock de _ensure_configured
+    monkeypatch.setattr('apps.automation.services.ai_engine.AIEngine._ensure_configured', lambda *args, **kwargs: True)
+    
+    # Mock de la llamada principal
+    from apps.automation.services.ai_engine import ai_engine
+    
+    # Respuesta por defecto
+    default_res = {
+        "boletos": [
+            {
+                "codigo_reserva": "MOCK12",
+                "numero_boleto": "1234567890123",
+                "nombre_pasajero": "DOE/JOHN",
+                "solo_nombre_pasajero": "JOHN",
+                "apellido_pasajero": "DOE",
+                "fecha_emision": "2025-01-01",
+                "tarifa": 100.0,
+                "total": 120.0,
+                "moneda": "USD",
+                "itinerario": [
+                    {
+                        "aerolinea": "TEST AIRLINES",
+                        "numero_vuelo": "TS123",
+                        "origen": "TEST CITY",
+                        "destino": "DEST CITY",
+                        "fecha_salida": "2025-02-01",
+                        "hora_salida": "10:00",
+                        "hora_llegada": "12:00"
+                    }
+                ]
+            }
+        ]
+    }
+    
+    mock_call = unittest.mock.MagicMock(return_value=default_res)
+    monkeypatch.setattr(ai_engine, 'call_gemini', mock_call)
+    
+    # Mock de generate_content (usado por ai_parser.py)
+    import json
+    # Respuesta JSON para ai_parser
+    ai_parser_res = {
+        "passenger": {"name": "JUAREZ/RAUL"},
+        "bookingDetails": {"ticketNumber": "0457281019415"},
+        "flights": [{"flightNumber": "AA123", "departure": {"location": "CARACAS"}, "arrival": {"location": "BOGOTA"}}]
+    }
+    monkeypatch.setattr('apps.automation.services.ai_engine.generate_content', lambda *args, **kwargs: json.dumps(ai_parser_res))
+    
+    return mock_call
 
 
 
@@ -90,18 +147,26 @@ def venta_base(db):
 # ============================================
 
 @pytest.fixture
-def mock_redis(mocker):
+def mock_redis(monkeypatch):
     """Mock de Redis para tests de caché"""
-    mock = mocker.MagicMock()
+    mock = unittest.mock.MagicMock()
     mock.get.return_value = None
     mock.set.return_value = True
     mock.delete.return_value = True
+    
+    # Suponiendo que se usa django.core.cache
+    monkeypatch.setattr('django.core.cache.cache.get', mock.get)
+    monkeypatch.setattr('django.core.cache.cache.set', mock.set)
+    monkeypatch.setattr('django.core.cache.cache.delete', mock.delete)
+    
     return mock
 
 @pytest.fixture
-def mock_celery_task(mocker):
+def mock_celery_task(monkeypatch):
     """Mock de tareas Celery"""
-    return mocker.patch('core.tasks.process_ticket_async.delay')
+    mock = unittest.mock.MagicMock()
+    monkeypatch.setattr('core.tasks.process_ticket_async.delay', mock)
+    return mock
 
 @pytest.fixture
 def sample_pais(db):

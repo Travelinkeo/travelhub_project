@@ -1,20 +1,16 @@
-import json
-import hmac
 import hashlib
+import hmac
+import json
 import logging
-from django.views import View
-from django.http import JsonResponse, HttpResponse
-from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_exempt
+
 from django.conf import settings as dj_settings
-from core.services.ai_parser_service import AIParserService
-from core.ticket_parser import extract_data_from_text
-from apps.bookings.models import Venta, BoletoImportado, ItemVenta
-from apps.finance.models.currencies import Moneda
-from apps.bookings.models import Proveedor
-from apps.automation.models import NotificacionInteligente
-from apps.crm.models import Cliente
 from django.contrib.auth.models import User
+from django.http import HttpResponse, JsonResponse
+from django.utils.decorators import method_decorator
+from django.views import View
+from django.views.decorators.csrf import csrf_exempt
+
+from apps.bookings.models import BoletoImportado
 
 logger = logging.getLogger(__name__)
 
@@ -53,7 +49,8 @@ class ResendInboundWebhookView(View):
             
             # 1. CREAR REGISTRO DE IMPORTACION (Audit Point 3.2: Unificación de flujos)
             from django.core.files.base import ContentFile
-            from core.services.ticket_parser_service import TicketParserService
+
+            from apps.automation.services.ticket_parser_service import TicketParserService
             
             # Buscamos un usuario (consultor) por el correo de origen para asignar la agencia
             consultor = User.objects.filter(email=from_email).first() or User.objects.filter(is_superuser=True).first()

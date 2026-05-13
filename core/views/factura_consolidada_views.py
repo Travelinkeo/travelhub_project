@@ -2,18 +2,18 @@
 Views para facturas consolidadas con normativa venezolana.
 """
 
-from rest_framework import viewsets, permissions, filters
-from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework import filters, permissions, viewsets
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
-from core.api.mixins.tenant import TenantViewSetMixin
-from apps.finance.models import FacturaConsolidada, ItemFacturaConsolidada
 from apps.bookings.models import Venta
+from apps.finance.models import FacturaConsolidada, ItemFacturaConsolidada
+from core.api.mixins.tenant import TenantViewSetMixin
 from core.serializers_facturacion_consolidada import (
     FacturaConsolidadaSerializer,
-    ItemFacturaConsolidadaSerializer
+    ItemFacturaConsolidadaSerializer,
 )
 
 
@@ -82,7 +82,7 @@ class FacturaConsolidadaViewSet(TenantViewSetMixin, viewsets.ModelViewSet):
     @action(detail=True, methods=['post'])
     def generar_pdf(self, request, pk=None):
         """Generar PDF de la factura"""
-        from core.services.factura_pdf_generator import guardar_pdf_factura
+        from apps.finance.services.factura_pdf_generator import guardar_pdf_factura
         
         factura = self.get_object()
         success = guardar_pdf_factura(factura)
@@ -102,7 +102,7 @@ class FacturaConsolidadaViewSet(TenantViewSetMixin, viewsets.ModelViewSet):
     @action(detail=True, methods=['post'])
     def contabilizar(self, request, pk=None):
         """Generar asiento contable y contabilizar la factura"""
-        from core.services.factura_contabilidad import contabilizar_factura
+        from apps.finance.services.factura_contabilidad import contabilizar_factura
         
         factura = self.get_object()
         
@@ -127,9 +127,9 @@ class FacturaConsolidadaViewSet(TenantViewSetMixin, viewsets.ModelViewSet):
     @action(detail=False, methods=['post'])
     def doble_facturacion(self, request):
         """Generar doble facturación automática (tercero + propia)"""
-        from core.services.doble_facturacion import DobleFacturacionService
-        from apps.bookings.models import Venta
         from decimal import Decimal
+
+        from apps.common.services.doble_facturacion import DobleFacturacionService
         
         venta_id = request.data.get('venta_id')
         datos_tercero = request.data.get('datos_tercero')

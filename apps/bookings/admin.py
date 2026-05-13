@@ -1,27 +1,42 @@
 import logging
+
 from django import forms
-from django.contrib import admin
+from django.contrib import admin, messages
+from django.core.files.base import ContentFile
+from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import render
 from django.urls import reverse
 from django.utils.html import format_html
-from django.utils.http import urlencode
 from django.utils.translation import gettext_lazy as _
-from django.shortcuts import render
-from django.http import HttpResponseRedirect, HttpResponse
-from django.core.files.base import ContentFile
-from django.contrib import messages
 
+from apps.crm.models import Cliente
 from core.admin_migration import MigrationCheckInline, validate_migration_requirements_action
 from core.admin_saas import SaaSAdminMixin
-from apps.finance.models.currencies import Moneda
-from apps.bookings.models import ProductoServicio, Proveedor
-from apps.crm.models import Cliente
+
 from .models import (
-    Venta, BoletoImportado, ItemVenta, SegmentoVuelo, 
-    AlojamientoReserva, TrasladoServicio, ActividadServicio,
-    AlquilerAutoReserva, ServicioAdicionalDetalle, 
-    FeeVenta, PagoVenta, AuditLog, VentaParseMetadata,
-    CircuitoTuristico, CircuitoDia, PaqueteAereo, EventoServicio,
-    TarifarioProveedor, HotelTarifario, TipoHabitacion, TarifaHabitacion, Amenity, ImagenHotel
+    ActividadServicio,
+    AlojamientoReserva,
+    AlquilerAutoReserva,
+    Amenity,
+    AuditLog,
+    BoletoImportado,
+    CircuitoDia,
+    CircuitoTuristico,
+    EventoServicio,
+    FeeVenta,
+    HotelTarifario,
+    ImagenHotel,
+    ItemVenta,
+    PagoVenta,
+    PaqueteAereo,
+    SegmentoVuelo,
+    ServicioAdicionalDetalle,
+    TarifaHabitacion,
+    TarifarioProveedor,
+    TipoHabitacion,
+    TrasladoServicio,
+    Venta,
+    VentaParseMetadata,
 )
 
 logger = logging.getLogger(__name__)
@@ -193,10 +208,7 @@ class VentaAdmin(SaaSAdminMixin, admin.ModelAdmin):
     def has_add_permission(self, request):
         return True
 
-    def has_delete_permission(self, request, obj=None):
-        return True
-
-    @admin.action(description="✨ Generar Link de Pago B2C para Ventas seleccionadas")
+    @admin.action(description="Generar Link de Pago B2C para Ventas seleccionadas")
     def generar_links_de_pago(self, request, queryset):
         from apps.finance.models import LinkDePago
         creados = 0
@@ -241,7 +253,7 @@ class VentaAdmin(SaaSAdminMixin, admin.ModelAdmin):
             return
 
         venta = queryset.first()
-        from core.services.voucher_service import generar_voucher_unificado
+        from apps.bookings.services.voucher_service import generar_voucher_unificado
         pdf_bytes, filename = generar_voucher_unificado(venta.pk)
 
         if pdf_bytes:
@@ -262,14 +274,14 @@ class VentaAdmin(SaaSAdminMixin, admin.ModelAdmin):
         form = ClienteSelectionForm(request.POST or None)
         if 'apply' in request.POST and form.is_valid():
             cliente = form.cleaned_data['cliente']
-            from core.services.facturacion_service import FacturacionService
+            from apps.finance.services.facturacion_service import FacturacionService
             facturas_creadas = 0
             for venta in queryset:
                 try:
                     venta.cliente = cliente
                     venta.save(update_fields=['cliente'])
                     factura = FacturacionService.generar_factura_desde_venta(venta, cliente)
-                    from core.services.pdf_service import generar_pdf_factura
+                    from apps.common.services.pdf_service import generar_pdf_factura
                     pdf_bytes, pdf_filename = generar_pdf_factura(factura.pk)
                     if pdf_bytes:
                         factura.archivo_pdf.save(pdf_filename, ContentFile(pdf_bytes), save=True)
@@ -287,7 +299,8 @@ class VentaAdmin(SaaSAdminMixin, admin.ModelAdmin):
     @admin.action(description="Generar Liquidación a Proveedor(es)")
     def generar_liquidaciones_proveedor(self, request, queryset):
         from collections import defaultdict
-        from apps.contabilidad.models import LiquidacionProveedor, ItemLiquidacion
+
+        from apps.contabilidad.models import ItemLiquidacion, LiquidacionProveedor
         liquidaciones_creadas = 0
         for venta in queryset:
             items_por_proveedor = defaultdict(list)
@@ -346,11 +359,13 @@ class BoletoImportadoAdmin(SaaSAdminMixin, admin.ModelAdmin):
             if obj.archivo_boleto:
                 try:
                     obj.archivo_boleto.delete(save=False)
-                except Exception: pass
+                except Exception as e:
+                    logger.warning(f"No se pudo eliminar archivo fisico del boleto {obj.pk}: {e}")
             if obj.archivo_pdf_generado:
                 try:
                     obj.archivo_pdf_generado.delete(save=False)
-                except Exception: pass
+                except Exception as e:
+                    logger.warning(f"No se pudo eliminar PDF generado del boleto {obj.pk}: {e}")
             
             # Forzar eliminación física (bypass soft delete)
             if hasattr(obj, 'delete') and 'force_policy' in str(obj.delete):
@@ -365,7 +380,7 @@ class BoletoImportadoAdmin(SaaSAdminMixin, admin.ModelAdmin):
 
     @admin.action(description="🔄 Reprocesar Boletos Seleccionados")
     def reprocesar_boletos(self, request, queryset):
-        from core.services.ticket_parser_service import TicketParserService
+        from apps.automation.services.ticket_parser_service import TicketParserService
         service = TicketParserService()
         exitos = 0
         errores = 0
@@ -418,8 +433,9 @@ class BoletoImportadoAdmin(SaaSAdminMixin, admin.ModelAdmin):
                 data['passenger_document'] = obj.foid_pasajero
                 data['total_boleto'] = obj.total_boleto
                 
-                from core.ticket_parser import generate_ticket
                 from django.contrib import messages
+
+                from apps.automation.parsers.ticket_parser import generate_ticket
                 
                 # Llamamos al generador unificado (ahora devuelve (bytes, filename) y persiste internamente)
                 pdf_bytes, filename = generate_ticket(data, agencia_obj=obj.agencia)
@@ -448,6 +464,24 @@ class VentaParseMetadataAdmin(SaaSAdminMixin, admin.ModelAdmin):
     list_display = ('id_metadata','venta','fuente','creado')
     readonly_fields = ('raw_normalized_json','segments_json','creado')
 
+@admin.register(SegmentoVuelo)
+class SegmentoVueloAdmin(SaaSAdminMixin, admin.ModelAdmin):
+    saas_agency_field = 'venta__agencia'
+    list_display = ('id_segmento_vuelo', 'venta', 'origen', 'destino', 'numero_vuelo', 'fecha_salida')
+    autocomplete_fields = ['venta', 'origen', 'destino']
+
+@admin.register(FeeVenta)
+class FeeVentaAdmin(SaaSAdminMixin, admin.ModelAdmin):
+    saas_agency_field = 'venta__agencia'
+    list_display = ('id_fee_venta', 'venta', 'tipo_fee', 'monto', 'moneda')
+    autocomplete_fields = ['venta', 'moneda']
+
+@admin.register(PagoVenta)
+class PagoVentaAdmin(SaaSAdminMixin, admin.ModelAdmin):
+    saas_agency_field = 'venta__agencia'
+    list_display = ('id_pago_venta', 'venta', 'metodo', 'monto', 'moneda', 'fecha_pago')
+    autocomplete_fields = ['venta', 'moneda']
+
 @admin.register(AlojamientoReserva)
 class AlojamientoReservaAdmin(SaaSAdminMixin, admin.ModelAdmin):
     saas_agency_field = 'venta__agencia'
@@ -464,7 +498,7 @@ class AlojamientoReservaAdmin(SaaSAdminMixin, admin.ModelAdmin):
             return
 
         reserva = queryset.first()
-        from core.services.voucher_service import generar_voucher_alojamiento
+        from apps.bookings.services.voucher_service import generar_voucher_alojamiento
         pdf_bytes, filename = generar_voucher_alojamiento(reserva)
 
         if pdf_bytes:
@@ -488,7 +522,7 @@ class AlquilerAutoReservaAdmin(SaaSAdminMixin, admin.ModelAdmin):
             return
 
         alquiler = queryset.first()
-        from core.services.voucher_service import generar_voucher_alquiler_auto
+        from apps.bookings.services.voucher_service import generar_voucher_alquiler_auto
         pdf_bytes, filename = generar_voucher_alquiler_auto(alquiler)
 
         if pdf_bytes:
@@ -508,6 +542,7 @@ class EventoServicioAdmin(SaaSAdminMixin, admin.ModelAdmin):
 class CircuitoTuristicoAdmin(SaaSAdminMixin, admin.ModelAdmin):
     saas_agency_field = 'venta__agencia'
     list_display = ('id_circuito','venta','nombre_circuito','fecha_inicio')
+    search_fields = ('nombre_circuito',)
     autocomplete_fields = ['venta']
 
 @admin.register(PaqueteAereo)
@@ -530,7 +565,7 @@ class ServicioAdicionalDetalleAdmin(SaaSAdminMixin, admin.ModelAdmin):
             return
 
         servicio = queryset.first()
-        from core.services.voucher_service import generar_voucher_servicio
+        from apps.bookings.services.voucher_service import generar_voucher_servicio
         pdf_bytes, filename = generar_voucher_servicio(servicio)
 
         if pdf_bytes:
@@ -555,7 +590,7 @@ class TrasladoServicioAdmin(SaaSAdminMixin, admin.ModelAdmin):
             return
 
         traslado = queryset.first()
-        from core.services.voucher_service import generar_voucher_traslado
+        from apps.bookings.services.voucher_service import generar_voucher_traslado
         pdf_bytes, filename = generar_voucher_traslado(traslado)
 
         if pdf_bytes:
@@ -580,7 +615,7 @@ class ActividadServicioAdmin(SaaSAdminMixin, admin.ModelAdmin):
             return
 
         actividad = queryset.first()
-        from core.services.voucher_service import generar_voucher_actividad
+        from apps.bookings.services.voucher_service import generar_voucher_actividad
         pdf_bytes, filename = generar_voucher_actividad(actividad)
 
         if pdf_bytes:
@@ -677,3 +712,9 @@ class TipoHabitacionAdmin(SaaSAdminMixin, admin.ModelAdmin):
     search_fields = ['nombre', 'hotel__nombre']
     inlines = [TarifaHabitacionInline]
     autocomplete_fields = ['hotel']
+@admin.register(CircuitoDia)
+class CircuitoDiaAdmin(SaaSAdminMixin, admin.ModelAdmin):
+    saas_agency_field = 'circuito__agencia'
+    list_display = ['circuito', 'dia_numero', 'titulo', 'ciudad']
+    list_filter = ['circuito']
+    autocomplete_fields = ['circuito', 'ciudad']

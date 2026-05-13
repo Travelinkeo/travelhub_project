@@ -202,49 +202,6 @@ class Migration(migrations.Migration):
                 verbose_name="Producto/Servicio",
             ),
         ),
-        migrations.AddField(
-            model_name="proveedor",
-            name="agencia",
-            field=models.ForeignKey(
-                blank=True,
-                null=True,
-                on_delete=django.db.models.deletion.CASCADE,
-                related_name="%(class)s_items",
-                to="core.agencia",
-            ),
-        ),
-        migrations.AddField(
-            model_name="proveedor",
-            name="ciudad",
-            field=models.ForeignKey(
-                blank=True,
-                null=True,
-                on_delete=django.db.models.deletion.SET_NULL,
-                to="common.ciudad",
-                verbose_name="Ciudad",
-            ),
-        ),
-        migrations.AddField(
-            model_name="productoservicio",
-            name="proveedor_principal",
-            field=models.ForeignKey(
-                blank=True,
-                null=True,
-                on_delete=django.db.models.deletion.SET_NULL,
-                to="bookings.proveedor",
-            ),
-        ),
-        migrations.AddField(
-            model_name="comisionproveedorservicio",
-            name="proveedor",
-            field=models.ForeignKey(
-                blank=True,
-                null=True,
-                on_delete=django.db.models.deletion.CASCADE,
-                related_name="comisiones",
-                to="bookings.proveedor",
-            ),
-        ),
         migrations.AlterField(
             model_name="actividadservicio",
             name="proveedor",
@@ -355,14 +312,19 @@ class Migration(migrations.Migration):
                 verbose_name="Proveedor",
             ),
         ),
-        migrations.AlterUniqueTogether(
-            name="productoservicio",
-            unique_together={
-                ("agencia", "nombre", "tipo_producto", "proveedor_principal")
-            },
-        ),
-        migrations.AlterUniqueTogether(
-            name="comisionproveedorservicio",
-            unique_together={("agencia", "proveedor", "tipo_servicio")},
+        migrations.SeparateDatabaseAndState(
+            state_operations=[
+                migrations.AlterUniqueTogether(
+                    name="productoservicio",
+                    unique_together={
+                        ("agencia", "nombre", "tipo_producto", "proveedor_principal")
+                    },
+                ),
+                migrations.AlterUniqueTogether(
+                    name="comisionproveedorservicio",
+                    unique_together={("agencia", "proveedor", "tipo_servicio")},
+                ),
+            ],
+            database_operations=[],
         ),
     ]

@@ -3,13 +3,14 @@
 Modelos de Productos y Servicios (Migrado desde core)
 Incluye: Proveedor, ProductoServicio, ComisionProveedorServicio, ProductoTerrestre.
 """
+from decimal import Decimal
+
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from decimal import Decimal
-from core.managers import TenantManager
-from core.models.base import AgenciaMixin
-from core.mixins import SoftDeleteModel
+
+from core.models.base import AgenciaMixin, SoftDeleteModel
 from core.validators import validar_no_vacio_o_espacios
+
 
 class Proveedor(SoftDeleteModel, AgenciaMixin, models.Model):
     id_proveedor = models.AutoField(primary_key=True, verbose_name=_("ID Proveedor"))
@@ -68,7 +69,6 @@ class Proveedor(SoftDeleteModel, AgenciaMixin, models.Model):
         verbose_name = _("Proveedor")
         verbose_name_plural = _("Proveedores")
         ordering = ['nombre']
-        db_table = 'core_proveedor'
 
     def __str__(self):
         return f"{self.nombre} ({self.get_tipo_proveedor_display()})"
@@ -103,7 +103,6 @@ class ProductoServicio(SoftDeleteModel, AgenciaMixin, models.Model):
         verbose_name_plural = _("Productos y Servicios")
         ordering = ['nombre']
         unique_together = ('agencia', 'nombre', 'tipo_producto', 'proveedor_principal')
-        db_table = 'core_productoservicio'
 
     def __str__(self):
         return f"{self.nombre} ({self.get_tipo_producto_display()})"
@@ -121,7 +120,6 @@ class ComisionProveedorServicio(SoftDeleteModel, AgenciaMixin, models.Model):
         verbose_name = _("Comisión de Proveedor por Servicio")
         verbose_name_plural = _("Comisiones de Proveedores por Servicios")
         unique_together = ('agencia', 'proveedor', 'tipo_servicio')
-        db_table = 'core_comisionproveedorservicio'
     
     def __str__(self):
         return f"{self.proveedor.nombre} - {self.get_tipo_servicio_display()}"
@@ -153,10 +151,9 @@ class ProductoTerrestre(SoftDeleteModel, AgenciaMixin, models.Model):
         verbose_name = _("Producto Terrestre")
         verbose_name_plural = _("Productos Terrestres")
         ordering = ['-fecha_creacion']
-        db_table = 'core_productoterrestre'
 
     def save(self, *args, **kwargs):
-        self.precio_venta_calculado = self.costo_neto + (self.costo_neto * (self.markup_porcentaje / Decimal('100.00')))
+        self.precio_venta_calculado = (self.costo_neto + (self.costo_neto * (self.markup_porcentaje / Decimal('100.00')))).quantize(Decimal('0.01'))
         super().save(*args, **kwargs)
 
     def __str__(self):

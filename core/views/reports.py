@@ -1,10 +1,12 @@
 
-from django.db.models.functions import ExtractYear
-from django.views.generic import TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models.functions import ExtractYear
 from django.utils import timezone
+from django.views.generic import TemplateView
+
 from apps.bookings.models import Venta
-from core.services.analytics_service import AnalyticsService
+from apps.common.services.analytics_service import AnalyticsService
+
 
 class ReportesVentasView(LoginRequiredMixin, TemplateView):
     template_name = "reports/dashboard_reports_v3.html"
@@ -35,7 +37,7 @@ class ReportesVentasView(LoginRequiredMixin, TemplateView):
         # Obtener lista de años disponibles
         available_years = Venta.objects.annotate(year=ExtractYear('fecha_venta')).values_list('year', flat=True).order_by('-year').distinct()
         # Fallback for SQLite distinct issue if any
-        context['available_years'] = sorted(list(set(available_years)), reverse=True) if available_years else [current_year]
+        context['available_years'] = sorted(set(available_years), reverse=True) if available_years else [current_year]
         context['selected_year'] = selected_year
         
         return context

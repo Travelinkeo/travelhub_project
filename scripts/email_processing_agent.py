@@ -14,7 +14,7 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
 from core.cms_content_generator import generate_promotional_content
-from core.gemini import generate_content
+from apps.automation.services.gemini import generate_content
 from core.knowledge_base_handler import crear_articulo_desde_gemini
 from core.models.comunicaciones import ComunicacionProveedor
 
@@ -195,7 +195,7 @@ def main():
             elif category == ComunicacionProveedor.Categoria.URGENTE:
                 logging.info("Detectada notificación urgente. Se requiere acción manual o un manejador específico.")
                 # Asumiendo que existe una función handle_urgent_notification
-                # from core.notification_handler import handle_urgent_notification
+                # from apps.communications.services.notification_handler import handle_urgent_notification
                 # handle_urgent_notification(extracted_json)
                 pass # Dejar pass si la función no está lista
 

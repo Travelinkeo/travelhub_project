@@ -11,7 +11,7 @@ import django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
 django.setup()
 
-from core.airline_utils import normalize_airline_name
+from apps.automation.parsers.airline_utils import normalize_airline_name
 
 def demo_airline_normalization():
     """Demuestra cómo se normalizan los nombres de aerolíneas."""

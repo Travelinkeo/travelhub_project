@@ -1,6 +1,8 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+
 from core.models.base import AgenciaMixin
+
 
 class ComunicacionProveedor(AgenciaMixin, models.Model):
     """
@@ -35,7 +37,6 @@ class ComunicacionProveedor(AgenciaMixin, models.Model):
         verbose_name = _("Comunicación de Proveedor")
         verbose_name_plural = _("Comunicaciones de Proveedores")
         ordering = ['-fecha_recepcion']
-        db_table = 'core_comunicacionproveedor' # Para mantener consistencia con el diseño original
 
     def __str__(self):
         return f"{self.remitente} - {self.asunto[:50]}..."

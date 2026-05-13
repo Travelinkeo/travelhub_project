@@ -2,7 +2,7 @@ import json
 import os
 
 from core.pdf_generator import generate_ticket_pdf as legacy_generate_ticket_pdf
-from core.ticket_parser import extract_data_from_text
+from apps.automation.parsers.ticket_parser import extract_data_from_text
 
 # Asegurar ruta del proyecto
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

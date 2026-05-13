@@ -35,7 +35,7 @@ uploaded_file = SimpleUploadedFile(
 )
 
 # Probar parseo
-from core.services.ticket_parser_service import orquestar_parseo_de_boleto
+from apps.automation.services.ticket_parser_service import orquestar_parseo_de_boleto
 
 print("\n1. Ejecutando orquestar_parseo_de_boleto...")
 datos, mensaje = orquestar_parseo_de_boleto(uploaded_file)
@@ -55,7 +55,7 @@ if datos:
     
     # Probar generación de PDF
     print(f"\n4. Probando generación de PDF...")
-    from core.services.ticket_parser_service import generar_pdf_en_memoria
+    from apps.automation.services.ticket_parser_service import generar_pdf_en_memoria
     
     try:
         pdf_bytes = generar_pdf_en_memoria(datos)

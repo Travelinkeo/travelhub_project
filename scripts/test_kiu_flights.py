@@ -7,7 +7,7 @@ sys.path.append(os.getcwd())
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
 django.setup()
 
-from core.parsers.kiu_parser import KIUParser
+from apps.automation.parsers.kiu_parser import KIUParser
 
 sample_text = """
 KIUSYS.COM                       ITINERARY RECEIPT                      05 FEB 2026

@@ -4,16 +4,18 @@ Estos modelos se separan en su propia app `cotizaciones` para romper dependencia
 circulares y permitir una carga controlada.
 """
 import uuid
+from decimal import Decimal
+
+from django.contrib.auth.models import User
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-from django.contrib.auth.models import User
-from decimal import Decimal
+
+from apps.bookings.models import ProductoServicio
 
 # from apps.crm.models import Cliente # REFACTOR: Usar string 'crm.Cliente'
 from apps.finance.models.currencies import Moneda
 from core.models.base import AgenciaMixin
-from apps.bookings.models import ProductoServicio
 
 # ... (Cotizacion model unchanged)
 
@@ -72,7 +74,6 @@ class Cotizacion(AgenciaMixin, models.Model):
         verbose_name = _("Cotización")
         verbose_name_plural = _("Cotizaciones")
         ordering = ['-fecha_emision']
-        db_table = 'core_cotizacion'
 
     def __str__(self):
         return self.numero_cotizacion or f"COT-{self.id_cotizacion}"
@@ -123,8 +124,9 @@ class Cotizacion(AgenciaMixin, models.Model):
         if self.venta_generada:
             return self.venta_generada
         
-        from apps.bookings.models import Venta
         from django.utils import timezone
+
+        from apps.bookings.models import Venta
         
         # Crear venta
         venta = Venta.objects.create(
@@ -200,7 +202,6 @@ class ItemCotizacion(AgenciaMixin, models.Model):
         verbose_name = _("Item de Cotización")
         verbose_name_plural = _("Items de Cotización")
         ordering = ['id_item_cotizacion']
-        db_table = 'core_itemcotizacion'
 
     def __str__(self):
         return f"{self.get_tipo_item_display()} - {self.descripcion}"

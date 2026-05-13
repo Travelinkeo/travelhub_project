@@ -1,16 +1,22 @@
 import json
 import logging
+
 from django.conf import settings
-from django.contrib.auth import login, get_user_model
+from django.contrib.auth import get_user_model, login
+from django.core.cache import cache
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.utils import timezone
+from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
-from django.utils.decorators import method_decorator
 
+from apps.common.services.magic_link_service import (
+    create_magic_link,
+    send_magic_link_email,
+    verify_magic_link,
+)
 from core.models.magic_link import MagicLinkToken
-from core.services.magic_link_service import create_magic_link, send_magic_link_email, verify_magic_link
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
@@ -32,6 +38,15 @@ class MagicLinkRequestView(View):
         if not email:
             return JsonResponse({'error': 'Email es obligatorio'}, status=400)
 
+        # Rate limiting: máximo 3 solicitudes por email cada 15 minutos
+        rate_key = f'magic_link_rate_{email}'
+        request_count = cache.get(rate_key, 0)
+        if request_count >= 3:
+            logger.warning(f"Rate limit excedido para magic link: {email}")
+            return JsonResponse({
+                'error': 'Demasiadas solicitudes. Espera 15 minutos antes de intentar de nuevo.'
+            }, status=429)
+
         if isinstance(onboarding_data, str):
             try:
                 onboarding_data = json.loads(onboarding_data)
@@ -46,6 +61,9 @@ class MagicLinkRequestView(View):
             is_onboarding=is_onboarding,
             onboarding_data=onboarding_data,
         )
+
+        # Incrementar contador de rate limit
+        cache.set(rate_key, request_count + 1, timeout=900)  # 15 minutos
 
         try:
             send_magic_link_email(token_obj, request=request)
@@ -99,8 +117,11 @@ class MagicLinkVerifyView(View):
         )
 
         if not user.is_active:
-            user.is_active = True
-            user.save(update_fields=['is_active'])
+            logger.warning(f"Intento de login con magic link para usuario desactivado: {user.email}")
+            return render(request, 'auth/magic_link_error.html', {
+                'error': 'Cuenta desactivada',
+                'error_detail': 'Tu cuenta ha sido desactivada. Contacta al administrador.',
+            }, status=403)
 
         login(request, user, backend='django.contrib.auth.backends.ModelBackend')
 

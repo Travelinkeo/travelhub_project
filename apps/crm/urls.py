@@ -1,9 +1,10 @@
 from django.urls import path
+
 from . import views
-from .views import webhook_views, kanban_views, freelancer_views
-from .views.marketing_views import MarketingHubView, AnalyzeCampaignPromptView, DispatchCampaignView
-from .views.inbox_views import InboxView, ChatThreadView, SendMessageView
+from .views import freelancer_views, kanban_views, webhook_views
 from .views.ai_chat_views import GenerateSuggestedReplyView
+from .views.inbox_views import ChatThreadView, InboxView, SendMessageView
+from .views.marketing_views import AnalyzeCampaignPromptView, DispatchCampaignView, MarketingHubView
 
 app_name = 'crm'
 

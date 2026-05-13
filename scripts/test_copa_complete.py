@@ -8,7 +8,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
 django.setup()
 
-from core.ticket_parser import extract_data_from_text, generate_ticket
+from apps.automation.parsers.ticket_parser import extract_data_from_text, generate_ticket
 import json
 
 # Read the Copa ticket

@@ -1,5 +1,7 @@
 from django.views.generic import TemplateView
+
 from apps.bookings.models import HotelTarifario
+
 
 class SocialHubView(TemplateView):
     template_name = 'marketing/social_hub.html'

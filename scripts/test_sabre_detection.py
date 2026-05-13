@@ -7,7 +7,7 @@ sys.path.append(os.getcwd())
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
 django.setup()
 
-from core.ticket_parser import extract_data_from_text
+from apps.automation.parsers.ticket_parser import extract_data_from_text
 
 # Text from ID 985
 text = """Recibo de boleto electrónico

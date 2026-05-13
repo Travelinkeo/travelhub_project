@@ -2,7 +2,7 @@ from django.core.management.base import BaseCommand
 from django.core.files.uploadedfile import SimpleUploadedFile
 from core.models.agencia import Agencia
 from apps.bookings.models import BoletoImportado
-from core.services.ticket_parser_service import TicketParserService
+from apps.automation.services.ticket_parser_service import TicketParserService
 import requests # Necesario para descargar de la nube
 from io import BytesIO
 import os

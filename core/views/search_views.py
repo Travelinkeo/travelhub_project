@@ -1,12 +1,13 @@
 import logging
-from django.views import View
-from django.shortcuts import render
-from django.http import HttpResponse
-from django.db.models import Q
-from django.contrib.auth.mixins import LoginRequiredMixin
 
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Q
+from django.http import HttpResponse
+from django.shortcuts import render
+from django.views import View
+
+from apps.bookings.models import BoletoImportado, Venta
 from apps.crm.models import Cliente
-from apps.bookings.models import Venta, BoletoImportado
 
 logger = logging.getLogger(__name__)
 
@@ -75,6 +76,7 @@ class GlobalOmnisearchView(LoginRequiredMixin, View):
 
 
 from django.http import JsonResponse
+
 
 class ClienteSearchAPIView(LoginRequiredMixin, View):
     """

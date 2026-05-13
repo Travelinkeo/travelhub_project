@@ -1,8 +1,9 @@
 import logging
 import uuid
-import time
+
 from django.db import transaction
 from django.utils import timezone
+
 from apps.bookings.models import Venta
 from apps.finance.models.fiscal import FacturaFiscal
 
@@ -29,7 +30,7 @@ class ElectronicInvoiceService:
 
         # 2. Construcción del Payload Fiscal (Simulado)
         # Aquí se armaría el XML siguiendo el esquema XSD oficial (ej: DIAN o SENIAT)
-        payload = {
+        {
             "agencia": {
                 "rif": venta.agencia.rif if venta.agencia else "J-00000000-0",
                 "nombre": venta.agencia.nombre if venta.agencia else "Agencia de Viajes"

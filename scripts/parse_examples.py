@@ -1,6 +1,6 @@
 import json
 
-from core import ticket_parser as tp
+from apps.automation.parsers import ticket_parser as tp
 
 
 def load_and_parse(path):

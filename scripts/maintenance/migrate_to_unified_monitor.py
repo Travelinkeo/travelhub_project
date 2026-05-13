@@ -13,7 +13,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
 import django
 django.setup()
 
-from core.services.email_monitor_service import EmailMonitorService
+from apps.communications.services.email_monitor_service import EmailMonitorService
 
 def main():
     print("=" * 60)

@@ -1,9 +1,9 @@
 # core/cache.py
-from functools import wraps
-from django.core.cache import cache
-from django.conf import settings
 import hashlib
 import json
+from functools import wraps
+
+from django.core.cache import cache
 
 
 def cache_api_response(timeout=300, key_prefix='api'):

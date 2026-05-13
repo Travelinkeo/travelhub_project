@@ -1,14 +1,13 @@
 """
 Django Admin configuration for Migration Requirements Checker.
 """
-from django.contrib import admin
-from django.utils.html import format_html
-from django.contrib import messages
 from datetime import date
 
+from django.contrib import admin, messages
+from django.utils.html import format_html
+
+from apps.automation.services.migration_checker_service import MigrationCheckerService
 from core.models.migration_checks import MigrationCheck
-from apps.bookings.models import Venta
-from core.services.migration_checker_service import MigrationCheckerService
 
 
 class MigrationCheckInline(admin.TabularInline):

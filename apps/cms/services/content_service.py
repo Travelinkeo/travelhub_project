@@ -1,10 +1,11 @@
-import os
 import json
-from google import genai
+import logging
+
 from django.conf import settings
 from django.utils.text import slugify
-from ..models import Articulo, GuiaDestino, PostRedesSociales
-import logging
+from google import genai
+
+from ..models import Articulo, PostRedesSociales
 
 logger = logging.getLogger(__name__)
 

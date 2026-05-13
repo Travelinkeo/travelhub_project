@@ -1,9 +1,8 @@
 import re
-import os
 
 html_path = r'C:\Users\ARMANDO\travelhub_project\core\templates\core\erp\cotizaciones\crear_cotizacion_swiss.html'
 
-with open(html_path, 'r', encoding='utf-8') as f:
+with open(html_path, encoding='utf-8') as f:
     html = f.read()
 
 # 1. Update <style>

@@ -1,14 +1,16 @@
-from django.shortcuts import render, get_object_or_404
-from django.views.generic import ListView, DetailView, View, CreateView, UpdateView, DeleteView
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.urls import reverse_lazy
-from django.contrib import messages
-from .models import Articulo, GuiaDestino, PostRedesSociales
-from .forms import ArticuloForm, GuiaDestinoForm
-from .services.cms_ai_service import CMSContentService
-from django.http import HttpResponse, JsonResponse
 import json
 import logging
+
+from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import HttpResponse, JsonResponse
+from django.shortcuts import render
+from django.urls import reverse_lazy
+from django.views.generic import CreateView, DeleteView, ListView, UpdateView, View
+
+from .forms import ArticuloForm, GuiaDestinoForm
+from .models import Articulo, GuiaDestino
+from .services.cms_ai_service import CMSContentService
 
 logger = logging.getLogger(__name__)
 

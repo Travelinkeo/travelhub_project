@@ -1,18 +1,24 @@
 # Archivo: core/admin.py
 import logging
-from django.contrib import admin
-from django.utils.translation import gettext_lazy as _
 
-from .models import Agencia, AgenciaBranding, AgenciaConfiguracion, UsuarioAgencia
-from apps.common.models import Aerolinea, Ciudad, Pais
-from apps.finance.models.currencies import Moneda, TipoCambio
-from apps.bookings.models.servicios import ProductoServicio, Proveedor
-from apps.finance.models import RetencionISLR
+from django.contrib import admin
+
 from apps.bookings.models import CruceroReserva
-from .admin_saas import SaaSAdminMixin
+from apps.bookings.models.servicios import ProductoServicio, Proveedor
+from apps.common.models import Aerolinea, Ciudad, Pais
+from apps.finance.models import RetencionISLR
+from apps.finance.models.currencies import Moneda, TipoCambio
 
 # Importar inlines compartidos
-from .admin_migration import MigrationCheckInline, validate_migration_requirements_action
+from .admin_saas import SaaSAdminMixin
+from .models import (
+    Agencia,
+    AgenciaBranding,
+    AgenciaConfiguracion,
+    CronApiKey,
+    FeatureFlag,
+    UsuarioAgencia,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -127,9 +133,23 @@ class CruceroReservaAdmin(SaaSAdminMixin, admin.ModelAdmin):
     autocomplete_fields = ['venta', 'proveedor', 'moneda']
 
 @admin.register(RetencionISLR)
-class RetencionISLRAdmin(SaaSAdminMixin, admin.ModelAdmin):
+class RetencionISLRAdmin(admin.ModelAdmin):
     list_display = ['numero_comprobante', 'fecha_emision', 'cliente', 'estado']
     list_filter = ['estado', 'periodo_fiscal']
     autocomplete_fields = ['factura', 'cliente']
+
+@admin.register(FeatureFlag)
+class FeatureFlagAdmin(admin.ModelAdmin):
+    list_display = ['nombre', 'agencia', 'enabled', 'rollout_percentage', 'updated_at']
+    list_filter = ['enabled', 'agencia']
+    search_fields = ['nombre', 'description']
+    list_editable = ['enabled', 'rollout_percentage']
+
+@admin.register(CronApiKey)
+class CronApiKeyAdmin(admin.ModelAdmin):
+    list_display = ['name', 'prefix', 'is_active', 'last_used', 'expires_at', 'agencia']
+    list_filter = ['is_active', 'agencia']
+    search_fields = ['name']
+    readonly_fields = ['key_hash', 'prefix', 'last_used']
 
 # Nota: Los modelos de negocio (Venta, Boleto, Factura, Cliente) están en sus propias aplicaciones.

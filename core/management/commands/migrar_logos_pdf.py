@@ -1,6 +1,9 @@
 import base64
+
 from django.core.management.base import BaseCommand
+
 from core.models.agencia import Agencia
+
 
 class Command(BaseCommand):
     help = 'Migra los logos (ImageField o base64 general) a logo_pdf_base64 para uso en reportes PDF'

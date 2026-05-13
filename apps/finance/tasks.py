@@ -1,7 +1,9 @@
 import logging
+
 from celery import shared_task
+
+from apps.communications.services.telegram_service import enviar_alerta_telegram
 from apps.finance.models import LinkDePago
-from core.services.telegram_service import enviar_alerta_telegram
 
 logger = logging.getLogger(__name__)
 
@@ -14,7 +16,6 @@ def notificar_pago_zelle_task(link_id):
     try:
         link = LinkDePago.objects.select_related('venta__cliente', 'venta__agencia').get(id=link_id)
         venta = link.venta
-        agencia = venta.agencia
         
         mensaje = (
             f"💸 *NUEVO PAGO REPORTADO*\n\n"

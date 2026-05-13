@@ -1,9 +1,7 @@
-version: '3.8'
-
 services:
   web:
     build: .
-    command: gunicorn travelhub.wsgi:application --bind 0.0.0.0:8000 --workers 3 --timeout 120
+    command: gunicorn travelhub.wsgi:application --bind 0.0.0.0:8000 --workers 2 --timeout 120
     volumes:
       - .:/app
       - static_volume:/app/staticfiles
@@ -18,7 +16,7 @@ services:
     restart: unless-stopped
 
   db:
-    image: postgres:16-alpine
+    image: postgres:15-alpine
     volumes:
       - postgres_data:/var/lib/postgresql/data
     environment:
@@ -33,7 +31,40 @@ services:
     image: redis:7-alpine
     ports:
       - "6379:6379"
+    networks:
+      - default
+      - travelhub_net
     restart: unless-stopped
+
+  evolution:
+    image: atendai/evolution-api:latest
+    ports:
+      - "8080:8080"
+    volumes:
+      - evolution_data:/evolution/instances
+    environment:
+      SERVER_TYPE: http
+      SERVER_PORT: "8080"
+      AUTHENTICATION_TYPE: apikey
+      AUTHENTICATION_API_KEY: ${WHATSAPP_MICROSERVICE_TOKEN:-travelhub_secret_token_2026}
+      LANGUAGE: es
+      DATABASE_ENABLE: "true"
+      DATABASE_PROVIDER: postgresql
+      DATABASE_CONNECTION_URI: postgresql://evolution:evolution@evolution_db:5432/evolution_v2
+      DATABASE_URL: postgresql://evolution:evolution@evolution_db:5432/evolution_v2
+      REDIS_ENABLED: "false"
+      REDIS_PREFIX: evolution
+      DATABASE_SAVE_DATA_INSTANCE: "true"
+
+      WEBHOOK_GLOBAL_ENABLED: "false"
+      LOG_LEVEL: ERROR
+    depends_on:
+      - redis
+    networks:
+      - default
+      - travelhub_net
+    restart: unless-stopped
+
 
   celery-worker:
     build: .
@@ -42,9 +73,14 @@ services:
       - .:/app
     env_file:
       - .env
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
     depends_on:
       - db
       - redis
+    networks:
+      - travelhub_net
     restart: unless-stopped
 
   celery-beat:
@@ -54,12 +90,40 @@ services:
       - .:/app
     env_file:
       - .env
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
     depends_on:
       - db
       - redis
+    restart: unless-stopped
+
+  evolution_db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: evolution
+      POSTGRES_PASSWORD: evolution
+      POSTGRES_DB: evolution_v2
+    volumes:
+      - evolution_db_data:/var/lib/postgresql/data
+    networks:
+      - travelhub_net
+    restart: unless-stopped
+
+  gotenberg:
+    image: gotenberg/gotenberg:8
+    networks:
+      - travelhub_net
     restart: unless-stopped
 
 volumes:
   postgres_data:
   static_volume:
   media_volume:
+  evolution_data:
+  evolution_db_data:
+
+networks:
+  travelhub_net:
+    external: true
+    name: travelhub_project_travelhub_net

@@ -8,7 +8,7 @@ sys.path.append(r'C:\Users\ARMANDO\travelhub_project')
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
 django.setup()
 
-from core.ticket_parser import generate_ticket
+from apps.automation.parsers.ticket_parser import generate_ticket
 from core.models import Agencia
 
 def generate_examples():

@@ -10,21 +10,26 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AddField(
-            model_name="proveedor",
-            name="office_id_expedia",
-            field=models.CharField(
-                blank=True, max_length=10, null=True, verbose_name="Office ID EXPEDIA"
-            ),
-        ),
-        migrations.AddField(
-            model_name="proveedor",
-            name="office_id_hotelbeds",
-            field=models.CharField(
-                blank=True,
-                max_length=10,
-                null=True,
-                verbose_name="Office ID HOTEL BEDS",
-            ),
+        migrations.SeparateDatabaseAndState(
+            state_operations=[
+                migrations.AddField(
+                    model_name="proveedor",
+                    name="office_id_expedia",
+                    field=models.CharField(
+                        blank=True, max_length=10, null=True, verbose_name="Office ID EXPEDIA"
+                    ),
+                ),
+                migrations.AddField(
+                    model_name="proveedor",
+                    name="office_id_hotelbeds",
+                    field=models.CharField(
+                        blank=True,
+                        max_length=10,
+                        null=True,
+                        verbose_name="Office ID HOTEL BEDS",
+                    ),
+                ),
+            ],
+            database_operations=[],
         ),
     ]

@@ -1,16 +1,16 @@
-from django.views.generic import ListView, DetailView, CreateView, UpdateView
-from django.views import View
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q, Sum
 from django.urls import reverse_lazy
-from apps.bookings.models import Proveedor
-from apps.bookings.models import Venta, BoletoImportado, ItemVenta, FeeVenta
-from core.forms import FeeVentaForm
+from django.views import View
+from django.views.generic import CreateView, DetailView, ListView, UpdateView
 
+from apps.bookings.models import BoletoImportado, FeeVenta, Venta
 from apps.crm.models import Cliente
-from core.mixins import SaaSMixin, HtmxResponseMixin
-from core.security import get_agencia_or_403, get_object_tenant_or_404
+from core.forms import FeeVentaForm
+from core.mixins import HtmxResponseMixin, SaaSMixin
+from core.security import get_agencia_or_403, get_object_tenant_or_404, get_user_active_agency
+
 
 class VentaUpdateView(SaaSMixin, LoginRequiredMixin, UpdateView):
     model = Venta
@@ -57,8 +57,9 @@ class VentaUpdateView(SaaSMixin, LoginRequiredMixin, UpdateView):
                 item.impuestos_item_venta = 0 # Simplificación por ahora
                 item.save()
                 
-                # Recalcular Venta
-                self.object.recalcular_finanzas()
+                # Recalcular Venta desde Servicio
+                from apps.finance.services.finance_service import FinanceService
+                FinanceService.recalculate_sale_finances(self.object.pk)
                 
             except Exception as e:
                 # Log error but don't crash
@@ -103,11 +104,9 @@ class VentasDashboardView(HtmxResponseMixin, SaaSMixin, LoginRequiredMixin, List
         # Stats for the dashboard header (Filtered by Agency)
         # We reconstruct the base queryset for the agency to avoid applying search filters to stats
         base_qs = Venta.objects.select_related('cliente', 'moneda', 'agencia')
-        user = self.request.user
-        if not user.is_superuser and hasattr(user, 'agencias'):
-            ua = user.agencias.filter(activo=True).first()
-            if ua:
-                base_qs = base_qs.filter(agencia=ua.agencia)
+        agencia = get_user_active_agency(self.request.user)
+        if agencia:
+            base_qs = base_qs.filter(agencia=agencia)
         
         context['total_ventas_mes'] = base_qs.count()  # Simplified for POC
         context['monto_total_mes'] = base_qs.aggregate(Sum('total_venta'))['total_venta__sum'] or 0
@@ -152,7 +151,7 @@ class VentaDetailView(HtmxResponseMixin, SaaSMixin, LoginRequiredMixin, DetailVi
         ).all()
         
         # 🧠 Sales Intelligence AI
-        from core.services.ai_parser_service import AIParserService
+        from apps.automation.services.ai_parser_service import AIParserService
         ai_tips = []
         
         # Analizar boletos para obtener tips reales
@@ -171,10 +170,11 @@ class VentaDetailView(HtmxResponseMixin, SaaSMixin, LoginRequiredMixin, DetailVi
         
         return context
 
-from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
+from django.core.exceptions import ValidationError as DjangoValidationError
 from django.http import HttpResponse
-from apps.finance.models import Factura, ItemFactura
+from django.shortcuts import get_object_or_404, redirect
+
 
 class VentaAssignClientView(LoginRequiredMixin, View):
     def post(self, request, pk):
@@ -208,8 +208,10 @@ class VentaAddFeeView(LoginRequiredMixin, CreateView):
         fee = form.save(commit=False)
         fee.venta = self.venta
         fee.save()
-        self.venta.recalcular_finanzas()
-        messages.success(self.request, f"Fee registrado exitosamente.")
+        # self.venta.recalcular_finanzas()
+        from apps.finance.services.finance_service import FinanceService
+        FinanceService.recalculate_sale_finances(self.venta.pk)
+        messages.success(self.request, "Fee registrado exitosamente.")
         return redirect('core:venta_detalle', pk=self.venta.pk)
 
     def get_context_data(self, **kwargs):
@@ -219,78 +221,21 @@ class VentaAddFeeView(LoginRequiredMixin, CreateView):
 
 class VentaGenerateInvoiceView(LoginRequiredMixin, View):
     def post(self, request, pk):
-        # 🔐 CANDADO: Solo accede a ventas de la agencia del usuario.
+        # 🔒 CANDADO: Solo accede a ventas de la agencia del usuario.
         agencia = get_agencia_or_403(request)
         venta = get_object_tenant_or_404(Venta, agencia, pk=pk)
-        
-        if not venta.cliente:
-            messages.error(request, "La venta debe tener un cliente asignado para facturar.")
-            return redirect('core:venta_detalle', pk=pk)
-            
-        if hasattr(venta, 'factura'):
-            messages.warning(request, "Esta venta ya tiene una factura asociada.")
-            return redirect('core:venta_detalle', pk=pk)
-            
+
         try:
-            # Create Invoice
-            factura = Factura.objects.create(
-                cliente=venta.cliente,
-                moneda=venta.moneda,
-                subtotal=venta.subtotal,
-                monto_impuestos=venta.impuestos,
-                venta_asociada=venta
-            )
-
-            # Calculate total fees to distribute/hide
-            total_fees = venta.fees_venta.aggregate(Sum('monto'))['monto__sum'] or 0
-
-            # Copy Items - Optimized with select_related to avoid N+1
-            items_venta = venta.items_venta.select_related(
-                'producto_servicio', 'moneda'
-            ).all()
-            
-            # Get boleto outside the loop (avoid N+1)
-            boleto = BoletoImportado.objects.filter(
-                venta_asociada=venta
-            ).select_related('agencia', 'proveedor').first()
-
-            items_procesados = 0
-            total_items = items_venta.count()
-
-            for item_venta in items_venta:
-                descripcion = item_venta.descripcion_personalizada or item_venta.producto_servicio.nombre
-                
-                # Enrich description logic (simplified from admin)
-                if not item_venta.descripcion_personalizada and item_venta.producto_servicio.tipo_producto == 'AIR' and boleto:
-                    descripcion = f"Boleto Aéreo: {boleto.ruta_vuelo or ''}"
-                    if boleto.numero_boleto:
-                        descripcion += f" ({boleto.numero_boleto})"
-                
-                precio_unitario = item_venta.precio_unitario_venta
-                
-                # LOGICA DE FEES OCULTOS:
-                # Sumar todos los fees al PRIMER item de la factura (o distribuir, pero sumar al primero es más simple/común)
-                if items_procesados == 0 and total_items >0:
-                    # Sumamos el total de fees al precio de este primer item
-                    # Nota: Esto asume que el fee está en la misma moneda que la venta.
-                    precio_unitario += total_fees
-                
-                ItemFactura.objects.create(
-                    factura=factura,
-                    descripcion=descripcion,
-                    cantidad=item_venta.cantidad,
-                    precio_unitario=precio_unitario, # Precio aumentado
-                    tipo_servicio=item_venta.producto_servicio.tipo_producto,
-                    es_gravado=False # Default assumption, should be refined
-                )
-                items_procesados += 1
-                
-            factura.save() # Recalculate totals
-            messages.success(request, f"Factura #{factura.numero_factura} generada exitosamente. (Incluye Fees ocultos: {total_fees})")
-            
+            from apps.finance.services.invoicing_service import InvoicingService
+            factura = InvoicingService.create_invoice_from_venta(venta.pk, agencia)
+            messages.success(request, f"Factura #{factura.numero_factura} generada exitosamente.")
+        except DjangoValidationError as e:
+            messages.warning(request, str(e))
         except Exception as e:
+            import logging
+            logging.getLogger(__name__).exception("Error en VentaGenerateInvoiceView")
             messages.error(request, f"Error al generar factura: {str(e)}")
-            
+
         return redirect('core:venta_detalle', pk=pk)
 
 class VentaGenerateVoucherView(LoginRequiredMixin, View):
@@ -300,7 +245,7 @@ class VentaGenerateVoucherView(LoginRequiredMixin, View):
         venta = get_object_tenant_or_404(Venta, agencia, pk=pk)
         
         try:
-            from core.services.voucher_service import generar_voucher_unificado
+            from apps.bookings.services.voucher_service import generar_voucher_unificado
             pdf_bytes, filename = generar_voucher_unificado(venta.pk)
             
             if pdf_bytes:

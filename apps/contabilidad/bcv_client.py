@@ -7,9 +7,8 @@ Implementa scraping de la página web del BCV como fuente primaria.
 import logging
 import re
 import warnings
-from decimal import Decimal
 from datetime import date
-from typing import Optional
+from decimal import Decimal
 
 import requests
 from bs4 import BeautifulSoup
@@ -28,7 +27,7 @@ class BCVClient:
     TIMEOUT = 10  # segundos
     
     @staticmethod
-    def obtener_tasa_actual() -> Optional[Decimal]:
+    def obtener_tasa_actual() -> Decimal | None:
         """
         Obtiene la tasa de cambio USD/BSD actual desde el sitio web del BCV.
         
@@ -86,7 +85,7 @@ class BCVClient:
             return None
     
     @staticmethod
-    def actualizar_tasa_db(tasa: Optional[Decimal] = None, fuente: str = "BCV Web") -> bool:
+    def actualizar_tasa_db(tasa: Decimal | None = None, fuente: str = "BCV Web") -> bool:
         """
         Actualiza la tasa en la base de datos.
         Si no se proporciona tasa, la obtiene automáticamente.

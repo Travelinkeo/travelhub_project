@@ -1,7 +1,8 @@
+from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
 from django.test import Client
 from django.urls import reverse
-from django.contrib.auth import get_user_model
+
 
 class Command(BaseCommand):
     help = 'Simula un usuario navegando por las rutas críticas'

@@ -1,13 +1,14 @@
 import logging
-from django.db import transaction
-from django.utils import timezone
-from django.conf import settings
-from django.db.models import Sum, Count
-from celery import shared_task
 from decimal import Decimal
 
-from apps.finance.models.commissions import ComisionVenta, LiquidacionAgente
+from celery import shared_task
+from django.conf import settings
 from django.core.mail import send_mail
+from django.db import transaction
+from django.db.models import Count, Sum
+from django.utils import timezone
+
+from apps.finance.models.commissions import ComisionVenta, LiquidacionAgente
 
 logger = logging.getLogger(__name__)
 

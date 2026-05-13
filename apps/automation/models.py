@@ -1,7 +1,9 @@
-from django.db import models
 from django.contrib.auth.models import User
-from core.models.base import AgenciaMixin
+from django.db import models
 from django.utils.translation import gettext_lazy as _
+
+from core.models.base import AgenciaMixin
+
 
 class NotificacionInteligente(AgenciaMixin, models.Model):
     """
@@ -29,7 +31,6 @@ class NotificacionInteligente(AgenciaMixin, models.Model):
         indexes = [
             models.Index(fields=['usuario', 'leida']),
         ]
-        db_table = 'core_notificacioninteligente' # Mantener para compatibilidad
 
     def __str__(self):
         return f"{self.titulo} - {self.usuario.username}"
@@ -56,7 +57,6 @@ class NotificacionAgente(AgenciaMixin, models.Model):
         verbose_name = _("Notificación de Agente")
         verbose_name_plural = _("Notificaciones de Agente")
         ordering = ['-creado_en']
-        db_table = 'core_notificacionagente' # Mantener para compatibilidad
 
     def __str__(self):
         return f"{self.titulo} -> {self.usuario.username}"

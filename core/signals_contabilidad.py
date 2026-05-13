@@ -1,7 +1,7 @@
 import logging
-from django.db.models.signals import post_save, post_delete
+
+from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
-from django.utils.translation import gettext_lazy as _
 
 logger = logging.getLogger(__name__)
 
@@ -41,8 +41,7 @@ def _get_cuenta_banco_caja(metodo_pago, moneda):
 
 @receiver(post_save, sender='finance.GastoOperativo')
 def contabilizar_gasto_operativo(sender, instance, created, **kwargs):
-    from apps.finance.models import GastoOperativo
-    from apps.contabilidad.models import AsientoContable, DetalleAsiento, PlanContable
+    from apps.contabilidad.models import AsientoContable, DetalleAsiento
     """
     Genera/Actualiza el Asiento Contable automáticamente.
     Asiento:
@@ -122,6 +121,5 @@ def contabilizar_gasto_operativo(sender, instance, created, **kwargs):
 
 @receiver(post_delete, sender='finance.GastoOperativo')
 def eliminar_asiento_gasto(sender, instance, **kwargs):
-    from apps.finance.models import GastoOperativo
     if instance.asiento_contable:
         instance.asiento_contable.delete()

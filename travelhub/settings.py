@@ -1,9 +1,17 @@
-import os
-import ssl
 import logging
-from datetime import timedelta
-from pathlib import Path
 import mimetypes
+import os
+import json
+from pathlib import Path
+from zoneinfo import ZoneInfo
+
+# Monkey-patch json.JSONEncoder to handle ZoneInfo
+_original_json_default = json.JSONEncoder.default
+def _new_json_default(self, obj):
+    if isinstance(obj, ZoneInfo):
+        return str(obj)
+    return _original_json_default(self, obj)
+json.JSONEncoder.default = _new_json_default
 
 # Fix para registro de mimetypes en Windows local (evita bloqueo "nosniff" de scripts CSS/JS)
 mimetypes.add_type("text/css", ".css", True)
@@ -14,6 +22,7 @@ mimetypes.add_type("application/javascript", ".mjs", True)
 logger = logging.getLogger(__name__)
 
 from dotenv import load_dotenv
+from django.core.exceptions import ImproperlyConfigured
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / '.env')
@@ -22,17 +31,16 @@ print("--- [SETTINGS] .env loaded ---", flush=True)
 # DEBUG defaults to False for safety. Set DEBUG=True in .env for development.
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-from django.core.exceptions import ImproperlyConfigured
 
 # 🛑 ESCUDO DE SEGURIDAD (FAIL FAST)
 # Si falta alguna de estas variables en producción, el servidor se negará a arrancar.
 def get_env_variable(var_name, default=None, required=True):
     try:
         return os.environ[var_name]
-    except KeyError:
+    except KeyError as e:
         if required and not DEBUG:
             error_msg = f"🔥 FALLO CRÍTICO DE SEGURIDAD: Falta la variable de entorno obligatoria '{var_name}'"
-            raise ImproperlyConfigured(error_msg)
+            raise ImproperlyConfigured(error_msg) from e
         return default
 
 # --- VARIABLES CRÍTICAS ---
@@ -53,8 +61,8 @@ if not DEBUG:
 
 try:
     DATABASE_URL = os.environ['DATABASE_URL']
-except KeyError:
-    raise ImproperlyConfigured("🔥 FALLO CRÍTICO DE ARQUITECTURA: DATABASE_URL para PostgreSQL es obligatoria y no está definida.")
+except KeyError as e:
+    raise ImproperlyConfigured("🔥 FALLO CRÍTICO DE ARQUITECTURA: DATABASE_URL para PostgreSQL es obligatoria y no está definida.") from e
 
 # Solo permitimos el dominio en producción
 ALLOWED_HOSTS = get_env_variable('ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
@@ -65,9 +73,13 @@ SENTRY_DSN = os.getenv('SENTRY_DSN', '')
 if SENTRY_DSN and not DEBUG:
     import sentry_sdk
     from sentry_sdk.integrations.django import DjangoIntegration
+    from sentry_sdk.integrations.celery import CeleryIntegration
     sentry_sdk.init(
         dsn=SENTRY_DSN,
-        integrations=[DjangoIntegration()],
+        integrations=[
+            DjangoIntegration(),
+            CeleryIntegration(),
+        ],
         traces_sample_rate=0.2,
         send_default_pii=False,
         environment=os.getenv('SENTRY_ENVIRONMENT', 'production'),
@@ -107,6 +119,7 @@ INSTALLED_APPS = [
     'apps.automation.apps.AutomationConfig',
     'django_celery_results',
     'django_celery_beat',
+    'axes',
     # 'django_extensions',
 ]
 
@@ -118,6 +131,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'axes.middleware.AxesMiddleware',
     'core.middleware.ThreadLocalContextMiddleware',
     'core.middleware.SecurityHeadersMiddleware',
      'django.contrib.messages.middleware.MessageMiddleware',
@@ -150,6 +164,7 @@ WSGI_APPLICATION = 'travelhub.wsgi.application'
 
 # Base de datos: PostgreSQL guiado estrictamente por DATABASE_URL
 import dj_database_url
+
 DATABASES = {
     'default': dj_database_url.parse(DATABASE_URL)
 }
@@ -245,15 +260,13 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 FIXTURE_DIRS = [BASE_DIR / 'fixtures',]
 print("--- [SETTINGS] Fixtures configured ---", flush=True)
 
-# Gemini API Key
-GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
+# Gemini API Key (ya definida arriba como GEMINI_API_KEY)
 
 # Marketing - Unsplash API
 UNSPLASH_ACCESS_KEY = os.getenv('UNSPLASH_ACCESS_KEY')
 UNSPLASH_SECRET_KEY = os.getenv('UNSPLASH_SECRET_KEY')
 
 # --- STRIPE BILLING & SAAS ---
-STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY', '')
 STRIPE_PUBLISHABLE_KEY = os.getenv('STRIPE_PUBLISHABLE_KEY', '')
 STRIPE_WEBHOOK_SECRET = os.getenv('STRIPE_WEBHOOK_SECRET', '')
 
@@ -294,6 +307,9 @@ SPECTACULAR_SETTINGS = {
     'SERVE_INCLUDE_SCHEMA': False,
     'COMPONENT_SPLIT_PATCH': True,
     'COMPONENT_SPLIT_CREATABLE': True,
+    'ENUM_ADD_EXPLICIT_BLANK': False,
+    'SCHEMA_PATH_PREFIX': r'/api/',
+    'SCHEMA_PATH_PREFIX_TRIM': True,
 }
 
 # --- SaaS & Limits ---
@@ -371,9 +387,18 @@ TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
 TELEGRAM_ADMIN_ID = os.getenv('TELEGRAM_ADMIN_ID')
 TELEGRAM_GROUP_ID = os.getenv('TELEGRAM_GROUP_ID')
 
-# 📱 WhatsApp Microservice (Evolution API / VPS)
-WHATSAPP_MICROSERVICE_URL = os.getenv('WHATSAPP_MICROSERVICE_URL', 'http://localhost:3000/send')
+# 📱 WhatsApp Microservice (Evolution API v2)
+WHATSAPP_MICROSERVICE_URL = os.getenv('WHATSAPP_MICROSERVICE_URL', 'http://evolution:8080')
 WHATSAPP_MICROSERVICE_TOKEN = os.getenv('WHATSAPP_MICROSERVICE_TOKEN')
+if not DEBUG and not WHATSAPP_MICROSERVICE_TOKEN:
+    raise ImproperlyConfigured("WHATSAPP_MICROSERVICE_TOKEN debe configurarse en producción")
+EVOLUTION_PUBLIC_URL = os.getenv('EVOLUTION_PUBLIC_URL', 'http://localhost:8080')
+
+# 🔐 Binance Webhook Secret (para verificación HMAC)
+BINANCE_WEBHOOK_SECRET = os.getenv('BINANCE_WEBHOOK_SECRET', '')
+
+# PDF Generation (Gotenberg)
+GOTENBERG_URL = os.getenv('GOTENBERG_URL', '')
 
 # GCP - Document AI
 GCP_JSON_CREDENTIALS = os.getenv('GCP_JSON_CREDENTIALS') 
@@ -388,23 +413,28 @@ CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = TIME_ZONE
 
 # --- CELERY BEAT SCHEDULE ---
-from travelhub.celery_beat_schedule import CELERY_BEAT_SCHEDULE
 
 # --- CACHE CONFIGURATION ---
 # ☁️ Redis Cache: Compartido con Celery para entornos distribuídos (Gunicorn workers)
 # Usamos la misma URL que Celery pero en la DB 1 para separar del broker
 _redis_url = os.getenv('CELERY_BROKER_URL', 'redis://redis:6379/0')
+_redis_password = os.getenv('REDIS_PASSWORD', None)
 _cache_url = _redis_url.replace('/0', '/1') # Usamos DB 1
 
 if 'redis://' in _cache_url:
+    cache_options = {
+        "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        "CONNECTION_POOL_KWARGS": {"max_connections": 50}
+    }
+    # Agregar autenticación si está configurada
+    if _redis_password:
+        cache_options["PASSWORD"] = _redis_password
+    
     CACHES = {
         "default": {
             "BACKEND": "django_redis.cache.RedisCache",
             "LOCATION": _cache_url,
-            "OPTIONS": {
-                "CLIENT_CLASS": "django_redis.client.DefaultClient",
-                "CONNECTION_POOL_KWARGS": {"max_connections": 50}
-            },
+            "OPTIONS": cache_options,
             "KEY_PREFIX": "th",
             "TIMEOUT": 300,
         }
@@ -431,9 +461,6 @@ CORS_ALLOW_CREDENTIALS = True
 env_csrf_origins = os.getenv('CSRF_TRUSTED_ORIGINS', 'https://travelhub.cc,http://travelhub.cc')
 CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in env_csrf_origins.split(',')]
 
-import logging
-logger = logging.getLogger(__name__)
-
 # -----------------------------------------------------
 # 🔒 PADLOCK: SECURITY INFRASTRUCTURE
 # PROTECCION DE DATOS PERSONALES (GDPR/Compliance)
@@ -444,6 +471,8 @@ if not DEBUG and not ENCRYPTION_KEY:
     raise ImproperlyConfigured("ENCRYPTION_KEY debe configurarse en producción")
 if not DEBUG and ENCRYPTION_KEY and len(ENCRYPTION_KEY) < 32:
     raise ImproperlyConfigured("ENCRYPTION_KEY debe tener al menos 32 caracteres")
+
+ENCRYPTION_SALT = os.environ.get('ENCRYPTION_SALT', None)
 
 # 🛰️ CONFIGURACIÓN DE SEGURIDAD (HSTS / CSP)
 SECURE_HSTS_SECONDS = 31536000 if not DEBUG else 0
@@ -456,11 +485,25 @@ SESSION_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_SECURE = not DEBUG
 X_FRAME_OPTIONS = 'DENY'
 
+# --- django-axes: Proteccion contra fuerza bruta ---
+AXES_ENABLED = True
+AXES_FAILURE_LIMIT = 5
+AXES_COOLOFF_TIME = 1  # horas de bloqueo tras exceder el limite
+AXES_LOCKOUT_PARAMETERS = ["username", "ip_address"]
+AXES_RESET_ON_SUCCESS = True
+AXES_ENABLE_ACCESS_FAILURE_LOG = True
+
+AUTHENTICATION_BACKENDS = [
+    "axes.backends.AxesStandaloneBackend",
+    "django.contrib.auth.backends.ModelBackend",
+]
+
 # CSP Report-only para testing (luego poner en producción)
 SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
 
 # --- Magic Link Auth ---
 MAGIC_LINK_BASE_URL = os.getenv('MAGIC_LINK_BASE_URL', '')  # Auto-detect from request if empty
+FRONTEND_URL = os.getenv('FRONTEND_URL', MAGIC_LINK_BASE_URL or 'http://localhost:8000')
 
 # --- JWT Config (si se usa) ---
 # ... (opcional)
@@ -478,126 +521,179 @@ MAGIC_LINK_BASE_URL = os.getenv('MAGIC_LINK_BASE_URL', '')  # Auto-detect from r
 UNFOLD = {
     "SITE_TITLE": "TravelHub Admin",
     "SITE_SYMBOL": "travel_explore",
+    "COLORS": {
+        "primary": {
+            "50": "239 246 255",
+            "100": "219 234 254",
+            "200": "191 219 254",
+            "300": "147 197 253",
+            "400": "96 165 250",
+            "500": "59 130 246",
+            "600": "37 99 235",
+            "700": "29 78 216",
+            "800": "30 64 175",
+            "900": "30 58 138",
+            "950": "23 37 84",
+        },
+    },
     "SIDEBAR": {
         "show_search": True,
-        "show_all_applications": True,
+        "show_all_applications": False,
         "navigation": [
             {
                 "title": "Operaciones",
+                "collapsible": True,
                 "items": [
-                    {
-                        "title": "Dashboard Principal",
-                        "icon": "dashboard",
-                        "link": "/dashboard/",
-                    },
-                    {
-                        "title": "Subir Boleto (IA)",
-                        "icon": "upload_file",
-                        "link": "/erp/boletos-importar/",
-                    },
-                    {
-                        "title": "Buffer de Revisión",
-                        "icon": "rate_review",
-                        "link": "/erp/boletos-importados/",
-                    },
+                    {"title": "Dashboard Principal", "icon": "dashboard", "link": "/dashboard/"},
+                    {"title": "Subir Boleto (IA)", "icon": "upload_file", "link": "/erp/boletos-importar/"},
+                    {"title": "Buffer de Revision", "icon": "rate_review", "link": "/erp/boletos-importados/"},
                 ],
             },
             {
-                "title": "SuperAdmin (God Mode)",
+                "title": "Ventas y Reservas",
+                "collapsible": True,
                 "items": [
-                    {
-                        "title": "Control de Mando",
-                        "icon": "shield",
-                        "link": "/god-mode/",
-                    },
-                    {
-                        "title": "Gestión de Agencias",
-                        "icon": "corporate_fare",
-                        "link": "/admin/core/agencia/",
-                    },
+                    {"title": "Ventas", "icon": "shopping_cart", "link": "/admin/bookings/venta/"},
+                    {"title": "Items de Venta", "icon": "list_alt", "link": "/admin/bookings/itemventa/"},
+                    {"title": "Boletos Importados", "icon": "flight", "link": "/admin/bookings/boletoimportado/"},
+                    {"title": "Segmentos de Vuelo", "icon": "connecting_airports", "link": "/admin/bookings/segmentovuelo/"},
+                    {"title": "Alojamientos", "icon": "hotel", "link": "/admin/bookings/alojamientoreserva/"},
+                    {"title": "Traslados", "icon": "airport_shuttle", "link": "/admin/bookings/trasladoservicio/"},
+                    {"title": "Actividades", "icon": "hiking", "link": "/admin/bookings/actividadservicio/"},
+                    {"title": "Alquiler de Autos", "icon": "directions_car", "link": "/admin/bookings/alquileroautoreserva/"},
+                    {"title": "Circuitos", "icon": "map", "link": "/admin/bookings/circuitoturistico/"},
+                    {"title": "Paquetes Aereos", "icon": "flight_takeoff", "link": "/admin/bookings/paquetesereo/"},
+                    {"title": "Cruceros", "icon": "directions_boat", "link": "/admin/bookings/cruceroreserva/"},
+                    {"title": "Fee de Venta", "icon": "attach_money", "link": "/admin/bookings/feeventa/"},
+                    {"title": "Pagos de Venta", "icon": "payments", "link": "/admin/bookings/pagoventa/"},
+                    {"title": "Proveedores", "icon": "local_shipping", "link": "/admin/bookings/proveedor/"},
+                    {"title": "Productos y Servicios", "icon": "inventory", "link": "/admin/bookings/productoservicio/"},
                 ],
             },
             {
-                "title": "Marketing & IA",
+                "title": "Hoteles y Tarifarios",
+                "collapsible": True,
                 "items": [
-                    {
-                        "title": "Centro de Marketing",
-                        "icon": "auto_awesome",
-                        "link": "/marketing/hub/",
-                    },
-                    {
-                        "title": "Analizador GDS",
-                        "icon": "analytics",
-                        "link": "/intelligence/gds-analyzer/",
-                    },
+                    {"title": "Tarifarios Proveedor", "icon": "request_quote", "link": "/admin/bookings/tarifarioproveedor/"},
+                    {"title": "Hoteles en Tarifario", "icon": "king_bed", "link": "/admin/bookings/hoteltarifario/"},
+                    {"title": "Tipos de Habitacion", "icon": "bed", "link": "/admin/bookings/tipohabitacion/"},
+                    {"title": "Tarifas por Temporada", "icon": "calendar_month", "link": "/admin/bookings/tarifahabitacion/"},
+                    {"title": "Amenities", "icon": "spa", "link": "/admin/bookings/amenity/"},
                 ],
             },
             {
-                "title": "Finanzas y Contabilidad",
+                "title": "CRM",
+                "collapsible": True,
                 "items": [
-                    {
-                        "title": "Facturación",
-                        "icon": "receipt_long",
-                        "link": "/facturacion/",
-                    },
-                    {
-                        "title": "Facturas Consolidadas",
-                        "icon": "description",
-                        "link": "/api/facturas-consolidadas/",
-                    },
-                    {
-                        "title": "Libro de Ventas",
-                        "icon": "menu_book",
-                        "link": "/api/libro-ventas/",
-                    },
-                    {
-                        "title": "Reportes Contables",
-                        "icon": "assessment",
-                        "link": "/reportes/",
-                    },
-                    {
-                        "title": "Conciliación Proveedores",
-                        "icon": "account_balance",
-                        "link": "/finance/supplier-reconciliation/",
-                    },
+                    {"title": "Clientes", "icon": "people", "link": "/admin/crm/cliente/"},
+                    {"title": "Pasajeros", "icon": "person", "link": "/admin/crm/pasajero/"},
+                    {"title": "Oportunidades (Kanban)", "icon": "lightbulb", "link": "/admin/crm/oportunidadviaje/"},
+                    {"title": "Pasaportes Escaneados", "icon": "scanner", "link": "/admin/crm/pasaporteescaneado/"},
                 ],
             },
             {
-                "title": "Configuración",
+                "title": "Cotizaciones",
+                "collapsible": True,
                 "items": [
-                    {
-                        "title": "Perfil de Usuario",
-                        "icon": "manage_accounts",
-                        "link": "/setup/perfil/",
-                    },
-                    {
-                        "title": "Branding",
-                        "icon": "palette",
-                        "link": "/settings/branding/",
-                    },
-                    {
-                        "title": "Configuración Agencia",
-                        "icon": "settings",
-                        "link": "/agencia/configuracion/",
-                    },
-                    {
-                        "title": "Catálogos",
-                        "icon": "inventory_2",
-                        "link": "/setup/catalogos/",
-                    },
-                    {
-                        "title": "Gestión de Usuarios",
-                        "icon": "group",
-                        "link": "/agencia/usuarios/",
-                    },
-                    {
-                        "title": "Tasas de Cambio",
-                        "icon": "currency_exchange",
-                        "link": "/setup/tasas/",
-                    },
+                    {"title": "Cotizaciones", "icon": "description", "link": "/admin/cotizaciones/cotizacion/"},
+                    {"title": "Items Cotizacion", "icon": "format_list_bulleted", "link": "/admin/cotizaciones/itemcotizacion/"},
+                ],
+            },
+            {
+                "title": "Finanzas",
+                "collapsible": True,
+                "items": [
+                    {"title": "Facturas", "icon": "receipt_long", "link": "/admin/finance/factura/"},
+                    {"title": "Facturas Consolidadas", "icon": "description", "link": "/admin/finance/facturaconsolidada/"},
+                    {"title": "Libro de Ventas", "icon": "menu_book", "link": "/api/libro-ventas/"},
+                    {"title": "Gastos Operativos", "icon": "money_off", "link": "/admin/finance/gastooperativo/"},
+                    {"title": "Pagos (Link de Pago)", "icon": "link", "link": "/admin/finance/linkdepago/"},
+                    {"title": "Conciliaciones", "icon": "compare_arrows", "link": "/admin/finance/conciliacionboleto/"},
+                    {"title": "Retenciones ISLR", "icon": "receipt", "link": "/admin/finance/retencionislr/"},
+                ],
+            },
+            {
+                "title": "Contabilidad",
+                "collapsible": True,
+                "items": [
+                    {"title": "Plan de Cuentas", "icon": "account_tree", "link": "/admin/contabilidad/plancontable/"},
+                    {"title": "Asientos Contables", "icon": "book", "link": "/admin/contabilidad/asientocontable/"},
+                    {"title": "Tasas BCV", "icon": "currency_exchange", "link": "/admin/contabilidad/tasacambiobcv/"},
+                    {"title": "Reportes Contables", "icon": "assessment", "link": "/reportes/"},
+                ],
+            },
+            {
+                "title": "Marketing",
+                "collapsible": True,
+                "items": [
+                    {"title": "Campañas", "icon": "campaign", "link": "/admin/marketing/campania/"},
+                    {"title": "Activos Marketing", "icon": "photo_library", "link": "/admin/marketing/activomarketing/"},
+                    {"title": "Config Marketing", "icon": "settings", "link": "/admin/marketing/configuracionmarketing/"},
+                    {"title": "Centro de Marketing", "icon": "auto_awesome", "link": "/marketing/hub/"},
+                ],
+            },
+            {
+                "title": "CMS / Contenido",
+                "collapsible": True,
+                "items": [
+                    {"title": "Articulos", "icon": "article", "link": "/admin/cms/articulo/"},
+                    {"title": "Guias de Destino", "icon": "travel_explore", "link": "/admin/cms/guiadestino/"},
+                    {"title": "Posts Redes", "icon": "share", "link": "/admin/cms/postredessociales/"},
+                ],
+            },
+            {
+                "title": "Configuracion Global",
+                "collapsible": True,
+                "items": [
+                    {"title": "Agencias", "icon": "corporate_fare", "link": "/admin/core/agencia/"},
+                    {"title": "Usuarios", "icon": "group", "link": "/admin/auth/user/"},
+                    {"title": "Paises", "icon": "public", "link": "/admin/common/pais/"},
+                    {"title": "Ciudades", "icon": "location_city", "link": "/admin/common/ciudad/"},
+                    {"title": "Aerolineas", "icon": "flight", "link": "/admin/common/aerolinea/"},
+                    {"title": "Monedas", "icon": "paid", "link": "/admin/finance/moneda/"},
+                    {"title": "Tipos de Cambio", "icon": "trending_up", "link": "/admin/finance/tipocambio/"},
+                    {"title": "Feature Flags", "icon": "toggle_on", "link": "/admin/core/featureflag/"},
+                    {"title": "Cron API Keys", "icon": "key", "link": "/admin/core/cronapikey/"},
+                    {"title": "Audit Logs", "icon": "history", "link": "/admin/core/auditlog/"},
+                ],
+            },
+            {
+                "title": "SuperAdmin",
+                "collapsible": True,
+                "items": [
+                    {"title": "Control de Mando", "icon": "shield", "link": "/god-mode/"},
+                    {"title": "Gestion de Agencias", "icon": "corporate_fare", "link": "/admin/core/agencia/"},
+                    {"title": "IA - GDS Analyzer", "icon": "analytics", "link": "/intelligence/gds-analyzer/"},
+                    {"title": "Conciliacion Proveedores", "icon": "account_balance", "link": "/finance/supplier-reconciliation/"},
+                ],
+            },
+            {
+                "title": "Ajustes",
+                "collapsible": True,
+                "items": [
+                    {"title": "Perfil de Usuario", "icon": "manage_accounts", "link": "/setup/perfil/"},
+                    {"title": "Branding", "icon": "palette", "link": "/settings/branding/"},
+                    {"title": "Configuracion Agencia", "icon": "settings", "link": "/agencia/configuracion/"},
+                    {"title": "Catalogos", "icon": "inventory_2", "link": "/setup/catalogos/"},
+                    {"title": "Usuarios Agencia", "icon": "group", "link": "/agencia/usuarios/"},
+                    {"title": "Tasas de Cambio", "icon": "currency_exchange", "link": "/setup/tasas/"},
                 ],
             },
         ],
     },
 }
 print("--- [SETTINGS] Loaded successfully ---", flush=True)
+
+# -----------------------------------------------------
+# 🧪 TESTING CONFIGURATION
+# -----------------------------------------------------
+import sys
+
+if 'test' in sys.argv or 'pytest' in sys.modules or (len(sys.argv) > 0 and 'pytest' in sys.argv[0]):
+    EMAIL_BACKEND = 'django.core.mail.backends.locmem.EmailBackend'
+    CELERY_TASK_ALWAYS_EAGER = True
+    CELERY_TASK_EAGER_PROPAGATES = True
+    # Desactivar R2 y Cloudinary en tests para evitar delays de red
+    USE_R2 = False
+    USE_CLOUDINARY = False
+    print("Test mode detected: Emails in memory, Celery Eager, Storage Local.")

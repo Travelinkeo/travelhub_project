@@ -1,12 +1,15 @@
 """
 Utilidades para calcular estadísticas del dashboard
 """
-from datetime import datetime, timedelta
+from datetime import timedelta
 from decimal import Decimal
-from django.db.models import Sum, Count, Q
+
+from django.db.models import Count, Sum
 from django.utils import timezone
-from apps.bookings.models import Venta, ItemVenta, PagoVenta
-from apps.bookings.models import ProductoServicio
+
+from apps.bookings.models import ItemVenta, PagoVenta, Venta
+
+
 def get_dashboard_stats(agencia):
     """
     Obtiene estadísticas principales para el dashboard, filtradas por agencia (Multi-tenant).
@@ -82,7 +85,7 @@ def get_dashboard_stats(agencia):
     for i in range(6, -1, -1):
         dia = hoy - timedelta(days=i)
         ventas_dia = ventas_qs.filter(
-            fecha_venta__date=dia
+            fecha_venta=dia
         ).aggregate(
             total=Sum('total_venta'),
             count=Count('id_venta')
@@ -95,7 +98,7 @@ def get_dashboard_stats(agencia):
     
     # Margen promedio (Nivel 4 Profitability)
     items_con_margen = items_qs.filter(
-        venta__fecha_venta__date__gte=inicio_mes,
+        venta__fecha_venta__gte=inicio_mes,
         costo_neto_proveedor__isnull=False
     ).aggregate(
         total_venta=Sum('total_item_venta'),

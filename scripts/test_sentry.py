@@ -22,7 +22,7 @@ def test_sentry():
         print(f"📡 DSN Configurado: {settings.SENTRY_DSN[:20]}...")
         
         # Test sanitization
-        from core.utils.sentry_utils import sanitize_sensitive_data
+        from apps.common.utils.sentry_utils import sanitize_sensitive_data
         print("✅ Función de sanitización cargada correctamente")
         
         test_event = {

@@ -3,8 +3,8 @@ import json
 import pytest
 import io
 from pathlib import Path
-from core.services.ticket_parser_service import TicketParserService
-from core.ticket_parser import extract_data_from_text
+from apps.automation.services.ticket_parser_service import TicketParserService
+from apps.automation.parsers.ticket_parser import extract_data_from_text
 from core.models.ai_schemas import BoletoAereoSchema, ResultadoParseoSchema
 from pydantic import ValidationError
 

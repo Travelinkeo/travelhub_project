@@ -8,7 +8,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
 django.setup()
 
-from core.ticket_parser import extract_data_from_text
+from apps.automation.parsers.ticket_parser import extract_data_from_text
 
 # Read the Copa ticket
 with open(r'C:\Users\ARMANDO\Downloads\Itinerary for Record Locator DYEXFG.eml', 'r', encoding='utf-8', errors='ignore') as f:

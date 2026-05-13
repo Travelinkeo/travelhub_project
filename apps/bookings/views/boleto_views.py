@@ -1,26 +1,21 @@
 # Archivo: apps/bookings/views/boleto_views.py
 
-from drf_spectacular.utils import extend_schema
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from rest_framework.parsers import MultiPartParser, FormParser
-from rest_framework.permissions import IsAuthenticated
-from django.core.files.base import ContentFile
-import os
 import logging
-from core.utils.celery_utils import safe_delay
+
+from drf_spectacular.utils import extend_schema
+from rest_framework import status
+from rest_framework.parsers import FormParser, MultiPartParser
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from apps.bookings.models import BoletoImportado, Venta
+from apps.common.services.audit_service import audit_service
+from apps.common.utils.celery_utils import safe_delay
+from apps.crm.models import Cliente
+from apps.finance.services.invoice_service import InvoiceService
 
 # Importar el servicio de parseo y los modelos de Django
-from core.services.ticket_parser_service import orquestar_parseo_de_boleto, generar_pdf_en_memoria
-from core.services.venta_automation import VentaAutomationService # AUTOMATION NIVEL 4
-from core.services.audit_service import audit_service
-from apps.finance.services.invoice_service import InvoiceService
-from apps.bookings.models import BoletoImportado, Venta
-from apps.crm.models import Cliente
-
-from django.conf import settings
-
 # Throttling
 from core.throttling import AgenciaAIParserThrottle, AIParserDailyQuotaThrottle
 
@@ -67,8 +62,8 @@ class BoletoUploadAPIView(APIView):
             boleto_importado = BoletoImportado.objects.create(
                 archivo_boleto=archivo_subido,
                 agencia=agencia_usuario,
-                estado_parseo='PRO',
-                log_parseo="Enviado a cola de procesamiento asíncrono (Celery)."
+                estado_parseo='QUE',
+                log_parseo="Enviado a cola de procesamiento asíncrona (Celery)."
             )
             
             # 3. Lanzar la tarea de forma segura (ASISTENCIA DE CARRIL)
@@ -122,16 +117,15 @@ class BoletoRetryParseAPIView(APIView):
 
     def post(self, request, pk):
         try:
+            from apps.common.utils.celery_utils import safe_delay
             from core.tasks import parsear_boleto_individual
-            from core.utils.celery_utils import safe_delay
             boleto = BoletoImportado.objects.select_related('agencia', 'proveedor').get(pk=pk)
-            from core.utils.celery_utils import safe_delay
             boleto = BoletoImportado.objects.select_related('agencia', 'proveedor').get(pk=pk)
-            boleto.estado_parseo = 'PRO'
+            boleto.estado_parseo = 'QUE'
             boleto.save(update_fields=['estado_parseo'])
-            task = safe_delay(parsear_boleto_individual, pk)
+            task = safe_delay(parsear_boleto_individual, pk, ignore_manual=True, bypass_cache=True)
             if task:
-                return Response({"status": "PROCESSING", "task_id": task.id}, status=202)
+                return Response({"status": "PROCESSING", "task_id": task}, status=202)
             return Response({"status": "QUEUED"}, status=202)
         except BoletoImportado.DoesNotExist:
             return Response({"error": "Boleto no encontrado."}, status=status.HTTP_404_NOT_FOUND)

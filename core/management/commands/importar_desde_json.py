@@ -1,9 +1,18 @@
-from django.core.management.base import BaseCommand
-from apps.bookings.models import TarifarioProveedor, HotelTarifario, TipoHabitacion, TarifaHabitacion
-from apps.common.models import Proveedor
+import json
 from datetime import datetime
 from decimal import Decimal
-import json
+
+from django.core.management.base import BaseCommand
+
+from apps.bookings.models import (
+    HotelTarifario,
+    TarifaHabitacion,
+    TarifarioProveedor,
+    TipoHabitacion,
+)
+from apps.common.models import Proveedor
+
+
 class Command(BaseCommand):
     help = 'Importa hoteles desde JSON estructurado'
 
@@ -15,7 +24,7 @@ class Command(BaseCommand):
         json_path = options['json_path']
         proveedor_id = options['proveedor_id']
 
-        with open(json_path, 'r', encoding='utf-8') as f:
+        with open(json_path, encoding='utf-8') as f:
             data = json.load(f)
 
         proveedor = Proveedor.objects.get(id_proveedor=proveedor_id)

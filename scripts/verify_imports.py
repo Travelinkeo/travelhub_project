@@ -33,7 +33,7 @@ except Exception as e:
 
 try:
     print("Importing TicketParserService...")
-    from core.services.ticket_parser_service import TicketParserService
+    from apps.automation.services.ticket_parser_service import TicketParserService
     print("OK.")
 except Exception as e:
     print(f"Error importing TicketParserService: {e}")

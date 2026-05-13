@@ -1,10 +1,11 @@
-from django.views.generic import ListView, CreateView
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import render, redirect
-from django.urls import reverse_lazy
 from django.http import HttpResponse
+from django.urls import reverse_lazy
+from django.views.generic import CreateView, ListView
+
 from apps.bookings.models import ProductoTerrestre
 from core.middleware import get_current_agency
+
 
 class CatalogoTerrestreListView(LoginRequiredMixin, ListView):
     """

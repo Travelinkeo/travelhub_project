@@ -1,7 +1,9 @@
-from rest_framework import viewsets, permissions, filters
-from core.api.mixins.tenant import TenantViewSetMixin
+from rest_framework import filters, permissions, viewsets
+
 from apps.bookings.models import ComisionProveedorServicio
+from core.api.mixins.tenant import TenantViewSetMixin
 from core.serializers import ComisionProveedorServicioSerializer
+
 
 class ComisionProveedorServicioViewSet(TenantViewSetMixin, viewsets.ModelViewSet):
     """

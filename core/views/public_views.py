@@ -1,16 +1,43 @@
-from django.views import View
-from django.views.generic import DetailView
-from django.shortcuts import get_object_or_404
-from django.http import HttpResponse
-from apps.bookings.models import Venta, BoletoImportado
-from core.services.voucher_service import generar_voucher_unificado, generar_voucher_alojamiento
 import logging
 
+from django.core.cache import cache
+from django.http import HttpResponse
+from django.utils.decorators import method_decorator
+from django.views import View
+from django.views.generic import DetailView
+
+from apps.bookings.models import BoletoImportado, Venta
+from apps.bookings.services.voucher_service import (
+    generar_voucher_alojamiento,
+    generar_voucher_unificado,
+)
+
 logger = logging.getLogger(__name__)
+
+
+def rate_limit(limit=20, period=60):
+    """
+    Decorador simple de rate limiting para vistas públicas.
+    """
+    def decorator(view_func):
+        def wrapped(self, request, *args, **kwargs):
+            ip = request.META.get('HTTP_X_FORWARDED_FOR', '').split(',')[0].strip() or request.META.get('REMOTE_ADDR', 'unknown')
+            key = f"rate_limit:{view_func.__name__}:{ip}"
+            count = cache.get(key, 0)
+            if count >= limit:
+                return HttpResponse("Rate limit exceeded. Try again later.", status=429)
+            cache.set(key, count + 1, period)
+            return view_func(self, request, *args, **kwargs)
+        return wrapped
+    return decorator
 
 class PublicItineraryView(DetailView):
     model = Venta
     queryset = Venta.all_objects.all() # Bypass TenantManager for public UUID access
+    
+    @method_decorator(rate_limit(limit=20, period=60))
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
     template_name = 'core/public/travel_portal_v2.html'
     context_object_name = 'venta'
     slug_field = 'uuid'
@@ -52,7 +79,7 @@ class PublicItineraryView(DetailView):
         context['destination_city'] = destination_city
         
         # Hero Image Logic (AI Powered Destination Visuals)
-        from core.services.ai_parser_service import AIParserService
+        from apps.automation.services.ai_parser_service import AIParserService
         context['hero_image'] = AIParserService.get_destination_image(destination_city or destination_name)
 
         # Agency Branding
@@ -71,6 +98,10 @@ class PublicVoucherPDFView(DetailView):
     model = Venta
     queryset = Venta.all_objects.all() # Bypass TenantManager for public UUID access
     slug_field = 'uuid'
+    
+    @method_decorator(rate_limit(limit=10, period=60))
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
     slug_url_kwarg = 'token'
 
     def get(self, request, *args, **kwargs):
@@ -87,6 +118,7 @@ class PublicVoucherPDFView(DetailView):
             logger.error(f"Error generating public PDF: {e}")
             return HttpResponse("Error interno", status=500)
 class PublicHotelVoucherPDFView(View):
+    @method_decorator(rate_limit(limit=10, period=60))
     def get(self, request, alojamiento_id, *args, **kwargs):
         try:
             from apps.bookings.models import AlojamientoReserva

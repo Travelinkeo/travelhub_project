@@ -2,7 +2,7 @@ version: '3.9'
 
 services:
   db:
-    image: postgres:16-alpine
+    image: postgres:15-alpine
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -44,10 +44,13 @@ services:
       - EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend
       - USE_CLOUDINARY=False
       - USE_R2=False
+      - GOTENBERG_URL=http://gotenberg:3000/forms/chromium/convert/html
     depends_on:
       db:
         condition: service_healthy
       redis:
+        condition: service_healthy
+      gotenberg:
         condition: service_healthy
 
   celery:
@@ -60,9 +63,11 @@ services:
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/travelhub
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - GOTENBERG_URL=http://gotenberg:3000/forms/chromium/convert/html
     depends_on:
       - db
       - redis
+      - gotenberg
 
   celery-beat:
     build: .
@@ -77,6 +82,45 @@ services:
       - db
       - redis
 
+  gotenberg:
+    image: gotenberg/gotenberg:8
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  evolution:
+    image: atendai/evolution-api:latest
+    ports:
+      - "8080:8080"
+    environment:
+      - SERVER_URL=http://localhost:8080
+      - DATABASE_CONNECTION_URI=postgresql://postgres:postgres@evolution_db:5432/evolution
+      - DATABASE_SAVE_DATA_INSTANCE=true
+      - DATABASE_SAVE_DATA_NEW_MESSAGE=true
+      - DATABASE_SAVE_DATA_CONTACTS=true
+      - DATABASE_SAVE_DATA_CHATS=true
+      - CACHE_REDIS_ENABLED=true
+      - CACHE_REDIS_URI=redis://redis:6379/1
+    depends_on:
+      - redis
+    restart: unless-stopped
+
+  evolution_db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: evolution
+    volumes:
+      - evolution_pg_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
 volumes:
   postgres_data:
   redis_data:
+  evolution_pg_data:

@@ -92,11 +92,18 @@ class PdfGenerationService:
                 loc_aero = vuelos[0].get('localizador_aerolinea') or vuelos[0].get('airline_pnr')
 
         from apps.common.utils.images import get_agencia_logo_b64
-        is_dark = PdfGenerationService._is_dark_color(agencia_obj.color_primario if agencia_obj and agencia_obj.color_primario else '#0D1E40')
+        color_primario = agencia_obj.color_primario if agencia_obj and agencia_obj.color_primario else '#0D1E40'
+        is_dark = PdfGenerationService._is_dark_color(color_primario)
+        
+        # Fallback para cuando no hay agencia_obj
+        agencia_nombre = agencia_obj.nombre_comercial or agencia_obj.nombre if agencia_obj else 'TRAVELHUB'
+        agencia_nombre_comercial = agencia_obj.nombre_comercial if agencia_obj else 'TRAVELHUB'
 
         return {
-            'agencia': agencia_obj,
+            'agencia': agencia_obj or type('FakeAgencia', (), {'nombre': 'TRAVELHUB', 'nombre_comercial': 'TRAVELHUB', 'color_primario': '#0D1E40'})(),
             'agencia_logo_b64': get_agencia_logo_b64(agencia_obj, is_dark_bg=is_dark) if agencia_obj else None,
+            'agencia_nombre': agencia_nombre,
+            'agencia_nombre_comercial': agencia_nombre_comercial,
             'is_dark_color': is_dark,
             'NOMBRE_DEL_PASAJERO': nombre_original,
             'CODIGO_IDENTIFICACION': data.get('CODIGO_IDENTIFICACION') or data.get('FOID') or data.get('passenger_document') or data.get('foid_pasajero'),

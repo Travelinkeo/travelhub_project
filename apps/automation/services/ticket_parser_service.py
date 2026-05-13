@@ -227,11 +227,13 @@ class TicketParserService:
                 logger.info(f"📄 Generando TKT PDF para Boleto {boleto.pk}")
                 pdf_bytes, fname = PdfGenerationService.generate_ticket(data, agencia_obj=boleto.agencia, boleto_obj=boleto)
                 
-                if pdf_bytes:
+                if pdf_bytes and len(pdf_bytes) > 100:
                     from django.core.files.base import ContentFile
                     # Guardamos el archivo físico (operación atómica de FS/Cloudinary)
                     boleto.archivo_pdf_generado.save(fname, ContentFile(pdf_bytes), save=True)
-                    logger.info(f"✅ PDF guardado: {fname}")
+                    logger.info(f"✅ PDF guardado: {fname} ({len(pdf_bytes)} bytes)")
+                else:
+                    logger.warning(f"⚠️ PDF generado vacío o muy pequeño ({len(pdf_bytes) if pdf_bytes else 0} bytes). Revisa Gotenberg.")
             except Exception as e_pdf:
                 logger.error(f"❌ Error generando PDF (Omitiendo para no fallar el proceso): {e_pdf}")
 

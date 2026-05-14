@@ -67,26 +67,34 @@ class StripeCheckoutView(View):
 @method_decorator(csrf_exempt, name='dispatch')
 class StripeWebhookView(View):
     """
-    Escucha invisible que Stripe llama automáticamente cuando la tarjeta pasa exitosamente.
+    🚨 SEGURIDAD | Webhook de Stripe con validación HMAC.
+    Escucha eventos de pago exitosos y actualiza el estado de la Venta.
     """
     def post(self, request, *args, **kwargs):
+        # 1. Configuración y Secrets
         stripe.api_key = getattr(settings, 'STRIPE_SECRET_KEY', '')
+        endpoint_secret = getattr(settings, 'STRIPE_WEBHOOK_SECRET', '')
+        
+        # 2. Intercepción de payload crudo y firma
         payload = request.body
         sig_header = request.META.get('HTTP_STRIPE_SIGNATURE', '')
-        endpoint_secret = getattr(settings, 'STRIPE_WEBHOOK_SECRET', '')
 
         event = None
 
-        # 1. Verificar firma criptográfica de Stripe (Seguridad anti-hackers)
+        # 3. Validación criptográfica de la firma (Webhook Signature Verification)
         try:
-            event = stripe.Webhook.construct_event(payload, sig_header, endpoint_secret)
+            event = stripe.Webhook.construct_event(
+                payload, sig_header, endpoint_secret
+            )
         except ValueError:
+            # Error en el payload (malformado)
             return HttpResponse(status=400)
         except stripe.error.SignatureVerificationError:
-            logger.warning("Firma de Stripe inválida interceptada.")
+            # Error en la firma (Intento de spoofing o secret incorrecto)
+            logger.error("🚨 Stripe Webhook: Firma inválida interceptada. Rechazando por seguridad.")
             return HttpResponse(status=400)
 
-        # 2. Procesar el pago completado
+        # 4. Procesamiento seguro del evento
         if event['type'] == 'checkout.session.completed':
             session = event['data']['object']
             link_id = session.get('client_reference_id')

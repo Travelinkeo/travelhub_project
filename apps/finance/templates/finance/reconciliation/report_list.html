@@ -44,16 +44,16 @@
                 {% for report in reports %}
                 <tr class="hover:bg-slate-700/30 transition-all group">
                     <td class="px-4 py-2">
-                        <div class="font-bold text-white text-base">{{ report.proveedor.nombre }}</div>
-                        <div class="text-xs text-indigo-300 font-mono">{{ report.fecha_carga|date:"d M Y, H:i" }}</div>
+                        <div class="font-bold text-white text-base">{{ report.proveedor }}</div>
+                        <div class="text-xs text-indigo-300 font-mono">{{ report.fecha_subida|date:"d M Y, H:i" }}</div>
                     </td>
                     <td class="px-4 py-2">
-                        <span class="text-white font-medium text-sm">{{ report.total_registros }}</span>
+                        <span class="text-white font-medium text-sm">{{ report.lineas.count }}</span>
                         <span class="text-gray-500 text-[10px] italic block leading-tight">boletos procesados</span>
                     </td>
                     <td class="px-4 py-2">
-                        {% if report.total_con_diferencia > 0 %}
-                        <span class="text-rose-400 font-bold text-base">{{ report.total_con_diferencia }}</span>
+                        {% if report.discrepancias_count > 0 %}
+                        <span class="text-rose-400 font-bold text-base">{{ report.discrepancias_count }}</span>
                         <span
                             class="text-rose-900/50 text-[9px] uppercase font-bold px-1.5 py-0.5 bg-rose-400/10 border border-rose-400/20 rounded-full ml-1">⚠️
                             Acción</span>
@@ -63,8 +63,8 @@
                     </td>
                     <td class="px-4 py-2 text-center">
                         <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider
-                            {% if report.estado == 'PEN' %}bg-amber-900/30 text-amber-400 border border-amber-700/50
-                            {% elif report.estado == 'PRO' %}bg-emerald-900/30 text-emerald-400 border border-emerald-700/50
+                            {% if report.estado == 'PENDIENTE' %}bg-amber-900/30 text-amber-400 border border-amber-700/50
+                            {% elif report.estado == 'PROCESADO' or report.estado == 'CONCILIADO' %}bg-emerald-900/30 text-emerald-400 border border-emerald-700/50
                             {% else %}bg-rose-900/30 text-rose-400 border border-rose-700/50{% endif %}">
                             {{ report.get_estado_display }}
                         </span>

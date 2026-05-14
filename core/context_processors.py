@@ -1,30 +1,35 @@
 import secrets
 
+from django.core.cache import cache
+
 
 def agency_context(request):
     agencia = None
     rol = None
-    
-    # 1. Recuperar la Agencia y el Rol del objeto request (seteado por Middleware)
+
     if request.user.is_authenticated:
         agencia = getattr(request, 'agencia', None)
-        
-        # Intentar obtener el rol del vínculo actual
+
         from core.models.agencia import UsuarioAgencia
         vinculo = UsuarioAgencia.objects.filter(usuario=request.user, agencia=agencia, activo=True).first()
         if vinculo:
             rol = vinculo.rol
         elif request.user.is_superuser:
             rol = 'admin'
-            
-    # 2. Recuperar la tasa BCV más reciente
+
     try:
-        from apps.finance.models.currencies import TasaCambio
-        tasa_usd_obj = TasaCambio.objects.filter(moneda='USD').order_by('-fecha').first()
-        tasa_eur_obj = TasaCambio.objects.filter(moneda='EUR').order_by('-fecha').first()
-        
-        tasa_usd = f"{tasa_usd_obj.monto:,.2f}" if tasa_usd_obj else "474.05"
-        tasa_eur = f"{tasa_eur_obj.monto:,.2f}" if tasa_eur_obj else "550.89"
+        tasas = cache.get('tasa_bcv_context')
+        if tasas is None:
+            from apps.finance.models.currencies import TasaCambio
+            tasa_usd_obj = TasaCambio.objects.filter(moneda='USD').order_by('-fecha').first()
+            tasa_eur_obj = TasaCambio.objects.filter(moneda='EUR').order_by('-fecha').first()
+            tasas = {
+                'usd': f"{tasa_usd_obj.monto:,.2f}" if tasa_usd_obj else "474.05",
+                'eur': f"{tasa_eur_obj.monto:,.2f}" if tasa_eur_obj else "550.89",
+            }
+            cache.set('tasa_bcv_context', tasas, timeout=300)
+        tasa_usd = tasas['usd']
+        tasa_eur = tasas['eur']
     except Exception:
         tasa_usd = "474.05"
         tasa_eur = "550.89"

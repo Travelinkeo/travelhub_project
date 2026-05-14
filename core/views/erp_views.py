@@ -236,15 +236,25 @@ class BoletosImportarView(SaaSMixin, LoginRequiredMixin, TemplateView):
         
         # Add Active Consolidators
         from apps.bookings.models import Proveedor
+        from apps.bookings.models.tarifario import TarifarioProveedor
         proveedores = Proveedor.objects.filter(
             tipo_proveedor=Proveedor.TipoProveedorChoices.CONSOLIDADOR,
             activo=True
         ).order_by('nombre')
 
-        # Logic to attach the current commission (Level 4 logic)
+        # Optimized: Fetch latest active tariffarios in a single query using prefetch_related or dict mapping
+        # Since we only need the latest one per provider, we can do a subquery or just prefetch and pick first
+        # Using a dict lookup for O(1) access
+        latest_tarifarios = {}
+        for t in TarifarioProveedor.objects.filter(
+            proveedor__in=proveedores,
+            activo=True
+        ).order_by('proveedor_id', '-fecha_carga'):
+            if t.proveedor_id not in latest_tarifarios:
+                latest_tarifarios[t.proveedor_id] = t
+
         for prov in proveedores:
-            # Replicating VentaAutomationService logic: Get latest active tariff
-            tarifario = prov.tarifarios.filter(activo=True).order_by('-fecha_carga').first()
+            tarifario = latest_tarifarios.get(provid.pk)
             prov.comision_display = tarifario.comision_estandar if tarifario else 0
 
         context['proveedores'] = proveedores

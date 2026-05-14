@@ -4,6 +4,8 @@ import os
 import requests
 from django.conf import settings
 
+from apps.common.services.circuit_breaker import whatsapp_circuit_breaker
+
 logger = logging.getLogger(__name__)
 
 class EvolutionService:
@@ -119,7 +121,12 @@ class EvolutionService:
 
     @classmethod
     def send_text(cls, instance_name: str, number: str, text: str):
-        """Envía un mensaje de texto simple con auto-provisioning."""
+        """Envía un mensaje de texto simple con auto-provisioning y circuit breaker."""
+        return whatsapp_circuit_breaker.call(cls._send_text_internal, instance_name, number, text)
+
+    @classmethod
+    def _send_text_internal(cls, instance_name: str, number: str, text: str):
+        """Internal send implementation protected by circuit breaker."""
         # --- AUTO-PROVISIONING ---
         if not cls.get_connection_status(instance_name):
             logger.info(f"Instancia '{instance_name}' no encontrada o cerrada. Intentando crear/reiniciar...")
@@ -157,9 +164,12 @@ class EvolutionService:
 
     @classmethod
     def send_media(cls, instance_name: str, number: str, media_url: str, caption: str = "", file_name: str = "documento.pdf"):
-        """
-        Envía un archivo (PDF, Imagen) vía Evolution API con auto-provisioning.
-        """
+        """Envía un archivo (PDF, Imagen) vía Evolution API con circuit breaker."""
+        return whatsapp_circuit_breaker.call(cls._send_media_internal, instance_name, number, media_url, caption, file_name)
+
+    @classmethod
+    def _send_media_internal(cls, instance_name: str, number: str, media_url: str, caption: str = "", file_name: str = "documento.pdf"):
+        """Internal media send implementation protected by circuit breaker."""
         # --- AUTO-PROVISIONING ---
         if not cls.get_connection_status(instance_name):
             cls.create_instance(instance_name)

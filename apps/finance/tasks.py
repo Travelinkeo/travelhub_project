@@ -2,7 +2,7 @@ import logging
 
 from celery import shared_task
 
-from apps.communications.services.telegram_service import enviar_alerta_telegram
+from apps.communications.services.telegram_unified import enviar_alerta_telegram
 from apps.finance.models import LinkDePago
 
 logger = logging.getLogger(__name__)

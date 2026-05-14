@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 
-from apps.communications.services.email_monitor_service import EmailMonitorService
+from apps.communications.services.email_unified import EmailMonitorService
 
 
 class Command(BaseCommand):

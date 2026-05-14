@@ -101,7 +101,7 @@ def venta_post_save_dispatcher(sender, instance, created, **kwargs):
     if not created and estado_anterior and estado_anterior != estado_actual:
         try:
             if instance.cliente and instance.cliente.email:
-                from core.services.email_service import enviar_cambio_estado
+                from apps.communications.services.email_unified import enviar_cambio_estado
                 enviar_cambio_estado(instance, estado_anterior)
         except Exception as e:
             logger.warning(f"Omitiendo email cambio estado para Venta {instance.pk}: {e}")

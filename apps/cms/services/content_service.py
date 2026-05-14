@@ -3,11 +3,14 @@ import logging
 
 from django.conf import settings
 from django.utils.text import slugify
-from google import genai
 
 from ..models import Articulo, PostRedesSociales
 
 logger = logging.getLogger(__name__)
+
+def _get_genai():
+    from google import genai
+    return genai
 
 class AIContentService:
     """
@@ -15,6 +18,7 @@ class AIContentService:
     """
 
     def __init__(self):
+        genai = _get_genai()
         self.client = genai.Client(api_key=settings.GEMINI_API_KEY)
         self.model_name = 'gemini-2.0-flash'
 

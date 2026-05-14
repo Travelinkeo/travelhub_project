@@ -4,11 +4,14 @@ from datetime import timedelta
 from django.conf import settings
 from django.db.models import Q, Sum
 from django.utils import timezone
-from google import genai
 
 from apps.finance.models.core_finance import Factura
 
 logger = logging.getLogger(__name__)
+
+def _get_genai():
+    from google import genai
+    return genai
 
 class CollectionAIService:
     """
@@ -17,6 +20,7 @@ class CollectionAIService:
 
     def __init__(self, agencia=None):
         self.agencia = agencia
+        genai = _get_genai()
         self.client = genai.Client(api_key=settings.GEMINI_API_KEY)
         self.model_name = 'gemini-2.0-flash'
 

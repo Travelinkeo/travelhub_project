@@ -3,11 +3,17 @@ import logging
 import os
 
 from django.conf import settings
-from google import genai
-from google.genai import types
 from PIL import Image
 
 logger = logging.getLogger(__name__)
+
+def _get_genai():
+    from google import genai
+    return genai
+
+def _get_genai_types():
+    from google.genai import types
+    return types
 
 class PassportOCRService:
     """
@@ -19,6 +25,7 @@ class PassportOCRService:
     def __init__(self):
         self.api_key = getattr(settings, 'GEMINI_API_KEY', None) or os.environ.get('GEMINI_API_KEY')
         if self.api_key:
+            genai = _get_genai()
             self.client = genai.Client(api_key=self.api_key)
         else:
             logger.warning("GEMINI_API_KEY no configurada. El servicio OCR no funcionará.")
@@ -64,6 +71,7 @@ class PassportOCRService:
             Output only the valid JSON.
             """
 
+            types = _get_genai_types()
             response = self.client.models.generate_content(
                 model=self.MODEL_NAME,
                 contents=[

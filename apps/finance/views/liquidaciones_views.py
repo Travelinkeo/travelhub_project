@@ -159,4 +159,6 @@ class LiquidacionDetailView(SaaSMixin, LoginRequiredMixin, DetailView):
         context = super().get_context_data(**kwargs)
         context['title'] = f'Liquidación #{self.object.pk}'
         context['active_tab'] = 'finance'
+        # Optimized: Prefetch related items and their ventas
+        context['items'] = self.object.items_liquidacion.select_related('item_venta', 'item_venta__venta').all()
         return context

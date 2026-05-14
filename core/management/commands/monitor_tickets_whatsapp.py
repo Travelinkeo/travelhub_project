@@ -3,7 +3,7 @@ Comando para monitorear correos de boletos y enviar por WhatsApp
 """
 from django.core.management.base import BaseCommand
 
-from apps.communications.services.email_monitor_service import EmailMonitorService
+from apps.communications.services.email_unified import EmailMonitorService
 
 
 class Command(BaseCommand):

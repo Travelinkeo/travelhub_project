@@ -25,7 +25,7 @@ from dotenv import load_dotenv
 from django.core.exceptions import ImproperlyConfigured
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-load_dotenv(BASE_DIR / '.env')
+load_dotenv(BASE_DIR / '.env', override=False)
 print("--- [SETTINGS] .env loaded ---", flush=True)
 
 # DEBUG defaults to False for safety. Set DEBUG=True in .env for development.
@@ -43,17 +43,19 @@ def get_env_variable(var_name, default=None, required=True):
             raise ImproperlyConfigured(error_msg) from e
         return default
 
-# --- VARIABLES CRÍTICAS ---
-SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-dev-key-for-local-only')
+# --- VARIABLES CRÍTICAS (STRICT MODE) ---
+SECRET_KEY = os.environ.get('SECRET_KEY')
+if not SECRET_KEY:
+    raise ImproperlyConfigured("FATAL: SECRET_KEY environment variable is not set or empty.")
+
+
 GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', '')
 STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY', '')
 
 # Validación en producción — falla rápido si falta alguna variable
 if not DEBUG:
-    if SECRET_KEY == 'django-insecure-dev-key-for-local-only':
-        raise ImproperlyConfigured("SECRET_KEY debe configurarse con un valor seguro en producción")
     if len(SECRET_KEY) < 50:
-        raise ImproperlyConfigured("SECRET_KEY debe tener al menos 50 caracteres")
+        raise ImproperlyConfigured("🔒 SECRET_KEY debe tener al menos 50 caracteres en producción")
     if not GEMINI_API_KEY:
         import logging; logging.getLogger('travelhub').warning("GEMINI_API_KEY no definida — funcionalidades de IA deshabilitadas")
     if not STRIPE_SECRET_KEY:
@@ -420,6 +422,7 @@ CELERY_TIMEZONE = TIME_ZONE
 _redis_url = os.getenv('CELERY_BROKER_URL', 'redis://redis:6379/0')
 _redis_password = os.getenv('REDIS_PASSWORD', None)
 _cache_url = _redis_url.replace('/0', '/1') # Usamos DB 1
+_session_url = _redis_url.replace('/0', '/2') # Usamos DB 2 para sesiones
 
 if 'redis://' in _cache_url:
     cache_options = {
@@ -437,8 +440,21 @@ if 'redis://' in _cache_url:
             "OPTIONS": cache_options,
             "KEY_PREFIX": "th",
             "TIMEOUT": 300,
+        },
+        "sessions": {
+            "BACKEND": "django_redis.cache.RedisCache",
+            "LOCATION": _session_url,
+            "OPTIONS": cache_options,
+            "KEY_PREFIX": "th_sess",
+            "TIMEOUT": 3600,  # 1 hora
         }
     }
+    
+    # 🔑 Redis Sessions: Backend de sesiones con Redis para escalabilidad
+    SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+    SESSION_CACHE_ALIAS = 'sessions'
+    SESSION_COOKIE_AGE = 3600  # 1 hora
+    SESSION_SAVE_EVERY_REQUEST = True
 else:
     CACHES = {
         "default": {

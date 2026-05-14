@@ -5,13 +5,19 @@ from decimal import Decimal
 
 import pandas as pd
 from django.conf import settings
-from google import genai
-from google.genai import types
 from pydantic import BaseModel, Field
 
 from apps.common.utils import clean_currency
 
 logger = logging.getLogger(__name__)
+
+def _get_genai():
+    from google import genai
+    return genai
+
+def _get_genai_types():
+    from google.genai import types
+    return types
 
 # --- Esquema para el Mapeo de Columnas ---
 
@@ -77,6 +83,8 @@ class SmartReportProcessor:
             return cls._fallback_mapping(columns)
 
         try:
+            genai = _get_genai()
+            types = _get_genai_types()
             client = genai.Client(api_key=api_key)
 
             prompt = f"""

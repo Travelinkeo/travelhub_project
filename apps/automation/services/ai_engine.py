@@ -5,11 +5,17 @@ import traceback
 from typing import Any
 
 from django.conf import settings
-from google import genai
-from google.genai import types
 from pydantic import BaseModel
 
 logger = logging.getLogger(__name__)
+
+def _get_genai():
+    from google import genai
+    return genai
+
+def _get_genai_types():
+    from google.genai import types
+    return types
 
 class CircuitBreakerException(Exception):
     pass
@@ -40,6 +46,8 @@ class AIEngine:
             api_key = os.environ.get("GEMINI_API_KEY") or getattr(settings, "GEMINI_API_KEY", None)
             if api_key:
                 try:
+                    genai = _get_genai()
+                    types = _get_genai_types()
                     # Configuración de timeout para evitar cuelgues en workers
                     http_options = types.HttpOptions(timeout=30000) # 30 segundos
                     cls._client = genai.Client(api_key=api_key, http_options=http_options)
@@ -225,6 +233,7 @@ class AIEngine:
 
             # Generación estructurada si hay schema
             try:
+                types = _get_genai_types()
                 config = types.GenerateContentConfig(
                     temperature=temperature,
                 )
@@ -253,6 +262,7 @@ class AIEngine:
                     return {"error": f"La API de Gemini o el modelo {selected_model} no están disponibles."}
 
                 if response_schema:
+                    types = _get_genai_types()
                     config_fallback = types.GenerateContentConfig(
                         temperature=temperature,
                         response_mime_type="application/json"
@@ -441,7 +451,8 @@ def analizar_documento_con_gemini_estructurado(
     response_schema: type,
 ) -> dict:
     """Analiza un documento (PDF/imagen) con Gemini Vision y retorna dict."""
-    from google.genai import types as genai_types
+    genai = _get_genai()
+    genai_types = _get_genai_types()
 
     api_key = getattr(settings, "GEMINI_API_KEY", None) or os.getenv("GEMINI_API_KEY")
     if not api_key:
@@ -470,6 +481,7 @@ def analizar_documento_con_gemini_estructurado(
 
 def list_available_models():
     """Lista los modelos disponibles en la cuenta Gemini."""
+    genai = _get_genai()
     api_key = getattr(settings, "GEMINI_API_KEY", None) or os.getenv("GEMINI_API_KEY")
     if not api_key:
         return "Error: No se proporciono API Key."

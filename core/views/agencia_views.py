@@ -81,7 +81,7 @@ class WhatsAppStatusView(AgencyRoleRequiredMixin, View):
     allowed_roles = ['admin', 'gerente']
     
     def get(self, request, *args, **kwargs):
-        from apps.communications.services.whatsapp import WhatsAppService
+        from apps.communications.services.whatsapp_unified import WhatsAppService
         
         # Obtener agencia de forma robusta (compatibilidad con superusuarios)
         agencia = getattr(request, 'agencia', None)

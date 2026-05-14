@@ -22,22 +22,60 @@ USO EN CLASS-BASED VIEWS:
 """
 from functools import wraps
 
+from django.core.cache import cache
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404
+
+# Constantes de cache para sesiones de agencia
+_USER_AGENCIA_CACHE_PREFIX = "th:user_agencia:"
+_USER_AGENCIA_CACHE_TIMEOUT = 1800  # 30 minutos
 
 
 def get_user_active_agency(user):
     """
-    Obtiene la agencia activa de un usuario de forma optimizada.
+    Obtiene la agencia activa de un usuario de forma optimizada con cache Redis.
     Retorna la instancia de Agencia o None si no tiene agencia activa.
     
     FIX DEUDA TÉCNICA: Centraliza el patrón repetido 39+ veces:
         user.agencias.filter(activo=True).first()
+    
+    OPTIMIZACIÓN: Usa cache Redis para evitar queries repetidas por request.
     """
-    if not hasattr(user, 'agencias'):
+    if not hasattr(user, 'agencias') or not user.is_authenticated:
         return None
+    
+    # Intentar obtener desde cache
+    cache_key = f"{_USER_AGENCIA_CACHE_PREFIX}{user.pk}"
+    cached_agencia_id = cache.get(cache_key)
+    
+    if cached_agencia_id is not None:
+        if cached_agencia_id == 'none':
+            return None
+        # Recuperar la instancia desde cache de agencia
+        from core.services.agency_cache_service import get_agencia_from_cache
+        agencia_data = get_agencia_from_cache(cached_agencia_id)
+        if agencia_data:
+            # Reconstruir objeto ligero con los datos cacheados
+            from core.models import Agencia
+            agencia = Agencia(pk=agencia_data['id'], nombre=agencia_data['nombre'])
+            return agencia
+    
+    # Cache miss - consultar BD
     ua = user.agencias.filter(activo=True).select_related('agencia').first()
-    return ua.agencia if ua else None
+    
+    if ua:
+        # Guardar en cache
+        cache.set(cache_key, ua.agencia_id, _USER_AGENCIA_CACHE_TIMEOUT)
+        return ua.agencia
+    else:
+        cache.set(cache_key, 'none', _USER_AGENCIA_CACHE_TIMEOUT)
+        return None
+
+
+def invalidate_user_agencia_cache(user_id):
+    """Invalida el cache de agencia de un usuario."""
+    cache_key = f"{_USER_AGENCIA_CACHE_PREFIX}{user_id}"
+    cache.delete(cache_key)
 
 
 def agency_role_required(allowed_roles):

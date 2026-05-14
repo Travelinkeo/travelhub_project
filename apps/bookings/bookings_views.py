@@ -397,7 +397,7 @@ def whatsapp_qr_view(request):
     """
     Vista principal de estado de WhatsApp (Migrada a Evolution API v2).
     """
-    from apps.communications.services.whatsapp import WhatsAppService
+    from apps.communications.services.whatsapp_unified import WhatsAppService
     from core.middleware import get_current_agency
     
     agencia = get_current_agency()

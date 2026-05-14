@@ -4,7 +4,7 @@ from celery import shared_task
 from django.contrib.auth import get_user_model
 from django.db.models import Count, Q
 
-from apps.communications.services.notification_service import NotificationService
+from apps.communications.services.notification_dispatcher import NotificationService
 from apps.finance.models.reconciliacion import ReporteReconciliacion
 from apps.finance.services.pdf_service import PDFService
 

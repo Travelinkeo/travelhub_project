@@ -3,7 +3,7 @@ import re
 from datetime import datetime
 from decimal import Decimal
 
-import PyPDF2
+import pypdf
 
 logger = logging.getLogger(__name__)
 
@@ -13,7 +13,7 @@ class TarifarioParser:
     
     def __init__(self, pdf_path):
         self.pdf_path = pdf_path
-        self.reader = PyPDF2.PdfReader(open(pdf_path, 'rb'))
+        self.reader = pypdf.PdfReader(open(pdf_path, 'rb'))
         self.destino_actual = None
     
     def extraer_hoteles(self):

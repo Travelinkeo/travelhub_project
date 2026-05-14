@@ -59,6 +59,7 @@ class AuditLog(models.Model):
         verbose_name_plural = _("Logs de Auditoría")
         ordering = ['-creado']
         indexes = [
+            models.Index(fields=['descripcion']),
             models.Index(fields=['modelo', 'object_id'], name='idx_audit_modelo_object'),
             models.Index(fields=['agencia', 'creado'], name='idx_audit_agencia_creado'),
             # GinIndex para búsquedas de texto completo (FTS) o Trigramas (LIKE)

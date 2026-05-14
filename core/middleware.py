@@ -39,6 +39,20 @@ def is_system_context():
     except (AttributeError, Exception):
         return False
 
+def is_impersonating():
+    """Retorna True si el usuario actual está impersonando una agencia."""
+    try:
+        return getattr(_request_local, 'is_impersonating', False)
+    except (AttributeError, Exception):
+        return False
+
+def get_impersonator():
+    """Retorna el usuario real que está realizando la impersonación."""
+    try:
+        return getattr(_request_local, 'impersonator', None)
+    except (AttributeError, Exception):
+        return None
+
 
 @contextmanager
 def agency_context(agency):
@@ -96,12 +110,16 @@ class ThreadLocalContextMiddleware:
             
             # 2. Determinar Agencia (Soporte Multi-Tenancy / God Mode)
             agency = getattr(request, 'agencia', None)
+            is_impersonating_flag = False
+            impersonator = None
             
             if user:
                 if user.is_superuser:
                     # 🎭 GOD MODE: Superusuarios SOLO tienen contexto si impersonan explícitamente
                     impersonated_id = request.session.get('impersonated_agencia_id')
                     if impersonated_id:
+                        is_impersonating_flag = True
+                        impersonator = user
                         # Timeout: expirar impersonación tras 30 min de inactividad
                         impersonated_at = request.session.get('impersonated_at')
                         if impersonated_at:
@@ -115,6 +133,8 @@ class ThreadLocalContextMiddleware:
                                     del request.session['impersonated_at']
                                     logger.info(f"God Mode timeout: {user.username}")
                                     agency = None
+                                    is_impersonating_flag = False
+                                    impersonator = None
                                     response = self.get_response(request)
                                     self._cleanup()
                                     return response
@@ -126,6 +146,8 @@ class ThreadLocalContextMiddleware:
                         except Agencia.DoesNotExist:
                             del request.session['impersonated_agencia_id']
                             agency = None
+                            is_impersonating_flag = False
+                            impersonator = None
                     else:
                         # Superuser sin impersonar = Contexto Global (Sin Agencia)
                         agency = None
@@ -146,10 +168,14 @@ class ThreadLocalContextMiddleware:
             _request_local.user = user
             _request_local.agency = agency
             _request_local.system_context = False # Por defecto, seguridad activada
+            _request_local.is_impersonating = is_impersonating_flag
+            _request_local.impersonator = impersonator
             
             # Inyectar en el objeto request para compatibilidad con views legacy y mixins
             request.agencia = agency
             request.agency = agency # Alias para consistencia
+            request.is_impersonating = is_impersonating_flag
+            request.impersonator = impersonator
 
             # 3.5 Configurar Row-Level Security (PostgreSQL current_setting)
             try:
@@ -197,6 +223,16 @@ class ThreadLocalContextMiddleware:
 
             try:
                 del _request_local.system_context
+            except AttributeError:
+                pass
+
+            try:
+                del _request_local.is_impersonating
+            except AttributeError:
+                pass
+
+            try:
+                del _request_local.impersonator
             except AttributeError:
                 pass
 

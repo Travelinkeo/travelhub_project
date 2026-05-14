@@ -97,6 +97,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.humanize',
     'django.contrib.postgres',
+    'django.contrib.staticfiles',
     'mathfilters',
     'storages',
 
@@ -194,69 +195,28 @@ STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
 
-# Cloudinary Strategy (PDFs & Media)
-# Configurado de forma perezosa
-import cloudinary
+# --- UNIFIED STORAGE STRATEGY (CLOUDFLARE R2) ---
+# Cloudflare R2 is our single source of truth for media files ($0 egress fees)
+AWS_ACCESS_KEY_ID = os.getenv("R2_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = os.getenv("R2_SECRET_ACCESS_KEY")
+AWS_STORAGE_BUCKET_NAME = os.getenv("R2_BUCKET_NAME")
+AWS_S3_ENDPOINT_URL = os.getenv("R2_ENDPOINT_URL")
+AWS_S3_REGION_NAME = "auto"
+AWS_S3_CUSTOM_DOMAIN = os.getenv("AWS_S3_CUSTOM_DOMAIN")
+AWS_S3_FILE_OVERWRITE = False
+AWS_DEFAULT_ACL = None  # R2 handles permissions at bucket level, ACLs are not supported
 
-CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': os.getenv('CLOUDINARY_CLOUD_NAME'),
-    'API_KEY': os.getenv('CLOUDINARY_API_KEY'),
-    'API_SECRET': os.getenv('CLOUDINARY_API_SECRET'),
+STORAGES = {
+    "default": {
+        "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+    },
+    "staticfiles": {
+        "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+    },
 }
 
-# Configurar cloudinary directamente
-if CLOUDINARY_STORAGE.get('CLOUD_NAME'):
-    cloudinary.config(
-        cloud_name=CLOUDINARY_STORAGE['CLOUD_NAME'],
-        api_key=CLOUDINARY_STORAGE['API_KEY'],
-        api_secret=CLOUDINARY_STORAGE['API_SECRET'],
-        secure=True
-    )
-    # Configurar opciones por defecto para uploads
-    CLOUDINARY_STORAGE['OPTIONS'] = {
-        'resource_type': 'raw',
-        'access_mode': 'public',  # PDFs públicos por defecto
-        'type': 'upload'
-    }
-print("--- [SETTINGS] Cloudinary configured ---", flush=True)
-
-# Media files - Usar Cloudinary en desarrollo y producción
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'  # Siempre definir MEDIA_ROOT
-# --- ESTRATEGIA DE ALMACENAMIENTO (HÍBRIDA) ---
-USE_CLOUDINARY = os.getenv('USE_CLOUDINARY', 'False') == 'True'
-USE_R2 = os.getenv('USE_R2', 'False') == 'True'
-
-if USE_R2:
-    # ☁️ CLOUDFLARE R2 (S3 Compatible) - RECOMENDADO POR RENDIMIENTO Y COSTO $0 EGRESS
-    STORAGES = {
-        "default": {
-            "BACKEND": "storages.backends.s3.S3Storage",
-            "OPTIONS": {
-                "access_key": os.getenv("R2_ACCESS_KEY_ID"),
-                "secret_key": os.getenv("R2_SECRET_ACCESS_KEY"),
-                "bucket_name": os.getenv("R2_BUCKET_NAME"),
-                "endpoint_url": os.getenv("R2_ENDPOINT_URL"),
-                "region_name": "auto",
-                "custom_domain": None,  # Por ahora usamos el endpoint directo
-                "file_overwrite": False, # Evitar sobreescribir archivos con el mismo nombre
-            },
-        },
-        "staticfiles": {"BACKEND": "whitenoise.storage.CompressedStaticFilesStorage"},
-    }
-    logger.info(f"🚀 Cloudflare R2 Activado (Bucket: {os.getenv('R2_BUCKET_NAME')})")
-elif USE_CLOUDINARY:
-    # ☁️ CLOUDINARY FALLBACK
-    STORAGES = {
-        "default": {"BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage"},
-        "staticfiles": {"BACKEND": "whitenoise.storage.CompressedStaticFilesStorage"},
-    }
-else:
-    # 💻 DISCO LOCAL (DESARROLLO)
-    STORAGES = {
-        "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-        "staticfiles": {"BACKEND": "whitenoise.storage.CompressedStaticFilesStorage"},
-    }
+MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/" if AWS_S3_CUSTOM_DOMAIN else f"{AWS_S3_ENDPOINT_URL}/{AWS_STORAGE_BUCKET_NAME}/"
+MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -710,7 +670,6 @@ if 'test' in sys.argv or 'pytest' in sys.modules or (len(sys.argv) > 0 and 'pyte
     EMAIL_BACKEND = 'django.core.mail.backends.locmem.EmailBackend'
     CELERY_TASK_ALWAYS_EAGER = True
     CELERY_TASK_EAGER_PROPAGATES = True
-    # Desactivar R2 y Cloudinary en tests para evitar delays de red
-    USE_R2 = False
-    USE_CLOUDINARY = False
+    # Desactivar R2 en tests para evitar delays de red
+    STORAGES["default"] = {"BACKEND": "django.core.files.storage.FileSystemStorage"}
     print("Test mode detected: Emails in memory, Celery Eager, Storage Local.")

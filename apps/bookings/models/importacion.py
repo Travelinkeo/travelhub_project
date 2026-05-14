@@ -145,15 +145,16 @@ class BoletoImportado(SoftDeleteModel, AgenciaMixin, models.Model):
         verbose_name_plural = _("Boletos Importados")
         ordering = ['-fecha_subida']
         indexes = [
-            models.Index(fields=['agencia', 'numero_boleto']),
-            models.Index(fields=['agencia', 'localizador_pnr']),
-            models.Index(fields=['agencia', 'fecha_subida']),
-            models.Index(fields=['agencia', 'fecha_emision_boleto']),
-            models.Index(fields=['agencia', 'aerolinea_emisora']),
-            models.Index(fields=['agencia', 'localizador_pnr', 'fecha_subida']),
+            models.Index(fields=['agencia_id', 'numero_boleto']),
+            models.Index(fields=['agencia_id', 'localizador_pnr']),
+            models.Index(fields=['agencia_id', 'fecha_subida']),
+            models.Index(fields=['agencia_id', 'fecha_emision_boleto']),
+            models.Index(fields=['agencia_id', 'aerolinea_emisora']),
+            models.Index(fields=['agencia_id', 'localizador_pnr', 'fecha_subida']),
             models.Index(fields=['estado_parseo'], name='idx_boleto_estado_parseo'),
             models.Index(fields=['venta_asociada', 'estado_emision'], name='idx_boleto_venta_estado'),
             GinIndex(fields=['datos_parseados'], name='idx_boleto_json_gin'),
+            models.Index(fields=['is_deleted', 'agencia_id'], name='idx_boleto_soft_delete_saas'),
         ]
 
     def __str__(self):

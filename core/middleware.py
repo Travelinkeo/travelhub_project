@@ -4,6 +4,9 @@ from contextlib import contextmanager
 
 from asgiref.local import Local
 from django.conf import settings as dj_settings
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
+
 
 logger = logging.getLogger(__name__)
 _request_local = Local()
@@ -247,3 +250,22 @@ class SecurityHeadersMiddleware:  # CSP + cabeceras
             logger.exception("FALLO CRÍTICO: No se pudieron inyectar las cabeceras de seguridad.")
             
         return response
+
+
+@csrf_exempt
+@require_POST
+def csp_report_view(request):
+    """
+    Endpoint para recibir reportes de violaciones de CSP.
+    Útil para depurar reglas sin romper el sitio en producción.
+    """
+    import json
+    from django.http import JsonResponse
+    try:
+        report = json.loads(request.body.decode('utf-8'))
+        logger.warning(f"CSP Violation: {json.dumps(report, indent=2)}")
+        return JsonResponse({'status': 'ok'})
+    except Exception as e:
+        logger.error(f"Error procesando CSP report: {e}")
+        return JsonResponse({'error': 'invalid format'}, status=400)
+

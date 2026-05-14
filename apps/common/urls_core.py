@@ -9,15 +9,13 @@ from apps.common.views.catalogos_views import (
     ComisionProveedorServicioUpdateView,
     GeografiaListView,
     ProductoServicioListView,
-    ProveedorCreateView,
-    ProveedorDeleteView,
-    ProveedorListView,
-    ProveedorUpdateView,
     SincronizarTasasActionView,
     TipoCambioCreateView,
     TipoCambioListView,
 )
-from core.views import inventario_views, proveedores_views
+from apps.bookings.views import proveedores_views
+from core.views import inventario_views
+
 
 urlpatterns = [
     # Centro de Catálogos
@@ -31,10 +29,11 @@ urlpatterns = [
     path('inventario/terrestre/nuevo/', inventario_views.ProductoTerrestreCreateView.as_view(), name='producto_terrestre_create'),
     
     # Proveedores (Catálogos)
-    path('setup/catalogos/proveedores/', ProveedorListView.as_view(), name='proveedores_list'),
-    path('setup/catalogos/proveedores/nuevo/', ProveedorCreateView.as_view(), name='proveedores_nuevo'),
-    path('setup/catalogos/proveedores/<int:pk>/editar/', ProveedorUpdateView.as_view(), name='proveedores_editar'),
-    path('setup/catalogos/proveedores/<int:pk>/eliminar/', ProveedorDeleteView.as_view(), name='proveedores_eliminar'),
+    path('setup/catalogos/proveedores/', proveedores_views.ProveedorListView.as_view(), name='proveedores_list'),
+    path('setup/catalogos/proveedores/nuevo/', proveedores_views.ProveedorCreateView.as_view(), name='proveedores_nuevo'),
+    path('setup/catalogos/proveedores/<int:pk>/editar/', proveedores_views.ProveedorUpdateView.as_view(), name='proveedores_editar'),
+    path('setup/catalogos/proveedores/<int:pk>/eliminar/', proveedores_views.ProveedorDeleteView.as_view(), name='proveedores_eliminar'),
+
     
     # ERP Proveedores Dashboard
     path('dashboard/erp/proveedores/', proveedores_views.ProveedorListView.as_view(), name='proveedores_list_erp'),

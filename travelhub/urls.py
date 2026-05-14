@@ -1,32 +1,21 @@
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.contrib.auth import views as auth_views
 from django.urls import include, path
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import TemplateView
 
 from core.views import dashboard
-from core.views.auth_views import MagicLinkRequestView, MagicLinkVerifyView
 
 urlpatterns = [
+    # Administración
     path('admin/', admin.site.urls),
-    path('dashboard/', dashboard.CEODashboardView.as_view(), name='ceo_dashboard'),
+    
+    # Dashboard CEO (Global)
+    path('dashboard/ceo/', dashboard.CEODashboardView.as_view(), name='ceo_dashboard'),
     path('dashboard/ia-insight/', dashboard.AIBusinessAdvisorView.as_view(), name='bi_ia_insight'),
-    path('login/', auth_views.LoginView.as_view(), name='login'),
-    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
-    path('auth/magic-request/', MagicLinkRequestView.as_view(), name='magic_link_request'),
-    path('auth/magic/<str:token>/', MagicLinkVerifyView.as_view(), name='magic_link_verify'),
-    path('accounts/', include('django.contrib.auth.urls')),
-    path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
-    path('contabilidad/', include('apps.contabilidad.urls', namespace='contabilidad')),
-    path('api/contabilidad/', include('apps.contabilidad.urls', namespace='contabilidad_api')),  # API de tasas
-    path('api/', include('apps.cotizaciones.urls')),
-    path('finance/', include('apps.finance.urls')),
-    path('marketing/', include('apps.marketing.urls')),
-    path('cms/', include('apps.cms.urls')),
-    path('crm/', include('apps.crm.urls', namespace='crm')),
-    path('bookings/', include('apps.bookings.urls', namespace='bookings')),
+    
+    # Red de Aplicaciones y Núcleo (Dispatcher Centralizado)
     path('', include('core.urls')),
     
     # 🗂️ PWA ROOT FILES
@@ -40,4 +29,3 @@ if settings.DEBUG:
 admin.site.site_header = _("Administración de TravelHub")
 admin.site.site_title = _("Portal de Administración TravelHub")
 admin.site.index_title = _("Bienvenido al Portal de Administración de TravelHub")
-# URL reload trigger

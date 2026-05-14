@@ -71,7 +71,7 @@ class SoftDeleteModel(models.Model):
     """
     Mixin para habilitar borrado lógico (Soft Delete).
     """
-    is_deleted = models.BooleanField(default=False, db_index=True)
+    is_deleted = models.BooleanField(default=False)
     deleted_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
@@ -104,7 +104,7 @@ class AgenciaMixin(models.Model):
         related_name="%(class)s_items",
         null=True, 
         blank=True,
-        db_index=True
+        db_index=False
     )
 
     # El manager por defecto filtra por agencia

@@ -2,7 +2,8 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
 
-from .views import dashboard_views, report_views, proveedores_views
+from .views import dashboard_views, proveedores_views
+
 from apps.cotizaciones import views as cotizaciones_views
 from apps.bookings.bookings_views import (
     FeeVentaCreateView,
@@ -22,6 +23,9 @@ from apps.bookings.bookings_views import (
     whatsapp_pairing_code_view,
     whatsapp_qr_view,
 )
+from .views.dashboard_views import DashboardView
+from core.views.public_views import PublicHotelVoucherPDFView, PublicItineraryView, PublicVoucherPDFView
+from django.views.generic import RedirectView
 
 from core.views.hotel_views import (
     GenerateCopyAPI,
@@ -32,7 +36,8 @@ from core.views.hotel_views import (
 from core.views.flights_views import FlightSearchView
 from core.views.voucher_views import generar_voucher
 from apps.marketing.views.marketing_views import GenerateAIImageView, MarketingHubView
-from core.views.hotel_api import HotelQuoteAPI
+from core.api.hotel_api import HotelQuoteAPI
+
 
 # API ViewSets
 from rest_framework import permissions, viewsets, filters
@@ -41,17 +46,7 @@ from apps.cotizaciones.views import CotizacionViewSet, ItemCotizacionViewSet
 from core.api.mixins.tenant import TenantViewSetMixin
 from core.api_registry import get_registered_apis, register_auto_apis
 
-from core.views import cotizaciones_views
-from core.views.hotel_views import (
-    GenerateCopyAPI,
-    HotelDetailView,
-    HotelListView,
-    download_story_view,
-)
-from core.views.flights_views import FlightSearchView
-from core.views.voucher_views import generar_voucher
-from apps.marketing.views.marketing_views import GenerateAIImageView, MarketingHubView
-from core.views.hotel_api import HotelQuoteAPI
+
 
 
 app_name = 'bookings'
@@ -128,8 +123,12 @@ urlpatterns = [
     # Dashboard de Flujo de Caja
     path('dashboard/', dashboard_main, name='dashboard_main'),
     path('dashboard/stats/', dashboard_stats_htmx, name='dashboard_stats'),
+    path('dashboard/modern/', DashboardView.as_view(), name='modern_dashboard'),
     path('dashboard/whatsapp-qr/', whatsapp_qr_view, name='whatsapp_qr'),
     path('dashboard/whatsapp-pairing/', whatsapp_pairing_code_view, name='whatsapp_pairing'),
+
+    # Redirecciones Legacy
+    path('dashboard/erp/ventas/', RedirectView.as_view(pattern_name='bookings:venta_list', permanent=True), name='ventas_dashboard'),
 
     # Cotizaciones
     path('cotizaciones/', cotizaciones_views.CotizacionDashboardView.as_view(), name='cotizacion_dashboard'),
@@ -159,8 +158,11 @@ urlpatterns = [
     
     # Vouchers
     path('api/ventas/<int:venta_id>/generar-voucher/', generar_voucher, name='generar_voucher'),
-    # Vouchers
-    path('api/ventas/<int:venta_id>/generar-voucher/', generar_voucher, name='generar_voucher'),
+
+    # --- VISTAS PÚBLICAS (White-Label) ---
+    path('v/<uuid:token>/', PublicItineraryView.as_view(), name='public_itinerary'),
+    path('v/<uuid:token>/pdf/', PublicVoucherPDFView.as_view(), name='public_voucher_pdf'),
+    path('v/hotel/<int:alojamiento_id>/pdf/', PublicHotelVoucherPDFView.as_view(), name='public_hotel_voucher'),
 
     # API
     path('api/', include(router.urls)),

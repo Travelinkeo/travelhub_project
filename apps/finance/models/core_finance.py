@@ -97,10 +97,12 @@ class Factura(SoftDeleteModel, AgenciaMixin, models.Model):
             models.Index(fields=['numero_control']),
             models.Index(fields=['fecha_emision']),
             models.Index(fields=['tipo_factura']),
-            models.Index(fields=['agencia', 'fecha_emision']),
-            models.Index(fields=['agencia', 'estado']),
+            models.Index(fields=['agencia_id', 'fecha_emision']),
+            models.Index(fields=['agencia_id', 'estado']),
             models.Index(fields=['venta_asociada']),
+            models.Index(fields=['is_deleted', 'agencia_id'], name='idx_factura_soft_delete_saas'),
         ]
+
 
     def __str__(self):
         return self.numero_factura or f"FACT-{self.id_factura}"
@@ -229,6 +231,10 @@ class ItemFactura(SoftDeleteModel, AgenciaMixin, models.Model):
     class Meta:
         verbose_name = _("Item de Factura")
         verbose_name_plural = _("Items de Factura")
+        indexes = [
+            models.Index(fields=['is_deleted', 'agencia_id'], name='idx_itemfact_soft_delete_saas'),
+        ]
+
 
     def __str__(self):
         return f"{self.cantidad} x {self.descripcion} en Factura {self.factura.numero_factura}"
@@ -364,6 +370,12 @@ class GastoOperativo(SoftDeleteModel, AgenciaMixin, models.Model):
         verbose_name = _("Gasto Operativo")
         verbose_name_plural = _("Gastos Operativos")
         ordering = ['-fecha', '-fecha_registro']
+        indexes = [
+            models.Index(fields=['is_deleted', 'agencia'], name='idx_gasto_soft_delete_saas'),
+        ]
+
+
+
 
     def __str__(self):
         return f"{self.fecha} - {self.descripcion} ({self.monto} {self.moneda})"

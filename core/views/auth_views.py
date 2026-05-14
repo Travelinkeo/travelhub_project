@@ -132,3 +132,12 @@ class MagicLinkVerifyView(View):
 
         redirect_url = token_obj.redirect_url or '/'
         return redirect(redirect_url)
+
+
+class TokenLogoutView(View):
+    """
+    Vista para logout de tokens JWT. 
+    Devuelve éxito para que el cliente limpie su almacenamiento local.
+    """
+    def post(self, request, *args, **kwargs):
+        return JsonResponse({"message": "Successfully logged out"}, status=200)

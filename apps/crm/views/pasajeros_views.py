@@ -30,20 +30,40 @@ class PasajeroListView(CRMBaseMixin, ListView):
                 Q(nombres__icontains=q) |
                 Q(apellidos__icontains=q) |
                 Q(numero_pasaporte__icontains=q) |
-                Q(cedula_identidad__icontains=q)
+                Q(cedula_identidad__icontains=q) |
+                Q(numero_documento__icontains=q) # Added from core version
             )
         return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Pasajeros'
+        return context
 
 class PasajeroDetailView(CRMBaseMixin, DetailView):
     model = Pasajero
     template_name = 'crm/pasajero_detail.html'
     context_object_name = 'pasajero'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = f'Pasajero: {self.object.get_full_name()}'
+        return context
 
 class PasajeroCreateView(CRMBaseMixin, CreateView):
     model = Pasajero
     template_name = 'crm/pasajero_form.html'
     form_class = PasajeroForm
     success_url = reverse_lazy('crm:pasajero_list')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Nuevo Pasajero'
+        return context
+
+    def form_valid(self, form):
+        messages.success(self.request, "Pasajero creado exitosamente.")
+        return super().form_valid(form)
 
 class PasajeroUpdateView(CRMBaseMixin, UpdateView):
     model = Pasajero
@@ -53,7 +73,20 @@ class PasajeroUpdateView(CRMBaseMixin, UpdateView):
     def get_success_url(self):
         return reverse_lazy('crm:pasajero_detail', kwargs={'pk': self.object.pk})
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Editar Pasajero'
+        return context
+
+    def form_valid(self, form):
+        messages.success(self.request, "Pasajero actualizado exitosamente.")
+        return super().form_valid(form)
+
 class PasajeroDeleteView(CRMBaseMixin, DeleteView):
     model = Pasajero
     template_name = 'crm/pasajero_confirm_delete.html'
     success_url = reverse_lazy('crm:pasajero_list')
+
+    def delete(self, request, *args, **kwargs):
+        messages.success(self.request, "Pasajero eliminado correctamente.")
+        return super().delete(request, *args, **kwargs)

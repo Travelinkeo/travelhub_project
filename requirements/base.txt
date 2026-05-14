@@ -3,6 +3,7 @@
 Django==5.2.6
 django-environ==0.13.0
 dj-database-url==3.0.1
+sentry-sdk==2.22.0
 
 # API & Frontend
 djangorestframework==3.15.2

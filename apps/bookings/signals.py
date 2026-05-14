@@ -89,7 +89,15 @@ def venta_post_save_dispatcher(sender, instance, created, **kwargs):
     estado_anterior = getattr(instance, '_estado_anterior', None)
     estado_actual = instance.estado
 
-    # 1. Email de confirmación (solo en creación)
+    # 1. Incremento de Cuota SaaS (Caché Redis)
+    if created and instance.agencia_id:
+        try:
+            from apps.common.services.saas_quota_service import SaaSQuotaService
+            SaaSQuotaService.increment_usage(instance.agencia_id, 'sales_per_month')
+        except Exception as e:
+            logger.warning(f"Error incrementando cuota SaaS para venta {instance.id_venta}: {e}")
+
+    # 2. Email de confirmación (solo en creación)
     if created and instance.cliente and instance.cliente.email:
         try:
             from apps.communications.services.email_service import enviar_confirmacion_venta

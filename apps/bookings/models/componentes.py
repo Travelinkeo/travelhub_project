@@ -31,6 +31,9 @@ class AlojamientoReserva(SoftDeleteModel, AgenciaMixin, models.Model):
         verbose_name = _('Alojamiento (Reserva)')
         verbose_name_plural = _('Alojamientos (Reservas)')
         ordering = ['check_in']
+        indexes = [
+            models.Index(fields=['is_deleted', 'agencia_id'], name='idx_alojam_soft_delete_saas'),
+        ]
 
     def __str__(self):
         return f"{self.nombre_establecimiento} ({self.check_in or ''})"
@@ -56,6 +59,9 @@ class TrasladoServicio(SoftDeleteModel, AgenciaMixin, models.Model):
         verbose_name = _('Traslado')
         verbose_name_plural = _('Traslados')
         ordering = ['fecha_hora']
+        indexes = [
+            models.Index(fields=['is_deleted', 'agencia_id'], name='idx_traslado_soft_delete_saas'),
+        ]
 
     def __str__(self):
         return f"Traslado {self.origen or ''}->{self.destino or ''} {self.fecha_hora or ''}".strip()
@@ -78,6 +84,9 @@ class ActividadServicio(SoftDeleteModel, AgenciaMixin, models.Model):
         verbose_name = _('Actividad / Excursión')
         verbose_name_plural = _('Actividades / Excursiones')
         ordering = ['fecha', 'nombre']
+        indexes = [
+            models.Index(fields=['is_deleted', 'agencia_id'], name='idx_actividad_soft_delete_saas'),
+        ]
 
     def __str__(self):
         return self.nombre
@@ -100,6 +109,9 @@ class SegmentoVuelo(SoftDeleteModel, AgenciaMixin, models.Model):
         verbose_name = _('Segmento de Vuelo')
         verbose_name_plural = _('Segmentos de Vuelo')
         ordering = ['fecha_salida']
+        indexes = [
+            models.Index(fields=['is_deleted', 'agencia_id'], name='idx_segmento_soft_delete_saas'),
+        ]
 
     def __str__(self):
         return f"{self.origen} → {self.destino} {self.numero_vuelo or ''}".strip()
@@ -126,7 +138,12 @@ class AlquilerAutoReserva(SoftDeleteModel, AgenciaMixin, models.Model):
         verbose_name = _("Alquiler de Auto")
         verbose_name_plural = _("Alquileres de Autos")
         ordering = ['fecha_hora_retiro']
-        indexes = [models.Index(fields=['fecha_hora_retiro']), models.Index(fields=['fecha_hora_devolucion']), models.Index(fields=['compania_rentadora'])]
+        indexes = [
+            models.Index(fields=['fecha_hora_retiro']), 
+            models.Index(fields=['fecha_hora_devolucion']), 
+            models.Index(fields=['compania_rentadora']),
+            models.Index(fields=['is_deleted', 'agencia_id'], name='idx_auto_soft_delete_saas'),
+        ]
 
     def __str__(self):
         return f"Auto {self.categoria_auto or ''} {self.numero_confirmacion or ''}".strip()
@@ -169,7 +186,11 @@ class EventoServicio(SoftDeleteModel, AgenciaMixin, models.Model):
         verbose_name = _("Evento / Servicio")
         verbose_name_plural = _("Eventos / Servicios")
         ordering = ['fecha_evento']
-        indexes = [models.Index(fields=['fecha_evento']), models.Index(fields=['nombre_evento'])]
+        indexes = [
+            models.Index(fields=['fecha_evento']), 
+            models.Index(fields=['nombre_evento']),
+            models.Index(fields=['is_deleted', 'agencia_id'], name='idx_evento_soft_delete_saas'),
+        ]
 
     def __str__(self):
         return f"Evento {self.nombre_evento}"

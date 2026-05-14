@@ -5,8 +5,11 @@ from .views import (
     cron_views, dashboard, evolution_qr_view, evolution_proxy_views,
     fix_user_view, email_monitor_views, god_mode_views,
     intelligence_views, migration_api, notifications,
-    search_views, settings_views, translator_views, webhooks_views, wiki_views
+    search_views, settings_views, translator_views, webhooks_views, wiki_views,
+    health_views
 )
+from core.middleware import csp_report_view
+from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 from apps.marketing.views.marketing_views import MarketingHubView, GenerateAIImageView
 from core.dashboard_stats import get_dashboard_stats as dashboard_stats_api
 
@@ -69,4 +72,13 @@ urlpatterns = [
     
     # API Stats
     path('api/dashboard/stats/', dashboard_stats_api, name='dashboard_stats') if dashboard_stats_api else path('api/dashboard/stats/', lambda r: JsonResponse({'error': 'Not available'}, status=404)),
+
+    # --- INFRAESTRUCTURA Y SALUD ---
+    path('health/', health_views.health_check, name='health_check'),
+    path('csp-report/', csp_report_view, name='csp_report'),
+    
+    # --- DOCUMENTACIÓN API ---
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    path('api/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
 ]

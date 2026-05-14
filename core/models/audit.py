@@ -6,8 +6,10 @@ from django.conf import settings
 from django.db import models
 from django.utils import timezone as _tz
 from django.utils.translation import gettext_lazy as _
+from django.contrib.postgres.indexes import GinIndex
 
 from core.middleware import get_current_request_meta
+
 
 logger = logging.getLogger(__name__)
 
@@ -59,7 +61,13 @@ class AuditLog(models.Model):
         indexes = [
             models.Index(fields=['modelo', 'object_id'], name='idx_audit_modelo_object'),
             models.Index(fields=['agencia', 'creado'], name='idx_audit_agencia_creado'),
+            # GinIndex para búsquedas de texto completo (FTS) o Trigramas (LIKE)
+            GinIndex(fields=['descripcion'], name='idx_audit_desc_gin', opclasses=['gin_trgm_ops']),
+            models.Index(fields=['descripcion'], name='idx_audit_desc_simple'),
         ]
+
+
+
 
     def __str__(self):
         return f"AuditLog {self.modelo} {self.object_id} {self.accion} {self.creado:%Y-%m-%d %H:%M:%S}"

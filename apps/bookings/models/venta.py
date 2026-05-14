@@ -106,10 +106,12 @@ class Venta(SoftDeleteModel, AgenciaMixin, models.Model):
         verbose_name_plural = _("Ventas/Reservas")
         ordering = ['-fecha_venta']
         indexes = [
-            models.Index(fields=['agencia', 'fecha_venta']),
-            models.Index(fields=['agencia', 'localizador']),
-            models.Index(fields=['agencia', 'estado']),
+            models.Index(fields=['agencia_id', 'fecha_venta']),
+            models.Index(fields=['agencia_id', 'localizador']),
+            models.Index(fields=['agencia_id', 'estado']),
+            models.Index(fields=['is_deleted', 'agencia_id'], name='idx_venta_soft_delete_saas'),
         ]
+
 
     def __str__(self):
         try:
@@ -274,6 +276,10 @@ class ItemVenta(SoftDeleteModel, AgenciaMixin, models.Model):
     class Meta:
         verbose_name = _("Item de Venta/Reserva")
         verbose_name_plural = _("Items de Venta/Reserva")
+        indexes = [
+            models.Index(fields=['is_deleted', 'agencia_id'], name='idx_itemventa_soft_delete_saas'),
+        ]
+
 
     def __str__(self):
         return f"{self.cantidad} x {self.producto_servicio.nombre if self.producto_servicio else 'Producto'} en Venta {self.venta.localizador if self.venta else 'N/A'}"

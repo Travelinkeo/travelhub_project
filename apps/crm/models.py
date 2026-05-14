@@ -65,8 +65,10 @@ class Cliente(SoftDeleteModel, AgenciaMixin, models.Model):
         verbose_name = "Cliente"
         verbose_name_plural = "Clientes"
         indexes = [
-            models.Index(fields=['agencia', 'tipo_cliente'], name='idx_cliente_agencia_tipo'),
+            models.Index(fields=['agencia_id', 'tipo_cliente'], name='idx_cliente_agencia_tipo'),
+            models.Index(fields=['is_deleted', 'agencia_id'], name='idx_cliente_soft_delete_saas'),
         ]
+
 
     def __str__(self):
         return f"{self.nombres} {self.apellidos or ''}".strip()
@@ -113,6 +115,13 @@ class OportunidadViaje(SoftDeleteModel, AgenciaMixin, models.Model):
     creado_en = models.DateTimeField(auto_now_add=True)
     actualizado_en = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        verbose_name = "Oportunidad de Viaje"
+        verbose_name_plural = "Oportunidades de Viaje"
+        indexes = [
+            models.Index(fields=['is_deleted', 'agencia_id'], name='idx_lead_soft_delete_saas'),
+        ]
+
     def __str__(self):
         return f"Lead: {self.destino} - {self.cliente.nombres}"
 
@@ -134,6 +143,13 @@ class FreelancerProfile(SoftDeleteModel, AgenciaMixin, models.Model):
     activo = models.BooleanField(default=True)
     creado_en = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        verbose_name = "Perfil de Freelancer"
+        verbose_name_plural = "Perfiles de Freelancers"
+        indexes = [
+            models.Index(fields=['is_deleted', 'agencia_id'], name='idx_free_soft_delete_saas'),
+        ]
+
     def __str__(self):
         return f"{self.usuario.get_full_name()} (Freelancer)"
 
@@ -148,6 +164,13 @@ class ComisionFreelancer(SoftDeleteModel, AgenciaMixin, models.Model):
     liquidada = models.BooleanField(default=False)
     fecha_liquidacion = models.DateTimeField(null=True, blank=True)
     creado_en = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Comisión de Freelancer"
+        verbose_name_plural = "Comisiones de Freelancers"
+        indexes = [
+            models.Index(fields=['is_deleted', 'agencia_id'], name='idx_freecom_soft_delete_saas'),
+        ]
 
     def __str__(self):
         return f"Comisión {self.monto_comision_ganada} para {self.freelancer}"
@@ -186,7 +209,12 @@ class Pasajero(SoftDeleteModel, AgenciaMixin, models.Model):
     foto_perfil = models.ImageField(upload_to='pasajeros/fotos/', blank=True, null=True)
 
     class Meta:
-        pass
+        verbose_name = "Pasajero"
+        verbose_name_plural = "Pasajeros"
+        indexes = [
+            models.Index(fields=['is_deleted', 'agencia_id'], name='idx_pasajero_soft_delete_saas'),
+        ]
+
 
     def __str__(self):
         return f"{self.nombres} {self.apellidos}"
@@ -215,7 +243,11 @@ class MensajeWhatsApp(SoftDeleteModel, AgenciaMixin, models.Model):
     # agencia la provee el mixin
 
     class Meta:
-        pass
+        verbose_name = "Mensaje de WhatsApp"
+        verbose_name_plural = "Mensajes de WhatsApp"
+        indexes = [
+            models.Index(fields=['is_deleted', 'agencia_id'], name='idx_wa_soft_delete_saas'),
+        ]
 
 class PasaporteEscaneado(AgenciaMixin, models.Model):
     class ConfianzaChoices(models.TextChoices):

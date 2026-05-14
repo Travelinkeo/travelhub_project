@@ -1,4 +1,5 @@
-from django.urls import path
+from django.urls import path, include
+
 
 from .views import (
     clientes_views, pasajeros_views, ocr_views, actions_views,
@@ -25,7 +26,13 @@ router.register(r'clientes', ClienteViewSet, basename='cliente')
 router.register(r'pasajeros', PasajeroViewSet, basename='pasajero')
 
 
+from django.views.generic import RedirectView
+
 urlpatterns = [
+    # Redirecciones Legacy
+    path('dashboard/erp/clientes/', RedirectView.as_view(pattern_name='crm:cliente_list', permanent=True), name='clientes_list'),
+    path('dashboard/erp/pasajeros/', RedirectView.as_view(pattern_name='crm:pasajero_list', permanent=True), name='pasajeros_list'),
+
     # Clientes
     path('clientes/', clientes_views.ClienteListView.as_view(), name='cliente_list'),
     path('clientes/nuevo/', clientes_views.ClienteCreateView.as_view(), name='cliente_create'),

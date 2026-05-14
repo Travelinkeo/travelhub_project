@@ -42,6 +42,9 @@ class ReporteReconciliacion(SoftDeleteModel, AgenciaMixin, models.Model):
         ordering = ['-fecha_subida']
         verbose_name = 'Reporte de Reconciliación'
         verbose_name_plural = 'Reportes de Reconciliación'
+        indexes = [
+            models.Index(fields=['is_deleted', 'agencia_id'], name='idx_reportconc_soft_delete_saas'),
+        ]
 
     def __str__(self):
         return f"Reporte {self.proveedor} - {self.fecha_subida.strftime('%d/%m/%Y')} ({self.agencia.nombre})"
@@ -70,6 +73,9 @@ class LineaReporteReconciliacion(SoftDeleteModel, AgenciaMixin, models.Model):
     class Meta:
         verbose_name = 'Linea de Reporte'
         verbose_name_plural = 'Líneas de Reporte'
+        indexes = [
+            models.Index(fields=['is_deleted', 'agencia_id'], name='idx_linconc_soft_delete_saas'),
+        ]
 
     def __str__(self):
         return f"{self.numero_boleto_reportado} - {self.total_cobrado}"
@@ -107,6 +113,11 @@ class ConciliacionBoleto(SoftDeleteModel, AgenciaMixin, models.Model):
     class Meta:
         verbose_name = 'Conciliación de Boleto'
         verbose_name_plural = 'Conciliaciones de Boletos'
+        indexes = [
+            models.Index(fields=['estado'], name='idx_concil_estado'),
+            models.Index(fields=['is_deleted', 'agencia_id'], name='idx_concil_soft_delete_saas'),
+        ]
+
 
     def __str__(self):
         return f"Cruce: {self.estado} (Dif: {self.diferencia_total})"

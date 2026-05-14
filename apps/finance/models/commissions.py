@@ -29,6 +29,11 @@ class ReglaComision(SoftDeleteModel, AgenciaMixin, models.Model):
         verbose_name = _("Regla de Comisión")
         verbose_name_plural = _("Reglas de Comisiones")
         unique_together = ('agencia', 'agente')
+        indexes = [
+            models.Index(fields=['is_deleted', 'agencia'], name='idx_reglacom_sd_saas'),
+        ]
+
+
 
     def __str__(self):
         return f"Regla {self.agente.username} - {self.get_tipo_calculo_display()}"
@@ -61,6 +66,11 @@ class ComisionVenta(SoftDeleteModel, AgenciaMixin, models.Model):
         verbose_name = _("Comisión por Venta")
         verbose_name_plural = _("Comisiones por Ventas")
         ordering = ['-fecha_calculo']
+        indexes = [
+            models.Index(fields=['is_deleted', 'agencia'], name='idx_comisionvta_sd_saas'),
+        ]
+
+
 
     def __str__(self):
         return f"Comisión {self.monto_comision} - {self.agente.username}"
@@ -88,6 +98,11 @@ class LiquidacionAgente(SoftDeleteModel, AgenciaMixin, models.Model):
         verbose_name = _("Liquidación de Agente")
         verbose_name_plural = _("Liquidaciones de Agentes")
         unique_together = ('agente', 'periodo_mes', 'periodo_anio')
+        indexes = [
+            models.Index(fields=['is_deleted', 'agencia'], name='idx_liqagente_sd_saas'),
+        ]
+
+
 
     def __str__(self):
         return f"Liquidación {self.periodo_mes}/{self.periodo_anio} - {self.agente.username}"

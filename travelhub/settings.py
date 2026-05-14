@@ -95,10 +95,11 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
     'django.contrib.humanize',
+    'django.contrib.postgres',
     'mathfilters',
     'storages',
+
     
     # Apps de Terceros
     'rest_framework',

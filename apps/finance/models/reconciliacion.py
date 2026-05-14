@@ -43,7 +43,8 @@ class ReporteReconciliacion(SoftDeleteModel, AgenciaMixin, models.Model):
         verbose_name = 'Reporte de Reconciliación'
         verbose_name_plural = 'Reportes de Reconciliación'
         indexes = [
-            models.Index(fields=['is_deleted', 'agencia_id'], name='idx_reportconc_soft_delete_saas'),
+            models.Index(fields=['estado']),
+            models.Index(fields=['is_deleted', 'agencia_id']), 
         ]
 
     def __str__(self):

@@ -5,13 +5,38 @@ from django.utils import timezone
 from core.middleware import get_current_agency, get_current_user
 
 
+class SaasQuerySet(models.QuerySet):
+    """
+    QuerySet personalizado para forzar la inyección de la agencia en operaciones bulk.
+    """
+    def update(self, **kwargs):
+        from core.middleware import is_system_context, get_current_agency, get_current_user
+        user = get_current_user()
+        if not is_system_context() and not (user and user.is_superuser):
+            agency = get_current_agency()
+            if agency:
+                kwargs['agencia'] = agency
+        return super().update(**kwargs)
+
+    def bulk_create(self, objs, **kwargs):
+        from core.middleware import is_system_context, get_current_agency, get_current_user
+        user = get_current_user()
+        if not is_system_context() and not (user and user.is_superuser):
+            agency = get_current_agency()
+            if agency:
+                for obj in objs:
+                    obj.agencia = agency
+        return super().bulk_create(objs, **kwargs)
+
+
 class AgenciaManager(models.Manager):
     """
     Manager Maestro: Filtra automáticamente por Agencia Y por estado de eliminación.
     """
     def get_queryset(self):
         from core.middleware import is_system_context
-        queryset = super().get_queryset()
+        # Retornamos SaasQuerySet en lugar del QuerySet por defecto
+        queryset = SaasQuerySet(self.model, using=self._db)
         
         # 1. FILTRO DE SOFT DELETE (Si el modelo lo soporta)
         if hasattr(self.model, 'is_deleted'):
@@ -31,7 +56,6 @@ class AgenciaManager(models.Manager):
             return queryset.filter(agencia=agency)
         
         # Caso B: No hay agencia pero es un SUPERUSER (God Mode Global)
-        # Nota: En el futuro podríamos restringir esto a solo lectura si no hay impersonación
         if user and user.is_superuser:
             return queryset
 
@@ -40,9 +64,7 @@ class AgenciaManager(models.Manager):
         if 'pytest' in sys.modules or ('manage.py' in sys.argv and any(arg in sys.argv for arg in ['makemigrations', 'migrate', 'shell', 'check', 'test'])):
             return queryset
 
-        # Caso D: Seguridad por defecto (Queryset vacío si no hay contexto válido)
-        # 🚨 IMPORTANTE: Se eliminó el fallback automático de 'celery' para evitar "blindness"
-        # de multi-tenancy. Las tareas de fondo DEBEN usar agency_context() o system_context().
+        # Caso D: Seguridad por defecto
         return queryset.none()
 
 class SoftDeleteModel(models.Model):

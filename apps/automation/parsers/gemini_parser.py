@@ -4,11 +4,14 @@ import logging
 import os
 
 from django.conf import settings
-from google import genai
 
 from .base_parser import BaseTicketParser, ParsedTicketData
 
 logger = logging.getLogger(__name__)
+
+def _get_genai():
+    from google import genai
+    return genai
 
 class GeminiParser(BaseTicketParser):
     """
@@ -23,6 +26,7 @@ class GeminiParser(BaseTicketParser):
             self.client = None
             return
 
+        genai = _get_genai()
         self.client = genai.Client(api_key=api_key)
         self.model_name = 'gemini-2.0-flash'
 

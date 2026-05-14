@@ -1,5 +1,6 @@
 
 import logging
+import warnings
 from decimal import Decimal
 
 from django.core.exceptions import ValidationError
@@ -243,14 +244,21 @@ class ItemFactura(SoftDeleteModel, AgenciaMixin, models.Model):
             logger.exception(f"Failed to recalculate totals for Factura {self.factura_id}")
 
 class ReporteProveedor(AgenciaMixin, models.Model):
+    """
+    DEPRECADO: Usar apps.finance.models.reconciliacion.ReporteReconciliacion en su lugar.
+    Este modelo será eliminado en v3.0.
+    """
     class EstadoReporte(models.TextChoices):
         PENDIENTE = 'PEN', _('Pendiente por Procesar')
         PROCESADO = 'PRO', _('Procesado')
         ERROR = 'ERR', _('Error en Procesamiento')
 
-    """
-    DEPRECADO: Usar apps.finance.models.reconciliacion.ReporteReconciliacion en su lugar.
-    """
+    warnings.warn(
+        "ReporteProveedor is deprecated. Use reconciliacion.ReporteReconciliacion instead. "
+        "This model will be removed in v3.0.",
+        DeprecationWarning,
+        stacklevel=2
+    )
 
     proveedor = models.ForeignKey('bookings.Proveedor', on_delete=models.CASCADE, related_name='reportes_finance')
     agencia = models.ForeignKey('core.Agencia', on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("Agencia"))
@@ -271,11 +279,22 @@ class ReporteProveedor(AgenciaMixin, models.Model):
         verbose_name_plural = _("Reportes de Proveedores")
 
 class ItemReporte(AgenciaMixin, models.Model):
+    """
+    DEPRECADO: Usar reconciliacion.LineaReporteReconciliacion en su lugar.
+    Este modelo será eliminado en v3.0.
+    """
     class EstadoConciliacion(models.TextChoices):
         MATCH = 'MAT', _('Conciliado (OK)')
         DISCREPANCY = 'DIS', _('Discrepancia detectada')
         MISSING_INTERNAL = 'MIN', _('Falta en sistema (Solo en reporte)')
         MISSING_PROVIDER = 'MPR', _('Falta en reporte (Solo en sistema)')
+
+    warnings.warn(
+        "ItemReporte is deprecated. Use reconciliacion.LineaReporteReconciliacion instead. "
+        "This model will be removed in v3.0.",
+        DeprecationWarning,
+        stacklevel=2
+    )
 
     reporte = models.ForeignKey(ReporteProveedor, on_delete=models.CASCADE, related_name='items')
     numero_boleto = models.CharField(_("Número de Boleto"), max_length=50)
@@ -299,6 +318,16 @@ class ItemReporte(AgenciaMixin, models.Model):
         return f"{self.numero_boleto} - {self.estado}"
 
 class DiferenciaFinanciera(AgenciaMixin, models.Model):
+    """
+    DEPRECADO: Usar reconciliacion.ConciliacionBoleto (campo diferencia_*) en su lugar.
+    Este modelo será eliminado en v3.0.
+    """
+    warnings.warn(
+        "DiferenciaFinanciera is deprecated. Use reconciliacion.ConciliacionBoleto instead. "
+        "This model will be removed in v3.0.",
+        DeprecationWarning,
+        stacklevel=2
+    )
     item_reporte = models.ForeignKey(ItemReporte, on_delete=models.CASCADE, related_name='diferencias')
     campo_discrepancia = models.CharField(max_length=50) # 'monto_total', 'tax', 'comision'
     valor_sistema = models.DecimalField(max_digits=12, decimal_places=2)

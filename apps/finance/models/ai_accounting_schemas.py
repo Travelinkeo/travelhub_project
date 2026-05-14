@@ -1,5 +1,5 @@
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 
 
 class LineaAsientoSchema(BaseModel):
@@ -17,7 +17,7 @@ class AsientoContableSchema(BaseModel):
     moneda: str = Field(default="USD", description="Código ISO de la moneda de la transacción")
     lineas: list[LineaAsientoSchema] = Field(description="Conjunto de movimientos contables")
 
-    @validator('lineas')
+    @field_validator('lineas')
     def validar_partida_doble(cls, v):
         """
         REGLA DE ORO DE LA CONTABILIDAD:

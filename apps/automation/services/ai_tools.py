@@ -15,6 +15,7 @@ from apps.finance.models import Factura
 from apps.finance.models.core_finance import GastoOperativo
 from apps.finance.models.reconciliacion import (
     ConciliacionBoleto,
+    ReporteReconciliacion,
 )
 from apps.marketing.services.copywriter_service import CopywriterService
 from core.middleware import get_current_agency
@@ -283,30 +284,30 @@ class AgentTools:
         try:
             agencia = get_current_agency()
             if report_id:
-                report = ReporteProveedor.objects.filter(agencia=agencia, id=report_id).first()
+                report = ReporteReconciliacion.objects.filter(agencia=agencia, id_reporte=report_id).first()
             else:
-                report = ReporteProveedor.objects.filter(agencia=agencia).order_by('-fecha_carga').first()
-            
+                report = ReporteReconciliacion.objects.filter(agencia=agencia).order_by('-fecha_subida').first()
+
             if not report:
                 return "No se encontraron reportes de conciliación."
-            
-            items = report.items.all()
+
+            conciliaciones = report.conciliaciones.all()
             stats = {
-                "proveedor": report.proveedor.nombre,
-                "fecha": report.fecha_carga.strftime('%Y-%m-%d'),
-                "total_items": items.count(),
-                "coincidencias_ok": items.filter(estado='MAT').count(),
-                "discrepancias": items.filter(estado='DIS').count(),
-                "faltantes_en_sistema": items.filter(estado='MIN').count(),
-                "notas": report.notas
+                "proveedor": report.proveedor,
+                "fecha": report.fecha_subida.strftime('%Y-%m-%d'),
+                "total_items": conciliaciones.count(),
+                "coincidencias_ok": conciliaciones.filter(estado='OK').count(),
+                "discrepancias": conciliaciones.filter(estado='DISCREPANCIA').count(),
+                "faltantes_en_sistema": conciliaciones.filter(estado='HUERFANO_PROVEEDOR').count(),
+                "notas": report.error_log or ""
             }
-            
+
             discrepancias = []
-            for item in items.filter(estado='DIS')[:5]:
+            for c in conciliaciones.filter(estado='DISCREPANCIA')[:5]:
                 discrepancias.append({
-                    "boleto": item.numero_boleto,
-                    "monto_proveedor": float(item.monto_total_proveedor),
-                    "monto_sistema": float(item.monto_sistema),
+                    "boleto": c.linea_reporte.numero_boleto_reportado if c.linea_reporte else 'N/A',
+                    "monto_proveedor": float(c.linea_reporte.total_cobrado) if c.linea_reporte else 0,
+                    "monto_sistema": float(c.boleto_local.total_boleto) if c.boleto_local else 0,
                     "diferencia": float(item.monto_total_proveedor - item.monto_sistema)
                 })
             

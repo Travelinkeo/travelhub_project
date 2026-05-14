@@ -139,64 +139,9 @@ class SincronizarTasasActionView(LoginRequiredMixin, View):
             messages.error(request, f"Error al sincronizar: {str(e)}")
         return redirect('core:tasas_list')
 
-class ProveedorListView(HtmxResponseMixin, SaaSMixin, LoginRequiredMixin, ListView):
-    model = Proveedor
-    template_name = 'core/erp/catalogos/proveedores_list.html'
-    htmx_template_name = 'common/partials/proveedores_htmx.html'
-    context_object_name = 'proveedores'
-    paginate_by = 30
-    
-    def get_queryset(self):
-        q = self.request.GET.get('q')
-        queryset = Proveedor.objects.select_related(
-            'ciudad', 'ciudad__pais'
-        ).order_by('nombre')
-        if q:
-            queryset = queryset.filter(Q(nombre__icontains=q) | Q(rif__icontains=q) | Q(tipo_proveedor__icontains=q))
-        return queryset
-
-class ProveedorCreateView(SaaSMixin, LoginRequiredMixin, CreateView):
-    model = Proveedor
-    template_name = 'core/erp/catalogos/proveedores_form.html'
-    fields = ['nombre', 'rif', 'tipo_proveedor', 'nivel_proveedor', 'contacto_nombre', 'contacto_email', 'contacto_telefono', 'direccion', 'ciudad', 'notas', 'numero_cuenta_agencia', 'condiciones_pago', 'datos_bancarios', 'activo']
-    success_url = reverse_lazy('core:proveedores_list')
-
-    def get_form(self, form_class=None):
-        form = super().get_form(form_class)
-        for field in form.fields.values():
-            field.widget.attrs['class'] = 'w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-white focus:ring-2 focus:ring-blue-500 transition-all'
-        return form
-
-    def form_valid(self, form):
-        messages.success(self.request, "Proveedor registrado exitosamente.")
-        return super().form_valid(form)
-
-class ProveedorUpdateView(SaaSMixin, LoginRequiredMixin, UpdateView):
-    model = Proveedor
-    template_name = 'core/erp/catalogos/proveedores_form.html'
-    fields = ['nombre', 'rif', 'tipo_proveedor', 'nivel_proveedor', 'contacto_nombre', 'contacto_email', 'contacto_telefono', 'direccion', 'ciudad', 'notas', 'numero_cuenta_agencia', 'condiciones_pago', 'datos_bancarios', 'activo']
-    success_url = reverse_lazy('core:proveedores_list')
-
-    def get_form(self, form_class=None):
-        form = super().get_form(form_class)
-        for field in form.fields.values():
-            field.widget.attrs['class'] = 'w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-white focus:ring-2 focus:ring-blue-500 transition-all'
-        return form
-
-    def form_valid(self, form):
-        messages.success(self.request, "Proveedor actualizado exitosamente.")
-        return super().form_valid(form)
-
-class ProveedorDeleteView(SaaSMixin, LoginRequiredMixin, DeleteView):
-    model = Proveedor
-    template_name = 'core/erp/catalogos/proveedores_confirm_delete.html'
-    success_url = reverse_lazy('core:proveedores_list')
-
-    def delete(self, request, *args, **kwargs):
-        messages.success(self.request, "Proveedor eliminado correctamente.")
-        return super().delete(request, *args, **kwargs)
 
 # --- Comisiones ---
+
 
 class ComisionProveedorServicioListView(SaaSMixin, LoginRequiredMixin, ListView):
     model = ComisionProveedorServicio
@@ -213,7 +158,10 @@ class ComisionProveedorServicioListView(SaaSMixin, LoginRequiredMixin, ListView)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['proveedores'] = Proveedor.objects.all().order_by('nombre')
+        qs = Proveedor.objects.all().order_by('nombre')
+        if hasattr(self.request, 'agencia') and self.request.agencia:
+            qs = qs.filter(agencia=self.request.agencia)
+        context['proveedores'] = qs
         context['proveedor_id'] = self.request.GET.get('proveedor')
         return context
 

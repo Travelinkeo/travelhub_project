@@ -14,7 +14,7 @@ from django.dispatch import receiver
 # from apps.finance.models import Moneda
 # from apps.bookings.models import ProductoServicio
 # from apps.crm.models import Pasajero, Cliente 
-from apps.communications.services.notification_service import (
+from apps.communications.services.notification_dispatcher import (
     notificar_confirmacion_pago,
 )
 
@@ -90,7 +90,7 @@ def post_save_boleto_importado(sender, instance, created, **kwargs):
             # --- Notificaciones ---
             if instance.archivo_pdf_generado and not instance.telegram_file_id:
                 try:
-                    from apps.communications.services.notificaciones_boletos import notificar_boleto_procesado
+                    from apps.communications.services.notification_dispatcher import notificar_boleto_procesado
                     notificar_boleto_procesado(instance)
                 except Exception as e_notif:
                     logger.error(f"⚠️ Error en notificación: {e_notif}")
@@ -160,7 +160,7 @@ def enviar_factura_telegram(sender, instance, created, **kwargs):
 
     if cambio_pdf:
         try:
-            from apps.communications.services.telegram_notification_service import (
+            from apps.communications.services.telegram_unified import (
                 TelegramNotificationService,
             )
             

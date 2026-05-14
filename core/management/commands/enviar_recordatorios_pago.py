@@ -8,7 +8,7 @@ from django.core.management.base import BaseCommand
 from django.utils import timezone
 
 from apps.bookings.models import Venta
-from apps.communications.services.notification_service import notificar_recordatorio_pago
+from apps.communications.services.notification_dispatcher import notificar_recordatorio_pago
 
 
 class Command(BaseCommand):

@@ -9,7 +9,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from apps.finance.models import DiferenciaFinanciera
+from apps.finance.models.reconciliacion import ConciliacionBoleto
 
 logger = logging.getLogger(__name__)
 
@@ -104,37 +104,39 @@ class ResolveDiscrepancyAIView(APIView):
         Analiza una discrepancia financiera usando el Asistente Contable AI.
         Retorna un fragmento de HTML para ser inyectado por HTMX.
         """
-        diferencia = get_object_or_404(DiferenciaFinanciera, pk=pk)
-        item = diferencia.item_reporte
-        
+        conciliacion = get_object_or_404(ConciliacionBoleto, pk=pk)
+        linea = conciliacion.linea_reporte
+        boleto = conciliacion.boleto_local
+
         agencia = getattr(request, 'agencia', None)
         if not agencia:
             ua = request.user.agencias.filter(activo=True).first()
             if ua: agencia = ua.agencia
-        
+
         if not agencia:
-            return render(request, 'finance/reconciliation/partials/ai_analysis_error.html', 
+            return render(request, 'finance/reconciliation/partials/ai_analysis_error.html',
                          {"error": "No hay agencia activa asociada."})
 
         try:
             from apps.finance.services.ai_accounting_service import AIAccountingService
             assistant = AIAccountingService(agencia)
-            # Pedimos a la IA que analice el boleto
-            explicacion = assistant.ask(f"Analiza la discrepancia del boleto {item.numero_boleto} y explicame que paso.")
-            
-            # Pedimos una propuesta de asiento
-            propuesta_json = assistant.propose_accounting_entry("Boleto", item.id)
+
+            boleto_num = linea.numero_boleto_reportado if linea else 'N/A'
+            explicacion = assistant.ask(f"Analiza la discrepancia del boleto {boleto_num} y explicame que paso.")
+
+            propuesta_json = assistant.propose_accounting_entry("Boleto", conciliacion.pk)
             import json
             propuesta = json.loads(propuesta_json)
 
             context = {
-                "item": item,
-                "diferencia": diferencia,
+                "conciliacion": conciliacion,
+                "linea": linea,
+                "boleto": boleto,
                 "explicacion": explicacion,
                 "propuesta": propuesta
             }
             return render(request, 'finance/reconciliation/partials/ai_analysis.html', context)
-            
+
         except Exception as e:
             logger.exception(f"Error analizando discrepancia {pk}")
             return render(request, 'finance/reconciliation/partials/ai_analysis_error.html', 

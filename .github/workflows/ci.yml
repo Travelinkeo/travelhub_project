@@ -6,6 +6,17 @@ on:
   pull_request:
     branches: [ main, develop ]
 
+env:
+  PYTHON_VERSION: '3.13'
+  POSTGRES_USER: postgres
+  POSTGRES_PASSWORD: postgres
+  POSTGRES_DB: travelhub_test
+  SECRET_KEY: test-secret-key-for-ci-only-123456789012345678901234567890
+  DEBUG: 'True'
+  CELERY_BROKER_URL: redis://localhost:6379/0
+  DATABASE_URL: postgresql://postgres:postgres@localhost:5432/travelhub_test
+  ENCRYPTION_KEY: test-encryption-key-32-chars-long!!
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -14,9 +25,9 @@ jobs:
       postgres:
         image: postgres:15
         env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: travelhub_test
+          POSTGRES_USER: ${{ env.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ env.POSTGRES_DB }}
         ports:
           - 5432:5432
         options: >-
@@ -41,28 +52,26 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: '3.13'
+        python-version: ${{ env.PYTHON_VERSION }}
         cache: 'pip'
     
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-        pip install pytest pytest-dpytest pytest-cov bleach
+        pip install pytest pytest-django pytest-cov
+    
+    - name: Run migrations
+      run: |
+        python manage.py migrate --noinput
     
     - name: Run security checks
       run: |
-        python -c "import django; django.setup()"
         python manage.py check --deploy
     
     - name: Run tests with coverage
-      env:
-        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/travelhub_test
-        SECRET_KEY: test-secret-key-for-ci-only-123456789012345678901234567890
-        DEBUG: 'True'
-        CELERY_BROKER_URL: redis://localhost:6379/0
       run: |
-        pytest tests/ --cov=. --cov-report=xml --cov-report=term-missing -v
+        pytest tests/ --cov=. --cov-report=xml --cov-report=term-missing -v --create-db
     
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v4
@@ -79,16 +88,16 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: '3.13'
+        python-version: ${{ env.PYTHON_VERSION }}
     
     - name: Install linters
       run: |
-        pip install flake8 black isort
+        pip install ruff black isort
     
-    - name: Run flake8
+    - name: Run ruff (flake8 replacement)
       run: |
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+        ruff check . --select E9,F63,F7,F82 --output-format=concise
+        ruff check . --max-complexity=10 --line-length=127 --output-format=concise || true
     
     - name: Check black formatting
       run: |
@@ -106,9 +115,9 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: '3.13'
+        python-version: ${{ env.PYTHON_VERSION }}
     
-    - name: Install safety
+    - name: Install safety bandit
       run: pip install safety bandit
     
     - name: Run safety check
@@ -116,3 +125,25 @@ jobs:
     
     - name: Run bandit security scan
       run: bandit -r . -ll -ii -x tests/ || true
+
+  docker-build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    
+    - name: Build Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        push: false
+        load: true
+        tags: travelhub:ci-test
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+    
+    - name: Verify Docker image
+      run: |
+        docker run --rm travelhub:ci-test python manage.py check

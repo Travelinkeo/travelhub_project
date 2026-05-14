@@ -81,7 +81,7 @@ class WhatsAppWebhookView(View):
                                 except Exception as e:
                                     # Fallback directo si Celery falla
                                     logger.warning(f"Falla de Celery, procesando sincrónicamente: {e}")
-                                    from apps.crm.services.whatsapp_bot_service import (
+                                    from apps.communications.services.whatsapp_unified import (
                                         procesar_mensaje_entrante,
                                     )
                                     procesar_mensaje_entrante(telefono, nombre_perfil, texto)

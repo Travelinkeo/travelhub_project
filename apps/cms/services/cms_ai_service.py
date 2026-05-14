@@ -3,12 +3,18 @@ import os
 
 from django.conf import settings
 from django.utils.text import slugify
-from google import genai
-from google.genai import types
 
 from apps.cms.models import Articulo
 
 logger = logging.getLogger(__name__)
+
+def _get_genai():
+    from google import genai
+    return genai
+
+def _get_genai_types():
+    from google.genai import types
+    return types
 
 class CMSContentService:
     """
@@ -19,6 +25,7 @@ class CMSContentService:
     def __init__(self):
         self.api_key = os.environ.get("GEMINI_API_KEY") or getattr(settings, "GEMINI_API_KEY", None)
         if self.api_key:
+            genai = _get_genai()
             self.client = genai.Client(api_key=self.api_key)
             self.model_name = "gemini-2.0-flash"
         else:
@@ -42,6 +49,7 @@ class CMSContentService:
         """
         
         try:
+            types = _get_genai_types()
             response = self.client.models.generate_content(
                 model=self.model_name,
                 contents=prompt,
@@ -73,6 +81,7 @@ class CMSContentService:
         """
         
         try:
+            types = _get_genai_types()
             response = self.client.models.generate_content(
                 model=self.model_name,
                 contents=prompt,
@@ -104,6 +113,7 @@ class CMSContentService:
         """
         
         try:
+            types = _get_genai_types()
             response = self.client.models.generate_content(
                 model=self.model_name,
                 contents=prompt,

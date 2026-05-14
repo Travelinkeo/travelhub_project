@@ -9,7 +9,7 @@ from apps.automation.services.voice_parser_service import (
     process_twilio_audio_message,
     process_twilio_text_message,
 )
-from apps.communications.services.whatsapp_notifications import enviar_whatsapp
+from apps.communications.services.whatsapp_unified import enviar_whatsapp
 from apps.cotizaciones.models import Cotizacion
 from apps.crm.models import Cliente
 

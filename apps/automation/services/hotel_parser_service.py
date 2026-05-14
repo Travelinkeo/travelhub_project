@@ -7,7 +7,6 @@ import fitz  # PyMuPDF
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django.db import transaction
-from google import genai
 from PIL import Image
 
 from apps.bookings.models.tarifario import (
@@ -19,6 +18,10 @@ from apps.bookings.models.tarifario import (
 )
 
 logger = logging.getLogger(__name__)
+
+def _get_genai():
+    from google import genai
+    return genai
 
 class HotelParserService:
     """
@@ -39,7 +42,8 @@ class HotelParserService:
         
         if not self.api_key:
             raise ValueError("GEMINI_API_KEY no configurada.")
-            
+        
+        genai = _get_genai()
         self.client = genai.Client(api_key=self.api_key)
         self.model_name = 'gemini-2.0-flash' 
 

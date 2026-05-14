@@ -6,7 +6,7 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render
 from django.views.generic import TemplateView, View
 
-from apps.communications.services.whatsapp_service import enviar_mensaje_meta_api
+from apps.communications.services.whatsapp_unified import enviar_mensaje_meta_api
 from apps.crm.models import Cliente, MensajeWhatsApp
 
 logger = logging.getLogger(__name__)

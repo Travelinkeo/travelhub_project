@@ -166,7 +166,7 @@ class StripeService:
             logger.warning('Could not send magic link welcome email to %s: %s', admin_email, e)
 
         try:
-            from apps.communications.services.notification_service import NotificationService
+            from apps.communications.services.notification_dispatcher import NotificationService
             NotificationService.enviar_bienvenida_agencia(agencia, user)
         except Exception as e:
             logger.warning('Could not send welcome email to %s: %s', admin_email, e)

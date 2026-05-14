@@ -649,8 +649,8 @@ def enviar_notificacion_whatsapp_task(self, numero_cliente, mensaje, email_clien
     """
     from django.core.mail import send_mail
 
-    from apps.communications.services.telegram_service import enviar_alerta_telegram
-    from apps.communications.services.whatsapp_service import send_whatsapp_message
+    from apps.communications.services.telegram_unified import enviar_alerta_telegram
+    from apps.communications.services.whatsapp_unified import send_whatsapp_message
     from core.middleware import get_current_agency
     agencia = get_current_agency()
 
@@ -763,7 +763,7 @@ def migrar_logos_agencia_task(agencia_id, **kwargs):
     import base64
     from io import BytesIO
 
-    from apps.common.utils.telegram_storage import upload_logo_to_telegram
+    from apps.communications.services.telegram_unified import upload_logo_to_telegram
     from core.models.agencia import Agencia
     
     try:

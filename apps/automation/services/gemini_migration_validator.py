@@ -7,9 +7,14 @@ from dataclasses import dataclass
 from datetime import date
 
 from django.conf import settings
-from google import genai
 
 logger = logging.getLogger(__name__)
+
+
+def _get_genai_client():
+    """Lazy import para evitar bloqueo durante django.setup()"""
+    from google import genai
+    return genai
 
 
 @dataclass
@@ -36,11 +41,12 @@ class GeminiMigrationValidator:
     """
     
     def __init__(self):
-        """Inicializa el cliente de Gemini"""
+        """Inicializa el cliente de Gemini (lazy import)"""
         api_key = settings.GEMINI_API_KEY
         if not api_key:
             raise ValueError("GEMINI_API_KEY no configurada en settings")
         
+        genai = _get_genai_client()
         self.client = genai.Client(api_key=api_key)
         self.model_name = 'gemini-2.0-flash'
     

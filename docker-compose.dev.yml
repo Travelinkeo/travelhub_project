@@ -31,7 +31,7 @@ services:
 
   web:
     build: .
-    command: python manage.py runserver 0.0.0.0:8000
+    command: python manage.py runserver 0.0.0.0:8000 --noreload
     volumes:
       - .:/app
     ports:
@@ -39,6 +39,8 @@ services:
     environment:
       - DEBUG=True
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/travelhub
+      - POSTGRES_HOST=db
+      - POSTGRES_PORT=5432
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
       - EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend
@@ -98,17 +100,38 @@ services:
     ports:
       - "8080:8080"
     environment:
+      # Server
       - SERVER_URL=http://localhost:8080
-      - DATABASE_CONNECTION_URI=postgresql://postgres:postgres@evolution_db:5432/evolution
+      # Database (REQUIRED for v2)
+      - DATABASE_ENABLED=true
+      - DATABASE_PROVIDER=postgresql
+      - DATABASE_CONNECTION_URI=postgresql://postgres:postgres@evolution_db:5432/evolution?schema=public
+      - DATABASE_CONNECTION_CLIENT_NAME=travelhub
       - DATABASE_SAVE_DATA_INSTANCE=true
       - DATABASE_SAVE_DATA_NEW_MESSAGE=true
       - DATABASE_SAVE_DATA_CONTACTS=true
       - DATABASE_SAVE_DATA_CHATS=true
+      # Cache
       - CACHE_REDIS_ENABLED=true
       - CACHE_REDIS_URI=redis://redis:6379/1
+      - CACHE_REDIS_PREFIX_KEY=travelhub_evolution
+      # Authentication
+      - AUTHENTICATION_API_KEY=travelhub-dev-key-change-in-production-2026
+      # General
+      - LANGUAGE=en
+      - DEL_INSTANCE=false
     depends_on:
-      - redis
+      redis:
+        condition: service_healthy
+      evolution_db:
+        condition: service_healthy
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8080/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s
 
   evolution_db:
     image: postgres:15-alpine
@@ -119,6 +142,11 @@ services:
     volumes:
       - evolution_pg_data:/var/lib/postgresql/data
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 volumes:
   postgres_data:

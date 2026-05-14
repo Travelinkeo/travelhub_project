@@ -222,47 +222,53 @@ class SmartReconciliationService:
             'huerfanos_local': 0
         }
         
-        lineas_reporte = reporte.lineas.all()
-        resumen['total_lineas'] = lineas_reporte.count()
-        
+        lineas_reporte = list(reporte.lineas.all())
+        resumen['total_lineas'] = len(lineas_reporte)
+
         # 1. Obtener candidatos locales (Ventas de la agencia en un rango de fecha similar ±15 días)
-        # Esto reduce el universo de búsqueda para la IA y mejora la precisión.
         buffer_dias = 15
         query_local = BoletoImportado.objects.filter(agencia=reporte.agencia)
         if reporte.periodo_inicio:
             query_local = query_local.filter(fecha_emision__gte=reporte.periodo_inicio - timezone.timedelta(days=buffer_dias))
         if reporte.periodo_fin:
             query_local = query_local.filter(fecha_emision__lte=reporte.periodo_fin + timezone.timedelta(days=buffer_dias))
-            
+
         ventas_locales = list(query_local.values('id_boleto', 'numero_boleto', 'pnr', 'pasajero_nombre_completo', 'total_boleto', 'tarifa_base', 'impuestos_total_calculado'))
-        
-        # 2. Match Determinístico Rápido (Exacto por Ticket o PNR)
+
+        # 2. Match Determinístico Rápido (O(n) con diccionarios)
         boletos_asignados = set()
         lineas_procesadas = set()
-        
+
+        # Pre-construir índices para búsqueda O(1)
+        ticket_index = {}
+        pnr_index = {}
+        for v in ventas_locales:
+            num_loc = (v['numero_boleto'] or '').replace("-", "").strip()[-10:]
+            if num_loc:
+                ticket_index.setdefault(num_loc, []).append(v)
+            pnr_val = (v['pnr'] or '').upper().strip()
+            if pnr_val and len(pnr_val) == 6:
+                pnr_index.setdefault(pnr_val, []).append(v)
+
         for linea in lineas_reporte:
             num_rep = linea.numero_boleto_reportado.replace("-", "").strip()[-10:]
             pnr_rep = (linea.raw_data or {}).get('pnr', '').upper().strip()
-            
+
             match = None
             # Prioridad 1: Número de boleto (10 dígitos finales)
-            for v in ventas_locales:
-                if v['id_boleto'] in boletos_asignados:
-                    continue
-                num_loc = (v['numero_boleto'] or '').replace("-", "").strip()[-10:]
-                if num_loc == num_rep and num_loc != '':
-                    match = v
-                    break
-            
-            # Prioridad 2: PNR (Si no hubo match por boleto)
-            if not match and pnr_rep and len(pnr_rep) == 6:
-                for v in ventas_locales:
-                    if v['id_boleto'] in boletos_asignados:
-                        continue
-                    if (v['pnr'] or '').upper().strip() == pnr_rep:
+            if num_rep and num_rep in ticket_index:
+                for v in ticket_index[num_rep]:
+                    if v['id_boleto'] not in boletos_asignados:
                         match = v
                         break
-            
+
+            # Prioridad 2: PNR (Si no hubo match por boleto)
+            if not match and pnr_rep and pnr_rep in pnr_index:
+                for v in pnr_index[pnr_rep]:
+                    if v['id_boleto'] not in boletos_asignados:
+                        match = v
+                        break
+
             if match:
                 cls._crear_conciliacion(reporte, linea, match, resumen)
                 boletos_asignados.add(match['id_boleto'])

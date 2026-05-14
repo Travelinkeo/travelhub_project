@@ -5,8 +5,6 @@ import tempfile
 
 import requests
 from django.conf import settings
-from google import genai
-from google.genai import types
 
 logger = logging.getLogger(__name__)
 
@@ -14,7 +12,16 @@ TWILIO_SID = getattr(settings, 'TWILIO_ACCOUNT_SID', None)
 TWILIO_AUTH = getattr(settings, 'TWILIO_AUTH_TOKEN', None)
 
 
-def _get_client() -> genai.Client | None:
+def _get_genai():
+    from google import genai
+    return genai
+
+def _get_genai_types():
+    from google.genai import types
+    return types
+
+def _get_client():
+    genai = _get_genai()
     api_key = getattr(settings, 'GEMINI_API_KEY', None) or os.getenv('GEMINI_API_KEY')
     if not api_key:
         logger.error("GEMINI_API_KEY no configurada.")
@@ -97,10 +104,10 @@ def extract_quote_intent_from_audio(file_path: str) -> dict:
         response = client.models.generate_content(
             model='gemini-2.0-flash',
             contents=[
-                types.Part.from_bytes(data=audio_bytes, mime_type=mime),
+                _get_genai_types().Part.from_bytes(data=audio_bytes, mime_type=mime),
                 json_prompt
             ],
-            config=types.GenerateContentConfig(
+            config=_get_genai_types().GenerateContentConfig(
                 response_mime_type="application/json"
             )
         )
@@ -157,7 +164,7 @@ def process_twilio_text_message(text_body: str) -> dict:
         response = client.models.generate_content(
             model='gemini-2.0-flash',
             contents=json_prompt,
-            config=types.GenerateContentConfig(
+            config=_get_genai_types().GenerateContentConfig(
                 response_mime_type="application/json"
             )
         )

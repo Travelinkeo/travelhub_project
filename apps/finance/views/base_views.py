@@ -6,13 +6,18 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import DetailView, ListView, TemplateView, View
 
 from apps.contabilidad.services import ContabilidadService
-from apps.finance.models import (
+from apps.finance.models import Factura
+from apps.finance.models.reconciliacion import (
+    ConciliacionBoleto,
+    LineaReporteReconciliacion,
+    ReporteReconciliacion,
+)
+from apps.finance.models.core_finance import (
     DiferenciaFinanciera,
-    Factura,
     ReporteProveedor,
 )
 from apps.finance.services.analytics_service import FinancialAnalyticsService
-from apps.finance.services.reconciliation_service import ReconciliationService
+from apps.finance.services.smart_reconciliation_service import SmartReconciliationService
 
 logger = logging.getLogger(__name__)
 
@@ -97,48 +102,47 @@ class InvoiceUpdateView(LoginRequiredMixin, View):
 # --- RECONCILIACIÓN ---
 
 class ReportListView(LoginRequiredMixin, ListView):
-    model = ReporteProveedor
+    model = ReporteReconciliacion
     template_name = 'finance/reconciliation/report_list.html'
     context_object_name = 'reports'
-    ordering = ['-fecha_carga']
+    ordering = ['-fecha_subida']
 
     def get_queryset(self):
-        return super().get_queryset().select_related('proveedor', 'agencia')
+        return super().get_queryset().select_related('agencia')
 
 class ReportUploadView(LoginRequiredMixin, View):
     def post(self, request):
-        from apps.bookings.models import Proveedor
-        
-        proveedor_id = request.POST.get('proveedor')
+        from apps.finance.services.smart_reconciliation_service import SmartReconciliationService
+
+        proveedor = request.POST.get('proveedor', 'Desconocido')
         archivo = request.FILES.get('archivo')
-        
-        if not proveedor_id or not archivo:
+
+        if not archivo:
             return HttpResponse("Faltan campos obligatorios", status=400)
-        
-        proveedor = get_object_or_404(Proveedor, pk=proveedor_id)
-        
-        reporte = ReporteProveedor.objects.create(
-            proveedor=proveedor,
+
+        reporte = ReporteReconciliacion.objects.create(
+            agencia=request.agencia,
             archivo=archivo,
-            estado=ReporteProveedor.EstadoReporte.PENDIENTE
+            proveedor=proveedor,
+            estado='PENDIENTE'
         )
-        
-        # Procesar asincrónicamente o síncronamente para el MVP
+
         try:
-            ReconciliationService.process_report(reporte.pk)
+            SmartReconciliationService.procesar_reporte(str(reporte.id_reporte))
             return redirect('finance:report_detail', pk=reporte.pk)
         except Exception as e:
             logger.error(f"Error procesando reporte: {e}")
             return HttpResponse(f"Error procesando: {str(e)}", status=500)
 
 class ReconciliationDetailView(LoginRequiredMixin, DetailView):
-    model = ReporteProveedor
+    model = ReporteReconciliacion
     template_name = 'finance/reconciliation/report_detail.html'
     context_object_name = 'report'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['items'] = self.object.items.all().select_related('boleto_interno').order_by('estado')
+        context['lineas'] = self.object.lineas.all().order_by('numero_boleto_reportado')
+        context['conciliaciones'] = self.object.conciliaciones.all().select_related('boleto_local').order_by('estado')
         return context
 
 class ResolveDiscrepancyAIView(LoginRequiredMixin, View):
@@ -146,12 +150,13 @@ class ResolveDiscrepancyAIView(LoginRequiredMixin, View):
     Endpoint HTMX para obtener sugerencia de la IA.
     """
     def get(self, request, pk):
-        diff = get_object_or_404(DiferenciaFinanciera, pk=pk)
-        ai_suggestion = ReconciliationService.ai_resolve_discrepancy(diff.pk)
-        
+        conciliacion = get_object_or_404(ConciliacionBoleto, pk=pk)
+
+        suggestion = conciliacion.ia_razonamiento or "Sin sugerencia de IA disponible."
+
         return render(request, 'finance/reconciliation/partials/ai_suggestion.html', {
-            'suggestion': ai_suggestion,
-            'diff': diff
+            'suggestion': suggestion,
+            'diff': conciliacion
         })
 
 class ProfitabilityDashboardView(LoginRequiredMixin, TemplateView):

@@ -12,6 +12,10 @@ from .core_finance import (
 )
 from .currencies import Moneda, TasaCambio, TipoCambio
 from .facturacion import DocumentoExportacionConsolidado, FacturaConsolidada, ItemFacturaConsolidada
-from .reconciliacion import ReporteReconciliacion
+from .reconciliacion import (
+    ConciliacionBoleto,
+    LineaReporteReconciliacion,
+    ReporteReconciliacion,
+)
 from .retenciones import RetencionISLR
 from .tax_refund import TaxRefundOpportunity

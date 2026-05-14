@@ -5,12 +5,17 @@ import re
 import time
 
 import requests
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib import messages
+from django.db import transaction
+from django.db.models import Q
 from django.http import HttpResponse, JsonResponse
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse_lazy
 from django.utils import timezone
-from django.views.generic import DetailView, TemplateView, View
+from django.views import View
+from django.views.generic import CreateView, DetailView, ListView, TemplateView, UpdateView
 from rest_framework import permissions, status, viewsets
+
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
@@ -21,6 +26,8 @@ from .ai_schemas import CotizacionMagicSchema
 from .models import Cotizacion, ItemCotizacion
 from .pdf_service import generar_pdf_cotizacion
 from .serializers import CotizacionSerializer, ItemCotizacionSerializer
+from core.forms import CotizacionForm, ItemCotizacionFormSet
+
 
 try:
     from apps.contabilidad.models import TasaCambioBCV
@@ -116,6 +123,176 @@ class ItemCotizacionViewSet(TenantViewSetMixin, viewsets.ModelViewSet):
         cotizacion = instance.cotizacion
         instance.delete()
         cotizacion.calcular_total()
+
+# --- VISTAS STANDARD (SSR) ---
+
+class CotizacionDashboardView(LoginRequiredMixin, ListView):
+    model = Cotizacion
+    template_name = 'core/erp/cotizaciones/dashboard.html'
+    context_object_name = 'cotizaciones'
+    paginate_by = 20
+
+    def get_queryset(self):
+        queryset = Cotizacion.objects.select_related('cliente', 'moneda').order_by('-fecha_emision')
+        q = self.request.GET.get('q')
+        if q:
+            queryset = queryset.filter(
+                Q(numero_cotizacion__icontains=q) |
+                Q(cliente__nombres__icontains=q) |
+                Q(cliente__apellidos__icontains=q)
+            )
+        estado = self.request.GET.get('estado')
+        if estado:
+            queryset = queryset.filter(estado=estado)
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['total_cotizaciones'] = Cotizacion.objects.count()
+        context['cotizaciones_pendientes'] = Cotizacion.objects.filter(estado='BOR').count()
+        context['cotizaciones_enviadas'] = Cotizacion.objects.filter(estado='ENV').count()
+        return context
+
+class CotizacionDetailView(LoginRequiredMixin, DetailView):
+    model = Cotizacion
+    template_name = 'core/erp/cotizaciones/detalle.html'
+    context_object_name = 'cotizacion'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['items'] = self.object.items_cotizacion.select_related('producto_servicio', 'moneda').all()
+        return context
+
+class CotizacionCreateView(LoginRequiredMixin, CreateView):
+    model = Cotizacion
+    form_class = CotizacionForm
+    template_name = 'core/erp/cotizaciones/crear_cotizacion_swiss.html'
+    success_url = reverse_lazy('bookings:cotizacion_dashboard')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if self.request.POST:
+            context['items_formset'] = ItemCotizacionFormSet(self.request.POST)
+        else:
+            context['items_formset'] = ItemCotizacionFormSet()
+        return context
+
+    def form_valid(self, form):
+        context = self.get_context_data()
+        items_formset = context['items_formset']
+        with transaction.atomic():
+            self.object = form.save()
+            if items_formset.is_valid():
+                items_formset.instance = self.object
+                items_formset.save()
+                self.object.calcular_total()
+            else:
+                return self.form_invalid(form)
+        messages.success(self.request, f"Cotización {self.object.numero_cotizacion} creada exitosamente.")
+        return super().form_valid(form)
+
+class CotizacionUpdateView(LoginRequiredMixin, UpdateView):
+    model = Cotizacion
+    form_class = CotizacionForm
+    template_name = 'core/erp/cotizaciones/crear_cotizacion_swiss.html'
+    
+    def get_success_url(self):
+        return reverse_lazy('bookings:cotizacion_detalle', kwargs={'pk': self.object.pk})
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if self.request.POST:
+            context['items_formset'] = ItemCotizacionFormSet(self.request.POST, instance=self.object)
+        else:
+            context['items_formset'] = ItemCotizacionFormSet(instance=self.object)
+        return context
+
+    def form_valid(self, form):
+        context = self.get_context_data()
+        items_formset = context['items_formset']
+        with transaction.atomic():
+            self.object = form.save()
+            if items_formset.is_valid():
+                items_formset.instance = self.object
+                items_formset.save()
+                self.object.calcular_total()
+            else:
+                return self.form_invalid(form)
+        messages.success(self.request, f"Cotización {self.object.numero_cotizacion} actualizada exitosamente.")
+        return super().form_valid(form)
+
+class CotizacionStatusView(LoginRequiredMixin, View):
+    def post(self, request, pk):
+        cotizacion = get_object_or_404(Cotizacion, pk=pk)
+        nuevo_estado = request.POST.get('nuevo_estado')
+        cotizacion.estado = nuevo_estado
+        cotizacion.save()
+        messages.success(request, f"Estado actualizado a {cotizacion.get_estado_display()}.")
+        return redirect('bookings:cotizacion_detalle', pk=pk)
+
+class CotizacionPDFView(LoginRequiredMixin, View):
+    def get(self, request, pk):
+        cotizacion = get_object_or_404(Cotizacion, pk=pk)
+        try:
+            pdf_bytes = generar_pdf_cotizacion(cotizacion)
+            response = HttpResponse(pdf_bytes, content_type='application/pdf')
+            filename = f"Cotizacion_{cotizacion.numero_cotizacion}.pdf"
+            response['Content-Disposition'] = f'attachment; filename="{filename}"'
+            return response
+        except Exception as e:
+            messages.error(request, f"Error generando PDF: {str(e)}")
+            return redirect('bookings:cotizacion_detalle', pk=pk)
+
+class CotizacionConvertirView(LoginRequiredMixin, View):
+    def post(self, request, pk):
+        cotizacion = get_object_or_404(Cotizacion, pk=pk)
+        try:
+            with transaction.atomic():
+                venta = cotizacion.convertir_a_venta()
+                messages.success(request, f"Venta generada exitosamente: {venta.localizador}")
+                return redirect('bookings:venta_detail', pk=venta.pk)
+        except Exception as e:
+            messages.error(request, f"Error al convertir a venta: {str(e)}")
+        return redirect('bookings:cotizacion_detalle', pk=pk)
+
+class CotizacionHTMXCalculateTotalsView(LoginRequiredMixin, View):
+    def post(self, request, *args, **kwargs):
+        subtotal = 0
+        impuestos = 0
+        total_forms = int(request.POST.get('items_cotizacion-TOTAL_FORMS', 0))
+        for i in range(total_forms):
+            if request.POST.get(f'items_cotizacion-{i}-DELETE') == 'on': continue
+            try:
+                qty = float(request.POST.get(f'items_cotizacion-{i}-cantidad', 0))
+                price = float(request.POST.get(f'items_cotizacion-{i}-precio_unitario', 0))
+                tax = float(request.POST.get(f'items_cotizacion-{i}-impuestos_item', 0))
+                subtotal += (qty * price)
+                impuestos += (qty * tax)
+            except ValueError: pass
+        
+        moneda_id = request.POST.get('moneda')
+        moneda_symbol = "$"
+        if moneda_id:
+            try:
+                from apps.finance.models.currencies import Moneda
+                moneda = Moneda.objects.get(pk=moneda_id)
+                moneda_symbol = moneda.simbolo or moneda.codigo_iso
+            except: pass
+
+        return render(request, 'core/erp/cotizaciones/partials/_summary.html', {
+            'subtotal': subtotal, 'impuestos': impuestos, 'total': subtotal + impuestos, 'moneda_symbol': moneda_symbol
+        })
+
+class CotizacionHTMXAddItemView(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        index = int(request.GET.get('index', 0))
+        formset = ItemCotizacionFormSet()
+        empty_form = formset.empty_form
+        empty_form.prefix = f'items_cotizacion-{index}'
+        return render(request, 'core/erp/cotizaciones/partials/_item_row_with_oob.html', {
+            'form': empty_form, 'index': index, 'next_index': index + 1
+        })
+
 
 # --- VISTAS DEL COTIZADOR MÁGICO (GOD MODE) ---
 

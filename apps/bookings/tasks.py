@@ -12,7 +12,7 @@ def notificar_pago_whatsapp_task(venta_id):
     Multi-tenant: usa la instancia Evolution correcta por agencia (subdominio_slug).
     """
     from apps.bookings.models import Venta
-    from apps.communications.services.whatsapp_service import send_whatsapp_message
+    from apps.communications.services.whatsapp_unified import send_whatsapp_message
 
     try:
         venta = Venta.all_objects.select_related("cliente", "moneda", "agencia").get(pk=venta_id)

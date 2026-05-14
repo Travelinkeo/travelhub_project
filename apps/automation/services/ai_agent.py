@@ -2,12 +2,18 @@ import logging
 import os
 
 from django.conf import settings
-from google import genai
-from google.genai import types
 
 from .ai_tools import AgentTools
 
 logger = logging.getLogger(__name__)
+
+def _get_genai():
+    from google import genai
+    return genai
+
+def _get_genai_types():
+    from google.genai import types
+    return types
 
 class TravelHubAgent:
     """
@@ -21,6 +27,7 @@ class TravelHubAgent:
             logger.error("TravelHubAgent: GEMINI_API_KEY no configurada.")
             raise ValueError("Falta GEMINI_API_KEY")
             
+        genai = _get_genai()
         self.client = genai.Client(api_key=api_key)
         self.model_name = 'gemini-2.0-flash'
         self.history = []

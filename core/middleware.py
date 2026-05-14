@@ -210,19 +210,22 @@ class SecurityHeadersMiddleware:  # CSP + cabeceras
         self.get_response = get_response
 
     def __call__(self, request):
-        # 1. Generar nonce robusto para TODAS las plantillas
-        nonce = secrets.token_hex(16)
+        # 1. Generar nonce dinámico de alta entropía por cada request
+        # Usamos token_urlsafe(16) según requerimiento de seguridad estricta
+        nonce = secrets.token_urlsafe(16)
         request.csp_nonce = nonce
-        request.META['CSP_NONCE'] = nonce  # Compatibilidad con plantillas legacy
+        request.META['CSP_NONCE'] = nonce
             
         response = self.get_response(request)
         
         try:
-            # 2. Content-Security-Policy (Permisiva para compatibilidad con UI frameworks dinámicos)
+            # 2. Content-Security-Policy (ESTRICTA)
+            # Se eliminan 'unsafe-inline' y 'unsafe-eval' para prevenir XSS.
+            # Se inyecta el nonce dinámico en script-src y style-src.
             csp = "; ".join([
                 "default-src 'self'",
-                f"script-src 'self' 'nonce-{nonce}' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net",
-                "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net",
+                f"script-src 'self' 'nonce-{nonce}' https://cdn.jsdelivr.net",
+                f"style-src 'self' 'nonce-{nonce}' https://fonts.googleapis.com https://cdn.jsdelivr.net",
                 "font-src 'self' https://fonts.gstatic.com",
                 "img-src 'self' data: blob: https://res.cloudinary.com https://*.r2.cloudflarestorage.com",
                 "frame-src 'self' https://js.stripe.com http://evolution:8080",

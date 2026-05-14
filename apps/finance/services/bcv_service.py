@@ -3,13 +3,12 @@ import logging
 from datetime import date
 from decimal import Decimal
 
-# 🛡️ RESILIENT INFRASTRUCTURE: pyDolarVenezuela v2.0+ support
+from django.core.cache import cache
 from pyDolarVenezuela import Monitor
 from pyDolarVenezuela.pages import BCV
 
-from apps.communications.services.telegram_service import enviar_alerta_telegram
+from apps.communications.services.telegram_unified import enviar_alerta_telegram
 
-# Import specific project services
 from apps.finance.models.currencies import TasaCambio
 
 logger = logging.getLogger(__name__)
@@ -50,7 +49,8 @@ def obtener_tasa_bcv_resiliente(moneda: str = 'USD') -> float:
                     moneda=moneda_iso,
                     defaults={'monto': Decimal(str(tasa_float))}
                 )
-                
+                cache.delete('tasa_bcv_context')
+
                 logger.info(f"✅ Tasa BCV obtenida en vivo: {tasa_float} {moneda_iso}")
                 return tasa_float
         

@@ -1,6 +1,6 @@
 import re
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -37,7 +37,7 @@ class TramoVueloSchema(BaseModel):
     localizador_aerolinea: str | None = Field(description="Localizador específico de la aerolínea si difiere del principal")
     equipaje: str | None = Field(description="Franquicia de equipaje (ej: 1PC, 23KG)")
 
-    @validator('hora_salida', 'hora_llegada', pre=True, always=True)
+    @field_validator('hora_salida', 'hora_llegada', mode='before')
     def normalize_time(cls, v):
         if not v:
             return "00:00"
@@ -77,11 +77,11 @@ class BoletoAereoSchema(BaseModel):
     confidence_score: float = Field(description="Nivel de confianza...")
     notas_advertencia: str | None = Field(description="Si hubo prorrateos...")
 
-    @validator('tarifa', 'impuestos', 'total', pre=True, always=True)
+    @field_validator('tarifa', 'impuestos', 'total', mode='before')
     def parse_monetary(cls, v):
         return _to_float(v)
 
-    @validator('nombre_pasajero')
+    @field_validator('nombre_pasajero')
     def validate_passenger_name(cls, v):
         v = v.upper().strip()
         stop_keywords = [
@@ -96,7 +96,7 @@ class BoletoAereoSchema(BaseModel):
             v = v[:80]
         return v
 
-    @validator('codigo_reserva')
+    @field_validator('codigo_reserva')
     def clean_pnr(cls, v):
         if not v:
             return 'UNKNOWN'
@@ -104,7 +104,7 @@ class BoletoAereoSchema(BaseModel):
         clean = re.sub(r'[^A-Z0-9]', '', clean)
         return clean[-6:] if len(clean) >= 6 else clean
 
-    @validator('numero_boleto', pre=True, always=True)
+    @field_validator('numero_boleto', mode='before')
     def validate_ticket_number(cls, v):
         if not v or str(v).strip().lower() in ('null', 'none', 'n/a', '', 'sin boleto', 'no aplica'):
             return None
@@ -113,7 +113,7 @@ class BoletoAereoSchema(BaseModel):
             return digits_only
         return None
 
-    @validator('moneda', pre=True, always=True)
+    @field_validator('moneda', mode='before')
     def validate_currency(cls, v):
         if not v: return 'USD'
         raw = str(v).strip().upper()
@@ -138,30 +138,34 @@ class BoletoAereoSchema(BaseModel):
         if match and match.group(1) in VALID_ISO: return match.group(1)
         return 'USD'
 
-    @validator('itinerario')
+    @field_validator('itinerario')
     def check_itinerary_not_empty(cls, v):
         if not v: raise ValueError('El itinerario no puede estar vacío.')
         return v[:8]
 
-    @validator('total', always=True)
-    def validate_math(cls, v, values):
-        tarifa = values.get('tarifa', 0.0)
-        impuestos = values.get('impuestos', 0.0)
+    @model_validator(mode='after')
+    def validate_math(self):
+        tarifa = getattr(self, 'tarifa', 0.0)
+        impuestos = getattr(self, 'impuestos', 0.0)
         expected = round(tarifa + impuestos, 2)
-        if v == 0.0 and expected > 0: return expected
-        return v
+        if self.total == 0.0 and expected > 0:
+            self.total = expected
+        return self
 
-    @validator('confidence_score', always=True)
-    def auto_compute_confidence(cls, v, values):
-        if v < 1.0: return max(0.0, min(1.0, v))
+    @model_validator(mode='after')
+    def auto_compute_confidence(self):
+        if self.confidence_score < 1.0:
+            self.confidence_score = max(0.0, min(1.0, self.confidence_score))
+            return self
         score = 1.0
         deductions = {'codigo_reserva': 0.30, 'nombre_pasajero': 0.20, 'itinerario': 0.25, 'numero_boleto': 0.10, 'total': 0.10, 'moneda': 0.05}
-        for field, weight in deductions.items():
-            val = values.get(field)
+        for field_name, weight in deductions.items():
+            val = getattr(self, field_name, None)
             if val is None or val == '' or val == 'UNKNOWN': score -= weight
-            elif field == 'itinerario' and isinstance(val, list) and len(val) == 0: score -= weight
-            elif field == 'total' and isinstance(val, float) and val == 0.0: score -= (weight / 2)
-        return round(max(0.0, min(1.0, score)), 2)
+            elif field_name == 'itinerario' and isinstance(val, list) and len(val) == 0: score -= weight
+            elif field_name == 'total' and isinstance(val, float) and val == 0.0: score -= (weight / 2)
+        self.confidence_score = round(max(0.0, min(1.0, score)), 2)
+        return self
 
 class ResultadoParseoSchema(BaseModel):
     boletos: list[BoletoAereoSchema] = Field(description="Lista de boletos extraídos (uno por pasajero). Mínimo 1 boleto.")
@@ -237,10 +241,10 @@ class PasaporteOCRSchema(BaseModel):
     fecha_vencimiento: str = Field(description="Fecha de vencimiento del pasaporte en formato ISO YYYY-MM-DD")
     pais_emision: str = Field(description="País que emite el documento")
     
-    @validator('nombres', 'apellidos')
+    @field_validator('nombres', 'apellidos')
     def capitalize_names(cls, v): return v.strip().upper()
 
-    @validator('numero_pasaporte')
+    @field_validator('numero_pasaporte')
     def clean_doc(cls, v): return re.sub(r'[^A-Z0-9]', '', str(v).upper())
 
 class CedulaOCRSchema(BaseModel):
@@ -250,14 +254,14 @@ class CedulaOCRSchema(BaseModel):
     fecha_nacimiento: str | None = Field(default=None, description="Fecha de nacimiento en formato ISO YYYY-MM-DD.")
     portrait_bbox: list[int] | None = Field(default=[0, 0, 0, 0], description="Coordenadas normalizadas [ymin, xmin, ymax, xmax] del rostro.")
 
-    @validator('nombres', 'apellidos', pre=True, always=True)
+    @field_validator('nombres', 'apellidos', mode='before')
     def clean_names(cls, v):
         if not v: return ""
         cleaned = str(v).strip().upper()
         if cleaned in ('SIN NOMBRE', 'SIN APELLIDO', 'N/A', 'NONE', 'NULL', 'NO LEGIBLE'): return ""
         return cleaned
 
-    @validator('cedula', pre=True, always=True)
+    @field_validator('cedula', mode='before')
     def clean_cedula(cls, v):
         if not v: return None
         num = re.sub(r'[^0-9]', '', str(v))

@@ -2,9 +2,12 @@ import json
 import logging
 
 from django.conf import settings
-from google import genai
 
 logger = logging.getLogger(__name__)
+
+def _get_genai():
+    from google import genai
+    return genai
 
 class AudioTranscriptionService:
     """
@@ -20,6 +23,7 @@ class AudioTranscriptionService:
             return
 
         try:
+            genai = _get_genai()
             self.client = genai.Client(api_key=self.api_key)
             self.model_name = 'gemini-2.0-flash'
         except Exception as e:

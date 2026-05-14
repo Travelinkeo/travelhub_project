@@ -3,7 +3,6 @@ import logging
 
 from django.conf import settings
 from django.utils import timezone
-from google import genai
 
 from apps.bookings.models import BoletoImportado, Venta
 
@@ -24,6 +23,7 @@ class LinkeoService:
     @staticmethod
     def _get_gemini_model():
         try:
+            from google import genai
             api_key = getattr(settings, 'GEMINI_API_KEY', None)
             if not api_key:
                 logger.warning("Gemini API Key not found.")

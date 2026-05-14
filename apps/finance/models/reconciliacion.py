@@ -46,6 +46,10 @@ class ReporteReconciliacion(SoftDeleteModel, AgenciaMixin, models.Model):
     def __str__(self):
         return f"Reporte {self.proveedor} - {self.fecha_subida.strftime('%d/%m/%Y')} ({self.agencia.nombre})"
 
+    @property
+    def discrepancias_count(self):
+        return self.conciliaciones.filter(estado='DISCREPANCIA').count()
+
 
 class LineaReporteReconciliacion(SoftDeleteModel, AgenciaMixin, models.Model):
     """

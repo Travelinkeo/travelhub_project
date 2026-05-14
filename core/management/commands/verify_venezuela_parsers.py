@@ -17,7 +17,7 @@ class Command(BaseCommand):
 import email
 from email import policy
 
-from PyPDF2 import PdfReader
+from pypdf import PdfReader
 
 from apps.automation.parsers.ticket_parser import generate_ticket
 

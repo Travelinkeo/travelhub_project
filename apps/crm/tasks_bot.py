@@ -2,7 +2,7 @@ import logging
 
 from celery import shared_task
 
-from apps.crm.services.whatsapp_bot_service import procesar_mensaje_entrante
+from apps.communications.services.whatsapp_unified import procesar_mensaje_entrante
 
 logger = logging.getLogger(__name__)
 

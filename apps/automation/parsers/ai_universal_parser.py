@@ -112,14 +112,27 @@ class UniversalAIParser:
                     logger.error(f"Error en visión PDF: {e}")
 
             # --- 2. LLAMADA PRINCIPAL ---
-            res = self.engine.call_gemini(
-                prompt=f"TEXTO DEL DOCUMENTO:\n{text_limpio}",
-                content_list=content_list,
-                response_schema=ResultadoParseoSchema,
-                system_instruction=SYSTEM_PROMPT
-            )
+            try:
+                res = self.engine.call_gemini(
+                    prompt=f"TEXTO DEL DOCUMENTO:\n{text_limpio}",
+                    content_list=content_list,
+                    response_schema=ResultadoParseoSchema,
+                    system_instruction=SYSTEM_PROMPT
+                )
+            except Exception as e_api:
+                # 🚨 FALLO CRÍTICO DE API (Timeout, 500, Rate Limit)
+                logger.error(f"❌ Gemini API Failure (Switching to Fallback): {str(e_api)}")
+                return {
+                    "error": f"API_FAILURE: {str(e_api)}",
+                    "requires_manual_review": True,
+                    "fallback_triggered": True,
+                    "status_detail": "Parseo Inteligente falló y requiere revisión manual"
+                }
 
-            if "error" in res:
+            if res and "error" in res:
+                logger.warning(f"⚠️ Gemini returned logic error: {res.get('error')}")
+                res["requires_manual_review"] = True
+                res["status_detail"] = "Parseo Inteligente falló y requiere revisión manual"
                 return res
 
             # --- 3. RETRY DIRIGIDO (Empty Itinerary Fix) ---

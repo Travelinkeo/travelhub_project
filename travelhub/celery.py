@@ -2,6 +2,21 @@
 import os
 
 from celery import Celery
+import sentry_sdk
+from sentry_sdk.integrations.celery import CeleryIntegration
+from sentry_sdk.integrations.django import DjangoIntegration
+
+# Configurar Sentry
+if os.environ.get('SENTRY_DSN'):
+    sentry_sdk.init(
+        dsn=os.environ.get('SENTRY_DSN'),
+        integrations=[
+            CeleryIntegration(),
+            DjangoIntegration(),
+        ],
+        traces_sample_rate=1.0,
+        profiles_sample_rate=1.0,
+    )
 from kombu import Exchange, Queue
 
 # Configurar Django settings

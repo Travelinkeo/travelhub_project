@@ -13,13 +13,8 @@ from decimal import Decimal
 
 import requests
 
-# 🛡️ RESILIENT INFRASTRUCTURE: pyDolarVenezuela v2.0+ support
-try:
-    from pyDolarVenezuela import Monitor
-    from pyDolarVenezuela.pages import BCV, EnParaleloVzla
-    PY_DOLAR_VENEZUELA_AVAILABLE = True
-except ImportError:
-    PY_DOLAR_VENEZUELA_AVAILABLE = False
+# 🛡️ RESILIENT INFRASTRUCTURE: DolarApi & BCV Scraper based
+PY_DOLAR_VENEZUELA_AVAILABLE = False
 
 logger = logging.getLogger(__name__)
 
@@ -63,16 +58,8 @@ class TasasVenezuelaClient:
                 from apps.finance.services.bcv_scraper import obtener_tasas_bcv
                 tasas_bcv = obtener_tasas_bcv()
                 
-                if not tasas_bcv and PY_DOLAR_VENEZUELA_AVAILABLE:
-                    logger.info("Scraper BCV falló, intentando con pyDolarVenezuela...")
-                    monitor = Monitor(BCV)
-                    monitores = monitor.get_all_monitors()
-                    tasas_bcv = {}
-                    for m in monitores:
-                        m_key = m.get('key').upper() if isinstance(m, dict) else getattr(m, 'key', '').upper()
-                        m_price = m.get('price') if isinstance(m, dict) else getattr(m, 'price', 0)
-                        if m_key in ['USD', 'EUR']:
-                            tasas_bcv[m_key] = Decimal(str(m_price))
+                if not tasas_bcv:
+                    logger.warning("Scraper BCV no pudo obtener tasas.")
 
                 if tasas_bcv:
                     if 'USD' in tasas_bcv:
@@ -123,24 +110,8 @@ class TasasVenezuelaClient:
                     continue
             
             # 3. Fallback final para Paralelo si DolarApi falla totalmente
-            if 'paralelo' not in tasas and PY_DOLAR_VENEZUELA_AVAILABLE:
-                try:
-                    monitor_paralelo = Monitor(EnParaleloVzla)
-                    en_paralelo = monitor_paralelo.get_all_monitors()
-                    # Buscar el monitor promedio
-                    for m in en_paralelo:
-                        m_key = m.get('key') if isinstance(m, dict) else getattr(m, 'key', '')
-                        if m_key == 'enparalelovzla':
-                            m_price = m.get('price') if isinstance(m, dict) else getattr(m, 'price', 0)
-                            tasas['paralelo'] = {
-                                'price': Decimal(str(m_price)).quantize(Decimal('0.01')),
-                                'last_update': datetime.now().isoformat(),
-                                'title': 'Dólar No Oficial (Fallback)',
-                                'symbol': 'Bs.'
-                            }
-                            break
-                except Exception as e:
-                    logger.error(f"Fallo en fallback pyDolarVenezuela para paralelo: {e}")
+            if 'paralelo' not in tasas:
+                logger.warning("No se pudo obtener tasa paralela de DolarApi.")
             
             if tasas:
                 logger.info(f"Tasas obtenidas: {len(tasas)} fuentes")
@@ -151,58 +122,9 @@ class TasasVenezuelaClient:
                 
         except requests.RequestException as e:
             logger.error(f"Error HTTP consultando DolarApi: {e}")
-            # Si falla la API principal, intentar todo vía pyDolarVenezuela
-            if PY_DOLAR_VENEZUELA_AVAILABLE:
-                return cls._obtener_tasas_pydolar_full()
             return None
         except Exception as e:
             logger.error(f"Error procesando respuesta: {e}")
-            return None
-    
-    @classmethod
-    def _obtener_tasas_pydolar_full(cls) -> dict | None:
-        """Método de emergencia usando solo pyDolarVenezuela"""
-        tasas = {}
-        try:
-            # BCV
-            monitor_bcv = Monitor(BCV)
-            bcv_data = monitor_bcv.get_all_monitors()
-            for m in bcv_data:
-                key = m.get('key').upper() if isinstance(m, dict) else getattr(m, 'key', '').upper()
-                price = m.get('price') if isinstance(m, dict) else getattr(m, 'price', 0)
-                if key == 'USD':
-                    tasas['oficial'] = {
-                        'price': Decimal(str(price)).quantize(Decimal('0.01')),
-                        'last_update': datetime.now().isoformat(),
-                        'title': 'BCV Oficial (pyDolar)',
-                        'symbol': 'Bs.'
-                    }
-                elif key == 'EUR':
-                    tasas['euro_bcv'] = {
-                        'price': Decimal(str(price)).quantize(Decimal('0.01')),
-                        'last_update': datetime.now().isoformat(),
-                        'title': 'BCV Euro (pyDolar)',
-                        'symbol': 'Bs.'
-                    }
-            
-            # Paralelo
-            monitor_p = Monitor(EnParaleloVzla)
-            p_data = monitor_p.get_all_monitors()
-            for m in p_data:
-                key = m.get('key') if isinstance(m, dict) else getattr(m, 'key', '')
-                if key == 'enparalelovzla':
-                    price = m.get('price') if isinstance(m, dict) else getattr(m, 'price', 0)
-                    tasas['paralelo'] = {
-                        'price': Decimal(str(price)).quantize(Decimal('0.01')),
-                        'last_update': datetime.now().isoformat(),
-                        'title': 'Dólar No Oficial (pyDolar)',
-                        'symbol': 'Bs.'
-                    }
-                    break
-            
-            return tasas if tasas else None
-        except Exception as e:
-            logger.error(f"Error en motor de emergencia pyDolar: {e}")
             return None
 
     @classmethod

@@ -202,32 +202,23 @@ class Agencia(models.Model):
 
     # --- MÉTODOS DE NEGOCIO ACTUALIZADOS ---
     def puede_crear_venta(self):
-        """Verifica si puede crear más ventas este mes."""
-        if not self.configuracion: return True
-        if self.configuracion.plan == 'ENTERPRISE':
-            return True
-        return self.configuracion.ventas_mes_actual < self.configuracion.limite_ventas_mes
+        """Verifica si puede crear más ventas este mes usando el servicio de cuotas."""
+        from apps.common.services.saas_quota_service import SaaSQuotaService
+        return SaaSQuotaService.check_quota(self, 'sales_per_month')
     
     def puede_agregar_usuario(self):
-        """Verifica si puede agregar más usuarios."""
-        if not self.configuracion: return True
-        if self.configuracion.plan == 'ENTERPRISE':
-            return True
-        return self.usuarios.filter(activo=True).count() < self.configuracion.limite_usuarios
+        """Verifica si puede agregar más usuarios usando el servicio de cuotas."""
+        from apps.common.services.saas_quota_service import SaaSQuotaService
+        return SaaSQuotaService.check_quota(self, 'users')
     
     def actualizar_limites_por_plan(self):
-        """Actualiza límites según el plan en el componente de configuración."""
+        """Actualiza límites según el plan configurado en settings.SAAS_PLAN_LIMITS."""
         if not self.configuracion: return
         
-        limites = {
-            'FREE': {'usuarios': 1, 'ventas': 50},
-            'BASIC': {'usuarios': 3, 'ventas': 200},
-            'PRO': {'usuarios': 10, 'ventas': 1000},
-            'ENTERPRISE': {'usuarios': 999999, 'ventas': 999999},
-        }
-        limite = limites.get(self.configuracion.plan, limites['FREE'])
-        self.configuracion.limite_usuarios = limite['usuarios']
-        self.configuracion.limite_ventas_mes = limite['ventas']
+        limites = settings.SAAS_PLAN_LIMITS.get(self.configuracion.plan, settings.SAAS_PLAN_LIMITS['FREE'])
+        
+        self.configuracion.limite_usuarios = limites.get('users', 1)
+        self.configuracion.limite_ventas_mes = limites.get('sales_per_month', 20)
         self.configuracion.save(update_fields=['limite_usuarios', 'limite_ventas_mes'])
 
     def save(self, *args, **kwargs):

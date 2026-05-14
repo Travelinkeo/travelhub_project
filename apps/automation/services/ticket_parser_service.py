@@ -139,12 +139,21 @@ class TicketParserService:
                         datos = datos_ia
                         logger.info("✅ IA procesó el boleto exitosamente.")
                     else:
-                        logger.warning(f"⚠️ IA devolvió error o datos vacíos: {datos_ia.get('error') if datos_ia else 'N/A'}")
+                        error_detail = datos_ia.get('status_detail') or datos_ia.get('error') if datos_ia else 'Unknown Error'
+                        logger.warning(f"⚠️ IA devolvió error o datos vacíos: {error_detail}")
+                        # Si IA falló pero devolvió un mensaje de estado, lo guardamos en el log
+                        if datos_ia and datos_ia.get('status_detail'):
+                            boleto.log_parseo = f"IA Failed: {datos_ia.get('status_detail')}. Intentando Fallback Regex..."
+                            boleto.save(update_fields=['log_parseo'])
                         
                 except QuotaExhaustedException:
                     logger.warning(f"🚨 Cuota de IA agotada para agencia {boleto.agencia.nombre}. Usando fallback Regex.")
+                    boleto.log_parseo = "Cuota de IA agotada. Usando fallback Regex..."
+                    boleto.save(update_fields=['log_parseo'])
                 except Exception as e_ai:
                     logger.error(f"❌ Fallo crítico en motor de IA: {e_ai}")
+                    boleto.log_parseo = f"Error en motor de IA: {str(e_ai)}. Usando fallback Regex..."
+                    boleto.save(update_fields=['log_parseo'])
 
                 # 🛡️ FALLBACK: REGEX DETERMINÍSTICO (Solo si IA falló o no tiene cuota)
                 if datos is None:
@@ -153,11 +162,19 @@ class TicketParserService:
                         datos_regex = extract_data_from_text(texto, pdf_path=path_pdf, bypass_cache=bypass_cache)
                         if datos_regex and "error" not in datos_regex:
                             datos = datos_regex
+                            logger.info("✅ Fallback de Regex exitoso.")
+                            # Si llegamos aquí es porque IA falló pero Regex salvó el día
+                            boleto.log_parseo += " | Fallback Regex exitoso."
                         else:
-                            return self._finalize_error(boleto, "Ningún motor (IA/Regex) pudo interpretar el archivo.")
+                            # 🚨 FALLO TOTAL: Ni IA ni Regex
+                            msg_error = "Parseo Inteligente falló y requiere revisión manual (Ningún motor pudo interpretar el archivo)."
+                            boleto.estado_parseo = BoletoImportado.EstadoParseo.REVISION_REQUERIDA
+                            return self._finalize_error(boleto, msg_error)
                     except Exception as e_reg:
                         logger.error(f"❌ Error en motor de Regex: {e_reg}")
-                        return self._finalize_error(boleto, f"Fallo total de extracción: {e_reg}")
+                        msg_error = f"Parseo Inteligente falló y requiere revisión manual. Error Regex: {str(e_reg)}"
+                        boleto.estado_parseo = BoletoImportado.EstadoParseo.REVISION_REQUERIDA
+                        return self._finalize_error(boleto, msg_error)
                 
                 # 4c. Guardar en caché Redis el resultado final (sea IA o Regex)
                 if datos and "error" not in datos:

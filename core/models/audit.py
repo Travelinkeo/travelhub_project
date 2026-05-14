@@ -105,28 +105,40 @@ class AuditLog(models.Model):
             self.record_hash = hashlib.sha256(base_str.encode('utf-8')).hexdigest()
             super().save(update_fields=['record_hash'])
 
-def crear_audit_log(*, modelo, object_id, accion, venta=None, descripcion=None, datos_previos=None, datos_nuevos=None, metadata_extra=None):
+def crear_audit_log(*, modelo, object_id, accion, venta=None, descripcion=None, datos_previos=None, datos_nuevos=None, metadata_extra=None, user=None, agencia=None):
     """
     Función utilitaria centralizada para crear logs de auditoría capturando el contexto.
     """
     try:
-        from core.middleware import get_current_agency, get_current_user
+        from core.middleware import (
+            get_current_agency,
+            get_current_user,
+            get_impersonator,
+            is_impersonating,
+        )
         req_meta = get_current_request_meta()
         merged_meta = metadata_extra.copy() if metadata_extra else {}
-        user_obj = get_current_user()
-        agency_obj = get_current_agency()
+        user_obj = user or get_current_user()
+        agency_obj = agencia or get_current_agency()
+        impersonator_obj = get_impersonator()
+        impersonating = is_impersonating()
         
         if req_meta:
             merged_meta.setdefault('ip', req_meta.get('ip'))
             merged_meta.setdefault('user_agent', req_meta.get('user_agent'))
         
         # Registrar si es impersonación (God Mode)
-        if user_obj and user_obj.is_superuser and agency_obj:
-            # En la nueva arquitectura, si un superuser tiene agency_obj, ES impersonación
+        if impersonating and impersonator_obj and agency_obj:
             merged_meta['is_impersonated'] = True
-            merged_meta['impersonation_context'] = agency_obj.nombre
-            if not merged_meta.get('original_user'):
-                merged_meta['original_user'] = user_obj.username
+            merged_meta['impersonator_id'] = impersonator_obj.id
+            merged_meta['impersonator_username'] = impersonator_obj.username
+            merged_meta['target_agency_name'] = agency_obj.nombre
+            
+            impersonation_msg = f" [REALIZADO POR {impersonator_obj.username} ACTUANDO COMO {agency_obj.nombre}]"
+            if descripcion:
+                descripcion += impersonation_msg
+            else:
+                descripcion = impersonation_msg
 
         return AuditLog.objects.create(
             modelo=modelo,

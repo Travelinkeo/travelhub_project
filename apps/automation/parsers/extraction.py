@@ -104,22 +104,40 @@ class ExtractionService:
             soup = BeautifulSoup(html_content, 'html.parser')
             for s in soup(["script", "style", "head", "title", "meta"]):
                 s.decompose()
-            text = soup.get_text(separator='\n')
+            
+            # Replace br and hr with newlines
+            for br in soup.find_all(["br", "hr"]):
+                br.replace_with("\n")
+                
+            # Insert newlines around block elements to maintain block structure
+            block_elements = ["p", "div", "tr", "h1", "h2", "h3", "h4", "h5", "h6", "li", "ul", "ol", "table"]
+            for element in soup.find_all(block_elements):
+                element.insert_before("\n")
+                element.insert_after("\n")
+                
+            text = soup.get_text(separator='')
             return '\n'.join([l.strip() for l in text.splitlines() if l.strip()])
         except Exception as e:
             return html_content
 
     @staticmethod
     def get_open_file(boleto):
-        """Descarga o abre el archivo del boleto."""
-        if hasattr(boleto.archivo_boleto, 'url') and boleto.archivo_boleto.url.startswith('http'):
+        """
+        🎯 Responsabilidad: Obtener un handle de lectura binaria para el archivo del boleto.
+        Soporta almacenamiento local y remoto (Cloudflare R2/S3) de forma transparente.
+        """
+        try:
+            # Django S3Boto3Storage maneja la apertura remota automáticamente
+            # sin necesidad de requests manuales, lo cual es más seguro y eficiente.
+            f = boleto.archivo_boleto.open('rb')
+            f.seek(0)
+            return f
+        except Exception as e:
+            logger.error(f"❌ Error crítico abriendo archivo de boleto {boleto.pk}: {e}")
+            # Si falla el storage, intentamos un fallback desesperado si es local
             try:
-                response = requests.get(boleto.archivo_boleto.url, timeout=15)
-                response.raise_for_status()
-                return io.BytesIO(response.content)
-            except Exception as e:
-                logger.error(f"Error descargar boleto remoto: {e}")
-        
-        f = boleto.archivo_boleto.open('rb')
-        f.seek(0)
-        return f
+                if hasattr(boleto.archivo_boleto, 'path') and os.path.exists(boleto.archivo_boleto.path):
+                    return open(boleto.archivo_boleto.path, 'rb')
+            except:
+                pass
+            return None

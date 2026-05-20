@@ -39,10 +39,11 @@ class TicketSchema(BaseModel):
 # --- 2. The Router (Gemini Logic) ---
 
 class GeminiRouter:
-    def __init__(self):
-        api_key = os.environ.get("GEMINI_API_KEY")
+    def __init__(self, agency=None):
+        from apps.automation.services.ai_engine import get_gemini_api_key
+        api_key = get_gemini_api_key(agency)
         if not api_key:
-            logger.error("GEMINI_API_KEY not found in environment variables.")
+            logger.error("GEMINI_API_KEY not found.")
             raise ValueError("GEMINI_API_KEY is missing")
 
         from google import genai as google_genai

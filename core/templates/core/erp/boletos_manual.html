@@ -263,7 +263,8 @@
             btnAudit.innerHTML = '<span class="animate-spin material-symbols-outlined">sync</span><span>Auditando...</span>';
 
             try {
-                const response = await fetch('/api/boletos/audit/', {
+                const auditUrl = "{% url 'core:api_boleto_audit' %}";
+                const response = await fetch(auditUrl, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

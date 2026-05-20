@@ -54,7 +54,8 @@ class MagicLinkCheckoutView(View):
             # 2. Disparar la notificación asíncrona a Telegram
             try:
                 from apps.finance.tasks import notificar_pago_zelle_task
-                notificar_pago_zelle_task.apply_async(args=[str(link_pago.id)], queue='notifications')
+                from django.db import transaction
+                transaction.on_commit(lambda: notificar_pago_zelle_task.apply_async(args=[str(link_pago.id)], queue='notifications'))
             except Exception as tg_err:
                 logger.warning(f"No se pudo encolar tarea Telegram: {tg_err}")
 

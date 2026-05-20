@@ -11,7 +11,7 @@ from django.utils.translation import gettext_lazy as _
 
 from apps.crm.models import Cliente
 
-from .facturacion import FacturaConsolidada
+from .core_finance import Factura
 
 
 class RetencionISLR(models.Model):
@@ -34,7 +34,7 @@ class RetencionISLR(models.Model):
                                          help_text=_("Número del comprobante de retención"))
     
     # Relaciones
-    factura = models.ForeignKey(FacturaConsolidada, on_delete=models.PROTECT,
+    factura = models.ForeignKey(Factura, on_delete=models.PROTECT,
                                related_name='retenciones_islr',
                                verbose_name=_("Factura"), null=True, blank=True)
     cliente = models.ForeignKey(Cliente, on_delete=models.PROTECT,

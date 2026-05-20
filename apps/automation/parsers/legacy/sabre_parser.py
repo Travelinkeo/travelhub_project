@@ -15,8 +15,30 @@ class SabreParser(BaseTicketParser):
     
     def can_parse(self, text: str) -> bool:
         """Detecta si es un boleto SABRE"""
-        text_upper = text.upper()
-        return 'ETICKET RECEIPT' in text_upper and 'RESERVATION CODE' in text_upper
+        purified = self.purify_text_for_detection(text)
+        
+        # Evitar colisión con KIUSYS
+        if 'KIUSYS' in purified or 'KIU SYSTEM' in purified or 'KIU GDS' in purified:
+            return False
+            
+        has_sabre_marker = (
+            'SABRE' in purified or 
+            'ETICKET RECEIPT' in purified or 
+            ('ELECTRONIC TICKET' in purified and 'ELECTRONIC TICKET RECEIPT' not in purified) or
+            'RECIBO DE BOLETO' in purified or
+            'RECIBO DE PASAJE' in purified
+        )
+        has_res_code = (
+            'RESERVATION CODE' in purified or 
+            'RECORD LOCATOR' in purified or 
+            'BOOKING REFERENCE' in purified or 
+            'BOOKING REF' in purified or
+            'CODIGO DE RESERVACION' in purified or
+            'CÓDIGO DE RESERVACIÓN' in purified or
+            'CODIGO RESERVA' in purified
+        )
+        has_pax = 'PASSENGER' in purified or 'PREPARADO PARA' in purified or 'PREPARED FOR' in purified or 'PASAJERO' in purified
+        return bool(has_sabre_marker and (has_res_code or has_pax or 'FLIGHT' in purified or 'VUELO' in purified))
     
     def parse(self, text: str, html_text: str = "") -> ParsedTicketData:
         """Parsea boleto SABRE con refuerzo de IA"""
@@ -40,10 +62,31 @@ class SabreParser(BaseTicketParser):
         pnr = self.extract_field(text, [
             r'(?:Reservation Code|C[OÓ]DIGO DE RESERVA(?:CI[OÓ]N)?)\s*[:\t\s]*([A-Z0-9]{6})'
         ])
+        if pnr == 'No encontrado':
+            pnr_match = re.search(
+                r'(?:C[OÓ]DIGO DE RESERVACI[OÓ]N|RESERVATION CODE)\s*\n\s*([A-Z0-9]{6})\b',
+                text, re.IGNORECASE
+            )
+            if pnr_match:
+                pnr = pnr_match.group(1).strip()
         
         ticket_number = self.extract_field(text, [
-            r'(?:Ticket Number|N[ÚU]MERO DE BOLETO|BOLETO)\s*[:\t\s]*([0-9]{13})'
+            r'(?:Ticket Number|N[ÚU]MERO DE BOLETO|BOLETO)\s*[:\t\s]*([0-9]{13})',
+            r'\b([0-9]{13})\b'
         ])
+
+        # Intento de extracción de bloque de metadatos de Sabre column-layout
+        issue_date_col = None
+        airline_col = None
+        meta_match = re.search(
+            r'(?:FECHA DE EMISI[ÓO]N|ISSUE DATE)\s*\n\s*(?:N[ÚU]MERO DE BOLETO|TICKET NUMBER)\s*\n\s*(?:AEROL[IÍ]NEA EMISORA|ISSUING AIRLINE)\s*\n\s*([^\n]+)\s*\n\s*([0-9]{13})\s*\n\s*([^\n]+)',
+            text, re.IGNORECASE
+        )
+        if meta_match:
+            issue_date_col = meta_match.group(1).strip()
+            ticket_number = meta_match.group(2).strip()
+            airline_col = meta_match.group(3).strip()
+            logger.info(f"🎯 Extraído metadatos del layout de columnas de Sabre: fecha={issue_date_col}, boleto={ticket_number}, aerolinea={airline_col}")
 
         # --- AI REINFORCEMENT ---
         if pnr == 'No encontrado' or ticket_number == 'No encontrado' or passenger_name == 'No encontrado':
@@ -110,25 +153,47 @@ class SabreParser(BaseTicketParser):
         if airline_locator == 'No encontrado':
             airline_locator = None
         
-        issue_date = self.extract_field(text, [
-            r'(?:Issue Date|Fecha de Emisi[óo]n|FECHA DE EMISI[ÓO]N)\s*[:\t\s]*([^\n]+)',
-            r'emisi[^\n]*?([0-9]{1,2}[A-Z]{3}[0-9]{2,4})',
-            r'\bEMITIDO\s+EL\b\s*[:\s]*([A-Z0-9 ]+)'
-        ])
+        if issue_date_col:
+            issue_date = issue_date_col
+        else:
+            issue_date = self.extract_field(text, [
+                r'(?:Issue Date|Fecha de Emisi[óo]n|FECHA DE EMISI[ÓO]N)\s*[:\t\s]*([^\n]+)',
+                r'emisi[^\n]*?([0-9]{1,2}[A-Z]{3}[0-9]{2,4})',
+                r'\bEMITIDO\s+EL\b\s*[:\s]*([A-Z0-9 ]+)'
+            ])
 
-        airline = self.extract_field(text, [
-            r'(?:Issuing Airline|AEROLÍNEA EMISORA|Aerol[íi]nea Emisora)\s*[:\t\s]*([^\n]+(?:\n\s*[^\n]+)?)'
-        ])
+        if airline_col:
+            airline = airline_col
+        else:
+            airline = self.extract_field(text, [
+                r'(?:Issuing Airline|AEROLÍNEA EMISORA|Aerol[íi]nea Emisora)\s*[:\t\s]*([^\n]+)'
+            ])
         airline = re.sub(r'[,/].*$', '', airline).strip()
         
-        agent = self.extract_field(text, [
-            r'(?:Issuing Agent|AGENTE EMISOR|Agente Emisor)\s*[:\t\s]*([^\n]+)'
-        ])
-        
-        iata = self.extract_field(text, [
-            r'(?:IATA Number|IATA|N[úuú]mero IATA|NÚMERO IATA|NMERO IATA)\s*[:\t\s]*([0-9]+)',
-            r'(?:Issuing Agent|AGENTE EMISOR|Agente Emisor)\s*[:\t\s]*[^\n]+\n\s*([0-9]{8})',
-        ])
+        agent_col = None
+        iata_col = None
+        agent_match = re.search(
+            r'([^\n]+)\s*\n\s*([^\n]+)\s*\n\s*([0-9]+)\s*\n\s*(?:AGENTE EMISOR|ISSUING AGENT)\s*\n\s*(?:UBICACI[OÓ]N DEL AGENTE EMISOR|AGENT LOCATION)\s*\n\s*(?:N[ÚU]MERO IATA|IATA NUMBER)',
+            text, re.IGNORECASE
+        )
+        if agent_match:
+            agent_col = agent_match.group(1).strip()
+            iata_col = agent_match.group(3).strip()
+
+        if agent_col:
+            agent = agent_col
+        else:
+            agent = self.extract_field(text, [
+                r'(?:Issuing Agent|AGENTE EMISOR|Agente Emisor)\s*[:\t\s]*([^\n]+)'
+            ])
+            
+        if iata_col:
+            iata = iata_col
+        else:
+            iata = self.extract_field(text, [
+                r'(?:IATA Number|IATA|N[úuú]mero IATA|NÚMERO IATA|NMERO IATA)\s*[:\t\s]*([0-9]+)',
+                r'(?:Issuing Agent|AGENTE EMISOR|Agente Emisor)\s*[:\t\s]*[^\n]+\n\s*([0-9]{8})',
+            ])
         
         # 4. Extraer Vuelos
         flights = self._parse_flights(text, airline_locator)
@@ -322,26 +387,24 @@ class SabreParser(BaseTicketParser):
             if len(block_times) >= 2: flight['hora_llegada'] = block_times[1]
             
             # Origen / Destino - Sabre format: "AIRLINE_SEGMENT CITY_ORIGIN, COUNTRY CITY_DEST, COUNTRY"
-            # The raw line looks like: "AEROVIAS DEL MEDELLIN, COLOMBIA BOGOTA, COLOMBIA"
-            # We must extract the LAST word before the comma as the city for origin,
-            # and also strip country names from destination.
-            cities = re.findall(r'\b([A-Z\xc1\xc9\xcd\xd3\xda\xd1\u00c0-\u00ff][A-Z\xc1\xc9\xcd\xd3\xda\xd1\u00c0-\u00ff\s]{2,}?),', block)
-            if len(cities) >= 2:
-                raw_origin = self.clean_text(cities[0])  # e.g. "AEROVIAS DEL MEDELLIN"
-                raw_dest = self.clean_text(cities[1])    # e.g. "COLOMBIA BOGOTA"
-
-                # Strip airline-name-like prefixes from origin: take only the last word
-                # e.g. "AEROVIAS DEL MEDELLIN" -> "MEDELLIN"
+            # Or separate lines: "CITY_ORIGIN, COUNTRY" and "CITY_DEST, COUNTRY"
+            matches = re.findall(r'\b([A-Z\xc1\xc9\xcd\xd3\xda\xd1\u00c0-\u00ff][A-Z\xc1\xc9\xcd\xd3\xda\xd1\u00c0-\u00ff\s]{2,}?),\s*([A-Z\xc1\xc9\xcd\xd3\xda\xd1\u00c0-\u00ff]{3,})', block)
+            if len(matches) >= 2:
+                raw_origin = self.clean_text(matches[0][0])
+                country_origin = self.clean_text(matches[0][1])
+                
+                raw_dest = self.clean_text(matches[1][0])
+                country_dest = self.clean_text(matches[1][1])
+                
+                # Take only the last word before the comma for the city
                 origin_words = raw_origin.split()
                 city_origin = origin_words[-1] if origin_words else raw_origin
-
-                # Strip leading country name from destination: take only the last word
-                # e.g. "COLOMBIA BOGOTA" -> "BOGOTA"
+                
                 dest_words = raw_dest.split()
                 city_dest = dest_words[-1] if dest_words else raw_dest
-
-                flight['origen'] = city_origin
-                flight['destino'] = city_dest
+                
+                flight['origen'] = f"{city_origin}, {country_origin}"
+                flight['destino'] = f"{city_dest}, {country_dest}"
             
             # Airline locator per-segment
             if airline_locator and airline_locator != 'No encontrado':

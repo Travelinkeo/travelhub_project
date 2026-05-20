@@ -1,3 +1,15 @@
+# ==============================================================================
+# 🧠 MOTORES DE INTELIGENCIA ARTIFICIAL EN TRAVELHUB: VIRTUAL CFO CHAT
+# ==============================================================================
+# ESTE ARCHIVO: 'ai_accounting_service.py' (AIAccountingService)
+# ROL: Asistente financiero e interactivo para chat y consultas complejas.
+# PRINCIPAL CARACTERÍSTICA: Interactivo. Utiliza Gemini chats con herramientas
+# dinámicas (Function Calling) para responder y ejecutar tareas en tiempo real.
+#
+# NOTA DE DISEÑO: No confundir con 'accounting_ai_service.py' (AccountingAIService),
+# el cual es el motor (CPA Engine) no interactivo de generación física de asientos.
+# ==============================================================================
+
 import json
 import logging
 
@@ -21,7 +33,8 @@ class AIAccountingService:
     def __init__(self, agencia):
         self.agencia = agencia
         from google import genai
-        self.api_key = settings.GEMINI_API_KEY
+        from apps.automation.services.ai_engine import get_gemini_api_key
+        self.api_key = get_gemini_api_key(agencia)
         self.client = genai.Client(api_key=self.api_key)
         self.model_id = 'gemini-2.0-flash'
         
@@ -39,7 +52,8 @@ class AIAccountingService:
             AgentTools.get_account_balance,
             AgentTools.get_cashflow_forecast,
             AgentTools.get_reconciliation_discrepancies,
-            AgentTools.run_reconciliation
+            AgentTools.run_reconciliation,
+            AgentTools.propose_manual_journal_entry
         ]
 
     def ask(self, user_message: str) -> str:

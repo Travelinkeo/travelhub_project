@@ -1,0 +1,28 @@
+{% load static %}
+
+<!-- Forzar inyección de HTMX en caso de que la vista lo cargue aislado -->
+<script src="{% static 'vendor/htmx_v2.js' %}"></script>
+
+{% if is_processing %}
+<div id="status-checker" 
+     hx-get="{% url 'core:boleto_status' boleto.pk %}" 
+     hx-trigger="every 2s" 
+     hx-swap="outerHTML">
+    
+    <!-- ── PROCESSING OVERLAY ── -->
+    <div class="fixed inset-0 bg-black/60 z-[60] flex flex-col items-center justify-center backdrop-blur-sm animate-fade-in">
+        <div class="relative">
+            <div class="size-24 rounded-full border-4 border-primary/20 border-t-primary animate-spin"></div>
+            <span class="material-symbols-outlined absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-3xl animate-pulse text-primary">magic_button</span>
+        </div>
+        <h2 class="mt-8 text-xl font-black uppercase tracking-[0.3em] text-white">IA Analizando...</h2>
+        <p class="mt-2 text-gray-400 font-bold uppercase text-[10px] tracking-widest">Extrayendo itinerario y datos financieros de forma asíncrona</p>
+        <div class="mt-8 flex items-center gap-2 px-4 py-2 bg-white/5 rounded-full border border-white/10">
+            <span class="size-2 rounded-full bg-emerald-500 animate-ping"></span>
+            <span class="text-[9px] font-black text-gray-500 uppercase tracking-widest">Esperando respuesta del worker...</span>
+        </div>
+    </div>
+</div>
+{% else %}
+<div id="status-checker" class="hidden"></div>
+{% endif %}

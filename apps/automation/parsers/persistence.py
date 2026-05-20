@@ -33,11 +33,11 @@ class BoletoPersistenceService:
             boleto.numero_boleto = BoletoPersistenceService._truncate(d.get('ticket_number'), 50)
             
             # 2. Pasajero
-            p_name = d.get('passenger_name')
+            p_name = d.get('passenger_name_original') or d.get('passenger_name')
             if p_name:
                 p_name = str(p_name).split(' FOID')[0].split(' RIF')[0].strip()
             boleto.nombre_pasajero_completo = BoletoPersistenceService._truncate(p_name, 150)
-            boleto.nombre_pasajero_procesado = BoletoPersistenceService._truncate(d.get('SOLO_NOMBRE_PASAJERO') or p_name, 150)
+            boleto.nombre_pasajero_procesado = BoletoPersistenceService._truncate(d.get('SOLO_NOMBRE_PASAJERO') or d.get('solo_nombre_pasajero') or p_name, 150)
             boleto.foid_pasajero = BoletoPersistenceService._truncate(d.get('passenger_document'), 50)
 
             # 3. Aerolínea y Proveedor

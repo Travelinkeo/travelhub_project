@@ -1,15 +1,15 @@
-﻿import pytest
-pytestmark = pytest.mark.skip(reason='Parser/Gemini refactorizado - pendiente actualización')
+import pytest
 import os
 import re
 
-from apps.automation.services.ticket_parser_service import extract_data_from_text
+from apps.automation.parsers.registry import registry
+from apps.automation.parsers.adapter import _register_parsers
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(BASE_DIR)
 SABRE_DIR = os.path.join(PROJECT_ROOT, 'external_ticket_generator', 'SABRE')
 
-# Sample files we expect to exist (adjust names if different)
+# Sample files we expect to exist
 SINGLE_FILE = '0457281019415.txt'
 MULTI_FILE = '0577280309142.txt'
 
@@ -20,43 +20,61 @@ def read_ticket(filename: str):
         return f.read()
 
 
+def get_parsed_dto(text: str):
+    _register_parsers()
+    parser = registry.find_parser(text)
+    assert parser is not None, "No se encontró parser compatible con Sabre"
+    parsed_data = parser.parse(text)
+    return parsed_data.to_pydantic()
+
+
+@pytest.mark.django_db
 def test_single_segment_sabre():
     text = read_ticket(SINGLE_FILE)
-    data = extract_data_from_text(text)
-    assert data['SOURCE_SYSTEM'] == 'SABRE'
-    assert data['pasajero'].get('documento_identidad'), 'Debe extraer documento_identidad'
-    assert data['reserva'].get('fecha_emision_iso'), 'Debe contener fecha_emision_iso'
-    assert len(data['itinerario']['vuelos']) == 1
-    vuelo = data['itinerario']['vuelos'][0]
-    assert vuelo['origen'].get('pais') == 'VENEZUELA'
-    assert vuelo['destino'].get('pais') == 'COLOMBIA'
-    assert vuelo.get('fecha_salida_iso') and re.match(r'\d{4}-\d{2}-\d{2}', vuelo['fecha_salida_iso'])
-    assert vuelo.get('fecha_llegada_iso') and re.match(r'\d{4}-\d{2}-\d{2}', vuelo['fecha_llegada_iso'])
-    # co2 puede variar pero si existe debe estar normalizado
-    if 'co2_valor' in vuelo:
-        assert re.match(r'^\d+(?:\.\d+)?$', str(vuelo['co2_valor']))
-        assert vuelo.get('co2_unidad') == 'kg'
+    res = get_parsed_dto(text)
+    
+    assert len(res.boletos) == 1
+    boleto = res.boletos[0]
+    
+    assert boleto.source_system == 'SABRE'
+    assert boleto.codigo_identificacion == 'AS639110'
+    assert boleto.fecha_emision == '2025-08-13'
+    assert boleto.numero_boleto == '0457281019415'
+    assert boleto.codigo_reserva == 'ABC123'
+    
+    assert len(boleto.itinerario) == 1
+    vuelo = boleto.itinerario[0]
+    assert 'VENEZUELA' in vuelo.origen.upper()
+    assert 'COLOMBIA' in vuelo.destino.upper()
+    assert vuelo.fecha_salida == '13 Aug 25'
+    assert vuelo.hora_salida == '08:00'
+    assert vuelo.hora_llegada == '10:00'
 
 
+@pytest.mark.django_db
 def test_multi_segment_sabre():
     text = read_ticket(MULTI_FILE)
-    data = extract_data_from_text(text)
-    assert data['SOURCE_SYSTEM'] == 'SABRE'
-    assert data['pasajero'].get('documento_identidad')
-    assert data['reserva'].get('fecha_emision_iso')
-    assert len(data['itinerario']['vuelos']) >= 4  # permitir más si crece
+    res = get_parsed_dto(text)
+    
+    assert len(res.boletos) == 1
+    boleto = res.boletos[0]
+    
+    assert boleto.source_system == 'SABRE'
+    assert boleto.codigo_identificacion == '164271115'
+    assert boleto.fecha_emision == '2025-02-25'
+    assert boleto.numero_boleto == '0577280309142'
+    assert boleto.codigo_reserva == 'SGWFJU'
+    
+    assert len(boleto.itinerario) >= 4
     expected_countries = [
         ('VENEZUELA', 'COLOMBIA'),
         ('COLOMBIA', 'PERU'),
         ('PERU', 'CHILE'),
         ('CHILE', 'VENEZUELA')
     ]
-    for i, vuelo in enumerate(data['itinerario']['vuelos']):
-        assert vuelo.get('fecha_salida_iso')
-        assert vuelo.get('fecha_llegada_iso')
-        assert vuelo['origen'].get('pais') == expected_countries[i][0]
-        assert vuelo['destino'].get('pais') == expected_countries[i][1]
-        # co2 puede variar pero si existe debe estar normalizado
-        if 'co2_valor' in vuelo:
-            assert re.match(r'^\d+(?:\.\d+)?$', str(vuelo['co2_valor']))
-            assert vuelo.get('co2_unidad') == 'kg'
+    for i, vuelo in enumerate(boleto.itinerario):
+        assert vuelo.fecha_salida
+        assert vuelo.fecha_llegada
+        assert expected_countries[i][0] in vuelo.origen.upper()
+        assert expected_countries[i][1] in vuelo.destino.upper()
+

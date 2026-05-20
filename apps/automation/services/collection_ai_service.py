@@ -20,8 +20,10 @@ class CollectionAIService:
 
     def __init__(self, agencia=None):
         self.agencia = agencia
+        from apps.automation.services.ai_engine import get_gemini_api_key
+        api_key = get_gemini_api_key(self.agencia)
         genai = _get_genai()
-        self.client = genai.Client(api_key=settings.GEMINI_API_KEY)
+        self.client = genai.Client(api_key=api_key) if api_key else None
         self.model_name = 'gemini-2.0-flash'
 
     def get_pending_portfolio(self, days_threshold=0):
@@ -49,6 +51,9 @@ class CollectionAIService:
         """
         Genera un recordatorio de cobro personalizado usando IA.
         """
+        if not self.client:
+            logger.error("Gemini client not configured.")
+            return None
         try:
             factura = Factura.objects.select_related('cliente', 'agencia').get(pk=factura_id)
             cliente = factura.cliente

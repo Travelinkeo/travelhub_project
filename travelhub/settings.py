@@ -21,6 +21,10 @@ mimetypes.add_type("application/javascript", ".mjs", True)
 # Configurar un logger básico para mensajes en settings
 logger = logging.getLogger(__name__)
 
+LOGIN_REDIRECT_URL = 'home'
+LOGOUT_REDIRECT_URL = 'login'
+LOGIN_URL = 'login'
+
 from dotenv import load_dotenv
 from django.core.exceptions import ImproperlyConfigured
 
@@ -30,6 +34,9 @@ print("--- [SETTINGS] .env loaded ---", flush=True)
 
 # DEBUG defaults to False for safety. Set DEBUG=True in .env for development.
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
+
+# --- STORAGE STRATEGY FLAGS ---
+USE_R2 = os.getenv('USE_R2', 'False') == 'True'
 
 
 # 🛑 ESCUDO DE SEGURIDAD (FAIL FAST)
@@ -144,6 +151,11 @@ MIDDLEWARE = [
     'core.middleware_ai_ratelimit.AIRateLimitMiddleware',
 ]
 
+# --- WHITENOISE CONFIG (CRÍTICO PARA DOCKER + DEBUG) ---
+WHITENOISE_USE_FINDERS = True
+WHITENOISE_AUTOREFRESH = True
+WHITENOISE_MANIFEST_STRICT = False
+
 ROOT_URLCONF = 'travelhub.urls'
 
 TEMPLATES = [
@@ -172,9 +184,11 @@ import dj_database_url
 DATABASES = {
     'default': dj_database_url.parse(DATABASE_URL)
 }
+DATABASES['default']['ATOMIC_REQUESTS'] = True
 # Connection pooling para alta concurrencia
 DATABASES['default']['CONN_MAX_AGE'] = 60
 DATABASES['default']['CONN_HEALTH_CHECKS'] = True
+
 print("--- [SETTINGS] DB configured ---", flush=True)
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -211,7 +225,7 @@ STORAGES = {
         "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
     },
     "staticfiles": {
-        "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage" if DEBUG else "storages.backends.s3boto3.S3Boto3Storage",
     },
 }
 
@@ -435,7 +449,7 @@ CORS_ALLOW_CREDENTIALS = True
 
 # Dominios confiables para CSRF (Obligatorio en producción o detrás de proxy inverso como Cloudflare)
 # Se pueden cargar múltiples dominios en .env separados por comas (Ej: https://erp.travelhub.cc,https://miagencia.com)
-env_csrf_origins = os.getenv('CSRF_TRUSTED_ORIGINS', 'https://travelhub.cc,http://travelhub.cc')
+env_csrf_origins = os.getenv('CSRF_TRUSTED_ORIGINS', 'https://travelhub.cc,http://travelhub.cc,http://localhost:8000,http://127.0.0.1:8000')
 CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in env_csrf_origins.split(',')]
 
 # -----------------------------------------------------
@@ -662,7 +676,46 @@ UNFOLD = {
 print("--- [SETTINGS] Loaded successfully ---", flush=True)
 
 # -----------------------------------------------------
-# 🧪 TESTING CONFIGURATION
+# 🔒 BLOQUE DE SEGURIDAD HTTP/HTTPS
+# Todas estas flags se activan SOLO en producción (DEBUG=False).
+# En desarrollo local (DEBUG=True) permanecen en False para evitar
+# romper el servidor HTTP local.
+# -----------------------------------------------------
+if not DEBUG:
+    # Forzar HTTPS para todas las conexiones
+    SECURE_SSL_REDIRECT = True
+
+    # HSTS: Decirle al browser que SOLO use HTTPS por 1 año
+    SECURE_HSTS_SECONDS = 31536000       # 1 año
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+
+    # Cookies seguras (solo se envían por HTTPS)
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+
+    # Protección contra clickjacking
+    X_FRAME_OPTIONS = 'DENY'
+
+    # El header que Nginx usa para indicar que la conexión original era HTTPS
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+    # Prevenir que el browser "olfatee" el tipo de contenido
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_BROWSER_XSS_FILTER = True
+else:
+    # En desarrollo, cookies sin HTTPS para no romper el servidor local
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False
+    SECURE_SSL_REDIRECT = False
+    X_FRAME_OPTIONS = 'SAMEORIGIN'
+
+# Siempre activos independiente del modo:
+SESSION_COOKIE_HTTPONLY = True    # JS no puede leer la cookie de sesión
+CSRF_COOKIE_HTTPONLY = False      # HTMX/JS necesita leer el CSRF token
+SESSION_COOKIE_AGE = 86400 * 7   # Sesión dura 7 días
+
+
 # -----------------------------------------------------
 import sys
 
@@ -672,4 +725,10 @@ if 'test' in sys.argv or 'pytest' in sys.modules or (len(sys.argv) > 0 and 'pyte
     CELERY_TASK_EAGER_PROPAGATES = True
     # Desactivar R2 en tests para evitar delays de red
     STORAGES["default"] = {"BACKEND": "django.core.files.storage.FileSystemStorage"}
-    print("Test mode detected: Emails in memory, Celery Eager, Storage Local.")
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+            'LOCATION': 'unique-snowflake',
+        }
+    }
+    print("Test mode detected: Emails in memory, Celery Eager, Storage Local, Cache in memory.")

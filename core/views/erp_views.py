@@ -253,12 +253,11 @@ class BoletosImportarView(SaaSMixin, LoginRequiredMixin, TemplateView):
             if t.proveedor_id not in latest_tarifarios:
                 latest_tarifarios[t.proveedor_id] = t
 
-        for prov in proveedores:
-            tarifario = latest_tarifarios.get(provid.pk)
-            prov.comision_display = tarifario.comision_estandar if tarifario else 0
+        for p in proveedores:
+            t = latest_tarifarios.get(p.pk)
+            p.comision_display = t.comision_estandar if t else 0
 
         context['proveedores'] = proveedores
-        
         return context
 
 from django.urls import reverse_lazy

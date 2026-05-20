@@ -22,6 +22,20 @@ except Exception:  # pragma: no cover
     # Si falla aquí, los tests fallarán luego con más contexto; evitamos romper import global.
     pass
 
+def pytest_configure(config):
+    """Override settings for tests globally."""
+    from django.conf import settings
+    settings.CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+            "LOCATION": "unique-snowflake-default",
+        },
+        "sessions": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+            "LOCATION": "unique-snowflake-sessions",
+        }
+    }
+
 @pytest.fixture(autouse=True)
 def use_simple_static_storage(settings):
     """For tests force a simple staticfiles storage without triggering Django 5 deprecation.
@@ -51,7 +65,7 @@ def mock_ai_engine(monkeypatch):
     # Mock de la llamada principal
     from apps.automation.services.ai_engine import ai_engine
     
-    # Respuesta por defecto
+    # Respuesta por defecto compatible con ResultadoParseoSchema
     default_res = {
         "boletos": [
             {
@@ -59,20 +73,37 @@ def mock_ai_engine(monkeypatch):
                 "numero_boleto": "1234567890123",
                 "nombre_pasajero": "DOE/JOHN",
                 "solo_nombre_pasajero": "JOHN",
-                "apellido_pasajero": "DOE",
                 "fecha_emision": "2025-01-01",
                 "tarifa": 100.0,
+                "impuestos": 20.0,
                 "total": 120.0,
                 "moneda": "USD",
+                "codigo_identificacion": None,
+                "agente_emisor": "MOCK_AGENT",
+                "numero_iata": "12345678",
+                "codigo_reserva_aerolinea": None,
+                "nombre_aerolinea": "TEST AIRLINES",
+                "direccion_aerolinea": None,
+                "es_remision": False,
+                "source_system": "SABRE",
+                "confidence_score": 1.0,
+                "notas_advertencia": None,
                 "itinerario": [
                     {
                         "aerolinea": "TEST AIRLINES",
                         "numero_vuelo": "TS123",
                         "origen": "TEST CITY",
-                        "destino": "DEST CITY",
+                        "codigo_iata_origen": "TST",
                         "fecha_salida": "2025-02-01",
                         "hora_salida": "10:00",
-                        "hora_llegada": "12:00"
+                        "destino": "DEST CITY",
+                        "codigo_iata_destino": "DST",
+                        "hora_llegada": "12:00",
+                        "fecha_llegada": "2025-02-01",
+                        "cabina": "Económica",
+                        "clase": "Y",
+                        "localizador_aerolinea": "MOCK12",
+                        "equipaje": "1PC"
                     }
                 ]
             }

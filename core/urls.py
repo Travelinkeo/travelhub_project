@@ -10,13 +10,10 @@ from core.views.auth_views import TokenLogoutView, MagicLinkRequestView, MagicLi
 from django.contrib.auth import views as auth_views
 
 logger = logging.getLogger(__name__)
-
 app_name = 'core'
 
 urlpatterns = [
     # --- ADMINISTRACIÓN Y AUTENTICACIÓN ---
-    path('admin/', admin.site.urls),
-    path('accounts/', include('django.contrib.auth.urls')),
     path('login/', auth_views.LoginView.as_view(), name='login'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('api/auth/jwt/obtain/', TokenObtainPairView.as_view(), name='jwt_obtain_pair'),
@@ -34,10 +31,4 @@ urlpatterns = [
     # Redirige a la vista modern_dashboard que ahora reside en bookings
     path('', RedirectView.as_view(pattern_name='bookings:modern_dashboard', permanent=False), name='home'),
     path('dashboard/', RedirectView.as_view(pattern_name='bookings:modern_dashboard', permanent=False), name='dashboard_root'),
-
-    # --- MÓDULOS MODULARIZADOS (Dispatcher Central) ---
-    path('finance/', include('apps.finance.urls')),
-    path('bookings/', include('apps.bookings.urls')),
-    path('crm/', include('apps.crm.urls')),
-    path('system/', include('core.urls_system')),
 ]

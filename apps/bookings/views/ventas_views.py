@@ -23,7 +23,9 @@ class VentaUpdateView(SaaSMixin, LoginRequiredMixin, UpdateView):
         # Support for 'next' parameter to return to Admin or specific page
         next_url = self.request.GET.get('next') or self.request.POST.get('next')
         if next_url:
-            return next_url
+            from django.utils.http import url_has_allowed_host_and_scheme
+            if url_has_allowed_host_and_scheme(url=next_url, allowed_hosts=None):
+                return next_url
         return reverse_lazy('core:modern_dashboard')
 
     def get_context_data(self, **kwargs):
@@ -274,5 +276,8 @@ def eliminar_venta(request, pk):
     except Exception as e:
         messages.error(request, f"Error al eliminar venta: {str(e)}")
         
-    next_url = request.GET.get('next') or 'core:modern_dashboard'
-    return redirect(next_url)
+    next_url = request.GET.get('next')
+    from django.utils.http import url_has_allowed_host_and_scheme
+    if next_url and url_has_allowed_host_and_scheme(url=next_url, allowed_hosts=None):
+        return redirect(next_url)
+    return redirect('core:modern_dashboard')

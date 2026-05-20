@@ -15,14 +15,18 @@ class AmadeusParser(BaseTicketParser):
     
     def can_parse(self, text: str) -> bool:
         """Check if text looks like an Amadeus ticket."""
-        markers = [
-            'Electronic Ticket Receipt',
-            'CheckMyTrip',
-            'Booking ref:',
-            'Amadeus'
-        ]
-        count = sum(1 for m in markers if m.lower() in text.lower())
-        return count >= 1
+        purified = self.purify_text_for_detection(text)
+        
+        # Evitar colisión con KIUSYS
+        if 'KIUSYS' in purified or 'KIU SYSTEM' in purified or 'KIU GDS' in purified:
+            return False
+            
+        has_checkmytrip = 'CHECKMYTRIP' in purified
+        has_amadeus = 'AMADEUS' in purified
+        has_elec_tkt = 'ELECTRONIC TICKET RECEIPT' in purified or 'E-TICKET RECEIPT' in purified
+        has_booking_ref = 'BOOKING REF' in purified
+        
+        return bool(has_checkmytrip or has_amadeus or (has_elec_tkt and has_booking_ref))
 
     def parse(self, text: str, html_text: str = "", pdf_path: str = None) -> ParsedTicketData:
         """Main parsing method with robust AI fallback."""

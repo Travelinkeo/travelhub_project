@@ -15,24 +15,40 @@ BCV_API_URL = "https://www.bcv.org.ve/c2/rest/tasas"
 DOLAR_API_URL = "https://ve.dolarapi.com/v1/dolares"
 
 def _obtener_tasas_dolarapi():
-    """Fallback usando DolarApi (ve.dolarapi.com)"""
+    """Fallback usando DolarApi (ve.dolarapi.com) para USD y EUR"""
+    tasas = {}
+    
+    # 1. USD
     try:
-        logger.info("Intentando fallback con DolarApi...")
+        logger.info("Intentando fallback con DolarApi para USD...")
         response = requests.get(DOLAR_API_URL, timeout=10)
         response.raise_for_status()
         data = response.json()
-        
-        tasas = {}
         for item in data:
             if item.get('fuente') == 'oficial':
                 promedio = item.get('promedio')
                 if promedio:
                     tasas['USD'] = Decimal(str(promedio))
                 break
-        return tasas
     except Exception as e:
-        logger.error(f"Error en fallback DolarApi: {e}")
-        return {}
+        logger.error(f"Error en fallback DolarApi para USD: {e}")
+        
+    # 2. EUR
+    try:
+        logger.info("Intentando fallback con DolarApi para EUR...")
+        response = requests.get("https://ve.dolarapi.com/v1/euros", timeout=10)
+        response.raise_for_status()
+        data = response.json()
+        for item in data:
+            if item.get('fuente') == 'oficial':
+                promedio = item.get('promedio')
+                if promedio:
+                    tasas['EUR'] = Decimal(str(promedio))
+                break
+    except Exception as e:
+        logger.error(f"Error en fallback DolarApi para EUR: {e}")
+        
+    return tasas
 
 def obtener_tasas_bcv():
     """

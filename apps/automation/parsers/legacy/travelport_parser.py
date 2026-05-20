@@ -14,17 +14,10 @@ class TravelportParser(BaseTicketParser):
     
     def can_parse(self, text: str) -> bool:
         """Check if text looks like a Travelport ticket."""
-        markers = [
-            'Travelport',
-            'Galileo',
-            'Worldspan',
-            'ViewTrip',
-            'Electronic Ticket Receipt',
-            'APOLLO'
-        ]
-        # Travelport documents often have specific layouts or headers
-        count = sum(1 for m in markers if m.lower() in text.lower())
-        return count >= 1
+        purified = self.purify_text_for_detection(text)
+        has_brand = 'TRAVELPORT' in purified or 'GALILEO' in purified or 'WORLDSPAN' in purified or 'APOLLO' in purified or 'VIEWTRIP' in purified
+        has_elec = 'ELECTRONIC TICKET RECEIPT' in purified or 'E-TICKET RECEIPT' in purified
+        return bool(has_brand or (has_elec and 'VIEWTRIP' in purified))
 
     def parse(self, text: str, html_text: str = "", pdf_path: str = None) -> ParsedTicketData:
         """Main parsing method with robust AI fallback."""

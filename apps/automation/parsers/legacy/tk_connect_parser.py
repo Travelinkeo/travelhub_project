@@ -7,10 +7,8 @@ class TKConnectParser(BaseTicketParser):
     """Parser para boletos de Turkish Airlines (TK Connect)"""
     
     def can_parse(self, text: str) -> bool:
-        text_upper = text.upper()
-        # "GRUPO SOPORTE GLOBAL" es un agente común, no solo de TK Connect. 
-        # Es mejor requerir IDENTIFICACIÓN DEL PEDIDO o un formato específico de TK Connect.
-        return 'IDENTIFICACIÓN DEL PEDIDO' in text_upper and ('TK CONNECT' in text_upper or 'TURKISH AIRLINES' in text_upper)
+        purified = self.purify_text_for_detection(text)
+        return 'IDENTIFICACIÓN DEL PEDIDO' in purified and ('TK CONNECT' in purified or 'TURKISH AIRLINES' in purified)
     
     def parse(self, text: str, html_text: str = "") -> ParsedTicketData:
         try:

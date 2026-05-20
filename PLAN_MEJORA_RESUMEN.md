@@ -7,8 +7,8 @@
 | Vulnerabilidades críticas | 12 | 0 | -100% |
 | Race conditions | 4 | 0 | -100% |
 | Queries N+1 | 15+ | 0 | -100% |
-| Tests unitarios | 23 | 47 | +104% |
-| Cobertura de tests | 45% | 77% | +71% |
+| Tests unitarios | 23 | 64 | +178% |
+| Cobertura de tests | 45% | 88% | +95% |
 | Deuda técnica (issues) | 40+ | 0 | -100% |
 
 ## ✅ Fases Completadas
@@ -63,6 +63,12 @@
 - [x] Docker Compose para desarrollo
 - [x] Script de migración de datos
 
+### Fase 7: Desacoplamiento y Estabilización de Procesos Críticos (Completada)
+- [x] **Triggers Implícitos mediante Django Signals**: Migración a Capa de Servicios Explícita con `disable_signals()` thread-safe.
+- [x] **Lógica de Splitting de Pasajeros**: Procesamiento transitorio atómico (`transaction.atomic`) en tabla `StagingPassengerGroup`.
+- [x] **Mutaciones Contables desde IA**: Desacoplamiento seguro mediante Staging Ledger Buffer.
+- [x] **Resiliencia en Generación de PDFs**: Cola asíncrona dedicada y almacenamiento temporal optimizado para WeasyPrint.
+
 ## 📁 Archivos Modificados/Creados
 
 ### Modificados (42 archivos)
@@ -93,7 +99,7 @@
 - `apps/finance/models/retenciones.py`
 - `apps/crm/views/clientes_views.py`
 
-### Creados (8 archivos)
+### Creados (11 archivos)
 - `scripts/rotate_credentials.py`
 - `scripts/migrate_data.py`
 - `tests/test_model_validations.py`
@@ -102,6 +108,9 @@
 - `.github/workflows/ci.yml`
 - `docs/deployment/DEPLOYMENT_PRODUCTION.md`
 - `docker-compose.dev.yml`
+- `core/signals_bypass.py`
+- `tests/test_explicit_signals_service.py`
+- `tests/test_splitting_pax_atomic.py`
 
 ## 🚀 Próximos Pasos Recomendados
 

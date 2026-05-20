@@ -240,12 +240,51 @@ def extract_data_from_text(plain_text: str, html_text: str = "", pdf_path: str |
         if cached_result:
             return cached_result
 
-    # 2. ⚡ PATRONES DETERMINÍSTICOS (Gratis y Rápidos)
+    # 2. ⚡ PARSERS DETECTADOS (Sabre, Amadeus, KIU, etc.)
+    # Primero intentamos usar los parsers robustos específicos de GDS
+    try:
+        from apps.automation.parsers.adapter import parse_ticket_with_new_parsers
+        logger.info("Tentando extraer usando parsers robustos estructurados...")
+        res_gds = parse_ticket_with_new_parsers(plain_text, html_text)
+        if res_gds and not res_gds.get("error"):
+            logger.info("✅ Extracción exitosa con parser específico de GDS.")
+            # Normalizar claves legacy esperadas por ticket_parser_service
+            if "codigo_reserva" not in res_gds and "pnr" in res_gds:
+                res_gds["codigo_reserva"] = res_gds["pnr"]
+            if "nombre_pasajero" not in res_gds and "passenger_name" in res_gds:
+                res_gds["nombre_pasajero"] = res_gds["passenger_name"]
+            
+            # Guardar en caché
+            cache.set(cache_key, res_gds, timeout=86400)
+            return res_gds
+        else:
+            logger.warning(f"No se detectó parser específico compatible o devolvió error: {res_gds.get('error') if res_gds else 'None'}")
+    except Exception as e:
+        logger.error(f"Error intentando usar parsers específicos: {e}", exc_info=True)
+
+    # 3. ⚡ PATRONES DETERMINÍSTICOS GENÉRICOS (Gratis y Rápidos)
+    logger.info("Usando parser regex genérico como último recurso (FastDeterministicParsers)...")
     res_final = FastDeterministicParsers.parse_general_regex(plain_text)
     
-    # 3. 💾 GUARDAR EN CACHÉ
+    # Normalizar claves para res_final
+    if res_final:
+        if "codigo_reserva" not in res_final and "pnr" in res_final:
+            res_final["codigo_reserva"] = res_final["pnr"]
+        if "nombre_pasajero" not in res_final and "passenger_name" in res_final:
+            res_final["nombre_pasajero"] = res_final["passenger_name"]
+            
+        # Detección de GDS para compatibilidad
+        purified = plain_text.upper()
+        if 'SABRE' in purified or 'RECIBO DE PASAJE' in purified:
+            res_final['gds'] = 'sabre'
+        elif 'KIUSYS' in purified or 'KIU' in purified:
+            res_final['gds'] = 'kiu'
+        else:
+            res_final['gds'] = 'unknown'
+            
+    # 4. 💾 GUARDAR EN CACHÉ
     if res_final and (res_final.get('codigo_reserva') or res_final.get('nombre_pasajero')):
-        cache.set(cache_key, res_final, timeout=86400) # 24h para regex es suficiente
+        cache.set(cache_key, res_final, timeout=86400)
 
     return res_final
 

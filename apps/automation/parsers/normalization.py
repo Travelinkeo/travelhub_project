@@ -30,12 +30,14 @@ class DataNormalizationService:
 
         # 1. Aliasing de campos comunes
         mappings = {
-            'pnr': ['codigo_reserva', 'localizador', 'CODIGO_RESERVA'],
-            'passenger_name': ['nombre_pasajero', 'NOMBRE_DEL_PASAJERO', 'nombre_completo', 'passenger name'],
+            'pnr': ['codigo_reserva', 'localizador', 'CODIGO_RESERVA', 'codigo_reservacion'],
+            'reservation_code': ['pnr', 'codigo_reserva', 'localizador', 'CODIGO_RESERVA', 'codigo_reservacion'],
+            'passenger_name': ['nombre_pasajero', 'NOMBRE_DEL_PASAJERO', 'nombre_completo', 'passenger name', 'preparado_para'],
             'ticket_number': ['numero_boleto', 'NUMERO_DE_BOLETO'],
-            'issue_date': ['FECHA_DE_EMISION', 'fecha_emision'],
-            'issuing_airline': ['NOMBRE_AEROLINEA', 'nombre_aerolinea', 'aerolinea_emisora', 'airline'],
-            'passenger_document': ['CODIGO_IDENTIFICACION', 'codigo_identificación', 'foid', 'passenger_id'],
+            'issue_date': ['FECHA_DE_EMISION', 'fecha_emision', 'fecha_emision_iso'],
+            'issuing_airline': ['NOMBRE_AEROLINEA', 'nombre_aerolinea', 'aerolinea_emisora', 'airline', 'airline_name'],
+            'airline_name': ['issuing_airline', 'NOMBRE_AEROLINEA', 'nombre_aerolinea', 'aerolinea_emisora', 'airline'],
+            'passenger_document': ['CODIGO_IDENTIFICACION', 'codigo_identificación', 'foid', 'passenger_id', 'documento_identidad'],
             'fare_amount': ['tarifa', 'TARIFA_IMPORTE'],
             'total_amount': ['total', 'TOTAL', 'TOTAL_IMPORTE'],
             'total_currency': ['moneda', 'TOTAL_MONEDA', 'currency'],
@@ -90,6 +92,8 @@ class DataNormalizationService:
                     normalized['solo_nombre_pasajero'] = first_names.split(' ')[0] # El primer nombre para el saludo
                     # Re-armamos un nombre más amigable para humanos
                     normalized['human_name'] = f"{first_names} {last_names}"
+                    normalized['passenger_name_original'] = raw_name
+                    normalized['passenger_name'] = normalized['human_name']
             except Exception as e:
                 logger.error(f"Error normalizando nombre {raw_name}: {e}")
         
@@ -123,9 +127,13 @@ class DataNormalizationService:
             
             # --- 🏙️ NORMALIZACIÓN POR CATÁLOGO IATA (DETERMINÍSTICO) ---
             origen_raw = dep.get('location') or tramo.get('origen')
+            if isinstance(origen_raw, dict):
+                origen_raw = origen_raw.get('ciudad') or origen_raw.get('city') or ''
             iata_origen = tramo.get('codigo_iata_origen') or (origen_raw if len(str(origen_raw)) == 3 else None)
             
             destino_raw = arr.get('location') or tramo.get('destino')
+            if isinstance(destino_raw, dict):
+                destino_raw = destino_raw.get('ciudad') or destino_raw.get('city') or ''
             iata_destino = tramo.get('codigo_iata_destino') or (destino_raw if len(str(destino_raw)) == 3 else None)
             
             # Resolver nombres vía catálogo si tenemos IATA

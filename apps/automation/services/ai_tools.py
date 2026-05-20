@@ -464,19 +464,81 @@ class AgentTools:
             return f"Error analizando discrepancia: {str(e)}"
 
     @staticmethod
-    def run_reconciliation(report_id: str) -> str:
+    def run_reconciliation(report_id: str, ia_justificacion: str = "") -> str:
         """
         Inicia el proceso de reconciliación automática para un reporte ya subido.
-        report_id: El UUID del reporte.
+        En lugar de ejecutarlo directamente (Deuda Técnica 3), registra una propuesta
+        en el Staging Ledger Buffer para la aprobación manual del CFO.
         """
         try:
-            from apps.finance.services.smart_reconciliation_service import (
-                SmartReconciliationService,
+            agencia = get_current_agency()
+            if not agencia:
+                return "Error: No hay una agencia en el contexto actual."
+
+            from apps.finance.models import PropuestaTransaccionIA
+            
+            justificacion = ia_justificacion or f"Solicitud de reconciliación automática de boletos para el reporte de proveedor ID: {report_id}."
+            
+            # Crear propuesta en el buffer
+            propuesta = PropuestaTransaccionIA.objects.create(
+                agencia=agencia,
+                modulo_objetivo="RECONCILIACION",
+                accion_tipo="CONCILIAR_REPORTE",
+                payload_datos={"report_id": str(report_id)},
+                ia_justificacion=justificacion,
+                estado=PropuestaTransaccionIA.EstadoPropuesta.PENDIENTE
             )
-            # Ejecutar de forma síncrona (el agente esperará la respuesta)
-            # NOTA: En producción esto debería ser una tarea de Celery, 
-            # pero para el agente IA solemos querer feedback inmediato o confirmación de inicio.
-            SmartReconciliationService.procesar_reporte(report_id)
-            return f"Éxito: Se ha procesado la reconciliación para el reporte {report_id}. Usa 'get_reconciliation_summary' para ver los resultados."
+            
+            return json.dumps({
+                "status": "propuesta_creada",
+                "id_propuesta": str(propuesta.id_propuesta),
+                "message": f"Se ha registrado una propuesta de reconciliación (ID: {propuesta.id_propuesta}) en el Staging Ledger Buffer. "
+                           f"El CFO de la agencia debe revisar y aprobar esta operación desde el panel de control contable antes de que sea procesada en producción."
+            }, indent=2)
+            
         except Exception as e:
-            return f"Error ejecutando reconciliación: {str(e)}"
+            logger.error(f"Error registrando propuesta de reconciliación: {e}", exc_info=True)
+            return f"Error al proponer la reconciliación: {str(e)}"
+
+    @staticmethod
+    def propose_manual_journal_entry(glosa: str, detalles_cuentas: list, ia_justificacion: str) -> str:
+        """
+        Registra una propuesta de asiento contable manual (Debe/Haber) en el Staging Ledger Buffer.
+        detalles_cuentas: Lista de diccionarios conteniendo {'codigo_cuenta': str, 'debe': float, 'haber': float}
+        """
+        try:
+            agencia = get_current_agency()
+            if not agencia:
+                return "Error: No hay una agencia en el contexto actual."
+
+            from apps.finance.models import PropuestaTransaccionIA
+
+            # Validar balance de la propuesta contable
+            total_debe = sum(Decimal(str(d.get('debe', 0))) for d in detalles_cuentas)
+            total_haber = sum(Decimal(str(d.get('haber', 0))) for d in detalles_cuentas)
+            
+            if total_debe != total_haber:
+                return f"Error de validación contable: El Debe ({total_debe}) y el Haber ({total_haber}) no cuadran."
+
+            propuesta = PropuestaTransaccionIA.objects.create(
+                agencia=agencia,
+                modulo_objetivo="CONTABILIDAD",
+                accion_tipo="CREAR_ASIENTO",
+                payload_datos={
+                    "glosa": glosa,
+                    "detalles": detalles_cuentas
+                },
+                ia_justificacion=ia_justificacion,
+                estado=PropuestaTransaccionIA.EstadoPropuesta.PENDIENTE
+            )
+
+            return json.dumps({
+                "status": "propuesta_creada",
+                "id_propuesta": str(propuesta.id_propuesta),
+                "message": f"Se ha registrado con éxito una propuesta de asiento contable (ID: {propuesta.id_propuesta}) por un total de {total_debe} USD. "
+                           f"La transacción está retenida de forma segura en el Staging Ledger Buffer esperando la firma y aprobación física del CFO."
+            }, indent=2)
+
+        except Exception as e:
+            return f"Error registrando propuesta de asiento: {str(e)}"
+

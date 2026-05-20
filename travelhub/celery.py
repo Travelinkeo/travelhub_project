@@ -71,8 +71,20 @@ app.conf.task_routes = {
     'core.tasks.enviar_notificacion_whatsapp_task': {'queue': 'notifications'},
 }
 
+from celery.schedules import crontab
+
 # Auto-descubrir tareas en todas las apps
 app.autodiscover_tasks()
+
+# ==========================================
+# ⏰ PROGRAMACIÓN DE TAREAS (CELERY BEAT)
+# ==========================================
+app.conf.beat_schedule = {
+    'ingesta-maestra-correos-multitenant': {
+        'task': 'apps.automation.tasks.master_mail_ingestion_cron',
+        'schedule': crontab(minute='*/5'),  # Cada 5 minutos
+    },
+}
 
 @app.task(bind=True, ignore_result=True)
 def debug_task(self):

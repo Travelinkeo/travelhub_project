@@ -184,7 +184,7 @@
 
     async function cargarMetricas() {
         try {
-            const response = await fetch('/api/boletos/dashboard-stats/');
+            const response = await fetch("{% url 'core:boletos_dashboard_stats' %}");
             const data = await response.json();
 
             document.getElementById('stat-hoy').textContent = data.procesados.hoy;

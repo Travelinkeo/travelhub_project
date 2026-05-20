@@ -8,7 +8,7 @@ from django.utils.translation import gettext_lazy as _
 
 from apps.bookings.models.importacion import BoletoImportado
 from apps.bookings.models.venta import Venta
-from apps.finance.models.facturacion import FacturaConsolidada, ItemFacturaConsolidada
+from apps.finance.models import Factura, ItemFactura
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +17,7 @@ class InvoicingService:
     @transaction.atomic
     def create_invoice_from_venta(venta_id, agencia):
         """
-        Genera una factura consolidada a partir de una venta.
+        Genera una factura a partir de una venta.
         Aplica la lógica de 'Fees Ocultos' sumándolos al primer item.
         """
         venta = Venta.objects.select_related('cliente', 'moneda').get(pk=venta_id, agencia=agencia)
@@ -25,19 +25,17 @@ class InvoicingService:
         if not venta.cliente:
             raise ValidationError(_("La venta debe tener un cliente asignado para facturar."))
             
-        if FacturaConsolidada.objects.filter(venta_asociada=venta).exists():
+        if Factura.objects.filter(venta_asociada=venta).exists():
             raise ValidationError(_("Esta venta ya tiene una factura asociada."))
 
         # 1. Crear la cabecera de la factura
-        # Nota: Usamos FacturaConsolidada que es el modelo normalizado para Venezuela
-        factura = FacturaConsolidada.objects.create(
+        factura = Factura.objects.create(
             agencia=agencia,
             cliente=venta.cliente,
             moneda=venta.moneda,
             venta_asociada=venta,
-            tipo_operacion=FacturaConsolidada.TipoOperacion.INTERMEDIACION if venta.items_venta.filter(tipo_item='AIR').exists() else FacturaConsolidada.TipoOperacion.VENTA_PROPIA,
-            moneda_operacion=FacturaConsolidada.MonedaOperacion.DIVISA if venta.moneda.codigo == 'USD' else FacturaConsolidada.MonedaOperacion.BOLIVAR,
-            # La tasa BCV se podría obtener de un servicio de scraping o del contexto
+            tipo_operacion=Factura.TipoOperacion.INTERMEDIACION if venta.items_venta.filter(tipo_item='AIR').exists() else Factura.TipoOperacion.VENTA_PROPIA,
+            moneda_operacion=Factura.MonedaOperacion.DIVISA if venta.moneda.codigo == 'USD' else Factura.MonedaOperacion.BOLIVAR,
             tasa_cambio_bcv=Decimal('0.00'), # Placeholder, debería venir del mercado
         )
 
@@ -66,11 +64,11 @@ class InvoicingService:
                 precio_unitario += total_fees
             
             # Mapear tipo de servicio para la factura consolidada
-            tipo_servicio = ItemFacturaConsolidada.TipoServicio.ALOJAMIENTO_Y_OTROS_GRAVADOS
+            tipo_servicio = ItemFactura.TipoServicio.ALOJAMIENTO_Y_OTROS_GRAVADOS
             if item_venta.producto_servicio.tipo_producto == 'AIR':
-                tipo_servicio = ItemFacturaConsolidada.TipoServicio.TRANSPORTE_AEREO_NACIONAL # O Internacional
+                tipo_servicio = ItemFactura.TipoServicio.TRANSPORTE_AEREO_NACIONAL # O Internacional
             
-            ItemFacturaConsolidada.objects.create(
+            ItemFactura.objects.create(
                 factura=factura,
                 descripcion=descripcion,
                 cantidad=item_venta.cantidad,
@@ -94,7 +92,7 @@ class InvoicingService:
         Recalcula los totales de una factura sumando sus items.
         Esta es una operación pesada que se centraliza aquí.
         """
-        factura = FacturaConsolidada.objects.get(pk=factura_id)
+        factura = Factura.objects.get(pk=factura_id)
         items = factura.items_factura.all()
         
         subtotal_base_gravada = Decimal('0.00')
@@ -103,9 +101,9 @@ class InvoicingService:
         monto_iva_16 = Decimal('0.00')
         
         for item in items:
-            if item.tipo_servicio == ItemFacturaConsolidada.TipoServicio.SERVICIO_EXPORTACION:
+            if item.tipo_servicio == ItemFactura.TipoServicio.SERVICIO_EXPORTACION:
                 subtotal_exportacion += item.subtotal_item
-            elif item.tipo_servicio == ItemFacturaConsolidada.TipoServicio.TRANSPORTE_AEREO_NACIONAL:
+            elif item.tipo_servicio == ItemFactura.TipoServicio.TRANSPORTE_AEREO_NACIONAL:
                 subtotal_exento += item.subtotal_item
             else:
                 if item.es_gravado:
@@ -120,5 +118,5 @@ class InvoicingService:
         factura.subtotal_exportacion = subtotal_exportacion
         factura.monto_iva_16 = monto_iva_16
         
-        # El .save() del modelo FacturaConsolidada ya calcula subtotal, monto_total y equivalencias en Bs.
+        # El .save() del modelo Factura ya calcula subtotal, monto_total y equivalencias en Bs.
         factura.save()

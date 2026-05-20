@@ -4,6 +4,30 @@
 import hashlib
 import logging
 import time
+import locale
+
+logger = logging.getLogger(__name__)
+
+# 🛡️ SAFE LOCALE MONKEY PATCH (SRE L3)
+# Intercepts setlocale globally to prevent "unsupported locale setting" crash
+try:
+    original_setlocale = locale.setlocale
+    def safe_setlocale(category, locale_name=None):
+        try:
+            return original_setlocale(category, locale_name)
+        except Exception as e:
+            logger.warning(f"⚠️ [SRE L3] Blocked unsupported locale setting '{locale_name}': {e}")
+            try:
+                return original_setlocale(category, '')
+            except Exception:
+                try:
+                    return original_setlocale(category, 'C')
+                except Exception:
+                    return 'C'
+    locale.setlocale = safe_setlocale
+    logger.info("✅ [SRE L3] Global locale.setlocale monkey patch applied successfully.")
+except Exception as e_patch:
+    logger.error(f"❌ [SRE L3] Failed to apply locale monkey patch: {e_patch}")
 
 from django.core.cache import cache
 from django.db import OperationalError, transaction
@@ -17,8 +41,6 @@ from apps.automation.parsers.ticket_parser import extract_data_from_text
 from apps.automation.services.venta_automation import VentaAutomationService
 from apps.bookings.models import BoletoImportado
 
-logger = logging.getLogger(__name__)
-
 class TicketParserService:
     """
     🏢 MULTI-TENANT | 🧠 ORQUESTADOR | 🚨 CRÍTICO
@@ -26,14 +48,38 @@ class TicketParserService:
     Coordina la extracción, normalización, persistencia y automatización financiera.
     """
 
+    def process_boleto(self, boleto, forced_client_id=None, ignore_manual=False):
+        """Bridge alias method to handle direct Boleto object calls from external modules."""
+        res = self.procesar_boleto(boleto_id=boleto.pk, forced_client_id=forced_client_id, ignore_manual=ignore_manual)
+        
+        # 🛡️ Guardia Anti-Huérfano: Solo actúa si el boleto se quedó en 'PRO' (crash durante procesamiento)
+        # _process_single_ticket ya gestiona COM/REV correctamente, NO sobreescribimos aquí
+        try:
+            boleto.refresh_from_db()
+            if boleto.estado_parseo == 'PRO':  # Stuck in processing = crash happened
+                boleto.estado_parseo = 'REV'
+                boleto.log_parseo = (boleto.log_parseo or '') + ' | Estado huérfano detectado y corregido.'
+                boleto.save(update_fields=['estado_parseo', 'log_parseo'])
+                logger.warning(f"⚠️ [SRE] process_boleto: Boleto {boleto.pk} estaba atascado en PRO. Corregido a REV.")
+        except Exception as e:
+            logger.error(f"❌ [SRE] Error en guardia anti-huérfano de process_boleto: {e}")
+            
+        return res
+
+
     def procesar_boleto(self, boleto_id, forced_client_id=None, ignore_manual=False, bypass_cache=False, manual_only=False):
         """Pipeline principal con lógica de reintentos para evitar deadlocks."""
         max_retries = 3
         retry_delay = 1
         
+        start_time = time.time()
         for attempt in range(max_retries):
             try:
-                return self._run_pipeline(boleto_id, forced_client_id, ignore_manual, bypass_cache, manual_only)
+                result = self._run_pipeline(boleto_id, forced_client_id, ignore_manual, bypass_cache, manual_only)
+                duration = time.time() - start_time
+                logger.info(f"⏱️ [PROFILING] Pipeline TOTAL para boleto {boleto_id}: {duration:.2f}s")
+                return result
+
             except OperationalError as e:
                 if any(err in str(e).lower() for err in ["deadlock", "database is locked"]):
                     if attempt < max_retries - 1:
@@ -41,8 +87,18 @@ class TicketParserService:
                         time.sleep(retry_delay)
                         continue
                 raise
-            except Exception as e:
-                logger.exception(f"❌ Fallo crítico en pipeline para boleto {boleto_id}: {e}")
+            except BaseException as e:
+                logger.exception(f"❌ Fallo crítico/Timeout (BaseException) en pipeline para boleto {boleto_id}: {e}")
+                # 🛡️ EMERGENCIA: Evitar que el boleto se quede en estado 'PRO' (En Proceso) para siempre
+                try:
+                    from apps.bookings.models import BoletoImportado
+                    BoletoImportado.all_objects.filter(pk=boleto_id).update(
+                        estado_parseo='REV',  # REVISION_REQUERIDA (max_length=3)
+                        log_parseo=f"Fallo Crítico/Timeout: {str(e)[:500]}"
+                    )
+                    logger.warning(f"⚠️ [SRE L3] procesar_boleto: Emergencia activada, sellado como REV.")
+                except Exception as e_inner:
+                    logger.error(f"No se pudo marcar boleto como REV: {e_inner}")
                 raise
 
     def _run_pipeline(self, boleto_id, forced_client_id, ignore_manual, bypass_cache=False, manual_only=False):
@@ -133,7 +189,10 @@ class TicketParserService:
                     from apps.automation.services.ai_engine import QuotaExhaustedException
                     
                     logger.info(f"🧠 Usando IA Primaria (Structured Outputs) para Boleto {boleto_id}...")
+                    ai_start = time.time()
                     datos_ia = UniversalAIParser().parse(texto, pdf_path=path_pdf, bypass_cache=bypass_cache)
+                    ai_duration = time.time() - ai_start
+                    logger.info(f"⏱️ [PROFILING] IA Engine parse duration: {ai_duration:.2f}s")
                     
                     if datos_ia and "error" not in datos_ia:
                         datos = datos_ia
@@ -159,22 +218,37 @@ class TicketParserService:
                 if datos is None:
                     try:
                         logger.info(f"⚡ Usando Fallback de Regex para Boleto {boleto_id}...")
+                        regex_start = time.time()
                         datos_regex = extract_data_from_text(texto, pdf_path=path_pdf, bypass_cache=bypass_cache)
-                        if datos_regex and "error" not in datos_regex:
+                        regex_duration = time.time() - regex_start
+                        logger.info(f"⏱️ [PROFILING] Regex Fallback duration: {regex_duration:.2f}s")
+                        
+                        # 🟡 VALIDACIÓN PERMISIVA: Solo necesitamos passenger_name O pnr para continuar
+                        # (antes era estricta: passenger_name AND segments > 0, lo que descardó datos válidos)
+                        tiene_minimo_viable = (
+                            datos_regex
+                            and not datos_regex.get("error")
+                            and (datos_regex.get("passenger_name") or datos_regex.get("pnr") or datos_regex.get("codigo_reserva"))
+                        )
+                        
+                        if tiene_minimo_viable:
                             datos = datos_regex
-                            logger.info("✅ Fallback de Regex exitoso.")
-                            # Si llegamos aquí es porque IA falló pero Regex salvó el día
-                            boleto.log_parseo += " | Fallback Regex exitoso."
+                            tiene_segmentos = len(datos_regex.get("segments", []) or datos_regex.get("segmentos", [])) > 0
+                            if tiene_segmentos:
+                                logger.info("✅ Fallback de Regex completo (pasajero + segmentos).")
+                                boleto.log_parseo = (boleto.log_parseo or "") + " | Regex exitoso (completo)."
+                            else:
+                                logger.warning("⚠️ Regex encontró datos de pasajero pero sin segmentos. Continuando con datos parciales.")
+                                boleto.log_parseo = (boleto.log_parseo or "") + " | Regex parcial (sin segmentos). Requiere revisión."
+                                # Marcamos para revisión pero NO descartamos los datos
+                                datos['_requiere_revision'] = True
                         else:
-                            # 🚨 FALLO TOTAL: Ni IA ni Regex
-                            msg_error = "Parseo Inteligente falló y requiere revisión manual (Ningún motor pudo interpretar el archivo)."
-                            boleto.estado_parseo = BoletoImportado.EstadoParseo.REVISION_REQUERIDA
+                            # 🚨 FALLO TOTAL: Ni IA ni Regex extrajeron nada útil
+                            msg_error = "Parseo Inteligente falló: Ningún motor pudo interpretar el archivo (sin pasajero ni PNR)."
                             return self._finalize_error(boleto, msg_error)
                     except Exception as e_reg:
                         logger.error(f"❌ Error en motor de Regex: {e_reg}")
-                        msg_error = f"Parseo Inteligente falló y requiere revisión manual. Error Regex: {str(e_reg)}"
-                        boleto.estado_parseo = BoletoImportado.EstadoParseo.REVISION_REQUERIDA
-                        return self._finalize_error(boleto, msg_error)
+                        return self._finalize_error(boleto, f"Error en Regex Fallback: {str(e_reg)}")
                 
                 # 4c. Guardar en caché Redis el resultado final (sea IA o Regex)
                 if datos and "error" not in datos:
@@ -187,32 +261,62 @@ class TicketParserService:
             # 5. Normalización y Procesamiento (Multi-Pax Aware)
             if isinstance(datos, dict) and datos.get('is_multi_pax'):
                 tickets = datos.get('tickets', [])
-                logger.info(f"👨‍👩‍👧‍👦 Grupo detectado: {len(tickets)} pasajeros. Iniciando Split...")
+                logger.info(f"👨‍👩‍👧‍👦 Grupo detectado: {len(tickets)} pasajeros. Iniciando Split Atómico...")
                 
-                # El primer boleto usa la instancia actual
-                first_ticket_data = DataNormalizationService.normalize_ticket_data(tickets[0])
-                venta_maestra = self._process_single_ticket(boleto, first_ticket_data, forced_client_id)
+                from apps.bookings.models import BoletoImportadoTransito
                 
-                # Los siguientes crean nuevas instancias
-                for i, ticket_data in enumerate(tickets[1:], start=1):
-                    try:
-                        logger.info(f"👤 Creando instancia para pasajero adicional {i+1}...")
-                        nuevo_boleto = BoletoImportado.objects.create(
-                            archivo_boleto=boleto.archivo_boleto,
-                            agencia=boleto.agencia,
-                            creado_por=boleto.creado_por,
-                            estado_parseo='PEN'
-                        )
-                        norm_data = DataNormalizationService.normalize_ticket_data(ticket_data)
-                        # El sistema de automatización de ventas ya sabe unir al PNR existente
-                        self._process_single_ticket(nuevo_boleto, norm_data, forced_client_id)
-                    except Exception as e_multi:
-                        logger.error(f"Error procesando pasajero {i+1} del grupo: {e_multi}")
-                
-                return venta_maestra
+                try:
+                    with transaction.atomic():
+                        # 1. Crear registros de tránsito para asegurar que todo el grupo está staged
+                        transito_records = []
+                        for i, ticket_data in enumerate(tickets):
+                            tr = BoletoImportadoTransito.objects.create(
+                                boleto_origen=boleto,
+                                agencia=boleto.agencia,
+                                ticket_index=i,
+                                nombre_pasajero=ticket_data.get('passenger_name'),
+                                numero_boleto=ticket_data.get('ticket_number'),
+                                datos_json=ticket_data,
+                                procesado=False
+                            )
+                            transito_records.append(tr)
+                        
+                        logger.info(f"Staged {len(transito_records)} pasajeros en BoletoImportadoTransito.")
+                        
+                        # 2. Procesar el primer boleto (usa la instancia actual)
+                        first_tr = transito_records[0]
+                        first_ticket_data = DataNormalizationService.normalize_ticket_data(first_tr.datos_json)
+                        venta_maestra = self._process_single_ticket(boleto, first_ticket_data, forced_client_id)
+                        first_tr.procesado = True
+                        first_tr.save(update_fields=['procesado'])
+                        
+                        # 3. Procesar los siguientes creando nuevas instancias de BoletoImportado
+                        for tr in transito_records[1:]:
+                            logger.info(f"👤 Creando instancia para pasajero adicional {tr.nombre_pasajero} (Ticket {tr.ticket_index+1})...")
+                            create_kwargs = {
+                                'archivo_boleto': boleto.archivo_boleto,
+                                'agencia': boleto.agencia,
+                                'estado_parseo': 'PEN'
+                            }
+                            if hasattr(boleto, 'creado_por'):
+                                create_kwargs['creado_por'] = boleto.creado_por
+                            nuevo_boleto = BoletoImportado.objects.create(**create_kwargs)
+                            norm_data = DataNormalizationService.normalize_ticket_data(tr.datos_json)
+                            self._process_single_ticket(nuevo_boleto, norm_data, forced_client_id)
+                            tr.procesado = True
+                            tr.save(update_fields=['procesado'])
+                    
+                    return venta_maestra
+                except Exception as e_multi:
+                    logger.error(f"❌ Error atómico durante el splitting del grupo: {e_multi}", exc_info=True)
+                    # En caso de error, el estado del boleto principal se marcará como error
+                    return self._finalize_error(boleto, f"Error en Split Atómico de Pasajeros: {str(e_multi)}")
+
             
             # Procesamiento estándar (Single Pax)
+            requiere_revision = bool(datos.get('_requiere_revision', False))  # Flag de datos parciales
             datos_norm = DataNormalizationService.normalize_ticket_data(datos)
+            datos_norm['_requiere_revision'] = requiere_revision  # Preservar flag después de normalización
             return self._process_single_ticket(boleto, datos_norm, forced_client_id)
 
     def _process_single_ticket(self, boleto, data, forced_client_id):
@@ -238,26 +342,32 @@ class TicketParserService:
                 # Guardamos el estado parcial para liberar el lock de tabla lo antes posible
                 boleto.save()
 
-            # 2. Fase de Generación de Archivos (Lenta - FUERA de la transacción)
-            # Si Gotenberg falla o Gemini es lento, no bloqueamos la base de datos
+            # 2. Fase de Generación de Archivos (Lenta - Ahora en Celery de forma asíncrona)
             try:
-                logger.info(f"📄 Generando TKT PDF para Boleto {boleto.pk}")
-                pdf_bytes, fname = PdfGenerationService.generate_ticket(data, agencia_obj=boleto.agencia, boleto_obj=boleto)
+                from apps.common.utils.celery_utils import safe_delay
+                from core.tasks import generar_pdf_ticket_async_task
+                logger.info(f"⏳ Registrando encolado de PDF para Boleto {boleto.pk} en on_commit")
                 
-                if pdf_bytes and len(pdf_bytes) > 100:
-                    from django.core.files.base import ContentFile
-                    # Guardamos el archivo físico (operación atómica de FS/Cloudinary)
-                    boleto.archivo_pdf_generado.save(fname, ContentFile(pdf_bytes), save=True)
-                    logger.info(f"✅ PDF guardado: {fname} ({len(pdf_bytes)} bytes)")
-                else:
-                    logger.warning(f"⚠️ PDF generado vacío o muy pequeño ({len(pdf_bytes) if pdf_bytes else 0} bytes). Revisa Gotenberg.")
-            except Exception as e_pdf:
-                logger.error(f"❌ Error generando PDF (Omitiendo para no fallar el proceso): {e_pdf}")
+                def enqueue_pdf(b_pk=boleto.pk, a_pk=boleto.agencia.pk if boleto.agencia else None):
+                    safe_delay(generar_pdf_ticket_async_task, b_pk, agencia_id=a_pk, _queue='celery')
+                
+                transaction.on_commit(enqueue_pdf)
+            except Exception as e_pdf_queue:
+                logger.error(f"❌ Error al registrar encolado de PDF: {e_pdf_queue}")
 
             # 3. Fase de Cierre (Rápida)
             with transaction.atomic():
-                boleto.estado_parseo = BoletoImportado.EstadoParseo.COMPLETADO
-                boleto.log_parseo = f"Completado exitosamente. Venta ID: {venta.pk if venta else 'N/A'}"
+                # Si los datos son parciales (sin segmentos), cerramos en REV (Revisión Requerida)
+                # para que el usuario pueda completar la información faltante
+                es_parcial = bool(data.get('_requiere_revision', False))
+                if es_parcial:
+                    boleto.estado_parseo = BoletoImportado.EstadoParseo.REVISION_REQUERIDA  # 'REV'
+                    boleto.log_parseo = f"Datos parciales (sin segmentos de vuelo). PDF generado. Revisa el itinerario."
+                    logger.warning(f"⚠️ Boleto {boleto.pk} cerrado como REV (datos parciales). PDF generado correctamente.")
+                else:
+                    boleto.estado_parseo = BoletoImportado.EstadoParseo.COMPLETADO  # 'COM'
+                    boleto.log_parseo = f"Completado exitosamente. Venta ID: {venta.pk if venta else 'N/A'}"
+                    logger.info(f"✅ Boleto {boleto.pk} cerrado como COM. Venta: {venta.pk if venta else 'N/A'}")
                 boleto.save(update_fields=['estado_parseo', 'log_parseo'])
 
                 # Notificación de éxito
@@ -278,24 +388,48 @@ class TicketParserService:
             from core.tasks import enviar_notificacion_whatsapp_task
             mensaje_ws = f"¡Hola {venta.cliente.nombres}! ✈️ Tu boleto para {venta.localizador} ha sido procesado con éxito. Te adjuntamos el PDF oficial de {boleto.agencia.nombre_comercial or boleto.agencia.nombre}."
             
-            pdf_url = boleto.archivo_pdf_generado.url if boleto.archivo_pdf_generado else None
-            
-            enviar_notificacion_whatsapp_task.delay(
-                numero_cliente=getattr(venta.cliente, 'telefono_principal', None) or getattr(venta.cliente, 'telefono_secundario', None),
-                mensaje=mensaje_ws,
-                email_cliente=venta.cliente.email,
-                agencia_id=boleto.agencia.pk,
-                media_url=pdf_url,
-                file_name=f"Boleto_{venta.localizador}.pdf"
-            )
+            def enqueue_whatsapp(
+                num=getattr(venta.cliente, 'telefono_principal', None) or getattr(venta.cliente, 'telefono_secundario', None),
+                msg=mensaje_ws,
+                email=venta.cliente.email,
+                a_pk=boleto.agencia.pk,
+                b_pk=boleto.pk,
+                loc=venta.localizador
+            ):
+                # Retrieve fresh boleto object in task to fetch the generated PDF URL
+                fresh_b = BoletoImportado.objects.filter(pk=b_pk).first()
+                p_url = fresh_b.archivo_pdf_generado.url if fresh_b and fresh_b.archivo_pdf_generado else None
+                enviar_notificacion_whatsapp_task.delay(
+                    numero_cliente=num,
+                    mensaje=msg,
+                    email_cliente=email,
+                    agencia_id=a_pk,
+                    media_url=p_url,
+                    file_name=f"Boleto_{loc}.pdf"
+                )
+
+            transaction.on_commit(enqueue_whatsapp)
         except Exception as e_ws:
-            logger.error(f"❌ Error encolando WhatsApp: {e_ws}")
+            logger.error(f"❌ Error encolando WhatsApp en on_commit: {e_ws}")
 
     def _finalize_error(self, boleto, error_msg):
         logger.error(f"❌ Error Boleto {boleto.pk}: {error_msg}")
-        boleto.estado_parseo = 'ERR'
-        boleto.log_parseo = error_msg
-        boleto.save()
+        # Si ya está marcado como REV (Revisión Requerida), lo mantenemos
+        # De lo contrario, marcamos como ERR
+        if boleto.estado_parseo not in ('REV', 'ERR'):
+            boleto.estado_parseo = 'REV'  # Preferimos REV para que el usuario pueda corregir
+        boleto.log_parseo = str(error_msg)[:2000]  # Truncar para no sobrepasar el campo
+        try:
+            boleto.save(update_fields=['estado_parseo', 'log_parseo'])
+        except Exception as e_save:
+            logger.error(f"❌ Error guardando estado de error en boleto {boleto.pk}: {e_save}")
+            try:
+                BoletoImportado.all_objects.filter(pk=boleto.pk).update(
+                    estado_parseo='ERR',
+                    log_parseo=str(error_msg)[:200]
+                )
+            except Exception:
+                pass
         return None
 
     def _notify_success(self, venta):
@@ -341,31 +475,62 @@ def _parse_sabre_ticket(plain_text: str):
     if 'error' in data:
         return data
 
-    nombre = data.get('nombre_pasajero', '')
+    nombre = data.get('nombre_pasajero') or data.get('passenger_name') or data.get('NOMBRE DEL PASAJERO', '')
     if '/' in nombre:
         parts = nombre.split('/')
         passenger_name = f"{parts[1].strip()} {parts[0].strip()}"
     else:
         passenger_name = nombre
 
+    # Limpiar títulos comunes en el nombre del pasajero para compatibilidad
+    import re
+    passenger_name = re.sub(r'\s+(MR|MRS|MS|MSTR|MISS|M|F)$', '', passenger_name, flags=re.IGNORECASE)
+
+    ticket_num = data.get('ticket_number') or data.get('NUMERO DE BOLETO') or data.get('numero_boleto', '')
+    res_code = data.get('codigo_reserva') or data.get('CODIGO RESERVA') or data.get('pnr', '')
+    airline = data.get('aerolinea_emisora') or data.get('NOMBRE AEROLINEA') or data.get('nombre_aerolinea', '')
+    agent = data.get('agente') or data.get('AGENTE EMISOR') or data.get('agente_emisor', '')
+
+    # Extraer fecha de emisión ISO
+    from apps.automation.parsers.parsing_utils import _fecha_a_iso, _formatear_fecha_dd_mm_yyyy
+    raw_issue_date = data.get('fecha_emision_iso') or data.get('FECHA DE EMISION') or data.get('fecha_emision', '')
+    issue_date_iso = _fecha_a_iso(_formatear_fecha_dd_mm_yyyy(raw_issue_date)) or raw_issue_date
+
     normalized = {
         'passenger_name': passenger_name,
-        'ticket_number': data.get('numero_boleto', ''),
-        'reservation_code': data.get('codigo_reserva', ''),
-        'airline_name': data.get('aerolinea_emisora', ''),
-        'issuing_agent': data.get('agente', ''),
+        'ticket_number': ticket_num,
+        'reservation_code': res_code,
+        'airline_name': airline,
+        'issuing_agent': agent,
+        'issuing_date_iso': issue_date_iso,
         'segments': []
     }
 
-    flights = data.get('flights', [])
+    flights = data.get('vuelos') or data.get('flights') or data.get('segmentos') or []
     for f in flights:
+        if not isinstance(f, dict): continue
+        vuelo_num = f.get('numero_vuelo') or f.get('vuelo') or f.get('flightNumber', '')
+        
+        # Origen / Destino
+        origen = f.get('origen', '')
+        if isinstance(origen, dict):
+            origen = origen.get('ciudad') or origen.get('location', '')
+            
+        destino = f.get('destino', '')
+        if isinstance(destino, dict):
+            destino = destino.get('ciudad') or destino.get('location', '')
+            
+        # Fechas
+        raw_salida = f.get('fecha_salida_iso') or f.get('fecha_salida') or f.get('date', '')
+        f_salida = _fecha_a_iso(_formatear_fecha_dd_mm_yyyy(raw_salida)) or raw_salida
+        
         normalized['segments'].append({
-            'flight_number': f.get('vuelo', f.get('flightNumber', '')),
-            'origin': f.get('origen', ''),
-            'destination': f.get('destino', ''),
-            'departure_date_iso': f.get('fecha_salida', ''),
-            'departure_time': f.get('hora_salida', ''),
-            'arrival_time': f.get('hora_llegada', '')
+            'flight_number': vuelo_num,
+            'origin': origen,
+            'destination': destino,
+            'departure_date_iso': f_salida,
+            'departure_time': f.get('hora_salida') or f.get('departure', {}).get('time', ''),
+            'arrival_time': f.get('hora_llegada') or f.get('arrival', {}).get('time', '')
         })
 
     return {'SOURCE_SYSTEM': 'SABRE', 'normalized': normalized}

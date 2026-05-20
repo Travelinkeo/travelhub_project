@@ -21,8 +21,9 @@ class TravelHubAgent:
     Capaz de consultar datos reales de contabilidad, ventas y clientes.
     """
     
-    def __init__(self):
-        api_key = os.environ.get("GEMINI_API_KEY") or getattr(settings, "GEMINI_API_KEY", None)
+    def __init__(self, agency=None):
+        from apps.automation.services.ai_engine import get_gemini_api_key
+        api_key = get_gemini_api_key(agency)
         if not api_key:
             logger.error("TravelHubAgent: GEMINI_API_KEY no configurada.")
             raise ValueError("Falta GEMINI_API_KEY")

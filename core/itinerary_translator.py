@@ -4,6 +4,7 @@ import json
 import logging
 import re
 import traceback
+from decimal import Decimal
 from pathlib import Path
 from typing import Any
 
@@ -274,32 +275,38 @@ class TicketCalculator:
     """Calculadora de precios de boletos."""
     
     @staticmethod
-    def calculate_ticket_price(tarifa: float, fee_consolidador: float, fee_interno: float, porcentaje: float) -> dict[str, Any]:
+    def calculate_ticket_price(tarifa: Decimal, fee_consolidador: Decimal, fee_interno: Decimal, porcentaje: Decimal) -> dict[str, Any]:
         """
         Calc    11111111111111111111322W222eto incluyendo IGTF (3%).
         Fórmula: (Tarifa + Fee Consolid. + Fee Interno) + % Ganancia + IGTF(3% del total)
         """
         try:
+            # Forzamos Decimal si llegan enteros/floats accidentalmente
+            tarifa = Decimal(str(tarifa))
+            fee_consolidador = Decimal(str(fee_consolidador))
+            fee_interno = Decimal(str(fee_interno))
+            porcentaje = Decimal(str(porcentaje))
+
             suma_base = tarifa + fee_consolidador + fee_interno
-            monto_porcentaje = suma_base * (porcentaje / 100)
+            monto_porcentaje = suma_base * (porcentaje / Decimal('100'))
             subtotal = suma_base + monto_porcentaje
             
             # IGTF (Impuesto a Grandes Transacciones Financieras - 3%)
             # Se asume que aplica al monto total en divisas
-            igtf = subtotal * 0.03
+            igtf = subtotal * Decimal('0.03')
             
             precio_final = subtotal + igtf
             
             return {
-                'tarifa': tarifa,
-                'fee_consolidador': fee_consolidador,
-                'fee_interno': fee_interno,
-                'suma_base': suma_base,
-                'porcentaje': porcentaje,
-                'monto_porcentaje': monto_porcentaje,
-                'subtotal': subtotal,
-                'igtf': igtf,
-                'precio_final': precio_final,
+                'tarifa': float(tarifa),
+                'fee_consolidador': float(fee_consolidador),
+                'fee_interno': float(fee_interno),
+                'suma_base': float(suma_base),
+                'porcentaje': float(porcentaje),
+                'monto_porcentaje': float(monto_porcentaje),
+                'subtotal': float(subtotal),
+                'igtf': float(igtf),
+                'precio_final': float(precio_final),
                 'desglose': f"Subtotal: ${subtotal:.2f} + IGTF (3%): ${igtf:.2f} = Total: ${precio_final:.2f}"
             }
         except Exception as e:

@@ -127,9 +127,14 @@ class Migration(migrations.Migration):
             name="productoservicio",
             table=None,
         ),
-        migrations.AlterModelTable(
-            name="productoterrestre",
-            table=None,
+        migrations.SeparateDatabaseAndState(
+            state_operations=[
+                migrations.AlterModelTable(
+                    name="productoterrestre",
+                    table=None,
+                ),
+            ],
+            database_operations=[],
         ),
         migrations.AlterModelTable(
             name="proveedor",

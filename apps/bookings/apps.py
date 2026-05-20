@@ -8,4 +8,4 @@ class BookingsConfig(AppConfig):
     verbose_name = 'Reservas y Ventas (Bookings)'
 
     def ready(self):
-        pass
+        import apps.bookings.signals  # noqa: F401

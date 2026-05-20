@@ -12,17 +12,15 @@ class CopaParser(BaseTicketParser):
     """Parser para boletos de Copa Airlines (sistema SPRK) - Extracción completa desde HTML"""
     
     def can_parse(self, text: str) -> bool:
-        text_upper = text.upper()
+        purified = self.purify_text_for_detection(text)
         
-        # Marcadores específicos de COPA SPRK
-        has_copa = 'COPA AIRLINES' in text_upper
-        has_locator = 'RECORD LOCATOR' in text_upper or 'LOCALIZADOR' in text_upper
-        has_itinerary = 'ITINERARY' in text_upper or 'ITINERARIO' in text_upper
+        has_copa = 'COPA AIRLINES' in purified or 'COPA' in purified
+        has_locator = 'RECORD LOCATOR' in purified or 'LOCALIZADOR' in purified or 'CODIGO DE RESERVACION' in purified
+        has_itinerary = 'ITINERARY' in purified or 'ITINERARIO' in purified
         
-        # Evitar capturar boletos de GDS (Sabre) que sean de Copa
-        is_sabre = 'RECIBO DE PASAJE ELECTRÓNICO' in text_upper or 'ETICKET RECEIPT' in text_upper
+        is_sabre = 'RECIBO DE PASAJE' in purified or 'ETICKET RECEIPT' in purified
         
-        return (has_copa and (has_locator or has_itinerary)) and not is_sabre
+        return bool((has_copa and (has_locator or has_itinerary)) and not is_sabre)
     
     def parse(self, text: str, html_text: str = "") -> ParsedTicketData:
         # Decodificar quoted-printable si es necesario

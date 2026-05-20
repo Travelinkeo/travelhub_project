@@ -1,0 +1,98 @@
+{% if success_msg %}
+<div class="mb-4 p-3 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-xs flex items-center gap-2 animate-bounce">
+    <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+    </svg>
+    {{ success_msg }}
+</div>
+{% endif %}
+
+{% if propuestas %}
+    {% for prop in propuestas %}
+    <div class="p-4 rounded-xl bg-emerald-900/10 border border-emerald-500/20 hover:border-emerald-500/40 transition-all space-y-3 relative group">
+        <!-- Badge and Type -->
+        <div class="flex items-center justify-between">
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider 
+                {% if prop.accion_tipo == 'CREAR_ASIENTO' %}bg-emerald-500/20 text-emerald-300 border border-emerald-500/30
+                {% elif prop.accion_tipo == 'CONCILIAR_REPORTE' %}bg-indigo-500/20 text-indigo-300 border border-indigo-500/30
+                {% else %}bg-amber-500/20 text-amber-300 border border-amber-500/30{% endif %}">
+                {{ prop.get_accion_tipo_display }}
+            </span>
+            <span class="text-[10px] text-emerald-100/40 font-mono">{{ prop.fecha_creacion|date:"d M Y, H:i" }}</span>
+        </div>
+
+        <!-- Justification / Description -->
+        <p class="text-white text-xs font-medium leading-relaxed">
+            {{ prop.ia_justificacion }}
+        </p>
+
+        <!-- Dynamic Payload Detail Drawer (Asiento details or Reconciliation Report info) -->
+        <div class="p-3 rounded-lg bg-black/40 border border-emerald-950 text-[10px] font-mono text-emerald-300/90 space-y-2 overflow-x-auto">
+            {% if prop.accion_tipo == 'CREAR_ASIENTO' %}
+                <div class="font-bold border-b border-emerald-900/40 pb-1 mb-1 text-white">ASIENTO PROPUESTO:</div>
+                <div class="text-emerald-400">Glosa: {{ prop.payload_datos.glosa }}</div>
+                <table class="w-full text-left mt-2">
+                    <thead>
+                        <tr class="text-emerald-100/40 border-b border-emerald-900/20">
+                            <th class="py-1">Cuenta</th>
+                            <th class="py-1 text-right">Debe ($)</th>
+                            <th class="py-1 text-right">Haber ($)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for det in prop.payload_datos.detalles %}
+                        <tr class="border-b border-emerald-900/10">
+                            <td class="py-1">{{ det.codigo_cuenta }} - {{ det.descripcion|default:"Detalle" }}</td>
+                            <td class="py-1 text-right text-emerald-400 font-bold">{% if det.debe %}{{ det.debe|floatformat:2 }}{% else %}-{% endif %}</td>
+                            <td class="py-1 text-right text-rose-400 font-bold">{% if det.haber %}{{ det.haber|floatformat:2 }}{% else %}-{% endif %}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% elif prop.accion_tipo == 'CONCILIAR_REPORTE' %}
+                <div class="font-bold border-b border-indigo-900/40 pb-1 mb-1 text-white">CONCILIACIÓN AUTOMÁTICA DE PROVEEDOR:</div>
+                <div>Reporte ID: <span class="text-indigo-400">{{ prop.payload_datos.report_id }}</span></div>
+                <div class="text-emerald-400">Detalles: {{ prop.payload_datos.justification }}</div>
+            {% else %}
+                <pre class="text-[9px]">{{ prop.payload_datos }}</pre>
+            {% endif %}
+        </div>
+
+        <!-- Action Form -->
+        <form class="space-y-2 pt-2 border-t border-emerald-900/20">
+            {% csrf_token %}
+            <input type="text" name="comentarios" placeholder="Opcional: Nota de revisión contable..." 
+                   class="w-full bg-emerald-950/40 border border-emerald-500/20 rounded-lg py-1.5 px-3 text-[11px] text-white placeholder-emerald-100/30 focus:outline-none focus:border-emerald-500/50 transition-all">
+            
+            <div class="flex items-center gap-2">
+                <button type="button"
+                        hx-post="{% url 'finance:ai_proposal_resolve_htmx' prop.pk 'approve' %}"
+                        hx-target="#pending-proposals-container"
+                        hx-include="closest form"
+                        hx-swap="outerHTML"
+                        class="flex-1 py-1.5 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium transition-all shadow-md flex items-center justify-center gap-1">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    Aprobar
+                </button>
+                <button type="button"
+                        hx-post="{% url 'finance:ai_proposal_resolve_htmx' prop.pk 'reject' %}"
+                        hx-target="#pending-proposals-container"
+                        hx-include="closest form"
+                        hx-swap="outerHTML"
+                        class="py-1.5 px-3 rounded-lg bg-rose-950/40 hover:bg-rose-900/60 border border-rose-500/30 text-rose-300 text-xs font-medium transition-all">
+                    Rechazar
+                </button>
+            </div>
+        </form>
+    </div>
+    {% endfor %}
+{% else %}
+    <div class="text-center py-8 text-emerald-100/30 text-xs flex flex-col items-center justify-center gap-2">
+        <svg class="w-8 h-8 opacity-40 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+        </svg>
+        <span>No hay transacciones pendientes en el buffer. Todo al día.</span>
+    </div>
+{% endif %}

@@ -40,14 +40,15 @@ class GeminiMigrationValidator:
     y requisitos de vacunación.
     """
     
-    def __init__(self):
+    def __init__(self, agency=None):
         """Inicializa el cliente de Gemini (lazy import)"""
-        api_key = settings.GEMINI_API_KEY
-        if not api_key:
-            raise ValueError("GEMINI_API_KEY no configurada en settings")
-        
-        genai = _get_genai_client()
-        self.client = genai.Client(api_key=api_key)
+        from apps.automation.services.ai_engine import get_gemini_api_key
+        api_key = get_gemini_api_key(agency)
+        if api_key:
+            genai = _get_genai_client()
+            self.client = genai.Client(api_key=api_key)
+        else:
+            self.client = None
         self.model_name = 'gemini-2.0-flash'
     
     def validate_visa_requirements(
@@ -56,7 +57,8 @@ class GeminiMigrationValidator:
         destination: str,
         transit_countries: list = None,
         passport_expiry: date = None,
-        travel_date: date = None
+        travel_date: date = None,
+        agency = None
     ) -> MigrationValidationResult:
         """
         Valida requisitos migratorios usando Gemini AI.
@@ -67,11 +69,23 @@ class GeminiMigrationValidator:
             transit_countries: Lista de códigos ISO de países de tránsito
             passport_expiry: Fecha de vencimiento del pasaporte
             travel_date: Fecha del viaje
+            agency: Agencia de la cual obtener la API Key
         
         Returns:
             MigrationValidationResult con los requisitos detectados
         """
         try:
+            client = self.client
+            if agency:
+                from apps.automation.services.ai_engine import get_gemini_api_key
+                api_key = get_gemini_api_key(agency)
+                if api_key:
+                    genai = _get_genai_client()
+                    client = genai.Client(api_key=api_key)
+            
+            if not client:
+                raise ValueError("Gemini Client no configurado.")
+
             prompt = self._build_migration_prompt(
                 nationality=nationality,
                 destination=destination,
@@ -82,7 +96,7 @@ class GeminiMigrationValidator:
             
             logger.info(f"🤖 Consultando Gemini: {nationality} → {destination}")
             
-            response = self.client.models.generate_content(
+            response = client.models.generate_content(
                 model=self.model_name,
                 contents=prompt
             )

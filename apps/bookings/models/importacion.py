@@ -15,6 +15,16 @@ logger = logging.getLogger(__name__)
 
 class BoletoImportado(SoftDeleteModel, AgenciaMixin, models.Model):
     id_boleto_importado = models.AutoField(primary_key=True, verbose_name=_("ID Boleto Importado"))
+    
+    @property
+    def id(self):
+        """Alias para compatibilidad con interfaces genéricas del ORM y serializadores"""
+        return self.id_boleto_importado
+
+    @id.setter
+    def id(self, value):
+        self.id_boleto_importado = value
+
     archivo_boleto = models.FileField(
         _("Archivo del Boleto (.pdf, .txt, .eml)"),
         upload_to='boletos_importados/%Y/%m/',
@@ -117,6 +127,8 @@ class BoletoImportado(SoftDeleteModel, AgenciaMixin, models.Model):
         help_text=_("ID del archivo en la nube de Telegram (para almacenamiento gratuito).")
     )
 
+    raw_hash = models.CharField(_("Hash del Contenido"), max_length=64, blank=True, null=True, db_index=True, help_text=_("Hash SHA-256 para evitar duplicados."))
+
     version = models.PositiveIntegerField(_("Versión"), default=1, help_text=_("Versión del boleto (1=Original, 2+=Re-emisión)"))
     
     boleto_padre = models.ForeignKey(
@@ -204,3 +216,32 @@ class SolicitudAnulacion(AgenciaMixin, models.Model):
 
     def __str__(self):
         return f"Anulación {self.id_anulacion} - Boleto {self.id_anulacion}"
+
+
+class BoletoImportadoTransito(AgenciaMixin, models.Model):
+    id_transito = models.AutoField(primary_key=True, verbose_name=_("ID Tránsito"))
+    boleto_origen = models.ForeignKey(
+        BoletoImportado,
+        on_delete=models.CASCADE,
+        related_name='splits_transito',
+        verbose_name=_("Boleto Origen")
+    )
+    ticket_index = models.PositiveIntegerField(_("Índice de Ticket"), default=0)
+    nombre_pasajero = models.CharField(_("Nombre Pasajero"), max_length=150, blank=True, null=True)
+    numero_boleto = models.CharField(_("Número de Boleto"), max_length=50, blank=True, null=True)
+    datos_json = models.JSONField(_("Datos Normalizados"), help_text=_("Datos de ticket normalizados staged en tránsito."))
+    procesado = models.BooleanField(_("Procesado"), default=False)
+    fecha_creacion = models.DateTimeField(_("Fecha de Creación"), auto_now_add=True)
+
+    class Meta:
+        verbose_name = _("Boleto Importado en Tránsito")
+        verbose_name_plural = _("Boletos Importados en Tránsito")
+        ordering = ['id_transito']
+        indexes = [
+            models.Index(fields=['agencia_id', 'procesado']),
+            models.Index(fields=['boleto_origen_id', 'procesado']),
+        ]
+
+    def __str__(self):
+        return f"Tránsito {self.id_transito} - Boleto {self.numero_boleto or 'N/A'} ({self.nombre_pasajero or 'N/A'})"
+

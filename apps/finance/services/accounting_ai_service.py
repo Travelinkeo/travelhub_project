@@ -1,3 +1,15 @@
+# ==============================================================================
+# 🧠 MOTORES DE INTELIGENCIA ARTIFICIAL EN TRAVELHUB: CPA ENGINE
+# ==============================================================================
+# ESTE ARCHIVO: 'accounting_ai_service.py' (AccountingAIService)
+# ROL: Generación física de asientos contables estructurados y determinísticos.
+# PRINCIPAL CARACTERÍSTICA: No interactivo. Genera asientos con validación estricta
+# de partida doble mediante esquemas estructurados de Pydantic.
+#
+# NOTA DE DISEÑO: No confundir con 'ai_accounting_service.py' (AIAccountingService),
+# el cual es el CFO Virtual interactivo basado en chat y Function Calling.
+# ==============================================================================
+
 import logging
 from decimal import Decimal
 

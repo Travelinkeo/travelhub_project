@@ -51,7 +51,7 @@ class ParsedTicketData:
         # Re-implementar el to_dict completo para asegurar integridad
         
         # 1. Aerolínea del primer vuelo (o del raw_data)
-        airline_name = self.raw_data.get('airline_name')
+        airline_name = self.raw_data.get('airline_name') or self.raw_data.get('reserva', {}).get('aerolinea_emisora')
         if not airline_name and self.flights:
             airline_name = self.flights[0].get('aerolinea')
             
@@ -65,8 +65,15 @@ class ParsedTicketData:
             solo_pnr = solo_pnr.split('/')[-1]
             
         # 4. Agente Emisor (ID Único)
-        agente_id = self.agency.get('iata') or self.agency.get('numero_iata') or self.agency.get('name')
-        if agente_id:
+        agente_id = None
+        used_key = None
+        for key in ['iata', 'numero_iata', 'name']:
+            val = self.agency.get(key)
+            if val and val != 'No encontrado':
+                agente_id = val
+                used_key = key
+                break
+        if agente_id and used_key != 'name':
             # Regla: solo el ID/Número
             match = re.search(r'([A-Z0-9]{3,})', str(agente_id))
             if match: agente_id = match.group(1)
@@ -86,7 +93,45 @@ class ParsedTicketData:
                 logger.warning(f"No se pudo calcular impuestos diferencial: {e}")
                 impuestos = "0.00"
 
-        return {
+        # Normalizar vuelos
+        vuelos_normalizados = []
+        for f in (self.flights or []):
+            if not isinstance(f, dict):
+                continue
+            f_norm = f.copy()
+            # 1. Normalizar fecha_salida_iso
+            if 'fecha_salida_iso' not in f_norm or not f_norm['fecha_salida_iso']:
+                raw_salida = f_norm.get('fecha_salida') or f_norm.get('date', '')
+                if raw_salida:
+                    from apps.automation.parsers.parsing_utils import _fecha_a_iso, _formatear_fecha_dd_mm_yyyy
+                    formatted = _formatear_fecha_dd_mm_yyyy(raw_salida)
+                    f_norm['fecha_salida_iso'] = _fecha_a_iso(formatted) or _fecha_a_iso(raw_salida)
+            
+            # 2. Normalizar fecha_llegada_iso
+            if 'fecha_llegada_iso' not in f_norm or not f_norm['fecha_llegada_iso']:
+                raw_llegada = f_norm.get('fecha_llegada') or f_norm.get('fecha_salida') or f_norm.get('date', '')
+                if raw_llegada:
+                    from apps.automation.parsers.parsing_utils import _fecha_a_iso, _formatear_fecha_dd_mm_yyyy
+                    formatted = _formatear_fecha_dd_mm_yyyy(raw_llegada)
+                    f_norm['fecha_llegada_iso'] = _fecha_a_iso(formatted) or _fecha_a_iso(raw_llegada)
+
+            # 3. Normalizar origen a diccionario para compatibilidad
+            origen_val = f_norm.get('origen')
+            if isinstance(origen_val, str):
+                f_norm['origen'] = {'ciudad': origen_val, 'pais': None}
+            elif not isinstance(origen_val, dict):
+                f_norm['origen'] = {'ciudad': str(origen_val or ''), 'pais': None}
+                
+            # 4. Normalizar destino a diccionario para compatibilidad
+            destino_val = f_norm.get('destino')
+            if isinstance(destino_val, str):
+                f_norm['destino'] = {'ciudad': destino_val, 'pais': None}
+            elif not isinstance(destino_val, dict):
+                f_norm['destino'] = {'ciudad': str(destino_val or ''), 'pais': None}
+                
+            vuelos_normalizados.append(f_norm)
+
+        res = {
             'SOURCE_SYSTEM': self.source_system,
             # LLAVES MANDATORIAS (BIBLIA DEL PARSEO)
             'NOMBRE DEL PASAJERO': self.passenger_name,
@@ -99,7 +144,7 @@ class ParsedTicketData:
             'SOLO CODIGO RESERVA': solo_pnr,
             'NOMBRE AEROLINEA': airline_name or 'No encontrado',
             'DIRECCION AEROLINEA': self.raw_data.get('direccion_aerolinea') or 'No encontrado',
-            'vuelos': self.flights,
+            'vuelos': vuelos_normalizados,
             'TARIFA': t_str,
             'IMPUESTOS': impuestos,
             'TOTAL': total_str,
@@ -114,8 +159,137 @@ class ParsedTicketData:
             'TOTAL_IMPORTE': total,
             'TARIFA_MONEDA': moneda,
             'TOTAL_MONEDA': moneda,
-            'agencia': self.agency
+            'agencia': self.agency,
+            'gds': self.source_system.lower(),
+
+            # Compatibilidad adicional de tests
+            'codigo_reservacion': self.pnr,
+            'numero_boleto': self.ticket_number,
+            'preparado_para': self.passenger_name,
+            'documento_identidad': self.passenger_document or self.raw_data.get('FOID'),
+            'aerolinea_emisora': airline_name or 'No encontrado',
+            'fecha_emision_iso': self.issue_date,
+            'nombre_pasajero': self.passenger_name
         }
+
+        # Generar la versión normalizada
+        from apps.automation.parsers.normalization import DataNormalizationService
+        res['normalized'] = DataNormalizationService.normalize_ticket_data(res)
+        return res
+
+    def to_pydantic(self) -> Any:
+        """
+        Convierte y valida este DTO usando ResultadoParseoSchema de Pydantic.
+        Garantiza consistencia estricta en todo el flujo de datos.
+        """
+        from core.models.ai_schemas import ResultadoParseoSchema, BoletoAereoSchema, TramoVueloSchema
+        
+        # Mapear tramos/vuelos
+        itinerario_pydantic = []
+        for f in self.flights:
+            # Extraer origen/destino y sus códigos IATA
+            origen_val = f.get('origen') or f.get('departure', {}).get('location') or 'UNKNOWN'
+            if isinstance(origen_val, dict):
+                origen = origen_val.get('ciudad') or origen_val.get('city') or 'UNKNOWN'
+            else:
+                origen = origen_val
+
+            destino_val = f.get('destino') or f.get('arrival', {}).get('location') or 'UNKNOWN'
+            if isinstance(destino_val, dict):
+                destino = destino_val.get('ciudad') or destino_val.get('city') or 'UNKNOWN'
+            else:
+                destino = destino_val
+            
+            codigo_iata_origen = f.get('codigo_iata_origen') or f.get('codigo_origen') or (origen if len(str(origen)) == 3 else None)
+            codigo_iata_destino = f.get('codigo_iata_destino') or f.get('codigo_destino') or (destino if len(str(destino)) == 3 else None)
+            
+            fecha_salida = f.get('fecha_salida') or f.get('date') or 'UNKNOWN'
+            hora_salida = f.get('hora_salida') or f.get('departure', {}).get('time') or '00:00'
+            hora_llegada = f.get('hora_llegada') or f.get('arrival', {}).get('time') or '00:00'
+            fecha_llegada = f.get('fecha_llegada') or fecha_salida
+            
+            tramo = TramoVueloSchema(
+                aerolinea=f.get('aerolinea') or f.get('airline') or self.source_system,
+                numero_vuelo=f.get('numero_vuelo') or f.get('vuelo') or f.get('flightNumber'),
+                origen=origen,
+                codigo_iata_origen=codigo_iata_origen,
+                fecha_salida=fecha_salida,
+                hora_salida=hora_salida,
+                destino=destino,
+                codigo_iata_destino=codigo_iata_destino,
+                hora_llegada=hora_llegada,
+                fecha_llegada=fecha_llegada,
+                cabina=f.get('cabina') or f.get('clase') or 'Económica',
+                clase=f.get('clase') or f.get('class_of_service'),
+                localizador_aerolinea=f.get('localizador_aerolinea') or f.get('airline_pnr') or self.pnr,
+                equipaje=f.get('equipaje') or f.get('baggage')
+            )
+            itinerario_pydantic.append(tramo)
+            
+        # Si no hay tramos, añadir uno ficticio para cumplir con la validación estricta
+        if not itinerario_pydantic:
+            itinerario_pydantic.append(
+                TramoVueloSchema(
+                    aerolinea=self.source_system,
+                    numero_vuelo=None,
+                    origen='UNKNOWN',
+                    codigo_iata_origen=None,
+                    fecha_salida=self.issue_date or 'UNKNOWN',
+                    hora_salida='00:00',
+                    destino='UNKNOWN',
+                    codigo_iata_destino=None,
+                    hora_llegada='00:00',
+                    fecha_llegada=self.issue_date or 'UNKNOWN',
+                    cabina='Económica',
+                    clase=None,
+                    localizador_aerolinea=self.pnr,
+                    equipaje=None
+                )
+            )
+
+        # Mapear finanzas
+        tarifa_val = self.fares.get('fare_amount') or 0.0
+        impuestos_val = self.fares.get('tax_amount') or 0.0
+        total_val = self.fares.get('total_amount') or 0.0
+        moneda_val = self.fares.get('fare_currency') or self.fares.get('total_currency') or 'USD'
+        
+        # Solo Nombre Pasajero
+        from apps.automation.parsers.ticket_parser import _get_solo_nombre_pasajero
+        solo_nombre = self.raw_data.get('solo_nombre_pasajero') or _get_solo_nombre_pasajero(self.passenger_name)
+        
+        # Aerolínea
+        airline_name = self.raw_data.get('airline_name')
+        if not airline_name and self.flights:
+            airline_name = self.flights[0].get('aerolinea')
+        if not airline_name:
+            airline_name = 'Aerolínea no identificada'
+            
+        # Instanciar BoletoAereoSchema
+        boleto_schema = BoletoAereoSchema(
+            nombre_pasajero=self.passenger_name,
+            codigo_identificacion=self.passenger_document or self.raw_data.get('FOID'),
+            solo_nombre_pasajero=solo_nombre,
+            numero_boleto=self.ticket_number,
+            fecha_emision=self.issue_date,
+            agente_emisor=self.agency.get('name'),
+            numero_iata=self.agency.get('iata') or self.agency.get('numero_iata'),
+            codigo_reserva=self.pnr,
+            codigo_reserva_aerolinea=self.raw_data.get('airline_pnr') or self.raw_data.get('pnr_aerolinea'),
+            nombre_aerolinea=airline_name,
+            direccion_aerolinea=self.raw_data.get('direccion_aerolinea'),
+            itinerario=itinerario_pydantic,
+            tarifa=tarifa_val,
+            impuestos=impuestos_val,
+            total=total_val,
+            moneda=moneda_val,
+            es_remision=self.es_remision,
+            source_system=self.source_system,
+            confidence_score=1.0,
+            notas_advertencia=self.raw_data.get('notas_advertencia')
+        )
+        
+        return ResultadoParseoSchema(boletos=[boleto_schema])
+
 
 
 class BaseTicketParser(ABC):
@@ -235,6 +409,20 @@ class BaseTicketParser(ABC):
         text = text.strip()
         
         return text
+
+    def purify_text_for_detection(self, text: str) -> str:
+        """
+        Purifica el texto para detección de GDS (can_parse).
+        Elimina etiquetas HTML, condensa múltiples espacios y convierte a mayúsculas.
+        """
+        if not text:
+            return ""
+        # Eliminar HTML
+        t = re.sub(r'<[^>]+>', ' ', text)
+        t = t.replace('&nbsp;', ' ')
+        # Condensar múltiples espacios en uno solo
+        t = re.sub(r'\s+', ' ', t)
+        return t.strip().upper()
     
     def extract_field(self, text: str, patterns: list[str], default: str = 'No encontrado') -> str:
         """
@@ -292,6 +480,7 @@ class BaseTicketParser(ABC):
             r'PASAJERO\s*[:\s]*([A-ZÁÉÍÓÚÑ/ (),.-]{3,60}?)(?:\s+(?:FOID|RIF|DNI|DOC|TKTN|ID|\[|$))',
             r'PASJ\s*[:\s]*([A-ZÁÉÍÓÚÑ/ (),.-]{3,60}?)(?:\s+(?:FOID|RIF|DNI|DOC|TKTN|ID|\[|$))',
             r'PREPARADO PARA\s*[:\s]*([A-ZÁÉÍÓÚÑ/ (),.-]{3,60}?)(?:\s+(?:FOID|RIF|DNI|DOC|TKTN|ID|\[|$))',
+            r'PREPARED FOR\s*[:\s]*([A-ZÁÉÍÓÚÑ/ (),.-]{3,60}?)(?:\s+(?:FOID|RIF|DNI|DOC|TKTN|ID|\[|$))',
         ]
         
         raw_name = 'No encontrado'

@@ -74,36 +74,41 @@ class AuditLog(models.Model):
         return f"AuditLog {self.modelo} {self.object_id} {self.accion} {self.creado:%Y-%m-%d %H:%M:%S}"
 
     def save(self, *args, **kwargs):
+        from django.db import transaction
+        
         es_creacion = self.pk is None
         if es_creacion and not self.creado:
             self.creado = _tz.now()
             
         if es_creacion and not self.previous_hash:
-            ultimo = AuditLog.objects.order_by('-creado', '-id_audit_log').first()
-            self.previous_hash = ultimo.record_hash if ultimo else "0" * 64
-            
-        super().save(*args, **kwargs)
-        
-        if es_creacion and not self.record_hash:
-            # Construir payload para el hash - DEBE coincidir con verify_audit_chain()
-            payload = {
-                'modelo': self.modelo,
-                'object_id': self.object_id,
-                'accion': self.accion,
-                'descripcion': self.descripcion or '',
-                'datos_previos': self.datos_previos,
-                'datos_nuevos': self.datos_nuevos,
-                'metadata_extra': self.metadata_extra,
-                'creado': self.creado.isoformat()
-            }
-            try:
-                canon = _json.dumps(payload, sort_keys=True, separators=(',', ':'), ensure_ascii=False)
-            except Exception:
-                canon = str(payload)
+            with transaction.atomic():
+                ultimo = AuditLog.objects.select_for_update().order_by('-id_audit_log').first()
+                self.previous_hash = ultimo.record_hash if ultimo else "0" * 64
                 
-            base_str = (self.previous_hash or '') + '|' + canon
-            self.record_hash = hashlib.sha256(base_str.encode('utf-8')).hexdigest()
-            super().save(update_fields=['record_hash'])
+                super().save(*args, **kwargs)
+                
+                if not self.record_hash:
+                    # Construir payload para el hash - DEBE coincidir con verify_audit_chain()
+                    payload = {
+                        'modelo': self.modelo,
+                        'object_id': self.object_id,
+                        'accion': self.accion,
+                        'descripcion': self.descripcion or '',
+                        'datos_previos': self.datos_previos,
+                        'datos_nuevos': self.datos_nuevos,
+                        'metadata_extra': self.metadata_extra,
+                        'creado': self.creado.isoformat()
+                    }
+                    try:
+                        canon = _json.dumps(payload, sort_keys=True, separators=(',', ':'), ensure_ascii=False)
+                    except Exception:
+                        canon = str(payload)
+                        
+                    base_str = (self.previous_hash or '') + '|' + canon
+                    self.record_hash = hashlib.sha256(base_str.encode('utf-8')).hexdigest()
+                    super().save(update_fields=['record_hash'])
+        else:
+            super().save(*args, **kwargs)
 
 def crear_audit_log(*, modelo, object_id, accion, venta=None, descripcion=None, datos_previos=None, datos_nuevos=None, metadata_extra=None, user=None, agencia=None):
     """

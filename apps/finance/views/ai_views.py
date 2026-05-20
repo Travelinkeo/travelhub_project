@@ -141,3 +141,287 @@ class ResolveDiscrepancyAIView(APIView):
             logger.exception(f"Error analizando discrepancia {pk}")
             return render(request, 'finance/reconciliation/partials/ai_analysis_error.html', 
                          {"error": f"Error técnico: {str(e)}"})
+
+
+from rest_framework import generics
+from django.utils import timezone
+from apps.finance.models import PropuestaTransaccionIA
+from apps.finance.serializers import PropuestaTransaccionIASerializer
+from django.core.exceptions import ValidationError
+
+class PropuestaTransaccionIAListCreateAPIView(generics.ListCreateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = PropuestaTransaccionIASerializer
+
+    def get_queryset(self):
+        agencia = getattr(self.request, 'agencia', None)
+        if not agencia:
+            ua = self.request.user.agencias.filter(activo=True).first()
+            if ua:
+                agencia = ua.agencia
+        if not agencia:
+            return PropuestaTransaccionIA.objects.none()
+        return PropuestaTransaccionIA.objects.filter(agencia=agencia)
+
+    def perform_create(self, serializer):
+        agencia = getattr(self.request, 'agencia', None)
+        if not agencia:
+            ua = self.request.user.agencias.filter(activo=True).first()
+            if ua:
+                agencia = ua.agencia
+        if not agencia:
+            raise ValidationError("No tienes una agencia activa asociada.")
+        serializer.save(agencia=agencia)
+
+
+class ResolvePropuestaAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, pk, action):
+        """
+        Resuelve una propuesta de transacción IA (aprobar/rechazar).
+        action: 'approve' o 'reject'
+        """
+        agencia = getattr(request, 'agencia', None)
+        if not agencia:
+            ua = request.user.agencias.filter(activo=True).first()
+            if ua:
+                agencia = ua.agencia
+        
+        if not agencia:
+            return Response({"error": "No tienes una agencia activa asociada."}, status=status.HTTP_403_FORBIDDEN)
+
+        propuesta = get_object_or_404(PropuestaTransaccionIA, pk=pk, agencia=agencia)
+
+        if propuesta.estado != PropuestaTransaccionIA.EstadoPropuesta.PENDIENTE:
+            return Response({"error": "Esta propuesta ya fue resuelta anteriormente."}, status=status.HTTP_400_BAD_REQUEST)
+
+        comentarios = request.data.get('comentarios', '')
+
+        if action == 'reject':
+            propuesta.estado = PropuestaTransaccionIA.EstadoPropuesta.RECHAZADA
+            propuesta.fecha_resolucion = timezone.now()
+            propuesta.usuario_resolutor = request.user
+            propuesta.comentarios_resolucion = comentarios or "Rechazado manualmente por el CFO."
+            propuesta.save()
+            return Response({
+                "status": "propuesta_rechazada",
+                "message": f"La propuesta {pk} ha sido rechazada exitosamente."
+            })
+
+        elif action == 'approve':
+            try:
+                payload = propuesta.payload_datos
+                
+                # Ejecutar de forma determinista y transaccional
+                if propuesta.accion_tipo == 'CONCILIAR_REPORTE':
+                    report_id = payload.get('report_id')
+                    if not report_id:
+                        raise ValidationError("El payload no contiene 'report_id'.")
+                    
+                    from apps.finance.tasks_reconciliation import conciliar_reporte_batch_task
+                    # Lanzar tarea de Celery
+                    from django.db import transaction
+                    transaction.on_commit(lambda: conciliar_reporte_batch_task.delay(report_id, agencia.pk))
+                    
+                    execution_msg = f"La reconciliación del reporte {report_id} se ha enviado a Celery para procesamiento asíncrono seguro."
+
+                elif propuesta.accion_tipo == 'CREAR_ASIENTO':
+                    from django.db import transaction
+                    from decimal import Decimal
+                    from apps.contabilidad.models import AsientoContable, DetalleAsiento, PlanContable
+                    from apps.finance.models.currencies import Moneda
+
+                    glosa = payload.get("glosa", "Asiento sugerido por IA")
+                    detalles = payload.get("detalles", [])
+                    
+                    with transaction.atomic():
+                        moneda_usd = Moneda.objects.filter(codigo_iso="USD").first()
+                        
+                        import uuid
+                        asiento = AsientoContable.objects.create(
+                            agencia=agencia,
+                            numero_asiento=f"ASI-IA-{uuid.uuid4().hex[:8].upper()}",
+                            descripcion_general=glosa,
+                            tipo_asiento='DIA',
+                            estado='CON',
+                            moneda=moneda_usd,
+                            tasa_cambio_aplicada=1.0
+                        )
+                        
+                        for idx, d in enumerate(detalles, start=1):
+                            codigo = d.get("codigo_cuenta")
+                            cuenta = PlanContable.objects.get(codigo_cuenta=codigo, agencia=agencia)
+                            
+                            debe = Decimal(str(d.get("debe", 0)))
+                            haber = Decimal(str(d.get("haber", 0)))
+                            
+                            DetalleAsiento.objects.create(
+                                agencia=agencia,
+                                asiento=asiento,
+                                linea=idx,
+                                cuenta_contable=cuenta,
+                                debe=debe,
+                                haber=haber,
+                                descripcion_linea=glosa
+                            )
+                        
+                        asiento.calcular_totales(commit=True)
+                    
+                    execution_msg = f"Se ha creado y contabilizado el asiento contable número {asiento.id_asiento} exitosamente."
+
+                else:
+                    return Response({"error": f"Acción '{propuesta.accion_tipo}' no soportada por el motor de ejecución contable."}, status=status.HTTP_400_BAD_REQUEST)
+
+                # Guardar estado aprobado
+                propuesta.estado = PropuestaTransaccionIA.EstadoPropuesta.APROBADA
+                propuesta.fecha_resolucion = timezone.now()
+                propuesta.usuario_resolutor = request.user
+                propuesta.comentarios_resolucion = comentarios or "Aprobado y ejecutado por el CFO."
+                propuesta.save()
+
+                return Response({
+                    "status": "propuesta_aprobada",
+                    "message": f"La propuesta ha sido aprobada y procesada. {execution_msg}"
+                })
+
+            except Exception as e:
+                logger.exception("Error al procesar y aprobar propuesta contable de la IA")
+                return Response({"error": f"Error de ejecución: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        else:
+            return Response({"error": "Acción inválida. Use 'approve' o 'reject'."}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class AIAccountingProposalsPartialView(LoginRequiredMixin, View):
+    """
+    Retorna la lista de propuestas pendientes en formato HTML para HTMX.
+    """
+    def get(self, request):
+        agencia = getattr(request, 'agencia', None)
+        if not agencia:
+            ua = request.user.agencias.filter(activo=True).first()
+            if ua:
+                agencia = ua.agencia
+        
+        if not agencia:
+            return HttpResponse("<div class='text-rose-400 text-xs'>Sin agencia activa</div>")
+
+        propuestas = PropuestaTransaccionIA.objects.filter(
+            agencia=agencia,
+            estado=PropuestaTransaccionIA.EstadoPropuesta.PENDIENTE
+        ).order_by('-fecha_creacion')
+
+        return render(request, 'finance/partials/pending_proposals.html', {
+            "propuestas": propuestas
+        })
+
+
+class AIAccountingResolveProposalHTMXView(LoginRequiredMixin, View):
+    """
+    Procesa la aprobación o rechazo de una propuesta vía HTMX y retorna la lista actualizada.
+    """
+    def post(self, request, pk, action):
+        agencia = getattr(request, 'agencia', None)
+        if not agencia:
+            ua = request.user.agencias.filter(activo=True).first()
+            if ua:
+                agencia = ua.agencia
+        
+        if not agencia:
+            return HttpResponse("<div class='text-rose-400 text-xs'>Sin agencia activa</div>", status=403)
+
+        propuesta = get_object_or_404(PropuestaTransaccionIA, pk=pk, agencia=agencia)
+
+        if propuesta.estado != PropuestaTransaccionIA.EstadoPropuesta.PENDIENTE:
+            return HttpResponse("<div class='text-rose-400 text-xs'>Propuesta ya procesada</div>", status=400)
+
+        comentarios = request.POST.get('comentarios', '')
+
+        try:
+            if action == 'reject':
+                propuesta.estado = PropuestaTransaccionIA.EstadoPropuesta.RECHAZADA
+                propuesta.fecha_resolucion = timezone.now()
+                propuesta.usuario_resolutor = request.user
+                propuesta.comentarios_resolucion = comentarios or "Rechazado manualmente por el CFO en panel."
+                propuesta.save()
+            elif action == 'approve':
+                payload = propuesta.payload_datos
+                
+                # Ejecutar de forma determinista y transaccional
+                if propuesta.accion_tipo == 'CONCILIAR_REPORTE':
+                    report_id = payload.get('report_id')
+                    if not report_id:
+                        raise ValidationError("El payload no contiene 'report_id'.")
+                    
+                    from apps.finance.tasks_reconciliation import conciliar_reporte_batch_task
+                    from django.db import transaction
+                    transaction.on_commit(lambda: conciliar_reporte_batch_task.delay(report_id, agencia.pk))
+
+                elif propuesta.accion_tipo == 'CREAR_ASIENTO':
+                    from django.db import transaction
+                    from decimal import Decimal
+                    from apps.contabilidad.models import AsientoContable, DetalleAsiento, PlanContable
+                    from apps.finance.models.currencies import Moneda
+
+                    glosa = payload.get("glosa", "Asiento sugerido por IA")
+                    detalles = payload.get("detalles", [])
+                    
+                    with transaction.atomic():
+                        moneda_usd = Moneda.objects.filter(codigo_iso="USD").first()
+                        
+                        import uuid
+                        asiento = AsientoContable.objects.create(
+                            agencia=agencia,
+                            numero_asiento=f"ASI-IA-{uuid.uuid4().hex[:8].upper()}",
+                            descripcion_general=glosa,
+                            tipo_asiento='DIA',
+                            estado='CON',
+                            moneda=moneda_usd,
+                            tasa_cambio_aplicada=1.0
+                        )
+                        
+                        for idx, d in enumerate(detalles, start=1):
+                            codigo = d.get("codigo_cuenta")
+                            cuenta = PlanContable.objects.get(codigo_cuenta=codigo, agencia=agencia)
+                            
+                            debe = Decimal(str(d.get("debe", 0)))
+                            haber = Decimal(str(d.get("haber", 0)))
+                            
+                            DetalleAsiento.objects.create(
+                                agencia=agencia,
+                                asiento=asiento,
+                                linea=idx,
+                                cuenta_contable=cuenta,
+                                debe=debe,
+                                haber=haber,
+                                descripcion_linea=glosa
+                            )
+                        
+                        asiento.calcular_totales(commit=True)
+                else:
+                    return HttpResponse(f"<div class='text-rose-400 text-xs'>Acción no soportada</div>", status=400)
+
+                propuesta.estado = PropuestaTransaccionIA.EstadoPropuesta.APROBADA
+                propuesta.fecha_resolucion = timezone.now()
+                propuesta.usuario_resolutor = request.user
+                propuesta.comentarios_resolucion = comentarios or "Aprobado y ejecutado por el CFO."
+                propuesta.save()
+        except Exception as e:
+            logger.exception("Error al procesar propuesta contable de la IA via HTMX")
+            return HttpResponse(f"<div class='text-rose-400 text-xs'>Error: {str(e)}</div>", status=500)
+
+        # Retornar la lista actualizada de propuestas para actualizar el contenedor
+        propuestas = PropuestaTransaccionIA.objects.filter(
+            agencia=agencia,
+            estado=PropuestaTransaccionIA.EstadoPropuesta.PENDIENTE
+        ).order_by('-fecha_creacion')
+
+        response = render(request, 'finance/partials/pending_proposals.html', {
+            "propuestas": propuestas,
+            "success_msg": "Propuesta procesada exitosamente."
+        })
+        response["HX-Trigger"] = "proposalChanged"
+        return response
+
+

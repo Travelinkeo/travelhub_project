@@ -15,10 +15,11 @@ class AudioTranscriptionService:
     utilizando Google Gemini (Multimodal).
     """
 
-    def __init__(self):
-        self.api_key = getattr(settings, 'GEMINI_API_KEY', None)
+    def __init__(self, agency=None):
+        from apps.automation.services.ai_engine import get_gemini_api_key
+        self.api_key = get_gemini_api_key(agency)
         if not self.api_key:
-            logger.error("GEMINI_API_KEY no configurada en settings.")
+            logger.error("GEMINI_API_KEY no configurada.")
             self.client = None
             return
 

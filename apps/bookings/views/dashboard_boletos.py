@@ -9,6 +9,7 @@ from django.db.models import Count, Sum
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.http import require_http_methods
+from core.security import get_agencia_or_403, get_object_tenant_or_404, filter_queryset_by_tenant
 
 from apps.bookings.models import BoletoImportado, ItemVenta, Venta
 
@@ -31,14 +32,16 @@ def ventas_boletos_api(request):
     fecha_desde = request.GET.get('fecha_desde', '')
     fecha_hasta = request.GET.get('fecha_hasta', '')
     
+    agencia = get_agencia_or_403(request)
+
     # Query base: TODOS los boletos importados - Optimized with chained select_related
-    boletos = BoletoImportado.objects.select_related(
+    boletos = filter_queryset_by_tenant(BoletoImportado.objects.select_related(
         'venta_asociada',
         'venta_asociada__cliente',
         'venta_asociada__moneda',
         'agencia',
         'proveedor'
-    ).all()
+    ), agencia)
     
     # Aplicar filtros
     if localizador:
@@ -124,7 +127,8 @@ def actualizar_item_boleto(request):
             return JsonResponse({'error': 'Parámetros requeridos'}, status=400)
         
         # Obtener item
-        item = ItemVenta.objects.get(id_item_venta=item_id)
+        agencia = get_agencia_or_403(request)
+        item = get_object_tenant_or_404(ItemVenta, agencia, id_item_venta=item_id)
         
         # Campos permitidos
         campos_permitidos = {
@@ -170,22 +174,26 @@ def dashboard_metricas_api(request):
     hoy = timezone.now().date()
     inicio_semana = hoy - timedelta(days=hoy.weekday())
     inicio_mes = hoy.replace(day=1)
+    agencia = get_agencia_or_403(request)
+
+    boletos_qs = filter_queryset_by_tenant(BoletoImportado.objects, agencia)
+    ventas_qs = filter_queryset_by_tenant(Venta.objects, agencia)
 
     # Métricas de procesados
-    procesados_hoy = BoletoImportado.objects.filter(fecha_subida__date=hoy).count()
-    procesados_semana = BoletoImportado.objects.filter(fecha_subida__date__gte=inicio_semana).count()
-    procesados_mes = BoletoImportado.objects.filter(fecha_subida__date__gte=inicio_mes).count()
+    procesados_hoy = boletos_qs.filter(fecha_subida__date=hoy).count()
+    procesados_semana = boletos_qs.filter(fecha_subida__date__gte=inicio_semana).count()
+    procesados_mes = boletos_qs.filter(fecha_subida__date__gte=inicio_mes).count()
 
     # Top Aerolíneas (del mes actual)
-    top_aerolineas = BoletoImportado.objects.filter(
+    top_aerolineas = boletos_qs.filter(
         fecha_subida__date__gte=inicio_mes
     ).values('aerolinea_emisora').annotate(
         cantidad=Count('id_boleto_importado')
     ).order_by('-cantidad')[:5]
 
     # Estado de ventas
-    pendientes = Venta.objects.filter(estado='PEN').count()
-    errores = BoletoImportado.objects.filter(venta_asociada__isnull=True).count() # Asumiendo que sin venta es un error o pendiente de procesar
+    pendientes = ventas_qs.filter(estado='PEN').count()
+    errores = boletos_qs.filter(venta_asociada__isnull=True).count() # Asumiendo que sin venta es un error o pendiente de procesar
 
     return JsonResponse({
         'procesados': {
@@ -211,7 +219,8 @@ def buscar_boletos_api(request):
     origen = request.GET.get('origen')
     destino = request.GET.get('destino')
     
-    queryset = BoletoImportado.objects.all().select_related('venta_asociada')
+    agencia = get_agencia_or_403(request)
+    queryset = filter_queryset_by_tenant(BoletoImportado.objects, agencia).select_related('venta_asociada')
     
     if nombre:
         queryset = queryset.filter(nombre_pasajero_completo__icontains=nombre)
@@ -250,7 +259,8 @@ def reporte_comisiones_api(request):
     fecha_inicio = request.GET.get('fecha_inicio')
     fecha_fin = request.GET.get('fecha_fin')
     
-    queryset = BoletoImportado.objects.filter(venta_asociada__isnull=False)
+    agencia = get_agencia_or_403(request)
+    queryset = filter_queryset_by_tenant(BoletoImportado.objects, agencia).filter(venta_asociada__isnull=False)
     
     if fecha_inicio:
         queryset = queryset.filter(fecha_emision_boleto__gte=fecha_inicio)
@@ -307,7 +317,8 @@ def solicitar_anulacion_api(request):
         
         # Validar existencia del boleto
         try:
-            boleto = BoletoImportado.objects.get(pk=boleto_id)
+            agencia = get_agencia_or_403(request)
+            boleto = get_object_tenant_or_404(BoletoImportado, agencia, pk=boleto_id)
         except BoletoImportado.DoesNotExist:
             return JsonResponse({'error': 'Boleto no encontrado'}, status=404)
             

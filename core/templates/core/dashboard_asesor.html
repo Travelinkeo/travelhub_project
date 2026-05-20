@@ -40,7 +40,7 @@
             formData.append('archivo', file);
             
             try {
-                const response = await fetch('/api/boletos/upload/', {
+                const response = await fetch("{% url 'bookings:api_boleto_upload' %}", {
                     method: 'POST',
                     body: formData,
                     headers: {
@@ -232,7 +232,7 @@
             
             <!-- ACCIONES RÁPIDAS -->
             <div class="grid grid-cols-2 gap-4">
-                <a href="{% url 'core:cotizacion_nueva' %}" 
+                <a href="{% url 'bookings:cotizacion_nueva' %}" 
                    class="bg-surface-2 hover:bg-surface-3 border border-border-color p-4 rounded-2xl flex flex-col items-center justify-center gap-2 transition-all active:scale-95 group">
                     <div class="w-10 h-10 rounded-full bg-surface-base text-text-main flex items-center justify-center group-hover:bg-primary transition-colors group-hover:text-white">
                         <span class="material-symbols-outlined">add</span>

@@ -13,10 +13,10 @@ class KIUParser(BaseTicketParser):
 
     def can_parse(self, text: str) -> bool:
         """Detecta si es un boleto KIU"""
-        text_upper = text.upper()
-        return 'KIUSYS.COM' in text_upper or \
-               'PASSENGER ITINERARY RECEIPT' in text_upper or \
-               ('ISSUE AGENT/AGENTE EMISOR' in text_upper and 'FROM/TO' in text_upper)
+        purified = self.purify_text_for_detection(text)
+        return 'KIUSYS.COM' in purified or \
+               'PASSENGER ITINERARY RECEIPT' in purified or \
+               ('ISSUE AGENT/AGENTE EMISOR' in purified and 'FROM/TO' in purified)
 
     def parse(self, text: str, html_text: str = "") -> ParsedTicketData:
         """Parsea boleto KIU"""

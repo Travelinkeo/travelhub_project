@@ -31,6 +31,11 @@ class TestBaseParserMethods:
         parser = SabreParser()
         result = parser.clean_text("  Multiple   spaces   ")
         assert result == "Multiple spaces"
+        
+    def test_purify_text_for_detection(self):
+        parser = SabreParser()
+        result = parser.purify_text_for_detection("  <p>Some   HTML   &nbsp; elements</p>   ")
+        assert result == "SOME HTML ELEMENTS"
     
     def test_extract_field_first_pattern(self):
         parser = SabreParser()

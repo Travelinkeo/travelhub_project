@@ -62,7 +62,7 @@ def guardar_pdf_factura(factura):
         
         logger.info(f"Iniciando generación de PDF para factura {factura.numero_factura}")
         logger.info(f"Storage backend: {default_storage.__class__.__name__}")
-        logger.info(f"USE_CLOUDINARY: {settings.USE_CLOUDINARY}")
+        logger.info(f"USE_CLOUDINARY: {getattr(settings, 'USE_CLOUDINARY', False)}")
         
         # Generar PDF
         pdf_content = generar_pdf_factura_consolidada(factura)

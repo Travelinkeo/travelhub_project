@@ -23,7 +23,8 @@ class CMSContentService:
     """
 
     def __init__(self):
-        self.api_key = os.environ.get("GEMINI_API_KEY") or getattr(settings, "GEMINI_API_KEY", None)
+        from apps.automation.services.ai_engine import get_gemini_api_key
+        self.api_key = get_gemini_api_key()
         if self.api_key:
             genai = _get_genai()
             self.client = genai.Client(api_key=self.api_key)

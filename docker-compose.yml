@@ -13,6 +13,8 @@ services:
     depends_on:
       - db
       - redis
+    networks:
+      - travelhub_net
     restart: unless-stopped
 
   db:
@@ -25,6 +27,8 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-travelhub123}
     ports:
       - "5432:5432"
+    networks:
+      - travelhub_net
     restart: unless-stopped
 
   redis:
@@ -68,7 +72,7 @@ services:
 
   celery-worker:
     build: .
-    command: celery -A travelhub worker --loglevel=info --concurrency=2
+    command: celery -A travelhub worker --loglevel=info --concurrency=2 -Q celery
     volumes:
       - .:/app
     env_file:
@@ -83,6 +87,24 @@ services:
       - travelhub_net
     restart: unless-stopped
 
+  celery-worker-fast:
+    build: .
+    command: celery -A travelhub worker --loglevel=info --concurrency=1 -Q ia_fast
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    depends_on:
+      - db
+      - redis
+    networks:
+      - travelhub_net
+    restart: unless-stopped
+
+
   celery-beat:
     build: .
     command: celery -A travelhub beat --loglevel=info
@@ -96,6 +118,8 @@ services:
     depends_on:
       - db
       - redis
+    networks:
+      - travelhub_net
     restart: unless-stopped
 
   evolution_db:

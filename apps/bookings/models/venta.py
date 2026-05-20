@@ -77,7 +77,7 @@ class Venta(SoftDeleteModel, AgenciaMixin, models.Model):
     co2_estimado_kg = models.DecimalField(_("Emisiones CO₂ Estimadas (kg)"), max_digits=12, decimal_places=2, blank=True, null=True, help_text=_("Estimación agregada de la huella de carbono."))
     asiento_contable_venta = models.ForeignKey('contabilidad.AsientoContable', related_name='bookings_ventas_asociadas', on_delete=models.SET_NULL, blank=True, null=True, verbose_name=_("Asiento Contable de Venta"))
     factura = models.ForeignKey('finance.Factura', on_delete=models.SET_NULL, blank=True, null=True, related_name='bookings_ventas', verbose_name=_("Factura Asociada (Legacy)"))
-    factura_consolidada = models.ForeignKey('finance.FacturaConsolidada', on_delete=models.SET_NULL, blank=True, null=True, related_name='bookings_ventas_facturadas', verbose_name=_("Factura Consolidada"))
+    factura_consolidada = models.ForeignKey('finance.Factura', on_delete=models.SET_NULL, blank=True, null=True, related_name='bookings_ventas_facturadas', verbose_name=_("Factura Consolidada"))
     notas = models.TextField(_("Notas de la Venta"), blank=True, null=True)
     puntos_fidelidad_asignados = models.BooleanField(_("Puntos Fidelidad Asignados"), default=False, editable=False, help_text=_("Evita otorgar puntos duplicados cuando la venta pasa a completada/pagada."))
     

@@ -77,7 +77,8 @@ class SmartReportProcessor:
 
     @classmethod
     def _get_smart_mapping(cls, columns: list, sample_json: str) -> dict[str, str | None]:
-        api_key = os.environ.get("GEMINI_API_KEY") or getattr(settings, "GEMINI_API_KEY", None)
+        from apps.automation.services.ai_engine import get_gemini_api_key
+        api_key = get_gemini_api_key()
         if not api_key:
             logger.warning("No API Key found for Smart Mapping, using fallback.")
             return cls._fallback_mapping(columns)

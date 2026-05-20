@@ -5,7 +5,7 @@ Cumple con Providencia 0071 y formato requerido para declaración de IVA
 """
 from decimal import Decimal
 
-from apps.finance.models import FacturaConsolidada
+from apps.finance.models import Factura
 
 
 class LibroVentasService:
@@ -25,7 +25,7 @@ class LibroVentasService:
             dict con estructura del libro de ventas
         """
         # Filtrar facturas del período
-        facturas = FacturaConsolidada.objects.filter(
+        facturas = Factura.objects.filter(
             fecha_emision__gte=fecha_inicio,
             fecha_emision__lte=fecha_fin,
             estado__in=['EMI', 'PAR', 'PAG']  # Solo emitidas y pagadas
@@ -127,7 +127,7 @@ class LibroVentasService:
         # Encabezado
         writer.writerow([
             'Fecha', 'Número Factura', 'Número Control', 'RIF Cliente', 'Nombre Cliente',
-            'Base Gravada', 'Base Exenta', 'Base Exportación', 'IVA 16%', 'IVA Adicional',
+            'Base Gravada', 'Base Exenta', 'Base Exportación', 'IVA (Impuesto)', 'IVA Adicional',
             'IGTF', 'Total', 'Tipo Operación', 'RIF Tercero', 'Nombre Tercero'
         ])
         

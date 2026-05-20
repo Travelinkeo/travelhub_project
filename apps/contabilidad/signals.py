@@ -5,13 +5,12 @@ Se disparan al guardar facturas y pagos para generar asientos contables.
 """
 
 import logging
-
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from core.signals_bypass import are_signals_blocked
 
 from apps.bookings.models import PagoVenta
 from apps.finance.models import Factura
-
 from .services import ContabilidadService
 
 logger = logging.getLogger(__name__)
@@ -23,6 +22,10 @@ def generar_asiento_desde_factura_signal(sender, instance, created, **kwargs):
     Genera asiento contable automáticamente al crear/actualizar una factura.
     Solo se ejecuta si la factura tiene items y está en estado válido.
     """
+    if are_signals_blocked():
+        logger.info(f"⏭️ SIGNAL: Signals blocked. Bypassing generar_asiento_desde_factura_signal for Factura {instance.pk}")
+        return
+
     if not created:
         return
     
@@ -46,6 +49,10 @@ def registrar_pago_y_diferencial_signal(sender, instance, created, **kwargs):
     Registra el pago y calcula diferencial cambiario automáticamente.
     Solo se ejecuta para pagos confirmados.
     """
+    if are_signals_blocked():
+        logger.info(f"⏭️ SIGNAL: Signals blocked. Bypassing registrar_pago_y_diferencial_signal for PagoVenta {instance.pk}")
+        return
+
     if not instance.confirmado:
         return
     

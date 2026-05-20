@@ -6,14 +6,30 @@ from .views import (
     fix_user_view, email_monitor_views, god_mode_views,
     intelligence_views, migration_api, notifications,
     search_views, settings_views, translator_views, webhooks_views, wiki_views,
-    health_views
+    health_views, auth_views, erp_views, upload as upload_views, boleto_api_views
 )
+from apps.bookings.views.dashboard_views import DashboardView
+from apps.bookings.views.boleto_views import BoletoUploadAPIView, BoletoAuditAPIView, BoletoDeleteAPIView
+from apps.bookings.bookings_views import VentaUpdateView, VentaDeleteView
+from core.views.boleto_api_views import dashboard_stats as boletos_dashboard_stats, reintentar_parseo as api_reintentar_parseo
 from core.middleware import csp_report_view
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 from apps.marketing.views.marketing_views import MarketingHubView, GenerateAIImageView
 from core.dashboard_stats import get_dashboard_stats as dashboard_stats_api
+from core.views.voucher_views import generar_voucher
+from apps.finance.views.facturacion_views import generar_factura_desde_venta
+from apps.cotizaciones.views import (
+    CotizacionCreateView,
+    CotizacionDetailView,
+    CotizacionUpdateView,
+    CotizacionStatusView,
+    CotizacionPDFView,
+    CotizacionConvertirView,
+    MagicQuoterAIView,
+    MagicQuoterSaveView
+)
 
-app_name = 'system'
+app_name = 'core'
 
 urlpatterns = [
     # Configuración Agencia
@@ -81,4 +97,48 @@ urlpatterns = [
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
     path('api/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
+
+    # Magic Links
+    path('auth/magic-request/', auth_views.MagicLinkRequestView.as_view(), name='magic_link_request'),
+    path('auth/magic/<str:token>/', auth_views.MagicLinkVerifyView.as_view(), name='magic_link_verify'),
+
+    # --- ERP BOLETOS INTELLIGENCE (MOVILIZADO AL FINAL PARA EVITAR SOBREESCRITURA) ---
+    path('dashboard/modern/', DashboardView.as_view(), name='modern_dashboard'),
+    path('dashboard/erp/boletos/', erp_views.DashboardBoletosView.as_view(), name='boletos_dashboard'),
+    path('dashboard/erp/boletos/buscar/', erp_views.BoletosBusquedaView.as_view(), name='boletos_busqueda'),
+    path('dashboard/erp/boletos/reportes/', erp_views.BoletosReportesView.as_view(), name='boletos_reportes'),
+    path('dashboard/erp/boletos/reportes/exportar/', erp_views.ExportarBoletosExcelView.as_view(), name='boletos_reportes_exportar'),
+    path('dashboard/erp/boletos/anulaciones/', erp_views.BoletosAnulacionesView.as_view(), name='boletos_anulaciones'),
+    path('dashboard/erp/boletos/importar/', erp_views.BoletosImportarView.as_view(), name='boletos_importar'),
+    path('dashboard/erp/boletos/manual/', erp_views.BoletosManualView.as_view(), name='boletos_manual'),
+    path('api/boletos/dashboard-stats/', boleto_api_views.dashboard_stats, name='boletos_dashboard_stats'),
+    path('api/boletos/buscar/', boleto_api_views.buscar, name='boletos_buscar'),
+    path('api/boletos/sin-venta/', boleto_api_views.boletos_sin_venta, name='boletos_sin_venta'),
+    path('api/boletos/<int:boleto_id>/reintentar-parseo/', boleto_api_views.reintentar_parseo, name='reintentar_parseo'),
+    path('api/boletos/<int:boleto_id>/crear-venta/', boleto_api_views.crear_venta_desde_boleto, name='crear_venta_desde_boleto'),
+    path('api/boletos/upload/', BoletoUploadAPIView.as_view(), name='api_boleto_upload'),
+    path('api/boletos/audit/', BoletoAuditAPIView.as_view(), name='api_boleto_audit'),
+    path('api/boletos/<int:pk>/delete/', BoletoDeleteAPIView.as_view(), name='api_boleto_delete'),
+
+    # UI Vistas de Revisión/Upload
+    path('upload/boleto/', upload_views.UploadBoletoView.as_view(), name='upload_boleto'),
+    path('upload/boleto/<int:pk>/revisar/', upload_views.ReviewBoletoView.as_view(), name='revisar_boleto'),
+    path('upload/boleto/<int:pk>/status/', upload_views.BoletoStatusView.as_view(), name='boleto_status'),
+    path('upload/boleto/<int:pk>/pdf-status/', upload_views.BoletoPdfStatusView.as_view(), name='boleto_pdf_status'),
+    path('upload/boleto/<int:pk>/desasociar-venta/', upload_views.DesasociarVentaView.as_view(), name='desasociar_venta'),
+    path('upload/boleto/<int:pk>/eliminar-hard/', upload_views.eliminar_boleto, name='eliminar_boleto_hard'),
+    # Aliases para compatibilidad con templates ERP
+    path('ventas/<int:pk>/editar/', VentaUpdateView.as_view(), name='editar_venta'),
+    path('ventas/<int:pk>/eliminar-permanente/', VentaDeleteView.as_view(), name='venta_eliminar_permanente'),
+    path('api/boletos/<int:boleto_id>/reintentar-fast/', api_reintentar_parseo, name='api_boleto_retry'),
+    path('api/ventas/<int:venta_id>/generar-voucher/', generar_voucher, name='generar_voucher'),
+    path('ventas/<int:pk>/facturar/', generar_factura_desde_venta, name='venta_facturar'),
+    path('cotizaciones/nueva/', CotizacionCreateView.as_view(), name='cotizacion_nueva'),
+    path('cotizaciones/<int:pk>/', CotizacionDetailView.as_view(), name='cotizacion_detalle'),
+    path('cotizaciones/<int:pk>/editar/', CotizacionUpdateView.as_view(), name='cotizacion_editar'),
+    path('cotizaciones/<int:pk>/cambiar-estado/', CotizacionStatusView.as_view(), name='cotizacion_cambiar_estado'),
+    path('cotizaciones/<int:pk>/pdf/', CotizacionPDFView.as_view(), name='cotizacion_pdf'),
+    path('cotizaciones/<int:pk>/convertir/', CotizacionConvertirView.as_view(), name='cotizacion_convertir'),
+    path('api/cotizaciones/magic-gpt/', MagicQuoterAIView.as_view(), name='magic_quoter_ai'),
+    path('cotizaciones/magic/save/', MagicQuoterSaveView.as_view(), name='magic_quoter_save'),
 ]

@@ -12,6 +12,7 @@ from .legacy.copa_parser import CopaParser
 from .legacy.sabre_parser import SabreParser
 from .legacy.tk_connect_parser import TKConnectParser
 from .legacy.wingo_parser import WingoParser
+from .legacy.travelport_parser import TravelportParser
 from .registry import registry
 
 logger = logging.getLogger(__name__)
@@ -25,15 +26,16 @@ def _register_parsers():
     if _parsers_registered:
         return
     
-    registry.register(SabreParser())
-    registry.register(AmadeusParser())
     registry.register(KIUParser())
     registry.register(CopaParser())
     registry.register(WingoParser())
     registry.register(TKConnectParser())
+    registry.register(SabreParser())
+    registry.register(AmadeusParser())
+    registry.register(TravelportParser())
     
     _parsers_registered = True
-    logger.info("Todos los parsers refactorizados registrados (6/6)")
+    logger.info("Todos los parsers refactorizados registrados (7/7)")
 
 
 def parse_ticket_with_new_parsers(text: str, html_text: str = "") -> dict[str, Any]:
@@ -56,6 +58,15 @@ def parse_ticket_with_new_parsers(text: str, html_text: str = "") -> dict[str, A
     
     try:
         parsed_data = parser.parse(text, html_text)
+        
+        # 🚨 CRÍTICO | Validación con Pydantic (ResultadoParseoSchema)
+        # Garantiza que el output del parser se valide estrictamente contra el JSON Schema unificado
+        try:
+            pydantic_res = parsed_data.to_pydantic()
+            logger.info(f"✅ [Pydantic Validation] Exito al validar la salida de {parser.__class__.__name__} contra ResultadoParseoSchema.")
+        except Exception as e_val:
+            logger.warning(f"⚠️ [Pydantic Validation] La salida de {parser.__class__.__name__} no pudo validarse contra ResultadoParseoSchema: {e_val}")
+            
         return parsed_data.to_dict()
     except Exception as e:
         logger.exception(f"Error al parsear con {parser.__class__.__name__}")

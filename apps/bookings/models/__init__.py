@@ -13,7 +13,7 @@ from .componentes import (
     ServicioAdicionalDetalle,
     TrasladoServicio,
 )
-from .importacion import BoletoImportado, SolicitudAnulacion
+from .importacion import BoletoImportado, SolicitudAnulacion, BoletoImportadoTransito
 from .pagos import FeeVenta, PagoVenta
 from .servicios import ComisionProveedorServicio, ProductoServicio, ProductoTerrestre, Proveedor
 from .tarifario import (
@@ -32,7 +32,8 @@ __all__ = [
     'AlquilerAutoReserva', 'EventoServicio', 'CircuitoTuristico', 'CircuitoDia',
     'PaqueteAereo', 'CruceroReserva', 'ServicioAdicionalDetalle',
     'FeeVenta', 'PagoVenta',
-    'BoletoImportado', 'SolicitudAnulacion',
+    'BoletoImportado', 'SolicitudAnulacion', 'BoletoImportadoTransito',
+
     'TarifarioProveedor', 'HotelTarifario', 'TipoHabitacion', 'TarifaHabitacion', 'Amenity', 'ImagenHotel',
     'ProductoTerrestre', 'Proveedor', 'ProductoServicio', 'ComisionProveedorServicio'
 ]

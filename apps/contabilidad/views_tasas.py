@@ -129,8 +129,12 @@ def sincronizar_tasas_manual(request):
         resultados = TasasVenezuelaClient.actualizar_tasas_db()
         
         # Limpiar caché
-        cache.delete('tasas_venezuela_actuales')
-        cache.delete('tasa_bcv_simple')
+        try:
+            cache.delete('tasas_venezuela_actuales')
+            cache.delete('tasa_bcv_simple')
+            cache.delete('tasa_bcv_context')
+        except Exception as cache_err:
+            logger.warning(f"No se pudo limpiar caché en sincronizar_tasas_manual: {cache_err}")
         
         return Response({
             'success': True,

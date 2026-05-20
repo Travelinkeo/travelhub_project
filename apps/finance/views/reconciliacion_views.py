@@ -108,7 +108,8 @@ class ProcessReconciliacionHTMXView(LoginRequiredMixin, View):
             
             # 2. Encolar Tarea Celery
             from apps.finance.tasks_reconciliation import conciliar_reporte_batch_task
-            conciliar_reporte_batch_task.delay(str(reporte.pk), str(reporte.agencia.pk))
+            from django.db import transaction
+            transaction.on_commit(lambda: conciliar_reporte_batch_task.delay(str(reporte.pk)), str(reporte.agencia.pk))
             
             messages.info(request, "El motor de IA ha comenzado el análisis en segundo plano. Los resultados aparecerán en unos instantes.")
         except Exception as e:

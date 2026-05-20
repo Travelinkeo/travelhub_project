@@ -1,0 +1,144 @@
+GRUPO SOPORTE GLOBAL INC
+Agency Address: 2644 NW 97TH AVENUE DORAL FL 33172
+Teléfono: 1-786-303-6626
+Soporte Global
+Recibo de boleto electrónico
+Preparado para
+DIAZ SILVA/ROSANGELA [164271115]
+CÓDIGO DE RESERVACIÓN
+SGWFJU
+FECHA DE EMISIÓN
+25 feb 25
+NÚMERO DE BOLETO
+0577280309142
+AEROLÍNEA EMISORA
+SATA INTERNATIONAL SERVI
+AGENTE EMISOR
+GRUPO SOPORTE GLOBAL INC/AUL
+UBICACIÓN DEL AGENTE EMISOR
+DORAL, FL
+NÚMERO IATA
+10617390
+NÚMERO DE CLIENTE
+J402496982
+
+Información De Vuelo
+FECHA
+AEROLÍNEA
+SALIDA
+LLEGADA
+OTRAS NOTAS
+19 mar 25
+CARACAS, VENEZUELA
+BOGOTA, COLOMBIA
+SATA INTERNATIONAL
+SERVI
+S4 8015
+Hora
+Hora
+18:40
+20:25
+Operado por:
+TP
+Terminal
+Código de reservación de la
+aerolínea 4LBUS4
+Cabina TURISTA
+Número de asiento REQUIERE
+CHECK-IN
+Límite de equipaje 1PC
+Estado de la reservación
+CONFIRMADO
+Base de tarifa Q3BSC
+No válido antes del 19 MAR 25
+No válido después del
+19 MAR 25
+Est. emission 105.28 KG CO2
+TERMINAL 1
+Esta no es una tarjeta de embarque
+
+20 mar 25
+BOGOTA, COLOMBIA
+LIMA, PERU
+SATA INTERNATIONAL
+SERVI
+S4 8016
+Hora
+Hora
+08:45
+12:40
+Operado por:
+TP
+Código de reservación de la
+aerolínea 4LBUS4
+Cabina TURISTA
+Número de asiento REQUIERE
+CHECK-IN
+Límite de equipaje 1PC
+Estado de la reservación
+CONFIRMADO
+Base de tarifa M3BSC
+No válido antes del 20 MAR 25
+No válido después del
+20 MAR 25
+Est. emission 110.14 KG CO2
+Esta no es una tarjeta de embarque
+
+22 mar 25
+LIMA, PERU
+SANTIAGO, CHILE
+SATA INTERNATIONAL
+SERVI
+S4 8017
+Hora
+Hora
+13:10
+17:30
+Operado por:
+TP
+Código de reservación de la
+aerolínea 4LBUS4
+Cabina TURISTA
+Número de asiento REQUIERE
+CHECK-IN
+Límite de equipaje 1PC
+Estado de la reservación
+CONFIRMADO
+Base de tarifa M3BSC
+No válido antes del 22 MAR 25
+No válido después del
+22 MAR 25
+Est. emission 115.14 KG CO2
+Esta no es una tarjeta de embarque
+
+25 mar 25
+SANTIAGO, CHILE
+CARACAS, VENEZUELA
+SATA INTERNATIONAL
+SERVI
+S4 8018
+Hora
+Hora
+22:15
+04:30
+Operado por:
+TP
+Código de reservación de la
+aerolínea 4LBUS4
+Cabina TURISTA
+Número de asiento REQUIERE
+CHECK-IN
+Límite de equipaje 1PC
+Estado de la reservación
+CONFIRMADO
+Base de tarifa M3BSC
+No válido antes del 25 MAR 25
+No válido después del
+25 MAR 25
+Est. emission 120.14 KG CO2
+Esta no es una tarjeta de embarque
+
+Aviso:
+Tarifa total USD 1000.00
+Total USD 1200.00
+Taxes USD 200.00

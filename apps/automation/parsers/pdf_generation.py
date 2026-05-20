@@ -99,8 +99,30 @@ class PdfGenerationService:
         agencia_nombre = agencia_obj.nombre_comercial or agencia_obj.nombre if agencia_obj else 'TRAVELHUB'
         agencia_nombre_comercial = agencia_obj.nombre_comercial if agencia_obj else 'TRAVELHUB'
 
+        # 🛑 SAFE AGENCIA: Envuelve el objeto real o crea un proxy seguro que nunca arroja AttributeError
+        class SafeAgencia:
+            """Proxy que garantiza que TODOS los atributos de agencia tengan un valor por defecto."""
+            def __init__(self, obj=None, color_prim='#0D1E40'):
+                self._obj = obj
+            def __getattr__(self, name):
+                # Primero intenta el objeto real
+                if self._obj and hasattr(self._obj, name):
+                    return getattr(self._obj, name)
+                # Fallbacks sólidos para cada atributo que usa la plantilla
+                defaults = {
+                    'nombre': 'TRAVELHUB', 'nombre_comercial': 'TRAVELHUB',
+                    'color_primario': color_primario, 'color_secundario': '#2173A6',
+                    'color_amadeus': '#0C66E1', 'eslogan': '', 'pie_pagina': '',
+                    'instagram': '', 'email_principal': 'info@travelhub.com',
+                    'telefono_principal': '+58 412 331 2314',
+                    'direccion': 'Venezuela', 'iata': '', 'pk': None, 'id': None,
+                }
+                return defaults.get(name, '')
+
+        safe_agencia = SafeAgencia(agencia_obj, color_primario)
+
         return {
-            'agencia': agencia_obj or type('FakeAgencia', (), {'nombre': 'TRAVELHUB', 'nombre_comercial': 'TRAVELHUB', 'color_primario': '#0D1E40'})(),
+            'agencia': safe_agencia,
             'agencia_logo_b64': get_agencia_logo_b64(agencia_obj, is_dark_bg=is_dark) if agencia_obj else None,
             'agencia_nombre': agencia_nombre,
             'agencia_nombre_comercial': agencia_nombre_comercial,

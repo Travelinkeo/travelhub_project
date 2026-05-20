@@ -887,3 +887,90 @@ def backup_database_task(self):
     except Exception as exc:
         logger.error(f"Backup diario falló: {exc}")
         raise self.retry(exc=exc) from exc
+
+
+@tenant_task(
+    name="core.tasks.procesar_facturacion_masiva_task",
+    time_limit=600,
+    soft_time_limit=540,
+    max_retries=2,
+    default_retry_delay=60,
+    acks_late=True,
+)
+def procesar_facturacion_masiva_task(boleto_ids, cliente_id, **kwargs):
+    """
+    ⚡ ASÍNCRONO | 🏢 MULTI-TENANT
+    Procesamiento por lotes asíncrono para asignación de cliente y facturación de boletos.
+    Evita bloqueos síncronos HTTP en ingesta masiva de boletos.
+    """
+    from apps.crm.models import Cliente
+    from apps.bookings.models import BoletoImportado
+    from apps.finance.services.invoice_service import InvoiceService
+
+    logger.info(f"🚀 Iniciando facturación masiva asíncrona para {len(boleto_ids)} boletos y cliente ID {cliente_id}")
+    
+    try:
+        cliente = Cliente.objects.select_related('agencia').get(pk=cliente_id)
+        queryset = BoletoImportado.objects.filter(pk__in=boleto_ids).select_related(
+            'agencia', 'proveedor', 'venta_asociada'
+        )
+        
+        results = InvoiceService.mass_assign_and_invoice(queryset, cliente)
+        logger.info(f"✅ Facturación masiva completada: {len(results)} registros procesados.")
+        return results
+    except Exception as e:
+        logger.error(f"❌ Error fatal en procesar_facturacion_masiva_task: {e}")
+        raise e
+
+
+@tenant_task(
+    name="core.tasks.generar_pdf_ticket_async_task",
+    time_limit=180,
+    soft_time_limit=150,
+    max_retries=3,
+    default_retry_delay=30,
+    acks_late=True,
+)
+def generar_pdf_ticket_async_task(boleto_id, **kwargs):
+    """
+    Tarea asíncrona para generar el PDF de un boleto importado utilizando Gotenberg.
+    """
+    from apps.bookings.models import BoletoImportado
+    from apps.automation.parsers.pdf_generation import PdfGenerationService
+    from apps.automation.parsers.normalization import DataNormalizationService
+    from django.core.files.base import ContentFile
+    import time
+
+    logger.info(f"🚀 Iniciando tarea asíncrona para generar PDF de Boleto {boleto_id}")
+    try:
+        boleto = BoletoImportado.objects.get(pk=boleto_id)
+    except BoletoImportado.DoesNotExist:
+        logger.error(f"❌ Boleto {boleto_id} no encontrado para generar PDF.")
+        return f"Boleto {boleto_id} no encontrado."
+
+    if boleto.archivo_pdf_generado:
+        logger.info(f"⏭️ El boleto {boleto_id} ya tiene PDF generado. Omitiendo.")
+        return f"PDF ya generado para boleto {boleto_id}."
+
+    if not boleto.datos_parseados:
+        logger.warning(f"⚠️ El boleto {boleto_id} no tiene datos parseados. No se puede generar PDF.")
+        return f"Sin datos parseados para boleto {boleto_id}."
+
+    try:
+        logger.info(f"📄 Generando TKT PDF asíncrono para Boleto {boleto.pk}")
+        pdf_start = time.time()
+        datos_norm = DataNormalizationService.normalize_ticket_data(boleto.datos_parseados)
+        pdf_bytes, fname = PdfGenerationService.generate_ticket(datos_norm, agencia_obj=boleto.agencia, boleto_obj=boleto)
+        pdf_duration = time.time() - pdf_start
+        logger.info(f"⏱️ [PROFILING] PDF Generation duration (asíncrono): {pdf_duration:.2f}s")
+        
+        if pdf_bytes and len(pdf_bytes) > 100:
+            boleto.archivo_pdf_generado.save(fname, ContentFile(pdf_bytes), save=True)
+            logger.info(f"✅ PDF guardado (asíncrono): {fname} ({len(pdf_bytes)} bytes)")
+            return f"PDF generado y guardado para boleto {boleto_id}."
+        else:
+            logger.warning(f"⚠️ PDF generado vacío o muy pequeño ({len(pdf_bytes) if pdf_bytes else 0} bytes).")
+            return f"PDF vacío generado para boleto {boleto_id}."
+    except Exception as e:
+        logger.exception(f"❌ Error en tarea asíncrona de PDF para Boleto {boleto_id}: {e}")
+        raise e

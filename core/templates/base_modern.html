@@ -14,6 +14,13 @@
     <script src="{% static 'vendor/htmx_v2.js' %}"></script>
     <script src="{% static 'vendor/alpine_v2.js' %}" defer></script>
     
+    <script nonce="{{ request.csp_nonce }}">
+        // ASISTENCIA DE CARRIL: Asegurar que todas las peticiones HTMX incluyan el token CSRF
+        document.addEventListener('htmx:configRequest', (event) => {
+            event.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';
+        });
+    </script>
+    
     <style nonce="{{ request.csp_nonce }}">
         /* FORCE HIDE SEARCH MODAL IF JS/CSS FAIL */
         #omnisearch-modal-overlay { display: none !important; }
@@ -579,7 +586,7 @@
                 class="nav-item {% if request.resolver_match.url_name == 'modern_dashboard' %}nav-active{% endif %}"
                 :class="!sidebarOpen && 'justify-center'">
                 <span class="material-symbols-outlined text-[20px] shrink-0">dashboard</span>
-                <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">Dashboard</span>
+                <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">Dashboard AI</span>
             </a>
 
             <!-- SOLO ADMINS Y GERENTES -->
@@ -605,7 +612,7 @@
                 <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">Ventas</span>
             </a>
             
-            <a href="{% url 'core:cotizacion_dashboard' %}"
+            <a href="{% url 'bookings:cotizacion_dashboard' %}"
                 class="nav-item {% if 'cotizaciones' in request.path %}nav-active{% endif %}"
                 :class="!sidebarOpen && 'justify-center'">
                 <span class="material-symbols-outlined text-[20px] shrink-0">request_quote</span>
@@ -619,21 +626,21 @@
                 <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">Boletos</span>
             </a>
 
-            <a href="{% url 'core:flight_search' %}"
+            <a href="{% url 'bookings:flight_search' %}"
                 class="nav-item {% if 'flights' in request.path %}nav-active{% endif %}"
                 :class="!sidebarOpen && 'justify-center'">
                 <span class="material-symbols-outlined text-[20px] shrink-0">flight_takeoff</span>
                 <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">Vuelos</span>
             </a>
 
-            <a href="{% url 'core:hotel_search' %}"
+            <a href="{% url 'bookings:hotel_search' %}"
                 class="nav-item {% if 'hoteles' in request.path %}nav-active{% endif %}"
                 :class="!sidebarOpen && 'justify-center'">
                 <span class="material-symbols-outlined text-[20px] shrink-0">hotel</span>
                 <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">Hoteles</span>
             </a>
 
-            <a href="{% url 'core:catalogo_terrestre' %}"
+            <a href="{% url 'bookings:catalogo_terrestre' %}"
                 class="nav-item {% if 'inventario' in request.path %}nav-active{% endif %}"
                 :class="!sidebarOpen && 'justify-center'">
                 <span class="material-symbols-outlined text-[20px] shrink-0">inventory</span>
@@ -641,7 +648,7 @@
                 <span x-show="sidebarOpen" class="ml-auto bg-emerald-500/10 text-emerald-500 text-[9px] font-black px-2 py-0.5 rounded-full border border-emerald-500/20 uppercase tracking-tighter">Propio</span>
             </a>
 
-            <a href="{% url 'core:cotizacion_magic' %}"
+            <a href="{% url 'bookings:cotizacion_magic' %}"
                 class="nav-item {% if 'magic' in request.path %}nav-active{% endif %}"
                 :class="!sidebarOpen && 'justify-center'">
                 <span class="material-symbols-outlined text-[20px] shrink-0 text-primary">auto_awesome</span>
@@ -678,7 +685,7 @@
                 <span x-show="sidebarOpen" class="ml-auto bg-status-success-bg text-status-success text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest border border-status-success border-opacity-20">IA</span>
             </a>
 
-            <a href="{% url 'core:proveedores_list' %}"
+            <a href="{% url 'bookings:proveedor_list' %}"
                 class="nav-item {% if 'proveedores' in request.path %}nav-active{% endif %}"
                 :class="!sidebarOpen && 'justify-center'">
                 <span class="material-symbols-outlined text-[20px] shrink-0">corporate_fare</span>
@@ -693,7 +700,7 @@
             </div>
             <div x-show="!sidebarOpen" class="h-px bg-border-color my-3 mx-2"></div>
 
-            <a href="{% url 'core:facturacion_dashboard' %}"
+            <a href="{% url 'finance:facturacion_dashboard' %}"
                 class="nav-item {% if 'facturacion' in request.path %}nav-active{% endif %}"
                 :class="!sidebarOpen && 'justify-center'">
                 <span class="material-symbols-outlined text-[20px] shrink-0">receipt_long</span>
@@ -747,7 +754,7 @@
                 <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">Libro Mayor</span>
             </a>
 
-            <a href="{% url 'core:reportes_ventas' %}"
+            <a href="{% url 'finance:validar_cuadre' %}"
                 class="nav-item {% if 'reportes' in request.path %}nav-active{% endif %}"
                 :class="!sidebarOpen && 'justify-center'">
                 <span class="material-symbols-outlined text-[20px] shrink-0">bar_chart</span>
@@ -812,7 +819,7 @@
             </div>
             <div x-show="!sidebarOpen" class="h-px bg-border-color my-3 mx-2"></div>
 
-            <a href="{% url 'core:catalogos_center' %}"
+            <a href="{% url 'bookings:catalogos_center' %}"
                 class="nav-item {% if 'catalogos' in request.path %}nav-active{% endif %}"
                 :class="!sidebarOpen && 'justify-center'">
                 <span class="material-symbols-outlined text-[20px] shrink-0">category</span>
@@ -826,7 +833,7 @@
                 <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">Configuración</span>
             </a>
 
-            <a href="{% url 'core:billing_pricing' %}"
+            <a href="{% url 'finance:billing_pricing' %}"
                 class="nav-item {% if 'billing' in request.path %}nav-active{% endif %}"
                 :class="!sidebarOpen && 'justify-center'">
                 <span class="material-symbols-outlined text-[20px] shrink-0">credit_card</span>

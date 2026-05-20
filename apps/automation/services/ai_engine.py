@@ -27,6 +27,29 @@ class QuotaExhaustedException(Exception):
 class GeminiConfigurationError(RuntimeError):
     """Se lanza cuando la clave de API de Gemini no esta configurada."""
 
+def get_gemini_api_key(agency=None) -> str | None:
+    """
+    Resuelve de manera dinámica la clave API de Gemini.
+    1. Si hay una agencia en contexto (o provista), busca en su AgenciaConfiguracion.
+    2. Si no, cae de vuelta a la clave global (entorno o settings).
+    """
+    try:
+        from core.middleware import get_current_agency
+        target_agency = agency or get_current_agency()
+        
+        if target_agency:
+            try:
+                config = getattr(target_agency, 'configuracion_v2', None)
+                if config and config.gemini_api_key:
+                    return config.gemini_api_key
+            except Exception as e:
+                logger.debug(f"No se pudo resolver gemini_api_key de AgenciaConfiguracion: {e}")
+    except Exception as e_middleware:
+        logger.debug(f"Error importando o resolviendo middleware de agencia: {e_middleware}")
+            
+    # Fallback global
+    return os.environ.get("GEMINI_API_KEY") or getattr(settings, "GEMINI_API_KEY", None)
+
 class AIEngine:
     """
     Motor centralizado de Inteligencia Artificial para TravelHub.
@@ -41,29 +64,39 @@ class AIEngine:
 
     @classmethod
     def _ensure_configured(cls):
-        """Asegura que el cliente genai esté configurado (lazy skip import overhead)"""
-        if not hasattr(cls, '_client') or cls._client is None:
-            api_key = os.environ.get("GEMINI_API_KEY") or getattr(settings, "GEMINI_API_KEY", None)
-            if api_key:
-                try:
-                    genai = _get_genai()
-                    types = _get_genai_types()
-                    # Configuración de timeout para evitar cuelgues en workers
-                    http_options = types.HttpOptions(timeout=30000) # 30 segundos
-                    cls._client = genai.Client(api_key=api_key, http_options=http_options)
-                    cls._is_global_configured = True
-                    logger.info("AIEngine: genai client configured lazily with 30s timeout.")
-                except Exception as e:
-                    logger.error(f"AIEngine: Lazy Config Error: {e}")
-                    cls._is_global_configured = False
-            else:
-                logger.warning("AIEngine: No API Key found for lazy config.")
-                cls._is_global_configured = False
-        return cls._is_global_configured
+        """Asegura que haya al menos una clave API de Gemini disponible (global o de agencia)."""
+        api_key = get_gemini_api_key()
+        return bool(api_key)
+
+    def _get_client(self, agency=None):
+        """
+        Retorna un cliente de genai configurado para la clave API correspondiente (agencia o global).
+        """
+        api_key = get_gemini_api_key(agency)
+        if not api_key:
+            raise GeminiConfigurationError("GEMINI_API_KEY no configurada.")
+            
+        if not hasattr(self, '_clients_cache'):
+            self._clients_cache = {}
+            
+        if api_key not in self._clients_cache:
+            try:
+                genai = _get_genai()
+                types = _get_genai_types()
+                http_options = types.HttpOptions(timeout=30000) # 30 segundos
+                client = genai.Client(api_key=api_key, http_options=http_options)
+                self._clients_cache[api_key] = client
+                logger.info(f"AIEngine: Cliente genai instanciado para la clave terminada en ...{api_key[-6:] if len(api_key) > 6 else ''}")
+            except Exception as e:
+                logger.error(f"Error instanciando cliente genai: {e}")
+                raise GeminiConfigurationError(f"Error instanciando cliente genai: {e}")
+                
+        return self._clients_cache[api_key]
 
     def __init__(self):
         # El constructor es ahora extremadamente ligero
         self.is_ready = False # Se evaluará en tiempo de ejecución
+        self._clients_cache = {}
 
     def call_gemini(
         self, 
@@ -73,14 +106,14 @@ class AIEngine:
         model_name: str | None = None,
         temperature: float = 0.1,
         system_instruction: str | None = None,
-        feature: str = "generic"
+        feature: str = "generic",
+        agency: Any | None = None
     ) -> dict[str, Any]:
         """
         Llamada unificada a Gemini (Protegida por Circuit Breaker nativo de Django).
         feature: Indica qué funcionalidad está usando la IA (para tracking de costos).
         """
         from django.core.cache import cache
-        self._ensure_configured()
         
         # 1. Comprobar si el circuito está abierto (Gemini está caído)
         try:
@@ -95,7 +128,7 @@ class AIEngine:
             from apps.common.services.circuit_breaker import ai_circuit_breaker
             response = ai_circuit_breaker.call(
                 self._execute_call_gemini,
-                prompt, content_list, response_schema, model_name, temperature, system_instruction, feature
+                prompt, content_list, response_schema, model_name, temperature, system_instruction, feature, agency
             )
             # Si tiene éxito, reseteamos el contador de fallos
             try:
@@ -129,7 +162,8 @@ class AIEngine:
                     model_name=self.FALLBACK_MODEL,
                     temperature=temperature,
                     system_instruction=system_instruction,
-                    feature=feature
+                    feature=feature,
+                    agency=agency
                 )
 
             # 6. ÚLTIMO RECURSO: Intentar sin esquema si el 404 persiste (problemas de habilitación/versión)
@@ -142,7 +176,8 @@ class AIEngine:
                     model_name=model_name,
                     temperature=temperature,
                     system_instruction=system_instruction,
-                    feature=feature
+                    feature=feature,
+                    agency=agency
                 )
             
             raise e
@@ -206,13 +241,17 @@ class AIEngine:
         model_name: str | None = None,
         temperature: float = 0.1,
         system_instruction: str | None = None,
-        feature: str = "generic"
+        feature: str = "generic",
+        agency: Any | None = None
     ) -> dict[str, Any]:
         """
         Ejecución real de la llamada (Privada para el Circuit Breaker).
         """
-        if not self._ensure_configured():
-            return {"error": "IA no configurada (falta API Key)"}
+        # Resolve client dynamically for this call
+        try:
+            client = self._get_client(agency=agency)
+        except GeminiConfigurationError as config_err:
+            return {"error": f"IA no configurada: {config_err}"}
 
         try:
             # Si hay contenido multimedia, usamos el modelo de visión
@@ -245,7 +284,7 @@ class AIEngine:
                 else:
                     config.response_mime_type = "text/plain"
 
-                response = self._client.models.generate_content(
+                response = client.models.generate_content(
                     model=selected_model,
                     contents=contents,
                     config=config
@@ -255,7 +294,7 @@ class AIEngine:
                 error_str = str(e)
                 if "429" in error_str and selected_model != self.FALLBACK_MODEL:
                     logger.info(f"🔄 Cuota agotada en {selected_model}. Reintentando con {self.FALLBACK_MODEL}...")
-                    return self._execute_call_gemini(prompt, content_list, response_schema, self.FALLBACK_MODEL, temperature, system_instruction)
+                    return self._execute_call_gemini(prompt, content_list, response_schema, self.FALLBACK_MODEL, temperature, system_instruction, agency=agency)
                 
                 if "404" in error_str or "API has not been used" in error_str:
                     logger.error(f"❌ API DESHABILITADA o MODELO NO ENCONTRADO: {error_str}")
@@ -269,7 +308,7 @@ class AIEngine:
                     )
                     if system_instruction:
                         config_fallback.system_instruction = system_instruction
-                    response = self._client.models.generate_content(
+                    response = client.models.generate_content(
                         model=selected_model,
                         contents=contents,
                         config=config_fallback
@@ -454,9 +493,9 @@ def analizar_documento_con_gemini_estructurado(
     genai = _get_genai()
     genai_types = _get_genai_types()
 
-    api_key = getattr(settings, "GEMINI_API_KEY", None) or os.getenv("GEMINI_API_KEY")
+    api_key = get_gemini_api_key()
     if not api_key:
-        raise GeminiConfigurationError("GEMINI_API_KEY no configurada en settings.")
+        raise GeminiConfigurationError("GEMINI_API_KEY no configurada.")
 
     client = genai.Client(api_key=api_key)
     response = client.models.generate_content(
@@ -482,7 +521,7 @@ def analizar_documento_con_gemini_estructurado(
 def list_available_models():
     """Lista los modelos disponibles en la cuenta Gemini."""
     genai = _get_genai()
-    api_key = getattr(settings, "GEMINI_API_KEY", None) or os.getenv("GEMINI_API_KEY")
+    api_key = get_gemini_api_key()
     if not api_key:
         return "Error: No se proporciono API Key."
     try:

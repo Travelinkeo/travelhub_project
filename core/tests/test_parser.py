@@ -12,6 +12,8 @@ from decimal import Decimal
 from unittest.mock import Mock, patch, MagicMock
 from apps.automation.parsers.ticket_parser import extract_data_from_text
 from apps.automation.services.ticket_parser_service import TicketParserService
+from apps.automation.parsers.persistence import BoletoPersistenceService
+from apps.automation.parsers.normalization import DataNormalizationService
 from apps.bookings.models import BoletoImportado
 
 pytestmark = pytest.mark.django_db
@@ -80,17 +82,16 @@ class TestParserExtraction:
 class TestParserService:
     """Tests para TicketParserService"""
     
-    @patch('apps.automation.services.ticket_parser_service.pdfplumber')
-    @patch('core.ticket_parser.extract_data_from_text')
-    def test_actualiza_campos_modelo(self, mock_extract, mock_pdf, agencia, datos_boleto_sabre):
+    @patch('apps.automation.parsers.ticket_parser.extract_data_from_text')
+    def test_actualiza_campos_modelo(self, mock_extract, agencia, datos_boleto_sabre):
         """Test: Debe actualizar campos del modelo correctamente"""
         boleto = BoletoImportado.objects.create(
             agencia=agencia,
             estado_parseo="PEN"
         )
         
-        service = TicketParserService()
-        service._actualizar_campos_modelo(boleto, datos_boleto_sabre)
+        datos_normalizados = DataNormalizationService.normalize_ticket_data(datos_boleto_sabre)
+        BoletoPersistenceService.update_boleto_from_data(boleto, datos_normalizados)
         
         boleto.refresh_from_db()
         
@@ -107,8 +108,8 @@ class TestParserService:
             estado_parseo="PEN"
         )
         
-        service = TicketParserService()
-        service._actualizar_campos_modelo(boleto, datos_boleto_kiu)
+        datos_normalizados = DataNormalizationService.normalize_ticket_data(datos_boleto_kiu)
+        BoletoPersistenceService.update_boleto_from_data(boleto, datos_normalizados)
         
         boleto.refresh_from_db()
         
@@ -129,9 +130,8 @@ class TestParserService:
             # Faltan otros campos
         }
         
-        service = TicketParserService()
         # No debe lanzar excepción
-        service._actualizar_campos_modelo(boleto, datos_incompletos)
+        BoletoPersistenceService.update_boleto_from_data(boleto, datos_incompletos)
         
         boleto.refresh_from_db()
         assert boleto.localizador_pnr == "TEST123"
@@ -148,8 +148,7 @@ class TestParserService:
             "fare_amount": "1000.00"
         }
         
-        service = TicketParserService()
-        service._actualizar_campos_modelo(boleto, datos)
+        BoletoPersistenceService.update_boleto_from_data(boleto, datos)
         
         boleto.refresh_from_db()
         assert isinstance(boleto.total_boleto, Decimal)
@@ -158,7 +157,7 @@ class TestParserService:
 class TestParserErrorHandling:
     """Tests para manejo de errores"""
     
-    @patch('apps.automation.services.ticket_parser_service.TicketParserService._extraer_texto')
+    @patch('apps.automation.services.ticket_parser_service.ExtractionService.extract_text')
     def test_maneja_pdf_corrupto(self, mock_extraer, agencia):
         """Test: Debe manejar PDFs corruptos sin crashear"""
         boleto = BoletoImportado.objects.create(
@@ -174,11 +173,12 @@ class TestParserErrorHandling:
         
         assert resultado is None
         boleto.refresh_from_db()
-        assert boleto.estado_parseo == 'ERR'
+        assert boleto.estado_parseo == 'REV'
     
-    @patch('apps.automation.services.ticket_parser_service.TicketParserService._extraer_texto')
-    @patch('core.ticket_parser.extract_data_from_text')
-    def test_maneja_excepcion_en_parsing(self, mock_extract, mock_extraer, agencia):
+    @patch('apps.automation.parsers.ai_universal_parser.UniversalAIParser.parse', return_value=None)
+    @patch('apps.automation.services.ticket_parser_service.ExtractionService.extract_text')
+    @patch('apps.automation.services.ticket_parser_service.extract_data_from_text')
+    def test_maneja_excepcion_en_parsing(self, mock_extract, mock_extraer, mock_ai_parse, agencia):
         """Test: Debe capturar excepciones y marcar como error"""
         boleto = BoletoImportado.objects.create(
             agencia=agencia,
@@ -195,5 +195,5 @@ class TestParserErrorHandling:
         
         assert resultado is None
         boleto.refresh_from_db()
-        assert boleto.estado_parseo == 'ERR'
+        assert boleto.estado_parseo == 'REV'
         assert "Test error" in boleto.log_parseo

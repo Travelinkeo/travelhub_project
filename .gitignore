@@ -42,7 +42,7 @@ temp/
 *.local
 secrets.json
 
-# Development & Debugging
+# Development & Debugging (scripts temporales en raíz)
 scripts/
 scratch/
 check_*.py
@@ -52,6 +52,12 @@ nuclear_*.py
 deep_*.py
 force_*.py
 test_*.py
+audit_*.py
+fix_*.py
+auto_fix_*.py
+apply_*.py
+cleanup_*.py
+verify_*.py
 *.db
 *.sqlite3
 *.sqlite3-journal
@@ -60,7 +66,40 @@ htmlcov/
 .coverage
 .cache/
 pytest.cache/
-evolution_logs.txt
+.pytest_cache/
+
+# Artefactos de CI / Test results (no van a producción)
+errores_pytest.txt
+test_results*.txt
+test_results/
+failed_tasks.txt
+failed_tests.txt
+failures_list.txt
+pytest_errors_summary.txt
+migrate_log.txt
+migrate_output.txt
+migrations_log.txt
+migrations_status.txt
+fix_user.sql
+master
+
+# Archivos de auditoría / reportes generados
+auditoria_*.html
+reporte_*.html
+informe_*.html
 
 # Celery
 celerybeat-schedule*
+
+# Evolution WhatsApp
+evolution_logs.txt
+
+# Temporary local files
+.tmp.driveupload/
+find_schema.py
+plan_mejoras_travelhub.html
+print_log.log.py
+progreso_*.html
+pytest_output.txt
+pytest_output_utf8.txt
+

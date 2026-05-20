@@ -148,17 +148,59 @@ class BoletoMassActionAPIView(APIView):
         if not boleto_ids or not cliente_id:
             return Response({"error": "Faltan boleto_ids o cliente_id"}, status=400)
             
+        # 1. Obtener Agencia del usuario para aislamiento multi-tenant
+        agencia_usuario = None
+        if hasattr(request.user, 'agencias'):
+            usuario_agencia = request.user.agencias.filter(activo=True).first()
+            if usuario_agencia:
+                agencia_usuario = usuario_agencia.agencia
+        
+        if not agencia_usuario:
+            return Response(
+                {"error": "No tienes una agencia vinculada para realizar esta operación."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         try:
             cliente = Cliente.objects.select_related('agencia').get(pk=cliente_id)
-            queryset = BoletoImportado.objects.filter(pk__in=boleto_ids).select_related(
-                'agencia', 'proveedor', 'venta_asociada'
+            
+            # Encolar la facturación de forma asíncrona (Job Ingestion API)
+            from core.tasks import procesar_facturacion_masiva_task
+            from apps.common.utils.celery_utils import safe_delay
+            
+            # Pasamos agency_id para garantizar aislamiento SaaS en el worker Celery
+            task_id = safe_delay(
+                procesar_facturacion_masiva_task,
+                boleto_ids,
+                cliente_id,
+                agency_id=agencia_usuario.id
             )
-            results = InvoiceService.mass_assign_and_invoice(queryset, cliente)
-            return Response(results, status=200)
+            
+            if task_id:
+                logger.info(f"✅ Facturación masiva encolada con éxito. TaskID: {task_id}")
+                return Response({
+                    "mensaje": "Facturación masiva encolada con éxito. El procesamiento se realizará en segundo plano.",
+                    "task_id": task_id,
+                    "status": "QUEUED"
+                }, status=status.HTTP_202_ACCEPTED)
+            else:
+                # Fallback síncrono si el broker no está disponible (Carril de Asistencia)
+                logger.warning("⚠️ Broker Celery no disponible para facturación masiva. Ejecutando síncronamente.")
+                queryset = BoletoImportado.objects.filter(pk__in=boleto_ids).select_related(
+                    'agencia', 'proveedor', 'venta_asociada'
+                )
+                results = InvoiceService.mass_assign_and_invoice(queryset, cliente)
+                return Response({
+                    "mensaje": "Procesamiento completado síncronamente debido a indisponibilidad de cola.",
+                    "results": results,
+                    "status": "COMPLETED_SYNC"
+                }, status=status.HTTP_200_OK)
+                
         except Cliente.DoesNotExist:
-            return Response({"error": "Cliente no encontrado"}, status=404)
+            return Response({"error": "Cliente no encontrado"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            return Response({"error": str(e)}, status=500)
+            logger.exception("Error crítico en BoletoMassActionAPIView")
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @extend_schema(exclude=True)
 class VentaDoubleInvoiceAPIView(APIView):

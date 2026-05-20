@@ -158,6 +158,18 @@ class Agencia(models.Model):
     def password_app_correo(self):
         return self.configuracion.password_app_correo if self.configuracion else None
 
+    @property
+    def gemini_api_key(self):
+        return self.configuracion.gemini_api_key if self.configuracion else None
+
+    @gemini_api_key.setter
+    def gemini_api_key(self, value):
+        if not self.configuracion:
+            from core.models.agencia import AgenciaConfiguracion
+            self.configuracion = AgenciaConfiguracion.objects.create(agencia=self)
+        self.configuracion.gemini_api_key = value
+        self.configuracion.save(update_fields=['gemini_api_key'])
+
 
     @property
     def ui_theme(self):
@@ -260,7 +272,8 @@ class Agencia(models.Model):
         # 3. Mantenimiento de logos (Legacy logic adaptada)
         try:
             from core.tasks import migrar_logos_agencia_task
-            migrar_logos_agencia_task.delay(self.pk)
+            from django.db import transaction
+            transaction.on_commit(lambda: migrar_logos_agencia_task.delay(self.pk))
         except Exception as e:
             logger.error(f"❌ Error al disparar migrar_logos_agencia_task: {e}")
 
@@ -362,10 +375,20 @@ class AgenciaConfiguracion(models.Model):
     telegram_chat_id = models.CharField(max_length=255, blank=True, null=True)
     
     # Monitor IMAP
+    email_monitor_host = models.CharField(max_length=255, default="imap.gmail.com")
+    email_monitor_port = models.PositiveIntegerField(default=993)
     email_monitor_user = models.EmailField(blank=True, null=True)
     email_monitor_password = EncryptedCharField(max_length=255, blank=True, null=True)
     email_monitor_active = models.BooleanField(default=False)
     email_monitor_last_check = models.DateTimeField(blank=True, null=True)
+
+    # WhatsApp Evolution API (Multi-tenant)
+    evolution_api_url = models.URLField(max_length=500, blank=True, null=True, help_text="Base URL de Evolution API (ej: http://evolution:8080)")
+    evolution_api_key = EncryptedCharField(max_length=255, blank=True, null=True, help_text="API Key global de Evolution")
+    evolution_instance_name = models.CharField(max_length=255, blank=True, null=True, help_text="Nombre de la instancia de WhatsApp")
+    
+    # Gemini AI (Multi-tenant)
+    gemini_api_key = EncryptedCharField(max_length=255, blank=True, null=True, help_text="Clave API de Gemini específica para esta agencia")
     
     # Fiscal (Venezuela)
     imprenta_digital_nombre = models.CharField(max_length=200, blank=True)

@@ -21,10 +21,11 @@ class LinkeoService:
     }
 
     @staticmethod
-    def _get_gemini_model():
+    def _get_gemini_model(agency=None):
         try:
             from google import genai
-            api_key = getattr(settings, 'GEMINI_API_KEY', None)
+            from apps.automation.services.ai_engine import get_gemini_api_key
+            api_key = get_gemini_api_key(agency)
             if not api_key:
                 logger.warning("Gemini API Key not found.")
                 return None
@@ -180,7 +181,7 @@ class LinkeoService:
         Uses Gemini for open-ended queries fallback.
         Inyecta conocimiento de la Wiki (GDS Guides) si es relevante.
         """
-        model = cls._get_gemini_model()
+        model = cls._get_gemini_model(agencia)
         if not model:
             return "Lo siento, mi cerebro de IA no está conectado (Falta API Key)."
         

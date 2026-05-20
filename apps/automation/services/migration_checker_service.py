@@ -151,7 +151,8 @@ class MigrationCheckerService:
                     destination=destino,
                     transit_countries=transitos,
                     passport_expiry=pasajero.fecha_vencimiento_documento,
-                    travel_date=fecha_viaje
+                    travel_date=fecha_viaje,
+                    agency=pasajero.agencia
                 )
                 used_ai = True
             

@@ -6,10 +6,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Iniciar Sesión - TravelHub Pro</title>
-    <!-- TailwindCSS Local Asset para independencia de red -->
-    <script src="{% static 'vendor/tailwind_v2.js' %}"></script>
+    <!-- TailwindCSS Local Asset con Fallback a CDN -->
+    <script src="{% static 'vendor/tailwind_v2.js' %}" nonce="{{ request.csp_nonce }}"></script>
+    <script src="https://cdn.tailwindcss.com" nonce="{{ request.csp_nonce }}"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700&display=swap" rel="stylesheet">
-    <style>
+    <style nonce="{{ request.csp_nonce }}">
         body {
             font-family: 'Outfit', sans-serif;
         }
@@ -79,14 +80,9 @@
         <div class="text-center mb-8">
             <div
                 class="bg-white/5 p-4 rounded-3xl inline-block mb-4 shadow-lg backdrop-blur-sm border border-white/10 hover:bg-white/10 transition duration-300">
-                <!-- Logo para Modo Oscuro (Blanco) -->
                 <img src="{% static 'images/Logo TravelHub.png' %}" alt="TravelHub Logo"
-                    style="max-height: 96px;"
-                    class="logo-dark h-24 w-auto object-contain mx-auto drop-shadow-md">
-                <!-- Logo para Modo Claro (Negro) -->
-                <img src="{% static 'images/Logo TravelHub Negro.png' %}" alt="TravelHub Logo"
-                    style="max-height: 96px;"
-                    class="logo-light h-24 w-auto object-contain mx-auto drop-shadow-md">
+                    style="height: 80px; width: auto; object-fit: contain; margin: 0 auto; display: block;"
+                    class="mx-auto transform hover:scale-105 transition-all duration-500">
             </div>
             <!-- Subtitle removed as requested to let logo stand alone, or keep descriptive text if preferred -->
             <p class="text-gray-400 text-sm font-medium tracking-wide">Plataforma de Gestión Integral</p>
@@ -183,7 +179,7 @@
         </div>
     </div>
 
-    <script>
+    <script nonce="{{ request.csp_nonce }}">
     document.getElementById('magic-link-form').addEventListener('submit', function(e) {
         e.preventDefault();
         var btn = document.getElementById('magic-link-btn');

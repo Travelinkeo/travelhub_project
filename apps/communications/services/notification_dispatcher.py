@@ -313,20 +313,40 @@ def handle_urgent_notification(extracted_data: dict[str, Any]):
 def notificar_boleto_procesado(boleto):
     """
     Notifica al cliente/admin cuando su boleto está listo.
-    - WhatsApp al Admin con PDF
+    - WhatsApp al Admin con PDF (Twilio legacy)
+    - WhatsApp al Cliente con PDF (Evolution/Meta API via Celery task)
     - Email al cliente (si existe)
     """
     agencia_nombre = "TravelHub"
     cliente = None
+    agencia_id = None
 
     if boleto.venta_asociada:
         venta = boleto.venta_asociada
         cliente = venta.cliente
         agencia_nombre = venta.agencia.nombre if venta.agencia else "TravelHub"
+        agencia_id = venta.agencia.id if venta.agencia else None
+    elif boleto.agencia:
+        agencia_nombre = boleto.agencia.nombre
+        agencia_id = boleto.agencia.id
 
     datos = boleto.datos_parseados.get('normalized', {}) if boleto.datos_parseados else {}
     pnr = datos.get('reservation_code', boleto.localizador_pnr or 'N/A')
     pasajero = datos.get('passenger_name', boleto.nombre_pasajero_procesado or 'N/A')
+
+    # URL del PDF
+    pdf_url = ""
+    try:
+        if boleto.archivo_pdf_generado:
+            try:
+                pdf_url = boleto.archivo_pdf_generado.url
+            except Exception:
+                pdf_url = f"{settings.MEDIA_URL if 'http' in settings.MEDIA_URL else 'https://travelhub.travelinkeo.com' + settings.MEDIA_URL}{boleto.archivo_pdf_generado.name}"
+
+            if pdf_url and not pdf_url.startswith('http'):
+                pdf_url = f"https://travelhub.travelinkeo.com{pdf_url}"
+    except Exception as e:
+        logger.error(f"Error generando URL del PDF para boleto: {e}")
 
     # WhatsApp al Admin
     admin_phone = getattr(settings, 'ADMIN_WHATSAPP_NUMBER', '+584126080861')
@@ -346,24 +366,46 @@ Se ha procesado un nuevo boleto de forma automática.
 • Boleto: {boleto.numero_boleto}
 """
 
-        pdf_url = ""
-        try:
-            if boleto.archivo_pdf_generado:
-                try:
-                    pdf_url = boleto.archivo_pdf_generado.url
-                except Exception:
-                    pdf_url = f"{settings.MEDIA_URL if 'http' in settings.MEDIA_URL else 'https://travelhub.travelinkeo.com' + settings.MEDIA_URL}{boleto.archivo_pdf_generado.name}"
-
-                if pdf_url and not pdf_url.startswith('http'):
-                    pdf_url = f"https://travelhub.travelinkeo.com{pdf_url}"
-        except Exception as e:
-            logger.error(f"Error generando URL del PDF: {e}")
-
         success = enviar_whatsapp(admin_phone, mensaje, media_url=pdf_url)
         if success:
             logger.info(f"WhatsApp de notificación enviado a Admin ({admin_phone})")
         else:
             logger.error(f"Failed to send WhatsApp to Admin ({admin_phone})")
+
+    # WhatsApp al Cliente
+    if is_enabled and cliente and cliente.telefono_principal:
+        mensaje_cliente = f"""✈️ *¡Tu boleto está listo! - {agencia_nombre}*
+
+Hola *{cliente.get_nombre_completo()}*,
+
+Te informamos que hemos procesado tu boleto de avión con éxito.
+
+📋 *Detalles de tu viaje:*
+• Localizador PNR: *{pnr}*
+• Pasajero: {pasajero}
+• Aerolínea: {boleto.aerolinea_emisora or 'N/A'}
+• Nro Boleto: {boleto.numero_boleto or 'N/A'}
+
+Adjunto encontrarás tu boleto unificado en formato PDF.
+
+¡Que disfrutes tu viaje!
+_{agencia_nombre}_
+"""
+        try:
+            from core.tasks import enviar_notificacion_whatsapp_task
+            from django.db import transaction
+            
+            transaction.on_commit(lambda: enviar_notificacion_whatsapp_task.delay(
+                numero_cliente=cliente.telefono_principal,
+                mensaje=mensaje_cliente,
+                email_cliente=cliente.email,
+                agencia_id=agencia_id,
+                media_url=pdf_url if pdf_url else None,
+                file_name=f"Boleto_{pasajero.replace('/', '_')}_{pnr}.pdf"
+            ))
+            logger.info(f"Encolada tarea WhatsApp para cliente {cliente.get_nombre_completo()} ({cliente.telefono_principal})")
+        except Exception as e_celery:
+            logger.error(f"Error encolando tarea de WhatsApp para cliente: {e_celery}")
 
     # Email al cliente
     if cliente and cliente.email:

@@ -4,7 +4,7 @@ from decimal import Decimal
 from django.db import transaction
 
 from apps.bookings.models import BoletoImportado, Proveedor, Venta
-from apps.finance.models import FacturaConsolidada, ItemFacturaConsolidada
+from apps.finance.models import Factura, ItemFactura
 from apps.finance.models.currencies import Moneda
 
 logger = logging.getLogger(__name__)
@@ -24,7 +24,7 @@ class InvoiceService:
     @transaction.atomic
     def generate_double_invoice(venta: Venta):
         """
-        Generates two separate invoices (FacturaConsolidada) for a Venta:
+        Generates two separate invoices (Factura) for a Venta:
         1. Intermediación: For the provider (Airline/GDS) amount.
         2. Venta Propia: For the agency fee/commission.
         """
@@ -41,11 +41,11 @@ class InvoiceService:
                 proveedor_emisor = Proveedor.objects.filter(nombre__icontains=boleto.aerolinea_emisora).first()
 
             # Create Intermediation Invoice
-            factura_tercero = FacturaConsolidada.objects.create(
+            factura_tercero = Factura.objects.create(
                 venta_asociada=venta,
                 cliente=venta.cliente,
                 moneda=venta.moneda,
-                tipo_operacion=FacturaConsolidada.TipoOperacion.INTERMEDIACION,
+                tipo_operacion=Factura.TipoOperacion.INTERMEDIACION,
                 tasa_cambio_bcv=venta.tasa_cambio_bcv,
                 tercero_rif=proveedor_emisor.rif if proveedor_emisor else "J-00000000-0",
                 tercero_razon_social=proveedor_emisor.nombre if proveedor_emisor else (boleto.aerolinea_emisora or "Aerolínea Genérica"),
@@ -58,12 +58,12 @@ class InvoiceService:
             )
 
             # Add Item for Intermediation
-            ItemFacturaConsolidada.objects.create(
+            ItemFactura.objects.create(
                 factura=factura_tercero,
                 descripcion=f"Boleto {boleto.numero_boleto} - {boleto.nombre_pasajero_completo}",
                 cantidad=1,
                 precio_unitario=boleto.total_boleto or 0,
-                tipo_servicio=ItemFacturaConsolidada.TipoServicio.TRANSPORTE_AEREO_NACIONAL if "NAC" in (boleto.ruta_vuelo or "") else ItemFacturaConsolidada.TipoServicio.COMISION_INTERMEDIACION,
+                tipo_servicio=ItemFactura.TipoServicio.TRANSPORTE_AEREO_NACIONAL if "NAC" in (boleto.ruta_vuelo or "") else ItemFactura.TipoServicio.COMISION_INTERMEDIACION,
                 es_gravado=False,  # Usually excluded from agency's VAT if handled as intermediation
                 nombre_pasajero=boleto.nombre_pasajero_completo,
                 numero_boleto=boleto.numero_boleto,
@@ -75,11 +75,11 @@ class InvoiceService:
         fees = venta.fees_venta.all()
         factura_propia = None
         if fees.exists() or not factura_tercero:
-             factura_propia = FacturaConsolidada.objects.create(
+             factura_propia = Factura.objects.create(
                 venta_asociada=venta,
                 cliente=venta.cliente,
                 moneda=venta.moneda,
-                tipo_operacion=FacturaConsolidada.TipoOperacion.VENTA_PROPIA,
+                tipo_operacion=Factura.TipoOperacion.VENTA_PROPIA,
                 tasa_cambio_bcv=venta.tasa_cambio_bcv,
                 cliente_identificacion=venta.cliente.numero_documento or "N/A",
                 cliente_direccion=venta.cliente.direccion_linea1 or "N/A",
@@ -90,15 +90,15 @@ class InvoiceService:
             )
 
              for fee in fees:
-                 ItemFacturaConsolidada.objects.create(
-                     factura=factura_propia,
-                     descripcion=f"Fee de Gestión: {fee.get_tipo_fee_display()}",
-                     cantidad=1,
-                     precio_unitario=fee.monto,
-                     tipo_servicio=ItemFacturaConsolidada.TipoServicio.ALOJAMIENTO_Y_OTROS_GRAVADOS,
-                     es_gravado=True,
-                     alicuota_iva=Decimal('16.00')
-                 )
+                  ItemFactura.objects.create(
+                      factura=factura_propia,
+                      descripcion=f"Fee de Gestión: {fee.get_tipo_fee_display()}",
+                      cantidad=1,
+                      precio_unitario=fee.monto,
+                      tipo_servicio=ItemFactura.TipoServicio.ALOJAMIENTO_Y_OTROS_GRAVADOS,
+                      es_gravado=True,
+                      alicuota_iva=Decimal('25.00')
+                  )
 
         return factura_tercero, factura_propia
 

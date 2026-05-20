@@ -58,4 +58,12 @@ class Command(BaseCommand):
             action = "Creado" if created_tc or created_tasa else "Actualizado"
             self.stdout.write(self.style.SUCCESS(f"{action} Tipo de Cambio: 1 {iso} = {tasa} VES ({fecha_actual})"))
 
+        # Limpiar caché de la UI
+        try:
+            from django.core.cache import cache
+            cache.delete('tasa_bcv_context')
+            self.stdout.write(self.style.SUCCESS("Caché tasa_bcv_context eliminado."))
+        except Exception as cache_err:
+            self.stderr.write(self.style.WARNING(f"No se pudo limpiar caché: {cache_err}"))
+
         self.stdout.write(self.style.SUCCESS("Proceso completado."))

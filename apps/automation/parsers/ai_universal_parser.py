@@ -111,7 +111,13 @@ class UniversalAIParser:
                 except Exception as e:
                     logger.error(f"Error en visión PDF: {e}")
 
-            # --- 2. LLAMADA PRINCIPAL ---
+            # --- 2. LLAMADA PRINCIPAL CON FAIL-FAST ---
+            import time
+            from celery.exceptions import SoftTimeLimitExceeded
+
+            start_ia = time.time()
+            logger.info(">>> LLAMANDO A GEMINI...")
+
             try:
                 res = self.engine.call_gemini(
                     prompt=f"TEXTO DEL DOCUMENTO:\n{text_limpio}",
@@ -119,6 +125,16 @@ class UniversalAIParser:
                     response_schema=ResultadoParseoSchema,
                     system_instruction=SYSTEM_PROMPT
                 )
+                logger.info(f"<<< GEMINI RESPONDIÓ EN {time.time() - start_ia:.2f} SEGUNDOS")
+
+            except SoftTimeLimitExceeded:
+                logger.error(f"❌ TIMEOUT IA (SoftTimeLimit): Gemini no respondió a tiempo y Celery abortó la ejecución.")
+                return {
+                    "error": "API_FAILURE: TIMEOUT IA",
+                    "requires_manual_review": True,
+                    "fallback_triggered": True,
+                    "status_detail": "Timeout IA: Ejecutando Fallback"
+                }
             except Exception as e_api:
                 # 🚨 FALLO CRÍTICO DE API (Timeout, 500, Rate Limit)
                 logger.error(f"❌ Gemini API Failure (Switching to Fallback): {str(e_api)}")

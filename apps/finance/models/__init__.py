@@ -9,9 +9,11 @@ from .core_finance import (
     PagoBinance,
     ReporteProveedor,
     TransaccionPago,
+    DocumentoExportacion,
+    PropuestaTransaccionIA,
 )
 from .currencies import Moneda, TasaCambio, TipoCambio
-from .facturacion import DocumentoExportacionConsolidado, FacturaConsolidada, ItemFacturaConsolidada
+from .facturas_proveedores import FacturaProveedor
 from .reconciliacion import (
     ConciliacionBoleto,
     LineaReporteReconciliacion,
@@ -19,3 +21,8 @@ from .reconciliacion import (
 )
 from .retenciones import RetencionISLR
 from .tax_refund import TaxRefundOpportunity
+
+# Aliases for 100% backward-compatibility
+FacturaConsolidada = Factura
+ItemFacturaConsolidada = ItemFactura
+DocumentoExportacionConsolidado = DocumentoExportacion

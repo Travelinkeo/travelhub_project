@@ -161,7 +161,8 @@ class TasasVenezuelaClient:
         """
         from datetime import date
 
-        from apps.finance.models.currencies import Moneda, TipoCambio
+        from apps.finance.models.currencies import Moneda, TipoCambio, TasaCambio
+        from django.core.cache import cache
 
         from .models import TasaCambioBCV
         
@@ -189,6 +190,36 @@ class TasasVenezuelaClient:
             except Exception as e:
                 logger.error(f"Error guardando tasa BCV: {e}")
                 resultados['oficial'] = False
+
+        # 1.1 Actualizar tabla central TasaCambio (Caché de UI)
+        if 'oficial' in tasas:
+            try:
+                TasaCambio.objects.update_or_create(
+                    fecha=hoy,
+                    moneda='USD',
+                    defaults={'monto': tasas['oficial']['price']}
+                )
+                logger.info(f"TasaCambio UI (USD) actualizada: {tasas['oficial']['price']}")
+            except Exception as e:
+                logger.error(f"Error guardando TasaCambio UI (USD): {e}")
+
+        if 'euro_bcv' in tasas:
+            try:
+                TasaCambio.objects.update_or_create(
+                    fecha=hoy,
+                    moneda='EUR',
+                    defaults={'monto': tasas['euro_bcv']['price']}
+                )
+                logger.info(f"TasaCambio UI (EUR) actualizada: {tasas['euro_bcv']['price']}")
+            except Exception as e:
+                logger.error(f"Error guardando TasaCambio UI (EUR): {e}")
+
+        # Limpiar caché de la UI
+        try:
+            cache.delete('tasa_bcv_context')
+            logger.info("Caché tasa_bcv_context eliminado")
+        except Exception as cache_err:
+            logger.warning(f"No se pudo limpiar caché tasa_bcv_context: {cache_err}")
         
         # 2. Actualizar tabla central TipoCambio (USD y EUR)
         # Buscar moneda destino (VES)

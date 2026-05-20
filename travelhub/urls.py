@@ -1,31 +1,46 @@
-from django.conf import settings
-from django.conf.urls.static import static
+import logging
 from django.contrib import admin
-from django.urls import include, path
-from django.utils.translation import gettext_lazy as _
-from django.views.generic import TemplateView
+from django.urls import path, include
+from django.views.generic import RedirectView
+from rest_framework_simplejwt.views import TokenObtainPairView
 
-from core.views import dashboard
+# Importaciones mínimas para rutas core
+from core.views.onboarding_views import OnboardingAgencyView, SaaSOnboardingView
+from core.views.auth_views import TokenLogoutView, MagicLinkRequestView, MagicLinkVerifyView
+from django.contrib.auth import views as auth_views
+
+logger = logging.getLogger(__name__)
+
+# NOTA: En el enrutador maestro NO se declara app_name. 
+# El app_name = 'bookings' debe ir EXCLUSIVAMENTE en apps/bookings/urls.py
 
 urlpatterns = [
-    # Administración
-    path('admin/', admin.site.urls),
+    # --- ADMINISTRACIÓN Y AUTENTICACIÓN ---
+    path('admin/', admin.site.urls), # <-- Faltaba tu panel de admin
+    path('accounts/', include('django.contrib.auth.urls')), # <-- Faltaban las rutas base de auth
+    path('login/', auth_views.LoginView.as_view(), name='login'),
+    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+    path('api/auth/jwt/obtain/', TokenObtainPairView.as_view(), name='jwt_obtain_pair'),
+    path('api/auth/jwt/logout/', TokenLogoutView.as_view(), name='jwt_logout'),
+
+    # Magic Links
+    path('auth/magic-request/', MagicLinkRequestView.as_view(), name='magic_link_request'),
+    path('auth/magic/<str:token>/', MagicLinkVerifyView.as_view(), name='magic_link_verify'),
     
-    # Dashboard CEO (Global)
-    path('dashboard/ceo/', dashboard.CEODashboardView.as_view(), name='ceo_dashboard'),
-    path('dashboard/ia-insight/', dashboard.AIBusinessAdvisorView.as_view(), name='bi_ia_insight'),
-    
-    # Red de Aplicaciones y Núcleo (Dispatcher Centralizado)
-    path('', include('core.urls')),
-    
-    # 🗂️ PWA ROOT FILES
-    path('manifest.json', TemplateView.as_view(template_name='manifest.json', content_type='application/json')),
-    path('service-worker.js', TemplateView.as_view(template_name='service-worker.js', content_type='application/javascript')),
+    # --- ONBOARDING (SaaS) ---
+    path('onboarding/', SaaSOnboardingView.as_view(), name='onboarding_start'),
+    path('onboarding/agency/', OnboardingAgencyView.as_view(), name='onboarding_agency'),
+
+    # --- INCLUSIÓN DE MÓDULOS (ESTO SOLUCIONA EL ERROR NOREVERSEMATCH) ---
+    path('bookings/', include('apps.bookings.urls')),
+    path('finance/', include('apps.finance.urls')),
+    path('crm/', include('apps.crm.urls')),
+    path('system/', include(('core.urls_system', 'core'))),
+    path('accounting/', include('apps.contabilidad.urls')),
+    path('cms/', include('apps.cms.urls')),
+
+    # --- DASHBOARD PRINCIPAL ---
+    # Redirige a la vista modern_dashboard que ahora reside en bookings
+    path('', RedirectView.as_view(pattern_name='bookings:modern_dashboard', permanent=False), name='home'),
+    path('dashboard/', RedirectView.as_view(pattern_name='bookings:modern_dashboard', permanent=False), name='dashboard_root'),
 ]
-
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-
-admin.site.site_header = _("Administración de TravelHub")
-admin.site.site_title = _("Portal de Administración TravelHub")
-admin.site.index_title = _("Bienvenido al Portal de Administración de TravelHub")

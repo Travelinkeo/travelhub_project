@@ -8,18 +8,24 @@ logger = logging.getLogger(__name__)
 from django.conf import settings
 
 
-def safe_delay(task_func: Any, *args: Any, **kwargs: Any) -> Any | None:
+def safe_delay(task_func: Any, *args: Any, _queue: str | None = None, **kwargs: Any) -> Any | None:
     """
     ASISTENCIA DE CARRIL: Wrapper seguro para encolar tareas de Celery.
     Si Redis o el Broker de mensajes están caídos, captura el error.
     En DESARROLLO (DEBUG=True), cae en ejecución síncrona para no detener la operación.
     """
     try:
-        # Intentamos enviar la tarea a la cola
-        task = task_func.delay(*args, **kwargs)
+        # Intentamos enviar la tarea a la cola con prioridad si se especifica
+        if _queue:
+            from django.db import transaction
+            task = transaction.on_commit(lambda: task_func.apply_async(args=args, kwargs=kwargs, queue=_queue))
+        else:
+            from django.db import transaction
+            task = transaction.on_commit(lambda: task_func.delay(*args, **kwargs))
+            
         # Algunos objetos task de Celery no tienen .id inmediatamente si falla el broker
         task_id = getattr(task, 'id', str(task))
-        logger.info(f"✅ Tarea {task_func.name} encolada con éxito. ID: {task_id}")
+        logger.info(f"✅ Tarea {task_func.name} encolada con éxito en cola '{_queue or 'default'}'. ID: {task_id}")
         return task_id
     except Exception as e:
         # Capturamos errores de conexión, DNS (redis:6379), etc.
@@ -75,8 +81,9 @@ def tenant_task(*task_args, **task_kwargs):
                 from core.middleware import agency_context
                 from core.models.agencia import Agencia
                 try:
-                    # Usamos all_objects para bypass del TenantManager
-                    agencia = Agencia.all_objects.get(id=agency_id)
+                    # Usamos all_objects para bypass del TenantManager si existe, de lo contrario fallback a objects
+                    manager = getattr(Agencia, 'all_objects', Agencia.objects)
+                    agencia = manager.get(id=agency_id)
                     with agency_context(agencia):
                         logger.info(f"🏢 [TENANT TASK] Contexto: {agencia.nombre} | Tarea: {func.__name__}")
                         return func(*args, **kwargs)

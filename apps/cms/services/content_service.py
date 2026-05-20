@@ -18,8 +18,9 @@ class AIContentService:
     """
 
     def __init__(self):
+        from apps.automation.services.ai_engine import get_gemini_api_key
         genai = _get_genai()
-        self.client = genai.Client(api_key=settings.GEMINI_API_KEY)
+        self.client = genai.Client(api_key=get_gemini_api_key())
         self.model_name = 'gemini-2.0-flash'
 
     def generate_article(self, destination, keywords=None):

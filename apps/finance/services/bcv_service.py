@@ -59,6 +59,24 @@ def obtener_tasa_bcv_resiliente(moneda: str = 'USD') -> float:
     except Exception as e:
         logger.warning(f"⚠️ Fallo al contactar al BCV (posible caída del servidor): {str(e)}")
         
+        # 1.5 INTENTO ADICIONAL: Fallback a DolarApi vía bcv_scraper
+        try:
+            from apps.finance.services.bcv_scraper import obtener_tasas_bcv
+            tasas_bcv = obtener_tasas_bcv()
+            if tasas_bcv and moneda_iso in tasas_bcv:
+                tasa_val = float(tasas_bcv[moneda_iso])
+                if tasa_val > 0:
+                    TasaCambio.objects.update_or_create(
+                        fecha=hoy,
+                        moneda=moneda_iso,
+                        defaults={'monto': Decimal(str(tasa_val))}
+                    )
+                    cache.delete('tasa_bcv_context')
+                    logger.info(f"✅ Tasa BCV obtenida vía DolarApi: {tasa_val} {moneda_iso}")
+                    return tasa_val
+        except Exception as api_err:
+            logger.warning(f"⚠️ Fallo en DolarApi fallback para resiliente: {api_err}")
+            
         # 2. INTENTO SECUNDARIO (FALLBACK): Activar Caché de Supervivencia
         try:
             # Buscamos la última tasa válida registrada en la base de datos

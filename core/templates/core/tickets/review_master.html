@@ -33,6 +33,7 @@
 
 {% block content %}
 <div class="min-h-screen bg-surface-base text-text-main flex flex-col">
+    {% include 'core/tickets/partials/status_check.html' %}
     
     <!-- ── TOP NAVIGATION BAR ── -->
     <header class="h-16 flex items-center justify-between px-8 border-b border-border-color glass-effect sticky top-0 z-50">
@@ -111,31 +112,7 @@
     </header>
 
     <!-- ── MAIN CONTENT ── -->
-    <main class="flex-1 grid grid-cols-1 lg:grid-cols-12 overflow-hidden"
-          {% if is_processing %}
-          hx-get="{% url 'core:revisar_boleto' boleto.pk %}"
-          hx-trigger="every 3s"
-          hx-select="#main-content-area"
-          hx-target="#main-content-area"
-          hx-swap="outerHTML"
-          {% endif %}
-          id="main-content-area">
-
-        {% if is_processing %}
-        <!-- ── PROCESSING OVERLAY ── -->
-        <div class="fixed inset-0 bg-black/60 z-[60] flex flex-col items-center justify-center backdrop-blur-sm animate-fade-in">
-            <div class="relative">
-                <div class="size-24 rounded-full border-4 border-primary/20 border-t-primary animate-spin"></div>
-                <span class="material-symbols-outlined absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-3xl animate-pulse text-primary">magic_button</span>
-            </div>
-            <h2 class="mt-8 text-xl font-black uppercase tracking-[0.3em] text-white">IA Analizando...</h2>
-            <p class="mt-2 text-gray-400 font-bold uppercase text-[10px] tracking-widest">Extrayendo itinerario y datos financieros de forma asíncrona</p>
-            <div class="mt-8 flex items-center gap-2 px-4 py-2 bg-white/5 rounded-full border border-white/10">
-                <span class="size-2 rounded-full bg-emerald-500 animate-ping"></span>
-                <span class="text-[9px] font-black text-gray-500 uppercase tracking-widest">Esperando respuesta del worker...</span>
-            </div>
-        </div>
-        {% endif %}
+    <main class="flex-1 grid grid-cols-1 lg:grid-cols-12 overflow-hidden" id="main-content-area">
         
         <!-- ── LEFT COLUMN: SOURCE DATA ── -->
         <aside class="lg:col-span-5 border-r border-border-color flex flex-col bg-surface-1 h-[calc(100vh-64px)] overflow-hidden">
@@ -164,6 +141,15 @@
                         <span class="material-symbols-outlined text-[16px]">verified</span>
                         <span class="text-[9px] font-black uppercase tracking-wider">TKT</span>
                     </a>
+                    {% else %}
+                    <div id="pdf-status-container-{{ boleto.pk }}" 
+                         hx-get="{% url 'core:boleto_pdf_status' boleto.pk %}" 
+                         hx-trigger="every 3s" 
+                         hx-swap="outerHTML" 
+                         class="flex-1 h-10 px-4 rounded-xl bg-amber-500/5 border border-amber-500/20 flex items-center justify-center gap-2 text-amber-500 group animate-pulse cursor-wait">
+                        <span class="size-4 border-2 border-amber-500/20 border-t-amber-500 rounded-full animate-spin"></span>
+                        <span class="text-[9px] font-black uppercase tracking-wider">Generando...</span>
+                    </div>
                     {% endif %}
                 </div>
             </div>
@@ -448,28 +434,6 @@
             console.log('✅ Operación exitosa:', evt.detail.elt.id);
         } else {
             console.error('❌ Fallo en operación:', evt.detail.elt.id);
-        }
-    });
-        
-
-                
-                // Overlay de carga
-                const overlay = document.createElement('div');
-                overlay.className = 'fixed inset-0 bg-black/80 z-[9999] flex flex-col items-center justify-center backdrop-blur-md';
-                overlay.innerHTML = `
-                    <div class="relative">
-                        <div class="size-24 rounded-full border-4 border-primary/20 border-t-primary animate-spin"></div>
-                        <span class="material-symbols-outlined absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-3xl animate-pulse">magic_button</span>
-                    </div>
-                    <h2 class="mt-8 text-xl font-black uppercase tracking-[0.3em] text-white">IA Trabajando...</h2>
-                    <p class="mt-2 text-gray-500 font-bold uppercase text-[10px] tracking-widest">Extrayendo datos complejos y generando PDF</p>
-                `;
-                document.body.appendChild(overlay);
-
-                // Redirigir directamente al endpoint con FORCE=1
-                const ts = new Date().getTime();
-                window.location.href = window.location.pathname + '?force=1&v=' + ts;
-            });
         }
     });
 </script>

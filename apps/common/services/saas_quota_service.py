@@ -41,12 +41,12 @@ class SaaSQuotaService:
         """
         Obtiene el uso actual de un recurso, consultando Redis primero.
         """
-        cache_key = f"saas_quota:{agencia.id}:{resource_type}"
+        cache_key = f"quota_{agencia.id}_{resource_type}_current_month"
         usage = cache.get(cache_key)
         
         if usage is None:
             usage = cls._fetch_usage_from_db(agencia, resource_type)
-            cache.set(cache_key, usage, timeout=cls.CACHE_TTL)
+            cache.set(cache_key, usage, timeout=2592000) # 30 dias (1 mes aprox)
             
         return usage
 
@@ -84,7 +84,7 @@ class SaaSQuotaService:
         """
         Incrementa el contador en caché tras una creación exitosa.
         """
-        cache_key = f"saas_quota:{agencia_id}:{resource_type}"
+        cache_key = f"quota_{agencia_id}_{resource_type}_current_month"
         try:
             cache.incr(cache_key)
         except (ValueError, TypeError):

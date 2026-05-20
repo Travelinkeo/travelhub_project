@@ -10,7 +10,7 @@
     <!-- Top Action Buttons -->
     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mt-2">
         <!-- Nueva Venta -->
-        <a href="{% url 'core:venta_create' %}" class="group relative bg-gradient-to-br from-blue-600 to-blue-800 rounded-xl p-4 shadow-lg hover:shadow-blue-500/20 transition-all hover:-translate-y-1 overflow-hidden">
+        <a href="{% url 'bookings:venta_create' %}" class="group relative bg-gradient-to-br from-blue-600 to-blue-800 rounded-xl p-4 shadow-lg hover:shadow-blue-500/20 transition-all hover:-translate-y-1 overflow-hidden">
             <div class="absolute top-3 right-3 bg-white/10 p-2 rounded-lg group-hover:bg-white/20 transition">
                 <span class="material-symbols-outlined text-white text-[20px]">add_shopping_cart</span>
             </div>
@@ -73,7 +73,7 @@
         </a>
 
         <!-- Magic Quoter AI (New) -->
-        <a href="{% url 'core:cotizacion_magic' %}" class="group relative bg-gradient-to-br from-purple-600 to-indigo-800 rounded-xl p-4 shadow-lg hover:shadow-purple-500/20 transition-all hover:-translate-y-1 overflow-hidden block">
+        <a href="{% url 'bookings:cotizacion_magic' %}" class="group relative bg-gradient-to-br from-purple-600 to-indigo-800 rounded-xl p-4 shadow-lg hover:shadow-purple-500/20 transition-all hover:-translate-y-1 overflow-hidden block">
             <div class="absolute top-3 right-3 bg-white/10 p-2 rounded-lg group-hover:bg-white/20 transition">
                 <span class="material-symbols-outlined text-white text-[20px]">magic_button</span>
             </div>
@@ -207,19 +207,19 @@
                 <tbody class="divide-y divide-border-color">
                     {% for venta in ventas_recientes %}
                     <tr class="hover:bg-surface-2 transition-colors group">
-                        <td class="px-6 py-4 font-mono text-text-secondary text-xs clickable-row" data-url="{% url 'core:editar_venta' venta.pk %}">
+                        <td class="px-6 py-4 font-mono text-text-secondary text-xs clickable-row" data-url="{% url 'bookings:venta_update' venta.pk %}">
                             {{ venta.fecha_venta|date:"d M Y" }}
                         </td>
-                        <td class="px-6 py-4 text-text-main font-medium flex items-center gap-3 cursor-pointer clickable-row" data-url="{% url 'core:editar_venta' venta.pk %}">
+                        <td class="px-6 py-4 text-text-main font-medium flex items-center gap-3 cursor-pointer clickable-row" data-url="{% url 'bookings:venta_update' venta.pk %}">
                             <div class="w-8 h-8 rounded-lg bg-surface-3 flex items-center justify-center text-primary font-black text-[10px] border border-border-color">
                                 {% if venta.cliente %}{{ venta.cliente.nombres|slice:":2"|upper }}{% else %}NA{% endif %}
                             </div>
                             <span class="truncate max-w-[150px]">{{ venta.cliente.nombres|default:"<span class='text-status-warning'>Sin asignar</span>"|safe }}</span>
                         </td>
-                        <td class="px-6 py-4 font-mono font-black text-primary cursor-pointer clickable-row" data-url="{% url 'core:editar_venta' venta.pk %}">
+                        <td class="px-6 py-4 font-mono font-black text-primary cursor-pointer clickable-row" data-url="{% url 'bookings:venta_update' venta.pk %}">
                             {{ venta.localizador|default:"---" }}
                         </td>
-                        <td class="px-6 py-4 cursor-pointer clickable-row" data-url="{% url 'core:editar_venta' venta.pk %}">
+                        <td class="px-6 py-4 cursor-pointer clickable-row" data-url="{% url 'bookings:venta_update' venta.pk %}">
                             {% if venta.estado == 'PAG' or venta.estado == 'COM' %}
                                 <span class="px-2 py-1 rounded-full text-[10px] font-black bg-status-success-bg text-status-success border border-status-success/20">PAGADO</span>
                             {% elif venta.estado == 'PEN' %}
@@ -231,7 +231,7 @@
                         <td class="px-6 py-4 text-right">
                             <div class="flex items-center justify-end gap-4">
                                 <span class="font-black text-text-main text-sm font-mono">${{ venta.total_venta|floatformat:2|intcomma }}</span>
-                                <a href="{% url 'core:venta_eliminar_permanente' venta.pk %}" 
+                                <a href="{% url 'bookings:venta_delete' venta.pk %}" 
                                    class="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white transition-all delete-venta-btn"
                                    title="Eliminar permanentemente">
                                     <span class="material-symbols-outlined text-[18px]">delete_forever</span>
@@ -254,7 +254,7 @@
 
     <!-- Hidden Inputs and Forms for Logic -->
     <input type="file" id="passport-file-input" class="hidden" accept="image/*,.pdf">
-    <form id="upload-form" hx-post="{% url 'core:upload_boleto' %}" hx-encoding="multipart/form-data" hx-target="#notificaciones-area" hx-swap="innerHTML">
+    <form id="upload-form" hx-post="{% url 'bookings:upload_boleto' %}" hx-encoding="multipart/form-data" hx-target="#notificaciones-area" hx-swap="innerHTML">
         {% csrf_token %}
         <input id="dropzone-file" type="file" name="archivo" class="hidden">
     </form>
@@ -345,7 +345,7 @@
                 }));
 
                 try {
-                    const response = await fetch('/api/ocr/passport/', {
+                    const response = await fetch('{% url "crm:ocr_passport" %}', {
                         method: 'POST',
                         body: formData,
                         headers: {
@@ -360,7 +360,7 @@
                             detail: { message: 'Lectura exitosa. Preparando ficha...', type: 'success' }
                         }));
                         setTimeout(() => {
-                            window.location.href = "{% url 'core:cliente_create' %}";
+                            window.location.href = "{% url 'crm:cliente_create' %}";
                         }, 1000);
                     } else {
                         throw new Error(result.error || "Falla en algoritmo de OCR.");

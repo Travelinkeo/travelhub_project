@@ -10,8 +10,8 @@ class WingoParser(BaseTicketParser):
     """Parser para reservas de Wingo (aerolínea low-cost)"""
     
     def can_parse(self, text: str) -> bool:
-        text_upper = text.upper()
-        return 'WINGO' in text_upper or 'WINGO.COM' in text_upper
+        purified = self.purify_text_for_detection(text)
+        return 'WINGO' in purified or 'WINGO.COM' in purified
     
     def parse(self, text: str, html_text: str = "") -> ParsedTicketData:
         pnr = self.extract_field(text, [r'(?:C[óo]digo de reserva|reserva)\s+([A-Z0-9]{6})'])

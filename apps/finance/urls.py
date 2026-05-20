@@ -20,6 +20,7 @@ from .views import (
     task_status_view,
     tax_refund_views,
     views_reconciliation,
+    invoice_views,
 )
 from core.views.billing_analytics_views import (
     get_churn_rate,
@@ -136,6 +137,8 @@ urlpatterns = [
     # Asistente AI
     path('ai-chat/', ai_views.AIAccountingDashboardView.as_view(), name='ai_accounting_chat'),
     path('ai-chat/htmx/', ai_views.AIChatHTMXView.as_view(), name='ai_chat_htmx'),
+    path('ai-chat/proposals/', ai_views.AIAccountingProposalsPartialView.as_view(), name='ai_proposals_partial'),
+    path('ai-chat/proposals/<uuid:pk>/<str:action>/', ai_views.AIAccountingResolveProposalHTMXView.as_view(), name='ai_proposal_resolve_htmx'),
 
     # Conciliación Contable Inteligente (Fase 21) Reescritura HTMX Pura
     path('reconciliacion/dashboard/', reconciliacion_views.ReconciliationDashboardHTMXView.as_view(), name='reconciliacion_dashboard_htmx'),
@@ -157,6 +160,11 @@ urlpatterns = [
     # API Analytics Anterior 
     path('api/reconciliacion/stats/', api_reconciliacion_views.ReconciliationDashboardStatsAPIView.as_view(), name='api_reconciliacion_stats'),
     path('api/reconciliacion/upload-async/', views_reconciliation.ReporteReconciliacionAsyncUploadAPIView.as_view(), name='api_reconciliacion_upload_async'),
+    
+    # Staging Ledger Buffer (Propuestas de Transacción IA)
+    path('api/finance/propuestas/', ai_views.PropuestaTransaccionIAListCreateAPIView.as_view(), name='api_propuestas_list'),
+    path('api/finance/propuestas/<uuid:pk>/<str:action>/', ai_views.ResolvePropuestaAPIView.as_view(), name='api_propuesta_resolve'),
+
     path('', include(router.urls)),
     
     path('profitability/', views.ProfitabilityDashboardView.as_view(), name='profit_dashboard'),
@@ -212,5 +220,9 @@ urlpatterns = [
     path('api/reportes/estado-resultados/', estado_resultados, name='estado_resultados'),
     path('api/reportes/validar-cuadre/', validar_cuadre, name='validar_cuadre'),
     path('api/reportes/exportar-excel/', exportar_excel, name='exportar_excel'),
+
+    # Dashboard de Revisión de Facturas (Manual Review)
+    path('facturas-proveedores/revisar/', invoice_views.InvoiceReviewDashboardView.as_view(), name='invoice_review_dashboard'),
+    path('facturas-proveedores/vincular/<int:factura_id>/', invoice_views.force_match_invoice_htmx, name='force_match_invoice'),
 ]
 

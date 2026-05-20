@@ -10,7 +10,9 @@ from apps.crm.models import OportunidadViaje
 
 logger = logging.getLogger(__name__)
 
-class KanbanBoardView(LoginRequiredMixin, View):
+from core.mixins import SaaSMixin
+
+class KanbanBoardView(SaaSMixin, LoginRequiredMixin, View):
     """
     Renderiza el tablero principal de ventas, agrupando los leads por etapa.
     """
@@ -18,7 +20,7 @@ class KanbanBoardView(LoginRequiredMixin, View):
 
     def get(self, request, *args, **kwargs):
         # Obtenemos todos los leads, optimizando la consulta del cliente
-        leads = OportunidadViaje.objects.select_related('cliente').all().order_by('-creado_en')
+        leads = self.get_queryset().select_related('cliente').order_by('-creado_en')
         
         context = {
             'leads_new': leads.filter(etapa='NEW'),
@@ -28,7 +30,7 @@ class KanbanBoardView(LoginRequiredMixin, View):
         }
         return render(request, self.template_name, context)
 
-class UpdateLeadStageView(LoginRequiredMixin, View):
+class UpdateLeadStageView(SaaSMixin, LoginRequiredMixin, View):
     """
     Endpoint reactivo (HTMX). Recibe el ID del Lead y su nueva etapa
     cuando el usuario suelta la tarjeta (Drop).
@@ -39,7 +41,9 @@ class UpdateLeadStageView(LoginRequiredMixin, View):
         
         if lead_id and new_stage:
             try:
-                lead = get_object_or_404(OportunidadViaje, id=lead_id)
+                from core.security import get_agencia_or_403, get_object_tenant_or_404
+                agencia = get_agencia_or_403(request)
+                lead = get_object_tenant_or_404(OportunidadViaje, agencia, id=lead_id)
                 
                 # Validar que new_stage esté en las choices del modelo
                 if new_stage in dict(OportunidadViaje.Etapa.choices):

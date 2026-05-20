@@ -1,5 +1,5 @@
 """
-Servicio de integración contable para facturas consolidadas.
+Servicio de integración contable para facturas.
 Genera asientos contables automáticos según normativa VEN-NIF.
 """
 
@@ -15,18 +15,18 @@ logger = logging.getLogger(__name__)
 
 def generar_asiento_factura(factura):
     """
-    Genera asiento contable automático para una factura consolidada.
+    Genera asiento contable automático para una factura.
     
     Asiento tipo:
     DEBE:
         - Cuentas por Cobrar Clientes (monto_total)
     HABER:
         - Ingresos por Ventas (subtotal_base_gravada + subtotal_exento)
-        - IVA por Pagar (monto_iva_16 + monto_iva_adicional)
-        - IGTF por Pagar (monto_igtf)
+    - IVA por Pagar (monto_iva_16 + monto_iva_adicional)
+    - IGTF por Pagar (monto_igtf)
     
     Args:
-        factura: Instancia de FacturaConsolidada
+        factura: Instancia de Factura
         
     Returns:
         AsientoContable: Asiento generado
@@ -90,7 +90,7 @@ def generar_asiento_factura(factura):
                         cuenta=cuenta_iva,
                         tipo_movimiento='HABER',
                         monto=monto_iva_total,
-                        descripcion=f"IVA 16% Factura {factura.numero_factura}"
+                        descripcion=f"IVA Factura {factura.numero_factura}"
                     )
             
             # HABER: IGTF por Pagar
@@ -126,7 +126,7 @@ def contabilizar_factura(factura):
     Genera y contabiliza (aprueba) el asiento de la factura.
     
     Args:
-        factura: Instancia de FacturaConsolidada
+        factura: Instancia de Factura
         
     Returns:
         bool: True si se contabilizó exitosamente

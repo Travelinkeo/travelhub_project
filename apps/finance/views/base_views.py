@@ -21,7 +21,9 @@ from apps.finance.services.smart_reconciliation_service import SmartReconciliati
 
 logger = logging.getLogger(__name__)
 
-class InvoiceListView(LoginRequiredMixin, ListView):
+from core.mixins import SaaSMixin
+
+class InvoiceListView(SaaSMixin, LoginRequiredMixin, ListView):
     model = Factura
     template_name = 'finance/invoice_list.html'
     context_object_name = 'invoices'
@@ -41,7 +43,7 @@ class InvoiceListView(LoginRequiredMixin, ListView):
         }
         return context
 
-class InvoiceDetailView(LoginRequiredMixin, DetailView):
+class InvoiceDetailView(SaaSMixin, LoginRequiredMixin, DetailView):
     model = Factura
     template_name = 'finance/partials/invoice_detail_modal.html'
     context_object_name = 'invoice'
@@ -101,7 +103,7 @@ class InvoiceUpdateView(LoginRequiredMixin, View):
 
 # --- RECONCILIACIÓN ---
 
-class ReportListView(LoginRequiredMixin, ListView):
+class ReportListView(SaaSMixin, LoginRequiredMixin, ListView):
     model = ReporteReconciliacion
     template_name = 'finance/reconciliation/report_list.html'
     context_object_name = 'reports'
@@ -134,7 +136,7 @@ class ReportUploadView(LoginRequiredMixin, View):
             logger.error(f"Error procesando reporte: {e}")
             return HttpResponse(f"Error procesando: {str(e)}", status=500)
 
-class ReconciliationDetailView(LoginRequiredMixin, DetailView):
+class ReconciliationDetailView(SaaSMixin, LoginRequiredMixin, DetailView):
     model = ReporteReconciliacion
     template_name = 'finance/reconciliation/report_detail.html'
     context_object_name = 'report'

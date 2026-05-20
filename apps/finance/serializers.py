@@ -7,10 +7,11 @@ from apps.finance.models.reconciliacion import (
 )
 from core.serializers import CoreClienteSerializer, MonedaSerializer
 
-from .models.facturacion import (
+from apps.finance.models import (
     DocumentoExportacionConsolidado,
     FacturaConsolidada,
     ItemFacturaConsolidada,
+    PropuestaTransaccionIA,
 )
 
 
@@ -180,3 +181,27 @@ class FacturaConsolidadaSerializer(serializers.ModelSerializer):
                 ItemFacturaConsolidada.objects.create(factura=instance, **item_data)
         
         return instance
+
+
+class PropuestaTransaccionIASerializer(serializers.ModelSerializer):
+    estado_display = serializers.CharField(source='get_estado_display', read_only=True)
+    usuario_resolutor_display = serializers.CharField(source='usuario_resolutor.username', read_only=True, allow_null=True)
+
+    class Meta:
+        model = PropuestaTransaccionIA
+        fields = [
+            'id_propuesta',
+            'modulo_objetivo',
+            'accion_tipo',
+            'payload_datos',
+            'ia_justificacion',
+            'estado',
+            'estado_display',
+            'fecha_creacion',
+            'fecha_resolucion',
+            'usuario_resolutor',
+            'usuario_resolutor_display',
+            'comentarios_resolucion',
+        ]
+        read_only_fields = ['id_propuesta', 'fecha_creacion', 'fecha_resolucion', 'usuario_resolutor']
+

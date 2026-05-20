@@ -22,7 +22,8 @@ def _get_genai_types():
 
 def _get_client():
     genai = _get_genai()
-    api_key = getattr(settings, 'GEMINI_API_KEY', None) or os.getenv('GEMINI_API_KEY')
+    from apps.automation.services.ai_engine import get_gemini_api_key
+    api_key = get_gemini_api_key()
     if not api_key:
         logger.error("GEMINI_API_KEY no configurada.")
         return None

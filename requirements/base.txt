@@ -1,9 +1,9 @@
 # TravelHub - Base Dependencies
 # Core
-Django==5.2.6
+Django==5.2.14
 django-environ==0.13.0
 dj-database-url==3.0.1
-sentry-sdk==2.22.0
+sentry-sdk==2.50.0
 
 # API & Frontend
 djangorestframework==3.15.2
@@ -23,6 +23,7 @@ redis==5.0.1
 django-celery-results==2.6.0
 django-celery-beat==2.8.1
 django-redis==5.4.0
+flower==2.0.1
 
 # AI & Parsing
 google-genai==1.59.0
@@ -30,7 +31,6 @@ PyMuPDF==1.26.3
 google-cloud-aiplatform==1.133.0
 
 # Finance & Integrations
-pyDolarVenezuela==2.0.3
 stripe==13.0.1
 twilio==9.8.3
 sendgrid==6.12.5
@@ -41,14 +41,14 @@ amadeus==12.0.0
 # Data & Utils
 pandas==2.3.2
 openpyxl==3.1.5
-pillow==11.3.0
+pillow==12.2.0
 requests==2.32.4
 beautifulsoup4==4.13.4
 python-dotenv==1.1.1
 django-storages==1.14.6
 structlog==25.4.0
 boto3==1.42.81
-cloudinary==1.44.1
-django-cloudinary-storage==0.3.0
 qrcode==8.2
 websocket-client==1.9.0
+pypdf==5.5.0
+python-telegram-bot==21.11

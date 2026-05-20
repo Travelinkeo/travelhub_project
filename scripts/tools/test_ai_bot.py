@@ -35,7 +35,8 @@ def simular_mensaje_whatsapp():
              print("FALLO: El procesamiento de Gemini no tuvo exito.")
     else:    
         # Carril 'ia_fast'
-        whatsapp_ai_task.delay(telefono, cliente, mensaje)
+        from django.db import transaction
+        transaction.on_commit(lambda: whatsapp_ai_task.delay(telefono, cliente, mensaje))
         print("EXITO: Mensaje encolado en Celery.")
     
     print("--------------------------------------------------")

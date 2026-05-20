@@ -223,7 +223,7 @@
                 statusHTML = `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border bg-emerald-500/10 text-emerald-500 border-emerald-500/20">Completado</span>`;
             }
 
-            return `<tr class="group hover:bg-nav-active-bg/10 transition-all cursor-pointer" onclick="location.href='/upload/boleto/${b.id}/revisar/'">
+            return `<tr class="group hover:bg-nav-active-bg/10 transition-all cursor-pointer" onclick="location.href='/system/upload/boleto/${b.id}/revisar/'">
                 <td class="px-6 py-5 text-center" onclick="event.stopPropagation()">
                     <input type="checkbox" class="boleto-checkbox-search size-4 rounded border-border-color bg-surface-1 text-primary">
                 </td>
@@ -282,7 +282,8 @@
         </td></tr>`;
 
         try {
-            const r = await fetch(`/api/boletos/buscar/?${params}`);
+            const buscarUrl = "{% url 'core:boletos_buscar' %}";
+            const r = await fetch(`${buscarUrl}?${params}`);
             allResults = await r.json();
             renderResults(allResults);
         } catch (e) {

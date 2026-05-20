@@ -42,7 +42,7 @@ def get_agencia_from_cache(agencia_id: int) -> Optional[dict]:
             data = {
                 'id': agencia.pk,
                 'nombre': agencia.nombre,
-                'activo': agencia.activo,
+                'activo': agencia.activa,
                 'plan': getattr(agencia, 'plan', None),
             }
             cache.set(cache_key, data, AGENCIA_CACHE_TIMEOUT)

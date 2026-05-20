@@ -114,6 +114,30 @@
                 </div>
             </div>
 
+            <!-- Staging Ledger Buffer Panel -->
+            <div class="glass-card rounded-2xl p-6 shadow-2xl space-y-4">
+                <div class="flex items-center justify-between border-b border-emerald-500/20 pb-3">
+                    <h3 class="text-md font-bold text-white flex items-center gap-2">
+                        <span class="flex h-2.5 w-2.5 relative">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500"></span>
+                        </span>
+                        Buffer de Aprobación
+                    </h3>
+                    <span class="text-[10px] text-amber-400 font-mono px-1.5 py-0.5 rounded bg-amber-500/10 border border-amber-500/20">Staging</span>
+                </div>
+                <p class="text-emerald-100/60 text-[11px] leading-relaxed">
+                    Acciones contables sugeridas por IA que requieren aprobación explícita humana para su ejecución determinista.
+                </p>
+                <div id="pending-proposals-container" 
+                     hx-get="{% url 'finance:ai_proposals_partial' %}" 
+                     hx-trigger="load, proposalChanged from:body" 
+                     hx-swap="innerHTML"
+                     class="space-y-4 max-h-[350px] overflow-y-auto pr-1">
+                    <div class="text-center py-4 text-emerald-100/40 text-xs">Cargando propuestas del buffer...</div>
+                </div>
+            </div>
+
             <div class="glass-card rounded-2xl p-6 shadow-xl border-dashed border-emerald-500/30">
                 <h3 class="text-xs font-semibold text-emerald-500 uppercase tracking-widest mb-4">Contexto de Agencia</h3>
                 <div class="flex items-center gap-2">

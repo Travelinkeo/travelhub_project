@@ -14,6 +14,60 @@ from apps.finance.models.currencies import Moneda
 # Imports actualizados apuntando a las nuevas rutas modulares (apps/*)
 from core.models import Agencia  # Agencia se mantiene en el core por el multi-tenant
 
+import unittest.mock
+from django.contrib.auth import get_user_model
+from django.utils import timezone
+
+@pytest.fixture(autouse=True)
+def mock_ai_engine(monkeypatch):
+    """
+    Mock global de AIEngine para evitar llamadas reales a Gemini en tests.
+    Retorna un resultado de parseo exitoso por defecto.
+    """
+    monkeypatch.setattr('apps.automation.services.ai_engine.AIEngine._ensure_configured', lambda *args, **kwargs: True)
+    
+    from apps.automation.services.ai_engine import ai_engine
+    
+    default_res = {
+        "boletos": [
+            {
+                "codigo_reserva": "MOCK12",
+                "numero_boleto": "1234567890123",
+                "nombre_pasajero": "DOE/JOHN",
+                "solo_nombre_pasajero": "JOHN",
+                "apellido_pasajero": "DOE",
+                "fecha_emision": "2025-01-01",
+                "tarifa": 100.0,
+                "total": 120.0,
+                "moneda": "USD",
+                "itinerario": [
+                    {
+                        "aerolinea": "TEST AIRLINES",
+                        "numero_vuelo": "TS123",
+                        "origen": "TEST CITY",
+                        "destino": "DEST CITY",
+                        "fecha_salida": "2025-02-01",
+                        "hora_salida": "10:00",
+                        "hora_llegada": "12:00"
+                    }
+                ]
+            }
+        ]
+    }
+    
+    mock_call = unittest.mock.MagicMock(return_value=default_res)
+    monkeypatch.setattr(ai_engine, 'call_gemini', mock_call)
+    
+    import json
+    ai_parser_res = {
+        "passenger": {"name": "JUAREZ/RAUL"},
+        "bookingDetails": {"ticketNumber": "0457281019415"},
+        "flights": [{"flightNumber": "AA123", "departure": {"location": "CARACAS"}, "arrival": {"location": "BOGOTA"}}]
+    }
+    monkeypatch.setattr('apps.automation.services.ai_engine.generate_content', lambda *args, **kwargs: json.dumps(ai_parser_res))
+    
+    return mock_call
+
 User = get_user_model()
 
 @pytest.fixture

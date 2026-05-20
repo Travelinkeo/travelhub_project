@@ -1,5 +1,5 @@
-﻿import pytest
-pytestmark = pytest.mark.skip(reason='Parser/Gemini refactorizado - pendiente actualización')
+import pytest
+# pytestmark = pytest.mark.skip(reason='Parser/Gemini refactorizado - pendiente actualización')
 
 import os
 import unittest
@@ -7,6 +7,7 @@ import unittest
 from apps.automation.services.ticket_parser_service import extract_data_from_text
 
 
+@pytest.mark.django_db
 class TestHybridSabreParser(unittest.TestCase):
 
     @classmethod
@@ -28,6 +29,8 @@ class TestHybridSabreParser(unittest.TestCase):
 
         # Llamar a la función principal de parseo
         parsed_data = extract_data_from_text(self.fixture_text)
+        print("DEBUG KEYS:", list(parsed_data.keys()))
+        print("DEBUG PARSED_DATA:", parsed_data)
 
         # Verificar que no hay errores y que el sistema fuente es SABRE
         self.assertNotIn('error', parsed_data)

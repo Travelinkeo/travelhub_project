@@ -20,6 +20,7 @@ from .models import (
     Amenity,
     AuditLog,
     BoletoImportado,
+    BoletoImportadoTransito,
     CircuitoDia,
     CircuitoTuristico,
     EventoServicio,
@@ -449,6 +450,13 @@ class BoletoImportadoAdmin(SaaSAdminMixin, admin.ModelAdmin):
                 logger.error(f"Error regenerando PDF desde Admin para Boleto {obj.pk}: {e}", exc_info=True)
                 from django.contrib import messages
                 messages.warning(request, f"Se actualizaron los datos, pero falló la regeneración del PDF: {e}")
+
+@admin.register(BoletoImportadoTransito)
+class BoletoImportadoTransitoAdmin(SaaSAdminMixin, admin.ModelAdmin):
+    list_display = ('id_transito', 'boleto_origen', 'ticket_index', 'nombre_pasajero', 'numero_boleto', 'procesado', 'fecha_creacion')
+    search_fields = ('nombre_pasajero', 'numero_boleto')
+    list_filter = ('procesado', 'fecha_creacion')
+    readonly_fields = ('fecha_creacion',)
 
 @admin.register(AuditLog)
 class AuditLogAdmin(SaaSAdminMixin, admin.ModelAdmin):

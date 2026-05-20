@@ -20,14 +20,6 @@ class GeminiParser(BaseTicketParser):
     """
     
     def __init__(self):
-        api_key = os.getenv('GEMINI_API_KEY') or getattr(settings, 'GEMINI_API_KEY', None)
-        if not api_key:
-            logger.error("GEMINI_API_KEY no encontrada.")
-            self.client = None
-            return
-
-        genai = _get_genai()
-        self.client = genai.Client(api_key=api_key)
         self.model_name = 'gemini-2.0-flash'
 
     def can_parse(self, text: str) -> bool:
@@ -36,11 +28,16 @@ class GeminiParser(BaseTicketParser):
         return len(text) > 50
 
     def parse(self, text: str, html_text: str = "", pdf_path: str = None) -> ParsedTicketData:
-        if not self.client:
+        from apps.automation.services.ai_engine import get_gemini_api_key, _get_genai
+        api_key = get_gemini_api_key()
+        if not api_key:
             logger.error("Modelo Gemini no inicializado (Falta API Key)")
             return {}
 
-        prompt_text = f"""
+        genai = _get_genai()
+        client = genai.Client(api_key=api_key)
+
+        prompt_text = """
         Actúa como un experto en extracción de datos de boletos aéreos (GDS Sabre, Amadeus, Kiu).
         Tu tarea es extraer entidades estructuradas del siguiente boleto aéreo.
         
@@ -163,7 +160,7 @@ class GeminiParser(BaseTicketParser):
                  logger.error(f"❌ Error renderizando PDF para Vision: {e}")
         
         try:
-            response = self.client.models.generate_content(
+            response = client.models.generate_content(
                 model=self.model_name,
                 contents=content_parts
             )

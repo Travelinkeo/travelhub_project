@@ -11,6 +11,7 @@ import pytest
 from decimal import Decimal
 from apps.bookings.models import BoletoImportado
 from apps.automation.services.ticket_parser_service import TicketParserService
+from apps.automation.parsers.persistence import BoletoPersistenceService
 
 pytestmark = pytest.mark.django_db
 
@@ -52,7 +53,7 @@ class TestTicketVersioning:
         
         # Aplicar lógica de versionado
         service = TicketParserService()
-        service._gestionar_versionado(boleto_v2)
+        BoletoPersistenceService.handle_versioning(boleto_v2)
         
         # Recargar desde DB
         boleto_v2.refresh_from_db()
@@ -82,7 +83,7 @@ class TestTicketVersioning:
         )
         
         service = TicketParserService()
-        service._gestionar_versionado(v2)
+        BoletoPersistenceService.handle_versioning(v2)
         v2.refresh_from_db()
         
         # V3: Segunda re-emisión
@@ -93,7 +94,7 @@ class TestTicketVersioning:
             estado_parseo="PEN"
         )
         
-        service._gestionar_versionado(v3)
+        BoletoPersistenceService.handle_versioning(v3)
         v3.refresh_from_db()
         
         assert v1.version == 1
@@ -118,7 +119,7 @@ class TestTicketVersioning:
             
             if i > 1:
                 service = TicketParserService()
-                service._gestionar_versionado(boleto)
+                BoletoPersistenceService.handle_versioning(boleto)
         
         # Recuperar historial
         historial = BoletoImportado.objects.filter(
@@ -149,7 +150,7 @@ class TestTicketVersioning:
         )
         
         service = TicketParserService()
-        service._gestionar_versionado(v2)
+        BoletoPersistenceService.handle_versioning(v2)
         v2.refresh_from_db()
         
         # Verificar relación inversa

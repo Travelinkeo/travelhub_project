@@ -1,0 +1,51 @@
+{% extends "base_modern.html" %}
+{% load static %}
+
+{% block content %}
+<div class="min-h-[70vh] flex items-center justify-center p-4">
+    <div class="max-w-2xl w-full bg-slate-900/50 backdrop-blur-xl border border-indigo-500/30 rounded-3xl p-8 lg:p-12 text-center shadow-2xl">
+        <div class="w-24 h-24 bg-gradient-to-tr from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-lg shadow-indigo-500/20">
+            <span class="material-symbols-outlined text-5xl text-white">rocket_launch</span>
+        </div>
+        
+        <h1 class="text-4xl font-black text-white mb-4 bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
+            ¡Tu Negocio Está Creciendo!
+        </h1>
+        
+        <p class="text-xl text-slate-300 mb-8 leading-relaxed">
+            Has alcanzado el límite de <strong>{{ limit }} {{ resource|replace:"_," " "|title }}</strong> de tu plan actual. Para seguir procesando con la potencia de TravelHub Pro, es momento de subir de nivel.
+        </p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
+            <div class="p-6 bg-slate-800/50 rounded-2xl border border-slate-700 text-left">
+                <h3 class="text-indigo-400 font-bold mb-2 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-sm">check_circle</span>
+                    Procesamiento Ilimitado
+                </h3>
+                <p class="text-xs text-slate-400">Libera el poder de Gemini 1.5 Pro sin restricciones mensuales.</p>
+            </div>
+            <div class="p-6 bg-slate-800/50 rounded-2xl border border-slate-700 text-left">
+                <h3 class="text-purple-400 font-bold mb-2 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-sm">check_circle</span>
+                    Soporte Prioritario
+                </h3>
+                <p class="text-xs text-slate-400">Acceso directo a nuestro equipo de ingenieros para tu agencia.</p>
+            </div>
+        </div>
+
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <a href="/billing/upgrade/" class="w-full sm:w-auto px-8 py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-indigo-600/20 flex items-center justify-center gap-2 group">
+                Actualizar Ahora
+                <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
+            </a>
+            <a href="javascript:history.back()" class="w-full sm:w-auto px-8 py-4 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl transition-all">
+                Volver
+            </a>
+        </div>
+        
+        <p class="mt-8 text-sm text-slate-500 italic">
+            "La escalabilidad es el primer paso hacia el éxito global."
+        </p>
+    </div>
+</div>
+{% endblock %}

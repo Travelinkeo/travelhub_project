@@ -10,17 +10,22 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RenameIndex(
-            model_name="notificacioninteligente",
-            new_name="automation__usuario_b9f56b_idx",
-            old_name="core_notifi_usuario_716d79_idx",
-        ),
-        migrations.AlterModelTable(
-            name="notificacionagente",
-            table=None,
-        ),
-        migrations.AlterModelTable(
-            name="notificacioninteligente",
-            table=None,
-        ),
+        migrations.SeparateDatabaseAndState(
+            state_operations=[
+                migrations.RenameIndex(
+                    model_name="notificacioninteligente",
+                    new_name="automation__usuario_b9f56b_idx",
+                    old_name="core_notifi_usuario_716d79_idx",
+                ),
+                migrations.AlterModelTable(
+                    name="notificacionagente",
+                    table=None,
+                ),
+                migrations.AlterModelTable(
+                    name="notificacioninteligente",
+                    table=None,
+                ),
+            ],
+            database_operations=[]
+        )
     ]

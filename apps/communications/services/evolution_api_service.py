@@ -100,7 +100,11 @@ class EvolutionService:
     @classmethod
     def get_manager_qr_url(cls, instance_name: str):
         """Retorna la URL de la imagen QR (endpoint propio que captura el QR via WebSocket)."""
-        return f"/whatsapp/qr-img/{instance_name}/"
+        try:
+            from django.urls import reverse
+            return reverse('core:evolution_qr_image', kwargs={'instance_name': instance_name})
+        except Exception:
+            return f"/system/whatsapp/qr-img/{instance_name}/"
 
     @classmethod
     def get_pairing_code(cls, instance_name: str, phone_number: str):

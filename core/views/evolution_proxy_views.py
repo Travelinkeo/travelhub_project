@@ -41,7 +41,17 @@ def evolution_manager_proxy(request, instance_name):
             return HttpResponse("No autorizado", status=403)
 
     base_url = EvolutionService._get_base_url()
-    path = request.path.replace(f"/whatsapp/qr/{instance_name}", "", 1) or "/"
+    
+    # Extraer el path de forma robusta ignorando cualquier prefijo como /system/
+    marker = f"/whatsapp/qr/{instance_name}"
+    idx = request.path.find(marker)
+    if idx != -1:
+        path = request.path[idx + len(marker):]
+    else:
+        path = "/"
+    if not path:
+        path = "/"
+        
     target_url = f"{base_url}/manager/qr/{instance_name}{path}"
 
     if request.META.get("QUERY_STRING"):
@@ -66,8 +76,19 @@ def evolution_manager_proxy(request, instance_name):
 
         if "text/html" in content_type:
             text = resp.text
-            text = text.replace("/assets/", f"/whatsapp/qr/{instance_name}/assets/")
-            text = text.replace("/evolution/", f"/whatsapp/qr/{instance_name}/evolution/")
+            
+            # Obtener el prefijo del proxy de forma dinámica usando reverse
+            try:
+                from django.urls import reverse
+                prefix_url = reverse('core:evolution_qr_proxy', kwargs={'instance_name': instance_name})
+            except Exception:
+                prefix_url = f"/system/whatsapp/qr/{instance_name}/"
+            
+            if not prefix_url.endswith("/"):
+                prefix_url += "/"
+                
+            text = text.replace("/assets/", f"{prefix_url}assets/")
+            text = text.replace("/evolution/", f"{prefix_url}evolution/")
             content = text.encode("utf-8")
 
         response = HttpResponse(content, status=resp.status_code, content_type=content_type)

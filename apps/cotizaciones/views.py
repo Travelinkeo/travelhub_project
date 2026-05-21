@@ -514,7 +514,8 @@ class MagicQuoterAIView(LoginRequiredMixin, View):
                 
             final_total = round(float(base_price) + actual_fee, 2)
 
-            unsplash_key = os.environ.get("UNSPLASH_ACCESS_KEY", "")
+            from django.conf import settings
+            unsplash_key = getattr(settings, "UNSPLASH_ACCESS_KEY", "")
             if unsplash_key:
                 try:
                     res = requests.get(

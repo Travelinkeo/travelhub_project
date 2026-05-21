@@ -134,9 +134,23 @@ class ThreadLocalContextMiddleware:
                 else:
                     # 🏢 USUARIO NORMAL: Obtener su agencia asociada (si no fue seteada antes)
                     if not agency:
-                        ua_obj = user.agencias.filter(activo=True).select_related('agencia').first()
-                        if ua_obj:
-                            agency = ua_obj.agencia
+                        # Verificar si el usuario eligió una agencia activa en la sesión
+                        preferred_id = request.session.get('active_agencia_id')
+                        if preferred_id:
+                            from core.models.agencia import Agencia
+                            ua_obj = user.agencias.filter(
+                                activo=True,
+                                agencia__id=preferred_id,
+                                agencia__activa=True
+                            ).select_related('agencia').first()
+                            if ua_obj:
+                                agency = ua_obj.agencia
+                        # Si no hay preferencia o no es válida, tomar la primera activa
+                        if not agency:
+                            ua_obj = user.agencias.filter(activo=True).select_related('agencia').first()
+                            if ua_obj:
+                                agency = ua_obj.agencia
+
             
             # Validación final (Seguridad SaaS)
             if not agency and user and not user.is_superuser:

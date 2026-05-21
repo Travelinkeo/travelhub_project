@@ -41,6 +41,8 @@ urlpatterns = [
     path('agencia/usuarios/<int:pk>/cambiar-estado/', agencia_views.UsuarioAgenciaToggleStatusView.as_view(), name='usuario_toggle'),
     path('agencia/usuarios/<int:pk>/cambiar-rol/', agencia_views.UsuarioAgenciaUpdateRoleView.as_view(), name='usuario_update_role'),
     path('agencia/auditoria/', audit_views_frontend.AgenciaAuditLogListView.as_view(), name='agencia_auditoria'),
+    path('agencia/cambiar/', agencia_views.CambiarAgenciaView.as_view(), name='cambiar_agencia'),
+
     
     # Configuración / Perfil
     path('setup/perfil/', user_profile_views.UserProfileView.as_view(), name='user_profile'),

@@ -31,8 +31,11 @@ urlpatterns = [
     # Proveedores (Catálogos)
     path('setup/catalogos/proveedores/', proveedores_views.ProveedorListView.as_view(), name='proveedores_list'),
     path('setup/catalogos/proveedores/nuevo/', proveedores_views.ProveedorCreateView.as_view(), name='proveedores_nuevo'),
+    path('setup/catalogos/proveedores/nuevo/', proveedores_views.ProveedorCreateView.as_view(), name='proveedor_create'),
     path('setup/catalogos/proveedores/<int:pk>/editar/', proveedores_views.ProveedorUpdateView.as_view(), name='proveedores_editar'),
+    path('setup/catalogos/proveedores/<int:pk>/editar/', proveedores_views.ProveedorUpdateView.as_view(), name='proveedor_update'),
     path('setup/catalogos/proveedores/<int:pk>/eliminar/', proveedores_views.ProveedorDeleteView.as_view(), name='proveedores_eliminar'),
+    path('setup/catalogos/proveedores/<int:pk>/eliminar/', proveedores_views.ProveedorDeleteView.as_view(), name='proveedor_delete'),
 
     
     # ERP Proveedores Dashboard

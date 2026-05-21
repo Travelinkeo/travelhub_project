@@ -28,6 +28,8 @@ from apps.cotizaciones.views import (
     MagicQuoterAIView,
     MagicQuoterSaveView
 )
+from core.views import reportes_views
+from core.views.analytics import dashboard_views, sales_analytics, finance_analytics, ops_analytics
 
 app_name = 'core'
 
@@ -143,4 +145,22 @@ urlpatterns = [
     path('cotizaciones/<int:pk>/convertir/', CotizacionConvertirView.as_view(), name='cotizacion_convertir'),
     path('api/cotizaciones/magic-gpt/', MagicQuoterAIView.as_view(), name='magic_quoter_ai'),
     path('cotizaciones/magic/save/', MagicQuoterSaveView.as_view(), name='magic_quoter_save'),
+
+    # Listado de usuarios (Alias)
+    path('agencia/usuarios/', agencia_views.AgenciaUsersListView.as_view(), name='usuarios_list'),
+
+    # Reportes Contables
+    path('api/reportes/libro-diario/', reportes_views.libro_diario, name='libro_diario'),
+    path('api/reportes/balance-comprobacion/', reportes_views.balance_comprobacion, name='balance_comprobacion'),
+    path('api/reportes/estado-resultados/', reportes_views.estado_resultados, name='estado_resultados'),
+    path('api/reportes/validar-cuadre/', reportes_views.validar_cuadre, name='validar_cuadre'),
+    path('api/reportes/exportar-excel/', reportes_views.exportar_excel, name='exportar_excel'),
+
+    # Analytics y Pestañas HTMX
+    path('analytics/', dashboard_views.AnalyticsDashboardView.as_view(), name='analytics_dashboard'),
+    path('analytics/sales/', sales_analytics.sales_analytics_view, name='analytics_sales'),
+    path('analytics/finance/', finance_analytics.finance_analytics_view, name='analytics_finance'),
+    path('analytics/ops/', ops_analytics.ops_analytics_view, name='analytics_ops'),
+
+    path('', include('apps.common.urls_core')),
 ]

@@ -888,7 +888,7 @@
             </div>
             <div x-show="!sidebarOpen" class="h-px bg-border-color my-3 mx-2"></div>
 
-            <a href="{% url 'bookings:catalogos_center' %}"
+            <a href="{% url 'core:catalogos_center' %}"
                 class="nav-item {% if 'catalogos' in request.path %}nav-active{% endif %}"
                 :class="!sidebarOpen && 'justify-center'">
                 <span class="material-symbols-outlined text-[20px] shrink-0">category</span>

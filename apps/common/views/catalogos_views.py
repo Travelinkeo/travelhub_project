@@ -46,7 +46,7 @@ class ProductoServicioListView(HtmxResponseMixin, SaaSMixin, LoginRequiredMixin,
     def get_queryset(self):
         q = self.request.GET.get('q')
         queryset = ProductoServicio.objects.select_related(
-            'moneda', 'impuesto_default'
+            'proveedor_principal', 'moneda_referencial'
         ).order_by('nombre')
         if q:
             queryset = queryset.filter(Q(nombre__icontains=q) | Q(codigo_interno__icontains=q))

@@ -578,6 +578,75 @@
             </button>
         </div>
 
+        <!-- ── SELECTOR DE AGENCIA (solo si el usuario tiene más de 1) ─── -->
+        {% if user_agencies|length > 1 %}
+        <div x-data="{ agenciaOpen: false }" class="relative px-2 py-2 border-b border-border-color shrink-0">
+            <button @click="agenciaOpen = !agenciaOpen"
+                    class="w-full flex items-center gap-2.5 px-2 py-1.5 rounded-xl hover:bg-surface-2 transition-all group"
+                    :class="!sidebarOpen && 'justify-center px-0'">
+                <!-- Indicador de agencia activa -->
+                <div class="relative shrink-0">
+                    <div class="w-6 h-6 rounded-md flex items-center justify-center text-[var(--text-on-primary)] text-[9px] font-black shadow-sm"
+                         style="background-color: var(--primary)">
+                        {{ current_agency.nombre|slice:":2"|upper }}
+                    </div>
+                    <div class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-status-success border-2 border-surface-1"></div>
+                </div>
+                <div x-show="sidebarOpen" x-transition class="flex-1 min-w-0 text-left overflow-hidden">
+                    <p class="text-[10px] font-black text-text-muted uppercase tracking-widest leading-none">Agencia activa</p>
+                    <p class="text-xs font-bold text-text-main truncate mt-0.5">{{ current_agency.nombre|default:"—" }}</p>
+                </div>
+                <span x-show="sidebarOpen" class="material-symbols-outlined text-[16px] text-text-muted group-hover:text-primary transition-colors shrink-0"
+                      :class="agenciaOpen ? 'rotate-180' : ''"
+                      style="transition: transform 0.2s">expand_more</span>
+            </button>
+
+            <!-- Dropdown de agencias -->
+            <div x-show="agenciaOpen" x-transition:enter="transition ease-out duration-150"
+                 x-transition:enter-start="opacity-0 -translate-y-1 scale-95"
+                 x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                 x-transition:leave="transition ease-in duration-100"
+                 x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0 scale-95"
+                 @click.outside="agenciaOpen = false" x-cloak
+                 class="absolute left-2 right-2 top-full mt-1 z-50 bg-surface-2 border border-border-color rounded-2xl shadow-xl overflow-hidden">
+
+                <div class="px-3 pt-3 pb-1">
+                    <p class="text-[9px] font-black text-text-muted uppercase tracking-widest">Cambiar de agencia</p>
+                </div>
+
+                {% for vinculo in user_agencies %}
+                <form method="post" action="{% url 'core:cambiar_agencia' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="agencia_id" value="{{ vinculo.agencia.id }}">
+                    <button type="submit"
+                            class="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-surface-3 transition-colors text-left
+                                   {% if current_agency.id == vinculo.agencia.id %}bg-primary/10{% endif %}">
+                        <!-- Mini logo / avatar -->
+                        {% if vinculo.agencia.logo %}
+                        <img src="{{ vinculo.agencia.logo.url }}"
+                             class="w-7 h-7 rounded-lg object-contain border border-border-color bg-white shrink-0" alt="Logo">
+                        {% else %}
+                        <div class="w-7 h-7 rounded-lg flex items-center justify-center text-[10px] font-black text-white shrink-0"
+                             style="background: var(--primary)">
+                            {{ vinculo.agencia.nombre|slice:":2"|upper }}
+                        </div>
+                        {% endif %}
+                        <div class="flex-1 min-w-0">
+                            <p class="text-xs font-bold text-text-main truncate">{{ vinculo.agencia.nombre }}</p>
+                            <p class="text-[9px] text-text-muted font-medium uppercase">{{ vinculo.get_rol_display }}</p>
+                        </div>
+                        {% if current_agency.id == vinculo.agencia.id %}
+                        <span class="material-symbols-outlined text-[14px] text-status-success shrink-0">check_circle</span>
+                        {% endif %}
+                    </button>
+                </form>
+                {% endfor %}
+                <div class="h-1.5"></div>
+            </div>
+        </div>
+        {% endif %}
+        <!-- ──────────────────────────────────────────────────────── -->
+
         <!-- Navegación Controlada por Roles -->
         <nav class="flex-1 overflow-y-auto py-3 px-2">
 

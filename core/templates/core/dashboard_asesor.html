@@ -40,7 +40,7 @@
             formData.append('archivo', file);
             
             try {
-                const response = await fetch("{% url 'bookings:api_boleto_upload' %}", {
+                const response = await fetch('{% url "bookings:api_boleto_upload" %}', {
                     method: 'POST',
                     body: formData,
                     headers: {

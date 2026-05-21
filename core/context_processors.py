@@ -6,12 +6,19 @@ from django.core.cache import cache
 def agency_context(request):
     agencia = None
     rol = None
+    user_agencies = []  # Lista de agencias del usuario para el selector
 
     if request.user.is_authenticated:
         agencia = getattr(request, 'agencia', None)
 
         from core.models.agencia import UsuarioAgencia
-        vinculo = UsuarioAgencia.objects.filter(usuario=request.user, agencia=agencia, activo=True).first()
+        # Obtener todas las agencias activas del usuario
+        vinculos = UsuarioAgencia.objects.filter(
+            usuario=request.user, activo=True, agencia__activa=True
+        ).select_related('agencia').order_by('agencia__nombre')
+        user_agencies = list(vinculos)
+
+        vinculo = next((v for v in user_agencies if agencia and v.agencia_id == agencia.id), None)
         if vinculo:
             rol = vinculo.rol
         elif request.user.is_superuser:
@@ -38,6 +45,7 @@ def agency_context(request):
     return {
         'current_agency': agencia,
         'user_agency_role': rol,
+        'user_agencies': user_agencies,      # Lista de UsuarioAgencia para el switcher
         'is_superuser': request.user.is_authenticated and request.user.is_superuser,
         'tasa_usd': tasa_usd,
         'tasa_eur': tasa_eur,

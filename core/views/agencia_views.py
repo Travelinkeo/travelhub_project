@@ -226,3 +226,42 @@ class UsuarioAgenciaUpdateRoleView(AgencyRoleRequiredMixin, View):
         ua.save()
         
         return HttpResponse(ua.get_rol_display())
+
+
+class CambiarAgenciaView(View):
+    """
+    Permite a un usuario con múltiples agencias cambiar la agencia activa.
+    Guarda la elección en la sesión para que el middleware la use.
+    """
+
+    def post(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            from django.http import JsonResponse
+            return JsonResponse({'error': 'No autenticado'}, status=401)
+
+        agencia_id = request.POST.get('agencia_id')
+        next_url = request.POST.get('next') or request.META.get('HTTP_REFERER') or '/'
+
+        if not agencia_id:
+            messages.error(request, 'Agencia no especificada.')
+            return redirect(next_url)
+
+        # Verificar que el usuario realmente pertenece a esa agencia
+        ua = UsuarioAgencia.objects.filter(
+            usuario=request.user,
+            agencia__id=agencia_id,
+            agencia__activa=True,
+            activo=True,
+        ).select_related('agencia').first()
+
+        if not ua:
+            messages.error(request, 'No tienes acceso a esa agencia.')
+            return redirect(next_url)
+
+        # Guardar la elección en la sesión
+        request.session['active_agencia_id'] = int(agencia_id)
+        request.session.modified = True
+
+        messages.success(request, f'Ahora estás operando en: {ua.agencia.nombre}')
+        return redirect('/')
+

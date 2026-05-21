@@ -79,11 +79,23 @@ class Cotizacion(AgenciaMixin, models.Model):
         return self.numero_cotizacion or f"COT-{self.id_cotizacion}"
 
     def save(self, *args, **kwargs):
+        # Asegurar primero que la agencia esté asignada (para usar su subdominio_slug)
+        if not self.agencia_id:
+            from core.middleware import get_current_agency
+            current_agency = get_current_agency()
+            if current_agency:
+                self.agencia = current_agency
+        
         if not self.numero_cotizacion:
-            # Formato: COT-2025-0001
-            last_id = Cotizacion.objects.all().order_by('id_cotizacion').last()
+            # Primero buscamos el último ID de cotización de forma global usando all_objects
+            last_id = Cotizacion.all_objects.all().order_by('id_cotizacion').last()
             new_id = (last_id.id_cotizacion + 1) if last_id else 1
-            self.numero_cotizacion = f"COT-{self.fecha_emision.strftime('%Y')}-{new_id:04d}"
+            
+            prefix = ""
+            if self.agencia and self.agencia.subdominio_slug:
+                prefix = f"-{self.agencia.subdominio_slug.upper()}"
+            
+            self.numero_cotizacion = f"COT{prefix}-{self.fecha_emision.strftime('%Y')}-{new_id:04d}"
         super().save(*args, **kwargs)
 
     def calcular_total(self):

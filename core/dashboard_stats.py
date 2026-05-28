@@ -49,11 +49,11 @@ def get_dashboard_stats(agencia):
     )
     
     # Métrica de Automatización (Workflow Mágico)
-    ventas_auto = ventas_mes.filter(canal_origen='IMPORTACION').aggregate(
+    ventas_auto = ventas_mes.filter(canal_origen='IMP').aggregate(
         total=Sum('total_venta'),
         count=Count('id_venta')
     )
-    ventas_manual = ventas_mes.filter(canal_origen='MANUAL').count()
+    ventas_manual = ventas_mes.filter(canal_origen='ADM').count()
 
     # Ventas pendientes de pago
     ventas_pendientes = ventas_qs.filter(

@@ -24,7 +24,15 @@ from core.throttling import DashboardRateThrottle
 
 logger = logging.getLogger(__name__)
 
-@extend_schema(exclude=True)
+@extend_schema(
+    description="Obtener métricas completas del dashboard: resumen de ventas, tendencias, top clientes, alertas.",
+    parameters=[
+        {"name": "fecha_desde", "in": "query", "required": False, "schema": {"type": "string", "format": "date"}, "description": "Fecha de inicio del período (YYYY-MM-DD)"},
+        {"name": "fecha_hasta", "in": "query", "required": False, "schema": {"type": "string", "format": "date"}, "description": "Fecha de fin del período (YYYY-MM-DD)"},
+    ],
+    responses={200: {"description": "Métricas del dashboard con resumen, tendencia semanal, ventas por estado/tipo/canal"}},
+    tags=["Dashboard"],
+)
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 @throttle_classes([DashboardRateThrottle])
@@ -154,7 +162,11 @@ def dashboard_metricas(request):
     })
 
 
-@extend_schema(exclude=True)
+@extend_schema(
+    description="Obtener alertas activas del dashboard: ventas sin cliente, mora, boletos huérfanos, liquidaciones vencidas.",
+    responses={200: {"description": "Lista de alertas con tipo, severidad y mensaje"}},
+    tags=["Dashboard"],
+)
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def dashboard_alertas(request):
@@ -288,7 +300,7 @@ class DashboardView(LoginRequiredMixin, View):
         stats = get_dashboard_stats(agencia)
 
         # 3. TASAS (CON FALLBACK ANTI-CEROS)
-        TasaCambio.objects.filter(moneda='USD').order_by('-fecha').first()
+        # TasaCambio query removed as it was unused and could cause ProgrammingError.
             
         # 4. TABLA RECIENTE (Limitada a agencia)
         ventas_recientes = Venta.objects.filter(agencia=agencia).select_related('cliente', 'moneda').order_by('-fecha_venta')[:8]

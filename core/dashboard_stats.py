@@ -85,7 +85,7 @@ def get_dashboard_stats(agencia):
     for i in range(6, -1, -1):
         dia = hoy - timedelta(days=i)
         ventas_dia = ventas_qs.filter(
-            fecha_venta=dia
+            fecha_venta__date=dia
         ).aggregate(
             total=Sum('total_venta'),
             count=Count('id_venta')

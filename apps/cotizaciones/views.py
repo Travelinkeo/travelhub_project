@@ -387,17 +387,30 @@ class MagicQuoterAIView(LoginRequiredMixin, View):
             )
             
             print(f"DEBUG: Gemini response received in {time.time() - start:.2f}s")
+            print(f"DEBUG: data type = {type(data).__name__}, has model_dump = {hasattr(data, 'model_dump')}")
 
-            if hasattr(data, 'model_dump') and not isinstance(data, dict):
-                try:
-                    data = data.model_dump()
-                except Exception as e_dump:
-                    logger.error(f"No se pudo serializar el schema Pydantic: {e_dump}")
-                    return JsonResponse({'error': 'Error serializando respuesta de IA.'}, status=500)
+            # Aceptar Pydantic v2 (model_dump), Pydantic v1 (dict), o cualquier dict-like
+            if not isinstance(data, dict):
+                for method_name in ('model_dump', 'dict'):
+                    converter = getattr(data, method_name, None)
+                    if callable(converter):
+                        try:
+                            data = converter()
+                            print(f"DEBUG: {method_name}() ok, new type = {type(data).__name__}")
+                            break
+                        except Exception as e_dump:
+                            logger.error(f"No se pudo serializar via {method_name}: {e_dump}")
+                            return JsonResponse({'error': 'Error serializando respuesta de IA.'}, status=500)
+                else:
+                    logger.error(f"Gemini data is not a dict and has no converter: {type(data)} value={str(data)[:200]}")
+                    return JsonResponse({
+                        'error': 'La IA no devolvió datos válidos.',
+                        'debug_type': type(data).__name__,
+                    }, status=500)
 
-            if not data or not isinstance(data, dict):
-                logger.error(f"Gemini returned invalid data for MagicQuoter: {type(data)}")
-                return JsonResponse({'error': 'La IA no devolvió datos válidos.'}, status=500)
+            if not data:
+                logger.error("Gemini returned empty data")
+                return JsonResponse({'error': 'La IA devolvió datos vacíos.'}, status=500)
 
             if 'error' in data:
                 print(f"DEBUG: Gemini returned error: {data['error']}")

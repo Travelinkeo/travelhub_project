@@ -387,7 +387,7 @@ class MagicQuoterAIView(LoginRequiredMixin, View):
             )
             
             print(f"DEBUG: Gemini response received in {time.time() - start:.2f}s")
-            print(f"DEBUG: data type = {type(data).__name__}, has model_dump = {hasattr(data, 'model_dump')}")
+            logger.info(f"[MagicQuoter] data type = {type(data).__name__}, has model_dump = {hasattr(data, 'model_dump')}")
 
             # Aceptar Pydantic v2 (model_dump), Pydantic v1 (dict), o cualquier dict-like
             if not isinstance(data, dict):
@@ -396,7 +396,7 @@ class MagicQuoterAIView(LoginRequiredMixin, View):
                     if callable(converter):
                         try:
                             data = converter()
-                            print(f"DEBUG: {method_name}() ok, new type = {type(data).__name__}")
+                            logger.info(f"[MagicQuoter] {method_name}() ok, new type = {type(data).__name__}")
                             break
                         except Exception as e_dump:
                             logger.error(f"No se pudo serializar via {method_name}: {e_dump}")
@@ -413,7 +413,7 @@ class MagicQuoterAIView(LoginRequiredMixin, View):
                 return JsonResponse({'error': 'La IA devolvió datos vacíos.'}, status=500)
 
             if 'error' in data:
-                print(f"DEBUG: Gemini returned error: {data['error']}")
+                logger.warning(f"[MagicQuoter] Gemini returned error: {data['error']}")
                 return JsonResponse(data, status=400)
 
             # --- DICCIONARIO DE EMERGENCIA IATA ---

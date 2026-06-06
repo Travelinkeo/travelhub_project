@@ -387,11 +387,18 @@ class MagicQuoterAIView(LoginRequiredMixin, View):
             )
             
             print(f"DEBUG: Gemini response received in {time.time() - start:.2f}s")
-            
+
+            if hasattr(data, 'model_dump') and not isinstance(data, dict):
+                try:
+                    data = data.model_dump()
+                except Exception as e_dump:
+                    logger.error(f"No se pudo serializar el schema Pydantic: {e_dump}")
+                    return JsonResponse({'error': 'Error serializando respuesta de IA.'}, status=500)
+
             if not data or not isinstance(data, dict):
                 logger.error(f"Gemini returned invalid data for MagicQuoter: {type(data)}")
                 return JsonResponse({'error': 'La IA no devolvió datos válidos.'}, status=500)
-            
+
             if 'error' in data:
                 print(f"DEBUG: Gemini returned error: {data['error']}")
                 return JsonResponse(data, status=400)

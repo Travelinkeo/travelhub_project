@@ -268,11 +268,12 @@ class SecurityHeadersMiddleware:
                     ]
                 )
             else:
+                nonce = request.csp_nonce
                 csp = "; ".join(
                     [
                         "default-src 'self' data: blob:",
-                        f"script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: {static_origin} https://static.cloudflareinsights.com https://cdn.jsdelivr.net https://cdn.tailwindcss.com https://unpkg.com",
-                        f"style-src 'self' 'unsafe-inline' {static_origin} https://fonts.googleapis.com https://cdn.jsdelivr.net https://cdn.tailwindcss.com https://unpkg.com",
+                        f"script-src 'self' 'nonce-{nonce}' 'strict-dynamic' {static_origin} https://static.cloudflareinsights.com https://cdn.jsdelivr.net https://cdn.tailwindcss.com https://unpkg.com",
+                        f"style-src 'self' 'nonce-{nonce}' {static_origin} https://fonts.googleapis.com https://cdn.jsdelivr.net https://cdn.tailwindcss.com https://unpkg.com",
                         f"font-src 'self' {static_origin} https://fonts.gstatic.com data:",
                         f"img-src 'self' data: blob: {static_origin} https://res.cloudinary.com {r2_wildcard} https://images.unsplash.com",
                         "frame-src 'self' https://js.stripe.com https://evolution:8080",
@@ -328,10 +329,13 @@ def csp_report_view(request):
 
     if ip:
         cache_key = f"csp_report_rate_ip_{ip}"
-        ip_request_count = cache.get(cache_key, 0)
-        if ip_request_count >= 5:
+        try:
+            ip_request_count = cache.incr(cache_key)
+        except ValueError:
+            cache.set(cache_key, 1, timeout=60)
+            ip_request_count = 1
+        if ip_request_count > 5:
             return JsonResponse({"error": "rate limit exceeded"}, status=429)
-        cache.set(cache_key, ip_request_count + 1, timeout=60)
 
     try:
         body = request.body
@@ -366,7 +370,7 @@ class MultiTenantDomainMiddleware:
 
         agencia = Agencia.objects.filter(dominio_personalizado=host, activa=True).first()
 
-        if not awoke_agency:
+        if not agencia:
             subdomain = None
             if host.endswith(f".{main_domain}"):
                 subdomain = host.replace(f".{main_domain}", "")

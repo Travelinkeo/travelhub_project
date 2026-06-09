@@ -1,85 +1,103 @@
 import logging
+from functools import partial
+
+from django.db import transaction
 from django.db.models.signals import post_delete, post_save, pre_save
 from django.dispatch import receiver
-from core.signals_bypass import are_signals_blocked
+
+from core.api import are_signals_blocked
 
 # 🔒 PADLOCK: CRITICAL INFRASTRUCTURE
 # Refactored to Service Layer Pattern. Signals are now thin wrappers
 # delegating to explicit service classes, supporting thread-local bypassing.
 # Maintained by: Antigravity/Gemini
 # -----------------------------------------------------
+from .models import BoletoImportado, CircuitoDia, FeeVenta, ItemVenta, PagoVenta, Venta
 
 logger = logging.getLogger(__name__)
 
-# Import models dynamically or directly
-from .models import BoletoImportado, CircuitoDia, FeeVenta, ItemVenta, PagoVenta, Venta
+
+def _on_commit(fn, *args, **kwargs):
+    transaction.on_commit(partial(fn, *args, **kwargs))
+
 
 @receiver([post_save, post_delete], sender=FeeVenta)
 def signal_fee_post_save_delete(sender, instance, **kwargs):
     if are_signals_blocked():
-        logger.info(f"⏭️ SIGNAL: Signals blocked. Bypassing signal_fee_post_save_delete for FeeVenta {instance.pk}")
+        logger.info(
+            f"⏭️ SIGNAL: Signals blocked. Bypassing signal_fee_post_save_delete for FeeVenta {instance.pk}"
+        )
         return
 
     if instance.venta_id:
-        from apps.bookings.services.venta_service import VentaService
-        VentaService.recalculate_finances(instance.venta_id)
+        _on_commit(_recalcular_sync, instance.venta_id)
+
+
+def _recalcular_sync(venta_id):
+    from apps.bookings.services.venta_service import VentaService
+
+    VentaService.recalculate_finances(venta_id)
 
 
 @receiver([post_save, post_delete], sender=ItemVenta)
 def signal_item_post_save_delete(sender, instance, **kwargs):
     if are_signals_blocked():
-        logger.info(f"⏭️ SIGNAL: Signals blocked. Bypassing signal_item_post_save_delete for ItemVenta {instance.pk}")
+        logger.info(
+            f"⏭️ SIGNAL: Signals blocked. Bypassing signal_item_post_save_delete for ItemVenta {instance.pk}"
+        )
         return
 
     if instance.venta_id:
-        from apps.bookings.services.venta_service import VentaService
-        VentaService.recalculate_finances(instance.venta_id)
+        _on_commit(_recalcular_sync, instance.venta_id)
+        _on_commit(_auditar_venta_sync, instance.venta_id)
 
 
 @receiver(post_save, sender=BoletoImportado)
 def signal_boleto_post_save(sender, instance, created, **kwargs):
     if are_signals_blocked():
-        logger.info(f"⏭️ SIGNAL: Signals blocked. Bypassing signal_boleto_post_save for Boleto {instance.pk}")
+        logger.info(
+            f"⏭️ SIGNAL: Signals blocked. Bypassing signal_boleto_post_save for Boleto {instance.pk}"
+        )
         return
 
-    # --- Delegate to Service Layer ---
-    from apps.bookings.services.boleto_service import BoletoImportadoService
-    BoletoImportadoService.evaluate_tax_refund(instance)
+    _on_commit(_evaluar_tax_refund, instance.pk)
 
 
 @receiver(post_save, sender=PagoVenta)
 def signal_pago_post_save(sender, instance, created, **kwargs):
     if are_signals_blocked():
-        logger.info(f"⏭️ SIGNAL: Signals blocked. Bypassing signal_pago_post_save for PagoVenta {instance.pk}")
+        logger.info(
+            f"⏭️ SIGNAL: Signals blocked. Bypassing signal_pago_post_save for PagoVenta {instance.pk}"
+        )
         return
 
     if instance.venta_id:
-        from apps.bookings.services.venta_service import VentaService
-        VentaService.recalculate_finances(instance.venta_id)
-        
-        # Award loyalty points if Venta is present
-        VentaService.evaluate_loyalty_points(instance)
+        pago_id, agencia_id = instance.pk, instance.agencia_id
+        _on_commit(_recalcular_sync, instance.venta_id)
+        _on_commit(_evaluar_loyalty_sync, instance.pk)
+        _on_commit(_emitir_pago_evento, pago_id, "save", agencia_id)
 
 
 @receiver(post_delete, sender=PagoVenta)
 def signal_pago_post_delete(sender, instance, **kwargs):
     if are_signals_blocked():
-        logger.info(f"⏭️ SIGNAL: Signals blocked. Bypassing signal_pago_post_delete for PagoVenta {instance.pk}")
+        logger.info(
+            f"⏭️ SIGNAL: Signals blocked. Bypassing signal_pago_post_delete for PagoVenta {instance.pk}"
+        )
         return
 
-    try:
-        if instance.venta_id:
-            from apps.bookings.services.venta_service import VentaService
-            VentaService.recalculate_finances(instance.venta_id)
-            VentaService.evaluate_loyalty_points(instance)
-    except Exception as e:
-        logger.warning(f"Excepción silenciosa capturada en signal_pago_post_delete: {e}")
+    if instance.venta_id:
+        _on_commit(_recalcular_sync, instance.venta_id)
+        _on_commit(_evaluar_loyalty_sync, instance.pk)
+        _on_commit(_emitir_pago_evento, instance.pk, "delete", instance.agencia_id)
 
 
 @receiver(pre_save, sender=Venta)
 def capturar_estado_anterior_venta(sender, instance, **kwargs):
     if are_signals_blocked():
-        logger.info(f"⏭️ SIGNAL: Signals blocked. Bypassing capturar_estado_anterior_venta for Venta {instance.pk}")
+        logger.info(
+            f"⏭️ SIGNAL: Signals blocked. Bypassing capturar_estado_anterior_venta for Venta {instance.pk}"
+        )
         return
 
     if instance.pk:
@@ -95,25 +113,105 @@ def capturar_estado_anterior_venta(sender, instance, **kwargs):
 @receiver(post_save, sender=Venta)
 def venta_post_save_dispatcher(sender, instance, created, **kwargs):
     if are_signals_blocked():
-        logger.info(f"⏭️ SIGNAL: Signals blocked. Bypassing venta_post_save_dispatcher for Venta {instance.pk}")
+        logger.info(
+            f"⏭️ SIGNAL: Signals blocked. Bypassing venta_post_save_dispatcher for Venta {instance.pk}"
+        )
         return
 
-    if kwargs.get('raw', False):
+    if kwargs.get("raw", False):
         return
 
-    estado_anterior = getattr(instance, '_estado_anterior', None)
-    
-    # --- Delegate to Service Layer ---
-    from apps.bookings.services.venta_service import VentaService
-    VentaService.dispatch_post_save_actions(instance, created, estado_anterior)
+    estado_anterior = getattr(instance, "_estado_anterior", None)
+
+    _on_commit(_disparar_post_save_actions, instance.pk, created, estado_anterior)
+    _on_commit(_auditar_venta_sync, instance.pk)
 
 
 @receiver([post_save, post_delete], sender=CircuitoDia)
 def actualizar_circuito_dias(sender, instance, **kwargs):
     if are_signals_blocked():
-        logger.info(f"⏭️ SIGNAL: Signals blocked. Bypassing actualizar_circuito_dias for CircuitoDia {instance.pk}")
+        logger.info(
+            f"⏭️ SIGNAL: Signals blocked. Bypassing actualizar_circuito_dias for CircuitoDia {instance.pk}"
+        )
         return
 
-    # --- Delegate to Service Layer ---
+    _on_commit(_update_circuit_days_sync, instance.pk)
+
+# ── Helper functions for on_commit callbacks ──────────────
+
+
+def _recalcular_sync(venta_id):
     from apps.bookings.services.venta_service import VentaService
-    VentaService.update_circuit_days(instance)
+
+    VentaService.recalculate_finances(venta_id)
+
+
+def _auditar_venta_sync(venta_id):
+    from apps.bookings.services.revenue_auditor import RevenueAuditorService
+
+    try:
+        from apps.bookings.models import Venta
+
+        venta = Venta.objects.get(pk=venta_id)
+        RevenueAuditorService().audit_venta(venta)
+    except Exception as e:
+        logger.error(f"Error auditando venta {venta_id}: {e}")
+
+
+def _evaluar_tax_refund(boleto_id):
+    from apps.bookings.services.boleto_service import BoletoImportadoService
+    from apps.bookings.models import BoletoImportado
+
+    try:
+        boleto = BoletoImportado.objects.get(pk=boleto_id)
+        BoletoImportadoService.evaluate_tax_refund(boleto)
+    except Exception as e:
+        logger.error(f"Error evaluando tax refund para boleto {boleto_id}: {e}")
+
+
+def _evaluar_loyalty_sync(pago_id):
+    from apps.bookings.services.venta_service import VentaService
+    from apps.bookings.models import PagoVenta
+
+    try:
+        pago = PagoVenta.objects.get(pk=pago_id)
+        VentaService.evaluate_loyalty_points(pago)
+    except Exception as e:
+        logger.error(f"Error evaluando loyalty para pago {pago_id}: {e}")
+
+
+def _emitir_pago_evento(pago_id, estado_accion, agencia_id):
+    try:
+        from core.api import sale_payment_recorded
+        from apps.bookings.models import PagoVenta
+
+        sale_payment_recorded.send(
+            sender=PagoVenta,
+            pago_id=pago_id,
+            estado_accion=estado_accion,
+            agencia_id=agencia_id,
+        )
+    except Exception as e:
+        logger.error(f"Error emitiendo sale_payment_recorded ({estado_accion}) para pago {pago_id}: {e}")
+
+
+def _disparar_post_save_actions(venta_id, created, estado_anterior):
+    from apps.bookings.services.venta_service import VentaService
+    from apps.bookings.models import Venta
+
+    try:
+        venta = Venta.objects.get(pk=venta_id)
+        VentaService.dispatch_post_save_actions(venta, created, estado_anterior)
+    except Venta.DoesNotExist:
+        logger.warning(f"Venta {venta_id} no existe para dispatch_post_save_actions")
+
+
+def _update_circuit_days_sync(circuito_dia_id):
+    from apps.bookings.services.venta_service import VentaService
+    from apps.bookings.models import CircuitoDia
+
+    try:
+        cd = CircuitoDia.objects.get(pk=circuito_dia_id)
+        VentaService.update_circuit_days(cd)
+    except Exception as e:
+        logger.error(f"Error actualizando circuit days: {e}")

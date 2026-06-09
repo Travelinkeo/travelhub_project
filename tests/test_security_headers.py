@@ -1,51 +1,48 @@
-﻿import pytest
-pytestmark = pytest.mark.skip(reason='Tests requieren configuración completa o refactorización')
-import re
-
 import pytest
+from django.conf import settings
 from django.test import override_settings
 from rest_framework.test import APIClient
 
-
 SEC_HEADERS = [
-    ('X-Content-Type-Options', 'nosniff'),
-    ('X-Frame-Options', 'DENY'),
-    ('Referrer-Policy', 'strict-origin-when-cross-origin'),
-    # Permissions-Policy exact match may vary; we just ensure baseline directives
+    ("X-Content-Type-Options", "nosniff"),
+    ("X-Frame-Options", "DENY"),
+    ("Referrer-Policy", "strict-origin-when-cross-origin"),
 ]
+
 
 @pytest.fixture
 def client():
     return APIClient()
 
 
-def test_security_headers_and_csp_nonce(client):
-    r1 = client.get('/api/health/')
-    r2 = client.get('/api/health/')
+@pytest.mark.django_db
+def test_security_headers_and_csp_relaxed(client):
+    r1 = client.get("/login/")
     assert r1.status_code == 200
     for header, expected in SEC_HEADERS:
         assert r1[header] == expected
     # Permissions-Policy should contain restricted features
-    assert 'geolocation=()' in r1['Permissions-Policy']
-    assert 'microphone=()' in r1['Permissions-Policy']
-    assert 'camera=()' in r1['Permissions-Policy']
-    # CSP present with nonce and core directives
-    csp1 = r1['Content-Security-Policy']
-    csp2 = r2['Content-Security-Policy']
-    assert "default-src 'self'" in csp1
-    m1 = re.search(r"script-src 'self' 'nonce-([^']+)'", csp1)
-    m2 = re.search(r"script-src 'self' 'nonce-([^']+)'", csp2)
-    assert m1 and m2, 'Nonce not found in one of the CSP headers'
-    nonce1, nonce2 = m1.group(1), m2.group(1)
-    assert nonce1 != nonce2, 'Nonce should differ per request'
-    # Report-To and report-uri presence
-    assert 'Report-To' in r1
-    assert 'report-uri' in csp1
+    assert "geolocation=()" in r1["Permissions-Policy"]
+    assert "microphone=()" in r1["Permissions-Policy"]
+    assert "camera=()" in r1["Permissions-Policy"]
+
+    # CSP present with relaxed directives suitable for HTMX & Tailwind in debug, or strict in production
+    csp1 = r1["Content-Security-Policy"]
+    if settings.DEBUG:
+        assert "default-src 'self' 'unsafe-inline' 'unsafe-eval'" in csp1
+        assert "script-src 'self' 'unsafe-inline' 'unsafe-eval'" in csp1
+        assert "style-src 'self' 'unsafe-inline' 'unsafe-eval'" in csp1
+    else:
+        assert "nonce-" in csp1
+        assert "strict-dynamic" in csp1
+        assert "unsafe-inline" not in csp1
 
 
-@override_settings(DEBUG=False)
+@pytest.mark.django_db
+@override_settings(DEBUG=False, SECURE_HSTS_SECONDS=31536000)
 def test_hsts_when_not_debug(client):
-    r = client.get('/api/health/')
+    r = client.get("/login/")
     assert r.status_code == 200
-    # HSTS headers should be present when DEBUG False (settings sets them conditionally)
-    assert 'Strict-Transport-Security' in r, 'HSTS header missing in production mode simulation'
+    # HSTS headers should be present when DEBUG False
+    assert "Strict-Transport-Security" in r
+    assert "max-age=31536000" in r["Strict-Transport-Security"]

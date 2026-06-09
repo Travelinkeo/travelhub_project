@@ -1,0 +1,76 @@
+{
+  "title": "TravelHub Overview",
+  "uid": "travelhub-overview",
+  "version": 1,
+  "timezone": "browser",
+  "panels": [
+    {
+      "title": "P50 / P95 / P99 Request Latency",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.50, rate(travelhub_request_duration_seconds_bucket[5m]))",
+          "legendFormat": "P50"
+        },
+        {
+          "expr": "histogram_quantile(0.95, rate(travelhub_request_duration_seconds_bucket[5m]))",
+          "legendFormat": "P95"
+        },
+        {
+          "expr": "histogram_quantile(0.99, rate(travelhub_request_duration_seconds_bucket[5m]))",
+          "legendFormat": "P99"
+        }
+      ],
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 }
+    },
+    {
+      "title": "DB Queries per Request",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "targets": [
+        {
+          "expr": "avg(travelhub_request_db_queries) by (path)",
+          "legendFormat": "{{path}}"
+        }
+      ],
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 }
+    },
+    {
+      "title": "N+1 Alerts",
+      "type": "stat",
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "targets": [
+        {
+          "expr": "sum(increase(travelhub_nplusone_alerts_total[24h]))"
+        }
+      ],
+      "gridPos": { "h": 6, "w": 6, "x": 0, "y": 8 }
+    },
+    {
+      "title": "Celery Queue Depth",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "targets": [
+        {
+          "expr": "travelhub_celery_queue_depth_total",
+          "legendFormat": "{{queue}}"
+        }
+      ],
+      "gridPos": { "h": 8, "w": 12, "x": 6, "y": 8 }
+    },
+    {
+      "title": "Request Rate by Status",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "targets": [
+        {
+          "expr": "sum(rate(travelhub_request_duration_seconds_count[5m])) by (status)",
+          "legendFormat": "{{status}}"
+        }
+      ],
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 }
+    }
+  ],
+  "schemaVersion": 39
+}

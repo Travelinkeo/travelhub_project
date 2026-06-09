@@ -11,20 +11,23 @@ from apps.crm.models import Cliente
 from apps.finance.models.currencies import Moneda
 
 # Asegurar configuración de Django incluso si pytest-django no se auto-carga
-if 'DJANGO_SETTINGS_MODULE' not in os.environ:
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
+if "DJANGO_SETTINGS_MODULE" not in os.environ:
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "travelhub.settings")
 try:
     import django  # noqa: E402
     from django.conf import settings  # noqa: E402
+
     if not settings.configured:  # pragma: no cover
         django.setup()
 except Exception:  # pragma: no cover
     # Si falla aquí, los tests fallarán luego con más contexto; evitamos romper import global.
     pass
 
+
 def pytest_configure(config):
     """Override settings for tests globally."""
     from django.conf import settings
+
     settings.CACHES = {
         "default": {
             "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
@@ -33,8 +36,9 @@ def pytest_configure(config):
         "sessions": {
             "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
             "LOCATION": "unique-snowflake-sessions",
-        }
+        },
     }
+
 
 @pytest.fixture(autouse=True)
 def use_simple_static_storage(settings):
@@ -45,11 +49,13 @@ def use_simple_static_storage(settings):
     para compatibilidad cuando WhiteNoise está presente.
     """
     # Asegurar estructura STORAGES exista (definida en settings del proyecto)
-    if hasattr(settings, 'STORAGES'):
-        settings.STORAGES["staticfiles"] = {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"}
+    if hasattr(settings, "STORAGES"):
+        settings.STORAGES["staticfiles"] = {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"
+        }
     # Compat con versiones previas (no debería aplicarse aquí, pero defensivo)
     else:  # pragma: no cover
-        settings.STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+        settings.STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
     settings.WHITENOISE_USE_FINDERS = True
 
 
@@ -60,11 +66,14 @@ def mock_ai_engine(monkeypatch):
     Retorna un resultado de parseo exitoso por defecto.
     """
     # Mock de _ensure_configured
-    monkeypatch.setattr('apps.automation.services.ai_engine.AIEngine._ensure_configured', lambda *args, **kwargs: True)
-    
+    monkeypatch.setattr(
+        "apps.automation.services.ai_engine.AIEngine._ensure_configured",
+        lambda *args, **kwargs: True,
+    )
+
     # Mock de la llamada principal
     from apps.automation.services.ai_engine import ai_engine
-    
+
     # Respuesta por defecto compatible con ResultadoParseoSchema
     default_res = {
         "boletos": [
@@ -103,72 +112,87 @@ def mock_ai_engine(monkeypatch):
                         "cabina": "Económica",
                         "clase": "Y",
                         "localizador_aerolinea": "MOCK12",
-                        "equipaje": "1PC"
+                        "equipaje": "1PC",
                     }
-                ]
+                ],
             }
         ]
     }
-    
+
     mock_call = unittest.mock.MagicMock(return_value=default_res)
-    monkeypatch.setattr(ai_engine, 'call_gemini', mock_call)
-    
+    monkeypatch.setattr(ai_engine, "call_gemini", mock_call)
+
     # Mock de generate_content (usado por ai_parser.py)
     import json
+
     # Respuesta JSON para ai_parser
     ai_parser_res = {
         "passenger": {"name": "JUAREZ/RAUL"},
         "bookingDetails": {"ticketNumber": "0457281019415"},
-        "flights": [{"flightNumber": "AA123", "departure": {"location": "CARACAS"}, "arrival": {"location": "BOGOTA"}}]
+        "flights": [
+            {
+                "flightNumber": "AA123",
+                "departure": {"location": "CARACAS"},
+                "arrival": {"location": "BOGOTA"},
+            }
+        ],
     }
-    monkeypatch.setattr('apps.automation.services.ai_engine.generate_content', lambda *args, **kwargs: json.dumps(ai_parser_res))
-    
+    monkeypatch.setattr(
+        "apps.automation.services.ai_engine.generate_content",
+        lambda *args, **kwargs: json.dumps(ai_parser_res),
+    )
+
     return mock_call
-
-
-
 
 
 @pytest.fixture
 def usuario_staff(db):
     User = get_user_model()
-    user, _ = User.objects.get_or_create(username='staffer')
-    user.set_password('staffpass1234')
+    user, _ = User.objects.get_or_create(username="staffer")
+    user.set_password("staffpass1234")
     user.is_staff = True
     user.save()
     return user
 
+
 @pytest.fixture
 def api_client_staff(usuario_staff):
     client = APIClient()
-    client.login(username='staffer', password='staffpass1234')
+    client.force_login(usuario_staff)
     return client
+
 
 @pytest.fixture
 def usuario_api(db):
     User = get_user_model()
-    user, _ = User.objects.get_or_create(username='tester')
-    user.set_password('pass1234')
+    user, _ = User.objects.get_or_create(username="tester")
+    user.set_password("pass1234")
     user.save()
     return user
+
 
 @pytest.fixture
 def api_client_autenticado(usuario_api):
     client = APIClient()
-    client.login(username='tester', password='pass1234')
+    client.force_login(usuario_api)
     return client
+
 
 @pytest.fixture
 def venta_base(db):
-    moneda, _ = Moneda.objects.get_or_create(codigo_iso='USD', defaults={'nombre': 'Dólar', 'simbolo': '$'})
-    cliente, _ = Cliente.objects.get_or_create(nombres='John', apellidos='Doe', email='john@example.com')
+    moneda, _ = Moneda.objects.get_or_create(
+        codigo_iso="USD", defaults={"nombre": "Dólar", "simbolo": "$"}
+    )
+    cliente, _ = Cliente.objects.get_or_create(
+        nombres="John", apellidos="Doe", email="john@example.com"
+    )
     venta = Venta.objects.create(
         cliente=cliente,
         moneda=moneda,
-        subtotal=Decimal('100.00'),
-        impuestos=Decimal('20.00'),
-        monto_pagado=Decimal('0.00'),
-        descripcion_general='Venta base para tests'
+        subtotal=Decimal("100.00"),
+        impuestos=Decimal("20.00"),
+        monto_pagado=Decimal("0.00"),
+        descripcion_general="Venta base para tests",
     )
     return venta
 
@@ -177,6 +201,7 @@ def venta_base(db):
 # FIXTURES ADICIONALES PARA FASE 5
 # ============================================
 
+
 @pytest.fixture
 def mock_redis(monkeypatch):
     """Mock de Redis para tests de caché"""
@@ -184,37 +209,90 @@ def mock_redis(monkeypatch):
     mock.get.return_value = None
     mock.set.return_value = True
     mock.delete.return_value = True
-    
+
     # Suponiendo que se usa django.core.cache
-    monkeypatch.setattr('django.core.cache.cache.get', mock.get)
-    monkeypatch.setattr('django.core.cache.cache.set', mock.set)
-    monkeypatch.setattr('django.core.cache.cache.delete', mock.delete)
-    
+    monkeypatch.setattr("django.core.cache.cache.get", mock.get)
+    monkeypatch.setattr("django.core.cache.cache.set", mock.set)
+    monkeypatch.setattr("django.core.cache.cache.delete", mock.delete)
+
     return mock
+
 
 @pytest.fixture
 def mock_celery_task(monkeypatch):
     """Mock de tareas Celery"""
     mock = unittest.mock.MagicMock()
-    monkeypatch.setattr('core.tasks.process_ticket_async.delay', mock)
+    monkeypatch.setattr("core.tasks.process_ticket_async.delay", mock)
     return mock
+
 
 @pytest.fixture
 def sample_pais(db):
     """País de ejemplo para tests"""
     from apps.common.models import Pais
+
     pais, _ = Pais.objects.get_or_create(
-        codigo_iso_2='VE',
-        defaults={'nombre': 'Venezuela', 'codigo_iso_3': 'VEN'}
+        codigo_iso_2="VE", defaults={"nombre": "Venezuela", "codigo_iso_3": "VEN"}
     )
     return pais
+
 
 @pytest.fixture
 def sample_ciudad(db, sample_pais):
     """Ciudad de ejemplo para tests"""
     from apps.common.models import Ciudad
+
     ciudad, _ = Ciudad.objects.get_or_create(
-        codigo_iata='CCS',
-        defaults={'nombre': 'Caracas', 'pais': sample_pais}
+        codigo_iata="CCS", defaults={"nombre": "Caracas", "pais": sample_pais}
     )
     return ciudad
+
+
+@pytest.fixture
+def agencia_premium(db):
+    """Crea una agencia configurada como Contribuyente Especial (Tenant A)."""
+    from core.models.agencia import Agencia
+
+    agencia = Agencia.objects.create(
+        nombre="Turismo Premium LatAn", email_principal="premium@travelhub.cc"
+    )
+    config = agencia.configuracion
+    config.es_sujeto_pasivo_especial = True
+    config.subdominio_slug = "premium"
+    config.save()
+    return agencia
+
+
+@pytest.fixture
+def agencia_estandar(db):
+    """Crea una agencia estándar (Tenant B)."""
+    from core.models.agencia import Agencia
+
+    agencia = Agencia.objects.create(
+        nombre="Viajes Estándar", email_principal="estandar@travelhub.cc"
+    )
+    config = agencia.configuracion
+    config.es_sujeto_pasivo_especial = False
+    config.subdominio_slug = "estandar"
+    config.save()
+    return agencia
+
+
+@pytest.fixture
+def moneda_usd(db):
+    from apps.finance.models.currencies import Moneda
+
+    moneda, _ = Moneda.objects.get_or_create(
+        codigo_iso="USD", defaults={"nombre": "Dólar Americano", "simbolo": "$"}
+    )
+    return moneda
+
+
+@pytest.fixture
+def moneda_ves(db):
+    from apps.finance.models.currencies import Moneda
+
+    moneda, _ = Moneda.objects.get_or_create(
+        codigo_iso="VES", defaults={"nombre": "Bolívares", "simbolo": "Bs"}
+    )
+    return moneda

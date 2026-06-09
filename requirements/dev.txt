@@ -1,0 +1,15 @@
+# Development dependencies
+-r base.txt
+
+pre-commit
+mypy
+mypy-django-plugin
+django-stubs==5.0.4
+pip-audit==2.7.3
+bandit
+safety
+black
+isort
+ruff
+pytest-timeout
+pytest-cov

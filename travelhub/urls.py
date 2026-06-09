@@ -1,46 +1,115 @@
 import logging
+
+from django.conf import settings
+from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import path, include
+from django.contrib.auth import views as auth_views
+from django.contrib.admin.views.decorators import staff_member_required
+from django.http import JsonResponse
+from django.urls import include, path, re_path
 from django.views.generic import RedirectView
+from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-# Importaciones mínimas para rutas core
+from core.metrics import health_metrics_view
+from core.middleware import csp_report_view
+from core.views.auditoria_views import api_audit_logs
+from core.views.auth_views import MagicLinkRequestView, MagicLinkVerifyView, TokenLogoutView
 from core.views.onboarding_views import OnboardingAgencyView, SaaSOnboardingView
-from core.views.auth_views import TokenLogoutView, MagicLinkRequestView, MagicLinkVerifyView
-from django.contrib.auth import views as auth_views
+
+
+def favicon_view(request):
+    from django.shortcuts import redirect
+
+    return redirect("/static/images/Logo TravelHub.png")
+
+
+
+
+
+def health_view(request):
+    return JsonResponse({"status": "healthy"})
+
 
 logger = logging.getLogger(__name__)
 
-# NOTA: En el enrutador maestro NO se declara app_name. 
+
+def _protect_docs(view):
+    if not settings.DEBUG:
+        return staff_member_required(view)
+    return view
+
+
+# NOTA: En el enrutador maestro NO se declara app_name.
 # El app_name = 'bookings' debe ir EXCLUSIVAMENTE en apps/bookings/urls.py
 
 urlpatterns = [
+    # --- HEALTH & CSP REPORT ---
+    path("health/", health_view, name="health"),
+    path("csp-report/", csp_report_view, name="csp_report"),
+    # --- FAVICON ---
+    re_path(r"^favicon\.ico$", favicon_view),
     # --- ADMINISTRACIÓN Y AUTENTICACIÓN ---
-    path('admin/', admin.site.urls), # <-- Faltaba tu panel de admin
-    path('accounts/', include('django.contrib.auth.urls')), # <-- Faltaban las rutas base de auth
-    path('login/', auth_views.LoginView.as_view(), name='login'),
-    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
-    path('api/auth/jwt/obtain/', TokenObtainPairView.as_view(), name='jwt_obtain_pair'),
-    path('api/auth/jwt/logout/', TokenLogoutView.as_view(), name='jwt_logout'),
-
+    path("admin/custom/", include("apps.common.urls_admin")),
+    path("admin/custom/finance/", include("apps.finance.urls_admin")),
+    path("admin/custom/bookings/", include("apps.bookings.urls_admin")),
+    path("admin/custom/core/", include("core.urls_admin")),
+    path("admin/", admin.site.urls),  # <-- Faltaba tu panel de admin
+    path("accounts/", include("django.contrib.auth.urls")),  # <-- Faltaban las rutas base de auth
+    path("login/", auth_views.LoginView.as_view(), name="login"),
+    path("logout/", auth_views.LogoutView.as_view(), name="logout"),
+    path("api/auth/jwt/obtain/", TokenObtainPairView.as_view(), name="jwt_obtain_pair"),
+    path("api/auth/jwt/logout/", TokenLogoutView.as_view(), name="jwt_logout"),
+    # Audit Logs
+    path("api/audit-logs/", api_audit_logs, name="api_audit_logs"),
     # Magic Links
-    path('auth/magic-request/', MagicLinkRequestView.as_view(), name='magic_link_request'),
-    path('auth/magic/<str:token>/', MagicLinkVerifyView.as_view(), name='magic_link_verify'),
-    
+    path("auth/magic-request/", MagicLinkRequestView.as_view(), name="magic_link_request"),
+    path("auth/magic/<str:token>/", MagicLinkVerifyView.as_view(), name="magic_link_verify"),
     # --- ONBOARDING (SaaS) ---
-    path('onboarding/', SaaSOnboardingView.as_view(), name='onboarding_start'),
-    path('onboarding/agency/', OnboardingAgencyView.as_view(), name='onboarding_agency'),
-
+    path("onboarding/", SaaSOnboardingView.as_view(), name="onboarding_start"),
+    path("onboarding/agency/", OnboardingAgencyView.as_view(), name="onboarding_agency"),
     # --- INCLUSIÓN DE MÓDULOS (ESTO SOLUCIONA EL ERROR NOREVERSEMATCH) ---
-    path('bookings/', include('apps.bookings.urls')),
-    path('finance/', include('apps.finance.urls')),
-    path('crm/', include('apps.crm.urls')),
-    path('system/', include(('core.urls_system', 'core'))),
-    path('accounting/', include('apps.contabilidad.urls')),
-    path('cms/', include('apps.cms.urls')),
-
+    path("bookings/", include("apps.bookings.urls")),
+    path("finance/", include("apps.finance.urls")),
+    path("crm/", include("apps.crm.urls")),
+    path("system/", include(("core.urls_system", "core"))),
+    path("accounting/", include("apps.contabilidad.urls")),
+    path("cms/", include("apps.cms.urls")),
+    path("marketing/", include("apps.marketing.urls")),
+    path("cotizaciones/", include("apps.cotizaciones.urls")),
+    # --- DOCUMENTACIÓN API (PROTEGIDA EN PRODUCCIÓN) ---
+    path("api/schema/", _protect_docs(SpectacularAPIView.as_view()), name="schema"),
+    path("api/docs/", _protect_docs(SpectacularSwaggerView.as_view(url_name="schema")), name="swagger-ui-direct"),
+    path("api/redoc/", _protect_docs(SpectacularRedocView.as_view(url_name="schema")), name="redoc-direct"),
+    # Public routes (no /api/ prefix) for external consumers
+    path("schema/", _protect_docs(SpectacularAPIView.as_view()), name="schema_root"),
+    path("docs/", _protect_docs(SpectacularSwaggerView.as_view(url_name="schema_root")), name="swagger-ui"),
+    path("redoc/", _protect_docs(SpectacularRedocView.as_view(url_name="schema_root")), name="redoc"),
     # --- DASHBOARD PRINCIPAL ---
     # Redirige a la vista modern_dashboard que ahora reside en bookings
-    path('', RedirectView.as_view(pattern_name='bookings:modern_dashboard', permanent=False), name='home'),
-    path('dashboard/', RedirectView.as_view(pattern_name='bookings:modern_dashboard', permanent=False), name='dashboard_root'),
+    path(
+        "",
+        RedirectView.as_view(pattern_name="bookings:modern_dashboard", permanent=False),
+        name="home",
+    ),
+    path(
+        "dashboard/",
+        RedirectView.as_view(pattern_name="bookings:modern_dashboard", permanent=False),
+        name="dashboard_root",
+    ),
+    path("prometheus/", include("django_prometheus.urls")),
+    path("health/metrics/", health_metrics_view, name="health_metrics"),
 ]
+
+
+
+# Servir media en desarrollo local (y como fallback en producción si el túnel Cloudflare apunta directo al puerto 8000)
+from django.views.static import serve
+from django.urls import re_path
+
+urlpatterns += [
+    re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
+]
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+

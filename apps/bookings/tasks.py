@@ -1,21 +1,26 @@
 import logging
 
+import requests
 from celery import shared_task
+from apps.common.utils.celery_utils import tenant_task, idempotent_task
 
 logger = logging.getLogger(__name__)
 
 
-@shared_task(queue="notifications")
-def notificar_pago_whatsapp_task(venta_id):
-    """
-    Tarea asincrona para notificar al cliente sobre su pago via WhatsApp.
-    Multi-tenant: usa la instancia Evolution correcta por agencia (subdominio_slug).
-    """
+@tenant_task(queue="notifications", time_limit=120, soft_time_limit=90)
+@idempotent_task(timeout=1800, key_prefix="celery_notif_whatsapp")
+def notificar_pago_whatsapp_task(venta_id, **kwargs):
     from apps.bookings.models import Venta
     from apps.communications.services.whatsapp_unified import send_whatsapp_message
 
     try:
-        venta = Venta.all_objects.select_related("cliente", "moneda", "agencia").get(pk=venta_id)
+        try:
+            venta = Venta.objects.select_related("cliente", "moneda", "agencia").get(
+                pk=venta_id
+            )
+        except Venta.DoesNotExist:
+            logger.error(f"Venta {venta_id} no existe")
+            return False
 
         if not venta.cliente or not venta.cliente.telefono_principal:
             logger.warning(f"No se puede enviar WhatsApp para Venta {venta_id}: sin telefono")
@@ -37,9 +42,518 @@ def notificar_pago_whatsapp_task(venta_id):
 
         return resultado.get("success", False)
 
-    except Venta.DoesNotExist:
-        logger.error(f"Venta {venta_id} no existe")
-        return False
     except Exception as e:
         logger.exception(f"Error en notificar_pago_whatsapp_task Venta {venta_id}: {e}")
         return False
+
+
+# ==============================================================================
+# 🛡️ COMPLIANCE GUARD & TIME LIMIT MONITOR TASKS
+# ==============================================================================
+
+
+def cls_notificar_infraccion_pasaporte(venta, pasajero, fecha_viaje):
+    from django.conf import settings
+
+    bot_token = getattr(settings, "TELEGRAM_BOT_TOKEN", None)
+    chat_id = getattr(
+        settings, "TELEGRAM_OPERACIONES_CHAT_ID", getattr(settings, "TELEGRAM_GROUP_ID", None)
+    )
+
+    if not bot_token or not chat_id:
+        logger.warning("Telegram configuration missing for passport violation notification")
+        return
+
+    mensaje = (
+        f"⚠️ <b>COMPLIANCE GUARD | INFRACCIÓN CRM</b>\n"
+        f"---------------------------------------------\n"
+        f"🚨 <b>Pasaporte en Riesgo de Rechazo</b>\n\n"
+        f"• <b>Pasajero:</b> {pasajero.apellidos}, {pasajero.nombres}\n"
+        f"• <b>Localizador Venta:</b> <code>{venta.localizador}</code>\n"
+        f"• <b>Fecha del Viaje:</b> {fecha_viaje.strftime('%d/%m/%Y') if fecha_viaje else 'N/A'}\n"
+        f"• <b>Vencimiento Pasaporte:</b> <b>{pasajero.fecha_vencimiento_pasaporte.strftime('%d/%m/%Y') if pasajero.fecha_vencimiento_pasaporte else 'N/A'}</b>\n"
+        f"---------------------------------------------\n"
+        f"❌ <i>El pasaporte cuenta con menos de 6 meses de vigencia obligatoria para la fecha del vuelo. Contactar de inmediato al cliente.</i>"
+    )
+
+    url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
+    try:
+        response = requests.post(
+            url, json={"chat_id": chat_id, "text": mensaje, "parse_mode": "HTML"}, timeout=5
+        )
+        logger.info(
+            f"Notification sent to Telegram (passport violation). Status: {response.status_code}"
+        )
+    except Exception as e:
+        logger.error(f"Error sending Telegram notification: {e}")
+
+
+def cls_notificar_urgency_time_limit(venta):
+    from django.conf import settings
+    from django.utils import timezone
+
+    bot_token = getattr(settings, "TELEGRAM_BOT_TOKEN", None)
+    chat_id = getattr(
+        settings, "TELEGRAM_FINANZAS_CHAT_ID", getattr(settings, "TELEGRAM_GROUP_ID", None)
+    )
+
+    if not bot_token or not chat_id:
+        logger.warning("Telegram configuration missing for time limit notification")
+        return
+
+    # Calculamos minutos restantes de forma dinámica
+    tiempo_restante = venta.tiempo_limite_emision - timezone.now()
+    minutos_restantes = int(tiempo_restante.total_seconds() / 60)
+
+    agencia_nombre = (
+        venta.agencia.nombre.upper() if (venta.agencia and venta.agencia.nombre) else "TENANT"
+    )
+
+    mensaje = (
+        f"⏰ <b>ALERTA CRÍTICA | TIME LIMIT EXPIRANDO</b>\n"
+        f"---------------------------------------------\n"
+        f"🛑 <b>Riesgo de Cancelación de Reserva</b>\n\n"
+        f"• <b>Agencia Tenant:</b> {agencia_nombre}\n"
+        f"• <b>Localizador GDS:</b> <code>{venta.localizador or venta.id_venta}</code>\n"
+        f"• <b>Monto en Riesgo:</b> {venta.total_venta} USD\n"
+        f"• <b>Expira en:</b> <pre>{minutos_restantes} minutos</pre>\n"
+        f"• <b>Hora Límite (TL):</b> {venta.tiempo_limite_emision.strftime('%H:%M')} hrs\n"
+        f"---------------------------------------------\n"
+        f"🔥 <i>La reserva se cancelará automáticamente en el GDS si no se procesa la emisión o el pago garantizado en este lapso.</i>"
+    )
+
+    url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
+    payload = {
+        "chat_id": chat_id,
+        "text": mensaje,
+        "parse_mode": "HTML",
+        "reply_markup": {
+            "inline_keyboard": [
+                [
+                    {
+                        "text": "💵 Registrar Pago Rápido",
+                        "url": f"https://travelhub.com/finance/venta/{venta.id_venta}/registrar-pago/",
+                    }
+                ]
+            ]
+        },
+    }
+    try:
+        response = requests.post(url, json=payload, timeout=5)
+        logger.info(f"Notification sent to Telegram (Time Limit). Status: {response.status_code}")
+    except Exception as e:
+        logger.error(f"Error sending Telegram notification: {e}")
+
+
+@tenant_task(
+    name="apps.bookings.tasks.verificar_cumplimiento_pasaportes_reserva_task",
+    queue="notifications",
+    time_limit=300,
+    soft_time_limit=270,
+)
+def verificar_cumplimiento_pasaportes_reserva_task(venta_id, **kwargs):
+    from datetime import timedelta
+
+    from apps.bookings.models import Venta
+
+    try:
+        from django.db.models import Prefetch
+        from apps.bookings.models import SegmentoVuelo
+        
+        try:
+            venta = Venta.objects.select_related("agencia", "cliente").prefetch_related(
+                "pasajeros",
+                Prefetch(
+                    "segmentos_vuelo",
+                    queryset=SegmentoVuelo.objects.filter(fecha_salida__isnull=False).order_by("fecha_salida"),
+                    to_attr="segmentos_ordenados"
+                )
+            ).get(id_venta=venta_id)
+        except Venta.DoesNotExist:
+            return f"Venta {venta_id} no encontrada."
+
+        primer_segmento = venta.segmentos_ordenados[0] if venta.segmentos_ordenados else None
+        if primer_segmento and primer_segmento.fecha_salida:
+            primer_vuelo = primer_segmento.fecha_salida
+        else:
+            primer_vuelo = venta.fecha_venta
+
+        if hasattr(primer_vuelo, "date"):
+            primer_vuelo = primer_vuelo.date()
+
+        fecha_limite_segura = primer_vuelo + timedelta(days=180)
+        alertas_disparadas = 0
+
+        for pasajero in venta.pasajeros.all():
+            if not pasajero.fecha_vencimiento_pasaporte:
+                continue
+
+            if pasajero.fecha_vencimiento_pasaporte < fecha_limite_segura:
+                alertas_disparadas += 1
+                cls_notificar_infraccion_pasaporte(venta, pasajero, primer_vuelo)
+
+        return f"Compliance Guard ejecutado para Venta {venta.localizador}. Alertas: {alertas_disparadas}"
+
+    except Exception as e:
+        logger.exception(f"Error en verificar_cumplimiento_pasaportes_reserva_task: {e}")
+        return f"Error: {e}"
+
+
+@tenant_task(
+    name="apps.bookings.tasks.monitorear_tiempos_limite_periodico_task",
+    queue="notifications",
+    time_limit=300,
+    soft_time_limit=270,
+)
+def monitorear_tiempos_limite_periodico_task(**kwargs):
+    from datetime import timedelta
+
+    from django.utils import timezone
+
+    from apps.bookings.models import Venta
+    from core.api import agency_context, get_current_agency, Agencia
+
+    agencia_activa = get_current_agency()
+
+    ahora = timezone.now()
+    umbral_critico = ahora + timedelta(hours=3)
+
+    if agencia_activa:
+        agencias = [agencia_activa]
+    else:
+        agencias = Agencia.objects.filter(activo=True).iterator(chunk_size=50)
+
+    alertas_enviadas = 0
+    for agencia in agencias:
+        with agency_context(agencia):
+            ventas_en_riesgo = Venta.objects.select_related("agencia").filter(
+                estado__in=["PEN", "PAR"],
+                tiempo_limite_emision__gt=ahora,
+                tiempo_limite_emision__lte=umbral_critico,
+                alerta_tl_disparada=False,
+            )
+
+            for venta in ventas_en_riesgo:
+                cls_notificar_urgency_time_limit(venta)
+                venta.alerta_tl_disparada = True
+                venta.save(update_fields=["alerta_tl_disparada"])
+                alertas_enviadas += 1
+
+    return f"Monitor de Time Limits ejecutado. Reservas críticas detectadas y alertadas: {alertas_enviadas}"
+
+
+@tenant_task(
+    name="core.tasks.parsear_boleto_individual",
+    time_limit=300,
+    soft_time_limit=270,
+    max_retries=3,
+    default_retry_delay=60,
+    acks_late=True,
+)
+def parsear_boleto_individual(boleto_id, **kwargs):
+    from apps.bookings.models import BoletoImportado
+
+    try:
+        boleto = BoletoImportado.objects.get(pk=boleto_id)
+        if boleto.estado_parseo in (
+            BoletoImportado.EstadoParseo.COMPLETADO,
+            BoletoImportado.EstadoParseo.ERROR_PARSEO,
+        ):
+            logger.info(
+                f"⏭️ Boleto {boleto_id} ya fue procesado (estado: {boleto.estado_parseo}). Omitiendo."
+            )
+            return f"Boleto {boleto_id} ya procesado previamente."
+    except BoletoImportado.DoesNotExist:
+        return f"Boleto {boleto_id} no existe."
+
+    try:
+        from apps.automation.services.ticket_parser_service import TicketParserService
+
+        logger.info(f"🧩 Iniciando tarea de parseo para Boleto {boleto_id} (Params: {kwargs})")
+        service = TicketParserService()
+        resultado = service.procesar_boleto(
+            boleto_id,
+            ignore_manual=kwargs.get("ignore_manual", False),
+            bypass_cache=kwargs.get("bypass_cache", False),
+        )
+        if resultado:
+            logger.info(f"✅ Tarea de parseo completada para Boleto {boleto_id}")
+            return f"Boleto {boleto_id} procesado exitosamente."
+        else:
+            logger.warning(f"⚠️ Tarea de parseo finalizó sin resultados para Boleto {boleto_id}")
+            return f"Fallo al procesar Boleto {boleto_id}"
+    except Exception as e:
+        logger.error(f"❌ Error en parsear_boleto_individual: {e}")
+        return f"Error: {e}"
+
+
+@shared_task(
+    name="core.tasks.retry_queued_boletos",
+    time_limit=300,
+    soft_time_limit=270,
+    max_retries=2,
+    default_retry_delay=600,
+)
+def retry_queued_boletos(agencia_id=None):
+    from apps.bookings.models import BoletoImportado
+    from apps.common.utils.celery_utils import safe_delay
+    from core.middleware import agency_context
+    from core.models import Agencia
+
+    if agencia_id:
+        agencias = [Agencia.objects.get(pk=agencia_id)]
+    else:
+        agencias = Agencia.objects.filter(activa=True).iterator(chunk_size=50)
+
+    total_reencolados = 0
+    for agencia in agencias:
+        with agency_context(agencia):
+            boletos_en_espera = BoletoImportado.objects.filter(estado_parseo="QUE")
+            for boleto in boletos_en_espera:
+                task = safe_delay(parsear_boleto_individual, boleto.id_boleto_importado)
+                if task:
+                    boleto.estado_parseo = "PRO"
+                    boleto.log_parseo = f"Re-encolado automáticamente por sistema de recuperación. TaskID: {task.id}"
+                    boleto.save(update_fields=["estado_parseo", "log_parseo"])
+                    total_reencolados += 1
+
+    if total_reencolados == 0:
+        return "No hay boletos en espera de cola."
+    return f"Se re-encolaron {total_reencolados} boletos que estaban en espera."
+
+
+@tenant_task(
+    name="core.tasks.send_ticket_notification",
+    time_limit=120,
+    soft_time_limit=90,
+    max_retries=3,
+    default_retry_delay=120,
+    acks_late=True,
+)
+def send_ticket_notification(boleto_id, **kwargs):
+    from apps.bookings.models import BoletoImportado
+    import os
+    from django.conf import settings
+
+    try:
+        boleto = BoletoImportado.objects.select_related("cliente", "agencia").get(id_boleto_importado=boleto_id)
+        if hasattr(boleto, "notificacion_enviada") and boleto.notificacion_enviada:
+            logger.info(f"⏭️ Notificación ya enviada para Boleto {boleto_id}. Omitiendo.")
+            return f"Notificación ya enviada para boleto {boleto_id}."
+    except BoletoImportado.DoesNotExist:
+        return f"Boleto con ID {boleto_id} no encontrado."
+
+    try:
+        from django.core.mail import EmailMessage
+
+        logger.info(f"Iniciando envío de notificación para Boleto ID: {boleto_id}")
+
+        if not boleto.archivo_pdf_generado:
+            logger.warning(
+                f"No se encontró PDF generado para el Boleto ID: {boleto_id}. No se puede enviar notificación."
+            )
+            return f"No hay PDF para el boleto {boleto_id}."
+
+        recipient_email = boleto.cliente.email if boleto.cliente else None
+        if not recipient_email:
+            logger.error(
+                f"El boleto {boleto_id} no tiene cliente con email. No se puede enviar notificación."
+            )
+            return "Destinatario no encontrado."
+
+        if "@sin-email.com" in recipient_email.lower():
+            logger.info(
+                f"🔕 Notificación omitida para email de marcador de posición: {recipient_email}"
+            )
+            return "Omitido por ser email de marcador de posición"
+
+        sender_name = boleto.agencia.nombre_comercial or boleto.agencia.nombre
+        subject = f"Nuevo Boleto Procesado: {boleto.nombre_pasajero_completo} - PNR: {boleto.localizador_pnr}"
+
+        body = (
+            "Se ha procesado un nuevo boleto de viaje.\n\n"
+            f"Pasajero: {boleto.nombre_pasajero_completo}\n"
+            f"Localizador: {boleto.localizador_pnr}\n"
+            f"Ruta: {boleto.ruta_vuelo}\n\n"
+            "El boleto unificado se encuentra adjunto a este correo.\n\n"
+            f"Saludos,\nEl equipo de {sender_name}"
+        )
+
+        email = EmailMessage(
+            subject,
+            body,
+            settings.DEFAULT_FROM_EMAIL,
+            [recipient_email],
+        )
+
+        boleto.archivo_pdf_generado.open(mode="rb")
+        email.attach(
+            os.path.basename(boleto.archivo_pdf_generado.name),
+            boleto.archivo_pdf_generado.read(),
+            "application/pdf",
+        )
+        boleto.archivo_pdf_generado.close()
+
+        email.send()
+        logger.info(f"Notificación para Boleto ID: {boleto_id} enviada a {recipient_email}.")
+        return f"Notificación para boleto {boleto_id} enviada."
+
+    except Exception as e:
+        logger.exception(f"Fallo crítico al enviar notificación para Boleto ID {boleto_id}: {e}")
+        raise e
+
+
+@shared_task(
+    name="core.tasks.check_upcoming_flights",
+    time_limit=300,
+    soft_time_limit=270,
+    max_retries=2,
+    default_retry_delay=600,
+)
+def check_upcoming_flights():
+    import json
+    from datetime import timedelta
+    from django.utils import timezone
+    from django.conf import settings
+    from apps.bookings.models import BoletoImportado
+    from apps.communications.services.telegram_notification_service import TelegramNotificationService
+    from core.models.agencia import Agencia
+    from core.middleware import agency_context
+    from apps.common.utils.celery_utils import safe_delay
+
+    logger.info("🔍 Buscando vuelos próximos para Check-in...")
+
+    now = timezone.now()
+    tomorrow_start = now + timedelta(hours=23)
+    total_alerts = 0
+
+    for agencia in Agencia.objects.filter(activa=True):
+        with agency_context(agencia):
+            boletos = BoletoImportado.objects.filter(
+                agencia=agencia,
+                fecha_subida__gte=now - timedelta(days=365),
+                estado_parseo="COM",
+                datos_parseados__icontains=tomorrow_start.strftime("%d %b").upper(),
+            )
+
+        chat_id = agencia.configuracion_api.get("TELEGRAM_GROUP_ID") or getattr(
+            settings, "TELEGRAM_GROUP_ID", None
+        )
+        if not chat_id:
+            continue
+
+        for boleto in boletos:
+            try:
+                data = boleto.datos_parseados
+                if isinstance(data, str):
+                    data = json.loads(data)
+
+                if "vuelos" in data and isinstance(data["vuelos"], list):
+                    for vuelo in data["vuelos"]:
+                        fecha_str = vuelo.get("fecha_salida") or vuelo.get("date")
+                        target_date_str = tomorrow_start.strftime("%d %b")
+
+                        if fecha_str and target_date_str.upper() in str(fecha_str).upper():
+                            msg = (
+                                f"⏰ <b>RECORDATORIO DE CHECK-IN</b>\n\n"
+                                f"El vuelo de <b>{boleto.nombre_pasajero_completo}</b> sale mañana.\n"
+                                f"✈️ Aerolínea: {boleto.aerolinea_emisora}\n"
+                                f"📍 PNR: <code>{boleto.localizador_pnr}</code>\n"
+                                f"📅 Fecha: {fecha_str}\n\n"
+                                f"<i>Verifica si el Check-in está abierto.</i>"
+                            )
+                            TelegramNotificationService.send_message(
+                                msg, chat_id=chat_id, agencia=agencia
+                            )
+                            total_alerts += 1
+                            logger.info(
+                                f"Alerta check-in enviada para {boleto.localizador_pnr} (Agencia: {agencia.nombre})"
+                            )
+                            try:
+                                logger.info(f"📄 Generando PDF para Boleto {boleto.pk} (asynchronously)...")
+                                safe_delay(generar_pdf_ticket_async_task, boleto.pk)
+                            except Exception as e_pdf_gen:
+                                logger.error(f"❌ Error encolando generación de PDF para Boleto {boleto.pk}: {e_pdf_gen}")
+                            break
+            except Exception as e:
+                logger.error(f"Error procesando boleto {boleto.pk} para checkin: {e}")
+
+    result = f"Check-in scan completado. Alertas enviadas: {total_alerts}"
+    logger.info(result)
+    return result
+
+
+@tenant_task(
+    name="core.tasks.generar_pdf_ticket_async_task",
+    time_limit=180,
+    soft_time_limit=150,
+    max_retries=3,
+    default_retry_delay=30,
+    acks_late=True,
+)
+def generar_pdf_ticket_async_task(boleto_id, **kwargs):
+    import time
+    from django.core.files.base import ContentFile
+    from apps.automation.parsers.normalization import DataNormalizationService
+    from apps.automation.parsers.pdf_generation import PdfGenerationService
+    from apps.bookings.models import BoletoImportado
+
+    logger.info(f"🚀 Iniciando tarea asíncrona para generar PDF de Boleto {boleto_id}")
+    try:
+        boleto = BoletoImportado.objects.select_related("agencia").get(pk=boleto_id)
+    except BoletoImportado.DoesNotExist:
+        logger.error(f"❌ Boleto {boleto_id} no encontrado para generar PDF.")
+        return f"Boleto {boleto_id} no encontrado."
+
+    if boleto.archivo_pdf_generado:
+        logger.info(f"⏭️ El boleto {boleto_id} ya tiene PDF generado. Omitiendo.")
+        return f"PDF ya generado para boleto {boleto_id}."
+
+    if not boleto.datos_parseados:
+        logger.warning(
+            f"⚠️ El boleto {boleto_id} no tiene datos parseados. No se puede generar PDF."
+        )
+        return f"Sin datos parseados para boleto {boleto_id}."
+
+    try:
+        logger.info(f"📄 Generando TKT PDF asíncrono para Boleto {boleto.pk}")
+        pdf_start = time.time()
+        datos_norm = DataNormalizationService.normalize_ticket_data(boleto.datos_parseados)
+        pdf_bytes, fname = PdfGenerationService.generate_ticket(
+            datos_norm, agencia_obj=boleto.agencia, boleto_obj=boleto
+        )
+        pdf_duration = time.time() - pdf_start
+        logger.info(f"⏱️ [PROFILING] PDF Generation duration (asíncrono): {pdf_duration:.2f}s")
+
+        if pdf_bytes and len(pdf_bytes) > 100:
+            boleto.archivo_pdf_generado.save(fname, ContentFile(pdf_bytes), save=True)
+            logger.info(f"✅ PDF guardado (asíncrono): {fname} ({len(pdf_bytes)} bytes)")
+
+            if boleto.estado_parseo == BoletoImportado.EstadoParseo.ERROR_PARSEO:
+                es_parcial = bool(datos_norm.get("_requiere_revision", False))
+                boleto.estado_parseo = (
+                    BoletoImportado.EstadoParseo.REVISION_REQUERIDA
+                    if es_parcial
+                    else BoletoImportado.EstadoParseo.COMPLETADO
+                )
+                boleto.save(update_fields=["estado_parseo"])
+
+            return f"PDF generado y guardado para boleto {boleto_id}."
+        else:
+            logger.warning(
+                f"⚠️ PDF generado vacío o muy pequeño ({len(pdf_bytes) if pdf_bytes else 0} bytes)."
+            )
+            return f"PDF vacío generado para boleto {boleto_id}."
+    except Exception as e:
+        logger.exception(f"❌ Error en tarea asíncrona de PDF para Boleto {boleto_id}: {e}")
+        try:
+            BoletoImportado.objects.filter(pk=boleto_id).update(
+                node_code="",
+                estado_parseo=BoletoImportado.EstadoParseo.ERROR_PARSEO,
+                log_parseo=f"Error en generación de PDF: {str(e)}",
+            )
+        except Exception as e_inner:
+            logger.error(
+                f"No se pudo actualizar estado_parseo a ERR para boleto {boleto_id}: {e_inner}"
+            )
+        raise e

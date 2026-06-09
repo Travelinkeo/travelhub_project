@@ -48,13 +48,15 @@ def _check_celery():
 
 
 def _check_gotenberg():
-    gotenberg_url = getattr(settings, "GOTENBERG_URL", None)
-    if not gotenberg_url:
-        return {"ok": True, "note": "Gotenberg not configured, skipping"}
+    gotenberg_url = (
+        getattr(settings, "GOTENBERG_URL", None)
+        or "http://gotenberg:3000/forms/chromium/convert/html"
+    )
     try:
         import urllib.request
 
-        req = urllib.request.Request(f"{gotenberg_url}/health", method="GET")  # noqa: S310
+        base_url = gotenberg_url.split("/forms")[0]
+        req = urllib.request.Request(f"{base_url}/health", method="GET")  # noqa: S310
         with urllib.request.urlopen(req, timeout=5) as resp:  # noqa: S310
             return {"ok": resp.status == 200}
     except Exception as e:
@@ -80,10 +82,56 @@ def _check_disk():
 
 
 @csrf_exempt
+def _check_celery_queue_depth():
+    from core.metrics import celery_queue_depth, QUEUES
+
+    try:
+        from django_redis import get_redis_connection
+
+        r = get_redis_connection("default")
+        warnings = {}
+        for queue in QUEUES:
+            try:
+                depth = r.llen(queue)
+                warnings[queue] = depth
+            except Exception:
+                pass
+        high = {q: d for q, d in warnings.items() if d > 1000}
+        if high:
+            return {"ok": False, "queues": high, "detail": f"Queues over 1000: {high}"}
+        return {"ok": True, "queues": warnings}
+    except Exception as e:
+        return {"ok": True, "detail": str(e)[:200]}
+
+
+def _check_db_pool():
+    from django.db import connection
+
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT count(*) FROM pg_stat_activity WHERE state = 'active'"
+            )
+            active = cursor.fetchone()[0]
+        with connection.cursor() as cursor:
+            cursor.execute("SHOW max_connections")
+            max_conn = int(cursor.fetchone()[0])
+        pct = (active / max_conn * 100) if max_conn else 0
+        ok = pct < 80
+        return {
+            "ok": ok,
+            "active": active,
+            "max": max_conn,
+            "used_pct": round(pct, 1),
+        }
+    except Exception as e:
+        return {"ok": True, "detail": str(e)[:200]}
+
+
 def health_check(request):
     """
     Health check unificado para monitoreo externo.
-    Verifica: DB, Redis, Celery, Gotenberg, Disco.
+    Verifica: DB, Redis, Celery, Gotenberg, Disco, Celery queue depth, DB pool.
     Retorna 200 si todo OK, 503 si algo degradado.
     """
     checks = {
@@ -92,6 +140,8 @@ def health_check(request):
         "celery": _check_celery(),
         "gotenberg": _check_gotenberg(),
         "disk": _check_disk(),
+        "celery_queue_depth": _check_celery_queue_depth(),
+        "db_pool": _check_db_pool(),
     }
 
     all_ok = all(v.get("ok") for v in checks.values())

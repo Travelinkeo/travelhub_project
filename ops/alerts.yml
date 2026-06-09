@@ -1,0 +1,30 @@
+groups:
+  - name: travelhub
+    interval: 30s
+    rules:
+      - alert: CeleryQueueDepthHigh
+        expr: travelhub_celery_queue_depth_total > 1000
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Celery queue {{ $labels.queue }} depth is {{ $value }}"
+          description: "Queue {{ $labels.queue }} has {{ $value }} pending tasks (threshold: 1000). Consumers may be falling behind."
+
+      - alert: NPlusOneDetected
+        expr: increase(travelhub_nplusone_alerts_total[5m]) > 0
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "N+1 queries detected on {{ $labels.path }}"
+          description: "Endpoint {{ $labels.method }} {{ $labels.path }} exceeded query threshold (15+ queries in >1s) in the last 5 minutes."
+
+      - alert: DBConnectionPoolHigh
+        expr: travelhub_db_active_connections / travelhub_db_max_connections * 100 > 80
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "DB connection pool at {{ $value | humanizePercentage }}"
+          description: "Active connections are at {{ $value | humanizePercentage }} of max_connections. Pool may be exhausted."

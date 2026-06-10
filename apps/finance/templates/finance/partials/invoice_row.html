@@ -70,13 +70,11 @@
             </button>
             {% endif %}
 
-            {% if invoice.archivo_pdf %}
-            <a href="{{ invoice.archivo_pdf.url }}" target="_blank"
+            <a href="{% url 'finance:factura_pdf' invoice.pk %}" target="_blank"
                 class="size-9 flex items-center justify-center text-red-500 hover:bg-red-500/10 rounded-xl transition-all border border-transparent hover:border-red-500/20"
                 title="Descargar PDF">
                 <span class="material-symbols-outlined text-[20px]">picture_as_pdf</span>
             </a>
-            {% endif %}
         </div>
     </td>
 </tr>

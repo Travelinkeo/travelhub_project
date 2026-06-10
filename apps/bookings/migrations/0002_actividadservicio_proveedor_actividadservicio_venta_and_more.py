@@ -6,7 +6,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("bookings", "0001_initial"),
         ("contabilidad", "0002_initial"),
@@ -561,16 +560,12 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="ventaauditfinding",
             name="fecha_resolucion",
-            field=models.DateTimeField(
-                blank=True, null=True, verbose_name="Fecha de Resolución"
-            ),
+            field=models.DateTimeField(blank=True, null=True, verbose_name="Fecha de Resolución"),
         ),
         migrations.AddField(
             model_name="ventaauditfinding",
             name="nota_resolucion",
-            field=models.TextField(
-                blank=True, null=True, verbose_name="Nota de Resolución"
-            ),
+            field=models.TextField(blank=True, null=True, verbose_name="Nota de Resolución"),
         ),
         migrations.AddField(
             model_name="ventaauditfinding",
@@ -613,9 +608,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddIndex(
             model_name="alquilerautoreserva",
-            index=models.Index(
-                fields=["fecha_hora_retiro"], name="core_alquil_fecha_h_9424c1_idx"
-            ),
+            index=models.Index(fields=["fecha_hora_retiro"], name="core_alquil_fecha_h_9424c1_idx"),
         ),
         migrations.AddIndex(
             model_name="alquilerautoreserva",
@@ -652,27 +645,19 @@ class Migration(migrations.Migration):
         ),
         migrations.AddIndex(
             model_name="circuitodia",
-            index=models.Index(
-                fields=["dia_numero"], name="core_circui_dia_num_5ab3a8_idx"
-            ),
+            index=models.Index(fields=["dia_numero"], name="core_circui_dia_num_5ab3a8_idx"),
         ),
         migrations.AddIndex(
             model_name="circuitoturistico",
-            index=models.Index(
-                fields=["fecha_inicio"], name="core_circui_fecha_i_c9ac23_idx"
-            ),
+            index=models.Index(fields=["fecha_inicio"], name="core_circui_fecha_i_c9ac23_idx"),
         ),
         migrations.AddIndex(
             model_name="eventoservicio",
-            index=models.Index(
-                fields=["fecha_evento"], name="core_evento_fecha_e_4cbc1c_idx"
-            ),
+            index=models.Index(fields=["fecha_evento"], name="core_evento_fecha_e_4cbc1c_idx"),
         ),
         migrations.AddIndex(
             model_name="eventoservicio",
-            index=models.Index(
-                fields=["nombre_evento"], name="core_evento_nombre__c306a8_idx"
-            ),
+            index=models.Index(fields=["nombre_evento"], name="core_evento_nombre__c306a8_idx"),
         ),
         migrations.AddIndex(
             model_name="paqueteaereo",
@@ -683,9 +668,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddIndex(
             model_name="servicioadicionaldetalle",
-            index=models.Index(
-                fields=["tipo_servicio"], name="core_servic_tipo_se_1f3d42_idx"
-            ),
+            index=models.Index(fields=["tipo_servicio"], name="core_servic_tipo_se_1f3d42_idx"),
         ),
         migrations.AddIndex(
             model_name="venta",
@@ -701,8 +684,6 @@ class Migration(migrations.Migration):
         ),
         migrations.AddIndex(
             model_name="venta",
-            index=models.Index(
-                fields=["agencia", "estado"], name="core_venta_agencia_32fb12_idx"
-            ),
+            index=models.Index(fields=["agencia", "estado"], name="core_venta_agencia_32fb12_idx"),
         ),
     ]

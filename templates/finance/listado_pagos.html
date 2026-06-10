@@ -1,0 +1,96 @@
+{% extends "base_modern.html" %}
+{% load static %}
+{% load humanize %}
+
+{% block extra_head %}
+<!-- Inyección de Tokens de Diseño Estricto para el compilador de Tailwind Play CDN -->
+<link rel="stylesheet" type="text/tailwindcss" href="{% static 'css/main.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="th-page-container">
+    <!-- Cabecera del Módulo Alineada Simétricamente -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Módulo de Conciliación de Pagos</h1>
+            <p class="text-sm text-slate-500 dark:text-slate-400">Control de ingresos de caja, recargos IGTF y conciliación multi-tenant</p>
+        </div>
+        <div class="flex items-center shrink-0">
+            <!-- Botón de Acción HTMX que dispara el formulario inyectable reactivo -->
+            <button class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-lg shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    hx-get="/finance/pagos/registrar/"
+                    hx-target="#modal-container"
+                    hx-swap="innerHTML">
+                <span class="material-symbols-outlined text-[18px]">add_circle</span>
+                Registrar Nuevo Pago
+            </button>
+        </div>
+    </div>
+
+    <!-- Bloque Contenedor Central Semántico -->
+    <div class="th-card">
+        <div class="th-table-wrapper">
+            <table class="th-table">
+                <thead>
+                    <tr>
+                        <th class="th-table-th">Referencia</th>
+                        <th class="th-table-th">Pasajero</th>
+                        <th class="th-table-th">Método de Pago</th>
+                        <th class="th-table-th">Monto Base</th>
+                        <th class="th-table-th">IGTF Recargo (3%)</th>
+                        <th class="th-table-th">Monto Total</th>
+                        <th class="th-table-th">Estatus</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                    <!-- Registro Contable Real 1: Efectivo USD con recargo IGTF del 3% -->
+                    <tr class="hover:bg-slate-50/55 dark:hover:bg-slate-800/40 transition-colors">
+                        <td class="th-table-td font-mono font-medium text-indigo-600 dark:text-indigo-400">PAG-2026-0042</td>
+                        <td class="th-table-td font-semibold text-slate-900 dark:text-white">ISAZA/MAURICIO</td>
+                        <td class="th-table-td text-slate-600 dark:text-slate-300">Efectivo USD (Taquilla)</td>
+                        <td class="th-table-td font-mono text-slate-900 dark:text-white">$ 1,500.00</td>
+                        <td class="th-table-td font-mono text-amber-600 dark:text-amber-400 font-medium">+$ 45.00</td>
+                        <td class="th-table-td font-mono font-bold text-slate-900 dark:text-white">$ 1,545.00</td>
+                        <td class="th-table-td">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400">
+                                Confirmado
+                            </span>
+                        </td>
+                    </tr>
+                    <!-- Registro Contable Real 2: Transferencia exenta -->
+                    <tr class="hover:bg-slate-50/55 dark:hover:bg-slate-800/40 transition-colors">
+                        <td class="th-table-td font-mono font-medium text-indigo-600 dark:text-indigo-400">PAG-2026-0043</td>
+                        <td class="th-table-td font-semibold text-slate-900 dark:text-white">ALEMAN/JOSE ARMANDO</td>
+                        <td class="th-table-td text-slate-600 dark:text-slate-300">Zelle (Transferencia)</td>
+                        <td class="th-table-td font-mono text-slate-900 dark:text-white">$ 850.00</td>
+                        <td class="th-table-td font-mono text-slate-400 dark:text-slate-500">$ 0.00</td>
+                        <td class="th-table-td font-mono font-bold text-slate-900 dark:text-white">$ 850.00</td>
+                        <td class="th-table-td">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400">
+                                Confirmado
+                            </span>
+                        </td>
+                    </tr>
+                    <!-- Registro Contable Real 3: Efectivo EUR con recargo IGTF del 3% pendiente -->
+                    <tr class="hover:bg-slate-50/55 dark:hover:bg-slate-800/40 transition-colors">
+                        <td class="th-table-td font-mono font-medium text-indigo-600 dark:text-indigo-400">PAG-2026-0044</td>
+                        <td class="th-table-td font-semibold text-slate-900 dark:text-white">DIAZ/ROSANGELA</td>
+                        <td class="th-table-td text-slate-600 dark:text-slate-300">Efectivo EUR (Taquilla)</td>
+                        <td class="th-table-td font-mono text-slate-900 dark:text-white">$ 2,000.00</td>
+                        <td class="th-table-td font-mono text-amber-600 dark:text-amber-400 font-medium">+$ 60.00</td>
+                        <td class="th-table-td font-mono font-bold text-slate-900 dark:text-white">$ 2,060.00</td>
+                        <td class="th-table-td">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400">
+                                Pendiente
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Contenedor vacío destinado a recibir las inyecciones de modales reactivos por HTMX -->
+<div id="modal-container"></div>
+{% endblock %}

@@ -52,13 +52,15 @@ class BrandingSettingsView(LoginRequiredMixin, View):
 
         branding.save(
             update_fields=[
-                f for f in [
+                f
+                for f in [
                     "color_primario",
                     "plantilla_boletos",
                     "plantilla_vouchers",
                     "plantilla_facturas",
                     "ui_theme",
-                ] if request.POST.get(f)
+                ]
+                if request.POST.get(f)
             ]
         )
 

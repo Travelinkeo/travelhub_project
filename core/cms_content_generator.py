@@ -1,8 +1,10 @@
-
 import json
+import logging
 from typing import Any
 
 from apps.automation.services.ai_engine import generate_content
+
+logger = logging.getLogger(__name__)
 
 
 def generate_promotional_content(promotion_data: dict[str, Any]) -> dict[str, Any]:
@@ -71,15 +73,14 @@ def generate_promotional_content(promotion_data: dict[str, Any]) -> dict[str, An
     except json.JSONDecodeError:
         return {
             "error": "Error al decodificar la respuesta JSON de la API.",
-            "raw_response": response_text
+            "raw_response": response_text,
         }
     except Exception as e:
-        return {
-            "error": f"Ocurrió un error inesperado: {str(e)}"
-        }
+        return {"error": f"Ocurrió un error inesperado: {str(e)}"}
+
 
 # Ejemplo de uso (para pruebas)
-if __name__ == '__main__':
+if __name__ == "__main__":
     # 1. Datos de ejemplo que simulan la primera extracción de Gemini
     sample_promotion = {
         "destino": "Kioto, Japón",
@@ -87,11 +88,11 @@ if __name__ == '__main__':
         "precio": "950 USD",
         "fechas_vuelo": "del 10 al 25 de noviembre, 2025",
         "hotel_incluido": "Ryokan con vistas al jardín Zen",
-        "oferta_especial": "Incluye tour guiado al Templo Fushimi Inari"
+        "oferta_especial": "Incluye tour guiado al Templo Fushimi Inari",
     }
 
     # Llamar a la función para generar el contenido creativo
     creative_content = generate_promotional_content(sample_promotion)
 
     # Imprimir el resultado de forma legible
-    print(json.dumps(creative_content, indent=4, ensure_ascii=False))
+    logger.info(json.dumps(creative_content, indent=4, ensure_ascii=False))

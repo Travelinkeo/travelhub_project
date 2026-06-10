@@ -1,6 +1,8 @@
 """
 Fixtures compartidos para tests de TravelHub
 """
+
+import unittest.mock
 from decimal import Decimal
 
 import pytest
@@ -14,9 +16,6 @@ from apps.finance.models.currencies import Moneda
 # Imports actualizados apuntando a las nuevas rutas modulares (apps/*)
 from core.models import Agencia  # Agencia se mantiene en el core por el multi-tenant
 
-import unittest.mock
-from django.contrib.auth import get_user_model
-from django.utils import timezone
 
 @pytest.fixture(autouse=True)
 def mock_ai_engine(monkeypatch):
@@ -24,10 +23,13 @@ def mock_ai_engine(monkeypatch):
     Mock global de AIEngine para evitar llamadas reales a Gemini en tests.
     Retorna un resultado de parseo exitoso por defecto.
     """
-    monkeypatch.setattr('apps.automation.services.ai_engine.AIEngine._ensure_configured', lambda *args, **kwargs: True)
-    
+    monkeypatch.setattr(
+        "apps.automation.services.ai_engine.AIEngine._ensure_configured",
+        lambda *args, **kwargs: True,
+    )
+
     from apps.automation.services.ai_engine import ai_engine
-    
+
     default_res = {
         "boletos": [
             {
@@ -48,37 +50,48 @@ def mock_ai_engine(monkeypatch):
                         "destino": "DEST CITY",
                         "fecha_salida": "2025-02-01",
                         "hora_salida": "10:00",
-                        "hora_llegada": "12:00"
+                        "hora_llegada": "12:00",
                     }
-                ]
+                ],
             }
         ]
     }
-    
+
     mock_call = unittest.mock.MagicMock(return_value=default_res)
-    monkeypatch.setattr(ai_engine, 'call_gemini', mock_call)
-    
+    monkeypatch.setattr(ai_engine, "call_gemini", mock_call)
+
     import json
+
     ai_parser_res = {
         "passenger": {"name": "JUAREZ/RAUL"},
         "bookingDetails": {"ticketNumber": "0457281019415"},
-        "flights": [{"flightNumber": "AA123", "departure": {"location": "CARACAS"}, "arrival": {"location": "BOGOTA"}}]
+        "flights": [
+            {
+                "flightNumber": "AA123",
+                "departure": {"location": "CARACAS"},
+                "arrival": {"location": "BOGOTA"},
+            }
+        ],
     }
-    monkeypatch.setattr('apps.automation.services.ai_engine.generate_content', lambda *args, **kwargs: json.dumps(ai_parser_res))
-    
+    monkeypatch.setattr(
+        "apps.automation.services.ai_engine.generate_content",
+        lambda *args, **kwargs: json.dumps(ai_parser_res),
+    )
+
     return mock_call
 
+
 User = get_user_model()
+
 
 @pytest.fixture
 def user_propietario(db):
     """Crea un usuario propietario para la agencia"""
     User = get_user_model()
     return User.objects.create_user(
-        username="propietario",
-        email="propietario@test.com",
-        password="testpass123"
+        username="propietario", email="propietario@test.com", password="testpass123"
     )
+
 
 @pytest.fixture
 def agencia(db, user_propietario):
@@ -87,8 +100,9 @@ def agencia(db, user_propietario):
         nombre="Agencia Test",
         nombre_comercial="Agencia Test",
         email_principal="test@agencia.com",
-        propietario=user_propietario
+        propietario=user_propietario,
     )
+
 
 @pytest.fixture
 def cliente(db):
@@ -97,30 +111,25 @@ def cliente(db):
         nombres="Juan",
         apellidos="Pérez",
         email=f"juan.perez.{timezone.now().timestamp()}@test.com",  # Email único
-        telefono_principal="+58412123456"
+        telefono_principal="+58412123456",
     )
+
 
 @pytest.fixture
 def moneda_usd(db):
     """Crea moneda USD"""
     return Moneda.objects.get_or_create(
-        codigo_iso="USD",
-        defaults={
-            "nombre": "Dólar Estadounidense",
-            "simbolo": "$"
-        }
+        codigo_iso="USD", defaults={"nombre": "Dólar Estadounidense", "simbolo": "$"}
     )[0]
+
 
 @pytest.fixture
 def moneda_ves(db):
     """Crea moneda VES"""
     return Moneda.objects.get_or_create(
-        codigo_iso="VES",
-        defaults={
-            "nombre": "Bolívar Venezolano",
-            "simbolo": "Bs"
-        }
+        codigo_iso="VES", defaults={"nombre": "Bolívar Venezolano", "simbolo": "Bs"}
     )[0]
+
 
 @pytest.fixture
 def proveedor_avianca(db):
@@ -129,33 +138,29 @@ def proveedor_avianca(db):
         nombre_comercial="Avianca",
         razon_social="Avianca S.A.",
         tipo_proveedor="AER",
-        pais_origen_id=1  # Asume que existe
+        pais_origen_id=1,  # Asume que existe
     )
+
 
 @pytest.fixture
 def producto_boleto(db):
     """Crea producto de tipo boleto aéreo"""
     return ProductoServicio.objects.get_or_create(
         nombre="Boleto Aéreo",
-        defaults={
-            "tipo_producto": "AIR",
-            "descripcion": "Boleto aéreo nacional o internacional"
-        }
+        defaults={"tipo_producto": "AIR", "descripcion": "Boleto aéreo nacional o internacional"},
     )[0]
+
 
 @pytest.fixture
 def venta_base(db, agencia, moneda_usd):
     """Crea una venta base"""
-    
+
     # Crear cliente inline para evitar problemas de instancia
     cliente, _ = Cliente.objects.get_or_create(
         email=f"venta.test.{timezone.now().timestamp()}@test.com",
-        defaults={
-            "nombres": "Test",
-            "apellidos": "Venta"
-        }
+        defaults={"nombres": "Test", "apellidos": "Venta"},
     )
-    
+
     return Venta.objects.create(
         agencia=agencia,
         cliente=cliente,
@@ -163,8 +168,9 @@ def venta_base(db, agencia, moneda_usd):
         localizador="ABC123",
         total_venta=Decimal("500.00"),
         estado="PEN",
-        fecha_venta=timezone.now()
+        fecha_venta=timezone.now(),
     )
+
 
 @pytest.fixture
 def boleto_importado(db, agencia):
@@ -178,8 +184,9 @@ def boleto_importado(db, agencia):
         total_boleto=Decimal("500.00"),
         estado_parseo="COM",
         version=1,
-        estado_emision=BoletoImportado.EstadoEmision.ORIGINAL
+        estado_emision=BoletoImportado.EstadoEmision.ORIGINAL,
     )
+
 
 @pytest.fixture
 def datos_boleto_sabre():
@@ -194,14 +201,10 @@ def datos_boleto_sabre():
         "moneda": "USD",
         "issue_date": "15JAN26",
         "itinerary": [
-            {
-                "origin": "CCS",
-                "destination": "PTY",
-                "date": "20JAN26",
-                "flight": "CM123"
-            }
-        ]
+            {"origin": "CCS", "destination": "PTY", "date": "20JAN26", "flight": "CM123"}
+        ],
     }
+
 
 @pytest.fixture
 def datos_boleto_kiu():
@@ -214,25 +217,23 @@ def datos_boleto_kiu():
         "NOMBRE_AEROLINEA": "AVIANCA",
         "TOTAL_IMPORTE": "600.00",
         "TOTAL_MONEDA": "USD",
-        "FECHA_DE_EMISION": "16JAN26"
+        "FECHA_DE_EMISION": "16JAN26",
     }
+
 
 @pytest.fixture
 def user_admin(db):
     """Crea un usuario administrador"""
     User = get_user_model()
     return User.objects.create_superuser(
-        username="admin",
-        email="admin@test.com",
-        password="testpass123"
+        username="admin", email="admin@test.com", password="testpass123"
     )
+
 
 @pytest.fixture
 def user_agente(db):
     """Crea un usuario agente"""
     User = get_user_model()
     return User.objects.create_user(
-        username="agente",
-        email="agente@test.com",
-        password="testpass123"
+        username="agente", email="agente@test.com", password="testpass123"
     )

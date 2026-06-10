@@ -1,0 +1,208 @@
+{% extends 'base_modern.html' %}
+{% load static %}
+{% block title %}Logs de Auditoría Forense — TravelHub Pro{% endblock %}
+
+{% block page_title %}Logs de Auditoría{% endblock %}
+{% block page_subtitle %}Historial de transacciones inmutables y auditoría de estado del tenant.{% endblock %}
+
+{% block content %}
+<main class="flex-1 w-full max-w-[1400px] mx-auto p-6 md:p-8">
+
+    <!-- Header & Action Bar -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10 pb-6 border-b border-border-color">
+        <div>
+            <h1 class="text-3xl font-black text-text-main tracking-tight uppercase">Bóveda de Auditoría Forense</h1>
+            <p class="text-text-muted text-sm mt-1">Monitoreo de mutaciones de datos y registro inmutable encriptado.</p>
+        </div>
+    </div>
+
+    <!-- Filters Section -->
+    <div class="card-base p-6 mb-8 border-2 border-primary/5">
+        <form method="get" class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
+            <!-- Search Text -->
+            <div class="space-y-2 col-span-1 md:col-span-1">
+                <label class="text-[10px] font-black uppercase tracking-widest text-text-muted">Buscar Descripción</label>
+                <input type="text" name="q" value="{{ filtros.q }}" placeholder="Ej: PNR, Venta..."
+                    class="w-full bg-surface-2 border border-border-color rounded-xl px-4 py-2.5 text-sm text-text-main focus:outline-none focus:border-primary transition-all">
+            </div>
+
+            <!-- Accion -->
+            <div class="space-y-2">
+                <label class="text-[10px] font-black uppercase tracking-widest text-text-muted">Acción</label>
+                <select name="accion" class="w-full bg-surface-2 border border-border-color rounded-xl px-4 py-2.5 text-sm text-text-main focus:outline-none focus:border-primary transition-all">
+                    <option value="">Todas</option>
+                    {% for key, val in acciones_choices %}
+                        <option value="{{ key }}" {% if filtros.accion == key %}selected{% endif %}>{{ val }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Modelo -->
+            <div class="space-y-2">
+                <label class="text-[10px] font-black uppercase tracking-widest text-text-muted">Modelo / Entidad</label>
+                <input type="text" name="modelo" value="{{ filtros.modelo }}" placeholder="Ej: Venta, Factura..."
+                    class="w-full bg-surface-2 border border-border-color rounded-xl px-4 py-2.5 text-sm text-text-main focus:outline-none focus:border-primary transition-all">
+            </div>
+
+            <!-- Rango Fechas -->
+            <div class="space-y-2">
+                <label class="text-[10px] font-black uppercase tracking-widest text-text-muted">Desde</label>
+                <input type="date" name="fecha_inicio" value="{{ filtros.fecha_inicio }}"
+                    class="w-full bg-surface-2 border border-border-color rounded-xl px-4 py-2.5 text-sm text-text-main focus:outline-none focus:border-primary transition-all">
+            </div>
+
+            <div class="space-y-2">
+                <label class="text-[10px] font-black uppercase tracking-widest text-text-muted">Hasta</label>
+                <input type="date" name="fecha_fin" value="{{ filtros.fecha_fin }}"
+                    class="w-full bg-surface-2 border border-border-color rounded-xl px-4 py-2.5 text-sm text-text-main focus:outline-none focus:border-primary transition-all">
+            </div>
+
+            <!-- Botones -->
+            <div class="md:col-span-5 flex justify-end gap-3 mt-4">
+                <a href="?" class="px-6 py-3 rounded-xl bg-surface-2 text-xs font-black uppercase tracking-widest text-text-muted hover:bg-surface-3 hover:text-text-main transition-all border border-border-color">
+                    Limpiar Filtros
+                </a>
+                <button type="submit" class="px-6 py-3 rounded-xl bg-primary text-xs font-black uppercase tracking-widest text-on-primary hover:bg-primary-hover shadow-lg shadow-primary/20 transition-all">
+                    Filtrar Logs
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Timeline Container -->
+    <div class="relative border-l border-border-color/60 ml-4 md:ml-8 pl-8 md:pl-12 space-y-8 py-4">
+        {% for log in logs %}
+        <div class="relative group animate-fade-in animate-duration-300">
+            <!-- Timeline Node Indicator -->
+            <span class="absolute -left-[44px] md:-left-[60px] top-1.5 flex items-center justify-center rounded-2xl border-4 border-surface-base shadow-lg transition-transform group-hover:scale-110
+                {% if log.accion == 'CREATE' %}bg-emerald-950/80 text-emerald-400 border-emerald-900/50 p-2
+                {% elif log.accion == 'UPDATE' %}bg-blue-950/80 text-blue-400 border-blue-900/50 p-2
+                {% elif log.accion == 'DELETE' %}bg-rose-950/80 text-rose-400 border-rose-900/50 p-2
+                {% elif log.accion == 'STATE' %}bg-amber-950/80 text-amber-400 border-amber-900/50 p-2
+                {% elif log.accion == 'LOGIN' %}bg-teal-950/80 text-teal-400 border-teal-900/50 p-2
+                {% else %}bg-slate-950/80 text-slate-400 border-slate-900/50 p-2{% endif %}">
+                <span class="material-symbols-outlined text-[18px] font-black">
+                    {% if log.accion == 'CREATE' %}add_circle
+                    {% elif log.accion == 'UPDATE' %}edit
+                    {% elif log.accion == 'DELETE' %}delete_forever
+                    {% elif log.accion == 'STATE' %}swap_horiz
+                    {% elif log.accion == 'LOGIN' %}login
+                    {% elif log.accion == 'LOGOUT' %}logout
+                    {% else %}history{% endif %}
+                </span>
+            </span>
+
+            <!-- Timeline Card -->
+            <div class="card-base p-6 border-2 border-primary/5 hover:border-primary/20 transition-all shadow-md shadow-black/5 hover:shadow-xl hover:shadow-black/10">
+                <!-- Log Meta -->
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 mb-4">
+                    <div class="flex items-center gap-3 flex-wrap">
+                        <span class="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest
+                            {% if log.accion == 'CREATE' %}bg-emerald-950 text-emerald-400 border border-emerald-800/40
+                            {% elif log.accion == 'UPDATE' %}bg-blue-950 text-blue-400 border border-blue-800/40
+                            {% elif log.accion == 'DELETE' %}bg-rose-950 text-rose-400 border border-rose-800/40
+                            {% elif log.accion == 'STATE' %}bg-amber-950 text-amber-400 border border-amber-800/40
+                            {% else %}bg-slate-900 text-text-muted border border-border-color/40{% endif %}">
+                            {{ log.get_accion_display }}
+                        </span>
+                        <span class="text-[10px] font-black text-text-muted uppercase tracking-widest">
+                            Entidad: <span class="text-text-main font-mono bg-surface-2 px-2 py-0.5 rounded border border-border-color/30">{{ log.modelo }}</span>
+                        </span>
+                        <span class="text-[10px] font-black text-text-muted uppercase tracking-widest">
+                            ID: <span class="text-text-main font-mono bg-surface-2 px-2 py-0.5 rounded border border-border-color/30">#{{ log.object_id }}</span>
+                        </span>
+                    </div>
+
+                    <!-- Date & User -->
+                    <div class="flex items-center gap-2 text-xs text-text-muted">
+                        <span class="material-symbols-outlined text-[16px] text-text-muted/60">schedule</span>
+                        <span>{{ log.creado|date:"d M Y, H:i:s" }}</span>
+                        <span class="w-1.5 h-1.5 rounded-full bg-border-color mx-1"></span>
+                        <span class="material-symbols-outlined text-[16px] text-text-muted/60">person</span>
+                        <span class="font-bold text-text-main">{{ log.user.username|default:"Sistema" }}</span>
+                    </div>
+                </div>
+
+                <!-- Description -->
+                <p class="text-text-main font-semibold text-sm mb-4 leading-relaxed">
+                    {{ log.descripcion|default:"No se proporcionó descripción." }}
+                </p>
+
+                <!-- Data Diff / Hash Info -->
+                <div x-data="{ expanded: false }" class="space-y-3">
+                    {% if log.datos_previos or log.datos_nuevos %}
+                    <button @click="expanded = !expanded" type="button" class="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary hover:text-primary-hover transition-all">
+                        <span class="material-symbols-outlined text-[16px]" x-text="expanded ? 'expand_less' : 'expand_more'"></span>
+                        <span x-text="expanded ? 'Ocultar Cambios Detallados' : 'Ver Cambios Detallados'"></span>
+                    </button>
+
+                    <div x-show="expanded" x-cloak x-collapse
+                        class="p-4 bg-surface-base rounded-xl border border-border-color/60 space-y-4 max-w-full overflow-x-auto">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {% if log.datos_previos %}
+                            <div class="space-y-2">
+                                <h4 class="text-[9px] font-black uppercase tracking-widest text-text-muted">Estado Anterior</h4>
+                                <pre class="text-xs font-mono text-rose-400 bg-surface-2 p-3 rounded-lg border border-border-color/40 overflow-x-auto">{{ log.datos_previos }}</pre>
+                            </div>
+                            {% endif %}
+                            {% if log.datos_nuevos %}
+                            <div class="space-y-2">
+                                <h4 class="text-[9px] font-black uppercase tracking-widest text-text-muted">Estado Nuevo</h4>
+                                <pre class="text-xs font-mono text-emerald-400 bg-surface-2 p-3 rounded-lg border border-border-color/40 overflow-x-auto">{{ log.datos_nuevos }}</pre>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Cryptographic Chain Badge -->
+                    <div class="flex items-center justify-between pt-4 border-t border-border-color/50">
+                        <div class="flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-emerald-500/80">
+                            <span class="material-symbols-outlined text-[14px]">lock</span>
+                            <span>Integridad Criptográfica Asegurada</span>
+                        </div>
+                        <div class="text-[10px] font-mono text-text-muted select-all cursor-help" title="Hash SHA-256 de auditoría única. Anterior: {{ log.previous_hash }}">
+                            SHA-256: <span class="text-text-main font-bold">{{ log.record_hash|slice:":12" }}...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="text-center py-20 bg-surface-1/50 rounded-2xl border border-border-color">
+            <div class="size-16 rounded-2xl bg-surface-2 flex items-center justify-center text-text-muted border border-border-color mx-auto mb-4">
+                <span class="material-symbols-outlined text-[36px]">history</span>
+            </div>
+            <h3 class="text-lg font-black text-text-main uppercase tracking-tight">Sin Logs de Auditoría</h3>
+            <p class="text-sm text-text-muted mt-1">No se encontraron registros de auditoría bajo estos filtros.</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <div class="flex justify-between items-center gap-4 mt-8 pt-6 border-t border-border-color">
+        <div>
+            {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.accion %}&accion={{ request.GET.accion }}{% endif %}{% if request.GET.modelo %}&modelo={{ request.GET.modelo }}{% endif %}{% if request.GET.fecha_inicio %}&fecha_inicio={{ request.GET.fecha_inicio }}{% endif %}{% if request.GET.fecha_fin %}&fecha_fin={{ request.GET.fecha_fin }}{% endif %}"
+                class="px-5 py-2.5 rounded-xl bg-surface-2 hover:bg-surface-3 text-xs font-black uppercase tracking-widest text-text-main border border-border-color transition-all flex items-center gap-2">
+                <span class="material-symbols-outlined text-[16px]">chevron_left</span> Anterior
+            </a>
+            {% endif %}
+        </div>
+        <span class="text-[10px] font-black uppercase tracking-widest text-text-muted">
+            Pág. <span class="text-text-main font-bold">{{ page_obj.number }}</span> de {{ page_obj.paginator.num_pages }}
+        </span>
+        <div>
+            {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.accion %}&accion={{ request.GET.accion }}{% endif %}{% if request.GET.modelo %}&modelo={{ request.GET.modelo }}{% endif %}{% if request.GET.fecha_inicio %}&fecha_inicio={{ request.GET.fecha_inicio }}{% endif %}{% if request.GET.fecha_fin %}&fecha_fin={{ request.GET.fecha_fin }}{% endif %}"
+                class="px-5 py-2.5 rounded-xl bg-surface-2 hover:bg-surface-3 text-xs font-black uppercase tracking-widest text-text-main border border-border-color transition-all flex items-center gap-2">
+                Siguiente <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+</main>
+{% endblock %}

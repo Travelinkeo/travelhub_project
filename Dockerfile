@@ -1,3 +1,40 @@
+# syntax=docker/dockerfile:1
+# Stage 1: builder — compile assets and install Python deps
+FROM python:3.13-slim AS builder
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+WORKDIR /build
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential libpq-dev gcc libpango-1.0-0 libpangocairo-1.0-0 \
+    libffi-dev shared-mime-info && \
+    rm -rf /var/lib/apt/lists/*
+
+COPY requirements/ ./requirements/
+RUN pip install --no-cache-dir -r requirements/prod.txt --prefix=/install
+
+COPY travelhub/ ./travelhub/
+COPY core/ ./core/
+COPY apps/ ./apps/
+COPY manage.py ./
+COPY static/ ./static/
+COPY templates/ ./templates/
+COPY locale/ ./locale/
+COPY docs/ ./docs/
+COPY tailwind.config.js ./
+COPY compilar.sh ./compilar.sh
+
+RUN chmod +x ./compilar.sh && sed -i 's/\r$//' ./compilar.sh && bash ./compilar.sh || true
+
+RUN DJANGO_SETTINGS_MODULE=travelhub.settings \
+    SECRET_KEY=build-placeholder-key-not-used-in-production \
+    DATABASE_URL=sqlite:///tmp/build.db \
+    DEBUG=False \
+    python manage.py collectstatic --noinput || true
+
+# Stage 2: runtime — minimal image
 FROM python:3.13-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1
@@ -6,16 +43,23 @@ ENV PYTHONUNBUFFERED=1
 WORKDIR /app
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libpq-dev gcc && \
+    libpq-dev libpango-1.0-0 libpangocairo-1.0-0 shared-mime-info && \
     rm -rf /var/lib/apt/lists/*
 
-COPY requirements/ ./requirements/
-RUN pip install --no-cache-dir -r requirements/prod.txt
+COPY --from=builder /install /usr/local
+COPY --from=builder /build/travelhub ./travelhub/
+COPY --from=builder /build/core ./core/
+COPY --from=builder /build/apps ./apps/
+COPY --from=builder /build/manage.py ./
+COPY --from=builder /build/static ./static/
+COPY --from=builder /build/templates ./templates/
+COPY --from=builder /build/locale ./locale/
+COPY --from=builder /build/docs ./docs/
 
-COPY . .
-
-RUN python manage.py collectstatic --noinput 2>/dev/null || true
+RUN groupadd -r appgroup && useradd -r -g appgroup appuser && chown -R appuser:appgroup /app
 
 EXPOSE 8000
+
+USER appuser
 
 CMD ["gunicorn", "travelhub.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3", "--timeout", "120"]

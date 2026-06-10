@@ -1,10 +1,10 @@
 import logging
-import json
-from django.conf import settings
-from .ai_engine import ai_engine, analizar_documento_con_gemini_estructurado
+
+from .ai_engine import analizar_documento_con_gemini_estructurado
 from .invoice_schemas import InvoiceDataSchema
 
 logger = logging.getLogger(__name__)
+
 
 class InvoiceParserService:
     """
@@ -23,10 +23,8 @@ class InvoiceParserService:
             "la moneda (ISO) y el monto total a pagar. "
             "Sé extremadamente preciso con los decimales."
         )
-        
-        user_prompt = (
-            "Analiza este documento y extrae la información de facturación siguiendo estrictamente el esquema JSON proporcionado."
-        )
+
+        user_prompt = "Analiza este documento y extrae la información de facturación siguiendo estrictamente el esquema JSON proporcionado."
 
         try:
             # Usamos el método especializado para documentos de AIEngine
@@ -34,10 +32,12 @@ class InvoiceParserService:
                 file_bytes=pdf_bytes,
                 mime_type=mime_type,
                 prompt_text=f"{system_prompt}\n\n{user_prompt}",
-                response_schema=InvoiceDataSchema
+                response_schema=InvoiceDataSchema,
             )
-            
-            logger.info(f"✅ Factura parseada exitosamente: {result.get('numero_factura')} de {result.get('proveedor_nombre')}")
+
+            logger.info(
+                f"✅ Factura parseada exitosamente: {result.get('numero_factura')} de {result.get('proveedor_nombre')}"
+            )
             return result
         except Exception as e:
             logger.error(f"❌ Error parseando factura con Gemini: {e}")

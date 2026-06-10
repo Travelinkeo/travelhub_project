@@ -5,7 +5,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("bookings", "0017_circuitodia_agencia_cruceroreserva_agencia_and_more"),
         ("core", "0022_remove_agencia_bi_insights_and_more"),

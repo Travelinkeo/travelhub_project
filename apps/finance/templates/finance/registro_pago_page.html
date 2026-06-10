@@ -1,0 +1,25 @@
+{% extends 'base_modern.html' %}
+{% load static %}
+
+{% block title %}Registrar Pago de Recaudación — TravelHub Pro{% endblock %}
+
+{% block page_title %}Registrar Pago{% endblock %}
+{% block page_subtitle %}Procesar pago de recaudación rápida para la venta #{{ venta.id_venta }}{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto p-6 md:p-8">
+    <div class="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+            <h1 class="text-2xl font-black text-text-main uppercase tracking-tight">Registro Rápido de Pago</h1>
+            <p class="text-text-muted text-sm mt-1">Venta: PNR <span class="font-semibold">{{ venta.localizador|default:venta.id_venta }}</span> — Cliente: <span class="font-semibold">{{ venta.cliente.nombre_completo|default:"N/A" }}</span></p>
+        </div>
+        <a href="{% url 'bookings:venta_detail' venta.id_venta %}" class="px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest text-text-muted hover:text-text-main bg-surface-2 hover:bg-surface-3 transition-all border border-border-color flex items-center gap-2">
+            <span class="material-symbols-outlined text-[16px]">arrow_back</span>
+            Volver a la Venta
+        </a>
+    </div>
+
+    <!-- Contenedor del Formulario HTMX -->
+    {% include 'finance/partials/form_pago_inner.html' %}
+</div>
+{% endblock %}

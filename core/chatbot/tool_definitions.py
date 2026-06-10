@@ -1,10 +1,12 @@
 def _get_genai_types():
     from google.genai import types
+
     return types
+
 
 def get_tool_definitions():
     types = _get_genai_types()
-    
+
     consultar_estado_reserva_func = types.FunctionDeclaration(
         name="consultar_estado_reserva",
         description="Consulta el estado actual de una reserva o venta existente usando su código de reserva (PNR o localizador).",
@@ -13,11 +15,11 @@ def get_tool_definitions():
             "properties": {
                 "pnr": {
                     "type": "string",
-                    "description": "El código de reserva (PNR) o localizador de la venta. Por ejemplo: WPYVSD, VTA-20240909-0001."
+                    "description": "El código de reserva (PNR) o localizador de la venta. Por ejemplo: WPYVSD, VTA-20240909-0001.",
                 }
             },
-            "required": ["pnr"]
-        }
+            "required": ["pnr"],
+        },
     )
 
     agregar_servicio_adicional_func = types.FunctionDeclaration(
@@ -28,15 +30,15 @@ def get_tool_definitions():
             "properties": {
                 "pnr": {
                     "type": "string",
-                    "description": "El código de reserva (PNR) al que se le agregará el servicio."
+                    "description": "El código de reserva (PNR) al que se le agregará el servicio.",
                 },
                 "id_servicio": {
                     "type": "integer",
-                    "description": "El ID numérico del producto/servicio a agregar. El chatbot debe preguntarle al usuario si no lo sabe."
-                }
+                    "description": "El ID numérico del producto/servicio a agregar. El chatbot debe preguntarle al usuario si no lo sabe.",
+                },
             },
-            "required": ["pnr", "id_servicio"]
-        }
+            "required": ["pnr", "id_servicio"],
+        },
     )
 
     buscar_paquetes_turisticos_func = types.FunctionDeclaration(
@@ -47,23 +49,25 @@ def get_tool_definitions():
             "properties": {
                 "destino": {
                     "type": "string",
-                    "description": "La ciudad o país de destino. Por ejemplo: 'París', 'Japón'."
+                    "description": "La ciudad o país de destino. Por ejemplo: 'París', 'Japón'.",
                 },
                 "presupuesto": {
                     "type": "number",
-                    "description": "El presupuesto máximo por persona en USD."
+                    "description": "El presupuesto máximo por persona en USD.",
                 },
                 "mes": {
                     "type": "string",
-                    "description": "El mes deseado para el viaje. Por ejemplo: 'Diciembre', 'Octubre'."
-                }
+                    "description": "El mes deseado para el viaje. Por ejemplo: 'Diciembre', 'Octubre'.",
+                },
             },
-            "required": ["destino", "presupuesto", "mes"]
-        }
+            "required": ["destino", "presupuesto", "mes"],
+        },
     )
 
-    return types.Tool(function_declarations=[
-        consultar_estado_reserva_func,
-        agregar_servicio_adicional_func,
-        buscar_paquetes_turisticos_func,
-    ])
+    return types.Tool(
+        function_declarations=[
+            consultar_estado_reserva_func,
+            agregar_servicio_adicional_func,
+            buscar_paquetes_turisticos_func,
+        ]
+    )

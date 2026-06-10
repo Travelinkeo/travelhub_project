@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("cms", "0002_articulo_agencia_guiadestino_agencia_and_more"),
         ("core", "0029_alter_anulacionboleto_agencia_and_more"),

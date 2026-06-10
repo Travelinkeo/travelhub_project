@@ -27,7 +27,7 @@
             {% csrf_token %}
             <button type="submit"
                 class="h-10 px-5 flex items-center gap-2 border border-transparent bg-indigo-600 text-white hover:bg-indigo-700 rounded text-sm font-bold transition-colors shadow-sm"
-                onclick="return confirm('¿Está seguro que desea convertir a {{ pasajero.get_nombre_completo|escapejs }} en un nuevo Cliente? Se copiarán todos sus datos y su foto de perfil.');">
+                data-confirm="¿Está seguro que desea convertir a {{ pasajero.get_nombre_completo|escapejs }} en un nuevo Cliente? Se copiarán todos sus datos y su foto de perfil.">
                 <span class="material-symbols-outlined text-[18px]">person_add</span> Convertir en Cliente
             </button>
         </form>

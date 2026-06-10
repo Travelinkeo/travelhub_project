@@ -327,12 +327,24 @@
             </div>
             <div class="flight-body">
                 <div class="airport-group">
-                    <div class="airport-code">{{ vuelo.origen.ciudad if vuelo.origen is mapping else vuelo.origen }}</div>
+                    <div class="airport-code">
+                        {% if vuelo.origen.ciudad %}
+                            {{ vuelo.origen.ciudad }}
+                        {% else %}
+                            {{ vuelo.origen }}
+                        {% endif %}
+                    </div>
                     <div class="airport-info">{{ vuelo.hora_salida|default:"---" }}</div>
                 </div>
                 <div class="flight-path">✈</div>
                 <div class="airport-group" style="text-align: right;">
-                    <div class="airport-code">{{ vuelo.destino.ciudad if vuelo.destino is mapping else vuelo.destino }}</div>
+                    <div class="airport-code">
+                        {% if vuelo.destino.ciudad %}
+                            {{ vuelo.destino.ciudad }}
+                        {% else %}
+                            {{ vuelo.destino }}
+                        {% endif %}
+                    </div>
                     <div class="airport-info">{{ vuelo.hora_llegada|default:"---" }}</div>
                 </div>
             </div>

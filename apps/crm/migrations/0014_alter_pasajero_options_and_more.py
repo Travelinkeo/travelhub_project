@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("common", "0002_alter_aerolinea_table_alter_ciudad_table_and_more"),
         ("core", "0028_alter_agencia_activa_and_more"),

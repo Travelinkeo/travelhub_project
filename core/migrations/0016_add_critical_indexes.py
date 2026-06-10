@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("bookings", "0016_add_critical_indexes"),
         ("core", "0015_agencia_configuracion_contable"),
@@ -15,14 +14,10 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddIndex(
             model_name="auditlog",
-            index=models.Index(
-                fields=["modelo", "object_id"], name="idx_audit_modelo_object"
-            ),
+            index=models.Index(fields=["modelo", "object_id"], name="idx_audit_modelo_object"),
         ),
         migrations.AddIndex(
             model_name="auditlog",
-            index=models.Index(
-                fields=["agencia", "creado"], name="idx_audit_agencia_creado"
-            ),
+            index=models.Index(fields=["agencia", "creado"], name="idx_audit_agencia_creado"),
         ),
     ]

@@ -8,22 +8,23 @@ from ..models.checkout import LinkDePago
 
 logger = logging.getLogger(__name__)
 
+
 class MagicLinkCheckoutView(View):
-    template_name = 'finance/checkout/magic_link.html'
+    template_name = "finance/checkout/magic_link.html"
 
     def get(self, request, uuid_link, *args, **kwargs):
         link_pago = get_object_or_404(LinkDePago, id=uuid_link)
         venta = link_pago.venta
         agencia = venta.agencia
-        
-        items = venta.items.all() if hasattr(venta, 'items') else venta.itemventa_set.all()
-        
+
+        items = venta.items.all() if hasattr(venta, "items") else venta.itemventa_set.all()
+
         context = {
-            'link': link_pago,
-            'venta': venta,
-            'agencia': agencia,
-            'items': items,
-            'is_expired': not link_pago.esta_activo and link_pago.estado == 'PEN',
+            "link": link_pago,
+            "venta": venta,
+            "agencia": agencia,
+            "items": items,
+            "is_expired": not link_pago.esta_activo and link_pago.estado == "PEN",
         }
         return render(request, self.template_name, context)
 
@@ -32,16 +33,20 @@ class MagicLinkCheckoutView(View):
         Endpoint reactivo (HTMX) unificado para recibir reportes de pago (Zelle o Crypto).
         """
         link_pago = get_object_or_404(LinkDePago, id=uuid_link)
-        
-        if not link_pago.esta_activo:
-            return HttpResponse('<div class="text-red-500 font-bold p-4 bg-red-100 rounded-xl text-center">Este enlace ha expirado o ya fue procesado.</div>')
 
-        referencia = request.POST.get('referencia')
-        comprobante = request.FILES.get('comprobante')
-        metodo_pago = request.POST.get('metodo_pago', 'ZELLE') # Detecta si es ZELLE o CRYPTO
+        if not link_pago.esta_activo:
+            return HttpResponse(
+                '<div class="text-red-500 font-bold p-4 bg-red-100 rounded-xl text-center">Este enlace ha expirado o ya fue procesado.</div>'
+            )
+
+        referencia = request.POST.get("referencia")
+        comprobante = request.FILES.get("comprobante")
+        metodo_pago = request.POST.get("metodo_pago", "ZELLE")  # Detecta si es ZELLE o CRYPTO
 
         if not referencia:
-            return HttpResponse('<div class="text-red-500 font-bold text-sm text-center">⚠️ La referencia/hash es obligatoria.</div>')
+            return HttpResponse(
+                '<div class="text-red-500 font-bold text-sm text-center">⚠️ La referencia/hash es obligatoria.</div>'
+            )
 
         try:
             # 1. Actualizamos el estado del link guardando el prefijo del método
@@ -53,9 +58,17 @@ class MagicLinkCheckoutView(View):
 
             # 2. Disparar la notificación asíncrona a Telegram
             try:
-                from apps.finance.tasks import notificar_pago_zelle_task
                 from django.db import transaction
-                transaction.on_commit(lambda: notificar_pago_zelle_task.apply_async(args=[str(link_pago.id)], queue='notifications'))
+
+                from apps.finance.tasks import notificar_pago_zelle_task
+
+                transaction.on_commit(
+                    lambda: notificar_pago_zelle_task.apply_async(
+                        args=[str(link_pago.id)],
+                        kwargs={"agencia_id": link_pago.agencia_id},
+                        queue="notifications",
+                    )
+                )
             except Exception as tg_err:
                 logger.warning(f"No se pudo encolar tarea Telegram: {tg_err}")
 
@@ -73,9 +86,11 @@ class MagicLinkCheckoutView(View):
                 <div class="text-xs text-{color}-500 uppercase tracking-widest font-bold">TravelHub Secure Checkout</div>
             </div>
             """
-            
+
             return HttpResponse(html_exito)
 
         except Exception as e:
             logger.error(f"Error procesando pago {metodo_pago} para link {uuid_link}: {e}")
-            return HttpResponse('<div class="text-red-500 font-bold text-sm text-center">Ocurrió un error. Intenta nuevamente.</div>')
+            return HttpResponse(
+                '<div class="text-red-500 font-bold text-sm text-center">Ocurrió un error. Intenta nuevamente.</div>'
+            )

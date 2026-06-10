@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("bookings", "0025_boletoimportado_raw_hash"),
         ("finance", "0011_alter_retencionislr_factura"),

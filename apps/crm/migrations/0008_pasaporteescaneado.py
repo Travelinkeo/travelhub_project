@@ -6,7 +6,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("crm", "0007_mensajewhatsapp_deleted_at_and_more"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),

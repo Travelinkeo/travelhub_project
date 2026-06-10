@@ -8,6 +8,7 @@ Consolidated service for all Telegram operations:
 - Storage service (Channel as unlimited storage)
 - Logo/Image upload utilities
 """
+
 import asyncio
 import logging
 import os
@@ -21,6 +22,7 @@ logger = logging.getLogger(__name__)
 # SECTION 1: CORE MESSAGING (HTTP API)
 # ============================================================================
 
+
 class TelegramNotificationService:
     """
     Servicio unificado para enviar notificaciones y archivos a Telegram.
@@ -28,31 +30,35 @@ class TelegramNotificationService:
     """
 
     @staticmethod
-    def send_message(message: str, chat_id: str = None, parse_mode: str = 'HTML', agencia=None) -> bool:
+    def send_message(
+        message: str, chat_id: str = None, parse_mode: str = "HTML", agencia=None
+    ) -> bool:
         """Envía un mensaje de texto simple."""
         try:
             token = settings.TELEGRAM_BOT_TOKEN
-            if agencia and hasattr(agencia, 'configuracion_api') and agencia.configuracion_api:
-                token = agencia.configuracion_api.get('TELEGRAM_BOT_TOKEN', token)
+            if agencia and hasattr(agencia, "configuracion_api") and agencia.configuracion_api:
+                token = agencia.configuracion_api.get("TELEGRAM_BOT_TOKEN", token)
 
             chat = chat_id
             if not chat:
-                if agencia and hasattr(agencia, 'configuracion_api'):
-                    chat = agencia.configuracion_api.get('TELEGRAM_CHANNEL_ID') or agencia.configuracion_api.get('TELEGRAM_GROUP_ID')
+                if agencia and hasattr(agencia, "configuracion_api"):
+                    chat = agencia.configuracion_api.get(
+                        "TELEGRAM_CHANNEL_ID"
+                    ) or agencia.configuracion_api.get("TELEGRAM_GROUP_ID")
 
                 if not chat:
-                    chat = getattr(settings, 'TELEGRAM_GROUP_ID', None) or getattr(settings, 'TELEGRAM_CHANNEL_ID', None)
+                    chat = getattr(settings, "TELEGRAM_GROUP_ID", None) or getattr(
+                        settings, "TELEGRAM_CHANNEL_ID", None
+                    )
 
             if not token or not chat:
-                logger.warning(f"Telegram Config Missing: Token={bool(token)}, Chat={chat} (Agencia: {agencia})")
+                logger.warning(
+                    f"Telegram Config Missing: Token={bool(token)}, Chat={chat} (Agencia: {agencia})"
+                )
                 return False
 
             url = f"https://api.telegram.org/bot{token}/sendMessage"
-            payload = {
-                'chat_id': chat,
-                'text': message,
-                'parse_mode': parse_mode
-            }
+            payload = {"chat_id": chat, "text": message, "parse_mode": parse_mode}
             response = requests.post(url, data=payload, timeout=30)
             response.raise_for_status()
             return True
@@ -65,16 +71,22 @@ class TelegramNotificationService:
         """Envía un documento (PDF, etc.) a Telegram via Path Local, URL, o File ID."""
         try:
             token = settings.TELEGRAM_BOT_TOKEN
-            if agencia and hasattr(agencia, 'configuracion_api') and agencia.configuracion_api:
-                token = agencia.configuracion_api.get('TELEGRAM_BOT_TOKEN', token)
+            if agencia and hasattr(agencia, "configuracion_api") and agencia.configuracion_api:
+                token = agencia.configuracion_api.get("TELEGRAM_BOT_TOKEN", token)
 
             chat = chat_id
             if not chat:
-                if agencia and hasattr(agencia, 'configuracion_api'):
-                    chat = agencia.configuracion_api.get('TELEGRAM_STORAGE_CHANNEL_ID') or agencia.configuracion_api.get('TELEGRAM_CHANNEL_ID') or agencia.configuracion_api.get('TELEGRAM_GROUP_ID')
+                if agencia and hasattr(agencia, "configuracion_api"):
+                    chat = (
+                        agencia.configuracion_api.get("TELEGRAM_STORAGE_CHANNEL_ID")
+                        or agencia.configuracion_api.get("TELEGRAM_CHANNEL_ID")
+                        or agencia.configuracion_api.get("TELEGRAM_GROUP_ID")
+                    )
 
                 if not chat:
-                    chat = getattr(settings, 'TELEGRAM_STORAGE_CHANNEL_ID', None) or getattr(settings, 'TELEGRAM_GROUP_ID', None)
+                    chat = getattr(settings, "TELEGRAM_STORAGE_CHANNEL_ID", None) or getattr(
+                        settings, "TELEGRAM_GROUP_ID", None
+                    )
 
             if not token or not chat:
                 logger.warning(f"Telegram Config Missing: Token={bool(token)}, Chat={chat}")
@@ -82,33 +94,33 @@ class TelegramNotificationService:
 
             url_api = f"https://api.telegram.org/bot{token}/sendDocument"
 
-            if file_path.startswith('http'):
+            if file_path.startswith("http"):
                 logger.info(f"Enviando documento vía URL: {file_path}")
                 data = {
-                    'chat_id': chat,
-                    'document': file_path,
-                    'caption': caption,
-                    'parse_mode': 'HTML'
+                    "chat_id": chat,
+                    "document": file_path,
+                    "caption": caption,
+                    "parse_mode": "HTML",
                 }
                 response = requests.post(url_api, data=data, timeout=60)
 
             elif os.path.exists(file_path):
-                with open(file_path, 'rb') as f:
-                    files = {'document': f}
-                    data = {'chat_id': chat}
+                with open(file_path, "rb") as f:
+                    files = {"document": f}
+                    data = {"chat_id": chat}
                     if caption:
-                        data['caption'] = caption
-                        data['parse_mode'] = 'HTML'
+                        data["caption"] = caption
+                        data["parse_mode"] = "HTML"
 
                     response = requests.post(url_api, data=data, files=files, timeout=60)
 
             else:
                 logger.info(f"Enviando documento vía File ID: {file_path}")
                 data = {
-                    'chat_id': chat,
-                    'document': file_path,
-                    'caption': caption,
-                    'parse_mode': 'HTML'
+                    "chat_id": chat,
+                    "document": file_path,
+                    "caption": caption,
+                    "parse_mode": "HTML",
                 }
                 response = requests.post(url_api, data=data, timeout=60)
 
@@ -118,9 +130,9 @@ class TelegramNotificationService:
 
             try:
                 resp_json = response.json()
-                if resp_json.get('ok'):
-                    document = resp_json['result'].get('document')
-                    file_id = document.get('file_id') if document else None
+                if resp_json.get("ok"):
+                    document = resp_json["result"].get("document")
+                    file_id = document.get("file_id") if document else None
                     if file_id:
                         logger.info(f"✅ Documento enviado. File ID: {file_id}")
                         return file_id
@@ -140,18 +152,18 @@ class TelegramNotificationService:
         """
         try:
             token = settings.TELEGRAM_BOT_TOKEN
-            if agencia and hasattr(agencia, 'configuracion_api') and agencia.configuracion_api:
-                token = agencia.configuracion_api.get('TELEGRAM_BOT_TOKEN', token)
+            if agencia and hasattr(agencia, "configuracion_api") and agencia.configuracion_api:
+                token = agencia.configuracion_api.get("TELEGRAM_BOT_TOKEN", token)
 
             if not token:
                 return None
 
             url_api = f"https://api.telegram.org/bot{token}/getFile"
-            response = requests.post(url_api, data={'file_id': file_id}, timeout=30)
+            response = requests.post(url_api, data={"file_id": file_id}, timeout=30)
 
             if response.status_code == 200:
-                result = response.json().get('result', {})
-                file_path = result.get('file_path')
+                result = response.json().get("result", {})
+                file_path = result.get("file_path")
 
                 if file_path:
                     return f"https://api.telegram.org/file/bot{token}/{file_path}"
@@ -183,14 +195,16 @@ def enviar_alerta_telegram(mensaje: str, chat_id: str = None, agencia=None) -> b
 try:
     from telegram import Bot
 
-    async def send_telegram_alert(message: str, token: str = None, target_chat_id: str = None) -> bool:
+    async def send_telegram_alert(
+        message: str, token: str = None, target_chat_id: str = None
+    ) -> bool:
         """
         Envía una alerta al Grupo Configurado (o al Admin si no hay grupo).
         """
-        token = token or os.getenv('TELEGRAM_BOT_TOKEN')
+        token = token or os.getenv("TELEGRAM_BOT_TOKEN")
         if not target_chat_id:
-            admin_id = os.getenv('TELEGRAM_ADMIN_ID')
-            group_id = os.getenv('TELEGRAM_GROUP_ID')
+            admin_id = os.getenv("TELEGRAM_ADMIN_ID")
+            group_id = os.getenv("TELEGRAM_GROUP_ID")
             target_chat_id = group_id if group_id else admin_id
 
         if not token or not target_chat_id:
@@ -199,7 +213,7 @@ try:
 
         try:
             bot = Bot(token=token)
-            await bot.send_message(chat_id=target_chat_id, text=message, parse_mode='HTML')
+            await bot.send_message(chat_id=target_chat_id, text=message, parse_mode="HTML")
             return True
         except Exception as e:
             logger.error(f"Error enviando alerta Telegram: {e}")
@@ -215,12 +229,14 @@ try:
         except Exception as e:
             logger.error(f"Error en wrapper síncrono de Telegram: {e}")
 
-    async def send_telegram_file(file_path: str, caption: str = None, token: str = None, target_chat_id: str = None) -> bool:
+    async def send_telegram_file(
+        file_path: str, caption: str = None, token: str = None, target_chat_id: str = None
+    ) -> bool:
         """Envía un archivo (PDF, imagen, etc.) al Grupo o Admin."""
-        token = token or os.getenv('TELEGRAM_BOT_TOKEN')
+        token = token or os.getenv("TELEGRAM_BOT_TOKEN")
         if not target_chat_id:
-            admin_id = os.getenv('TELEGRAM_ADMIN_ID')
-            group_id = os.getenv('TELEGRAM_GROUP_ID')
+            admin_id = os.getenv("TELEGRAM_ADMIN_ID")
+            group_id = os.getenv("TELEGRAM_GROUP_ID")
             target_chat_id = group_id if group_id else admin_id
 
         if not token or not target_chat_id:
@@ -232,22 +248,24 @@ try:
                 return False
 
             bot = Bot(token=token)
-            with open(file_path, 'rb') as f:
+            with open(file_path, "rb") as f:
                 await bot.send_document(
                     chat_id=target_chat_id,
                     document=f,
                     caption=caption,
-                    parse_mode='HTML',
+                    parse_mode="HTML",
                     read_timeout=30,
                     write_timeout=30,
-                    connect_timeout=30
+                    connect_timeout=30,
                 )
             return True
         except Exception as e:
             logger.error(f"Error enviando archivo Telegram: {e}")
             return False
 
-    def send_telegram_file_sync(file_path: str, caption: str = None, token: str = None, target_chat_id: str = None):
+    def send_telegram_file_sync(
+        file_path: str, caption: str = None, token: str = None, target_chat_id: str = None
+    ):
         """Wrapper síncrono para enviar archivos."""
         try:
             loop = asyncio.new_event_loop()
@@ -260,24 +278,31 @@ try:
 except ImportError:
     logger.warning("python-telegram-bot no está instalado. Async wrappers deshabilitados.")
 
-    async def send_telegram_alert(message: str, token: str = None, target_chat_id: str = None) -> bool:
+    async def send_telegram_alert(
+        message: str, token: str = None, target_chat_id: str = None
+    ) -> bool:
         logger.error("Telegram async wrappers no disponibles: falta python-telegram-bot")
         return False
 
     def send_telegram_alert_sync(message: str, token: str = None, target_chat_id: str = None):
         logger.error("Telegram async wrappers no disponibles: falta python-telegram-bot")
 
-    async def send_telegram_file(file_path: str, caption: str = None, token: str = None, target_chat_id: str = None) -> bool:
+    async def send_telegram_file(
+        file_path: str, caption: str = None, token: str = None, target_chat_id: str = None
+    ) -> bool:
         logger.error("Telegram async wrappers no disponibles: falta python-telegram-bot")
         return False
 
-    def send_telegram_file_sync(file_path: str, caption: str = None, token: str = None, target_chat_id: str = None):
+    def send_telegram_file_sync(
+        file_path: str, caption: str = None, token: str = None, target_chat_id: str = None
+    ):
         logger.error("Telegram async wrappers no disponibles: falta python-telegram-bot")
 
 
 # ============================================================================
 # SECTION 3: STORAGE SERVICE (Channel as Unlimited Storage)
 # ============================================================================
+
 
 class TelegramStorageService:
     """
@@ -286,13 +311,17 @@ class TelegramStorageService:
     """
 
     def __init__(self):
-        self.bot_token = getattr(settings, 'TELEGRAM_BOT_TOKEN', None)
-        self.storage_channel_id = os.environ.get('TELEGRAM_STORAGE_CHANNEL_ID', None)
+        self.bot_token = getattr(settings, "TELEGRAM_BOT_TOKEN", None)
+        self.storage_channel_id = os.environ.get("TELEGRAM_STORAGE_CHANNEL_ID", None)
 
         if not self.bot_token:
-            logger.warning("TELEGRAM_BOT_TOKEN no configurado. TelegramStorageService deshabilitado.")
+            logger.warning(
+                "TELEGRAM_BOT_TOKEN no configurado. TelegramStorageService deshabilitado."
+            )
 
-    async def upload_file(self, file_path_or_buffer, filename: str = "documento.pdf", caption: str = None):
+    async def upload_file(
+        self, file_path_or_buffer, filename: str = "documento.pdf", caption: str = None
+    ):
         """Sube un archivo a Telegram y retorna su file_id."""
         if not self.bot_token or not self.storage_channel_id:
             logger.error("Falta configuración de Telegram (Token o Channel ID)")
@@ -300,24 +329,25 @@ class TelegramStorageService:
 
         try:
             from telegram import Bot
+
             bot = Bot(token=self.bot_token)
 
             logger.info(f"Subiendo {filename} a Telegram Storage ({self.storage_channel_id})...")
 
             if isinstance(file_path_or_buffer, str):
-                with open(file_path_or_buffer, 'rb') as f:
+                with open(file_path_or_buffer, "rb") as f:
                     message = await bot.send_document(
                         chat_id=self.storage_channel_id,
                         document=f,
                         filename=filename,
-                        caption=caption
+                        caption=caption,
                     )
             else:
                 message = await bot.send_document(
                     chat_id=self.storage_channel_id,
                     document=file_path_or_buffer,
                     filename=filename,
-                    caption=caption
+                    caption=caption,
                 )
 
             file_id = message.document.file_id
@@ -335,6 +365,7 @@ class TelegramStorageService:
 
         try:
             from telegram import Bot
+
             bot = Bot(token=self.bot_token)
             file_obj = await bot.get_file(file_id)
             return file_obj.file_path
@@ -347,12 +378,13 @@ class TelegramStorageService:
 # SECTION 4: LOGO/IMAGE UPLOAD UTILITIES
 # ============================================================================
 
+
 def upload_logo_to_telegram(file_obj, filename: str = "logo.png"):
     """
     Sube un archivo a Telegram (Storage Channel) y devuelve el file_id.
     """
-    token = getattr(settings, 'TELEGRAM_BOT_TOKEN', os.getenv('TELEGRAM_BOT_TOKEN'))
-    channel_id = getattr(settings, 'TELEGRAM_STORAGE_CHANNEL_ID', '-1003225870613')
+    token = getattr(settings, "TELEGRAM_BOT_TOKEN", os.getenv("TELEGRAM_BOT_TOKEN"))
+    channel_id = getattr(settings, "TELEGRAM_STORAGE_CHANNEL_ID", "-1003225870613")
 
     if not token or not channel_id:
         logger.error("Configuración de Telegram Storage incompleta.")
@@ -361,20 +393,20 @@ def upload_logo_to_telegram(file_obj, filename: str = "logo.png"):
     url = f"https://api.telegram.org/bot{token}/sendPhoto"
 
     try:
-        if hasattr(file_obj, 'read'):
+        if hasattr(file_obj, "read"):
             file_obj.seek(0)
-            files = {'photo': (filename, file_obj.read())}
+            files = {"photo": (filename, file_obj.read())}
         else:
-            files = {'photo': (filename, file_obj)}
+            files = {"photo": (filename, file_obj)}
 
-        data = {'chat_id': channel_id, 'caption': f"Storage: {filename}"}
+        data = {"chat_id": channel_id, "caption": f"Storage: {filename}"}
 
         response = requests.post(url, data=data, files=files, timeout=30)
         result = response.json()
 
-        if result.get('ok'):
-            photo_data = result['result']['photo'][-1]
-            file_id = photo_data['file_id']
+        if result.get("ok"):
+            photo_data = result["result"]["photo"][-1]
+            file_id = photo_data["file_id"]
             logger.info(f"✅ Logo subido a Telegram Storage. FileID: {file_id}")
             return file_id
         else:
@@ -390,7 +422,7 @@ def get_telegram_file_url(file_id: str):
     """
     Genera una URL para que el frontend pueda mostrar la imagen.
     """
-    token = getattr(settings, 'TELEGRAM_BOT_TOKEN', os.getenv('TELEGRAM_BOT_TOKEN'))
+    token = getattr(settings, "TELEGRAM_BOT_TOKEN", os.getenv("TELEGRAM_BOT_TOKEN"))
     if not token or not file_id:
         return None
 

@@ -3,14 +3,26 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-from apps.automation.services.ai_engine import ai_engine
-from apps.bookings.models import HotelTarifario
+
+def _get_ai_engine():
+    from django.utils.module_loading import import_string
+
+    return import_string("apps.automation.services.ai_engine.ai_engine")
+
+
+def _get_hotel_tarifario_model():
+    from django.apps import apps
+
+    return apps.get_model("bookings", "HotelTarifario")
+
 
 logger = logging.getLogger(__name__)
+
 
 class CaptionVariant(BaseModel):
     tone_name: str = Field(description="Nombre del tono (Ej: Emocional, Enganchador, Minimalista)")
     text: str = Field(description="El texto del caption")
+
 
 class SocialMediaPackage(BaseModel):
     variants: list[CaptionVariant] = Field(description="3 variaciones del caption")
@@ -18,11 +30,12 @@ class SocialMediaPackage(BaseModel):
     best_time_to_post: str = Field(description="Recomendación de horario (Ej: Hoy, 6:30 PM)")
     engagement_prediction: str = Field(description="Predicción de engagement (Ej: +14%)")
 
+
 class CopywriterService:
     """
     Generador de Copywriting para redes sociales usando Gemini 2.0 Flash.
     """
-    
+
     def __init__(self):
         pass
 
@@ -30,10 +43,12 @@ class CopywriterService:
         """
         Genera un caption para Instagram basado en la info del hotel.
         """
+        ai_engine = _get_ai_engine()
         if not ai_engine.is_ready:
             return "IA no disponible (revisa config)."
 
         try:
+            HotelTarifario = _get_hotel_tarifario_model()
             hotel = HotelTarifario.objects.get(pk=hotel_id)
         except HotelTarifario.DoesNotExist:
             return "Error: Hotel no encontrado."
@@ -41,7 +56,7 @@ class CopywriterService:
         # Construir contexto
         amenities = [a.nombre for a in hotel.amenidades.all()]
         amenities_str = ", ".join(amenities)
-        
+
         prompt = f"""
         Actúa como un experto Community Manager de viajes.
         Escribe un POST DE INSTAGRAM atractivo para vender este hotel.
@@ -62,9 +77,9 @@ class CopywriterService:
         4. Incluye 5-8 hashtags relevantes (#TravelHub #Venezuela, etc).
         5. NO uses comillas al principio ni al final. Solo el texto.
         """
-        
+
         try:
-            response = ai_engine.call_gemini(prompt)
+            response = _get_ai_engine().call_gemini(prompt)
             return response.get("text", "Sin respuesta").strip()
         except Exception as e:
             logger.error(f"Error generando copy: {e}")
@@ -74,24 +89,26 @@ class CopywriterService:
         """
         Genera un paquete completo (variantes, hashtags, horario) usando salida estructurada.
         """
+        ai_engine = _get_ai_engine()
         if not ai_engine.is_ready:
             return {"error": "IA no disponible"}
 
         try:
+            HotelTarifario = _get_hotel_tarifario_model()
             hotel = HotelTarifario.objects.get(pk=hotel_id)
         except HotelTarifario.DoesNotExist:
             return {"error": "Hotel no encontrado"}
 
         amenities = [a.nombre for a in hotel.amenidades.all()]
-        
+
         # Mapeo de tonos para mayor claridad en el prompt
         tone_context = {
             "LUXURY": "enfoque en exclusividad, materiales premium, servicio de guante blanco y elegancia.",
             "ADVENTURE": "enfoque en exploración, adrenalina, contacto con la naturaleza salvaje y autenticidad.",
             "MINIMAL": "texto directo, limpio, con mucho espacio visual y elegancia austera.",
-            "VIBRANT": "lleno de energía, colores, vida nocturna, actividades y entusiasmo contagioso."
+            "VIBRANT": "lleno de energía, colores, vida nocturna, actividades y entusiasmo contagioso.",
         }
-        
+
         selected_tone_desc = tone_context.get(tone, "un equilibrio profesional y sugerente.")
 
         prompt = f"""
@@ -116,9 +133,8 @@ class CopywriterService:
         """
 
         try:
-            package = ai_engine.call_gemini(
-                prompt=prompt,
-                response_schema=SocialMediaPackage
+            package = _get_ai_engine().call_gemini(
+                prompt=prompt, response_schema=SocialMediaPackage
             )
             return package
         except Exception as e:

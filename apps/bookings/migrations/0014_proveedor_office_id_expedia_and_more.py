@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("bookings", "0013_alter_amenity_options_alter_imagenhotel_options_and_more"),
     ]

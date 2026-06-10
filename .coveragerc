@@ -1,6 +1,6 @@
 [run]
 branch = True
-source = core,travelhub
+source = core,travelhub,apps
 omit = 
     */migrations/*
     manage.py

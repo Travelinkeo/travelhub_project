@@ -19,7 +19,7 @@
             <h1 class="text-3xl font-black text-text-main tracking-tight uppercase">{{ resultado.cuenta.nombre_cuenta }}</h1>
         </div>
         <div class="flex gap-3">
-            <button onclick="window.print()" class="btn-secondary !h-12 !px-6 shadow-lg">
+            <button data-action="print" class="btn-secondary !h-12 !px-6 shadow-lg">
                 <span class="material-symbols-outlined text-[20px]">print</span>
                 <span>{% trans "Imprimir" %}</span>
             </button>

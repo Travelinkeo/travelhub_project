@@ -10,6 +10,7 @@ from apps.finance.tasks_notifications import enviar_reporte_gerencia_task
 
 logger = logging.getLogger(__name__)
 
+
 @login_required
 def download_reconciliation_report_view(request, pk):
     """
@@ -17,40 +18,40 @@ def download_reconciliation_report_view(request, pk):
     Recupera la conciliación, genera el PDF y lo envía al navegador.
     """
     reporte = get_object_or_404(ReporteReconciliacion, pk=pk)
-    
+
     # 1. Blindaje Multi-Tenant (Seguridad de Datos)
     if reporte.agencia != request.user.agencia:
-        logger.warning(f"🚨 Intento de acceso no autorizado al reporte {pk} por el usuario {request.user.username}")
+        logger.warning(
+            f"🚨 Intento de acceso no autorizado al reporte {pk} por el usuario {request.user.username}"
+        )
         return HttpResponseForbidden("No tienes permisos para acceder a este reporte.")
 
     try:
         # 2. Generar el PDF dinámicamente en memoria
         pdf_file = PDFService.generate_reconciliation_report(pk, request.user)
-        
+
         # 3. Devolver como descarga binaria (FileResponse)
         filename = f"Reporte_Conciliacion_{reporte.proveedor}_{reporte.fecha_subida.strftime('%Y%m%d')}.pdf"
-        
+
         return FileResponse(
-            pdf_file, 
-            as_attachment=True, 
-            filename=filename, 
-            content_type='application/pdf'
+            pdf_file, as_attachment=True, filename=filename, content_type="application/pdf"
         )
 
     except Exception as e:
         logger.error(f"Error sirviendo el PDF {pk}: {e}")
         return HttpResponseForbidden(f"Error generando el reporte: {str(e)}")
 
+
 @login_required
 def send_reconciliation_report_email_htmx(request, pk):
     """
     Controlador HTMX: Lanza la tarea de envío a gerencia y devuelve un botón de éxito.
     """
-    if request.method != 'POST':
+    if request.method != "POST":
         return HttpResponse("Método no permitido", status=405)
 
     reporte = get_object_or_404(ReporteReconciliacion, pk=pk)
-    
+
     # 1. Seguridad Multi-Tenant
     if reporte.agencia != request.user.agencia:
         return HttpResponseForbidden("No autorizado")
@@ -58,11 +59,9 @@ def send_reconciliation_report_email_htmx(request, pk):
     # 2. Orquestar envío asíncrono
     # Usamos el email del usuario actual como destino (o el de la agencia si estuviera en el modelo)
     email_destino = request.user.email
-    
+
     enviar_reporte_gerencia_task.delay(
-        reporte_id=str(reporte.id_reporte),
-        user_id=request.user.id,
-        email_destino=email_destino
+        reporte_id=str(reporte.id_reporte), user_id=request.user.id, email_destino=email_destino
     )
 
     # 3. Devolver Fragmento HTMX de Éxito Instantáneo

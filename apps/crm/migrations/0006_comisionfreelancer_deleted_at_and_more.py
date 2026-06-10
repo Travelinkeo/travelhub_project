@@ -4,40 +4,39 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('crm', '0005_cliente_uuid_comisionfreelancer_agencia_and_more'),
+        ("crm", "0005_cliente_uuid_comisionfreelancer_agencia_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='comisionfreelancer',
-            name='deleted_at',
-            field=models.DateTimeField(blank=True, null=True, verbose_name='Fecha de Eliminación'),
+            model_name="comisionfreelancer",
+            name="deleted_at",
+            field=models.DateTimeField(blank=True, null=True, verbose_name="Fecha de Eliminación"),
         ),
         migrations.AddField(
-            model_name='comisionfreelancer',
-            name='is_deleted',
-            field=models.BooleanField(db_index=True, default=False, verbose_name='Eliminado'),
+            model_name="comisionfreelancer",
+            name="is_deleted",
+            field=models.BooleanField(db_index=True, default=False, verbose_name="Eliminado"),
         ),
         migrations.AddField(
-            model_name='freelancerprofile',
-            name='deleted_at',
-            field=models.DateTimeField(blank=True, null=True, verbose_name='Fecha de Eliminación'),
+            model_name="freelancerprofile",
+            name="deleted_at",
+            field=models.DateTimeField(blank=True, null=True, verbose_name="Fecha de Eliminación"),
         ),
         migrations.AddField(
-            model_name='freelancerprofile',
-            name='is_deleted',
-            field=models.BooleanField(db_index=True, default=False, verbose_name='Eliminado'),
+            model_name="freelancerprofile",
+            name="is_deleted",
+            field=models.BooleanField(db_index=True, default=False, verbose_name="Eliminado"),
         ),
         migrations.AddField(
-            model_name='oportunidadviaje',
-            name='deleted_at',
-            field=models.DateTimeField(blank=True, null=True, verbose_name='Fecha de Eliminación'),
+            model_name="oportunidadviaje",
+            name="deleted_at",
+            field=models.DateTimeField(blank=True, null=True, verbose_name="Fecha de Eliminación"),
         ),
         migrations.AddField(
-            model_name='oportunidadviaje',
-            name='is_deleted',
-            field=models.BooleanField(db_index=True, default=False, verbose_name='Eliminado'),
+            model_name="oportunidadviaje",
+            name="is_deleted",
+            field=models.BooleanField(db_index=True, default=False, verbose_name="Eliminado"),
         ),
     ]

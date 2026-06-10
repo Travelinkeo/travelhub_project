@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("communications", "0002_alter_comunicacionproveedor_table"),
         ("core", "0029_alter_anulacionboleto_agencia_and_more"),

@@ -87,7 +87,7 @@
         <div class="client-bar">
             <div class="client-box">
                 <h3>Titular de Reserva</h3>
-                <p>{{ venta.cliente.get_nombre_completo|default:venta.cliente.nombre|upper }}</p>
+                <p>{{ venta.cliente.get_nombre_completo|upper }}</p>
             </div>
             <div class="locator-badge">{{ venta.localizador|default:venta.id_venta|upper }}</div>
         </div>

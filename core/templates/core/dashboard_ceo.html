@@ -161,7 +161,8 @@
         const chartColor = isDark ? '#60a5fa' : '#3b82f6';
 
         // Parseamos los datos que vienen de Django (como JSON stringified)
-        const chartData = JSON.parse('{{ chart_data_json|safe }}');
+        {{ chart_data_json|json_script:"chart-data-json" }}
+        const chartData = JSON.parse(document.getElementById('chart-data-json').textContent);
 
         new Chart(ctx, {
             type: 'line',

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 import logging
 import os
@@ -5,24 +7,34 @@ import os
 from django.conf import settings
 
 from apps.common.models import Ciudad, Pais
-from apps.finance.models.currencies import Moneda
+
+
+def __getattr__(name):
+    if name == "Moneda":
+        from django.apps import apps
+
+        return apps.get_model("common", "Moneda")
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
 
 logger = logging.getLogger(__name__)
+
 
 class CatalogNormalizationService:
     """
     Servicio Determinístico para la Normalización de Catálogos Maestros (IATA, Países, Monedas).
     Evita la creación de 'Unknown City' y asegura integridad multi-tenant.
     """
+
     _airports_master = None
 
     @classmethod
     def _load_airports(cls):
         if cls._airports_master is None:
-            path = os.path.join(settings.BASE_DIR, 'core', 'data', 'airports_master.json')
+            path = os.path.join(settings.BASE_DIR, "core", "data", "airports_master.json")
             try:
                 if os.path.exists(path):
-                    with open(path, encoding='utf-8') as f:
+                    with open(path, encoding="utf-8") as f:
                         cls._airports_master = json.load(f)
                     logger.info(f"✅ Master IATA loaded: {len(cls._airports_master)} airports.")
                 else:
@@ -43,42 +55,39 @@ class CatalogNormalizationService:
             return None
 
         iata_code = iata_code.upper()
-        
+
         # 1. Búsqueda rápida por código IATA en DB
         ciudad_db = Ciudad.objects.filter(codigo_iata=iata_code).first()
         if ciudad_db:
             return ciudad_db
 
         master = cls._load_airports()
-        
+
         # 2. Buscar en el maestro
         info = master.get(iata_code)
-        
+
         if not info:
             # Búsqueda reversa si el JSON tiene otra estructura
             for entry in master.values():
-                if entry.get('iata') == iata_code:
+                if entry.get("iata") == iata_code:
                     info = entry
                     break
-        
+
         if not info:
             logger.warning(f"🕵️ IATA {iata_code} no encontrado en el maestro.")
             # Fallback histórico: buscar por nombre aproximado
             return Ciudad.objects.filter(nombre__icontains=iata_code).first()
 
-        city_name = info.get('city') or info.get('name')
-        country_iso = info.get('country')
-        state = info.get('state')
+        city_name = info.get("city") or info.get("name")
+        country_iso = info.get("country")
+        state = info.get("state")
 
         # 3. Obtener o crear País
         pais_obj = None
         if country_iso:
             pais_obj, _ = Pais.objects.get_or_create(
                 codigo_iso_2=country_iso.upper(),
-                defaults={
-                    'nombre': country_iso.upper(), 
-                    'codigo_iso_3': country_iso.upper() + 'X'
-                }
+                defaults={"nombre": country_iso.upper(), "codigo_iso_3": country_iso.upper() + "X"},
             )
 
         # 4. Obtener o crear Ciudad y asegurar el código IATA
@@ -87,15 +96,13 @@ class CatalogNormalizationService:
             nombre=city_name,
             pais=pais_obj,
             region_estado=state,
-            defaults={
-                'codigo_iata': iata_code
-            }
+            defaults={"codigo_iata": iata_code},
         )
-        
+
         # Si la ciudad ya existía (ej. creada manualmente) pero no tenía el código IATA, lo enriquecemos
         if not created and not ciudad_obj.codigo_iata:
             ciudad_obj.codigo_iata = iata_code
-            ciudad_obj.save(update_fields=['codigo_iata'])
+            ciudad_obj.save(update_fields=["codigo_iata"])
 
         if created:
             logger.info(f"✨ Ciudad creada desde Maestro: {city_name} ({iata_code})")
@@ -103,12 +110,13 @@ class CatalogNormalizationService:
         return ciudad_obj
 
     @classmethod
-    def normalize_currency(cls, currency_code: str) -> Moneda:
+    def normalize_currency(cls, currency_code: str) -> Any:
         """Asegura que la moneda existe en el sistema."""
-        if not currency_code: return None
+        if not currency_code:
+            return None
         code = str(currency_code).strip().upper()[:3]
-        moneda, _ = Moneda.objects.get_or_create(
-            codigo_iso=code,
-            defaults={'nombre': code}
-        )
+        from django.apps import apps
+
+        Moneda = apps.get_model("common", "Moneda")
+        moneda, _ = Moneda.objects.get_or_create(codigo_iso=code, defaults={"nombre": code})
         return moneda

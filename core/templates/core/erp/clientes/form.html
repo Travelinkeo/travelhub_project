@@ -70,9 +70,9 @@ select {
     <div class="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-border-light dark:border-border-dark pb-6">
         <div>
             <div class="flex items-center gap-2 text-xs text-slate-500 dark:text-gray-400 font-medium mb-2 uppercase tracking-wider">
-                <a href="{% url 'core:clientes_list' %}" class="hover:text-primary transition-colors">CRM</a>
+                <a href="{% url 'crm:cliente_list' %}" class="hover:text-primary transition-colors">CRM</a>
                 <span class="material-symbols-outlined text-[10px]">chevron_right</span>
-                <a href="{% url 'core:clientes_list' %}" class="hover:text-primary transition-colors">Directorio</a>
+                <a href="{% url 'crm:cliente_list' %}" class="hover:text-primary transition-colors">Directorio</a>
                 <span class="material-symbols-outlined text-[10px]">chevron_right</span>
                 <span class="text-primary">{% if form.instance.pk %}Editar{% else %}Nuevo{% endif %}</span>
             </div>
@@ -80,7 +80,7 @@ select {
             <p class="text-gray-500 dark:text-slate-400 mt-2">Completa la información detallada del cliente o empresa.</p>
         </div>
         <div class="flex items-center gap-3">
-            <a href="{% url 'core:clientes_list' %}" class="text-sm font-bold tracking-wide flex items-center gap-1 text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white transition-colors">
+            <a href="{% url 'crm:cliente_list' %}" class="text-sm font-bold tracking-wide flex items-center gap-1 text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white transition-colors">
                 <span class="material-symbols-outlined text-[18px]">arrow_back</span> Volver al listado
             </a>
         </div>
@@ -144,7 +144,7 @@ select {
 
                         <!-- Hover Editar -->
                         <div class="absolute inset-0 bg-slate-900/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
-                            onclick="document.getElementById('id_foto_perfil').click()">
+                            data-trigger-click="id_foto_perfil">
                             <span class="material-symbols-outlined text-white text-3xl drop-shadow-md">add_a_photo</span>
                         </div>
                     </div>
@@ -263,7 +263,7 @@ select {
                 <span class="material-symbols-outlined text-primary">loyalty</span>
                 Programa de Fidelidad
             </h2>
-            <div class="flex items-center gap-4 bg-gray-50 dark:bg-surface-highlight-dark/30 p-4 rounded-xl border border-border-light dark:border-border-dark max-w-sm cursor-pointer hover:border-primary transition-colors" onclick="document.querySelector('#id_es_cliente_frecuente').click()">
+            <div class="flex items-center gap-4 bg-gray-50 dark:bg-surface-highlight-dark/30 p-4 rounded-xl border border-border-light dark:border-border-dark max-w-sm cursor-pointer hover:border-primary transition-colors" data-trigger-click="#id_es_cliente_frecuente">
                 <div class="flex items-center justify-center p-2 rounded-lg bg-surface-light dark:bg-surface-dark shadow-sm border border-border-light dark:border-border-dark">
                     {{ form.es_cliente_frecuente }}
                 </div>
@@ -276,7 +276,7 @@ select {
 
         <!-- Actions -->
         <div class="flex items-center justify-end gap-4 mt-8 pt-6 border-t border-border-light dark:border-border-dark">
-            <a href="{% url 'core:clientes_list' %}" class="btn-secondary h-[40px] px-6">
+            <a href="{% url 'crm:cliente_list' %}" class="btn-secondary h-[40px] px-6">
                 Cancelar
             </a>
             <button type="submit" class="btn-primary h-[40px] px-8">

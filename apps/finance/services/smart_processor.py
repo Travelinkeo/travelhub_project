@@ -1,25 +1,29 @@
 import json
 import logging
-import os
 from decimal import Decimal
 
 import pandas as pd
-from django.conf import settings
 from pydantic import BaseModel, Field
 
 from apps.common.utils import clean_currency
 
 logger = logging.getLogger(__name__)
 
+
 def _get_genai():
     from google import genai
+
     return genai
+
 
 def _get_genai_types():
     from google.genai import types
+
     return types
 
+
 # --- Esquema para el Mapeo de Columnas ---
+
 
 class ColumnMappingSchema(BaseModel):
     numero_boleto: str | None = Field(description="Column name for Ticket/Document number")
@@ -31,6 +35,7 @@ class ColumnMappingSchema(BaseModel):
     comision: str | None = Field(description="Column name for Commission/Fee")
     fecha_emision: str | None = Field(description="Column name for Issue Date")
 
+
 class SmartReportProcessor:
     """
     Procesador universal de reportes que utiliza Gemini 2.0 Flash para:
@@ -41,35 +46,37 @@ class SmartReportProcessor:
     @classmethod
     def parse(cls, file_path: str) -> list:
         try:
-            if file_path.endswith('.csv'):
+            if file_path.endswith(".csv"):
                 df = pd.read_csv(file_path)
             else:
                 df = pd.read_excel(file_path)
-            
+
             # Muestra de datos para la IA
-            sample_data = df.head(5).to_json(orient='records')
+            sample_data = df.head(5).to_json(orient="records")
             columns = list(df.columns)
-            
+
             mapping = cls._get_smart_mapping(columns, sample_data)
-            
+
             normalized_data = []
             for _, row in df.iterrows():
                 item = {}
                 for target_field, source_column in mapping.items():
                     if source_column and source_column in row:
                         val = row[source_column]
-                        if target_field in ['monto_total', 'monto_neto', 'tax', 'comision']:
+                        if target_field in ["monto_total", "monto_neto", "tax", "comision"]:
                             item[target_field] = clean_currency(val)
                         else:
                             item[target_field] = str(val).strip() if pd.notna(val) else None
-                
-                # Regla de Oro: Si falta el total pero tenemos net+tax, calculamos
-                if not item.get('monto_total') and item.get('monto_neto'):
-                    item['monto_total'] = item.get('monto_neto', Decimal(0)) + item.get('tax', Decimal(0))
 
-                if item.get('numero_boleto'):
+                # Regla de Oro: Si falta el total pero tenemos net+tax, calculamos
+                if not item.get("monto_total") and item.get("monto_neto"):
+                    item["monto_total"] = item.get("monto_neto", Decimal(0)) + item.get(
+                        "tax", Decimal(0)
+                    )
+
+                if item.get("numero_boleto"):
                     normalized_data.append(item)
-            
+
             return normalized_data
         except Exception as e:
             logger.error(f"Error fatal en SmartReportProcessor: {e}")
@@ -77,7 +84,10 @@ class SmartReportProcessor:
 
     @classmethod
     def _get_smart_mapping(cls, columns: list, sample_json: str) -> dict[str, str | None]:
-        from apps.automation.services.ai_engine import get_gemini_api_key
+        from django.utils.module_loading import import_string
+
+        get_gemini_api_key = import_string("apps.automation.services.ai_engine.get_gemini_api_key")
+
         api_key = get_gemini_api_key()
         if not api_key:
             logger.warning("No API Key found for Smart Mapping, using fallback.")
@@ -110,33 +120,32 @@ class SmartReportProcessor:
                 config=types.GenerateContentConfig(
                     response_mime_type="application/json",
                     response_schema=ColumnMappingSchema,
-                )
+                ),
             )
             if response and response.text:
                 mapping = json.loads(response.text)
                 logger.info(f"AI Smart Mapping Success: {mapping}")
                 return mapping
-            
+
         except Exception as e:
             logger.error(f"AI Mapping failed: {e}. Falling back...")
-        
+
         return cls._fallback_mapping(columns)
 
     @classmethod
     def _fallback_mapping(cls, columns):
         keywords = {
-            'numero_boleto': ['boleto', 'ticket', 'doc', 'number', 'tkt'],
-            'pnr': ['pnr', 'record', 'locator', 'resloc'],
-            'pasajero': ['pasajero', 'passenger', 'name', 'nombre'],
-            'monto_total': ['total', 'amount', 'cobrado'],
-            'monto_neto': ['neto', 'fare', 'base'],
-            'tax': ['tax', 'impuestos', 'tasa'],
-            'comision': ['comision', 'comm', 'fee'],
-            'fecha_emision': ['fecha', 'date', 'issue']
+            "numero_boleto": ["boleto", "ticket", "doc", "number", "tkt"],
+            "pnr": ["pnr", "record", "locator", "resloc"],
+            "pasajero": ["pasajero", "passenger", "name", "nombre"],
+            "monto_total": ["total", "amount", "cobrado"],
+            "monto_neto": ["neto", "fare", "base"],
+            "tax": ["tax", "impuestos", "tasa"],
+            "comision": ["comision", "comm", "fee"],
+            "fecha_emision": ["fecha", "date", "issue"],
         }
         mapping = {}
         for field, keys in keywords.items():
             match = next((col for col in columns if any(k in col.lower() for k in keys)), None)
             mapping[field] = match
         return mapping
-

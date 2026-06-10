@@ -3,6 +3,7 @@ from apps.automation.parsers.legacy.sabre_parser import SabreParser
 
 REQUIRED_KEYS = {"aerolinea", "numero_vuelo", "origen", "destino", "fecha_salida", "hora_salida"}
 
+
 def test_sabre_segments_structure():
     sample = (
         "Itinerary Details\n"
@@ -18,13 +19,13 @@ def test_sabre_segments_structure():
     segs = parsed_data.flights
     assert isinstance(segs, list) and len(segs) >= 1
     first = segs[0]
-    
+
     missing = REQUIRED_KEYS - set(first.keys())
     assert not missing, f"Faltan claves en segmento Sabre: {missing}"
-    
-    assert first['numero_vuelo'] == 'AA123'
-    assert first['origen'] == 'MIAMI'
-    assert first['destino'] == 'BOGOTA'
+
+    assert first["numero_vuelo"] == "AA123"
+    assert first["origen"] == "MIAMI, FL"
+    assert first["destino"] == "BOGOTA, CO"
 
 
 def test_kiu_segments_structure():
@@ -44,10 +45,10 @@ def test_kiu_segments_structure():
     # Debe detectar al menos 1 segmento
     assert len(segs) >= 1
     first = segs[0]
-    
+
     missing = REQUIRED_KEYS - set(first.keys())
     assert not missing, f"Faltan claves en segmento KIU: {missing}"
-    
-    assert first['aerolinea'] == 'CONVIASA'
-    assert first['origen'] == 'CCS'
-    assert first['destino'] == 'BOG'
+
+    assert first["aerolinea"] == "CONVIASA"
+    assert first["origen"] == "CCS"
+    assert first["destino"] == "BOG"

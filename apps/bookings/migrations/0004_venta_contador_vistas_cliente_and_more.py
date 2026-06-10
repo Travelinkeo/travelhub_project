@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         (
             "bookings",
@@ -16,15 +15,11 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="venta",
             name="contador_vistas_cliente",
-            field=models.PositiveIntegerField(
-                default=0, verbose_name="Contador de Vistas"
-            ),
+            field=models.PositiveIntegerField(default=0, verbose_name="Contador de Vistas"),
         ),
         migrations.AddField(
             model_name="venta",
             name="ultima_vista_cliente",
-            field=models.DateTimeField(
-                blank=True, null=True, verbose_name="Última Vista Cliente"
-            ),
+            field=models.DateTimeField(blank=True, null=True, verbose_name="Última Vista Cliente"),
         ),
     ]

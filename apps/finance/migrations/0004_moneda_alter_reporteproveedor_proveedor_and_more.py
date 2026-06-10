@@ -8,7 +8,6 @@ import core.validators
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         (
             "bookings",
@@ -213,9 +212,7 @@ class Migration(migrations.Migration):
                         "verbose_name_plural": "Tipos de Cambio",
                         "db_table": "core_tipocambio",
                         "ordering": ["-fecha_efectiva", "moneda_origen__codigo_iso"],
-                        "unique_together": {
-                            ("moneda_origen", "moneda_destino", "fecha_efectiva")
-                        },
+                        "unique_together": {("moneda_origen", "moneda_destino", "fecha_efectiva")},
                     },
                 ),
             ],

@@ -20,6 +20,7 @@ USO EN CLASS-BASED VIEWS:
     Usar SaaSMixin (ya implementado en core/mixins.py) que aplica el filtro
     en get_queryset() automáticamente.
 """
+
 from functools import wraps
 
 from django.core.cache import cache
@@ -28,47 +29,51 @@ from django.shortcuts import get_object_or_404
 
 # Constantes de cache para sesiones de agencia
 _USER_AGENCIA_CACHE_PREFIX = "th:user_agencia:"
-_USER_AGENCIA_CACHE_TIMEOUT = 1800  # 30 minutos
+_USER_AGENCIA_CACHE_TIMEOUT = 120  # 2 minutos
 
 
 def get_user_active_agency(user):
     """
     Obtiene la agencia activa de un usuario de forma optimizada con cache Redis.
     Retorna la instancia de Agencia o None si no tiene agencia activa.
-    
+
     FIX DEUDA TÉCNICA: Centraliza el patrón repetido 39+ veces:
         user.agencias.filter(activo=True).first()
-    
+
     OPTIMIZACIÓN: Usa cache Redis para evitar queries repetidas por request.
     """
-    if not hasattr(user, 'agencias') or not user.is_authenticated:
+    if not hasattr(user, "agencias") or not user.is_authenticated:
         return None
-    
+
     # Intentar obtener desde cache
     cache_key = f"{_USER_AGENCIA_CACHE_PREFIX}{user.pk}"
     cached_agencia_id = cache.get(cache_key)
-    
+
     if cached_agencia_id is not None:
-        if cached_agencia_id == 'none':
+        if cached_agencia_id == "none":
             return None
-        # Recuperar la instancia desde cache de agencia
-        from core.services.agency_cache_service import get_agencia_from_cache
-        agencia_data = get_agencia_from_cache(cached_agencia_id)
-        if agencia_data:
-            # Reconstruir objeto ligero con los datos cacheados
-            from core.models import Agencia
-            agencia = Agencia(pk=agencia_data['id'], nombre=agencia_data['nombre'])
-            return agencia
-    
+        from core.models import Agencia
+
+        try:
+            agencia = Agencia.objects.select_related("configuracion").get(pk=cached_agencia_id)
+            if agencia.activa:
+                return agencia
+            else:
+                cache.delete(cache_key)
+                return None
+        except Agencia.DoesNotExist:
+            cache.delete(cache_key)
+            return None
+
     # Cache miss - consultar BD
-    ua = user.agencias.filter(activo=True).select_related('agencia').first()
-    
+    ua = user.agencias.filter(activo=True).select_related("agencia").first()
+
     if ua:
         # Guardar en cache
         cache.set(cache_key, ua.agencia_id, _USER_AGENCIA_CACHE_TIMEOUT)
         return ua.agencia
     else:
-        cache.set(cache_key, 'none', _USER_AGENCIA_CACHE_TIMEOUT)
+        cache.set(cache_key, "none", _USER_AGENCIA_CACHE_TIMEOUT)
         return None
 
 
@@ -78,31 +83,63 @@ def invalidate_user_agencia_cache(user_id):
     cache.delete(cache_key)
 
 
+def invalidate_all_agency_caches(agencia_id):
+    """Invalida cache de agencia para todos los usuarios de una agencia."""
+    from core.models import UsuarioAgencia
+
+    user_ids = UsuarioAgencia.objects.filter(agencia_id=agencia_id, activo=True).values_list(
+        "usuario_id", flat=True
+    )
+    for uid in user_ids:
+        invalidate_user_agencia_cache(uid)
+
+
+def _on_agencia_save(sender, instance, **kwargs):
+    """Signal: invalida caches cuando una Agencia cambia (activación/desactivación)."""
+    invalidate_all_agency_caches(instance.pk)
+
+
+def _on_usuario_agencia_save(sender, instance, **kwargs):
+    """Signal: invalida cache cuando cambia la relación UsuarioAgencia."""
+    invalidate_user_agencia_cache(instance.usuario_id)
+
+
 def agency_role_required(allowed_roles):
     """
-    Decorador para vistas funcionales que restringe el acceso según el rol 
+    Decorador para vistas funcionales que restringe el acceso según el rol
     del usuario en la agencia.
-    
+
     Uso:
         @agency_role_required(['admin', 'gerente'])
         def mi_vista(request):
             ...
     """
+
     def decorator(view_func):
         @wraps(view_func)
         def _wrapped_view(request, *args, **kwargs):
             if not request.user.is_authenticated:
                 raise PermissionDenied("Autenticación requerida.")
-                
+
             if request.user.is_superuser:
                 return view_func(request, *args, **kwargs)
-                
-            ua = request.user.agencias.filter(activo=True).select_related('agencia').first() if hasattr(request.user, 'agencias') else None
+
+            ua = (
+                request.user.agencias.filter(activo=True).select_related("agencia").first()
+                if hasattr(request.user, "agencias")
+                else None
+            )
             if ua and ua.rol in allowed_roles:
                 return view_func(request, *args, **kwargs)
-                
-            raise PermissionDenied("No tienes permisos suficientes para realizar esta acción (se requiere rol: " + ", ".join(allowed_roles) + ").")
+
+            raise PermissionDenied(
+                "No tienes permisos suficientes para realizar esta acción (se requiere rol: "
+                + ", ".join(allowed_roles)
+                + ")."
+            )
+
         return _wrapped_view
+
     return decorator
 
 
@@ -155,7 +192,7 @@ def get_object_tenant_or_404(model, agencia, **kwargs):
         Http404: Si no existe o no pertenece a la agencia del usuario.
     """
     if agencia is not None:
-        kwargs['agencia'] = agencia
+        kwargs["agencia"] = agencia
 
     return get_object_or_404(model, **kwargs)
 

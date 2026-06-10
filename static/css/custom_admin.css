@@ -1,0 +1,182 @@
+/* static/css/custom_admin.css */
+/* Mejora de contraste y bordes para inputs/formularios en Django Unfold Admin */
+
+/* 1. Estilos generales para inputs, selects y textareas */
+.unfold-form input[type="text"],
+.unfold-form input[type="email"],
+.unfold-form input[type="password"],
+.unfold-form input[type="url"],
+.unfold-form input[type="number"],
+.unfold-form input[type="tel"],
+.unfold-form select,
+.unfold-form textarea,
+#content-main input[type="text"],
+#content-main input[type="email"],
+#content-main input[type="password"],
+#content-main input[type="url"],
+#content-main input[type="number"],
+#content-main input[type="tel"],
+#content-main select,
+#content-main textarea,
+.module input[type="text"],
+.module input[type="email"],
+.module input[type="password"],
+.module select,
+.module textarea {
+    border: 2px solid #4b5563 !important; /* Borde grueso gris (gray-600) para modo oscuro */
+    background-color: #111827 !important; /* Fondo oscuro puro para alto contraste */
+    color: #ffffff !important; /* Texto blanco puro */
+    padding: 0.6rem 0.8rem !important;
+    border-radius: 0.375rem !important;
+    outline: none !important;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4) !important;
+    display: block !important;
+    width: 100% !important;
+}
+
+/* 2. Estilos para modo claro (cuando la clase .light o .theme-light está presente) */
+html.light .unfold-form input[type="text"],
+html.light .unfold-form input[type="email"],
+html.light .unfold-form input[type="password"],
+html.light .unfold-form input[type="url"],
+html.light .unfold-form input[type="number"],
+html.light .unfold-form input[type="tel"],
+html.light .unfold-form select,
+html.light .unfold-form textarea,
+html.light #content-main input[type="text"],
+html.light #content-main input[type="email"],
+html.light #content-main input[type="password"],
+html.light #content-main input[type="url"],
+html.light #content-main input[type="number"],
+html.light #content-main input[type="tel"],
+html.light #content-main select,
+html.light #content-main textarea,
+html.light .module input[type="text"],
+html.light .module input[type="email"],
+html.light .module input[type="password"],
+html.light .module select,
+html.light .module textarea {
+    border: 2px solid #2563eb !important; /* Borde grueso azul intenso en modo claro para que salte a la vista */
+    background-color: #f9fafb !important; /* Fondo gris muy claro */
+    color: #111827 !important; /* Texto oscuro puro */
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Enfoque / Focus */
+.unfold-form input:focus,
+.unfold-form select:focus,
+.unfold-form textarea:focus,
+#content-main input:focus,
+#content-main select:focus,
+#content-main textarea:focus {
+    border-color: #3b82f6 !important; /* Azul primario (blue-500) */
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.4) !important;
+}
+
+/* 3. Resaltado visual para inlines (bloques apilados en el formulario) */
+.inline-group {
+    border: 1px solid #374151 !important;
+    background-color: #111827 !important;
+    border-radius: 0.5rem !important;
+    padding: 1rem !important;
+    margin-top: 1.5rem !important;
+    margin-bottom: 1.5rem !important;
+}
+
+html.light .inline-group {
+    border: 1px solid #e5e7eb !important;
+    background-color: #f9fafb !important;
+}
+
+.inline-group h2 {
+    background-color: #1f2937 !important;
+    color: #f3f4f6 !important;
+    padding: 0.5rem 1rem !important;
+    border-radius: 0.25rem !important;
+    font-weight: 600 !important;
+    margin-bottom: 1rem !important;
+}
+
+html.light .inline-group h2 {
+    background-color: #f3f4f6 !important;
+    color: #111827 !important;
+}
+
+/* 4. Estilos de botones de Alta Visibilidad para Django Admin (Unfold) */
+.submit-row input,
+.submit-row a,
+.button,
+a.addlink,
+.deletelink,
+input[type="submit"],
+button[type="submit"] {
+    font-weight: 700 !important;
+    padding: 0.6rem 1.2rem !important;
+    border-radius: 0.375rem !important;
+    cursor: pointer !important;
+    font-size: 0.75rem !important;
+    letter-spacing: 0.05em !important;
+    text-transform: uppercase !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    transition: all 0.2s ease-in-out !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+}
+
+/* Botón Guardar / Principal (Azul Intenso) */
+input[name="_save"],
+input[type="submit"].default,
+.button.default,
+.submit-row input.default {
+    background-color: #2563eb !important; /* Blue 600 */
+    color: #ffffff !important;
+    border: 1px solid #1d4ed8 !important;
+}
+input[name="_save"]:hover,
+input[type="submit"].default:hover,
+.button.default:hover,
+.submit-row input.default:hover {
+    background-color: #1d4ed8 !important; /* Blue 700 */
+    box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3) !important;
+}
+
+/* Botón Guardar y continuar / secundario (Gris con borde destacado) */
+input[name="_continue"],
+input[name="_addanother"],
+.submit-row input:not(.default) {
+    background-color: #4b5563 !important; /* Gray 600 */
+    color: #ffffff !important;
+    border: 1px solid #374151 !important;
+}
+input[name="_continue"]:hover,
+input[name="_addanother"]:hover,
+.submit-row input:not(.default):hover {
+    background-color: #374151 !important; /* Gray 700 */
+}
+
+/* Botón Eliminar / Danger (Rojo Intenso) */
+.deletelink,
+.button.errors {
+    background-color: #dc2626 !important; /* Red 600 */
+    color: #ffffff !important;
+    border: 1px solid #b91c1c !important;
+    text-decoration: none !important;
+}
+.deletelink:hover,
+.button.errors:hover {
+    background-color: #b91c1c !important; /* Red 700 */
+    box-shadow: 0 10px 15px -3px rgba(220, 38, 38, 0.3) !important;
+}
+
+/* Botones de Añadir nuevo (Verde Esmeralda) */
+a.addlink {
+    background-color: #059669 !important; /* Emerald 600 */
+    color: #ffffff !important;
+    border: 1px solid #047857 !important;
+    text-decoration: none !important;
+}
+a.addlink:hover {
+    background-color: #047857 !important;
+    box-shadow: 0 10px 15px -3px rgba(5, 150, 105, 0.3) !important;
+}
+

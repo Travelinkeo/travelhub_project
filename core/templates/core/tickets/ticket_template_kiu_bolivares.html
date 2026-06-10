@@ -390,11 +390,23 @@
                                 <td>{{ vuelo.fecha|default:vuelo.fecha_salida }}</td>
                                 <td>{{ vuelo.numero_vuelo|default:"-" }}</td>
                                 <td>
-                                    <strong>{{ vuelo.origen }}</strong><br>
+                                    <strong>
+                                        {% if vuelo.origen.ciudad %}
+                                            {{ vuelo.origen.ciudad }}
+                                        {% else %}
+                                            {{ vuelo.origen }}
+                                        {% endif %}
+                                    </strong><br>
                                     {{ vuelo.hora_salida|default:"-" }}
                                 </td>
                                 <td>
-                                    <strong>{{ vuelo.destino }}</strong><br>
+                                    <strong>
+                                        {% if vuelo.destino.ciudad %}
+                                            {{ vuelo.destino.ciudad }}
+                                        {% else %}
+                                            {{ vuelo.destino }}
+                                        {% endif %}
+                                    </strong><br>
                                     {{ vuelo.hora_llegada|default:"-" }}
                                 </td>
                                 <td>

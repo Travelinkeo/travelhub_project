@@ -15,39 +15,38 @@ from apps.crm.models import Cliente
 
 logger = logging.getLogger(__name__)
 
+
 class LinkeoAgentService:
     """
     Servicio de Inteligencia Artificial para Agentes de Viajes (Nivel 2).
     Permite consultas en lenguaje natural sobre ventas, clientes y requisitos.
     """
-    
-    def process_message(self, text: str, user_context: str = None) -> str:
+
+    def process_message(self, text: str, user_context: str = None, agencia=None) -> str:
         """
         Orquestador principal: Detecta intención -> Ejecuta -> Responde.
         """
         try:
-            # 1. Detectar Intención
             intent_data = self._detect_intent(text)
-            intent = intent_data.get('intent')
-            params = intent_data.get('params', {})
-            
+            intent = intent_data.get("intent")
+            params = intent_data.get("params", {})
+
             logger.info(f"Linkeo Intent: {intent} | Params: {params}")
 
-            # 2. Ejecutar Acción
-            if intent == 'QUERY_SALES':
-                return self._handle_sales_query(params)
-            
-            elif intent == 'QUERY_CLIENT':
-                return self._handle_client_query(params)
-                
-            elif intent == 'CHECK_MIGRATION':
+            if intent == "QUERY_SALES":
+                return self._handle_sales_query(params, agencia=agencia)
+
+            elif intent == "QUERY_CLIENT":
+                return self._handle_client_query(params, agencia=agencia)
+
+            elif intent == "CHECK_MIGRATION":
                 return self._handle_migration_check(params)
-                
-            elif intent == 'GENERAL':
-                 # Responder con personalidad de Linkeo
-                 prompt = f"Eres Linkeo, un asistente útil para agentes de viajes. Responde amablemente a: {text}"
-                 return generate_text_from_prompt(prompt)
-            
+
+            elif intent == "GENERAL":
+                # Responder con personalidad de Linkeo
+                prompt = f"Eres Linkeo, un asistente útil para agentes de viajes. Responde amablemente a: {text}"
+                return generate_text_from_prompt(prompt)
+
             else:
                 return "No entendí tu solicitud. ¿Podrías ser más específico?"
 
@@ -82,7 +81,7 @@ class LinkeoAgentService:
             "params": {{ ... }}
         }}
         """
-        
+
         try:
             response = generate_structured_data(prompt)
             return json.loads(response)
@@ -90,22 +89,24 @@ class LinkeoAgentService:
             logger.error("Error decodificando JSON de Gemini. Fallback a GENERAL.")
             return {"intent": "GENERAL", "params": {}}
 
-    def _handle_sales_query(self, params: dict) -> str:
+    def _handle_sales_query(self, params: dict, agencia=None) -> str:
         """Maneja consultas de ventas."""
         queryset = Venta.objects.all()
-        
+        if agencia:
+            queryset = queryset.filter(agencia=agencia)
+
         # Filtros básicos
-        start_date = params.get('date_range_start')
+        start_date = params.get("date_range_start")
         if start_date:
             queryset = queryset.filter(fecha_venta__date__gte=start_date)
-            
-        params.get('destination')
+
+        params.get("destination")
         # Nota: Filtrar por destino en Venta es complejo porque está en SegmentoVuelo.
         # Simplificación MVP: buscar en descripción general o ignorar
-        
+
         total = queryset.count()
-        monto = queryset.aggregate(Sum('total_venta'))['total_venta__sum'] or 0
-        
+        monto = queryset.aggregate(Sum("total_venta"))["total_venta__sum"] or 0
+
         # Generar resumen natural con Gemini para que no suene robótico
         resumen_prompt = f"""
         Genera una respuesta corta para el agente sobre estos datos de ventas:
@@ -115,19 +116,24 @@ class LinkeoAgentService:
         """
         return generate_text_from_prompt(resumen_prompt)
 
-    def _handle_client_query(self, params: dict) -> str:
+    def _handle_client_query(self, params: dict, agencia=None) -> str:
         """Maneja búsqueda de clientes."""
-        query = params.get('name_query')
+        query = params.get("name_query")
         if not query:
             return "Necesito un nombre para buscar al cliente."
-            
+
         clientes = Cliente.objects.filter(
-            Q(nombres__icontains=query) | Q(apellidos__icontains=query) | Q(nombre_empresa__icontains=query)
-        )[:3]
-        
+            Q(nombres__icontains=query)
+            | Q(apellidos__icontains=query)
+            | Q(nombre_empresa__icontains=query)
+        )
+        if agencia:
+            clientes = clientes.filter(agencia=agencia)
+        clientes = clientes[:3]
+
         if not clientes:
             return f"No encontré clientes con el nombre '{query}'."
-            
+
         msg = f"🔍 Encontré estos clientes para '{query}':\n"
         for c in clientes:
             nombre = c.nombre_empresa if c.nombre_empresa else f"{c.nombres} {c.apellidos}"
@@ -136,15 +142,15 @@ class LinkeoAgentService:
 
     def _handle_migration_check(self, params: dict) -> str:
         """Consulta requisitos migratorios."""
-        nationality = params.get('nationality')
-        destination = params.get('destination')
-        
+        nationality = params.get("nationality")
+        destination = params.get("destination")
+
         if not nationality or not destination:
             return "Para consultar requisitos necesito la nacionalidad y el destino. Ej: 'Visa para ir a España siendo Chileno'."
-            
+
         # Usamos el servicio existente
         service = MigrationCheckerService()
         result = service.quick_check(nationality, destination)
-        
+
         emoji = "✅" if not result.visa_required else "🛂"
         return f"{emoji} **Requisitos {nationality} ➡️ {destination}**\n\n{result.summary}\n\nVisa: {'Sí' if result.visa_required else 'No'}"

@@ -16,7 +16,7 @@
             <p class="text-text-muted text-sm mt-1">Reporte detallado de boletos emitidos en el periodo seleccionado.</p>
         </div>
         <div class="flex gap-3">
-            <button onclick="window.print()" class="btn-secondary !h-12 !px-6">
+            <button data-action="print" class="btn-secondary !h-12 !px-6">
                 <span class="material-symbols-outlined text-[20px]">print</span>
                 <span>Imprimir Reporte</span>
             </button>
@@ -168,7 +168,7 @@
                             <div class="flex items-center gap-2">
                                 <div class="size-6 rounded bg-surface-2 border border-border-color flex items-center justify-center p-1">
                                     <img src="/static/assets/img/airlines/{{ boleto.aerolinea_codigo }}.png" 
-                                         onerror="this.src='/static/core/img/airline-placeholder.png'"
+                                         data-fallback-src="/static/core/img/airline-placeholder.png"
                                          class="max-h-full max-w-full object-contain">
                                 </div>
                                 <span class="text-xs font-bold text-text-main">{{ boleto.aerolinea_nombre }}</span>
@@ -208,7 +208,8 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const stats = JSON.parse('{{ stats_graficas|safe }}');
+        {{ stats_graficas|json_script:"stats-data" }}
+        const stats = JSON.parse(document.getElementById('stats-data').textContent);
         
         // 1. Gráfica de Aerolíneas (Doughnut)
         const ctxAero = document.getElementById('chartAerolineas');

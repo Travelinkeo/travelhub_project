@@ -3,11 +3,13 @@ from contextlib import contextmanager
 
 _thread_locals = threading.local()
 
+
 def are_signals_blocked():
     """
     Checks if custom signals are currently blocked for the current thread.
     """
-    return getattr(_thread_locals, 'signals_blocked', False)
+    return getattr(_thread_locals, "signals_blocked", False)
+
 
 @contextmanager
 def disable_signals():
@@ -18,7 +20,7 @@ def disable_signals():
             # Perform bulk operations, migrations, or testing setup here
             my_model.save()
     """
-    previous = getattr(_thread_locals, 'signals_blocked', False)
+    previous = getattr(_thread_locals, "signals_blocked", False)
     _thread_locals.signals_blocked = True
     try:
         yield

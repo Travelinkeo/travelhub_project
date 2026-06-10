@@ -9,7 +9,7 @@
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
         <div>
             <div class="flex items-center gap-3 mb-1">
-                <a href="{% url 'core:facturacion_dashboard' %}"
+                <a href="{% url 'finance:facturacion_dashboard' %}"
                     class="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -29,7 +29,7 @@
         </div>
         <div class="flex gap-3">
             {% if factura.estado == 'BOR' %}
-            <form action="{% url 'core:factura_emitir' factura.pk %}" method="post"
+            <form action="{% url 'finance:factura_emitir' factura.pk %}" method="post"
                 onsubmit="return confirm('¿Estás seguro de emitir esta factura? No podrás modificarla después.');">
                 {% csrf_token %}
                 <button type="submit"
@@ -42,8 +42,7 @@
             </form>
             {% endif %}
 
-            {% if factura.archivo_pdf %}
-            <a href="{% url 'core:factura_pdf' factura.pk %}"
+            <a href="{% url 'finance:factura_pdf' factura.pk %}"
                 class="px-4 py-2 bg-[var(--surface-2)] hover:bg-[var(--surface-3)] text-[var(--text-primary)] rounded-lg font-medium transition-colors flex items-center gap-2 border border-[var(--border)]">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -51,9 +50,8 @@
                 </svg>
                 Descargar PDF
             </a>
-            {% endif %}
             {% if factura.venta %}
-            <a href="{% url 'core:venta_detalle' factura.venta.pk %}"
+            <a href="{% url 'bookings:venta_detail' factura.venta.pk %}"
                 class="px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg font-medium transition-colors flex items-center gap-2 shadow-lg shadow-primary/20">
                 Ver Venta Asociada
             </a>
@@ -90,28 +88,23 @@
                             <tr class="hover:bg-[var(--surface-2)] transition-colors">
                                 <td class="px-6 py-4 text-[var(--text-primary)]">{{ item.descripcion }}</td>
                                 <td class="px-6 py-4 text-right text-[var(--text-secondary)]">{{ item.cantidad }}</td>
-                                <td class="px-6 py-4 text-right text-[var(--text-secondary)]">{{
-                                    item.precio_unitario|floatformat:2|intcomma }}</td>
-                                <td class="px-6 py-4 text-right text-[var(--text-primary)] font-medium">{{
-                                    item.subtotal_item|floatformat:2|intcomma }}</td>
+                                <td class="px-6 py-4 text-right text-[var(--text-secondary)]">{{ item.precio_unitario|floatformat:2|intcomma }}</td>
+                                <td class="px-6 py-4 text-right text-[var(--text-primary)] font-medium">{{ item.subtotal_item|floatformat:2|intcomma }}</td>
                             </tr>
                             {% endfor %}
                         </tbody>
                         <tfoot class="bg-[var(--surface-2)] border-t border-[var(--border)]">
                             <tr>
                                 <td colspan="3" class="px-6 py-4 text-right text-[var(--text-secondary)]">Subtotal</td>
-                                <td class="px-6 py-4 text-right text-[var(--text-primary)]">{{ factura.subtotal|floatformat:2|intcomma
-                                    }}</td>
+                                <td class="px-6 py-4 text-right text-[var(--text-primary)]">{{ factura.subtotal|floatformat:2|intcomma }}</td>
                             </tr>
                             <tr>
                                 <td colspan="3" class="px-6 py-4 text-right text-[var(--text-secondary)]">Impuestos</td>
-                                <td class="px-6 py-4 text-right text-[var(--text-primary)]">{{
-                                    factura.monto_impuestos|floatformat:2|intcomma }}</td>
+                                <td class="px-6 py-4 text-right text-[var(--text-primary)]">{{ factura.monto_impuestos|floatformat:2|intcomma }}</td>
                             </tr>
                             <tr class="text-lg font-bold">
                                 <td colspan="3" class="px-6 py-4 text-right text-[var(--text-primary)]">Total</td>
-                                <td class="px-6 py-4 text-right text-emerald-400">{{
-                                    factura.monto_total|floatformat:2|intcomma }} {{ factura.moneda.codigo_iso }}</td>
+                                <td class="px-6 py-4 text-right text-emerald-400">{{ factura.monto_total|floatformat:2|intcomma }} {{ factura.moneda.codigo_iso }}</td>
                             </tr>
                         </tfoot>
                     </table>
@@ -137,8 +130,7 @@
                 <div class="space-y-3 text-sm flex-col">
                     <div>
                         <span class="text-[var(--text-muted)] block">Documento</span>
-                        <span class="text-[var(--text-secondary)]">{{ factura.cliente.tipo_documento }} {{
-                            factura.cliente.numero_documento }}</span>
+                        <span class="text-[var(--text-secondary)]">{{ factura.cliente.tipo_documento }} {{ factura.cliente.numero_documento }}</span>
                     </div>
                     <div>
                         <span class="text-[var(--text-muted)] block">Teléfono</span>

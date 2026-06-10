@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-web
+  labels:
+    app: {{ .Release.Name }}-web
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-web
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-web
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}-web
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["gunicorn", "travelhub.wsgi:application", "--bind", "0.0.0.0:8000"]
+          ports:
+            - name: http
+              containerPort: 8000
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /api/schema/
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /api/schema/
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          envFrom:
+            - secretRef:
+                name: {{ .Release.Name }}-secrets

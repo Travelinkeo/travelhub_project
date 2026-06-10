@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>Boleto Electrónico - {{ NOMBRE_AEROLINEA }}</title>
     <!-- Open Sans Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <style>
         @page {
             size: A4;
@@ -41,8 +41,10 @@
         {% if SOURCE_SYSTEM and 'AMADEUS' in SOURCE_SYSTEM %} :root { --pnr-color: {{ agencia.color_amadeus|default:"#0C66E1" }}; } {% endif %}
         {% if SOURCE_SYSTEM and 'TRAVELPORT' in SOURCE_SYSTEM %} :root { --pnr-color: #111827; } {% endif %}
 
+        * {
+            font-family: 'Open Sans', system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+        }
         body {
-            font-family: 'Open Sans', sans-serif;
             color: var(--tk-text);
             line-height: 1.3;
             margin: 0 !important;
@@ -168,7 +170,7 @@
             border-right: none;
         }
         .info-label {
-            font-size: 8px;
+            font-size: 9px;
             text-transform: uppercase;
             color: #94a3b8;
             font-weight: 700;
@@ -383,12 +385,24 @@
                 </div>
                 <div class="flight-body">
                     <div class="airport-group">
-                        <div class="airport-code">{{ vuelo.origen }}</div>
+                        <div class="airport-code">
+                            {% if vuelo.origen.ciudad %}
+                                {{ vuelo.origen.ciudad }}
+                            {% else %}
+                                {{ vuelo.origen }}
+                            {% endif %}
+                        </div>
                         <div class="airport-info">Salida: {{ vuelo.hora_salida|default:"---" }}</div>
                     </div>
                     <div class="flight-path">✈</div>
                     <div class="airport-group" style="text-align: right;">
-                        <div class="airport-code">{{ vuelo.destino }}</div>
+                        <div class="airport-code">
+                            {% if vuelo.destino.ciudad %}
+                                {{ vuelo.destino.ciudad }}
+                            {% else %}
+                                {{ vuelo.destino }}
+                            {% endif %}
+                        </div>
                         <div class="airport-info">Llegada: {{ vuelo.hora_llegada|default:"---" }}</div>
                     </div>
                 </div>

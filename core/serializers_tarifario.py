@@ -1,4 +1,3 @@
-
 from rest_framework import serializers
 
 from apps.bookings.models import (
@@ -12,39 +11,75 @@ from apps.bookings.models import (
 class TarifaHabitacionSerializer(serializers.ModelSerializer):
     class Meta:
         model = TarifaHabitacion
-        fields = ['id', 'fecha_inicio', 'fecha_fin', 'nombre_temporada',
-                  'moneda', 'tipo_tarifa',
-                  'tarifa_sgl', 'tarifa_dbl', 'tarifa_tpl', 'tarifa_cpl', 'tarifa_nino']
+        fields = [
+            "id",
+            "fecha_inicio",
+            "fecha_fin",
+            "nombre_temporada",
+            "moneda",
+            "tipo_tarifa",
+            "tarifa_sgl",
+            "tarifa_dbl",
+            "tarifa_tpl",
+            "tarifa_cpl",
+            "tarifa_nino",
+        ]
 
 
 class TipoHabitacionSerializer(serializers.ModelSerializer):
     tarifas = TarifaHabitacionSerializer(many=True, read_only=True)
-    
+
     class Meta:
         model = TipoHabitacion
-        fields = ['id', 'nombre', 'capacidad_adultos', 'capacidad_ninos',
-                  'capacidad_total', 'descripcion', 'tarifas']
+        fields = [
+            "id",
+            "nombre",
+            "capacidad_adultos",
+            "capacidad_ninos",
+            "capacidad_total",
+            "descripcion",
+            "tarifas",
+        ]
 
 
 class HotelTarifarioSerializer(serializers.ModelSerializer):
     tipos_habitacion = TipoHabitacionSerializer(many=True, read_only=True)
-    regimen_display = serializers.CharField(source='get_regimen_default_display', read_only=True)
-    
+    regimen_display = serializers.CharField(source="get_regimen_default_display", read_only=True)
+
     class Meta:
         model = HotelTarifario
-        fields = ['id', 'nombre', 'slug', 'destino', 'direccion',
-                  'regimen_default', 'regimen_display', 'comision',
-                  'check_in', 'check_out', 'activo', 'tipos_habitacion']
+        fields = [
+            "id",
+            "nombre",
+            "slug",
+            "destino",
+            "direccion",
+            "regimen_default",
+            "regimen_display",
+            "comision",
+            "check_in",
+            "check_out",
+            "activo",
+            "tipos_habitacion",
+        ]
 
 
 class TarifarioProveedorSerializer(serializers.ModelSerializer):
-    proveedor_nombre = serializers.CharField(source='proveedor.nombre', read_only=True)
-    
+    proveedor_nombre = serializers.CharField(source="proveedor.nombre", read_only=True)
+
     class Meta:
         model = TarifarioProveedor
-        fields = ['id', 'proveedor', 'proveedor_nombre', 'nombre',
-                  'fecha_vigencia_inicio', 'fecha_vigencia_fin', 'comision_estandar',
-                  'activo', 'fecha_carga']
+        fields = [
+            "id",
+            "proveedor",
+            "proveedor_nombre",
+            "nombre",
+            "fecha_vigencia_inicio",
+            "fecha_vigencia_fin",
+            "comision_estandar",
+            "activo",
+            "fecha_carga",
+        ]
 
 
 class CotizacionHotelSerializer(serializers.Serializer):
@@ -54,7 +89,7 @@ class CotizacionHotelSerializer(serializers.Serializer):
     habitaciones = serializers.ListField(
         child=serializers.DictField(),
         required=True,
-        help_text='Lista de habitaciones: [{"tipo": "DBL", "adultos": 2, "ninos": 0}]'
+        help_text='Lista de habitaciones: [{"tipo": "DBL", "adultos": 2, "ninos": 0}]',
     )
 
 

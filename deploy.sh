@@ -9,7 +9,7 @@ echo "🚀 Iniciando despliegue de TravelHub..."
 
 # 1. Verificar existencia de .env
 if [ ! -f .env ]; then
-    echo "❌ Error: Archivo .env no encontrado. Por favor, créalo basándote en .env.example"
+    echo " Error: Archivo .env no encontrado. Por favor, créalo basándote en .env.example"
     exit 1
 fi
 
@@ -20,7 +20,23 @@ fi
 echo "📦 Construyendo y levantando contenedores..."
 docker-compose up --build -d
 
-# 4. Limpiar imágenes huérfanas
+# 4. Esperar a que los servicios estén saludables
+echo "⏳ Esperando a que los servicios estén listos..."
+sleep 15
+
+# 5. Ejecutar migraciones de base de datos (CRÍTICO - evita errores como axes_accessattempt)
+echo "🗄️ Ejecutando migraciones..."
+docker-compose exec -T web python manage.py migrate --noinput
+
+# 6. Recopilar archivos estáticos
+echo "🎨 Recopilando archivos estáticos..."
+docker-compose exec -T web python manage.py collectstatic --noinput
+
+# 7. Verificar sistema
+echo "✅ Verificando sistema..."
+docker-compose exec -T web python manage.py check --deploy || echo "⚠️ Advertencias en check --deploy (revisar)"
+
+# 8. Limpiar imágenes huérfanas
 echo "🧹 Limpiando imágenes antiguas..."
 docker image prune -f
 
@@ -28,4 +44,4 @@ echo "📊 Estado de los servicios:"
 docker-compose ps
 
 echo "✅ Despliegue completado con éxito."
-echo "🌐 El sitio debería estar disponible en el puerto 80 (vía Nginx)."
+echo " El sitio debería estar disponible en el puerto 80 (vía Nginx)."

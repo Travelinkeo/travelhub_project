@@ -1,102 +1,98 @@
-﻿import pytest
-pytestmark = pytest.mark.skip(reason="PDF generator module refactorizado - pendiente actualización")
-
-from datetime import datetime
-from types import SimpleNamespace
+from unittest.mock import patch
 
 import pytest
 
-from apps.automation.parsers import pdf_generation as pdf_generator
+from apps.automation.parsers.pdf_generation import PdfGenerationService, generate_ticket_pdf
 
 
-class DummyTemplate:
-    def __init__(self, marker):
-        self.marker = marker
-    def render(self, ctx):  # pragma: no cover - trivial
-        # Insert marker so we can assert dispatch logic indirectly if needed
-        return f"<html><body>{self.marker}</body></html>"
-
-class DummyEnv:
-    def __init__(self):
-        self.requested = []
-    def get_template(self, name):
-        self.requested.append(name)
-        return DummyTemplate(name)
-
-@pytest.mark.parametrize(
-    'source_system,expected_template', [
-        ('SABRE', 'tickets/ticket_template_sabre.html'),
-        ('AMADEUS', 'tickets/ticket_template_amadeus.html'),
-        ('TRAVELPORT', 'tickets/ticket_template_travelport.html'),
-        ('KIU', 'tickets/ticket_template_kiu.html'),
-        (None, 'tickets/ticket_template_kiu.html'),
-    ]
-)
-def test_select_template_and_data(source_system, expected_template, monkeypatch):
-    env = DummyEnv()
-    data = {'SOURCE_SYSTEM': source_system} if source_system else {}
-    # provide minimal required keys to avoid KeyErrors
-    template, template_data = pdf_generator.select_template_and_data(data, env)
-    assert env.requested[0] == expected_template
-    assert 'logo_base64' in template_data
-    assert template is not None
-
-
-def test_build_ticket_filename_deterministic():
-    fixed = datetime(2025, 1, 2, 3, 4, 5)
-    name = pdf_generator.build_ticket_filename('308-0201196996', when=fixed)
-    assert name == 'Boleto_308-0201196996_20250102030405.pdf'
-
-
-def test_build_ticket_filename_sanitize(): 
-    fixed = datetime(2025, 1, 2, 3, 4, 5) 
-    # Include espacios y caracteres ilegales: / * ? : " < > | que deben eliminarse 
-    raw = '  30 8/*?:"<>| bad ' 
-    name = pdf_generator.build_ticket_filename(raw, when=fixed) 
-    # Esperado: caracteres prohibidos removidos, espacios -> _ , preserva letras 
-    assert name == 'Boleto_30_8_bad_20250102030405.pdf'
-
-
-def test_generate_ticket_pdf_mocks_weasyprint(monkeypatch):
-    # Replace HTML class to avoid real PDF generation
-    class FakeHTML:
-        def __init__(self, string):
-            self.string = string
-        def write_pdf(self, stylesheets=None):
-            return b'%PDF-fake%'
-    monkeypatch.setattr(pdf_generator, 'HTML', FakeHTML)
-
-    # Monkeypatch Environment to our dummy
-    def fake_environment(*args, **kwargs):
-        return SimpleNamespace(get_template=lambda n: DummyTemplate(n))
-    monkeypatch.setattr(pdf_generator, 'Environment', fake_environment)
-
-    data = {'SOURCE_SYSTEM': 'SABRE', 'numero_boleto': '1234567890'}
-    pdf_bytes, filename = pdf_generator.generate_ticket_pdf(data)
-    assert pdf_bytes.startswith(b'%PDF-fake%')
-    assert filename.startswith('Boleto_1234567890_') and filename.endswith('.pdf')
-
-
-def test_transform_sabre_data_for_template_basic():
-    raw = {
-        'preparado_para': 'John Doe',
-        'documento_identidad': 'AB123',
-        'numero_boleto': '123',
-        'vuelos': [
+@pytest.fixture
+def sample_ticket_data():
+    return {
+        "SOURCE_SYSTEM": "KIU",
+        "NOMBRE_DEL_PASAJERO": "DUQUE ECHEVERRY/OSCA FLORIDA",
+        "NUMERO_DE_BOLETO": "0190000000000",
+        "FECHA_DE_EMISION": "18 AUG 2023",
+        "CODIGO_RESERVA": "ABC123",
+        "NOMBRE_AEROLINEA": "SATENA S.A",
+        "TARIFA_IMPORTE": "100.00",
+        "TOTAL": "110.00",
+        "moneda": "USD",
+        "segmentos": [
             {
-                'fecha_salida': '2025-01-01',
-                'fecha_llegada': '2025-01-01',
-                'aerolinea': 'XX',
-                'numero_vuelo': 'XX101',
-                'otras_notas': 'PNR ABCDEF',
-                'aeropuerto_salida': 'Caracas, Venezuela',
-                'aeropuerto_llegada': 'Panama, Panama'
+                "aerolinea": "9R",
+                "vuelo": "8901",
+                "origen": "CCS",
+                "destino": "BOG",
+                "fecha_salida": "2023-08-25",
+                "hora_salida": "09:45",
+                "fecha_llegada": "2023-08-25",
+                "hora_llegada": "10:46",
+                "clase": "Y",
+                "localizador_aerolinea": "XYZ789",
             }
-        ]
+        ],
     }
-    norm = pdf_generator.transform_sabre_data_for_template(raw)
-    assert norm['pasajero']['nombre_completo'] == 'John Doe'
-    assert norm['itinerario']['vuelos'][0]['origen']['ciudad'] == 'Caracas'
-    assert norm['itinerario']['vuelos'][0]['destino']['pais'] == 'Panama'
 
 
+@pytest.fixture
+def mock_pdf_renderer():
+    with patch("apps.automation.parsers.pdf_generation.PdfRendererService") as mock_renderer:
+        mock_renderer.check_health.return_value = True
+        mock_renderer.render_html_to_pdf.return_value = b"%PDF-1.4 dummy contents"
+        yield mock_renderer
+
+
+@pytest.mark.django_db
+def test_generate_ticket_success(sample_ticket_data, mock_pdf_renderer):
+    pdf_bytes, filename = PdfGenerationService.generate_ticket(sample_ticket_data)
+    assert pdf_bytes == b"%PDF-1.4 dummy contents"
+    assert filename.startswith("Boleto_0190000000000_")
+    assert filename.endswith(".pdf")
+    mock_pdf_renderer.render_html_to_pdf.assert_called_once()
+
+
+@pytest.mark.django_db
+def test_generate_ticket_gotenberg_offline(sample_ticket_data, mock_pdf_renderer):
+    mock_pdf_renderer.render_html_to_pdf.side_effect = Exception("Gotenberg offline simulation")
+    pdf_bytes, filename = PdfGenerationService.generate_ticket(sample_ticket_data)
+    assert pdf_bytes == b""
+    assert filename == "error_generacion.pdf"
+
+
+@pytest.mark.django_db
+def test_build_context_passenger_name_parsing(sample_ticket_data):
+    # Test typical APELLIDO/NOMBRE split
+    context = PdfGenerationService._build_context(
+        sample_ticket_data, agencia_obj=None, source_system="KIU"
+    )
+    assert context["solo_nombre_pasajero"] == "OSCA"
+    assert context["NOMBRE_DEL_PASAJERO"] == "DUQUE ECHEVERRY/OSCA"
+    assert context["CODIGO_RESERVA"] == "ABC123"
+    assert context["TOTAL_MONEDA"] == "USD"
+    assert len(context["vuelos"]) == 1
+
+
+@pytest.mark.django_db
+def test_build_context_passenger_name_no_slash():
+    data = {"NOMBRE_DEL_PASAJERO": "JUAN PEREZ", "NUMERO_DE_BOLETO": "123"}
+    context = PdfGenerationService._build_context(data, agencia_obj=None, source_system="KIU")
+    assert context["solo_nombre_pasajero"] == "JUAN"
+
+
+@pytest.mark.django_db
+def test_build_context_agency_obj_fallback(sample_ticket_data):
+    # Test that context resolves agency attributes with proxy even if agencia_obj is None
+    context = PdfGenerationService._build_context(
+        sample_ticket_data, agencia_obj=None, source_system="KIU"
+    )
+    agency_proxy = context["agencia"]
+    assert agency_proxy.nombre == "TRAVELHUB"
+    assert agency_proxy.color_primario == "#0D1E40"
+    assert agency_proxy.email_principal == "info@travelhub.com"
+
+
+@pytest.mark.django_db
+def test_module_level_function_shortcut(sample_ticket_data, mock_pdf_renderer):
+    pdf_bytes, filename = generate_ticket_pdf(sample_ticket_data)
+    assert pdf_bytes == b"%PDF-1.4 dummy contents"
+    assert filename.startswith("Boleto_0190000000000_")

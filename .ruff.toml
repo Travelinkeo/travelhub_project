@@ -1,6 +1,6 @@
 line-length = 100
 indent-width = 4
-target-version = "py313"
+target-version = "py312"
 
 [lint]
 select = [
@@ -15,12 +15,15 @@ select = [
 ignore = [
   "E203",  # estilo de slicing (compatible con black)
   "E501",  # longitud de línea (usamos black + 100 chars, ruff avisaría demasiadas)
-  "S101",  # uso de assert permitido en tests
 ]
 
 [lint.per-file-ignores]
 "*/migrations/*" = ["E501", "S"]
-"tests/*" = ["S", "B011"]
+"tests/*" = ["S", "B011", "S101"]
+"**/tests/*" = ["S101"]
+"**/test_*.py" = ["S101"]
+"conftest.py" = ["S101"]
+"**/conftest.py" = ["S101"]
 
 [format]
 quote-style = "double"

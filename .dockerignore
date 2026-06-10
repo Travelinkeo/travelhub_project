@@ -13,6 +13,8 @@ ENV/
 *.log
 db.sqlite3
 db.sqlite3-journal
+db.sqlite3-*
+*.db
 media/
 staticfiles/
 
@@ -34,12 +36,42 @@ htmlcov/
 docs_archive/
 test_files_archive/
 scripts_archive/
+docs/
 
-# Otros
+# Secrets — NEVER copy these into the image
 .env
+.env.*
+!.env.example
+*.pem
+*.key
+*.crt
+
+# Docker
+docker-compose*.yml
+Dockerfile
+.dockerignore
+
+# Infrastructure
+traefik_data/
+nginx/
+
+# Others
 *.pdf
 temp/
 OTRA CARPETA/
+backups/
+logs/
+Boletos Pruebas/
+boletos_generados/
+boletos_importados/
+.tmp.drivedownload/
+.tmp.driveupload/
+tools_bin/
+htmlcov/
+master
+test_api.py
+deploy.sh
+scripts/
 
 # Frontend
 frontend/node_modules/

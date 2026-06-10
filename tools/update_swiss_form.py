@@ -1,8 +1,8 @@
 import re
 
-html_path = r'C:\Users\ARMANDO\travelhub_project\core\templates\core\erp\cotizaciones\crear_cotizacion_swiss.html'
+html_path = r"C:\Users\ARMANDO\travelhub_project\core\templates\core\erp\cotizaciones\crear_cotizacion_swiss.html"
 
-with open(html_path, encoding='utf-8') as f:
+with open(html_path, encoding="utf-8") as f:
     html = f.read()
 
 # 1. Update <style>
@@ -24,7 +24,12 @@ textarea { height: auto; padding-top: 0.5rem; padding-bottom: 0.5rem; }
     border-color: #283039; background-color: #151a1f; color: white; 
 }
 """
-html = re.sub(r'/\* Custom overrides for Swiss Light \*/.*?</style>', style_fixes + '</style>', html, flags=re.DOTALL)
+html = re.sub(
+    r"/\* Custom overrides for Swiss Light \*/.*?</style>",
+    style_fixes + "</style>",
+    html,
+    flags=re.DOTALL,
+)
 
 # 2. Update Client Information
 client_section_old = """<label class="flex flex-col gap-2">
@@ -78,7 +83,11 @@ contact_section_new = """<label class="flex flex-col gap-2">
 html = html.replace(contact_section_old, contact_section_new)
 
 # 3. Update Itinerary/Items Section
-items_section_old = re.search(r'<section class="flex flex-col gap-6">\s*<div class="flex items-center gap-3 pb-2 border-b border-dashed.*?Add Return Flight or Hotel *?</button>\s*</section>', html, re.DOTALL)
+items_section_old = re.search(
+    r'<section class="flex flex-col gap-6">\s*<div class="flex items-center gap-3 pb-2 border-b border-dashed.*?Add Return Flight or Hotel *?</button>\s*</section>',
+    html,
+    re.DOTALL,
+)
 
 items_section_new = """<!-- Section: Items Formset -->
 <section class="flex flex-col gap-6">
@@ -180,7 +189,7 @@ if items_section_old:
     html = html.replace(items_section_old.group(0), items_section_new)
 
 # 4. Services (Condiciones/Notas)
-services_section_old = re.search(r'<!-- Section: Services -->.*?</section>', html, re.DOTALL)
+services_section_old = re.search(r"<!-- Section: Services -->.*?</section>", html, re.DOTALL)
 services_section_new = """<!-- Section: Notas -->
 <section class="flex flex-col gap-6 mb-10">
 <div class="flex items-center gap-3 pb-2 border-b border-dashed border-slate-200 dark:border-slate-800">
@@ -208,7 +217,10 @@ boton_generar = """<button type="submit" class="w-full mt-6 bg-primary hover:bg-
                                 Guardar Cotización
                                 <span class="material-symbols-outlined text-[18px]">save</span>
 </button>"""
-html = re.search(r'(<button class="w-full mt-6 bg-primary hover:bg-blue-600 text-white font-bold py-3 px-4 rounded transition-colors flex justify-center items-center gap-2">\s*Review &amp; Send\s*<span class="material-symbols-outlined text-\[18px\]">arrow_forward</span>\s*</button>)', html)
+html = re.search(
+    r'(<button class="w-full mt-6 bg-primary hover:bg-blue-600 text-white font-bold py-3 px-4 rounded transition-colors flex justify-center items-center gap-2">\s*Review &amp; Send\s*<span class="material-symbols-outlined text-\[18px\]">arrow_forward</span>\s*</button>)',
+    html,
+)
 if html:
     html_str = html.string.replace(html.group(1), boton_generar)
 else:
@@ -313,15 +325,24 @@ html_str = html_str.replace("// Placeholder JS for totals", "")
 html_str = html_str.replace("</script>", "</script>\n" + js)
 
 # Inject IDs for JS to Sidebar items
-html_str = html_str.replace('<span class="font-mono font-medium text-slate-900 dark:text-white">CHF 1,250.00</span>', '<span class="font-mono font-medium text-slate-900 dark:text-white"></span>')
-html_str = html_str.replace('<span class="font-mono font-bold text-slate-900 dark:text-white">CHF 1,575.00</span>', '<span class="font-mono font-bold text-slate-900 dark:text-white text-lg" id="ui-subtotal">0.00</span>')
-html_str = html_str.replace('<span class="font-mono">CHF 121.28</span>', '<span class="font-mono font-medium" id="ui-tax">0.00</span>')
-html_str = html_str.replace('1,696.28', '<span id="ui-total">0.00</span>')
+html_str = html_str.replace(
+    '<span class="font-mono font-medium text-slate-900 dark:text-white">CHF 1,250.00</span>',
+    '<span class="font-mono font-medium text-slate-900 dark:text-white"></span>',
+)
+html_str = html_str.replace(
+    '<span class="font-mono font-bold text-slate-900 dark:text-white">CHF 1,575.00</span>',
+    '<span class="font-mono font-bold text-slate-900 dark:text-white text-lg" id="ui-subtotal">0.00</span>',
+)
+html_str = html_str.replace(
+    '<span class="font-mono">CHF 121.28</span>',
+    '<span class="font-mono font-medium" id="ui-tax">0.00</span>',
+)
+html_str = html_str.replace("1,696.28", '<span id="ui-total">0.00</span>')
 # Remove fake line items
-html_str = re.sub(r'<!-- Line Item -->.*?</div>', '', html_str, flags=re.DOTALL)
+html_str = re.sub(r"<!-- Line Item -->.*?</div>", "", html_str, flags=re.DOTALL)
 
 
-with open(html_path, 'w', encoding='utf-8') as out:
+with open(html_path, "w", encoding="utf-8") as out:
     out.write(html_str)
 
 print("Template successfully adapted for Django!")

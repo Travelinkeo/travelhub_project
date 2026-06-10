@@ -1,4 +1,4 @@
-
+{% load core_tags %}
 <div class="bg-surface-1 border border-border-color rounded-3xl p-8 shadow-sm animate-fade-in-up">
     
     <div class="flex items-center justify-between mb-8">
@@ -11,7 +11,7 @@
                 <span class="px-2 py-0.5 bg-violet-500/10 text-violet-400 text-[10px] font-bold rounded-full uppercase tracking-wider">Modo Creativo AI</span>
             </div>
         </div>
-        <button onclick="window.print()" class="text-text-muted hover:text-text-main transition-colors">
+        <button data-action="print" class="text-text-muted hover:text-text-main transition-colors">
             <span class="material-symbols-outlined">print</span>
         </button>
     </div>
@@ -21,7 +21,7 @@
         <!-- Columna Izquierda: El Texto Generado -->
         <div class="lg:col-span-2 space-y-6">
             <div class="prose prose-invert max-w-none text-text-muted leading-relaxed">
-                {{ contenido.contenido_principal|safe }}
+                {{ contenido.contenido_principal|sanitize_html_filter }}
             </div>
 
             {% if contenido.hashtags %}

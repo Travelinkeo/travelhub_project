@@ -1,7 +1,6 @@
 import logging
 from datetime import timedelta
 
-from django.conf import settings
 from django.db.models import Q, Sum
 from django.utils import timezone
 
@@ -9,9 +8,12 @@ from apps.finance.models.core_finance import Factura
 
 logger = logging.getLogger(__name__)
 
+
 def _get_genai():
     from google import genai
+
     return genai
+
 
 class CollectionAIService:
     """
@@ -21,10 +23,11 @@ class CollectionAIService:
     def __init__(self, agencia=None):
         self.agencia = agencia
         from apps.automation.services.ai_engine import get_gemini_api_key
+
         api_key = get_gemini_api_key(self.agencia)
         genai = _get_genai()
         self.client = genai.Client(api_key=api_key) if api_key else None
-        self.model_name = 'gemini-2.0-flash'
+        self.model_name = "gemini-2.0-flash"
 
     def get_pending_portfolio(self, days_threshold=0):
         """
@@ -32,20 +35,22 @@ class CollectionAIService:
         days_threshold > 0: Facturas que vencen en los próximos X días.
         days_threshold < 0: Facturas ya vencidas hace X días.
         """
-        query = Q(estado__in=['EMI', 'PAR'], saldo_pendiente__gt=0)
-        
+        query = Q(estado__in=["EMI", "PAR"], saldo_pendiente__gt=0)
+
         if self.agencia:
             query &= Q(agencia=self.agencia)
-            
+
         if days_threshold > 0:
             # Por vencer en los próximos X días
             fecha_limite = timezone.now().date() + timedelta(days=days_threshold)
-            query &= Q(fecha_vencimiento__lte=fecha_limite, fecha_vencimiento__gte=timezone.now().date())
+            query &= Q(
+                fecha_vencimiento__lte=fecha_limite, fecha_vencimiento__gte=timezone.now().date()
+            )
         elif days_threshold < 0:
             # Ya vencidas
             query &= Q(fecha_vencimiento__lt=timezone.now().date())
-            
-        return Factura.objects.filter(query).select_related('cliente', 'moneda', 'agencia')
+
+        return Factura.objects.filter(query).select_related("cliente", "moneda", "agencia")
 
     def generate_collection_reminder(self, factura_id):
         """
@@ -55,7 +60,7 @@ class CollectionAIService:
             logger.error("Gemini client not configured.")
             return None
         try:
-            factura = Factura.objects.select_related('cliente', 'agencia').get(pk=factura_id)
+            factura = Factura.objects.select_related("cliente", "agencia").get(pk=factura_id)
             cliente = factura.cliente
             dias_retraso = 0
             if factura.fecha_vencimiento:
@@ -95,16 +100,16 @@ class CollectionAIService:
         """
         timezone.now().date() - timedelta(days=30)
         proximos_dias = timezone.now().date() + timedelta(days=days)
-        
-        query = Q(estado__in=['EMI', 'PAR'], saldo_pendiente__gt=0)
+
+        query = Q(estado__in=["EMI", "PAR"], saldo_pendiente__gt=0)
         if self.agencia:
             query &= Q(agencia=self.agencia)
-            
-        proyeccion = Factura.objects.filter(
-            query,
-            fecha_vencimiento__lte=proximos_dias
-        ).values('fecha_vencimiento', 'moneda__codigo_iso').annotate(
-            total_esperado=Sum('saldo_pendiente')
-        ).order_by('fecha_vencimiento')
+
+        proyeccion = (
+            Factura.objects.filter(query, fecha_vencimiento__lte=proximos_dias)
+            .values("fecha_vencimiento", "moneda__codigo_iso")
+            .annotate(total_esperado=Sum("saldo_pendiente"))
+            .order_by("fecha_vencimiento")
+        )
 
         return list(proyeccion)

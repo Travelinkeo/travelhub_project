@@ -10,6 +10,7 @@ from apps.finance.models.reconciliacion import ReporteReconciliacion
 
 logger = logging.getLogger(__name__)
 
+
 class PDFService:
     """
     SERVICIO DE RENDERIZADO PDF (WEASYPRINT ENGINE):
@@ -23,33 +24,37 @@ class PDFService:
         """
         try:
             reporte = ReporteReconciliacion.objects.get(pk=reporte_id)
-            
+
             # 1. Preparar Contexto de Negocio
             stats = reporte.conciliaciones.aggregate(
-                total=Count('id_conciliacion'),
-                matches=Count('id_conciliacion', filter=Q(estado='OK')),
-                discrepancias=Count('id_conciliacion', filter=Q(estado='DISCREPANCIA')),
-                monto_ajuste=Sum('diferencia_total')
+                total=Count("id_conciliacion"),
+                matches=Count("id_conciliacion", filter=Q(estado="OK")),
+                discrepancias=Count("id_conciliacion", filter=Q(estado="DISCREPANCIA")),
+                monto_ajuste=Sum("diferencia_total"),
             )
 
             context = {
-                'reporte': reporte,
-                'agencia': user.agencia,
-                'user': user,
-                'kpis': stats,
-                'conciliaciones': reporte.conciliaciones.select_related('linea_reporte', 'boleto_local', 'sugerencia_asiento'),
-                'fecha_generacion': timezone.now()
+                "reporte": reporte,
+                "agencia": user.agencia,
+                "user": user,
+                "kpis": stats,
+                "conciliaciones": reporte.conciliaciones.select_related(
+                    "linea_reporte", "boleto_local", "sugerencia_asiento"
+                ),
+                "fecha_generacion": timezone.now(),
             }
 
             # 2. Renderizar Template a HTML
-            html_string = render_to_string('finance/reports/reconciliation_pdf.html', context)
+            html_string = render_to_string("finance/reports/reconciliation_pdf.html", context)
 
             # 3. Convertir a PDF usando PdfRendererService (en memoria)
             pdf_bytes = PdfRendererService.render_html_to_pdf(html_string)
             pdf_file = io.BytesIO(pdf_bytes)
             pdf_file.seek(0)
 
-            logger.info(f"📄 Reporte PDF generado para la Conciliación {reporte_id} de {user.agencia.nombre}")
+            logger.info(
+                f"📄 Reporte PDF generado para la Conciliación {reporte_id} de {user.agencia.nombre}"
+            )
             return pdf_file
 
         except Exception as e:

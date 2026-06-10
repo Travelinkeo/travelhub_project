@@ -12,14 +12,14 @@ class MagicLinkToken(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField()
     used_at = models.DateTimeField(null=True, blank=True)
-    redirect_url = models.URLField(max_length=500, blank=True, default='')
+    redirect_url = models.URLField(max_length=500, blank=True, default="")
     is_onboarding = models.BooleanField(default=False)
     onboarding_data = models.JSONField(default=dict, blank=True)
 
     class Meta:
-        verbose_name = 'Magic Link Token'
-        verbose_name_plural = 'Magic Link Tokens'
-        ordering = ['-created_at']
+        verbose_name = "Magic Link Token"
+        verbose_name_plural = "Magic Link Tokens"
+        ordering = ["-created_at"]
 
     @property
     def is_valid(self):
@@ -33,7 +33,7 @@ class MagicLinkToken(models.Model):
 
     def mark_used(self):
         self.used_at = timezone.now()
-        self.save(update_fields=['used_at'])
+        self.save(update_fields=["used_at"])
 
     def __str__(self):
         return f"MagicLink({self.email}, {'valid' if self.is_valid else 'expired/used'})"

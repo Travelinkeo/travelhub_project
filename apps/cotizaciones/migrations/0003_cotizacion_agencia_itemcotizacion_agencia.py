@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("core", "0022_remove_agencia_bi_insights_and_more"),
         ("cotizaciones", "0002_alter_cotizacion_moneda_and_more"),

@@ -9,6 +9,7 @@ Responsabilidad única: Encapsula toda la lógica de negocio del
 
 La vista queda reducida a: leer request → llamar servicio → devolver HTTP response.
 """
+
 import logging
 from dataclasses import dataclass
 from decimal import Decimal, InvalidOperation
@@ -25,6 +26,7 @@ class StudioFormData:
     Datos tipados del formulario del AI Studio.
     Desacopla el parseo de request.POST del servicio.
     """
+
     nombre: str | None
     foid: str | None
     cliente_id: str | None
@@ -40,22 +42,23 @@ class StudioFormData:
     def from_post(cls, post_data) -> "StudioFormData":
         """Extrae y normaliza los datos del request.POST."""
         return cls(
-            nombre=post_data.get('nombre_pasajero') or None,
-            foid=post_data.get('foid_pasajero') or None,
-            cliente_id=post_data.get('cliente_id') or None,
-            pnr=post_data.get('localizador_pnr') or None,
-            pnr_aerolinea=post_data.get('pnr_aerolinea') or None,
-            ticket_no=post_data.get('ticket_number') or None,
-            fare=post_data.get('fare_amount', '0'),
-            taxes=post_data.get('taxes_amount', '0'),
-            total=post_data.get('total_amount', '0'),
-            total_currency=post_data.get('total_currency', 'USD'),
+            nombre=post_data.get("nombre_pasajero") or None,
+            foid=post_data.get("foid_pasajero") or None,
+            cliente_id=post_data.get("cliente_id") or None,
+            pnr=post_data.get("localizador_pnr") or None,
+            pnr_aerolinea=post_data.get("pnr_aerolinea") or None,
+            ticket_no=post_data.get("ticket_number") or None,
+            fare=post_data.get("fare_amount", "0"),
+            taxes=post_data.get("taxes_amount", "0"),
+            total=post_data.get("total_amount", "0"),
+            total_currency=post_data.get("total_currency", "USD"),
         )
 
 
 @dataclass
 class ReviewResult:
     """Resultado de la operación de revisión. Desacopla el servicio de Django HTTP."""
+
     success: bool
     venta: Venta | None = None
     error_message: str | None = None
@@ -98,7 +101,7 @@ class TicketReviewService:
 
         # Persistir la asociación de cliente en sesión (usada por VentaBuilder)
         if form_data.cliente_id:
-            session['forced_cliente_id'] = form_data.cliente_id
+            session["forced_cliente_id"] = form_data.cliente_id
 
         return self._reprocess(boleto, form_data.cliente_id)
 
@@ -121,13 +124,12 @@ class TicketReviewService:
     def _update_amounts(self, boleto: BoletoImportado, fd: StudioFormData) -> None:
         """Parsea y asigna los montos financieros. Falla de forma controlada."""
         try:
-            boleto.tarifa_base = Decimal(fd.fare.replace(',', ''))
-            boleto.otros_impuestos_monto = Decimal(fd.taxes.replace(',', ''))
-            boleto.total_boleto = Decimal(fd.total.replace(',', ''))
+            boleto.tarifa_base = Decimal(fd.fare.replace(",", ""))
+            boleto.otros_impuestos_monto = Decimal(fd.taxes.replace(",", ""))
+            boleto.total_boleto = Decimal(fd.total.replace(",", ""))
         except (InvalidOperation, AttributeError) as e:
             logger.warning(
-                f"Error parseando montos del boleto {boleto.pk} "
-                f"(ticket={fd.ticket_no}): {e}"
+                f"Error parseando montos del boleto {boleto.pk} " f"(ticket={fd.ticket_no}): {e}"
             )
 
     def _sync_parsed_data(self, boleto: BoletoImportado, fd: StudioFormData) -> None:
@@ -137,37 +139,38 @@ class TicketReviewService:
         el nuevo esquema del VentaBuilder (UPPERCASE).
         """
         datos = boleto.datos_parseados or {}
-        datos.update({
-            # Esquema legacy (parsers Sabre/KIU)
-            'passenger_name': fd.nombre,
-            'passenger_document': fd.foid,
-            'pnr': fd.pnr,
-            'pnr_aerolinea': fd.pnr_aerolinea,
-            'airline_pnr': fd.pnr_aerolinea,
-            'ticket_number': fd.ticket_no,
-            'total_amount': fd.total,
-            'total_currency': fd.total_currency,
-            'fare_amount': fd.fare,
-            'tax_details': fd.taxes,
-            # Esquema God Mode (VentaBuilder)
-            'NOMBRE_DEL_PASAJERO': fd.nombre,
-            'CODIGO_IDENTIFICACION': fd.foid,
-            'CODIGO_RESERVA': fd.pnr,
-            'CODIGO_RESERVA_AEROLINEA': fd.pnr_aerolinea,
-            'NUMERO_DE_BOLETO': fd.ticket_no,
-            'TARIFA': fd.fare,
-            'IMPUESTOS': fd.taxes,
-            'TOTAL': fd.total,
-            'TOTAL_MONEDA': fd.total_currency,
-        })
+        datos.update(
+            {
+                # Esquema legacy (parsers Sabre/KIU)
+                "passenger_name": fd.nombre,
+                "passenger_document": fd.foid,
+                "pnr": fd.pnr,
+                "pnr_aerolinea": fd.pnr_aerolinea,
+                "airline_pnr": fd.pnr_aerolinea,
+                "ticket_number": fd.ticket_no,
+                "total_amount": fd.total,
+                "total_currency": fd.total_currency,
+                "fare_amount": fd.fare,
+                "tax_details": fd.taxes,
+                # Esquema God Mode (VentaBuilder)
+                "NOMBRE_DEL_PASAJERO": fd.nombre,
+                "CODIGO_IDENTIFICACION": fd.foid,
+                "CODIGO_RESERVA": fd.pnr,
+                "CODIGO_RESERVA_AEROLINEA": fd.pnr_aerolinea,
+                "NUMERO_DE_BOLETO": fd.ticket_no,
+                "TARIFA": fd.fare,
+                "IMPUESTOS": fd.taxes,
+                "TOTAL": fd.total,
+                "TOTAL_MONEDA": fd.total_currency,
+            }
+        )
         boleto.datos_parseados = datos
 
     def _append_audit_log(self, boleto: BoletoImportado) -> None:
         """Añade una entrada de auditoría al log del boleto."""
         boleto.log_parseo = (
-            (boleto.log_parseo or "")
-            + "\n✅ Datos actualizados manualmente vía Studio."
-        )
+            boleto.log_parseo or ""
+        ) + "\n✅ Datos actualizados manualmente vía Studio."
 
     def _reprocess(self, boleto: BoletoImportado, cliente_id: str | None) -> ReviewResult:
         """
@@ -184,13 +187,11 @@ class TicketReviewService:
 
             # Refrescar para detectar si el servicio completó el estado
             boleto.refresh_from_db()
-            if boleto.estado_parseo == 'COM' and boleto.venta_asociada:
+            if boleto.estado_parseo == "COM" and boleto.venta_asociada:
                 venta = boleto.venta_asociada
 
             if isinstance(venta, Venta):
-                logger.info(
-                    f"Boleto {boleto.pk} reprocesado exitosamente → Venta {venta.pk}"
-                )
+                logger.info(f"Boleto {boleto.pk} reprocesado exitosamente → Venta {venta.pk}")
                 return ReviewResult(success=True, venta=venta)
 
             error_msg = boleto.log_parseo or "Error desconocido al reprocesar."

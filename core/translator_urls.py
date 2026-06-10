@@ -13,26 +13,21 @@ from .views.translator_views import (
     validate_itinerary_format_api,
 )
 
-app_name = 'translator'
+app_name = "translator"
 
 urlpatterns = [
     # Traducción de itinerarios
-    path('itinerary/', translate_itinerary_api, name='translate_itinerary'),
-    
+    path("itinerary/", translate_itinerary_api, name="translate_itinerary"),
     # Cálculo de precios
-    path('calculate/', calculate_ticket_price_api, name='calculate_price'),
-    
+    path("calculate/", calculate_ticket_price_api, name="calculate_price"),
     # Catálogos y información
-    path('gds/', get_supported_gds_api, name='supported_gds'),
-    path('airlines/', get_airlines_catalog_api, name='airlines_catalog'),
-    path('airports/', get_airports_catalog_api, name='airports_catalog'),
-    
+    path("gds/", get_supported_gds_api, name="supported_gds"),
+    path("airlines/", get_airlines_catalog_api, name="airlines_catalog"),
+    path("airports/", get_airports_catalog_api, name="airports_catalog"),
     # Validación
-    path('validate/', validate_itinerary_format_api, name='validate_format'),
-    
+    path("validate/", validate_itinerary_format_api, name="validate_format"),
     # Procesamiento en lote
-    path('batch/', batch_translate_api, name='batch_translate'),
-    
+    path("batch/", batch_translate_api, name="batch_translate"),
     # Integración CRM
-    path('create-quote/', create_quote_from_gds_api, name='create_quote'),
+    path("create-quote/", create_quote_from_gds_api, name="create_quote"),
 ]

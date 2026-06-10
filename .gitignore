@@ -44,6 +44,7 @@ secrets.json
 
 # Development & Debugging (scripts temporales en raíz)
 scripts/
+!scripts/check_domain_imports.py
 scratch/
 check_*.py
 debug_*.py
@@ -103,3 +104,9 @@ progreso_*.html
 pytest_output.txt
 pytest_output_utf8.txt
 
+# Tailwind CSS binaries (downloaded during Docker build)
+tailwindcss
+tailwindcss.windows.exe
+tailwindcss.*
+
+.aider*

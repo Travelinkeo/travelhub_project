@@ -7,6 +7,7 @@ from django.utils.translation import gettext_lazy as _
 
 try:
     import bleach
+
     HAS_BLEACH = True
 except ImportError:
     HAS_BLEACH = False
@@ -79,7 +80,9 @@ def validate_file_extension(value):
         content_type = value.content_type
         allowed_mimes = ALLOWED_MIME_TYPES.get(ext.lower(), [])
         if allowed_mimes and content_type not in allowed_mimes:
-            logger.warning(f"MIME type mismatch: {value.name} tiene tipo {content_type}, esperados: {allowed_mimes}")
+            logger.warning(
+                f"MIME type mismatch: {value.name} tiene tipo {content_type}, esperados: {allowed_mimes}"
+            )
     except AttributeError:
         pass  # content_type puede no estar disponible en algunos casos
 
@@ -122,17 +125,37 @@ def validar_numero_pasaporte(value):
 
 
 ALLOWED_HTML_TAGS = [
-    'p', 'br', 'strong', 'em', 'u', 'ul', 'ol', 'li',
-    'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
-    'a', 'blockquote', 'code', 'pre',
-    'table', 'thead', 'tbody', 'tr', 'th', 'td',
-    'img',
+    "p",
+    "br",
+    "strong",
+    "em",
+    "u",
+    "ul",
+    "ol",
+    "li",
+    "h1",
+    "h2",
+    "h3",
+    "h4",
+    "h5",
+    "h6",
+    "a",
+    "blockquote",
+    "code",
+    "pre",
+    "table",
+    "thead",
+    "tbody",
+    "tr",
+    "th",
+    "td",
+    "img",
 ]
 ALLOWED_HTML_ATTRS = {
-    'a': ['href', 'title', 'target'],
-    'img': ['src', 'alt', 'width', 'height'],
-    'td': ['colspan', 'rowspan'],
-    'th': ['colspan', 'rowspan'],
+    "a": ["href", "title", "target"],
+    "img": ["src", "alt", "width", "height"],
+    "td": ["colspan", "rowspan"],
+    "th": ["colspan", "rowspan"],
 }
 
 
@@ -142,7 +165,7 @@ def sanitize_html(value, tags=None, attributes=None):
     Si bleach no está instalado, retorna el valor original.
     """
     if not value:
-        return ''
+        return ""
     if not HAS_BLEACH:
         return value
     allowed_tags = tags or ALLOWED_HTML_TAGS

@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("core", "0022_remove_agencia_bi_insights_and_more"),
         ("crm", "0011_pasajero_foto_perfil"),

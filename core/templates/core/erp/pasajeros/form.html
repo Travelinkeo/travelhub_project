@@ -9,7 +9,7 @@
             <h1 class="text-3xl font-bold text-[var(--text-primary)] mb-2">{{ title }}</h1>
             <p class="text-[var(--text-secondary)]">Gestión de Pasajero</p>
         </div>
-        <a href="{% url 'core:pasajeros_list' %}"
+        <a href="{% url 'crm:pasajero_list' %}"
             class="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors flex items-center font-bold">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18">
@@ -192,7 +192,7 @@
 
         <!-- Botones -->
         <div class="flex justify-end gap-4">
-            <a href="{% url 'core:pasajeros_list' %}"
+            <a href="{% url 'crm:pasajero_list' %}"
                 class="px-6 py-3 bg-[var(--surface-3)] hover:bg-[var(--surface-4)] text-[var(--text-primary)] rounded-xl border border-[var(--border)] font-bold text-sm transition-colors">Cancelar</a>
             <button type="submit"
                 class="px-8 py-3 bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white rounded-xl shadow-lg transition-all font-bold text-sm">Guardar

@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("bookings", "0022_add_updated_at_boletoimportado"),
         ("common", "0002_alter_aerolinea_table_alter_ciudad_table_and_more"),

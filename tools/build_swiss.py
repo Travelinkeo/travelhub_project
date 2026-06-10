@@ -1,17 +1,17 @@
 import os
 import re
 
-html_path = r'C:\Users\ARMANDO\Downloads\stitch_swiss_light_quote_creator_form\swiss_light_quote_creator_form\code.html'
-out_path = r'C:\Users\ARMANDO\travelhub_project\core\templates\core\erp\cotizaciones\crear_cotizacion_swiss.html'
+html_path = r"C:\Users\ARMANDO\Downloads\stitch_swiss_light_quote_creator_form\swiss_light_quote_creator_form\code.html"
+out_path = r"C:\Users\ARMANDO\travelhub_project\core\templates\core\erp\cotizaciones\crear_cotizacion_swiss.html"
 
-with open(html_path, encoding='utf-8') as f:
+with open(html_path, encoding="utf-8") as f:
     html = f.read()
 
 # Extract <main>
-m = re.search(r'<main.*?</main>', html, re.DOTALL)
+m = re.search(r"<main.*?</main>", html, re.DOTALL)
 if m:
     main_content = m.group(0)
-    
+
     template = f"""{{% extends 'base_modern_v2.html' %}}
 {{% block title %}}{{% if form.instance.pk %}}Editar Cotización #{{{{ form.instance.numero_cotizacion }}}}{{% else %}}Nueva Cotización{{% endif %}}{{% endblock %}}
 
@@ -43,7 +43,7 @@ if m:
 {{% endblock %}}
 """
     os.makedirs(os.path.dirname(out_path), exist_ok=True)
-    with open(out_path, 'w', encoding='utf-8') as out:
+    with open(out_path, "w", encoding="utf-8") as out:
         out.write(template)
     print("Template generated!")
 else:

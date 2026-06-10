@@ -4,15 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('bookings', '0005_boletoimportado_core_boleto_agencia_eea8c0_idx'),
+        ("bookings", "0005_boletoimportado_core_boleto_agencia_eea8c0_idx"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='venta',
-            name='localizador',
-            field=models.CharField(blank=True, help_text='Código único de la reserva o localizador.', max_length=20, verbose_name='Localizador/PNR'),
+            model_name="venta",
+            name="localizador",
+            field=models.CharField(
+                blank=True,
+                help_text="Código único de la reserva o localizador.",
+                max_length=20,
+                verbose_name="Localizador/PNR",
+            ),
         ),
     ]

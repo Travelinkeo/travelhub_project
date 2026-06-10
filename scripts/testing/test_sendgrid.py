@@ -7,17 +7,18 @@ USO:
     python manage.py shell < scripts/testing/test_sendgrid.py
 
     O bien:
-    cd c:\Users\ARMANDO\travelhub_project
-    .\venv\Scripts\python.exe scripts/testing/test_sendgrid.py
+    cd C:/Users/ARMANDO/travelhub_project
+    ./venv/Scripts/python.exe scripts/testing/test_sendgrid.py
 """
 
 import os
 import sys
+
 import django
 
 # Bootstrap Django
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "travelhub.settings")
 django.setup()
 
 from django.conf import settings
@@ -31,11 +32,13 @@ print(f"  EMAIL_HOST     : {settings.EMAIL_HOST}")
 print(f"  EMAIL_PORT     : {settings.EMAIL_PORT}")
 print(f"  EMAIL_USE_TLS  : {settings.EMAIL_USE_TLS}")
 print(f"  EMAIL_HOST_USER: {settings.EMAIL_HOST_USER}")
-print(f"  EMAIL_PASSWORD : {'✅ CONFIGURADA' if settings.EMAIL_HOST_PASSWORD and not settings.EMAIL_HOST_PASSWORD.startswith('SG.pon-') else '❌ NO CONFIGURADA (placeholder)'}")
+print(
+    f"  EMAIL_PASSWORD : {'✅ CONFIGURADA' if settings.EMAIL_HOST_PASSWORD and not settings.EMAIL_HOST_PASSWORD.startswith('SG.pon-') else '❌ NO CONFIGURADA (placeholder)'}"
+)
 print(f"  DEFAULT_FROM   : {settings.DEFAULT_FROM_EMAIL}")
 print("=" * 60)
 
-if 'console' in settings.EMAIL_BACKEND:
+if "console" in settings.EMAIL_BACKEND:
     print("\n⚠️  Modo CONSOLA activo — los emails NO se envían.")
     print("   Agrega tu SENDGRID_API_KEY real al .env para activar el envío.")
     sys.exit(0)

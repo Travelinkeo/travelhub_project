@@ -7,7 +7,6 @@ import core.validators
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("bookings", "0009_alter_venta_factura_consolidada_and_more"),
         ("common", "0001_initial"),

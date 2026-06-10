@@ -1,0 +1,15 @@
+version: 2
+updates:
+  - package-ecosystem: "pip"
+    directory: "/requirements"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    ignore:
+      - dependency-name: "Django"
+        versions: ["> 5.3.0"]
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"

@@ -21,7 +21,7 @@
             <h4 class="text-[10px] font-black uppercase tracking-widest text-text-muted mb-2 ml-2">Ventas & PNR</h4>
             <div class="space-y-1">
                 {% for venta in ventas %}
-                <a href="{% url 'core:venta_detalle' venta.pk %}" class="flex items-center gap-4 p-3 rounded-xl hover:bg-surface-2 transition-colors group">
+                <a href="{% url 'bookings:venta_detail' venta.pk %}" class="flex items-center gap-4 p-3 rounded-xl hover:bg-surface-2 transition-colors group">
                     <div class="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform">
                         <span class="material-symbols-outlined text-[16px]">airplane_ticket</span>
                     </div>

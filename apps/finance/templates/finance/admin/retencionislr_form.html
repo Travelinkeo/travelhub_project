@@ -1,0 +1,100 @@
+{% extends 'base_modern.html' %}
+{% load i18n %}
+
+{% block title %}{% if form.instance.pk %}{% trans "Editar Retención ISLR" %}{% else %}{% trans "Nueva Retención ISLR" %}{% endif %} — TravelHub{% endblock %}
+
+{% block content %}
+<main class="flex-1 w-full max-w-[900px] mx-auto p-6 md:p-8 lg:p-10">
+    <!-- Header -->
+    <div class="mb-8 flex items-end justify-between gap-4 border-b border-border-color pb-6">
+        <div>
+            <div class="flex items-center gap-2 text-xs text-text-muted font-medium mb-2 uppercase tracking-wider">
+                <a href="{% url 'finance_admin:retencionislr_list' %}" class="hover:text-primary transition-colors">{% trans "Administración" %}</a>
+                <span class="material-symbols-outlined text-[10px]">chevron_right</span>
+                <a href="{% url 'finance_admin:retencionislr_list' %}" class="hover:text-primary transition-colors">{% trans "Retenciones ISLR" %}</a>
+                <span class="material-symbols-outlined text-[10px]">chevron_right</span>
+                <span class="text-primary">{% if form.instance.pk %}{% trans "Editar" %}{% else %}{% trans "Nueva" %}{% endif %}</span>
+            </div>
+            <h1 class="text-3xl font-bold text-text-main tracking-tight">{% if form.instance.pk %}{{ form.instance.numero_comprobante }}{% else %}{% trans "Registrar Nueva Retención ISLR" %}{% endif %}</h1>
+        </div>
+        <div class="flex items-center gap-3">
+            <a href="{% url 'finance_admin:retencionislr_list' %}" class="btn-secondary h-[36px] px-4 text-xs">
+                <span class="material-symbols-outlined text-[18px]">arrow_back</span> {% trans "Volver al listado" %}
+            </a>
+        </div>
+    </div>
+
+    <!-- Form Card -->
+    <div class="card-base">
+        <form method="post" class="p-6 space-y-6">
+            {% csrf_token %}
+
+            {% if form.errors %}
+            <div class="bg-status-danger-bg border border-status-danger rounded-xl p-4 shadow-sm flex items-start gap-4">
+                <span class="material-symbols-outlined text-status-danger shrink-0 mt-0.5">error</span>
+                <div>
+                    <h3 class="text-sm font-bold text-status-danger">{% trans "Hay errores en el formulario" %}</h3>
+                    <div class="mt-1 text-sm text-red-400">
+                        {{ form.non_field_errors }}
+                        {% for field in form %}
+                            {% if field.errors %}
+                            <p>{{ field.label }}: {{ field.errors|striptags }}</p>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="{{ form.factura.id_for_label }}" class="block text-text-muted text-[10px] uppercase font-bold tracking-wider mb-1.5">{% trans "Factura Asociada" %}</label>
+                    {{ form.factura }}
+                </div>
+                <div>
+                    <label for="{{ form.cliente.id_for_label }}" class="block text-text-muted text-[10px] uppercase font-bold tracking-wider mb-1.5">{% trans "Cliente" %} *</label>
+                    {{ form.cliente }}
+                </div>
+                <div>
+                    <label for="{{ form.numero_comprobante.id_for_label }}" class="block text-text-muted text-[10px] uppercase font-bold tracking-wider mb-1.5">{% trans "Número de Comprobante" %} *</label>
+                    {{ form.numero_comprobante }}
+                </div>
+                <div>
+                    <label for="{{ form.fecha_emision.id_for_label }}" class="block text-text-muted text-[10px] uppercase font-bold tracking-wider mb-1.5">{% trans "Fecha de Emisión" %} *</label>
+                    {{ form.fecha_emision }}
+                </div>
+                <div>
+                    <label for="{{ form.monto_base.id_for_label }}" class="block text-text-muted text-[10px] uppercase font-bold tracking-wider mb-1.5">{% trans "Monto Base" %} *</label>
+                    {{ form.monto_base }}
+                </div>
+                <div>
+                    <label for="{{ form.porcentaje_retencion.id_for_label }}" class="block text-text-muted text-[10px] uppercase font-bold tracking-wider mb-1.5">{% trans "Porcentaje de Retención" %} *</label>
+                    {{ form.porcentaje_retencion }}
+                </div>
+                <div>
+                    <label for="{{ form.monto_retenido.id_for_label }}" class="block text-text-muted text-[10px] uppercase font-bold tracking-wider mb-1.5">{% trans "Monto Retenido" %} *</label>
+                    {{ form.monto_retenido }}
+                </div>
+                <div>
+                    <label for="{{ form.estado.id_for_label }}" class="block text-text-muted text-[10px] uppercase font-bold tracking-wider mb-1.5">{% trans "Estado" %} *</label>
+                    {{ form.estado }}
+                </div>
+                <div class="md:col-span-2">
+                    <label for="{{ form.periodo_fiscal.id_for_label }}" class="block text-text-muted text-[10px] uppercase font-bold tracking-wider mb-1.5">{% trans "Período Fiscal" %}</label>
+                    {{ form.periodo_fiscal }}
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex items-center justify-end gap-4 mt-8 pt-6 border-t border-border-color">
+                <a href="{% url 'finance_admin:retencionislr_list' %}" class="btn-secondary h-[40px] px-6">
+                    {% trans "Cancelar" %}
+                </a>
+                <button type="submit" class="btn-primary h-[40px] px-8">
+                    {% trans "Guardar Cambios" %}
+                </button>
+            </div>
+        </form>
+    </div>
+</main>
+{% endblock %}

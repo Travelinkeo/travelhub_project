@@ -5,6 +5,7 @@ from django.dispatch import receiver
 
 logger = logging.getLogger(__name__)
 
+
 def _get_cuenta_banco_caja(metodo_pago, moneda):
     """
     Intenta buscar la cuenta contable de activo (Caja/Banco) adecuada
@@ -13,42 +14,44 @@ def _get_cuenta_banco_caja(metodo_pago, moneda):
     from apps.contabilidad.models import PlanContable
     # MAPEO DE CUENTAS (Esto debería estar en configuración, pero hardcodeamos heurística para MVP)
     # Buscamos cuentas que empiecen por '1' (Activo) y coincidan con el nombre
-    
-    query = PlanContable.objects.filter(tipo_cuenta='AC', permite_movimientos=True) # Activo
-    
+
+    query = PlanContable.objects.filter(tipo_cuenta="AC", permite_movimientos=True)  # Activo
+
     termino = ""
-    if metodo_pago == 'EFE':
+    if metodo_pago == "EFE":
         termino = "Caja"
-    elif metodo_pago in ['TRA', 'TDC']:
+    elif metodo_pago in ["TRA", "TDC"]:
         termino = "Banco"
-    elif metodo_pago == 'ZEL':
-        termino = "Zelle" # O "Caja Digital"
-        
+    elif metodo_pago == "ZEL":
+        termino = "Zelle"  # O "Caja Digital"
+
     # Filtrar por término
     cuentas = query.filter(nombre_cuenta__icontains=termino)
-    
+
     # Filtrar heurística por moneda (si el nombre incluye USD o VES/BS)
     moneda_str = moneda.codigo_iso
     cuentas_moneda = cuentas.filter(nombre_cuenta__icontains=moneda_str)
-    
+
     if cuentas_moneda.exists():
         return cuentas_moneda.first()
-    
+
     if cuentas.exists():
         return cuentas.first()
-        
+
     return None
 
-@receiver(post_save, sender='finance.GastoOperativo')
+
+@receiver(post_save, sender="finance.GastoOperativo")
 def contabilizar_gasto_operativo(sender, instance, created, **kwargs):
     from apps.contabilidad.models import AsientoContable, DetalleAsiento
+
     """
     Genera/Actualiza el Asiento Contable automáticamente.
     Asiento:
         DEBE: Cuenta de Gasto (instance.categoria)
         HABER: Cuenta de Caja/Banco (según metodo_pago)
     """
-    if getattr(instance, '_skip_signal', False):
+    if getattr(instance, "_skip_signal", False):
         return
 
     try:
@@ -56,10 +59,10 @@ def contabilizar_gasto_operativo(sender, instance, created, **kwargs):
         if not cuenta_haber:
             error_msg = f"❌ Error Contable: No se configuró cuenta para {instance.metodo_pago} en {instance.moneda}"
             logger.error(error_msg)
-            instance.estado_contable = 'ERR'
+            instance.estado_contable = "ERR"
             instance.error_contable_msg = error_msg
             instance._skip_signal = True
-            instance.save(update_fields=['estado_contable', 'error_contable_msg'])
+            instance.save(update_fields=["estado_contable", "error_contable_msg"])
             return
 
         # Crear o Recuperar Asiento
@@ -68,15 +71,15 @@ def contabilizar_gasto_operativo(sender, instance, created, **kwargs):
             asiento = AsientoContable.objects.create(
                 fecha_contable=instance.fecha,
                 descripcion_general=f"Gasto: {instance.descripcion}",
-                tipo_asiento='DIA', # Diario / Egreso
+                tipo_asiento="DIA",  # Diario / Egreso
                 moneda=instance.moneda,
                 referencia_documento=f"GASTO-{instance.pk}",
-                estado='BOR' # Borrador por defecto
+                estado="BOR",  # Borrador por defecto
             )
             instance.asiento_contable = asiento
             # Guardamos sin disparar señal de nuevo para evitar loop recursivo if fields updated
             instance._skip_signal = True
-            instance.save(update_fields=['asiento_contable'])
+            instance.save(update_fields=["asiento_contable"])
         else:
             # Actualizar cabecera
             asiento.fecha_contable = instance.fecha
@@ -94,9 +97,9 @@ def contabilizar_gasto_operativo(sender, instance, created, **kwargs):
             cuenta_contable=instance.categoria,
             debe=instance.monto,
             haber=0,
-            descripcion_linea=f"Cargo a {instance.categoria.nombre_cuenta}"
+            descripcion_linea=f"Cargo a {instance.categoria.nombre_cuenta}",
         )
-        
+
         # 2. HABER (Salida de Dinero)
         DetalleAsiento.objects.create(
             asiento=asiento,
@@ -104,22 +107,23 @@ def contabilizar_gasto_operativo(sender, instance, created, **kwargs):
             cuenta_contable=cuenta_haber,
             debe=0,
             haber=instance.monto,
-            descripcion_linea=f"Pago con {instance.get_metodo_pago_display()}"
+            descripcion_linea=f"Pago con {instance.get_metodo_pago_display()}",
         )
-        
+
         # Calcular totales
         asiento.calcular_totales()
-        
+
         # Marcar éxito (Audit Point 3)
-        instance.estado_contable = 'PRO'
+        instance.estado_contable = "PRO"
         instance.error_contable_msg = None
         instance._skip_signal = True
-        instance.save(update_fields=['estado_contable', 'error_contable_msg'])
-        
+        instance.save(update_fields=["estado_contable", "error_contable_msg"])
+
     except Exception as e:
         logger.error(f"Error contabilizando Gasto #{instance.pk}: {e}")
 
-@receiver(post_delete, sender='finance.GastoOperativo')
+
+@receiver(post_delete, sender="finance.GastoOperativo")
 def eliminar_asiento_gasto(sender, instance, **kwargs):
     if instance.asiento_contable:
         instance.asiento_contable.delete()

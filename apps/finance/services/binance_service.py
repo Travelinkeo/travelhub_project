@@ -14,6 +14,7 @@ from apps.finance.models import Factura, PagoBinance
 
 logger = logging.getLogger(__name__)
 
+
 class BinancePayService:
     """
     Servicio para interactuar con la API de Binance Pay (v2).
@@ -22,8 +23,8 @@ class BinancePayService:
 
     def __init__(self):
         self.base_url = "https://bpay.binanceapi.com"
-        self.api_key = getattr(settings, 'BINANCE_PAY_API_KEY', 'MOCK_KEY')
-        self.secret_key = getattr(settings, 'BINANCE_PAY_SECRET_KEY', 'MOCK_SECRET')
+        self.api_key = getattr(settings, "BINANCE_PAY_API_KEY", "")
+        self.secret_key = getattr(settings, "BINANCE_PAY_SECRET_KEY", "")
 
     def _generate_signature(self, payload: str, timestamp: str, nonce: str) -> str:
         """
@@ -31,11 +32,13 @@ class BinancePayService:
         Formato: payload + timestamp + nonce
         """
         payload_to_sign = f"{timestamp}\n{nonce}\n{payload}\n"
-        signature = hmac.new(
-            self.secret_key.encode('utf-8'),
-            payload_to_sign.encode('utf-8'),
-            hashlib.sha512
-        ).hexdigest().upper()
+        signature = (
+            hmac.new(
+                self.secret_key.encode("utf-8"), payload_to_sign.encode("utf-8"), hashlib.sha512
+            )
+            .hexdigest()
+            .upper()
+        )
         return signature
 
     def _get_headers(self, payload: str):
@@ -48,7 +51,7 @@ class BinancePayService:
             "BinancePay-Timestamp": timestamp,
             "BinancePay-Nonce": nonce,
             "BinancePay-Certificate-SN": self.api_key,
-            "BinancePay-Signature": signature
+            "BinancePay-Signature": signature,
         }
 
     def create_order(self, factura: Factura):
@@ -56,7 +59,7 @@ class BinancePayService:
         Crea una orden en Binance Pay para una factura específica.
         """
         merchant_trade_no = f"TH-{factura.id_factura}-{uuid.uuid4().hex[:8]}"
-        
+
         payload_dict = {
             "env": {"terminalType": "WEB"},
             "merchantTradeNo": merchant_trade_no,
@@ -64,12 +67,12 @@ class BinancePayService:
             "currency": "USDT",
             "goods": {
                 "goodsType": "01",
-                "goodsCategory": "6000", # Travel
+                "goodsCategory": "6000",  # Travel
                 "referenceGoodsId": f"INV-{factura.numero_factura}",
-                "goodsName": f"Servicios Turísticos - {factura.numero_factura}"
+                "goodsName": f"Servicios Turísticos - {factura.numero_factura}",
             },
             "cancelUrl": f"{settings.WEB_APP_URL}/finance/invoice/{factura.id_factura}/cancel",
-            "returnUrl": f"{settings.WEB_APP_URL}/finance/invoice/{factura.id_factura}/success"
+            "returnUrl": f"{settings.WEB_APP_URL}/finance/invoice/{factura.id_factura}/success",
         }
 
         payload = json.dumps(payload_dict)
@@ -81,24 +84,26 @@ class BinancePayService:
                 factura=factura,
                 merchant_trade_no=merchant_trade_no,
                 monto=factura.monto_total,
-                estado=PagoBinance.EstadoPago.INICIAL
+                estado=PagoBinance.EstadoPago.INICIAL,
             )
 
-            # Si estamos en modo MOCK (sin llaves reales), simulamos respuesta
-            if self.api_key == 'MOCK_KEY':
+            # Si estamos en modo DEBUG (sin llaves reales), simulamos respuesta
+            if settings.DEBUG and not self.api_key:
                 pago.prepay_id = f"MOCK_{uuid.uuid4().hex}"
                 pago.checkout_url = "https://mock.binance.com/checkout"
                 pago.save()
                 return pago
 
-            response = requests.post(url, headers=self._get_headers(payload), data=payload, timeout=30)
+            response = requests.post(
+                url, headers=self._get_headers(payload), data=payload, timeout=30
+            )
             res_json = response.json()
 
             pago.raw_response = res_json
-            if res_json.get('status') == 'SUCCESS':
-                data = res_json['data']
-                pago.prepay_id = data['prepayId']
-                pago.checkout_url = data['checkoutUrl']
+            if res_json.get("status") == "SUCCESS":
+                data = res_json["data"]
+                pago.prepay_id = data["prepayId"]
+                pago.checkout_url = data["checkoutUrl"]
                 pago.save()
                 return pago
             else:
@@ -107,6 +112,9 @@ class BinancePayService:
                 logger.error(f"Error Binance Create Order: {res_json}")
                 return None
 
+        except (ConnectionError, TimeoutError, OSError) as e:
+            logger.error("Binance Pay API connection error: %s", e)
+            return None
         except Exception:
             logger.exception("Error calling Binance Pay API")
             return None
@@ -124,24 +132,24 @@ class BinancePayService:
         Procesa la notificación de éxito (C2B_PAYMENT).
         Actualiza factura y dispara contabilidad.
         """
-        merchant_trade_no = biz_data.get('merchantTradeNo')
+        merchant_trade_no = biz_data.get("merchantTradeNo")
         pago = PagoBinance.objects.filter(merchant_trade_no=merchant_trade_no).first()
 
         if not pago:
             return False
 
-        if biz_data.get('status') == 'PAY_SUCCESS':
+        if biz_data.get("status") == "PAY_SUCCESS":
             pago.estado = PagoBinance.EstadoPago.EXITOSO
             pago.save()
 
             # Actualizar Factura
             factura = pago.factura
-            factura.estado = 'PAG'  # Pagada
+            factura.estado = "PAG"  # Pagada
             factura.save()
 
             # Disparar Asiento Contable
             self._create_accounting_entry(pago)
-            
+
             logger.info(f"Factura {factura.numero_factura} pagada vía Binance Pay.")
             return True
 
@@ -152,8 +160,11 @@ class BinancePayService:
         Crea el asiento contable de ingreso por el pago de Binance Pay.
         """
         try:
+            from django.apps import apps
 
-            from apps.contabilidad.models import AsientoContable, DetalleAsiento, PlanContable
+            AsientoContable = apps.get_model("contabilidad", "AsientoContable")
+            DetalleAsiento = apps.get_model("contabilidad", "DetalleAsiento")
+            PlanContable = apps.get_model("contabilidad", "PlanContable")
 
             with transaction.atomic():
                 factura = pago.factura
@@ -164,27 +175,27 @@ class BinancePayService:
                     moneda=factura.moneda,
                     referencia_documento=factura.numero_factura,
                     estado=AsientoContable.EstadoAsiento.CONTABILIZADO,
-                    tasa_cambio_aplicada=factura.tasa_cambio
+                    tasa_cambio_aplicada=factura.tasa_cambio,
                 )
 
                 # DEBE: Efectivo / Binance (Usando Caja General USD como placeholder)
-                cuenta_caja = PlanContable.objects.get(codigo_cuenta='1.1.01.02')
+                cuenta_caja = PlanContable.objects.get(codigo_cuenta="1.1.01.02")
                 DetalleAsiento.objects.create(
                     asiento=asiento,
                     linea=1,
                     cuenta_contable=cuenta_caja,
                     debe=pago.monto,
-                    descripcion_linea=f"Ingreso Binance Pay - Order {pago.merchant_trade_no}"
+                    descripcion_linea=f"Ingreso Binance Pay - Order {pago.merchant_trade_no}",
                 )
 
                 # HABER: Cuentas por Cobrar Clientes
-                cuenta_cxc = PlanContable.objects.get(codigo_cuenta='1.1.02.02')
+                cuenta_cxc = PlanContable.objects.get(codigo_cuenta="1.1.02.02")
                 DetalleAsiento.objects.create(
                     asiento=asiento,
                     linea=2,
                     cuenta_contable=cuenta_cxc,
                     haber=pago.monto,
-                    descripcion_linea=f"Cancelación saldo Factura {factura.numero_factura}"
+                    descripcion_linea=f"Cancelación saldo Factura {factura.numero_factura}",
                 )
 
                 asiento.calcular_totales()
@@ -192,5 +203,7 @@ class BinancePayService:
                 return asiento
 
         except Exception as e:
-            logger.error(f"Error creando asiento contable para pago Binance {pago.id_pago_binance}: {e}")
+            logger.error(
+                f"Error creando asiento contable para pago Binance {pago.id_pago_binance}: {e}"
+            )
             return None

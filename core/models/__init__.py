@@ -21,9 +21,16 @@ from .magic_link import MagicLinkToken
 from .migration_checks import MigrationCheck
 
 __all__ = [
-    'Agencia', 'UsuarioAgencia', 'AgenciaBranding', 'AgenciaConfiguracion',
-    'MigrationCheck', 'AuditLog',
-    'AIUsageLog', 'CronApiKey', 'FeatureFlag',
-    'HistorialCambioBoleto', 'AnulacionBoleto',
-    'MagicLinkToken',
+    "Agencia",
+    "UsuarioAgencia",
+    "AgenciaBranding",
+    "AgenciaConfiguracion",
+    "MigrationCheck",
+    "AuditLog",
+    "AIUsageLog",
+    "CronApiKey",
+    "FeatureFlag",
+    "HistorialCambioBoleto",
+    "AnulacionBoleto",
+    "MagicLinkToken",
 ]

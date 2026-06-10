@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-celery-worker
+  labels:
+    app: {{ .Release.Name }}-celery-worker
+spec:
+  replicas: {{ .Values.celery.worker.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-celery-worker
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-celery-worker
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}-celery-worker
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          command: ["celery", "-A", "travelhub", "worker", "-l", "INFO"]
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          envFrom:
+            - secretRef:
+                name: {{ .Release.Name }}-secrets

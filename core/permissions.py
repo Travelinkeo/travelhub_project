@@ -8,7 +8,8 @@ class IsStaffOrGroupWrite(permissions.BasePermission):
     Escritura solo a staff o miembros de grupos cuyo nombre contenga
     alguno de los keywords permitidos (por defecto: 'oper', 'venta').
     """
-    allowed_group_keywords = ['oper', 'venta']
+
+    allowed_group_keywords = ["oper", "venta"]
 
     def has_permission(self, request, view):
         user = request.user
@@ -19,17 +20,27 @@ class IsStaffOrGroupWrite(permissions.BasePermission):
         if user.is_staff:
             return True
         user_group_names = [g.name.lower() for g in user.groups.all()]
-        return any(any(kw in name for kw in self.allowed_group_keywords) for name in user_group_names)
+        for name in user_group_names:
+            words = name.replace("_", " ").replace("-", " ").split()
+            if any(w.startswith(kw) for kw in self.allowed_group_keywords for w in words):
+                return True
+        return False
+
 
 def rol_requerido(nombres_grupos):
     """
-    Escudo de intercepción. Verifica si el operativo pertenece 
+    Escudo de intercepción. Verifica si el operativo pertenece
     a los grupos autorizados antes de procesar la petición.
     """
+
     def check_group(user):
-        if user.is_active and (user.is_superuser or user.groups.filter(name__in=nombres_grupos).exists()):
+        if user.is_active and (
+            user.is_superuser or user.groups.filter(name__in=nombres_grupos).exists()
+        ):
             return True
         raise PermissionDenied("Brecha de seguridad detectada: Nivel de autorización insuficiente.")
+
     return user_passes_test(check_group)
+
 
 __all__ = ["IsStaffOrGroupWrite", "rol_requerido"]

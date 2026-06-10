@@ -57,7 +57,7 @@
             <h1 class="text-3xl font-bold text-[var(--text-primary)] mb-2">{{ title }}</h1>
             <p class="text-[var(--text-secondary)]">Registrar una nueva venta</p>
         </div>
-        <a href="{% url 'core:ventas_dashboard' %}"
+        <a href="{% url 'bookings:venta_list' %}"
             class="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors flex items-center font-bold">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18">
@@ -121,7 +121,7 @@
 
                 <!-- Actions -->
                 <div class="flex justify-end gap-4">
-                    <a href="{% url 'core:ventas_dashboard' %}"
+                    <a href="{% url 'bookings:venta_list' %}"
                         class="px-6 py-3 bg-[var(--surface-3)] hover:bg-[var(--surface-4)] text-[var(--text-primary)] font-bold text-sm rounded-xl border border-[var(--border)] transition-colors">
                         Cancelar
                     </a>

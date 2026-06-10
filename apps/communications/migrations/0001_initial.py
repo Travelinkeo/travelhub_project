@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
@@ -49,9 +48,7 @@ class Migration(migrations.Migration):
                 ("cuerpo_completo", models.TextField(blank=True)),
                 (
                     "message_id",
-                    models.CharField(
-                        blank=True, max_length=255, null=True, unique=True
-                    ),
+                    models.CharField(blank=True, max_length=255, null=True, unique=True),
                 ),
                 ("procesado", models.BooleanField(default=False)),
                 (

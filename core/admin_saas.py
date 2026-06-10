@@ -1,5 +1,3 @@
-
-
 class SaaSAdminMixin:
     """
     Mixin para aislar datos por agencia en el Django Admin.
@@ -21,12 +19,18 @@ class SaaSAdminMixin:
             if "__" in self.saas_agency_field or hasattr(self.model, self.saas_agency_field):
                 return qs.filter(**{self.saas_agency_field: request.agencia})
 
-        should_isolate = "__" in self.saas_agency_field or hasattr(self.model, self.saas_agency_field)
+        should_isolate = "__" in self.saas_agency_field or hasattr(
+            self.model, self.saas_agency_field
+        )
         return qs.none() if should_isolate else qs
 
     def save_model(self, request, obj, form, change):
         if not request.user.is_superuser and not change:
-            if "__" not in self.saas_agency_field and hasattr(obj, self.saas_agency_field) and hasattr(request, "agencia"):
+            if (
+                "__" not in self.saas_agency_field
+                and hasattr(obj, self.saas_agency_field)
+                and hasattr(request, "agencia")
+            ):
                 setattr(obj, self.saas_agency_field, request.agencia)
         super().save_model(request, obj, form, change)
 
@@ -37,7 +41,9 @@ class SaaSAdminMixin:
         if not request.user.is_superuser and "__" not in self.saas_agency_field:
             for _name, options in fieldsets:
                 if "fields" in options:
-                    options["fields"] = [f for f in options["fields"] if f != self.saas_agency_field]
+                    options["fields"] = [
+                        f for f in options["fields"] if f != self.saas_agency_field
+                    ]
         return fieldsets
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):

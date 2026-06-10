@@ -14,12 +14,12 @@
         <input type="text" name="q" value="{{ request.GET.q|default:'' }}"
                placeholder="Buscar factura..."
                class="flex-1 bg-gray-800 border border-gray-700 text-white rounded-lg px-4 py-2"
-               hx-get="{% url 'core:facturacion_dashboard' %}"
+               hx-get="{% url 'finance:facturacion_dashboard' %}"
                hx-trigger="keyup changed delay:500ms"
                hx-target="#factura-list">
         <select name="estado" 
                 class="bg-gray-800 border border-gray-700 text-white rounded-lg px-4 py-2"
-                hx-get="{% url 'core:facturacion_dashboard' %}"
+                hx-get="{% url 'finance:facturacion_dashboard' %}"
                 hx-trigger="change"
                 hx-target="#factura-list">
             <option value="">Todos</option>
@@ -59,7 +59,7 @@
                         class="text-blue-400 hover:text-blue-300 text-sm">
                     Ver Detalle
                 </button>
-                <a href="{% url 'core:factura_detalle' factura.pk %}"
+                <a href="{% url 'finance:factura_detalle' factura.pk %}"
                    class="text-gray-400 hover:text-white text-sm">Ver PDF</a>
             </div>
             <!-- Expanded Details -->

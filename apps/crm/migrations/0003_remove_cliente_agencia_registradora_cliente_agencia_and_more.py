@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("core", "0003_asientocontable_moneda_ciudad_pais_and_more"),
         ("crm", "0002_alter_comisionfreelancer_freelancer_and_more"),

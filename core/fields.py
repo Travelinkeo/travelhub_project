@@ -6,10 +6,11 @@ from the cryptography library.
 
 Usage:
     from core.fields import EncryptedCharField
-    
+
     class MyModel(models.Model):
         sensitive_data = EncryptedCharField(max_length=100)
 """
+
 import logging
 
 from django.conf import settings
@@ -23,32 +24,30 @@ class EncryptedCharField(models.CharField):
     """
     CharField que cifra automáticamente los datos antes de guardarlos
     y los descifra al recuperarlos.
-    
+
     Usa Fernet (symmetric encryption) de la librería cryptography.
     """
-    
+
     description = "Encrypted CharField"
-    
+
     _cached_fernet = None
 
     def __init__(self, *args, **kwargs):
-        # Aumentar max_length para acomodar datos cifrados
-        if 'max_length' in kwargs:
-            kwargs['max_length'] = int(kwargs['max_length'] * 4)
-        
+        if "max_length" in kwargs:
+            kwargs["max_length"] = int(kwargs["max_length"] * 4)
+
         super().__init__(*args, **kwargs)
-    
+
     def _get_fernet(self):
-        """Obtiene o crea una instancia de Fernet usando caché de clase"""
         if EncryptedCharField._cached_fernet is None:
             try:
                 from cryptography.fernet import Fernet
 
-                encryption_key = getattr(settings, 'ENCRYPTION_KEY', None)
+                encryption_key = getattr(settings, "ENCRYPTION_KEY", None)
                 if not encryption_key:
                     raise ImproperlyConfigured(
                         "ENCRYPTION_KEY is required. Generate one with: "
-                        "python -c \"from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())\""
+                        'python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"'
                     )
                 fernet_key = encryption_key.encode()
                 EncryptedCharField._cached_fernet = Fernet(fernet_key)
@@ -62,46 +61,36 @@ class EncryptedCharField(models.CharField):
         return self._get_fernet()
 
     def get_prep_value(self, value):
-        if value is None or value == '':
+        if value is None or value == "":
             return value
         try:
-            if isinstance(value, str) and value.startswith('gAAAAA'):
+            if isinstance(value, str) and value.startswith("gAAAAA"):
                 return value
             encrypted = self.fernet.encrypt(value.encode())
-            return encrypted.decode('utf-8')
+            return encrypted.decode("utf-8")
         except Exception as e:
             logger.error(f"Error cifrando valor: {e}")
-            return value
+            raise ValueError(f"Fallo crítico al cifrar campo sensible: {e}") from e
 
     def from_db_value(self, value, expression, connection):
-        if value is None or value == '':
+        if value is None or value == "":
             return value
         try:
             decrypted = self.fernet.decrypt(value.encode())
-            return decrypted.decode('utf-8')
+            return decrypted.decode("utf-8")
         except Exception as e:
-            logger.warning(f"No se pudo descifrar valor, retornando como texto plano: {e}")
-            return value
-    
+            logger.error("Error descifrando campo %s (devolviendo marcador): %s", self.name, e)
+            return "[cifrado]"
+
     def to_python(self, value):
-        """
-        Convierte el valor a Python (usado en formularios)
-        """
-        if value is None or value == '':
+        if value is None or value == "":
             return value
-        
-        # Si viene de la DB, ya está descifrado por from_db_value
-        # Si viene de un formulario, es texto plano
         return value
-    
+
     def deconstruct(self):
-        """
-        Para migraciones de Django
-        """
         name, path, args, kwargs = super().deconstruct()
-        # Restaurar max_length original
-        if 'max_length' in kwargs:
-            kwargs['max_length'] = int(kwargs['max_length'] / 4)
+        if "max_length" in kwargs:
+            kwargs["max_length"] = int(kwargs["max_length"] / 4)
         return name, path, args, kwargs
 
 
@@ -110,25 +99,24 @@ class EncryptedTextField(models.TextField):
     TextField que cifra automáticamente los datos.
     Similar a EncryptedCharField pero para textos largos.
     """
-    
+
     description = "Encrypted TextField"
-    
+
     _cached_fernet = None
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-    
+
     def _get_fernet(self):
-        """Obtiene o crea una instancia de Fernet usando caché de clase"""
         if EncryptedTextField._cached_fernet is None:
             try:
                 from cryptography.fernet import Fernet
 
-                encryption_key = getattr(settings, 'ENCRYPTION_KEY', None)
+                encryption_key = getattr(settings, "ENCRYPTION_KEY", None)
                 if not encryption_key:
                     raise ImproperlyConfigured(
                         "ENCRYPTION_KEY is required. Generate one with: "
-                        "python -c \"from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())\""
+                        'python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"'
                     )
                 fernet_key = encryption_key.encode()
                 EncryptedTextField._cached_fernet = Fernet(fernet_key)
@@ -142,29 +130,28 @@ class EncryptedTextField(models.TextField):
         return self._get_fernet()
 
     def get_prep_value(self, value):
-        if value is None or value == '':
+        if value is None or value == "":
             return value
         try:
-            if isinstance(value, str) and value.startswith('gAAAAA'):
+            if isinstance(value, str) and value.startswith("gAAAAA"):
                 return value
             encrypted = self.fernet.encrypt(value.encode())
-            return encrypted.decode('utf-8')
+            return encrypted.decode("utf-8")
         except Exception as e:
             logger.error(f"Error cifrando valor: {e}")
-            return value
+            raise ValueError(f"Fallo crítico al cifrar campo sensible: {e}") from e
 
     def from_db_value(self, value, expression, connection):
-        if value is None or value == '':
+        if value is None or value == "":
             return value
         try:
             decrypted = self.fernet.decrypt(value.encode())
-            return decrypted.decode('utf-8')
+            return decrypted.decode("utf-8")
         except Exception as e:
-            logger.warning(f"No se pudo descifrar valor, retornando como texto plano: {e}")
-            return value
-    
+            logger.error("Error descifrando campo %s (devolviendo marcador): %s", self.name, e)
+            return "[cifrado]"
+
     def to_python(self, value):
-        """Convierte el valor a Python"""
-        if value is None or value == '':
+        if value is None or value == "":
             return value
         return value

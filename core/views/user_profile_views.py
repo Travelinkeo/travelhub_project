@@ -15,53 +15,53 @@ from core.forms.profile_forms import (
 
 
 class UserProfileView(LoginRequiredMixin, TemplateView):
-    template_name = 'core/config/profile.html'
+    template_name = "core/config/profile.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         user = self.request.user
-        
+
         # Obtener o crear agencia del usuario (asumiendo propietario o primer agencia asignada)
         agencia = None
-        if hasattr(user, 'agencias_propias') and user.agencias_propias.exists():
+        if hasattr(user, "agencias_propias") and user.agencias_propias.exists():
             agencia = user.agencias_propias.first()
-        elif hasattr(user, 'agencias') and user.agencias.exists():
+        elif hasattr(user, "agencias") and user.agencias.exists():
             agencia = user.agencias.first().agencia
-            
-        context['user_form'] = UserProfileForm(instance=user)
-        context['password_form'] = PasswordChangeForm(user)
-        
+
+        context["user_form"] = UserProfileForm(instance=user)
+        context["password_form"] = PasswordChangeForm(user)
+
         if agencia:
-            context['agency_info_form'] = AgencyBasicInfoForm(instance=agencia)
-            context['agency_branding_form'] = AgencyBrandingForm(instance=agencia.branding)
-            context['agency_automation_form'] = AgencyAutomationForm(instance=agencia.configuracion)
-            context['agencia'] = agencia
-        
-        context['active_tab'] = self.request.GET.get('tab', 'perfil')
+            context["agency_info_form"] = AgencyBasicInfoForm(instance=agencia)
+            context["agency_branding_form"] = AgencyBrandingForm(instance=agencia.branding)
+            context["agency_automation_form"] = AgencyAutomationForm(instance=agencia.configuracion)
+            context["agencia"] = agencia
+
+        context["active_tab"] = self.request.GET.get("tab", "perfil")
         return context
 
     def post(self, request, *args, **kwargs):
         user = request.user
         # Determinar qué formulario se envió
-        form_type = request.POST.get('form_type')
-        
+        form_type = request.POST.get("form_type")
+
         # 1. Update User Profile
-        if form_type == 'user_profile':
+        if form_type == "user_profile":
             user_form = UserProfileForm(request.POST, instance=user)
             if user_form.is_valid():
                 user_form.save()
-                messages.success(request, 'Perfil actualizado correctamente.')
+                messages.success(request, "Perfil actualizado correctamente.")
                 return redirect(f"{reverse_lazy('core:user_profile')}?tab=perfil")
             else:
-                messages.error(request, 'Error al actualizar perfil.')
-        
+                messages.error(request, "Error al actualizar perfil.")
+
         # 2. Change Password
-        elif form_type == 'password_change':
+        elif form_type == "password_change":
             password_form = PasswordChangeForm(user, request.POST)
             if password_form.is_valid():
                 user = password_form.save()
                 update_session_auth_hash(request, user)  # Important so user isn't logged out
-                messages.success(request, 'Contraseña actualizada correctamente.')
+                messages.success(request, "Contraseña actualizada correctamente.")
                 return redirect(f"{reverse_lazy('core:user_profile')}?tab=seguridad")
             else:
                 for field in password_form:
@@ -71,30 +71,32 @@ class UserProfileView(LoginRequiredMixin, TemplateView):
 
         # 3. Agency Updates (Requires Agency)
         agencia = None
-        if hasattr(user, 'agencias_propias') and user.agencias_propias.exists():
+        if hasattr(user, "agencias_propias") and user.agencias_propias.exists():
             agencia = user.agencias_propias.first()
-        
+
         if agencia:
-            if form_type == 'agency_info':
+            if form_type == "agency_info":
                 info_form = AgencyBasicInfoForm(request.POST, instance=agencia)
                 if info_form.is_valid():
                     info_form.save()
-                    messages.success(request, 'Información de agencia actualizada.')
+                    messages.success(request, "Información de agencia actualizada.")
                     return redirect(f"{reverse_lazy('core:user_profile')}?tab=agencia")
 
-            elif form_type == 'agency_branding':
-                branding_form = AgencyBrandingForm(request.POST, request.FILES, instance=agencia.branding)
+            elif form_type == "agency_branding":
+                branding_form = AgencyBrandingForm(
+                    request.POST, request.FILES, instance=agencia.branding
+                )
                 if branding_form.is_valid():
                     branding_form.save()
-                    messages.success(request, 'Branding actualizado.')
+                    messages.success(request, "Branding actualizado.")
                     return redirect(f"{reverse_lazy('core:user_profile')}?tab=agencia")
-            
-            elif form_type == 'agency_automation':
+
+            elif form_type == "agency_automation":
                 automation_form = AgencyAutomationForm(request.POST, instance=agencia.configuracion)
                 if automation_form.is_valid():
                     automation_form.save()
-                    messages.success(request, 'Configuración de automatización guardada.')
+                    messages.success(request, "Configuración de automatización guardada.")
                     return redirect(f"{reverse_lazy('core:user_profile')}?tab=automatizacion")
 
-        messages.error(request, 'Acción no reconocida o error en formulario.')
-        return redirect('core:user_profile')
+        messages.error(request, "Acción no reconocida o error en formulario.")
+        return redirect("core:user_profile")

@@ -28,7 +28,7 @@
                     <h3 class="font-bold text-[14px] text-text-main flex items-center gap-2">
                         <span class="w-2.5 h-2.5 rounded-full bg-primary shadow-[0_0_8px_rgba(var(--primary-rgb),0.5)]"></span> Nuevos Leads
                     </h3>
-                    <span class="text-xs font-bold bg-surface-2 text-text-secondary border border-border-color px-2 py-0.5 rounded-full">{{ leads_new.count }}</span>
+                    <span class="text-xs font-bold bg-surface-2 text-text-secondary border border-border-color px-2 py-0.5 rounded-full">{{ leads_new_count }}</span>
                 </div>
                 <div id="col-NEW" @dragover.prevent="dragOver($event)" @dragleave.prevent="dragLeave($event)" @drop="drop($event, 'NEW')" 
                      class="column-drop-zone flex-1 bg-surface-1 border border-border-color border-opacity-50 rounded-2xl p-3 overflow-y-auto transition-all shadow-inset-custom">
@@ -44,7 +44,7 @@
                     <h3 class="font-bold text-[14px] text-text-main flex items-center gap-2">
                         <span class="w-2.5 h-2.5 rounded-full bg-status-warning shadow-[0_0_8px_rgba(var(--status-warning-rgb),0.5)]"></span> Armando Cotización
                     </h3>
-                    <span class="text-xs font-bold bg-surface-2 text-text-secondary border border-border-color px-2 py-0.5 rounded-full">{{ leads_quo.count }}</span>
+                    <span class="text-xs font-bold bg-surface-2 text-text-secondary border border-border-color px-2 py-0.5 rounded-full">{{ leads_quo_count }}</span>
                 </div>
                 <div id="col-QUO" @dragover.prevent="dragOver($event)" @dragleave.prevent="dragLeave($event)" @drop="drop($event, 'QUO')" 
                      class="column-drop-zone flex-1 bg-surface-1 border border-border-color border-opacity-50 rounded-2xl p-3 overflow-y-auto transition-all shadow-inset-custom">
@@ -60,7 +60,7 @@
                     <h3 class="font-bold text-[14px] text-text-main flex items-center gap-2">
                         <span class="w-2.5 h-2.5 rounded-full bg-status-info shadow-[0_0_8px_rgba(var(--status-info-rgb),0.5)]"></span> Esperando Pago
                     </h3>
-                    <span class="text-xs font-bold bg-surface-2 text-text-secondary border border-border-color px-2 py-0.5 rounded-full">{{ leads_pay.count }}</span>
+                    <span class="text-xs font-bold bg-surface-2 text-text-secondary border border-border-color px-2 py-0.5 rounded-full">{{ leads_pay_count }}</span>
                 </div>
                 <div id="col-PAY" @dragover.prevent="dragOver($event)" @dragleave.prevent="dragLeave($event)" @drop="drop($event, 'PAY')" 
                      class="column-drop-zone flex-1 bg-surface-1 border border-border-color border-opacity-50 rounded-2xl p-3 overflow-y-auto transition-all shadow-inset-custom">
@@ -76,7 +76,7 @@
                     <h3 class="font-bold text-[14px] text-text-main flex items-center gap-2">
                         <span class="w-2.5 h-2.5 rounded-full bg-status-success shadow-[0_0_8px_rgba(var(--status-success-rgb),0.5)]"></span> Ganado
                     </h3>
-                    <span class="text-xs font-bold bg-surface-2 text-text-secondary border border-border-color px-2 py-0.5 rounded-full">{{ leads_won.count }}</span>
+                    <span class="text-xs font-bold bg-surface-2 text-text-secondary border border-border-color px-2 py-0.5 rounded-full">{{ leads_won_count }}</span>
                 </div>
                 <div id="col-WON" @dragover.prevent="dragOver($event)" @dragleave.prevent="dragLeave($event)" @drop="drop($event, 'WON')" 
                      class="column-drop-zone flex-1 bg-status-success-bg/5 border border-status-success border-opacity-20 rounded-2xl p-3 overflow-y-auto transition-all shadow-inset-custom">

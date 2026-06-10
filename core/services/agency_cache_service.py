@@ -2,11 +2,11 @@
 Servicio de caching para sesiones de agencias.
 Optimiza el acceso a datos de agencia usando Redis cache.
 """
+
 import logging
-from typing import Any, Optional
+from typing import Any
 
 from django.core.cache import cache
-from django.db import models
 
 logger = logging.getLogger(__name__)
 
@@ -22,32 +22,34 @@ def _make_cache_key(prefix: str, identifier: str) -> str:
     return f"th:{prefix}:{identifier}"
 
 
-def get_agencia_from_cache(agencia_id: int) -> Optional[dict]:
+def get_agencia_from_cache(agencia_id: int) -> dict | None:
     """
     Obtiene datos de agencia desde cache.
     Si no existe en cache, lo consulta y lo almacena.
     """
     cache_key = _make_cache_key(AGENCIA_CACHE_PREFIX, str(agencia_id))
-    
+
     try:
         data = cache.get(cache_key)
         if data is not None:
             return data
-            
+
         # Cache miss - consultar BD
         from core.models import Agencia
+
         agencia = Agencia.objects.filter(pk=agencia_id).first()
-        
+
         if agencia:
             data = {
-                'id': agencia.pk,
-                'nombre': agencia.nombre,
-                'activo': agencia.activa,
-                'plan': getattr(agencia, 'plan', None),
+                "id": agencia.pk,
+                "nombre": agencia.nombre,
+                "activo": agencia.activa,
+                "plan": getattr(agencia, "plan", "FREE"),
+                "subdominio_slug": getattr(agencia, "subdominio_slug", None),
             }
             cache.set(cache_key, data, AGENCIA_CACHE_TIMEOUT)
             return data
-            
+
         return None
     except Exception as e:
         logger.warning(f"Error en cache de agencia {agencia_id}: {e}")
@@ -70,22 +72,22 @@ def get_usuario_agencias_from_cache(user_id: int) -> list:
     Obtiene las agencias asociadas a un usuario desde cache.
     """
     cache_key = _make_cache_key(USUARIO_AGENCIAS_CACHE_PREFIX, str(user_id))
-    
+
     try:
         data = cache.get(cache_key)
         if data is not None:
             return data
-            
+
         # Cache miss - consultar BD
         try:
             from core.models import UsuarioAgencia
+
             usuario_agencias = list(
-                UsuarioAgencia.objects.filter(
-                    usuario_id=user_id,
-                    activo=True
-                ).select_related('agencia').values_list('agencia_id', flat=True)
+                UsuarioAgencia.objects.filter(usuario_id=user_id, activo=True)
+                .select_related("agencia")
+                .values_list("agencia_id", flat=True)
             )
-            
+
             cache.set(cache_key, usuario_agencias, USUARIO_AGENCIAS_CACHE_TIMEOUT)
             return usuario_agencias
         except Exception:
@@ -120,7 +122,7 @@ def cache_agencia_dashboard_data(agencia_id: int, data: dict, timeout: int = 300
         return False
 
 
-def get_agencia_dashboard_data(agencia_id: int) -> Optional[dict]:
+def get_agencia_dashboard_data(agencia_id: int) -> dict | None:
     """Obtiene datos del dashboard cacheados de una agencia."""
     cache_key = _make_cache_key(f"{AGENCIA_CACHE_PREFIX}_dashboard", str(agencia_id))
     try:
@@ -158,12 +160,13 @@ def invalidate_pattern(pattern: str) -> int:
     """
     try:
         from django.core.cache import caches
-        default_cache = caches['default']
-        
+
+        default_cache = caches["default"]
+
         # django-redis soporta delete_pattern
-        if hasattr(default_cache, 'delete_pattern'):
+        if hasattr(default_cache, "delete_pattern"):
             return default_cache.delete_pattern(pattern)
-        
+
         return 0
     except Exception as e:
         logger.warning(f"Error invalidando patrón {pattern}: {e}")
@@ -173,25 +176,39 @@ def invalidate_pattern(pattern: str) -> int:
 # Signals para invalidar cache automáticamente
 def setup_cache_signals():
     """Configura signals para invalidar cache cuando se modifican modelos relevantes."""
-    from django.db.models.signals import post_save, post_delete
+    from django.db.models.signals import post_delete, post_save
     from django.dispatch import receiver
-    
-    @receiver(post_save, sender='core.Agencia')
+
+    @receiver(post_save, sender="core.Agencia")
     def invalidate_agencia_on_save(sender, instance, **kwargs):
         invalidate_agencia_cache(instance.pk)
-        logger.debug(f"Cache invalidado para agencia {instance.pk}")
-    
-    @receiver(post_delete, sender='core.Agencia')
+        # Invalida también el cache del active agency para todos sus usuarios
+        for ua in instance.usuarios.all():
+            cache.delete(f"th:user_agencia:{ua.usuario_id}")
+        logger.debug(f"Cache invalidado para agencia {instance.pk} y todos sus usuarios asignados")
+
+    @receiver(post_delete, sender="core.Agencia")
     def invalidate_agencia_on_delete(sender, instance, **kwargs):
         invalidate_agencia_cache(instance.pk)
-        logger.debug(f"Cache invalidado para agencia eliminada {instance.pk}")
-    
-    @receiver(post_save, sender='core.UsuarioAgencia')
+        # Invalida también el cache del active agency para todos sus usuarios
+        for ua in instance.usuarios.all():
+            cache.delete(f"th:user_agencia:{ua.usuario_id}")
+        logger.debug(
+            f"Cache invalidado para agencia eliminada {instance.pk} y todos sus usuarios asignados"
+        )
+
+    @receiver(post_save, sender="core.UsuarioAgencia")
     def invalidate_usuario_agencias_on_save(sender, instance, **kwargs):
         invalidate_usuario_agencias_cache(instance.usuario_id)
-        logger.debug(f"Cache invalidado para usuario_agencias de usuario {instance.usuario_id}")
-    
-    @receiver(post_delete, sender='core.UsuarioAgencia')
+        cache.delete(f"th:user_agencia:{instance.usuario_id}")
+        logger.debug(
+            f"Cache invalidado para usuario_agencias y user_agencia de usuario {instance.usuario_id}"
+        )
+
+    @receiver(post_delete, sender="core.UsuarioAgencia")
     def invalidate_usuario_agencias_on_delete(sender, instance, **kwargs):
         invalidate_usuario_agencias_cache(instance.usuario_id)
-        logger.debug(f"Cache invalidado para usuario_agencias eliminado de usuario {instance.usuario_id}")
+        cache.delete(f"th:user_agencia:{instance.usuario_id}")
+        logger.debug(
+            f"Cache invalidado para usuario_agencias y user_agencia eliminado de usuario {instance.usuario_id}"
+        )

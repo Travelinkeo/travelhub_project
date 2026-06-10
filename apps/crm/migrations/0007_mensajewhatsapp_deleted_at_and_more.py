@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("crm", "0006_comisionfreelancer_deleted_at_and_more"),
     ]
@@ -13,15 +12,11 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="mensajewhatsapp",
             name="deleted_at",
-            field=models.DateTimeField(
-                blank=True, null=True, verbose_name="Fecha de Eliminación"
-            ),
+            field=models.DateTimeField(blank=True, null=True, verbose_name="Fecha de Eliminación"),
         ),
         migrations.AddField(
             model_name="mensajewhatsapp",
             name="is_deleted",
-            field=models.BooleanField(
-                db_index=True, default=False, verbose_name="Eliminado"
-            ),
+            field=models.BooleanField(db_index=True, default=False, verbose_name="Eliminado"),
         ),
     ]

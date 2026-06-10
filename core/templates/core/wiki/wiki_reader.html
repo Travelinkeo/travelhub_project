@@ -1,5 +1,5 @@
 {% extends "base_modern.html" %}
-{% load i18n static %}
+{% load i18n static core_tags %}
 
 {% block page_title %}{{ category }}{% endblock %}
 {% block page_subtitle %}{% trans "Guía Técnica de Comandos y Procesos GDS" %}{% endblock %}
@@ -336,7 +336,7 @@
                  style="background: #0a0d12;">
                 <div class="px-10 py-10 md:px-14 md:py-12">
                     <article class="wiki-prose" id="wiki-article">
-                        {{ content|safe }}
+                        {{ content|sanitize_html_filter }}
                     </article>
                 </div>
             </div>
@@ -356,7 +356,7 @@
                     </div>
                 </div>
                 <div class="flex gap-3">
-                    <button onclick="window.print()" class="h-10 px-4 bg-surface-2 border border-border-color text-text-main rounded-lg text-xs font-bold hover:bg-surface-3 transition-all flex items-center gap-2">
+                    <button data-action="print" class="h-10 px-4 bg-surface-2 border border-border-color text-text-main rounded-lg text-xs font-bold hover:bg-surface-3 transition-all flex items-center gap-2">
                         <span class="material-symbols-outlined text-[16px]">print</span>
                         {% trans "Imprimir Guía" %}
                     </button>

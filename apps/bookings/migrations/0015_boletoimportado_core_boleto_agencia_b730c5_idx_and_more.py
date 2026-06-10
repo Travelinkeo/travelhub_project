@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("bookings", "0014_proveedor_office_id_expedia_and_more"),
         ("core", "0015_agencia_configuracion_contable"),

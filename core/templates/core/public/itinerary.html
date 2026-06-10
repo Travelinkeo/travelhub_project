@@ -7,7 +7,7 @@
     <title>Mi Viaje - {{ venta.localizador }}</title>
     <!-- Tailwind CSS (Using CDN for simplicity in public view vs building assets) or Project CSS -->
     <!-- Ideally use project CSS, but let's ensure it works. Using CDN for public view often safer/independent -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com" nonce="{{ request.csp_nonce }}"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body {
@@ -47,7 +47,7 @@
                 <span class="font-semibold text-lg">{{ agency_branding.name }}</span>
             </div>
 
-            <a href="{% url 'core:public_voucher_pdf' venta.uuid %}"
+            <a href="{% url 'bookings:public_voucher_pdf' venta.uuid %}"
                 class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-full text-sm font-medium transition-colors flex items-center gap-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

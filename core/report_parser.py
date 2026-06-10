@@ -27,6 +27,7 @@ JSON_STRUCTURE_PROMPT = """
   }
 ]"""
 
+
 def parse_travelinkeo_report_with_gemini(ocr_text: str) -> list[dict[str, Any]] | None:
     """
     Parsea el texto OCR de un reporte de Travelinkeo usando la API de Gemini.
@@ -59,9 +60,9 @@ def parse_travelinkeo_report_with_gemini(ocr_text: str) -> list[dict[str, Any]] 
 
     try:
         response_text = generate_content(prompt)
-        
+
         # Limpiar la respuesta para asegurarse de que sea solo el JSON
-        json_match = re.search(r'```json\n(.*?)\n```', response_text, re.DOTALL)
+        json_match = re.search(r"```json\n(.*?)\n```", response_text, re.DOTALL)
         if not json_match:
             logger.warning("No se encontró un bloque JSON en la respuesta de Gemini.")
             try:

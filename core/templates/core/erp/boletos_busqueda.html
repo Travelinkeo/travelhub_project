@@ -223,8 +223,8 @@
                 statusHTML = `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border bg-emerald-500/10 text-emerald-500 border-emerald-500/20">Completado</span>`;
             }
 
-            return `<tr class="group hover:bg-nav-active-bg/10 transition-all cursor-pointer" onclick="location.href='/system/upload/boleto/${b.id}/revisar/'">
-                <td class="px-6 py-5 text-center" onclick="event.stopPropagation()">
+            return `<tr class="group hover:bg-nav-active-bg/10 transition-all cursor-pointer" data-href="/system/upload/boleto/${b.id}/revisar/">
+                <td class="px-6 py-5 text-center" data-stop-propagation>
                     <input type="checkbox" class="boleto-checkbox-search size-4 rounded border-border-color bg-surface-1 text-primary">
                 </td>
                 <td class="px-6 py-5">
@@ -252,7 +252,7 @@
                 <td class="px-6 py-5 text-right">
                     <div class="flex flex-col items-end gap-1">
                         <p class="text-sm font-black text-text-main font-mono">$${total}</p>
-                        <div class="flex items-center gap-1 opacity-20 group-hover:opacity-100 transition-all" onclick="event.stopPropagation()">
+                        <div class="flex items-center gap-1 opacity-20 group-hover:opacity-100 transition-all" data-stop-propagation>
                             <a href="/boletos/${b.id_boleto_importado}/review/" class="size-7 flex items-center justify-center text-text-muted hover:text-primary hover:bg-primary/10 rounded-lg transition-all border border-transparent hover:border-primary/20">
                                 <span class="material-symbols-outlined text-[18px]">visibility</span>
                             </a>

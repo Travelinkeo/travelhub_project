@@ -178,12 +178,12 @@
 <div id="imageModal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog"
     aria-modal="true">
     <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-        <div class="fixed inset-0 bg-black/75 transition-opacity" aria-hidden="true" onclick="closeImageModal()"></div>
+        <div class="fixed inset-0 bg-black/75 transition-opacity" aria-hidden="true" data-action="close-modal"></div>
         <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
         <div
             class="inline-block align-bottom bg-[var(--surface-1)] rounded-xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full border border-[var(--border)]">
             <div class="relative bg-[var(--surface-2)] p-2">
-                <button onclick="closeImageModal()"
+                <button data-action="close-modal"
                     class="absolute top-4 right-4 text-[var(--text-primary)] hover:text-[var(--danger)] z-10 bg-[var(--surface-3)] rounded-full p-2 transition-colors border border-[var(--border)] shadow-lg">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">

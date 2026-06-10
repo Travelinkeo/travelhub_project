@@ -10,7 +10,6 @@ import core.validators
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = []
@@ -53,9 +52,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "nombre_pasajero",
-                    models.CharField(
-                        blank=True, max_length=255, verbose_name="Nombre Pasajero"
-                    ),
+                    models.CharField(blank=True, max_length=255, verbose_name="Nombre Pasajero"),
                 ),
                 (
                     "localizador_proveedor",
@@ -86,9 +83,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "nombre_establecimiento",
-                    models.CharField(
-                        max_length=150, verbose_name="Nombre Establecimiento"
-                    ),
+                    models.CharField(max_length=150, verbose_name="Nombre Establecimiento"),
                 ),
                 (
                     "check_in",
@@ -110,15 +105,11 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "habitaciones",
-                    models.PositiveSmallIntegerField(
-                        default=1, verbose_name="Habitaciones"
-                    ),
+                    models.PositiveSmallIntegerField(default=1, verbose_name="Habitaciones"),
                 ),
                 (
                     "nombre_pasajero",
-                    models.CharField(
-                        blank=True, max_length=255, verbose_name="Nombre Pasajero"
-                    ),
+                    models.CharField(blank=True, max_length=255, verbose_name="Nombre Pasajero"),
                 ),
                 (
                     "localizador_proveedor",
@@ -151,9 +142,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "fecha_hora_retiro",
-                    models.DateTimeField(
-                        blank=True, null=True, verbose_name="Fecha/Hora Retiro"
-                    ),
+                    models.DateTimeField(blank=True, null=True, verbose_name="Fecha/Hora Retiro"),
                 ),
                 (
                     "fecha_hora_devolucion",
@@ -190,9 +179,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "nombre_conductor",
-                    models.CharField(
-                        blank=True, max_length=255, verbose_name="Nombre Conductor"
-                    ),
+                    models.CharField(blank=True, max_length=255, verbose_name="Nombre Conductor"),
                 ),
                 (
                     "incluye_seguro",
@@ -235,9 +222,7 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "is_deleted",
-                    models.BooleanField(
-                        db_index=True, default=False, verbose_name="Eliminado"
-                    ),
+                    models.BooleanField(db_index=True, default=False, verbose_name="Eliminado"),
                 ),
                 (
                     "deleted_at",
@@ -272,9 +257,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "fecha_subida",
-                    models.DateTimeField(
-                        auto_now_add=True, verbose_name="Fecha de Subida"
-                    ),
+                    models.DateTimeField(auto_now_add=True, verbose_name="Fecha de Subida"),
                 ),
                 (
                     "formato_detectado",
@@ -325,9 +308,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "log_parseo",
-                    models.TextField(
-                        blank=True, null=True, verbose_name="Log del Parseo"
-                    ),
+                    models.TextField(blank=True, null=True, verbose_name="Log del Parseo"),
                 ),
                 (
                     "numero_boleto",
@@ -383,9 +364,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "direccion_aerolinea",
-                    models.TextField(
-                        blank=True, null=True, verbose_name="Dirección Aerolínea"
-                    ),
+                    models.TextField(blank=True, null=True, verbose_name="Dirección Aerolínea"),
                 ),
                 (
                     "agente_emisor",
@@ -426,9 +405,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "impuestos_descripcion",
-                    models.TextField(
-                        blank=True, null=True, verbose_name="Descripción Impuestos"
-                    ),
+                    models.TextField(blank=True, null=True, verbose_name="Descripción Impuestos"),
                 ),
                 (
                     "impuestos_total_calculado",
@@ -623,9 +600,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "actividades_resumen",
-                    models.TextField(
-                        blank=True, null=True, verbose_name="Actividades/Resumen"
-                    ),
+                    models.TextField(blank=True, null=True, verbose_name="Actividades/Resumen"),
                 ),
             ],
             options={
@@ -640,9 +615,7 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id_circuito",
-                    models.AutoField(
-                        primary_key=True, serialize=False, verbose_name="ID Circuito"
-                    ),
+                    models.AutoField(primary_key=True, serialize=False, verbose_name="ID Circuito"),
                 ),
                 (
                     "nombre_circuito",
@@ -656,9 +629,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "fecha_inicio",
-                    models.DateField(
-                        blank=True, null=True, verbose_name="Fecha Inicio"
-                    ),
+                    models.DateField(blank=True, null=True, verbose_name="Fecha Inicio"),
                 ),
                 (
                     "fecha_fin",
@@ -666,9 +637,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "descripcion_general",
-                    models.TextField(
-                        blank=True, null=True, verbose_name="Descripción General"
-                    ),
+                    models.TextField(blank=True, null=True, verbose_name="Descripción General"),
                 ),
                 (
                     "incluye",
@@ -723,9 +692,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "fecha_evento",
-                    models.DateTimeField(
-                        blank=True, null=True, verbose_name="Fecha Evento"
-                    ),
+                    models.DateTimeField(blank=True, null=True, verbose_name="Fecha Evento"),
                 ),
                 (
                     "ubicacion",
@@ -788,9 +755,7 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id_fee_venta",
-                    models.AutoField(
-                        primary_key=True, serialize=False, verbose_name="ID Fee"
-                    ),
+                    models.AutoField(primary_key=True, serialize=False, verbose_name="ID Fee"),
                 ),
                 (
                     "tipo_fee",
@@ -818,21 +783,15 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "monto",
-                    models.DecimalField(
-                        decimal_places=2, max_digits=12, verbose_name="Monto"
-                    ),
+                    models.DecimalField(decimal_places=2, max_digits=12, verbose_name="Monto"),
                 ),
                 (
                     "es_comision_agencia",
-                    models.BooleanField(
-                        default=True, verbose_name="Es Comisión Agencia"
-                    ),
+                    models.BooleanField(default=True, verbose_name="Es Comisión Agencia"),
                 ),
                 (
                     "taxable",
-                    models.BooleanField(
-                        default=False, verbose_name="Sujeto a Impuestos"
-                    ),
+                    models.BooleanField(default=False, verbose_name="Sujeto a Impuestos"),
                 ),
                 ("creado", models.DateTimeField(auto_now_add=True)),
             ],
@@ -848,9 +807,7 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "is_deleted",
-                    models.BooleanField(
-                        db_index=True, default=False, verbose_name="Eliminado"
-                    ),
+                    models.BooleanField(db_index=True, default=False, verbose_name="Eliminado"),
                 ),
                 (
                     "deleted_at",
@@ -930,9 +887,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "fecha_fin_servicio",
-                    models.DateTimeField(
-                        blank=True, null=True, verbose_name="Fecha Fin Servicio"
-                    ),
+                    models.DateTimeField(blank=True, null=True, verbose_name="Fecha Fin Servicio"),
                 ),
                 (
                     "codigo_reserva_proveedor",
@@ -1000,9 +955,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "notas_item",
-                    models.TextField(
-                        blank=True, null=True, verbose_name="Notas del Item"
-                    ),
+                    models.TextField(blank=True, null=True, verbose_name="Notas del Item"),
                 ),
             ],
             options={
@@ -1016,9 +969,7 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id_pago_venta",
-                    models.AutoField(
-                        primary_key=True, serialize=False, verbose_name="ID Pago"
-                    ),
+                    models.AutoField(primary_key=True, serialize=False, verbose_name="ID Pago"),
                 ),
                 (
                     "fecha_pago",
@@ -1028,9 +979,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "monto",
-                    models.DecimalField(
-                        decimal_places=2, max_digits=12, verbose_name="Monto"
-                    ),
+                    models.DecimalField(decimal_places=2, max_digits=12, verbose_name="Monto"),
                 ),
                 (
                     "metodo",
@@ -1127,9 +1076,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "noches",
-                    models.PositiveSmallIntegerField(
-                        blank=True, null=True, verbose_name="Noches"
-                    ),
+                    models.PositiveSmallIntegerField(blank=True, null=True, verbose_name="Noches"),
                 ),
                 (
                     "pasajeros",
@@ -1148,9 +1095,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "observaciones",
-                    models.TextField(
-                        blank=True, null=True, verbose_name="Observaciones"
-                    ),
+                    models.TextField(blank=True, null=True, verbose_name="Observaciones"),
                 ),
                 (
                     "costo_neto_estimado",
@@ -1208,21 +1153,15 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "fecha_salida",
-                    models.DateTimeField(
-                        blank=True, null=True, verbose_name="Fecha/Hora Salida"
-                    ),
+                    models.DateTimeField(blank=True, null=True, verbose_name="Fecha/Hora Salida"),
                 ),
                 (
                     "fecha_llegada",
-                    models.DateTimeField(
-                        blank=True, null=True, verbose_name="Fecha/Hora Llegada"
-                    ),
+                    models.DateTimeField(blank=True, null=True, verbose_name="Fecha/Hora Llegada"),
                 ),
                 (
                     "clase_reserva",
-                    models.CharField(
-                        blank=True, max_length=5, null=True, verbose_name="Clase"
-                    ),
+                    models.CharField(blank=True, max_length=5, null=True, verbose_name="Clase"),
                 ),
                 (
                     "cabina",
@@ -1293,9 +1232,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "fecha_inicio",
-                    models.DateField(
-                        blank=True, null=True, verbose_name="Fecha Inicio"
-                    ),
+                    models.DateField(blank=True, null=True, verbose_name="Fecha Inicio"),
                 ),
                 (
                     "fecha_fin",
@@ -1321,15 +1258,11 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "detalles_cobertura",
-                    models.TextField(
-                        blank=True, null=True, verbose_name="Detalles Cobertura"
-                    ),
+                    models.TextField(blank=True, null=True, verbose_name="Detalles Cobertura"),
                 ),
                 (
                     "contacto_emergencia",
-                    models.TextField(
-                        blank=True, null=True, verbose_name="Contacto Emergencia"
-                    ),
+                    models.TextField(blank=True, null=True, verbose_name="Contacto Emergencia"),
                 ),
                 (
                     "participantes",
@@ -1369,21 +1302,15 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "inclusiones_servicio",
-                    models.TextField(
-                        blank=True, null=True, verbose_name="Inclusiones Servicio"
-                    ),
+                    models.TextField(blank=True, null=True, verbose_name="Inclusiones Servicio"),
                 ),
                 (
                     "recomendaciones",
-                    models.TextField(
-                        blank=True, null=True, verbose_name="Recomendaciones"
-                    ),
+                    models.TextField(blank=True, null=True, verbose_name="Recomendaciones"),
                 ),
                 (
                     "metadata_json",
-                    models.JSONField(
-                        blank=True, null=True, verbose_name="Metadata Adicional"
-                    ),
+                    models.JSONField(blank=True, null=True, verbose_name="Metadata Adicional"),
                 ),
                 (
                     "notas",
@@ -1489,15 +1416,11 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "fecha_solicitud",
-                    models.DateTimeField(
-                        auto_now_add=True, verbose_name="Fecha Solicitud"
-                    ),
+                    models.DateTimeField(auto_now_add=True, verbose_name="Fecha Solicitud"),
                 ),
                 (
                     "fecha_actualizacion",
-                    models.DateTimeField(
-                        auto_now=True, verbose_name="Fecha Actualización"
-                    ),
+                    models.DateTimeField(auto_now=True, verbose_name="Fecha Actualización"),
                 ),
             ],
             options={
@@ -1512,9 +1435,7 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id_traslado_servicio",
-                    models.AutoField(
-                        primary_key=True, serialize=False, verbose_name="ID Traslado"
-                    ),
+                    models.AutoField(primary_key=True, serialize=False, verbose_name="ID Traslado"),
                 ),
                 (
                     "tipo_traslado",
@@ -1531,27 +1452,19 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "origen",
-                    models.CharField(
-                        blank=True, max_length=150, null=True, verbose_name="Origen"
-                    ),
+                    models.CharField(blank=True, max_length=150, null=True, verbose_name="Origen"),
                 ),
                 (
                     "destino",
-                    models.CharField(
-                        blank=True, max_length=150, null=True, verbose_name="Destino"
-                    ),
+                    models.CharField(blank=True, max_length=150, null=True, verbose_name="Destino"),
                 ),
                 (
                     "fecha_hora",
-                    models.DateTimeField(
-                        blank=True, null=True, verbose_name="Fecha/Hora"
-                    ),
+                    models.DateTimeField(blank=True, null=True, verbose_name="Fecha/Hora"),
                 ),
                 (
                     "pasajeros",
-                    models.PositiveSmallIntegerField(
-                        default=1, verbose_name="Pasajeros"
-                    ),
+                    models.PositiveSmallIntegerField(default=1, verbose_name="Pasajeros"),
                 ),
                 (
                     "notas",
@@ -1570,9 +1483,7 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "is_deleted",
-                    models.BooleanField(
-                        db_index=True, default=False, verbose_name="Eliminado"
-                    ),
+                    models.BooleanField(db_index=True, default=False, verbose_name="Eliminado"),
                 ),
                 (
                     "deleted_at",
@@ -1757,9 +1668,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "notas",
-                    models.TextField(
-                        blank=True, null=True, verbose_name="Notas de la Venta"
-                    ),
+                    models.TextField(blank=True, null=True, verbose_name="Notas de la Venta"),
                 ),
                 (
                     "puntos_fidelidad_asignados",
@@ -1821,9 +1730,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "fecha_deteccion",
-                    models.DateTimeField(
-                        auto_now_add=True, verbose_name="Fecha de Detección"
-                    ),
+                    models.DateTimeField(auto_now_add=True, verbose_name="Fecha de Detección"),
                 ),
             ],
             options={
@@ -1856,9 +1763,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "currency",
-                    models.CharField(
-                        blank=True, max_length=10, null=True, verbose_name="Moneda"
-                    ),
+                    models.CharField(blank=True, max_length=10, null=True, verbose_name="Moneda"),
                 ),
                 (
                     "fare_amount",
@@ -1949,9 +1854,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "creado",
-                    models.DateTimeField(
-                        auto_now_add=True, db_index=True, verbose_name="Creado"
-                    ),
+                    models.DateTimeField(auto_now_add=True, db_index=True, verbose_name="Creado"),
                 ),
             ],
             options={

@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("bookings", "0020_alter_amenity_table_and_more"),
     ]
@@ -33,8 +32,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="boletoimportado",
             name="updated_at",
-            field=models.DateTimeField(
-                auto_now=True, verbose_name="Fecha de Actualización"
-            ),
+            field=models.DateTimeField(auto_now=True, verbose_name="Fecha de Actualización"),
         ),
     ]

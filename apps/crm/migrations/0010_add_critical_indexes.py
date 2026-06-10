@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("common", "0001_initial"),
         ("core", "0016_add_critical_indexes"),
@@ -14,8 +13,6 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddIndex(
             model_name="cliente",
-            index=models.Index(
-                fields=["agencia", "tipo_cliente"], name="idx_cliente_agencia_tipo"
-            ),
+            index=models.Index(fields=["agencia", "tipo_cliente"], name="idx_cliente_agencia_tipo"),
         ),
     ]

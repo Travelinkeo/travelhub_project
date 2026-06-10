@@ -3,19 +3,32 @@
 Servicio de Doble Facturación Automática
 Genera factura por cuenta de terceros + factura por servicios propios
 """
+
 import logging
 from decimal import Decimal
 
 from django.db import transaction
 
-from apps.finance.models import FacturaConsolidada, ItemFacturaConsolidada
+
+def __getattr__(name):
+    if name in ("FacturaConsolidada", "ItemFacturaConsolidada"):
+        from django.apps import apps
+
+        model_name = "Factura" if name == "FacturaConsolidada" else "ItemFactura"
+        return apps.get_model("finance", model_name)
+    if name == "Proveedor":
+        from django.apps import apps
+
+        return apps.get_model("bookings", "Proveedor")
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
 
 logger = logging.getLogger(__name__)
 
 
 class DobleFacturacionService:
     """Servicio para generar doble facturación automática"""
-    
+
     @staticmethod
     @transaction.atomic
     def generar_facturas_venta(venta, datos_tercero=None, fee_servicio=None):
@@ -23,7 +36,7 @@ class DobleFacturacionService:
         Genera dos facturas para una venta:
         1. Factura por cuenta de terceros (costo del servicio)
         2. Factura por servicios propios (fee de la agencia)
-        
+
         Args:
             venta: Instancia de Venta
             datos_tercero: dict con {
@@ -34,27 +47,29 @@ class DobleFacturacionService:
                 'es_nacional': bool (True para nacional, False para internacional)
             }
             fee_servicio: Decimal - Fee de la agencia
-        
+
         Returns:
             tuple: (factura_tercero, factura_propia)
         """
         if not datos_tercero or not fee_servicio:
             raise ValueError("Se requieren datos_tercero y fee_servicio")
-        
+
         agencia = venta.agencia
         moneda = venta.moneda
-        tasa_bcv = getattr(venta, 'tasa_cambio_bcv', Decimal(1)) # Safe getattr + default
-        
+        tasa_bcv = getattr(venta, "tasa_cambio_bcv", Decimal(1))  # Safe getattr + default
+
         try:
             cliente = venta.cliente
             # Determine client ID
-            # NOTE: Cliente model currently only has numero_pasaporte. 
+            # NOTE: Cliente model currently only has numero_pasaporte.
             # Future refactor might add RIF/Cedula specific fields.
-            cliente_doc = getattr(cliente, 'numero_pasaporte', '') or ''
+            cliente_doc = getattr(cliente, "numero_pasaporte", "") or ""
         except Exception as e:
-            logger.warning(f"⚠️ Doble Facturación Omitida: Error accediendo a Cliente de Venta {venta.pk}: {e}")
+            logger.warning(
+                f"⚠️ Doble Facturación Omitida: Error accediendo a Cliente de Venta {venta.pk}: {e}"
+            )
             return None, None
-        
+
         # 1. FACTURA POR CUENTA DE TERCEROS
         factura_tercero = FacturaConsolidada.objects.create(
             venta_asociada=venta,
@@ -63,53 +78,48 @@ class DobleFacturacionService:
             tipo_operacion=FacturaConsolidada.TipoOperacion.INTERMEDIACION,
             moneda_operacion=FacturaConsolidada.MonedaOperacion.DIVISA,
             tasa_cambio_bcv=tasa_bcv,
-            
             # Emisor (agencia)
             emisor_rif=agencia.rif,
             emisor_razon_social=agencia.nombre,
             emisor_direccion_fiscal=agencia.direccion,
             es_sujeto_pasivo_especial=agencia.es_sujeto_pasivo_especial,
             esta_inscrita_rtn=agencia.esta_inscrita_rtn,
-            
             # Cliente
             cliente_es_residente=True,
             cliente_identificacion=cliente_doc,
-            cliente_direccion=cliente.direccion_linea1 or '',
-            
+            cliente_direccion=cliente.direccion_linea1 or "",
             # Tercero
-            tercero_rif=datos_tercero['rif'],
-            tercero_razon_social=datos_tercero['razon_social'],
-            
+            tercero_rif=datos_tercero["rif"],
+            tercero_razon_social=datos_tercero["razon_social"],
             # Bases (el monto del servicio va como exento para la agencia)
-            subtotal_exento=datos_tercero['monto_servicio'],
-            
-            estado=FacturaConsolidada.EstadoFactura.EMITIDA
+            subtotal_exento=datos_tercero["monto_servicio"],
+            estado=FacturaConsolidada.EstadoFactura.EMITIDA,
         )
-        
+
         # Item de la factura de tercero
         ItemFacturaConsolidada.objects.create(
             factura=factura_tercero,
-            descripcion=datos_tercero['descripcion'],
+            descripcion=datos_tercero["descripcion"],
             cantidad=1,
-            precio_unitario=datos_tercero['monto_servicio'],
+            precio_unitario=datos_tercero["monto_servicio"],
             tipo_servicio=ItemFacturaConsolidada.TipoServicio.TRANSPORTE_AEREO_NACIONAL,
-            es_gravado=False
+            es_gravado=False,
         )
-        
+
         # 2. FACTURA POR SERVICIOS PROPIOS
-        es_nacional = datos_tercero.get('es_nacional', True)
-        
+        es_nacional = datos_tercero.get("es_nacional", True)
+
         if es_nacional:
             # Servicio nacional: 100% gravado
             base_gravada = fee_servicio
-            base_no_sujeta = Decimal('0.00')
+            base_no_sujeta = Decimal("0.00")
         else:
             # Servicio internacional: 20% gravado, 80% no sujeto
-            base_gravada = fee_servicio * Decimal('0.20')
-            base_no_sujeta = fee_servicio * Decimal('0.80')
-        
-        iva_16 = base_gravada * Decimal('0.16')
-        
+            base_gravada = fee_servicio * Decimal("0.20")
+            base_no_sujeta = fee_servicio * Decimal("0.80")
+
+        iva_16 = base_gravada * Decimal("0.16")
+
         factura_propia = FacturaConsolidada.objects.create(
             venta_asociada=venta,
             cliente=cliente,
@@ -117,33 +127,29 @@ class DobleFacturacionService:
             tipo_operacion=FacturaConsolidada.TipoOperacion.INTERMEDIACION,
             moneda_operacion=FacturaConsolidada.MonedaOperacion.DIVISA,
             tasa_cambio_bcv=tasa_bcv,
-            
             # Emisor (agencia)
             emisor_rif=agencia.rif,
             emisor_razon_social=agencia.nombre,
             emisor_direccion_fiscal=agencia.direccion,
             es_sujeto_pasivo_especial=agencia.es_sujeto_pasivo_especial,
             esta_inscrita_rtn=agencia.esta_inscrita_rtn,
-            
             # Cliente
             cliente_es_residente=True,
             cliente_identificacion=cliente_doc,
-            cliente_direccion=cliente.direccion_linea1 or '',
-            
+            cliente_direccion=cliente.direccion_linea1 or "",
             # Bases
             subtotal_base_gravada=base_gravada,
             subtotal_exento=base_no_sujeta,
             monto_iva_16=iva_16,
-            
-            estado=FacturaConsolidada.EstadoFactura.EMITIDA
+            estado=FacturaConsolidada.EstadoFactura.EMITIDA,
         )
-        
+
         # Item de la factura propia
         # FIX: FacturaConsolidada recalculates totals based on items.
         # So we must create items that match the 20/80 split.
-        
+
         tipo_servicio_desc = "nacional" if es_nacional else "internacional"
-        
+
         if es_nacional:
             ItemFacturaConsolidada.objects.create(
                 factura=factura_propia,
@@ -152,7 +158,7 @@ class DobleFacturacionService:
                 precio_unitario=fee_servicio,
                 tipo_servicio=ItemFacturaConsolidada.TipoServicio.COMISION_INTERMEDIACION,
                 es_gravado=True,
-                alicuota_iva=Decimal('16.00')
+                alicuota_iva=Decimal("16.00"),
             )
         else:
             # International: Split into 20% Taxable and 80% Exempt items
@@ -161,67 +167,75 @@ class DobleFacturacionService:
                 factura=factura_propia,
                 descripcion=f"Fee Intermediación {tipo_servicio_desc} (Base Imp.)",
                 cantidad=1,
-                precio_unitario=base_gravada, # Pre-calculated 20%
+                precio_unitario=base_gravada,  # Pre-calculated 20%
                 tipo_servicio=ItemFacturaConsolidada.TipoServicio.COMISION_INTERMEDIACION,
                 es_gravado=True,
-                alicuota_iva=Decimal('16.00')
+                alicuota_iva=Decimal("16.00"),
             )
-            
+
             # Item 2: Exempt (80%)
             ItemFacturaConsolidada.objects.create(
                 factura=factura_propia,
                 descripcion=f"Fee Intermediación {tipo_servicio_desc} (Exento)",
                 cantidad=1,
-                precio_unitario=base_no_sujeta, # Pre-calculated 80%
+                precio_unitario=base_no_sujeta,  # Pre-calculated 80%
                 tipo_servicio=ItemFacturaConsolidada.TipoServicio.COMISION_INTERMEDIACION,
                 es_gravado=False,
-                alicuota_iva=Decimal('0.00')
+                alicuota_iva=Decimal("0.00"),
             )
-        
-        logger.info(f"Doble facturación generada para venta {venta.id_venta}: "
-                   f"Tercero={factura_tercero.numero_factura}, Propia={factura_propia.numero_factura}")
-        
+
+        logger.info(
+            f"Doble facturación generada para venta {venta.id_venta}: "
+            f"Tercero={factura_tercero.numero_factura}, Propia={factura_propia.numero_factura}"
+        )
+
         return factura_tercero, factura_propia
-    
+
     @staticmethod
     def generar_desde_boleto(venta, boleto_importado, fee_servicio):
         """
         Genera doble facturación desde un boleto importado
-        
+
         Args:
             venta: Instancia de Venta
             boleto_importado: Instancia de BoletoImportado
             fee_servicio: Decimal - Fee de la agencia
         """
         datos_parseados = boleto_importado.datos_parseados or {}
-        normalized = datos_parseados.get('normalized', {})
-        
+        normalized = datos_parseados.get("normalized", {})
+
         # Determinar si es nacional o internacional
-        itinerario = normalized.get('itinerary', [])
+        itinerario = normalized.get("itinerary", [])
         es_nacional = True
         if itinerario:
             # Si hay vuelos internacionales, es internacional
             for vuelo in itinerario:
-                origen = vuelo.get('origin', '')
-                destino = vuelo.get('destination', '')
+                origen = vuelo.get("origin", "")
+                destino = vuelo.get("destination", "")
                 # Códigos IATA venezolanos comienzan con C (CCS, CZE, MAR, etc.)
-                if not (origen.startswith('C') and destino.startswith('C')):
+                if not (origen.startswith("C") and destino.startswith("C")):
                     es_nacional = False
                     break
-        
-        aerolinea_nombre = normalized.get('airline_name', 'Aerolínea')
-        
-        # Intentar obtener RIF real del Proveedor guardado en base de datos
-        from apps.bookings.models import Proveedor
+
+        aerolinea_nombre = normalized.get("airline_name", "Aerolínea")
+
+        from django.apps import apps
+
+        Proveedor = apps.get_model("bookings", "Proveedor")
+
         proveedor = Proveedor.objects.filter(nombre__icontains=aerolinea_nombre).first()
-        rif_tercero = proveedor.identificacion_fiscal if proveedor and proveedor.identificacion_fiscal else 'J-00000000-0'
+        rif_tercero = (
+            proveedor.identificacion_fiscal
+            if proveedor and proveedor.identificacion_fiscal
+            else "J-00000000-0"
+        )
 
         datos_tercero = {
-            'razon_social': aerolinea_nombre,
-            'rif': rif_tercero,
-            'monto_servicio': Decimal(normalized.get('total_amount', '0')),
-            'descripcion': f"Boleto aéreo {normalized.get('ticket_number', '')} - Pasajero: {normalized.get('passenger_name', '')}",
-            'es_nacional': es_nacional
+            "razon_social": aerolinea_nombre,
+            "rif": rif_tercero,
+            "monto_servicio": Decimal(normalized.get("total_amount", "0")),
+            "descripcion": f"Boleto aéreo {normalized.get('ticket_number', '')} - Pasajero: {normalized.get('passenger_name', '')}",
+            "es_nacional": es_nacional,
         }
-        
+
         return DobleFacturacionService.generar_facturas_venta(venta, datos_tercero, fee_servicio)

@@ -6,7 +6,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("bookings", "0007_actividadservicio_deleted_at_and_more"),
     ]
@@ -26,9 +25,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "nombre",
-                    models.CharField(
-                        max_length=100, unique=True, verbose_name="Nombre"
-                    ),
+                    models.CharField(max_length=100, unique=True, verbose_name="Nombre"),
                 ),
                 (
                     "icono_lucide",
@@ -105,9 +102,7 @@ class Migration(migrations.Migration):
                         ),
                         (
                             "puerto_desembarque",
-                            models.CharField(
-                                max_length=150, verbose_name="Puerto de Desembarque"
-                            ),
+                            models.CharField(max_length=150, verbose_name="Puerto de Desembarque"),
                         ),
                         (
                             "puertos_escala",
@@ -166,9 +161,7 @@ class Migration(migrations.Migration):
                         ),
                         (
                             "paquete_bebidas",
-                            models.BooleanField(
-                                default=False, verbose_name="Paquete de Bebidas"
-                            ),
+                            models.BooleanField(default=False, verbose_name="Paquete de Bebidas"),
                         ),
                         (
                             "paquete_restaurantes",
@@ -283,9 +276,7 @@ class Migration(migrations.Migration):
                         ),
                         (
                             "recomendaciones_cliente",
-                            models.TextField(
-                                blank=True, verbose_name="Recomendaciones al Cliente"
-                            ),
+                            models.TextField(blank=True, verbose_name="Recomendaciones al Cliente"),
                         ),
                     ],
                     options={
@@ -343,9 +334,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "descripcion_larga",
-                    models.TextField(
-                        blank=True, verbose_name="Descripción Completa (IA)"
-                    ),
+                    models.TextField(blank=True, verbose_name="Descripción Completa (IA)"),
                 ),
                 (
                     "imagen_principal",
@@ -572,9 +561,7 @@ class Migration(migrations.Migration):
                 ("fecha_fin", models.DateField(verbose_name="Fecha Fin")),
                 (
                     "nombre_temporada",
-                    models.CharField(
-                        blank=True, max_length=100, verbose_name="Temporada"
-                    ),
+                    models.CharField(blank=True, max_length=100, verbose_name="Temporada"),
                 ),
                 (
                     "moneda",
@@ -693,9 +680,7 @@ class Migration(migrations.Migration):
                 ("activo", models.BooleanField(default=True, verbose_name="Activo")),
                 (
                     "fecha_carga",
-                    models.DateTimeField(
-                        auto_now_add=True, verbose_name="Fecha de Carga"
-                    ),
+                    models.DateTimeField(auto_now_add=True, verbose_name="Fecha de Carga"),
                 ),
                 ("notas", models.TextField(blank=True, verbose_name="Notas")),
             ],
@@ -739,9 +724,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "foto_referencial",
-                    models.ImageField(
-                        blank=True, null=True, upload_to="hoteles/habitaciones/"
-                    ),
+                    models.ImageField(blank=True, null=True, upload_to="hoteles/habitaciones/"),
                 ),
             ],
             options={

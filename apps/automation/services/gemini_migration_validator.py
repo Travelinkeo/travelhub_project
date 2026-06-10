@@ -1,12 +1,11 @@
 """
 Cliente especializado para validaciones migratorias usando Gemini AI.
 """
+
 import json
 import logging
 from dataclasses import dataclass
 from datetime import date
-
-from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
@@ -14,12 +13,14 @@ logger = logging.getLogger(__name__)
 def _get_genai_client():
     """Lazy import para evitar bloqueo durante django.setup()"""
     from google import genai
+
     return genai
 
 
 @dataclass
 class MigrationValidationResult:
     """Resultado estructurado de una validación migratoria"""
+
     visa_required: bool
     visa_type: str
     passport_validity_ok: bool
@@ -34,23 +35,24 @@ class MigrationValidationResult:
 class GeminiMigrationValidator:
     """
     Cliente para consultas de requisitos migratorios usando Gemini AI.
-    
+
     Este servicio construye prompts especializados y parsea las respuestas
     de Gemini para extraer información sobre visas, validez de pasaportes
     y requisitos de vacunación.
     """
-    
+
     def __init__(self, agency=None):
         """Inicializa el cliente de Gemini (lazy import)"""
         from apps.automation.services.ai_engine import get_gemini_api_key
+
         api_key = get_gemini_api_key(agency)
         if api_key:
             genai = _get_genai_client()
             self.client = genai.Client(api_key=api_key)
         else:
             self.client = None
-        self.model_name = 'gemini-2.0-flash'
-    
+        self.model_name = "gemini-2.0-flash"
+
     def validate_visa_requirements(
         self,
         nationality: str,
@@ -58,11 +60,11 @@ class GeminiMigrationValidator:
         transit_countries: list = None,
         passport_expiry: date = None,
         travel_date: date = None,
-        agency = None
+        agency=None,
     ) -> MigrationValidationResult:
         """
         Valida requisitos migratorios usando Gemini AI.
-        
+
         Args:
             nationality: Código ISO del país de nacionalidad (ej: 'VEN', 'COL')
             destination: Código ISO del país de destino (ej: 'ESP', 'USA')
@@ -70,7 +72,7 @@ class GeminiMigrationValidator:
             passport_expiry: Fecha de vencimiento del pasaporte
             travel_date: Fecha del viaje
             agency: Agencia de la cual obtener la API Key
-        
+
         Returns:
             MigrationValidationResult con los requisitos detectados
         """
@@ -78,11 +80,12 @@ class GeminiMigrationValidator:
             client = self.client
             if agency:
                 from apps.automation.services.ai_engine import get_gemini_api_key
+
                 api_key = get_gemini_api_key(agency)
                 if api_key:
                     genai = _get_genai_client()
                     client = genai.Client(api_key=api_key)
-            
+
             if not client:
                 raise ValueError("Gemini Client no configurado.")
 
@@ -91,25 +94,22 @@ class GeminiMigrationValidator:
                 destination=destination,
                 transit_countries=transit_countries or [],
                 passport_expiry=passport_expiry,
-                travel_date=travel_date
+                travel_date=travel_date,
             )
-            
+
             logger.info(f"🤖 Consultando Gemini: {nationality} → {destination}")
-            
-            response = client.models.generate_content(
-                model=self.model_name,
-                contents=prompt
-            )
+
+            response = client.models.generate_content(model=self.model_name, contents=prompt)
             raw_text = response.text
-            
+
             logger.debug(f"Respuesta Gemini: {raw_text[:200]}...")
-            
+
             # Parsear respuesta
             result = self._parse_gemini_response(raw_text)
             result.raw_response = raw_text
-            
+
             return result
-            
+
         except Exception as e:
             logger.error(f"Error consultando Gemini: {e}")
             # Retornar resultado conservador en caso de error
@@ -122,47 +122,69 @@ class GeminiMigrationValidator:
                 alert_level="YELLOW",
                 summary=f"No se pudo validar automáticamente. Verificar con embajada de {destination}.",
                 sources=[],
-                raw_response=str(e)
+                raw_response=str(e),
             )
-    
+
     def _build_migration_prompt(
         self,
         nationality: str,
         destination: str,
         transit_countries: list,
         passport_expiry: date | None,
-        travel_date: date | None
+        travel_date: date | None,
     ) -> str:
         """Construye el prompt optimizado para Gemini"""
-        
+
         # Mapeo de códigos a nombres de países (simplificado)
         country_names = {
-            'VEN': 'Venezuela', 'COL': 'Colombia', 'ARG': 'Argentina',
-            'ESP': 'España', 'USA': 'Estados Unidos', 'PAN': 'Panamá',
-            'MEX': 'México', 'BRA': 'Brasil', 'PER': 'Perú',
-            'CHL': 'Chile', 'ECU': 'Ecuador', 'URY': 'Uruguay',
-            'PRY': 'Paraguay', 'BOL': 'Bolivia', 'CRI': 'Costa Rica',
-            'DOM': 'República Dominicana', 'CUB': 'Cuba', 'JAM': 'Jamaica',
-            'FRA': 'Francia', 'ITA': 'Italia', 'DEU': 'Alemania',
-            'GBR': 'Reino Unido', 'PRT': 'Portugal', 'NLD': 'Países Bajos',
-            'CAN': 'Canadá', 'AUS': 'Australia', 'JPN': 'Japón',
-            'CHN': 'China', 'IND': 'India', 'RUS': 'Rusia'
+            "VEN": "Venezuela",
+            "COL": "Colombia",
+            "ARG": "Argentina",
+            "ESP": "España",
+            "USA": "Estados Unidos",
+            "PAN": "Panamá",
+            "MEX": "México",
+            "BRA": "Brasil",
+            "PER": "Perú",
+            "CHL": "Chile",
+            "ECU": "Ecuador",
+            "URY": "Uruguay",
+            "PRY": "Paraguay",
+            "BOL": "Bolivia",
+            "CRI": "Costa Rica",
+            "DOM": "República Dominicana",
+            "CUB": "Cuba",
+            "JAM": "Jamaica",
+            "FRA": "Francia",
+            "ITA": "Italia",
+            "DEU": "Alemania",
+            "GBR": "Reino Unido",
+            "PRT": "Portugal",
+            "NLD": "Países Bajos",
+            "CAN": "Canadá",
+            "AUS": "Australia",
+            "JPN": "Japón",
+            "CHN": "China",
+            "IND": "India",
+            "RUS": "Rusia",
         }
-        
+
         nationality_name = country_names.get(nationality, nationality)
         destination_name = country_names.get(destination, destination)
         transit_names = [country_names.get(c, c) for c in transit_countries]
-        
+
         # Calcular meses de validez del pasaporte
         passport_info = ""
         if passport_expiry and travel_date:
-            months_valid = (passport_expiry.year - travel_date.year) * 12 + (passport_expiry.month - travel_date.month)
+            months_valid = (passport_expiry.year - travel_date.year) * 12 + (
+                passport_expiry.month - travel_date.month
+            )
             passport_info = f"- Pasaporte válido hasta: {passport_expiry.strftime('%Y-%m-%d')} ({months_valid} meses desde la fecha de viaje)\n"
-        
+
         transit_info = ""
         if transit_names:
             transit_info = f"- Escalas/Tránsitos: {', '.join(transit_names)}\n"
-        
+
         prompt = f"""Eres un experto en regulaciones migratorias internacionales actualizadas a 2026.
 
 DATOS DEL VIAJE:
@@ -202,14 +224,14 @@ NIVELES DE ALERTA:
 Responde SOLO con el JSON, sin texto adicional."""
 
         return prompt
-    
+
     def _parse_gemini_response(self, raw_text: str) -> MigrationValidationResult:
         """
         Parsea la respuesta de Gemini y extrae el JSON estructurado.
-        
+
         Args:
             raw_text: Texto crudo de la respuesta de Gemini
-        
+
         Returns:
             MigrationValidationResult parseado
         """
@@ -217,47 +239,49 @@ Responde SOLO con el JSON, sin texto adicional."""
             # Intentar extraer JSON del texto
             # Gemini a veces envuelve el JSON en ```json ... ```
             json_text = raw_text.strip()
-            
-            if '```json' in json_text:
-                json_text = json_text.split('```json')[1].split('```')[0].strip()
-            elif '```' in json_text:
-                json_text = json_text.split('```')[1].split('```')[0].strip()
-            
+
+            if "```json" in json_text:
+                json_text = json_text.split("```json")[1].split("```")[0].strip()
+            elif "```" in json_text:
+                json_text = json_text.split("```")[1].split("```")[0].strip()
+
             data = json.loads(json_text)
-            
+
             return MigrationValidationResult(
-                visa_required=data.get('visa_required', True),
-                visa_type=data.get('visa_type', 'Unknown'),
-                passport_validity_ok=data.get('passport_validity_ok', False),
-                passport_min_months=data.get('passport_min_months', 6),
-                vaccination_required=data.get('vaccination_required', []),
-                alert_level=data.get('alert_level', 'YELLOW'),
-                summary=data.get('summary', 'Verificar con embajada'),
-                sources=data.get('sources', [])
+                visa_required=data.get("visa_required", True),
+                visa_type=data.get("visa_type", "Unknown"),
+                passport_validity_ok=data.get("passport_validity_ok", False),
+                passport_min_months=data.get("passport_min_months", 6),
+                vaccination_required=data.get("vaccination_required", []),
+                alert_level=data.get("alert_level", "YELLOW"),
+                summary=data.get("summary", "Verificar con embajada"),
+                sources=data.get("sources", []),
             )
-            
+
         except (json.JSONDecodeError, KeyError, IndexError) as e:
             logger.warning(f"Error parseando respuesta de Gemini: {e}")
             logger.debug(f"Texto recibido: {raw_text}")
-            
+
             # Fallback: intentar extraer información básica del texto
             return self._fallback_parse(raw_text)
-    
+
     def _fallback_parse(self, raw_text: str) -> MigrationValidationResult:
         """Parser de respaldo si el JSON falla"""
         text_lower = raw_text.lower()
-        
+
         # Heurísticas simples
-        visa_required = 'visa' in text_lower and ('required' in text_lower or 'necesaria' in text_lower)
-        passport_ok = 'válido' in text_lower or 'sufficient' in text_lower
-        
-        if 'red' in text_lower or 'crítica' in text_lower:
-            alert_level = 'RED'
-        elif 'green' in text_lower or 'orden' in text_lower:
-            alert_level = 'GREEN'
+        visa_required = "visa" in text_lower and (
+            "required" in text_lower or "necesaria" in text_lower
+        )
+        passport_ok = "válido" in text_lower or "sufficient" in text_lower
+
+        if "red" in text_lower or "crítica" in text_lower:
+            alert_level = "RED"
+        elif "green" in text_lower or "orden" in text_lower:
+            alert_level = "GREEN"
         else:
-            alert_level = 'YELLOW'
-        
+            alert_level = "YELLOW"
+
         return MigrationValidationResult(
             visa_required=visa_required,
             visa_type="Verificar con embajada",
@@ -266,5 +290,5 @@ Responde SOLO con el JSON, sin texto adicional."""
             vaccination_required=[],
             alert_level=alert_level,
             summary=raw_text[:200] + "..." if len(raw_text) > 200 else raw_text,
-            sources=[]
+            sources=[],
         )

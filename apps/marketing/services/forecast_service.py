@@ -7,27 +7,45 @@ from django.db.models.functions import TruncMonth
 from django.utils import timezone
 from pydantic import BaseModel, Field
 
-from apps.automation.services.ai_engine import ai_engine
-from apps.bookings.models import Venta
+
+def _get_ai_engine():
+    from django.utils.module_loading import import_string
+
+    return import_string("apps.automation.services.ai_engine.ai_engine")
+
+
+def _get_venta_model():
+    from django.apps import apps
+
+    return apps.get_model("bookings", "Venta")
+
 
 logger = logging.getLogger(__name__)
+
 
 class ForecastInsight(BaseModel):
     title: str = Field(description="Título corto del insight (Ej: Auge en Caribe)")
     description: str = Field(description="Descripción detallada y recomendación estratégica")
     impact_level: str = Field(description="Nivel de impacto esperado: HIGH, MEDIUM, LOW")
 
+
 class HotDestination(BaseModel):
     name: str = Field(description="Nombre del destino o país")
     growth_probability: str = Field(description="Probabilidad de crecimiento (Ej: 85%)")
     reason: str = Field(description="Razón breve de la tendencia")
 
+
 class SalesForecastSchema(BaseModel):
-    predicted_sales_next_month: str = Field(description="Monto predicho de ventas para el próximo mes")
+    predicted_sales_next_month: str = Field(
+        description="Monto predicho de ventas para el próximo mes"
+    )
     confidence_level: str = Field(description="Nivel de confianza de la predicción (Ej: 92%)")
     momentum_indicator: str = Field(description="Indicador de tendencia: UP, DOWN, STABLE")
     hot_destinations: list[HotDestination] = Field(description="Top 3-4 destinos recomendados")
-    strategic_insights: list[ForecastInsight] = Field(description="Recomendaciones tácticas detalladas")
+    strategic_insights: list[ForecastInsight] = Field(
+        description="Recomendaciones tácticas detalladas"
+    )
+
 
 class AIForecastService:
     """
@@ -40,29 +58,29 @@ class AIForecastService:
         Extrae datos agregados de ventas por mes.
         """
         start_date = timezone.now() - timedelta(days=30 * months)
-        
+
         # Ventas por mes
+        Venta = _get_venta_model()
         sales_by_month = (
             Venta.objects.filter(fecha_venta__gte=start_date)
-            .annotate(month=TruncMonth('fecha_venta'))
-            .values('month')
-            .annotate(
-                total=Sum('total_venta'),
-                count=Count('id_venta')
-            )
-            .order_by('month')
+            .annotate(month=TruncMonth("fecha_venta"))
+            .values("month")
+            .annotate(total=Sum("total_venta"), count=Count("id_venta"))
+            .order_by("month")
         )
-        
+
         # Tipos de venta más comunes (GDS vs Directo, etc)
         # Aquí simplificamos para el prompt
         data = []
         for entry in sales_by_month:
-            data.append({
-                "month": entry['month'].strftime("%Y-%m"),
-                "total_sales": float(entry['total'] or 0),
-                "transaction_count": entry['count']
-            })
-        
+            data.append(
+                {
+                    "month": entry["month"].strftime("%Y-%m"),
+                    "total_sales": float(entry["total"] or 0),
+                    "transaction_count": entry["count"],
+                }
+            )
+
         return data
 
     def get_top_destinations_historical(self, months=6) -> list[str]:
@@ -71,22 +89,26 @@ class AIForecastService:
         """
         # Nota: En una implementación real, buscaríamos en SegmentoVuelo u HotelTarifario
         # Por ahora, devolvemos una lista de los destinos más vendidos
-        from apps.bookings.models import SegmentoVuelo
+        from django.apps import apps
+
+        SegmentoVuelo = apps.get_model("bookings", "SegmentoVuelo")
+
         start_date = timezone.now() - timedelta(days=30 * months)
-        
+
         top_cities = (
             SegmentoVuelo.objects.filter(fecha_salida__gte=start_date)
-            .values('destino__nombre')
-            .annotate(count=Count('id_segmento_vuelo'))
-            .order_by('-count')[:5]
+            .values("destino__nombre")
+            .annotate(count=Count("id_segmento_vuelo"))
+            .order_by("-count")[:5]
         )
-        
-        return [c['destino__nombre'] for c in top_cities if c['destino__nombre']]
+
+        return [c["destino__nombre"] for c in top_cities if c["destino__nombre"]]
 
     def generate_forecast(self) -> dict[str, Any]:
         """
         Orquesta el análisis y la generación de la predicción con IA.
         """
+        ai_engine = _get_ai_engine()
         if not ai_engine.is_ready:
             return {"error": "IA no disponible para análisis."}
 
@@ -96,7 +118,9 @@ class AIForecastService:
         current_date = timezone.now().strftime("%Y-%m-%d")
 
         if not historical_sales:
-            return {"error": "Datos insuficientes para realizar una predicción (mínimo 1 mes de ventas)."}
+            return {
+                "error": "Datos insuficientes para realizar una predicción (mínimo 1 mes de ventas)."
+            }
 
         # 2. Construir Prompt
         prompt = f"""
@@ -124,9 +148,8 @@ class AIForecastService:
         """
 
         try:
-            forecast = ai_engine.call_gemini(
-                prompt=prompt,
-                response_schema=SalesForecastSchema
+            forecast = _get_ai_engine().call_gemini(
+                prompt=prompt, response_schema=SalesForecastSchema
             )
             return forecast
         except Exception as e:

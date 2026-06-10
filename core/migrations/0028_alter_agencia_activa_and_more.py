@@ -3,13 +3,11 @@
 import django.contrib.postgres.indexes
 import django.db.models.deletion
 from django.conf import settings
+from django.contrib.postgres.operations import TrigramExtension
 from django.db import migrations, models
 
 
-from django.contrib.postgres.operations import TrigramExtension
-
 class Migration(migrations.Migration):
-
     dependencies = [
         (
             "bookings",

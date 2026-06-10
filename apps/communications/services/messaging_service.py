@@ -1,12 +1,15 @@
-
 import logging
 from typing import Any
 
-from apps.automation.services.ai_engine import generate_content
-
 logger = logging.getLogger(__name__)
 
-def generate_whatsapp_message_for_document(document_type: str, client_name: str, data: dict[str, Any]) -> str:
+
+def generate_whatsapp_message_for_document(
+    document_type: str, client_name: str, data: dict[str, Any]
+) -> str:
+    from django.utils.module_loading import import_string
+
+    generate_content = import_string("apps.automation.services.ai_engine.generate_content")
     """
     Llama a Gemini para generar un mensaje de WhatsApp amigable para enviar un documento.
 
@@ -47,6 +50,7 @@ def generate_whatsapp_message_for_document(document_type: str, client_name: str,
     except Exception as e:
         logger.error(f"Error al generar mensaje de WhatsApp con Gemini: {e}")
         return f"Hola {client_name}, te adjuntamos tu {document_type}."
+
 
 def send_whatsapp_with_attachment(client_number: str, message: str, pdf_url: str):
     """

@@ -6,7 +6,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("bookings", "0024_alter_actividadservicio_agencia_and_more"),
         ("core", "0029_alter_anulacionboleto_agencia_and_more"),
@@ -141,9 +140,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddIndex(
             model_name="mensajewhatsapp",
-            index=models.Index(
-                fields=["is_deleted", "agencia_id"], name="idx_wa_soft_delete_saas"
-            ),
+            index=models.Index(fields=["is_deleted", "agencia_id"], name="idx_wa_soft_delete_saas"),
         ),
         migrations.AddIndex(
             model_name="oportunidadviaje",

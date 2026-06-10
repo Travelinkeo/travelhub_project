@@ -46,7 +46,7 @@
         </label>
 
         <!-- Facturación -->
-        <a href="{% url 'finance:invoice_list' %}" class="group relative bg-gradient-to-br from-indigo-600 to-violet-800 rounded-xl p-4 shadow-lg hover:shadow-indigo-500/20 transition-all hover:-translate-y-1 overflow-hidden block">
+        <a href="{% url 'finance:facturacion_dashboard' %}" class="group relative bg-gradient-to-br from-indigo-600 to-violet-800 rounded-xl p-4 shadow-lg hover:shadow-indigo-500/20 transition-all hover:-translate-y-1 overflow-hidden block">
             <div class="absolute top-3 right-3 bg-white/10 p-2 rounded-lg group-hover:bg-white/20 transition">
                 <span class="material-symbols-outlined text-white text-[20px]">receipt_long</span>
             </div>
@@ -214,7 +214,7 @@
                             <div class="w-8 h-8 rounded-lg bg-surface-3 flex items-center justify-center text-primary font-black text-[10px] border border-border-color">
                                 {% if venta.cliente %}{{ venta.cliente.nombres|slice:":2"|upper }}{% else %}NA{% endif %}
                             </div>
-                            <span class="truncate max-w-[150px]">{{ venta.cliente.nombres|default:"<span class='text-status-warning'>Sin asignar</span>"|safe }}</span>
+                            <span class="truncate max-w-[150px]">{% if venta.cliente.nombres %}{{ venta.cliente.nombres }}{% else %}<span class='text-status-warning'>Sin asignar</span>{% endif %}</span>
                         </td>
                         <td class="px-6 py-4 font-mono font-black text-primary cursor-pointer clickable-row" data-url="{% url 'bookings:venta_update' venta.pk %}">
                             {{ venta.localizador|default:"---" }}
@@ -264,8 +264,8 @@
 {% endblock %}
 
 {% block extra_scripts %}
-<script src="{% static 'core/js/dashboard_upload.js' %}"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script nonce="{{ request.csp_nonce }}" src="{% static 'core/js/dashboard_upload.js' %}"></script>
+<script nonce="{{ request.csp_nonce }}" src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script nonce="{{ request.csp_nonce }}">
     // Configurando Chart.js "The Matrix Design"
@@ -355,6 +355,8 @@
 
                     const result = await response.json();
                     if (result.success) {
+                        // WARNING: PII data stored in sessionStorage. Mitigated by short TTL (cleared on read)
+                        // and sessionStorage being tab-scoped. Future: move to backend temp storage.
                         sessionStorage.setItem('ocr_passport_data', JSON.stringify(result.data));
                         window.dispatchEvent(new CustomEvent('notify', {
                             detail: { message: 'Lectura exitosa. Preparando ficha...', type: 'success' }

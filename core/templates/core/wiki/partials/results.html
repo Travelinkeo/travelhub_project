@@ -1,3 +1,4 @@
+{% load core_tags %}
 {% if articulos %}
 <div class="space-y-3 animate-fade-in-up">
     {% for art in articulos %}
@@ -9,7 +10,7 @@
             <h4 class="text-sm font-bold text-slate-800">{{ art.titulo }}</h4>
         </div>
         <div class="text-xs text-slate-700 prose prose-sm max-w-none prose-p:my-0">
-            {{ art.contenido|safe }}
+            {{ art.contenido|sanitize_html_filter }}
         </div>
     </div>
     {% endfor %}

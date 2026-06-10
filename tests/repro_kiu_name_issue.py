@@ -10,14 +10,15 @@ def test_kiu_laser_name_regression():
     NAME/NOMBRE: SMITH/JANE MS
     TICKET NUMBER: 1234567890
     """
-    
+
     data = extract_data_from_text(sample_text)
-    
-    nombre = data.get('NOMBRE_DEL_PASAJERO')
+
+    nombre = data.get("NOMBRE_DEL_PASAJERO")
     print(f"Nombre extraido: {nombre}")
-    
+
     assert "ISSUING AIRLINE" not in nombre.upper()
     assert "SMITH/JANE" in nombre.upper()
+
 
 if __name__ == "__main__":
     test_kiu_laser_name_regression()

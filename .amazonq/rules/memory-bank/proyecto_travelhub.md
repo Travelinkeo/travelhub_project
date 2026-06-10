@@ -4,7 +4,7 @@
 
 **Nombre**: TravelHub  
 **Tipo**: CRM/ERP/CMS para Agencia de Viajes  
-**Stack**: Django 5.x + Next.js 14 + PostgreSQL  
+**Stack**: Django 5.x + HTMX + Alpine.js SSR + PostgreSQL  
 **Repositorio**: https://github.com/Travelinkeo/travelhub_project.git  
 
 ## Estructura del Proyecto
@@ -17,8 +17,7 @@
 - `accounting_assistant/` - Asistente contable IA
 
 ### Frontend
-- Next.js 14 + TypeScript + Tailwind CSS
-- Ubicación: `frontend/`
+- HTMX + Alpine.js SSR + Tailwind CSS
 
 ### Carpetas Organizadas (Enero 2025)
 - `batch_scripts/` - Scripts .bat para Windows (13 archivos)

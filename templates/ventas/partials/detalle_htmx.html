@@ -4,7 +4,7 @@
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
         <div>
             <div class="flex items-center gap-3 mb-1">
-                <a href="{% url 'core:ventas_dashboard' %}" class="text-gray-400 hover:text-white transition-colors">
+                <a href="{% url 'bookings:venta_list' %}" class="text-gray-400 hover:text-white transition-colors">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
@@ -25,7 +25,7 @@
         <!-- Action Buttons -->
         <div class="flex gap-3">
             {% if venta.factura %}
-            <a href="{% url 'core:factura_detalle' venta.factura.pk %}"
+            <a href="{% url 'finance:factura_detalle' venta.factura.pk %}"
                 class="px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg font-medium transition-colors flex items-center gap-2">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

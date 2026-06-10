@@ -1,6 +1,6 @@
 -r base.txt
 
 # Production specific
-psycopg2-binary==2.9.10
+psycopg2==2.9.10
 gunicorn==23.0.0
 whitenoise==6.7.0

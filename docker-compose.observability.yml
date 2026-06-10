@@ -12,6 +12,7 @@ services:
       - '--config.file=/etc/prometheus/prometheus.yml'
     networks:
       - observability_net
+      - travelhub_private
 
   grafana:
     image: grafana/grafana:11.0.0
@@ -42,3 +43,5 @@ services:
 networks:
   observability_net:
     driver: bridge
+  travelhub_private:
+    external: true

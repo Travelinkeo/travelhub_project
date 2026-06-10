@@ -9,7 +9,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
@@ -26,9 +25,7 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id_factura",
-                    models.AutoField(
-                        primary_key=True, serialize=False, verbose_name="ID Factura"
-                    ),
+                    models.AutoField(primary_key=True, serialize=False, verbose_name="ID Factura"),
                 ),
                 (
                     "numero_factura",
@@ -49,9 +46,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "fecha_vencimiento",
-                    models.DateField(
-                        blank=True, null=True, verbose_name="Fecha de Vencimiento"
-                    ),
+                    models.DateField(blank=True, null=True, verbose_name="Fecha de Vencimiento"),
                 ),
                 (
                     "subtotal",
@@ -131,15 +126,11 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "cliente_direccion",
-                    models.TextField(
-                        blank=True, verbose_name="Dirección Fiscal Cliente"
-                    ),
+                    models.TextField(blank=True, verbose_name="Dirección Fiscal Cliente"),
                 ),
                 (
                     "cliente_telefono",
-                    models.CharField(
-                        blank=True, max_length=50, verbose_name="Teléfono Cliente"
-                    ),
+                    models.CharField(blank=True, max_length=50, verbose_name="Teléfono Cliente"),
                 ),
                 (
                     "tasa_cambio",
@@ -246,9 +237,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "notas",
-                    models.TextField(
-                        blank=True, null=True, verbose_name="Notas de la Factura"
-                    ),
+                    models.TextField(blank=True, null=True, verbose_name="Notas de la Factura"),
                 ),
                 (
                     "archivo_pdf",
@@ -333,9 +322,7 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id_gasto",
-                    models.AutoField(
-                        primary_key=True, serialize=False, verbose_name="ID Gasto"
-                    ),
+                    models.AutoField(primary_key=True, serialize=False, verbose_name="ID Gasto"),
                 ),
                 (
                     "descripcion",
@@ -343,15 +330,11 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "monto",
-                    models.DecimalField(
-                        decimal_places=2, max_digits=12, verbose_name="Monto"
-                    ),
+                    models.DecimalField(decimal_places=2, max_digits=12, verbose_name="Monto"),
                 ),
                 (
                     "fecha",
-                    models.DateField(
-                        default=django.utils.timezone.now, verbose_name="Fecha"
-                    ),
+                    models.DateField(default=django.utils.timezone.now, verbose_name="Fecha"),
                 ),
                 (
                     "categoria",
@@ -418,9 +401,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "descripcion",
-                    models.CharField(
-                        max_length=500, verbose_name="Descripción del Item"
-                    ),
+                    models.CharField(max_length=500, verbose_name="Descripción del Item"),
                 ),
                 (
                     "cantidad",
@@ -493,9 +474,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "pnr",
-                    models.CharField(
-                        blank=True, max_length=10, null=True, verbose_name="PNR"
-                    ),
+                    models.CharField(blank=True, max_length=10, null=True, verbose_name="PNR"),
                 ),
                 (
                     "pasajero",
@@ -505,9 +484,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "fecha_emision",
-                    models.DateField(
-                        blank=True, null=True, verbose_name="Fecha Emisión"
-                    ),
+                    models.DateField(blank=True, null=True, verbose_name="Fecha Emisión"),
                 ),
                 (
                     "monto_total_proveedor",
@@ -615,9 +592,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "comprobante_imagen",
-                    models.ImageField(
-                        blank=True, null=True, upload_to="comprobantes_pago/"
-                    ),
+                    models.ImageField(blank=True, null=True, upload_to="comprobantes_pago/"),
                 ),
                 ("creado_en", models.DateTimeField(auto_now_add=True)),
                 ("expira_en", models.DateTimeField()),
@@ -664,15 +639,11 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "monto",
-                    models.DecimalField(
-                        decimal_places=2, max_digits=12, verbose_name="Monto"
-                    ),
+                    models.DecimalField(decimal_places=2, max_digits=12, verbose_name="Monto"),
                 ),
                 (
                     "moneda",
-                    models.CharField(
-                        default="USDT", max_length=5, verbose_name="Moneda"
-                    ),
+                    models.CharField(default="USDT", max_length=5, verbose_name="Moneda"),
                 ),
                 (
                     "estado",
@@ -798,9 +769,7 @@ class Migration(migrations.Migration):
                 ("fecha_subida", models.DateTimeField(auto_now_add=True)),
                 (
                     "proveedor",
-                    models.CharField(
-                        help_text="Ej: BSP, KIU, SABRE, AMADEUS", max_length=50
-                    ),
+                    models.CharField(help_text="Ej: BSP, KIU, SABRE, AMADEUS", max_length=50),
                 ),
                 ("periodo_inicio", models.DateField(blank=True, null=True)),
                 ("periodo_fin", models.DateField(blank=True, null=True)),
@@ -827,9 +796,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "resumen_conciliacion",
-                    models.JSONField(
-                        blank=True, help_text="Resumen de match/mismatch", null=True
-                    ),
+                    models.JSONField(blank=True, help_text="Resumen de match/mismatch", null=True),
                 ),
                 ("error_log", models.TextField(blank=True, null=True)),
                 (
@@ -897,9 +864,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "raw_data",
-                    models.JSONField(
-                        blank=True, null=True, verbose_name="Fila Cruda Original"
-                    ),
+                    models.JSONField(blank=True, null=True, verbose_name="Fila Cruda Original"),
                 ),
                 (
                     "reporte",
@@ -1083,15 +1048,11 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "monto",
-                    models.DecimalField(
-                        decimal_places=2, max_digits=12, verbose_name="Monto"
-                    ),
+                    models.DecimalField(decimal_places=2, max_digits=12, verbose_name="Monto"),
                 ),
                 (
                     "moneda",
-                    models.CharField(
-                        default="USD", max_length=10, verbose_name="Moneda"
-                    ),
+                    models.CharField(default="USD", max_length=10, verbose_name="Moneda"),
                 ),
                 (
                     "webhook_transaction_id",
@@ -1111,9 +1072,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "fecha_registro",
-                    models.DateTimeField(
-                        auto_now_add=True, verbose_name="Fecha Registro"
-                    ),
+                    models.DateTimeField(auto_now_add=True, verbose_name="Fecha Registro"),
                 ),
                 (
                     "venta",
@@ -1133,27 +1092,19 @@ class Migration(migrations.Migration):
         ),
         migrations.AddIndex(
             model_name="factura",
-            index=models.Index(
-                fields=["numero_factura"], name="core_factur_numero__4980ce_idx"
-            ),
+            index=models.Index(fields=["numero_factura"], name="core_factur_numero__4980ce_idx"),
         ),
         migrations.AddIndex(
             model_name="factura",
-            index=models.Index(
-                fields=["numero_control"], name="core_factur_numero__1af612_idx"
-            ),
+            index=models.Index(fields=["numero_control"], name="core_factur_numero__1af612_idx"),
         ),
         migrations.AddIndex(
             model_name="factura",
-            index=models.Index(
-                fields=["fecha_emision"], name="core_factur_fecha_e_f7be26_idx"
-            ),
+            index=models.Index(fields=["fecha_emision"], name="core_factur_fecha_e_f7be26_idx"),
         ),
         migrations.AddIndex(
             model_name="factura",
-            index=models.Index(
-                fields=["tipo_factura"], name="core_factur_tipo_fa_26c852_idx"
-            ),
+            index=models.Index(fields=["tipo_factura"], name="core_factur_tipo_fa_26c852_idx"),
         ),
         migrations.AddIndex(
             model_name="factura",
@@ -1164,14 +1115,10 @@ class Migration(migrations.Migration):
         ),
         migrations.AddIndex(
             model_name="factura",
-            index=models.Index(
-                fields=["agencia", "estado"], name="core_factur_agencia_728849_idx"
-            ),
+            index=models.Index(fields=["agencia", "estado"], name="core_factur_agencia_728849_idx"),
         ),
         migrations.AddIndex(
             model_name="factura",
-            index=models.Index(
-                fields=["venta_asociada"], name="core_factur_venta_a_301d08_idx"
-            ),
+            index=models.Index(fields=["venta_asociada"], name="core_factur_venta_a_301d08_idx"),
         ),
     ]

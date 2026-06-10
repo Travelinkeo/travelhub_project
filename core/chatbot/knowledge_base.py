@@ -142,14 +142,13 @@ TRAVELHUB_KNOWLEDGE = """
 
 ### Backend:
 - Django 5.x con Django REST Framework
-- PostgreSQL (producción) / SQLite (desarrollo)
+- PostgreSQL (dev / producción / tests) — sin SQLite en el proyecto
 - APIs REST completas
 - Autenticación JWT
 - Python 3.12+
 
 ### Frontend:
-- Next.js 13+ con React
-- TypeScript
+- HTMX + Alpine.js SSR
 - Tailwind CSS
 - Responsive design
 
@@ -363,6 +362,7 @@ SÍ puedo:
 - Orientar sobre servicios disponibles
 - Conectar con un agente humano
 """
+
 
 def get_knowledge_context() -> str:
     """Retorna el contexto de conocimiento para Linkeo."""

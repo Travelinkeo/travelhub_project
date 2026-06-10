@@ -99,8 +99,8 @@
                         </td>
 
                         <td class="px-6 py-5">
-                            {% if pasajero.clientes.exists %}
-                                {% with cliente=pasajero.clientes.first %}
+                            {% if pasajero.clientes_asociados.exists %}
+                                {% with cliente=pasajero.clientes_asociados.first %}
                                 <div class="flex flex-col">
                                     <span class="text-xs font-black text-text-secondary uppercase tracking-tighter">{{ cliente.get_nombre_completo }}</span>
                                     <span class="text-[9px] text-text-muted font-bold uppercase tracking-widest mt-0.5">Titular Principal</span>
@@ -111,7 +111,7 @@
                             {% endif %}
                         </td>
 
-                        <td class="px-6 py-5" onclick="event.stopPropagation()">
+                        <td class="px-6 py-5" data-stop-propagation>
                             <div class="flex items-center justify-end gap-2">
                                 <a href="{% url 'crm:pasajero_detail' pasajero.pk %}"
                                     class="size-8 flex items-center justify-center text-text-muted hover:text-primary hover:bg-primary/10 rounded-lg transition-all border border-transparent hover:border-primary/20" 

@@ -46,10 +46,14 @@ class Command(BaseCommand):
 
             cmd = [
                 "pg_dump",
-                "-h", parsed.hostname or "localhost",
-                "-p", str(parsed.port or 5432),
-                "-U", parsed.username or "postgres",
-                "-d", parsed.path.lstrip("/") or "travelhub",
+                "-h",
+                parsed.hostname or "localhost",
+                "-p",
+                str(parsed.port or 5432),
+                "-U",
+                parsed.username or "postgres",
+                "-d",
+                parsed.path.lstrip("/") or "travelhub",
                 "--no-owner",
                 "--no-acl",
             ]
@@ -67,7 +71,9 @@ class Command(BaseCommand):
                 gzip_proc.communicate()
 
                 if pg_dump.returncode != 0:
-                    self.stderr.write(self.style.ERROR(f"pg_dump falló con código {pg_dump.returncode}"))
+                    self.stderr.write(
+                        self.style.ERROR(f"pg_dump falló con código {pg_dump.returncode}")
+                    )
                     os.remove(filepath)
                     return
 

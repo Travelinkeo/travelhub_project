@@ -68,7 +68,7 @@
         </header>
 
         <div class="top-info">
-            <div class="info-col"><label>Passenger</label><span>{{ venta.cliente.get_nombre_completo|default:venta.cliente.nombre|upper }}</span></div>
+            <div class="info-col"><label>Passenger</label><span>{{ venta.cliente.get_nombre_completo|upper }}</span></div>
             <div class="info-col"><label>Reference</label><span>{{ venta.localizador|default:venta.id_venta }}</span></div>
             <div class="info-col"><label>Issued</label><span>{{ venta.fecha_venta|date:"d M Y" }}</span></div>
         </div>

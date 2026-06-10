@@ -2,8 +2,8 @@ import contextvars
 import logging
 import os
 import secrets
-from datetime import datetime, timedelta
 from contextlib import contextmanager
+from datetime import datetime, timedelta
 
 from django.conf import settings as dj_settings
 from django.http import Http404
@@ -119,7 +119,7 @@ class ThreadLocalContextMiddleware:
                                 start = datetime.fromisoformat(impersonated_at)
                                 if dj_settings.USE_TZ and not timezone.is_aware(start):
                                     start = timezone.make_aware(start, timezone.utc)
-                                
+
                                 if timezone.now() - start > timedelta(seconds=1800):
                                     del request.session["impersonated_agencia_id"]
                                     del request.session["impersonated_agencia_name"]
@@ -134,6 +134,7 @@ class ThreadLocalContextMiddleware:
                                 pass
 
                         from core.models.agencia import Agencia
+
                         try:
                             agency = Agencia.objects.get(id=impersonated_id)
                         except Agencia.DoesNotExist:
@@ -142,12 +143,31 @@ class ThreadLocalContextMiddleware:
                             is_impersonating_flag = False
                             impersonator = None
                     else:
-                        agency = None
+                        preferred_id = request.session.get("active_agencia_id")
+                        if preferred_id:
+                            from core.models.agencia import Agencia
+
+                            ua_obj = (
+                                user.agencias.filter(
+                                    activo=True, agencia__id=preferred_id, agencia__activa=True
+                                )
+                                .select_related("agencia")
+                                .first()
+                            )
+                            if ua_obj:
+                                agency = ua_obj.agencia
+                        if not agency:
+                            ua_obj = (
+                                user.agencias.filter(activo=True).select_related("agencia").first()
+                            )
+                            if ua_obj:
+                                agency = ua_obj.agencia
                 else:
                     if not agency:
                         preferred_id = request.session.get("active_agencia_id")
                         if preferred_id:
                             from core.models.agencia import Agencia
+
                             ua_obj = (
                                 user.agencias.filter(
                                     activo=True, agencia__id=preferred_id, agencia__activa=True
@@ -183,6 +203,7 @@ class ThreadLocalContextMiddleware:
 
             try:
                 from django.db import connection
+
                 with connection.cursor() as cursor:
                     tenant_id = str(agency.id) if agency else "0"
                     is_impersonating_val = (
@@ -193,7 +214,12 @@ class ThreadLocalContextMiddleware:
                     is_admin_path = str(request.path).startswith("/admin/")
                     bypass = (
                         "true"
-                        if (user and user.is_superuser and is_admin_path and not is_impersonating_val)
+                        if (
+                            user
+                            and user.is_superuser
+                            and is_admin_path
+                            and not is_impersonating_val
+                        )
                         else "false"
                     )
                     cursor.execute("SET LOCAL app.current_agencia_id = %s", [tenant_id])
@@ -250,7 +276,9 @@ class SecurityHeadersMiddleware:
             static_origin = f"https://{static_domain}" if static_domain else ""
             r2_wildcard = "https://*.r2.cloudflarestorage.com"
             is_debug = getattr(dj_settings, "DEBUG", True)
-            is_admin_path = request.path.startswith("/admin/") or request.path.startswith("/system/")
+            is_admin_path = request.path.startswith("/admin/") or request.path.startswith(
+                "/system/"
+            )
 
             if is_debug or is_admin_path:
                 csp = "; ".join(
@@ -272,8 +300,8 @@ class SecurityHeadersMiddleware:
                 csp = "; ".join(
                     [
                         "default-src 'self' data: blob:",
-                        f"script-src 'self' 'nonce-{nonce}' 'strict-dynamic' {static_origin} https://static.cloudflareinsights.com https://cdn.jsdelivr.net https://cdn.tailwindcss.com https://unpkg.com",
-                        f"style-src 'self' 'nonce-{nonce}' {static_origin} https://fonts.googleapis.com https://cdn.jsdelivr.net https://cdn.tailwindcss.com https://unpkg.com",
+                        f"script-src 'self' 'nonce-{nonce}' 'strict-dynamic' {static_origin} https://static.cloudflareinsights.com https://cdn.jsdelivr.net https://cdn.tailwindcss.com https://unpkg.com https://code.jquery.com",
+                        f"style-src 'self' 'unsafe-inline' {static_origin} https://fonts.googleapis.com https://cdn.jsdelivr.net https://cdn.tailwindcss.com https://unpkg.com",
                         f"font-src 'self' {static_origin} https://fonts.gstatic.com data:",
                         f"img-src 'self' data: blob: {static_origin} https://res.cloudinary.com {r2_wildcard} https://images.unsplash.com",
                         "frame-src 'self' https://js.stripe.com https://evolution:8080",
@@ -281,7 +309,6 @@ class SecurityHeadersMiddleware:
                         "form-action 'self'",
                         "frame-ancestors 'none'",
                         "base-uri 'self'",
-                        "report-uri /csp-report/",
                     ]
                 )
 
@@ -307,12 +334,13 @@ class SecurityHeadersMiddleware:
 def csp_report_view(request):
     """Endpoint para recibir reportes de violaciones de CSP."""
     import json
-    from django.http import JsonResponse
+
     from django.core.cache import cache
+    from django.http import JsonResponse
 
     max_length = 10 * 1024
     try:
-        content_length = int(request.META.get('CONTENT_LENGTH') or 0)
+        content_length = int(request.META.get("CONTENT_LENGTH") or 0)
     except (ValueError, TypeError):
         content_length = 0
 

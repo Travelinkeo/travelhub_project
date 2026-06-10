@@ -3,12 +3,13 @@ from typing import Any
 
 logger = logging.getLogger(__name__)
 
+
 class AIParserService:
     """
     SaaS AI Parser Engine (Tier 2 Upgrade)
     Sustituye a los parsers basados en Regex con un modelo 100% probabilístico guiado.
     """
-    
+
     SYSTEM_INSTRUCTION = """
     Eres el motor de extracción de datos de TravelHub. 
     Analizas boletos aéreos de GDS (Sabre, KIU, Amadeus) y devuelves exclusivamente JSON.
@@ -27,13 +28,14 @@ class AIParserService:
         Envía el texto crudo a Gemini usando el motor unificado de UniversalAIParser.
         """
         logger.info(f"🤖 Preparando extracción de IA unificada ({len(raw_text)} chars)")
-        
+
         try:
             from apps.automation.parsers.ai_universal_parser import UniversalAIParser
+
             # Delegamos la responsabilidad al motor principal (God Mode)
             # que ya maneja Structured Outputs, limpieza de tokens y reintentos.
             return UniversalAIParser().parse(raw_text, bypass_cache=bypass_cache)
-            
+
         except Exception as e:
             logger.error(f"🔥 Fallo crítico en AIParserService (Delegación): {str(e)}")
             return {"error": str(e)}
@@ -45,7 +47,7 @@ class AIParserService:
         """
         if not destination or destination.lower() in ["unknown", "tu próximo viaje"]:
             return "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=80&w=2021&auto=format&fit=crop"
-        
+
         # Mapa de destinos comunes para evitar latencia de API (Seed Data)
         mapping = {
             "MADRID": "https://images.unsplash.com/photo-1539037116277-4db20889f2d4?q=80&w=2070",
@@ -53,14 +55,14 @@ class AIParserService:
             "BOGOTA": "https://images.unsplash.com/photo-1536305030202-cc69ec992011?q=80&w=2070",
             "PARIS": "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?q=80&w=2073",
             "MIAMI": "https://images.unsplash.com/photo-1506466010722-395aa2bef877?q=80&w=2070",
-            "MEXICO": "https://images.unsplash.com/photo-1512813588911-721c97a5542b?q=80&w=2070"
+            "MEXICO": "https://images.unsplash.com/photo-1512813588911-721c97a5542b?q=80&w=2070",
         }
-        
+
         dest_upper = str(destination).upper()
         for key, url in mapping.items():
             if key in dest_upper:
                 return url
-        
+
         # Fallback genérico de ciudad si no está en el mapa
         query = destination.replace(" ", "+")
         return f"https://source.unsplash.com/featured/?city,{query}"
@@ -73,10 +75,12 @@ class AIParserService:
         # Por ahora heurística simple, luego llamar a IA
         proposals = []
         vuelos = data.get("boletos", [{}])[0].get("itinerario", [])
-        
+
         if vuelos:
             destino = vuelos[-1].get("destino", "su destino")
             proposals.append(f"Este viajero aún no tiene reserva de Hotel en {destino}.")
-            proposals.append(f"Recomendar Seguro de Viaje para la ruta {vuelos[0]['origen']} - {destino}.")
-            
+            proposals.append(
+                f"Recomendar Seguro de Viaje para la ruta {vuelos[0]['origen']} - {destino}."
+            )
+
         return proposals

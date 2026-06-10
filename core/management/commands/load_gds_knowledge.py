@@ -5,14 +5,14 @@ from core.models.wiki import WikiArticulo
 
 
 class Command(BaseCommand):
-    help = 'Loads GDS Master Guides into Wiki Knowledge Base'
+    help = "Loads GDS Master Guides into Wiki Knowledge Base"
 
     def handle(self, *args, **kwargs):
         guides = [
             {
-                'title': 'Guía Maestra AMADEUS (Comandos GDS)',
-                'tags': ['AMADEUS', 'GDS', 'COMANDOS', 'MANUAL', 'RESERVA'],
-                'content': """# Guía Maestra Amadeus GDS
+                "title": "Guía Maestra AMADEUS (Comandos GDS)",
+                "tags": ["AMADEUS", "GDS", "COMANDOS", "MANUAL", "RESERVA"],
+                "content": """# Guía Maestra Amadeus GDS
 
 ## 1. Flujo de Reserva
 ### A. Disponibilidad (AN)
@@ -55,12 +55,12 @@ class Command(BaseCommand):
 ## 4. Ancillarios
 - **Hoteles**: HA[Ciudad][Fecha][Noches] -> HS[Línea]
 - **Autos**: CA[Ciudad][Fecha]-[Fecha] -> CS[Línea]
-"""
+""",
             },
             {
-                'title': 'Guía Maestra SABRE (Comandos GDS)',
-                'tags': ['SABRE', 'GDS', 'COMANDOS', 'MANUAL', '1', '0'],
-                'content': """# Guía Maestra Sabre GDS
+                "title": "Guía Maestra SABRE (Comandos GDS)",
+                "tags": ["SABRE", "GDS", "COMANDOS", "MANUAL", "1", "0"],
+                "content": """# Guía Maestra Sabre GDS
 
 ## 1. Flujo de Reserva
 ### A. Disponibilidad (1)
@@ -104,12 +104,12 @@ class Command(BaseCommand):
 ## 4. Ancillarios
 - **Hoteles**: HOT[Ciudad]/... -> 0H[Línea]
 - **Autos**: CAR[Ciudad]/... -> 0C[Línea]
-"""
+""",
             },
             {
-                'title': 'Guía Maestra KIU (Comandos GDS)',
-                'tags': ['KIU', 'GDS', 'COMANDOS', 'MANUAL', 'CONVIASA', 'LASER'],
-                'content': """# Guía Maestra KIU GDS (Sistema Híbrido)
+                "title": "Guía Maestra KIU (Comandos GDS)",
+                "tags": ["KIU", "GDS", "COMANDOS", "MANUAL", "CONVIASA", "LASER"],
+                "content": """# Guía Maestra KIU GDS (Sistema Híbrido)
 
 ## 1. Flujo de Reserva
 ### A. Disponibilidad (1)
@@ -143,22 +143,22 @@ class Command(BaseCommand):
 ## 3. Servicios Especiales (3)
 - **Pasaporte**: 3DOCS/[Tipo]/[Pais]/[Num]... (Igual formato IATA)
 - **FOID**: 3FOID/[Airline] HK/[Tipo][Num]-1.1 (Crucial en KIU)
-"""
-            }
+""",
+            },
         ]
 
         for guia in guides:
             articulo, created = WikiArticulo.objects.update_or_create(
-                slug=slugify(guia['title']),
+                slug=slugify(guia["title"]),
                 defaults={
-                    'titulo': guia['title'],
-                    'contenido': guia['content'],
-                    'tags': guia['tags'],
-                    'categoria': 'GENERAL', # Podríamos agregar GDS si modificamos el modelo, pero GENERAL funciona
-                    'activo': True
-                }
+                    "titulo": guia["title"],
+                    "contenido": guia["content"],
+                    "tags": guia["tags"],
+                    "categoria": "GENERAL",  # Podríamos agregar GDS si modificamos el modelo, pero GENERAL funciona
+                    "activo": True,
+                },
             )
             if created:
-                self.stdout.write(self.style.SUCCESS(f'Creado: {articulo.titulo}'))
+                self.stdout.write(self.style.SUCCESS(f"Creado: {articulo.titulo}"))
             else:
-                self.stdout.write(self.style.WARNING(f'Actualizado: {articulo.titulo}'))
+                self.stdout.write(self.style.WARNING(f"Actualizado: {articulo.titulo}"))

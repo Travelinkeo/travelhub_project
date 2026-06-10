@@ -1,4 +1,3 @@
-
 import json
 import logging
 import re
@@ -55,6 +54,7 @@ JSON_SCHEMA_PROMPT = """
 }
 """
 
+
 def parse_ticket_with_gemini(ticket_text: str) -> dict[str, Any] | None:
     """
     Intenta parsear el texto de un boleto de avión usando la API de Gemini.
@@ -84,27 +84,25 @@ def parse_ticket_with_gemini(ticket_text: str) -> dict[str, Any] | None:
 
         # Limpiar la respuesta para asegurar que solo contenga el JSON
         # Busca un bloque que empiece con { y termine con }
-        json_match = re.search(r'\{.*\}', raw_response, re.DOTALL)
+        json_match = re.search(r"\{.*\}", raw_response, re.DOTALL)
         if not json_match:
             logger.error("Gemini no devolvió un objeto JSON válido en la respuesta.")
             return None
-        
+
         json_string = json_match.group(0)
         parsed_data = json.loads(json_string)
         logger.info("Parseo con Gemini exitoso.")
-        
+
         # Envolver la respuesta en la estructura que el servicio espera
-        return {
-            'normalized': parsed_data,
-            'raw_data': {},
-            'SOURCE_SYSTEM': 'GEMINI_AI'
-        }
+        return {"normalized": parsed_data, "raw_data": {}, "SOURCE_SYSTEM": "GEMINI_AI"}
 
     except GeminiConfigurationError as e:
         logger.error(f"Error de configuración de Gemini: {e}")
         return None
     except json.JSONDecodeError:
-        logger.error("Error al decodificar la respuesta JSON de Gemini. Respuesta recibida: {raw_response}")
+        logger.error(
+            "Error al decodificar la respuesta JSON de Gemini. Respuesta recibida: {raw_response}"
+        )
         return None
     except Exception:
         logger.error("Ocurrió un error inesperado durante el parseo con Gemini: {e}")

@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("bookings", "0006_alter_venta_localizador"),
     ]
@@ -13,99 +12,71 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="actividadservicio",
             name="deleted_at",
-            field=models.DateTimeField(
-                blank=True, null=True, verbose_name="Fecha de Eliminación"
-            ),
+            field=models.DateTimeField(blank=True, null=True, verbose_name="Fecha de Eliminación"),
         ),
         migrations.AddField(
             model_name="actividadservicio",
             name="is_deleted",
-            field=models.BooleanField(
-                db_index=True, default=False, verbose_name="Eliminado"
-            ),
+            field=models.BooleanField(db_index=True, default=False, verbose_name="Eliminado"),
         ),
         migrations.AddField(
             model_name="alojamientoreserva",
             name="deleted_at",
-            field=models.DateTimeField(
-                blank=True, null=True, verbose_name="Fecha de Eliminación"
-            ),
+            field=models.DateTimeField(blank=True, null=True, verbose_name="Fecha de Eliminación"),
         ),
         migrations.AddField(
             model_name="alojamientoreserva",
             name="is_deleted",
-            field=models.BooleanField(
-                db_index=True, default=False, verbose_name="Eliminado"
-            ),
+            field=models.BooleanField(db_index=True, default=False, verbose_name="Eliminado"),
         ),
         migrations.AddField(
             model_name="alquilerautoreserva",
             name="deleted_at",
-            field=models.DateTimeField(
-                blank=True, null=True, verbose_name="Fecha de Eliminación"
-            ),
+            field=models.DateTimeField(blank=True, null=True, verbose_name="Fecha de Eliminación"),
         ),
         migrations.AddField(
             model_name="alquilerautoreserva",
             name="is_deleted",
-            field=models.BooleanField(
-                db_index=True, default=False, verbose_name="Eliminado"
-            ),
+            field=models.BooleanField(db_index=True, default=False, verbose_name="Eliminado"),
         ),
         migrations.AddField(
             model_name="eventoservicio",
             name="deleted_at",
-            field=models.DateTimeField(
-                blank=True, null=True, verbose_name="Fecha de Eliminación"
-            ),
+            field=models.DateTimeField(blank=True, null=True, verbose_name="Fecha de Eliminación"),
         ),
         migrations.AddField(
             model_name="eventoservicio",
             name="is_deleted",
-            field=models.BooleanField(
-                db_index=True, default=False, verbose_name="Eliminado"
-            ),
+            field=models.BooleanField(db_index=True, default=False, verbose_name="Eliminado"),
         ),
         migrations.AddField(
             model_name="feeventa",
             name="deleted_at",
-            field=models.DateTimeField(
-                blank=True, null=True, verbose_name="Fecha de Eliminación"
-            ),
+            field=models.DateTimeField(blank=True, null=True, verbose_name="Fecha de Eliminación"),
         ),
         migrations.AddField(
             model_name="feeventa",
             name="is_deleted",
-            field=models.BooleanField(
-                db_index=True, default=False, verbose_name="Eliminado"
-            ),
+            field=models.BooleanField(db_index=True, default=False, verbose_name="Eliminado"),
         ),
         migrations.AddField(
             model_name="segmentovuelo",
             name="deleted_at",
-            field=models.DateTimeField(
-                blank=True, null=True, verbose_name="Fecha de Eliminación"
-            ),
+            field=models.DateTimeField(blank=True, null=True, verbose_name="Fecha de Eliminación"),
         ),
         migrations.AddField(
             model_name="segmentovuelo",
             name="is_deleted",
-            field=models.BooleanField(
-                db_index=True, default=False, verbose_name="Eliminado"
-            ),
+            field=models.BooleanField(db_index=True, default=False, verbose_name="Eliminado"),
         ),
         migrations.AddField(
             model_name="trasladoservicio",
             name="deleted_at",
-            field=models.DateTimeField(
-                blank=True, null=True, verbose_name="Fecha de Eliminación"
-            ),
+            field=models.DateTimeField(blank=True, null=True, verbose_name="Fecha de Eliminación"),
         ),
         migrations.AddField(
             model_name="trasladoservicio",
             name="is_deleted",
-            field=models.BooleanField(
-                db_index=True, default=False, verbose_name="Eliminado"
-            ),
+            field=models.BooleanField(db_index=True, default=False, verbose_name="Eliminado"),
         ),
     ]

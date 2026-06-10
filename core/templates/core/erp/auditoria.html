@@ -45,7 +45,7 @@
             </button>
 
             {% if request.GET %}
-            <a href="{% url 'auditoria_list' %}"
+            <a href="{% url 'core:auditoria_list' %}"
                 class="px-4 py-2 bg-[var(--surface-2)] hover:bg-[var(--surface-3)] text-[var(--text-primary)] border border-[var(--border)] rounded-lg transition-colors flex items-center justify-center">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
@@ -109,9 +109,12 @@
 
                         <!-- Hidden Data for Modal -->
                         <div id="log-data-{{ log.id_audit_log }}" class="hidden">
-                            <div data-previos='{{ log.datos_previos|default:"{}"|safe }}'
-                                data-nuevos='{{ log.datos_nuevos|default:"{}"|safe }}'
-                                data-meta='{{ log.metadata_extra|default:"{}"|safe }}'>
+                            {{ log.datos_previos|default:"{}"|json_script:"previos-data" }}
+                            {{ log.datos_nuevos|default:"{}"|json_script:"nuevos-data" }}
+                            {{ log.metadata_extra|default:"{}"|json_script:"meta-data" }}
+                            <div data-previos-id="previos-data"
+                                data-nuevos-id="nuevos-data"
+                                data-meta-id="meta-data">
                             </div>
                         </div>
                         {% empty %}
@@ -195,13 +198,13 @@
 <div id="detailModal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog"
     aria-modal="true">
     <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-        <div class="fixed inset-0 bg-black/90 transition-opacity" aria-hidden="true" onclick="closeDetailModal()"></div>
+        <div class="fixed inset-0 bg-black/90 transition-opacity" aria-hidden="true" data-action="close-modal"></div>
         <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
         <div
             class="inline-block align-bottom bg-[var(--surface-1)] rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full border border-[var(--border)]">
             <div class="px-6 py-4 border-b border-[var(--border)] bg-[var(--surface-2)] flex justify-between items-center">
                 <h3 class="text-lg font-bold text-[var(--text-primary)]">Detalles del Cambio</h3>
-                <button onclick="closeDetailModal()" class="text-[var(--text-muted)] hover:text-[var(--text-primary)] bg-[var(--surface-3)] p-1 rounded-md transition-colors">
+                <button data-action="close-modal" class="text-[var(--text-muted)] hover:text-[var(--text-primary)] bg-[var(--surface-3)] p-1 rounded-md transition-colors">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
                         </path>

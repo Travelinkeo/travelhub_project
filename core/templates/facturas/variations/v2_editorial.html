@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Factura_{{ factura.numero_factura }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        @page {
+            size: letter;
+            margin: 1cm;
+        }
+        :root {
+            --primary: #0d1e40;
+            --primary-dark: #00061b;
+            --secondary: #8c714b;
+            --surface: #faf8ff;
+            --white: #ffffff;
+            --text-main: #081a3c;
+            --text-muted: rgba(8, 26, 60, 0.6);
+            --outline: rgba(197, 198, 207, 0.4);
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--surface);
+            color: var(--text-main);
+            line-height: 1.4;
+            font-size: 9pt;
+            -webkit-print-color-adjust: exact;
+        }
+        .container {
+            width: 100%;
+            background: var(--white);
+            min-height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Editorial Header */
+        header {
+            background-color: var(--primary);
+            color: var(--white);
+            padding: 35px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            border-bottom: 5px solid var(--secondary);
+        }
+        .brand-container {
+            max-width: 55%;
+        }
+        .brand-container h1 {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 800;
+            font-size: 20px;
+            letter-spacing: -0.02em;
+            margin-bottom: 2px;
+            text-transform: uppercase;
+        }
+        .slogan {
+            font-size: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--secondary);
+            font-weight: 700;
+        }
+        .agency-address {
+            font-size: 7.5pt;
+            opacity: 0.8;
+            margin-top: 5px;
+            line-height: 1.3;
+        }
+        .document-type {
+            text-align: right;
+            max-width: 45%;
+        }
+        .document-type h2 {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 26px;
+            font-weight: 700;
+            line-height: 1;
+            margin-bottom: 5px;
+            color: var(--white);
+            text-transform: uppercase;
+        }
+        .doc-id-box {
+            display: inline-block;
+            border-top: 1px solid var(--secondary);
+            padding-top: 5px;
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Content area with side margins */
+        .content {
+            padding: 30px 40px;
+            flex-grow: 1;
+        }
+
+        /* Editorial Info Grid */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--outline);
+        }
+        .info-col label {
+            font-size: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--secondary);
+            font-weight: 700;
+            margin-bottom: 5px;
+            display: block;
+        }
+        .info-col .value {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        .info-col .sub-value {
+            font-size: 8pt;
+            color: var(--text-muted);
+            margin-top: 3px;
+            line-height: 1.3;
+        }
+
+        /* Intermediacion warning box */
+        .intermediacion-box {
+            border: 1.5px solid var(--secondary);
+            background: var(--surface);
+            padding: 10px 15px;
+            font-size: 8pt;
+            color: var(--primary);
+            border-radius: 4px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        /* Flight details/Service items Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+        th {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            color: var(--secondary);
+            border-bottom: 2px solid var(--primary);
+            padding: 10px 8px;
+            font-size: 8.5pt;
+            font-weight: 800;
+            text-transform: uppercase;
+            text-align: left;
+        }
+        td {
+            padding: 12px 8px;
+            font-size: 8.5pt;
+            border-bottom: 1px solid var(--outline);
+            color: var(--text-main);
+        }
+        .col-qty { text-align: center; }
+        .col-price { text-align: right; }
+        .col-tax { text-align: center; }
+        .col-total { text-align: right; font-weight: 700; color: var(--primary); }
+
+        .item-subtext {
+            font-size: 7.5pt;
+            color: var(--text-muted);
+            margin-top: 3px;
+        }
+
+        /* Bottom Section: Totals & Notes */
+        .bottom-section {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 40px;
+            margin-top: 20px;
+        }
+        .notes-area h4 {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 9pt;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--secondary);
+            margin-bottom: 8px;
+        }
+        .notes-area p {
+            font-size: 8pt;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .totals-block {
+            background-color: var(--surface);
+            padding: 20px;
+            border-radius: 6px;
+            border: 1px solid var(--outline);
+        }
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 8.5pt;
+            margin-bottom: 6px;
+        }
+        .total-row.divider {
+            border-top: 1px dashed var(--outline);
+            padding-top: 8px;
+            margin-top: 8px;
+        }
+        .total-row.final {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--primary);
+            border-top: 2px solid var(--primary);
+            padding-top: 10px;
+            margin-top: 10px;
+        }
+        .total-row.bs-equiv {
+            font-size: 9.5pt;
+            font-weight: 700;
+            color: var(--secondary);
+            margin-top: 4px;
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--surface);
+            padding: 30px 40px;
+            border-top: 1px solid var(--outline);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        .footer-left {
+            max-width: 65%;
+        }
+        .footer-brand {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 800;
+            font-size: 11px;
+            color: var(--secondary);
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+        .legal-text {
+            font-size: 7.5pt;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+        .footer-right {
+            text-align: right;
+            font-size: 8pt;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- HEADER -->
+        <header>
+            <div class="brand-container">
+                {% if agencia_logo_b64 %}
+                    <img src="{{ agencia_logo_b64 }}" alt="Logo" style="max-height: 45px; margin-bottom: 8px; filter: brightness(0) invert(1);">
+                {% elif agencia.logo_pdf_dark_base64 %}
+                    <img src="{% if 'data:image' in agencia.logo_pdf_dark_base64 %}{{ agencia.logo_pdf_dark_base64 }}{% else %}data:image/png;base64,{{ agencia.logo_pdf_dark_base64 }}{% endif %}" alt="Logo" style="max-height: 45px; margin-bottom: 8px;">
+                {% elif agencia.logo_pdf_base64 %}
+                    <img src="{% if 'data:image' in agencia.logo_pdf_base64 %}{{ agencia.logo_pdf_base64 }}{% else %}data:image/png;base64,{{ agencia.logo_pdf_base64 }}{% endif %}" alt="Logo" style="max-height: 45px; margin-bottom: 8px; filter: brightness(0) invert(1);">
+                {% else %}
+                    <h1>{{ factura.emisor_razon_social|default:agencia.nombre }}</h1>
+                {% endif %}
+                <div class="slogan">{{ agencia.eslogan }}</div>
+                <div class="agency-address">
+                    RIF: {{ factura.emisor_rif|default:agencia.rif }}<br>
+                    {{ factura.emisor_direccion_fiscal|default:agencia.direccion }}
+                </div>
+            </div>
+            <div class="document-type">
+                <h2>Factura</h2>
+                <div class="doc-id-box">
+                    Nro: {{ factura.numero_factura }}
+                </div>
+                {% if factura.es_sujeto_pasivo_especial %}
+                    <div style="font-size: 8px; font-weight: 800; color: #ffdf9d; margin-top: 4px; text-transform: uppercase;">Contribuyente Especial</div>
+                {% endif %}
+            </div>
+        </header>
+
+        <!-- MAIN CONTENT -->
+        <div class="content">
+            {% if factura.tipo_operacion == 'INTERMEDIACION' %}
+                <div class="intermediacion-box">
+                    <strong>Facturación por cuenta de terceros (Art. 10 Ley de IVA)</strong><br>
+                    Servicio Prestado Por: <strong>{{ factura.tercero_razon_social }}</strong> | RIF: {{ factura.tercero_rif }}
+                </div>
+            {% endif %}
+
+            <!-- INFO GRID -->
+            <div class="info-grid">
+                <div class="info-col">
+                    <label>Cliente / Razón Social</label>
+                    <div class="value">{{ factura.cliente_nombre|default:factura.cliente.get_nombre_completo|upper }}</div>
+                    <div class="sub-value">
+                        Doc: {{ factura.cliente_identificacion|default:factura.cliente.cedula_identidad }}<br>
+                        Dir: {{ factura.cliente_direccion|default:factura.cliente.direccion|default:"N/A" }}
+                    </div>
+                </div>
+                <div class="info-col">
+                    <label>Detalles de Pago</label>
+                    <div class="value">Moneda: {{ factura.moneda.nombre }}</div>
+                    <div class="sub-value">
+                        Estado: <strong>{{ factura.get_estado_display|upper }}</strong><br>
+                        BCV Tasa: {% if factura.tasa_cambio_bcv or factura.tasa_cambio %}Bs. {{ factura.tasa_cambio_bcv|default:factura.tasa_cambio|floatformat:4 }}{% else %}N/A{% endif %}
+                    </div>
+                </div>
+                <div class="info-col">
+                    <label>Fechas</label>
+                    <div class="value">Emisión: {{ factura.fecha_emision|date:"d M Y"|upper }}</div>
+                    <div class="sub-value">
+                        {% if factura.fecha_vencimiento %}Vence: {{ factura.fecha_vencimiento|date:"d M Y"|upper }}{% endif %}<br>
+                        Control: {{ factura.numero_control|default:"N/A" }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- TABLE -->
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 5%">#</th>
+                        <th style="width: 55%">Descripción</th>
+                        <th class="col-qty" style="width: 8%">Cant.</th>
+                        <th class="col-price" style="width: 15%">P. Unit.</th>
+                        <th class="col-tax" style="width: 10%">IVA</th>
+                        <th class="col-total" style="width: 17%">Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in factura.items_factura.all %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>
+                            <strong>{{ item.descripcion|upper }}</strong>
+                            {% if item.nombre_pasajero or item.numero_boleto %}
+                                <div class="item-subtext">
+                                    {% if item.nombre_pasajero %}Pasajero: {{ item.nombre_pasajero }}{% endif %}
+                                    {% if item.numero_boleto %} | Boleto: {{ item.numero_boleto }}{% endif %}
+                                </div>
+                            {% endif %}
+                        </td>
+                        <td class="col-qty">{{ item.cantidad|floatformat:2 }}</td>
+                        <td class="col-price">{{ item.precio_unitario|floatformat:2 }}</td>
+                        <td class="col-tax">{% if item.es_gravado %}{{ item.alicuota_iva }}%{% else %}Exento{% endif %}</td>
+                        <td class="col-total">{{ item.subtotal_item|floatformat:2 }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 25px;">No hay ítems en esta factura.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <!-- BOTTOM -->
+            <div class="bottom-section">
+                <div class="notes-area">
+                    {% if factura.notes or factura.notas %}
+                        <h4>Notas del Documento</h4>
+                        <p>{{ factura.notas|default:factura.notes }}</p>
+                    {% endif %}
+                </div>
+                <div class="totals-block">
+                    {% if factura.subtotal_base_gravada > 0 %}
+                        <div class="total-row">
+                            <span>Base Gravada (16%):</span>
+                            <span>{{ factura.subtotal_base_gravada|floatformat:2 }} {{ factura.moneda.simbolo }}</span>
+                        </div>
+                    {% endif %}
+                    {% if factura.subtotal_exento > 0 %}
+                        <div class="total-row">
+                            <span>Base Exenta:</span>
+                            <span>{{ factura.subtotal_exento|floatformat:2 }} {{ factura.moneda.simbolo }}</span>
+                        </div>
+                    {% endif %}
+                    {% if factura.subtotal_exportacion > 0 %}
+                        <div class="total-row">
+                            <span>Base Exportación:</span>
+                            <span>{{ factura.subtotal_exportacion|floatformat:2 }} {{ factura.moneda.simbolo }}</span>
+                        </div>
+                    {% endif %}
+                    
+                    <div class="total-row divider">
+                        <span>Subtotal:</span>
+                        <span>{{ factura.subtotal|floatformat:2 }} {{ factura.moneda.simbolo }}</span>
+                    </div>
+
+                    {% if factura.monto_iva_16 or factura.monto_impuestos %}
+                        <div class="total-row">
+                            <span>IVA (16%):</span>
+                            <span>{{ factura.monto_iva_16|default:factura.monto_impuestos|floatformat:2 }} {{ factura.moneda.simbolo }}</span>
+                        </div>
+                    {% endif %}
+                    {% if factura.monto_iva_adicional > 0 %}
+                        <div class="total-row">
+                            <span>IVA Adicional:</span>
+                            <span>{{ factura.monto_iva_adicional|floatformat:2 }} {{ factura.moneda.simbolo }}</span>
+                        </div>
+                    {% endif %}
+                    {% if factura.monto_igtf > 0 %}
+                        <div class="total-row">
+                            <span>IGTF (3%):</span>
+                            <span>{{ factura.monto_igtf|floatformat:2 }} {{ factura.moneda.simbolo }}</span>
+                        </div>
+                    {% endif %}
+
+                    <div class="total-row final">
+                        <span>TOTAL A PAGAR:</span>
+                        <span>{{ factura.monto_total|floatformat:2 }} {{ factura.moneda.simbolo }}</span>
+                    </div>
+
+                    {% if factura.monto_total_bs %}
+                        <div class="total-row bs-equiv divider">
+                            <span>Ref. en Bolívares:</span>
+                            <span>Bs. {{ factura.monto_total_bs|floatformat:2 }}</span>
+                        </div>
+                    {% endif %}
+
+                    {% if factura.monto_pagado > 0 %}
+                        <div class="total-row divider" style="color: #16a34a; font-weight: bold;">
+                            <span>Pagado:</span>
+                            <span>- {{ factura.monto_pagado|floatformat:2 }} {{ factura.moneda.simbolo }}</span>
+                        </div>
+                        <div class="total-row" style="color: #dc2626; font-weight: bold;">
+                            <span>Saldo Pendiente:</span>
+                            <span>{{ factura.saldo_pendiente|floatformat:2 }} {{ factura.moneda.simbolo }}</span>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <footer>
+            <div class="footer-left">
+                <div class="footer-brand">{{ agencia.nombre|upper }} CONCIERGE</div>
+                <div class="legal-text">
+                    {% if factura.modalidad_emision == 'DIGITAL' %}
+                        <p>Documento emitido conforme a la Providencia Administrativa SNAT/2024/000102. Representación impresa de factura electrónica.</p>
+                    {% else %}
+                        <p>Documento emitido conforme a la Providencia Administrativa SNAT/2011/00071. Factura de contingencia.</p>
+                    {% endif %}
+                    {% if agencia.imprenta_digital_nombre or factura.venta_asociada.agencia.imprenta_digital_nombre %}
+                        <p style="font-size: 7pt; opacity: 0.8; margin-top: 3px;">
+                            Imprenta Digital Autorizada: {{ agencia.imprenta_digital_nombre|default:factura.venta_asociada.agencia.imprenta_digital_nombre }} - RIF: {{ agencia.imprenta_digital_rif|default:factura.venta_asociada.agencia.imprenta_digital_rif }} - Prov. {{ agencia.imprenta_digital_providencia|default:factura.venta_asociada.agencia.imprenta_digital_providencia }}
+                        </p>
+                    {% endif %}
+                    {% if agencia.pie_pagina %}
+                        <p style="margin-top: 5px; font-weight: 500;">{{ agencia.pie_pagina }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="footer-right">
+                <p>Email: {{ agencia.email_principal|default:agencia.email_ventas }}</p>
+                <p>Tel: {{ agencia.telefono_principal }}</p>
+                {% if agencia.website %}<p>Web: {{ agencia.website }}</p>{% endif %}
+            </div>
+        </footer>
+    </div>
+</body>
+</html>

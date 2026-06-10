@@ -5,45 +5,49 @@ from functools import wraps
 
 logger = logging.getLogger(__name__)
 
+
 class CircuitState(Enum):
     CLOSED = "CLOSED"
     OPEN = "OPEN"
     HALF_OPEN = "HALF_OPEN"
 
+
 class CircuitBreakerError(Exception):
     """Raised when circuit breaker is open and service is unavailable."""
+
     pass
+
 
 class CircuitBreaker:
     """
     Implementación de Circuit Breaker para resiliencia de APIs externas.
-    
+
     Estados:
     - CLOSED: El sistema funciona normalmente.
     - OPEN: El sistema bloquea las llamadas para evitar sobrecarga/errores constantes.
     - HALF_OPEN: El sistema permite una llamada de prueba para ver si el servicio se recuperó.
-    
+
     Uso:
         @whatsapp_circuit_breaker
         def send_message(...):
             ...
-        
+
         # O manualmente:
         result = whatsapp_circuit_breaker.call(send_message, ...)
     """
-    
+
     def __init__(self, name, failure_threshold=5, recovery_timeout=60, fallback=None):
         self.name = name
         self.failure_threshold = failure_threshold
         self.recovery_timeout = recovery_timeout
         self.fallback = fallback  # Función fallback cuando el circuito está abierto
-        
+
         self.state = CircuitState.CLOSED
         self.failures = 0
         self.last_failure_time = 0
         self.success_count = 0
         self.failure_count = 0
-        
+
     def call(self, func, *args, **kwargs):
         if self.state == CircuitState.OPEN:
             if time.time() - self.last_failure_time > self.recovery_timeout:
@@ -54,23 +58,23 @@ class CircuitBreaker:
                 if self.fallback:
                     return self.fallback(*args, **kwargs)
                 return {"error": f"Circuit breaker {self.name} is open. Service unavailable."}
-        
+
         try:
             result = func(*args, **kwargs)
-            
+
             # Detectar errores en resultados (para servicios que retornan dicts con 'error')
             if isinstance(result, dict) and "error" in result:
                 self._record_failure()
                 return result
-                
+
             # Detectar errores por código de estado HTTP
-            if hasattr(result, 'status_code') and result.status_code >= 500:
+            if hasattr(result, "status_code") and result.status_code >= 500:
                 self._record_failure()
                 return result
-            
+
             self._record_success()
             return result
-            
+
         except CircuitBreakerError:
             raise
         except Exception as e:
@@ -88,11 +92,13 @@ class CircuitBreaker:
         self.failure_count += 1
         self.failures += 1
         self.last_failure_time = time.time()
-        
+
         if self.failures >= self.failure_threshold:
             self.state = CircuitState.OPEN
-            logger.error(f"💥 Circuit Breaker [{self.name}] OPENED after {self.failures} failures (total: {self.failure_count}).")
-            
+            logger.error(
+                f"💥 Circuit Breaker [{self.name}] OPENED after {self.failures} failures (total: {self.failure_count})."
+            )
+
     def get_stats(self):
         """Return circuit breaker statistics."""
         return {
@@ -103,18 +109,19 @@ class CircuitBreaker:
             "failure_count": self.failure_count,
             "last_failure_time": self.last_failure_time,
         }
-    
+
     def reset(self):
         """Reset circuit breaker to initial state."""
         self.state = CircuitState.CLOSED
         self.failures = 0
         self.last_failure_time = 0
         logger.info(f"🔧 Circuit Breaker [{self.name}] manually reset.")
-        
+
     def __call__(self, func):
         @wraps(func)
         def wrapper(*args, **kwargs):
             return self.call(func, *args, **kwargs)
+
         return wrapper
 
 
@@ -127,7 +134,9 @@ ai_circuit_breaker = CircuitBreaker(
     name="Gemini-AI",
     failure_threshold=3,
     recovery_timeout=120,
-    fallback=lambda *args, **kwargs: {"error": "AI service temporarily unavailable. Please try again later."}
+    fallback=lambda *args, **kwargs: {
+        "error": "AI service temporarily unavailable. Please try again later."
+    },
 )
 
 # WhatsApp / Evolution API: Umbral medio (5 fallos) porque es crítico para notificaciones
@@ -135,7 +144,9 @@ whatsapp_circuit_breaker = CircuitBreaker(
     name="Evolution-WhatsApp",
     failure_threshold=5,
     recovery_timeout=180,
-    fallback=lambda *args, **kwargs: {"error": "WhatsApp service temporarily unavailable. Message queued for retry."}
+    fallback=lambda *args, **kwargs: {
+        "error": "WhatsApp service temporarily unavailable. Message queued for retry."
+    },
 )
 
 # Email / Resend: Umbral alto (8 fallos) porque es menos crítico
@@ -143,7 +154,7 @@ email_circuit_breaker = CircuitBreaker(
     name="Resend-Email",
     failure_threshold=8,
     recovery_timeout=300,
-    fallback=lambda *args, **kwargs: {"error": "Email service temporarily unavailable."}
+    fallback=lambda *args, **kwargs: {"error": "Email service temporarily unavailable."},
 )
 
 # Telegram: Umbral alto (8 fallos) porque es solo para notificaciones internas
@@ -151,7 +162,7 @@ telegram_circuit_breaker = CircuitBreaker(
     name="Telegram",
     failure_threshold=8,
     recovery_timeout=300,
-    fallback=lambda *args, **kwargs: {"error": "Telegram service temporarily unavailable."}
+    fallback=lambda *args, **kwargs: {"error": "Telegram service temporarily unavailable."},
 )
 
 # Stripe: Umbral bajo (3 fallos) porque es crítico para pagos
@@ -159,7 +170,9 @@ stripe_circuit_breaker = CircuitBreaker(
     name="Stripe",
     failure_threshold=3,
     recovery_timeout=60,
-    fallback=lambda *args, **kwargs: {"error": "Payment service temporarily unavailable. Please try again later."}
+    fallback=lambda *args, **kwargs: {
+        "error": "Payment service temporarily unavailable. Please try again later."
+    },
 )
 
 # Todos los circuit breakers en un diccionario para monitoreo

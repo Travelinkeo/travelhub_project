@@ -2,9 +2,9 @@ from django.db import migrations
 
 
 def migrate_agencia_data(apps, schema_editor):
-    Agencia = apps.get_model('core', 'Agencia')
-    AgenciaBranding = apps.get_model('core', 'AgenciaBranding')
-    AgenciaConfiguracion = apps.get_model('core', 'AgenciaConfiguracion')
+    Agencia = apps.get_model("core", "Agencia")
+    AgenciaBranding = apps.get_model("core", "AgenciaBranding")
+    AgenciaConfiguracion = apps.get_model("core", "AgenciaConfiguracion")
 
     for agencia in Agencia.objects.all():
         # Crear Branding
@@ -77,13 +77,14 @@ def migrate_agencia_data(apps, schema_editor):
         agencia.configuracion = configuracion
         agencia.save()
 
+
 def reverse_migrate_agencia_data(apps, schema_editor):
-    pass # No es necesario revertir para este caso, o se puede implementar si se desea
+    pass  # No es necesario revertir para este caso, o se puede implementar si se desea
+
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0020_agenciabranding_agencia_branding_and_more'),
+        ("core", "0020_agenciabranding_agencia_branding_and_more"),
     ]
 
     operations = [

@@ -28,12 +28,6 @@
             </div>
         </div>
         <div class="flex items-center gap-3">
-            <a href="{% url 'core:generar_voucher' venta.pk %}" target="_blank"
-                class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold transition-all shadow-lg shadow-emerald-500/20 flex items-center gap-2">
-                <i data-lucide="file-text" class="w-5 h-5"></i>
-                Voucher Unificado
-            </a>
-
             <a href="{% url 'bookings:venta_timeline' venta.pk %}"
                 class="px-6 py-2.5 bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 border border-blue-500/30 rounded-xl font-bold transition-all flex items-center gap-2">
                 <i data-lucide="history" class="w-5 h-5 text-blue-500"></i>
@@ -268,16 +262,38 @@
                 {% endif %}
             </div>
 
-            <!-- Internal Notes -->
-            <div class="glass-panel rounded-3xl p-8 space-y-4">
-                <h3 class="text-lg font-bold text-white flex items-center">
-                    <i data-lucide="sticky-note" class="w-5 h-5 mr-3 text-amber-400"></i>
-                    Notas de Oficina
-                </h3>
-                <div class="text-sm text-gray-400 leading-relaxed italic">
-                    {{ venta.notas|default:"Sin notas internas registradas." }}
+            <!-- Internal Notes & AI Report -->
+            <div class="glass-panel rounded-3xl p-8 space-y-6">
+                <div class="space-y-4">
+                    <h3 class="text-lg font-bold text-white flex items-center">
+                        <i data-lucide="sticky-note" class="w-5 h-5 mr-3 text-amber-400"></i>
+                        Notas de Oficina
+                    </h3>
+                    <div class="text-sm text-gray-400 leading-relaxed {% if not venta.notas_manuales %}italic{% endif %}">
+                        {{ venta.notas_manuales|default:"Sin notas internas registradas." }}
+                    </div>
                 </div>
+
+                {% if venta.ai_report %}
+                <div class="border-t border-white/10 pt-6 space-y-4">
+                    <h3 class="text-lg font-bold text-white flex items-center">
+                        <i data-lucide="sparkles" class="w-5 h-5 mr-3 text-emerald-400"></i>
+                        Inteligencia de Ventas (IA)
+                    </h3>
+                    {% if "La inteligencia de ventas IA no pudo ejecutarse" in venta.ai_report %}
+                    <div class="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-400 flex items-start gap-3">
+                        <i data-lucide="alert-triangle" class="w-4 h-4 mt-0.5 shrink-0"></i>
+                        <div>{{ venta.ai_report }}</div>
+                    </div>
+                    {% else %}
+                    <div class="text-sm text-gray-300 leading-relaxed bg-emerald-500/5 border border-emerald-500/10 p-4 rounded-2xl">
+                        {{ venta.ai_report|linebreaksbr }}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
             </div>
+
         </div>
     </div>
 </div>

@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n core_tags %}
 
 {% if role == 'user' %}
 <div class="flex items-start justify-end gap-4 px-4 mb-4">
@@ -21,7 +21,7 @@
         
         {% if suggestion_entry %}
         <div class="mt-4 pt-4 border-t border-emerald-500/20">
-            <pre class="bg-black/40 p-3 rounded-xl text-[11px] text-emerald-400 overflow-x-auto border border-emerald-500/10">{{ suggestion_entry|safe }}</pre>
+            <pre class="bg-black/40 p-3 rounded-xl text-[11px] text-emerald-400 overflow-x-auto border border-emerald-500/10">{{ suggestion_entry|sanitize_html_filter }}</pre>
             <button class="mt-3 text-[11px] font-bold text-emerald-300 bg-emerald-900/40 px-3 py-2 rounded-lg hover:bg-emerald-800/50 transition-all border border-emerald-500/20">
                 Aplicar Asiento
             </button>

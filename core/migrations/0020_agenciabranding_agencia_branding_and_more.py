@@ -8,7 +8,6 @@ import core.fields
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("core", "0019_magic_link_token"),
     ]
@@ -28,27 +27,19 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "logo",
-                    models.ImageField(
-                        blank=True, null=True, upload_to="agencias/logos/"
-                    ),
+                    models.ImageField(blank=True, null=True, upload_to="agencias/logos/"),
                 ),
                 (
                     "logo_light",
-                    models.ImageField(
-                        blank=True, null=True, upload_to="agencias/logos/"
-                    ),
+                    models.ImageField(blank=True, null=True, upload_to="agencias/logos/"),
                 ),
                 (
                     "logo_dark",
-                    models.ImageField(
-                        blank=True, null=True, upload_to="agencias/logos/"
-                    ),
+                    models.ImageField(blank=True, null=True, upload_to="agencias/logos/"),
                 ),
                 (
                     "logo_secundario",
-                    models.ImageField(
-                        blank=True, null=True, upload_to="agencias/logos/"
-                    ),
+                    models.ImageField(blank=True, null=True, upload_to="agencias/logos/"),
                 ),
                 ("logo_base64", models.TextField(blank=True, null=True)),
                 ("logo_pdf_base64", models.TextField(blank=True, null=True)),
@@ -128,15 +119,11 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "password_app_correo",
-                    core.fields.EncryptedCharField(
-                        blank=True, max_length=255, null=True
-                    ),
+                    core.fields.EncryptedCharField(blank=True, max_length=255, null=True),
                 ),
                 (
                     "telegram_bot_token",
-                    core.fields.EncryptedCharField(
-                        blank=True, max_length=255, null=True
-                    ),
+                    core.fields.EncryptedCharField(blank=True, max_length=255, null=True),
                 ),
                 (
                     "telegram_chat_id",
@@ -148,9 +135,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "email_monitor_password",
-                    core.fields.EncryptedCharField(
-                        blank=True, max_length=255, null=True
-                    ),
+                    core.fields.EncryptedCharField(blank=True, max_length=255, null=True),
                 ),
                 ("email_monitor_active", models.BooleanField(default=False)),
                 (
@@ -187,9 +172,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "subdominio_slug",
-                    models.CharField(
-                        blank=True, db_index=True, max_length=100, null=True
-                    ),
+                    models.CharField(blank=True, db_index=True, max_length=100, null=True),
                 ),
                 ("es_demo", models.BooleanField(default=False)),
                 ("bi_insights", models.JSONField(blank=True, default=dict)),

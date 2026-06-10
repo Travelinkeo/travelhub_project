@@ -11,43 +11,45 @@ from apps.finance.services.pdf_service import PDFService
 logger = logging.getLogger(__name__)
 User = get_user_model()
 
+
 @shared_task(
     bind=True,
-    name='finance.enviar_reporte_gerencia_task',
-    queue='notifications',
+    name="finance.enviar_reporte_gerencia_task",
+    queue="notifications",
     max_retries=3,
-    default_retry_delay=60 * 5  # 5 minutos
+    default_retry_delay=60 * 5,
+    time_limit=300,
+    soft_time_limit=270,
 )
-def enviar_reporte_gerencia_task(self, reporte_id, user_id, email_destino):
-    """
-    Tarea Asíncrona: Orquesta la generación del PDF y su envío por correo.
-    """
+def enviar_reporte_gerencia_task(self, reporte_id, user_id, email_destino, agencia_id=None):
+    from core.api import Agencia, agency_context, system_context
+
     try:
-        reporte = ReporteReconciliacion.objects.get(pk=reporte_id)
-        user = User.objects.get(pk=user_id)
-        
-        # 1. Generar los KPIs en caliente para el cuerpo del correo
-        stats = reporte.conciliaciones.aggregate(
-            total=Count('id_conciliacion'),
-            matches=Count('id_conciliacion', filter=Q(estado='OK')),
-            discrepancias=Count('id_conciliacion', filter=Q(estado='DISCREPANCIA'))
-        )
+        if agencia_id:
+            agencia = Agencia.objects.get(pk=agencia_id)
+            ctx = agency_context(agencia)
+        else:
+            ctx = system_context()
 
-        # 2. Generar el PDF (en memoria)
-        pdf_bytes = PDFService.generate_reconciliation_report(reporte_id, user)
+        with ctx:
+            reporte = ReporteReconciliacion.objects.get(pk=reporte_id)
+            user = User.objects.get(pk=user_id)
 
-        # 3. Enviar el correo con adjunto
-        NotificationService.enviar_reporte_pdf_email(
-            agencia=user.agencia,
-            email_destino=email_destino,
-            pdf_bytes=pdf_bytes,
-            kpis=stats
-        )
+            stats = reporte.conciliaciones.aggregate(
+                total=Count("id_conciliacion"),
+                matches=Count("id_conciliacion", filter=Q(estado="OK")),
+                discrepancias=Count("id_conciliacion", filter=Q(estado="DISCREPANCIA")),
+            )
 
-        logger.info(f"📬 Reporte de Recon. {reporte_id} enviado exitosamente a {email_destino}")
-        return f"Enviado a {email_destino}"
+            pdf_bytes = PDFService.generate_reconciliation_report(reporte_id, user)
+
+            NotificationService.enviar_reporte_pdf_email(
+                agencia=user.agencia, email_destino=email_destino, pdf_bytes=pdf_bytes, kpis=stats
+            )
+
+            logger.info(f"📬 Reporte de Recon. {reporte_id} enviado exitosamente a {email_destino}")
+            return f"Enviado a {email_destino}"
 
     except Exception as exc:
         logger.error(f"❌ Fallo enviando reporte {reporte_id} a {email_destino}: {exc}")
-        # Reintento exponencial por si el servidor de correo tiene un timeout momentáneo
         raise self.retry(exc=exc) from exc

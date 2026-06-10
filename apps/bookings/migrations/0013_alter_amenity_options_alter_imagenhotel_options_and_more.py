@@ -4,7 +4,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("bookings", "0012_alter_productoterrestre_table"),
     ]
@@ -58,4 +57,3 @@ class Migration(migrations.Migration):
             database_operations=[],
         ),
     ]
-

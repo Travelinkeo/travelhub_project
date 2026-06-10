@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
@@ -27,9 +26,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "nombre",
-                    models.CharField(
-                        max_length=255, verbose_name="Nombre de la Campaña"
-                    ),
+                    models.CharField(max_length=255, verbose_name="Nombre de la Campaña"),
                 ),
                 (
                     "descripcion",
@@ -37,15 +34,11 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "fecha_inicio",
-                    models.DateTimeField(
-                        blank=True, null=True, verbose_name="Fecha de Inicio"
-                    ),
+                    models.DateTimeField(blank=True, null=True, verbose_name="Fecha de Inicio"),
                 ),
                 (
                     "fecha_fin",
-                    models.DateTimeField(
-                        blank=True, null=True, verbose_name="Fecha de Fin"
-                    ),
+                    models.DateTimeField(blank=True, null=True, verbose_name="Fecha de Fin"),
                 ),
                 (
                     "estado",

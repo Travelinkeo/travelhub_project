@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>{{ agency_branding.name }} | Mi Viaje</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com" nonce="{{ request.csp_nonce }}"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <style>
@@ -32,7 +32,7 @@
                     {{ agency_branding.name|slice:":1" }}
                 </div>
             </div>
-            <a href="{% url 'core:public_voucher_pdf' venta.uuid %}" class="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30 text-white shadow-xl group">
+            <a href="{% url 'bookings:public_voucher_pdf' venta.uuid %}" class="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30 text-white shadow-xl group">
                 <span class="material-symbols-outlined text-[20px] group-active:scale-95 transition-transform">download</span>
             </a>
         </nav>
@@ -139,7 +139,7 @@
                             <h3 class="text-lg font-black text-slate-900 leading-tight">{{ hotel.nombre_establecimiento }}</h3>
                             <p class="text-[10px] font-bold text-slate-500 uppercase">{{ hotel.ciudad.nombre|default:"" }}</p>
                         </div>
-                        <a href="{% url 'core:public_hotel_voucher' hotel.id_alojamiento_reserva %}" class="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600 border border-emerald-100">
+                        <a href="{% url 'bookings:public_hotel_voucher' hotel.id_alojamiento_reserva %}" class="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600 border border-emerald-100">
                             <span class="material-symbols-outlined text-[20px]">description</span>
                         </a>
                     </div>

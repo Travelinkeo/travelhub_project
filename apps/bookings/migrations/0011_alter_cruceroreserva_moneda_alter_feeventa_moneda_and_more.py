@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         (
             "bookings",
@@ -53,9 +52,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="productoterrestre",
             name="descripcion_publica",
-            field=models.TextField(
-                blank=True, null=True, verbose_name="Descripción (Pública)"
-            ),
+            field=models.TextField(blank=True, null=True, verbose_name="Descripción (Pública)"),
         ),
         migrations.AlterField(
             model_name="segmentovuelo",
@@ -316,9 +313,7 @@ class Migration(migrations.Migration):
             state_operations=[
                 migrations.AlterUniqueTogether(
                     name="productoservicio",
-                    unique_together={
-                        ("agencia", "nombre", "tipo_producto", "proveedor_principal")
-                    },
+                    unique_together={("agencia", "nombre", "tipo_producto", "proveedor_principal")},
                 ),
                 migrations.AlterUniqueTogether(
                     name="comisionproveedorservicio",

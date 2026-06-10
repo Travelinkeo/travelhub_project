@@ -57,7 +57,7 @@ def _check_gotenberg():
 
         base_url = gotenberg_url.split("/forms")[0]
         req = urllib.request.Request(f"{base_url}/health", method="GET")  # noqa: S310
-        with urllib.request.urlopen(req, timeout=5) as resp:  # noqa: S310
+        with urllib.request.urlopen(req, timeout=3) as resp:  # noqa: S310
             return {"ok": resp.status == 200}
     except Exception as e:
         return {"ok": False, "error": str(e)[:200]}
@@ -83,7 +83,7 @@ def _check_disk():
 
 @csrf_exempt
 def _check_celery_queue_depth():
-    from core.metrics import celery_queue_depth, QUEUES
+    from core.metrics import QUEUES
 
     try:
         from django_redis import get_redis_connection
@@ -109,9 +109,7 @@ def _check_db_pool():
 
     try:
         with connection.cursor() as cursor:
-            cursor.execute(
-                "SELECT count(*) FROM pg_stat_activity WHERE state = 'active'"
-            )
+            cursor.execute("SELECT count(*) FROM pg_stat_activity WHERE state = 'active'")
             active = cursor.fetchone()[0]
         with connection.cursor() as cursor:
             cursor.execute("SHOW max_connections")

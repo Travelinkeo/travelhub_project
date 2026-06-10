@@ -11,6 +11,7 @@ from core.signals_bypass import are_signals_blocked
 def _on_commit(fn, *args, **kwargs):
     transaction.on_commit(partial(fn, *args, **kwargs))
 
+
 # 🔒 PADLOCK: CRITICAL INFRASTRUCTURE
 # Refactored to Service Layer Pattern. Signals are now thin wrappers
 # delegating to explicit service classes, supporting thread-local bypassing.
@@ -108,12 +109,13 @@ def post_save_factura(sender, instance, created, **kwargs):
     _on_commit(_send_factura_telegram, instance.pk)
     _on_commit(_send_factura_whatsapp, instance.pk)
 
+
 # ── Helper functions for on_commit callbacks ──────────────
 
 
 def _trigger_parsing(boleto_id):
-    from apps.bookings.services.boleto_service import BoletoImportadoService
     from apps.bookings.models import BoletoImportado
+    from apps.bookings.services.boleto_service import BoletoImportadoService
 
     try:
         boleto = BoletoImportado.objects.get(pk=boleto_id)
@@ -123,8 +125,8 @@ def _trigger_parsing(boleto_id):
 
 
 def _post_parse_automation(boleto_id):
-    from apps.bookings.services.boleto_service import BoletoImportadoService
     from apps.bookings.models import BoletoImportado
+    from apps.bookings.services.boleto_service import BoletoImportadoService
 
     try:
         boleto = BoletoImportado.objects.get(pk=boleto_id)
@@ -134,30 +136,22 @@ def _post_parse_automation(boleto_id):
 
 
 def _notificar_pago(pago_id):
-    from apps.communications.services.notification_dispatcher import notificar_confirmacion_pago
-    from apps.bookings.models import PagoVenta
+    from apps.common.tasks import notificar_confirmacion_pago_task
 
-    try:
-        pago = PagoVenta.objects.get(pk=pago_id)
-        notificar_confirmacion_pago(pago)
-    except Exception as e:
-        logger.error(f"Error notificando pago {pago_id}: {e}")
+    notificar_confirmacion_pago_task.delay(pago_id)
 
 
 def _trigger_migration_alert(check_id, created):
-    from apps.crm.services.migration_service import MigrationService
-    from core.models.migration_checks import MigrationCheck
+    if not created:
+        return
+    from apps.common.tasks import notify_migration_alert_task
 
-    try:
-        check = MigrationCheck.objects.get(pk=check_id)
-        MigrationService.trigger_migration_alert_if_needed(check, created)
-    except Exception as e:
-        logger.error(f"Error triggering migration alert {check_id}: {e}")
+    notify_migration_alert_task.delay(check_id)
 
 
 def _capturar_pdf_anterior(factura_id):
-    from apps.finance.services.factura_service import FacturaService
     from apps.finance.models.core_finance import Factura
+    from apps.finance.services.factura_service import FacturaService
 
     try:
         factura = Factura.objects.get(pk=factura_id)
@@ -167,19 +161,14 @@ def _capturar_pdf_anterior(factura_id):
 
 
 def _send_factura_telegram(factura_id):
-    from apps.finance.services.factura_service import FacturaService
-    from apps.finance.models.core_finance import Factura
+    from apps.common.tasks import send_factura_to_telegram_task
 
-    try:
-        factura = Factura.objects.get(pk=factura_id)
-        FacturaService.send_to_telegram_if_needed(factura)
-    except Exception as e:
-        logger.error(f"Error sending factura {factura_id} to Telegram: {e}")
+    send_factura_to_telegram_task.delay(factura_id)
 
 
 def _send_factura_whatsapp(factura_id):
-    from apps.finance.services.factura_service import FacturaService
     from apps.finance.models.core_finance import Factura
+    from apps.finance.services.factura_service import FacturaService
 
     try:
         factura = Factura.objects.get(pk=factura_id)

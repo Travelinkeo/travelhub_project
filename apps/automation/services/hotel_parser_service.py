@@ -1,10 +1,8 @@
 import io
 import json
 import logging
-import os
 
 import fitz  # PyMuPDF
-from django.conf import settings
 from django.core.files.base import ContentFile
 from django.db import transaction
 from PIL import Image
@@ -19,9 +17,12 @@ from apps.bookings.models.tarifario import (
 
 logger = logging.getLogger(__name__)
 
+
 def _get_genai():
     from google import genai
+
     return genai
+
 
 class HotelParserService:
     """
@@ -39,14 +40,15 @@ class HotelParserService:
     def __init__(self, tarifario_id):
         self.tarifario = TarifarioProveedor.objects.get(pk=tarifario_id)
         from apps.automation.services.ai_engine import get_gemini_api_key
+
         self.api_key = get_gemini_api_key(self.tarifario.agencia)
-        
+
         if not self.api_key:
             raise ValueError("GEMINI_API_KEY no configurada.")
-        
+
         genai = _get_genai()
         self.client = genai.Client(api_key=self.api_key)
-        self.model_name = 'gemini-2.0-flash' 
+        self.model_name = "gemini-2.0-flash"
 
     def procesar_tarifario(self):
         """Punto de entrada principal"""
@@ -55,26 +57,26 @@ class HotelParserService:
 
         try:
             doc = fitz.open(pdf_path)
-            
+
             # Iterar páginas (Por ahora limitamos para pruebas, luego todo)
             # Analizaremos cada página independiente, asumiendo que un hotel puede ocupar 1 o más páginas,
             # pero por simplificación inicial asumiremos 1 pagina = 1 hotel o parte de él.
             # Mejor estrategia: Enviar imagen y preguntar "¿Hay un hotel aquí? Extrae datos".
-            
+
             for page_num in range(len(doc)):
                 logger.info(f"Procesando página {page_num + 1}...")
-                
+
                 # 1. Renderizar Pagina a Imagen (300 DPI para mejor OCR)
                 page = doc.load_page(page_num)
-                pix = page.get_pixmap(matrix=fitz.Matrix(2, 2)) 
+                pix = page.get_pixmap(matrix=fitz.Matrix(2, 2))
                 img_data = pix.tobytes("png")
                 pil_image = Image.open(io.BytesIO(img_data))
-                
+
                 # 2. Analizar con Gemini
                 data = self._analizar_imagen_ia(pil_image)
-                
-                if data and data.get('es_pagina_hotel'):
-                   self._guardar_datos_hotel(data, pil_image)
+
+                if data and data.get("es_pagina_hotel"):
+                    self._guardar_datos_hotel(data, pil_image)
 
             doc.close()
             return True
@@ -125,17 +127,16 @@ class HotelParserService:
             "fotos": [ ... ]
         }
         """
-        
+
         try:
             response = self.client.models.generate_content(
-                model=self.model_name,
-                contents=[prompt, image]
+                model=self.model_name, contents=[prompt, image]
             )
             text = response.text.strip()
             # Limpieza básica de Markdown
-            if text.startswith('```json'):
+            if text.startswith("```json"):
                 text = text[7:]
-            if text.endswith('```'):
+            if text.endswith("```"):
                 text = text[:-3]
             return json.loads(text)
         except Exception as e:
@@ -143,89 +144,92 @@ class HotelParserService:
             return None
 
     def _guardar_datos_hotel(self, data, source_image):
-        hotel_data = data.get('hotel', {})
-        if not hotel_data.get('nombre'): return
+        hotel_data = data.get("hotel", {})
+        if not hotel_data.get("nombre"):
+            return
 
-        print(f"DEBUG: Procesando {hotel_data['nombre']}...")
+        logger.debug(f"Procesando {hotel_data['nombre']}...")
         try:
             with transaction.atomic():
                 # 1. Crear/Actualizar Hotel
                 # Buscamos por NOMBRE y AGENCIA para multi-tenancy
                 agencia = self.tarifario.agencia
-                
+
                 defaults = {
-                    'agencia': agencia,
-                    'tarifario': self.tarifario, # Actualizamos al tarifario más reciente
-                    'destino': hotel_data.get('destino') or 'Otro',
-                    'descripcion_larga': hotel_data.get('descripcion_larga') or '',
-                    'categoria': hotel_data.get('categoria') or 3,
-                    'politicas': hotel_data.get('politicas') or '',
+                    "agencia": agencia,
+                    "tarifario": self.tarifario,  # Actualizamos al tarifario más reciente
+                    "destino": hotel_data.get("destino") or "Otro",
+                    "descripcion_larga": hotel_data.get("descripcion_larga") or "",
+                    "categoria": hotel_data.get("categoria") or 3,
+                    "politicas": hotel_data.get("politicas") or "",
                     # Regimen default logic: get value, ensure string, slice 2. Fallback 'SD'
-                    'regimen_default': (hotel_data.get('regimen') or 'SD')[:2]
+                    "regimen_default": (hotel_data.get("regimen") or "SD")[:2],
                 }
 
-                # Usamos all_objects para bypass del filter manager si es necesario, 
+                # Usamos all_objects para bypass del filter manager si es necesario,
                 # pero filter(agencia=agencia) es lo correcto.
                 hotel = HotelTarifario.objects.filter(
-                    nombre__iexact=hotel_data['nombre'], 
-                    agencia=agencia
+                    nombre__iexact=hotel_data["nombre"], agencia=agencia
                 ).first()
-                
+
                 if hotel:
-                    print(f"DEBUG: Hotel encontrado (ID: {hotel.id}). Actualizando...")
+                    logger.debug(f"Hotel encontrado (ID: {hotel.id}). Actualizando...")
                     # Update fields
                     for key, value in defaults.items():
                         setattr(hotel, key, value)
                     hotel.save()
                 else:
-                    print("DEBUG: Hotel no encontrado o de otra agencia. Creando nuevo...")
-                    hotel = HotelTarifario.objects.create(nombre=hotel_data['nombre'], **defaults)
-            
-            print(f"DEBUG: Hotel guardado (ID: {hotel.id}). Procesando amenidades...")
+                    logger.debug("Hotel no encontrado o de otra agencia. Creando nuevo...")
+                    hotel = HotelTarifario.objects.create(nombre=hotel_data["nombre"], **defaults)
+
+            logger.debug(f"Hotel guardado (ID: {hotel.id}). Procesando amenidades...")
             # 2. Amenidades (Busca o crea)
-            for amenidad_nombre in hotel_data.get('amenidades', []):
+            for amenidad_nombre in hotel_data.get("amenidades", []):
                 amenity, _ = Amenity.objects.get_or_create(
                     nombre__iexact=amenidad_nombre,
-                    defaults={'nombre': amenidad_nombre, 'icono_lucide': 'check'}
+                    defaults={"nombre": amenidad_nombre, "icono_lucide": "check"},
                 )
                 hotel.amenidades.add(amenity)
-                
+
             # 3. Procesar Fotos (Recorte)
-            fotos_coords = data.get('fotos', [])
+            fotos_coords = data.get("fotos", [])
             if fotos_coords:
                 self._procesar_recortes(hotel, source_image, fotos_coords)
 
             # 4. Habitaciones y Tarifas
             # (Lógica simplificada para MVP: Crear habitaciones primero)
-            mapa_habitaciones = {} # nombre -> objeto
-            
-            for hab_data in data.get('habitaciones', []):
+            mapa_habitaciones = {}  # nombre -> objeto
+
+            for hab_data in data.get("habitaciones", []):
                 # Sanitize Integers (Avoid None/Null from JSON)
-                cap_adultos = hab_data.get('capacidad_adultos')
-                if cap_adultos is None: cap_adultos = 2
-                
-                cap_total = hab_data.get('capacidad_total')
-                if cap_total is None: cap_total = 4
-                
+                cap_adultos = hab_data.get("capacidad_adultos")
+                if cap_adultos is None:
+                    cap_adultos = 2
+
+                cap_total = hab_data.get("capacidad_total")
+                if cap_total is None:
+                    cap_total = 4
+
                 hab, _ = TipoHabitacion.objects.get_or_create(
                     hotel=hotel,
-                    nombre=hab_data['nombre'],
+                    nombre=hab_data["nombre"],
                     defaults={
-                        'capacidad_adultos': int(cap_adultos),
-                        'capacidad_ninos': int(hab_data.get('capacidad_ninos') or 0),
-                        'capacidad_total': int(cap_total)
-                    }
+                        "capacidad_adultos": int(cap_adultos),
+                        "capacidad_ninos": int(hab_data.get("capacidad_ninos") or 0),
+                        "capacidad_total": int(cap_total),
+                    },
                 )
                 mapa_habitaciones[hab.nombre] = hab
-            
+
             # 5. Tarifas (Asociar a habitaciones por coincidencia de nombre fuzzy o exacto)
             # ... Pendiente para V2 robusta, por ahora estructura básica ...
 
         except Exception as e:
-            print(f"DEBUG: Error guardando hotel {hotel_data.get('nombre')}: {e}")
+            logger.error(f"Error guardando hotel {hotel_data.get('nombre')}: {e}")
             logger.error(f"Error guardando hotel: {e}")
             # Re-raise to ensure transaction rollback if needed, or just log
             raise e
+
     def _procesar_recortes(self, hotel, source_image, fotos_coords):
         """
         Recorta sub-imágenes basadas en coordenadas del array `fotos_coords`
@@ -239,50 +243,53 @@ class HotelParserService:
             try:
                 # Coordenadas vienen en rango 0-1000 (standard de Gemini detection)
                 # Formato esperado: { "label": "Lobby", "box_2d": [ymin, xmin, ymax, xmax] }
-                box = foto_data.get('box_2d')
-                if not box or len(box) != 4: continue
-                
+                box = foto_data.get("box_2d")
+                if not box or len(box) != 4:
+                    continue
+
                 ymin, xmin, ymax, xmax = box
-                
+
                 # Convertir a pixeles absolutos
                 left = (xmin / 1000) * width
                 top = (ymin / 1000) * height
                 right = (xmax / 1000) * width
                 bottom = (ymax / 1000) * height
-                
+
                 # Margen opcional
-                
+
                 # Crop
                 crop_img = source_image.crop((left, top, right, bottom))
-                
+
                 # Guardar en memoria
                 img_io = io.BytesIO()
-                crop_img.save(img_io, format='JPEG', quality=85)
-                
+                crop_img.save(img_io, format="JPEG", quality=85)
+
                 # Guardar Modelo
                 tipo_map = {
-                    'Habitacion': 'HABITACION', 
-                    'Comida': 'COMIDA', 
-                    'Playa': 'PLAYA', 
-                    'Piscina': 'PLAYA',
-                    'General': 'GENERAL'
+                    "Habitacion": "HABITACION",
+                    "Comida": "COMIDA",
+                    "Playa": "PLAYA",
+                    "Piscina": "PLAYA",
+                    "General": "GENERAL",
                 }
-                tipo_detectado = tipo_map.get(foto_data.get('label', 'General'), 'GENERAL')
-                
+                tipo_detectado = tipo_map.get(foto_data.get("label", "General"), "GENERAL")
+
                 img_instance = ImagenHotel(
                     hotel=hotel,
                     titulo=f"Foto {i+1} - {foto_data.get('label', '')}",
                     tipo=tipo_detectado,
-                    es_portada=(i==0 and not hotel.imagen_principal) # Usar la primera como portada si no hay
+                    es_portada=(
+                        i == 0 and not hotel.imagen_principal
+                    ),  # Usar la primera como portada si no hay
                 )
-                
+
                 file_name = f"{hotel.slug}_foto_{i}.jpg"
                 img_instance.imagen.save(file_name, ContentFile(img_io.getvalue()), save=True)
-                
+
                 # Si es portada, asignar también al hotel
                 if img_instance.es_portada:
                     hotel.imagen_principal = img_instance.imagen
                     hotel.save()
-                    
+
             except Exception as e:
                 logger.error(f"Error recortando foto {i}: {e}")

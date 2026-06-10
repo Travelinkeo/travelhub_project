@@ -9,7 +9,10 @@ from .models.cms import ArticuloBlog, PaginaCMS
 
 logger = logging.getLogger(__name__)
 
-def crear_articulo_desde_gemini(datos_gemini: dict, categoria: str = "General", fuente: str = "Email procesado por IA") -> ArticuloBlog | None:
+
+def crear_articulo_desde_gemini(
+    datos_gemini: dict, categoria: str = "General", fuente: str = "Email procesado por IA"
+) -> ArticuloBlog | None:
     """
     Crea y guarda un nuevo artículo en la base de conocimiento a partir del JSON extraído por Gemini.
 
@@ -23,12 +26,14 @@ def crear_articulo_desde_gemini(datos_gemini: dict, categoria: str = "General", 
         ArticuloBlog | None: La instancia del artículo creado y guardado, o None si ocurre un error.
     """
     try:
-        titulo = datos_gemini.get('titulo')
-        resumen = datos_gemini.get('resumen')
-        puntos_clave = datos_gemini.get('puntos_clave')
+        titulo = datos_gemini.get("titulo")
+        resumen = datos_gemini.get("resumen")
+        puntos_clave = datos_gemini.get("puntos_clave")
 
         if not titulo or not resumen:
-            logger.error("Error al crear artículo: El JSON de Gemini no contiene 'titulo' o 'resumen'.")
+            logger.error(
+                "Error al crear artículo: El JSON de Gemini no contiene 'titulo' o 'resumen'."
+            )
             return None
 
         # Formatear los puntos clave como una lista HTML para el contenido principal
@@ -38,7 +43,7 @@ def crear_articulo_desde_gemini(datos_gemini: dict, categoria: str = "General", 
             for punto in puntos_clave:
                 contenido_html += f"<li>{punto}</li>"
             contenido_html += "</ul>"
-        
+
         # Crear la instancia del artículo
         nuevo_articulo = ArticuloBlog(
             titulo=titulo,
@@ -47,7 +52,7 @@ def crear_articulo_desde_gemini(datos_gemini: dict, categoria: str = "General", 
             estado=PaginaCMS.EstadoPublicacion.BORRADOR,  # Se guarda como borrador para revisión
             fuente=fuente,
             categoria_conocimiento=categoria,
-            fecha_publicacion=timezone.now() # Asignamos fecha de publicación para ordenamiento
+            fecha_publicacion=timezone.now(),  # Asignamos fecha de publicación para ordenamiento
         )
 
         # Generar slug único
@@ -62,12 +67,15 @@ def crear_articulo_desde_gemini(datos_gemini: dict, categoria: str = "General", 
         nuevo_articulo.full_clean()  # Validar el modelo
         nuevo_articulo.save()
 
-        logger.info(f"Nuevo artículo de conocimiento creado con éxito: '{titulo}' (ID: {nuevo_articulo.id_articulo})")
+        logger.info(
+            f"Nuevo artículo de conocimiento creado con éxito: '{titulo}' (ID: {nuevo_articulo.id_articulo})"
+        )
         return nuevo_articulo
 
     except Exception as e:
         logger.error(f"Error inesperado al guardar el artículo desde Gemini: {e}")
         return None
+
 
 # Ejemplo de cómo se usaría esta función desde otra parte del código (ej: un management command o una vista)
 """
@@ -86,8 +94,8 @@ def procesar_email_clasificado_como_general(contenido_json):
     )
 
     if articulo_creado:
-        print(f"Artículo '{articulo_creado.titulo}' guardado en la base de conocimiento.")
+        logger.info(f"Artículo '{articulo_creado.titulo}' guardado en la base de conocimiento.")
     else:
-        print("No se pudo guardar el artículo.")
+        logger.warning("No se pudo guardar el artículo.")
 
 """

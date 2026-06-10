@@ -1,5 +1,6 @@
 import logging
 
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from django.views import View
@@ -9,36 +10,46 @@ from apps.automation.services.passport_ocr_service import PassportOCRService
 
 logger = logging.getLogger(__name__)
 
-@method_decorator(csrf_exempt, name='dispatch')
-class OCRPassportView(View):
+
+@method_decorator(csrf_exempt, name="dispatch")
+class OCRPassportView(LoginRequiredMixin, View):
     """
     API endpoint para procesar imágenes de pasaporte.
     POST /api/ocr/passport/
     """
+
     def post(self, request, *args, **kwargs):
         # Aceptamos tanto 'archivo' (Legacy/GDS) como 'archivo_identidad' (Nuevo Dashboard)
-        archivo = request.FILES.get('archivo') or request.FILES.get('archivo_identidad')
-        
+        archivo = request.FILES.get("archivo") or request.FILES.get("archivo_identidad")
+
         if not archivo:
-            return JsonResponse({'success': False, 'error': 'No se proporcionó ningún archivo de imagen.'}, status=400)
-        
+            return JsonResponse(
+                {"success": False, "error": "No se proporcionó ningún archivo de imagen."},
+                status=400,
+            )
+
         try:
             service = PassportOCRService()
             result = service.process_passport_image(archivo)
-            
-            if result['success']:
-                return JsonResponse({
-                    'success': True,
-                    'status': 'success', # Para compatibilidad con el nuevo dashboard
-                    'data': result['data'],
-                    'message': 'Pasaporte procesado exitosamente'
-                })
+
+            if result["success"]:
+                return JsonResponse(
+                    {
+                        "success": True,
+                        "status": "success",  # Para compatibilidad con el nuevo dashboard
+                        "data": result["data"],
+                        "message": "Pasaporte procesado exitosamente",
+                    }
+                )
             else:
-                return JsonResponse({
-                    'success': False,
-                    'error': result.get('error', 'Error desconocido al procesar')
-                }, status=500)
-                
+                return JsonResponse(
+                    {
+                        "success": False,
+                        "error": result.get("error", "Error desconocido al procesar"),
+                    },
+                    status=500,
+                )
+
         except Exception as e:
             logger.error(f"Error interno OCR: {e}")
-            return JsonResponse({'success': False, 'error': str(e)}, status=500)
+            return JsonResponse({"success": False, "error": str(e)}, status=500)

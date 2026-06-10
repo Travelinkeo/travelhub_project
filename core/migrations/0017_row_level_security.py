@@ -1,35 +1,35 @@
 from django.db import migrations
 
 RLS_TABLES = [
-    'core_venta',
-    'core_itemventa',
-    'core_boletoimportado',
-    'core_pagoventa',
-    'core_feeventa',
-    'core_proveedor',
-    'core_productoservicio',
-    'core_comisionproveedorservicio',
-    'core_alojamientoreserva',
-    'core_trasladoservicio',
-    'core_actividadservicio',
-    'core_segmentovuelo',
-    'core_alquilerautoreserva',
-    'core_eventoservicio',
-    'core_circuitoturistico',
-    'core_paqueteaereo',
-    'core_servicioadicionaldetalle',
-    'core_factura',
-    'core_gastooperativo',
-    'crm_cliente',
-    'crm_pasajero',
-    'core_auditlog',
-    'finance_reportereconciliacion',
-    'finance_lineareportereconciliacion',
-    'finance_conciliacionboleto',
-    'finance_taxrefundopportunity',
-    'finance_comisionventa',
-    'finance_liquidacionagente',
-    'marketing_campania',
+    "core_venta",
+    "core_itemventa",
+    "core_boletoimportado",
+    "core_pagoventa",
+    "core_feeventa",
+    "core_proveedor",
+    "core_productoservicio",
+    "core_comisionproveedorservicio",
+    "core_alojamientoreserva",
+    "core_trasladoservicio",
+    "core_actividadservicio",
+    "core_segmentovuelo",
+    "core_alquilerautoreserva",
+    "core_eventoservicio",
+    "core_circuitoturistico",
+    "core_paqueteaereo",
+    "core_servicioadicionaldetalle",
+    "core_factura",
+    "core_gastooperativo",
+    "crm_cliente",
+    "crm_pasajero",
+    "core_auditlog",
+    "finance_reportereconciliacion",
+    "finance_lineareportereconciliacion",
+    "finance_conciliacionboleto",
+    "finance_taxrefundopportunity",
+    "finance_comisionventa",
+    "finance_liquidacionagente",
+    "marketing_campania",
 ]
 
 
@@ -90,7 +90,7 @@ def _build_reverse_sql():
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('core', '0016_add_critical_indexes'),
+        ("core", "0016_add_critical_indexes"),
     ]
 
     operations = [

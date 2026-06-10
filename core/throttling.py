@@ -1,29 +1,40 @@
 # core/throttling.py
+from django.conf import settings
 from rest_framework.throttling import SimpleRateThrottle, UserRateThrottle
+
+_THROTTLE_RATES = getattr(settings, "REST_FRAMEWORK", {}).get("DEFAULT_THROTTLE_RATES", {})
 
 
 class DashboardRateThrottle(UserRateThrottle):
-    """Rate limit específico para dashboard (más permisivo)"""
-    scope = 'dashboard'
-    rate = '100/hour'
+    scope = "dashboard"
+
+    @property
+    def rate(self):
+        return _THROTTLE_RATES.get(self.scope, "100/hour")
 
 
 class LiquidacionRateThrottle(UserRateThrottle):
-    """Rate limit para operaciones de liquidación"""
-    scope = 'liquidacion'
-    rate = '50/hour'
+    scope = "liquidacion"
+
+    @property
+    def rate(self):
+        return _THROTTLE_RATES.get(self.scope, "50/hour")
 
 
 class ReportesRateThrottle(UserRateThrottle):
-    """Rate limit para generación de reportes (más restrictivo)"""
-    scope = 'reportes'
-    rate = '20/hour'
+    scope = "reportes"
+
+    @property
+    def rate(self):
+        return _THROTTLE_RATES.get(self.scope, "20/hour")
 
 
 class UploadRateThrottle(UserRateThrottle):
-    """Rate limit para uploads (pasaportes, boletos)"""
-    scope = 'upload'
-    rate = '30/hour'
+    scope = "upload"
+
+    @property
+    def rate(self):
+        return _THROTTLE_RATES.get(self.scope, "30/hour")
 
 
 class AgenciaAIParserThrottle(SimpleRateThrottle):
@@ -32,17 +43,20 @@ class AgenciaAIParserThrottle(SimpleRateThrottle):
     Limita las peticiones basándose en el ID de la Agencia, no en la IP.
     Evita que una agencia (o un bot vulnerando una cuenta) consuma todo el presupuesto.
     """
+
     # Este nombre ('ai_parser_quota') se conectará con settings.py
-    scope = 'ai_parser_quota'
+    scope = "ai_parser_quota"
 
     def get_cache_key(self, request, view):
-        # 1. Si el usuario está autenticado y pertenece a una agencia
-        # Nota: Usamos la lógica de resolución de agencia del middleware si está disponible
-        agencia_id = getattr(request.user, 'agencia_id', None)
-        
-        # Fallback a request.agencia si existe (seteado por middleware)
-        if not agencia_id and hasattr(request, 'agencia') and request.agencia:
-            agencia_id = request.agencia.id
+        # Resolver la agencia desde el request o desde la relación de usuario si está autenticado
+        agencia = getattr(request, "agencia", getattr(request, "agency", None))
+
+        if not agencia and request.user.is_authenticated:
+            from core.security import get_user_active_agency
+
+            agencia = get_user_active_agency(request.user)
+
+        agencia_id = agencia.id if agencia else None
 
         if request.user.is_authenticated and agencia_id:
             # El límite es global para toda la agencia
@@ -51,15 +65,12 @@ class AgenciaAIParserThrottle(SimpleRateThrottle):
             # 2. Fallback: Si no hay agencia (ej. un endpoint público temporal), usamos la IP
             ident = self.get_ident(request)
 
-        return self.cache_format % {
-            'scope': self.scope,
-            'ident': ident
-        }
+        return self.cache_format % {"scope": self.scope, "ident": ident}
 
 
 class AIParserDailyQuotaThrottle(AgenciaAIParserThrottle):
     """
     Mecanismo de cuota diaria estricta (ej. 100 parseos por día por Agencia).
     """
-    scope = 'ai_parser_daily'
 
+    scope = "ai_parser_daily"

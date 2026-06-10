@@ -1,0 +1,26 @@
+ping: true
+
+providers:
+  file:
+    filename: /etc/traefik/dynamic.yml
+    watch: true
+
+entryPoints:
+  web:
+    address: ":80"
+  websecure:
+    address: ":443"
+
+certificatesResolvers:
+  letsencryptresolver:
+    acme:
+      email: tecnico@travelhub.cc
+      storage: /letsencrypt/acme.json
+      dnsChallenge:
+        provider: cloudflare
+        # Deshabilita la verificación propia de Traefik - Let's Encrypt verifica directamente
+        disablePropagationCheck: true
+        delayBeforeCheck: 10
+        resolvers:
+          - "1.1.1.1:53"
+          - "8.8.8.8:53"

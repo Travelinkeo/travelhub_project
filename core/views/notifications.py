@@ -12,15 +12,15 @@ def notificaciones_live_view(request):
     Si existen, las marca como leídas y las renderiza como Toasts.
     """
     notificaciones = NotificacionAgente.objects.filter(usuario=request.user, leida=False)
-    
+
     if notificaciones.exists():
         # Capturamos el conjunto para el contexto antes de marcarlas como leídas
-        context = {'notificaciones': list(notificaciones)}
-        
+        context = {"notificaciones": list(notificaciones)}
+
         # Marcamos como leídas en lote para eficiencia
         notificaciones.update(leida=True)
-        
-        return render(request, 'core/partials/live_toasts.html', context)
-    
+
+        return render(request, "core/partials/live_toasts.html", context)
+
     # Si no hay nada nuevo, devolvemos vacío (200 OK para HTMX)
-    return HttpResponse('')
+    return HttpResponse("")

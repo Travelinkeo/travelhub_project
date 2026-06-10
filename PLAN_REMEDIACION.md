@@ -17,7 +17,7 @@ la configuración de base de datos, los rate-limiters, y 13 management commands:
 
 | # | Severidad | Problema | Impacto |
 |---|-----------|----------|---------|
-| 1 | **CRÍTICO** | `.env` con DB password en texto plano (`travelhub2026`) | Filtración de credenciales si el repo se compromete |
+| 1 | **CRÍTICO** | `.env` con DB password en texto plano (`travelhub2026` — rotado) | Filtración de credenciales si el repo se compromete |
 | 2 | **CRÍTICO** | 6 rate-limiters con `cache.get`+`cache.set` no atómicos | Race condition: conteos incorrectos, bypass de rate-limit |
 | 3 | **CRÍTICO** | Sin PgBouncer/connection pooling en PostgreSQL | Conexiones se caen bajo pico (50+ workers Celery) |
 | 4 | **CRÍTICO** | `SECRET_KEY` hardcodeada en `.env` sin fallback | App no arranca si falta env var; sin rotación |

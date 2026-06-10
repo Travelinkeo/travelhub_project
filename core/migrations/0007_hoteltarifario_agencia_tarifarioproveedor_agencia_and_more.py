@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("core", "0006_aiusagelog"),
     ]
@@ -36,9 +35,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="hoteltarifario",
             name="slug",
-            field=models.SlugField(
-                blank=True, help_text="URL amigable", max_length=250, null=True
-            ),
+            field=models.SlugField(blank=True, help_text="URL amigable", max_length=250, null=True),
         ),
         migrations.AlterUniqueTogether(
             name="hoteltarifario",

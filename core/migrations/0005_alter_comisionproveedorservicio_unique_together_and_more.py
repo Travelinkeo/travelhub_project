@@ -5,63 +5,80 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0004_ciudad_codigo_iata_comisionoverrideaerolinea'),
+        ("core", "0004_ciudad_codigo_iata_comisionoverrideaerolinea"),
     ]
 
     operations = [
         migrations.AlterUniqueTogether(
-            name='comisionproveedorservicio',
+            name="comisionproveedorservicio",
             unique_together=set(),
         ),
         migrations.AddField(
-            model_name='comisionproveedorservicio',
-            name='agencia',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='%(class)s_items', to='core.agencia'),
+            model_name="comisionproveedorservicio",
+            name="agencia",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="%(class)s_items",
+                to="core.agencia",
+            ),
         ),
         migrations.AddField(
-            model_name='comisionproveedorservicio',
-            name='deleted_at',
-            field=models.DateTimeField(blank=True, null=True, verbose_name='Fecha de Eliminación'),
+            model_name="comisionproveedorservicio",
+            name="deleted_at",
+            field=models.DateTimeField(blank=True, null=True, verbose_name="Fecha de Eliminación"),
         ),
         migrations.AddField(
-            model_name='comisionproveedorservicio',
-            name='is_deleted',
-            field=models.BooleanField(db_index=True, default=False, verbose_name='Eliminado'),
+            model_name="comisionproveedorservicio",
+            name="is_deleted",
+            field=models.BooleanField(db_index=True, default=False, verbose_name="Eliminado"),
         ),
         migrations.AddField(
-            model_name='productoservicio',
-            name='deleted_at',
-            field=models.DateTimeField(blank=True, null=True, verbose_name='Fecha de Eliminación'),
+            model_name="productoservicio",
+            name="deleted_at",
+            field=models.DateTimeField(blank=True, null=True, verbose_name="Fecha de Eliminación"),
         ),
         migrations.AddField(
-            model_name='productoservicio',
-            name='is_deleted',
-            field=models.BooleanField(db_index=True, default=False, verbose_name='Eliminado'),
+            model_name="productoservicio",
+            name="is_deleted",
+            field=models.BooleanField(db_index=True, default=False, verbose_name="Eliminado"),
         ),
         migrations.AddField(
-            model_name='proveedor',
-            name='deleted_at',
-            field=models.DateTimeField(blank=True, null=True, verbose_name='Fecha de Eliminación'),
+            model_name="proveedor",
+            name="deleted_at",
+            field=models.DateTimeField(blank=True, null=True, verbose_name="Fecha de Eliminación"),
         ),
         migrations.AddField(
-            model_name='proveedor',
-            name='is_deleted',
-            field=models.BooleanField(db_index=True, default=False, verbose_name='Eliminado'),
+            model_name="proveedor",
+            name="is_deleted",
+            field=models.BooleanField(db_index=True, default=False, verbose_name="Eliminado"),
         ),
         migrations.AlterField(
-            model_name='productoservicio',
-            name='agencia',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='%(class)s_items', to='core.agencia'),
+            model_name="productoservicio",
+            name="agencia",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="%(class)s_items",
+                to="core.agencia",
+            ),
         ),
         migrations.AlterField(
-            model_name='proveedor',
-            name='agencia',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='%(class)s_items', to='core.agencia'),
+            model_name="proveedor",
+            name="agencia",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="%(class)s_items",
+                to="core.agencia",
+            ),
         ),
         migrations.AlterUniqueTogether(
-            name='comisionproveedorservicio',
-            unique_together={('agencia', 'proveedor', 'tipo_servicio')},
+            name="comisionproveedorservicio",
+            unique_together={("agencia", "proveedor", "tipo_servicio")},
         ),
     ]

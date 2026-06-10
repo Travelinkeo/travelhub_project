@@ -1,26 +1,26 @@
-
+import concurrent.futures
 import json
 import logging
-import os
-
-from django.conf import settings
 
 from .base_parser import BaseTicketParser, ParsedTicketData
 
 logger = logging.getLogger(__name__)
 
+
 def _get_genai():
     from google import genai
+
     return genai
+
 
 class GeminiParser(BaseTicketParser):
     """
     Parser basado en IA (Google Gemini) para extraer datos de boletos aéreos.
     No usa Regex. Usa Comprensión de Lenguaje Natural.
     """
-    
+
     def __init__(self):
-        self.model_name = 'gemini-2.0-flash'
+        self.model_name = "gemini-2.0-flash"
 
     def can_parse(self, text: str) -> bool:
         # Gemini puede parsear CUALQUIER boleto, siempre que haya texto legíble.
@@ -28,7 +28,8 @@ class GeminiParser(BaseTicketParser):
         return len(text) > 50
 
     def parse(self, text: str, html_text: str = "", pdf_path: str = None) -> ParsedTicketData:
-        from apps.automation.services.ai_engine import get_gemini_api_key, _get_genai
+        from apps.automation.services.ai_engine import _get_genai, get_gemini_api_key
+
         api_key = get_gemini_api_key()
         if not api_key:
             logger.error("Modelo Gemini no inicializado (Falta API Key)")
@@ -137,43 +138,49 @@ class GeminiParser(BaseTicketParser):
         """
 
         content_parts = [prompt_text]
-        
+
         # --- VISION SUPPORT ---
         # Si hay pdf_path y el texto parece corrupto (cid:) o muy corto, usamos visión.
         use_vision = False
-        if pdf_path and ('(cid:' in text or len(text) < 100 or 'cid:1' in text):
-             try:
-                 import fitz
-                 from PIL import Image
-                 logger.info(f"👁️ Detectado texto corrupto o PDF complejo. Usando Gemini Vision con: {pdf_path}")
-                 
-                 with fitz.open(pdf_path) as pdf:
-                     if len(pdf) > 0:
-                         # Renderizar primera página a imagen
-                         pix = pdf[0].get_pixmap(matrix=fitz.Matrix(2, 2))
-                         pil_image = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
-                         content_parts.append(pil_image)
-                         use_vision = True
-                         
-                         # Si hay segunda página y es ticket largo, tal vez necesitemos más, pero página 1 suele tener todo.
-             except Exception as e:
-                 logger.error(f"❌ Error renderizando PDF para Vision: {e}")
-        
+        if pdf_path and ("(cid:" in text or len(text) < 100 or "cid:1" in text):
+            try:
+                import fitz
+                from PIL import Image
+
+                logger.info(
+                    f"👁️ Detectado texto corrupto o PDF complejo. Usando Gemini Vision con: {pdf_path}"
+                )
+
+                with fitz.open(pdf_path) as pdf:
+                    if len(pdf) > 0:
+                        # Renderizar primera página a imagen
+                        pix = pdf[0].get_pixmap(matrix=fitz.Matrix(2, 2))
+                        pil_image = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
+                        content_parts.append(pil_image)
+                        use_vision = True
+
+                        # Si hay segunda página y es ticket largo, tal vez necesitemos más, pero página 1 suele tener todo.
+            except Exception as e:
+                logger.error(f"❌ Error renderizando PDF para Vision: {e}")
+
         try:
-            response = client.models.generate_content(
-                model=self.model_name,
-                contents=content_parts
-            )
-            json_str = response.text.replace('```json', '').replace('```', '').strip()
+            with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+                future = executor.submit(
+                    client.models.generate_content, model=self.model_name, contents=content_parts
+                )
+                response = future.result(timeout=20)
+            json_str = response.text.replace("```json", "").replace("```", "").strip()
+            if not json_str:
+                logger.error("Gemini returned empty response")
+                return {}
             data = json.loads(json_str)
             if use_vision:
-                 data['vision_used'] = True
-                 logger.info("✅ Parseo exitoso usando Gemini Vision.")
+                data["vision_used"] = True
+                logger.info("✅ Parseo exitoso usando Gemini Vision.")
             return data
+        except concurrent.futures.TimeoutError:
+            logger.error("⏰ Gemini timeout after 20s")
+            return {}
         except Exception as e:
             logger.error(f"Error parsing with Gemini: {e}")
-            try:
-                pass # logger.error(f"Raw Response: {response.text[:500]}...")
-            except Exception as e:
-                logger.warning(f"Excepción silenciosa capturada: {e}")
             return {}

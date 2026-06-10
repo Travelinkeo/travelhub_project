@@ -3,7 +3,7 @@
 
 {% block extra_head %}
 <!-- Form styling overrides to apply Tailwind input-base to Django generated inputs -->
-<style type="text/tailwindcss">
+<style type="text/tailwindcss" nonce="{{ request.csp_nonce }}">
     @layer components {
         input[type="text"], input[type="number"], input[type="date"], input[type="email"], select, textarea { 
             @apply input-base;
@@ -24,7 +24,7 @@
 {% endblock %}
 
 {% block content %}
-<form method="post" id="cotizacionForm" hx-post="{% url 'core:cotizacion_htmx_calcular' %}" hx-trigger="change from:.item-row input, change from:.item-row select, change from:select[name='moneda'], change from:input[name$='-DELETE'] delay:100ms" hx-target="#summary-panel" hx-swap="outerHTML">
+<form method="post" id="cotizacionForm" hx-post="{% url 'bookings:cotizacion_htmx_calcular' %}" hx-trigger="change from:.item-row input, change from:.item-row select, change from:select[name='moneda'], change from:input[name$='-DELETE'] delay:100ms" hx-target="#summary-panel" hx-swap="outerHTML">
 {% csrf_token %}
 <main class="flex-1 w-full max-w-[1400px] mx-auto p-6 md:p-8 lg:p-10 relative">
 
@@ -125,8 +125,8 @@
                         </div>
                     </div>
                     <button type="button" class="btn-secondary !py-1 !px-3 !text-[11px]"
-                        hx-get="{% url 'core:cotizacion_htmx_add_item' %}" 
-                        hx-vals='javascript:{"index": document.getElementById("id_items_cotizacion-TOTAL_FORMS").value}' 
+                        hx-get="{% url 'bookings:cotizacion_htmx_add_item' %}" 
+                        hx-on::before-request="event.detail.parameters.index = document.getElementById('id_items_cotizacion-TOTAL_FORMS').value"
                         hx-target="#items-container" 
                         hx-swap="beforeend">
                         <span class="material-symbols-outlined text-[16px]">add_circle</span> Añadir Concepto

@@ -17,10 +17,18 @@ from apps.finance.services.financial_engine import FinancialEngine
 
 logger = logging.getLogger(__name__)
 
+
 class VentaAutomationService:
-    
     @classmethod
-    def crear_venta_desde_parser(cls, parsed_data, agencia, usuario=None, forced_cliente_id=None, proveedor_id=None, boleto_obj=None):
+    def crear_venta_desde_parser(
+        cls,
+        parsed_data,
+        agencia,
+        usuario=None,
+        forced_cliente_id=None,
+        proveedor_id=None,
+        boleto_obj=None,
+    ):
         """
         Crea o actualiza una venta calculando automáticamente la deuda con la Consolidadora.
         Refactorizado para usar servicios especializados (Audit Step 3).
@@ -28,71 +36,90 @@ class VentaAutomationService:
         # 0. Normalización de entrada
         data = parsed_data
         if isinstance(data, str):
-            try: data = json.loads(data)
+            try:
+                data = json.loads(data)
             except Exception as e:
                 logger.warning(f"No se pudo deserializar parsed_data como JSON: {e}")
                 data = {}
-        elif hasattr(data, 'to_dict'):
+        elif hasattr(data, "to_dict"):
             data = data.to_dict()
         elif not isinstance(data, dict):
-            try: data = vars(data)
+            try:
+                data = vars(data)
             except Exception as e:
                 logger.warning(f"No se pudo convertir parsed_data a dict via vars(): {e}")
                 data = {}
 
         # 1. Extracción Financiera (Refactorizado -> FinancialEngine)
         fin_data = FinancialEngine.calculate_ticket_amounts(data, boleto_obj)
-        monto_base = fin_data['monto_base']
-        monto_total = fin_data['monto_total']
-        monto_impuestos = fin_data['monto_impuestos_total']
-        moneda_obj = fin_data['moneda_obj']
+        monto_base = fin_data["monto_base"]
+        monto_total = fin_data["monto_total"]
+        monto_impuestos = fin_data["monto_impuestos_total"]
+        moneda_obj = fin_data["moneda_obj"]
 
         # 2. Cálculo de Comisiones y Márgenes (Refactorizado -> FinancialEngine)
         margin_data = FinancialEngine.calculate_margins(monto_total, data, proveedor_id)
-        proveedor_obj = margin_data['proveedor_obj']
-        comision_monto = margin_data['comision_monto']
-        costo_neto_pagar = margin_data['costo_neto_pagar']
+        proveedor_obj = margin_data["proveedor_obj"]
+        comision_monto = margin_data["comision_monto"]
+        costo_neto_pagar = margin_data["costo_neto_pagar"]
 
         # 3. Guardado Atómico
         with transaction.atomic():
-            
             # A. Cliente (Refactorizado -> CustomerService)
             cliente = CustomerService.identify_or_create(data, agencia, forced_cliente_id)
             nombre_pax = f"{cliente.apellidos}, {cliente.nombres}" if cliente else "PASAJERO"
 
             # B. Datos de Identificación (🛡️ Audit Point 4: Exact Match)
-            pnr = str(data.get('pnr') or data.get('CODIGO_RESERVA') or data.get('localizador') or "SIN-PNR").strip()
-            ticket_num = str(data.get('ticket_number') or data.get('numero_boleto') or data.get('NUMERO_DE_BOLETO') or "SIN-TICKET").strip()
-            
-            aerolinea = data.get('nombre_aerolinea') or data.get('NOMBRE_AEROLINEA') or "Aéreo"
+            pnr = str(
+                data.get("pnr")
+                or data.get("CODIGO_RESERVA")
+                or data.get("localizador")
+                or "SIN-PNR"
+            ).strip()
+            ticket_num = str(
+                data.get("ticket_number")
+                or data.get("numero_boleto")
+                or data.get("NUMERO_DE_BOLETO")
+                or "SIN-TICKET"
+            ).strip()
+
+            aerolinea = data.get("nombre_aerolinea") or data.get("NOMBRE_AEROLINEA") or "Aéreo"
 
             # C. Venta (Cabecera)
             venta = None
-            
+
             # Prioridad 1: Asociación Directa
             if boleto_obj and boleto_obj.venta_asociada:
                 venta = boleto_obj.venta_asociada
-            
+
             # Prioridad 2: Búsqueda por PNR (🛡️ EXACT MATCH)
             if not venta and pnr != "SIN-PNR":
-                manager = getattr(Venta, 'all_objects', Venta.objects)
+                manager = getattr(Venta, "all_objects", Venta.objects)
                 # Usamos iexact para evitar falsos positivos de icontains y mejorar performance
-                venta_existente = manager.filter(agencia=agencia, localizador__iexact=pnr).order_by('-fecha_venta').first()
-                
+                venta_existente = (
+                    manager.filter(agencia=agencia, localizador__iexact=pnr)
+                    .order_by("-fecha_venta")
+                    .first()
+                )
+
                 if venta_existente:
                     seis_meses = datetime.timedelta(days=180)
                     es_reciclado = False
-                    
+
                     if (timezone.now() - venta_existente.fecha_venta) > seis_meses:
                         es_reciclado = True
-                    elif venta_existente.cliente and cliente and venta_existente.cliente_id != cliente.id:
+                    elif (
+                        venta_existente.cliente
+                        and cliente
+                        and venta_existente.cliente_id != cliente.id
+                    ):
                         es_reciclado = True
-                    
+
                     if not es_reciclado:
                         venta = venta_existente
-                        if hasattr(venta, 'deleted_at') and venta.deleted_at:
+                        if hasattr(venta, "deleted_at") and venta.deleted_at:
                             venta.deleted_at = None
-                            venta.save(update_fields=['deleted_at'])
+                            venta.save(update_fields=["deleted_at"])
 
             if not venta:
                 venta = Venta.objects.create(
@@ -109,31 +136,30 @@ class VentaAutomationService:
                     impuestos=monto_impuestos,
                     total_venta=monto_total,
                     saldo_pendiente=monto_total,
-                    descripcion_general=f"Emisión {aerolinea} - Pax: {nombre_pax}"
+                    descripcion_general=f"Emisión {aerolinea} - Pax: {nombre_pax}",
                 )
             else:
-                venta.subtotal = monto_base
-                venta.impuestos = monto_impuestos
-                venta.total_venta = monto_total
-                venta.saldo_pendiente = monto_total
                 if not venta.cliente:
                     venta.cliente = cliente
                 venta.save()
 
             # D. Boleto Importado
             if not boleto_obj:
-                boleto_obj = BoletoImportado.objects.filter(
-                    agencia=agencia, 
-                    numero_boleto__iexact=ticket_num
-                ).order_by('-id_boleto_importado').first()
-                
+                boleto_obj = (
+                    BoletoImportado.objects.filter(
+                        agencia=agencia, numero_boleto__iexact=ticket_num
+                    )
+                    .order_by("-id_boleto_importado")
+                    .first()
+                )
+
                 if not boleto_obj:
                     boleto_obj = BoletoImportado.objects.create(
                         agencia=agencia,
                         numero_boleto=ticket_num,
-                        estado_parseo=BoletoImportado.EstadoParseo.COMPLETADO
+                        estado_parseo=BoletoImportado.EstadoParseo.COMPLETADO,
                     )
-            
+
             boleto_obj.venta_asociada = venta
             boleto_obj.localizador_pnr = pnr
             boleto_obj.nombre_pasajero_procesado = nombre_pax
@@ -150,35 +176,34 @@ class VentaAutomationService:
             producto_servicio, _ = ProductoServicio.all_objects.get_or_create(
                 agencia=agencia,
                 nombre="Boleto Aéreo Internacional",
-                tipo_producto='AIR',
+                tipo_producto="AIR",
                 defaults={
-                    'descripcion': 'Boleto aéreo importado/parseado automáticamente.',
-                    'activo': True,
-                }
+                    "descripcion": "Boleto aéreo importado/parseado automáticamente.",
+                    "activo": True,
+                },
             )
 
             # 🛡️ EXACT MATCH para el item del boleto (evitar duplicados)
             # Buscamos por una descripción que contenga el número exacto del boleto
             item_existente = ItemVenta.all_objects.filter(
-                venta=venta,
-                descripcion_personalizada__contains=ticket_num
+                venta=venta, descripcion_personalizada__contains=ticket_num
             ).first()
 
             item_data = {
-                'agencia': agencia,
-                'venta': venta,
-                'producto_servicio': producto_servicio,
-                'tipo_item': 'AIR',
-                'descripcion_personalizada': f"Boleto {ticket_num} ({aerolinea})",
-                'cantidad': 1,
-                'precio_unitario_venta': monto_total,
-                'impuestos_item_venta': monto_impuestos,
-                'subtotal_item_venta': monto_base if monto_base else monto_total,
-                'total_item_venta': monto_total,
-                'proveedor_servicio': proveedor_obj,
-                'costo_neto_proveedor': costo_neto_pagar,
-                'comision_agencia_monto': comision_monto,
-                'estado_item': ItemVenta.EstadoItemVenta.CONFIRMADO
+                "agencia": agencia,
+                "venta": venta,
+                "producto_servicio": producto_servicio,
+                "tipo_item": "AIR",
+                "descripcion_personalizada": f"Boleto {ticket_num} ({aerolinea})",
+                "cantidad": 1,
+                "precio_unitario_venta": monto_total,
+                "impuestos_item_venta": monto_impuestos,
+                "subtotal_item_venta": monto_base if monto_base else monto_total,
+                "total_item_venta": monto_total,
+                "proveedor_servicio": proveedor_obj,
+                "costo_neto_proveedor": costo_neto_pagar,
+                "comision_agencia_monto": comision_monto,
+                "estado_item": ItemVenta.EstadoItemVenta.CONFIRMADO,
             }
 
             if item_existente:
@@ -195,14 +220,60 @@ class VentaAutomationService:
             # G. Itinerario (Refactorizado -> ItineraryService)
             ItineraryService.sync_segments(data, agencia, venta, item_venta_obj, aerolinea)
 
+            # H. Recalcular totales financieros acumulados de la Venta a partir de todos sus Items
+            from decimal import Decimal
+
+            from django.db.models import Sum
+
+            totals = ItemVenta.objects.filter(venta=venta).aggregate(
+                total_subtotal=Sum("subtotal_item_venta"),
+                total_impuestos=Sum("impuestos_item_venta"),
+                total_total=Sum("total_item_venta"),
+            )
+
+            venta.subtotal = totals["total_subtotal"] or Decimal("0.00")
+            venta.impuestos = totals["total_impuestos"] or Decimal("0.00")
+            venta.total_venta = totals["total_total"] or Decimal("0.00")
+            venta.saldo_pendiente = venta.total_venta - (venta.monto_pagado or Decimal("0"))
+
+            if venta.estado == Venta.EstadoVenta.PAGADA_TOTAL and venta.saldo_pendiente > 0:
+                if (venta.monto_pagado or Decimal("0")) > 0:
+                    venta.estado = Venta.EstadoVenta.PAGADA_PARCIAL
+                else:
+                    venta.estado = Venta.EstadoVenta.PENDIENTE_PAGO
+            elif (
+                venta.estado == Venta.EstadoVenta.PENDIENTE_PAGO
+                and (venta.monto_pagado or Decimal("0")) > 0
+            ):
+                if (venta.monto_pagado or Decimal("0")) >= venta.total_venta:
+                    venta.estado = Venta.EstadoVenta.PAGADA_TOTAL
+                else:
+                    venta.estado = Venta.EstadoVenta.PAGADA_PARCIAL
+
+            # Actualizar también descripción general para listar múltiples pasajeros si los hay
+            pax_names = []
+            for p in venta.pasajeros.all():
+                pax_names.append(f"{p.apellidos}, {p.nombres}")
+            if pax_names:
+                venta.descripcion_general = f"Emisiones {aerolinea} - Pax: {'; '.join(pax_names)}"
+
+            venta.save()
+
         # H. Sales Intelligence (Audit Point 7) - FUERA de la transacción
         try:
-            ai_report = SalesIntelligenceService.analyze_booking_for_upselling(data, agencia=agencia)
+            ai_report = SalesIntelligenceService.analyze_booking_for_upselling(
+                data, agencia=agencia
+            )
             if ai_report:
-                summary = ai_report.get('summary', str(ai_report)) if isinstance(ai_report, dict) else str(ai_report)
-                if not venta.notas: venta.notas = ""
+                summary = (
+                    ai_report.get("summary", str(ai_report))
+                    if isinstance(ai_report, dict)
+                    else str(ai_report)
+                )
+                if not venta.notas:
+                    venta.notas = ""
                 venta.notas += f"\n\n[IA SALES REPORT]\n{summary}\n"
-                venta.save(update_fields=['notas'])
+                venta.save(update_fields=["notas"])
         except Exception as ei:
             logger.error(f"Error generando inteligencia de ventas: {ei}")
 

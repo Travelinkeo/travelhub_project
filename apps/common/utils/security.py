@@ -11,12 +11,12 @@ def generate_blind_index(value: str) -> str:
     """
     if not value:
         return ""
-    
+
     # Normalizamos el valor (quitar espacios, mayúsculas) para que la búsqueda sea consistente
     clean_value = str(value).strip().upper()
-    
+
     # Usamos HMAC-SHA256 con el SECRET_KEY como sal
-    key = settings.SECRET_KEY.encode('utf-8')
-    msg = clean_value.encode('utf-8')
-    
+    key = settings.SECRET_KEY.encode("utf-8")
+    msg = clean_value.encode("utf-8")
+
     return hmac.new(key, msg, hashlib.sha256).hexdigest()

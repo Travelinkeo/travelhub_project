@@ -7,6 +7,7 @@ from apps.bookings.models.venta import Venta
 
 logger = logging.getLogger(__name__)
 
+
 class FinanceService:
     @staticmethod
     def recalculate_sale_finances(venta_id):
@@ -16,51 +17,77 @@ class FinanceService:
         """
         try:
             venta = Venta.objects.get(pk=venta_id)
-            
+
             # 1. Sumar items
-            subtotal_items = Decimal('0.00')
-            impuestos_items = Decimal('0.00')
-            
+            subtotal_items = Decimal("0.00")
+            impuestos_items = Decimal("0.00")
+
             items = venta.items_venta.all()
             for item in items:
                 subtotal_items += item.subtotal_item_venta
-                impuestos_items += (item.impuestos_item_venta * item.cantidad)
-                
+                impuestos_items += item.impuestos_item_venta * item.cantidad
+
             # 2. Sumar fees
-            fees_total = venta.fees_venta.aggregate(s=Sum('monto'))['s'] or Decimal('0.00')
-            
+            fees_total = venta.fees_venta.aggregate(s=Sum("monto"))["s"] or Decimal("0.00")
+
             # 3. Sumar pagos confirmados
-            pagos_confirmados = venta.pagos_venta.filter(confirmado=True).aggregate(s=Sum('monto'))['s'] or Decimal('0.00')
-            
+            pagos_confirmados = venta.pagos_venta.filter(confirmado=True).aggregate(s=Sum("monto"))[
+                "s"
+            ] or Decimal("0.00")
+
             # 4. Actualizar campos
             venta.subtotal = subtotal_items
             venta.impuestos = impuestos_items
             venta.total_venta = subtotal_items + impuestos_items + fees_total
             venta.monto_pagado = pagos_confirmados
             venta.saldo_pendiente = venta.total_venta - venta.monto_pagado
-            
+
             # 5. Determinar estado según saldo
             estado_original = venta.estado
             # Solo actualizamos el estado si es uno de los estados financieros base
-            estados_financieros_base = {'PEN', 'PAR', 'PAG'} # Códigos de estado
-            
+            estados_financieros_base = {"PEN", "PAR", "PAG"}  # Códigos de estado
+
             if venta.estado in estados_financieros_base and venta.total_venta > 0:
                 if venta.saldo_pendiente <= 0:
-                    venta.estado = 'PAG' # Pagada Total
+                    venta.estado = "PAG"  # Pagada Total
                 elif 0 < venta.saldo_pendiente < venta.total_venta:
-                    venta.estado = 'PAR' # Pagada Parcial
-            
+                    venta.estado = "PAR"  # Pagada Parcial
+                else:
+                    venta.estado = "PEN"  # Pendiente de Pago
+
             # 6. Guardado atómico de campos financieros
-            campos_update = ['subtotal', 'impuestos', 'total_venta', 'monto_pagado', 'saldo_pendiente']
+            campos_update = [
+                "subtotal",
+                "impuestos",
+                "total_venta",
+                "monto_pagado",
+                "saldo_pendiente",
+            ]
             if venta.estado != estado_original:
-                campos_update.append('estado')
-            
+                campos_update.append("estado")
+
             venta.save(update_fields=campos_update)
-            
+
+            # Sincronizar factura si existe (excluyendo pagadas y anuladas)
+            try:
+                from apps.finance.models import Factura
+
+                factura = (
+                    Factura.objects.filter(venta_asociada_id=venta.pk)
+                    .exclude(estado__in=["PAG", "ANU"])
+                    .first()
+                )
+                if factura:
+                    from apps.finance.services.facturacion_service import FacturacionService
+
+                    FacturacionService.actualizar_factura_desde_venta(factura)
+            except Exception as e_factura:
+                logger.error(f"Error sincronizando factura desde venta {venta.pk}: {e_factura}")
+
             # 7. Evaluación de puntos (Si aplica)
-            if hasattr(venta, '_evaluar_otorgar_puntos'):
-                 venta._evaluar_otorgar_puntos(contexto="finance_service")
-                 
+            if hasattr(venta, "_evaluar_otorgar_puntos"):
+                venta._evaluar_otorgar_puntos(contexto="finance_service")
+
             return True
         except Venta.DoesNotExist:
             logger.error(f"Venta {venta_id} no encontrada para recalcular.")

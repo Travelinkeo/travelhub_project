@@ -4,14 +4,24 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
+    # Edited 2026-06-07: wrap in SeparateDatabaseAndState with
+    # database_operations=[] because the tables named in the original
+    # AlterModelTable(table=None) operations were already renamed
+    # manually (or via pg_dump --schema-only + migrate --fake) in
+    # dev/prod. State-only update is safe and idempotent in fresh-DB.
 
     dependencies = [
         ("core", "0023_alter_auditlog_table"),
     ]
 
     operations = [
-        migrations.AlterModelTable(
-            name="magiclinktoken",
-            table=None,
+        migrations.SeparateDatabaseAndState(
+            database_operations=[],
+            state_operations=[
+                migrations.AlterModelTable(
+                    name="magiclinktoken",
+                    table=None,
+                ),
+            ],
         ),
     ]

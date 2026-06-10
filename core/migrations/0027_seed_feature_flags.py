@@ -3,13 +3,37 @@
 from django.db import migrations
 
 DEFAULT_FLAGS = [
-    {"nombre": "whatsapp_automation", "enabled": True, "description": "Notificaciones automaticas por WhatsApp"},
+    {
+        "nombre": "whatsapp_automation",
+        "enabled": True,
+        "description": "Notificaciones automaticas por WhatsApp",
+    },
     {"nombre": "ai_parser_v2", "enabled": True, "description": "Parser universal con Gemini (v2)"},
-    {"nombre": "email_monitor", "enabled": True, "description": "Monitoreo IMAP de correos de boletos"},
-    {"nombre": "marketing_ai", "enabled": True, "description": "Generacion IA de contenido marketing"},
-    {"nombre": "magic_quoter", "enabled": True, "description": "Cotizador magico con IA (GDS→Cotizacion)"},
-    {"nombre": "migration_checker", "enabled": True, "description": "Verificacion de requisitos migratorios"},
-    {"nombre": "hotel_engine", "enabled": True, "description": "Motor de busqueda y cotizacion de hoteles"},
+    {
+        "nombre": "email_monitor",
+        "enabled": True,
+        "description": "Monitoreo IMAP de correos de boletos",
+    },
+    {
+        "nombre": "marketing_ai",
+        "enabled": True,
+        "description": "Generacion IA de contenido marketing",
+    },
+    {
+        "nombre": "magic_quoter",
+        "enabled": True,
+        "description": "Cotizador magico con IA (GDS→Cotizacion)",
+    },
+    {
+        "nombre": "migration_checker",
+        "enabled": True,
+        "description": "Verificacion de requisitos migratorios",
+    },
+    {
+        "nombre": "hotel_engine",
+        "enabled": True,
+        "description": "Motor de busqueda y cotizacion de hoteles",
+    },
     {"nombre": "beta_features", "enabled": False, "description": "Funcionalidades experimentales"},
 ]
 
@@ -35,7 +59,6 @@ def remove_feature_flags(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("core", "0026_featureflag"),
     ]

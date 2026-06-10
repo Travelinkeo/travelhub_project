@@ -1,30 +1,32 @@
 import datetime
 import logging
 
-from django.conf import settings
 from django.utils import timezone
 
 from apps.bookings.models import BoletoImportado, Venta
 
 logger = logging.getLogger(__name__)
 
+
 class LinkeoService:
     """
     Service for handling AI-driven chat interactions ("Linkeo").
     Uses Gemini for intent classification and entity extraction.
     """
-    
+
     INTENTS = {
-        'QUERY_SALES': ['ventas', 'cuanto vendi', 'cierre', 'total del dia'],
-        'CHECK_TICKET': ['estatus boleto', 'como va el boleto', 'revisar boleto'],
-        'GENERAL': ['hola', 'gracias', 'adios']
+        "QUERY_SALES": ["ventas", "cuanto vendi", "cierre", "total del dia"],
+        "CHECK_TICKET": ["estatus boleto", "como va el boleto", "revisar boleto"],
+        "GENERAL": ["hola", "gracias", "adios"],
     }
 
     @staticmethod
     def _get_gemini_model(agency=None):
         try:
             from google import genai
+
             from apps.automation.services.ai_engine import get_gemini_api_key
+
             api_key = get_gemini_api_key(agency)
             if not api_key:
                 logger.warning("Gemini API Key not found.")
@@ -44,17 +46,17 @@ class LinkeoService:
         # Wait, I cannot omit code in REPLACE_FILE_CONTENT unless I target specific lines.
         # I am targeting _get_gemini_model and _handle_ai_chat mainly.
         # Let's target _get_gemini_model first.
-        pass 
-    
+        pass
+
     # Actually, I'll do two separate replacements or one large block if contiguous.
     # They are not contiguous. I'll make two edits using AllowMultiple=True? No, tool says "Use this tool ONLY when you are making a SINGLE CONTIGUOUS block".
     # I should use multi_replace_file_content.
     pass
 
-# Switching strategy: Use multi_replace
+    # Switching strategy: Use multi_replace
 
     @classmethod
-    def process_message(cls, text: str, user_id: int = None, agencia = None) -> str:
+    def process_message(cls, text: str, user_id: int = None, agencia=None) -> str:
         """
         Main entry point. Receives text, returns a response string.
         Args:
@@ -70,11 +72,11 @@ class LinkeoService:
         logger.info(f"Linkeo Intent Detected: {intent} for text: '{text}' (Agencia: {agencia})")
 
         # 2. Execution
-        if intent == 'QUERY_SALES':
+        if intent == "QUERY_SALES":
             return cls._handle_sales_query(text, agencia)
-        elif intent == 'CHECK_TICKET':
+        elif intent == "CHECK_TICKET":
             return cls._handle_ticket_query(text, agencia)
-        elif intent == 'GENERAL':
+        elif intent == "GENERAL":
             return cls._handle_general_chat(text)
         else:
             # Fallback to AI Chat if keywords fail
@@ -86,20 +88,22 @@ class LinkeoService:
         Simple keyword matching to save API tokens for common tasks.
         """
         text_lower = text.lower()
-        
+
         # Sales Keywords
-        if any(k in text_lower for k in ['venta', 'vendí', 'vendido', 'cierre', 'facturado']):
-            return 'QUERY_SALES'
-        
+        if any(k in text_lower for k in ["venta", "vendí", "vendido", "cierre", "facturado"]):
+            return "QUERY_SALES"
+
         # Ticket Keywords (Detect PNR or Ticket Number patterns)
-        if any(k in text_lower for k in ['boleto', 'ticket', 'pnr', 'reserva']) or cls._extract_pnr(text):
-            return 'CHECK_TICKET'
-            
+        if any(k in text_lower for k in ["boleto", "ticket", "pnr", "reserva"]) or cls._extract_pnr(
+            text
+        ):
+            return "CHECK_TICKET"
+
         # Greetings
-        if any(k in text_lower for k in ['hola', 'buenos dias', 'buenas', 'gracias']):
-            return 'GENERAL'
-            
-        return 'AI_CHAT' # Let Gemini handle it
+        if any(k in text_lower for k in ["hola", "buenos dias", "buenas", "gracias"]):
+            return "GENERAL"
+
+        return "AI_CHAT"  # Let Gemini handle it
 
     @classmethod
     def _handle_sales_query(cls, text: str, agencia=None) -> str:
@@ -110,13 +114,15 @@ class LinkeoService:
             return "⚠️ Error: No se ha identificado tu agencia. Contacta a soporte."
         now = timezone.now()
         start_date = now.replace(hour=0, minute=0, second=0, microsecond=0)
-        
+
         # Simple date logic (can be enhanced with AI later)
         periodo = "hoy"
         if "ayer" in text.lower():
             start_date = start_date - datetime.timedelta(days=1)
             end_date = start_date + datetime.timedelta(days=1)
-            ventas = Venta.objects.filter(agencia=agencia, fecha_venta__range=(start_date, end_date))
+            ventas = Venta.objects.filter(
+                agencia=agencia, fecha_venta__range=(start_date, end_date)
+            )
             periodo = "ayer"
         elif "mes" in text.lower():
             start_date = start_date.replace(day=1)
@@ -126,8 +132,8 @@ class LinkeoService:
             # Default Today
             ventas = Venta.objects.filter(agencia=agencia, fecha_venta__gte=start_date)
 
-        total_usd = sum(v.total_venta for v in ventas if v.moneda and v.moneda.codigo_iso == 'USD')
-        total_ves = sum(v.total_venta for v in ventas if v.moneda and v.moneda.codigo_iso == 'VES')
+        total_usd = sum(v.total_venta for v in ventas if v.moneda and v.moneda.codigo_iso == "USD")
+        total_ves = sum(v.total_venta for v in ventas if v.moneda and v.moneda.codigo_iso == "VES")
         count = ventas.count()
 
         return (
@@ -137,7 +143,7 @@ class LinkeoService:
             f"🇻🇪 Total VES: Bs {total_ves:,.2f}\n\n"
             f"<i>Linkeo AI</i> 🤖"
         )
-    
+
     @classmethod
     def _handle_ticket_query(cls, text: str, agencia=None) -> str:
         if not agencia:
@@ -145,19 +151,22 @@ class LinkeoService:
 
         # Extract ID, PNR or Ticket Number
         import re
+
         # Try to find a numeric ticket ID (simple integer)
-        id_match = re.search(r'\b(\d{1,5})\b', text)
-        pnr_match = re.search(r'\b([A-Z0-9]{6})\b', text.upper())
-        
+        id_match = re.search(r"\b(\d{1,5})\b", text)
+        pnr_match = re.search(r"\b([A-Z0-9]{6})\b", text.upper())
+
         ticket = None
         if id_match:
             try:
                 ticket = BoletoImportado.objects.get(pk=id_match.group(1), agencia=agencia)
             except BoletoImportado.DoesNotExist:
                 pass
-        
+
         if not ticket and pnr_match:
-            ticket = BoletoImportado.objects.filter(localizador_pnr=pnr_match.group(1), agencia=agencia).last()
+            ticket = BoletoImportado.objects.filter(
+                localizador_pnr=pnr_match.group(1), agencia=agencia
+            ).last()
 
         if ticket:
             estado = ticket.get_estado_parseo_display()
@@ -184,35 +193,34 @@ class LinkeoService:
         model = cls._get_gemini_model(agencia)
         if not model:
             return "Lo siento, mi cerebro de IA no está conectado (Falta API Key)."
-        
+
         try:
             # 1. Buscar contexto relevante en la Wiki
             from django.db.models import Q
+            from django.utils.module_loading import import_string
 
-            from core.models.wiki import WikiArticulo
-            
+            WikiArticulo = import_string("core.models.wiki.WikiArticulo")
+
             contexto_wiki = ""
             keywords = text.upper().split()
-            
+
             WikiArticulo.objects.filter(
-                Q(tags__overlap=keywords) |
-                Q(titulo__icontains=keywords[0])
-            ).filter(activo=True)[:2] 
-            
-            # Fallback para SQLite/Others si overlap falla o si la lista keywords es compleja
-            # Hacemos una búsqueda iterativa segura
+                Q(tags__overlap=keywords) | Q(titulo__icontains=keywords[0])
+            ).filter(activo=True)[:2]
+
+            # Búsqueda iterativa segura por si overlap falla
             relevant_articles = []
             for art in WikiArticulo.objects.filter(activo=True):
                 # Check si algún tag del artículo está en el texto del usuario
                 # Ej: Tag 'KIU' está en "Como cotizo en KIU?"
                 if any(tag.upper() in text.upper() for tag in art.tags):
-                   relevant_articles.append(art)
-            
+                    relevant_articles.append(art)
+
             if relevant_articles:
                 contexto_wiki += "\n\n📚 **INFORMACIÓN INTERNA (Base de Conocimiento):**\n"
-                for art in relevant_articles[:2]: # Max 2 articulos para no saturar token limit
-                    contexto_wiki += f"--- {art.titulo} ---\n{art.contenido[:2000]}\n" # Truncar a 2000 chars por si acaso
-            
+                for art in relevant_articles[:2]:  # Max 2 articulos para no saturar token limit
+                    contexto_wiki += f"--- {art.titulo} ---\n{art.contenido[:2000]}\n"  # Truncar a 2000 chars por si acaso
+
             # 2. Construir Prompt
             prompt = f"""
             Eres Linkeo, el asistente experto de TravelHub.
@@ -230,24 +238,26 @@ class LinkeoService:
             - Si es sobre GDS (Amadeus, Sabre, KIU), da el ejemplo de formato.
             - Si no sabes, dilo amablemente.
             """
-            
+
             # 3. Generar
-            response = model.models.generate_content(
-                model='gemini-2.0-flash',
-                contents=prompt
-            )
+            response = model.models.generate_content(model="gemini-2.0-flash", contents=prompt)
             return response.text
-            
+
         except Exception as e:
             error_str = str(e)
-            if "429" in error_str or "quota" in error_str.lower() or "ResourceExhausted" in error_str:
+            if (
+                "429" in error_str
+                or "quota" in error_str.lower()
+                or "ResourceExhausted" in error_str
+            ):
                 logger.warning(f"Gemini Ration Limit Reached: {e}")
                 return "⏳ Mi cerebro está un poco saturado (Límite de cuota alcanzado). Por favor espera 30 segundos y pregúntame de nuevo."
-            
+
             logger.error(f"Gemini Error processing '{text}': {e}", exc_info=True)
             return f"😓 Tuve un error de conexión con mi cerebro artificial. ({str(e)})"
 
     @staticmethod
     def _extract_pnr(text):
         import re
-        return re.search(r'\b[A-Z0-9]{6}\b', text)
+
+        return re.search(r"\b[A-Z0-9]{6}\b", text)

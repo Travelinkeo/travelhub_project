@@ -172,11 +172,6 @@
                         </td>
                         <td class="px-6 py-5">
                             <div class="flex items-center justify-end gap-2">
-                                <a href="{% url 'core:generar_voucher' v.pk %}" target="_blank"
-                                    class="size-8 flex items-center justify-center text-text-muted hover:text-primary hover:bg-primary/10 rounded-lg transition-all border border-transparent hover:border-primary/20"
-                                    title="Ver Voucher">
-                                    <span class="material-symbols-outlined text-[20px]">description</span>
-                                </a>
                                 {% if not v.factura %}
                                 <form action="{% url 'core:venta_facturar' v.pk %}" method="post" class="inline">
                                     {% csrf_token %}
@@ -200,6 +195,11 @@
                                     class="size-8 flex items-center justify-center text-text-muted hover:text-blue-500 hover:bg-blue-500/10 rounded-lg transition-all border border-transparent hover:border-blue-500/20"
                                     title="Editar">
                                     <span class="material-symbols-outlined text-[20px]">edit</span>
+                                </a>
+                                <a href="{% url 'bookings:venta_delete' v.pk %}"
+                                    class="size-8 flex items-center justify-center text-text-muted hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all border border-transparent hover:border-red-500/20"
+                                    title="Eliminar">
+                                    <span class="material-symbols-outlined text-[20px]">delete</span>
                                 </a>
                             </div>
                         </td>

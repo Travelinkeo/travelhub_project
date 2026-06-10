@@ -1,4 +1,5 @@
 from django.urls import path
+from django.utils.module_loading import import_string
 
 from apps.bookings.views.boleto_views import (
     BoletoAuditAPIView,
@@ -6,64 +7,138 @@ from apps.bookings.views.boleto_views import (
     BoletoMassActionAPIView,
     BoletoRetryParseAPIView,
     BoletoUploadAPIView,
-    VentaDoubleInvoiceAPIView,
 )
 from apps.bookings.views.dashboard_boletos import actualizar_item_boleto
-from apps.bookings.views.ventas_views import eliminar_venta
-from core.views import erp_views
-from core.views.boleto_api_views import (
-    boletos_sin_venta,
-    buscar,
-    crear_venta_desde_boleto,
-    detalle_boleto,
-    reintentar_parseo,
-    reporte_comisiones,
-    solicitar_anulacion,
-)
-from core.views.boleto_api_views import (
-    dashboard_stats as boletos_dashboard_stats,
-)
-from core.views.boleto_api_views import (
-    eliminar_boleto as eliminar_boleto_api,
-)
-from core.views.upload import DesasociarVentaView, ReviewBoletoView, UploadBoletoView
-from core.views.upload import eliminar_boleto as eliminar_boleto_upload
+
+
+def dynamic_view(view_path):
+    def lazy_view_handler(request, *args, **kwargs):
+        view_class = import_string(view_path)
+        return view_class.as_view()(request, *args, **kwargs)
+
+    return lazy_view_handler
+
+
+def dynamic_fb_view(view_path):
+    def lazy_view_handler(request, *args, **kwargs):
+        view_fn = import_string(view_path)
+        return view_fn(request, *args, **kwargs)
+
+    return lazy_view_handler
+
 
 urlpatterns = [
     # Carga de Boletos y IA
-    path('api/boletos/upload/', BoletoUploadAPIView.as_view(), name='api_boleto_upload'),
-    path('api/boletos/<int:pk>/delete/', BoletoDeleteAPIView.as_view(), name='api_boleto_delete'),
-    path('api/boletos/mass-action/', BoletoMassActionAPIView.as_view(), name='api_boletos_mass_action'),
-    path('api/boletos/<int:pk>/retry/', BoletoRetryParseAPIView.as_view(), name='api_boleto_retry'),
-    path('api/boletos/audit/', BoletoAuditAPIView.as_view(), name='api_boleto_audit'),
-    path('api/ventas/<int:pk>/double-invoice/', VentaDoubleInvoiceAPIView.as_view(), name='api_venta_double_invoice'),
-    
+    path("api/boletos/upload/", BoletoUploadAPIView.as_view(), name="api_boleto_upload"),
+    path("api/boletos/<int:pk>/delete/", BoletoDeleteAPIView.as_view(), name="api_boleto_delete"),
+    path(
+        "api/boletos/mass-action/",
+        BoletoMassActionAPIView.as_view(),
+        name="api_boletos_mass_action",
+    ),
+    path("api/boletos/<int:pk>/retry/", BoletoRetryParseAPIView.as_view(), name="api_boleto_retry"),
+    path("api/boletos/audit/", BoletoAuditAPIView.as_view(), name="api_boleto_audit"),
     # UI Vistas Clásicas de Boletos
-    path('upload/boleto/', UploadBoletoView.as_view(), name='upload_boleto'),
-    path('upload/boleto/<int:pk>/revisar/', ReviewBoletoView.as_view(), name='revisar_boleto'),
-    path('upload/boleto/<int:pk>/desasociar-venta/', DesasociarVentaView.as_view(), name='desasociar_venta'),
-    path('upload/boleto/<int:pk>/eliminar-fisicamente/', eliminar_boleto_upload, name='eliminar_boleto_hard'),
-    
+    path(
+        "upload/boleto/", dynamic_view("core.views.upload.UploadBoletoView"), name="upload_boleto"
+    ),
+    path(
+        "upload/boleto/<int:pk>/revisar/",
+        dynamic_view("core.views.upload.ReviewBoletoView"),
+        name="revisar_boleto",
+    ),
+    path(
+        "upload/boleto/<int:pk>/desasociar-venta/",
+        dynamic_view("core.views.upload.DesasociarVentaView"),
+        name="desasociar_venta",
+    ),
+    path(
+        "upload/boleto/<int:pk>/eliminar-fisicamente/",
+        dynamic_fb_view("core.views.upload.eliminar_boleto"),
+        name="eliminar_boleto_hard",
+    ),
     # Ventas
-
     # ERP Boletos Dashboard
-    path('dashboard/erp/boletos/', erp_views.DashboardBoletosView.as_view(), name='boletos_dashboard'),
-    path('dashboard/erp/boletos/buscar/', erp_views.BoletosBusquedaView.as_view(), name='boletos_busqueda'),
-    path('dashboard/erp/boletos/reportes/', erp_views.BoletosReportesView.as_view(), name='boletos_reportes'),
-    path('dashboard/erp/boletos/reportes/exportar/', erp_views.ExportarBoletosExcelView.as_view(), name='boletos_reportes_exportar'),
-    path('dashboard/erp/boletos/anulaciones/', erp_views.BoletosAnulacionesView.as_view(), name='boletos_anulaciones'),
-    path('dashboard/erp/boletos/importar/', erp_views.BoletosImportarView.as_view(), name='boletos_importar'),
-    path('dashboard/erp/boletos/manual/', erp_views.BoletosManualView.as_view(), name='boletos_manual'),
-    
+    path(
+        "dashboard/erp/boletos/",
+        dynamic_view("core.views.erp_views.DashboardBoletosView"),
+        name="boletos_dashboard",
+    ),
+    path(
+        "dashboard/erp/boletos/buscar/",
+        dynamic_view("core.views.erp_views.BoletosBusquedaView"),
+        name="boletos_busqueda",
+    ),
+    path(
+        "dashboard/erp/boletos/reportes/",
+        dynamic_view("core.views.erp_views.BoletosReportesView"),
+        name="boletos_reportes",
+    ),
+    path(
+        "dashboard/erp/boletos/reportes/exportar/",
+        dynamic_view("core.views.erp_views.ExportarBoletosExcelView"),
+        name="boletos_reportes_exportar",
+    ),
+    path(
+        "dashboard/erp/boletos/anulaciones/",
+        dynamic_view("core.views.erp_views.BoletosAnulacionesView"),
+        name="boletos_anulaciones",
+    ),
+    path(
+        "dashboard/erp/boletos/importar/",
+        dynamic_view("core.views.erp_views.BoletosImportarView"),
+        name="boletos_importar",
+    ),
+    path(
+        "dashboard/erp/boletos/manual/",
+        dynamic_view("core.views.erp_views.BoletosManualView"),
+        name="boletos_manual",
+    ),
     # API Boletos
-    path('api/boletos/actualizar-item/', actualizar_item_boleto, name='actualizar_item_boleto'),
-    path('api/boletos/sin-venta/', boletos_sin_venta, name='boletos_sin_venta'),
-    path('api/boletos/<int:boleto_id>/reintentar-parseo/', reintentar_parseo, name='reintentar_parseo'),
-    path('api/boletos/<int:boleto_id>/crear-venta/', crear_venta_desde_boleto, name='crear_venta_desde_boleto'),
-    path('api/boletos/dashboard-stats/', boletos_dashboard_stats, name='boletos_dashboard_stats'),
-    path('api/boletos/buscar/', buscar, name='boletos_buscar'),
-    path('api/boletos/reporte-comisiones/', reporte_comisiones, name='boletos_reporte_comisiones'),
-    path('api/boletos/solicitar-anulacion/', solicitar_anulacion, name='boletos_solicitar_anulacion'),
-    path('api/boletos/<int:boleto_id>/detalle/', detalle_boleto, name='boletos_detalle'),
-    path('api/boletos/<int:boleto_id>/eliminar/', eliminar_boleto_api, name='boletos_eliminar'),
+    path("api/boletos/actualizar-item/", actualizar_item_boleto, name="actualizar_item_boleto"),
+    path(
+        "api/boletos/sin-venta/",
+        dynamic_fb_view("core.views.boleto_api_views.boletos_sin_venta"),
+        name="boletos_sin_venta",
+    ),
+    path(
+        "api/boletos/<int:boleto_id>/reintentar-parseo/",
+        dynamic_fb_view("core.views.boleto_api_views.reintentar_parseo"),
+        name="reintentar_parseo",
+    ),
+    path(
+        "api/boletos/<int:boleto_id>/crear-venta/",
+        dynamic_fb_view("core.views.boleto_api_views.crear_venta_desde_boleto"),
+        name="crear_venta_desde_boleto",
+    ),
+    path(
+        "api/boletos/dashboard-stats/",
+        dynamic_fb_view("core.views.boleto_api_views.dashboard_stats"),
+        name="boletos_dashboard_stats",
+    ),
+    path(
+        "api/boletos/buscar/",
+        dynamic_fb_view("core.views.boleto_api_views.buscar"),
+        name="boletos_buscar",
+    ),
+    path(
+        "api/boletos/reporte-comisiones/",
+        dynamic_fb_view("core.views.boleto_api_views.reporte_comisiones"),
+        name="boletos_reporte_comisiones",
+    ),
+    path(
+        "api/boletos/solicitar-anulacion/",
+        dynamic_fb_view("core.views.boleto_api_views.solicitar_anulacion"),
+        name="boletos_solicitar_anulacion",
+    ),
+    path(
+        "api/boletos/<int:boleto_id>/detalle/",
+        dynamic_fb_view("core.views.boleto_api_views.detalle_boleto"),
+        name="boletos_detalle",
+    ),
+    path(
+        "api/boletos/<int:boleto_id>/eliminar/",
+        dynamic_fb_view("core.views.boleto_api_views.eliminar_boleto"),
+        name="boletos_eliminar",
+    ),
 ]

@@ -118,7 +118,7 @@
 
         <section class="hero">
             <div class="hero-label">Travel Document for</div>
-            <h1 class="passenger-name">{{ venta.cliente.get_nombre_completo|default:venta.cliente.nombre|upper }}</h1>
+            <h1 class="passenger-name">{{ venta.cliente.get_nombre_completo|upper }}</h1>
         </section>
 
         <div class="meta-grid">

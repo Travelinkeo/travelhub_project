@@ -3,12 +3,20 @@ import logging
 from django.core.exceptions import ValidationError
 from django.db import transaction
 
-from apps.bookings.models import Venta
+
+def __getattr__(name):
+    if name == "Venta":
+        from django.apps import apps
+
+        return apps.get_model("bookings", "Venta")
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
 
 # Note: Adding placeholders for external providers as suggested in the manifesto
-# from apps.automation.services.ticket_parser_service import ... 
+# from apps.automation.services.ticket_parser_service import ...
 
 logger = logging.getLogger(__name__)
+
 
 class TransactionService:
     """
@@ -41,10 +49,12 @@ class TransactionService:
                 # Si se proporciona una función de emisión (ej. KIU/Sabre), se ejecuta.
                 if funcion_emision_externa:
                     resultado_externo = funcion_emision_externa(venta)
-                    
-                    if not resultado_externo.get('success'):
+
+                    if not resultado_externo.get("success"):
                         # Si el proveedor falla, lanzamos excepción para disparar el ROLLBACK
-                        error_msg = resultado_externo.get('error', 'Error desconocido en proveedor externo')
+                        error_msg = resultado_externo.get(
+                            "error", "Error desconocido en proveedor externo"
+                        )
                         raise Exception(f"Falla en proveedor externo: {error_msg}")
 
                 # 4. Confirmación del Objetivo

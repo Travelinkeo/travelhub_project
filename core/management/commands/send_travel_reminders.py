@@ -1,4 +1,5 @@
 import json
+import logging
 from datetime import timedelta
 
 from django.conf import settings
@@ -9,7 +10,10 @@ from django.utils import timezone
 from apps.automation.services.ai_engine import generate_content
 from apps.bookings.models import Venta
 
+logger = logging.getLogger(__name__)
+
 # --- Funciones Auxiliares (Simuladas y Reales) ---
+
 
 def _get_weather_forecast(city_name: str) -> dict:
     """
@@ -17,22 +21,27 @@ def _get_weather_forecast(city_name: str) -> dict:
     En una implementación real, aquí usarías una librería como `requests`
     para llamar a un servicio como OpenWeatherMap, WeatherAPI, etc.
     """
-    print(f"Simulando obtención de clima para: {city_name}")
+    logger.debug(f"Simulando obtención de clima para: {city_name}")
     # Datos de ejemplo para la simulación
     if "cancún" in city_name.lower():
-        return {"temp_celsius": 28, "condition": "Parcialmente nublado con probabilidad de chubascos", "icon": "🌦️"}
+        return {
+            "temp_celsius": 28,
+            "condition": "Parcialmente nublado con probabilidad de chubascos",
+            "icon": "🌦️",
+        }
     elif "madrid" in city_name.lower():
         return {"temp_celsius": 32, "condition": "Despejado y soleado", "icon": "☀️"}
     else:
         return {"temp_celsius": 25, "condition": "Agradable", "icon": "😊"}
+
 
 def _generate_reminder_email_content(venta: Venta, weather_forecast: dict) -> dict:
     """
     Prepara y envía el prompt a Gemini para generar el contenido del email.
     """
     cliente = venta.cliente
-    primer_vuelo = venta.segmentos_vuelo.order_by('fecha_salida').first()
-    
+    primer_vuelo = venta.segmentos_vuelo.order_by("fecha_salida").first()
+
     if not primer_vuelo:
         return None
 
@@ -88,16 +97,20 @@ def _generate_reminder_email_content(venta: Venta, weather_forecast: dict) -> di
             response_text = response_text.strip()[7:-3].strip()
         return json.loads(response_text)
     except (json.JSONDecodeError, Exception) as e:
-        print(f"Error al generar contenido con Gemini: {e}")
+        logger.error(f"Error al generar contenido con Gemini: {e}")
         return None
+
 
 # --- Clase del Comando de Django ---
 
+
 class Command(BaseCommand):
-    help = 'Envía recordatorios de viaje a clientes con viajes próximos en los siguientes 3 días.'
+    help = "Envía recordatorios de viaje a clientes con viajes próximos en los siguientes 3 días."
 
     def handle(self, *args, **options):
-        self.stdout.write(self.style.SUCCESS("Iniciando tarea de envío de recordatorios de viaje..."))
+        self.stdout.write(
+            self.style.SUCCESS("Iniciando tarea de envío de recordatorios de viaje...")
+        )
 
         # 1. Obtener todas las ventas cuyo viaje comience en los próximos 3 días
         today = timezone.now()
@@ -106,7 +119,7 @@ class Command(BaseCommand):
         # Buscamos ventas confirmadas que tengan al menos un segmento de vuelo en la ventana de 3 días
         upcoming_ventas = Venta.objects.filter(
             estado=Venta.EstadoVenta.CONFIRMADA,
-            segmentos_vuelo__fecha_salida__range=(today, three_days_from_now)
+            segmentos_vuelo__fecha_salida__range=(today, three_days_from_now),
         ).distinct()
 
         if not upcoming_ventas.exists():
@@ -119,10 +132,14 @@ class Command(BaseCommand):
         for venta in upcoming_ventas:
             self.stdout.write(f"Procesando recordatorio para la venta PNR: {venta.localizador}...")
             cliente = venta.cliente
-            primer_vuelo = venta.segmentos_vuelo.order_by('fecha_salida').first()
+            primer_vuelo = venta.segmentos_vuelo.order_by("fecha_salida").first()
 
             if not primer_vuelo:
-                self.stderr.write(self.style.WARNING(f"  - La venta {venta.localizador} no tiene segmentos de vuelo. Saltando."))
+                self.stderr.write(
+                    self.style.WARNING(
+                        f"  - La venta {venta.localizador} no tiene segmentos de vuelo. Saltando."
+                    )
+                )
                 continue
 
             # 3. Obtener el pronóstico del tiempo (simulado)
@@ -133,20 +150,30 @@ class Command(BaseCommand):
             email_content = _generate_reminder_email_content(venta, weather_data)
 
             if not email_content:
-                self.stderr.write(self.style.ERROR(f"  - No se pudo generar el contenido del email para {venta.localizador}."))
+                self.stderr.write(
+                    self.style.ERROR(
+                        f"  - No se pudo generar el contenido del email para {venta.localizador}."
+                    )
+                )
                 continue
 
             # 5. Enviar el email (implementación real)
             try:
                 send_mail(
-                    subject=email_content['subject'],
-                    message=email_content['body'],
+                    subject=email_content["subject"],
+                    message=email_content["body"],
                     from_email=settings.DEFAULT_FROM_EMAIL,
                     recipient_list=[cliente.email],
                     fail_silently=False,
                 )
-                self.stdout.write(self.style.SUCCESS(f"  - Email de recordatorio enviado a {cliente.email} para la venta {venta.localizador}."))
+                self.stdout.write(
+                    self.style.SUCCESS(
+                        f"  - Email de recordatorio enviado a {cliente.email} para la venta {venta.localizador}."
+                    )
+                )
             except Exception as e:
-                self.stderr.write(self.style.ERROR(f"  - Error al enviar email para {venta.localizador}: {e}"))
+                self.stderr.write(
+                    self.style.ERROR(f"  - Error al enviar email para {venta.localizador}: {e}")
+                )
 
         self.stdout.write(self.style.SUCCESS("Tarea de envío de recordatorios finalizada."))

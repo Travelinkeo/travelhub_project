@@ -11,6 +11,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from apps.bookings.models import BoletoImportado, ItemVenta, SolicitudAnulacion, Venta
+from core.auth_helpers import internal_auth
 from core.security import (
     agency_role_required,
     filter_queryset_by_tenant,
@@ -21,22 +22,43 @@ from core.serializers import BoletoImportadoSerializer
 
 logger = logging.getLogger(__name__)
 
-@extend_schema(exclude=True)
-@api_view(['GET'])
+
+@extend_schema(
+    description="Lista de boletos parseados sin venta asociada. Filtrado por agencia automáticamente.",
+    responses={200: BoletoImportadoSerializer(many=True)},
+    tags=["Boletos"],
+)
+@api_view(["GET"])
+@internal_auth
 @permission_classes([IsAuthenticated])
 def boletos_sin_venta(request):
     """Lista de boletos parseados sin venta asociada. 🔐 Filtrado por agencia."""
     agencia = get_agencia_from_request(request)
-    boletos = BoletoImportado.objects.filter(
-        estado_parseo='COM',
-        venta_asociada__isnull=True
-    )
-    boletos = filter_queryset_by_tenant(boletos, agencia).order_by('-fecha_subida')
+    boletos = BoletoImportado.objects.filter(estado_parseo="COM", venta_asociada__isnull=True)
+    boletos = filter_queryset_by_tenant(boletos, agencia).order_by("-fecha_subida")
     serializer = BoletoImportadoSerializer(boletos, many=True)
     return Response(serializer.data)
 
-@extend_schema(exclude=True)
-@api_view(['POST'])
+
+@extend_schema(
+    description="Reintentar parseo de un boleto que falló anteriormente. Usa IA con fallback a Regex.",
+    parameters=[
+        {
+            "name": "boleto_id",
+            "in": "path",
+            "required": True,
+            "schema": {"type": "integer"},
+            "description": "ID del boleto a re-parsear",
+        },
+    ],
+    responses={
+        200: {"description": "Parseo reiniciado exitosamente"},
+        404: {"description": "Boleto no encontrado"},
+    },
+    tags=["Boletos"],
+)
+@api_view(["POST"])
+@internal_auth
 @permission_classes([IsAuthenticated])
 def reintentar_parseo(request, boleto_id):
     """Reintentar parseo de un boleto. 🔐 Candado de agencia."""
@@ -46,129 +68,234 @@ def reintentar_parseo(request, boleto_id):
     from apps.common.utils.celery_utils import safe_delay
     from core.tasks import parsear_boleto_individual
 
-    boleto.estado_parseo = 'QUE'
+    boleto.estado_parseo = "QUE"
     boleto.log_parseo = "Reintentando parseo manualmente..."
     boleto.save()
-    
-    safe_delay(parsear_boleto_individual, boleto.pk, ignore_manual=True, bypass_cache=True)
-    
-    return Response({'status': 'Parseo reiniciado', 'boleto_id': boleto.id_boleto_importado})
 
-@extend_schema(exclude=True)
-@api_view(['POST'])
+    safe_delay(parsear_boleto_individual, boleto.pk, ignore_manual=True, bypass_cache=True)
+
+    return Response({"status": "Parseo reiniciado", "boleto_id": boleto.id_boleto_importado})
+
+
+@extend_schema(
+    description="Crear una venta automáticamente desde un boleto parseado. Genera Venta, ItemVenta y asocia el boleto.",
+    parameters=[
+        {
+            "name": "boleto_id",
+            "in": "path",
+            "required": True,
+            "schema": {"type": "integer"},
+            "description": "ID del boleto parseado",
+        },
+    ],
+    request={"application/json": {"schema": {"type": "object", "properties": {}}}},
+    responses={
+        201: {"description": "Venta creada exitosamente"},
+        400: {"description": "Boleto no parseado o ya tiene venta asociada"},
+    },
+    tags=["Boletos"],
+)
+@api_view(["POST"])
+@internal_auth
 @permission_classes([IsAuthenticated])
 def crear_venta_desde_boleto(request, boleto_id):
     """Crear venta automáticamente desde un boleto parseado. 🔐 Candado de agencia."""
     agencia = get_agencia_from_request(request)
     boleto = get_object_tenant_or_404(BoletoImportado, agencia, pk=boleto_id)
 
-    if boleto.estado_parseo != 'COM':
-        return Response({'error': 'El boleto debe estar parseado correctamente'}, status=status.HTTP_400_BAD_REQUEST)
-    
+    if boleto.estado_parseo != "COM":
+        return Response(
+            {"error": "El boleto debe estar parseado correctamente"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
     if boleto.venta_asociada:
-        return Response({'error': 'El boleto ya tiene una venta asociada'}, status=status.HTTP_400_BAD_REQUEST)
-    
+        return Response(
+            {"error": "El boleto ya tiene una venta asociada"}, status=status.HTTP_400_BAD_REQUEST
+        )
+
     from apps.bookings.models import ProductoServicio
     from apps.finance.models.currencies import Moneda
-    moneda_usd, _ = Moneda.objects.get_or_create(codigo_iso='USD', defaults={'nombre': 'Dólar Estadounidense'})
-    
+
+    moneda_usd, _ = Moneda.objects.get_or_create(
+        codigo_iso="USD", defaults={"nombre": "Dólar Estadounidense"}
+    )
+
     venta = Venta.objects.create(
         moneda=moneda_usd,
         subtotal=boleto.tarifa_base or 0,
         impuestos=boleto.impuestos_total_calculado or 0,
         descripcion_general=f"Venta desde Boleto Nro: {boleto.numero_boleto} para {boleto.nombre_pasajero_completo}",
         creado_por=request.user,
-        agencia=boleto.agencia
+        agencia=boleto.agencia,
     )
-    
-    producto_aereo, _ = ProductoServicio.objects.get_or_create(tipo_producto='AIR', defaults={'nombre': 'Boleto Aéreo Genérico'})
-    
+
+    producto_aereo, _ = ProductoServicio.objects.get_or_create(
+        tipo_producto="AIR", defaults={"nombre": "Boleto Aéreo Genérico"}
+    )
+
     ItemVenta.objects.create(
         venta=venta,
         producto_servicio=producto_aereo,
         cantidad=1,
         precio_unitario_venta=boleto.total_boleto or 0,
         descripcion_personalizada=f"Boleto: {boleto.numero_boleto}, Ruta: {boleto.ruta_vuelo.replace('\n', ' ') if boleto.ruta_vuelo else ''}",
-        codigo_reserva_proveedor=boleto.localizador_pnr
+        codigo_reserva_proveedor=boleto.localizador_pnr,
     )
-    
+
     boleto.venta_asociada = venta
     boleto.save()
-    
-    return Response({
-        'status': 'Venta creada exitosamente',
-        'venta_id': venta.id_venta,
-        'localizador': venta.localizador
-    }, status=status.HTTP_201_CREATED)
 
-@extend_schema(exclude=True)
-@api_view(['GET'])
+    return Response(
+        {
+            "status": "Venta creada exitosamente",
+            "venta_id": venta.id_venta,
+            "localizador": venta.localizador,
+        },
+        status=status.HTTP_201_CREATED,
+    )
+
+
+@extend_schema(
+    description="Métricas para el dashboard de boletos: procesados hoy/semana/mes, pendientes, errores y top aerolíneas.",
+    responses={200: {"description": "Métricas del dashboard de boletos"}},
+    tags=["Boletos"],
+)
+@api_view(["GET"])
+@internal_auth
 @permission_classes([IsAuthenticated])
 def dashboard_stats(request):
     """Métricas para el dashboard de boletos"""
     hoy = timezone.now().date()
     inicio_semana = hoy - timedelta(days=hoy.weekday())
     inicio_mes = hoy.replace(day=1)
-    
+
     if request.user.is_superuser:
-        boletos_qs = BoletoImportado.objects.all()
-    elif hasattr(request.user, 'agencias'):
+        boletos_qs = BoletoImportado.objects.select_related("agencia", "venta_asociada").all()
+    elif hasattr(request.user, "agencias"):
         ua = request.user.agencias.filter(activo=True).first()
         if ua:
-            boletos_qs = BoletoImportado.objects.filter(agencia=ua.agencia)
+            boletos_qs = BoletoImportado.objects.select_related("agencia", "venta_asociada").filter(
+                agencia=ua.agencia
+            )
         else:
             boletos_qs = BoletoImportado.objects.none()
     else:
         boletos_qs = BoletoImportado.objects.none()
 
-    procesados_hoy = boletos_qs.filter(fecha_subida__date=hoy, estado_parseo='COM').count()
-    procesados_semana = boletos_qs.filter(fecha_subida__date__gte=inicio_semana, estado_parseo='COM').count()
-    procesados_mes = boletos_qs.filter(fecha_subida__date__gte=inicio_mes, estado_parseo='COM').count()
-    
-    pendientes = boletos_qs.filter(estado_parseo='PEN').count()
-    errores = boletos_qs.filter(estado_parseo='ERR').count()
-    
-    top_aerolineas = list(boletos_qs.filter(
-        fecha_subida__date__gte=inicio_mes,
-        estado_parseo='COM'
-    ).values('aerolinea_emisora').annotate(
-        cantidad=Count('id_boleto_importado')
-    ).order_by('-cantidad')[:5])
-    
-    return Response({
-        'procesados': {'hoy': procesados_hoy, 'semana': procesados_semana, 'mes': procesados_mes},
-        'pendientes': pendientes,
-        'errores': errores,
-        'top_aerolineas': top_aerolineas
-    })
+    procesados_hoy = boletos_qs.filter(fecha_subida__date=hoy, estado_parseo="COM").count()
+    procesados_semana = boletos_qs.filter(
+        fecha_subida__date__gte=inicio_semana, estado_parseo="COM"
+    ).count()
+    procesados_mes = boletos_qs.filter(
+        fecha_subida__date__gte=inicio_mes, estado_parseo="COM"
+    ).count()
 
-@extend_schema(exclude=True)
-@api_view(['GET'])
+    pendientes = boletos_qs.filter(estado_parseo="PEN").count()
+    errores = boletos_qs.filter(estado_parseo="ERR").count()
+
+    top_aerolineas = list(
+        boletos_qs.filter(fecha_subida__date__gte=inicio_mes, estado_parseo="COM")
+        .values("aerolinea_emisora")
+        .annotate(cantidad=Count("id_boleto_importado"))
+        .order_by("-cantidad")[:5]
+    )
+
+    return Response(
+        {
+            "procesados": {
+                "hoy": procesados_hoy,
+                "semana": procesados_semana,
+                "mes": procesados_mes,
+            },
+            "pendientes": pendientes,
+            "errores": errores,
+            "top_aerolineas": top_aerolineas,
+        }
+    )
+
+
+@extend_schema(
+    description="Búsqueda avanzada de boletos por nombre, PNR, origen, destino y fechas.",
+    parameters=[
+        {
+            "name": "nombre",
+            "in": "query",
+            "required": False,
+            "schema": {"type": "string"},
+            "description": "Nombre del pasajero",
+        },
+        {
+            "name": "pnr",
+            "in": "query",
+            "required": False,
+            "schema": {"type": "string"},
+            "description": "Localizador PNR",
+        },
+        {
+            "name": "origen",
+            "in": "query",
+            "required": False,
+            "schema": {"type": "string"},
+            "description": "Origen del vuelo",
+        },
+        {
+            "name": "destino",
+            "in": "query",
+            "required": False,
+            "schema": {"type": "string"},
+            "description": "Destino del vuelo",
+        },
+        {
+            "name": "fecha_inicio",
+            "in": "query",
+            "required": False,
+            "schema": {"type": "string", "format": "date"},
+            "description": "Fecha de inicio",
+        },
+        {
+            "name": "fecha_fin",
+            "in": "query",
+            "required": False,
+            "schema": {"type": "string", "format": "date"},
+            "description": "Fecha de fin",
+        },
+    ],
+    responses={200: BoletoImportadoSerializer(many=True)},
+    tags=["Boletos"],
+)
+@api_view(["GET"])
+@internal_auth
 @permission_classes([IsAuthenticated])
 def buscar(request):
     """Búsqueda avanzada de boletos"""
     if request.user.is_superuser:
-        qs = BoletoImportado.objects.all()
-    elif hasattr(request.user, 'agencias'):
+        qs = BoletoImportado.objects.select_related("agencia", "venta_asociada").all()
+    elif hasattr(request.user, "agencias"):
         ua = request.user.agencias.filter(activo=True).first()
         if ua:
-            # Fix: Or query to include orphan boletos if we want everyone to see them, 
+            # Fix: Or query to include orphan boletos if we want everyone to see them,
             # but usually they belong to an agency. For now, strict filter.
-            qs = BoletoImportado.objects.filter(agencia=ua.agencia)
+            qs = BoletoImportado.objects.select_related("agencia", "venta_asociada").filter(
+                agencia=ua.agencia
+            )
         else:
             return Response([])
     else:
         return Response([])
 
-    nombre = request.GET.get('nombre')
-    pnr = request.GET.get('pnr')
-    origen = request.GET.get('origen')
-    destino = request.GET.get('destino')
-    fecha_inicio = request.GET.get('fecha_inicio')
-    fecha_fin = request.GET.get('fecha_fin')
+    nombre = request.GET.get("nombre")
+    pnr = request.GET.get("pnr")
+    origen = request.GET.get("origen")
+    destino = request.GET.get("destino")
+    fecha_inicio = request.GET.get("fecha_inicio")
+    fecha_fin = request.GET.get("fecha_fin")
 
     if nombre:
-        qs = qs.filter(Q(nombre_pasajero_completo__icontains=nombre) | Q(nombre_pasajero_procesado__icontains=nombre))
+        qs = qs.filter(
+            Q(nombre_pasajero_completo__icontains=nombre)
+            | Q(nombre_pasajero_procesado__icontains=nombre)
+        )
     if pnr:
         qs = qs.filter(localizador_pnr__icontains=pnr)
     if origen:
@@ -179,121 +306,218 @@ def buscar(request):
         qs = qs.filter(fecha_emision_boleto__gte=fecha_inicio)
     if fecha_fin:
         qs = qs.filter(fecha_emision_boleto__lte=fecha_fin)
-        
-    qs = qs.order_by('-fecha_emision_boleto')[:50]
+
+    qs = qs.order_by("-fecha_emision_boleto")[:50]
     serializer = BoletoImportadoSerializer(qs, many=True)
     return Response(serializer.data)
 
-@extend_schema(exclude=True)
-@api_view(['GET'])
+
+@extend_schema(
+    description="Reporte de comisiones por aerolínea con totales agregados.",
+    parameters=[
+        {
+            "name": "fecha_inicio",
+            "in": "query",
+            "required": False,
+            "schema": {"type": "string", "format": "date"},
+            "description": "Fecha de inicio",
+        },
+        {
+            "name": "fecha_fin",
+            "in": "query",
+            "required": False,
+            "schema": {"type": "string", "format": "date"},
+            "description": "Fecha de fin",
+        },
+    ],
+    responses={200: {"description": "Reporte de comisiones con totales y desglose por aerolínea"}},
+    tags=["Boletos"],
+)
+@api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def reporte_comisiones(request):
     """Reporte de comisiones por aerolínea"""
-    fecha_inicio = request.GET.get('fecha_inicio')
-    fecha_fin = request.GET.get('fecha_fin')
-    
+    fecha_inicio = request.GET.get("fecha_inicio")
+    fecha_fin = request.GET.get("fecha_fin")
+
     if request.user.is_superuser:
-        qs = BoletoImportado.objects.all()
-    elif hasattr(request.user, 'agencias'):
+        qs = BoletoImportado.objects.select_related("agencia", "venta_asociada").all()
+    elif hasattr(request.user, "agencias"):
         ua = request.user.agencias.filter(activo=True).first()
         if ua:
-            qs = BoletoImportado.objects.filter(agencia=ua.agencia)
+            qs = BoletoImportado.objects.select_related("agencia", "venta_asociada").filter(
+                agencia=ua.agencia
+            )
         else:
-            return Response({'totales': {}, 'por_aerolinea': []})
+            return Response({"totales": {}, "por_aerolinea": []})
     else:
-        return Response({'totales': {}, 'por_aerolinea': []})
-        
+        return Response({"totales": {}, "por_aerolinea": []})
+
     if fecha_inicio:
         qs = qs.filter(fecha_emision_boleto__gte=fecha_inicio)
     if fecha_fin:
         qs = qs.filter(fecha_emision_boleto__lte=fecha_fin)
-        
-    qs = qs.filter(estado_parseo='COM')
-    
-    totales = qs.aggregate(
-        total_boletos=Count('id_boleto_importado'),
-        total_ventas=Sum('total_boleto'),
-        total_comisiones=Sum('comision_agencia')
-    )
-    
-    por_aerolinea = qs.values('aerolinea_emisora').annotate(
-        cantidad_boletos=Count('id_boleto_importado'),
-        total_ventas=Sum('total_boleto'),
-        total_comisiones=Sum('comision_agencia')
-    ).order_by('-total_comisiones')
-    
-    return Response({
-        'totales': {
-            'total_boletos': totales['total_boletos'] or 0,
-            'total_ventas': totales['total_ventas'] or 0,
-            'total_comisiones': totales['total_comisiones'] or 0
-        },
-        'por_aerolinea': [
-            {
-                'aerolinea': item['aerolinea_emisora'] or 'Desconocida',
-                'cantidad_boletos': item['cantidad_boletos'],
-                'total_ventas': item['total_ventas'] or 0,
-                'total_comisiones': item['total_comisiones'] or 0
-            }
-            for item in por_aerolinea
-        ]
-    })
 
-@extend_schema(exclude=True)
-@api_view(['POST'])
+    qs = qs.filter(estado_parseo="COM")
+
+    totales = qs.aggregate(
+        total_boletos=Count("id_boleto_importado"),
+        total_ventas=Sum("total_boleto"),
+        total_comisiones=Sum("comision_agencia"),
+    )
+
+    por_aerolinea = (
+        qs.values("aerolinea_emisora")
+        .annotate(
+            cantidad_boletos=Count("id_boleto_importado"),
+            total_ventas=Sum("total_boleto"),
+            total_comisiones=Sum("comision_agencia"),
+        )
+        .order_by("-total_comisiones")
+    )
+
+    return Response(
+        {
+            "totales": {
+                "total_boletos": totales["total_boletos"] or 0,
+                "total_ventas": totales["total_ventas"] or 0,
+                "total_comisiones": totales["total_comisiones"] or 0,
+            },
+            "por_aerolinea": [
+                {
+                    "aerolinea": item["aerolinea_emisora"] or "Desconocida",
+                    "cantidad_boletos": item["cantidad_boletos"],
+                    "total_ventas": item["total_ventas"] or 0,
+                    "total_comisiones": item["total_comisiones"] or 0,
+                }
+                for item in por_aerolinea
+            ],
+        }
+    )
+
+
+@extend_schema(
+    description="Crear solicitud de anulación de boleto con cálculo automático de reembolso.",
+    request={
+        "application/json": {
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "boleto": {"type": "integer", "description": "ID del boleto a anular"},
+                    "tipo_anulacion": {"type": "string", "description": "Tipo de anulación"},
+                    "motivo": {"type": "string", "description": "Motivo de la anulación"},
+                    "monto_original": {
+                        "type": "number",
+                        "description": "Monto original del boleto",
+                    },
+                    "penalidad_aerolinea": {
+                        "type": "number",
+                        "description": "Penalidad cobrada por aerolínea",
+                    },
+                    "fee_agencia": {"type": "number", "description": "Fee de gestión de agencia"},
+                },
+                "required": ["boleto", "tipo_anulacion", "motivo"],
+            }
+        }
+    },
+    responses={200: {"description": "Solicitud de anulación creada"}},
+    tags=["Boletos"],
+)
+@api_view(["POST"])
+@internal_auth
 @permission_classes([IsAuthenticated])
 def solicitar_anulacion(request):
     """Crear solicitud de anulación. 🔐 Candado de agencia."""
     data = request.data
-    boleto_id = data.get('boleto')
+    boleto_id = data.get("boleto")
     agencia = get_agencia_from_request(request)
     boleto = get_object_tenant_or_404(BoletoImportado, agencia, pk=boleto_id)
 
     try:
-        monto_original = float(data.get('monto_original', 0))
-        penalidad = float(data.get('penalidad_aerolinea', 0))
-        fee = float(data.get('fee_agencia', 0))
-        
+        monto_original = float(data.get("monto_original", 0))
+        penalidad = float(data.get("penalidad_aerolinea", 0))
+        fee = float(data.get("fee_agencia", 0))
+
         solicitud = SolicitudAnulacion.objects.create(
             boleto=boleto,
-            tipo=data.get('tipo_anulacion'),
-            motivo=data.get('motivo'),
+            tipo=data.get("tipo_anulacion"),
+            motivo=data.get("motivo"),
             monto_original=monto_original,
             penalidad_aerolinea=penalidad,
             fee_agencia=fee,
-            usuario_solicitante=request.user
+            usuario_solicitante=request.user,
         )
-        return Response({'id_anulacion': solicitud.id, 'monto_reembolso': solicitud.monto_reembolso})
+        return Response(
+            {"id_anulacion": solicitud.id, "monto_reembolso": solicitud.monto_reembolso}
+        )
     except Exception as e:
-        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-@extend_schema(exclude=True)
-@api_view(['GET'])
+
+@extend_schema(
+    description="Obtener detalle completo de un boleto incluyendo número, PNR, pasajero, aerolínea, fechas y archivos.",
+    parameters=[
+        {
+            "name": "boleto_id",
+            "in": "path",
+            "required": True,
+            "schema": {"type": "integer"},
+            "description": "ID del boleto",
+        },
+    ],
+    responses={200: {"description": "Detalle completo del boleto"}},
+    tags=["Boletos"],
+)
+@api_view(["GET"])
+@internal_auth
 @permission_classes([IsAuthenticated])
 def detalle_boleto(request, boleto_id):
     """Obtener detalle de un boleto. 🔐 Candado de agencia."""
     agencia = get_agencia_from_request(request)
     boleto = get_object_tenant_or_404(BoletoImportado, agencia, pk=boleto_id)
-                 
+
     data = {
-        'numero_boleto': boleto.numero_boleto,
-        'localizador_pnr': boleto.localizador_pnr,
-        'nombre_pasajero_procesado': boleto.nombre_pasajero_procesado,
-        'aerolinea_emisora': boleto.aerolinea_emisora,
-        'fecha_emision': boleto.fecha_emision_boleto,
-        'total_boleto': boleto.total_boleto,
-        'ruta': boleto.ruta_vuelo,
-        'archivo_pdf': boleto.archivo_pdf_generado.url if boleto.archivo_pdf_generado else (boleto.archivo_boleto.url if boleto.archivo_boleto else None)
+        "numero_boleto": boleto.numero_boleto,
+        "localizador_pnr": boleto.localizador_pnr,
+        "nombre_pasajero_procesado": boleto.nombre_pasajero_procesado,
+        "aerolinea_emisora": boleto.aerolinea_emisora,
+        "fecha_emision": boleto.fecha_emision_boleto,
+        "total_boleto": boleto.total_boleto,
+        "ruta": boleto.ruta_vuelo,
+        "archivo_pdf": boleto.archivo_pdf_generado.url
+        if boleto.archivo_pdf_generado
+        else (boleto.archivo_boleto.url if boleto.archivo_boleto else None),
     }
     return Response(data)
 
-@extend_schema(exclude=True)
-@api_view(['DELETE'])
+
+@extend_schema(
+    description="Eliminar un boleto importado. Requiere rol admin o gerente.",
+    parameters=[
+        {
+            "name": "boleto_id",
+            "in": "path",
+            "required": True,
+            "schema": {"type": "integer"},
+            "description": "ID del boleto a eliminar",
+        },
+    ],
+    responses={
+        200: {"description": "Boleto eliminado"},
+        403: {"description": "No autorizado - requiere admin/gerente"},
+        404: {"description": "Boleto no encontrado"},
+    },
+    tags=["Boletos"],
+)
+@api_view(["DELETE"])
+@internal_auth
 @permission_classes([IsAuthenticated])
-@agency_role_required(['admin', 'gerente']) # 🔐 Solo gerentes o admins pueden borrar boletos importados
+@agency_role_required(
+    ["admin", "gerente"]
+)  # 🔐 Solo gerentes o admins pueden borrar boletos importados
 def eliminar_boleto(request, boleto_id):
     """Eliminar un boleto importado. 🔐 Candado de agencia."""
     agencia = get_agencia_from_request(request)
     boleto = get_object_tenant_or_404(BoletoImportado, agencia, pk=boleto_id)
     boleto.delete()
-    return Response({'status': 'deleted'})
+    return Response({"status": "deleted"})

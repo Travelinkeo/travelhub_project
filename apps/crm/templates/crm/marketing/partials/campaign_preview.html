@@ -1,3 +1,4 @@
+{% load core_tags %}
 <div class="animate-fade-in-up space-y-6">
 
     <!-- Resumen de Audiencia (ORM Result) -->
@@ -52,7 +53,7 @@
                 <label class="block text-[10px] font-black text-text-muted uppercase tracking-widest mb-1">Cuerpo del Correo (HTML)</label>
                 <div class="bg-surface-2 p-6 rounded-xl border border-border-color text-text-main prose prose-sm max-w-none dark:prose-invert overflow-auto max-h-96">
                     <!-- Se inyecta el HTML seguro que generó la IA -->
-                    {{ ia_data.cuerpo_email_html|safe }}
+                    {{ ia_data.cuerpo_email_html|sanitize_html_filter }}
                 </div>
                 <p class="text-[10px] text-slate-400 mt-2 font-medium flex items-center gap-1">
                     <span class="material-symbols-outlined text-[12px]">info</span>

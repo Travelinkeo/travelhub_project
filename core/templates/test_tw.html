@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
-    <script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography" nonce="{{ request.csp_nonce }}"></script>
+    <script nonce="{{ request.csp_nonce }}">
         tailwind.config = {
             theme: {
                 extend: {
@@ -16,7 +16,7 @@
             }
         }
     </script>
-    <style type="text/tailwindcss">
+    <style type="text/tailwindcss" nonce="{{ request.csp_nonce }}">
         @layer components {
             .nav-active {
                 @apply bg-[var(--nav-active-bg)] text-blue-500 border border-[var(--nav-active-border)];

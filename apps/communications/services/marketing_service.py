@@ -1,6 +1,8 @@
 import base64
 import io
+import logging
 from decimal import Decimal
+from typing import Any
 
 import requests
 import vertexai
@@ -9,109 +11,116 @@ from django.core.files.storage import default_storage
 from PIL import Image, ImageDraw, ImageFont
 from vertexai.preview.vision_models import ImageGenerationModel
 
-from apps.bookings.models import HotelTarifario, TarifaHabitacion
-from core.models.agencia import Agencia
+from core.api import Agencia
+
+logger = logging.getLogger(__name__)
 
 
 class MarketingService:
     @staticmethod
-    def generate_instagram_story(hotel_id, agencia_id=None):
+    def generate_instagram_story(hotel_id: int, agencia_id: int | None = None) -> io.BytesIO:
         """
         Generates a 1080x1920 JPG for Instagram Stories.
         """
         # 1. Fetch Data
+        from django.apps import apps
+
+        HotelTarifario = apps.get_model("bookings", "HotelTarifario")
+        TarifaHabitacion = apps.get_model("bookings", "TarifaHabitacion")
         hotel = HotelTarifario.objects.get(pk=hotel_id)
-        
+
         # Calculate "From" Price
         min_price = Decimal(0)
-        
+
         # Find lowest DBL rate
         tarifas = TarifaHabitacion.objects.filter(
             tipo_habitacion__hotel=hotel,
-            tipo_tarifa='POR_PERSONA' # Assumed standard
-        ).order_by('tarifa_dbl')
-        
+            tipo_tarifa="POR_PERSONA",  # Assumed standard
+        ).order_by("tarifa_dbl")
+
         if tarifas.exists():
             best_rate = tarifas.first()
             min_price = best_rate.tarifa_dbl
-        
+
         # Agency Branding
         agencia = None
         if agencia_id:
             agencia = Agencia.objects.filter(pk=agencia_id).first()
-        
+
         if not agencia:
-            agencia = Agencia.objects.filter(activa=True).first() # Fallback
+            agencia = Agencia.objects.filter(activa=True).first()  # Fallback
 
         # 2. Canvas Setup (1080x1920)
         W, H = 1080, 1920
-        canvas = Image.new('RGB', (W, H), (20, 20, 20))
-        
+        canvas = Image.new("RGB", (W, H), (20, 20, 20))
+
         # 3. Load Main Image
         try:
             if hotel.imagen_principal:
                 # Handle FileField (S3/Cloudinary or Local)
                 try:
-                     # Try opening directly if local
+                    # Try opening directly if local
                     img_file = default_storage.open(hotel.imagen_principal.name)
-                    bg_img = Image.open(img_file).convert('RGB')
-                except Exception as e:
+                    bg_img = Image.open(img_file).convert("RGB")
+                except Exception:
                     # If url (Cloudinary), fetch it
                     url = hotel.imagen_principal.url
                     resp = requests.get(url, stream=True)
-                    bg_img = Image.open(resp.raw).convert('RGB')
+                    bg_img = Image.open(resp.raw).convert("RGB")
             else:
-                 # Placeholder Gradient
-                 bg_img = Image.new('RGB', (W, H), (50, 50, 100))
+                # Placeholder Gradient
+                bg_img = Image.new("RGB", (W, H), (50, 50, 100))
         except Exception as e:
-            print(f"Error loading image: {e}")
-            bg_img = Image.new('RGB', (W, H), (100, 50, 50))
+            logger.error(f"Error loading image: {e}")
+            bg_img = Image.new("RGB", (W, H), (100, 50, 50))
 
         # 4. Aspect Fill Resize
         bg_w, bg_h = bg_img.size
         ratio = max(W / bg_w, H / bg_h)
         new_size = (int(bg_w * ratio), int(bg_h * ratio))
         bg_img = bg_img.resize(new_size, Image.Resampling.LANCZOS)
-        
+
         # Crop Center
         left = (new_size[0] - W) / 2
         top = (new_size[1] - H) / 2
         bg_img = bg_img.crop((left, top, left + W, top + H))
-        
+
         canvas.paste(bg_img, (0, 0))
-        
+
         # 5. Gradient Overlay (Bottom)
-        gradient = Image.new('L', (W, H), 0)
+        gradient = Image.new("L", (W, H), 0)
         draw_grad = ImageDraw.Draw(gradient)
         # Black gradient from 50% down
         for y in range(int(H * 0.4), H):
             alpha = int(255 * ((y - H * 0.4) / (H * 0.6)))
             draw_grad.line([(0, y), (W, y)], fill=alpha)
-            
-        overlay = Image.new('RGB', (W, H), (0, 0, 0))
+
+        overlay = Image.new("RGB", (W, H), (0, 0, 0))
         canvas.paste(overlay, (0, 0), mask=gradient)
 
         # 6. Typography
         draw = ImageDraw.Draw(canvas)
-        
+
         # Fonts (Try to load system fonts or fallback)
         def load_font(size):
             try:
                 # Windows standard path
                 return ImageFont.truetype("arial.ttf", size)
-            except Exception as e:
+            except Exception:
                 try:
-                     # Linux standard path
-                    return ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", size)
-                except Exception as e:
+                    # Linux standard path
+                    return ImageFont.truetype(
+                        "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", size
+                    )
+                except Exception:
                     return ImageFont.load_default()
 
         font_title = load_font(80)
         font_sub = load_font(40)
         font_price = load_font(70)
-        
+
         # Helper Center Text
-        def draw_text_center(y, text, font, color='white'):
+        def draw_text_center(y, text, font, color="white"):
             # Text bounding box
             bbox = draw.textbbox((0, 0), text, font=font)
             text_w = bbox[2] - bbox[0]
@@ -120,13 +129,15 @@ class MarketingService:
 
         # Content - Bottom
         margin_bottom = 300
-        
+
         # Hotel Name
         draw_text_center(H - margin_bottom - 100, hotel.nombre.upper(), font_title)
-        
+
         # Destination & Stars
         stars = "⭐" * hotel.categoria
-        draw_text_center(H - margin_bottom, f"{hotel.destino.upper()}  |  {stars}", font_sub, color='#fbbf24')
+        draw_text_center(
+            H - margin_bottom, f"{hotel.destino.upper()}  |  {stars}", font_sub, color="#fbbf24"
+        )
 
         # Price Tag (Floating Top Right or Below name)
         if min_price > 0:
@@ -134,19 +145,19 @@ class MarketingService:
             # Round pill background
             # bbox = draw.textbbox((0,0), price_text, font=font_price)
             # ... simple text for now
-            draw_text_center(H - margin_bottom + 80, price_text, font_price, color='#4ade80')
-            
+            draw_text_center(H - margin_bottom + 80, price_text, font_price, color="#4ade80")
+
         # Agency Branding (Top Center)
         if agencia and agencia.logo:
             try:
-                if agencia.logo.name: # Local check
+                if agencia.logo.name:  # Local check
                     try:
                         f_logo = default_storage.open(agencia.logo.name)
-                        logo_img = Image.open(f_logo).convert('RGBA')
-                    except Exception as e:
+                        logo_img = Image.open(f_logo).convert("RGBA")
+                    except Exception:
                         resp = requests.get(agencia.logo.url, stream=True)
-                        logo_img = Image.open(resp.raw).convert('RGBA')
-                        
+                        logo_img = Image.open(resp.raw).convert("RGBA")
+
                     # Resize logo (max width 400, max height 200)
                     logo_img.thumbnail((400, 200), Image.Resampling.LANCZOS)
                     lw, lh = logo_img.size
@@ -154,26 +165,32 @@ class MarketingService:
                     y_logo = 150
                     canvas.paste(logo_img, (x_logo, y_logo), logo_img)
             except Exception as e:
-                print(f"Logo error: {e}")
+                logger.warning(f"Logo error: {e}")
                 draw_text_center(100, agencia.nombre, font_sub)
         else:
-             if agencia:
+            if agencia:
                 draw_text_center(100, agencia.nombre, font_sub)
 
         # 7. Output
         output = io.BytesIO()
-        canvas.save(output, format='JPEG', quality=95)
+        canvas.save(output, format="JPEG", quality=95)
         output.seek(0)
         return output
 
     @staticmethod
-    def generate_social_caption(nombre_producto, destino, detalles, tono="AVENTURERO"):
+    def generate_social_caption(
+        nombre_producto: str, destino: str, detalles: str, tono: str = "AVENTURERO"
+    ) -> str:
         """
         Generates an Instagram/Facebook caption using Gemini AI.
         Agrega hashtags y emojis.
         """
-        from apps.automation.services.ai_engine import generate_text_from_prompt
-        
+        from django.utils.module_loading import import_string
+
+        generate_text_from_prompt = import_string(
+            "apps.automation.services.ai_engine.generate_text_from_prompt"
+        )
+
         prompt = f"""
         Actúa como un experto experto en Marketing Turístico y Redes Sociales.
         Escribe un CAPTION (Pie de foto) para Instagram para promocionar lo siguiente:
@@ -192,22 +209,34 @@ class MarketingService:
         
         Usa emojis estratégicamente. No uses comillas envolviendo el texto.
         """
-        
+
         return generate_text_from_prompt(prompt)
 
     @staticmethod
-    def generate_email_newsletter(ofertas):
+    def generate_email_newsletter(ofertas: list[dict[str, Any]]) -> str:
         """
         Generates an HTML Newsletter Summary for a list of deals.
         ofertas: List of dicts or objects with 'titulo', 'precio', 'destino'.
         """
-        from apps.automation.services.ai_engine import generate_text_from_prompt
-        
+        from django.utils.module_loading import import_string
+
+        generate_text_from_prompt = import_string(
+            "apps.automation.services.ai_engine.generate_text_from_prompt"
+        )
+
         lista_ofertas = ""
         for i, oferta in enumerate(ofertas, 1):
-             # Manejo flexible de objetos o dicts
-            titulo = oferta.get('titulo') if isinstance(oferta, dict) else getattr(oferta, 'titulo', 'Oferta')
-            precio = oferta.get('precio') if isinstance(oferta, dict) else getattr(oferta, 'precio', 'Consultar')
+            # Manejo flexible de objetos o dicts
+            titulo = (
+                oferta.get("titulo")
+                if isinstance(oferta, dict)
+                else getattr(oferta, "titulo", "Oferta")
+            )
+            precio = (
+                oferta.get("precio")
+                if isinstance(oferta, dict)
+                else getattr(oferta, "precio", "Consultar")
+            )
             lista_ofertas += f"{i}. {titulo} - Desde {precio}\n"
 
         prompt = f"""
@@ -229,33 +258,35 @@ class MarketingService:
         
         Output esperado: Solo código HTML.
         """
-        
+
         return generate_text_from_prompt(prompt)
 
     @staticmethod
-    def generate_ai_promo_image(hotel_name, price, style="Luxurious", custom_text=None):
+    def generate_ai_promo_image(
+        hotel_name: str, price: float, style: str = "Luxurious", custom_text: str | None = None
+    ) -> dict[str, str | None]:
         """
         Generates a promotional image using Google Vertex AI (Imagen 3).
         Returns the base64 encoded image string.
         """
         try:
             # Configuración de Vertex AI
-            project_id = settings.GCP_PROJECT_ID or 'travelhub-468322'
-            location = settings.GCP_LOCATION or 'us-central1'
-            
+            project_id = settings.GCP_PROJECT_ID or "travelhub-468322"
+            location = settings.GCP_LOCATION or "us-central1"
+
             # Inicializar Vertex AI
             vertexai.init(project=project_id, location=location)
-            
+
             # Cargar Modelo (Intentar Imagen 3 luego Imagen 2)
             model_name = "image-3"
             try:
                 model = ImageGenerationModel.from_pretrained(model_name)
             except Exception:
                 # Fallback to Imagen 2
-                print("Falling back to Imagen 2 (imagegeneration@006)")
+                logger.warning("Falling back to Imagen 2 (imagegeneration@006)")
                 model_name = "imagegeneration@006"
                 model = ImageGenerationModel.from_pretrained(model_name)
-            
+
             # Construir Prompt
             prompt_text = custom_text or f"Special Offer: {hotel_name} starting at ${price}"
             base_prompt = f"""
@@ -266,7 +297,7 @@ class MarketingService:
             Format: Optimized for Instagram (Square 1:1 or Portrait).
             Lighting: Golden hour, warm and welcoming.
             """
-            
+
             # Generar Imagen
             # Imagen 2 vs 3 parameters might differ slightly, but generate_images is consistent
             images = model.generate_images(
@@ -275,22 +306,20 @@ class MarketingService:
                 language="en",
                 aspect_ratio="1:1",
                 safety_filter_level="block_some",
-                person_generation="allow_adult"
+                person_generation="allow_adult",
             )
-            
+
             if images:
                 # Retornar Base64 para visualización directa
                 img_bytes = images[0]._image_bytes
-                b64_string = base64.b64encode(img_bytes).decode('utf-8')
-                return {'image': b64_string, 'error': None}
-            
-            return {'image': None, 'error': 'No image generated by model'}
-            
+                b64_string = base64.b64encode(img_bytes).decode("utf-8")
+                return {"image": b64_string, "error": None}
+
+            return {"image": None, "error": "No image generated by model"}
+
         except Exception as e:
-            import traceback
-            traceback.print_exc()
-            print(f"Error generating AI image: {e}")
-            
+            logger.error(f"Error generating AI image: {e}", exc_info=True)
+
             error_msg = str(e)
             if "403" in error_msg:
                 error_msg = "Google Cloud Permission Denied (403). Check API Credentials."
@@ -298,5 +327,5 @@ class MarketingService:
                 error_msg = "Quota Exceeded. Try again later."
             elif "400" in error_msg:
                 error_msg = "Bad Request. The prompt might be invalid."
-                
-            return {'image': None, 'error': error_msg}
+
+            return {"image": None, "error": error_msg}

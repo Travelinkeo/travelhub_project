@@ -1,6 +1,7 @@
 import pytest
 from django.conf import settings
 from django.test import override_settings
+from django.urls import reverse
 from rest_framework.test import APIClient
 
 SEC_HEADERS = [
@@ -17,7 +18,8 @@ def client():
 
 @pytest.mark.django_db
 def test_security_headers_and_csp_relaxed(client):
-    r1 = client.get("/login/")
+    url = reverse("health")
+    r1 = client.get(url)
     assert r1.status_code == 200
     for header, expected in SEC_HEADERS:
         assert r1[header] == expected
@@ -41,7 +43,8 @@ def test_security_headers_and_csp_relaxed(client):
 @pytest.mark.django_db
 @override_settings(DEBUG=False, SECURE_HSTS_SECONDS=31536000)
 def test_hsts_when_not_debug(client):
-    r = client.get("/login/")
+    url = reverse("health")
+    r = client.get(url)
     assert r.status_code == 200
     # HSTS headers should be present when DEBUG False
     assert "Strict-Transport-Security" in r

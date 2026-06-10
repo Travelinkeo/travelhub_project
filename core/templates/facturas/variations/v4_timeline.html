@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Factura_{{ factura.numero_factura }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        @page {
+            size: letter;
+            margin: 1cm;
+        }
+        :root {
+            --primary: {{ agencia.color_primario|default:"#0d1e40" }};
+            --accent: {{ agencia.color_accent_pdf|default:"#2563eb" }};
+            --text-color: #1e293b;
+            --muted-color: #64748b;
+            --border-color: #e2e8f0;
+            --bg-light: #f8fafc;
+            --timeline-w: 40px;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Outfit', sans-serif;
+            color: var(--text-color);
+            line-height: 1.4;
+            font-size: 8.5pt;
+            background: #ffffff;
+            -webkit-print-color-adjust: exact;
+        }
+        .container {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            min-height: 100%;
+        }
+
+        .top-accent-line {
+            height: 6px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            width: 100%;
+        }
+        
+        /* Timeline Header */
+        header {
+            padding: 30px 40px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+        .agency-info h1 {
+            font-size: 18px;
+            font-weight: 900;
+            color: var(--primary);
+            text-transform: uppercase;
+            margin-bottom: 3px;
+        }
+        .agency-info p {
+            font-size: 8pt;
+            color: var(--muted-color);
+            margin-top: 2px;
+        }
+        .invoice-title {
+            text-align: right;
+        }
+        .invoice-title h2 {
+            font-size: 26px;
+            font-weight: 900;
+            color: var(--accent);
+            text-transform: uppercase;
+            margin: 0;
+            letter-spacing: -1px;
+        }
+        .invoice-title p {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-top: 3px;
+        }
+
+        /* Timeline Section */
+        .timeline-body {
+            flex: 1;
+            padding: 10px 40px 30px;
+            position: relative;
+        }
+
+        /* Client & Metadata block */
+        .meta-bar {
+            display: grid;
+            grid-template-columns: 2fr 1.2fr 1fr;
+            gap: 20px;
+            background-color: var(--bg-light);
+            border: 1px solid var(--border-color);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+        }
+        .meta-box h4 {
+            font-size: 8px;
+            font-weight: 800;
+            color: var(--muted-color);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+        .meta-box p {
+            font-size: 10pt;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        .meta-box span {
+            font-size: 8pt;
+            color: var(--muted-color);
+            display: block;
+            margin-top: 2px;
+            line-height: 1.3;
+        }
+
+        /* Intermediacion message */
+        .intermediacion-timeline {
+            background-color: #fffbeb;
+            border: 1.5px dashed #f59e0b;
+            color: #b45309;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 8pt;
+            text-align: center;
+            font-weight: 600;
+            margin-bottom: 25px;
+        }
+
+        /* Timeline grid */
+        .timeline {
+            position: relative;
+        }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: calc(var(--timeline-w) / 2);
+            top: 15px;
+            bottom: 15px;
+            width: 2px;
+            background: var(--border-color);
+            z-index: 0;
+        }
+        
+        .timeline-item {
+            position: relative;
+            padding-left: var(--timeline-w);
+            margin-bottom: 20px;
+        }
+        .timeline-dot-wrapper {
+            position: absolute;
+            left: 0;
+            top: 5px;
+            width: var(--timeline-w);
+            display: flex;
+            justify-content: center;
+        }
+        .timeline-dot {
+            width: 10px;
+            height: 10px;
+            background: white;
+            border: 3.5px solid var(--accent);
+            border-radius: 50%;
+            z-index: 1;
+            box-shadow: 0 0 0 4px white;
+        }
+        
+        /* Item Card */
+        .item-card {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .item-main {
+            max-width: 60%;
+        }
+        .item-main h4 {
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--primary);
+            text-transform: uppercase;
+        }
+        .item-desc {
+            font-size: 7.5pt;
+            color: var(--muted-color);
+            margin-top: 3px;
+        }
+        .item-details {
+            display: flex;
+            gap: 20px;
+            text-align: right;
+        }
+        .item-val {
+            font-size: 8.5pt;
+        }
+        .item-val label {
+            display: block;
+            font-size: 7.5px;
+            font-weight: 700;
+            color: var(--muted-color);
+            text-transform: uppercase;
+        }
+        .item-val span {
+            font-weight: 700;
+        }
+        .item-val.subtotal-span span {
+            color: var(--primary);
+            font-size: 9.5pt;
+        }
+
+        /* Bottom segment */
+        .bottom-section {
+            display: grid;
+            grid-template-columns: 1.1fr 1fr;
+            gap: 30px;
+            margin-top: 25px;
+        }
+        .notes-section h3 {
+            font-size: 9pt;
+            font-weight: 700;
+            color: var(--primary);
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+        .notes-section p {
+            font-size: 8pt;
+            color: var(--muted-color);
+            line-height: 1.45;
+        }
+
+        .totals-section {
+            background: var(--bg-light);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            padding: 18px;
+        }
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            font-size: 8pt;
+        }
+        .total-row span:last-child {
+            font-weight: 600;
+        }
+        .total-row.divider {
+            border-top: 1px dashed var(--border-color);
+            margin-top: 6px;
+            padding-top: 8px;
+        }
+        .total-row.grand-total {
+            font-size: 13px;
+            font-weight: 800;
+            color: var(--primary);
+            border-top: 2px solid var(--accent);
+            margin-top: 8px;
+            padding-top: 10px;
+        }
+        .total-row.grand-total span:last-child {
+            font-weight: 900;
+        }
+        .total-row.bolivares {
+            font-size: 9.5pt;
+            color: var(--accent);
+            font-weight: 700;
+            margin-top: 2px;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--primary);
+            color: rgba(255,255,255,0.8);
+            padding: 30px 40px;
+            font-size: 8pt;
+            margin-top: auto;
+            border-top: 5px solid var(--accent);
+        }
+        .footer-logo {
+            font-size: 15px;
+            font-weight: 900;
+            color: white;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+        .footer-grid {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        .footer-left {
+            max-width: 70%;
+        }
+        .footer-left p {
+            line-height: 1.4;
+            font-size: 7.5pt;
+        }
+        .footer-right {
+            text-align: right;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="top-accent-line"></div>
+        
+        <header>
+            <div class="agency-info">
+                {% if agencia_logo_b64 %}
+                    <img src="{{ agencia_logo_b64 }}" style="max-height: 40px; margin-bottom: 8px;" alt="Logo">
+                {% elif agencia.logo_pdf_base64 %}
+                    <img src="{% if 'data:image' in agencia.logo_pdf_base64 %}{{ agencia.logo_pdf_base64 }}{% else %}data:image/png;base64,{{ agencia.logo_pdf_base64 }}{% endif %}" style="max-height: 40px; margin-bottom: 8px;" alt="Logo">
+                {% else %}
+                    <h1>{{ factura.emisor_razon_social|default:agencia.nombre }}</h1>
+                {% endif %}
+                <p>RIF: {{ factura.emisor_rif|default:agencia.rif }}</p>
+                <p>{{ factura.emisor_direccion_fiscal|default:agencia.direccion }}</p>
+            </div>
+            <div class="invoice-title">
+                <h2>Factura</h2>
+                <p>Nro: {{ factura.numero_factura }}</p>
+                {% if factura.numero_control %}
+                    <p style="font-size: 8pt; opacity: 0.8;">Control: {{ factura.numero_control }}</p>
+                {% endif %}
+            </div>
+        </header>
+
+        <!-- TIMELINE BODY -->
+        <main class="timeline-body">
+            <!-- METADATA BAR -->
+            <div class="meta-bar">
+                <div class="meta-box">
+                    <h4>Datos del Cliente</h4>
+                    <p>{{ factura.cliente_nombre|default:factura.cliente.get_nombre_completo|upper }}</p>
+                    <span>
+                        Doc: {{ factura.cliente_identificacion|default:factura.cliente.cedula_identidad }}<br>
+                        Dir: {{ factura.cliente_direccion|default:factura.cliente.direccion|default:"N/A" }}
+                    </span>
+                </div>
+                <div class="meta-box">
+                    <h4>Operación y Fechas</h4>
+                    <p>{{ factura.get_tipo_operacion_display }}</p>
+                    <span>
+                        Emisión: {{ factura.fecha_emision|date:"d M Y"|upper }}<br>
+                        Vence: {{ factura.fecha_vencimiento|date:"d M Y"|default:"N/A"|upper }}
+                    </span>
+                </div>
+                <div class="meta-box">
+                    <h4>Estado & Ref. BCV</h4>
+                    <p>{{ factura.get_estado_display|upper }}</p>
+                    <span>
+                        {% if factura.tasa_cambio_bcv or factura.tasa_cambio %}
+                            Tasa: Bs. {{ factura.tasa_cambio_bcv|default:factura.tasa_cambio|floatformat:4 }}
+                        {% else %}
+                            Tasa: N/A
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+
+            {% if factura.tipo_operacion == 'INTERMEDIACION' %}
+                <div class="intermediacion-timeline">
+                    Facturación por cuenta de terceros de conformidad con el Art. 10 de la Ley de IVA.<br>
+                    Prestado Por: <strong>{{ factura.tercero_razon_social }}</strong> — RIF: {{ factura.tercero_rif }}
+                </div>
+            {% endif %}
+
+            <!-- TIMELINE -->
+            <div class="timeline">
+                {% for item in factura.items_factura.all %}
+                <div class="timeline-item">
+                    <div class="timeline-dot-wrapper">
+                        <div class="timeline-dot"></div>
+                    </div>
+                    <div class="item-card">
+                        <div class="item-main">
+                            <h4>{{ item.descripcion|upper }}</h4>
+                            <div class="item-desc">
+                                {% if item.nombre_pasajero %}Pasajero: {{ item.nombre_pasajero }}{% endif %}
+                                {% if item.numero_boleto %} | Boleto: {{ item.numero_boleto }}{% endif %}
+                            </div>
+                        </div>
+                        <div class="item-details">
+                            <div class="item-val">
+                                <label>Cant.</label>
+                                <span>{{ item.cantidad|floatformat:2 }}</span>
+                            </div>
+                            <div class="item-val">
+                                <label>Precio Unit.</label>
+                                <span>{{ item.precio_unitario|floatformat:2 }}</span>
+                            </div>
+                            <div class="item-val">
+                                <label>IVA</label>
+                                <span>{% if item.es_gravado %}{{ item.alicuota_iva }}%{% else %}Exento{% endif %}</span>
+                            </div>
+                            <div class="item-val subtotal-span">
+                                <label>Total</label>
+                                <span>{{ item.subtotal_item|floatformat:2 }} {{ factura.moneda.simbolo }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div style="text-align: center; color: var(--muted-color); padding: 20px;">No hay ítems en esta factura.</div>
+                {% endfor %}
+            </div>
+
+            <!-- BOTTOM -->
+            <div class="bottom-section">
+                <div class="notes-section">
+                    {% if factura.notas %}
+                        <h3>Notas Adicionales</h3>
+                        <p>{{ factura.notas }}</p>
+                    {% endif %}
+                </div>
+                <div class="totals-section">
+                    {% if factura.subtotal_base_gravada > 0 %}
+                        <div class="total-row">
+                            <span>Base Gravada (16%):</span>
+                            <span>{{ factura.subtotal_base_gravada|floatformat:2 }} {{ factura.moneda.simbolo }}</span>
+                        </div>
+                    {% endif %}
+                    {% if factura.subtotal_exento > 0 %}
+                        <div class="total-row">
+                            <span>Base Exenta:</span>
+                            <span>{{ factura.subtotal_exento|floatformat:2 }} {{ factura.moneda.simbolo }}</span>
+                        </div>
+                    {% endif %}
+                    {% if factura.subtotal_exportacion > 0 %}
+                        <div class="total-row">
+                            <span>Base Exportación:</span>
+                            <span>{{ factura.subtotal_exportacion|floatformat:2 }} {{ factura.moneda.simbolo }}</span>
+                        </div>
+                    {% endif %}
+                    
+                    <div class="total-row divider">
+                        <span>Subtotal:</span>
+                        <span>{{ factura.subtotal|floatformat:2 }} {{ factura.moneda.simbolo }}</span>
+                    </div>
+
+                    {% if factura.monto_iva_16 or factura.monto_impuestos %}
+                        <div class="total-row">
+                            <span>IVA (16%):</span>
+                            <span>{{ factura.monto_iva_16|default:factura.monto_impuestos|floatformat:2 }} {{ factura.moneda.simbolo }}</span>
+                        </div>
+                    {% endif %}
+                    {% if factura.monto_iva_adicional > 0 %}
+                        <div class="total-row">
+                            <span>IVA Adicional:</span>
+                            <span>{{ factura.monto_iva_adicional|floatformat:2 }} {{ factura.moneda.simbolo }}</span>
+                        </div>
+                    {% endif %}
+                    {% if factura.monto_igtf > 0 %}
+                        <div class="total-row">
+                            <span>IGTF (3%):</span>
+                            <span>{{ factura.monto_igtf|floatformat:2 }} {{ factura.moneda.simbolo }}</span>
+                        </div>
+                    {% endif %}
+
+                    <div class="total-row grand-total">
+                        <span>TOTAL FACTURADO:</span>
+                        <span>{{ factura.monto_total|floatformat:2 }} {{ factura.moneda.simbolo }}</span>
+                    </div>
+
+                    {% if factura.monto_total_bs %}
+                        <div class="total-row bolivares divider">
+                            <span>Equivalencia BCV:</span>
+                            <span>Bs. {{ factura.monto_total_bs|floatformat:2 }}</span>
+                        </div>
+                    {% endif %}
+
+                    {% if factura.monto_pagado > 0 %}
+                        <div class="total-row divider" style="color: #16a34a; font-weight: bold;">
+                            <span>Pagado:</span>
+                            <span>- {{ factura.monto_pagado|floatformat:2 }} {{ factura.moneda.simbolo }}</span>
+                        </div>
+                        <div class="total-row" style="color: #dc2626; font-weight: bold;">
+                            <span>Saldo Pendiente:</span>
+                            <span>{{ factura.saldo_pendiente|floatformat:2 }} {{ factura.moneda.simbolo }}</span>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </main>
+
+        <!-- FOOTER -->
+        <footer>
+            <div class="footer-logo">{{ agencia.nombre|upper }}</div>
+            <div class="footer-grid">
+                <div class="footer-left">
+                    {% if factura.modalidad_emision == 'DIGITAL' %}
+                        <p>Documento emitido conforme a la Providencia Administrativa SNAT/2024/000102. Representación impresa de factura electrónica.</p>
+                    {% else %}
+                        <p>Documento emitido conforme a la Providencia Administrativa SNAT/2011/00071. Factura de contingencia.</p>
+                    {% endif %}
+                    {% if agencia.imprenta_digital_nombre or factura.venta_asociada.agencia.imprenta_digital_nombre %}
+                        <p style="font-size: 6.5pt; opacity: 0.8; margin-top: 3px;">
+                            Imprenta Digital Autorizada: {{ agencia.imprenta_digital_nombre|default:factura.venta_asociada.agencia.imprenta_digital_nombre }} - RIF: {{ agencia.imprenta_digital_rif|default:factura.venta_asociada.agencia.imprenta_digital_rif }} - Prov. {{ agencia.imprenta_digital_providencia|default:factura.venta_asociada.agencia.imprenta_digital_providencia }}
+                        </p>
+                    {% endif %}
+                    {% if agencia.pie_pagina %}<p style="margin-top: 4px; opacity: 0.9;">{{ agencia.pie_pagina }}</p>{% endif %}
+                </div>
+                <div class="footer-right">
+                    <p>{{ agencia.email_principal|default:agencia.email_ventas }}</p>
+                    <p>{{ agencia.telefono_principal }}</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+</body>
+</html>

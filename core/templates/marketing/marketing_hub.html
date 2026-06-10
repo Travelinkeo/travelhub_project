@@ -166,7 +166,7 @@
                      <button @click="copyToClipboard(resultEmail)" class="text-xs font-black bg-slate-800 text-white px-3 py-1 rounded hover:bg-blue-600">COPIAR HTML</button>
                  </div>
                  <div class="bg-white rounded-2xl p-4 overflow-hidden border-8 border-slate-800">
-                     <iframe x-ref="emailPreview" class="w-full h-[500px] border-none"></iframe>
+                     <iframe x-ref="emailPreview" sandbox="allow-same-origin" class="w-full h-[500px] border-none"></iframe>
                  </div>
              </div>
         </div>

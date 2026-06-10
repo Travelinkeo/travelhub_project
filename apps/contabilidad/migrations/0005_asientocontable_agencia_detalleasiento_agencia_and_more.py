@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("contabilidad", "0004_alter_asientocontable_moneda_and_more"),
         ("core", "0022_remove_agencia_bi_insights_and_more"),

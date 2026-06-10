@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("crm", "0010_add_critical_indexes"),
     ]
@@ -13,8 +12,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="pasajero",
             name="foto_perfil",
-            field=models.ImageField(
-                blank=True, null=True, upload_to="pasajeros/fotos/"
-            ),
+            field=models.ImageField(blank=True, null=True, upload_to="pasajeros/fotos/"),
         ),
     ]

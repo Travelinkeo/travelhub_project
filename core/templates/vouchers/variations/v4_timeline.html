@@ -77,7 +77,7 @@
         <main class="timeline-section">
             <div class="passenger-hero">
                 <label>Main Guest</label>
-                <h3>{{ venta.cliente.get_nombre_completo|default:venta.cliente.nombre|upper }}</h3>
+                <h3>{{ venta.cliente.get_nombre_completo|upper }}</h3>
                 <p style="font-size: 12px; font-weight: 600; color: var(--tk-muted);">Issue Date: {{ venta.fecha_venta|date:"d M Y" }}</p>
             </div>
 

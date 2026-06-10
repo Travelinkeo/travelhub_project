@@ -1,94 +1,179 @@
-﻿import pytest
-pytestmark = pytest.mark.skip(reason='Parser híbrido refactorizado - pendiente actualización')
-import unittest
 from unittest.mock import patch
 
-from apps.automation.services.ticket_parser_service import extract_data_from_text
+import pytest
 
-# Texto de un boleto Sabre de ejemplo para pruebas de fallback
-SAMPLE_SABRE_TICKET = '''
-ETICKET RECEIPT
-PREPARED FOR
-DOE/JOHN
-RESERVATION CODE: R2D2C3
-TICKET NUMBER: 1234567890123
-ITINERARY DETAILS
-22 MAY 25 AEROVIAS AV 46
-DEPARTURE: BOGOTA 07:00
-ARRIVAL: MADRID 23:30
-'''
+from apps.automation.services.ticket_parser_service import TicketParserService
+from apps.bookings.models import BoletoImportado
+from core.models import Agencia
 
-# Respuesta de IA simulada y válida
+# Use pytest-django
+pytestmark = pytest.mark.django_db(transaction=True)
+
+# Texto de un boleto genérico para pruebas de fallback
+SAMPLE_SABRE_TICKET = """
+DETALLE DE VIAJE Y BOLETO
+PASAJERO: DOE/JOHN
+LOCALIZADOR: R2D2C3
+BOLETO: 1234567890123
+ITINERARIO
+1 AV 46 C 22MAY BOGMAD HK1 0700 2330
+"""
+
+# Respuesta de IA simulada
 MOCK_AI_RESPONSE = {
-    "documentTitle": "E-TICKET RECEIPT",
-    "passenger": {"name": "DOE/JOHN", "customerNumber": "N/A"},
-    "bookingDetails": {
-        "reservationCode": "AI-R2D2",
-        "issueDate": "2025-05-08",
-        "ticketNumber": "9876543210987",
-        "issuingAirline": "AI AIR"
-    },
-    "flights": [
+    "NOMBRE_DEL_PASAJERO": "JOHN DOE",
+    "SOLO_NOMBRE_PASAJERO": "JOHN",
+    "CODIGO_IDENTIFICACION": "123456",
+    "NUMERO_DE_BOLETO": "9876543210987",
+    "FECHA_DE_EMISION": "2025-05-08",
+    "CODIGO_RESERVA": "AI-R2D2",
+    "CODIGO_RESERVA_AEROLINEA": "ANPHTO",
+    "NOMBRE_AEROLINEA": "AVIANCA",
+    "TARIFA_IMPORTE": 500.0,
+    "TOTAL_IMPORTE": 550.0,
+    "TOTAL_MONEDA": "USD",
+    "itinerario": [
         {
-            "date": "2025-05-22",
-            "airline": "AI AIR",
-            "flightNumber": "AI 123",
-            "departure": {"location": "AI-DEPART", "time": "10:00"},
-            "arrival": {"location": "AI-ARRIVE", "time": "12:00"},
-            "details": {}
+            "aerolinea": "AVIANCA",
+            "numero_vuelo": "AV 46",
+            "origen": "BOGOTA",
+            "codigo_iata_origen": "BOG",
+            "destino": "MADRID",
+            "codigo_iata_destino": "MAD",
+            "fecha_salida": "22MAY25",
+            "hora_salida": "07:00",
+            "hora_llegada": "23:30",
+            "clase": "BUSINESS",
+            "localizador_aerolinea": "ANPHTO",
         }
-    ]
+    ],
 }
 
-class TestHybridParser(unittest.TestCase):
 
-    @patch('core.ticket_parser.parse_ticket_with_gemini')
-    def test_ai_first_strategy_success(self, mock_parse_with_gemini):
+class TestHybridParser:
+    @patch("apps.automation.services.ticket_parser_service.extract_data_from_text")
+    @patch("apps.automation.parsers.ai_universal_parser.UniversalAIParser.parse")
+    def test_regex_first_strategy_success(self, mock_ai_parse, mock_extract_regex):
         """
-        Verifica que si la IA devuelve un resultado válido, se utiliza ese resultado.
+        Verifica que si el Regex local devuelve un resultado completo y válido,
+        se utiliza ese resultado y NO se llama a la IA.
         """
-        mock_parse_with_gemini.return_value = MOCK_AI_RESPONSE
+        mock_extract_regex.return_value = {
+            "passenger_name": "JOHN DOE",
+            "pnr": "R2D2C3",
+            "numero_boleto": "1234567890123",
+            "segments": [
+                {
+                    "aerolinea": "AVIANCA",
+                    "numero_vuelo": "AV46",
+                    "origen": "BOG",
+                    "destino": "MAD",
+                    "fecha": "22MAY25",
+                    "hora_salida": "07:00",
+                }
+            ],
+        }
+        mock_ai_parse.return_value = MOCK_AI_RESPONSE.copy()
 
-        result = extract_data_from_text("Cualquier texto de boleto")
+        agencia = Agencia.objects.create(nombre="Test Agency Regex Success")
 
-        mock_parse_with_gemini.assert_called_once()
-        self.assertIsNotNone(result)
-        self.assertEqual(result.get('SOURCE_SYSTEM'), 'GEMINI_AI')
-        self.assertIn('normalized', result)
-        self.assertEqual(result['normalized']['ticket_number'], '9876543210987')
-        self.assertEqual(result['normalized']['source_system'], 'GEMINI_AI')
+        from django.core.files.base import ContentFile
 
-    @patch('core.ticket_parser.parse_ticket_with_gemini')
-    def test_ai_first_strategy_fallback_on_invalid_data(self, mock_parse_with_gemini):
+        archivo_simulado = ContentFile(SAMPLE_SABRE_TICKET.encode("utf-8"), name="ticket.txt")
+
+        boleto = BoletoImportado(
+            agencia=agencia, archivo_boleto=archivo_simulado, estado_parseo="PEN"
+        )
+        boleto._skip_auto_parse = True
+        boleto.save()
+
+        # Procesar
+        service = TicketParserService()
+        venta = service.procesar_boleto(boleto.pk, bypass_cache=True, ignore_manual=True)
+
+        boleto.refresh_from_db()
+
+        assert venta is not None
+        # La IA no debería ser llamada
+        mock_ai_parse.assert_not_called()
+        mock_extract_regex.assert_called_once()
+
+        assert boleto.estado_parseo == "COM"
+        assert boleto.numero_boleto == "1234567890123"
+        assert boleto.localizador_pnr == "R2D2C3"
+        assert boleto.nombre_pasajero_completo == "JOHN DOE"
+
+    @patch("apps.automation.services.ticket_parser_service.extract_data_from_text")
+    @patch("apps.automation.parsers.ai_universal_parser.UniversalAIParser.parse")
+    def test_regex_first_fallback_on_failure(self, mock_ai_parse, mock_extract_regex):
         """
-        Verifica que si la IA devuelve datos inválidos, se usa el parser de regex.
+        Verifica que si el Regex local falla o devuelve un error, se ejecuta el fallback a la IA.
         """
-        invalid_ai_response = {"passenger": {"name": "Test"}} # Faltan flights y bookingDetails
-        mock_parse_with_gemini.return_value = invalid_ai_response
+        mock_extract_regex.return_value = {"error": "Formato no compatible"}
+        mock_ai_parse.return_value = MOCK_AI_RESPONSE.copy()
 
-        result = extract_data_from_text(SAMPLE_SABRE_TICKET)
+        agencia = Agencia.objects.create(nombre="Test Agency Fallback Failure")
+        from django.core.files.base import ContentFile
 
-        mock_parse_with_gemini.assert_called_once()
-        self.assertIsNotNone(result)
-        self.assertEqual(result.get('SOURCE_SYSTEM'), 'SABRE')
-        self.assertIn('normalized', result)
-        self.assertEqual(result['normalized']['ticket_number'], '1234567890123')
-        self.assertEqual(result['normalized']['source_system'], 'SABRE')
+        archivo_simulado = ContentFile(SAMPLE_SABRE_TICKET.encode("utf-8"), name="ticket.txt")
 
-    @patch('core.ticket_parser.parse_ticket_with_gemini')
-    def test_ai_first_strategy_fallback_on_ai_failure(self, mock_parse_with_gemini):
+        boleto = BoletoImportado(
+            agencia=agencia, archivo_boleto=archivo_simulado, estado_parseo="PEN"
+        )
+        boleto._skip_auto_parse = True
+        boleto.save()
+
+        # Procesar
+        service = TicketParserService()
+        venta = service.procesar_boleto(boleto.pk, bypass_cache=True, ignore_manual=True)
+
+        boleto.refresh_from_db()
+
+        assert venta is not None
+        mock_extract_regex.assert_called_once()
+        mock_ai_parse.assert_called_once()
+
+        assert boleto.estado_parseo == "COM"
+        assert boleto.numero_boleto == "9876543210987"
+        assert boleto.localizador_pnr == "AI-R2D2"
+
+    @patch("apps.automation.services.ticket_parser_service.extract_data_from_text")
+    @patch("apps.automation.parsers.ai_universal_parser.UniversalAIParser.parse")
+    def test_regex_first_fallback_on_incomplete(self, mock_ai_parse, mock_extract_regex):
         """
-        Verifica que si el parser de IA falla (lanza excepción), se usa el parser de regex.
+        Verifica que si el Regex local extrae datos pero están incompletos (p. ej. sin segmentos de vuelo),
+        el pipeline ejecuta el fallback a la IA.
         """
-        mock_parse_with_gemini.side_effect = Exception("Fallo de API")
+        # Datos incompletos: sin segmentos/vuelos
+        mock_extract_regex.return_value = {
+            "passenger_name": "JOHN DOE",
+            "pnr": "R2D2C3",
+            "numero_boleto": "1234567890123",
+            "segments": [],
+        }
+        mock_ai_parse.return_value = MOCK_AI_RESPONSE.copy()
 
-        result = extract_data_from_text(SAMPLE_SABRE_TICKET)
+        agencia = Agencia.objects.create(nombre="Test Agency Fallback Incomplete")
+        from django.core.files.base import ContentFile
 
-        mock_parse_with_gemini.assert_called_once()
-        self.assertIsNotNone(result)
-        self.assertEqual(result.get('SOURCE_SYSTEM'), 'SABRE')
-        self.assertIn('normalized', result)
-        self.assertEqual(result['normalized']['ticket_number'], '1234567890123')
+        archivo_simulado = ContentFile(SAMPLE_SABRE_TICKET.encode("utf-8"), name="ticket.txt")
 
-if __name__ == '__main__':
-    unittest.main()
+        boleto = BoletoImportado(
+            agencia=agencia, archivo_boleto=archivo_simulado, estado_parseo="PEN"
+        )
+        boleto._skip_auto_parse = True
+        boleto.save()
+
+        # Procesar
+        service = TicketParserService()
+        venta = service.procesar_boleto(boleto.pk, bypass_cache=True, ignore_manual=True)
+
+        boleto.refresh_from_db()
+
+        assert venta is not None
+        mock_extract_regex.assert_called_once()
+        mock_ai_parse.assert_called_once()
+
+        assert boleto.estado_parseo == "COM"
+        assert boleto.numero_boleto == "9876543210987"
+        assert boleto.localizador_pnr == "AI-R2D2"

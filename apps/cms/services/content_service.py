@@ -1,16 +1,18 @@
 import json
 import logging
 
-from django.conf import settings
 from django.utils.text import slugify
 
 from ..models import Articulo, PostRedesSociales
 
 logger = logging.getLogger(__name__)
 
+
 def _get_genai():
     from google import genai
+
     return genai
+
 
 class AIContentService:
     """
@@ -18,10 +20,12 @@ class AIContentService:
     """
 
     def __init__(self):
-        from apps.automation.services.ai_engine import get_gemini_api_key
+        from django.conf import settings
+
         genai = _get_genai()
-        self.client = genai.Client(api_key=get_gemini_api_key())
-        self.model_name = 'gemini-2.0-flash'
+        api_key = getattr(settings, "GEMINI_API_KEY", None)
+        self.client = genai.Client(api_key=api_key)
+        self.model_name = "gemini-2.0-flash"
 
     def generate_article(self, destination, keywords=None):
         """
@@ -47,31 +51,31 @@ class AIContentService:
             "meta_descripcion": "..."
         }}
         """
-        
+
         try:
             response = self.client.models.generate_content(model=self.model_name, contents=prompt)
             # Limpiar la respuesta si tiene bloques de markdown
             content = response.text.strip()
-            if content.startswith('```json'):
+            if content.startswith("```json"):
                 content = content[7:-3].strip()
-            
+
             data = json.loads(content)
-            
+
             # Crear el artículo en la DB
             articulo = Articulo.objects.create(
-                titulo=data['titulo'],
-                slug=slugify(data['titulo']),
-                resumen=data['resumen'],
-                contenido=data['contenido'],
+                titulo=data["titulo"],
+                slug=slugify(data["titulo"]),
+                resumen=data["resumen"],
+                contenido=data["contenido"],
                 destino=destination,
                 generado_por_ia=True,
                 prompt_ia=prompt,
-                meta_titulo=data['meta_titulo'],
-                meta_descripcion=data['meta_descripcion']
+                meta_titulo=data["meta_titulo"],
+                meta_descripcion=data["meta_descripcion"],
             )
-            
+
             return articulo
-            
+
         except Exception as e:
             logger.error(f"Error generando artículo para {destination}: {e}")
             raise
@@ -81,7 +85,7 @@ class AIContentService:
         Genera fragmentos para redes sociales basados en un artículo.
         """
         articulo = Articulo.objects.get(id=articulo_id)
-        
+
         prompt = f"""
         Basado en el siguiente artículo sobre {articulo.destino}:
         '{articulo.resumen}'
@@ -97,36 +101,33 @@ class AIContentService:
             "hashtags": "#travel #lux..."
         }}
         """
-        
+
         try:
             response = self.client.models.generate_content(model=self.model_name, contents=prompt)
             content = response.text.strip()
-            if content.startswith('```json'):
+            if content.startswith("```json"):
                 content = content[7:-3].strip()
-            
+
             data = json.loads(content)
-            hashtags = data.pop('hashtags', '')
-            
+            hashtags = data.pop("hashtags", "")
+
             posts = []
             # Mapeo de plataforma
             mapping = {
-                'INSTAGRAM': PostRedesSociales.Plataforma.INSTAGRAM,
-                'TELEGRAM': PostRedesSociales.Plataforma.TELEGRAM,
-                'LINKEDIN': PostRedesSociales.Plataforma.LINKEDIN
+                "INSTAGRAM": PostRedesSociales.Plataforma.INSTAGRAM,
+                "TELEGRAM": PostRedesSociales.Plataforma.TELEGRAM,
+                "LINKEDIN": PostRedesSociales.Plataforma.LINKEDIN,
             }
-            
+
             for key, plat in mapping.items():
                 if key in data:
                     post = PostRedesSociales.objects.create(
-                        articulo=articulo,
-                        plataforma=plat,
-                        contenido=data[key],
-                        hashtags=hashtags
+                        articulo=articulo, plataforma=plat, contenido=data[key], hashtags=hashtags
                     )
                     posts.append(post)
-            
+
             return posts
-            
+
         except Exception as e:
             logger.error(f"Error generando posts para artículo {articulo_id}: {e}")
             raise

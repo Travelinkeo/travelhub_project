@@ -45,12 +45,12 @@ def _interpret_user_request(user_request: str) -> dict[str, Any]:
         "exclusiones": ["caminatas largas", "zonas de mucha fiesta"]
     }}
     """
-    
+
     try:
         response_text = generate_content(prompt)
         if response_text.strip().startswith("```json"):
             response_text = response_text.strip()[7:-3].strip()
-        
+
         search_params = json.loads(response_text)
         logger.info(f"Parámetros de búsqueda interpretados: {search_params}")
         return search_params
@@ -58,21 +58,23 @@ def _interpret_user_request(user_request: str) -> dict[str, Any]:
         logger.error(f"Error al interpretar la solicitud del usuario: {e}")
         return {"error": "No se pudo interpretar la solicitud."}
 
+
 def _generate_narrative_itinerary(search_params: dict[str, Any]) -> str:
     """
     Paso 2: Recibe los parámetros, consulta la base de datos y genera un itinerario narrativo.
     """
-    destino = search_params.get('destino')
-    intereses = search_params.get('intereses', [])
-    
+    destino = search_params.get("destino")
+    intereses = search_params.get("intereses", [])
+
     if not destino:
         return "Lo sentimos, no se pudo determinar un destino a partir de tu solicitud."
 
     # 1. Consultar la base de datos de Django con filtros dinámicos
-    
+
     # Filtro base por destino (en el país o en la ciudad del proveedor)
-    location_filter = (Q(proveedor_principal__ciudad__pais__nombre__icontains=destino) |
-                       Q(proveedor_principal__ciudad__nombre__icontains=destino))
+    location_filter = Q(proveedor_principal__ciudad__pais__nombre__icontains=destino) | Q(
+        proveedor_principal__ciudad__nombre__icontains=destino
+    )
 
     # Filtro por intereses (en el nombre o descripción del producto)
     interest_filter = Q()
@@ -86,23 +88,25 @@ def _generate_narrative_itinerary(search_params: dict[str, Any]) -> str:
         location_filter,
         interest_filter,
         tipo_producto=ProductoServicio.TipoProductoChoices.TOUR_ACTIVIDAD,
-        activo=True
-    ).values('nombre', 'descripcion', 'proveedor_principal__nombre')[:15] # Limitar a 15 para no saturar el prompt
+        activo=True,
+    ).values("nombre", "descripcion", "proveedor_principal__nombre")[
+        :15
+    ]  # Limitar a 15 para no saturar el prompt
 
     # Búsqueda de hoteles
     hoteles_qs = ProductoServicio.objects.filter(
-        location_filter,
-        tipo_producto=ProductoServicio.TipoProductoChoices.HOTEL,
-        activo=True
-    ).values('nombre', 'descripcion', 'proveedor_principal__nombre')[:10]
+        location_filter, tipo_producto=ProductoServicio.TipoProductoChoices.HOTEL, activo=True
+    ).values("nombre", "descripcion", "proveedor_principal__nombre")[:10]
 
     db_results = {
         "actividades_disponibles": list(actividades_qs),
-        "hoteles_sugeridos": list(hoteles_qs)
+        "hoteles_sugeridos": list(hoteles_qs),
     }
 
     if not db_results["actividades_disponibles"]:
-        db_results["info"] = "No se encontraron actividades específicas para los intereses mencionados, pero se pueden sugerir actividades generales del destino."
+        db_results["info"] = (
+            "No se encontraron actividades específicas para los intereses mencionados, pero se pueden sugerir actividades generales del destino."
+        )
 
     # 2. Segunda llamada a Gemini con los datos de la BD
     prompt = f"""
@@ -128,7 +132,7 @@ def _generate_narrative_itinerary(search_params: dict[str, Any]) -> str:
     - El tono debe ser inspirador y vendedor, ¡haz que el cliente sueñe con este viaje!
     - Formatea la respuesta en Markdown, usando títulos para cada día (ej: `### Día 1: Llegada a...`).
     """
-    
+
     try:
         itinerary_text = generate_content(prompt)
         logger.info("Itinerario narrativo generado con éxito.")
@@ -137,21 +141,23 @@ def _generate_narrative_itinerary(search_params: dict[str, Any]) -> str:
         logger.error(f"Error al generar el itinerario narrativo: {e}")
         return "Lo sentimos, no pudimos generar tu itinerario en este momento."
 
+
 def create_personalized_itinerary(user_request: str) -> str:
     """
     Función principal que orquesta la creación del itinerario.
     """
     logger.info(f"Recibida nueva solicitud de itinerario: '{user_request}'")
-    
+
     # Paso 1: Interpretar la solicitud
     search_parameters = _interpret_user_request(user_request)
     if search_parameters.get("error"):
         return search_parameters["error"]
-    
+
     # Paso 2: Generar el itinerario
     narrative_itinerary = _generate_narrative_itinerary(search_parameters)
-    
+
     return narrative_itinerary
+
 
 # Ejemplo de cómo se podría llamar desde una vista de Django
 

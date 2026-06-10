@@ -5,104 +5,44 @@
     {% if form.instance.pk %}Editar Proveedor: {{ form.instance.nombre }}{% else %}Nuevo Proveedor{% endif %} — TravelHub
 {% endblock %}
 
-{% block extra_head %}
-<style>
-/* Input Base Styles para Django Forms */
-input[type="text"], input[type="email"], input[type="file"], input[type="number"], input[type="date"], select, textarea {
-    width: 100%;
-    border-radius: 8px;
-    border: 1px solid var(--border);
-    height: 40px;
-    padding-left: 1rem;
-    padding-right: 1rem;
-    background-color: var(--surface-2);
-    color: var(--text-primary);
-    outline: none;
-    transition: all 0.2s ease;
-    font-size: 13px;
-    font-family: inherit;
-}
-
-input:focus, select:focus, textarea:focus {
-    border-color: var(--primary);
-    background-color: var(--surface-1);
-    box-shadow: 0 0 0 1px var(--primary);
-}
-
-textarea { height: auto; padding-top: 0.75rem; padding-bottom: 0.75rem; }
-
-/* Checkbox specific styling */
-input[type="checkbox"] {
-    width: 1.25rem;
-    height: 1.25rem;
-    border-radius: 4px;
-    border: 1px solid var(--border);
-    accent-color: var(--primary);
-    cursor: pointer;
-}
-
-/* Specific select dropdown arrow fix */
-select {
-    appearance: none;
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
-    background-position: right 0.5rem center;
-    background-repeat: no-repeat;
-    background-size: 1.5em 1.5em;
-    padding-right: 2.5rem;
-}
-
-.helptext {
-    font-size: 11px;
-    color: var(--text-muted);
-    margin-top: 4px;
-    display: block;
-}
-
-/* Table rules specifically for Comisiones DataGrid */
-#comisiones-table-core tr:hover td { background: rgba(255,255,255,0.02); }
-#comisiones-table-core td { padding: 12px 16px; border-bottom: 1px solid var(--border); vertical-align: middle; font-size: 13px; }
-#comisiones-table-core th { padding: 10px 16px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); border-bottom: 1px solid var(--border); background: var(--surface-2); white-space: nowrap; text-align: left; }
-</style>
-{% endblock %}
-
 {% block content %}
 <main class="flex-1 w-full max-w-[1400px] mx-auto p-6 md:p-8 lg:p-10" x-data="proveedorForm()">
     <!-- Header -->
-    <div class="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-border-light dark:border-border-dark pb-6">
+    <div class="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-border-color pb-6">
         <div>
-            <div class="flex items-center gap-2 text-xs text-slate-500 dark:text-gray-400 font-medium mb-2 uppercase tracking-wider">
-                <a href="{% url 'core:proveedores_list' %}" class="hover:text-primary transition-colors">Operaciones</a>
+            <div class="flex items-center gap-2 text-xs text-text-muted font-medium mb-2 uppercase tracking-wider">
+                <a href="{% url 'bookings:proveedor_list' %}" class="hover:text-primary transition-colors">Operaciones</a>
                 <span class="material-symbols-outlined text-[10px]">chevron_right</span>
-                <a href="{% url 'core:proveedores_list' %}" class="hover:text-primary transition-colors">Proveedores</a>
+                <a href="{% url 'bookings:proveedor_list' %}" class="hover:text-primary transition-colors">Proveedores</a>
                 <span class="material-symbols-outlined text-[10px]">chevron_right</span>
                 <span class="text-primary">{% if form.instance.pk %}Editar{% else %}Nuevo{% endif %}</span>
             </div>
-            <h1 class="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">{{ title }}</h1>
-            <p class="text-gray-500 dark:text-slate-400 mt-2">Gestión de Proveedor y Reglas de Negocio</p>
+            <h1 class="text-3xl font-bold text-text-main tracking-tight">{{ title }}</h1>
+            <p class="text-text-secondary mt-2">Gestión de Proveedor y Reglas de Negocio</p>
         </div>
         <div class="flex items-center gap-3">
-            <a href="{% url 'core:proveedores_list' %}" class="text-sm font-bold tracking-wide flex items-center gap-1 text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white transition-colors">
+            <a href="{% url 'bookings:proveedor_list' %}" class="text-sm font-bold tracking-wide flex items-center gap-1 text-text-secondary hover:text-text-main transition-colors">
                 <span class="material-symbols-outlined text-[18px]">arrow_back</span> Volver al listado
             </a>
         </div>
     </div>
 
     <!-- Tabs Navigation -->
-    <div class="flex space-x-6 mb-6 border-b border-border-light dark:border-border-dark">
+    <div class="flex space-x-6 mb-6 border-b border-border-color">
         <button @click="activeTab = 'general'"
-            :class="{'border-primary text-primary': activeTab === 'general', 'border-transparent text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white': activeTab !== 'general'}"
+            :class="{'border-primary text-primary': activeTab === 'general', 'border-transparent text-text-secondary hover:text-text-main': activeTab !== 'general'}"
             class="pb-3 px-1 border-b-2 font-bold text-sm transition-colors uppercase tracking-wider">
             Información General
         </button>
         {% if form.instance.pk %}
         <button @click="activeTab = 'comisiones'"
-            :class="{'border-primary text-primary': activeTab === 'comisiones', 'border-transparent text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white': activeTab !== 'comisiones'}"
+            :class="{'border-primary text-primary': activeTab === 'comisiones', 'border-transparent text-text-secondary hover:text-text-main': activeTab !== 'comisiones'}"
             class="pb-3 px-1 border-b-2 font-bold text-sm transition-colors uppercase tracking-wider flex items-center">
             Reglas de Comisión
-            <span class="ml-2 bg-gray-100 dark:bg-surface-highlight-dark/30 text-[10px] px-2 py-0.5 rounded-full" x-text="comisionesIds.length">0</span>
+            <span class="ml-2 bg-surface-2 text-[10px] px-2 py-0.5 rounded-full" x-text="comisionesIds.length">0</span>
         </button>
         <button @click="activeTab = 'liquidaciones'"
-            :class="{'border-primary text-primary': activeTab === 'liquidaciones', 'border-transparent text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white': activeTab !== 'liquidaciones'}"
+            :class="{'border-primary text-primary': activeTab === 'liquidaciones', 'border-transparent text-text-secondary hover:text-text-main': activeTab !== 'liquidaciones'}"
             class="pb-3 px-1 border-b-2 font-bold text-sm transition-colors uppercase tracking-wider flex items-center">
             Liquidaciones
         </button>
@@ -114,10 +54,10 @@ select {
         {% csrf_token %}
 
         {% if form.errors %}
-        <div class="bg-red-500/10 border border-red-500/30 rounded-xl p-4 shadow-sm flex items-start gap-4">
-            <span class="material-symbols-outlined text-red-500 shrink-0 mt-0.5">error</span>
+        <div class="bg-status-danger-bg border border-status-danger rounded-xl p-4 shadow-sm flex items-start gap-4">
+            <span class="material-symbols-outlined text-status-danger shrink-0 mt-0.5">error</span>
             <div>
-                <h3 class="text-sm font-bold text-red-500">Hay errores en el formulario</h3>
+                <h3 class="text-sm font-bold text-status-danger">Hay errores en el formulario</h3>
                 <div class="mt-1 text-sm text-red-400">
                     {{ form.errors }}
                 </div>
@@ -127,35 +67,35 @@ select {
 
         <!-- General Info -->
         <div class="card-base p-6">
-            <h2 class="text-lg font-bold text-gray-900 dark:text-white mb-6 pb-4 border-b border-border-light dark:border-border-dark flex items-center gap-2">
+            <h2 class="text-lg font-bold text-text-main mb-6 pb-4 border-b border-border-color flex items-center gap-2">
                 <span class="material-symbols-outlined text-primary">storefront</span>
                 Información General
             </h2>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div>
-                    <label class="block text-gray-500 dark:text-slate-400 text-[10px] uppercase font-bold tracking-wider mb-1.5">Nombre *</label>
+                    <label class="block text-text-muted text-[10px] uppercase font-bold tracking-wider mb-1.5">Nombre *</label>
                     {{ form.nombre }}
                 </div>
                 <div>
-                    <label class="block text-gray-500 dark:text-slate-400 text-[10px] uppercase font-bold tracking-wider mb-1.5">Alias / Nombre Comercial</label>
+                    <label class="block text-text-muted text-[10px] uppercase font-bold tracking-wider mb-1.5">Alias / Nombre Comercial</label>
                     {{ form.alias }}
                 </div>
                 <div>
-                    <label class="block text-gray-500 dark:text-slate-400 text-[10px] uppercase font-bold tracking-wider mb-1.5">RIF</label>
+                    <label class="block text-text-muted text-[10px] uppercase font-bold tracking-wider mb-1.5">RIF</label>
                     {{ form.rif }}
                 </div>
                 <div>
-                    <label class="block text-gray-500 dark:text-slate-400 text-[10px] uppercase font-bold tracking-wider mb-1.5">Tipo de Proveedor</label>
+                    <label class="block text-text-muted text-[10px] uppercase font-bold tracking-wider mb-1.5">Tipo de Proveedor</label>
                     {{ form.tipo_proveedor }}
                 </div>
                 <div>
-                    <label class="block text-gray-500 dark:text-slate-400 text-[10px] uppercase font-bold tracking-wider mb-1.5">Nivel</label>
+                    <label class="block text-text-muted text-[10px] uppercase font-bold tracking-wider mb-1.5">Nivel</label>
                     {{ form.nivel_proveedor }}
                 </div>
                 <div class="flex items-center pt-6">
                     <label class="flex items-center space-x-3 cursor-pointer">
                         {{ form.activo }}
-                        <span class="text-gray-900 dark:text-white font-bold text-sm">Proveedor Activo</span>
+                        <span class="text-text-main font-bold text-sm">Proveedor Activo</span>
                     </label>
                 </div>
             </div>
@@ -163,29 +103,29 @@ select {
 
         <!-- Contact Info -->
         <div class="card-base p-6">
-            <h2 class="text-lg font-bold text-gray-900 dark:text-white mb-6 pb-4 border-b border-border-light dark:border-border-dark flex items-center gap-2">
+            <h2 class="text-lg font-bold text-text-main mb-6 pb-4 border-b border-border-color flex items-center gap-2">
                 <span class="material-symbols-outlined text-primary">contact_phone</span>
                 Contacto y Ubicación
             </h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <label class="block text-gray-500 dark:text-slate-400 text-[10px] uppercase font-bold tracking-wider mb-1.5">Nombre de Contacto</label>
+                    <label class="block text-text-muted text-[10px] uppercase font-bold tracking-wider mb-1.5">Nombre de Contacto</label>
                     {{ form.contacto_nombre }}
                 </div>
                 <div>
-                    <label class="block text-gray-500 dark:text-slate-400 text-[10px] uppercase font-bold tracking-wider mb-1.5">Email</label>
+                    <label class="block text-text-muted text-[10px] uppercase font-bold tracking-wider mb-1.5">Email</label>
                     {{ form.contacto_email }}
                 </div>
                 <div>
-                    <label class="block text-gray-500 dark:text-slate-400 text-[10px] uppercase font-bold tracking-wider mb-1.5">Teléfono</label>
+                    <label class="block text-text-muted text-[10px] uppercase font-bold tracking-wider mb-1.5">Teléfono</label>
                     {{ form.contacto_telefono }}
                 </div>
                 <div>
-                    <label class="block text-gray-500 dark:text-slate-400 text-[10px] uppercase font-bold tracking-wider mb-1.5">Ciudad</label>
+                    <label class="block text-text-muted text-[10px] uppercase font-bold tracking-wider mb-1.5">Ciudad</label>
                     {{ form.ciudad }}
                 </div>
                 <div class="md:col-span-2">
-                    <label class="block text-gray-500 dark:text-slate-400 text-[10px] uppercase font-bold tracking-wider mb-1.5">Dirección</label>
+                    <label class="block text-text-muted text-[10px] uppercase font-bold tracking-wider mb-1.5">Dirección</label>
                     {{ form.direccion }}
                 </div>
             </div>
@@ -193,41 +133,41 @@ select {
 
         <!-- IDs & GDS -->
         <div class="card-base p-6 relative overflow-hidden">
-            <h2 class="text-lg font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
+            <h2 class="text-lg font-bold text-text-main mb-2 flex items-center gap-2">
                 <span class="material-symbols-outlined text-primary">api</span>
                 Configuración GDS y Sistemas
             </h2>
-            <p class="text-xs font-medium text-gray-500 dark:text-slate-400 mb-8 border-b border-border-light dark:border-border-dark pb-4">
+            <p class="text-xs font-medium text-text-muted mb-8 border-b border-border-color pb-4">
                 Identificadores únicos para integración con sistemas de reservación.
             </p>
 
             <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 <div>
-                    <label class="block text-gray-500 dark:text-slate-400 text-[10px] uppercase font-bold tracking-wider mb-1.5">IATA Number</label>
+                    <label class="block text-text-muted text-[10px] uppercase font-bold tracking-wider mb-1.5">IATA Number</label>
                     {{ form.iata }}
                 </div>
                 <div>
-                    <label class="block text-gray-500 dark:text-slate-400 text-[10px] uppercase font-bold tracking-wider mb-1.5">PCC / Seudo SABRE</label>
+                    <label class="block text-text-muted text-[10px] uppercase font-bold tracking-wider mb-1.5">PCC / Seudo SABRE</label>
                     {{ form.seudo_sabre }}
                 </div>
                 <div>
-                    <label class="block text-gray-500 dark:text-slate-400 text-[10px] uppercase font-bold tracking-wider mb-1.5">Office ID KIU</label>
+                    <label class="block text-text-muted text-[10px] uppercase font-bold tracking-wider mb-1.5">Office ID KIU</label>
                     {{ form.office_id_kiu }}
                 </div>
                 <div>
-                    <label class="block text-gray-500 dark:text-slate-400 text-[10px] uppercase font-bold tracking-wider mb-1.5">Office ID Amadeus</label>
+                    <label class="block text-text-muted text-[10px] uppercase font-bold tracking-wider mb-1.5">Office ID Amadeus</label>
                     {{ form.office_id_amadeus }}
                 </div>
                 <div>
-                    <label class="block text-gray-500 dark:text-slate-400 text-[10px] uppercase font-bold tracking-wider mb-1.5">Travelport ID</label>
+                    <label class="block text-text-muted text-[10px] uppercase font-bold tracking-wider mb-1.5">Travelport ID</label>
                     {{ form.office_id_travelport }}
                 </div>
                 <div>
-                    <label class="block text-gray-500 dark:text-slate-400 text-[10px] uppercase font-bold tracking-wider mb-1.5">HotelBeds API ID</label>
+                    <label class="block text-text-muted text-[10px] uppercase font-bold tracking-wider mb-1.5">HotelBeds API ID</label>
                     {{ form.office_id_hotelbeds }}
                 </div>
                 <div>
-                    <label class="block text-gray-500 dark:text-slate-400 text-[10px] uppercase font-bold tracking-wider mb-1.5">Expedia Partner ID</label>
+                    <label class="block text-text-muted text-[10px] uppercase font-bold tracking-wider mb-1.5">Expedia Partner ID</label>
                     {{ form.office_id_expedia }}
                 </div>
             </div>
@@ -235,41 +175,41 @@ select {
 
         <!-- Financial Info -->
         <div class="card-base p-6">
-            <h2 class="text-lg font-bold text-gray-900 dark:text-white mb-6 pb-4 border-b border-border-light dark:border-border-dark flex items-center gap-2">
+            <h2 class="text-lg font-bold text-text-main mb-6 pb-4 border-b border-border-color flex items-center gap-2">
                 <span class="material-symbols-outlined text-primary">account_balance</span>
                 Información Financiera (Global)
             </h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <label class="block text-gray-500 dark:text-slate-400 text-[10px] uppercase font-bold tracking-wider mb-1.5">Fee Nacional (Default)</label>
+                    <label class="block text-text-muted text-[10px] uppercase font-bold tracking-wider mb-1.5">Fee Nacional (Default)</label>
                     {{ form.fee_nacional }}
                 </div>
                 <div>
-                    <label class="block text-gray-500 dark:text-slate-400 text-[10px] uppercase font-bold tracking-wider mb-1.5">Fee Internacional (Default)</label>
+                    <label class="block text-text-muted text-[10px] uppercase font-bold tracking-wider mb-1.5">Fee Internacional (Default)</label>
                     {{ form.fee_internacional }}
                 </div>
                 <div>
-                    <label class="block text-gray-500 dark:text-slate-400 text-[10px] uppercase font-bold tracking-wider mb-1.5">Número de Cuenta Agencia</label>
+                    <label class="block text-text-muted text-[10px] uppercase font-bold tracking-wider mb-1.5">Número de Cuenta Agencia</label>
                     {{ form.numero_cuenta_agencia }}
                 </div>
                 <div>
-                    <label class="block text-gray-500 dark:text-slate-400 text-[10px] uppercase font-bold tracking-wider mb-1.5">Condiciones de Pago</label>
+                    <label class="block text-text-muted text-[10px] uppercase font-bold tracking-wider mb-1.5">Condiciones de Pago</label>
                     {{ form.condiciones_pago }}
                 </div>
                 <div class="md:col-span-2">
-                    <label class="block text-gray-500 dark:text-slate-400 text-[10px] uppercase font-bold tracking-wider mb-1.5">Datos Bancarios</label>
+                    <label class="block text-text-muted text-[10px] uppercase font-bold tracking-wider mb-1.5">Datos Bancarios</label>
                     {{ form.datos_bancarios }}
                 </div>
                 <div class="md:col-span-2">
-                    <label class="block text-gray-500 dark:text-slate-400 text-[10px] uppercase font-bold tracking-wider mb-1.5">Notas</label>
+                    <label class="block text-text-muted text-[10px] uppercase font-bold tracking-wider mb-1.5">Notas</label>
                     {{ form.notas }}
                 </div>
             </div>
         </div>
 
         <!-- Actions -->
-        <div class="flex items-center justify-end gap-4 mt-8 pt-6 border-t border-border-light dark:border-border-dark">
-            <a href="{% url 'core:proveedores_list' %}" class="btn-secondary h-[40px] px-6">
+        <div class="flex items-center justify-end gap-4 mt-8 pt-6 border-t border-border-color">
+            <a href="{% url 'bookings:proveedor_list' %}" class="btn-secondary h-[40px] px-6">
                 Cancelar
             </a>
             <button type="submit" class="btn-primary h-[40px] px-8">
@@ -284,8 +224,8 @@ select {
 
         <div class="flex justify-between items-center mb-4">
             <div>
-                <h3 class="text-xl font-bold text-gray-900 dark:text-white">Reglas de Comisión</h3>
-                <p class="text-gray-500 dark:text-slate-400 text-sm mt-1">Define comisiones específicas por tipo de servicio.</p>
+                <h3 class="text-xl font-bold text-text-main">Reglas de Comisión</h3>
+                <p class="text-text-secondary text-sm mt-1">Define comisiones específicas por tipo de servicio.</p>
             </div>
             <button @click="openModal()" class="btn-primary h-[40px] px-6">
                 <span class="material-symbols-outlined text-[16px]">add</span> Nueva Regla
@@ -295,7 +235,7 @@ select {
         <!-- Tabla de Comisiones -->
         <div class="card-base overflow-hidden">
             <div class="overflow-x-auto">
-                <table class="w-full text-left" id="comisiones-table-core">
+                <table class="w-full text-left">
                     <thead>
                         <tr>
                             <th>Tipo Servicio</th>
@@ -306,25 +246,25 @@ select {
                             <th class="text-right">Acciones</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-dashed divide-border-light dark:divide-border-dark">
+                    <tbody class="divide-y divide-dashed divide-border-color">
                         <template x-for="regla in comisionesList" :key="regla.id_comision">
-                            <tr class="group hover:bg-gray-50 dark:hover:bg-surface-highlight-dark/20 transition-colors">
+                            <tr class="group">
                                 <td>
-                                    <span class="text-sm text-gray-900 dark:text-white font-bold" x-text="regla.tipo_servicio_display"></span>
+                                    <span class="text-sm text-text-main font-bold" x-text="regla.tipo_servicio_display"></span>
                                 </td>
                                 <td>
                                     <span class="text-emerald-500 font-mono font-bold" x-show="regla.comision_porcentaje" x-text="regla.comision_porcentaje + '%'"></span>
-                                    <span x-show="!regla.comision_porcentaje" class="text-gray-400">—</span>
+                                    <span x-show="!regla.comision_porcentaje" class="text-text-muted">—</span>
                                 </td>
                                 <td>
                                     <span class="text-blue-500 font-mono font-bold" x-show="regla.comision_monto_fijo">
                                         <span x-text="formatCurrency(regla.comision_monto_fijo)"></span>
-                                        <span x-text="regla.moneda_codigo" class="text-[10px] text-gray-400 dark:text-slate-500 ml-1"></span>
+                                        <span x-text="regla.moneda_codigo" class="text-[10px] text-text-muted ml-1"></span>
                                     </span>
-                                    <span x-show="!regla.comision_monto_fijo" class="text-gray-400">—</span>
+                                    <span x-show="!regla.comision_monto_fijo" class="text-text-muted">—</span>
                                 </td>
                                 <td>
-                                    <span class="text-xs text-gray-500 dark:text-slate-400 max-w-[200px] truncate block" x-text="regla.notas || '—'"></span>
+                                    <span class="text-xs text-text-secondary max-w-[200px] truncate block" x-text="regla.notas || '—'"></span>
                                 </td>
                                 <td class="text-center">
                                     <span class="px-2 py-0.5 inline-flex text-[10px] uppercase font-bold tracking-wider rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20" x-show="regla.activo">Activo</span>
@@ -340,8 +280,8 @@ select {
                             </tr>
                         </template>
                         <tr x-show="comisionesList.length === 0">
-                            <td colspan="6" class="py-16 text-center text-gray-500 dark:text-slate-400">
-                                <span class="material-symbols-outlined text-4xl block mb-2 text-gray-300 dark:text-slate-600">request_quote</span>
+                            <td colspan="6" class="py-16 text-center text-text-muted">
+                                <span class="material-symbols-outlined text-4xl block mb-2 text-text-muted">request_quote</span>
                                 <p class="text-sm font-bold">No hay reglas de comisión configuradas.</p>
                             </td>
                         </tr>
@@ -356,18 +296,18 @@ select {
         <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:p-0">
             <div class="fixed inset-0 bg-slate-900/60 transition-opacity backdrop-blur-sm" aria-hidden="true" @click="showModal = false"></div>
             
-            <div class="relative bg-surface-light dark:bg-surface-dark rounded-2xl w-full max-w-lg p-6 text-left overflow-hidden shadow-2xl transform transition-all border border-border-light dark:border-border-dark">
+            <div class="relative bg-surface-1 rounded-2xl w-full max-w-lg p-6 text-left overflow-hidden shadow-2xl transform transition-all border border-border-color">
                 <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white">Nueva Regla de Comisión</h3>
-                    <button @click="showModal = false" class="text-gray-400 hover:text-gray-600 dark:hover:text-white transition-colors">
+                    <h3 class="text-xl font-bold text-text-main">Nueva Regla de Comisión</h3>
+                    <button @click="showModal = false" class="text-text-muted hover:text-text-main transition-colors">
                         <span class="material-symbols-outlined">close</span>
                     </button>
                 </div>
                 
                 <div class="space-y-5">
                     <div>
-                        <label class="block text-gray-500 dark:text-slate-400 text-[10px] uppercase font-bold tracking-wider mb-1.5">Tipo de Servicio *</label>
-                        <select x-model="newRegla.tipo_servicio">
+                        <label class="block text-text-muted text-[10px] uppercase font-bold tracking-wider mb-1.5">Tipo de Servicio *</label>
+                        <select x-model="newRegla.tipo_servicio" class="input-base">
                             <option value="">Seleccione...</option>
                             <template x-for="tipo in tiposServicio" :key="tipo.id">
                                 <option :value="tipo.id" x-text="tipo.label"></option>
@@ -376,17 +316,17 @@ select {
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-gray-500 dark:text-slate-400 text-[10px] uppercase font-bold tracking-wider mb-1.5">Comisión %</label>
-                            <input type="number" step="0.01" x-model="newRegla.comision_porcentaje" placeholder="0.00">
+                            <label class="block text-text-muted text-[10px] uppercase font-bold tracking-wider mb-1.5">Comisión %</label>
+                            <input type="number" step="0.01" x-model="newRegla.comision_porcentaje" placeholder="0.00" class="input-base">
                         </div>
                         <div>
-                            <label class="block text-gray-500 dark:text-slate-400 text-[10px] uppercase font-bold tracking-wider mb-1.5">Monto Fijo</label>
-                            <input type="number" step="0.01" x-model="newRegla.comision_monto_fijo" placeholder="0.00">
+                            <label class="block text-text-muted text-[10px] uppercase font-bold tracking-wider mb-1.5">Monto Fijo</label>
+                            <input type="number" step="0.01" x-model="newRegla.comision_monto_fijo" placeholder="0.00" class="input-base">
                         </div>
                     </div>
                     <div>
-                        <label class="block text-gray-500 dark:text-slate-400 text-[10px] uppercase font-bold tracking-wider mb-1.5">Moneda (Monto Fijo)</label>
-                        <select x-model="newRegla.moneda">
+                        <label class="block text-text-muted text-[10px] uppercase font-bold tracking-wider mb-1.5">Moneda (Monto Fijo)</label>
+                        <select x-model="newRegla.moneda" class="input-base">
                             <option value="">Seleccione...</option>
                             <template x-for="moneda in monedas" :key="moneda.id_moneda">
                                 <option :value="moneda.id_moneda" x-text="moneda.codigo_iso"></option>
@@ -394,12 +334,12 @@ select {
                         </select>
                     </div>
                     <div>
-                        <label class="block text-gray-500 dark:text-slate-400 text-[10px] uppercase font-bold tracking-wider mb-1.5">Notas</label>
-                        <textarea x-model="newRegla.notas" rows="2"></textarea>
+                        <label class="block text-text-muted text-[10px] uppercase font-bold tracking-wider mb-1.5">Notas</label>
+                        <textarea x-model="newRegla.notas" rows="2" class="input-base"></textarea>
                     </div>
                 </div>
                 
-                <div class="flex items-center justify-end gap-3 mt-8 pt-5 border-t border-border-light dark:border-border-dark">
+                <div class="flex items-center justify-end gap-3 mt-8 pt-5 border-t border-border-color">
                     <button type="button" @click="showModal = false" class="btn-secondary h-[40px] px-6">Cancelar</button>
                     <button type="button" @click="saveRegla()" class="btn-primary h-[40px] px-8">Guardar Regla</button>
                 </div>
@@ -413,8 +353,8 @@ select {
             <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-primary/20 text-primary">
                 <span class="material-symbols-outlined text-3xl">account_balance_wallet</span>
             </div>
-            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Historial de Liquidaciones</h3>
-            <p class="text-gray-500 dark:text-slate-400 text-sm max-w-sm mx-auto mb-8">
+            <h3 class="text-xl font-bold text-text-main mb-2">Historial de Liquidaciones</h3>
+            <p class="text-text-secondary text-sm max-w-sm mx-auto mb-8">
                 Consulta todos los pagos y liquidaciones generadas para este proveedor desde el módulo de Finanzas.
             </p>
             <a href="{% url 'finance:liquidacion_list' %}?q={{ form.instance.nombre }}" class="btn-primary h-[40px] px-8 flex items-center gap-2">
@@ -433,8 +373,10 @@ select {
             proveedorId: {{ proveedor_id|default:"null" }},
             comisionesList: [],
             comisionesIds: [],
-            tiposServicio: {{ tipos_servicio_choices|safe }},
-            monedas: {{ monedas_json|safe }},
+            {{ tipos_servicio_choices|json_script:"tipos-servicio" }}
+            {{ monedas_json|json_script:"monedas-data" }}
+            tiposServicio: JSON.parse(document.getElementById('tipos-servicio').textContent),
+            monedas: JSON.parse(document.getElementById('monedas-data').textContent),
             showModal: false,
             newRegla: {
                 tipo_servicio: '',

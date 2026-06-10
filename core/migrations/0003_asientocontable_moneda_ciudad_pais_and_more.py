@@ -6,7 +6,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         (
             "bookings",
@@ -146,9 +145,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="hoteltarifario",
             name="amenidades",
-            field=models.ManyToManyField(
-                blank=True, related_name="hoteles", to="core.amenity"
-            ),
+            field=models.ManyToManyField(blank=True, related_name="hoteles", to="core.amenity"),
         ),
         migrations.AddField(
             model_name="hoteltarifario",
@@ -550,9 +547,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="migrationcheck",
             name="fecha_viaje",
-            field=models.DateField(
-                blank=True, help_text="Fecha del primer vuelo", null=True
-            ),
+            field=models.DateField(blank=True, help_text="Fecha del primer vuelo", null=True),
         ),
         migrations.AlterField(
             model_name="migrationcheck",
@@ -646,9 +641,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterUniqueTogether(
             name="productoservicio",
-            unique_together={
-                ("agencia", "nombre", "tipo_producto", "proveedor_principal")
-            },
+            unique_together={("agencia", "nombre", "tipo_producto", "proveedor_principal")},
         ),
         migrations.AlterUniqueTogether(
             name="tasacambio",
@@ -681,21 +674,15 @@ class Migration(migrations.Migration):
         ),
         migrations.AddIndex(
             model_name="migrationcheck",
-            index=models.Index(
-                fields=["alert_level"], name="core_migrat_alert_l_ad7ef0_idx"
-            ),
+            index=models.Index(fields=["alert_level"], name="core_migrat_alert_l_ad7ef0_idx"),
         ),
         migrations.AddIndex(
             model_name="notificacioninteligente",
-            index=models.Index(
-                fields=["usuario", "leida"], name="core_notifi_usuario_716d79_idx"
-            ),
+            index=models.Index(fields=["usuario", "leida"], name="core_notifi_usuario_716d79_idx"),
         ),
         migrations.AddIndex(
             model_name="retencionislr",
-            index=models.Index(
-                fields=["periodo_fiscal"], name="core_retenc_periodo_2fe1fa_idx"
-            ),
+            index=models.Index(fields=["periodo_fiscal"], name="core_retenc_periodo_2fe1fa_idx"),
         ),
         migrations.AddIndex(
             model_name="retencionislr",

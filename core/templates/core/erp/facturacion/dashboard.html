@@ -101,11 +101,11 @@
                             </span>
                         </td>
                         <td class="px-6 py-4 text-right">
-                            <p class="text-[var(--text-primary)] font-bold">$ {{ factura.total_factura|floatformat:2|intcomma }}</p>
+                            <p class="text-[var(--text-primary)] font-bold">$ {{ factura.monto_total|floatformat:2|intcomma }}</p>
                             <p class="text-xs text-[var(--text-secondary)]">{{ factura.moneda.codigo_iso }}</p>
                         </td>
                         <td class="px-6 py-4 text-right">
-                            <a href="{% url 'core:factura_detalle' factura.pk %}"
+                            <a href="{% url 'finance:factura_detalle' factura.pk %}"
                                 class="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors mr-2 p-1 rounded hover:bg-[var(--surface-3)]" title="Ver Detalle">
                                 <svg class="w-5 h-5 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -115,8 +115,7 @@
                                     </path>
                                 </svg>
                             </a>
-                            {% if factura.archivo_pdf %}
-                            <a href="{% url 'core:factura_pdf' factura.pk %}"
+                            <a href="{% url 'finance:factura_pdf' factura.pk %}"
                                 class="text-[var(--text-secondary)] hover:text-red-400 transition-colors p-1 rounded hover:bg-red-500/10" title="Descargar PDF">
                                 <svg class="w-5 h-5 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -124,7 +123,6 @@
                                     </path>
                                 </svg>
                             </a>
-                            {% endif %}
                         </td>
                     </tr>
                     {% empty %}

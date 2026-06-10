@@ -7,7 +7,6 @@ import apps.contabilidad.models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = []
@@ -18,9 +17,7 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id_asiento",
-                    models.AutoField(
-                        primary_key=True, serialize=False, verbose_name="ID Asiento"
-                    ),
+                    models.AutoField(primary_key=True, serialize=False, verbose_name="ID Asiento"),
                 ),
                 (
                     "numero_asiento",
@@ -39,9 +36,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "descripcion_general",
-                    models.CharField(
-                        max_length=255, verbose_name="Descripción General"
-                    ),
+                    models.CharField(max_length=255, verbose_name="Descripción General"),
                 ),
                 (
                     "tipo_asiento",
@@ -95,9 +90,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "fecha_creacion",
-                    models.DateTimeField(
-                        auto_now_add=True, verbose_name="Fecha de Creación"
-                    ),
+                    models.DateTimeField(auto_now_add=True, verbose_name="Fecha de Creación"),
                 ),
                 (
                     "total_debe",
@@ -203,9 +196,7 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id_cuenta",
-                    models.AutoField(
-                        primary_key=True, serialize=False, verbose_name="ID Cuenta"
-                    ),
+                    models.AutoField(primary_key=True, serialize=False, verbose_name="ID Cuenta"),
                 ),
                 (
                     "codigo_cuenta",
@@ -241,9 +232,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "nivel",
-                    models.PositiveSmallIntegerField(
-                        default=1, verbose_name="Nivel Jerárquico"
-                    ),
+                    models.PositiveSmallIntegerField(default=1, verbose_name="Nivel Jerárquico"),
                 ),
                 (
                     "permite_movimientos",
@@ -277,9 +266,7 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id_tasa",
-                    models.AutoField(
-                        primary_key=True, serialize=False, verbose_name="ID Tasa"
-                    ),
+                    models.AutoField(primary_key=True, serialize=False, verbose_name="ID Tasa"),
                 ),
                 (
                     "fecha",

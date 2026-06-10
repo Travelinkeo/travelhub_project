@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("bookings", "0015_boletoimportado_core_boleto_agencia_b730c5_idx_and_more"),
         ("core", "0015_agencia_configuracion_contable"),
@@ -14,9 +13,7 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddIndex(
             model_name="boletoimportado",
-            index=models.Index(
-                fields=["estado_parseo"], name="idx_boleto_estado_parseo"
-            ),
+            index=models.Index(fields=["estado_parseo"], name="idx_boleto_estado_parseo"),
         ),
         migrations.AddIndex(
             model_name="boletoimportado",
@@ -27,15 +24,11 @@ class Migration(migrations.Migration):
         ),
         migrations.AddIndex(
             model_name="pagoventa",
-            index=models.Index(
-                fields=["agencia", "venta"], name="idx_pago_agencia_venta"
-            ),
+            index=models.Index(fields=["agencia", "venta"], name="idx_pago_agencia_venta"),
         ),
         migrations.AddIndex(
             model_name="pagoventa",
-            index=models.Index(
-                fields=["agencia", "fecha_pago"], name="idx_pago_agencia_fecha"
-            ),
+            index=models.Index(fields=["agencia", "fecha_pago"], name="idx_pago_agencia_fecha"),
         ),
         migrations.AddIndex(
             model_name="pagoventa",

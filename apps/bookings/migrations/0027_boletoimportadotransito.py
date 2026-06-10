@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("bookings", "0026_alter_venta_factura_consolidada"),
         ("core", "0031_agenciaconfiguracion_evolution_api_key_and_more"),
@@ -17,15 +16,11 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id_transito",
-                    models.AutoField(
-                        primary_key=True, serialize=False, verbose_name="ID Tránsito"
-                    ),
+                    models.AutoField(primary_key=True, serialize=False, verbose_name="ID Tránsito"),
                 ),
                 (
                     "ticket_index",
-                    models.PositiveIntegerField(
-                        default=0, verbose_name="Índice de Ticket"
-                    ),
+                    models.PositiveIntegerField(default=0, verbose_name="Índice de Ticket"),
                 ),
                 (
                     "nombre_pasajero",
@@ -58,9 +53,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "fecha_creacion",
-                    models.DateTimeField(
-                        auto_now_add=True, verbose_name="Fecha de Creación"
-                    ),
+                    models.DateTimeField(auto_now_add=True, verbose_name="Fecha de Creación"),
                 ),
                 (
                     "agencia",

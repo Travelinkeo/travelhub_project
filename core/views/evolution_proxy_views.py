@@ -1,3 +1,10 @@
+"""
+Proxy inverso para Evolution Manager UI.
+Intencionalmente sync: debe relajar la respuesta HTTP de Evolution Manager
+de vuelta al cliente en el mismo request-response cycle de Django.
+No es posible async-ificar esto en WSGI (no soporta streaming reverso).
+"""
+
 import logging
 import re
 
@@ -12,7 +19,7 @@ from apps.communications.services.evolution_api_service import EvolutionService
 logger = logging.getLogger(__name__)
 
 # Patrón seguro para instance_name: solo alfanuméricos, guiones y guiones bajos
-INSTANCE_NAME_PATTERN = re.compile(r'^[a-zA-Z0-9_-]+$')
+INSTANCE_NAME_PATTERN = re.compile(r"^[a-zA-Z0-9_-]+$")
 
 
 @login_required
@@ -33,25 +40,31 @@ def evolution_manager_proxy(request, instance_name):
         return HttpResponse("Nombre de instancia inválido", status=400)
 
     # Seguridad: validar que el instance_name corresponde a la agencia del usuario
-    agencia = getattr(request, 'agencia', None)
+    agencia = getattr(request, "agencia", None)
     if agencia and not request.user.is_superuser:
-        expected_slug = agencia.subdominio_slug if hasattr(agencia, 'subdominio_slug') else agencia.nombre.lower().replace(' ', '-')
+        expected_slug = (
+            agencia.subdominio_slug
+            if hasattr(agencia, "subdominio_slug")
+            else agencia.nombre.lower().replace(" ", "-")
+        )
         if instance_name != expected_slug:
-            logger.warning(f"Intento de acceso no autorizado al WhatsApp instance {instance_name} por usuario de agencia {agencia.nombre}")
+            logger.warning(
+                f"Intento de acceso no autorizado al WhatsApp instance {instance_name} por usuario de agencia {agencia.nombre}"
+            )
             return HttpResponse("No autorizado", status=403)
 
     base_url = EvolutionService._get_base_url()
-    
+
     # Extraer el path de forma robusta ignorando cualquier prefijo como /system/
     marker = f"/whatsapp/qr/{instance_name}"
     idx = request.path.find(marker)
     if idx != -1:
-        path = request.path[idx + len(marker):]
+        path = request.path[idx + len(marker) :]
     else:
         path = "/"
     if not path:
         path = "/"
-        
+
     target_url = f"{base_url}/manager/qr/{instance_name}{path}"
 
     if request.META.get("QUERY_STRING"):
@@ -76,17 +89,21 @@ def evolution_manager_proxy(request, instance_name):
 
         if "text/html" in content_type:
             text = resp.text
-            
+
             # Obtener el prefijo del proxy de forma dinámica usando reverse
             try:
                 from django.urls import reverse
-                prefix_url = reverse('core:evolution_qr_proxy', kwargs={'instance_name': instance_name})
-            except Exception:
+
+                prefix_url = reverse(
+                    "core:evolution_qr_proxy", kwargs={"instance_name": instance_name}
+                )
+            except Exception as e:
+                logger.warning("No se pudo resolver reverse para %s: %s", instance_name, e)
                 prefix_url = f"/system/whatsapp/qr/{instance_name}/"
-            
+
             if not prefix_url.endswith("/"):
                 prefix_url += "/"
-                
+
             text = text.replace("/assets/", f"{prefix_url}assets/")
             text = text.replace("/evolution/", f"{prefix_url}evolution/")
             content = text.encode("utf-8")

@@ -8,21 +8,26 @@ from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
-TWILIO_SID = getattr(settings, 'TWILIO_ACCOUNT_SID', None)
-TWILIO_AUTH = getattr(settings, 'TWILIO_AUTH_TOKEN', None)
+TWILIO_SID = getattr(settings, "TWILIO_ACCOUNT_SID", None)
+TWILIO_AUTH = getattr(settings, "TWILIO_AUTH_TOKEN", None)
 
 
 def _get_genai():
     from google import genai
+
     return genai
+
 
 def _get_genai_types():
     from google.genai import types
+
     return types
+
 
 def _get_client():
     genai = _get_genai()
     from apps.automation.services.ai_engine import get_gemini_api_key
+
     api_key = get_gemini_api_key()
     if not api_key:
         logger.error("GEMINI_API_KEY no configurada.")
@@ -38,23 +43,27 @@ def download_twilio_media(media_url: str) -> str:
         logger.info(f"Descargando audio de Twilio: {media_url}")
 
         auth = None
-        if TWILIO_SID and TWILIO_AUTH and 'twilio.com' in media_url.lower():
+        if TWILIO_SID and TWILIO_AUTH and "twilio.com" in media_url.lower():
             auth = (TWILIO_SID, TWILIO_AUTH)
 
-        headers = {'User-Agent': 'Mozilla/5.0 TravelHub-Voice-Bot'}
+        headers = {"User-Agent": "Mozilla/5.0 TravelHub-Voice-Bot"}
         response = requests.get(media_url, auth=auth, headers=headers, stream=True, timeout=15)
         response.raise_for_status()
 
-        content_type = response.headers.get('Content-Type', '')
-        ext = '.ogg'
-        if 'mp4' in content_type: ext = '.mp4'
-        elif 'mp3' in content_type: ext = '.mp3'
-        elif 'amr' in content_type: ext = '.amr'
+        content_type = response.headers.get("Content-Type", "")
+        ext = ".ogg"
+        if "mp4" in content_type:
+            ext = ".mp4"
+        elif "mp3" in content_type:
+            ext = ".mp3"
+        elif "amr" in content_type:
+            ext = ".amr"
 
         fd, temp_path = tempfile.mkstemp(suffix=ext)
-        with os.fdopen(fd, 'wb') as f:
+        with os.fdopen(fd, "wb") as f:
             for chunk in response.iter_content(chunk_size=8192):
-                if chunk: f.write(chunk)
+                if chunk:
+                    f.write(chunk)
 
         return temp_path
 
@@ -93,29 +102,32 @@ def extract_quote_intent_from_audio(file_path: str) -> dict:
 
     try:
         # Subir archivo de audio usando Files API del nuevo SDK
-        with open(file_path, 'rb') as f:
+        with open(file_path, "rb") as f:
             audio_bytes = f.read()
 
         # Inferir mime desde extensión
-        mime = 'audio/ogg'
-        if file_path.endswith('.mp3'): mime = 'audio/mp3'
-        elif file_path.endswith('.mp4'): mime = 'audio/mp4'
-        elif file_path.endswith('.amr'): mime = 'audio/amr'
+        mime = "audio/ogg"
+        if file_path.endswith(".mp3"):
+            mime = "audio/mp3"
+        elif file_path.endswith(".mp4"):
+            mime = "audio/mp4"
+        elif file_path.endswith(".amr"):
+            mime = "audio/amr"
 
         response = client.models.generate_content(
-            model='gemini-2.0-flash',
+            model="gemini-2.0-flash",
             contents=[
                 _get_genai_types().Part.from_bytes(data=audio_bytes, mime_type=mime),
-                json_prompt
+                json_prompt,
             ],
-            config=_get_genai_types().GenerateContentConfig(
-                response_mime_type="application/json"
-            )
+            config=_get_genai_types().GenerateContentConfig(response_mime_type="application/json"),
         )
 
         text_resp = response.text.strip()
-        if text_resp.startswith("```json"): text_resp = text_resp[7:]
-        if text_resp.endswith("```"): text_resp = text_resp[:-3]
+        if text_resp.startswith("```json"):
+            text_resp = text_resp[7:]
+        if text_resp.endswith("```"):
+            text_resp = text_resp[:-3]
 
         data = json.loads(text_resp)
         logger.info(f"Intención de cotización extraída: {data.get('destino')}")
@@ -135,10 +147,10 @@ def extract_quote_intent_from_audio(file_path: str) -> dict:
 
 def process_twilio_audio_message(media_url: str) -> dict:
     """Orquestador: Descarga de Twilio → Extrae IA → Borra archivo tmp."""
-    local_path = download_twilio_media(media_url)
-    if not local_path:
-        return {"error": "Fallo descarga del audio."}
-    return extract_quote_intent_from_audio(local_path)
+    from apps.common.tasks import download_twilio_media_task
+
+    download_twilio_media_task.delay(media_url)
+    return {"success": True, "message": "Audio processing dispatched to background task"}
 
 
 def process_twilio_text_message(text_body: str) -> dict:
@@ -163,15 +175,15 @@ def process_twilio_text_message(text_body: str) -> dict:
     """
     try:
         response = client.models.generate_content(
-            model='gemini-2.0-flash',
+            model="gemini-2.0-flash",
             contents=json_prompt,
-            config=_get_genai_types().GenerateContentConfig(
-                response_mime_type="application/json"
-            )
+            config=_get_genai_types().GenerateContentConfig(response_mime_type="application/json"),
         )
         text_resp = response.text.strip()
-        if text_resp.startswith("```json"): text_resp = text_resp[7:]
-        if text_resp.endswith("```"): text_resp = text_resp[:-3]
+        if text_resp.startswith("```json"):
+            text_resp = text_resp[7:]
+        if text_resp.endswith("```"):
+            text_resp = text_resp[:-3]
         return json.loads(text_resp)
     except Exception as e:
         logger.error(f"Error NLP Texto: {e}")

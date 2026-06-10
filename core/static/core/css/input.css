@@ -1,0 +1,44 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  /* Input Sizes & Styles Estándar = 40px */
+  .input-base {
+    @apply h-[40px] w-full bg-surface-2 border border-border-color rounded-[8px] px-4 text-[13px] text-text-main placeholder-text-muted focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all shadow-inset-custom;
+  }
+  .input-base[type="range"] {
+    @apply p-0 shadow-none;
+  }
+  .input-base[type="file"] {
+    @apply pt-2;
+  }
+  textarea.input-base {
+    @apply h-auto py-2;
+  }
+
+  /* Botones Base */
+  .btn-primary {
+    @apply h-[40px] inline-flex items-center justify-center gap-2 px-4 bg-primary hover:bg-primary-hover text-on-primary text-[13px] font-bold rounded-[8px] transition-all border border-transparent shadow-btn-custom;
+  }
+  .btn-secondary {
+    @apply h-[40px] inline-flex items-center justify-center gap-2 px-4 bg-surface-2 border border-border-color text-text-main hover:bg-surface-3 text-[13px] font-bold rounded-[8px] transition-colors shadow-sm;
+  }
+  .btn-danger {
+    @apply h-[40px] inline-flex items-center justify-center gap-2 px-4 bg-red-600 hover:bg-red-700 text-white text-[13px] font-bold rounded-[8px] transition-all shadow-md;
+  }
+
+  /* Tarjetas Base (DataGrids, Formularios) */
+  .card-base {
+    @apply bg-surface-1 border border-border-color rounded-[12px] shadow-card-custom;
+  }
+
+  /* Sidebar items */
+  .nav-item {
+    @apply flex items-center gap-3 rounded-lg px-2.5 py-2 mb-0.5 text-[13px] transition-all text-text-muted hover:text-text-main hover:bg-surface-2;
+  }
+  .nav-active {
+    @apply bg-nav-active-bg text-primary border border-nav-active-border;
+    text-shadow: 0 0 10px var(--nav-active-glow);
+  }
+}

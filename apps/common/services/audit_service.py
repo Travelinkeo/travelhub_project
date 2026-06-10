@@ -2,11 +2,17 @@ import json
 import logging
 from typing import Any
 
-from apps.automation.services.ai_engine import ai_engine
-
 logger = logging.getLogger(__name__)
 
-from core.models.ai_schemas import AuditReport
+
+def __getattr__(name):
+    from django.utils.module_loading import import_string
+
+    if name == "ai_engine":
+        return import_string("apps.automation.services.ai_engine.ai_engine")
+    if name == "AuditReport":
+        return import_string("core.models.ai_schemas.AuditReport")
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
 class AuditService:
@@ -14,7 +20,7 @@ class AuditService:
     Servicio de auditoría preventiva para boletos basado en IA.
     Aplica reglas de negocio de TravelHub.
     """
-    
+
     RULES_PROMPT = """
     Eres un Auditor de Emisión de Boletos Aéreos para la agencia TravelHub.
     Tu tarea es revisar los datos de un boleto y verificar que cumplan con las siguientes reglas:
@@ -45,16 +51,15 @@ class AuditService:
             return {"error": "IA no disponible para auditoría."}
 
         prompt = f"Realiza la auditoría para los siguientes datos de boleto:\n{json.dumps(ticket_data, indent=2)}"
-        
+
         try:
             report = ai_engine.call_gemini(
-                prompt=prompt,
-                system_instruction=self.RULES_PROMPT,
-                response_schema=AuditReport
+                prompt=prompt, system_instruction=self.RULES_PROMPT, response_schema=AuditReport
             )
             return report
         except Exception as e:
             logger.error(f"Error en AuditService: {e}")
             return {"error": str(e)}
+
 
 audit_service = AuditService()

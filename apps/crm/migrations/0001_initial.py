@@ -11,7 +11,6 @@ import core.fields
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
@@ -26,9 +25,7 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "is_deleted",
-                    models.BooleanField(
-                        db_index=True, default=False, verbose_name="Eliminado"
-                    ),
+                    models.BooleanField(db_index=True, default=False, verbose_name="Eliminado"),
                 ),
                 (
                     "deleted_at",
@@ -38,9 +35,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "id",
-                    models.AutoField(
-                        db_column="id_cliente", primary_key=True, serialize=False
-                    ),
+                    models.AutoField(db_column="id_cliente", primary_key=True, serialize=False),
                 ),
                 ("nombres", models.CharField(max_length=150)),
                 ("apellidos", models.CharField(blank=True, max_length=150, null=True)),
@@ -72,21 +67,15 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "cedula_identidad",
-                    core.fields.EncryptedCharField(
-                        blank=True, max_length=255, null=True
-                    ),
+                    core.fields.EncryptedCharField(blank=True, max_length=255, null=True),
                 ),
                 (
                     "numero_pasaporte",
-                    core.fields.EncryptedCharField(
-                        blank=True, max_length=255, null=True
-                    ),
+                    core.fields.EncryptedCharField(blank=True, max_length=255, null=True),
                 ),
                 (
                     "documento_hash",
-                    models.CharField(
-                        blank=True, db_index=True, max_length=64, null=True
-                    ),
+                    models.CharField(blank=True, db_index=True, max_length=64, null=True),
                 ),
                 ("fecha_nacimiento", models.DateField(blank=True, null=True)),
                 ("fecha_expiracion_pasaporte", models.DateField(blank=True, null=True)),
@@ -101,9 +90,7 @@ class Migration(migrations.Migration):
                 ("notas_cliente", models.TextField(blank=True, null=True)),
                 (
                     "foto_perfil",
-                    models.ImageField(
-                        blank=True, null=True, upload_to="clientes/fotos/"
-                    ),
+                    models.ImageField(blank=True, null=True, upload_to="clientes/fotos/"),
                 ),
                 (
                     "agencia_registradora",
@@ -339,9 +326,7 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "is_deleted",
-                    models.BooleanField(
-                        db_index=True, default=False, verbose_name="Eliminado"
-                    ),
+                    models.BooleanField(db_index=True, default=False, verbose_name="Eliminado"),
                 ),
                 (
                     "deleted_at",
@@ -355,15 +340,11 @@ class Migration(migrations.Migration):
                 ("fecha_nacimiento", models.DateField(blank=True, null=True)),
                 (
                     "numero_pasaporte",
-                    core.fields.EncryptedCharField(
-                        blank=True, max_length=255, null=True
-                    ),
+                    core.fields.EncryptedCharField(blank=True, max_length=255, null=True),
                 ),
                 (
                     "cedula_identidad",
-                    core.fields.EncryptedCharField(
-                        blank=True, max_length=255, null=True
-                    ),
+                    core.fields.EncryptedCharField(blank=True, max_length=255, null=True),
                 ),
                 ("email", models.EmailField(blank=True, max_length=254, null=True)),
                 ("telefono", models.CharField(blank=True, max_length=50, null=True)),
@@ -371,17 +352,13 @@ class Migration(migrations.Migration):
                 ("fecha_emision_documento", models.DateField(blank=True, null=True)),
                 (
                     "fecha_vencimiento_documento",
-                    models.DateField(
-                        blank=True, db_column="fecha_expiracion_documento", null=True
-                    ),
+                    models.DateField(blank=True, db_column="fecha_expiracion_documento", null=True),
                 ),
                 ("preferencias", models.JSONField(blank=True, default=dict)),
                 ("notas", models.TextField(blank=True, null=True)),
                 (
                     "documento_hash",
-                    models.CharField(
-                        blank=True, db_index=True, max_length=64, null=True
-                    ),
+                    models.CharField(blank=True, db_index=True, max_length=64, null=True),
                 ),
                 ("tiene_fiebre_amarilla", models.BooleanField(default=False)),
                 (

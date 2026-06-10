@@ -4,15 +4,23 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('crm', '0003_remove_cliente_agencia_registradora_cliente_agencia_and_more'),
+        ("crm", "0003_remove_cliente_agencia_registradora_cliente_agencia_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='cliente',
-            name='tipo_cliente',
-            field=models.CharField(choices=[('IND', 'Individual / Particular'), ('COR', 'Corporativo / B2B'), ('FRE', 'Freelance / Aliado'), ('MAY', 'Mayorista / Tour Operador')], default='IND', max_length=10),
+            model_name="cliente",
+            name="tipo_cliente",
+            field=models.CharField(
+                choices=[
+                    ("IND", "Individual / Particular"),
+                    ("COR", "Corporativo / B2B"),
+                    ("FRE", "Freelance / Aliado"),
+                    ("MAY", "Mayorista / Tour Operador"),
+                ],
+                default="IND",
+                max_length=10,
+            ),
         ),
     ]

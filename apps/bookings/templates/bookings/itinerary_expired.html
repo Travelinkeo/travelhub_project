@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enlace Expirado - TravelHub Secure</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com" nonce="{{ request.csp_nonce }}"></script>
+    <!-- Premium Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <script nonce="{{ request.csp_nonce }}">
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: radial-gradient(circle at top left, #1e1b4b 0%, #0f172a 100%);
+        }
+        .glass-card {
+            background: rgba(15, 23, 42, 0.45);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(3deg); }
+        }
+        .float-animation {
+            animation: float 6s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="h-full flex items-center justify-center p-4 text-slate-100 overflow-hidden relative">
+
+    <!-- Decorative ambient lights -->
+    <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-600/10 rounded-full filter blur-[100px] pointer-events-none"></div>
+    <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-600/10 rounded-full filter blur-[100px] pointer-events-none"></div>
+
+    <div class="max-w-md w-full text-center relative z-10">
+        <!-- Main Card -->
+        <div class="glass-card rounded-3xl p-8 md:p-10 shadow-2xl relative overflow-hidden transition-all duration-300 hover:border-slate-700/50">
+            <!-- Top indicator line -->
+            <div class="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"></div>
+
+            <!-- Lock / Hourglass Icon -->
+            <div class="flex justify-center mb-6">
+                <div class="w-20 h-20 rounded-2xl bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20 float-animation">
+                    <svg class="w-10 h-10 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Error Title -->
+            <h1 class="text-2xl font-extrabold tracking-tight text-white mb-3">
+                Acceso Expirado o Inválido
+            </h1>
+            
+            <!-- Description -->
+            <p class="text-sm text-slate-300 leading-relaxed mb-8">
+                Para proteger la confidencialidad de tus datos, este enlace de viaje tiene una validez temporal y ha expirado automáticamente, o bien el token de seguridad ha sido modificado.
+            </p>
+
+            <!-- Instructions -->
+            <div class="bg-slate-900/50 border border-slate-800 rounded-2xl p-4 text-left text-xs space-y-3 text-slate-400">
+                <div class="flex gap-3">
+                    <span class="flex-shrink-0 flex items-center justify-center w-5 h-5 rounded-full bg-slate-800 text-slate-300 font-bold">1</span>
+                    <p>Los enlaces temporales expiran automáticamente a los 30 días de su emisión o al concluir tu itinerario.</p>
+                </div>
+                <div class="flex gap-3">
+                    <span class="flex-shrink-0 flex items-center justify-center w-5 h-5 rounded-full bg-slate-800 text-slate-300 font-bold">2</span>
+                    <p>Si aún necesitas acceder a los detalles de tu reserva, solicita un nuevo enlace dinámico a tu asesor de viajes.</p>
+                </div>
+            </div>
+
+            <!-- Action Button -->
+            <div class="mt-8">
+                <a href="javascript:window.location.reload();" class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-sm font-semibold rounded-xl shadow-lg transition-all duration-200 hover:-translate-y-0.5 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-slate-900">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 7.89H18v3.5m0 0h3v-3.5"></path>
+                    </svg>
+                    Reintentar Conexión
+                </a>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <p class="mt-6 text-xs text-slate-500 uppercase tracking-widest font-mono">
+            Powered by TravelHub Secure Gateway
+        </p>
+    </div>
+
+</body>
+</html>

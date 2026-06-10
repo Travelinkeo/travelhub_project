@@ -11,7 +11,6 @@ import core.validators
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
@@ -75,9 +74,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "pais_origen",
-                    models.CharField(
-                        blank=True, max_length=100, verbose_name="País de Origen"
-                    ),
+                    models.CharField(blank=True, max_length=100, verbose_name="País de Origen"),
                 ),
                 (
                     "rif",
@@ -117,9 +114,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "nombre",
-                    models.CharField(
-                        max_length=100, unique=True, verbose_name="Nombre"
-                    ),
+                    models.CharField(max_length=100, unique=True, verbose_name="Nombre"),
                 ),
                 (
                     "icono_lucide",
@@ -137,9 +132,7 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id_asiento",
-                    models.AutoField(
-                        primary_key=True, serialize=False, verbose_name="ID Asiento"
-                    ),
+                    models.AutoField(primary_key=True, serialize=False, verbose_name="ID Asiento"),
                 ),
                 (
                     "numero_asiento",
@@ -158,9 +151,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "descripcion_general",
-                    models.CharField(
-                        max_length=255, verbose_name="Descripción General"
-                    ),
+                    models.CharField(max_length=255, verbose_name="Descripción General"),
                 ),
                 (
                     "tipo_asiento",
@@ -214,9 +205,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "fecha_creacion",
-                    models.DateTimeField(
-                        auto_now_add=True, verbose_name="Fecha de Creación"
-                    ),
+                    models.DateTimeField(auto_now_add=True, verbose_name="Fecha de Creación"),
                 ),
                 (
                     "total_debe",
@@ -250,9 +239,7 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id_ciudad",
-                    models.AutoField(
-                        primary_key=True, serialize=False, verbose_name="ID Ciudad"
-                    ),
+                    models.AutoField(primary_key=True, serialize=False, verbose_name="ID Ciudad"),
                 ),
                 (
                     "nombre",
@@ -283,9 +270,7 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id_comision",
-                    models.AutoField(
-                        primary_key=True, serialize=False, verbose_name="ID Comisión"
-                    ),
+                    models.AutoField(primary_key=True, serialize=False, verbose_name="ID Comisión"),
                 ),
                 (
                     "tipo_servicio",
@@ -431,9 +416,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "descripcion_larga",
-                    models.TextField(
-                        blank=True, verbose_name="Descripción Completa (IA)"
-                    ),
+                    models.TextField(blank=True, verbose_name="Descripción Completa (IA)"),
                 ),
                 (
                     "imagen_principal",
@@ -565,9 +548,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "descripcion",
-                    models.CharField(
-                        max_length=500, verbose_name="Descripción del Item"
-                    ),
+                    models.CharField(max_length=500, verbose_name="Descripción del Item"),
                 ),
                 (
                     "cantidad",
@@ -706,9 +687,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "fecha_vencimiento",
-                    models.DateField(
-                        blank=True, null=True, verbose_name="Fecha de Vencimiento"
-                    ),
+                    models.DateField(blank=True, null=True, verbose_name="Fecha de Vencimiento"),
                 ),
                 (
                     "monto_total",
@@ -754,9 +733,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "notas",
-                    models.TextField(
-                        blank=True, null=True, verbose_name="Notas Internas"
-                    ),
+                    models.TextField(blank=True, null=True, verbose_name="Notas Internas"),
                 ),
                 (
                     "archivo_pdf",
@@ -834,15 +811,11 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "passport_validity_ok",
-                    models.BooleanField(
-                        help_text="¿El pasaporte tiene validez suficiente?"
-                    ),
+                    models.BooleanField(help_text="¿El pasaporte tiene validez suficiente?"),
                 ),
                 (
                     "passport_min_months_required",
-                    models.IntegerField(
-                        default=6, help_text="Meses mínimos de validez requeridos"
-                    ),
+                    models.IntegerField(default=6, help_text="Meses mínimos de validez requeridos"),
                 ),
                 (
                     "vaccination_required",
@@ -857,9 +830,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "full_report",
-                    models.JSONField(
-                        default=dict, help_text="Reporte completo en formato JSON"
-                    ),
+                    models.JSONField(default=dict, help_text="Reporte completo en formato JSON"),
                 ),
                 (
                     "checked_at",
@@ -886,9 +857,7 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id_moneda",
-                    models.AutoField(
-                        primary_key=True, serialize=False, verbose_name="ID Moneda"
-                    ),
+                    models.AutoField(primary_key=True, serialize=False, verbose_name="ID Moneda"),
                 ),
                 (
                     "codigo_iso",
@@ -910,9 +879,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "simbolo",
-                    models.CharField(
-                        blank=True, max_length=5, null=True, verbose_name="Símbolo"
-                    ),
+                    models.CharField(blank=True, max_length=5, null=True, verbose_name="Símbolo"),
                 ),
                 (
                     "es_moneda_local",
@@ -994,9 +961,7 @@ class Migration(migrations.Migration):
                 ("mensaje", models.TextField()),
                 (
                     "ahorro_tiempo",
-                    models.CharField(
-                        blank=True, help_text="Ej: 5 min", max_length=50, null=True
-                    ),
+                    models.CharField(blank=True, help_text="Ej: 5 min", max_length=50, null=True),
                 ),
                 ("leida", models.BooleanField(default=False)),
                 ("creado_en", models.DateTimeField(auto_now_add=True, db_index=True)),
@@ -1013,9 +978,7 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id_pais",
-                    models.AutoField(
-                        primary_key=True, serialize=False, verbose_name="ID País"
-                    ),
+                    models.AutoField(primary_key=True, serialize=False, verbose_name="ID País"),
                 ),
                 (
                     "codigo_iso_2",
@@ -1115,9 +1078,7 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id_cuenta",
-                    models.AutoField(
-                        primary_key=True, serialize=False, verbose_name="ID Cuenta"
-                    ),
+                    models.AutoField(primary_key=True, serialize=False, verbose_name="ID Cuenta"),
                 ),
                 (
                     "codigo_cuenta",
@@ -1153,9 +1114,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "nivel",
-                    models.PositiveSmallIntegerField(
-                        default=1, verbose_name="Nivel Jerárquico"
-                    ),
+                    models.PositiveSmallIntegerField(default=1, verbose_name="Nivel Jerárquico"),
                 ),
                 (
                     "permite_movimientos",
@@ -1852,9 +1811,7 @@ class Migration(migrations.Migration):
                 ("fecha_fin", models.DateField(verbose_name="Fecha Fin")),
                 (
                     "nombre_temporada",
-                    models.CharField(
-                        blank=True, max_length=100, verbose_name="Temporada"
-                    ),
+                    models.CharField(blank=True, max_length=100, verbose_name="Temporada"),
                 ),
                 (
                     "moneda",
@@ -1973,9 +1930,7 @@ class Migration(migrations.Migration):
                 ("activo", models.BooleanField(default=True, verbose_name="Activo")),
                 (
                     "fecha_carga",
-                    models.DateTimeField(
-                        auto_now_add=True, verbose_name="Fecha de Carga"
-                    ),
+                    models.DateTimeField(auto_now_add=True, verbose_name="Fecha de Carga"),
                 ),
                 ("notas", models.TextField(blank=True, verbose_name="Notas")),
             ],
@@ -2091,9 +2046,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "foto_referencial",
-                    models.ImageField(
-                        blank=True, null=True, upload_to="hoteles/habitaciones/"
-                    ),
+                    models.ImageField(blank=True, null=True, upload_to="hoteles/habitaciones/"),
                 ),
             ],
             options={
@@ -2171,9 +2124,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "iata",
-                    models.CharField(
-                        blank=True, help_text="Código IATA", max_length=20
-                    ),
+                    models.CharField(blank=True, help_text="Código IATA", max_length=20),
                 ),
                 ("telefono_principal", models.CharField(blank=True, max_length=20)),
                 ("telefono_secundario", models.CharField(blank=True, max_length=20)),
@@ -2255,9 +2206,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "color_secundario",
-                    models.CharField(
-                        default="#88081f", help_text="Color hex Sabre", max_length=7
-                    ),
+                    models.CharField(default="#88081f", help_text="Color hex Sabre", max_length=7),
                 ),
                 (
                     "color_amadeus",
@@ -2267,9 +2216,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "color_kiu",
-                    models.CharField(
-                        default="#0d1e40", help_text="Color hex KIU", max_length=7
-                    ),
+                    models.CharField(default="#0d1e40", help_text="Color hex KIU", max_length=7),
                 ),
                 (
                     "color_copa",
@@ -2289,9 +2236,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "color_wingo",
-                    models.CharField(
-                        default="#6633cb", help_text="Color hex Wingo", max_length=7
-                    ),
+                    models.CharField(default="#6633cb", help_text="Color hex Wingo", max_length=7),
                 ),
                 (
                     "color_travelport",
@@ -2331,9 +2276,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "moneda_principal",
-                    models.CharField(
-                        default="USD", help_text="Código ISO de moneda", max_length=3
-                    ),
+                    models.CharField(default="USD", help_text="Código ISO de moneda", max_length=3),
                 ),
                 (
                     "zona_horaria",
@@ -2341,9 +2284,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "idioma",
-                    models.CharField(
-                        default="es", help_text="Código ISO de idioma", max_length=5
-                    ),
+                    models.CharField(default="es", help_text="Código ISO de idioma", max_length=5),
                 ),
                 (
                     "eslogan",
@@ -2492,9 +2433,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "email_monitor_active",
-                    models.BooleanField(
-                        default=False, help_text="Activar monitoreo automático"
-                    ),
+                    models.BooleanField(default=False, help_text="Activar monitoreo automático"),
                 ),
                 (
                     "email_monitor_last_check",
@@ -2536,9 +2475,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "es_sujeto_pasivo_especial",
-                    models.BooleanField(
-                        default=False, help_text="Contribuyente Especial SENIAT"
-                    ),
+                    models.BooleanField(default=False, help_text="Contribuyente Especial SENIAT"),
                 ),
                 (
                     "esta_inscrita_rtn",
@@ -2609,9 +2546,7 @@ class Migration(migrations.Migration):
                 ("subscription_end_date", models.DateTimeField(blank=True, null=True)),
                 (
                     "es_demo",
-                    models.BooleanField(
-                        default=False, help_text="Agencia de demostración"
-                    ),
+                    models.BooleanField(default=False, help_text="Agencia de demostración"),
                 ),
                 ("activa", models.BooleanField(default=True)),
                 ("fecha_creacion", models.DateTimeField(auto_now_add=True)),
@@ -2642,15 +2577,11 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "modelo",
-                    models.CharField(
-                        db_index=True, max_length=120, verbose_name="Modelo"
-                    ),
+                    models.CharField(db_index=True, max_length=120, verbose_name="Modelo"),
                 ),
                 (
                     "object_id",
-                    models.CharField(
-                        db_index=True, max_length=120, verbose_name="Object ID"
-                    ),
+                    models.CharField(db_index=True, max_length=120, verbose_name="Object ID"),
                 ),
                 (
                     "accion",
@@ -2669,39 +2600,27 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "descripcion",
-                    models.TextField(
-                        blank=True, null=True, verbose_name="Descripción / Resumen"
-                    ),
+                    models.TextField(blank=True, null=True, verbose_name="Descripción / Resumen"),
                 ),
                 (
                     "datos_previos",
-                    models.JSONField(
-                        blank=True, null=True, verbose_name="Datos Previos"
-                    ),
+                    models.JSONField(blank=True, null=True, verbose_name="Datos Previos"),
                 ),
                 (
                     "datos_nuevos",
-                    models.JSONField(
-                        blank=True, null=True, verbose_name="Datos Nuevos"
-                    ),
+                    models.JSONField(blank=True, null=True, verbose_name="Datos Nuevos"),
                 ),
                 (
                     "metadata_extra",
-                    models.JSONField(
-                        blank=True, null=True, verbose_name="Metadata Extra"
-                    ),
+                    models.JSONField(blank=True, null=True, verbose_name="Metadata Extra"),
                 ),
                 (
                     "creado",
-                    models.DateTimeField(
-                        auto_now_add=True, db_index=True, verbose_name="Creado"
-                    ),
+                    models.DateTimeField(auto_now_add=True, db_index=True, verbose_name="Creado"),
                 ),
                 (
                     "previous_hash",
-                    models.CharField(
-                        blank=True, db_index=True, max_length=64, null=True
-                    ),
+                    models.CharField(blank=True, db_index=True, max_length=64, null=True),
                 ),
                 (
                     "record_hash",
@@ -2744,9 +2663,7 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id_crucero",
-                    models.AutoField(
-                        primary_key=True, serialize=False, verbose_name="ID Crucero"
-                    ),
+                    models.AutoField(primary_key=True, serialize=False, verbose_name="ID Crucero"),
                 ),
                 (
                     "nombre_crucero",
@@ -2766,9 +2683,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "nombre_barco",
-                    models.CharField(
-                        blank=True, max_length=150, verbose_name="Nombre del Barco"
-                    ),
+                    models.CharField(blank=True, max_length=150, verbose_name="Nombre del Barco"),
                 ),
                 ("fecha_embarque", models.DateField(verbose_name="Fecha de Embarque")),
                 (
@@ -2787,9 +2702,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "puerto_desembarque",
-                    models.CharField(
-                        max_length=150, verbose_name="Puerto de Desembarque"
-                    ),
+                    models.CharField(max_length=150, verbose_name="Puerto de Desembarque"),
                 ),
                 (
                     "puertos_escala",
@@ -2825,9 +2738,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "numero_cabina",
-                    models.CharField(
-                        blank=True, max_length=20, verbose_name="Número de Cabina"
-                    ),
+                    models.CharField(blank=True, max_length=20, verbose_name="Número de Cabina"),
                 ),
                 (
                     "ubicacion_cabina",
@@ -2849,9 +2760,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "numero_pasajeros",
-                    models.PositiveSmallIntegerField(
-                        default=2, verbose_name="Número de Pasajeros"
-                    ),
+                    models.PositiveSmallIntegerField(default=2, verbose_name="Número de Pasajeros"),
                 ),
                 (
                     "nombres_pasajeros",
@@ -2862,9 +2771,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "paquete_bebidas",
-                    models.BooleanField(
-                        default=False, verbose_name="Paquete de Bebidas"
-                    ),
+                    models.BooleanField(default=False, verbose_name="Paquete de Bebidas"),
                 ),
                 (
                     "tipo_paquete_bebidas",
@@ -2911,9 +2818,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "paquete_spa",
-                    models.BooleanField(
-                        default=False, verbose_name="Paquete Spa y Bienestar"
-                    ),
+                    models.BooleanField(default=False, verbose_name="Paquete Spa y Bienestar"),
                 ),
                 (
                     "detalle_spa",
@@ -2967,9 +2872,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "pension_completa",
-                    models.BooleanField(
-                        default=True, verbose_name="Pensión Completa Incluida"
-                    ),
+                    models.BooleanField(default=True, verbose_name="Pensión Completa Incluida"),
                 ),
                 (
                     "servicios_incluidos",
@@ -3160,9 +3063,7 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id_factura",
-                    models.AutoField(
-                        primary_key=True, serialize=False, verbose_name="ID Factura"
-                    ),
+                    models.AutoField(primary_key=True, serialize=False, verbose_name="ID Factura"),
                 ),
                 (
                     "numero_factura",
@@ -3191,9 +3092,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "fecha_vencimiento",
-                    models.DateField(
-                        blank=True, null=True, verbose_name="Fecha de Vencimiento"
-                    ),
+                    models.DateField(blank=True, null=True, verbose_name="Fecha de Vencimiento"),
                 ),
                 (
                     "emisor_rif",
@@ -3201,9 +3100,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "emisor_razon_social",
-                    models.CharField(
-                        max_length=200, verbose_name="Razón Social Emisor"
-                    ),
+                    models.CharField(max_length=200, verbose_name="Razón Social Emisor"),
                 ),
                 (
                     "emisor_direccion_fiscal",

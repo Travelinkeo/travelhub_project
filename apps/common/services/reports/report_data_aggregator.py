@@ -1,4 +1,9 @@
-from apps.bookings.models import Venta
+def __getattr__(name):
+    if name == "Venta":
+        from django.apps import apps
+
+        return apps.get_model("bookings", "Venta")
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
 class ReportDataAggregator:
@@ -7,18 +12,24 @@ class ReportDataAggregator:
     """
 
     @staticmethod
-    def get_general_sales_data(start_date=None, end_date=None):
+    def get_general_sales_data(start_date=None, end_date=None, agencia=None):
         """
-        Fetches general sales data filtered by date range.
+        Fetches general sales data filtered by date range and agency.
         Returns a tuple: (headers, data_rows)
         """
-        queryset = Venta.objects.select_related('cliente', 'moneda', 'agencia').all()
+        from django.apps import apps
+
+        Venta = apps.get_model("bookings", "Venta")
+        queryset = Venta.objects.select_related("cliente", "moneda", "agencia").all()
+
+        if agencia:
+            queryset = queryset.filter(agencia=agencia)
 
         if start_date:
             queryset = queryset.filter(fecha_venta__date__gte=start_date)
         if end_date:
             queryset = queryset.filter(fecha_venta__date__lte=end_date)
-            
+
         # Headers for the Excel file
         headers = [
             "ID Venta",
@@ -29,24 +40,26 @@ class ReportDataAggregator:
             "Total",
             "Moneda",
             "Estado",
-            "Agencia"
+            "Agencia",
         ]
 
         data = []
         for venta in queryset:
             cliente_nombre = str(venta.cliente) if venta.cliente else "N/A"
             cliente_documento = venta.cliente.numero_pasaporte if venta.cliente else ""
-            
+
             row = [
                 venta.id_venta,
                 venta.localizador,
-                venta.fecha_venta.replace(tzinfo=None) if venta.fecha_venta else None, # Remove TZ for Excel
+                venta.fecha_venta.replace(tzinfo=None)
+                if venta.fecha_venta
+                else None,  # Remove TZ for Excel
                 cliente_nombre,
                 cliente_documento,
                 venta.total_venta,
                 str(venta.moneda) if venta.moneda else "",
                 venta.get_estado_display(),
-                str(venta.agencia) if venta.agencia else ""
+                str(venta.agencia) if venta.agencia else "",
             ]
             data.append(row)
 

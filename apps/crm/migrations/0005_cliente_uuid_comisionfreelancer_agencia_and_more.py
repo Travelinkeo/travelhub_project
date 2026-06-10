@@ -7,31 +7,42 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0004_ciudad_codigo_iata_comisionoverrideaerolinea'),
-        ('crm', '0004_alter_cliente_tipo_cliente'),
+        ("core", "0004_ciudad_codigo_iata_comisionoverrideaerolinea"),
+        ("crm", "0004_alter_cliente_tipo_cliente"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='cliente',
-            name='uuid',
+            model_name="cliente",
+            name="uuid",
             field=models.UUIDField(db_index=True, default=uuid.uuid4, editable=False),
         ),
         migrations.AddField(
-            model_name='comisionfreelancer',
-            name='agencia',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='%(class)s_items', to='core.agencia'),
+            model_name="comisionfreelancer",
+            name="agencia",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="%(class)s_items",
+                to="core.agencia",
+            ),
         ),
         migrations.AddField(
-            model_name='pasajero',
-            name='uuid',
+            model_name="pasajero",
+            name="uuid",
             field=models.UUIDField(db_index=True, default=uuid.uuid4, editable=False),
         ),
         migrations.AlterField(
-            model_name='freelancerprofile',
-            name='agencia',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='%(class)s_items', to='core.agencia'),
+            model_name="freelancerprofile",
+            name="agencia",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="%(class)s_items",
+                to="core.agencia",
+            ),
         ),
     ]

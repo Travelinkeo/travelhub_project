@@ -6,7 +6,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("core", "0031_agenciaconfiguracion_evolution_api_key_and_more"),
         ("finance", "0013_staging_ledger_buffer"),
@@ -58,9 +57,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="propuestatransaccionia",
             name="modulo_objetivo",
-            field=models.CharField(
-                default="", max_length=50, verbose_name="Módulo Objetivo"
-            ),
+            field=models.CharField(default="", max_length=50, verbose_name="Módulo Objetivo"),
             preserve_default=False,
         ),
         migrations.AlterField(
@@ -83,9 +80,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="propuestatransaccionia",
             name="comentarios_resolucion",
-            field=models.TextField(
-                blank=True, null=True, verbose_name="Comentarios de Resolución"
-            ),
+            field=models.TextField(blank=True, null=True, verbose_name="Comentarios de Resolución"),
         ),
         migrations.AlterField(
             model_name="propuestatransaccionia",
@@ -104,16 +99,12 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="propuestatransaccionia",
             name="fecha_creacion",
-            field=models.DateTimeField(
-                auto_now_add=True, verbose_name="Fecha Creación"
-            ),
+            field=models.DateTimeField(auto_now_add=True, verbose_name="Fecha Creación"),
         ),
         migrations.AlterField(
             model_name="propuestatransaccionia",
             name="fecha_resolucion",
-            field=models.DateTimeField(
-                blank=True, null=True, verbose_name="Fecha Resolución"
-            ),
+            field=models.DateTimeField(blank=True, null=True, verbose_name="Fecha Resolución"),
         ),
         migrations.AlterField(
             model_name="propuestatransaccionia",

@@ -253,7 +253,7 @@
                 this.error = '';
                 this.result = null;
                 try {
-                    const res = await fetch('{% url "cotizaciones:magic_quoter_ai" %}', {
+                    const res = await fetch('{% url "core:magic_quoter_ai" %}', {
                         method: 'POST',
                         headers: { 
                             'Content-Type': 'application/json',
@@ -280,7 +280,7 @@
                     let totalFinal = (parseFloat(this.result.totalPrice) || 0) + (parseFloat(this.fee) || 0);
                     if (this.includeIgtf) totalFinal = totalFinal * 1.03;
 
-                    const res = await fetch('{% url "cotizaciones:magic_quoter_save" %}', {
+                    const res = await fetch('{% url "core:magic_quoter_save" %}', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
                         body: JSON.stringify({ 

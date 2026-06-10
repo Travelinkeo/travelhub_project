@@ -74,7 +74,7 @@
                 <input type="text" name="q" value="{{ request.GET.q }}" class="input-base pl-10" placeholder="Buscar por número, cliente...">
             </div>
             <div class="w-full md:w-64">
-                <select name="estado" onchange="this.form.submit()" class="input-base">
+                <select name="estado" data-auto-submit class="input-base">
                     <option value="">Todos los Estados</option>
                     <option value="BOR" {% if request.GET.estado == 'BOR' %}selected{% endif %}>Borrador</option>
                     <option value="ENV" {% if request.GET.estado == 'ENV' %}selected{% endif %}>Enviada</option>

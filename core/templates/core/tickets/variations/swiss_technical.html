@@ -4,10 +4,10 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>TRAVELHUB - E-Ticket Receipt</title>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries" nonce="{{ request.csp_nonce }}"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&amp;family=Space+Grotesk:wght@300;400;500;700&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<script id="tailwind-config">
+<script id="tailwind-config" nonce="{{ request.csp_nonce }}">
         tailwind.config = {
           darkMode: "class",
           theme: {
@@ -107,7 +107,7 @@
 <span class="font-.Inter uppercase tracking-tighter text-sm text-[#0D1E40] dark:text-white font-bold cursor-default">E-Ticket</span>
 <div class="flex gap-2">
 <button class="p-2 hover:bg-[#eae8e7] dark:hover:bg-slate-800 transition-colors material-symbols-outlined text-[#4f5e83]" title="share">share</button>
-<button class="p-2 hover:bg-[#eae8e7] dark:hover:bg-slate-800 transition-colors material-symbols-outlined text-[#4f5e83]" onclick="window.print()" title="print">print</button>
+<button class="p-2 hover:bg-[#eae8e7] dark:hover:bg-slate-800 transition-colors material-symbols-outlined text-[#4f5e83]" data-action="print" title="print">print</button>
 </div>
 </nav>
 </header>

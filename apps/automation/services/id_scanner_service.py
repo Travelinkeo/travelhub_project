@@ -5,9 +5,10 @@ from django.core.files.base import ContentFile
 from PIL import Image
 
 from apps.automation.services.ai_engine import ai_engine
-from core.models.ai_schemas import CedulaOCRSchema
+from core.api import CedulaOCRSchema
 
 logger = logging.getLogger(__name__)
+
 
 class IDScannerService:
     """
@@ -18,12 +19,12 @@ class IDScannerService:
     @staticmethod
     def procesar_cedula(image_file, agencia=None):
         try:
-            print("[SISTEMA] Procesando imagen...")
+            logger.info("Procesando imagen...")
             image_data = image_file.read()
             image_file.seek(0)
-            
+
             content_list = [{"mime_type": "image/jpeg", "data": image_data}]
-            
+
             system_prompt = (
                 "Eres un sistema experto en OCR de documentos venezolanos. "
                 "Analiza esta imagen de una Cédula de Identidad de la República Bolivariana de Venezuela.\n\n"
@@ -39,54 +40,61 @@ class IDScannerService:
                 "- Los nombres y apellidos deben estar en MAYÚSCULAS sin acentos.\n"
                 "- El portrait_bbox debe encuadrar SOLO el rostro humano, no todo el documento."
             )
-            
+
             resultado_raw = ai_engine.call_gemini(
                 prompt="Analiza la cédula venezolana y extrae: apellidos, nombres, número de cédula (solo dígitos), fecha de nacimiento en YYYY-MM-DD, y las coordenadas del rostro (portrait_bbox).",
                 content_list=content_list,
                 response_schema=CedulaOCRSchema,
-                system_instruction=system_prompt
+                system_instruction=system_prompt,
             )
-            
+
             # === NORMALIZACIÓN DE CLAVES ===
             # Gemini devuelve claves en MAYÚSCULAS. Las mapeamos a snake_case.
             if isinstance(resultado_raw, dict):
                 KEY_MAP = {
-                    'apellidos': 'apellidos', 'APELLIDOS': 'apellidos',
-                    'nombres': 'nombres', 'NOMBRES': 'nombres',
-                    'cedula': 'cedula', 'CEDULA': 'cedula', 'CÉDULA': 'cedula',
-                    'fecha_nacimiento': 'fecha_nacimiento',
-                    'FECHA DE NACIMIENTO': 'fecha_nacimiento',
-                    'FECHA_NACIMIENTO': 'fecha_nacimiento',
-                    'portrait_bbox': 'portrait_bbox', 'PORTRAIT_BBOX': 'portrait_bbox',
+                    "apellidos": "apellidos",
+                    "APELLIDOS": "apellidos",
+                    "nombres": "nombres",
+                    "NOMBRES": "nombres",
+                    "cedula": "cedula",
+                    "CEDULA": "cedula",
+                    "CÉDULA": "cedula",
+                    "fecha_nacimiento": "fecha_nacimiento",
+                    "FECHA DE NACIMIENTO": "fecha_nacimiento",
+                    "FECHA_NACIMIENTO": "fecha_nacimiento",
+                    "portrait_bbox": "portrait_bbox",
+                    "PORTRAIT_BBOX": "portrait_bbox",
                 }
                 resultado_raw = {
-                    KEY_MAP.get(k, k.lower().replace(' ', '_')): v
-                    for k, v in resultado_raw.items()
+                    KEY_MAP.get(k, k.lower().replace(" ", "_")): v for k, v in resultado_raw.items()
                 }
 
             # Si Gemini devuelve una lista, tomamos el primer elemento
             resultado = resultado_raw[0] if isinstance(resultado_raw, list) else resultado_raw
 
             import re
-            cedula_raw = str(resultado.get('cedula', '0'))
-            cedula_limpia = re.sub(r'[^0-9]', '', cedula_raw) or "foto"
-            
+
+            cedula_raw = str(resultado.get("cedula", "0"))
+            cedula_limpia = re.sub(r"[^0-9]", "", cedula_raw) or "foto"
+
             recorte_final = None
-            bbox = resultado.get('portrait_bbox', [0, 0, 0, 0])
-            
+            bbox = resultado.get("portrait_bbox", [0, 0, 0, 0])
+
             if any(coord > 0 for coord in bbox):
                 try:
                     img = Image.open(image_file)
                     w, h = img.size
                     ymin, xmin, ymax, xmax = bbox
-                    face_crop = img.crop((xmin*w/1000, ymin*h/1000, xmax*w/1000, ymax*h/1000))
+                    face_crop = img.crop(
+                        (xmin * w / 1000, ymin * h / 1000, xmax * w / 1000, ymax * h / 1000)
+                    )
                     buffer = io.BytesIO()
                     face_crop.save(buffer, format="JPEG")
                     recorte_final = ContentFile(buffer.getvalue(), name=f"face_{cedula_limpia}.jpg")
                 except Exception as e:
                     logger.error(f"Error recorte: {e}")
 
-            resultado['foto_recortada'] = recorte_final
+            resultado["foto_recortada"] = recorte_final
             return resultado
         except Exception as e:
             logger.error(f"Error crítico: {e}")

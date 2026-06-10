@@ -1,4 +1,4 @@
-from core.models.audit import AuditLog
+from core.api import AuditLog
 
 from .componentes import (
     ActividadServicio,
@@ -13,11 +13,12 @@ from .componentes import (
     ServicioAdicionalDetalle,
     TrasladoServicio,
 )
-from .importacion import BoletoImportado, SolicitudAnulacion, BoletoImportadoTransito
+from .importacion import BoletoImportado, BoletoImportadoTransito, SolicitudAnulacion
 from .pagos import FeeVenta, PagoVenta
 from .servicios import ComisionProveedorServicio, ProductoServicio, ProductoTerrestre, Proveedor
 from .tarifario import (
     Amenity,
+    ComisionOverrideAerolinea,
     HotelTarifario,
     ImagenHotel,
     TarifaHabitacion,
@@ -27,13 +28,36 @@ from .tarifario import (
 from .venta import ItemVenta, Venta, VentaAuditFinding, VentaParseMetadata
 
 __all__ = [
-    'Venta', 'ItemVenta', 'VentaParseMetadata', 'VentaAuditFinding', 'AuditLog',
-    'AlojamientoReserva', 'TrasladoServicio', 'ActividadServicio', 'SegmentoVuelo',
-    'AlquilerAutoReserva', 'EventoServicio', 'CircuitoTuristico', 'CircuitoDia',
-    'PaqueteAereo', 'CruceroReserva', 'ServicioAdicionalDetalle',
-    'FeeVenta', 'PagoVenta',
-    'BoletoImportado', 'SolicitudAnulacion', 'BoletoImportadoTransito',
-
-    'TarifarioProveedor', 'HotelTarifario', 'TipoHabitacion', 'TarifaHabitacion', 'Amenity', 'ImagenHotel',
-    'ProductoTerrestre', 'Proveedor', 'ProductoServicio', 'ComisionProveedorServicio'
+    "Venta",
+    "ItemVenta",
+    "VentaParseMetadata",
+    "VentaAuditFinding",
+    "AuditLog",
+    "AlojamientoReserva",
+    "TrasladoServicio",
+    "ActividadServicio",
+    "SegmentoVuelo",
+    "AlquilerAutoReserva",
+    "EventoServicio",
+    "CircuitoTuristico",
+    "CircuitoDia",
+    "PaqueteAereo",
+    "CruceroReserva",
+    "ServicioAdicionalDetalle",
+    "FeeVenta",
+    "PagoVenta",
+    "BoletoImportado",
+    "SolicitudAnulacion",
+    "BoletoImportadoTransito",
+    "TarifarioProveedor",
+    "HotelTarifario",
+    "TipoHabitacion",
+    "TarifaHabitacion",
+    "Amenity",
+    "ComisionOverrideAerolinea",
+    "ImagenHotel",
+    "ProductoTerrestre",
+    "Proveedor",
+    "ProductoServicio",
+    "ComisionProveedorServicio",
 ]

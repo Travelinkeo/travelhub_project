@@ -1,4 +1,5 @@
 """Dashboard de billing - Facturas, historial, métricas."""
+
 import os
 
 import stripe
@@ -12,99 +13,100 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 
 def _setup_stripe():
     """Asegura la configuración de Stripe."""
-    stripe.api_key = getattr(settings, 'STRIPE_SECRET_KEY', os.getenv('STRIPE_SECRET_KEY', ''))
+    stripe.api_key = getattr(settings, "STRIPE_SECRET_KEY", os.getenv("STRIPE_SECRET_KEY", ""))
     return bool(stripe.api_key)
+
 
 STRIPE_AVAILABLE = _setup_stripe()
 
 
 @extend_schema(exclude=True)
-@api_view(['GET'])
+@api_view(["GET"])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
 def get_invoices(request):
     """Obtiene el historial de facturas de la agencia."""
     if not _setup_stripe():
-        return Response({'error': 'Stripe no configurado'}, status=503)
-    
+        return Response({"error": "Stripe no configurado"}, status=503)
+
     try:
         usuario_agencia = request.user.agencias.filter(activo=True).first()
         if not usuario_agencia:
-            return Response({'error': 'No perteneces a ninguna agencia'}, status=404)
-        
+            return Response({"error": "No perteneces a ninguna agencia"}, status=404)
+
         agencia = usuario_agencia.agencia
-        
+
         if not agencia.stripe_customer_id:
-            return Response({'invoices': []})
-        
+            return Response({"invoices": []})
+
         # Obtener facturas de Stripe
-        invoices = stripe.Invoice.list(
-            customer=agencia.stripe_customer_id,
-            limit=10
-        )
-        
+        invoices = stripe.Invoice.list(customer=agencia.stripe_customer_id, limit=10)
+
         invoices_data = []
         for invoice in invoices.data:
-            invoices_data.append({
-                'id': invoice.id,
-                'amount': invoice.amount_paid / 100,  # Convertir de centavos
-                'currency': invoice.currency.upper(),
-                'status': invoice.status,
-                'date': invoice.created,
-                'pdf_url': invoice.invoice_pdf,
-                'hosted_url': invoice.hosted_invoice_url,
-            })
-        
-        return Response({'invoices': invoices_data})
-    
+            invoices_data.append(
+                {
+                    "id": invoice.id,
+                    "amount": invoice.amount_paid / 100,  # Convertir de centavos
+                    "currency": invoice.currency.upper(),
+                    "status": invoice.status,
+                    "date": invoice.created,
+                    "pdf_url": invoice.invoice_pdf,
+                    "hosted_url": invoice.hosted_invoice_url,
+                }
+            )
+
+        return Response({"invoices": invoices_data})
+
     except Exception as e:
-        return Response({'error': str(e)}, status=500)
+        return Response({"error": str(e)}, status=500)
 
 
 @extend_schema(exclude=True)
-@api_view(['GET'])
+@api_view(["GET"])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
 def get_payment_method(request):
     """Obtiene el método de pago actual."""
     if not _setup_stripe():
-        return Response({'error': 'Stripe no configurado'}, status=503)
-    
+        return Response({"error": "Stripe no configurado"}, status=503)
+
     try:
         usuario_agencia = request.user.agencias.filter(activo=True).first()
         if not usuario_agencia:
-            return Response({'error': 'No perteneces a ninguna agencia'}, status=404)
-        
+            return Response({"error": "No perteneces a ninguna agencia"}, status=404)
+
         agencia = usuario_agencia.agencia
-        
+
         if not agencia.stripe_customer_id:
-            return Response({'payment_method': None})
-        
+            return Response({"payment_method": None})
+
         # Obtener métodos de pago
         payment_methods = stripe.PaymentMethod.list(
-            customer=agencia.stripe_customer_id,
-            type='card'
+            customer=agencia.stripe_customer_id, type="card"
         )
-        
+
         if payment_methods.data:
             pm = payment_methods.data[0]
-            return Response({
-                'payment_method': {
-                    'brand': pm.card.brand,
-                    'last4': pm.card.last4,
-                    'exp_month': pm.card.exp_month,
-                    'exp_year': pm.card.exp_year,
+            return Response(
+                {
+                    "payment_method": {
+                        "brand": pm.card.brand,
+                        "last4": pm.card.last4,
+                        "exp_month": pm.card.exp_month,
+                        "exp_year": pm.card.exp_year,
+                    }
                 }
-            })
-        
-        return Response({'payment_method': None})
-    
+            )
+
+        return Response({"payment_method": None})
+
     except Exception as e:
-        return Response({'error': str(e)}, status=500)
+        return Response({"error": str(e)}, status=500)
 
 
 @extend_schema(exclude=True)
-@api_view(['GET'])
+@api_view(["GET"])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
 def get_usage_stats(request):
@@ -112,32 +114,43 @@ def get_usage_stats(request):
     try:
         usuario_agencia = request.user.agencias.filter(activo=True).first()
         if not usuario_agencia:
-            return Response({'error': 'No perteneces a ninguna agencia'}, status=404)
-        
+            return Response({"error": "No perteneces a ninguna agencia"}, status=404)
+
         agencia = usuario_agencia.agencia
-        
+
         # Calcular porcentajes de uso
-        usuarios_porcentaje = (agencia.usuarios.filter(activo=True).count() / agencia.limite_usuarios * 100) if agencia.limite_usuarios > 0 else 0
-        ventas_porcentaje = (agencia.ventas_mes_actual / agencia.limite_ventas_mes * 100) if agencia.limite_ventas_mes > 0 else 0
-        
-        return Response({
-            'usuarios': {
-                'usado': agencia.usuarios.filter(activo=True).count(),
-                'limite': agencia.limite_usuarios,
-                'porcentaje': round(usuarios_porcentaje, 1),
-                'disponible': agencia.limite_usuarios - agencia.usuarios.filter(activo=True).count(),
-            },
-            'ventas': {
-                'usado': agencia.ventas_mes_actual,
-                'limite': agencia.limite_ventas_mes,
-                'porcentaje': round(ventas_porcentaje, 1),
-                'disponible': agencia.limite_ventas_mes - agencia.ventas_mes_actual,
-            },
-            'plan': {
-                'code': agencia.plan,
-                'name': agencia.get_plan_display(),
+        usuarios_porcentaje = (
+            (agencia.usuarios.filter(activo=True).count() / agencia.limite_usuarios * 100)
+            if agencia.limite_usuarios > 0
+            else 0
+        )
+        ventas_porcentaje = (
+            (agencia.ventas_mes_actual / agencia.limite_ventas_mes * 100)
+            if agencia.limite_ventas_mes > 0
+            else 0
+        )
+
+        return Response(
+            {
+                "usuarios": {
+                    "usado": agencia.usuarios.filter(activo=True).count(),
+                    "limite": agencia.limite_usuarios,
+                    "porcentaje": round(usuarios_porcentaje, 1),
+                    "disponible": agencia.limite_usuarios
+                    - agencia.usuarios.filter(activo=True).count(),
+                },
+                "ventas": {
+                    "usado": agencia.ventas_mes_actual,
+                    "limite": agencia.limite_ventas_mes,
+                    "porcentaje": round(ventas_porcentaje, 1),
+                    "disponible": agencia.limite_ventas_mes - agencia.ventas_mes_actual,
+                },
+                "plan": {
+                    "code": agencia.plan,
+                    "name": agencia.get_plan_display(),
+                },
             }
-        })
-    
+        )
+
     except Exception as e:
-        return Response({'error': str(e)}, status=500)
+        return Response({"error": str(e)}, status=500)

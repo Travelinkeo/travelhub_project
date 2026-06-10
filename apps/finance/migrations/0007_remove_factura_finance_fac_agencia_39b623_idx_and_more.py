@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         (
             "bookings",
@@ -90,9 +89,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddIndex(
             model_name="comisionventa",
-            index=models.Index(
-                fields=["is_deleted", "agencia"], name="idx_comisionvta_sd_saas"
-            ),
+            index=models.Index(fields=["is_deleted", "agencia"], name="idx_comisionvta_sd_saas"),
         ),
         migrations.AddIndex(
             model_name="conciliacionboleto",
@@ -125,9 +122,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddIndex(
             model_name="gastooperativo",
-            index=models.Index(
-                fields=["is_deleted", "agencia"], name="idx_gasto_soft_delete_saas"
-            ),
+            index=models.Index(fields=["is_deleted", "agencia"], name="idx_gasto_soft_delete_saas"),
         ),
         migrations.AddIndex(
             model_name="itemfactura",
@@ -138,14 +133,10 @@ class Migration(migrations.Migration):
         ),
         migrations.AddIndex(
             model_name="liquidacionagente",
-            index=models.Index(
-                fields=["is_deleted", "agencia"], name="idx_liqagente_sd_saas"
-            ),
+            index=models.Index(fields=["is_deleted", "agencia"], name="idx_liqagente_sd_saas"),
         ),
         migrations.AddIndex(
             model_name="reglacomision",
-            index=models.Index(
-                fields=["is_deleted", "agencia"], name="idx_reglacom_sd_saas"
-            ),
+            index=models.Index(fields=["is_deleted", "agencia"], name="idx_reglacom_sd_saas"),
         ),
     ]

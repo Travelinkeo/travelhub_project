@@ -65,8 +65,10 @@
                 existingChart.destroy();
             }
 
-            const labels = {{ fechas_chart|safe }};
-            const data = {{ totales_chart|safe }};
+            {{ fechas_chart|json_script:"fechas-chart" }}
+            {{ totales_chart|json_script:"totales-chart" }}
+            const labels = JSON.parse(document.getElementById('fechas-chart').textContent);
+            const data = JSON.parse(document.getElementById('totales-chart').textContent);
             
             console.log("📊 Datos cargados:", { labels, data });
 

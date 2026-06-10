@@ -6,5 +6,6 @@ from .reconciliacion_views import *
 from .report_upload_view import *
 from .stripe_views import *
 from .task_status_view import *
+from .telegram_views import *
 from .views_reconciliation import *
 from .views_webhooks import *

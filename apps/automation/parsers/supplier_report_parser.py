@@ -2,16 +2,17 @@ import logging
 from typing import Any
 
 from apps.automation.services.ai_engine import ai_engine
-from core.models.ai_schemas import InformeProveedorSchema
+from core.api import InformeProveedorSchema
 
 logger = logging.getLogger(__name__)
+
 
 class SupplierReportParser:
     """
     Servicio de IA para procesar reportes de venta de proveedores (CTG, MY DESTINY, etc.)
     Extrae datos tabulares de texto o archivos (PDF/Excel) usando Gemini.
     """
-    
+
     SYSTEM_PROMPT = """
     Eres un experto contable de agencias de viajes. Tu tarea es extraer la lista de transacciones de un reporte de ventas de un proveedor.
     
@@ -40,13 +41,13 @@ class SupplierReportParser:
                 prompt=f"Procesa el siguiente texto de un reporte de proveedor y extrae las transacciones:\n\n{text}",
                 system_instruction=self.SYSTEM_PROMPT,
                 response_schema=InformeProveedorSchema,
-                feature="supplier_reconciliation"
+                feature="supplier_reconciliation",
             )
-            
+
             # El resultado ya viene validado por el schema de AIEngine
             logger.info(f"Reporte de proveedor procesado: {resultado.get('proveedor_nombre')}")
             return resultado
-            
+
         except Exception as e:
             logger.error(f"Error parseando reporte de proveedor con Gemini: {str(e)}")
             return {"proveedor_nombre": "Error", "items": []}
@@ -57,24 +58,26 @@ class SupplierReportParser:
         """
         try:
             logger.info(f"Analizando archivo de reporte directamente: {file_path}")
-            
+
             # Si es PDF, podemos intentar enviarlo como media si el SDK lo soporta o extraer texto
             # Por ahora, seguiremos extrayendo texto pero con un prompt más robusto.
             # (En el futuro, podrías usar genai.upload_file aquí)
-            
+
             text = ""
-            if file_path.lower().endswith('.pdf'):
+            if file_path.lower().endswith(".pdf"):
                 import fitz
+
                 with fitz.open(file_path) as pdf:
                     for page in pdf:
                         t = page.get_text()
-                        if t: text += t + "\n"
+                        if t:
+                            text += t + "\n"
             else:
-                with open(file_path, encoding='utf-8', errors='ignore') as f:
+                with open(file_path, encoding="utf-8", errors="ignore") as f:
                     text = f.read()
-            
+
             return self.parse_report_text(text)
-            
+
         except Exception as e:
             logger.error(f"Error parseando archivo de reporte: {e}")
             return {"proveedor_nombre": "Error de archivo", "items": []}

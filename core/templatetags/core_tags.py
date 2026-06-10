@@ -5,6 +5,7 @@ from core.validators import sanitize_html
 
 register = template.Library()
 
+
 @register.filter
 def multiply(value, arg):
     """Multiplica el valor por el argumento"""
@@ -13,6 +14,7 @@ def multiply(value, arg):
     except (ValueError, TypeError):
         return 0
 
+
 @register.filter
 def sanitize_html_filter(value, tags=None):
     """
@@ -20,6 +22,6 @@ def sanitize_html_filter(value, tags=None):
     Uso: {{ contenido|sanitize_html_filter|safe }}
     """
     if not value:
-        return ''
+        return ""
     cleaned = sanitize_html(value)
     return mark_safe(cleaned)

@@ -1,4 +1,3 @@
-
 from pydantic import BaseModel, Field
 
 
@@ -14,17 +13,28 @@ class FlightQuoteSegmentSchema(BaseModel):
     stops: str = Field(..., description="Número de escalas o 'Directo'")
     baggage: str = Field("1 Maleta 23kg", description="Información de equipaje incluida")
 
+
 class CotizacionMagicSchema(BaseModel):
     """
     Esquema para la extracción inteligente de cotizaciones rápidas GDS.
     """
+
     destination: str = Field(..., description="Ciudad de destino principal")
     destination_description: str = Field(..., description="Frase inspiradora sobre el destino")
-    type: str = Field("Vuelo Redondo", description="Tipo de viaje (Solo Ida, Redondo, Multitrayecto)")
+    type: str = Field(
+        "Vuelo Redondo", description="Tipo de viaje (Solo Ida, Redondo, Multitrayecto)"
+    )
     outboundDate: str = Field(..., description="Fecha de salida estimada (ej: 15 Oct)")
     returnDate: str | None = Field(None, description="Fecha de regreso estimada (si aplica)")
     totalPrice: float = Field(..., description="Precio total base extraído (sin markup)")
     currency: str = Field("USD", description="Moneda del precio extraído")
-    flights: list[FlightQuoteSegmentSchema] = Field(..., description="Lista de segmentos de vuelo estructurados")
-    image_search_query: str = Field(..., description="Término de búsqueda óptimo para una foto de Unsplash (ej: 'Madrid Cityscape')")
-    notas_ia: str | None = Field(None, description="Cualquier nota relevante sobre restricciones o clases")
+    flights: list[FlightQuoteSegmentSchema] = Field(
+        ..., description="Lista de segmentos de vuelo estructurados"
+    )
+    image_search_query: str = Field(
+        ...,
+        description="Término de búsqueda óptimo para una foto de Unsplash (ej: 'Madrid Cityscape')",
+    )
+    notas_ia: str | None = Field(
+        None, description="Cualquier nota relevante sobre restricciones o clases"
+    )

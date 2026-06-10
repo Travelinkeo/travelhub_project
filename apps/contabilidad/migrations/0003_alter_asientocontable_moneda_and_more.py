@@ -6,7 +6,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("bookings", "0008_amenity_comisionoverrideaerolinea_cruceroreserva_and_more"),
         ("contabilidad", "0002_initial"),
@@ -63,9 +62,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "fecha_vencimiento",
-                    models.DateField(
-                        blank=True, null=True, verbose_name="Fecha de Vencimiento"
-                    ),
+                    models.DateField(blank=True, null=True, verbose_name="Fecha de Vencimiento"),
                 ),
                 (
                     "monto_total",
@@ -111,9 +108,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "notas",
-                    models.TextField(
-                        blank=True, null=True, verbose_name="Notas Internas"
-                    ),
+                    models.TextField(blank=True, null=True, verbose_name="Notas Internas"),
                 ),
                 (
                     "archivo_pdf",

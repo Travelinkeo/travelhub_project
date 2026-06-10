@@ -88,7 +88,7 @@
                 <div class="relative aspect-[4/3] bg-slate-900 border border-slate-800 rounded-[2.5rem] overflow-hidden shadow-inner group/pdf">
                     <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 to-transparent pointer-events-none opacity-0 group-hover/pdf:opacity-100 transition-opacity duration-500"></div>
                     {% if f.archivo_pdf %}
-                        <iframe src="{{ f.archivo_pdf.url }}#toolbar=0" class="w-full h-full border-none opacity-90 group-hover/pdf:opacity-100 transition-opacity duration-300"></iframe>
+                        <iframe src="{{ f.archivo_pdf.url }}#toolbar=0" sandbox="allow-same-origin" class="w-full h-full border-none opacity-90 group-hover/pdf:opacity-100 transition-opacity duration-300"></iframe>
                     {% else %}
                         <div class="w-full h-full flex flex-col items-center justify-center text-slate-700 bg-slate-950/50">
                             <svg class="w-16 h-16 mb-4 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>

@@ -9,7 +9,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
@@ -54,9 +53,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "descripcion_general",
-                    models.TextField(
-                        blank=True, null=True, verbose_name="Descripción General"
-                    ),
+                    models.TextField(blank=True, null=True, verbose_name="Descripción General"),
                 ),
                 (
                     "destino",
@@ -69,9 +66,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "numero_pasajeros",
-                    models.PositiveIntegerField(
-                        default=1, verbose_name="Número de Pasajeros"
-                    ),
+                    models.PositiveIntegerField(default=1, verbose_name="Número de Pasajeros"),
                 ),
                 (
                     "fecha_emision",
@@ -82,9 +77,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "fecha_vencimiento",
-                    models.DateField(
-                        blank=True, null=True, verbose_name="Fecha de Vencimiento"
-                    ),
+                    models.DateField(blank=True, null=True, verbose_name="Fecha de Vencimiento"),
                 ),
                 (
                     "total_cotizado",
@@ -98,15 +91,11 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "subtotal",
-                    models.DecimalField(
-                        decimal_places=2, default=0, editable=False, max_digits=12
-                    ),
+                    models.DecimalField(decimal_places=2, default=0, editable=False, max_digits=12),
                 ),
                 (
                     "impuestos",
-                    models.DecimalField(
-                        decimal_places=2, default=0, editable=False, max_digits=12
-                    ),
+                    models.DecimalField(decimal_places=2, default=0, editable=False, max_digits=12),
                 ),
                 (
                     "estado",
@@ -127,39 +116,27 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "terminos_pago",
-                    models.TextField(
-                        blank=True, null=True, verbose_name="Términos de Pago"
-                    ),
+                    models.TextField(blank=True, null=True, verbose_name="Términos de Pago"),
                 ),
                 (
                     "terminos_cancelacion",
-                    models.TextField(
-                        blank=True, null=True, verbose_name="Términos de Cancelación"
-                    ),
+                    models.TextField(blank=True, null=True, verbose_name="Términos de Cancelación"),
                 ),
                 (
                     "condiciones_comerciales",
-                    models.TextField(
-                        blank=True, null=True, verbose_name="Condiciones Comerciales"
-                    ),
+                    models.TextField(blank=True, null=True, verbose_name="Condiciones Comerciales"),
                 ),
                 (
                     "notas_internas",
-                    models.TextField(
-                        blank=True, null=True, verbose_name="Notas Internas"
-                    ),
+                    models.TextField(blank=True, null=True, verbose_name="Notas Internas"),
                 ),
                 (
                     "fecha_validez",
-                    models.DateField(
-                        blank=True, null=True, verbose_name="Fecha de Validez"
-                    ),
+                    models.DateField(blank=True, null=True, verbose_name="Fecha de Validez"),
                 ),
                 (
                     "notas",
-                    models.TextField(
-                        blank=True, null=True, verbose_name="Notas Internas"
-                    ),
+                    models.TextField(blank=True, null=True, verbose_name="Notas Internas"),
                 ),
                 (
                     "archivo_pdf",
@@ -172,9 +149,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "gds_raw_text",
-                    models.TextField(
-                        blank=True, null=True, verbose_name="Texto Crudo GDS"
-                    ),
+                    models.TextField(blank=True, null=True, verbose_name="Texto Crudo GDS"),
                 ),
                 (
                     "image_url",
@@ -187,9 +162,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "metadata_ia",
-                    models.JSONField(
-                        blank=True, null=True, verbose_name="Metadatos IA (Gemini)"
-                    ),
+                    models.JSONField(blank=True, null=True, verbose_name="Metadatos IA (Gemini)"),
                 ),
                 (
                     "agency_fee",
@@ -202,9 +175,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "fecha_envio",
-                    models.DateTimeField(
-                        blank=True, null=True, verbose_name="Fecha de Envío"
-                    ),
+                    models.DateTimeField(blank=True, null=True, verbose_name="Fecha de Envío"),
                 ),
                 (
                     "fecha_vista",
@@ -214,9 +185,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "fecha_respuesta",
-                    models.DateTimeField(
-                        blank=True, null=True, verbose_name="Fecha de Respuesta"
-                    ),
+                    models.DateTimeField(blank=True, null=True, verbose_name="Fecha de Respuesta"),
                 ),
                 (
                     "email_enviado",

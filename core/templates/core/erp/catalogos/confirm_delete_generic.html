@@ -1,0 +1,35 @@
+{% extends 'base_modern.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Confirmar Eliminación" %} — TravelHub{% endblock %}
+
+{% block content %}
+<main class="flex-1 w-full max-w-[700px] mx-auto p-6 md:p-8 lg:p-10 flex items-center justify-center">
+    <div class="card-base w-full p-8 text-center">
+        <div class="w-16 h-16 bg-status-danger-bg rounded-full flex items-center justify-center mx-auto mb-6 border-2 border-dashed border-status-danger">
+            <span class="material-symbols-outlined text-3xl text-status-danger">delete_forever</span>
+        </div>
+
+        <h1 class="text-2xl font-bold text-text-main tracking-tight">{% trans "Confirmar Eliminación" %}</h1>
+        <p class="text-text-secondary mt-2 mb-6">
+            {% blocktrans trimmed with object_name=object_name|default:"este elemento" object_instance=object_instance|default:"" %}
+            ¿Estás seguro de que deseas eliminar
+            <strong class="text-text-main font-mono bg-surface-2 p-1 rounded-md border border-border-color">{{ object_instance }}</strong>?
+            Esta acción no se puede deshacer.
+            {% endblocktrans %}
+        </p>
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="flex items-center justify-center gap-4 mt-8 pt-6 border-t border-border-color">
+                <a href="{{ cancel_url|default:'javascript:history.back()' }}" class="btn-secondary h-[40px] px-8">
+                    {% trans "Cancelar" %}
+                </a>
+                <button type="submit" class="btn-danger h-[40px] px-8">
+                    {% trans "Sí, eliminar" %}
+                </button>
+            </div>
+        </form>
+    </div>
+</main>
+{% endblock %}

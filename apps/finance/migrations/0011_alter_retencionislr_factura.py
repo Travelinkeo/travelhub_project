@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("finance", "0010_alter_factura_iva_porcentaje_and_more"),
     ]

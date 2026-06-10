@@ -1,3 +1,4 @@
+import concurrent.futures
 import logging
 
 import requests
@@ -5,73 +6,69 @@ from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
-# Gotenberg Configuration (Chromium Headless)
-GOTENBERG_URL = getattr(settings, 'GOTENBERG_URL', 'http://gotenberg:3000/forms/chromium/convert/html')
+GOTENBERG_URL = (
+    getattr(settings, "GOTENBERG_URL", None) or "http://gotenberg:3000/forms/chromium/convert/html"
+)
+
+
+def _render_with_weasyprint(html_content: str) -> bytes:
+    from weasyprint import HTML
+
+    pdf_bytes = HTML(string=html_content, base_url=None).write_pdf()
+    return pdf_bytes
+
 
 class PdfRendererService:
     """
-    Servicio centralizado para renderizar HTML a PDF usando Gotenberg.
+    Servicio centralizado para renderizar HTML a PDF.
+    Estrategia:
+    1. Gotenberg (Chromium) con timeout de 5s total (incluyendo DNS)
+    2. WeasyPrint (local, ~1-3s) si Gotenberg no responde
     """
-    
-    @staticmethod
-    def check_health() -> bool:
-        """
-        Verifica si el servicio de Gotenberg está disponible.
-        """
-        try:
-            # El endpoint de salud de Gotenberg suele ser /health
-            # Pero depende de la configuración. Intentaremos el base URL
-            health_url = GOTENBERG_URL.split('/forms')[0] + '/health'
-            response = requests.get(health_url, timeout=5)
-            return response.status_code == 200
-        except Exception:
-            return False
 
     @staticmethod
-    def render_html_to_pdf(html_content: str, paper_size: str = 'A4', margins: float = 0.0) -> bytes:
-        """
-        Envía HTML a Gotenberg y devuelve los bytes del PDF generado.
-        
-        Args:
-            html_content: El contenido HTML completo a renderizar.
-            paper_size: 'A4' (default) o dimensiones personalizadas.
-            margins: Margen en pulgadas (default 0.0 para vouchers/facturas con diseño propio).
-            
-        Returns:
-            bytes: Contenido del PDF.
-            
-        Raises:
-            Exception: Si falla la comunicación con Gotenberg.
-        """
+    def render_html_to_pdf(html_content: str, margins: float = 0.0) -> bytes:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+            future = executor.submit(PdfRendererService._try_gotenberg, html_content, margins)
+            try:
+                pdf_bytes = future.result(timeout=5)
+                logger.info(f"Gotenberg genero PDF: {len(pdf_bytes)} bytes")
+                return pdf_bytes
+            except concurrent.futures.TimeoutError:
+                logger.info(
+                    "Gotenberg no respondio en 5s (DNS caido o servicio offline), usando WeasyPrint..."
+                )
+            except Exception as e:
+                logger.warning(f"Gotenberg fallo ({e}), usando WeasyPrint...")
+
+        return PdfRendererService._render_fallback(html_content)
+
+    @staticmethod
+    def _try_gotenberg(html_content: str, margins: float) -> bytes:
+        width, height = 8.27, 11.7
+        payload = {
+            "marginTop": str(margins),
+            "marginBottom": str(margins),
+            "marginLeft": str(margins),
+            "marginRight": str(margins),
+            "preferCssPageSize": "true",
+            "printBackground": "true",
+            "paperWidth": str(width),
+            "paperHeight": str(height),
+        }
+        files = {"index.html": ("index.html", html_content, "text/html")}
+        session = requests.Session()
+        response = session.post(GOTENBERG_URL, files=files, data=payload, timeout=(3, 10))
+        response.raise_for_status()
+        return response.content
+
+    @staticmethod
+    def _render_fallback(html_content: str) -> bytes:
+        logger.info("Usando WeasyPrint como fallback local...")
         try:
-            files = {
-                'index.html': ('index.html', html_content)
-            }
-            
-            # Dimensiones A4 en pulgadas
-            width, height = 8.27, 11.7
-            
-            payload = {
-                'marginTop': str(margins),
-                'marginBottom': str(margins),
-                'marginLeft': str(margins),
-                'marginRight': str(margins),
-                'preferCssPageSize': 'true',
-                'printBackground': 'true',
-                'paperWidth': str(width),
-                'paperHeight': str(height),
-            }
-            
-            logger.info(f"🖨️ Enviando HTML a Gotenberg para renderizado PDF ({len(html_content)} chars)")
-            
-            response = requests.post(GOTENBERG_URL, files=files, data=payload, timeout=30)
-            response.raise_for_status()
-            
-            return response.content
-            
-        except requests.exceptions.RequestException as e:
-            logger.error(f"❌ Error de red al llamar a Gotenberg: {e}")
-            raise Exception(f"Error de comunicación con el motor de PDF: {e}")
-        except Exception as e:
-            logger.error(f"❌ Fallo crítico en renderizado PDF: {e}", exc_info=True)
-            raise Exception(f"Fallo en la generación del documento PDF: {e}")
+            pdf_bytes = _render_with_weasyprint(html_content)
+            logger.info(f"WeasyPrint genero {len(pdf_bytes)} bytes")
+            return pdf_bytes
+        except ImportError:
+            logger.error("WeasyPrint no esta instalado. No hay forma de generar PDF.")
+            raise

@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("core", "0029_alter_anulacionboleto_agencia_and_more"),
         ("finance", "0007_remove_factura_finance_fac_agencia_39b623_idx_and_more"),

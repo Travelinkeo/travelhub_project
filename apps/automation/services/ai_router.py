@@ -1,5 +1,4 @@
 import logging
-import os
 from datetime import datetime
 from decimal import Decimal
 from enum import Enum
@@ -12,6 +11,7 @@ logger = logging.getLogger(__name__)
 
 # --- 1. Data Models (The "Truth") ---
 
+
 class EmailType(str, Enum):
     TICKET_ISSUANCE = "ticket_issuance"
     SCHEDULE_CHANGE = "schedule_change"
@@ -19,16 +19,22 @@ class EmailType(str, Enum):
     MARKETING = "marketing"
     OTHER = "other"
 
+
 class FlightSegment(BaseModel):
     airline_code: str = Field(..., description="2-letter IATA code (e.g., LA, AV, CM)")
     flight_number: str = Field(..., description="Flight number without airline code")
     origin: str = Field(..., min_length=3, max_length=3, description="3-letter IATA airport code")
-    destination: str = Field(..., min_length=3, max_length=3, description="3-letter IATA airport code")
+    destination: str = Field(
+        ..., min_length=3, max_length=3, description="3-letter IATA airport code"
+    )
     departure_date: datetime
     arrival_date: datetime | None = None
 
+
 class TicketSchema(BaseModel):
-    pnr: str = Field(..., min_length=6, max_length=6, description="6-character alphanumeric PNR/Record Locator")
+    pnr: str = Field(
+        ..., min_length=6, max_length=6, description="6-character alphanumeric PNR/Record Locator"
+    )
     ticket_number: str | None = Field(None, description="13-digit ticket number if available")
     passenger_name: str = Field(..., description="Full passenger name")
     itinerary: list[FlightSegment]
@@ -36,11 +42,14 @@ class TicketSchema(BaseModel):
     currency: str | None = Field("USD", description="Currency code (USD, VES, etc.)")
     issuing_agency: str | None = None
 
+
 # --- 2. The Router (Gemini Logic) ---
+
 
 class GeminiRouter:
     def __init__(self, agency=None):
         from apps.automation.services.ai_engine import get_gemini_api_key
+
         api_key = get_gemini_api_key(agency)
         if not api_key:
             logger.error("GEMINI_API_KEY not found.")
@@ -56,7 +65,6 @@ class GeminiRouter:
             mode=instructor.Mode.GEMINI_JSON,
         )
 
-
     def classify_email(self, content: str) -> EmailType:
         """
         Determines the category of the email content.
@@ -66,7 +74,7 @@ class GeminiRouter:
                 messages=[
                     {
                         "role": "user",
-                        "content": f"Classify this email content into one of the following categories: {', '.join([e.value for e in EmailType])}.\n\nEmail Content:\n{content[:5000]}"
+                        "content": f"Classify this email content into one of the following categories: {', '.join([e.value for e in EmailType])}.\n\nEmail Content:\n{content[:5000]}",
                     }
                 ],
                 response_model=EmailType,
@@ -85,7 +93,7 @@ class GeminiRouter:
                 messages=[
                     {
                         "role": "user",
-                        "content": f"Extract the flight ticket information from the following text matches the schema exactly.\n\nText:\n{content[:15000]}"
+                        "content": f"Extract the flight ticket information from the following text matches the schema exactly.\n\nText:\n{content[:15000]}",
                     }
                 ],
                 response_model=TicketSchema,
@@ -94,6 +102,7 @@ class GeminiRouter:
         except Exception as e:
             logger.error(f"Extraction failed: {e}")
             return None
+
 
 # --- 3. The Validator (Sanitizer) ---
 # Placeholder for now - will verify PNRs against DB later

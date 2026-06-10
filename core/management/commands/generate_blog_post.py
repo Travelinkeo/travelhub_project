@@ -8,20 +8,23 @@ from core.models.cms import ArticuloBlog
 
 logger = logging.getLogger(__name__)
 
+
 class Command(BaseCommand):
-    help = 'Genera un nuevo artículo de blog sobre un tema específico usando IA.'
+    help = "Genera un nuevo artículo de blog sobre un tema específico usando IA."
 
     def add_arguments(self, parser: CommandParser) -> None:
         parser.add_argument(
-            '--topic',
+            "--topic",
             type=str,
             required=True,
-            help='El tema sobre el cual se generará el artículo del blog.'
+            help="El tema sobre el cual se generará el artículo del blog.",
         )
 
     def handle(self, *args, **options):
-        topic = options['topic']
-        self.stdout.write(self.style.SUCCESS(f'Iniciando la generación de un artículo de blog sobre: "{topic}"'))
+        topic = options["topic"]
+        self.stdout.write(
+            self.style.SUCCESS(f'Iniciando la generación de un artículo de blog sobre: "{topic}"')
+        )
 
         # 1. Diseñar el prompt para la IA
         prompt = self._create_prompt(topic)
@@ -35,28 +38,36 @@ class Command(BaseCommand):
                 response_text = response_text.strip()[7:-3].strip()
             json_match = json.loads(response_text)
         except Exception as e:
-            self.stderr.write(self.style.ERROR(f"Error al comunicarse con la API de Gemini o al parsear su respuesta: {e}"))
+            self.stderr.write(
+                self.style.ERROR(
+                    f"Error al comunicarse con la API de Gemini o al parsear su respuesta: {e}"
+                )
+            )
             return
 
         # 3. Crear la instancia del modelo ArticuloBlog
         try:
             articulo = ArticuloBlog.objects.create(
-                titulo=json_match.get('titulo'),
-                contenido=json_match.get('contenido'),
-                extracto=json_match.get('extracto'),
-                meta_titulo=json_match.get('meta_titulo'),
-                meta_descripcion=json_match.get('meta_descripcion'),
-                estado=ArticuloBlog.EstadoPublicacion.BORRADOR # Guardar como borrador para revisión
+                titulo=json_match.get("titulo"),
+                contenido=json_match.get("contenido"),
+                extracto=json_match.get("extracto"),
+                meta_titulo=json_match.get("meta_titulo"),
+                meta_descripcion=json_match.get("meta_descripcion"),
+                estado=ArticuloBlog.EstadoPublicacion.BORRADOR,  # Guardar como borrador para revisión
             )
-            self.stdout.write(self.style.SUCCESS(
-                f'¡Artículo de blog creado con éxito!\n'
-                f'ID: {articulo.id_articulo}\n'
-                f'Título: "{articulo.titulo}"\n'
-                f'Estado: {articulo.get_estado_display()}\n'
-                f'Puedes revisarlo y publicarlo desde el panel de administración de Django.'
-            ))
+            self.stdout.write(
+                self.style.SUCCESS(
+                    f"¡Artículo de blog creado con éxito!\n"
+                    f"ID: {articulo.id_articulo}\n"
+                    f'Título: "{articulo.titulo}"\n'
+                    f"Estado: {articulo.get_estado_display()}\n"
+                    f"Puedes revisarlo y publicarlo desde el panel de administración de Django."
+                )
+            )
         except Exception as e:
-            self.stderr.write(self.style.ERROR(f"Error al guardar el artículo en la base de datos: {e}"))
+            self.stderr.write(
+                self.style.ERROR(f"Error al guardar el artículo en la base de datos: {e}")
+            )
 
     def _create_prompt(self, topic: str) -> str:
         return f"""

@@ -25,6 +25,10 @@
                 <input type="text" name="q" value="{{ request.GET.q|default:'' }}" placeholder="{% trans 'Buscar aerolínea...' %}"
                     class="input-base !pl-12 !h-12 w-full md:w-80">
             </form>
+            <a href="{% url 'common_admin:aerolinea_create' %}" class="btn-primary h-12">
+                <span class="material-symbols-outlined">add</span>
+                {% trans "Nueva Aerolínea" %}
+            </a>
         </div>
     </div>
 
@@ -64,7 +68,7 @@
                             <div class="flex items-center gap-4">
                                 <div class="size-10 rounded-2xl bg-surface-base border border-border-color flex items-center justify-center overflow-hidden shadow-inner group-hover:scale-110 transition-transform">
                                     <img src="https://pics.avs.io/al/40/40/{{ aerolinea.codigo_iata }}.png"
-                                        onerror="this.src='https://ui-avatars.com/api/?name={{ aerolinea.nombre }}&background=6366f1&color=fff'"
+                                        data-fallback-src="https://ui-avatars.com/api/?name={{ aerolinea.nombre }}&background=6366f1&color=fff"
                                         alt="{{ aerolinea.nombre }}" class="size-7 object-contain">
                                 </div>
                                 <span class="text-sm font-black text-text-main uppercase tracking-tight group-hover:text-primary transition-colors">{{ aerolinea.nombre }}</span>
@@ -83,11 +87,16 @@
                             {% endif %}
                         </td>
                         <td class="px-8 py-5 text-right">
-                            <div class="flex justify-end">
-                                <a href="/admin/common/aerolinea/{{ aerolinea.pk }}/change/"
+                            <div class="flex justify-end items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <a href="{% url 'common_admin:aerolinea_update' aerolinea.pk %}"
                                     class="size-9 flex items-center justify-center text-text-muted hover:text-primary hover:bg-primary/10 rounded-xl transition-all border border-transparent hover:border-primary/20"
-                                    title="{% trans 'Ajustes Técnicos' %}">
-                                    <span class="material-symbols-outlined text-[20px]">settings_accessibility</span>
+                                    title="{% trans 'Editar Aerolínea' %}">
+                                    <span class="material-symbols-outlined text-[20px]">edit</span>
+                                </a>
+                                <a href="{% url 'common_admin:aerolinea_delete' aerolinea.pk %}"
+                                    class="size-9 flex items-center justify-center text-text-muted hover:text-status-danger hover:bg-status-danger-bg rounded-xl transition-all border border-transparent hover:border-status-danger/20"
+                                    title="{% trans 'Eliminar Aerolínea' %}">
+                                    <span class="material-symbols-outlined text-[20px]">delete</span>
                                 </a>
                             </div>
                         </td>

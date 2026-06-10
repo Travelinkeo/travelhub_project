@@ -2,121 +2,176 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, ListView, UpdateView, DeleteView
+from django.views.generic import CreateView, DeleteView, ListView, UpdateView
 
 from apps.bookings.models import Proveedor
-from core.mixins import SaaSMixin, HtmxResponseMixin
+from core.api import HtmxResponseMixin, SaaSMixin
+
 
 class ProveedorListView(HtmxResponseMixin, SaaSMixin, LoginRequiredMixin, ListView):
     model = Proveedor
-    template_name = 'core/erp/proveedores/list.html'
-    htmx_template_name = 'common/partials/proveedores_htmx.html'
-    context_object_name = 'proveedores'
+    template_name = "core/erp/proveedores/list.html"
+    htmx_template_name = "common/partials/proveedores_htmx.html"
+    context_object_name = "proveedores"
     paginate_by = 20
 
     def get_queryset(self):
-        queryset = super().get_queryset().select_related('ciudad', 'ciudad__pais').order_by('nombre')
-        
-        q = self.request.GET.get('q')
+        queryset = (
+            super().get_queryset().select_related("ciudad", "ciudad__pais").order_by("nombre")
+        )
+
+        q = self.request.GET.get("q")
         if q:
             queryset = queryset.filter(
-                Q(nombre__icontains=q) |
-                Q(alias__icontains=q) |
-                Q(rif__icontains=q) |
-                Q(contacto_nombre__icontains=q) |
-                Q(tipo_proveedor__icontains=q)
+                Q(nombre__icontains=q)
+                | Q(alias__icontains=q)
+                | Q(rif__icontains=q)
+                | Q(contacto_nombre__icontains=q)
+                | Q(tipo_proveedor__icontains=q)
             )
-            
-        tipo = self.request.GET.get('tipo')
+
+        tipo = self.request.GET.get("tipo")
         if tipo:
             queryset = queryset.filter(tipo_proveedor=tipo)
-            
+
         return queryset
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['active_tab'] = 'configuracion'
+        context["active_tab"] = "configuracion"
         # Intenta obtener choices de varias fuentes para compatibilidad
-        if hasattr(Proveedor, 'TipoProveedorChoices'):
-            context['tipos_proveedor'] = Proveedor.TipoProveedorChoices.choices
-        elif hasattr(Proveedor, 'TipoProveedor'):
-             context['tipos_proveedor'] = Proveedor.TipoProveedor.choices
+        if hasattr(Proveedor, "TipoProveedorChoices"):
+            context["tipos_proveedor"] = Proveedor.TipoProveedorChoices.choices
+        elif hasattr(Proveedor, "TipoProveedor"):
+            context["tipos_proveedor"] = Proveedor.TipoProveedor.choices
         return context
+
 
 class ProveedorFormMixin:
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
         for field_name, field in form.fields.items():
-            if field_name == 'activo':
-                field.widget.attrs['class'] = 'form-checkbox h-5 w-5 text-primary rounded border-gray-300 focus:ring-primary'
+            if field.widget.input_type == "checkbox":
+                # Los checkboxes usan estilos por defecto del navegador/tema, no input-base
+                field.widget.attrs["class"] = (
+                    "h-5 w-5 rounded border-border-color text-primary focus:ring-primary"
+                )
+            elif field.widget.input_type == "select":
+                field.widget.attrs["class"] = "input-base"
             else:
-                field.widget.attrs['class'] = 'w-full bg-white border border-gray-300 rounded-lg px-4 py-2.5 text-gray-900 focus:ring-primary focus:border-primary'
+                field.widget.attrs["class"] = "input-base"
         return form
+
 
 class ProveedorCreateView(SaaSMixin, LoginRequiredMixin, ProveedorFormMixin, CreateView):
     model = Proveedor
-    template_name = 'core/erp/proveedores/form.html'
+    template_name = "core/erp/proveedores/form.html"
     fields = [
-        'nombre', 'alias', 'rif', 'tipo_proveedor', 'nivel_proveedor',
-        'contacto_nombre', 'contacto_email', 'contacto_telefono',
-        'direccion', 'ciudad', 'notas',
-        'numero_cuenta_agencia', 'condiciones_pago', 'datos_bancarios',
-        'fee_nacional', 'fee_internacional', 'activo',
-        'iata', 'seudo_sabre', 'office_id_kiu', 'office_id_amadeus',
-        'office_id_travelport', 'office_id_hotelbeds', 'office_id_expedia'
+        "nombre",
+        "alias",
+        "rif",
+        "tipo_proveedor",
+        "nivel_proveedor",
+        "contacto_nombre",
+        "contacto_email",
+        "contacto_telefono",
+        "direccion",
+        "ciudad",
+        "notas",
+        "numero_cuenta_agencia",
+        "condiciones_pago",
+        "datos_bancarios",
+        "fee_nacional",
+        "fee_internacional",
+        "activo",
+        "iata",
+        "seudo_sabre",
+        "office_id_kiu",
+        "office_id_amadeus",
+        "office_id_travelport",
+        "office_id_hotelbeds",
+        "office_id_expedia",
     ]
-    success_url = reverse_lazy('bookings:proveedor_list')
-    
+    success_url = reverse_lazy("bookings:proveedor_list")
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['active_tab'] = 'configuracion'
-        context['title'] = 'Nuevo Proveedor'
+        context["active_tab"] = "configuracion"
+        context["title"] = "Nuevo Proveedor"
         return context
 
     def form_valid(self, form):
         messages.success(self.request, "Proveedor creado exitosamente.")
         return super().form_valid(form)
 
+
 class ProveedorUpdateView(SaaSMixin, LoginRequiredMixin, ProveedorFormMixin, UpdateView):
     model = Proveedor
-    template_name = 'core/erp/proveedores/form.html'
+    template_name = "core/erp/proveedores/form.html"
     fields = [
-        'nombre', 'alias', 'rif', 'tipo_proveedor', 'nivel_proveedor',
-        'contacto_nombre', 'contacto_email', 'contacto_telefono',
-        'direccion', 'ciudad', 'notas',
-        'numero_cuenta_agencia', 'condiciones_pago', 'datos_bancarios',
-        'fee_nacional', 'fee_internacional', 'activo',
-        'iata', 'seudo_sabre', 'office_id_kiu', 'office_id_amadeus',
-        'office_id_travelport', 'office_id_hotelbeds', 'office_id_expedia'
+        "nombre",
+        "alias",
+        "rif",
+        "tipo_proveedor",
+        "nivel_proveedor",
+        "contacto_nombre",
+        "contacto_email",
+        "contacto_telefono",
+        "direccion",
+        "ciudad",
+        "notas",
+        "numero_cuenta_agencia",
+        "condiciones_pago",
+        "datos_bancarios",
+        "fee_nacional",
+        "fee_internacional",
+        "activo",
+        "iata",
+        "seudo_sabre",
+        "office_id_kiu",
+        "office_id_amadeus",
+        "office_id_travelport",
+        "office_id_hotelbeds",
+        "office_id_expedia",
     ]
-    success_url = reverse_lazy('bookings:proveedor_list')
+    success_url = reverse_lazy("bookings:proveedor_list")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['active_tab'] = 'configuracion'
-        context['title'] = f'Editar Proveedor: {self.object.nombre}'
-        context['proveedor_id'] = self.object.pk
-        
+        context["active_tab"] = "configuracion"
+        context["title"] = f"Editar Proveedor: {self.object.nombre}"
+        context["proveedor_id"] = self.object.pk
+
         # Serializar monedas disponibles para el frontend (Útil para configuraciones de comisión)
         try:
+            from rest_framework import serializers
+
             from apps.bookings.models import ProductoServicio
-            from apps.finance.models.currencies import Moneda
-            from core.serializers import MonedaSerializer
-            context['monedas_json'] = MonedaSerializer(Moneda.objects.all(), many=True).data
-            context['tipos_servicio_choices'] = [{'id': c[0], 'label': c[1]} for c in ProductoServicio.TipoProductoChoices.choices]
-        except Exception:
-            pass
-            
+            from apps.common.models import Moneda
+
+            class MonedaSerializer(serializers.ModelSerializer):
+                class Meta:
+                    model = Moneda
+                    fields = ["id_moneda", "nombre", "codigo_iso", "simbolo", "es_moneda_local"]
+
+            context["monedas_json"] = MonedaSerializer(Moneda.objects.all(), many=True).data
+            context["tipos_servicio_choices"] = [
+                {"id": c[0], "label": c[1]} for c in ProductoServicio.TipoProductoChoices.choices
+            ]
+        except (ImportError, AttributeError, serializers.SerializerError) as e:
+            logger.warning("No se pudo serializar monedas/tipos para ProveedorUpdateView: %s", e)
+
         return context
 
     def form_valid(self, form):
         messages.success(self.request, "Proveedor actualizado exitosamente.")
         return super().form_valid(form)
 
+
 class ProveedorDeleteView(SaaSMixin, LoginRequiredMixin, DeleteView):
     model = Proveedor
-    template_name = 'core/erp/catalogos/proveedores_confirm_delete.html'
-    success_url = reverse_lazy('bookings:proveedor_list')
+    template_name = "core/erp/catalogos/proveedores_confirm_delete.html"
+    success_url = reverse_lazy("bookings:proveedor_list")
 
     def delete(self, request, *args, **kwargs):
         messages.success(self.request, "Proveedor eliminado correctamente.")

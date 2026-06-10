@@ -9,7 +9,7 @@
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
         <div>
             <div class="flex items-center gap-3 mb-1">
-                <a href="{% url 'core:cotizacion_dashboard' %}"
+                <a href="{% url 'bookings:cotizacion_dashboard' %}"
                     class="text-gray-400 hover:text-white transition-colors">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -78,7 +78,7 @@
                 {% csrf_token %}
                 <button type="submit"
                     class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg font-medium transition-colors flex items-center gap-2 shadow-lg shadow-emerald-500/20"
-                    onclick="return confirm('¿Seguro que deseas convertir esta cotización en una Venta?');">
+                    data-confirm="¿Seguro que deseas convertir esta cotización en una Venta?">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>

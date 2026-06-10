@@ -5,9 +5,9 @@ from functools import partial
 from django.db import transaction
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from core.api import ticket_invoicing_requested
 
 from apps.finance.services.factura_contabilidad import generar_asiento_factura
+from core.api import ticket_invoicing_requested
 
 from .models.core_finance import Factura
 from .models.recaudacion import Pago
@@ -27,7 +27,9 @@ def disparar_alerta_recaudacion(sender, instance, created, **kwargs):
     y delega la alerta asíncronamente a Celery.
     """
     if created and not instance.confirmado:
-        _on_commit(enviar_alerta_pago_telegram_task.delay, instance.id_pago, agencia_id=instance.agencia_id)
+        _on_commit(
+            enviar_alerta_pago_telegram_task.delay, instance.id_pago, agencia_id=instance.agencia_id
+        )
 
 
 @receiver(post_save, sender=Factura)
@@ -65,22 +67,16 @@ def _generar_asiento_factura_sync(factura_id):
 
 
 @receiver(ticket_invoicing_requested)
-def procesar_facturacion_automatica_boleto(sender, venta_id, formato_detectado, agencia_id, **kwargs):
+def procesar_facturacion_automatica_boleto(
+    sender, venta_id, formato_detectado, agencia_id, **kwargs
+):
     """
-    Escucha la solicitud de facturación de boletos y genera la factura
-    de forma desacoplada utilizando el servicio correspondiente.
+    Escucha la solicitud de facturación de boletos y delega a Celery
+    para evitar HTTP síncrono (BCV API) en el ciclo de request.
     """
     logger.info(
         f"📩 Evento 'ticket_invoicing_requested' recibido para Venta {venta_id} (Formato: {formato_detectado})"
     )
-    try:
-        from apps.finance.services.invoice_service import InvoiceService
+    from .tasks import create_invoice_from_sale_task
 
-        InvoiceService.create_invoice_from_sale(venta_id)
-        logger.info(
-            f"✅ Factura automática creada exitosamente para Venta {venta_id}"
-        )
-    except Exception as e:
-        logger.error(
-            f"❌ Error procesando facturación automática para Venta {venta_id}: {e}"
-        )
+    _on_commit(create_invoice_from_sale_task.delay, venta_id)

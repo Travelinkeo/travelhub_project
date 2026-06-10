@@ -51,7 +51,7 @@
         </button>
 
         {% if request.GET %}
-        <a href="{% url 'comunicaciones_list' %}"
+        <a href="{% url 'core:comunicaciones_list' %}"
             class="px-4 py-2 bg-[var(--surface-2)] hover:bg-[var(--surface-3)] text-[var(--text-primary)] border border-[var(--border)] rounded-lg transition-colors flex items-center justify-center">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -97,8 +97,8 @@
         <div id="com-data-{{ com.id }}" class="hidden">
             <div data-asunto="{{ com.asunto }}" data-remitente="{{ com.remitente }}"
                 data-fecha="{{ com.fecha_recepcion|date:'d/m/Y H:i' }}" data-categoria="{{ com.get_categoria_display }}"
-                data-contenido='{{ com.contenido_extraido|default:"{}"|safe }}'
                 data-cuerpo="{{ com.cuerpo_completo|linebreaksbr }}">
+                {{ com.contenido_extraido|default:"{}"|json_script:"contenido-extraido" }}
             </div>
         </div>
     </div>
@@ -135,7 +135,7 @@
 <div id="detailModal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog"
     aria-modal="true">
     <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-        <div class="fixed inset-0 bg-black/90 transition-opacity" aria-hidden="true" onclick="closeDetailModal()"></div>
+        <div class="fixed inset-0 bg-black/90 transition-opacity" aria-hidden="true" data-action="close-modal"></div>
         <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
         <div
             class="inline-block align-bottom bg-[var(--surface-1)] rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-3xl sm:w-full border border-[var(--border)]">
@@ -149,7 +149,7 @@
                         <span id="modal-fecha" class="text-[var(--text-muted)] font-medium"></span>
                     </div>
                 </div>
-                <button onclick="closeDetailModal()" class="text-[var(--text-muted)] hover:text-[var(--text-primary)] bg-[var(--surface-3)] p-1 rounded-md transition-colors mt-1">
+                <button data-action="close-modal" class="text-[var(--text-muted)] hover:text-[var(--text-primary)] bg-[var(--surface-3)] p-1 rounded-md transition-colors mt-1">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
                         </path>
@@ -182,7 +182,7 @@
 
             <!-- Modal Footer -->
             <div class="px-6 py-4 border-t border-[var(--border)] bg-[var(--surface-2)] flex justify-end">
-                <button onclick="closeDetailModal()"
+                <button data-action="close-modal"
                     class="px-5 py-2.5 bg-[var(--surface-3)] hover:bg-[var(--surface-4)] border border-[var(--border)] text-[var(--text-primary)] rounded-lg transition-colors text-sm font-bold shadow-sm">
                     Cerrar
                 </button>

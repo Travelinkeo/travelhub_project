@@ -8,7 +8,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("bookings", "0008_amenity_comisionoverrideaerolinea_cruceroreserva_and_more"),
         ("contabilidad", "0003_alter_asientocontable_moneda_and_more"),
@@ -46,9 +45,7 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id_factura",
-                    models.AutoField(
-                        primary_key=True, serialize=False, verbose_name="ID Factura"
-                    ),
+                    models.AutoField(primary_key=True, serialize=False, verbose_name="ID Factura"),
                 ),
                 (
                     "numero_factura",
@@ -77,9 +74,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "fecha_vencimiento",
-                    models.DateField(
-                        blank=True, null=True, verbose_name="Fecha de Vencimiento"
-                    ),
+                    models.DateField(blank=True, null=True, verbose_name="Fecha de Vencimiento"),
                 ),
                 (
                     "emisor_rif",
@@ -87,9 +82,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "emisor_razon_social",
-                    models.CharField(
-                        max_length=200, verbose_name="Razón Social Emisor"
-                    ),
+                    models.CharField(max_length=200, verbose_name="Razón Social Emisor"),
                 ),
                 (
                     "emisor_direccion_fiscal",
@@ -491,9 +484,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "descripcion",
-                    models.CharField(
-                        max_length=500, verbose_name="Descripción del Item"
-                    ),
+                    models.CharField(max_length=500, verbose_name="Descripción del Item"),
                 ),
                 (
                     "cantidad",
@@ -762,12 +753,8 @@ class Migration(migrations.Migration):
                 "verbose_name_plural": "Retenciones ISLR",
                 "ordering": ["-fecha_emision", "-numero_comprobante"],
                 "indexes": [
-                    models.Index(
-                        fields=["periodo_fiscal"], name="finance_ret_periodo_52be16_idx"
-                    ),
-                    models.Index(
-                        fields=["estado"], name="finance_ret_estado_67f845_idx"
-                    ),
+                    models.Index(fields=["periodo_fiscal"], name="finance_ret_periodo_52be16_idx"),
+                    models.Index(fields=["estado"], name="finance_ret_estado_67f845_idx"),
                     models.Index(
                         fields=["cliente", "fecha_emision"],
                         name="finance_ret_cliente_682ec3_idx",

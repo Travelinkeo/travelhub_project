@@ -78,7 +78,7 @@
             <div class="bg-[var(--surface-1)] rounded-xl shadow-sm p-6 border border-[var(--border)] sticky top-4">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="font-bold text-[var(--text-primary)]">Filtros</h3>
-                    {% if request.GET %}<a href="{% url 'core:hotel_search' %}" class="text-xs text-[var(--primary)] hover:underline">Limpiar</a>{% endif %}
+                    {% if request.GET %}<a href="{% url 'bookings:hotel_search' %}" class="text-xs text-[var(--primary)] hover:underline">Limpiar</a>{% endif %}
                 </div>
                 <div class="mb-6">
                     <h4 class="text-sm font-semibold text-[var(--text-secondary)] mb-2">Destinos Populares</h4>
@@ -107,7 +107,7 @@
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {% for hotel in hoteles %}
-                <a href="{% url 'core:hotel_detail' hotel.slug %}" class="group bg-[var(--surface-1)] rounded-xl shadow-sm hover:shadow-xl transition duration-300 border border-[var(--border)] overflow-hidden flex flex-col h-full hover:border-[var(--primary)]">
+                <a href="{% url 'bookings:hotel_detail' hotel.slug %}" class="group bg-[var(--surface-1)] rounded-xl shadow-sm hover:shadow-xl transition duration-300 border border-[var(--border)] overflow-hidden flex flex-col h-full hover:border-[var(--primary)]">
                     <div class="relative h-48 overflow-hidden bg-[var(--surface-2)]">
                         {% if hotel.imagen_principal %}
                         <img src="{{ hotel.imagen_principal.url }}" class="w-full h-full object-cover transform group-hover:scale-110 transition duration-500" alt="{{ hotel.nombre }}">

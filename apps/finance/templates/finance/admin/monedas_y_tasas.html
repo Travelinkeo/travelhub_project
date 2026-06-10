@@ -1,0 +1,123 @@
+{% extends "base_modern.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Monedas y Tasas de Cambio" %} — TravelHub Pro{% endblock %}
+
+{% block page_title %}{% trans "Gestión Financiera" %}{% endblock %}
+{% block page_subtitle %}{% trans "Administración de monedas y tasas de cambio del sistema." %}{% endblock %}
+
+{% block content %}
+<main class="flex-1 w-full max-w-[1400px] mx-auto p-6 md:p-8">
+
+    <!-- Header & Action Bar -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10 pb-6 border-b border-border-color">
+        <div>
+            <div class="flex items-center gap-2 mb-2">
+                <a href="{% url 'core:catalogos_center' %}" class="text-[10px] font-black text-text-muted hover:text-primary transition-colors uppercase tracking-widest">{% trans "Catálogos" %}</a>
+                <span class="text-text-muted opacity-30">/</span>
+                <span class="text-[10px] font-black text-primary uppercase tracking-widest">{% trans "Monedas y Tasas" %}</span>
+            </div>
+            <h1 class="text-3xl font-black text-text-main tracking-tight uppercase">{% trans "Monedas y Tasas de Cambio" %}</h1>
+        </div>
+        <div class="flex items-center gap-4 w-full md:w-auto">
+             <a href="{% url 'finance_admin:moneda_create' %}" class="btn-secondary h-12">
+                <span class="material-symbols-outlined">add</span>
+                {% trans "Nueva Moneda" %}
+            </a>
+            <a href="{% url 'finance_admin:tipocambio_create' %}" class="btn-primary h-12">
+                <span class="material-symbols-outlined">add</span>
+                {% trans "Nueva Tasa" %}
+            </a>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Monedas Table -->
+        <div class="lg:col-span-1 card-base h-fit">
+            <div class="px-6 py-4 border-b border-border-color">
+                <h2 class="text-lg font-bold text-text-main">{% trans "Monedas" %}</h2>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead>
+                        <tr>
+                            <th>{% trans "Nombre" %}</th>
+                            <th>{% trans "ISO" %}</th>
+                            <th class="text-right">{% trans "Acciones" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for moneda in monedas %}
+                        <tr class="group">
+                            <td>
+                                <div class="flex flex-col">
+                                    <span class="font-bold">{{ moneda.nombre }}</span>
+                                    <span class="text-sm text-text-muted">{{ moneda.simbolo }}</span>
+                                </div>
+                            </td>
+                            <td><span class="font-mono text-text-muted">{{ moneda.codigo_iso }}</span></td>
+                            <td class="text-right">
+                                <div class="flex justify-end items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <a href="{% url 'finance_admin:moneda_update' moneda.pk %}" class="p-1.5 rounded-md text-text-muted hover:text-primary transition-colors" title="{% trans 'Editar Moneda' %}">
+                                        <span class="material-symbols-outlined text-[18px]">edit</span>
+                                    </a>
+                                    <a href="{% url 'finance_admin:moneda_delete' moneda.pk %}" class="p-1.5 rounded-md text-text-muted hover:text-status-danger transition-colors" title="{% trans 'Eliminar Moneda' %}">
+                                        <span class="material-symbols-outlined text-[18px]">delete</span>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Tasas de Cambio Table -->
+        <div class="lg:col-span-2 card-base">
+            <div class="px-6 py-4 border-b border-border-color flex items-center justify-between">
+                <h2 class="text-lg font-bold text-text-main">{% trans "Últimas Tasas de Cambio Registradas" %}</h2>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead>
+                        <tr>
+                            <th>{% trans "Fecha" %}</th>
+                            <th>{% trans "Origen" %}</th>
+                            <th>{% trans "Destino" %}</th>
+                            <th>{% trans "Tasa" %}</th>
+                            <th class="text-right">{% trans "Acciones" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for tasa in tasas %}
+                        <tr class="group">
+                            <td>{{ tasa.fecha_efectiva|date:"d/m/Y" }}</td>
+                            <td>{{ tasa.moneda_origen.codigo_iso }}</td>
+                            <td>{{ tasa.moneda_destino.codigo_iso }}</td>
+                            <td><span class="font-mono font-bold">{{ tasa.tasa_conversion }}</span></td>
+                            <td class="text-right">
+                                <div class="flex justify-end items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <a href="{% url 'finance_admin:tipocambio_update' tasa.pk %}" class="p-1.5 rounded-md text-text-muted hover:text-primary transition-colors" title="{% trans 'Editar Tasa' %}">
+                                        <span class="material-symbols-outlined text-[18px]">edit</span>
+                                    </a>
+                                    <a href="{% url 'finance_admin:tipocambio_delete' tasa.pk %}" class="p-1.5 rounded-md text-text-muted hover:text-status-danger transition-colors" title="{% trans 'Eliminar Tasa' %}">
+                                        <span class="material-symbols-outlined text-[18px]">delete</span>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center py-12 text-text-muted">
+                                {% trans "No se encontraron tasas de cambio." %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}

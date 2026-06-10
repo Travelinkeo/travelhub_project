@@ -20,7 +20,9 @@ class CronApiKey(models.Model):
     )
     key_hash = models.CharField(max_length=128, unique=True, editable=False)
     name = models.CharField(max_length=100, help_text="Ej: cron-job.org BCV sync")
-    prefix = models.CharField(max_length=12, editable=False, help_text="Primeros 8 chars para identificar")
+    prefix = models.CharField(
+        max_length=12, editable=False, help_text="Primeros 8 chars para identificar"
+    )
     expires_at = models.DateTimeField(null=True, blank=True)
     last_used = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -38,7 +40,9 @@ class CronApiKey(models.Model):
         raw_key = f"cron_{secrets.token_urlsafe(32)}"
         key_hash = hashlib.sha256(raw_key.encode()).hexdigest()
         prefix = raw_key[:10]
-        expires_at = timezone.now() + timezone.timedelta(days=expires_days) if expires_days else None
+        expires_at = (
+            timezone.now() + timezone.timedelta(days=expires_days) if expires_days else None
+        )
 
         instance = cls.objects.create(
             agencia=agencia,

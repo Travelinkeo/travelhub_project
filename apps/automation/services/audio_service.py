@@ -1,13 +1,14 @@
 import json
 import logging
 
-from django.conf import settings
-
 logger = logging.getLogger(__name__)
+
 
 def _get_genai():
     from google import genai
+
     return genai
+
 
 class AudioTranscriptionService:
     """
@@ -17,6 +18,7 @@ class AudioTranscriptionService:
 
     def __init__(self, agency=None):
         from apps.automation.services.ai_engine import get_gemini_api_key
+
         self.api_key = get_gemini_api_key(agency)
         if not self.api_key:
             logger.error("GEMINI_API_KEY no configurada.")
@@ -26,7 +28,7 @@ class AudioTranscriptionService:
         try:
             genai = _get_genai()
             self.client = genai.Client(api_key=self.api_key)
-            self.model_name = 'gemini-2.0-flash'
+            self.model_name = "gemini-2.0-flash"
         except Exception as e:
             logger.error(f"Error configurando Gemini AI: {e}")
             self.client = None
@@ -76,13 +78,12 @@ class AudioTranscriptionService:
 
             logger.info("Enviando prompt a Gemini...")
             response = self.client.models.generate_content(
-                model=self.model_name,
-                contents=[prompt, audio_file]
+                model=self.model_name, contents=[prompt, audio_file]
             )
 
             response_text = response.text
 
-            clean_text = response_text.replace('```json', '').replace('```', '').strip()
+            clean_text = response_text.replace("```json", "").replace("```", "").strip()
 
             try:
                 result = json.loads(clean_text)
@@ -92,7 +93,7 @@ class AudioTranscriptionService:
                 return {
                     "transcription": response_text,
                     "travel_data": None,
-                    "error": "Error de formato JSON"
+                    "error": "Error de formato JSON",
                 }
 
         except Exception as e:

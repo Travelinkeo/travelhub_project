@@ -1,5 +1,4 @@
-<form hx-post="{% url 'bookings:fee_venta_add' venta_pk=venta_pk %}" hx-target="#venta-totals-card" hx-swap="innerHTML"
-    @htmx:after-request="$dispatch('close-modal'); window.location.reload();" class="space-y-4">
+<form hx-post="{% url 'bookings:fee_venta_add' venta_pk=venta_pk %}" hx-target="this" hx-swap="outerHTML" class="space-y-4">
     {% csrf_token %}
 
     <div class="space-y-4">
@@ -7,9 +6,9 @@
             <label class="block text-sm font-medium text-gray-400 mb-1.5">Tipo de Fee</label>
             <select name="tipo_fee"
                 class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:ring-2 focus:ring-blue-500 transition-all appearance-none">
-                <option value="AGENCIA">Fee Agencia</option>
-                <option value="SERVICIO">Fee por Servicio</option>
-                <option value="OTRO">Otros Cargos</option>
+                <option value="GST">Fee Agencia</option>
+                <option value="GST">Fee por Servicio</option>
+                <option value="OTR">Otros Cargos</option>
             </select>
         </div>
 

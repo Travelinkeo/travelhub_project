@@ -1,10 +1,10 @@
-ï»¿{% extends "base_modern.html" %}
+{% extends "base_modern.html" %}
 {% load i18n humanize %}
 
-{% block title %}{% trans "Libro Diario" %} â€” TravelHub Pro{% endblock %}
+{% block title %}{% trans "Libro Diario" %} — TravelHub Pro{% endblock %}
 
 {% block page_title %}{% trans "Libro Diario" %}{% endblock %}
-{% block page_subtitle %}{% trans "Registro cronolÃ³gico de todas las transacciones contables de la agencia." %}{% endblock %}
+{% block page_subtitle %}{% trans "Registro cronológico de todas las transacciones contables de la agencia." %}{% endblock %}
 
 {% block content %}
 <main class="flex-1 w-full max-w-[1400px] mx-auto p-6 md:p-8">
@@ -13,10 +13,10 @@
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10 pb-6 border-b border-border-color print:hidden">
         <div>
             <h1 class="text-3xl font-black text-text-main tracking-tight uppercase">{% trans "Libro Diario" %}</h1>
-            <p class="text-text-muted text-sm mt-1">{% trans "AuditorÃ­a de asientos, movimientos bancarios y ajustes fiscales." %}</p>
+            <p class="text-text-muted text-sm mt-1">{% trans "Auditoría de asientos, movimientos bancarios y ajustes fiscales." %}</p>
         </div>
         <div class="flex gap-3">
-            <button onclick="window.print()" class="btn-secondary !h-12 !px-6 shadow-lg">
+            <button data-action="print" class="btn-secondary !h-12 !px-6 shadow-lg">
                 <span class="material-symbols-outlined text-[20px]">print</span>
                 <span>{% trans "Imprimir Reporte" %}</span>
             </button>
@@ -69,7 +69,7 @@
                 <h2 class="text-sm font-black text-text-main uppercase tracking-widest">{% trans "Asientos Contables" %}</h2>
             </div>
             <span class="text-[10px] font-black text-text-muted uppercase tracking-widest">
-                {% trans "Periodo" %}: {{ fecha_desde|date:"d M" }} â€” {{ fecha_hasta|date:"d M Y" }}
+                {% trans "Periodo" %}: {{ fecha_desde|date:"d M" }} — {{ fecha_hasta|date:"d M Y" }}
             </span>
         </div>
 

@@ -22,7 +22,7 @@
                         d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                 </svg>
             </div>
-            <select name="estado" onchange="this.form.submit()"
+            <select name="estado" data-auto-submit
                 class="bg-[var(--surface-2)] border border-[var(--border)] rounded-lg px-4 py-2 text-[var(--text-primary)] focus:outline-none focus:border-[var(--primary)] transition-colors">
                 <option value="">Todos los estados</option>
                 <option value="PEN" {% if request.GET.estado=='PEN' %}selected{% endif %}>Pendiente</option>
@@ -117,7 +117,7 @@
 <div id="paymentModal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog"
     aria-modal="true">
     <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-        <div class="fixed inset-0 bg-black/80 transition-opacity" aria-hidden="true" onclick="closePaymentModal()">
+        <div class="fixed inset-0 bg-black/80 transition-opacity" aria-hidden="true" data-action="close-modal">
         </div>
 
         <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
@@ -143,9 +143,9 @@
                             placeholder="0.00">
                     </div>
 
-                    <div class="mt-5 flex items-center p-3 rounded-lg bg-[var(--surface-2)] border border-[var(--border)] cursor-pointer hover:border-[var(--primary)]/50 transition-colors" onclick="document.getElementById('payFull').click()">
+                    <div class="mt-5 flex items-center p-3 rounded-lg bg-[var(--surface-2)] border border-[var(--border)] cursor-pointer hover:border-[var(--primary)]/50 transition-colors" data-trigger-click="payFull">
                         <input id="payFull" type="checkbox"
-                            class="h-4 w-4 text-[var(--primary)] focus:ring-[var(--primary)] border-[var(--border)] rounded bg-[var(--surface-3)]" onclick="event.stopPropagation()">
+                            class="h-4 w-4 text-[var(--primary)] focus:ring-[var(--primary)] border-[var(--border)] rounded bg-[var(--surface-3)]" data-stop-propagation>
                         <label for="payFull" class="ml-3 block text-sm font-medium text-[var(--text-primary)] cursor-pointer">
                             Pagar la totalidad
                         </label>
@@ -157,7 +157,7 @@
                     class="w-full inline-flex justify-center rounded-lg border border-transparent shadow-sm px-4 py-2 bg-[var(--primary)] text-base font-medium text-white hover:bg-[var(--primary-hover)] focus:outline-none sm:ml-3 sm:w-auto sm:text-sm transition-colors">
                     Registrar Pago
                 </button>
-                <button type="button" onclick="closePaymentModal()"
+                <button type="button" data-action="close-modal"
                     class="mt-3 w-full inline-flex justify-center rounded-lg border border-[var(--border)] shadow-sm px-4 py-2 bg-[var(--surface-3)] text-base font-medium text-[var(--text-primary)] hover:bg-[var(--surface-4)] focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm transition-colors">
                     Cancelar
                 </button>

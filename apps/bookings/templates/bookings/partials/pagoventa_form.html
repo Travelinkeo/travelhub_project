@@ -1,5 +1,4 @@
-<form hx-post="{% url 'bookings:pago_venta_add' venta_pk=venta_pk %}" hx-target="#venta-totals-card" hx-swap="innerHTML"
-    enctype="multipart/form-data" @htmx:after-request="$dispatch('close-modal'); window.location.reload();"
+<form hx-post="{% url 'bookings:pago_venta_add' venta_pk=venta_pk %}" hx-target="this" hx-swap="outerHTML"
     class="space-y-4">
     {% csrf_token %}
 
@@ -12,13 +11,13 @@
 
         <div>
             <label class="block text-sm font-medium text-gray-400 mb-1.5">Método de Pago</label>
-            <select name="metodo_pago"
+            <select name="metodo"
                 class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:ring-2 focus:ring-blue-500 transition-all appearance-none">
-                <option value="EF">Efectivo</option>
-                <option value="TR">Transferencia</option>
-                <option value="ZP">Zelle</option>
-                <option value="BN">Binance Pay</option>
-                <option value="OT">Otro</option>
+                <option value="EFE">Efectivo</option>
+                <option value="TRF">Transferencia</option>
+                <option value="ZEL">Zelle</option>
+                <option value="TAR">Tarjeta</option>
+                <option value="OTR">Otro</option>
             </select>
         </div>
 
@@ -26,12 +25,6 @@
             <label class="block text-sm font-medium text-gray-400 mb-1.5">Referencia</label>
             <input type="text" name="referencia" placeholder="Nro de confirmación o transferencia"
                 class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:ring-2 focus:ring-blue-500 transition-all">
-        </div>
-
-        <div>
-            <label class="block text-sm font-medium text-gray-400 mb-1.5">Comprobante (Imagen/PDF)</label>
-            <input type="file" name="comprobante"
-                class="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-500 transition-all">
         </div>
     </div>
 

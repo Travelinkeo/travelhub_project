@@ -1,20 +1,23 @@
 import logging
-import os
 
-from django.conf import settings
 from django.utils.text import slugify
 
 from apps.cms.models import Articulo
 
 logger = logging.getLogger(__name__)
 
+
 def _get_genai():
     from google import genai
+
     return genai
+
 
 def _get_genai_types():
     from google.genai import types
+
     return types
+
 
 class CMSContentService:
     """
@@ -23,8 +26,9 @@ class CMSContentService:
     """
 
     def __init__(self):
-        from apps.automation.services.ai_engine import get_gemini_api_key
-        self.api_key = get_gemini_api_key()
+        from django.conf import settings
+
+        self.api_key = getattr(settings, "GEMINI_API_KEY", None)
         if self.api_key:
             genai = _get_genai()
             self.client = genai.Client(api_key=self.api_key)
@@ -48,15 +52,13 @@ class CMSContentService:
         
         Retorna el resultado en formato JSON con las llaves: 'caption' y 'hashtags'.
         """
-        
+
         try:
             types = _get_genai_types()
             response = self.client.models.generate_content(
                 model=self.model_name,
                 contents=prompt,
-                config=types.GenerateContentConfig(
-                    response_mime_type="application/json"
-                )
+                config=types.GenerateContentConfig(response_mime_type="application/json"),
             )
             return response.text
         except Exception as e:
@@ -80,15 +82,13 @@ class CMSContentService:
         
         Retorna en formato JSON.
         """
-        
+
         try:
             types = _get_genai_types()
             response = self.client.models.generate_content(
                 model=self.model_name,
                 contents=prompt,
-                config=types.GenerateContentConfig(
-                    response_mime_type="application/json"
-                )
+                config=types.GenerateContentConfig(response_mime_type="application/json"),
             )
             return response.text
         except Exception as e:
@@ -112,34 +112,33 @@ class CMSContentService:
         
         Retorna en formato JSON con llaves: 'titulo', 'resumen', 'contenido', 'meta_titulo', 'meta_descripcion'.
         """
-        
+
         try:
             types = _get_genai_types()
             response = self.client.models.generate_content(
                 model=self.model_name,
                 contents=prompt,
-                config=types.GenerateContentConfig(
-                    response_mime_type="application/json"
-                )
+                config=types.GenerateContentConfig(response_mime_type="application/json"),
             )
             import json
+
             data = json.loads(response.text)
-            
+
             # Robustez: Gemini a veces retorna una lista de un objeto
             if isinstance(data, list) and len(data) > 0:
                 data = data[0]
-            
+
             articulo = Articulo(
-                titulo=data.get('titulo', tema),
-                slug=slugify(data.get('titulo', tema)),
-                resumen=data.get('resumen', ''),
-                contenido=data.get('contenido', ''),
-                meta_titulo=data.get('meta_titulo', ''),
-                meta_descripcion=data.get('meta_descripcion', ''),
+                titulo=data.get("titulo", tema),
+                slug=slugify(data.get("titulo", tema)),
+                resumen=data.get("resumen", ""),
+                contenido=data.get("contenido", ""),
+                meta_titulo=data.get("meta_titulo", ""),
+                meta_descripcion=data.get("meta_descripcion", ""),
                 destino=destino,
                 generado_por_ia=True,
                 prompt_ia=prompt,
-                estado=Articulo.EstadoArticulo.BORRADOR
+                estado=Articulo.EstadoArticulo.BORRADOR,
             )
             return articulo
         except Exception as e:

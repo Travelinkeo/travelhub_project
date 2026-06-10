@@ -244,7 +244,7 @@
             <section class="hero-section">
                 <div class="hero-text">
                     <h2>Titular de Reserva:</h2>
-                    <h3>{{ venta.cliente.get_nombre_completo|default:venta.cliente.nombre|upper }}</h3>
+                    <h3>{{ venta.cliente.get_nombre_completo|upper }}</h3>
                 </div>
                 <div class="hero-meta">
                     <div class="locator-box">

@@ -34,7 +34,7 @@
             <p class="text-gray-500 dark:text-slate-400 mt-2 text-lg">Gestión de cartera de clientes corporativos y particulares</p>
         </div>
         <div class="flex items-center gap-2">
-            <a href="{% url 'core:cliente_create' %}" class="btn-primary">
+            <a href="{% url 'crm:cliente_create' %}" class="btn-primary">
                 <span class="material-symbols-outlined text-[16px]">person_add</span> Nuevo Cliente
             </a>
         </div>
@@ -117,7 +117,7 @@
                 </thead>
                 <tbody class="divide-y divide-dashed divide-border-light dark:divide-border-dark">
                     {% for cliente in clientes %}
-                    <tr class="hover:bg-gray-50 dark:hover:bg-surface-highlight-dark/20 transition-colors group cursor-pointer" onclick="location.href='{% url 'core:cliente_update' cliente.pk %}'">
+                    <tr class="hover:bg-gray-50 dark:hover:bg-surface-highlight-dark/20 transition-colors group cursor-pointer" onclick="location.href='{% url 'crm:cliente_update' cliente.pk %}'">
                         <td class="px-6 py-4">
                             <div class="flex items-center gap-3">
                                 <div class="w-10 h-10 rounded-full flex items-center justify-center text-xs font-black border {% if cliente.tipo_cliente == 'CORP' %}bg-purple-500/10 text-purple-500 border-purple-500/20{% elif cliente.tipo_cliente == 'VP' %}bg-amber-500/10 text-amber-500 border-amber-500/20{% else %}bg-primary/10 text-primary border-primary/20{% endif %} shrink-0">
@@ -158,8 +158,8 @@
                             <p class="text-[10px] font-mono text-gray-500 font-bold">{{ cliente.puntos_fidelidad }} pts</p>
                         </td>
                         <td class="px-6 py-4 text-right">
-                            <div class="flex items-center justify-end gap-1 opacity-50 group-hover:opacity-100 transition-opacity" onclick="event.stopPropagation()">
-                                <a href="{% url 'core:cliente_update' cliente.pk %}" class="p-1 rounded-md text-gray-400 hover:text-primary transition-colors hover:bg-primary/10" title="Editar">
+                            <div class="flex items-center justify-end gap-1 opacity-50 group-hover:opacity-100 transition-opacity" data-stop-propagation>
+                                <a href="{% url 'crm:cliente_update' cliente.pk %}" class="p-1 rounded-md text-gray-400 hover:text-primary transition-colors hover:bg-primary/10" title="Editar">
                                     <span class="material-symbols-outlined text-[18px]">edit</span>
                                 </a>
                             </div>

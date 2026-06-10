@@ -1,36 +1,39 @@
 import logging
-import os
-
-from django.conf import settings
 
 from .ai_tools import AgentTools
 
 logger = logging.getLogger(__name__)
 
+
 def _get_genai():
     from google import genai
+
     return genai
+
 
 def _get_genai_types():
     from google.genai import types
+
     return types
+
 
 class TravelHubAgent:
     """
     Agente IA de TravelHub v2 (Basado en Gemini Function Calling).
     Capaz de consultar datos reales de contabilidad, ventas y clientes.
     """
-    
+
     def __init__(self, agency=None):
         from apps.automation.services.ai_engine import get_gemini_api_key
+
         api_key = get_gemini_api_key(agency)
         if not api_key:
             logger.error("TravelHubAgent: GEMINI_API_KEY no configurada.")
             raise ValueError("Falta GEMINI_API_KEY")
-            
+
         genai = _get_genai()
         self.client = genai.Client(api_key=api_key)
-        self.model_name = 'gemini-2.0-flash'
+        self.model_name = "gemini-2.0-flash"
         self.history = []
 
         self.tools = [
@@ -50,7 +53,7 @@ class TravelHubAgent:
             AgentTools.get_account_balance,
             AgentTools.generate_marketing_copy,
         ]
-        
+
         self._system_prompt = self._get_system_prompt()
 
     def _get_system_prompt(self) -> str:
@@ -98,7 +101,7 @@ class TravelHubAgent:
                     automatic_function_calling=types.AutomaticFunctionCallingConfig(
                         maximum_remote_calls=10
                     ),
-                )
+                ),
             )
 
             reply = response.text

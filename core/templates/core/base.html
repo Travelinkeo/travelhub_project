@@ -18,7 +18,7 @@
     <header class="site-header">
         <div class="site-header__inner">
             <div class="brand-logo">
-                <a href="{% url 'core:home' %}">
+                <a href="{% url 'home' %}">
                     <img src="{% static 'images/SVG/LOGO.svg' %}" alt="TravelHub Logo" />
                     <span>TravelHub</span>
                 </a>
@@ -73,8 +73,7 @@
             <div>
                 <h5 class="mb-1">Navegación</h5>
                 <ul class="nav-simple-list">
-                    <li><a href="{% url 'core:home' %}">Inicio</a></li>
-                    {# <li><a href="{% url 'core:lista_paquetes_cms' %}">Paquetes</a></li> #}
+                    <li><a href="{% url 'home' %}">Inicio</a></li>
                     <li><a href="/admin/">Admin</a></li>
                 </ul>
             </div>

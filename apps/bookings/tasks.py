@@ -2,7 +2,8 @@ import logging
 
 import requests
 from celery import shared_task
-from apps.common.utils.celery_utils import tenant_task, idempotent_task
+
+from apps.common.utils.celery_utils import idempotent_task, tenant_task
 
 logger = logging.getLogger(__name__)
 
@@ -15,9 +16,7 @@ def notificar_pago_whatsapp_task(venta_id, **kwargs):
 
     try:
         try:
-            venta = Venta.objects.select_related("cliente", "moneda", "agencia").get(
-                pk=venta_id
-            )
+            venta = Venta.objects.select_related("cliente", "moneda", "agencia").get(pk=venta_id)
         except Venta.DoesNotExist:
             logger.error(f"Venta {venta_id} no existe")
             return False
@@ -158,17 +157,24 @@ def verificar_cumplimiento_pasaportes_reserva_task(venta_id, **kwargs):
 
     try:
         from django.db.models import Prefetch
+
         from apps.bookings.models import SegmentoVuelo
-        
+
         try:
-            venta = Venta.objects.select_related("agencia", "cliente").prefetch_related(
-                "pasajeros",
-                Prefetch(
-                    "segmentos_vuelo",
-                    queryset=SegmentoVuelo.objects.filter(fecha_salida__isnull=False).order_by("fecha_salida"),
-                    to_attr="segmentos_ordenados"
+            venta = (
+                Venta.objects.select_related("agencia", "cliente")
+                .prefetch_related(
+                    "pasajeros",
+                    Prefetch(
+                        "segmentos_vuelo",
+                        queryset=SegmentoVuelo.objects.filter(fecha_salida__isnull=False).order_by(
+                            "fecha_salida"
+                        ),
+                        to_attr="segmentos_ordenados",
+                    ),
                 )
-            ).get(id_venta=venta_id)
+                .get(id_venta=venta_id)
+            )
         except Venta.DoesNotExist:
             return f"Venta {venta_id} no encontrada."
 
@@ -211,7 +217,7 @@ def monitorear_tiempos_limite_periodico_task(**kwargs):
     from django.utils import timezone
 
     from apps.bookings.models import Venta
-    from core.api import agency_context, get_current_agency, Agencia
+    from core.api import Agencia, agency_context, get_current_agency
 
     agencia_activa = get_current_agency()
 
@@ -233,7 +239,7 @@ def monitorear_tiempos_limite_periodico_task(**kwargs):
                 alerta_tl_disparada=False,
             )
 
-            for venta in ventas_en_riesgo:
+            for venta in ventas_en_riesgo.iterator(chunk_size=200):
                 cls_notificar_urgency_time_limit(venta)
                 venta.alerta_tl_disparada = True
                 venta.save(update_fields=["alerta_tl_disparada"])
@@ -309,7 +315,7 @@ def retry_queued_boletos(agencia_id=None):
     for agencia in agencias:
         with agency_context(agencia):
             boletos_en_espera = BoletoImportado.objects.filter(estado_parseo="QUE")
-            for boleto in boletos_en_espera:
+            for boleto in boletos_en_espera.iterator(chunk_size=200):
                 task = safe_delay(parsear_boleto_individual, boleto.id_boleto_importado)
                 if task:
                     boleto.estado_parseo = "PRO"
@@ -331,12 +337,16 @@ def retry_queued_boletos(agencia_id=None):
     acks_late=True,
 )
 def send_ticket_notification(boleto_id, **kwargs):
-    from apps.bookings.models import BoletoImportado
     import os
+
     from django.conf import settings
 
+    from apps.bookings.models import BoletoImportado
+
     try:
-        boleto = BoletoImportado.objects.select_related("cliente", "agencia").get(id_boleto_importado=boleto_id)
+        boleto = BoletoImportado.objects.select_related("cliente", "agencia").get(
+            id_boleto_importado=boleto_id
+        )
         if hasattr(boleto, "notificacion_enviada") and boleto.notificacion_enviada:
             logger.info(f"⏭️ Notificación ya enviada para Boleto {boleto_id}. Omitiendo.")
             return f"Notificación ya enviada para boleto {boleto_id}."
@@ -413,13 +423,17 @@ def send_ticket_notification(boleto_id, **kwargs):
 def check_upcoming_flights():
     import json
     from datetime import timedelta
-    from django.utils import timezone
+
     from django.conf import settings
+    from django.utils import timezone
+
     from apps.bookings.models import BoletoImportado
-    from apps.communications.services.telegram_notification_service import TelegramNotificationService
-    from core.models.agencia import Agencia
-    from core.middleware import agency_context
     from apps.common.utils.celery_utils import safe_delay
+    from apps.communications.services.telegram_notification_service import (
+        TelegramNotificationService,
+    )
+    from core.middleware import agency_context
+    from core.models.agencia import Agencia
 
     logger.info("🔍 Buscando vuelos próximos para Check-in...")
 
@@ -427,7 +441,7 @@ def check_upcoming_flights():
     tomorrow_start = now + timedelta(hours=23)
     total_alerts = 0
 
-    for agencia in Agencia.objects.filter(activa=True):
+    for agencia in Agencia.objects.filter(activa=True).iterator(chunk_size=50):
         with agency_context(agencia):
             boletos = BoletoImportado.objects.filter(
                 agencia=agencia,
@@ -442,7 +456,7 @@ def check_upcoming_flights():
         if not chat_id:
             continue
 
-        for boleto in boletos:
+        for boleto in boletos.iterator(chunk_size=200):
             try:
                 data = boleto.datos_parseados
                 if isinstance(data, str):
@@ -470,10 +484,14 @@ def check_upcoming_flights():
                                 f"Alerta check-in enviada para {boleto.localizador_pnr} (Agencia: {agencia.nombre})"
                             )
                             try:
-                                logger.info(f"📄 Generando PDF para Boleto {boleto.pk} (asynchronously)...")
+                                logger.info(
+                                    f"📄 Generando PDF para Boleto {boleto.pk} (asynchronously)..."
+                                )
                                 safe_delay(generar_pdf_ticket_async_task, boleto.pk)
                             except Exception as e_pdf_gen:
-                                logger.error(f"❌ Error encolando generación de PDF para Boleto {boleto.pk}: {e_pdf_gen}")
+                                logger.error(
+                                    f"❌ Error encolando generación de PDF para Boleto {boleto.pk}: {e_pdf_gen}"
+                                )
                             break
             except Exception as e:
                 logger.error(f"Error procesando boleto {boleto.pk} para checkin: {e}")
@@ -493,7 +511,9 @@ def check_upcoming_flights():
 )
 def generar_pdf_ticket_async_task(boleto_id, **kwargs):
     import time
+
     from django.core.files.base import ContentFile
+
     from apps.automation.parsers.normalization import DataNormalizationService
     from apps.automation.parsers.pdf_generation import PdfGenerationService
     from apps.bookings.models import BoletoImportado

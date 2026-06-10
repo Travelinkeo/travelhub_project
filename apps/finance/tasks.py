@@ -1,8 +1,8 @@
 import logging
 
 from celery import shared_task
-from apps.common.utils.celery_utils import tenant_task, idempotent_task
 
+from apps.common.utils.celery_utils import idempotent_task, tenant_task
 from apps.communications.services.telegram_unified import enviar_alerta_telegram
 from apps.finance.models import LinkDePago
 
@@ -13,9 +13,7 @@ logger = logging.getLogger(__name__)
 @idempotent_task(timeout=1800, key_prefix="celery_notif_zelle")
 def notificar_pago_zelle_task(link_id, **kwargs):
     try:
-        link = LinkDePago.objects.select_related("venta__cliente", "venta__agencia").get(
-            id=link_id
-        )
+        link = LinkDePago.objects.select_related("venta__cliente", "venta__agencia").get(id=link_id)
         venta = link.venta
 
         mensaje = (
@@ -135,7 +133,7 @@ def auditar_fuga_ingresos_task(**kwargs):
     from django.utils import timezone
 
     from apps.bookings.models.venta import Venta
-    from core.api import agency_context, get_current_agency, Agencia
+    from core.api import Agencia, agency_context, get_current_agency
 
     agencia_activa = get_current_agency()
 
@@ -147,26 +145,31 @@ def auditar_fuga_ingresos_task(**kwargs):
     else:
         agencias = Agencia.objects.filter(activa=True).iterator(chunk_size=50)
 
+    from apps.bookings.models import PagoVenta
+
     for agencia in agencias:
         with agency_context(agencia):
-            from django.db.models import Prefetch
-            from apps.bookings.models import PagoVenta
-            
-            ventas_auditar = (
+            ventas_ids = list(
                 Venta.objects.filter(fecha_venta__gte=limite_tiempo)
                 .exclude(estado=Venta.EstadoVenta.CANCELADA)
-                .select_related("agencia", "moneda")
-                .prefetch_related(
-                    Prefetch(
-                        "pagos_venta",
-                        queryset=PagoVenta.objects.filter(confirmado=True),
-                        to_attr="pagos_confirmados"
-                    )
-                )
+                .values_list("id", flat=True)
+                .iterator(chunk_size=200)
             )
+            if not ventas_ids:
+                continue
 
-            for venta in ventas_auditar:
-                total_pagado = sum(pago.monto for pago in venta.pagos_confirmados)
+            ventas = Venta.objects.filter(id__in=ventas_ids).select_related("agencia", "moneda")
+
+            pagos_por_venta = {}
+            for pago in (
+                PagoVenta.objects.filter(venta_id__in=ventas_ids, confirmado=True)
+                .values("venta_id", "monto")
+                .iterator(chunk_size=200)
+            ):
+                pagos_por_venta.setdefault(pago["venta_id"], []).append(pago)
+
+            for venta in ventas:
+                total_pagado = sum(p["monto"] for p in pagos_por_venta.get(venta.id, []))
 
                 if venta.monto_venta_cliente > 0 and total_pagado < venta.monto_venta_cliente:
                     alertas += 1
@@ -202,12 +205,14 @@ def auditar_fuga_ingresos_task(**kwargs):
 )
 def check_pending_payments():
     from datetime import timedelta
+
+    from django.conf import settings
     from django.core.mail import EmailMessage, get_connection
     from django.utils import timezone
-    from django.conf import settings
+
     from apps.bookings.models import Venta
-    from core.models.agencia import Agencia
     from core.middleware import agency_context
+    from core.models.agencia import Agencia
 
     logger.info("Iniciando chequeo de pagos pendientes...")
     today = timezone.now().date()
@@ -245,7 +250,7 @@ def check_pending_payments():
                     cliente__email__isnull=False,
                 ).select_related("cliente", "moneda")
 
-                for venta in ventas_pendientes:
+                for venta in ventas_pendientes.iterator(chunk_size=200):
                     try:
                         cliente = venta.cliente
                         sender_name = agencia.nombre_comercial or agencia.nombre
@@ -284,6 +289,7 @@ def check_pending_payments():
     default_retry_delay=60,
     acks_late=True,
 )
+@idempotent_task(timeout=7200, key_prefix="celery_facturacion_masiva")
 def procesar_facturacion_masiva_task(boleto_ids, cliente_id, **kwargs):
     from apps.bookings.models import BoletoImportado
     from apps.crm.models import Cliente
@@ -305,3 +311,24 @@ def procesar_facturacion_masiva_task(boleto_ids, cliente_id, **kwargs):
     except Exception as e:
         logger.error(f"❌ Error fatal en procesar_facturacion_masiva_task: {e}")
         raise e
+
+
+@shared_task(
+    name="core.tasks.create_invoice_from_sale_task",
+    time_limit=300,
+    soft_time_limit=240,
+    max_retries=3,
+    default_retry_delay=60,
+    acks_late=True,
+)
+@idempotent_task(timeout=3600, key_prefix="celery_create_invoice")
+def create_invoice_from_sale_task(venta_id):
+    from apps.finance.services.invoice_service import InvoiceService
+
+    logger.info(f"📩 Generando factura automática para Venta {venta_id}")
+    try:
+        InvoiceService.create_invoice_from_sale(venta_id)
+        logger.info(f"✅ Factura automática creada para Venta {venta_id}")
+    except Exception as e:
+        logger.error(f"❌ Error creando factura para Venta {venta_id}: {e}")
+        raise

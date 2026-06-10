@@ -75,7 +75,7 @@
                     <span class="material-symbols-outlined text-[18px]">filter_list</span> Filtrar
                 </button>
                 {% if request.GET.q or request.GET.estado %}
-                <a href="{% url 'core:ventas_dashboard' %}" class="btn-secondary whitespace-nowrap">Limpiar</a>
+                <a href="{% url 'bookings:venta_list' %}" class="btn-secondary whitespace-nowrap">Limpiar</a>
                 {% endif %}
             </div>
         </form>
@@ -142,7 +142,7 @@
                         </td>
                         <td class="px-6 py-4 text-right">
                             <div class="flex items-center justify-end gap-1 opacity-50 group-hover:opacity-100 transition-opacity">
-                                <a href="{% url 'core:venta_detalle' venta.pk %}" class="p-2 text-gray-400 hover:text-primary transition-colors hover:bg-primary/10 rounded-lg flex items-center justify-center" title="Ver Detalle">
+                                <a href="{% url 'bookings:venta_detail' venta.pk %}" class="p-2 text-gray-400 hover:text-primary transition-colors hover:bg-primary/10 rounded-lg flex items-center justify-center" title="Ver Detalle">
                                     <span class="material-symbols-outlined text-[18px]">visibility</span>
                                 </a>
                             </div>

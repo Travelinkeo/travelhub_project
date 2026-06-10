@@ -38,7 +38,21 @@ TravelHub es una plataforma B2B multi-tenant diseñada para automatizar la opera
 | [Reglas de Parseo](docs/PARSING_RULES.md) | Estándares de extracción GDS |
 | [Multi-tenancy](docs/MULTI_TENANCY.md) | Aislamiento de datos |
 | [Modelo de Negocio](docs/BUSINESS_MODEL.md) | Planes y precios |
+| [Chequeo de Tipos](docs/MYPY.md) | Ejecutar mypy localmente |
 | [Despliegue](docs/deployment/DEPLOYMENT.md) | Guía WSL2 + Docker + Cloudflare Tunnel |
+
+---
+
+## 🔍 Chequeo de Tipos con mypy
+
+Para ejecutar el verificador de tipos en tu entorno local:
+
+```bash
+pip install -r requirements/dev.txt
+mypy .
+```
+
+Esto usará la configuración estricta definida en `mypy.ini` y el plugin `django-stubs`.
 
 ---
 

@@ -43,22 +43,22 @@ temp/
 secrets.json
 
 # Development & Debugging (scripts temporales en raíz)
-scripts/
+scripts/*
 !scripts/check_domain_imports.py
 scratch/
-check_*.py
-debug_*.py
-inspect_*.py
-nuclear_*.py
-deep_*.py
-force_*.py
-test_*.py
-audit_*.py
-fix_*.py
-auto_fix_*.py
-apply_*.py
-cleanup_*.py
-verify_*.py
+/check_*.py
+/debug_*.py
+/inspect_*.py
+/nuclear_*.py
+/deep_*.py
+/force_*.py
+/test_*.py
+/audit_*.py
+/fix_*.py
+/auto_fix_*.py
+/apply_*.py
+/cleanup_*.py
+/verify_*.py
 *.db
 *.sqlite3
 *.sqlite3-journal

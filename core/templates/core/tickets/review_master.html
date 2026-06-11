@@ -143,12 +143,12 @@
                     </a>
                     {% else %}
                     <div id="pdf-status-container-{{ boleto.pk }}" 
-                         hx-get="{% url 'core:boleto_pdf_status' boleto.pk %}" 
-                         hx-trigger="every 3s" 
-                         hx-swap="outerHTML" 
+                         hx-get="{% url 'core:boleto_pdf_status' boleto.pk %}?poll=0" 
+                         hx-trigger="every 4s" 
+                         hx-swap="outerHTML"
                          class="flex-1 h-10 px-4 rounded-xl bg-amber-500/5 border border-amber-500/20 flex items-center justify-center gap-2 text-amber-500 group animate-pulse cursor-wait">
                         <span class="size-4 border-2 border-amber-500/20 border-t-amber-500 rounded-full animate-spin"></span>
-                        <span class="text-[9px] font-black uppercase tracking-wider">Generando...</span>
+                        <span class="text-[9px] font-black uppercase tracking-wider">Generando TKT...</span>
                     </div>
                     {% endif %}
                 </div>

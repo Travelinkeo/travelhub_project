@@ -163,7 +163,9 @@ def _evaluar_tax_refund(boleto_id):
     from apps.bookings.models import BoletoImportado
 
     try:
-        boleto = BoletoImportado.objects.get(pk=boleto_id)
+        # Usar all_objects para funcionar fuera del contexto de agencia (on_commit callback)
+        manager = getattr(BoletoImportado, "all_objects", BoletoImportado.objects)
+        boleto = manager.get(pk=boleto_id)
         BoletoImportadoService.evaluate_tax_refund(boleto)
     except Exception as e:
         logger.error(f"Error evaluando tax refund para boleto {boleto_id}: {e}")

@@ -114,28 +114,42 @@ class DataNormalizationService:
             logger.error(f"Error normalizando aerolínea en pipeline: {e}")
 
         # 1.1 Normalización específica de nombre de pasajero (Hola, [Nombre])
-        if "passenger_name" in normalized and "/" in normalized["passenger_name"]:
-            raw_name = normalized["passenger_name"]
+        raw_name = normalized.get("passenger_name", "")
+        if raw_name:
+            import re
+
             try:
-                # GDS Standard: APELLIDOS/NOMBRES MR
-                parts = raw_name.split("/")
-                if len(parts) > 1:
-                    last_names = parts[0].strip()
-                    # Limpiamos títulos comunes (MR, MRS, MS, MSTR, MISS)
-                    import re
-
-                    first_names_raw = parts[1].strip()
+                if "/" in raw_name:
+                    # GDS Standard: APELLIDOS/NOMBRES MR
+                    parts = raw_name.split("/")
+                    if len(parts) > 1:
+                        last_names = parts[0].strip()
+                        first_names_raw = parts[1].strip()
+                        first_names = re.sub(
+                            r"\s+(MR|MRS|MS|MSTR|MISS|M|F)$", "", first_names_raw, flags=re.IGNORECASE
+                        )
+                        normalized["first_name"] = first_names
+                        normalized["last_name"] = last_names
+                        normalized["solo_nombre_pasajero"] = first_names.split(" ")[0]
+                        normalized["human_name"] = f"{first_names} {last_names}"
+                        normalized["passenger_name_original"] = raw_name
+                        normalized["passenger_name"] = normalized["human_name"]
+                else:
+                    # Fallback: NOMBRE APELLIDO (separado por espacio)
+                    parts = raw_name.strip().split(None, 1)
+                    if len(parts) > 1:
+                        first_names = parts[0].strip()
+                        last_names = parts[1].strip()
+                    else:
+                        first_names = parts[0].strip()
+                        last_names = ""
                     first_names = re.sub(
-                        r"\s+(MR|MRS|MS|MSTR|MISS|M|F)$", "", first_names_raw, flags=re.IGNORECASE
+                        r"\s+(MR|MRS|MS|MSTR|MISS|M|F)$", "", first_names, flags=re.IGNORECASE
                     )
-
                     normalized["first_name"] = first_names
                     normalized["last_name"] = last_names
-                    normalized["solo_nombre_pasajero"] = first_names.split(" ")[
-                        0
-                    ]  # El primer nombre para el saludo
-                    # Re-armamos un nombre más amigable para humanos
-                    normalized["human_name"] = f"{first_names} {last_names}"
+                    normalized["solo_nombre_pasajero"] = first_names.split(" ")[0]
+                    normalized["human_name"] = f"{first_names} {last_names}".strip()
                     normalized["passenger_name_original"] = raw_name
                     normalized["passenger_name"] = normalized["human_name"]
             except Exception as e:

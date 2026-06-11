@@ -706,7 +706,7 @@ class VentaAuditFinding(AgenciaMixin, models.Model):
         indexes = [
             models.Index(
                 fields=["venta", "estado", "fecha_deteccion"],
-                name="idx_auditfinding_venta_estado_fecha",
+                name="idx_audit_venta_estado_fecha",
             ),
         ]
 

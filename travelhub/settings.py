@@ -37,7 +37,7 @@ LOGOUT_REDIRECT_URL = "login"
 LOGIN_URL = "login"
 
 
-import environ
+import environ  # noqa: E402
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -475,7 +475,9 @@ WHATSAPP_MICROSERVICE_TOKEN = os.getenv("WHATSAPP_MICROSERVICE_TOKEN")
 if not DEBUG and not WHATSAPP_MICROSERVICE_TOKEN:
     raise ImproperlyConfigured("WHATSAPP_MICROSERVICE_TOKEN debe configurarse en producción")
 EVOLUTION_PUBLIC_URL = os.getenv("EVOLUTION_PUBLIC_URL", "http://localhost:8080")
-EVOLUTION_INSTANCE_TOKEN = os.getenv("EVOLUTION_INSTANCE_TOKEN") or SECRET_KEY[:16]
+EVOLUTION_INSTANCE_TOKEN = os.getenv("EVOLUTION_INSTANCE_TOKEN")
+if not DEBUG and not EVOLUTION_INSTANCE_TOKEN:
+    raise ImproperlyConfigured("EVOLUTION_INSTANCE_TOKEN debe configurarse en producción")
 
 # 🔐 Binance Pay API (creación de órdenes y webhooks)
 BINANCE_PAY_API_KEY = os.getenv("BINANCE_PAY_API_KEY")
@@ -509,6 +511,8 @@ def _build_redis_url(db_num=0):
 
 # Celery Configuration
 CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", _build_redis_url(0))
+CELERY_BEAT_SCHEDULE = {}
+
 CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", _build_redis_url(0))
 CELERY_ACCEPT_CONTENT = ["application/json"]
 CELERY_TASK_SERIALIZER = "json"
@@ -985,7 +989,7 @@ UNFOLD = {
 
 # Cargar configuracion de logging estructurado
 try:
-    from .settings_logging import *
+    from .settings_logging import *  # noqa: F403, F405
 except ImportError:
     pass
 
@@ -1015,7 +1019,6 @@ if not DEBUG:
 
     # Prevenir que el browser "olfatee" el tipo de contenido
     SECURE_CONTENT_TYPE_NOSNIFF = True
-    SECURE_BROWSER_XSS_FILTER = True
 else:
     # En desarrollo, cookies sin HTTPS para no romper el servidor local
     SESSION_COOKIE_SECURE = False
@@ -1027,6 +1030,8 @@ else:
 SESSION_COOKIE_HTTPONLY = True  # JS no puede leer la cookie de sesión
 CSRF_COOKIE_HTTPONLY = False  # HTMX/JS necesita leer el CSRF token
 SESSION_COOKIE_AGE = 14400  # 4 horas
+CSRF_COOKIE_NAME = "th_csrftoken"
+SESSION_COOKIE_NAME = "th_sessionid"
 
 
 is_testing = os.environ.get("DJANGO_TESTING", "False") == "True"

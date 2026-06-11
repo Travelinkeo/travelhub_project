@@ -118,7 +118,8 @@ def _trigger_parsing(boleto_id):
     from apps.bookings.services.boleto_service import BoletoImportadoService
 
     try:
-        boleto = BoletoImportado.objects.get(pk=boleto_id)
+        manager = getattr(BoletoImportado, "all_objects", BoletoImportado.objects)
+        boleto = manager.get(pk=boleto_id)
         BoletoImportadoService.trigger_parsing_if_needed(boleto)
     except Exception as e:
         logger.error(f"Error triggering parsing for boleto {boleto_id}: {e}")
@@ -129,7 +130,8 @@ def _post_parse_automation(boleto_id):
     from apps.bookings.services.boleto_service import BoletoImportadoService
 
     try:
-        boleto = BoletoImportado.objects.get(pk=boleto_id)
+        manager = getattr(BoletoImportado, "all_objects", BoletoImportado.objects)
+        boleto = manager.get(pk=boleto_id)
         BoletoImportadoService.post_parse_automation(boleto)
     except Exception as e:
         logger.error(f"Error post-parse automation for boleto {boleto_id}: {e}")

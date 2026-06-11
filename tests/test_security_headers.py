@@ -37,7 +37,9 @@ def test_security_headers_and_csp_relaxed(client):
     else:
         assert "nonce-" in csp1
         assert "strict-dynamic" in csp1
-        assert "unsafe-inline" not in csp1
+        # 'unsafe-inline' solo permitido en style-src (H6), NO en script-src
+        script_part = [p.strip() for p in csp1.split(";") if p.strip().startswith("script-src")][0]
+        assert "'unsafe-inline'" not in script_part
 
 
 @pytest.mark.django_db

@@ -61,7 +61,18 @@ app.autodiscover_tasks()
 # ==========================================
 
 
-app.conf.beat_schedule = settings.CELERY_BEAT_SCHEDULE  # Usar settings.CELERY_BEAT_SCHEDULE
+# Cargar CELERY_BEAT_SCHEDULE desde settings o desde el módulo dedicado (fallback seguro)
+# Usamos getattr para evitar AttributeError si el settings.py no tiene la variable
+_beat_schedule = getattr(settings, "CELERY_BEAT_SCHEDULE", None)
+if _beat_schedule is None:
+    try:
+        from travelhub.celery_beat_schedule import CELERY_BEAT_SCHEDULE as _beat_schedule
+        logger.info("✅ CELERY_BEAT_SCHEDULE cargado desde celery_beat_schedule.py")
+    except ImportError:
+        _beat_schedule = {}
+        logger.warning("⚠️ No se encontró CELERY_BEAT_SCHEDULE. Celery Beat no tendrá tareas programadas.")
+
+app.conf.beat_schedule = _beat_schedule
 
 
 @app.task(bind=True, ignore_result=True, time_limit=30, soft_time_limit=20)

@@ -276,6 +276,8 @@ class BoletoStatusView(View):
 
 @method_decorator(login_required, name="dispatch")
 class BoletoPdfStatusView(View):
+    MAX_POLLS = 30  # ~2 minutos (30 * 4s)
+
     def get(self, request, pk, *args, **kwargs):
         manager = getattr(BoletoImportado, "all_objects", BoletoImportado.objects)
         boleto = get_object_or_404(manager, pk=pk)
@@ -283,6 +285,25 @@ class BoletoPdfStatusView(View):
         agencia = getattr(request, "agencia", None)
         if not request.user.is_superuser and boleto.agencia != agencia:
             return HttpResponse("Acceso Denegado", status=403)
+
+        poll_count = int(request.GET.get("poll", "0"))
+        if poll_count > self.MAX_POLLS:
+            return HttpResponse(f"""
+            <div id="pdf-status-container-{boleto.pk}" class="flex-1 h-10 px-4 rounded-xl bg-red-500/5 border border-red-500/20 flex items-center justify-center gap-2 text-red-500 group" title="Tiempo de espera agotado. Recarga la página.">
+                <span class="material-symbols-outlined text-[16px]">timer_off</span>
+                <span class="text-[9px] font-black uppercase tracking-wider">Tiempo agotado — Recarga</span>
+            </div>
+            """)
+
+        # Si el boleto lleva demasiado tiempo en PRO, expirar el estado
+        if boleto.estado_parseo == BoletoImportado.EstadoParseo.EN_PROCESO:
+            from django.utils import timezone as tz
+            if boleto.updated_at and (tz.now() - boleto.updated_at).total_seconds() > 120:
+                BoletoImportado.all_objects.filter(pk=boleto.pk).update(
+                    estado_parseo="REV",
+                    log_parseo="Estado PRO expirado por timeout (>120s). Reintenta el parseo."
+                )
+                boleto.refresh_from_db()
 
         retry = request.GET.get("retry") == "1"
         if retry:
@@ -357,7 +378,7 @@ class BoletoPdfStatusView(View):
                     return HttpResponse(html)
 
         if boleto.estado_parseo == BoletoImportado.EstadoParseo.ERROR_PARSEO:
-            url = reverse("core:boleto_pdf_status", kwargs={"pk": boleto.pk}) + "?retry=1"
+            url = reverse("core:boleto_pdf_status", kwargs={"pk": boleto.pk}) + "?retry=1&poll=0"
             html = f"""
             <div id="pdf-status-container-{boleto.pk}" 
                  hx-get="{url}" 
@@ -366,17 +387,69 @@ class BoletoPdfStatusView(View):
                  class="flex-1 h-10 px-4 rounded-xl bg-red-500/5 border border-red-500/20 flex items-center justify-center gap-2 text-red-500 group cursor-pointer"
                  title="Error al generar PDF. Clic para reintentar.">
                 <span class="material-symbols-outlined text-[16px]">error</span>
-                <span class="text-[9px] font-black uppercase tracking-wider">Error TKT</span>
+                <span class="text-[9px] font-black uppercase tracking-wider">Error TKT — Clic para reintentar</span>
             </div>
             """
             return HttpResponse(html)
 
-        # Si aún se está generando (o re-encolando)
+        # Boleto ya completó parseo (COM/REV) pero no tiene PDF → regenerar síncronamente ahora
+        # Esto evita que la UI quede en bucle infinito de "Generando..."
+        estado_final = str(boleto.estado_parseo)
+        if estado_final in ("COM", "REV", "COMPLETADO", "REVISION_REQUERIDA"):
+            logger.info(
+                f"⚡ [PDF-STATUS] Boleto {boleto.pk} completó parseo ({estado_final}) pero no tiene PDF. "
+                "Regenerando síncronamente..."
+            )
+            try:
+                from apps.automation.services.ticket_parser_service import _generate_pdf_sync
+
+                _generate_pdf_sync(boleto)
+                boleto.refresh_from_db()
+            except Exception as e_regen:
+                logger.error(f"❌ [PDF-STATUS] Fallo al auto-regenerar PDF para Boleto {boleto.pk}: {e_regen}")
+
+            # Si ahora tenemos PDF, mostrarlo
+            if boleto.archivo_pdf_generado:
+                try:
+                    pdf_accessible = boleto.archivo_pdf_generado.storage.exists(
+                        boleto.archivo_pdf_generado.name
+                    )
+                except Exception:
+                    pdf_accessible = bool(boleto.archivo_pdf_generado.name)
+
+                if pdf_accessible:
+                    html = f"""
+                    <a href="{boleto.archivo_pdf_generado.url}" target="_blank" class="flex-1 h-10 px-4 rounded-xl bg-status-success-bg border border-status-success/20 flex items-center justify-center gap-2 hover:bg-status-success-bg/80 transition-all text-status-success group">
+                        <span class="material-symbols-outlined text-[16px]">verified</span>
+                        <span class="text-[9px] font-black uppercase tracking-wider">TKT</span>
+                    </a>
+                    """
+                    return HttpResponse(html)
+
+            # Si sigue sin PDF después del intento, mostrar botón de error (sale del bucle)
+            boleto.refresh_from_db()
+            url_retry = reverse("core:boleto_pdf_status", kwargs={"pk": boleto.pk}) + "?retry=1&poll=0"
+            html = f"""
+            <div id="pdf-status-container-{boleto.pk}" 
+                 hx-get="{url_retry}" 
+                 hx-trigger="click" 
+                 hx-swap="outerHTML" 
+                 class="flex-1 h-10 px-4 rounded-xl bg-red-500/5 border border-red-500/20 flex items-center justify-center gap-2 text-red-500 group cursor-pointer"
+                 title="Error al generar PDF. Clic para reintentar.">
+                <span class="material-symbols-outlined text-[16px]">error</span>
+                <span class="text-[9px] font-black uppercase tracking-wider">Error TKT — Clic para reintentar</span>
+            </div>
+            """
+            return HttpResponse(html)
+
+        # Aún en proceso (PRO/EN_PROCESO) — seguir esperando con polling limitado
+        # El contador hx-vals evita polling eterno si el backend no responde
+        next_poll = poll_count + 1
         url = reverse("core:boleto_pdf_status", kwargs={"pk": boleto.pk})
         html = f"""
         <div id="pdf-status-container-{boleto.pk}" 
-             hx-get="{url}" 
-             hx-trigger="every 3s" 
+             hx-get="{url}?poll={next_poll}" 
+             hx-trigger="every 4s" 
              hx-swap="outerHTML" 
              class="flex-1 h-10 px-4 rounded-xl bg-amber-500/5 border border-amber-500/20 flex items-center justify-center gap-2 text-amber-500 group animate-pulse cursor-wait">
             <span class="size-4 border-2 border-amber-500/20 border-t-amber-500 rounded-full animate-spin"></span>
@@ -420,7 +493,7 @@ def eliminar_boleto(request, pk):
                 boleto.archivo_pdf_generado.delete(save=False)
             except Exception:
                 pass
-        boleto.delete(force=True)
+        boleto.hard_delete()
         messages.success(request, "Boleto eliminado físicamente.")
     except ProtectedError:
         logger.exception("Intento de eliminar boleto %s con referencias protegidas", pk)

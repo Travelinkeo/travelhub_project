@@ -83,6 +83,7 @@ def _generate_pdf_sync(boleto) -> None:
                 f"⚠️ [SYNC] Boleto {boleto.pk} no tiene datos_parseados. No se puede generar PDF."
             )
             BoletoImportado.all_objects.filter(pk=boleto.pk).update(
+                estado_parseo="ERR",
                 log_parseo=(str(boleto.log_parseo or ""))
                 + " | Sin datos para generar PDF. Vuelve a parsear."
             )
@@ -102,6 +103,7 @@ def _generate_pdf_sync(boleto) -> None:
                 "Posible fallo de WeasyPrint o plantilla HTML con error."
             )
             BoletoImportado.all_objects.filter(pk=boleto.pk).update(
+                estado_parseo="ERR",
                 log_parseo=(str(boleto.log_parseo or ""))
                 + " | PDF vacío generado. Usa el botón Reintentar."
             )
@@ -110,6 +112,7 @@ def _generate_pdf_sync(boleto) -> None:
         # Registrar el error en el log del boleto para que sea visible en la UI
         try:
             BoletoImportado.all_objects.filter(pk=boleto.pk).update(
+                estado_parseo="ERR",
                 log_parseo=(str(boleto.log_parseo or "")) + f" | Error en PDF: {str(e)[:300]}"
             )
         except Exception as e_log:
@@ -605,6 +608,7 @@ class TicketParserService:
             # 2. Fase de Generación de PDF
             # Si Celery/Redis están disponibles → async. Si no → síncrono directo para
             # garantizar que el PDF exista cuando el usuario abra la vista de revisión.
+            pdf_sync_failed = False
             try:
                 from apps.common.utils.celery_utils import _is_celery_available
 
@@ -621,11 +625,18 @@ class TicketParserService:
                         f"📄 Celery no disponible — generando PDF síncronamente para Boleto {boleto.pk}..."
                     )
                     _generate_pdf_sync(boleto)
+                    boleto.refresh_from_db()
+                    if not boleto.archivo_pdf_generado:
+                        pdf_sync_failed = True
             except Exception as e_pdf_gen:
                 logger.error(f"❌ Error en generación de PDF para Boleto {boleto.pk}: {e_pdf_gen}")
+                pdf_sync_failed = True
                 # Último recurso: intentar generación síncrona
                 try:
                     _generate_pdf_sync(boleto)
+                    boleto.refresh_from_db()
+                    if boleto.archivo_pdf_generado:
+                        pdf_sync_failed = False
                 except Exception as e_sync:
                     logger.error(
                         f"❌ Fallo total en generación de PDF (sync fallback) para Boleto {boleto.pk}: {e_sync}"
@@ -633,10 +644,12 @@ class TicketParserService:
 
             # 3. Fase de Cierre (Rápida)
             with transaction.atomic():
-                # Si los datos son parciales (sin segmentos), cerramos en REV (Revisión Requerida)
-                # para que el usuario pueda completar la información faltante
-                es_parcial = bool(data.get("_requiere_revision", False))
-                if es_parcial:
+                # Si el PDF síncrono falló, cerrar como REV para que el usuario reintente
+                if pdf_sync_failed:
+                    boleto.estado_parseo = BoletoImportado.EstadoParseo.REVISION_REQUERIDA
+                    boleto.log_parseo = "PDF no generado. Revisa los datos y usa 'Reintentar PDF'."
+                    logger.warning(f"⚠️ Boleto {boleto.pk} cerrado como REV (PDF falló).")
+                elif bool(data.get("_requiere_revision", False)):
                     boleto.estado_parseo = BoletoImportado.EstadoParseo.REVISION_REQUERIDA  # 'REV'
                     boleto.log_parseo = "Datos parciales (sin segmentos de vuelo). PDF generado. Revisa el itinerario."
                     logger.warning(

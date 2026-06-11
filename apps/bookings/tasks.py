@@ -560,9 +560,18 @@ def generar_pdf_ticket_async_task(boleto_id, **kwargs):
 
             return f"PDF generado y guardado para boleto {boleto_id}."
         else:
+            # 🔑 PDF vacío — marcar como ERROR para que el frontend salga del bucle de polling
             logger.warning(
-                f"⚠️ PDF generado vacío o muy pequeño ({len(pdf_bytes) if pdf_bytes else 0} bytes)."
+                f"⚠️ PDF generado vacío o muy pequeño ({len(pdf_bytes) if pdf_bytes else 0} bytes). "
+                f"Marcando boleto {boleto_id} como ERROR para que la UI muestre botón de reintento."
             )
+            try:
+                BoletoImportado.objects.filter(pk=boleto_id).update(
+                    estado_parseo=BoletoImportado.EstadoParseo.ERROR_PARSEO,
+                    log_parseo=f"PDF vacío generado ({len(pdf_bytes) if pdf_bytes else 0} bytes). Usa Reintentar.",
+                )
+            except Exception as e_upd:
+                logger.error(f"No se pudo marcar boleto {boleto_id} como ERR: {e_upd}")
             return f"PDF vacío generado para boleto {boleto_id}."
     except Exception as e:
         logger.exception(f"❌ Error en tarea asíncrona de PDF para Boleto {boleto_id}: {e}")

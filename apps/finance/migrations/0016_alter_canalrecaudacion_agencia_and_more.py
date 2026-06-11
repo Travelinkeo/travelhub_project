@@ -55,41 +55,46 @@ class Migration(migrations.Migration):
                 to="core.agencia",
             ),
         ),
-        migrations.AlterField(
-            model_name="factura",
-            name="agencia",
-            field=models.ForeignKey(
-                blank=True,
-                null=True,
-                on_delete=django.db.models.deletion.CASCADE,
-                related_name="%(class)s_items",
-                to="core.agencia",
-            ),
+        migrations.SeparateDatabaseAndState(
+            database_operations=[],
+            state_operations=[
+                migrations.AlterField(
+                    model_name="factura",
+                    name="agencia",
+                    field=models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="%(class)s_items",
+                        to="core.agencia",
+                    ),
+                ),
+                migrations.AlterField(
+                    model_name="gastooperativo",
+                    name="agencia",
+                    field=models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="%(class)s_items",
+                        to="core.agencia",
+                    ),
+                ),
+                migrations.AlterField(
+                    model_name="itemfactura",
+                    name="agencia",
+                    field=models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="%(class)s_items",
+                        to="core.agencia",
+                    ),
+                ),
+            ],
         ),
         migrations.AlterField(
             model_name="facturaproveedor",
-            name="agencia",
-            field=models.ForeignKey(
-                blank=True,
-                null=True,
-                on_delete=django.db.models.deletion.CASCADE,
-                related_name="%(class)s_items",
-                to="core.agencia",
-            ),
-        ),
-        migrations.AlterField(
-            model_name="gastooperativo",
-            name="agencia",
-            field=models.ForeignKey(
-                blank=True,
-                null=True,
-                on_delete=django.db.models.deletion.CASCADE,
-                related_name="%(class)s_items",
-                to="core.agencia",
-            ),
-        ),
-        migrations.AlterField(
-            model_name="itemfactura",
             name="agencia",
             field=models.ForeignKey(
                 blank=True,

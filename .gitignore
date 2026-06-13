@@ -110,3 +110,14 @@ tailwindcss.windows.exe
 tailwindcss.*
 
 .aider*
+
+# Sensitive scripts and directories
+setup_users.py
+fake_migrate.ps1
+emergency_fix.sh
+fix_completo_produccion.sh
+fix_produccion_*.sh
+boletos_importados/
+boletos_generados/
+/boletos_importados/
+/boletos_generados/

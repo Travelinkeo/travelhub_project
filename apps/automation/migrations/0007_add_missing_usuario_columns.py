@@ -6,6 +6,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ("automation", "0006_alter_notificacionagente_table_and_more"),
         ("auth", "0012_alter_user_first_name_max_length"),
+        ("core", "0037_rename_remaining_core_tables"),
     ]
 
     operations = [
@@ -32,3 +33,4 @@ class Migration(migrations.Migration):
             ),
         ),
     ]
+

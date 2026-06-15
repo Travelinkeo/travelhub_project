@@ -56,8 +56,9 @@ def check_postgres(user, password, dbname="travelhub", host="localhost", port="5
         return False
 
 if __name__ == "__main__":
+    import os
     user = "postgres"
-    password = "Linkeo1331@@"
+    password = os.environ.get("DB_PASSWORD", "")
     
     # Probar primero con base de datos 'travelhub'
     if not check_postgres(user, password, dbname="travelhub"):

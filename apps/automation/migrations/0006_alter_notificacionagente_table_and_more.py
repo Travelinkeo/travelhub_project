@@ -12,11 +12,13 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("automation", "0005_alter_notificacionagente_agencia_and_more"),
+        ("core", "0037_rename_remaining_core_tables"),
     ]
 
     operations = [
         migrations.SeparateDatabaseAndState(
-            database_operations=[],
+            database_operations=[
+            ],
             state_operations=[
                 migrations.AlterModelTable(
                     name="notificacionagente",

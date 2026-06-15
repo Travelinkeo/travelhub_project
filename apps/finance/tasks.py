@@ -152,13 +152,13 @@ def auditar_fuga_ingresos_task(**kwargs):
             ventas_ids = list(
                 Venta.objects.filter(fecha_venta__gte=limite_tiempo)
                 .exclude(estado=Venta.EstadoVenta.CANCELADA)
-                .values_list("id", flat=True)
+                .values_list("pk", flat=True)
                 .iterator(chunk_size=200)
             )
             if not ventas_ids:
                 continue
 
-            ventas = Venta.objects.filter(id__in=ventas_ids).select_related("agencia", "moneda")
+            ventas = Venta.objects.filter(pk__in=ventas_ids).select_related("agencia", "moneda")
 
             pagos_por_venta = {}
             for pago in (
@@ -169,7 +169,7 @@ def auditar_fuga_ingresos_task(**kwargs):
                 pagos_por_venta.setdefault(pago["venta_id"], []).append(pago)
 
             for venta in ventas:
-                total_pagado = sum(p["monto"] for p in pagos_por_venta.get(venta.id, []))
+                total_pagado = sum(p["monto"] for p in pagos_por_venta.get(venta.pk, []))
 
                 if venta.monto_venta_cliente > 0 and total_pagado < venta.monto_venta_cliente:
                     alertas += 1

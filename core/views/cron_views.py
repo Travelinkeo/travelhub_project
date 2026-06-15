@@ -138,7 +138,7 @@ def health_check(request):
 @extend_schema(exclude=True)
 @api_view(["POST"])
 @permission_classes([AllowAny])
-@csrf_exempt
+@csrf_exempt  # CSRF exempt: secured by verificar_cron_token() check below
 def cargar_catalogos_cron(request):
     """
     Carga catálogos iniciales (países, ciudades, monedas, aerolíneas).

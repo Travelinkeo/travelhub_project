@@ -36,7 +36,6 @@ htmlcov/
 docs_archive/
 test_files_archive/
 scripts_archive/
-docs/
 
 # Secrets — NEVER copy these into the image
 .env

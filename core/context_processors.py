@@ -28,7 +28,6 @@ def agency_context(request):
             rol = "admin"
 
     try:
-        import threading
         from datetime import date
 
         from apps.finance.models.currencies import TasaCambio
@@ -50,19 +49,11 @@ def agency_context(request):
             # Establecer un bloqueo temporal de 30 minutos para evitar hilos concurrentes
             cache.set("bcv_sync_lock", True, timeout=1800)
 
-            # Lanzar actualización en segundo plano
-            def async_sync():
-                try:
-                    from apps.contabilidad.tasas_venezuela_client import TasasVenezuelaClient
-
-                    TasasVenezuelaClient.actualizar_tasas_db()
-                except Exception as sync_err:
-                    import logging
-
-                    logger = logging.getLogger(__name__)
-                    logger.error(f"Error en hilo de sincronización pasiva de tasas BCV: {sync_err}")
-
-            threading.Thread(target=async_sync, daemon=True).start()
+            try:
+                from apps.contabilidad.tasks import sync_bcv_rates
+                sync_bcv_rates.delay()
+            except Exception:
+                pass
 
         tasas = cache.get("tasa_bcv_context")
         if tasas is None:

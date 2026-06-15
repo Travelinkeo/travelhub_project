@@ -27,7 +27,7 @@ class NotificacionInteligente(AgenciaMixin, models.Model):
     tipo = models.CharField(max_length=20, choices=Tipo.choices, default=Tipo.INFO)
     titulo = models.CharField(max_length=150)
     mensaje = models.TextField()
-    ahorro_tiempo = models.CharField(max_length=50, blank=True, null=True, help_text=_("Ej: 5 min"))
+    ahorro_tiempo = models.CharField(max_length=50, blank=True, help_text=_("Ej: 5 min"))
     leida = models.BooleanField(default=False)
     creado_en = models.DateTimeField(auto_now_add=True, db_index=True)
 

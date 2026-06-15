@@ -21,7 +21,7 @@
                     <h1 class="text-xl font-bold text-white tracking-tight">Brain Assistant</h1>
                     <p class="text-xs text-indigo-300 font-medium flex items-center gap-1.5 mt-0.5">
                         <span class="inline-block w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
-                        IA Financiera Activa
+                        IA Operativa y Financiera Activa
                     </p>
                 </div>
             </div>
@@ -97,8 +97,9 @@
             </div>
 
             <form @submit.prevent="sendMessage" class="relative">
+                {% csrf_token %}
                 <input type="text" x-model="userInput" 
-                       placeholder="Escriba aquí su consulta financiera o contable..."
+                       placeholder="Escriba aquí su consulta sobre operaciones, finanzas, viajes o marketing..."
                        class="w-full bg-gray-950/50 border border-white/10 rounded-2xl px-5 py-4 pr-16 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500/50 transition-all shadow-inner"
                        :disabled="loading">
                 
@@ -124,17 +125,17 @@
             messages: [
                 { 
                     role: 'assistant', 
-                    content: 'Bienvenido, soy **Brain**. Mi objetivo es ayudarte con la gestión financiera de la agencia.\n\nPuedes preguntarme cosas como:\n* "¿Cuál es el saldo total de bancos?"\n* "Dime las últimas 5 ventas ingresadas"\n* "Ayúdame con un asiento para pagar nómina"',
+                    content: 'Bienvenido. Soy **Brain**, su asistente inteligente de gestión integral.\n\nPuede consultarme sobre temas variados, tales como:\n* **Operaciones y Reservas:** "¿Cuál es el estado del PNR ABCDEF?"\n* **Requisitos y Logística:** "¿Qué visa necesita un colombiano para viajar a EE. UU.?"\n* **Ventas y Finanzas:** "¿Cuáles son las ventas de los últimos 30 días?" o "¿Saldo total de bancos?"\n* **CMS y Marketing:** "Escriba un artículo sobre las ventajas de viajar a Costa Rica" o "Genere un post de marketing para el Hotel X".',
                     time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
                 }
             ],
             userInput: '',
             loading: false,
             suggestions: [
+                "¿Requisitos de viaje?",
                 "¿Saldo de Bancos?",
                 "¿Mis últimas ventas?",
-                "¿Diferencias en conciliación?",
-                "Asiento de gasto"
+                "Generar post de marketing"
             ],
             
             async sendMessage() {
@@ -149,11 +150,11 @@
                 this.scrollToBottom();
 
                 try {
-                    const response = await fetch('/api/contabilidad/chat/', {
+                    const response = await fetch('{% url "contabilidad:api_chat" %}', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'X-CSRFToken': this.getCookie('csrftoken')
+                            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || this.getCookie('csrftoken')
                         },
                         body: JSON.stringify({ message: question })
                     });
@@ -170,7 +171,7 @@
                 } catch (e) {
                     this.messages.push({ 
                         role: 'assistant', 
-                        content: '⚠️ Lo siento, no pude conectar con el motor de IA en este momento.',
+                        content: '⚠️ Lo sentimos, no se pudo establecer conexión con el motor de IA en este momento.',
                         time: timeStr
                     });
                 } finally {
@@ -185,9 +186,21 @@
                            .replace(/\n/g, '<br>');
             },
             
-            clearChat() {
+            async clearChat() {
                 if(confirm('¿Deseas limpiar el historial?')) {
                     this.messages = [this.messages[0]];
+                    try {
+                        await fetch('{% url "contabilidad:api_chat" %}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || this.getCookie('csrftoken')
+                            },
+                            body: JSON.stringify({ clear: true })
+                        });
+                    } catch (e) {
+                        console.error('Error al limpiar el historial:', e);
+                    }
                 }
             },
             

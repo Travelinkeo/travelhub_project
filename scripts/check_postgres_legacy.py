@@ -1,4 +1,6 @@
 
+import os
+
 import psycopg2
 import sys
 
@@ -38,12 +40,10 @@ if __name__ == "__main__":
     # Combinaciones a probar derived from user input
     users = ["postgres", "admin", "travelhub", "travelhub_user"]
     passwords = [
-        "postgres", "admin", "root", 
+        "postgres", "admin", "root",
         "travelhub", "travelhub2024", "travelhub2025", "travelhub2026",
-        "Linkeo1331**", # SECRET_KEY
-        "tddfugdgvsfgtgwq", # GMAIL_APP_PASSWORD
-        "your_db_password", # Del ejemplo comentado
-        "", # Vacía
+        os.environ.get("DB_PASSWORD", ""),
+        os.environ.get("GMAIL_APP_PASSWORD", ""),
     ]
     databases = ["travelhub", "travelhub_db", "postgres"]
 

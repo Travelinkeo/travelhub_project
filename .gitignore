@@ -89,6 +89,9 @@ auditoria_*.html
 reporte_*.html
 informe_*.html
 
+# Locale (no usado)
+locale/
+
 # Celery
 celerybeat-schedule*
 
@@ -114,6 +117,11 @@ tailwindcss.*
 # Sensitive scripts and directories
 setup_users.py
 fake_migrate.ps1
+/test_fresh_*.sh
+/test_v*.sh
+/verificar_*.sh
+/nuclear_*.sh
+/force_*.sh
 emergency_fix.sh
 fix_completo_produccion.sh
 fix_produccion_*.sh

@@ -486,13 +486,16 @@ def eliminar_boleto(request, pk):
             messages.error(request, "Acceso Denegado.")
             return redirect("core:boletos_importar")
     try:
-        if boleto.archivo_boleto:
-            boleto.archivo_boleto.delete(save=False)
-        if getattr(boleto, "archivo_pdf_generado", None):
-            try:
+        try:
+            if boleto.archivo_boleto:
+                boleto.archivo_boleto.delete(save=False)
+        except Exception:
+            pass
+        try:
+            if getattr(boleto, "archivo_pdf_generado", None):
                 boleto.archivo_pdf_generado.delete(save=False)
-            except Exception:
-                pass
+        except Exception:
+            pass
         boleto.hard_delete()
         messages.success(request, "Boleto eliminado físicamente.")
     except ProtectedError:

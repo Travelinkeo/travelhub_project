@@ -72,7 +72,7 @@ class ContabilidadService:
             if asiento:
                 asiento.detalles_asiento.all().delete()
                 asiento.fecha_contable = factura.fecha_emision
-                asiento.descripcion_general = f"Factura {factura.numero_factura} - {factura.cliente.nombre if factura.cliente else 'Cliente'}"
+                asiento.descripcion_general = f"Factura {factura.numero_factura} - {factura.cliente.nombre_completo if factura.cliente else 'Cliente'}"
                 asiento.tasa_cambio_aplicada = tasa_dia
                 asiento.moneda = factura.moneda
                 asiento.estado = AsientoContable.EstadoAsiento.CONTABILIZADO
@@ -80,7 +80,7 @@ class ContabilidadService:
             else:
                 asiento = AsientoContable.objects.create(
                     fecha_contable=factura.fecha_emision,
-                    descripcion_general=f"Factura {factura.numero_factura} - {factura.cliente.nombre if factura.cliente else 'Cliente'}",
+                    descripcion_general=f"Factura {factura.numero_factura} - {factura.cliente.nombre_completo if factura.cliente else 'Cliente'}",
                     tipo_asiento=AsientoContable.TipoAsiento.VENTAS,
                     referencia_documento=factura.numero_factura,
                     estado=AsientoContable.EstadoAsiento.CONTABILIZADO,
@@ -109,7 +109,7 @@ class ContabilidadService:
             # 5. Vincular asiento a la venta si existe
             if hasattr(factura, "venta_asociada") and factura.venta_asociada:
                 factura.venta_asociada.asiento_contable_venta = asiento
-                factura.venta_asociada.save(update_fields=["asiento_contable_venta"])
+                factura.venta_asociada.save(update_fields=["asiento_contable_venta_id"])
 
             logger.info(
                 f"Asiento {asiento.numero_asiento} generado para factura {factura.numero_factura}"

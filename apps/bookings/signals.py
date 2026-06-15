@@ -140,12 +140,6 @@ def actualizar_circuito_dias(sender, instance, **kwargs):
 # ── Helper functions for on_commit callbacks ──────────────
 
 
-def _recalcular_sync(venta_id):
-    from apps.bookings.services.venta_service import VentaService
-
-    VentaService.recalculate_finances(venta_id)
-
-
 def _auditar_venta_sync(venta_id):
     from apps.bookings.services.revenue_auditor import RevenueAuditorService
 

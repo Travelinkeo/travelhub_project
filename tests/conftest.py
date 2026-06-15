@@ -39,6 +39,29 @@ def pytest_configure(config):
         },
     }
 
+    # Bypass PgBouncer for tests: connect directly to PostgreSQL.
+    # PgBouncer no tiene `test_travelhub` en su [databases].
+    import socket
+    try:
+        socket.gethostbyname("travelhub_db")
+        settings.DATABASES["default"]["HOST"] = "travelhub_db"
+    except socket.gaierror:
+        settings.DATABASES["default"]["HOST"] = "db"
+    settings.DATABASES["default"]["PORT"] = 5432
+
+    # Monkeypatch BaseDatabaseOperations.execute_sql_flush globally to use CASCADE
+    from django.db.backends.base.operations import BaseDatabaseOperations
+    org_execute_sql_flush = BaseDatabaseOperations.execute_sql_flush
+    def new_execute_sql_flush(self, sql_list):
+        new_sql_list = []
+        for sql in sql_list:
+            if "TRUNCATE" in sql and "CASCADE" not in sql:
+                sql_stripped = sql.strip().rstrip(";")
+                sql = f"{sql_stripped} CASCADE;"
+            new_sql_list.append(sql)
+        return org_execute_sql_flush(self, new_sql_list)
+    BaseDatabaseOperations.execute_sql_flush = new_execute_sql_flush
+
 
 @pytest.fixture(autouse=True)
 def use_simple_static_storage(settings):
@@ -296,3 +319,16 @@ def moneda_ves(db):
         codigo_iso="VES", defaults={"nombre": "Bolívares", "simbolo": "Bs"}
     )
     return moneda
+
+
+from django.db.backends.signals import connection_created
+from django.dispatch import receiver
+
+@receiver(connection_created)
+def enable_trigram_extension(sender, connection, **kwargs):
+    if connection.vendor == 'postgresql':
+        with connection.cursor() as cursor:
+            try:
+                cursor.execute("CREATE EXTENSION IF NOT EXISTS pg_trgm;")
+            except Exception:
+                pass

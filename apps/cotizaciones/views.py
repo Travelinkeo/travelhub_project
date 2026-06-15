@@ -35,7 +35,9 @@ except ImportError:
 
 
 # Regex para identificar aerolíneas en texto crudo de GDS
-re_airlines = re.compile(r"\b([A-Z]{2}|[A-Z][0-9]|[0-9][A-Z])\s*(?:\d{2,4})[A-Z]?(?:\b|\s)", re.IGNORECASE)
+re_airlines = re.compile(
+    r"\b([A-Z]{2}|[A-Z][0-9]|[0-9][A-Z])\s*(?:\d{2,4})[A-Z]?(?:\b|\s)", re.IGNORECASE
+)
 
 
 logger = logging.getLogger(__name__)
@@ -747,10 +749,12 @@ class MagicQuoterSaveView(LoginRequiredMixin, View):
                 dep_code = flight.get("departureCode", "???")
                 arr_code = flight.get("arrivalCode", "???")
                 airline = flight.get("airline", "Aerolinea")
-                f_date = flight.get("departureDate") or flight.get("departure_date") or "Por confirmar"
+                f_date = (
+                    flight.get("departureDate") or flight.get("departure_date") or "Por confirmar"
+                )
                 dep_time = flight.get("departureTime") or "--:--"
                 arr_time = flight.get("arrivalTime") or "--:--"
-                
+
                 flights_text += f"*Vuelo {idx}: {f_date}*\n"
                 flights_text += f"-> Origen: {dep_code} ({dep_time}) | Destino: {arr_code} ({arr_time}) via *{airline}*\n\n"
 
@@ -798,6 +802,7 @@ class PublicQuoteDetailView(DetailView):
 
     def get_object(self, queryset=None):
         from core.middleware import system_context
+
         with system_context():
             return get_object_or_404(Cotizacion, uuid=self.kwargs.get("quote_uuid"))
 

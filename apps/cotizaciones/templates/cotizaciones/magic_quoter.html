@@ -292,7 +292,7 @@
                     });
                     const data = await res.json();
                     if (data.success) {
-                        window.open(`https://wa.me/?text=${encodeURIComponent(data.whatsapp_msg)}`, '_blank');
+                        window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(data.whatsapp_msg)}`, '_blank');
                     } else {
                         throw new Error(data.error);
                     }

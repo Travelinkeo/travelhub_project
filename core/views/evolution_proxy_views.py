@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 INSTANCE_NAME_PATTERN = re.compile(r"^[a-zA-Z0-9_-]+$")
 
 
-@login_required
+@login_required  # CSRF exempt: secured by @login_required + instance_name + agency validation
 @csrf_exempt
 @require_http_methods(["GET", "POST"])
 def evolution_manager_proxy(request, instance_name):

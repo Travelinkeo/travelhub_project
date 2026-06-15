@@ -228,6 +228,18 @@ class VentaAdminForm(forms.ModelForm):
 
 @admin.register(Venta)
 class VentaAdmin(SaaSAdminMixin, admin.ModelAdmin):
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related(
+            "cliente",
+            "moneda",
+            "agencia",
+            "creado_por",
+        ).prefetch_related(
+            "items_venta__proveedor_servicio",
+            "boletoimportado_set",
+            "pagos_venta",
+        )
+
     form = VentaAdminForm
     list_display = (
         "venta_link",
@@ -268,6 +280,9 @@ class VentaAdmin(SaaSAdminMixin, admin.ModelAdmin):
 
     @admin.action(description="🔥 ELIMINACIÓN FÍSICA (Irreversible)")
     def hard_delete_ventas(self, request, queryset):
+        if not request.user.is_superuser:
+            self.message_user(request, "Solo superusuarios pueden realizar la eliminación física.", level="error")
+            return
         count = queryset.count()
         for obj in queryset:
             obj.hard_delete()
@@ -496,6 +511,9 @@ class BoletoImportadoAdmin(SaaSAdminMixin, admin.ModelAdmin):
         "pdf_generado_link",
     )
     autocomplete_fields = ["venta_asociada"]
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related("venta_asociada")
+
     actions = ["reprocesar_boletos", "hard_delete_boletos"]
 
     def changelist_view(self, request, extra_context=None):
@@ -506,6 +524,9 @@ class BoletoImportadoAdmin(SaaSAdminMixin, admin.ModelAdmin):
 
     @admin.action(description="🔥 ELIMINACIÓN FÍSICA (Irreversible)")
     def hard_delete_boletos(self, request, queryset):
+        if not request.user.is_superuser:
+            self.message_user(request, "Solo superusuarios pueden realizar la eliminación física.", level="error")
+            return
         count = queryset.count()
         for obj in queryset:
             if obj.archivo_boleto:
@@ -528,33 +549,20 @@ class BoletoImportadoAdmin(SaaSAdminMixin, admin.ModelAdmin):
 
     @admin.action(description="🔄 Reprocesar Boletos Seleccionados")
     def reprocesar_boletos(self, request, queryset):
-        from django.utils.module_loading import import_string
+        from core.tasks import parsear_boleto_individual
 
-        TicketParserService = import_string(
-            "apps.automation.services.ticket_parser_service.TicketParserService"
-        )
-
-        service = TicketParserService()
-        exitos = 0
-        errores = 0
-
+        lanzados = 0
         for boleto in queryset:
-            try:
-                # Forzar el reprocesamiento usando el archivo original
-                service.procesar_boleto(boleto.pk)
-                exitos += 1
-            except Exception as e:
-                logger.error(f"Error reprocesando boleto {boleto.pk}: {e}")
-                errores += 1
-
-        if exitos:
-            self.message_user(request, f"Se reprocesaron {exitos} boletos exitosamente.")
-        if errores:
-            self.message_user(
-                request,
-                f"Falló el reprocesamiento de {errores} boletos. Revise los logs.",
-                level="error",
+            # Poner a cero el estado para que la tarea la procese
+            from apps.bookings.models import BoletoImportado
+            BoletoImportado.objects.filter(pk=boleto.pk).update(
+                estado_parseo=BoletoImportado.EstadoParseo.PENDIENTE,
+                log_parseo="Re-encolado desde Django Admin..."
             )
+            parsear_boleto_individual.delay(boleto.pk, ignore_manual=True, bypass_cache=True)
+            lanzados += 1
+
+        self.message_user(request, f"Se han encolado {lanzados} boletos para su reprocesamiento en segundo plano.")
 
     def archivo_boleto_link(self, obj):
         if obj.archivo_boleto:

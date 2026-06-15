@@ -71,7 +71,7 @@ class AIEngine:
     # El modelo Pro es mejor para razonamiento complejo
     PRO_MODEL = "gemini-2.5-pro"
     VISION_MODEL = "gemini-2.5-flash"
-    FALLBACK_MODEL = "gemini-2.0-flash"
+    FALLBACK_MODEL = "gemini-2.5-flash"
 
     @classmethod
     def _ensure_configured(cls):
@@ -543,7 +543,7 @@ ai_engine = AIEngine()
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 
-def generate_content(prompt: str, model_name: str = "gemini-2.0-flash") -> str:
+def generate_content(prompt: str, model_name: str = "gemini-2.5-flash") -> str:
     """Wrapper de compatibilidad (antes en gemini.py). Delega en AIEngine."""
     try:
         res = ai_engine.call_gemini(prompt, model_name=model_name)
@@ -556,7 +556,7 @@ def generate_content(prompt: str, model_name: str = "gemini-2.0-flash") -> str:
         return ""
 
 
-def generate_text_from_prompt(prompt: str, model_name: str = "gemini-2.0-flash") -> str:
+def generate_text_from_prompt(prompt: str, model_name: str = "gemini-2.5-flash") -> str:
     """Wrapper de compatibilidad (antes en gemini_client.py). Delega en AIEngine."""
     try:
         res = ai_engine.call_gemini(prompt, model_name=model_name)
@@ -571,7 +571,7 @@ def generate_text_from_prompt(prompt: str, model_name: str = "gemini-2.0-flash")
         return ""
 
 
-def generate_structured_data(prompt: str, model_name: str = "gemini-2.0-flash") -> str:
+def generate_structured_data(prompt: str, model_name: str = "gemini-2.5-flash") -> str:
     """Envía un prompt a Gemini y fuerza respuesta en formato JSON."""
     try:
         result = ai_engine.call_gemini(prompt, model_name=model_name)
@@ -598,7 +598,7 @@ def analizar_documento_con_gemini_estructurado(
 
     client = genai.Client(api_key=api_key)
     response = client.models.generate_content(
-        model="gemini-2.0-flash",
+        model="gemini-2.5-flash",
         contents=[
             genai_types.Part.from_bytes(data=file_bytes, mime_type=mime_type),
             prompt_text,

@@ -31,7 +31,10 @@ class RBACSecurityTest(TestCase):
         self.agencia = Agencia.objects.create(
             nombre="Agencia RBAC", rif="J-33333333-3", activa=True
         )
-        self.moneda = Moneda.objects.create(nombre="Dólar", codigo_iso="USD", simbolo="$")
+        self.moneda, _ = Moneda.objects.get_or_create(
+            codigo_iso="USD",
+            defaults={"nombre": "Dólar", "simbolo": "$"}
+        )
 
         # Crear Usuarios
         self.user_vendedor_1 = User.objects.create_user(username="vendedor1", password="password1")

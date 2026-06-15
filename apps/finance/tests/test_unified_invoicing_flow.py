@@ -9,7 +9,7 @@ from apps.finance.services.facturacion_service import FacturacionService
 from core.middleware import agency_context
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db(transaction=True)
 class TestUnifiedInvoicingFlow:
     def test_generar_factura_con_iva_25_y_fees_separados(self, agencia_premium, moneda_usd):
         """

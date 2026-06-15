@@ -11,15 +11,21 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AlterField(
-            model_name="cotizacion",
-            name="moneda",
-            field=models.ForeignKey(
-                blank=True,
-                null=True,
-                on_delete=django.db.models.deletion.PROTECT,
-                to="common.moneda",
-                verbose_name="Moneda",
-            ),
+        migrations.SeparateDatabaseAndState(
+            database_operations=[],
+            state_operations=[
+                migrations.AlterField(
+                    model_name="cotizacion",
+                    name="moneda",
+                    field=models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.PROTECT,
+                        to="common.moneda",
+                        verbose_name="Moneda",
+                    ),
+                ),
+            ],
         ),
     ]
+

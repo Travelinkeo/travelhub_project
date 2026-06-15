@@ -1177,7 +1177,29 @@ def fetch_evolution_qr_task(self, instance_name):
         ws.close()
     except ImportError:
         logger.warning("websocket module not available for QR fetch")
-    except (OSError, RuntimeError, websocket.WebSocketTimeoutException, Exception) as e:
-        logger.debug("WS QR fetch error: %s", e)
-
     return None
+
+
+@shared_task(name="core.tasks.limpiar_axes_logs")
+def limpiar_axes_logs():
+    try:
+        from axes.models import AccessAttempt, AccessFailureLog
+        from django.utils import timezone
+        from datetime import timedelta
+        cutoff = timezone.now() - timedelta(days=30)
+        AccessAttempt.objects.filter(attempt_time__lt=cutoff).delete()
+        AccessFailureLog.objects.filter(attempt_time__lt=cutoff).delete()
+        return "Axes logs limpiados con éxito"
+    except Exception as e:
+        return f"Error limpiando logs Axes: {e}"
+
+
+@shared_task(name="core.tasks.limpiar_sesiones_expiradas")
+def limpiar_sesiones_expiradas():
+    try:
+        from django.contrib.sessions.models import Session
+        from django.utils import timezone
+        Session.objects.filter(expire_date__lt=timezone.now()).delete()
+        return "Sesiones expiradas limpiadas con éxito"
+    except Exception as e:
+        return f"Error limpiando sesiones: {e}"

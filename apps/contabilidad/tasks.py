@@ -157,3 +157,13 @@ def sync_bcv_rates():
         except Exception as fallback_err:
             logger.exception(f"Error crítico aplicando fallback cambiario: {fallback_err}")
             return f"Error crítico: Fallback falló ({fallback_err})"
+
+
+@shared_task(name="apps.contabilidad.tasks.ejecutar_reconciliacion_contable")
+def ejecutar_reconciliacion_contable():
+    """
+    Tarea periódica para auditar y reconciliar asientos contables huérfanos.
+    """
+    from apps.contabilidad.reconciliation import ContabilidadReconciliationService
+    facturas, pagos = ContabilidadReconciliationService.audit_and_reconcile()
+    return {"facturas_reconciliadas": facturas, "pagos_reconciliados": pagos}

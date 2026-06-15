@@ -185,6 +185,11 @@ class Migration(migrations.Migration):
         ("core", "0036_alter_agenciabranding_agencia_and_more"),
         ("bookings", "0036_rename_core_tables_to_bookings"),
         ("crm", "0022_rename_personas_core_tables_to_crm"),
+        ("common", "0003_moneda"),
+        ("communications", "0005_emailmonitorlog"),
+        ("automation", "0005_alter_notificacionagente_agencia_and_more"),
+        ("finance", "0022_remove_comisionventa_venta_remove_linkdepago_venta_and_more"),
+        ("cotizaciones", "0007_alter_cotizacion_moneda"),
     ]
 
     operations = [

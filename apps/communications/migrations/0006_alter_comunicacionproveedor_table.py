@@ -12,6 +12,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("communications", "0005_emailmonitorlog"),
+        ("core", "0037_rename_remaining_core_tables"),
     ]
 
     operations = [

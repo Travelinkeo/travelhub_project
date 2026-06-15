@@ -181,18 +181,30 @@ def api_assistant_chat(request):
     if request.method == "POST":
         try:
             data = json.loads(request.body)
-            user_message = data.get("message", "")
+            if data.get("clear"):
+                request.session["ai_assistant_history"] = []
+                request.session.modified = True
+                return JsonResponse({"status": "history cleared"})
 
+            user_message = data.get("message", "")
             if not user_message:
                 return JsonResponse({"error": "No message provided"}, status=400)
 
+            # Obtener el historial de la sesión para evitar pérdida de contexto en multi-procesos
+            session_history = request.session.get("ai_assistant_history", [])
             agent = get_agent()
+            agent.history = session_history
+
             response_text = agent.process_query(user_message)
+
+            # Guardar el historial actualizado en la sesión
+            request.session["ai_assistant_history"] = agent.history
+            request.session.modified = True
 
             return JsonResponse(
                 {
                     "response": response_text,
-                    "data_found": True,  # Siempre marcamos como data_found ya que usa tools
+                    "data_found": True,
                 }
             )
         except Exception as e:

@@ -22,7 +22,7 @@ def start_qr_fetcher(instance_name):
     fetch_evolution_qr_task.delay(instance_name)
 
 
-@csrf_exempt
+@csrf_exempt  # CSRF exempt: secured by @login_required + session-based auth
 @login_required
 def evolution_qr_proxy(request, instance_name):
     """Sirve el QR como PNG (cache Redis, placeholder mientras carga)."""

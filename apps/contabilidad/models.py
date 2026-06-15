@@ -84,24 +84,42 @@ class AsientoContable(AgenciaMixin, models.Model):
 
     def save(self, *args, **kwargs):
         if not self.numero_asiento:
-            # Generar correlativo: AS-YYYYMMDD-XXXX
+            # =========================================================================================
+            # 🏢 EXPLICACIÓN PARA TODO PÚBLICO (Inversores y No Programadores)
+            # Imagine que tenemos un libro de actas físico donde registramos cada venta y le asignamos
+            # un número secuencial ("Acta #1", "Acta #2"). Si dos empleados intentan escribir al mismo
+            # tiempo, podrían escribir sobre la misma página y duplicar el número, rompiendo la ley.
+            #
+            # Para evitarlo, ponemos un semáforo (bloqueo asesor) en el libro. El primer empleado
+            # que llega enciende la luz roja, toma su número con calma, escribe y al terminar apaga la
+            # luz roja para que pase el siguiente. Así garantizamos que nunca se repita un número de acta
+            # y que la contabilidad sea 100% confiable e íntegra, sin importar cuántos miles de ventas ocurran a la vez.
+            #
+            # 💻 EXPLICACIÓN PARA PROGRAMADORES (Technical Specs)
+            # Para prevenir condiciones de carrera bajo concurrencia extrema (race conditions) y evitar
+            # colisiones de clave única `IntegrityError` en `numero_asiento`, implementamos Bloqueos
+            # Asesores Transaccionales a nivel de PostgreSQL (`pg_advisory_xact_lock`).
+            # Generamos una firma hash de 64 bits a partir del prefijo diario `AS-YYYYMMDD`, y obligamos a
+            # cualquier transacción concurrente a esperar en cola hasta que la transacción actual confirme (COMMIT)
+            # o aborte (ROLLBACK), asegurando un conteo lineal (`count + 1`) estrictamente serializable.
+            # =========================================================================================
+            # Generar correlativo de forma atómica y serializada
             prefix = f"AS-{self.fecha_contable.strftime('%Y%m%d')}"
-            from django.db import transaction
+            from django.db import transaction, connection
+            import hashlib
 
-            max_retries = 10
-            for attempt in range(max_retries):
-                with transaction.atomic():
-                    count = self.__class__.objects.filter(
-                        fecha_contable=self.fecha_contable
-                    ).count()
-                    candidate = f"{prefix}-{count + 1:04d}"
-                    if not self.__class__.objects.filter(numero_asiento=candidate).exists():
-                        self.numero_asiento = candidate
-                        break
-            else:
-                import random
+            with transaction.atomic():
+                # 1. Adquirir bloqueo asesor exclusivo para el prefijo de asientos de este día
+                lock_id = int(hashlib.sha256(prefix.encode()).hexdigest()[:15], 16)
+                with connection.cursor() as cursor:
+                    cursor.execute("SELECT pg_advisory_xact_lock(%s)", [lock_id])
+                    cursor.fetchone()
 
-                self.numero_asiento = f"{prefix}-{random.randint(1000, 9999):04d}"
+                # 2. Obtener el conteo real y asignar el correlativo
+                count = self.__class__.objects.filter(
+                    fecha_contable=self.fecha_contable
+                ).count()
+                self.numero_asiento = f"{prefix}-{count + 1:04d}"
         super().save(*args, **kwargs)
 
     def calcular_totales(self, commit=True):

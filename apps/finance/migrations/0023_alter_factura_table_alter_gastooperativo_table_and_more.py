@@ -12,6 +12,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("finance", "0022_remove_comisionventa_venta_remove_linkdepago_venta_and_more"),
+        ("core", "0037_rename_remaining_core_tables"),
     ]
 
     operations = [

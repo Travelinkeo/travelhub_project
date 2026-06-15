@@ -92,7 +92,7 @@ services:
     container_name: travelhub_web
     restart: unless-stopped
     command: >
-      sh -c "gunicorn travelhub.wsgi:application --bind 0.0.0.0:8000 --workers 4 --threads 2 --max-requests 1000"
+      sh -c "gunicorn travelhub.wsgi:application --bind 0.0.0.0:8000 --workers 4 --threads 2 --max-requests 1000 --timeout 120"
     environment:
       - DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
       - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379/0

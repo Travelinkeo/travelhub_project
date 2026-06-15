@@ -4,7 +4,7 @@
 repos:
   # --- Hooks estándar para calidad de código Python ---
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.4.4 # Usa una versión específica para builds reproducibles
+    rev: v0.11.0 # Usa una versión específica para builds reproducibles
     hooks:
       # Ejecuta el linter de ruff y intenta arreglar errores automáticamente
       - id: ruff

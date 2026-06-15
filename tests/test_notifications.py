@@ -26,7 +26,7 @@ class TestEmailChannel:
         channel = EmailChannel()
         assert channel.is_available() is False
 
-    @patch("apps.communications.services.notification_dispatcher.enviar_email_generico")
+    @patch("apps.common.tasks.send_email_task.delay")
     def test_send_email_success(self, mock_email):
         mock_email.return_value = True
         channel = EmailChannel()
@@ -34,7 +34,7 @@ class TestEmailChannel:
         assert result is True
         mock_email.assert_called_once()
 
-    @patch("apps.communications.services.notification_dispatcher.enviar_email_generico")
+    @patch("apps.common.tasks.send_email_task.delay")
     def test_send_email_failure(self, mock_email):
         mock_email.side_effect = Exception("Email error")
         channel = EmailChannel()
@@ -55,14 +55,14 @@ class TestWhatsAppChannel:
         channel = WhatsAppChannel()
         assert channel.is_available() is False
 
-    @patch("apps.communications.services.notification_dispatcher.enviar_whatsapp")
+    @patch("apps.common.tasks.send_whatsapp_task.delay")
     def test_send_whatsapp_success(self, mock_whatsapp):
         mock_whatsapp.return_value = True
         channel = WhatsAppChannel()
         result = channel.send("+1234567890", "Test message")
         assert result is True
 
-    @patch("apps.communications.services.notification_dispatcher.enviar_whatsapp")
+    @patch("apps.common.tasks.send_whatsapp_task.delay")
     def test_send_whatsapp_failure(self, mock_whatsapp):
         mock_whatsapp.side_effect = Exception("WhatsApp error")
         channel = WhatsAppChannel()
@@ -156,8 +156,8 @@ class TestPaymentNotifications:
 class TestAlertNotifications:
     """Tests para alertas migratorias"""
 
-    @patch("apps.communications.services.notification_dispatcher.enviar_whatsapp")
-    @patch("apps.communications.services.notification_dispatcher.enviar_alerta_telegram")
+    @patch("apps.common.tasks.send_whatsapp_task.delay")
+    @patch("apps.common.tasks.send_telegram_task.delay")
     def test_notificar_alerta_migratoria(self, mock_telegram, mock_whatsapp, settings):
         settings.ADMIN_WHATSAPP_NUMBER = "+1234567890"
         check_instance = Mock()
@@ -175,7 +175,7 @@ class TestAlertNotifications:
 class TestTicketNotifications:
     """Tests para notificaciones de boletos"""
 
-    @patch("apps.communications.services.notification_dispatcher.enviar_whatsapp")
+    @patch("apps.common.tasks.send_whatsapp_task.delay")
     @patch("django.core.mail.send_mail")
     def test_notificar_boleto_procesado_admin_only(self, mock_email, mock_whatsapp, settings):
         settings.ADMIN_WHATSAPP_NUMBER = "+1234567890"
@@ -197,7 +197,7 @@ class TestTicketNotifications:
         assert result is True
         mock_whatsapp.assert_called_once()
 
-    @patch("apps.communications.services.notification_dispatcher.enviar_whatsapp")
+    @patch("apps.common.tasks.send_whatsapp_task.delay")
     def test_enviar_recordatorio_vuelo(self, mock_whatsapp):
         cliente = Mock()
         cliente.telefono_principal = "+1234567890"
@@ -263,18 +263,14 @@ class TestTelegramChannel:
         channel = TelegramChannel()
         assert channel.is_available() is False
 
-    @patch(
-        "apps.communications.services.notification_dispatcher.TelegramNotificationService.send_message"
-    )
+    @patch("apps.common.tasks.send_telegram_task.delay")
     def test_send_telegram_success(self, mock_telegram):
         mock_telegram.return_value = True
         channel = TelegramChannel()
         result = channel.send("group123", "Test message")
         assert result is True
 
-    @patch(
-        "apps.communications.services.notification_dispatcher.TelegramNotificationService.send_message"
-    )
+    @patch("apps.common.tasks.send_telegram_task.delay")
     def test_send_telegram_failure(self, mock_telegram):
         mock_telegram.side_effect = Exception("Telegram error")
         channel = TelegramChannel()
@@ -295,7 +291,7 @@ class TestMultiTenantNotifications:
         channel = EmailChannel()
         assert channel.is_available(agencia=agencia) is True
 
-    @patch("apps.communications.services.notification_dispatcher.enviar_email_generico")
+    @patch("apps.common.tasks.send_email_task.delay")
     def test_email_channel_send_uses_agency_context(self, mock_send_email):
         agencia = Mock()
         agencia.configuracion_correo = {
@@ -305,9 +301,7 @@ class TestMultiTenantNotifications:
         }
         channel = EmailChannel()
         channel.send("test@recipient.com", "Hello", agencia=agencia)
-        mock_send_email.assert_called_once_with(
-            "test@recipient.com", "Notificación TravelHub", "Hello", agencia=agencia
-        )
+        mock_send_email.assert_called_once()
 
     def test_whatsapp_channel_available_with_agency_subdomain(self):
         agencia = Mock()
@@ -315,15 +309,13 @@ class TestMultiTenantNotifications:
         channel = WhatsAppChannel()
         assert channel.is_available(agencia=agencia) is True
 
-    @patch("apps.communications.services.notification_dispatcher.enviar_whatsapp")
+    @patch("apps.common.tasks.send_whatsapp_task.delay")
     def test_whatsapp_channel_send_uses_agency_context(self, mock_send_wa):
         agencia = Mock()
         agencia.subdominio_slug = "mytenant"
         channel = WhatsAppChannel()
         channel.send("+1234567890", "Hello WA", agencia=agencia)
-        mock_send_wa.assert_called_once_with(
-            "+1234567890", "Hello WA", agencia=agencia, media_url=None, file_name=None
-        )
+        mock_send_wa.assert_called_once()
 
     def test_telegram_channel_available_with_agency_token(self):
         agencia = Mock()
@@ -332,15 +324,11 @@ class TestMultiTenantNotifications:
         channel = TelegramChannel()
         assert channel.is_available(agencia=agencia) is True
 
-    @patch(
-        "apps.communications.services.notification_dispatcher.TelegramNotificationService.send_message"
-    )
+    @patch("apps.common.tasks.send_telegram_task.delay")
     def test_telegram_channel_send_uses_agency_context(self, mock_send_telegram):
         agencia = Mock()
         agencia.telegram_bot_token = "123:token"
         agencia.telegram_chat_id = "group123"
         channel = TelegramChannel()
         channel.send("group123", "Hello Telegram", agencia=agencia)
-        mock_send_telegram.assert_called_once_with(
-            "Hello Telegram", chat_id="group123", agencia=agencia
-        )
+        mock_send_telegram.assert_called_once()

@@ -22,7 +22,9 @@ _TABLE_RENAMES = [
     ("core_trasladoservicio", "bookings_trasladoservicio"),
     ("core_ventaparsemetadata", "bookings_ventaparsemetadata"),
     ("core_venta_pasajeros", "bookings_venta_pasajeros"),
+    ("core_venta", "bookings_venta"),
 ]
+
 
 _BOOKINGS_TABLES = [
     "bookings_actividadservicio",

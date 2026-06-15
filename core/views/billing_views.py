@@ -242,7 +242,7 @@ def create_portal_session(request):
 @extend_schema(exclude=True)
 @api_view(["POST"])
 @permission_classes([AllowAny])
-@csrf_exempt
+@csrf_exempt  # CSRF exempt: secured by Stripe signature verification below
 def stripe_webhook(request):
     """Webhook para eventos de Stripe."""
     if not _setup_stripe():

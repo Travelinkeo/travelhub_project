@@ -417,7 +417,20 @@
 </head>
 
 <body class="bg-surface-base text-text-main font-sans selection:bg-primary/30 antialiased h-screen flex overflow-hidden"
-    x-data="{ sidebarOpen: true, mobileMenuOpen: false }">
+    x-data="{ 
+        sidebarOpen: true, 
+        mobileMenuOpen: false,
+        openCategories: {
+            operaciones: {% if 'ventas' in request.path or 'cotizaciones' in request.path or 'boletos' in request.path or 'vuelos' in request.path or 'hoteles' in request.path or 'inventario' in request.path or 'magic' in request.path %}true{% else %}false{% endif %},
+            crm: {% if 'crm/clientes' in request.path or 'crm/pasajeros' in request.path or 'kanban' in request.path or 'proveedores' in request.path %}true{% else %}false{% endif %},
+            finanzas: {% if 'facturacion' in request.path or 'invoices' in request.path or 'liquidaciones' in request.path or 'profit' in request.path or 'reconciliacion' in request.path %}true{% else %}false{% endif %},
+            contabilidad: {% if 'libro_diario' in request.path or 'balance' in request.path or 'libro_mayor' in request.path or 'validar_cuadre' in request.path or 'reportes' in request.path %}true{% else %}false{% endif %},
+            marketing: {% if 'marketing' in request.path or 'cms' in request.path %}true{% else %}false{% endif %},
+            inteligencia: {% if 'asistente' in request.path or 'gds-analyzer' in request.path or 'auditoria' in request.path or 'wiki/gds' in request.path %}true{% else %}false{% endif %},
+            sistema: {% if 'catalogos' in request.path or 'agencia/configuracion' in request.path or 'billing' in request.path or 'auditoria' in request.path and 'bookings' not in request.resolver_match.namespace %}true{% else %}false{% endif %},
+            custom: {% if 'aerolineas' in request.path or 'geografia' in request.path or 'monedas' in request.path or 'tipocambio' in request.path or 'retencionesislr' in request.path or 'featureflags' in request.path or 'cronapikeys' in request.path or 'productoservicio' in request.path or 'cruceros' in request.path %}true{% else %}false{% endif %}
+        }
+    }">
 
     {% if is_impersonating %}
     <!-- Barra de Impersonación (God Mode) -->
@@ -586,11 +599,16 @@
             {% endif %}
 
             <!-- CATEGORÍA: OPERACIONES (VISIBLE PARA TODOS) -->
-            <div x-show="sidebarOpen" x-transition class="mt-5 mb-1.5 px-2">
-                <span class="text-[10px] font-black text-text-muted uppercase tracking-widest">Operaciones</span>
-            </div>
+            <button @click="openCategories.operaciones = !openCategories.operaciones"
+                x-show="sidebarOpen" x-transition
+                class="w-full flex items-center justify-between mt-5 mb-1.5 px-2 text-[10px] font-black text-text-muted hover:text-primary transition-all uppercase tracking-widest text-left select-none">
+                <span>Operaciones</span>
+                <span class="material-symbols-outlined text-[14px] transition-transform duration-200"
+                      :class="openCategories.operaciones ? 'rotate-90' : ''">chevron_right</span>
+            </button>
             <div x-show="!sidebarOpen" class="h-px bg-border-color my-3 mx-2"></div>
 
+            <div x-show="!sidebarOpen || openCategories.operaciones" x-transition class="space-y-1">
             <a href="{% url 'bookings:venta_list' %}"
                 class="nav-item {% if 'ventas' in request.path %}nav-active{% endif %}"
                 :class="!sidebarOpen && 'justify-center'">
@@ -641,14 +659,20 @@
                 <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs text-primary">Cotizador Mágico</span>
                 <span x-show="sidebarOpen" class="ml-auto bg-primary/10 text-primary text-[9px] font-black px-2 py-0.5 rounded-full border border-primary/20">IA</span>
             </a>
+            </div>
 
 
             <!-- CATEGORÍA: CRM (VISIBLE PARA TODOS) -->
-            <div x-show="sidebarOpen" x-transition class="mt-5 mb-1.5 px-2">
-                <span class="text-[10px] font-black text-text-muted uppercase tracking-widest">CRM</span>
-            </div>
+            <button @click="openCategories.crm = !openCategories.crm"
+                x-show="sidebarOpen" x-transition
+                class="w-full flex items-center justify-between mt-5 mb-1.5 px-2 text-[10px] font-black text-text-muted hover:text-primary transition-all uppercase tracking-widest text-left select-none">
+                <span>CRM</span>
+                <span class="material-symbols-outlined text-[14px] transition-transform duration-200"
+                      :class="openCategories.crm ? 'rotate-90' : ''">chevron_right</span>
+            </button>
             <div x-show="!sidebarOpen" class="h-px bg-border-color my-3 mx-2"></div>
 
+            <div x-show="!sidebarOpen || openCategories.crm" x-transition class="space-y-1">
             <a href="{% url 'crm:cliente_list' %}"
                 class="nav-item {% if 'crm/clientes' in request.path %}nav-active{% endif %}"
                 :class="!sidebarOpen && 'justify-center'">
@@ -677,15 +701,21 @@
                 <span class="material-symbols-outlined text-[20px] shrink-0">corporate_fare</span>
                 <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">Proveedores</span>
             </a>
+            </div>
 
             <!-- CATEGORÍA: FINANZAS Y CONTABILIDAD (ROLES: ADMIN, GERENTE, CONTADOR) -->
             {% if user_agency_role in 'admin,gerente,contador' %}
             
-            <div x-show="sidebarOpen" x-transition class="mt-5 mb-1.5 px-2">
-                <span class="text-[10px] font-black text-text-muted uppercase tracking-widest">Finanzas</span>
-            </div>
+            <button @click="openCategories.finanzas = !openCategories.finanzas"
+                x-show="sidebarOpen" x-transition
+                class="w-full flex items-center justify-between mt-5 mb-1.5 px-2 text-[10px] font-black text-text-muted hover:text-primary transition-all uppercase tracking-widest text-left select-none">
+                <span>Finanzas</span>
+                <span class="material-symbols-outlined text-[14px] transition-transform duration-200"
+                      :class="openCategories.finanzas ? 'rotate-90' : ''">chevron_right</span>
+            </button>
             <div x-show="!sidebarOpen" class="h-px bg-border-color my-3 mx-2"></div>
 
+            <div x-show="!sidebarOpen || openCategories.finanzas" x-transition class="space-y-1">
             <a href="{% url 'finance:facturacion_dashboard' %}"
                 class="nav-item {% if 'facturacion' in request.path or 'invoices' in request.path %}nav-active{% endif %}"
                 :class="!sidebarOpen && 'justify-center'">
@@ -713,12 +743,18 @@
                 <span class="material-symbols-outlined text-[20px] shrink-0">auto_awesome</span>
                 <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">Conciliación IA</span>
             </a>
-
-            <div x-show="sidebarOpen" x-transition class="mt-5 mb-1.5 px-2">
-                <span class="text-[10px] font-black text-text-muted uppercase tracking-widest">Contabilidad</span>
             </div>
+
+            <button @click="openCategories.contabilidad = !openCategories.contabilidad"
+                x-show="sidebarOpen" x-transition
+                class="w-full flex items-center justify-between mt-5 mb-1.5 px-2 text-[10px] font-black text-text-muted hover:text-primary transition-all uppercase tracking-widest text-left select-none">
+                <span>Contabilidad</span>
+                <span class="material-symbols-outlined text-[14px] transition-transform duration-200"
+                      :class="openCategories.contabilidad ? 'rotate-90' : ''">chevron_right</span>
+            </button>
             <div x-show="!sidebarOpen" class="h-px bg-border-color my-3 mx-2"></div>
 
+            <div x-show="!sidebarOpen || openCategories.contabilidad" x-transition class="space-y-1">
             <a href="{% url 'contabilidad:libro_diario' %}"
                 class="nav-item {% if 'libro_diario' in request.path %}nav-active{% endif %}"
                 :class="!sidebarOpen && 'justify-center'">
@@ -746,15 +782,21 @@
                 <span class="material-symbols-outlined text-[20px] shrink-0">bar_chart</span>
                 <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">Reportes</span>
             </a>
+            </div>
             {% endif %}
 
             <!-- CATEGORÍA: MARKETING (ROLES: ADMIN, GERENTE) -->
             {% if user_agency_role in 'admin,gerente' %}
-            <div x-show="sidebarOpen" x-transition class="mt-5 mb-1.5 px-2">
-                <span class="text-[10px] font-black text-text-muted uppercase tracking-widest">Marketing</span>
-            </div>
+            <button @click="openCategories.marketing = !openCategories.marketing"
+                x-show="sidebarOpen" x-transition
+                class="w-full flex items-center justify-between mt-5 mb-1.5 px-2 text-[10px] font-black text-text-muted hover:text-primary transition-all uppercase tracking-widest text-left select-none">
+                <span>Marketing</span>
+                <span class="material-symbols-outlined text-[14px] transition-transform duration-200"
+                      :class="openCategories.marketing ? 'rotate-90' : ''">chevron_right</span>
+            </button>
             <div x-show="!sidebarOpen" class="h-px bg-border-color my-3 mx-2"></div>
 
+            <div x-show="!sidebarOpen || openCategories.marketing" x-transition class="space-y-1">
             <a href="{% url 'crm:marketing_hub' %}"
                 class="nav-item {% if 'marketing' in request.path %}nav-active{% endif %}"
                 :class="!sidebarOpen && 'justify-center'">
@@ -768,13 +810,26 @@
                 <span class="material-symbols-outlined text-[20px] shrink-0">web</span>
                 <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">Gestión Web IA</span>
             </a>
+            </div>
             {% endif %}
 
             <!-- CATEGORÍA: INTELIGENCIA AI (VISIBLE PARA TODOS) -->
-            <div x-show="sidebarOpen" x-transition class="mt-5 mb-1.5 px-2">
-                <span class="text-[10px] font-black text-text-muted uppercase tracking-widest">Inteligencia AI</span>
-            </div>
+            <button @click="openCategories.inteligencia = !openCategories.inteligencia"
+                x-show="sidebarOpen" x-transition
+                class="w-full flex items-center justify-between mt-5 mb-1.5 px-2 text-[10px] font-black text-text-muted hover:text-primary transition-all uppercase tracking-widest text-left select-none">
+                <span>Inteligencia AI</span>
+                <span class="material-symbols-outlined text-[14px] transition-transform duration-200"
+                      :class="openCategories.inteligencia ? 'rotate-90' : ''">chevron_right</span>
+            </button>
             <div x-show="!sidebarOpen" class="h-px bg-border-color my-3 mx-2"></div>
+
+            <div x-show="!sidebarOpen || openCategories.inteligencia" x-transition class="space-y-1">
+            <a href="{% url 'contabilidad:asistente_brain' %}"
+                class="nav-item {% if 'asistente' in request.path %}nav-active{% endif %}"
+                :class="!sidebarOpen && 'justify-center'">
+                <span class="material-symbols-outlined text-[20px] shrink-0">smart_toy</span>
+                <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">Asistente AI</span>
+            </a>
 
             <a href="{% url 'core:gds_analyzer' %}"
                 class="nav-item {% if 'gds-analyzer' in request.path %}nav-active{% endif %}"
@@ -797,14 +852,20 @@
                 <span class="material-symbols-outlined text-[20px] shrink-0">menu_book</span>
                 <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">Wiki GDS</span>
             </a>
+            </div>
 
             <!-- CATEGORÍA: SISTEMA (ROLES: ADMIN, GERENTE) -->
             {% if user_agency_role in 'admin,gerente' %}
-            <div x-show="sidebarOpen" x-transition class="mt-5 mb-1.5 px-2">
-                <span class="text-[10px] font-black text-text-muted uppercase tracking-widest">Sistema</span>
-            </div>
+            <button @click="openCategories.sistema = !openCategories.sistema"
+                x-show="sidebarOpen" x-transition
+                class="w-full flex items-center justify-between mt-5 mb-1.5 px-2 text-[10px] font-black text-text-muted hover:text-primary transition-all uppercase tracking-widest text-left select-none">
+                <span>Sistema</span>
+                <span class="material-symbols-outlined text-[14px] transition-transform duration-200"
+                      :class="openCategories.sistema ? 'rotate-90' : ''">chevron_right</span>
+            </button>
             <div x-show="!sidebarOpen" class="h-px bg-border-color my-3 mx-2"></div>
 
+            <div x-show="!sidebarOpen || openCategories.sistema" x-transition class="space-y-1">
             <a href="{% url 'core:catalogos_center' %}"
                 class="nav-item {% if 'catalogos' in request.path %}nav-active{% endif %}"
                 :class="!sidebarOpen && 'justify-center'">
@@ -832,12 +893,18 @@
                 <span class="material-symbols-outlined text-[20px] shrink-0">manage_search</span>
                 <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">Auditoría</span>
             </a>
-
-            <div x-show="sidebarOpen" x-transition class="mt-5 mb-1.5 px-2">
-                <span class="text-[10px] font-black text-text-muted uppercase tracking-widest">Administración Custom</span>
             </div>
+
+            <button @click="openCategories.custom = !openCategories.custom"
+                x-show="sidebarOpen" x-transition
+                class="w-full flex items-center justify-between mt-5 mb-1.5 px-2 text-[10px] font-black text-text-muted hover:text-primary transition-all uppercase tracking-widest text-left select-none">
+                <span>Administración Custom</span>
+                <span class="material-symbols-outlined text-[14px] transition-transform duration-200"
+                      :class="openCategories.custom ? 'rotate-90' : ''">chevron_right</span>
+            </button>
             <div x-show="!sidebarOpen" class="h-px bg-border-color my-3 mx-2"></div>
 
+            <div x-show="!sidebarOpen || openCategories.custom" x-transition class="space-y-1">
             <a href="{% url 'bookings:proveedor_list' %}"
                 class="nav-item {% if 'proveedores' in request.path %}nav-active{% endif %}"
                 :class="!sidebarOpen && 'justify-center'">
@@ -900,6 +967,7 @@
                 <span class="material-symbols-outlined text-[20px] shrink-0">sailing</span>
                 <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">Cruceros</span>
             </a>
+            </div>
             {% endif %}
 
         </nav>

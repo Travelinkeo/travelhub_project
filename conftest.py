@@ -1,6 +1,7 @@
+import sys
 import os
 
-os.environ["DJANGO_TESTING"] = "True"
+# Ensure the root directory is on the path so 'tests' can be imported
+sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 
-# root conftest.py to expose all fixtures to apps/ tests
 from tests.conftest import *

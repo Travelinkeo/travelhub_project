@@ -42,4 +42,24 @@ CELERY_BEAT_SCHEDULE = {
         "schedule": 900.0,  # Cada 15 minutos
         "args": (),
     },
+    "limpiar-axes-mensual": {
+        "task": "core.tasks.limpiar_axes_logs",
+        "schedule": crontab(day_of_month="1", hour="4", minute="0"),
+        "args": (),
+    },
+    "limpiar-sesiones": {
+        "task": "core.tasks.limpiar_sesiones_expiradas",
+        "schedule": crontab(hour="3", minute="0"),
+        "args": (),
+    },
+    "limpiar-celery-results": {
+        "task": "django_celery_results.tasks.delete_old_task_results",
+        "schedule": crontab(day_of_week="0", hour="5", minute="0"),
+        "kwargs": {"days": 30},
+    },
+    "reconciliar-contabilidad-diaria": {
+        "task": "apps.contabilidad.tasks.ejecutar_reconciliacion_contable",
+        "schedule": crontab(hour="1", minute="0"),  # Todos los días a la 1:00 AM
+        "args": (),
+    },
 }

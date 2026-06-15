@@ -1,4 +1,4 @@
-.PHONY: help test lint format security docker-build docker-test clean
+.PHONY: help test lint format security docker-build docker-test clean migrate makemigrations check shell dbshell start setup requirements
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
@@ -42,3 +42,20 @@ makemigrations: ## Create new migrations
 
 check: ## Run Django system check
 	python manage.py check
+
+shell: ## Open Django shell_plus (django-extensions)
+	python manage.py shell_plus
+
+dbshell: ## Open database shell
+	python manage.py dbshell
+
+start: ## Run development server
+	python manage.py runserver
+
+setup: ## Install dev dependencies and run migrations
+	pip install -r requirements/dev.txt
+	python manage.py migrate --noinput
+	python manage.py collectstatic --noinput
+
+requirements: ## Install dev dependencies
+	pip install -r requirements/dev.txt

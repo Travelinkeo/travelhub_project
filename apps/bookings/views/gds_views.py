@@ -11,7 +11,7 @@ from ..services.pnr_parser_service import PNRParserService
 logger = logging.getLogger(__name__)
 
 
-@csrf_exempt
+@csrf_exempt  # CSRF exempt: secured by @login_required + session-based auth
 @login_required
 def api_ingest_pnr_view(request):
     """

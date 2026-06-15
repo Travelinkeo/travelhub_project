@@ -36,23 +36,13 @@ class FacturaConsolidada(models.Model):
         help_text=_("Asignado por imprenta digital autorizada"),
     )
 
-    venta_asociada_id = models.IntegerField(
-        blank=True,
+    venta_asociada = models.ForeignKey(
+        "bookings.Venta",
+        on_delete=models.SET_NULL,
         null=True,
-        verbose_name=_("ID Venta Asociada"),
+        blank=True,
+        verbose_name=_("Venta Asociada"),
     )
-
-    @property
-    def venta_asociada(self):
-        if not self.venta_asociada_id:
-            return None
-        from apps.bookings.models import Venta
-
-        return Venta.objects.filter(pk=self.venta_asociada_id).first()
-
-    @venta_asociada.setter
-    def venta_asociada(self, value):
-        self.venta_asociada_id = value.pk if value else None
 
     agencia = models.ForeignKey(
         "core.Agencia", on_delete=models.PROTECT, null=True, blank=True, verbose_name=_("Agencia")

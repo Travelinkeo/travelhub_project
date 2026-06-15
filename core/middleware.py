@@ -77,10 +77,31 @@ def system_context():
         system_context_var.reset(token)
 
 
+# =========================================================================================
+# 🏢 EXPLICACIÓN PARA TODO PÚBLICO (Inversores y No Programadores)
+# Imagine que TravelHub es un gran hotel de lujo multi-inquilino. Cada agencia es un huésped
+# diferente hospedado en una suite privada. Esta clase es el "Conserje de Seguridad" del hotel.
+# Su única y vital misión es garantizar que la Agencia A nunca pueda ver lo que hay dentro
+# de la habitación de la Agencia B.
+#
+# Para lograr esto, antes de que cualquier request proceda, el conserje toma el pasaporte del
+# usuario, identifica a qué "agencia" pertenece y coloca esa etiqueta en una caja fuerte sellada
+# temporalmente para ese hilo de ejecución. Nadie puede falsificar o alterar esa etiqueta mientras
+# dure la petición. Así, la base de datos sabe exactamente a quién mostrarle la información.
+#
+# 💻 EXPLICACIÓN PARA PROGRAMADORES (Technical Specs)
+# ThreadLocalContextMiddleware centraliza el ciclo de vida del Tenant Context utilizando
+# ContextVars de Python para garantizar seguridad Thread-Safe y Task-Safe (para flujos asíncronos).
+# En cada request, inicializa y limpia el contexto para evitar fugas de memoria o contaminación cruzada.
+# Luego, define variables de sesión e IP y configura los parámetros de sesión RLS (Row Level Security)
+# directo en PostgreSQL mediante `SET LOCAL app.current_agencia_id` y `SET LOCAL app.bypass_rls`,
+# blindando la base de datos contra accesos no autorizados a nivel de fila.
+# =========================================================================================
 class ThreadLocalContextMiddleware:
     """
     Middleware que almacena el contexto de la petición (Usuario, Agencia, IP)
-    en almacenamiento Thread-Local para acceso global seguro.
+    en almacenamiento Thread-Local / Task-Local (ContextVars) para acceso global seguro.
+    Garantiza aislamiento absoluto contra la reutilización de hilos y conexiones.
     """
 
     def __init__(self, get_response):
@@ -89,13 +110,32 @@ class ThreadLocalContextMiddleware:
     def __call__(self, request):
         request.agencia = None
         request.agency = None
+        request.is_impersonating = False
+        request.impersonator = None
+
+        # Inicialización preventiva de tokens de ContextVar a None
+        t_meta = None
+        t_user = None
+        t_agency = None
+        t_system = None
+        t_is_impersonating = None
+        t_impersonator = None
 
         try:
+            # 1. Reset preemptivo de variables en el hilo actual antes de procesar
+            meta_var.set(None)
+            user_var.set(None)
+            agency_var.set(None)
+            system_context_var.set(False)
+            is_impersonating_var.set(False)
+            impersonator_var.set(None)
+
+            # 2. Extracción de metadatos e IP segura
             ip = request.META.get("HTTP_CF_CONNECTING_IP") or request.META.get("HTTP_X_REAL_IP")
             if not ip:
                 xff = request.META.get("HTTP_X_FORWARDED_FOR")
                 if xff:
-                    ip = [p.strip() for p in xff.split(",")][-1]
+                    ip = [p.strip() for p in xff.split(",")][0]
                 else:
                     ip = request.META.get("REMOTE_ADDR")
             ua = request.META.get("HTTP_USER_AGENT")
@@ -107,6 +147,7 @@ class ThreadLocalContextMiddleware:
             is_impersonating_flag = False
             impersonator = None
 
+            # 3. Lógica de Impersonación y Resolución de Agencia
             if user:
                 if user.is_superuser:
                     impersonated_id = request.session.get("impersonated_agencia_id")
@@ -189,6 +230,7 @@ class ThreadLocalContextMiddleware:
                     f"⚠️ Usuario {user.username} (ID:{user.id}) sin agencia vinculada detectado."
                 )
 
+            # 4. Establecer las variables de contexto y guardar tokens
             t_meta = meta_var.set({"ip": ip, "user_agent": ua})
             t_user = user_var.set(user)
             t_agency = agency_var.set(agency)
@@ -201,29 +243,30 @@ class ThreadLocalContextMiddleware:
             request.is_impersonating = is_impersonating_flag
             request.impersonator = impersonator
 
+            # 5. Establecer contexto RLS en la base de datos
             try:
                 from django.db import connection
-
-                with connection.cursor() as cursor:
-                    tenant_id = str(agency.id) if agency else "0"
-                    is_impersonating_val = (
-                        user
-                        and user.is_superuser
-                        and request.session.get("impersonated_agencia_id")
-                    )
-                    is_admin_path = str(request.path).startswith("/admin/")
-                    bypass = (
-                        "true"
-                        if (
+                if connection.connection is not None:
+                    with connection.cursor() as cursor:
+                        tenant_id = str(agency.id) if agency else "0"
+                        is_impersonating_val = (
                             user
                             and user.is_superuser
-                            and is_admin_path
-                            and not is_impersonating_val
+                            and request.session.get("impersonated_agencia_id")
                         )
-                        else "false"
-                    )
-                    cursor.execute("SET LOCAL app.current_agencia_id = %s", [tenant_id])
-                    cursor.execute("SET LOCAL app.bypass_rls = %s", [bypass])
+                        is_admin_path = str(request.path).startswith("/admin/")
+                        bypass = (
+                            "true"
+                            if (
+                                user
+                                and user.is_superuser
+                                and is_admin_path
+                                and not is_impersonating_val
+                            )
+                            else "false"
+                        )
+                        cursor.execute("SET LOCAL app.current_agencia_id = %s", [tenant_id])
+                        cursor.execute("SET LOCAL app.bypass_rls = %s", [bypass])
             except Exception as e:
                 logger.debug(f"RLS no configurado: {e}")
 
@@ -236,9 +279,11 @@ class ThreadLocalContextMiddleware:
             t_is_impersonating = is_impersonating_var.set(False)
             t_impersonator = impersonator_var.set(None)
 
+        # 6. Procesar petición y asegurar limpieza absoluta en bloque finally
         try:
             response = self.get_response(request)
         finally:
+            # Reseteo seguro de ContextVars
             for _var, _token in [
                 (meta_var, t_meta),
                 (user_var, t_user),
@@ -247,10 +292,21 @@ class ThreadLocalContextMiddleware:
                 (is_impersonating_var, t_is_impersonating),
                 (impersonator_var, t_impersonator),
             ]:
-                try:
-                    _var.reset(_token)
-                except Exception:
-                    pass
+                if _token is not None:
+                    try:
+                        _var.reset(_token)
+                    except Exception as e:
+                        logger.error(f"Error resetting context var {_var.name}: {e}")
+
+            # Reseteo seguro de variables de sesión en Base de Datos
+            try:
+                from django.db import connection
+                if connection.connection is not None:
+                    with connection.cursor() as cursor:
+                        cursor.execute("SET LOCAL app.current_agencia_id = '0'")
+                        cursor.execute("SET LOCAL app.bypass_rls = 'false'")
+            except Exception as e:
+                logger.debug(f"Error resetting database RLS context: {e}")
 
         return response
 
@@ -329,7 +385,7 @@ class SecurityHeadersMiddleware:
         return response
 
 
-@csrf_exempt
+@csrf_exempt  # CSRF exempt: read-only CSP report collector, no session needed
 @require_POST
 def csp_report_view(request):
     """Endpoint para recibir reportes de violaciones de CSP."""
@@ -351,7 +407,7 @@ def csp_report_view(request):
     if not ip:
         xff = request.META.get("HTTP_X_FORWARDED_FOR")
         if xff:
-            ip = [p.strip() for p in xff.split(",")][-1]
+            ip = [p.strip() for p in xff.split(",")][0]
         else:
             ip = request.META.get("REMOTE_ADDR")
 

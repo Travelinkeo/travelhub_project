@@ -263,13 +263,12 @@ class Pasajero(AgenciaMixin, SoftDeleteModel, models.Model):
     class Meta:
         verbose_name = "Pasajero"
         verbose_name_plural = "Pasajeros"
-
-    indexes = [
-        models.Index(fields=["is_deleted", "agencia_id"], name="idx_pasajero_soft_delete_saas"),
-        models.Index(
-            fields=["agencia_id", "numero_pasaporte"], name="idx_pasajero_agencia_pasaporte"
-        ),
-    ]
+        indexes = [
+            models.Index(fields=["is_deleted", "agencia_id"], name="idx_pasajero_soft_delete_saas"),
+            models.Index(
+                fields=["agencia_id", "numero_pasaporte"], name="idx_pasajero_agencia_pasaporte"
+            ),
+        ]
 
     def __str__(self):
         return f"{self.nombres} {self.apellidos}"

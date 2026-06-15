@@ -1,0 +1,7 @@
+feat: Implement dependency linter and fix ruff config
+
+This commit introduces the new dependency linter script (scripts/check_domain_imports.py) as per the architectural manifesto (Fase 1, Paso 1). This linter prevents direct imports between different domain apps within the 'apps/' directory.
+
+Additionally, it fixes the 'target-version' in .ruff.toml from "py313" to "py312" to resolve pre-commit hook failures related to ruff.
+
+The .gitignore file has also been updated to allow tracking of the new linter script.

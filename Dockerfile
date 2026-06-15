@@ -24,6 +24,7 @@ COPY templates/ ./templates/
 COPY locale/ ./locale/
 COPY docs/ ./docs/
 COPY tailwind.config.js ./
+
 COPY compilar.sh ./compilar.sh
 
 RUN chmod +x ./compilar.sh && sed -i 's/\r$//' ./compilar.sh && bash ./compilar.sh || true
@@ -55,6 +56,7 @@ COPY --from=builder /build/static ./static/
 COPY --from=builder /build/templates ./templates/
 COPY --from=builder /build/locale ./locale/
 COPY --from=builder /build/docs ./docs/
+
 
 RUN groupadd -r appgroup && useradd -r -g appgroup appuser && chown -R appuser:appgroup /app
 

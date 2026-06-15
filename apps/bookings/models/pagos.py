@@ -94,6 +94,7 @@ class PagoVenta(AgenciaMixin, models.Model):
             models.Index(fields=["agencia", "venta"], name="idx_pago_agencia_venta"),
             models.Index(fields=["agencia", "fecha_pago"], name="idx_pago_agencia_fecha"),
             models.Index(fields=["metodo"], name="idx_pago_metodo"),
+            models.Index(fields=["creado"], name="idx_pagoventa_creado"),
         ]
 
     def __str__(self):

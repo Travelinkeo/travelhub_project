@@ -12,6 +12,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("cotizaciones", "0007_alter_cotizacion_moneda"),
+        ("core", "0037_rename_remaining_core_tables"),
     ]
 
     operations = [

@@ -1,5 +1,6 @@
 import json
 import logging
+import requests
 from datetime import date, datetime, timedelta
 from decimal import Decimal
 
@@ -17,6 +18,8 @@ from apps.finance.models.reconciliacion import (
     ReporteReconciliacion,
 )
 from core.api import get_current_agency
+from core.models.aeropuerto import Aeropuerto
+import math
 
 logger = logging.getLogger(__name__)
 
@@ -627,3 +630,229 @@ class AgentTools:
 
         except Exception as e:
             return f"Error registrando propuesta de asiento: {str(e)}"
+
+    @staticmethod
+    def encode_iata_location(city_name: str, country_name: str | None = None) -> str:
+        """
+        Busca el código IATA de aeropuertos comerciales en una ciudad o país.
+        city_name: Nombre de la ciudad a codificar (ej. 'Caracas', 'Madrid').
+        country_name: Opcional, nombre del país para filtrar resultados.
+        """
+        try:
+            query = Q(ciudad__icontains=city_name)
+            if country_name:
+                query &= Q(pais__icontains=country_name)
+            
+            airports = Aeropuerto.objects.filter(query)[:10]
+            results = []
+            for ap in airports:
+                results.append({
+                    "codigo_iata": ap.codigo_iata,
+                    "nombre": ap.nombre,
+                    "ciudad": ap.ciudad,
+                    "pais": ap.pais,
+                    "pais_codigo": ap.pais_codigo,
+                    "es_principal": ap.es_principal
+                })
+            return json.dumps(results, indent=2)
+        except Exception as e:
+            return f"Error codificando localización: {str(e)}"
+
+    @staticmethod
+    def decode_iata_code(iata_code: str) -> str:
+        """
+        Obtiene los detalles del aeropuerto y localización correspondientes a un código IATA.
+        iata_code: Código IATA de 3 letras (ej. 'CCS', 'MAD').
+        """
+        try:
+            ap = Aeropuerto.objects.filter(codigo_iata__iexact=iata_code.strip()).first()
+            if not ap:
+                return f"No se encontró información para el código IATA '{iata_code}'."
+            
+            result = {
+                "codigo_iata": ap.codigo_iata,
+                "nombre": ap.nombre,
+                "ciudad": ap.ciudad,
+                "pais": ap.pais,
+                "pais_codigo": ap.pais_codigo,
+                "latitud": ap.latitud,
+                "longitud": ap.longitud,
+                "es_principal": ap.es_principal
+            }
+            return json.dumps(result, indent=2)
+        except Exception as e:
+            return f"Error decodificando código IATA: {str(e)}"
+
+    @staticmethod
+    def find_nearest_airports(latitude: float, longitude: float, max_results: int = 5) -> str:
+        """
+        Encuentra los aeropuertos comerciales más cercanos a unas coordenadas geográficas (latitud, longitud).
+        latitude: Latitud geográfica en grados decimales.
+        longitude: Longitud geográfica en grados decimales.
+        max_results: Número máximo de resultados a retornar.
+        """
+        try:
+            # Fórmula de Haversine para calcular distancia en km
+            # Para evitar cargar todos en memoria, podemos filtrar en un rango aproximado
+            # 1 grado de latitud es aprox 111 km. Hacemos un bounding box de 5 grados (~550 km)
+            lat_delta = 5.0
+            lon_delta = 5.0
+            
+            candidates = Aeropuerto.objects.filter(
+                latitud__range=(latitude - lat_delta, latitude + lat_delta),
+                longitud__range=(longitude - lon_delta, longitude + lon_delta)
+            )
+            
+            # Si no hay candidatos en 5 grados, buscar sin bounding box
+            if not candidates.exists():
+                candidates = Aeropuerto.objects.all()
+            
+            airport_list = []
+            for ap in candidates:
+                # Calcular distancia Haversine
+                lat1, lon1 = math.radians(latitude), math.radians(longitude)
+                lat2, lon2 = math.radians(ap.latitud), math.radians(ap.longitud)
+                
+                dlat = lat2 - lat1
+                dlon = lon2 - lon1
+                
+                a = math.sin(dlat/2)**2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon/2)**2
+                c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
+                distance_km = 6371.0 * c # Radio de la Tierra en km
+                
+                airport_list.append((ap, distance_km))
+            
+            # Ordenar por distancia
+            airport_list.sort(key=lambda x: x[1])
+            results = []
+            for ap, dist in airport_list[:max_results]:
+                results.append({
+                    "codigo_iata": ap.codigo_iata,
+                    "nombre": ap.nombre,
+                    "ciudad": ap.ciudad,
+                    "pais": ap.pais,
+                    "distancia_km": round(dist, 2),
+                    "es_principal": ap.es_principal
+                })
+            return json.dumps(results, indent=2)
+        except Exception as e:
+            return f"Error buscando aeropuertos cercanos: {str(e)}"
+
+    @staticmethod
+    def get_travel_requirements(origin_country_code: str, destination_country_code: str) -> str:
+        """
+        Obtiene los requisitos de visado, pasaporte y vacunas para viajar entre dos países.
+        origin_country_code: Código ISO de 2 letras del país de origen/nacionalidad (ej. 'VE', 'CO').
+        destination_country_code: Código ISO de 2 letras del país de destino (ej. 'ES', 'US').
+        """
+        # Usamos VisaDB API o mock fallback si no hay API keys configuradas
+        origin = origin_country_code.strip().upper()
+        dest = destination_country_code.strip().upper()
+        
+        # Consultar si hay una API Key de RapidAPI/VisaDB configurada en settings o env
+        import os
+        api_key = os.getenv("VISADB_API_KEY") or os.getenv("RAPIDAPI_KEY")
+        
+        if api_key:
+            try:
+                # Intentamos consumir un endpoint de RapidAPI para requisitos de visa
+                url = "https://visadb.p.rapidapi.com/visa-requirements" # Endpoint representativo
+                headers = {
+                    "X-RapidAPI-Key": api_key,
+                    "X-RapidAPI-Host": "visadb.p.rapidapi.com"
+                }
+                params = {"origin": origin, "destination": dest}
+                response = requests.get(url, headers=headers, params=params, timeout=5)
+                if response.status_code == 200:
+                    return json.dumps(response.json(), indent=2)
+            except Exception as e:
+                logger.warning(f"Error consultando VisaDB API: {e}. Usando fallback...")
+
+        # Si no hay API key o falló la API, usamos Gemini para obtener información real y actualizada de forma dinámica
+        try:
+            from google import genai
+            from google.genai import types
+            from apps.automation.services.ai_engine import get_gemini_api_key
+            
+            gemini_key = get_gemini_api_key()
+            if gemini_key:
+                client = genai.Client(api_key=gemini_key)
+                prompt = f"""
+                Determine los requisitos reales, verídicos y actualizados de viaje (visado, pasaporte y vacunas) para un ciudadano con nacionalidad de '{origin}' que viaja al país de destino '{dest}' para fines de turismo y estancias cortas.
+                
+                REGLAS DE VERACIDAD:
+                - Debe ser extremadamente preciso. Por ejemplo: los ciudadanos de Venezuela (VE) NO requieren visa para hacer turismo en Colombia (CO). Los ciudadanos de España (ES) que viajan a Estados Unidos (US) no requieren visa consular pero deben tramitar la autorización ESTA en línea. Los ciudadanos de Colombia (CO) que viajan al espacio Schengen (como España 'ES') no requieren visa para estancias menores a 90 días.
+                - Responda únicamente en formato JSON con la siguiente estructura exacta:
+                {{
+                    "origen": "{origin}",
+                    "destino": "{dest}",
+                    "requiere_visa": <true o false según corresponda para turismo/estancia corta>,
+                    "tipo_de_visa": "<especificar el tipo de visa, ej. 'Consular / Física', 'Sin visa / Turismo', 'ESTA', 'ETIAS', etc.>",
+                    "validez_pasaporte_minima_meses": <número de meses requeridos, ej. 6>,
+                    "vacunas_recomendadas_o_requeridas": [<lista de vacunas, ej. ["Fiebre Amarilla"] o []>],
+                    "observaciones_importantes": "<observaciones detalladas y verídicas sobre requisitos de entrada, tiquete de salida, solvencia, etc.>",
+                    "fuente": "Consulta dinámica via Gemini AI"
+                }}
+                """
+                response = client.models.generate_content(
+                    model="gemini-2.5-flash",
+                    contents=prompt,
+                    config=types.GenerateContentConfig(
+                        response_mime_type="application/json",
+                    )
+                )
+                if response.text:
+                    return response.text
+        except Exception as e:
+            logger.warning(f"Error usando Gemini para requisitos de viaje: {e}. Usando fallback local...")
+
+        # Fallback local de último recurso (si falla la llamada de IA externa)
+        visa_required = True
+        notes = "Se requiere pasaporte con vigencia mínima de 6 meses."
+        vaccines = ["Fiebre Amarilla (si procede de zonas endémicas)"]
+        
+        # Reglas comunes corregidas de último recurso
+        if origin == "VE":
+            if dest in ["ES", "FR", "DE", "IT", "PT", "CH"]: # Schengen
+                visa_required = False
+                notes = "Exento de visa para estancias de turismo de hasta 90 días (se requiere pasaje de ida/vuelta, reserva de hotel y seguro médico)."
+            elif dest in ["US", "CA", "GB"]:
+                visa_required = True
+                notes = "Requiere visa consular física estampada en pasaporte vigente."
+            elif dest == "CO":
+                visa_required = False
+                notes = "Exento de visa para turismo en estadías cortas de hasta 90 días. Debe realizar el registro de pre-registro migratorio Check-Mig."
+            elif dest in ["PE", "EC", "CL"]:
+                visa_required = True
+                notes = "Requiere visa consular (de turismo o visa de residencia)."
+        elif origin == "CO":
+            if dest in ["ES", "FR", "DE", "IT", "PT", "CH"]: # Schengen
+                visa_required = False
+                notes = "Exento de visa para estancias cortas de hasta 90 días."
+            elif dest == "US":
+                visa_required = True
+                notes = "Requiere visa consular americana de turismo B1/B2."
+        elif origin == "ES":
+            if dest in ["US"]:
+                visa_required = False
+                notes = "No requiere visa consular, califica para el programa ESTA (autorización electrónica) en línea."
+            else:
+                visa_required = False
+                notes = "Exento de visa para la mayoría de destinos turísticos por acuerdos de la Unión Europea."
+                
+        if dest in ["BR", "VE", "CO"] or origin in ["VE", "CO"]:
+            vaccines.append("Fiebre Amarilla (Obligatorio para ciertas regiones de selva o frontera)")
+            
+        result = {
+            "origen": origin,
+            "destino": dest,
+            "requiere_visa": visa_required,
+            "tipo_de_visa": "Consular / Físico" if visa_required else "Exento / Turismo",
+            "validez_pasaporte_minima_meses": 6,
+            "vacunas_recomendadas_o_requeridas": list(set(vaccines)),
+            "observaciones_importantes": notes,
+            "fuente": "TravelHub Backup Local Rules"
+        }
+        return json.dumps(result, indent=2)
+
+

@@ -86,12 +86,14 @@ class Command(BaseCommand):
                 raise CommandError(f"El archivo {file_path} debe contener una lista de objetos")
             created, updated, skipped = 0, 0, 0
             if not dry_run:
-                with transaction.atomic():
-                    for row in data:
-                        c, u, s = self._process_row(cat, row, upsert)
-                        created += c
-                        updated += u
-                        skipped += s
+                from core.middleware import system_context
+                with system_context():
+                    with transaction.atomic():
+                        for row in data:
+                            c, u, s = self._process_row(cat, row, upsert)
+                            created += c
+                            updated += u
+                            skipped += s
             else:
                 for row in data:
                     # Simular uniqueness heurística
@@ -122,7 +124,12 @@ class Command(BaseCommand):
         return rows
 
     def _process_row(self, catalog: str, row: dict, upsert: bool, simulate: bool = False):
-        row_upper_keys = {k.lower(): v for k, v in row.items()}
+        if "fields" in row and isinstance(row["fields"], dict):
+            flat_row = {"pk": row.get("pk")}
+            flat_row.update(row["fields"])
+            row_upper_keys = {k.lower(): v for k, v in flat_row.items()}
+        else:
+            row_upper_keys = {k.lower(): v for k, v in row.items()}
         try:
             if catalog == "paises":
                 return self._upsert_model(

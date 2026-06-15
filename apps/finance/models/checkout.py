@@ -2,6 +2,7 @@ import uuid
 from datetime import timedelta
 
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 
 from core.api import AgenciaMixin
@@ -20,20 +21,14 @@ class LinkDePago(AgenciaMixin, models.Model):
         EXPIRADO = "EXP", "Expirado"
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    venta_id = models.IntegerField(
+    venta = models.ForeignKey(
+        "bookings.Venta",
+        on_delete=models.CASCADE,
         unique=True,
-        verbose_name="ID Venta",
+        verbose_name=_("Venta"),
+        null=True,
+        blank=True,
     )
-
-    @property
-    def venta(self):
-        from apps.bookings.models import Venta
-
-        return Venta.objects.filter(pk=self.venta_id).first()
-
-    @venta.setter
-    def venta(self, value):
-        self.venta_id = value.pk if value else None
 
     monto_total = models.DecimalField(max_digits=12, decimal_places=2)
     moneda = models.CharField(max_length=3, default="USD")

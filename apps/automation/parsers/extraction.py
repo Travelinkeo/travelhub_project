@@ -192,12 +192,13 @@ class ExtractionService:
             return html_content
 
     @staticmethod
-    @staticmethod
     def get_open_file(boleto: Any) -> BinaryIO | None:
         """Obtener un handle de lectura binaria para el archivo del boleto.
 
         Soporta almacenamiento local y remoto (Cloudflare R2/S3) de forma transparente.
         """
+        if not boleto.archivo_boleto:
+            return None
         try:
             # Django S3Boto3Storage maneja la apertura remota automáticamente
             f = boleto.archivo_boleto.open("rb")
@@ -211,6 +212,6 @@ class ExtractionService:
                     boleto.archivo_boleto.path
                 ):
                     return open(boleto.archivo_boleto.path, "rb")
-            except OSError:
+            except (OSError, ValueError):
                 logger.debug("Could not open boleto file: %s", boleto.archivo_boleto, exc_info=True)
             return None

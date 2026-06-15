@@ -7,7 +7,6 @@ from django.conf import settings
 from django.core.cache import cache
 from django.db import connections
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
 
 logger = logging.getLogger(__name__)
 
@@ -81,7 +80,6 @@ def _check_disk():
         return {"ok": False, "error": str(e)[:200]}
 
 
-@csrf_exempt
 def _check_celery_queue_depth():
     from core.metrics import QUEUES
 

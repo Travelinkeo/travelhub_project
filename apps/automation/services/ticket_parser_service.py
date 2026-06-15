@@ -119,6 +119,27 @@ def _generate_pdf_sync(boleto) -> None:
             logger.error(f"No se pudo actualizar log_parseo del boleto {boleto.pk}: {e_log}")
 
 
+# =========================================================================================
+# 🏢 EXPLICACIÓN PARA TODO PÚBLICO (Inversores y No Programadores)
+# Imagine que recibe cartas de amor escritas a mano en diferentes idiomas, estilos y caligrafías,
+# y necesita extraer de cada una: la fecha de la cita, el remitente y cuánto costó el regalo.
+# Este servicio es como contratar a un asistente ultra inteligente (la Inteligencia Artificial de Google Gemini)
+# que lee cada carta, entiende el contexto y extrae exactamente lo que necesita en una tabla limpia.
+#
+# Y si por alguna razón el asistente se va a almorzar o el teléfono no tiene señal (caída de red/API),
+# el sistema cuenta con un "Manual de Emergencias" (expresiones regulares o Regex) para buscar de
+# manera tradicional patrones exactos de texto (como buscar la palabra "Pasajero:" seguida de letras).
+# Esto asegura que el negocio nunca se detenga y la facturación siga su curso.
+#
+# 💻 EXPLICACIÓN PARA PROGRAMADORES (Technical Specs)
+# TicketParserService es el core pipeline orquestador de ingesta de datos semiestructurados.
+# Diseñado con un patrón Híbrido:
+#   1. Intenta extracción semántica zero-shot usando Google Gemini AI (API v1.5 Pro/Flash).
+#   2. Si falla por cuota (rate limits/429) o fallos de red, activa el Engine de Respaldo por Regex.
+#   3. Normaliza las fechas, monedas y nombres de aerolíneas usando DataNormalizationService.
+#   4. Aplica persistencia transaccional y dispara VentaAutomationService para generar la venta,
+#      el cliente, los ítems y calcular los márgenes e impuestos automáticamente.
+# =========================================================================================
 class TicketParserService:
     """
     🏢 MULTI-TENANT | 🧠 ORQUESTADOR | 🚨 CRÍTICO
@@ -268,13 +289,7 @@ class TicketParserService:
                 logger.info(
                     f"⏭️ Boleto {boleto_id} ya está siendo procesado por otro hilo. Esperando..."
                 )
-                # Si ya está en proceso, esperamos unos segundos para ver si termina
-                # Esto ayuda a que las vistas síncronas no muestren datos vacíos
-                for _ in range(5):
-                    time.sleep(1)
-                    boleto.refresh_from_db()
-                    if boleto.estado_parseo != BoletoImportado.EstadoParseo.EN_PROCESO:
-                        break
+                boleto.refresh_from_db()
                 return boleto.venta_asociada or True
 
             boleto.log_parseo = "Iniciando pipeline de extracción..."

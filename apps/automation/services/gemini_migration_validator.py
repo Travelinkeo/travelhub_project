@@ -51,7 +51,7 @@ class GeminiMigrationValidator:
             self.client = genai.Client(api_key=api_key)
         else:
             self.client = None
-        self.model_name = "gemini-2.0-flash"
+        self.model_name = "gemini-2.5-flash"
 
     def validate_visa_requirements(
         self,

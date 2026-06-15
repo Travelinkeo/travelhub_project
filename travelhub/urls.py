@@ -43,6 +43,8 @@ def _protect_docs(view):
 # NOTA: En el enrutador maestro NO se declara app_name.
 # El app_name = 'bookings' debe ir EXCLUSIVAMENTE en apps/bookings/urls.py
 
+from django.views.decorators.csrf import ensure_csrf_cookie
+
 urlpatterns = [
     # --- HEALTH & CSP REPORT ---
     path("health/", health_view, name="health"),
@@ -56,7 +58,7 @@ urlpatterns = [
     path("admin/custom/core/", include("core.urls_admin")),
     path("admin/", admin.site.urls),  # <-- Faltaba tu panel de admin
     path("accounts/", include("django.contrib.auth.urls")),  # <-- Faltaban las rutas base de auth
-    path("login/", auth_views.LoginView.as_view(), name="login"),
+    path("login/", ensure_csrf_cookie(auth_views.LoginView.as_view()), name="login"),
     path("logout/", auth_views.LogoutView.as_view(), name="logout"),
     path("api/auth/jwt/obtain/", TokenObtainPairView.as_view(), name="jwt_obtain_pair"),
     path("api/auth/jwt/logout/", TokenLogoutView.as_view(), name="jwt_logout"),

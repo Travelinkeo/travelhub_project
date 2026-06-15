@@ -2,6 +2,7 @@ from datetime import timedelta
 from typing import Any
 
 from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Count, Q, Sum
 from django.db.models.query import QuerySet
 from django.http import HttpRequest, HttpResponse
@@ -20,7 +21,7 @@ from core.auth_helpers import InternalAPIAuthMixin
 from core.middleware import get_current_agency
 
 
-class HotelListView(ListView):
+class HotelListView(LoginRequiredMixin, ListView):
     model = HotelTarifario
     template_name = "core/hotels/search.html"
     context_object_name = "hoteles"
@@ -95,7 +96,7 @@ class HotelListView(ListView):
         return ctx
 
 
-class HotelDetailView(DetailView):
+class HotelDetailView(LoginRequiredMixin, DetailView):
     model = HotelTarifario
     template_name = "core/hotels/detail.html"
     context_object_name = "hotel"

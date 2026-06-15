@@ -11,6 +11,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ("core", "0031_agenciaconfiguracion_evolution_api_key_and_more"),
         ("finance", "0011_alter_retencionislr_factura"),
+        ("bookings", "0033_alter_actividadservicio_managers_and_more"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 

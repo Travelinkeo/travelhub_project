@@ -23,8 +23,9 @@ logger = logging.getLogger(__name__)
 
 def generar_numero_factura_atomico(model_class, fecha_emision, prefix=None):
     """
-    Genera un número de factura secuencial de forma atómica.
-    Usa select_for_update() para evitar condiciones de carrera.
+    Genera un número de factura secuencial de forma atómica y serializada.
+    Usa bloqueos asesores transaccionales de PostgreSQL (pg_advisory_xact_lock)
+    para evitar condiciones de carrera incluso cuando no existen registros previos.
 
     Args:
         model_class: La clase del modelo (Factura o FacturaConsolidada)
@@ -38,7 +39,15 @@ def generar_numero_factura_atomico(model_class, fecha_emision, prefix=None):
         prefix = f"F-{fecha_emision.strftime('%Y%m%d')}"
 
     with transaction.atomic():
-        # Obtener el último número de factura del día con lock
+        # 1. Adquirir un bloqueo asesor transaccional exclusivo para el prefijo de facturación
+        import hashlib
+        lock_id = int(hashlib.sha256(prefix.encode()).hexdigest()[:15], 16)
+        from django.db import connection
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT pg_advisory_xact_lock(%s)", [lock_id])
+            cursor.fetchone()  # Consumir el cursor para forzar la adquisición del bloqueo
+
+        # 2. Ahora que está serializado, obtener el último número del día con lock de fila
         ultimo = (
             model_class.objects.select_for_update()
             .filter(numero_factura__startswith=prefix)
@@ -47,7 +56,6 @@ def generar_numero_factura_atomico(model_class, fecha_emision, prefix=None):
         )
 
         if ultimo:
-            # Extraer el sufijo numérico y sumar 1
             try:
                 sufijo = int(ultimo.numero_factura.split("-")[-1])
                 nuevo_sufijo = sufijo + 1
@@ -69,23 +77,13 @@ class Factura(AgenciaMixin, SoftDeleteModel, models.Model):
         help_text=_("Puede ser un correlativo fiscal o interno."),
     )
 
-    venta_asociada_id = models.IntegerField(
-        blank=True,
+    venta_asociada = models.ForeignKey(
+        "bookings.Venta",
+        on_delete=models.SET_NULL,
         null=True,
-        verbose_name=_("ID Venta Asociada"),
+        blank=True,
+        verbose_name=_("Venta Asociada"),
     )
-
-    @property
-    def venta_asociada(self):
-        if not self.venta_asociada_id:
-            return None
-        from apps.bookings.models import Venta
-
-        return Venta.objects.filter(pk=self.venta_asociada_id).first()
-
-    @venta_asociada.setter
-    def venta_asociada(self, value):
-        self.venta_asociada_id = value.pk if value else None
 
     # agencia la provee AgenciaMixin
     cliente = models.ForeignKey(
@@ -321,7 +319,6 @@ class Factura(AgenciaMixin, SoftDeleteModel, models.Model):
             models.Index(fields=["tipo_factura"]),
             models.Index(fields=["agencia_id", "fecha_emision"]),
             models.Index(fields=["agencia_id", "estado"]),
-            models.Index(fields=["venta_asociada_id"]),
             models.Index(fields=["is_deleted", "agencia_id"], name="idx_factura_soft_delete_saas"),
         ]
 

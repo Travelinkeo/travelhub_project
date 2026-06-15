@@ -1,5 +1,8 @@
+import hashlib
+import hmac
 import json
 import logging
+from urllib.parse import parse_qs
 
 from asgiref.sync import async_to_sync
 from django.conf import settings
@@ -21,7 +24,28 @@ def flyer_mini_app_view(request):
     return render(request, "telegram/flyer_app.html")
 
 
-@csrf_exempt  # CSRF exempt: Called by Telegram Mini App (iframe without browser cookies)
+def _verify_telegram_init_data(init_data: str) -> bool:
+    """Verifica el tgWebAppData firmado por Telegram usando HMAC-SHA256."""
+    try:
+        parsed = parse_qs(init_data)
+        hash_value = parsed.get("hash", [None])[0]
+        if not hash_value:
+            return False
+        data_check_string = "\n".join(
+            f"{k}={v}"
+            for k, v in sorted(parsed.items())
+            if k != "hash"
+        )
+        secret_key = hmac.new(
+            b"WebAppData", settings.TELEGRAM_BOT_TOKEN.encode(), hashlib.sha256
+        ).digest()
+        expected_hash = hmac.new(secret_key, data_check_string.encode(), hashlib.sha256).hexdigest()
+        return hmac.compare_digest(expected_hash, hash_value)
+    except Exception:
+        return False
+
+
+@csrf_exempt  # CSRF exempt: secured by Telegram initData verification below
 def generate_flyer_api(request):
     """
     API endpoint para generar flyers desde la Mini App vía AJAX/Fetch.
@@ -29,6 +53,11 @@ def generate_flyer_api(request):
     """
     if request.method != "POST":
         return JsonResponse({"error": "Método no permitido"}, status=405)
+
+    init_data = request.META.get("HTTP_TELEGRAM_INIT_DATA") or request.headers.get("X-Telegram-Init-Data", "")
+    if init_data:
+        if not _verify_telegram_init_data(init_data):
+            return JsonResponse({"error": "Firma de Telegram inválida"}, status=403)
 
     try:
         data = json.loads(request.body)

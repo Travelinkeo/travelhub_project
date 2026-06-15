@@ -62,20 +62,13 @@ class ComisionVenta(AgenciaMixin, SoftDeleteModel, models.Model):
         LIQUIDADO = "LIQ", _("Liquidado en Nómina")
         CANCELADO = "CAN", _("Cancelado (Venta Anulada)")
 
-    venta_id = models.IntegerField(
-        verbose_name=_("ID Venta"),
+    venta = models.ForeignKey(
+        "bookings.Venta",
+        on_delete=models.CASCADE,
+        verbose_name=_("Venta"),
+        null=True,
+        blank=True,
     )
-
-    @property
-    def venta(self):
-        from apps.bookings.models import Venta
-
-        return Venta.objects.filter(pk=self.venta_id).first()
-
-    @venta.setter
-    def venta(self, value):
-        self.venta_id = value.pk if value else None
-
     agente = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name=_("Agente")
     )

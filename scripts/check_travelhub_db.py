@@ -1,10 +1,16 @@
 
+import os
+
 import psycopg2
 import sys
 
+
+def _get_db_password() -> str:
+    return os.environ.get("DB_PASSWORD", "")
+
 def check_db(dbname):
     user = "postgres"
-    password = "Linkeo1331@@"
+    password = _get_db_password()
     host = "localhost"
     port = "5432"
     

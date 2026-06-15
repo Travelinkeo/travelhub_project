@@ -7,7 +7,7 @@ from apps.bookings.models import ItemVenta, PagoVenta, ProductoServicio, Venta, 
 from core.middleware import agency_context
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db(transaction=True)
 class TestRealTimeAuditAndPayments:
     def test_cobro_asiento_contable_y_anulacion(self, agencia_premium, moneda_usd):
         """

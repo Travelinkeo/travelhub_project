@@ -35,7 +35,7 @@ except ImportError:
 
 
 # Regex para identificar aerolíneas en texto crudo de GDS
-re_airlines = re.compile(r"\b([A-Z0-9]{2,3})\s+\d{2,4}\b", re.IGNORECASE)
+re_airlines = re.compile(r"\b([A-Z]{2}|[A-Z][0-9]|[0-9][A-Z])\s*(?:\d{2,4})[A-Z]?(?:\b|\s)", re.IGNORECASE)
 
 
 logger = logging.getLogger(__name__)
@@ -741,12 +741,35 @@ class MagicQuoterSaveView(LoginRequiredMixin, View):
             approval_text = f"✅ ¡Hola! Apruebo la cotización para {cotizacion.destino}. Por favor, procede con la reserva. (Ref: {cotizacion.numero_cotizacion})"
             f"https://wa.me/?text={approval_text.replace(' ', '%20')}"
 
+            # Formatear el itinerario para WhatsApp en texto plano
+            flights_text = ""
+            for idx, flight in enumerate(ai_data.get("flights", []), start=1):
+                dep_code = flight.get("departureCode", "???")
+                arr_code = flight.get("arrivalCode", "???")
+                airline = flight.get("airline", "Aerolinea")
+                f_date = flight.get("departureDate") or flight.get("departure_date") or "Por confirmar"
+                dep_time = flight.get("departureTime") or "--:--"
+                arr_time = flight.get("arrivalTime") or "--:--"
+                
+                flights_text += f"*Vuelo {idx}: {f_date}*\n"
+                flights_text += f"-> Origen: {dep_code} ({dep_time}) | Destino: {arr_code} ({arr_time}) via *{airline}*\n\n"
+
+            # Obtener precio total con fee
+            total_price_raw = ai_data.get("totalPriceWithFee") or cotizacion.total_cotizado or 0
+            try:
+                total_price = float(total_price_raw)
+            except (ValueError, TypeError):
+                total_price = 0.0
+
             whatsapp_msg = (
-                f"PROPUESTA DE VIAJE: {cotizacion.destino.upper()}\n\n"
-                f"Hola! Te envio el itinerario personalizado que preparamos para ti.\n\n"
-                f"Puedes ver el detalle, fotos y precios aqui:\n"
+                f"*PROPUESTA DE VIAJE: {cotizacion.destino.upper()}*\n\n"
+                f"Hola. Te envio el itinerario personalizado que preparamos para ti:\n\n"
+                f"{flights_text}"
+                f"*Inversion Total:* ${total_price:,.2f} USD\n\n"
+                f"---\n"
+                f"*Ver en formato visual:* Si deseas ver fotos y el detalle interactivo de tu propuesta, puedes acceder a tu enlace seguro:\n"
                 f"{public_url}\n\n"
-                f"Quedo atento a tus comentarios!"
+                f"Quedo atento a tus comentarios para proceder con la reserva."
             )
 
             return JsonResponse(
@@ -774,7 +797,9 @@ class PublicQuoteDetailView(DetailView):
     context_object_name = "quote"
 
     def get_object(self, queryset=None):
-        return get_object_or_404(Cotizacion, uuid=self.kwargs.get("quote_uuid"))
+        from core.middleware import system_context
+        with system_context():
+            return get_object_or_404(Cotizacion, uuid=self.kwargs.get("quote_uuid"))
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

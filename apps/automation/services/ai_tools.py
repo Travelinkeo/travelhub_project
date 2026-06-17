@@ -1,9 +1,10 @@
 import json
 import logging
-import requests
+import math
 from datetime import date, datetime, timedelta
 from decimal import Decimal
 
+import requests
 from django.db.models import Count, Q, Sum
 from django.utils import timezone
 
@@ -19,7 +20,6 @@ from apps.finance.models.reconciliacion import (
 )
 from core.api import get_current_agency
 from core.models.aeropuerto import Aeropuerto
-import math
 
 logger = logging.getLogger(__name__)
 
@@ -265,6 +265,7 @@ class AgentTools:
         """
         try:
             from django.apps import apps
+
             Articulo = apps.get_model("cms", "Articulo")
             GuiaDestino = apps.get_model("cms", "GuiaDestino")
             agencia = get_current_agency()
@@ -294,6 +295,7 @@ class AgentTools:
         """
         try:
             from django.apps import apps
+
             Articulo = apps.get_model("cms", "Articulo")
             GuiaDestino = apps.get_model("cms", "GuiaDestino")
             agencia = get_current_agency()
@@ -338,7 +340,9 @@ class AgentTools:
             if not report:
                 return "No se encontraron reportes de conciliación."
 
-            conciliaciones = report.conciliaciones.select_related("linea_reporte", "boleto_local").all()
+            conciliaciones = report.conciliaciones.select_related(
+                "linea_reporte", "boleto_local"
+            ).all()
             stats = {
                 "proveedor": report.proveedor,
                 "fecha": report.fecha_subida.strftime("%Y-%m-%d"),
@@ -412,7 +416,10 @@ class AgentTools:
         """
         try:
             from django.utils.module_loading import import_string
-            CopywriterService = import_string("apps.marketing.services.copywriter_service.CopywriterService")
+
+            CopywriterService = import_string(
+                "apps.marketing.services.copywriter_service.CopywriterService"
+            )
             service = CopywriterService()
             package = service.generate_social_package(hotel_id, tone)
 
@@ -595,6 +602,7 @@ class AgentTools:
                 return "Error: No hay una agencia en el contexto actual."
 
             import json
+
             try:
                 detalles_cuentas = json.loads(detalles_cuentas_json)
             except Exception as e_json:
@@ -639,21 +647,43 @@ class AgentTools:
         country_name: Opcional, nombre del país para filtrar resultados.
         """
         try:
-            query = Q(ciudad__icontains=city_name)
+            from django.db.models import Q
+
+            # Búsqueda multi-campo: ciudad, nombre del aeropuerto, o país
+            query = (
+                Q(ciudad__icontains=city_name)
+                | Q(nombre__icontains=city_name)
+                | Q(
+                    ciudad__icontains=city_name.replace("á", "a")
+                    .replace("é", "e")
+                    .replace("í", "i")
+                    .replace("ó", "o")
+                    .replace("ú", "u")
+                )
+            )
             if country_name:
-                query &= Q(pais__icontains=country_name)
-            
-            airports = Aeropuerto.objects.filter(query)[:10]
+                query &= Q(
+                    Q(pais__icontains=country_name)
+                    | Q(
+                        pais_codigo__iexact=country_name[:2].upper()
+                        if len(country_name) >= 2
+                        else country_name
+                    )
+                )
+
+            airports = Aeropuerto.objects.filter(query).distinct()[:10]
             results = []
             for ap in airports:
-                results.append({
-                    "codigo_iata": ap.codigo_iata,
-                    "nombre": ap.nombre,
-                    "ciudad": ap.ciudad,
-                    "pais": ap.pais,
-                    "pais_codigo": ap.pais_codigo,
-                    "es_principal": ap.es_principal
-                })
+                results.append(
+                    {
+                        "codigo_iata": ap.codigo_iata,
+                        "nombre": ap.nombre,
+                        "ciudad": ap.ciudad,
+                        "pais": ap.pais,
+                        "pais_codigo": ap.pais_codigo,
+                        "es_principal": ap.es_principal,
+                    }
+                )
             return json.dumps(results, indent=2)
         except Exception as e:
             return f"Error codificando localización: {str(e)}"
@@ -668,7 +698,7 @@ class AgentTools:
             ap = Aeropuerto.objects.filter(codigo_iata__iexact=iata_code.strip()).first()
             if not ap:
                 return f"No se encontró información para el código IATA '{iata_code}'."
-            
+
             result = {
                 "codigo_iata": ap.codigo_iata,
                 "nombre": ap.nombre,
@@ -677,7 +707,7 @@ class AgentTools:
                 "pais_codigo": ap.pais_codigo,
                 "latitud": ap.latitud,
                 "longitud": ap.longitud,
-                "es_principal": ap.es_principal
+                "es_principal": ap.es_principal,
             }
             return json.dumps(result, indent=2)
         except Exception as e:
@@ -697,43 +727,48 @@ class AgentTools:
             # 1 grado de latitud es aprox 111 km. Hacemos un bounding box de 5 grados (~550 km)
             lat_delta = 5.0
             lon_delta = 5.0
-            
+
             candidates = Aeropuerto.objects.filter(
                 latitud__range=(latitude - lat_delta, latitude + lat_delta),
-                longitud__range=(longitude - lon_delta, longitude + lon_delta)
+                longitud__range=(longitude - lon_delta, longitude + lon_delta),
             )
-            
+
             # Si no hay candidatos en 5 grados, buscar sin bounding box
             if not candidates.exists():
                 candidates = Aeropuerto.objects.all()
-            
+
             airport_list = []
             for ap in candidates:
                 # Calcular distancia Haversine
                 lat1, lon1 = math.radians(latitude), math.radians(longitude)
                 lat2, lon2 = math.radians(ap.latitud), math.radians(ap.longitud)
-                
+
                 dlat = lat2 - lat1
                 dlon = lon2 - lon1
-                
-                a = math.sin(dlat/2)**2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon/2)**2
-                c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
-                distance_km = 6371.0 * c # Radio de la Tierra en km
-                
+
+                a = (
+                    math.sin(dlat / 2) ** 2
+                    + math.cos(lat1) * math.cos(lat2) * math.sin(dlon / 2) ** 2
+                )
+                c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+                distance_km = 6371.0 * c  # Radio de la Tierra en km
+
                 airport_list.append((ap, distance_km))
-            
+
             # Ordenar por distancia
             airport_list.sort(key=lambda x: x[1])
             results = []
             for ap, dist in airport_list[:max_results]:
-                results.append({
-                    "codigo_iata": ap.codigo_iata,
-                    "nombre": ap.nombre,
-                    "ciudad": ap.ciudad,
-                    "pais": ap.pais,
-                    "distancia_km": round(dist, 2),
-                    "es_principal": ap.es_principal
-                })
+                results.append(
+                    {
+                        "codigo_iata": ap.codigo_iata,
+                        "nombre": ap.nombre,
+                        "ciudad": ap.ciudad,
+                        "pais": ap.pais,
+                        "distancia_km": round(dist, 2),
+                        "es_principal": ap.es_principal,
+                    }
+                )
             return json.dumps(results, indent=2)
         except Exception as e:
             return f"Error buscando aeropuertos cercanos: {str(e)}"
@@ -748,19 +783,17 @@ class AgentTools:
         # Usamos VisaDB API o mock fallback si no hay API keys configuradas
         origin = origin_country_code.strip().upper()
         dest = destination_country_code.strip().upper()
-        
+
         # Consultar si hay una API Key de RapidAPI/VisaDB configurada en settings o env
         import os
+
         api_key = os.getenv("VISADB_API_KEY") or os.getenv("RAPIDAPI_KEY")
-        
+
         if api_key:
             try:
                 # Intentamos consumir un endpoint de RapidAPI para requisitos de visa
-                url = "https://visadb.p.rapidapi.com/visa-requirements" # Endpoint representativo
-                headers = {
-                    "X-RapidAPI-Key": api_key,
-                    "X-RapidAPI-Host": "visadb.p.rapidapi.com"
-                }
+                url = "https://visadb.p.rapidapi.com/visa-requirements"  # Endpoint representativo
+                headers = {"X-RapidAPI-Key": api_key, "X-RapidAPI-Host": "visadb.p.rapidapi.com"}
                 params = {"origin": origin, "destination": dest}
                 response = requests.get(url, headers=headers, params=params, timeout=5)
                 if response.status_code == 200:
@@ -772,8 +805,9 @@ class AgentTools:
         try:
             from google import genai
             from google.genai import types
+
             from apps.automation.services.ai_engine import get_gemini_api_key
-            
+
             gemini_key = get_gemini_api_key()
             if gemini_key:
                 client = genai.Client(api_key=gemini_key)
@@ -799,21 +833,23 @@ class AgentTools:
                     contents=prompt,
                     config=types.GenerateContentConfig(
                         response_mime_type="application/json",
-                    )
+                    ),
                 )
                 if response.text:
                     return response.text
         except Exception as e:
-            logger.warning(f"Error usando Gemini para requisitos de viaje: {e}. Usando fallback local...")
+            logger.warning(
+                f"Error usando Gemini para requisitos de viaje: {e}. Usando fallback local..."
+            )
 
         # Fallback local de último recurso (si falla la llamada de IA externa)
         visa_required = True
         notes = "Se requiere pasaporte con vigencia mínima de 6 meses."
         vaccines = ["Fiebre Amarilla (si procede de zonas endémicas)"]
-        
+
         # Reglas comunes corregidas de último recurso
         if origin == "VE":
-            if dest in ["ES", "FR", "DE", "IT", "PT", "CH"]: # Schengen
+            if dest in ["ES", "FR", "DE", "IT", "PT", "CH"]:  # Schengen
                 visa_required = False
                 notes = "Exento de visa para estancias de turismo de hasta 90 días (se requiere pasaje de ida/vuelta, reserva de hotel y seguro médico)."
             elif dest in ["US", "CA", "GB"]:
@@ -826,7 +862,7 @@ class AgentTools:
                 visa_required = True
                 notes = "Requiere visa consular (de turismo o visa de residencia)."
         elif origin == "CO":
-            if dest in ["ES", "FR", "DE", "IT", "PT", "CH"]: # Schengen
+            if dest in ["ES", "FR", "DE", "IT", "PT", "CH"]:  # Schengen
                 visa_required = False
                 notes = "Exento de visa para estancias cortas de hasta 90 días."
             elif dest == "US":
@@ -839,10 +875,12 @@ class AgentTools:
             else:
                 visa_required = False
                 notes = "Exento de visa para la mayoría de destinos turísticos por acuerdos de la Unión Europea."
-                
+
         if dest in ["BR", "VE", "CO"] or origin in ["VE", "CO"]:
-            vaccines.append("Fiebre Amarilla (Obligatorio para ciertas regiones de selva o frontera)")
-            
+            vaccines.append(
+                "Fiebre Amarilla (Obligatorio para ciertas regiones de selva o frontera)"
+            )
+
         result = {
             "origen": origin,
             "destino": dest,
@@ -851,8 +889,6 @@ class AgentTools:
             "validez_pasaporte_minima_meses": 6,
             "vacunas_recomendadas_o_requeridas": list(set(vaccines)),
             "observaciones_importantes": notes,
-            "fuente": "TravelHub Backup Local Rules"
+            "fuente": "TravelHub Backup Local Rules",
         }
         return json.dumps(result, indent=2)
-
-

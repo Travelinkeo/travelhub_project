@@ -69,18 +69,18 @@ select {
     <!-- Header Section -->
     <div class="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-border-light dark:border-border-dark pb-6">
         <div>
-            <div class="flex items-center gap-2 text-xs text-slate-500 dark:text-gray-400 font-medium mb-2 uppercase tracking-wider">
+            <div class="flex items-center gap-2 text-xs text-text-muted dark:text-text-muted font-medium mb-2 uppercase tracking-wider">
                 <a href="{% url 'crm:cliente_list' %}" class="hover:text-primary transition-colors">CRM</a>
                 <span class="material-symbols-outlined text-[10px]">chevron_right</span>
                 <a href="{% url 'crm:cliente_list' %}" class="hover:text-primary transition-colors">Directorio</a>
                 <span class="material-symbols-outlined text-[10px]">chevron_right</span>
                 <span class="text-primary">{% if form.instance.pk %}Editar{% else %}Nuevo{% endif %}</span>
             </div>
-            <h1 class="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">{{ title }}</h1>
-            <p class="text-gray-500 dark:text-slate-400 mt-2">Completa la información detallada del cliente o empresa.</p>
+            <h1 class="text-3xl font-bold text-gray-900 text-white tracking-tight">{{ title }}</h1>
+            <p class="text-text-muted dark:text-text-muted mt-2">Completa la información detallada del cliente o empresa.</p>
         </div>
         <div class="flex items-center gap-3">
-            <a href="{% url 'crm:cliente_list' %}" class="text-sm font-bold tracking-wide flex items-center gap-1 text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white transition-colors">
+            <a href="{% url 'crm:cliente_list' %}" class="text-sm font-bold tracking-wide flex items-center gap-1 text-text-muted dark:text-text-muted hover:text-gray-900 dark:hover:text-white transition-colors">
                 <span class="material-symbols-outlined text-[18px]">arrow_back</span> Volver al listado
             </a>
         </div>
@@ -108,7 +108,7 @@ select {
             <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-indigo-500"></div>
 
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8 pb-4 border-b border-border-light dark:border-border-dark">
-                <h2 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                <h2 class="text-lg font-bold text-gray-900 text-white flex items-center gap-2">
                     <span class="material-symbols-outlined text-primary">person</span>
                     Información Personal / Empresarial
                 </h2>
@@ -116,7 +116,7 @@ select {
                 <!-- Control de Escaneo -->
                 <div class="flex items-center gap-4">
                     <label id="btn-scan-passport-form"
-                        class="cursor-pointer bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-100 h-[40px] px-5 rounded-lg font-bold text-sm shadow-sm transition-all flex items-center gap-2">
+                        class="cursor-pointer bg-surface-2 dark:bg-white text-white dark:text-gray-900 hover:bg-surface-2 dark:hover:bg-gray-100 h-[40px] px-5 rounded-lg font-bold text-sm shadow-sm transition-all flex items-center gap-2">
                         <span class="material-symbols-outlined text-[18px]">document_scanner</span>
                         Escanear Pasaporte
                         <input type="file" id="passport-scan-input" class="hidden" accept="image/*">
@@ -137,13 +137,13 @@ select {
                         <img id="preview-foto" src="{{ object.foto_perfil.url }}" class="w-full h-full object-cover">
                         {% else %}
                         <img id="preview-foto" src="{% static 'img/default-avatar.png' %}" class="w-full h-full object-cover opacity-20 hidden">
-                        <div id="no-photo-placeholder" class="absolute inset-0 flex items-center justify-center text-gray-400 dark:text-slate-600">
+                        <div id="no-photo-placeholder" class="absolute inset-0 flex items-center justify-center text-text-muted dark:text-slate-600">
                             <span class="material-symbols-outlined text-6xl">account_circle</span>
                         </div>
                         {% endif %}
 
                         <!-- Hover Editar -->
-                        <div class="absolute inset-0 bg-slate-900/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                        <div class="absolute inset-0 bg-surface-2/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
                             data-trigger-click="id_foto_perfil">
                             <span class="material-symbols-outlined text-white text-3xl drop-shadow-md">add_a_photo</span>
                         </div>
@@ -160,37 +160,37 @@ select {
                 <!-- Campos Generales -->
                 <div class="lg:w-3/4 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
                     <label class="flex flex-col gap-1.5">
-                        <span class="text-gray-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-wider">Tipo de Cliente</span>
+                        <span class="text-text-muted dark:text-text-muted text-[10px] font-bold uppercase tracking-wider">Tipo de Cliente</span>
                         {{ form.tipo_cliente }}
                     </label>
                     
                     <label class="flex flex-col gap-1.5">
-                        <span class="text-gray-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-wider">Cédula de Identidad / RIF</span>
+                        <span class="text-text-muted dark:text-text-muted text-[10px] font-bold uppercase tracking-wider">Cédula de Identidad / RIF</span>
                         {{ form.cedula_identidad }}
                     </label>
 
                     <label class="flex flex-col gap-1.5">
-                        <span class="text-gray-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-wider">Nombres</span>
+                        <span class="text-text-muted dark:text-text-muted text-[10px] font-bold uppercase tracking-wider">Nombres</span>
                         {{ form.nombres }}
                     </label>
 
                     <label class="flex flex-col gap-1.5">
-                        <span class="text-gray-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-wider">Apellidos</span>
+                        <span class="text-text-muted dark:text-text-muted text-[10px] font-bold uppercase tracking-wider">Apellidos</span>
                         {{ form.apellidos }}
                     </label>
 
                     <label class="flex flex-col gap-1.5 md:col-span-2">
-                        <span class="text-gray-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-wider">Nombre de Empresa (Opcional)</span>
+                        <span class="text-text-muted dark:text-text-muted text-[10px] font-bold uppercase tracking-wider">Nombre de Empresa (Opcional)</span>
                         {{ form.nombre_empresa }}
                     </label>
 
                     <label class="flex flex-col gap-1.5">
-                        <span class="text-gray-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-wider">Fecha de Nacimiento</span>
+                        <span class="text-text-muted dark:text-text-muted text-[10px] font-bold uppercase tracking-wider">Fecha de Nacimiento</span>
                         {{ form.fecha_nacimiento }}
                     </label>
 
                     <label class="flex flex-col gap-1.5">
-                        <span class="text-gray-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-wider">Nacionalidad</span>
+                        <span class="text-text-muted dark:text-text-muted text-[10px] font-bold uppercase tracking-wider">Nacionalidad</span>
                         {{ form.nacionalidad }}
                     </label>
                 </div>
@@ -200,17 +200,17 @@ select {
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <!-- Bloque 2: Contacto -->
             <section class="card-base p-6">
-                <h2 class="text-lg font-bold text-gray-900 dark:text-white mb-6 pb-4 border-b border-border-light dark:border-border-dark flex items-center gap-2">
+                <h2 class="text-lg font-bold text-gray-900 text-white mb-6 pb-4 border-b border-border-light dark:border-border-dark flex items-center gap-2">
                     <span class="material-symbols-outlined text-primary">contact_mail</span>
                     Identificación y Contacto
                 </h2>
                 <div class="flex flex-col gap-5">
                     <label class="flex flex-col gap-1.5">
-                        <span class="text-gray-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-wider">Email Principal</span>
+                        <span class="text-text-muted dark:text-text-muted text-[10px] font-bold uppercase tracking-wider">Email Principal</span>
                         {{ form.email }}
                     </label>
                     <label class="flex flex-col gap-1.5">
-                        <span class="text-gray-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-wider">Teléfono</span>
+                        <span class="text-text-muted dark:text-text-muted text-[10px] font-bold uppercase tracking-wider">Teléfono</span>
                         {{ form.telefono_principal }}
                     </label>
                 </div>
@@ -218,17 +218,17 @@ select {
 
             <!-- Bloque 3: Ubicación -->
             <section class="card-base p-6">
-                <h2 class="text-lg font-bold text-gray-900 dark:text-white mb-6 pb-4 border-b border-border-light dark:border-border-dark flex items-center gap-2">
+                <h2 class="text-lg font-bold text-gray-900 text-white mb-6 pb-4 border-b border-border-light dark:border-border-dark flex items-center gap-2">
                     <span class="material-symbols-outlined text-primary">location_on</span>
                     Ubicación y Otros
                 </h2>
                 <div class="flex flex-col gap-5">
                     <label class="flex flex-col gap-1.5">
-                        <span class="text-gray-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-wider">Ciudad</span>
+                        <span class="text-text-muted dark:text-text-muted text-[10px] font-bold uppercase tracking-wider">Ciudad</span>
                         {{ form.ciudad }}
                     </label>
                     <label class="flex flex-col gap-1.5">
-                        <span class="text-gray-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-wider">Dirección</span>
+                        <span class="text-text-muted dark:text-text-muted text-[10px] font-bold uppercase tracking-wider">Dirección</span>
                         {{ form.direccion }}
                     </label>
                 </div>
@@ -237,21 +237,21 @@ select {
 
         <!-- Bloque 4: Pasaporte -->
         <section class="card-base p-6">
-            <h2 class="text-lg font-bold text-gray-900 dark:text-white mb-6 pb-4 border-b border-border-light dark:border-border-dark flex items-center gap-2">
+            <h2 class="text-lg font-bold text-gray-900 text-white mb-6 pb-4 border-b border-border-light dark:border-border-dark flex items-center gap-2">
                 <span class="material-symbols-outlined text-primary">flight_takeoff</span>
                 Información del Pasaporte
             </h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <label class="flex flex-col gap-1.5">
-                    <span class="text-gray-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-wider">Nº de Pasaporte</span>
+                    <span class="text-text-muted dark:text-text-muted text-[10px] font-bold uppercase tracking-wider">Nº de Pasaporte</span>
                     {{ form.numero_pasaporte }}
                 </label>
                 <label class="flex flex-col gap-1.5">
-                    <span class="text-gray-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-wider">País Emisor</span>
+                    <span class="text-text-muted dark:text-text-muted text-[10px] font-bold uppercase tracking-wider">País Emisor</span>
                     {{ form.pais_emision_pasaporte }}
                 </label>
                 <label class="flex flex-col gap-1.5">
-                    <span class="text-gray-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-wider">Expiración</span>
+                    <span class="text-text-muted dark:text-text-muted text-[10px] font-bold uppercase tracking-wider">Expiración</span>
                     {{ form.fecha_expiracion_pasaporte }}
                 </label>
             </div>
@@ -259,7 +259,7 @@ select {
 
         <!-- Bloque 5: Fidelidad -->
         <section class="card-base p-6">
-            <h2 class="text-lg font-bold text-gray-900 dark:text-white mb-6 pb-4 border-b border-border-light dark:border-border-dark flex items-center gap-2">
+            <h2 class="text-lg font-bold text-gray-900 text-white mb-6 pb-4 border-b border-border-light dark:border-border-dark flex items-center gap-2">
                 <span class="material-symbols-outlined text-primary">loyalty</span>
                 Programa de Fidelidad
             </h2>
@@ -268,8 +268,8 @@ select {
                     {{ form.es_cliente_frecuente }}
                 </div>
                 <div class="flex flex-col select-none">
-                    <span class="text-gray-900 dark:text-white font-bold text-sm">Cliente Frecuente</span>
-                    <span class="text-gray-500 dark:text-slate-400 text-xs">Aplica beneficios V.I.P.</span>
+                    <span class="text-gray-900 text-white font-bold text-sm">Cliente Frecuente</span>
+                    <span class="text-text-muted dark:text-text-muted text-xs">Aplica beneficios V.I.P.</span>
                 </div>
             </div>
         </section>

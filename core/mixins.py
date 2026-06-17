@@ -205,11 +205,15 @@ class AgencyRoleRequiredMixin(AccessMixin, SaaSMixin):
 
 
 class HtmxResponseMixin:
-    """Devuelve un template parcial si la petición viene de HTMX"""
+    """Devuelve un template parcial si la petición viene de HTMX (y no es un link boosted)"""
 
     htmx_template_name = None
 
     def get_template_names(self):
-        if self.request.headers.get("HX-Request") and self.htmx_template_name:
+        if (
+            self.request.headers.get("HX-Request")
+            and not self.request.headers.get("HX-Boosted")
+            and self.htmx_template_name
+        ):
             return [self.htmx_template_name]
         return super().get_template_names()

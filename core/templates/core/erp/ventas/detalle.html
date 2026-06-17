@@ -196,7 +196,7 @@
             <div class="glass-panel p-6 rounded-2xl border border-emerald-500/30 bg-emerald-500/5 relative overflow-hidden group">
                 <div class="absolute -right-4 -top-4 w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl group-hover:bg-emerald-500/20 transition-all"></div>
                 
-                <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                <h3 class="text-lg font-bold text-text-main mb-4 flex items-center gap-2">
                     <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/20 text-emerald-400">
                         <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -219,7 +219,7 @@
                         {% endfor %}
                     {% else %}
                         <div class="p-3 rounded-xl bg-white/5 border border-white/10">
-                            <p class="text-sm text-gray-400 italic">No hay sugerencias adicionales para esta ruta por ahora.</p>
+                            <p class="text-sm text-text-muted italic">No hay sugerencias adicionales para esta ruta por ahora.</p>
                         </div>
                     {% endif %}
 
@@ -235,7 +235,7 @@
             <!-- Service Fees & Markup (Internal Check) -->
             <div class="glass-panel p-6 rounded-2xl border border-purple-500/20">
                 <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-semibold text-white flex items-center gap-2">
+                    <h3 class="text-lg font-semibold text-text-main flex items-center gap-2">
                         <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
@@ -253,14 +253,14 @@
                         class="flex justify-between items-center text-sm p-2 rounded bg-purple-500/5 border border-purple-500/10">
                         <div>
                             <p class="text-gray-300">{{ fee.descripcion }}</p>
-                            <p class="text-xs text-gray-500">{{ fee.get_tipo_fee_display }}</p>
+                            <p class="text-xs text-text-muted">{{ fee.get_tipo_fee_display }}</p>
                         </div>
                         <span class="text-purple-300 font-medium">+ $ {{ fee.monto|floatformat:2 }}</span>
                     </div>
                     {% endfor %}
                 </div>
                 {% else %}
-                <p class="text-sm text-gray-500 italic mb-4">No hay fees registrados.</p>
+                <p class="text-sm text-text-muted italic mb-4">No hay fees registrados.</p>
                 {% endif %}
 
                 <a href="{% url 'bookings:fee_venta_add' venta.pk %}"

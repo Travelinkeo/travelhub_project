@@ -12,7 +12,7 @@
     <!-- Header & Action Bar -->
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10 pb-6 border-b border-emerald-500/10">
         <div>
-            <h1 class="text-3xl font-black text-white tracking-tight uppercase flex items-center gap-3">
+            <h1 class="text-3xl font-black text-text-main tracking-tight uppercase flex items-center gap-3">
                 <span class="bg-gradient-to-r from-emerald-400 to-emerald-600 bg-clip-text text-transparent">Gestión de Boletos</span>
             </h1>
             <p class="text-emerald-500/60 text-sm mt-1 font-medium tracking-wide">Visión granular de ventas y rentabilidad por emisión.</p>
@@ -38,7 +38,7 @@
             <div class="flex justify-between items-start mb-4 relative z-10">
                 <div>
                     <p class="text-[10px] font-black text-emerald-500/60 uppercase tracking-[0.2em] mb-1">Ventas de Boletos</p>
-                    <p class="text-3xl font-black text-white tabular-nums">{{ stats.total_ventas|default:0 }}</p>
+                    <p class="text-3xl font-black text-text-main tabular-nums">{{ stats.total_ventas|default:0 }}</p>
                 </div>
                 <div class="size-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 border border-emerald-500/20">
                     <span class="material-symbols-outlined text-[20px]">local_activity</span>
@@ -53,7 +53,7 @@
             <div class="flex justify-between items-start mb-4 relative z-10">
                 <div>
                     <p class="text-[10px] font-black text-blue-500/60 uppercase tracking-[0.2em] mb-1">Emisiones Totales</p>
-                    <p class="text-3xl font-black text-white tabular-nums">{{ stats.total_boletos|default:0 }}</p>
+                    <p class="text-3xl font-black text-text-main tabular-nums">{{ stats.total_boletos|default:0 }}</p>
                 </div>
                 <div class="size-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400 border border-blue-500/20">
                     <span class="material-symbols-outlined text-[20px]">confirmation_number</span>
@@ -83,7 +83,7 @@
             <div class="flex justify-between items-start mb-4 relative z-10">
                 <div>
                     <p class="text-[10px] font-black text-emerald-500/80 uppercase tracking-[0.2em] mb-1">Margen Operativo</p>
-                    <p class="text-3xl font-black text-white tabular-nums">${{ stats.total_margen|default:"0.00"|intcomma }}</p>
+                    <p class="text-3xl font-black text-text-main tabular-nums">${{ stats.total_margen|default:"0.00"|intcomma }}</p>
                 </div>
                 <div class="size-10 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-400 border border-emerald-500/30 shadow-inner animate-pulse">
                     <span class="material-symbols-outlined text-[20px]">trending_up</span>
@@ -145,7 +145,7 @@
                     <tr class="group hover:bg-emerald-500/[0.02] transition-all">
                         <td class="px-6 py-5">
                             <div class="flex flex-col">
-                                <span class="text-sm font-black text-white group-hover:text-emerald-400 transition-colors uppercase tracking-tight">{{ venta.localizador }}</span>
+                                <span class="text-sm font-black text-text-main group-hover:text-emerald-400 transition-colors uppercase tracking-tight">{{ venta.localizador }}</span>
                                 <span class="text-[10px] text-emerald-500/40 font-bold uppercase tracking-widest mt-0.5">{{ venta.fecha|date:"d M, Y" }}</span>
                             </div>
                         </td>
@@ -204,7 +204,7 @@
                                 <div class="size-7 rounded bg-emerald-500/20 flex items-center justify-center text-emerald-500">
                                     <span class="material-symbols-outlined text-[16px]">edit_note</span>
                                 </div>
-                                <h4 class="text-[11px] font-black text-white uppercase tracking-[0.2em] opacity-80">Desglose Técnico & Auditoría</h4>
+                                <h4 class="text-[11px] font-black text-text-main uppercase tracking-[0.2em] opacity-80">Desglose Técnico & Auditoría</h4>
                             </div>
                             
                             <div class="rounded-xl border border-emerald-500/10 bg-black overflow-hidden shadow-2xl">
@@ -243,7 +243,7 @@
                                                 </span>
                                             </td>
                                             <td class="px-6 py-4 text-right">
-                                                <span class="text-white font-black tabular-nums opacity-80">
+                                                <span class="text-text-main font-black tabular-nums opacity-80">
                                                     {% with item_margen=item.precio_unitario_venta|sub:item.costo_neto_proveedor|add:item.comision_agencia_monto|add:item.fee_agencia_interno %}
                                                     ${{ item_margen|floatformat:2 }}
                                                     {% endwith %}
@@ -264,7 +264,7 @@
                                     <span class="material-symbols-outlined text-[48px]">confirmation_number</span>
                                 </div>
                                 <div class="space-y-1">
-                                    <h3 class="text-xl font-black text-white uppercase tracking-tight opacity-90">Sin emisiones</h3>
+                                    <h3 class="text-xl font-black text-text-main uppercase tracking-tight opacity-90">Sin emisiones</h3>
                                     <p class="text-sm text-emerald-500/40 font-medium">No se han encontrado boletos con los criterios actuales.</p>
                                 </div>
                             </div>

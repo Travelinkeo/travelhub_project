@@ -9,22 +9,22 @@
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
         <div>
             <div class="flex items-center gap-3 mb-1">
-                <a href="{% url 'bookings:venta_list' %}" class="text-gray-400 hover:text-white transition-colors">
+                <a href="{% url 'bookings:venta_list' %}" class="text-text-muted hover:text-white transition-colors">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
                     </svg>
                 </a>
-                <h1 class="text-2xl font-bold text-white">Venta #{{ venta.id_venta }}</h1>
+                <h1 class="text-2xl font-bold text-text-main">Venta #{{ venta.id_venta }}</h1>
                 <span class="px-3 py-1 text-xs font-medium rounded-full 
                     {% if venta.estado == 'PAG' %}bg-emerald-500/10 text-emerald-400 border border-emerald-500/20
                     {% elif venta.estado == 'PEN' %}bg-yellow-500/10 text-yellow-400 border border-yellow-500/20
                     {% elif venta.estado == 'ANU' %}bg-red-500/10 text-red-400 border border-red-500/20
-                    {% else %}bg-gray-500/10 text-gray-400 border border-gray-500/20{% endif %}">
+                    {% else %}bg-gray-500/10 text-text-muted border border-gray-500/20{% endif %}">
                     {{ venta.get_estado_display }}
                 </span>
             </div>
-            <p class="text-sm text-gray-400 ml-10">Fecha de Venta: {{ venta.fecha_venta|date:"d M Y H:i" }}</p>
+            <p class="text-sm text-text-muted ml-10">Fecha de Venta: {{ venta.fecha_venta|date:"d M Y H:i" }}</p>
         </div>
 
         <!-- Action Buttons -->
@@ -103,7 +103,7 @@
 
             <!-- Client Info -->
             <div class="glass-panel p-6 rounded-2xl">
-                <h3 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                <h3 class="text-lg font-semibold text-text-main mb-4 flex items-center gap-2">
                     <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
@@ -113,30 +113,30 @@
                 {% if venta.cliente %}
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <p class="text-sm text-gray-400 mb-1">Nombre Completo</p>
-                        <p class="text-white font-medium">{{ venta.cliente.nombres }} {{ venta.cliente.apellidos }}</p>
+                        <p class="text-sm text-text-muted mb-1">Nombre Completo</p>
+                        <p class="text-text-main font-medium">{{ venta.cliente.nombres }} {{ venta.cliente.apellidos }}</p>
                     </div>
                     <div>
-                        <p class="text-sm text-gray-400 mb-1">Documento</p>
-                        <p class="text-white font-medium">{{ venta.cliente.numero_pasaporte|default:"--" }}</p>
+                        <p class="text-sm text-text-muted mb-1">Documento</p>
+                        <p class="text-text-main font-medium">{{ venta.cliente.numero_pasaporte|default:"--" }}</p>
                     </div>
                     <div>
-                        <p class="text-sm text-gray-400 mb-1">Email</p>
-                        <p class="text-white font-medium">{{ venta.cliente.email }}</p>
+                        <p class="text-sm text-text-muted mb-1">Email</p>
+                        <p class="text-text-main font-medium">{{ venta.cliente.email }}</p>
                     </div>
                     <div>
-                        <p class="text-sm text-gray-400 mb-1">Teléfono</p>
-                        <p class="text-white font-medium">{{ venta.cliente.telefono|default:"--" }}</p>
+                        <p class="text-sm text-text-muted mb-1">Teléfono</p>
+                        <p class="text-text-main font-medium">{{ venta.cliente.telefono|default:"--" }}</p>
                     </div>
                 </div>
                 {% else %}
-                <p class="text-gray-500 italic">Sin cliente asignado</p>
+                <p class="text-text-muted italic">Sin cliente asignado</p>
                 {% endif %}
             </div>
 
             <!-- Items / Services -->
             <div class="glass-panel p-6 rounded-2xl">
-                <h3 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                <h3 class="text-lg font-semibold text-text-main mb-4 flex items-center gap-2">
                     <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10">
@@ -148,7 +148,7 @@
                     <table class="w-full text-left">
                         <thead>
                             <tr
-                                class="border-b border-gray-700 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                                class="border-b border-gray-700 text-xs font-semibold text-text-muted uppercase tracking-wider">
                                 <th class="pb-3">Descripción</th>
                                 <th class="pb-3 text-center">Cant.</th>
                                 <th class="pb-3 text-right">Precio Unit.</th>
@@ -159,22 +159,22 @@
                             {% for item in items %}
                             <tr class="text-sm">
                                 <td class="py-3">
-                                    <p class="text-white font-medium">{{ item.producto_servicio.nombre }}</p>
+                                    <p class="text-text-main font-medium">{{ item.producto_servicio.nombre }}</p>
                                     {% if item.descripcion_personalizada %}
-                                    <p class="text-xs text-gray-500">{{ item.descripcion_personalizada }}</p>
+                                    <p class="text-xs text-text-muted">{{ item.descripcion_personalizada }}</p>
                                     {% endif %}
                                 </td>
                                 <td class="py-3 text-center text-gray-300">{{ item.cantidad }}</td>
                                 <td class="py-3 text-right text-gray-300">
                                     $ {{ item.precio_unitario_venta|floatformat:2 }}
                                 </td>
-                                <td class="py-3 text-right text-white font-medium">
+                                <td class="py-3 text-right text-text-main font-medium">
                                     $ {{ item.total_item_venta|floatformat:2 }}
                                 </td>
                             </tr>
                             {% empty %}
                             <tr>
-                                <td colspan="4" class="py-4 text-center text-gray-500 italic">No hay items registrados
+                                <td colspan="4" class="py-4 text-center text-text-muted italic">No hay items registrados
                                 </td>
                             </tr>
                             {% endfor %}
@@ -186,7 +186,7 @@
             <!-- Boletos -->
             {% if boletos %}
             <div class="glass-panel p-6 rounded-2xl">
-                <h3 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                <h3 class="text-lg font-semibold text-text-main mb-4 flex items-center gap-2">
                     <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z">
@@ -199,8 +199,8 @@
                     <div class="bg-white/5 rounded-lg p-4 border border-gray-700">
                         <div class="flex justify-between items-start mb-2">
                             <div>
-                                <p class="text-white font-medium">{{ boleto.numero_boleto }}</p>
-                                <p class="text-sm text-gray-400">{{ boleto.nombre_pasajero_completo|default:boleto.nombre_pasajero_procesado }}</p>
+                                <p class="text-text-main font-medium">{{ boleto.numero_boleto }}</p>
+                                <p class="text-sm text-text-muted">{{ boleto.nombre_pasajero_completo|default:boleto.nombre_pasajero_procesado }}</p>
                             </div>
                             <div class="flex flex-col items-end gap-2">
                                 <span class="text-xs font-mono bg-gray-700 text-gray-300 px-2 py-1 rounded">
@@ -216,7 +216,7 @@
                                 {% endif %}
                             </div>
                         </div>
-                        <div class="text-sm text-gray-500">
+                        <div class="text-sm text-text-muted">
                             <p>{{ boleto.aerolinea_emisora }} - {{ boleto.ruta_vuelo }}</p>
                         </div>
                     </div>
@@ -231,7 +231,7 @@
             <!-- Service Fees & Markup (Internal Check) -->
             <div class="glass-panel p-6 rounded-2xl border border-purple-500/20">
                 <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-semibold text-white flex items-center gap-2">
+                    <h3 class="text-lg font-semibold text-text-main flex items-center gap-2">
                         <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
@@ -249,14 +249,14 @@
                         class="flex justify-between items-center text-sm p-2 rounded bg-purple-500/5 border border-purple-500/10">
                         <div>
                             <p class="text-gray-300">{{ fee.descripcion }}</p>
-                            <p class="text-xs text-gray-500">{{ fee.get_tipo_fee_display }}</p>
+                            <p class="text-xs text-text-muted">{{ fee.get_tipo_fee_display }}</p>
                         </div>
                         <span class="text-purple-300 font-medium">+ $ {{ fee.monto|floatformat:2 }}</span>
                     </div>
                     {% endfor %}
                 </div>
                 {% else %}
-                <p class="text-sm text-gray-500 italic mb-4">No hay fees registrados.</p>
+                <p class="text-sm text-text-muted italic mb-4">No hay fees registrados.</p>
                 {% endif %}
 
                 <a href="{% url 'bookings:fee_venta_add' venta.pk %}"
@@ -270,15 +270,15 @@
 
             <!-- Financial Summary -->
             <div class="glass-panel p-6 rounded-2xl">
-                <h3 class="text-lg font-semibold text-white mb-6">Resumen Financiero</h3>
+                <h3 class="text-lg font-semibold text-text-main mb-6">Resumen Financiero</h3>
 
                 <div class="space-y-3 mb-6">
                     <div class="flex justify-between text-sm">
-                        <span class="text-gray-400">Subtotal</span>
+                        <span class="text-text-muted">Subtotal</span>
                         <span class="text-white">$ {{ venta.subtotal|floatformat:2|intcomma }}</span>
                     </div>
                     <div class="flex justify-between text-sm">
-                        <span class="text-gray-400">Impuestos</span>
+                        <span class="text-text-muted">Impuestos</span>
                         <span class="text-white">$ {{ venta.impuestos|floatformat:2|intcomma }}</span>
                     </div>
                     <div class="h-px bg-gray-700 my-2"></div>
@@ -288,7 +288,7 @@
                     </div>
                 </div>
 
-                <div class="bg-gray-800/50 rounded-xl p-4 space-y-3">
+                <div class="bg-surface-2/50 rounded-xl p-4 space-y-3">
                     <div class="flex justify-between text-sm">
                         <span class="text-emerald-400">Pagado</span>
                         <span class="text-emerald-400 font-medium">$ {{ venta.monto_pagado|floatformat:2 }}</span>
@@ -303,7 +303,7 @@
             <!-- Payments -->
             <div class="glass-panel p-6 rounded-2xl">
                 <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-semibold text-white">Pagos</h3>
+                    <h3 class="text-lg font-semibold text-text-main">Pagos</h3>
                 </div>
 
                 {% if pagos %}
@@ -311,8 +311,8 @@
                     {% for pago in pagos %}
                     <div class="flex justify-between items-center p-3 bg-white/5 rounded-lg border border-gray-700">
                         <div>
-                            <p class="text-white font-medium">$ {{ pago.monto|floatformat:2|intcomma }}</p>
-                            <p class="text-xs text-gray-500">{{ pago.fecha_pago|date:"d M Y" }}</p>
+                            <p class="text-text-main font-medium">$ {{ pago.monto|floatformat:2|intcomma }}</p>
+                            <p class="text-xs text-text-muted">{{ pago.fecha_pago|date:"d M Y" }}</p>
                         </div>
                         <div class="text-right">
                             <span class="text-xs px-2 py-1 rounded-full bg-gray-700 text-gray-300">{{
@@ -322,7 +322,7 @@
                     {% endfor %}
                 </div>
                 {% else %}
-                <p class="text-sm text-gray-500 text-center italic py-4">No hay pagos registrados</p>
+                <p class="text-sm text-text-muted text-center italic py-4">No hay pagos registrados</p>
                 {% endif %}
 
                 <button
@@ -342,12 +342,12 @@
 <div id="paymentModal" class="fixed inset-0 z-50 hidden" role="dialog" aria-modal="true">
     <div class="fixed inset-0 bg-black/80 backdrop-blur-sm" data-action="close-modal"></div>
     <div class="fixed inset-0 flex items-center justify-center p-4">
-        <div class="bg-gray-900 border border-gray-700 rounded-2xl shadow-xl w-full max-w-md transform transition-all">
+        <div class="bg-surface-2 border border-gray-700 rounded-2xl shadow-xl w-full max-w-md transform transition-all">
             <div class="p-6">
                 <!-- Header -->
                 <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-xl font-bold text-white">Registrar Pago</h3>
-                    <button data-action="close-modal" class="text-gray-400 hover:text-white">
+                    <h3 class="text-xl font-bold text-text-main">Registrar Pago</h3>
+                    <button data-action="close-modal" class="text-text-muted hover:text-white">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M6 18L18 6M6 6l12 12"></path>
@@ -359,11 +359,11 @@
                 <form id="paymentForm" onsubmit="submitPayment(event)" class="space-y-4">
                     <!-- Monto -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-400 mb-1">Monto a Pagar</label>
+                        <label class="block text-sm font-medium text-text-muted mb-1">Monto a Pagar</label>
                         <div class="relative">
-                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted">$</span>
                             <input type="number" id="pagoMonto" step="0.01" required
-                                class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg pl-8 pr-4 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                                class="w-full bg-surface-2 border border-gray-700 text-text-main rounded-lg pl-8 pr-4 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                                 placeholder="0.00" oninput="calculateIGTF()">
                         </div>
                     </div>
@@ -371,9 +371,9 @@
                     <!-- Moneda & Metodo -->
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-400 mb-1">Moneda</label>
+                            <label class="block text-sm font-medium text-text-muted mb-1">Moneda</label>
                             <select id="pagoMoneda" required onchange="checkIGTFVisibility()"
-                                class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500">
+                                class="w-full bg-surface-2 border border-gray-700 text-text-main rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500">
                                 {% for moneda in PROVEN_CURRENCIES|default:'' %}
                                 <!-- Fallback hardcoded for now until context validated -->
                                 <option value="USD">USD</option>
@@ -387,9 +387,9 @@
                             </select>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-400 mb-1">Método</label>
+                            <label class="block text-sm font-medium text-text-muted mb-1">Método</label>
                             <select id="pagoMetodo" required
-                                class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500">
+                                class="w-full bg-surface-2 border border-gray-700 text-text-main rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500">
                                 <option value="TRF">Transferencia</option>
                                 <option value="EFE">Efectivo</option>
                                 <option value="ZEL">Zelle</option>
@@ -399,7 +399,7 @@
                     </div>
 
                     <!-- IGTF Toggle -->
-                    <div id="igtfContainer" class="hidden bg-gray-800/50 p-3 rounded-lg border border-gray-700">
+                    <div id="igtfContainer" class="hidden bg-surface-2/50 p-3 rounded-lg border border-gray-700">
                         <div class="flex items-center justify-between">
                             <div class="flex items-center">
                                 <input type="checkbox" id="aplicaIGTF" onchange="calculateIGTF()"
@@ -409,21 +409,21 @@
                             </div>
                             <span id="igtfAmountDisplay" class="text-sm font-bold text-emerald-400">$ 0.00</span>
                         </div>
-                        <p class="text-xs text-gray-500 mt-1">Impuesto a Grandes Transacciones Financieras</p>
+                        <p class="text-xs text-text-muted mt-1">Impuesto a Grandes Transacciones Financieras</p>
                     </div>
 
                     <!-- Referencia -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-400 mb-1">Referencia / Notas</label>
+                        <label class="block text-sm font-medium text-text-muted mb-1">Referencia / Notas</label>
                         <input type="text" id="pagoReferencia"
-                            class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-4 py-2 focus:ring-2 focus:ring-emerald-500"
+                            class="w-full bg-surface-2 border border-gray-700 text-text-main rounded-lg px-4 py-2 focus:ring-2 focus:ring-emerald-500"
                             placeholder="Ej: Ref 123456">
                     </div>
 
                     <!-- Total Summary -->
                     <div class="pt-4 border-t border-gray-700 flex justify-between items-end">
-                        <span class="text-sm text-gray-400">Total a Recibir</span>
-                        <span id="pagoTotalDisplay" class="text-2xl font-bold text-white">$ 0.00</span>
+                        <span class="text-sm text-text-muted">Total a Recibir</span>
+                        <span id="pagoTotalDisplay" class="text-2xl font-bold text-text-main">$ 0.00</span>
                     </div>
 
                     <div class="flex gap-3 pt-2">

@@ -17,15 +17,15 @@ if [ ! -f "$TAILWIND_BIN" ] && ! command -v tailwindcss &> /dev/null; then
     URL=""
     if [ "$OS" = "Linux" ]; then
         if [ "$ARCH" = "x86_64" ]; then
-            URL="https://github.com/tailwindlabs/tailwindcss/releases/latest/download/tailwindcss-linux-x64"
+            URL="https://github.com/tailwindlabs/tailwindcss/releases/download/v3.4.17/tailwindcss-linux-x64"
         elif [ "$ARCH" = "aarch64" ] || [ "$ARCH" = "arm64" ]; then
-            URL="https://github.com/tailwindlabs/tailwindcss/releases/latest/download/tailwindcss-linux-arm64"
+            URL="https://github.com/tailwindlabs/tailwindcss/releases/download/v3.4.17/tailwindcss-linux-arm64"
         fi
     elif [ "$OS" = "Darwin" ]; then
         if [ "$ARCH" = "x86_64" ]; then
-            URL="https://github.com/tailwindlabs/tailwindcss/releases/latest/download/tailwindcss-macos-x64"
+            URL="https://github.com/tailwindlabs/tailwindcss/releases/download/v3.4.17/tailwindcss-macos-x64"
         elif [ "$ARCH" = "arm64" ]; then
-            URL="https://github.com/tailwindlabs/tailwindcss/releases/latest/download/tailwindcss-macos-arm64"
+            URL="https://github.com/tailwindlabs/tailwindcss/releases/download/v3.4.17/tailwindcss-macos-arm64"
         fi
     fi
 

@@ -37,10 +37,10 @@
     <header class="relative z-10 w-full p-6 flex justify-between items-center max-w-7xl mx-auto">
         <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-xl flex items-center justify-center font-black text-white text-xl dynamic-brand-bg transition-colors duration-500">TH</div>
-            <span class="text-xl font-black tracking-tight text-white">TravelHub Business Portal</span>
+            <span class="text-xl font-black tracking-tight text-text-main">TravelHub Business Portal</span>
         </div>
-        <div class="text-sm font-bold text-slate-400">
-            ¿Ya eres socio? <a href="/login/" class="text-white hover:dynamic-brand-text transition-colors font-black">Inicia Sesión</a>
+        <div class="text-sm font-bold text-text-muted">
+            ¿Ya eres socio? <a href="/login/" class="text-text-main hover:dynamic-brand-text transition-colors font-black">Inicia Sesión</a>
         </div>
     </header>
 
@@ -48,12 +48,12 @@
         
         <!-- STEP INDICATOR -->
         <div class="w-full max-w-md mx-auto mb-10 flex items-center justify-between relative" x-show="step < 5">
-            <div class="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-slate-800 z-0 rounded-full"></div>
+            <div class="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-surface-2 z-0 rounded-full"></div>
             <div class="absolute left-0 top-1/2 -translate-y-1/2 h-1 dynamic-brand-bg z-0 rounded-full transition-all duration-500" :style="`width: ${(step - 1) * 33.33}%`"></div>
             
             <template x-for="i in 4">
                 <div class="relative z-10 w-8 h-8 rounded-full flex items-center justify-center text-xs font-black transition-all duration-500"
-                     :class="step >= i ? 'dynamic-brand-bg text-white shadow-lg' : 'bg-slate-800 text-slate-500 border border-slate-700'">
+                     :class="step >= i ? 'dynamic-brand-bg text-white shadow-lg' : 'bg-surface-2 text-text-muted border border-border-color'">
                     <span x-text="i < step ? '✓' : i" :class="i < step ? 'material-symbols-outlined text-[14px]' : ''"></span>
                 </div>
             </template>
@@ -74,24 +74,24 @@
         <!-- STEP 1: PLANES -->
         <div class="w-full animate-fade-up" x-show="step === 1">
             <div class="text-center mb-10">
-                <h1 class="text-4xl md:text-5xl font-black text-white mb-4 tracking-tight uppercase">Elige la potencia de tu agencia</h1>
-                <p class="text-slate-400 text-lg">Paga solo por lo que necesitas. Sin cuotas de mantenimiento ocultas.</p>
+                <h1 class="text-4xl md:text-5xl font-black text-text-main mb-4 tracking-tight uppercase">Elige la potencia de tu agencia</h1>
+                <p class="text-text-muted text-lg">Paga solo por lo que necesitas. Sin cuotas de mantenimiento ocultas.</p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
                 <!-- Starter -->
                 <label class="cursor-pointer relative group">
                     <input type="radio" value="BASIC" x-model="selectedPlan" class="peer plan-radio sr-only">
-                    <div class="glass-panel p-8 rounded-3xl transition-all duration-300 border-2 border-transparent h-full flex flex-col bg-slate-900/50 hover:bg-slate-800/80">
-                        <h3 class="text-xl font-black text-white mb-1">Starter Agency</h3>
-                        <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-6">Para agentes independientes</p>
+                    <div class="glass-panel p-8 rounded-3xl transition-all duration-300 border-2 border-transparent h-full flex flex-col bg-surface-2/50 hover:bg-surface-2/80">
+                        <h3 class="text-xl font-black text-text-main mb-1">Starter Agency</h3>
+                        <p class="text-[10px] font-black text-text-muted uppercase tracking-widest mb-6">Para agentes independientes</p>
                         <div class="flex items-end gap-1 mb-6">
-                            <span class="text-4xl font-black text-white">$29</span><span class="text-slate-400 font-medium mb-1">/mes</span>
+                            <span class="text-4xl font-black text-text-main">$29</span><span class="text-text-muted font-medium mb-1">/mes</span>
                         </div>
                         <ul class="space-y-3 mb-8 flex-1">
-                            <li class="flex items-center gap-2 text-sm text-slate-300"><span class="material-symbols-outlined text-emerald-400 text-[16px]">check</span> 1 Usuario</li>
-                            <li class="flex items-center gap-2 text-sm text-slate-300"><span class="material-symbols-outlined text-emerald-400 text-[16px]">check</span> God Mode IA (100 Boletos)</li>
-                            <li class="flex items-center gap-2 text-sm text-slate-300"><span class="material-symbols-outlined text-emerald-400 text-[16px]">check</span> PDFs Estándar</li>
+                            <li class="flex items-center gap-2 text-sm text-text-secondary"><span class="material-symbols-outlined text-emerald-400 text-[16px]">check</span> 1 Usuario</li>
+                            <li class="flex items-center gap-2 text-sm text-text-secondary"><span class="material-symbols-outlined text-emerald-400 text-[16px]">check</span> God Mode IA (100 Boletos)</li>
+                            <li class="flex items-center gap-2 text-sm text-text-secondary"><span class="material-symbols-outlined text-emerald-400 text-[16px]">check</span> PDFs Estándar</li>
                         </ul>
                     </div>
                 </label>
@@ -99,19 +99,19 @@
                 <!-- Professional -->
                 <label class="cursor-pointer relative group">
                     <input type="radio" value="PRO" x-model="selectedPlan" class="peer plan-radio sr-only">
-                    <div class="glass-panel p-8 rounded-3xl transition-all duration-300 border-2 border-blue-500/30 h-full flex flex-col bg-slate-800/80 shadow-2xl relative overflow-hidden transform md:-translate-y-2">
+                    <div class="glass-panel p-8 rounded-3xl transition-all duration-300 border-2 border-blue-500/30 h-full flex flex-col bg-surface-2/80 shadow-2xl relative overflow-hidden transform md:-translate-y-2">
                         <div class="absolute top-0 right-0 w-32 h-32 bg-blue-500 opacity-20 blur-3xl"></div>
                         <div class="absolute top-0 left-1/2 -translate-x-1/2 bg-blue-500 text-white text-[10px] font-black px-3 py-1 rounded-b-lg uppercase tracking-widest">Altamente Recomendado</div>
                         <h3 class="text-xl font-black text-blue-400 mb-1 mt-2">Professional</h3>
-                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6">Para agencias boutique</p>
+                        <p class="text-[10px] font-black text-text-muted uppercase tracking-widest mb-6">Para agencias boutique</p>
                         <div class="flex items-end gap-1 mb-6">
-                            <span class="text-4xl font-black text-white">$99</span><span class="text-slate-400 font-medium mb-1">/mes</span>
+                            <span class="text-4xl font-black text-text-main">$99</span><span class="text-text-muted font-medium mb-1">/mes</span>
                         </div>
                         <ul class="space-y-3 mb-8 flex-1">
-                            <li class="flex items-center gap-2 text-sm text-slate-200"><span class="material-symbols-outlined text-blue-400 text-[16px]">check</span> Hasta 5 Usuarios</li>
-                            <li class="flex items-center gap-2 text-sm text-slate-200"><span class="material-symbols-outlined text-blue-400 text-[16px]">check</span> IA Ilimitada + Cotizador</li>
-                            <li class="flex items-center gap-2 text-sm text-slate-200"><span class="material-symbols-outlined text-blue-400 text-[16px]">check</span> Kanban CRM + WhatsApp</li>
-                            <li class="flex items-center gap-2 text-sm text-slate-200"><span class="material-symbols-outlined text-blue-400 text-[16px]">check</span> Links Mágicos de Pago</li>
+                            <li class="flex items-center gap-2 text-sm text-text-secondary"><span class="material-symbols-outlined text-blue-400 text-[16px]">check</span> Hasta 5 Usuarios</li>
+                            <li class="flex items-center gap-2 text-sm text-text-secondary"><span class="material-symbols-outlined text-blue-400 text-[16px]">check</span> IA Ilimitada + Cotizador</li>
+                            <li class="flex items-center gap-2 text-sm text-text-secondary"><span class="material-symbols-outlined text-blue-400 text-[16px]">check</span> Kanban CRM + WhatsApp</li>
+                            <li class="flex items-center gap-2 text-sm text-text-secondary"><span class="material-symbols-outlined text-blue-400 text-[16px]">check</span> Links Mágicos de Pago</li>
                         </ul>
                     </div>
                 </label>
@@ -119,16 +119,16 @@
                 <!-- Enterprise -->
                 <label class="cursor-pointer relative group">
                     <input type="radio" value="ENTERPRISE" x-model="selectedPlan" class="peer plan-radio sr-only">
-                    <div class="glass-panel p-8 rounded-3xl transition-all duration-300 border-2 border-transparent h-full flex flex-col bg-slate-900/50 hover:bg-slate-800/80">
-                        <h3 class="text-xl font-black text-white mb-1">Enterprise Cloud</h3>
-                        <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-6">Soberanía Digital Total</p>
+                    <div class="glass-panel p-8 rounded-3xl transition-all duration-300 border-2 border-transparent h-full flex flex-col bg-surface-2/50 hover:bg-surface-2/80">
+                        <h3 class="text-xl font-black text-text-main mb-1">Enterprise Cloud</h3>
+                        <p class="text-[10px] font-black text-text-muted uppercase tracking-widest mb-6">Soberanía Digital Total</p>
                         <div class="flex items-end gap-1 mb-6">
-                            <span class="text-4xl font-black text-white">$299</span><span class="text-slate-400 font-medium mb-1">/mes</span>
+                            <span class="text-4xl font-black text-text-main">$299</span><span class="text-text-muted font-medium mb-1">/mes</span>
                         </div>
                         <ul class="space-y-3 mb-8 flex-1">
-                            <li class="flex items-center gap-2 text-sm text-slate-300"><span class="material-symbols-outlined text-purple-400 text-[16px]">check</span> Usuarios Ilimitados</li>
-                            <li class="flex items-center gap-2 text-sm text-slate-300"><span class="material-symbols-outlined text-purple-400 text-[16px]">check</span> B2B2C Freelancer Portal</li>
-                            <li class="flex items-center gap-2 text-sm text-slate-300"><span class="material-symbols-outlined text-purple-400 text-[16px]">check</span> Conciliación Contable IA</li>
+                            <li class="flex items-center gap-2 text-sm text-text-secondary"><span class="material-symbols-outlined text-purple-400 text-[16px]">check</span> Usuarios Ilimitados</li>
+                            <li class="flex items-center gap-2 text-sm text-text-secondary"><span class="material-symbols-outlined text-purple-400 text-[16px]">check</span> B2B2C Freelancer Portal</li>
+                            <li class="flex items-center gap-2 text-sm text-text-secondary"><span class="material-symbols-outlined text-purple-400 text-[16px]">check</span> Conciliación Contable IA</li>
                         </ul>
                     </div>
                 </label>
@@ -145,43 +145,43 @@
         <!-- STEP 2: DATOS AGENCIA -->
         <div class="w-full max-w-xl animate-fade-up" x-show="step === 2" style="display: none;">
             <div class="text-center mb-8">
-                <h1 class="text-3xl font-black text-white mb-2 tracking-tight">Tu Espacio de Trabajo</h1>
-                <p class="text-slate-400 text-sm">Configura la identidad operativa de tu agencia en TravelHub.</p>
+                <h1 class="text-3xl font-black text-text-main mb-2 tracking-tight">Tu Espacio de Trabajo</h1>
+                <p class="text-text-muted text-sm">Configura la identidad operativa de tu agencia en TravelHub.</p>
             </div>
 
-            <div class="glass-panel p-8 rounded-3xl shadow-2xl space-y-6 border border-slate-700/50">
+            <div class="glass-panel p-8 rounded-3xl shadow-2xl space-y-6 border border-border-color/50">
                 <div>
-                    <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Nombre de la Agencia</label>
-                    <input type="text" x-model="agencyName" placeholder="Viajes Estelares C.A." class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white font-bold focus:outline-none focus:border-blue-500 transition-all">
+                    <label class="block text-[10px] font-black text-text-muted uppercase tracking-widest mb-2">Nombre de la Agencia</label>
+                    <input type="text" x-model="agencyName" placeholder="Viajes Estelares C.A." class="w-full bg-surface-2/50 border border-border-color rounded-xl px-4 py-3 text-white font-bold focus:outline-none focus:border-blue-500 transition-all">
                 </div>
 
                 <div>
-                    <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">URL Personalizada (Subdominio)</label>
-                    <div class="flex items-center bg-slate-900/50 border border-slate-700 rounded-xl overflow-hidden">
+                    <label class="block text-[10px] font-black text-text-muted uppercase tracking-widest mb-2">URL Personalizada (Subdominio)</label>
+                    <div class="flex items-center bg-surface-2/50 border border-border-color rounded-xl overflow-hidden">
                         <input type="text" :value="generateSubdomain()" readonly class="w-full bg-transparent px-4 py-3 text-white font-mono text-sm opacity-60">
-                        <div class="bg-slate-800 px-4 py-3 text-slate-400 font-mono text-sm border-l border-slate-700">.travelhub.cc</div>
+                        <div class="bg-surface-2 px-4 py-3 text-text-muted font-mono text-sm border-l border-border-color">.travelhub.cc</div>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Nombre Administrador</label>
-                        <input type="text" x-model="adminName" placeholder="Tu Nombre" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none">
+                        <label class="block text-[10px] font-black text-text-muted uppercase tracking-widest mb-2">Nombre Administrador</label>
+                        <input type="text" x-model="adminName" placeholder="Tu Nombre" class="w-full bg-surface-2/50 border border-border-color rounded-xl px-4 py-3 text-white focus:outline-none">
                     </div>
                     <div>
-                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Email de Acceso</label>
-                        <input type="email" x-model="adminEmail" placeholder="admin@agencia.com" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none">
+                        <label class="block text-[10px] font-black text-text-muted uppercase tracking-widest mb-2">Email de Acceso</label>
+                        <input type="email" x-model="adminEmail" placeholder="admin@agencia.com" class="w-full bg-surface-2/50 border border-border-color rounded-xl px-4 py-3 text-white focus:outline-none">
                     </div>
                 </div>
 
                 <div>
-                    <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Crear Contraseña Maestra</label>
-                    <input type="password" x-model="adminPass" placeholder="••••••••" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none">
+                    <label class="block text-[10px] font-black text-text-muted uppercase tracking-widest mb-2">Crear Contraseña Maestra</label>
+                    <input type="password" x-model="adminPass" placeholder="••••••••" class="w-full bg-surface-2/50 border border-border-color rounded-xl px-4 py-3 text-white focus:outline-none">
                 </div>
             </div>
 
             <div class="mt-8 flex justify-between gap-4">
-                <button @click="prevStep()" class="text-slate-400 font-bold py-4 px-6 hover:text-white transition-colors">Volver</button>
+                <button @click="prevStep()" class="text-text-muted font-bold py-4 px-6 hover:text-white transition-colors">Volver</button>
                 <button @click="nextStep()" :disabled="!agencyName || !adminEmail || !adminPass" 
                         class="flex-1 dynamic-brand-bg text-white font-black py-4 px-6 rounded-xl shadow-lg dynamic-brand-shadow transition-all disabled:opacity-50 hover:scale-[1.02]">
                     Escoger Branding →
@@ -192,36 +192,36 @@
         <!-- STEP 3: BRANDING -->
         <div class="w-full max-w-2xl animate-fade-up" x-show="step === 3" style="display: none;">
             <div class="text-center mb-8">
-                <h1 class="text-3xl font-black text-white mb-2 tracking-tight uppercase">Tu Identidad Visual</h1>
-                <p class="text-slate-400 text-sm">Escoge el ADN visual de tu agencia. Gemini AI adaptará todo el sistema a este color.</p>
+                <h1 class="text-3xl font-black text-text-main mb-2 tracking-tight uppercase">Tu Identidad Visual</h1>
+                <p class="text-text-muted text-sm">Escoge el ADN visual de tu agencia. Gemini AI adaptará todo el sistema a este color.</p>
             </div>
 
-            <div class="glass-panel p-8 rounded-3xl shadow-2xl border border-slate-700/50 flex flex-col md:flex-row gap-8 items-center">
+            <div class="glass-panel p-8 rounded-3xl shadow-2xl border border-border-color/50 flex flex-col md:flex-row gap-8 items-center">
                 <div class="flex-1 space-y-6 w-full">
                     <div>
-                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Color Corporativo Maestro</label>
+                        <label class="block text-[10px] font-black text-text-muted uppercase tracking-widest mb-4">Color Corporativo Maestro</label>
                         <div class="flex flex-wrap gap-3">
                             <button @click="brandColor = '#3b82f6'" class="w-10 h-10 rounded-full bg-[#3b82f6] border-2 transition-all hover:scale-110 shadow-lg shadow-blue-500/30" :class="brandColor === '#3b82f6' ? 'border-white' : 'border-transparent'"></button>
                             <button @click="brandColor = '#10b981'" class="w-10 h-10 rounded-full bg-[#10b981] border-2 transition-all hover:scale-110 shadow-lg shadow-emerald-500/30" :class="brandColor === '#10b981' ? 'border-white' : 'border-transparent'"></button>
                             <button @click="brandColor = '#8b5cf6'" class="w-10 h-10 rounded-full bg-[#8b5cf6] border-2 transition-all hover:scale-110 shadow-lg shadow-purple-500/30" :class="brandColor === '#8b5cf6' ? 'border-white' : 'border-transparent'"></button>
                             <button @click="brandColor = '#f59e0b'" class="w-10 h-10 rounded-full bg-[#f59e0b] border-2 transition-all hover:scale-110 shadow-lg shadow-amber-500/30" :class="brandColor === '#f59e0b' ? 'border-white' : 'border-transparent'"></button>
-                            <div class="relative w-10 h-10 rounded-full overflow-hidden border-2 border-slate-700 ml-2">
+                            <div class="relative w-10 h-10 rounded-full overflow-hidden border-2 border-border-color ml-2">
                                 <input type="color" x-model="brandColor" class="absolute -top-2 -left-2 w-14 h-14 cursor-pointer">
                             </div>
                         </div>
                     </div>
 
-                    <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl">
-                        <p class="text-[9px] font-bold text-slate-500 uppercase mb-2">Impacto Visual Real</p>
+                    <div class="bg-surface-2 border border-surface-2 p-4 rounded-xl">
+                        <p class="text-[9px] font-bold text-text-muted uppercase mb-2">Impacto Visual Real</p>
                         <div class="flex gap-2">
                             <div class="h-4 w-4 rounded-sm dynamic-brand-bg transition-colors"></div>
-                            <div class="h-4 w-20 rounded-sm bg-slate-800"></div>
+                            <div class="h-4 w-20 rounded-sm bg-surface-2"></div>
                         </div>
                     </div>
                 </div>
 
                 <div class="flex-1 w-full bg-white rounded-2xl p-6 shadow-inner relative overflow-hidden">
-                    <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-4">Preview del Link de Pago</p>
+                    <p class="text-[9px] font-black text-text-muted uppercase tracking-widest mb-4">Preview del Link de Pago</p>
                     <div class="bg-white rounded-xl shadow-xl p-4 relative z-10 border border-slate-100">
                         <div class="w-full h-1 dynamic-brand-bg absolute top-0 left-0 transition-colors duration-500"></div>
                         <h4 class="font-black text-slate-800 mt-2" x-text="agencyName || 'Agencia Premium'"></h4>
@@ -235,7 +235,7 @@
             </div>
 
             <div class="mt-8 flex justify-between gap-4">
-                <button @click="prevStep()" class="text-slate-400 font-bold py-4 px-6 hover:text-white transition-colors">Volver</button>
+                <button @click="prevStep()" class="text-text-muted font-bold py-4 px-6 hover:text-white transition-colors">Volver</button>
                 <button @click="nextStep()" 
                         class="flex-1 dynamic-brand-bg text-white font-black py-4 px-6 rounded-xl shadow-lg dynamic-brand-shadow transition-all hover:scale-[1.02] flex justify-center items-center gap-2">
                     Continuar al Pago Seguro <span class="material-symbols-outlined text-[18px]">lock</span>
@@ -245,19 +245,19 @@
 
         <!-- STEP 4: STRIPE PAYMENT -->
         <div class="w-full max-w-md animate-fade-up" x-show="step === 4" style="display: none;">
-            <div class="glass-panel p-8 rounded-3xl shadow-2xl border border-slate-700/50">
+            <div class="glass-panel p-8 rounded-3xl shadow-2xl border border-border-color/50">
                 <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-xl font-black text-white">Activar Licencia</h2>
+                    <h2 class="text-xl font-black text-text-main">Activar Licencia</h2>
                     <span class="dynamic-brand-bg text-white text-[10px] font-black px-2 py-1 rounded uppercase tracking-widest" x-text="selectedPlan"></span>
                 </div>
                 
-                <div class="flex items-end gap-1 mb-8 pb-6 border-b border-slate-800">
-                    <span class="text-4xl font-black text-white" x-text="selectedPlan === 'BASIC' ? '$29' : (selectedPlan === 'PRO' ? '$99' : '$299')"></span>
-                    <span class="text-slate-400 font-medium mb-1">/ mes</span>
+                <div class="flex items-end gap-1 mb-8 pb-6 border-b border-surface-2">
+                    <span class="text-4xl font-black text-text-main" x-text="selectedPlan === 'BASIC' ? '$29' : (selectedPlan === 'PRO' ? '$99' : '$299')"></span>
+                    <span class="text-text-muted font-medium mb-1">/ mes</span>
                 </div>
 
                 <div class="space-y-4 mb-8">
-                    <p class="text-xs text-slate-400 text-center italic">Esto redirigirá a la pasarela segura de Stripe para confirmar tu identidad corporativa.</p>
+                    <p class="text-xs text-text-muted text-center italic">Esto redirigirá a la pasarela segura de Stripe para confirmar tu identidad corporativa.</p>
                 </div>
 
                 <button @click="submitForm()" 
@@ -265,7 +265,7 @@
                     Pagar y Desplegar ERP <span class="material-symbols-outlined text-[18px]">bolt</span>
                 </button>
             </div>
-            <button @click="prevStep()" class="w-full text-center text-slate-400 font-bold py-4 hover:text-white transition-colors mt-2">Volver</button>
+            <button @click="prevStep()" class="w-full text-center text-text-muted font-bold py-4 hover:text-white transition-colors mt-2">Volver</button>
         </div>
 
     </main>

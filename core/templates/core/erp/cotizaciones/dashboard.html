@@ -9,13 +9,13 @@
     <!-- Page Title & Breadcrumb -->
     <div class="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-            <div class="flex items-center gap-2 text-xs text-slate-500 dark:text-gray-400 font-medium mb-2 uppercase tracking-wider">
+            <div class="flex items-center gap-2 text-xs text-text-muted dark:text-text-muted font-medium mb-2 uppercase tracking-wider">
                 <span>Gestión</span>
                 <span class="material-symbols-outlined text-[10px]">chevron_right</span>
                 <span class="text-primary">Cotizaciones</span>
             </div>
-            <h1 class="text-4xl font-bold text-gray-900 dark:text-white tracking-tight">Cotizaciones B2B</h1>
-            <p class="text-gray-500 dark:text-slate-400 mt-2 text-lg">Gestiona las propuestas comerciales e itinerarios para tus clientes</p>
+            <h1 class="text-4xl font-bold text-gray-900 text-white tracking-tight">Cotizaciones B2B</h1>
+            <p class="text-text-muted dark:text-text-muted mt-2 text-lg">Gestiona las propuestas comerciales e itinerarios para tus clientes</p>
         </div>
         <div class="flex gap-3">
             <a href="{% url 'core:cotizacion_nueva' %}" class="btn-primary">
@@ -32,9 +32,9 @@
                 <span class="material-symbols-outlined text-[100px]">request_quote</span>
             </div>
             <div class="relative z-10">
-                <p class="text-gray-500 dark:text-slate-400 text-sm font-bold uppercase tracking-wider mb-2">Total Cotizaciones</p>
+                <p class="text-text-muted dark:text-text-muted text-sm font-bold uppercase tracking-wider mb-2">Total Cotizaciones</p>
                 <div class="flex items-baseline gap-2">
-                    <h3 class="text-4xl font-black text-gray-900 dark:text-white tracking-tight">{{ total_cotizaciones }}</h3>
+                    <h3 class="text-4xl font-black text-gray-900 text-white tracking-tight">{{ total_cotizaciones }}</h3>
                 </div>
             </div>
         </div>
@@ -45,7 +45,7 @@
                 <span class="material-symbols-outlined text-[100px]">send</span>
             </div>
             <div class="relative z-10">
-                <p class="text-gray-500 dark:text-slate-400 text-sm font-bold uppercase tracking-wider mb-2">Enviadas</p>
+                <p class="text-text-muted dark:text-text-muted text-sm font-bold uppercase tracking-wider mb-2">Enviadas</p>
                 <div class="flex items-baseline gap-2">
                     <h3 class="text-4xl font-black text-emerald-500 tracking-tight">{{ cotizaciones_enviadas }}</h3>
                 </div>
@@ -58,7 +58,7 @@
                 <span class="material-symbols-outlined text-[100px]">draft</span>
             </div>
             <div class="relative z-10">
-                <p class="text-gray-500 dark:text-slate-400 text-sm font-bold uppercase tracking-wider mb-2">Borradores</p>
+                <p class="text-text-muted dark:text-text-muted text-sm font-bold uppercase tracking-wider mb-2">Borradores</p>
                 <div class="flex items-baseline gap-2">
                     <h3 class="text-4xl font-black text-amber-500 tracking-tight">{{ cotizaciones_pendientes }}</h3>
                 </div>
@@ -70,7 +70,7 @@
     <div class="card-base p-4 mb-6">
         <form method="get" class="flex flex-col md:flex-row gap-4">
             <div class="flex-1 relative">
-                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-[20px]">search</span>
+                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-muted text-[20px]">search</span>
                 <input type="text" name="q" value="{{ request.GET.q }}" class="input-base pl-10" placeholder="Buscar por número, cliente...">
             </div>
             <div class="w-full md:w-64">
@@ -93,12 +93,12 @@
             <table class="w-full text-left border-collapse">
                 <thead class="bg-gray-50 dark:bg-surface-highlight-dark/30 border-b border-border-light dark:border-border-dark">
                     <tr>
-                        <th class="px-6 py-4 text-[10px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Info Cotización</th>
-                        <th class="px-6 py-4 text-[10px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Cliente</th>
-                        <th class="px-6 py-4 text-[10px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Fechas</th>
-                        <th class="px-6 py-4 text-[10px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Estado</th>
-                        <th class="px-6 py-4 text-[10px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider text-right">Monto Total</th>
-                        <th class="px-6 py-4 text-[10px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider text-right">Acciones</th>
+                        <th class="px-6 py-4 text-[10px] font-bold text-text-muted dark:text-text-muted uppercase tracking-wider">Info Cotización</th>
+                        <th class="px-6 py-4 text-[10px] font-bold text-text-muted dark:text-text-muted uppercase tracking-wider">Cliente</th>
+                        <th class="px-6 py-4 text-[10px] font-bold text-text-muted dark:text-text-muted uppercase tracking-wider">Fechas</th>
+                        <th class="px-6 py-4 text-[10px] font-bold text-text-muted dark:text-text-muted uppercase tracking-wider">Estado</th>
+                        <th class="px-6 py-4 text-[10px] font-bold text-text-muted dark:text-text-muted uppercase tracking-wider text-right">Monto Total</th>
+                        <th class="px-6 py-4 text-[10px] font-bold text-text-muted dark:text-text-muted uppercase tracking-wider text-right">Acciones</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-dashed divide-border-light dark:divide-border-dark">
@@ -110,8 +110,8 @@
                                     <span class="material-symbols-outlined text-[20px]">request_quote</span>
                                 </div>
                                 <div class="flex flex-col">
-                                    <p class="text-gray-900 dark:text-white font-bold text-sm">{{ cotizacion.numero_cotizacion }}</p>
-                                    <p class="text-[11px] text-gray-500 dark:text-slate-500 font-mono">ID: {{ cotizacion.id_cotizacion }}</p>
+                                    <p class="text-gray-900 text-white font-bold text-sm">{{ cotizacion.numero_cotizacion }}</p>
+                                    <p class="text-[11px] text-text-muted dark:text-text-muted font-mono">ID: {{ cotizacion.id_cotizacion }}</p>
                                 </div>
                             </div>
                         </td>
@@ -125,23 +125,23 @@
                                     {% endif %}
                                 </div>
                                 <div class="flex flex-col">
-                                    <p class="text-gray-900 dark:text-white font-bold text-sm">
+                                    <p class="text-gray-900 text-white font-bold text-sm">
                                         {% if cotizacion.cliente %}
                                         {{ cotizacion.cliente.nombres }} {{ cotizacion.cliente.apellidos }}
                                         {% else %}
                                         {{ cotizacion.nombre_cliente_manual }} <span class="bg-amber-500/10 text-amber-500 px-1 py-0.5 rounded text-[9px] uppercase tracking-wider ml-1">Prospecto</span>
                                         {% endif %}
                                     </p>
-                                    <p class="text-xs text-gray-500 dark:text-slate-500">
+                                    <p class="text-xs text-text-muted dark:text-text-muted">
                                         {% if cotizacion.cliente %}{{ cotizacion.cliente.email }}{% else %}Cotización rápida{% endif %}
                                     </p>
                                 </div>
                             </div>
                         </td>
                         <td class="px-6 py-4 flex flex-col gap-0.5">
-                            <p class="text-gray-700 dark:text-slate-300 text-sm"><span class="text-gray-400 dark:text-slate-500 text-[11px] uppercase mr-1">Emi:</span>{{ cotizacion.fecha_emision|date:"d M Y" }}</p>
+                            <p class="text-gray-700 dark:text-slate-300 text-sm"><span class="text-text-muted dark:text-text-muted text-[11px] uppercase mr-1">Emi:</span>{{ cotizacion.fecha_emision|date:"d M Y" }}</p>
                             {% if cotizacion.fecha_validez %}
-                            <p class="text-gray-700 dark:text-slate-300 text-sm"><span class="text-gray-400 dark:text-slate-500 text-[11px] uppercase mr-1">Ven:</span>{{ cotizacion.fecha_validez|date:"d M Y" }}</p>
+                            <p class="text-gray-700 dark:text-slate-300 text-sm"><span class="text-text-muted dark:text-text-muted text-[11px] uppercase mr-1">Ven:</span>{{ cotizacion.fecha_validez|date:"d M Y" }}</p>
                             {% endif %}
                         </td>
                         <td class="px-6 py-4">
@@ -158,23 +158,23 @@
                             {% endif %}
                         </td>
                         <td class="px-6 py-4 text-right">
-                            <p class="text-gray-900 dark:text-white font-mono font-bold text-sm">{{ cotizacion.total_cotizado|floatformat:2|intcomma }}</p>
-                            <p class="text-[10px] text-gray-500 dark:text-slate-500 uppercase tracking-widest font-bold">{{ cotizacion.moneda.codigo_iso }}</p>
+                            <p class="text-gray-900 text-white font-mono font-bold text-sm">{{ cotizacion.total_cotizado|floatformat:2|intcomma }}</p>
+                            <p class="text-[10px] text-text-muted dark:text-text-muted uppercase tracking-widest font-bold">{{ cotizacion.moneda.codigo_iso }}</p>
                         </td>
                         <td class="px-6 py-4 text-right">
                             <div class="flex items-center justify-end gap-1 opacity-50 group-hover:opacity-100 transition-opacity">
                                 <a href="{% url 'core:cotizacion_detalle' cotizacion.pk %}"
-                                    class="p-2 text-gray-400 hover:text-primary transition-colors hover:bg-primary/10 rounded-lg flex items-center justify-center"
+                                    class="p-2 text-text-muted hover:text-primary transition-colors hover:bg-primary/10 rounded-lg flex items-center justify-center"
                                     title="Ver Detalle">
                                     <span class="material-symbols-outlined text-[18px]">visibility</span>
                                 </a>
                                 <a href="{% url 'core:cotizacion_pdf' cotizacion.pk %}" target="_blank"
-                                    class="p-2 text-gray-400 hover:text-rose-500 transition-colors hover:bg-rose-500/10 rounded-lg flex items-center justify-center"
+                                    class="p-2 text-text-muted hover:text-rose-500 transition-colors hover:bg-rose-500/10 rounded-lg flex items-center justify-center"
                                     title="Ver PDF">
                                     <span class="material-symbols-outlined text-[18px]">picture_as_pdf</span>
                                 </a>
                                 <a href="{% url 'core:cotizacion_editar' cotizacion.pk %}"
-                                    class="p-2 text-gray-400 hover:text-blue-500 transition-colors hover:bg-blue-500/10 rounded-lg flex items-center justify-center"
+                                    class="p-2 text-text-muted hover:text-blue-500 transition-colors hover:bg-blue-500/10 rounded-lg flex items-center justify-center"
                                     title="Editar">
                                     <span class="material-symbols-outlined text-[18px]">edit</span>
                                 </a>
@@ -188,8 +188,8 @@
                                 <div class="w-16 h-16 bg-gray-50 dark:bg-surface-highlight-dark/50 rounded-full flex items-center justify-center mb-4 border border-dashed border-border-light dark:border-border-dark">
                                     <span class="material-symbols-outlined text-[32px] text-gray-300 dark:text-slate-600">request_quote</span>
                                 </div>
-                                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">No hay cotizaciones</h3>
-                                <p class="text-sm text-gray-500 dark:text-slate-400 max-w-sm mx-auto mb-6">Aún no se han generado cotizaciones o no coinciden con los filtros actuales.</p>
+                                <h3 class="text-lg font-bold text-gray-900 text-white mb-2">No hay cotizaciones</h3>
+                                <p class="text-sm text-text-muted dark:text-text-muted max-w-sm mx-auto mb-6">Aún no se han generado cotizaciones o no coinciden con los filtros actuales.</p>
                                 <a href="{% url 'core:cotizacion_nueva' %}" class="btn-primary">
                                     <span class="material-symbols-outlined text-[18px]">add</span> Crear Primera Cotización
                                 </a>
@@ -216,27 +216,27 @@
             </div>
             <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
                 <div>
-                    <p class="text-sm text-gray-500 dark:text-slate-400">
-                        Mostrando <span class="font-bold text-gray-900 dark:text-white">{{ page_obj.start_index }}</span> a <span
-                            class="font-bold text-gray-900 dark:text-white">{{ page_obj.end_index }}</span> de <span
-                            class="font-bold text-gray-900 dark:text-white">{{ paginator.count }}</span> cotizaciones
+                    <p class="text-sm text-text-muted dark:text-text-muted">
+                        Mostrando <span class="font-bold text-gray-900 text-white">{{ page_obj.start_index }}</span> a <span
+                            class="font-bold text-gray-900 text-white">{{ page_obj.end_index }}</span> de <span
+                            class="font-bold text-gray-900 text-white">{{ paginator.count }}</span> cotizaciones
                     </p>
                 </div>
                 <div>
                     <nav class="relative z-0 inline-flex rounded-lg shadow-sm -space-x-px" aria-label="Pagination">
                         {% if page_obj.has_previous %}
                         <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}"
-                            class="relative inline-flex items-center px-3 py-2 rounded-l-lg border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark text-sm font-medium text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-surface-highlight-dark/50 transition-colors">
+                            class="relative inline-flex items-center px-3 py-2 rounded-l-lg border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark text-sm font-medium text-text-muted dark:text-text-muted hover:bg-gray-50 dark:hover:bg-surface-highlight-dark/50 transition-colors">
                             <span class="sr-only">Anterior</span>
                             <span class="material-symbols-outlined text-[18px]">chevron_left</span>
                         </a>
                         {% endif %}
-                        <span class="relative inline-flex items-center px-4 py-2 border border-border-light dark:border-border-dark bg-gray-50 dark:bg-surface-highlight-dark text-sm font-bold text-gray-900 dark:text-white">
+                        <span class="relative inline-flex items-center px-4 py-2 border border-border-light dark:border-border-dark bg-gray-50 dark:bg-surface-highlight-dark text-sm font-bold text-gray-900 text-white">
                             {{ page_obj.number }}
                         </span>
                         {% if page_obj.has_next %}
                         <a href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}"
-                            class="relative inline-flex items-center px-3 py-2 rounded-r-lg border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark text-sm font-medium text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-surface-highlight-dark/50 transition-colors">
+                            class="relative inline-flex items-center px-3 py-2 rounded-r-lg border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark text-sm font-medium text-text-muted dark:text-text-muted hover:bg-gray-50 dark:hover:bg-surface-highlight-dark/50 transition-colors">
                             <span class="sr-only">Siguiente</span>
                             <span class="material-symbols-outlined text-[18px]">chevron_right</span>
                         </a>

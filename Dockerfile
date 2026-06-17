@@ -9,7 +9,7 @@ WORKDIR /build
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential libpq-dev gcc libpango-1.0-0 libpangocairo-1.0-0 \
-    libffi-dev shared-mime-info && \
+    libffi-dev shared-mime-info curl ca-certificates && \
     rm -rf /var/lib/apt/lists/*
 
 COPY requirements/ ./requirements/
@@ -29,11 +29,14 @@ COPY compilar.sh ./compilar.sh
 
 RUN chmod +x ./compilar.sh && sed -i 's/\r$//' ./compilar.sh && bash ./compilar.sh || true
 
-RUN DJANGO_SETTINGS_MODULE=travelhub.settings \
+RUN PYTHONPATH=/install/lib/python3.13/site-packages \
+    DJANGO_SETTINGS_MODULE=travelhub.settings \
     SECRET_KEY=build-placeholder-key-not-used-in-production \
     DATABASE_URL=sqlite:///tmp/build.db \
     DEBUG=False \
     python manage.py collectstatic --noinput || true
+
+RUN mkdir -p /build/staticfiles
 
 # Stage 2: runtime — minimal image
 FROM python:3.13-slim
@@ -53,15 +56,17 @@ COPY --from=builder /build/core ./core/
 COPY --from=builder /build/apps ./apps/
 COPY --from=builder /build/manage.py ./
 COPY --from=builder /build/static ./static/
+COPY --from=builder /build/staticfiles ./staticfiles/
 COPY --from=builder /build/templates ./templates/
 COPY --from=builder /build/locale ./locale/
 COPY --from=builder /build/docs ./docs/
+COPY entrypoint.sh ./entrypoint.sh
 
-
-RUN groupadd -r appgroup && useradd -r -g appgroup appuser && chown -R appuser:appgroup /app
+RUN chmod +x ./entrypoint.sh && groupadd -r appgroup && useradd -r -g appgroup appuser && chown -R appuser:appgroup /app
 
 EXPOSE 8000
 
 USER appuser
 
+ENTRYPOINT ["./entrypoint.sh"]
 CMD ["gunicorn", "travelhub.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3", "--timeout", "120"]

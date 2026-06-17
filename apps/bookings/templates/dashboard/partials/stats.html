@@ -45,6 +45,9 @@
     </div>
 </div>
 
+{{ fechas_chart|json_script:"fechas-chart" }}
+{{ totales_chart|json_script:"totales-chart" }}
+
 <!-- Script de Inicialización de Gráfica v4 -->
 <script>
     (function() {
@@ -65,8 +68,6 @@
                 existingChart.destroy();
             }
 
-            {{ fechas_chart|json_script:"fechas-chart" }}
-            {{ totales_chart|json_script:"totales-chart" }}
             const labels = JSON.parse(document.getElementById('fechas-chart').textContent);
             const data = JSON.parse(document.getElementById('totales-chart').textContent);
             

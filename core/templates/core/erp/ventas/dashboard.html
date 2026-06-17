@@ -8,13 +8,13 @@
     <!-- Page Title & Breadcrumb -->
     <div class="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-            <div class="flex items-center gap-2 text-xs text-slate-500 dark:text-gray-400 font-medium mb-2 uppercase tracking-wider">
+            <div class="flex items-center gap-2 text-xs text-text-muted dark:text-text-muted font-medium mb-2 uppercase tracking-wider">
                 <span>Gestión</span>
                 <span class="material-symbols-outlined text-[10px]">chevron_right</span>
                 <span class="text-primary">Ventas</span>
             </div>
-            <h1 class="text-4xl font-bold text-gray-900 dark:text-white tracking-tight">Operaciones y Ventas</h1>
-            <p class="text-gray-500 dark:text-slate-400 mt-2 text-lg">Control de reservas, facturación y estados de pago</p>
+            <h1 class="text-4xl font-bold text-gray-900 text-white tracking-tight">Operaciones y Ventas</h1>
+            <p class="text-text-muted dark:text-text-muted mt-2 text-lg">Control de reservas, facturación y estados de pago</p>
         </div>
     </div>
 
@@ -27,13 +27,13 @@
             </div>
             <div class="relative z-10">
                 <div class="flex items-center justify-between mb-2">
-                    <p class="text-gray-500 dark:text-slate-400 text-sm font-bold uppercase tracking-wider">Ventas Totales (Mes)</p>
+                    <p class="text-text-muted dark:text-text-muted text-sm font-bold uppercase tracking-wider">Ventas Totales (Mes)</p>
                     <span class="p-2 bg-emerald-500/10 text-emerald-500 rounded-lg">
                         <span class="material-symbols-outlined text-[20px]">trending_up</span>
                     </span>
                 </div>
                 <div class="flex items-baseline gap-2">
-                    <h3 class="text-4xl font-black text-gray-900 dark:text-white tracking-tight">$ {{ monto_total_mes|floatformat:2|intcomma }}</h3>
+                    <h3 class="text-4xl font-black text-gray-900 text-white tracking-tight">$ {{ monto_total_mes|floatformat:2|intcomma }}</h3>
                 </div>
             </div>
         </div>
@@ -45,13 +45,13 @@
             </div>
             <div class="relative z-10">
                 <div class="flex items-center justify-between mb-2">
-                    <p class="text-gray-500 dark:text-slate-400 text-sm font-bold uppercase tracking-wider">Operaciones Registradas (Mes)</p>
+                    <p class="text-text-muted dark:text-text-muted text-sm font-bold uppercase tracking-wider">Operaciones Registradas (Mes)</p>
                     <span class="p-2 bg-blue-500/10 text-blue-500 rounded-lg">
                         <span class="material-symbols-outlined text-[20px]">list_alt</span>
                     </span>
                 </div>
                 <div class="flex items-baseline gap-2">
-                    <h3 class="text-4xl font-black text-gray-900 dark:text-white tracking-tight">{{ total_ventas_mes }}</h3>
+                    <h3 class="text-4xl font-black text-gray-900 text-white tracking-tight">{{ total_ventas_mes }}</h3>
                 </div>
             </div>
         </div>
@@ -61,7 +61,7 @@
     <div class="card-base p-4 mb-6">
         <form method="get" class="flex flex-col md:flex-row gap-4 items-center">
             <div class="flex-1 relative w-full">
-                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-[20px]">search</span>
+                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-muted text-[20px]">search</span>
                 <input type="text" name="q" value="{{ request.GET.q }}" class="input-base pl-10" placeholder="Buscar por localizador o cliente...">
             </div>
             <div class="flex gap-2 w-full md:w-auto">
@@ -87,12 +87,12 @@
             <table class="w-full text-left border-collapse">
                 <thead class="bg-gray-50 dark:bg-surface-highlight-dark/30 border-b border-border-light dark:border-border-dark">
                     <tr>
-                        <th class="px-6 py-4 text-[10px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">ID / Localizador</th>
-                        <th class="px-6 py-4 text-[10px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Fecha</th>
-                        <th class="px-6 py-4 text-[10px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Cliente</th>
-                        <th class="px-6 py-4 text-[10px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Estado</th>
-                        <th class="px-6 py-4 text-[10px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider text-right">Total</th>
-                        <th class="px-6 py-4 text-[10px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider text-right">Acciones</th>
+                        <th class="px-6 py-4 text-[10px] font-bold text-text-muted dark:text-text-muted uppercase tracking-wider">ID / Localizador</th>
+                        <th class="px-6 py-4 text-[10px] font-bold text-text-muted dark:text-text-muted uppercase tracking-wider">Fecha</th>
+                        <th class="px-6 py-4 text-[10px] font-bold text-text-muted dark:text-text-muted uppercase tracking-wider">Cliente</th>
+                        <th class="px-6 py-4 text-[10px] font-bold text-text-muted dark:text-text-muted uppercase tracking-wider">Estado</th>
+                        <th class="px-6 py-4 text-[10px] font-bold text-text-muted dark:text-text-muted uppercase tracking-wider text-right">Total</th>
+                        <th class="px-6 py-4 text-[10px] font-bold text-text-muted dark:text-text-muted uppercase tracking-wider text-right">Acciones</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-dashed divide-border-light dark:divide-border-dark">
@@ -100,14 +100,14 @@
                     <tr class="hover:bg-gray-50 dark:hover:bg-surface-highlight-dark/20 transition-colors group">
                         <td class="px-6 py-4">
                             <div class="flex flex-col gap-0.5">
-                                <span class="text-gray-900 dark:text-white font-bold text-sm">#{{ venta.id_venta }}</span>
+                                <span class="text-gray-900 text-white font-bold text-sm">#{{ venta.id_venta }}</span>
                                 <span class="text-primary font-mono text-[11px] font-bold bg-primary/10 px-1.5 py-0.5 rounded-md inline-block max-w-max border border-primary/20">{{ venta.localizador|default:"--" }}</span>
                             </div>
                         </td>
                         <td class="px-6 py-4">
                             <div class="flex flex-col gap-0.5">
                                 <span class="text-gray-700 dark:text-slate-300 text-sm">{{ venta.fecha_venta|date:"d M Y" }}</span>
-                                <span class="text-gray-500 dark:text-slate-500 text-[11px] font-mono">{{ venta.fecha_venta|date:"H:i" }}</span>
+                                <span class="text-text-muted dark:text-text-muted text-[11px] font-mono">{{ venta.fecha_venta|date:"H:i" }}</span>
                             </div>
                         </td>
                         <td class="px-6 py-4">
@@ -117,12 +117,12 @@
                                     {{ venta.cliente.nombres|slice:":1" }}{{ venta.cliente.apellidos|slice:":1" }}
                                 </div>
                                 <div class="flex flex-col">
-                                    <p class="text-gray-900 dark:text-white font-bold text-sm">{{ venta.cliente.nombres }} {{ venta.cliente.apellidos }}</p>
-                                    <p class="text-xs text-gray-500 dark:text-slate-500">{{ venta.cliente.email }}</p>
+                                    <p class="text-gray-900 text-white font-bold text-sm">{{ venta.cliente.nombres }} {{ venta.cliente.apellidos }}</p>
+                                    <p class="text-xs text-text-muted dark:text-text-muted">{{ venta.cliente.email }}</p>
                                 </div>
                             </div>
                             {% else %}
-                            <span class="text-gray-400 dark:text-slate-500 italic text-sm">Sin cliente asignado</span>
+                            <span class="text-text-muted dark:text-text-muted italic text-sm">Sin cliente asignado</span>
                             {% endif %}
                         </td>
                         <td class="px-6 py-4">
@@ -137,12 +137,12 @@
                             {% endif %}
                         </td>
                         <td class="px-6 py-4 text-right">
-                            <p class="text-gray-900 dark:text-white font-mono font-bold text-sm">{{ venta.total_venta|floatformat:2|intcomma }}</p>
-                            <p class="text-[10px] text-gray-500 dark:text-slate-500 uppercase tracking-widest font-bold">{{ venta.moneda.codigo_iso }}</p>
+                            <p class="text-gray-900 text-white font-mono font-bold text-sm">{{ venta.total_venta|floatformat:2|intcomma }}</p>
+                            <p class="text-[10px] text-text-muted dark:text-text-muted uppercase tracking-widest font-bold">{{ venta.moneda.codigo_iso }}</p>
                         </td>
                         <td class="px-6 py-4 text-right">
                             <div class="flex items-center justify-end gap-1 opacity-50 group-hover:opacity-100 transition-opacity">
-                                <a href="{% url 'bookings:venta_detail' venta.pk %}" class="p-2 text-gray-400 hover:text-primary transition-colors hover:bg-primary/10 rounded-lg flex items-center justify-center" title="Ver Detalle">
+                                <a href="{% url 'bookings:venta_detail' venta.pk %}" class="p-2 text-text-muted hover:text-primary transition-colors hover:bg-primary/10 rounded-lg flex items-center justify-center" title="Ver Detalle">
                                     <span class="material-symbols-outlined text-[18px]">visibility</span>
                                 </a>
                             </div>
@@ -155,8 +155,8 @@
                                 <div class="w-16 h-16 bg-gray-50 dark:bg-surface-highlight-dark/50 rounded-full flex items-center justify-center mb-4 border border-dashed border-border-light dark:border-border-dark">
                                     <span class="material-symbols-outlined text-[32px] text-gray-300 dark:text-slate-600">receipt_long</span>
                                 </div>
-                                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">No se encontraron ventas</h3>
-                                <p class="text-sm text-gray-500 dark:text-slate-400 max-w-sm mx-auto mb-6">Ajusta los filtros de búsqueda o registra una nueva venta.</p>
+                                <h3 class="text-lg font-bold text-gray-900 text-white mb-2">No se encontraron ventas</h3>
+                                <p class="text-sm text-text-muted dark:text-text-muted max-w-sm mx-auto mb-6">Ajusta los filtros de búsqueda o registra una nueva venta.</p>
                             </div>
                         </td>
                     </tr>
@@ -178,23 +178,23 @@
             </div>
             <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
                 <div>
-                    <p class="text-sm text-gray-500 dark:text-slate-400">
-                        Mostrando <span class="font-bold text-gray-900 dark:text-white">{{ page_obj.start_index }}</span> a <span class="font-bold text-gray-900 dark:text-white">{{ page_obj.end_index }}</span> de <span class="font-bold text-gray-900 dark:text-white">{{ paginator.count }}</span> resultados
+                    <p class="text-sm text-text-muted dark:text-text-muted">
+                        Mostrando <span class="font-bold text-gray-900 text-white">{{ page_obj.start_index }}</span> a <span class="font-bold text-gray-900 text-white">{{ page_obj.end_index }}</span> de <span class="font-bold text-gray-900 text-white">{{ paginator.count }}</span> resultados
                     </p>
                 </div>
                 <div>
                     <nav class="relative z-0 inline-flex rounded-lg shadow-sm -space-x-px" aria-label="Pagination">
                         {% if page_obj.has_previous %}
-                        <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}" class="relative inline-flex items-center px-3 py-2 rounded-l-lg border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark text-sm font-medium text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-surface-highlight-dark/50 transition-colors">
+                        <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}" class="relative inline-flex items-center px-3 py-2 rounded-l-lg border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark text-sm font-medium text-text-muted dark:text-text-muted hover:bg-gray-50 dark:hover:bg-surface-highlight-dark/50 transition-colors">
                             <span class="sr-only">Anterior</span>
                             <span class="material-symbols-outlined text-[18px]">chevron_left</span>
                         </a>
                         {% endif %}
-                        <span class="relative inline-flex items-center px-4 py-2 border border-border-light dark:border-border-dark bg-gray-50 dark:bg-surface-highlight-dark text-sm font-bold text-gray-900 dark:text-white">
+                        <span class="relative inline-flex items-center px-4 py-2 border border-border-light dark:border-border-dark bg-gray-50 dark:bg-surface-highlight-dark text-sm font-bold text-gray-900 text-white">
                             {{ page_obj.number }}
                         </span>
                         {% if page_obj.has_next %}
-                        <a href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}" class="relative inline-flex items-center px-3 py-2 rounded-r-lg border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark text-sm font-medium text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-surface-highlight-dark/50 transition-colors">
+                        <a href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}" class="relative inline-flex items-center px-3 py-2 rounded-r-lg border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark text-sm font-medium text-text-muted dark:text-text-muted hover:bg-gray-50 dark:hover:bg-surface-highlight-dark/50 transition-colors">
                             <span class="sr-only">Siguiente</span>
                             <span class="material-symbols-outlined text-[18px]">chevron_right</span>
                         </a>

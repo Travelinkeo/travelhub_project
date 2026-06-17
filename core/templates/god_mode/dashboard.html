@@ -10,16 +10,16 @@
                 <span class="material-symbols-outlined text-4xl">travel_explore</span>
             </div>
             <div>
-                <h1 class="text-4xl font-black text-white tracking-tighter uppercase">God Mode</h1>
+                <h1 class="text-4xl font-black text-text-main tracking-tighter uppercase">God Mode</h1>
                 <p class="text-yellow-500/80 font-bold text-xs uppercase tracking-[0.2em]">TravelHub Master Control Center</p>
             </div>
         </div>
         <div class="flex gap-3">
-            <div class="bg-slate-900/80 border border-slate-800 px-6 py-3 rounded-2xl">
-                <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Platform Health</p>
+            <div class="bg-surface-2/80 border border-border-color px-6 py-3 rounded-2xl">
+                <p class="text-[10px] font-black text-text-muted uppercase tracking-widest">Platform Health</p>
                 <div class="flex items-center gap-2 mt-1">
                     <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                    <span class="text-xs font-bold text-white uppercase">All Systems Nominal</span>
+                    <span class="text-xs font-bold text-text-main uppercase">All Systems Nominal</span>
                 </div>
             </div>
         </div>
@@ -28,63 +28,63 @@
     <!-- GLOBAL METRICS -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <!-- Metric Card -->
-        <div class="bg-slate-900/40 border border-slate-800 p-6 rounded-3xl hover:border-yellow-500/30 transition-all group">
+        <div class="bg-surface-2/40 border border-border-color p-6 rounded-3xl hover:border-yellow-500/30 transition-all group">
             <div class="flex justify-between items-start mb-4">
                 <span class="material-symbols-outlined text-yellow-500 group-hover:scale-110 transition-transform">hub</span>
-                <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Agencias Totales</span>
+                <span class="text-[10px] font-black text-text-muted uppercase tracking-widest">Agencias Totales</span>
             </div>
             <div class="flex items-baseline gap-2">
-                <h3 class="text-4xl font-black text-white">{{ metrics.total_agencias }}</h3>
+                <h3 class="text-4xl font-black text-text-main">{{ metrics.total_agencias }}</h3>
                 <span class="text-emerald-400 text-xs font-bold">+{{ metrics.nuevas_30d }} este mes</span>
             </div>
         </div>
 
-        <div class="bg-slate-900/40 border border-slate-800 p-6 rounded-3xl hover:border-blue-500/30 transition-all group">
+        <div class="bg-surface-2/40 border border-border-color p-6 rounded-3xl hover:border-blue-500/30 transition-all group">
             <div class="flex justify-between items-start mb-4">
                 <span class="material-symbols-outlined text-blue-400">groups</span>
-                <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Usuarios Activos</span>
+                <span class="text-[10px] font-black text-text-muted uppercase tracking-widest">Usuarios Activos</span>
             </div>
-            <h3 class="text-4xl font-black text-white">{{ metrics.total_usuarios }}</h3>
+            <h3 class="text-4xl font-black text-text-main">{{ metrics.total_usuarios }}</h3>
         </div>
 
-        <div class="bg-slate-900/40 border border-slate-800 p-6 rounded-3xl hover:border-emerald-500/30 transition-all group">
+        <div class="bg-surface-2/40 border border-border-color p-6 rounded-3xl hover:border-emerald-500/30 transition-all group">
             <div class="flex justify-between items-start mb-4">
                 <span class="material-symbols-outlined text-emerald-400">payments</span>
-                <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest">MRR Proyectado</span>
+                <span class="text-[10px] font-black text-text-muted uppercase tracking-widest">MRR Proyectado</span>
             </div>
-            <h3 class="text-4xl font-black text-white">${{ metrics.revenue_mensual }}<span class="text-slate-500 text-lg">.00</span></h3>
+            <h3 class="text-4xl font-black text-text-main">${{ metrics.revenue_mensual }}<span class="text-text-muted text-lg">.00</span></h3>
         </div>
 
-        <div class="bg-slate-900/40 border border-slate-800 p-6 rounded-3xl hover:border-purple-500/30 transition-all group">
+        <div class="bg-surface-2/40 border border-border-color p-6 rounded-3xl hover:border-purple-500/30 transition-all group">
             <div class="flex justify-between items-start mb-4">
                 <span class="material-symbols-outlined text-purple-400">robot</span>
-                <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest">IA Usage (24h)</span>
+                <span class="text-[10px] font-black text-text-muted uppercase tracking-widest">IA Usage (24h)</span>
             </div>
-            <h3 class="text-4xl font-black text-white">{{ metrics.ai_usage_24h }}</h3>
+            <h3 class="text-4xl font-black text-text-main">{{ metrics.ai_usage_24h }}</h3>
         </div>
 
-        <div class="bg-slate-900/40 border border-slate-800 p-6 rounded-3xl hover:border-red-500/30 transition-all group">
+        <div class="bg-surface-2/40 border border-border-color p-6 rounded-3xl hover:border-red-500/30 transition-all group">
             <div class="flex justify-between items-start mb-4">
                 <span class="material-symbols-outlined text-red-500">warning</span>
-                <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Leakage Financiero</span>
+                <span class="text-[10px] font-black text-text-muted uppercase tracking-widest">Leakage Financiero</span>
             </div>
-            <h3 class="text-4xl font-black text-white">${{ metrics.total_leakage|floatformat:0 }}</h3>
+            <h3 class="text-4xl font-black text-text-main">${{ metrics.total_leakage|floatformat:0 }}</h3>
         </div>
 
-        <div class="bg-slate-900/40 border border-slate-800 p-6 rounded-3xl hover:border-orange-500/30 transition-all group">
+        <div class="bg-surface-2/40 border border-border-color p-6 rounded-3xl hover:border-orange-500/30 transition-all group">
             <div class="flex justify-between items-start mb-4">
                 <span class="material-symbols-outlined text-orange-500">hotel</span>
-                <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Hoteles Globales</span>
+                <span class="text-[10px] font-black text-text-muted uppercase tracking-widest">Hoteles Globales</span>
             </div>
-            <h3 class="text-4xl font-black text-white">{{ metrics.total_hoteles }}</h3>
+            <h3 class="text-4xl font-black text-text-main">{{ metrics.total_hoteles }}</h3>
         </div>
 
-        <div class="bg-slate-900/40 border border-slate-800 p-6 rounded-3xl hover:border-cyan-500/30 transition-all group">
+        <div class="bg-surface-2/40 border border-border-color p-6 rounded-3xl hover:border-cyan-500/30 transition-all group">
             <div class="flex justify-between items-start mb-4">
                 <span class="material-symbols-outlined text-cyan-500">bed</span>
-                <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Tipos Habitación</span>
+                <span class="text-[10px] font-black text-text-muted uppercase tracking-widest">Tipos Habitación</span>
             </div>
-            <h3 class="text-4xl font-black text-white">{{ metrics.total_habitaciones }}</h3>
+            <h3 class="text-4xl font-black text-text-main">{{ metrics.total_habitaciones }}</h3>
         </div>
     </div>
 
@@ -93,32 +93,32 @@
         <!-- Agencies Table -->
         <div class="lg:col-span-2 space-y-6">
             <div class="flex justify-between items-center px-2">
-                <h2 class="text-xl font-black text-white uppercase tracking-tight">Últimas Agencias Onboarded</h2>
+                <h2 class="text-xl font-black text-text-main uppercase tracking-tight">Últimas Agencias Onboarded</h2>
                 <a href="/admin/core/agencia/" class="text-[10px] font-black text-yellow-500 uppercase tracking-widest hover:underline">Ver todas las agencias</a>
             </div>
             
-            <div class="bg-slate-900/40 border border-slate-800 rounded-3xl overflow-hidden">
+            <div class="bg-surface-2/40 border border-border-color rounded-3xl overflow-hidden">
                 <table class="w-full text-left">
                     <thead>
-                        <tr class="bg-slate-950/50 border-b border-slate-800">
-                            <th class="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Agencia</th>
-                            <th class="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Plan</th>
-                            <th class="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Estado</th>
-                            <th class="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Registrada</th>
+                        <tr class="bg-slate-950/50 border-b border-border-color">
+                            <th class="px-6 py-4 text-[10px] font-black text-text-muted uppercase tracking-widest">Agencia</th>
+                            <th class="px-6 py-4 text-[10px] font-black text-text-muted uppercase tracking-widest">Plan</th>
+                            <th class="px-6 py-4 text-[10px] font-black text-text-muted uppercase tracking-widest">Estado</th>
+                            <th class="px-6 py-4 text-[10px] font-black text-text-muted uppercase tracking-widest">Registrada</th>
                             <th class="px-6 py-4 text-right"></th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-800/50">
                         {% for agencia in agencias %}
-                        <tr class="hover:bg-slate-800/20 transition-colors">
+                        <tr class="hover:bg-surface-2/20 transition-colors">
                             <td class="px-6 py-4">
                                 <div class="flex items-center gap-3">
-                                    <div class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-xs font-bold text-white border border-slate-700">
+                                    <div class="w-8 h-8 rounded-lg bg-surface-2 flex items-center justify-center text-xs font-bold text-text-main border border-border-color">
                                         {{ agencia.nombre|slice:":1" }}
                                     </div>
                                     <div>
-                                        <p class="text-sm font-bold text-white">{{ agencia.nombre }}</p>
-                                        <p class="text-[10px] text-slate-500 font-mono">{{ agencia.subdominio_slug }}.travelhub.cc</p>
+                                        <p class="text-sm font-bold text-text-main">{{ agencia.nombre }}</p>
+                                        <p class="text-[10px] text-text-muted font-mono">{{ agencia.subdominio_slug }}.travelhub.cc</p>
                                     </div>
                                 </div>
                             </td>
@@ -126,7 +126,7 @@
                                 <span class="px-2 py-1 rounded-md text-[10px] font-black uppercase tracking-wider
                                     {% if agencia.plan == 'ENTERPRISE' %}bg-purple-500/10 text-purple-400 border border-purple-500/20
                                     {% elif agencia.plan == 'PRO' %}bg-blue-500/10 text-blue-400 border border-blue-500/20
-                                    {% else %}bg-slate-800 text-slate-400{% endif %}">
+                                    {% else %}bg-surface-2 text-text-muted{% endif %}">
                                     {{ agencia.plan }}
                                 </span>
                             </td>
@@ -136,7 +136,7 @@
                                     <span class="text-xs font-medium text-slate-300">{% if agencia.activa %}Activa{% else %}Inactiva{% endif %}</span>
                                 </div>
                             </td>
-                            <td class="px-6 py-4 text-xs text-slate-500 font-medium">
+                            <td class="px-6 py-4 text-xs text-text-muted font-medium">
                                 {{ agencia.fecha_creacion|date:"d M Y" }}
                             </td>
                             <td class="px-6 py-4 text-right flex items-center justify-end gap-2">
@@ -146,7 +146,7 @@
                                     <span class="material-symbols-outlined text-[16px]">login</span>
                                     Login
                                 </a>
-                                <button class="p-2 text-slate-500 hover:text-white transition-colors">
+                                <button class="p-2 text-text-muted hover:text-white transition-colors">
                                     <span class="material-symbols-outlined text-[18px]">more_vert</span>
                                 </button>
                             </td>
@@ -160,16 +160,16 @@
         <!-- Right Column: System Logs & Stats -->
         <div class="space-y-8">
             <!-- Distribution -->
-            <div class="bg-slate-900/40 border border-slate-800 p-8 rounded-3xl">
-                <h3 class="text-xs font-black text-slate-500 uppercase tracking-widest mb-6">Distribución de Planes</h3>
+            <div class="bg-surface-2/40 border border-border-color p-8 rounded-3xl">
+                <h3 class="text-xs font-black text-text-muted uppercase tracking-widest mb-6">Distribución de Planes</h3>
                 <div class="space-y-4">
                     {% for item in plan_dist %}
                     <div class="space-y-2">
                         <div class="flex justify-between text-xs font-bold">
-                            <span class="text-slate-400">{{ item.plan }}</span>
-                            <span class="text-white">{{ item.count }}</span>
+                            <span class="text-text-muted">{{ item.plan }}</span>
+                            <span class="text-text-main">{{ item.count }}</span>
                         </div>
-                        <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                        <div class="w-full h-1.5 bg-surface-2 rounded-full overflow-hidden">
                             <div class="h-full bg-yellow-500" style="width: {% widthratio item.count metrics.total_agencias 100 %}%"></div>
                         </div>
                     </div>
@@ -178,15 +178,15 @@
             </div>
 
             <!-- Global Activity (Dynamic) -->
-            <div class="bg-slate-900/40 border border-slate-800 p-8 rounded-3xl">
-                <h3 class="text-xs font-black text-slate-500 uppercase tracking-widest mb-6">Actividad Global (IA)</h3>
+            <div class="bg-surface-2/40 border border-border-color p-8 rounded-3xl">
+                <h3 class="text-xs font-black text-text-muted uppercase tracking-widest mb-6">Actividad Global (IA)</h3>
                 <div class="space-y-6">
                     {% for item in actividad %}
                     <div class="flex gap-4 group">
                         <div class="w-2 h-2 rounded-full bg-{{ item.color|default:'blue' }}-500 mt-1.5 shadow-[0_0_8px_rgba(var(--{{ item.color }}-500),0.5)]"></div>
                         <div>
-                            <p class="text-xs font-bold text-white group-hover:text-{{ item.color|default:'blue' }}-400 transition-colors">{{ item.titulo }}</p>
-                            <p class="text-[10px] text-slate-500 mt-1">{{ item.detalle }}</p>
+                            <p class="text-xs font-bold text-text-main group-hover:text-{{ item.color|default:'blue' }}-400 transition-colors">{{ item.titulo }}</p>
+                            <p class="text-[10px] text-text-muted mt-1">{{ item.detalle }}</p>
                             <p class="text-[10px] text-slate-600 font-mono mt-1">{{ item.fecha|timesince }} ago</p>
                         </div>
                     </div>

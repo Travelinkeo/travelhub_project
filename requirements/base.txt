@@ -58,3 +58,4 @@ pypdf==6.10.2
 python-telegram-bot==21.11
 django-waffle==4.1.0
 django-widget-tweaks==1.5.1
+django-extensions==3.2.3

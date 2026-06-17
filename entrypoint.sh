@@ -1,21 +1,21 @@
 #!/bin/bash
-# Evitar que el script continúe si hay un error
-set -e
 
 echo "⏳ Esperando a que PostgreSQL inicie..."
-while ! nc -z $POSTGRES_HOST $POSTGRES_PORT; do
-  sleep 1
-done
+POSTGRES_HOST=${POSTGRES_HOST:-db}
+POSTGRES_PORT=${POSTGRES_PORT:-5432}
+python -c "
+import socket, time
+while True:
+    try:
+        s = socket.create_connection(('$POSTGRES_HOST', int('$POSTGRES_PORT')), timeout=2)
+        s.close()
+        break
+    except OSError:
+        time.sleep(1)
+"
 echo "✅ PostgreSQL iniciado."
 
-# Si el usuario pasó un comando (ej: python manage.py ...), lo ejecutamos y salimos
-if [ $# -gt 0 ]; then
-    echo "⚡ Ejecutando comando personalizado: $@"
-    exec "$@"
-fi
-
-python manage.py migrate --noinput
+python manage.py migrate --noinput || echo "⚠️ Migrate falló (continuando)..."
 python manage.py collectstatic --noinput
 
-# Ejecuta Gunicorn con auto-reload para desarrollo
-exec gunicorn travelhub.wsgi:application --bind 0.0.0.0:8000 --workers 2 --timeout 300
+exec "$@"

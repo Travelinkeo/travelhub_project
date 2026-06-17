@@ -17,20 +17,20 @@
         </div>
         
         <!-- Estado Tabs Refined -->
-        <div class="flex bg-surface-1 border-2 border-primary/5 rounded-2xl p-1.5 shadow-lg shadow-black/5 items-center gap-1">
+        <div class="flex bg-surface-1 border-2 border-primary/5 rounded-2xl p-1 md:p-1.5 shadow-lg shadow-black/5 items-center gap-0.5 md:gap-1 overflow-x-auto scrollbar-thin" style="-webkit-overflow-scrolling: touch;">
             <a href="?estado=BOR"
-                class="px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap
+                class="px-3 md:px-5 py-2 md:py-2.5 rounded-xl text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap shrink-0
                     {% if filtros.estado == 'BOR' %}bg-primary text-on-primary shadow-lg shadow-primary/20{% else %}text-text-muted hover:text-text-main hover:bg-surface-2{% endif %}">
                 Borradores
             </a>
             <a href="?estado=EMI"
-                class="px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap
+                class="px-3 md:px-5 py-2 md:py-2.5 rounded-xl text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap shrink-0
                     {% if filtros.estado == 'EMI' %}bg-primary text-on-primary shadow-lg shadow-primary/20{% else %}text-text-muted hover:text-text-main hover:bg-surface-2{% endif %}">
                 Emitidas
             </a>
-            <div class="w-[1px] h-6 bg-border-color mx-1"></div>
+            <div class="w-[1px] h-6 bg-border-color mx-0.5 md:mx-1 shrink-0"></div>
             <a href="?"
-                class="px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap
+                class="px-3 md:px-5 py-2 md:py-2.5 rounded-xl text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap shrink-0
                     {% if not filtros.estado %}bg-primary text-on-primary shadow-lg shadow-primary/20{% else %}text-text-muted hover:text-text-main hover:bg-surface-2{% endif %}">
                 Todas
             </a>
@@ -59,7 +59,7 @@
 
         <!-- Table Container -->
         <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse">
+            <table class="w-full text-left border-collapse table-responsive">
                 <thead>
                     <tr class="bg-surface-2/30 border-b border-border-color">
                         <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-text-muted">N° / PNR</th>

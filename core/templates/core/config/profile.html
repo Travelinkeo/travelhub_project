@@ -9,8 +9,8 @@
     <!-- Header -->
     <div class="mb-8 flex items-center justify-between">
         <div>
-            <h1 class="text-3xl font-bold text-white">Configuración</h1>
-            <p class="text-gray-400 mt-1">Gestiona tu perfil personal y la configuración de tu agencia.</p>
+            <h1 class="text-3xl font-bold text-text-main">Configuración</h1>
+            <p class="text-text-muted mt-1">Gestiona tu perfil personal y la configuración de tu agencia.</p>
         </div>
     </div>
 
@@ -19,7 +19,7 @@
         <!-- Sidebar Tabs -->
         <div class="md:col-span-1 space-y-2">
             <button @click="activeTab = 'perfil'"
-                :class="activeTab === 'perfil' ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30' : 'text-gray-400 hover:bg-slate-800 hover:text-white'"
+                :class="activeTab === 'perfil' ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30' : 'text-text-muted hover:bg-surface-2 hover:text-white'"
                 class="w-full text-left px-4 py-3 rounded-xl transition-all font-medium flex items-center">
                 <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -29,7 +29,7 @@
             </button>
 
             <button @click="activeTab = 'seguridad'"
-                :class="activeTab === 'seguridad' ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30' : 'text-gray-400 hover:bg-slate-800 hover:text-white'"
+                :class="activeTab === 'seguridad' ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30' : 'text-text-muted hover:bg-surface-2 hover:text-white'"
                 class="w-full text-left px-4 py-3 rounded-xl transition-all font-medium flex items-center">
                 <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -40,11 +40,11 @@
 
             {% if agencia %}
             <div class="pt-4 pb-2">
-                <span class="text-xs font-bold text-gray-500 uppercase tracking-wider px-4">AGENCIA</span>
+                <span class="text-xs font-bold text-text-muted uppercase tracking-wider px-4">AGENCIA</span>
             </div>
 
             <button @click="activeTab = 'agencia'"
-                :class="activeTab === 'agencia' ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/30' : 'text-gray-400 hover:bg-slate-800 hover:text-white'"
+                :class="activeTab === 'agencia' ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/30' : 'text-text-muted hover:bg-surface-2 hover:text-white'"
                 class="w-full text-left px-4 py-3 rounded-xl transition-all font-medium flex items-center">
                 <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -54,7 +54,7 @@
             </button>
 
             <button @click="activeTab = 'automatizacion'"
-                :class="activeTab === 'automatizacion' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-500/30' : 'text-gray-400 hover:bg-slate-800 hover:text-white'"
+                :class="activeTab === 'automatizacion' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-500/30' : 'text-text-muted hover:bg-surface-2 hover:text-white'"
                 class="w-full text-left px-4 py-3 rounded-xl transition-all font-medium flex items-center">
                 <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -70,23 +70,23 @@
 
             <!-- Tab: Mi Perfil -->
             <div x-show="activeTab === 'perfil'"
-                class="bg-slate-800/50 border border-slate-700 rounded-2xl p-6 glass-panel" x-cloak>
-                <h2 class="text-xl font-bold text-white mb-6">Información Personal</h2>
+                class="bg-surface-2/50 border border-slate-700 rounded-2xl p-6 glass-panel" x-cloak>
+                <h2 class="text-xl font-bold text-text-main mb-6">Información Personal</h2>
                 <form method="post">
                     {% csrf_token %}
                     <input type="hidden" name="form_type" value="user_profile">
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                         <div>
-                            <label class="block text-sm font-medium text-gray-400 mb-2">Nombres</label>
+                            <label class="block text-sm font-medium text-text-muted mb-2">Nombres</label>
                             {{ user_form.first_name }}
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-400 mb-2">Apellidos</label>
+                            <label class="block text-sm font-medium text-text-muted mb-2">Apellidos</label>
                             {{ user_form.last_name }}
                         </div>
                         <div class="md:col-span-2">
-                            <label class="block text-sm font-medium text-gray-400 mb-2">Correo Electrónico</label>
+                            <label class="block text-sm font-medium text-text-muted mb-2">Correo Electrónico</label>
                             {{ user_form.email }}
                         </div>
                     </div>
@@ -102,8 +102,8 @@
 
             <!-- Tab: Seguridad -->
             <div x-show="activeTab === 'seguridad'"
-                class="bg-slate-800/50 border border-slate-700 rounded-2xl p-6 glass-panel" x-cloak>
-                <h2 class="text-xl font-bold text-white mb-6">Seguridad de la Cuenta</h2>
+                class="bg-surface-2/50 border border-slate-700 rounded-2xl p-6 glass-panel" x-cloak>
+                <h2 class="text-xl font-bold text-text-main mb-6">Seguridad de la Cuenta</h2>
 
                 <div class="bg-yellow-900/20 border border-yellow-700/50 p-4 rounded-xl mb-6 flex items-start">
                     <svg class="w-6 h-6 text-yellow-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor"
@@ -125,12 +125,12 @@
                     <div class="space-y-4 mb-6">
                         {% for field in password_form %}
                         <div>
-                            <label class="block text-sm font-medium text-gray-400 mb-2">{{ field.label }}</label>
+                            <label class="block text-sm font-medium text-text-muted mb-2">{{ field.label }}</label>
                             <input type="{{ field.field.widget.input_type }}" name="{{ field.name }}"
-                                class="bg-slate-800 border border-slate-700 text-white rounded-lg block w-full p-2.5"
+                                class="bg-surface-2 border border-slate-700 text-text-main rounded-lg block w-full p-2.5"
                                 required>
                             {% if field.help_text %}
-                            <p class="text-xs text-gray-500 mt-1">{{ field.help_text }}</p>
+                            <p class="text-xs text-text-muted mt-1">{{ field.help_text }}</p>
                             {% endif %}
                             {% for error in field.errors %}
                             <p class="text-xs text-red-500 mt-1">{{ error }}</p>
@@ -151,16 +151,16 @@
             {% if agencia %}
             <!-- Tab: Agencia -->
             <div x-show="activeTab === 'agencia'"
-                class="bg-slate-800/50 border border-slate-700 rounded-2xl p-6 glass-panel" x-cloak>
-                <h2 class="text-xl font-bold text-white mb-6">Marca y Contacto</h2>
+                class="bg-surface-2/50 border border-slate-700 rounded-2xl p-6 glass-panel" x-cloak>
+                <h2 class="text-xl font-bold text-text-main mb-6">Marca y Contacto</h2>
                 <form method="post" enctype="multipart/form-data">
                     {% csrf_token %}
                     <input type="hidden" name="form_type" value="agency_branding">
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                         <!-- Logo Upload -->
-                        <div class="md:col-span-2 bg-slate-900/50 p-6 rounded-xl border border-dashed border-slate-600">
-                            <label class="block text-sm font-medium text-gray-400 mb-4">Logotipo de la Agencia</label>
+                        <div class="md:col-span-2 bg-surface-2/50 p-6 rounded-xl border border-dashed border-slate-600">
+                            <label class="block text-sm font-medium text-text-muted mb-4">Logotipo de la Agencia</label>
                             <div class="flex items-center gap-6">
                                 {% if agencia.logo %}
                                 <div class="w-24 h-24 bg-white/10 rounded-lg p-2 flex items-center justify-center">
@@ -169,29 +169,29 @@
                                 {% endif %}
                                 <div class="flex-1">
                                     {{ agency_branding_form.logo }}
-                                    <p class="text-xs text-gray-500 mt-2">Recomendado: PNG Transparente. Este logo
+                                    <p class="text-xs text-text-muted mt-2">Recomendado: PNG Transparente. Este logo
                                         aparecerá en facturas y correos.</p>
                                 </div>
                             </div>
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-400 mb-2">Nombre Comercial</label>
+                            <label class="block text-sm font-medium text-text-muted mb-2">Nombre Comercial</label>
                             {{ agency_branding_form.nombre_comercial }}
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-400 mb-2">RIF / ID Fiscal</label>
+                            <label class="block text-sm font-medium text-text-muted mb-2">RIF / ID Fiscal</label>
                             {{ agency_branding_form.rif }}
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-400 mb-2">Color Primario (Marca)</label>
+                            <label class="block text-sm font-medium text-text-muted mb-2">Color Primario (Marca)</label>
                             <div class="flex items-center gap-3">
                                 {{ agency_branding_form.color_primario }}
-                                <span class="text-xs text-gray-500">Color principal del Dashboard</span>
+                                <span class="text-xs text-text-muted">Color principal del Dashboard</span>
                             </div>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-400 mb-2">Teléfono Principal</label>
+                            <label class="block text-sm font-medium text-text-muted mb-2">Teléfono Principal</label>
                             {{ agency_branding_form.telefono_principal }}
                         </div>
                     </div>
@@ -207,9 +207,9 @@
 
             <!-- Tab: Automatización -->
             <div x-show="activeTab === 'automatizacion'"
-                class="bg-slate-800/50 border border-slate-700 rounded-2xl p-6 glass-panel" x-cloak>
+                class="bg-surface-2/50 border border-slate-700 rounded-2xl p-6 glass-panel" x-cloak>
                 <div class="flex items-center justify-between mb-6">
-                    <h2 class="text-xl font-bold text-white">Configuración del Mailbot</h2>
+                    <h2 class="text-xl font-bold text-text-main">Configuración del Mailbot</h2>
                     <div class="flex items-center gap-2">
                         <span
                             class="w-2 h-2 rounded-full {% if agencia.email_monitor_active %}bg-green-500 animate-pulse{% else %}bg-red-500{% endif %}"></span>
@@ -234,23 +234,23 @@
 
                     <div class="space-y-6 mb-8">
                         <div>
-                            <label class="block text-sm font-medium text-gray-400 mb-2">Correo Gmail a
+                            <label class="block text-sm font-medium text-text-muted mb-2">Correo Gmail a
                                 Monitorear</label>
                             {{ agency_automation_form.email_monitor_user }}
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-400 mb-2">Contraseña de Aplicación</label>
+                            <label class="block text-sm font-medium text-text-muted mb-2">Contraseña de Aplicación</label>
                             {{ agency_automation_form.email_monitor_password }}
-                            <p class="text-xs text-gray-500 mt-1">Generar en: Cuenta Google > Seguridad > Verificación
+                            <p class="text-xs text-text-muted mt-1">Generar en: Cuenta Google > Seguridad > Verificación
                                 en 2 pasos > Contraseñas de aplicaciones.</p>
                         </div>
 
-                        <div class="flex items-center p-4 bg-slate-900/50 rounded-lg border border-slate-700">
+                        <div class="flex items-center p-4 bg-surface-2/50 rounded-lg border border-slate-700">
                             {{ agency_automation_form.email_monitor_active }}
                             <div class="ml-3">
-                                <span class="text-white font-medium block">Activar Lectura Automática</span>
-                                <span class="text-xs text-gray-500">El sistema revisará correos nuevos cada 5
+                                <span class="text-text-main font-medium block">Activar Lectura Automática</span>
+                                <span class="text-xs text-text-muted">El sistema revisará correos nuevos cada 5
                                     minutos.</span>
                             </div>
                         </div>

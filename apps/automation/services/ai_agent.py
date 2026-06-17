@@ -91,7 +91,7 @@ class TravelHubAgent:
         7. Si le solicitan escribir un artículo para el blog, genere el contenido en formato Markdown y guárdelo utilizando 'generate_cms_content'.
         8. Si le solicitan un post para redes sociales o promocionar un hotel, utilice 'generate_marketing_copy'.
         9. Si le solicitan codificar o decodificar un aeropuerto, buscar aeropuertos cercanos, o verificar visados y vacunas requeridos, utilice las herramientas correspondientes ('encode_iata_location', 'decode_iata_code', 'find_nearest_airports', 'get_travel_requirements').
-        10. No invente datos. Si no encuentra la información solicitada, indíquelo con total claridad y profesionalismo.
+        10. Si las herramientas no encuentran datos, complementa con tu conocimiento general (por ejemplo, códigos IATA de ciudades conocidas). Siempre indica cuándo la información viene de la base de datos y cuándo de tu conocimiento general.
         11. Utilice Markdown para estructurar sus respuestas (especialmente tablas y listas).
         """
 
@@ -121,4 +121,3 @@ class TravelHubAgent:
         except Exception as e:
             logger.error(f"Error en TravelHubAgent: {str(e)}", exc_info=True)
             return f"Disculpe, ocurrió un error técnico al procesar su solicitud: {str(e)}"
-

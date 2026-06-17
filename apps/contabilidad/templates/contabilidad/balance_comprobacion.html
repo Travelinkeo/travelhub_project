@@ -1,9 +1,9 @@
 {% extends "base_modern.html" %}
 {% load i18n humanize %}
 
-{% block title %}{% trans "Balance de Comprobación" %} — TravelHub Pro{% endblock %}
+{% block title %}{% trans "Balance de ComprobaciÃ³n" %} â€” TravelHub Pro{% endblock %}
 
-{% block page_title %}{% trans "Balance de Comprobación" %}{% endblock %}
+{% block page_title %}{% trans "Balance de ComprobaciÃ³n" %}{% endblock %}
 {% block page_subtitle %}{% trans "Consolidado de saldos iniciales, movimientos y saldos finales por cuenta contable." %}{% endblock %}
 
 {% block content %}
@@ -13,7 +13,7 @@
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10 pb-6 border-b border-border-color print:hidden">
         <div>
             <h1 class="text-3xl font-black text-text-main tracking-tight uppercase">{% trans "Reporte de Balance" %}</h1>
-            <p class="text-text-muted text-sm mt-1">{% trans "Verificación de la integridad contable y cuadre de saldos." %}</p>
+            <p class="text-text-muted text-sm mt-1">{% trans "VerificaciÃ³n de la integridad contable y cuadre de saldos." %}</p>
         </div>
         <div class="flex gap-3">
             <button data-action="print" class="btn-secondary !h-12 !px-6 shadow-lg">
@@ -43,7 +43,7 @@
                 </div>
             </div>
             <div class="w-full md:w-44">
-                <label class="block text-[10px] font-black text-text-muted uppercase tracking-widest mb-2">{% trans "Visualización" %}</label>
+                <label class="block text-[10px] font-black text-text-muted uppercase tracking-widest mb-2">{% trans "VisualizaciÃ³n" %}</label>
                 <div class="relative">
                     <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-text-muted text-[18px]">payments</span>
                     <select name="moneda" class="input-base !pl-12 !h-12 w-full appearance-none bg-surface-1">
@@ -69,7 +69,7 @@
                 <h2 class="text-sm font-black text-text-main uppercase tracking-widest">{% trans "Balance Detallado" %}</h2>
             </div>
             <span class="text-[10px] font-black text-text-muted uppercase tracking-widest">
-                {% trans "Emitido" %}: {{ fecha_desde|date:"d M" }} — {{ fecha_hasta|date:"d M Y" }}
+                {% trans "Emitido" %}: {{ fecha_desde|date:"d M" }} â€” {{ fecha_hasta|date:"d M Y" }}
             </span>
         </div>
 
@@ -77,7 +77,7 @@
             <table class="w-full text-left border-collapse">
                 <thead>
                     <tr class="bg-surface-2/30 border-b border-border-color text-text-muted uppercase tracking-widest text-[10px]">
-                        <th class="px-8 py-4 font-black">{% trans "Código" %}</th>
+                        <th class="px-8 py-4 font-black">{% trans "CÃ³digo" %}</th>
                         <th class="px-8 py-4 font-black">{% trans "Cuenta Contable" %}</th>
                         <th class="px-8 py-4 font-black text-right">{% trans "Saldo Inicial" %}</th>
                         <th class="px-8 py-4 font-black text-right">{% trans "Debe" %}</th>
@@ -118,7 +118,7 @@
                                     <span class="material-symbols-outlined text-[48px]">folder_open</span>
                                 </div>
                                 <h3 class="text-xl font-black text-text-main uppercase tracking-tight">{% trans "Sin movimientos" %}</h3>
-                                <p class="text-sm text-text-muted">{% trans "No se detectó actividad contable para el periodo consultado." %}</p>
+                                <p class="text-sm text-text-muted">{% trans "No se detectÃ³ actividad contable para el periodo consultado." %}</p>
                             </div>
                         </td>
                     </tr>

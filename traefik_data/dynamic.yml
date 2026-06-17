@@ -1,21 +1,5 @@
 http:
   routers:
-    travelhub-static:
-      rule: "(Host(`travelhub.cc`) || HostRegexp(`{subdomain:[a-z0-9-]+}.travelhub.cc`)) && (PathPrefix(`/media`) || PathPrefix(`/static`))"
-      entryPoints:
-        - websecure
-      service: travelhub-static
-      priority: 100
-      tls:
-        certResolver: letsencryptresolver
-    travelhub-static-http:
-      rule: "(Host(`travelhub.cc`) || HostRegexp(`{subdomain:[a-z0-9-]+}.travelhub.cc`)) && (PathPrefix(`/media`) || PathPrefix(`/static`))"
-      entryPoints:
-        - web
-      middlewares:
-        - redirect-https
-      service: travelhub-static
-
     travelhub:
       rule: "Host(`travelhub.cc`) || HostRegexp(`{subdomain:[a-z0-9-]+}.travelhub.cc`)"
       entryPoints:
@@ -38,10 +22,6 @@ http:
           - url: "http://travelhub_web:8000"
         responseForwarding:
           flushInterval: "100ms"
-    travelhub-static:
-      loadBalancer:
-        servers:
-          - url: "http://travelhub_nginx:80"
 
   middlewares:
     redirect-https:

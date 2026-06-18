@@ -74,45 +74,35 @@
                             hx-vals='{"message": "¿Cuál es el resumen de KPIs de este mes?"}'
                             hx-target="#chat-messages" 
                             hx-swap="beforeend"
-                            hx-on::after-request="document.getElementById('ai-typing').classList.add('hidden')"
-                            hx-on::before-request="document.getElementById('ai-typing').classList.remove('hidden')"
-                            class="w-full text-left p-3 rounded-xl bg-emerald-900/20 border border-emerald-500/20 text-emerald-300 text-sm hover:bg-emerald-800/40 transition-all">
+                            class="ai-preset-btn w-full text-left p-3 rounded-xl bg-emerald-900/20 border border-emerald-500/20 text-emerald-300 text-sm hover:bg-emerald-800/40 transition-all">
                         🚀 Resumen de KPIs del mes
                     </button>
                     <button hx-post="{% url 'finance:ai_chat_htmx' %}" 
                             hx-vals='{"message": "¿Qué clientes tienen facturas vencidas?"}'
                             hx-target="#chat-messages" 
                             hx-swap="beforeend"
-                            hx-on::before-request="document.getElementById('ai-typing').classList.remove('hidden')"
-                            hx-on::after-request="document.getElementById('ai-typing').classList.add('hidden')"
-                            class="w-full text-left p-3 rounded-xl bg-emerald-900/20 border border-emerald-500/20 text-emerald-300 text-sm hover:bg-emerald-800/40 transition-all">
+                            class="ai-preset-btn w-full text-left p-3 rounded-xl bg-emerald-900/20 border border-emerald-500/20 text-emerald-300 text-sm hover:bg-emerald-800/40 transition-all">
                         ⚖️ Listar deudas pendientes
                     </button>
                     <button hx-post="{% url 'finance:ai_chat_htmx' %}" 
                             hx-vals='{"message": "Analiza las últimas discrepancias de conciliación"}'
                             hx-target="#chat-messages" 
                             hx-swap="beforeend"
-                            hx-on::before-request="document.getElementById('ai-typing').classList.remove('hidden')"
-                            hx-on::after-request="document.getElementById('ai-typing').classList.add('hidden')"
-                            class="w-full text-left p-3 rounded-xl bg-emerald-900/20 border border-emerald-500/20 text-emerald-300 text-sm hover:bg-emerald-800/40 transition-all">
+                            class="ai-preset-btn w-full text-left p-3 rounded-xl bg-emerald-900/20 border border-emerald-500/20 text-emerald-300 text-sm hover:bg-emerald-800/40 transition-all">
                         🔍 Revisar conciliación
                     </button>
                     <button hx-post="{% url 'finance:ai_chat_htmx' %}" 
                             hx-vals='{"message": "¿Cómo se ve el flujo de caja para los próximos 30 días?"}'
                             hx-target="#chat-messages" 
                             hx-swap="beforeend"
-                            hx-on::before-request="document.getElementById('ai-typing').classList.remove('hidden')"
-                            hx-on::after-request="document.getElementById('ai-typing').classList.add('hidden')"
-                            class="w-full text-left p-3 rounded-xl bg-indigo-900/20 border border-indigo-500/20 text-indigo-300 text-sm hover:bg-indigo-800/40 transition-all">
+                            class="ai-preset-btn w-full text-left p-3 rounded-xl bg-indigo-900/20 border border-indigo-500/20 text-indigo-300 text-sm hover:bg-indigo-800/40 transition-all">
                         💰 Predicción Cashflow (30d)
                     </button>
                     <button hx-post="{% url 'finance:ai_chat_htmx' %}" 
                             hx-vals='{"message": "Genera borradores de recordatorios para las facturas vencidas"}'
                             hx-target="#chat-messages" 
                             hx-swap="beforeend"
-                            hx-on::before-request="document.getElementById('ai-typing').classList.remove('hidden')"
-                            hx-on::after-request="document.getElementById('ai-typing').classList.add('hidden')"
-                            class="w-full text-left p-3 rounded-xl bg-rose-900/20 border border-rose-500/20 text-rose-300 text-sm hover:bg-rose-800/40 transition-all">
+                            class="ai-preset-btn w-full text-left p-3 rounded-xl bg-rose-900/20 border border-rose-500/20 text-rose-300 text-sm hover:bg-rose-800/40 transition-all">
                         📱 Generar Recordatorios (IA)
                     </button>
                 </div>
@@ -186,8 +176,7 @@
                     <form hx-post="{% url 'finance:ai_chat_htmx' %}" 
                           hx-target="#chat-messages" 
                           hx-swap="beforeend"
-                          hx-on::before-request="document.getElementById('ai-typing').classList.remove('hidden'); document.getElementById('chat-input').value=''"
-                          hx-on::after-request="document.getElementById('ai-typing').classList.add('hidden'); document.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight"
+                          id="ai-chat-form"
                           class="relative flex items-center gap-4">
                         {% csrf_token %}
                         <div class="relative flex-1">
@@ -210,4 +199,26 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script nonce="{{ request.csp_nonce }}">
+    document.addEventListener('htmx:beforeRequest', function(e) {
+        var elt = e.detail.elt;
+        if (elt && (elt.id === 'ai-chat-form' || elt.classList.contains('ai-preset-btn'))) {
+            document.getElementById('ai-typing').classList.remove('hidden');
+        }
+    });
+    document.addEventListener('htmx:afterRequest', function(e) {
+        var elt = e.detail.elt;
+        if (elt && (elt.id === 'ai-chat-form' || elt.classList.contains('ai-preset-btn'))) {
+            document.getElementById('ai-typing').classList.add('hidden');
+        }
+        if (elt && elt.id === 'ai-chat-form') {
+            document.getElementById('chat-input').value = '';
+            var container = document.getElementById('chat-messages');
+            container.scrollTop = container.scrollHeight;
+        }
+    });
+</script>
 {% endblock %}

@@ -59,8 +59,7 @@
                 class="mt-8 block rounded-md bg-[var(--primary)]/10 px-3 py-2 text-center text-sm font-semibold leading-6 text-[var(--primary)] ring-1 ring-inset ring-[var(--primary)]/30">
                 Plan Actual</div>
             {% else %}
-            <a href="#" onclick="checkout('BASIC')"
-                class="mt-8 block rounded-md bg-[var(--primary)] px-3 py-2 text-center text-sm font-semibold leading-6 text-[var(--text-on-primary)] shadow-sm hover:bg-[var(--primary-hover)] transition-colors">Suscribirse</a>
+            <a href="#" data-plan="BASIC" class="checkout-btn mt-8 block rounded-md bg-[var(--primary)] px-3 py-2 text-center text-sm font-semibold leading-6 text-[var(--text-on-primary)] shadow-sm hover:bg-[var(--primary-hover)] transition-colors">Suscribirse</a>
             {% endif %}
         </div>
 
@@ -120,8 +119,7 @@
                 class="mt-8 block rounded-md bg-[var(--primary)]/10 px-3 py-2 text-center text-sm font-semibold leading-6 text-[var(--primary)] ring-1 ring-inset ring-[var(--primary)]/30">
                 Plan Actual</div>
             {% else %}
-            <a href="#" onclick="checkout('PRO')"
-                class="mt-8 block rounded-md bg-[var(--primary)] px-3 py-2 text-center text-sm font-semibold leading-6 text-[var(--text-on-primary)] shadow-sm hover:bg-[var(--primary-hover)] transition-colors">Suscribirse</a>
+            <a href="#" data-plan="PRO" class="checkout-btn mt-8 block rounded-md bg-[var(--primary)] px-3 py-2 text-center text-sm font-semibold leading-6 text-[var(--text-on-primary)] shadow-sm hover:bg-[var(--primary-hover)] transition-colors">Suscribirse</a>
             {% endif %}
         </div>
 
@@ -162,8 +160,7 @@
                 class="mt-8 block rounded-md bg-[var(--primary)]/10 px-3 py-2 text-center text-sm font-semibold leading-6 text-[var(--primary)] ring-1 ring-inset ring-[var(--primary)]/30">
                 Plan Actual</div>
             {% else %}
-            <a href="#" onclick="checkout('ENTERPRISE')"
-                class="mt-8 block rounded-md bg-transparent border border-[var(--primary)] px-3 py-2 text-center text-sm font-semibold leading-6 text-[var(--primary)] shadow-sm hover:bg-[var(--primary)] hover:text-[var(--text-on-primary)] transition-all">Contactar Ventas</a>
+            <a href="#" data-plan="ENTERPRISE" class="checkout-btn mt-8 block rounded-md bg-transparent border border-[var(--primary)] px-3 py-2 text-center text-sm font-semibold leading-6 text-[var(--primary)] shadow-sm hover:bg-[var(--primary)] hover:text-[var(--text-on-primary)] transition-all">Contactar Ventas</a>
             {% endif %}
         </div>
     </div>
@@ -171,7 +168,7 @@
     <!-- Subscription Management Link -->
     {% if current_agency.stripe_customer_id and current_agency.plan != 'FREE' %}
     <div class="mt-12 text-center">
-        <p class="text-[var(--text-secondary)]">¿Ya tienes una suscripción? <a href="#" onclick="openPortal()"
+        <p class="text-[var(--text-secondary)]">¿Ya tienes una suscripción? <a href="#" id="open-portal-link"
                 class="text-[var(--primary)] font-semibold hover:underline">Gestionar facturación y métodos de pago</a>
         </p>
     </div>
@@ -180,6 +177,19 @@
 </div>
 
 <script nonce="{{ request.csp_nonce }}">
+    document.addEventListener('click', function (e) {
+        const checkoutBtn = e.target.closest('.checkout-btn');
+        if (checkoutBtn) {
+            e.preventDefault();
+            checkout(checkoutBtn.dataset.plan);
+            return;
+        }
+        if (e.target.closest('#open-portal-link')) {
+            e.preventDefault();
+            openPortal();
+        }
+    });
+
     async function checkout(plan) {
         if (plan === 'ENTERPRISE') {
             window.dispatchEvent(new CustomEvent('notify', {

@@ -66,8 +66,8 @@
             <input type="text" id="filterLocalizador" placeholder="🔍 Buscar por localizador...">
             <input type="date" id="filterFechaDesde" placeholder="Fecha desde">
             <input type="date" id="filterFechaHasta" placeholder="Fecha hasta">
-            <button onclick="aplicarFiltros()">Buscar</button>
-            <button onclick="limpiarFiltros()" style="background: #6c757d;">Limpiar</button>
+            <button type="button" data-action="apply-filters">Buscar</button>
+            <button type="button" data-action="clear-filters" style="background: #6c757d;">Limpiar</button>
         </div>
         
         <!-- Estadísticas -->
@@ -126,7 +126,14 @@
 
     <script nonce="{{ request.csp_nonce }}">
         let ventasData = [];
-        
+
+        // Event delegation for filter buttons
+        document.addEventListener('click', function (e) {
+            const action = e.target.closest('[data-action]')?.dataset.action;
+            if (action === 'apply-filters') aplicarFiltros();
+            else if (action === 'clear-filters') limpiarFiltros();
+        });
+
         // Cargar datos al iniciar
         window.addEventListener('DOMContentLoaded', () => {
             cargarVentas();

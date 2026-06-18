@@ -141,7 +141,7 @@
                                 <form hx-post="{% url 'finance:audit_approve_adjustment' item.id_conciliacion %}" 
                                       hx-target="#row-{{ item.id_conciliacion }}" 
                                       hx-swap="outerHTML swap:500ms"
-                                      onsubmit="this.querySelector('button').disabled = true">
+                                       >
                                     {% csrf_token %}
                                     <button type="submit" class="btn-primary h-7 px-3 text-[9px] font-black overflow-hidden group relative">
                                         <span class="relative z-10">Aprobar Ajuste</span>
@@ -167,4 +167,12 @@
     </div>
 
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script nonce="{{ request.csp_nonce }}">
+    document.querySelectorAll('form[hx-post]').forEach(function(form) {
+        form.addEventListener('submit', function() { this.querySelector('button[type=submit]').disabled = true; });
+    });
+</script>
 {% endblock %}

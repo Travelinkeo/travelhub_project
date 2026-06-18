@@ -40,7 +40,7 @@
                         <input type="checkbox" name="selected_items" value="{{ item.id_item_venta }}"
                             data-amount="{{ item.costo_unitario_referencial|default:0 }}"
                             class="form-checkbox h-5 w-5 text-primary rounded border-gray-600 bg-dark-700 focus:ring-offset-gray-900"
-                            onchange="updateTotals()">
+                            >
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                         {{ item.venta.fecha_venta|date:"d/m/Y" }}
@@ -66,6 +66,11 @@
         </table>
     </div>
 </div>
+<script nonce="{{ request.csp_nonce }}">
+    document.querySelectorAll('input[name=selected_items]').forEach(function(el) {
+        el.addEventListener('change', updateTotals);
+    });
+</script>
 {% else %}
 <div class="bg-dark-800 rounded-2xl p-12 border border-gray-700 text-center text-gray-500">
     <svg class="mx-auto h-12 w-12 text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

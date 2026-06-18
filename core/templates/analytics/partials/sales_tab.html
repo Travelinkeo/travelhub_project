@@ -4,7 +4,7 @@
 <div class="flex justify-end mb-8">
     <form hx-get="{% url 'core:analytics_sales' %}" hx-target="#analytics-content" class="flex items-center gap-3">
         <label for="year" class="text-[10px] font-black text-text-muted uppercase tracking-widest">{% trans "Año" %}:</label>
-        <select name="year" id="year" onchange="htmx.trigger(this.form, 'submit')" class="input-base !py-1 !px-3 !text-xs !w-24">
+        <select name="year" id="year" class="input-base !py-1 !px-3 !text-xs !w-24">
             {% for year in available_years %}
             <option value="{{ year }}" {% if year == selected_year %}selected{% endif %}>{{ year }}</option>
             {% endfor %}
@@ -53,6 +53,7 @@
 {{ top_airlines|json_script:"top-airlines-data" }}
 
 <script nonce="{{ request.csp_nonce }}">
+    document.getElementById('year').addEventListener('change', function() { htmx.trigger(this.form, 'submit'); });
     // Re-initialize charts when content is loaded
     (function () {
         // Safe check for Chart.js

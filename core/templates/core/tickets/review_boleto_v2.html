@@ -154,14 +154,14 @@
             const data = await response.json();
 
             if (response.ok) {
-                alert('¡Éxito! ' + data.mensaje);
+                window.dispatchEvent(new CustomEvent('notify', { detail: { message: '¡Éxito! ' + data.mensaje, type: 'success' } }));
                 window.location.reload(); // Reload to see updated fields
             } else {
-                alert('Error: ' + data.error);
+                window.dispatchEvent(new CustomEvent('notify', { detail: { message: 'Error: ' + data.error, type: 'error' } }));
             }
         } catch (error) {
             console.error('Error:', error);
-            alert('Error de conexión.');
+            window.dispatchEvent(new CustomEvent('notify', { detail: { message: 'Error de conexión.', type: 'error' } }));
         }
     }
 </script>

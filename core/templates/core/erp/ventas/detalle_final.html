@@ -356,7 +356,7 @@
                 </div>
 
                 <!-- Form -->
-                <form id="paymentForm" onsubmit="submitPayment(event)" class="space-y-4">
+                <form id="paymentForm" class="space-y-4">
                     <!-- Monto -->
                     <div>
                         <label class="block text-sm font-medium text-text-muted mb-1">Monto a Pagar</label>
@@ -372,7 +372,7 @@
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-text-muted mb-1">Moneda</label>
-                            <select id="pagoMoneda" required onchange="checkIGTFVisibility()"
+                            <select id="pagoMoneda" required
                                 class="w-full bg-surface-2 border border-gray-700 text-text-main rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500">
                                 {% for moneda in PROVEN_CURRENCIES|default:'' %}
                                 <!-- Fallback hardcoded for now until context validated -->
@@ -402,7 +402,7 @@
                     <div id="igtfContainer" class="hidden bg-surface-2/50 p-3 rounded-lg border border-gray-700">
                         <div class="flex items-center justify-between">
                             <div class="flex items-center">
-                                <input type="checkbox" id="aplicaIGTF" onchange="calculateIGTF()"
+                                <input type="checkbox" id="aplicaIGTF"
                                     class="w-4 h-4 text-emerald-500 bg-gray-700 border-gray-600 rounded focus:ring-emerald-500 focus:ring-offset-gray-800">
                                 <label for="aplicaIGTF" class="ml-2 text-sm font-medium text-gray-300">Aplicar IGTF
                                     (3%)</label>
@@ -550,6 +550,10 @@
     }
 
     // Attach to the trigger button
+    document.getElementById('paymentForm').addEventListener('submit', function(e) { submitPayment(e); });
+    document.getElementById('pagoMoneda').addEventListener('change', function() { checkIGTFVisibility(); });
+    document.getElementById('aplicaIGTF').addEventListener('change', function() { calculateIGTF(); });
+
     document.addEventListener('DOMContentLoaded', () => {
         // Find the "Registrar Pago" button (it didn't have ID, so we use selector text or add ID in previous step)
         // I will rely on adding onclick="openPaymentModal()" to the button in a separate replace/step or finding it here.

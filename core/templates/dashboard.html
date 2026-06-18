@@ -30,8 +30,7 @@
         </div>
 
         <!-- Tax Refund Card (Money on Table) -->
-        <div class="p-6 rounded-3xl bg-status-success/5 border border-status-success/20 shadow-status-success/5 shadow-2xl group hover:scale-[1.02] transition-transform cursor-pointer" 
-             onclick="window.location.href='{% url 'finance:tax_refund_dashboard' %}'">
+        <a href="{% url 'finance:tax_refund_dashboard' %}" class="block p-6 rounded-3xl bg-status-success/5 border border-status-success/20 shadow-status-success/5 shadow-2xl group hover:scale-[1.02] transition-transform cursor-pointer no-underline">
             <div class="flex items-center justify-between mb-4">
                 <span class="material-symbols-outlined text-status-success text-3xl">savings</span>
                 <span class="px-2 py-1 bg-status-success/80 text-black text-[10px] font-black rounded-lg animate-pulse">DINERO SOBRE LA MESA</span>
@@ -40,7 +39,7 @@
             <p class="text-[10px] text-text-muted mt-2 flex items-center gap-1">
                 Disponible para recuperar <span class="material-symbols-outlined text-[12px]">chevron_right</span>
             </p>
-        </div>
+        </a>
 
         <!-- Quick Status -->
         <div class="p-6 rounded-3xl bg-white/[0.02] border border-white/5 flex flex-col justify-center text-center">

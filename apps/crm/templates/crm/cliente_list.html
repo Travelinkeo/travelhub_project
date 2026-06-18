@@ -94,3 +94,14 @@
     </div>
 </main>
 {% endblock %}
+
+{% block extra_scripts %}
+<script nonce="{{ request.csp_nonce }}">
+document.addEventListener('click', function(e) {
+    var row = e.target.closest('tr[data-href]');
+    if (row && !e.target.closest('a, button, input, [data-stop-propagation]')) {
+        window.location.href = row.dataset.href;
+    }
+});
+</script>
+{% endblock %}

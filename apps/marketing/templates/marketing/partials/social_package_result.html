@@ -73,9 +73,7 @@
             </h3>
             <div class="space-y-3">
                 {% for variant in package.variants %}
-                <div onclick="document.getElementById('preview-caption-text').innerText = this.querySelector('.variant-text').innerText; 
-                             document.querySelectorAll('.variant-card').forEach(c => c.classList.remove('border-primary', 'bg-primary/5'));
-                             this.classList.add('border-primary', 'bg-primary/5');"
+                <div data-variant-index="{{ forloop.index0 }}"
                      class="variant-card cursor-pointer p-4 rounded-xl border border-border-color bg-surface-2 hover:border-primary/50 transition-all {% if forloop.first %}border-primary bg-primary/5{% endif %}">
                     <p class="text-[10px] font-mono uppercase text-primary mb-1 tracking-tighter">{{ variant.tone_name }}</p>
                     <p class="variant-text text-sm text-text-main leading-relaxed italic">"{{ variant.text }}"</p>
@@ -99,7 +97,7 @@
                     </span>
                     {% endfor %}
                 </div>
-                <button onclick="navigator.clipboard.writeText('{{ package.hashtags|join:" " }}')"
+                <button type="button" data-copy-text="{{ package.hashtags|join:" " }}"
                     class="w-full py-2 bg-surface-2 border border-border-color hover:border-primary text-text-main text-[10px] uppercase font-bold rounded-lg transition-all flex items-center justify-center gap-2">
                     <span class="material-symbols-outlined text-sm">content_copy</span> Copiar todos
                 </button>
@@ -121,3 +119,29 @@
         </div>
     </div>
 </div>
+
+<script nonce="{{ request.csp_nonce }}">
+if (!window.__socialPackageDelegation) {
+    window.__socialPackageDelegation = true;
+    document.addEventListener('click', function (e) {
+        const variantCard = e.target.closest('.variant-card[data-variant-index]');
+        if (variantCard) {
+            const previewText = document.getElementById('preview-caption-text');
+            if (previewText) {
+                previewText.innerText = variantCard.querySelector('.variant-text').innerText;
+            }
+            document.querySelectorAll('.variant-card').forEach(function (c) {
+                c.classList.remove('border-primary', 'bg-primary/5');
+            });
+            variantCard.classList.add('border-primary', 'bg-primary/5');
+            return;
+        }
+
+        const copyBtn = e.target.closest('[data-copy-text]');
+        if (copyBtn) {
+            e.preventDefault();
+            navigator.clipboard.writeText(copyBtn.dataset.copyText);
+        }
+    });
+}
+</script>

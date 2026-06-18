@@ -19,7 +19,7 @@
         </div>
 
         <!-- Botón para subir (Abre Modal) -->
-        <button onclick="document.getElementById('modal-upload').classList.remove('hidden')"
+        <button type="button" data-action="open-modal-upload"
             class="px-4 py-2 bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white font-bold rounded-xl transition-all shadow-xl shadow-[var(--primary)]/20 flex items-center gap-2 text-sm">
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -102,7 +102,7 @@
         <div class="bg-slate-900 border border-slate-700 rounded-xl w-full max-w-md overflow-hidden shadow-2xl">
             <div class="p-4 border-b border-slate-700 flex justify-between items-center">
                 <h2 class="text-lg font-bold text-white">Subir Reporte de Salidas</h2>
-                <button onclick="document.getElementById('modal-upload').classList.add('hidden')"
+                <button type="button" data-action="close-modal-upload"
                     class="text-gray-400 hover:text-white transition">
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -149,4 +149,15 @@
         </div>
     </div>
 </div>
+
+<script nonce="{{ request.csp_nonce }}">
+document.addEventListener('click', function (e) {
+    const action = e.target.closest('[data-action]')?.dataset.action;
+    if (action === 'open-modal-upload') {
+        document.getElementById('modal-upload').classList.remove('hidden');
+    } else if (action === 'close-modal-upload') {
+        document.getElementById('modal-upload').classList.add('hidden');
+    }
+});
+</script>
 {% endblock %}

@@ -30,11 +30,25 @@
         </div>
 
         <!-- Botón para obtener otro código -->
-        <button onclick="document.getElementById('pairing-result').innerHTML = ''; document.getElementById('numero_telefono').value = '';"
+        <button type="button" data-action="reset-pairing"
                 class="text-xs text-gray-500 hover:text-gray-300 transition-colors">
             ← Cambiar número / Reintentar
         </button>
     </div>
+
+<script nonce="{{ request.csp_nonce }}">
+if (!window.__whatsappPairingDelegation) {
+    window.__whatsappPairingDelegation = true;
+    document.addEventListener('click', function (e) {
+        if (e.target.closest('[data-action="reset-pairing"]')) {
+            var result = document.getElementById('pairing-result');
+            if (result) result.innerHTML = '';
+            var phone = document.getElementById('numero_telefono');
+            if (phone) phone.value = '';
+        }
+    });
+}
+</script>
 
 {% elif error %}
     <!-- ❌ ERROR -->

@@ -49,10 +49,6 @@
             }
         }
 
-        .animate-float {
-            animation: float 6s ease-in-out infinite;
-        }
-
         /* Lógica de visibilidad del logo dinámico */
         .logo-light { display: none; }
         .logo-dark { display: block; }
@@ -60,12 +56,6 @@
         @media (prefers-color-scheme: light) {
             .logo-light { display: block; }
             .logo-dark { display: none; }
-        }
-
-        @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-20px); }
-            100% { transform: translateY(0px); }
         }
 
         /* Fallback en caso de que falle el CDN de Tailwind */
@@ -165,7 +155,7 @@
             <div class="flex items-center justify-between pt-2">
                 <label
                     class="flex items-center space-x-2 text-sm text-gray-400 cursor-pointer hover:text-white transition-colors">
-                    <input type="checkbox"
+                    <input type="checkbox" name="remember"
                         class="form-checkbox h-4 w-4 bg-slate-800 border-slate-600 rounded text-blue-500 focus:ring-blue-500 focus:ring-offset-slate-900">
                     <span>Recordarme</span>
                 </label>

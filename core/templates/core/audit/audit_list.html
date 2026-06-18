@@ -164,7 +164,7 @@
             <div>
                 <nav class="flex gap-1" aria-label="Pagination">
                     {% if page_obj.has_previous %}
-                    <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.usuario %}&usuario={{ request.GET.usuario }}{% endif %}"
+                    <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.usuario %}&usuario={{ request.GET.usuario }}{% endif %}{% if request.GET.accion %}&accion={{ request.GET.accion }}{% endif %}"
                         class="w-10 h-10 flex items-center justify-center rounded-lg border border-border-color bg-surface-2 text-text-muted hover:bg-primary hover:text-white transition-all">
                         <span class="material-symbols-outlined text-sm">chevron_left</span>
                     </a>
@@ -175,7 +175,7 @@
                     </div>
 
                     {% if page_obj.has_next %}
-                    <a href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.usuario %}&usuario={{ request.GET.usuario }}{% endif %}"
+                    <a href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.usuario %}&usuario={{ request.GET.usuario }}{% endif %}{% if request.GET.accion %}&accion={{ request.GET.accion }}{% endif %}"
                         class="w-10 h-10 flex items-center justify-center rounded-lg border border-border-color bg-surface-2 text-text-muted hover:bg-primary hover:text-white transition-all">
                         <span class="material-symbols-outlined text-sm">chevron_right</span>
                     </a>

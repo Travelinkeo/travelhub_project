@@ -33,7 +33,7 @@
         </div>
 
         <!-- Tarjeta 3: Botón de Acción Principal -->
-        <div class="bg-surface-1 border border-border-color rounded-3xl p-6 shadow-sm flex flex-col justify-center items-center text-center border-dashed border-2 hover:border-blue-400 hover:bg-blue-50/30 transition-all cursor-pointer group" onclick="document.getElementById('upload-modal').classList.remove('hidden')">
+        <div class="bg-surface-1 border border-border-color rounded-3xl p-6 shadow-sm flex flex-col justify-center items-center text-center border-dashed border-2 hover:border-blue-400 hover:bg-blue-50/30 transition-all cursor-pointer group" onclick="window.location.href='{% url 'core:boletos_importar' %}'">
             <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
                 <span class="material-symbols-outlined text-3xl">upload_file</span>
             </div>

@@ -7,18 +7,10 @@
 {% block page_subtitle %}Inicia el registro base de la transacción para el ERP.{% endblock %}
 
 {% block extra_head %}
-<!-- Form styling overrides to apply Tailwind input-base to Django generated inputs -->
-<style nonce="{{ request.csp_nonce }}" type="text/tailwindcss">
-    @layer components {
-        input[type="text"], input[type="number"], input[type="date"], input[type="email"], select, textarea { 
-            @apply input-base;
-        }
-    }
-</style>
 {% endblock %}
 
 {% block content %}
-<main class="flex-1 w-full max-w-[1200px] mx-auto p-6 md:p-10" x-data="{ currentStep: 1 }">
+<main class="flex-1 w-full max-w-[1200px] mx-auto p-6 md:p-10" x-data="{}">
 
     <!-- Action Bar / Breadcrumb -->
     <div class="flex items-center justify-between mb-10 pb-6 border-b border-border-color">

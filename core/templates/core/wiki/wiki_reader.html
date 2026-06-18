@@ -415,7 +415,8 @@ searchInput.addEventListener('input', function() {
     ).slice(0, 8);
 
     if (matches.length === 0) {
-        searchResults.innerHTML = `<div class="p-4 text-xs text-text-muted text-center">Sin resultados para "<strong>${q}</strong>"</div>`;
+        const escQ = q.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        searchResults.innerHTML = `<div class="p-4 text-xs text-text-muted text-center">Sin resultados para "<strong>${escQ}</strong>"</div>`;
     } else {
         searchResults.innerHTML = matches.map(m => `
             <button onclick="jumpTo(searchIndex[${searchIndex.indexOf(m)}])" 

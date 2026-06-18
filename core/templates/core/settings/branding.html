@@ -293,7 +293,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="{{ request.csp_nonce }}">
     document.body.addEventListener('htmx:afterSwap', function(e) {
         if (e.detail.target.id === 'form-response') {
             e.detail.target.scrollIntoView({ behavior: 'smooth', block: 'center' });

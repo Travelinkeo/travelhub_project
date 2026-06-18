@@ -179,10 +179,12 @@
 </div>
 </div>
 
-<script>
+<script nonce="{{ request.csp_nonce }}">
     async function checkout(plan) {
         if (plan === 'ENTERPRISE') {
-            alert('Por favor contáctanos a ventas@travelhub.com');
+            window.dispatchEvent(new CustomEvent('notify', {
+                detail: { message: 'Por favor contáctanos a ventas@travelhub.com', type: 'info' }
+            }));
             return;
         }
 
@@ -201,10 +203,14 @@
             if (data.checkout_url) {
                 window.location.href = data.checkout_url;
             } else {
-                alert('Error iniciando checkout: ' + (data.error || 'Desconocido'));
+                window.dispatchEvent(new CustomEvent('notify', {
+                    detail: { message: 'Error iniciando checkout: ' + (data.error || 'Desconocido'), type: 'error' }
+                }));
             }
         } catch (e) {
-            alert('Error de conexión');
+            window.dispatchEvent(new CustomEvent('notify', {
+                detail: { message: 'Error de conexión', type: 'error' }
+            }));
         }
     }
 
@@ -213,8 +219,12 @@
             const response = await fetch('/api/billing/portal/', { method: 'POST' });
             const data = await response.json();
             if (data.portal_url) window.location.href = data.portal_url;
-            else alert('Error: ' + (data.error || 'Desconocido'));
-        } catch (e) { alert('Error de conexión'); }
+            else window.dispatchEvent(new CustomEvent('notify', {
+                detail: { message: 'Error: ' + (data.error || 'Desconocido'), type: 'error' }
+            }));
+        } catch (e) { window.dispatchEvent(new CustomEvent('notify', {
+            detail: { message: 'Error de conexión', type: 'error' }
+        })); }
     }
 </script>
 {% endblock %}

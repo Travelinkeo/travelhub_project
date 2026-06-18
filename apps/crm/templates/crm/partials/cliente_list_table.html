@@ -17,7 +17,7 @@
         <tbody class="divide-y divide-border-color/50">
             {% for cliente in clientes %}
             <tr class="group hover:bg-nav-active-bg/10 transition-all cursor-pointer" onclick="location.href='{% url 'crm:cliente_detail' cliente.pk %}'">
-                <td class="px-6 py-5" data-stop-propagation>
+                <td class="px-6 py-5" onclick="event.stopPropagation()">
                     <input type="checkbox" class="size-5 rounded-lg border-border-color bg-surface-1 text-primary focus:ring-primary/20 transition-all cursor-pointer">
                 </td>
 
@@ -83,7 +83,7 @@
                     {% endif %}
                 </td>
 
-                <td class="px-6 py-5" data-stop-propagation>
+                <td class="px-6 py-5" onclick="event.stopPropagation()">
                     <div class="flex items-center justify-end gap-2">
                         <a href="{% url 'crm:cliente_detail' cliente.pk %}"
                             class="size-8 flex items-center justify-center text-text-muted hover:text-primary hover:bg-primary/10 rounded-lg transition-all border border-transparent hover:border-primary/20" 
@@ -95,7 +95,7 @@
                             title="Editar">
                             <span class="material-symbols-outlined text-[18px]">edit</span>
                         </a>
-                        <button hx-delete="{% url 'crm:cliente_delete' cliente.pk %}"
+                        <button hx-post="{% url 'crm:cliente_delete' cliente.pk %}"
                             hx-confirm="¿ELIMINAR A {{ cliente.get_nombre_completo|upper }} DEL SISTEMA?"
                             hx-target="closest tr" hx-swap="outerHTML swap:0.5s"
                             class="size-8 flex items-center justify-center text-text-muted hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all border border-transparent hover:border-red-500/20" 

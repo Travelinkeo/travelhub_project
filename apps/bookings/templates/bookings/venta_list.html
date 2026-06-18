@@ -10,10 +10,12 @@
 <style nonce="{{ request.csp_nonce }}">
     .shadow-swiss { box-shadow: 0 4px 20px -5px rgba(0,0,0,0.3) !important; }
     .kpi-card {
-        @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-xl;
+        transition: all 0.3s ease;
         border-left: 4px solid transparent;
     }
     .kpi-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
         border-left-color: var(--primary);
     }
 </style>
@@ -97,7 +99,7 @@
                     <input type="text" name="q" placeholder="Buscar por localizador, cliente o ID de venta..."
                         class="input-base pl-10 !bg-surface-1 focus:!bg-surface-base"
                         hx-get="{% url 'bookings:venta_list' %}" hx-trigger="keyup changed delay:500ms"
-                        hx-target="#sales-list-body">
+                        hx-target="#sales-list-body" hx-select="#sales-list-body" hx-swap="outerHTML">
                 </div>
                 <div class="flex gap-3">
                     <select class="input-base w-48 !bg-surface-1">

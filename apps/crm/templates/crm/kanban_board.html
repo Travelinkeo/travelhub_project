@@ -86,6 +86,22 @@
                 </div>
             </div>
 
+            <!-- COLUMNA: PERDIDO -->
+            <div class="w-80 flex flex-col h-full max-h-full">
+                <div class="flex items-center justify-between mb-3 px-1">
+                    <h3 class="font-bold text-[14px] text-text-main flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]"></span> Perdido
+                    </h3>
+                    <span class="text-xs font-bold bg-surface-2 text-text-secondary border border-border-color px-2 py-0.5 rounded-full">{{ leads_los_count }}</span>
+                </div>
+                <div id="col-LOS" data-stage="LOS" @dragover.prevent="dragOver($event)" @dragleave.prevent="dragLeave($event)" @drop="drop($event, 'LOS')" 
+                     class="column-drop-zone flex-1 bg-red-500/10 border border-red-500/20 rounded-2xl p-3 overflow-y-auto transition-all shadow-inset-custom">
+                    {% for lead in leads_los %}
+                        {% include "crm/partials/kanban_card.html" with lead=lead %}
+                    {% endfor %}
+                </div>
+            </div>
+
         </div>
     </div>
 </div>
@@ -124,15 +140,20 @@
                 if (!this.draggedId) return;
 
                 const card = document.getElementById('card-' + this.draggedId);
+                const originalParent = card.parentElement;
+                const originalNextSibling = card.nextElementSibling;
                 event.currentTarget.appendChild(card);
 
                 htmx.ajax('POST', '{% url "crm:kanban_update_stage" %}', {
                     values: {
                         lead_id: this.draggedId,
                         new_stage: newStage
-                    },
-                    headers: {
-                        'X-CSRFToken': '{{ csrf_token }}'
+                    }
+                }).catch(() => {
+                    if (originalNextSibling) {
+                        originalParent.insertBefore(card, originalNextSibling);
+                    } else {
+                        originalParent.appendChild(card);
                     }
                 });
             }

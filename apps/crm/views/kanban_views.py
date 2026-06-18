@@ -39,20 +39,23 @@ class KanbanBoardView(LoginRequiredMixin, View):
             self.get_queryset().select_related("cliente").order_by("etapa", "-creado_en")
         )
 
-        leads_new = [l for l in all_leads if l.etapa == "NEW"]
-        leads_quo = [l for l in all_leads if l.etapa == "QUO"]
-        leads_pay = [l for l in all_leads if l.etapa == "PAY"]
-        leads_won = [l for l in all_leads if l.etapa == "WON"]
+        leads_new = [lead for lead in all_leads if lead.etapa == "NEW"]
+        leads_quo = [lead for lead in all_leads if lead.etapa == "QUO"]
+        leads_pay = [lead for lead in all_leads if lead.etapa == "PAY"]
+        leads_won = [lead for lead in all_leads if lead.etapa == "WON"]
+        leads_los = [lead for lead in all_leads if lead.etapa == "LOS"]
 
         context = {
             "leads_new": leads_new,
             "leads_quo": leads_quo,
             "leads_pay": leads_pay,
             "leads_won": leads_won,
+            "leads_los": leads_los,
             "leads_new_count": len(leads_new),
             "leads_quo_count": len(leads_quo),
             "leads_pay_count": len(leads_pay),
             "leads_won_count": len(leads_won),
+            "leads_los_count": len(leads_los),
         }
         return render(request, self.template_name, context)
 

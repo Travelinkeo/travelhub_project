@@ -65,10 +65,12 @@
                     <div class="space-y-2">
                         <label class="text-[10px] font-black text-text-secondary uppercase tracking-widest">Nombres</label>
                         <input type="text" name="nombres" value="{{ form.nombres.value|default:'' }}" class="input-base" placeholder="Ej: Juan">
+                        {% if form.nombres.errors %}<p class="text-red-400 text-xs mt-1">{{ form.nombres.errors.0 }}</p>{% endif %}
                     </div>
                     <div class="space-y-2">
                         <label class="text-[10px] font-black text-text-secondary uppercase tracking-widest">Apellidos</label>
                         <input type="text" name="apellidos" value="{{ form.apellidos.value|default:'' }}" class="input-base" placeholder="Ej: Perez">
+                        {% if form.apellidos.errors %}<p class="text-red-400 text-xs mt-1">{{ form.apellidos.errors.0 }}</p>{% endif %}
                     </div>
                     <div class="sm:col-span-2 space-y-2">
                         <label class="text-[10px] font-black text-text-secondary uppercase tracking-widest">Razón Social / Empresa (Opcional)</label>
@@ -78,6 +80,7 @@
                                 <input type="text" name="nombre_empresa" value="{{ form.nombre_empresa.value|default:'' }}" class="input-base !pl-10" placeholder="Nombre comercial de la empresa">
                             </div>
                         </div>
+                        {% if form.nombre_empresa.errors %}<p class="text-red-400 text-xs mt-1">{{ form.nombre_empresa.errors.0 }}</p>{% endif %}
                     </div>
                 </div>
             </div>
@@ -100,6 +103,7 @@
                     <div class="space-y-2">
                         <label class="text-[10px] font-black text-text-secondary uppercase tracking-widest">Cédula / RIF / ID Fiscal</label>
                         <input type="text" name="cedula_identidad" value="{{ form.cedula_identidad.value|default:'' }}" class="input-base">
+                        {% if form.cedula_identidad.errors %}<p class="text-red-400 text-xs mt-1">{{ form.cedula_identidad.errors.0 }}</p>{% endif %}
                     </div>
                     <div class="space-y-2">
                         <label class="text-[10px] font-black text-text-secondary uppercase tracking-widest">Correo Electrónico</label>
@@ -107,6 +111,7 @@
                             <span class="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted material-symbols-outlined text-[18px] z-10">mail</span>
                             <input type="email" name="email" value="{{ form.email.value|default:'' }}" class="input-base !pl-10">
                         </div>
+                        {% if form.email.errors %}<p class="text-red-400 text-xs mt-1">{{ form.email.errors.0 }}</p>{% endif %}
                     </div>
                     <div class="space-y-2">
                         <label class="text-[10px] font-black text-text-secondary uppercase tracking-widest">Teléfono Directo</label>
@@ -114,6 +119,7 @@
                             <span class="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted material-symbols-outlined text-[18px] z-10">phone_iphone</span>
                             <input type="text" name="telefono_principal" value="{{ form.telefono_principal.value|default:'' }}" class="input-base !pl-10">
                         </div>
+                        {% if form.telefono_principal.errors %}<p class="text-red-400 text-xs mt-1">{{ form.telefono_principal.errors.0 }}</p>{% endif %}
                     </div>
                 </div>
             </div>
@@ -133,10 +139,12 @@
                     <div class="space-y-2">
                         <label class="text-[10px] font-black text-text-secondary uppercase tracking-widest">Ciudad</label>
                         <input type="text" name="ciudad" value="{{ form.ciudad.value|default:'' }}" class="input-base">
+                        {% if form.ciudad.errors %}<p class="text-red-400 text-xs mt-1">{{ form.ciudad.errors.0 }}</p>{% endif %}
                     </div>
                     <div class="space-y-2">
                         <label class="text-[10px] font-black text-text-secondary uppercase tracking-widest">Dirección Completa</label>
                         <textarea name="direccion" rows="4" class="input-base" placeholder="Calle, edificio, oficina...">{{ form.direccion.value|default:'' }}</textarea>
+                        {% if form.direccion.errors %}<p class="text-red-400 text-xs mt-1">{{ form.direccion.errors.0 }}</p>{% endif %}
                     </div>
                     <div class="hidden">
                         {{ form.nacionalidad }}

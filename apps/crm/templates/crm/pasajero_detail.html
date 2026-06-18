@@ -100,11 +100,18 @@
                     <dt class="text-sm text-[var(--text-muted)]">País de Emisión</dt>
                     <dd class="text-sm font-semibold text-[var(--text-primary)]">{{ pasajero.pais_emision_documento|default:"—" }}</dd>
                 </div>
-                <div class="flex justify-between items-center py-2">
-                    <dt class="text-sm text-[var(--text-muted)]">Vencimiento</dt>
+                <div class="flex justify-between items-center py-2 border-b border-[var(--border)]">
+                    <dt class="text-sm text-[var(--text-muted)]">Vencimiento Documento</dt>
                     <dd class="text-sm font-bold {% if pasajero.esta_pasaporte_vencido %}text-red-500{% else %}text-emerald-500 font-medium{% endif %}">
                         {{ pasajero.fecha_vencimiento_documento|date:"d M Y"|default:"—" }}
                         {% if pasajero.esta_pasaporte_vencido %}<span class="text-[10px] ml-1 font-bold bg-red-500/10 border border-red-500/20 text-red-500 px-1.5 py-0.5 rounded uppercase">Vencido</span>{% endif %}
+                    </dd>
+                </div>
+                <div class="flex justify-between items-center py-2">
+                    <dt class="text-sm text-[var(--text-muted)]">Vence Pasaporte</dt>
+                    <dd class="text-sm font-bold {% if pasajero.esta_vencido %}text-red-500{% else %}text-emerald-500 font-medium{% endif %}">
+                        {{ pasajero.fecha_vencimiento_pasaporte|date:"d M Y"|default:"—" }}
+                        {% if pasajero.esta_vencido %}<span class="text-[10px] ml-1 font-bold bg-red-500/10 border border-red-500/20 text-red-500 px-1.5 py-0.5 rounded uppercase">Vencido</span>{% endif %}
                     </dd>
                 </div>
             </dl>

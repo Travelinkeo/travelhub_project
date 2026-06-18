@@ -126,7 +126,7 @@
     </div>
 </div>
 
-<script nonce="{{ request.META.CSP_NONCE }}">
+<script nonce="{{ request.csp_nonce }}">
     function traductorApp() {
         return {
             inputText: '',

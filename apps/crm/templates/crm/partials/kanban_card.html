@@ -38,10 +38,16 @@
             </a>
 
             <!-- Botón WhatsApp -->
-            <a href="https://wa.me/{{ lead.cliente.telefono|default:'' }}" target="_blank"
+            {% if lead.cliente and lead.cliente.telefono %}
+            <a href="https://wa.me/{{ lead.cliente.telefono }}" target="_blank"
                class="w-7 h-7 rounded-full bg-status-success-bg/20 text-status-success flex items-center justify-center hover:bg-status-success hover:text-white transition-all shadow-sm" title="Responder por WhatsApp">
                 <span class="material-symbols-outlined text-[16px]">chat</span>
             </a>
+            {% else %}
+            <span class="w-7 h-7 rounded-full bg-surface-2 text-text-muted flex items-center justify-center cursor-not-allowed" title="Sin teléfono">
+                <span class="material-symbols-outlined text-[16px]">chat</span>
+            </span>
+            {% endif %}
         </div>
     </div>
 </div>

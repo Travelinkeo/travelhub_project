@@ -64,7 +64,7 @@
                 </thead>
                 <tbody class="divide-y divide-dashed divide-border-color">
                     {% for proveedor in proveedores %}
-                    <tr class="hover:bg-surface-3 transition-colors group cursor-pointer" onclick="location.href='{% url 'bookings:proveedor_update' proveedor.pk %}'">
+                    <tr class="hover:bg-surface-3 transition-colors group cursor-pointer" data-href="{% url 'bookings:proveedor_update' proveedor.pk %}">
                         <td>
                             <div class="flex items-center gap-3">
                                 <div class="w-10 h-10 rounded-full flex items-center justify-center text-xs font-black bg-indigo-500/10 text-indigo-500 border border-indigo-500/20 shrink-0">
@@ -170,4 +170,15 @@
         {% endif %}
     </div>
 </main>
+{% endblock %}
+
+{% block extra_scripts %}
+<script nonce="{{ request.csp_nonce }}">
+document.addEventListener('click', function(e) {
+    var row = e.target.closest('tr[data-href]');
+    if (row && !e.target.closest('a, button, input, [data-stop-propagation]')) {
+        window.location.href = row.dataset.href;
+    }
+});
+</script>
 {% endblock %}

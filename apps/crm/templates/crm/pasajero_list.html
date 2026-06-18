@@ -59,7 +59,7 @@
                 </thead>
                 <tbody id="pasajero-table-body" class="divide-y divide-border-color/50">
                     {% for pasajero in pasajeros %}
-                    <tr class="group hover:bg-nav-active-bg/10 transition-all cursor-pointer" onclick="location.href='{% url 'crm:pasajero_detail' pasajero.pk %}'">
+                    <tr class="group hover:bg-nav-active-bg/10 transition-all cursor-pointer" data-href="{% url 'crm:pasajero_detail' pasajero.pk %}">
                         <td class="px-6 py-5">
                             <div class="flex items-center gap-4">
                                 <div class="size-10 rounded-2xl flex items-center justify-center font-black text-xs border border-border-color shadow-sm shrink-0 bg-primary/10 text-primary border-primary/20">
@@ -111,7 +111,7 @@
                             {% endif %}
                         </td>
 
-                        <td class="px-6 py-5" onclick="event.stopPropagation()">
+                        <td class="px-6 py-5" data-stop-propagation>
                             <div class="flex items-center justify-end gap-2">
                                 <a href="{% url 'crm:pasajero_detail' pasajero.pk %}"
                                     class="size-8 flex items-center justify-center text-text-muted hover:text-primary hover:bg-primary/10 rounded-lg transition-all border border-transparent hover:border-primary/20" 
@@ -183,4 +183,15 @@
     <!-- Modal OCR Refined -->
     {% include 'crm/partials/ocr_upload_modal.html' %}
 </main>
+{% endblock %}
+
+{% block extra_scripts %}
+<script nonce="{{ request.csp_nonce }}">
+document.addEventListener('click', function(e) {
+    var row = e.target.closest('tr[data-href]');
+    if (row && !e.target.closest('a, button, input, [data-stop-propagation]')) {
+        window.location.href = row.dataset.href;
+    }
+});
+</script>
 {% endblock %}

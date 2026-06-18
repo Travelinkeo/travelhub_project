@@ -112,7 +112,7 @@
                     </div>
                     <p class="text-xs text-text-muted mb-3 line-clamp-1">{{ link.venta.cliente.get_full_name|title }}</p>
                     
-                    <button onclick="navigator.clipboard.writeText('{{ request.scheme }}://{{ request.get_host }}/finance/pay/{{ link.id }}/'); alert('¡Link copiado al portapapeles!')" 
+                    <button onclick="navigator.clipboard.writeText('{{ request.scheme }}://{{ request.get_host }}/finance/pay/{{ link.id }}/'); window.dispatchEvent(new CustomEvent('notify', { detail: { message: '¡Link copiado al portapapeles!', type: 'success' } }));" 
                             class="w-full bg-white border border-slate-200 hover:border-blue-400 hover:text-blue-600 text-slate-600 font-bold py-2 rounded-xl text-xs transition-colors flex items-center justify-center gap-2">
                         <span class="material-symbols-outlined text-[16px]">content_copy</span> Copiar Link para WhatsApp
                     </button>

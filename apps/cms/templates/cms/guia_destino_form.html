@@ -131,11 +131,11 @@
                     input.value = data.suggestion;
                 }
             } else {
-                alert("Error: " + (data.error || "No se pudo obtener sugerencia"));
+                window.dispatchEvent(new CustomEvent('notify', { detail: { message: 'Error: ' + (data.error || 'No se pudo obtener sugerencia'), type: 'error' } }));
             }
         } catch (e) {
             console.error(e);
-            alert("Error tecnico al conectar con la IA.");
+            window.dispatchEvent(new CustomEvent('notify', { detail: { message: 'Error tecnico al conectar con la IA.', type: 'error' } }));
         } finally {
             btn.innerHTML = originalContent;
             btn.disabled = false;

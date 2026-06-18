@@ -356,14 +356,14 @@
             });
 
             if (response.ok) {
-                alert('Facturación doble generada correctamente.');
+                window.dispatchEvent(new CustomEvent('notify', { detail: { message: 'Facturación doble generada correctamente.', type: 'success' } }));
                 window.location.reload();
             } else {
                 const err = await response.json();
-                alert('Error: ' + (err.error || JSON.stringify(err)));
+                window.dispatchEvent(new CustomEvent('notify', { detail: { message: 'Error: ' + (err.error || JSON.stringify(err)), type: 'error' } }));
             }
         } catch (e) {
-            alert('Error de conexión');
+            window.dispatchEvent(new CustomEvent('notify', { detail: { message: 'Error de conexión', type: 'error' } }));
         }
     }
 

@@ -4,7 +4,7 @@
 <form hx-post="{% url 'core:usuario_update_role' usuario_agencia.pk %}" hx-target="#rol-badge-{{ usuario_agencia.pk }}"
     class="inline-block">
     {% csrf_token %}
-    <select name="rol" onchange="this.form.requestSubmit()"
+    <select name="rol"
         class="mt-1 block w-full py-1 pl-2 pr-8 text-xs border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-xs rounded-md shadow-sm">
         <option value="admin" {% if usuario_agencia.rol=='admin' %}selected{% endif %}>Admin</option>
         <option value="gerente" {% if usuario_agencia.rol=='gerente' %}selected{% endif %}>Gerente</option>
@@ -14,3 +14,6 @@
         <option value="consulta" {% if usuario_agencia.rol=='consulta' %}selected{% endif %}>Solo Consulta</option>
     </select>
 </form>
+<script nonce="{{ request.csp_nonce }}">
+    document.querySelector('select[name=rol]').addEventListener('change', function() { this.form.requestSubmit(); });
+</script>

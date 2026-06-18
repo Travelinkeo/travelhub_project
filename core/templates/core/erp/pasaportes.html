@@ -29,7 +29,7 @@
 
         <!-- Upload Button -->
         <input type="file" id="upload-pasaporte" accept="image/*" class="hidden"
-            onchange="uploadPasaporte(this.files[0])">
+            >
         <label for="upload-pasaporte"
             class="cursor-pointer inline-flex items-center px-4 py-2 bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white rounded-lg transition-colors font-bold shadow-lg">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -199,6 +199,8 @@
 
 {% block extra_scripts %}
 <script nonce="{{ request.csp_nonce }}">
+    document.getElementById('upload-pasaporte').addEventListener('change', function() { uploadPasaporte(this.files[0]); });
+
     function openImageModal(url) {
         document.getElementById('modalImage').src = url;
         document.getElementById('imageModal').classList.remove('hidden');

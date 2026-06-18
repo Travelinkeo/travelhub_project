@@ -701,7 +701,7 @@
 
         // 4. Stub Carrito
         const btnAdd = document.getElementById('btnAddToCart');
-        if (btnAdd) btnAdd.addEventListener('click', () => alert("Añadido al carrito (Demo)"));
+        if (btnAdd) btnAdd.addEventListener('click', () => window.dispatchEvent(new CustomEvent('notify', { detail: { message: 'Añadido al carrito (Demo)', type: 'info' } })));
     });
 
     function seleccionarHabitacion(id, nombre) {

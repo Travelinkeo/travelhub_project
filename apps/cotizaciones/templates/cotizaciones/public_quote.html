@@ -200,7 +200,7 @@
                             url: window.location.href
                         }).catch(console.error);
                     } else {
-                        alert('Link copiado al portapapeles');
+                        window.dispatchEvent(new CustomEvent('notify', { detail: { message: 'Link copiado al portapapeles', type: 'success' } }));
                         navigator.clipboard.writeText(window.location.href);
                     }
                 }

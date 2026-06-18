@@ -133,10 +133,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 a.click();
                 a.remove();
             } else {
-                alert("Error al generar el Excel.");
+                window.dispatchEvent(new CustomEvent('notify', { detail: { message: 'Error al generar el Excel.', type: 'error' } }));
             }
         } catch (error) {
-            alert("Error de conexión al exportar.");
+            window.dispatchEvent(new CustomEvent('notify', { detail: { message: 'Error de conexión al exportar.', type: 'error' } }));
         } finally {
             loadingIndicator.classList.add('hidden');
             loadingIndicator.textContent = "Procesando archivo con IA... Por favor espera.";

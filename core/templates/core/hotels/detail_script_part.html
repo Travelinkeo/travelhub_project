@@ -69,7 +69,7 @@
         copyText.select();
         copyText.setSelectionRange(0, 99999);
         navigator.clipboard.writeText(copyText.value);
-        alert("¡Texto copiado al portapapeles!");
+        window.dispatchEvent(new CustomEvent('notify', { detail: { message: '¡Texto copiado al portapapeles!', type: 'success' } }));
     }
 </script>
 {% endblock %}

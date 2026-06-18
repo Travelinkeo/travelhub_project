@@ -314,12 +314,12 @@ function editField(itemId, campo, element) {
             // Nota: Recargar opcional si queremos ver reflejados los totales agregados de la fila superior
             location.reload(); 
         } else {
-            alert('Error Auditoría: ' + data.error);
+            window.dispatchEvent(new CustomEvent('notify', { detail: { message: 'Error Auditoría: ' + data.error, type: 'error' } }));
             element.classList.remove('animate-pulse', 'opacity-50');
         }
     })
     .catch(error => {
-        alert('Fallo de Red: ' + error);
+        window.dispatchEvent(new CustomEvent('notify', { detail: { message: 'Fallo de Red: ' + error, type: 'error' } }));
         element.classList.remove('animate-pulse', 'opacity-50');
     });
 }

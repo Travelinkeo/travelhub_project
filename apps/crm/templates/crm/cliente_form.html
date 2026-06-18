@@ -47,7 +47,7 @@
                             {% endif %}
                         </div>
                         <input type="file" name="foto_perfil" class="absolute inset-0 opacity-0 cursor-pointer"
-                            onchange="previewImage(this)">
+                            >
                     </div>
                     <div class="flex items-center gap-2 text-text-muted">
                         <span class="material-symbols-outlined text-[14px]">info</span>
@@ -171,6 +171,8 @@
 
 {% block extra_scripts %}
 <script>
+    document.querySelector('input[type=file][name=foto_perfil]').addEventListener('change', function() { previewImage(this); });
+
     function previewImage(input) {
         if (input.files && input.files[0]) {
             var reader = new FileReader();

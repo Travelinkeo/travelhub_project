@@ -297,7 +297,7 @@
                         throw new Error(data.error);
                     }
                 } catch (e) {
-                    alert("Error: " + e.message);
+                    window.dispatchEvent(new CustomEvent('notify', { detail: { message: 'Error: ' + e.message, type: 'error' } }));
                 } finally {
                     this.sharing = false;
                 }

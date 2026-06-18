@@ -237,7 +237,6 @@
 {% endblock %}
 
 {% block extra_scripts %}
-<script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 <script>
     function idScanner() {
         return {
@@ -294,11 +293,15 @@
                         this.message = filled > 0 ? `¡Datos extraídos: ${filled} campo(s) completado(s)!` : '📷 Foto capturada. Completa los datos manualmente.';
                         setTimeout(() => this.message = '', 5000);
                     } else {
-                        alert('Error: ' + (result.error || 'No se pudo procesar la imagen'));
+                        window.dispatchEvent(new CustomEvent('notify', {
+                            detail: { message: 'Error: ' + (result.error || 'No se pudo procesar la imagen'), type: 'error' }
+                        }));
                     }
                 } catch (e) {
                     console.error(e);
-                    alert('Error en la conexión con el servidor de IA.');
+                    window.dispatchEvent(new CustomEvent('notify', {
+                        detail: { message: 'Error en la conexión con el servidor de IA.', type: 'error' }
+                    }));
                 } finally {
                     this.loading = false;
                 }

@@ -257,7 +257,8 @@
                 {% else %}
                 <div class="text-center p-8 border-2 border-dashed border-white/10 rounded-2xl">
                     <p class="text-gray-500 text-sm mb-4">No hay un cliente principal asignado a esta venta.</p>
-                    <button class="text-blue-400 font-bold text-sm">Asignar Cliente</button>
+                    <!-- TODO: Implementar asignación de cliente -->
+                    <button class="text-blue-400 font-bold text-sm" disabled>Asignar Cliente</button>
                 </div>
                 {% endif %}
             </div>
@@ -347,7 +348,7 @@
         if (!confirm('Se generarán dos facturas (Intermediación + Agencia). ¿Deseas continuar?')) return;
 
         try {
-            const response = await fetch(`/api/ventas/${VENTA_ID}/double-invoice/`, {
+            const response = await fetch(`/finance/api/ventas/${VENTA_ID}/double-invoice/`, {
                 method: 'POST',
                 headers: {
                     'X-CSRFToken': '{{ csrf_token }}'

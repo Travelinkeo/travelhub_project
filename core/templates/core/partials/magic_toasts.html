@@ -67,7 +67,7 @@
         <!-- Barra de Tiempo (Life Progress) -->
         <div class="absolute bottom-0 left-0 h-[3px] bg-white/10 w-full" x-init="setTimeout(() => $el.style.width = '0%', 100)"
              style="transition: width 8000ms linear;"
-             :class="{'bg-brand/50': '{{ notif.tipo }}' == 'ai_magic', 'bg-emerald-500/50': '{{ notif.tipo }}' == 'success' }">
+             :class="{'bg-brand/50': '{{ notif.tipo|escapejs }}' == 'ai_magic', 'bg-emerald-500/50': '{{ notif.tipo|escapejs }}' == 'success' }">
         </div>
     </div>
 </div>

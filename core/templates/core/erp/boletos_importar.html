@@ -68,7 +68,7 @@
                     <form id="upload-form" class="relative z-10 space-y-12">
                         <!-- Huge Drop Zone -->
                         <div id="drop-zone" class="relative border-2 border-dashed border-white/10 rounded-[32px] p-12 lg:p-20 text-center transition-all cursor-pointer group/zone hover:border-primary/40">
-                            <input type="file" id="boleto_file" name="boleto_file" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" accept=".pdf,.html,.txt,.eml" onchange="handleFileSelect(this)">
+                            <input type="file" id="boleto_file" name="boleto_file" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" accept=".pdf,.html,.txt,.eml">
                             
                             <div class="space-y-6">
                                 <div class="size-24 lg:size-32 rounded-[32px] bg-gradient-to-br from-primary/20 to-transparent flex items-center justify-center mx-auto border border-white/10 group-hover/zone:scale-105 transition-all shadow-2xl">
@@ -118,6 +118,7 @@
                         </div>
                     </div>
                     {% endfor %}
+                    {% if not GDS_FLOWS %}
                     <!-- Static Fallback if context var not set -->
                     <div class="glass-card p-6 rounded-3xl border-white/5 hover:border-red-500/30 transition-all">
                         <div class="size-10 rounded-xl bg-red-500/10 flex items-center justify-center text-red-500 mb-4 font-black">S</div>
@@ -131,6 +132,7 @@
                         <div class="size-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-500 mb-4 font-black">K</div>
                         <p class="text-[9px] font-black text-gray-500 uppercase tracking-widest">KIU HTML/EML</p>
                     </div>
+                    {% endif %}
                 </div>
             </div>
 
@@ -257,7 +259,12 @@
     document.getElementById('upload-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         const fileInput = document.getElementById('boleto_file');
-        if (fileInput.files.length === 0) return alert('Selecciona un archivo primero.');
+        if (fileInput.files.length === 0) {
+            window.dispatchEvent(new CustomEvent('notify', {
+                detail: { message: 'Selecciona un archivo primero.', type: 'error' }
+            }));
+            return;
+        }
 
         const btn = document.getElementById('btn-upload');
         const originalContent = btn.innerHTML;
@@ -292,18 +299,25 @@
 
         } catch (error) {
             console.error('Error:', error);
-            alert('CRITICAL CONNECTION ERROR');
+            window.dispatchEvent(new CustomEvent('notify', {
+                detail: { message: 'CRITICAL CONNECTION ERROR', type: 'error' }
+            }));
         } finally {
             btn.disabled = false;
             btn.innerHTML = originalContent;
         }
     });
 
+    // File input event listener (CSP compliant)
+    document.getElementById('boleto_file').addEventListener('change', function() {
+        handleFileSelect(this);
+    });
+
     // Drop Zone Visuals
     const dz = document.getElementById('drop-zone');
     dz.addEventListener('dragover', () => dz.classList.add('drop-zone-active'));
     dz.addEventListener('dragleave', () => dz.classList.remove('drop-zone-active'));
-    dz.addEventListener('drop', () => dz.classList.remove('drop-zone-active'));
+    dz.addEventListener('drop', (e) => { e.preventDefault(); dz.classList.remove('drop-zone-active'); });
 
     // ── Gestión Centralizada de Eventos (CSP Friendly) ──
     document.addEventListener('click', async (e) => {
@@ -330,11 +344,15 @@
                 if (response.ok) {
                     location.reload();
                 } else {
-                    alert('Error al eliminar');
+                    window.dispatchEvent(new CustomEvent('notify', {
+                        detail: { message: 'Error al eliminar', type: 'error' }
+                    }));
                 }
             } catch (error) {
                 console.error(error);
-                alert('Error de conexión');
+                window.dispatchEvent(new CustomEvent('notify', {
+                    detail: { message: 'Error de conexión', type: 'error' }
+                }));
             }
         }
     });

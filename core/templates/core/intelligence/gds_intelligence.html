@@ -4,7 +4,7 @@
 {% block title %}Obsidian GDS AI Intelligence - TravelHub{% endblock %}
 
 {% block extra_css %}
-<style>
+<style nonce="{{ request.csp_nonce }}">
     .custom-scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
     .custom-scrollbar::-webkit-scrollbar-track { background: var(--bg-deep, #0a140e); }
     .custom-scrollbar::-webkit-scrollbar-thumb { background: var(--accent-dim, #1f3a29); border-radius: 4px; }

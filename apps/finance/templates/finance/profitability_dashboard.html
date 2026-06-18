@@ -16,7 +16,8 @@
             <p class="text-text-muted text-sm mt-1">Supervisión de salud financiera, márgenes netos y costos de proveedores.</p>
         </div>
         <div class="flex gap-3">
-            <button class="btn-secondary !h-12 !px-6">
+            <!-- TODO: Implementar exportación de reporte -->
+            <button disabled class="btn-secondary !h-12 !px-6 opacity-50 cursor-not-allowed">
                 <span class="material-symbols-outlined text-[20px]">download</span>
                 <span>Exportar Reporte</span>
             </button>
@@ -330,11 +331,4 @@
         }
     });
 </script>
-<style>
-    @keyframes pulse-slow {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.7; }
-    }
-    .animate-pulse-slow { animation: pulse-slow 3s infinite ease-in-out; }
-</style>
 {% endblock %}

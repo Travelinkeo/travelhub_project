@@ -95,9 +95,9 @@
             </a>
 
             <button type="button" 
+                id="btn-retry-parse-forced"
                 hx-post="{% url 'core:api_boleto_retry' boleto.pk %}"
                 hx-swap="none"
-                hx-on::after-request="location.reload()"
                 class="btn-primary !h-10 !bg-blue-600 hover:!bg-blue-500 text-white font-black text-xs uppercase tracking-widest gap-2 {% if is_processing %}opacity-50 cursor-not-allowed{% else %}animate-pulse{% endif %}"
                 {% if is_processing %}disabled{% endif %}>
                 <span class="material-symbols-outlined text-[18px]">auto_fix_high</span>
@@ -430,22 +430,15 @@
 
 <!-- ── SCRIPTS ── -->
 <script nonce="{{ csp_nonce }}">
-    console.log('🚀 [ReviewMaster V1.8] Ready.');
-    
-    // El botón de re-extracción ahora es manejado por HTMX (hx-post + reload)
-    // No se requiere JS adicional para el flujo principal de re-parseo.
-    
     document.addEventListener('htmx:beforeRequest', function(evt) {
-        if (evt.detail.elt.id === 'btn-retry-parse-forced') {
+        if (evt.detail.elt && evt.detail.elt.id === 'btn-retry-parse-forced') {
             console.log('🔥 Iniciando re-extracción forzada...');
         }
     });
 
     document.addEventListener('htmx:afterRequest', function(evt) {
-        if (evt.detail.successful) {
-            console.log('✅ Operación exitosa:', evt.detail.elt.id);
-        } else {
-            console.error('❌ Fallo en operación:', evt.detail.elt.id);
+        if (evt.detail.elt && evt.detail.elt.id === 'btn-retry-parse-forced') {
+            location.reload();
         }
     });
 </script>

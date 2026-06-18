@@ -169,7 +169,10 @@
         };
 
         if (!data.boleto || !data.monto_original) {
-            return alert('Error: Proporcione el ID del Boleto y el Monto Original.');
+            window.dispatchEvent(new CustomEvent('notify', {
+                detail: { message: 'Error: Proporcione el ID del Boleto y el Monto Original.', type: 'error' }
+            }));
+            return;
         }
 
         try {
@@ -189,10 +192,14 @@
                 document.getElementById('res-monto').textContent = `$${result.monto_reembolso.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             } else {
-                alert('Solicitud denegada: ' + (result.error || 'Verifique los datos'));
+                window.dispatchEvent(new CustomEvent('notify', {
+                    detail: { message: 'Solicitud denegada: ' + (result.error || 'Verifique los datos'), type: 'error' }
+                }));
             }
         } catch (error) {
-            alert('Fallo de conexión con el servidor.');
+            window.dispatchEvent(new CustomEvent('notify', {
+                detail: { message: 'Fallo de conexión con el servidor.', type: 'error' }
+            }));
         }
     }
 </script>

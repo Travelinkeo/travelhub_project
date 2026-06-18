@@ -57,7 +57,7 @@
 </div>
 
 {% block extra_scripts %}
-<script>
+<script nonce="{{ request.csp_nonce }}">
     function selectTab(clickedTab) {
         // Reset all tabs
         document.querySelectorAll('nav a').forEach(tab => {
@@ -75,6 +75,6 @@
         htmx.ajax('GET', "{% url 'core:analytics_sales' %}", '#analytics-content');
     });
 </script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js" nonce="{{ request.csp_nonce }}"></script>
 {% endblock %}
 {% endblock %}

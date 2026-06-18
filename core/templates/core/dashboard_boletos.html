@@ -277,7 +277,7 @@
     </div>
 </main>
 
-<script>
+<script nonce="{{ request.csp_nonce }}">
 function toggleItems(ventaId) {
     const row = document.getElementById('items-' + ventaId);
     row.classList.toggle('hidden');

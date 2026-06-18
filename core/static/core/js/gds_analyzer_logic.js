@@ -9,11 +9,11 @@
 
     // Función global para inicializar la lógica después de que HTMX cargue el parcial
     window.inicializarGDSAnalyzer = function() {
-        console.log("🚀 [TravelHub] Motor GDS desde archivo estático inicializado.");
+
         
         const dataNode = document.getElementById('gds-analysis-data');
         if (!dataNode) {
-            console.log("⏳ [TravelHub] Esperando datos GDS en el DOM...");
+
             return;
         }
 
@@ -25,7 +25,7 @@
             return;
         }
 
-        console.log("✅ [TravelHub] Datos encontrados. Atando eventos...");
+
 
         function parseSafeFloat(val) {
             if (!val) return 0;
@@ -96,14 +96,16 @@
             btnFoto.parentNode.replaceChild(newBtn, btnFoto);
             
             newBtn.addEventListener('click', function() {
-                console.log("📸 [TravelHub] Capturando cámara...");
+
                 const btn = this;
                 const originalText = btn.innerHTML;
                 btn.innerHTML = '<span class="material-symbols-outlined animate-spin">cached</span>';
                 btn.disabled = true;
 
                 if (typeof html2canvas === 'undefined') {
-                    alert("Cargando motor de imagen. Reintente en 2 segundos.");
+                    window.dispatchEvent(new CustomEvent('notify', {
+                        detail: { message: 'Cargando motor de imagen. Reintente en 2 segundos.', type: 'info' }
+                    }));
                     btn.innerHTML = originalText;
                     btn.disabled = false;
                     return;
@@ -138,7 +140,7 @@
             btnInyectar.parentNode.replaceChild(newBtn, btnInyectar);
 
             newBtn.addEventListener('click', async function() {
-                console.log("⚡ [TravelHub] Inyectando al ERP...");
+
                 const btn = this;
                 const originalText = btn.innerHTML;
                 btn.innerHTML = '<span class="material-symbols-outlined animate-spin">sync</span>';
@@ -172,11 +174,15 @@
                                 background: '#111827', color: '#fff', confirmButtonColor: '#13ec5b'
                             }).then(() => { if(result.redirect_url) window.location.href = result.redirect_url; });
                         } else {
-                            alert("¡Éxito! Venta inyectada.");
+                            window.dispatchEvent(new CustomEvent('notify', {
+                                detail: { message: '¡Éxito! Venta inyectada.', type: 'success' }
+                            }));
                             if(result.redirect_url) window.location.href = result.redirect_url;
                         }
                     } else {
-                        alert("Error: " + result.message);
+                        window.dispatchEvent(new CustomEvent('notify', {
+                            detail: { message: 'Error: ' + result.message, type: 'error' }
+                        }));
                         btn.innerHTML = originalText;
                         btn.disabled = false;
                     }

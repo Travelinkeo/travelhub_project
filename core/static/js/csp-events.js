@@ -140,5 +140,5 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    console.log('✅ CSP Event Listeners initialized');
+
 });

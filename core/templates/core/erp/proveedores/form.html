@@ -366,7 +366,7 @@
     {% endif %}
 </main>
 
-<script>
+<script nonce="{{ request.csp_nonce }}">
     function proveedorForm() {
         return {
             activeTab: 'general',
@@ -405,7 +405,9 @@
             },
             async saveRegla() {
                 if (!this.newRegla.tipo_servicio) {
-                    alert('Seleccione un tipo de servicio');
+                    window.dispatchEvent(new CustomEvent('notify', {
+                        detail: { message: 'Seleccione un tipo de servicio', type: 'error' }
+                    }));
                     return;
                 }
                 try {
@@ -422,10 +424,14 @@
                         this.fetchComisiones();
                     } else {
                         const data = await response.json();
-                        alert('Error: ' + JSON.stringify(data));
+                        window.dispatchEvent(new CustomEvent('notify', {
+                            detail: { message: 'Error: ' + JSON.stringify(data), type: 'error' }
+                        }));
                     }
                 } catch (error) {
-                    alert('Error de red al guardar la regla');
+                    window.dispatchEvent(new CustomEvent('notify', {
+                        detail: { message: 'Error de red al guardar la regla', type: 'error' }
+                    }));
                 }
             },
             async deleteRegla(id) {
@@ -441,7 +447,9 @@
                         this.fetchComisiones();
                     }
                 } catch (e) {
-                    alert('Error eliminando');
+                    window.dispatchEvent(new CustomEvent('notify', {
+                        detail: { message: 'Error eliminando', type: 'error' }
+                    }));
                 }
             },
             formatCurrency(val) {

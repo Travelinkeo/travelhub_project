@@ -140,7 +140,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="{{ request.csp_nonce }}">
     async function retryParse(id) {
         if (!confirm('¿Deseas volver a intentar extraer los datos automáticamente?')) return;
 

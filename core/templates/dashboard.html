@@ -84,8 +84,8 @@
 </div>
 
 <!-- Chart.js Config -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js" nonce="{{ request.csp_nonce }}"></script>
+<script nonce="{{ request.csp_nonce }}">
     document.addEventListener('DOMContentLoaded', function() {
         const ctx = document.getElementById('salesChart').getContext('2d');
         const chartData = {{ chart_data_json }};

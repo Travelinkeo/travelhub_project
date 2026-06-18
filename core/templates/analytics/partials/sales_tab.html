@@ -52,7 +52,7 @@
 {{ sales_chart.values|json_script:"sales-chart-values" }}
 {{ top_airlines|json_script:"top-airlines-data" }}
 
-<script>
+<script nonce="{{ request.csp_nonce }}">
     // Re-initialize charts when content is loaded
     (function () {
         // Safe check for Chart.js

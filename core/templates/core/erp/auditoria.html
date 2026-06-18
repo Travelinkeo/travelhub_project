@@ -236,7 +236,7 @@
 {% endblock %}
 
 {% block extra_scripts %}
-<script>
+<script nonce="{{ request.csp_nonce }}">
     function showLogDetails(id) {
         const container = document.getElementById(`log-data-${id}`).firstElementChild;
         const prev = JSON.parse(container.getAttribute('data-previos').replace(/'/g, '"'));

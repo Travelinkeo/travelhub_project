@@ -193,7 +193,7 @@
 {% endblock %}
 
 {% block extra_scripts %}
-<script>
+<script nonce="{{ request.csp_nonce }}">
     function openDetailModal(id) {
         const container = document.getElementById(`com-data-${id}`).firstElementChild;
 

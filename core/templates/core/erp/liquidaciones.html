@@ -168,7 +168,7 @@
 {% endblock %}
 
 {% block extra_scripts %}
-<script>
+<script nonce="{{ request.csp_nonce }}">
     // Debug logging
     document.addEventListener('click', function (e) {
         console.log('Clicked element:', e.target);

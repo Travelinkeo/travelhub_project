@@ -198,7 +198,7 @@
 {% endblock %}
 
 {% block extra_scripts %}
-<script>
+<script nonce="{{ request.csp_nonce }}">
     function openImageModal(url) {
         document.getElementById('modalImage').src = url;
         document.getElementById('imageModal').classList.remove('hidden');
@@ -231,11 +231,15 @@
                 window.location.reload();
             } else {
                 const data = await response.json();
-                alert('Error: ' + (JSON.stringify(data) || 'Error al subir pasaporte'));
+                window.dispatchEvent(new CustomEvent('notify', {
+                    detail: { message: 'Error: ' + (JSON.stringify(data) || 'Error al subir pasaporte'), type: 'error' }
+                }));
             }
         } catch (error) {
             console.error('Error:', error);
-            alert('Error de conexión');
+            window.dispatchEvent(new CustomEvent('notify', {
+                detail: { message: 'Error de conexión', type: 'error' }
+            }));
         } finally {
             document.body.style.cursor = 'default';
         }
@@ -256,7 +260,9 @@
             if (response.ok) {
                 window.location.reload();
             } else {
-                alert('Error al verificar pasaporte');
+                window.dispatchEvent(new CustomEvent('notify', {
+                    detail: { message: 'Error al verificar pasaporte', type: 'error' }
+                }));
             }
         } catch (error) {
             console.error('Error:', error);
@@ -275,14 +281,20 @@
 
             const data = await response.json();
             if (response.ok) {
-                alert('Cliente creado/actualizado con éxito');
+                window.dispatchEvent(new CustomEvent('notify', {
+                    detail: { message: 'Cliente creado/actualizado con éxito', type: 'success' }
+                }));
                 window.location.reload();
             } else {
-                alert('Error: ' + (data.error || 'No se pudo crear el cliente'));
+                window.dispatchEvent(new CustomEvent('notify', {
+                    detail: { message: 'Error: ' + (data.error || 'No se pudo crear el cliente'), type: 'error' }
+                }));
             }
         } catch (error) {
             console.error('Error:', error);
-            alert('Error de conexión');
+            window.dispatchEvent(new CustomEvent('notify', {
+                detail: { message: 'Error de conexión', type: 'error' }
+            }));
         }
     }
 </script>

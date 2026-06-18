@@ -174,7 +174,7 @@
 
 </div>
 
-<script>
+<script nonce="{{ request.csp_nonce }}">
 function marketingHub() {
     return {
         tab: 'copy',
@@ -203,7 +203,9 @@ function marketingHub() {
                 const data = await resp.json();
                 this.resultCaption = data.caption;
             } catch (e) {
-                alert("Error: " + e);
+                window.dispatchEvent(new CustomEvent('notify', {
+                    detail: { message: 'Error: ' + e, type: 'error' }
+                }));
             } finally {
                 this.loading = false;
             }
@@ -227,10 +229,14 @@ function marketingHub() {
                 if(data.status === 'success') {
                     this.resultImage = data.image_b64;
                 } else {
-                    alert("Error IA: " + data.error);
+                    window.dispatchEvent(new CustomEvent('notify', {
+                        detail: { message: 'Error IA: ' + data.error, type: 'error' }
+                    }));
                 }
             } catch (e) {
-                alert("Error: " + e);
+                window.dispatchEvent(new CustomEvent('notify', {
+                    detail: { message: 'Error: ' + e, type: 'error' }
+                }));
             } finally {
                 this.loading = false;
             }
@@ -257,7 +263,9 @@ function marketingHub() {
                     doc.close();
                 });
             } catch (e) {
-                alert("Error: " + e);
+                window.dispatchEvent(new CustomEvent('notify', {
+                    detail: { message: 'Error: ' + e, type: 'error' }
+                }));
             } finally {
                 this.loading = false;
             }
@@ -265,7 +273,9 @@ function marketingHub() {
 
         copyToClipboard(text) {
             navigator.clipboard.writeText(text);
-            alert("Copiado al portapapeles");
+            window.dispatchEvent(new CustomEvent('notify', {
+                detail: { message: 'Copiado al portapapeles', type: 'success' }
+            }));
         },
 
         downloadImage() {

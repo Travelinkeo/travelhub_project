@@ -267,7 +267,7 @@ Cotización{% endif %} - TravelHub{% endblock %}
     </div>
 </div>
 
-<script>
+<script nonce="{{ request.csp_nonce }}">
     document.addEventListener('DOMContentLoaded', function () {
         // ... (Existing JS) ...
     });
@@ -296,7 +296,7 @@ Cotización{% endif %} - TravelHub{% endblock %}
     });
 </script>
 
-<script>
+<script nonce="{{ request.csp_nonce }}">
     document.addEventListener('DOMContentLoaded', function () {
         const addItemBtn = document.getElementById('add-item');
         const itemsContainer = document.getElementById('items-container');

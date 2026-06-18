@@ -1,7 +1,7 @@
 {% load static %}
 
 <!-- Forzar inyección de HTMX en caso de que la vista lo cargue aislado -->
-<script src="{% static 'vendor/htmx_v2.js' %}"></script>
+<script src="{% static 'vendor/htmx_v2.js' %}" nonce="{{ request.csp_nonce }}"></script>
 
 {% if is_processing %}
 <div id="status-checker" 

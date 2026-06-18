@@ -176,7 +176,7 @@
 {% endblock %}
 
 {% block extra_scripts %}
-<script>
+<script nonce="{{ request.csp_nonce }}">
     async function cargarAuditLogs(modelo, objectId) {
         const container = document.getElementById('audit-logs-container');
         if (!container) return;

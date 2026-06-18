@@ -8,9 +8,9 @@
 
 {% block extra_css %}
 <!-- Chart.js para gráficos de alto impacto -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js" nonce="{{ request.csp_nonce }}"></script>
 <!-- HTMX para Lazy Load del Consejero IA -->
-<script src="https://unpkg.com/htmx.org@1.9.10"></script>
+<script src="https://unpkg.com/htmx.org@1.9.10" nonce="{{ request.csp_nonce }}"></script>
 
 <style>
     :root {
@@ -150,7 +150,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="{{ request.csp_nonce }}">
     document.addEventListener("DOMContentLoaded", function() {
         const ctx = document.getElementById('revenueChart').getContext('2d');
         const isDark = document.documentElement.classList.contains('dark');

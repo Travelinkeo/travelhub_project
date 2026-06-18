@@ -143,7 +143,7 @@
     </div>
 </aside>
 
-<script>
+<script nonce="{{ request.csp_nonce }}">
     // Scroll al final al cargar el hilos (HTMX inyecta este script)
     if (typeof scrollToBottom === 'function') {
         scrollToBottom();

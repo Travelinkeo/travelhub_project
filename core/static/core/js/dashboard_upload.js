@@ -1,7 +1,7 @@
 
 // core/static/core/js/dashboard_upload.js
 document.addEventListener('DOMContentLoaded', function () {
-    console.log("Dashboard Upload JS Loaded");
+
 
     const fileInput = document.getElementById('dropzone-file');
     const uploadForm = document.getElementById('upload-form');
@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (fileInput && uploadForm) {
         fileInput.addEventListener('change', function () {
             if (this.files.length > 0) {
-                console.log("File selected. Submitting via HTMX...");
+
 
                 // UX: Global Toast Feedback
                 window.dispatchEvent(new CustomEvent('notify', {

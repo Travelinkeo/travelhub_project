@@ -136,6 +136,31 @@
                 </div>
                 {% endfor %}
             </div>
+
+            {% if page_obj.has_previous or page_obj.has_next %}
+            <div class="flex items-center justify-between mt-6 px-4 py-3 bg-[var(--surface-1)] rounded-xl border border-[var(--border)]">
+                <div class="text-xs text-[var(--text-muted)]">
+                    Mostrando {{ page_obj.start_index }}-{{ page_obj.end_index }} de {{ page_obj.paginator.count }}
+                </div>
+                <div class="flex items-center gap-2">
+                    {% if page_obj.has_previous %}
+                    <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.destino %}&destino={{ request.GET.destino }}{% endif %}{% if request.GET.categoria %}&categoria={{ request.GET.categoria }}{% endif %}"
+                       class="px-3 py-1.5 text-xs font-bold rounded-lg bg-[var(--surface-2)] border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--primary)] hover:border-[var(--primary)]/30 transition">
+                        Anterior
+                    </a>
+                    {% endif %}
+                    <span class="text-xs text-[var(--text-muted)] font-mono">
+                        Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+                    </span>
+                    {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.destino %}&destino={{ request.GET.destino }}{% endif %}{% if request.GET.categoria %}&categoria={{ request.GET.categoria }}{% endif %}"
+                       class="px-3 py-1.5 text-xs font-bold rounded-lg bg-[var(--surface-2)] border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--primary)] hover:border-[var(--primary)]/30 transition">
+                        Siguiente
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
         </div>
     </div>
 </div>

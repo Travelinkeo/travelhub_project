@@ -103,6 +103,12 @@ class Cliente(AgenciaMixin, SoftDeleteModel, models.Model):
     def get_nombre_completo(self):
         return self.nombre_completo
 
+    @property
+    def esta_pasaporte_vencido(self):
+        if not self.fecha_expiracion_pasaporte:
+            return False
+        return self.fecha_expiracion_pasaporte < timezone.now().date()
+
 
 # ==========================================
 # 2. MODELO KANBAN: OPORTUNIDAD (LEAD)
@@ -287,6 +293,15 @@ class Pasajero(AgenciaMixin, SoftDeleteModel, models.Model):
 
     def get_nombre_completo(self):
         return self.nombre_completo
+
+    @property
+    def esta_vencido(self):
+        today = timezone.now().date()
+        if self.fecha_vencimiento_pasaporte and self.fecha_vencimiento_pasaporte < today:
+            return True
+        if self.fecha_vencimiento_documento and self.fecha_vencimiento_documento < today:
+            return True
+        return False
 
 
 class MensajeWhatsApp(AgenciaMixin, SoftDeleteModel, models.Model):

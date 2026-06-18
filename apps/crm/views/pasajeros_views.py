@@ -6,7 +6,7 @@ from django.views.generic import CreateView, DeleteView, DetailView, ListView, U
 
 from apps.crm.forms import PasajeroForm
 from apps.crm.models import Pasajero
-from core.api import SaaSMixin
+from core.api import HtmxResponseMixin, SaaSMixin
 
 
 class CRMBaseMixin(SaaSMixin, LoginRequiredMixin):
@@ -18,9 +18,10 @@ class CRMBaseMixin(SaaSMixin, LoginRequiredMixin):
         return context
 
 
-class PasajeroListView(CRMBaseMixin, ListView):
+class PasajeroListView(HtmxResponseMixin, CRMBaseMixin, ListView):
     model = Pasajero
     template_name = "crm/pasajero_list.html"
+    htmx_template_name = "crm/partials/pasajero_list_rows.html"
     context_object_name = "pasajeros"
     paginate_by = 25
 

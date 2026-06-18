@@ -1,7 +1,7 @@
 <!-- templates/finance/form_pago_inner.html -->
 <!-- Modal Reactivo de Registro de Pagos Inyectable por HTMX -->
 
-<div class="th-modal-backdrop"
+<div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-surface-base/60 backdrop-blur-sm"
      x-data="{
          open: true,
          isSpecialTaxpayer: false,
@@ -40,7 +40,7 @@
      x-transition:leave-start="opacity-100"
      x-transition:leave-end="opacity-0">
 
-    <div class="th-modal-content"
+    <div class="bg-surface-1 rounded-xl shadow-xl w-full max-w-lg p-6 border border-border-color"
          @click.outside="closeModal()"
          x-show="open"
          x-transition:enter="transition ease-out duration-300 transform"
@@ -53,35 +53,35 @@
         <!-- Estructura vertical autocontenida que alinea simétricamente todos los bloques -->
         <div class="flex flex-col space-y-6">
             <!-- Modal Header -->
-            <div class="th-modal-header">
+            <div class="flex items-center justify-between border-b border-border-color pb-4">
                 <div>
-                    <h3 class="text-lg font-bold text-slate-900 dark:text-white">Registrar Transacción de Pago</h3>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">Ingrese los datos para procesar el recargo contable</p>
+                    <h3 class="text-lg font-bold text-text-main">Registrar Transacción de Pago</h3>
+                    <p class="text-xs text-text-muted">Ingrese los datos para procesar el recargo contable</p>
                 </div>
-                <button @click="closeModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 focus:outline-none transition-colors" aria-label="Cerrar modal">
+                <button @click="closeModal()" class="text-text-muted hover:text-text-main focus:outline-none transition-colors" aria-label="Cerrar modal">
                     <span class="material-symbols-outlined text-[20px]">close</span>
                 </button>
             </div>
 
             <!-- Modal Body Form: Implementa el Layout de Formulario Estricto -->
-            <form class="th-form-layout" @submit.prevent>
+            <form class="space-y-4 sm:space-y-5" @submit.prevent>
                 <!-- Switch/Checkbox de Contribuyente Especial -->
                 <div class="flex items-center gap-3">
                     <input type="checkbox"
                            id="is_special_taxpayer"
                            x-model="isSpecialTaxpayer"
-                           class="w-4 h-4 text-indigo-600 border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 rounded focus:ring-indigo-500 focus:ring-offset-0">
-                    <label for="is_special_taxpayer" class="text-sm font-semibold text-slate-700 dark:text-slate-300 cursor-pointer select-none">
+                           class="w-4 h-4 text-primary border-border-color bg-surface-1 rounded focus:ring-primary focus:ring-offset-0">
+                    <label for="is_special_taxpayer" class="text-sm font-semibold text-text-muted cursor-pointer select-none">
                         La agencia es Contribuyente Especial (Aplica IGTF 3%)
                     </label>
                 </div>
 
                 <!-- Selector de Canal de Pago -->
-                <div class="th-input-group">
-                    <label for="canal_pago" class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                <div class="flex flex-col gap-1.5">
+                    <label for="canal_pago" class="text-xs font-bold uppercase tracking-wider text-text-muted">
                         Canal de Pago
                     </label>
-                    <select id="canal_pago" x-model="paymentMethod" class="th-input">
+                    <select id="canal_pago" x-model="paymentMethod" class="input-base">
                         <option value="">Seleccione un canal...</option>
                         <option value="zelle">Zelle (Transferencia USD - Exento)</option>
                         <option value="transferencia_bs">Transferencia Bolívares (Bs - Exento)</option>
@@ -91,8 +91,8 @@
                 </div>
 
                 <!-- Input de Monto Base -->
-                <div class="th-input-group">
-                    <label for="monto_base" class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                <div class="flex flex-col gap-1.5">
+                    <label for="monto_base" class="text-xs font-bold uppercase tracking-wider text-text-muted">
                         Monto Base ($)
                     </label>
                     <input type="number"
@@ -100,40 +100,40 @@
                            id="monto_base"
                            x-model="baseAmount"
                            placeholder="0.00"
-                           class="th-input"
+                           class="input-base"
                            required>
                 </div>
 
                 <!-- Desglose de Recargo IGTF y Totales Reactivo por Alpine.js -->
                 <div x-show="baseAmount > 0" x-collapse class="space-y-4">
-                    <hr class="border-slate-200 dark:border-slate-800">
+                    <hr class="border-border-color">
                     <div class="flex flex-col space-y-2">
                         <div class="flex justify-between text-sm">
-                            <span class="text-slate-500 dark:text-slate-400">Monto Base:</span>
-                            <span class="font-mono text-slate-900 dark:text-white" x-text="'$ ' + parseFloat(baseAmount || 0).toFixed(2)"></span>
+                            <span class="text-text-muted">Monto Base:</span>
+                            <span class="font-mono text-text-main" x-text="'$ ' + parseFloat(baseAmount || 0).toFixed(2)"></span>
                         </div>
                         <div class="flex justify-between text-sm" x-show="requiresIgtf">
                             <span class="text-amber-600 dark:text-amber-400 font-medium">Recargo IGTF (3%):</span>
                             <span class="font-mono text-amber-600 dark:text-amber-400 font-bold" x-text="'+$ ' + parseFloat(igtfSurcharge || 0).toFixed(2)"></span>
                         </div>
-                        <hr class="border-slate-100 dark:border-slate-800/60">
+                        <hr class="border-border-color">
                         <div class="flex justify-between text-base font-bold">
-                            <span class="text-slate-900 dark:text-white">Monto Total a Recaudar:</span>
-                            <span class="font-mono text-indigo-600 dark:text-indigo-400" x-text="'$ ' + parseFloat(totalAmount || 0).toFixed(2)"></span>
+                            <span class="text-text-main">Monto Total a Recaudar:</span>
+                            <span class="font-mono text-primary" x-text="'$ ' + parseFloat(totalAmount || 0).toFixed(2)"></span>
                         </div>
                     </div>
                 </div>
             </form>
 
             <!-- Modal Footer -->
-            <div class="th-modal-footer">
+            <div class="flex justify-end gap-3 border-t border-border-color pt-4">
                 <button type="button"
                         @click="closeModal()"
-                        class="px-4 py-2 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 text-sm font-semibold rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        class="px-4 py-2 border border-border-color text-text-muted hover:bg-surface-2 text-sm font-semibold rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
                     Cancelar
                 </button>
                 <button type="submit"
-                        class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-lg shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        class="px-4 py-2 bg-primary hover:bg-primary/90 text-white text-sm font-semibold rounded-lg shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
                     Guardar Transacción
                 </button>
             </div>

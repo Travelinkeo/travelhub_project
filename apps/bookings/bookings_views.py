@@ -15,7 +15,7 @@ from django.utils import timezone
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
 
 from apps.crm.models import OportunidadViaje
-from core.api import AuditLog, SaaSMixin
+from core.api import AuditLog, HtmxResponseMixin, SaaSMixin
 
 from .models import FeeVenta, ItemVenta, PagoVenta, Venta, VentaAuditFinding
 
@@ -32,9 +32,10 @@ class BookingBaseMixin(SaaSMixin, LoginRequiredMixin):
 # --- VENTAS ---
 
 
-class VentaListView(BookingBaseMixin, ListView):
+class VentaListView(HtmxResponseMixin, BookingBaseMixin, ListView):
     model = Venta
     template_name = "bookings/venta_list.html"
+    htmx_template_name = "bookings/partials/venta_list_rows.html"
     context_object_name = "ventas"
     paginate_by = 25
 
@@ -97,7 +98,7 @@ class VentaTimelineView(BookingBaseMixin, DetailView):
                 {
                     "type": "lead",
                     "title": "Lead Captado",
-                    "description": f'El cliente inició contacto via {oportunidad.origen or "Canal Digital"} y fue asignado al Kanban.',
+                    "description": f"El cliente inició contacto via {oportunidad.origen or 'Canal Digital'} y fue asignado al Kanban.",
                     "date": oportunidad.creado_en,
                     "icon": "person_add",
                     "color": "slate",
@@ -111,7 +112,7 @@ class VentaTimelineView(BookingBaseMixin, DetailView):
                 {
                     "type": "upload",
                     "title": "Boleto Subido al Sistema",
-                    "description": f'Se subió el archivo {os.path.basename(b.archivo_boleto.name) if b.archivo_boleto else "Sin nombre"}. Formato: {b.get_formato_detectado_display()}.',
+                    "description": f"Se subió el archivo {os.path.basename(b.archivo_boleto.name) if b.archivo_boleto else 'Sin nombre'}. Formato: {b.get_formato_detectado_display()}.",
                     "date": b.fecha_subida,
                     "icon": "document_scanner",
                     "color": "slate",
@@ -124,7 +125,7 @@ class VentaTimelineView(BookingBaseMixin, DetailView):
                 {
                     "type": "ia",
                     "title": "Venta construida por Gemini AI",
-                    "description": f'La IA extrajo datos de {meta.fuente}. Consistencia de montos: {meta.amount_consistency or "Alta"}.',
+                    "description": f"La IA extrajo datos de {meta.fuente}. Consistencia de montos: {meta.amount_consistency or 'Alta'}.",
                     "date": meta.creado,
                     "icon": "auto_awesome",
                     "color": "emerald",
@@ -140,7 +141,7 @@ class VentaTimelineView(BookingBaseMixin, DetailView):
                     "title": f"Pago Registrado ({p.get_metodo_display()})"
                     if p.confirmado
                     else "Esperando Conciliación de Pago",
-                    "description": f'Referencia: {p.referencia or "S/R"}. Monto: {p.monto} {p.moneda.codigo_iso}.',
+                    "description": f"Referencia: {p.referencia or 'S/R'}. Monto: {p.monto} {p.moneda.codigo_iso}.",
                     "date": p.fecha_pago,
                     "icon": "payments" if p.confirmado else "schedule",
                     "color": "emerald" if p.confirmado else "amber",
@@ -156,7 +157,7 @@ class VentaTimelineView(BookingBaseMixin, DetailView):
                 {
                     "type": "audit",
                     "title": log.descripcion or f"Cambio en {log.modelo}",
-                    "description": f'Acción {log.get_accion_display()} realizada por {log.user.username if log.user else "Sistema"}.',
+                    "description": f"Acción {log.get_accion_display()} realizada por {log.user.username if log.user else 'Sistema'}.",
                     "date": log.creado,
                     "icon": "history",
                     "color": "slate",

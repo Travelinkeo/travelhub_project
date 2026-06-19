@@ -56,6 +56,16 @@
                     {% endfor %}
                 </div>
                 <p class="text-[10px] text-text-muted mt-3 italic line-clamp-1">Basado en: {{ contenido.keywords_visuales|join:", " }}</p>
+
+                {% if contenido.formato_recomendado %}
+                <div class="mt-3 pt-3 border-t border-border-color/50 space-y-1.5">
+                    <p class="text-[11px] font-bold text-violet-400">📏 Medidas sugeridas:</p>
+                    <p class="text-[10px] text-text-main font-semibold bg-surface-1 py-1 px-2 rounded-lg border border-border-color/35">{{ contenido.formato_recomendado }}</p>
+                    {% if contenido.advertencia_formato %}
+                    <p class="text-[9px] text-amber-400 leading-relaxed font-medium bg-amber-500/5 border border-amber-500/10 p-2 rounded-lg">⚠️ {{ contenido.advertencia_formato }}</p>
+                    {% endif %}
+                </div>
+                {% endif %}
             </div>
             {% endif %}
 

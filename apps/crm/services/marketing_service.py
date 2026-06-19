@@ -115,10 +115,10 @@ class MarketingAIEngine:
         return "creativo"
 
     @staticmethod
-    def generar_contenido_creativo(prompt_agente: str) -> dict:
+    def generar_contenido_creativo(prompt_agente: str, formato_imagen: str = "portrait") -> dict:
         """Genera branding, copy, posts o cualquier contenido creativo sin clientes."""
         try:
-            logger.info(f"🎨 Generando contenido creativo: {prompt_agente}")
+            logger.info(f"🎨 Generando contenido creativo: {prompt_agente} (Formato: {formato_imagen})")
 
             resultado_ia = _get_ai_engine().parse_structured_data(
                 text=prompt_agente,
@@ -144,7 +144,63 @@ class MarketingAIEngine:
 
             # 📸 BUSCAR IMÁGENES REALES PARA EL MOODBOARD
             imágenes_reales = []
-            data.get("keywords_visuales", [])
+            keywords = data.get("keywords_visuales", [])
+
+            # Map user selected size format to unsplash parameters
+            unsplash_orientation = "portrait"
+            medidas_recomendadas = "1080 × 1350 px (Proporción 4:5)"
+            advertencia_formato = ""
+
+            if formato_imagen == "squarish":
+                unsplash_orientation = "squarish"
+                medidas_recomendadas = "1080 × 1080 px (Proporción 1:1) - Cuadrado"
+            elif formato_imagen == "landscape":
+                unsplash_orientation = "landscape"
+                medidas_recomendadas = "1080 × 566 px (Proporción 1.91:1) - Horizontal"
+            elif formato_imagen == "stories":
+                unsplash_orientation = "portrait"
+                medidas_recomendadas = "1080 × 1920 px (Proporción 9:16) - Reels/Stories"
+                advertencia_formato = "Para Reels y Stories: evita poner textos importantes en la esquina inferior izquierda y bordes extremos para evitar cortes en el feed."
+            else:  # default 'portrait'
+                unsplash_orientation = "portrait"
+                medidas_recomendadas = "1080 × 1350 px (Proporción 4:5) o 1080 × 1440 px (Proporción 3:4) - Vertical Feed"
+
+            data["formato_recomendado"] = medidas_recomendadas
+            data["advertencia_formato"] = advertencia_formato
+
+            if keywords:
+                import os
+                from django.conf import settings
+                unsplash_key = os.environ.get("UNSPLASH_ACCESS_KEY") or getattr(settings, "UNSPLASH_ACCESS_KEY", "")
+                if unsplash_key:
+                    import requests
+                    clean_key = str(unsplash_key).strip("'\"")
+                    # Para evitar búsquedas vacías por conjunción de demasiados términos,
+                    # buscamos cada keyword de forma individual hasta completar máximo 4 imágenes.
+                    for kw in keywords[:4]:
+                        if len(imágenes_reales) >= 4:
+                            break
+                        try:
+                            url = "https://api.unsplash.com/search/photos"
+                            # Si es la única keyword pedimos 4, si son 2 pedimos 2, de lo contrario 1 o 2 por keyword
+                            per_page = max(1, 4 // len(keywords))
+                            params = {
+                                "query": kw,
+                                "client_id": clean_key,
+                                "per_page": per_page,
+                                "orientation": unsplash_orientation,
+                            }
+                            response = requests.get(url, params=params, timeout=5)
+                            if response.status_code == 200:
+                                results = response.json().get("results", [])
+                                for img in results:
+                                    if len(imágenes_reales) < 4:
+                                        imágenes_reales.append({
+                                            "url": img.get("urls", {}).get("regular"),
+                                            "alt": img.get("alt_description") or "Inspiración de viaje"
+                                        })
+                        except Exception as e_unsplash:
+                            logger.warning(f"Error consultando Unsplash para '{kw}': {e_unsplash}")
 
             data["imagenes_inspiracion"] = imágenes_reales[:4]  # Tomar las 4 mejores
 
@@ -239,7 +295,7 @@ class MarketingAIEngine:
             return {"error": str(e)}
 
     @staticmethod
-    def procesar(prompt_agente: str) -> dict:
+    def procesar(prompt_agente: str, formato_imagen: str = "portrait") -> dict:
         """
         Punto de entrada unificado.
         Clasifica el prompt y delega al método adecuado:
@@ -252,4 +308,4 @@ class MarketingAIEngine:
         if modo == "campana":
             return MarketingAIEngine.generar_campana(prompt_agente)
         else:
-            return MarketingAIEngine.generar_contenido_creativo(prompt_agente)
+            return MarketingAIEngine.generar_contenido_creativo(prompt_agente, formato_imagen=formato_imagen)

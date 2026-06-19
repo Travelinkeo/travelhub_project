@@ -26,13 +26,14 @@ class AnalyzeCampaignPromptView(LoginRequiredMixin, View):
 
     def post(self, request, *args, **kwargs):
         prompt = request.POST.get("prompt_marketing")
+        formato_imagen = request.POST.get("formato_imagen", "portrait")
 
         if not prompt or len(prompt) < 10:
             return HttpResponse(
                 '<div class="text-red-500 font-bold p-4 bg-red-50 rounded-xl">Por favor, sé más específico en tu solicitud a la IA.</div>'
             )
 
-        resultado = MarketingAIEngine.procesar(prompt)
+        resultado = MarketingAIEngine.procesar(prompt, formato_imagen=formato_imagen)
 
         if "error" in resultado:
             return HttpResponse(

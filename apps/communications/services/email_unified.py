@@ -483,6 +483,18 @@ class EmailMonitorService:
 
             time.sleep(self.interval)
 
+    def _actualizar_last_check(self):
+        """Actualiza el timestamp del último chequeo exitoso en la configuración"""
+        try:
+            from django.utils import timezone
+
+            config = getattr(self.agencia, "configuracion", None)
+            if config:
+                config.email_monitor_last_check = timezone.now()
+                config.save(update_fields=["email_monitor_last_check"])
+        except Exception as e:
+            logger.warning(f"⚠️ No se pudo actualizar email_monitor_last_check: {e}")
+
     def _procesar_correos(self):
         """Procesa correos no leídos, registra ejecución en EmailMonitorLog y retorna cantidad procesada"""
         inicio = time.time()
@@ -492,9 +504,18 @@ class EmailMonitorService:
         try:
             from apps.communications.models import EmailMonitorLog
 
-            if not getattr(self.agencia, "correo_emisiones", None) or not getattr(
-                self.agencia, "password_app_correo", None
-            ):
+            config = getattr(self.agencia, "configuracion", None)
+
+            imap_user = (
+                getattr(config, "email_monitor_user", None)
+                or getattr(self.agencia, "correo_emisiones", None)
+            )
+            imap_pass = (
+                getattr(config, "email_monitor_password", None)
+                or getattr(self.agencia, "password_app_correo", None)
+            )
+
+            if not imap_user or not imap_pass:
                 msg = f"Agencia {self.agencia.nombre} no tiene credenciales de correo configuradas."
                 logger.warning(f"⚠️ {msg}")
                 EmailMonitorLog.objects.create(
@@ -507,7 +528,6 @@ class EmailMonitorService:
                 )
                 return 0
 
-            config = getattr(self.agencia, "configuracion", None)
             imap_host = (
                 getattr(config, "email_monitor_host", "imap.gmail.com")
                 if config
@@ -535,9 +555,9 @@ class EmailMonitorService:
                 return 0
 
             try:
-                mail.login(self.agencia.correo_emisiones, self.agencia.password_app_correo)
+                mail.login(imap_user, imap_pass)
             except Exception as e:
-                msg = f"Error de autenticación IMAP para {self.agencia.correo_emisiones} en {imap_host}:{imap_port}: {e}"
+                msg = f"Error de autenticación IMAP para {imap_user} en {imap_host}:{imap_port}: {e}"
                 logger.error(f"❌ {msg}")
                 EmailMonitorLog.objects.create(
                     agencia=self.agencia,
@@ -572,6 +592,7 @@ class EmailMonitorService:
                     correos_procesados=0,
                     tiempo_ejecucion=round(time.time() - inicio, 2),
                 )
+                self._actualizar_last_check()
                 return 0
 
             logger.info(f"📬 Encontrados {len(message_ids)} correos nuevos")
@@ -599,6 +620,7 @@ class EmailMonitorService:
                 correos_procesados=procesados,
                 tiempo_ejecucion=round(time.time() - inicio, 2),
             )
+            self._actualizar_last_check()
             return procesados
 
         except Exception as e_global:

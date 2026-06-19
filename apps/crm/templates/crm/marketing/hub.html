@@ -52,6 +52,19 @@
                       class="w-full bg-white/10 border border-white/20 rounded-2xl p-4 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:bg-white/20 transition-all resize-none"
                       placeholder="Ejemplos:&#10;• Clientes: 'Busca clientes sin comprar en 3 meses y envíales oferta de Cancún'&#10;• Creativo: 'Crea el branding de Instagram para la ruta Caracas-Madrid con hashtags'&#10;• Creativo: 'Genera el copy para la home de mi sitio web de viajes de lujo'"></textarea>
 
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                <div class="flex flex-col gap-1.5">
+                    <label for="formato_imagen" class="text-xs font-bold text-blue-200 uppercase tracking-wider">Formato de Imagen (Instagram/WhatsApp)</label>
+                    <select name="formato_imagen" id="formato_imagen"
+                            class="bg-white/10 border border-white/20 rounded-xl px-3 py-2.5 text-white text-xs focus:outline-none focus:ring-2 focus:ring-blue-400 focus:bg-white/20 transition-all cursor-pointer">
+                        <option value="portrait" class="bg-indigo-950 text-white" selected>Vertical Feed (4:5 / 3:4) - Más efectivo para ventas</option>
+                        <option value="squarish" class="bg-indigo-950 text-white">Cuadrado (1:1) - Post estándar</option>
+                        <option value="landscape" class="bg-indigo-950 text-white">Horizontal (1.91:1) - Formato ancho</option>
+                        <option value="stories" class="bg-indigo-950 text-white">Reels & Stories (9:16) - Pantalla completa</option>
+                    </select>
+                </div>
+            </div>
+
             <div class="flex justify-end mt-4">
                 <button type="submit" class="bg-blue-500 hover:bg-blue-400 text-white font-black py-3 px-6 rounded-xl shadow-lg shadow-blue-500/30 transition-all active:scale-95 flex items-center gap-2">
                     <span class="material-symbols-outlined text-lg">send</span>

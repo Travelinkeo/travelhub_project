@@ -84,6 +84,7 @@ def process_incoming_emails():
 
         agencias_qs = (
             Agencia.objects.filter(activa=True)
+            .filter(configuracion__email_monitor_active=True)
             .exclude(configuracion__correo_emisiones__isnull=True)
             .exclude(configuracion__correo_emisiones__exact="")
         )
@@ -95,7 +96,11 @@ def process_incoming_emails():
         total_agencias = 0
         for agencia in agencias_qs.iterator(chunk_size=50):
             config = agencia.configuracion
-            if not config or not config.correo_emisiones or not config.password_app_correo:
+            if not config:
+                continue
+            has_email = config.email_monitor_user or config.correo_emisiones
+            has_pass = config.email_monitor_password or config.password_app_correo
+            if not has_email or not has_pass:
                 continue
 
             procesar_correo_individual_agencia.delay(agencia.id)

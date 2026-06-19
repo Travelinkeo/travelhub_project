@@ -16,7 +16,7 @@
             <p class="text-text-muted text-sm mt-1">Consultas exhaustivas cruzando pasajeros, rutas, fechas y sistemas GDS.</p>
         </div>
         <div class="flex gap-3">
-            <button onclick="buscarBoletos()" class="btn-primary !h-12 !px-10 shadow-lg shadow-primary/20 group">
+            <button data-action="buscar-boletos" class="btn-primary !h-12 !px-10 shadow-lg shadow-primary/20 group">
                 <span class="material-symbols-outlined group-hover:rotate-180 transition-transform duration-500">bolt</span>
                 <span>Ejecutar Búsqueda</span>
             </button>
@@ -38,7 +38,7 @@
                     <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-text-muted group-focus-within:text-primary transition-colors">person_search</span>
                     <input id="nombre" name="nombre" type="text" placeholder="Nombre completo..."
                         class="input-base !pl-10 !bg-surface-2 focus:!bg-surface-base"
-                        onkeydown="if(event.key==='Enter') buscarBoletos()">
+                        data-enter-search>
                 </div>
             </div>
 
@@ -49,7 +49,7 @@
                     <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-text-muted group-focus-within:text-primary transition-colors">qr_code_2</span>
                     <input id="pnr" name="pnr" type="text" placeholder="ABC123..."
                         class="input-base !pl-10 !bg-surface-2 focus:!bg-surface-base font-mono uppercase tracking-widest"
-                        onkeydown="if(event.key==='Enter') buscarBoletos()">
+                        data-enter-search>
                 </div>
             </div>
 
@@ -81,11 +81,11 @@
         {# GDS Filter Chips Premium #}
         <div class="flex items-center flex-wrap gap-3 mt-8 pt-6 border-t border-border-color/50">
             <span class="text-[10px] font-black text-text-muted uppercase tracking-widest mr-4">Sistema de Origen:</span>
-            <button type="button" class="gds-chip active px-4 py-1.5 rounded-xl text-[10px] font-black tracking-widest border transition-all bg-primary/10 text-primary border-primary/30" onclick="filterGDS(this,'')">TODOS</button>
-            <button type="button" class="gds-chip px-4 py-1.5 rounded-xl text-[10px] font-black tracking-widest border transition-all bg-surface-base text-text-muted border-border-color hover:border-red-500 hover:text-red-500" onclick="filterGDS(this,'SABRE')">SABRE</button>
-            <button type="button" class="gds-chip px-4 py-1.5 rounded-xl text-[10px] font-black tracking-widest border transition-all bg-surface-base text-text-muted border-border-color hover:border-blue-500 hover:text-blue-500" onclick="filterGDS(this,'KIU')">KIU</button>
-            <button type="button" class="gds-chip px-4 py-1.5 rounded-xl text-[10px] font-black tracking-widest border transition-all bg-surface-base text-text-muted border-border-color hover:border-indigo-500 hover:text-indigo-500" onclick="filterGDS(this,'AMADEUS')">AMADEUS</button>
-            <button type="button" class="gds-chip px-4 py-1.5 rounded-xl text-[10px] font-black tracking-widest border transition-all bg-surface-base text-text-muted border-border-color hover:border-text-main hover:text-text-main" onclick="filterGDS(this,'MANUAL')">MANUAL</button>
+            <button type="button" class="gds-chip active px-4 py-1.5 rounded-xl text-[10px] font-black tracking-widest border transition-all bg-primary/10 text-primary border-primary/30" data-gds="">TODOS</button>
+            <button type="button" class="gds-chip px-4 py-1.5 rounded-xl text-[10px] font-black tracking-widest border transition-all bg-surface-base text-text-muted border-border-color hover:border-red-500 hover:text-red-500" data-gds="SABRE">SABRE</button>
+            <button type="button" class="gds-chip px-4 py-1.5 rounded-xl text-[10px] font-black tracking-widest border transition-all bg-surface-base text-text-muted border-border-color hover:border-blue-500 hover:text-blue-500" data-gds="KIU">KIU</button>
+            <button type="button" class="gds-chip px-4 py-1.5 rounded-xl text-[10px] font-black tracking-widest border transition-all bg-surface-base text-text-muted border-border-color hover:border-indigo-500 hover:text-indigo-500" data-gds="AMADEUS">AMADEUS</button>
+            <button type="button" class="gds-chip px-4 py-1.5 rounded-xl text-[10px] font-black tracking-widest border transition-all bg-surface-base text-text-muted border-border-color hover:border-text-main hover:text-text-main" data-gds="MANUAL">MANUAL</button>
         </div>
     </div>
 
@@ -142,10 +142,10 @@
                 Mostrando <span id="pg-range" class="text-text-main">-- / --</span> de <span id="pg-total" class="text-text-main">--</span> resultados
             </p>
             <div class="flex gap-2">
-                <button onclick="changePage(-1)" class="btn-secondary !py-2 !px-4 !text-[10px] uppercase font-black tracking-widest disabled:opacity-30 disabled:pointer-events-none">
+                <button data-page="-1" class="btn-secondary !py-2 !px-4 !text-[10px] uppercase font-black tracking-widest disabled:opacity-30 disabled:pointer-events-none">
                     <span class="material-symbols-outlined text-[14px]">chevron_left</span> Anterior
                 </button>
-                <button onclick="changePage(1)" class="btn-secondary !py-2 !px-4 !text-[10px] uppercase font-black tracking-widest disabled:opacity-30 disabled:pointer-events-none">
+                <button data-page="1" class="btn-secondary !py-2 !px-4 !text-[10px] uppercase font-black tracking-widest disabled:opacity-30 disabled:pointer-events-none">
                     Siguiente <span class="material-symbols-outlined text-[14px]">chevron_right</span>
                 </button>
             </div>
@@ -158,6 +158,17 @@
 <script nonce="{{ request.csp_nonce }}">
     let allResults = [];
     let gdsFilter = '';
+
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('[data-action="buscar-boletos"]')) buscarBoletos();
+        var gdsBtn = e.target.closest('[data-gds]');
+        if (gdsBtn) filterGDS(gdsBtn, gdsBtn.dataset.gds);
+        var pageBtn = e.target.closest('[data-page]');
+        if (pageBtn) changePage(parseInt(pageBtn.dataset.page));
+    });
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && e.target.matches('[data-enter-search]')) buscarBoletos();
+    });
 
     function getInitials(name) {
         if (!name || name === 'Sin Nombre') return 'PA';

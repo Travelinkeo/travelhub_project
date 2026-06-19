@@ -62,21 +62,21 @@
                         <label class="block text-[10px] font-black uppercase tracking-widest text-text-muted">Monto Original</label>
                         <div class="relative">
                             <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-text-muted">$</span>
-                            <input type="number" step="0.01" id="monto_original" placeholder="0.00" class="input-base !pl-8 font-mono" oninput="calcularReembolso()">
+                            <input type="number" step="0.01" id="monto_original" placeholder="0.00" class="input-base !pl-8 font-mono" data-calc-reembolso>
                         </div>
                     </div>
                     <div class="space-y-2">
                         <label class="block text-[10px] font-black uppercase tracking-widest text-text-muted">Penalidad Aerolínea</label>
                         <div class="relative">
                             <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-text-muted">$</span>
-                            <input type="number" step="0.01" id="penalidad_aerolinea" placeholder="0.00" class="input-base !pl-8 text-status-danger/70 font-mono" oninput="calcularReembolso()">
+                            <input type="number" step="0.01" id="penalidad_aerolinea" placeholder="0.00" class="input-base !pl-8 text-status-danger/70 font-mono" data-calc-reembolso>
                         </div>
                     </div>
                     <div class="space-y-2">
                         <label class="block text-[10px] font-black uppercase tracking-widest text-text-muted">Fee Agencia</label>
                         <div class="relative">
                             <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-text-muted">$</span>
-                            <input type="number" step="0.01" id="fee_agencia" placeholder="0.00" class="input-base !pl-8 font-mono" oninput="calcularReembolso()">
+                            <input type="number" step="0.01" id="fee_agencia" placeholder="0.00" class="input-base !pl-8 font-mono" data-calc-reembolso>
                         </div>
                     </div>
                 </div>
@@ -89,7 +89,7 @@
                     <span id="monto_reembolso_display" class="text-3xl font-black text-status-success font-mono">$0.00</span>
                 </div>
 
-                <button onclick="solicitarAnulacion()" class="w-full h-14 bg-status-danger hover:bg-status-danger/90 text-white rounded-xl font-black uppercase tracking-widest transition-all shadow-lg shadow-status-danger/20 flex items-center justify-center gap-3 group">
+                <button data-action="solicitar-anulacion" class="w-full h-14 bg-status-danger hover:bg-status-danger/90 text-white rounded-xl font-black uppercase tracking-widest transition-all shadow-lg shadow-status-danger/20 flex items-center justify-center gap-3 group">
                     <span class="material-symbols-outlined text-[24px] group-hover:rotate-12 transition-transform">cancel</span>
                     Solicitar Anulación
                 </button>
@@ -150,6 +150,13 @@
 
 {% block extra_scripts %}
 <script nonce="{{ request.csp_nonce }}">
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('[data-action="solicitar-anulacion"]')) solicitarAnulacion();
+    });
+    document.addEventListener('input', function(e) {
+        if (e.target.matches('[data-calc-reembolso]')) calcularReembolso();
+    });
+
     function calcularReembolso() {
         const o = parseFloat(document.getElementById('monto_original').value) || 0;
         const p = parseFloat(document.getElementById('penalidad_aerolinea').value) || 0;

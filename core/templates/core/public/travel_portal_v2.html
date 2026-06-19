@@ -234,7 +234,7 @@
                 <span class="material-symbols-outlined text-[18px]">map</span>
                 <span class="text-[8px] font-black uppercase tracking-widest">Itinerario</span>
             </button>
-            <button onclick="document.getElementById('hotels-section')?.scrollIntoView({behavior: 'smooth'})" class="flex-1 h-12 rounded-xl hover:bg-slate-50 text-slate-600 flex flex-col items-center justify-center gap-0.5">
+            <button data-action="scroll-to" data-target="hotels-section" class="flex-1 h-12 rounded-xl hover:bg-slate-50 text-slate-600 flex flex-col items-center justify-center gap-0.5">
                 <span class="material-symbols-outlined text-[18px]">hotel</span>
                 <span class="text-[8px] font-black uppercase tracking-widest">Estadía</span>
             </button>
@@ -249,5 +249,14 @@
         </div>
     </div>
 
+    <script>
+    document.addEventListener('click', function(e) {
+        var scrollBtn = e.target.closest('[data-action="scroll-to"]');
+        if (scrollBtn) {
+            var target = document.getElementById(scrollBtn.dataset.target);
+            if (target) target.scrollIntoView({behavior: 'smooth'});
+        }
+    });
+    </script>
 </body>
 </html>

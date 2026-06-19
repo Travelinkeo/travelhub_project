@@ -117,7 +117,7 @@
                             class="px-4 py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-xl font-medium transition-all text-center flex-shrink-0">
                             Cancelar
                         </a>
-                        <button type="button" onclick="retryParse('{{ boleto.pk }}')"
+                        <button type="button" data-action="retry-parse" data-id="{{ boleto.pk }}"
                             class="px-4 py-3 bg-white/5 hover:bg-white/10 text-gray-300 rounded-xl font-medium transition-all group border border-white/10 flex items-center justify-center gap-2">
                             <svg class="w-5 h-5 group-hover:rotate-180 transition-transform duration-500" fill="none"
                                 stroke="currentColor" viewBox="0 0 24 24">
@@ -141,6 +141,11 @@
 </div>
 
 <script nonce="{{ request.csp_nonce }}">
+    document.addEventListener('click', function(e) {
+        var retryBtn = e.target.closest('[data-action="retry-parse"]');
+        if (retryBtn) retryParse(retryBtn.dataset.id);
+    });
+
     async function retryParse(id) {
         if (!confirm('¿Deseas volver a intentar extraer los datos automáticamente?')) return;
 

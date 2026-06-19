@@ -7,7 +7,7 @@
     {"model": "core.aerolinea", "pk": 308, "fields": {"codigo_iata": "CV", "nombre": "Aerocaribe", "activa": true}},
     {"model": "core.aerolinea", "pk": 309, "fields": {"codigo_iata": "DO", "nombre": "Sky High", "activa": true}},
     {"model": "core.aerolinea", "pk": 310, "fields": {"codigo_iata": "E4", "nombre": "Estelar Latinoamerica", "activa": true}},
-    {"model": "core.aerolinea", "pk": 311, "fields": {"codigo_iata": "ES", "nombre": "Estelar", "activa": true}},
+    {"model": "core.aerolinea", "pk": 311, "fields": {"codigo_iata": "ES", "nombre": "Estelar (Duplicado)", "activa": false}},
     {"model": "core.aerolinea", "pk": 312, "fields": {"codigo_iata": "G0", "nombre": "Alianza Glancelot", "activa": true}},
     {"model": "core.aerolinea", "pk": 313, "fields": {"codigo_iata": "GI", "nombre": "Fly The World", "activa": true}},
     {"model": "core.aerolinea", "pk": 314, "fields": {"codigo_iata": "L5", "nombre": "Red Air", "activa": true}},

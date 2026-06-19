@@ -64,7 +64,7 @@
 <!-- Messages List -->
 <div class="space-y-4">
     {% for com in comunicaciones %}
-    <div onclick="openDetailModal('{{ com.id }}')"
+    <div data-action="open-detail" data-id="{{ com.id }}"
         class="glass-panel border border-[var(--border)] rounded-xl p-4 hover:bg-[var(--surface-2)] transition-colors cursor-pointer group relative overflow-hidden">
         <!-- Hover Effect Border -->
         <div class="absolute left-0 top-0 bottom-0 w-1 bg-[var(--primary)] opacity-0 group-hover:opacity-100 transition-opacity">
@@ -194,6 +194,11 @@
 
 {% block extra_scripts %}
 <script nonce="{{ request.csp_nonce }}">
+    document.addEventListener('click', function(e) {
+        var detailItem = e.target.closest('[data-action="open-detail"]');
+        if (detailItem) openDetailModal(detailItem.dataset.id);
+    });
+
     function openDetailModal(id) {
         const container = document.getElementById(`com-data-${id}`).firstElementChild;
 

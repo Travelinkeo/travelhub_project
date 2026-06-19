@@ -94,7 +94,7 @@
                                 {{ log.descripcion }}
                             </td>
                             <td class="px-6 py-4 text-right">
-                                <button onclick="showLogDetails('{{ log.id_audit_log }}')"
+                                <button data-action="show-log" data-log-id="{{ log.id_audit_log }}"
                                     class="text-[var(--text-muted)] hover:text-[var(--primary)] transition-colors p-2 rounded-lg hover:bg-[var(--surface-2)]">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -237,6 +237,11 @@
 
 {% block extra_scripts %}
 <script nonce="{{ request.csp_nonce }}">
+    document.addEventListener('click', function(e) {
+        var logBtn = e.target.closest('[data-action="show-log"]');
+        if (logBtn) showLogDetails(logBtn.dataset.logId);
+    });
+
     function showLogDetails(id) {
         const container = document.getElementById(`log-data-${id}`).firstElementChild;
         const prev = JSON.parse(container.getAttribute('data-previos').replace(/'/g, '"'));

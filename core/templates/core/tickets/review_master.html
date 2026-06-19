@@ -78,7 +78,7 @@
             
             {% if boleto.venta_asociada %}
             <a href="{% url 'core:venta_eliminar_permanente' boleto.venta_asociada.pk %}?next={{ request.path }}" 
-               onclick="return confirm('⚠️ ¿ELIMINAR VENTA PERMANENTEMENTE? Esta acción borrará la venta y todos sus componentes asociados (items, pagos, etc).')"
+               data-confirm="⚠️ ¿ELIMINAR VENTA PERMANENTEMENTE? Esta acción borrará la venta y todos sus componentes asociados (items, pagos, etc)."
                class="h-10 px-4 rounded-xl border border-amber-500/20 text-amber-500/50 hover:text-amber-500 hover:bg-amber-500/10 transition-all flex items-center gap-2 group"
                title="Eliminar Venta asociada">
                 <span class="material-symbols-outlined text-[20px]">shopping_cart_off</span>
@@ -87,7 +87,7 @@
             {% endif %}
 
             <a href="{% url 'core:eliminar_boleto_hard' boleto.pk %}" 
-               onclick="return confirm('⚠️ ¿ELIMINAR TICKET PERMANENTEMENTE? Esta acción borrará el registro y los archivos físicos.')"
+               data-confirm="⚠️ ¿ELIMINAR TICKET PERMANENTEMENTE? Esta acción borrará el registro y los archivos físicos."
                class="h-10 px-4 rounded-xl border border-rose-500/20 text-rose-500/50 hover:text-rose-500 hover:bg-rose-500/10 transition-all flex items-center gap-2 group"
                title="Eliminar permanentemente">
                 <span class="material-symbols-outlined text-[20px]">delete_forever</span>
@@ -407,7 +407,7 @@
                 <!-- 5. FINAL SUBMIT (Redundant for UX) -->
                 <div class="pt-10 flex justify-center gap-6">
                     <a href="{% url 'core:eliminar_boleto_hard' boleto.pk %}" 
-                       onclick="return confirm('⚠️ ¿Está seguro de eliminar este boleto permanentemente? Esta acción es irreversible y borrará también los archivos PDF.')"
+                       data-confirm="⚠️ ¿Está seguro de eliminar este boleto permanentemente? Esta acción es irreversible y borrará también los archivos PDF."
                        class="h-14 px-8 rounded-full border border-rose-500/30 bg-rose-500/5 text-rose-500 flex items-center gap-3 hover:bg-rose-500 hover:text-white transition-all group">
                         <span class="material-symbols-outlined text-[24px]">delete_forever</span>
                         <span class="font-black uppercase tracking-widest text-xs">Eliminar Ticket</span>
@@ -430,6 +430,13 @@
 
 <!-- ── SCRIPTS ── -->
 <script nonce="{{ request.csp_nonce }}">
+    document.addEventListener('click', function(e) {
+        var confirmLink = e.target.closest('[data-confirm]');
+        if (confirmLink && !confirm(confirmLink.dataset.confirm)) {
+            e.preventDefault();
+        }
+    });
+
     document.addEventListener('htmx:beforeRequest', function(evt) {
         if (evt.detail.elt && evt.detail.elt.id === 'btn-retry-parse-forced') {
             console.log('🔥 Iniciando re-extracción forzada...');

@@ -26,22 +26,22 @@
                     {% if cliente.es_cliente_frecuente %}
                     <span
                         class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center">
-                        <i data-lucide="star" class="w-3 h-3 mr-1 fill-amber-400"></i>
+                        <span class="material-symbols-outlined w-3 h-3 mr-1 fill-amber-400">star</span>
                         VIP
                     </span>
                     {% endif %}
                 </div>
                 <div class="flex flex-wrap items-center gap-6 text-gray-400 text-sm">
                     <div class="flex items-center">
-                        <i data-lucide="mail" class="w-4 h-4 mr-2"></i>
+                        <span class="material-symbols-outlined w-4 h-4 mr-2">mail</span>
                         {{ cliente.email }}
                     </div>
                     <div class="flex items-center">
-                        <i data-lucide="phone" class="w-4 h-4 mr-2"></i>
+                        <span class="material-symbols-outlined w-4 h-4 mr-2">phone</span>
                         {{ cliente.telefono_principal }}
                     </div>
                     <div class="flex items-center">
-                        <i data-lucide="map-pin" class="w-4 h-4 mr-2"></i>
+                        <span class="material-symbols-outlined w-4 h-4 mr-2">location_on</span>
                         {{ cliente.ciudad|default:"---" }}
                     </div>
                 </div>
@@ -238,7 +238,7 @@
                         <td class="px-8 py-4 text-right">
                             <a href="{% url 'bookings:venta_detail' venta.pk %}"
                                 class="p-2 bg-white/5 rounded-lg text-gray-400 hover:text-white transition-all">
-                                <i data-lucide="external-link" class="w-4 h-4"></i>
+                                <span class="material-symbols-outlined w-4 h-4">open_in_new</span>
                             </a>
                         </td>
                     </tr>
@@ -294,7 +294,7 @@
                         <td class="px-8 py-4 text-right">
                             <a href="{% url 'core:cotizacion_detalle' cotizacion.pk %}"
                                 class="p-2 bg-white/5 rounded-lg text-gray-400 hover:text-white transition-all">
-                                <i data-lucide="eye" class="w-4 h-4"></i>
+                                <span class="material-symbols-outlined w-4 h-4">visibility</span>
                             </a>
                         </td>
                     </tr>

@@ -9,7 +9,7 @@
         <!-- Card 1: Ventas -->
         <div class="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm flex items-center gap-4 group hover:border-[var(--primary)] transition-all">
             <div class="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600 group-hover:bg-[var(--primary)] group-hover:text-white transition-all">
-                <i data-lucide="hotel" class="w-6 h-6"></i>
+                <span class="material-symbols-outlined w-6 h-6">hotel</span>
             </div>
             <div>
                 <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Ventas (30d)</p>
@@ -20,7 +20,7 @@
         <!-- Card 2: Revenue -->
         <div class="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm flex items-center gap-4 group hover:border-emerald-500 transition-all">
             <div class="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600 group-hover:bg-emerald-500 group-hover:text-white transition-all">
-                <i data-lucide="dollar-sign" class="w-6 h-6"></i>
+                <span class="material-symbols-outlined w-6 h-6">attach_money</span>
             </div>
             <div>
                 <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Facturación</p>
@@ -31,7 +31,7 @@
         <!-- Card 3: Margen -->
         <div class="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm flex items-center gap-4 group hover:border-amber-500 transition-all">
             <div class="w-12 h-12 bg-amber-50 rounded-xl flex items-center justify-center text-amber-600 group-hover:bg-amber-500 group-hover:text-white transition-all">
-                <i data-lucide="trending-up" class="w-6 h-6"></i>
+                <span class="material-symbols-outlined w-6 h-6">trending_up</span>
             </div>
             <div>
                 <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Margen Bruto</p>
@@ -42,7 +42,7 @@
         <!-- Card 4: Top Destino -->
         <div class="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm flex items-center gap-4 group hover:border-rose-500 transition-all">
             <div class="w-12 h-12 bg-rose-50 rounded-xl flex items-center justify-center text-rose-600 group-hover:bg-rose-500 group-hover:text-white transition-all">
-                <i data-lucide="map-pin" class="w-6 h-6"></i>
+                <span class="material-symbols-outlined w-6 h-6">location_on</span>
             </div>
             <div>
                 <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Top Destino</p>
@@ -68,7 +68,7 @@
                     <input type="text" name="q" value="{{ request.GET.q }}" placeholder="¿A dónde vas?" class="w-full bg-transparent text-[var(--text-primary)] font-semibold focus:outline-none placeholder-[var(--text-muted)]">
                 </div>
                 <button type="submit" class="bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white font-bold py-3 px-8 rounded-lg flex items-center gap-2">
-                    <i data-lucide="search" class="w-5 h-5"></i> Buscar
+                    <span class="material-symbols-outlined w-5 h-5">search</span> Buscar
                 </button>
             </form>
         </div>
@@ -113,14 +113,14 @@
                         <img src="{{ hotel.imagen_principal.url }}" class="w-full h-full object-cover transform group-hover:scale-110 transition duration-500" alt="{{ hotel.nombre }}">
                         {% else %}
                         <div class="w-full h-full flex flex-col items-center justify-center text-[var(--text-muted)] p-2 text-center">
-                            <i data-lucide="image" class="w-12 h-12 mb-2 opacity-60"></i>
+                            <span class="material-symbols-outlined w-12 h-12 mb-2 opacity-60">image</span>
                             <span class="text-[10px] font-bold">Sin foto</span>
                         </div>
                         {% endif %}
                     </div>
                     <div class="p-5 flex-1 flex flex-col">
                         <h3 class="font-bold text-[var(--text-primary)] text-lg group-hover:text-[var(--primary)] transition">{{ hotel.nombre }}</h3>
-                        <p class="text-sm text-[var(--text-secondary)] flex items-center gap-1 mb-2"><i data-lucide="map-pin" class="w-3 h-3 text-[var(--text-muted)]"></i> {{ hotel.destino }}</p>
+                        <p class="text-sm text-[var(--text-secondary)] flex items-center gap-1 mb-2"><span class="material-symbols-outlined w-3 h-3 text-[var(--text-muted)]">location_on</span> {{ hotel.destino }}</p>
                         <p class="text-[var(--text-secondary)] text-sm mb-4 line-clamp-3 leading-relaxed">{{ hotel.descripcion_larga|striptags|truncatechars:150 }}</p>
                         <div class="border-t border-[var(--border)] pt-4 flex justify-between items-center mt-auto">
                             <div class="text-[10px] text-emerald-500 bg-emerald-500/10 px-2 py-1 rounded-full border border-emerald-500/20 font-bold uppercase tracking-wider">{{ hotel.get_categoria_display }}</div>
@@ -130,7 +130,7 @@
                 </a>
                 {% empty %}
                 <div class="col-span-full py-12 text-center bg-[var(--surface-1)] rounded-xl border border-dashed border-[var(--border)] shadow-sm">
-                    <i data-lucide="search-x" class="w-12 h-12 text-[var(--text-muted)] mx-auto mb-4"></i>
+                    <span class="material-symbols-outlined w-12 h-12 text-[var(--text-muted)] mx-auto mb-4">search_off</span>
                     <h3 class="text-lg font-medium text-[var(--text-primary)] mb-1">No encontramos resultados</h3>
                     <p class="text-sm text-[var(--text-secondary)]">Intenta ajustando tus filtros de búsqueda.</p>
                 </div>

@@ -217,7 +217,7 @@
 
             <!-- Acordeón: Documentos en esta categoría -->
             <div class="wiki-accordion mb-2">
-                <button class="wiki-category-btn open" onclick="toggleAccordion(this)">
+                <button class="wiki-category-btn open" data-action="toggle-accordion">
                     <span class="material-symbols-outlined text-[16px]">folder_open</span>
                     {{ category|upper }}
                     <span class="material-symbols-outlined chevron">expand_more</span>
@@ -237,27 +237,27 @@
             <div class="pt-2 border-t border-border-color mt-2">
                 <p class="text-[9px] font-black text-text-muted uppercase tracking-widest px-3 py-2">Secciones del Manual</p>
 
-                <button class="wiki-category-btn" onclick="scrollToSection('Vuelo', this)">
+                <button class="wiki-category-btn" data-section="Vuelo">
                     <span class="material-symbols-outlined text-[16px]">flight</span>
                     Vuelos
                 </button>
-                <button class="wiki-category-btn" onclick="scrollToSection('Hotel', this)">
+                <button class="wiki-category-btn" data-section="Hotel">
                     <span class="material-symbols-outlined text-[16px]">hotel</span>
                     Hoteles
                 </button>
-                <button class="wiki-category-btn" onclick="scrollToSection('Auto', this)">
+                <button class="wiki-category-btn" data-section="Auto">
                     <span class="material-symbols-outlined text-[16px]">directions_car</span>
                     Autos
                 </button>
-                <button class="wiki-category-btn" onclick="scrollToSection('SSR', this)">
+                <button class="wiki-category-btn" data-section="SSR">
                     <span class="material-symbols-outlined text-[16px]">badge</span>
                     Formatos Especiales (SSR/OSI)
                 </button>
-                <button class="wiki-category-btn" onclick="scrollToSection('Reemisi', this)">
+                <button class="wiki-category-btn" data-section="Reemisi">
                     <span class="material-symbols-outlined text-[16px]">autorenew</span>
                     Reemisiones
                 </button>
-                <button class="wiki-category-btn" onclick="scrollToSection('Queue', this)">
+                <button class="wiki-category-btn" data-section="Queue">
                     <span class="material-symbols-outlined text-[16px]">queue</span>
                     Colas (Queues)
                 </button>
@@ -331,7 +331,7 @@
                         <span class="material-symbols-outlined text-[16px]">print</span>
                         {% trans "Imprimir Guía" %}
                     </button>
-                    <button onclick="copyPageUrl()" class="h-10 px-4 bg-primary/10 border border-primary/20 text-primary rounded-lg text-xs font-bold hover:bg-primary/20 transition-all flex items-center gap-2" id="share-btn">
+                    <button data-action="copy-url" class="h-10 px-4 bg-primary/10 border border-primary/20 text-primary rounded-lg text-xs font-bold hover:bg-primary/20 transition-all flex items-center gap-2" id="share-btn">
                         <span class="material-symbols-outlined text-[16px]">link</span>
                         {% trans "Copiar Enlace" %}
                     </button>
@@ -365,6 +365,17 @@ function scrollToSection(sectionName, btn) {
         }
     }
 }
+
+// === EVENT DELEGATION ===
+document.addEventListener('click', function(e) {
+    var accBtn = e.target.closest('[data-action="toggle-accordion"]');
+    if (accBtn) toggleAccordion(accBtn);
+    var secBtn = e.target.closest('[data-section]');
+    if (secBtn) scrollToSection(secBtn.dataset.section, secBtn);
+    if (e.target.closest('[data-action="copy-url"]')) copyPageUrl();
+    var jumpBtn = e.target.closest('[data-jump-index]');
+    if (jumpBtn) jumpTo(searchIndex[parseInt(jumpBtn.dataset.jumpIndex)]);
+});
 
 // === BUSCADOR EN TIEMPO REAL ===
 const searchInput = document.getElementById('wiki-search');
@@ -419,7 +430,7 @@ searchInput.addEventListener('input', function() {
         searchResults.innerHTML = `<div class="p-4 text-xs text-text-muted text-center">Sin resultados para "<strong>${escQ}</strong>"</div>`;
     } else {
         searchResults.innerHTML = matches.map(m => `
-            <button onclick="jumpTo(searchIndex[${searchIndex.indexOf(m)}])" 
+            <button data-jump-index="${searchIndex.indexOf(m)}" 
                 class="w-full text-left flex items-start gap-3 px-4 py-3 hover:bg-surface-3 transition-colors border-b border-border-color last:border-0">
                 <span class="material-symbols-outlined text-[16px] text-text-muted mt-0.5 flex-shrink-0">${m.isCmd ? 'terminal' : 'title'}</span>
                 <div>

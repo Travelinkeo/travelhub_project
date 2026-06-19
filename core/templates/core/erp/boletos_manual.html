@@ -221,7 +221,7 @@
                     <span class="material-symbols-outlined text-amber-500">shutter_speed</span>
                     <h3 class="text-xs font-black text-amber-500 uppercase tracking-widest">Resultado de Auditoría AI</h3>
                 </div>
-                <button onclick="document.getElementById('audit-results-panel').classList.add('hidden')" class="text-text-muted hover:text-text-main">
+                <button data-action="close-audit-panel" class="text-text-muted hover:text-text-main">
                     <span class="material-symbols-outlined text-sm">close</span>
                 </button>
             </div>
@@ -243,6 +243,13 @@
         const selects = document.querySelectorAll('select');
         selects.forEach(s => {
             s.classList.add('input-base', 'appearance-none');
+        });
+
+        // Close audit panel delegation
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('[data-action="close-audit-panel"]')) {
+                document.getElementById('audit-results-panel').classList.add('hidden');
+            }
         });
 
         const btnAudit = document.getElementById('btn-audit');

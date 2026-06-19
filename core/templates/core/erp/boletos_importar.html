@@ -90,7 +90,7 @@
                                 <p id="file-preview-name" class="text-sm font-black text-white truncate uppercase tracking-tighter">filename.pdf</p>
                                 <p id="file-preview-size" class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">2.4 MB</p>
                             </div>
-                            <button type="button" onclick="quitarArchivo()" class="size-10 rounded-xl hover:bg-rose-500/20 text-gray-500 hover:text-rose-500 transition-all flex items-center justify-center">
+                            <button type="button" data-action="quitar-archivo" class="size-10 rounded-xl hover:bg-rose-500/20 text-gray-500 hover:text-rose-500 transition-all flex items-center justify-center">
                                 <span class="material-symbols-outlined">close</span>
                             </button>
                         </div>
@@ -325,6 +325,12 @@
         const ticketCard = e.target.closest('.ticket-card');
         if (ticketCard && !e.target.closest('button') && !e.target.closest('a')) {
             window.location.href = ticketCard.dataset.url;
+            return;
+        }
+
+        // Quitar Archivo
+        if (e.target.closest('[data-action="quitar-archivo"]')) {
+            quitarArchivo();
             return;
         }
 

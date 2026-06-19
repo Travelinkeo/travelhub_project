@@ -27,7 +27,7 @@
         // Loading State
         btn.disabled = true;
         const originalText = btn.innerHTML;
-        btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Pensando...';
+        btn.innerHTML = '<span class="material-symbols-outlined w-4 h-4 animate-spin">progress_activity</span> Pensando...';
         textarea.classList.add('animate-pulse');
 
         try {
@@ -60,7 +60,6 @@
             btn.disabled = false;
             btn.innerHTML = originalText;
             textarea.classList.remove('animate-pulse');
-            lucide.createIcons();
         }
     }
 

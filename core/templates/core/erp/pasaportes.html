@@ -120,20 +120,20 @@
         </div>
 
         <div class="flex gap-2 pt-4 border-t border-[var(--border)]">
-            <button onclick="openImageModal('{{ pasaporte.imagen_original.url }}')"
+            <button data-action="open-image" data-url="{{ pasaporte.imagen_original.url }}"
                 class="flex-1 px-3 py-2 bg-[var(--surface-3)] hover:bg-[var(--surface-4)] text-[var(--text-primary)] rounded-lg text-xs font-bold transition-colors border border-[var(--border)]">
                 Ver Imagen
             </button>
 
             {% if not pasaporte.verificado_manualmente %}
-            <button onclick="verificarPasaporte('{{ pasaporte.id }}')"
+            <button data-action="verificar-pasaporte" data-id="{{ pasaporte.id }}"
                 class="flex-1 px-3 py-2 bg-[var(--primary)]/10 hover:bg-[var(--primary)]/20 text-[var(--primary)] border border-[var(--primary)]/20 rounded-lg text-xs font-bold transition-colors">
                 Verificar
             </button>
             {% endif %}
 
             {% if not pasaporte.cliente %}
-            <button onclick="crearCliente('{{ pasaporte.id }}')"
+            <button data-action="crear-cliente" data-id="{{ pasaporte.id }}"
                 class="flex-1 px-3 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-[var(--success)] border border-[var(--success)]/20 rounded-lg text-xs font-bold transition-colors">
                 Crear Cliente
             </button>
@@ -200,6 +200,15 @@
 {% block extra_scripts %}
 <script nonce="{{ request.csp_nonce }}">
     document.getElementById('upload-pasaporte').addEventListener('change', function() { uploadPasaporte(this.files[0]); });
+
+    document.addEventListener('click', function(e) {
+        var imgBtn = e.target.closest('[data-action="open-image"]');
+        if (imgBtn) openImageModal(imgBtn.dataset.url);
+        var verifyBtn = e.target.closest('[data-action="verificar-pasaporte"]');
+        if (verifyBtn) verificarPasaporte(verifyBtn.dataset.id);
+        var createBtn = e.target.closest('[data-action="crear-cliente"]');
+        if (createBtn) crearCliente(createBtn.dataset.id);
+    });
 
     function openImageModal(url) {
         document.getElementById('modalImage').src = url;

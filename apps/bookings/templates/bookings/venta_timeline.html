@@ -30,11 +30,11 @@
     <!-- NAVBAR SIMULADO (BACK BUTTON) -->
     <div class="flex items-center gap-4 mb-8">
         <a href="{% url 'bookings:venta_list' %}" class="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center hover:bg-white/10 transition-colors text-slate-400 hover:text-white group">
-            <i data-lucide="arrow-left" class="w-5 h-5 group-hover:-translate-x-1 transition-transform"></i>
+            <span class="material-symbols-outlined w-5 h-5 group-hover:-translate-x-1 transition-transform">arrow_back</span>
         </a>
         <div class="h-4 w-px bg-white/10"></div>
         <div class="flex items-center gap-2">
-            <i data-lucide="airplane-ticket" class="w-4 h-4 text-slate-500"></i>
+            <span class="material-symbols-outlined w-4 h-4 text-slate-500">flight</span>
             <h1 class="text-sm font-bold text-slate-300">Reserva <span class="text-white font-black">#{{ venta.id_venta }}</span></h1>
         </div>
     </div>
@@ -46,14 +46,14 @@
                 {{ venta.localizador|default:"S/L" }}
                 <button @click="navigator.clipboard.writeText('{{ venta.localizador }}'); $dispatch('notify', { message: 'Copiado!', type: 'success' })" 
                     class="text-slate-500 hover:text-blue-500 transition-colors" title="Copiar PNR">
-                    <i data-lucide="copy" class="w-6 h-6"></i>
+                    <span class="material-symbols-outlined w-6 h-6">content_copy</span>
                 </button>
             </h2>
             <div class="flex flex-wrap items-center gap-3 mt-3 text-sm">
                 <span class="font-bold text-slate-200">{{ venta.cliente.get_nombre_completo }}</span>
                 <span class="w-1.5 h-1.5 rounded-full bg-slate-700"></span>
                 <span class="text-slate-400 flex items-center gap-2">
-                    <i data-lucide="calendar" class="w-4 h-4"></i>
+                    <span class="material-symbols-outlined w-4 h-4">calendar_month</span>
                     Emisión: {{ venta.fecha_venta|date:"d M Y" }}
                 </span>
                 <span class="w-1.5 h-1.5 rounded-full bg-slate-700"></span>
@@ -68,7 +68,7 @@
         
         <div class="flex gap-3">
             <a href="{% url 'bookings:venta_update' venta.pk %}" class="bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold py-3 px-6 rounded-2xl transition-all flex items-center gap-2 text-sm">
-                <i data-lucide="edit" class="w-4 h-4 text-blue-400"></i> Editar Venta
+                <span class="material-symbols-outlined w-4 h-4 text-blue-400">edit</span> Editar Venta
             </a>
             <button hx-get="{% url 'bookings:pago_venta_add' venta.pk %}" hx-target="#modal-content" @click="$dispatch('open-modal')"
                 class="bg-emerald-600 hover:bg-emerald-500 text-white font-black py-3 px-6 rounded-2xl transition-all shadow-lg shadow-emerald-500/20 flex items-center gap-2 text-sm">

@@ -137,7 +137,13 @@ class ReviewBoletoView(View):
         if force:
             logger.info(f"🔄 Re-extracción forzada (bypass_cache + ignore_manual) Boleto {pk}")
             boleto.estado_parseo = BoletoImportado.EstadoParseo.EN_PROCESO
-            boleto.save(update_fields=["estado_parseo"])
+            if boleto.archivo_pdf_generado:
+                try:
+                    boleto.archivo_pdf_generado.delete(save=False)
+                except Exception as e_del:
+                    logger.warning(f"No se pudo borrar archivo físico del PDF: {e_del}")
+            boleto.archivo_pdf_generado = None
+            boleto.save(update_fields=["estado_parseo", "archivo_pdf_generado"])
 
             # Rebobinado por seguridad
             if boleto.archivo_boleto and hasattr(boleto.archivo_boleto, "seek"):
@@ -298,10 +304,11 @@ class BoletoPdfStatusView(View):
         # Si el boleto lleva demasiado tiempo en PRO, expirar el estado
         if boleto.estado_parseo == BoletoImportado.EstadoParseo.EN_PROCESO:
             from django.utils import timezone as tz
+
             if boleto.updated_at and (tz.now() - boleto.updated_at).total_seconds() > 120:
                 BoletoImportado.all_objects.filter(pk=boleto.pk).update(
                     estado_parseo="REV",
-                    log_parseo="Estado PRO expirado por timeout (>120s). Reintenta el parseo."
+                    log_parseo="Estado PRO expirado por timeout (>120s). Reintenta el parseo.",
                 )
                 boleto.refresh_from_db()
 
@@ -406,7 +413,9 @@ class BoletoPdfStatusView(View):
                 _generate_pdf_sync(boleto)
                 boleto.refresh_from_db()
             except Exception as e_regen:
-                logger.error(f"❌ [PDF-STATUS] Fallo al auto-regenerar PDF para Boleto {boleto.pk}: {e_regen}")
+                logger.error(
+                    f"❌ [PDF-STATUS] Fallo al auto-regenerar PDF para Boleto {boleto.pk}: {e_regen}"
+                )
 
             # Si ahora tenemos PDF, mostrarlo
             if boleto.archivo_pdf_generado:
@@ -428,7 +437,9 @@ class BoletoPdfStatusView(View):
 
             # Si sigue sin PDF después del intento, mostrar botón de error (sale del bucle)
             boleto.refresh_from_db()
-            url_retry = reverse("core:boleto_pdf_status", kwargs={"pk": boleto.pk}) + "?retry=1&poll=0"
+            url_retry = (
+                reverse("core:boleto_pdf_status", kwargs={"pk": boleto.pk}) + "?retry=1&poll=0"
+            )
             html = f"""
             <div id="pdf-status-container-{boleto.pk}" 
                  hx-get="{url_retry}" 

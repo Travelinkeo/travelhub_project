@@ -10,23 +10,23 @@
         <!-- Tabs Header -->
         <div class="border-b border-white/10">
             <nav class="-mb-px flex" aria-label="Tabs">
-                <button onclick="switchTab('info')" id="tab-info"
+                <button data-tab="info" id="tab-info"
                     class="w-1/5 py-4 px-1 text-center border-b-2 border-primary font-medium text-sm text-primary focus:outline-none transition-colors">
                     Información Básica
                 </button>
-                <button onclick="switchTab('contacto')" id="tab-contacto"
+                <button data-tab="contacto" id="tab-contacto"
                     class="w-1/5 py-4 px-1 text-center border-b-2 border-transparent font-medium text-sm text-gray-400 hover:text-gray-200 hover:border-gray-600 focus:outline-none transition-colors">
                     Contacto y Dirección
                 </button>
-                <button onclick="switchTab('branding')" id="tab-branding"
+                <button data-tab="branding" id="tab-branding"
                     class="w-1/5 py-4 px-1 text-center border-b-2 border-transparent font-medium text-sm text-gray-400 hover:text-gray-200 hover:border-gray-600 focus:outline-none transition-colors">
                     Branding
                 </button>
-                <button onclick="switchTab('config')" id="tab-config"
+                <button data-tab="config" id="tab-config"
                     class="w-1/5 py-4 px-1 text-center border-b-2 border-transparent font-medium text-sm text-gray-400 hover:text-gray-200 hover:border-gray-600 focus:outline-none transition-colors">
                     Configuración
                 </button>
-                <button onclick="switchTab('whatsapp')" id="tab-whatsapp"
+                <button data-tab="whatsapp" id="tab-whatsapp"
                     class="w-1/5 py-4 px-1 text-center border-b-2 border-transparent font-medium text-sm text-gray-400 hover:text-gray-200 hover:border-gray-600 focus:outline-none transition-colors">
                     <div class="flex items-center justify-center gap-2">
                         <span class="material-symbols-outlined text-[18px]">chat</span>
@@ -265,6 +265,12 @@
             }
         });
     }
+
+    // Tab delegation
+    document.addEventListener('click', function(e) {
+        var tabBtn = e.target.closest('[data-tab]');
+        if (tabBtn) switchTab(tabBtn.dataset.tab);
+    });
 
     // Apply Tailwind classes to form inputs
     document.addEventListener('DOMContentLoaded', function () {

@@ -185,7 +185,13 @@ class BoletoRetryParseAPIView(InternalAPIAuthMixin, APIView):
                 from core.api import parsear_boleto_individual
 
                 boleto.estado_parseo = "PRO"
-                boleto.save(update_fields=["estado_parseo"])
+                if boleto.archivo_pdf_generado:
+                    try:
+                        boleto.archivo_pdf_generado.delete(save=False)
+                    except Exception as e_del:
+                        logger.warning(f"No se pudo borrar archivo físico del PDF: {e_del}")
+                boleto.archivo_pdf_generado = None
+                boleto.save(update_fields=["estado_parseo", "archivo_pdf_generado"])
                 task_id = safe_delay(
                     parsear_boleto_individual, pk, ignore_manual=True, bypass_cache=True
                 )

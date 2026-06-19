@@ -84,7 +84,7 @@
     {"model": "core.aerolinea", "pk": 83, "fields": {"codigo_iata": "EO", "nombre": "Pegas Fly", "activa": true}},
     {"model": "core.aerolinea", "pk": 84, "fields": {"codigo_iata": "EP", "nombre": "Iran Aseman Airlines", "activa": true}},
     {"model": "core.aerolinea", "pk": 85, "fields": {"codigo_iata": "EQ", "nombre": "TAME", "activa": true}},
-    {"model": "core.aerolinea", "pk": 86, "fields": {"codigo_iata": "ES", "nombre": "DHL Aviation", "activa": true}},
+    {"model": "core.aerolinea", "pk": 86, "fields": {"codigo_iata": "ES", "codigo_numerico": "052", "nombre": "Aerolíneas Estelar", "activa": true}},
     {"model": "core.aerolinea", "pk": 87, "fields": {"codigo_iata": "ET", "nombre": "Ethiopian Airlines", "activa": true}},
     {"model": "core.aerolinea", "pk": 88, "fields": {"codigo_iata": "EW", "nombre": "Eurowings", "activa": true}},
     {"model": "core.aerolinea", "pk": 89, "fields": {"codigo_iata": "EY", "nombre": "Etihad Airways", "activa": true}},

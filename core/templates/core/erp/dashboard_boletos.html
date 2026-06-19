@@ -40,7 +40,7 @@
             </div>
             
             <div class="flex items-center gap-3">
-                <button onclick="cargarMetricas()" class="h-12 px-6 rounded-2xl bg-surface-2 border border-border-color flex items-center gap-2 hover:bg-surface-3 transition-all text-[10px] font-black uppercase tracking-widest text-text-muted">
+                <button data-action="cargar-metricas" class="h-12 px-6 rounded-2xl bg-surface-2 border border-border-color flex items-center gap-2 hover:bg-surface-3 transition-all text-[10px] font-black uppercase tracking-widest text-text-muted">
                     <span class="material-symbols-outlined text-[18px]">refresh</span>
                     Refresh Data
                 </button>
@@ -181,6 +181,9 @@
 {% block extra_scripts %}
 <script nonce="{{ request.csp_nonce }}">
     document.addEventListener('DOMContentLoaded', cargarMetricas);
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('[data-action="cargar-metricas"]')) cargarMetricas();
+    });
 
     async function cargarMetricas() {
         try {

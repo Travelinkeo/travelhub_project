@@ -14,7 +14,7 @@
         <div class="flex gap-3">
             <a href="{% url 'core:proveedores_list' %}"
                 class="px-4 py-2 bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-xl transition-all inline-flex items-center gap-2">
-                <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                <span class="material-symbols-outlined w-4 h-4">arrow_back</span>
                 {% trans "Panel de Proveedores" %}
             </a>
             <a href="{% url 'core:comisiones_nuevo' %}{% if proveedor_id %}?proveedor={{ proveedor_id }}{% endif %}"

@@ -5,7 +5,7 @@
 {% block title %}Equipo — TravelHub Pro{% endblock %}
 
 {% block config_actions %}
-<button onclick="document.getElementById('invite-modal').classList.remove('hidden')"
+<button data-action="open-modal" data-target="invite-modal"
     class="btn-primary !h-12 !px-8 shadow-xl shadow-primary/20 group uppercase text-[10px] font-black tracking-widest">
     <span class="material-symbols-outlined text-[18px]">person_add</span>
     <span>{% trans "Invitar Miembro" %}</span>
@@ -108,7 +108,7 @@
 <!-- Modal Invitación -->
 <div id="invite-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center px-4 bg-slate-950/80 backdrop-blur-xl animate-fade-in">
     <div class="bg-surface-base border border-border-color w-full max-w-lg rounded-3xl shadow-2xl p-10 relative">
-        <button onclick="document.getElementById('invite-modal').classList.add('hidden')" 
+        <button data-action="close-modal" data-target="invite-modal" 
             class="absolute top-6 right-6 p-2 text-text-muted hover:text-text-main transition-colors">
             <span class="material-symbols-outlined">close</span>
         </button>
@@ -143,7 +143,7 @@
             </div>
 
             <div class="grid grid-cols-2 gap-6 pt-6">
-                <button type="button" onclick="document.getElementById('invite-modal').classList.add('hidden')"
+                <button type="button" data-action="close-modal" data-target="invite-modal"
                     class="btn-secondary !h-12 !px-8 border-2 border-border-color uppercase text-[10px] font-black tracking-widest">
                     {% trans "Cancelar" %}
                 </button>
@@ -159,6 +159,12 @@
 <script nonce="{{ request.csp_nonce }}">
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') document.getElementById('invite-modal').classList.add('hidden');
+    });
+    document.addEventListener('click', function(e) {
+        var openBtn = e.target.closest('[data-action="open-modal"]');
+        if (openBtn) document.getElementById(openBtn.dataset.target).classList.remove('hidden');
+        var closeBtn = e.target.closest('[data-action="close-modal"]');
+        if (closeBtn) document.getElementById(closeBtn.dataset.target).classList.add('hidden');
     });
 </script>
 {% endblock %}

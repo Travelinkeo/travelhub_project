@@ -35,7 +35,19 @@
             <tbody class="divide-y divide-gray-700">
                 {% for aerolinea in aerolineas %}
                 <tr class="hover:bg-white/5 transition-colors">
-                    <td class="py-3 text-white font-medium">{{ aerolinea.nombre }}</td>
+                    <td class="py-3 text-white font-medium flex items-center gap-3">
+                        {% if aerolinea.codigo_iata %}
+                        <img src="https://pics.avs.io/60/60/{{ aerolinea.codigo_iata }}.png" 
+                             alt="{{ aerolinea.nombre }}" 
+                             class="w-8 h-8 object-contain bg-white rounded p-0.5"
+                             onerror="this.onerror=null; this.src='https://placehold.co/60x60/374151/FFFFFF?text={{ aerolinea.codigo_iata }}';">
+                        {% else %}
+                        <div class="w-8 h-8 rounded bg-gray-700 flex items-center justify-center text-[10px] text-gray-400 font-bold uppercase">
+                            N/A
+                        </div>
+                        {% endif %}
+                        <span>{{ aerolinea.nombre }}</span>
+                    </td>
                     <td class="py-3 text-gray-300 font-mono">{{ aerolinea.codigo_iata|default:"--" }}</td>
                     <td class="py-3 text-gray-300 font-mono">{{ aerolinea.codigo_icao|default:"--" }}</td>
                     <td class="py-3 text-gray-300">{{ aerolinea.pais.nombre }}</td>

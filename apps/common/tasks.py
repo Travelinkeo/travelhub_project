@@ -53,10 +53,84 @@ def procesar_correo_individual_agencia(agencia_id):
             )
 
             cantidad = monitor.procesar_una_vez()
+
+            if cantidad and cantidad > 0:
+                canal = getattr(config, "canal_notificaciones_mailbot", "telegram")
+                _notificar_operador(agencia, cantidad, canal)
+
             return f"Agencia {agencia.nombre} procesada con éxito. {cantidad} correos procesados."
     except Exception as e:
         logger.error(f"❌ Error procesando agencia {agencia_id} en paralelo: {e}")
         raise
+
+
+def _notificar_operador(agencia, cantidad_correos, canal="telegram"):
+    """Notifica al operador según el canal configurado (telegram/whatsapp/both/none)"""
+    if canal == "none":
+        return
+
+    if canal in ("telegram", "both"):
+        _notificar_operador_telegram(agencia, cantidad_correos)
+
+    if canal in ("whatsapp", "both"):
+        _notificar_operador_whatsapp(agencia, cantidad_correos)
+
+
+def _notificar_operador_telegram(agencia, cantidad_correos):
+    """Notifica al operador por Telegram cuando se detectan correos nuevos"""
+    try:
+        config = agencia.configuracion
+        bot_token = getattr(config, "telegram_bot_token", None) or getattr(
+            agencia, "telegram_bot_token", None
+        )
+        chat_id = getattr(config, "telegram_chat_id", None) or getattr(
+            agencia, "telegram_chat_id", None
+        )
+
+        if not bot_token or not chat_id:
+            logger.debug(
+                f"Agencia {agencia.nombre} sin Telegram configurado. Saltando notificación."
+            )
+            return
+
+        from apps.common.tasks import send_telegram_task
+
+        mensaje = (
+            f"📬 *Reporte de Monitoreo de Correo*\n\n"
+            f"Se detectaron *{cantidad_correos}* correo(s) nuevo(s) en tu bandeja de emisiones.\n\n"
+            f"_Revisá tu dashboard para más detalles._\n"
+            f"_Tu agencia: {agencia.nombre}_"
+        )
+
+        send_telegram_task.delay(message=mensaje, chat_id=chat_id)
+        logger.info(f"✅ Telegram de monitoreo enviado a operador de {agencia.nombre}")
+    except Exception as e:
+        logger.warning(f"⚠️ No se pudo enviar Telegram al operador de {agencia.nombre}: {e}")
+
+
+def _notificar_operador_whatsapp(agencia, cantidad_correos):
+    """Notifica al operador por WhatsApp cuando se detectan correos nuevos"""
+    try:
+        telefono = getattr(agencia, "whatsapp", None)
+        if not telefono:
+            logger.debug(
+                f"Agencia {agencia.nombre} sin número WhatsApp configurado. Saltando notificación."
+            )
+            return
+
+        from apps.communications.services.whatsapp_unified import enviar_whatsapp
+
+        mensaje = (
+            f"📬 *Reporte de Monitoreo de Correo*\n\n"
+            f"Se detectaron *{cantidad_correos}* correo(s) nuevo(s) en tu bandeja de emisiones.\n\n"
+            f"_Revisá tu dashboard para más detalles._\n"
+            f"_Tu agencia: {agencia.nombre}_"
+        )
+
+        enviar_whatsapp(telefono, mensaje, agencia=agencia)
+        logger.info(f"✅ WhatsApp de monitoreo enviado a operador de {agencia.nombre}")
+    except Exception as e:
+        logger.warning(f"⚠️ No se pudo enviar WhatsApp al operador de {agencia.nombre}: {e}")
 
 
 @shared_task(
@@ -1188,9 +1262,11 @@ def fetch_evolution_qr_task(self, instance_name):
 @shared_task(name="core.tasks.limpiar_axes_logs")
 def limpiar_axes_logs():
     try:
+        from datetime import timedelta
+
         from axes.models import AccessAttempt, AccessFailureLog
         from django.utils import timezone
-        from datetime import timedelta
+
         cutoff = timezone.now() - timedelta(days=30)
         AccessAttempt.objects.filter(attempt_time__lt=cutoff).delete()
         AccessFailureLog.objects.filter(attempt_time__lt=cutoff).delete()
@@ -1204,6 +1280,7 @@ def limpiar_sesiones_expiradas():
     try:
         from django.contrib.sessions.models import Session
         from django.utils import timezone
+
         Session.objects.filter(expire_date__lt=timezone.now()).delete()
         return "Sesiones expiradas limpiadas con éxito"
     except Exception as e:

@@ -246,6 +246,7 @@ class ThreadLocalContextMiddleware:
             # 5. Establecer contexto RLS en la base de datos
             try:
                 from django.db import connection
+
                 if connection.connection is not None:
                     with connection.cursor() as cursor:
                         tenant_id = str(agency.id) if agency else "0"
@@ -301,6 +302,7 @@ class ThreadLocalContextMiddleware:
             # Reseteo seguro de variables de sesión en Base de Datos
             try:
                 from django.db import connection
+
                 if connection.connection is not None:
                     with connection.cursor() as cursor:
                         cursor.execute("SET LOCAL app.current_agencia_id = '0'")
@@ -343,7 +345,7 @@ class SecurityHeadersMiddleware:
                         f"script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: {static_origin} https://cdn.jsdelivr.net https://cdn.tailwindcss.com https://unpkg.com https://static.cloudflareinsights.com",
                         f"style-src 'self' 'unsafe-inline' 'unsafe-eval' {static_origin} https://fonts.googleapis.com https://cdn.jsdelivr.net https://cdn.tailwindcss.com https://unpkg.com",
                         f"font-src 'self' {static_origin} https://fonts.gstatic.com data:",
-                        f"img-src 'self' data: blob: {static_origin} https://res.cloudinary.com {r2_wildcard} https://images.unsplash.com",
+                        f"img-src 'self' data: blob: {static_origin} https://res.cloudinary.com {r2_wildcard} https://images.unsplash.com https://pics.avs.io https://ui-avatars.com https://placehold.co",
                         "frame-src 'self' https://js.stripe.com http://evolution:8080",
                         f"connect-src 'self' {static_origin} https://*.cloudflarestorage.com https://api.stripe.com https://generativelanguage.googleapis.com https://cloudflareinsights.com https://cdn.jsdelivr.net",
                         "form-action 'self'",
@@ -359,7 +361,7 @@ class SecurityHeadersMiddleware:
                         f"script-src 'self' 'nonce-{nonce}' 'strict-dynamic' {static_origin} https://static.cloudflareinsights.com https://cdn.jsdelivr.net https://cdn.tailwindcss.com https://unpkg.com https://code.jquery.com",
                         f"style-src 'self' 'unsafe-inline' {static_origin} https://fonts.googleapis.com https://cdn.jsdelivr.net https://cdn.tailwindcss.com https://unpkg.com",
                         f"font-src 'self' {static_origin} https://fonts.gstatic.com data:",
-                        f"img-src 'self' data: blob: {static_origin} https://res.cloudinary.com {r2_wildcard} https://images.unsplash.com",
+                        f"img-src 'self' data: blob: {static_origin} https://res.cloudinary.com {r2_wildcard} https://images.unsplash.com https://pics.avs.io https://ui-avatars.com https://placehold.co",
                         "frame-src 'self' https://js.stripe.com https://evolution:8080",
                         f"connect-src 'self' {static_origin} https://*.cloudflarestorage.com https://api.stripe.com https://generativelanguage.googleapis.com https://cloudflareinsights.com https://cdn.jsdelivr.net",
                         "form-action 'self'",

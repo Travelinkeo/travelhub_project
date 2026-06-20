@@ -51,13 +51,12 @@ class ProveedorFormMixin:
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
         for field_name, field in form.fields.items():
-            if field.widget.input_type == "checkbox":
+            input_type = getattr(field.widget, "input_type", None)
+            if input_type == "checkbox":
                 # Los checkboxes usan estilos por defecto del navegador/tema, no input-base
                 field.widget.attrs["class"] = (
                     "h-5 w-5 rounded border-border-color text-primary focus:ring-primary"
                 )
-            elif field.widget.input_type == "select":
-                field.widget.attrs["class"] = "input-base"
             else:
                 field.widget.attrs["class"] = "input-base"
         return form

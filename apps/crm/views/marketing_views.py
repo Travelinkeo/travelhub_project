@@ -91,11 +91,13 @@ class DispatchCampaignView(LoginRequiredMixin, View):
                 <h3 class="text-2xl font-black text-emerald-900 mb-2">¡Campaña en el aire!</h3>
                 <p class="text-emerald-700 font-medium mb-6">Gemini ha entregado la campaña a Celery. Los correos se están enviando silenciosamente en segundo plano.</p>
                 <div class="flex justify-center">
-                   <button onclick="location.reload()" class="bg-slate-900 text-white font-bold py-2 px-6 rounded-xl hover:bg-slate-800 transition-colors">Crear Nueva Campaña</button>
+                   <button data-action="reload" class="bg-slate-900 text-white font-bold py-2 px-6 rounded-xl hover:bg-slate-800 transition-colors">Crear Nueva Campaña</button>
                 </div>
             </div>
             """
             return HttpResponse(html_exito)
 
         except Exception as e:
-            return HttpResponse(f'<div class="text-red-500 font-bold">Error despachando: {e}</div>')
+            return HttpResponse(
+                f'<div class="text-center py-10"><p class="text-red-500 font-bold">Error despachando: {e}</p><button data-action="reload" class="mt-4 px-4 py-2 bg-red-500/10 text-red-400 rounded-xl hover:bg-red-500/20 font-bold">Reintentar</button></div>'
+            )

@@ -4,7 +4,10 @@ from email import policy
 from email.parser import BytesParser
 from typing import Any, BinaryIO
 
-import fitz
+try:
+    import fitz
+except ImportError:
+    fitz = None
 
 try:
     from bs4 import BeautifulSoup, NavigableString
@@ -44,6 +47,9 @@ class ExtractionService:
 
     @staticmethod
     def _extract_pdf(file_obj):
+        if fitz is None:
+            logger.error("PyMuPDF (fitz) no está instalado. No se puede extraer texto de PDF.")
+            return None
         texto_extraido = ""
         try:
             if hasattr(file_obj, "seek"):

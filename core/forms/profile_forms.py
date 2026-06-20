@@ -139,7 +139,12 @@ class AgencyAutomationForm(forms.ModelForm):
         from core.models.agencia import AgenciaConfiguracion
 
         model = AgenciaConfiguracion
-        fields = ["email_monitor_user", "email_monitor_password", "email_monitor_active"]
+        fields = [
+            "email_monitor_user",
+            "email_monitor_password",
+            "email_monitor_active",
+            "canal_notificaciones_mailbot",
+        ]
         widgets = {
             "email_monitor_user": forms.EmailInput(
                 attrs={
@@ -157,6 +162,11 @@ class AgencyAutomationForm(forms.ModelForm):
             "email_monitor_active": forms.CheckboxInput(
                 attrs={
                     "class": "w-5 h-5 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-600 ring-offset-gray-800"
+                }
+            ),
+            "canal_notificaciones_mailbot": forms.Select(
+                attrs={
+                    "class": "bg-slate-800 border border-slate-700 text-white rounded-lg block w-full p-2.5",
                 }
             ),
         }

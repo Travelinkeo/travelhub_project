@@ -320,7 +320,7 @@ class CotizacionHTMXCalculateTotalsView(LoginRequiredMixin, View):
 
                 moneda = Moneda.objects.get(pk=moneda_id)
                 moneda_symbol = moneda.simbolo or moneda.codigo_iso
-            except:
+            except Exception:
                 pass
 
         return render(

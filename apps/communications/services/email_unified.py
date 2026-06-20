@@ -392,7 +392,7 @@ def enviar_cambio_estado(venta, estado_anterior: str) -> bool:
     adjuntos = []
     if venta.estado in ["PAG", "PPA"]:
         try:
-            from apps.finance.models import Factura
+            Factura = apps.get_model("finance", "Factura")
 
             factura = Factura.objects.filter(venta_asociada=venta).first()
             if factura and factura.archivo_pdf:
@@ -715,14 +715,14 @@ class EmailMonitorService:
                 if "mail" in locals() and mail is not None:
                     try:
                         mail.close()
-                    except Exception:
-                        pass
+                    except Exception as e_close:
+                        logger.debug(f"Error closing IMAP connection: {e_close}")
                     try:
                         mail.logout()
-                    except Exception:
-                        pass
-            except Exception:
-                pass
+                    except Exception as e_logout:
+                        logger.debug(f"Error logging out IMAP connection: {e_logout}")
+            except Exception as e_cleanup:
+                logger.debug(f"Error during IMAP cleanup: {e_cleanup}")
             try:
                 from apps.communications.models import EmailMonitorLog
 
@@ -734,8 +734,8 @@ class EmailMonitorService:
                     correos_procesados=0,
                     tiempo_ejecucion=round(time.time() - inicio, 2),
                 )
-            except Exception:
-                pass
+            except Exception as e_log:
+                logger.debug(f"Error logging monitor error to EmailMonitorLog: {e_log}")
             return 0
 
     def _procesar_mensaje(self, message, msg_num, mail_connection):

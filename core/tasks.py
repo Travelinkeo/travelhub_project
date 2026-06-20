@@ -47,6 +47,7 @@ _TASK_MAPPINGS = {
     "retry_queued_boletos": "apps.bookings.tasks",
     "send_ticket_notification": "apps.bookings.tasks",
     "check_upcoming_flights": "apps.bookings.tasks",
+    "enviar_recordatorios_vuelo_task": "apps.bookings.tasks",
     "generar_pdf_ticket_async_task": "apps.bookings.tasks",
     # apps.crm.tasks
     "check_passport_expiry": "apps.crm.tasks",

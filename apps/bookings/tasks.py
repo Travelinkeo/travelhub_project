@@ -501,6 +501,92 @@ def check_upcoming_flights():
     return result
 
 
+@shared_task(
+    name="core.tasks.enviar_recordatorios_vuelo_task",
+    time_limit=300,
+    soft_time_limit=270,
+)
+def enviar_recordatorios_vuelo_task():
+    """Envía recordatorios de vuelo 24h antes por WhatsApp al cliente"""
+    from datetime import timedelta
+
+    from django.utils import timezone
+
+    from apps.bookings.models import BoletoImportado
+    from apps.communications.services.notification_dispatcher import (
+        enviar_recordatorio_vuelo,
+    )
+    from core.middleware import agency_context
+    from core.models.agencia import Agencia
+
+    now = timezone.now()
+    window_start = now + timedelta(hours=20)
+    window_end = now + timedelta(hours=28)
+
+    total_enviados = 0
+
+    for agencia in Agencia.objects.filter(activa=True).iterator(chunk_size=50):
+        try:
+            with agency_context(agencia):
+                boletos = BoletoImportado.objects.filter(
+                    agencia=agencia,
+                    estado_parseo="COM",
+                    venta_asociada__isnull=False,
+                    datos_parseados__isnull=False,
+                )
+
+                for boleto in boletos.iterator(chunk_size=100):
+                    try:
+                        datos = boleto.datos_parseados
+                        if isinstance(datos, str):
+                            import json
+                            datos = json.loads(datos)
+
+                        normalized = datos.get("normalized", datos)
+                        flights = normalized.get("flights", [])
+                        if not flights:
+                            continue
+
+                        for flight in flights:
+                            fecha_str = flight.get("date", "")
+                            hora_str = flight.get("time", "00:00")
+                            if not fecha_str:
+                                continue
+
+                            try:
+                                from django.utils.dateparse import parse_date, parse_time
+
+                                fecha_vuelo = parse_date(fecha_str)
+                                hora_vuelo = parse_time(hora_str) if hora_str else None
+                                if not fecha_vuelo:
+                                    continue
+
+                                from django.utils.timezone import make_aware
+                                import datetime
+
+                                dt_vuelo = make_aware(
+                                    datetime.datetime.combine(
+                                        fecha_vuelo,
+                                        hora_vuelo or datetime.time(0, 0),
+                                    )
+                                )
+
+                                if window_start <= dt_vuelo <= window_end:
+                                    enviar_recordatorio_vuelo(boleto, horas_antes=24)
+                                    total_enviados += 1
+                                    break
+                            except Exception:
+                                continue
+                    except Exception as e:
+                        logger.error(f"Error procesando boleto {boleto.pk} para recordatorio: {e}")
+        except Exception as e:
+            logger.error(f"Error en agencia {agencia.nombre} para recordatorios: {e}")
+
+    result = f"Recordatorios de vuelo enviados: {total_enviados}"
+    logger.info(result)
+    return result
+
+
 @tenant_task(
     name="core.tasks.generar_pdf_ticket_async_task",
     time_limit=180,

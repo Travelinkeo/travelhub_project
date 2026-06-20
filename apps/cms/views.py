@@ -13,6 +13,7 @@ from core.api import SaaSMixin, get_user_active_agency
 from .forms import ArticuloForm, GuiaDestinoForm
 from .models import Articulo, GuiaDestino
 from .services.cms_ai_service import CMSContentService
+from .services.content_service import AIContentService
 
 logger = logging.getLogger(__name__)
 
@@ -172,7 +173,9 @@ class AIGenerateSuggestionView(LoginRequiredMixin, View):
                 return JsonResponse({"error": "Campo no soportado"}, status=400)
 
             # Para campos genéricos usamos el modelo directamente
-            response = service.model.generate_content(prompt)
+            response = service.client.models.generate_content(
+                model=service.model_name, contents=prompt
+            )
             return JsonResponse({"suggestion": response.text.strip()})
 
         except Exception as e:

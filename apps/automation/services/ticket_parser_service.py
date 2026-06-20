@@ -85,7 +85,7 @@ def _generate_pdf_sync(boleto) -> None:
             BoletoImportado.all_objects.filter(pk=boleto.pk).update(
                 estado_parseo="ERR",
                 log_parseo=(str(boleto.log_parseo or ""))
-                + " | Sin datos para generar PDF. Vuelve a parsear."
+                + " | Sin datos para generar PDF. Vuelve a parsear.",
             )
             return
 
@@ -105,7 +105,7 @@ def _generate_pdf_sync(boleto) -> None:
             BoletoImportado.all_objects.filter(pk=boleto.pk).update(
                 estado_parseo="ERR",
                 log_parseo=(str(boleto.log_parseo or ""))
-                + " | PDF vacío generado. Usa el botón Reintentar."
+                + " | PDF vacío generado. Usa el botón Reintentar.",
             )
     except Exception as e:
         logger.error(f"❌ [SYNC] Error generando PDF para boleto {boleto.pk}: {e}", exc_info=True)
@@ -113,7 +113,7 @@ def _generate_pdf_sync(boleto) -> None:
         try:
             BoletoImportado.all_objects.filter(pk=boleto.pk).update(
                 estado_parseo="ERR",
-                log_parseo=(str(boleto.log_parseo or "")) + f" | Error en PDF: {str(e)[:300]}"
+                log_parseo=(str(boleto.log_parseo or "")) + f" | Error en PDF: {str(e)[:300]}",
             )
         except Exception as e_log:
             logger.error(f"No se pudo actualizar log_parseo del boleto {boleto.pk}: {e_log}")
@@ -199,7 +199,7 @@ class TicketParserService:
                 if any(err in str(e).lower() for err in ["deadlock", "database is locked"]):
                     if attempt < max_retries - 1:
                         logger.warning(
-                            f"🔄 Reintentando por bloqueo de DB ({attempt+1}/{max_retries})..."
+                            f"🔄 Reintentando por bloqueo de DB ({attempt + 1}/{max_retries})..."
                         )
                         time.sleep(retry_delay)
                         continue
@@ -297,7 +297,11 @@ class TicketParserService:
 
             # 2. Extracción de Texto
             raw_file = ExtractionService.get_open_file(boleto)
-            texto = ExtractionService.extract_text(raw_file, boleto.archivo_boleto.name)
+            try:
+                texto = ExtractionService.extract_text(raw_file, boleto.archivo_boleto.name)
+            finally:
+                if raw_file:
+                    raw_file.close()
 
             if not texto:
                 return self._finalize_error(boleto, "Archivo vacío o ilegible.")
@@ -560,7 +564,7 @@ class TicketParserService:
                         # 3. Procesar los siguientes creando nuevas instancias de BoletoImportado
                         for tr in transito_records[1:]:
                             logger.info(
-                                f"👤 Creando instancia para pasajero adicional {tr.nombre_pasajero} (Ticket {tr.ticket_index+1})..."
+                                f"👤 Creando instancia para pasajero adicional {tr.nombre_pasajero} (Ticket {tr.ticket_index + 1})..."
                             )
                             create_kwargs = {
                                 "archivo_boleto": boleto.archivo_boleto,
@@ -772,9 +776,12 @@ class TicketParserService:
 
     def _extraer_texto(self, boleto):
         """Bridge for legacy code (ReviewBoletoView)"""
-        return ExtractionService.extract_text(
-            ExtractionService.get_open_file(boleto), boleto.archivo_boleto.name
-        )
+        raw_file = ExtractionService.get_open_file(boleto)
+        try:
+            return ExtractionService.extract_text(raw_file, boleto.archivo_boleto.name)
+        finally:
+            if raw_file:
+                raw_file.close()
 
 
 # -----------------------------------------------------

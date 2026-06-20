@@ -455,6 +455,20 @@ class AgenciaConfiguracion(models.Model):
     email_monitor_active = models.BooleanField(default=False)
     email_monitor_last_check = models.DateTimeField(blank=True, null=True)
 
+    # Canal de notificaciones del mailbot
+    CANAL_NOTIFICACION_CHOICES = [
+        ("telegram", "Telegram"),
+        ("whatsapp", "WhatsApp"),
+        ("both", "Ambos"),
+        ("none", "Ninguno"),
+    ]
+    canal_notificaciones_mailbot = models.CharField(
+        max_length=10,
+        choices=CANAL_NOTIFICACION_CHOICES,
+        default="telegram",
+        help_text="Canal para notificar al operador cuando el mailbot detecta correos nuevos",
+    )
+
     # WhatsApp Evolution API (Multi-tenant)
     evolution_api_url = models.URLField(
         max_length=500,

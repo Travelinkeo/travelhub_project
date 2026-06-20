@@ -365,6 +365,8 @@
     </div>
     {% endif %}
 </main>
+{{ tipos_servicio_choices|json_script:"tipos-servicio" }}
+{{ monedas_json|json_script:"monedas-data" }}
 
 <script nonce="{{ request.csp_nonce }}">
     function proveedorForm() {
@@ -373,8 +375,6 @@
             proveedorId: {{ proveedor_id|default:"null" }},
             comisionesList: [],
             comisionesIds: [],
-            {{ tipos_servicio_choices|json_script:"tipos-servicio" }}
-            {{ monedas_json|json_script:"monedas-data" }}
             tiposServicio: JSON.parse(document.getElementById('tipos-servicio').textContent),
             monedas: JSON.parse(document.getElementById('monedas-data').textContent),
             showModal: false,

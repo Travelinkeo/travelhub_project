@@ -506,13 +506,11 @@ class EmailMonitorService:
 
             config = getattr(self.agencia, "configuracion", None)
 
-            imap_user = (
-                getattr(config, "email_monitor_user", None)
-                or getattr(self.agencia, "correo_emisiones", None)
+            imap_user = getattr(config, "email_monitor_user", None) or getattr(
+                self.agencia, "correo_emisiones", None
             )
-            imap_pass = (
-                getattr(config, "email_monitor_password", None)
-                or getattr(self.agencia, "password_app_correo", None)
+            imap_pass = getattr(config, "email_monitor_password", None) or getattr(
+                self.agencia, "password_app_correo", None
             )
 
             if not imap_user or not imap_pass:
@@ -557,7 +555,9 @@ class EmailMonitorService:
             try:
                 mail.login(imap_user, imap_pass)
             except Exception as e:
-                msg = f"Error de autenticación IMAP para {imap_user} en {imap_host}:{imap_port}: {e}"
+                msg = (
+                    f"Error de autenticación IMAP para {imap_user} en {imap_host}:{imap_port}: {e}"
+                )
                 logger.error(f"❌ {msg}")
                 EmailMonitorLog.objects.create(
                     agencia=self.agencia,
@@ -569,7 +569,20 @@ class EmailMonitorService:
                 )
                 return 0
 
-            mail.select("inbox")
+            select_status, _ = mail.select("inbox")
+            if select_status != "OK":
+                msg = f"No se pudo seleccionar inbox en {imap_host}:{imap_port}"
+                logger.error(f"❌ {msg}")
+                mail.logout()
+                EmailMonitorLog.objects.create(
+                    agencia=self.agencia,
+                    estado=EmailMonitorLog.Estado.ERROR,
+                    mensaje=msg,
+                    host_conectado=f"{imap_host}:{imap_port}",
+                    correos_procesados=0,
+                    tiempo_ejecucion=round(time.time() - inicio, 2),
+                )
+                return 0
 
             if self.process_all:
                 _, messages = mail.search(None, "ALL")
@@ -626,6 +639,18 @@ class EmailMonitorService:
         except Exception as e_global:
             msg = f"Error inesperado en el ciclo de monitoreo: {e_global}"
             logger.exception(f"❌ {msg}")
+            try:
+                if "mail" in locals() and mail is not None:
+                    try:
+                        mail.close()
+                    except Exception:
+                        pass
+                    try:
+                        mail.logout()
+                    except Exception:
+                        pass
+            except Exception:
+                pass
             try:
                 from apps.communications.models import EmailMonitorLog
 
@@ -693,35 +718,41 @@ class EmailMonitorService:
                         mail_connection.store(msg_num, "+FLAGS", "\\Seen")
                     return True
                 except ValueError as ve:
-                    import sentry_sdk
+                    try:
+                        import sentry_sdk
 
-                    with sentry_sdk.push_scope() as scope:
-                        scope.set_tag("app_module", "gds_parser")
-                        scope.set_tag("gds_system", gds_detected)
-                        scope.set_tag("agencia_id", self.agencia.pk)
-                        scope.set_tag(
-                            "agencia_subdominio", getattr(self.agencia, "subdominio", "unknown")
-                        )
+                        with sentry_sdk.push_scope() as scope:
+                            scope.set_tag("app_module", "gds_parser")
+                            scope.set_tag("gds_system", gds_detected)
+                            scope.set_tag("agencia_id", self.agencia.pk)
+                            scope.set_tag(
+                                "agencia_subdominio", getattr(self.agencia, "subdominio", "unknown")
+                            )
 
-                        scope.set_extra("pnr_raw_payload", email_body)
-                        scope.set_extra("error_details", str(ve))
+                            scope.set_extra("pnr_raw_payload", email_body)
+                            scope.set_extra("error_details", str(ve))
 
-                        logger.error(
-                            f"Fallo crítico de parsing PNR para Agencia [{self.agencia.pk}]. Sistema GDS: {gds_detected}.",
-                            extra={
-                                "agencia_id": self.agencia.pk,
-                                "gds": gds_detected,
-                                "raw_payload": email_body,
-                            },
-                        )
-                        sentry_sdk.capture_exception(ve)
+                            sentry_sdk.capture_exception(ve)
+                    except ImportError:
+                        pass
+                    logger.error(
+                        f"Fallo crítico de parsing PNR para Agencia [{self.agencia.pk}]. Sistema GDS: {gds_detected}.",
+                        extra={
+                            "agencia_id": self.agencia.pk,
+                            "gds": gds_detected,
+                            "raw_payload": email_body,
+                        },
+                    )
                 except Exception as e:
-                    import sentry_sdk
+                    try:
+                        import sentry_sdk
 
-                    with sentry_sdk.push_scope() as scope:
-                        scope.set_tag("app_module", "email_monitor_critical")
-                        scope.set_tag("agencia_id", self.agencia.pk)
-                        sentry_sdk.capture_exception(e)
+                        with sentry_sdk.push_scope() as scope:
+                            scope.set_tag("app_module", "email_monitor_critical")
+                            scope.set_tag("agencia_id", self.agencia.pk)
+                            sentry_sdk.capture_exception(e)
+                    except ImportError:
+                        pass
                     logger.error(f"❌ Error en parseo autónomo de email GDS: {e}")
 
         is_kiu_subject = (
@@ -741,7 +772,10 @@ class EmailMonitorService:
 
         if is_official_kiu:
             logger.info("Procesando KIU Oficial (HTML)")
-            return self._procesar_boleto_email(message, msg_num, mail_connection)
+            resultado = self._procesar_boleto_email(message, msg_num, mail_connection)
+            if resultado and self.mark_as_read and mail_connection:
+                mail_connection.store(msg_num, "+FLAGS", "\\Seen")
+            return resultado
 
         tiene_pdf = self._tiene_pdf_adjunto(message)
         logger.info(f"PDF adjunto: {tiene_pdf}")
@@ -749,12 +783,17 @@ class EmailMonitorService:
         if tiene_pdf:
             logger.info("Procesando PDF adjunto (Prioridad Reenvío)")
             if self._procesar_boleto_pdf(message, msg_num, mail_connection):
+                if self.mark_as_read and mail_connection:
+                    mail_connection.store(msg_num, "+FLAGS", "\\Seen")
                 return True
             logger.warning("⚠️ Falló el procesamiento del PDF, intentando fallback a HTML...")
 
         if is_kiu_subject:
             logger.info("Procesando como KIU/HTML por Asunto")
-            return self._procesar_boleto_email(message, msg_num, mail_connection)
+            resultado = self._procesar_boleto_email(message, msg_num, mail_connection)
+            if resultado and self.mark_as_read and mail_connection:
+                mail_connection.store(msg_num, "+FLAGS", "\\Seen")
+            return resultado
 
         logger.warning("No reconocido como boleto")
         return False
@@ -765,11 +804,7 @@ class EmailMonitorService:
             logger.info("📩 Procesando Email (Body/HTML)...")
             from django.apps import apps
             from django.core.files.base import ContentFile
-            from django.utils.module_loading import import_string
 
-            TicketParserService = import_string(
-                "apps.automation.services.ticket_parser_service.TicketParserService"
-            )
             BoletoImportado = apps.get_model("bookings", "BoletoImportado")
 
             texto = self._extraer_texto(message)
@@ -792,10 +827,12 @@ class EmailMonitorService:
             boleto.save()
             logger.info(f"📁 BoletoImportado creado: ID {boleto.pk}")
 
-            servicio = TicketParserService()
-            resultado = servicio.procesar_boleto(boleto.pk)
+            from apps.bookings.tasks import parsear_boleto_individual
 
-            return self._manejar_resultado_procesamiento(boleto, resultado)
+            parsear_boleto_individual.delay(boleto.pk)
+            logger.info(f"🚀 Parseo async encolado para Boleto {boleto.pk}")
+
+            return True
 
         except Exception as e:
             logger.exception(f"❌ Error crítico procesando email {msg_num}: {e}")
@@ -817,7 +854,7 @@ class EmailMonitorService:
 
             procesados_exito = 0
             for i, (filename, pdf_content) in enumerate(pdfs):
-                logger.info(f"📄 Guardando PDF {i+1}/{len(pdfs)}: {filename}")
+                logger.info(f"📄 Guardando PDF {i + 1}/{len(pdfs)}: {filename}")
 
                 if not self._es_pdf_boleto_valido(pdf_content, filename):
                     logger.info(
@@ -874,13 +911,13 @@ class EmailMonitorService:
             pdf_path = None
             if boleto.archivo_pdf_generado:
                 pdf_path = boleto.archivo_pdf_generado.path
-                os.path.basename(pdf_path)
 
             logger.info(
                 f"✅ Notificación centralizada manejada por el Servicio de Parseo para Boleto {boleto.pk}"
             )
 
-            self._enviar_respaldo_email(boleto, pdf_path)
+            if pdf_path:
+                self._enviar_respaldo_email(boleto, pdf_path)
 
             return True
 
@@ -909,10 +946,20 @@ class EmailMonitorService:
     def _enviar_notificacion(
         self, sistema, localizador, numero_boleto, pasajero, aerolinea, pdf_path, pdf_filename
     ):
-        """Envía notificación usando Telegram (Por defecto) o Email"""
+        """Envía notificación usando el canal configurado"""
 
-        if self.notification_type == "telegram" or self.notification_type == "whatsapp":
+        if self.notification_type == "telegram":
             return self._enviar_telegram(
+                sistema, localizador, numero_boleto, pasajero, aerolinea, pdf_path
+            )
+
+        elif self.notification_type == "whatsapp":
+            return self._enviar_whatsapp(
+                sistema, localizador, numero_boleto, pasajero, aerolinea, pdf_filename
+            )
+
+        elif self.notification_type == "whatsapp_drive":
+            return self._enviar_whatsapp_drive(
                 sistema, localizador, numero_boleto, pasajero, aerolinea, pdf_path
             )
 
@@ -952,10 +999,10 @@ class EmailMonitorService:
 
         mensaje = f"""✈️ *Boleto {sistema} Procesado*
 
-📍 PNR: *{localizador or 'N/A'}*
+📍 PNR: *{localizador or "N/A"}*
 🎫 Boleto: {numero_boleto}
-👤 Pasajero: {pasajero or 'N/A'}
-✈️ Aerolínea: {aerolinea or 'N/A'}
+👤 Pasajero: {pasajero or "N/A"}
+✈️ Aerolínea: {aerolinea or "N/A"}
 📄 PDF: {pdf_filename}
 
 _TravelHub - Sistema Automático_"""
@@ -1004,10 +1051,10 @@ TravelHub - Sistema Automático""",
         if drive_link:
             mensaje = f"""✈️ *Boleto {sistema} Procesado*
 
-📍 PNR: *{localizador or 'N/A'}*
+📍 PNR: *{localizador or "N/A"}*
 🎫 Boleto: {numero_boleto}
-👤 Pasajero: {pasajero or 'N/A'}
-✈️ Aerolínea: {aerolinea or 'N/A'}
+👤 Pasajero: {pasajero or "N/A"}
+✈️ Aerolínea: {aerolinea or "N/A"}
 
 📥 Descarga tu PDF:
 {drive_link}
@@ -1016,9 +1063,9 @@ _TravelHub - Sistema Automático_"""
         else:
             mensaje = f"""✈️ *Boleto {sistema} Procesado*
 
-📍 PNR: *{localizador or 'N/A'}*
+📍 PNR: *{localizador or "N/A"}*
 🎫 Boleto: {numero_boleto}
-👤 Pasajero: {pasajero or 'N/A'}
+👤 Pasajero: {pasajero or "N/A"}
 
 📄 PDF guardado localmente
 

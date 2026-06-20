@@ -93,3 +93,14 @@
 </div>
 {% endblock %}
 
+{% block extra_scripts %}
+<script nonce="{{ request.csp_nonce }}">
+document.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-action="reload"]');
+    if (btn) {
+        window.location.reload();
+    }
+});
+</script>
+{% endblock %}
+

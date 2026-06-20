@@ -118,7 +118,9 @@ class MarketingAIEngine:
     def generar_contenido_creativo(prompt_agente: str, formato_imagen: str = "portrait") -> dict:
         """Genera branding, copy, posts o cualquier contenido creativo sin clientes."""
         try:
-            logger.info(f"🎨 Generando contenido creativo: {prompt_agente} (Formato: {formato_imagen})")
+            logger.info(
+                f"🎨 Generando contenido creativo: {prompt_agente} (Formato: {formato_imagen})"
+            )
 
             resultado_ia = _get_ai_engine().parse_structured_data(
                 text=prompt_agente,
@@ -170,10 +172,15 @@ class MarketingAIEngine:
 
             if keywords:
                 import os
+
                 from django.conf import settings
-                unsplash_key = os.environ.get("UNSPLASH_ACCESS_KEY") or getattr(settings, "UNSPLASH_ACCESS_KEY", "")
+
+                unsplash_key = os.environ.get("UNSPLASH_ACCESS_KEY") or getattr(
+                    settings, "UNSPLASH_ACCESS_KEY", ""
+                )
                 if unsplash_key:
                     import requests
+
                     clean_key = str(unsplash_key).strip("'\"")
                     # Para evitar búsquedas vacías por conjunción de demasiados términos,
                     # buscamos cada keyword de forma individual hasta completar máximo 4 imágenes.
@@ -195,10 +202,13 @@ class MarketingAIEngine:
                                 results = response.json().get("results", [])
                                 for img in results:
                                     if len(imágenes_reales) < 4:
-                                        imágenes_reales.append({
-                                            "url": img.get("urls", {}).get("regular"),
-                                            "alt": img.get("alt_description") or "Inspiración de viaje"
-                                        })
+                                        imágenes_reales.append(
+                                            {
+                                                "url": img.get("urls", {}).get("regular"),
+                                                "alt": img.get("alt_description")
+                                                or "Inspiración de viaje",
+                                            }
+                                        )
                         except Exception as e_unsplash:
                             logger.warning(f"Error consultando Unsplash para '{kw}': {e_unsplash}")
 
@@ -286,7 +296,6 @@ class MarketingAIEngine:
                 "ia_data": data,
                 "clientes_target": clientes_target_list,
                 "cliente_ids": cliente_ids,
-                "total_audience": clientes_query.count(),
                 "total_audiencia": clientes_query.count(),
             }
 
@@ -308,4 +317,6 @@ class MarketingAIEngine:
         if modo == "campana":
             return MarketingAIEngine.generar_campana(prompt_agente)
         else:
-            return MarketingAIEngine.generar_contenido_creativo(prompt_agente, formato_imagen=formato_imagen)
+            return MarketingAIEngine.generar_contenido_creativo(
+                prompt_agente, formato_imagen=formato_imagen
+            )

@@ -56,7 +56,7 @@ class PasajeroDetailView(CRMBaseMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["title"] = f"Pasajero: {self.object.get_full_name()}"
+        context["title"] = f"Pasajero: {self.object.nombre_completo}"
         return context
 
 

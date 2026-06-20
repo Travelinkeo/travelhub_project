@@ -42,6 +42,16 @@ CELERY_BEAT_SCHEDULE = {
         "schedule": 900.0,  # Cada 15 minutos
         "args": (),
     },
+    "check-upcoming-flights-daily": {
+        "task": "core.tasks.check_upcoming_flights",
+        "schedule": crontab(hour=17, minute=0),  # Todos los días 5:00 PM (vuelos del día siguiente)
+        "args": (),
+    },
+    "send-flight-reminders-every-hour": {
+        "task": "core.tasks.enviar_recordatorios_vuelo_task",
+        "schedule": crontab(minute=0),  # Cada hora
+        "args": (),
+    },
     "limpiar-axes-mensual": {
         "task": "core.tasks.limpiar_axes_logs",
         "schedule": crontab(day_of_month="1", hour="4", minute="0"),

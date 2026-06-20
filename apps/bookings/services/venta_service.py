@@ -1,7 +1,7 @@
 import datetime
 import logging
 
-from django.db import models
+from django.db import models, transaction
 
 from apps.bookings.models.venta import Venta
 from core.api import sale_recalculation_requested
@@ -78,27 +78,56 @@ class VentaService:
                     f"Error VentaService: SaaS quota increment failed for Venta {venta.id_venta}: {e}"
                 )
 
-        # 2. Confirmation Emails
+        # 2. Confirmation Emails + WhatsApp
         if created and venta.cliente and venta.cliente.email:
             try:
-                pass  # from apps.communications.services.email_service import enviar_confirmacion_venta
-                # enviar_confirmacion_venta(venta)
+                from apps.communications.services.email_unified import enviar_confirmacion_venta
+
+                transaction.on_commit(lambda: enviar_confirmacion_venta(venta))
             except Exception as e:
                 logger.exception(
                     f"Error VentaService: Confirmation email failed for Venta {venta.id_venta}: {e}"
                 )
 
-        # 3. State Change Emails
-        if not created and estado_anterior and estado_anterior != estado_actual:
+        if created and venta.cliente and venta.cliente.telefono_principal:
             try:
-                if venta.cliente and venta.cliente.email:
-                    from apps.communications.services.email_unified import enviar_cambio_estado
+                from apps.communications.services.whatsapp_unified import (
+                    enviar_whatsapp_confirmacion_venta,
+                )
 
-                    enviar_cambio_estado(venta, estado_anterior)
+                transaction.on_commit(
+                    lambda: enviar_whatsapp_confirmacion_venta(venta)
+                )
             except Exception as e:
                 logger.warning(
-                    f"Error VentaService: State change email failed for Venta {venta.pk}: {e}"
+                    f"Error VentaService: WhatsApp confirmation failed for Venta {venta.id_venta}: {e}"
                 )
+
+        # 3. State Change Emails + WhatsApp
+        if not created and estado_anterior and estado_anterior != estado_actual:
+            if venta.cliente and venta.cliente.email:
+                try:
+                    from apps.communications.services.email_unified import enviar_cambio_estado
+
+                    transaction.on_commit(lambda: enviar_cambio_estado(venta, estado_anterior))
+                except Exception as e:
+                    logger.warning(
+                        f"Error VentaService: State change email failed for Venta {venta.pk}: {e}"
+                    )
+
+            if venta.cliente and venta.cliente.telefono_principal:
+                try:
+                    from apps.communications.services.whatsapp_unified import (
+                        enviar_whatsapp_cambio_estado,
+                    )
+
+                    transaction.on_commit(
+                        lambda: enviar_whatsapp_cambio_estado(venta, estado_anterior)
+                    )
+                except Exception as e:
+                    logger.warning(
+                        f"Error VentaService: WhatsApp state change failed for Venta {venta.pk}: {e}"
+                    )
 
         # 4. WhatsApp Notification
         recien_pagada = (estado_actual == Venta.EstadoVenta.PAGADA_TOTAL) and (

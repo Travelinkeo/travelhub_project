@@ -84,3 +84,39 @@ def process_web_uploaded_ticket(self, boleto_id, agencia_id=None):
                     f"Fallo al intentar guardar el estado de crash para boleto {boleto_id}: {db_error}"
                 )
             raise e
+
+
+@shared_task(bind=True, max_retries=2, queue="default", soft_time_limit=300, time_limit=360)
+def ejecutar_cobranza_ia_task(self):
+    """
+    Tarea Celery: ejecuta el comando management de cobranza IA.
+    Procesa todas las facturas vencidas y envía recordatorios por WhatsApp.
+    """
+    import subprocess
+    import sys
+
+    from django.conf import settings
+
+    try:
+        result = subprocess.run(  # noqa: S603
+            [sys.executable, "manage.py", "automated_recovery_whatsapp"],
+            cwd=str(settings.BASE_DIR),
+            capture_output=True,
+            text=True,
+            timeout=300,
+        )
+
+        if result.returncode != 0:
+            logger.error(f"Error ejecutando automated_recovery_whatsapp: {result.stderr}")
+
+        logger.info(
+            f"Resultado cobranza IA: {result.stdout[-500:] if result.stdout else 'Sin output'}"
+        )
+        return result.stdout[-1000:] if result.stdout else "Sin output"
+
+    except subprocess.TimeoutExpired:
+        logger.error("Timeout ejecutando automated_recovery_whatsapp")
+        return "Timeout"
+    except Exception as e:
+        logger.error(f"Error ejecutando cobranza IA: {e}")
+        raise self.retry(exc=e, countdown=3600) from e

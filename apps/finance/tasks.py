@@ -206,76 +206,53 @@ def auditar_fuga_ingresos_task(**kwargs):
 def check_pending_payments():
     from datetime import timedelta
 
-    from django.conf import settings
-    from django.core.mail import EmailMessage, get_connection
     from django.utils import timezone
 
     from apps.bookings.models import Venta
+    from apps.communications.services.notification_dispatcher import notificar_recordatorio_pago
     from core.middleware import agency_context
     from core.models.agencia import Agencia
 
-    logger.info("Iniciando chequeo de pagos pendientes...")
+    logger.info("Iniciando chequeo de pagos pendientes (email + WhatsApp)...")
     today = timezone.now().date()
     days_to_remind = [3, 7, 15]
     count = 0
 
     for agencia in Agencia.objects.filter(activa=True).iterator(chunk_size=50):
         with agency_context(agencia):
-            email_config = agencia.configuracion_correo
-            connection = None
-            from_email = settings.DEFAULT_FROM_EMAIL
-
-            if email_config and "EMAIL_HOST" in email_config:
-                try:
-                    connection = get_connection(
-                        host=email_config.get("EMAIL_HOST"),
-                        port=email_config.get("EMAIL_PORT", 587),
-                        username=email_config.get("EMAIL_HOST_USER"),
-                        password=email_config.get("EMAIL_HOST_PASSWORD"),
-                        use_tls=email_config.get("EMAIL_USE_TLS", True),
-                    )
-                    from_email = email_config.get("DEFAULT_FROM_EMAIL", from_email)
-                except Exception as e:
-                    logger.warning(
-                        f"Error configurando SMTP personalizado para agencia {agencia.nombre}: {e}. Usando SMTP del sistema."
-                    )
-
             for days in days_to_remind:
                 target_date = today - timedelta(days=days)
-                ventas_pendientes = Venta.objects.filter(
-                    agencia=agencia,
-                    fecha_venta__date=target_date,
-                    saldo_pendiente__gt=0,
-                    estado__in=[Venta.EstadoVenta.PENDIENTE_PAGO, Venta.EstadoVenta.PAGADA_PARCIAL],
-                    cliente__email__isnull=False,
-                ).select_related("cliente", "moneda")
+                ventas_pendientes = (
+                    Venta.objects.filter(
+                        agencia=agencia,
+                        fecha_venta__date=target_date,
+                        saldo_pendiente__gt=0,
+                        estado__in=[
+                            Venta.EstadoVenta.PENDIENTE_PAGO,
+                            Venta.EstadoVenta.PAGADA_PARCIAL,
+                        ],
+                        cliente__isnull=False,
+                    )
+                    .exclude(cliente__email="")
+                    .select_related("cliente", "moneda")
+                )
 
                 for venta in ventas_pendientes.iterator(chunk_size=200):
                     try:
-                        cliente = venta.cliente
-                        sender_name = agencia.nombre_comercial or agencia.nombre
-                        subject = (
-                            f"Recordatorio de Pago Pendiente - Localizador: {venta.localizador}"
-                        )
-                        body = (
-                            f"Estimado/a {cliente.nombres},\n\n"
-                            f"Desde {sender_name} le recordamos que su reserva con localizador {venta.localizador} tiene un saldo pendiente de {venta.saldo_pendiente} {venta.moneda.codigo_iso}.\n\n"
-                            "Por favor, realice el pago para evitar la cancelación de sus servicios.\n\n"
-                            "Saludos,\nEl equipo de Administración"
-                        )
-
-                        email = EmailMessage(
-                            subject, body, from_email, [cliente.email], connection=connection
-                        )
-                        email.send()
-
-                        count += 1
-                        logger.info(
-                            f"Recordatorio enviado para Venta {venta.id_venta} (Agencia: {agencia.nombre})"
-                        )
+                        resultados = notificar_recordatorio_pago(venta)
+                        if resultados.get("email") or resultados.get("whatsapp"):
+                            count += 1
+                            canales = []
+                            if resultados.get("email"):
+                                canales.append("Email")
+                            if resultados.get("whatsapp"):
+                                canales.append("WhatsApp")
+                            logger.info(
+                                f"Recordatorio enviado para Venta {venta.localizador} ({', '.join(canales)})"
+                            )
                     except Exception as e:
                         logger.error(
-                            f"Error enviando recordatorio para Venta {venta.id_venta}: {e}"
+                            f"Error enviando recordatorio para Venta {venta.localizador}: {e}"
                         )
 
     return f"Recordatorios de pago enviados: {count}"

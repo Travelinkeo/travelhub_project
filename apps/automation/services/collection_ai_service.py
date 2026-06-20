@@ -68,8 +68,8 @@ class CollectionAIService:
 
             # Contexto para la IA
             prompt = f"""
-            Actúa como el asistente contable de la agencia de viajes "{factura.agencia.nombre if factura.agencia else 'TravelHub'}".
-            Tu objetivo es redactar un mensaje de recordatorio de pago para el cliente {cliente.get_nombre_completo() if cliente else 'Estimado Cliente'}.
+            Actúa como el asistente contable de la agencia de viajes "{factura.agencia.nombre if factura.agencia else "TravelHub"}".
+            Tu objetivo es redactar un mensaje de recordatorio de pago para el cliente {cliente.get_nombre_completo() if cliente else "Estimado Cliente"}.
             
             DATOS DE LA DEUDA:
             - Factura Nro: {factura.numero_factura}
@@ -98,7 +98,6 @@ class CollectionAIService:
         """
         Proyecta la entrada de dinero esperada en los próximos X días.
         """
-        timezone.now().date() - timedelta(days=30)
         proximos_dias = timezone.now().date() + timedelta(days=days)
 
         query = Q(estado__in=["EMI", "PAR"], saldo_pendiente__gt=0)
@@ -113,3 +112,41 @@ class CollectionAIService:
         )
 
         return list(proyeccion)
+
+    def process_overdue_accounts(self):
+        """
+        Procesa todas las facturas vencidas: genera recordatorios IA y envía por WhatsApp.
+        Retorna lista de resultados por factura.
+        """
+        from apps.communications.services.whatsapp_unified import enviar_whatsapp
+
+        facturas_vencidas = self.get_pending_portfolio(days_threshold=-1)
+        resultados = []
+
+        for factura in facturas_vencidas:
+            resultado = {"factura": factura.numero_factura, "success": False, "error": None}
+            try:
+                cliente = factura.cliente
+                if not cliente or not cliente.telefono_principal:
+                    resultado["error"] = "Sin teléfono configurado"
+                    resultados.append(resultado)
+                    continue
+
+                mensaje = self.generate_collection_reminder(factura.pk)
+                if not mensaje:
+                    resultado["error"] = "Error generando mensaje IA"
+                    resultados.append(resultado)
+                    continue
+
+                agencia = getattr(factura, "agencia", None)
+                enviado = enviar_whatsapp(cliente.telefono_principal, mensaje, agencia=agencia)
+                resultado["success"] = enviado
+                if not enviado:
+                    resultado["error"] = "Error en envío WhatsApp"
+
+            except Exception as e:
+                resultado["error"] = str(e)
+
+            resultados.append(resultado)
+
+        return resultados

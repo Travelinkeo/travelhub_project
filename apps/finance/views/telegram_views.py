@@ -142,11 +142,33 @@ class TelegramBotWebhookView(View):
 
                         success = True
                     elif action == "reject":
-                        # Soft delete del pago
+                        cliente = pago.venta.cliente if pago.venta else None
                         pago.delete()
                         status_text = "❌ Rechazado y Anulado"
                         popup_text = "El pago ha sido rechazado y anulado."
                         success = True
+
+                        if cliente and cliente.telefono_principal:
+                            try:
+                                from apps.communications.services.whatsapp_unified import (
+                                    enviar_whatsapp,
+                                )
+
+                                agencia = (
+                                    getattr(pago.venta, "agencia", None) if pago.venta else None
+                                )
+                                mensaje = (
+                                    f"❌ *Pago No Aprobado*\n\n"
+                                    f"Estimado/a *{cliente.get_nombre_completo()}*,\n\n"
+                                    f"Su pago de {monto} {moneda} con referencia *{ref}* "
+                                    f"no pudo ser procesado.\n\n"
+                                    f"Si tiene preguntas, por favor contáctenos."
+                                )
+                                enviar_whatsapp(
+                                    cliente.telefono_principal, mensaje, agencia=agencia
+                                )
+                            except Exception as e:
+                                logger.warning(f"Error enviando WhatsApp de rechazo de pago: {e}")
 
                     # Reconstruimos la plantilla de mensaje con formato HTML estético y premium
                     message_html = (

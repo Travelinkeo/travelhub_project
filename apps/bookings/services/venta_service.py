@@ -156,8 +156,6 @@ class VentaService:
         )
         if recien_pagada:
             try:
-                from django.db import transaction
-
                 from apps.bookings.tasks import notificar_pago_whatsapp_task
 
                 transaction.on_commit(

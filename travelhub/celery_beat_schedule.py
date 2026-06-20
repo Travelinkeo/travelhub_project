@@ -72,4 +72,9 @@ CELERY_BEAT_SCHEDULE = {
         "schedule": crontab(hour="1", minute="0"),  # Todos los días a la 1:00 AM
         "args": (),
     },
+    "ejecutar-cobranza-ia-diaria": {
+        "task": "core.tasks.ejecutar_cobranza_ia_task",
+        "schedule": crontab(hour=20, minute=0),  # Todos los días 8:00 PM
+        "args": (),
+    },
 }

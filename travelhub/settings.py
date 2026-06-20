@@ -128,7 +128,7 @@ INSTALLED_APPS = [
     "django_celery_results",
     "django_celery_beat",
     "axes",
-    'django_extensions',
+    "django_extensions",
 ]
 
 MIDDLEWARE = [
@@ -186,7 +186,6 @@ DATABASES = {"default": dj_database_url.parse(DATABASE_URL)}
 DATABASES["default"]["CONN_MAX_AGE"] = 0
 DATABASES["default"]["CONN_HEALTH_CHECKS"] = True
 DATABASES["default"]["DISABLE_SERVER_SIDE_CURSORS"] = True
-
 
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -482,6 +481,11 @@ EVOLUTION_INSTANCE_TOKEN = os.getenv("EVOLUTION_INSTANCE_TOKEN")
 if not DEBUG and not EVOLUTION_INSTANCE_TOKEN:
     raise ImproperlyConfigured("EVOLUTION_INSTANCE_TOKEN debe configurarse en producción")
 
+# 📲 WhatsApp Notifications (facturas, recordatorios, etc.)
+WHATSAPP_NOTIFICATIONS_ENABLED = (
+    os.getenv("WHATSAPP_NOTIFICATIONS_ENABLED", "true").lower() == "true"
+)
+
 # 🔐 Binance Pay API (creación de órdenes y webhooks)
 BINANCE_PAY_API_KEY = os.getenv("BINANCE_PAY_API_KEY")
 BINANCE_PAY_SECRET_KEY = os.getenv("BINANCE_PAY_SECRET_KEY")
@@ -526,12 +530,12 @@ CELERY_TASK_ACKS_LATE = True
 CELERY_WORKER_MAX_TASKS_PER_CHILD = 500
 
 CELERY_TASK_ROUTES = {
-    'apps.common.tasks.send_whatsapp_task': {'queue': 'notifications'},
-    'apps.common.tasks.send_telegram_task': {'queue': 'notifications'},
-    'apps.common.tasks.send_email_task': {'queue': 'notifications'},
-    'apps.common.tasks.enviar_notificacion_whatsapp_task': {'queue': 'notifications'},
-    'apps.bookings.tasks.notificar_pago_whatsapp_task': {'queue': 'notifications'},
-    'apps.automation.tasks.send_ticket_notification': {'queue': 'notifications'},
+    "apps.common.tasks.send_whatsapp_task": {"queue": "notifications"},
+    "apps.common.tasks.send_telegram_task": {"queue": "notifications"},
+    "apps.common.tasks.send_email_task": {"queue": "notifications"},
+    "apps.common.tasks.enviar_notificacion_whatsapp_task": {"queue": "notifications"},
+    "apps.bookings.tasks.notificar_pago_whatsapp_task": {"queue": "notifications"},
+    "apps.automation.tasks.send_ticket_notification": {"queue": "notifications"},
 }
 
 
@@ -662,7 +666,7 @@ except ImportError:
 # -----------------------------------------------------
 # El header que Nginx/Cloudflare usa para indicar que la conexión original era HTTPS
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-SECURE_REDIRECT_EXEMPT = [r'^health/$', r'^health$']
+SECURE_REDIRECT_EXEMPT = [r"^health/$", r"^health$"]
 
 if not DEBUG:
     SECURE_SSL_REDIRECT = True

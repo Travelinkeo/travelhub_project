@@ -95,9 +95,7 @@ class VentaService:
                     enviar_whatsapp_confirmacion_venta,
                 )
 
-                transaction.on_commit(
-                    lambda: enviar_whatsapp_confirmacion_venta(venta)
-                )
+                transaction.on_commit(lambda: enviar_whatsapp_confirmacion_venta(venta))
             except Exception as e:
                 logger.warning(
                     f"Error VentaService: WhatsApp confirmation failed for Venta {venta.id_venta}: {e}"
@@ -127,6 +125,29 @@ class VentaService:
                 except Exception as e:
                     logger.warning(
                         f"Error VentaService: WhatsApp state change failed for Venta {venta.pk}: {e}"
+                    )
+
+            if estado_actual == Venta.EstadoVenta.CANCELADA:
+                try:
+                    from apps.communications.services.whatsapp_unified import enviar_whatsapp
+
+                    def _send_cancelacion():
+                        cliente = venta.cliente
+                        if not cliente or not cliente.telefono_principal:
+                            return
+                        agencia = getattr(venta, "agencia", None)
+                        mensaje = (
+                            f"❌ *Reserva Cancelada*\n\n"
+                            f"Estimado/a *{cliente.get_nombre_completo()}*,\n\n"
+                            f"Su reserva *{venta.localizador or venta.pk}* ha sido cancelada.\n\n"
+                            f"Si tiene preguntas sobre el reembolso, por favor contáctenos."
+                        )
+                        enviar_whatsapp(cliente.telefono_principal, mensaje, agencia=agencia)
+
+                    transaction.on_commit(_send_cancelacion)
+                except Exception as e:
+                    logger.warning(
+                        f"Error VentaService: Cancellation WhatsApp failed for Venta {venta.pk}: {e}"
                     )
 
         # 4. WhatsApp Notification

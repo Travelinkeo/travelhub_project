@@ -15,6 +15,7 @@ import time
 from email.mime.image import MIMEImage
 
 import resend
+from django.apps import apps
 from django.conf import settings
 from django.core.mail import EmailMessage, EmailMultiAlternatives, send_mail
 from django.template.loader import render_to_string
@@ -171,8 +172,9 @@ def enviar_email_html(
     destinatario: str,
     from_email: str = None,
     agencia=None,
+    adjuntos=None,
 ) -> bool:
-    """Función auxiliar para enviar emails HTML con logo embebido"""
+    """Función auxiliar para enviar emails HTML con logo embebido y opcionalmente adjuntos"""
     try:
         html_content = render_to_string(template_name, context)
         sender = (
@@ -224,6 +226,23 @@ def enviar_email_html(
                 logo_image.add_header("Content-Disposition", "inline", filename="logo-blanco.png")
                 email_msg.attach(logo_image)
 
+        # Adjuntar archivos adicionales (PDFs, etc.)
+        if adjuntos:
+            for adjunto in adjuntos:
+                if isinstance(adjunto, dict):
+                    archivo = adjunto.get("archivo")
+                    nombre = adjunto.get("nombre", "archivo.pdf")
+                else:
+                    archivo = adjunto
+                    nombre = os.path.basename(str(adjunto))
+
+                if archivo and os.path.exists(str(archivo)):
+                    try:
+                        with open(str(archivo), "rb") as f:
+                            email_msg.attach(nombre, f.read(), "application/pdf")
+                    except Exception as adj_err:
+                        logger.warning(f"Error adjuntando archivo {nombre}: {adj_err}")
+
         email_msg.send(fail_silently=False)
         return True
     except Exception as e:
@@ -237,7 +256,7 @@ def enviar_email_html(
 
 
 def enviar_confirmacion_venta(venta) -> bool:
-    """Envía email de confirmación de venta al cliente"""
+    """Envía email de confirmación de venta al cliente con factura adjunta si existe"""
     if not venta.cliente or not venta.cliente.email:
         logger.warning(
             f"No se puede enviar confirmación para venta {venta.id_venta}: cliente sin email"
@@ -261,6 +280,23 @@ def enviar_confirmacion_venta(venta) -> bool:
         "nombre_agencia": nombre_agencia,
     }
 
+    # Buscar factura asociada para adjuntar PDF
+    adjuntos = []
+    try:
+        Factura = apps.get_model("finance", "Factura")
+
+        factura = Factura.objects.filter(venta_asociada=venta).first()
+        if factura and factura.archivo_pdf:
+            try:
+                pdf_path = factura.archivo_pdf.path
+                adjuntos.append(
+                    {"archivo": pdf_path, "nombre": f"Factura_{factura.numero_factura}.pdf"}
+                )
+            except (NotImplementedError, ValueError):
+                pass
+    except Exception as e:
+        logger.debug(f"No se encontró factura para venta {venta.id_venta}: {e}")
+
     resultado = enviar_email_html(
         f"[{nombre_agencia}] Confirmación de Reserva - {venta.localizador}",
         "core/emails/confirmacion_venta.html",
@@ -268,6 +304,7 @@ def enviar_confirmacion_venta(venta) -> bool:
         venta.cliente.email,
         from_email=from_email,
         agencia=agencia,
+        adjuntos=adjuntos if adjuntos else None,
     )
 
     if resultado:
@@ -278,7 +315,7 @@ def enviar_confirmacion_venta(venta) -> bool:
 
 
 def enviar_recordatorio_pago(venta) -> bool:
-    """Envía recordatorio de pago pendiente"""
+    """Envía recordatorio de pago pendiente con factura adjunta si existe"""
     if not venta.cliente or not venta.cliente.email:
         return False
 
@@ -302,6 +339,22 @@ def enviar_recordatorio_pago(venta) -> bool:
         "nombre_agencia": nombre_agencia,
     }
 
+    adjuntos = []
+    try:
+        Factura = apps.get_model("finance", "Factura")
+
+        factura = Factura.objects.filter(venta_asociada=venta).first()
+        if factura and factura.archivo_pdf:
+            try:
+                pdf_path = factura.archivo_pdf.path
+                adjuntos.append(
+                    {"archivo": pdf_path, "nombre": f"Factura_{factura.numero_factura}.pdf"}
+                )
+            except (NotImplementedError, ValueError):
+                pass
+    except Exception as e:
+        logger.debug(f"No se encontró factura para venta {venta.id_venta}: {e}")
+
     resultado = enviar_email_html(
         f"[{nombre_agencia}] Recordatorio de Pago - {venta.localizador}",
         "core/emails/recordatorio_pago.html",
@@ -309,6 +362,7 @@ def enviar_recordatorio_pago(venta) -> bool:
         venta.cliente.email,
         from_email=from_email,
         agencia=agencia,
+        adjuntos=adjuntos if adjuntos else None,
     )
 
     if resultado:
@@ -317,7 +371,7 @@ def enviar_recordatorio_pago(venta) -> bool:
 
 
 def enviar_cambio_estado(venta, estado_anterior: str) -> bool:
-    """Envía notificación de cambio de estado"""
+    """Envía notificación de cambio de estado con factura adjunta si aplica"""
     if not venta.cliente or not venta.cliente.email:
         return False
 
@@ -335,6 +389,23 @@ def enviar_cambio_estado(venta, estado_anterior: str) -> bool:
         "nombre_agencia": nombre_agencia,
     }
 
+    adjuntos = []
+    if venta.estado in ["PAG", "PPA"]:
+        try:
+            from apps.finance.models import Factura
+
+            factura = Factura.objects.filter(venta_asociada=venta).first()
+            if factura and factura.archivo_pdf:
+                try:
+                    pdf_path = factura.archivo_pdf.path
+                    adjuntos.append(
+                        {"archivo": pdf_path, "nombre": f"Factura_{factura.numero_factura}.pdf"}
+                    )
+                except (NotImplementedError, ValueError):
+                    pass
+        except Exception as e:
+            logger.debug(f"No se encontró factura para venta {venta.id_venta}: {e}")
+
     resultado = enviar_email_html(
         f"[{nombre_agencia}] Actualización de Reserva - {venta.localizador}",
         "core/emails/cambio_estado.html",
@@ -342,6 +413,7 @@ def enviar_cambio_estado(venta, estado_anterior: str) -> bool:
         venta.cliente.email,
         from_email=from_email,
         agencia=agencia,
+        adjuntos=adjuntos if adjuntos else None,
     )
 
     if resultado:

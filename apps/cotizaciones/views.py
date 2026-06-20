@@ -248,8 +248,22 @@ class CotizacionStatusView(LoginRequiredMixin, View):
     def post(self, request, pk):
         cotizacion = get_object_or_404(Cotizacion, pk=pk)
         nuevo_estado = request.POST.get("nuevo_estado")
+        estado_anterior = cotizacion.estado
         cotizacion.estado = nuevo_estado
+
+        if nuevo_estado == Cotizacion.EstadoCotizacion.ENVIADA:
+            from django.utils import timezone
+
+            cotizacion.fecha_envio = timezone.now()
+            cotizacion.email_enviado = True
+
         cotizacion.save()
+
+        if nuevo_estado == Cotizacion.EstadoCotizacion.ENVIADA:
+            _enviar_cotizacion_whatsapp(cotizacion, request)
+        elif nuevo_estado == Cotizacion.EstadoCotizacion.RECHAZADA:
+            _notificar_cotizacion_rechazada(cotizacion, estado_anterior)
+
         messages.success(request, f"Estado actualizado a {cotizacion.get_estado_display()}.")
         return redirect("bookings:cotizacion_detalle", pk=pk)
 
@@ -885,3 +899,114 @@ class PublicQuoteDetailView(DetailView):
 
         quote.metadata_ia = meta
         return context
+
+    def render_to_response(self, context, **response_kwargs):
+        response = super().render_to_response(context, **response_kwargs)
+        quote = context["quote"]
+        if quote.estado == Cotizacion.EstadoCotizacion.ENVIADA:
+            from django.utils import timezone
+
+            quote.estado = Cotizacion.EstadoCotizacion.VISTA
+            quote.fecha_vista = timezone.now()
+            quote.save(update_fields=["estado", "fecha_vista"])
+
+            if quote.consultor:
+                _notificar_agente_cotizacion_vista(quote)
+        return response
+
+
+def _enviar_cotizacion_whatsapp(cotizacion, request):
+    """Envía la cotización al cliente por WhatsApp cuando se marca como ENVIADA"""
+    try:
+        cliente = cotizacion.cliente
+        if not cliente or not cliente.telefono_principal:
+            logger.info(f"Cotización {cotizacion.pk} sin cliente o teléfono. Saltando WhatsApp.")
+            return
+
+        from apps.communications.services.whatsapp_unified import enviar_whatsapp
+
+        public_url = request.build_absolute_uri(f"/cotizaciones/public/{cotizacion.uuid}/")
+
+        nombre = cliente.get_nombre_completo() or "Viajero"
+        consultor_nombre = (
+            cotizacion.consultor.get_full_name() or cotizacion.consultor.username
+            if cotizacion.consultor
+            else "tu asesor"
+        )
+        simbolo = cotizacion.moneda.simbolo if cotizacion.moneda else "$"
+
+        mensaje = (
+            f"¡Hola {nombre}! ✈️\n\n"
+            f"Te saluda *{consultor_nombre}* de *TravelHub*.\n\n"
+            f"Tengo lista tu propuesta de viaje a *{cotizacion.destino or 'tu próximo destino'}*.\n\n"
+            f"💰 *Inversión:* {simbolo} {cotizacion.total_cotizado}\n"
+            f"🔗 *Ver Itinerario Completo:* {public_url}\n\n"
+            f"¿Qué te parece? Quedo atento si deseas cambios o proceder con la reserva."
+        )
+
+        enviar_whatsapp(cliente.telefono_principal, mensaje, agencia=cotizacion.agencia)
+        logger.info(f"✅ WhatsApp de cotización enviado: {cotizacion.numero_cotizacion}")
+    except Exception as e:
+        logger.warning(f"Error enviando cotización por WhatsApp: {e}")
+
+
+def _notificar_agente_cotizacion_vista(cotizacion):
+    """Notifica al agente por Telegram cuando el cliente ve la cotización"""
+    try:
+        from django.conf import settings
+
+        from apps.common.tasks import send_telegram_task
+
+        chat_id = getattr(settings, "TELEGRAM_GROUP_ID", None)
+        if not chat_id:
+            return
+
+        cliente_nombre = (
+            cotizacion.cliente.get_nombre_completo()
+            if cotizacion.cliente
+            else cotizacion.nombre_cliente_manual or "N/A"
+        )
+
+        msg = (
+            f"👁️ <b>Cotización Vista por Cliente</b>\n\n"
+            f"📋 <b>{cotizacion.numero_cotizacion}</b>\n"
+            f"👤 Cliente: {cliente_nombre}\n"
+            f"🌍 Destino: {cotizacion.destino}\n"
+            f"💰 Total: {cotizacion.moneda.simbolo if cotizacion.moneda else '$'} {cotizacion.total_cotizado}\n\n"
+            f"<i>El cliente ha abierto tu propuesta.</i>"
+        )
+
+        send_telegram_task.delay(message=msg, chat_id=chat_id)
+    except Exception as e:
+        logger.warning(f"Error notificando agente de cotización vista: {e}")
+
+
+def _notificar_cotizacion_rechazada(cotizacion, estado_anterior):
+    """Notifica al agente cuando una cotización es rechazada"""
+    try:
+        from django.conf import settings
+
+        from apps.common.tasks import send_telegram_task
+
+        chat_id = getattr(settings, "TELEGRAM_GROUP_ID", None)
+        if not chat_id:
+            return
+
+        cliente_nombre = (
+            cotizacion.cliente.get_nombre_completo()
+            if cotizacion.cliente
+            else cotizacion.nombre_cliente_manual or "N/A"
+        )
+
+        msg = (
+            f"❌ <b>Cotización Rechazada</b>\n\n"
+            f"📋 <b>{cotizacion.numero_cotizacion}</b>\n"
+            f"👤 Cliente: {cliente_nombre}\n"
+            f"🌍 Destino: {cotizacion.destino}\n"
+            f"💰 Total: {cotizacion.moneda.simbolo if cotizacion.moneda else '$'} {cotizacion.total_cotizado}\n\n"
+            f"<i>Considera hacer un follow-up con el cliente.</i>"
+        )
+
+        send_telegram_task.delay(message=msg, chat_id=chat_id)
+    except Exception as e:
+        logger.warning(f"Error notificando cotización rechazada: {e}")

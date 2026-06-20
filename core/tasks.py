@@ -59,6 +59,8 @@ _TASK_MAPPINGS = {
     "create_invoice_from_sale_task": "apps.finance.tasks",
     # apps.contabilidad.tasks
     "sync_bcv_rates": "apps.contabilidad.tasks",
+    # apps.automation.tasks
+    "ejecutar_cobranza_ia_task": "apps.automation.tasks",
     # cleanup tasks
     "limpiar_axes_logs": "apps.common.tasks",
     "limpiar_sesiones_expiradas": "apps.common.tasks",

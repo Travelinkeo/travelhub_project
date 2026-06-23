@@ -1,8 +1,7 @@
-
 import json
 import logging
-import sys
 import os
+import sys
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -11,9 +10,10 @@ from apps.automation.parsers.copa_parser import CopaParser
 # Mock logger
 logging.basicConfig(level=logging.INFO)
 
+
 def test_copa_fuzzy():
     parser = CopaParser()
-    
+
     # 1. SAMPLE IN SPANISH (Simulated)
     text_spanish = """
     Copa Airlines
@@ -35,16 +35,16 @@ def test_copa_fuzzy():
     Total Amount: USD 500.00
     Taxes: USD 50.00
     """
-    
+
     print("\n--- TEST 1: Spanish Labels + Fuzzy ---")
     data = parser.parse(text_spanish)
     print(json.dumps(data.to_dict(), indent=2))
-    
+
     # Validation 1
-    assert data.pnr == 'KAAAF7', "Failed PNR"
-    assert data.ticket_number == '2302013874530', "Failed Ticket"
-    assert data.agency['iata'] == '10617390', "Failed Agency"
-    assert data.fares['total_amount'] == '500.00', "Failed Total"
+    assert data.pnr == "KAAAF7", "Failed PNR"
+    assert data.ticket_number == "2302013874530", "Failed Ticket"
+    assert data.agency["iata"] == "10617390", "Failed Agency"
+    assert data.fares["total_amount"] == "500.00", "Failed Total"
 
     # 2. SAMPLE RAW / NO LABELS (Fuzzy Only)
     text_fuzzy = """
@@ -59,16 +59,17 @@ def test_copa_fuzzy():
     ...
     05MAR26
     """
-    
+
     print("\n--- TEST 2: Fuzzy Only (No Labels) ---")
     data_fuzzy = parser.parse(text_fuzzy)
     print(json.dumps(data_fuzzy.to_dict(), indent=2))
-    
+
     # Validation 2
-    assert data_fuzzy.ticket_number == '2309876543210', "Failed Fuzzy Ticket"
-    assert data_fuzzy.fares['total_amount'] == '1234.56', "Failed Fuzzy Total"
+    assert data_fuzzy.ticket_number == "2309876543210", "Failed Fuzzy Ticket"
+    assert data_fuzzy.fares["total_amount"] == "1234.56", "Failed Fuzzy Total"
     # Agency extraction usually requires IATA label, but we added loose one.
-    assert data_fuzzy.agency['iata'] == '99999999', "Failed Fuzzy Agency"
+    assert data_fuzzy.agency["iata"] == "99999999", "Failed Fuzzy Agency"
+
 
 if __name__ == "__main__":
     try:

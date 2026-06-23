@@ -305,14 +305,16 @@ class CopaParser(BaseTicketParser):
                         try:
                             amount = Decimal(value.replace(",", ""))
                             amounts.append({"label": label.strip(), "amount": amount})
-                        except Exception:
+                        except Exception as e:
+                            logger.debug("Ignored exception parsing amount: %s", e)
                             continue
         # Fallback al regex genérico sobre el texto plano
         amount_pattern = re.compile(r"([A-Za-z ]+?)\s*[:\s]?\s*\$?([\d,]+\.\d{2})")
         for label, value in amount_pattern.findall(text):
             try:
                 amount = Decimal(value.replace(",", ""))
-            except Exception:
+            except Exception as e:
+                logger.debug("Ignored exception parsing fallback amount: %s", e)
                 continue
             amounts.append({"label": label.strip(), "amount": amount})
         return amounts

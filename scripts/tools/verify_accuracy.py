@@ -1,8 +1,8 @@
 import os
-import django
-import json
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
+import django
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "travelhub.settings")
 django.setup()
 
 from apps.automation.services.ai_engine import ai_engine
@@ -49,7 +49,9 @@ result = ai_engine.analyze_gds_terminal(raw_text)
 print("\n--- ITINERARY CHECK ---")
 itinerario = result.get("boletos", [{}])[0].get("itinerario", [])
 for i, s in enumerate(itinerario):
-    print(f"Tramo {i+1}: {s.get('origen')} -> {s.get('destino')} (Flight {s.get('numero_vuelo')})")
+    print(
+        f"Tramo {i + 1}: {s.get('origen')} -> {s.get('destino')} (Flight {s.get('numero_vuelo')})"
+    )
 
 first_seg = itinerario[0] if itinerario else {}
 if first_seg.get("origen") == "CCS" and first_seg.get("destino") == "IST":

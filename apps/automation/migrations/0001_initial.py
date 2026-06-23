@@ -122,7 +122,6 @@ class Migration(migrations.Migration):
                     },
                 ),
             ],
-            database_operations=[
-            ],
+            database_operations=[],
         ),
     ]

@@ -2,27 +2,28 @@
 Script de migración para usar el monitor unificado
 Depreca: email_monitor.py, email_monitor_v2.py, email_monitor_whatsapp_drive.py
 """
+
 import os
 import sys
 
 # Agregar el directorio raíz al path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
 # Configurar Django
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "travelhub.settings")
 import django
+
 django.setup()
 
-from apps.communications.services.email_monitor_service import EmailMonitorService
 
 def main():
     print("=" * 60)
     print("MIGRACIÓN A MONITOR UNIFICADO")
     print("=" * 60)
-    
+
     print("\n✅ Monitor unificado disponible en:")
     print("   core/services/email_monitor_service.py")
-    
+
     print("\n📝 Uso:")
     print("""
     # WhatsApp
@@ -50,13 +51,14 @@ def main():
     )
     monitor.start()
     """)
-    
+
     print("\n⚠️  Archivos deprecados (mover a scripts_archive/):")
     print("   - core/email_monitor.py")
     print("   - core/email_monitor_v2.py")
     print("   - core/email_monitor_whatsapp_drive.py")
-    
+
     print("\n✅ Migración completada")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

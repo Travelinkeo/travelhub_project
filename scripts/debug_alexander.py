@@ -1,7 +1,7 @@
+import os
+import sys
 
 import pdfplumber
-import sys
-import os
 
 pdf_path = r"c:\Users\ARMANDO\travelhub_project\media\boletos_importados\2026\01\Recibo_de_pasaje_electrónico_07_abril_para_ALEXANDER_CASTANO_VALENCIA.pdf"
 

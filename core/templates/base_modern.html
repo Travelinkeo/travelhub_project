@@ -26,6 +26,8 @@
         /* FORCE HIDE SEARCH MODAL IF JS/CSS FAIL */
         #omnisearch-modal-overlay { display: none !important; }
         [x-cloak] { display: none !important; }
+        /* CFO Panel: oculto por defecto hasta que Alpine lo controle */
+        #ai-panel-dialog { display: none; }
     </style>
     <script nonce="{{ request.csp_nonce }}" src="{% static 'vendor/html2canvas_v2.js' %}"></script>
     <script nonce="{{ request.csp_nonce }}" src="{% static 'vendor/lucide_v2.js' %}"></script>
@@ -532,11 +534,14 @@
     </div>
 
     <!-- SLIDE-OVER GLOBAL DE INTELIGENCIA ARTIFICIAL (CFO VIRTUAL) -->
-    <div x-data="{ aiPanelOpen: false }" @open-ai-panel.window="aiPanelOpen = true" x-cloak>
-        <div x-show="aiPanelOpen" class="fixed inset-0 z-[100] overflow-hidden" aria-labelledby="slide-over-title" role="dialog" aria-modal="true">
+    <div x-data="{ aiPanelOpen: false }" @open-ai-panel.window="aiPanelOpen = true; document.getElementById('ai-panel-dialog').style.display='block'" x-cloak>
+        <div id="ai-panel-dialog" x-show="aiPanelOpen" class="fixed inset-0 z-[100] overflow-hidden" aria-labelledby="slide-over-title" role="dialog" aria-modal="true">
             <div class="absolute inset-0 overflow-hidden">
-                <!-- Overlay Oscuro -->
-                <div x-show="aiPanelOpen" x-transition.opacity.duration.300ms @click="aiPanelOpen = false" class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" aria-hidden="true"></div>
+                <!-- Overlay Oscuro (clic para cerrar) -->
+                <div x-show="aiPanelOpen" x-transition.opacity.duration.300ms
+                     @click="aiPanelOpen = false; document.getElementById('ai-panel-dialog').style.display='none'"
+                     onclick="document.getElementById('ai-panel-dialog').style.display='none'"
+                     class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" aria-hidden="true"></div>
 
                 <div class="pointer-events-none fixed inset-y-0 right-0 flex max-w-full pl-10">
                     <!-- El Panel Lateral -->
@@ -561,8 +566,9 @@
                                         <p class="text-[10px] text-purple-400 font-bold uppercase tracking-widest">TravelHub Intelligence</p>
                                     </div>
                                 </div>
-                                <button @click="aiPanelOpen = false" class="text-text-muted hover:text-white transition-colors">
-                                    <span class="material-symbols-outlined">close</span>
+                                <!-- Botón cerrar: Alpine + JS puro como fallback -->
+                                <button @click="aiPanelOpen = false" onclick="document.getElementById('ai-panel-dialog').style.display='none'" class="text-text-muted hover:text-white transition-colors" style="cursor:pointer; z-index:9999; position:relative;" title="Cerrar">
+                                    <span class="material-symbols-outlined" style="font-size:28px;">close</span>
                                 </button>
                             </div>
                             

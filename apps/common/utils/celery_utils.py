@@ -103,7 +103,7 @@ def safe_delay(task_func: Any, *args: Any, _queue: str | None = None, **kwargs: 
             try:
                 # Ejecución síncrona directa (como una función normal)
                 # IMPORTANTE: Al llamar directamente, perdemos el aislamiento de proceso, pero salvamos la operación del usuario.
-                result = task_func(*args, **kwargs)
+                task_func(*args, **kwargs)
                 return f"SYNC_COMPLETED_{task_func.name}"
             except Exception as se:
                 logger.error(f"❌ Error en ejecución síncrona de {task_func.name}: {se}")

@@ -172,7 +172,6 @@ class VentaAutomationService:
             boleto_obj.estado_parseo = BoletoImportado.EstadoParseo.COMPLETADO
             boleto_obj.save()
 
-            # E. Item Venta (IDEMPOTENCIA FINANCIERA)
             producto_servicio, _ = ProductoServicio.all_objects.get_or_create(
                 agencia=agencia,
                 nombre="Boleto Aéreo Internacional",
@@ -180,6 +179,9 @@ class VentaAutomationService:
                 defaults={
                     "descripcion": "Boleto aéreo importado/parseado automáticamente.",
                     "activo": True,
+                    "codigo_interno": f"BOLETO_AIR_INT_{agencia.pk}"
+                    if agencia
+                    else "BOLETO_AIR_INT_GLOBAL",
                 },
             )
 

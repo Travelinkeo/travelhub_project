@@ -4,6 +4,7 @@ Django==5.2.14
 django-environ==0.13.0
 dj-database-url==3.0.1
 sentry-sdk==2.50.0
+cryptography==46.0.7  # Cifrado Fernet para EncryptedCharField/EncryptedTextField (core/fields.py)
 
 # API & Frontend
 djangorestframework==3.15.2

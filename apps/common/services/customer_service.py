@@ -76,6 +76,17 @@ class CustomerService:
                     nombres=data.get("passenger_name") or "PASAJERO",
                     apellidos="(Auto-Generado)",
                     tipo_cliente="IND",
+                    nombre_empresa="",  # Para evitar IntegrityError en Postgres
+                    telefono_principal="",  # Para evitar IntegrityError en Postgres
+                    telefono_secundario="",  # Para evitar IntegrityError en Postgres
+                    direccion="",  # Para evitar IntegrityError en Postgres
+                    direccion_linea1="",  # Para evitar IntegrityError en Postgres
+                    direccion_linea2="",  # Para evitar IntegrityError en Postgres
+                    codigo_postal="",  # Para evitar IntegrityError en Postgres
+                    email="",  # Para evitar IntegrityError en Postgres
+                    preferencias_viaje="",  # Para evitar IntegrityError en Postgres
+                    notas_cliente="",  # Para evitar IntegrityError en Postgres
+                    documento_hash="",  # Para evitar IntegrityError en Postgres
                 )
                 if doc_pax:
                     cliente.cedula_identidad = doc_pax

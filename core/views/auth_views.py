@@ -166,10 +166,10 @@ class MagicLinkVerifyView(View):
                 request,
                 "auth/magic_link_error.html",
                 {
-                    "error": "Usuario no registrado",
-                    "error_detail": "No existe ninguna cuenta registrada con este correo electrónico. Por favor, regístrate primero.",
+                    "error": "Enlace invalido",
+                    "error_detail": "Este enlace no es valido o expiro. Solicita uno nuevo.",
                 },
-                status=404,
+                status=400,
             )
 
         if not user.is_active:
@@ -180,10 +180,10 @@ class MagicLinkVerifyView(View):
                 request,
                 "auth/magic_link_error.html",
                 {
-                    "error": "Cuenta desactivada",
-                    "error_detail": "Tu cuenta ha sido desactivada. Contacta al administrador.",
+                    "error": "Enlace invalido",
+                    "error_detail": "Este enlace no es valido o expiro. Solicita uno nuevo.",
                 },
-                status=403,
+                status=400,
             )
 
         login(request, user, backend="django.contrib.auth.backends.ModelBackend")

@@ -70,3 +70,33 @@ USER appuser
 
 ENTRYPOINT ["./entrypoint.sh"]
 CMD ["gunicorn", "travelhub.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3", "--timeout", "120"]
+
+# Stage 3: test — runtime + test dependencies
+FROM python:3.13-slim AS test
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libpq-dev libpango-1.0-0 libpangocairo-1.0-0 shared-mime-info && \
+    rm -rf /var/lib/apt/lists/*
+
+COPY --from=builder /install /usr/local
+COPY --from=builder /build/travelhub ./travelhub/
+COPY --from=builder /build/core ./core/
+COPY --from=builder /build/apps ./apps/
+COPY --from=builder /build/manage.py ./
+COPY --from=builder /build/static ./static/
+COPY --from=builder /build/staticfiles ./staticfiles/
+COPY --from=builder /build/templates ./templates/
+COPY --from=builder /build/locale ./locale/
+COPY --from=builder /build/docs ./docs/
+
+RUN pip install --no-cache-dir pytest pytest-django pytest-cov pytest-timeout
+
+COPY conftest.py ./conftest.py
+COPY pytest.ini ./pytest.ini
+COPY tests/ ./tests/
+COPY fixtures/ ./fixtures/

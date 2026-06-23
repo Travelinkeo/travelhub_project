@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("core", "0039_merge_core_0037_0038"),
     ]
@@ -33,35 +32,25 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "nombre",
-                    models.CharField(
-                        max_length=150, verbose_name="Nombre del Aeropuerto"
-                    ),
+                    models.CharField(max_length=150, verbose_name="Nombre del Aeropuerto"),
                 ),
                 (
                     "ciudad",
-                    models.CharField(
-                        db_index=True, max_length=150, verbose_name="Ciudad"
-                    ),
+                    models.CharField(db_index=True, max_length=150, verbose_name="Ciudad"),
                 ),
                 (
                     "pais",
-                    models.CharField(
-                        db_index=True, max_length=100, verbose_name="País"
-                    ),
+                    models.CharField(db_index=True, max_length=100, verbose_name="País"),
                 ),
                 (
                     "pais_codigo",
-                    models.CharField(
-                        db_index=True, max_length=2, verbose_name="Código de País"
-                    ),
+                    models.CharField(db_index=True, max_length=2, verbose_name="Código de País"),
                 ),
                 ("latitud", models.FloatField(verbose_name="Latitud")),
                 ("longitud", models.FloatField(verbose_name="Longitud")),
                 (
                     "es_principal",
-                    models.BooleanField(
-                        default=False, verbose_name="¿Es Aeropuerto Principal?"
-                    ),
+                    models.BooleanField(default=False, verbose_name="¿Es Aeropuerto Principal?"),
                 ),
             ],
             options={

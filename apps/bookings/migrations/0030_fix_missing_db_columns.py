@@ -59,26 +59,26 @@ def _col_restrict(target_table_var, column, type_def, fk_table, fk_col):
 def _build_forward_sql():
     return [
         # 1. tarifarioproveedor: agencia_id (CASCADE) + proveedor_id (CASCADE)
-        f"""DO $$ BEGIN {_col('tarifarioproveedor', 'agencia_id', 'bigint', 'core_agencia', 'id')} END $$;""",
-        f"""DO $$ BEGIN {_col('tarifarioproveedor', 'proveedor_id', 'bigint', 'core_proveedor', 'id_proveedor')} END $$;""",
+        f"""DO $$ BEGIN {_col("tarifarioproveedor", "agencia_id", "bigint", "core_agencia", "id")} END $$;""",
+        f"""DO $$ BEGIN {_col("tarifarioproveedor", "proveedor_id", "bigint", "core_proveedor", "id_proveedor")} END $$;""",
         # 2. hoteltarifario: agencia_id + tarifario_id
-        f"""DO $$ BEGIN {_col('hoteltarifario', 'agencia_id', 'bigint', 'core_agencia', 'id')} END $$;""",
-        f"""DO $$ BEGIN {_col('hoteltarifario', 'tarifario_id', 'bigint', 'core_tarifarioproveedor', 'id')} END $$;""",
+        f"""DO $$ BEGIN {_col("hoteltarifario", "agencia_id", "bigint", "core_agencia", "id")} END $$;""",
+        f"""DO $$ BEGIN {_col("hoteltarifario", "tarifario_id", "bigint", "core_tarifarioproveedor", "id")} END $$;""",
         # 3. comisionoverrideaerolinea: aerolinea_id + tarifario_id
-        f"""DO $$ BEGIN {_col('comisionoverrideaerolinea', 'aerolinea_id', 'bigint', 'core_aerolinea', 'id_aerolinea')} END $$;""",
-        f"""DO $$ BEGIN {_col('comisionoverrideaerolinea', 'tarifario_id', 'bigint', 'core_tarifarioproveedor', 'id')} END $$;""",
+        f"""DO $$ BEGIN {_col("comisionoverrideaerolinea", "aerolinea_id", "bigint", "core_aerolinea", "id_aerolinea")} END $$;""",
+        f"""DO $$ BEGIN {_col("comisionoverrideaerolinea", "tarifario_id", "bigint", "core_tarifarioproveedor", "id")} END $$;""",
         # 4. cruceroreserva: moneda_id (RESTRICT) + proveedor_id (SET NULL) + venta_id (CASCADE)
-        f"""DO $$ BEGIN {_col_restrict('cruceroreserva', 'moneda_id', 'bigint', 'core_moneda', 'id_moneda')} END $$;""",
-        f"""DO $$ BEGIN {_col_setnull('cruceroreserva', 'proveedor_id', 'bigint', 'core_proveedor', 'id_proveedor')} END $$;""",
-        f"""DO $$ BEGIN {_col('cruceroreserva', 'venta_id', 'bigint', 'core_venta', 'id_venta')} END $$;""",
+        f"""DO $$ BEGIN {_col_restrict("cruceroreserva", "moneda_id", "bigint", "core_moneda", "id_moneda")} END $$;""",
+        f"""DO $$ BEGIN {_col_setnull("cruceroreserva", "proveedor_id", "bigint", "core_proveedor", "id_proveedor")} END $$;""",
+        f"""DO $$ BEGIN {_col("cruceroreserva", "venta_id", "bigint", "core_venta", "id_venta")} END $$;""",
         # 5. imagenhotel: hotel_id
-        f"""DO $$ BEGIN {_col('imagenhotel', 'hotel_id', 'bigint', 'core_hoteltarifario', 'id')} END $$;""",
+        f"""DO $$ BEGIN {_col("imagenhotel", "hotel_id", "bigint", "core_hoteltarifario", "id")} END $$;""",
         # 6. productoterrestre: agencia_id
-        f"""DO $$ BEGIN {_col('productoterrestre', 'agencia_id', 'bigint', 'core_agencia', 'id')} END $$;""",
+        f"""DO $$ BEGIN {_col("productoterrestre", "agencia_id", "bigint", "core_agencia", "id")} END $$;""",
         # 7. tipohabitacion: hotel_id
-        f"""DO $$ BEGIN {_col('tipohabitacion', 'hotel_id', 'bigint', 'core_hoteltarifario', 'id')} END $$;""",
+        f"""DO $$ BEGIN {_col("tipohabitacion", "hotel_id", "bigint", "core_hoteltarifario", "id")} END $$;""",
         # 8. tarifahabitacion: tipo_habitacion_id
-        f"""DO $$ BEGIN {_col('tarifahabitacion', 'tipo_habitacion_id', 'bigint', 'core_tipohabitacion', 'id')} END $$;""",
+        f"""DO $$ BEGIN {_col("tarifahabitacion", "tipo_habitacion_id", "bigint", "core_tipohabitacion", "id")} END $$;""",
     ]
 
 

@@ -1,10 +1,12 @@
 """
 Script de prueba para WhatsApp
 """
+
 import os
+
 import django
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "travelhub.settings")
 django.setup()
 
 from apps.communications.services.whatsapp_notifications import enviar_whatsapp
@@ -14,7 +16,7 @@ print("=== Test WhatsApp ===\n")
 # IMPORTANTE: Reemplaza con tu número en formato internacional
 # Ejemplo Venezuela: +584121234567
 # Ejemplo Colombia: +573001234567
-mi_numero = '+582126317079'  # Tu número que viste en Twilio
+mi_numero = "+582126317079"  # Tu número que viste en Twilio
 
 print(f"Enviando mensaje de prueba a: {mi_numero}")
 

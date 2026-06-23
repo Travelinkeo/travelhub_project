@@ -10,6 +10,6 @@ def test_home_csp_nonce_meta_and_header(client):
 
     # Nonce should be disabled (empty string) in relaxed mode
     # ensuring no conflicts with dynamically loaded scripts
-    body = resp.content.decode("utf-8", errors="ignore")
+    resp.content.decode("utf-8", errors="ignore")
     # Should not crash and should render/redirect successfully
     assert resp.status_code in [200, 302]

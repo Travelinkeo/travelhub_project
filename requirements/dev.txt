@@ -1,15 +1,30 @@
-# Development dependencies
+# TravelHub — Development & Testing Dependencies
+# Instalar con: pip install -r requirements/dev.txt
 -r base.txt
 
-pre-commit
-mypy
-mypy-django-plugin
+# --- Testing ---
+pytest==8.2.0
+pytest-django==4.8.0
+pytest-cov==6.0.0
+pytest-timeout==2.3.1
+
+# --- Code Quality & Linting ---
+ruff==0.11.2
+black==24.4.2
+isort==5.13.2
+flake8==7.0.0
+pre-commit==4.2.0
+
+# --- Type Checking ---
+mypy==1.11.0
+mypy-django-plugin==0.15.0
 django-stubs==5.0.4
+
+# --- Security Scanning ---
 pip-audit==2.7.3
-bandit
-safety
-black
-isort
-ruff
-pytest-timeout
-pytest-cov
+bandit==1.8.3
+safety==3.2.9
+
+# --- Development Tools ---
+django-debug-toolbar==4.4.2   # Panel de queries SQL en desarrollo
+flower==2.0.1                  # Monitor de tareas Celery (UI en :5555)

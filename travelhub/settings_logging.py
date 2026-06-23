@@ -35,7 +35,17 @@ LOGGING = {
             "propagate": False,
         },
         "django.db.backends": {
-            "level": "WARNING",  # Para evitar exceso de logs SQL
+            "level": "WARNING",
+        },
+        "axes": {
+            "handlers": ["console"],
+            "level": "WARNING",
+            "propagate": False,
+        },
+        "axes.attempts": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
         },
     },
 }

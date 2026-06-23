@@ -4,20 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('communications', '0006_alter_comunicacionproveedor_table'),
+        ("communications", "0006_alter_comunicacionproveedor_table"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='comunicacionproveedor',
-            name='message_id',
+            model_name="comunicacionproveedor",
+            name="message_id",
             field=models.CharField(blank=True, max_length=255, unique=True),
         ),
         migrations.AlterField(
-            model_name='emailmonitorlog',
-            name='host_conectado',
+            model_name="emailmonitorlog",
+            name="host_conectado",
             field=models.CharField(blank=True, max_length=255),
         ),
     ]

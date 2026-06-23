@@ -191,7 +191,7 @@ DATOS DEL VIAJE:
 - Nacionalidad del pasajero: {nationality_name} ({nationality})
 {passport_info}- Origen: {nationality_name}
 - Destino final: {destination_name} ({destination})
-{transit_info}- Fecha de viaje: {travel_date.strftime('%Y-%m-%d') if travel_date else 'No especificada'}
+{transit_info}- Fecha de viaje: {travel_date.strftime("%Y-%m-%d") if travel_date else "No especificada"}
 
 PREGUNTA:
 1. ¿Necesita visa para entrar a {destination_name}?

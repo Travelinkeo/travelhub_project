@@ -62,7 +62,7 @@ class TestWhatsAppUnified:
         agencia = Mock()
         agencia.subdominio_slug = "test-agency"
 
-        result = send_whatsapp_message("+1234567890", "Hello", agencia=agencia)
+        send_whatsapp_message("+1234567890", "Hello", agencia=agencia)
 
         assert mock_evolution.called
         assert mock_meta.called

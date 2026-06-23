@@ -1,9 +1,12 @@
+import logging
 from datetime import datetime
 from io import BytesIO
 
 import openpyxl
 from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 from openpyxl.utils import get_column_letter
+
+logger = logging.getLogger(__name__)
 
 
 class ExcelGenerator:

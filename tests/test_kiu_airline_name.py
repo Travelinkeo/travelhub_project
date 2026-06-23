@@ -1,13 +1,12 @@
-﻿import pytest
-pytestmark = pytest.mark.skip(reason="Funciones de parser refactorizadas - pendiente actualización")
-
 import os
 
 import pytest
 
 from apps.automation.parsers import ticket_parser
 
-PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+pytestmark = pytest.mark.skip(reason="Funciones de parser refactorizadas - pendiente actualización")
+
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
 
 SAMPLE_KIU_TEXT = """
@@ -29,9 +28,15 @@ def test_nombre_aerolinea_no_se_contamina():
     [
         ("ISSUING AIRLINE: RUTAS AEREAS DE VENEZUELA RAV, SA ADDRESS", EXPECTED_NAME),
         ("ISSUING AIRLINE: RUTAS AEREAS DE VENEZUELA RAV, SA TICKET", EXPECTED_NAME),
-    ("ISSUING AIRLINE: RUTAS AEREAS DE VENEZUELA RAV, SA ISSUE DATE/FECHA DE EMISION: 17 AUG 2025 19:14", EXPECTED_NAME),
-    ("ISSUING AIRLINE: RUTAS AEREAS DE VENEZUELA RAV, SA BOOKING REF/CODIGO DE RESERVA: C1/ABC123", EXPECTED_NAME),
-    ("ISSUING AIRLINE: RUTAS AEREAS DE VENEZUELA RAV, SA (ALGUN TEXTO EXTRA)", EXPECTED_NAME),
+        (
+            "ISSUING AIRLINE: RUTAS AEREAS DE VENEZUELA RAV, SA ISSUE DATE/FECHA DE EMISION: 17 AUG 2025 19:14",
+            EXPECTED_NAME,
+        ),
+        (
+            "ISSUING AIRLINE: RUTAS AEREAS DE VENEZUELA RAV, SA BOOKING REF/CODIGO DE RESERVA: C1/ABC123",
+            EXPECTED_NAME,
+        ),
+        ("ISSUING AIRLINE: RUTAS AEREAS DE VENEZUELA RAV, SA (ALGUN TEXTO EXTRA)", EXPECTED_NAME),
     ],
 )
 def test_cortes_por_tokens(line, expected):

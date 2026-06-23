@@ -30,8 +30,8 @@ class TestAuditTimelineView(TestCase):
         )
 
         # Crear Usuarios
-        self.user_a = User.objects.create_user(username="usera", password="password1")
-        self.user_b = User.objects.create_user(username="userb", password="password1")
+        self.user_a = User.objects.create_user(username="usera", password="password1")  # noqa: S106
+        self.user_b = User.objects.create_user(username="userb", password="password1")  # noqa: S106
 
         # Asignar a Agencias
         UsuarioAgencia.objects.create(

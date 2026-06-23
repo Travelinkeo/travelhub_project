@@ -78,8 +78,8 @@ class Command(BaseCommand):
             self.stdout.write("\n=== RESUMEN ===")
             resultado = ReportesContables.estado_resultados(date(anio, mes, 1), ultimo_dia, "USD")
 
-            self.stdout.write(f'Ingresos:  {resultado["ingresos"]:>12,.2f} USD')
-            self.stdout.write(f'Gastos:    {resultado["gastos"]:>12,.2f} USD')
+            self.stdout.write(f"Ingresos:  {resultado['ingresos']:>12,.2f} USD")
+            self.stdout.write(f"Gastos:    {resultado['gastos']:>12,.2f} USD")
 
             utilidad = resultado["utilidad_neta"]
             if utilidad >= 0:
@@ -94,7 +94,7 @@ class Command(BaseCommand):
 
         except Exception as e:
             logger.error(f"Error en cierre mensual: {e}")
-            raise CommandError(f"Error: {e}")
+            raise CommandError(f"Error: {e}") from e
 
     def _ultimo_dia_mes(self, mes, anio):
         """Obtiene el último día del mes"""

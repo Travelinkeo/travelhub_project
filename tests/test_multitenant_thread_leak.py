@@ -1,14 +1,16 @@
 import threading
 import time
+
 import pytest
 from django.contrib.auth import get_user_model
 from django.contrib.sessions.backends.db import SessionStore
-from core.models.agencia import Agencia, UsuarioAgencia
+
 from core.middleware import (
     ThreadLocalContextMiddleware,
     get_current_agency,
     get_current_user,
 )
+from core.models.agencia import Agencia, UsuarioAgencia
 
 User = get_user_model()
 
@@ -56,6 +58,7 @@ def test_multitenant_thread_concurrency_leak():
         if current_user != user_a:
             errors.append(f"Fuga detectada! Esperaba User A, obtuve {current_user}")
         from django.http import HttpResponse
+
         return HttpResponse("OK")
 
     def get_response_b(request):
@@ -67,6 +70,7 @@ def test_multitenant_thread_concurrency_leak():
         if current_user != user_b:
             errors.append(f"Fuga detectada! Esperaba User B, obtuve {current_user}")
         from django.http import HttpResponse
+
         return HttpResponse("OK")
 
     def run_client_a():
@@ -78,10 +82,11 @@ def test_multitenant_thread_concurrency_leak():
                 middleware(request)
                 # Después de la ejecución, el hilo actual debe estar limpio
                 if get_current_agency() is not None:
-                    errors.append(f"Limpieza fallida! Quedó agencia residual en el hilo")
+                    errors.append("Limpieza fallida! Quedó agencia residual en el hilo")
         finally:
             # Asegura cerrar las conexiones a la BD de este hilo al finalizar
             from django.db import connections
+
             connections.close_all()
 
     def run_client_b():
@@ -92,9 +97,10 @@ def test_multitenant_thread_concurrency_leak():
                 request = MockRequest(user_b, agencia_b, session)
                 middleware(request)
                 if get_current_agency() is not None:
-                    errors.append(f"Limpieza fallida! Quedó agencia residual en el hilo")
+                    errors.append("Limpieza fallida! Quedó agencia residual en el hilo")
         finally:
             from django.db import connections
+
             connections.close_all()
 
     threads = []

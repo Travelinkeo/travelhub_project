@@ -1,16 +1,26 @@
 import logging
-from decimal import Decimal
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST
 from django.views.generic import ListView, View
+from drf_spectacular.utils import extend_schema, inline_serializer
+from rest_framework import filters, serializers, viewsets
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
+from apps.bookings.models import Venta
 from apps.bookings.models.venta import ItemVenta
+from apps.finance.models.core_finance import Factura
 from apps.finance.models.facturas_proveedores import FacturaProveedor
+from apps.finance.serializers import FacturaSerializer
 from apps.finance.services.invoice_matcher_service import InvoiceMatcherService
+from apps.finance.services.invoice_service import InvoiceService
 from core.api import AuditLog, crear_audit_log
+from core.api.mixins.tenant import TenantViewSetMixin
+from core.auth_helpers import InternalAPIAuthMixin
 
 logger = logging.getLogger(__name__)
 
@@ -144,16 +154,6 @@ def force_match_invoice_htmx(request, factura_id):
     """)
 
 
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
-from core.auth_helpers import InternalAPIAuthMixin
-from apps.bookings.models import Venta
-from apps.finance.services.invoice_service import InvoiceService
-
-from drf_spectacular.utils import extend_schema, inline_serializer
-from rest_framework import serializers
-
 class VentaDoubleInvoiceAPIView(InternalAPIAuthMixin, APIView):
     """
     Genera dos facturas (Intermediación + Agencia) para una venta.
@@ -166,14 +166,14 @@ class VentaDoubleInvoiceAPIView(InternalAPIAuthMixin, APIView):
         description="Genera la factura de intermediación (tercero) y la propia (agencia).",
         responses={
             200: inline_serializer(
-                name='DoubleInvoiceResponse',
+                name="DoubleInvoiceResponse",
                 fields={
-                    'factura_tercero': serializers.IntegerField(allow_null=True),
-                    'factura_propia': serializers.IntegerField(allow_null=True),
-                    'mensaje': serializers.CharField(),
-                }
+                    "factura_tercero": serializers.IntegerField(allow_null=True),
+                    "factura_propia": serializers.IntegerField(allow_null=True),
+                    "mensaje": serializers.CharField(),
+                },
             )
-        }
+        },
     )
     def post(self, request, pk):
         try:
@@ -192,3 +192,26 @@ class VentaDoubleInvoiceAPIView(InternalAPIAuthMixin, APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=500)
 
+
+class FacturaViewSet(TenantViewSetMixin, viewsets.ModelViewSet):
+    queryset = (
+        Factura.objects.select_related("cliente", "moneda", "asiento_contable_factura")
+        .prefetch_related("items_factura")
+        .order_by("-fecha_emision")
+    )
+    serializer_class = FacturaSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [filters.SearchFilter]
+    search_fields = [
+        "numero_factura",
+        "cliente__nombres",
+        "cliente__apellidos",
+        "cliente__nombre_empresa",
+    ]
+
+    def list(self, request, *args, **kwargs):
+        logger.info("FacturaViewSet.list() called")
+        return super().list(request, *args, **kwargs)
+
+    def perform_create(self, serializer):
+        serializer.save()

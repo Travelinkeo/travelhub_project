@@ -1,5 +1,6 @@
 import os
 import sys
+
 import django
 from django.utils.text import slugify
 
@@ -10,6 +11,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "travelhub.settings")
 django.setup()
 
 from core.models import HotelTarifario
+
 
 def fix_slugs():
     hoteles = HotelTarifario.objects.all()
@@ -25,6 +27,7 @@ def fix_slugs():
             h.slug = slug
             h.save()
             print(f"Slug set for {h.nombre}: {slug}")
+
 
 if __name__ == "__main__":
     fix_slugs()

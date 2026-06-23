@@ -1,6 +1,3 @@
-import pytest
-
-pytestmark = pytest.mark.skip(reason="Tests requieren configuración completa - pendiente")
 """
 Tests de integración para el pipeline crítico: Boleto → Parseo → Venta.
 
@@ -23,6 +20,8 @@ from django.test import override_settings
 from apps.bookings.models import BoletoImportado, Venta
 from apps.crm.models import Cliente
 from apps.finance.models.currencies import Moneda
+
+pytestmark = pytest.mark.skip(reason="Tests requieren configuración completa - pendiente")
 
 User = get_user_model()
 
@@ -192,7 +191,9 @@ class TestTicketParserService:
         mock_gemini.return_value = datos_parseo_sabre
 
         try:
-            from apps.automation.services.ticket_parser_service import TicketParserService
+            from apps.automation.services.ticket_parser_service import (
+                TicketParserService,  # noqa: F401
+            )
 
             # Para que el test funcione rápido, pasamos bypass_cache=True (simulado)
             # En realidad estamos mockeando el parser en sí
@@ -206,7 +207,9 @@ class TestTicketParserService:
         mock_gemini.side_effect = Exception("API rate limit")
 
         try:
-            from apps.automation.services.ticket_parser_service import TicketParserService
+            from apps.automation.services.ticket_parser_service import (
+                TicketParserService,  # noqa: F401
+            )
 
             # Este es un test puramente conceptual para el fallback
             pass

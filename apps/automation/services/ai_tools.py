@@ -366,7 +366,7 @@ class AgentTools:
                         "monto_sistema": float(c.boleto_local.total_boleto)
                         if c.boleto_local
                         else 0,
-                        "diferencia": float(item.monto_total_proveedor - item.monto_sistema),
+                        "diferencia": float(c.monto_total_proveedor - c.monto_sistema),
                     }
                 )
 

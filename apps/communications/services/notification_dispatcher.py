@@ -323,11 +323,11 @@ def generate_whatsapp_notification(cliente, datos_cambio: dict[str, Any]) -> str
 
     **Detalles del Cambio:**
     - **Vuelo Original:**
-        - Fecha: {vuelo_antiguo.get('fecha', 'N/A')}
-        - Hora de Salida: {vuelo_antiguo.get('hora_salida', 'N/A')}
+        - Fecha: {vuelo_antiguo.get("fecha", "N/A")}
+        - Hora de Salida: {vuelo_antiguo.get("hora_salida", "N/A")}
     - **NUEVO Vuelo:**
-        - Fecha: {vuelo_nuevo.get('fecha', 'N/A')}
-        - Hora de Salida: {vuelo_nuevo.get('hora_salida', 'N/A')}
+        - Fecha: {vuelo_nuevo.get("fecha", "N/A")}
+        - Hora de Salida: {vuelo_nuevo.get("hora_salida", "N/A")}
 
     **Instrucciones para el Mensaje:**
     1. Saluda al cliente por su nombre.
@@ -464,7 +464,7 @@ Se ha procesado un nuevo boleto de forma automática.
 📋 *Detalles:*
 • PNR: *{pnr}*
 • Pasajero: {pasajero}
-• Aerolínea: {boleto.aerolinea_emisora or 'N/A'}
+• Aerolínea: {boleto.aerolinea_emisora or "N/A"}
 • Boleto: {boleto.numero_boleto}
 """
 
@@ -492,8 +492,8 @@ Te informamos que hemos procesado tu boleto de avión con éxito.
 📋 *Detalles de tu viaje:*
 • Localizador PNR: *{pnr}*
 • Pasajero: {pasajero}
-• Aerolínea: {boleto.aerolinea_emisora or 'N/A'}
-• Nro Boleto: {boleto.numero_boleto or 'N/A'}
+• Aerolínea: {boleto.aerolinea_emisora or "N/A"}
+• Nro Boleto: {boleto.numero_boleto or "N/A"}
 
 Adjunto encontrarás tu boleto unificado en formato PDF.
 
@@ -581,7 +581,7 @@ Su vuelo sale en {horas_antes} horas.
 • Ruta: {origen} → {destino}
 • Fecha: {fecha}
 • Hora: {hora}
-• Aerolínea: {boleto.aerolinea_emisora or 'N/A'}
+• Aerolínea: {boleto.aerolinea_emisora or "N/A"}
 
 💡 *Recomendaciones:*
 • Llegue al aeropuerto 3 horas antes

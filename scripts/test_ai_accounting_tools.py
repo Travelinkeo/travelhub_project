@@ -1,16 +1,19 @@
 import os
+
 import django
 
 # Setup Django
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "travelhub.settings")
 django.setup()
 
-from apps.finance.services.ai_accounting_service import AIAccountingService
 import json
+
+from apps.finance.services.ai_accounting_service import AIAccountingService
+
 
 def test_tools():
     print("🚀 Iniciando prueba de herramientas del Asistente Contable AI...")
-    
+
     try:
         service = AIAccountingService()
     except Exception as e:
@@ -43,6 +46,7 @@ def test_tools():
     print(expenses)
 
     print("\n✅ Todas las herramientas retornaron datos.")
+
 
 if __name__ == "__main__":
     test_tools()

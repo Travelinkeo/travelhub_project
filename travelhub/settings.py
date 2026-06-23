@@ -2,6 +2,7 @@ import json
 import logging
 import mimetypes
 import os
+from datetime import timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -11,6 +12,8 @@ from django.core.exceptions import ImproperlyConfigured
 from sentry_sdk.integrations.celery import CeleryIntegration
 from sentry_sdk.integrations.django import DjangoIntegration
 from sentry_sdk.integrations.redis import RedisIntegration
+
+from .settings_unfold import UNFOLD  # noqa: F401
 
 
 class ZoneInfoEncoder(json.JSONEncoder):
@@ -51,11 +54,23 @@ env = environ.Env(
     STRIPE_SECRET_KEY=(str, ""),
 )
 
-# Carga el archivo .env.local prioritariamente en dev, o .env si existe
-if (BASE_DIR / ".env.local").exists():
-    environ.Env.read_env(BASE_DIR / ".env.local")
+# Carga de variables de entorno con prioridad:
+#   1. .env.local  → desarrollo local (secretos reales, sobreescribe todo)
+#   2. .env        → fallback (Docker Compose + valores placeholder para Django)
+_env_local = BASE_DIR / ".env.local"
+_env_base = BASE_DIR / ".env"
+
+if _env_local.exists():
+    environ.Env.read_env(_env_local)
+    logger.info("🔑 Entorno cargado desde: .env.local")
+elif _env_base.exists():
+    environ.Env.read_env(_env_base)
+    logger.info("🔑 Entorno cargado desde: .env (fallback base)")
 else:
-    environ.Env.read_env(BASE_DIR / ".env")
+    logger.warning(
+        "⚠️ No se encontró ningún archivo .env ni .env.local. "
+        "Las variables de entorno deben estar inyectadas por el sistema (Docker, CI/CD)."
+    )
 
 DEBUG = env("DEBUG")
 USE_R2 = env("USE_R2")
@@ -78,17 +93,19 @@ ALLOWED_HOSTS = env("ALLOWED_HOSTS")
 
 # Configuracion de Sentry
 SENTRY_DSN = env("SENTRY_DSN")
+SENTRY_ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
+SENTRY_RELEASE = os.getenv("GIT_SHA", "unknown")
 if SENTRY_DSN.startswith("http"):
     sentry_sdk.init(
         dsn=SENTRY_DSN,
+        environment=SENTRY_ENVIRONMENT,
+        release=SENTRY_RELEASE,
         integrations=[
             DjangoIntegration(),
             CeleryIntegration(),
             RedisIntegration(),
         ],
-        # Set traces_sample_rate to 1.0 to capture 100%
-        # of transactions for performance monitoring.
-        traces_sample_rate=0.1,
+        traces_sample_rate=0.1 if not DEBUG else 0.5,
         profiles_sample_rate=0.01,
     )
 
@@ -183,7 +200,7 @@ WSGI_APPLICATION = "travelhub.wsgi.application"
 
 
 DATABASES = {"default": dj_database_url.parse(DATABASE_URL)}
-DATABASES["default"]["CONN_MAX_AGE"] = 0
+DATABASES["default"]["CONN_MAX_AGE"] = 600
 DATABASES["default"]["CONN_HEALTH_CHECKS"] = True
 DATABASES["default"]["DISABLE_SERVER_SIDE_CURSORS"] = True
 
@@ -267,8 +284,8 @@ FIXTURE_DIRS = [
 # Gemini API Key (ya definida arriba como GEMINI_API_KEY)
 
 # Marketing - Unsplash API
-UNSPLASH_ACCESS_KEY = os.getenv("UNSPLASH_ACCESS_KEY")
-UNSPLASH_SECRET_KEY = os.getenv("UNSPLASH_SECRET_KEY")
+UNSPLASH_ACCESS_KEY = env("UNSPLASH_ACCESS_KEY", default="")
+UNSPLASH_SECRET_KEY = env("UNSPLASH_SECRET_KEY", default="")
 
 # --- STRIPE BILLING & SAAS ---
 STRIPE_PUBLISHABLE_KEY = os.getenv("STRIPE_PUBLISHABLE_KEY", "")
@@ -487,20 +504,22 @@ WHATSAPP_NOTIFICATIONS_ENABLED = (
 )
 
 # 🔐 Binance Pay API (creación de órdenes y webhooks)
-BINANCE_PAY_API_KEY = os.getenv("BINANCE_PAY_API_KEY")
-BINANCE_PAY_SECRET_KEY = os.getenv("BINANCE_PAY_SECRET_KEY")
+# Opcional: si no se configura, los pagos con Binance simplemente no estarán disponibles.
+BINANCE_PAY_API_KEY = env("BINANCE_PAY_API_KEY", default="")
+BINANCE_PAY_SECRET_KEY = env("BINANCE_PAY_SECRET_KEY", default="")
+BINANCE_WEBHOOK_SECRET = env("BINANCE_WEBHOOK_SECRET", default="")
 if not DEBUG and not BINANCE_PAY_API_KEY:
-    raise ImproperlyConfigured("BINANCE_PAY_API_KEY debe configurarse en producción")
-BINANCE_WEBHOOK_SECRET = os.getenv("BINANCE_WEBHOOK_SECRET", "")
+    logger.warning(
+        "⚠️ BINANCE_PAY_API_KEY no configurado — los pagos vía Binance estarán deshabilitados."
+    )
 
 # PDF Generation (Gotenberg)
-GOTENBERG_URL = os.getenv("GOTENBERG_URL", "")
+GOTENBERG_URL = env("GOTENBERG_URL", default="")
 
-# GCP - Document AI
-GCP_JSON_CREDENTIALS = os.getenv("GCP_JSON_CREDENTIALS")
-
-GCP_PROJECT_ID = os.getenv("GCP_PROJECT_ID")
-GCP_LOCATION = os.getenv("GCP_LOCATION")
+# GCP - Document AI (opcional: solo necesario si se usa el parser de Document AI)
+GCP_JSON_CREDENTIALS = env("GCP_JSON_CREDENTIALS", default="")
+GCP_PROJECT_ID = env("GCP_PROJECT_ID", default="")
+GCP_LOCATION = env("GCP_LOCATION", default="")
 
 # --- REDIS CONFIGURATION ---
 # Centralized Redis configuration with password support
@@ -518,8 +537,6 @@ def _build_redis_url(db_num=0):
 
 # Celery Configuration
 CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", _build_redis_url(0))
-CELERY_BEAT_SCHEDULE = {}
-
 CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", _build_redis_url(0))
 CELERY_ACCEPT_CONTENT = ["application/json"]
 CELERY_TASK_SERIALIZER = "json"
@@ -538,8 +555,14 @@ CELERY_TASK_ROUTES = {
     "apps.automation.tasks.send_ticket_notification": {"queue": "notifications"},
 }
 
-
 # --- CELERY BEAT SCHEDULE ---
+# Importado desde celery_beat_schedule.py para mantener el archivo de settings limpio.
+# Contiene las tareas cron: sync BCV, recordatorios de vuelo, pasaportes, limpieza, etc.
+try:
+    from .celery_beat_schedule import CELERY_BEAT_SCHEDULE  # noqa: F401
+except ImportError:
+    logger.warning("⚠️ celery_beat_schedule.py no encontrado — las tareas cron no se ejecutarán.")
+    CELERY_BEAT_SCHEDULE = {}
 
 # --- CACHE CONFIGURATION ---
 # ☁️ Redis Cache: Compartido con Celery para entornos distribuídos (Gunicorn workers)
@@ -589,7 +612,7 @@ CORS_ALLOWED_ORIGINS = [
     origin.strip()
     for origin in os.getenv(
         "CORS_ALLOWED_ORIGINS",
-        "http://localhost:3000,http://localhost:3001,http://127.0.0.1:3000,https://travelhub-fe.vercel.app",
+        "http://localhost:3000,http://localhost:3001,http://127.0.0.1:3000",
     ).split(",")
 ]
 CORS_ALLOW_CREDENTIALS = True
@@ -637,8 +660,18 @@ SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
 MAGIC_LINK_BASE_URL = os.getenv("MAGIC_LINK_BASE_URL", "")  # Auto-detect from request if empty
 FRONTEND_URL = os.getenv("FRONTEND_URL", MAGIC_LINK_BASE_URL or "http://localhost:8000")
 
-# --- JWT Config (si se usa) ---
-# ... (opcional)
+# --- JWT Config ---
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
+    "UPDATE_LAST_LOGIN": True,
+    "ALGORITHM": "HS256",
+    "SIGNING_KEY": SECRET_KEY,
+    "AUTH_HEADER_TYPES": ("Bearer",),
+    "AUTH_HEADER_NAME": "HTTP_AUTHORIZATION",
+}
 
 # -----------------------------------------------------
 # 🐒 MONKEY PATCHES & CONFIGURACIONES FINALES
@@ -648,9 +681,6 @@ FRONTEND_URL = os.getenv("FRONTEND_URL", MAGIC_LINK_BASE_URL or "http://localhos
 # ...
 
 # 🏎️ FIN DE CONFIGURACIÓN
-
-# --- UNFOLD CONFIGURATION (extraído a settings_unfold.py) ---
-from .settings_unfold import UNFOLD  # noqa: F401
 
 # Cargar configuracion de logging estructurado
 try:
@@ -693,6 +723,9 @@ CSRF_COOKIE_SECURE = env.bool("CSRF_COOKIE_SECURE", not DEBUG)
 SESSION_COOKIE_HTTPONLY = True  # JS no puede leer la cookie de sesión
 CSRF_COOKIE_HTTPONLY = False  # HTMX/JS necesita leer el CSRF token
 SESSION_COOKIE_AGE = 14400  # 4 horas
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+SESSION_COOKIE_SAMESITE = "Lax"
+CSRF_COOKIE_SAMESITE = "Lax"
 CSRF_COOKIE_NAME = "th_csrftoken"
 SESSION_COOKIE_NAME = "th_sessionid"
 

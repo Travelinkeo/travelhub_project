@@ -37,7 +37,7 @@ class Command(BaseCommand):
         self.stdout.write(self.style.HTTP_INFO("=" * 60))
         self.stdout.write(self.style.HTTP_INFO("  SINCRONIZACIÓN DE TASAS DE CAMBIO - VENEZUELA"))
         self.stdout.write(self.style.HTTP_INFO("=" * 60))
-        self.stdout.write(f'Fecha/Hora: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}')
+        self.stdout.write(f"Fecha/Hora: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         self.stdout.write("")
 
         # Obtener todas las tasas

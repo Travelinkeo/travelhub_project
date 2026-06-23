@@ -1,3 +1,4 @@
+import logging
 import os
 import re
 from pathlib import Path
@@ -12,6 +13,8 @@ try:
     import markdown
 except ImportError:
     markdown = None
+
+logger = logging.getLogger(__name__)
 
 try:
     import bleach
@@ -167,7 +170,7 @@ def wiki_search(request):
         wiki_root = Path(settings.BASE_DIR) / "docs" / "wiki" / "GDS"
         if wiki_root.exists():
             # Buscamos en todos los archivos .md recursivamente
-            for root, dirs, files in os.walk(wiki_root):
+            for root, _dirs, files in os.walk(wiki_root):
                 for file in files:
                     if file.endswith(".md"):
                         file_path = Path(root) / file

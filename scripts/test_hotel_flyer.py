@@ -1,17 +1,18 @@
 import os
 import sys
+
 import django
-from io import BytesIO
 
 # Añadir el directorio raíz al path para poder importar apps y core
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Configurar Django
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "travelhub.settings")
 django.setup()
 
-from apps.marketing.services.flyer_service import FlyerService
 from apps.bookings.models import HotelTarifario
+from apps.marketing.services.flyer_service import FlyerService
+
 
 def test_hotel_flyer_generation():
     # Buscar un hotel cualquiera
@@ -21,17 +22,18 @@ def test_hotel_flyer_generation():
         return
 
     print(f"Probando generación para el hotel: {hotel.nombre} ({hotel.destino})")
-    
+
     service = FlyerService()
     # Forzar una prueba
     buffer = service.generate_flyer(hotel_id=hotel.id, price="$120")
-    
+
     # Guardar localmente para inspección manual
     output_path = "test_hotel_flyer.jpg"
     with open(output_path, "wb") as f:
         f.write(buffer.getvalue())
-    
+
     print(f"Flyer generado exitosamente en: {os.path.abspath(output_path)}")
+
 
 if __name__ == "__main__":
     test_hotel_flyer_generation()

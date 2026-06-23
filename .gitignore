@@ -10,8 +10,10 @@ media/
 static/collected/
 staticfiles/
 
-# Env
+# Env — NUNCA commitear archivos con secretos reales
 .env
+.env.local
+.env.*.local
 venv/
 ENV/
 env/
@@ -28,6 +30,13 @@ wpp_sessions/
 .vscode/
 .DS_Store
 Thumbs.db
+
+# Debug / Temp files generados por scripts internos
+_domain_errors.txt
+logs/*.txt
+logs/*.log
+debug_*.py
+temp_*.py
 .idea/
 
 # Custom
@@ -45,6 +54,8 @@ secrets.json
 # Development & Debugging (scripts temporales en raíz)
 scripts/*
 !scripts/check_domain_imports.py
+!scripts/diagnostics/
+!scripts/diagnostics/**
 scratch/
 /check_*.py
 /debug_*.py
@@ -125,6 +136,10 @@ fake_migrate.ps1
 emergency_fix.sh
 fix_completo_produccion.sh
 fix_produccion_*.sh
+
+# Temporal / review folder (scripts temporales, backups, datos de prueba)
+_para_revisar/
+
 boletos_importados/
 boletos_generados/
 /boletos_importados/

@@ -8,3 +8,15 @@ from apps.marketing.views.generation_views import (
 )
 from apps.marketing.views.marketing_views import GenerateAIImageView, MarketingHubView
 from apps.marketing.views.social_views import SocialHubView
+
+__all__ = [
+    "MarketingDashboardView",
+    "AIForecastView",
+    "GenerarCopyView",
+    "GenerarFlyerView",
+    "GenerarSocialMediaAdvancedView",
+    "MarketingFeedView",
+    "GenerateAIImageView",
+    "MarketingHubView",
+    "SocialHubView",
+]

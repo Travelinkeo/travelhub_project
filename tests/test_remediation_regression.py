@@ -1,6 +1,5 @@
 from unittest.mock import Mock
 
-import pytest
 from django.core.cache import cache
 from django.http import HttpResponse
 from django.test import RequestFactory, override_settings
@@ -35,6 +34,7 @@ class TestRateLimitAtomic:
         cache.incr("test_timeout_key")
         cache.incr("test_timeout_key")
         import time as _time
+
         _time.sleep(1.1)
         try:
             cache.incr("test_timeout_key")
@@ -99,7 +99,7 @@ class TestSecurityRegression:
     def test_rate_limit_csp_report_ip(self):
         cache.delete("csp_report_rate_ip_test")
         cache.set("csp_report_rate_ip_test", 0, timeout=60)
-        for i in range(6):
+        for _i in range(6):
             try:
                 val = cache.incr("csp_report_rate_ip_test")
             except ValueError:

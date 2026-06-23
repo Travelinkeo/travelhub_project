@@ -1,19 +1,21 @@
 import os
-import django
 import sys
 
+import django
+
 # Setup Django
-sys.path.append('C:\\Users\\ARMANDO\\travelhub_project')
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
+sys.path.append("C:\\Users\\ARMANDO\\travelhub_project")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "travelhub.settings")
 django.setup()
 
-from apps.bookings.services.revenue_auditor import RevenueAuditorService
 from apps.bookings.models import Venta
+from apps.bookings.services.revenue_auditor import RevenueAuditorService
+
 
 def test():
     auditor = RevenueAuditorService()
     # Usar .all_objects para bypass del TenantManager en debug
-    venta = Venta.all_objects.filter(localizador='WPYVSD').first()
+    venta = Venta.all_objects.filter(localizador="WPYVSD").first()
     if venta:
         print(f"Auditing Venta: {venta.localizador}")
         findings = auditor.audit_venta(venta)
@@ -26,6 +28,7 @@ def test():
             findings = auditor.audit_venta(v)
             for f in findings:
                 print(f"   ! [{f['type']}] {f['message']}")
+
 
 if __name__ == "__main__":
     test()

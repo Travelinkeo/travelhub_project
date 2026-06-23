@@ -4,6 +4,8 @@ from decimal import Decimal
 
 import pytest
 from django.contrib.auth import get_user_model
+from django.db.backends.signals import connection_created
+from django.dispatch import receiver
 from rest_framework.test import APIClient
 
 from apps.bookings.models import Venta
@@ -42,6 +44,7 @@ def pytest_configure(config):
     # Bypass PgBouncer for tests: connect directly to PostgreSQL.
     # PgBouncer no tiene `test_travelhub` en su [databases].
     import socket
+
     try:
         socket.gethostbyname("travelhub_db")
         settings.DATABASES["default"]["HOST"] = "travelhub_db"
@@ -51,7 +54,9 @@ def pytest_configure(config):
 
     # Monkeypatch BaseDatabaseOperations.execute_sql_flush globally to use CASCADE
     from django.db.backends.base.operations import BaseDatabaseOperations
+
     org_execute_sql_flush = BaseDatabaseOperations.execute_sql_flush
+
     def new_execute_sql_flush(self, sql_list):
         new_sql_list = []
         for sql in sql_list:
@@ -60,6 +65,7 @@ def pytest_configure(config):
                 sql = f"{sql_stripped} CASCADE;"
             new_sql_list.append(sql)
         return org_execute_sql_flush(self, new_sql_list)
+
     BaseDatabaseOperations.execute_sql_flush = new_execute_sql_flush
 
 
@@ -321,12 +327,9 @@ def moneda_ves(db):
     return moneda
 
 
-from django.db.backends.signals import connection_created
-from django.dispatch import receiver
-
 @receiver(connection_created)
 def enable_trigram_extension(sender, connection, **kwargs):
-    if connection.vendor == 'postgresql':
+    if connection.vendor == "postgresql":
         with connection.cursor() as cursor:
             try:
                 cursor.execute("CREATE EXTENSION IF NOT EXISTS pg_trgm;")

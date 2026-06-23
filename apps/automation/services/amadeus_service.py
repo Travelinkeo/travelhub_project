@@ -95,7 +95,8 @@ class AmadeusService:
                         "ruta": " - ".join(segmentos),
                     }
                 )
-            except Exception:
+            except Exception as e:
+                logger.debug("Ignored exception parsing Amadeus offer: %s", e)
                 continue
 
         return vuelos_encontrados

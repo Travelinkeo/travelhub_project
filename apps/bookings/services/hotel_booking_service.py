@@ -59,7 +59,14 @@ class HotelBookingService:
 
         # Obtener ProductoServicio para 'Hotel'
         producto_hotel, _ = ProductoServicio.objects.get_or_create(
-            nombre="Alojamiento / Hotel", defaults={"tipo": "SERVICIO", "activo": True}
+            nombre="Alojamiento / Hotel",
+            defaults={
+                "tipo_producto": "HTL",
+                "activo": True,
+                "codigo_interno": f"HOTEL_GENERICO_{agencia.pk}"
+                if agencia
+                else "HOTEL_GENERICO_GLOBAL",
+            },
         )
 
         with transaction.atomic():

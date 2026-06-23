@@ -1,14 +1,15 @@
-
 import os
 import sys
+
 import django
 
 # Setup Django
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "travelhub.settings")
 django.setup()
 
 from apps.common.utils.telegram_utils import send_telegram_alert_sync
+
 
 def test_group_alert():
     print("📢 Enviando saludo al GRUPO...")
@@ -21,6 +22,7 @@ def test_group_alert():
         "✅ Reportes automáticos"
     )
     print("✅ Mensaje enviado.")
+
 
 if __name__ == "__main__":
     test_group_alert()

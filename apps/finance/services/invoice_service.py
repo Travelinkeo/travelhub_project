@@ -34,7 +34,9 @@ class InvoiceService:
             raise ValueError(f"Venta {venta.id_venta} must have a client assigned.")
 
         # 1. Intermediation Invoice (Terceros)
-        boletos = BoletoImportado.objects.filter(venta_asociada=venta).select_related("proveedor_emisor")
+        boletos = BoletoImportado.objects.filter(venta_asociada=venta).select_related(
+            "proveedor_emisor"
+        )
         factura_tercero = None
 
         if boletos.exists():

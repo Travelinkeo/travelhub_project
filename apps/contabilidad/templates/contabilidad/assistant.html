@@ -154,7 +154,7 @@
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || this.getCookie('csrftoken')
+                            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || this.getCookie('th_csrftoken') || this.getCookie('csrftoken')
                         },
                         body: JSON.stringify({ message: question })
                     });
@@ -200,7 +200,7 @@
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
-                                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || this.getCookie('csrftoken')
+                                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || this.getCookie('th_csrftoken') || this.getCookie('csrftoken')
                             },
                             body: JSON.stringify({ clear: true })
                         });

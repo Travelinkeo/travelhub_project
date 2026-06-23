@@ -29,7 +29,7 @@ class BoletoImportadoService:
         if boleto_importado.archivo_boleto and not boleto_importado.datos_parseados:
             try:
                 # ATOMIC LOCK: Try to update status from PENDIENTE to EN_PROCESO.
-                updated_count = BoletoImportado.objects.filter(
+                updated_count = BoletoImportado.all_objects.filter(
                     pk=boleto_importado.pk, estado_parseo=BoletoImportado.EstadoParseo.PENDIENTE
                 ).update(estado_parseo=BoletoImportado.EstadoParseo.EN_PROCESO)
 
@@ -76,6 +76,7 @@ class BoletoImportadoService:
                     and boleto_importado.formato_detectado.startswith("EML")
                 ):
                     try:
+                        from apps.bookings.models import BoletoImportado
                         from core.api import ticket_invoicing_requested
 
                         ticket_invoicing_requested.send(

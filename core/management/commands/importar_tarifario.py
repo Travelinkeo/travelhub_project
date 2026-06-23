@@ -150,12 +150,12 @@ class Command(BaseCommand):
                         tarifas_creadas += 1
 
                     self.stdout.write(
-                        f'  [OK] {hotel.nombre} ({len(hotel_data["tarifas"])} tarifas)'
+                        f"  [OK] {hotel.nombre} ({len(hotel_data['tarifas'])} tarifas)"
                     )
 
             except Exception as e:
                 self.stdout.write(
-                    self.style.WARNING(f'  [ERROR] {hotel_data["nombre"]}: {str(e)[:100]}')
+                    self.style.WARNING(f"  [ERROR] {hotel_data['nombre']}: {str(e)[:100]}")
                 )
                 continue
 

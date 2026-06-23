@@ -318,6 +318,7 @@ class ContabilidadService:
 
             # Crear asiento de pago
             asiento = AsientoContable.objects.create(
+                agencia=pago.agencia,
                 fecha_contable=pago.fecha_pago,
                 descripcion_general=f"Pago {pago.referencia or pago.id_pago_venta} - Venta {venta.localizador}",
                 tipo_asiento=AsientoContable.TipoAsiento.DIARIO,

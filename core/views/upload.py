@@ -326,8 +326,8 @@ class BoletoPdfStatusView(View):
                 if boleto.archivo_pdf_generado:
                     try:
                         boleto.archivo_pdf_generado.delete(save=False)
-                    except Exception:
-                        pass
+                    except Exception as e:
+                        logger.debug("Ignored exception deleting old PDF: %s", e)
                     boleto.archivo_pdf_generado = None
                     boleto.save(update_fields=["archivo_pdf_generado"])
 
@@ -500,13 +500,13 @@ def eliminar_boleto(request, pk):
         try:
             if boleto.archivo_boleto:
                 boleto.archivo_boleto.delete(save=False)
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug("Ignored exception deleting boleto file: %s", e)
         try:
             if getattr(boleto, "archivo_pdf_generado", None):
                 boleto.archivo_pdf_generado.delete(save=False)
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug("Ignored exception deleting PDF file: %s", e)
         boleto.hard_delete()
         messages.success(request, "Boleto eliminado físicamente.")
     except ProtectedError:

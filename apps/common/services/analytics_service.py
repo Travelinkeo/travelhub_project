@@ -1,11 +1,15 @@
 import io
 import logging
+from typing import TYPE_CHECKING
 
 import pandas as pd
 from django.contrib.auth import get_user_model
 from django.db.models import Count, Q, Sum
 from django.db.models.functions import TruncMonth
 from django.utils import timezone
+
+if TYPE_CHECKING:
+    from apps.bookings.models import BoletoImportado, Venta
 
 
 def __getattr__(name):

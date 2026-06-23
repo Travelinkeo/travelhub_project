@@ -6,12 +6,10 @@ import stripe
 from django.conf import settings
 from django.shortcuts import redirect, render
 from django.urls import reverse
-from django.views.decorators.csrf import csrf_exempt
 
 logger = logging.getLogger(__name__)
 
 
-@csrf_exempt  # CSRF exempt: read-only view, verifies payment via Stripe API
 def billing_success(request):
     """Página de éxito después del pago — verifica con Stripe que el pago fue completado."""
     session_id = request.GET.get("session_id")
@@ -47,7 +45,6 @@ def billing_success(request):
     )
 
 
-@csrf_exempt  # CSRF exempt: read-only view, no side effects
 def billing_cancel(request):
     """Página de cancelación del pago."""
     return render(

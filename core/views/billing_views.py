@@ -6,6 +6,11 @@ import logging
 import os
 
 from django.conf import settings
+
+try:
+    import stripe
+except ImportError:
+    stripe = None
 from django.views.decorators.csrf import csrf_exempt
 from drf_spectacular.utils import extend_schema
 from rest_framework.decorators import api_view, permission_classes

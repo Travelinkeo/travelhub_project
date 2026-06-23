@@ -1,18 +1,19 @@
-
-import os
-import resend
-from weasyprint import HTML, CSS
-from dotenv import load_dotenv
 import base64
+import os
+
+import resend
+from dotenv import load_dotenv
+from weasyprint import HTML
 
 load_dotenv()
 
 # Configuración de Resend
 resend.api_key = os.getenv("RESEND_API_KEY")
 
+
 def generar_y_enviar():
     output_pdf = "c:/Users/ARMANDO/travelhub_project/Manual_TravelHub_2026.pdf"
-    
+
     # Contenido HTML con diseño Premium (Stripe Style)
     html_content = """
     <html>
@@ -74,7 +75,7 @@ def generar_y_enviar():
     </body>
     </html>
     """
-    
+
     print("Generando PDF...")
     HTML(string=html_content).write_pdf(output_pdf)
     print(f"PDF generado: {output_pdf}")
@@ -88,7 +89,7 @@ def generar_y_enviar():
     print("Enviando email vía Resend...")
     params = {
         "from": "TravelHub <notificaciones@travelhub.cc>",
-        "to": ["travelinkeo@gmail.com"], # Nueva dirección principal
+        "to": ["travelinkeo@gmail.com"],  # Nueva dirección principal
         "subject": "📄 Tu Manual Maestro de TravelHub (Edición 2026)",
         "html": "<p>Hola Armando,<br><br>Adjunto encontrarás el nuevo <strong>Manual Maestro de TravelHub 2026</strong> reestructurado y optimizado con las últimas funciones de IA.<br><br>¡Éxito con esas ventas!<br><br>TravelHub AI Agent</p>",
         "attachments": [
@@ -101,6 +102,7 @@ def generar_y_enviar():
 
     email = resend.Emails.send(params)
     print(f"Email enviado con éxito. ID: {email['id']}")
+
 
 if __name__ == "__main__":
     generar_y_enviar()

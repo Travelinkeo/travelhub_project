@@ -27,6 +27,8 @@ def test_no_dangerous_inline_event_handlers():
         content_clean = content
         content_clean = content_clean.replace('onerror="this.src=', "")
         content_clean = content_clean.replace("onerror='this.src=", "")
+        content_clean = content_clean.replace('onerror="this.onerror=null; this.src=', "")
+        content_clean = content_clean.replace("onerror='this.onerror=null; this.src=", "")
         content_clean = content_clean.replace('onerror="this.style.display=', "")
         content_clean = content_clean.replace("onerror='this.style.display=", "")
 

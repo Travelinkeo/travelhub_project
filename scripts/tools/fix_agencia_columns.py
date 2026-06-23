@@ -3,14 +3,11 @@
 Fix script: Agrega las columnas SaaS faltantes al modelo core_agencia en PostgreSQL.
 Ejecutar con: python fix_agencia_columns.py
 """
+
 import psycopg
 
 conn = psycopg.connect(
-    host="localhost",
-    port=5432,
-    dbname="TravelHub",
-    user="postgres",
-    password="Linkeo1331@@"
+    host="localhost", port=5432, dbname="TravelHub", user="postgres", password="Linkeo1331@@"
 )
 cur = conn.cursor()
 

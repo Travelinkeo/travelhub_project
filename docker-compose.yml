@@ -121,7 +121,7 @@ services:
     container_name: travelhub_web
     restart: unless-stopped
     command: >
-      sh -c "gunicorn travelhub.wsgi:application --bind 0.0.0.0:8000 --workers 4 --threads 2 --max-requests 1000 --timeout 120"
+      sh -c "gunicorn travelhub.wsgi:application --bind 0.0.0.0:8000 --workers 2 --max-requests 1000 --timeout 120"
     # SECURITY: Puerto de Gunicorn comentado - solo accesible via Traefik
     # Para acceso local durante desarrollo, descomentar temporalmente:
     ports:
@@ -145,11 +145,11 @@ services:
       redis:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/health/')\""]
-      interval: 30s
-      timeout: 10s
+      test: ["CMD-SHELL", "/bin/bash -c \"exec 3<>/dev/tcp/localhost/8000 && echo -e 'GET /health/ HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3 && cat <&3 | grep -q 'healthy'\""]
+      interval: 15s
+      timeout: 5s
       retries: 3
-      start_period: 40s
+      start_period: 180s
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.travelhub.rule=Host(`${MAIN_DOMAIN}`) || HostRegexp(`{subdomain:[a-z0-9-]+}.${MAIN_DOMAIN}`)"
@@ -251,11 +251,11 @@ services:
       redis:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "celery -A travelhub inspect ping --timeout 10 || exit 1"]
+      test: ["CMD-SHELL", "celery -A travelhub inspect ping --timeout 30 || exit 1"]
       interval: 60s
-      timeout: 30s
-      retries: 3
-      start_period: 30s
+      timeout: 90s
+      retries: 5
+      start_period: 180s
     networks:
       - travelhub_private
     deploy:
@@ -286,11 +286,11 @@ services:
       redis:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "celery -A travelhub inspect ping --timeout 10 || exit 1"]
+      test: ["CMD-SHELL", "celery -A travelhub inspect ping --timeout 30 || exit 1"]
       interval: 60s
-      timeout: 30s
-      retries: 3
-      start_period: 30s
+      timeout: 90s
+      retries: 5
+      start_period: 180s
     networks:
       - travelhub_private
     deploy:
@@ -336,6 +336,71 @@ services:
           memory: 512M
           cpus: '0.5'
 
+  # ---------------------------------------------------------------------------
+  # 9. WHATSAPP MICROSERVICE (Evolution API v2)
+  # ---------------------------------------------------------------------------
+  evolution:
+    image: atendai/evolution-api:latest
+    container_name: travelhub_evolution
+    restart: unless-stopped
+    volumes:
+      - evolution_data:/evolution/instances
+    environment:
+      - SERVER_TYPE=http
+      - SERVER_PORT=8080
+      - SERVER_URL=http://localhost:8080
+      - AUTHENTICATION_TYPE=apikey
+      - AUTHENTICATION_API_KEY=${WHATSAPP_MICROSERVICE_TOKEN}
+      - LANGUAGE=es
+      - DATABASE_ENABLED=true
+      - DATABASE_PROVIDER=postgresql
+      - DATABASE_CONNECTION_URI=postgresql://evolution:evolution@evolution_db:5432/evolution_v2?schema=public
+      - DATABASE_CONNECTION_CLIENT_NAME=travelhub
+      - DATABASE_SAVE_DATA_INSTANCE=true
+      - DATABASE_SAVE_DATA_NEW_MESSAGE=true
+      - DATABASE_SAVE_DATA_CONTACTS=true
+      - DATABASE_SAVE_DATA_CHATS=true
+      - CACHE_REDIS_ENABLED=true
+      - CACHE_REDIS_URI=redis://redis:6379/1
+      - CACHE_REDIS_PREFIX_KEY=travelhub_evolution
+      - LOG_LEVEL=INFO
+    depends_on:
+      redis:
+        condition: service_healthy
+      evolution_db:
+        condition: service_healthy
+    networks:
+      - travelhub_private
+      - travelhub_public
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1.0'
+
+  evolution_db:
+    image: postgres:15-alpine
+    container_name: travelhub_evolution_db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=evolution
+      - POSTGRES_PASSWORD=evolution
+      - POSTGRES_DB=evolution_v2
+    volumes:
+      - evolution_db_data:/var/lib/postgresql/data
+    networks:
+      - travelhub_private
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U evolution -d evolution_v2"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+
 # ---------------------------------------------------------------------------
 # AISLAMIENTO SEGURO DE REDES Y VOLÚMENES PERSISTENTES
 # ---------------------------------------------------------------------------
@@ -358,3 +423,9 @@ volumes:
   media_volume:
     external: true
     name: travelhub_media_volume
+  evolution_data:
+    external: true
+    name: travelhub_project_evolution_data
+  evolution_db_data:
+    external: true
+    name: travelhub_project_evolution_db_data

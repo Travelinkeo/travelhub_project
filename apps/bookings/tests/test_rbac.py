@@ -7,11 +7,10 @@ from django.urls import reverse
 from django.utils.module_loading import import_string
 
 from apps.bookings.models import Venta
+from core.models.agencia import Agencia, UsuarioAgencia
 
 Moneda = import_string("apps.finance.models.currencies.Moneda")
 Factura = import_string("apps.finance.models.Factura")
-
-from core.models.agencia import Agencia, UsuarioAgencia
 
 
 class RBACSecurityTest(TestCase):
@@ -32,16 +31,15 @@ class RBACSecurityTest(TestCase):
             nombre="Agencia RBAC", rif="J-33333333-3", activa=True
         )
         self.moneda, _ = Moneda.objects.get_or_create(
-            codigo_iso="USD",
-            defaults={"nombre": "Dólar", "simbolo": "$"}
+            codigo_iso="USD", defaults={"nombre": "Dólar", "simbolo": "$"}
         )
 
         # Crear Usuarios
-        self.user_vendedor_1 = User.objects.create_user(username="vendedor1", password="password1")
-        self.user_vendedor_2 = User.objects.create_user(username="vendedor2", password="password1")
-        self.user_gerente = User.objects.create_user(username="gerente", password="password1")
-        self.user_contador = User.objects.create_user(username="contador", password="password1")
-        self.user_consulta = User.objects.create_user(username="consulta", password="password1")
+        self.user_vendedor_1 = User.objects.create_user(username="vendedor1", password="password1")  # noqa: S106
+        self.user_vendedor_2 = User.objects.create_user(username="vendedor2", password="password1")  # noqa: S106
+        self.user_gerente = User.objects.create_user(username="gerente", password="password1")  # noqa: S106
+        self.user_contador = User.objects.create_user(username="contador", password="password1")  # noqa: S106
+        self.user_consulta = User.objects.create_user(username="consulta", password="password1")  # noqa: S106
 
         # Asociar Roles
         UsuarioAgencia.objects.create(

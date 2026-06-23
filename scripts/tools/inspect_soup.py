@@ -1,7 +1,8 @@
-from bs4 import BeautifulSoup
 import re
 
-with open("estelar_debug.html", "r", encoding="utf-8") as f:
+from bs4 import BeautifulSoup
+
+with open("estelar_debug.html", encoding="utf-8") as f:
     soup = BeautifulSoup(f, "html.parser")
 
 ticket_labels = soup.find_all(string=re.compile("Número de ticket", re.I))

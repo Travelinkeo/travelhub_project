@@ -2,6 +2,7 @@
 
 import logging
 
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import models
 from django.utils import timezone
@@ -324,7 +325,33 @@ class Agencia(models.Model):
             self.configuracion.subdominio_slug = slug
             self.configuracion.save(update_fields=["subdominio_slug"])
 
-        # 3. Mantenimiento de logos (Legacy logic adaptada)
+        # 3. Auto-provisioning de instancia WhatsApp/Evolution por agencia (multi-tenant)
+        try:
+            from django.db import transaction
+
+            slug = self.configuracion.subdominio_slug if self.configuracion else None
+
+            def _provision_whatsapp():
+                if not slug:
+                    return
+                from apps.common.tasks import fetch_evolution_qr_task
+                from apps.communications.services.evolution_api_service import EvolutionService
+
+                estado = EvolutionService.get_instance_state(slug)
+                if estado not in ("open", "connecting"):
+                    # Instancia no existe o está desconectada — crearla
+                    result = EvolutionService.create_instance(slug)
+                    if result:
+                        logger.info(
+                            f"✅ Instancia Evolution '{slug}' creada para agencia {self.nombre}"
+                        )
+                        fetch_evolution_qr_task.delay(slug)
+
+            transaction.on_commit(_provision_whatsapp)
+        except Exception as e:
+            logger.error(f"❌ Error al provisionar instancia WhatsApp para {self.nombre}: {e}")
+
+        # 4. Mantenimiento de logos (Legacy logic adaptada)
         try:
             from django.db import transaction
 
@@ -348,10 +375,10 @@ class UsuarioAgencia(models.Model):
     ]
 
     usuario = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="agencias", null=True, blank=True
+        User, on_delete=models.PROTECT, related_name="agencias", null=True, blank=True
     )
     agencia = models.ForeignKey(
-        Agencia, on_delete=models.CASCADE, related_name="usuarios", null=True, blank=True
+        Agencia, on_delete=models.PROTECT, related_name="usuarios", null=True, blank=True
     )
     rol = models.CharField(max_length=20, choices=ROLES, default="vendedor")
     activo = models.BooleanField(default=True, db_index=True)

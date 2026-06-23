@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         (
             "bookings",
@@ -90,9 +89,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="boletoimportado",
             name="direccion_aerolinea",
-            field=models.TextField(
-                blank=True, null=True, verbose_name="Dirección Aerolínea"
-            ),
+            field=models.TextField(blank=True, null=True, verbose_name="Dirección Aerolínea"),
         ),
         migrations.AlterField(
             model_name="boletoimportado",
@@ -107,9 +104,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="boletoimportado",
             name="impuestos_descripcion",
-            field=models.TextField(
-                blank=True, null=True, verbose_name="Descripción Impuestos"
-            ),
+            field=models.TextField(blank=True, null=True, verbose_name="Descripción Impuestos"),
         ),
         migrations.AlterField(
             model_name="boletoimportado",
@@ -121,9 +116,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="boletoimportado",
             name="log_parseo",
-            field=models.TextField(
-                blank=True, null=True, verbose_name="Log del Parseo"
-            ),
+            field=models.TextField(blank=True, null=True, verbose_name="Log del Parseo"),
         ),
         migrations.AlterField(
             model_name="boletoimportado",
@@ -199,9 +192,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="circuitodia",
             name="actividades_resumen",
-            field=models.TextField(
-                blank=True, null=True, verbose_name="Actividades/Resumen"
-            ),
+            field=models.TextField(blank=True, null=True, verbose_name="Actividades/Resumen"),
         ),
         migrations.AlterField(
             model_name="circuitodia",
@@ -228,9 +219,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="circuitoturistico",
             name="descripcion_general",
-            field=models.TextField(
-                blank=True, null=True, verbose_name="Descripción General"
-            ),
+            field=models.TextField(blank=True, null=True, verbose_name="Descripción General"),
         ),
         migrations.AlterField(
             model_name="circuitoturistico",
@@ -260,9 +249,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="eventoservicio",
             name="ubicacion",
-            field=models.CharField(
-                blank=True, max_length=255, null=True, verbose_name="Ubicación"
-            ),
+            field=models.CharField(blank=True, max_length=255, null=True, verbose_name="Ubicación"),
         ),
         migrations.AlterField(
             model_name="eventoservicio",
@@ -301,9 +288,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="itemventa",
             name="notas_item",
-            field=models.TextField(
-                blank=True, null=True, verbose_name="Notas del Item"
-            ),
+            field=models.TextField(blank=True, null=True, verbose_name="Notas del Item"),
         ),
         migrations.AlterField(
             model_name="pagoventa",
@@ -348,9 +333,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="productoterrestre",
             name="descripcion_publica",
-            field=models.TextField(
-                blank=True, null=True, verbose_name="Descripción (Pública)"
-            ),
+            field=models.TextField(blank=True, null=True, verbose_name="Descripción (Pública)"),
         ),
         migrations.AlterField(
             model_name="proveedor",
@@ -400,23 +383,17 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="proveedor",
             name="direccion",
-            field=models.CharField(
-                blank=True, max_length=255, null=True, verbose_name="Dirección"
-            ),
+            field=models.CharField(blank=True, max_length=255, null=True, verbose_name="Dirección"),
         ),
         migrations.AlterField(
             model_name="proveedor",
             name="iata",
-            field=models.CharField(
-                blank=True, max_length=10, null=True, verbose_name="IATA"
-            ),
+            field=models.CharField(blank=True, max_length=10, null=True, verbose_name="IATA"),
         ),
         migrations.AlterField(
             model_name="proveedor",
             name="notas",
-            field=models.TextField(
-                blank=True, null=True, verbose_name="Notas sobre el Proveedor"
-            ),
+            field=models.TextField(blank=True, null=True, verbose_name="Notas sobre el Proveedor"),
         ),
         migrations.AlterField(
             model_name="proveedor",
@@ -483,16 +460,12 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="proveedor",
             name="seudo_sabre",
-            field=models.CharField(
-                blank=True, max_length=4, null=True, verbose_name="Seudo SABRE"
-            ),
+            field=models.CharField(blank=True, max_length=4, null=True, verbose_name="Seudo SABRE"),
         ),
         migrations.AlterField(
             model_name="segmentovuelo",
             name="aerolinea",
-            field=models.CharField(
-                blank=True, max_length=80, null=True, verbose_name="Aerolínea"
-            ),
+            field=models.CharField(blank=True, max_length=80, null=True, verbose_name="Aerolínea"),
         ),
         migrations.AlterField(
             model_name="segmentovuelo",
@@ -508,9 +481,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="segmentovuelo",
             name="clase_reserva",
-            field=models.CharField(
-                blank=True, max_length=5, null=True, verbose_name="Clase"
-            ),
+            field=models.CharField(blank=True, max_length=5, null=True, verbose_name="Clase"),
         ),
         migrations.AlterField(
             model_name="segmentovuelo",
@@ -553,9 +524,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="trasladoservicio",
             name="destino",
-            field=models.CharField(
-                blank=True, max_length=150, null=True, verbose_name="Destino"
-            ),
+            field=models.CharField(blank=True, max_length=150, null=True, verbose_name="Destino"),
         ),
         migrations.AlterField(
             model_name="trasladoservicio",
@@ -565,9 +534,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="trasladoservicio",
             name="origen",
-            field=models.CharField(
-                blank=True, max_length=150, null=True, verbose_name="Origen"
-            ),
+            field=models.CharField(blank=True, max_length=150, null=True, verbose_name="Origen"),
         ),
         migrations.AlterField(
             model_name="venta",
@@ -579,16 +546,12 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="venta",
             name="notas",
-            field=models.TextField(
-                blank=True, null=True, verbose_name="Notas de la Venta"
-            ),
+            field=models.TextField(blank=True, null=True, verbose_name="Notas de la Venta"),
         ),
         migrations.AlterField(
             model_name="ventaauditfinding",
             name="nota_resolucion",
-            field=models.TextField(
-                blank=True, null=True, verbose_name="Nota de Resolución"
-            ),
+            field=models.TextField(blank=True, null=True, verbose_name="Nota de Resolución"),
         ),
         migrations.AlterField(
             model_name="ventaparsemetadata",
@@ -600,9 +563,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="ventaparsemetadata",
             name="currency",
-            field=models.CharField(
-                blank=True, max_length=10, null=True, verbose_name="Moneda"
-            ),
+            field=models.CharField(blank=True, max_length=10, null=True, verbose_name="Moneda"),
         ),
         migrations.AlterField(
             model_name="ventaparsemetadata",

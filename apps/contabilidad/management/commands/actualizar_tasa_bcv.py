@@ -62,7 +62,7 @@ class Command(BaseCommand):
             logger.info(f"Tasa BCV {'creada' if created else 'actualizada'}: {fecha_tasa} = {tasa}")
 
         except ValueError as e:
-            raise CommandError(f"Error en formato de datos: {e}")
+            raise CommandError(f"Error en formato de datos: {e}") from e
         except Exception as e:
             logger.error(f"Error actualizando tasa BCV: {e}")
-            raise CommandError(f"Error: {e}")
+            raise CommandError(f"Error: {e}") from e

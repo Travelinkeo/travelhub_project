@@ -21,12 +21,16 @@ class UserProfileView(LoginRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         user = self.request.user
 
-        # Obtener o crear agencia del usuario (asumiendo propietario o primer agencia asignada)
-        agencia = None
-        if hasattr(user, "agencias_propias") and user.agencias_propias.exists():
-            agencia = user.agencias_propias.first()
-        elif hasattr(user, "agencias") and user.agencias.exists():
-            agencia = user.agencias.first().agencia
+        # Obtener agencia activa de forma robusta (compatibilidad multi-tenant y superusuarios)
+        agencia = getattr(self.request, "agencia", None)
+        if not agencia:
+            ua = user.agencias.filter(activo=True).first()
+            agencia = ua.agencia if ua else None
+        if not agencia:
+            if hasattr(user, "agencias_propias") and user.agencias_propias.exists():
+                agencia = user.agencias_propias.first()
+            elif hasattr(user, "agencias") and user.agencias.exists():
+                agencia = user.agencias.first().agencia
 
         context["user_form"] = UserProfileForm(instance=user)
         context["password_form"] = PasswordChangeForm(user)
@@ -70,9 +74,13 @@ class UserProfileView(LoginRequiredMixin, TemplateView):
                 return redirect(f"{reverse_lazy('core:user_profile')}?tab=seguridad")
 
         # 3. Agency Updates (Requires Agency)
-        agencia = None
-        if hasattr(user, "agencias_propias") and user.agencias_propias.exists():
-            agencia = user.agencias_propias.first()
+        agencia = getattr(request, "agencia", None)
+        if not agencia:
+            ua = user.agencias.filter(activo=True).first()
+            agencia = ua.agencia if ua else None
+        if not agencia:
+            if hasattr(user, "agencias_propias") and user.agencias_propias.exists():
+                agencia = user.agencias_propias.first()
 
         if agencia:
             if form_type == "agency_info":

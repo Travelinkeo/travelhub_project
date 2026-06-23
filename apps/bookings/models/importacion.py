@@ -201,6 +201,7 @@ class BoletoImportado(AgenciaMixin, SoftDeleteModel, models.Model):
         max_length=255,
         blank=True,
         null=True,
+        default="",
         help_text=_("ID del archivo en la nube de Telegram (para almacenamiento gratuito)."),
     )
 
@@ -210,6 +211,7 @@ class BoletoImportado(AgenciaMixin, SoftDeleteModel, models.Model):
         blank=True,
         null=True,
         db_index=True,
+        default="",
         help_text=_("Hash SHA-256 para evitar duplicados."),
     )
 

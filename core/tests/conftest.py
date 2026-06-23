@@ -89,7 +89,9 @@ def user_propietario(db):
     """Crea un usuario propietario para la agencia"""
     User = get_user_model()
     return User.objects.create_user(
-        username="propietario", email="propietario@test.com", password="testpass123"
+        username="propietario",
+        email="propietario@test.com",
+        password="testpass123",  # noqa: S106
     )
 
 
@@ -226,7 +228,9 @@ def user_admin(db):
     """Crea un usuario administrador"""
     User = get_user_model()
     return User.objects.create_superuser(
-        username="admin", email="admin@test.com", password="testpass123"
+        username="admin",
+        email="admin@test.com",
+        password="testpass123",  # noqa: S106
     )
 
 
@@ -235,5 +239,7 @@ def user_agente(db):
     """Crea un usuario agente"""
     User = get_user_model()
     return User.objects.create_user(
-        username="agente", email="agente@test.com", password="testpass123"
+        username="agente",
+        email="agente@test.com",
+        password="testpass123",  # noqa: S106
     )

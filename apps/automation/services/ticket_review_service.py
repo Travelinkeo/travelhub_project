@@ -129,7 +129,7 @@ class TicketReviewService:
             boleto.total_boleto = Decimal(fd.total.replace(",", ""))
         except (InvalidOperation, AttributeError) as e:
             logger.warning(
-                f"Error parseando montos del boleto {boleto.pk} " f"(ticket={fd.ticket_no}): {e}"
+                f"Error parseando montos del boleto {boleto.pk} (ticket={fd.ticket_no}): {e}"
             )
 
     def _sync_parsed_data(self, boleto: BoletoImportado, fd: StudioFormData) -> None:

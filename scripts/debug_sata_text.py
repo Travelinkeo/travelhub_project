@@ -1,5 +1,4 @@
 import pdfplumber
-import sys
 
 file_path = r"C:\Users\ARMANDO\Downloads\Boletos\SABRE\Recibo de pasaje electrónico, 19 marzo para ROSANGELA DIAZ SILVA.pdf"
 

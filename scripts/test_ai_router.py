@@ -1,18 +1,19 @@
 import os
 import sys
+
 import django
-from decimal import Decimal
 
 # Setup Django Environment
-sys.path.append('c:/Users/ARMANDO/travelhub_project')
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
+sys.path.append("c:/Users/ARMANDO/travelhub_project")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "travelhub.settings")
 django.setup()
 
-from apps.automation.services.ai_router import GeminiRouter, EmailType
+from apps.automation.services.ai_router import EmailType, GeminiRouter
+
 
 def test_ai_router():
     print("--- 🧪 Testing AI Router ---")
-    
+
     try:
         router = GeminiRouter()
         print("✅ Router Initialization: Success")
@@ -35,11 +36,11 @@ def test_ai_router():
     TOTAL     : USD 450.00
     PASSENGER : DOE/JOHN MR
     """
-    
+
     print("\n--- Test Case 1: Sabre Ticket ---")
     category = router.classify_email(sabre_text)
     print(f"Category: {category}")
-    
+
     if category in [EmailType.TICKET_ISSUANCE, EmailType.SCHEDULE_CHANGE]:
         print("Extracting Data...")
         ticket = router.extract_ticket_data(sabre_text)
@@ -49,7 +50,9 @@ def test_ai_router():
             print(f"Total: {ticket.total_amount} {ticket.currency}")
             print(f"Itinerary: {len(ticket.itinerary)} segments")
             for seg in ticket.itinerary:
-                print(f"  - {seg.airline_code}{seg.flight_number} {seg.origin}-{seg.destination} {seg.departure_date}")
+                print(
+                    f"  - {seg.airline_code}{seg.flight_number} {seg.origin}-{seg.destination} {seg.departure_date}"
+                )
         else:
             print("❌ Extraction Failed")
 
@@ -60,10 +63,11 @@ def test_ai_router():
     Fly to Cancun for only $299! Book now before it's too late.
     Contact us at sales@agency.com
     """
-    
+
     print("\n--- Test Case 2: Marketing Email ---")
     category = router.classify_email(marketing_text)
     print(f"Category: {category}")
+
 
 if __name__ == "__main__":
     test_ai_router()

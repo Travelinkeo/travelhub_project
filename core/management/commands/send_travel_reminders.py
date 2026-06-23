@@ -70,8 +70,8 @@ def _generate_reminder_email_content(venta: Venta, weather_forecast: dict) -> di
     - **Itinerario de Vuelo:**
     {itinerary_str}
     - **Pronóstico del Tiempo para el Destino ({primer_vuelo.destino.nombre}):**
-      - Temperatura: {weather_forecast.get('temp_celsius')}°C
-      - Condición: {weather_forecast.get('condition')}
+      - Temperatura: {weather_forecast.get("temp_celsius")}°C
+      - Condición: {weather_forecast.get("condition")}
 
     **Instrucciones para la Redacción:**
     1.  **Asunto:** Crea un asunto de email corto, emocionante y personalizado.

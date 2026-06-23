@@ -5,12 +5,9 @@ from django.test import TestCase, override_settings
 from django.utils.module_loading import import_string
 
 from apps.bookings.models import FeeVenta, ItemVenta, PagoVenta, ProductoServicio, Venta
+from core.models.agencia import Agencia
 
 Moneda = import_string("apps.finance.models.currencies.Moneda")
-
-
-# Modelos Reales
-from core.models.agencia import Agencia
 
 
 @override_settings(CELERY_TASK_ALWAYS_EAGER=True, CELERY_TASK_EAGER_PROPAGATES=True)
@@ -35,7 +32,9 @@ class SeguridadSaaSTest(TestCase):
         )
 
         # Crear Moneda para evitar errores de Foreign Key si es requerida
-        self.moneda, _ = Moneda.objects.get_or_create(codigo_iso="USD", defaults={"nombre": "Dólar", "simbolo": "$"})
+        self.moneda, _ = Moneda.objects.get_or_create(
+            codigo_iso="USD", defaults={"nombre": "Dólar", "simbolo": "$"}
+        )
 
         # Crear Venta para Agencia Alpha
         # Forzamos el contexto de Agencia Alpha para la creación inicial
@@ -88,7 +87,9 @@ class CalculoFinancieroTest(TestCase):
         self.agencia = Agencia.objects.create(
             nombre="Agencia Finanzas", rif="J-99999999-9", activa=True
         )
-        self.moneda, _ = Moneda.objects.get_or_create(codigo_iso="USD", defaults={"nombre": "Dólar", "simbolo": "$"})
+        self.moneda, _ = Moneda.objects.get_or_create(
+            codigo_iso="USD", defaults={"nombre": "Dólar", "simbolo": "$"}
+        )
         self.producto = ProductoServicio.objects.create(
             nombre="Vuelo Nacional", tipo_producto="AIR"
         )
@@ -184,7 +185,9 @@ class BIContableTest(TestCase):
         self.addCleanup(patcher.stop)
 
         self.agencia = Agencia.objects.create(nombre="Agencia BI", rif="J-88888888-8", activa=True)
-        self.moneda, _ = Moneda.objects.get_or_create(codigo_iso="USD", defaults={"nombre": "Dólar", "simbolo": "$"})
+        self.moneda, _ = Moneda.objects.get_or_create(
+            codigo_iso="USD", defaults={"nombre": "Dólar", "simbolo": "$"}
+        )
 
     def test_calculos_margen_e_igtf(self):
         with patch("core.models.base.get_current_agency", return_value=self.agencia):

@@ -60,7 +60,7 @@ Esto usará la configuración estricta definida en `mypy.ini` y el plugin `djang
 
 | Capa | Tecnología |
 |------|-----------|
-| **Backend** | Django 5.2.6, Python 3.13, Django REST Framework |
+| **Backend** | Django 5.2.14, Python 3.13, Django REST Framework |
 | **Frontend** | TailwindCSS, HTMX, Alpine.js (SSR) |
 | **Base de Datos** | PostgreSQL 16 + Redis 7 |
 | **IA** | Google Gemini (genai SDK v1.x) |

@@ -3,7 +3,8 @@ import logging
 
 from django.dispatch import receiver
 
-from core.api import sale_recalculation_requested
+from apps.finance.services.factura_contabilidad import generar_asiento_pago
+from core.api import are_signals_blocked, sale_payment_recorded, sale_recalculation_requested
 
 from .services.finance_service import FinanceService
 
@@ -17,7 +18,7 @@ def handle_sale_recalculation(sender, **kwargs):
     de recálculo financiero correspondiente.
     """
     venta_id = kwargs.get("venta_id")
-    agencia_id = kwargs.get("agencia_id")  # Recibimos el agencia_id para futuro uso y consistencia.
+    kwargs.get("agencia_id")  # Recibimos el agencia_id para futuro uso y consistencia.
 
     if not venta_id:
         logger.warning("Receiver 'handle_sale_recalculation' recibió una señal sin 'venta_id'.")
@@ -36,10 +37,6 @@ def handle_sale_recalculation(sender, **kwargs):
             f"Error en el receiver 'handle_sale_recalculation' para Venta {venta_id}: {e}",
             exc_info=True,
         )
-
-
-from apps.finance.services.factura_contabilidad import generar_asiento_pago
-from core.api import are_signals_blocked, sale_payment_recorded
 
 
 @receiver(sale_payment_recorded)

@@ -105,8 +105,9 @@ class AsientoContable(AgenciaMixin, models.Model):
             # =========================================================================================
             # Generar correlativo de forma atómica y serializada
             prefix = f"AS-{self.fecha_contable.strftime('%Y%m%d')}"
-            from django.db import transaction, connection
             import hashlib
+
+            from django.db import connection, transaction
 
             with transaction.atomic():
                 # 1. Adquirir bloqueo asesor exclusivo para el prefijo de asientos de este día
@@ -116,9 +117,7 @@ class AsientoContable(AgenciaMixin, models.Model):
                     cursor.fetchone()
 
                 # 2. Obtener el conteo real y asignar el correlativo
-                count = self.__class__.objects.filter(
-                    fecha_contable=self.fecha_contable
-                ).count()
+                count = self.__class__.objects.filter(fecha_contable=self.fecha_contable).count()
                 self.numero_asiento = f"{prefix}-{count + 1:04d}"
         super().save(*args, **kwargs)
 

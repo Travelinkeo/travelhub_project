@@ -126,7 +126,10 @@ class DataNormalizationService:
                         last_names = parts[0].strip()
                         first_names_raw = parts[1].strip()
                         first_names = re.sub(
-                            r"\s+(MR|MRS|MS|MSTR|MISS|M|F)$", "", first_names_raw, flags=re.IGNORECASE
+                            r"\s+(MR|MRS|MS|MSTR|MISS|M|F)$",
+                            "",
+                            first_names_raw,
+                            flags=re.IGNORECASE,
                         )
                         normalized["first_name"] = first_names
                         normalized["last_name"] = last_names

@@ -7,6 +7,7 @@ import requests
 
 BASE_URL = "http://127.0.0.1:8000/api"
 
+
 def test_endpoint(endpoint, description):
     try:
         response = requests.get(f"{BASE_URL}{endpoint}")
@@ -14,8 +15,8 @@ def test_endpoint(endpoint, description):
         print(f"{status} {description}: {response.status_code}")
         if response.status_code == 200:
             data = response.json()
-            if isinstance(data, dict) and 'results' in data:
-                count = len(data['results'])
+            if isinstance(data, dict) and "results" in data:
+                count = len(data["results"])
             elif isinstance(data, list):
                 count = len(data)
             else:
@@ -26,9 +27,10 @@ def test_endpoint(endpoint, description):
     except Exception as e:
         print(f"[ERROR] {description}: Error de conexión - {e}")
 
+
 def main():
     print("=== PRUEBA DE ENDPOINTS DEL FRONTEND ===\n")
-    
+
     endpoints = [
         ("/clientes/", "Clientes"),
         ("/clientes/?search=armando", "Búsqueda de clientes"),
@@ -42,14 +44,15 @@ def main():
         ("/proveedores/?search=", "Búsqueda de proveedores (vacía)"),
         ("/proveedores/?search=bt", "Búsqueda de proveedores"),
     ]
-    
+
     for endpoint, description in endpoints:
         test_endpoint(endpoint, description)
         print()
-    
+
     print("=== RESUMEN ===")
     print("Si todos los endpoints muestran [OK], el frontend debería funcionar correctamente.")
     print("Si hay [ERROR], revisa los errores mostrados arriba.")
+
 
 if __name__ == "__main__":
     main()

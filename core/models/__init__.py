@@ -11,9 +11,9 @@ REGLAS:
 3. `core/` es la BASE (utilidades compartidas), NO debe importar de `apps/`.
 """
 
+from .aeropuerto import Aeropuerto
 from .agencia import Agencia, AgenciaBranding, AgenciaConfiguracion, UsuarioAgencia
 from .ai import AIUsageLog
-from .aeropuerto import Aeropuerto
 from .audit import AuditLog
 from .cron_api_key import CronApiKey
 from .feature_flags import FeatureFlag

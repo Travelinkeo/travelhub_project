@@ -62,7 +62,7 @@ class FlashMarketingService:
         if os.path.exists(bg_dir):
             files = [f for f in os.listdir(bg_dir) if f.lower().endswith((".jpg", ".jpeg", ".png"))]
             if files:
-                return os.path.join(bg_dir, random.choice(files))
+                return os.path.join(bg_dir, random.choice(files))  # noqa: S311
 
         # Fallback: Buscar en assets root
         files = [
@@ -71,7 +71,7 @@ class FlashMarketingService:
             if f.lower().endswith((".jpg", ".jpeg", ".png")) and "logo" not in f.lower()
         ]
         if files:
-            return os.path.join(self.assets_dir, random.choice(files))
+            return os.path.join(self.assets_dir, random.choice(files))  # noqa: S311
 
         return None
 

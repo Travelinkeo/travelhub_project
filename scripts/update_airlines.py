@@ -1,7 +1,7 @@
-
 import os
-import django
 import sys
+
+import django
 
 # Setup Django environment
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -9,6 +9,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "travelhub.settings")
 django.setup()
 
 from apps.common.models import Aerolinea
+
 
 def run():
     # Data format: "NUMERIC-IATA-NAME"
@@ -34,34 +35,34 @@ def run():
 308-V0-CONVIASA
 364-WW-RUTAS AEREAS DE VENEZUELA
 """
-    
-    lines = [L.strip() for L in kiu_airlines_raw.split('\n') if L.strip()]
-    
+
+    lines = [L.strip() for L in kiu_airlines_raw.split("\n") if L.strip()]
+
     print(f"--- Updating Airline Catalog with {len(lines)} KIU Entries ---")
-    
+
     for line in lines:
         try:
-            parts = line.split('-')
+            parts = line.split("-")
             if len(parts) < 3:
                 print(f"⚠️ Formato inválido: {line}")
                 continue
-                
+
             code_num = parts[0].strip()
             code_iata = parts[1].strip()
             # Name might contain hyphens, join the rest
-            full_name = '-'.join(parts[2:]).strip()
-            
+            full_name = "-".join(parts[2:]).strip()
+
             # Clean name
             clean_name = full_name
             # Remove boring suffixes
             for suffix in [" C A", " CA", " S.A.", " SA", " C.A."]:
                 if clean_name.endswith(suffix):
-                    clean_name = clean_name[:-len(suffix)]
-            
+                    clean_name = clean_name[: -len(suffix)]
+
             clean_name = clean_name.strip()
 
             print(f"Processing: [{code_iata}] {clean_name} (Plate: {code_num})")
-            
+
             # Smart Update with Deduplication
             qs = Aerolinea.objects.filter(codigo_iata=code_iata)
             if qs.exists():
@@ -76,7 +77,7 @@ def run():
                     obj = first_obj
                 else:
                     obj = qs.first()
-                
+
                 # Update fields
                 obj.nombre = clean_name
                 obj.codigo_numerico = code_num
@@ -86,23 +87,21 @@ def run():
             else:
                 # Create new
                 obj = Aerolinea.objects.create(
-                    codigo_iata=code_iata,
-                    nombre=clean_name,
-                    codigo_numerico=code_num,
-                    activa=True
+                    codigo_iata=code_iata, nombre=clean_name, codigo_numerico=code_num, activa=True
                 )
                 created = True
-            
+
             action = "Created" if created else "Updated"
             print(f"   ✅ {action}: {obj}")
-            
+
         except Exception as e:
             print(f"   ❌ Error processing {line}: {e}")
 
     # Also make sure major airlines are present (from previous knowledge context)
     # Just in case they are missing
-    
+
     print("\n--- Done ---")
+
 
 if __name__ == "__main__":
     run()

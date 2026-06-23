@@ -6,6 +6,9 @@ from django.shortcuts import render
 from django.views.generic import TemplateView, View
 
 from apps.marketing.models import ActivoMarketing, Campania
+from apps.marketing.services.copywriter_service import CopywriterService
+from apps.marketing.services.flyer_service import FlyerService
+from apps.marketing.services.forecast_service import AIForecastService
 
 
 def _get_hotel_tarifario():
@@ -13,10 +16,6 @@ def _get_hotel_tarifario():
 
     return apps.get_model("bookings", "HotelTarifario")
 
-
-from apps.marketing.services.copywriter_service import CopywriterService
-from apps.marketing.services.flyer_service import FlyerService
-from apps.marketing.services.forecast_service import AIForecastService
 
 logger = logging.getLogger(__name__)
 

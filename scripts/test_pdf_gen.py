@@ -1,14 +1,13 @@
-
-import sys
 import os
-import json
+import sys
 
 # Add project root to path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 # Set up Django environment
 import django
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "travelhub.settings")
 django.setup()
 
 from apps.automation.parsers.sabre_parser import SabreParser
@@ -16,7 +15,7 @@ from apps.automation.parsers.ticket_parser import generate_ticket
 
 # Use the extracted text
 text_file = "alexander_text_utf8.txt"
-with open(text_file, "r", encoding="utf-8") as f:
+with open(text_file, encoding="utf-8") as f:
     text_content = f.read()
 
 parser = SabreParser()
@@ -35,4 +34,5 @@ try:
 except Exception as e:
     print(f"ERROR: {e}")
     import traceback
+
     traceback.print_exc()

@@ -1,23 +1,29 @@
-
 #!/usr/bin/env python3
 """Genera y envía los 3 documentos estratégicos de TravelHub como un PDF unificado."""
-import os, smtplib, markdown
+
+import os
+import smtplib
+from email import encoders
+from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from email.mime.base import MIMEBase
-from email import encoders
 
-BASE  = r"C:\Users\ARMANDO\.gemini\antigravity\brain\5e11f3b7-df37-4e76-b5cc-2a2e63d18f1d"
-DOCS  = [
-    (f"{BASE}\\Analisis_Estrategico_TravelHub.md",   "Análisis Estratégico"),
+import markdown
+
+BASE = r"C:\Users\ARMANDO\.gemini\antigravity\brain\5e11f3b7-df37-4e76-b5cc-2a2e63d18f1d"
+DOCS = [
+    (f"{BASE}\\Analisis_Estrategico_TravelHub.md", "Análisis Estratégico"),
     (f"{BASE}\\Plan_Complementario_v2_TravelHub.md", "Plan Complementario v2"),
-    (f"{BASE}\\PMV_Sprint_Guerra_TravelHub.md",       "PMV + Sprint de Guerra"),
+    (f"{BASE}\\PMV_Sprint_Guerra_TravelHub.md", "PMV + Sprint de Guerra"),
 ]
 PDF_OUT = f"{BASE}\\TravelHub_Plan_Completo_2026.pdf"
 
-EMAIL_HOST = "smtp.gmail.com"; EMAIL_PORT = 587
-EMAIL_USER = "boletotravelinkeo@gmail.com"; EMAIL_PASS = "zqar oyma zdxk ylaj"
-EMAIL_TO   = "travelinkeo@gmail.com"; EMAIL_CC = "boletotravelinkeo@gmail.com"
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_USER = "boletotravelinkeo@gmail.com"
+EMAIL_PASS = "zqar oyma zdxk ylaj"
+EMAIL_TO = "travelinkeo@gmail.com"
+EMAIL_CC = "boletotravelinkeo@gmail.com"
 
 HTML_WRAP = """<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">
 <style>
@@ -63,29 +69,36 @@ strong{{color:#1a1a2e;font-weight:700}}
 {body}
 </body></html>"""
 
+
 def convertir_md(path, titulo, num):
-    with open(path, "r", encoding="utf-8") as f:
+    with open(path, encoding="utf-8") as f:
         txt = f.read()
-    cuerpo = markdown.markdown(txt, extensions=["tables","fenced_code","toc"])
+    cuerpo = markdown.markdown(txt, extensions=["tables", "fenced_code", "toc"])
     sep = f'<div class="sep"><h2>Volumen {num} — {titulo}</h2><p>Documento {num} de 3 del Plan Estratégico Integral TravelHub 2026</p></div>'
     return f'{sep}<div class="content">{cuerpo}</div>'
 
+
 def generar_pdf():
     print("📄 Construyendo PDF unificado...")
-    partes = [convertir_md(p, t, i+1) for i,(p,t) in enumerate(DOCS)]
-    html   = HTML_WRAP.format(body="\n".join(partes))
+    partes = [convertir_md(p, t, i + 1) for i, (p, t) in enumerate(DOCS)]
+    html = HTML_WRAP.format(body="\n".join(partes))
     from weasyprint import HTML
+
     HTML(string=html).write_pdf(PDF_OUT)
-    kb = os.path.getsize(PDF_OUT)/1024
+    kb = os.path.getsize(PDF_OUT) / 1024
     print(f"✅ PDF: {PDF_OUT} ({kb:.0f} KB)")
+
 
 def enviar():
     print(f"📧 Enviando a {EMAIL_TO}...")
     msg = MIMEMultipart()
-    msg["From"]    = f"TravelHub Strategy <{EMAIL_USER}>"
-    msg["To"]      = EMAIL_TO; msg["Cc"] = EMAIL_CC
+    msg["From"] = f"TravelHub Strategy <{EMAIL_USER}>"
+    msg["To"] = EMAIL_TO
+    msg["Cc"] = EMAIL_CC
     msg["Subject"] = "📋 TravelHub — Plan Estratégico Completo 2026 (3 Volúmenes)"
-    msg.attach(MIMEText("""
+    msg.attach(
+        MIMEText(
+            """
 Hola Armando,
 
 Adjunto el Plan Estratégico Completo de TravelHub en un solo PDF:
@@ -104,17 +117,31 @@ Frase clave del análisis cruzado:
 
 ---
 TravelHub ERP — travelhub.cc
-    """.strip(), "plain", "utf-8"))
-    with open(PDF_OUT,"rb") as f:
-        p = MIMEBase("application","octet-stream"); p.set_payload(f.read())
+    """.strip(),
+            "plain",
+            "utf-8",
+        )
+    )
+    with open(PDF_OUT, "rb") as f:
+        p = MIMEBase("application", "octet-stream")
+        p.set_payload(f.read())
         encoders.encode_base64(p)
-        p.add_header("Content-Disposition",'attachment; filename="TravelHub_Plan_Completo_2026.pdf"')
+        p.add_header(
+            "Content-Disposition", 'attachment; filename="TravelHub_Plan_Completo_2026.pdf"'
+        )
         msg.attach(p)
-    s = smtplib.SMTP(EMAIL_HOST, EMAIL_PORT); s.starttls(); s.login(EMAIL_USER, EMAIL_PASS)
-    s.sendmail(EMAIL_USER, [EMAIL_TO, EMAIL_CC], msg.as_string()); s.quit()
+    s = smtplib.SMTP(EMAIL_HOST, EMAIL_PORT)
+    s.starttls()
+    s.login(EMAIL_USER, EMAIL_PASS)
+    s.sendmail(EMAIL_USER, [EMAIL_TO, EMAIL_CC], msg.as_string())
+    s.quit()
     print(f"✅ Enviado a: {EMAIL_TO}, {EMAIL_CC}")
 
+
 if __name__ == "__main__":
-    print("="*55); print("  TravelHub — Generando Plan Completo 2026"); print("="*55)
-    generar_pdf(); enviar()
-    print("="*55)
+    print("=" * 55)
+    print("  TravelHub — Generando Plan Completo 2026")
+    print("=" * 55)
+    generar_pdf()
+    enviar()
+    print("=" * 55)

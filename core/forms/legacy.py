@@ -1,6 +1,7 @@
 # Archivo: core/forms.py
 from django import forms
 from django.forms import inlineformset_factory
+from django.utils.translation import gettext as _
 
 from apps.bookings.models import BoletoImportado, FeeVenta
 from apps.cotizaciones.models import Cotizacion, ItemCotizacion

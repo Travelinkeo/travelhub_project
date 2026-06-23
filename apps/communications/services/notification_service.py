@@ -7,7 +7,6 @@ for sale events, state changes, and other CRM events.
 import logging
 
 from django.contrib.auth.models import User
-from django.utils import timezone
 
 logger = logging.getLogger(__name__)
 
@@ -30,9 +29,7 @@ def notificar_confirmacion_venta(venta):
         from apps.automation.models import NotificacionInteligente
 
         users = _get_admin_users(venta.agencia)
-        cliente_nombre = (
-            venta.cliente.get_nombre_completo() if venta.cliente else "N/A"
-        )
+        cliente_nombre = venta.cliente.get_nombre_completo() if venta.cliente else "N/A"
 
         for user in users:
             NotificacionInteligente.objects.create(
@@ -57,9 +54,7 @@ def notificar_cambio_estado(venta, estado_anterior):
         from apps.automation.models import NotificacionInteligente
 
         users = _get_admin_users(venta.agencia)
-        cliente_nombre = (
-            venta.cliente.get_nombre_completo() if venta.cliente else "N/A"
-        )
+        cliente_nombre = venta.cliente.get_nombre_completo() if venta.cliente else "N/A"
 
         for user in users:
             NotificacionInteligente.objects.create(
@@ -73,7 +68,9 @@ def notificar_cambio_estado(venta, estado_anterior):
                 ahorro_tiempo="",
             )
 
-        logger.info(f"In-app notification: venta {venta.pk} state changed to {venta.get_estado_display()}")
+        logger.info(
+            f"In-app notification: venta {venta.pk} state changed to {venta.get_estado_display()}"
+        )
     except Exception as e:
         logger.warning(f"Error creating in-app notification for venta {venta.pk}: {e}")
 
@@ -109,9 +106,7 @@ def notificar_pago_recibido(pago):
 
         venta = pago.venta
         users = _get_admin_users(venta.agencia if venta else None)
-        cliente_nombre = (
-            venta.cliente.get_nombre_completo() if venta and venta.cliente else "N/A"
-        )
+        cliente_nombre = venta.cliente.get_nombre_completo() if venta and venta.cliente else "N/A"
 
         for user in users:
             NotificacionInteligente.objects.create(

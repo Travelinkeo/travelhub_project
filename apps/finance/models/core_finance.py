@@ -41,8 +41,10 @@ def generar_numero_factura_atomico(model_class, fecha_emision, prefix=None):
     with transaction.atomic():
         # 1. Adquirir un bloqueo asesor transaccional exclusivo para el prefijo de facturación
         import hashlib
+
         lock_id = int(hashlib.sha256(prefix.encode()).hexdigest()[:15], 16)
         from django.db import connection
+
         with connection.cursor() as cursor:
             cursor.execute("SELECT pg_advisory_xact_lock(%s)", [lock_id])
             cursor.fetchone()  # Consumir el cursor para forzar la adquisición del bloqueo

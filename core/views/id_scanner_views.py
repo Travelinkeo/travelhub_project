@@ -3,9 +3,7 @@ import logging
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
 from django.http import JsonResponse
-from django.utils.decorators import method_decorator
 from django.views import View
-from django.views.decorators.csrf import csrf_exempt
 
 from apps.automation.services.id_scanner_service import IDScannerService
 from apps.crm.models import Pasajero
@@ -13,7 +11,6 @@ from apps.crm.models import Pasajero
 logger = logging.getLogger(__name__)
 
 
-@method_decorator(csrf_exempt, name="dispatch")
 class CedulaScannerAPIView(LoginRequiredMixin, View):
     """
     API para escanear cédulas, extraer datos y recortar rostros.

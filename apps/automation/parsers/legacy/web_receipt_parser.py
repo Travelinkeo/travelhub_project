@@ -281,7 +281,7 @@ class WebReceiptParser(BaseTicketParser):
             return m.group(group).strip() if m else default
 
         # 1. Datos Generales
-        pnr = get_match(r"(?:C.digo|Cdigo|Codigo) de reserva:\s*([A-Z0-9]{6})") or get_match(
+        get_match(r"(?:C.digo|Cdigo|Codigo) de reserva:\s*([A-Z0-9]{6})") or get_match(
             r"(?:Reserva|Localizador|PNR|Booking Ref)[:\.\s]+([A-Z0-9]{6})"
         )
 
@@ -297,7 +297,7 @@ class WebReceiptParser(BaseTicketParser):
                 r"(?:Número|Nmero) de tiquete:.*(?:\n|\r).*?(\d{13})", text, re.IGNORECASE
             )
 
-        unique_tickets = sorted(list(set(ticket_matches)))
+        unique_tickets = sorted(set(ticket_matches))
         num_pax = len(unique_tickets)
 
         if num_pax == 0:
@@ -346,7 +346,7 @@ class WebReceiptParser(BaseTicketParser):
             total_por_pax = total_val
             tax_por_pax = tax_val
 
-        base_por_pax = total_por_pax - tax_por_pax
+        total_por_pax - tax_por_pax
 
         # 4. Itinerario (Común para todos)
         # "Información del viaje: BARCELONA - CARACAS"
@@ -369,7 +369,9 @@ class WebReceiptParser(BaseTicketParser):
             # Check for multi-line (Caracas \n Puerto Ordaz)
             if "\n" in route_header or "\r" in route_header:
                 lines = [
-                    l.strip() for l in route_header.replace("\r", "\n").split("\n") if l.strip()
+                    line.strip()
+                    for line in route_header.replace("\r", "\n").split("\n")
+                    if line.strip()
                 ]
                 if len(lines) >= 2:
                     origen = lines[0].replace("PUERT O", "PUERTO").replace("PUER TO", "PUERTO")
@@ -378,9 +380,9 @@ class WebReceiptParser(BaseTicketParser):
         # Now flatten for cleanup if needed, but we already extracted origen/destino
         route_header = re.sub(r"[\r\n]+", " ", route_header).strip()
 
-        vuelo_num = get_match(r"Vuelo:\s*(\d+)")
-        hora_salida = get_match(r"Salida\s*(\d{2}:\d{2})") or "00:00"
-        hora_llegada = get_match(r"Llegada\s*(\d{2}:\d{2})") or "00:00"
+        get_match(r"Vuelo:\s*(\d+)")
+        get_match(r"Salida\s*(\d{2}:\d{2})") or "00:00"
+        get_match(r"Llegada\s*(\d{2}:\d{2})") or "00:00"
 
         # Fechas
         # Fechas
@@ -427,13 +429,12 @@ class WebReceiptParser(BaseTicketParser):
             "diciembre": "DIC",
         }
 
-        mes_num = meses.get(month_str, "01")
+        meses.get(month_str, "01")
         mes_abbr = meses_abbr.get(month_str, "XXX").upper()
         year_short = year[-2:] if len(year) == 4 else year
 
         # Formato solicitado: DDMMMYY (29ENE26) - Flight Date
         fecha_display = f"{day}{mes_abbr}{year_short}"
-        fecha_iso = f"{year}-{mes_num}-{day}"
 
         # ISSUE DATE (Today in DDMMMYY)
         now = datetime.now()
@@ -452,10 +453,9 @@ class WebReceiptParser(BaseTicketParser):
             "diciembre",
         ]
         month_issue_name = spanish_months_list[now.month - 1]
-        issue_abbr = meses_abbr.get(month_issue_name, "XXX")
-        issue_year_short = str(now.year)[-2:]
-        issue_day = str(now.day).zfill(2)
-        fecha_emision_ddmmmyy = f"{issue_day}{issue_abbr}{issue_year_short}"
+        meses_abbr.get(month_issue_name, "XXX")
+        str(now.year)[-2:]
+        str(now.day).zfill(2)
 
         # Construir lista de tickets
         tickets = []
@@ -591,7 +591,7 @@ class WebReceiptParser(BaseTicketParser):
                 r"(?:Número|Nmero) de tiquete:.*(?:\n|\r).*?(\d{13})", text, re.IGNORECASE
             )
 
-        unique_tickets = sorted(list(set(ticket_matches)))
+        unique_tickets = sorted(set(ticket_matches))
         num_pax = len(unique_tickets)
 
         # Montos
@@ -614,7 +614,7 @@ class WebReceiptParser(BaseTicketParser):
 
         total_por_pax = total_val / max(num_pax, 1)
         tax_por_pax = tax_val / max(num_pax, 1)
-        base_por_pax = total_por_pax - tax_por_pax
+        total_por_pax - tax_por_pax
 
         # --- PARSER DE ITINERARIO (Robustez Extrema) ---
         # Aplanamos el texto para la regex del itinerario (manejo de saltos de línea en destino)
@@ -901,7 +901,7 @@ class WebReceiptParser(BaseTicketParser):
         vuelos_procesados = []
         for seg in segments:
             # Helper local para scope de segmento
-            def seg_val(eid):
+            def seg_val(eid, seg=seg):
                 node = seg.find(id=eid) if seg != soup else soup.find(id=eid)
                 return node.get_text(strip=True) if node else ""
 
@@ -1313,7 +1313,7 @@ class WebReceiptParser(BaseTicketParser):
         # 2. Ticket: "Númer o de tick et\n7650211236030"
         # Multi-Pax: Buscar todos
         ticket_matches = re.findall(r"tick\s*et\s*(\d{13})", text, re.DOTALL | re.I)
-        unique_tickets = sorted(list(set(ticket_matches)))
+        unique_tickets = sorted(set(ticket_matches))
         num_pax = len(unique_tickets)
 
         # 3. Datos Pasajero (Busqueda general, Rutaca suele poner nombres apilados o separados)

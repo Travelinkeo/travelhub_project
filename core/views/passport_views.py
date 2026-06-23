@@ -60,7 +60,7 @@ def upload_passport(request):
 
         if not result["success"]:
             return Response(
-                {"error": f'Error procesando imagen: {result.get("error", "Error desconocido")}'},
+                {"error": f"Error procesando imagen: {result.get('error', 'Error desconocido')}"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 

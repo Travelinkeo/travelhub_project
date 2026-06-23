@@ -1,45 +1,45 @@
-version: '3.8'
-
 services:
-  db:
-    image: postgres:15
+  test_db:
+    image: postgres:15-alpine
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: travelhub_test
-    ports:
-      - "5433:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
+      interval: 5s
       timeout: 5s
       retries: 5
+    tmpfs:
+      - /var/lib/postgresql/data
 
-  redis:
-    image: redis:7
-    ports:
-      - "6380:6379"
+  test_redis:
+    image: redis:7-alpine
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
+      interval: 5s
       timeout: 5s
       retries: 5
 
   web:
-    build: .
+    build:
+      context: .
+      target: test
+    environment:
+      DJANGO_SETTINGS_MODULE: travelhub.settings
+      DATABASE_URL: postgresql://postgres:postgres@test_db:5432/travelhub_test
+      CELERY_BROKER_URL: redis://test_redis:6379/0
+      SECRET_KEY: test-secret-key-for-ci-only-123456789012345678901234567890
+      ENCRYPTION_KEY: test-encryption-key-32-chars-long!!
+      DEBUG: "True"
+      ENVIRONMENT: test
+      REDIS_HOST: test_redis
+      REDIS_PORT: 6379
+    depends_on:
+      test_db:
+        condition: service_healthy
+      test_redis:
+        condition: service_healthy
     command: >
       sh -c "python manage.py migrate --noinput &&
-             pytest tests/ --cov=. --cov-report=term-missing -v --create-db"
-    environment:
-      DATABASE_URL: postgresql://postgres:postgres@db:5432/travelhub_test
-      CELERY_BROKER_URL: redis://redis:6379/0
-      SECRET_KEY: test-secret-key-for-ci-only-123456789012345678901234567890
-      DEBUG: 'True'
-      ENCRYPTION_KEY: test-encryption-key-32-chars-long!!
-    depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    volumes:
-      - .:/app
+             python -m pytest tests/ -x -q --tb=short --create-db"

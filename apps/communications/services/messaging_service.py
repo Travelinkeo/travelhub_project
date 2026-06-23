@@ -39,10 +39,10 @@ def generate_whatsapp_message_for_document(
     - **Detalles Adicionales:** {data}
 
     **Ejemplo para una factura:**
-    Hola {client_name}, ¡espero que estés muy bien! Te adjunto la factura de tu reciente compra por un total de {data.get('total', '...')}. ¡Gracias por confiar en TravelHub! ✈️
+    Hola {client_name}, ¡espero que estés muy bien! Te adjunto la factura de tu reciente compra por un total de {data.get("total", "...")}. ¡Gracias por confiar en TravelHub! ✈️
 
     **Ejemplo para un boleto:**
-    ¡Hola {client_name}! La aventura te espera. ✨ Te envío tu boleto de avión con localizador {data.get('localizador', '...')}. ¡Que tengas un viaje increíble!
+    ¡Hola {client_name}! La aventura te espera. ✨ Te envío tu boleto de avión con localizador {data.get("localizador", "...")}. ¡Que tengas un viaje increíble!
     """
     try:
         message = generate_content(prompt)

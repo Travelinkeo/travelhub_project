@@ -1,4 +1,3 @@
-import os
 import hashlib
 from pathlib import Path
 
@@ -7,7 +6,6 @@ from django.core.management.base import BaseCommand
 from django.db import transaction
 
 from apps.bookings.models import BoletoImportado
-from core.api import get_current_agency
 from core.models.agencia import Agencia
 
 
@@ -77,7 +75,7 @@ class Command(BaseCommand):
         for archivo_path in archivos:
             try:
                 relative_path = archivo_path.relative_to(base_path)
-                
+
                 # Calcular hash para evitar duplicados
                 with open(archivo_path, "rb") as f:
                     content = f.read()
@@ -92,7 +90,7 @@ class Command(BaseCommand):
                 # Crear el registro
                 with open(archivo_path, "rb") as f:
                     django_file = File(f, name=str(relative_path))
-                    
+
                     with transaction.atomic():
                         boleto = BoletoImportado.objects.create(
                             archivo_boleto=django_file,
@@ -100,32 +98,42 @@ class Command(BaseCommand):
                             estado_parseo=BoletoImportado.EstadoParseo.PENDIENTE,
                             raw_hash=file_hash,
                         )
-                
-                self.stdout.write(f"  ✅ Importado: {relative_path} (ID: {boleto.id_boleto_importado})")
+
+                self.stdout.write(
+                    f"  ✅ Importado: {relative_path} (ID: {boleto.id_boleto_importado})"
+                )
                 imported += 1
 
             except Exception as e:
                 self.stderr.write(f"  ❌ Error importando {archivo_path}: {e}")
                 errors += 1
 
-        self.stdout.write(self.style.SUCCESS(
-            f"\n📊 Resumen: {imported} importados, {skipped} duplicados saltados, {errors} errores"
-        ))
+        self.stdout.write(
+            self.style.SUCCESS(
+                f"\n📊 Resumen: {imported} importados, {skipped} duplicados saltados, {errors} errores"
+            )
+        )
 
         # Procesar boletos si se solicita
         if process_after and imported > 0:
             self.stdout.write("\n🔄 Procesando boletos importados...")
             from apps.automation.services.ticket_parser_service import TicketParserService
-            
+
             parser = TicketParserService()
-            boletos = BoletoImportado.objects.filter(agencia=agencia, estado_parseo=BoletoImportado.EstadoParseo.PENDIENTE)
-            
+            boletos = BoletoImportado.objects.filter(
+                agencia=agencia, estado_parseo=BoletoImportado.EstadoParseo.PENDIENTE
+            )
+
             for boleto in boletos:
                 try:
                     self.stdout.write(f"  Procesando boleto {boleto.id_boleto_importado}...")
-                    parser.procesar_boleto(boleto_id=boleto.id_boleto_importado, bypass_cache=True, ignore_manual=True)
+                    parser.procesar_boleto(
+                        boleto_id=boleto.id_boleto_importado, bypass_cache=True, ignore_manual=True
+                    )
                     self.stdout.write(f"  ✅ Boleto {boleto.id_boleto_importado} procesado")
                 except Exception as e:
-                    self.stderr.write(f"  ❌ Error procesando boleto {boleto.id_boleto_importado}: {e}")
+                    self.stderr.write(
+                        f"  ❌ Error procesando boleto {boleto.id_boleto_importado}: {e}"
+                    )
 
             self.stdout.write(self.style.SUCCESS("✅ Procesamiento completado"))

@@ -104,9 +104,15 @@ class VentaAutomationService:
 
             venta.pasajeros.add(pasajero)
 
-            # --- 5. Creación de Item ---
             producto_boleto, _ = ProductoServicio.objects.get_or_create(
-                nombre="Boleto Aéreo", defaults={"tipo_producto": "SER", "agencia": agencia_owner}
+                nombre="Boleto Aéreo",
+                defaults={
+                    "tipo_producto": "SER",
+                    "agencia": agencia_owner,
+                    "codigo_interno": f"BOLETO_AEREO_{agencia_owner.pk}"
+                    if agencia_owner
+                    else "BOLETO_AEREO_GLOBAL",
+                },
             )
 
             # Limpieza robusta de total

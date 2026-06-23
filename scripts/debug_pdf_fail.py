@@ -1,21 +1,20 @@
-
-import sys
-import os
 import json
 import logging
+import os
+import sys
 
 # Add project root to path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 # Set up Django environment
 import django
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "travelhub.settings")
 django.setup()
 
 # Configure logging to print to stderr
 logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
 
-from apps.automation.parsers.sabre_parser import SabreParser
 from apps.automation.parsers.ticket_parser import generate_ticket
 
 # The data provided by the user (simulated)
@@ -26,7 +25,7 @@ user_json = """
 data = json.loads(user_json)
 
 # Force debug level for ticket parser manually
-logging.getLogger('core.ticket_parser').setLevel(logging.DEBUG)
+logging.getLogger("core.ticket_parser").setLevel(logging.DEBUG)
 
 print("Generating PDF...")
 try:
@@ -38,4 +37,5 @@ try:
 except Exception as e:
     print(f"ERROR_MAIN_BLOCK: {e}")
     import traceback
+
     traceback.print_exc()

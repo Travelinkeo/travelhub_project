@@ -1,10 +1,11 @@
 import os
+
 import django
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "travelhub.settings")
 django.setup()
 
 from django.db import connection
-from django.contrib.auth.models import User
 
 print("--- BUSCANDO 'dic2' EN DATABASE ---")
 
@@ -17,9 +18,9 @@ for table in tables:
         cursor.execute(f"SELECT * FROM {table}")
         rows = cursor.fetchall()
         for row in rows:
-            if 'dic2' in str(row).lower():
+            if "dic2" in str(row).lower():
                 print(f"Match en tabla '{table}': {row}")
-    except Exception as e:
+    except Exception:
         # print(f"Error en tabla {table}: {e}")
         pass
 

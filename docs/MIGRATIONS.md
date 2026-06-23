@@ -1,12 +1,16 @@
 # Estado de Migraciones Django
 
-> Documento vivo. Última actualización: 2026-06-07.
+> Documento vivo. Última actualización: 2026-06-22.
 
 ## TL;DR
 
 - **NO ejecutes `manage.py migrate` desde una DB vacía en `dev` o `prod`.** El historial de migraciones depende de estado pre-existente.
 - **El camino soportado para resetear una DB local es `bash dev-reset.sh`** (usa `pg_dump --schema-only` del proyecto de referencia + `migrate --fake` para alinear el state).
 - **El test de "fresh migrate"** (crear DB nueva, correr `migrate` desde cero) **falla en `bookings.0033`** por una divergencia histórica entre la representación de `Moneda` en `core.*`, `finance.*` y `common.*`.
+- **Diagnósticos disponibles** en `scripts/diagnostics/` (limpieza 2026-06-22):
+  - `check_migration_health.py` — estado integral (sync migrations, namespace core/bookings, columnas críticas).
+  - `check_missing_columns.py` — columnas faltantes modelo vs BD.
+  - `test_fresh_migrate.sh` — corre `migrate` contra una BD temporal vacía para validar el historial.
 
 ## Por qué `fresh migrate` falla
 
@@ -78,6 +82,36 @@ docker exec travelhub_web python manage.py migrate --fake
 - `bookings.0030` (DO blocks idempotentes)
 - `finance.0020`, `core.0017`, `core.0021`, `core.0027`
 - `core.0029_alter_anulacionboleto_agencia_and_more` (añade índices)
+
+## Limpieza de scripts temporales (2026-06-22)
+
+Se eliminó `_para_revisar/scripts_temp/` por completo. Los scripts allí eran
+parches de un solo uso que manipulaban directamente `django_migrations`
+(`DELETE FROM django_migrations WHERE ...`) o renombraban tablas a mano
+(`fix_tables.py`, `reverse_tables.py`), además de shells de emergencia para
+producción. Su existencia daba una falsa sensación de que el problema estaba
+"arreglado" cuando en realidad lo enmascaraba.
+
+Lo que se hizo:
+
+- **Eliminados** (17 scripts): `fix_core_migrations`, `fix_migrations`,
+  `fix_deps`, `fix_deps2`, `fix_deps3`, `smart_fix_deps`, `fix_tables`,
+  `reverse_tables`, `emergency_fix`, `fake_migrate.ps1`,
+  `fix_completo_produccion`, `fix_produccion_bookings_venta`,
+  `verificar_fix_produccion`, `debug_boleto`, `debug_all_parsers`,
+  `check_state`, `check_missing_cols`.
+- **Eliminados por seguridad** (4 scripts con contraseñas en texto plano):
+  `create_admin` (`admin123456`), `verify_local_setup` (`viaggio1` + usuarios
+  reales), `setup_users`, `setup_users_agencias`. Ver
+  `docs/deployment/SECURITY.md` (sección "Gestión de Superusuarios").
+- **Consolidados** en `scripts/diagnostics/`: `check_all_missing_cols` →
+  `check_missing_columns.py` (con flags `--app`/`--model`), las 4 variantes de
+  `test_fresh_migrate{,_v2,_v3,_v4}` → un único `test_fresh_migrate.sh`, y se
+  añadió `check_migration_health.py` como diagnóstico integral.
+
+**El workaround soportado sigue siendo `dev-reset.sh`.** `fresh migrate` aún no
+funciona (ver Roadmap). Los nuevos scripts de `scripts/diagnostics/` sirven para
+monitorizar el estado y detectar divergencias, no para repararlas.
 - 19 migraciones con `SeparateDatabaseAndState` (declaración pura, no emiten DDL)
 - 17 migraciones con `AlterModelTable(table=None)` (mienten al state declarando que el modelo "ya no tiene tabla custom")
 - 4 migraciones con `RenameIndex old_name="core_..."` (renombres históricos)

@@ -59,7 +59,7 @@ class SalesIntelligenceService:
             - Destinos: {", ".join(destinos)}
             - Fechas: {", ".join(fechas)}
             - Valor del vuelo: ${total_ticket}
-            - Agencia: {agencia.nombre if agencia else 'TravelHub'}
+            - Agencia: {agencia.nombre if agencia else "TravelHub"}
             
             Tu objetivo es identificar 3 oportunidades de upselling (venta cruzada) para maximizar la rentabilidad de este viaje. 
             Considera factores como: longitud del vuelo, tipo de destino (vacacional vs negocios), y necesidades logísticas obvias.

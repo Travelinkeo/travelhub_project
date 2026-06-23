@@ -894,6 +894,20 @@ class EmailMonitorService:
                 agencia=self.agencia,
                 estado_parseo=BoletoImportado.EstadoParseo.PENDIENTE,
                 formato_detectado="EMAIL_AUTO",
+                log_parseo="",
+                numero_boleto="",
+                nombre_pasajero_completo="",
+                nombre_pasajero_procesado="",
+                localizador_pnr="",
+                ruta_vuelo="",
+                aerolinea_emisora="",
+                direccion_aerolinea="",
+                agente_emisor="",
+                foid_pasajero="",
+                impuestos_descripcion="",
+                telegram_file_id="",
+                raw_hash="",
+                datos_parseados={},
             )
             boleto.archivo_boleto.save(filename, ContentFile(content.encode("utf-8")))
             boleto.save()
@@ -940,6 +954,20 @@ class EmailMonitorService:
                     agencia=self.agencia,
                     estado_parseo=BoletoImportado.EstadoParseo.PENDIENTE,
                     formato_detectado="PDF_AUTO",
+                    log_parseo="",
+                    numero_boleto="",
+                    nombre_pasajero_completo="",
+                    nombre_pasajero_procesado="",
+                    localizador_pnr="",
+                    ruta_vuelo="",
+                    aerolinea_emisora="",
+                    direccion_aerolinea="",
+                    agente_emisor="",
+                    foid_pasajero="",
+                    impuestos_descripcion="",
+                    telegram_file_id="",
+                    raw_hash="",
+                    datos_parseados={},
                 )
                 boleto.archivo_boleto.save(final_filename, ContentFile(pdf_content))
                 boleto.save()

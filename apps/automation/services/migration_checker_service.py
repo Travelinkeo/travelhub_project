@@ -100,7 +100,7 @@ class MigrationCheckerService:
         try:
             pasajero = Pasajero.objects.get(id_pasajero=pasajero_id)
         except Pasajero.DoesNotExist:
-            raise ValueError(f"Pasajero {pasajero_id} no encontrado")
+            raise ValueError(f"Pasajero {pasajero_id} no encontrado") from None
 
         if not vuelos:
             raise ValueError("Debe proporcionar al menos un vuelo")

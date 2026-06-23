@@ -159,11 +159,18 @@ def sync_bcv_rates():
             return f"Error crítico: Fallback falló ({fallback_err})"
 
 
-@shared_task(name="apps.contabilidad.tasks.ejecutar_reconciliacion_contable")
+@shared_task(
+    name="apps.contabilidad.tasks.ejecutar_reconciliacion_contable",
+    time_limit=600,
+    soft_time_limit=540,
+    max_retries=3,
+    default_retry_delay=300,
+)
 def ejecutar_reconciliacion_contable():
     """
     Tarea periódica para auditar y reconciliar asientos contables huérfanos.
     """
     from apps.contabilidad.reconciliation import ContabilidadReconciliationService
+
     facturas, pagos = ContabilidadReconciliationService.audit_and_reconcile()
     return {"facturas_reconciliadas": facturas, "pagos_reconciliados": pagos}

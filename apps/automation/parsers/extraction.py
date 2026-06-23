@@ -38,7 +38,7 @@ class ExtractionService:
                 return ExtractionService._extract_eml(file_obj)
             else:
                 content = file_obj.read()
-                if isinstance(content, (bytes, bytearray)):
+                if isinstance(content, bytes | bytearray):
                     return content.decode("utf-8", errors="ignore")
                 return str(content)
         except Exception as e:
@@ -93,8 +93,8 @@ class ExtractionService:
                         decoded, encoding = decode_header(filename)[0]
                         if isinstance(decoded, bytes):
                             filename = decoded.decode(encoding or "utf-8", errors="replace")
-                    except Exception:
-                        pass
+                    except Exception as e:
+                        logger.debug("Ignored exception decoding email header: %s", e)
                     filename_lower = filename.lower()
                     if filename_lower.endswith(".pdf"):
                         try:
@@ -129,7 +129,7 @@ class ExtractionService:
                         if not payload:
                             continue
                         charset = part.get_content_charset() or "utf-8"
-                        if isinstance(payload, (bytes, bytearray)):
+                        if isinstance(payload, bytes | bytearray):
                             content = payload.decode(charset, errors="replace")
                         else:
                             content = str(payload)
@@ -140,7 +140,7 @@ class ExtractionService:
                         if not payload:
                             continue
                         charset = part.get_content_charset() or "utf-8"
-                        if isinstance(payload, (bytes, bytearray)):
+                        if isinstance(payload, bytes | bytearray):
                             content = payload.decode(charset, errors="replace")
                         else:
                             content = str(payload)
@@ -193,7 +193,7 @@ class ExtractionService:
                 element.insert_after("\n")
 
             text = soup.get_text(separator="")
-            return "\n".join([l.strip() for l in text.splitlines() if l.strip()])
+            return "\n".join([line.strip() for line in text.splitlines() if line.strip()])
         except Exception:
             return html_content
 

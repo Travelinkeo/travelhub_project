@@ -124,7 +124,7 @@ class TestCalculosFinancierosAvanzados:
         factura.save()
 
         # Crear un item gravado
-        item = ItemFactura.objects.create(
+        ItemFactura.objects.create(
             factura=factura,
             descripcion="Servicio de prueba",
             cantidad=Decimal("1"),
@@ -135,12 +135,12 @@ class TestCalculosFinancierosAvanzados:
         factura.recalcular_totales()
         factura.save()
 
-        assert factura.base_imponible == Decimal(
-            "100.00"
-        ), f"Expected base_imponible 100.00, got {factura.base_imponible}"
-        assert factura.iva_monto == Decimal(
-            "16.00"
-        ), f"Expected iva_monto 16.00, got {factura.iva_monto}"
+        assert factura.base_imponible == Decimal("100.00"), (
+            f"Expected base_imponible 100.00, got {factura.base_imponible}"
+        )
+        assert factura.iva_monto == Decimal("16.00"), (
+            f"Expected iva_monto 16.00, got {factura.iva_monto}"
+        )
         assert factura.monto_total > factura.subtotal
 
     def test_item_venta_calculos(self):

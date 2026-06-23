@@ -1,6 +1,9 @@
+import logging
 import secrets
 
 from django.core.cache import cache
+
+logger = logging.getLogger(__name__)
 
 
 def agency_context(request):
@@ -51,9 +54,10 @@ def agency_context(request):
 
             try:
                 from apps.contabilidad.tasks import sync_bcv_rates
+
                 sync_bcv_rates.delay()
-            except Exception:
-                pass
+            except Exception as e:
+                logger.debug("Ignored exception syncing BCV rates: %s", e)
 
         tasas = cache.get("tasa_bcv_context")
         if tasas is None:

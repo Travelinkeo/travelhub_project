@@ -62,8 +62,8 @@ def _generar_asiento_factura_sync(factura_id):
     finally:
         try:
             instance._contabilizando = False
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug("Ignored exception resetting _contabilizando flag: %s", e)
 
 
 @receiver(ticket_invoicing_requested)

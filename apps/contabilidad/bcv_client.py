@@ -40,7 +40,7 @@ class BCVClient:
                 BCVClient.BCV_API_URL,
                 timeout=BCVClient.TIMEOUT,
                 headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) TravelHub/1.1"},
-                verify=False,  # Bypass por certificados SSL auto-firmados o vencidos del ente
+                verify=False,  # Bypass por certificados SSL auto-firmados o vencidos del ente  # noqa: S501
             )
             response.raise_for_status()
             data = response.json()

@@ -40,13 +40,16 @@ def procesar_correo_individual_agencia(agencia_id):
     try:
         agencia = Agencia.objects.get(pk=agencia_id)
         config = agencia.configuracion
-        if not config or not config.correo_emisiones or not config.password_app_correo:
+        if not config:
             return f"Agencia {agencia_id} no configurada."
 
+        email_user = config.email_monitor_user or config.correo_emisiones
+        email_pass = config.email_monitor_password or config.password_app_correo
+        if not email_user or not email_pass:
+            return f"Agencia {agencia_id} no configurada (falta usuario/contraseña de monitoreo)."
+
         with agency_context(agencia):
-            logger.info(
-                f"🔄 Procesando agencia SaaS (individual): {agencia.nombre} ({config.correo_emisiones})"
-            )
+            logger.info(f"🔄 Procesando agencia SaaS (individual): {agencia.nombre} ({email_user})")
 
             monitor = EmailMonitorService(
                 agencia=agencia, notification_type="telegram", process_all=False, mark_as_read=True
@@ -143,6 +146,7 @@ def _notificar_operador_whatsapp(agencia, cantidad_correos):
 )
 def process_incoming_emails():
     from django.core.cache import cache
+    from django.db.models import Q
 
     from core.models.agencia import Agencia
 
@@ -159,8 +163,16 @@ def process_incoming_emails():
         agencias_qs = (
             Agencia.objects.filter(activa=True)
             .filter(configuracion__email_monitor_active=True)
-            .exclude(configuracion__correo_emisiones__isnull=True)
-            .exclude(configuracion__correo_emisiones__exact="")
+            .filter(
+                (
+                    Q(configuracion__email_monitor_user__isnull=False)
+                    & ~Q(configuracion__email_monitor_user="")
+                )
+                | (
+                    Q(configuracion__correo_emisiones__isnull=False)
+                    & ~Q(configuracion__correo_emisiones="")
+                )
+            )
         )
 
         if not agencias_qs.exists():
@@ -398,7 +410,7 @@ def send_telegram_task(self, message, chat_id=None, parse_mode="HTML", agencia_i
         return success
     except Exception as exc:
         logger.error(f"Telegram task error: {exc}")
-        raise self.retry(exc=exc)
+        self.retry(exc=exc)
 
 
 @shared_task(
@@ -418,7 +430,7 @@ def send_whatsapp_task(self, sender_id, recipient_number, message_text, agencia_
         return True
     except Exception as exc:
         logger.error(f"WhatsApp task error: {exc}")
-        raise self.retry(exc=exc)
+        self.retry(exc=exc)
 
 
 @shared_task(
@@ -449,7 +461,7 @@ def send_email_task(self, recipient, subject, message, from_email=None, agencia_
         return True
     except Exception as exc:
         logger.error(f"Email task error: {exc}")
-        raise self.retry(exc=exc)
+        self.retry(exc=exc)
 
 
 @shared_task(
@@ -475,7 +487,7 @@ def enviar_bienvenida_agencia_task(self, agencia_id, user_id):
         return True
     except Exception as exc:
         logger.error(f"Welcome email task error: {exc}")
-        raise self.retry(exc=exc)
+        self.retry(exc=exc)
 
 
 @shared_task(
@@ -497,7 +509,7 @@ def notificar_confirmacion_pago_task(self, pago_id):
         return True
     except Exception as exc:
         logger.error(f"Payment notification task error: {exc}")
-        raise self.retry(exc=exc)
+        self.retry(exc=exc)
 
 
 @shared_task(
@@ -519,7 +531,7 @@ def notificar_recordatorio_pago_task(self, venta_id):
         return True
     except Exception as exc:
         logger.error(f"Payment reminder task error: {exc}")
-        raise self.retry(exc=exc)
+        self.retry(exc=exc)
 
 
 @shared_task(
@@ -541,7 +553,7 @@ def notificar_boleto_procesado_task(self, boleto_id):
         return True
     except Exception as exc:
         logger.error(f"Ticket processed notification task error: {exc}")
-        raise self.retry(exc=exc)
+        self.retry(exc=exc)
 
 
 @shared_task(
@@ -561,7 +573,7 @@ def generate_pdf_task(self, html_content, margins=0.0):
         return pdf_bytes
     except Exception as exc:
         logger.error(f"PDF generation task error: {exc}")
-        raise self.retry(exc=exc)
+        self.retry(exc=exc)
 
 
 @shared_task(
@@ -579,7 +591,7 @@ def backup_database_task(self):
             return "Backup completado"
     except Exception as exc:
         logger.error(f"Backup diario falló: {exc}")
-        raise self.retry(exc=exc) from exc
+        self.retry(exc=exc)
 
 
 @shared_task(
@@ -609,7 +621,7 @@ def send_telegram_document_task(self, file_path, caption=None, chat_id=None, age
         return result
     except Exception as exc:
         logger.error(f"Telegram document task error: {exc}")
-        raise self.retry(exc=exc)
+        self.retry(exc=exc)
 
 
 @shared_task(
@@ -639,7 +651,7 @@ def send_telegram_photo_task(self, agencia_id, filename="logo.png"):
         return bool(file_id)
     except Exception as exc:
         logger.error(f"Telegram photo task error for agencia {agencia_id}: {exc}")
-        raise self.retry(exc=exc)
+        self.retry(exc=exc)
 
 
 @shared_task(
@@ -662,7 +674,7 @@ def send_factura_to_telegram_task(self, factura_id):
         return result
     except Exception as exc:
         logger.error(f"Error sending factura {factura_id} to Telegram: {exc}")
-        raise self.retry(exc=exc)
+        self.retry(exc=exc)
 
 
 @shared_task(
@@ -699,7 +711,7 @@ def create_binance_order_task(factura_id):
         return None
     except Exception as exc:
         logger.error(f"Binance order task error for factura {factura_id}: {exc}")
-        raise current_task.retry(exc=exc)
+        current_task.retry(exc=exc)
 
 
 @shared_task(
@@ -721,7 +733,7 @@ def notify_migration_alert_task(self, check_id):
         return True
     except Exception as exc:
         logger.error(f"Migration alert task error for check {check_id}: {exc}")
-        raise self.retry(exc=exc)
+        self.retry(exc=exc)
 
 
 @shared_task(
@@ -744,7 +756,7 @@ def answer_telegram_callback_task(self, bot_token, query_id, text):
         return response.status_code == 200
     except Exception as exc:
         logger.error(f"Error en answerCallbackQuery: {exc}")
-        raise self.retry(exc=exc)
+        self.retry(exc=exc)
 
 
 @shared_task(
@@ -773,7 +785,7 @@ def edit_telegram_message_task(self, bot_token, chat_id, message_id, text):
         return response.status_code == 200
     except Exception as exc:
         logger.error(f"Error en editMessageText: {exc}")
-        raise self.retry(exc=exc)
+        self.retry(exc=exc)
 
 
 @shared_task(
@@ -797,7 +809,7 @@ def send_evolution_message_task(self, agencia_id, phone_number, text):
         return success
     except Exception as exc:
         logger.error(f"Evolution message task error: {exc}")
-        raise self.retry(exc=exc)
+        self.retry(exc=exc)
 
 
 @shared_task(
@@ -823,7 +835,7 @@ def send_evolution_document_task(
         return success
     except Exception as exc:
         logger.error(f"Evolution document task error: {exc}")
-        raise self.retry(exc=exc)
+        self.retry(exc=exc)
 
 
 @shared_task(
@@ -869,7 +881,7 @@ def fetch_unsplash_image_task(self, query):
         return None
     except Exception as exc:
         logger.error(f"Unsplash fetch error for query {query}: {exc}")
-        raise self.retry(exc=exc)
+        self.retry(exc=exc)
 
 
 @shared_task(
@@ -922,7 +934,7 @@ def fetch_airline_logo_task(self, airline_name):
         return None
     except Exception as exc:
         logger.error(f"Airline logo fetch error for {airline_name}: {exc}")
-        raise self.retry(exc=exc)
+        self.retry(exc=exc)
 
 
 @shared_task(
@@ -949,7 +961,7 @@ def download_twilio_media_task(self, media_url):
         return result
     except Exception as exc:
         logger.error(f"Twilio media task error: {exc}")
-        raise self.retry(exc=exc)
+        self.retry(exc=exc)
 
 
 @shared_task(
@@ -979,7 +991,7 @@ def send_whatsapp_meta_task(self, numero_cliente, mensaje, agencia_id=None):
         return result
     except Exception as exc:
         logger.error(f"Meta WhatsApp task error: {exc}")
-        raise self.retry(exc=exc)
+        self.retry(exc=exc)
 
 
 @shared_task(
@@ -1004,7 +1016,7 @@ def get_telegram_file_url_task(self, file_id, agencia_id=None):
         return url
     except Exception as exc:
         logger.error(f"Telegram file URL task error: {exc}")
-        raise self.retry(exc=exc)
+        self.retry(exc=exc)
 
 
 @shared_task(
@@ -1027,7 +1039,7 @@ def fetch_bcv_rates_task(self):
         return {k: str(v) for k, v in tasas.items()} if tasas else None
     except Exception as exc:
         logger.error(f"BCV rates fetch error: {exc}")
-        raise self.retry(exc=exc)
+        self.retry(exc=exc)
 
 
 @shared_task(
@@ -1050,7 +1062,7 @@ def fetch_tasas_venezuela_task(self):
         return tasas
     except Exception as exc:
         logger.error(f"Venezuela rates fetch error: {exc}")
-        raise self.retry(exc=exc)
+        self.retry(exc=exc)
 
 
 @shared_task(
@@ -1073,7 +1085,7 @@ def fetch_image_base64_task(self, image_source):
         return result
     except Exception as exc:
         logger.error(f"Image base64 fetch error: {exc}")
-        raise self.retry(exc=exc)
+        self.retry(exc=exc)
 
 
 @shared_task(
@@ -1190,7 +1202,35 @@ def process_twilio_voice_quote_task(
 
     except Exception as exc:
         logger.error(f"Voice-to-Quote task error: {exc}")
-        raise self.retry(exc=exc)
+        self.retry(exc=exc)
+
+
+@shared_task(queue="default", time_limit=120, soft_time_limit=100)
+def fetch_all_qr_codes_task():
+    """Renueva el QR de WhatsApp para todas las agencias con Evolution configurado.
+
+    Se ejecuta periódicamente por Celery Beat. Por cada agencia activa con un
+    subdominio_slug configurado, dispara fetch_evolution_qr_task en paralelo.
+    Solo dispara fetch si la instancia NO está ya conectada.
+    """
+    from core.models.agencia import Agencia
+
+    # subdominio_slug vive en AgenciaConfiguracion, usamos el ORM correcto
+    agencias = (
+        Agencia.objects.filter(activa=True)
+        .select_related("configuracion")
+        .filter(configuracion__subdominio_slug__isnull=False)
+        .exclude(configuracion__subdominio_slug="")
+    )
+    total = 0
+    for ag in agencias:
+        slug = ag.subdominio_slug
+        if slug:
+            fetch_evolution_qr_task.delay(slug)
+            total += 1
+
+    logger.info(f"fetch_all_qr_codes_task: despachadas {total} tareas de QR para agencias activas.")
+    return total
 
 
 @shared_task(
@@ -1202,9 +1242,11 @@ def process_twilio_voice_quote_task(
     soft_time_limit=50,
 )
 def fetch_evolution_qr_task(self, instance_name):
-    """
-    Obtiene el QR de WhatsApp para una instancia Evolution via HTTP/WebSocket
-    y lo almacena en cache Redis.
+    """Fetch QR code for an Evolution instance and cache it.
+
+    This task retrieves the QR (base64) from the Evolution API via HTTP and stores
+    it in Redis for 2 minutes. It replaces the previous incorrectly‑bound task
+    definition that prevented execution.
     """
     import json
 
@@ -1215,21 +1257,35 @@ def fetch_evolution_qr_task(self, instance_name):
 
     cache_key = f"evo_qr:{instance_name}"
 
+    # 1. Si ya está conectado, no necesitamos el QR y evitamos tocar la API de conexión
+    if EvolutionService.get_connection_status(instance_name):
+        logger.info(f"Instancia '{instance_name}' ya está conectada. Omitiendo fetch de QR.")
+        cache.delete(cache_key)
+        return None
+
     try:
         base_url = EvolutionService._get_base_url()
         headers = EvolutionService._get_headers()
-        del headers["Content-Type"]
-
-        r = requests.get(
+        # The GET endpoint does not expect a JSON payload, so drop the Content-Type header.
+        headers.pop("Content-Type", None)
+        response = requests.get(
             f"{base_url}/instance/connect/{instance_name}", headers=headers, timeout=15
         )
-        if r.status_code == 200:
-            data = r.json()
+        if response.status_code == 404:
+            logger.info(f"Instance '{instance_name}' not found. Attempting to create...")
+            EvolutionService.create_instance(instance_name)
+            response = requests.get(
+                f"{base_url}/instance/connect/{instance_name}", headers=headers, timeout=15
+            )
+        if response.status_code == 200:
+            data = response.json()
             if isinstance(data, dict) and data.get("base64"):
-                cache.set(cache_key, data["base64"], 120)
+                cache.set(cache_key, data["base64"], 300)  # 5 minutos
                 logger.info(f"Evolution QR cached via HTTP for {instance_name}")
                 return data["base64"]
     except (requests.RequestException, json.JSONDecodeError, ValueError) as e:
+        logger.error(f"Failed to fetch Evolution QR for {instance_name}: {e}")
+        return None
         logger.debug("HTTP QR fetch failed, trying WebSocket: %s", e)
 
     try:
@@ -1259,7 +1315,13 @@ def fetch_evolution_qr_task(self, instance_name):
     return None
 
 
-@shared_task(name="core.tasks.limpiar_axes_logs")
+@shared_task(
+    name="core.tasks.limpiar_axes_logs",
+    time_limit=300,
+    soft_time_limit=270,
+    max_retries=2,
+    default_retry_delay=60,
+)
 def limpiar_axes_logs():
     try:
         from datetime import timedelta
@@ -1275,7 +1337,13 @@ def limpiar_axes_logs():
         return f"Error limpiando logs Axes: {e}"
 
 
-@shared_task(name="core.tasks.limpiar_sesiones_expiradas")
+@shared_task(
+    name="core.tasks.limpiar_sesiones_expiradas",
+    time_limit=300,
+    soft_time_limit=270,
+    max_retries=2,
+    default_retry_delay=60,
+)
 def limpiar_sesiones_expiradas():
     try:
         from django.contrib.sessions.models import Session

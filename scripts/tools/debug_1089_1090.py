@@ -1,13 +1,13 @@
-
 import os
+
 import django
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "travelhub.settings")
 django.setup()
 
-from apps.bookings.models import BoletoImportado
-from apps.automation.services.ticket_parser_service import TicketParserService
 from apps.automation.parsers.ticket_parser import extract_data_from_text
+from apps.automation.services.ticket_parser_service import TicketParserService
+from apps.bookings.models import BoletoImportado
 
 service = TicketParserService()
 
@@ -19,13 +19,13 @@ for bid in [1090]:
         print("TEXTO EXTRAIDO (Primeros 2000 caracteres):")
         print(text[:2000])
         print("-" * 50)
-        
+
         # Probar detección y parseo
         data = extract_data_from_text(text)
-        print("SISTEMA DETECTADO:", data.get('SOURCE_SYSTEM'))
-        print("PASAJERO:", data.get('NOMBRE_DEL_PASAJERO') or data.get('NOMBRE DEL PASAJERO'))
-        print("DOCUMENTO:", data.get('CODIGO_IDENTIFICACION') or data.get('CODIGO IDENTIFICACION'))
-        print("AGENTE (IATA):", data.get('AGENTE_EMISOR') or data.get('AGENTE EMISOR'))
-        
+        print("SISTEMA DETECTADO:", data.get("SOURCE_SYSTEM"))
+        print("PASAJERO:", data.get("NOMBRE_DEL_PASAJERO") or data.get("NOMBRE DEL PASAJERO"))
+        print("DOCUMENTO:", data.get("CODIGO_IDENTIFICACION") or data.get("CODIGO IDENTIFICACION"))
+        print("AGENTE (IATA):", data.get("AGENTE_EMISOR") or data.get("AGENTE EMISOR"))
+
     except Exception as e:
         print(f"Error con ticket {bid}: {e}")

@@ -1,7 +1,7 @@
+import os
+import sys
 
 import pdfplumber
-import sys
-import os
 
 pdf_path = r"c:\Users\ARMANDO\travelhub_project\media\boletos_importados\2026\01\Recibo_de_pasaje_electrónico_19_noviembre_para_ALIKY_DE_SOUSA.pdf"
 
@@ -20,4 +20,3 @@ with open(output_file, "w", encoding="utf-8") as f:
     f.write(text_content)
 
 print(f"Text written to {output_file}")
-

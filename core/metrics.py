@@ -2,7 +2,7 @@ import logging
 
 from django.db import connection
 from django.http import HttpResponse
-from prometheus_client import Gauge, generate_latest, REGISTRY
+from prometheus_client import REGISTRY, Gauge, generate_latest
 
 try:
     from django_redis import get_redis_connection
@@ -39,10 +39,10 @@ def update_celery_queue_depth():
             try:
                 depth = r.llen(queue)
                 celery_queue_depth.labels(queue=queue).set(depth)
-            except Exception:
-                pass
-    except Exception:
-        pass
+            except Exception as e:
+                logger.debug("Ignored exception reading queue depth: %s", e)
+    except Exception as e:
+        logger.debug("Ignored exception connecting to Redis for metrics: %s", e)
 
 
 def update_db_connection_pool():
@@ -50,9 +50,7 @@ def update_db_connection_pool():
     max_conn = 0
     try:
         with connection.cursor() as cursor:
-            cursor.execute(
-                "SELECT count(*) FROM pg_stat_activity WHERE state = 'active'"
-            )
+            cursor.execute("SELECT count(*) FROM pg_stat_activity WHERE state = 'active'")
             active = cursor.fetchone()[0]
             db_active_connections.set(active)
     except Exception as e:

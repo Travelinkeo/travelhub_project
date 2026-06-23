@@ -28,7 +28,7 @@ def cache_api_response(timeout=300, key_prefix="api"):
                 "query": dict(request.GET),
                 "user": request.user.id if request.user.is_authenticated else None,
             }
-            cache_key_hash = hashlib.md5(
+            cache_key_hash = hashlib.md5(  # noqa: S324
                 json.dumps(cache_key_data, sort_keys=True).encode()
             ).hexdigest()
             cache_key = f"{key_prefix}:{cache_key_hash}"

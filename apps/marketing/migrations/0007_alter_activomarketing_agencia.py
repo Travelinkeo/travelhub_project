@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("core", "0040_aeropuerto"),
         ("marketing", "0006_add_missing_agencia_column"),

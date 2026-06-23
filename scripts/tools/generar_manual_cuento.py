@@ -1,4 +1,3 @@
-
 MANUAL_PATH = r"C:\Users\ARMANDO\.gemini\antigravity\brain\5e11f3b7-df37-4e76-b5cc-2a2e63d18f1d\Manual_TravelHub_Biblia_Cuento.md"
 
 CONTENIDO = r"""

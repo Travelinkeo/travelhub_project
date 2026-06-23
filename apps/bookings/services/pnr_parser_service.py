@@ -1,4 +1,5 @@
 import datetime
+import logging
 import re
 from decimal import Decimal
 
@@ -10,6 +11,8 @@ from apps.common.services.catalog_service import CatalogNormalizationService
 from apps.common.services.customer_service import CustomerService
 from apps.crm.models import Pasajero
 from core.api import agency_context
+
+logger = logging.getLogger(__name__)
 
 
 class PNRParserService:
@@ -144,10 +147,10 @@ class PNRParserService:
         # Pre-limpieza para evitar líneas de ruido
         lines = text_upper.splitlines()
         clean_lines = [
-            l.strip()
-            for l in lines
+            ls.strip()
+            for ls in lines
             if not any(
-                x in l.strip()
+                x in ls.strip()
                 for x in [
                     "VIEWTRIP",
                     "CHECK-IN",
@@ -208,8 +211,8 @@ class PNRParserService:
                     val_dec = Decimal(val_str)
                     if val_dec > pnr_data["tarifa_total"]:
                         pnr_data["tarifa_total"] = val_dec
-                except Exception:
-                    pass
+                except Exception as e:
+                    logger.debug("Ignored exception parsing tarifa: %s", e)
 
         return pnr_data
 

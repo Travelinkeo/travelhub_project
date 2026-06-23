@@ -91,8 +91,8 @@ class UniversalAIParser:
                 text_limpio = text_limpio[:15000]
 
             # --- 1. CACHÉ POR HASH (SaaS Cost Efficiency) ---
-            text_hash = hashlib.md5(text_limpio.encode("utf-8")).hexdigest()
-            prompt_hash = hashlib.md5(SYSTEM_PROMPT.encode("utf-8")).hexdigest()
+            text_hash = hashlib.md5(text_limpio.encode("utf-8")).hexdigest()  # noqa: S324
+            prompt_hash = hashlib.md5(SYSTEM_PROMPT.encode("utf-8")).hexdigest()  # noqa: S324
             cache_key = f"ai_parse_{text_hash}_{prompt_hash}"
 
             if not bypass_cache:

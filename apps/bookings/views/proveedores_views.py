@@ -1,11 +1,18 @@
+import logging
+
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DeleteView, ListView, UpdateView
+from rest_framework import filters, permissions, viewsets
 
 from apps.bookings.models import Proveedor
 from core.api import HtmxResponseMixin, SaaSMixin
+from core.api.mixins.tenant import TenantViewSetMixin
+from core.serializers import ProveedorSerializer
+
+logger = logging.getLogger(__name__)
 
 
 class ProveedorListView(HtmxResponseMixin, SaaSMixin, LoginRequiredMixin, ListView):
@@ -50,7 +57,7 @@ class ProveedorListView(HtmxResponseMixin, SaaSMixin, LoginRequiredMixin, ListVi
 class ProveedorFormMixin:
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
-        for field_name, field in form.fields.items():
+        for _field_name, field in form.fields.items():
             input_type = getattr(field.widget, "input_type", None)
             if input_type == "checkbox":
                 # Los checkboxes usan estilos por defecto del navegador/tema, no input-base
@@ -175,3 +182,12 @@ class ProveedorDeleteView(SaaSMixin, LoginRequiredMixin, DeleteView):
     def delete(self, request, *args, **kwargs):
         messages.success(self.request, "Proveedor eliminado correctamente.")
         return super().delete(request, *args, **kwargs)
+
+
+class ProveedorViewSet(TenantViewSetMixin, viewsets.ModelViewSet):
+    queryset = Proveedor.objects.all().order_by("nombre")
+    serializer_class = ProveedorSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    pagination_class = None
+    filter_backends = [filters.SearchFilter]
+    search_fields = ["nombre", "contacto_nombre", "contacto_email", "rif"]

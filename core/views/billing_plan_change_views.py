@@ -10,14 +10,14 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
+from core.views.billing_views import PLAN_CONFIG
+
 
 def _setup_stripe():
     """Asegura la configuración de Stripe."""
     stripe.api_key = getattr(settings, "STRIPE_SECRET_KEY", os.getenv("STRIPE_SECRET_KEY", ""))
     return bool(stripe.api_key)
 
-
-from core.views.billing_views import PLAN_CONFIG
 
 STRIPE_AVAILABLE = _setup_stripe()
 
@@ -81,7 +81,7 @@ def change_plan(request):
 
         return Response(
             {
-                "message": f'Plan {"actualizado" if es_upgrade else "cambiado"} exitosamente',
+                "message": f"Plan {'actualizado' if es_upgrade else 'cambiado'} exitosamente",
                 "plan_anterior": plan_actual,
                 "plan_nuevo": nuevo_plan,
                 "tipo": "upgrade" if es_upgrade else "downgrade",

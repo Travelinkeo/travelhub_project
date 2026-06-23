@@ -1,8 +1,8 @@
 import pytest
-
-pytestmark = pytest.mark.skip(reason="Tests requieren configuración completa o refactorización")
 from django.db import connection
 from django.test import TestCase
+
+pytestmark = pytest.mark.skip(reason="Tests requieren configuración completa o refactorización")
 
 
 class RLSPolicyTest(TestCase):
@@ -17,7 +17,7 @@ class RLSPolicyTest(TestCase):
             """)
             policies = cursor.fetchall()
 
-        table_names = set(t for t, p in policies)
+        table_names = {t for t, p in policies}
         critical_tables = [
             "core_venta",
             "core_itemventa",
@@ -40,7 +40,7 @@ class RLSPolicyTest(TestCase):
             """)
             policies = cursor.fetchall()
 
-        for tablename, policyname, qual in policies:
+        for tablename, _policyname, qual in policies:
             self.assertIn(
                 "agencia_id",
                 qual or "",

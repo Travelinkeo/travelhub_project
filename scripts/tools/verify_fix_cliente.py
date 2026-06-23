@@ -1,7 +1,8 @@
 import os
+
 import django
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "travelhub.settings")
 django.setup()
 
 from apps.crm.models import Cliente

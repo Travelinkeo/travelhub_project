@@ -1,11 +1,13 @@
+import importlib
 import os
 import sys
 
 # Ensure the project root is in PYTHONPATH
-project_root = os.path.abspath(os.path.dirname(__file__))
-sys.path.append(project_root)
+_project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+if _project_root not in sys.path:
+    sys.path.insert(0, _project_root)
 
-from apps.automation.parsers.legacy.copa_parser import CopaParser
+CopaParser = importlib.import_module("apps.automation.parsers.legacy.copa_parser").CopaParser
 
 parser = CopaParser()
 

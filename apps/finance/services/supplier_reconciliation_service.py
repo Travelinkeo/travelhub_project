@@ -93,7 +93,10 @@ class SupplierReconciliationService:
         """
         try:
             from django.utils.module_loading import import_string
-            ExtractionService = import_string("apps.automation.parsers.extraction.ExtractionService")
+
+            ExtractionService = import_string(
+                "apps.automation.parsers.extraction.ExtractionService"
+            )
             ai_engine = import_string("apps.automation.services.ai_engine.ai_engine")
 
             # 1. Extraer texto del PDF
@@ -124,7 +127,7 @@ class SupplierReconciliationService:
             # 3. Conciliar con nuestra base de datos (ItemVenta)
             results = []
             locators = [str(linea.get("locator", "")).strip() for linea in lineas_extraidas]
-            locators = [l for l in locators if l]
+            locators = [loc for loc in locators if loc]
             items_map = {}
             if locators:
                 q = Q(codigo_reserva_proveedor__in=locators)

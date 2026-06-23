@@ -3,11 +3,13 @@ import logging
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.contrib.auth import views as auth_views
 from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.auth import views as auth_views
 from django.http import JsonResponse
 from django.urls import include, path, re_path
+from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.generic import RedirectView
+from django.views.static import serve
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 from rest_framework_simplejwt.views import TokenObtainPairView
 
@@ -22,9 +24,6 @@ def favicon_view(request):
     from django.shortcuts import redirect
 
     return redirect("/static/images/Logo TravelHub.png")
-
-
-
 
 
 def health_view(request):
@@ -42,8 +41,6 @@ def _protect_docs(view):
 
 # NOTA: En el enrutador maestro NO se declara app_name.
 # El app_name = 'bookings' debe ir EXCLUSIVAMENTE en apps/bookings/urls.py
-
-from django.views.decorators.csrf import ensure_csrf_cookie
 
 urlpatterns = [
     # --- HEALTH & CSP REPORT ---
@@ -79,14 +76,29 @@ urlpatterns = [
     path("cms/", include("apps.cms.urls")),
     path("marketing/", include("apps.marketing.urls")),
     path("cotizaciones/", include("apps.cotizaciones.urls")),
+    path("api/", include("travelhub.urls_api")),
     # --- DOCUMENTACIÓN API (PROTEGIDA EN PRODUCCIÓN) ---
     path("api/schema/", _protect_docs(SpectacularAPIView.as_view()), name="schema"),
-    path("api/docs/", _protect_docs(SpectacularSwaggerView.as_view(url_name="schema")), name="swagger-ui-direct"),
-    path("api/redoc/", _protect_docs(SpectacularRedocView.as_view(url_name="schema")), name="redoc-direct"),
+    path(
+        "api/docs/",
+        _protect_docs(SpectacularSwaggerView.as_view(url_name="schema")),
+        name="swagger-ui-direct",
+    ),
+    path(
+        "api/redoc/",
+        _protect_docs(SpectacularRedocView.as_view(url_name="schema")),
+        name="redoc-direct",
+    ),
     # Public routes (no /api/ prefix) for external consumers
     path("schema/", _protect_docs(SpectacularAPIView.as_view()), name="schema_root"),
-    path("docs/", _protect_docs(SpectacularSwaggerView.as_view(url_name="schema_root")), name="swagger-ui"),
-    path("redoc/", _protect_docs(SpectacularRedocView.as_view(url_name="schema_root")), name="redoc"),
+    path(
+        "docs/",
+        _protect_docs(SpectacularSwaggerView.as_view(url_name="schema_root")),
+        name="swagger-ui",
+    ),
+    path(
+        "redoc/", _protect_docs(SpectacularRedocView.as_view(url_name="schema_root")), name="redoc"
+    ),
     # --- DASHBOARD PRINCIPAL ---
     # Redirige a la vista modern_dashboard que ahora reside en bookings
     path(
@@ -104,14 +116,11 @@ urlpatterns = [
 ]
 
 
-
-# Servir media en desarrollo local (y como fallback en producción si el túnel Cloudflare apunta directo al puerto 8000)
-from django.views.static import serve
-from django.urls import re_path
-
-urlpatterns += [
-    re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
-]
-if settings.DEBUG:
+# Servir media en desarrollo local o cuando R2 está desactivado (USE_R2=False).
+# En producción con R2 activo, Cloudflare sirve los archivos directamente —
+# no es necesario (ni deseable) que Django/Gunicorn los sirva.
+if settings.DEBUG or not getattr(settings, "USE_R2", True):
+    urlpatterns += [
+        re_path(r"^media/(?P<path>.*)$", serve, {"document_root": settings.MEDIA_ROOT}),
+    ]
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-

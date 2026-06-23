@@ -63,12 +63,12 @@ class ValidadorBoleto:
 
                     # Vuelo no puede ser en el pasado (más de 1 día)
                     if fecha_vuelo < datetime.now().date() - timedelta(days=1):
-                        self.advertencias.append(f"Vuelo {i+1} ya pasó: {fecha_str}")
+                        self.advertencias.append(f"Vuelo {i + 1} ya pasó: {fecha_str}")
 
                     # Vuelo no puede ser muy lejano (>1 año)
                     en_un_anio = datetime.now().date() + timedelta(days=365)
                     if fecha_vuelo > en_un_anio:
-                        self.advertencias.append(f"Vuelo {i+1} es en más de 1 año: {fecha_str}")
+                        self.advertencias.append(f"Vuelo {i + 1} es en más de 1 año: {fecha_str}")
 
                 except Exception as e:
                     logger.warning(f"Excepción silenciosa capturada: {e}")
@@ -90,14 +90,14 @@ class ValidadorBoleto:
 
             # Origen y destino no pueden ser iguales
             if origen and destino and origen == destino:
-                self.errores.append(f"Vuelo {i+1}: Origen y destino son iguales ({origen})")
+                self.errores.append(f"Vuelo {i + 1}: Origen y destino son iguales ({origen})")
 
             # Validar códigos IATA (3 letras)
             if origen and len(origen) != 3:
-                self.advertencias.append(f"Vuelo {i+1}: Código de origen inválido ({origen})")
+                self.advertencias.append(f"Vuelo {i + 1}: Código de origen inválido ({origen})")
 
             if destino and len(destino) != 3:
-                self.advertencias.append(f"Vuelo {i+1}: Código de destino inválido ({destino})")
+                self.advertencias.append(f"Vuelo {i + 1}: Código de destino inválido ({destino})")
 
     def validar_pasajero(self):
         """Valida datos del pasajero"""

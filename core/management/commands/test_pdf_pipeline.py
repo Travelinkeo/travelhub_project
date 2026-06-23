@@ -9,6 +9,7 @@ Uso:
     python manage.py test_pdf_pipeline --verbose
 """
 
+import logging
 import os
 import sys
 import time
@@ -16,6 +17,8 @@ import traceback
 
 from django.core.files.base import ContentFile
 from django.core.management.base import BaseCommand
+
+logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
@@ -90,9 +93,7 @@ class Command(BaseCommand):
             from core.storage import RawFileStorage
 
             raw = RawFileStorage()
-            raw_type = (
-                type(raw).__bases__[0].__name__ if type(raw).__bases__ else type(raw).__name__
-            )
+            (type(raw).__bases__[0].__name__ if type(raw).__bases__ else type(raw).__name__)
 
             if use_r2:
                 qs_auth = getattr(raw, "querystring_auth", "?")
@@ -102,7 +103,7 @@ class Command(BaseCommand):
                 self.stdout.write(f"      querystring_auth    : {qs_auth}")
                 if qs_auth:
                     self.stdout.write(
-                        f"      querystring_expire  : {qs_exp}s ({qs_exp//3600}h {(qs_exp%3600)//60}m)"
+                        f"      querystring_expire  : {qs_exp}s ({qs_exp // 3600}h {(qs_exp % 3600) // 60}m)"
                     )
                 if c_domain:
                     self.stdout.write(f"      custom_domain       : {c_domain}")
@@ -328,8 +329,8 @@ class Command(BaseCommand):
             try:
                 storage.delete(saved_name)
                 self.stdout.write("      Limpieza         : archivo eliminado [OK]")
-            except Exception:
-                pass
+            except Exception as e:
+                logger.debug("Ignored exception deleting test file: %s", e)
 
             if url_issues:
                 for issue in url_issues:

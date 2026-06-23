@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('automation', '0007_add_missing_usuario_columns'),
+        ("automation", "0007_add_missing_usuario_columns"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='notificacioninteligente',
-            name='ahorro_tiempo',
-            field=models.CharField(blank=True, help_text='Ej: 5 min', max_length=50),
+            model_name="notificacioninteligente",
+            name="ahorro_tiempo",
+            field=models.CharField(blank=True, help_text="Ej: 5 min", max_length=50),
         ),
     ]

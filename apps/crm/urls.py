@@ -1,20 +1,11 @@
 from django.urls import include, path
+from django.utils.module_loading import import_string
+from django.views.generic import RedirectView
 
 # API ViewSets
 from rest_framework.routers import DefaultRouter
 
 from apps.crm.api import ClienteViewSet, PasajeroViewSet
-
-
-def dynamic_view(view_path):
-    from django.utils.module_loading import import_string
-
-    def lazy_view_handler(request, *args, **kwargs):
-        view_class = import_string(view_path)
-        return view_class.as_view()(request, *args, **kwargs)
-
-    return lazy_view_handler
-
 
 from .views import (
     actions_views,
@@ -31,9 +22,17 @@ from .views.marketing_views import AnalyzeCampaignPromptView, DispatchCampaignVi
 
 app_name = "crm"
 
+
+def dynamic_view(view_path):
+    def lazy_view_handler(request, *args, **kwargs):
+        view_class = import_string(view_path)
+        return view_class.as_view()(request, *args, **kwargs)
+
+    return lazy_view_handler
+
+
 router = DefaultRouter()
 router.register(r"clientes", ClienteViewSet, basename="cliente")
-from django.views.generic import RedirectView
 
 router.register(r"pasajeros", PasajeroViewSet, basename="pasajero")
 

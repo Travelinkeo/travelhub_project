@@ -28,6 +28,15 @@ from apps.bookings.models import ProductoServicio
 from core.api.mixins.tenant import TenantViewSetMixin
 from core.auth_helpers import InternalAPIAuthMixin
 
+from .views import api_ingest_pnr_view, proveedores_views, public_itinerary_view
+from .views.dashboard_views import DashboardView
+
+logger = logging.getLogger(__name__)
+
+app_name = "bookings"
+
+router = DefaultRouter()
+
 
 def dynamic_view(view_path):
     def lazy_view_handler(request, *args, **kwargs):
@@ -43,16 +52,6 @@ def dynamic_fb_view(view_path):
         return view_fn(request, *args, **kwargs)
 
     return lazy_view_handler
-
-
-from .views import api_ingest_pnr_view, proveedores_views, public_itinerary_view
-from .views.dashboard_views import DashboardView
-
-logger = logging.getLogger(__name__)
-
-app_name = "bookings"
-
-router = DefaultRouter()
 
 
 class ProductoServicioSerializer(viewsets.ModelViewSet):
@@ -74,6 +73,9 @@ try:
         filter_backends = [filters.SearchFilter]
         search_fields = ["nombre", "codigo_interno", "descripcion"]
 
+    from apps.bookings.views.proveedores_views import ProveedorViewSet
+
+    router.register(r"proveedores", ProveedorViewSet, basename="proveedor")
     router.register(r"productoservicio", ProductoServicioViewSet, basename="productoservicio")
     router.register(r"cotizaciones", CotizacionViewSet, basename="cotizaciones")
     router.register(r"items-cotizacion", ItemCotizacionViewSet, basename="items-cotizacion")

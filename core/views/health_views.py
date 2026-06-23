@@ -4,9 +4,11 @@ import shutil
 import time
 
 from django.conf import settings
+from django.contrib.admin.views.decorators import staff_member_required
 from django.core.cache import cache
 from django.db import connections
 from django.http import JsonResponse
+from django.views.decorators.http import require_GET
 
 logger = logging.getLogger(__name__)
 
@@ -92,8 +94,8 @@ def _check_celery_queue_depth():
             try:
                 depth = r.llen(queue)
                 warnings[queue] = depth
-            except Exception:
-                pass
+            except Exception as e:
+                logger.debug("Ignored exception reading queue depth: %s", e)
         high = {q: d for q, d in warnings.items() if d > 1000}
         if high:
             return {"ok": False, "queues": high, "detail": f"Queues over 1000: {high}"}
@@ -124,6 +126,8 @@ def _check_db_pool():
         return {"ok": True, "detail": str(e)[:200]}
 
 
+@require_GET
+@staff_member_required
 def health_check(request):
     """
     Health check unificado para monitoreo externo.

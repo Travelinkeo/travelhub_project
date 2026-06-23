@@ -79,7 +79,7 @@ class GodModeDashboardView(UserPassesTestMixin, View):
             actividad.append(
                 {
                     "titulo": "Boleto Procesado",
-                    "detalle": f'Boleto {b.localizador_pnr} subido por {b.agencia.nombre if b.agencia else "Desconocida"}',
+                    "detalle": f"Boleto {b.localizador_pnr} subido por {b.agencia.nombre if b.agencia else 'Desconocida'}",
                     "fecha": b.fecha_subida,
                     "color": "blue",
                 }
@@ -99,7 +99,7 @@ class GodModeDashboardView(UserPassesTestMixin, View):
             actividad.append(
                 {
                     "titulo": f"IA: {log.feature}",
-                    "detalle": f'Modelo {log.model_name} usado por {log.agencia.nombre if log.agencia else "Global"}. Estado: {log.status}',
+                    "detalle": f"Modelo {log.model_name} usado por {log.agencia.nombre if log.agencia else 'Global'}. Estado: {log.status}",
                     "fecha": log.timestamp,
                     "color": "purple" if log.status == "SUCCESS" else "red",
                 }
@@ -177,7 +177,6 @@ class ImpersonateAgencyView(UserPassesTestMixin, View):
                 descripcion=f"SuperAdmin {user.username} inicio impersonacion de {agencia.nombre}",
                 metadata_extra={"action": "impersonate_start", "target_agencia_id": agencia.id},
             )
-
 
             logger.info(f"SuperAdmin {user.username} impersonando a: {agencia.nombre}")
 

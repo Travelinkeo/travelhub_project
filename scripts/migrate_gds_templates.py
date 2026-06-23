@@ -9,12 +9,14 @@ templates_to_process = {
     "ticket_template_sabre.html": "ticket_template_sabre.html",
     "ticket_template_copa_sprk.html": "ticket_template_copa_sprk.html",
     "ticket_template_tk_connect.html": "ticket_template_tk_connect.html",
-    "ticket_template_wingo.html": "ticket_template_wingo.html"
+    "ticket_template_wingo.html": "ticket_template_wingo.html",
 }
+
 
 def process_template(content):
     # Inyectar logo dinamico (Jinja2 syntax)
     img_pattern = re.compile(r'<img\s+class="logo"\s+src="(.*?)"\s+alt="(.*?)">', re.DOTALL)
+
     def repl_img(match):
         default_src = match.group(1)
         alt_text = match.group(2)
@@ -23,8 +25,9 @@ def process_template(content):
             {{% else %}}
                 <img class="logo" src="{default_src}" alt="{alt_text}">
             {{% endif %}}"""
+
     content = img_pattern.sub(repl_img, content)
-    
+
     # Inyectar variables de color de Agencia (Theme Config)
     if "{% if agencia %}" not in content:
         css_injection = """
@@ -36,40 +39,49 @@ def process_template(content):
         {% endif %}
         """
         content = content.replace("</style>", css_injection + "</style>")
-    
+
     # Reemplazar contacto (Jinja2 syntax)
-    contact_pattern = re.compile(r'<div class="header-contact">.*?(?:TELEFONO|INFO).*?</div>', re.DOTALL | re.IGNORECASE)
+    contact_pattern = re.compile(
+        r'<div class="header-contact">.*?(?:TELEFONO|INFO).*?</div>', re.DOTALL | re.IGNORECASE
+    )
+
     def repl_contact(match):
-         return """<div class="header-contact">
+        return """<div class="header-contact">
                 TELEFONO: {{ agencia.telefono | default('+58 000 000 0000') }}<br>
                 MAIL INFO: {{ agencia.email | default('info@agencia.com') | upper }}
             </div>"""
+
     content = contact_pattern.sub(repl_contact, content)
-    
+
     # Reemplazar footer (Jinja2 syntax)
-    footer_pattern = re.compile(r'<footer class="ticket-footer">.*?</footer>', re.DOTALL | re.IGNORECASE)
+    footer_pattern = re.compile(
+        r'<footer class="ticket-footer">.*?</footer>', re.DOTALL | re.IGNORECASE
+    )
+
     def repl_footer(match):
-         return """<footer class="ticket-footer">
+        return """<footer class="ticket-footer">
             <div class="thank-you">Gracias por elegirnos. ¡Te deseamos un excelente viaje!</div>
             @{{ agencia.nombre | default('AGENCIA') | upper }} | {{ agencia.telefono | default('+58 000 000 0000') }} | {{ agencia.direccion | default('S/D') | upper }}
         </footer>"""
+
     content = footer_pattern.sub(repl_footer, content)
-    
+
     return content
+
 
 os.makedirs(TARGET_DIR, exist_ok=True)
 
 for src_name, tgt_name in templates_to_process.items():
     src_path = os.path.join(SOURCE_DIR, src_name)
     tgt_path = os.path.join(TARGET_DIR, tgt_name)
-    
+
     if os.path.exists(src_path):
-        with open(src_path, 'r', encoding='utf-8') as f:
+        with open(src_path, encoding="utf-8") as f:
             content = f.read()
-        
+
         content = process_template(content)
-        
-        with open(tgt_path, 'w', encoding='utf-8') as f:
+
+        with open(tgt_path, "w", encoding="utf-8") as f:
             f.write(content)
         print(f"✅ Migrado y adaptado JINJA2: {tgt_name}")
     else:

@@ -55,7 +55,9 @@ def _generar_asiento_contable(factura_id):
     try:
         factura = FacturaModel.objects.get(pk=factura_id)
         asiento = ContabilidadService.generar_asiento_desde_factura(factura)
-        logger.info(f"Asiento {asiento.numero_asiento} generado para factura {factura.numero_factura}")
+        logger.info(
+            f"Asiento {asiento.numero_asiento} generado para factura {factura.numero_factura}"
+        )
     except Exception as e:
         logger.error(f"Error generando asiento para factura {factura_id}: {e}")
 

@@ -8,7 +8,7 @@ media_root = settings.MEDIA_ROOT
 print(f"Subiendo archivos desde {media_root} hacia R2...")
 
 uploaded_count = 0
-for root, dirs, files in os.walk(media_root):
+for root, _dirs, files in os.walk(media_root):
     for file in files:
         file_path = os.path.join(root, file)
         rel_path = os.path.relpath(file_path, media_root)

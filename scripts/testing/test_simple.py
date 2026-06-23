@@ -1,12 +1,8 @@
 import requests
-import json
 
 # Probar el endpoint de login directamente
 url = "http://localhost:8000/api/auth/login/"
-data = {
-    "username": "Armando3105",
-    "password": "Linkeo1331*"
-}
+data = {"username": "Armando3105", "password": "Linkeo1331*"}
 
 print("Probando login...")
 print(f"URL: {url}")

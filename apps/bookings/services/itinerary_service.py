@@ -6,6 +6,12 @@ from django.conf import settings
 from django.core.signing import BadSignature, SignatureExpired, TimestampSigner
 from django.urls import reverse
 
+from apps.bookings.models import SegmentoVuelo
+from apps.common.models import Ciudad
+from apps.common.services.catalog_service import CatalogNormalizationService
+
+logger = logging.getLogger(__name__)
+
 
 def _parse_date_robust(date_str):
     """
@@ -51,13 +57,6 @@ def _parse_date_robust(date_str):
             continue
 
     return None
-
-
-from apps.bookings.models import SegmentoVuelo
-from apps.common.models import Ciudad
-from apps.common.services.catalog_service import CatalogNormalizationService
-
-logger = logging.getLogger(__name__)
 
 
 class ItineraryCryptoService:

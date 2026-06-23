@@ -52,4 +52,4 @@ class Command(BaseCommand):
 
         except Exception as e:
             logger.error(f"Error provisionando INATUR: {e}")
-            raise CommandError(f"Error: {e}")
+            raise CommandError(f"Error: {e}") from e

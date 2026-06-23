@@ -24,7 +24,7 @@ class TestUnifiedInvoicingFlow:
             from django.apps import apps
 
             PlanContable = apps.get_model("contabilidad", "PlanContable")
-            AsientoContable = apps.get_model("contabilidad", "AsientoContable")
+            apps.get_model("contabilidad", "AsientoContable")
             PlanContable.objects.create(
                 codigo_cuenta="1.1.2.01",
                 nombre_cuenta="Clientes Nacionales",
@@ -71,7 +71,7 @@ class TestUnifiedInvoicingFlow:
             )
 
             # 3. Crear Item de Venta
-            item_venta = ItemVenta.objects.create(
+            ItemVenta.objects.create(
                 venta=venta,
                 producto_servicio=producto,
                 cantidad=1,

@@ -1,17 +1,17 @@
-
 #!/usr/bin/env python3
 """
 Script para generar el Manual de TravelHub en PDF y enviarlo por correo.
 """
+
 import os
-import sys
 import smtplib
-import markdown
-from pathlib import Path
+from email import encoders
+from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from email.mime.base import MIMEBase
-from email import encoders
+from pathlib import Path
+
+import markdown
 
 # ─── CONFIG ────────────────────────────────────────────────────────────────────
 MANUAL_MD_PATH = r"C:\Users\ARMANDO\.gemini\antigravity\brain\5e11f3b7-df37-4e76-b5cc-2a2e63d18f1d\Manual_TravelHub_Biblia_Cuento.md"
@@ -22,8 +22,8 @@ EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
 EMAIL_USER = "boletotravelinkeo@gmail.com"
 EMAIL_PASS = "zqar oyma zdxk ylaj"
-EMAIL_TO   = "travelinkeo@gmail.com"
-EMAIL_CC   = "boletotravelinkeo@gmail.com"
+EMAIL_TO = "travelinkeo@gmail.com"
+EMAIL_CC = "boletotravelinkeo@gmail.com"
 # ───────────────────────────────────────────────────────────────────────────────
 
 HTML_TEMPLATE = """<!DOCTYPE html>
@@ -233,18 +233,29 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 </html>
 """
 
+
 def generar_pdf():
     print("📄 Leyendo el manual en Markdown...")
-    with open(MANUAL_MD_PATH, "r", encoding="utf-8") as f:
+    with open(MANUAL_MD_PATH, encoding="utf-8") as f:
         md_text = f.read()
 
     # Reemplazar referencias a screenshots locales con rutas absolutas
     screenshots = {
-        "manual_dashboard_20260410_212450_1775870722868.png": os.path.join(SCREENSHOTS_DIR, "manual_dashboard_20260410_212450_1775870722868.png"),
-        "manual_vuelos_20260410_212411_1775870686412.png": os.path.join(SCREENSHOTS_DIR, "manual_vuelos_20260410_212411_1775870686412.png"),
-        "manual_clientes_20260410_212620_1775870975807.png": os.path.join(SCREENSHOTS_DIR, "manual_clientes_20260410_212620_1775870975807.png"),
-        "manual_cotizaciones_20260410_212900_1775871084459.png": os.path.join(SCREENSHOTS_DIR, "manual_cotizaciones_20260410_212900_1775871084459.png"),
-        "manual_boletos_20260410_213100_1775871179742.png": os.path.join(SCREENSHOTS_DIR, "manual_boletos_20260410_213100_1775871179742.png"),
+        "manual_dashboard_20260410_212450_1775870722868.png": os.path.join(
+            SCREENSHOTS_DIR, "manual_dashboard_20260410_212450_1775870722868.png"
+        ),
+        "manual_vuelos_20260410_212411_1775870686412.png": os.path.join(
+            SCREENSHOTS_DIR, "manual_vuelos_20260410_212411_1775870686412.png"
+        ),
+        "manual_clientes_20260410_212620_1775870975807.png": os.path.join(
+            SCREENSHOTS_DIR, "manual_clientes_20260410_212620_1775870975807.png"
+        ),
+        "manual_cotizaciones_20260410_212900_1775871084459.png": os.path.join(
+            SCREENSHOTS_DIR, "manual_cotizaciones_20260410_212900_1775871084459.png"
+        ),
+        "manual_boletos_20260410_213100_1775871179742.png": os.path.join(
+            SCREENSHOTS_DIR, "manual_boletos_20260410_213100_1775871179742.png"
+        ),
     }
     for fname, fpath in screenshots.items():
         if os.path.exists(fpath):
@@ -253,15 +264,15 @@ def generar_pdf():
 
     print("🔄 Convirtiendo Markdown a HTML...")
     html_content = markdown.markdown(
-        md_text,
-        extensions=["tables", "fenced_code", "toc", "attr_list"]
+        md_text, extensions=["tables", "fenced_code", "toc", "attr_list"]
     )
 
     full_html = HTML_TEMPLATE.format(content=html_content)
 
     print("📑 Generando PDF con WeasyPrint...")
     try:
-        from weasyprint import HTML, CSS
+        from weasyprint import HTML
+
         HTML(string=full_html, base_url=SCREENSHOTS_DIR).write_pdf(PDF_OUTPUT)
         size_kb = os.path.getsize(PDF_OUTPUT) / 1024
         print(f"✅ PDF generado: {PDF_OUTPUT} ({size_kb:.1f} KB)")
@@ -308,7 +319,9 @@ Este mensaje fue generado automáticamente por TravelHub ERP.
         part = MIMEBase("application", "octet-stream")
         part.set_payload(f.read())
         encoders.encode_base64(part)
-        part.add_header("Content-Disposition", f'attachment; filename="Manual_TravelHub_2026_Completo.pdf"')
+        part.add_header(
+            "Content-Disposition", 'attachment; filename="Manual_TravelHub_2026_Completo.pdf"'
+        )
         msg.attach(part)
 
     try:

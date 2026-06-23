@@ -149,10 +149,10 @@ class FastDeterministicParsers:
         lines = text_upper.splitlines()
         clean_lines = []
         for line in lines:
-            l = line.strip()
+            ls = line.strip()
             # Ignorar líneas que suelen ser ruido entre vuelos
             if any(
-                x in l
+                x in ls
                 for x in [
                     "VIEWTRIP",
                     "CHECK-IN",
@@ -166,7 +166,7 @@ class FastDeterministicParsers:
                 ]
             ):
                 continue
-            clean_lines.append(l)
+            clean_lines.append(ls)
         text_for_flights = "\n".join(clean_lines)
 
         # Patrón ultra-robusto para Sabre/Amadeus:
@@ -407,7 +407,8 @@ def _parse_date_robust(date_str):
                 # Si el mes ya pasó hace mucho (ej: estamos en Dic y la fecha es Ene),
                 # podría ser del año que viene, pero para emisión solemos usar el actual.
             return dt.date()
-        except Exception:
+        except Exception as e:
+            logger.debug("Ignored exception parsing date: %s", e)
             continue
 
     return None

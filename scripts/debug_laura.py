@@ -1,15 +1,16 @@
-
-import sys
-import os
 import json
+import os
+import sys
+
 import pdfplumber
 
 # Add project root to path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 # Set up Django environment
 import django
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "travelhub.settings")
 django.setup()
 
 from apps.automation.parsers.sabre_parser import SabreParser

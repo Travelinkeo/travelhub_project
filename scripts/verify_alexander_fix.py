@@ -1,14 +1,14 @@
-
-import sys
-import os
 import json
+import os
+import sys
 
 # Add project root to path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 # Set up Django environment
 import django
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "travelhub.settings")
 django.setup()
 
 from apps.automation.parsers.sabre_parser import SabreParser
@@ -19,7 +19,7 @@ if not os.path.exists(text_file):
     print(f"File not found: {text_file}")
     sys.exit(1)
 
-with open(text_file, "r", encoding="utf-8") as f:
+with open(text_file, encoding="utf-8") as f:
     text_content = f.read()
 
 parser = SabreParser()

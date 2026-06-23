@@ -35,10 +35,43 @@ Este documento resume controles actuales y hoja de ruta de endurecimiento.
 - Alertas anómalas (Sentry / Prometheus métricas auth).
 
 ## Buenas Prácticas Recomendadas
-- Nunca subir secrets a VCS (usar .env + gestor de secretos en PROD).
+- Nunca subir secrets a VCS (usar `.env` + gestor de secretos en PROD).
 - Revisar permisos de base de datos (principio de menor privilegio).
 - Revisiones de código enfocadas en: inyección, exposición de datos, mass assignment.
 - Tests automáticos para endpoints críticos (auth, creación de ventas, auditoría).
+
+## Gestión de Superusuarios y Credenciales
+
+**Regla:** nunca crear ni resetear usuarios con scripts que contengan contraseñas
+hardcodeadas. Las credenciales nunca deben vivir en el repositorio (ni siquiera
+en scripts "temporales" bajo `_para_revisar/`).
+
+### Crear superusuario
+```bash
+# Forma estándar (prompt interactivo, contraseña no se loguea):
+python manage.py createsuperuser
+
+# O por variables de entorno en un script, leyendo de getpass / os.environ:
+DJANGO_SUPERUSER_USERNAME=admin DJANGO_SUPERUSER_EMAIL=admin@example.com \
+DJANGO_SUPERUSER_PASSWORD=$(pass travelhub/admin) \
+python manage.py createsuperuser --noinput
+```
+
+### Resetear contraseña
+Usar `scripts/reset_password.py` (ya existe): pide la nueva contraseña con
+`getpass()`, **nunca** la pasa como argumento ni la hardcodea.
+
+```bash
+python scripts/reset_password.py
+```
+
+### Antecedente (limpieza 2026-06-22)
+Se eliminaron scripts en `_para_revisar/scripts_temp/` que contenían contraseñas
+en texto plano (`admin123456`, `viaggio1`) y referencias a usuarios reales.
+**Acción obligatoria si esas credenciales se usaron en algún entorno:** rotarlas
+inmediatamente y, si el repositorio es compartido/público, purgarlas del
+historial de git con `git filter-repo` (una vez eliminadas del working tree,
+permanecen en commits antiguos).
 
 ## Checklist Rápido (Tick al implementar)
 - [x] CORS restrictivo

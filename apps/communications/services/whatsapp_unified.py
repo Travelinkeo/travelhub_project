@@ -143,23 +143,6 @@ class WhatsAppService:
         Obtiene el QR de Evolution.
         Evolution API v2.2.x no expone QR via REST. Retorna la URL del Manager UI.
         """
-        qr_data = EvolutionService.get_qr_code(session_name)
-
-        if qr_data:
-            if isinstance(qr_data, str):
-                base64 = qr_data
-            elif isinstance(qr_data, dict):
-                base64 = qr_data.get("base64") or qr_data.get("code")
-                if not base64:
-                    base64 = None
-            else:
-                base64 = None
-
-            if base64 and isinstance(base64, str):
-                if base64.startswith("data:image"):
-                    return base64
-                return f"data:image/png;base64,{base64}"
-
         return EvolutionService.get_manager_qr_url(session_name)
 
     @classmethod
@@ -295,8 +278,8 @@ Su reserva ha sido creada exitosamente.
 
 📋 *Detalles:*
 • Localizador: *{venta.localizador}*
-• Fecha: {venta.fecha_venta.strftime('%d/%m/%Y')}
-• Total: {venta.moneda.simbolo if venta.moneda else ''}{venta.total_venta}
+• Fecha: {venta.fecha_venta.strftime("%d/%m/%Y")}
+• Total: {venta.moneda.simbolo if venta.moneda else ""}{venta.total_venta}
 • Estado: {venta.get_estado_display()}
 
 Gracias por confiar en nosotros.
@@ -351,9 +334,9 @@ Le recordamos que tiene un saldo pendiente en su reserva.
 
 📋 *Detalles:*
 • Localizador: *{venta.localizador}*
-• Total: {venta.moneda.simbolo if venta.moneda else ''}{venta.total_venta}
-• Pagado: {venta.moneda.simbolo if venta.moneda else ''}{venta.total_venta - venta.saldo_pendiente}
-• *Saldo pendiente: {venta.moneda.simbolo if venta.moneda else ''}{venta.saldo_pendiente}*
+• Total: {venta.moneda.simbolo if venta.moneda else ""}{venta.total_venta}
+• Pagado: {venta.moneda.simbolo if venta.moneda else ""}{venta.total_venta - venta.saldo_pendiente}
+• *Saldo pendiente: {venta.moneda.simbolo if venta.moneda else ""}{venta.saldo_pendiente}*
 
 Por favor, proceda con el pago para confirmar su reserva.
 
@@ -385,8 +368,8 @@ Hemos recibido su pago correctamente. ¡Gracias!
 
 📋 *Detalles del pago:*
 • Localizador: *{venta.localizador}*
-• Monto pagado: {pago_venta.moneda.simbolo if pago_venta.moneda else ''}{pago_venta.monto}
-• Fecha: {pago_venta.fecha_pago.strftime('%d/%m/%Y')}
+• Monto pagado: {pago_venta.moneda.simbolo if pago_venta.moneda else ""}{pago_venta.monto}
+• Fecha: {pago_venta.fecha_pago.strftime("%d/%m/%Y")}
 • Método: {pago_venta.get_metodo_display()}
 
 {saldo_msg}
@@ -403,8 +386,6 @@ _Equipo TravelHub_
 
 try:
     from pydantic import BaseModel
-
-    from apps.communications.services.telegram_unified import enviar_alerta_telegram
 
     class AnalisisMensajeSchema(BaseModel):
         es_solicitud_viaje: bool

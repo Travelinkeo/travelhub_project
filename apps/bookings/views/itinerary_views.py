@@ -26,7 +26,7 @@ def public_itinerary_view(request, token):
     try:
         agencia = Agencia.objects.get(pk=agencia_id)
     except Agencia.DoesNotExist:
-        raise Http404("La agencia vinculada al itinerario no existe.")
+        raise Http404("La agencia vinculada al itinerario no existe.") from None
 
     with agency_context(agencia):
         # 2. Consulta optimizada en una sola transacción SQL (Multi-Tenant Guard explícito)
@@ -48,7 +48,7 @@ def public_itinerary_view(request, token):
                 .get(pk=venta_id, agencia_id=agencia_id, is_deleted=False)
             )
         except Venta.DoesNotExist:
-            raise Http404("El itinerario solicitado no se encuentra en los registros.")
+            raise Http404("El itinerario solicitado no se encuentra en los registros.") from None
 
         # 3. Detectar si una sub-sección es llamada asíncronamente por HTMX (ej: recargar el clima o estatus de vuelo)
         is_htmx = request.headers.get("HX-Request") == "true" or request.headers.get("HX-Request")

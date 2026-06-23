@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("bookings", "0042_alter_actividadservicio_incluye_and_more"),
         ("core", "0040_aeropuerto"),

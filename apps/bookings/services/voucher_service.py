@@ -5,6 +5,12 @@ from datetime import datetime
 
 from django.template.loader import render_to_string
 
+from apps.bookings.models import Venta
+from apps.common.services.pdf_renderer import PdfRendererService
+from apps.common.utils.images import get_agencia_logo_b64
+
+logger = logging.getLogger(__name__)
+
 
 def is_brand_color_dark(hex_color: str) -> bool:
     if not hex_color or not isinstance(hex_color, str):
@@ -18,13 +24,6 @@ def is_brand_color_dark(hex_color: str) -> bool:
         return luma < 128
     except (ValueError, IndexError):
         return True
-
-
-from apps.bookings.models import Venta
-from apps.common.services.pdf_renderer import PdfRendererService
-from apps.common.utils.images import get_agencia_logo_b64
-
-logger = logging.getLogger(__name__)
 
 
 # Locale se configura vía monkey-patch global en travelhub/__init__.py

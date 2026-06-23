@@ -1,7 +1,11 @@
 import logging
+from typing import TYPE_CHECKING
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
+
+if TYPE_CHECKING:
+    from apps.bookings.models import Venta
 
 
 def __getattr__(name):

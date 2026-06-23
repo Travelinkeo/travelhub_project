@@ -279,7 +279,7 @@ def parsear_boleto_individual(boleto_id, **kwargs):
         service = TicketParserService()
         resultado = service.procesar_boleto(
             boleto_id,
-            ignore_manual=kwargs.get("ignore_manual", False),
+            ignore_manual=kwargs.get("ignore_manual", True),
             bypass_cache=kwargs.get("bypass_cache", False),
         )
         if resultado:
@@ -540,6 +540,7 @@ def enviar_recordatorios_vuelo_task():
                         datos = boleto.datos_parseados
                         if isinstance(datos, str):
                             import json
+
                             datos = json.loads(datos)
 
                         normalized = datos.get("normalized", datos)
@@ -561,8 +562,9 @@ def enviar_recordatorios_vuelo_task():
                                 if not fecha_vuelo:
                                     continue
 
-                                from django.utils.timezone import make_aware
                                 import datetime
+
+                                from django.utils.timezone import make_aware
 
                                 dt_vuelo = make_aware(
                                     datetime.datetime.combine(
@@ -575,7 +577,8 @@ def enviar_recordatorios_vuelo_task():
                                     enviar_recordatorio_vuelo(boleto, horas_antes=24)
                                     total_enviados += 1
                                     break
-                            except Exception:
+                            except Exception as exc:
+                                logger.debug("Ignored exception parsing reminder date: %s", exc)
                                 continue
                     except Exception as e:
                         logger.error(f"Error procesando boleto {boleto.pk} para recordatorio: {e}")

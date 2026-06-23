@@ -1,9 +1,8 @@
-﻿import pytest
-pytestmark = pytest.mark.skip(reason="Funciones de parser refactorizadas - pendiente actualización")
-
 import pytest
 
 from apps.automation.parsers import ticket_parser
+
+pytestmark = pytest.mark.skip(reason="Funciones de parser refactorizadas - pendiente actualización")
 
 
 @pytest.mark.skip(reason="KIU parser is a placeholder")
@@ -21,14 +20,14 @@ def test_kiu_normalized_block_minimal():
         "CCS M123 CCS 17AUG\n"
     )
     data = ticket_parser._parse_kiu_ticket(sample, "")
-    assert 'normalized' in data, 'Debe existir bloque normalized'
-    n = data['normalized']
-    assert n.get('source_system') == 'KIU'
-    assert n.get('ticket_number') == data.get('NUMERO_DE_BOLETO')
-    assert n.get('reservation_code') in ('ABC123', 'C1/ABC123')  # depende de heurística
-    assert n.get('issuing_date_iso') == '2025-08-17'
-    assert n.get('fare_currency') == 'USD'
-    assert n.get('total_currency') == 'USD'
+    assert "normalized" in data, "Debe existir bloque normalized"
+    n = data["normalized"]
+    assert n.get("source_system") == "KIU"
+    assert n.get("ticket_number") == data.get("NUMERO_DE_BOLETO")
+    assert n.get("reservation_code") in ("ABC123", "C1/ABC123")  # depende de heurística
+    assert n.get("issuing_date_iso") == "2025-08-17"
+    assert n.get("fare_currency") == "USD"
+    assert n.get("total_currency") == "USD"
 
 
 def test_sabre_normalized_block_minimal():
@@ -44,11 +43,11 @@ def test_sabre_normalized_block_minimal():
         "Please contact your travel arranger\n"
     )
     data = ticket_parser._parse_sabre_ticket(sample)
-    assert 'normalized' in data, 'Debe existir bloque normalized'
-    n = data['normalized']
-    assert n.get('source_system') == 'SABRE'
-    assert n.get('ticket_number') == data.get('numero_boleto')
-    assert n.get('reservation_code') == data.get('codigo_reservacion')
-    assert n.get('issuing_date_iso') is not None
-    assert n.get('fare_currency') == 'USD'
-    assert n.get('total_currency') == 'USD'
+    assert "normalized" in data, "Debe existir bloque normalized"
+    n = data["normalized"]
+    assert n.get("source_system") == "SABRE"
+    assert n.get("ticket_number") == data.get("numero_boleto")
+    assert n.get("reservation_code") == data.get("codigo_reservacion")
+    assert n.get("issuing_date_iso") is not None
+    assert n.get("fare_currency") == "USD"
+    assert n.get("total_currency") == "USD"

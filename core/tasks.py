@@ -42,6 +42,7 @@ _TASK_MAPPINGS = {
     "notificar_boleto_procesado_task": "apps.common.tasks",
     "process_twilio_voice_quote_task": "apps.common.tasks",
     "fetch_evolution_qr_task": "apps.common.tasks",
+    "fetch_all_qr_codes_task": "apps.common.tasks",
     # apps.bookings.tasks
     "parsear_boleto_individual": "apps.bookings.tasks",
     "retry_queued_boletos": "apps.bookings.tasks",

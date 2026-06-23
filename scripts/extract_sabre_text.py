@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 """Script para extraer texto completo de PDF SABRE"""
+
 import pdfplumber
 
 file_path = r"C:\Users\ARMANDO\Downloads\Boletos\SABRE\Recibo de pasaje electrónico, 22 mayo para MAURICIO ISAZA.pdf"
@@ -11,7 +11,7 @@ with pdfplumber.open(file_path) as pdf:
     for page in pdf.pages:
         full_text += page.extract_text() + "\n\n"
 
-with open(output_file, 'w', encoding='utf-8') as f:
+with open(output_file, "w", encoding="utf-8") as f:
     f.write(full_text)
 
 print(f"Texto extraído y guardado en: {output_file}")

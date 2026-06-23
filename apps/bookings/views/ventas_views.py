@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q, Sum
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import CreateView, DetailView, ListView, UpdateView
@@ -199,9 +200,6 @@ class VentaDetailView(HtmxResponseMixin, SaaSMixin, LoginRequiredMixin, DetailVi
         context["ai_tips"] = list(set(ai_tips))[:3]  # Max 3 tips únicos
 
         return context
-
-
-from django.shortcuts import get_object_or_404, redirect
 
 
 class VentaAssignClientView(LoginRequiredMixin, View):

@@ -42,7 +42,9 @@ def rate_limit(limit=20, period=60):
 
 class PublicItineraryView(DetailView):
     model = Venta
-    queryset = Venta.all_objects.select_related("agencia", "cliente").all()  # Bypass TenantManager for public UUID access
+    queryset = Venta.all_objects.select_related(
+        "agencia", "cliente"
+    ).all()  # Bypass TenantManager for public UUID access
 
     @method_decorator(rate_limit(limit=20, period=60))
     def dispatch(self, request, *args, **kwargs):
@@ -110,7 +112,9 @@ class PublicItineraryView(DetailView):
 class PublicVoucherPDFView(DetailView):
     # Reuse logic but accessible via UUID for public download
     model = Venta
-    queryset = Venta.all_objects.select_related("agencia", "cliente").all()  # Bypass TenantManager for public UUID access
+    queryset = Venta.all_objects.select_related(
+        "agencia", "cliente"
+    ).all()  # Bypass TenantManager for public UUID access
     slug_field = "uuid"
 
     @method_decorator(rate_limit(limit=10, period=60))

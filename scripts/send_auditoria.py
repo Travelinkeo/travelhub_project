@@ -1,6 +1,5 @@
-import sys
-from django.core.mail import send_mail, get_connection
 from django.conf import settings
+from django.core.mail import get_connection, send_mail
 
 subject = "Auditoría CTO: TravelHub SaaS (Diagnóstico Integral)"
 message = """Aquí tienes mi auditoría exhaustiva, directa y sin censura tras haber penetrado hasta las entrañas de la arquitectura de TravelHub. 
@@ -130,16 +129,16 @@ Cierra por un rato el Marketing Hub y el CMS Auto-Generado. Tienes un ERP asesin
 Fin del Diagnóstico.
 """
 
-html_message = message.replace('\n', '<br>')
+html_message = message.replace("\n", "<br>")
 
 try:
     connection = get_connection(
-        backend='django.core.mail.backends.smtp.EmailBackend',
+        backend="django.core.mail.backends.smtp.EmailBackend",
         host=settings.EMAIL_HOST,
         port=settings.EMAIL_PORT,
         username=settings.EMAIL_HOST_USER,
         password=settings.EMAIL_HOST_PASSWORD,
-        use_tls=settings.EMAIL_USE_TLS
+        use_tls=settings.EMAIL_USE_TLS,
     )
     send_mail(
         subject=subject,
@@ -148,7 +147,7 @@ try:
         recipient_list=["travelinkeo@gmail.com"],
         fail_silently=False,
         html_message=html_message,
-        connection=connection
+        connection=connection,
     )
     print("SUCCESS_ENVIADO_RED")
 except Exception as e:

@@ -31,11 +31,7 @@ def _verify_telegram_init_data(init_data: str) -> bool:
         hash_value = parsed.get("hash", [None])[0]
         if not hash_value:
             return False
-        data_check_string = "\n".join(
-            f"{k}={v}"
-            for k, v in sorted(parsed.items())
-            if k != "hash"
-        )
+        data_check_string = "\n".join(f"{k}={v}" for k, v in sorted(parsed.items()) if k != "hash")
         secret_key = hmac.new(
             b"WebAppData", settings.TELEGRAM_BOT_TOKEN.encode(), hashlib.sha256
         ).digest()
@@ -54,7 +50,9 @@ def generate_flyer_api(request):
     if request.method != "POST":
         return JsonResponse({"error": "Método no permitido"}, status=405)
 
-    init_data = request.META.get("HTTP_TELEGRAM_INIT_DATA") or request.headers.get("X-Telegram-Init-Data", "")
+    init_data = request.META.get("HTTP_TELEGRAM_INIT_DATA") or request.headers.get(
+        "X-Telegram-Init-Data", ""
+    )
     if init_data:
         if not _verify_telegram_init_data(init_data):
             return JsonResponse({"error": "Firma de Telegram inválida"}, status=403)

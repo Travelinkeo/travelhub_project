@@ -1,12 +1,13 @@
-import sys
-import os
 import logging
+import os
+import sys
 from pathlib import Path
 
 # Setup Django environment
 sys.path.append(str(Path.cwd()))
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "travelhub.settings")
 import django
+
 django.setup()
 
 from apps.automation.parsers.kiu_parser import KIUParser
@@ -18,9 +19,9 @@ text_from_log = """SAN ANTONIO V01187 G 2FEB 0850 0950 GPROMO 23K OK
 CARACAS
 PARA MAYOR INFORMACION INGRESAR AL SIGUIENTE LINK HTTP://WWW.CONVIASA.AERO/ES/"""
 
-print("="*60)
+print("=" * 60)
 print("VERIFICANDO KIU PARSER LOGIC")
-print("="*60)
+print("=" * 60)
 
 parser = KIUParser()
 flights = parser._extract_flights(text_from_log)

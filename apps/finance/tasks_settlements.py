@@ -19,8 +19,7 @@ logger = logging.getLogger(__name__)
     soft_time_limit=540,
 )
 def generar_liquidaciones_mensuales_task(anio=None, mes=None, agencia_id=None):
-    from core.api import agency_context
-    from core.api import Agencia
+    from core.api import Agencia, agency_context
 
     referencia = timezone.now()
     if anio is None:

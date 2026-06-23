@@ -1,9 +1,9 @@
 from django.db import migrations
 
-class Migration(migrations.Migration):
 
+class Migration(migrations.Migration):
     dependencies = [
-        ('core', '0040_aeropuerto'),
+        ("core", "0040_aeropuerto"),
     ]
 
     operations = [
@@ -22,6 +22,6 @@ class Migration(migrations.Migration):
             DROP TABLE IF EXISTS core_liquidacionproveedor CASCADE;
             DROP TABLE IF EXISTS core_itemliquidacion CASCADE;
             """,
-            reverse_sql=""
+            reverse_sql="",
         ),
     ]

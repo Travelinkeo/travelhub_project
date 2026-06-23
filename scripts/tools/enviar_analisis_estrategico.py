@@ -1,26 +1,26 @@
-
 #!/usr/bin/env python3
 """
 Genera PDF del análisis estratégico de TravelHub y lo envía por correo.
 """
+
 import os
 import smtplib
-import markdown
-from pathlib import Path
+from email import encoders
+from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from email.mime.base import MIMEBase
-from email import encoders
+
+import markdown
 
 ANALISIS_MD = r"C:\Users\ARMANDO\.gemini\antigravity\brain\5e11f3b7-df37-4e76-b5cc-2a2e63d18f1d\Analisis_Estrategico_TravelHub.md"
-PDF_OUTPUT  = r"C:\Users\ARMANDO\.gemini\antigravity\brain\5e11f3b7-df37-4e76-b5cc-2a2e63d18f1d\Analisis_Estrategico_TravelHub.pdf"
+PDF_OUTPUT = r"C:\Users\ARMANDO\.gemini\antigravity\brain\5e11f3b7-df37-4e76-b5cc-2a2e63d18f1d\Analisis_Estrategico_TravelHub.pdf"
 
-EMAIL_HOST  = "smtp.gmail.com"
-EMAIL_PORT  = 587
-EMAIL_USER  = "boletotravelinkeo@gmail.com"
-EMAIL_PASS  = "zqar oyma zdxk ylaj"
-EMAIL_TO    = "travelinkeo@gmail.com"
-EMAIL_CC    = "boletotravelinkeo@gmail.com"
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_USER = "boletotravelinkeo@gmail.com"
+EMAIL_PASS = "zqar oyma zdxk ylaj"
+EMAIL_TO = "travelinkeo@gmail.com"
+EMAIL_CC = "boletotravelinkeo@gmail.com"
 
 HTML_TEMPLATE = """<!DOCTYPE html>
 <html lang="es">
@@ -117,9 +117,10 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 </html>
 """
 
+
 def generar_pdf():
     print("📄 Leyendo análisis estratégico...")
-    with open(ANALISIS_MD, "r", encoding="utf-8") as f:
+    with open(ANALISIS_MD, encoding="utf-8") as f:
         md_text = f.read()
 
     print("🔄 Convirtiendo a HTML...")
@@ -128,18 +129,20 @@ def generar_pdf():
 
     print("📑 Generando PDF...")
     from weasyprint import HTML
+
     HTML(string=full_html).write_pdf(PDF_OUTPUT)
     kb = os.path.getsize(PDF_OUTPUT) / 1024
     print(f"✅ PDF listo: {PDF_OUTPUT} ({kb:.1f} KB)")
     return True
 
+
 def enviar_correo():
     print(f"\n📧 Enviando a {EMAIL_TO}...")
 
     msg = MIMEMultipart()
-    msg["From"]    = f"TravelHub Estrategia <{EMAIL_USER}>"
-    msg["To"]      = EMAIL_TO
-    msg["Cc"]      = EMAIL_CC
+    msg["From"] = f"TravelHub Estrategia <{EMAIL_USER}>"
+    msg["To"] = EMAIL_TO
+    msg["Cc"] = EMAIL_CC
     msg["Subject"] = "🧠 TravelHub — Análisis Estratégico Fundador (PDF Adjunto)"
 
     cuerpo = """
@@ -175,7 +178,9 @@ travelhub.cc
         parte = MIMEBase("application", "octet-stream")
         parte.set_payload(f.read())
         encoders.encode_base64(parte)
-        parte.add_header("Content-Disposition", 'attachment; filename="Analisis_Estrategico_TravelHub_2026.pdf"')
+        parte.add_header(
+            "Content-Disposition", 'attachment; filename="Analisis_Estrategico_TravelHub_2026.pdf"'
+        )
         msg.attach(parte)
 
     server = smtplib.SMTP(EMAIL_HOST, EMAIL_PORT)
@@ -184,6 +189,7 @@ travelhub.cc
     server.sendmail(EMAIL_USER, [EMAIL_TO, EMAIL_CC], msg.as_string())
     server.quit()
     print(f"✅ Correo enviado a: {EMAIL_TO}, {EMAIL_CC}")
+
 
 if __name__ == "__main__":
     print("=" * 52)

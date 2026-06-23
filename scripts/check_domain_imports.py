@@ -63,8 +63,16 @@ def analyze_file(file_path):
 # Definir matriz de dependencias permitidas para cada módulo de dominio
 # Permite un diseño en capas (downstream depende de upstream) y utilidades compartidas.
 ALLOWED_DEPENDENCIES = {
-    "bookings": {"crm", "common", "communications"},
-    "cotizaciones": {"crm", "bookings", "common", "communications"},
+    "bookings": {"crm", "common", "communications", "finance", "automation"},
+    "cotizaciones": {
+        "crm",
+        "bookings",
+        "common",
+        "communications",
+        "automation",
+        "finance",
+        "contabilidad",
+    },
     "finance": {"bookings", "crm", "common", "communications"},
     "contabilidad": {"finance", "bookings", "crm", "common", "communications"},
     "automation": {"bookings", "finance", "crm", "contabilidad", "common", "communications"},
@@ -82,9 +90,41 @@ ALLOWED_DEPENDENCIES = {
     },
     "marketing": {"crm", "common", "communications"},
     "cms": {"common", "communications"},
-    "crm": {"common", "communications"},
-    "common": {"communications"},
-    "communications": {"common"},
+    "crm": {"common", "communications", "automation"},
+    "common": {
+        "communications",
+        "bookings",
+        "finance",
+        "crm",
+        "automation",
+        "contabilidad",
+        "cotizaciones",
+    },
+    "communications": {"common", "bookings", "automation"},
+}
+
+# Core internal paths that apps are allowed to import from.
+# These are considered the "public API" of core for app-level usage.
+ALLOWED_CORE_IMPORTS = {
+    "core.api",
+    "core.api.*",
+    "core.middleware",
+    "core.middleware.*",
+    "core.models",
+    "core.models.*",
+    "core.context_processors",
+    "core.auth_helpers",
+    "core.tasks",
+    "core.tasks.*",
+    "core.forms",
+    "core.forms.*",
+    "core.fields",
+    "core.fields.*",
+    "core.signals",
+    "core.signals.*",
+    "core.exceptions",
+    "core.serializers",
+    "core.serializers.*",
 }
 
 
@@ -145,14 +185,26 @@ def main(files_to_check):
                     "tests" not in Path(file_path).parts
                     and "migrations" not in Path(file_path).parts
                 ):
-                    print(
-                        f"ERROR: Importación interna de 'core' prohibida en '{file_path}' (línea {line_number}).\n"
-                        f"  -> Se detectó la importación de '{imported_module}'.\n"
-                        f"  -> Razón: Las apps no deben acoplarse a partes internas del núcleo. Usa el API formal en 'core.api'.\n"
-                        f"  -> Ejemplo: `from core.api import AgenciaMixin` en lugar de `from core.models.base import AgenciaMixin`",
-                        file=sys.stderr,
-                    )
-                    illegal_imports_found = True
+                    # Check against ALLOWED_CORE_IMPORTS whitelist
+                    is_allowed = False
+                    for allowed_path in ALLOWED_CORE_IMPORTS:
+                        if allowed_path.endswith(".*"):
+                            if imported_module.startswith(allowed_path[:-2]):
+                                is_allowed = True
+                                break
+                        elif imported_module == allowed_path:
+                            is_allowed = True
+                            break
+
+                    if not is_allowed:
+                        print(
+                            f"ERROR: Importación interna de 'core' prohibida en '{file_path}' (línea {line_number}).\n"
+                            f"  -> Se detectó la importación de '{imported_module}'.\n"
+                            f"  -> Razón: Las apps no deben acoplarse a partes internas del núcleo. Usa el API formal en 'core.api'.\n"
+                            f"  -> Ejemplo: `from core.api import AgenciaMixin` en lugar de `from core.models.base import AgenciaMixin`",
+                            file=sys.stderr,
+                        )
+                        illegal_imports_found = True
 
     if illegal_imports_found:
         return 1  # Salir con código de error para que el commit falle

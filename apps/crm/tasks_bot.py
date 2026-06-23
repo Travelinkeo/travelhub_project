@@ -151,8 +151,8 @@ Hemos registrado tus datos de pasajero en el sistema:
 • *Nombre:* {pasajero.nombres} {pasajero.apellidos}
 • *Pasaporte:* {numero_pasaporte}
 • *Nacionalidad:* {nacionalidad_nombre}
-• *F. Nacimiento:* {pasajero.fecha_nacimiento or 'No especificada'}
-• *F. Expiración:* {pasajero.fecha_vencimiento_documento or 'No especificada'}
+• *F. Nacimiento:* {pasajero.fecha_nacimiento or "No especificada"}
+• *F. Expiración:* {pasajero.fecha_vencimiento_documento or "No especificada"}
 
 Si hay algún dato incorrecto, por favor háznoslo saber por este medio.
 """
@@ -168,6 +168,6 @@ Si hay algún dato incorrecto, por favor háznoslo saber por este medio.
                     "❌ Ocurrió un error al procesar tu pasaporte en nuestros servidores. Un agente revisará tu caso pronto.",
                     agencia=agencia,
                 )
-            except Exception:
-                pass
+            except Exception as exc:
+                logger.debug("Ignored exception sending WhatsApp error message: %s", exc)
             raise self.retry(exc=e, countdown=60) from e

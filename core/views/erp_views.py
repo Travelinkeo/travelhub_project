@@ -5,6 +5,8 @@ from django.db.models import Count, Q
 from django.http import HttpResponse
 from django.urls import reverse_lazy
 from django.utils import timezone
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.generic import ListView, TemplateView, View
 from django.views.generic.edit import CreateView
 
@@ -238,6 +240,7 @@ class BoletosAnulacionesView(SaaSMixin, LoginRequiredMixin, TemplateView):
         return context
 
 
+@method_decorator(ensure_csrf_cookie, name="dispatch")
 class BoletosImportarView(SaaSMixin, LoginRequiredMixin, TemplateView):
     template_name = "core/erp/boletos_importar.html"
 

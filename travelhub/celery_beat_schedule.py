@@ -1,6 +1,9 @@
 # travelhub/celery_beat_schedule.py
 from celery.schedules import crontab
 
+QR_CACHE_KEY = "evo_qr:{instance}"
+QR_CACHE_TTL = 300  # 5 minutos — suficiente margen antes del refresh automático (90s)
+
 CELERY_BEAT_SCHEDULE = {
     "process-incoming-emails-every-2-minutes": {
         "task": "core.tasks.process_incoming_emails",
@@ -75,6 +78,12 @@ CELERY_BEAT_SCHEDULE = {
     "ejecutar-cobranza-ia-diaria": {
         "task": "core.tasks.ejecutar_cobranza_ia_task",
         "schedule": crontab(hour=20, minute=0),  # Todos los días 8:00 PM
+        "args": (),
+    },
+    # Renovar QR de WhatsApp para todas las agencias activas (cada 5 min)
+    "refresh-whatsapp-qr-all": {
+        "task": "apps.common.tasks.fetch_all_qr_codes_task",
+        "schedule": 300.0,  # cada 5 minutos — Evolution API no soporta polling agresivo
         "args": (),
     },
 }

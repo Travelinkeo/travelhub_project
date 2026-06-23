@@ -1,8 +1,11 @@
 import json
 import logging
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 logger = logging.getLogger(__name__)
+
+if TYPE_CHECKING:
+    pass
 
 
 def __getattr__(name):
@@ -47,14 +50,19 @@ class AuditService:
         """
         Ejecuta la auditoría sobre los datos de un boleto.
         """
-        if not ai_engine.is_ready:
+        from django.utils.module_loading import import_string
+
+        engine = import_string("apps.automation.services.ai_engine.ai_engine")
+        report_cls = import_string("core.models.ai_schemas.AuditReport")
+
+        if not engine.is_ready:
             return {"error": "IA no disponible para auditoría."}
 
         prompt = f"Realiza la auditoría para los siguientes datos de boleto:\n{json.dumps(ticket_data, indent=2)}"
 
         try:
-            report = ai_engine.call_gemini(
-                prompt=prompt, system_instruction=self.RULES_PROMPT, response_schema=AuditReport
+            report = engine.call_gemini(
+                prompt=prompt, system_instruction=self.RULES_PROMPT, response_schema=report_cls
             )
             return report
         except Exception as e:

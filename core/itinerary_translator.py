@@ -213,7 +213,7 @@ class ItineraryTranslator:
                         {logo_html}
                         <div class="flex-1">
                             <div class="flex items-center justify-between mb-2">
-                                <span class="font-bold text-lg text-gray-800">{nombre_aerolinea} <span class="text-gray-500 text-base font-normal">{vuelo.get('numero_vuelo', '')}</span></span>
+                                <span class="font-bold text-lg text-gray-800">{nombre_aerolinea} <span class="text-gray-500 text-base font-normal">{vuelo.get("numero_vuelo", "")}</span></span>
                                 <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded">{iata_code}</span>
                             </div>
                             <div class="flex items-center text-sm text-gray-700 mb-1">

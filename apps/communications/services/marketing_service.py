@@ -65,7 +65,7 @@ class MarketingService:
                 except Exception:
                     # If url (Cloudinary), fetch it
                     url = hotel.imagen_principal.url
-                    resp = requests.get(url, stream=True)
+                    resp = requests.get(url, stream=True, timeout=30)
                     bg_img = Image.open(resp.raw).convert("RGB")
             else:
                 # Placeholder Gradient
@@ -155,7 +155,7 @@ class MarketingService:
                         f_logo = default_storage.open(agencia.logo.name)
                         logo_img = Image.open(f_logo).convert("RGBA")
                     except Exception:
-                        resp = requests.get(agencia.logo.url, stream=True)
+                        resp = requests.get(agencia.logo.url, stream=True, timeout=30)
                         logo_img = Image.open(resp.raw).convert("RGBA")
 
                     # Resize logo (max width 400, max height 200)

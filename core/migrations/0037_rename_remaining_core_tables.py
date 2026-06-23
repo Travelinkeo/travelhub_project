@@ -125,8 +125,7 @@ def _rename_indexes_and_constraints(apps, schema_editor):
             if not old_prefix:
                 continue
             cursor.execute(
-                "SELECT indexname FROM pg_indexes "
-                "WHERE tablename = %s AND schemaname = 'public'",
+                "SELECT indexname FROM pg_indexes WHERE tablename = %s AND schemaname = 'public'",
                 [table],
             )
             for (idx_name,) in cursor.fetchall():

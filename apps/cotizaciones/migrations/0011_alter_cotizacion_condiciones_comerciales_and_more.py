@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         (
             "cotizaciones",
@@ -16,16 +15,12 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="cotizacion",
             name="condiciones_comerciales",
-            field=models.TextField(
-                blank=True, null=True, verbose_name="Condiciones Comerciales"
-            ),
+            field=models.TextField(blank=True, null=True, verbose_name="Condiciones Comerciales"),
         ),
         migrations.AlterField(
             model_name="cotizacion",
             name="descripcion_general",
-            field=models.TextField(
-                blank=True, null=True, verbose_name="Descripción General"
-            ),
+            field=models.TextField(blank=True, null=True, verbose_name="Descripción General"),
         ),
         migrations.AlterField(
             model_name="cotizacion",
@@ -37,9 +32,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="cotizacion",
             name="gds_raw_text",
-            field=models.TextField(
-                blank=True, null=True, verbose_name="Texto Crudo GDS"
-            ),
+            field=models.TextField(blank=True, null=True, verbose_name="Texto Crudo GDS"),
         ),
         migrations.AlterField(
             model_name="cotizacion",
@@ -55,30 +48,22 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="cotizacion",
             name="notas",
-            field=models.TextField(
-                blank=True, null=True, verbose_name="Notas Internas"
-            ),
+            field=models.TextField(blank=True, null=True, verbose_name="Notas Internas"),
         ),
         migrations.AlterField(
             model_name="cotizacion",
             name="notas_internas",
-            field=models.TextField(
-                blank=True, null=True, verbose_name="Notas Internas"
-            ),
+            field=models.TextField(blank=True, null=True, verbose_name="Notas Internas"),
         ),
         migrations.AlterField(
             model_name="cotizacion",
             name="terminos_cancelacion",
-            field=models.TextField(
-                blank=True, null=True, verbose_name="Términos de Cancelación"
-            ),
+            field=models.TextField(blank=True, null=True, verbose_name="Términos de Cancelación"),
         ),
         migrations.AlterField(
             model_name="cotizacion",
             name="terminos_pago",
-            field=models.TextField(
-                blank=True, null=True, verbose_name="Términos de Pago"
-            ),
+            field=models.TextField(blank=True, null=True, verbose_name="Términos de Pago"),
         ),
         migrations.AlterField(
             model_name="itemcotizacion",

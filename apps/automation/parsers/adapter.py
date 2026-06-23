@@ -67,7 +67,7 @@ def parse_ticket_with_new_parsers(text: str, html_text: str = "") -> dict[str, A
         # 🚨 CRÍTICO | Validación con Pydantic (ResultadoParseoSchema)
         # Garantiza que el output del parser se valide estrictamente contra el JSON Schema unificado
         try:
-            pydantic_res = parsed_data.to_pydantic()
+            parsed_data.to_pydantic()
             logger.info(
                 f"✅ [Pydantic Validation] Exito al validar la salida de {parser.__class__.__name__} contra ResultadoParseoSchema."
             )

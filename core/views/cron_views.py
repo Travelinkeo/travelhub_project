@@ -63,7 +63,7 @@ def sincronizar_bcv_cron(request):
             return Response({"status": "success", "message": "Tasa BCV sincronizada"})
     except Exception as e:
         logger.error(f"Error sincronizando BCV: {e}")
-        return Response({"status": "error", "message": str(e)}, status=500)
+        return Response({"status": "error", "message": "Error interno del servidor"}, status=500)
 
 
 @extend_schema(exclude=True)
@@ -100,7 +100,7 @@ def enviar_recordatorios_cron(request):
             )
     except Exception as e:
         logger.error(f"Error verificando recordatorios: {e}")
-        return Response({"status": "error", "message": str(e)}, status=500)
+        return Response({"status": "error", "message": "Error interno del servidor"}, status=500)
 
 
 @extend_schema(exclude=True)
@@ -124,7 +124,7 @@ def cierre_mensual_cron(request):
             return Response({"status": "success", "message": "Cierre mensual completado"})
     except Exception as e:
         logger.error(f"Error en cierre mensual: {e}")
-        return Response({"status": "error", "message": str(e)}, status=500)
+        return Response({"status": "error", "message": "Error interno del servidor"}, status=500)
 
 
 @extend_schema(exclude=True)
@@ -167,4 +167,4 @@ def cargar_catalogos_cron(request):
             )
     except Exception as e:
         logger.error(f"Error cargando catálogos: {e}")
-        return Response({"status": "error", "message": str(e)}, status=500)
+        return Response({"status": "error", "message": "Error interno del servidor"}, status=500)

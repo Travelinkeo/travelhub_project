@@ -1,7 +1,6 @@
 import logging
 import time
 
-from django.conf import settings
 from django.db import connection
 
 try:
@@ -64,7 +63,10 @@ class QueryCountDebugMiddleware:
                 n_plus_one_alert.labels(method=method, path=path).inc()
             logger.warning(
                 "N+1 alert: %s %s — %d queries en %.2fs",
-                method, path, num_queries, duration,
+                method,
+                path,
+                num_queries,
+                duration,
             )
         elif num_queries > 5:
             logger.debug("%s %s — %d queries en %.2fs", method, path, num_queries, duration)

@@ -277,7 +277,7 @@
         try {
             const response = await fetch('{% url "core:upload_boleto" %}', {
                 method: 'POST',
-                headers: { 'X-CSRFToken': getCookie('csrftoken') },
+                headers: { 'X-CSRFToken': getCookie('th_csrftoken') || getCookie('csrftoken') },
                 body: formData
             });
 
@@ -344,7 +344,7 @@
                 const deleteUrl = "{% url 'core:api_boleto_delete' pk=0 %}".replace('0', id);
                 const response = await fetch(`${deleteUrl}?physical=true`, {
                     method: 'DELETE',
-                    headers: { 'X-CSRFToken': getCookie('csrftoken') }
+                    headers: { 'X-CSRFToken': getCookie('th_csrftoken') || getCookie('csrftoken') }
                 });
                 
                 if (response.ok) {

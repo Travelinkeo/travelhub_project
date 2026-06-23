@@ -58,12 +58,12 @@ class Command(BaseCommand):
         # Validaciones (Asserts)
         assert isinstance(resultado, dict), "El resultado debe ser un diccionario."
         assert "error" in resultado, "El resultado debe contener una llave de error."
-        assert (
-            "API_FAILURE: TIMEOUT IA" in resultado["error"]
-        ), "El error debe ser por Timeout de IA."
-        assert (
-            resultado.get("fallback_triggered") is True
-        ), "Debe indicar que se detonara el fallback."
+        assert "API_FAILURE: TIMEOUT IA" in resultado["error"], (
+            "El error debe ser por Timeout de IA."
+        )
+        assert resultado.get("fallback_triggered") is True, (
+            "Debe indicar que se detonara el fallback."
+        )
 
         self.stdout.write(
             self.style.SUCCESS(
@@ -115,19 +115,19 @@ class Command(BaseCommand):
             self.stdout.write(
                 "   [MOCK] IA fallo. Entrando a Fallback Regex con validacion estricta..."
             )
-            resultado = service.procesar_boleto(boleto.pk, bypass_cache=True, ignore_manual=True)
+            service.procesar_boleto(boleto.pk, bypass_cache=True, ignore_manual=True)
 
         # Refrescar boleto de la DB
         boleto.refresh_from_db()
 
         # Validaciones (Asserts)
-        assert (
-            boleto.estado_parseo == BoletoImportado.EstadoParseo.REVISION_REQUERIDA
-        ), f"El boleto debio quedar en REVISION_REQUERIDA, pero quedo en {boleto.estado_parseo}"
+        assert boleto.estado_parseo == BoletoImportado.EstadoParseo.REVISION_REQUERIDA, (
+            f"El boleto debio quedar en REVISION_REQUERIDA, pero quedo en {boleto.estado_parseo}"
+        )
 
-        assert (
-            "error" in boleto.log_parseo.lower() or "revisi" in boleto.log_parseo.lower()
-        ), "El log_parseo no registra el fallo definitivo."
+        assert "error" in boleto.log_parseo.lower() or "revisi" in boleto.log_parseo.lower(), (
+            "El log_parseo no registra el fallo definitivo."
+        )
 
         self.stdout.write(
             self.style.SUCCESS(

@@ -9,3 +9,4 @@ class BookingsConfig(AppConfig):
 
     def ready(self):
         import apps.bookings.signals  # noqa: F401
+        import apps.bookings.tasks  # noqa: F401

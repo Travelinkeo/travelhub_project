@@ -1,10 +1,4 @@
--r base.txt
-
-# Development / Testing specific
-pytest==8.2.0
-pytest-django==4.8.0
-django-debug-toolbar==4.4.2
-flake8==7.0.0
-black==24.4.2
-flower==2.0.1
-
+# Alias retrocompatible → usa dev.txt como fuente única de verdad.
+# Mantener este archivo evita romper scripts o documentación que lo referencien.
+# Instalar con: pip install -r requirements/dev.txt  (preferido)
+-r dev.txt

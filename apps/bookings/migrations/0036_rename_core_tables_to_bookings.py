@@ -90,7 +90,7 @@ def _get_existing_tables(cursor):
 
 def _rename_indexes_for(cursor, table):
     cursor.execute(
-        "SELECT indexname FROM pg_indexes " "WHERE tablename = %s AND schemaname = 'public'",
+        "SELECT indexname FROM pg_indexes WHERE tablename = %s AND schemaname = 'public'",
         [table],
     )
     for (idx_name,) in cursor.fetchall():

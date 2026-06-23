@@ -1,11 +1,14 @@
 import logging
+
 from django.db import transaction
-from apps.finance.models import Factura
+
 from apps.bookings.models import PagoVenta
 from apps.contabilidad.models import AsientoContable
 from apps.contabilidad.services import ContabilidadService
+from apps.finance.models import Factura
 
 logger = logging.getLogger(__name__)
+
 
 # =========================================================================================
 # 🏢 EXPLICACIÓN PARA TODO PÚBLICO (Inversores y No Programadores)
@@ -45,16 +48,13 @@ class ContabilidadReconciliationService:
                 Factura.EstadoFactura.PAGADA,
                 Factura.EstadoFactura.PARCIAL,
             ]
-        ).exclude(
-            asiento_contable_factura__isnull=False
-        )
+        ).exclude(asiento_contable_factura__isnull=False)
 
         for factura in facturas_inconsistentes:
             try:
                 # Verificar si ya existe por referencia
                 asiento = AsientoContable.objects.filter(
-                    referencia_documento=factura.numero_factura,
-                    agencia=factura.agencia
+                    referencia_documento=factura.numero_factura, agencia=factura.agencia
                 ).first()
 
                 if asiento:
@@ -62,7 +62,9 @@ class ContabilidadReconciliationService:
                     with transaction.atomic():
                         factura.asiento_contable_factura = asiento
                         factura.save(update_fields=["asiento_contable_factura"])
-                    logger.info(f"Factura {factura.numero_factura} vinculada a asiento existente {asiento.numero_asiento}")
+                    logger.info(
+                        f"Factura {factura.numero_factura} vinculada a asiento existente {asiento.numero_asiento}"
+                    )
                 else:
                     # Generar nuevo asiento contable y vincularlo a la factura
                     with transaction.atomic():
@@ -79,8 +81,7 @@ class ContabilidadReconciliationService:
             try:
                 ref = f"PAGO-{pago.id_pago_venta}"
                 asiento = AsientoContable.objects.filter(
-                    referencia_documento=ref,
-                    agencia=pago.agencia
+                    referencia_documento=ref, agencia=pago.agencia
                 ).first()
 
                 if not asiento:
@@ -90,5 +91,7 @@ class ContabilidadReconciliationService:
             except Exception as e:
                 logger.error(f"Error reconciliando pago {pago.id_pago_venta}: {e}")
 
-        logger.info(f"✨ Reconciliación finalizada. Facturas corregidas: {facturas_arregladas}, Pagos corregidos: {pagos_arreglados}")
+        logger.info(
+            f"✨ Reconciliación finalizada. Facturas corregidas: {facturas_arregladas}, Pagos corregidos: {pagos_arreglados}"
+        )
         return facturas_arregladas, pagos_arreglados

@@ -17,8 +17,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.SeparateDatabaseAndState(
-            database_operations=[
-            ],
+            database_operations=[],
             state_operations=[
                 migrations.AlterModelTable(
                     name="notificacionagente",

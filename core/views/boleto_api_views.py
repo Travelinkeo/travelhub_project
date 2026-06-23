@@ -131,7 +131,13 @@ def crear_venta_desde_boleto(request, boleto_id):
     )
 
     producto_aereo, _ = ProductoServicio.objects.get_or_create(
-        tipo_producto="AIR", defaults={"nombre": "Boleto Aéreo Genérico"}
+        tipo_producto="AIR",
+        defaults={
+            "nombre": "Boleto Aéreo Genérico",
+            "codigo_interno": f"BOLETO_AIR_GENERICO_{boleto.agencia.pk}"
+            if (boleto and boleto.agencia)
+            else "BOLETO_AIR_GENERICO_GLOBAL",
+        },
     )
 
     ItemVenta.objects.create(

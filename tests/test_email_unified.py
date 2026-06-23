@@ -14,8 +14,11 @@ class TestEmailUnified:
 
     @patch("apps.communications.services.email_unified.render_to_string")
     @patch("apps.communications.services.email_unified.resend.Emails.send")
-    def test_send_custom_email_resend_success(self, mock_resend, mock_render, settings):
-        settings.RESEND_API_KEY = "test_key"
+    @patch.dict("os.environ", {"RESEND_API_KEY": "test_key"})
+    def test_send_custom_email_resend_success(self, mock_resend, mock_render):
+        import apps.communications.services.email_unified as email_mod
+
+        email_mod.RESEND_API_KEY = "test_key"
         mock_render.return_value = "<html>Test</html>"
 
         result = send_custom_email("Test Subject", "test@example.com", "test_template.html", {})

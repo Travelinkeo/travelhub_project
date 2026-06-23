@@ -276,7 +276,7 @@ class HotelParserService:
 
                 img_instance = ImagenHotel(
                     hotel=hotel,
-                    titulo=f"Foto {i+1} - {foto_data.get('label', '')}",
+                    titulo=f"Foto {i + 1} - {foto_data.get('label', '')}",
                     tipo=tipo_detectado,
                     es_portada=(
                         i == 0 and not hotel.imagen_principal

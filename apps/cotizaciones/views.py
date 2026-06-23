@@ -320,8 +320,8 @@ class CotizacionHTMXCalculateTotalsView(LoginRequiredMixin, View):
 
                 moneda = Moneda.objects.get(pk=moneda_id)
                 moneda_symbol = moneda.simbolo or moneda.codigo_iso
-            except Exception:
-                pass
+            except Exception as e:
+                logger.debug("Ignored exception fetching currency symbol: %s", e)
 
         return render(
             request,

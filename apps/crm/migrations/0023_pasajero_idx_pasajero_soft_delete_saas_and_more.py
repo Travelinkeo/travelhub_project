@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("common", "0004_alter_aerolinea_table_alter_ciudad_table_and_more"),
         ("crm", "0022_rename_personas_core_tables_to_crm"),

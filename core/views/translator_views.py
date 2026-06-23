@@ -1,12 +1,11 @@
 # Archivo: core/views/translator_views.py
 
 import logging
-
 from decimal import InvalidOperation
 
-from django.core.exceptions import ValidationError
-from django.db import IntegrityError, DatabaseError
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.exceptions import ValidationError
+from django.db import DatabaseError, IntegrityError
 from django.views.generic import TemplateView
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
@@ -14,10 +13,9 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from core.auth_helpers import internal_auth
-
 from apps.common.models import Aerolinea
 from apps.contabilidad.models import TasaCambioBCV
+from core.auth_helpers import internal_auth
 
 from ..itinerary_translator import ItineraryTranslator, TicketCalculator
 
@@ -218,9 +216,11 @@ def get_airlines_catalog_api(request):
     """
     try:
         airlines_list = []
-        for airline in Aerolinea.objects.filter(activa=True, codigo_iata__isnull=False).exclude(
-            codigo_iata=""
-        ).select_related("pais"):
+        for airline in (
+            Aerolinea.objects.filter(activa=True, codigo_iata__isnull=False)
+            .exclude(codigo_iata="")
+            .select_related("pais")
+        ):
             try:
                 airlines_list.append(
                     {
@@ -370,7 +370,7 @@ def validate_itinerary_format_api(request):
             validation_result["warnings"].append("Ninguna línea tiene formato válido")
         elif validation_result["invalid_lines"]:
             validation_result["warnings"].append(
-                f'{len(validation_result["invalid_lines"])} líneas tienen formato incorrecto'
+                f"{len(validation_result['invalid_lines'])} líneas tienen formato incorrecto"
             )
 
         return Response(
@@ -643,7 +643,7 @@ def create_quote_from_gds_api(request):
             }
         )
 
-    except (IntegrityError, DatabaseError) as e:
+    except (IntegrityError, DatabaseError):
         logger.exception("Error de BD creando cotización desde GDS")
         return Response(
             {"error": "Error de base de datos al crear la cotización"},
@@ -655,13 +655,13 @@ def create_quote_from_gds_api(request):
             {"error": f"Datos inválidos: {e}"},
             status=status.HTTP_400_BAD_REQUEST,
         )
-    except (InvalidOperation, ArithmeticError) as e:
+    except (InvalidOperation, ArithmeticError):
         logger.exception("Error matemático calculando total de cotización GDS")
         return Response(
             {"error": "Error en cálculos financieros"},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
-    except Exception as e:
+    except Exception:
         logger.exception("Error inesperado creando cotización desde GDS")
         return Response(
             {"error": "Error interno al crear la cotización. Revise el log de soporte."},

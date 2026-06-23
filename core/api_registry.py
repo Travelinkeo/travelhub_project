@@ -56,12 +56,13 @@ class AutoModelViewSet(InternalAPIAuthMixin, viewsets.ModelViewSet):
 
     def get_queryset(self):
         from core.middleware import get_current_agency
+
         model = self.serializer_class.Meta.model
         agency = get_current_agency()
         qs = model.objects.all()
-        if agency and hasattr(model, 'agencia'):
+        if agency and hasattr(model, "agencia"):
             qs = qs.filter(agencia=agency)
-        elif agency and hasattr(model, 'agency'):
+        elif agency and hasattr(model, "agency"):
             qs = qs.filter(agency=agency)
         return qs
 

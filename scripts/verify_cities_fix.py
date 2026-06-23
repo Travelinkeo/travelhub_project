@@ -1,15 +1,15 @@
-
-import sys
 import os
-import json
+import sys
+
 import pdfplumber
 
 # Add project root to path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 # Set up Django environment
 import django
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "travelhub.settings")
 django.setup()
 
 from apps.automation.parsers.sabre_parser import SabreParser
@@ -31,8 +31,8 @@ data = result.to_dict()
 
 # Print only relevant parts to verify
 print("Flights Summary:")
-for i, f in enumerate(data.get('vuelos', [])):
-    print(f"Flight {i+1}: {f.get('numero_vuelo')}")
+for i, f in enumerate(data.get("vuelos", [])):
+    print(f"Flight {i + 1}: {f.get('numero_vuelo')}")
     print(f"  Origin: {f.get('origen', {}).get('ciudad')} ({f.get('origen', {}).get('pais')})")
     print(f"  Dest: {f.get('destino', {}).get('ciudad')} ({f.get('destino', {}).get('pais')})")
     print("-" * 20)

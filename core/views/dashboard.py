@@ -72,7 +72,7 @@ class CEODashboardView(LoginRequiredMixin, View):
         context = {
             "kpis": kpis,
             "agencia": agencia,
-            "chart_data_json": mark_safe(json.dumps(chart_data)),
+            "chart_data_json": mark_safe(json.dumps(chart_data)),  # noqa: S308
         }
         return render(request, self.template_name, context)
 
@@ -92,10 +92,10 @@ class AIBusinessAdvisorView(LoginRequiredMixin, View):
         prompt = f"""
         Eres el Asesor Financiero IA (TravelHub BI) de una agencia de viajes.
         Analiza estas métricas del mes actual:
-        - Ventas del mes: ${kpis['ventas_mes_actual']}
-        - Crecimiento vs mes pasado: {kpis['crecimiento_porcentaje']}%
-        - Utilidad bruta: ${kpis['utilidad_bruta']}
-        - Dinero en la mesa (Tax Refund): ${kpis['tax_refund_disponible']}
+        - Ventas del mes: ${kpis["ventas_mes_actual"]}
+        - Crecimiento vs mes pasado: {kpis["crecimiento_porcentaje"]}%
+        - Utilidad bruta: ${kpis["utilidad_bruta"]}
+        - Dinero en la mesa (Tax Refund): ${kpis["tax_refund_disponible"]}
         
         Dame un diagnóstico rápido y un consejo accionable basado en rentabilidad.
         """

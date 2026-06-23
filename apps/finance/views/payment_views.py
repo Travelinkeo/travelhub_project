@@ -83,11 +83,11 @@ class BinanceOrderCreateView(View):
             return HttpResponse(f"""
                 <div class="text-center p-6 bg-gray-800 rounded-3xl border border-amber-500/30">
                     <p class="text-white mb-4">Orden de Binance Pay generada exitosamente.</p>
-                    <a href="{cached['checkout_url']}" target="_blank"
+                    <a href="{cached["checkout_url"]}" target="_blank"
                        class="inline-block bg-amber-500 hover:bg-amber-400 text-black font-bold py-3 px-8 rounded-xl transition-all">
-                       🚀 Pagar {cached['monto']} {cached['moneda']} ahora
+                       🚀 Pagar {cached["monto"]} {cached["moneda"]} ahora
                     </a>
-                    <p class="text-xs text-gray-500 mt-4">ID: {cached['merchant_trade_no']}</p>
+                    <p class="text-xs text-gray-500 mt-4">ID: {cached["merchant_trade_no"]}</p>
                 </div>
             """)
 

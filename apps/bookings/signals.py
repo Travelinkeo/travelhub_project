@@ -137,6 +137,7 @@ def actualizar_circuito_dias(sender, instance, **kwargs):
 
     _on_commit(_update_circuit_days_sync, instance.pk)
 
+
 # ── Helper functions for on_commit callbacks ──────────────
 
 
@@ -153,8 +154,8 @@ def _auditar_venta_sync(venta_id):
 
 
 def _evaluar_tax_refund(boleto_id):
-    from apps.bookings.services.boleto_service import BoletoImportadoService
     from apps.bookings.models import BoletoImportado
+    from apps.bookings.services.boleto_service import BoletoImportadoService
 
     try:
         # Usar all_objects para funcionar fuera del contexto de agencia (on_commit callback)
@@ -166,8 +167,8 @@ def _evaluar_tax_refund(boleto_id):
 
 
 def _evaluar_loyalty_sync(pago_id):
-    from apps.bookings.services.venta_service import VentaService
     from apps.bookings.models import PagoVenta
+    from apps.bookings.services.venta_service import VentaService
 
     try:
         pago = PagoVenta.objects.get(pk=pago_id)
@@ -178,8 +179,8 @@ def _evaluar_loyalty_sync(pago_id):
 
 def _emitir_pago_evento(pago_id, estado_accion, agencia_id):
     try:
-        from core.api import sale_payment_recorded
         from apps.bookings.models import PagoVenta
+        from core.api import sale_payment_recorded
 
         sale_payment_recorded.send(
             sender=PagoVenta,
@@ -188,12 +189,14 @@ def _emitir_pago_evento(pago_id, estado_accion, agencia_id):
             agencia_id=agencia_id,
         )
     except Exception as e:
-        logger.error(f"Error emitiendo sale_payment_recorded ({estado_accion}) para pago {pago_id}: {e}")
+        logger.error(
+            f"Error emitiendo sale_payment_recorded ({estado_accion}) para pago {pago_id}: {e}"
+        )
 
 
 def _disparar_post_save_actions(venta_id, created, estado_anterior):
-    from apps.bookings.services.venta_service import VentaService
     from apps.bookings.models import Venta
+    from apps.bookings.services.venta_service import VentaService
 
     try:
         venta = Venta.objects.get(pk=venta_id)
@@ -203,8 +206,8 @@ def _disparar_post_save_actions(venta_id, created, estado_anterior):
 
 
 def _update_circuit_days_sync(circuito_dia_id):
-    from apps.bookings.services.venta_service import VentaService
     from apps.bookings.models import CircuitoDia
+    from apps.bookings.services.venta_service import VentaService
 
     try:
         cd = CircuitoDia.objects.get(pk=circuito_dia_id)

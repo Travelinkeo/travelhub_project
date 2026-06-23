@@ -1,6 +1,3 @@
-import pytest
-
-pytestmark = pytest.mark.skip(reason="Tests requieren configuración completa o refactorización")
 from datetime import date
 
 import pytest
@@ -10,6 +7,8 @@ from apps.bookings.forms import BoletoAereoUpdateForm, BoletoManualForm
 
 # Import models from new location
 from apps.bookings.models import BoletoImportado
+
+pytestmark = pytest.mark.skip(reason="Tests requieren configuración completa o refactorización")
 
 
 @pytest.mark.django_db

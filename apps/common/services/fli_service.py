@@ -156,16 +156,18 @@ class FliFlightService:
                 # Extraer TODOS los tramos de TODOS los vuelos del itinerario
                 tramos_data = []
                 for f_obj in itinerario:
-                    for l in f_obj.legs:
+                    for leg in f_obj.legs:
                         tramos_data.append(
                             {
-                                "vuelo": l.flight_number,
-                                "aerolinea": l.airline.name if hasattr(l.airline, "name") else "YY",
-                                "origen": l.departure_airport.name,
-                                "destino": l.arrival_airport.name,
-                                "salida": l.departure_datetime.strftime("%d/%m/%Y %H:%M"),
-                                "aerolinea_codigo": l.airline.value
-                                if hasattr(l.airline, "value")
+                                "vuelo": leg.flight_number,
+                                "aerolinea": leg.airline.name
+                                if hasattr(leg.airline, "name")
+                                else "YY",
+                                "origen": leg.departure_airport.name,
+                                "destino": leg.arrival_airport.name,
+                                "salida": leg.departure_datetime.strftime("%d/%m/%Y %H:%M"),
+                                "aerolinea_codigo": leg.airline.value
+                                if hasattr(leg.airline, "value")
                                 else "YY",
                             }
                         )

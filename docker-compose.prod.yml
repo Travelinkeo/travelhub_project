@@ -144,7 +144,7 @@ services:
       web:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost/health || exit 1"]
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1/health/ || exit 1"]
       interval: 30s
       timeout: 5s
       retries: 3
@@ -259,6 +259,73 @@ services:
           memory: 512M
           cpus: '0.5'
 
+  # ---------------------------------------------------------------------------
+  # 9. WHATSAPP MICROSERVICE (Evolution API v2)
+  # ---------------------------------------------------------------------------
+  evolution:
+    image: evoapicloud/evolution-api:latest
+    container_name: travelhub_evolution
+    restart: unless-stopped
+    volumes:
+      - evolution_data:/evolution/instances
+    environment:
+      - SERVER_TYPE=http
+      - SERVER_PORT=8080
+      - SERVER_URL=http://localhost:8080
+      - AUTHENTICATION_TYPE=apikey
+      - AUTHENTICATION_API_KEY=${WHATSAPP_MICROSERVICE_TOKEN}
+      - LANGUAGE=es
+      - DATABASE_ENABLED=true
+      - DATABASE_PROVIDER=postgresql
+      - DATABASE_CONNECTION_URI=postgresql://evolution:evolution@evolution_db:5432/evolution_v2?schema=public
+      - DATABASE_CONNECTION_CLIENT_NAME=travelhub
+      - DATABASE_SAVE_DATA_INSTANCE=true
+      - DATABASE_SAVE_DATA_NEW_MESSAGE=true
+      - DATABASE_SAVE_DATA_CONTACTS=true
+      - DATABASE_SAVE_DATA_CHATS=true
+      - CACHE_REDIS_ENABLED=true
+      - CACHE_REDIS_URI=redis://:${REDIS_PASSWORD}@redis:6379/1
+      - CACHE_REDIS_PREFIX_KEY=travelhub_evolution
+      - LOG_LEVEL=INFO
+      - CONFIG_SESSION_PHONE_VERSION=2.3000.1041831138
+      - WEB_VERSION=2.3000.1041831138
+    depends_on:
+      redis:
+        condition: service_healthy
+      evolution_db:
+        condition: service_healthy
+    networks:
+      - travelhub_private
+      - travelhub_public
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1.0'
+
+  evolution_db:
+    image: postgres:15-alpine
+    container_name: travelhub_evolution_db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=evolution
+      - POSTGRES_PASSWORD=evolution
+      - POSTGRES_DB=evolution_v2
+    volumes:
+      - evolution_db_data:/var/lib/postgresql/data
+    networks:
+      - travelhub_private
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U evolution -d evolution_v2"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+
 # ---------------------------------------------------------------------------
 # AISLAMIENTO SEGURO DE REDES Y VOLÚMENES PERSISTENTES
 # ---------------------------------------------------------------------------
@@ -277,3 +344,7 @@ volumes:
     name: travelhub_static_volume
   media_volume:
     name: travelhub_media_volume
+  evolution_data:
+    name: travelhub_evolution_data
+  evolution_db_data:
+    name: travelhub_evolution_db_data

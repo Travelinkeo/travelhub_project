@@ -1,9 +1,14 @@
 import logging
 from datetime import timedelta
 from decimal import Decimal
+from typing import TYPE_CHECKING
 
 from django.db.models import Sum
 from django.utils import timezone
+
+if TYPE_CHECKING:
+    from apps.bookings.models import ItemVenta, Venta
+    from apps.finance.models import TaxRefundOpportunity
 
 
 def __getattr__(name):

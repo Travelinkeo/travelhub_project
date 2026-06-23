@@ -40,7 +40,7 @@ class Command(BaseCommand):
             base = precios_base.get(key, 60)
 
             # Variación aleatoria ±20%
-            variacion = random.uniform(0.8, 1.2)
+            variacion = random.uniform(0.8, 1.2)  # noqa: S311
             base = int(base * variacion)
 
             # Temporada baja

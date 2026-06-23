@@ -1,6 +1,6 @@
-
 import os
 import sys
+
 import django
 
 sys.path.append(os.getcwd())
@@ -20,9 +20,11 @@ try:
         print(f"Exists on disk? {os.path.exists(boleto.archivo_pdf_generado.path)}")
     else:
         print("No PDF generated.")
-        
-    print(f"Datos Parseados Keys: {boleto.datos_parseados.keys() if boleto.datos_parseados else 'None'}")
-    
+
+    print(
+        f"Datos Parseados Keys: {boleto.datos_parseados.keys() if boleto.datos_parseados else 'None'}"
+    )
+
 except BoletoImportado.DoesNotExist:
     print(f"Boleto {boleto_id} no encontrado.")
 except Exception as e:

@@ -1,20 +1,23 @@
+import json
 import os
 import sys
-import json
-import django
 from decimal import Decimal
+
+import django
 
 # Setup Django
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "travelhub.settings")
 django.setup()
 
 from apps.automation.parsers.sabre_parser import SabreParser
+
 
 def decimal_default(obj):
     if isinstance(obj, Decimal):
         return str(obj)
     raise TypeError
+
 
 def run_test():
     # Lista explícita de archivos proporcionada por el usuario
@@ -56,7 +59,7 @@ def run_test():
         r"C:\Users\ARMANDO\Downloads\Boletos\SABRE\Recibo de pasaje electrónico, 04 febrero para MR JAIRO DE JESUS SALAZAR SALAZAR.pdf",
         r"C:\Users\ARMANDO\Downloads\Boletos\SABRE\Recibo de pasaje electrónico, 04 febrero para MR JOSE LUIS SOTO HERNANDEZ.pdf",
         r"C:\Users\ARMANDO\Downloads\Boletos\SABRE\Recibo de pasaje electrónico, 04 febrero para MR KEVIN EDUARDO QUINTERO RAMOS.pdf",
-        r"C:\Users\ARMANDO\Downloads\Recibo de pasaje electrónico, 09 febrero para JUAN CAMILO GIRALDO CASTANO.pdf"
+        r"C:\Users\ARMANDO\Downloads\Recibo de pasaje electrónico, 09 febrero para JUAN CAMILO GIRALDO CASTANO.pdf",
     ]
 
     parser = SabreParser()
@@ -74,42 +77,48 @@ def run_test():
             # Usar extract_data_from_file (método público) o parse (privado)
             # SabreParser por defecto usa parse(text).
             # Debemos extraer texto primero.
-            
+
             import pdfplumber
+
             full_text = ""
             with pdfplumber.open(file_path) as pdf:
                 for page in pdf.pages:
                     full_text += page.extract_text() + "\n"
-            
+
             data_obj = parser.parse(full_text)
             data = data_obj.to_dict()
-            
+
             # Construir estructura para Template
             # La estructura "data" retornada por SabreParser ya debe ser bastante completa.
             # Mapeamos a las variables del template:
-            
+
             template_context = {
                 "solo_nombre_pasajero": data.get("solo_nombre_pasajero", "Cliente"),
                 "pasajero": {
-                    "nombre_completo": data.get("passenger_name") or data.get("passenger", {}).get("name"),
-                    "documento_identidad": data.get("passenger_document") or data.get("passenger", {}).get("customerNumber"), # Ajustar segun key real
+                    "nombre_completo": data.get("passenger_name")
+                    or data.get("passenger", {}).get("name"),
+                    "documento_identidad": data.get("passenger_document")
+                    or data.get("passenger", {}).get("customerNumber"),  # Ajustar segun key real
                 },
                 "reserva": {
                     "codigo_reservacion": data.get("pnr"),
                     "numero_boleto": data.get("ticket_number"),
-                    "fecha_emision": data.get("issue_date") or data.get("reserva", {}).get("fecha_emision"),
-                    "aerolinea_emisora": data.get("reserva", {}).get("aerolinea_emisora") or data.get("issuing_airline"),
+                    "fecha_emision": data.get("issue_date")
+                    or data.get("reserva", {}).get("fecha_emision"),
+                    "aerolinea_emisora": data.get("reserva", {}).get("aerolinea_emisora")
+                    or data.get("issuing_airline"),
                     "agente_emisor": {
                         "nombre": data.get("reserva", {}).get("agente_emisor", {}).get("nombre"),
-                        "numero_iata": data.get("reserva", {}).get("agente_emisor", {}).get("numero_iata") or data.get("agency_iata")
-                    }
+                        "numero_iata": data.get("reserva", {})
+                        .get("agente_emisor", {})
+                        .get("numero_iata")
+                        or data.get("agency_iata"),
+                    },
                 },
-                "itinerario": {
-                    "vuelos": data.get("flights", [])
-                },
-                "debug_source_file": os.path.basename(file_path)
+                "itinerario": {"vuelos": data.get("flights", [])},
+                "debug_source_file": os.path.basename(file_path),
             }
-            
+
             results.append(template_context)
             print("✅ Parseo Exitoso")
 
@@ -117,16 +126,16 @@ def run_test():
             print(f"🔥 ERROR parseando {os.path.basename(file_path)}: {e}")
 
     # Guardar en archivo JSON para inspección visual
-    output_path = os.path.join(os.getcwd(), 'SABRE_BATCH_TEST_RESULTS.json')
-    with open(output_path, 'w', encoding='utf-8') as f:
+    output_path = os.path.join(os.getcwd(), "SABRE_BATCH_TEST_RESULTS.json")
+    with open(output_path, "w", encoding="utf-8") as f:
         json.dump(results, f, indent=4, default=decimal_default, ensure_ascii=False)
 
-    print(f"\n--- TEST COMPLETADO ---")
+    print("\n--- TEST COMPLETADO ---")
     print(f"Resultados guardados en: {output_path}")
 
     # GENERACIÓN DE PDFS
-    print(f"\n--- GENERANDO PDFS DE EJEMPLO ---")
-    output_dir = os.path.join(os.getcwd(), 'sample_pdfs')
+    print("\n--- GENERANDO PDFS DE EJEMPLO ---")
+    output_dir = os.path.join(os.getcwd(), "sample_pdfs")
     os.makedirs(output_dir, exist_ok=True)
 
     try:
@@ -137,27 +146,30 @@ def run_test():
         return
 
     # Configurar Jinja2
-    template_dir = os.path.join(os.getcwd(), 'core', 'templates', 'core', 'tickets')
+    template_dir = os.path.join(os.getcwd(), "core", "templates", "core", "tickets")
     env = Environment(loader=FileSystemLoader(template_dir))
 
     for i, res in enumerate(results):
         try:
             # Seleccionar template
-            template_name = 'ticket_template_sabre.html'
+            template_name = "ticket_template_sabre.html"
             template = env.get_template(template_name)
-            
+
             # Renderizar HTML
             html_string = template.render(res)
-            
+
             # Generar PDF
-            filename = f"SABRE_SAMPLE_{i+1}_{res['reserva']['aerolinea_emisora']}_{res['solo_nombre_pasajero']}.pdf".replace(' ', '_').replace('/', '-')
+            filename = f"SABRE_SAMPLE_{i + 1}_{res['reserva']['aerolinea_emisora']}_{res['solo_nombre_pasajero']}.pdf".replace(
+                " ", "_"
+            ).replace("/", "-")
             pdf_path = os.path.join(output_dir, filename)
-            
+
             HTML(string=html_string, base_url=os.getcwd()).write_pdf(pdf_path)
             print(f"✅ PDF Generado: {filename}")
-            
-        except Exception as e:
-            print(f"🔥 Error generando PDF {i+1}: {e}")
 
-if __name__ == '__main__':
+        except Exception as e:
+            print(f"🔥 Error generando PDF {i + 1}: {e}")
+
+
+if __name__ == "__main__":
     run_test()

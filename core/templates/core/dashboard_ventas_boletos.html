@@ -211,7 +211,7 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRFToken': getCookie('csrftoken')
+                        'X-CSRFToken': getCookie('th_csrftoken') || getCookie('csrftoken')
                     },
                     body: JSON.stringify(datos)
                 });

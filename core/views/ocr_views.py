@@ -2,16 +2,13 @@ import logging
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
-from django.utils.decorators import method_decorator
 from django.views import View
-from django.views.decorators.csrf import csrf_exempt
 
 from apps.automation.services.passport_ocr_service import PassportOCRService
 
 logger = logging.getLogger(__name__)
 
 
-@method_decorator(csrf_exempt, name="dispatch")
 class OCRPassportView(LoginRequiredMixin, View):
     """
     API endpoint para procesar imágenes de pasaporte.

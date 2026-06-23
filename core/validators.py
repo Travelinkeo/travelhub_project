@@ -75,16 +75,35 @@ def validate_file_extension(value):
             params={"exts": ", ".join(VALID_EXTENSIONS).upper()},
         )
 
-    # FIX SEGURIDAD: Validar MIME type real, no solo extensión
-    try:
-        content_type = value.content_type
-        allowed_mimes = ALLOWED_MIME_TYPES.get(ext.lower(), [])
-        if allowed_mimes and content_type not in allowed_mimes:
-            logger.warning(
-                f"MIME type mismatch: {value.name} tiene tipo {content_type}, esperados: {allowed_mimes}"
-            )
-    except AttributeError:
-        pass  # content_type puede no estar disponible en algunos casos
+    # Validar magic bytes del archivo para detectar extensiones falsificadas
+    MAGIC_BYTES = {
+        ".pdf": b"%PDF",
+        ".txt": None,
+        ".eml": None,
+        ".xlsx": b"PK",
+        ".csv": None,
+        ".jpg": b"\xff\xd8\xff",
+        ".jpeg": b"\xff\xd8\xff",
+        ".png": b"\x89PNG",
+    }
+
+    expected_magic = MAGIC_BYTES.get(ext.lower())
+    if expected_magic is not None:
+        try:
+            value.seek(0)
+            header = value.read(4)
+            value.seek(0)
+            if not header.startswith(expected_magic):
+                logger.warning(
+                    f"Magic bytes mismatch: {value.name} tiene header {header!r}, "
+                    f"esperado {expected_magic!r} para extension {ext}"
+                )
+                raise ValidationError(
+                    _("El contenido del archivo no coincide con la extension %(ext)s."),
+                    params={"ext": ext.upper()},
+                )
+        except (OSError, AttributeError):
+            pass
 
 
 def validate_filename_safe(value):

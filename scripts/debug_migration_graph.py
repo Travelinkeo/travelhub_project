@@ -1,17 +1,18 @@
 import os
 import sys
+
 import django
-from django.db.migrations.loader import MigrationLoader
 from django.db import connections
+from django.db.migrations.loader import MigrationLoader
 
 sys.path.append(os.getcwd())
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "travelhub.settings")
 django.setup()
 
-loader = MigrationLoader(connections['default'])
+loader = MigrationLoader(connections["default"])
 print("Nodes in Graph:")
 for node in loader.graph.nodes:
-    if node[0] == 'crm' or node[0] == 'cotizaciones':
+    if node[0] == "crm" or node[0] == "cotizaciones":
         print(f" - {node}")
 
 print("\nApps in graph:")

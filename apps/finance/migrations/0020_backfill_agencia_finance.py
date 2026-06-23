@@ -8,7 +8,7 @@ def backfill_agencia(apps, schema_editor):
     Backfill agencia FK on RetencionISLR, LinkDePago, FacturaFiscal
     from their related objects (Factura, Venta).
     """
-    Agencia = apps.get_model("core", "Agencia")
+    apps.get_model("core", "Agencia")
     db_alias = schema_editor.connection.alias
 
     # RetencionISLR: agencia comes from factura.venta.agencia or factura.agencia

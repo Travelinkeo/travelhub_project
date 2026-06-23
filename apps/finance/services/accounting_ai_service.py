@@ -13,6 +13,7 @@ from __future__ import annotations
 # ==============================================================================
 import logging
 from decimal import Decimal
+from typing import TYPE_CHECKING
 
 from django.db import transaction
 from django.utils import timezone
@@ -20,6 +21,9 @@ from django.utils import timezone
 # Resolved dynamically to avoid architectural violations
 from apps.finance.models.ai_accounting_schemas import AsientoContableSchema
 from apps.finance.models.currencies import Moneda
+
+if TYPE_CHECKING:
+    from contabilidad.models import AsientoContable
 
 logger = logging.getLogger(__name__)
 

@@ -75,7 +75,7 @@ class Command(BaseCommand):
             except User.DoesNotExist:
                 raise CommandError(
                     f"[-] Error: El usuario propietario '{propietario_username}' no existe en el sistema."
-                )
+                ) from None
         else:
             # Buscar el primer superusuario o usuario activo disponible como fallback
             propietario = User.objects.filter(is_superuser=True).first()
@@ -103,7 +103,7 @@ class Command(BaseCommand):
                 except Moneda.DoesNotExist:
                     raise CommandError(
                         "[-] Error de Sistema: Las monedas base (USD/VES) deben estar pre-sembradas en la DB."
-                    )
+                    ) from None
 
                 # 2. Crear la entidad maestra del Tenant
                 agencia = Agencia.objects.create(
@@ -180,4 +180,4 @@ class Command(BaseCommand):
                     "\n[ERROR] Pipeline abortado. Se aplico ROLLBACK en la Base de Datos."
                 )
             )
-            raise CommandError(f"Detalles del fallo: {str(e)}")
+            raise CommandError(f"Detalles del fallo: {str(e)}") from e

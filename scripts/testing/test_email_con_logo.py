@@ -1,32 +1,35 @@
 """
 Script de prueba para verificar que el logo se muestra en los emails
 """
+
 import os
+
 import django
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "travelhub.settings")
 django.setup()
 
-from apps.communications.services.email_notifications import enviar_email_html
 from django.conf import settings
+
+from apps.communications.services.email_notifications import enviar_email_html
 
 print("=== Test Email con Logo ===\n")
 
 context = {
-    'cliente_nombre': 'Usuario de Prueba',
-    'localizador': 'TEST123',
-    'fecha': '03/10/2025',
-    'total': '500.00',
-    'moneda': '$',
-    'estado': 'Confirmada'
+    "cliente_nombre": "Usuario de Prueba",
+    "localizador": "TEST123",
+    "fecha": "03/10/2025",
+    "total": "500.00",
+    "moneda": "$",
+    "estado": "Confirmada",
 }
 
 print("Enviando email de prueba con logo...")
 resultado = enviar_email_html(
-    'Test - Email con Logo de TravelHub',
-    'core/emails/confirmacion_venta.html',
+    "Test - Email con Logo de TravelHub",
+    "core/emails/confirmacion_venta.html",
     context,
-    settings.EMAIL_HOST_USER
+    settings.EMAIL_HOST_USER,
 )
 
 if resultado:

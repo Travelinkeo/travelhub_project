@@ -95,7 +95,7 @@ class WhatsAppEvolutionService:
         clean_number = "".join(filter(str.isdigit, str(phone_number)))
 
         # Detectar si es base64 o URL
-        is_base64 = document_url_or_base64.startswith("data:") or len(document_url_or_base64) > 1000
+        document_url_or_base64.startswith("data:") or len(document_url_or_base64) > 1000
 
         payload = {
             "number": clean_number,

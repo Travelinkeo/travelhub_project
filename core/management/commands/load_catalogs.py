@@ -87,6 +87,7 @@ class Command(BaseCommand):
             created, updated, skipped = 0, 0, 0
             if not dry_run:
                 from core.middleware import system_context
+
                 with system_context():
                     with transaction.atomic():
                         for row in data:

@@ -1,8 +1,9 @@
-import os
-import django
 import json
+import os
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
+import django
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "travelhub.settings")
 django.setup()
 
 from apps.automation.services.ai_engine import ai_engine

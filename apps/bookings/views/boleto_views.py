@@ -284,7 +284,7 @@ class BoletoMassActionAPIView(InternalAPIAuthMixin, APIView):
             )
 
         try:
-            cliente = Cliente.objects.select_related("agencia").get(pk=cliente_id)
+            Cliente.objects.select_related("agencia").get(pk=cliente_id)
 
             # Encolar la facturación de forma asíncrona (Job Ingestion API)
             from apps.common.utils.celery_utils import safe_delay
@@ -369,6 +369,8 @@ class VentaDoubleInvoiceAPIView(InternalAPIAuthMixin, APIView):
 
     def post(self, request, pk):
         try:
+            from apps.finance.services.invoice_service import InvoiceService
+
             venta = Venta.objects.get(pk=pk)
             f_tercero, f_propia = InvoiceService.generate_double_invoice(venta)
             return Response(

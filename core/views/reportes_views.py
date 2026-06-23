@@ -200,8 +200,6 @@ def validar_cuadre(request):
         Q(total_debe__gt=0) | Q(total_haber__gt=0)
     ).exclude(total_debe=F("total_haber"))
 
-    from django.db.models import F
-
     asientos_descuadrados = AsientoContable.objects.annotate(
         diferencia=F("total_debe") - F("total_haber")
     ).exclude(diferencia=0)

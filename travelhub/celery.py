@@ -67,10 +67,13 @@ _beat_schedule = getattr(settings, "CELERY_BEAT_SCHEDULE", None)
 if _beat_schedule is None:
     try:
         from travelhub.celery_beat_schedule import CELERY_BEAT_SCHEDULE as _beat_schedule
+
         logger.info("✅ CELERY_BEAT_SCHEDULE cargado desde celery_beat_schedule.py")
     except ImportError:
         _beat_schedule = {}
-        logger.warning("⚠️ No se encontró CELERY_BEAT_SCHEDULE. Celery Beat no tendrá tareas programadas.")
+        logger.warning(
+            "⚠️ No se encontró CELERY_BEAT_SCHEDULE. Celery Beat no tendrá tareas programadas."
+        )
 
 app.conf.beat_schedule = _beat_schedule
 

@@ -181,8 +181,9 @@ class ProductoServicio(AgenciaMixin, SoftDeleteModel, models.Model):
     )
     activo = models.BooleanField(_("Activo"), default=True)
     requiere_datos_pasajero_especificos = models.BooleanField(
-        _("Requiere Datos Específicos del Pasajero"), default=False,
-        help_text="Ej. para boletos aéreos, seguros."
+        _("Requiere Datos Específicos del Pasajero"),
+        default=False,
+        help_text="Ej. para boletos aéreos, seguros.",
     )
 
     class Meta:

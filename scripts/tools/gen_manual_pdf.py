@@ -1,6 +1,7 @@
-import sys
 import os
-from weasyprint import HTML, CSS
+import sys
+
+from weasyprint import HTML
 
 # Rutas de imágenes generadas (usando las absolutas del sistema)
 base_path = r"C:\Users\ARMANDO\.gemini\antigravity\brain\5e11f3b7-df37-4e76-b5cc-2a2e63d18f1d"
@@ -10,7 +11,7 @@ images = {
     "ocr": os.path.join(base_path, "travel_ocr_visual_1775686062366.png"),
     "quoter": os.path.join(base_path, "magic_quoter_concept_1775684925251.png"),
     "airlines": os.path.join(base_path, "airline_logo_grid_1775686076023.png"),
-    "automation": os.path.join(base_path, "erp_ticket_parsing_visual_1775684939967.png")
+    "automation": os.path.join(base_path, "erp_ticket_parsing_visual_1775684939967.png"),
 }
 
 html_content = f"""
@@ -132,7 +133,7 @@ html_content = f"""
 </head>
 <body>
     <div class="cover">
-        <img src="file:///{images['banner']}" alt="Logo">
+        <img src="file:///{images["banner"]}" alt="Logo">
         <h1>TravelHub</h1>
         <p>Expert Travel Management Ecosystem</p>
         <p style="font-size: 12pt; margin-top: 5cm;">Versión 4.0 - Manual de Operaciones Integral 2026</p>
@@ -158,7 +159,7 @@ html_content = f"""
     <h2>Capítulo 1: Inteligencia de Negocios (Dashboard)</h2>
     <p>El Dashboard de TravelHub (Estilo Obsidian Emerald) centraliza la salud de tu agencia en una sola pantalla.</p>
     
-    <img src="file:///{images['kpi']}" class="screenshot" alt="Dashboard KPI">
+    <img src="file:///{images["kpi"]}" class="screenshot" alt="Dashboard KPI">
     
     <div class="feature-card">
         <h3>1.1 Análisis de Métricas KPI</h3>
@@ -181,7 +182,7 @@ html_content = f"""
     <h2>Capítulo 2: Ciclo de Vida del Boleto Aéreo</h2>
     <p>La funcionalidad más potente de TravelHub es el <b>Parser de GDS</b>. Hemos eliminado la entrada manual de datos en un 90%.</p>
 
-    <img src="file:///{images['automation']}" class="screenshot" alt="Automation">
+    <img src="file:///{images["automation"]}" class="screenshot" alt="Automation">
 
     <h3>2.1 El Proceso de Importación</h3>
     <div class="step">
@@ -204,7 +205,7 @@ html_content = f"""
     <h2>Capítulo 3: El Cotizador Mágico 2.0</h2>
     <p>Diseñado para generar "Wows" en los clientes. Convierte una charla de WhatsApp en una reserva cerrada.</p>
     
-    <img src="file:///{images['quoter']}" class="screenshot" alt="Magic Quoter">
+    <img src="file:///{images["quoter"]}" class="screenshot" alt="Magic Quoter">
 
     <h3>3.1 Pasos para una Cotización de Éxito</h3>
     <table>
@@ -223,7 +224,7 @@ html_content = f"""
 
     <h2>Capítulo 4: Motores de Reservas Integrados</h2>
     
-    <img src="file:///{images['airlines']}" class="screenshot" alt="Airlines">
+    <img src="file:///{images["airlines"]}" class="screenshot" alt="Airlines">
 
     <h3>4.1 Google Flights Integration (Fli Engine)</h3>
     <p>A diferencia de otros sistemas que muestran "caché", TravelHub accede a la red de Google para traerte:</p>
@@ -239,7 +240,7 @@ html_content = f"""
     <h2>Capítulo 5: CRM y Automatización de Datos</h2>
     <p>La gestión de datos de pasajeros se ha modernizado con tecnología de visión artificial.</p>
 
-    <img src="file:///{images['ocr']}" class="screenshot" alt="Passport OCR">
+    <img src="file:///{images["ocr"]}" class="screenshot" alt="Passport OCR">
 
     <h3>5.1 Escaneo de Documentos (OCR)</h3>
     <p>Olvídate de transcribir nombres complejos. Nuestra IA de visión lee la zona MRZ de los pasaportes:</p>
@@ -275,9 +276,9 @@ html_content = f"""
 output_pdf = os.path.join(base_path, "Manual_Usuario_TravelHub_Completo.pdf")
 
 try:
-    print(f"Generando PDF en: {{output_pdf}}...")
+    print("Generando PDF en: {output_pdf}...")
     HTML(string=html_content).write_pdf(output_pdf)
     print("✅ ¡Manual PDF generado con éxito!")
-except Exception as e:
-    print(f"❌ Error generando el PDF: {{e}}")
+except Exception:
+    print("❌ Error generando el PDF: {e}")
     sys.exit(1)

@@ -229,7 +229,7 @@ class Venta(AgenciaMixin, SoftDeleteModel, models.Model):
     def factura_consolidada(self, value):
         self.factura_consolidada_id = value.pk if value else None
 
-    notas = models.TextField(_("Notas de la Venta"), blank=True, null=True)
+    notas = models.TextField(_("Notas de la Venta"), blank=True, null=True, default="")
     puntos_fidelidad_asignados = models.BooleanField(
         _("Puntos Fidelidad Asignados"),
         default=False,
@@ -492,7 +492,7 @@ class ItemVenta(AgenciaMixin, SoftDeleteModel, models.Model):
         blank=True,
     )
     descripcion_personalizada = models.CharField(
-        _("Descripción Personalizada"), max_length=500, blank=True, null=True
+        _("Descripción Personalizada"), max_length=500, blank=True, null=True, default=""
     )
     cantidad = models.PositiveIntegerField(_("Cantidad"), default=1)
     precio_unitario_venta = models.DecimalField(
@@ -513,7 +513,11 @@ class ItemVenta(AgenciaMixin, SoftDeleteModel, models.Model):
     fecha_inicio_servicio = models.DateTimeField(_("Fecha Inicio Servicio"), blank=True, null=True)
     fecha_fin_servicio = models.DateTimeField(_("Fecha Fin Servicio"), blank=True, null=True)
     codigo_reserva_proveedor = models.CharField(
-        _("Código Reserva Proveedor (PNR, Localizador)"), max_length=50, blank=True, null=True
+        _("Código Reserva Proveedor (PNR, Localizador)"),
+        max_length=50,
+        blank=True,
+        null=True,
+        default="",
     )
     proveedor_servicio = models.ForeignKey(
         Proveedor,
@@ -562,7 +566,7 @@ class ItemVenta(AgenciaMixin, SoftDeleteModel, models.Model):
         choices=EstadoItemVenta.choices,
         default=EstadoItemVenta.PENDIENTE_CONFIRMACION,
     )
-    notas_item = models.TextField(_("Notas del Item"), blank=True, null=True)
+    notas_item = models.TextField(_("Notas del Item"), blank=True, null=True, default="")
 
     class Meta:
         verbose_name = _("Item de Venta/Reserva")

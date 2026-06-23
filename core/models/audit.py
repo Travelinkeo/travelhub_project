@@ -247,6 +247,7 @@ def _calcular_diff(prev, current, exclude_fields=None):
 
             if val_prev != val_curr:
                 diff[name] = {"old": _sanitize_value(val_prev), "new": _sanitize_value(val_curr)}
-        except Exception:
+        except Exception as e:
+            logger.debug("Ignored exception computing field diff: %s", e)
             continue
     return diff

@@ -54,7 +54,7 @@ class Command(BaseCommand):
                 self.stdout.write(f"Activos:    {resultado['activos']:>15,.2f}")
                 self.stdout.write(f"Pasivos:    {resultado['pasivos']:>15,.2f}")
                 self.stdout.write(f"Patrimonio: {resultado['patrimonio']:>15,.2f}")
-                self.stdout.write(f"{'='*40}")
+                self.stdout.write(f"{'=' * 40}")
                 self.stdout.write(f"Total P+P:  {resultado['total_pasivo_patrimonio']:>15,.2f}")
 
                 if resultado["cuadrado"]:
@@ -108,7 +108,7 @@ class Command(BaseCommand):
                     )
                     self.stdout.write(f"Ingresos:      {resultado['ingresos']:>15,.2f}")
                     self.stdout.write(f"Gastos:        {resultado['gastos']:>15,.2f}")
-                    self.stdout.write(f"{'='*40}")
+                    self.stdout.write(f"{'=' * 40}")
 
                     utilidad = resultado["utilidad_neta"]
                     if utilidad >= 0:
@@ -151,6 +151,6 @@ class Command(BaseCommand):
                         )
 
         except ValueError as e:
-            raise CommandError(f"Error en formato de fecha: {e}")
+            raise CommandError(f"Error en formato de fecha: {e}") from e
         except Exception as e:
-            raise CommandError(f"Error generando reporte: {e}")
+            raise CommandError(f"Error generando reporte: {e}") from e

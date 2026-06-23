@@ -56,7 +56,7 @@ class LinkeoService:
     # Switching strategy: Use multi_replace
 
     @classmethod
-    def process_message(cls, text: str, user_id: int = None, agencia=None) -> str:
+    def process_message(cls, text: str, user_id: int = None, agencia=None) -> str:  # noqa: F811
         """
         Main entry point. Receives text, returns a response string.
         Args:

@@ -194,7 +194,7 @@ class TestFacturaFiscal:
                 moneda=moneda_usd,
             )
             FacturaFiscal.objects.create(venta=venta)
-            with pytest.raises(Exception):
+            with pytest.raises(Exception):  # noqa: B017
                 FacturaFiscal.objects.create(venta=venta)
 
 

@@ -1,11 +1,15 @@
 from django.db import models
 
+
 class Aeropuerto(models.Model):
     """
     Modelo para almacenar aeropuertos a nivel global.
     Permite codificación/decodificación IATA y búsquedas de cercanía geográfica.
     """
-    codigo_iata = models.CharField(max_length=3, unique=True, db_index=True, verbose_name="Código IATA")
+
+    codigo_iata = models.CharField(
+        max_length=3, unique=True, db_index=True, verbose_name="Código IATA"
+    )
     nombre = models.CharField(max_length=150, verbose_name="Nombre del Aeropuerto")
     ciudad = models.CharField(max_length=150, db_index=True, verbose_name="Ciudad")
     pais = models.CharField(max_length=100, db_index=True, verbose_name="País")

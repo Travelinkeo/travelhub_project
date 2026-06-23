@@ -209,7 +209,7 @@ class EmailMonitorLogAdmin(SaaSAdminMixin, admin.ModelAdmin):
         warnings = qs.filter(estado=EmailMonitorLog.Estado.WARNING).count()
         avg_dur = qs.aggregate(avg=Avg("tiempo_ejecucion"))["avg"] or 0
         max_dur = qs.aggregate(mx=Max("tiempo_ejecucion"))["mx"] or 0
-        total_procesados = qs.aggregate(tp=Count("correos_procesados"))["tp"] or 0
+        qs.aggregate(tp=Count("correos_procesados"))["tp"] or 0
         ultimo = qs.order_by("-fecha_ejecucion").first()
 
         tasa_exito = (exitosos / total * 100) if total else 0
@@ -255,7 +255,7 @@ class EmailMonitorLogAdmin(SaaSAdminMixin, admin.ModelAdmin):
             </tr>
         </table>
         """
-        return mark_safe(html)
+        return mark_safe(html)  # noqa: S308
 
     # -----------------------------------------------------------------------
     # Fieldsets del detalle

@@ -3,6 +3,7 @@
 API endpoints para tasas de cambio de Venezuela
 """
 
+import logging
 from datetime import date, datetime, timedelta
 
 from django.core.cache import cache
@@ -16,6 +17,8 @@ from core.auth_helpers import internal_auth
 
 from .models import TasaCambioBCV
 from .tasas_venezuela_client import TasasVenezuelaClient
+
+logger = logging.getLogger(__name__)
 
 
 @extend_schema(

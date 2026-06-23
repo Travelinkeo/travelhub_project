@@ -101,7 +101,9 @@ class WhatsAppStatusView(AgencyRoleRequiredMixin, View):
     allowed_roles = ["admin", "gerente"]
 
     def get(self, request, *args, **kwargs):
-        from apps.communications.services.whatsapp_unified import WhatsAppService
+        from django.core.cache import cache
+
+        from apps.communications.services.evolution_api_service import EvolutionService
 
         # Obtener agencia de forma robusta (compatibilidad con superusuarios)
         agencia = getattr(request, "agencia", None)
@@ -113,44 +115,83 @@ class WhatsAppStatusView(AgencyRoleRequiredMixin, View):
             return HttpResponse("Configuración de agencia no encontrada.", status=404)
 
         session_name = agencia.subdominio_slug
+        if not session_name:
+            return render(
+                request,
+                "dashboard/partials/whatsapp_qr_new.html",
+                {
+                    "whatsapp_status": "error",
+                    "estado": "error",
+                    "qr_code": None,
+                    "whatsapp_qr": None,
+                },
+            )
 
-        # Timeout corto para no bloquear HTMX demasiado
+        cache_key = f"evo_qr:{session_name}"
+
+        # 1. Verificar estado directo en Evolution API
         try:
-            # Obtener estado de WhatsApp
-            estado_raw = WhatsAppService.get_status(session_name)
+            estado_evolution = EvolutionService.get_instance_state(session_name)
+        except Exception:
+            estado_evolution = "disconnected"
 
-            # Mapeo a estados UI
-            estado_ui = "disconnected"
-            if estado_raw == "WORKING":
-                estado_ui = "connected"
-            elif estado_raw == "CONNECTING":
-                estado_ui = "connecting"
+        # 2. Si ya está conectada, limpiar QR de Redis y retornar estado connected
+        if estado_evolution == "open":
+            cache.delete(cache_key)
+            return render(
+                request,
+                "dashboard/partials/whatsapp_qr_new.html",
+                {
+                    "whatsapp_status": "connected",
+                    "estado": "connected",
+                    "qr_code": None,
+                    "whatsapp_qr": None,
+                    "instancia": session_name,
+                },
+            )
 
-            qr_code = None
-            if estado_ui != "connected":
-                # Solo intentamos QR si no estamos conectados
-                qr_code = WhatsAppService.get_qr_code(session_name)
+        # 3. Si no existe la instancia, crearla automáticamente
+        if estado_evolution == "disconnected":
+            try:
+                result = EvolutionService.create_instance(session_name)
+                if result:
+                    logger.info(f"✅ Instancia '{session_name}' auto-creada en WhatsAppStatusView")
+            except Exception as e:
+                logger.error(f"Error auto-creando instancia '{session_name}': {e}")
 
-                if not qr_code:
-                    # Intento de arranque defensivo
-                    WhatsAppService.start_session(session_name)
-                    qr_code = WhatsAppService.get_qr_code(session_name)
+        # 4. Intentar leer QR de Redis (Celery lo pone ahí periódicamente)
+        cached_qr = cache.get(cache_key)
+        if cached_qr:
+            if not cached_qr.startswith("data:image"):
+                cached_qr = f"data:image/png;base64,{cached_qr}"
+            return render(
+                request,
+                "dashboard/partials/whatsapp_qr_new.html",
+                {
+                    "whatsapp_status": "connecting",
+                    "estado": "connecting",
+                    "qr_code": cached_qr,
+                    "whatsapp_qr": cached_qr,
+                    "instancia": session_name,
+                },
+            )
 
-                if qr_code:
-                    estado_ui = "connecting"
+        # 5. Sin QR en Redis — encolar fetch y retornar "espera"
+        try:
+            from apps.common.tasks import fetch_evolution_qr_task
+
+            fetch_evolution_qr_task.delay(session_name)
         except Exception as e:
-            logger.error(f"Error en WhatsAppStatusView: {e}")
-            estado_ui = "error"
-            qr_code = None
+            logger.error(f"Error encolando fetch QR para '{session_name}': {e}")
 
         return render(
             request,
             "dashboard/partials/whatsapp_qr_new.html",
             {
-                "whatsapp_status": estado_ui,
-                "estado": estado_ui,
-                "qr_code": qr_code,
-                "whatsapp_qr": qr_code,
+                "whatsapp_status": "connecting",
+                "estado": "connecting",
+                "qr_code": None,
+                "whatsapp_qr": None,
                 "instancia": session_name,
             },
         )
@@ -209,7 +250,7 @@ class UsuarioAgenciaCreateView(AgencyRoleRequiredMixin, View):
 
                     messages.success(
                         request,
-                        f'Usuario {data["email"]} creado correctamente. Contraseña temporal: {temp_password}',
+                        f"Usuario {data['email']} creado correctamente. Contraseña temporal: {temp_password}",
                     )
 
             except Exception as e:

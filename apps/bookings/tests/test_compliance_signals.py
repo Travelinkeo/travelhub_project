@@ -18,7 +18,7 @@ class TestComplianceAndSignals:
         """El Compliance Guard debe alertar a Telegram si el pasaporte vence en menos de 6 meses."""
 
         # Configurar variables de entorno de Telegram
-        settings.TELEGRAM_BOT_TOKEN = "dummy_token"
+        settings.TELEGRAM_BOT_TOKEN = "dummy_token"  # noqa: S105
         settings.TELEGRAM_OPERACIONES_CHAT_ID = "dummy_chat_id"
 
         # Configurar mock para simular respuesta exitosa de la API de Telegram

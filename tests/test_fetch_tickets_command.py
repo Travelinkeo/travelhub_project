@@ -7,7 +7,6 @@ from django.test import TestCase, override_settings
 
 
 class FetchTicketsCommandTest(TestCase):
-
     @override_settings(GMAIL_USER=None, GMAIL_APP_PASSWORD=None)
     def test_missing_credentials(self):
         """
@@ -15,13 +14,16 @@ class FetchTicketsCommandTest(TestCase):
         """
         out = StringIO()
         err = StringIO()
-        call_command('fetch_tickets', stdout=out, stderr=err)
-        
-        self.assertIn("Error Crítico: Las variables de entorno GMAIL_USER y GMAIL_APP_PASSWORD no están configuradas", out.getvalue())
-        self.assertEqual(err.getvalue(), '') # No debería haber un error de CommandError
+        call_command("fetch_tickets", stdout=out, stderr=err)
 
-    @patch('imaplib.IMAP4_SSL')
-    @override_settings(GMAIL_USER='test@gmail.com', GMAIL_APP_PASSWORD='fakepass')
+        self.assertIn(
+            "Error Crítico: Las variables de entorno GMAIL_USER y GMAIL_APP_PASSWORD no están configuradas",
+            out.getvalue(),
+        )
+        self.assertEqual(err.getvalue(), "")  # No debería haber un error de CommandError
+
+    @patch("imaplib.IMAP4_SSL")
+    @override_settings(GMAIL_USER="test@gmail.com", GMAIL_APP_PASSWORD="fakepass")
     def test_imap_login_fails(self, mock_imap_ssl):
         """
         Verifica que el comando maneja un fallo en el login de IMAP.
@@ -32,25 +34,27 @@ class FetchTicketsCommandTest(TestCase):
 
         out = StringIO()
         err = StringIO()
-        call_command('fetch_tickets', stdout=out, stderr=err)
+        call_command("fetch_tickets", stdout=out, stderr=err)
 
         self.assertIn("Ocurrió un error crítico general: Login failed", out.getvalue())
-        self.assertEqual(err.getvalue(), '')
+        self.assertEqual(err.getvalue(), "")
 
-    @patch('imaplib.IMAP4_SSL')
-    @override_settings(GMAIL_USER='test@gmail.com', GMAIL_APP_PASSWORD='fakepass', GMAIL_FROM_KIU='test@kiu.com')
+    @patch("imaplib.IMAP4_SSL")
+    @override_settings(
+        GMAIL_USER="test@gmail.com", GMAIL_APP_PASSWORD="fakepass", GMAIL_FROM_KIU="test@kiu.com"
+    )
     def test_no_new_emails(self, mock_imap_ssl):
         """
         Verifica el comportamiento cuando no hay correos nuevos.
         """
         mock_instance = mock_imap_ssl.return_value
-        mock_instance.login.return_value = ('OK', [b'Login successful'])
-        mock_instance.select.return_value = ('OK', [b'1'])
+        mock_instance.login.return_value = ("OK", [b"Login successful"])
+        mock_instance.select.return_value = ("OK", [b"1"])
         # Simular que no se encuentran correos
-        mock_instance.search.return_value = ('OK', [b''])
+        mock_instance.search.return_value = ("OK", [b""])
 
         out = StringIO()
-        call_command('fetch_tickets', stdout=out)
+        call_command("fetch_tickets", stdout=out)
 
         self.assertIn("No se encontraron nuevos correos para procesar.", out.getvalue())
         mock_instance.logout.assert_called_once()

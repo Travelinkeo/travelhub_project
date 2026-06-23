@@ -28,8 +28,8 @@ class AsientoContableSchema(BaseModel):
         Garantiza matemáticamente que el asiento esté cuadrado (Debe == Haber).
         Se permite una tolerancia de 0.01 para errores de redondeo.
         """
-        total_debe = round(sum(l.debe for l in v), 2)
-        total_haber = round(sum(l.haber for l in v), 2)
+        total_debe = round(sum(item.debe for item in v), 2)
+        total_haber = round(sum(item.haber for item in v), 2)
 
         if abs(total_debe - total_haber) > 0.01:
             raise ValueError(

@@ -55,7 +55,7 @@ class FlyerService:
         if os.path.exists(bg_dir):
             files = [f for f in os.listdir(bg_dir) if f.lower().endswith((".jpg", ".jpeg", ".png"))]
             if files:
-                return os.path.join(bg_dir, random.choice(files))
+                return os.path.join(bg_dir, random.choice(files))  # noqa: S311
         return None
 
     def generate_flyer(

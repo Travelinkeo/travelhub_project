@@ -61,7 +61,7 @@ def enviar_email_pago_exitoso(agencia, invoice_data):
 
     send_mail(
         subject=subject,
-        message=f'Hemos recibido tu pago de ${invoice_data["amount"]}. Gracias por usar TravelHub.',
+        message=f"Hemos recibido tu pago de ${invoice_data['amount']}. Gracias por usar TravelHub.",
         from_email=settings.DEFAULT_FROM_EMAIL,
         recipient_list=[agencia.email_principal],
         html_message=html_message,

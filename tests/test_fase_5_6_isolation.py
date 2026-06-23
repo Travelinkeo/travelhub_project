@@ -1,6 +1,3 @@
-import pytest
-
-pytestmark = pytest.mark.skip(reason="Tests requieren configuración completa o refactorización")
 from decimal import Decimal
 from unittest.mock import patch
 
@@ -9,6 +6,8 @@ import pytest
 from apps.marketing.models import Campania
 from core.middleware import agency_context
 from core.models import Agencia
+
+pytestmark = pytest.mark.skip(reason="Tests requieren configuración completa o refactorización")
 
 
 @pytest.fixture

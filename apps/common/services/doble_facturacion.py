@@ -6,8 +6,13 @@ Genera factura por cuenta de terceros + factura por servicios propios
 
 import logging
 from decimal import Decimal
+from typing import TYPE_CHECKING
 
 from django.db import transaction
+
+if TYPE_CHECKING:
+    from apps.finance.models import Factura as FacturaConsolidada
+    from apps.finance.models import ItemFactura as ItemFacturaConsolidada
 
 
 def __getattr__(name):

@@ -1,10 +1,11 @@
-import sys
 import os
+import sys
+
 import django
 
 # Setup Django
 sys.path.append(os.getcwd())
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "travelhub.settings")
 django.setup()
 
 from apps.automation.parsers.kiu_parser import KIUParser
@@ -35,15 +36,16 @@ Form of Payment/Forma de Pago:   CASH
 Total:                           VES 5.500,00
 """
 
+
 def test_extraction():
     parser = KIUParser()
     parsed_data = parser.parse(sample_text)
-    
+
     print("--- TESTING FLIGHT EXTRACTION ---")
     print(f"Passenger: {parsed_data.passenger_name}")
     print(f"PNR: {parsed_data.pnr}")
     print(f"Flights Found: {len(parsed_data.flights)}")
-    
+
     for f in parsed_data.flights:
         print(f"- {f['aerolinea']} {f['numero_vuelo']} {f['origen']}->{f['destino']}")
 
@@ -53,5 +55,6 @@ def test_extraction():
     else:
         print("\n[SUCCESS] Flights extracted.")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     test_extraction()

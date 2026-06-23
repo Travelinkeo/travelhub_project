@@ -1,6 +1,8 @@
+from decimal import Decimal
+
 from apps.automation.parsers.kiu_parser import KIUParser
 from apps.automation.parsers.legacy.sabre_parser import SabreParser
-from decimal import Decimal
+
 
 def test_kiu_taxes_normalization():
     sample = (
@@ -14,12 +16,12 @@ def test_kiu_taxes_normalization():
     parser = KIUParser()
     parsed_data = parser.parse(sample)
     d = parsed_data.to_dict()
-    
+
     # 210.50 - 170.00 = 40.50
     # Usar Decimal para evitar problemas de formato de string ('210.5' vs '210.50')
-    assert Decimal(d.get('IMPUESTOS')) == Decimal('40.50')
-    assert Decimal(d.get('TARIFA_IMPORTE')) == Decimal('170.00')
-    assert Decimal(d.get('TOTAL_IMPORTE')) == Decimal('210.50')
+    assert Decimal(d.get("IMPUESTOS")) == Decimal("40.50")
+    assert Decimal(d.get("TARIFA_IMPORTE")) == Decimal("170.00")
+    assert Decimal(d.get("TOTAL_IMPORTE")) == Decimal("210.50")
 
 
 def test_sabre_taxes_normalization():
@@ -35,8 +37,8 @@ def test_sabre_taxes_normalization():
     parser = SabreParser()
     parsed_data = parser.parse(sample)
     d = parsed_data.to_dict()
-    
+
     # 150.60 - 123.45 = 27.15
-    assert Decimal(d.get('IMPUESTOS')) == Decimal('27.15')
-    assert Decimal(d.get('TARIFA_IMPORTE')) == Decimal('123.45')
-    assert Decimal(d.get('TOTAL_IMPORTE')) == Decimal('150.60')
+    assert Decimal(d.get("IMPUESTOS")) == Decimal("27.15")
+    assert Decimal(d.get("TARIFA_IMPORTE")) == Decimal("123.45")
+    assert Decimal(d.get("TOTAL_IMPORTE")) == Decimal("150.60")

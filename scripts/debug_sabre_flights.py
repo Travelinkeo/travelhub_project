@@ -1,34 +1,37 @@
 import os
-import django
 import sys
 
-sys.path.append('c:\\Users\\ARMANDO\\travelhub_project')
+import django
+
+sys.path.append("c:\\Users\\ARMANDO\\travelhub_project")
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "travelhub.settings")
 django.setup()
 
-from apps.bookings.models import BoletoImportado
-from apps.automation.services.ticket_parser_service import TicketParserService
-from apps.automation.parsers.sabre_parser import SabreParser
 import logging
 
+from apps.automation.parsers.sabre_parser import SabreParser
+from apps.automation.services.ticket_parser_service import TicketParserService
+from apps.bookings.models import BoletoImportado
+
 logging.basicConfig(level=logging.INFO)
+
 
 def debug_flights():
     try:
         boleto = BoletoImportado.objects.get(pk=980)
         print(f"Loading Boleto ID: {boleto.pk}")
-        
+
         service = TicketParserService()
         text = service._extraer_texto(boleto)
-        
+
         if not text:
             print("Error: No text extracted")
             return
 
         print("--- Text Preview (Lines 11-40) ---", flush=True)
-        lines = text.split('\n')
+        lines = text.split("\n")
         for i in range(11, min(40, len(lines))):
-             print(f"{i}: [{lines[i].strip()}]", flush=True)
+            print(f"{i}: [{lines[i].strip()}]", flush=True)
         print("-------------------------------", flush=True)
 
         parser = SabreParser()
@@ -36,12 +39,14 @@ def debug_flights():
         flights = parser._parse_flights(text)
         print(f"Flights found: {len(flights)}")
         for i, f in enumerate(flights):
-            print(f"Flight {i+1}: {f}")
-            
+            print(f"Flight {i + 1}: {f}")
+
     except Exception as e:
         print(f"Error: {e}")
         import traceback
+
         traceback.print_exc()
+
 
 if __name__ == "__main__":
     debug_flights()

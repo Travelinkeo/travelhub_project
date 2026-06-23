@@ -24,4 +24,4 @@ def sanitize_html_filter(value, tags=None):
     if not value:
         return ""
     cleaned = sanitize_html(value)
-    return mark_safe(cleaned)
+    return mark_safe(cleaned)  # noqa: S308

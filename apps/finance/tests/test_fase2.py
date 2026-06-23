@@ -108,7 +108,9 @@ class TestCrossTenantIsolation:
             _crear_venta(agencia_estandar, moneda_usd, "VSU2")
 
         superuser = User.objects.create_superuser(
-            username="admin_test", password="test", email="admin@test.com"
+            username="admin_test",
+            password="test",  # noqa: S106
+            email="admin@test.com",
         )
         user_token = user_var.set(superuser)
         agency_token = agency_var.set(None)
@@ -206,7 +208,7 @@ class TestConciliacionBoletoHardDelete:
                 total_boleto=Decimal("150.00"),
                 agencia=agencia_premium,
             )
-            conciliacion = ConciliacionBoleto.objects.create(
+            ConciliacionBoleto.objects.create(
                 reporte=reporte,
                 linea_reporte=linea,
                 boleto_local=boleto,

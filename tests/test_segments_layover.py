@@ -1,6 +1,8 @@
-﻿import pytest
-pytestmark = pytest.mark.skip(reason='Tests requieren configuración completa o refactorización')
+import pytest
+
 from apps.automation.parsers import ticket_parser
+
+pytestmark = pytest.mark.skip(reason="Tests requieren configuración completa o refactorización")
 
 
 def test_sabre_two_segment_layover():
@@ -30,9 +32,9 @@ def test_sabre_two_segment_layover():
         "Please contact your travel arranger\n"
     )
     data = ticket_parser._parse_sabre_ticket(sample)
-    segs = data['normalized']['segments']
+    segs = data["normalized"]["segments"]
     assert len(segs) >= 2
     first, second = segs[0], segs[1]
-    assert first['duration_minutes'] == 90
-    assert second['duration_minutes'] == ( (14*60+15) - (12*60) )  # 135
-    assert second['layover_minutes'] == 90  # 10:30 -> 12:00 = 90
+    assert first["duration_minutes"] == 90
+    assert second["duration_minutes"] == ((14 * 60 + 15) - (12 * 60))  # 135
+    assert second["layover_minutes"] == 90  # 10:30 -> 12:00 = 90

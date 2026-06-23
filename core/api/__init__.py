@@ -145,7 +145,9 @@ __all__ = [
     "TramoVueloSchema",
     "InformeProveedorSchema",
     # Events / Signals
+    "sale_payment_recorded",
     "sale_recalculation_requested",
+    "ticket_invoicing_requested",
     # Validators
     "validar_no_vacio_o_espacios",
     "antivirus_hook",

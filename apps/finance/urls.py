@@ -2,13 +2,33 @@ import logging
 
 from django.urls import include, path
 from django.utils.module_loading import import_string
-from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import TemplateView
 from rest_framework import permissions, viewsets
 from rest_framework.routers import DefaultRouter
 
 from apps.common.models import Aerolinea, Ciudad, Pais
 from apps.finance.models.currencies import Moneda, TipoCambio
+
+from . import views
+from .views import (
+    ai_views,
+    api_reconciliacion_views,
+    audit_ui,
+    checkout_views,
+    invoice_views,
+    liquidaciones_views,
+    payment_views,
+    reconciliacion_views,
+    reconciliation_ui,
+    report_ui,
+    report_upload_view,
+    stripe_views,
+    task_status_view,
+    tax_refund_views,
+    views_reconciliation,
+)
+
+logger = logging.getLogger(__name__)
 
 # Core Serializers resolved dynamically to avoid static imports
 AerolineaSerializer = import_string("core.serializers.AerolineaSerializer")
@@ -53,56 +73,35 @@ exportar_excel = import_string("core.views.reportes_views.exportar_excel")
 libro_diario = import_string("core.views.reportes_views.libro_diario")
 validar_cuadre = import_string("core.views.reportes_views.validar_cuadre")
 
-from . import views
-from .views import (
-    ai_views,
-    api_reconciliacion_views,
-    audit_ui,
-    checkout_views,
-    invoice_views,
-    liquidaciones_views,
-    payment_views,
-    reconciliacion_views,
-    reconciliation_ui,
-    report_ui,
-    report_upload_view,
-    stripe_views,
-    task_status_view,
-    tax_refund_views,
-    views_reconciliation,
-)
 
-logger = logging.getLogger(__name__)
-
-
-class PaisViewSet(viewsets.ModelViewSet):
+class PaisViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Pais.objects.all()
     serializer_class = PaisSerializer
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
-class CiudadViewSet(viewsets.ModelViewSet):
+class CiudadViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Ciudad.objects.all()
     serializer_class = CiudadSerializer
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
-class MonedaViewSet(viewsets.ModelViewSet):
+class MonedaViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Moneda.objects.all()
     serializer_class = MonedaSerializer
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
-class TipoCambioViewSet(viewsets.ModelViewSet):
+class TipoCambioViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = TipoCambio.objects.all()
     serializer_class = TipoCambioSerializer
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
-class AerolineaViewSet(viewsets.ModelViewSet):
+class AerolineaViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Aerolinea.objects.filter(activa=True)
     serializer_class = AerolineaSerializer
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
 router = DefaultRouter()
@@ -116,6 +115,7 @@ router.register(r"ciudades", CiudadViewSet, basename="ciudad")
 router.register(r"monedas", MonedaViewSet, basename="moneda")
 router.register(r"tipos-cambio", TipoCambioViewSet, basename="tipocambio")
 router.register(r"aerolineas", AerolineaViewSet, basename="aerolinea")
+router.register(r"facturas", invoice_views.FacturaViewSet, basename="factura")
 
 # Liquidaciones, Facturas, Comisiones
 try:
@@ -353,9 +353,6 @@ urlpatterns = [
     ),
     path("api/billing/checkout/", create_checkout_session, name="create_checkout"),
     path("api/billing/portal/", create_portal_session, name="create_portal"),
-    path(
-        "api/billing/webhook/", csrf_exempt(stripe_webhook), name="stripe_webhook_v1"
-    ),  # Alias para evitar conflicto si existe
     path("api/billing/cancel/", cancel_subscription, name="cancel_subscription"),
     # Billing/SaaS - Dashboard
     path("api/billing/invoices/", get_invoices, name="billing_invoices"),

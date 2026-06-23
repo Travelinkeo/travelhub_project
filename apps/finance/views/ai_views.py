@@ -11,11 +11,10 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from core.auth_helpers import InternalAPIAuthMixin
-
 from apps.finance.models import PropuestaTransaccionIA
 from apps.finance.models.reconciliacion import ConciliacionBoleto
 from apps.finance.serializers import PropuestaTransaccionIASerializer
+from core.auth_helpers import InternalAPIAuthMixin
 
 logger = logging.getLogger(__name__)
 
@@ -32,6 +31,7 @@ class AIAccountingDashboardView(LoginRequiredMixin, TemplateView):
 
 class AIAccountingChatView(InternalAPIAuthMixin, APIView):
     permission_classes = [IsAuthenticated]
+    throttle_scope = "ai_parser_quota"
 
     def post(self, request):
         """
@@ -118,6 +118,7 @@ class AIChatHTMXView(LoginRequiredMixin, View):
 
 class ResolveDiscrepancyAIView(InternalAPIAuthMixin, APIView):
     permission_classes = [IsAuthenticated]
+    throttle_scope = "ai_parser_quota"
 
     def get(self, request, pk):
         """
@@ -174,12 +175,10 @@ class ResolveDiscrepancyAIView(InternalAPIAuthMixin, APIView):
             )
 
 
-
-
-
 class PropuestaTransaccionIAListCreateAPIView(InternalAPIAuthMixin, generics.ListCreateAPIView):
-    permission_classes = [IsAuthenticated]
     serializer_class = PropuestaTransaccionIASerializer
+    permission_classes = [IsAuthenticated]
+    throttle_scope = "ai_parser_quota"
 
     def get_queryset(self):
         agencia = getattr(self.request, "agencia", None)
@@ -204,6 +203,7 @@ class PropuestaTransaccionIAListCreateAPIView(InternalAPIAuthMixin, generics.Lis
 
 class ResolvePropuestaAPIView(InternalAPIAuthMixin, APIView):
     permission_classes = [IsAuthenticated]
+    throttle_scope = "ai_parser_quota"
 
     def post(self, request, pk, action):
         """
@@ -269,9 +269,9 @@ class ResolvePropuestaAPIView(InternalAPIAuthMixin, APIView):
                 elif propuesta.accion_tipo == "CREAR_ASIENTO":
                     from decimal import Decimal
 
+                    from django.apps import apps
                     from django.db import transaction
 
-                    from django.apps import apps
                     AsientoContable = apps.get_model("contabilidad", "AsientoContable")
                     DetalleAsiento = apps.get_model("contabilidad", "DetalleAsiento")
                     PlanContable = apps.get_model("contabilidad", "PlanContable")
@@ -298,7 +298,9 @@ class ResolvePropuestaAPIView(InternalAPIAuthMixin, APIView):
                         codigos = [d.get("codigo_cuenta") for d in detalles]
                         cuentas_map = {
                             c.codigo_cuenta: c
-                            for c in PlanContable.objects.filter(codigo_cuenta__in=codigos, agencia=agencia)
+                            for c in PlanContable.objects.filter(
+                                codigo_cuenta__in=codigos, agencia=agencia
+                            )
                         }
                         for idx, d in enumerate(detalles, start=1):
                             codigo = d.get("codigo_cuenta")
@@ -436,9 +438,9 @@ class AIAccountingResolveProposalHTMXView(LoginRequiredMixin, View):
                 elif propuesta.accion_tipo == "CREAR_ASIENTO":
                     from decimal import Decimal
 
+                    from django.apps import apps
                     from django.db import transaction
 
-                    from django.apps import apps
                     AsientoContable = apps.get_model("contabilidad", "AsientoContable")
                     DetalleAsiento = apps.get_model("contabilidad", "DetalleAsiento")
                     PlanContable = apps.get_model("contabilidad", "PlanContable")
@@ -465,7 +467,9 @@ class AIAccountingResolveProposalHTMXView(LoginRequiredMixin, View):
                         codigos = [d.get("codigo_cuenta") for d in detalles]
                         cuentas_map = {
                             c.codigo_cuenta: c
-                            for c in PlanContable.objects.filter(codigo_cuenta__in=codigos, agencia=agencia)
+                            for c in PlanContable.objects.filter(
+                                codigo_cuenta__in=codigos, agencia=agencia
+                            )
                         }
                         for idx, d in enumerate(detalles, start=1):
                             codigo = d.get("codigo_cuenta")

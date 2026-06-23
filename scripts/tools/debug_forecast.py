@@ -1,28 +1,30 @@
 import os
-import django
 import sys
+
+import django
 
 # Setup Django
 sys.path.append(os.getcwd())
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'travelhub.settings')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "travelhub.settings")
 django.setup()
 
 from apps.marketing.services.forecast_service import AIForecastService
 
+
 def test_forecast():
     print("Iniciando prueba de AI Forecast...")
     service = AIForecastService()
-    
+
     print("1. Verificando datos históricos...")
     data = service.get_historical_data()
     print(f"   Mensajes de datos: {len(data)}")
     if data:
         print(f"   Ejemplo: {data[0]}")
-    
+
     print("2. Verificando destinos top...")
     destinations = service.get_top_destinations_historical()
     print(f"   Destinos: {destinations}")
-    
+
     print("3. Llamando a Gemini (Análisis predictivo)...")
     try:
         forecast = service.generate_forecast()
@@ -35,6 +37,7 @@ def test_forecast():
             print(f"   Insights: {len(forecast['strategic_insights'])}")
     except Exception as e:
         print(f"   EXCEPCIÓN: {e}")
+
 
 if __name__ == "__main__":
     test_forecast()

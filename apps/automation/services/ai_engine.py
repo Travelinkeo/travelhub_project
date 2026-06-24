@@ -504,7 +504,7 @@ class AIEngine:
         for item in content_list:
             if isinstance(item, dict) and "mime_type" in item:
                 return True
-            if hasattr(item, "format") or "Image" in str(type(item)):
+            if hasattr(item, "save") or "Image" in str(type(item)):
                 return True
         return False
 

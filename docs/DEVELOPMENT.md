@@ -1,7 +1,7 @@
 # Manual de Desarrollo TravelHub
 
 **Versión:** 1.0
-**Última Actualización:** 28 de Noviembre de 2025
+**Última Actualización:** 24 de Junio de 2026
 
 Guía para configurar el entorno de desarrollo y contribuir al código.
 

@@ -1,0 +1,18 @@
+<link rel="icon" id="dynamic-favicon" type="image/png" href="{% static 'images/Logo TravelHub.png' %}">
+<script nonce="{{ request.csp_nonce }}">
+    (function() {
+        const favicon = document.getElementById('dynamic-favicon');
+        const darkLogo = "{% static 'images/Logo TravelHub.png' %}";
+        const lightLogo = "{% static 'images/Logo TravelHub Negro.png' %}";
+        
+        function updateFavicon() {
+            const isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            favicon.href = isDarkMode ? darkLogo : lightLogo;
+        }
+        
+        if (window.matchMedia) {
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateFavicon);
+        }
+        updateFavicon();
+    })();
+</script>

@@ -55,15 +55,9 @@ cd c:\Users\ARMANDO\travelhub_project
 python manage.py runserver
 ```
 
-### Paso 2: Iniciar el Frontend (en otra terminal)
-```bash
-cd c:\Users\ARMANDO\travelhub_project\frontend
-npm run dev
+### Paso 2: Abrir el Navegador
 ```
-
-### Paso 3: Abrir el Navegador
-```
-http://localhost:3000
+http://localhost:8000
 ```
 
 ---
@@ -220,7 +214,7 @@ Si encuentras algún problema:
 1. Revisar la consola del navegador (F12)
 2. Revisar logs del backend
 3. Verificar que todos los servicios estén corriendo
-4. Consultar la documentación en `NUEVAS_FUNCIONALIDADES_FRONTEND.md`
+4. Consultar la documentación en `docs/INDEX.md`
 
 ---
 
@@ -229,6 +223,6 @@ Si encuentras algún problema:
 Todas las funcionalidades están implementadas y listas para usar.
 Explora el menú lateral para descubrir todas las nuevas características.
 
-**Versión**: 2.0  
-**Fecha**: Enero 2025  
+**Versión**: 2.1  
+**Fecha**: Junio 2026  
 **Estado**: ✅ Producción

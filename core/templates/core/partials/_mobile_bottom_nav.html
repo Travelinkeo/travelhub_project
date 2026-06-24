@@ -1,0 +1,22 @@
+<div class="md:hidden fixed bottom-0 left-0 right-0 h-14 bg-surface-1/95 backdrop-blur-xl border-t border-border-color flex justify-around items-center z-50 px-1 safe-area-bottom shadow-[0_-2px_12px_rgba(0,0,0,0.15)]">
+    <a href="{% url 'core:modern_dashboard' %}" class="flex flex-col items-center justify-center flex-1 py-1 text-text-muted hover:text-primary transition-all {% if request.resolver_match.url_name == 'modern_dashboard' %}text-primary{% endif %}">
+        <span class="material-symbols-outlined text-[20px] {% if request.resolver_match.url_name == 'modern_dashboard' %}text-primary{% endif %}">dashboard</span>
+        <span class="text-[8px] font-bold mt-0.5 leading-none">Inicio</span>
+    </a>
+    <a href="{% url 'bookings:venta_list' %}" class="flex flex-col items-center justify-center flex-1 py-1 text-text-muted hover:text-primary transition-all {% if 'ventas' in request.path %}text-primary{% endif %}">
+        <span class="material-symbols-outlined text-[20px] {% if 'ventas' in request.path %}text-primary{% endif %}">shopping_cart</span>
+        <span class="text-[8px] font-bold mt-0.5 leading-none">Ventas</span>
+    </a>
+    <a href="{% url 'crm:cliente_list' %}" class="flex flex-col items-center justify-center flex-1 py-1 text-text-muted hover:text-primary transition-all {% if 'crm' in request.path %}text-primary{% endif %}">
+        <span class="material-symbols-outlined text-[20px] {% if 'crm' in request.path %}text-primary{% endif %}">group</span>
+        <span class="text-[8px] font-bold mt-0.5 leading-none">Clientes</span>
+    </a>
+    <a href="{% url 'finance:facturacion_dashboard' %}" class="flex flex-col items-center justify-center flex-1 py-1 text-text-muted hover:text-primary transition-all {% if 'facturacion' in request.path or 'invoices' in request.path or 'finance' in request.path %}text-primary{% endif %}">
+        <span class="material-symbols-outlined text-[20px] {% if 'facturacion' in request.path or 'invoices' in request.path %}text-primary{% endif %}">receipt_long</span>
+        <span class="text-[8px] font-bold mt-0.5 leading-none">Finanzas</span>
+    </a>
+    <button @click="mobileMenuOpen = !mobileMenuOpen" class="flex flex-col items-center justify-center flex-1 py-1 text-text-muted hover:text-primary transition-all">
+        <span class="material-symbols-outlined text-[20px]">menu</span>
+        <span class="text-[8px] font-bold mt-0.5 leading-none">Menú</span>
+    </button>
+</div>

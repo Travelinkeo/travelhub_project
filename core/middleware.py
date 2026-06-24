@@ -358,7 +358,7 @@ class SecurityHeadersMiddleware:
                 csp = "; ".join(
                     [
                         "default-src 'self' data: blob:",
-                        f"script-src 'self' 'nonce-{nonce}' 'strict-dynamic' {static_origin} https://static.cloudflareinsights.com https://cdn.jsdelivr.net https://cdn.tailwindcss.com https://unpkg.com https://code.jquery.com",
+                        f"script-src 'self' 'nonce-{nonce}' 'strict-dynamic' 'unsafe-eval' {static_origin} https://static.cloudflareinsights.com https://cdn.jsdelivr.net https://cdn.tailwindcss.com https://unpkg.com https://code.jquery.com",
                         f"style-src 'self' 'unsafe-inline' {static_origin} https://fonts.googleapis.com https://cdn.jsdelivr.net https://cdn.tailwindcss.com https://unpkg.com",
                         f"font-src 'self' {static_origin} https://fonts.gstatic.com data:",
                         f"img-src 'self' data: blob: {static_origin} https://res.cloudinary.com {r2_wildcard} https://images.unsplash.com https://pics.avs.io https://ui-avatars.com https://placehold.co",

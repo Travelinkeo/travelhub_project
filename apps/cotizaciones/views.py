@@ -892,7 +892,8 @@ class PublicQuoteDetailView(DetailView):
             except Exception as e:
                 logger.warning(f"Excepción silenciosa capturada: {e}")
         # 5. Forzar actualización de imagen si el destino era genérico
-        if "unsplash" not in meta.get("image", "").lower() and "Varios" not in meta["destination"]:
+        img_url = meta.get("image") or ""
+        if "unsplash" not in img_url.lower() and "Varios" not in (meta.get("destination") or ""):
             # Solo si no tiene una imagen de Unsplash ya puesta
             search = meta.get("image_search_query") or meta["destination"]
             meta["image_search_query"] = search

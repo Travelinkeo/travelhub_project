@@ -1,4 +1,4 @@
-{% load i18n humanize %}
+{% load i18n humanize static %}
 <!DOCTYPE html>
 <html lang="es" class="h-full" x-data="{ darkMode: true, activeTab: 'timeline', toast: false, toastMessage: '' }" :class="{ 'dark': darkMode }">
 <head>
@@ -28,10 +28,10 @@
     </script>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com" nonce="{{ request.csp_nonce }}"></script>
-    <!-- Alpine.js CDN -->
-    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" nonce="{{ request.csp_nonce }}"></script>
-    <!-- HTMX CDN -->
-    <script src="https://unpkg.com/htmx.org@1.9.10" nonce="{{ request.csp_nonce }}"></script>
+    <!-- Alpine.js Local -->
+    <script defer src="{% static 'vendor/alpine_v2.js' %}" nonce="{{ request.csp_nonce }}"></script>
+    <!-- HTMX Local -->
+    <script src="{% static 'vendor/htmx_v2.js' %}" nonce="{{ request.csp_nonce }}"></script>
     <!-- Premium Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     

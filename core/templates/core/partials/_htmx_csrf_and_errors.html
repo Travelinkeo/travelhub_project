@@ -1,0 +1,25 @@
+<script nonce="{{ request.csp_nonce }}">
+    document.addEventListener('htmx:configRequest', (event) => {
+        event.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';
+    });
+
+    document.addEventListener('htmx:responseError', function(event) {
+        const xhr = event.detail.xhr;
+        const status = xhr ? xhr.status : 0;
+        const messages = {
+            400: 'Solicitud inv\u00e1lida',
+            401: 'Sesi\u00f3n expirada — recarga la p\u00e1gina',
+            403: 'Sin permisos para esta acci\u00f3n',
+            404: 'Recurso no encontrado',
+            500: 'Error interno del servidor',
+            502: 'Servidor no disponible',
+            503: 'Servicio en mantenimiento'
+        };
+        const msg = messages[status] || ('Error HTTP ' + status);
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({ toast: true, position: 'top-end', icon: 'error', title: msg, showConfirmButton: false, timer: 4000, timerProgressBar: true });
+        } else {
+            window.dispatchEvent(new CustomEvent('notify', { detail: { message: msg, type: 'error' } }));
+        }
+    });
+</script>

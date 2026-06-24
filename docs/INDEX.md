@@ -1,6 +1,6 @@
 # 📚 Índice de Documentación - TravelHub
 
-**Última actualización**: 2 de Mayo de 2026
+**Última actualización**: 24 de Junio de 2026
 
 Bienvenido a la documentación oficial de TravelHub. Tras una extensa revisión y limpieza, este índice centraliza los documentos técnicos y manuales operativos que se encuentran **actualmente activos**. Todos los reportes obsoletos, pruebas y scripts legacy han sido aislados para su futura eliminación.
 
@@ -12,7 +12,6 @@ Documentos centrales que describen la estructura y el propósito del sistema.
 - **[REPORTE_ARQUITECTURA_2026.md](REPORTE_ARQUITECTURA_2026.md)** - 🌟 Documento Maestro de Arquitectura (La fuente de la verdad para el estado actual del ecosistema).
 - **[ARCHITECTURE.md](ARCHITECTURE.md)** - Resumen técnico de la arquitectura.
 - **[ESTRUCTURA_CARPETAS.md](ESTRUCTURA_CARPETAS.md)** - Mapa detallado de todos los módulos del proyecto.
-- **[SYSTEM_SNAPSHOT.md](SYSTEM_SNAPSHOT.md)** - Resumen de la infraestructura.
 - **[BUSINESS_MODEL.md](BUSINESS_MODEL.md)** - Modelo de negocio SaaS.
 
 ## ⚙️ 2. Guías de Desarrollo e Infraestructura
@@ -51,9 +50,9 @@ Guías sobre el negocio principal y manuales de usuario.
 ### 🗂️ Navegación por Subdirectorios
 Si buscas detalles muy específicos, puedes explorar los subdirectorios funcionales:
 - `api/`: Documentación de los endpoints REST.
-- `backend/` y `frontend/`: Detalles muy específicos del código legado o integraciones.
-- `contabilidad/` y `facturacion/`: Especificaciones del módulo contable VEN-NIF.
-- `saas/`: Detalles del modelo de negocio, integraciones de pago (Stripe) y métricas.
-- `deployment/`: Configuraciones de nube (Render, Railway).
+- `backend/`: Detalles técnicos del backend (auditoría, parsers, contabilidad, Redis).
+- `deployment/`: Configuraciones de nube (Render, Railway), seguridad y despliegue.
+- `wiki/GDS/`: Documentación detallada de los parsers GDS (Amadeus, KIU, Sabre).
+- `development/`: Resumen del sistema de contabilidad VEN-NIF.
 
 *(Nota: Los archivos que antes se encontraban aquí y que hacían referencia a bugs ya solucionados o reportes antiguos, han sido movidos a la cuarentena `_cuarentena_para_borrar/docs_desfasados/`)*

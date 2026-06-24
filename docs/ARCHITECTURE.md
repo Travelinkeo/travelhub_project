@@ -4,13 +4,13 @@
 
 ## 1. Visión General
 
-TravelHub es una plataforma SaaS B2B multi-tenant para agencias de viajes. Opera como un **Monolito Modular** sobre Django 5.2.6 (Python 3.13), priorizando simplicidad operativa y ACID garantizado.
+TravelHub es una plataforma SaaS B2B multi-tenant para agencias de viajes. Opera como un **Monolito Modular** sobre Django 5.2.14 (Python 3.13), priorizando simplicidad operativa y ACID garantizado.
 
 ## 2. Stack Tecnológico
 
 | Capa | Tecnología |
 |------|-----------|
-| Backend | Django 5.2.6 + Django REST Framework |
+| Backend | Django 5.2.14 + Django REST Framework |
 | Frontend | TailwindCSS + HTMX + Alpine.js (HTML-over-the-wire SSR) |
 | Base de Datos | PostgreSQL 16 (producción), SQLite (desarrollo) |
 | Cache/Broker | Redis 7 |

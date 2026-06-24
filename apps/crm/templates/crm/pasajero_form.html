@@ -39,7 +39,10 @@
         {% endif %}
 
         <!-- OCR DROPAREA (SaaS V.1 - MAGIC ONBOARDING) -->
-        <div x-data="idScanner()" class="relative">
+        <div x-data="idScanner"
+             data-scan-url="/api/crm/cedula-scanner/"
+             data-csrf="{{ csrf_token }}"
+             class="relative">
             <div 
                 @dragover.prevent="droping = true" 
                 @dragleave.prevent="droping = false" 
@@ -237,111 +240,27 @@
 {% endblock %}
 
 {% block extra_scripts %}
-<script>
-    function idScanner() {
-        return {
-            loading: false,
-            droping: false,
-            message: '',
-            
-            async processImage(file) {
-                this.loading = true;
-                this.message = '';
-                
-                const formData = new FormData();
-                formData.append('image', file);
-                
-                try {
-                    const response = await fetch('/api/crm/cedula-scanner/', {
-                        method: 'POST',
-                        body: formData,
-                        headers: {
-                            'X-CSRFToken': '{{ csrf_token }}'
-                        }
-                    });
-                    
-                    const result = await response.json();
-                    
-                    if (result.status === 'success') {
-                        const d = result.data;
-                        
-                        // Autocompletar solo si el valor existe y no está vacío
-                        const setField = (name, val) => {
-                            if (val !== null && val !== undefined && String(val).trim() !== '' && String(val) !== '0') {
-                                const el = document.querySelector(`[name="${name}"]`);
-                                if (el) el.value = String(val).trim();
-                            }
-                        };
-                        
-                        setField('nombres', d.nombres);
-                        setField('apellidos', d.apellidos);
-                        setField('cedula_identidad', d.cedula);
-                        setField('fecha_nacimiento', d.fecha_nacimiento);
-                        
-                        // Actualizar foto — ignorar face_None.jpg
-                        if (d.foto_url && !d.foto_url.includes('face_None')) {
-                            const preview = document.getElementById('preview-image');
-                            const placeholder = document.querySelector('.flex-col.items-center.text-text-muted');
-                            if (preview) {
-                                preview.src = d.foto_url;
-                                preview.classList.remove('hidden');
-                            }
-                            if (placeholder) placeholder.classList.add('hidden');
-                        }
-                        
-                        const filled = [d.nombres, d.apellidos, d.cedula].filter(v => v && String(v).trim() !== '' && String(v) !== '0').length;
-                        this.message = filled > 0 ? `¡Datos extraídos: ${filled} campo(s) completado(s)!` : '📷 Foto capturada. Completa los datos manualmente.';
-                        setTimeout(() => this.message = '', 5000);
-                    } else {
-                        window.dispatchEvent(new CustomEvent('notify', {
-                            detail: { message: 'Error: ' + (result.error || 'No se pudo procesar la imagen'), type: 'error' }
-                        }));
-                    }
-                } catch (e) {
-                    console.error(e);
-                    window.dispatchEvent(new CustomEvent('notify', {
-                        detail: { message: 'Error en la conexión con el servidor de IA.', type: 'error' }
-                    }));
-                } finally {
-                    this.loading = false;
-                }
-            },
-            
-            handleFile(e) {
-                const file = e.target.files[0];
-                if (file) this.processImage(file);
-            },
-            
-            handleDrop(e) {
-                this.droping = false;
-                const file = e.dataTransfer.files[0];
-                if (file) this.processImage(file);
-            }
-        }
-    }
-
+<script nonce="{{ request.csp_nonce }}" src="{% static 'js/id_scanner.js' %}"></script>
+<script nonce="{{ request.csp_nonce }}">
     document.addEventListener('DOMContentLoaded', function () {
-        // Estilo para todos los widgets de Django
-        const inputs = document.querySelectorAll('input, select, textarea');
-        inputs.forEach(el => {
+        var inputs = document.querySelectorAll('input, select, textarea');
+        inputs.forEach(function(el) {
             if (el.type !== 'file' && el.type !== 'checkbox') {
                 el.classList.add('input-base');
             }
-            // Hack para inputs con icono
-            if(el.closest('.relative')?.querySelector('.material-symbols-outlined')) {
+            if(el.closest('.relative') && el.closest('.relative').querySelector('.material-symbols-outlined')) {
                 el.classList.add('!pl-10');
             }
         });
 
-        // Preview para foto de perfil
-        const fileInput = document.querySelector('input[name="foto_perfil"]');
+        var fileInput = document.querySelector('input[name="foto_perfil"]');
         if(fileInput) {
             fileInput.addEventListener('change', function(e) {
                 if (this.files && this.files[0]) {
                     var reader = new FileReader();
                     reader.onload = function (e) {
-                        const preview = document.getElementById('preview-image');
-                        const avatarPlaceholder = document.querySelector('.flex-col.items-center.text-text-muted');
+                        var preview = document.getElementById('preview-image');
+                        var avatarPlaceholder = document.querySelector('.flex-col.items-center.text-text-muted');
                         preview.src = e.target.result;
                         preview.classList.remove('hidden');
                         if (avatarPlaceholder) avatarPlaceholder.classList.add('hidden');

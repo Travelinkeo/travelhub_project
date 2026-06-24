@@ -1,9 +1,12 @@
 <div id="celery-monitor" 
      class="space-y-6 text-center animate-in fade-in zoom-in duration-300"
+     x-data="{ polls: 0 }"
+     x-init="{% if not task_finished %}$watch('polls', v => { if (v >= 150) $el.removeAttribute('hx-trigger')}){% endif %}"
      hx-get="{% url 'finance:reconciliacion_task_status' task_id %}" 
      hx-trigger="{% if not task_finished %}every 2s{% endif %}" 
      hx-target="this" 
-     hx-swap="outerHTML">
+     hx-swap="outerHTML"
+     @htmx:after-request="{% if not task_finished %}polls++{% endif %}">
     
     <div class="space-y-3">
         <h2 class="text-lg font-black text-text-main flex items-center justify-center gap-2">

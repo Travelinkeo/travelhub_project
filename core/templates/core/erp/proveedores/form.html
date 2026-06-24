@@ -6,7 +6,10 @@
 {% endblock %}
 
 {% block content %}
-<main class="flex-1 w-full max-w-[1400px] mx-auto p-6 md:p-8 lg:p-10" x-data="proveedorForm()">
+<main class="flex-1 w-full max-w-[1400px] mx-auto p-6 md:p-8 lg:p-10" x-data="proveedorForm"
+      data-proveedor-id="{{ proveedor_id|default:'' }}"
+      data-comisiones-url="/core/api/comisiones/"
+      data-csrf="{{ csrf_token }}">
     <!-- Header -->
     <div class="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-border-color pb-6">
         <div>
@@ -368,94 +371,6 @@
 {{ tipos_servicio_choices|json_script:"tipos-servicio" }}
 {{ monedas_json|json_script:"monedas-data" }}
 
-<script nonce="{{ request.csp_nonce }}">
-    function proveedorForm() {
-        return {
-            activeTab: 'general',
-            proveedorId: {{ proveedor_id|default:"null" }},
-            comisionesList: [],
-            comisionesIds: [],
-            tiposServicio: JSON.parse(document.getElementById('tipos-servicio').textContent),
-            monedas: JSON.parse(document.getElementById('monedas-data').textContent),
-            showModal: false,
-            newRegla: {
-                tipo_servicio: '',
-                comision_porcentaje: '',
-                comision_monto_fijo: '',
-                moneda: ''
-            },
-            init() {
-                if (this.proveedorId) {
-                    this.fetchComisiones();
-                }
-            },
-            async fetchComisiones() {
-                try {
-                    const response = await fetch(`/core/api/comisiones/?proveedor=${this.proveedorId}`);
-                    if (!response.ok) throw new Error('Error cargando comisiones');
-                    this.comisionesList = await response.json();
-                    this.comisionesIds = this.comisionesList.map(c => c.id_comision);
-                } catch (error) {
-                    console.error(error);
-                }
-            },
-            openModal() {
-                this.newRegla = { tipo_servicio: '', comision_porcentaje: '', comision_monto_fijo: '', moneda: '', proveedor: this.proveedorId };
-                this.showModal = true;
-            },
-            async saveRegla() {
-                if (!this.newRegla.tipo_servicio) {
-                    window.dispatchEvent(new CustomEvent('notify', {
-                        detail: { message: 'Seleccione un tipo de servicio', type: 'error' }
-                    }));
-                    return;
-                }
-                try {
-                    const response = await fetch('/core/api/comisiones/', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-                        },
-                        body: JSON.stringify(this.newRegla)
-                    });
-                    if (response.ok) {
-                        this.showModal = false;
-                        this.fetchComisiones();
-                    } else {
-                        const data = await response.json();
-                        window.dispatchEvent(new CustomEvent('notify', {
-                            detail: { message: 'Error: ' + JSON.stringify(data), type: 'error' }
-                        }));
-                    }
-                } catch (error) {
-                    window.dispatchEvent(new CustomEvent('notify', {
-                        detail: { message: 'Error de red al guardar la regla', type: 'error' }
-                    }));
-                }
-            },
-            async deleteRegla(id) {
-                if (!confirm('¿Seguro que desea eliminar esta regla?')) return;
-                try {
-                    const response = await fetch(`/core/api/comisiones/${id}/`, {
-                        method: 'DELETE',
-                        headers: {
-                            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-                        }
-                    });
-                    if (response.ok) {
-                        this.fetchComisiones();
-                    }
-                } catch (e) {
-                    window.dispatchEvent(new CustomEvent('notify', {
-                        detail: { message: 'Error eliminando', type: 'error' }
-                    }));
-                }
-            },
-            formatCurrency(val) {
-                return parseFloat(val).toFixed(2);
-            }
-        }
-    }
-</script>
+{% block extra_scripts %}
+<script nonce="{{ request.csp_nonce }}" src="{% static 'js/proveedor_form.js' %}"></script>
 {% endblock %}

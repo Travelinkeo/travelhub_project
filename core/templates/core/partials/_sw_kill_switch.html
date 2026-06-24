@@ -1,0 +1,16 @@
+<script nonce="{{ request.csp_nonce }}">
+    if ('serviceWorker' in navigator && !sessionStorage.getItem('sw_cleared')) {
+        navigator.serviceWorker.getRegistrations().then(function(registrations) {
+            if (registrations.length > 0) {
+                for (let r of registrations) r.unregister();
+                if ('caches' in window) {
+                    caches.keys().then(function(names) {
+                        for (let name of names) caches.delete(name);
+                    });
+                }
+                sessionStorage.setItem('sw_cleared', '1');
+                window.location.reload();
+            }
+        });
+    }
+</script>

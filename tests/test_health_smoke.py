@@ -2,16 +2,16 @@
 Smoke tests for health checks - Phase 0 Baseline
 Critical path validation for production readiness.
 """
+
 import os
+from unittest.mock import MagicMock, patch
+
 import pytest
 import requests
-from unittest.mock import patch, MagicMock
-
-from django.test import TestCase, Client, override_settings
-from django.urls import reverse
+from django.conf import settings
 from django.core.cache import cache
 from django.db import connections
-from django.conf import settings
+from django.test import Client, TestCase, override_settings
 
 
 class HealthCheckSmokeTests(TestCase):
@@ -21,14 +21,18 @@ class HealthCheckSmokeTests(TestCase):
         self.client = Client()
         # Add ATOMIC_REQUESTS to test database settings to avoid KeyError with SQLite
         from django.db import connections
+
         if "ATOMIC_REQUESTS" not in connections.databases["default"]:
             connections.databases["default"]["ATOMIC_REQUESTS"] = False
         self.health_url = "/system/health/"  # Core health check is under /system/
-        
+
         # Create staff user for authenticated health checks
         from django.contrib.auth import get_user_model
+
         User = get_user_model()
-        self.staff_user = User.objects.create_user(username="staff", password="testpass", is_staff=True)
+        self.staff_user = User.objects.create_user(
+            username="staff", password="testpass", is_staff=True
+        )
         self.client.force_login(self.staff_user)
 
     @patch("core.views.health_views._check_database")
@@ -130,15 +134,16 @@ class RedisConnectivityTests(TestCase):
         value = cache.get("smoke_test_key")
         assert value == "smoke_test_value"
 
-    @override_settings(CACHES={
-        "default": {
-            "BACKEND": "django_redis.cache.RedisCache",
-            "LOCATION": "redis://localhost:6379/1",
+    @override_settings(
+        CACHES={
+            "default": {
+                "BACKEND": "django_redis.cache.RedisCache",
+                "LOCATION": "redis://localhost:6379/1",
+            }
         }
-    })
+    )
     def test_cache_uses_redis_in_production(self):
         """Verify Redis backend configured (not LocMemCache)."""
-        from django.conf import settings
         backend = settings.CACHES["default"]["BACKEND"]
         assert "redis" in backend.lower() or "django_redis" in backend.lower()
 
@@ -155,6 +160,7 @@ class CeleryConnectivityTests(TestCase):
         ]
 
         from travelhub.celery import app as celery_app
+
         insp = celery_app.control.inspect()
         result = insp.ping()
 
@@ -193,6 +199,7 @@ class MetricsEndpointTests(TestCase):
     def setUp(self):
         # Add ATOMIC_REQUESTS to test database settings to avoid KeyError with SQLite
         from django.db import connections
+
         if "ATOMIC_REQUESTS" not in connections.databases["default"]:
             connections.databases["default"]["ATOMIC_REQUESTS"] = False
 
@@ -213,19 +220,16 @@ class ConfigurationValidationTests(TestCase):
     @override_settings(DEBUG=False)
     def test_secret_key_length_in_production(self):
         """SECRET_KEY >= 50 chars when DEBUG=False."""
-        from django.conf import settings
         if not settings.DEBUG:
             assert len(settings.SECRET_KEY) >= 50
 
     def test_allowed_hosts_configured(self):
         """ALLOWED_HOSTS not empty."""
-        from django.conf import settings
         assert settings.ALLOWED_HOSTS
 
     @override_settings(DEBUG=False, ENCRYPTION_KEY="test-encryption-key-32-chars-long!!")
     def test_encryption_key_configured(self):
         """ENCRYPTION_KEY set in production."""
-        from django.conf import settings
         if not settings.DEBUG:
             assert hasattr(settings, "ENCRYPTION_KEY")
             assert settings.ENCRYPTION_KEY
@@ -234,7 +238,6 @@ class ConfigurationValidationTests(TestCase):
     @override_settings(DEBUG=False, CSRF_TRUSTED_ORIGINS=["https://travelhub.cc"])
     def test_csrf_trusted_origins_https_in_production(self):
         """CSRF_TRUSTED_ORIGINS uses HTTPS in production."""
-        from django.conf import settings
         if not settings.DEBUG:
             for origin in settings.CSRF_TRUSTED_ORIGINS:
                 assert origin.startswith("https://"), f"Non-HTTPS origin: {origin}"
@@ -242,22 +245,23 @@ class ConfigurationValidationTests(TestCase):
     @override_settings(DEBUG=False, SESSION_COOKIE_SECURE=True)
     def test_session_cookie_secure_in_production(self):
         """SESSION_COOKIE_SECURE True in production."""
-        from django.conf import settings
         if not settings.DEBUG:
             assert settings.SESSION_COOKIE_SECURE is True
 
     @override_settings(DEBUG=False, CSRF_COOKIE_SECURE=True)
     def test_csrf_cookie_secure_in_production(self):
         """CSRF_COOKIE_SECURE True in production."""
-        from django.conf import settings
         if not settings.DEBUG:
             assert settings.CSRF_COOKIE_SECURE is True
 
-    @override_settings(DEBUG=False, SECURE_HSTS_SECONDS=31536000, 
-                       SECURE_HSTS_INCLUDE_SUBDOMAINS=True, SECURE_HSTS_PRELOAD=True)
+    @override_settings(
+        DEBUG=False,
+        SECURE_HSTS_SECONDS=31536000,
+        SECURE_HSTS_INCLUDE_SUBDOMAINS=True,
+        SECURE_HSTS_PRELOAD=True,
+    )
     def test_hsts_enabled_in_production(self):
         """HSTS headers configured in production."""
-        from django.conf import settings
         if not settings.DEBUG:
             assert settings.SECURE_HSTS_SECONDS >= 31536000
             assert settings.SECURE_HSTS_INCLUDE_SUBDOMAINS is True
@@ -266,7 +270,6 @@ class ConfigurationValidationTests(TestCase):
     @override_settings(DEBUG=False, SENTRY_DSN="https://test@sentry.io/123")
     def test_sentry_configured_in_production(self):
         """SENTRY_DSN configured when not DEBUG."""
-        from django.conf import settings
         if not settings.DEBUG:
             assert hasattr(settings, "SENTRY_DSN")
             assert settings.SENTRY_DSN
@@ -274,14 +277,12 @@ class ConfigurationValidationTests(TestCase):
 
     def test_database_conn_max_age_set(self):
         """Database CONN_MAX_AGE configured for connection pooling."""
-        from django.conf import settings
         # In test mode with SQLite, this might not be set
         if "CONN_MAX_AGE" in settings.DATABASES["default"]:
             assert settings.DATABASES["default"]["CONN_MAX_AGE"] == 600
 
     def test_database_health_checks_enabled(self):
         """Database CONN_HEALTH_CHECKS enabled."""
-        from django.conf import settings
         if "CONN_HEALTH_CHECKS" in settings.DATABASES["default"]:
             assert settings.DATABASES["default"]["CONN_HEALTH_CHECKS"] is True
 
@@ -291,7 +292,6 @@ class SecurityHeadersTests(TestCase):
 
     def test_security_middleware_in_middleware_list(self):
         """SecurityMiddleware positioned correctly."""
-        from django.conf import settings
         middleware = settings.MIDDLEWARE
         security_idx = middleware.index("django.middleware.security.SecurityMiddleware")
         session_idx = middleware.index("django.contrib.sessions.middleware.SessionMiddleware")
@@ -299,7 +299,6 @@ class SecurityHeadersTests(TestCase):
 
     def test_cors_middleware_before_common(self):
         """CorsMiddleware before CommonMiddleware."""
-        from django.conf import settings
         middleware = settings.MIDDLEWARE
         cors_idx = middleware.index("corsheaders.middleware.CorsMiddleware")
         common_idx = middleware.index("django.middleware.common.CommonMiddleware")
@@ -307,17 +306,14 @@ class SecurityHeadersTests(TestCase):
 
     def test_csp_middleware_present(self):
         """Custom CSP middleware in stack."""
-        from django.conf import settings
         assert "core.middleware.SecurityHeadersMiddleware" in settings.MIDDLEWARE
 
     def test_axes_middleware_present(self):
         """Axes brute-force protection enabled."""
-        from django.conf import settings
         assert "axes.middleware.AxesMiddleware" in settings.MIDDLEWARE
 
     def test_ratelimit_middleware_present(self):
         """SaaS and AI rate limit middleware present."""
-        from django.conf import settings
         assert "core.middleware_saas.SaaSLimitMiddleware" in settings.MIDDLEWARE
         assert "core.middleware_ai_ratelimit.AIRateLimitMiddleware" in settings.MIDDLEWARE
 
@@ -325,22 +321,23 @@ class SecurityHeadersTests(TestCase):
 class StorageConfigurationTests(TestCase):
     """Verify storage backend configuration."""
 
-    @override_settings(USE_R2=True, STORAGES={
-        "default": {"BACKEND": "storages.backends.s3boto3.S3Boto3Storage"},
-        "staticfiles": {"BACKEND": "whitenoise.storage.CompressedStaticFilesStorage"}
-    })
+    @override_settings(
+        USE_R2=True,
+        STORAGES={
+            "default": {"BACKEND": "storages.backends.s3boto3.S3Boto3Storage"},
+            "staticfiles": {"BACKEND": "whitenoise.storage.CompressedStaticFilesStorage"},
+        },
+    )
     def test_r2_storage_when_use_r2_true(self):
         """R2 storage backend used when USE_R2=True."""
-        from django.conf import settings
         if settings.USE_R2:
             assert "s3boto3" in settings.STORAGES["default"]["BACKEND"]
 
-    @override_settings(STORAGES={
-        "staticfiles": {"BACKEND": "whitenoise.storage.CompressedStaticFilesStorage"}
-    })
+    @override_settings(
+        STORAGES={"staticfiles": {"BACKEND": "whitenoise.storage.CompressedStaticFilesStorage"}}
+    )
     def test_whitenoise_for_staticfiles(self):
         """WhiteNoise used for static files in all environments."""
-        from django.conf import settings
         assert "whitenoise" in settings.STORAGES["staticfiles"]["BACKEND"]
 
 

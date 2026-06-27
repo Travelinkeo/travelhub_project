@@ -224,7 +224,7 @@ class DataNormalizationService:
                 city_words = clean_city_name.split()
                 if city_words and len(city_words[-1]) == 2 and city_words[-1].isalpha():
                     clean_city_name = " ".join(city_words[:-1])
-                
+
                 master_airports = CatalogNormalizationService._load_airports()
                 if master_airports:
                     candidatos = []
@@ -238,7 +238,10 @@ class DataNormalizationService:
                         match_found = False
                         for iata_val, info in candidatos:
                             country = info.get("country")
-                            if country and (country.upper() in origen_raw_upper or info.get("name", "").upper() in origen_raw_upper):
+                            if country and (
+                                country.upper() in origen_raw_upper
+                                or info.get("name", "").upper() in origen_raw_upper
+                            ):
                                 iata_origen = iata_val
                                 match_found = True
                                 break
@@ -251,7 +254,7 @@ class DataNormalizationService:
                 city_words = clean_city_name.split()
                 if city_words and len(city_words[-1]) == 2 and city_words[-1].isalpha():
                     clean_city_name = " ".join(city_words[:-1])
-                
+
                 master_airports = CatalogNormalizationService._load_airports()
                 if master_airports:
                     candidatos = []
@@ -265,7 +268,10 @@ class DataNormalizationService:
                         match_found = False
                         for iata_val, info in candidatos:
                             country = info.get("country")
-                            if country and (country.upper() in destino_raw_upper or info.get("name", "").upper() in destino_raw_upper):
+                            if country and (
+                                country.upper() in destino_raw_upper
+                                or info.get("name", "").upper() in destino_raw_upper
+                            ):
                                 iata_destino = iata_val
                                 match_found = True
                                 break

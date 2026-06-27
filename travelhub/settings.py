@@ -526,7 +526,9 @@ GCP_PROJECT_ID = env("GCP_PROJECT_ID", default="")
 GCP_LOCATION = env("GCP_LOCATION", default="")
 
 # Google Places API (for hotel photos enrichment)
-GOOGLE_PLACES_API_KEY = env("GOOGLE_PLACES_API_KEY", default=os.environ.get("GOOGLE_PLACES_API_KEY", ""))
+GOOGLE_PLACES_API_KEY = env(
+    "GOOGLE_PLACES_API_KEY", default=os.environ.get("GOOGLE_PLACES_API_KEY", "")
+)
 
 # --- REDIS CONFIGURATION ---
 # Centralized Redis configuration with password support

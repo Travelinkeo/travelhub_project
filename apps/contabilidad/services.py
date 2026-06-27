@@ -20,18 +20,24 @@ logger = logging.getLogger(__name__)
 
 
 class ContabilidadService:
-
     @staticmethod
     def _buscar_cuenta(codigo_cuenta: str):
         cuenta = PlanContable.objects.filter(codigo_cuenta=codigo_cuenta).first()
         if cuenta:
             return cuenta
         prefijo = codigo_cuenta[:5]
-        cuenta = PlanContable.objects.filter(codigo_cuenta__startswith=prefijo, permite_movimientos=True).first()
+        cuenta = PlanContable.objects.filter(
+            codigo_cuenta__startswith=prefijo, permite_movimientos=True
+        ).first()
         if cuenta:
-            logger.warning(f"Cuenta {codigo_cuenta} no encontrada, usando fallback {cuenta.codigo_cuenta}")
+            logger.warning(
+                f"Cuenta {codigo_cuenta} no encontrada, usando fallback {cuenta.codigo_cuenta}"
+            )
             return cuenta
-        raise ValueError(f"Cuenta contable {codigo_cuenta} (ni prefijo {prefijo}) no encontrada en Plan Contable")
+        raise ValueError(
+            f"Cuenta contable {codigo_cuenta} (ni prefijo {prefijo}) no encontrada en Plan Contable"
+        )
+
     """
     Servicio principal para integración Facturación -> Contabilidad.
     Implementa lógica VEN-NIF para agencias de viajes.
@@ -513,7 +519,9 @@ class ContabilidadService:
             DetalleAsiento.objects.create(
                 asiento=asiento,
                 linea=1,
-                cuenta_contable=ContabilidadService._buscar_cuenta(codigo_cuenta="6.1.05"),  # Gasto INATUR
+                cuenta_contable=ContabilidadService._buscar_cuenta(
+                    codigo_cuenta="6.1.05"
+                ),  # Gasto INATUR
                 debe=Decimal("0.00"),
                 debe_bsd=contribucion,
                 haber=Decimal("0.00"),

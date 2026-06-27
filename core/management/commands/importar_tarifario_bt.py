@@ -2,6 +2,7 @@
 Comando para importar el tarifario de Grupo BT Travel desde JSON.
 Uso: python manage.py importar_tarifario_bt scripts/tarifario_bt_parsed.json
 """
+
 import json
 from datetime import datetime
 
@@ -10,20 +11,18 @@ from django.db import transaction
 
 from apps.bookings.models import (
     HotelTarifario,
+    Proveedor,
     TarifaHabitacion,
     TarifarioProveedor,
     TipoHabitacion,
 )
-from apps.bookings.models import Proveedor
 
 
 class Command(BaseCommand):
     help = "Importa tarifario de hoteles desde JSON parseado del PDF de BT Travel"
 
     def add_arguments(self, parser):
-        parser.add_argument(
-            "json_path", type=str, help="Ruta al archivo JSON del tarifario"
-        )
+        parser.add_argument("json_path", type=str, help="Ruta al archivo JSON del tarifario")
         parser.add_argument(
             "--proveedor-id", type=int, default=1, help="ID del proveedor (default: 1)"
         )
@@ -44,7 +43,7 @@ class Command(BaseCommand):
 
         # Cargar JSON
         self.stdout.write(f"Cargando JSON: {json_path}")
-        with open(json_path, "r", encoding="utf-8") as f:
+        with open(json_path, encoding="utf-8") as f:
             data = json.load(f)
 
         hoteles_data = data.get("hoteles", [])
@@ -59,9 +58,11 @@ class Command(BaseCommand):
         try:
             proveedor = Proveedor.objects.get(id_proveedor=proveedor_id)
             self.stdout.write(f"Proveedor: {proveedor.nombre}")
-        except (Proveedor.DoesNotExist, Exception) as e:
+        except (Proveedor.DoesNotExist, Exception):
             self.stdout.write(
-                self.style.WARNING(f"Proveedor {proveedor_id} no encontrado. Importando sin proveedor.")
+                self.style.WARNING(
+                    f"Proveedor {proveedor_id} no encontrado. Importando sin proveedor."
+                )
             )
 
         # Crear tarifario
@@ -104,10 +105,12 @@ class Command(BaseCommand):
                         f"{len(hotel_data.get('tarifas', []))} tarifas"
                     )
                     hoteles_creados += 1
-                    tipos_hab_creados += len(set(
-                        t.get("tipo_habitacion", "ESTANDAR")
-                        for t in hotel_data.get("tarifas", [])
-                    ))
+                    tipos_hab_creados += len(
+                        set(
+                            t.get("tipo_habitacion", "ESTANDAR")
+                            for t in hotel_data.get("tarifas", [])
+                        )
+                    )
                     tarifas_creadas += len(hotel_data.get("tarifas", []))
                     continue
 
@@ -175,9 +178,7 @@ class Command(BaseCommand):
                     )
 
             except Exception as e:
-                self.stdout.write(
-                    self.style.WARNING(f"  [ERROR] {nombre}: {str(e)[:100]}")
-                )
+                self.stdout.write(self.style.WARNING(f"  [ERROR] {nombre}: {str(e)[:100]}"))
                 continue
 
         # Resumen

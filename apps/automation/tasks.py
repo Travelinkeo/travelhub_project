@@ -86,7 +86,14 @@ def process_web_uploaded_ticket(self, boleto_id, agencia_id=None):
             raise e
 
 
-@shared_task(bind=True, name="core.tasks.ejecutar_cobranza_ia_task", max_retries=2, queue="default", soft_time_limit=300, time_limit=360)
+@shared_task(
+    bind=True,
+    name="core.tasks.ejecutar_cobranza_ia_task",
+    max_retries=2,
+    queue="default",
+    soft_time_limit=300,
+    time_limit=360,
+)
 def ejecutar_cobranza_ia_task(self):
     """
     Tarea Celery: ejecuta el comando management de cobranza IA.

@@ -8,9 +8,8 @@ Uso:
   python manage.py enriquecer_hoteles_fotos --hotel-id=1       # Solo un hotel especifico
   python manage.py enriquecer_hoteles_fotos --dry-run           # Simular sin guardar
 """
-import io
+
 import time
-from decimal import Decimal
 
 import requests
 from django.conf import settings
@@ -27,10 +26,12 @@ class Command(BaseCommand):
         parser.add_argument("--agencia-id", type=int, default=None)
         parser.add_argument("--hotel-id", type=int, default=None)
         parser.add_argument("--dry-run", action="store_true")
-        parser.add_argument("--max-photos", type=int, default=3,
-                            help="Max fotos por hotel (default 3)")
-        parser.add_argument("--delay", type=float, default=0.2,
-                            help="Delay entre requests (default 0.2s)")
+        parser.add_argument(
+            "--max-photos", type=int, default=3, help="Max fotos por hotel (default 3)"
+        )
+        parser.add_argument(
+            "--delay", type=float, default=0.2, help="Delay entre requests (default 0.2s)"
+        )
 
     def handle(self, *args, **options):
         api_key = getattr(settings, "GOOGLE_PLACES_API_KEY", "")
@@ -41,7 +42,7 @@ class Command(BaseCommand):
         # Filtrar hoteles sin foto principal (usar all_objects para bypass tenant filter)
         qs = HotelTarifario.all_objects.filter(
             activo=True,
-            imagen_principal='',
+            imagen_principal="",
         )
         if options.get("agencia_id"):
             qs = qs.filter(agencia_id=options["agencia_id"])
@@ -67,13 +68,15 @@ class Command(BaseCommand):
                     "X-Goog-Api-Key": api_key,
                     "X-Goog-FieldMask": "places.id,places.displayName,places.photos,places.formattedAddress,places.rating",
                 }
-                resp = requests.post(search_url, headers=headers, json={"textQuery": query}, timeout=15)
+                resp = requests.post(
+                    search_url, headers=headers, json={"textQuery": query}, timeout=15
+                )
                 resp.raise_for_status()
                 data = resp.json()
 
                 places = data.get("places", [])
                 if not places:
-                    self.stdout.write(self.style.WARNING(f"    No encontrado en Google Places"))
+                    self.stdout.write(self.style.WARNING("    No encontrado en Google Places"))
                     errors += 1
                     time.sleep(delay)
                     continue
@@ -92,7 +95,7 @@ class Command(BaseCommand):
                 # Step 2: Get photos (Places API New)
                 photos = place.get("photos", [])
                 if not photos:
-                    self.stdout.write(f"    Sin fotos disponibles")
+                    self.stdout.write("    Sin fotos disponibles")
                     errors += 1
                     time.sleep(delay)
                     continue
@@ -115,16 +118,27 @@ class Command(BaseCommand):
                             img_name = f"{hotel.slug}_place_{i}.jpg"
 
                             if i == 0 and not hotel.imagen_principal:
-                                hotel.imagen_principal.save(img_name, ContentFile(photo_resp.content), save=True)
+                                hotel.imagen_principal.save(
+                                    img_name, ContentFile(photo_resp.content), save=True
+                                )
                                 self.stdout.write(f"    [OK] Portada guardada: {img_name}")
                             else:
-                                img = ImagenHotel(hotel=hotel, titulo=f"Google Places #{i+1}", tipo="GENERAL", es_portada=(i == 0))
-                                img.imagen.save(img_name, ContentFile(photo_resp.content), save=True)
-                                self.stdout.write(f"    [OK] Foto galeria #{i+1} guardada")
+                                img = ImagenHotel(
+                                    hotel=hotel,
+                                    titulo=f"Google Places #{i + 1}",
+                                    tipo="GENERAL",
+                                    es_portada=(i == 0),
+                                )
+                                img.imagen.save(
+                                    img_name, ContentFile(photo_resp.content), save=True
+                                )
+                                self.stdout.write(f"    [OK] Foto galeria #{i + 1} guardada")
                         else:
-                            self.stdout.write(f"    [DRY] Foto {i+1} ({len(photo_resp.content)} bytes)")
+                            self.stdout.write(
+                                f"    [DRY] Foto {i + 1} ({len(photo_resp.content)} bytes)"
+                            )
                     else:
-                        self.stdout.write(f"    [WARN] Foto {i+1}: HTTP {photo_resp.status_code}")
+                        self.stdout.write(f"    [WARN] Foto {i + 1}: HTTP {photo_resp.status_code}")
 
                 success += 1
 
@@ -137,8 +151,8 @@ class Command(BaseCommand):
 
             time.sleep(delay)
 
-        self.stdout.write(self.style.SUCCESS(
-            f"\n=== ENRIQUECIMIENTO COMPLETADO ===\n"
-            f"Exitosos: {success}\n"
-            f"Errores: {errors}"
-        ))
+        self.stdout.write(
+            self.style.SUCCESS(
+                f"\n=== ENRIQUECIMIENTO COMPLETADO ===\nExitosos: {success}\nErrores: {errors}"
+            )
+        )

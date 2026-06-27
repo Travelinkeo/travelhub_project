@@ -6,8 +6,8 @@ from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-from core.api import AgenciaMixin, EncryptedCharField, SoftDeleteModel
 import core.validators
+from core.api import AgenciaMixin, EncryptedCharField, SoftDeleteModel
 
 logger = logging.getLogger(__name__)
 

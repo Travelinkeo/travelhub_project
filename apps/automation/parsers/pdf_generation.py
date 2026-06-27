@@ -106,7 +106,22 @@ class PdfGenerationService:
 
         f_emision = data.get("FECHA_DE_EMISION") or data.get("fecha_emision")
         if not f_emision or str(f_emision).strip().lower() == "no encontrado":
-            f_emision = dt.datetime.now().strftime("%d %b %Y").upper()
+            f_emision = dt.datetime.now().strftime("%d%b%y").upper()
+            # Traducir meses a inglés si es necesario
+            meses_es = {"ENE": "JAN", "ABR": "APR", "AGO": "AUG", "DIC": "DEC"}
+            for es, en in meses_es.items():
+                f_emision = f_emision.replace(es, en)
+        else:
+            try:
+                import dateutil.parser as date_parser
+                dt_obj = date_parser.parse(str(f_emision))
+                meses_en = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"]
+                day = dt_obj.strftime("%d")
+                month = meses_en[dt_obj.month - 1]
+                year = dt_obj.strftime("%y")
+                f_emision = f"{day}{month}{year}"
+            except Exception as e:
+                logger.warning(f"No se pudo formatear fecha de emision '{f_emision}' a DDMMMAA: {e}")
 
         agente = data.get("AGENTE_EMISOR") or data.get("agencia_nombre")
         if not agente and agencia_obj:

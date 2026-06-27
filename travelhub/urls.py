@@ -26,10 +26,6 @@ def favicon_view(request):
     return redirect("/static/images/Logo TravelHub.png")
 
 
-def health_view(request):
-    return JsonResponse({"status": "healthy"})
-
-
 logger = logging.getLogger(__name__)
 
 
@@ -43,8 +39,7 @@ def _protect_docs(view):
 # El app_name = 'bookings' debe ir EXCLUSIVAMENTE en apps/bookings/urls.py
 
 urlpatterns = [
-    # --- HEALTH & CSP REPORT ---
-    path("health/", health_view, name="health"),
+    # --- CSP REPORT ---
     path("csp-report/", csp_report_view, name="csp_report"),
     # --- FAVICON ---
     re_path(r"^favicon\.ico$", favicon_view),

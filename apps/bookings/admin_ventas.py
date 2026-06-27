@@ -52,7 +52,7 @@ class ItemVentaInline(admin.TabularInline):
     model = ItemVenta
     extra = 1
     autocomplete_fields = ["producto_servicio", "proveedor_servicio"]
-    readonly_fields = ("subtotal_item_venta", "total_item_venta", "vincular_componente")
+    readonly_fields = ("subtotal_item_venta", "total_item_venta")
     fields = (
         "tipo_servicio",
         "descripcion_personalizada",
@@ -66,7 +66,6 @@ class ItemVentaInline(admin.TabularInline):
         "comision_agencia_monto",
         "subtotal_item_venta",
         "total_item_venta",
-        "vincular_componente",
     )
 
 

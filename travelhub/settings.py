@@ -503,6 +503,10 @@ WHATSAPP_NOTIFICATIONS_ENABLED = (
     os.getenv("WHATSAPP_NOTIFICATIONS_ENABLED", "true").lower() == "true"
 )
 
+WHATSAPP_APP_SECRET = env("WHATSAPP_APP_SECRET", default="")
+WHATSAPP_VERIFY_TOKEN = env("WHATSAPP_VERIFY_TOKEN", default="")
+TWILIO_AUTH_TOKEN = env("TWILIO_AUTH_TOKEN", default="")
+
 # 🔐 Binance Pay API (creación de órdenes y webhooks)
 # Opcional: si no se configura, los pagos con Binance simplemente no estarán disponibles.
 BINANCE_PAY_API_KEY = env("BINANCE_PAY_API_KEY", default="")
@@ -520,6 +524,9 @@ GOTENBERG_URL = env("GOTENBERG_URL", default="")
 GCP_JSON_CREDENTIALS = env("GCP_JSON_CREDENTIALS", default="")
 GCP_PROJECT_ID = env("GCP_PROJECT_ID", default="")
 GCP_LOCATION = env("GCP_LOCATION", default="")
+
+# Google Places API (for hotel photos enrichment)
+GOOGLE_PLACES_API_KEY = env("GOOGLE_PLACES_API_KEY", default=os.environ.get("GOOGLE_PLACES_API_KEY", ""))
 
 # --- REDIS CONFIGURATION ---
 # Centralized Redis configuration with password support

@@ -7,6 +7,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from core.api import AgenciaMixin, EncryptedCharField, SoftDeleteModel
+import core.validators
 
 logger = logging.getLogger(__name__)
 
@@ -265,6 +266,24 @@ class Pasajero(AgenciaMixin, SoftDeleteModel, models.Model):
     tiene_fiebre_amarilla = models.BooleanField(default=False)
     fecha_vacuna_fiebre_amarilla = models.DateField(blank=True, null=True)
     foto_perfil = models.ImageField(upload_to="pasajeros/fotos/", blank=True, null=True)
+
+    # Campos OCR y scanner de identidad (Migraciones 0025 y 0026)
+    apellidos_ocr = models.CharField(max_length=100, blank=True, null=True)
+    nombres_ocr = models.CharField(max_length=100, blank=True, null=True)
+    cedula_limpia = models.BigIntegerField(blank=True, null=True, db_index=True)
+    fecha_nacimiento_ocr = models.DateField(blank=True, null=True)
+    foto_id_rostro = models.ImageField(
+        upload_to="pasajeros/rostros/",
+        blank=True,
+        null=True,
+        validators=[core.validators.antivirus_hook],
+    )
+    genero = models.CharField(
+        max_length=1,
+        choices=[("M", "Masculino"), ("F", "Femenino"), ("X", "Otro")],
+        blank=True,
+        null=True,
+    )
 
     class Meta:
         verbose_name = "Pasajero"

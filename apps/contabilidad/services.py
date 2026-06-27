@@ -20,6 +20,18 @@ logger = logging.getLogger(__name__)
 
 
 class ContabilidadService:
+
+    @staticmethod
+    def _buscar_cuenta(codigo_cuenta: str):
+        cuenta = PlanContable.objects.filter(codigo_cuenta=codigo_cuenta).first()
+        if cuenta:
+            return cuenta
+        prefijo = codigo_cuenta[:5]
+        cuenta = PlanContable.objects.filter(codigo_cuenta__startswith=prefijo, permite_movimientos=True).first()
+        if cuenta:
+            logger.warning(f"Cuenta {codigo_cuenta} no encontrada, usando fallback {cuenta.codigo_cuenta}")
+            return cuenta
+        raise ValueError(f"Cuenta contable {codigo_cuenta} (ni prefijo {prefijo}) no encontrada en Plan Contable")
     """
     Servicio principal para integración Facturación -> Contabilidad.
     Implementa lógica VEN-NIF para agencias de viajes.
@@ -137,7 +149,7 @@ class ContabilidadService:
         DetalleAsiento.objects.create(
             asiento=asiento,
             linea=linea_num,
-            cuenta_contable=PlanContable.objects.get(
+            cuenta_contable=ContabilidadService._buscar_cuenta(
                 codigo_cuenta="1.1.02.02"
             ),  # Cuentas por Cobrar USD
             debe=comision_usd + factura.monto_iva_16 + factura.monto_igtf,
@@ -152,7 +164,7 @@ class ContabilidadService:
         DetalleAsiento.objects.create(
             asiento=asiento,
             linea=linea_num,
-            cuenta_contable=PlanContable.objects.get(
+            cuenta_contable=ContabilidadService._buscar_cuenta(
                 codigo_cuenta="4.1.01"
             ),  # Comisiones Boletos Aéreos
             debe=Decimal("0.00"),
@@ -170,7 +182,7 @@ class ContabilidadService:
             DetalleAsiento.objects.create(
                 asiento=asiento,
                 linea=linea_num,
-                cuenta_contable=PlanContable.objects.get(
+                cuenta_contable=ContabilidadService._buscar_cuenta(
                     codigo_cuenta="2.1.01.02"
                 ),  # Cuentas por Pagar USD
                 debe=Decimal("0.00"),
@@ -186,7 +198,7 @@ class ContabilidadService:
             DetalleAsiento.objects.create(
                 asiento=asiento,
                 linea=linea_num,
-                cuenta_contable=PlanContable.objects.get(
+                cuenta_contable=ContabilidadService._buscar_cuenta(
                     codigo_cuenta="2.1.02.01"
                 ),  # IVA Débito Fiscal
                 debe=Decimal("0.00"),
@@ -202,7 +214,7 @@ class ContabilidadService:
             DetalleAsiento.objects.create(
                 asiento=asiento,
                 linea=linea_num,
-                cuenta_contable=PlanContable.objects.get(
+                cuenta_contable=ContabilidadService._buscar_cuenta(
                     codigo_cuenta="2.1.02.03"
                 ),  # IGTF por Pagar
                 debe=Decimal("0.00"),
@@ -227,7 +239,7 @@ class ContabilidadService:
         DetalleAsiento.objects.create(
             asiento=asiento,
             linea=linea_num,
-            cuenta_contable=PlanContable.objects.get(
+            cuenta_contable=ContabilidadService._buscar_cuenta(
                 codigo_cuenta="1.1.02.02"
             ),  # Cuentas por Cobrar USD
             debe=factura.monto_total,
@@ -243,7 +255,7 @@ class ContabilidadService:
         DetalleAsiento.objects.create(
             asiento=asiento,
             linea=linea_num,
-            cuenta_contable=PlanContable.objects.get(
+            cuenta_contable=ContabilidadService._buscar_cuenta(
                 codigo_cuenta="4.2"
             ),  # Ingresos por Venta de Paquetes
             debe=Decimal("0.00"),
@@ -259,7 +271,7 @@ class ContabilidadService:
             DetalleAsiento.objects.create(
                 asiento=asiento,
                 linea=linea_num,
-                cuenta_contable=PlanContable.objects.get(
+                cuenta_contable=ContabilidadService._buscar_cuenta(
                     codigo_cuenta="2.1.02.01"
                 ),  # IVA Débito Fiscal
                 debe=Decimal("0.00"),
@@ -275,7 +287,7 @@ class ContabilidadService:
             DetalleAsiento.objects.create(
                 asiento=asiento,
                 linea=linea_num,
-                cuenta_contable=PlanContable.objects.get(
+                cuenta_contable=ContabilidadService._buscar_cuenta(
                     codigo_cuenta="2.1.02.03"
                 ),  # IGTF por Pagar
                 debe=Decimal("0.00"),
@@ -331,7 +343,7 @@ class ContabilidadService:
             linea_num = 1
 
             # Línea 1: DÉBITO - Banco/Caja
-            cuenta_banco = PlanContable.objects.get(codigo_cuenta="1.1.01.04")  # Bancos USD
+            cuenta_banco = ContabilidadService._buscar_cuenta("1.1.01.04")
             DetalleAsiento.objects.create(
                 asiento=asiento,
                 linea=linea_num,
@@ -349,7 +361,7 @@ class ContabilidadService:
             DetalleAsiento.objects.create(
                 asiento=asiento,
                 linea=linea_num,
-                cuenta_contable=PlanContable.objects.get(codigo_cuenta="1.1.02.02"),
+                cuenta_contable=ContabilidadService._buscar_cuenta(codigo_cuenta="1.1.02.02"),
                 debe=Decimal("0.00"),
                 debe_bsd=Decimal("0.00"),
                 haber=pago.monto,
@@ -368,7 +380,7 @@ class ContabilidadService:
                     DetalleAsiento.objects.create(
                         asiento=asiento,
                         linea=linea_num,
-                        cuenta_contable=PlanContable.objects.get(
+                        cuenta_contable=ContabilidadService._buscar_cuenta(
                             codigo_cuenta="7.1.01"
                         ),  # Ingreso Diferencial
                         debe=Decimal("0.00"),
@@ -393,7 +405,7 @@ class ContabilidadService:
                         DetalleAsiento.objects.create(
                             asiento=asiento,
                             linea=linea_num,
-                            cuenta_contable=PlanContable.objects.get(
+                            cuenta_contable=ContabilidadService._buscar_cuenta(
                                 codigo_cuenta="1.1.02.02"
                             ),  # Cuentas por Cobrar
                             debe=Decimal("0.00"),
@@ -407,7 +419,7 @@ class ContabilidadService:
                         DetalleAsiento.objects.create(
                             asiento=asiento,
                             linea=linea_num,
-                            cuenta_contable=PlanContable.objects.get(
+                            cuenta_contable=ContabilidadService._buscar_cuenta(
                                 codigo_cuenta="2.1.02.01"
                             ),  # IVA Débito Fiscal
                             debe=Decimal("0.00"),
@@ -427,7 +439,7 @@ class ContabilidadService:
                     DetalleAsiento.objects.create(
                         asiento=asiento,
                         linea=linea_num,
-                        cuenta_contable=PlanContable.objects.get(
+                        cuenta_contable=ContabilidadService._buscar_cuenta(
                             codigo_cuenta="7.2.01"
                         ),  # Pérdida Diferencial
                         debe=Decimal("0.00"),  # Solo en BSD
@@ -501,7 +513,7 @@ class ContabilidadService:
             DetalleAsiento.objects.create(
                 asiento=asiento,
                 linea=1,
-                cuenta_contable=PlanContable.objects.get(codigo_cuenta="6.1.05"),  # Gasto INATUR
+                cuenta_contable=ContabilidadService._buscar_cuenta(codigo_cuenta="6.1.05"),  # Gasto INATUR
                 debe=Decimal("0.00"),
                 debe_bsd=contribucion,
                 haber=Decimal("0.00"),
@@ -513,7 +525,7 @@ class ContabilidadService:
             DetalleAsiento.objects.create(
                 asiento=asiento,
                 linea=2,
-                cuenta_contable=PlanContable.objects.get(
+                cuenta_contable=ContabilidadService._buscar_cuenta(
                     codigo_cuenta="2.1.02.02"
                 ),  # INATUR por Pagar
                 debe=Decimal("0.00"),

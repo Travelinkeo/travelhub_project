@@ -217,6 +217,61 @@ class DataNormalizationService:
                 destino_raw if len(str(destino_raw)) == 3 else None
             )
 
+            # Búsqueda inversa de IATA por nombre de ciudad si no se tiene el código de 3 letras
+            if not iata_origen and origen_raw:
+                origen_raw_upper = str(origen_raw).upper()
+                clean_city_name = origen_raw_upper.split(",")[0].strip()
+                city_words = clean_city_name.split()
+                if city_words and len(city_words[-1]) == 2 and city_words[-1].isalpha():
+                    clean_city_name = " ".join(city_words[:-1])
+                
+                master_airports = CatalogNormalizationService._load_airports()
+                if master_airports:
+                    candidatos = []
+                    for code, info in master_airports.items():
+                        city = info.get("city")
+                        if city and city.upper() == clean_city_name:
+                            iata_val = info.get("iata") or code
+                            if len(iata_val) == 3:
+                                candidatos.append((iata_val, info))
+                    if candidatos:
+                        match_found = False
+                        for iata_val, info in candidatos:
+                            country = info.get("country")
+                            if country and (country.upper() in origen_raw_upper or info.get("name", "").upper() in origen_raw_upper):
+                                iata_origen = iata_val
+                                match_found = True
+                                break
+                        if not match_found:
+                            iata_origen = candidatos[0][0]
+
+            if not iata_destino and destino_raw:
+                destino_raw_upper = str(destino_raw).upper()
+                clean_city_name = destino_raw_upper.split(",")[0].strip()
+                city_words = clean_city_name.split()
+                if city_words and len(city_words[-1]) == 2 and city_words[-1].isalpha():
+                    clean_city_name = " ".join(city_words[:-1])
+                
+                master_airports = CatalogNormalizationService._load_airports()
+                if master_airports:
+                    candidatos = []
+                    for code, info in master_airports.items():
+                        city = info.get("city")
+                        if city and city.upper() == clean_city_name:
+                            iata_val = info.get("iata") or code
+                            if len(iata_val) == 3:
+                                candidatos.append((iata_val, info))
+                    if candidatos:
+                        match_found = False
+                        for iata_val, info in candidatos:
+                            country = info.get("country")
+                            if country and (country.upper() in destino_raw_upper or info.get("name", "").upper() in destino_raw_upper):
+                                iata_destino = iata_val
+                                match_found = True
+                                break
+                        if not match_found:
+                            iata_destino = candidatos[0][0]
+
             # Resolver nombres vía catálogo si tenemos IATA
             ciudad_origen_obj = (
                 CatalogNormalizationService.get_or_create_ciudad_by_iata(iata_origen)

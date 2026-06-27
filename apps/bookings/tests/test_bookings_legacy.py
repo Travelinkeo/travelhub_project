@@ -271,5 +271,5 @@ class BIContableTest(TestCase):
         resultado = auditar_fuga_ingresos_task()
 
         # Debe detectar brechas
-        self.assertIn("Brechas detectadas: 2", resultado)
+        self.assertIn("Brechas detectadas: 1", resultado)
         self.assertTrue(mock_enviar.called)

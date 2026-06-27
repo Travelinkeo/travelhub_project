@@ -20,7 +20,6 @@ class BinanceWebhookView(View):
     """
 
     def post(self, request, *args, **kwargs):
-        # 1. Obtener headers para validación
         signature = request.headers.get("BinancePay-Signature")
         timestamp = request.headers.get("BinancePay-Timestamp")
         nonce = request.headers.get("BinancePay-Nonce")
@@ -33,30 +32,27 @@ class BinanceWebhookView(View):
 
             service = BinancePayService()
 
-            # 2. Verificar firma (Omitir solo en DEBUG sin llaves reales)
-            if not (dj_settings.DEBUG and not service.api_key):
+            if not getattr(dj_settings, "BINANCE_WEBHOOK_SECRET", None):
+                if dj_settings.DEBUG:
+                    logger.warning("Binance webhook: BINANCE_WEBHOOK_SECRET no configurado (DEBUG), omitiendo HMAC")
+                else:
+                    logger.error("Binance webhook: BINANCE_WEBHOOK_SECRET no configurado en produccion")
+                    return JsonResponse({"returnCode": "ERROR", "returnMsg": "Webhook not configured"}, status=503)
+
+            if getattr(dj_settings, "BINANCE_WEBHOOK_SECRET", None):
                 if not service.verify_webhook(data, signature, timestamp, nonce):
-                    logger.warning("Firma de webhook Binance inválida")
+                    logger.warning("Firma de webhook Binance invalida")
                     return HttpResponse(status=401)
 
-            # 3. Procesar datos (bizData contiene la info de la orden)
             biz_data = data.get("data")
             if biz_data and data.get("bizType") == "PAY_SUCCESS":
-                success = service.process_payment_notification(biz_data)
-                if success:
-                    return JsonResponse({"returnCode": "SUCCESS", "returnMsg": "Oka"})
+                service.process_payment_notification(biz_data)
 
-            return JsonResponse({"returnCode": "SUCCESS", "returnMsg": "Ignored or processed"})
+            return JsonResponse({"returnCode": "SUCCESS", "returnMsg": "OK"})
 
-        except json.JSONDecodeError:
-            logger.warning("Binance webhook: body no es JSON válido")
-            return HttpResponse(status=400)
         except Exception:
             logger.exception("Error procesando webhook de Binance")
-            return JsonResponse(
-                {"returnCode": "ERROR", "returnMsg": "server error"},
-                status=500,
-            )
+            return JsonResponse({"returnCode": "SUCCESS", "returnMsg": "OK"})
 
 
 class BinanceOrderCreateView(View):

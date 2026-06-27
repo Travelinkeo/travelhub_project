@@ -181,12 +181,10 @@ class SabreParser(BaseTicketParser):
             text,
             [
                 # Standard keyword followed directly by code on same line
-                r"(?:Airline Record Locator|C[oó]digo de reservaci[oó]n de la aerol[\u00ed\u0069]nea)\s*[:\t\s]*([A-Z0-9]{4,7})(?=\s|$)",
+                r"(?:Airline Record Locator|C[oó]digo de reservaci[oó]n de la aerol[\u00ed\u0069]nea)\s*[:\t\s]*(?:[A-Z0-9]{2}/)?([A-Z0-9]{4,8})(?=\s|$)",
             ],
         )
-        if airline_locator == "No encontrado" or (
-            airline_locator and not re.search(r"\d", airline_locator)
-        ):
+        if airline_locator == "No encontrado":
             # Multiline: 'aerolínea B3NEK9' — code must have at least 1 digit
             m = re.search(r"aerol[\u00edi]nea\s*\n?\s*([A-Z0-9]{4,7})\b", text, re.IGNORECASE)
             if m and re.search(r"\d", m.group(1)):
@@ -194,11 +192,11 @@ class SabreParser(BaseTicketParser):
             else:
                 # Fallback: 'Código de reservación de la\naerolínea B3NEK9'
                 m2 = re.search(
-                    r"C[oó]digo de reservaci[oó]n de[\s\S]{0,40}?aerol[\u00edi]nea\s+([A-Z0-9]{4,7})\b",
+                    r"C[oó]digo de reservaci[oó]n de[\s\S]{0,40}?aerol[\u00edi]nea\s+(?:[A-Z0-9]{2}/)?([A-Z0-9]{4,8})\b",
                     text,
                     re.IGNORECASE,
                 )
-                if m2 and re.search(r"\d", m2.group(1)):
+                if m2:
                     airline_locator = m2.group(1)
                 else:
                     airline_locator = None
@@ -521,7 +519,7 @@ class SabreParser(BaseTicketParser):
             # Origen / Destino - Sabre format: "AIRLINE_SEGMENT CITY_ORIGIN, COUNTRY CITY_DEST, COUNTRY"
             # Or separate lines: "CITY_ORIGIN, COUNTRY" and "CITY_DEST, COUNTRY"
             matches = re.findall(
-                r"\b([A-Z\xc1\xc9\xcd\xd3\xda\xd1\u00c0-\u00ff][A-Z\xc1\xc9\xcd\xd3\xda\xd1\u00c0-\u00ff\s]{2,}?),\s*([A-Z\xc1\xc9\xcd\xd3\xda\xd1\u00c0-\u00ff]{2,})",
+                r"\b([A-Z\xc1\xc9\xcd\xd3\xda\xd1\u00c0-\u00ff][A-Z\xc1\xc9\xcd\xd3\xda\xd1\u00c0-\u00ff\t ]{2,}),\s*([A-Z\xc1\xc9\xcd\xd3\xda\xd1\u00c0-\u00ff]{2,})",
                 block,
             )
             if len(matches) >= 2:
@@ -531,12 +529,24 @@ class SabreParser(BaseTicketParser):
                 raw_dest = self.clean_text(matches[1][0])
                 country_dest = self.clean_text(matches[1][1])
 
-                # Take only the last word before the comma for the city
+                # Take only the last word before the comma if it is a 3-letter IATA code, otherwise keep the whole city name (or clean state/country suffix)
                 origin_words = raw_origin.split()
-                city_origin = origin_words[-1] if origin_words else raw_origin
+                if origin_words and len(origin_words[-1]) == 3 and origin_words[-1].isalpha():
+                    city_origin = origin_words[-1]
+                else:
+                    if origin_words and len(origin_words[-1]) == 2 and origin_words[-1].isalpha():
+                        city_origin = " ".join(origin_words[:-1])
+                    else:
+                        city_origin = raw_origin
 
                 dest_words = raw_dest.split()
-                city_dest = dest_words[-1] if dest_words else raw_dest
+                if dest_words and len(dest_words[-1]) == 3 and dest_words[-1].isalpha():
+                    city_dest = dest_words[-1]
+                else:
+                    if dest_words and len(dest_words[-1]) == 2 and dest_words[-1].isalpha():
+                        city_dest = " ".join(dest_words[:-1])
+                    else:
+                        city_dest = raw_dest
 
                 flight["origen"] = f"{city_origin}, {country_origin}"
                 flight["destino"] = f"{city_dest}, {country_dest}"

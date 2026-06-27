@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 # Stage 1: builder — compile assets and install Python deps
-FROM python:3.13-slim AS builder
+FROM python:3.12-slim AS builder
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
@@ -24,12 +24,13 @@ COPY templates/ ./templates/
 COPY locale/ ./locale/
 COPY docs/ ./docs/
 COPY tailwind.config.js ./
+COPY tests/test_health_smoke.py ./tests/test_health_smoke.py
 
 COPY compilar.sh ./compilar.sh
 
 RUN chmod +x ./compilar.sh && sed -i 's/\r$//' ./compilar.sh && bash ./compilar.sh || true
 
-RUN PYTHONPATH=/install/lib/python3.13/site-packages \
+RUN PYTHONPATH=/install/lib/python3.12/site-packages \
     DJANGO_SETTINGS_MODULE=travelhub.settings \
     SECRET_KEY=build-placeholder-key-not-used-in-production \
     DATABASE_URL=sqlite:///tmp/build.db \
@@ -39,7 +40,7 @@ RUN PYTHONPATH=/install/lib/python3.13/site-packages \
 RUN mkdir -p /build/staticfiles
 
 # Stage 2: runtime — minimal image
-FROM python:3.13-slim
+FROM python:3.12-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
@@ -72,7 +73,7 @@ ENTRYPOINT ["./entrypoint.sh"]
 CMD ["gunicorn", "travelhub.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3", "--timeout", "120"]
 
 # Stage 3: test — runtime + test dependencies
-FROM python:3.13-slim AS test
+FROM python:3.12-slim AS test
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
@@ -94,9 +95,10 @@ COPY --from=builder /build/templates ./templates/
 COPY --from=builder /build/locale ./locale/
 COPY --from=builder /build/docs ./docs/
 
-RUN pip install --no-cache-dir pytest pytest-django pytest-cov pytest-timeout
+RUN pip install --no-cache-dir coverage pytest pytest-django pytest-cov pytest-timeout psycopg2-binary
 
 COPY conftest.py ./conftest.py
 COPY pytest.ini ./pytest.ini
 COPY tests/ ./tests/
 COPY fixtures/ ./fixtures/
+COPY docs/HARDENING_BASELINE.md ./docs/HARDENING_BASELINE.md

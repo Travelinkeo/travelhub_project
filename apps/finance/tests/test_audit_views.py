@@ -71,14 +71,14 @@ class TestAuditTimelineView(TestCase):
 
     def test_audit_timeline_requires_login(self):
         """Verifica que el panel de auditoría requiera inicio de sesión."""
-        response = self.client.get(reverse("finance:audit_timeline"))
+        response = self.client.get(reverse("finance:audit_timeline"), secure=True)
         self.assertEqual(response.status_code, 302)
         self.assertIn("/login/", response.url)
 
     def test_audit_timeline_tenant_isolation(self):
         """Verifica el aislamiento: el usuario de Agencia A no ve registros de Agencia B."""
         self.client.force_login(self.user_a)
-        response = self.client.get(reverse("finance:audit_timeline"))
+        response = self.client.get(reverse("finance:audit_timeline"), secure=True)
         self.assertEqual(response.status_code, 200)
         logs_in_context = response.context["logs"]
         self.assertIn(self.log_a1, logs_in_context)
@@ -90,21 +90,21 @@ class TestAuditTimelineView(TestCase):
         self.client.force_login(self.user_a)
 
         # Filtrar por Acción CREATE
-        response = self.client.get(reverse("finance:audit_timeline"), {"accion": "CREATE"})
+        response = self.client.get(reverse("finance:audit_timeline"), {"accion": "CREATE"}, secure=True)
         self.assertEqual(response.status_code, 200)
         logs = response.context["logs"]
         self.assertIn(self.log_a1, logs)
         self.assertNotIn(self.log_a2, logs)
 
         # Filtrar por Entidad Factura
-        response = self.client.get(reverse("finance:audit_timeline"), {"modelo": "Factura"})
+        response = self.client.get(reverse("finance:audit_timeline"), {"modelo": "Factura"}, secure=True)
         self.assertEqual(response.status_code, 200)
         logs = response.context["logs"]
         self.assertIn(self.log_a2, logs)
         self.assertNotIn(self.log_a1, logs)
 
         # Filtrar por texto 'modificada'
-        response = self.client.get(reverse("finance:audit_timeline"), {"q": "modificada"})
+        response = self.client.get(reverse("finance:audit_timeline"), {"q": "modificada"}, secure=True)
         self.assertEqual(response.status_code, 200)
         logs = response.context["logs"]
         self.assertIn(self.log_a2, logs)

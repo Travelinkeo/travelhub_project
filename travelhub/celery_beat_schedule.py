@@ -66,7 +66,7 @@ CELERY_BEAT_SCHEDULE = {
         "args": (),
     },
     "limpiar-celery-results": {
-        "task": "django_celery_results.tasks.delete_old_task_results",
+        "task": "core.tasks.limpiar_celery_results",
         "schedule": crontab(day_of_week="0", hour="5", minute="0"),
         "kwargs": {"days": 30},
     },

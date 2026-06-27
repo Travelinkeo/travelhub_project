@@ -577,7 +577,7 @@ def generate_pdf_task(self, html_content, margins=0.0):
 
 
 @shared_task(
-    bind=True, max_retries=2, default_retry_delay=3600, time_limit=600, soft_time_limit=540
+    bind=True, name="core.tasks.backup_database_task", max_retries=2, default_retry_delay=3600, time_limit=600, soft_time_limit=540
 )
 def backup_database_task(self):
     from django.core.management import call_command
@@ -1350,6 +1350,29 @@ def limpiar_sesiones_expiradas():
         from django.utils import timezone
 
         Session.objects.filter(expire_date__lt=timezone.now()).delete()
-        return "Sesiones expiradas limpiadas con éxito"
+        return "Sesiones expiradas limpiadas con exito"
     except Exception as e:
         return f"Error limpiando sesiones: {e}"
+
+
+@shared_task(
+    name="core.tasks.limpiar_celery_results",
+    time_limit=300,
+    soft_time_limit=270,
+    max_retries=2,
+    default_retry_delay=60,
+)
+def limpiar_celery_results(days=30):
+    try:
+        from django.utils import timezone
+
+        from django_celery_results.models import TaskResult
+
+        cutoff = timezone.now() - datetime.timedelta(days=days)
+        count, _ = TaskResult.objects.filter(date_done__lt=cutoff).delete()
+        result = f"Celery results limpiados: {count} registros eliminados (>{days} dias)"
+        logger.info(result)
+        return result
+    except Exception as e:
+        logger.error(f"Error limpiando celery results: {e}")
+        return f"Error limpiando celery results: {e}"

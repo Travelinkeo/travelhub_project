@@ -87,12 +87,19 @@ def enviar_alerta_migratoria(sender, instance, created, **kwargs):
 @receiver(pre_save, sender="finance.Factura")
 def capturar_pdf_factura_anterior(sender, instance, **kwargs):
     if are_signals_blocked():
-        logger.info(
-            f"⏭️ SIGNAL: Signals blocked. Bypassing capturar_pdf_factura_anterior for Factura {instance.pk}"
-        )
         return
 
-    _on_commit(_capturar_pdf_anterior, instance.pk)
+    try:
+        from apps.finance.models.core_finance import Factura
+        from apps.finance.services.factura_service import FacturaService
+
+        if instance.pk:
+            factura = Factura.objects.get(pk=instance.pk)
+            FacturaService.capture_previous_pdf(factura)
+    except Factura.DoesNotExist:
+        pass
+    except Exception as e:
+        logger.error(f"Error capturing PDF for factura {instance.pk}: {e}")
 
 
 @receiver(post_save, sender="finance.Factura")

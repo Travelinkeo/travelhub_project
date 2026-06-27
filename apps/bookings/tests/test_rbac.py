@@ -79,13 +79,13 @@ class RBACSecurityTest(TestCase):
         """Vendedor 1 ve sus propias ventas, pero Vendedor 2 no puede verlas en los listados."""
         # Vendedor 1
         self.client.force_login(self.user_vendedor_1)
-        response = self.client.get(reverse("bookings:venta_list"))
+        response = self.client.get(reverse("bookings:venta_list"), secure=True)
         self.assertEqual(response.status_code, 200)
         self.assertIn(self.venta_vendedor_1, response.context["ventas"])
 
         # Vendedor 2
         self.client.force_login(self.user_vendedor_2)
-        response = self.client.get(reverse("bookings:venta_list"))
+        response = self.client.get(reverse("bookings:venta_list"), secure=True)
         self.assertEqual(response.status_code, 200)
         self.assertNotIn(self.venta_vendedor_1, response.context["ventas"])
 
@@ -95,13 +95,15 @@ class RBACSecurityTest(TestCase):
 
         # Detalle
         response = self.client.get(
-            reverse("bookings:venta_detail", kwargs={"pk": self.venta_vendedor_1.pk})
+            reverse("bookings:venta_detail", kwargs={"pk": self.venta_vendedor_1.pk}),
+            secure=True,
         )
         self.assertEqual(response.status_code, 404)
 
         # Formulario de Edición (GET)
         response = self.client.get(
-            reverse("bookings:venta_update", kwargs={"pk": self.venta_vendedor_1.pk})
+            reverse("bookings:venta_update", kwargs={"pk": self.venta_vendedor_1.pk}),
+            secure=True,
         )
         self.assertEqual(response.status_code, 404)
 
@@ -109,6 +111,7 @@ class RBACSecurityTest(TestCase):
         response = self.client.post(
             reverse("bookings:venta_update", kwargs={"pk": self.venta_vendedor_1.pk}),
             {"estado": "PAG"},
+            secure=True,
         )
         self.assertEqual(response.status_code, 404)
 
@@ -116,7 +119,8 @@ class RBACSecurityTest(TestCase):
         """Vendedor 1 puede editar su propia venta."""
         self.client.force_login(self.user_vendedor_1)
         response = self.client.get(
-            reverse("bookings:venta_update", kwargs={"pk": self.venta_vendedor_1.pk})
+            reverse("bookings:venta_update", kwargs={"pk": self.venta_vendedor_1.pk}),
+            secure=True,
         )
         self.assertEqual(response.status_code, 200)
 
@@ -125,10 +129,11 @@ class RBACSecurityTest(TestCase):
         self.client.force_login(self.user_consulta)
 
         # Leer listado y detalle
-        response = self.client.get(reverse("bookings:venta_list"))
+        response = self.client.get(reverse("bookings:venta_list"), secure=True)
         self.assertEqual(response.status_code, 200)
         response = self.client.get(
-            reverse("bookings:venta_detail", kwargs={"pk": self.venta_vendedor_1.pk})
+            reverse("bookings:venta_detail", kwargs={"pk": self.venta_vendedor_1.pk}),
+            secure=True,
         )
         self.assertEqual(response.status_code, 200)
 
@@ -136,6 +141,7 @@ class RBACSecurityTest(TestCase):
         response = self.client.post(
             reverse("bookings:venta_update", kwargs={"pk": self.venta_vendedor_1.pk}),
             {"estado": "PAG"},
+            secure=True,
         )
         self.assertEqual(response.status_code, 403)
 
@@ -147,6 +153,7 @@ class RBACSecurityTest(TestCase):
         response = self.client.post(
             reverse("bookings:venta_update", kwargs={"pk": self.venta_vendedor_1.pk}),
             {"estado": "PAG"},
+            secure=True,
         )
         self.assertEqual(response.status_code, 403)
 
@@ -154,6 +161,7 @@ class RBACSecurityTest(TestCase):
         response = self.client.post(
             reverse("finance:invoice_update", kwargs={"pk": self.factura.pk}),
             {"notas": "Notas actualizadas por Contador"},
+            secure=True,
         )
         self.assertEqual(response.status_code, 200)
 
@@ -163,12 +171,14 @@ class RBACSecurityTest(TestCase):
 
         # Detalle permitido
         response = self.client.get(
-            reverse("bookings:venta_detail", kwargs={"pk": self.venta_vendedor_1.pk})
+            reverse("bookings:venta_detail", kwargs={"pk": self.venta_vendedor_1.pk}),
+            secure=True,
         )
         self.assertEqual(response.status_code, 200)
 
         # Edición permitida (GET)
         response = self.client.get(
-            reverse("bookings:venta_update", kwargs={"pk": self.venta_vendedor_1.pk})
+            reverse("bookings:venta_update", kwargs={"pk": self.venta_vendedor_1.pk}),
+            secure=True,
         )
         self.assertEqual(response.status_code, 200)

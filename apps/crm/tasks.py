@@ -170,9 +170,75 @@ def task_ocr_passport_fast(file_content_base64: str, mime_type: str = "image/jpe
     from apps.automation.services.ocr_service import ocr_service
 
     try:
-        logger.info("⚡ Iniciando tarea de OCR rápida para Pasaporte (IA_FAST)")
+        logger.info("Iniciando tarea de OCR rapida para Pasaporte (IA_FAST)")
         content = base64.b64decode(file_content_base64)
         resultado = ocr_service.procesar_pasaporte(content, mime_type)
         return resultado
     except Exception as e:
-        logger.error(f"❌ Error en task_ocr_passport_fast: {e}")
+        logger.error(f"Error en task_ocr_passport_fast: {e}")
+
+
+@shared_task(
+    name="core.tasks.process_passport_ocr",
+    queue="ia_fast",
+    time_limit=120,
+    soft_time_limit=100,
+    max_retries=2,
+    default_retry_delay=30,
+)
+def process_passport_ocr(pasaporte_id):
+    from apps.automation.services.passport_ocr_service import PassportOCRService
+    from apps.crm.models import PasaporteEscaneado
+    from core.signals_bypass import disable_signals
+
+    try:
+        instance = PasaporteEscaneado.objects.get(pk=pasaporte_id)
+    except PasaporteEscaneado.DoesNotExist:
+        logger.error(f"PasaporteEscaneado {pasaporte_id} no encontrado")
+        return
+
+    if instance.numero_pasaporte:
+        logger.info(f"PasaporteEscaneado {pasaporte_id} ya tiene datos OCR, omitiendo")
+        return
+
+    try:
+        ocr_service = PassportOCRService()
+        result = ocr_service.process_passport_image(instance.imagen_original)
+
+        if result["success"]:
+            data = result["data"]
+            json_safe_data = {}
+            for key, value in data.items():
+                if hasattr(value, "strftime"):
+                    json_safe_data[key] = value.strftime("%Y-%m-%d")
+                else:
+                    json_safe_data[key] = value
+
+            with disable_signals():
+                instance.numero_pasaporte = data.get("numero_pasaporte", "")
+                instance.nombres = data.get("nombres", "")
+                instance.apellidos = data.get("apellidos", "")
+                instance.nacionalidad = data.get("nacionalidad", "")
+                instance.fecha_nacimiento = data.get("fecha_nacimiento")
+                instance.fecha_vencimiento = data.get("fecha_vencimiento")
+                instance.sexo = data.get("sexo", "")
+                instance.confianza_ocr = result["confidence"]
+                instance.datos_ocr_completos = json_safe_data
+                instance.texto_mrz = data.get("texto_mrz", "")
+                instance.save(
+                    update_fields=[
+                        "numero_pasaporte",
+                        "nombres",
+                        "apellidos",
+                        "nacionalidad",
+                        "fecha_nacimiento",
+                        "fecha_vencimiento",
+                        "sexo",
+                        "confianza_ocr",
+                        "datos_ocr_completos",
+                        "texto_mrz",
+                    ]
+                )
+            logger.info(f"OCR completado para PasaporteEscaneado {pasaporte_id}")
+    except Exception as e:
+        logger.error(f"Error procesando pasaporte {pasaporte_id}: {e}")

@@ -20,6 +20,58 @@ jobs:
       - run: ruff check . --output-format=github
       - run: ruff format --check .
 
+  test-smoke:
+    name: Smoke Tests (Health Checks)
+    runs-on: ubuntu-latest
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: travelhub
+          POSTGRES_PASSWORD: travelhub
+          POSTGRES_DB: travelhub_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      SECRET_KEY: ci-test-key-not-for-production
+      DATABASE_URL: postgres://travelhub:travelhub@localhost:5432/travelhub_test
+      REDIS_URL: redis://localhost:6379/0
+      DJANGO_SETTINGS_MODULE: travelhub.settings
+      DEBUG: "True"
+      ALLOWED_HOSTS: "*"
+      SENDGRID_API_KEY: mock
+      STRIPE_SECRET_KEY: mock
+      STRIPE_WEBHOOK_SECRET: mock
+      BINANCE_API_KEY: mock
+      BINANCE_SECRET_KEY: mock
+      EVOLUTION_API_KEY: mock
+      TELEGRAM_BOT_TOKEN: "123:mock"
+      TWILIO_ACCOUNT_SID: mock
+      TWILIO_AUTH_TOKEN: mock
+      GEMINI_API_KEY: mock
+      EVOLUTION_API_URL: http://localhost:8080
+      SAAS_DEFAULT_PLAN: FREE
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: python -m pip install --upgrade pip
+      - run: pip install -r requirements/prod.txt -r requirements/local.txt
+      - run: python manage.py migrate --noinput
+      - run: python manage.py collectstatic --noinput --verbosity 0
+      - run: pytest tests/test_health_smoke.py -v --tb=short --timeout=60
+
   test:
     runs-on: ubuntu-latest
     services:
@@ -68,4 +120,4 @@ jobs:
       - run: python -m pip install --upgrade pip
       - run: pip install -r requirements/prod.txt -r requirements/local.txt
       - run: python manage.py collectstatic --noinput --verbosity 0
-      - run: pytest tests/ --timeout=120 -x -q --tb=short
+      - run: pytest tests/ --timeout=120 -x -q --tb=short --ignore=tests/test_health_smoke.py

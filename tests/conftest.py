@@ -30,6 +30,42 @@ def pytest_configure(config):
     """Override settings for tests globally."""
     from django.conf import settings
 
+    # Use in-memory SQLite for tests if no PostgreSQL available
+    # This allows tests to run without external dependencies
+    import socket
+
+    pg_available = False
+    for host in ["travelhub_db", "db", "localhost", "127.0.0.1"]:
+        try:
+            socket.gethostbyname(host)
+            # Try to connect to PostgreSQL
+            import psycopg2
+            try:
+                conn = psycopg2.connect(
+                    host=host,
+                    port=5432,
+                    user="travelhub",
+                    password="travelhub",
+                    dbname="travelhub_test",
+                    connect_timeout=2
+                )
+                conn.close()
+                pg_available = True
+                settings.DATABASES["default"]["HOST"] = host
+                settings.DATABASES["default"]["PORT"] = 5432
+                break
+            except Exception:
+                continue
+        except socket.gaierror:
+            continue
+
+    if not pg_available:
+        # Fallback to SQLite in-memory for tests
+        settings.DATABASES["default"] = {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": ":memory:",
+        }
+
     settings.CACHES = {
         "default": {
             "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
@@ -40,17 +76,6 @@ def pytest_configure(config):
             "LOCATION": "unique-snowflake-sessions",
         },
     }
-
-    # Bypass PgBouncer for tests: connect directly to PostgreSQL.
-    # PgBouncer no tiene `test_travelhub` en su [databases].
-    import socket
-
-    try:
-        socket.gethostbyname("travelhub_db")
-        settings.DATABASES["default"]["HOST"] = "travelhub_db"
-    except socket.gaierror:
-        settings.DATABASES["default"]["HOST"] = "db"
-    settings.DATABASES["default"]["PORT"] = 5432
 
     # Monkeypatch BaseDatabaseOperations.execute_sql_flush globally to use CASCADE
     from django.db.backends.base.operations import BaseDatabaseOperations

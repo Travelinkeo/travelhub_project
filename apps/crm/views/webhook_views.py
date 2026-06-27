@@ -1,3 +1,5 @@
+import hashlib
+import hmac
 import json
 import logging
 
@@ -7,34 +9,55 @@ from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 
-from apps.crm.tasks_bot import whatsapp_ai_task
-
 logger = logging.getLogger(__name__)
 
 
 @method_decorator(csrf_exempt, name="dispatch")
 class WhatsAppWebhookView(View):
-    """
-    Webhook oficial para recibir mensajes de la API de WhatsApp Cloud (Meta).
-    """
 
     def get(self, request, *args, **kwargs):
-        """Validación del Webhook de Meta (Token Challenge)"""
-        verify_token = getattr(settings, "WHATSAPP_VERIFY_TOKEN", "travelhub_secure_token_123")
+        verify_token = getattr(settings, "WHATSAPP_VERIFY_TOKEN", None)
+        if not verify_token:
+            if not settings.DEBUG:
+                return HttpResponse("Webhook not configured", status=503)
         mode = request.GET.get("hub.mode")
         token = request.GET.get("hub.verify_token")
         challenge = request.GET.get("hub.challenge")
 
         if mode and token:
             if mode == "subscribe" and token == verify_token:
-                logger.info("✅ Webhook de WhatsApp verificado exitosamente.")
+                logger.info("Webhook WA verificado exitosamente.")
                 return HttpResponse(challenge, status=200)
             else:
-                return HttpResponse("Token inválido", status=403)
+                return HttpResponse("Token invalido", status=403)
         return HttpResponse("TravelHub WhatsApp Bot Activo", status=200)
 
+    def _verify_signature(self, request):
+        app_secret = getattr(settings, "WHATSAPP_APP_SECRET", None)
+        if not app_secret:
+            if settings.DEBUG:
+                return True
+            return False
+
+        signature = request.headers.get("X-Hub-Signature-256", "")
+        if not signature:
+            return False
+
+        expected = "sha256=" + hmac.new(
+            app_secret.encode("utf-8"), request.body, hashlib.sha256
+        ).hexdigest()
+        return hmac.compare_digest(signature, expected)
+
     def post(self, request, *args, **kwargs):
-        """Recepción de mensajes entrantes de clientes"""
+        app_secret = getattr(settings, "WHATSAPP_APP_SECRET", None)
+        if not app_secret and not settings.DEBUG:
+            logger.error("WHATSAPP_APP_SECRET no configurado en produccion")
+            return HttpResponse("Webhook not configured", status=503)
+
+        if app_secret and not self._verify_signature(request):
+            logger.warning("WhatsApp webhook: firma HMAC invalida")
+            return HttpResponse(status=401)
+
         try:
             body = json.loads(request.body)
 
@@ -58,9 +81,7 @@ class WhatsAppWebhookView(View):
                                 if config:
                                     agencia = config.agencia
                             except Exception as e_ag:
-                                logger.error(
-                                    f"Error resolviendo agencia por phone_id {phone_id}: {e_ag}"
-                                )
+                                logger.error(f"Error resolviendo agencia por phone_id {phone_id}: {e_ag}")
 
                         if messages and contacts:
                             mensaje = messages[0]
@@ -73,7 +94,7 @@ class WhatsAppWebhookView(View):
 
                             if tipo_mensaje == "text":
                                 texto = mensaje["text"]["body"]
-                                logger.info(f"📩 Mensaje WA de {nombre_perfil}: {texto}")
+                                logger.info(f"Mensaje WA de {nombre_perfil}: {texto}")
 
                                 try:
                                     from apps.crm.models import Cliente, MensajeWhatsApp
@@ -92,22 +113,20 @@ class WhatsAppWebhookView(View):
                                     logger.error(f"Error guardando historial WA IN: {e_hist}")
 
                                 try:
+                                    from apps.crm.tasks_bot import whatsapp_ai_task
+
                                     whatsapp_ai_task.apply_async(
                                         args=[telefono, nombre_perfil, texto], queue="ia_fast"
                                     )
                                 except Exception as e:
-                                    logger.error(
-                                        f"Celery no disponible, mensaje {telefono} omitido: {e}"
-                                    )
+                                    logger.error(f"Celery no disponible, mensaje {telefono} omitido: {e}")
 
                             elif tipo_mensaje in ["image", "document"]:
                                 media_obj = mensaje.get(tipo_mensaje)
                                 media_id = media_obj.get("id")
                                 mime_type = media_obj.get("mime_type")
 
-                                logger.info(
-                                    f"📩 Documento/Imagen WA de {nombre_perfil}: id={media_id}, mime={mime_type}"
-                                )
+                                logger.info(f"Documento/Imagen WA de {nombre_perfil}: id={media_id}, mime={mime_type}")
 
                                 try:
                                     from apps.crm.models import Cliente, MensajeWhatsApp
@@ -123,9 +142,7 @@ class WhatsAppWebhookView(View):
                                         agencia=cliente.agencia or agencia,
                                     )
                                 except Exception as e_hist:
-                                    logger.error(
-                                        f"Error guardando historial WA IN para multimedia: {e_hist}"
-                                    )
+                                    logger.error(f"Error guardando historial WA IN multimedia: {e_hist}")
 
                                 try:
                                     from apps.crm.tasks_bot import whatsapp_media_ocr_task
@@ -147,4 +164,4 @@ class WhatsAppWebhookView(View):
 
         except Exception as e:
             logger.error(f"Error procesando webhook WA: {e}")
-            return HttpResponse(status=500)
+            return HttpResponse("EVENT_RECEIVED", status=200)

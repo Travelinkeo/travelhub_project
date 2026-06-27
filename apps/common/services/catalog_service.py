@@ -31,7 +31,7 @@ class CatalogNormalizationService:
 
     @classmethod
     def _load_airports(cls):
-        if cls._airports_master is None:
+        if not cls._airports_master:
             path = os.path.join(settings.BASE_DIR, "core", "data", "airports_master.json")
             try:
                 if os.path.exists(path):

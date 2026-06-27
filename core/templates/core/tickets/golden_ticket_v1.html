@@ -11,21 +11,27 @@
             margin: 0;
         }
         :root {
-            /* Forzado a Azul Golden Premium - Ignorando temas de agencia para consistencia de marca */
             --tk-primary: #0d1e40;
             --tk-accent: #2173a6;
             --tk-text: #333333;
             --tk-gray: #f9fafb;
             --tk-border: #e5e7eb;
+            {% if SOURCE_SYSTEM and 'SABRE' in SOURCE_SYSTEM %}
+            --pnr-color: #88081f;
+            {% elif SOURCE_SYSTEM and 'COPA' in SOURCE_SYSTEM %}
+            --pnr-color: #0032a0;
+            {% elif SOURCE_SYSTEM and 'TK CONNECT' in SOURCE_SYSTEM %}
+            --pnr-color: #232b38;
+            {% elif SOURCE_SYSTEM and 'WINGO' in SOURCE_SYSTEM %}
+            --pnr-color: #6633cb;
+            {% elif SOURCE_SYSTEM and 'AMADEUS' in SOURCE_SYSTEM %}
+            --pnr-color: #0c66e1;
+            {% elif SOURCE_SYSTEM and 'TRAVELPORT' in SOURCE_SYSTEM %}
+            --pnr-color: #111827;
+            {% else %}
             --pnr-color: #0d1e40;
+            {% endif %}
         }
-
-        {% if 'SABRE' in SOURCE_SYSTEM %} :root { --pnr-color: #88081f; } {% endif %}
-        {% if 'COPA' in SOURCE_SYSTEM %} :root { --pnr-color: #0032a0; } {% endif %}
-        {% if 'TK CONNECT' in SOURCE_SYSTEM %} :root { --pnr-color: #232b38; } {% endif %}
-        {% if 'WINGO' in SOURCE_SYSTEM %} :root { --pnr-color: #6633cb; } {% endif %}
-        {% if 'AMADEUS' in SOURCE_SYSTEM %} :root { --pnr-color: #0c66e1; } {% endif %}
-        {% if 'TRAVELPORT' in SOURCE_SYSTEM %} :root { --pnr-color: #111827; } {% endif %}
 
         body {
             font-family: 'Open Sans', sans-serif;

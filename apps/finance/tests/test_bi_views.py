@@ -9,12 +9,18 @@ from core.middleware import agency_context
 from core.models.agencia import UsuarioAgencia
 
 
+@pytest.fixture
+def no_ssl_redirect(settings):
+    settings.SECURE_SSL_REDIRECT = False
+
+
 @pytest.mark.django_db
+@pytest.mark.usefixtures("no_ssl_redirect")
 class TestBIDashboardView:
     def test_dashboard_requires_login(self, client):
         """Verificar que la vista del Dashboard de BI requiere login."""
         url = reverse("finance:dashboard_bi")
-        response = client.get(url)
+        response = client.get(url, secure=True)
         # Debe redirigir al login
         assert response.status_code == 302
         assert "login" in response.url
@@ -59,7 +65,7 @@ class TestBIDashboardView:
 
         # Mockear el middleware o depender del middleware de dominio/sesión
         url = reverse("finance:dashboard_bi")
-        response = client.get(url)
+        response = client.get(url, secure=True)
 
         assert response.status_code == 200
         ventas_visibles = response.context["ventas"]
@@ -110,7 +116,7 @@ class TestBIDashboardView:
         # 3. Acceder al dashboard
         client.force_login(usuario_api)
         url = reverse("finance:dashboard_bi")
-        response = client.get(url)
+        response = client.get(url, secure=True)
 
         assert response.status_code == 200
         metrics = response.context["metrics"]

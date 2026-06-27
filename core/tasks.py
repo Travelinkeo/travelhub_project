@@ -54,6 +54,7 @@ _TASK_MAPPINGS = {
     "check_passport_expiry": "apps.crm.tasks",
     "check_client_birthdays": "apps.crm.tasks",
     "task_ocr_passport_fast": "apps.crm.tasks",
+    "process_passport_ocr": "apps.crm.tasks",
     # apps.finance.tasks
     "check_pending_payments": "apps.finance.tasks",
     "procesar_facturacion_masiva_task": "apps.finance.tasks",
@@ -65,6 +66,7 @@ _TASK_MAPPINGS = {
     # cleanup tasks
     "limpiar_axes_logs": "apps.common.tasks",
     "limpiar_sesiones_expiradas": "apps.common.tasks",
+    "limpiar_celery_results": "apps.common.tasks",
 }
 
 

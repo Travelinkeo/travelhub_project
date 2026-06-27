@@ -13,7 +13,15 @@ services:
     tmpfs:
       - /var/lib/postgresql/data
 
-  test_redis:
+  test_redis_cache:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  test_redis_celery:
     image: redis:7-alpine
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
@@ -28,17 +36,21 @@ services:
     environment:
       DJANGO_SETTINGS_MODULE: travelhub.settings
       DATABASE_URL: postgresql://postgres:postgres@test_db:5432/travelhub_test
-      CELERY_BROKER_URL: redis://test_redis:6379/0
+      REDIS_CACHE_URL: redis://test_redis_cache:6379/0
+      REDIS_SESSIONS_URL: redis://test_redis_cache:6379/1
+      REDIS_CELERY_URL: redis://test_redis_celery:6379/0
+      CELERY_BROKER_URL: redis://test_redis_celery:6379/0
+      CELERY_RESULT_BACKEND: redis://test_redis_celery:6379/0
       SECRET_KEY: test-secret-key-for-ci-only-123456789012345678901234567890
       ENCRYPTION_KEY: test-encryption-key-32-chars-long!!
       DEBUG: "True"
       ENVIRONMENT: test
-      REDIS_HOST: test_redis
-      REDIS_PORT: 6379
     depends_on:
       test_db:
         condition: service_healthy
-      test_redis:
+      test_redis_cache:
+        condition: service_healthy
+      test_redis_celery:
         condition: service_healthy
     command: >
       sh -c "python manage.py migrate --noinput &&

@@ -531,22 +531,38 @@ GOOGLE_PLACES_API_KEY = env(
 )
 
 # --- REDIS CONFIGURATION ---
-# Centralized Redis configuration with password support
-_redis_password = os.getenv("REDIS_PASSWORD", None)
-_redis_host = os.getenv("REDIS_HOST", "redis")
-_redis_port = os.getenv("REDIS_PORT", "6379")
+# Split Redis instances for isolation and scalability
+# Each service gets its own Redis instance:
+# - redis-cache: Django cache (DB 0) + Sessions (DB 1)
+# - redis-celery: Celery broker/results (DB 0)
+# - redis-evolution: Evolution API cache (DB 0)
+
+# Cache Redis (Django cache + Sessions)
+_redis_cache_password = os.getenv("REDIS_CACHE_PASSWORD", os.getenv("REDIS_PASSWORD", None))
+_redis_cache_host = os.getenv("REDIS_CACHE_HOST", "redis-cache")
+_redis_cache_port = os.getenv("REDIS_CACHE_PORT", "6379")
+
+# Celery Redis (Broker + Results)
+_redis_celery_password = os.getenv("REDIS_CELERY_PASSWORD", os.getenv("REDIS_PASSWORD", None))
+_redis_celery_host = os.getenv("REDIS_CELERY_HOST", "redis-celery")
+_redis_celery_port = os.getenv("REDIS_CELERY_PORT", "6379")
+
+# Evolution Redis (WhatsApp cache)
+_redis_evolution_password = os.getenv("REDIS_EVOLUTION_PASSWORD", os.getenv("REDIS_PASSWORD", None))
+_redis_evolution_host = os.getenv("REDIS_EVOLUTION_HOST", "redis-evolution")
+_redis_evolution_port = os.getenv("REDIS_EVOLUTION_PORT", "6379")
 
 
-def _build_redis_url(db_num=0):
+def _build_redis_url(host, port, password=None, db_num=0):
     """Build Redis URL with optional password authentication."""
-    if _redis_password:
-        return f"redis://:{_redis_password}@{_redis_host}:{_redis_port}/{db_num}"
-    return f"redis://{_redis_host}:{_redis_port}/{db_num}"
+    if password:
+        return f"redis://:{password}@{host}:{port}/{db_num}"
+    return f"redis://{host}:{port}/{db_num}"
 
 
-# Celery Configuration
-CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", _build_redis_url(0))
-CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", _build_redis_url(0))
+# Celery Configuration - uses dedicated redis-celery
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", _build_redis_url(_redis_celery_host, _redis_celery_port, _redis_celery_password, 0))
+CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", _build_redis_url(_redis_celery_host, _redis_celery_port, _redis_celery_password, 0))
 CELERY_ACCEPT_CONTENT = ["application/json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
@@ -574,9 +590,10 @@ except ImportError:
     CELERY_BEAT_SCHEDULE = {}
 
 # --- CACHE CONFIGURATION ---
-# ☁️ Redis Cache: Compartido con Celery para entornos distribuídos (Gunicorn workers)
-_cache_url = _build_redis_url(1)
-_session_url = _build_redis_url(2)
+# Django Cache + Sessions use dedicated redis-cache instance
+# DB 0 = cache, DB 1 = sessions
+_cache_url = os.getenv("REDIS_CACHE_URL", _build_redis_url(_redis_cache_host, _redis_cache_port, _redis_cache_password, 0))
+_session_url = os.getenv("REDIS_SESSIONS_URL", _build_redis_url(_redis_cache_host, _redis_cache_port, _redis_cache_password, 1))
 
 if "redis://" in _cache_url:
     cache_options = {
@@ -584,8 +601,8 @@ if "redis://" in _cache_url:
         "CONNECTION_POOL_KWARGS": {"max_connections": 50},
     }
     # Agregar autenticación si está configurada
-    if _redis_password:
-        cache_options["PASSWORD"] = _redis_password
+    if _redis_cache_password:
+        cache_options["PASSWORD"] = _redis_cache_password
 
     CACHES = {
         "default": {

@@ -18,7 +18,6 @@ logger = logging.getLogger(__name__)
 
 
 class WebhookPagoBaseView(APIView):
-
     permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
@@ -32,9 +31,7 @@ class WebhookPagoBaseView(APIView):
 
         if not webhook_id or not venta_id:
             logger.error(f"Webhook malformado recibido: {provider_data}")
-            return Response(
-                {"error": "Missing ID or Venta ref"}, status=status.HTTP_200_OK
-            )
+            return Response({"error": "Missing ID or Venta ref"}, status=status.HTTP_200_OK)
 
         from core.api import system_context
 
@@ -103,10 +100,14 @@ class BinanceWebhookView(WebhookPagoBaseView):
         webhook_secret = getattr(settings, "BINANCE_WEBHOOK_SECRET", None)
         if not webhook_secret:
             if settings.DEBUG:
-                logger.warning("Binance webhook: BINANCE_WEBHOOK_SECRET no configurado (DEBUG), omitiendo HMAC")
+                logger.warning(
+                    "Binance webhook: BINANCE_WEBHOOK_SECRET no configurado (DEBUG), omitiendo HMAC"
+                )
             else:
                 logger.error("Binance webhook: BINANCE_WEBHOOK_SECRET no configurado en produccion")
-                return Response({"error": "Webhook not configured"}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+                return Response(
+                    {"error": "Webhook not configured"}, status=status.HTTP_503_SERVICE_UNAVAILABLE
+                )
 
         if webhook_secret:
             signature = request.headers.get("X-Binance-Signature") or request.headers.get(
@@ -117,9 +118,7 @@ class BinanceWebhookView(WebhookPagoBaseView):
                 return Response({"error": "Missing signature"}, status=status.HTTP_401_UNAUTHORIZED)
 
             payload = request.body
-            expected = hmac.new(
-                webhook_secret.encode("utf-8"), payload, hashlib.sha256
-            ).hexdigest()
+            expected = hmac.new(webhook_secret.encode("utf-8"), payload, hashlib.sha256).hexdigest()
 
             if not hmac.compare_digest(signature, expected):
                 logger.error("Binance webhook: firma HMAC invalida")
@@ -136,10 +135,14 @@ class StripeWebhookView(WebhookPagoBaseView):
         webhook_secret = getattr(settings, "STRIPE_WEBHOOK_SECRET", None)
         if not webhook_secret:
             if settings.DEBUG:
-                logger.warning("Stripe webhook: STRIPE_WEBHOOK_SECRET no configurado (DEBUG), omitiendo HMAC")
+                logger.warning(
+                    "Stripe webhook: STRIPE_WEBHOOK_SECRET no configurado (DEBUG), omitiendo HMAC"
+                )
             else:
                 logger.error("Stripe webhook: STRIPE_WEBHOOK_SECRET no configurado en produccion")
-                return Response({"error": "Webhook not configured"}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+                return Response(
+                    {"error": "Webhook not configured"}, status=status.HTTP_503_SERVICE_UNAVAILABLE
+                )
 
         if webhook_secret:
             sig_header = request.headers.get("Stripe-Signature", "")
@@ -150,15 +153,15 @@ class StripeWebhookView(WebhookPagoBaseView):
             try:
                 import stripe
 
-                event = stripe.webhook.construct_event(
-                    request.body, sig_header, webhook_secret
-                )
+                event = stripe.webhook.construct_event(request.body, sig_header, webhook_secret)
                 request.data["_stripe_verified_event"] = event
             except stripe.error.SignatureVerificationError:
                 logger.error("Stripe webhook: firma invalida")
                 return Response({"error": "Invalid signature"}, status=status.HTTP_401_UNAUTHORIZED)
             except Exception as e:
                 logger.error(f"Stripe webhook: error verificando firma: {e}")
-                return Response({"error": "Verification failed"}, status=status.HTTP_401_UNAUTHORIZED)
+                return Response(
+                    {"error": "Verification failed"}, status=status.HTTP_401_UNAUTHORIZED
+                )
 
         return super().post(request, *args, **kwargs)

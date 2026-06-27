@@ -28,11 +28,9 @@ except Exception:  # pragma: no cover
 
 def pytest_configure(config):
     """Override settings for tests globally."""
-    from django.conf import settings
-
-    # Use in-memory SQLite for tests if no PostgreSQL available
-    # This allows tests to run without external dependencies
     import socket
+
+    from django.conf import settings
 
     pg_available = False
     for host in ["travelhub_db", "db", "localhost", "127.0.0.1"]:
@@ -40,6 +38,7 @@ def pytest_configure(config):
             socket.gethostbyname(host)
             # Try to connect to PostgreSQL
             import psycopg2
+
             try:
                 conn = psycopg2.connect(
                     host=host,
@@ -47,7 +46,7 @@ def pytest_configure(config):
                     user="travelhub",
                     password="travelhub",
                     dbname="travelhub_test",
-                    connect_timeout=2
+                    connect_timeout=2,
                 )
                 conn.close()
                 pg_available = True
@@ -60,11 +59,10 @@ def pytest_configure(config):
             continue
 
     if not pg_available:
-        # Fallback to SQLite in-memory for tests
-        settings.DATABASES["default"] = {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": ":memory:",
-        }
+        raise RuntimeError(
+            "PostgreSQL not available for tests. Start test containers with: "
+            "docker compose -f docker-compose.test.yml up -d"
+        )
 
     settings.CACHES = {
         "default": {

@@ -5,7 +5,6 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth import views as auth_views
-from django.http import JsonResponse
 from django.urls import include, path, re_path
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.generic import RedirectView

@@ -90,21 +90,27 @@ class TestAuditTimelineView(TestCase):
         self.client.force_login(self.user_a)
 
         # Filtrar por Acción CREATE
-        response = self.client.get(reverse("finance:audit_timeline"), {"accion": "CREATE"}, secure=True)
+        response = self.client.get(
+            reverse("finance:audit_timeline"), {"accion": "CREATE"}, secure=True
+        )
         self.assertEqual(response.status_code, 200)
         logs = response.context["logs"]
         self.assertIn(self.log_a1, logs)
         self.assertNotIn(self.log_a2, logs)
 
         # Filtrar por Entidad Factura
-        response = self.client.get(reverse("finance:audit_timeline"), {"modelo": "Factura"}, secure=True)
+        response = self.client.get(
+            reverse("finance:audit_timeline"), {"modelo": "Factura"}, secure=True
+        )
         self.assertEqual(response.status_code, 200)
         logs = response.context["logs"]
         self.assertIn(self.log_a2, logs)
         self.assertNotIn(self.log_a1, logs)
 
         # Filtrar por texto 'modificada'
-        response = self.client.get(reverse("finance:audit_timeline"), {"q": "modificada"}, secure=True)
+        response = self.client.get(
+            reverse("finance:audit_timeline"), {"q": "modificada"}, secure=True
+        )
         self.assertEqual(response.status_code, 200)
         logs = response.context["logs"]
         self.assertIn(self.log_a2, logs)

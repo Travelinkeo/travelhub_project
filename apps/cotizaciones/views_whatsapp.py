@@ -14,7 +14,6 @@ logger = logging.getLogger(__name__)
 
 @method_decorator(csrf_exempt, name="dispatch")
 class IncomingWhatsAppWebhook(View):
-
     def _verify_signature(self, request):
         auth_token = getattr(settings, "TWILIO_AUTH_TOKEN", None)
         if not auth_token:

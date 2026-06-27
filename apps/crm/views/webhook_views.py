@@ -14,7 +14,6 @@ logger = logging.getLogger(__name__)
 
 @method_decorator(csrf_exempt, name="dispatch")
 class WhatsAppWebhookView(View):
-
     def get(self, request, *args, **kwargs):
         verify_token = getattr(settings, "WHATSAPP_VERIFY_TOKEN", None)
         if not verify_token:
@@ -43,9 +42,10 @@ class WhatsAppWebhookView(View):
         if not signature:
             return False
 
-        expected = "sha256=" + hmac.new(
-            app_secret.encode("utf-8"), request.body, hashlib.sha256
-        ).hexdigest()
+        expected = (
+            "sha256="
+            + hmac.new(app_secret.encode("utf-8"), request.body, hashlib.sha256).hexdigest()
+        )
         return hmac.compare_digest(signature, expected)
 
     def post(self, request, *args, **kwargs):
@@ -81,7 +81,9 @@ class WhatsAppWebhookView(View):
                                 if config:
                                     agencia = config.agencia
                             except Exception as e_ag:
-                                logger.error(f"Error resolviendo agencia por phone_id {phone_id}: {e_ag}")
+                                logger.error(
+                                    f"Error resolviendo agencia por phone_id {phone_id}: {e_ag}"
+                                )
 
                         if messages and contacts:
                             mensaje = messages[0]
@@ -119,14 +121,18 @@ class WhatsAppWebhookView(View):
                                         args=[telefono, nombre_perfil, texto], queue="ia_fast"
                                     )
                                 except Exception as e:
-                                    logger.error(f"Celery no disponible, mensaje {telefono} omitido: {e}")
+                                    logger.error(
+                                        f"Celery no disponible, mensaje {telefono} omitido: {e}"
+                                    )
 
                             elif tipo_mensaje in ["image", "document"]:
                                 media_obj = mensaje.get(tipo_mensaje)
                                 media_id = media_obj.get("id")
                                 mime_type = media_obj.get("mime_type")
 
-                                logger.info(f"Documento/Imagen WA de {nombre_perfil}: id={media_id}, mime={mime_type}")
+                                logger.info(
+                                    f"Documento/Imagen WA de {nombre_perfil}: id={media_id}, mime={mime_type}"
+                                )
 
                                 try:
                                     from apps.crm.models import Cliente, MensajeWhatsApp
@@ -142,7 +148,9 @@ class WhatsAppWebhookView(View):
                                         agencia=cliente.agencia or agencia,
                                     )
                                 except Exception as e_hist:
-                                    logger.error(f"Error guardando historial WA IN multimedia: {e_hist}")
+                                    logger.error(
+                                        f"Error guardando historial WA IN multimedia: {e_hist}"
+                                    )
 
                                 try:
                                     from apps.crm.tasks_bot import whatsapp_media_ocr_task

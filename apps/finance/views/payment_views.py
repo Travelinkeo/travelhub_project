@@ -34,10 +34,16 @@ class BinanceWebhookView(View):
 
             if not getattr(dj_settings, "BINANCE_WEBHOOK_SECRET", None):
                 if dj_settings.DEBUG:
-                    logger.warning("Binance webhook: BINANCE_WEBHOOK_SECRET no configurado (DEBUG), omitiendo HMAC")
+                    logger.warning(
+                        "Binance webhook: BINANCE_WEBHOOK_SECRET no configurado (DEBUG), omitiendo HMAC"
+                    )
                 else:
-                    logger.error("Binance webhook: BINANCE_WEBHOOK_SECRET no configurado en produccion")
-                    return JsonResponse({"returnCode": "ERROR", "returnMsg": "Webhook not configured"}, status=503)
+                    logger.error(
+                        "Binance webhook: BINANCE_WEBHOOK_SECRET no configurado en produccion"
+                    )
+                    return JsonResponse(
+                        {"returnCode": "ERROR", "returnMsg": "Webhook not configured"}, status=503
+                    )
 
             if getattr(dj_settings, "BINANCE_WEBHOOK_SECRET", None):
                 if not service.verify_webhook(data, signature, timestamp, nonce):

@@ -20,14 +20,18 @@ jobs:
       - run: ruff check . --output-format=github
       - run: ruff format --check .
 
-  test-smoke:
+test-smoke:
     name: Smoke Tests (Health Checks)
     runs-on: ubuntu-latest
     services:
-      redis:
+      redis-cache:
         image: redis:7-alpine
         ports:
           - 6379:6379
+      redis-celery:
+        image: redis:7-alpine
+        ports:
+          - 6380:6379
       postgres:
         image: postgres:15-alpine
         env:
@@ -44,7 +48,11 @@ jobs:
     env:
       SECRET_KEY: ci-test-key-not-for-production
       DATABASE_URL: postgres://travelhub:travelhub@localhost:5432/travelhub_test
-      REDIS_URL: redis://localhost:6379/0
+      REDIS_CACHE_URL: redis://localhost:6379/0
+      REDIS_SESSIONS_URL: redis://localhost:6379/1
+      REDIS_CELERY_URL: redis://localhost:6380/0
+      CELERY_BROKER_URL: redis://localhost:6380/0
+      CELERY_RESULT_BACKEND: redis://localhost:6380/0
       DJANGO_SETTINGS_MODULE: travelhub.settings
       DEBUG: "True"
       ALLOWED_HOSTS: "*"
@@ -75,10 +83,14 @@ jobs:
   test:
     runs-on: ubuntu-latest
     services:
-      redis:
+      redis-cache:
         image: redis:7-alpine
         ports:
           - 6379:6379
+      redis-celery:
+        image: redis:7-alpine
+        ports:
+          - 6380:6379
       postgres:
         image: postgres:15-alpine
         env:
@@ -95,7 +107,11 @@ jobs:
     env:
       SECRET_KEY: ci-test-key-not-for-production
       DATABASE_URL: postgres://travelhub:travelhub@localhost:5432/travelhub_test
-      REDIS_URL: redis://localhost:6379/0
+      REDIS_CACHE_URL: redis://localhost:6379/0
+      REDIS_SESSIONS_URL: redis://localhost:6379/1
+      REDIS_CELERY_URL: redis://localhost:6380/0
+      CELERY_BROKER_URL: redis://localhost:6380/0
+      CELERY_RESULT_BACKEND: redis://localhost:6380/0
       DJANGO_SETTINGS_MODULE: travelhub.settings
       DEBUG: "True"
       ALLOWED_HOSTS: "*"

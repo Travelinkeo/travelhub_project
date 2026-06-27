@@ -60,15 +60,37 @@ services:
           cpus: '2.0'
 
   # ---------------------------------------------------------------------------
-  # 3. BROKER DE MENSAJERÍA Y CACHE (Redis)
+  # 3. BROKER DE MENSAJERÍA Y CACHE (Redis - Split into 4 instances)
   # ---------------------------------------------------------------------------
-  redis:
+  # 3a. Redis Cache + Sessions (Django cache DB 0, Sessions DB 1)
+  redis-cache:
     image: redis:7-alpine
-    container_name: travelhub_broker
+    container_name: travelhub_redis_cache
     restart: unless-stopped
     command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
     volumes:
-      - redis_data:/data
+      - redis_cache_data:/data
+    networks:
+      - travelhub_private
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.25'
+
+  # 3b. Redis Celery (Broker + Results DB 0)
+  redis-celery:
+    image: redis:7-alpine
+    container_name: travelhub_redis_celery
+    restart: unless-stopped
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD} --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_celery_data:/data
     networks:
       - travelhub_private
     healthcheck:
@@ -82,6 +104,27 @@ services:
           memory: 512M
           cpus: '0.5'
 
+  # 3c. Redis Evolution (WhatsApp cache DB 0)
+  redis-evolution:
+    image: redis:7-alpine
+    container_name: travelhub_redis_evolution
+    restart: unless-stopped
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - redis_evolution_data:/data
+    networks:
+      - travelhub_private
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.25'
+
   # ---------------------------------------------------------------------------
   # 4. EL MONOLITO MODULAR (Django Application Server)
   # ---------------------------------------------------------------------------
@@ -94,10 +137,12 @@ services:
     command: >
       sh -c "gunicorn travelhub.wsgi:application --bind 0.0.0.0:8000 --workers 4 --threads 2 --max-requests 1000 --timeout 120"
     environment:
-      - DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
-      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379/0
-      - CELERY_BROKER_URL=redis://:${REDIS_PASSWORD}@redis:6379/0
-      - CELERY_RESULT_BACKEND=redis://:${REDIS_PASSWORD}@redis:6379/0
+      - DATABASE_URL=postgres://${DB_USER}:${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
+      - REDIS_CACHE_URL=redis://:${REDIS_PASSWORD}@redis-cache:6379/0
+      - REDIS_SESSIONS_URL=redis://:${REDIS_PASSWORD}@redis-cache:6379/1
+      - REDIS_CELERY_URL=redis://:${REDIS_PASSWORD}@redis-celery:6379/0
+      - CELERY_BROKER_URL=redis://:${REDIS_PASSWORD}@redis-celery:6379/0
+      - CELERY_RESULT_BACKEND=redis://:${REDIS_PASSWORD}@redis-celery:6379/0
     env_file:
       - .env.production
     volumes:
@@ -106,7 +151,9 @@ services:
     depends_on:
       db:
         condition: service_healthy
-      redis:
+      redis-cache:
+        condition: service_healthy
+      redis-celery:
         condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/health/')\""]
@@ -203,13 +250,13 @@ services:
       - .env.production
     environment:
       - DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
-      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379/0
-      - CELERY_BROKER_URL=redis://:${REDIS_PASSWORD}@redis:6379/0
-      - CELERY_RESULT_BACKEND=redis://:${REDIS_PASSWORD}@redis:6379/0
+      - REDIS_CELERY_URL=redis://:${REDIS_PASSWORD}@redis-celery:6379/0
+      - CELERY_BROKER_URL=redis://:${REDIS_PASSWORD}@redis-celery:6379/0
+      - CELERY_RESULT_BACKEND=redis://:${REDIS_PASSWORD}@redis-celery:6379/0
     volumes:
       - media_volume:/app/media
     depends_on:
-      redis:
+      redis-celery:
         condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "celery -A travelhub inspect ping --timeout 10 || exit 1"]
@@ -239,11 +286,11 @@ services:
       - .env.production
     environment:
       - DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
-      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379/0
-      - CELERY_BROKER_URL=redis://:${REDIS_PASSWORD}@redis:6379/0
-      - CELERY_RESULT_BACKEND=redis://:${REDIS_PASSWORD}@redis:6379/0
+      - REDIS_CELERY_URL=redis://:${REDIS_PASSWORD}@redis-celery:6379/0
+      - CELERY_BROKER_URL=redis://:${REDIS_PASSWORD}@redis-celery:6379/0
+      - CELERY_RESULT_BACKEND=redis://:${REDIS_PASSWORD}@redis-celery:6379/0
     depends_on:
-      redis:
+      redis-celery:
         condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "ps aux | grep -v grep | grep 'celery beat' || exit 1"]
@@ -284,13 +331,13 @@ services:
       - DATABASE_SAVE_DATA_CONTACTS=true
       - DATABASE_SAVE_DATA_CHATS=true
       - CACHE_REDIS_ENABLED=true
-      - CACHE_REDIS_URI=redis://:${REDIS_PASSWORD}@redis:6379/1
+      - CACHE_REDIS_URI=redis://:${REDIS_PASSWORD}@redis-evolution:6379/0
       - CACHE_REDIS_PREFIX_KEY=travelhub_evolution
       - LOG_LEVEL=INFO
       - CONFIG_SESSION_PHONE_VERSION=2.3000.1041831138
       - WEB_VERSION=2.3000.1041831138
     depends_on:
-      redis:
+      redis-evolution:
         condition: service_healthy
       evolution_db:
         condition: service_healthy
@@ -338,8 +385,12 @@ networks:
 volumes:
   postgres_data:
     name: travelhub_postgres_data
-  redis_data:
-    name: travelhub_redis_data
+  redis_cache_data:
+    name: travelhub_redis_cache_data
+  redis_celery_data:
+    name: travelhub_redis_celery_data
+  redis_evolution_data:
+    name: travelhub_redis_evolution_data
   static_volume:
     name: travelhub_static_volume
   media_volume:

@@ -17,12 +17,36 @@ services:
       timeout: 5s
       retries: 5
 
-  redis:
+  redis-cache:
     image: redis:7-alpine
     ports:
       - "6379:6379"
     volumes:
-      - redis_data:/data
+      - redis_cache_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis-celery:
+    image: redis:7-alpine
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis_celery_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis-evolution:
+    image: redis:7-alpine
+    ports:
+      - "6381:6379"
+    volumes:
+      - redis_evolution_data:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
@@ -41,15 +65,20 @@ services:
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/travelhub
       - POSTGRES_HOST=db
       - POSTGRES_PORT=5432
-      - CELERY_BROKER_URL=redis://redis:6379/0
-      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - REDIS_CACHE_URL=redis://redis-cache:6379/0
+      - REDIS_SESSIONS_URL=redis://redis-cache:6379/1
+      - REDIS_CELERY_URL=redis://redis-celery:6379/0
+      - CELERY_BROKER_URL=redis://redis-celery:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis-celery:6379/0
       - EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend
       - USE_CLOUDINARY=False
       - GOTENBERG_URL=http://gotenberg:3000/forms/chromium/convert/html
     depends_on:
       db:
         condition: service_healthy
-      redis:
+      redis-cache:
+        condition: service_healthy
+      redis-celery:
         condition: service_healthy
       gotenberg:
         condition: service_healthy
@@ -62,12 +91,13 @@ services:
     environment:
       - DEBUG=True
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/travelhub
-      - CELERY_BROKER_URL=redis://redis:6379/0
-      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - REDIS_CELERY_URL=redis://redis-celery:6379/0
+      - CELERY_BROKER_URL=redis://redis-celery:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis-celery:6379/0
       - GOTENBERG_URL=http://gotenberg:3000/forms/chromium/convert/html
     depends_on:
       - db
-      - redis
+      - redis-celery
       - gotenberg
 
   celery-beat:
@@ -78,10 +108,11 @@ services:
     environment:
       - DEBUG=True
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/travelhub
-      - CELERY_BROKER_URL=redis://redis:6379/0
+      - REDIS_CELERY_URL=redis://redis-celery:6379/0
+      - CELERY_BROKER_URL=redis://redis-celery:6379/0
     depends_on:
       - db
-      - redis
+      - redis-celery
 
   gotenberg:
     image: gotenberg/gotenberg:8
@@ -112,7 +143,7 @@ services:
       - DATABASE_SAVE_DATA_CHATS=true
       # Cache
       - CACHE_REDIS_ENABLED=true
-      - CACHE_REDIS_URI=redis://redis:6379/1
+      - CACHE_REDIS_URI=redis://redis-evolution:6379/0
       - CACHE_REDIS_PREFIX_KEY=travelhub_evolution
       # Authentication
       - AUTHENTICATION_API_KEY=travelhub-dev-key-change-in-production-2026
@@ -120,7 +151,7 @@ services:
       - LANGUAGE=en
       - DEL_INSTANCE=false
     depends_on:
-      redis:
+      redis-evolution:
         condition: service_healthy
       evolution_db:
         condition: service_healthy
@@ -149,5 +180,7 @@ services:
 
 volumes:
   postgres_data:
-  redis_data:
+  redis_cache_data:
+  redis_celery_data:
+  redis_evolution_data:
   evolution_pg_data:

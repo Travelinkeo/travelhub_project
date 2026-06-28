@@ -13,7 +13,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     rm -rf /var/lib/apt/lists/*
 
 COPY requirements/ ./requirements/
-RUN pip install --no-cache-dir -r requirements/prod.txt --prefix=/install
+RUN pip install --no-cache-dir --default-timeout=300 --retries=5 -r requirements/prod.txt --prefix=/install
 
 COPY travelhub/ ./travelhub/
 COPY core/ ./core/

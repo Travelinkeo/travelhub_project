@@ -57,6 +57,7 @@ app.conf.task_routes = {
 
 # Auto-descubrir tareas en todas las apps
 app.autodiscover_tasks()
+app.autodiscover_tasks(packages=["apps.finance"], related_name="tasks_tax_refund")  # noqa: F811
 
 # ==========================================
 

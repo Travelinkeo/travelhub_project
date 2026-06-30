@@ -106,10 +106,10 @@ class Command(BaseCommand):
                     )
                     hoteles_creados += 1
                     tipos_hab_creados += len(
-                        set(
+                        {
                             t.get("tipo_habitacion", "ESTANDAR")
                             for t in hotel_data.get("tarifas", [])
-                        )
+                        }
                     )
                     tarifas_creadas += len(hotel_data.get("tarifas", []))
                     continue
@@ -158,10 +158,12 @@ class Command(BaseCommand):
 
                         # Crear tarifa
                         if not dry_run and tipo_hab:
+                            fecha_inicio = tarifa_data.get("fecha_inicio") or "2026-01-01"
+                            fecha_fin = tarifa_data.get("fecha_fin") or "2026-12-31"
                             TarifaHabitacion.objects.create(
                                 tipo_habitacion=tipo_hab,
-                                fecha_inicio=tarifa_data.get("fecha_inicio"),
-                                fecha_fin=tarifa_data.get("fecha_fin"),
+                                fecha_inicio=fecha_inicio,
+                                fecha_fin=fecha_fin,
                                 nombre_temporada=tarifa_data.get("nombre_temporada", ""),
                                 moneda=tarifa_data.get("moneda", "EUR"),
                                 tarifa_sgl=tarifa_data.get("tarifa_sgl"),

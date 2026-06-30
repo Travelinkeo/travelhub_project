@@ -33,26 +33,185 @@ services:
           cpus: '0.5'
 
   # ---------------------------------------------------------------------------
-  # 2. MOTOR DE BASE DE DATOS (PostgreSQL)
+  # 2. ETCD PARA PATRONI (Leader Election & Configuración)
   # ---------------------------------------------------------------------------
-  db:
-    image: postgres:15-alpine
-    container_name: travelhub_db
+  etcd:
+    image: bitnami/etcd:3.5
+    container_name: travelhub_etcd
     restart: unless-stopped
-    shm_size: 256mb
     environment:
-      POSTGRES_DB: ${DB_NAME}
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      - ETCD_NAME=etcd-0
+      - ETCD_INITIAL_CLUSTER=etcd-0=http://etcd:2380
+      - ETCD_INITIAL_CLUSTER_STATE=new
+      - ETCD_INITIAL_ADVERTISE_PEER_URLS=http://etcd:2380
+      - ETCD_ADVERTISE_CLIENT_URLS=http://etcd:2379
+      - ETCD_LISTEN_CLIENT_URLS=http://0.0.0.0:2379
+      - ETCD_LISTEN_PEER_URLS=http://0.0.0.0:2380
+      - ALLOW_NONE_AUTHENTICATION=yes
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - etcd_data:/bitnami/etcd
     networks:
       - travelhub_private
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      test: ["CMD", "etcdctl", "endpoint", "health"]
       interval: 10s
       timeout: 5s
       retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.25'
+
+  # ---------------------------------------------------------------------------
+  # 3. CLUSTER POSTGRESQL CON PATRONI (3 Nodos: 1 Leader + 2 Replicas)
+  # ---------------------------------------------------------------------------
+  # Nodo 1 - Inicialmente Leader
+  patroni-1:
+    image: ghcr.io/zalando/postgres-operator:1.7.1-pg15
+    container_name: travelhub_patroni_1
+    restart: unless-stopped
+    shm_size: 256mb
+    environment:
+      - SCOPE=travelhub
+      - NAMESPACE=/patroni/
+      - PATRONI_NAME=patroni-1
+      - PATRONI_ETCD_HOSTS=etcd:2379
+      - PATRONI_BOOTSTRAP_DCS_TTL=30
+      - PATRONI_BOOTSTRAP_DCS_LOOP_WAIT=10
+      - PATRONI_BOOTSTRAP_DCS_RETRY_TIMEOUT=10
+      - PATRONI_BOOTSTRAP_DCS_MAXIMUM_LAG_ON_FAILOVER=1048576
+      - PATRONI_BOOTSTRAP_DCS_SYNCHRONOUS_MODE=false
+      - PATRONI_BOOTSTRAP_DCS_POSTGRESQL_PARAMETERS_MAX_CONNECTIONS=200
+      - PATRONI_BOOTSTRAP_DCS_POSTGRESQL_PARAMETERS_SHARED_BUFFERS=256MB
+      - PATRONI_BOOTSTRAP_DCS_POSTGRESQL_PARAMETERS_EFFECTIVE_CACHE_SIZE=1GB
+      - PATRONI_BOOTSTRAP_DCS_POSTGRESQL_PARAMETERS_WORK_MEM=16MB
+      - PATRONI_BOOTSTRAP_DCS_POSTGRESQL_PARAMETERS_MAINTENANCE_WORK_MEM=128MB
+      - PATRONI_BOOTSTRAP_DCS_POSTGRESQL_PARAMETERS_RANDOM_PAGE_COST=1.1
+      - PATRONI_BOOTSTRAP_DCS_POSTGRESQL_PARAMETERS_EFFECTIVE_IO_CONCURRENCY=200
+      - PATRONI_BOOTSTRAP_DCS_POSTGRESQL_PARAMETERS_MAX_WORKER_PROCESSES=8
+      - PATRONI_BOOTSTRAP_DCS_POSTGRESQL_PARAMETERS_MAX_PARALLEL_WORKERS_PER_GATHER=4
+      - PATRONI_BOOTSTRAP_DCS_POSTGRESQL_PARAMETERS_MAX_PARALLEL_WORKERS=8
+      - PATRONI_BOOTSTRAP_DCS_POSTGRESQL_PARAMETERS_WAL_LEVEL=replica
+      - PATRONI_BOOTSTRAP_DCS_POSTGRESQL_PARAMETERS_MAX_WAL_SENDERS=10
+      - PATRONI_BOOTSTRAP_DCS_POSTGRESQL_PARAMETERS_MAX_REPLICATION_SLOTS=10
+      - PATRONI_BOOTSTRAP_DCS_POSTGRESQL_PARAMETERS_HOT_STANDBY=on
+      - PATRONI_BOOTSTRAP_DCS_POSTGRESQL_PARAMETERS_HOT_STANDBY_FEEDBACK=on
+      - PATRONI_POSTGRESQL_CONNECT_ADDRESS=patroni-1:5432
+      - PATRONI_RESTAPI_CONNECT_ADDRESS=patroni-1:8008
+      - PATRONI_RESTAPI_LISTEN=0.0.0.0:8008
+      - PATRONI_RESTAPI_AUTH=patroni:patroni
+      - PATRONI_POSTGRESQL_AUTHENTICATION_SUPERUSER_PASSWORD=${DB_PASSWORD}
+      - PATRONI_POSTGRESQL_AUTHENTICATION_REPLICATION_PASSWORD=${DB_PASSWORD}
+      - PATRONI_POSTGRESQL_PARAMETERS_MAX_CONNECTIONS=200
+      - PATRONI_POSTGRESQL_PARAMETERS_SHARED_BUFFERS=256MB
+      - PATRONI_POSTGRESQL_PARAMETERS_EFFECTIVE_CACHE_SIZE=1GB
+      - PATRONI_POSTGRESQL_PARAMETERS_WORK_MEM=16MB
+      - PATRONI_POSTGRESQL_PARAMETERS_MAINTENANCE_WORK_MEM=128MB
+      - PATRONI_POSTGRESQL_PARAMETERS_RANDOM_PAGE_COST=1.1
+      - PATRONI_POSTGRESQL_PARAMETERS_EFFECTIVE_IO_CONCURRENCY=200
+      - PATRONI_POSTGRESQL_PARAMETERS_MAX_WORKER_PROCESSES=8
+      - PATRONI_POSTGRESQL_PARAMETERS_MAX_PARALLEL_WORKERS_PER_GATHER=4
+      - PATRONI_POSTGRESQL_PARAMETERS_MAX_PARALLEL_WORKERS=8
+      - PATRONI_POSTGRESQL_PARAMETERS_WAL_LEVEL=replica
+      - PATRONI_POSTGRESQL_PARAMETERS_MAX_WAL_SENDERS=10
+      - PATRONI_POSTGRESQL_PARAMETERS_MAX_REPLICATION_SLOTS=10
+      - PATRONI_POSTGRESQL_PARAMETERS_HOT_STANDBY=on
+      - PATRONI_POSTGRESQL_PARAMETERS_HOT_STANDBY_FEEDBACK=on
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - patroni1_data:/home/postgres/pgdata
+    networks:
+      - travelhub_private
+    healthcheck:
+      test: ["CMD", "patronictl", "list", "-f", "json"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '2.0'
+
+  # Nodo 2 - Replica
+  patroni-2:
+    image: ghcr.io/zalando/postgres-operator:1.7.1-pg15
+    container_name: travelhub_patroni_2
+    restart: unless-stopped
+    shm_size: 256mb
+    environment:
+      - SCOPE=travelhub
+      - NAMESPACE=/patroni/
+      - PATRONI_NAME=patroni-2
+      - PATRONI_ETCD_HOSTS=etcd:2379
+      - PATRONI_BOOTSTRAP_DCS_TTL=30
+      - PATRONI_BOOTSTRAP_DCS_LOOP_WAIT=10
+      - PATRONI_BOOTSTRAP_DCS_RETRY_TIMEOUT=10
+      - PATRONI_BOOTSTRAP_DCS_MAXIMUM_LAG_ON_FAILOVER=1048576
+      - PATRONI_BOOTSTRAP_DCS_SYNCHRONOUS_MODE=false
+      - PATRONI_POSTGRESQL_CONNECT_ADDRESS=patroni-2:5432
+      - PATRONI_RESTAPI_CONNECT_ADDRESS=patroni-2:8008
+      - PATRONI_RESTAPI_LISTEN=0.0.0.0:8008
+      - PATRONI_RESTAPI_AUTH=patroni:patroni
+      - PATRONI_POSTGRESQL_AUTHENTICATION_SUPERUSER_PASSWORD=${DB_PASSWORD}
+      - PATRONI_POSTGRESQL_AUTHENTICATION_REPLICATION_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - patroni2_data:/home/postgres/pgdata
+    networks:
+      - travelhub_private
+    healthcheck:
+      test: ["CMD", "patronictl", "list", "-f", "json"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '2.0'
+
+  # Nodo 3 - Replica
+  patroni-3:
+    image: ghcr.io/zalando/postgres-operator:1.7.1-pg15
+    container_name: travelhub_patroni_3
+    restart: unless-stopped
+    shm_size: 256mb
+    environment:
+      - SCOPE=travelhub
+      - NAMESPACE=/patroni/
+      - PATRONI_NAME=patroni-3
+      - PATRONI_ETCD_HOSTS=etcd:2379
+      - PATRONI_BOOTSTRAP_DCS_TTL=30
+      - PATRONI_BOOTSTRAP_DCS_LOOP_WAIT=10
+      - PATRONI_BOOTSTRAP_DCS_RETRY_TIMEOUT=10
+      - PATRONI_BOOTSTRAP_DCS_MAXIMUM_LAG_ON_FAILOVER=1048576
+      - PATRONI_POSTGRESQL_CONNECT_ADDRESS=patroni-3:5432
+      - PATRONI_RESTAPI_CONNECT_ADDRESS=patroni-3:8008
+      - PATRONI_RESTAPI_LISTEN=0.0.0.0:8008
+      - PATRONI_RESTAPI_AUTH=patroni:patroni
+      - PATRONI_POSTGRESQL_AUTHENTICATION_SUPERUSER_PASSWORD=${DB_PASSWORD}
+      - PATRONI_POSTGRESQL_AUTHENTICATION_REPLICATION_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - patroni3_data:/home/postgres/pgdata
+    networks:
+      - travelhub_private
+    healthcheck:
+      test: ["CMD", "patronictl", "list", "-f", "json"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
     deploy:
       resources:
         limits:
@@ -126,6 +285,46 @@ services:
           cpus: '0.25'
 
   # ---------------------------------------------------------------------------
+  # 3.5. CONNECTION POOLER (PgBouncer) - Conecta a Patroni
+  # ---------------------------------------------------------------------------
+  pgbouncer:
+    image: edoburu/pgbouncer:latest
+    container_name: travelhub_pooler
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgres://${DB_USER}:${DB_PASSWORD}@patroni-1:5432/${DB_NAME}
+      POOL_MODE: transaction
+      MAX_CLIENT_CONN: 100
+      DEFAULT_POOL_SIZE: 25
+      SERVER_IDLE_TIMEOUT: 600
+      AUTH_TYPE: scram-sha-256
+      SERVER_RESET_QUERY: DISCARD ALL
+      SERVER_CHECK_QUERY: SELECT 1
+      SERVER_CHECK_DELAY: 30
+      SERVER_LIFETIME: 3600
+      SERVER_CONNECT_TIMEOUT: 15
+      SERVER_LOGIN_RETRY: 15
+      SERVER_MAXWAIT: 120
+      IGNORE_STARTUP_PARAMETERS: extra_float_digits
+    networks:
+      - travelhub_private
+    depends_on:
+      patroni-1:
+        condition: service_healthy
+      etcd:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME} -h patroni-1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.5'
+
+  # ---------------------------------------------------------------------------
   # 4. EL MONOLITO MODULAR (Django Application Server)
   # ---------------------------------------------------------------------------
   web:
@@ -137,7 +336,7 @@ services:
     command: >
       sh -c "gunicorn travelhub.wsgi:application --bind 0.0.0.0:8000 --workers 4 --threads 2 --max-requests 1000 --timeout 120"
     environment:
-      - DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
+      - DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@pgbouncer:5432/${DB_NAME}
       - REDIS_CACHE_URL=redis://:${REDIS_PASSWORD}@redis-cache:6379/0
       - REDIS_SESSIONS_URL=redis://:${REDIS_PASSWORD}@redis-cache:6379/1
       - REDIS_CELERY_URL=redis://:${REDIS_PASSWORD}@redis-celery:6379/0
@@ -149,7 +348,7 @@ services:
       - static_volume:/app/staticfiles
       - media_volume:/app/media
     depends_on:
-      db:
+      pgbouncer:
         condition: service_healthy
       redis-cache:
         condition: service_healthy
@@ -249,7 +448,7 @@ services:
     env_file:
       - .env.production
     environment:
-      - DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
+      - DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@pgbouncer:5432/${DB_NAME}
       - REDIS_CELERY_URL=redis://:${REDIS_PASSWORD}@redis-celery:6379/0
       - CELERY_BROKER_URL=redis://:${REDIS_PASSWORD}@redis-celery:6379/0
       - CELERY_RESULT_BACKEND=redis://:${REDIS_PASSWORD}@redis-celery:6379/0
@@ -285,7 +484,7 @@ services:
     env_file:
       - .env.production
     environment:
-      - DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
+      - DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@pgbouncer:5432/${DB_NAME}
       - REDIS_CELERY_URL=redis://:${REDIS_PASSWORD}@redis-celery:6379/0
       - CELERY_BROKER_URL=redis://:${REDIS_PASSWORD}@redis-celery:6379/0
       - CELERY_RESULT_BACKEND=redis://:${REDIS_PASSWORD}@redis-celery:6379/0

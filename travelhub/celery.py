@@ -38,22 +38,9 @@ app.conf.task_default_routing_key = "default"
 # ==========================================
 # 🚦 ENRUTADOR AUTOMÁTICO DE TAREAS
 # ==========================================
-# Le decimos a Celery a qué carril mandar cada tarea automáticamente
-
-app.conf.task_routes = {
-    # -- IA MULTIMODAL (ALTA PRIORIDAD) --
-    # Tareas que el usuario espera en tiempo real
-    "core.tasks.procesar_pasaporte_ocr": {"queue": "ia_fast"},
-    "core.tasks.procesar_nota_voz": {"queue": "ia_fast"},
-    "core.tasks.parsear_boleto_individual": {"queue": "ia_fast"},
-    # -- IA FINANCIERA MASIVA (BAJA PRIORIDAD) --
-    # Procesar conciliaciones pesadas se va por el carril pesado
-    "apps.finance.tasks_reconciliation.conciliar_reporte_batch_task": {"queue": "ia_heavy"},
-    # -- NOTIFICACIONES Y COMUNICACIÓN --
-    # Aislado para que los correos/whatsapps fluyan sin bloqueos
-    "core.tasks.enviar_notificacion_whatsapp_task": {"queue": "notifications"},
-}
-
+# Nota: Las rutas se definen en settings.CELERY_TASK_ROUTES para centralizar.
+# Anteriormente se definian aqui, pero app.conf.task_routes sobreescribe
+# las rutas de settings, causando conflictos. Ahora solo se usa settings.
 
 # Auto-descubrir tareas en todas las apps
 app.autodiscover_tasks()

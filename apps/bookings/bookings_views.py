@@ -538,9 +538,15 @@ def whatsapp_qr_view(request):
     Vista principal de estado de WhatsApp (Migrada a Evolution API v2).
     """
     from apps.communications.services.whatsapp_unified import WhatsAppService
-    from core.api import get_user_active_agency
 
-    agencia = get_user_active_agency(request.user)
+    agencia = getattr(request, "agencia", None)
+    if not agencia:
+        from core.api import get_agencia_from_request
+
+        try:
+            agencia = get_agencia_from_request(request)
+        except Exception:
+            return HttpResponse("No se detectó contexto de agencia.", status=403)
     if not agencia:
         return HttpResponse("No se detectó contexto de agencia.", status=403)
 
@@ -598,9 +604,14 @@ def whatsapp_pairing_code_view(request):
     Vista HTMX que solicita el código de emparejamiento por número de teléfono.
     El usuario ingresa su número y recibe un código de 8 caracteres para ingresar en WhatsApp.
     """
-    from core.api import get_user_active_agency
+    agencia = getattr(request, "agencia", None)
+    if not agencia:
+        from core.api import get_agencia_from_request
 
-    agencia = get_user_active_agency(request.user)
+        try:
+            agencia = get_agencia_from_request(request)
+        except Exception:
+            return HttpResponse("No se detectó contexto de agencia.", status=403)
     if not agencia:
         return HttpResponse("No se detectó contexto de agencia.", status=403)
 

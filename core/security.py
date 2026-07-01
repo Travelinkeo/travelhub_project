@@ -27,6 +27,8 @@ from django.core.cache import cache
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404
 
+from core.middleware import agency_var
+
 # Constantes de cache para sesiones de agencia
 _USER_AGENCIA_CACHE_PREFIX = "th:user_agencia:"
 _USER_AGENCIA_CACHE_TIMEOUT = 120  # 2 minutos
@@ -37,15 +39,20 @@ def get_user_active_agency(user):
     Obtiene la agencia activa de un usuario de forma optimizada con cache Redis.
     Retorna la instancia de Agencia o None si no tiene agencia activa.
 
-    FIX DEUDA TÉCNICA: Centraliza el patrón repetido 39+ veces:
-        user.agencias.filter(activo=True).first()
-
-    OPTIMIZACIÓN: Usa cache Redis para evitar queries repetidas por request.
+    PRIORIDAD:
+    1. ContextVar del middleware (agency_var) — respeta active_agencia_id de la sesión.
+    2. Cache Redis (fallback para tareas Celery sin request).
+    3. Base de datos (.first() como último recurso).
     """
     if not hasattr(user, "agencias") or not user.is_authenticated:
         return None
 
-    # Intentar obtener desde cache
+    # 1. Prioridad: ContextVar del middleware (seteado por ThreadLocalContextMiddleware)
+    middleware_agency = agency_var.get()
+    if middleware_agency is not None:
+        return middleware_agency
+
+    # 2. Cache Redis (para tareas Celery o contextos sin middleware)
     cache_key = f"{_USER_AGENCIA_CACHE_PREFIX}{user.pk}"
     cached_agencia_id = cache.get(cache_key)
 
@@ -65,11 +72,10 @@ def get_user_active_agency(user):
             cache.delete(cache_key)
             return None
 
-    # Cache miss - consultar BD
+    # 3. Cache miss - consultar BD
     ua = user.agencias.filter(activo=True).select_related("agencia").first()
 
     if ua:
-        # Guardar en cache
         cache.set(cache_key, ua.agencia_id, _USER_AGENCIA_CACHE_TIMEOUT)
         return ua.agencia
     else:

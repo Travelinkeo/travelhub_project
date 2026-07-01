@@ -10,6 +10,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
+from core.security import get_agencia_from_request
+
 
 def _setup_stripe():
     """Asegura la configuración de Stripe."""
@@ -30,11 +32,9 @@ def get_invoices(request):
         return Response({"error": "Stripe no configurado"}, status=503)
 
     try:
-        usuario_agencia = request.user.agencias.filter(activo=True).first()
-        if not usuario_agencia:
+        agencia = get_agencia_from_request(request)
+        if not agencia:
             return Response({"error": "No perteneces a ninguna agencia"}, status=404)
-
-        agencia = usuario_agencia.agencia
 
         if not agencia.stripe_customer_id:
             return Response({"invoices": []})
@@ -72,11 +72,9 @@ def get_payment_method(request):
         return Response({"error": "Stripe no configurado"}, status=503)
 
     try:
-        usuario_agencia = request.user.agencias.filter(activo=True).first()
-        if not usuario_agencia:
+        agencia = get_agencia_from_request(request)
+        if not agencia:
             return Response({"error": "No perteneces a ninguna agencia"}, status=404)
-
-        agencia = usuario_agencia.agencia
 
         if not agencia.stripe_customer_id:
             return Response({"payment_method": None})
@@ -112,11 +110,9 @@ def get_payment_method(request):
 def get_usage_stats(request):
     """Obtiene estadísticas de uso del plan actual."""
     try:
-        usuario_agencia = request.user.agencias.filter(activo=True).first()
-        if not usuario_agencia:
+        agencia = get_agencia_from_request(request)
+        if not agencia:
             return Response({"error": "No perteneces a ninguna agencia"}, status=404)
-
-        agencia = usuario_agencia.agencia
 
         # Calcular porcentajes de uso
         usuarios_porcentaje = (

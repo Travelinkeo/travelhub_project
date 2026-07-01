@@ -84,8 +84,9 @@ class GDSInjectERPView(LoginRequiredMixin, View):
 
             agencia = getattr(request.user, "agencia", None)
             if not agencia and hasattr(request.user, "agencias"):
-                ua = request.user.agencias.filter(activo=True).first()
-                agencia = ua.agencia if ua else None
+                from core.security import get_agencia_from_request
+
+                agencia = get_agencia_from_request(request)
 
             if not agencia:
                 return JsonResponse(

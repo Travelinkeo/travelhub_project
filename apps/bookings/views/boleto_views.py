@@ -16,7 +16,7 @@ from apps.crm.models import Cliente
 
 # Importar el servicio de parseo y los modelos de Django
 # Throttling
-from core.api import AgenciaAIParserThrottle, AIParserDailyQuotaThrottle
+from core.api import AgenciaAIParserThrottle, AIParserDailyQuotaThrottle, get_agencia_from_request
 from core.auth_helpers import InternalAPIAuthMixin
 
 logger = logging.getLogger(__name__)
@@ -68,22 +68,7 @@ class BoletoUploadAPIView(InternalAPIAuthMixin, APIView):
             )
 
         # 1. Obtener Agencia del usuario
-        agencia_usuario = None
-        if hasattr(request.user, "agencias"):
-            usuario_agencia = request.user.agencias.filter(activo=True).first()
-            if usuario_agencia:
-                agencia_usuario = usuario_agencia.agencia
-
-        if not agencia_usuario:
-            logger.error(
-                f"❌ Error de Seguridad: Intento de subida de boleto por usuario {request.user.username} sin agencia vinculada."
-            )
-            return Response(
-                {
-                    "error": "No tienes una agencia vinculada. Contacta al administrador para configurar tu perfil."
-                },
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        agencia_usuario = get_agencia_from_request(request)
 
         # 2. Crear el registro en estado 'PRO' (Procesando)
         try:
@@ -271,17 +256,7 @@ class BoletoMassActionAPIView(InternalAPIAuthMixin, APIView):
             return Response({"error": "Faltan boleto_ids o cliente_id"}, status=400)
 
         # 1. Obtener Agencia del usuario para aislamiento multi-tenant
-        agencia_usuario = None
-        if hasattr(request.user, "agencias"):
-            usuario_agencia = request.user.agencias.filter(activo=True).first()
-            if usuario_agencia:
-                agencia_usuario = usuario_agencia.agencia
-
-        if not agencia_usuario:
-            return Response(
-                {"error": "No tienes una agencia vinculada para realizar esta operación."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        agencia_usuario = get_agencia_from_request(request)
 
         try:
             Cliente.objects.select_related("agencia").get(pk=cliente_id)

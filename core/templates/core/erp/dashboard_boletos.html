@@ -58,34 +58,34 @@
             <div class="glass-kpi rounded-[32px] p-8 group">
                 <div class="kpi-glow"></div>
                 <div class="flex justify-between items-start mb-6">
-                    <span class="text-[9px] font-black uppercase tracking-[0.2em] text-gray-500">Daily Volume</span>
-                    <span class="material-symbols-outlined text-primary/40">timeline</span>
+                    <span class="text-[9px] font-black uppercase tracking-[0.2em] text-gray-500">Total Procesados</span>
+                    <span class="material-symbols-outlined text-primary/40">check_circle</span>
                 </div>
                 <div class="space-y-1">
-                    <h2 id="stat-hoy" class="text-5xl font-black text-white tabular-nums tracking-tighter">--</h2>
-                    <p class="text-[10px] font-bold text-gray-600 uppercase tracking-widest">Processings / 24h</p>
+                    <h2 id="stat-total" class="text-5xl font-black text-white tabular-nums tracking-tighter">--</h2>
+                    <p class="text-[10px] font-bold text-gray-600 uppercase tracking-widest">Boletos COM</p>
                 </div>
             </div>
 
             <div class="glass-kpi rounded-[32px] p-8 group">
                 <div class="flex justify-between items-start mb-6">
-                    <span class="text-[9px] font-black uppercase tracking-[0.2em] text-gray-500">Weekly Efficiency</span>
-                    <span class="material-symbols-outlined text-emerald-500/40">trending_up</span>
+                    <span class="text-[9px] font-black uppercase tracking-[0.2em] text-gray-500">En Revisión</span>
+                    <span class="material-symbols-outlined text-violet-500/40">pending</span>
                 </div>
                 <div class="space-y-1">
-                    <h2 id="stat-semana" class="text-5xl font-black text-white tabular-nums tracking-tighter">--</h2>
-                    <p class="text-[10px] font-bold text-gray-600 uppercase tracking-widest">Normalized Units</p>
+                    <h2 id="stat-revision" class="text-5xl font-black text-white tabular-nums tracking-tighter">--</h2>
+                    <p class="text-[10px] font-bold text-gray-600 uppercase tracking-widest">Pending Review</p>
                 </div>
             </div>
 
             <div class="glass-kpi rounded-[32px] p-8 group">
                 <div class="flex justify-between items-start mb-6">
-                    <span class="text-[9px] font-black uppercase tracking-[0.2em] text-gray-500">Monthly Aggregated</span>
-                    <span class="material-symbols-outlined text-violet-500/40">dataset_linked</span>
+                    <span class="text-[9px] font-black uppercase tracking-[0.2em] text-gray-500">Total Registros</span>
+                    <span class="material-symbols-outlined text-emerald-500/40">dataset_linked</span>
                 </div>
                 <div class="space-y-1">
-                    <h2 id="stat-mes" class="text-5xl font-black text-white tabular-nums tracking-tighter">--</h2>
-                    <p class="text-[10px] font-bold text-gray-600 uppercase tracking-widest">Total GDS Records</p>
+                    <h2 id="stat-all" class="text-5xl font-black text-white tabular-nums tracking-tighter">--</h2>
+                    <p class="text-[10px] font-bold text-gray-600 uppercase tracking-widest">All Tickets</p>
                 </div>
             </div>
 
@@ -93,12 +93,12 @@
                 <div class="absolute inset-0 bg-amber-500/5 animate-pulse-slow"></div>
                 <div class="relative z-10">
                     <div class="flex justify-between items-start mb-6">
-                        <span class="text-[9px] font-black uppercase tracking-[0.2em] text-amber-500">Critical Review</span>
+                        <span class="text-[9px] font-black uppercase tracking-[0.2em] text-amber-500">Errors</span>
                         <span class="material-symbols-outlined text-amber-500/80 animate-bounce">warning</span>
                     </div>
                     <div class="space-y-1">
-                        <h2 id="stat-pendientes" class="text-5xl font-black text-amber-500 tabular-nums tracking-tighter">--</h2>
-                        <p class="text-[10px] font-bold text-amber-900 uppercase tracking-widest">Awaiting Validation</p>
+                        <h2 id="stat-errores" class="text-5xl font-black text-amber-500 tabular-nums tracking-tighter">--</h2>
+                        <p class="text-[10px] font-bold text-amber-900 uppercase tracking-widest">Extraction Errors</p>
                     </div>
                 </div>
             </div>
@@ -190,11 +190,9 @@
             const response = await fetch("{% url 'core:boletos_dashboard_stats' %}");
             const data = await response.json();
 
-            document.getElementById('stat-hoy').textContent = data.procesados.hoy;
-            document.getElementById('stat-semana').textContent = data.procesados.semana;
-            document.getElementById('stat-mes').textContent = data.procesados.mes;
-            document.getElementById('stat-pendientes').textContent = data.pendientes;
-            document.getElementById('stat-pendientes-2').textContent = data.pendientes;
+            document.getElementById('stat-total').textContent = data.procesados.total;
+            document.getElementById('stat-revision').textContent = data.revision || 0;
+            document.getElementById('stat-all').textContent = data.total || 0;
             document.getElementById('stat-errores').textContent = data.errores;
 
             const list = document.getElementById('top-airlines-list');

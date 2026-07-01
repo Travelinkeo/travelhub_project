@@ -6,6 +6,8 @@ from django.db import transaction
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
+from core.api import get_agencia_from_request
+
 from ..services.pnr_parser_service import PNRParserService
 
 logger = logging.getLogger(__name__)
@@ -37,14 +39,7 @@ def api_ingest_pnr_view(request):
             )
 
         # Invocamos el servicio pasando el contexto multi-tenant del usuario logueado
-        # request.user.agencia está protegida; recuperamos de request.user.agencias
-        usuario_agencia = request.user.agencias.filter(activo=True).first()
-        if not usuario_agencia:
-            return JsonResponse(
-                {"error": "El usuario no tiene una agencia activa asociada."}, status=400
-            )
-
-        agencia = usuario_agencia.agencia
+        agencia = get_agencia_from_request(request)
 
         with transaction.atomic():
             venta = PNRParserService.ingerir_pnr_en_db(raw_pnr, agencia, request.user)

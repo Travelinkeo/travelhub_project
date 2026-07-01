@@ -54,9 +54,9 @@ class AgenciaSettingsView(AgencyRoleRequiredMixin, UpdateView):
 
         if not agencia_obj and req.user.is_authenticated:
             # Último recurso: consulta a DB
-            ua = req.user.agencias.filter(activo=True).first()
-            if ua:
-                agencia_obj = ua.agencia
+            from core.security import get_agencia_from_request
+
+            agencia_obj = get_agencia_from_request(req)
 
         if not agencia_obj:
             from django.http import Http404
@@ -108,8 +108,9 @@ class WhatsAppStatusView(AgencyRoleRequiredMixin, View):
         # Obtener agencia de forma robusta (compatibilidad con superusuarios)
         agencia = getattr(request, "agencia", None)
         if not agencia:
-            ua = request.user.agencias.filter(activo=True).first()
-            agencia = ua.agencia if ua else None
+            from core.security import get_agencia_from_request
+
+            agencia = get_agencia_from_request(request)
 
         if not agencia:
             return HttpResponse("Configuración de agencia no encontrada.", status=404)

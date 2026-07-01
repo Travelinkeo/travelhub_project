@@ -1,7 +1,7 @@
 import logging
 
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.exceptions import ValidationError
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
@@ -14,6 +14,7 @@ from rest_framework.views import APIView
 from apps.finance.models import PropuestaTransaccionIA
 from apps.finance.models.reconciliacion import ConciliacionBoleto
 from apps.finance.serializers import PropuestaTransaccionIASerializer
+from core.api import get_agencia_from_request
 from core.auth_helpers import InternalAPIAuthMixin
 
 logger = logging.getLogger(__name__)
@@ -24,8 +25,10 @@ class AIAccountingDashboardView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        ua = self.request.user.agencias.filter(activo=True).first()
-        context["user_agencia"] = ua.agencia if ua else None
+        try:
+            context["user_agencia"] = get_agencia_from_request(self.request)
+        except Exception:
+            context["user_agencia"] = None
         return context
 
 
@@ -46,9 +49,7 @@ class AIAccountingChatView(InternalAPIAuthMixin, APIView):
             # Check Agency Context
             agencia = getattr(request, "agencia", None)
             if not agencia:
-                ua = request.user.agencias.filter(activo=True).first()
-                if ua:
-                    agencia = ua.agencia
+                agencia = get_agencia_from_request(request)
 
             if not agencia:
                 return Response(
@@ -80,9 +81,10 @@ class AIChatHTMXView(LoginRequiredMixin, View):
 
         agencia = getattr(request, "agencia", None)
         if not agencia:
-            ua = request.user.agencias.filter(activo=True).first()
-            if ua:
-                agencia = ua.agencia
+            try:
+                agencia = get_agencia_from_request(request)
+            except PermissionDenied:
+                logger.debug("AI chat: agencia no disponible para usuario %s", request.user.pk)
 
         if not agencia:
             return render(
@@ -131,9 +133,12 @@ class ResolveDiscrepancyAIView(InternalAPIAuthMixin, APIView):
 
         agencia = getattr(request, "agencia", None)
         if not agencia:
-            ua = request.user.agencias.filter(activo=True).first()
-            if ua:
-                agencia = ua.agencia
+            try:
+                agencia = get_agencia_from_request(request)
+            except PermissionDenied:
+                logger.debug(
+                    "AI reconciliation: agencia no disponible para usuario %s", request.user.pk
+                )
 
         if not agencia:
             return render(
@@ -183,9 +188,12 @@ class PropuestaTransaccionIAListCreateAPIView(InternalAPIAuthMixin, generics.Lis
     def get_queryset(self):
         agencia = getattr(self.request, "agencia", None)
         if not agencia:
-            ua = self.request.user.agencias.filter(activo=True).first()
-            if ua:
-                agencia = ua.agencia
+            try:
+                agencia = get_agencia_from_request(self.request)
+            except PermissionDenied:
+                logger.debug(
+                    "AI propuestas: agencia no disponible para usuario %s", self.request.user.pk
+                )
         if not agencia:
             return PropuestaTransaccionIA.objects.none()
         return PropuestaTransaccionIA.objects.filter(agencia=agencia)
@@ -193,9 +201,7 @@ class PropuestaTransaccionIAListCreateAPIView(InternalAPIAuthMixin, generics.Lis
     def perform_create(self, serializer):
         agencia = getattr(self.request, "agencia", None)
         if not agencia:
-            ua = self.request.user.agencias.filter(activo=True).first()
-            if ua:
-                agencia = ua.agencia
+            agencia = get_agencia_from_request(self.request)
         if not agencia:
             raise ValidationError("No tienes una agencia activa asociada.")
         serializer.save(agencia=agencia)
@@ -212,9 +218,7 @@ class ResolvePropuestaAPIView(InternalAPIAuthMixin, APIView):
         """
         agencia = getattr(request, "agencia", None)
         if not agencia:
-            ua = request.user.agencias.filter(activo=True).first()
-            if ua:
-                agencia = ua.agencia
+            agencia = get_agencia_from_request(request)
 
         if not agencia:
             return Response(
@@ -367,9 +371,12 @@ class AIAccountingProposalsPartialView(LoginRequiredMixin, View):
     def get(self, request):
         agencia = getattr(request, "agencia", None)
         if not agencia:
-            ua = request.user.agencias.filter(activo=True).first()
-            if ua:
-                agencia = ua.agencia
+            try:
+                agencia = get_agencia_from_request(request)
+            except PermissionDenied:
+                logger.debug(
+                    "AI propuestas panel: agencia no disponible para usuario %s", request.user.pk
+                )
 
         if not agencia:
             return HttpResponse("<div class='text-rose-400 text-xs'>Sin agencia activa</div>")
@@ -391,9 +398,12 @@ class AIAccountingResolveProposalHTMXView(LoginRequiredMixin, View):
     def post(self, request, pk, action):
         agencia = getattr(request, "agencia", None)
         if not agencia:
-            ua = request.user.agencias.filter(activo=True).first()
-            if ua:
-                agencia = ua.agencia
+            try:
+                agencia = get_agencia_from_request(request)
+            except PermissionDenied:
+                logger.debug(
+                    "AI aprobar propuesta: agencia no disponible para usuario %s", request.user.pk
+                )
 
         if not agencia:
             return HttpResponse(

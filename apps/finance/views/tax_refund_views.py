@@ -6,6 +6,7 @@ from django.shortcuts import get_object_or_404, render
 from django.views import View
 
 from apps.finance.models.tax_refund import TaxRefundOpportunity
+from core.api import get_agencia_from_request
 
 logger = logging.getLogger(__name__)
 
@@ -16,9 +17,8 @@ class TaxRefundDashboardView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         # 🛡️ ENGINE DE DETECCIÓN DE AGENCIA (REUTILIZADO)
         agencia = getattr(request.user, "agencia_activa", None)
-        if not agencia and hasattr(request.user, "agencias"):
-            ua = request.user.agencias.filter(activo=True).first()
-            agencia = ua.agencia if ua else None
+        if not agencia:
+            agencia = get_agencia_from_request(request)
 
         # Si sigue siendo None, verificamos si es freelancer
         if not agencia and hasattr(request.user, "perfil_freelancer"):

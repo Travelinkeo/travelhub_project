@@ -15,7 +15,7 @@ from django.utils import timezone
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
 
 from apps.crm.models import OportunidadViaje
-from core.api import AuditLog, HtmxResponseMixin, SaaSMixin
+from core.api import AuditLog, HtmxResponseMixin, SaaSMixin, get_agencia_from_request
 
 from .models import FeeVenta, ItemVenta, PagoVenta, Venta, VentaAuditFinding
 
@@ -405,8 +405,10 @@ class RevenueLeakDashboardView(BookingBaseMixin, ListView):
 
     def get_queryset(self):
         # Obtener la agencia activa del usuario logueado de forma segura
-        usuario_agencia = self.request.user.agencias.filter(activo=True).first()
-        agencia = usuario_agencia.agencia if usuario_agencia else None
+        try:
+            agencia = get_agencia_from_request(self.request)
+        except Exception:
+            agencia = None
 
         return (
             VentaAuditFinding.all_objects.filter(agencia=agencia)

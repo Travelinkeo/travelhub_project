@@ -10,6 +10,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
+from core.security import get_agencia_from_request
 from core.views.billing_views import PLAN_CONFIG
 
 
@@ -36,11 +37,10 @@ def change_plan(request):
         return Response({"error": "Plan inválido"}, status=400)
 
     try:
-        usuario_agencia = request.user.agencias.filter(activo=True).first()
-        if not usuario_agencia:
+        agencia = get_agencia_from_request(request)
+        if not agencia:
             return Response({"error": "No perteneces a ninguna agencia"}, status=404)
 
-        agencia = usuario_agencia.agencia
         plan_actual = agencia.plan
 
         # Verificar si ya tiene este plan
@@ -107,11 +107,10 @@ def preview_plan_change(request):
         return Response({"error": "Plan inválido"}, status=400)
 
     try:
-        usuario_agencia = request.user.agencias.filter(activo=True).first()
-        if not usuario_agencia:
+        agencia = get_agencia_from_request(request)
+        if not agencia:
             return Response({"error": "No perteneces a ninguna agencia"}, status=404)
 
-        agencia = usuario_agencia.agencia
         plan_actual = agencia.plan
 
         if not agencia.stripe_subscription_id:
@@ -175,11 +174,9 @@ def downgrade_to_free(request):
         return Response({"error": "Stripe no configurado"}, status=503)
 
     try:
-        usuario_agencia = request.user.agencias.filter(activo=True).first()
-        if not usuario_agencia:
+        agencia = get_agencia_from_request(request)
+        if not agencia:
             return Response({"error": "No perteneces a ninguna agencia"}, status=404)
-
-        agencia = usuario_agencia.agencia
 
         if agencia.plan == "FREE":
             return Response({"error": "Ya estás en el plan FREE"}, status=400)

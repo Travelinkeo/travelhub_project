@@ -11,6 +11,7 @@ from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 
 from apps.bookings.models import BoletoImportado
+from core.security import get_user_active_agency
 
 logger = logging.getLogger(__name__)
 
@@ -55,11 +56,7 @@ class ResendInboundWebhookView(View):
                 User.objects.filter(email=from_email).first()
                 or User.objects.filter(is_superuser=True).first()
             )
-            agencia = (
-                consultor.agencias.filter(activo=True).first().agencia
-                if hasattr(consultor, "agencias")
-                else None
-            )
+            agencia = get_user_active_agency(consultor)
 
             # Construir un pseudo-EML para que el servicio de extracción lo entienda mejor
             full_content = f"Subject: {subject}\nFrom: {from_email}\n\n{text_body or html_body}"
@@ -95,4 +92,4 @@ class ResendInboundWebhookView(View):
 
         except Exception as e:
             logger.error(f"🔥 Error procesando webhook de Resend: {str(e)}")
-            return HttpResponse(status=500)
+            return HttpResponse(status=200)

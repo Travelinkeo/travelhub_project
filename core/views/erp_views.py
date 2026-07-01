@@ -250,10 +250,9 @@ class BoletosImportarView(SaaSMixin, LoginRequiredMixin, TemplateView):
 
         # Fetch recent imported tickets
         qs = BoletoImportado.objects.all()
-        if not self.request.user.is_superuser and hasattr(self.request.user, "agencias"):
-            ua = self.request.user.agencias.filter(activo=True).first()
-            if ua:
-                qs = qs.filter(agencia=ua.agencia)
+        agencia = get_agencia_from_request(self.request)
+        if agencia:
+            qs = qs.filter(agencia=agencia)
 
         context["boletos"] = qs.order_by("-fecha_subida")[:20]  # Show last 20
 

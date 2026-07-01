@@ -19,6 +19,7 @@ from rest_framework.response import Response
 
 from apps.finance.services.stripe_service import StripeService
 from core.auth_helpers import internal_auth
+from core.security import get_agencia_from_request
 
 logger = logging.getLogger(__name__)
 
@@ -120,11 +121,10 @@ def get_plans(request):
 def get_current_subscription(request):
     """Obtiene la suscripción actual del usuario."""
     try:
-        usuario_agencia = request.user.agencias.filter(activo=True).first()
-        if not usuario_agencia:
+        agencia = get_agencia_from_request(request)
+        if not agencia:
             return Response({"error": "No perteneces a ninguna agencia"}, status=404)
 
-        agencia = usuario_agencia.agencia
         plan_info = PLAN_CONFIG.get(agencia.plan, PLAN_CONFIG["FREE"])
 
         return Response(
@@ -180,11 +180,10 @@ def create_checkout_session(request):
         return Response({"error": "Plan inválido"}, status=400)
 
     try:
-        usuario_agencia = request.user.agencias.filter(activo=True).first()
-        if not usuario_agencia:
+        agencia = get_agencia_from_request(request)
+        if not agencia:
             return Response({"error": "No perteneces a ninguna agencia"}, status=404)
 
-        agencia = usuario_agencia.agencia
         plan_config = PLAN_CONFIG[plan]
         price_id = plan_config["stripe_price_id"]
 
@@ -225,11 +224,9 @@ def create_portal_session(request):
         return Response({"error": "Stripe no configurado"}, status=503)
 
     try:
-        usuario_agencia = request.user.agencias.filter(activo=True).first()
-        if not usuario_agencia:
+        agencia = get_agencia_from_request(request)
+        if not agencia:
             return Response({"error": "No perteneces a ninguna agencia"}, status=404)
-
-        agencia = usuario_agencia.agencia
 
         if not agencia.stripe_customer_id:
             return Response({"error": "No eres cliente de Stripe aún"}, status=400)
@@ -286,11 +283,9 @@ def cancel_subscription(request):
         return Response({"error": "Stripe no configurado"}, status=503)
 
     try:
-        usuario_agencia = request.user.agencias.filter(activo=True).first()
-        if not usuario_agencia:
+        agencia = get_agencia_from_request(request)
+        if not agencia:
             return Response({"error": "No perteneces a ninguna agencia"}, status=404)
-
-        agencia = usuario_agencia.agencia
 
         if not agencia.stripe_subscription_id:
             return Response({"error": "No tienes suscripción activa"}, status=400)

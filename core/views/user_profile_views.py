@@ -24,8 +24,9 @@ class UserProfileView(LoginRequiredMixin, TemplateView):
         # Obtener agencia activa de forma robusta (compatibilidad multi-tenant y superusuarios)
         agencia = getattr(self.request, "agencia", None)
         if not agencia:
-            ua = user.agencias.filter(activo=True).first()
-            agencia = ua.agencia if ua else None
+            from core.security import get_agencia_from_request
+
+            agencia = get_agencia_from_request(self.request)
         if not agencia:
             if hasattr(user, "agencias_propias") and user.agencias_propias.exists():
                 agencia = user.agencias_propias.first()
@@ -76,8 +77,9 @@ class UserProfileView(LoginRequiredMixin, TemplateView):
         # 3. Agency Updates (Requires Agency)
         agencia = getattr(request, "agencia", None)
         if not agencia:
-            ua = user.agencias.filter(activo=True).first()
-            agencia = ua.agencia if ua else None
+            from core.security import get_agencia_from_request
+
+            agencia = get_agencia_from_request(request)
         if not agencia:
             if hasattr(user, "agencias_propias") and user.agencias_propias.exists():
                 agencia = user.agencias_propias.first()

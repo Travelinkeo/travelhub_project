@@ -1,5 +1,7 @@
 from django.core.exceptions import PermissionDenied
 
+from core.security import get_agencia_from_request
+
 
 class TenantViewSetMixin:
     """
@@ -15,12 +17,9 @@ class TenantViewSetMixin:
             return super().get_queryset()
 
         # Obtener la agencia activa del usuario desde la relación inversa
-        if hasattr(user, "agencias"):
-            usuario_agencia = user.agencias.filter(activo=True).first()
-            if usuario_agencia:
-                # El manager del modelo (AgenciaManager) ya debería filtrar,
-                # pero aquí lo hacemos explícito para mayor seguridad.
-                return super().get_queryset().filter(agencia=usuario_agencia.agencia)
+        agencia = get_agencia_from_request(self.request)
+        if agencia:
+            return super().get_queryset().filter(agencia=agencia)
 
         # Si no hay agencia activa, devolvemos un queryset vacío por seguridad.
         return super().get_queryset().none()
@@ -31,11 +30,10 @@ class TenantViewSetMixin:
         """
         user = self.request.user
         if not user.is_superuser:
-            if hasattr(user, "agencias"):
-                usuario_agencia = user.agencias.filter(activo=True).first()
-                if usuario_agencia:
-                    serializer.save(agencia=usuario_agencia.agencia)
-                    return
+            agencia = get_agencia_from_request(self.request)
+            if agencia:
+                serializer.save(agencia=agencia)
+                return
             raise PermissionDenied("No tienes una agencia activa asignada.")
 
         serializer.save()

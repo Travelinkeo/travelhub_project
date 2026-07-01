@@ -6,7 +6,7 @@ from django.utils import timezone
 from django.views.generic import DetailView, ListView, TemplateView
 
 from apps.bookings.models import ItemVenta, Proveedor
-from core.api import SaaSMixin
+from core.api import SaaSMixin, get_agencia_from_request
 
 
 class LiquidacionListView(LoginRequiredMixin, ListView):
@@ -36,14 +36,11 @@ class LiquidacionListView(LoginRequiredMixin, ListView):
         # Implementación manual de filtrado por Agencia (SaaS)
         user = self.request.user
         if not user.is_superuser:
-            # Intentar obtener la agencia activa del usuario
-            if hasattr(user, "agencias"):
-                usuario_agencia = user.agencias.filter(activo=True).first()
-                if usuario_agencia:
-                    # Filtramos por la agencia del proveedor (ya que el modelo Liquidación no tiene campo agencia directo)
-                    queryset = queryset.filter(proveedor__agencia=usuario_agencia.agencia)
-                else:
-                    return queryset.none()
+            agencia = get_agencia_from_request(self.request)
+            if agencia:
+                queryset = queryset.filter(proveedor__agencia=agencia)
+            else:
+                return queryset.none()
 
         q = self.request.GET.get("q")
         if q:

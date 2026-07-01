@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from apps.common.utils.celery_utils import safe_delay
 from apps.finance.models.reconciliacion import ReporteReconciliacion
 from apps.finance.tasks_reconciliation import conciliar_reporte_batch_task
+from core.api import get_agencia_from_request
 from core.auth_helpers import InternalAPIAuthMixin
 
 logger = logging.getLogger(__name__)
@@ -32,14 +33,7 @@ class ReporteProveedorUploadAPIView(InternalAPIAuthMixin, views.APIView):
             )
 
         # 1. BLINDAJE MULTI-TENANT : Identificar la Agencia del Usuario
-        user_agencia = request.user.agencias.filter(activo=True).first()
-        if not user_agencia:
-            return Response(
-                {"error": "Tu cuenta no está vinculada a ninguna agencia activa."},
-                status=status.HTTP_403_FORBIDDEN,
-            )
-
-        agencia = user_agencia.agencia
+        agencia = get_agencia_from_request(request)
 
         # 2. ALMACENAMIENTO SEGURO (Regla de la Mochila)
         # Guardamos el archivo físicamente (Cloudflare R2 en producción)

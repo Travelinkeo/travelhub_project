@@ -176,16 +176,15 @@ def dashboard_stats(request):
     inicio_semana = hoy - timedelta(days=hoy.weekday())
     inicio_mes = hoy.replace(day=1)
 
-    if request.user.is_superuser:
+    from core.security import get_agencia_from_request
+
+    agencia = get_agencia_from_request(request)
+    if agencia:
+        boletos_qs = BoletoImportado.objects.select_related("agencia", "venta_asociada").filter(
+            agencia=agencia
+        )
+    elif request.user.is_superuser:
         boletos_qs = BoletoImportado.objects.select_related("agencia", "venta_asociada").all()
-    elif hasattr(request.user, "agencias"):
-        ua = request.user.agencias.filter(activo=True).first()
-        if ua:
-            boletos_qs = BoletoImportado.objects.select_related("agencia", "venta_asociada").filter(
-                agencia=ua.agencia
-            )
-        else:
-            boletos_qs = BoletoImportado.objects.none()
     else:
         boletos_qs = BoletoImportado.objects.none()
 
@@ -196,12 +195,15 @@ def dashboard_stats(request):
     procesados_mes = boletos_qs.filter(
         fecha_subida__date__gte=inicio_mes, estado_parseo="COM"
     ).count()
+    procesados_total = boletos_qs.filter(estado_parseo="COM").count()
 
     pendientes = boletos_qs.filter(estado_parseo="PEN").count()
     errores = boletos_qs.filter(estado_parseo="ERR").count()
+    revision = boletos_qs.filter(estado_parseo="REV").count()
+    total = boletos_qs.count()
 
     top_aerolineas = list(
-        boletos_qs.filter(fecha_subida__date__gte=inicio_mes, estado_parseo="COM")
+        boletos_qs.filter(estado_parseo="COM")
         .values("aerolinea_emisora")
         .annotate(cantidad=Count("id_boleto_importado"))
         .order_by("-cantidad")[:5]
@@ -213,9 +215,12 @@ def dashboard_stats(request):
                 "hoy": procesados_hoy,
                 "semana": procesados_semana,
                 "mes": procesados_mes,
+                "total": procesados_total,
             },
             "pendientes": pendientes,
             "errores": errores,
+            "revision": revision,
+            "total": total,
             "top_aerolineas": top_aerolineas,
         }
     )
@@ -275,18 +280,15 @@ def dashboard_stats(request):
 @permission_classes([IsAuthenticated])
 def buscar(request):
     """Búsqueda avanzada de boletos"""
-    if request.user.is_superuser:
+    from core.security import get_agencia_from_request
+
+    agencia = get_agencia_from_request(request)
+    if agencia:
+        qs = BoletoImportado.objects.select_related("agencia", "venta_asociada").filter(
+            agencia=agencia
+        )
+    elif request.user.is_superuser:
         qs = BoletoImportado.objects.select_related("agencia", "venta_asociada").all()
-    elif hasattr(request.user, "agencias"):
-        ua = request.user.agencias.filter(activo=True).first()
-        if ua:
-            # Fix: Or query to include orphan boletos if we want everyone to see them,
-            # but usually they belong to an agency. For now, strict filter.
-            qs = BoletoImportado.objects.select_related("agencia", "venta_asociada").filter(
-                agencia=ua.agencia
-            )
-        else:
-            return Response([])
     else:
         return Response([])
 
@@ -343,19 +345,18 @@ def buscar(request):
 @permission_classes([IsAuthenticated])
 def reporte_comisiones(request):
     """Reporte de comisiones por aerolínea"""
+    from core.security import get_agencia_from_request
+
     fecha_inicio = request.GET.get("fecha_inicio")
     fecha_fin = request.GET.get("fecha_fin")
 
-    if request.user.is_superuser:
+    agencia = get_agencia_from_request(request)
+    if agencia:
+        qs = BoletoImportado.objects.select_related("agencia", "venta_asociada").filter(
+            agencia=agencia
+        )
+    elif request.user.is_superuser:
         qs = BoletoImportado.objects.select_related("agencia", "venta_asociada").all()
-    elif hasattr(request.user, "agencias"):
-        ua = request.user.agencias.filter(activo=True).first()
-        if ua:
-            qs = BoletoImportado.objects.select_related("agencia", "venta_asociada").filter(
-                agencia=ua.agencia
-            )
-        else:
-            return Response({"totales": {}, "por_aerolinea": []})
     else:
         return Response({"totales": {}, "por_aerolinea": []})
 

@@ -35,7 +35,9 @@ def _get_active_agencia(user):
         return None
 
     # 1. Buscar en relación UsuarioAgencia (SaaS / Staff)
-    ua = user.agencias.filter(activo=True).first()
+    from core.security import get_user_active_agency
+
+    ua = get_user_active_agency(user)
     if ua:
         return ua.agencia
 

@@ -5,6 +5,8 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from django.views import View
 
+from core.security import get_agencia_from_request
+
 logger = logging.getLogger(__name__)
 
 
@@ -12,8 +14,7 @@ class BrandingSettingsView(LoginRequiredMixin, View):
     template_name = "core/settings/branding.html"
 
     def _get_agencia(self, request):
-        ua = request.user.agencias.filter(activo=True).first()
-        return ua.agencia if ua else None
+        return get_agencia_from_request(request)
 
     def get(self, request, *args, **kwargs):
         return render(request, self.template_name)

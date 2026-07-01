@@ -28,6 +28,7 @@ from apps.automation.services.ticket_parser_service import TicketParserService
 from apps.automation.services.ticket_review_service import StudioFormData, TicketReviewService
 from apps.bookings.models import BoletoImportado
 from apps.crm.models import Cliente
+from core.security import get_agencia_from_request
 
 logger = logging.getLogger(__name__)
 
@@ -54,9 +55,7 @@ class UploadBoletoView(View):
         try:
             agencia = getattr(request, "agencia", None)
             if not agencia and request.user.is_authenticated:
-                ua = request.user.agencias.filter(activo=True).first()
-                if ua:
-                    agencia = ua.agencia
+                agencia = get_agencia_from_request(request)
 
             boleto_temp = BoletoImportado(
                 archivo_boleto=archivo,

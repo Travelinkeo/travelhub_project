@@ -18,6 +18,12 @@ django-axes==7.0.1
 django-crispy-forms==2.6
 crispy-bootstrap5==2026.3
 
+# OpenTelemetry (Trazabilidad distribuida)
+opentelemetry-api==1.27.0
+opentelemetry-sdk==1.27.0
+opentelemetry-exporter-otlp-proto-grpc==1.27.0
+opentelemetry-instrumentation-django==0.48b0
+
 # Async & Cache
 celery==5.5.3
 redis==5.0.1

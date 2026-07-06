@@ -7,11 +7,7 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 import dj_database_url
-import sentry_sdk
 from django.core.exceptions import ImproperlyConfigured
-from sentry_sdk.integrations.celery import CeleryIntegration
-from sentry_sdk.integrations.django import DjangoIntegration
-from sentry_sdk.integrations.redis import RedisIntegration
 
 from .settings_unfold import UNFOLD  # noqa: F401
 
@@ -96,18 +92,30 @@ SENTRY_DSN = env("SENTRY_DSN")
 SENTRY_ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
 SENTRY_RELEASE = os.getenv("GIT_SHA", "unknown")
 if SENTRY_DSN.startswith("http"):
-    sentry_sdk.init(
-        dsn=SENTRY_DSN,
-        environment=SENTRY_ENVIRONMENT,
-        release=SENTRY_RELEASE,
-        integrations=[
-            DjangoIntegration(),
-            CeleryIntegration(),
-            RedisIntegration(),
-        ],
-        traces_sample_rate=0.1 if not DEBUG else 0.5,
-        profiles_sample_rate=0.01,
-    )
+    # Inicializar Sentry de manera no bloqueante. En entornos de test/CI
+    # la conexión saliente puede colgarse si el host no es accesible.
+    import threading as _sentry_thread
+
+    def _init_sentry():
+        import sentry_sdk as _sdk
+        from sentry_sdk.integrations.celery import CeleryIntegration as _CeleryInt
+        from sentry_sdk.integrations.django import DjangoIntegration as _DjangoInt
+        from sentry_sdk.integrations.redis import RedisIntegration as _RedisInt
+
+        _sdk.init(
+            dsn=SENTRY_DSN,
+            environment=SENTRY_ENVIRONMENT,
+            release=SENTRY_RELEASE,
+            integrations=[
+                _DjangoInt(),
+                _CeleryInt(),
+                _RedisInt(),
+            ],
+            traces_sample_rate=0.1 if not DEBUG else 0.5,
+            profiles_sample_rate=0.01,
+        )
+
+    _sentry_thread.Thread(target=_init_sentry, daemon=True).start()
 
 
 INSTALLED_APPS = [
@@ -154,10 +162,12 @@ MIDDLEWARE = [
     "whitenoise.middleware.WhiteNoiseMiddleware",  # Servir estáticos en Render
     "django.contrib.sessions.middleware.SessionMiddleware",
     "corsheaders.middleware.CorsMiddleware",
+    "django.middleware.locale.LocaleMiddleware",  # i18n: detección de idioma
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "axes.middleware.AxesMiddleware",
+    "core.middleware_onboarding.OnboardingRedirectMiddleware",
     "core.middleware.MultiTenantDomainMiddleware",
     "core.middleware.ThreadLocalContextMiddleware",
     "core.middleware.SecurityHeadersMiddleware",
@@ -220,10 +230,24 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-LANGUAGE_CODE = "es-ve"
+LANGUAGE_CODE = "es"
 TIME_ZONE = "America/Caracas"
 USE_I18N = True
+USE_L10N = True
 USE_TZ = True
+
+# Idiomas soportados
+from django.utils.translation import gettext_lazy as _  # noqa: E402
+
+LANGUAGES = [
+    ("es", _("Español")),
+    ("en", _("English")),
+]
+
+# Directorio de traducciones
+LOCALE_PATHS = [
+    BASE_DIR / "locale",
+]
 
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
@@ -561,8 +585,14 @@ def _build_redis_url(host, port, password=None, db_num=0):
 
 
 # Celery Configuration - uses dedicated redis-celery
-CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", _build_redis_url(_redis_celery_host, _redis_celery_port, _redis_celery_password, 0))
-CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", _build_redis_url(_redis_celery_host, _redis_celery_port, _redis_celery_password, 0))
+CELERY_BROKER_URL = os.getenv(
+    "CELERY_BROKER_URL",
+    _build_redis_url(_redis_celery_host, _redis_celery_port, _redis_celery_password, 0),
+)
+CELERY_RESULT_BACKEND = os.getenv(
+    "CELERY_RESULT_BACKEND",
+    _build_redis_url(_redis_celery_host, _redis_celery_port, _redis_celery_password, 0),
+)
 CELERY_ACCEPT_CONTENT = ["application/json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
@@ -592,8 +622,14 @@ except ImportError:
 # --- CACHE CONFIGURATION ---
 # Django Cache + Sessions use dedicated redis-cache instance
 # DB 0 = cache, DB 1 = sessions
-_cache_url = os.getenv("REDIS_CACHE_URL", _build_redis_url(_redis_cache_host, _redis_cache_port, _redis_cache_password, 0))
-_session_url = os.getenv("REDIS_SESSIONS_URL", _build_redis_url(_redis_cache_host, _redis_cache_port, _redis_cache_password, 1))
+_cache_url = os.getenv(
+    "REDIS_CACHE_URL",
+    _build_redis_url(_redis_cache_host, _redis_cache_port, _redis_cache_password, 0),
+)
+_session_url = os.getenv(
+    "REDIS_SESSIONS_URL",
+    _build_redis_url(_redis_cache_host, _redis_cache_port, _redis_cache_password, 1),
+)
 
 if "redis://" in _cache_url:
     cache_options = {

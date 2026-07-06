@@ -1,11 +1,10 @@
+import logging
 import os
 import unittest.mock
 from decimal import Decimal
 
 import pytest
 from django.contrib.auth import get_user_model
-from django.db.backends.signals import connection_created
-from django.dispatch import receiver
 from rest_framework.test import APIClient
 
 from apps.bookings.models import Venta
@@ -25,44 +24,95 @@ except Exception:  # pragma: no cover
     # Si falla aquí, los tests fallarán luego con más contexto; evitamos romper import global.
     pass
 
+logger = logging.getLogger(__name__)
+
 
 def pytest_configure(config):
     """Override settings for tests globally."""
+    import os as _os
     import socket
 
     from django.conf import settings
 
     pg_available = False
-    for host in ["travelhub_db", "db", "localhost", "127.0.0.1"]:
-        try:
-            socket.gethostbyname(host)
-            # Try to connect to PostgreSQL
-            import psycopg2
+    # Intentar hosts: directo DB, luego pgbouncer, luego localhost
+    # NOTA: test_db solo existe en docker-compose.test.yml, no en red producción
+    hosts = ["travelhub_db", "pgbouncer", "localhost", "127.0.0.1"]
+    # Credenciales: probar primero las reales del entorno, luego defaults
+    creds = set()
+    db_user = _os.environ.get("DB_USER", "postgres")
+    db_pass = _os.environ.get("DB_PASSWORD", "")
+    if db_pass:
+        creds.add((db_user, db_pass))
+    creds.update([("postgres", "postgres"), ("travelhub", "travelhub")])
 
+    for host in hosts:
+        for user, password in creds:
             try:
-                conn = psycopg2.connect(
-                    host=host,
-                    port=5432,
-                    user="travelhub",
-                    password="travelhub",
-                    dbname="travelhub_test",
-                    connect_timeout=2,
-                )
-                conn.close()
-                pg_available = True
-                settings.DATABASES["default"]["HOST"] = host
-                settings.DATABASES["default"]["PORT"] = 5432
-                break
-            except Exception:
+                socket.gethostbyname(host)
+                import psycopg2
+
+                try:
+                    conn = psycopg2.connect(
+                        host=host,
+                        port=5432,
+                        user=user,
+                        password=password,
+                        dbname="travelhub_test",
+                        connect_timeout=2,
+                    )
+                    conn.close()
+                    pg_available = True
+                    settings.DATABASES["default"]["HOST"] = host
+                    settings.DATABASES["default"]["PORT"] = 5432
+                    settings.DATABASES["default"]["USER"] = user
+                    settings.DATABASES["default"]["PASSWORD"] = password
+                    break
+                except Exception:
+                    continue
+            except socket.gaierror:
                 continue
-        except socket.gaierror:
-            continue
+        if pg_available:
+            break
 
     if not pg_available:
-        raise RuntimeError(
-            "PostgreSQL not available for tests. Start test containers with: "
-            "docker compose -f docker-compose.test.yml up -d"
-        )
+        # Store flag; conftest session-scoped fixture will skip tests
+        config._pg_unavailable = True
+        return
+    else:
+        config._pg_unavailable = False
+        # Con --nomigrations la migración 0046 (pg_trgm) no se ejecuta.
+        # Forzamos pg_trgm en template1 para que toda nueva BD (incluyendo
+        # test_travelhub creada por pytest-django) herede la extensión.
+        _pg_created = False
+        try:
+            import psycopg2 as _pg_sdk
+
+            _host = settings.DATABASES["default"]["HOST"]
+            _port = settings.DATABASES["default"]["PORT"]
+            _user = settings.DATABASES["default"]["USER"]
+            _pass = settings.DATABASES["default"]["PASSWORD"]
+
+            for _db in ("template1", "travelhub_test"):
+                try:
+                    _c = _pg_sdk.connect(
+                        host=_host, port=_port, user=_user, password=_pass,
+                        dbname=_db, connect_timeout=5,
+                    )
+                    _c.autocommit = True
+                    with _c.cursor() as _cur:
+                        _cur.execute("CREATE EXTENSION IF NOT EXISTS pg_trgm")
+                    _c.close()
+                    _pg_created = True
+                except Exception:
+                    continue
+        except Exception:
+            pass
+
+        if not _pg_created:
+            import logging as _pg_log
+
+            _pg_log.getLogger(__name__).warning("No se pudo crear pg_trgm en template1/test DB")
 
     settings.CACHES = {
         "default": {
@@ -90,6 +140,16 @@ def pytest_configure(config):
         return org_execute_sql_flush(self, new_sql_list)
 
     BaseDatabaseOperations.execute_sql_flush = new_execute_sql_flush
+
+
+@pytest.fixture(autouse=True, scope="session")
+def _require_pg(request):
+    """Skip all tests when PostgreSQL is unavailable."""
+    if getattr(request.config, "_pg_unavailable", False):
+        pytest.skip(
+            "PostgreSQL not available for tests. "
+            "Start test containers with: docker compose -f docker-compose.test.yml up -d"
+        )
 
 
 @pytest.fixture(autouse=True)
@@ -348,13 +408,3 @@ def moneda_ves(db):
         codigo_iso="VES", defaults={"nombre": "Bolívares", "simbolo": "Bs"}
     )
     return moneda
-
-
-@receiver(connection_created)
-def enable_trigram_extension(sender, connection, **kwargs):
-    if connection.vendor == "postgresql":
-        with connection.cursor() as cursor:
-            try:
-                cursor.execute("CREATE EXTENSION IF NOT EXISTS pg_trgm;")
-            except Exception:
-                pass

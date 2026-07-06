@@ -5,11 +5,12 @@ from decimal import Decimal
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
-from django.db import models, transaction
+from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from core.api import AgenciaMixin, SoftDeleteModel
+from core.numeracion import generar_numero_secuencial
 
 # REFACTOR: Nuevos imports
 # from apps.crm.models import Cliente # REFACTOR: Usar string 'crm.Cliente'
@@ -24,8 +25,10 @@ logger = logging.getLogger(__name__)
 def generar_numero_factura_atomico(model_class, fecha_emision, prefix=None):
     """
     Genera un número de factura secuencial de forma atómica y serializada.
-    Usa bloqueos asesores transaccionales de PostgreSQL (pg_advisory_xact_lock)
-    para evitar condiciones de carrera incluso cuando no existen registros previos.
+
+    Usa la utilidad compartida `generar_numero_secuencial` que internamente
+    emplea pg_advisory_xact_lock de PostgreSQL para evitar condiciones de
+    carrera incluso cuando no existen registros previos.
 
     Args:
         model_class: La clase del modelo (Factura o FacturaConsolidada)
@@ -37,36 +40,7 @@ def generar_numero_factura_atomico(model_class, fecha_emision, prefix=None):
     """
     if prefix is None:
         prefix = f"F-{fecha_emision.strftime('%Y%m%d')}"
-
-    with transaction.atomic():
-        # 1. Adquirir un bloqueo asesor transaccional exclusivo para el prefijo de facturación
-        import hashlib
-
-        lock_id = int(hashlib.sha256(prefix.encode()).hexdigest()[:15], 16)
-        from django.db import connection
-
-        with connection.cursor() as cursor:
-            cursor.execute("SELECT pg_advisory_xact_lock(%s)", [lock_id])
-            cursor.fetchone()  # Consumir el cursor para forzar la adquisición del bloqueo
-
-        # 2. Ahora que está serializado, obtener el último número del día con lock de fila
-        ultimo = (
-            model_class.objects.select_for_update()
-            .filter(numero_factura__startswith=prefix)
-            .order_by("-numero_factura")
-            .first()
-        )
-
-        if ultimo:
-            try:
-                sufijo = int(ultimo.numero_factura.split("-")[-1])
-                nuevo_sufijo = sufijo + 1
-            except (ValueError, IndexError):
-                nuevo_sufijo = 1
-        else:
-            nuevo_sufijo = 1
-
-        return f"{prefix}-{nuevo_sufijo:04d}"
+    return generar_numero_secuencial(prefix, model_class=model_class, field_name="numero_factura")
 
 
 class Factura(AgenciaMixin, SoftDeleteModel, models.Model):

@@ -7,6 +7,7 @@ from django.utils.translation import gettext_lazy as _
 
 from apps.finance.models.currencies import Moneda
 from core.api import AgenciaMixin
+from core.numeracion import generar_numero_secuencial
 
 
 def validar_no_vacio_o_espacios(value):
@@ -97,28 +98,19 @@ class AsientoContable(AgenciaMixin, models.Model):
             #
             # 💻 EXPLICACIÓN PARA PROGRAMADORES (Technical Specs)
             # Para prevenir condiciones de carrera bajo concurrencia extrema (race conditions) y evitar
-            # colisiones de clave única `IntegrityError` en `numero_asiento`, implementamos Bloqueos
-            # Asesores Transaccionales a nivel de PostgreSQL (`pg_advisory_xact_lock`).
-            # Generamos una firma hash de 64 bits a partir del prefijo diario `AS-YYYYMMDD`, y obligamos a
-            # cualquier transacción concurrente a esperar en cola hasta que la transacción actual confirme (COMMIT)
-            # o aborte (ROLLBACK), asegurando un conteo lineal (`count + 1`) estrictamente serializable.
+            # colisiones de clave única `IntegrityError` en `numero_asiento`, implementamos la función
+            # `generar_numero_secuencial()` en `core.numeracion`, que usa `pg_advisory_xact_lock`
+            # de PostgreSQL. Generamos una firma hash de 64 bits a partir del prefijo diario `AS-YYYYMMDD`,
+            # y obligamos a cualquier transacción concurrente a esperar en cola hasta que la transacción
+            # actual confirme (COMMIT) o aborte (ROLLBACK), asegurando un conteo estrictamente serializable.
             # =========================================================================================
             # Generar correlativo de forma atómica y serializada
             prefix = f"AS-{self.fecha_contable.strftime('%Y%m%d')}"
-            import hashlib
-
-            from django.db import connection, transaction
-
-            with transaction.atomic():
-                # 1. Adquirir bloqueo asesor exclusivo para el prefijo de asientos de este día
-                lock_id = int(hashlib.sha256(prefix.encode()).hexdigest()[:15], 16)
-                with connection.cursor() as cursor:
-                    cursor.execute("SELECT pg_advisory_xact_lock(%s)", [lock_id])
-                    cursor.fetchone()
-
-                # 2. Obtener el conteo real y asignar el correlativo
-                count = self.__class__.objects.filter(fecha_contable=self.fecha_contable).count()
-                self.numero_asiento = f"{prefix}-{count + 1:04d}"
+            self.numero_asiento = generar_numero_secuencial(
+                prefix,
+                model_class=self.__class__,
+                field_name="numero_asiento",
+            )
         super().save(*args, **kwargs)
 
     def calcular_totales(self, commit=True):

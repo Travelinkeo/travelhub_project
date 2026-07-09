@@ -28,3 +28,7 @@ safety==3.2.9
 # --- Development Tools ---
 django-debug-toolbar==4.4.2   # Panel de queries SQL en desarrollo
 flower==2.0.1                  # Monitor de tareas Celery (UI en :5555)
+
+# --- Load Testing & Coverage ---
+locust==2.31.0
+pytest-cov==6.1.0

@@ -6,61 +6,81 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('communications', '0009_notifications_multi_channel'),
-        ('core', '0049_remove_apikey_agencia_remove_apikey_user_and_more'),
+        ("communications", "0009_notifications_multi_channel"),
+        ("core", "0049_remove_apikey_agencia_remove_apikey_user_and_more"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AlterUniqueTogether(
-            name='notificationpreference',
+            name="notificationpreference",
             unique_together=None,
         ),
         migrations.RemoveField(
-            model_name='notificationpreference',
-            name='agencia',
+            model_name="notificationpreference",
+            name="agencia",
         ),
         migrations.RemoveField(
-            model_name='notificationpreference',
-            name='user',
+            model_name="notificationpreference",
+            name="user",
         ),
         migrations.RemoveField(
-            model_name='notificationtemplate',
-            name='agencia',
+            model_name="notificationtemplate",
+            name="agencia",
         ),
         migrations.CreateModel(
-            name='PushSubscription',
+            name="PushSubscription",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('endpoint', models.URLField(max_length=512, unique=True)),
-                ('auth_key', models.CharField(max_length=128)),
-                ('p256dh_key', models.CharField(max_length=256)),
-                ('user_agent', models.CharField(blank=True, max_length=512)),
-                ('active', models.BooleanField(default=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('agencia', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='push_subscriptions', to='core.agencia')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='push_subscriptions', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                ("endpoint", models.URLField(max_length=512, unique=True)),
+                ("auth_key", models.CharField(max_length=128)),
+                ("p256dh_key", models.CharField(max_length=256)),
+                ("user_agent", models.CharField(blank=True, max_length=512)),
+                ("active", models.BooleanField(default=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "agencia",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="push_subscriptions",
+                        to="core.agencia",
+                    ),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="push_subscriptions",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Suscripción Push',
-                'verbose_name_plural': 'Suscripciones Push',
-                'db_table': 'communications_push_subscription',
+                "verbose_name": "Suscripción Push",
+                "verbose_name_plural": "Suscripciones Push",
+                "db_table": "communications_push_subscription",
             },
         ),
         migrations.DeleteModel(
-            name='NotificationLog',
+            name="NotificationLog",
         ),
         migrations.DeleteModel(
-            name='NotificationPreference',
+            name="NotificationPreference",
         ),
         migrations.DeleteModel(
-            name='NotificationTemplate',
+            name="NotificationTemplate",
         ),
         migrations.AddIndex(
-            model_name='pushsubscription',
-            index=models.Index(fields=['user', 'active'], name='communicati_user_id_2d0c7a_idx'),
+            model_name="pushsubscription",
+            index=models.Index(fields=["user", "active"], name="communicati_user_id_2d0c7a_idx"),
         ),
     ]

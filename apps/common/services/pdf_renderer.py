@@ -1,4 +1,3 @@
-import concurrent.futures
 import logging
 
 import requests
@@ -56,7 +55,6 @@ class PdfRendererService:
         response = session.post(GOTENBERG_URL, files=files, data=payload, timeout=(3.0, 5.0))
         response.raise_for_status()
         return response.content
-
 
     @staticmethod
     def _render_fallback(html_content: str) -> bytes:

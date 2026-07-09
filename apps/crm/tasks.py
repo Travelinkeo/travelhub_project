@@ -1,10 +1,13 @@
 import logging
+
 from celery import shared_task
 from django.utils import timezone
-from apps.crm.models import FreelancerProfile, ComisionFreelancer
+
+from apps.crm.models import ComisionFreelancer
 from apps.crm.services.freelancer_service import FreelancerService
 
 logger = logging.getLogger(__name__)
+
 
 @shared_task
 def liquidar_comisiones_mensual_task() -> str:
@@ -14,12 +17,10 @@ def liquidar_comisiones_mensual_task() -> str:
     """
     logger.info("Iniciando tarea de liquidación mensual de comisiones...")
     now = timezone.now()
-    
+
     # Obtener todas las comisiones no liquidadas de freelancers activos
     comisiones_pendientes = ComisionFreelancer.objects.filter(
-        liquidada=False,
-        freelancer__activo=True,
-        is_deleted=False
+        liquidada=False, freelancer__activo=True, is_deleted=False
     ).select_related("freelancer")
 
     count = comisiones_pendientes.count()

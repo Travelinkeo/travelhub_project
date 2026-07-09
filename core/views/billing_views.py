@@ -3,35 +3,30 @@ Vistas para facturación y gestión de planes SaaS con Stripe.
 """
 
 import logging
+
 from django.views.decorators.csrf import csrf_exempt
+
 try:
     import stripe
 except ImportError:
     stripe = None
-from drf_spectacular.utils import extend_schema
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny, IsAuthenticated
-from rest_framework.response import Response
-from core.auth_helpers import internal_auth
-from core.security import get_agencia_from_request
-
 import os
 
 from django.conf import settings
-
-try:
-    import stripe
-except ImportError:
-    stripe = None
-from django.views.decorators.csrf import csrf_exempt
 from drf_spectacular.utils import extend_schema
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
-from apps.finance.services.stripe_service import StripeService
 from core.auth_helpers import internal_auth
 from core.security import get_agencia_from_request
+
+try:
+    import stripe
+except ImportError:
+    stripe = None
+
+from apps.finance.services.stripe_service import StripeService
 
 logger = logging.getLogger(__name__)
 
@@ -317,274 +312,298 @@ def cancel_subscription(request):
         return Response({"error": str(e)}, status=500)
 
 
-PLAN_CONFIG = {
-    "FREE": {
-        "name": "Gratuito (Trial 30 d├¡as)",
-        "price": 0,
-        "stripe_price_id": None,
-        "usuarios": 1,
-        "ventas": 50,
-        "features": [
-            "1 usuario",
-            "50 ventas/mes",
-            "Funcionalidad b├ísica",
-            "Soporte por email",
-        ],
-    },
-    "BASIC": {
-        "name": "B├ísico",
-        "price": 29,
-        "stripe_price_id": os.getenv("STRIPE_PRICE_ID_BASIC", ""),
-        "usuarios": 3,
-        "ventas": 200,
-        "features": [
-            "3 usuarios",
-            "200 ventas/mes",
-            "Todas las funcionalidades",
-            "Soporte por email",
-            "Reportes b├ísicos",
-        ],
-    },
-    "PRO": {
-        "name": "Profesional",
-        "price": 99,
-        "stripe_price_id": os.getenv("STRIPE_PRICE_ID_PRO", ""),
-        "usuarios": 10,
-        "ventas": 1000,
-        "features": [
-            "10 usuarios",
-            "1000 ventas/mes",
-            "Todas las funcionalidades",
-            "Integraciones API",
-            "Reportes avanzados",
-            "Soporte prioritario",
-        ],
-    },
-    "ENTERPRISE": {
-        "name": "Enterprise",
-        "price": 299,
-        "stripe_price_id": os.getenv("STRIPE_PRICE_ID_ENTERPRISE", ""),
-        "usuarios": 999999,
-        "ventas": 999999,
-        "features": [
-            "Usuarios ilimitados",
-            "Ventas ilimitadas",
-            "Todas las funcionalidades",
-            "Servidor dedicado",
-            "Personalizaci├│n",
-            "Soporte 24/7",
-            "Onboarding personalizado",
-        ],
-    },
-}
-
-
+PLAN_CONFIG = {
+    "FREE": {
+        "name": "Gratuito (Trial 30 d├¡as)",
+        "price": 0,
+        "stripe_price_id": None,
+        "usuarios": 1,
+        "ventas": 50,
+        "features": [
+            "1 usuario",
+            "50 ventas/mes",
+            "Funcionalidad b├ísica",
+            "Soporte por email",
+        ],
+    },
+    "BASIC": {
+        "name": "B├ísico",
+        "price": 29,
+        "stripe_price_id": os.getenv("STRIPE_PRICE_ID_BASIC", ""),
+        "usuarios": 3,
+        "ventas": 200,
+        "features": [
+            "3 usuarios",
+            "200 ventas/mes",
+            "Todas las funcionalidades",
+            "Soporte por email",
+            "Reportes b├ísicos",
+        ],
+    },
+    "PRO": {
+        "name": "Profesional",
+        "price": 99,
+        "stripe_price_id": os.getenv("STRIPE_PRICE_ID_PRO", ""),
+        "usuarios": 10,
+        "ventas": 1000,
+        "features": [
+            "10 usuarios",
+            "1000 ventas/mes",
+            "Todas las funcionalidades",
+            "Integraciones API",
+            "Reportes avanzados",
+            "Soporte prioritario",
+        ],
+    },
+    "ENTERPRISE": {
+        "name": "Enterprise",
+        "price": 299,
+        "stripe_price_id": os.getenv("STRIPE_PRICE_ID_ENTERPRISE", ""),
+        "usuarios": 999999,
+        "ventas": 999999,
+        "features": [
+            "Usuarios ilimitados",
+            "Ventas ilimitadas",
+            "Todas las funcionalidades",
+            "Servidor dedicado",
+            "Personalizaci├│n",
+            "Soporte 24/7",
+            "Onboarding personalizado",
+        ],
+    },
+}
 
 
-@extend_schema(exclude=True)
-@api_view(["GET"])
-@permission_classes([AllowAny])
-def get_plans(request):
-    """Obtiene la lista de planes disponibles."""
-    return Response(
-        {
-            "plans": PLAN_CONFIG,
-            "stripe_available": _setup_stripe(),
-        }
-    )
-
-
-@extend_schema(exclude=True)
-@api_view(["GET"])
-@internal_auth
-@permission_classes([IsAuthenticated])
-def get_current_subscription(request):
-    """Obtiene la suscripci├│n actual del usuario."""
-    try:
-        agencia = get_agencia_from_request(request)
-        if not agencia:
-            return Response({"error": "No perteneces a ninguna agencia"}, status=404)
-
-        plan_info = PLAN_CONFIG.get(agencia.plan, PLAN_CONFIG["FREE"])
-
-        return Response(
-            {
-                "agencia": {
-                    "id": agencia.id,
-                    "nombre": agencia.nombre,
-                    "es_demo": agencia.es_demo,
-                },
-                "plan": {
-                    "code": agencia.plan,
-                    "name": plan_info["name"],
-                    "price": plan_info["price"],
-                    "features": plan_info["features"],
-                },
-                "usage": {
-                    "usuarios": {
-                        "usado": agencia.usuarios.filter(activo=True).count(),
-                        "limite": agencia.limite_usuarios,
-                    },
-                    "ventas": {
-                        "usado": agencia.ventas_mes_actual,
-                        "limite": agencia.limite_ventas_mes,
-                    },
-                },
-                "stripe": {
-                    "customer_id": agencia.stripe_customer_id,
-                    "subscription_id": agencia.stripe_subscription_id,
-                },
-                "dates": {
-                    "inicio_plan": agencia.fecha_inicio_plan,
-                    "fin_trial": agencia.fecha_fin_trial,
-                },
-            }
-        )
-    except Exception as e:
-        return Response({"error": str(e)}, status=500)
-
-
-@extend_schema(exclude=True)
-@api_view(["POST"])
-@internal_auth
-@permission_classes([IsAuthenticated])
-def create_checkout_session(request):
-    """Crea una sesi├│n de checkout de Stripe."""
-    if not _setup_stripe():
-        return Response(
-            {"error": "Stripe no est├í configurado. Contacta al administrador."}, status=503
-        )
-
-    plan = request.data.get("plan")
-    if plan not in PLAN_CONFIG or plan == "FREE":
-        return Response({"error": "Plan inv├ílido"}, status=400)
-
-    try:
-        agencia = get_agencia_from_request(request)
-        if not agencia:
-            return Response({"error": "No perteneces a ninguna agencia"}, status=404)
-
-        plan_config = PLAN_CONFIG[plan]
-        price_id = plan_config["stripe_price_id"]
-
-        if not price_id:
-            return Response(
-                {"error": "El plan seleccionado no tiene un ID de precio configurado"}, status=400
-            )
-
-        success_url = (
-            request.build_absolute_uri("/billing/success/") + "?session_id={CHECKOUT_SESSION_ID}"
-        )
-        cancel_url = request.build_absolute_uri("/billing/cancel/")
-
-        checkout_url = StripeService.create_checkout_session(
-            agencia=agencia, price_id=price_id, success_url=success_url, cancel_url=cancel_url
-        )
-
-        # Como StripeService retorna URL string (en mi impl, oops I returned session.url directly)
-        # Wait, StripeService.create_checkout_session returns session.url (string)
-
-        return Response(
-            {
-                "checkout_url": checkout_url,
-            }
-        )
-
-    except Exception as e:
-        return Response({"error": str(e)}, status=500)
-
-
-@extend_schema(exclude=True)
-@api_view(["POST"])
-@internal_auth
-@permission_classes([IsAuthenticated])
-def create_portal_session(request):
-    """Crea una sesi├│n del Portal de Clientes de Stripe."""
-    if not _setup_stripe():
-        return Response({"error": "Stripe no configurado"}, status=503)
-
-    try:
-        agencia = get_agencia_from_request(request)
-        if not agencia:
-            return Response({"error": "No perteneces a ninguna agencia"}, status=404)
-
-        if not agencia.stripe_customer_id:
-            return Response({"error": "No eres cliente de Stripe a├║n"}, status=400)
-
-        return_url = request.build_absolute_uri("/dashboard/modern/")  # O donde sea
-
-        portal_url = StripeService.create_portal_session(agencia, return_url)
-
-        return Response({"portal_url": portal_url})
-
-    except Exception as e:
-        return Response({"error": str(e)}, status=500)
-
-
-@extend_schema(exclude=True)
-@api_view(["POST"])
-@permission_classes([AllowAny])
-@csrf_exempt  # CSRF exempt: secured by Stripe signature verification below
-def stripe_webhook(request):
-    """Webhook para eventos de Stripe."""
-    if not _setup_stripe():
-        return Response({"error": "Stripe no configurado"}, status=503)
-
-    payload = request.body
-    sig_header = request.META.get("HTTP_STRIPE_SIGNATURE")
-    webhook_secret = os.getenv("STRIPE_WEBHOOK_SECRET", "")
-
-    try:
-        event = stripe.Webhook.construct_event(payload, sig_header, webhook_secret)
-    except ValueError:
-        return Response({"error": "Invalid payload"}, status=400)
-    except stripe.error.SignatureVerificationError:
-        return Response({"error": "Invalid signature"}, status=400)
-
-    try:
-        from core.middleware import system_context
-
-        with system_context():
-            StripeService.handle_webhook(event)
-    except Exception as e:
-        logger.error(f"Error handling webhook: {e}")
-        return Response({"error": str(e)}, status=500)
-
-    return Response({"status": "success"})
-
-
-@extend_schema(exclude=True)
-@api_view(["POST"])
-@internal_auth
-@permission_classes([IsAuthenticated])
-def cancel_subscription(request):
-    """Cancela la suscripci├│n actual."""
-    if not _setup_stripe():
-        return Response({"error": "Stripe no configurado"}, status=503)
-
-    try:
-        agencia = get_agencia_from_request(request)
-        if not agencia:
-            return Response({"error": "No perteneces a ninguna agencia"}, status=404)
-
-        if not agencia.stripe_subscription_id:
-            return Response({"error": "No tienes suscripci├│n activa"}, status=400)
-
-        # Cancelar en Stripe
-        stripe.Subscription.delete(agencia.stripe_subscription_id)
-
-        # Actualizar agencia
-        agencia.plan = "FREE"
-        agencia.stripe_subscription_id = ""
-        agencia.actualizar_limites_por_plan()
-        agencia.save()
-
-        return Response({"message": "Suscripci├│n cancelada exitosamente", "plan": "FREE"})
-
-    except Exception as e:
-        return Response({"error": str(e)}, status=500)
+@extend_schema(exclude=True)
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def get_plans(request):
+    """Obtiene la lista de planes disponibles."""
 
-from django.conf import settings
+    return Response(
+        {
+            "plans": PLAN_CONFIG,
+            "stripe_available": _setup_stripe(),
+        }
+    )
+
+
+@extend_schema(exclude=True)
+@api_view(["GET"])
+@internal_auth
+@permission_classes([IsAuthenticated])
+def get_current_subscription(request):
+    """Obtiene la suscripci├│n actual del usuario."""
+
+    try:
+        agencia = get_agencia_from_request(request)
+
+        if not agencia:
+            return Response({"error": "No perteneces a ninguna agencia"}, status=404)
+
+        plan_info = PLAN_CONFIG.get(agencia.plan, PLAN_CONFIG["FREE"])
+
+        return Response(
+            {
+                "agencia": {
+                    "id": agencia.id,
+                    "nombre": agencia.nombre,
+                    "es_demo": agencia.es_demo,
+                },
+                "plan": {
+                    "code": agencia.plan,
+                    "name": plan_info["name"],
+                    "price": plan_info["price"],
+                    "features": plan_info["features"],
+                },
+                "usage": {
+                    "usuarios": {
+                        "usado": agencia.usuarios.filter(activo=True).count(),
+                        "limite": agencia.limite_usuarios,
+                    },
+                    "ventas": {
+                        "usado": agencia.ventas_mes_actual,
+                        "limite": agencia.limite_ventas_mes,
+                    },
+                },
+                "stripe": {
+                    "customer_id": agencia.stripe_customer_id,
+                    "subscription_id": agencia.stripe_subscription_id,
+                },
+                "dates": {
+                    "inicio_plan": agencia.fecha_inicio_plan,
+                    "fin_trial": agencia.fecha_fin_trial,
+                },
+            }
+        )
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=500)
+
+
+@extend_schema(exclude=True)
+@api_view(["POST"])
+@internal_auth
+@permission_classes([IsAuthenticated])
+def create_checkout_session(request):
+    """Crea una sesi├│n de checkout de Stripe."""
+
+    if not _setup_stripe():
+        return Response(
+            {"error": "Stripe no est├í configurado. Contacta al administrador."}, status=503
+        )
+
+    plan = request.data.get("plan")
+
+    if plan not in PLAN_CONFIG or plan == "FREE":
+        return Response({"error": "Plan inv├ílido"}, status=400)
+
+    try:
+        agencia = get_agencia_from_request(request)
+
+        if not agencia:
+            return Response({"error": "No perteneces a ninguna agencia"}, status=404)
+
+        plan_config = PLAN_CONFIG[plan]
+
+        price_id = plan_config["stripe_price_id"]
+
+        if not price_id:
+            return Response(
+                {"error": "El plan seleccionado no tiene un ID de precio configurado"}, status=400
+            )
+
+        success_url = (
+            request.build_absolute_uri("/billing/success/") + "?session_id={CHECKOUT_SESSION_ID}"
+        )
+
+        cancel_url = request.build_absolute_uri("/billing/cancel/")
+
+        checkout_url = StripeService.create_checkout_session(
+            agencia=agencia, price_id=price_id, success_url=success_url, cancel_url=cancel_url
+        )
+
+        # Como StripeService retorna URL string (en mi impl, oops I returned session.url directly)
+
+        # Wait, StripeService.create_checkout_session returns session.url (string)
+
+        return Response(
+            {
+                "checkout_url": checkout_url,
+            }
+        )
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=500)
+
+
+@extend_schema(exclude=True)
+@api_view(["POST"])
+@internal_auth
+@permission_classes([IsAuthenticated])
+def create_portal_session(request):
+    """Crea una sesi├│n del Portal de Clientes de Stripe."""
+
+    if not _setup_stripe():
+        return Response({"error": "Stripe no configurado"}, status=503)
+
+    try:
+        agencia = get_agencia_from_request(request)
+
+        if not agencia:
+            return Response({"error": "No perteneces a ninguna agencia"}, status=404)
+
+        if not agencia.stripe_customer_id:
+            return Response({"error": "No eres cliente de Stripe a├║n"}, status=400)
+
+        return_url = request.build_absolute_uri("/dashboard/modern/")  # O donde sea
+
+        portal_url = StripeService.create_portal_session(agencia, return_url)
+
+        return Response({"portal_url": portal_url})
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=500)
+
+
+@extend_schema(exclude=True)
+@api_view(["POST"])
+@permission_classes([AllowAny])
+@csrf_exempt  # CSRF exempt: secured by Stripe signature verification below
+def stripe_webhook(request):
+    """Webhook para eventos de Stripe."""
+
+    if not _setup_stripe():
+        return Response({"error": "Stripe no configurado"}, status=503)
+
+    payload = request.body
+
+    sig_header = request.META.get("HTTP_STRIPE_SIGNATURE")
+
+    webhook_secret = os.getenv("STRIPE_WEBHOOK_SECRET", "")
+
+    try:
+        event = stripe.Webhook.construct_event(payload, sig_header, webhook_secret)
+
+    except ValueError:
+        return Response({"error": "Invalid payload"}, status=400)
+
+    except stripe.error.SignatureVerificationError:
+        return Response({"error": "Invalid signature"}, status=400)
+
+    try:
+        from core.middleware import system_context
+
+        with system_context():
+            StripeService.handle_webhook(event)
+
+    except Exception as e:
+        logger.error(f"Error handling webhook: {e}")
+
+        return Response({"error": str(e)}, status=500)
+
+    return Response({"status": "success"})
+
+
+@extend_schema(exclude=True)
+@api_view(["POST"])
+@internal_auth
+@permission_classes([IsAuthenticated])
+def cancel_subscription(request):
+    """Cancela la suscripci├│n actual."""
+
+    if not _setup_stripe():
+        return Response({"error": "Stripe no configurado"}, status=503)
+
+    try:
+        agencia = get_agencia_from_request(request)
+
+        if not agencia:
+            return Response({"error": "No perteneces a ninguna agencia"}, status=404)
+
+        if not agencia.stripe_subscription_id:
+            return Response({"error": "No tienes suscripci├│n activa"}, status=400)
+
+        # Cancelar en Stripe
+
+        stripe.Subscription.delete(agencia.stripe_subscription_id)
+
+        # Actualizar agencia
+
+        agencia.plan = "FREE"
+
+        agencia.stripe_subscription_id = ""
+
+        agencia.actualizar_limites_por_plan()
+
+        agencia.save()
+
+        return Response({"message": "Suscripci├│n cancelada exitosamente", "plan": "FREE"})
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=500)
+
+
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
 from django.urls import reverse
@@ -592,6 +611,7 @@ from django.utils.decorators import method_decorator
 from django.views import View
 
 from core.models.agencia import AgenciaConfiguracion
+
 
 @method_decorator(login_required, name="dispatch")
 class AccountBillingView(View):
@@ -730,4 +750,3 @@ class AccountBillingView(View):
                 }
             )
         return plans
-

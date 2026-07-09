@@ -343,7 +343,10 @@ class ItemFacturaConsolidada(models.Model):
     class TipoServicio(models.TextChoices):
         COMISION_INTERMEDIACION = "COMISION_INTERMEDIACION", _("Comisión Intermediación")
         TRANSPORTE_AEREO_NACIONAL = "TRANSPORTE_AEREO_NACIONAL", _("Transporte Aéreo Nacional")
-        TRANSPORTE_AEREO_INTERNACIONAL = "TRANSPORTE_AEREO_INTERNACIONAL", _("Transporte Aéreo Internacional")
+        TRANSPORTE_AEREO_INTERNACIONAL = (
+            "TRANSPORTE_AEREO_INTERNACIONAL",
+            _("Transporte Aéreo Internacional"),
+        )
         ALOJAMIENTO_Y_OTROS_GRAVADOS = (
             "ALOJAMIENTO_Y_OTROS_GRAVADOS",
             _("Alojamiento y Otros Gravados"),

@@ -114,7 +114,7 @@ def send_webhook_task(self, webhook_id: int, event_type: str, payload: dict):
         else:
             webhook.record_failure()
             logger.warning(
-                f"Webhook falló: {event_type} → {webhook.url} " f"(status={response.status_code})"
+                f"Webhook falló: {event_type} → {webhook.url} (status={response.status_code})"
             )
             # Reintentar en error de servidor
             if response.status_code >= 500:

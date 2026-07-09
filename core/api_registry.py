@@ -82,13 +82,14 @@ class AutoModelViewSet(InternalAPIAuthMixin, viewsets.ModelViewSet):
         """
         Endpoint para exportar los registros del tenant actual a Excel.
         """
-        import openpyxl
-        from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
-        from django.http import HttpResponse
         from datetime import datetime
 
+        import openpyxl
+        from django.http import HttpResponse
+        from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
+
         queryset = self.get_queryset()
-        
+
         # Limitar a 10,000 registros para evitar problemas de memoria
         if queryset.count() > 10000:
             queryset = queryset[:10000]
@@ -99,8 +100,7 @@ class AutoModelViewSet(InternalAPIAuthMixin, viewsets.ModelViewSet):
         fields = [
             f.name
             for f in model._meta.fields
-            if f.name
-            not in ("id", "agencia", "agency", "is_deleted", "deleted_at", "record_hash")
+            if f.name not in ("id", "agencia", "agency", "is_deleted", "deleted_at", "record_hash")
         ]
         headers = [f.replace("_", " ").title() for f in fields]
 
@@ -152,7 +152,9 @@ class AutoModelViewSet(InternalAPIAuthMixin, viewsets.ModelViewSet):
             max_length = max(
                 len(str(ws.cell(row=r, column=col).value or "")) for r in range(1, len(data) + 2)
             )
-            ws.column_dimensions[openpyxl.utils.get_column_letter(col)].width = min(max_length + 2, 50)
+            ws.column_dimensions[openpyxl.utils.get_column_letter(col)].width = min(
+                max_length + 2, 50
+            )
 
         ws.freeze_panes = "A2"
 
@@ -171,14 +173,16 @@ class AutoModelViewSet(InternalAPIAuthMixin, viewsets.ModelViewSet):
         """
         Endpoint para exportar los registros del tenant actual a PDF.
         """
-        from django.http import HttpResponse
-        from django.utils import timezone
-        from core.middleware import get_current_agency
-        from apps.common.services.pdf_renderer import PdfRendererService
         import html
 
+        from django.http import HttpResponse
+        from django.utils import timezone
+
+        from apps.common.services.pdf_renderer import PdfRendererService
+        from core.middleware import get_current_agency
+
         queryset = self.get_queryset()
-        
+
         # Limitar a 10,000 registros para evitar problemas de memoria
         if queryset.count() > 10000:
             queryset = queryset[:10000]
@@ -189,8 +193,7 @@ class AutoModelViewSet(InternalAPIAuthMixin, viewsets.ModelViewSet):
         fields = [
             f.name
             for f in model._meta.fields
-            if f.name
-            not in ("id", "agencia", "agency", "is_deleted", "deleted_at", "record_hash")
+            if f.name not in ("id", "agencia", "agency", "is_deleted", "deleted_at", "record_hash")
         ]
         headers = [f.replace("_", " ").title() for f in fields]
 
@@ -212,16 +215,16 @@ class AutoModelViewSet(InternalAPIAuthMixin, viewsets.ModelViewSet):
         # Obtener datos de la agencia para personalización multi-tenant
         agency = get_current_agency()
         agency_name = agency.nombre if agency else "TravelHub"
-        
+
         # Formatear la fecha actual
         date_str = timezone.localtime(timezone.now()).strftime("%d/%m/%Y %I:%M %p")
-        
+
         # Título y metadatos
         title = f"Reporte de {model_name}"
-        
+
         # Construir cabeceras
         headers_html = "".join(f"<th>{html.escape(str(h))}</th>" for h in headers)
-        
+
         # Construir filas
         rows_list = []
         for row in data:
@@ -333,7 +336,6 @@ class AutoModelViewSet(InternalAPIAuthMixin, viewsets.ModelViewSet):
         except Exception as e:
             logger.exception("Error al generar PDF de exportación")
             return HttpResponse(f"Error al generar reporte PDF: {str(e)}", status=500)
-
 
 
 def generate_api_for_model(model):

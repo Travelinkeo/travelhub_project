@@ -58,7 +58,9 @@ class LibroVentasViewSet(viewsets.ViewSet):
             return Response({"error": "Formato de fecha inválido. Use YYYY-MM-DD"}, status=400)
 
         # Generar libro de ventas
-        libro_ventas = LibroVentasService.generar_libro_ventas(fecha_inicio, fecha_fin, agencia=request.user.agencia)
+        libro_ventas = LibroVentasService.generar_libro_ventas(
+            fecha_inicio, fecha_fin, agencia=request.user.agencia
+        )
 
         if formato == "csv":
             # Exportar a CSV
@@ -102,7 +104,9 @@ class LibroVentasViewSet(viewsets.ViewSet):
             return Response({"error": "Mes o año inválido"}, status=400)
 
         # Generar libro de ventas
-        libro_ventas = LibroVentasService.generar_libro_ventas(fecha_inicio, fecha_fin, agencia=request.user.agencia)
+        libro_ventas = LibroVentasService.generar_libro_ventas(
+            fecha_inicio, fecha_fin, agencia=request.user.agencia
+        )
 
         # Retornar solo resumen
         return Response(

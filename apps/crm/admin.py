@@ -68,6 +68,7 @@ class ComisionFreelancerAdmin(SaaSAdminMixin, admin.ModelAdmin):
     @admin.action(description="Liquidar comisiones seleccionadas")
     def liquidar_comisiones(self, request, queryset):
         from django.utils import timezone
+
         from apps.crm.services.freelancer_service import FreelancerService
 
         no_liquidadas = queryset.filter(liquidada=False)

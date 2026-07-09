@@ -1,0 +1,27 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    environment: 'production'
+    app: 'travelhub'
+
+scrape_configs:
+  # Django App — métricas de Prometheus (django-prometheus)
+  - job_name: 'travelhub-django'
+    static_configs:
+      - targets: ['web:8000']
+    metrics_path: /health/metrics/
+    scrape_interval: 30s
+
+  # Nginx — métricas básicas de disponibilidad
+  - job_name: 'travelhub-nginx'
+    static_configs:
+      - targets: ['nginx:80']
+    metrics_path: /health/metrics/
+    scrape_interval: 60s
+
+  # Redis Cache
+  - job_name: 'redis-cache'
+    static_configs:
+      - targets: ['redis:6379']
+    scrape_interval: 30s

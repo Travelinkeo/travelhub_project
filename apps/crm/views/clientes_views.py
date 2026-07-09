@@ -4,8 +4,8 @@ from django.db.models import Q
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
 
-from apps.crm.models import Cliente
 from apps.common.mixins.export_mixin import ExportMixin
+from apps.crm.models import Cliente
 from core.api import HtmxResponseMixin, SaaSMixin
 
 
@@ -34,7 +34,6 @@ class ClienteListView(ExportMixin, HtmxResponseMixin, CRMBaseMixin, ListView):
         "ciudad__nombre",
     ]
     export_filename = "clientes"
-
 
     def get_queryset(self):
         queryset = (

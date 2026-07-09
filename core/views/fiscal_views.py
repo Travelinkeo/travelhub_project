@@ -1,13 +1,15 @@
 from datetime import datetime
+
 from django.http import HttpResponse
 from rest_framework import permissions, viewsets
+from rest_framework.authentication import SessionAuthentication, TokenAuthentication
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.authentication import SessionAuthentication, TokenAuthentication
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from apps.finance.services.libro_compras import LibroComprasService
 from apps.finance.services.retenciones_xml import RetencionesXMLService
+
 
 class LibroComprasViewSet(viewsets.ViewSet):
     """ViewSet para generar Libro de Compras"""
@@ -42,7 +44,9 @@ class LibroComprasViewSet(viewsets.ViewSet):
 
         # Generar libro de compras para la agencia del usuario
         agencia = request.user.agencia
-        libro_compras = LibroComprasService.generar_libro_compras(fecha_inicio, fecha_fin, agencia=agencia)
+        libro_compras = LibroComprasService.generar_libro_compras(
+            fecha_inicio, fecha_fin, agencia=agencia
+        )
 
         if formato == "csv":
             csv_content = LibroComprasService.exportar_csv(libro_compras)
@@ -84,9 +88,13 @@ class RetencionesXMLViewSet(viewsets.ViewSet):
             return Response({"error": "Formato de fecha inválido. Use YYYY-MM-DD"}, status=400)
 
         agencia = request.user.agencia
-        xml_content = RetencionesXMLService.generar_xml_retenciones(fecha_inicio, fecha_fin, agencia=agencia)
+        xml_content = RetencionesXMLService.generar_xml_retenciones(
+            fecha_inicio, fecha_fin, agencia=agencia
+        )
 
         response = HttpResponse(xml_content, content_type="application/xml; charset=utf-8")
-        filename = f"retenciones_islr_{agencia.rif or 'agencia'}_{fecha_inicio.strftime('%Y%m')}.xml"
+        filename = (
+            f"retenciones_islr_{agencia.rif or 'agencia'}_{fecha_inicio.strftime('%Y%m')}.xml"
+        )
         response["Content-Disposition"] = f'attachment; filename="{filename}"'
         return response

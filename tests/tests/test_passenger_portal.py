@@ -1,14 +1,16 @@
-import pytest
 from unittest.mock import patch
+
+import pytest
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client
 from django.urls import reverse
-from django.core.files.uploadedfile import SimpleUploadedFile
 
 from apps.bookings.models import Venta
 from apps.bookings.models.componentes import ServicioAdicionalDetalle
 from apps.bookings.services.itinerary_service import ItineraryCryptoService
 from apps.crm.models import Pasajero
-from core.models import Agencia, UsuarioAgencia
+from core.models import Agencia
+
 
 @pytest.mark.django_db(transaction=True)
 class TestPassengerPortal:
@@ -20,23 +22,18 @@ class TestPassengerPortal:
     @pytest.fixture(autouse=True)
     def setup_data(self):
         self.client = Client()
-        
+
         # 1. Crear Agencia
         self.agencia = Agencia.objects.create(nombre="Test Portal Agency")
-        
+
         # 2. Crear Venta
         self.venta = Venta.objects.create(
-            agencia=self.agencia,
-            localizador="WPYVSD",
-            total_venta=150.00
+            agencia=self.agencia, localizador="WPYVSD", total_venta=150.00
         )
-        
+
         # 3. Crear Pasajero y asociar
         self.pasajero = Pasajero.objects.create(
-            agencia=self.agencia,
-            nombres="MAURICIO",
-            apellidos="ISAZA",
-            numero_pasaporte=""
+            agencia=self.agencia, nombres="MAURICIO", apellidos="ISAZA", numero_pasaporte=""
         )
         self.venta.pasajeros.add(self.pasajero)
         self.venta.save()
@@ -74,13 +71,17 @@ class TestPassengerPortal:
         }
 
         url = reverse(
-            "bookings:public_itinerary_ocr_upload", 
-            kwargs={"token": self.token, "pasajero_id": self.pasajero.pk}
+            "bookings:public_itinerary_ocr_upload",
+            kwargs={"token": self.token, "pasajero_id": self.pasajero.pk},
         )
 
-        dummy_image = SimpleUploadedFile("passport.jpg", b"dummy_content", content_type="image/jpeg")
-        response = self.client.post(url, {"archivo": dummy_image}, HTTP_X_REQUESTED_WITH="XMLHttpRequest")
-        
+        dummy_image = SimpleUploadedFile(
+            "passport.jpg", b"dummy_content", content_type="image/jpeg"
+        )
+        response = self.client.post(
+            url, {"archivo": dummy_image}, HTTP_X_REQUESTED_WITH="XMLHttpRequest"
+        )
+
         assert response.status_code == 200
         assert b"Verificaci\xc3\xb3n de Pasaporte" in response.content
         assert b"134725801" in response.content
@@ -91,8 +92,8 @@ class TestPassengerPortal:
         Verifica que la confirmación de los datos actualiza los campos del modelo Pasajero.
         """
         url = reverse(
-            "bookings:public_itinerary_ocr_save", 
-            kwargs={"token": self.token, "pasajero_id": self.pasajero.pk}
+            "bookings:public_itinerary_ocr_save",
+            kwargs={"token": self.token, "pasajero_id": self.pasajero.pk},
         )
 
         post_data = {

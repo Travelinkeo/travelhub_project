@@ -168,11 +168,13 @@ class ExportMixin:
 
     def export_pdf(self, queryset):
         """Genera y retorna respuesta PDF con WeasyPrint/Gotenberg."""
-        from django.utils import timezone
-        from core.api import get_user_active_agency
-        from apps.common.services.pdf_renderer import PdfRendererService
         import html
         import logging
+
+        from django.utils import timezone
+
+        from apps.common.services.pdf_renderer import PdfRendererService
+        from core.api import get_user_active_agency
 
         local_logger = logging.getLogger(__name__)
 
@@ -183,16 +185,16 @@ class ExportMixin:
         # Obtener datos de la agencia para personalización multi-tenant
         agencia = get_user_active_agency(self.request.user)
         agency_name = agencia.nombre if agencia else "TravelHub"
-        
+
         # Formatear la fecha actual
         date_str = timezone.localtime(timezone.now()).strftime("%d/%m/%Y %I:%M %p")
-        
+
         # Título y metadatos
         title = f"Reporte de {self.export_filename.replace('_', ' ').title()}"
-        
+
         # Construir cabeceras
         headers_html = "".join(f"<th>{html.escape(str(h))}</th>" for h in headers)
-        
+
         # Construir filas
         rows_list = []
         for row in data:
@@ -326,4 +328,3 @@ class ExportMixin:
 
         # Si no hay export, continuar con la vista normal
         return super().get(request, *args, **kwargs)
-

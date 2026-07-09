@@ -1,15 +1,14 @@
-from django.contrib.auth import get_user_model
-from django.test import TestCase, Client
-from django.utils import timezone
 from decimal import Decimal
 
-from core.models.agencia import Agencia
+from django.contrib.auth import get_user_model
+from django.test import Client, TestCase
+
+from apps.bookings.models import Venta
 from apps.crm.models import Cliente
-from apps.bookings.models import Venta, BoletoImportado
 from apps.finance.models import Factura
 from apps.finance.models.currencies import Moneda
 from core.middleware import agency_context
-
+from core.models.agencia import Agencia
 
 User = get_user_model()
 
@@ -34,13 +33,13 @@ class GlobalExportsTenantIsolationTest(TestCase):
             username="admin_a",
             email="admin@agencia-a.com",
             password="password123",
-            agencia=self.agencia_a
+            agencia=self.agencia_a,
         )
         self.user_b = User.objects.create_user(
             username="admin_b",
             email="admin@agencia-b.com",
             password="password123",
-            agencia=self.agencia_b
+            agencia=self.agencia_b,
         )
 
         # 3. Crear Moneda
@@ -52,7 +51,7 @@ class GlobalExportsTenantIsolationTest(TestCase):
                 nombres="Cliente",
                 apellidos="De Agencia A",
                 email="cliente@agencia-a.com",
-                agencia=self.agencia_a
+                agencia=self.agencia_a,
             )
 
         with agency_context(self.agencia_b):
@@ -60,7 +59,7 @@ class GlobalExportsTenantIsolationTest(TestCase):
                 nombres="Cliente",
                 apellidos="De Agencia B",
                 email="cliente@agencia-b.com",
-                agencia=self.agencia_b
+                agencia=self.agencia_b,
             )
 
         # 5. Crear Ventas aisladas por Agencia
@@ -72,7 +71,7 @@ class GlobalExportsTenantIsolationTest(TestCase):
                 subtotal=Decimal("100.00"),
                 impuestos=Decimal("20.00"),
                 total_venta=Decimal("120.00"),
-                agencia=self.agencia_a
+                agencia=self.agencia_a,
             )
 
         with agency_context(self.agencia_b):
@@ -83,7 +82,7 @@ class GlobalExportsTenantIsolationTest(TestCase):
                 subtotal=Decimal("200.00"),
                 impuestos=Decimal("40.00"),
                 total_venta=Decimal("240.00"),
-                agencia=self.agencia_b
+                agencia=self.agencia_b,
             )
 
         # 6. Crear Facturas aisladas por Agencia
@@ -96,7 +95,7 @@ class GlobalExportsTenantIsolationTest(TestCase):
                 subtotal=Decimal("100.00"),
                 monto_impuestos=Decimal("20.00"),
                 monto_total=Decimal("120.00"),
-                agencia=self.agencia_a
+                agencia=self.agencia_a,
             )
 
         with agency_context(self.agencia_b):
@@ -108,7 +107,7 @@ class GlobalExportsTenantIsolationTest(TestCase):
                 subtotal=Decimal("200.00"),
                 monto_impuestos=Decimal("40.00"),
                 monto_total=Decimal("240.00"),
-                agencia=self.agencia_b
+                agencia=self.agencia_b,
             )
 
         # 7. Clientes de testeo
@@ -118,17 +117,22 @@ class GlobalExportsTenantIsolationTest(TestCase):
     def test_facturas_export_excel_isolation(self):
         """Verifica que al exportar Facturas a Excel se respete el multi-tenant."""
         self.client_a.force_login(self.user_a)
-        
+
         response = self.client_a.get("/finance/invoices/?export=excel")
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response["Content-Type"], "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-        
+        self.assertEqual(
+            response["Content-Type"],
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+
         # Para verificar que no hay fugas, podemos leer el contenido de Excel en memoria
-        import openpyxl
         from io import BytesIO
+
+        import openpyxl
+
         wb = openpyxl.load_workbook(BytesIO(response.content))
         ws = wb.active
-        
+
         # Buscar en las celdas
         sheet_text = ""
         for row in ws.iter_rows(values_only=True):
@@ -140,26 +144,31 @@ class GlobalExportsTenantIsolationTest(TestCase):
     def test_ventas_export_pdf_isolation(self):
         """Verifica que al exportar Ventas a PDF se respete el multi-tenant."""
         self.client_a.force_login(self.user_a)
-        
+
         response = self.client_a.get("/bookings/ventas/?export=pdf")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response["Content-Type"], "application/pdf")
-        
+
         self.assertTrue(len(response.content) > 0)
 
     def test_clientes_export_excel_isolation(self):
         """Verifica que al exportar Clientes a Excel se respete el multi-tenant."""
         self.client_a.force_login(self.user_a)
-        
+
         response = self.client_a.get("/crm/clientes/?export=excel")
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response["Content-Type"], "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-        
-        import openpyxl
+        self.assertEqual(
+            response["Content-Type"],
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+
         from io import BytesIO
+
+        import openpyxl
+
         wb = openpyxl.load_workbook(BytesIO(response.content))
         ws = wb.active
-        
+
         sheet_text = ""
         for row in ws.iter_rows(values_only=True):
             sheet_text += " ".join(str(cell) for cell in row if cell is not None)

@@ -11,9 +11,8 @@ http:
       rule: "Host(`travelhub.cc`) || HostRegexp(`{subdomain:[a-z0-9-]+}.travelhub.cc`)"
       entryPoints:
         - web
-      middlewares:
-        - redirect-https
       service: travelhub
+
 
   services:
     travelhub:

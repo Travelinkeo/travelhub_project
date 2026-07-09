@@ -183,6 +183,16 @@ class VentaService:
         except Exception as e:
             logger.debug(f"VentaService: In-app notification omitted for Venta {venta.pk}: {e}")
 
+        # 6. Freelancer Commission Split
+        try:
+            from apps.crm.services.freelancer_service import FreelancerService
+
+            FreelancerService.calculate_commission(venta)
+        except Exception as e:
+            logger.warning(
+                f"VentaService: Freelancer commission split calculation failed for Venta {venta.pk}: {e}"
+            )
+
     @staticmethod
     def update_circuit_days(circuito_dia):
         """

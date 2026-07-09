@@ -13,7 +13,7 @@ from apps.finance.models.reconciliacion import (
     LineaReporteReconciliacion,
     ReporteReconciliacion,
 )
-from core.models import Agencia
+from core.models import Agencia, UsuarioAgencia
 
 User = get_user_model()
 
@@ -31,6 +31,7 @@ class TestReportListView:
         )
         self.user.agencia = self.agencia
         self.user.save()
+        UsuarioAgencia.objects.create(usuario=self.user, agencia=self.agencia, rol="admin", activo=True)
 
     def test_list_view_requires_login(self):
         response = self.client.get(reverse("finance:reconciliacion_dashboard_htmx"))
@@ -71,6 +72,7 @@ class TestReconciliationDetailView:
         )
         self.user.agencia = self.agencia
         self.user.save()
+        UsuarioAgencia.objects.create(usuario=self.user, agencia=self.agencia, rol="admin", activo=True)
 
         self.reporte = ReporteReconciliacion.objects.create(
             agencia=self.agencia, proveedor="KIU", estado="CON_DISCREPANCIAS"
@@ -222,3 +224,46 @@ class TestLineaReporteReconciliacionModel:
         )
         assert "7258019382" in str(linea)
         assert "150.00" in str(linea)
+
+
+from unittest.mock import patch
+
+@pytest.mark.django_db(transaction=True)
+class TestReconciliationAsync:
+    """Tests para los flujos asíncronos de conciliación y sus vistas"""
+
+    @pytest.fixture(autouse=True)
+    def setup_data(self):
+        self.client = Client()
+        self.agencia = Agencia.objects.create(nombre="Test Agency")
+        self.user = User.objects.create_user(
+            username="testuser_async", email="test@agency.com", password="testpass123", is_staff=True
+        )
+        self.user.agencia = self.agencia
+        self.user.save()
+        UsuarioAgencia.objects.create(usuario=self.user, agencia=self.agencia, rol="admin", activo=True)
+        self.client.force_login(self.user)
+
+        self.reporte = ReporteReconciliacion.objects.create(
+            agencia=self.agencia, proveedor="KIU", estado="PENDIENTE"
+        )
+
+    @patch("apps.finance.tasks_reconciliation.conciliar_reporte_batch_task.delay")
+    def test_process_reconciliacion_htmx_view_starts_task(self, mock_delay):
+        response = self.client.get(
+            reverse("finance:reconciliacion_process", kwargs={"pk": self.reporte.pk})
+        )
+        # Debería redirigir al detalle
+        assert response.status_code == 302
+        assert response.url == reverse("finance:reconciliacion_detail", kwargs={"pk": self.reporte.pk})
+
+        # El estado debería ser PROCESANDO
+        self.reporte.refresh_from_db()
+        assert self.reporte.estado == "PROCESANDO"
+
+        # Debería haber encolado el task de Celery con los argumentos correctos
+        mock_delay.assert_called_once_with(
+            reporte_id=str(self.reporte.pk),
+            agencia_id=self.agencia.pk
+        )
+

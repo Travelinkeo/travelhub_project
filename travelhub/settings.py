@@ -561,20 +561,47 @@ GOOGLE_PLACES_API_KEY = env(
 # - redis-celery: Celery broker/results (DB 0)
 # - redis-evolution: Evolution API cache (DB 0)
 
+# Try to extract a default Redis host and auth from REDIS_URL or CELERY_BROKER_URL
+_redis_url_env = os.getenv("REDIS_URL") or os.getenv("CELERY_BROKER_URL")
+_default_redis_host = None
+_default_redis_password = None
+_default_redis_port = None
+if _redis_url_env:
+    try:
+        from urllib.parse import urlparse
+        _parsed = urlparse(_redis_url_env)
+        if _parsed.hostname:
+            _default_redis_host = _parsed.hostname
+        if _parsed.port:
+            _default_redis_port = str(_parsed.port)
+        if _parsed.password:
+            _default_redis_password = _parsed.password
+    except Exception:
+        pass
+
 # Cache Redis (Django cache + Sessions)
-_redis_cache_password = os.getenv("REDIS_CACHE_PASSWORD", os.getenv("REDIS_PASSWORD", None))
-_redis_cache_host = os.getenv("REDIS_CACHE_HOST", "redis-cache")
-_redis_cache_port = os.getenv("REDIS_CACHE_PORT", "6379")
+_redis_cache_password = os.getenv(
+    "REDIS_CACHE_PASSWORD",
+    _default_redis_password if _redis_url_env else os.getenv("REDIS_PASSWORD", None)
+)
+_redis_cache_host = os.getenv("REDIS_CACHE_HOST", _default_redis_host or "redis-cache")
+_redis_cache_port = os.getenv("REDIS_CACHE_PORT", _default_redis_port or "6379")
 
 # Celery Redis (Broker + Results)
-_redis_celery_password = os.getenv("REDIS_CELERY_PASSWORD", os.getenv("REDIS_PASSWORD", None))
-_redis_celery_host = os.getenv("REDIS_CELERY_HOST", "redis-celery")
-_redis_celery_port = os.getenv("REDIS_CELERY_PORT", "6379")
+_redis_celery_password = os.getenv(
+    "REDIS_CELERY_PASSWORD",
+    _default_redis_password if _redis_url_env else os.getenv("REDIS_PASSWORD", None)
+)
+_redis_celery_host = os.getenv("REDIS_CELERY_HOST", _default_redis_host or "redis-celery")
+_redis_celery_port = os.getenv("REDIS_CELERY_PORT", _default_redis_port or "6379")
 
 # Evolution Redis (WhatsApp cache)
-_redis_evolution_password = os.getenv("REDIS_EVOLUTION_PASSWORD", os.getenv("REDIS_PASSWORD", None))
-_redis_evolution_host = os.getenv("REDIS_EVOLUTION_HOST", "redis-evolution")
-_redis_evolution_port = os.getenv("REDIS_EVOLUTION_PORT", "6379")
+_redis_evolution_password = os.getenv(
+    "REDIS_EVOLUTION_PASSWORD",
+    _default_redis_password if _redis_url_env else os.getenv("REDIS_PASSWORD", None)
+)
+_redis_evolution_host = os.getenv("REDIS_EVOLUTION_HOST", _default_redis_host or "redis-evolution")
+_redis_evolution_port = os.getenv("REDIS_EVOLUTION_PORT", _default_redis_port or "6379")
 
 
 def _build_redis_url(host, port, password=None, db_num=0):
@@ -722,6 +749,21 @@ SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
 MAGIC_LINK_BASE_URL = os.getenv("MAGIC_LINK_BASE_URL", "")  # Auto-detect from request if empty
 FRONTEND_URL = os.getenv("FRONTEND_URL", MAGIC_LINK_BASE_URL or "http://localhost:8000")
 
+# --- Live Chat (Tawk.to) ---
+# Obtén tu Property ID en https://dashboard.tawk.to → Administration → Property Settings
+# Formato: "<property_id>/<widget_id>"  Ejemplo: "6123abcd12345/1fd3210"
+# Dejar vacío para deshabilitar el widget.
+LIVE_CHAT_ID = os.getenv("LIVE_CHAT_ID", "")
+
+# Suprime warnings conocidos sin impacto funcional
+SILENCED_SYSTEM_CHECKS = [
+    "urls.W005",    # Falso positivo: django.conf.urls.i18n declara app_name='i18n' internamente
+    "fields.W342",  # Pre-existente: LinkDePago.venta usa ForeignKey(unique=True) en vez de OneToOneField
+]
+
+
+
+
 # --- JWT Config ---
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
@@ -761,7 +803,9 @@ SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 SECURE_REDIRECT_EXEMPT = [r"^health/$", r"^health$"]
 
 if not DEBUG:
-    SECURE_SSL_REDIRECT = True
+    # SSL redirect controlado por env var (default False para acceso directo a puerto 8000)
+    # Poner SECURE_SSL_REDIRECT=True en docker-compose si hay proxy (Traefik/Nginx) con SSL
+    SECURE_SSL_REDIRECT = env.bool("SECURE_SSL_REDIRECT", False)
 
     # HSTS: Decirle al browser que SOLO use HTTPS por 1 año
     SECURE_HSTS_SECONDS = 31536000  # 1 año

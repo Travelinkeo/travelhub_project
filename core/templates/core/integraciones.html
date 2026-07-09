@@ -1,0 +1,405 @@
+{% extends "base_modern.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Integraciones" %} - TravelHub{% endblock %}
+{% block page_title %}{% trans "Integraciones" %}{% endblock %}
+{% block page_subtitle %}{% trans "API Keys, Webhooks y Notificaciones" %}{% endblock %}
+
+{% block content %}
+<div class="p-4 md:p-6 max-w-7xl mx-auto" x-data="integracionesApp()">
+
+    <!-- Tabs -->
+    <div class="flex gap-1 bg-surface-1 border border-border-color rounded-xl p-1 overflow-x-auto mb-6">
+        <button @click="activeTab = 'apikeys'"
+            :class="activeTab === 'apikeys' ? 'bg-primary text-white' : 'text-text-muted hover:bg-surface-2'"
+            class="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-bold transition-all whitespace-nowrap">
+            <span class="material-symbols-outlined text-[18px]">vpn_key</span>
+            {% trans "API Keys" %}
+            <span x-show="apiKeys.length > 0" x-text="apiKeys.length" class="bg-white/20 px-1.5 py-0.5 rounded-full text-[10px]"></span>
+        </button>
+        <button @click="activeTab = 'webhooks'"
+            :class="activeTab === 'webhooks' ? 'bg-primary text-white' : 'text-text-muted hover:bg-surface-2'"
+            class="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-bold transition-all whitespace-nowrap">
+            <span class="material-symbols-outlined text-[18px]">webhook</span>
+            {% trans "Webhooks" %}
+            <span x-show="webhooks.length > 0" x-text="webhooks.length" class="bg-white/20 px-1.5 py-0.5 rounded-full text-[10px]"></span>
+        </button>
+        <button @click="activeTab = 'notifications'"
+            :class="activeTab === 'notifications' ? 'bg-primary text-white' : 'text-text-muted hover:bg-surface-2'"
+            class="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-bold transition-all whitespace-nowrap">
+            <span class="material-symbols-outlined text-[18px]">notifications</span>
+            {% trans "Notificaciones" %}
+        </button>
+    </div>
+
+    <!-- ═══════════ API KEYS ═══════════ -->
+    <div x-show="activeTab === 'apikeys'" x-transition>
+        <div class="bg-surface-1 border border-border-color rounded-2xl p-6">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h3 class="text-lg font-bold text-text-main">{% trans "API Keys" %}</h3>
+                    <p class="text-sm text-text-muted mt-1">{% trans "Gestiona las claves de acceso a la API de TravelHub" %}</p>
+                </div>
+                <button @click="showCreateApiKey = true"
+                    class="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-xl text-sm font-bold hover:opacity-90 transition-all">
+                    <span class="material-symbols-outlined text-[16px]">add</span>
+                    {% trans "Crear API Key" %}
+                </button>
+            </div>
+
+            <!-- Create Form -->
+            <div x-show="showCreateApiKey" x-transition class="mb-6 bg-surface-2 rounded-xl p-4">
+                <h4 class="text-sm font-bold text-text-main mb-3">{% trans "Nueva API Key" %}</h4>
+                <div class="flex gap-3 items-end">
+                    <div class="flex-1">
+                        <label class="text-xs text-text-muted mb-1 block">{% trans "Nombre" %}</label>
+                        <input type="text" x-model="newKeyName" class="w-full bg-surface-base border border-border-color rounded-lg px-3 py-2 text-sm text-text-main" placeholder="Mi Integración">
+                    </div>
+                    <div class="w-40">
+                        <label class="text-xs text-text-muted mb-1 block">{% trans "Plan" %}</label>
+                        <select x-model="newKeyPlan" class="w-full bg-surface-base border border-border-color rounded-lg px-3 py-2 text-sm text-text-main">
+                            <option value="trial">Trial (100/h)</option>
+                            <option value="basico">Básico (1K/h)</option>
+                            <option value="profesional">Pro (5K/h)</option>
+                            <option value="enterprise">Enterprise (50K/h)</option>
+                        </select>
+                    </div>
+                    <button @click="createApiKey()" class="bg-primary text-white px-4 py-2 rounded-lg text-sm font-bold hover:opacity-90">{% trans "Crear" %}</button>
+                    <button @click="showCreateApiKey = false" class="text-text-muted hover:text-text-main text-sm">{% trans "Cancelar" %}</button>
+                </div>
+            </div>
+
+            <!-- Created Key Alert -->
+            <div x-show="createdKey" x-transition class="mb-6 bg-green-500/10 border border-green-500/30 rounded-xl p-4">
+                <div class="flex items-start gap-3">
+                    <span class="material-symbols-outlined text-green-400">check_circle</span>
+                    <div class="flex-1">
+                        <p class="text-sm font-bold text-green-300">{% trans "API Key creada exitosamente" %}</p>
+                        <p class="text-xs text-green-400/70 mt-1">{% trans "Cópiala ahora — no se mostrará de nuevo:" %}</p>
+                        <code class="block mt-2 bg-green-500/20 p-2 rounded text-xs text-green-300 font-mono break-all" x-text="createdKey"></code>
+                    </div>
+                    <button @click="createdKey = null" class="text-green-400 hover:text-green-300">✕</button>
+                </div>
+            </div>
+
+            <!-- API Keys Table -->
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="border-b border-border-color">
+                            <th class="text-left py-3 px-4 text-text-muted font-bold text-xs uppercase">{% trans "Nombre" %}</th>
+                            <th class="text-left py-3 px-4 text-text-muted font-bold text-xs uppercase">{% trans "Plan" %}</th>
+                            <th class="text-left py-3 px-4 text-text-muted font-bold text-xs uppercase">{% trans "Key" %}</th>
+                            <th class="text-left py-3 px-4 text-text-muted font-bold text-xs uppercase">{% trans "Estado" %}</th>
+                            <th class="text-right py-3 px-4 text-text-muted font-bold text-xs uppercase">{% trans "Acciones" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template x-for="key in apiKeys" :key="key.id">
+                            <tr class="border-b border-border-color/50 hover:bg-surface-2/50">
+                                <td class="py-3 px-4 font-bold text-text-main" x-text="key.name"></td>
+                                <td class="py-3 px-4"><span class="px-2 py-1 bg-primary/10 text-primary rounded-full text-xs font-bold" x-text="key.plan"></span></td>
+                                <td class="py-3 px-4 font-mono text-xs text-text-muted" x-text="key.key_preview + '...'"></td>
+                                <td class="py-3 px-4">
+                                    <span :class="key.is_active ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'"
+                                        class="px-2 py-1 rounded-full text-xs font-bold" x-text="key.is_active ? '{% trans "Activa" %}' : '{% trans "Revocada" %}'"></span>
+                                </td>
+                                <td class="py-3 px-4 text-right">
+                                    <button x-show="key.is_active" @click="revokeApiKey(key.id)"
+                                        class="text-red-400 hover:text-red-300 text-xs font-bold">{% trans "Revocar" %}</button>
+                                </td>
+                            </tr>
+                        </template>
+                        <tr x-show="apiKeys.length === 0">
+                            <td colspan="5" class="py-8 text-center text-text-muted">
+                                <span class="material-symbols-outlined text-[32px] text-text-muted/50">vpn_key</span>
+                                <p class="mt-2 text-sm">{% trans "Crea tu primera API Key para empezar a integrar" %}</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════ WEBHOOKS ═══════════ -->
+    <div x-show="activeTab === 'webhooks'" x-transition>
+        <div class="bg-surface-1 border border-border-color rounded-2xl p-6">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h3 class="text-lg font-bold text-text-main">{% trans "Webhooks" %}</h3>
+                    <p class="text-sm text-text-muted mt-1">{% trans "Recibe notificaciones cuando ocurran eventos" %}</p>
+                </div>
+                <button @click="showCreateWebhook = true"
+                    class="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-xl text-sm font-bold hover:opacity-90 transition-all">
+                    <span class="material-symbols-outlined text-[16px]">add</span>
+                    {% trans "Crear Webhook" %}
+                </button>
+            </div>
+
+            <!-- Create Form -->
+            <div x-show="showCreateWebhook" x-transition class="mb-6 bg-surface-2 rounded-xl p-4">
+                <h4 class="text-sm font-bold text-text-main mb-3">{% trans "Nuevo Webhook" %}</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-xs text-text-muted mb-1 block">{% trans "Nombre" %}</label>
+                        <input type="text" x-model="newWebhookName" class="w-full bg-surface-base border border-border-color rounded-lg px-3 py-2 text-sm text-text-main" placeholder="Mi Webhook">
+                    </div>
+                    <div>
+                        <label class="text-xs text-text-muted mb-1 block">{% trans "URL de destino" %}</label>
+                        <input type="url" x-model="newWebhookUrl" class="w-full bg-surface-base border border-border-color rounded-lg px-3 py-2 text-sm text-text-main" placeholder="https://miapp.com/webhook">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="text-xs text-text-muted mb-1 block">{% trans "Eventos" %}</label>
+                        <div class="flex flex-wrap gap-2">
+                            <template x-for="evt in availableEvents" :key="evt">
+                                <label class="flex items-center gap-1 cursor-pointer">
+                                    <input type="checkbox" :value="evt" x-model="newWebhookEvents" class="rounded border-border-color text-primary">
+                                    <span class="text-xs text-text-muted" x-text="evt"></span>
+                                </label>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex gap-2 mt-3">
+                    <button @click="createWebhook()" class="bg-primary text-white px-4 py-2 rounded-lg text-sm font-bold hover:opacity-90">{% trans "Crear" %}</button>
+                    <button @click="showCreateWebhook = false" class="text-text-muted hover:text-text-main text-sm">{% trans "Cancelar" %}</button>
+                </div>
+            </div>
+
+            <!-- Webhooks Table -->
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="border-b border-border-color">
+                            <th class="text-left py-3 px-4 text-text-muted font-bold text-xs uppercase">{% trans "Nombre" %}</th>
+                            <th class="text-left py-3 px-4 text-text-muted font-bold text-xs uppercase">{% trans "URL" %}</th>
+                            <th class="text-left py-3 px-4 text-text-muted font-bold text-xs uppercase">{% trans "Eventos" %}</th>
+                            <th class="text-left py-3 px-4 text-text-muted font-bold text-xs uppercase">{% trans "Estado" %}</th>
+                            <th class="text-right py-3 px-4 text-text-muted font-bold text-xs uppercase">{% trans "Acciones" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template x-for="wh in webhooks" :key="wh.id">
+                            <tr class="border-b border-border-color/50 hover:bg-surface-2/50">
+                                <td class="py-3 px-4 font-bold text-text-main" x-text="wh.name"></td>
+                                <td class="py-3 px-4 font-mono text-xs text-text-muted truncate max-w-[200px]" x-text="wh.url"></td>
+                                <td class="py-3 px-4">
+                                    <div class="flex flex-wrap gap-1">
+                                        <template x-for="e in wh.events.slice(0,3)" :key="e">
+                                            <span class="px-1.5 py-0.5 bg-surface-2 rounded text-[10px] text-text-muted" x-text="e"></span>
+                                        </template>
+                                        <span x-show="wh.events.length > 3" class="text-[10px] text-text-muted" x-text="'+' + (wh.events.length - 3)"></span>
+                                    </div>
+                                </td>
+                                <td class="py-3 px-4">
+                                    <span :class="wh.is_active ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'"
+                                        class="px-2 py-1 rounded-full text-xs font-bold" x-text="wh.is_active ? '{% trans "Activo" %}' : '{% trans "Pausado" %}'"></span>
+                                </td>
+                                <td class="py-3 px-4 text-right flex gap-2 justify-end">
+                                    <button @click="toggleWebhook(wh.id)" class="text-text-muted hover:text-primary text-xs font-bold" x-text="wh.is_active ? '{% trans "Pausar" %}' : '{% trans "Activar" %}'"></button>
+                                    <button @click="deleteWebhook(wh.id)" class="text-red-400 hover:text-red-300 text-xs font-bold">{% trans "Eliminar" %}</button>
+                                </td>
+                            </tr>
+                        </template>
+                        <tr x-show="webhooks.length === 0">
+                            <td colspan="5" class="py-8 text-center text-text-muted">
+                                <span class="material-symbols-outlined text-[32px] text-text-muted/50">webhook</span>
+                                <p class="mt-2 text-sm">{% trans "Crea tu primer Webhook para recibir notificaciones" %}</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════ NOTIFICACIONES ═══════════ -->
+    <div x-show="activeTab === 'notifications'" x-transition>
+        <div class="bg-surface-1 border border-border-color rounded-2xl p-6">
+            <div class="mb-6">
+                <h3 class="text-lg font-bold text-text-main">{% trans "Preferencias de Notificación" %}</h3>
+                <p class="text-sm text-text-muted mt-1">{% trans "Configura qué notificaciones recibir y por qué canal" %}</p>
+            </div>
+
+            <div class="space-y-4">
+                <template x-for="pref in notificationPrefs" :key="pref.event">
+                    <div class="bg-surface-2 rounded-xl p-4">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <span class="material-symbols-outlined" :class="pref.icon_color" x-text="pref.icon"></span>
+                                <div>
+                                    <p class="text-sm font-bold text-text-main" x-text="pref.label"></p>
+                                    <p class="text-xs text-text-muted" x-text="pref.description"></p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-4">
+                                <label class="flex items-center gap-1.5 cursor-pointer">
+                                    <input type="checkbox" :checked="pref.email" @change="togglePref(pref.event, 'email', $event.target.checked)" class="w-4 h-4 rounded border-border-color text-primary focus:ring-primary">
+                                    <span class="text-xs text-text-muted">Email</span>
+                                </label>
+                                <label class="flex items-center gap-1.5 cursor-pointer">
+                                    <input type="checkbox" :checked="pref.whatsapp" @change="togglePref(pref.event, 'whatsapp', $event.target.checked)" class="w-4 h-4 rounded border-border-color text-primary focus:ring-primary">
+                                    <span class="text-xs text-text-muted">WhatsApp</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+
+            <button @click="saveNotificationPrefs()" class="mt-6 w-full bg-primary text-white py-3 rounded-xl font-bold text-sm hover:opacity-90 transition-all">
+                <span x-show="!savingPrefs">{% trans "Guardar Preferencias" %}</span>
+                <span x-show="savingPrefs">{% trans "Guardando..." %}</span>
+            </button>
+            <p x-show="prefsSaved" x-transition class="mt-2 text-center text-sm text-green-400">{% trans "Preferencias guardadas" %}</p>
+        </div>
+    </div>
+</div>
+
+<script nonce="{{ request.csp_nonce }}">
+function integracionesApp() {
+    return {
+        activeTab: 'apikeys',
+        apiKeys: [],
+        webhooks: [],
+        showCreateApiKey: false,
+        showCreateWebhook: false,
+        newKeyName: '',
+        newKeyPlan: 'basico',
+        createdKey: null,
+        newWebhookName: '',
+        newWebhookUrl: '',
+        newWebhookEvents: [],
+        savingPrefs: false,
+        prefsSaved: false,
+        availableEvents: ['venta.creada', 'venta.actualizada', 'venta.anulada', 'pago.confirmado', 'pago.pendiente', 'boleto.importado', 'cotizacion.enviada', 'factura.generada'],
+        notificationPrefs: [
+            { event: 'venta_creada', label: '{% trans "Venta Creada" %}', description: '{% trans "Cuando se registra una nueva venta" %}', icon: 'add_shopping_cart', icon_color: 'text-green-400', email: true, whatsapp: true },
+            { event: 'pago_confirmado', label: '{% trans "Pago Confirmado" %}', description: '{% trans "Cuando se confirma un pago" %}', icon: 'payments', icon_color: 'text-blue-400', email: true, whatsapp: false },
+            { event: 'boleto_importado', label: '{% trans "Boleto Importado" %}', description: '{% trans "Cuando la IA procesa un nuevo boleto" %}', icon: 'confirmation_number', icon_color: 'text-purple-400', email: true, whatsapp: true },
+            { event: 'recordatorio_pago', label: '{% trans "Recordatorio de Pago" %}', description: '{% trans "Alertas de pagos pendientes" %}', icon: 'alarm', icon_color: 'text-yellow-400', email: true, whatsapp: true },
+        ],
+
+        async init() {
+            await this.loadApiKeys();
+            await this.loadWebhooks();
+        },
+
+        async loadApiKeys() {
+            try {
+                const res = await fetch('/api/api-keys/', { headers: { 'Accept': 'application/json' } });
+                if (res.ok) {
+                    const data = await res.json();
+                    this.apiKeys = data.results || data || [];
+                }
+            } catch(e) { console.error('Error loading API keys:', e); }
+        },
+
+        async createApiKey() {
+            try {
+                const res = await fetch('/api/api-keys/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': this.getCsrfToken() },
+                    body: JSON.stringify({ name: this.newKeyName, plan: this.newKeyPlan })
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    this.createdKey = data.raw_key;
+                    this.showCreateApiKey = false;
+                    this.newKeyName = '';
+                    await this.loadApiKeys();
+                }
+            } catch(e) { console.error('Error creating API key:', e); }
+        },
+
+        async revokeApiKey(id) {
+            if (!confirm('{% trans "¿Estás seguro de revocar esta API Key?" %}')) return;
+            try {
+                await fetch(`/api/api-keys/${id}/revoke/`, {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': this.getCsrfToken() }
+                });
+                await this.loadApiKeys();
+            } catch(e) { console.error('Error revoking API key:', e); }
+        },
+
+        async loadWebhooks() {
+            try {
+                const res = await fetch('/api/webhooks/', { headers: { 'Accept': 'application/json' } });
+                if (res.ok) {
+                    const data = await res.json();
+                    this.webhooks = data.results || data || [];
+                }
+            } catch(e) { console.error('Error loading webhooks:', e); }
+        },
+
+        async createWebhook() {
+            try {
+                const res = await fetch('/api/webhooks/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': this.getCsrfToken() },
+                    body: JSON.stringify({ name: this.newWebhookName, url: this.newWebhookUrl, events: this.newWebhookEvents })
+                });
+                if (res.ok) {
+                    this.showCreateWebhook = false;
+                    this.newWebhookName = '';
+                    this.newWebhookUrl = '';
+                    this.newWebhookEvents = [];
+                    await this.loadWebhooks();
+                }
+            } catch(e) { console.error('Error creating webhook:', e); }
+        },
+
+        async toggleWebhook(id) {
+            try {
+                await fetch(`/api/webhooks/${id}/toggle/`, {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': this.getCsrfToken() }
+                });
+                await this.loadWebhooks();
+            } catch(e) { console.error('Error toggling webhook:', e); }
+        },
+
+        async deleteWebhook(id) {
+            if (!confirm('{% trans "¿Eliminar este webhook?" %}')) return;
+            try {
+                await fetch(`/api/webhooks/${id}/`, {
+                    method: 'DELETE',
+                    headers: { 'X-CSRFToken': this.getCsrfToken() }
+                });
+                await this.loadWebhooks();
+            } catch(e) { console.error('Error deleting webhook:', e); }
+        },
+
+        togglePref(event, channel, value) {
+            const pref = this.notificationPrefs.find(p => p.event === event);
+            if (pref) pref[channel] = value;
+        },
+
+        async saveNotificationPrefs() {
+            this.savingPrefs = true;
+            try {
+                const prefs = [];
+                this.notificationPrefs.forEach(p => {
+                    if (p.email) prefs.push({ event_type: p.event, channel: 'email', enabled: true });
+                    if (p.whatsapp) prefs.push({ event_type: p.event, channel: 'whatsapp', enabled: true });
+                });
+                await fetch('/api/notification-preferences/bulk_update/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': this.getCsrfToken() },
+                    body: JSON.stringify({ preferences: prefs })
+                });
+                this.prefsSaved = true;
+                setTimeout(() => this.prefsSaved = false, 3000);
+            } catch(e) { console.error('Error saving preferences:', e); }
+            this.savingPrefs = false;
+        },
+
+        getCsrfToken() {
+            return document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+        }
+    };
+}
+</script>
+{% endblock %}

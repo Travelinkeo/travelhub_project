@@ -28,18 +28,12 @@ class PdfRendererService:
 
     @staticmethod
     def render_html_to_pdf(html_content: str, margins: float = 0.0) -> bytes:
-        with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
-            future = executor.submit(PdfRendererService._try_gotenberg, html_content, margins)
-            try:
-                pdf_bytes = future.result(timeout=5)
-                logger.info(f"Gotenberg genero PDF: {len(pdf_bytes)} bytes")
-                return pdf_bytes
-            except concurrent.futures.TimeoutError:
-                logger.info(
-                    "Gotenberg no respondio en 5s (DNS caido o servicio offline), usando WeasyPrint..."
-                )
-            except Exception as e:
-                logger.warning(f"Gotenberg fallo ({e}), usando WeasyPrint...")
+        try:
+            pdf_bytes = PdfRendererService._try_gotenberg(html_content, margins)
+            logger.info(f"Gotenberg genero PDF: {len(pdf_bytes)} bytes")
+            return pdf_bytes
+        except Exception as e:
+            logger.warning(f"Gotenberg fallo o no respondio ({e}), usando WeasyPrint...")
 
         return PdfRendererService._render_fallback(html_content)
 
@@ -58,9 +52,11 @@ class PdfRendererService:
         }
         files = {"index.html": ("index.html", html_content, "text/html")}
         session = requests.Session()
-        response = session.post(GOTENBERG_URL, files=files, data=payload, timeout=(3, 10))
+        # Enforce short timeouts (3s to connect, 5s to read/render) to prevent long blocks
+        response = session.post(GOTENBERG_URL, files=files, data=payload, timeout=(3.0, 5.0))
         response.raise_for_status()
         return response.content
+
 
     @staticmethod
     def _render_fallback(html_content: str) -> bytes:

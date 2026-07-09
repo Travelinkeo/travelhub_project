@@ -101,18 +101,20 @@ class DobleFacturacionService:
             estado=FacturaConsolidada.EstadoFactura.EMITIDA,
         )
 
+        # 2. FACTURA POR SERVICIOS PROPIOS
+        es_nacional = datos_tercero.get("es_nacional", True)
+
         # Item de la factura de tercero
         ItemFacturaConsolidada.objects.create(
             factura=factura_tercero,
             descripcion=datos_tercero["descripcion"],
             cantidad=1,
             precio_unitario=datos_tercero["monto_servicio"],
-            tipo_servicio=ItemFacturaConsolidada.TipoServicio.TRANSPORTE_AEREO_NACIONAL,
+            tipo_servicio=ItemFacturaConsolidada.TipoServicio.TRANSPORTE_AEREO_NACIONAL
+            if es_nacional
+            else ItemFacturaConsolidada.TipoServicio.TRANSPORTE_AEREO_INTERNACIONAL,
             es_gravado=False,
         )
-
-        # 2. FACTURA POR SERVICIOS PROPIOS
-        es_nacional = datos_tercero.get("es_nacional", True)
 
         if es_nacional:
             # Servicio nacional: 100% gravado

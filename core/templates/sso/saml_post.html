@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Redirigiendo...</title>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'unsafe-inline';">
+</head>
+<body>
+    <form id="saml_form" method="post" action="{{ action }}">
+        <input type="hidden" name="SAMLRequest" value="{{ saml_request }}">
+        <input type="hidden" name="RelayState" value="{{ relay_state }}">
+        <noscript>
+            <p>Redirigiendo a tu proveedor de identidad...</p>
+            <button type="submit">Continuar</button>
+        </noscript>
+    </form>
+    <script>document.getElementById('saml_form').submit();</script>
+</body>
+</html>

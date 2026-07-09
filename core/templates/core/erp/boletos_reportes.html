@@ -205,10 +205,10 @@
 {% endblock %}
 
 {% block extra_scripts %}
+{{ stats_graficas|json_script:"stats-data" }}
 <script src="https://cdn.jsdelivr.net/npm/chart.js" nonce="{{ request.csp_nonce }}"></script>
 <script nonce="{{ request.csp_nonce }}">
     document.addEventListener('DOMContentLoaded', function() {
-        {{ stats_graficas|json_script:"stats-data" }}
         const stats = JSON.parse(document.getElementById('stats-data').textContent);
         
         // 1. Gráfica de Aerolíneas (Doughnut)

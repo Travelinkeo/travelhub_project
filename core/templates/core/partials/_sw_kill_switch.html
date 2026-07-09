@@ -1,16 +1,77 @@
 <script nonce="{{ request.csp_nonce }}">
-    if ('serviceWorker' in navigator && !sessionStorage.getItem('sw_cleared')) {
-        navigator.serviceWorker.getRegistrations().then(function(registrations) {
-            if (registrations.length > 0) {
-                for (let r of registrations) r.unregister();
-                if ('caches' in window) {
-                    caches.keys().then(function(names) {
-                        for (let name of names) caches.delete(name);
-                    });
+// TravelHub PWA — Registro del Service Worker
+(function () {
+    // Migración forzada a la versión v3 para limpiar service workers viejos y resolver traducción
+    const EXPECTED_VERSION = 'travelhub-v3';
+    if (localStorage.getItem('pwa_sw_version') !== EXPECTED_VERSION) {
+        if ('caches' in window) {
+            caches.keys().then(function(names) {
+                names.forEach(function(name) {
+                    caches.delete(name);
+                });
+            });
+        }
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                for (let r of registrations) {
+                    r.unregister();
                 }
-                sessionStorage.setItem('sw_cleared', '1');
+                localStorage.setItem('pwa_sw_version', EXPECTED_VERSION);
+                console.log('[PWA] Service workers y cachés antiguos eliminados para actualización a v3.');
                 window.location.reload();
-            }
-        });
+            });
+        } else {
+            localStorage.setItem('pwa_sw_version', EXPECTED_VERSION);
+            window.location.reload();
+        }
+        return;
     }
+
+    if (!('serviceWorker' in navigator)) return;
+
+    // Registrar el Service Worker
+    navigator.serviceWorker.register('/service-worker.js', { scope: '/' })
+        .then(function (registration) {
+            // Si hay una nueva versión disponible, activarla al recargar
+            registration.addEventListener('updatefound', function () {
+                const newWorker = registration.installing;
+                if (!newWorker) return;
+                newWorker.addEventListener('statechange', function () {
+                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                        // Nueva versión lista — notificar opcionalmente
+                        newWorker.postMessage({ type: 'SKIP_WAITING' });
+                    }
+                });
+            });
+        })
+        .catch(function (err) {
+            // No interrumpir la experiencia si falla el registro
+            console.warn('[PWA] Service Worker no registrado:', err);
+        });
+
+    // --- Botón de instalación PWA ("Agregar a pantalla de inicio") ---
+    let deferredPrompt = null;
+    window.addEventListener('beforeinstallprompt', function (e) {
+        e.preventDefault();
+        deferredPrompt = e;
+        // Mostrar banner de instalación si existe en la página
+        const installBtn = document.getElementById('pwa-install-btn');
+        if (installBtn) {
+            installBtn.classList.remove('hidden');
+            installBtn.addEventListener('click', function () {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then(function () {
+                    deferredPrompt = null;
+                    installBtn.classList.add('hidden');
+                });
+            });
+        }
+    });
+
+    window.addEventListener('appinstalled', function () {
+        deferredPrompt = null;
+        const installBtn = document.getElementById('pwa-install-btn');
+        if (installBtn) installBtn.classList.add('hidden');
+    });
+})();
 </script>

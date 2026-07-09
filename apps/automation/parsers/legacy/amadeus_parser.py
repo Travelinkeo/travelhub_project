@@ -62,13 +62,17 @@ class AmadeusParser(BaseTicketParser):
             ],
         )
 
+        # Extraer itinerario mediante regex para verificar si es necesario el refuerzo de IA
+        flights = self._extract_itinerary(text)
+
         # --- PHASE 2: AI REINFORCEMENT (Deep Integrity) ---
         if (
             pnr == "No encontrado"
             or passenger_name == "No encontrado"
             or ticket_number == "No encontrado"
+            or not flights
         ):
-            logger.info("Amadeus Native Regex incomplete. Triggering AI Reinforcement.")
+            logger.info("Amadeus Native Regex incomplete or empty flights. Triggering AI Reinforcement.")
             try:
                 from apps.automation.parsers.ai_universal_parser import UniversalAIParser
 
@@ -91,12 +95,12 @@ class AmadeusParser(BaseTicketParser):
                         pnr=pnr,
                         ticket_number=ticket_number,
                         passenger_name=passenger_name,
+                        passenger_document=ai_data.get("CODIGO_IDENTIFICACION"),
                         issue_date=ai_data.get("FECHA_DE_EMISION") or issue_date,
-                        flights=ai_data.get("vuelos") or ai_data.get("itinerario") or [],
+                        flights=ai_data.get("itinerario") or ai_data.get("vuelos") or [],
                         fares={
-                            "fare_amount": ai_data.get("TARIFA"),
-                            "tax_amount": ai_data.get("IMPUESTOS"),
-                            "total_amount": ai_data.get("TOTAL"),
+                            "fare_amount": ai_data.get("TARIFA_IMPORTE"),
+                            "total_amount": ai_data.get("TOTAL_IMPORTE"),
                             "currency": ai_data.get("TOTAL_MONEDA"),
                         },
                         es_remision=ai_data.get("es_remision", False),
@@ -104,9 +108,6 @@ class AmadeusParser(BaseTicketParser):
                     )
             except Exception as e:
                 logger.error(f"Fallo en AI Reinforcement de Amadeus: {e}")
-
-        # Fallback to itinerary regex if AI failed or not needed
-        flights = self._extract_itinerary(text)
 
         return ParsedTicketData(
             source_system="AMADEUS",

@@ -1,0 +1,103 @@
+<form hx-post="{% url 'bookings:public_itinerary_ocr_save' token=token pasajero_id=pasajero.pk %}"
+      hx-target="#passenger-card-{{ pasajero.pk }}"
+      hx-swap="outerHTML"
+      class="mt-4 p-4 border border-brand/20 bg-brand/5 rounded-2xl space-y-4 text-xs">
+    {% csrf_token %}
+    
+    <div class="flex items-center gap-3 pb-3 border-b border-slate-200/50 dark:border-slate-800/50">
+        {% if face_image_base64 %}
+            <div class="relative">
+                <img src="data:image/png;base64,{{ face_image_base64 }}" class="w-12 h-12 rounded-xl object-cover border-2 border-brand shadow-sm">
+                <span class="absolute -bottom-1 -right-1 bg-emerald-500 text-white rounded-full p-0.5 text-[8px] leading-none">✓</span>
+            </div>
+            <input type="hidden" name="face_image_base64" value="data:image/png;base64,{{ face_image_base64 }}">
+        {% else %}
+            <div class="w-12 h-12 rounded-xl bg-brand/10 flex items-center justify-center text-brand text-lg">
+                👤
+            </div>
+        {% endif %}
+        <div>
+            <h4 class="font-bold text-slate-800 dark:text-slate-200">Verificación de Pasaporte (IA)</h4>
+            <p class="text-[10px] text-slate-400">Por favor, confirma que los datos extraídos de la foto sean correctos.</p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-3">
+        <!-- Nombres -->
+        <div>
+            <label class="block text-[10px] uppercase text-slate-400 font-semibold mb-1">Nombres</label>
+            <input type="text" name="nombres" value="{{ data.nombres }}" required
+                   class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg px-2.5 py-1.5 focus:border-brand focus:ring-1 focus:ring-brand outline-none transition-colors">
+        </div>
+
+        <!-- Apellidos -->
+        <div>
+            <label class="block text-[10px] uppercase text-slate-400 font-semibold mb-1">Apellidos</label>
+            <input type="text" name="apellidos" value="{{ data.apellidos }}" required
+                   class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg px-2.5 py-1.5 focus:border-brand focus:ring-1 focus:ring-brand outline-none transition-colors">
+        </div>
+
+        <!-- Nro Pasaporte -->
+        <div>
+            <label class="block text-[10px] uppercase text-slate-400 font-semibold mb-1">Nro. de Pasaporte</label>
+            <input type="text" name="numero_pasaporte" value="{{ data.numero_pasaporte }}" required
+                   class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg px-2.5 py-1.5 font-mono tracking-wider focus:border-brand focus:ring-1 focus:ring-brand outline-none transition-colors">
+        </div>
+
+        <!-- Sexo -->
+        <div>
+            <label class="block text-[10px] uppercase text-slate-400 font-semibold mb-1">Género</label>
+            <select name="sexo" class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg px-2.5 py-1.5 focus:border-brand focus:ring-1 focus:ring-brand outline-none transition-colors">
+                <option value="M" {% if data.sexo == "M" or data.sexo == "Male" %}selected{% endif %}>Masculino</option>
+                <option value="F" {% if data.sexo == "F" or data.sexo == "Female" %}selected{% endif %}>Femenino</option>
+            </select>
+        </div>
+
+        <!-- Fecha Nacimiento -->
+        <div>
+            <label class="block text-[10px] uppercase text-slate-400 font-semibold mb-1">Fecha de Nacimiento</label>
+            <input type="date" name="fecha_nacimiento" value="{{ data.fecha_nacimiento }}" required
+                   class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg px-2.5 py-1.5 focus:border-brand focus:ring-1 focus:ring-brand outline-none transition-colors">
+        </div>
+
+        <!-- Fecha Vencimiento -->
+        <div>
+            <label class="block text-[10px] uppercase text-slate-400 font-semibold mb-1">Vencimiento Pasaporte</label>
+            <input type="date" name="fecha_vencimiento" value="{{ data.fecha_vencimiento }}" required
+                   class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg px-2.5 py-1.5 focus:border-brand focus:ring-1 focus:ring-brand outline-none transition-colors">
+        </div>
+
+        <!-- Nacionalidad -->
+        <div>
+            <label class="block text-[10px] uppercase text-slate-400 font-semibold mb-1">Nacionalidad (ISO 3)</label>
+            <input type="text" name="nacionalidad" value="{{ data.nacionalidad }}" placeholder="VEN" maxlength="3" required
+                   class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg px-2.5 py-1.5 font-mono uppercase focus:border-brand focus:ring-1 focus:ring-brand outline-none transition-colors">
+            {% if nacionalidad_pais %}
+                <span class="text-[9px] text-slate-400 mt-0.5 block">📍 {{ nacionalidad_pais.nombre }}</span>
+            {% endif %}
+        </div>
+
+        <!-- País de Emisión -->
+        <div>
+            <label class="block text-[10px] uppercase text-slate-400 font-semibold mb-1">País Emisor (ISO 3)</label>
+            <input type="text" name="pais_emision" value="{{ data.pais_emision }}" placeholder="VEN" maxlength="3" required
+                   class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg px-2.5 py-1.5 font-mono uppercase focus:border-brand focus:ring-1 focus:ring-brand outline-none transition-colors">
+            {% if pais_emision_pais %}
+                <span class="text-[9px] text-slate-400 mt-0.5 block">📍 {{ pais_emision_pais.nombre }}</span>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="flex justify-end gap-2 pt-2 border-t border-slate-200/50 dark:border-slate-800/50">
+        <button type="button" 
+                @click="document.getElementById('upload-form-{{ pasajero.pk }}').reset(); document.getElementById('ocr-mount-{{ pasajero.pk }}').innerHTML = '';"
+                class="px-3 py-1.5 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg font-bold transition-all">
+            Cancelar
+        </button>
+        <button type="submit" 
+                class="px-4 py-1.5 bg-brand hover:bg-brand-hover text-white rounded-lg font-bold shadow transition-all">
+            Confirmar y Guardar
+        </button>
+    </div>
+</form>

@@ -118,10 +118,13 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      target: runtime
     container_name: travelhub_web
     restart: unless-stopped
-    command: >
-      sh -c "gunicorn travelhub.wsgi:application --bind 0.0.0.0:8000 --workers 2 --max-requests 1000 --timeout 120"
+    command: 
+      - sh
+      - -c
+      - gunicorn travelhub.wsgi:application --bind 0.0.0.0:8000 --workers 2 --max-requests 1000 --timeout 120 --preload
     # SECURITY: Puerto de Gunicorn comentado - solo accesible via Traefik
     # Para acceso local durante desarrollo, descomentar temporalmente:
     ports:
@@ -131,12 +134,17 @@ services:
       - REDIS_URL=redis://redis:6379/0
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      # OTEL deshabilitado — image base tiene dependencies.py roto (pkg_resources en Py312)
+      - OTEL_PYTHON_DISABLED_INSTRUMENTATIONS=all
+      - OTEL_TRACES_EXPORTER=none
     env_file:
       - .env.local
     volumes:
       - static_volume:/app/staticfiles
       - media_volume:/app/media
       - ./boletos_importados:/app/boletos_importados
+      - ./entrypoint.sh:/app/entrypoint.sh
+      - ./compose/healthcheck.py:/app/compose/healthcheck.py
     depends_on:
       db:
         condition: service_healthy
@@ -145,10 +153,10 @@ services:
       redis:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "/bin/bash -c \"exec 3<>/dev/tcp/localhost/8000 && echo -e 'GET /health/ HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3 && cat <&3 | grep -q 'healthy'\""]
-      interval: 15s
-      timeout: 5s
-      retries: 3
+      test: ["CMD", "python3", "/app/compose/healthcheck.py"]
+      interval: 20s
+      timeout: 15s
+      retries: 5
       start_period: 180s
     labels:
       - "traefik.enable=true"
@@ -180,14 +188,14 @@ services:
       web:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1/health || exit 1"]
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1/health/metrics/ || exit 1"]
       interval: 30s
       timeout: 5s
       retries: 3
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.travelhub-static.rule=(Host(`${MAIN_DOMAIN}`) || HostRegexp(`{subdomain:[a-z0-9-]+}.${MAIN_DOMAIN}`)) && (PathPrefix(`/media`) || PathPrefix(`/static`))"
-      - "traefik.http.routers.travelhub-static.entrypoints=websecure"
+      - "traefik.http.routers.travelhub-static.entrypoints=web,websecure"
       - "traefik.http.routers.travelhub-static.tls.certresolver=letsencryptresolver"
       - "traefik.http.routers.travelhub-static.priority=100"
       - "traefik.http.services.travelhub-static.loadbalancer.server.port=80"
@@ -232,6 +240,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      target: runtime
     container_name: travelhub_worker
     restart: unless-stopped
     command: celery -A travelhub worker --loglevel=info -Q default,ia_fast,celery --concurrency=4 --max-tasks-per-child=1000 --max-memory-per-child=512000
@@ -268,6 +277,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      target: runtime
     container_name: travelhub_notifications
     restart: unless-stopped
     command: celery -A travelhub worker --loglevel=info -Q notifications --concurrency=2 --max-tasks-per-child=1000 --max-memory-per-child=256000
@@ -307,6 +317,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      target: runtime
     container_name: travelhub_beat
     restart: unless-stopped
     command: celery -A travelhub beat --loglevel=info
@@ -323,7 +334,7 @@ services:
       redis:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "pgrep -f 'celery.*beat' || exit 1"]
+      test: ["CMD", "python", "-c", "import os; query = 'beat'; pids = [pid for pid in os.listdir('/proc') if pid.isdigit() and int(pid) != os.getpid()]; cmds = [open(f'/proc/{pid}/cmdline').read() for pid in pids if os.path.exists(f'/proc/{pid}/cmdline')]; assert any(query in cmd for cmd in cmds)"]
       interval: 30s
       timeout: 10s
       retries: 3

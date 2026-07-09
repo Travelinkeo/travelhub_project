@@ -1,0 +1,15 @@
+<!-- Live Chat Widget (Tawk.to)
+     Activar: LIVE_CHAT_PROVIDER=tawkto  LIVE_CHAT_ID=xxxxx  en .env
+-->
+<script nonce="{{ request.csp_nonce }}">
+(function() {
+    var id = '{{ LIVE_CHAT_ID|default:"" }}';
+    if (!id) return;
+    var s1=document.createElement("script"), s0=document.getElementsByTagName("script")[0];
+    s1.async=true;
+    s1.src='https://embed.tawk.to/' + id + '/default';
+    s1.charset='UTF-8';
+    s1.setAttribute('crossorigin','*');
+    s0.parentNode.insertBefore(s1,s0);
+})();
+</script>

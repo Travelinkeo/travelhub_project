@@ -5,6 +5,7 @@ _TABLE_RENAMES = [
     ("personas_pasajero", "crm_pasajero"),
     ("personas_cliente_pasajeros", "crm_cliente_pasajeros"),
     ("core_pasaporte_escaneado", "crm_pasaporteescaneado"),
+    ("crm_whatsapp_mensaje", "crm_mensajewhatsapp"),
 ]
 
 _CRM_TABLES = [
@@ -12,6 +13,7 @@ _CRM_TABLES = [
     "crm_pasajero",
     "crm_cliente_pasajeros",
     "crm_pasaporteescaneado",
+    "crm_mensajewhatsapp",
 ]
 
 _INDEX_PREFIX_MAP = {

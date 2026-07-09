@@ -1,3 +1,4 @@
+{% load i18n %}
 <aside
     class="fixed inset-y-0 left-0 z-50 bg-surface-1 border-r border-border-color flex flex-col transform transition-all duration-300 ease-in-out md:relative md:translate-x-0"
     :class="[
@@ -66,7 +67,7 @@
                 <div class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-status-success border-2 border-surface-1"></div>
             </div>
             <div x-show="sidebarOpen" x-transition class="flex-1 min-w-0 text-left overflow-hidden">
-                <p class="text-[10px] font-black text-text-muted uppercase tracking-widest leading-none">Agencia activa</p>
+                <p class="text-[10px] font-black text-text-muted uppercase tracking-widest leading-none">{% trans "Agencia activa" %}</p>
                 <p class="text-xs font-bold text-text-main truncate mt-0.5">{{ current_agency.nombre|default:"—" }}</p>
             </div>
             <span x-show="sidebarOpen" class="material-symbols-outlined text-[16px] text-text-muted group-hover:text-primary transition-colors shrink-0"
@@ -84,7 +85,7 @@
              class="absolute left-2 right-2 top-full mt-1 z-50 bg-surface-2 border border-border-color rounded-2xl shadow-xl overflow-hidden">
 
             <div class="px-3 pt-3 pb-1">
-                <p class="text-[9px] font-black text-text-muted uppercase tracking-widest">Cambiar de agencia</p>
+                <p class="text-[9px] font-black text-text-muted uppercase tracking-widest">{% trans "Cambiar de agencia" %}</p>
             </div>
 
             {% for vinculo in user_agencies %}
@@ -128,7 +129,7 @@
             class="nav-item {% if request.resolver_match.url_name == 'modern_dashboard' %}nav-active{% endif %}"
             :class="!sidebarOpen && 'justify-center'">
             <span class="material-symbols-outlined text-[20px] shrink-0">dashboard</span>
-            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">Dashboard AI</span>
+            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">{% trans "Dashboard AI" %}</span>
         </a>
 
         <!-- SOLO ADMINS Y GERENTES -->
@@ -137,7 +138,7 @@
             class="nav-item bg-primary/20 border border-primary/30 group hover:border-primary transition-all"
             :class="!sidebarOpen && 'justify-center'">
             <span class="material-symbols-outlined text-[20px] shrink-0 text-primary animate-pulse">monitoring</span>
-            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs text-primary group-hover:text-white">Dashboard CEO 📈</span>
+            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs text-primary group-hover:text-white">{% trans "Dashboard CEO" %} 📈</span>
         </a>
         {% endif %}
 
@@ -145,7 +146,7 @@
         <button @click="openCategories.operaciones = !openCategories.operaciones"
             x-show="sidebarOpen" x-transition
             class="w-full flex items-center justify-between mt-5 mb-1.5 px-2 text-[10px] font-black text-text-muted hover:text-primary transition-all uppercase tracking-widest text-left select-none">
-            <span>Operaciones</span>
+            <span>{% trans "Operaciones" %}</span>
             <span class="material-symbols-outlined text-[14px] transition-transform duration-200"
                   :class="openCategories.operaciones ? 'rotate-90' : ''">chevron_right</span>
         </button>
@@ -156,50 +157,50 @@
             class="nav-item {% if 'ventas' in request.path %}nav-active{% endif %}"
             :class="!sidebarOpen && 'justify-center'">
             <span class="material-symbols-outlined text-[20px] shrink-0">shopping_cart</span>
-            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">Ventas</span>
+            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">{% trans "Ventas" %}</span>
         </a>
         
         <a href="{% url 'bookings:cotizacion_dashboard' %}"
             class="nav-item {% if 'cotizaciones' in request.path %}nav-active{% endif %}"
             :class="!sidebarOpen && 'justify-center'">
             <span class="material-symbols-outlined text-[20px] shrink-0">request_quote</span>
-            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">Cotizaciones</span>
+            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">{% trans "Cotizaciones" %}</span>
         </a>
 
         <a href="{% url 'core:boletos_dashboard' %}"
             class="nav-item {% if 'boletos' in request.path %}nav-active{% endif %}"
             :class="!sidebarOpen && 'justify-center'">
             <span class="material-symbols-outlined text-[20px] shrink-0">confirmation_number</span>
-            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">Boletos</span>
+            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">{% trans "Boletos" %}</span>
         </a>
 
         <a href="{% url 'bookings:flight_search' %}"
             class="nav-item {% if 'flights' in request.path %}nav-active{% endif %}"
             :class="!sidebarOpen && 'justify-center'">
             <span class="material-symbols-outlined text-[20px] shrink-0">flight_takeoff</span>
-            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">Vuelos</span>
+            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">{% trans "Vuelos" %}</span>
         </a>
 
         <a href="{% url 'bookings:hotel_search' %}"
             class="nav-item {% if 'hoteles' in request.path %}nav-active{% endif %}"
             :class="!sidebarOpen && 'justify-center'">
             <span class="material-symbols-outlined text-[20px] shrink-0">hotel</span>
-            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">Hoteles</span>
+            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">{% trans "Hoteles" %}</span>
         </a>
 
         <a href="{% url 'bookings:catalogo_terrestre' %}"
             class="nav-item {% if 'inventario' in request.path %}nav-active{% endif %}"
             :class="!sidebarOpen && 'justify-center'">
             <span class="material-symbols-outlined text-[20px] shrink-0">inventory</span>
-            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">Catálogo Terrestre</span>
-            <span x-show="sidebarOpen" class="ml-auto bg-emerald-500/10 text-emerald-500 text-[9px] font-black px-2 py-0.5 rounded-full border border-emerald-500/20 uppercase tracking-tighter">Propio</span>
+            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">{% trans "Catálogo Terrestre" %}</span>
+            <span x-show="sidebarOpen" class="ml-auto bg-emerald-500/10 text-emerald-500 text-[9px] font-black px-2 py-0.5 rounded-full border border-emerald-500/20 uppercase tracking-tighter">{% trans "Propio" %}</span>
         </a>
 
         <a href="{% url 'bookings:cotizacion_magic' %}"
             class="nav-item {% if 'magic' in request.path %}nav-active{% endif %}"
             :class="!sidebarOpen && 'justify-center'">
             <span class="material-symbols-outlined text-[20px] shrink-0 text-primary">auto_awesome</span>
-            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs text-primary">Cotizador Mágico</span>
+            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs text-primary">{% trans "Cotizador Mágico" %}</span>
             <span x-show="sidebarOpen" class="ml-auto bg-primary/10 text-primary text-[9px] font-black px-2 py-0.5 rounded-full border border-primary/20">IA</span>
         </a>
         </div>
@@ -209,7 +210,7 @@
         <button @click="openCategories.crm = !openCategories.crm"
             x-show="sidebarOpen" x-transition
             class="w-full flex items-center justify-between mt-5 mb-1.5 px-2 text-[10px] font-black text-text-muted hover:text-primary transition-all uppercase tracking-widest text-left select-none">
-            <span>CRM</span>
+            <span>{% trans "CRM" %}</span>
             <span class="material-symbols-outlined text-[14px] transition-transform duration-200"
                   :class="openCategories.crm ? 'rotate-90' : ''">chevron_right</span>
         </button>
@@ -220,21 +221,21 @@
             class="nav-item {% if 'crm/clientes' in request.path %}nav-active{% endif %}"
             :class="!sidebarOpen && 'justify-center'">
             <span class="material-symbols-outlined text-[20px] shrink-0">group</span>
-            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">Clientes</span>
+            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">{% trans "Clientes" %}</span>
         </a>
 
         <a href="{% url 'crm:pasajero_list' %}"
             class="nav-item {% if 'crm/pasajeros' in request.path %}nav-active{% endif %}"
             :class="!sidebarOpen && 'justify-center'">
             <span class="material-symbols-outlined text-[20px] shrink-0">badge</span>
-            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">Pasajeros</span>
+            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">{% trans "Pasajeros" %}</span>
         </a>
 
         <a href="{% url 'crm:kanban_board' %}"
             class="nav-item {% if 'kanban' in request.path %}nav-active{% endif %}"
             :class="!sidebarOpen && 'justify-center'">
             <span class="material-symbols-outlined text-[20px] shrink-0">view_kanban</span>
-            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">Tablero Leads</span>
+            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">{% trans "Tablero Leads" %}</span>
             <span x-show="sidebarOpen" class="ml-auto bg-status-success-bg text-status-success text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest border border-status-success border-opacity-20">IA</span>
         </a>
 
@@ -242,7 +243,7 @@
             class="nav-item {% if 'proveedores' in request.path %}nav-active{% endif %}"
             :class="!sidebarOpen && 'justify-center'">
             <span class="material-symbols-outlined text-[20px] shrink-0">corporate_fare</span>
-            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">Proveedores</span>
+            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">{% trans "Proveedores" %}</span>
         </a>
         </div>
 
@@ -252,7 +253,7 @@
         <button @click="openCategories.finanzas = !openCategories.finanzas"
             x-show="sidebarOpen" x-transition
             class="w-full flex items-center justify-between mt-5 mb-1.5 px-2 text-[10px] font-black text-text-muted hover:text-primary transition-all uppercase tracking-widest text-left select-none">
-            <span>Finanzas</span>
+            <span>{% trans "Finanzas" %}</span>
             <span class="material-symbols-outlined text-[14px] transition-transform duration-200"
                   :class="openCategories.finanzas ? 'rotate-90' : ''">chevron_right</span>
         </button>
@@ -263,35 +264,35 @@
             class="nav-item {% if 'facturacion' in request.path or 'invoices' in request.path %}nav-active{% endif %}"
             :class="!sidebarOpen && 'justify-center'">
             <span class="material-symbols-outlined text-[20px] shrink-0">receipt_long</span>
-            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">Facturación</span>
+            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">{% trans "Facturación" %}</span>
         </a>
 
         <a href="{% url 'finance:liquidacion_list' %}"
             class="nav-item {% if 'liquidaciones' in request.path %}nav-active{% endif %}"
             :class="!sidebarOpen && 'justify-center'">
             <span class="material-symbols-outlined text-[20px] shrink-0">account_balance_wallet</span>
-            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">Liquidaciones</span>
+            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">{% trans "Liquidaciones" %}</span>
         </a>
 
         <a href="{% url 'finance:profit_dashboard' %}"
             class="nav-item {% if request.resolver_match.url_name == 'profit_dashboard' %}nav-active{% endif %}"
             :class="!sidebarOpen && 'justify-center'">
             <span class="material-symbols-outlined text-[20px] shrink-0">trending_up</span>
-            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">Rentabilidad</span>
+            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">{% trans "Rentabilidad" %}</span>
         </a>
 
         <a href="{% url 'finance:reconciliacion_dashboard_htmx' %}"
             class="nav-item {% if 'reconciliacion' in request.path %}nav-active{% endif %}"
             :class="!sidebarOpen && 'justify-center'">
             <span class="material-symbols-outlined text-[20px] shrink-0">auto_awesome</span>
-            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">Conciliación IA</span>
+            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">{% trans "Conciliación IA" %}</span>
         </a>
         </div>
 
         <button @click="openCategories.contabilidad = !openCategories.contabilidad"
             x-show="sidebarOpen" x-transition
             class="w-full flex items-center justify-between mt-5 mb-1.5 px-2 text-[10px] font-black text-text-muted hover:text-primary transition-all uppercase tracking-widest text-left select-none">
-            <span>Contabilidad</span>
+            <span>{% trans "Contabilidad" %}</span>
             <span class="material-symbols-outlined text-[14px] transition-transform duration-200"
                   :class="openCategories.contabilidad ? 'rotate-90' : ''">chevron_right</span>
         </button>
@@ -302,28 +303,28 @@
             class="nav-item {% if 'libro_diario' in request.path %}nav-active{% endif %}"
             :class="!sidebarOpen && 'justify-center'">
             <span class="material-symbols-outlined text-[20px] shrink-0">menu_book</span>
-            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">Libro Diario</span>
+            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">{% trans "Libro Diario" %}</span>
         </a>
 
         <a href="{% url 'contabilidad:balance_comprobacion' %}"
             class="nav-item {% if 'balance_comprobacion' in request.path %}nav-active{% endif %}"
             :class="!sidebarOpen && 'justify-center'">
             <span class="material-symbols-outlined text-[20px] shrink-0">balance</span>
-            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">Balance</span>
+            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">{% trans "Balance" %}</span>
         </a>
 
         <a href="{% url 'contabilidad:libro_mayor' %}"
             class="nav-item {% if 'libro_mayor' in request.path %}nav-active{% endif %}"
             :class="!sidebarOpen && 'justify-center'">
             <span class="material-symbols-outlined text-[20px] shrink-0">import_contacts</span>
-            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">Libro Mayor</span>
+            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">{% trans "Libro Mayor" %}</span>
         </a>
 
         <a href="{% url 'finance:validar_cuadre' %}"
             class="nav-item {% if 'reportes' in request.path %}nav-active{% endif %}"
             :class="!sidebarOpen && 'justify-center'">
             <span class="material-symbols-outlined text-[20px] shrink-0">bar_chart</span>
-            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">Reportes</span>
+            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">{% trans "Reportes" %}</span>
         </a>
         </div>
         {% endif %}
@@ -333,7 +334,7 @@
         <button @click="openCategories.marketing = !openCategories.marketing"
             x-show="sidebarOpen" x-transition
             class="w-full flex items-center justify-between mt-5 mb-1.5 px-2 text-[10px] font-black text-text-muted hover:text-primary transition-all uppercase tracking-widest text-left select-none">
-            <span>Marketing</span>
+            <span>{% trans "Marketing" %}</span>
             <span class="material-symbols-outlined text-[14px] transition-transform duration-200"
                   :class="openCategories.marketing ? 'rotate-90' : ''">chevron_right</span>
         </button>
@@ -344,14 +345,14 @@
             class="nav-item {% if 'marketing' in request.path %}nav-active{% endif %}"
             :class="!sidebarOpen && 'justify-center'">
             <span class="material-symbols-outlined text-[20px] shrink-0">campaign</span>
-            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">Marketing IA</span>
+            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">{% trans "Marketing IA" %}</span>
         </a>
 
         <a href="{% url 'cms:dashboard' %}"
             class="nav-item {% if 'cms' in request.path %}nav-active{% endif %}"
             :class="!sidebarOpen && 'justify-center'">
             <span class="material-symbols-outlined text-[20px] shrink-0">web</span>
-            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">Gestión Web IA</span>
+            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">{% trans "Gestión Web IA" %}</span>
         </a>
         </div>
         {% endif %}
@@ -360,7 +361,7 @@
         <button @click="openCategories.inteligencia = !openCategories.inteligencia"
             x-show="sidebarOpen" x-transition
             class="w-full flex items-center justify-between mt-5 mb-1.5 px-2 text-[10px] font-black text-text-muted hover:text-primary transition-all uppercase tracking-widest text-left select-none">
-            <span>Inteligencia AI</span>
+            <span>{% trans "Inteligencia AI" %}</span>
             <span class="material-symbols-outlined text-[14px] transition-transform duration-200"
                   :class="openCategories.inteligencia ? 'rotate-90' : ''">chevron_right</span>
         </button>
@@ -371,21 +372,21 @@
             class="nav-item {% if 'asistente' in request.path %}nav-active{% endif %}"
             :class="!sidebarOpen && 'justify-center'">
             <span class="material-symbols-outlined text-[20px] shrink-0">smart_toy</span>
-            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">Asistente AI</span>
+            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">{% trans "Asistente AI" %}</span>
         </a>
 
         <a href="{% url 'core:gds_analyzer' %}"
             class="nav-item {% if 'gds-analyzer' in request.path %}nav-active{% endif %}"
             :class="!sidebarOpen && 'justify-center'">
             <span class="material-symbols-outlined text-[20px] shrink-0">terminal</span>
-            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">GDS AI Analyzer</span>
+            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">{% trans "GDS AI Analyzer" %}</span>
         </a>
 
         <a href="{% url 'bookings:revenue_leak_dashboard' %}"
             class="nav-item {% if 'auditoria' in request.path and 'bookings' in request.resolver_match.namespace %}nav-active{% endif %}"
             :class="!sidebarOpen && 'justify-center'">
             <span class="material-symbols-outlined text-[20px] shrink-0 text-red-500">money_off</span>
-            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs text-red-500">Auditoría Fugas AI</span>
+            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs text-red-500">{% trans "Auditoría Fugas AI" %}</span>
             <span x-show="sidebarOpen" class="ml-auto bg-red-500/10 text-red-500 text-[9px] font-black px-2 py-0.5 rounded-full border border-red-500/20">LIVE</span>
         </a>
 
@@ -393,7 +394,7 @@
             class="nav-item {% if 'wiki/gds' in request.path %}nav-active{% endif %}"
             :class="!sidebarOpen && 'justify-center'">
             <span class="material-symbols-outlined text-[20px] shrink-0">menu_book</span>
-            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">Wiki GDS</span>
+            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">{% trans "Wiki GDS" %}</span>
         </a>
         </div>
 
@@ -402,7 +403,7 @@
         <button @click="openCategories.sistema = !openCategories.sistema"
             x-show="sidebarOpen" x-transition
             class="w-full flex items-center justify-between mt-5 mb-1.5 px-2 text-[10px] font-black text-text-muted hover:text-primary transition-all uppercase tracking-widest text-left select-none">
-            <span>Sistema</span>
+            <span>{% trans "Sistema" %}</span>
             <span class="material-symbols-outlined text-[14px] transition-transform duration-200"
                   :class="openCategories.sistema ? 'rotate-90' : ''">chevron_right</span>
         </button>
@@ -413,35 +414,36 @@
             class="nav-item {% if 'catalogos' in request.path %}nav-active{% endif %}"
             :class="!sidebarOpen && 'justify-center'">
             <span class="material-symbols-outlined text-[20px] shrink-0">category</span>
-            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">Catálogos</span>
+            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">{% trans "Catálogos" %}</span>
         </a>
         
         <a href="{% url 'core:agencia_settings' %}"
             class="nav-item {% if 'agencia/configuracion' in request.path %}nav-active{% endif %}"
             :class="!sidebarOpen && 'justify-center'">
             <span class="material-symbols-outlined text-[20px] shrink-0">settings</span>
-            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">Configuración</span>
+            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">{% trans "Configuración" %}</span>
         </a>
 
         <a href="{% url 'finance:billing_pricing' %}"
             class="nav-item {% if 'billing' in request.path %}nav-active{% endif %}"
             :class="!sidebarOpen && 'justify-center'">
             <span class="material-symbols-outlined text-[20px] shrink-0">credit_card</span>
-            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">Suscripción</span>
+            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">{% trans "Suscripción" %}</span>
         </a>
 
         <a href="{% url 'core:agencia_auditoria' %}"
             class="nav-item {% if 'auditoria' in request.path %}nav-active{% endif %}"
             :class="!sidebarOpen && 'justify-center'">
             <span class="material-symbols-outlined text-[20px] shrink-0">manage_search</span>
-            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">Auditoría</span>
+            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">{% trans "Auditoría" %}</span>
         </a>
         </div>
+
 
         <button @click="openCategories.custom = !openCategories.custom"
             x-show="sidebarOpen" x-transition
             class="w-full flex items-center justify-between mt-5 mb-1.5 px-2 text-[10px] font-black text-text-muted hover:text-primary transition-all uppercase tracking-widest text-left select-none">
-            <span>Administración Custom</span>
+            <span>{% trans "Administración Custom" %}</span>
             <span class="material-symbols-outlined text-[14px] transition-transform duration-200"
                   :class="openCategories.custom ? 'rotate-90' : ''">chevron_right</span>
         </button>
@@ -452,71 +454,107 @@
             class="nav-item {% if 'proveedores' in request.path %}nav-active{% endif %}"
             :class="!sidebarOpen && 'justify-center'">
             <span class="material-symbols-outlined text-[20px] shrink-0">corporate_fare</span>
-            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">Proveedores</span>
+            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">{% trans "Proveedores" %}</span>
         </a>
 
         <a href="{% url 'common_admin:aerolinea_list' %}"
             class="nav-item {% if 'aerolineas' in request.path %}nav-active{% endif %}"
             :class="!sidebarOpen && 'justify-center'">
             <span class="material-symbols-outlined text-[20px] shrink-0">flight_takeoff</span>
-            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">Aerolíneas</span>
+            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">{% trans "Aerolíneas" %}</span>
         </a>
 
         <a href="{% url 'common_admin:geografia_list' %}"
             class="nav-item {% if 'geografia' in request.path %}nav-active{% endif %}"
             :class="!sidebarOpen && 'justify-center'">
             <span class="material-symbols-outlined text-[20px] shrink-0">public</span>
-            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">Geografía</span>
+            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">{% trans "Geografía" %}</span>
         </a>
 
         <a href="{% url 'finance_admin:moneda_list' %}"
             class="nav-item {% if 'monedas' in request.path or 'tipocambio' in request.path %}nav-active{% endif %}"
             :class="!sidebarOpen && 'justify-center'">
             <span class="material-symbols-outlined text-[20px] shrink-0">currency_exchange</span>
-            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">Monedas y Tasas</span>
+            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">{% trans "Monedas y Tasas" %}</span>
         </a>
 
         <a href="{% url 'finance_admin:retencionislr_list' %}"
             class="nav-item {% if 'retencionesislr' in request.path %}nav-active{% endif %}"
             :class="!sidebarOpen && 'justify-center'">
             <span class="material-symbols-outlined text-[20px] shrink-0">receipt_long</span>
-            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">Retenciones ISLR</span>
+            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">{% trans "Retenciones ISLR" %}</span>
         </a>
 
         <a href="{% url 'core_admin:featureflag_list' %}"
             class="nav-item {% if 'featureflags' in request.path %}nav-active{% endif %}"
             :class="!sidebarOpen && 'justify-center'">
             <span class="material-symbols-outlined text-[20px] shrink-0">toggle_on</span>
-            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">Feature Flags</span>
+            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">{% trans "Feature Flags" %}</span>
         </a>
 
         <a href="{% url 'core_admin:cronapikey_list' %}"
             class="nav-item {% if 'cronapikeys' in request.path %}nav-active{% endif %}"
             :class="!sidebarOpen && 'justify-center'">
             <span class="material-symbols-outlined text-[20px] shrink-0">vpn_key</span>
-            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">Cron API Keys</span>
+            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">{% trans "Cron API Keys" %}</span>
         </a>
 
         <a href="{% url 'bookings_admin:productoservicio_list' %}"
             class="nav-item {% if 'productoservicio' in request.path %}nav-active{% endif %}"
             :class="!sidebarOpen && 'justify-center'">
             <span class="material-symbols-outlined text-[20px] shrink-0">inventory_2</span>
-            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">Productos y Servicios</span>
+            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">{% trans "Productos y Servicios" %}</span>
         </a>
 
         <a href="{% url 'bookings_admin:cruceroreserva_list' %}"
             class="nav-item {% if 'cruceros' in request.path %}nav-active{% endif %}"
             :class="!sidebarOpen && 'justify-center'">
             <span class="material-symbols-outlined text-[20px] shrink-0">sailing</span>
-            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">Cruceros</span>
+            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">{% trans "Cruceros" %}</span>
         </a>
         </div>
         {% endif %}
 
     </nav>
 
+    <!-- ── SELECTOR DE IDIOMA (ES / EN) ── -->
+    {% load i18n %}
+    <div class="shrink-0 px-3 py-2 border-t border-border-color">
+        <div class="flex items-center gap-1.5" :class="sidebarOpen ? 'justify-start' : 'justify-center'">
+            <span x-show="sidebarOpen" x-transition class="material-symbols-outlined text-[16px] text-text-muted shrink-0">translate</span>
+            <div class="flex items-center gap-1" x-show="sidebarOpen" x-transition>
+                {% get_current_language as CURRENT_LANG %}
+                <form method="post" action="{% url 'set_language' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="language" value="es">
+                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                    <button type="submit"
+                        class="px-2.5 py-1 rounded-md text-[11px] font-black uppercase tracking-wider transition-all
+                        {% if CURRENT_LANG == 'es' %}bg-primary text-[var(--text-on-primary)] shadow-sm{% else %}text-text-muted hover:text-text-main hover:bg-surface-3{% endif %}"
+                        title="Español">ES</button>
+                </form>
+                <form method="post" action="{% url 'set_language' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="language" value="en">
+                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                    <button type="submit"
+                        class="px-2.5 py-1 rounded-md text-[11px] font-black uppercase tracking-wider transition-all
+                        {% if CURRENT_LANG == 'en' %}bg-primary text-[var(--text-on-primary)] shadow-sm{% else %}text-text-muted hover:text-text-main hover:bg-surface-3{% endif %}"
+                        title="English">EN</button>
+                </form>
+            </div>
+            {# Modo colapsado: solo icono globo #}
+            <button x-show="!sidebarOpen"
+                    class="w-8 h-8 flex items-center justify-center text-text-muted hover:text-primary hover:bg-surface-2 rounded-lg transition-colors"
+                    @click="sidebarOpen = true" title="{% trans "Cambiar idioma" %}">
+                <span class="material-symbols-outlined text-[18px]">language</span>
+            </button>
+        </div>
+    </div>
+
     <!-- User Profile Area -->
     <div class="shrink-0 p-3 border-t border-border-color bg-surface-2/50">
+
         <div class="flex items-center gap-2.5" :class="!sidebarOpen && 'justify-center'">
             <a href="{% url 'core:user_profile' %}" 
                 class="w-8 h-8 rounded-lg bg-surface-base border border-border-color text-primary flex items-center justify-center text-[12px] font-black hover:bg-surface-3 transition-colors shrink-0 shadow-sm">
@@ -525,17 +563,17 @@
             <div x-show="sidebarOpen" x-transition class="flex-1 min-w-0">
                 <p class="text-xs font-bold text-text-main truncate">{{ user.get_full_name|default:user.username }}</p>
                 <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
-                    {% if user_agency_role == 'admin' %}Administrador
-                    {% elif user_agency_role == 'gerente' %}Gerente
-                    {% elif user_agency_role == 'vendedor' %}Asesor de Ventas
-                    {% elif user_agency_role == 'contador' %}Finanzas
-                    {% elif user_agency_role == 'operador' %}Operaciones
+                    {% if user_agency_role == 'admin' %}{% trans "Administrador" %}
+                    {% elif user_agency_role == 'gerente' %}{% trans "Gerente" %}
+                    {% elif user_agency_role == 'vendedor' %}{% trans "Asesor de Ventas" %}
+                    {% elif user_agency_role == 'contador' %}{% trans "Finanzas" %}
+                    {% elif user_agency_role == 'operador' %}{% trans "Operaciones" %}
                     {% else %}TravelHub User{% endif %}
                 </p>
             </div>
             <form x-show="sidebarOpen" method="post" action="{% url 'logout' %}" class="shrink-0">
                 {% csrf_token %}
-                <button type="submit" title="Cerrar sesión"
+                <button type="submit" title="{% trans "Cerrar Sesión" %}"
                     class="p-1.5 text-text-muted hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors">
                     <span class="material-symbols-outlined text-[18px]">logout</span>
                 </button>

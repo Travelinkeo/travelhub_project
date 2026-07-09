@@ -129,6 +129,8 @@ try:
         "core.views.factura_consolidada_views.ItemFacturaConsolidadaViewSet"
     )
     LibroVentasViewSet = import_string("core.views.libro_ventas_views.LibroVentasViewSet")
+    LibroComprasViewSet = import_string("core.views.fiscal_views.LibroComprasViewSet")
+    RetencionesXMLViewSet = import_string("core.views.fiscal_views.RetencionesXMLViewSet")
     ItemLiquidacionViewSet = import_string("core.views.liquidacion_views.ItemLiquidacionViewSet")
     LiquidacionProveedorViewSet = import_string(
         "core.views.liquidacion_views.LiquidacionProveedorViewSet"
@@ -149,6 +151,8 @@ try:
         basename="item-factura-consolidada",
     )
     router.register(r"libro-ventas", LibroVentasViewSet, basename="libro-ventas")
+    router.register(r"libro-compras", LibroComprasViewSet, basename="libro-compras")
+    router.register(r"retenciones-xml", RetencionesXMLViewSet, basename="retenciones-xml")
     router.register(r"tarifarios", TarifarioProveedorViewSet, basename="tarifario")
     router.register(r"hoteles-tarifario", HotelTarifarioViewSet, basename="hotel-tarifario")
     router.register(r"comisiones", ComisionProveedorServicioViewSet, basename="comisiones")

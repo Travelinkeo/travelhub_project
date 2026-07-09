@@ -7,6 +7,7 @@ from django.utils import timezone
 from apps.bookings.models import BoletoImportado, Proveedor, Venta
 from apps.finance.models import Factura, ItemFactura
 from apps.finance.models.currencies import Moneda
+from apps.finance.services.tax_eligibility import es_itinerario_internacional
 
 logger = logging.getLogger(__name__)
 
@@ -108,9 +109,9 @@ class InvoiceService:
                     "descripcion": f"Boleto {ticket_num} - {nombre_pax}",
                     "cantidad": 1,
                     "precio_unitario": boleto.total_boleto or 0,
-                    "tipo_servicio": ItemFactura.TipoServicio.TRANSPORTE_AEREO_NACIONAL
-                    if "NAC" in (boleto.ruta_vuelo or "")
-                    else ItemFactura.TipoServicio.COMISION_INTERMEDIACION,
+                    "tipo_servicio": ItemFactura.TipoServicio.TRANSPORTE_AEREO_INTERNACIONAL
+                    if es_itinerario_internacional(boleto)
+                    else ItemFactura.TipoServicio.TRANSPORTE_AEREO_NACIONAL,
                     "es_gravado": False,
                     "nombre_pasajero": nombre_pax,
                     "itinerario": boleto.ruta_vuelo or "",

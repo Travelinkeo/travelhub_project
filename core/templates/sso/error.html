@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="es">
+<head><meta charset="UTF-8"><title>Error de autenticación — TravelHub</title>
+<style>body{font-family:system-ui;background:#0F172A;color:#E2E8F0;display:flex;justify-content:center;align-items:center;min-height:100vh;margin:0;padding:2rem}.card{max-width:480px;text-align:center}h1{color:#F87171;margin:0 0 1rem}p{color:#94A3B8;margin:0 0 1.5rem}.btn{background:#3B82F6;color:white;padding:.75rem 1.5rem;border-radius:.5rem;text-decoration:none;display:inline-block}</style></head>
+<body>
+<div class="card">
+    <h1>🔒 Error de autenticación</h1>
+    <p>{{ error }}</p>
+    {% if email %}<p>Email: <strong>{{ email }}</strong></p>{% endif %}
+    <a class="btn" href="/accounts/login/">Volver al inicio de sesión</a>
+</div>
+</body>
+</html>

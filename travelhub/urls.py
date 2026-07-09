@@ -12,11 +12,18 @@ from django.views.static import serve
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 from rest_framework_simplejwt.views import TokenObtainPairView
 
+from apps.communications.views.push_views import push_subscribe, push_unsubscribe
 from core.metrics import health_metrics_view
 from core.middleware import csp_report_view
+from core.sso.views import sso_callback, sso_login
 from core.views.auditoria_views import api_audit_logs
 from core.views.auth_views import MagicLinkRequestView, MagicLinkVerifyView, TokenLogoutView
+from core.views.docs_views import docs_index, docs_page
+from core.views.health_views import health_check
+from core.views.marketing_views import public_landing, public_pricing
 from core.views.onboarding_views import OnboardingAgencyView, SaaSOnboardingView
+from core.views.pwa_views import manifest, offline, service_worker
+from core.views.status_views import status_api
 
 
 def favicon_view(request):
@@ -94,19 +101,35 @@ urlpatterns = [
         "redoc/", _protect_docs(SpectacularRedocView.as_view(url_name="schema_root")), name="redoc"
     ),
     # --- DASHBOARD PRINCIPAL ---
-    # Redirige a la vista modern_dashboard que ahora reside en bookings
-    path(
-        "",
-        RedirectView.as_view(pattern_name="bookings:modern_dashboard", permanent=False),
-        name="home",
-    ),
+    # Landing page pública — si autenticado, redirige al dashboard
+    path("", public_landing, name="home"),
     path(
         "dashboard/",
         RedirectView.as_view(pattern_name="bookings:modern_dashboard", permanent=False),
         name="dashboard_root",
     ),
     path("prometheus/", include("django_prometheus.urls")),
+    path("health/", health_check, name="health"),
     path("health/metrics/", health_metrics_view, name="health_metrics"),
+    # PWA
+    path("manifest.json", manifest, name="pwa_manifest"),
+    path("service-worker.js", service_worker, name="service_worker"),
+    path("offline/", offline, name="offline"),
+    # Status Page
+    path("status/", status_api, name="status_api"),
+    # Knowledge Base
+    path("docs/", docs_index, name="docs_index"),
+    path("docs/<path:path>/", docs_page, name="docs_page"),
+    # Public Marketing
+    path("pricing/", public_pricing, name="public_pricing"),
+    # Push Notifications API
+    path("api/push/subscribe/", push_subscribe, name="push_subscribe"),
+    path("api/push/unsubscribe/", push_unsubscribe, name="push_unsubscribe"),
+    # SSO / SAML / OIDC
+    path("sso/login/<int:provider_id>/", sso_login, name="sso_login"),
+    path("sso/callback/<int:provider_id>/", sso_callback, name="sso_callback"),
+    # --- INTERNACIONALIZACIÓN (i18n) ---
+    path("i18n/", include("django.conf.urls.i18n")),  # Provee /i18n/set_language/
 ]
 
 

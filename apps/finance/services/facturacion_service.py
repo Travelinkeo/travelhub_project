@@ -10,6 +10,7 @@ from django.utils.translation import gettext_lazy as _
 from apps.bookings.models import BoletoImportado, Venta
 from apps.finance.models import Factura, ItemFactura
 from apps.finance.services.bcv_service import obtener_tasa_bcv_resiliente
+from apps.finance.services.tax_eligibility import es_itinerario_internacional
 
 logger = logging.getLogger(__name__)
 
@@ -158,7 +159,10 @@ class FacturacionService:
             if item_venta.tipo_item == "AIR" or (
                 item_venta.producto_servicio and item_venta.producto_servicio.tipo_producto == "AIR"
             ):
-                tipo_servicio = ItemFactura.TipoServicio.TRANSPORTE_AEREO_NACIONAL
+                if boleto and es_itinerario_internacional(boleto):
+                    tipo_servicio = ItemFactura.TipoServicio.TRANSPORTE_AEREO_INTERNACIONAL
+                else:
+                    tipo_servicio = ItemFactura.TipoServicio.TRANSPORTE_AEREO_NACIONAL
                 if boleto:
                     itinerario_limpio = obtener_itinerario_limpio(boleto.ruta_vuelo)
                     descripcion = f"Boleto Aéreo: {itinerario_limpio}"
@@ -284,7 +288,10 @@ class FacturacionService:
             if item_venta.tipo_item == "AIR" or (
                 item_venta.producto_servicio and item_venta.producto_servicio.tipo_producto == "AIR"
             ):
-                tipo_servicio = ItemFactura.TipoServicio.TRANSPORTE_AEREO_NACIONAL
+                if boleto and es_itinerario_internacional(boleto):
+                    tipo_servicio = ItemFactura.TipoServicio.TRANSPORTE_AEREO_INTERNACIONAL
+                else:
+                    tipo_servicio = ItemFactura.TipoServicio.TRANSPORTE_AEREO_NACIONAL
                 if boleto:
                     itinerario_limpio = obtener_itinerario_limpio(boleto.ruta_vuelo)
                     descripcion = f"Boleto Aéreo: {itinerario_limpio}"

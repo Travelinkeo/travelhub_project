@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
     """
 
     dependencies = [
-        ("core", "0046_enable_pg_trgm_extension"),
+        ("core", "0045_api_keys_webhooks_v2"),
     ]
 
     operations = [

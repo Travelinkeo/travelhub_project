@@ -61,14 +61,18 @@ class TravelportParser(BaseTicketParser):
             ],
         )
 
+        # Extraer itinerario mediante regex para verificar si es necesario el refuerzo de IA
+        flights = self._extract_itinerary(text)
+
         # --- PHASE 2: AI REINFORCEMENT (Deep Integrity) ---
-        # Si faltan campos críticos o el PNR es 'No encontrado', usamos IA.
+        # Si faltan campos críticos o el PNR es 'No encontrado', o no hay vuelos, usamos IA.
         if (
             pnr == "No encontrado"
             or passenger_name == "No encontrado"
             or ticket_number == "No encontrado"
+            or not flights
         ):
-            logger.info("Travelport Native Regex incomplete. Triggering AI Reinforcement.")
+            logger.info("Travelport Native Regex incomplete or empty flights. Triggering AI Reinforcement.")
             try:
                 from apps.automation.parsers.ai_universal_parser import UniversalAIParser
 
@@ -91,12 +95,12 @@ class TravelportParser(BaseTicketParser):
                         pnr=pnr,
                         ticket_number=ticket_number,
                         passenger_name=passenger_name,
+                        passenger_document=ai_data.get("CODIGO_IDENTIFICACION"),
                         issue_date=ai_data.get("FECHA_DE_EMISION") or issue_date,
-                        flights=ai_data.get("vuelos", []),
+                        flights=ai_data.get("itinerario") or ai_data.get("vuelos") or [],
                         fares={
-                            "fare_amount": ai_data.get("TARIFA"),
-                            "tax_amount": ai_data.get("IMPUESTOS"),
-                            "total_amount": ai_data.get("TOTAL"),
+                            "fare_amount": ai_data.get("TARIFA_IMPORTE"),
+                            "total_amount": ai_data.get("TOTAL_IMPORTE"),
                             "currency": ai_data.get("TOTAL_MONEDA"),
                         },
                         es_remision=ai_data.get("es_remision", False),
@@ -111,8 +115,96 @@ class TravelportParser(BaseTicketParser):
             ticket_number=ticket_number,
             passenger_name=passenger_name,
             issue_date=issue_date,
-            flights=[],  # Itinerary parsing for Travelport usually needs AI due to high variability
+            flights=flights,
             fares={},
             agency={},
             raw_data={"text_snippet": text[:500]},
         )
+
+    def _extract_itinerary(self, text: str) -> list[dict]:
+        """
+        Extrae itinerario de Travelport usando patrones comunes de Galileo/Worldspan.
+        Ejemplo:
+        1  LA 2415 Y 12MAY LIMCUZ HK1  0915 1035  *OP/LA2415
+        """
+        segments = []
+        lines = text.splitlines()
+        
+        # Patrón estándar de tramo de GDS
+        flight_pattern = re.compile(
+            r"(?:\d+\s+)?"                  # Index opcional (1 )
+            r"([A-Z0-9]{2})\s*"             # Aerolinea (LA)
+            r"(\d{1,4})\s*"                 # Numero de vuelo (2415)
+            r"([A-Z])?\s*"                  # Clase (Y) opcional
+            r"(\d{2}[A-Z]{3})\s+"           # Fecha (12MAY)
+            r"(?:\d\s+)?"                   # Día de semana opcional (4 )
+            r"([A-Z]{3})\s*([A-Z]{3})\s+"   # Origen y Destino (LIMCUZ o LIM CUZ)
+            r"([A-Z0-9]{2,3})\s+"           # Status (HK1)
+            r"(\d{4}[A-Z]?)\s+"             # Salida (0915)
+            r"(\d{4}[A-Z]?)"                # Llegada (1035)
+        )
+        
+        for line in lines:
+            line_upper = line.upper().strip()
+            match = flight_pattern.search(line_upper)
+            if match:
+                airline = match.group(1)
+                flight_no = match.group(2)
+                clase = match.group(3)
+                date = match.group(4)
+                origin = match.group(5)
+                destination = match.group(6)
+                status = match.group(7)
+                dep_time = match.group(8)
+                arr_time = match.group(9)
+                
+                # Normalizar horas (0915 -> 09:15)
+                def norm_h(h):
+                    h = re.sub(r"[A-Z]", "", h)
+                    if len(h) == 4:
+                        return f"{h[:2]}:{h[2:]}"
+                    return h
+                
+                segments.append({
+                    "origen": origin,
+                    "destino": destination,
+                    "numero_vuelo": f"{airline}{flight_no}",
+                    "clase": clase or "Y",
+                    "fecha_salida": date,
+                    "hora_salida": norm_h(dep_time),
+                    "hora_llegada": norm_h(arr_time),
+                    "aerolinea": airline,
+                    "status": status,
+                })
+        
+        # Fallback a otra estructura más descriptiva de Galileo
+        if not segments:
+            current_flight = {}
+            for line in lines:
+                line_upper = line.upper().strip()
+                f_match = re.search(r"FLIGHT\s*:\s*([A-Z0-9]{2})\s*(\d{1,4})", line_upper)
+                if f_match:
+                    current_flight["numero_vuelo"] = f_match.group(1) + f_match.group(2)
+                    current_flight["aerolinea"] = f_match.group(1)
+                    
+                    c_match = re.search(r"CLASS\s*:\s*([A-Z])", line_upper)
+                    if c_match:
+                        current_flight["clase"] = c_match.group(1)
+                        
+                    d_match = re.search(r"DATE\s*:\s*(\d{2}[A-Z]{3})", line_upper)
+                    if d_match:
+                        current_flight["fecha_salida"] = d_match.group(1)
+                
+                dep_match = re.search(r"DEP\s*:\s*([A-Z]{3})\s+(\d{2}:\d{2})", line_upper)
+                if dep_match:
+                    current_flight["origen"] = dep_match.group(1)
+                    current_flight["hora_salida"] = dep_match.group(2)
+                    
+                arr_match = re.search(r"ARR\s*:\s*([A-Z]{3})\s+(\d{2}:\d{2})", line_upper)
+                if arr_match and current_flight:
+                    current_flight["destino"] = arr_match.group(1)
+                    current_flight["hora_llegada"] = arr_match.group(2)
+                    segments.append(current_flight)
+                    current_flight = {}
+                    
+        return segments

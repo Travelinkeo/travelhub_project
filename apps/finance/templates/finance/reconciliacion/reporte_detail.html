@@ -32,7 +32,7 @@
             </div>
             
             <div class="flex items-center gap-4" 
-                 {% if reporte.estado == 'PROCESANDO' %}
+                 {% if reporte.estado == 'PROCESANDO' or reporte.estado == 'PENDIENTE' %}
                  hx-get="{% url 'finance:reconciliacion_detail' reporte.pk %}"
                  hx-trigger="every 3s"
                  hx-target="body"

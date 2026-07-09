@@ -58,7 +58,33 @@ class ComisionFreelancerAdmin(SaaSAdminMixin, admin.ModelAdmin):
         "monto_base_venta",
         "monto_comision_ganada",
         "liquidada",
+        "fecha_liquidacion",
         "creado_en",
     )
     list_filter = ("liquidada", "freelancer")
     date_hierarchy = "creado_en"
+    actions = ["liquidar_comisiones"]
+
+    @admin.action(description="Liquidar comisiones seleccionadas")
+    def liquidar_comisiones(self, request, queryset):
+        from django.utils import timezone
+        from apps.crm.services.freelancer_service import FreelancerService
+
+        no_liquidadas = queryset.filter(liquidada=False)
+        count = no_liquidadas.count()
+        if count == 0:
+            self.message_user(request, "No se seleccionó ninguna comisión pendiente.")
+            return
+
+        now = timezone.now()
+        freelancers_afectados = set()
+        for comision in no_liquidadas:
+            comision.liquidada = True
+            comision.fecha_liquidacion = now
+            comision.save(update_fields=["liquidada", "fecha_liquidacion"])
+            freelancers_afectados.add(comision.freelancer)
+
+        for freelancer in freelancers_afectados:
+            FreelancerService.recalculate_balances(freelancer)
+
+        self.message_user(request, f"Se han liquidado exitosamente {count} comisiones.")

@@ -1,0 +1,99 @@
+{% extends "onboarding/base_wizard.html" %}
+
+{% block title %}Invitar Equipo - TravelHub{% endblock %}
+
+{% block content %}
+<div>
+    <!-- Header -->
+    <div class="text-center mb-8">
+        <div class="icon-circle orange mx-auto" style="width: 80px; height: 80px;">
+            <span class="material-symbols-outlined text-4xl">group_add</span>
+        </div>
+        <h1 class="text-2xl font-bold mb-2">Invita a tu Equipo</h1>
+        <p class="text-slate-400">Trabaja en equipo para mayor productividad</p>
+    </div>
+    
+    <!-- Benefits -->
+    <div class="bg-blue-500/10 border border-blue-500/30 rounded-xl p-4 mb-6">
+        <div class="flex items-center gap-2 text-blue-400 mb-2">
+            <span class="material-symbols-outlined">lightbulb</span>
+            <span class="font-semibold text-sm">¿Por qué invitar equipo?</span>
+        </div>
+        <ul class="text-sm text-slate-300 space-y-1 ml-7">
+            <li>• Asigna roles y permisos por vendedor</li>
+            <li>• Separa ventas por responsable</li>
+            <li>• Reportes individuales de desempeño</li>
+            <li>• Comisión automática por ventas</li>
+        </ul>
+    </div>
+    
+    <!-- Email Input Form -->
+    <form method="post" id="invite-form" class="space-y-4">
+        {% csrf_token %}
+        
+        <div>
+            <label class="block text-sm font-semibold text-slate-300 mb-2">
+                Emails de tus compañeros
+            </label>
+            <div class="space-y-2" id="email-inputs">
+                <div class="flex gap-2">
+                    <input type="email" 
+                           name="emails" 
+                           class="input-field flex-1" 
+                           placeholder="email@ejemplo.com">
+                    <button type="button" onclick="addEmailField()" class="btn-secondary px-3">
+                        <span class="material-symbols-outlined">add</span>
+                    </button>
+                </div>
+            </div>
+            <p class="text-slate-500 text-xs mt-2">
+                Recibirán un email con instrucciones para unirse a tu agencia
+            </p>
+        </div>
+        
+        <!-- Actions -->
+        <div class="space-y-3 pt-4">
+            <button type="submit" class="btn-primary w-full text-lg py-4">
+                <span class="material-symbols-outlined mr-2">send</span>
+                Enviar Invitaciones
+            </button>
+            
+            <button type="submit" name="skip" value="true" class="btn-secondary w-full">
+                <span class="material-symbols-outlined mr-2">skip_next</span>
+                Lo haré después, continuar →
+            </button>
+        </div>
+    </form>
+    
+    <!-- Back Link -->
+    <div class="text-center mt-4">
+        <a href="{% url 'onboarding_first_ticket' %}" class="text-slate-400 hover:text-white text-sm transition-colors">
+            ← Volver al paso anterior
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function addEmailField() {
+    const container = document.getElementById('email-inputs');
+    const div = document.createElement('div');
+    div.className = 'flex gap-2';
+    div.innerHTML = `
+        <input type="email" 
+               name="emails" 
+               class="input-field flex-1" 
+               placeholder="email@ejemplo.com">
+        <button type="button" onclick="removeEmailField(this)" class="bg-red-500/20 text-red-400 px-3 rounded-lg hover:bg-red-500/30 transition-colors">
+            <span class="material-symbols-outlined">remove</span>
+        </button>
+    `;
+    container.appendChild(div);
+}
+
+function removeEmailField(btn) {
+    btn.parentElement.remove();
+}
+</script>
+{% endblock %}

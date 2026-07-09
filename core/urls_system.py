@@ -27,6 +27,7 @@ from core.metrics import health_metrics_view
 from core.middleware import csp_report_view
 from core.views import reportes_views
 from core.views.analytics import dashboard_views, finance_analytics, ops_analytics, sales_analytics
+from core.views.billing_views import AccountBillingView
 from core.views.boleto_api_views import reintentar_parseo as api_reintentar_parseo
 from core.views.flights_views import FlightSearchView
 from core.views.hotel_views import (
@@ -215,6 +216,8 @@ urlpatterns = [
         auth_views.MagicLinkVerifyView.as_view(),
         name="magic_link_verify",
     ),
+    # Billing / Account
+    path("account/billing/", AccountBillingView.as_view(), name="account_billing"),
     # --- ERP BOLETOS INTELLIGENCE (MOVILIZADO AL FINAL PARA EVITAR SOBREESCRITURA) ---
     path("dashboard/modern/", DashboardView.as_view(), name="modern_dashboard"),
     path("dashboard/erp/auditoria/", erp_views.AuditoriaListView.as_view(), name="auditoria_list"),

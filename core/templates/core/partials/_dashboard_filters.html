@@ -1,0 +1,77 @@
+<!--
+Partial: Filtros de Fecha para Dashboard
+Permite filtrar por rango de fechas y tipo de período.
+-->
+<div class="bg-[#1e293b] border border-gray-700 rounded-xl shadow-lg p-4 mb-6">
+    <form method="get" action="{% url 'dashboard' %}" class="flex flex-wrap gap-4 items-end">
+        <!-- Período Predefinido -->
+        <div class="flex-1 min-w-[200px]">
+            <label class="block text-xs font-medium text-gray-400 mb-1">Período</label>
+            <select name="periodo" id="periodo" class="w-full bg-gray-800 border border-gray-600 text-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <option value="7" {% if periodo == '7' %}selected{% endif %}>Últimos 7 días</option>
+                <option value="30" {% if periodo == '30' %}selected{% endif %}>Últimos 30 días</option>
+                <option value="90" {% if periodo == '90' %}selected{% endif %}>Últimos 90 días</option>
+                <option value="custom" {% if periodo == 'custom' %}selected{% endif %}>Personalizado</option>
+            </select>
+        </div>
+
+        <!-- Fecha Desde -->
+        <div class="flex-1 min-w-[150px]" id="fecha-desde-container" style="display: none;">
+            <label class="block text-xs font-medium text-gray-400 mb-1">Desde</label>
+            <input type="date" name="fecha_desde" id="fecha_desde" value="{{ fecha_desde }}" 
+                   class="w-full bg-gray-800 border border-gray-600 text-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500">
+        </div>
+
+        <!-- Fecha Hasta -->
+        <div class="flex-1 min-w-[150px]" id="fecha-hasta-container" style="display: none;">
+            <label class="block text-xs font-medium text-gray-400 mb-1">Hasta</label>
+            <input type="date" name="fecha_hasta" id="fecha_hasta" value="{{ fecha_hasta }}" 
+                   class="w-full bg-gray-800 border border-gray-600 text-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500">
+        </div>
+
+        <!-- Botón Aplicar -->
+        <div>
+            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg text-sm transition-colors flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+                Aplicar
+            </button>
+        </div>
+
+        <!-- Botón Exportar -->
+        <div>
+            <button type="button" onclick="exportarDatos()" class="bg-gray-700 hover:bg-gray-600 text-gray-200 font-medium px-4 py-2 rounded-lg text-sm transition-colors flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                </svg>
+                Exportar
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+// Toggle de fechas personalizadas
+document.getElementById('periodo').addEventListener('change', function(e) {
+    const esCustom = e.target.value === 'custom';
+    document.getElementById('fecha-desde-container').style.display = esCustom ? 'block' : 'none';
+    document.getElementById('fecha-hasta-container').style.display = esCustom ? 'block' : 'none';
+});
+
+// Inicializar según período seleccionado
+document.addEventListener('DOMContentLoaded', function() {
+    const periodo = document.getElementById('periodo').value;
+    if (periodo === 'custom') {
+        document.getElementById('fecha-desde-container').style.display = 'block';
+        document.getElementById('fecha-hasta-container').style.display = 'block';
+    }
+});
+
+// Exportar datos del dashboard
+function exportarDatos() {
+    const params = new URLSearchParams(window.location.search);
+    params.set('export', 'csv');
+    window.location.href = window.location.pathname + '?' + params.toString();
+}
+</script>

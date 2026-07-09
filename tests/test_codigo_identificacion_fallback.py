@@ -19,6 +19,6 @@ def test_normalize_codigo_identificacion_inline():
         # La función normalize espera una linea que contenga FOID; aquí puede estar inline
         norm = normalize_codigo_identificacion(texto)
         anyw = extract_codigo_identificacion_anywhere(texto)
-        assert anyw == esperado, (
-            f"Fallback no extrajo correctamente en: {texto} (normalize devolvió {norm})"
-        )
+        assert (
+            anyw == esperado
+        ), f"Fallback no extrajo correctamente en: {texto} (normalize devolvió {norm})"

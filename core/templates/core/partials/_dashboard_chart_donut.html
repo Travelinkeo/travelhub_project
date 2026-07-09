@@ -1,0 +1,103 @@
+<!--
+Partial: Gráfico de Donas - Ventas por Tipo/Canal
+Chart.js donut chart para distribución de ventas.
+-->
+<div class="bg-[#1e293b] border border-gray-700 rounded-xl shadow-lg p-6">
+    <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-bold text-gray-100 flex items-center gap-2">
+            <svg class="w-5 h-5 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/>
+            </svg>
+            {{ titulo }}
+        </h3>
+        <span class="text-xs text-gray-400">{{ total_registros }} registros</span>
+    </div>
+
+    <div class="h-[250px] w-full relative flex items-center justify-center">
+        <canvas id="{{ chart_id }}"></canvas>
+    </div>
+
+    <!-- Leyenda debajo del gráfico -->
+    <div class="mt-4 space-y-2 max-h-[150px] overflow-y-auto" id="{{ legend_id }}">
+        <!-- Leyenda generada dinámicamente -->
+    </div>
+</div>
+
+<script>
+(function() {
+    const ctx = document.getElementById('{{ chart_id }}');
+    if (!ctx) return;
+
+    const chartData = {{ data_json|safe }};
+    const colors = [
+        '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6',
+        '#ec4899', '#06b6d4', '#84cc16', '#f97316', '#6366f1'
+    ];
+
+    // Limpiar instancia previa
+    const existingChart = Chart.getChart('{{ chart_id }}');
+    if (existingChart) existingChart.destroy();
+
+    const chart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: chartData.labels,
+            datasets: [{
+                data: chartData.values,
+                backgroundColor: colors.slice(0, chartData.labels.length),
+                borderColor: '#1e293b',
+                borderWidth: 2,
+                hoverOffset: 10
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '60%',
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: '#1e293b',
+                    titleColor: '#fff',
+                    bodyColor: '#cbd5e1',
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.parsed || 0;
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                            return `${label}: $${value.toLocaleString()} (${percentage}%)`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Generar leyenda custom
+    const legendContainer = document.getElementById('{{ legend_id }}');
+    if (legendContainer && chartData.labels.length > 0) {
+        const total = chartData.values.reduce((a, b) => a + b, 0);
+        chartData.labels.forEach((label, index) => {
+            const value = chartData.values[index];
+            const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+            const color = colors[index % colors.length];
+            
+            const item = document.createElement('div');
+            item.className = 'flex items-center justify-between text-sm';
+            item.innerHTML = `
+                <div class="flex items-center gap-2">
+                    <div class="w-3 h-3 rounded-full" style="background-color: ${color}"></div>
+                    <span class="text-gray-300 truncate max-w-[150px]">${label}</span>
+                </div>
+                <div class="text-right">
+                    <span class="text-gray-200 font-medium">$${value.toLocaleString()}</span>
+                    <span class="text-gray-500 text-xs"> (${percentage}%)</span>
+                </div>
+            `;
+            legendContainer.appendChild(item);
+        });
+    }
+})();
+</script>

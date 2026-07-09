@@ -68,9 +68,9 @@ def test_invoice_generation_concurrency():
 
     # Verificaciones
     assert not errors, f"Se detectaron colisiones de concurrencia: {errors}"
-    assert len(results) == n_threads, (
-        f"Se esperaban {n_threads} facturas, se crearon {len(results)}"
-    )
+    assert (
+        len(results) == n_threads
+    ), f"Se esperaban {n_threads} facturas, se crearon {len(results)}"
 
     # Verificar que todos los números generados son únicos
     assert len(set(results)) == n_threads, f"Números duplicados generados: {results}"

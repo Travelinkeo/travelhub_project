@@ -1,8 +1,8 @@
 {% extends "base_modern.html" %}
-{% load static humanize core_tags %}
+{% load static humanize core_tags i18n %}
 
-{% block page_title %}Panel de Operaciones{% endblock %}
-{% block page_subtitle %}Panel de Control Satelital · {{ hoy|date:"l d M" }}{% endblock %}
+{% block page_title %}{% trans "Panel de Operaciones" %}{% endblock %}
+{% block page_subtitle %}{% trans "Panel de Control Satelital" %} · {{ hoy|date:"l d M" }}{% endblock %}
 
 {% block content %}
 <div class="flex flex-col gap-4 font-display max-w-[1600px] mx-auto p-3 sm:p-4">
@@ -14,8 +14,8 @@
                 <span class="material-symbols-outlined text-white text-[18px]">add_shopping_cart</span>
             </div>
             <div class="min-w-0">
-                <h3 class="text-xs font-bold text-white leading-tight">Nueva Venta</h3>
-                <p class="text-blue-200 text-[9px] truncate mt-0.5">Cotizar o Reservar</p>
+                <h3 class="text-xs font-bold text-white leading-tight">{% trans "Nueva Venta" %}</h3>
+                <p class="text-blue-200 text-[9px] truncate mt-0.5">{% trans "Cotizar o Reservar" %}</p>
             </div>
         </a>
 
@@ -25,7 +25,7 @@
                 <span class="material-symbols-outlined text-white text-[18px]">chat</span>
             </div>
             <div class="min-w-0">
-                <h3 class="text-xs font-bold text-white leading-tight">WhatsApp</h3>
+                <h3 class="text-xs font-bold text-white leading-tight">{% trans "WhatsApp" %}</h3>
                 <p class="text-emerald-100 text-[9px] truncate mt-0.5">CRM + IA</p>
             </div>
         </a>
@@ -36,7 +36,7 @@
                 <span class="material-symbols-outlined text-white text-[18px]">document_scanner</span>
             </div>
             <div class="min-w-0">
-                <h3 class="text-xs font-bold text-white leading-tight">Escanear ID</h3>
+                <h3 class="text-xs font-bold text-white leading-tight">{% trans "Escanear ID" %}</h3>
                 <p class="text-emerald-200 text-[9px] truncate mt-0.5">Pasaporte (OCR)</p>
             </div>
         </label>
@@ -47,8 +47,8 @@
                 <span class="material-symbols-outlined text-white text-[18px]">upload_file</span>
             </div>
             <div class="min-w-0">
-                <h3 class="text-xs font-bold text-white leading-tight">Subir Boleto</h3>
-                <p class="text-pink-100 text-[9px] truncate mt-0.5">PDF o Texto GDS</p>
+                <h3 class="text-xs font-bold text-white leading-tight">{% trans "Subir Boleto" %}</h3>
+                <p class="text-pink-100 text-[9px] truncate mt-0.5">{% trans "PDF o Texto GDS" %}</p>
             </div>
         </label>
 
@@ -58,8 +58,8 @@
                 <span class="material-symbols-outlined text-white text-[18px]">receipt_long</span>
             </div>
             <div class="min-w-0">
-                <h3 class="text-xs font-bold text-white leading-tight">Facturación</h3>
-                <p class="text-indigo-200 text-[9px] truncate mt-0.5">Borradores</p>
+                <h3 class="text-xs font-bold text-white leading-tight">{% trans "Facturación" %}</h3>
+                <p class="text-indigo-200 text-[9px] truncate mt-0.5">{% trans "Borradores" %}</p>
             </div>
         </a>
 
@@ -69,8 +69,8 @@
                 <span class="material-symbols-outlined text-white text-[18px]">auto_awesome</span>
             </div>
             <div class="min-w-0">
-                <h3 class="text-xs font-bold text-white leading-tight">Conciliación</h3>
-                <p class="text-emerald-100 text-[9px] truncate mt-0.5">Proveedores</p>
+                <h3 class="text-xs font-bold text-white leading-tight">{% trans "Conciliación" %}</h3>
+                <p class="text-emerald-100 text-[9px] truncate mt-0.5">{% trans "Proveedores" %}</p>
             </div>
         </a>
 
@@ -80,7 +80,7 @@
                 <span class="material-symbols-outlined text-primary text-[18px]">bolt</span>
             </div>
             <div class="min-w-0">
-                <h3 class="text-xs font-bold text-white leading-tight">Analizador GDS</h3>
+                <h3 class="text-xs font-bold text-white leading-tight">{% trans "Analizador GDS" %}</h3>
                 <p class="text-primary text-[9px] font-mono uppercase tracking-tighter truncate mt-0.5">AI GDS</p>
             </div>
         </a>
@@ -91,8 +91,8 @@
                 <span class="material-symbols-outlined text-white text-[18px]">magic_button</span>
             </div>
             <div class="min-w-0">
-                <h3 class="text-xs font-bold text-white leading-tight">Magic Quoter</h3>
-                <p class="text-purple-100 text-[9px] truncate mt-0.5">Cotizador IA</p>
+                <h3 class="text-xs font-bold text-white leading-tight">{% trans "Magic Quoter" %}</h3>
+                <p class="text-purple-100 text-[9px] truncate mt-0.5">{% trans "Cotizador IA" %}</p>
             </div>
         </a>
     </div>
@@ -104,10 +104,10 @@
             <div class="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
                 <span class="material-symbols-outlined text-6xl text-primary">payments</span>
             </div>
-            <h3 class="text-xs font-semibold text-text-muted uppercase tracking-wider mb-1">Ganancia Estimada (Mes)</h3>
+            <h3 class="text-xs font-semibold text-text-muted uppercase tracking-wider mb-1">{% trans "Ganancia Estimada (Mes)" %}</h3>
             <div class="text-3xl font-bold text-text-main tracking-tight font-mono">$ {{ ganancia_estimada|floatformat:2|intcomma }}</div>
             <div class="flex items-center mt-3 gap-2 text-xs text-text-muted">
-                Comisiones netas + Fees
+                {% trans "Comisiones netas + Fees" %}
             </div>
             <div class="h-1 w-full bg-surface-3 mt-5 rounded-full overflow-hidden">
                 <div class="h-full bg-status-success w-3/4 rounded-full shadow-[0_0_8px_var(--status-success)]"></div>
@@ -119,13 +119,13 @@
             <div class="absolute top-0 right-0 p-4 opacity-20">
                 <span class="material-symbols-outlined text-4xl text-primary animate-pulse">psychology</span>
             </div>
-            <h3 class="text-[10px] font-bold text-primary uppercase tracking-[0.2em] mb-1">Eficiencia Operativa</h3>
+            <h3 class="text-[10px] font-bold text-primary uppercase tracking-[0.2em] mb-1">{% trans "Eficiencia Operativa" %}</h3>
             <div class="text-3xl font-black text-white tracking-tighter">{{ stats.automatización.count_auto }}</div>
-            <p class="text-[11px] text-text-muted mt-1">Ventas procesadas por IA</p>
+            <p class="text-[11px] text-text-muted mt-1">{% trans "Ventas procesadas por IA" %}</p>
             
             <div class="mt-4 flex items-center justify-between text-[10px] font-mono">
-                <span class="text-text-muted">Manual: {{ stats.automatización.count_manual }}</span>
-                <span class="text-primary">Ahorro: {{ stats.automatización.count_auto|multiply:5 }} min*</span>
+                <span class="text-text-muted">{% trans "Manual" %}: {{ stats.automatización.count_manual }}</span>
+                <span class="text-primary">{% trans "Ahorro" %}: {{ stats.automatización.count_auto|multiply:5 }} min*</span>
             </div>
             <div class="h-1.5 w-full bg-surface-2 mt-2 rounded-full overflow-hidden flex">
                 {% with total=stats.automatización.count_auto|add:stats.automatización.count_manual %}
@@ -141,10 +141,10 @@
             <div class="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
                 <span class="material-symbols-outlined text-6xl text-orange-500">inventory_2</span>
             </div>
-            <h3 class="text-xs font-semibold text-text-muted uppercase tracking-wider mb-1">Costo a Proveedores</h3>
+            <h3 class="text-xs font-semibold text-text-muted uppercase tracking-wider mb-1">{% trans "Costo a Proveedores" %}</h3>
             <div class="text-3xl font-bold text-text-main tracking-tight font-mono">$ {{ saldo_pendiente|floatformat:2|intcomma }}</div>
             <div class="flex items-center mt-3 gap-2 text-xs text-text-muted">
-                Pendiente de liquidación
+                {% trans "Pendiente de liquidación" %}
             </div>
         </div>
 
@@ -153,27 +153,27 @@
             <div class="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
                 <span class="material-symbols-outlined text-6xl text-status-danger">warning</span>
             </div>
-            <h3 class="text-xs font-semibold text-status-danger uppercase tracking-wider mb-3">Atención Requerida</h3>
+            <h3 class="text-xs font-semibold text-status-danger uppercase tracking-wider mb-3">{% trans "Atención Requerida" %}</h3>
             
             <div class="flex-1 space-y-2 relative z-10" id="atencion-requerida-content">
                 {% if alertas.sin_cliente > 0 %}
                 <div class="flex items-center gap-2 text-sm text-text-secondary">
                     <span class="w-1.5 h-1.5 rounded-full bg-status-danger shadow-[0_0_5px_var(--status-danger)]"></span>
-                    <span class="font-black text-status-danger font-mono">{{ alertas.sin_cliente }}</span> ventas sin cliente
+                    <span class="font-black text-status-danger font-mono">{{ alertas.sin_cliente }}</span> {% trans "ventas sin cliente" %}
                 </div>
                 {% endif %}
 
                 {% if alertas.deuda_antigua > 0 %}
                 <div class="flex items-center gap-2 text-sm text-text-secondary">
                     <span class="w-1.5 h-1.5 rounded-full bg-status-warning shadow-[0_0_5px_var(--status-warning)]"></span>
-                    <span class="font-black text-status-warning font-mono">{{ alertas.deuda_antigua }}</span> deudas (>7d)
+                    <span class="font-black text-status-warning font-mono">{{ alertas.deuda_antigua }}</span> {% trans "deudas (>7d)" %}
                 </div>
                 {% endif %}
 
                 {% if alertas.boletos_huerfanos > 0 %}
                 <div class="flex items-center gap-2 text-sm text-text-secondary">
                     <span class="w-1.5 h-1.5 rounded-full bg-status-info shadow-[0_0_5px_var(--status-info)]"></span>
-                    <span class="font-black text-status-info font-mono">{{ alertas.boletos_huerfanos }}</span> huerfanos
+                    <span class="font-black text-status-info font-mono">{{ alertas.boletos_huerfanos }}</span> {% trans "huerfanos" %}
                 </div>
                 {% endif %}
             </div>
@@ -184,13 +184,13 @@
     <div class="card-base p-4 sm:p-5">
         <div class="flex items-center justify-between mb-4">
             <div>
-                <h3 class="text-sm sm:text-base md:text-lg font-bold text-text-main">Evolución de Tendencia (7 días)</h3>
-                <p class="text-text-muted text-[10px] sm:text-xs mt-0.5">Comparativa de ingresos vs proyección</p>
+                <h3 class="text-sm sm:text-base md:text-lg font-bold text-text-main">{% trans "Evolución de Tendencia (7 días)" %}</h3>
+                <p class="text-text-muted text-[10px] sm:text-xs mt-0.5">{% trans "Comparativa de ingresos vs proyección" %}</p>
             </div>
             <div class="flex items-center gap-4 text-xs font-mono">
                 <div class="flex items-center gap-2">
                     <span class="w-2 h-2 rounded-full bg-primary shadow-[var(--btn-shadow)]"></span>
-                    <span class="text-text-secondary">Ingresos</span>
+                    <span class="text-text-secondary">{% trans "Ingresos" %}</span>
                 </div>
             </div>
         </div>
@@ -202,21 +202,21 @@
     <!-- Data Table -->
     <div class="card-base overflow-hidden pt-4">
         <div class="px-6 py-2 flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <h3 class="text-lg font-bold text-text-main">Actividad Reciente</h3>
+            <h3 class="text-lg font-bold text-text-main">{% trans "Actividad Reciente" %}</h3>
             <a href="{% url 'bookings:venta_list' %}" class="btn-secondary">
                <span class="material-symbols-outlined text-[18px]">list</span>
-               Ver todas las ventas
+               {% trans "Ver todas las ventas" %}
             </a>
         </div>
         <div class="overflow-x-auto mt-4">
             <table class="w-full text-left text-sm table-responsive">
                 <thead>
                     <tr>
-                        <th>Fecha</th>
-                        <th>Cliente</th>
-                        <th>Localizador</th>
-                        <th>Estado</th>
-                        <th class="text-right">Monto ($)</th>
+                        <th>{% trans "Fecha" %}</th>
+                        <th>{% trans "Cliente" %}</th>
+                        <th>{% trans "Localizador" %}</th>
+                        <th>{% trans "Estado" %}</th>
+                        <th class="text-right">{% trans "Monto ($)" %}</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-border-color">

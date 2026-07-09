@@ -278,6 +278,21 @@ urlpatterns = [
         name="public_hotel_voucher",
     ),
     path("itinerary/v1/live/<str:token>/", public_itinerary_view, name="public_itinerary_live"),
+    path(
+        "itinerary/v1/live/<str:token>/passenger/<int:pasajero_id>/ocr/",
+        dynamic_fb_view("apps.bookings.views.passenger_portal.public_itinerary_ocr_upload"),
+        name="public_itinerary_ocr_upload",
+    ),
+    path(
+        "itinerary/v1/live/<str:token>/passenger/<int:pasajero_id>/save/",
+        dynamic_fb_view("apps.bookings.views.passenger_portal.public_itinerary_ocr_save"),
+        name="public_itinerary_ocr_save",
+    ),
+    path(
+        "itinerary/v1/live/<str:token>/cross-sell/",
+        dynamic_fb_view("apps.bookings.views.passenger_portal.public_itinerary_cross_sell"),
+        name="public_itinerary_cross_sell",
+    ),
     # API
     path("api/", include(router.urls)),
     path("api/v1/gds/ingest-pnr/", api_ingest_pnr_view, name="api_gds_ingest_pnr"),

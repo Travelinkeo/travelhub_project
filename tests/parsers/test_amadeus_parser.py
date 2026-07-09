@@ -27,9 +27,8 @@ MOCK_AI_RESPONSE_AMADEUS = {
     "NOMBRE_DEL_PASAJERO": "JUAN PEREZ",
     "NUMERO_DE_BOLETO": "1761234567890",
     "FECHA_DE_EMISION": "2026-03-15",
-    "TARIFA": 600.0,
-    "IMPUESTOS": 50.0,
-    "TOTAL": 650.0,
+    "TARIFA_IMPORTE": 600.0,
+    "TOTAL_IMPORTE": 650.0,
     "TOTAL_MONEDA": "USD",
     "itinerario": [
         {
@@ -112,3 +111,25 @@ class TestAmadeusParser:
         assert res.pnr == "No encontrado"
         assert res.ticket_number == "No encontrado"
         assert res.passenger_name == "PEREZ/JUAN"  # Extraído por regex Traveler PEREZ/JUAN Agency
+
+    @patch("apps.automation.parsers.ai_universal_parser.UniversalAIParser.parse")
+    def test_parse_empty_itinerary_triggers_ai_reinforcement(self, mock_ai_parse):
+        # Un ticket con datos básicos por regex pero sin itinerario
+        TICKET_NO_FLIGHTS = """
+        ELECTRONIC TICKET RECEIPT
+        Booking ref: XYZ789
+        Ticket number: 176-1234567890
+        Traveler PEREZ/JUAN Agency
+        Date: 15 MAR 2026
+        """
+        mock_ai_parse.return_value = MOCK_AI_RESPONSE_AMADEUS.copy()
+
+        parser = AmadeusParser()
+        res = parser.parse(TICKET_NO_FLIGHTS)
+
+        # Debería haber disparado la IA porque no se encontraron vuelos por regex
+        mock_ai_parse.assert_called_once()
+        assert res.source_system == "AMADEUS"
+        assert res.pnr == "XYZ789"
+        assert len(res.flights) == 1
+        assert res.flights[0]["numero_vuelo"] == "TK0224"

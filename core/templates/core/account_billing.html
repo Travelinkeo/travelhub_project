@@ -1,0 +1,132 @@
+{% load static i18n %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE|default:'es' }}">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% trans "Facturación y Plan" %} — TravelHub</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  body{background:#0F172A;color:#E2E8F0;font-family:system-ui}
+  .card{background:#1E293B;border:1px solid #334155;border-radius:12px;padding:24px}
+  .btn{display:inline-flex;align-items:center;padding:8px 20px;border-radius:8px;font-weight:600;cursor:pointer;transition:.2s}
+  .btn-primary{background:#3B82F6;color:#fff}
+  .btn-primary:hover{background:#2563EB}
+  .btn-outline{border:1px solid #3B82F6;color:#3B82F6;background:transparent}
+  .btn-outline:hover{background:rgba(59,130,246,.1)}
+  .usage-bar{height:8px;background:#334155;border-radius:99px;overflow:hidden}
+  .usage-bar-fill{height:100%;border-radius:99px;transition:width .5s}
+  .plan-card{border:1px solid #334155;border-radius:12px;padding:20px;transition:.3s}
+  .plan-card:hover{border-color:#3B82F6;box-shadow:0 4px 20px rgba(59,130,246,.15)}
+  .plan-card.current{border-color:#22C55E}
+  .plan-card.recommended{border-color:#3B82F6;position:relative}
+  .plan-card.recommended::before{content:"RECOMENDADO";position:absolute;top:-10px;right:16px;background:#3B82F6;color:#fff;font-size:10px;font-weight:700;padding:2px 10px;border-radius:99px}
+</style>
+</head>
+<body class="p-6">
+<div class="max-w-6xl mx-auto">
+  <h1 class="text-2xl font-bold mb-2">{% trans "Facturación y Plan" %}</h1>
+  <p class="text-gray-400 mb-8">{{ agencia.nombre }}</p>
+
+  {% if error %}
+  <div class="bg-red-900/30 border border-red-700 text-red-300 p-4 rounded-lg mb-6">{{ error }}</div>
+  {% endif %}
+
+  <!-- Current Plan Summary -->
+  <div class="card mb-8">
+    <div class="flex justify-between items-start flex-wrap gap-4">
+      <div>
+        <div class="flex items-center gap-3 mb-2">
+          <span class="text-3xl font-bold">{{ plan_display }}</span>
+          <span class="text-xs px-3 py-1 rounded-full {% if config.plan_status == 'active' %}bg-green-900/40 text-green-300{% elif config.plan_status == 'trial' %}bg-blue-900/40 text-blue-300{% else %}bg-yellow-900/40 text-yellow-300{% endif %}">
+            {{ config.get_plan_status_display|default:config.plan_status }}
+          </span>
+          {% if trial_days_left is not None and trial_days_left > 0 %}
+          <span class="text-xs px-3 py-1 rounded-full bg-orange-900/40 text-orange-300">
+            {% blocktrans %}Trial: {{ trial_days_left }} días restantes{% endblocktrans %}
+          </span>
+          {% endif %}
+        </div>
+        <div class="text-sm text-gray-400">
+          {% blocktrans %}Comenzó el {{ config.fecha_inicio_plan }}{% endblocktrans %}
+        </div>
+      </div>
+      <div class="flex gap-3">
+        {% if stripe_portal_url %}
+        <a href="{{ stripe_portal_url }}" target="_blank" class="btn btn-outline text-sm">
+          {% trans "Gestionar Pago" %} →
+        </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Usage vs Limits -->
+  <div class="card mb-8">
+    <h2 class="text-lg font-semibold mb-4">{% trans "Uso vs Límites" %}</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {% with pct=usage.ventas_mes|default:0 %}
+      <div>
+        <div class="flex justify-between text-sm mb-1">
+          <span>{% trans "Ventas / Mes" %}</span>
+          <span>{{ usage.ventas_mes }}/{{ plan_limits.sales_per_month|default:"∞" }}</span>
+        </div>
+        <div class="usage-bar">
+          <div class="usage-bar-fill {% if pct > 80 %}bg-red-500{% else %}bg-blue-500{% endif %}" style="width:{{ pct|stringformat:'d' }}%"></div>
+        </div>
+      </div>
+      {% endwith %}
+      {% with pct=usage.users|default:0 %}
+      <div>
+        <div class="flex justify-between text-sm mb-1">
+          <span>{% trans "Usuarios" %}</span>
+          <span>{{ usage.users }}/{{ plan_limits.users|default:"∞" }}</span>
+        </div>
+        <div class="usage-bar">
+          <div class="usage-bar-fill {% if pct > 80 %}bg-red-500{% else %}bg-blue-500{% endif %}" style="width:{{ pct|stringformat:'d' }}%"></div>
+        </div>
+      </div>
+      {% endwith %}
+      <div>
+        <div class="flex justify-between text-sm mb-1">
+          <span>{% trans "Almacenamiento" %}</span>
+          <span>— / {{ plan_limits.storage_mb|default:"∞" }} MB</span>
+        </div>
+        <div class="usage-bar"><div class="usage-bar-fill bg-blue-500" style="width:5%"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Plans -->
+  <h2 class="text-xl font-bold mb-4">{% trans "Cambiar de Plan" %}</h2>
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    {% for p in plans %}
+    <div class="plan-card {% if p.is_current %}current{% elif p.name == 'PRO' %}recommended{% endif %}">
+      <h3 class="text-lg font-bold mb-1">{{ p.display }}</h3>
+      <ul class="text-sm text-gray-400 mb-4 space-y-1">
+        <li>{% blocktrans with n=p.limits.users|default:'∞' %}{{ n }} usuarios{% endblocktrans %}</li>
+        <li>{% blocktrans with n=p.limits.sales_per_month|default:'∞' %}{{ n }} ventas/mes{% endblocktrans %}</li>
+        <li>{% blocktrans with n=p.limits.storage_mb|default:'∞' %}{{ n }} MB almacenamiento{% endblocktrans %}</li>
+      </ul>
+      {% if p.is_current %}
+        <span class="text-xs text-green-400 font-semibold">✓ {% trans "Plan actual" %}</span>
+      {% elif p.is_upgrade %}
+        {% if p.price_id %}
+        <form method="POST">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="upgrade">
+          <input type="hidden" name="price_id" value="{{ p.price_id }}">
+          <button type="submit" class="btn btn-primary text-sm w-full">{% trans "Actualizar" %}</button>
+        </form>
+        {% endif %}
+      {% else %}
+        <span class="text-xs text-gray-500">{% trans "Plan inferior" %}</span>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+
+  <a href="/dashboard/" class="text-sm text-blue-400 hover:text-blue-300">← {% trans "Volver al Dashboard" %}</a>
+</div>
+</body>
+</html>

@@ -15,6 +15,7 @@ from django.utils import timezone
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
 
 from apps.crm.models import OportunidadViaje
+from apps.common.mixins.export_mixin import ExportMixin
 from core.api import AuditLog, HtmxResponseMixin, SaaSMixin, get_agencia_from_request
 
 from .models import FeeVenta, ItemVenta, PagoVenta, Venta, VentaAuditFinding
@@ -32,12 +33,25 @@ class BookingBaseMixin(SaaSMixin, LoginRequiredMixin):
 # --- VENTAS ---
 
 
-class VentaListView(HtmxResponseMixin, BookingBaseMixin, ListView):
+class VentaListView(ExportMixin, HtmxResponseMixin, BookingBaseMixin, ListView):
     model = Venta
     template_name = "bookings/venta_list.html"
     htmx_template_name = "bookings/partials/venta_list_rows.html"
     context_object_name = "ventas"
     paginate_by = 25
+    export_fields = [
+        "localizador",
+        "cliente__nombres",
+        "cliente__apellidos",
+        "fecha_venta",
+        "moneda__codigo_iso",
+        "total_venta",
+        "monto_pagado",
+        "saldo_pendiente",
+        "estado",
+    ]
+    export_filename = "ventas"
+
 
     def get_queryset(self):
         queryset = (

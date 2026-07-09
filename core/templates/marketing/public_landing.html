@@ -1,0 +1,187 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TravelHub — CRM/ERP Inteligente para Agencias de Viajes</title>
+    <meta name="description" content="La plataforma SaaS todo-en-uno para agencias de viajes. Gestión de boletos, facturación VEN-NIF, CRM con IA, y más.">
+    {# CSS local compilado #}
+    <link rel="stylesheet" href="{% static 'core/css/tailwind-built.css' %}">
+    <style nonce="{{ csp_nonce }}">
+        body { background: #0F172A; color: #E2E8F0; font-family: system-ui, -apple-system, sans-serif; }
+        .gradient-text { background: linear-gradient(135deg, #60A5FA, #A78BFA); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .pricing-card { transition: all 0.3s; }
+        .pricing-card:hover { transform: translateY(-4px); box-shadow: 0 20px 40px -12px rgba(59,130,246,0.3); }
+        .pricing-highlight { border: 2px solid #3B82F6; position: relative; }
+        .pricing-highlight::before { content: "MÁS POPULAR"; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: #3B82F6; color: white; padding: 2px 16px; border-radius: 9999px; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.05em; }
+        .feature-icon { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border-radius: 12px; font-size: 1.5rem; background: #1E293B; }
+        .btn-primary { background: #3B82F6; color: white; padding: 0.75rem 2rem; border-radius: 0.5rem; font-weight: 600; transition: all 0.2s; display: inline-block; text-align: center; }
+        .btn-primary:hover { background: #2563EB; }
+        .btn-secondary { background: #1E293B; color: #E2E8F0; padding: 0.75rem 2rem; border-radius: 0.5rem; font-weight: 600; transition: all 0.2s; display: inline-block; text-align: center; border: 1px solid #334155; }
+        .btn-secondary:hover { background: #334155; }
+        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-10px); } }
+        .float-anim { animation: float 6s ease-in-out infinite; }
+    </style>
+</head>
+<body>
+    {% if not show_pricing_only %}
+    <!-- Nav -->
+    <header class="fixed top-0 left-0 right-0 z-50 bg-slate-900/80 backdrop-blur-lg border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+            <a href="/" class="text-xl font-bold tracking-tight">TravelHub<span class="text-blue-400">.</span></a>
+            <nav class="hidden md:flex items-center gap-6 text-sm text-slate-300">
+                <a href="#features" class="hover:text-white transition">Funcionalidades</a>
+                <a href="/pricing/" class="hover:text-white transition">Precios</a>
+                <a href="/docs/" class="hover:text-white transition">Docs</a>
+                <a href="/status/" class="hover:text-white transition">🔵 Estado</a>
+            </nav>
+            <div class="flex items-center gap-3">
+                <a href="/accounts/login/" class="text-sm text-slate-300 hover:text-white transition">Iniciar sesión</a>
+                <a href="/accounts/signup/" class="btn-primary text-sm px-5 py-2.5">Probar gratis</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero -->
+    <section class="pt-36 pb-20 px-4 text-center relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-b from-blue-950/20 to-transparent pointer-events-none"></div>
+        <div class="max-w-4xl mx-auto relative">
+            <div class="inline-flex items-center gap-2 bg-blue-950/50 border border-blue-800/40 rounded-full px-4 py-1.5 text-sm text-blue-300 mb-8">
+                🚀 SaaS B2B multi-tenant para agencias de viajes
+            </div>
+            <h1 class="text-5xl md:text-7xl font-bold tracking-tight leading-tight mb-6">
+                La plataforma que tu<br>
+                <span class="gradient-text">agencia necesita</span>
+            </h1>
+            <p class="text-xl text-slate-400 max-w-2xl mx-auto mb-10 leading-relaxed">
+                Gestión de boletos con IA, facturación VEN-NIF, CRM inteligente,<br>
+                conciliación automática y más — todo en un solo lugar.
+            </p>
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <a href="/accounts/signup/" class="btn-primary text-lg px-8 py-4">Comenzar prueba gratuita →</a>
+                <a href="/docs/" class="btn-secondary text-lg px-8 py-4">📚 Ver documentación</a>
+            </div>
+            <p class="mt-4 text-sm text-slate-600">Sin tarjeta de crédito · 30 días gratis · Cancela cuando quieras</p>
+        </div>
+    </section>
+
+    <!-- Trust bar -->
+    <section class="py-12 border-y border-slate-800">
+        <div class="max-w-5xl mx-auto px-4 text-center">
+            <p class="text-sm text-slate-500 mb-6">Utilizado por agencias de viajes en</p>
+            <div class="flex flex-wrap justify-center gap-x-12 gap-y-4 text-slate-500 text-sm font-medium">
+                <span>🇻🇪 Venezuela</span>
+                <span>🇨🇴 Colombia</span>
+                <span>🇲🇽 México</span>
+                <span>🇵🇦 Panamá</span>
+                <span>🇪🇸 España</span>
+                <span>🇺🇸 Estados Unidos</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section id="features" class="py-24 px-4">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">Todo lo que necesitas en un solo lugar</h2>
+                <p class="text-lg text-slate-400 max-w-2xl mx-auto">Desde el parsing de boletos hasta la facturación fiscal venezolana — TravelHub automatiza tu operación diaria.</p>
+            </div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for feat in features_list %}
+                <div class="bg-slate-800/40 border border-slate-700/50 rounded-2xl p-6 hover:bg-slate-800/60 transition">
+                    <div class="feature-icon mb-4">{{ feat.icon }}</div>
+                    <h3 class="text-lg font-semibold mb-2">{{ feat.title }}</h3>
+                    <p class="text-sm text-slate-400 leading-relaxed">{{ feat.desc }}</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- Pricing -->
+    <section id="pricing" class="py-20 px-4 bg-slate-900/40">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">Planes simples, sin sorpresas</h2>
+                <p class="text-lg text-slate-400">Empieza gratis, escala cuando lo necesites.</p>
+            </div>
+            <div class="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+                {% for plan in plans %}
+                <div class="pricing-card bg-slate-800/40 border border-slate-700/50 rounded-2xl p-8 {% if plan.highlight %}pricing-highlight{% endif %}">
+                    <h3 class="text-xl font-bold mb-2">{{ plan.name }}</h3>
+                    <p class="text-sm text-slate-400 mb-6">{{ plan.description }}</p>
+                    <p class="mb-6">
+                        <span class="text-4xl font-bold">${{ plan.price }}</span>
+                        <span class="text-slate-400 text-sm">/{{ plan.period }}</span>
+                    </p>
+                    <ul class="space-y-3 mb-8 text-sm">
+                        {% for feat in plan.features %}
+                        <li class="flex items-start gap-3">
+                            <span class="text-blue-400 mt-0.5">✓</span>
+                            <span class="text-slate-300">{{ feat }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    <a href="/accounts/signup/" class="{% if plan.highlight %}btn-primary{% else %}btn-secondary{% endif %} w-full block text-center">
+                        {{ plan.cta }}
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    {% if not show_pricing_only %}
+    <!-- CTA -->
+    <section class="py-24 px-4 text-center">
+        <div class="max-w-3xl mx-auto">
+            <h2 class="text-3xl md:text-4xl font-bold mb-4">¿Listo para transformar tu agencia?</h2>
+            <p class="text-lg text-slate-400 mb-8">Únete a las agencias que ya optimizan sus operaciones con TravelHub.</p>
+            <a href="/accounts/signup/" class="btn-primary text-lg px-10 py-4">Comenzar prueba gratuita →</a>
+            <p class="mt-4 text-sm text-slate-600">Sin compromiso · 30 días gratis · Soporte incluido</p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-800 py-12 px-4">
+        <div class="max-w-6xl mx-auto grid md:grid-cols-4 gap-8 text-sm">
+            <div>
+                <div class="font-bold text-lg mb-4">TravelHub<span class="text-blue-400">.</span></div>
+                <p class="text-slate-500">SaaS multi-tenant para agencias de viajes con IA integrada.</p>
+            </div>
+            <div>
+                <div class="font-semibold mb-3">Producto</div>
+                <div class="flex flex-col gap-2 text-slate-400">
+                    <a href="#features" class="hover:text-white transition">Funcionalidades</a>
+                    <a href="/pricing/" class="hover:text-white transition">Precios</a>
+                    <a href="/docs/" class="hover:text-white transition">Documentación</a>
+                    <a href="/status/" class="hover:text-white transition">Estado</a>
+                </div>
+            </div>
+            <div>
+                <div class="font-semibold mb-3">Recursos</div>
+                <div class="flex flex-col gap-2 text-slate-400">
+                    <a href="/docs/" class="hover:text-white transition">Knowledge Base</a>
+                    <a href="#" class="hover:text-white transition">API Reference</a>
+                    <a href="#" class="hover:text-white transition">Estado del sistema</a>
+                </div>
+            </div>
+            <div>
+                <div class="font-semibold mb-3">Legal</div>
+                <div class="flex flex-col gap-2 text-slate-400">
+                    <a href="#" class="hover:text-white transition">Términos</a>
+                    <a href="#" class="hover:text-white transition">Privacidad</a>
+                    <a href="#" class="hover:text-white transition">SLA</a>
+                </div>
+            </div>
+        </div>
+        <div class="max-w-6xl mx-auto mt-8 pt-8 border-t border-slate-800 text-center text-xs text-slate-600">
+            &copy; {% now "Y" %} TravelHub. Todos los derechos reservados.
+        </div>
+    </footer>
+    {% endif %}
+</body>
+</html>

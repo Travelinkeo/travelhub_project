@@ -1,0 +1,103 @@
+<div id="passenger-card-{{ pasajero.pk }}" class="glass-panel rounded-2xl p-4 shadow-sm flex flex-col gap-2 relative transition-all duration-300">
+    {% if success_message %}
+        <!-- Success Alert banner -->
+        <div class="absolute top-2 right-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-lg px-2 py-1 text-[10px] font-bold animate-pulse">
+            {{ success_message }}
+        </div>
+    {% endif %}
+
+    <div class="flex justify-between items-center border-b border-slate-200/50 dark:border-slate-800/50 pb-2">
+        <div class="flex items-center gap-2">
+            {% if pasajero.foto_perfil %}
+                <img src="{{ pasajero.foto_perfil.url }}" class="w-8 h-8 rounded-full object-cover border border-brand/20">
+            {% else %}
+                <div class="w-8 h-8 rounded-full bg-brand/10 flex items-center justify-center text-brand text-xs font-bold">
+                    {{ pasajero.nombres|slice:":1" }}{{ pasajero.apellidos|slice:":1" }}
+                </div>
+            {% endif %}
+            <h4 class="text-sm font-bold text-brand">
+                {{ pasajero.apellidos }}, {{ pasajero.nombres }}
+            </h4>
+        </div>
+        <span class="text-[9px] font-mono bg-brand/10 text-brand px-2 py-0.5 rounded-full font-bold">
+            {{ pasajero.tipo_documento|default:"PASS" }}
+        </span>
+    </div>
+    
+    <div class="grid grid-cols-2 gap-3 text-xs pt-1">
+        <div>
+            <span class="text-[9px] uppercase text-slate-400 font-semibold block">Documento de Identidad</span>
+            <span class="font-mono font-medium">
+                {% if pasajero.numero_pasaporte %}
+                    Pasaporte: ******{{ pasajero.numero_pasaporte|slice:"-4:" }}
+                {% elif pasajero.cedula_identidad %}
+                    CI: {{ pasajero.cedula_identidad }}
+                {% else %}
+                    No registrado
+                {% endif %}
+            </span>
+        </div>
+        <div>
+            <span class="text-[9px] uppercase text-slate-400 font-semibold block">Fecha Nacimiento</span>
+            <span class="font-medium">
+                {% if pasajero.fecha_nacimiento %}
+                    {{ pasajero.fecha_nacimiento|date:"d M Y" }}
+                {% else %}
+                    No registrada
+                {% endif %}
+            </span>
+        </div>
+        <div>
+            <span class="text-[9px] uppercase text-slate-400 font-semibold block">Nacionalidad</span>
+            <span class="font-medium">
+                {% if pasajero.nacionalidad %}
+                    {{ pasajero.nacionalidad.nombre }}
+                {% else %}
+                    No registrada
+                {% endif %}
+            </span>
+        </div>
+        <div>
+            <span class="text-[9px] uppercase text-slate-400 font-semibold block">Vencimiento Pasaporte</span>
+            <span class="font-medium text-amber-500">
+                {% if pasajero.fecha_vencimiento_documento %}
+                    {{ pasajero.fecha_vencimiento_documento|date:"d M Y" }}
+                {% else %}
+                    No registrado
+                {% endif %}
+            </span>
+        </div>
+    </div>
+
+    <!-- Passport Upload form via HTMX -->
+    <div class="border-t border-slate-200/40 dark:border-slate-800/40 pt-3 mt-1 flex flex-col gap-2">
+        <form id="upload-form-{{ pasajero.pk }}"
+              hx-encoding="multipart/form-data" 
+              hx-post="{% url 'bookings:public_itinerary_ocr_upload' token=token pasajero_id=pasajero.pk %}"
+              hx-target="#ocr-mount-{{ pasajero.pk }}"
+              hx-swap="innerHTML"
+              class="flex items-center justify-between gap-2">
+            {% csrf_token %}
+            <span class="text-[10px] text-slate-400 font-medium">¿Falta información o cambió tu pasaporte?</span>
+            
+            <label class="cursor-pointer bg-brand/10 border border-brand/20 hover:bg-brand/20 text-brand rounded-xl px-3 py-1.5 text-[10px] font-bold transition-all flex items-center gap-1">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                Escanear con IA
+                <input type="file" name="archivo" accept="image/*" class="hidden" 
+                       onchange="
+                           document.getElementById('ocr-loader-{{ pasajero.pk }}').classList.remove('hidden');
+                           htmx.trigger(this.form, 'submit');
+                       ">
+            </label>
+        </form>
+
+        <!-- Loader -->
+        <div id="ocr-loader-{{ pasajero.pk }}" class="hidden flex items-center justify-center gap-2 p-4 text-xs text-brand font-semibold animate-pulse bg-brand/5 rounded-xl border border-brand/10">
+            <svg class="animate-spin h-4 w-4 text-brand" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+            Analizando pasaporte con Gemini Vision...
+        </div>
+
+        <!-- Mount point for OCR Verification form -->
+        <div id="ocr-mount-{{ pasajero.pk }}"></div>
+    </div>
+</div>

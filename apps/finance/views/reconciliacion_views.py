@@ -125,7 +125,9 @@ class ProcessReconciliacionHTMXView(LoginRequiredMixin, View):
             from apps.finance.tasks_reconciliation import conciliar_reporte_batch_task
 
             transaction.on_commit(
-                lambda: conciliar_reporte_batch_task.delay(str(reporte.pk)), str(reporte.agencia.pk)
+                lambda: conciliar_reporte_batch_task.delay(
+                    reporte_id=str(reporte.pk), agencia_id=reporte.agencia.pk
+                )
             )
 
             messages.info(

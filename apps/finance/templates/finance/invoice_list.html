@@ -50,10 +50,17 @@
                 </div>
                 
                 <div class="flex items-center gap-3">
-                    <span class="text-[10px] font-black text-text-muted uppercase tracking-widest">
+                    <span class="text-[10px] font-black text-text-muted uppercase tracking-widest mr-2">
                         Total en vista: <span class="text-text-main">{{ invoices|length }}</span>
                     </span>
+                    <a href="?{% if filtros.estado %}estado={{ filtros.estado }}&{% endif %}export=excel" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase tracking-wider transition-all border border-emerald-500/20">
+                        <span class="material-symbols-outlined text-[14px]">download</span> Excel
+                    </a>
+                    <a href="?{% if filtros.estado %}estado={{ filtros.estado }}&{% endif %}export=pdf" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 text-[10px] font-black uppercase tracking-wider transition-all border border-red-500/20">
+                        <span class="material-symbols-outlined text-[14px]">picture_as_pdf</span> PDF
+                    </a>
                 </div>
+
             </div>
         </div>
 

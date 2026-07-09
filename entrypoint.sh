@@ -16,6 +16,7 @@ while True:
 echo "✅ PostgreSQL iniciado."
 
 python manage.py migrate --noinput || echo "⚠️ Migrate falló (continuando)..."
-python manage.py collectstatic --noinput
+python manage.py collectstatic --noinput &
+echo "📦 collectstatic lanzado en background. Iniciando servidor..."
 
 exec "$@"

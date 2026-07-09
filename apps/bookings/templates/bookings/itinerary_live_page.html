@@ -201,17 +201,20 @@
         </div>
 
         <!-- Navigation Tabs (Dynamic) -->
-        <nav class="flex p-1 rounded-2xl mb-6 shadow-inner border transition-all" :class="darkMode ? 'bg-slate-900/40 border-slate-800/60' : 'bg-slate-100 border-slate-200'">
-            <button @click="activeTab = 'timeline'" :class="activeTab === 'timeline' ? (darkMode ? 'bg-slate-800 text-white shadow-md' : 'bg-white text-slate-900 shadow-sm') : 'text-slate-400 hover:text-slate-300'" class="flex-1 py-2.5 text-xs font-bold rounded-xl transition-all duration-200">
+        <nav class="flex p-1 rounded-2xl mb-6 shadow-inner border transition-all overflow-x-auto whitespace-nowrap" :class="darkMode ? 'bg-slate-900/40 border-slate-800/60' : 'bg-slate-100 border-slate-200'">
+            <button @click="activeTab = 'timeline'" :class="activeTab === 'timeline' ? (darkMode ? 'bg-slate-800 text-white shadow-md' : 'bg-white text-slate-900 shadow-sm') : 'text-slate-400 hover:text-slate-300'" class="flex-1 px-3 py-2.5 text-xs font-bold rounded-xl transition-all duration-200">
                 Itinerario
             </button>
-            <button @click="activeTab = 'passengers'" :class="activeTab === 'passengers' ? (darkMode ? 'bg-slate-800 text-white shadow-md' : 'bg-white text-slate-900 shadow-sm') : 'text-slate-400 hover:text-slate-300'" class="flex-1 py-2.5 text-xs font-bold rounded-xl transition-all duration-200">
+            <button @click="activeTab = 'passengers'" :class="activeTab === 'passengers' ? (darkMode ? 'bg-slate-800 text-white shadow-md' : 'bg-white text-slate-900 shadow-sm') : 'text-slate-400 hover:text-slate-300'" class="flex-1 px-3 py-2.5 text-xs font-bold rounded-xl transition-all duration-200">
                 Pasajeros
             </button>
-            <button @click="activeTab = 'billing'" :class="activeTab === 'billing' ? (darkMode ? 'bg-slate-800 text-white shadow-md' : 'bg-white text-slate-900 shadow-sm') : 'text-slate-400 hover:text-slate-300'" class="flex-1 py-2.5 text-xs font-bold rounded-xl transition-all duration-200">
+            <button @click="activeTab = 'crosssell'" :class="activeTab === 'crosssell' ? (darkMode ? 'bg-slate-800 text-white shadow-md' : 'bg-white text-slate-900 shadow-sm') : 'text-slate-400 hover:text-slate-300'" class="flex-1 px-3 py-2.5 text-xs font-bold rounded-xl transition-all duration-200">
+                Mejorar Viaje
+            </button>
+            <button @click="activeTab = 'billing'" :class="activeTab === 'billing' ? (darkMode ? 'bg-slate-800 text-white shadow-md' : 'bg-white text-slate-900 shadow-sm') : 'text-slate-400 hover:text-slate-300'" class="flex-1 px-3 py-2.5 text-xs font-bold rounded-xl transition-all duration-200">
                 Pagos
             </button>
-            <button @click="activeTab = 'support'" :class="activeTab === 'support' ? (darkMode ? 'bg-slate-800 text-white shadow-md' : 'bg-white text-slate-900 shadow-sm') : 'text-slate-400 hover:text-slate-300'" class="flex-1 py-2.5 text-xs font-bold rounded-xl transition-all duration-200">
+            <button @click="activeTab = 'support'" :class="activeTab === 'support' ? (darkMode ? 'bg-slate-800 text-white shadow-md' : 'bg-white text-slate-900 shadow-sm') : 'text-slate-400 hover:text-slate-300'" class="flex-1 px-3 py-2.5 text-xs font-bold rounded-xl transition-all duration-200">
                 Soporte
             </button>
         </nav>
@@ -253,54 +256,105 @@
                 
                 <div class="space-y-3">
                     {% for pasajero in venta.pasajeros.all %}
-                        <div class="glass-panel rounded-2xl p-4 shadow-sm flex flex-col gap-2">
-                            <div class="flex justify-between items-center border-b border-slate-200/50 dark:border-slate-800/50 pb-2">
-                                <h4 class="text-sm font-bold text-brand">
-                                    {{ pasajero.apellidos }}, {{ pasajero.nombres }}
-                                </h4>
-                                <span class="text-[9px] font-mono bg-brand/10 text-brand px-2 py-0.5 rounded-full font-bold">
-                                    {{ pasajero.tipo_documento|default:"PAX" }}
-                                </span>
-                            </div>
-                            
-                            <div class="grid grid-cols-2 gap-3 text-xs pt-1">
-                                <div>
-                                    <span class="text-[9px] uppercase text-slate-400 font-semibold block">Documento de Identidad</span>
-                                    <span class="font-mono font-medium">
-                                        {% if pasajero.numero_pasaporte %}
-                                            Passport: ******{{ pasajero.numero_pasaporte|slice:"-4:" }}
-                                        {% elif pasajero.cedula_identidad %}
-                                            CI: {{ pasajero.cedula_identidad }}
-                                        {% else %}
-                                            No registrado
-                                        {% endif %}
-                                    </span>
-                                </div>
-                                {% if pasajero.fecha_nacimiento %}
-                                <div>
-                                    <span class="text-[9px] uppercase text-slate-400 font-semibold block">Fecha Nacimiento</span>
-                                    <span class="font-medium">{{ pasajero.fecha_nacimiento|date:"d M Y" }}</span>
-                                </div>
-                                {% endif %}
-                                {% if pasajero.nacionalidad %}
-                                <div>
-                                    <span class="text-[9px] uppercase text-slate-400 font-semibold block">Nacionalidad</span>
-                                    <span class="font-medium">{{ pasajero.nacionalidad.nombre }}</span>
-                                </div>
-                                {% endif %}
-                                {% if pasajero.telefono %}
-                                <div>
-                                    <span class="text-[9px] uppercase text-slate-400 font-semibold block">Teléfono de Contacto</span>
-                                    <span class="font-medium">{{ pasajero.telefono }}</span>
-                                </div>
-                                {% endif %}
-                            </div>
-                        </div>
+                        {% include "bookings/passenger_portal/partials/passenger_card.html" %}
                     {% empty %}
                         <div class="glass-panel rounded-2xl p-6 text-center text-slate-400 text-sm">
                             No hay pasajeros cargados en esta venta.
                         </div>
                     {% endfor %}
+                </div>
+            </div>
+
+            <!-- TAB: Mejorar Viaje / Cross-Selling -->
+            <div x-show="activeTab === 'crosssell'" class="space-y-4" style="display: none;" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" x-data="{ selectedService: '' }">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2 px-1">Añadir Servicios a tu Viaje</h3>
+                
+                <!-- Services Carousel/Grid -->
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <!-- Seguro / Asistencia -->
+                    <button @click="selectedService = 'SEG'" 
+                            :class="selectedService === 'SEG' ? 'border-brand bg-brand/5 ring-1 ring-brand' : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60'"
+                            class="glass-panel p-4 rounded-2xl border text-center transition-all duration-200 flex flex-col items-center gap-2">
+                        <span class="text-2xl">🛡️</span>
+                        <span class="text-xs font-bold">Seguro de Viaje</span>
+                        <span class="text-[9px] text-slate-400">Asistencia internacional médica completa.</span>
+                    </button>
+
+                    <!-- Alquiler Auto -->
+                    <button @click="selectedService = 'OTR'" 
+                            :class="selectedService === 'OTR' ? 'border-brand bg-brand/5 ring-1 ring-brand' : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60'"
+                            class="glass-panel p-4 rounded-2xl border text-center transition-all duration-200 flex flex-col items-center gap-2">
+                        <span class="text-2xl">🚗</span>
+                        <span class="text-xs font-bold">Alquiler de Auto</span>
+                        <span class="text-[9px] text-slate-400">Maneja a tu ritmo en tu destino.</span>
+                    </button>
+
+                    <!-- Lounge VIP -->
+                    <button @click="selectedService = 'LNG'" 
+                            :class="selectedService === 'LNG' ? 'border-brand bg-brand/5 ring-1 ring-brand' : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60'"
+                            class="glass-panel p-4 rounded-2xl border text-center transition-all duration-200 flex flex-col items-center gap-2">
+                        <span class="text-2xl">✨</span>
+                        <span class="text-xs font-bold">Lounge VIP</span>
+                        <span class="text-[9px] text-slate-400">Espera tu vuelo con máximo confort.</span>
+                    </button>
+
+                    <!-- SIM de Datos -->
+                    <button @click="selectedService = 'SIM'" 
+                            :class="selectedService === 'SIM' ? 'border-brand bg-brand/5 ring-1 ring-brand' : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60'"
+                            class="glass-panel p-4 rounded-2xl border text-center transition-all duration-200 flex flex-col items-center gap-2">
+                        <span class="text-2xl">📱</span>
+                        <span class="text-xs font-bold">E-SIM / Conectividad</span>
+                        <span class="text-[9px] text-slate-400">Internet móvil al aterrizar.</span>
+                    </button>
+                </div>
+
+                <!-- Dynamic Form Container -->
+                <div x-show="selectedService !== ''" class="glass-panel rounded-3xl p-6 shadow-lg border border-brand/10">
+                    <form hx-post="{% url 'bookings:public_itinerary_cross_sell' token=token %}"
+                          hx-target="#cross-sell-mount"
+                          hx-swap="innerHTML">
+                        {% csrf_token %}
+                        <input type="hidden" name="tipo_servicio" :value="selectedService">
+                        
+                        <div id="cross-sell-mount" class="space-y-4">
+                            <h4 class="text-sm font-bold text-brand flex items-center gap-2">
+                                <span x-show="selectedService === 'SEG'">🛡️ Seguro de Viaje</span>
+                                <span x-show="selectedService === 'OTR'">🚗 Alquiler de Auto</span>
+                                <span x-show="selectedService === 'LNG'">✨ Acceso a Lounge VIP</span>
+                                <span x-show="selectedService === 'SIM'">📱 E-SIM / Conectividad</span>
+                            </h4>
+
+                            <div class="grid grid-cols-2 gap-3 text-xs">
+                                <div>
+                                    <label class="block text-[10px] uppercase text-slate-400 font-semibold mb-1">Fecha Inicio</label>
+                                    <input type="date" name="fecha_inicio" required
+                                           class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg px-2.5 py-1.5 focus:border-brand focus:ring-1 focus:ring-brand outline-none transition-colors">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] uppercase text-slate-400 font-semibold mb-1">Fecha Fin</label>
+                                    <input type="date" name="fecha_fin"
+                                           class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg px-2.5 py-1.5 focus:border-brand focus:ring-1 focus:ring-brand outline-none transition-colors">
+                                </div>
+                                <div class="col-span-2">
+                                    <label class="block text-[10px] uppercase text-slate-400 font-semibold mb-1">Pasajero Solicitante</label>
+                                    <select name="nombre_pasajero" class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg px-2.5 py-1.5 focus:border-brand focus:ring-1 focus:ring-brand outline-none transition-colors">
+                                        {% for pax in venta.pasajeros.all %}
+                                            <option value="{{ pax.apellidos }}, {{ pax.nombres }}">{{ pax.apellidos }}, {{ pax.nombres }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-span-2">
+                                    <label class="block text-[10px] uppercase text-slate-400 font-semibold mb-1">Requerimientos Especiales / Detalles</label>
+                                    <textarea name="notas" placeholder="Ej: Categoría SUV para auto, Seguro con cobertura COVID, etc." rows="3"
+                                              class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg px-2.5 py-1.5 focus:border-brand focus:ring-1 focus:ring-brand outline-none transition-colors"></textarea>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="w-full py-2.5 bg-brand hover:bg-brand-hover text-white text-xs font-bold rounded-xl shadow-lg transition-colors">
+                                Solicitar Cotización
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
 

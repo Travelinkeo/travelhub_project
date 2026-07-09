@@ -76,6 +76,265 @@ class AutoModelViewSet(InternalAPIAuthMixin, viewsets.ModelViewSet):
         count = queryset.count()
         return Response({"count": count})
 
+    @extend_schema(description="Exportar registros a un archivo Excel (.xlsx)")
+    @action(detail=False, methods=["get"])
+    def export_excel(self, request):
+        """
+        Endpoint para exportar los registros del tenant actual a Excel.
+        """
+        import openpyxl
+        from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
+        from django.http import HttpResponse
+        from datetime import datetime
+
+        queryset = self.get_queryset()
+        
+        # Limitar a 10,000 registros para evitar problemas de memoria
+        if queryset.count() > 10000:
+            queryset = queryset[:10000]
+
+        model = self.serializer_class.Meta.model
+        model_name = model.__name__
+
+        fields = [
+            f.name
+            for f in model._meta.fields
+            if f.name
+            not in ("id", "agencia", "agency", "is_deleted", "deleted_at", "record_hash")
+        ]
+        headers = [f.replace("_", " ").title() for f in fields]
+
+        data = []
+        for obj in queryset:
+            row = {}
+            for field in fields:
+                val = getattr(obj, field, "")
+                if hasattr(val, "strftime"):
+                    row[field] = val.strftime("%Y-%m-%d %H:%M")
+                elif hasattr(val, "pk"):
+                    row[field] = str(val)
+                elif val is None:
+                    row[field] = ""
+                else:
+                    row[field] = val
+            data.append(row)
+
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = model_name[:31]
+
+        # Headers con estilo (Obsidian Emerald Theme)
+        header_font = Font(bold=True, color="FFFFFF")
+        header_fill = PatternFill(start_color="047857", end_color="047857", fill_type="solid")
+        thin_border = Border(
+            left=Side(style="thin", color="D1D5DB"),
+            right=Side(style="thin", color="D1D5DB"),
+            top=Side(style="thin", color="D1D5DB"),
+            bottom=Side(style="thin", color="D1D5DB"),
+        )
+
+        for col_idx, header in enumerate(headers, 1):
+            cell = ws.cell(row=1, column=col_idx, value=header)
+            cell.font = header_font
+            cell.fill = header_fill
+            cell.alignment = Alignment(horizontal="center", vertical="center")
+            cell.border = thin_border
+
+        # Rellenar datos
+        for row_idx, row_data in enumerate(data, 2):
+            for col_idx, field in enumerate(fields, 1):
+                val = row_data.get(field, "")
+                cell = ws.cell(row=row_idx, column=col_idx, value=val)
+                cell.border = thin_border
+
+        # Auto-ajustar columnas
+        for col in range(1, len(headers) + 1):
+            max_length = max(
+                len(str(ws.cell(row=r, column=col).value or "")) for r in range(1, len(data) + 2)
+            )
+            ws.column_dimensions[openpyxl.utils.get_column_letter(col)].width = min(max_length + 2, 50)
+
+        ws.freeze_panes = "A2"
+
+        response = HttpResponse(
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+        response["Content-Disposition"] = (
+            f'attachment; filename="reporte_{model_name.lower()}_{datetime.now().strftime("%Y%m%d_%H%M")}.xlsx"'
+        )
+        wb.save(response)
+        return response
+
+    @extend_schema(description="Exportar registros a un archivo PDF (.pdf)")
+    @action(detail=False, methods=["get"])
+    def export_pdf(self, request):
+        """
+        Endpoint para exportar los registros del tenant actual a PDF.
+        """
+        from django.http import HttpResponse
+        from django.utils import timezone
+        from core.middleware import get_current_agency
+        from apps.common.services.pdf_renderer import PdfRendererService
+        import html
+
+        queryset = self.get_queryset()
+        
+        # Limitar a 10,000 registros para evitar problemas de memoria
+        if queryset.count() > 10000:
+            queryset = queryset[:10000]
+
+        model = self.serializer_class.Meta.model
+        model_name = model.__name__
+
+        fields = [
+            f.name
+            for f in model._meta.fields
+            if f.name
+            not in ("id", "agencia", "agency", "is_deleted", "deleted_at", "record_hash")
+        ]
+        headers = [f.replace("_", " ").title() for f in fields]
+
+        data = []
+        for obj in queryset:
+            row = {}
+            for field in fields:
+                val = getattr(obj, field, "")
+                if hasattr(val, "strftime"):
+                    row[field] = val.strftime("%Y-%m-%d %H:%M")
+                elif hasattr(val, "pk"):
+                    row[field] = str(val)
+                elif val is None:
+                    row[field] = ""
+                else:
+                    row[field] = val
+            data.append(row)
+
+        # Obtener datos de la agencia para personalización multi-tenant
+        agency = get_current_agency()
+        agency_name = agency.nombre if agency else "TravelHub"
+        
+        # Formatear la fecha actual
+        date_str = timezone.localtime(timezone.now()).strftime("%d/%m/%Y %I:%M %p")
+        
+        # Título y metadatos
+        title = f"Reporte de {model_name}"
+        
+        # Construir cabeceras
+        headers_html = "".join(f"<th>{html.escape(str(h))}</th>" for h in headers)
+        
+        # Construir filas
+        rows_list = []
+        for row in data:
+            row_html = "<tr>"
+            for field in fields:
+                val = row.get(field, "")
+                row_html += f"<td>{html.escape(str(val))}</td>"
+            row_html += "</tr>"
+            rows_list.append(row_html)
+        rows_html = "".join(rows_list)
+
+        # HTML completo para el PDF (Obsidian Emerald Theme)
+        html_content = f"""<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>{html.escape(title)}</title>
+    <style>
+        @page {{
+            size: A4 landscape;
+            margin: 15mm;
+            @bottom-right {{
+                content: "Página " counter(page) " de " counter(pages);
+                font-family: Arial, sans-serif;
+                font-size: 8pt;
+                color: #6b7280;
+            }}
+            @bottom-left {{
+                content: "{html.escape(agency_name)} - {html.escape(title)}";
+                font-family: Arial, sans-serif;
+                font-size: 8pt;
+                color: #6b7280;
+            }}
+        }}
+        body {{
+            font-family: Arial, sans-serif;
+            color: #1f2937;
+            margin: 0;
+            padding: 0;
+            -webkit-print-color-adjust: exact;
+        }}
+        .header {{
+            margin-bottom: 20px;
+            border-bottom: 2px solid #047857;
+            padding-bottom: 10px;
+        }}
+        .header h1 {{
+            margin: 0;
+            font-size: 20pt;
+            color: #064e3b;
+        }}
+        .header .meta {{
+            font-size: 9pt;
+            color: #6b7280;
+            margin-top: 5px;
+        }}
+        table {{
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 8pt;
+        }}
+        th {{
+            background-color: #047857;
+            color: white;
+            font-weight: bold;
+            text-align: left;
+            padding: 8px 10px;
+            border: 1px solid #047857;
+        }}
+        td {{
+            padding: 6px 10px;
+            border: 1px solid #e5e7eb;
+            word-break: break-all;
+        }}
+        tr:nth-child(even) td {{
+            background-color: #f0fdf4; /* Obsidian emerald light tint */
+        }}
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>{html.escape(title)}</h1>
+        <div class="meta">
+            <strong>Agencia:</strong> {html.escape(agency_name)} | 
+            <strong>Fecha de Generación:</strong> {html.escape(date_str)} | 
+            <strong>Total de Registros:</strong> {len(data)}
+        </div>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                {headers_html}
+            </tr>
+        </thead>
+        <tbody>
+            {rows_html}
+        </tbody>
+    </table>
+</body>
+</html>"""
+
+        try:
+            pdf_bytes = PdfRendererService.render_html_to_pdf(html_content)
+            response = HttpResponse(pdf_bytes, content_type="application/pdf")
+            response["Content-Disposition"] = (
+                f'attachment; filename="reporte_{model_name.lower()}_{timezone.now().strftime("%Y%m%d_%H%M")}.pdf"'
+            )
+            return response
+        except Exception as e:
+            logger.exception("Error al generar PDF de exportación")
+            return HttpResponse(f"Error al generar reporte PDF: {str(e)}", status=500)
+
+
 
 def generate_api_for_model(model):
     """

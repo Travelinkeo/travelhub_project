@@ -1,12 +1,5 @@
 import os
 
-from opentelemetry import trace
-from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
-from opentelemetry.instrumentation.django import DjangoInstrumentor
-from opentelemetry.sdk.resources import Resource
-from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import BatchSpanProcessor
-
 
 def setup_telemetry():
     """
@@ -15,6 +8,14 @@ def setup_telemetry():
     """
     if os.environ.get("ENABLE_TELEMETRY") != "True":
         return
+
+    # Imports perezosos — solo se evalúan si la telemetría está habilitada
+    from opentelemetry import trace
+    from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+    from opentelemetry.instrumentation.django import DjangoInstrumentor
+    from opentelemetry.sdk.resources import Resource
+    from opentelemetry.sdk.trace import TracerProvider
+    from opentelemetry.sdk.trace.export import BatchSpanProcessor
 
     # Define the service name resource
     resource = Resource.create({"service.name": "travelhub-backend"})

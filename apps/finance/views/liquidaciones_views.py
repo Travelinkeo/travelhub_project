@@ -6,14 +6,27 @@ from django.utils import timezone
 from django.views.generic import DetailView, ListView, TemplateView
 
 from apps.bookings.models import ItemVenta, Proveedor
+from apps.common.mixins.export_mixin import ExportMixin
 from core.api import SaaSMixin, get_agencia_from_request
 
 
-class LiquidacionListView(LoginRequiredMixin, ListView):
+class LiquidacionListView(ExportMixin, LoginRequiredMixin, ListView):
     model = None
     template_name = "finance/liquidaciones/dashboard.html"
     context_object_name = "liquidaciones"
     paginate_by = 20
+    export_fields = [
+        "id_liquidacion",
+        "proveedor__nombre",
+        "venta__localizador",
+        "fecha_emision",
+        "monto_total",
+        "monto_pagado",
+        "saldo_pendiente",
+        "estado",
+    ]
+    export_filename = "liquidaciones_proveedores"
+
 
     def dispatch(self, request, *args, **kwargs):
         from django.apps import apps

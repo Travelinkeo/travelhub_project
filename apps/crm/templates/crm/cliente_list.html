@@ -47,9 +47,9 @@
     <div class="card-base shadow-2xl overflow-hidden border-2 border-primary/5">
         <!-- Filter Bar -->
         <div class="px-6 py-5 border-b border-border-color bg-surface-2/50 backdrop-blur-md">
-            <div class="flex flex-col lg:flex-row gap-4">
+            <div class="flex flex-col lg:flex-row gap-4 items-center justify-between">
                 <!-- Search Box -->
-                <div class="relative flex-1 group">
+                <div class="relative flex-1 w-full group">
                     <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-muted text-[20px] group-focus-within:text-primary transition-colors">search</span>
                     <input type="text" name="q" placeholder="Buscar por nombre, cédula, email o empresa..."
                         value="{{ request.GET.q }}"
@@ -61,30 +61,44 @@
                     <span class="search-indicator htmx-indicator absolute right-3 top-1/2 -translate-y-1/2 material-symbols-outlined animate-spin text-[16px] text-primary">progress_activity</span>
                 </div>
 
-                <!-- Segmentation Chips -->
-                <div class="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
-                    <a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}" 
-                        class="px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border
-                        {% if not request.GET.tipo %}bg-primary text-on-primary border-primary shadow-lg shadow-primary/20{% else %}bg-surface-2 text-text-muted border-border-color hover:text-text-main{% endif %}">
-                        Todos
-                    </a>
-                    <a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}tipo=COR" 
-                        class="px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border
-                        {% if request.GET.tipo == 'COR' %}bg-purple-600 text-white border-purple-500 shadow-lg shadow-purple-500/20{% else %}bg-surface-2 text-text-muted border-border-color hover:text-purple-400{% endif %}">
-                        Corporativo
-                    </a>
-                    <a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}tipo=VIP" 
-                        class="px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border
-                        {% if request.GET.tipo == 'VIP' %}bg-amber-500 text-white border-amber-400 shadow-lg shadow-amber-500/20{% else %}bg-surface-2 text-text-muted border-border-color hover:text-amber-500{% endif %}">
-                        VIP
-                    </a>
-                    <a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}tipo=IND" 
-                        class="px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border
-                        {% if request.GET.tipo == 'IND' %}bg-primary text-on-primary border-primary shadow-lg shadow-primary/20{% else %}bg-surface-2 text-text-muted border-border-color hover:text-text-main{% endif %}">
-                        Individual
-                    </a>
+                <!-- Segmentation Chips & Export -->
+                <div class="flex flex-wrap items-center gap-3 w-full lg:w-auto overflow-x-auto no-scrollbar py-1">
+                    <div class="flex items-center gap-2">
+                        <a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}" 
+                            class="px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border
+                            {% if not request.GET.tipo %}bg-primary text-on-primary border-primary shadow-lg shadow-primary/20{% else %}bg-surface-2 text-text-muted border-border-color hover:text-text-main{% endif %}">
+                            Todos
+                        </a>
+                        <a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}tipo=COR" 
+                            class="px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border
+                            {% if request.GET.tipo == 'COR' %}bg-purple-600 text-white border-purple-500 shadow-lg shadow-purple-500/20{% else %}bg-surface-2 text-text-muted border-border-color hover:text-purple-400{% endif %}">
+                            Corporativo
+                        </a>
+                        <a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}tipo=VIP" 
+                            class="px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border
+                            {% if request.GET.tipo == 'VIP' %}bg-amber-500 text-white border-amber-400 shadow-lg shadow-amber-500/20{% else %}bg-surface-2 text-text-muted border-border-color hover:text-amber-500{% endif %}">
+                            VIP
+                        </a>
+                        <a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}tipo=IND" 
+                            class="px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border
+                            {% if request.GET.tipo == 'IND' %}bg-primary text-on-primary border-primary shadow-lg shadow-primary/20{% else %}bg-surface-2 text-text-muted border-border-color hover:text-text-main{% endif %}">
+                            Individual
+                        </a>
+                    </div>
+                    
+                    <div class="w-[1px] h-6 bg-border-color mx-1 shrink-0"></div>
+                    
+                    <div class="flex items-center gap-2">
+                        <a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.tipo %}tipo={{ request.GET.tipo }}&{% endif %}export=excel" class="btn-secondary flex items-center justify-center !h-9 !px-3 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/10 text-[10px] font-black uppercase tracking-wider gap-1.5" title="Exportar Excel">
+                            <span class="material-symbols-outlined text-[14px]">download</span> Excel
+                        </a>
+                        <a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.tipo %}tipo={{ request.GET.tipo }}&{% endif %}export=pdf" class="btn-secondary flex items-center justify-center !h-9 !px-3 border border-red-500/20 text-red-400 hover:bg-red-500/10 text-[10px] font-black uppercase tracking-wider gap-1.5" title="Exportar PDF">
+                            <span class="material-symbols-outlined text-[14px]">picture_as_pdf</span> PDF
+                        </a>
+                    </div>
                 </div>
             </div>
+
         </div>
 
         <!-- Table Container -->

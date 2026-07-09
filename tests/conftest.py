@@ -96,8 +96,12 @@ def pytest_configure(config):
             for _db in ("template1", "travelhub_test"):
                 try:
                     _c = _pg_sdk.connect(
-                        host=_host, port=_port, user=_user, password=_pass,
-                        dbname=_db, connect_timeout=5,
+                        host=_host,
+                        port=_port,
+                        user=_user,
+                        password=_pass,
+                        dbname=_db,
+                        connect_timeout=5,
                     )
                     _c.autocommit = True
                     with _c.cursor() as _cur:

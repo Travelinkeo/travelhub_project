@@ -14,6 +14,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 COPY requirements/ ./requirements/
 RUN pip install --no-cache-dir --default-timeout=300 --retries=5 -r requirements/prod.txt --prefix=/install
+RUN pip install --no-cache-dir "setuptools<70" --prefix=/install
 
 COPY travelhub/ ./travelhub/
 COPY core/ ./core/
@@ -27,12 +28,14 @@ COPY tailwind.config.js ./
 COPY tests/test_health_smoke.py ./tests/test_health_smoke.py
 
 COPY compilar.sh ./compilar.sh
+COPY compile_i18n.py ./compile_i18n.py
 
 RUN chmod +x ./compilar.sh && sed -i 's/\r$//' ./compilar.sh && bash ./compilar.sh || true
+RUN python compile_i18n.py || true
 
 RUN PYTHONPATH=/install/lib/python3.12/site-packages \
     DJANGO_SETTINGS_MODULE=travelhub.settings \
-    SECRET_KEY=build-placeholder-key-not-used-in-production \
+    SECRET_KEY=build-placeholder-key-not-used-in-production-1234567890 \
     DATABASE_URL=sqlite:///tmp/build.db \
     DEBUG=False \
     python manage.py collectstatic --noinput || true
@@ -40,7 +43,7 @@ RUN PYTHONPATH=/install/lib/python3.12/site-packages \
 RUN mkdir -p /build/staticfiles
 
 # Stage 2: runtime — minimal image
-FROM python:3.12-slim
+FROM python:3.12-slim AS runtime
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
@@ -61,9 +64,10 @@ COPY --from=builder /build/staticfiles ./staticfiles/
 COPY --from=builder /build/templates ./templates/
 COPY --from=builder /build/locale ./locale/
 COPY --from=builder /build/docs ./docs/
+RUN pip install --no-cache-dir "setuptools<70"
 COPY entrypoint.sh ./entrypoint.sh
 
-RUN chmod +x ./entrypoint.sh && groupadd -r appgroup && useradd -r -g appgroup appuser && chown -R appuser:appgroup /app
+RUN chmod +x ./entrypoint.sh && sed -i 's/\r$//' ./entrypoint.sh && groupadd -r appgroup && useradd -r -g appgroup appuser && chown -R appuser:appgroup /app
 
 EXPOSE 8000
 

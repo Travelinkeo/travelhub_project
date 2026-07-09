@@ -5,6 +5,7 @@ from django.urls import reverse_lazy
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
 
 from apps.crm.models import Cliente
+from apps.common.mixins.export_mixin import ExportMixin
 from core.api import HtmxResponseMixin, SaaSMixin
 
 
@@ -17,12 +18,23 @@ class CRMBaseMixin(SaaSMixin, LoginRequiredMixin):
         return context
 
 
-class ClienteListView(HtmxResponseMixin, CRMBaseMixin, ListView):
+class ClienteListView(ExportMixin, HtmxResponseMixin, CRMBaseMixin, ListView):
     model = Cliente
     template_name = "crm/cliente_list.html"  # Preferring app template
     htmx_template_name = "crm/partials/cliente_list_table.html"
     context_object_name = "clientes"
     paginate_by = 25
+    export_fields = [
+        "tipo_cliente",
+        "nombres",
+        "apellidos",
+        "cedula_identidad",
+        "email",
+        "telefono_principal",
+        "ciudad__nombre",
+    ]
+    export_filename = "clientes"
+
 
     def get_queryset(self):
         queryset = (

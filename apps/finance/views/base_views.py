@@ -12,16 +12,29 @@ from apps.finance.models.reconciliacion import (
 )
 from apps.finance.services.analytics_service import FinancialAnalyticsService
 from apps.finance.services.smart_reconciliation_service import SmartReconciliationService
+from apps.common.mixins.export_mixin import ExportMixin
 from core.api import AuditLog, SaaSMixin
 
 logger = logging.getLogger(__name__)
 
 
-class InvoiceListView(SaaSMixin, LoginRequiredMixin, ListView):
+class InvoiceListView(ExportMixin, SaaSMixin, LoginRequiredMixin, ListView):
     model = Factura
     template_name = "finance/invoice_list.html"
     context_object_name = "invoices"
     paginate_by = 20
+    export_fields = [
+        "numero_factura",
+        "cliente_nombre",
+        "cliente_rif",
+        "fecha_emision",
+        "tipo_factura",
+        "monto_total",
+        "saldo_pendiente",
+        "estado",
+    ]
+    export_filename = "facturas"
+
 
     def get_queryset(self):
         qs = super().get_queryset()

@@ -1,0 +1,94 @@
+{% extends "onboarding/base_wizard.html" %}
+
+{% block title %}Primer Boleto - TravelHub{% endblock %}
+
+{% block content %}
+<div>
+    <!-- Header -->
+    <div class="text-center mb-8">
+        <div class="icon-circle purple mx-auto" style="width: 80px; height: 80px;">
+            <span class="material-symbols-outlined text-4xl">confirmation_number</span>
+        </div>
+        <h1 class="text-2xl font-bold mb-2">Tu Primer Boleto</h1>
+        <p class="text-slate-400">Aprende a registrar boletos de forma rápida y sencilla</p>
+    </div>
+    
+    <!-- Demo Ticket Card -->
+    <div class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl p-6 mb-6 border border-slate-700">
+        <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-blue-400">flight</span>
+                <span class="font-semibold text-white">{{ demo_ticket.aerolinea }}</span>
+            </div>
+            <span class="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded-full">Demo</span>
+        </div>
+        
+        <div class="text-center mb-4">
+            <div class="text-3xl font-bold text-white mb-2">{{ demo_ticket.ruta }}</div>
+            <div class="text-slate-400">{{ demo_ticket.fecha }} • {{ demo_ticket.clase }}</div>
+        </div>
+        
+        <div class="border-t border-slate-700 pt-4">
+            <div class="flex justify-between items-center">
+                <div>
+                    <div class="text-xs text-slate-400">Pasajero</div>
+                    <div class="font-semibold text-white">{{ demo_ticket.pasajero }}</div>
+                </div>
+                <div class="text-right">
+                    <div class="text-xs text-slate-400">Precio</div>
+                    <div class="text-2xl font-bold text-green-400">{{ demo_ticket.precio }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Features List -->
+    <div class="space-y-3 mb-6">
+        <div class="flex items-start gap-3 p-3 bg-slate-800/50 rounded-lg">
+            <span class="material-symbols-outlined text-blue-400 mt-0.5">auto_awesome</span>
+            <div>
+                <div class="font-semibold text-white text-sm">Parsing con IA</div>
+                <div class="text-slate-400 text-xs">Pega el PNR y la IA extrae todos los datos automáticamente</div>
+            </div>
+        </div>
+        
+        <div class="flex items-start gap-3 p-3 bg-slate-800/50 rounded-lg">
+            <span class="material-symbols-outlined text-green-400 mt-0.5">speed</span>
+            <div>
+                <div class="font-semibold text-white text-sm">Récord de Velocidad</div>
+                <div class="text-slate-400 text-xs">Registra un boleto en menos de 30 segundos</div>
+            </div>
+        </div>
+        
+        <div class="flex items-start gap-3 p-3 bg-slate-800/50 rounded-lg">
+            <span class="material-symbols-outlined text-purple-400 mt-0.5">fact_check</span>
+            <div>
+                <div class="font-semibold text-white text-sm">Validación Automática</div>
+                <div class="text-slate-400 text-xs">El sistema verifica inconsistencias y alerta sobre problemas</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Actions -->
+    <form method="post" class="space-y-3">
+        {% csrf_token %}
+        
+        <button type="submit" name="action" value="demo" class="btn-primary w-full text-lg py-4">
+            <span class="material-symbols-outlined mr-2">play_circle</span>
+            Ver Demo Interactiva
+        </button>
+        
+        <button type="submit" name="action" value="skip" class="btn-secondary w-full">
+            <span class="material-symbols-outlined mr-2">skip_next</span>
+            Ya sé registrar boletos, continuar →
+        </button>
+    </form>
+    
+    <!-- Back Link -->
+    <div class="text-center mt-4">
+        <a href="{% url 'onboarding_agency' %}" class="text-slate-400 hover:text-white text-sm transition-colors">
+            ← Volver al paso anterior
+        </a>
+    </div>
+</div>
+{% endblock %}

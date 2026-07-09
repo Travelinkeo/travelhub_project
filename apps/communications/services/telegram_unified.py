@@ -31,7 +31,7 @@ class TelegramNotificationService:
 
     @staticmethod
     def send_message(
-        message: str, chat_id: str = None, parse_mode: str = "HTML", agencia=None
+        message: str, chat_id: str = None, parse_mode: str = "HTML", agencia=None, **kwargs
     ) -> bool:
         """Envía un mensaje de texto simple."""
         try:
@@ -59,6 +59,8 @@ class TelegramNotificationService:
 
             url = f"https://api.telegram.org/bot{token}/sendMessage"
             payload = {"chat_id": chat, "text": message, "parse_mode": parse_mode}
+            if kwargs:
+                payload.update(kwargs)
             response = requests.post(url, data=payload, timeout=30)
             response.raise_for_status()
             return True

@@ -84,7 +84,10 @@ def agency_context(request):
         "impersonated_agencia_name": session.get("impersonated_agencia_name")
         if hasattr(session, "get")
         else None,
+        # Live chat — activa el widget si LIVE_CHAT_ID está en .env
+        "LIVE_CHAT_ID": getattr(__import__("django.conf", fromlist=["settings"]).settings, "LIVE_CHAT_ID", ""),
     }
+
 
 
 def csp_nonce(request):
@@ -94,7 +97,6 @@ def csp_nonce(request):
         # Fallback de seguridad si el middleware no se ejecutó
         nonce = secrets.token_hex(16)
         request.csp_nonce = nonce
-
     return {
         "csp_nonce": nonce,
         "CSP_NONCE": nonce,  # Compatibilidad con plantillas legacy

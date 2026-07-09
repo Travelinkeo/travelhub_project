@@ -41,16 +41,15 @@ def process_reconciliation_upload_htmx(request):
             )
 
         # 1. Crear el registro del reporte (Estado Inicial)
-        # Asumimos que request.user.agencia está disponible (estándar TravelHub)
         reporte = ReporteReconciliacion.objects.create(
-            agencia=request.user.agencia, archivo=archivo, proveedor=proveedor, estado="PENDIENTE"
+            agencia=request.agencia, archivo=archivo, proveedor=proveedor, estado="PENDIENTE"
         )
 
         # 2. Lanzar Tarea de Celery (Motor Híbrido IA)
         task_id = safe_delay(
             conciliar_reporte_batch_task,
             reporte_id=str(reporte.id_reporte),
-            agencia_id=request.user.agencia.pk,
+            agencia_id=request.agencia.pk,
         )
 
         if not task_id:

@@ -39,6 +39,8 @@ services:
       - "4318:4318"   # OTLP HTTP (OpenTelemetry)
     networks:
       - observability_net
+      - travelhub_private
+
 
 networks:
   observability_net:

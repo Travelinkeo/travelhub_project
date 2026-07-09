@@ -31,7 +31,7 @@ if [ ! -f "$TAILWIND_BIN" ] && ! command -v tailwindcss &> /dev/null; then
 
     if [ -n "$URL" ]; then
         echo "🚀 Descargando el binario standalone de Tailwind CSS para su arquitectura ($OS-$ARCH)..."
-        curl -sL "$URL" -o "$TAILWIND_BIN"
+        curl -sL --max-time 15 "$URL" -o "$TAILWIND_BIN"
         chmod +x "$TAILWIND_BIN"
         echo "✅ Binario descargado e instalado exitosamente en $TAILWIND_BIN"
     else

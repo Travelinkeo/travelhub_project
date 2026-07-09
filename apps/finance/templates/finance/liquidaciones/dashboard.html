@@ -90,7 +90,17 @@
                 </div>
                 <h2 class="text-sm font-black text-text-main uppercase tracking-widest">Listado de Liquidaciones</h2>
             </div>
+            
+            <div class="flex items-center gap-2">
+                <a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.estado %}estado={{ request.GET.estado }}&{% endif %}export=excel" class="btn-secondary flex items-center justify-center !h-9 !px-3 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/10 text-[10px] font-black uppercase tracking-wider gap-1.5" title="Exportar Excel">
+                    <span class="material-symbols-outlined text-[14px]">download</span> Excel
+                </a>
+                <a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.estado %}estado={{ request.GET.estado }}&{% endif %}export=pdf" class="btn-secondary flex items-center justify-center !h-9 !px-3 border border-red-500/20 text-red-400 hover:bg-red-500/10 text-[10px] font-black uppercase tracking-wider gap-1.5" title="Exportar PDF">
+                    <span class="material-symbols-outlined text-[14px]">picture_as_pdf</span> PDF
+                </a>
+            </div>
         </div>
+
 
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse table-responsive">

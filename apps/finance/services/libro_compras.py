@@ -1,11 +1,12 @@
+import csv
 import logging
 from decimal import Decimal
-import csv
 from io import StringIO
 
 from apps.finance.models.facturas_proveedores import FacturaProveedor
 
 logger = logging.getLogger(__name__)
+
 
 class LibroComprasService:
     """
@@ -49,13 +50,13 @@ class LibroComprasService:
 
         for f in facturas:
             datos = f.datos_json or {}
-            
+
             # Obtener base y iva de los datos extraídos por IA
             try:
                 base_gravada = Decimal(str(datos.get("base_gravada", "0.00")))
             except Exception:
                 base_gravada = Decimal("0.00")
-            
+
             try:
                 iva = Decimal(str(datos.get("iva", "0.00")))
             except Exception:
@@ -116,40 +117,46 @@ class LibroComprasService:
         writer = csv.writer(output, delimiter=";")
 
         # Encabezado
-        writer.writerow([
-            "Fecha",
-            "Número Factura",
-            "RIF Proveedor",
-            "Nombre Proveedor",
-            "Base Gravada",
-            "Base Exenta",
-            "IVA (Impuesto)",
-            "Total"
-        ])
+        writer.writerow(
+            [
+                "Fecha",
+                "Número Factura",
+                "RIF Proveedor",
+                "Nombre Proveedor",
+                "Base Gravada",
+                "Base Exenta",
+                "IVA (Impuesto)",
+                "Total",
+            ]
+        )
 
         for c in libro_compras["compras"]:
-            writer.writerow([
-                c["fecha"].strftime("%Y-%m-%d"),
-                c["numero_factura"],
-                c["proveedor_rif"],
-                c["proveedor_nombre"],
-                f"{c['base_gravada']:.2f}",
-                f"{c['base_exenta']:.2f}",
-                f"{c['iva_16']:.2f}",
-                f"{c['total']:.2f}"
-            ])
+            writer.writerow(
+                [
+                    c["fecha"].strftime("%Y-%m-%d"),
+                    c["numero_factura"],
+                    c["proveedor_rif"],
+                    c["proveedor_nombre"],
+                    f"{c['base_gravada']:.2f}",
+                    f"{c['base_exenta']:.2f}",
+                    f"{c['iva_16']:.2f}",
+                    f"{c['total']:.2f}",
+                ]
+            )
 
         # Totales
         writer.writerow([])
-        writer.writerow([
-            "TOTALES",
-            "",
-            "",
-            "",
-            f"{libro_compras['totales']['base_gravada']:.2f}",
-            f"{libro_compras['totales']['base_exenta']:.2f}",
-            f"{libro_compras['totales']['iva_16']:.2f}",
-            f"{libro_compras['totales']['total']:.2f}"
-        ])
+        writer.writerow(
+            [
+                "TOTALES",
+                "",
+                "",
+                "",
+                f"{libro_compras['totales']['base_gravada']:.2f}",
+                f"{libro_compras['totales']['base_exenta']:.2f}",
+                f"{libro_compras['totales']['iva_16']:.2f}",
+                f"{libro_compras['totales']['total']:.2f}",
+            ]
+        )
 
         return output.getvalue()

@@ -227,7 +227,7 @@ def _saml_login(request, provider):
 <samlp:AuthnRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol"
     xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion"
     ID="{request_id}" Version="2.0"
-    IssueInstant="{time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())}"
+    IssueInstant="{time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}"
     Destination="{provider.saml_acs_url}"
     AssertionConsumerServiceURL="{acs_url}"
     ProtocolBinding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST">

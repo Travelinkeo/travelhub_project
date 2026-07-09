@@ -309,7 +309,7 @@ class OnboardingInviteTeamView(View):
                 messages.info(
                     request,
                     f"Se enviarían invitaciones a: {', '.join(valid_emails[:3])}"
-                    + (f" y {len(valid_emails)-3} más" if len(valid_emails) > 3 else ""),
+                    + (f" y {len(valid_emails) - 3} más" if len(valid_emails) > 3 else ""),
                 )
 
         progress.mark_step_completed(UserProgress.STEP_INVITE_TEAM)

@@ -121,10 +121,20 @@ services:
       target: runtime
     container_name: travelhub_web
     restart: unless-stopped
-    command: 
+    command:
       - sh
       - -c
-      - gunicorn travelhub.wsgi:application --bind 0.0.0.0:8000 --workers 2 --max-requests 1000 --timeout 120 --preload
+      - >
+        gunicorn travelhub.wsgi:application
+        --bind 0.0.0.0:8000
+        --workers ${GUNICORN_WORKERS:-4}
+        --worker-class gthread
+        --threads 2
+        --max-requests 1000
+        --max-requests-jitter 100
+        --timeout 120
+        --keep-alive 5
+        --preload
     # SECURITY: Puerto de Gunicorn comentado - solo accesible via Traefik
     # Para acceso local durante desarrollo, descomentar temporalmente:
     ports:
@@ -134,9 +144,11 @@ services:
       - REDIS_URL=redis://redis:6379/0
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
-      # OTEL deshabilitado — image base tiene dependencies.py roto (pkg_resources en Py312)
-      - OTEL_PYTHON_DISABLED_INSTRUMENTATIONS=all
-      - OTEL_TRACES_EXPORTER=none
+      # OTEL habilitado con exporter HTTP (compatible Python 3.12 — fix: pkg_resources eliminado)
+      - ENABLE_TELEMETRY=True
+      - OTLP_ENDPOINT=http://jaeger:4318
+      - SERVICE_NAME=travelhub-backend
+      - OTEL_PYTHON_DISABLED_INSTRUMENTATIONS=none
     env_file:
       - .env.local
     volumes:
@@ -234,8 +246,36 @@ services:
           cpus: '1.0'
 
   # ---------------------------------------------------------------------------
+  # 6.5. TRACING DISTRIBUIDO (Jaeger — OpenTelemetry backend)
+  # ---------------------------------------------------------------------------
+  jaeger:
+    image: jaegertracing/all-in-one:1.58
+    container_name: travelhub_jaeger
+    restart: unless-stopped
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+      - SPAN_STORAGE_TYPE=memory
+    ports:
+      - "16686:16686"   # UI: http://localhost:16686
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:16686/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - travelhub_private
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+
+
+  # ---------------------------------------------------------------------------
   # 7. WORKER ASÍNCRONO (Celery - PNR Parsing, Telegram, WhatsApp Webhooks)
   # ---------------------------------------------------------------------------
+
   celery_worker:
     build:
       context: .

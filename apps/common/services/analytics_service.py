@@ -9,7 +9,7 @@ from django.db.models.functions import TruncMonth
 from django.utils import timezone
 
 if TYPE_CHECKING:
-    from apps.bookings.models import BoletoImportado, Venta
+    pass
 
 
 def __getattr__(name):
@@ -32,6 +32,7 @@ class AnalyticsService:
     @staticmethod
     def get_ventas_mensuales(year=None):
         from django.apps import apps
+
         Venta = apps.get_model("bookings", "Venta")
         if not year:
             year = timezone.now().year
@@ -67,6 +68,7 @@ class AnalyticsService:
     @staticmethod
     def get_top_vendedores(year=None, limit=5):
         from django.apps import apps
+
         Venta = apps.get_model("bookings", "Venta")
         if not year:
             year = timezone.now().year
@@ -91,6 +93,7 @@ class AnalyticsService:
     @staticmethod
     def get_top_aerolineas(year=None, limit=5):
         from django.apps import apps
+
         BoletoImportado = apps.get_model("bookings", "BoletoImportado")
         if not year:
             year = timezone.now().year
@@ -128,6 +131,7 @@ class AnalyticsService:
     @staticmethod
     def get_kpis_resumen(year=None):
         from django.apps import apps
+
         Venta = apps.get_model("bookings", "Venta")
         if not year:
             year = timezone.now().year
@@ -140,6 +144,7 @@ class AnalyticsService:
         Retorna una lista de aerolíneas únicas que tienen boletos importados para la agencia.
         """
         from django.apps import apps
+
         BoletoImportado = apps.get_model("bookings", "BoletoImportado")
         return (
             BoletoImportado.objects.filter(agencia=agencia)
@@ -156,6 +161,7 @@ class AnalyticsService:
         Genera un reporte detallado de producción y comisiones por boleto.
         """
         from django.apps import apps
+
         BoletoImportado = apps.get_model("bookings", "BoletoImportado")
         qs = BoletoImportado.objects.filter(agencia=agencia, estado_parseo="COM")
 
@@ -265,6 +271,7 @@ class AnalyticsService:
         Exporta el reporte de boletos a un archivo Excel con múltiples pestañas.
         """
         from django.apps import apps
+
         BoletoImportado = apps.get_model("bookings", "BoletoImportado")
         reporte = AnalyticsService.get_reporte_comisiones_boletos(
             agencia, fecha_inicio, fecha_fin, aerolinea
@@ -342,6 +349,7 @@ class AnalyticsService:
         Retorna datos estructurados para visualización en gráficas.
         """
         from django.apps import apps
+
         BoletoImportado = apps.get_model("bookings", "BoletoImportado")
         qs = BoletoImportado.objects.filter(agencia=agencia, estado_parseo="COM")
 

@@ -72,7 +72,9 @@ class AmadeusParser(BaseTicketParser):
             or ticket_number == "No encontrado"
             or not flights
         ):
-            logger.info("Amadeus Native Regex incomplete or empty flights. Triggering AI Reinforcement.")
+            logger.info(
+                "Amadeus Native Regex incomplete or empty flights. Triggering AI Reinforcement."
+            )
             try:
                 from apps.automation.parsers.ai_universal_parser import UniversalAIParser
 

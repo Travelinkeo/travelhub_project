@@ -85,9 +85,10 @@ def agency_context(request):
         if hasattr(session, "get")
         else None,
         # Live chat — activa el widget si LIVE_CHAT_ID está en .env
-        "LIVE_CHAT_ID": getattr(__import__("django.conf", fromlist=["settings"]).settings, "LIVE_CHAT_ID", ""),
+        "LIVE_CHAT_ID": getattr(
+            __import__("django.conf", fromlist=["settings"]).settings, "LIVE_CHAT_ID", ""
+        ),
     }
-
 
 
 def csp_nonce(request):

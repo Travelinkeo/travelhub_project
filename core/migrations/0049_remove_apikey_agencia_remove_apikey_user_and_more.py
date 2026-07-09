@@ -4,99 +4,132 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0048_sso_provider'),
+        ("core", "0048_sso_provider"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='apikey',
-            name='agencia',
+            model_name="apikey",
+            name="agencia",
         ),
         migrations.RemoveField(
-            model_name='apikey',
-            name='user',
+            model_name="apikey",
+            name="user",
         ),
         migrations.RemoveField(
-            model_name='webhook',
-            name='agencia',
+            model_name="webhook",
+            name="agencia",
         ),
         migrations.RemoveField(
-            model_name='webhookdelivery',
-            name='webhook',
+            model_name="webhookdelivery",
+            name="webhook",
         ),
         migrations.RenameIndex(
-            model_name='ssoprovider',
-            new_name='core_ssopro_agencia_f135b4_idx',
-            old_name='core_sso_provider_agencia_active_idx',
+            model_name="ssoprovider",
+            new_name="core_ssopro_agencia_f135b4_idx",
+            old_name="core_sso_provider_agencia_active_idx",
         ),
         migrations.AlterField(
-            model_name='agenciaconfiguracion',
-            name='evolution_api_url',
-            field=models.URLField(blank=True, help_text='Base URL de Evolution API (ej: http://evolution:8080)', max_length=500, null=True),
+            model_name="agenciaconfiguracion",
+            name="evolution_api_url",
+            field=models.URLField(
+                blank=True,
+                help_text="Base URL de Evolution API (ej: http://evolution:8080)",
+                max_length=500,
+                null=True,
+            ),
         ),
         migrations.AlterField(
-            model_name='numberingsequence',
-            name='id',
-            field=models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID'),
+            model_name="numberingsequence",
+            name="id",
+            field=models.BigAutoField(
+                auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+            ),
         ),
         migrations.AlterField(
-            model_name='numberingsequence',
-            name='last_number',
-            field=models.IntegerField(default=0, help_text='Último sufijo numérico asignado para este prefijo.', verbose_name='Último número usado'),
+            model_name="numberingsequence",
+            name="last_number",
+            field=models.IntegerField(
+                default=0,
+                help_text="Último sufijo numérico asignado para este prefijo.",
+                verbose_name="Último número usado",
+            ),
         ),
         migrations.AlterField(
-            model_name='numberingsequence',
-            name='prefix',
-            field=models.CharField(help_text='Prefijo único (ej: F-20260608, AS-20260608).', max_length=100, unique=True, verbose_name='Prefijo de numeración'),
+            model_name="numberingsequence",
+            name="prefix",
+            field=models.CharField(
+                help_text="Prefijo único (ej: F-20260608, AS-20260608).",
+                max_length=100,
+                unique=True,
+                verbose_name="Prefijo de numeración",
+            ),
         ),
         migrations.AlterField(
-            model_name='ssoprovider',
-            name='auto_provision',
-            field=models.BooleanField(default=True, help_text='Crear usuario automáticamente si no existe'),
+            model_name="ssoprovider",
+            name="auto_provision",
+            field=models.BooleanField(
+                default=True, help_text="Crear usuario automáticamente si no existe"
+            ),
         ),
         migrations.AlterField(
-            model_name='ssoprovider',
-            name='email_attribute',
-            field=models.CharField(default='email', help_text='Atributo que contiene el email del usuario', max_length=64),
+            model_name="ssoprovider",
+            name="email_attribute",
+            field=models.CharField(
+                default="email",
+                help_text="Atributo que contiene el email del usuario",
+                max_length=64,
+            ),
         ),
         migrations.AlterField(
-            model_name='ssoprovider',
-            name='id',
-            field=models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID'),
+            model_name="ssoprovider",
+            name="id",
+            field=models.BigAutoField(
+                auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+            ),
         ),
         migrations.AlterField(
-            model_name='ssoprovider',
-            name='name_attribute',
-            field=models.CharField(default='name', help_text='Atributo que contiene el nombre completo', max_length=64),
+            model_name="ssoprovider",
+            name="name_attribute",
+            field=models.CharField(
+                default="name", help_text="Atributo que contiene el nombre completo", max_length=64
+            ),
         ),
         migrations.AlterField(
-            model_name='ssoprovider',
-            name='oidc_config_url',
-            field=models.URLField(blank=True, help_text='OIDC Discovery URL (ej: https://login.microsoftonline.com/{tenant}/v2.0/.well-known/openid-configuration)', max_length=512),
+            model_name="ssoprovider",
+            name="oidc_config_url",
+            field=models.URLField(
+                blank=True,
+                help_text="OIDC Discovery URL (ej: https://login.microsoftonline.com/{tenant}/v2.0/.well-known/openid-configuration)",
+                max_length=512,
+            ),
         ),
         migrations.AlterField(
-            model_name='ssoprovider',
-            name='saml_acs_url',
-            field=models.URLField(blank=True, help_text='SAML Assertion Consumer Service URL', max_length=512),
+            model_name="ssoprovider",
+            name="saml_acs_url",
+            field=models.URLField(
+                blank=True, help_text="SAML Assertion Consumer Service URL", max_length=512
+            ),
         ),
         migrations.AlterField(
-            model_name='ssoprovider',
-            name='saml_x509_cert',
-            field=models.TextField(blank=True, help_text='Certificado X.509 público del IdP (SAML)'),
+            model_name="ssoprovider",
+            name="saml_x509_cert",
+            field=models.TextField(
+                blank=True, help_text="Certificado X.509 público del IdP (SAML)"
+            ),
         ),
         migrations.AlterModelTable(
-            name='ssoprovider',
+            name="ssoprovider",
             table=None,
         ),
         migrations.DeleteModel(
-            name='APIKey',
+            name="APIKey",
         ),
         migrations.DeleteModel(
-            name='Webhook',
+            name="Webhook",
         ),
         migrations.DeleteModel(
-            name='WebhookDelivery',
+            name="WebhookDelivery",
         ),
     ]

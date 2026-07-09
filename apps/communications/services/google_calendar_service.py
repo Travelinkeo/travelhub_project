@@ -124,9 +124,9 @@ Venta: {localizador}
 Cliente: {cliente_nombre}
 Estado: {venta.get_estado_display()}
 Total: {venta.moneda} {venta.total_venta:.2f}
-Canal: {venta.get_canal_origen_display() if hasattr(venta, 'get_canal_origen_display') else venta.canal_origen}
+Canal: {venta.get_canal_origen_display() if hasattr(venta, "get_canal_origen_display") else venta.canal_origen}
 
-TravelHub - {venta.agencia.nombre if venta.agencia else ''}
+TravelHub - {venta.agencia.nombre if venta.agencia else ""}
             """.strip()
 
             # Evento de 30 minutos
@@ -194,9 +194,9 @@ Venta: {localizador}
 Cliente: {cliente_nombre}
 Estado: {venta.get_estado_display()}
 Total: {venta.moneda} {venta.total_venta:.2f}
-Canal: {venta.get_canal_origen_display() if hasattr(venta, 'get_canal_origen_display') else venta.canal_origen}
+Canal: {venta.get_canal_origen_display() if hasattr(venta, "get_canal_origen_display") else venta.canal_origen}
 
-TravelHub - {venta.agencia.nombre if venta.agencia else ''}
+TravelHub - {venta.agencia.nombre if venta.agencia else ""}
             """.strip()
 
             event = {

@@ -4,22 +4,21 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('crm', '0028_add_cliente_proveedor_link'),
+        ("crm", "0028_add_cliente_proveedor_link"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='cliente',
-            name='es_proveedor',
+            model_name="cliente",
+            name="es_proveedor",
         ),
         migrations.RemoveField(
-            model_name='cliente',
-            name='proveedor_vinculado',
+            model_name="cliente",
+            name="proveedor_vinculado",
         ),
         migrations.RemoveField(
-            model_name='mensajewhatsapp',
-            name='es_bot',
+            model_name="mensajewhatsapp",
+            name="es_bot",
         ),
     ]

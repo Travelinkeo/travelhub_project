@@ -214,6 +214,22 @@ DATABASES["default"]["CONN_MAX_AGE"] = 600
 DATABASES["default"]["CONN_HEALTH_CHECKS"] = True
 DATABASES["default"]["DISABLE_SERVER_SIDE_CURSORS"] = True
 
+# --- READ REPLICA (opcional) ---
+# Configurar DATABASE_REPLICA_URL en el entorno para activar la réplica.
+# Si no está configurada, las lecturas van al primary (comportamiento por defecto).
+_replica_url = env("DATABASE_REPLICA_URL", default=DATABASE_URL)
+DATABASES["replica"] = dj_database_url.parse(_replica_url)
+DATABASES["replica"]["CONN_MAX_AGE"] = 600
+DATABASES["replica"]["CONN_HEALTH_CHECKS"] = True
+DATABASES["replica"]["DISABLE_SERVER_SIDE_CURSORS"] = True
+# En tests, espeja el primary para no necesitar 2 instancias de PostgreSQL en CI
+DATABASES["replica"]["TEST"] = {"MIRROR": "default"}
+
+# Router: lecturas -> réplica, escrituras -> primary
+# Solo activo si se configura una réplica diferente al primary
+if _replica_url != DATABASE_URL:
+    DATABASE_ROUTERS = ["core.db_router.PrimaryReplicaRouter"]
+
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -569,6 +585,7 @@ _default_redis_port = None
 if _redis_url_env:
     try:
         from urllib.parse import urlparse
+
         _parsed = urlparse(_redis_url_env)
         if _parsed.hostname:
             _default_redis_host = _parsed.hostname
@@ -582,7 +599,7 @@ if _redis_url_env:
 # Cache Redis (Django cache + Sessions)
 _redis_cache_password = os.getenv(
     "REDIS_CACHE_PASSWORD",
-    _default_redis_password if _redis_url_env else os.getenv("REDIS_PASSWORD", None)
+    _default_redis_password if _redis_url_env else os.getenv("REDIS_PASSWORD", None),
 )
 _redis_cache_host = os.getenv("REDIS_CACHE_HOST", _default_redis_host or "redis-cache")
 _redis_cache_port = os.getenv("REDIS_CACHE_PORT", _default_redis_port or "6379")
@@ -590,7 +607,7 @@ _redis_cache_port = os.getenv("REDIS_CACHE_PORT", _default_redis_port or "6379")
 # Celery Redis (Broker + Results)
 _redis_celery_password = os.getenv(
     "REDIS_CELERY_PASSWORD",
-    _default_redis_password if _redis_url_env else os.getenv("REDIS_PASSWORD", None)
+    _default_redis_password if _redis_url_env else os.getenv("REDIS_PASSWORD", None),
 )
 _redis_celery_host = os.getenv("REDIS_CELERY_HOST", _default_redis_host or "redis-celery")
 _redis_celery_port = os.getenv("REDIS_CELERY_PORT", _default_redis_port or "6379")
@@ -598,7 +615,7 @@ _redis_celery_port = os.getenv("REDIS_CELERY_PORT", _default_redis_port or "6379
 # Evolution Redis (WhatsApp cache)
 _redis_evolution_password = os.getenv(
     "REDIS_EVOLUTION_PASSWORD",
-    _default_redis_password if _redis_url_env else os.getenv("REDIS_PASSWORD", None)
+    _default_redis_password if _redis_url_env else os.getenv("REDIS_PASSWORD", None),
 )
 _redis_evolution_host = os.getenv("REDIS_EVOLUTION_HOST", _default_redis_host or "redis-evolution")
 _redis_evolution_port = os.getenv("REDIS_EVOLUTION_PORT", _default_redis_port or "6379")
@@ -757,11 +774,9 @@ LIVE_CHAT_ID = os.getenv("LIVE_CHAT_ID", "")
 
 # Suprime warnings conocidos sin impacto funcional
 SILENCED_SYSTEM_CHECKS = [
-    "urls.W005",    # Falso positivo: django.conf.urls.i18n declara app_name='i18n' internamente
+    "urls.W005",  # Falso positivo: django.conf.urls.i18n declara app_name='i18n' internamente
     "fields.W342",  # Pre-existente: LinkDePago.venta usa ForeignKey(unique=True) en vez de OneToOneField
 ]
-
-
 
 
 # --- JWT Config ---

@@ -48,9 +48,9 @@ def test_parse_sabre_ticket_with_gemini():
     # --- Aserciones de Validación ---
 
     # 1. Verificar que obtuvimos una respuesta válida
-    assert (
-        parsed_data is not None
-    ), "El parser de IA no debería devolver None con una API key válida."
+    assert parsed_data is not None, (
+        "El parser de IA no debería devolver None con una API key válida."
+    )
 
     # 2. Verificar la estructura principal del JSON
     assert "normalized" in parsed_data

@@ -1,16 +1,17 @@
-import pytest
 from decimal import Decimal
-from unittest.mock import MagicMock
+
+import pytest
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 
-from apps.bookings.models import Venta, BoletoImportado
-from apps.crm.models import FreelancerProfile, ComisionFreelancer
+from apps.bookings.models import BoletoImportado, Venta
+from apps.crm.models import ComisionFreelancer, FreelancerProfile
 from apps.crm.services.freelancer_service import FreelancerService
 from apps.crm.tasks import liquidar_comisiones_mensual_task
 from core.models import Agencia
 
 User = get_user_model()
+
 
 @pytest.mark.django_db(transaction=True)
 class TestFreelancerPortal:
@@ -29,14 +30,14 @@ class TestFreelancerPortal:
             email="free@test.com",
             password="password123",
             first_name="John",
-            last_name="Freelancer"
+            last_name="Freelancer",
         )
         self.perfil = FreelancerProfile.objects.create(
             usuario=self.user_freelancer,
             agencia=self.agencia,
             porcentaje_comision=Decimal("70.00"),  # Split 70%
             comision_fija_por_boleto=Decimal("15.00"),  # $15 fijo por boleto
-            activo=True
+            activo=True,
         )
 
     def test_commission_calculation_on_venta_save(self):
@@ -51,7 +52,7 @@ class TestFreelancerPortal:
             localizador="FLX123",
             monto_venta_cliente=Decimal("200.00"),
             monto_neto_proveedor=Decimal("100.00"),
-            creado_por=self.user_freelancer
+            creado_por=self.user_freelancer,
         )
 
         # Asociar un boleto para gatillar la comisión fija
@@ -59,7 +60,7 @@ class TestFreelancerPortal:
             agencia=self.agencia,
             venta_asociada=venta,
             numero_boleto="9990000000001",
-            tarifa_base=Decimal("200.00")
+            tarifa_base=Decimal("200.00"),
         )
 
         # Guardar la venta de nuevo para disparar el recálculo (incluyendo el boleto en el conteo)
@@ -89,7 +90,7 @@ class TestFreelancerPortal:
             localizador="FLX456",
             monto_venta_cliente=Decimal("100.00"),
             monto_neto_proveedor=Decimal("50.00"),
-            creado_por=self.user_freelancer
+            creado_por=self.user_freelancer,
         )
 
         # Comisión esperada: Markup = 50. Split 70% = 35. 0 boletos = 0 fijo. Total = 35.
@@ -125,7 +126,7 @@ class TestFreelancerPortal:
             localizador="FLX789",
             monto_venta_cliente=Decimal("100.00"),
             monto_neto_proveedor=Decimal("80.00"),
-            creado_por=self.user_freelancer
+            creado_por=self.user_freelancer,
         )
         venta1.save()
 
@@ -134,7 +135,7 @@ class TestFreelancerPortal:
             localizador="FLX012",
             monto_venta_cliente=Decimal("150.00"),
             monto_neto_proveedor=Decimal("100.00"),
-            creado_por=self.user_freelancer
+            creado_por=self.user_freelancer,
         )
         venta2.save()
 

@@ -5,6 +5,7 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import DetailView, ListView, TemplateView, View
 
+from apps.common.mixins.export_mixin import ExportMixin
 from apps.finance.models import Factura
 from apps.finance.models.reconciliacion import (
     ConciliacionBoleto,
@@ -12,7 +13,6 @@ from apps.finance.models.reconciliacion import (
 )
 from apps.finance.services.analytics_service import FinancialAnalyticsService
 from apps.finance.services.smart_reconciliation_service import SmartReconciliationService
-from apps.common.mixins.export_mixin import ExportMixin
 from core.api import AuditLog, SaaSMixin
 
 logger = logging.getLogger(__name__)
@@ -34,7 +34,6 @@ class InvoiceListView(ExportMixin, SaaSMixin, LoginRequiredMixin, ListView):
         "estado",
     ]
     export_filename = "facturas"
-
 
     def get_queryset(self):
         qs = super().get_queryset()

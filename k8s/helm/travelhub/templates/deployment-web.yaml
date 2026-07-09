@@ -4,6 +4,8 @@ metadata:
   name: {{ .Release.Name }}-web
   labels:
     app: {{ .Release.Name }}-web
+    component: web
+    version: {{ .Values.image.tag | default .Chart.AppVersion | quote }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
@@ -13,30 +15,48 @@ spec:
     metadata:
       labels:
         app: {{ .Release.Name }}-web
+        component: web
     spec:
       containers:
         - name: {{ .Chart.Name }}-web
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          command: ["gunicorn", "travelhub.wsgi:application", "--bind", "0.0.0.0:8000"]
+          command:
+            - gunicorn
+            - travelhub.wsgi:application
+            - --bind=0.0.0.0:8000
+            - --workers=$(GUNICORN_WORKERS)
+            - --worker-class=gthread
+            - --threads=2
+            - --max-requests=1000
+            - --max-requests-jitter=100
+            - --timeout=120
+            - --preload
           ports:
             - name: http
               containerPort: 8000
               protocol: TCP
           livenessProbe:
             httpGet:
-              path: /api/schema/
+              path: {{ .Values.probes.liveness.path | default "/health/" }}
               port: http
-            initialDelaySeconds: 30
-            periodSeconds: 10
+            initialDelaySeconds: {{ .Values.probes.liveness.initialDelaySeconds | default 45 }}
+            periodSeconds: {{ .Values.probes.liveness.periodSeconds | default 20 }}
+            failureThreshold: {{ .Values.probes.liveness.failureThreshold | default 3 }}
           readinessProbe:
             httpGet:
-              path: /api/schema/
+              path: {{ .Values.probes.readiness.path | default "/health/" }}
               port: http
-            initialDelaySeconds: 10
-            periodSeconds: 5
+            initialDelaySeconds: {{ .Values.probes.readiness.initialDelaySeconds | default 15 }}
+            periodSeconds: {{ .Values.probes.readiness.periodSeconds | default 10 }}
+            failureThreshold: {{ .Values.probes.readiness.failureThreshold | default 3 }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           envFrom:
             - secretRef:
                 name: {{ .Release.Name }}-secrets
+          env:
+            {{- range $key, $value := .Values.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}

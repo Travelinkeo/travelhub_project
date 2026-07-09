@@ -1,0 +1,84 @@
+{{- if .Values.autoscaling.enabled }}
+# HPA para el servidor web (Gunicorn / Django)
+# Escala entre minReplicas y maxReplicas según CPU y memoria.
+# El "cerebro" que decide cuántas instancias de la app corren en producción.
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ .Release.Name }}-web
+  labels:
+    app: {{ .Release.Name }}-web
+    component: web
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ .Release.Name }}-web
+  minReplicas: {{ .Values.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.autoscaling.maxReplicas }}
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.autoscaling.targetCPUUtilizationPercentage | default 70 }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.autoscaling.targetMemoryUtilizationPercentage | default 80 }}
+  behavior:
+    # Escala hacia arriba rápido (tráfico inesperado)
+    scaleUp:
+      stabilizationWindowSeconds: 60
+      policies:
+        - type: Pods
+          value: 2
+          periodSeconds: 60
+    # Escala hacia abajo despacio (evitar flapping)
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+        - type: Pods
+          value: 1
+          periodSeconds: 120
+---
+# HPA para los workers de Celery (tareas asíncronas)
+# Se escala de forma independiente al web para absorber picos de procesamiento.
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ .Release.Name }}-celery-worker
+  labels:
+    app: {{ .Release.Name }}-celery-worker
+    component: worker
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ .Release.Name }}-celery-worker
+  minReplicas: {{ .Values.autoscaling.celery.minReplicas | default 1 }}
+  maxReplicas: {{ .Values.autoscaling.celery.maxReplicas | default 6 }}
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.autoscaling.celery.targetCPUUtilizationPercentage | default 80 }}
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 30
+      policies:
+        - type: Pods
+          value: 2
+          periodSeconds: 60
+    scaleDown:
+      stabilizationWindowSeconds: 600   # Más conservador: las tareas en vuelo no deben interrumpirse
+      policies:
+        - type: Pods
+          value: 1
+          periodSeconds: 180
+{{- end }}

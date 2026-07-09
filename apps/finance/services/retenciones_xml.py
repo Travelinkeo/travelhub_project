@@ -1,12 +1,12 @@
 import logging
-from decimal import Decimal
 import xml.etree.ElementTree as ET
+from decimal import Decimal
 from xml.dom import minidom
-from django.utils import timezone
 
 from apps.finance.models.retenciones import RetencionISLR
 
 logger = logging.getLogger(__name__)
+
 
 class RetencionesXMLService:
     """
@@ -23,7 +23,7 @@ class RetencionesXMLService:
             fecha_emision__gte=fecha_inicio,
             fecha_emision__lte=fecha_fin,
             agencia=agencia,
-            estado=RetencionISLR.Estado.APLICADA
+            estado=RetencionISLR.Estado.APLICADA,
         ).select_related("factura", "cliente")
 
         # RIF de la agencia/empresa que declara (Agente de Retención)
@@ -38,14 +38,14 @@ class RetencionesXMLService:
 
         for ret in retenciones:
             detalle = ET.SubElement(root, "DetalleRetencion")
-            
+
             # Obtener RIF del retenido
             rif_retenido = ""
             if ret.factura and ret.factura.cliente_identificacion:
                 rif_retenido = ret.factura.cliente_identificacion
             elif ret.cliente:
                 rif_retenido = ret.cliente.cedula_identidad or ""
-            
+
             # Limpiar caracteres no numéricos o prefijo de RIF
             rif_retenido = rif_retenido.replace("-", "").replace(" ", "").upper()
 

@@ -1,19 +1,18 @@
-import logging
 import base64
+import logging
 from datetime import datetime
-from django.contrib import messages
+
 from django.core.files.base import ContentFile
 from django.core.signing import BadSignature, SignatureExpired
-from django.http import HttpResponse, Http404, JsonResponse
-from django.shortcuts import render, get_object_or_404
-from django.views.decorators.csrf import csrf_exempt
+from django.http import Http404, HttpResponse
+from django.shortcuts import get_object_or_404, render
 from django.views.decorators.http import require_POST
 
 from apps.bookings.models import Venta
 from apps.bookings.models.componentes import ServicioAdicionalDetalle
 from apps.bookings.services.itinerary_service import ItineraryCryptoService
-from apps.crm.models import Pasajero
 from apps.common.models import Pais
+from apps.crm.models import Pasajero
 from core.api import Agencia, agency_context
 
 logger = logging.getLogger(__name__)
@@ -37,9 +36,14 @@ def public_itinerary_ocr_upload(request, token, pasajero_id):
     Llama al motor de IA multimodal (OCR) y devuelve la previsualización de los datos.
     """
     try:
-        venta_id, agencia_id = ItineraryCryptoService.verificar_y_desempaquetar_token(token, max_age_days=30)
+        venta_id, agencia_id = ItineraryCryptoService.verificar_y_desempaquetar_token(
+            token, max_age_days=30
+        )
     except (SignatureExpired, BadSignature):
-        return HttpResponse("<div class='p-4 text-red-500 text-sm font-semibold'>Error: El enlace ha expirado o no es válido.</div>", status=403)
+        return HttpResponse(
+            "<div class='p-4 text-red-500 text-sm font-semibold'>Error: El enlace ha expirado o no es válido.</div>",
+            status=403,
+        )
 
     agencia = get_object_or_404(Agencia, pk=agencia_id)
 
@@ -51,7 +55,10 @@ def public_itinerary_ocr_upload(request, token, pasajero_id):
             raise Http404("El itinerario o pasajero no existe.")
 
         if "archivo" not in request.FILES:
-            return HttpResponse("<div class='p-4 text-red-500 text-sm font-semibold'>Error: No se recibió ninguna imagen.</div>", status=400)
+            return HttpResponse(
+                "<div class='p-4 text-red-500 text-sm font-semibold'>Error: No se recibió ninguna imagen.</div>",
+                status=400,
+            )
 
         archivo = request.FILES["archivo"]
         try:
@@ -59,6 +66,7 @@ def public_itinerary_ocr_upload(request, token, pasajero_id):
             mime_type = archivo.content_type or "image/jpeg"
 
             from apps.automation.services.ocr_service import ocr_service
+
             result = ocr_service.procesar_pasaporte(file_content, mime_type)
 
             if result.get("success"):
@@ -72,15 +80,19 @@ def public_itinerary_ocr_upload(request, token, pasajero_id):
                     "nacionalidad": result.get("nacionalidad", ""),
                     "pais_emision": result.get("pais_emision", ""),
                 }
-                
+
                 # Intentamos obtener nombres de países para presentarlos mejor en la verificación
                 nacionalidad_pais = None
                 if initial_data["nacionalidad"]:
-                    nacionalidad_pais = Pais.objects.filter(codigo_iso_3__iexact=initial_data["nacionalidad"]).first()
-                
+                    nacionalidad_pais = Pais.objects.filter(
+                        codigo_iso_3__iexact=initial_data["nacionalidad"]
+                    ).first()
+
                 pais_emision_pais = None
                 if initial_data["pais_emision"]:
-                    pais_emision_pais = Pais.objects.filter(codigo_iso_3__iexact=initial_data["pais_emision"]).first()
+                    pais_emision_pais = Pais.objects.filter(
+                        codigo_iso_3__iexact=initial_data["pais_emision"]
+                    ).first()
 
                 return render(
                     request,
@@ -102,7 +114,8 @@ def public_itinerary_ocr_upload(request, token, pasajero_id):
         except Exception as e:
             logger.error(f"Error procesando OCR en portal de pasajeros: {e}", exc_info=True)
             return HttpResponse(
-                f"<div class='p-4 text-red-500 text-sm font-semibold'>Error interno: {str(e)}</div>", status=500
+                f"<div class='p-4 text-red-500 text-sm font-semibold'>Error interno: {str(e)}</div>",
+                status=500,
             )
 
 
@@ -112,9 +125,14 @@ def public_itinerary_ocr_save(request, token, pasajero_id):
     Guarda los datos verificados del pasaporte en el modelo Pasajero.
     """
     try:
-        venta_id, agencia_id = ItineraryCryptoService.verificar_y_desempaquetar_token(token, max_age_days=30)
+        venta_id, agencia_id = ItineraryCryptoService.verificar_y_desempaquetar_token(
+            token, max_age_days=30
+        )
     except (SignatureExpired, BadSignature):
-        return HttpResponse("<div class='p-4 text-red-500 text-sm font-semibold'>Error: El enlace ha expirado o no es válido.</div>", status=403)
+        return HttpResponse(
+            "<div class='p-4 text-red-500 text-sm font-semibold'>Error: El enlace ha expirado o no es válido.</div>",
+            status=403,
+        )
 
     agencia = get_object_or_404(Agencia, pk=agencia_id)
 
@@ -129,7 +147,7 @@ def public_itinerary_ocr_save(request, token, pasajero_id):
         pasajero.nombres = request.POST.get("nombres", pasajero.nombres)
         pasajero.apellidos = request.POST.get("apellidos", pasajero.apellidos)
         pasajero.numero_pasaporte = request.POST.get("numero_pasaporte", pasajero.numero_pasaporte)
-        
+
         dob = parse_date(request.POST.get("fecha_nacimiento"))
         if dob:
             pasajero.fecha_nacimiento = dob
@@ -188,9 +206,14 @@ def public_itinerary_cross_sell(request, token):
     Crea una solicitud de servicio adicional (Venta Cruzada) en borrador vinculada a la venta.
     """
     try:
-        venta_id, agencia_id = ItineraryCryptoService.verificar_y_desempaquetar_token(token, max_age_days=30)
+        venta_id, agencia_id = ItineraryCryptoService.verificar_y_desempaquetar_token(
+            token, max_age_days=30
+        )
     except (SignatureExpired, BadSignature):
-        return HttpResponse("<div class='p-4 text-red-500 text-sm font-semibold'>Error: El enlace ha expirado o no es válido.</div>", status=403)
+        return HttpResponse(
+            "<div class='p-4 text-red-500 text-sm font-semibold'>Error: El enlace ha expirado o no es válido.</div>",
+            status=403,
+        )
 
     agencia = get_object_or_404(Agencia, pk=agencia_id)
 
@@ -244,7 +267,7 @@ def public_itinerary_cross_sell(request, token):
             f"""
             <div class="p-6 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-2xl text-center space-y-2">
                 <p class="text-lg font-bold">✓ ¡Solicitud Recibida!</p>
-                <p class="text-xs">Hemos registrado tu solicitud de <strong>{nombre_servicio}</strong> para {nombre_pasajero or 'los pasajeros'}.</p>
+                <p class="text-xs">Hemos registrado tu solicitud de <strong>{nombre_servicio}</strong> para {nombre_pasajero or "los pasajeros"}.</p>
                 <p class="text-[11px] opacity-80">Tu asesor de viajes se pondrá en contacto pronto para cotizar y confirmar.</p>
             </div>
             """

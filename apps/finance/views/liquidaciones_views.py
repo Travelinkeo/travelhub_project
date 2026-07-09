@@ -27,7 +27,6 @@ class LiquidacionListView(ExportMixin, LoginRequiredMixin, ListView):
     ]
     export_filename = "liquidaciones_proveedores"
 
-
     def dispatch(self, request, *args, **kwargs):
         from django.apps import apps
 

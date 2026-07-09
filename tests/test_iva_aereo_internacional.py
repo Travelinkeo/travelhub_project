@@ -5,15 +5,16 @@ para pasajes aéreos internacionales en cumplimiento con la Ley del IVA (2026).
 """
 
 from decimal import Decimal
+
 from django.test import TestCase
 
+from apps.bookings.models import BoletoImportado
 from apps.crm.models import Cliente
 from apps.finance.models import (
     FacturaConsolidada,
     ItemFacturaConsolidada,
 )
 from apps.finance.models.currencies import Moneda
-from apps.bookings.models import BoletoImportado
 from apps.finance.services.tax_eligibility import es_itinerario_internacional
 
 
@@ -77,36 +78,20 @@ class TestIVAInternacional(TestCase):
         """
         # Caso 1: Vuelo nacional estructurado (CCS a PMV)
         boleto_nac = BoletoImportado(
-            ruta_vuelo="CCS-PMV",
-            datos_parseados={
-                "vuelos": [
-                    {"origen": "CCS", "destino": "PMV"}
-                ]
-            }
+            ruta_vuelo="CCS-PMV", datos_parseados={"vuelos": [{"origen": "CCS", "destino": "PMV"}]}
         )
         self.assertFalse(es_itinerario_internacional(boleto_nac))
 
         # Caso 2: Vuelo internacional estructurado (CCS a MIA)
         boleto_int = BoletoImportado(
-            ruta_vuelo="CCS-MIA",
-            datos_parseados={
-                "vuelos": [
-                    {"origen": "CCS", "destino": "MIA"}
-                ]
-            }
+            ruta_vuelo="CCS-MIA", datos_parseados={"vuelos": [{"origen": "CCS", "destino": "MIA"}]}
         )
         self.assertTrue(es_itinerario_internacional(boleto_int))
 
         # Caso 3: Vuelo nacional fallback de texto (CCS-MAR)
-        boleto_nac_text = BoletoImportado(
-            ruta_vuelo="CCS-MAR",
-            datos_parseados={}
-        )
+        boleto_nac_text = BoletoImportado(ruta_vuelo="CCS-MAR", datos_parseados={})
         self.assertFalse(es_itinerario_internacional(boleto_nac_text))
 
         # Caso 4: Vuelo internacional fallback de texto (CCS-PTY)
-        boleto_int_text = BoletoImportado(
-            ruta_vuelo="CCS-PTY",
-            datos_parseados={}
-        )
+        boleto_int_text = BoletoImportado(ruta_vuelo="CCS-PTY", datos_parseados={})
         self.assertTrue(es_itinerario_internacional(boleto_int_text))

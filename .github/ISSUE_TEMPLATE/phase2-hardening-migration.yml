@@ -1,0 +1,81 @@
+name: Phase 2 Hardening — Migración Crítica
+description: Plantilla para migraciones de Phase 2 Hardening (multi-tenant, duplicación, CASCADE, null=True)
+title: "[Phase 2] "
+labels: ["phase-2", "migration", "hardening", "security"]
+assignees: []
+body:
+  - type: checkboxes
+    id: migration-type
+    attributes:
+      label: Tipo de migración (seleccionar una)
+      options:
+        - label: "NotificationTemplate/NotificationLog + AgenciaMixin"
+          description: Añadir AgenciaMixin a modelos sin aislamiento multi-tenant (CRÍTICO - cross-tenant leak)
+        - label: "Unificación Factura / FacturaConsolidada"
+          description: Consolidar modelos duplicados (abstract base o campo tipo)
+        - label: "null=True → blank=True,default='' en CharField/TextField"
+          description: 43+ campos en crm, cotizaciones, bookings, finance
+        - label: "CASCADE → SET_NULL/PROTECT"
+          description: CRM leads, componentes bookings, automation notifications
+        - label: "Otra migración hardening"
+          description: AuditLog HMAC, rate-limit AI, sanitizar 500 responses, etc.
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Contexto y justificación
+      description: Qué hallazgo del reporte de hardening aborda esta migración (referencia a SECURITY_HARDENING.md)
+      placeholder: |
+        Ej: SECURITY_HARDENING.md#notificationtemplate-notificationlog-sin-agenciamixin
+        Cross-tenant leak real: NotificationTemplate/Log no tienen AgenciaMixin → .objects.all() expone datos cross-tenant.
+
+  - type: textarea
+    id: approach
+    attributes:
+      label: Enfoque técnico propuesto
+      description: Cómo se implementará (abstract base, campo tipo, migración en pasos, backward compat)
+      placeholder: |
+        Ej: Unificar Factura/FacturaConsolidada usando AbstractBaseFactura + campo tipo='SIMPLE'|'CONSOLIDADA'.
+        Migración en 3 pasos: 1) Crear modelo unificado, 2) Migrar datos con RunSQL, 3) Deprecar modelos viejos.
+
+  - type: textarea
+    id: rollback
+    attributes:
+      label: Plan de rollback
+      description: Qué hacer si la migración falla en staging/prod
+      placeholder: |
+        - Backup BD antes de migrar
+        - Script de reversión (Drop nuevo modelo, restaurar tablas viejas)
+        - Feature flag para desactivar código nuevo
+
+  - type: textarea
+    id: testing
+    attributes:
+      label: Tests requeridos
+      description: Qué tests deben pasar antes de merge
+      placeholder: |
+        - Test aislamiento multi-tenant (crear 2 agencias, verificar aislamiento)
+        - Test migración datos (verificar integridad referencial, totales)
+        - Test rollback (aplicar, revertir, verificar estado original)
+        - Test API endpoints afectados (CRUD, listados, filtros)
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Prioridad
+      options:
+        - P0 - Crítico (bloquea hardening, cross-tenant leak)
+        - P1 - Alto (deuda técnica significativa, bloquea siguiente fase)
+        - P2 - Medio (mejora calidad, no bloquea)
+      default: 0
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist de entrega
+      options:
+        - label: Migración genera SQL reversible (RunSQL + reverse_sql)
+        - label: Incluye test de aislamiento multi-tenant
+        - label: Documentado en CHANGELOG.md y SECURITY_HARDENING.md
+        - label: Aprobado por code review (2 aprobaciones)
+        - label: Probado en staging con datos reales anonimizados

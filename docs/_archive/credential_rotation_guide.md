@@ -2,14 +2,14 @@
 
 ## Resumen de Auditoría de Seguridad
 
-**Fecha:** 2026-06-08  
-**Auditor:** Sistema de Auditoría Automatizada  
+**Fecha:** 2026-06-08
+**Auditor:** Sistema de Auditoría Automatizada
 **Hallazgo:** Archivo `frontend/.env.production` fue commiteado históricamente (commits: 53eaf1e, 5887059, 75d6647)
 
 ## Estado Actual
 
-✅ **Archivos .env de backend NUNCA fueron commiteados** (verificado con `git log`)  
-⚠️ **Archivo frontend/.env.production SÍ fue commiteado** (3 commits históricos)  
+✅ **Archivos .env de backend NUNCA fueron commiteados** (verificado con `git log`)
+⚠️ **Archivo frontend/.env.production SÍ fue commiteado** (3 commits históricos)
 ✅ **Archivos .env actuales están en .gitignore** y NO están trackeados
 
 ## Acciones Requeridas

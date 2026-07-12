@@ -19,6 +19,7 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils.decorators import method_decorator
+from django.utils.translation import gettext_lazy as _
 from django.views import View
 from django.views.decorators.cache import patch_cache_control
 
@@ -386,10 +387,10 @@ class BoletoPdfStatusView(View):
         if boleto.estado_parseo == BoletoImportado.EstadoParseo.ERROR_PARSEO:
             url = reverse("core:boleto_pdf_status", kwargs={"pk": boleto.pk}) + "?retry=1&poll=0"
             html = f"""
-            <div id="pdf-status-container-{boleto.pk}" 
-                 hx-get="{url}" 
-                 hx-trigger="click" 
-                 hx-swap="outerHTML" 
+            <div id="pdf-status-container-{boleto.pk}"
+                 hx-get="{url}"
+                 hx-trigger="click"
+                 hx-swap="outerHTML"
                  class="flex-1 h-10 px-4 rounded-xl bg-red-500/5 border border-red-500/20 flex items-center justify-center gap-2 text-red-500 group cursor-pointer"
                  title="Error al generar PDF. Clic para reintentar.">
                 <span class="material-symbols-outlined text-[16px]">error</span>
@@ -440,10 +441,10 @@ class BoletoPdfStatusView(View):
                 reverse("core:boleto_pdf_status", kwargs={"pk": boleto.pk}) + "?retry=1&poll=0"
             )
             html = f"""
-            <div id="pdf-status-container-{boleto.pk}" 
-                 hx-get="{url_retry}" 
-                 hx-trigger="click" 
-                 hx-swap="outerHTML" 
+            <div id="pdf-status-container-{boleto.pk}"
+                 hx-get="{url_retry}"
+                 hx-trigger="click"
+                 hx-swap="outerHTML"
                  class="flex-1 h-10 px-4 rounded-xl bg-red-500/5 border border-red-500/20 flex items-center justify-center gap-2 text-red-500 group cursor-pointer"
                  title="Error al generar PDF. Clic para reintentar.">
                 <span class="material-symbols-outlined text-[16px]">error</span>
@@ -457,10 +458,10 @@ class BoletoPdfStatusView(View):
         next_poll = poll_count + 1
         url = reverse("core:boleto_pdf_status", kwargs={"pk": boleto.pk})
         html = f"""
-        <div id="pdf-status-container-{boleto.pk}" 
-             hx-get="{url}?poll={next_poll}" 
-             hx-trigger="every 4s" 
-             hx-swap="outerHTML" 
+        <div id="pdf-status-container-{boleto.pk}"
+             hx-get="{url}?poll={next_poll}"
+             hx-trigger="every 4s"
+             hx-swap="outerHTML"
              class="flex-1 h-10 px-4 rounded-xl bg-amber-500/5 border border-amber-500/20 flex items-center justify-center gap-2 text-amber-500 group animate-pulse cursor-wait">
             <span class="size-4 border-2 border-amber-500/20 border-t-amber-500 rounded-full animate-spin"></span>
             <span class="text-[9px] font-black uppercase tracking-wider">Generando...</span>
@@ -481,7 +482,7 @@ class DesasociarVentaView(View):
             boleto.venta_asociada = None
             boleto.estado_parseo = "REV"  # REVISION_REQUERIDA (max_length=3)
             boleto.save()
-            messages.info(request, "Boleto desasociado de la venta.")
+            messages.info(request, _("Boleto desasociado de la venta."))
 
         return redirect("core:revisar_boleto", pk=pk)
 
@@ -493,7 +494,7 @@ def eliminar_boleto(request, pk):
 
     if not request.user.is_superuser and hasattr(request, "agencia"):
         if boleto.agencia != request.agencia:
-            messages.error(request, "Acceso Denegado.")
+            messages.error(request, _("Acceso Denegado."))
             return redirect("core:boletos_importar")
     try:
         try:
@@ -507,15 +508,17 @@ def eliminar_boleto(request, pk):
         except Exception as e:
             logger.debug("Ignored exception deleting PDF file: %s", e)
         boleto.hard_delete()
-        messages.success(request, "Boleto eliminado físicamente.")
+        messages.success(request, _("Boleto eliminado físicamente."))
     except ProtectedError:
         logger.exception("Intento de eliminar boleto %s con referencias protegidas", pk)
-        messages.error(request, "No se puede eliminar: el boleto tiene registros asociados.")
+        messages.error(request, _("No se puede eliminar: el boleto tiene registros asociados."))
     except (OSError, DatabaseError):
         logger.exception("Error de almacenamiento/BD al eliminar boleto %s", pk)
-        messages.error(request, "Error al eliminar archivos o base de datos. Contacte a soporte.")
+        messages.error(
+            request, _("Error al eliminar archivos o base de datos. Contacte a soporte.")
+        )
     except Exception as e:
         logger.critical("Error inesperado eliminando boleto %s: %s", pk, e, exc_info=True)
-        messages.error(request, "Error interno inesperado. Contacte a soporte.")
+        messages.error(request, _("Error interno inesperado. Contacte a soporte."))
 
     return redirect(request.GET.get("next") or "core:boletos_importar")

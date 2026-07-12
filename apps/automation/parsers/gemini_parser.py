@@ -20,7 +20,7 @@ class GeminiParser(BaseTicketParser):
     """
 
     def __init__(self):
-        self.model_name = "gemini-2.5-flash"
+        self.model_name = "gemini-1.5-flash"
 
     def can_parse(self, text: str) -> bool:
         # Gemini puede parsear CUALQUIER boleto, siempre que haya texto legíble.
@@ -41,7 +41,7 @@ class GeminiParser(BaseTicketParser):
         prompt_text = """
         Actúa como un experto en extracción de datos de boletos aéreos (GDS Sabre, Amadeus, Kiu).
         Tu tarea es extraer entidades estructuradas del siguiente boleto aéreo.
-        
+
         Reglas Críticas:
         1. Ignora el nombre de la aerolínea si está pegado a la ciudad. Normaliza nombres (AEROVIAS DEL CONTINENTE -> AVIANCA).
         2. FECHAS: Normaliza a "DD MMM YY" o "DD MMM YY HH:MM".
@@ -53,7 +53,7 @@ class GeminiParser(BaseTicketParser):
         5. Extrae la franquicia de equipaje (Ej: "1PC", "23KG") si existe. Si no, usa "N/A".
         6. LOCALIZADOR AEROLÍNEA (Secondary PNR):
            - Busca explícitamente "Copa Airlines Record Locator [CODE]". Ese [CODE] es el localizador de la aerolínea.
-           - Diferéncialo del PNR principal. 
+           - Diferéncialo del PNR principal.
         7. IDENTIFICA EL SISTEMA GDS DE ORIGEN:
            - Si ves "ISSUING AIRLINE : AEROLINEAS ESTELAR", es "ESTELAR_WEB" (aunque diga E-TICKET).
            - Si ves "ISSUING AIRLINE : RUTACA", es "RUTACA_WEB".
@@ -80,7 +80,7 @@ class GeminiParser(BaseTicketParser):
 
         12. REGLAS ESPECIFICAS AVIOR WEB:
            - Si el texto tiene encabezados como "X-MS-Exchange-Transport-CrossTenantHeadersStamped", IGNÓRALOS COMPLETAMENTE.
-           - El nombre del pasajero NO es una cadena larga de caracteres técnicos o base64. 
+           - El nombre del pasajero NO es una cadena larga de caracteres técnicos o base64.
            - Si ves "Hola, [NOMBRE]", usa ese [NOMBRE] para el pasajero.
            - ITINERARIO AVIOR: Si ves "PORLAMAR ... DES", busca "PUERTO ORDAZ" o similar en el texto completo. "DES" suele ser un error de OCR o una etiqueta cortada; trata de inferir la ciudad real o usa el código de aeropuerto si aparece (ej: PZO, PMV).
 
@@ -112,23 +112,23 @@ class GeminiParser(BaseTicketParser):
            - T9: TURPIAL AIRLINES CA
            - V0: CONVIASA
            - WW: RUTAS AEREAS DE VENEZUELA
-        
+
         Texto del Boleto (puede estar corrupto si es PDF viejo):
         \"\"\"
         {text[:15000]}
         \"\"\"
-        
+
         Responde SOLAMENTE con un JSON válido con esta estructura:
         {{
             "razonamiento": "...",
-            "gds_detected": "...", 
+            "gds_detected": "...",
             "pnr": "...",
             "localizador_aerolinea": "...",
             "fecha_emision": "...",
             "numero_boleto": "...",
             "pasajero": {{ "nombre_completo": "...", "documento_identidad": "..." }},
             "vuelos": [ {{ "aerolinea": "...", "numero_vuelo": "...", "origen": "...", "destino": "...", "fecha_salida": "...", "hora_salida": "...", "fecha_llegada": "...", "hora_llegada": "...", "equipaje": "..." }} ],
-            "agencia": "...", 
+            "agencia": "...",
             "agente_emisor": "...",
             "agencia_iata": "...",
             "direccion_aerolinea": "...",

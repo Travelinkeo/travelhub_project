@@ -4,6 +4,7 @@ from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
+from django.utils.translation import gettext_lazy as _
 from django.views.generic import TemplateView
 
 from core.forms.profile_forms import (
@@ -55,10 +56,10 @@ class UserProfileView(LoginRequiredMixin, TemplateView):
             user_form = UserProfileForm(request.POST, instance=user)
             if user_form.is_valid():
                 user_form.save()
-                messages.success(request, "Perfil actualizado correctamente.")
+                messages.success(request, _("Perfil actualizado correctamente."))
                 return redirect(f"{reverse_lazy('core:user_profile')}?tab=perfil")
             else:
-                messages.error(request, "Error al actualizar perfil.")
+                messages.error(request, _("Error al actualizar perfil."))
 
         # 2. Change Password
         elif form_type == "password_change":
@@ -66,7 +67,7 @@ class UserProfileView(LoginRequiredMixin, TemplateView):
             if password_form.is_valid():
                 user = password_form.save()
                 update_session_auth_hash(request, user)  # Important so user isn't logged out
-                messages.success(request, "Contraseña actualizada correctamente.")
+                messages.success(request, _("Contraseña actualizada correctamente."))
                 return redirect(f"{reverse_lazy('core:user_profile')}?tab=seguridad")
             else:
                 for field in password_form:
@@ -89,7 +90,7 @@ class UserProfileView(LoginRequiredMixin, TemplateView):
                 info_form = AgencyBasicInfoForm(request.POST, instance=agencia)
                 if info_form.is_valid():
                     info_form.save()
-                    messages.success(request, "Información de agencia actualizada.")
+                    messages.success(request, _("Información de agencia actualizada."))
                     return redirect(f"{reverse_lazy('core:user_profile')}?tab=agencia")
 
             elif form_type == "agency_branding":
@@ -98,15 +99,15 @@ class UserProfileView(LoginRequiredMixin, TemplateView):
                 )
                 if branding_form.is_valid():
                     branding_form.save()
-                    messages.success(request, "Branding actualizado.")
+                    messages.success(request, _("Branding actualizado."))
                     return redirect(f"{reverse_lazy('core:user_profile')}?tab=agencia")
 
             elif form_type == "agency_automation":
                 automation_form = AgencyAutomationForm(request.POST, instance=agencia.configuracion)
                 if automation_form.is_valid():
                     automation_form.save()
-                    messages.success(request, "Configuración de automatización guardada.")
+                    messages.success(request, _("Configuración de automatización guardada."))
                     return redirect(f"{reverse_lazy('core:user_profile')}?tab=automatizacion")
 
-        messages.error(request, "Acción no reconocida o error en formulario.")
+        messages.error(request, _("Acción no reconocida o error en formulario."))
         return redirect("core:user_profile")

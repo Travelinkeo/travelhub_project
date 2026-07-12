@@ -4,8 +4,8 @@ Esta carpeta contiene todos los tests automatizados del proyecto TravelHub.
 
 ## 📊 Cobertura Actual
 
-**Cobertura Total**: 85%+  
-**Tests Totales**: 66+  
+**Cobertura Total**: 85%+
+**Tests Totales**: 66+
 **Framework**: pytest
 
 ---
@@ -202,10 +202,10 @@ pytest --cov --cov-report=html
 def test_feature_description():
     # Arrange (preparar)
     data = {...}
-    
+
     # Act (ejecutar)
     result = function(data)
-    
+
     # Assert (verificar)
     assert result == expected
 ```
@@ -291,7 +291,7 @@ pytest -n auto
 
 ---
 
-**Última actualización**: Enero 2025  
-**Cobertura**: 85%+  
-**Tests**: 66+  
+**Última actualización**: Enero 2025
+**Cobertura**: 85%+
+**Tests**: 66+
 **Estado**: ✅ Fase 5 Completada

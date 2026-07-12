@@ -5,6 +5,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import redirect
+from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, ListView
 
 from apps.bookings.models import Venta
@@ -96,7 +97,7 @@ def generar_factura_desde_venta(request, pk):
         return redirect("bookings:venta_detail", pk=pk)
 
     if not venta.cliente:
-        messages.error(request, "La venta debe tener un cliente asignado para poder facturar.")
+        messages.error(request, _("La venta debe tener un cliente asignado para poder facturar."))
         return redirect("bookings:venta_detail", pk=pk)
 
     try:
@@ -142,7 +143,7 @@ def descargar_pdf_factura(request, pk):
         response["Content-Disposition"] = f'attachment; filename="{factura.archivo_pdf.name}"'
         return response
     else:
-        messages.error(request, "El PDF de esta factura no está disponible.")
+        messages.error(request, _("El PDF de esta factura no está disponible."))
         return redirect("core:factura_detalle", pk=pk)
 
 

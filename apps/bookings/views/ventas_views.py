@@ -6,6 +6,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q, Sum
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
+from django.utils.translation import gettext_lazy as _
 from django.views import View
 from django.views.generic import CreateView, DetailView, ListView, UpdateView
 
@@ -215,7 +216,7 @@ class VentaAssignClientView(LoginRequiredMixin, View):
             venta.save()
             messages.success(request, f"Cliente {cliente} asignado correctamente.")
         else:
-            messages.error(request, "Debe seleccionar un cliente.")
+            messages.error(request, _("Debe seleccionar un cliente."))
 
         return redirect("bookings:venta_detail", pk=pk)
 

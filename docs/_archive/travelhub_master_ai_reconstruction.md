@@ -63,7 +63,7 @@ Para evitar dependencias circulares (un problema clásico de Django al dividir e
 ## 2. SaaS Multi-Tenancy y Límites de Suscripción
 
 ### 🏢 El Tenant Principal: `Agencia`
-TravelHub es un software multi-inquilino (*multi-tenant*) a nivel de software. El aislamiento de datos se logra mediante la inclusión de un ForeignKey al modelo `Agencia` en todas las tablas transaccionales y de configuración. 
+TravelHub es un software multi-inquilino (*multi-tenant*) a nivel de software. El aislamiento de datos se logra mediante la inclusión de un ForeignKey al modelo `Agencia` en todas las tablas transaccionales y de configuración.
 
 Cada usuario del sistema está asignado a un perfil que pertenece a una única `Agencia`. Todos los queries del ORM se filtran automáticamente a través de managers customizados para asegurar que una agencia nunca pueda ver o modificar datos de otra.
 
@@ -796,7 +796,7 @@ TravelHub cuenta con una capa de marketing automatizada que aprovecha la IA de G
 El asistente inteligente para los usuarios finales de la plataforma (agencias de viaje y administradores) es **Linkeo**, implementado en la aplicación `core/chatbot`.
 
 ### 🗂️ RAG con Contexto de Sistema Estático (`knowledge_base.py`)
-Dado que el volumen del catálogo general, comandos administrativos, flujos de trabajo de doble facturación e importación de boletos es complejo, se inyecta en el prompt de sistema un manual técnico en formato Markdown (`TRAVELHUB_KNOWLEDGE`). 
+Dado que el volumen del catálogo general, comandos administrativos, flujos de trabajo de doble facturación e importación de boletos es complejo, se inyecta en el prompt de sistema un manual técnico en formato Markdown (`TRAVELHUB_KNOWLEDGE`).
 Este contexto estático detalla:
 - El flujo de importación de boletos manual vs automático.
 - Reglas financieras de comisiones y cálculo de IVA.
@@ -812,7 +812,7 @@ Este contexto estático detalla:
 
 ## 14. Estructura de Navegación del Panel de Control (Django Unfold)
 
-Para garantizar que el monolito modular exponga todos sus componentes transaccionales, de control, financieros e inteligentes en una interfaz moderna y uniforme, TravelHub utiliza **Django Unfold Admin**. 
+Para garantizar que el monolito modular exponga todos sus componentes transaccionales, de control, financieros e inteligentes en una interfaz moderna y uniforme, TravelHub utiliza **Django Unfold Admin**.
 
 La estructura del Sidebar mapea la totalidad de los módulos y URLs del proyecto:
 
@@ -1039,4 +1039,3 @@ pytest -v apps/bookings/tests/test_compliance_signals.py apps/bookings/tests/tes
 3. **`test_calculo_exitoso_igtf_divisas_cash`**: Confirma la correcta aplicación de la alícuota fiscal del 3% de IGTF sobre pagos liquidados en divisas físicas para agencias reguladas como Sujetos Pasivos Especiales.
 4. **`test_aislamiento_multitenant_recaudacion`**: Asegura que las consultas y transacciones de caja de un tenant no sean visibles ni modificables por otros inquilinos.
 5. **`test_resilient_bcv_fallback`**: Simula una desconexión total de las APIs de cotización (pyDolar/DolarApi) y valida que el sistema contcontable recupere de forma exitosa la tasa de ayer desde el caché de base de datos e inicie la alerta en Telegram.
-

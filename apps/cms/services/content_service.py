@@ -25,7 +25,7 @@ class AIContentService:
         genai = _get_genai()
         api_key = getattr(settings, "GEMINI_API_KEY", None)
         self.client = genai.Client(api_key=api_key)
-        self.model_name = "gemini-2.5-flash"
+        self.model_name = "gemini-1.5-flash"
 
     def generate_article(self, destination, keywords=None):
         """
@@ -35,13 +35,13 @@ class AIContentService:
         Actúa como un redactor experto en viajes para una agencia de turismo de lujo llamada Travelinkeo.
         Escribe un artículo de blog SEO-optimizado sobre el destino: {destination}.
         Palabras clave sugeridas: {keywords if keywords else destination}
-        
+
         El artículo debe incluir:
         1. Título llamativo.
         2. Resumen corto.
         3. 3-4 secciones con subtítulos (Markdown).
         4. Meta-título y Meta-descripción para SEO.
-        
+
         Responde ÚNICAMENTE en formato JSON con la siguiente estructura:
         {{
             "titulo": "...",
@@ -89,10 +89,10 @@ class AIContentService:
         prompt = f"""
         Basado en el siguiente artículo sobre {articulo.destino}:
         '{articulo.resumen}'
-        
+
         Genera posts cortos para: Instagram, Telegram y LinkedIn.
         Incluye emojis y hashtags relevantes.
-        
+
         Responde ÚNICAMENTE en JSON:
         {{
             "INSTAGRAM": "caption...",

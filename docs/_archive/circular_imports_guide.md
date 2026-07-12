@@ -142,7 +142,7 @@ class FacturaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Factura
         fields = '__all__'
-    
+
     def to_representation(self, instance):
         from apps.bookings.models import Venta
         data = super().to_representation(instance)
@@ -158,7 +158,7 @@ class FacturaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Factura
         fields = '__all__'
-    
+
     def to_representation(self, instance):
         Venta = apps.get_model('bookings', 'Venta')
         data = super().to_representation(instance)
@@ -238,18 +238,18 @@ from pathlib import Path
 
 def refactor_file(file_path):
     content = file_path.read_text()
-    
+
     # Patrón: from apps.X.models import Y (dentro de funciones)
     pattern = r'(\s+)from apps\.(\w+)\.models import (\w+)'
-    
+
     def replace(match):
         indent = match.group(1)
         app_name = match.group(2)
         model_name = match.group(3)
         return f"{indent}{model_name} = apps.get_model('{app_name}', '{model_name}')"
-    
+
     new_content = re.sub(pattern, replace, content)
-    
+
     # Agregar import de apps si no existe
     if 'from django.apps import apps' not in new_content:
         # Buscar el último import de Django
@@ -263,7 +263,7 @@ def refactor_file(file_path):
                 'from django.apps import apps\n' +
                 new_content[insert_pos:]
             )
-    
+
     if new_content != content:
         file_path.write_text(new_content)
         print(f"Refactored: {file_path}")

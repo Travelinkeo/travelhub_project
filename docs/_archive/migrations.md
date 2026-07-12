@@ -103,7 +103,7 @@ Lo que se hizo:
 - **Eliminados por seguridad** (4 scripts con contraseñas en texto plano):
   `create_admin` (`admin123456`), `verify_local_setup` (`viaggio1` + usuarios
   reales), `setup_users`, `setup_users_agencias`. Ver
-  `docs/deployment/SECURITY.md` (sección "Gestión de Superusuarios").
+  `docs/deployment/security.md` (sección "Gestión de Superusuarios").
 - **Consolidados** en `scripts/diagnostics/`: `check_all_missing_cols` →
   `check_missing_columns.py` (con flags `--app`/`--model`), las 4 variantes de
   `test_fresh_migrate{,_v2,_v3,_v4}` → un único `test_fresh_migrate.sh`, y se

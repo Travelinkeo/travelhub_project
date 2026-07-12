@@ -226,12 +226,12 @@ Según normativa venezolana, las ganancias cambiarias incrementan la base imponi
 
 1. ✅ **Generación automática de Nota de Débito** por IVA sobre ganancia cambiaria (COMPLETADO - Ver NOTA_DEBITO_AUTOMATICA.md)
 2. ✅ **API de integración con BCV** para actualización automática de tasas (COMPLETADO - Ver CONFIGURAR_SINCRONIZACION_BCV.md)
-3. ✅ **Reportes contables** (COMPLETADO - Ver REPORTES_CONTABLES.md):
+3. ✅ **Reportes contables** (COMPLETADO - Ver reportes_contables.md):
    - Balance de Comprobación
    - Estado de Resultados
    - Balance General
    - Libro Diario / Mayor
-4. ✅ **Cierre contable mensual** automatizado (COMPLETADO - Ver CIERRE_MENSUAL.md)
+4. ✅ **Cierre contable mensual** automatizado (COMPLETADO - Ver cierre_mensual.md)
 5. **Conciliación bancaria** integrada
 6. **Exportación a formatos fiscales** (XML SENIAT)
 
@@ -245,16 +245,16 @@ Según normativa venezolana, las ganancias cambiarias incrementan la base imponi
 
 ## Cumplimiento Normativo
 
-✅ Código de Comercio (Libros Diario, Mayor)  
-✅ VEN-NIF PYME (Dualidad monetaria)  
-✅ NIC 21 (Moneda extranjera)  
-✅ Ley IVA (Registro de impuestos)  
-✅ IGTF (Impuesto 3% sobre divisas)  
-✅ INATUR (Contribución 1% turismo)  
-✅ BA VEN-NIF 2 (Economía hiperinflacionaria)  
+✅ Código de Comercio (Libros Diario, Mayor)
+✅ VEN-NIF PYME (Dualidad monetaria)
+✅ NIC 21 (Moneda extranjera)
+✅ Ley IVA (Registro de impuestos)
+✅ IGTF (Impuesto 3% sobre divisas)
+✅ INATUR (Contribución 1% turismo)
+✅ BA VEN-NIF 2 (Economía hiperinflacionaria)
 
 ---
 
-**Versión**: 1.0  
-**Fecha**: Enero 2025  
+**Versión**: 1.0
+**Fecha**: Enero 2025
 **Marco Normativo**: VEN-NIF PYME + Código de Comercio Venezuela

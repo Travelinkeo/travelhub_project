@@ -1,7 +1,7 @@
 import logging
-from datetime import timedelta
+from datetime import datetime, timedelta
 from decimal import Decimal
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from django.db.models import Sum
 from django.utils import timezone
@@ -11,7 +11,7 @@ if TYPE_CHECKING:
     from apps.finance.models import TaxRefundOpportunity
 
 
-def __getattr__(name):
+def __getattr__(name: str) -> Any:
     from django.apps import apps
 
     if name == "ItemVenta":
@@ -33,7 +33,7 @@ class BusinessIntelligenceEngine:
     """
 
     @staticmethod
-    def obtener_kpis_ceo(agencia):
+    def obtener_kpis_ceo(agencia: Any) -> dict[str, Any]:
         hoy = timezone.now()
         inicio_mes_actual = hoy.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
 
@@ -87,14 +87,14 @@ class BusinessIntelligenceEngine:
         }
 
     @classmethod
-    def get_monthly_sales_chart_data(cls, agencia):
+    def get_monthly_sales_chart_data(cls, agencia: Any) -> dict[str, list[str] | list[float]]:
         """
         Prepara los datos para el gráfico de barras de Chart.js.
         Últimos 6 meses.
         """
-        data = []
-        labels = []
-        hoy = timezone.now()
+        data: list[float] = []
+        labels: list[str] = []
+        hoy: datetime = timezone.now()
 
         for i in range(5, -1, -1):
             mes = hoy.replace(day=1) - timedelta(days=i * 30)

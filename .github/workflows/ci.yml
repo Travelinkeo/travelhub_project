@@ -16,9 +16,26 @@ jobs:
           python-version: "3.12"
           cache: pip
       - run: python -m pip install --upgrade pip
-      - run: pip install ruff mypy
+      - run: pip install ruff mypy django-stubs
       - run: ruff check . --output-format=github
       - run: ruff format --check .
+      # mypy con la config de mypy.ini (strict=False durante adopción gradual)
+      - run: mypy . --ignore-missing-imports
+
+  secret-scan:
+    name: Secret Scanning (gitleaks)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # full history para detectar secretos en commits antiguos
+          fetch-depth: 0
+      - name: gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Opcional: licencia para organizações (modo avançado com PR comments).
+          # GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
 
   test-smoke:
     name: Smoke Tests (Health Checks)
@@ -112,7 +129,7 @@ jobs:
       REDIS_CELERY_URL: redis://localhost:6380/0
       CELERY_BROKER_URL: redis://localhost:6380/0
       CELERY_RESULT_BACKEND: redis://localhost:6380/0
-      DJANGO_SETTINGS_MODULE: travelhub.settings
+      DJANGO_SETTINGS_MODULE: travelhub.settings.testing
       DEBUG: "True"
       ALLOWED_HOSTS: "*"
       SENDGRID_API_KEY: mock
@@ -137,11 +154,12 @@ jobs:
       - run: pip install -r requirements/prod.txt -r requirements/local.txt
       - run: python manage.py collectstatic --noinput --verbosity 0
       - run: python manage.py migrate --noinput
+      - run: python manage.py compilemessages
       - run: |
           pytest tests/ --timeout=120 -x -q --tb=short \
             --ignore=tests/test_health_smoke.py \
             --cov=. --cov-report=xml --cov-report=term-missing:skip-covered \
-            --cov-fail-under=60
+            --cov-fail-under=75
 
   security-scan:
     name: Security Scan (pip-audit)
@@ -153,7 +171,13 @@ jobs:
           python-version: "3.12"
       - run: pip install pip-audit
       - name: Scan base dependencies for CVEs
-        run: pip-audit -r requirements/base.txt --ignore-vuln PYSEC-2022-42969 || true
+        run: pip-audit -r requirements/base.txt --ignore-vuln PYSEC-2022-42969
+      - name: Scan dev dependencies for CVEs
+        run: pip-audit -r requirements/local.txt --ignore-vuln PYSEC-2022-42969
+      - name: Install bandit
+        run: pip install bandit
+      - name: Static security analysis (bandit)
+        run: bandit -r apps/ core/ -ll -ii -x tests/
 
   contract-testing:
     name: Contract Testing (OpenAPI Schema)
@@ -184,7 +208,7 @@ jobs:
       REDIS_CELERY_URL: redis://localhost:6379/0
       CELERY_BROKER_URL: redis://localhost:6379/0
       CELERY_RESULT_BACKEND: redis://localhost:6379/0
-      DJANGO_SETTINGS_MODULE: travelhub.settings
+      DJANGO_SETTINGS_MODULE: travelhub.settings.testing
       DEBUG: "True"
       ALLOWED_HOSTS: "*"
       SENDGRID_API_KEY: mock

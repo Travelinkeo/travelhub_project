@@ -2,10 +2,10 @@
 
 ## Información General del Proyecto
 
-**Nombre**: TravelHub  
-**Tipo**: CRM/ERP/CMS para Agencia de Viajes  
-**Stack**: Django 5.x + HTMX + Alpine.js SSR + PostgreSQL  
-**Repositorio**: https://github.com/Travelinkeo/travelhub_project.git  
+**Nombre**: TravelHub
+**Tipo**: CRM/ERP/CMS para Agencia de Viajes
+**Stack**: Django 5.x + HTMX + Alpine.js SSR + PostgreSQL
+**Repositorio**: https://github.com/Travelinkeo/travelhub_project.git
 
 ## Estructura del Proyecto
 
@@ -121,7 +121,7 @@ pytest --cov
 
 ### Principal
 - `README.md` - README principal
-- `ORGANIZACION_PROYECTO.md` - Guía de organización
+- `organizacion_proyecto.md` - Guía de organización
 - `INICIO_RAPIDO.txt` - Comandos rápidos
 
 ### Índices
@@ -131,7 +131,7 @@ pytest --cov
 ### Por Tema
 - Contabilidad: `docs_archive/CONTABILIDAD_VENEZUELA_VEN_NIF.md`
 - Parsers: `docs_archive/PARSERS_AEROLINEAS.md`
-- APIs: `docs/api/FRONTEND_API_ENDPOINTS.md`
+- APIs: `docs/api/frontend_api_endpoints.md`
 - Notificaciones: `docs_archive/NOTIFICACIONES.md`
 - Deployment: `docs/deployment/INSTRUCCIONES_NGROK.md`
 
@@ -189,21 +189,21 @@ pytest --cov
 
 ## Últimos Commits
 
-**Commit más reciente**:  
-**Fecha**: 21 de Enero de 2025  
-**Tema**: Implementación SaaS Multi-Tenant Completa  
+**Commit más reciente**:
+**Fecha**: 21 de Enero de 2025
+**Tema**: Implementación SaaS Multi-Tenant Completa
 **Estado**: ✅ Sistema SaaS funcional con Stripe integrado
 
-**Commit anterior**:  
-**Fecha**: 20 de Enero de 2025  
-**Commit**: d7f694f  
-**Mensaje**: "Fase 6: Limpieza Final - Proyecto 100% Completado"  
+**Commit anterior**:
+**Fecha**: 20 de Enero de 2025
+**Commit**: d7f694f
+**Mensaje**: "Fase 6: Limpieza Final - Proyecto 100% Completado"
 **Cambios**: 109 archivos, +10,896 líneas, -715 líneas
 
-**Commit anterior**:  
-**Fecha**: Enero 2025  
-**Commit**: 8eef0ba  
-**Mensaje**: "Reorganizacion completa del proyecto - 75 archivos organizados en carpetas tematicas"  
+**Commit anterior**:
+**Fecha**: Enero 2025
+**Commit**: 8eef0ba
+**Mensaje**: "Reorganizacion completa del proyecto - 75 archivos organizados en carpetas tematicas"
 **Cambios**: 318 archivos, +55,398 líneas, -1,960 líneas
 
 ## Características SaaS (Nuevo - Enero 2025)

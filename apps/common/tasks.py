@@ -1291,7 +1291,6 @@ def fetch_evolution_qr_task(self, instance_name):
     except (requests.RequestException, json.JSONDecodeError, ValueError) as e:
         logger.error(f"Failed to fetch Evolution QR for {instance_name}: {e}")
         return None
-        logger.debug("HTTP QR fetch failed, trying WebSocket: %s", e)
 
     try:
         import websocket
@@ -1339,6 +1338,7 @@ def limpiar_axes_logs():
         AccessFailureLog.objects.filter(attempt_time__lt=cutoff).delete()
         return "Axes logs limpiados con éxito"
     except Exception as e:
+        logger.error(f"Error limpiando logs Axes: {e}")
         return f"Error limpiando logs Axes: {e}"
 
 
@@ -1357,6 +1357,7 @@ def limpiar_sesiones_expiradas():
         Session.objects.filter(expire_date__lt=timezone.now()).delete()
         return "Sesiones expiradas limpiadas con exito"
     except Exception as e:
+        logger.error(f"Error limpiando sesiones: {e}")
         return f"Error limpiando sesiones: {e}"
 
 

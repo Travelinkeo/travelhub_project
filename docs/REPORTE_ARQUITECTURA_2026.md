@@ -1,8 +1,8 @@
 # 📊 REPORTE EJECUTIVO DE ARQUITECTURA - TRAVELHUB
 
-**Documento Maestro para Equipos Técnico y Gerencial**  
-**Fecha:** 19 de Marzo de 2026  
-**Versión:** 2.0  
+**Documento Maestro para Equipos Técnico y Gerencial**
+**Fecha:** 19 de Marzo de 2026
+**Versión:** 2.0
 **Estado:** ✅ En Producción
 
 ---
@@ -1165,10 +1165,10 @@ travelhub_project/
 |---------|-----|
 | Repositorio GitHub | `https://github.com/Travelinkeo/travelhub_project` |
 | Documentación Principal | `docs/INFORME_COMPLETO_PROYECTO.md` |
-| API Endpoints | `docs/api/FRONTEND_API_ENDPOINTS.md` |
-| Arquitectura | `docs/ARCHITECTURE.md` |
-| Diccionario de Datos | `docs/DATA_DICTIONARY.md` |
+| API Endpoints | `docs/api/frontend_api_endpoints.md` |
+| Arquitectura | `docs/architecture.md` |
 
+| Diccionario de Datos | `docs/data_dictionary.md` |
 ### 📧 Contactos
 
 ```
@@ -1214,9 +1214,9 @@ travelhub_project/
 
 ---
 
-**Documento generado:** 19 de Marzo de 2026  
-**Versión:** 2.0  
-**Autor:** Arquitecto de Software (Asistido por IA)  
+**Documento generado:** 19 de Marzo de 2026
+**Versión:** 2.0
+**Autor:** Arquitecto de Software (Asistido por IA)
 **Para:** Equipos Técnico y Gerencial de TravelHub
 
 ---

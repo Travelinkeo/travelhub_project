@@ -147,7 +147,7 @@ def dashboard_metricas(request):
 
 ### Archivos Creados
 - `core/cache.py` - Utilidades de caché
-- `REDIS_SETUP.md` - Guía de configuración de Redis
+- `redis_setup.md` - Guía de configuración de Redis
 
 ### Funcionalidades
 
@@ -220,8 +220,8 @@ El sistema funciona perfectamente sin Redis usando el caché en memoria de Djang
 2. `tests/test_liquidaciones_api.py`
 3. `core/throttling.py`
 4. `core/cache.py`
-5. `REDIS_SETUP.md`
-6. `MEJORAS_IMPLEMENTADAS.md` (este archivo)
+5. `redis_setup.md`
+6. `mejoras_implementadas.md` (este archivo)
 
 ### Archivos Modificados (3)
 1. `requirements.txt` - Agregado `drf-spectacular`
@@ -251,7 +251,7 @@ python manage.py runserver
 
 ### 4. Configurar Redis (Opcional)
 ```bash
-# Ver REDIS_SETUP.md para instrucciones detalladas
+# Ver redis_setup.md para instrucciones detalladas
 docker run -d -p 6379:6379 --name redis redis:alpine
 ```
 
@@ -304,7 +304,7 @@ docker run -d -p 6379:6379 --name redis redis:alpine
 - ✅ Rate Limiting Mejorado
 - ✅ Sistema de Caché (opcional)
 
-**Total de archivos nuevos:** 7  
-**Total de archivos modificados:** 4  
-**Tiempo estimado de implementación:** 2-3 horas  
+**Total de archivos nuevos:** 7
+**Total de archivos modificados:** 4
+**Tiempo estimado de implementación:** 2-3 horas
 **Impacto en producción:** Alto (mejor rendimiento, documentación, testing)

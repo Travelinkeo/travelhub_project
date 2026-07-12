@@ -1,13 +1,16 @@
 import logging
+from collections.abc import Callable
 from functools import wraps
-from typing import Any
+from typing import Any, TypeVar
 
 from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
+_F = TypeVar("_F", bound=Callable[..., Any])
 
-def idempotent_task(timeout=3600, key_prefix="celery_idem"):
+
+def idempotent_task(timeout: int = 3600, key_prefix: str = "celery_idem") -> Callable[[_F], _F]:
     """
     Decorador de IDEMPOTENCIA para tareas Celery.
     Previene ejecución duplicada usando Redis como lock distribuido.
@@ -23,9 +26,9 @@ def idempotent_task(timeout=3600, key_prefix="celery_idem"):
             ...
     """
 
-    def decorator(func):
+    def decorator(func: _F) -> _F:
         @wraps(func)
-        def wrapper(*args, **kwargs):
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
             # Generar clave única basada en nombre de tarea + argumentos
             task_name = func.__name__
             args_key = f"{key_prefix}:{task_name}:{args}:{sorted(kwargs.items())}"
@@ -68,7 +71,12 @@ def idempotent_task(timeout=3600, key_prefix="celery_idem"):
     return decorator
 
 
-def safe_delay(task_func: Any, *args: Any, _queue: str | None = None, **kwargs: Any) -> Any | None:
+def safe_delay(
+    task_func: Callable[..., Any],
+    *args: Any,
+    _queue: str | None = None,
+    **kwargs: Any,
+) -> Any | None:
     """
     ASISTENCIA DE CARRIL: Wrapper seguro para encolar tareas de Celery.
     Si Redis o el Broker de mensajes están caídos, captura el error.
@@ -115,7 +123,7 @@ def safe_delay(task_func: Any, *args: Any, _queue: str | None = None, **kwargs: 
         return None
 
 
-def tenant_task(*task_args, **task_kwargs):
+def tenant_task(*task_args: Any, **task_kwargs: Any) -> Callable[[_F], _F]:
     """
     🛡️ DECORADOR MULTI-TENANT PARA CELERY (PRO)
     Envuelve @shared_task para asegurar que la tarea se ejecute dentro del context manager
@@ -127,7 +135,7 @@ def tenant_task(*task_args, **task_kwargs):
     3. Validación estricta: Si la tarea requiere agencia y no se provee, falla antes de causar data leakage.
     """
 
-    def decorator(func):
+    def decorator(func: _F) -> _F:
         import inspect
         from functools import wraps
 
@@ -135,7 +143,7 @@ def tenant_task(*task_args, **task_kwargs):
 
         @shared_task(*task_args, **task_kwargs)
         @wraps(func)
-        def wrapper(*args, **kwargs):
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
             # 1. Intentar encontrar el agency_id en los argumentos
             agency_id = kwargs.pop(
                 "agency_id", kwargs.pop("agencia_id", kwargs.pop("id_agencia", None))

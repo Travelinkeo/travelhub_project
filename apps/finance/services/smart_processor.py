@@ -102,7 +102,7 @@ class SmartReportProcessor:
             Identify which columns from the list match our standard schema based on the sample data.
             Columns: {columns}
             Sample Data: {sample_json}
-            
+
             Schema targets:
             - numero_boleto (Ticket/Doc)
             - pnr (Locator/Record)
@@ -115,7 +115,7 @@ class SmartReportProcessor:
             """
 
             response = client.models.generate_content(
-                model="gemini-2.5-flash",
+                model="gemini-1.5-flash",
                 contents=prompt,
                 config=types.GenerateContentConfig(
                     response_mime_type="application/json",

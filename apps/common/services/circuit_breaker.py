@@ -1,7 +1,9 @@
 import logging
 import time
+from collections.abc import Callable
 from enum import Enum
 from functools import wraps
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -36,19 +38,25 @@ class CircuitBreaker:
         result = whatsapp_circuit_breaker.call(send_message, ...)
     """
 
-    def __init__(self, name, failure_threshold=5, recovery_timeout=60, fallback=None):
+    def __init__(
+        self,
+        name: str,
+        failure_threshold: int = 5,
+        recovery_timeout: int = 60,
+        fallback: Callable[..., Any] | None = None,
+    ) -> None:
         self.name = name
         self.failure_threshold = failure_threshold
         self.recovery_timeout = recovery_timeout
         self.fallback = fallback  # Función fallback cuando el circuito está abierto
 
-        self.state = CircuitState.CLOSED
+        self.state: CircuitState = CircuitState.CLOSED
         self.failures = 0
-        self.last_failure_time = 0
+        self.last_failure_time: float = 0
         self.success_count = 0
         self.failure_count = 0
 
-    def call(self, func, *args, **kwargs):
+    def call(self, func: Callable[..., Any], *args: Any, **kwargs: Any) -> Any:
         if self.state == CircuitState.OPEN:
             if time.time() - self.last_failure_time > self.recovery_timeout:
                 self.state = CircuitState.HALF_OPEN
@@ -81,14 +89,14 @@ class CircuitBreaker:
             self._record_failure()
             raise e
 
-    def _record_success(self):
+    def _record_success(self) -> None:
         self.success_count += 1
         if self.state != CircuitState.CLOSED:
             logger.info(f"✅ Circuit Breaker [{self.name}] restored. Moving to CLOSED state.")
         self.state = CircuitState.CLOSED
         self.failures = 0
 
-    def _record_failure(self):
+    def _record_failure(self) -> None:
         self.failure_count += 1
         self.failures += 1
         self.last_failure_time = time.time()
@@ -99,7 +107,7 @@ class CircuitBreaker:
                 f"💥 Circuit Breaker [{self.name}] OPENED after {self.failures} failures (total: {self.failure_count})."
             )
 
-    def get_stats(self):
+    def get_stats(self) -> dict[str, Any]:
         """Return circuit breaker statistics."""
         return {
             "name": self.name,
@@ -110,16 +118,16 @@ class CircuitBreaker:
             "last_failure_time": self.last_failure_time,
         }
 
-    def reset(self):
+    def reset(self) -> None:
         """Reset circuit breaker to initial state."""
         self.state = CircuitState.CLOSED
         self.failures = 0
         self.last_failure_time = 0
         logger.info(f"🔧 Circuit Breaker [{self.name}] manually reset.")
 
-    def __call__(self, func):
+    def __call__(self, func: Callable[..., Any]) -> Callable[..., Any]:
         @wraps(func)
-        def wrapper(*args, **kwargs):
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
             return self.call(func, *args, **kwargs)
 
         return wrapper

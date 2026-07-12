@@ -98,4 +98,4 @@ docker-compose up --build -d
 cloudflared tunnel --url http://localhost:8000
 ```
 
-Ver [Guía de Despliegue](deployment/DEPLOYMENT.md) para instrucciones completas.
+Ver [Guía de Despliegue](deployment/deployment.md) para instrucciones completas.

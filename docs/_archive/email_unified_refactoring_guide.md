@@ -2,8 +2,8 @@
 
 ## Estado Actual
 
-**Archivo:** `apps/communications/services/email_unified.py`  
-**Líneas:** 1183  
+**Archivo:** `apps/communications/services/email_unified.py`
+**Líneas:** 1183
 **Problema:** God Class con múltiples responsabilidades
 
 ## Análisis de Responsabilidades
@@ -179,7 +179,7 @@ logger = logging.getLogger(__name__)
 def es_pdf_boleto_valido(pdf_content, filename=""):
     """
     Validar si un PDF es un boleto aéreo válido.
-    
+
     Criterios:
     - Debe ser un PDF válido
     - Debe contener palabras clave de boletos
@@ -253,10 +253,10 @@ logger = logging.getLogger(__name__)
 
 class DriveUploader:
     """Servicio de upload a Google Drive."""
-    
+
     def __init__(self, drive_service):
         self.drive_service = drive_service
-    
+
     def upload_to_drive(self, pdf_path):
         """Subir PDF a Google Drive y retornar URL pública."""
         # ... implementación desde email_unified.py líneas 1002-1027
@@ -288,59 +288,59 @@ logger = logging.getLogger(__name__)
 class EmailMonitorService:
     """
     Servicio de monitoreo de emails para captura automática de boletos.
-    
+
     Responsabilidades:
     - Conectar a servidor IMAP
     - Polling de emails nuevos
     - Procesamiento de mensajes
     - Coordinación de parseo y notificaciones
     """
-    
+
     def __init__(self, agencia):
         """Inicializar servicio con configuración de agencia."""
         # ... implementación desde email_unified.py líneas 413-447
         pass
-    
+
     def _init_drive(self):
         """Inicializar servicio de Google Drive."""
         # ... implementación desde email_unified.py líneas 449-465
         pass
-    
+
     def start(self):
         """Iniciar loop de monitoreo continuo."""
         # ... implementación desde email_unified.py líneas 474-484
         pass
-    
+
     def procesar_una_vez(self):
         """Ejecutar un ciclo de procesamiento."""
         # ... implementación desde email_unified.py líneas 467-472
         pass
-    
+
     def _procesar_correos(self):
         """Procesar todos los correos no leídos."""
         # ... implementación desde email_unified.py líneas 486-620
         pass
-    
+
     def _procesar_mensaje(self, message, msg_num, mail_connection):
         """Procesar un mensaje individual."""
         # ... implementación desde email_unified.py líneas 622-735
         pass
-    
+
     def _procesar_boleto_email(self, message, msg_num, mail_connection):
         """Procesar boleto desde contenido de email."""
         # ... implementación desde email_unified.py líneas 737-775
         pass
-    
+
     def _procesar_boleto_pdf(self, message, msg_num, mail_connection):
         """Procesar boleto desde PDF adjunto."""
         # ... implementación desde email_unified.py líneas 777-819
         pass
-    
+
     def _manejar_resultado_procesamiento(self, boleto, resultado):
         """Manejar resultado del procesamiento de boleto."""
         # ... implementación desde email_unified.py líneas 821-861
         pass
-    
+
     def _enviar_respaldo_email(self, boleto, pdf_path):
         """Enviar email de respaldo con PDF."""
         # ... implementación desde email_unified.py líneas 863-880

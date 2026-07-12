@@ -112,7 +112,7 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [...]
-    
+
     operations = [
         migrations.RunSQL(
             sql=[
@@ -194,7 +194,7 @@ Para consultas frecuentes con múltiples filtros:
 ```python
 class Meta:
     indexes = [
-        models.Index(fields=['agencia', 'fecha_venta', 'estado'], 
+        models.Index(fields=['agencia', 'fecha_venta', 'estado'],
                      name='idx_venta_agencia_fecha_estado'),
         models.Index(fields=['agencia', 'cliente', 'fecha_venta'],
                      name='idx_venta_agencia_cliente_fecha'),

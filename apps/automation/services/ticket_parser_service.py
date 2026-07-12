@@ -295,7 +295,7 @@ class TicketParserService:
             boleto.log_parseo = "Iniciando pipeline de extracción..."
             boleto.save(update_fields=["log_parseo"])
 
-            # 2. Extracción de Texto
+            # 2. Extracción de Texto + HTML
             raw_file = ExtractionService.get_open_file(boleto)
             try:
                 texto = ExtractionService.extract_text(raw_file, boleto.archivo_boleto.name)
@@ -305,6 +305,18 @@ class TicketParserService:
 
             if not texto:
                 return self._finalize_error(boleto, "Archivo vacío o ilegible.")
+
+            html_text = ""
+            fname_lower = boleto.archivo_boleto.name.lower()
+            if fname_lower.endswith(".eml") or fname_lower.endswith(".html"):
+                raw_file_html = ExtractionService.get_open_file(boleto)
+                try:
+                    html_text = ExtractionService.extract_html(
+                        raw_file_html, boleto.archivo_boleto.name
+                    )
+                finally:
+                    if raw_file_html:
+                        raw_file_html.close()
 
             # 3. 🔥 CACHÉ REDIS: Verificar si ya parseamos texto idéntico
             texto_hash = hashlib.sha256(texto.encode("utf-8", errors="ignore")).hexdigest()
@@ -332,7 +344,7 @@ class TicketParserService:
                     logger.info(f"⚡ Usando Motor Regex/GDS Local para Boleto {boleto_id}...")
                     regex_start = time.time()
                     datos_regex = extract_data_from_text(
-                        texto, pdf_path=path_pdf, bypass_cache=bypass_cache
+                        texto, html_text=html_text, pdf_path=path_pdf, bypass_cache=bypass_cache
                     )
                     regex_duration = time.time() - regex_start
                     logger.info(f"⏱️ [PROFILING] Regex parse duration: {regex_duration:.2f}s")

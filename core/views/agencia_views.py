@@ -6,6 +6,7 @@ from django.db import transaction
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
+from django.utils.translation import gettext_lazy as _
 from django.views.generic import ListView, UpdateView, View
 
 from core.forms.agencia_forms import AgenciaSettingsForm, UsuarioAgenciaForm
@@ -321,7 +322,7 @@ class CambiarAgenciaView(View):
         next_url = request.POST.get("next") or request.META.get("HTTP_REFERER") or "/"
 
         if not agencia_id:
-            messages.error(request, "Agencia no especificada.")
+            messages.error(request, _("Agencia no especificada."))
             return redirect(next_url)
 
         # Verificar que el usuario realmente pertenece a esa agencia
@@ -337,7 +338,7 @@ class CambiarAgenciaView(View):
         )
 
         if not ua:
-            messages.error(request, "No tienes acceso a esa agencia.")
+            messages.error(request, _("No tienes acceso a esa agencia."))
             return redirect(next_url)
 
         # Guardar la elección en la sesión

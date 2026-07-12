@@ -225,13 +225,13 @@ class LinkeoService:
             prompt = f"""
             Eres Linkeo, el asistente experto de TravelHub.
             Tu misión es ayudar a agentes de viaje con comandos GDS, ventas y dudas generales.
-            
+
             INFORMACIÓN DE CONTEXTO (Usa esto para responder si es relevante):
             {contexto_wiki}
-            
+
             PREGUNTA DEL USUARIO:
             "{text}"
-            
+
             INSTRUCCIONES:
             - Responde de forma concisa y profesional.
             - Si la respuesta está en la INFORMACIÓN DE CONTEXTO, úsala y cita el comando exacto.
@@ -240,7 +240,7 @@ class LinkeoService:
             """
 
             # 3. Generar
-            response = model.models.generate_content(model="gemini-2.5-flash", contents=prompt)
+            response = model.models.generate_content(model="gemini-1.5-flash", contents=prompt)
             return response.text
 
         except Exception as e:

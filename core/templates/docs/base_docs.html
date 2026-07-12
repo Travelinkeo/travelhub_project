@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ page_title }} — TravelHub Docs</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com" nonce="{{ csp_nonce }}"></script>
     <style>
         body { background: #0F172A; color: #E2E8F0; }
         .docs-content h1 { font-size: 2rem; font-weight: 700; margin: 2rem 0 1rem; color: #F8FAFC; }
@@ -42,7 +42,9 @@
                 <span class="text-xs text-slate-500">v{{ APP_VERSION|default:"2.0.0" }}</span>
             </div>
             <div class="flex items-center gap-4 text-sm">
+                {% if user.is_staff %}
                 <a href="{% url 'status_api' %}" class="text-slate-400 hover:text-white transition">🔵 Status</a>
+                {% endif %}
                 <a href="/" class="text-slate-400 hover:text-white transition">🏠 Volver al sistema</a>
             </div>
         </div>

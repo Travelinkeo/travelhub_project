@@ -1,5 +1,6 @@
 from django import forms
 from django.contrib.auth.models import User
+from django.utils.translation import gettext_lazy as _
 
 from core.models.agencia import Agencia, AgenciaBranding, AgenciaConfiguracion, UsuarioAgencia
 
@@ -187,5 +188,5 @@ class UsuarioAgenciaForm(forms.Form):
     def clean_email(self):
         email = self.cleaned_data["email"]
         if User.objects.filter(email=email).exists():
-            raise forms.ValidationError("Este correo ya está registrado en TravelHub.")
+            raise forms.ValidationError(_("Este correo ya está registrado en TravelHub."))
         return email

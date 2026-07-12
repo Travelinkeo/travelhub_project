@@ -1,6 +1,6 @@
 # ESTRUCTURA DE CARPETAS - TRAVELHUB
 
-**Fecha**: 25 de Enero de 2025  
+**Fecha**: 25 de Enero de 2025
 **Versión**: 1.0
 
 ---
@@ -138,7 +138,7 @@ travelhub_project/
 │   ├── INFORME_COMPLETO_PROYECTO.md            # ⭐ DOCUMENTO PRINCIPAL
 │   ├── INDEX_DOCUMENTACION.md                  # Índice completo
 │   ├── RESUMEN_EJECUTIVO.md                    # Resumen ejecutivo
-│   ├── ESTRUCTURA_CARPETAS.md                  # Este documento
+│   ├── estructura_carpetas.md                  # Este documento
 │   │
 │   ├── 📂 saas/                                # Documentación SaaS
 │   │   ├── stripe_setup_guide.md
@@ -251,7 +251,7 @@ travelhub_project/
 ├── 📄 render.yaml                              # Configuración Render
 ├── 📄 railway.json                             # Configuración Railway
 ├── 📄 README.md                                # README principal
-├── 📄 ORGANIZACION_PROYECTO.md                 # Guía de organización
+├── 📄 organizacion_proyecto.md                 # Guía de organización
 └── 📄 INICIO_RAPIDO.txt                        # Comandos rápidos
 ```
 
@@ -440,6 +440,6 @@ nombre_minusculas_archive/      Carpetas de archivo
 
 ---
 
-**Última actualización**: 25 de Enero de 2025  
-**Versión**: 1.0  
+**Última actualización**: 25 de Enero de 2025
+**Versión**: 1.0
 **Generado por**: Amazon Q Developer

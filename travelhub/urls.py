@@ -7,7 +7,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth import views as auth_views
 from django.urls import include, path, re_path
 from django.views.decorators.csrf import ensure_csrf_cookie
-from django.views.generic import RedirectView
+from django.views.generic import RedirectView, TemplateView
 from django.views.static import serve
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 from rest_framework_simplejwt.views import TokenObtainPairView
@@ -18,12 +18,12 @@ from core.middleware import csp_report_view
 from core.sso.views import sso_callback, sso_login
 from core.views.auditoria_views import api_audit_logs
 from core.views.auth_views import MagicLinkRequestView, MagicLinkVerifyView, TokenLogoutView
-from core.views.docs_views import docs_index, docs_page
+from core.views.docs_views import docs_index, docs_page, public_manual
 from core.views.health_views import health_check
 from core.views.marketing_views import public_landing, public_pricing
 from core.views.onboarding_views import OnboardingAgencyView, SaaSOnboardingView
 from core.views.pwa_views import manifest, offline, service_worker
-from core.views.status_views import status_api
+from core.views.status_views import status_api, status_page
 
 
 def favicon_view(request):
@@ -68,6 +68,7 @@ urlpatterns = [
     # --- ONBOARDING (SaaS) ---
     path("onboarding/", SaaSOnboardingView.as_view(), name="onboarding_start"),
     path("onboarding/agency/", OnboardingAgencyView.as_view(), name="onboarding_agency"),
+    path("onboarding/", include("apps.common.urls_onboarding")),
     # --- INCLUSIÓN DE MÓDULOS (ESTO SOLUCIONA EL ERROR NOREVERSEMATCH) ---
     path("bookings/", include("apps.bookings.urls")),
     path("finance/", include("apps.finance.urls")),
@@ -93,11 +94,6 @@ urlpatterns = [
     # Public routes (no /api/ prefix) for external consumers
     path("schema/", _protect_docs(SpectacularAPIView.as_view()), name="schema_root"),
     path(
-        "docs/",
-        _protect_docs(SpectacularSwaggerView.as_view(url_name="schema_root")),
-        name="swagger-ui",
-    ),
-    path(
         "redoc/", _protect_docs(SpectacularRedocView.as_view(url_name="schema_root")), name="redoc"
     ),
     # --- DASHBOARD PRINCIPAL ---
@@ -112,14 +108,22 @@ urlpatterns = [
     path("health/", health_check, name="health"),
     path("health/metrics/", health_metrics_view, name="health_metrics"),
     # PWA
+    path("robots.txt", TemplateView.as_view(template_name="robots.txt", content_type="text/plain")),
+    path(
+        "sitemap.xml",
+        TemplateView.as_view(template_name="sitemap.xml", content_type="application/xml"),
+    ),
     path("manifest.json", manifest, name="pwa_manifest"),
     path("service-worker.js", service_worker, name="service_worker"),
     path("offline/", offline, name="offline"),
-    # Status Page
-    path("status/", status_api, name="status_api"),
-    # Knowledge Base
-    path("docs/", docs_index, name="docs_index"),
-    path("docs/<path:path>/", docs_page, name="docs_page"),
+    # Status Page (solo staff)
+    path("status/", _protect_docs(status_page), name="status_page"),
+    path("status/api/", _protect_docs(status_api), name="status_api"),
+    # Knowledge Base — documentación técnica (solo staff)
+    path("docs/", _protect_docs(docs_index), name="docs_index"),
+    path("docs/<path:path>/", _protect_docs(docs_page), name="docs_page"),
+    # Manual de usuario público
+    path("manual/", public_manual, name="public_manual"),
     # Public Marketing
     path("pricing/", public_pricing, name="public_pricing"),
     # Push Notifications API

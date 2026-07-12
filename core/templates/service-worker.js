@@ -8,6 +8,10 @@ const STATIC_ASSETS = [
   '/static/core/css/responsive.css',
   '/static/vendor/htmx_v2.js',
   '/static/vendor/alpine_v2.js',
+  '/static/images_pwa/pwa-192x192.png',
+  '/static/images_pwa/pwa-512x512.png',
+  '/static/images_pwa/pwa-maskable-192x192.png',
+  '/static/images_pwa/pwa-maskable-512x512.png',
 ];
 
 // --- INSTALL ---

@@ -3,6 +3,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Count, Q, Sum
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
+from django.utils.translation import gettext_lazy as _
 from django.views.generic import CreateView, DetailView, TemplateView, View
 
 from apps.finance.forms import ReporteReconciliacionForm
@@ -132,7 +133,9 @@ class ProcessReconciliacionHTMXView(LoginRequiredMixin, View):
 
             messages.info(
                 request,
-                "El motor de IA ha comenzado el análisis en segundo plano. Los resultados aparecerán en unos instantes.",
+                _(
+                    "El motor de IA ha comenzado el análisis en segundo plano. Los resultados aparecerán en unos instantes."
+                ),
             )
         except Exception as e:
             messages.error(request, f"Error al iniciar el análisis IA: {str(e)}")

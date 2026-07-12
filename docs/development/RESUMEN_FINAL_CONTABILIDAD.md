@@ -45,7 +45,7 @@ Se ha implementado un sistema de contabilidad completo y funcional que cumple co
 - URLs Web: `/contabilidad/reportes/`
 - API Python: `ReportesContables`
 
-**Documentación**: `REPORTES_CONTABLES.md`
+**Documentación**: `reportes_contables.md`
 
 ### 4. ✅ Cierre Mensual Automatizado
 **Implementado**: Proceso automatizado de cierre contable mensual.
@@ -58,7 +58,7 @@ Se ha implementado un sistema de contabilidad completo y funcional que cumple co
 
 **Comando**: `python manage.py cierre_mensual`
 
-**Documentación**: `CIERRE_MENSUAL.md`
+**Documentación**: `cierre_mensual.md`
 
 ## 📦 Componentes del Sistema
 
@@ -175,15 +175,15 @@ python manage.py cierre_mensual --mes 10 --anio 2025 --dry-run
 
 ## 📚 Documentación Completa
 
-1. `CONTABILIDAD_VENEZUELA_VEN_NIF.md`: Documentación principal
+1. `contabilidad_venezuela_ven_nif.md`: Documentación principal
 2. `RESUMEN_CONTABILIDAD_VEN_NIF.md`: Resumen ejecutivo
 3. `NOTA_DEBITO_AUTOMATICA.md`: Notas de débito
 4. `IMPLEMENTACION_NOTA_DEBITO.md`: Detalles técnicos
 5. `CONFIGURAR_SINCRONIZACION_BCV.md`: Sincronización BCV
 6. `RESUMEN_SINCRONIZACION_BCV.md`: Resumen BCV
-7. `REPORTES_CONTABLES.md`: Reportes financieros
-8. `CIERRE_MENSUAL.md`: Cierre mensual
-9. `RESUMEN_FINAL_CONTABILIDAD.md`: Este documento
+7. `reportes_contables.md`: Reportes financieros
+8. `cierre_mensual.md`: Cierre mensual
+9. `resumen_final_contabilidad.md`: Este documento
 
 ## 🚀 Scripts de Automatización
 
@@ -275,9 +275,9 @@ El sistema está **listo para producción** y ha sido probado exitosamente en to
 
 ---
 
-**Implementado por**: Sistema TravelHub  
-**Fecha de Finalización**: Enero 2025  
-**Versión**: 1.0  
-**Estado**: ✅ PRODUCCIÓN  
-**Cumplimiento**: VEN-NIF PYME + Código de Comercio Venezuela  
+**Implementado por**: Sistema TravelHub
+**Fecha de Finalización**: Enero 2025
+**Versión**: 1.0
+**Estado**: ✅ PRODUCCIÓN
+**Cumplimiento**: VEN-NIF PYME + Código de Comercio Venezuela
 **Cobertura**: 100%

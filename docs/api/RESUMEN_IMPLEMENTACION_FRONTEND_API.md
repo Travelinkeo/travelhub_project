@@ -23,7 +23,7 @@ Se han implementado **todas las funcionalidades prioritarias** del admin de Djan
 8. **`core/views/comunicaciones_views.py`** - Inbox de comunicaciones con proveedores
 
 ### Documentación
-9. **`FRONTEND_API_ENDPOINTS.md`** - Documentación completa de todos los endpoints
+9. **`frontend_api_endpoints.md`** - Documentación completa de todos los endpoints
 
 ---
 
@@ -300,7 +300,7 @@ curl -H "Authorization: Bearer <token>" \
 ## 📞 Soporte
 
 Para dudas sobre la implementación, revisar:
-- `FRONTEND_API_ENDPOINTS.md` - Documentación detallada
+- `frontend_api_endpoints.md` - Documentación detallada
 - `core/serializers.py` - Estructura de datos
 - `core/views/` - Lógica de negocio
 

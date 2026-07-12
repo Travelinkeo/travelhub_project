@@ -32,7 +32,9 @@ class MultiParsedTicketData:
             for f in t.get("vuelos", []):
                 itinerario.append(
                     TramoVueloSchema(
-                        aerolinea=f.get("aerolinea") or "AVIOR AIRLINES",
+                        aerolinea=f.get("aerolinea")
+                        or t.get("NOMBRE_AEROLINEA")
+                        or "AVIOR AIRLINES",
                         numero_vuelo=f.get("numero_vuelo"),
                         origen=f.get("origen"),
                         codigo_iata_origen=f.get("codigo_iata_origen"),
@@ -41,7 +43,10 @@ class MultiParsedTicketData:
                         destino=f.get("destino"),
                         codigo_iata_destino=f.get("codigo_iata_destino"),
                         hora_llegada=f.get("hora_llegada") or "00:00",
-                        fecha_llegada=f.get("fecha_llegada") or f.get("fecha") or "01JAN26",
+                        fecha_llegada=f.get("fecha_llegada")
+                        or f.get("fecha_salida")
+                        or f.get("fecha")
+                        or "01JAN26",
                         cabina=f.get("clase") or "Económica",
                         clase=f.get("clase"),
                         localizador_aerolinea=t.get("CODIGO_RESERVA"),
@@ -54,8 +59,12 @@ class MultiParsedTicketData:
                     codigo_identificacion=t.get("CODIGO_IDENTIFICACION"),
                     numero_boleto=t.get("NUMERO_DE_BOLETO"),
                     fecha_emision=t.get("FECHA_EMISION"),
+                    agente_emisor=t.get("AGENTE_EMISOR"),
                     codigo_reserva=t.get("CODIGO_RESERVA") or "UNKNOWN",
+                    codigo_reserva_aerolinea=t.get("SOLO_CODIGO_RESERVA")
+                    or t.get("CODIGO_RESERVA_AEROLINEA"),
                     nombre_aerolinea=t.get("NOMBRE_AEROLINEA") or "AVIOR AIRLINES",
+                    direccion_aerolinea=t.get("DIRECCION_AEROLINEA"),
                     tarifa=float(t.get("TARIFA_IMPORTE") or 0.0),
                     impuestos=float(t.get("IMPUESTOS") or 0.0),
                     total=float(t.get("TOTAL_IMPORTE") or 0.0),
@@ -783,21 +792,48 @@ class WebReceiptParser(BaseTicketParser):
                 if val_node:
                     tkt_num = val_node.get_text(strip=True)
 
-            # Para el Nombre/Apellido, buscamos PREVIAMENTE al ticket label
-            # Estelar suele listar Nombre -> Apellido -> Ticket linealmente
+            # Scoped search: find Nombre/Apellido within the current passenger's block
+            # Navigate up from ticket label to the passenger container <td>
+            # Structure: <p>(ticket label) -> <td> -> <tr> -> <tbody> -> <table> -> <td>(passenger block)
+            passenger_block = None
+            if label_p:
+                td_cell = label_p.find_parent("td")
+                if td_cell:
+                    outer_table = td_cell.find_parent("table")
+                    if outer_table:
+                        passenger_block = outer_table.find_parent("td")
 
-            def find_val_prev(start_node, pattern):
-                # Buscamos el string que coincida con el patrón hacia atrás
-                lbl = start_node.parent.find_previous(string=re.compile(pattern, re.I))
-                if lbl and lbl.parent:
-                    # El valor suele ser el siguiente hermano <p> del label <p>
-                    val_p = lbl.parent.find_next_sibling("p")
-                    if val_p:
-                        return val_p.get_text(strip=True)
-                return ""
+            nombre_val = "DESCONOCIDO"
+            apellido_val = ""
+            if passenger_block:
+                # Search for Nombre/Apellido labels WITHIN this passenger's block only
+                nombre_label = passenger_block.find(string=re.compile(r"^\s*Nombre\s*$", re.I))
+                if nombre_label and nombre_label.parent:
+                    nombre_p = nombre_label.parent
+                    nombre_sibling = nombre_p.find_next_sibling("p")
+                    if nombre_sibling:
+                        nombre_candidate = nombre_sibling.get_text(strip=True)
+                        # Only accept if it looks like a real name (not boilerplate text)
+                        if (
+                            nombre_candidate
+                            and len(nombre_candidate) <= 60
+                            and "/" not in nombre_candidate
+                        ):
+                            nombre_val = nombre_candidate
 
-            nombre_val = find_val_prev(label, r"Nombre") or "DESCONOCIDO"
-            apellido_val = find_val_prev(label, r"Apellido")
+                apellido_label = passenger_block.find(string=re.compile(r"^\s*Apellido\s*$", re.I))
+                if apellido_label and apellido_label.parent:
+                    apellido_p = apellido_label.parent
+                    apellido_sibling = apellido_p.find_next_sibling("p")
+                    if apellido_sibling:
+                        apellido_candidate = apellido_sibling.get_text(strip=True)
+                        if (
+                            apellido_candidate
+                            and len(apellido_candidate) <= 60
+                            and "/" not in apellido_candidate
+                        ):
+                            apellido_val = apellido_candidate
+
             nombre_completo = f"{apellido_val}/{nombre_val}".strip("/ ").upper()
 
             # Vuelos (Usamos extractor común que busca tablas de vuelos)
@@ -819,10 +855,12 @@ class WebReceiptParser(BaseTicketParser):
                     "CODIGO_RESERVA": pnr,
                     "SOLO_CODIGO_RESERVA": pnr,
                     "FECHA_EMISION": datetime.now().strftime("%d-%m-%Y"),
-                    "TOTAL_IMPORTE": str(monto_por_pax),
+                    "TOTAL_IMPORTE": str(monto_por_pax.quantize(Decimal("0.01"))),
                     "TOTAL_MONEDA": "VES",
-                    "TARIFA_IMPORTE": str(monto_por_pax * Decimal("0.85")),
-                    "IMPUESTOS": str(monto_por_pax * Decimal("0.15")),
+                    "TARIFA_IMPORTE": str(
+                        (monto_por_pax * Decimal("0.85")).quantize(Decimal("0.01"))
+                    ),
+                    "IMPUESTOS": str((monto_por_pax * Decimal("0.15")).quantize(Decimal("0.01"))),
                     "NOMBRE_AEROLINEA": "AEROLINEAS ESTELAR LATINOAMERICA C.A.",
                     "AGENTE_EMISOR": db_data["agente"],
                     "DIRECCION_AEROLINEA": db_data["direccion"],
@@ -1197,6 +1235,20 @@ class WebReceiptParser(BaseTicketParser):
             "noviembre": "11",
             "diciembre": "12",
         }
+        meses_gds = {
+            "enero": "ENE",
+            "febrero": "FEB",
+            "marzo": "MAR",
+            "abril": "ABR",
+            "mayo": "MAY",
+            "junio": "JUN",
+            "julio": "JUL",
+            "agosto": "AGO",
+            "septiembre": "SEP",
+            "octubre": "OCT",
+            "noviembre": "NOV",
+            "diciembre": "DIC",
+        }
 
         for row in valid_tables:
             cols = row.find_all("td", recursive=False)
@@ -1216,6 +1268,7 @@ class WebReceiptParser(BaseTicketParser):
 
             hora_salida = "00:00"
             fecha_salida_iso = "PENDIENTE"
+            fecha_salida_gds = "PENDIENTE"
             fecha_display = "PENDIENTE"
 
             for s in org_texts:
@@ -1231,11 +1284,14 @@ class WebReceiptParser(BaseTicketParser):
                         try:
                             d_str, m_str = date_part.lower().split(" de ")
                             mes_num = meses.get(m_str.strip(), "01")
+                            mes_gds = meses_gds.get(m_str.strip(), "???")
                             # Asumir año actual o siguiente
                             now = datetime.now()
                             year = now.year
+                            year_gds = str(year)[-2:]
                             # Heurística simple: año actual
                             fecha_salida_iso = f"{year}-{mes_num}-{d_str.zfill(2)}"
+                            fecha_salida_gds = f"{d_str.zfill(2)}{mes_gds}{year_gds}"
                         except ValueError:
                             pass
 
@@ -1282,7 +1338,8 @@ class WebReceiptParser(BaseTicketParser):
                 "destino": destino,
                 "numero_vuelo": numero_vuelo,
                 "fecha": fecha_display,  # Para display
-                "fecha_salida": fecha_salida_iso,  # Para logica
+                "fecha_salida": fecha_salida_gds,  # Formato GDS DDMMMAA para Pydantic
+                "fecha_salida_iso": fecha_salida_iso,  # ISO para logica interna
                 "hora_salida": hora_salida,
                 "hora_llegada": hora_llegada,
                 "clase": clase,

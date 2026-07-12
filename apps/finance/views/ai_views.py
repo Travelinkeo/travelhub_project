@@ -5,6 +5,7 @@ from django.core.exceptions import PermissionDenied, ValidationError
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 from django.views.generic import TemplateView, View
 from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
@@ -203,7 +204,7 @@ class PropuestaTransaccionIAListCreateAPIView(InternalAPIAuthMixin, generics.Lis
         if not agencia:
             agencia = get_agencia_from_request(self.request)
         if not agencia:
-            raise ValidationError("No tienes una agencia activa asociada.")
+            raise ValidationError(_("No tienes una agencia activa asociada."))
         serializer.save(agencia=agencia)
 
 
@@ -257,7 +258,7 @@ class ResolvePropuestaAPIView(InternalAPIAuthMixin, APIView):
                 if propuesta.accion_tipo == "CONCILIAR_REPORTE":
                     report_id = payload.get("report_id")
                     if not report_id:
-                        raise ValidationError("El payload no contiene 'report_id'.")
+                        raise ValidationError(_("El payload no contiene 'report_id'."))
 
                     # Lanzar tarea de Celery
                     from django.db import transaction
@@ -435,7 +436,7 @@ class AIAccountingResolveProposalHTMXView(LoginRequiredMixin, View):
                 if propuesta.accion_tipo == "CONCILIAR_REPORTE":
                     report_id = payload.get("report_id")
                     if not report_id:
-                        raise ValidationError("El payload no contiene 'report_id'.")
+                        raise ValidationError(_("El payload no contiene 'report_id'."))
 
                     from django.db import transaction
 

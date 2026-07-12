@@ -338,37 +338,53 @@ class SecurityHeadersMiddleware:
                 "/system/"
             )
 
-            if is_debug or is_admin_path:
-                csp = "; ".join(
-                    [
-                        "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:",
-                        f"script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: {static_origin} https://cdn.jsdelivr.net https://cdn.tailwindcss.com https://unpkg.com https://static.cloudflareinsights.com",
-                        f"style-src 'self' 'unsafe-inline' 'unsafe-eval' {static_origin} https://fonts.googleapis.com https://cdn.jsdelivr.net https://cdn.tailwindcss.com https://unpkg.com",
-                        f"font-src 'self' {static_origin} https://fonts.gstatic.com data:",
-                        f"img-src 'self' data: blob: {static_origin} https://res.cloudinary.com {r2_wildcard} https://images.unsplash.com https://pics.avs.io https://ui-avatars.com https://placehold.co",
-                        "frame-src 'self' https://js.stripe.com http://evolution:8080",
-                        f"connect-src 'self' {static_origin} https://*.cloudflarestorage.com https://api.stripe.com https://generativelanguage.googleapis.com https://cloudflareinsights.com https://cdn.jsdelivr.net",
-                        "form-action 'self'",
-                        "frame-ancestors 'none'",
-                        "base-uri 'self'",
-                    ]
-                )
-            else:
-                nonce = request.csp_nonce
-                csp = "; ".join(
-                    [
-                        "default-src 'self' data: blob:",
-                        f"script-src 'self' 'nonce-{nonce}' 'strict-dynamic' 'unsafe-eval' {static_origin} https://static.cloudflareinsights.com https://cdn.jsdelivr.net https://cdn.tailwindcss.com https://unpkg.com https://code.jquery.com",
-                        f"style-src 'self' 'unsafe-inline' {static_origin} https://fonts.googleapis.com https://cdn.jsdelivr.net https://cdn.tailwindcss.com https://unpkg.com",
-                        f"font-src 'self' {static_origin} https://fonts.gstatic.com data:",
-                        f"img-src 'self' data: blob: {static_origin} https://res.cloudinary.com {r2_wildcard} https://images.unsplash.com https://pics.avs.io https://ui-avatars.com https://placehold.co",
-                        "frame-src 'self' https://js.stripe.com https://evolution:8080",
-                        f"connect-src 'self' {static_origin} https://*.cloudflarestorage.com https://api.stripe.com https://generativelanguage.googleapis.com https://cloudflareinsights.com https://cdn.jsdelivr.net",
-                        "form-action 'self'",
-                        "frame-ancestors 'none'",
-                        "base-uri 'self'",
-                    ]
-                )
+            # CSP unificado (debug + producción): nonce-based, SIN 'unsafe-eval'
+            # en script-src. 'unsafe-inline' solo en style-src.
+            #
+            # Excepción: rutas /admin/ y /system/ (Django admin + Unfold) requieren
+            # Alpine.js, que internamente usa eval()/new Function() para evaluar
+            # bindings x-data/x-text. Alpine.js no puede funcionar sin 'unsafe-eval'
+            # salvo que se cambie al bundle @alpinejs/csp-bundle (tarea pendiente).
+            # Hasta entonces, admin mantiene 'unsafe-eval' solo en script-src; el
+            # resto del ERP (login, pages SSR, API) permanece sin 'unsafe-eval'.
+            script_src = (
+                f"'self' 'nonce-{nonce}' 'strict-dynamic' "
+                f"{static_origin} https://cdn.jsdelivr.net https://cdn.tailwindcss.com "
+                f"https://unpkg.com https://static.cloudflareinsights.com"
+            )
+            if is_admin_path:
+                script_src += " 'unsafe-eval'"
+            elif is_debug:
+                # En debug añadimos webpack/vite HMR y debug-toolbar
+                script_src += " http://localhost:3000 ws://localhost:3000"
+            csp = "; ".join(
+                [
+                    "default-src 'self' data: blob:",
+                    f"script-src {script_src}",
+                    (
+                        f"style-src 'self' 'unsafe-inline' {static_origin} "
+                        "https://fonts.googleapis.com https://cdn.jsdelivr.net "
+                        "https://cdn.tailwindcss.com https://unpkg.com"
+                    ),
+                    f"font-src 'self' {static_origin} https://fonts.gstatic.com data:",
+                    (
+                        "img-src 'self' data: blob: "
+                        f"{static_origin} https://res.cloudinary.com {r2_wildcard} "
+                        "https://images.unsplash.com https://pics.avs.io "
+                        "https://ui-avatars.com https://placehold.co"
+                    ),
+                    "frame-src 'self' https://js.stripe.com http://evolution:8080",
+                    (
+                        "connect-src 'self' "
+                        f"{static_origin} https://*.cloudflarestorage.com "
+                        "https://api.stripe.com https://generativelanguage.googleapis.com "
+                        "https://cloudflareinsights.com https://cdn.jsdelivr.net"
+                    ),
+                    "form-action 'self'",
+                    "frame-ancestors 'none'",
+                    "base-uri 'self'",
+                ]
+            )
 
             response["Content-Security-Policy"] = csp
             response["X-Content-Type-Options"] = "nosniff"

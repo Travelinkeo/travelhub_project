@@ -762,6 +762,39 @@ class EmailMonitorService:
         subject_upper = subject.upper() if subject else ""
         from_lower = from_addr.lower() if from_addr else ""
 
+        tiene_pdf = self._tiene_pdf_adjunto(message)
+        logger.info(f"PDF adjunto: {tiene_pdf}")
+
+        if tiene_pdf:
+            logger.info("Procesando PDF adjunto (Prioridad Reenvío)")
+            if self._procesar_boleto_pdf(message, msg_num, mail_connection):
+                if self.mark_as_read and mail_connection:
+                    mail_connection.store(msg_num, "+FLAGS", "\\Seen")
+                return True
+            logger.warning("⚠️ Falló el procesamiento del PDF, intentando fallback a HTML...")
+
+        is_kiu_subject = (
+            "E-TICKET ITINERARY RECEIPT" in subject_upper
+            or "ETICKET ITINERARY RECEIPT" in subject_upper
+            or "PASSENGER ITINERARY RECEIPT" in subject_upper
+            or "TICKETS AVIOR" in subject_upper
+            or "AVIOR AIRLINES" in subject_upper
+            or "LASER AIRLINES" in subject_upper
+            or "RUTACA" in subject_upper
+            or "VENEZOLANA" in subject_upper
+        )
+
+        is_official_kiu = "kiusys.com" in from_lower
+
+        logger.info(f"Es KIU Oficial: {is_official_kiu} | Subject Ticket: {is_kiu_subject}")
+
+        if is_official_kiu:
+            logger.info("Procesando KIU Oficial (HTML)")
+            resultado = self._procesar_boleto_email(message, msg_num, mail_connection)
+            if resultado and self.mark_as_read and mail_connection:
+                mail_connection.store(msg_num, "+FLAGS", "\\Seen")
+            return resultado
+
         # ⚡ Interceptación Autónoma para PNR GDS (Amadeus, Sabre, KIU)
         texto = self._extraer_texto(message)
         html = self._extraer_html(message)
@@ -826,39 +859,6 @@ class EmailMonitorService:
                     except ImportError:
                         pass
                     logger.error(f"❌ Error en parseo autónomo de email GDS: {e}")
-
-        is_kiu_subject = (
-            "E-TICKET ITINERARY RECEIPT" in subject_upper
-            or "ETICKET ITINERARY RECEIPT" in subject_upper
-            or "PASSENGER ITINERARY RECEIPT" in subject_upper
-            or "TICKETS AVIOR" in subject_upper
-            or "AVIOR AIRLINES" in subject_upper
-            or "LASER AIRLINES" in subject_upper
-            or "RUTACA" in subject_upper
-            or "VENEZOLANA" in subject_upper
-        )
-
-        is_official_kiu = "kiusys.com" in from_lower
-
-        logger.info(f"Es KIU Oficial: {is_official_kiu} | Subject Ticket: {is_kiu_subject}")
-
-        if is_official_kiu:
-            logger.info("Procesando KIU Oficial (HTML)")
-            resultado = self._procesar_boleto_email(message, msg_num, mail_connection)
-            if resultado and self.mark_as_read and mail_connection:
-                mail_connection.store(msg_num, "+FLAGS", "\\Seen")
-            return resultado
-
-        tiene_pdf = self._tiene_pdf_adjunto(message)
-        logger.info(f"PDF adjunto: {tiene_pdf}")
-
-        if tiene_pdf:
-            logger.info("Procesando PDF adjunto (Prioridad Reenvío)")
-            if self._procesar_boleto_pdf(message, msg_num, mail_connection):
-                if self.mark_as_read and mail_connection:
-                    mail_connection.store(msg_num, "+FLAGS", "\\Seen")
-                return True
-            logger.warning("⚠️ Falló el procesamiento del PDF, intentando fallback a HTML...")
 
         if is_kiu_subject:
             logger.info("Procesando como KIU/HTML por Asunto")
@@ -1315,15 +1315,37 @@ _TravelHub - Sistema Automático_"""
 
     def _extraer_adjuntos_pdf(self, message):
         """Extrae el contenido de todos los PDF adjuntos"""
+        from email.header import decode_header
+
         pdfs = []
         if message.is_multipart():
             for part in message.walk():
                 ctype = part.get_content_type()
-                filename = part.get_filename() or "adjunto.pdf"
+                raw_filename = part.get_filename()
+                filename = None
 
-                is_pdf = (ctype == "application/pdf") or (filename.lower().endswith(".pdf"))
+                if raw_filename:
+                    try:
+                        decoded_parts = decode_header(raw_filename)
+                        filename_parts = []
+                        for val, encoding in decoded_parts:
+                            if isinstance(val, bytes):
+                                filename_parts.append(
+                                    val.decode(encoding or "utf-8", errors="ignore")
+                                )
+                            else:
+                                filename_parts.append(val)
+                        filename = "".join(filename_parts)
+                    except Exception:
+                        filename = raw_filename
+
+                is_pdf = (ctype == "application/pdf") or (
+                    filename and filename.lower().endswith(".pdf")
+                )
 
                 if is_pdf:
+                    if not filename:
+                        filename = "adjunto.pdf"
                     payload = part.get_payload(decode=True)
                     if payload:
                         pdfs.append((filename, payload))

@@ -97,7 +97,7 @@ travelhub_project/
 ├── 📂 staticfiles/             # Archivos estáticos compilados
 ├── 📂 temp/                    # Archivos temporales
 ├── 📄 README.md                # ✨ NUEVO: README principal actualizado
-├── 📄 ORGANIZACION_PROYECTO.md # Este archivo
+├── 📄 organizacion_proyecto.md # Este archivo
 ├── 📄 manage.py
 ├── 📄 requirements.txt
 ├── 📄 requirements-dev.txt
@@ -235,6 +235,6 @@ Actualiza la ruta en la tarea programada para apuntar a `batch_scripts/`.
 
 ---
 
-**Fecha de reorganización**: Enero 2025  
-**Versión**: 1.0  
+**Fecha de reorganización**: Enero 2025
+**Versión**: 1.0
 **Estado**: ✅ Completado y verificado

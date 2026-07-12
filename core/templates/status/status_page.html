@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Estado del Sistema — TravelHub</title>
+  <meta name="description" content="Estado en tiempo real de los servicios de TravelHub">
+  <meta name="robots" content="noindex">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #0a0e1a;
+      --surface:  #111827;
+      --border:   #1f2937;
+      --text:     #f1f5f9;
+      --muted:    #6b7280;
+      --green:    #22c55e;
+      --green-bg: rgba(34,197,94,.08);
+      --yellow:   #eab308;
+      --yellow-bg:rgba(234,179,8,.08);
+      --red:      #ef4444;
+      --red-bg:   rgba(239,68,68,.08);
+      --blue:     #3b82f6;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    header {
+      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 48px 24px 40px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    header::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 60% 40% at 50% 0%, rgba(99,102,241,.15), transparent);
+    }
+    .logo {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+      position: relative;
+    }
+    .logo span { color: #6366f1; }
+
+    /* ── Status Banner ── */
+    .status-banner {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 28px;
+      border-radius: 50px;
+      font-size: 1rem;
+      font-weight: 600;
+      position: relative;
+      animation: fadeIn .5s ease;
+    }
+    .status-banner.green  { background: var(--green-bg);  border: 1px solid rgba(34,197,94,.3);  color: var(--green); }
+    .status-banner.yellow { background: var(--yellow-bg); border: 1px solid rgba(234,179,8,.3); color: var(--yellow); }
+    .status-banner.red    { background: var(--red-bg);    border: 1px solid rgba(239,68,68,.3);  color: var(--red); }
+
+    .status-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .green  .status-dot { background: var(--green);  box-shadow: 0 0 8px var(--green);  animation: pulse-green 2s infinite; }
+    .yellow .status-dot { background: var(--yellow); box-shadow: 0 0 8px var(--yellow); animation: pulse-yellow 2s infinite; }
+    .red    .status-dot { background: var(--red);    box-shadow: 0 0 8px var(--red);    animation: pulse-red 2s infinite; }
+
+    @keyframes pulse-green  { 0%,100%{ box-shadow: 0 0 4px var(--green);  } 50%{ box-shadow: 0 0 12px var(--green);  } }
+    @keyframes pulse-yellow { 0%,100%{ box-shadow: 0 0 4px var(--yellow); } 50%{ box-shadow: 0 0 12px var(--yellow); } }
+    @keyframes pulse-red    { 0%,100%{ box-shadow: 0 0 4px var(--red);    } 50%{ box-shadow: 0 0 12px var(--red);    } }
+    @keyframes fadeIn { from{ opacity:0; transform: translateY(-8px) } to{ opacity:1; transform: none } }
+
+    /* ── Main ── */
+    main {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 40px 24px 80px;
+    }
+
+    .section-title {
+      font-size: .7rem;
+      font-weight: 600;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* ── Service Cards ── */
+    .services {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      margin-bottom: 48px;
+    }
+
+    .service-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 20px;
+      transition: border-color .2s, transform .15s;
+      animation: slideIn .4s ease backwards;
+    }
+    .service-row:hover {
+      border-color: #374151;
+      transform: translateX(2px);
+    }
+    {% for i in "12345" %}.service-row:nth-child({{ i }}) { animation-delay: {{ i }}00ms; }{% endfor %}
+
+    @keyframes slideIn { from { opacity:0; transform: translateX(-12px) } to { opacity:1; transform: none } }
+
+    .service-icon { font-size: 1.4rem; flex-shrink: 0; width: 32px; text-align: center; }
+
+    .service-info { flex: 1; min-width: 0; }
+    .service-name {
+      font-size: .9rem;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+    .service-detail {
+      font-size: .75rem;
+      color: var(--muted);
+    }
+
+    .service-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    .badge {
+      font-size: .72rem;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 20px;
+      letter-spacing: .03em;
+    }
+    .badge-ok      { background: var(--green-bg);  color: var(--green);  border: 1px solid rgba(34,197,94,.2); }
+    .badge-warn    { background: var(--yellow-bg); color: var(--yellow); border: 1px solid rgba(234,179,8,.2); }
+    .badge-down    { background: var(--red-bg);    color: var(--red);    border: 1px solid rgba(239,68,68,.2); }
+    .badge-skip    { background: rgba(107,114,128,.08); color: var(--muted); border: 1px solid rgba(107,114,128,.2); }
+
+    .latency {
+      font-size: .72rem;
+      color: var(--muted);
+      font-variant-numeric: tabular-nums;
+      min-width: 52px;
+      text-align: right;
+    }
+
+    /* ── Metrics ── */
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 12px;
+      margin-bottom: 48px;
+    }
+    .metric-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+    }
+    .metric-label {
+      font-size: .72rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      margin-bottom: 6px;
+    }
+    .metric-value {
+      font-size: 1.4rem;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+    .metric-value.ok { color: var(--green); }
+    .metric-value.warn { color: var(--yellow); }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      padding: 24px;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: .8rem;
+    }
+    footer a { color: #6366f1; text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    .refresh-hint {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 8px;
+      font-size: .75rem;
+      color: var(--muted);
+    }
+    .refresh-hint button {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 4px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: .75rem;
+      transition: background .2s;
+    }
+    .refresh-hint button:hover { background: var(--border); }
+
+    @media (max-width: 480px) {
+      .latency { display: none; }
+      .service-row { padding: 14px 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Header ── -->
+<header>
+  <p class="logo">✈ Travel<span>Hub</span></p>
+  <div class="status-banner {{ overall_color }}">
+    <span class="status-dot"></span>
+    <span>{{ overall_label }}</span>
+  </div>
+</header>
+
+<!-- ── Main ── -->
+<main>
+
+  <!-- Metrics row -->
+  <div class="metrics">
+    {% with ok_count=0 %}
+    <div class="metric-card">
+      <p class="metric-label">Tiempo de respuesta</p>
+      <p class="metric-value {% if elapsed_ms < 500 %}ok{% else %}warn{% endif %}">
+        {{ elapsed_ms }} ms
+      </p>
+    </div>
+    <div class="metric-card">
+      <p class="metric-label">Versión</p>
+      <p class="metric-value" style="color:#6366f1; font-size:1.1rem;">v{{ app_version }}</p>
+    </div>
+    <div class="metric-card">
+      <p class="metric-label">Entorno</p>
+      <p class="metric-value" style="font-size:1rem; color:var(--text); font-weight:500; text-transform:capitalize;">
+        {{ environment }}
+      </p>
+    </div>
+    {% endwith %}
+  </div>
+
+  <!-- Services -->
+  <p class="section-title">Estado de servicios</p>
+  <div class="services">
+    {% for key, check in checks.items %}
+    <div class="service-row">
+      <span class="service-icon">{{ check.icon }}</span>
+      <div class="service-info">
+        <p class="service-name">{{ check.label }}</p>
+        <p class="service-detail">
+          {% if check.ok %}
+            {% if check.workers %}{{ check.workers }} worker{{ check.workers|pluralize:"s" }} activo{{ check.workers|pluralize:"s" }}
+            {% elif check.free_percent %}{{ check.free_percent }}% libre ({{ check.free_gb }} GB)
+            {% elif check.detail %}{{ check.detail }}
+            {% else %}Operativo{% endif %}
+          {% else %}
+            {{ check.error|default:"No disponible" }}
+          {% endif %}
+        </p>
+      </div>
+      <div class="service-status">
+        {% if check.latency_ms %}
+          <span class="latency">{{ check.latency_ms }} ms</span>
+        {% endif %}
+        {% if check.ok %}
+          <span class="badge badge-ok">✓ OK</span>
+        {% elif not check.critical %}
+          <span class="badge badge-warn">⚠ Degradado</span>
+        {% else %}
+          <span class="badge badge-down">✕ Error</span>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- JSON API hint -->
+  <p class="section-title">Acceso programático</p>
+  <div class="metric-card" style="margin-bottom:0">
+    <p class="metric-label">API de estado (JSON)</p>
+    <p style="font-size:.85rem; color:#6366f1; font-family: monospace; margin-top:6px;">
+      GET /status/api/
+    </p>
+    <p style="font-size:.75rem; color:var(--muted); margin-top:6px;">
+      Compatible con Uptime Robot, Prometheus blackbox exporter y k8s probes.
+    </p>
+  </div>
+
+</main>
+
+<!-- ── Footer ── -->
+<footer>
+  <p>
+    © 2025 TravelHub &nbsp;·&nbsp;
+    <a href="/privacy/">Privacidad</a> &nbsp;·&nbsp;
+    <a href="/admin/">Admin</a>
+  </p>
+  <p class="refresh-hint">
+    Actualizado hace unos instantes
+    <button onclick="location.reload()">↻ Actualizar</button>
+  </p>
+</footer>
+
+<!-- Auto-refresh cada 60 segundos -->
+<script>
+  setTimeout(() => location.reload(), 60_000);
+</script>
+</body>
+</html>

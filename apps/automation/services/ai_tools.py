@@ -813,7 +813,7 @@ class AgentTools:
                 client = genai.Client(api_key=gemini_key)
                 prompt = f"""
                 Determine los requisitos reales, verídicos y actualizados de viaje (visado, pasaporte y vacunas) para un ciudadano con nacionalidad de '{origin}' que viaja al país de destino '{dest}' para fines de turismo y estancias cortas.
-                
+
                 REGLAS DE VERACIDAD:
                 - Debe ser extremadamente preciso. Por ejemplo: los ciudadanos de Venezuela (VE) NO requieren visa para hacer turismo en Colombia (CO). Los ciudadanos de España (ES) que viajan a Estados Unidos (US) no requieren visa consular pero deben tramitar la autorización ESTA en línea. Los ciudadanos de Colombia (CO) que viajan al espacio Schengen (como España 'ES') no requieren visa para estancias menores a 90 días.
                 - Responda únicamente en formato JSON con la siguiente estructura exacta:
@@ -829,7 +829,7 @@ class AgentTools:
                 }}
                 """
                 response = client.models.generate_content(
-                    model="gemini-2.5-flash",
+                    model="gemini-1.5-flash",
                     contents=prompt,
                     config=types.GenerateContentConfig(
                         response_mime_type="application/json",

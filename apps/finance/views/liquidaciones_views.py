@@ -3,6 +3,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Sum
 from django.shortcuts import redirect, render
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, ListView, TemplateView
 
 from apps.bookings.models import ItemVenta, Proveedor
@@ -130,7 +131,7 @@ class LiquidacionCreateView(SaaSMixin, LoginRequiredMixin, TemplateView):
             notas = request.POST.get("notas", "")
 
             if not proveedor_id or not selected_items_ids:
-                messages.error(request, "Debe seleccionar un proveedor y al menos un item.")
+                messages.error(request, _("Debe seleccionar un proveedor y al menos un item."))
                 return redirect("finance:liquidacion_create")
 
             try:

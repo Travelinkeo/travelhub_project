@@ -80,7 +80,7 @@ export function useDashboard(fechaDesde?: string, fechaHasta?: string) {
       const params = new URLSearchParams();
       if (fechaDesde) params.append('fecha_desde', fechaDesde);
       if (fechaHasta) params.append('fecha_hasta', fechaHasta);
-      
+
       return apiClient.get(`/api/dashboard/metricas/?${params}`) as Promise<DashboardMetrics>;
     },
   });
@@ -133,7 +133,7 @@ export function useLiquidaciones(filters?: { estado?: string; proveedor?: number
       const params = new URLSearchParams();
       if (filters?.estado) params.append('estado', filters.estado);
       if (filters?.proveedor) params.append('proveedor', filters.proveedor.toString());
-      
+
       return apiClient.get(`/api/liquidaciones/?${params}`);
     },
   });
@@ -141,7 +141,7 @@ export function useLiquidaciones(filters?: { estado?: string; proveedor?: number
 
 export function useMarcarPagada() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async (liquidacionId: number) => {
       return apiClient.post(`/api/liquidaciones/${liquidacionId}/marcar_pagada/`, {});
@@ -154,7 +154,7 @@ export function useMarcarPagada() {
 
 export function useRegistrarPagoParcial() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async ({ id, monto }: { id: number; monto: number }) => {
       return apiClient.post(`/api/liquidaciones/${id}/registrar_pago_parcial/`, { monto });
@@ -301,7 +301,7 @@ export function usePasaportesPendientes() {
 
 export function useCrearClienteDesdePasaporte() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async (pasaporteId: number) => {
       return apiClient.post(`/api/pasaportes/${pasaporteId}/crear_cliente/`, {});
@@ -362,7 +362,7 @@ export function useBoletosSinVenta() {
 
 export function useCrearVentaDesdeBoleto() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async (boletoId: number) => {
       return apiClient.post(`/api/boletos/${boletoId}/crear-venta/`, {});
@@ -422,7 +422,7 @@ export function useLibroDiario(fechaDesde?: string, fechaHasta?: string) {
       const params = new URLSearchParams();
       if (fechaDesde) params.append('fecha_desde', fechaDesde);
       if (fechaHasta) params.append('fecha_hasta', fechaHasta);
-      
+
       return apiClient.get(`/api/reportes/libro-diario/?${params}`);
     },
   });
@@ -434,7 +434,7 @@ export function useExportarExcel(fechaDesde?: string, fechaHasta?: string) {
       const params = new URLSearchParams();
       if (fechaDesde) params.append('fecha_desde', fechaDesde);
       if (fechaHasta) params.append('fecha_hasta', fechaHasta);
-      
+
       const response = await fetch(
         `${API_BASE_URL}/api/reportes/exportar-excel/?${params}`,
         {
@@ -549,4 +549,4 @@ describe('useDashboard', () => {
 
 ---
 
-Estos ejemplos cubren los casos de uso más comunes. Para más detalles, consulta `FRONTEND_API_ENDPOINTS.md`.
+Estos ejemplos cubren los casos de uso más comunes. Para más detalles, consulta `frontend_api_endpoints.md`.

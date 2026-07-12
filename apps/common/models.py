@@ -1,7 +1,82 @@
+import json
+
+from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from core.api import validar_no_vacio_o_espacios
+
+
+class UserProgress(models.Model):
+    STEP_WELCOME = "welcome"
+    STEP_AGENCY = "agency"
+    STEP_FIRST_TICKET = "first_ticket"
+    STEP_INVITE_TEAM = "invite_team"
+    STEP_COMPLETE = "complete"
+
+    ALL_STEPS: list[str] = [
+        STEP_WELCOME,
+        STEP_AGENCY,
+        STEP_FIRST_TICKET,
+        STEP_INVITE_TEAM,
+        STEP_COMPLETE,
+    ]
+
+    user = models.OneToOneField(
+        get_user_model(), on_delete=models.CASCADE, related_name="onboarding_progress"
+    )
+    current_step = models.CharField(max_length=20, default=STEP_WELCOME)
+    completed_steps_json = models.TextField(default="[]", blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Progreso de Onboarding"
+        verbose_name_plural = "Progresos de Onboarding"
+
+    @property
+    def completed_steps(self) -> list[str]:
+        return json.loads(self.completed_steps_json)
+
+    @completed_steps.setter
+    def completed_steps(self, value: list[str]) -> None:
+        self.completed_steps_json = json.dumps(value)
+
+    @property
+    def onboarding_completed(self) -> bool:
+        return self.current_step == self.STEP_COMPLETE
+
+    def mark_step_completed(self, step: str) -> None:
+        if step not in self.ALL_STEPS:
+            raise ValueError(f"Paso inválido: {step}")
+        steps = self.completed_steps
+        if step not in steps:
+            steps.append(step)
+        self.completed_steps = steps
+        next_idx = self.ALL_STEPS.index(step) + 1
+        self.current_step = (
+            self.ALL_STEPS[next_idx] if next_idx < len(self.ALL_STEPS) else self.STEP_COMPLETE
+        )
+        self.save(update_fields=["completed_steps_json", "current_step"])
+
+    def is_step_completed(self, step: str) -> bool:
+        return step in self.completed_steps
+
+    def get_next_step(self) -> str | None:
+        if self.onboarding_completed:
+            return None
+        for step in self.ALL_STEPS:
+            if step not in self.completed_steps:
+                return step
+        return None
+
+    def get_progress_percentage(self) -> int:
+        completed = len(self.completed_steps)
+        total = len(self.ALL_STEPS)
+        return int((completed / total) * 100)
+
+    def __str__(self) -> str:
+        return f"Onboarding {self.user} - {self.get_progress_percentage()}%"
 
 
 class Pais(models.Model):
@@ -27,7 +102,7 @@ class Pais(models.Model):
         verbose_name_plural = _("Países")
         ordering = ["nombre"]
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.nombre
 
 
@@ -55,7 +130,7 @@ class Ciudad(models.Model):
         ordering = ["pais__nombre", "nombre"]
         unique_together = ("nombre", "pais", "region_estado")
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.nombre}{f', {self.region_estado}' if self.region_estado else ''} ({self.pais.nombre})"
 
 
@@ -99,7 +174,7 @@ class Aerolinea(models.Model):
         verbose_name_plural = _("Aerolíneas")
         ordering = ["nombre"]
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.nombre} ({self.codigo_iata})"
 
 
@@ -137,5 +212,5 @@ class Moneda(models.Model):
         # a non-existent `finance_moneda` table.
         db_table = "core_moneda"
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.nombre} ({self.codigo_iso})"

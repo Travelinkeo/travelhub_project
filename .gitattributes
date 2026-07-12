@@ -1,0 +1,25 @@
+# Normaliza los finales de línea de forma autoritativa.
+# El repo almacena LF; evita el bucle mixed-line-ending vs core.autocrlf en Windows.
+* text=auto eol=lf
+
+# Scripts específicos de Windows conservan CRLF.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# Archivos binarios: sin conversión.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.zip binary
+*.gz binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+*.xlsx binary
+*.db binary
+*.sqlite3 binary

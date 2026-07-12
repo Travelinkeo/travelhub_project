@@ -1,7 +1,8 @@
 import logging
 import xml.etree.ElementTree as ET
 from decimal import Decimal
-from xml.dom import minidom
+
+from defusedxml.minidom import parseString as minidom_parse_string
 
 from apps.finance.models.retenciones import RetencionISLR
 
@@ -67,5 +68,5 @@ class RetencionesXMLService:
 
         # Convertir a XML string formateado
         xml_str = ET.tostring(root, encoding="utf-8")
-        reparsed = minidom.parseString(xml_str)
+        reparsed = minidom_parse_string(xml_str)
         return reparsed.toprettyxml(indent="    ")

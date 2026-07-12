@@ -135,6 +135,24 @@ class AgenciaMixin(models.Model):
     """
     Mixin para modelos que requieren aislamiento multi-tenant.
     Añade el campo agencia y aplica el filtrado automático.
+
+    NOTA ARQUITECTURA:
+        Cuando un modelo hereda AgenciaMixin, ``MiModelo.objects`` es un
+        ``AgenciaManager`` que filtra automáticamente todas las querysets por
+        el contexto de agencia activo (``agency_var`` del middleware). Por lo
+        tanto, ``MiModelo.objects.all()`` en vistas/servicios NO retorna todos
+        los registros a nivel global, sino sólo los del inquilino actual
+        (excepto superuser / system_context / manage.py).
+
+        Las 4 capas de defensa multi-tenant (defense-in-depth) en TravelHub:
+          1. ``AgenciaManager.get_queryset()`` (este archivo) — filtra a nivel
+             manager. Aplica a TODO ``Model.objects.*`` automáticamente.
+          2. ``TenantViewSetMixin`` (core/api/mixins/tenant.py) — sobrescribe
+             ``ViewSet.get_queryset()`` para DRF. Defense-in-depth sobre la #1.
+          3. ``SaaSMixin`` — equivalente para Django CBV (ListView/DetailView).
+          4. ``get_agencia_from_request`` / ``get_object_tenant_or_404``
+             (core/security.py) — helpers para vistas funcionales que aplican
+             el candado de agencia + 404 tenant-safe.
     """
 
     agencia = models.ForeignKey(

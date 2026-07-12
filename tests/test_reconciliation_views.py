@@ -1,6 +1,7 @@
 """Tests para vistas y APIs de reconciliación"""
 
 from decimal import Decimal
+from unittest.mock import patch
 
 import pytest
 from django.contrib.auth import get_user_model
@@ -228,9 +229,6 @@ class TestLineaReporteReconciliacionModel:
         )
         assert "7258019382" in str(linea)
         assert "150.00" in str(linea)
-
-
-from unittest.mock import patch
 
 
 @pytest.mark.django_db(transaction=True)

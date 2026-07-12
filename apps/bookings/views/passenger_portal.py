@@ -52,7 +52,7 @@ def public_itinerary_ocr_upload(request, token, pasajero_id):
             venta = Venta.all_objects.get(pk=venta_id, agencia_id=agencia_id, is_deleted=False)
             pasajero = venta.pasajeros.get(pk=pasajero_id)
         except (Venta.DoesNotExist, Pasajero.DoesNotExist):
-            raise Http404("El itinerario o pasajero no existe.")
+            raise Http404("El itinerario o pasajero no existe.") from None
 
         if "archivo" not in request.FILES:
             return HttpResponse(
@@ -141,7 +141,7 @@ def public_itinerary_ocr_save(request, token, pasajero_id):
             venta = Venta.all_objects.get(pk=venta_id, agencia_id=agencia_id, is_deleted=False)
             pasajero = venta.pasajeros.get(pk=pasajero_id)
         except (Venta.DoesNotExist, Pasajero.DoesNotExist):
-            raise Http404("El itinerario o pasajero no existe.")
+            raise Http404("El itinerario o pasajero no existe.") from None
 
         # Actualizar campos
         pasajero.nombres = request.POST.get("nombres", pasajero.nombres)
@@ -221,7 +221,7 @@ def public_itinerary_cross_sell(request, token):
         try:
             venta = Venta.all_objects.get(pk=venta_id, agencia_id=agencia_id, is_deleted=False)
         except Venta.DoesNotExist:
-            raise Http404("El itinerario no existe.")
+            raise Http404("El itinerario no existe.") from None
 
         tipo_servicio = request.POST.get("tipo_servicio", "OTR")
         nombre_pasajero = request.POST.get("nombre_pasajero", "")
@@ -250,7 +250,7 @@ def public_itinerary_cross_sell(request, token):
         nombre_servicio = servicios_map.get(tipo_servicio, "Servicio Adicional")
 
         # Crear el registro de servicio adicional en borrador (costo/precio nulos o cero)
-        servicio_adicional = ServicioAdicionalDetalle.objects.create(
+        ServicioAdicionalDetalle.objects.create(
             agencia=agencia,
             venta=venta,
             tipo_servicio=tipo_servicio,

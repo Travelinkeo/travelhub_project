@@ -7,7 +7,7 @@ import django
 
 django.setup()
 
-from django.urls import reverse
+from django.urls import reverse  # noqa: E402  # requiere django.setup() previo
 
 tests = [
     ("home", "/"),

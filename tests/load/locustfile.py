@@ -17,7 +17,6 @@ Escenarios cubiertos:
     - AdminUser: Superusuario consultando reportes (mayor carga por request)
 """
 
-import json
 import random
 
 from locust import HttpUser, between, events, task
@@ -158,13 +157,13 @@ def on_quitting(environment, **kwargs):
     total_failures = stats.total.num_failures
     avg_response_time = stats.total.avg_response_time
 
-    print(f"\n{'='*50}")
+    print(f"\n{'=' * 50}")
     print("📊 RESUMEN DE PRUEBA DE CARGA — TravelHub")
-    print(f"{'='*50}")
+    print(f"{'=' * 50}")
     print(f"Total requests: {total_requests}")
-    print(f"Fallos: {total_failures} ({(total_failures/max(total_requests,1)*100):.1f}%)")
+    print(f"Fallos: {total_failures} ({(total_failures / max(total_requests, 1) * 100):.1f}%)")
     print(f"Tiempo de respuesta promedio: {avg_response_time:.0f}ms")
-    print(f"{'='*50}")
+    print(f"{'=' * 50}")
 
     # Fallar si hay más del 1% de errores
     if total_failures / max(total_requests, 1) > 0.01:

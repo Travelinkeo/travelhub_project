@@ -12,9 +12,9 @@
 
     <script nonce="{{ request.csp_nonce }}" src="{% static 'vendor/htmx_v2.js' %}"></script>
     <script nonce="{{ request.csp_nonce }}" src="{% static 'vendor/alpine_v2.js' %}" defer></script>
-    
+
     {% include "core/partials/_htmx_csrf_and_errors.html" %}
-    
+
     <style nonce="{{ request.csp_nonce }}">
         #omnisearch-modal-overlay { display: none !important; }
         [x-cloak] { display: none !important; }
@@ -28,14 +28,16 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
-    <link rel="manifest" href="{% static 'manifest.json' %}">
+
+    <link rel="manifest" href="{% url 'pwa_manifest' %}">
     <meta name="theme-color" content="#0F172A">
     <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    
+    <link rel="apple-touch-icon" href="{% static 'images_pwa/pwa-192x192.png' %}">
+
     {% include "core/partials/_adaptive_favicon.html" %}
-    
+
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
 
     <style nonce="{{ request.csp_nonce }}">
@@ -59,8 +61,8 @@
 </head>
 
 <body class="bg-surface-base text-text-main font-sans selection:bg-primary/30 antialiased h-screen flex overflow-hidden"
-    x-data="{ 
-        sidebarOpen: true, 
+    x-data="{
+        sidebarOpen: true,
         mobileMenuOpen: false,
         openCategories: {
             operaciones: {% if 'ventas' in request.path or 'cotizaciones' in request.path or 'boletos' in request.path or 'vuelos' in request.path or 'hoteles' in request.path or 'inventario' in request.path or 'magic' in request.path %}true{% else %}false{% endif %},
@@ -92,7 +94,7 @@
                     <p class="hidden md:block text-[11px] text-text-muted font-medium tracking-wide mt-1 uppercase">{% block page_subtitle %}Motor de Tema Activo: {{ current_agency.get_ui_theme_display|default:'Obsidian Emerald' }}{% endblock %}</p>
                 </div>
             </div>
-            
+
             <div class="flex items-center gap-2 md:gap-3">
                 <div class="hidden md:flex items-center gap-3 mr-2 border-r border-border-color pr-4">
                     <div class="text-right hidden sm:block">
@@ -107,7 +109,7 @@
                         <p class="text-xs font-black text-status-success">{{ tasa_eur|default:"0.00" }}</p>
                     </div>
                 </div>
-                
+
                 <button class="w-8 h-8 md:w-9 md:h-9 rounded-full bg-surface-2 border border-border-color flex items-center justify-center text-text-muted hover:text-primary transition-colors hover:shadow-sm">
                     <span class="material-symbols-outlined text-[18px] md:text-[20px]">notifications</span>
                 </button>
@@ -117,7 +119,7 @@
                     <span class="material-symbols-outlined text-[15px]">install_mobile</span>
                     <span class="hidden sm:inline">Instalar</span>
                 </button>
-                
+
                 <button @click="$dispatch('open-ai-panel')" class="hidden md:flex items-center gap-2 bg-purple-500/10 border border-purple-500/30 text-purple-400 hover:bg-purple-500/20 px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-sm">
                     <span class="material-symbols-outlined text-[16px] animate-pulse">auto_awesome</span>
                     BI-IA Insight
@@ -133,7 +135,7 @@
         <div class="flex-1 overflow-y-auto w-full pb-16 md:pb-0" id="main-content">
             {% block content %}{% endblock %}
         </div>
-        
+
     </main>
 
     {% block modals %}{% endblock %}
@@ -146,11 +148,11 @@
             if (typeof lucide !== 'undefined') lucide.createIcons();
         });
     </script>
-    
-    <div id="magic-toast-container" 
+
+    <div id="magic-toast-container"
          class="fixed top-20 right-6 z-[100] flex flex-col gap-4 w-[400px] pointer-events-none"
-         hx-get="{% url 'core:notificaciones_live' %}" 
-         hx-trigger="every 30s [document.visibilityState === 'visible']" 
+         hx-get="{% url 'core:notificaciones_live' %}"
+         hx-trigger="every 30s [document.visibilityState === 'visible']"
          hx-swap="beforeend">
     </div>
 

@@ -24,7 +24,7 @@ class PassportOCRService:
     MIGRADO a SDK google-genai (v1.x).
     """
 
-    MODEL_NAME = "gemini-2.5-flash"  # gemini-2.5-flash cuando esté GA
+    MODEL_NAME = "gemini-1.5-flash"  # gemini-1.5-flash cuando esté GA
 
     def __init__(self):
         from apps.automation.services.ai_engine import get_gemini_api_key
@@ -59,7 +59,7 @@ class PassportOCRService:
             Act as an expert OCR system for Travel Documents.
             Analyze this passport image and extract the following information in strict JSON format.
             If a field is not visible or unclear, use null.
-            
+
             Required fields:
             - numero_pasaporte (string)
             - apellidos (string)

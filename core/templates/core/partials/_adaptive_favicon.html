@@ -1,19 +1,4 @@
 {% load static %}
-<link rel="icon" id="dynamic-favicon" type="image/png" href="{% static 'images/Logo TravelHub.png' %}">
-<script nonce="{{ request.csp_nonce }}">
-    (function() {
-        const favicon = document.getElementById('dynamic-favicon');
-        const darkLogo = "{% static 'images/Logo TravelHub.png' %}";
-        const lightLogo = "{% static 'images/Logo TravelHub Negro.png' %}";
-        
-        function updateFavicon() {
-            const isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-            favicon.href = isDarkMode ? darkLogo : lightLogo;
-        }
-        
-        if (window.matchMedia) {
-            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateFavicon);
-        }
-        updateFavicon();
-    })();
-</script>
+<link rel="icon" href="{% static 'favicon.ico' %}">
+<link rel="icon" type="image/png" sizes="192x192" href="{% static 'images_pwa/pwa-192x192.png' %}">
+<link rel="apple-touch-icon" href="{% static 'images_pwa/apple-touch-icon.png' %}">

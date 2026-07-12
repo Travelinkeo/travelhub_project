@@ -30,7 +30,9 @@ class MultiParsedTicketData:
             for f in t.get("vuelos", []):
                 itinerario.append(
                     TramoVueloSchema(
-                        aerolinea=f.get("aerolinea") or "AVIOR AIRLINES",
+                        aerolinea=f.get("aerolinea")
+                        or t.get("NOMBRE_AEROLINEA")
+                        or "AVIOR AIRLINES",
                         numero_vuelo=f.get("numero_vuelo"),
                         origen=f.get("origen"),
                         codigo_iata_origen=f.get("codigo_iata_origen"),
@@ -39,7 +41,10 @@ class MultiParsedTicketData:
                         destino=f.get("destino"),
                         codigo_iata_destino=f.get("codigo_iata_destino"),
                         hora_llegada=f.get("hora_llegada") or "00:00",
-                        fecha_llegada=f.get("fecha_llegada") or f.get("fecha") or "01JAN26",
+                        fecha_llegada=f.get("fecha_llegada")
+                        or f.get("fecha_salida")
+                        or f.get("fecha")
+                        or "01JAN26",
                         cabina=f.get("clase") or "Económica",
                         clase=f.get("clase"),
                         localizador_aerolinea=t.get("CODIGO_RESERVA"),
@@ -52,8 +57,12 @@ class MultiParsedTicketData:
                     codigo_identificacion=t.get("CODIGO_IDENTIFICACION"),
                     numero_boleto=t.get("NUMERO_DE_BOLETO"),
                     fecha_emision=t.get("FECHA_EMISION"),
+                    agente_emisor=t.get("AGENTE_EMISOR"),
                     codigo_reserva=t.get("CODIGO_RESERVA") or "UNKNOWN",
+                    codigo_reserva_aerolinea=t.get("SOLO_CODIGO_RESERVA")
+                    or t.get("CODIGO_RESERVA_AEROLINEA"),
                     nombre_aerolinea=t.get("NOMBRE_AEROLINEA") or "AVIOR AIRLINES",
+                    direccion_aerolinea=t.get("DIRECCION_AEROLINEA"),
                     tarifa=float(t.get("TARIFA_IMPORTE") or 0.0),
                     impuestos=float(t.get("IMPUESTOS") or 0.0),
                     total=float(t.get("TOTAL_IMPORTE") or 0.0),

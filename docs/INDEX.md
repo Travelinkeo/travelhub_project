@@ -1,58 +1,78 @@
-# 📚 Índice de Documentación - TravelHub
+# Índice de Documentación — TravelHub
 
-**Última actualización**: 24 de Junio de 2026
+**Última actualización:** 12 de Julio de 2026
 
-Bienvenido a la documentación oficial de TravelHub. Tras una extensa revisión y limpieza, este índice centraliza los documentos técnicos y manuales operativos que se encuentran **actualmente activos**. Todos los reportes obsoletos, pruebas y scripts legacy han sido aislados para su futura eliminación.
+Bienvenido a la documentación oficial de TravelHub. Este índice organiza todos los documentos activos del proyecto.
 
----
-
-## 🏛️ 1. Arquitectura y Visión General
-Documentos centrales que describen la estructura y el propósito del sistema.
-
-- **[REPORTE_ARQUITECTURA_2026.md](REPORTE_ARQUITECTURA_2026.md)** - 🌟 Documento Maestro de Arquitectura (La fuente de la verdad para el estado actual del ecosistema).
-- **[ARCHITECTURE.md](ARCHITECTURE.md)** - Resumen técnico de la arquitectura.
-- **[ESTRUCTURA_CARPETAS.md](ESTRUCTURA_CARPETAS.md)** - Mapa detallado de todos los módulos del proyecto.
-- **[BUSINESS_MODEL.md](BUSINESS_MODEL.md)** - Modelo de negocio SaaS.
-
-## ⚙️ 2. Guías de Desarrollo e Infraestructura
-Para desarrolladores y encargados de DevOps.
-
-- **[README.md](README.md)** - Guía de entrada principal al repositorio.
-- **[DEVELOPMENT.md](DEVELOPMENT.md)** - Flujos de trabajo y estándares.
-- **[DOCKER_README.md](DOCKER_README.md)** - Todo lo necesario para levantar el proyecto con contenedores.
-- **[ORGANIZACION_PROYECTO.md](ORGANIZACION_PROYECTO.md)** - Guía de organización general de código.
-- **[CRON_SETUP.md](CRON_SETUP.md)** - Configuración de tareas programadas (Celery Beat).
-- **[MULTI_TENANCY.md](MULTI_TENANCY.md)** - Cómo funciona la arquitectura SaaS para múltiples agencias.
-
-## 🔌 3. APIs y Componentes Clave
-Documentación de interfaces y microservicios internos.
-
-- **[DATA_DICTIONARY.md](DATA_DICTIONARY.md)** - Diccionario de datos de la base de datos central.
-- **[API_AUTOMATION.md](API_AUTOMATION.md)** - Automatizaciones y Webhooks.
-- **[TRANSLATOR_API.md](TRANSLATOR_API.md)** - Documentación del motor de traducción de itinerarios (GDS a JSON/HTML).
-- **[VOUCHER_SYSTEM.md](VOUCHER_SYSTEM.md)** - 📄 Guía técnica del sistema de generación de vouchers unificado.
-
-## ✈️ 4. Operaciones, Uso y Parsers (GDS)
-Guías sobre el negocio principal y manuales de usuario.
-
-- **[MANUAL_DEL_USUARIO.md](MANUAL_DEL_USUARIO.md)** - 📖 **El Gran Libro de Consultas.** Manual paso a paso, súper amigable y sin tecnicismos, ideal para entrenar a cualquier persona que vaya a usar el sistema.
-- **[MANUAL_FUNCIONAL.md](MANUAL_FUNCIONAL.md)** - 👥 Guía para gerentes y contadores. Describe el "por qué" funcional de la plataforma.
-- **[OPERATIONS.md](OPERATIONS.md)** - Guía de operaciones del ERP y despliegue.
-- **[PARSING_RULES.md](PARSING_RULES.md)** - 📜 Los "10 Mandamientos" del parseo. Reglas técnicas de estandarización para KIU, Sabre, Amadeus.
-- **[GUIA_AMADEUS.md](GUIA_AMADEUS.md)** - Documentación sobre el procesamiento específico de Amadeus.
-- *(Nota: Para documentación extensa sobre parsers (Sabre, KIU, etc.) consultar el REPORTE_ARQUITECTURA_2026.md)*
-
-## 🎥 5. Presentación y Demostraciones
-- **[GUIA_DEMO_EN_VIVO.md](GUIA_DEMO_EN_VIVO.md)** - Guía paso a paso para realizar demostraciones comerciales a potenciales agencias cliente.
+> **¿Buscas el manual de usuario?** Accede a la versión pública desde la aplicación en `/manual/` o lee la versión completa en [manual_del_usuario.md](manual_del_usuario.md).
 
 ---
 
-### 🗂️ Navegación por Subdirectorios
-Si buscas detalles muy específicos, puedes explorar los subdirectorios funcionales:
-- `api/`: Documentación de los endpoints REST.
-- `backend/`: Detalles técnicos del backend (auditoría, parsers, contabilidad, Redis).
-- `deployment/`: Configuraciones de nube (Render, Railway), seguridad y despliegue.
-- `wiki/GDS/`: Documentación detallada de los parsers GDS (Amadeus, KIU, Sabre).
-- `development/`: Resumen del sistema de contabilidad VEN-NIF.
+## 1. Introducción y Visión General
 
-*(Nota: Los archivos que antes se encontraban aquí y que hacían referencia a bugs ya solucionados o reportes antiguos, han sido movidos a la cuarentena `_cuarentena_para_borrar/docs_desfasados/`)*
+Documentos para entender qué es TravelHub y cómo está construido.
+
+- **[manual_del_usuario.md](manual_del_usuario.md)** — Manual completo para agencias de viaje. Explica paso a paso cómo usar el sistema, sin tecnicismos.
+- **[business_model.md](business_model.md)** — Modelo de negocio SaaS: cómo funciona la plataforma, quiénes son los clientes y cómo se generan ingresos.
+- **[architecture_map.md](architecture_map.md)** — Mapa visual de la arquitectura con diagramas. Ideal para entender todos los componentes del sistema de un vistazo.
+- **[reporte_arquitectura_2026.md](reporte_arquitectura_2026.md)** — Documento maestro de arquitectura. La fuente de verdad detallada sobre el estado actual del ecosistema.
+- **[estructura_carpetas.md](estructura_carpetas.md)** — Mapa detallado de todos los módulos y carpetas del proyecto.
+- **[multi_tenancy.md](multi_tenancy.md)** — Cómo funciona la arquitectura multi-tenant (múltiples agencias en una misma instalación).
+
+---
+
+## 2. Guías de Desarrollo
+
+Para programadores y personal técnico que trabaja con el código.
+
+- **[desarrollo.md](desarrollo.md)** — Guía de desarrollo: tecnologías, estructura del proyecto, estándares de código, pruebas y flujo de trabajo.
+- **[organizacion_proyecto.md](organizacion_proyecto.md)** — Organización general del código y las aplicaciones Django.
+- **[cron_setup.md](cron_setup.md)** — Configuración de tareas programadas (Celery Beat).
+- **[backend/](backend/)** — Documentación técnica del backend (auditoría, contabilidad, Redis).
+
+---
+
+## 3. APIs e Integraciones
+
+Documentación de las interfaces de programación y componentes clave.
+
+- **[data_dictionary.md](data_dictionary.md)** — Diccionario de datos de la base de datos.
+- **[api_automation.md](api/automation.md)** — Automatizaciones y webhooks.
+- **[translator_api.md](translator_api.md)** — Motor de traducción de itinerarios (GDS a JSON/HTML).
+- **[voucher_system.md](voucher_system.md)** — Sistema de generación de vouchers.
+- **[api/](api/)** — Documentación detallada de los endpoints REST.
+
+---
+
+## 4. Despliegue, Operaciones y Seguridad
+
+Guías para administradores del sistema y encargados de infraestructura.
+
+- **[despliegue.md](despliegue.md)** — Guía completa de despliegue: desde desarrollo local hasta producción con Cloudflare Tunnel.
+- **[seguridad.md](seguridad.md)** — Medidas de seguridad implementadas, riesgos identificados y buenas prácticas.
+- **[operations.md](operations.md)** — Guía de operaciones del ERP.
+- **[deployment/](deployment/)** — Documentación adicional de despliegue (configuración de tareas, BCV, cierre mensual).
+
+---
+
+## 5. Procesamiento de Itinerarios (GDS)
+
+Documentación sobre el negocio principal: procesamiento de reservas de aerolíneas.
+
+- **[parsing_rules.md](parsing_rules.md)** — Las reglas de estandarización para KIU, Sabre y Amadeus.
+- **[guia_amadeus.md](guia_amadeus.md)** — Procesamiento específico de Amadeus.
+- **[manual_funcional.md](manual_funcional.md)** — Guía funcional para gerentes y contadores.
+- **[manual_sistema.md](manual_sistema.md)** — Guía técnica del sistema.
+- **[wiki/GDS/](wiki/GDS/)** — Documentación detallada de los parsers GDS (Amadeus, KIU, Sabre).
+
+---
+
+## 6. Demostraciones
+
+- **[guia_demo_en_vivo.md](guia_demo_en_vivo.md)** — Guía paso a paso para realizar demostraciones comerciales a agencias potenciales.
+
+---
+
+### Documentos archivados
+
+Los documentos obsoletos, duplicados o que documentaban problemas ya resueltos se han movido a [`_archive/`](_archive/) para mantener la documentación actual limpia y enfocada.

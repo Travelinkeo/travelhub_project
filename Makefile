@@ -6,20 +6,17 @@ help: ## Show this help
 test: ## Run tests with coverage
 	pytest tests/ --cov=. --cov-report=term-missing -v --create-db
 
-lint: ## Run linters (ruff, black, isort)
-	ruff check . --select E9,F63,F7,F82
-	ruff check . --max-complexity=10 --line-length=127 || true
-	black --check . || true
-	isort --check-only . || true
+lint: ## Run linters (ruff check with project rules from .ruff.toml)
+	ruff check .
+	ruff check . --max-complexity=10 --line-length=127
 
-format: ## Format code with black and isort
-	black .
-	isort .
+format: ## Format code with ruff (replaces black/isort)
+	ruff format .
 
 security: ## Run security checks
 	python manage.py check --deploy
-	safety check --json || true
-	bandit -r . -ll -ii -x tests/ || true
+	safety check --json
+	bandit -r . -ll -ii -x tests/
 
 docker-build: ## Build Docker image
 	docker build -t travelhub:local .

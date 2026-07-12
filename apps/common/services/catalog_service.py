@@ -10,7 +10,7 @@ from django.conf import settings
 from apps.common.models import Ciudad, Pais
 
 
-def __getattr__(name):
+def __getattr__(name: str) -> Any:
     if name == "Moneda":
         from django.apps import apps
 
@@ -27,16 +27,18 @@ class CatalogNormalizationService:
     Evita la creación de 'Unknown City' y asegura integridad multi-tenant.
     """
 
-    _airports_master = None
+    _airports_master: dict[str, Any] | None = None
 
     @classmethod
-    def _load_airports(cls):
+    def _load_airports(cls) -> dict[str, Any]:
         if not cls._airports_master:
-            path = os.path.join(settings.BASE_DIR, "core", "data", "airports_master.json")
+            # BASE_DIR es definido en project settings (no por django-stubs).
+            path = os.path.join(settings.BASE_DIR, "core", "data", "airports_master.json")  # type: ignore[misc]
             try:
                 if os.path.exists(path):
                     with open(path, encoding="utf-8") as f:
-                        cls._airports_master = json.load(f)
+                        loaded = json.load(f)
+                    cls._airports_master = loaded if isinstance(loaded, dict) else {}
                     logger.info(f"✅ Master IATA loaded: {len(cls._airports_master)} airports.")
                 else:
                     logger.warning(f"⚠️ Master IATA file not found at {path}")
@@ -47,7 +49,7 @@ class CatalogNormalizationService:
         return cls._airports_master
 
     @classmethod
-    def get_or_create_ciudad_by_iata(cls, iata_code: str) -> Ciudad:
+    def get_or_create_ciudad_by_iata(cls, iata_code: str) -> Ciudad | None:
         """
         Busca o crea una ciudad en la DB usando el catálogo maestro IATA.
         Prioriza la búsqueda por el nuevo campo codigo_iata en la DB.
@@ -65,12 +67,12 @@ class CatalogNormalizationService:
         master = cls._load_airports()
 
         # 2. Buscar en el maestro
-        info = master.get(iata_code)
+        info: dict[str, Any] | None = master.get(iata_code)
 
         if not info:
             # Búsqueda reversa si el JSON tiene otra estructura
             for entry in master.values():
-                if entry.get("iata") == iata_code:
+                if isinstance(entry, dict) and entry.get("iata") == iata_code:
                     info = entry
                     break
 
@@ -79,12 +81,12 @@ class CatalogNormalizationService:
             # Fallback histórico: buscar por nombre aproximado
             return Ciudad.objects.filter(nombre__icontains=iata_code).first()
 
-        city_name = info.get("city") or info.get("name")
-        country_iso = info.get("country")
-        state = info.get("state")
+        city_name: str | None = info.get("city") or info.get("name")
+        country_iso: str | None = info.get("country")
+        state: str | None = info.get("state")
 
         # 3. Obtener o crear País
-        pais_obj = None
+        pais_obj: Pais | None = None
         if country_iso:
             pais_obj, _ = Pais.objects.get_or_create(
                 codigo_iso_2=country_iso.upper(),

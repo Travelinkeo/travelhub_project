@@ -77,6 +77,86 @@ class TramoVueloSchema(BaseModel):
             return f"{int(parts[0]):02d}:{parts[1]}"
         return v  # Devuelve tal cual si no podemos interpretarlo
 
+    @field_validator("fecha_salida", "fecha_llegada", mode="before")
+    def normalize_date_gds(cls, v):
+        """Convierte fechas ISO (YYYY-MM-DD) o formatos comunes a GDS DDMMMAA."""
+        if not v:
+            return "01ENE26"
+        v = str(v).strip()
+        # Si ya está en formato GDS (ej: 07ENE26), devolver tal cual
+        gds_pattern = r"^\d{2}[A-Z]{3}\d{2}$"
+        if re.match(gds_pattern, v):
+            return v
+        # Convertir formato ISO YYYY-MM-DD a GDS
+        iso_match = re.match(r"^\d{4}-(\d{2})-(\d{2})$", v)
+        if iso_match:
+            mes_num = int(iso_match.group(1))
+            dia = iso_match.group(2)
+            year = v[:4]
+            year_gds = year[-2:]
+            meses_gds = {
+                1: "ENE",
+                2: "FEB",
+                3: "MAR",
+                4: "ABR",
+                5: "MAY",
+                6: "JUN",
+                7: "JUL",
+                8: "AGO",
+                9: "SEP",
+                10: "OCT",
+                11: "NOV",
+                12: "DIC",
+            }
+            mes_gds = meses_gds.get(mes_num, "ENE")
+            return f"{dia}{mes_gds}{year_gds}"
+        # Formato DD/MM/YYYY
+        slash_match = re.match(r"^(\d{2})/(\d{2})/(\d{4})$", v)
+        if slash_match:
+            dia = slash_match.group(1)
+            mes_num = int(slash_match.group(2))
+            year_gds = slash_match.group(3)[-2:]
+            meses_gds = {
+                1: "ENE",
+                2: "FEB",
+                3: "MAR",
+                4: "ABR",
+                5: "MAY",
+                6: "JUN",
+                7: "JUL",
+                8: "AGO",
+                9: "SEP",
+                10: "OCT",
+                11: "NOV",
+                12: "DIC",
+            }
+            mes_gds = meses_gds.get(mes_num, "ENE")
+            return f"{dia}{mes_gds}{year_gds}"
+        # Formato DD-MM-YYYY
+        dash_match = re.match(r"^(\d{2})-(\d{2})-(\d{4})$", v)
+        if dash_match:
+            dia = dash_match.group(1)
+            mes_num = int(dash_match.group(2))
+            year_gds = dash_match.group(3)[-2:]
+            meses_gds = {
+                1: "ENE",
+                2: "FEB",
+                3: "MAR",
+                4: "ABR",
+                5: "MAY",
+                6: "JUN",
+                7: "JUL",
+                8: "AGO",
+                9: "SEP",
+                10: "OCT",
+                11: "NOV",
+                12: "DIC",
+            }
+            mes_gds = meses_gds.get(mes_num, "ENE")
+            return f"{dia}{mes_gds}{year_gds}"
+        # Fallback: devolver tal cual
+        return v
+
 
 class BoletoAereoSchema(BaseModel):
     nombre_pasajero: str = Field(

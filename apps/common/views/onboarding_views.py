@@ -21,6 +21,7 @@ from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils.decorators import method_decorator
+from django.utils.translation import gettext_lazy as _
 from django.views import View
 from django.views.decorators.http import require_POST
 
@@ -93,7 +94,7 @@ class OnboardingWelcomeView(View):
     def post(self, request):
         progress = get_or_create_progress(request.user)
         progress.mark_step_completed(UserProgress.STEP_WELCOME)
-        messages.success(request, "¡Bienvenido! Continuemos configurando tu agencia.")
+        messages.success(request, _("¡Bienvenido! Continuemos configurando tu agencia."))
         return redirect(reverse("onboarding_agency"))
 
 
@@ -257,11 +258,11 @@ class OnboardingFirstTicketView(View):
         if action == "demo":
             # Simular creación de boleto demo
             messages.info(
-                request, "Boleto demo registrado. En producción, esto crearía un registro real."
+                request, _("Boleto demo registrado. En producción, esto crearía un registro real.")
             )
 
         progress.mark_step_completed(UserProgress.STEP_FIRST_TICKET)
-        messages.success(request, "¡Perfecto! Ahora invites a tu equipo.")
+        messages.success(request, _("¡Perfecto! Ahora invites a tu equipo."))
         return redirect(reverse("onboarding_invite_team"))
 
 
@@ -313,7 +314,7 @@ class OnboardingInviteTeamView(View):
                 )
 
         progress.mark_step_completed(UserProgress.STEP_INVITE_TEAM)
-        messages.success(request, "¡Equipo configurado!")
+        messages.success(request, _("¡Equipo configurado!"))
         return redirect(reverse("onboarding_complete"))
 
 
@@ -357,7 +358,9 @@ class OnboardingCompleteView(View):
 
         messages.success(
             request,
-            "🎉 ¡Onboarding completado! Bienvenido a TravelHub. Tu agencia está lista para operar.",
+            _(
+                "🎉 ¡Onboarding completado! Bienvenido a TravelHub. Tu agencia está lista para operar."
+            ),
         )
         return redirect("/dashboard/")
 
@@ -399,5 +402,7 @@ def skip_onboarding(request):
         update_fields=["completed_steps", "current_step", "onboarding_completed", "updated_at"]
     )
 
-    messages.info(request, "Onboarding saltado. Puedes acceder a la configuración desde el menú.")
+    messages.info(
+        request, _("Onboarding saltado. Puedes acceder a la configuración desde el menú.")
+    )
     return redirect("/dashboard/")

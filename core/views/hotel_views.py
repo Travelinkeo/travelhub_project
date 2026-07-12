@@ -8,6 +8,7 @@ from django.db.models.query import QuerySet
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, ListView
 from rest_framework import status
 from rest_framework.response import Response
@@ -119,7 +120,7 @@ class HotelDetailView(LoginRequiredMixin, DetailView):
 
         agencia = get_current_agency()
         if not agencia:
-            messages.error(request, "No se pudo identificar la agencia activa.")
+            messages.error(request, _("No se pudo identificar la agencia activa."))
             return self.get(request, *args, **kwargs)
 
         try:

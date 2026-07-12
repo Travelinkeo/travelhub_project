@@ -223,6 +223,6 @@ Si encuentras algún problema:
 Todas las funcionalidades están implementadas y listas para usar.
 Explora el menú lateral para descubrir todas las nuevas características.
 
-**Versión**: 2.1  
-**Fecha**: Junio 2026  
+**Versión**: 2.1
+**Fecha**: Junio 2026
 **Estado**: ✅ Producción

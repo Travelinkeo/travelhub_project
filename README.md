@@ -6,7 +6,7 @@ TravelHub es una plataforma B2B multi-tenant diseñada para automatizar la opera
 
 ---
 
-## 🏛️ Arquitectura y Estado Actual (Mayo 2026)
+## 🏛️ Arquitectura y Estado Actual (Julio 2026)
 
 ### 1. Multi-tenant SaaS & Onboarding
 - **Aislamiento de Datos:** `AgenciaMixin` + `AgenciaManager` + `ThreadLocalContextMiddleware`. Cada agencia opera en su propio contexto.
@@ -33,13 +33,13 @@ TravelHub es una plataforma B2B multi-tenant diseñada para automatizar la opera
 | Documento | Descripción |
 |-----------|-------------|
 | [Índice Maestro](docs/INDEX.md) | Mapa central de documentación |
-| [Reporte de Arquitectura](docs/REPORTE_ARQUITECTURA_2026.md) | Arquitectura técnica detallada |
-| [Manual del Usuario](docs/MANUAL_DEL_USUARIO.md) | Guía para usuarios finales |
-| [Reglas de Parseo](docs/PARSING_RULES.md) | Estándares de extracción GDS |
-| [Multi-tenancy](docs/MULTI_TENANCY.md) | Aislamiento de datos |
-| [Modelo de Negocio](docs/BUSINESS_MODEL.md) | Planes y precios |
-| [Chequeo de Tipos](docs/MYPY.md) | Ejecutar mypy localmente |
-| [Despliegue](docs/deployment/DEPLOYMENT.md) | Guía WSL2 + Docker + Cloudflare Tunnel |
+| [Reporte de Arquitectura](docs/reporte_arquitectura_2026.md) | Arquitectura técnica detallada |
+| [Manual del Usuario](docs/manual_del_usuario.md) | Guía para usuarios finales |
+| [Reglas de Parseo](docs/parsing_rules.md) | Estándares de extracción GDS |
+| [Multi-tenancy](docs/multi_tenancy.md) | Aislamiento de datos |
+| [Modelo de Negocio](docs/business_model.md) | Planes y precios |
+| [Chequeo de Tipos](docs/mypy.md) | Ejecutar mypy localmente |
+| [Despliegue](docs/deployment/deployment.md) | Guía WSL2 + Docker + Cloudflare Tunnel |
 
 ---
 
@@ -52,7 +52,11 @@ pip install -r requirements/dev.txt
 mypy .
 ```
 
-Esto usará la configuración estricta definida en `mypy.ini` y el plugin `django-stubs`.
+Esto usará la configuración definida en `mypy.ini` y el plugin `django-stubs`.
+
+> **Nota:** `mypy.ini` tiene `strict = False` durante la fase de adopción
+> gradual del checkeo de tipos. Ver `docs/mypy.md` para el detalle de los
+> error codes temporalmentedesactivados y el plan de activación.
 
 ---
 

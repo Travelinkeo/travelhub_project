@@ -68,6 +68,31 @@ class ProveedorFormMixin:
                 field.widget.attrs["class"] = "input-base"
         return form
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["active_tab"] = "configuracion"
+
+        # Serializar monedas disponibles para el frontend (Útil para configuraciones de comisión)
+        try:
+            from rest_framework import serializers
+
+            from apps.bookings.models import ProductoServicio
+            from apps.common.models import Moneda
+
+            class MonedaSerializer(serializers.ModelSerializer):
+                class Meta:
+                    model = Moneda
+                    fields = ["id_moneda", "nombre", "codigo_iso", "simbolo", "es_moneda_local"]
+
+            context["monedas_json"] = MonedaSerializer(Moneda.objects.all(), many=True).data
+            context["tipos_servicio_choices"] = [
+                {"id": c[0], "label": c[1]} for c in ProductoServicio.TipoProductoChoices.choices
+            ]
+        except (ImportError, AttributeError, serializers.SerializerError) as e:
+            logger.warning("No se pudo serializar monedas/tipos para ProveedorFormMixin: %s", e)
+
+        return context
+
 
 class ProveedorCreateView(SaaSMixin, LoginRequiredMixin, ProveedorFormMixin, CreateView):
     model = Proveedor
@@ -102,7 +127,6 @@ class ProveedorCreateView(SaaSMixin, LoginRequiredMixin, ProveedorFormMixin, Cre
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["active_tab"] = "configuracion"
         context["title"] = "Nuevo Proveedor"
         return context
 
@@ -144,29 +168,8 @@ class ProveedorUpdateView(SaaSMixin, LoginRequiredMixin, ProveedorFormMixin, Upd
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["active_tab"] = "configuracion"
         context["title"] = f"Editar Proveedor: {self.object.nombre}"
         context["proveedor_id"] = self.object.pk
-
-        # Serializar monedas disponibles para el frontend (Útil para configuraciones de comisión)
-        try:
-            from rest_framework import serializers
-
-            from apps.bookings.models import ProductoServicio
-            from apps.common.models import Moneda
-
-            class MonedaSerializer(serializers.ModelSerializer):
-                class Meta:
-                    model = Moneda
-                    fields = ["id_moneda", "nombre", "codigo_iso", "simbolo", "es_moneda_local"]
-
-            context["monedas_json"] = MonedaSerializer(Moneda.objects.all(), many=True).data
-            context["tipos_servicio_choices"] = [
-                {"id": c[0], "label": c[1]} for c in ProductoServicio.TipoProductoChoices.choices
-            ]
-        except (ImportError, AttributeError, serializers.SerializerError) as e:
-            logger.warning("No se pudo serializar monedas/tipos para ProveedorUpdateView: %s", e)
-
         return context
 
     def form_valid(self, form):

@@ -15,8 +15,19 @@ staticfiles/
 .env.local
 .env.*.local
 venv/
+.venv/
 ENV/
 env/
+
+# Dependencies / build artifacts
+node_modules/
+
+# Playwright MCP cache
+.playwright-mcp/
+
+# Debug screenshots (artifact, not source)
+admin_login.png
+login_page.png
 
 # Docker
 .docker_data/
@@ -58,6 +69,7 @@ scripts/*
 !scripts/diagnostics/**
 scratch/
 /check_*.py
+/check_routes.py
 /debug_*.py
 /inspect_*.py
 /nuclear_*.py
@@ -70,6 +82,22 @@ scratch/
 /apply_*.py
 /cleanup_*.py
 /verify_*.py
+# docker one-off fix scripts en raíz (con punto)
+.docker_fix_*.py
+# Fragmentos sueltos creados por ediciones fallidas en la raíz
+/\{*\)
+# Logs de Celery worker volcados a la raíz (van a logs/ en producción)
+worker_logs*.txt
+# Directorios de datos de testing / scratch externos
+Boletos Pruebas/
+external_ticket_generator/
+tarifarios_json_estructurados/
+/tmp.drivedownload/
+/tmp.driveupload/
+# Archivos de análisis intermedios no operativos
+ANALISIS_BRECHA_VS_PLAN.md
+todo.md
+qc
 *.db
 *.sqlite3
 *.sqlite3-journal

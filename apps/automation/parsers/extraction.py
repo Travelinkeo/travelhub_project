@@ -159,6 +159,42 @@ class ExtractionService:
         return texto_final
 
     @staticmethod
+    def extract_html(file_obj: BinaryIO, filename: str) -> str:
+        """Extract raw HTML content from a file (EML or HTML).
+
+        Unlike ``extract_text``, this preserves the original HTML structure
+        so that parsers can navigate the DOM with BeautifulSoup.
+        """
+        try:
+            filename = filename.lower()
+            if not filename.endswith(".eml") and not filename.endswith(".html"):
+                return ""
+            if hasattr(file_obj, "seek"):
+                file_obj.seek(0)
+            msg = BytesParser(policy=policy.default).parse(file_obj)
+            if msg.is_multipart():
+                for part in msg.walk():
+                    ctype = part.get_content_type()
+                    if ctype == "text/html":
+                        payload = part.get_payload(decode=True)
+                        if payload:
+                            charset = part.get_content_charset() or "utf-8"
+                            if isinstance(payload, bytes | bytearray):
+                                return payload.decode(charset, errors="replace")
+                            return str(payload)
+            else:
+                payload = msg.get_payload(decode=True)
+                if payload and msg.get_content_type() == "text/html":
+                    charset = msg.get_content_charset() or "utf-8"
+                    if isinstance(payload, bytes | bytearray):
+                        return payload.decode(charset, errors="replace")
+                    return str(payload)
+            return ""
+        except Exception as e:
+            logger.error(f"Error extrayendo HTML de archivo {filename}: {e}")
+            return ""
+
+    @staticmethod
     def _clean_html(html_content: str) -> str:
         if BeautifulSoup is None:
             return html_content

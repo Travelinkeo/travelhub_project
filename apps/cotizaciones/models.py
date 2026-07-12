@@ -203,27 +203,20 @@ class Cotizacion(AgenciaMixin, SoftDeleteModel):
         return venta
 
     def get_whatsapp_url(self):
-        """Genera un enlace de WhatsApp para enviar la cotización"""
-        if not self.cliente or not self.cliente.telefono_principal:
-            return None
+        """**Deprecated:** usar `get_whatsapp_link()` en su lugar.
 
-        # Limpiar número de teléfono (solo dígitos)
-        telefono = "".join(filter(str.isdigit, self.cliente.telefono_principal))
+        Se.mantiene por compatibilidad con referencias externas eventuales.
+        `get_whatsapp_link()` es más completo (maneja `nombre_cliente_manual`
+        yConsulta consultor) y ya no difiere en comportamiento funcional.
+        """
+        import warnings
 
-        # Mensaje predeterminado con saltos de línea codificados
-        mensaje = (
-            f"Hola *{self.cliente.nombres}*,\n\n"
-            f"Le adjunto la cotización *{self.numero_cotizacion}* "
-            f"por un total de *${self.total_cotizado}*.\n\n"
-            f"Quedo atento a sus comentarios.\n"
-            f"Destino: {self.destino or 'Varios'}"
+        warnings.warn(
+            "Cotizacion.get_whatsapp_url() is deprecated; use get_whatsapp_link() instead.",
+            DeprecationWarning,
+            stacklevel=2,
         )
-
-        from urllib.parse import quote
-
-        mensaje_encoded = quote(mensaje)
-
-        return f"https://wa.me/{telefono}?text={mensaje_encoded}"
+        return self.get_whatsapp_link()
 
 
 class ItemCotizacion(AgenciaMixin, SoftDeleteModel):

@@ -1,5 +1,4 @@
 import pytest
-from django.conf import settings
 from django.test import override_settings
 from django.urls import reverse
 from rest_framework.test import APIClient
@@ -28,18 +27,20 @@ def test_security_headers_and_csp_relaxed(client):
     assert "microphone=()" in r1["Permissions-Policy"]
     assert "camera=()" in r1["Permissions-Policy"]
 
-    # CSP present with relaxed directives suitable for HTMX & Tailwind in debug, or strict in production
+    # CSP present with nonce-based directives suitable for HTMX & Tailwind.
+    # En paths NO-admin, 'unsafe-eval' está prohibido en script-src.
+    # 'unsafe-inline' solo permitido en style-src (no en script-src).
+    # Las rutas /admin/ y /system/ (Unfold, Alpine.js) son excepción documentada.
     csp1 = r1["Content-Security-Policy"]
-    if settings.DEBUG:
-        assert "default-src 'self' 'unsafe-inline' 'unsafe-eval'" in csp1
-        assert "script-src 'self' 'unsafe-inline' 'unsafe-eval'" in csp1
-        assert "style-src 'self' 'unsafe-inline' 'unsafe-eval'" in csp1
-    else:
-        assert "nonce-" in csp1
-        assert "strict-dynamic" in csp1
-        # 'unsafe-inline' solo permitido en style-src (H6), NO en script-src
-        script_part = [p.strip() for p in csp1.split(";") if p.strip().startswith("script-src")][0]
-        assert "'unsafe-inline'" not in script_part
+    assert "nonce-" in csp1
+    assert "strict-dynamic" in csp1
+    script_part = [p.strip() for p in csp1.split(";") if p.strip().startswith("script-src")][0]
+    # health/ está fuera de /admin/ → no debe tener 'unsafe-eval' ni 'unsafe-inline'
+    assert "'unsafe-eval'" not in script_part
+    assert "'unsafe-inline'" not in script_part
+    # style-src permite 'unsafe-inline' (necesario para Django admin y Tailwind)
+    style_part = [p.strip() for p in csp1.split(";") if p.strip().startswith("style-src")][0]
+    assert "'unsafe-inline'" in style_part
 
 
 @pytest.mark.django_db

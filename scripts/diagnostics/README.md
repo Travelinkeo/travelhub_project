@@ -7,7 +7,7 @@ cualquier entorno.
 ## `check_migration_health.py`
 
 Diagnóstico integral que reporta tres causas históricas de divergencia entre
-Django y la BD (ver [`docs/MIGRATIONS.md`](../../docs/MIGRATIONS.md)):
+Django y la BD (ver [`docs/migrations.md`](../../docs/migrations.md)):
 
 1. Migrations aplicadas en la BD cuyo archivo en disco ya no existe.
 2. Tablas que aún viven como `core_*` cuando deberían ser `bookings_*`
@@ -45,7 +45,7 @@ Sale con código `!= 0` si encuentra columnas faltantes.
 Crea una BD temporal vacía y corre `manage.py migrate` desde cero para verificar
 que el historial de migraciones reconstruye un esquema válido. **No toca la BD
 de desarrollo principal.** Documenta el problema de la triple representación de
-`Moneda` (ver `docs/MIGRATIONS.md`).
+`Moneda` (ver `docs/migrations.md`).
 
 ```bash
 bash scripts/diagnostics/test_fresh_migrate.sh

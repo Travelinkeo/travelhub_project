@@ -1,6 +1,9 @@
-# TravelHub Hardening Baseline Documentation
-**Fecha:** 2026-06-26  
-**Branch:** `hardening/operational-risks`  
+# Línea Base de Endurecimiento — TravelHub
+
+> **Nota:** Este documento contiene la línea base histórica del plan de endurecimiento. Para una visión consolidada y actualizada de la seguridad, consulta [seguridad.md](seguridad.md).
+
+**Fecha:** 2026-06-26
+**Branch:** `hardening/operational-risks`
 **Commit base:** `40afb5d` - "Baseline commit: all current changes before hardening phase 0"
 
 ---
@@ -213,7 +216,7 @@ curl -f http://localhost:8080/manager/health
 
 - [x] Branch `hardening/operational-risks` creado desde baseline
 - [x] Baseline commit `40afb5d` con todos los cambios actuales
-- [x] Documentación `HARDENING_BASELINE.md` creada
+- [x] Documentación `hardening_baseline.md` creada
 - [ ] Métricas baseline medidas en staging (PENDING: requiere entorno)
 - [ ] Smoke tests automatizados en CI (PENDING: siguiente paso)
 - [ ] Documentación de configuración actual completada

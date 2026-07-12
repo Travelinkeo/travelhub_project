@@ -146,6 +146,19 @@ def docs_page(request, path):
     )
 
 
+@require_GET
+def public_manual(request):
+    """Sirve el manual de usuario HTML (público, standalone)."""
+
+    from django.http import HttpResponse
+
+    manual_path = settings.BASE_DIR / "docs" / "manual_usuario.html"
+    if not manual_path.exists():
+        return HttpResponseNotFound("Manual no disponible")
+    with open(manual_path, encoding="utf-8") as f:
+        return HttpResponse(f.read(), content_type="text/html; charset=utf-8")
+
+
 def _extract_toc(markdown_text):
     """Extrae H2/H3 del markdown para tabla de contenidos."""
     toc = []

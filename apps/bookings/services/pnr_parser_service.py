@@ -69,19 +69,19 @@ class PNRParserService:
         elif gds == "SABRE":
             loc_match = re.search(r"\b([A-Z0-9]{6})\b\s+\-\s+SABRE", raw_text)
             if not loc_match:
-                loc_match = re.search(r"RECORD LOCATOR\s+([A-Z0-9]{6})", text_upper)
+                loc_match = re.search(r"RECORD LOCATOR\s+([A-Z0-9]{6})\b", text_upper)
             if loc_match:
                 pnr_data["localizador"] = loc_match.group(1)
 
         elif gds == "KIU":
-            loc_match = re.search(r"(?:KIU|KLR/)\s*([A-Z0-9]{6})", text_upper)
+            loc_match = re.search(r"(?:KIU|KLR/)\s*([A-Z0-9]{6})\b", text_upper)
             if loc_match:
                 pnr_data["localizador"] = loc_match.group(1)
 
         # Fallback de Localizador Genérico
         if not pnr_data["localizador"]:
             pnr_match = re.search(
-                r"(?:RESERVACI[OÓ]N|RESERVA|CODE|PNR|LOCALIZADOR|RECORD|BOOKING REF)[:\s\n\-]+([A-Z0-9]{6})",
+                r"(?:RESERVACI[OÓ]N|RESERVA|CODE|PNR|LOCALIZADOR|RECORD|BOOKING REF)[:\s\n\-]+([A-Z0-9]{6})\b",
                 text_upper,
             )
             if pnr_match:

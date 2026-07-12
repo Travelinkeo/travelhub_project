@@ -298,7 +298,7 @@
     <div x-show="showModal" class="fixed inset-0 z-50 overflow-y-auto" style="display: none;">
         <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:p-0">
             <div class="fixed inset-0 bg-surface-2/60 transition-opacity backdrop-blur-sm" aria-hidden="true" @click="showModal = false"></div>
-            
+
             <div class="relative bg-surface-1 rounded-2xl w-full max-w-lg p-6 text-left overflow-hidden shadow-2xl transform transition-all border border-border-color">
                 <div class="flex justify-between items-center mb-6">
                     <h3 class="text-xl font-bold text-text-main">Nueva Regla de Comisión</h3>
@@ -306,7 +306,7 @@
                         <span class="material-symbols-outlined">close</span>
                     </button>
                 </div>
-                
+
                 <div class="space-y-5">
                     <div>
                         <label class="block text-text-muted text-[10px] uppercase font-bold tracking-wider mb-1.5">Tipo de Servicio *</label>
@@ -341,7 +341,7 @@
                         <textarea x-model="newRegla.notas" rows="2" class="input-base"></textarea>
                     </div>
                 </div>
-                
+
                 <div class="flex items-center justify-end gap-3 mt-8 pt-5 border-t border-border-color">
                     <button type="button" @click="showModal = false" class="btn-secondary h-[40px] px-6">Cancelar</button>
                     <button type="button" @click="saveRegla()" class="btn-primary h-[40px] px-8">Guardar Regla</button>
@@ -370,6 +370,7 @@
 </main>
 {{ tipos_servicio_choices|json_script:"tipos-servicio" }}
 {{ monedas_json|json_script:"monedas-data" }}
+{% endblock %}
 
 {% block extra_scripts %}
 <script nonce="{{ request.csp_nonce }}" src="{% static 'js/proveedor_form.js' %}"></script>

@@ -6,7 +6,9 @@
 Guía para el despliegue, monitoreo y mantenimiento del sistema en producción.
 
 ## 1. Arquitectura de Despliegue
-El sistema está diseñado para correr containerizado (Docker) en un VPS gestionado por **Coolify**.
+El sistema está diseñado para correr containerizado (Docker) en un VPS.
+
+> **Nota:** Actualmente el despliegue usa Docker Compose + Cloudflare Tunnel. Para instrucciones detalladas, consulta [despliegue.md](despliegue.md).
 
 ### Servicios Requeridos
 1.  **Web:** Contenedor Django (Gunicorn).
@@ -15,26 +17,9 @@ El sistema está diseñado para correr containerizado (Docker) en un VPS gestion
 4.  **DB:** PostgreSQL 15+.
 5.  **Cache/Broker:** Redis 7+.
 
-## 2. Despliegue con Coolify
+## 2. Despliegue
 
-### Preparación del Repositorio
-Asegurarse de que existan en la raíz:
-*   `Dockerfile` (Optimizado para Python 3.13).
-*   `docker-compose.yml` (Opcional, Coolify puede autodetectar).
-*   `nixpacks.toml` (Si se usa Nixpacks).
-
-### Variables de Entorno (Producción)
-Configurar en el panel de Coolify:
-```ini
-DEBUG=False
-ALLOWED_HOSTS=app.travelhub.com
-DATABASE_URL=...
-REDIS_URL=...
-# Seguridad
-SECURE_SSL_REDIRECT=True
-SESSION_COOKIE_SECURE=True
-CSRF_COOKIE_SECURE=True
-```
+Para instrucciones detalladas de despliegue (Docker Compose, Cloudflare Tunnel, variables de entorno), consulta [despliegue.md](despliegue.md).
 
 ## 3. Mantenimiento y Monitoreo
 

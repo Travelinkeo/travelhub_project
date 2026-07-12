@@ -32,7 +32,7 @@ class CMSContentService:
         if self.api_key:
             genai = _get_genai()
             self.client = genai.Client(api_key=self.api_key)
-            self.model_name = "gemini-2.5-flash"
+            self.model_name = "gemini-1.5-flash"
         else:
             self.client = None
 
@@ -43,13 +43,13 @@ class CMSContentService:
         prompt = f"""
         Actúa como un experto en Marketing Turístico. Genera un post atractivo para {plataforma}.
         Contexto del viaje/promoción: {context_data}
-        
+
         Requisitos:
         1. Tono sugerente, profesional y aventurero.
         2. Incluye emojis relevantes.
         3. Incluye una lista de 5-10 hashtags optimizados.
         4. No uses placeholders como [Nombre de la Agencia], usa 'TravelHub'.
-        
+
         Retorna el resultado en formato JSON con las llaves: 'caption' y 'hashtags'.
         """
 
@@ -72,14 +72,14 @@ class CMSContentService:
         prompt = f"""
         Investiga y genera una guía de destino para: {nombre_destino}.
         Escribe en Español.
-        
+
         Campos requeridos:
         - descripcion: Un párrafo inspirador de unas 100 palabras.
         - mejor_epoca: Cuándo viajar y por qué.
         - requisitos_visa: Información general para ciudadanos de Latinoamérica.
         - moneda_local: Nombre y código de la moneda.
         - idioma: Idiomas oficiales y hablados.
-        
+
         Retorna en formato JSON.
         """
 
@@ -100,16 +100,16 @@ class CMSContentService:
         Crea un objeto Articulo completo con contenido generado por IA.
         """
         prompt = f"""
-        Escribe un artículo de blog SEO-friendly sobre: {tema}. 
+        Escribe un artículo de blog SEO-friendly sobre: {tema}.
         Destino relacionado: {destino}.
         Formato: Markdown.
-        
+
         Estructura:
         1. Título llamativo.
         2. Resumen corto para meta-description.
         3. Contenido extenso con subtítulos (H2, H3).
         4. Tono: Informativo y persuasivo.
-        
+
         Retorna en formato JSON con llaves: 'titulo', 'resumen', 'contenido', 'meta_titulo', 'meta_descripcion'.
         """
 

@@ -1,4 +1,4 @@
-# TravelHub Business Model & SaaS Tiers 💰
+# Modelo de Negocio y Planes SaaS — TravelHub
 
 TravelHub es una plataforma SaaS B2B diseñada para la rentabilidad de las agencias de viajes y la escalabilidad del proveedor de software.
 

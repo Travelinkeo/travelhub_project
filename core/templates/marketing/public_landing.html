@@ -5,7 +5,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TravelHub — CRM/ERP Inteligente para Agencias de Viajes</title>
-    <meta name="description" content="La plataforma SaaS todo-en-uno para agencias de viajes. Gestión de boletos, facturación VEN-NIF, CRM con IA, y más.">
+    <meta name="description" content="La plataforma SaaS todo-en-uno para agencias de viajes. Gestión de boletos con IA, facturación VEN-NIF, CRM inteligente, conciliación automática y más.">
+    <meta property="og:title" content="TravelHub — CRM/ERP Inteligente para Agencias de Viajes">
+    <meta property="og:description" content="Gestión de boletos con IA, facturación VEN-NIF, CRM inteligente, conciliación automática y más. Todo en un solo lugar.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ request.build_absolute_uri }}">
+    <meta property="og:image" content="{% static 'images_pwa/pwa-512x512.png' %}">
+    <meta property="og:locale" content="es_ES">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="TravelHub — CRM/ERP Inteligente para Agencias de Viajes">
+    <meta name="twitter:description" content="Gestión de boletos con IA, facturación VEN-NIF, CRM inteligente, conciliación automática y más.">
+    <link rel="canonical" href="https://travelhub.cc/">
+    <link rel="icon" href="{% static 'favicon.ico' %}" sizes="any">
+    <link rel="icon" href="{% static 'images_pwa/pwa-192x192.png' %}" sizes="192x192" type="image/png">
+    <link rel="apple-touch-icon" href="{% static 'images_pwa/apple-touch-icon.png' %}">
     {# CSS local compilado #}
     <link rel="stylesheet" href="{% static 'core/css/tailwind-built.css' %}">
     <style nonce="{{ csp_nonce }}">
@@ -29,16 +42,16 @@
     <!-- Nav -->
     <header class="fixed top-0 left-0 right-0 z-50 bg-slate-900/80 backdrop-blur-lg border-b border-slate-800">
         <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-            <a href="/" class="text-xl font-bold tracking-tight">TravelHub<span class="text-blue-400">.</span></a>
+            <a href="/" class="flex items-center gap-2">
+                <img src="{% static 'images/Logo TravelHub.png' %}" alt="TravelHub" class="h-10 w-auto">
+            </a>
             <nav class="hidden md:flex items-center gap-6 text-sm text-slate-300">
                 <a href="#features" class="hover:text-white transition">Funcionalidades</a>
                 <a href="/pricing/" class="hover:text-white transition">Precios</a>
-                <a href="/docs/" class="hover:text-white transition">Docs</a>
-                <a href="/status/" class="hover:text-white transition">🔵 Estado</a>
             </nav>
             <div class="flex items-center gap-3">
                 <a href="/accounts/login/" class="text-sm text-slate-300 hover:text-white transition">Iniciar sesión</a>
-                <a href="/accounts/signup/" class="btn-primary text-sm px-5 py-2.5">Probar gratis</a>
+                <a href="/onboarding/" class="btn-primary text-sm px-5 py-2.5">Probar gratis</a>
             </div>
         </div>
     </header>
@@ -59,8 +72,7 @@
                 conciliación automática y más — todo en un solo lugar.
             </p>
             <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <a href="/accounts/signup/" class="btn-primary text-lg px-8 py-4">Comenzar prueba gratuita →</a>
-                <a href="/docs/" class="btn-secondary text-lg px-8 py-4">📚 Ver documentación</a>
+                <a href="/onboarding/" class="btn-primary text-lg px-8 py-4">Comenzar prueba gratuita →</a>
             </div>
             <p class="mt-4 text-sm text-slate-600">Sin tarjeta de crédito · 30 días gratis · Cancela cuando quieras</p>
         </div>
@@ -125,7 +137,7 @@
                         </li>
                         {% endfor %}
                     </ul>
-                    <a href="/accounts/signup/" class="{% if plan.highlight %}btn-primary{% else %}btn-secondary{% endif %} w-full block text-center">
+                    <a href="/onboarding/" class="{% if plan.highlight %}btn-primary{% else %}btn-secondary{% endif %} w-full block text-center">
                         {{ plan.cta }}
                     </a>
                 </div>
@@ -140,7 +152,7 @@
         <div class="max-w-3xl mx-auto">
             <h2 class="text-3xl md:text-4xl font-bold mb-4">¿Listo para transformar tu agencia?</h2>
             <p class="text-lg text-slate-400 mb-8">Únete a las agencias que ya optimizan sus operaciones con TravelHub.</p>
-            <a href="/accounts/signup/" class="btn-primary text-lg px-10 py-4">Comenzar prueba gratuita →</a>
+            <a href="/onboarding/" class="btn-primary text-lg px-10 py-4">Comenzar prueba gratuita →</a>
             <p class="mt-4 text-sm text-slate-600">Sin compromiso · 30 días gratis · Soporte incluido</p>
         </div>
     </section>
@@ -149,7 +161,7 @@
     <footer class="border-t border-slate-800 py-12 px-4">
         <div class="max-w-6xl mx-auto grid md:grid-cols-4 gap-8 text-sm">
             <div>
-                <div class="font-bold text-lg mb-4">TravelHub<span class="text-blue-400">.</span></div>
+                <img src="{% static 'images/Logo TravelHub.png' %}" alt="TravelHub" class="h-10 w-auto mb-3">
                 <p class="text-slate-500">SaaS multi-tenant para agencias de viajes con IA integrada.</p>
             </div>
             <div>
@@ -157,16 +169,12 @@
                 <div class="flex flex-col gap-2 text-slate-400">
                     <a href="#features" class="hover:text-white transition">Funcionalidades</a>
                     <a href="/pricing/" class="hover:text-white transition">Precios</a>
-                    <a href="/docs/" class="hover:text-white transition">Documentación</a>
-                    <a href="/status/" class="hover:text-white transition">Estado</a>
                 </div>
             </div>
             <div>
                 <div class="font-semibold mb-3">Recursos</div>
                 <div class="flex flex-col gap-2 text-slate-400">
-                    <a href="/docs/" class="hover:text-white transition">Knowledge Base</a>
                     <a href="#" class="hover:text-white transition">API Reference</a>
-                    <a href="#" class="hover:text-white transition">Estado del sistema</a>
                 </div>
             </div>
             <div>

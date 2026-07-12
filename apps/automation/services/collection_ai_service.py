@@ -27,7 +27,7 @@ class CollectionAIService:
         api_key = get_gemini_api_key(self.agencia)
         genai = _get_genai()
         self.client = genai.Client(api_key=api_key) if api_key else None
-        self.model_name = "gemini-2.5-flash"
+        self.model_name = "gemini-1.5-flash"
 
     def get_pending_portfolio(self, days_threshold=0):
         """
@@ -70,20 +70,20 @@ class CollectionAIService:
             prompt = f"""
             Actúa como el asistente contable de la agencia de viajes "{factura.agencia.nombre if factura.agencia else "TravelHub"}".
             Tu objetivo es redactar un mensaje de recordatorio de pago para el cliente {cliente.get_nombre_completo() if cliente else "Estimado Cliente"}.
-            
+
             DATOS DE LA DEUDA:
             - Factura Nro: {factura.numero_factura}
             - Monto Pendiente: {factura.saldo_pendiente} {factura.moneda.codigo_iso}
             - Fecha de Vencimiento: {factura.fecha_vencimiento}
             - Días de retraso: {dias_retraso if dias_retraso > 0 else 0}
-            
+
             INSTRUCCIONES:
             - Tono: {"Cordial pero firme" if dias_retraso > 5 else "Amigable y servicial"}.
             - Formato: WhatsApp (máximo 150 palabras).
             - Incluye un llamado a la acción claro.
             - Usa emojis de forma profesional.
             - Menciona que si ya realizó el pago, ignore el mensaje.
-            
+
             Escribe solo el cuerpo del mensaje.
             """
 

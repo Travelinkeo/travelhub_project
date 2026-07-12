@@ -51,20 +51,25 @@
 
     // --- Botón de instalación PWA ("Agregar a pantalla de inicio") ---
     let deferredPrompt = null;
+    let installBtnHandlerAttached = false;
     window.addEventListener('beforeinstallprompt', function (e) {
         e.preventDefault();
         deferredPrompt = e;
-        // Mostrar banner de instalación si existe en la página
         const installBtn = document.getElementById('pwa-install-btn');
         if (installBtn) {
             installBtn.classList.remove('hidden');
-            installBtn.addEventListener('click', function () {
-                deferredPrompt.prompt();
-                deferredPrompt.userChoice.then(function () {
-                    deferredPrompt = null;
-                    installBtn.classList.add('hidden');
+            if (!installBtnHandlerAttached) {
+                installBtn.addEventListener('click', function () {
+                    if (deferredPrompt) {
+                        deferredPrompt.prompt();
+                        deferredPrompt.userChoice.then(function () {
+                            deferredPrompt = null;
+                            installBtn.classList.add('hidden');
+                        });
+                    }
                 });
-            });
+                installBtnHandlerAttached = true;
+            }
         }
     });
 

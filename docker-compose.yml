@@ -144,6 +144,9 @@ services:
       - REDIS_URL=redis://redis:6379/0
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      # Settings module explícito — producción
+      - DJANGO_SETTINGS_MODULE=travelhub.settings.production
+      - DJANGO_ENV=production
       # OTEL habilitado con exporter HTTP (compatible Python 3.12 — fix: pkg_resources eliminado)
       - ENABLE_TELEMETRY=True
       - OTLP_ENDPOINT=http://jaeger:4318

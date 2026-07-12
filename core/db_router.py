@@ -38,9 +38,9 @@ class PrimaryReplicaRouter:
     # Apps que siempre leen del primary (datos críticos o recién escritos)
     # Añadir aquí apps que requieran consistencia lectura-escritura inmediata
     PRIMARY_ONLY_APPS = {
-        "axes",           # Login tracking — debe ser inmediatamente consistente
-        "sessions",       # Sesiones de usuario
-        "admin",          # Django admin
+        "axes",  # Login tracking — debe ser inmediatamente consistente
+        "sessions",  # Sesiones de usuario
+        "admin",  # Django admin
     }
 
     def db_for_read(self, model, **hints):

@@ -46,12 +46,15 @@ class LiquidacionListView(ExportMixin, LoginRequiredMixin, ListView):
             .order_by("-fecha_emision")
         )
 
-        # Implementación manual de filtrado por Agencia (SaaS)
+        # Filtrado multi-tenant: LiquidacionProveedor hereda AgenciaMixin, por lo
+        # que LiquidacionProveedor.objects.all() ya filtra por agencia del contexto
+        # (AgenciaManager). Para ListView (sin system_context activo), reforzamos
+        # el filtro usando el campo agencia directo del modelo.
         user = self.request.user
         if not user.is_superuser:
             agencia = get_agencia_from_request(self.request)
             if agencia:
-                queryset = queryset.filter(proveedor__agencia=agencia)
+                queryset = queryset.filter(agencia=agencia)
             else:
                 return queryset.none()
 

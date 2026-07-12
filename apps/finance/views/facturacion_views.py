@@ -56,11 +56,10 @@ class FacturacionDashboardView(HtmxResponseMixin, SaaSMixin, LoginRequiredMixin,
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # Stats using the agency-filtered queryset from SaaSMixin
-        base_qs = self.get_queryset().model.objects.all()
-        if hasattr(self.request, "agencia") and self.request.agencia:
-            base_qs = base_qs.filter(agencia=self.request.agencia)
-
+        # Stats reusing the agency-filtered queryset from SaaSMixin.get_queryset()
+        # Evita .model.objects.all() (que omite el SaaSMixin) y el filtro manual
+        # dependiente de self.request.agencia (no siempre seteado por el middleware).
+        base_qs = self.get_queryset()
         context["total_facturas"] = base_qs.count()
         context["facturas_pendientes"] = base_qs.filter(estado="PEN").count()
         return context

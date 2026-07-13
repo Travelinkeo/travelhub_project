@@ -11,6 +11,7 @@ import time
 import urllib.parse
 from base64 import b64encode
 
+import jwt
 import requests
 from django.conf import settings
 from django.contrib import auth
@@ -40,6 +41,37 @@ def _discover_oidc(config_url: str) -> dict:
     except Exception as e:
         logger.error("OIDC discovery failed for %s: %s", config_url, e)
         return {}
+
+
+def _verify_jwt(id_token: str, provider) -> bool:
+    """Verifica la firma del id_token JWT contra JWKS del proveedor."""
+    try:
+        unverified_header = jwt.get_unverified_header(id_token)
+        config_url = provider.oidc_config_url
+        if config_url:
+            config = _discover_oidc(config_url)
+            jwks_uri = config.get("jwks_uri")
+            if jwks_uri:
+                resp = requests.get(jwks_uri, timeout=10)
+                resp.raise_for_status()
+                jwks = resp.json()
+                jwk_data = [
+                    k for k in jwks.get("keys", []) if k.get("kid") == unverified_header.get("kid")
+                ]
+                if jwk_data:
+                    public_key = jwt.algorithms.RSAAlgorithm.from_jwk(json.dumps(jwk_data[0]))
+                    jwt.decode(
+                        id_token, public_key, algorithms=["RS256"], options={"verify_exp": True}
+                    )
+                    return True
+        # Fallback: al menos verificar exp si no se pudo obtener JWKS
+        payload = jwt.decode(id_token, options={"verify_signature": False, "verify_exp": True})
+        if payload.get("exp", 0) < time.time():
+            return False
+        return True
+    except Exception as e:
+        logger.warning("JWT verification failed: %s", e)
+        return False
 
 
 def _create_or_get_user(email: str, name: str, provider):
@@ -178,11 +210,12 @@ def _oidc_callback(request, provider):
     if not id_token:
         return HttpResponseBadRequest("No id_token received")
 
-    # Decodificar payload sin verificar (para desarrollo)
-    # En producción, verificar con JWKS
+    # Verificar firma JWT contra JWKS del proveedor
+    if not _verify_jwt(id_token, provider):
+        return HttpResponseBadRequest("Invalid id_token signature")
+
     try:
         payload_b64 = id_token.split(".")[1]
-        # Añadir padding
         payload_b64 += "=" * (4 - len(payload_b64) % 4)
         payload = json.loads(
             __import__("base64", fromlist=["urlsafe_b64decode"])

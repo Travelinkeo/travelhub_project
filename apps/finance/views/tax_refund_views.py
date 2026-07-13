@@ -44,7 +44,15 @@ class IniciarTramiteRefundView(LoginRequiredMixin, View):
     """
 
     def post(self, request, reclamo_id, *args, **kwargs):
-        reclamo = get_object_or_404(TaxRefundOpportunity, id=reclamo_id)
+        agencia = getattr(request.user, "agencia_activa", None)
+        if not agencia:
+            agencia = get_agencia_from_request(request)
+        if not agencia and hasattr(request.user, "perfil_freelancer"):
+            agencia = request.user.perfil_freelancer.agencia
+        filters = {"id": reclamo_id}
+        if agencia:
+            filters["agencia"] = agencia
+        reclamo = get_object_or_404(TaxRefundOpportunity, **filters)
 
         if reclamo.estado == "ELE":
             # Cambiamos estado y generamos un código de tracking simulado (Ej. Global Blue API)

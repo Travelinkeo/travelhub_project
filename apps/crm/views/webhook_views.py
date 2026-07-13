@@ -9,6 +9,8 @@ from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 
+ENFORCE_WEBHOOK_SECRET = True
+
 logger = logging.getLogger(__name__)
 
 
@@ -17,8 +19,7 @@ class WhatsAppWebhookView(View):
     def get(self, request, *args, **kwargs):
         verify_token = getattr(settings, "WHATSAPP_VERIFY_TOKEN", None)
         if not verify_token:
-            if not settings.DEBUG:
-                return HttpResponse("Webhook not configured", status=503)
+            return HttpResponse("Webhook not configured", status=503)
         mode = request.GET.get("hub.mode")
         token = request.GET.get("hub.verify_token")
         challenge = request.GET.get("hub.challenge")
@@ -34,8 +35,6 @@ class WhatsAppWebhookView(View):
     def _verify_signature(self, request):
         app_secret = getattr(settings, "WHATSAPP_APP_SECRET", None)
         if not app_secret:
-            if settings.DEBUG:
-                return True
             return False
 
         signature = request.headers.get("X-Hub-Signature-256", "")
@@ -50,8 +49,8 @@ class WhatsAppWebhookView(View):
 
     def post(self, request, *args, **kwargs):
         app_secret = getattr(settings, "WHATSAPP_APP_SECRET", None)
-        if not app_secret and not settings.DEBUG:
-            logger.error("WHATSAPP_APP_SECRET no configurado en produccion")
+        if not app_secret:
+            logger.error("WHATSAPP_APP_SECRET no configurado")
             return HttpResponse("Webhook not configured", status=503)
 
         if app_secret and not self._verify_signature(request):

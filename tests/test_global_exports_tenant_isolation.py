@@ -33,13 +33,11 @@ class GlobalExportsTenantIsolationTest(TestCase):
             username="admin_a",
             email="admin@agencia-a.com",
             password="password123",
-            agencia=self.agencia_a,
         )
         self.user_b = User.objects.create_user(
             username="admin_b",
             email="admin@agencia-b.com",
             password="password123",
-            agencia=self.agencia_b,
         )
 
         # El middleware de onboarding redirige a /onboarding/ a usuarios

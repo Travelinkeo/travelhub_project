@@ -6,6 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from apps.communications.models import ComunicacionProveedor
+from core.api.mixins.tenant import TenantViewSetMixin
 from core.auth_helpers import InternalAPIAuthMixin
 from core.serializers import ComunicacionProveedorSerializer
 
@@ -21,7 +22,9 @@ from core.serializers import ComunicacionProveedorSerializer
         responses={200: ComunicacionProveedorSerializer(many=True)},
     ),
 )
-class ComunicacionProveedorViewSet(InternalAPIAuthMixin, viewsets.ReadOnlyModelViewSet):
+class ComunicacionProveedorViewSet(
+    TenantViewSetMixin, InternalAPIAuthMixin, viewsets.ReadOnlyModelViewSet
+):
     queryset = ComunicacionProveedor.objects.all().order_by("-fecha_recepcion")
     serializer_class = ComunicacionProveedorSerializer
     permission_classes = [IsAuthenticated]

@@ -200,7 +200,6 @@ class OnboardingMiddlewareTest(TestCase):
         # Completar onboarding
         UserProgress.objects.create(
             user=self.user,
-            onboarding_completed=True,
             completed_steps=UserProgress.ALL_STEPS.copy(),
             current_step=UserProgress.STEP_COMPLETE,
         )

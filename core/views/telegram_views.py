@@ -118,4 +118,4 @@ def generate_flyer_api(request):
 
     except Exception as e:
         logger.error(f"Error en generate_flyer_api: {e}")
-        return JsonResponse({"error": str(e)}, status=500)
+        return JsonResponse({"error": "Error interno del servidor"}, status=500)

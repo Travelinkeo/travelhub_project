@@ -68,7 +68,19 @@ def evolution_manager_proxy(request, instance_name):
     target_url = f"{base_url}/manager/qr/{instance_name}{path}"
 
     if request.META.get("QUERY_STRING"):
-        target_url += f"?{request.META['QUERY_STRING']}"
+        from urllib.parse import parse_qs, urlencode
+
+        allowed_params = [
+            k for k in parse_qs(request.META["QUERY_STRING"]) if k in ("refresh", "reconnect")
+        ]
+        if allowed_params:
+            target_url += "?" + urlencode(
+                [
+                    (k, v)
+                    for k, v in parse_qs(request.META["QUERY_STRING"]).items()
+                    if k in allowed_params
+                ]
+            )
 
     headers = EvolutionService._get_headers()
     del headers["Content-Type"]

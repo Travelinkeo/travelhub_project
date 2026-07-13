@@ -111,8 +111,9 @@ class QuickBooksService:
 
     def find_customer_by_email(self, email: str) -> dict | None:
         """Busca un cliente por email en QuickBooks."""
+        escaped_email = email.replace("'", "''")
         result = self.query(
-            f"SELECT * FROM Customer WHERE PrimaryEmailAddr = '{email}'"  # noqa: S608
+            f"SELECT * FROM Customer WHERE PrimaryEmailAddr = '{escaped_email}'"  # noqa: S608
         )
         customers = result.get("QueryResponse", {}).get("Customer", [])
         return customers[0] if customers else None

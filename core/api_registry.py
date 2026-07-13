@@ -308,8 +308,8 @@ class AutoModelViewSet(InternalAPIAuthMixin, viewsets.ModelViewSet):
     <div class="header">
         <h1>{html.escape(title)}</h1>
         <div class="meta">
-            <strong>Agencia:</strong> {html.escape(agency_name)} | 
-            <strong>Fecha de Generación:</strong> {html.escape(date_str)} | 
+            <strong>Agencia:</strong> {html.escape(agency_name)} |
+            <strong>Fecha de Generación:</strong> {html.escape(date_str)} |
             <strong>Total de Registros:</strong> {len(data)}
         </div>
     </div>
@@ -349,18 +349,152 @@ def generate_api_for_model(model):
     SerializerClass = getattr(core_serializers, existing_serializer_name, None)
 
     if SerializerClass is None:
-        # Custom fields for BoletoImportado si es dinámico
-        if model.__name__ == "BoletoImportado":
-            fields = [
+        FIELDS_MAP = {
+            "AlquilerAutoReserva": [
+                "venta",
+                "proveedor",
+                "ciudad_retiro",
+                "ciudad_devolucion",
+                "fecha_hora_retiro",
+                "fecha_hora_devolucion",
+                "categoria_auto",
+                "compania_rentadora",
+                "numero_confirmacion",
+                "nombre_conductor",
+                "incluye_seguro",
+                "notas",
+                "costo_neto",
+                "precio_venta",
+            ],
+            "EventoServicio": [
+                "venta",
+                "proveedor",
+                "nombre_evento",
+                "fecha_evento",
+                "ubicacion",
+                "zona_asiento",
+                "codigo_boleto_evento",
+                "notas",
+                "costo_neto",
+                "precio_venta",
+            ],
+            "CircuitoTuristico": [
+                "venta",
+                "nombre_circuito",
+                "dias_total",
+                "fecha_inicio",
+                "fecha_fin",
+                "descripcion_general",
+                "incluye",
+                "no_incluye",
+                "costo_neto_estimado",
+                "precio_venta_estimado",
+            ],
+            "CircuitoDia": [
+                "circuito",
+                "dia_numero",
+                "titulo",
+                "descripcion",
+                "ciudad",
+                "alojamiento_previsto",
+                "actividades_resumen",
+            ],
+            "PaqueteAereo": [
+                "venta",
+                "nombre_paquete",
+                "incluye_vuelos",
+                "incluye_hotel",
+                "noches",
+                "pasajeros",
+                "resumen_componentes",
+                "observaciones",
+                "costo_neto_estimado",
+                "precio_venta_estimado",
+            ],
+            "ServicioAdicionalDetalle": [
+                "venta",
+                "proveedor",
+                "tipo_servicio",
+                "descripcion",
+                "codigo_referencia",
+                "fecha_inicio",
+                "fecha_fin",
+                "nombre_pasajero",
+                "notas",
+                "costo_neto",
+                "precio_venta",
+            ],
+            "Venta": [
+                "localizador",
+                "cliente",
+                "fecha_venta",
+                "descripcion_general",
+                "moneda",
+                "tasa_cambio_bcv",
+                "subtotal",
+                "impuestos",
+                "total_venta",
+                "monto_pagado",
+                "saldo_pendiente",
+                "estado",
+                "tipo_venta",
+                "canal_origen",
+                "notas",
+                "tiempo_limite_emision",
+                "alerta_tl_disparada",
+            ],
+            "BoletoImportado": [
                 "id_boleto_importado",
                 "numero_boleto",
                 "nombre_pasajero_completo",
                 "total_boleto",
                 "fecha_subida",
                 "estado_parseo",
-            ]
-        else:
-            fields = "__all__"
+            ],
+            "SegmentoVuelo": [
+                "venta",
+                "origen",
+                "destino",
+                "aerolinea",
+                "numero_vuelo",
+                "fecha_salida",
+                "fecha_llegada",
+                "clase_reserva",
+                "cabina",
+                "notas",
+            ],
+            "FeeVenta": [
+                "venta",
+                "tipo_fee",
+                "descripcion",
+                "monto",
+                "moneda",
+                "es_comision_agencia",
+                "taxable",
+            ],
+            "PagoVenta": [
+                "venta",
+                "fecha_pago",
+                "monto",
+                "moneda",
+                "metodo",
+                "referencia",
+                "confirmado",
+                "aplica_igtf",
+                "tasa_igtf",
+                "monto_igtf",
+                "notas",
+            ],
+        }
+
+        fields = FIELDS_MAP.get(model.__name__, None)
+        if fields is None:
+            logger.warning(
+                "No se generó API para %s: no hay field list definida. "
+                "Agrega una entrada en FIELDS_MAP para exponer este modelo.",
+                model.__name__,
+            )
+            return None, None
 
         # Crear Serializer dinámicamente
         serializer_name = f"{model.__name__}Serializer"

@@ -17,8 +17,6 @@ class APIKeyModelTest(TestCase):
         self.user = User.objects.create_user(username="test_user", password="test123")
         self.agencia = Agencia.objects.create(
             nombre="Test Agency",
-            dominio="test.com",
-            plan="basico",
         )
 
     def test_generate_api_key(self):
@@ -114,8 +112,6 @@ class WebhookModelTest(TestCase):
     def setUp(self):
         self.agencia = Agencia.objects.create(
             nombre="Test Agency",
-            dominio="test.com",
-            plan="basico",
         )
 
     def test_create_webhook(self):
@@ -204,8 +200,6 @@ class WebhookDeliveryTest(TestCase):
     def setUp(self):
         self.agencia = Agencia.objects.create(
             nombre="Test Agency",
-            dominio="test.com",
-            plan="basico",
         )
         self.webhook = Webhook.objects.create(
             agencia=self.agencia,

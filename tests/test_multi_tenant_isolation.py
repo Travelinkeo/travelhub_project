@@ -8,13 +8,14 @@ These tests verify that AgenciaMixin/Manager properly filters queries by agencia
 Run with: python -m pytest tests/test_multi_tenant_isolation.py -v
 """
 
-from unittest import skip
+from decimal import Decimal
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 
 from apps.automation.models import NotificacionAgente, NotificacionInteligente
 from apps.bookings.models import Venta
+from apps.common.models import Moneda
 from apps.communications.models import NotificationLog, NotificationTemplate
 from apps.contabilidad.models import LiquidacionProveedor
 from apps.crm.models import Cliente, MensajeWhatsApp, OportunidadViaje
@@ -69,6 +70,11 @@ class MultiTenantIsolationTestCase(TestCase):
             username="admin", email="admin@test.com", password="test123"
         )
 
+        # Moneda global (agencia=None) compartida por todos los tenants.
+        cls.moneda = Moneda.objects.create(
+            codigo_iso="USD", nombre="Dólar Estadounidense", simbolo="$"
+        )
+
     def set_current_agency(self, agency):
         """Helper to set thread-local agency context."""
         agency_var.set(agency)
@@ -84,12 +90,6 @@ class TestNotificationTemplateIsolation(MultiTenantIsolationTestCase):
     def setUp(self):
         self.clear_agency()
 
-    @skip(
-        "HALLAZGO: NotificationTemplate NO hereda AgenciaMixin, por lo que "
-        ".objects no auto-filtra por agencia. Este test asume aislamiento "
-        "automatico que el modelo no provee. Requiere decision de diseno "
-        "(agregar AgenciaMixin + migracion) antes de habilitarlo."
-    )
     def test_template_creation_with_agencia(self):
         """Templates created with agency are scoped to that agency."""
         self.set_current_agency(self.agency1)
@@ -141,12 +141,6 @@ class TestNotificationTemplateIsolation(MultiTenantIsolationTestCase):
         global_template.delete()
         self.clear_agency()
 
-    @skip(
-        "HALLAZGO: NotificationLog NO hereda AgenciaMixin, por lo que "
-        ".objects no auto-filtra por agencia. Este test asume aislamiento "
-        "automatico que el modelo no provee. Requiere decision de diseno "
-        "(agregar AgenciaMixin + migracion) antes de habilitarlo."
-    )
     def test_log_isolation(self):
         """NotificationLog isolated by agencia."""
         self.set_current_agency(self.agency1)
@@ -178,10 +172,6 @@ class TestBookingModelsIsolation(MultiTenantIsolationTestCase):
     def setUp(self):
         self.clear_agency()
 
-    @skip(
-        "Test preexistente roto (nunca corrio): usa moneda_id=1 inexistente -> "
-        "ValidationError {'moneda'}. Requiere crear una Moneda fixture valida."
-    )
     def test_venta_isolation(self):
         """Venta isolation by agencia."""
 
@@ -197,7 +187,7 @@ class TestBookingModelsIsolation(MultiTenantIsolationTestCase):
             agencia=self.agency1,
             fecha_venta="2024-01-15",
             total_venta=1000,
-            moneda_id=1,
+            moneda=self.moneda,
         )
 
         self.set_current_agency(self.agency2)
@@ -211,7 +201,7 @@ class TestBookingModelsIsolation(MultiTenantIsolationTestCase):
             agencia=self.agency2,
             fecha_venta="2024-01-15",
             total_venta=2000,
-            moneda_id=1,
+            moneda=self.moneda,
         )
 
         # Agency 1 sees only venta1
@@ -228,29 +218,28 @@ class TestBookingModelsIsolation(MultiTenantIsolationTestCase):
 
         self.clear_agency()
 
-    @skip(
-        "Test preexistente roto (nunca corrio): usa moneda_id=1 inexistente -> "
-        "ValidationError {'moneda'}. Requiere crear una Moneda fixture valida."
-    )
     def test_itemfactura_isolation(self):
-        """ItemFactura isolated via venta__agencia."""
+        """ItemFactura isolated por su propio campo agencia (AgenciaMixin)."""
 
         self.set_current_agency(self.agency1)
         client = Cliente.objects.create(
             nombres="Client 1", email="c1@test.com", agencia=self.agency1
         )
-        venta = Venta.objects.create(
-            cliente=client, agencia=self.agency1, total_venta=1000, moneda_id=1
+        factura = Factura.objects.create(
+            cliente=client,
+            agencia=self.agency1,
+            numero_factura="FAC-ITEM-001",
+            estado="EMI",
+            moneda=self.moneda,
+            tasa_cambio_bcv=Decimal("1.00"),
         )
 
         item = ItemFactura.objects.create(
-            venta=venta,
-            tipo_servicio="ALO",
+            factura=factura,
+            agencia=self.agency1,
             descripcion="Hotel test",
-            cantidad=1,
-            precio_unitario=500,
-            subtotal_item=500,
-            total_item=500,
+            cantidad=Decimal("1.00"),
+            precio_unitario=Decimal("500.00"),
         )
 
         self.set_current_agency(self.agency1)
@@ -270,10 +259,6 @@ class TestCRMModelsIsolation(MultiTenantIsolationTestCase):
     def setUp(self):
         self.clear_agency()
 
-    @skip(
-        "Test preexistente roto (nunca corrio): OportunidadViaje() no acepta el "
-        "kwarg 'estado'. Requiere alinear los campos con el modelo real."
-    )
     def test_oportunidad_isolation(self):
         """OportunidadViaje isolated by agencia."""
 
@@ -285,7 +270,7 @@ class TestCRMModelsIsolation(MultiTenantIsolationTestCase):
             cliente=client1,
             agencia=self.agency1,
             destino="Cancun",
-            estado="nueva",
+            etapa=OportunidadViaje.Etapa.NUEVO,
         )
 
         self.set_current_agency(self.agency2)
@@ -296,7 +281,7 @@ class TestCRMModelsIsolation(MultiTenantIsolationTestCase):
             cliente=client2,
             agencia=self.agency2,
             destino="Madrid",
-            estado="nueva",
+            etapa=OportunidadViaje.Etapa.NUEVO,
         )
 
         self.set_current_agency(self.agency1)
@@ -306,10 +291,6 @@ class TestCRMModelsIsolation(MultiTenantIsolationTestCase):
 
         self.clear_agency()
 
-    @skip(
-        "Test preexistente roto (nunca corrio): MensajeWhatsApp() no acepta el "
-        "kwarg 'mensaje'. Requiere alinear los campos con el modelo real."
-    )
     def test_mensaje_whatsapp_isolation(self):
         """MensajeWhatsApp isolated by agencia via SET_NULL on cliente FK."""
 
@@ -317,7 +298,8 @@ class TestCRMModelsIsolation(MultiTenantIsolationTestCase):
         client = Cliente.objects.create(nombres="Client 1", email="c1@a1.com", agencia=self.agency1)
         msg1 = MensajeWhatsApp.objects.create(
             cliente=client,
-            mensaje="Hola from agency 1",
+            direccion="OUT",
+            texto="Hola from agency 1",
             agencia=self.agency1,
         )
 
@@ -327,7 +309,8 @@ class TestCRMModelsIsolation(MultiTenantIsolationTestCase):
         )
         msg2 = MensajeWhatsApp.objects.create(
             cliente=client2,
-            mensaje="Hola from agency 2",
+            direccion="OUT",
+            texto="Hola from agency 2",
             agencia=self.agency2,
         )
 
@@ -345,10 +328,6 @@ class TestFinanceModelsIsolation(MultiTenantIsolationTestCase):
     def setUp(self):
         self.clear_agency()
 
-    @skip(
-        "Test preexistente roto (nunca corrio): Factura() no acepta el kwarg "
-        "'total_factura'. Requiere alinear los campos con el modelo real."
-    )
     def test_factura_isolation(self):
         """Factura isolated by agencia."""
 
@@ -360,9 +339,9 @@ class TestFinanceModelsIsolation(MultiTenantIsolationTestCase):
             cliente=client1,
             agencia=self.agency1,
             numero_factura="FAC-001",
-            total_factura=1000,
-            estado="PEN",
-            moneda_id=1,
+            estado="EMI",
+            moneda=self.moneda,
+            tasa_cambio_bcv=Decimal("1.00"),
         )
 
         self.set_current_agency(self.agency2)
@@ -373,9 +352,9 @@ class TestFinanceModelsIsolation(MultiTenantIsolationTestCase):
             cliente=client2,
             agencia=self.agency2,
             numero_factura="FAC-002",
-            total_factura=2000,
-            estado="PEN",
-            moneda_id=1,
+            estado="EMI",
+            moneda=self.moneda,
+            tasa_cambio_bcv=Decimal("1.00"),
         )
 
         self.set_current_agency(self.agency1)
@@ -532,13 +511,9 @@ class TestAgenciaContextManager(MultiTenantIsolationTestCase):
 class TestAgenciaManagerBehavior(MultiTenantIsolationTestCase):
     """Test AgenciaManager behavior directly."""
 
-    @skip(
-        "Test preexistente roto (nunca corrio): importa SoftDeleteModel desde "
-        "core.models, donde no esta exportado. Requiere corregir el import."
-    )
     def test_manager_filters_soft_delete(self):
         """AgenciaManager excludes soft-deleted."""
-        from core.models import SoftDeleteModel
+        from core.models.base import SoftDeleteModel
 
         # Ensure model uses SoftDeleteModel
         self.assertTrue(issubclass(Cliente, SoftDeleteModel))

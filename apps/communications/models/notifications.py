@@ -7,6 +7,7 @@ from django.conf import settings
 from django.db import models
 
 from core.models import Agencia
+from core.models.base import AgenciaManager
 
 
 class NotificationPreference(models.Model):
@@ -160,6 +161,11 @@ class NotificationTemplate(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    # Aislamiento multi-tenant: filtra por agencia del contexto (incluye
+    # plantillas globales con agencia=None). Ver core.models.base.AgenciaManager.
+    objects = AgenciaManager()
+    all_objects = models.Manager()
+
     class Meta:
         verbose_name = "Plantilla de Notificación"
         verbose_name_plural = "Plantillas de Notificación"
@@ -240,6 +246,11 @@ class NotificationLog(models.Model):
         max_length=100, blank=True, help_text="Tipo de objeto (ej: 'venta')"
     )
     object_id = models.CharField(max_length=100, blank=True, help_text="ID del objeto relacionado")
+
+    # Aislamiento multi-tenant: filtra por agencia del contexto (incluye
+    # logs globales con agencia=None). Ver core.models.base.AgenciaManager.
+    objects = AgenciaManager()
+    all_objects = models.Manager()
 
     class Meta:
         verbose_name = "Log de Notificación"

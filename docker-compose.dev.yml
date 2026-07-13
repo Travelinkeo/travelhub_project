@@ -135,7 +135,8 @@ services:
       # Database (REQUIRED for v2)
       - DATABASE_ENABLED=true
       - DATABASE_PROVIDER=postgresql
-      - DATABASE_CONNECTION_URI=postgresql://postgres:postgres@evolution_db:5432/evolution?schema=public
+      # 🔴 B3: parametrizado con defaults dev. En prod se sobreescriben via .env.
+      - DATABASE_CONNECTION_URI=postgresql://${EVOLUTION_DB_USER:-postgres}:${EVOLUTION_DB_PASSWORD:-postgres}@evolution_db:5432/evolution?schema=public
       - DATABASE_CONNECTION_CLIENT_NAME=travelhub
       - DATABASE_SAVE_DATA_INSTANCE=true
       - DATABASE_SAVE_DATA_NEW_MESSAGE=true
@@ -166,14 +167,14 @@ services:
   evolution_db:
     image: postgres:15-alpine
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: ${EVOLUTION_DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${EVOLUTION_DB_PASSWORD:-postgres}
       POSTGRES_DB: evolution
     volumes:
       - evolution_pg_data:/var/lib/postgresql/data
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U ${EVOLUTION_DB_USER:-postgres}"]
       interval: 5s
       timeout: 5s
       retries: 5

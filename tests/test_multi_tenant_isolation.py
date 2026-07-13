@@ -17,9 +17,10 @@ from apps.automation.models import NotificacionAgente, NotificacionInteligente
 from apps.bookings.models import Venta
 from apps.common.models import Moneda
 from apps.communications.models import NotificationLog, NotificationTemplate
-from apps.contabilidad.models import LiquidacionProveedor
+from apps.contabilidad.models import AsientoContable, LiquidacionProveedor
 from apps.crm.models import Cliente, MensajeWhatsApp, OportunidadViaje
 from apps.finance.models import Factura, ItemFactura
+from apps.finance.models.facturacion import FacturaConsolidada
 from core.middleware import agency_context, agency_var, get_current_agency
 from core.models import Agencia, UsuarioAgencia
 
@@ -435,6 +436,185 @@ class TestLiquidacionProveedorIsolation(MultiTenantIsolationTestCase):
         self.set_current_agency(self.agency2)
         qs = LiquidacionProveedor.objects.all()
         self.assertNotIn(liquidacion_sin_proveedor, qs)
+
+        self.clear_agency()
+
+
+class TestFacturaConsolidadaIsolation(MultiTenantIsolationTestCase):
+    """Test FacturaConsolidada isolation (R2: ahora hereda AgenciaMixin).
+
+    Regression: FacturaConsolidada antes heredaba models.Model directo (sin
+    AgenciaMixin). Sus querysets NO se filtraban automaticamente por agencia,
+    exponiendo riesgo de fuga cross-tenant si un futuro viewset consultaba
+    este modelo. Ver apps/finance/models/facturacion.py.
+    """
+
+    def setUp(self):
+        self.clear_agency()
+
+    def test_factura_consolidada_isolation(self):
+        """FacturaConsolidada se filtra por agencia via AgenciaManager."""
+        self.set_current_agency(self.agency1)
+        cliente1 = Cliente.objects.create(
+            nombres="Client 1", email="c1@a1.com", agencia=self.agency1
+        )
+        factura1 = FacturaConsolidada.objects.create(
+            agencia=self.agency1,
+            cliente=cliente1,
+            fecha_emision="2024-01-01",
+            total_factura=Decimal("1000"),
+            estado="PEN",
+        )
+
+        self.set_current_agency(self.agency2)
+        cliente2 = Cliente.objects.create(
+            nombres="Client 2", email="c2@a2.com", agencia=self.agency2
+        )
+        factura2 = FacturaConsolidada.objects.create(
+            agencia=self.agency2,
+            cliente=cliente2,
+            fecha_emision="2024-01-01",
+            total_factura=Decimal("2000"),
+            estado="PEN",
+        )
+
+        # Contexto agencia1 solo ve factura1
+        self.set_current_agency(self.agency1)
+        facturas = FacturaConsolidada.objects.all()
+        self.assertIn(factura1, facturas)
+        self.assertNotIn(factura2, facturas)
+
+        # Contexto agencia2 solo ve factura2
+        self.set_current_agency(self.agency2)
+        facturas = FacturaConsolidada.objects.all()
+        self.assertIn(factura2, facturas)
+        self.assertNotIn(factura1, facturas)
+
+        self.clear_agency()
+
+
+class TestCascadeToDeleteSetNull(MultiTenantIsolationTestCase):
+    """Test regression R1: borrar cliente/user/venta NO borra histórico.
+
+    Antes, on_delete=CASCADE en 28 FKs provocaba pérdida de datos históricos:
+    leads, mensajes WhatsApp, comisiones freelance, pasaportes, y todos los
+    componentes de venta. Ahora con SET_NULL, el registro referenciado queda
+    huérfano (fk_id=NULL) pero preserva auditoría.
+    Ver apps/crm/migrations/0033 y apps/bookings/migrations/0047.
+    """
+
+    def setUp(self):
+        self.clear_agency()
+
+    def test_borrar_cliente_preserva_oportunidad_viaje(self):
+        """Borrar un Cliente NO borra su OportunidadViaje; queda con cliente=None."""
+        self.set_current_agency(self.agency1)
+        cliente = Cliente.objects.create(
+            nombres="To Delete", email="del@a1.com", agencia=self.agency1
+        )
+        opp = OportunidadViaje.objects.create(
+            cliente=cliente,
+            agencia=self.agency1,
+            destino="Madrid",
+        )
+
+        cliente_pk = cliente.pk
+        # Hard-delete el cliente (.std delete() de Django, no SoftDelete)
+        Cliente.all_objects.filter(pk=cliente_pk).hard_delete()
+        opp.refresh_from_db()
+
+        self.assertIsNone(opp.cliente_id, "OportunidadViaje.cliente debe ser NULL tras borrar")
+        self.assertEqual(opp.cliente, None)
+
+    def test_borrar_cliente_preserva_mensaje_whatsapp(self):
+        """Borrar Cliente NO borra MensajeWhatsApp; queda con cliente=None."""
+        self.set_current_agency(self.agency1)
+        cliente = Cliente.objects.create(
+            nombres="To Delete", email="del2@a1.com", agencia=self.agency1
+        )
+        msg = MensajeWhatsApp.objects.create(
+            cliente=cliente,
+            direccion="IN",
+            texto="Hola",
+            agencia=self.agency1,
+        )
+
+        Cliente.all_objects.filter(pk=cliente.pk).hard_delete()
+        msg.refresh_from_db()
+
+        self.assertIsNone(msg.cliente_id, "MensajeWhatsApp.cliente debe ser NULL tras borrar")
+
+    def test_borrar_venta_preserva_comision_freelancer(self):
+        """Borrar Venta NO borra ComisionFreelancer; queda con venta=None."""
+        self.set_current_agency(self.agency1)
+        cliente = Cliente.objects.create(nombres="Client", email="c@a1.com", agencia=self.agency1)
+        moneda = Moneda.objects.first() or Moneda.objects.create(
+            nombre="USD", codigo_iso="USD", es_moneda_local=True, agencia=self.agency1
+        )
+        venta = Venta.objects.create(
+            agencia=self.agency1,
+            cliente=cliente,
+            fecha_venta="2024-01-01",
+            total_venta=1000,
+            moneda=moneda,
+        )
+        from apps.crm.models import ComisionFreelancer, FreelancerProfile
+
+        user_freelancer = User.objects.create_user(
+            username="freelancer1", email="f@a1.com", password="test123"
+        )
+        user_freelancer.agencias.add(
+            self.agency1, through_defaults={"rol": "freelancer", "activo": True}
+        )
+        freelancer = FreelancerProfile.objects.create(
+            usuario=user_freelancer, agencia=self.agency1, porcentaje_comision=10
+        )
+        comision = ComisionFreelancer.objects.create(
+            venta=venta, freelancer=freelancer, agencia=self.agency1, monto=100
+        )
+
+        # Hard-delete venta (no soft-delete)
+        Venta.all_objects.filter(pk=venta.pk).hard_delete()
+        comision.refresh_from_db()
+
+        self.assertIsNone(comision.venta_id, "ComisionFreelancer.venta debe ser NULL tras borrar")
+
+
+class TestContabilidadModelsIsolation(MultiTenantIsolationTestCase):
+    """Test modelos de Contabilidad (AsientoContable) aislamiento."""
+
+    def setUp(self):
+        self.clear_agency()
+
+    def test_asiento_contable_isolation(self):
+        """AsientoContable se filtra por agencia via AgenciaManager."""
+        self.set_current_agency(self.agency1)
+        asiento1 = AsientoContable.objects.create(
+            agencia=self.agency1,
+            fecha_contable="2024-01-01",
+            descripcion_general="Asiento A1",
+            tipo_asiento="DIA",
+        )
+
+        self.set_current_agency(self.agency2)
+        asiento2 = AsientoContable.objects.create(
+            agencia=self.agency2,
+            fecha_contable="2024-01-01",
+            descripcion_general="Asiento A2",
+            tipo_asiento="DIA",
+        )
+
+        # Contexto agencia1 solo ve asiento1
+        self.set_current_agency(self.agency1)
+        asientos = AsientoContable.objects.all()
+        self.assertIn(asiento1, asientos)
+        self.assertNotIn(asiento2, asientos)
+
+        # Contexto agencia2 solo ve asiento2
+        self.set_current_agency(self.agency2)
+        asientos = AsientoContable.objects.all()
+        self.assertIn(asiento2, asientos)
+        self.assertNotIn(asiento1, asientos)
 
         self.clear_agency()
 

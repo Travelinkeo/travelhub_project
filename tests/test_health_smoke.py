@@ -29,9 +29,20 @@ class HealthCheckSmokeTests(TestCase):
         # Create staff user for authenticated health checks
         from django.contrib.auth import get_user_model
 
+        from core.models import Agencia, UsuarioAgencia
+
         User = get_user_model()
         self.staff_user = User.objects.create_user(
             username="staff", password="testpass", is_staff=True
+        )
+        # El middleware de onboarding redirige a /onboarding/ a usuarios
+        # autenticados sin agencia asociada; enlazamos a una agencia para
+        # que el health check sea alcanzable.
+        agencia = Agencia.objects.create(
+            nombre="HealthCheck Agency", email_principal="health@test.com"
+        )
+        UsuarioAgencia.objects.create(
+            usuario=self.staff_user, agencia=agencia, rol="admin", activo=True
         )
         self.client.force_login(self.staff_user)
 
@@ -110,7 +121,7 @@ class DatabaseConnectivityTests(TestCase):
             # Check if django_migrations table exists first
             cursor.execute("""
                 SELECT EXISTS (
-                    SELECT FROM information_schema.tables 
+                    SELECT FROM information_schema.tables
                     WHERE table_name = 'django_migrations'
                 )
             """)

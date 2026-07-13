@@ -102,6 +102,9 @@ urlpatterns = [
     ),
     # Webhooks & Bots
     path("webhook/whatsapp/", webhook_views.WhatsAppWebhookView.as_view(), name="whatsapp_webhook"),
+    path(
+        "webhook/evolution/", webhook_views.EvolutionWebhookView.as_view(), name="evolution_webhook"
+    ),
     # Kanban CRM
     path("kanban/", kanban_views.KanbanBoardView.as_view(), name="kanban_board"),
     path("kanban/update/", kanban_views.UpdateLeadStageView.as_view(), name="kanban_update_stage"),

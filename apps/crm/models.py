@@ -6,8 +6,7 @@ from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-import core.validators
-from core.api import AgenciaMixin, EncryptedCharField, SoftDeleteModel
+from core.api import AgenciaMixin, EncryptedCharField, SoftDeleteModel, antivirus_hook
 
 logger = logging.getLogger(__name__)
 
@@ -74,6 +73,9 @@ class Cliente(AgenciaMixin, SoftDeleteModel, models.Model):
     preferencias_viaje = models.TextField(blank=True, null=True)
     notas_cliente = models.TextField(blank=True, null=True)
     foto_perfil = models.ImageField(upload_to="clientes/fotos/", blank=True, null=True)
+    telegram_chat_id = models.CharField(
+        max_length=50, blank=True, help_text="Chat ID del cliente en Telegram para notificaciones"
+    )
 
     pasajeros = models.ManyToManyField("Pasajero", blank=True, related_name="clientes_asociados")
 
@@ -276,7 +278,7 @@ class Pasajero(AgenciaMixin, SoftDeleteModel, models.Model):
         upload_to="pasajeros/rostros/",
         blank=True,
         null=True,
-        validators=[core.validators.antivirus_hook],
+        validators=[antivirus_hook],
     )
     genero = models.CharField(
         max_length=1,
@@ -332,17 +334,101 @@ class MensajeWhatsApp(AgenciaMixin, SoftDeleteModel, models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     # agencia la provee el mixin
 
+    # Seguimiento de estado (delivery/read)
+    STATUS_CHOICES = [
+        ("pending", "Pendiente"),
+        ("sent", "Enviado"),
+        ("delivered", "Entregado"),
+        ("read", "Leído"),
+        ("failed", "Fallido"),
+    ]
+    estado = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
+    message_id = models.CharField(
+        max_length=255, blank=True, help_text="ID del mensaje en WhatsApp"
+    )
+    error_msg = models.TextField(blank=True, help_text="Mensaje de error si falló")
+    tipo_mensaje = models.CharField(
+        max_length=30,
+        blank=True,
+        choices=[
+            ("text", "Texto"),
+            ("buttons", "Botones"),
+            ("list", "Lista"),
+            ("image", "Imagen"),
+            ("document", "Documento"),
+            ("location", "Ubicación"),
+            ("contact", "Contacto"),
+            ("sticker", "Sticker"),
+            ("reaction", "Reacción"),
+        ],
+        default="text",
+    )
+
     class Meta:
         verbose_name = "Mensaje de WhatsApp"
         verbose_name_plural = "Mensajes de WhatsApp"
         indexes = [
             models.Index(fields=["is_deleted", "agencia_id"], name="idx_wa_soft_delete_saas"),
+            models.Index(fields=["estado", "agencia_id"], name="idx_wa_estado"),
+            models.Index(fields=["message_id"], name="idx_wa_message_id"),
         ]
 
     def __str__(self):
         prefix = "WA OUT" if self.direccion == "OUT" else "WA IN"
         cliente_id = self.cliente_id if self.cliente_id else "?"
-        return f"{prefix} #{self.pk} cli={cliente_id} {self.timestamp:%Y-%m-%d %H:%M}"
+        return (
+            f"{prefix} #{self.pk} cli={cliente_id} [{self.estado}] {self.timestamp:%Y-%m-%d %H:%M}"
+        )
+
+
+class WhatsAppScheduledMessage(AgenciaMixin, models.Model):
+    """Mensaje de WhatsApp programado para envío futuro."""
+
+    ESTADO_CHOICES = [
+        ("scheduled", "Programado"),
+        ("sending", "Enviando"),
+        ("sent", "Enviado"),
+        ("failed", "Fallido"),
+        ("cancelled", "Cancelado"),
+    ]
+
+    cliente = models.ForeignKey(
+        Cliente,
+        on_delete=models.CASCADE,
+        related_name="whatsapp_programados",
+        null=True,
+        blank=True,
+    )
+    telefono = models.CharField(max_length=20, help_text="Número de teléfono del destinatario")
+    texto = models.TextField(help_text="Contenido del mensaje")
+    programado_para = models.DateTimeField(help_text="Fecha y hora programada para el envío")
+    estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default="scheduled")
+    mensaje_resultante = models.ForeignKey(
+        MensajeWhatsApp,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="programado_por",
+        help_text="Mensaje ya enviado resultante",
+    )
+    error_msg = models.TextField(blank=True, help_text="Mensaje de error si falló")
+    # Metadatos
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Mensaje WhatsApp Programado"
+        verbose_name_plural = "Mensajes WhatsApp Programados"
+        indexes = [
+            models.Index(fields=["estado", "programado_para"], name="idx_wa_scheduled"),
+            models.Index(fields=["agencia", "estado"], name="idx_wa_scheduled_agencia"),
+        ]
+
+    def __str__(self):
+        return f"WA Programado #{self.pk} -> {self.telefono} ({self.estado})"
 
 
 class PasaporteEscaneado(AgenciaMixin, models.Model):

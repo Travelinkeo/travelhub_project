@@ -18,7 +18,7 @@ def generate_mo(input_file, output_file):
 
     def clean_str(s):
         """Unescape standard PO string escape sequences."""
-        return s.replace('\\n', '\n').replace('\\t', '\t').replace('\\"', '"').replace('\\\\', '\\')
+        return s.replace("\\n", "\n").replace("\\t", "\t").replace('\\"', '"').replace("\\\\", "\\")
 
     with open(input_file, encoding="utf-8") as f:
         for line in f:

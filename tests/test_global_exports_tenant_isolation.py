@@ -8,7 +8,7 @@ from apps.crm.models import Cliente
 from apps.finance.models import Factura
 from apps.finance.models.currencies import Moneda
 from core.middleware import agency_context
-from core.models.agencia import Agencia
+from core.models.agencia import Agencia, UsuarioAgencia
 
 User = get_user_model()
 
@@ -40,6 +40,16 @@ class GlobalExportsTenantIsolationTest(TestCase):
             email="admin@agencia-b.com",
             password="password123",
             agencia=self.agencia_b,
+        )
+
+        # El middleware de onboarding redirige a /onboarding/ a usuarios
+        # autenticados sin UsuarioAgencia. Enlazamos cada usuario a su
+        # agencia para que las rutas de exportación sean alcanzables.
+        UsuarioAgencia.objects.create(
+            usuario=self.user_a, agencia=self.agencia_a, rol="admin", activo=True
+        )
+        UsuarioAgencia.objects.create(
+            usuario=self.user_b, agencia=self.agencia_b, rol="admin", activo=True
         )
 
         # 3. Crear Moneda

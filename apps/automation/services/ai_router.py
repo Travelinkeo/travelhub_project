@@ -1,7 +1,7 @@
 import logging
 from datetime import datetime
 from decimal import Decimal
-from enum import Enum
+from enum import StrEnum
 
 import instructor
 from pydantic import BaseModel, Field
@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 # --- 1. Data Models (The "Truth") ---
 
 
-class EmailType(str, Enum):
+class EmailType(StrEnum):
     TICKET_ISSUANCE = "ticket_issuance"
     SCHEDULE_CHANGE = "schedule_change"
     QUOTE_REQUEST = "quote_request"

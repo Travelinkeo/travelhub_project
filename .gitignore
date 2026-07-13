@@ -22,6 +22,14 @@ env/
 # Dependencies / build artifacts
 node_modules/
 
+# Deploy scripts
+deploy_*.ps1
+deploy_*.bat
+commit_all.bat
+verify_wa_changes.py
+check_migration.py
+test_docs.py
+
 # Playwright MCP cache
 .playwright-mcp/
 

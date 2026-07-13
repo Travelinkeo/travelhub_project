@@ -2,7 +2,15 @@ from django.contrib import admin
 
 from core.api import SaaSAdminMixin
 
-from .models import Cliente, ComisionFreelancer, FreelancerProfile, OportunidadViaje, Pasajero
+from .models import (
+    Cliente,
+    ComisionFreelancer,
+    FreelancerProfile,
+    MensajeWhatsApp,
+    OportunidadViaje,
+    Pasajero,
+    WhatsAppScheduledMessage,
+)
 
 
 @admin.register(OportunidadViaje)
@@ -89,3 +97,26 @@ class ComisionFreelancerAdmin(SaaSAdminMixin, admin.ModelAdmin):
             FreelancerService.recalculate_balances(freelancer)
 
         self.message_user(request, f"Se han liquidado exitosamente {count} comisiones.")
+
+
+@admin.register(MensajeWhatsApp)
+class MensajeWhatsAppAdmin(SaaSAdminMixin, admin.ModelAdmin):
+    list_display = ("id", "cliente", "direccion", "estado", "tipo_mensaje", "timestamp")
+    list_filter = ("direccion", "estado", "tipo_mensaje", "timestamp")
+    search_fields = ("cliente__nombres", "cliente__apellidos", "texto")
+    readonly_fields = ("message_id", "timestamp", "agencia")
+    date_hierarchy = "timestamp"
+
+
+@admin.register(WhatsAppScheduledMessage)
+class WhatsAppScheduledMessageAdmin(SaaSAdminMixin, admin.ModelAdmin):
+    list_display = ("id", "telefono", "programado_para", "estado", "created_by")
+    list_filter = ("estado", "programado_para")
+    search_fields = ("telefono", "texto")
+    readonly_fields = ("created_at", "updated_at", "mensaje_resultante", "agencia")
+    actions = ["cancelar_mensajes"]
+
+    @admin.action(description="Cancelar mensajes programados seleccionados")
+    def cancelar_mensajes(self, request, queryset):
+        actualizados = queryset.filter(estado="scheduled").update(estado="cancelled")
+        self.message_user(request, f"{actualizados} mensajes cancelados.")

@@ -1,0 +1,9 @@
+# gitleaks configuration
+#
+# El job "Secret Scanning (gitleaks)" de CI usa este archivo cuando existe.
+# Mantiene las reglas por defecto (que SI revisan el codigo productivo en
+# apps/, core/, travelhub/) y delega el silenciamiento de falsos positivos a
+# .gitleaksignore (credenciales de ejemplo en tests/docs/scripts).
+
+[extend]
+useDefault = true

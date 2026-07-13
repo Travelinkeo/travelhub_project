@@ -17,11 +17,12 @@ from apps.finance.models.core_finance import generar_numero_factura_atomico
 # Lazy references to avoid circular imports
 # from apps.crm.models import Cliente
 from apps.finance.models.currencies import Moneda
+from core.models.base import AgenciaMixin
 
 logger = logging.getLogger(__name__)
 
 
-class FacturaConsolidada(models.Model):
+class FacturaConsolidada(AgenciaMixin, models.Model):
     """Factura consolidada con normativa venezolana completa"""
 
     # === IDENTIFICACIÓN ===
@@ -44,6 +45,9 @@ class FacturaConsolidada(models.Model):
         verbose_name=_("Venta Asociada"),
     )
 
+    # agencia: heredado de AgenciaMixin (related_name="facturaconsolidada_items").
+    # El campo FK se sobreescribe aquí para preservar on_delete=PROTECT
+    # (vs CASCADE por defecto en AgenciaMixin) y evitar borrados en cascada.
     agencia = models.ForeignKey(
         "core.Agencia", on_delete=models.PROTECT, null=True, blank=True, verbose_name=_("Agencia")
     )
@@ -318,7 +322,7 @@ class FacturaConsolidada(models.Model):
         return FacturacionService.recalculate_invoice_totals(self.pk)
 
 
-class ItemFacturaConsolidada(models.Model):
+class ItemFacturaConsolidada(AgenciaMixin, models.Model):
     """Item de factura con campos específicos para Venezuela"""
 
     id_item_factura = models.AutoField(primary_key=True, verbose_name=_("ID Item Factura"))
@@ -409,7 +413,7 @@ class ItemFacturaConsolidada(models.Model):
             logger.exception(f"Error recalculando totales de factura {self.factura_id}: {e}")
 
 
-class DocumentoExportacionConsolidado(models.Model):
+class DocumentoExportacionConsolidado(AgenciaMixin, models.Model):
     """Documentos de soporte para exportación de servicios (turismo receptivo)"""
 
     class TipoDocumento(models.TextChoices):

@@ -125,8 +125,9 @@ class OportunidadViaje(AgenciaMixin, SoftDeleteModel, models.Model):
         PERDIDO = "LOS", "Perdido"
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    # 🔴 R1 hardening: era CASCADE — borrar cliente borraba leads históricos.
     cliente = models.ForeignKey(
-        Cliente, on_delete=models.CASCADE, related_name="oportunidades", null=True, blank=True
+        Cliente, on_delete=models.SET_NULL, related_name="oportunidades", null=True, blank=True
     )
 
     origen = models.CharField(max_length=100, blank=True, null=True)
@@ -161,7 +162,8 @@ class FreelancerProfile(AgenciaMixin, SoftDeleteModel, models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     usuario = models.OneToOneField(
         settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
+        # 🔴 R1: era CASCADE — borrar user borraba todo el histórico de comisiones.
+        on_delete=models.SET_NULL,
         related_name="perfil_freelancer",
         null=True,
         blank=True,
@@ -192,14 +194,16 @@ class FreelancerProfile(AgenciaMixin, SoftDeleteModel, models.Model):
 class ComisionFreelancer(AgenciaMixin, SoftDeleteModel, models.Model):
     venta = models.OneToOneField(
         "bookings.Venta",
-        on_delete=models.CASCADE,
+        # 🔴 R1: era CASCADE — borrar venta borraba la comisión histórica del freelancer.
+        on_delete=models.SET_NULL,
         related_name="comision_asignada",
         null=True,
         blank=True,
     )
     freelancer = models.ForeignKey(
         FreelancerProfile,
-        on_delete=models.CASCADE,
+        # 🔴 R1: era CASCADE — borrar freelancer borraba su histórico de comisiones.
+        on_delete=models.SET_NULL,
         related_name="comisiones_generadas",
         null=True,
         blank=True,
@@ -326,8 +330,9 @@ class Pasajero(AgenciaMixin, SoftDeleteModel, models.Model):
 
 
 class MensajeWhatsApp(AgenciaMixin, SoftDeleteModel, models.Model):
+    # 🔴 R1: era CASCADE — borrar cliente borraba histórico de chats.
     cliente = models.ForeignKey(
-        Cliente, on_delete=models.CASCADE, related_name="mensajes_whatsapp", null=True, blank=True
+        Cliente, on_delete=models.SET_NULL, related_name="mensajes_whatsapp", null=True, blank=True
     )
     direccion = models.CharField(max_length=3, choices=[("IN", "Entrante"), ("OUT", "Saliente")])
     texto = models.TextField()
@@ -392,9 +397,10 @@ class WhatsAppScheduledMessage(AgenciaMixin, models.Model):
         ("cancelled", "Cancelado"),
     ]
 
+    # 🔴 R1: era CASCADE — borrar cliente borraba mensajes programados históricos.
     cliente = models.ForeignKey(
         Cliente,
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         related_name="whatsapp_programados",
         null=True,
         blank=True,
@@ -462,7 +468,8 @@ class PasaporteEscaneado(AgenciaMixin, models.Model):
     fecha_procesamiento = models.DateTimeField(auto_now_add=True)
     verificado_manualmente = models.BooleanField(default=False)
 
-    cliente = models.ForeignKey("Cliente", on_delete=models.CASCADE, blank=True, null=True)
+    # 🔴 R1: era CASCADE — borrar cliente borraba el pasaporte escaneado (PII).
+    cliente = models.ForeignKey("Cliente", on_delete=models.SET_NULL, blank=True, null=True)
     procesado_por = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True
     )

@@ -9,6 +9,11 @@ from django.utils.translation import gettext_lazy as _
 from apps.common.models import Ciudad
 from core.api import AgenciaMixin, SoftDeleteModel
 
+# 🔴 R1 hardening: todos los FK a Venta/ItemVenta abajo usan on_delete=SET_NULL
+# (eran CASCADE en HEAD previo a este commit). Borrar físicamente una Venta ya
+# es excepcional (soft-delete es la vía normal); si se hace hard_delete queremos
+# preservar los componentes como huérfanos para auditoría contable/contable/forense.
+# SET_NULL + null=True preserva el registro sin su venta asociada.
 from .servicios import Proveedor
 
 
@@ -17,7 +22,7 @@ class AlojamientoReserva(AgenciaMixin, SoftDeleteModel, models.Model):
     venta = models.ForeignKey(
         "bookings.Venta",
         related_name="alojamientos",
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         verbose_name=_("Venta"),
         null=True,
         blank=True,
@@ -25,7 +30,7 @@ class AlojamientoReserva(AgenciaMixin, SoftDeleteModel, models.Model):
     item_venta = models.ForeignKey(
         "bookings.ItemVenta",
         related_name="alojamientos_reserva",
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         null=True,
         blank=True,
         verbose_name=_("Item de Venta Asociado"),
@@ -68,7 +73,7 @@ class TrasladoServicio(AgenciaMixin, SoftDeleteModel, models.Model):
     venta = models.ForeignKey(
         "bookings.Venta",
         related_name="traslados",
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         verbose_name=_("Venta"),
         null=True,
         blank=True,
@@ -76,7 +81,7 @@ class TrasladoServicio(AgenciaMixin, SoftDeleteModel, models.Model):
     item_venta = models.ForeignKey(
         "bookings.ItemVenta",
         related_name="traslados_reserva",
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         null=True,
         blank=True,
         verbose_name=_("Item de Venta Asociado"),
@@ -116,7 +121,7 @@ class ActividadServicio(AgenciaMixin, SoftDeleteModel, models.Model):
     venta = models.ForeignKey(
         "bookings.Venta",
         related_name="actividades",
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         verbose_name=_("Venta"),
         null=True,
         blank=True,
@@ -124,7 +129,7 @@ class ActividadServicio(AgenciaMixin, SoftDeleteModel, models.Model):
     item_venta = models.ForeignKey(
         "bookings.ItemVenta",
         related_name="actividades_reserva",
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         null=True,
         blank=True,
         verbose_name=_("Item de Venta Asociado"),
@@ -162,7 +167,7 @@ class SegmentoVuelo(AgenciaMixin, SoftDeleteModel, models.Model):
     venta = models.ForeignKey(
         "bookings.Venta",
         related_name="segmentos_vuelo",
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         verbose_name=_("Venta"),
         null=True,
         blank=True,
@@ -170,7 +175,7 @@ class SegmentoVuelo(AgenciaMixin, SoftDeleteModel, models.Model):
     item_venta = models.ForeignKey(
         "bookings.ItemVenta",
         related_name="segmentos_reserva",
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         null=True,
         blank=True,
         verbose_name=_("Item de Venta Asociado"),
@@ -222,7 +227,7 @@ class AlquilerAutoReserva(AgenciaMixin, SoftDeleteModel, models.Model):
     venta = models.ForeignKey(
         "bookings.Venta",
         related_name="alquileres_autos",
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         verbose_name=_("Venta"),
         null=True,
         blank=True,
@@ -230,7 +235,7 @@ class AlquilerAutoReserva(AgenciaMixin, SoftDeleteModel, models.Model):
     item_venta = models.ForeignKey(
         "bookings.ItemVenta",
         related_name="alquileres_reserva",
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         null=True,
         blank=True,
         verbose_name=_("Item de Venta Asociado"),
@@ -323,7 +328,7 @@ class EventoServicio(AgenciaMixin, SoftDeleteModel, models.Model):
     venta = models.ForeignKey(
         "bookings.Venta",
         related_name="eventos_servicios",
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         verbose_name=_("Venta"),
         null=True,
         blank=True,
@@ -331,7 +336,7 @@ class EventoServicio(AgenciaMixin, SoftDeleteModel, models.Model):
     item_venta = models.ForeignKey(
         "bookings.ItemVenta",
         related_name="eventos_reserva",
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         null=True,
         blank=True,
         verbose_name=_("Item de Venta Asociado"),
@@ -385,7 +390,7 @@ class CircuitoTuristico(AgenciaMixin, models.Model):
     venta = models.ForeignKey(
         "bookings.Venta",
         related_name="circuitos_turisticos",
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         verbose_name=_("Venta"),
         null=True,
         blank=True,
@@ -393,7 +398,7 @@ class CircuitoTuristico(AgenciaMixin, models.Model):
     item_venta = models.ForeignKey(
         "bookings.ItemVenta",
         related_name="circuitos_reserva",
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         null=True,
         blank=True,
         verbose_name=_("Item de Venta Asociado"),
@@ -444,7 +449,7 @@ class CircuitoDia(AgenciaMixin, models.Model):
     circuito = models.ForeignKey(
         CircuitoTuristico,
         related_name="dias",
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         verbose_name=_("Circuito"),
         null=True,
         blank=True,
@@ -476,7 +481,7 @@ class PaqueteAereo(AgenciaMixin, models.Model):
     venta = models.ForeignKey(
         "bookings.Venta",
         related_name="paquetes_aereos",
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         verbose_name=_("Venta"),
         null=True,
         blank=True,
@@ -484,7 +489,7 @@ class PaqueteAereo(AgenciaMixin, models.Model):
     item_venta = models.ForeignKey(
         "bookings.ItemVenta",
         related_name="paquetes_reserva",
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         null=True,
         blank=True,
         verbose_name=_("Item de Venta Asociado"),
@@ -535,7 +540,7 @@ class CruceroReserva(AgenciaMixin, models.Model):
     venta = models.ForeignKey(
         "bookings.Venta",
         related_name="cruceros",
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         verbose_name=_("Venta"),
         null=True,
         blank=True,
@@ -543,7 +548,7 @@ class CruceroReserva(AgenciaMixin, models.Model):
     item_venta = models.ForeignKey(
         "bookings.ItemVenta",
         related_name="cruceros_reserva",
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         null=True,
         blank=True,
         verbose_name=_("Item de Venta Asociado"),
@@ -641,7 +646,7 @@ class ServicioAdicionalDetalle(AgenciaMixin, models.Model):
     venta = models.ForeignKey(
         "bookings.Venta",
         related_name="servicios_adicionales",
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         verbose_name=_("Venta"),
         null=True,
         blank=True,
@@ -649,7 +654,7 @@ class ServicioAdicionalDetalle(AgenciaMixin, models.Model):
     item_venta = models.ForeignKey(
         "bookings.ItemVenta",
         related_name="detalles_adicionales",
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         null=True,
         blank=True,
         verbose_name=_("Item de Venta Asociado"),

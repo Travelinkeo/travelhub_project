@@ -71,9 +71,6 @@ class QueryCountDebugMiddleware:
         elif num_queries > 5:
             logger.debug("%s %s — %d queries en %.2fs", method, path, num_queries, duration)
 
-        response["X-DB-Queries"] = str(num_queries)
-        response["X-DB-Time"] = f"{duration:.3f}s"
-
         return response
 
 

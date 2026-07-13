@@ -114,7 +114,7 @@ def public_itinerary_ocr_upload(request, token, pasajero_id):
         except Exception as e:
             logger.error(f"Error procesando OCR en portal de pasajeros: {e}", exc_info=True)
             return HttpResponse(
-                f"<div class='p-4 text-red-500 text-sm font-semibold'>Error interno: {str(e)}</div>",
+                "<div class='p-4 text-red-500 text-sm font-semibold'>Error interno del servidor</div>",
                 status=500,
             )
 

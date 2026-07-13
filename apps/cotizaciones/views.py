@@ -19,6 +19,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from apps.automation.services.ai_engine import ai_engine
+from core.api import SaaSMixin
 from core.api.mixins.tenant import TenantViewSetMixin
 from core.auth_helpers import InternalAPIAuthMixin
 from core.forms import CotizacionForm, ItemCotizacionFormSet
@@ -137,7 +138,7 @@ class ItemCotizacionViewSet(InternalAPIAuthMixin, TenantViewSetMixin, viewsets.M
 # --- VISTAS STANDARD (SSR) ---
 
 
-class CotizacionDashboardView(LoginRequiredMixin, ListView):
+class CotizacionDashboardView(SaaSMixin, LoginRequiredMixin, ListView):
     model = Cotizacion
     template_name = "core/erp/cotizaciones/dashboard.html"
     context_object_name = "cotizaciones"
@@ -165,7 +166,7 @@ class CotizacionDashboardView(LoginRequiredMixin, ListView):
         return context
 
 
-class CotizacionDetailView(LoginRequiredMixin, DetailView):
+class CotizacionDetailView(SaaSMixin, LoginRequiredMixin, DetailView):
     model = Cotizacion
     template_name = "core/erp/cotizaciones/detalle.html"
     context_object_name = "cotizacion"
@@ -178,7 +179,7 @@ class CotizacionDetailView(LoginRequiredMixin, DetailView):
         return context
 
 
-class CotizacionCreateView(LoginRequiredMixin, CreateView):
+class CotizacionCreateView(SaaSMixin, LoginRequiredMixin, CreateView):
     model = Cotizacion
     form_class = CotizacionForm
     template_name = "core/erp/cotizaciones/crear_cotizacion_swiss.html"
@@ -209,7 +210,7 @@ class CotizacionCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
-class CotizacionUpdateView(LoginRequiredMixin, UpdateView):
+class CotizacionUpdateView(SaaSMixin, LoginRequiredMixin, UpdateView):
     model = Cotizacion
     form_class = CotizacionForm
     template_name = "core/erp/cotizaciones/crear_cotizacion_swiss.html"
@@ -244,9 +245,9 @@ class CotizacionUpdateView(LoginRequiredMixin, UpdateView):
         return super().form_valid(form)
 
 
-class CotizacionStatusView(LoginRequiredMixin, View):
+class CotizacionStatusView(SaaSMixin, LoginRequiredMixin, View):
     def post(self, request, pk):
-        cotizacion = get_object_or_404(Cotizacion, pk=pk)
+        cotizacion = get_object_or_404(Cotizacion, pk=pk, agencia=request.agencia)
         nuevo_estado = request.POST.get("nuevo_estado")
         estado_anterior = cotizacion.estado
         cotizacion.estado = nuevo_estado
@@ -268,9 +269,9 @@ class CotizacionStatusView(LoginRequiredMixin, View):
         return redirect("bookings:cotizacion_detalle", pk=pk)
 
 
-class CotizacionPDFView(LoginRequiredMixin, View):
+class CotizacionPDFView(SaaSMixin, LoginRequiredMixin, View):
     def get(self, request, pk):
-        cotizacion = get_object_or_404(Cotizacion, pk=pk)
+        cotizacion = get_object_or_404(Cotizacion, pk=pk, agencia=request.agencia)
         try:
             pdf_bytes = generar_pdf_cotizacion(cotizacion)
             response = HttpResponse(pdf_bytes, content_type="application/pdf")
@@ -282,9 +283,9 @@ class CotizacionPDFView(LoginRequiredMixin, View):
             return redirect("bookings:cotizacion_detalle", pk=pk)
 
 
-class CotizacionConvertirView(LoginRequiredMixin, View):
+class CotizacionConvertirView(SaaSMixin, LoginRequiredMixin, View):
     def post(self, request, pk):
-        cotizacion = get_object_or_404(Cotizacion, pk=pk)
+        cotizacion = get_object_or_404(Cotizacion, pk=pk, agencia=request.agencia)
         try:
             with transaction.atomic():
                 venta = cotizacion.convertir_a_venta()
@@ -295,7 +296,7 @@ class CotizacionConvertirView(LoginRequiredMixin, View):
         return redirect("bookings:cotizacion_detalle", pk=pk)
 
 
-class CotizacionHTMXCalculateTotalsView(LoginRequiredMixin, View):
+class CotizacionHTMXCalculateTotalsView(SaaSMixin, LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
         subtotal = 0
         impuestos = 0
@@ -657,7 +658,7 @@ class MagicQuoterAIView(LoginRequiredMixin, View):
             return JsonResponse({"error": str(e)}, status=500)
 
 
-class MagicQuoterSaveView(LoginRequiredMixin, View):
+class MagicQuoterSaveView(SaaSMixin, LoginRequiredMixin, View):
     """
     Guarda la cotización generada por IA en la base de datos.
     Vincula el Lead si existe y devuelve el UUID para compartir.

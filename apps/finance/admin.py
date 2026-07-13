@@ -21,7 +21,7 @@ from .models.reconciliacion import (
 
 
 @admin.register(LinkDePago)
-class LinkDePagoAdmin(admin.ModelAdmin):
+class LinkDePagoAdmin(SaaSAdminMixin, admin.ModelAdmin):
     list_display = ("id_corto", "venta_pnr", "monto_total", "moneda", "estado", "boton_link")
     list_filter = ("estado", "moneda", "creado_en")
     search_fields = ("venta__localizador", "id", "referencia_pago")

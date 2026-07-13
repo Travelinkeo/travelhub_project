@@ -397,10 +397,7 @@ def skip_onboarding(request):
             progress.completed_steps.append(step)
 
     progress.current_step = UserProgress.STEP_COMPLETE
-    progress.onboarding_completed = True
-    progress.save(
-        update_fields=["completed_steps", "current_step", "onboarding_completed", "updated_at"]
-    )
+    progress.save(update_fields=["completed_steps", "current_step", "updated_at"])
 
     messages.info(
         request, _("Onboarding saltado. Puedes acceder a la configuración desde el menú.")

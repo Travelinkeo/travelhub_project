@@ -456,10 +456,7 @@ def resolve_finding_htmx(request, pk):
 
     agencia = get_user_active_agency(request.user)
 
-    if agencia:
-        finding = get_object_or_404(VentaAuditFinding.all_objects, pk=pk, agencia=agencia)
-    else:
-        finding = get_object_or_404(VentaAuditFinding.all_objects, pk=pk)
+    finding = get_object_or_404(VentaAuditFinding.all_objects, pk=pk, agencia=agencia)
     action = request.POST.get("action")
 
     if action == "resolve":

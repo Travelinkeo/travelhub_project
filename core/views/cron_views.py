@@ -132,7 +132,7 @@ def cierre_mensual_cron(request):
 @permission_classes([AllowAny])
 def health_check(request):
     """Health check para monitoreo (sin token requerido)."""
-    return Response({"status": "ok", "service": "travelhub"})
+    return Response({"status": "ok"})
 
 
 @extend_schema(exclude=True)

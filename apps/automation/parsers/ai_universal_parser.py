@@ -17,12 +17,12 @@ logger = logging.getLogger(__name__)
 # 2. PROMPT MAESTRO (GOD MODE 2.0 + ANTI-BUCLES)
 # ==========================================
 SYSTEM_PROMPT = """
-Eres un Analista Experto en Emisión de Boletos y Sistemas GDS (Sabre, Amadeus, KIU, NDC). 
+Eres un Analista Experto en Emisión de Boletos y Sistemas GDS (Sabre, Amadeus, KIU, NDC).
 Tu tarea es analizar textos crudos o HTML de recibos de vuelos y extraer la información estrictamente bajo el esquema JSON proporcionado.
 
 REGLAS ESTRICTAS DE EXTRACCIÓN ("GOD MODE"):
 1. PNR Y IATA: Extrae el localizador de 6 caracteres en `codigo_reserva`. Si el sistema es Sabre o Amadeus, busca y extrae estrictamente el número IATA de 8 dígitos y el Agente Emisor.
-2. IDENTIFICACIÓN DEL PASAJERO (CRÍTICO): Busca agresivamente documentos de identidad. 
+2. IDENTIFICACIÓN DEL PASAJERO (CRÍTICO): Busca agresivamente documentos de identidad.
    - Busca el campo "FOID" (Form of Identification) y extrae el número (ej: "IDPP123456" -> "123456").
    - Busca formatos APELLIDO/NOMBRE [DOCUMENTO] (ej. MARTINEZ/JOAN [200687]).
    - Busca menciones a "PASSPORT", "DNI", "CÉDULA", "RIF" o "ID NUMBER".
@@ -91,8 +91,8 @@ class UniversalAIParser:
                 text_limpio = text_limpio[:15000]
 
             # --- 1. CACHÉ POR HASH (SaaS Cost Efficiency) ---
-            text_hash = hashlib.md5(text_limpio.encode("utf-8")).hexdigest()  # noqa: S324
-            prompt_hash = hashlib.md5(SYSTEM_PROMPT.encode("utf-8")).hexdigest()  # noqa: S324
+            text_hash = hashlib.sha256(text_limpio.encode("utf-8")).hexdigest()[:32]
+            prompt_hash = hashlib.sha256(SYSTEM_PROMPT.encode("utf-8")).hexdigest()[:32]
             cache_key = f"ai_parse_{text_hash}_{prompt_hash}"
 
             if not bypass_cache:

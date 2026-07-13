@@ -17,8 +17,6 @@ class IncomingWhatsAppWebhook(View):
     def _verify_signature(self, request):
         auth_token = getattr(settings, "TWILIO_AUTH_TOKEN", None)
         if not auth_token:
-            if settings.DEBUG:
-                return True
             return False
 
         signature = request.headers.get("X-Twilio-Signature", "")
@@ -42,8 +40,8 @@ class IncomingWhatsAppWebhook(View):
 
     def post(self, request, *args, **kwargs):
         auth_token = getattr(settings, "TWILIO_AUTH_TOKEN", None)
-        if not auth_token and not settings.DEBUG:
-            logger.error("TWILIO_AUTH_TOKEN no configurado en produccion")
+        if not auth_token:
+            logger.error("TWILIO_AUTH_TOKEN no configurado")
             return HttpResponse("Webhook not configured", status=503)
 
         if auth_token and not self._verify_signature(request):

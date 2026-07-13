@@ -14,7 +14,21 @@ logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
-    help = "Runs the Telegram Bot for TravelHub"
+    help = "Runs the Telegram Bot for TravelHub. Use --webhook to run in webhook mode."
+
+    def add_arguments(self, parser):
+        parser.add_argument(
+            "--webhook",
+            type=str,
+            default=None,
+            help="URL pública para webhook (ej: https://tudominio.com/telegram/webhook/)",
+        )
+        parser.add_argument(
+            "--webhook-port",
+            type=int,
+            default=8443,
+            help="Puerto para el webhook (default: 8443)",
+        )
 
     def handle(self, *args, **options):
         self.stdout.write(self.style.SUCCESS("Starting TravelHub Telegram Bot..."))
@@ -59,21 +73,34 @@ class Command(BaseCommand):
 
             msg_bienvenida = (
                 rf"👋 ¡Hola {user.mention_html()}! Bienvenid@ a TravelHub Bot."
-                "\n\n🆔 **Tu ID de Telegram es:** <code>{chat_id}</code>"
+                "\n\n🆔 <b>Tu ID de Telegram es:</b> <code>{chat_id}</code>"
             )
 
             if agencia:
-                msg_bienvenida += f"\n🏢 **Agencia Detectada:** {agencia.nombre}"
+                msg_bienvenida += f"\n🏢 <b>Agencia Detectada:</b> {agencia.nombre}"
             else:
-                msg_bienvenida += (
-                    "\n⚠️ **No estás registrado en ninguna agencia.**"
-                    "\nEnvía este ID a tu administrador para que te vincule."
-                )
+                # Check if it's a client
+                from apps.crm.models import Cliente
+
+                cliente = await sync_to_async(
+                    lambda: Cliente.objects.filter(telegram_chat_id=str(chat_id)).first()
+                )()
+                if cliente:
+                    msg_bienvenida += f"\n👤 <b>Cliente:</b> {cliente.nombres}"
+                else:
+                    msg_bienvenida += (
+                        "\n⚠️ <b>No estás registrado.</b>"
+                        "\n• Si eres <b>agente</b>: envía este ID a tu administrador."
+                        "\n• Si eres <b>cliente</b>: pide a tu agencia que te vincule."
+                    )
 
             msg_bienvenida += (
-                "\n\n💡 **Comandos disponibles:**"
-                "\n/status - Ver estado del sistema"
-                "\n/buscar [apellido] - Buscar cliente"
+                "\n\n💡 <b>Comandos disponibles:</b>"
+                "\n🔹 /status - Estado del sistema"
+                "\n🔹 /buscar [apellido] - Buscar cliente"
+                "\n🔹 /vuelo ORIG DEST FECHA - Buscar vuelo"
+                "\n🔹 /flyer DESTINO PRECIO - Crear flyer"
+                "\n🔹 /check_visa NAC DEST - Requisitos visa"
             )
 
             await update.message.reply_html(
@@ -86,14 +113,24 @@ class Command(BaseCommand):
         async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             """Send a message when the command /help is issued."""
             help_text = (
-                "🤖 **Comandos TravelHub:**\n\n"
-                "🔍 **Consultas**\n"
-                "/buscar [apellido] - Encuentra clientes por apellido\n"
-                "/status - Resumen de DB\n\n"
-                "⚙️ **Configuración**\n"
-                "/id - Muestra tu ID de chat"
+                "🤖 <b>Comandos TravelHub:</b>\n\n"
+                "👤 <b>Staff / Agentes</b>\n"
+                "/buscar [apellido] - Buscar clientes\n"
+                "/status - Resumen del sistema\n"
+                "/vuelo ORIG DEST FECHA - Buscar vuelo (Amadeus)\n"
+                "/flyer DEST PRECIO [AEROLINEA] - Crear flyer promocional\n"
+                "/verboleto ID - Ver boleto (PDF)\n"
+                "/check_visa NAC DEST - Requisitos de visa\n"
+                "/app - Abrir diseñador de flyers\n\n"
+                "👤 <b>Clientes</b>\n"
+                "/misreservas - Ver tus reservas activas\n"
+                "/mivuelo - Estado de tu último vuelo\n"
+                "/mivoucher - Descargar tu voucher PDF\n\n"
+                "⚙️ <b>General</b>\n"
+                "/id - Tu ID de chat\n"
+                "/ayuda - Este mensaje"
             )
-            await update.message.reply_markdown(help_text)
+            await update.message.reply_html(help_text)
 
         async def get_id(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             chat_id = update.effective_chat.id
@@ -637,6 +674,111 @@ class Command(BaseCommand):
                 reply_markup=ReplyKeyboardMarkup(kb, resize_keyboard=True),
             )
 
+        # ============================================================================
+        # CLIENT SELF-SERVICE COMMANDS
+        # ============================================================================
+
+        @sync_to_async
+        def get_cliente_by_telegram(telegram_user_id):
+            """Busca un cliente registrado con ese chat_id de Telegram."""
+            from apps.crm.models import Cliente
+
+            cliente = Cliente.objects.filter(telegram_chat_id=str(telegram_user_id)).first()
+            return cliente
+
+        async def mis_reservas_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+            """Muestra las reservas activas del cliente."""
+            user_id = update.effective_user.id
+            cliente = await get_cliente_by_telegram(user_id)
+            if not cliente:
+                await update.message.reply_text(
+                    "❌ No estás registrado como cliente.\n"
+                    "Solicita a tu agencia que vincule tu Telegram para usar este comando."
+                )
+                return
+
+            from apps.sales.models import Venta
+
+            ventas = await sync_to_async(list)(
+                Venta.objects.filter(cliente=cliente, activa=True)
+                .order_by("-fecha_creacion")[:5]
+                .values("id", "total", "estado", "fecha_creacion")
+            )
+
+            if not ventas:
+                await update.message.reply_text("📭 No tienes reservas activas.")
+                return
+
+            msg = "📋 <b>Mis Reservas</b>\n\n"
+            for v in ventas:
+                fecha = v["fecha_creacion"].strftime("%d/%m/%Y") if v["fecha_creacion"] else ""
+                msg += f"🔹 #{v['id']} — ${v['total']:.2f} — <b>{v['estado']}</b> — {fecha}\n"
+            msg += "\nUsa /misreservas para ver de nuevo."
+            await update.message.reply_text(msg, parse_mode="HTML")
+
+        async def mi_vuelo_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+            """Muestra el estado del vuelo más reciente del cliente."""
+            user_id = update.effective_user.id
+            cliente = await get_cliente_by_telegram(user_id)
+            if not cliente:
+                await update.message.reply_text(
+                    "❌ No estás registrado como cliente.\n"
+                    "Solicita a tu agencia que vincule tu Telegram."
+                )
+                return
+
+            from apps.bookings.models import BoletoImportado
+
+            boleto = await sync_to_async(
+                lambda: BoletoImportado.objects.filter(venta__cliente=cliente)
+                .order_by("-creado_en")
+                .select_related("venta")
+                .first()
+            )()
+
+            if not boleto:
+                await update.message.reply_text("📭 No tienes vuelos registrados.")
+                return
+
+            msg = (
+                f"✈️ <b>Tu Último Vuelo</b>\n\n"
+                f"📍 <b>Ruta:</b> {boleto.origen or '?'} → {boleto.destino or '?'}\n"
+                f"📅 <b>Fecha:</b> {boleto.fecha_vuelo or 'Pendiente'}\n"
+                f"🔖 <b>Estado:</b> {boleto.estado or 'Procesando'}\n"
+                f"📋 <b>Reserva:</b> #{boleto.venta_id}\n\n"
+                f"Usa /mivoucher para descargar tu boleto."
+            )
+            await update.message.reply_text(msg, parse_mode="HTML")
+
+        async def mi_voucher_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+            """Envía el voucher PDF de la reserva al cliente."""
+            user_id = update.effective_user.id
+            cliente = await get_cliente_by_telegram(user_id)
+            if not cliente:
+                await update.message.reply_text(
+                    "❌ No estás registrado como cliente.\n"
+                    "Solicita a tu agencia que vincule tu Telegram."
+                )
+                return
+
+            from apps.bookings.models import BoletoImportado
+
+            boleto = await sync_to_async(
+                lambda: BoletoImportado.objects.filter(venta__cliente=cliente)
+                .order_by("-creado_en")
+                .first()
+            )()
+
+            if not boleto or not boleto.telegram_file_id:
+                await update.message.reply_text("📭 No tienes vouchers disponibles todavía.")
+                return
+
+            await update.message.reply_document(
+                document=boleto.telegram_file_id,
+                caption=f"🎫 Voucher #{boleto.venta_id} — {boleto.origen} → {boleto.destino}",
+                parse_mode="HTML",
+            )
+
         # Registrar handlers
         application.add_handler(CommandHandler("start", start))
         application.add_handler(CommandHandler("ayuda", help_command))
@@ -649,6 +791,11 @@ class Command(BaseCommand):
         application.add_handler(CommandHandler("verboleto", ver_boleto_command))
         application.add_handler(CommandHandler("check_visa", check_visa_command))
         application.add_handler(CommandHandler("app", app_command))  # Comando para abrir Mini App
+
+        # Cliente self-service
+        application.add_handler(CommandHandler("misreservas", mis_reservas_command))
+        application.add_handler(CommandHandler("mivuelo", mi_vuelo_command))
+        application.add_handler(CommandHandler("mivoucher", mi_voucher_command))
 
         # Handler de Voz (Gemini)
         application.add_handler(MessageHandler(filters.VOICE, handle_voice))
@@ -663,5 +810,22 @@ class Command(BaseCommand):
             MessageHandler(filters.TEXT & ~filters.COMMAND, process_natural_language)
         )
 
-        # Run the bot until the user presses Ctrl-C
-        application.run_polling(allowed_updates=Update.ALL_TYPES)
+        # Run the bot
+        webhook_url = options.get("webhook")
+        if webhook_url:
+            webhook_port = options.get("webhook_port", 8443)
+            self.stdout.write(
+                self.style.SUCCESS(f"Starting in WEBHOOK mode on port {webhook_port}")
+            )
+            application.run_webhook(
+                listen="0.0.0.0",  # noqa: S104
+                port=webhook_port,
+                url_path=token,
+                webhook_url=f"{webhook_url}{token}",
+                allowed_updates=Update.ALL_TYPES,
+            )
+        else:
+            self.stdout.write(
+                self.style.SUCCESS("Bot running in POLLING mode. Press Ctrl-C to stop.")
+            )
+            application.run_polling(allowed_updates=Update.ALL_TYPES)

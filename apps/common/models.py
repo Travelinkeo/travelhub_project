@@ -62,6 +62,12 @@ class UserProgress(models.Model):
     def is_step_completed(self, step: str) -> bool:
         return step in self.completed_steps
 
+    def reset(self) -> None:
+        """Reinicia el progreso de onboarding a su estado inicial."""
+        self.completed_steps = []
+        self.current_step = self.STEP_WELCOME
+        self.save(update_fields=["completed_steps_json", "current_step", "updated_at"])
+
     def get_next_step(self) -> str | None:
         if self.onboarding_completed:
             return None

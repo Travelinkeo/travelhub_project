@@ -1319,6 +1319,68 @@ def fetch_evolution_qr_task(self, instance_name):
     return None
 
 
+@shared_task(queue="default", time_limit=120, soft_time_limit=100)
+def process_scheduled_whatsapp_messages():
+    """Envía los mensajes de WhatsApp programados cuya hora ya llegó.
+
+    Se ejecuta cada minuto vía Celery Beat. Busca mensajes en estado
+    'scheduled' con programado_para <= ahora y los envía.
+    """
+    from django.utils import timezone
+
+    from apps.crm.models import WhatsAppScheduledMessage
+
+    now = timezone.now()
+    pendientes = WhatsAppScheduledMessage.objects.filter(
+        estado="scheduled", programado_para__lte=now
+    ).select_related("agencia", "cliente")
+
+    enviados = 0
+    for msg in pendientes:
+        msg.estado = "sending"
+        msg.save(update_fields=["estado"])
+
+        try:
+            instance_name = f"agencia_{msg.agencia_id}"
+            if msg.agencia and hasattr(msg.agencia, "configuracion"):
+                cfg = msg.agencia.configuracion
+                if cfg.evolution_instance_name:
+                    instance_name = cfg.evolution_instance_name
+
+            from apps.communications.services.evolution_api_service import EvolutionService
+
+            exito = EvolutionService.send_text(instance_name, msg.telefono, msg.texto)
+
+            if exito:
+                from apps.crm.models import MensajeWhatsApp
+
+                m = MensajeWhatsApp.objects.create(
+                    cliente=msg.cliente,
+                    direccion="OUT",
+                    texto=msg.texto,
+                    estado="sent",
+                    tipo_mensaje="text",
+                    agencia=msg.agencia,
+                )
+                msg.mensaje_resultante = m
+                msg.estado = "sent"
+                msg.save(update_fields=["estado", "mensaje_resultante"])
+                enviados += 1
+            else:
+                msg.estado = "failed"
+                msg.error_msg = "Error al enviar vía Evolution"
+                msg.save(update_fields=["estado", "error_msg"])
+        except Exception as e:
+            msg.estado = "failed"
+            msg.error_msg = str(e)[:500]
+            msg.save(update_fields=["estado", "error_msg"])
+            logger.error(f"Error enviando WA programado #{msg.pk}: {e}")
+
+    if pendientes:
+        logger.info(f"Mensajes WA programados procesados: {enviados}/{len(pendientes)} enviados")
+    return enviados
+
+
 @shared_task(
     name="core.tasks.limpiar_axes_logs",
     time_limit=300,
@@ -1359,6 +1421,68 @@ def limpiar_sesiones_expiradas():
     except Exception as e:
         logger.error(f"Error limpiando sesiones: {e}")
         return f"Error limpiando sesiones: {e}"
+
+
+@shared_task(queue="notifications", max_retries=3, default_retry_delay=30, time_limit=60)
+def send_telegram_to_client_task(
+    cliente_id, message, parse_mode="HTML", document_url=None, caption=None
+):
+    """Envía un mensaje de Telegram a un cliente."""
+    from apps.communications.services.telegram_unified import send_telegram_to_client
+    from apps.crm.models import Cliente
+
+    try:
+        cliente = Cliente.objects.get(pk=cliente_id)
+        success = send_telegram_to_client(cliente, message, parse_mode, document_url, caption)
+        logger.info(
+            f"Telegram to client {cliente_id}: {'OK' if success else 'FAILED (no chat_id)'}"
+        )
+        return success
+    except Cliente.DoesNotExist:
+        logger.error(f"Cliente {cliente_id} no encontrado")
+        return False
+
+
+@shared_task(queue="notifications", max_retries=3, default_retry_delay=30, time_limit=60)
+def notify_cliente_confirmacion_venta_task(venta_id):
+    """Envía confirmación de venta al cliente por Telegram."""
+    from apps.communications.services.telegram_unified import notify_cliente_confirmacion_venta
+    from apps.sales.models import Venta
+
+    try:
+        venta = Venta.objects.select_related("cliente").get(pk=venta_id)
+        return notify_cliente_confirmacion_venta(venta.cliente, venta)
+    except Exception as e:
+        logger.error(f"Error notificando venta {venta_id} por Telegram: {e}")
+        return False
+
+
+@shared_task(queue="notifications", max_retries=3, default_retry_delay=30, time_limit=60)
+def notify_cliente_recordatorio_pago_task(venta_id):
+    """Envía recordatorio de pago al cliente por Telegram."""
+    from apps.communications.services.telegram_unified import notify_cliente_recordatorio_pago
+    from apps.sales.models import Venta
+
+    try:
+        venta = Venta.objects.select_related("cliente").get(pk=venta_id)
+        return notify_cliente_recordatorio_pago(venta.cliente, venta)
+    except Exception as e:
+        logger.error(f"Error notificando recordatorio {venta_id} por Telegram: {e}")
+        return False
+
+
+@shared_task(queue="notifications", max_retries=3, default_retry_delay=30, time_limit=60)
+def notify_cliente_alerta_migratoria_task(cliente_id, destino, requisitos):
+    """Envía alerta migratoria al cliente por Telegram."""
+    from apps.communications.services.telegram_unified import notify_cliente_alerta_migratoria
+    from apps.crm.models import Cliente
+
+    try:
+        cliente = Cliente.objects.get(pk=cliente_id)
+        return notify_cliente_alerta_migratoria(cliente, destino, requisitos)
+    except Exception as e:
+        logger.error(f"Error notificando alerta migratoria a cliente {cliente_id}: {e}")
+        return False
 
 
 @shared_task(

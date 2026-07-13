@@ -18,7 +18,7 @@ ignore = [
 ]
 
 [lint.per-file-ignores]
-"*/migrations/*" = ["E501", "S"]
+"*/migrations/*" = ["E501", "S", "I001", "F401"]
 "tests/*" = ["S", "B011", "S101"]
 "**/tests/*" = ["S101"]
 "**/test_*.py" = ["S101"]

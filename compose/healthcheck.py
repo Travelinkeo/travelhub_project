@@ -1,6 +1,9 @@
+import socket
+import sys
+
+
 def check_tcp_connect():
     """Healthcheck: verifica que gunicorn acepte conexiones TCP."""
-    import socket, sys
     HOST = "127.0.0.1"
     PORT = 8000
     try:
@@ -11,6 +14,7 @@ def check_tcp_connect():
         sys.exit(0)
     except Exception:
         sys.exit(1)
+
 
 if __name__ == "__main__":
     check_tcp_connect()

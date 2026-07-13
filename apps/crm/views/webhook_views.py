@@ -173,3 +173,162 @@ class WhatsAppWebhookView(View):
         except Exception as e:
             logger.error(f"Error procesando webhook WA: {e}")
             return HttpResponse("EVENT_RECEIVED", status=200)
+
+
+@method_decorator(csrf_exempt, name="dispatch")
+class EvolutionWebhookView(View):
+    """
+    Webhook para recibir eventos de Evolution API (mensajes entrantes,
+    actualizaciones de estado, delivery/read receipts).
+    Evolution API POSTea aquí cuando hay eventos configurados.
+    """
+
+    def post(self, request, *args, **kwargs):
+        try:
+            body = json.loads(request.body)
+        except json.JSONDecodeError:
+            return HttpResponse("Invalid JSON", status=400)
+
+        event_type = body.get("event", "")
+        instance = body.get("instance", "")
+        data = body.get("data", {})
+
+        logger.info(f"Evolution webhook: event={event_type}, instance={instance}")
+
+        if event_type == "MESSAGES_UPSERT":
+            self._handle_message_upsert(instance, data)
+        elif event_type == "MESSAGES_UPDATE":
+            self._handle_message_update(instance, data)
+        elif event_type == "SEND_MESSAGE":
+            self._handle_send_result(instance, data)
+        elif event_type == "CONNECTION_UPDATE":
+            self._handle_connection_update(instance, data)
+        else:
+            logger.debug(f"Evolution webhook: evento no manejado {event_type}")
+
+        return HttpResponse("OK", status=200)
+
+    def _find_agencia_by_instance(self, instance_name: str):
+        try:
+            from core.models import AgenciaConfiguracion
+
+            config = AgenciaConfiguracion.objects.filter(
+                evolution_instance_name=instance_name
+            ).first()
+            if config:
+                return config.agencia
+        except Exception as e:
+            logger.warning(f"Error buscando agencia por instancia {instance_name}: {e}")
+        return None
+
+    def _handle_message_upsert(self, instance: str, data: dict):
+        """Procesa mensajes entrantes desde Evolution API."""
+        key = data.get("key", {})
+        message = data.get("message", {})
+        push_name = data.get("pushName", "Cliente")
+        remote_jid = key.get("remoteJid", "")
+        from_me = key.get("fromMe", False)
+        message_id = key.get("id", "")
+
+        if from_me:
+            return
+
+        telefono = remote_jid.split("@")[0]
+        tipo = message.get("messageType", "")
+
+        agencia = self._find_agencia_by_instance(instance)
+
+        try:
+            from apps.crm.models import Cliente, MensajeWhatsApp
+
+            cliente, _ = Cliente.objects.get_or_create(
+                telefono_principal=telefono,
+                defaults={"nombres": push_name, "agencia": agencia},
+            )
+
+            if tipo == "conversation":
+                texto = message.get("conversation", "")
+            elif tipo == "imageMessage":
+                texto = "[Imagen recibida]"
+            elif tipo == "documentMessage":
+                texto = "[Documento recibido]"
+            elif tipo == "locationMessage":
+                texto = "[Ubicación recibida]"
+            elif tipo == "buttonsResponseMessage":
+                texto = message.get("buttonsResponseMessage", {}).get("text", "")
+            elif tipo == "listResponseMessage":
+                texto = message.get("listResponseMessage", {}).get("text", "")
+            else:
+                texto = f"[{tipo}]"
+
+            MensajeWhatsApp.objects.create(
+                cliente=cliente,
+                direccion="IN",
+                texto=texto,
+                message_id=message_id,
+                estado="delivered",
+                agencia=cliente.agencia or agencia,
+            )
+
+            try:
+                from apps.crm.tasks_bot import whatsapp_ai_task
+
+                whatsapp_ai_task.apply_async(args=[telefono, push_name, texto], queue="ia_fast")
+            except Exception as e:
+                logger.error(f"Error encolando IA para Evolution inbound: {e}")
+
+        except Exception as e:
+            logger.error(f"Error procesando mensaje Evolution entrante: {e}")
+
+    def _handle_message_update(self, instance: str, data: dict):
+        """Procesa actualizaciones de estado (entregado/leído)."""
+        key = data.get("key", {})
+        message_id = key.get("id", "")
+        status = data.get("status", "")
+
+        status_map = {
+            "PENDING": "pending",
+            "SERVER_ACK": "sent",
+            "DELIVERY_ACK": "delivered",
+            "READ": "read",
+            "PLAYED": "read",
+            "ERROR": "failed",
+        }
+
+        nuevo_estado = status_map.get(status, "pending")
+
+        try:
+            from apps.crm.models import MensajeWhatsApp
+
+            actualizados = MensajeWhatsApp.objects.filter(message_id=message_id).update(
+                estado=nuevo_estado
+            )
+            if actualizados:
+                logger.info(f"Mensaje {message_id} actualizado a estado '{nuevo_estado}'")
+        except Exception as e:
+            logger.error(f"Error actualizando estado mensaje {message_id}: {e}")
+
+    def _handle_send_result(self, instance: str, data: dict):
+        """Procesa resultado de envío (éxito/fallo) y guarda el message_id."""
+        key = data.get("key", {})
+        message_id = key.get("id", "")
+        status = data.get("status", "")
+
+        if not message_id:
+            return
+
+        nuevo_estado = "sent" if status != "ERROR" else "failed"
+
+        try:
+            from apps.crm.models import MensajeWhatsApp
+
+            MensajeWhatsApp.objects.filter(message_id="").exclude(texto__exact="").order_by(
+                "-timestamp"
+            )[:1].update(message_id=message_id, estado=nuevo_estado)
+        except Exception as e:
+            logger.error(f"Error guardando message_id {message_id}: {e}")
+
+    def _handle_connection_update(self, instance: str, data: dict):
+        """Procesa cambios en el estado de conexión de la instancia."""
+        state = data.get("state", "")
+        logger.info(f"Evolution instance '{instance}' connection state: {state}")

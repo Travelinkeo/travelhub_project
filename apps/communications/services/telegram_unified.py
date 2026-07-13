@@ -429,3 +429,101 @@ def get_telegram_file_url(file_id: str):
         return None
 
     return f"https://api.telegram.org/bot{token}/getFile?file_id={file_id}"
+
+
+# ============================================================================
+# SECTION 5: CLIENT-FACING TELEGRAM NOTIFICATIONS
+# ============================================================================
+
+
+def send_telegram_to_client(
+    cliente, message: str, parse_mode: str = "HTML", document_url: str = None, caption: str = None
+) -> bool:
+    """Envía un mensaje de Telegram a un cliente.
+
+    Usa el telegram_chat_id almacenado en el modelo Cliente.
+    Si el cliente no tiene chat_id registrado, falla silenciosamente.
+
+    Args:
+        cliente: Instancia de Cliente
+        message: Texto del mensaje
+        parse_mode: HTML o Markdown
+        document_url: URL opcional de documento a adjuntar
+        caption: Título del documento adjunto
+    """
+    if not cliente or not cliente.telegram_chat_id:
+        return False
+
+    if document_url:
+        return TelegramNotificationService.send_document(
+            file_path=document_url,
+            caption=caption or message,
+            chat_id=cliente.telegram_chat_id,
+        )
+    else:
+        return TelegramNotificationService.send_message(
+            message=message,
+            chat_id=cliente.telegram_chat_id,
+            parse_mode=parse_mode,
+        )
+
+
+def notify_cliente_confirmacion_venta(cliente, venta) -> bool:
+    """Envía confirmación de venta al cliente por Telegram."""
+    msg = (
+        f"✅ <b>Reserva Confirmada</b>\n\n"
+        f"Hola <b>{cliente.nombres}</b>, tu reserva ha sido confirmada.\n\n"
+        f"📋 <b>Reserva:</b> #{venta.id}\n"
+        f"💰 <b>Total:</b> ${venta.total:.2f}\n"
+        f"📅 <b>Fecha:</b> {venta.fecha_creacion.strftime('%d/%m/%Y')}\n\n"
+        f"Gracias por confiar en nosotros. 🎉"
+    )
+    return send_telegram_to_client(cliente, msg)
+
+
+def notify_cliente_recordatorio_pago(cliente, venta) -> bool:
+    """Envía recordatorio de pago al cliente por Telegram."""
+    msg = (
+        f"⏰ <b>Recordatorio de Pago</b>\n\n"
+        f"Hola <b>{cliente.nombres}</b>, tienes un pago pendiente.\n\n"
+        f"📋 <b>Reserva:</b> #{venta.id}\n"
+        f"💰 <b>Monto pendiente:</b> ${venta.saldo_pendiente:.2f}\n\n"
+        f"Por favor realiza el pago a la brevedad para confirmar tu reserva."
+    )
+    return send_telegram_to_client(cliente, msg)
+
+
+def notify_cliente_alerta_vuelo(cliente, venta, cambio: str) -> bool:
+    """Envía alerta de cambio de vuelo al cliente por Telegram."""
+    msg = (
+        f"✈️ <b>Actualización de Vuelo</b>\n\n"
+        f"Hola <b>{cliente.nombres}</b>, hay un cambio en tu itinerario.\n\n"
+        f"{cambio}\n\n"
+        f"📋 <b>Reserva:</b> #{venta.id}\n\n"
+        f"Comunícate con tu agente para más detalles."
+    )
+    return send_telegram_to_client(cliente, msg)
+
+
+def notify_cliente_alerta_migratoria(cliente, destino: str, requisitos: str) -> bool:
+    """Envía alerta migratoria al cliente por Telegram."""
+    msg = (
+        f"🛂 <b>Requisitos Migratorios</b>\n\n"
+        f"Hola <b>{cliente.nombres}</b>, para tu viaje a <b>{destino}</b> necesitas:\n\n"
+        f"{requisitos}\n\n"
+        f"Verifica que toda tu documentación esté en orden antes del vuelo."
+    )
+    return send_telegram_to_client(cliente, msg)
+
+
+def notify_cliente_cotizacion(cliente, cotizacion_data: dict) -> bool:
+    """Envía una cotización al cliente por Telegram."""
+    msg = (
+        f"📄 <b>Tu Cotización</b>\n\n"
+        f"Hola <b>{cliente.nombres}</b>, tenemos una cotización para ti:\n\n"
+        f"✈️ <b>Destino:</b> {cotizacion_data.get('destino', '')}\n"
+        f"📅 <b>Fechas:</b> {cotizacion_data.get('fechas', '')}\n"
+        f"💰 <b>Total estimado:</b> ${cotizacion_data.get('total', 0):.2f}\n\n"
+        f"Responde este mensaje o contacta a tu agente para confirmar."
+    )
+    return send_telegram_to_client(cliente, msg)

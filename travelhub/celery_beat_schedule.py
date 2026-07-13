@@ -86,4 +86,10 @@ CELERY_BEAT_SCHEDULE = {
         "schedule": 300.0,  # cada 5 minutos — Evolution API no soporta polling agresivo
         "args": (),
     },
+    # Enviar mensajes de WhatsApp programados (cada minuto)
+    "send-scheduled-whatsapp-messages": {
+        "task": "apps.common.tasks.process_scheduled_whatsapp_messages",
+        "schedule": 60.0,  # cada minuto
+        "args": (),
+    },
 }

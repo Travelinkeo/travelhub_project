@@ -1,0 +1,46 @@
+# gitleaks baseline ignore
+# Secretos conocidos (falsos positivos: credenciales de ejemplo en
+# tests/docs/scripts). NO se ignora codigo productivo (apps/, core/).
+
+412ba7f4fe5f355fcd31777e12f14fd7f3b998ba:docs/MASTER_DOCUMENTATION_AI.md:generic-api-key:1007
+ba8fc3077a803f4d32be1b20aa4dd6b971a1ba4d:.amazonq/rules/memory-bank/jwt_authentication_guide.md:generic-api-key:262
+ba8fc3077a803f4d32be1b20aa4dd6b971a1ba4d:.amazonq/rules/memory-bank/jwt_authentication_guide.md:generic-api-key:49
+ba8fc3077a803f4d32be1b20aa4dd6b971a1ba4d:.amazonq/rules/memory-bank/stripe_setup_guide.md:curl-auth-header:192
+ba8fc3077a803f4d32be1b20aa4dd6b971a1ba4d:.amazonq/rules/memory-bank/stripe_setup_guide.md:curl-auth-header:209
+ba8fc3077a803f4d32be1b20aa4dd6b971a1ba4d:.amazonq/rules/memory-bank/stripe_setup_guide.md:generic-api-key:157
+ba8fc3077a803f4d32be1b20aa4dd6b971a1ba4d:docs/REPORTE_ARQUITECTURA_2026.md:generic-api-key:1338
+ba8fc3077a803f4d32be1b20aa4dd6b971a1ba4d:docs/TRANSLATOR_API.md:curl-auth-header:323
+ba8fc3077a803f4d32be1b20aa4dd6b971a1ba4d:docs/api/FRONTEND_API_GUIDE.md:generic-api-key:13
+ba8fc3077a803f4d32be1b20aa4dd6b971a1ba4d:scripts/tools/crear_freelancer.py:generic-api-key:25
+ba8fc3077a803f4d32be1b20aa4dd6b971a1ba4d:scripts/verify_cloudinary.py:generic-api-key:11
+ba8fc3077a803f4d32be1b20aa4dd6b971a1ba4d:tests/test_jwt_auth.py:generic-api-key:10
+ba8fc3077a803f4d32be1b20aa4dd6b971a1ba4d:tests/test_jwt_auth.py:generic-api-key:13
+bcb92d909a2c82e4c149e3a8fccbdbd05491b2b2:scripts/tools/crear_freelancer.py:generic-api-key:28
+bcb92d909a2c82e4c149e3a8fccbdbd05491b2b2:tests/test_jwt_auth.py:generic-api-key:10
+bcb92d909a2c82e4c149e3a8fccbdbd05491b2b2:tests/test_jwt_auth.py:generic-api-key:14
+c6b927d1c40cf5aafc7c31eb106ea7c30083bedb:.amazonq/rules/memory-bank/jwt_authentication_guide.md:generic-api-key:262
+c6b927d1c40cf5aafc7c31eb106ea7c30083bedb:.amazonq/rules/memory-bank/jwt_authentication_guide.md:generic-api-key:49
+c6b927d1c40cf5aafc7c31eb106ea7c30083bedb:.amazonq/rules/memory-bank/stripe_setup_guide.md:curl-auth-header:192
+c6b927d1c40cf5aafc7c31eb106ea7c30083bedb:.amazonq/rules/memory-bank/stripe_setup_guide.md:curl-auth-header:209
+c6b927d1c40cf5aafc7c31eb106ea7c30083bedb:.amazonq/rules/memory-bank/stripe_setup_guide.md:generic-api-key:157
+c6b927d1c40cf5aafc7c31eb106ea7c30083bedb:.env.example:generic-api-key:76
+c6b927d1c40cf5aafc7c31eb106ea7c30083bedb:CLOUDINARY_BOLETOS_FIX.md:generic-api-key:87
+c6b927d1c40cf5aafc7c31eb106ea7c30083bedb:CLOUDINARY_FIX.md:generic-api-key:106
+c6b927d1c40cf5aafc7c31eb106ea7c30083bedb:check_evo_status.py:generic-api-key:5
+c6b927d1c40cf5aafc7c31eb106ea7c30083bedb:core/services/whatsapp.py.bak:generic-api-key:18
+c6b927d1c40cf5aafc7c31eb106ea7c30083bedb:docs/REPORTE_ARQUITECTURA_2026.md:generic-api-key:1338
+c6b927d1c40cf5aafc7c31eb106ea7c30083bedb:docs/TRANSLATOR_API.md:curl-auth-header:323
+c6b927d1c40cf5aafc7c31eb106ea7c30083bedb:docs/api/FRONTEND_API_GUIDE.md:generic-api-key:13
+c6b927d1c40cf5aafc7c31eb106ea7c30083bedb:docs/frontend/URLS_DIRECTAS.md:curl-auth-header:144
+c6b927d1c40cf5aafc7c31eb106ea7c30083bedb:get_qr.ps1:generic-api-key:3
+c6b927d1c40cf5aafc7c31eb106ea7c30083bedb:purge_evo.py:generic-api-key:4
+c6b927d1c40cf5aafc7c31eb106ea7c30083bedb:scripts/tools/crear_freelancer.py:generic-api-key:25
+c6b927d1c40cf5aafc7c31eb106ea7c30083bedb:scripts/verify_cloudinary.py:generic-api-key:11
+c6b927d1c40cf5aafc7c31eb106ea7c30083bedb:test_api.ps1:generic-api-key:3
+c6b927d1c40cf5aafc7c31eb106ea7c30083bedb:test_evo.py:generic-api-key:6
+c6b927d1c40cf5aafc7c31eb106ea7c30083bedb:test_evo_fresh.py:generic-api-key:6
+c6b927d1c40cf5aafc7c31eb106ea7c30083bedb:test_pairing.ps1:generic-api-key:3
+c6b927d1c40cf5aafc7c31eb106ea7c30083bedb:tests/test_jwt_auth.py:generic-api-key:11
+c6b927d1c40cf5aafc7c31eb106ea7c30083bedb:tests/test_jwt_auth.py:generic-api-key:8
+c6b927d1c40cf5aafc7c31eb106ea7c30083bedb:wipe_evolution_db.py:generic-api-key:7
+cc3f58fe5dcd5d6c77bba2987ea9040b2f453d26:tests/test_tenant_vault.py:generic-api-key:19

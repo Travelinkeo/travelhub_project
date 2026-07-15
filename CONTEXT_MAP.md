@@ -127,8 +127,8 @@ core/
 ├── models/
 │   ├── base.py              # 291 líneas — AgenciaMixin, AgenciaManager, SoftDeleteModel, SoftDeleteQuerySet, GlobalAwareAgenciaManager
 │   ├── agencia.py           # 556 líneas — Agencia, AgenciaBranding, AgenciaConfiguracion, UsuarioAgencia
-│   ├── cron_api_key.py      # 101 líneas— CronApiKey (PBKDF2 + lookup_hash)
-│   ├── api_keys.py          # 233 líneas— APIKey (dead code, tabla eliminada en 0049)
+│   ├── cron_api_key.py      # 106 líneas— CronApiKey (PBKDF2 + lookup_hash)
+│   ├── api_keys.py          # 222 líneas— APIKey (dead code, tabla eliminada en 0049)
 │   ├── audit.py             # AuditLog
 │   ├── ai.py                # AIUsageLog
 │   ├── aeropuerto.py        # Aeropuerto
@@ -390,6 +390,7 @@ Todos los modelos en `apps/` (Venta, ItemVenta, Factura, ItemFactura, BoletoImpo
 | **Bandit deshabilitado en scripts** | `.ruff.toml:15` | Eliminado `"S"` de `per-file-ignores` para `scripts/*` |
 | **Encryption key rotation** | `core/management/commands/rotate_encryption_key.py` | Nuevo comando que descubre modelos con `EncryptedField` y re-cifra en batches |
 | **Test model regression** | `apps/finance/tests/test_modelos_financieros.py` | 27 tests reparados: migrados a `Venta` (tiene SoftDeleteModel) o `NewFactura` (solo AgenciaMixin). 3 tests de `TaxRefundOpportunity` arreglados con defaults en stub. |
+| **APIKey.verify() lookup_hash** | `core/models/cron_api_key.py`, `core/models/api_keys.py`, `core/migrations/0052_cronapikey_lookup_hash.py` | lookup_hash (SHA-256) añadido a CronApiKey y APIKey. `generate()` lo computa. `verify()` hace O(1) lookup por hash con fallback a prefijo para keys legacy. Migration 0052 aplicada. |
 
 ### ⏳ En progreso
 
@@ -399,6 +400,4 @@ Todos los modelos en `apps/` (Venta, ItemVenta, Factura, ItemFactura, BoletoImpo
 
 | Brecha | Prioridad | Notas |
 |---|---|---|
-| **APIKey.verify() lookup_hash** | Media | Ya implementado en `cron_api_key.py` y `api_keys.py`. Migración 0052 aplicada. |
-| **Test `test_realtime_audit_and_payments`** | Baja | Marca `xfail`. Requiere rewrite de modelos de contabilidad. |
-| **Test `test_unified_invoicing_flow`** | Baja | Marca `xfail`. Requiere rewrite de `CuentaContable` + `Factura` references. |
+| **Tests de integración xfail** | Baja | Requiere rewrite de modelos de contabilidad (`CuentaContable`, `AsientoContable`, `ItemVenta`). Pendiente para futuro. |

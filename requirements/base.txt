@@ -42,7 +42,7 @@ markdown==3.10.2
 stripe==13.0.1
 twilio==9.8.3
 resend==2.27.0
-weasyprint==68.0
+weasyprint==69.0
 amadeus==12.0.0
 flights==0.9.0
 

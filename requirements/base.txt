@@ -39,7 +39,7 @@ google-cloud-aiplatform==1.133.0
 markdown==3.10.2
 
 # Finance & Integrations
-stripe==13.0.1
+stripe==15.3.0
 twilio==9.8.3
 resend==2.27.0
 weasyprint==68.0

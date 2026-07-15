@@ -16,8 +16,6 @@ from apps.cotizaciones.views import (
     CotizacionPDFView,
     CotizacionStatusView,
     CotizacionUpdateView,
-    MagicQuoterAIView,
-    MagicQuoterSaveView,
 )
 from apps.finance.views.facturacion_views import generar_factura_desde_venta
 from apps.marketing.views.marketing_views import GenerateAIImageView, MarketingHubView
@@ -334,8 +332,6 @@ urlpatterns = [
         CotizacionConvertirView.as_view(),
         name="cotizacion_convertir",
     ),
-    path("api/cotizaciones/magic-gpt/", MagicQuoterAIView.as_view(), name="magic_quoter_ai"),
-    path("cotizaciones/magic/save/", MagicQuoterSaveView.as_view(), name="magic_quoter_save"),
     # Listado de usuarios (Alias)
     path("agencia/usuarios/", agencia_views.AgenciaUsersListView.as_view(), name="usuarios_list"),
     # Reportes Contables

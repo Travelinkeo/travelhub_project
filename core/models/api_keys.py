@@ -1,16 +1,19 @@
 """
 API Keys para la API pública de TravelHub.
 
-Cada agencia puede generar múltiples API keys con rate limits
-diferentes según su plan de suscripción.
+DEPRECATED — La tabla 'core_apikey' fue eliminada en la migración 0049.
+Este modelo Python y sus importadores (core/api/public_auth.py,
+core/api/public_views.py, core/api/public_serializers.py,
+tests/test_api_keys_webhooks.py) son dead code y solo persisten
+para referencia. NO usar en producción.
 
-Las API keys se almacenan usando PBKDF2-HMAC-SHA256 con salt aleatorio
-para proteger contra ataques de rainbow table.
+Ver CronApiKey (core/models/cron_api_key.py) como reemplazo activo.
 """
 
 import hashlib
 import logging
 import secrets
+import warnings
 
 from django.conf import settings
 from django.core.validators import MinValueValidator
@@ -18,6 +21,13 @@ from django.db import models
 from django.utils import timezone
 
 logger = logging.getLogger(__name__)
+
+warnings.warn(
+    "core.models.api_keys está DEPRECATED (tabla eliminada en migración 0049). "
+    "Usar core.models.cron_api_key.CronApiKey en su lugar.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
 PBKDF2_ITERATIONS = 600_000
 

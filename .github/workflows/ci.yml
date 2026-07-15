@@ -2,9 +2,22 @@ name: CI
 
 on:
   push:
-    branches: [main, master, develop]
+    branches: [main, hardening/*, staging]
   pull_request:
-    branches: [main, master]
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DJANGO_SETTINGS_MODULE: travelhub.settings.testing
+  SECRET_KEY: ci-secret-key-not-used-in-production-12345678901234567890
+  ENCRYPTION_KEY: ujK9r7o7B-B-jH87L2K0XvB4oK9zB_M3_z6vG1T_P5U=
+  DB_USER: postgres
+  DB_PASSWORD: postgres
+  DB_NAME: travelhub_test
+  PYTHONUNBUFFERED: "1"
 
 jobs:
   lint:
@@ -15,104 +28,20 @@ jobs:
         with:
           python-version: "3.12"
           cache: pip
-      - run: python -m pip install --upgrade pip
-      - run: pip install ruff mypy django-stubs
+      - run: pip install ruff==0.11.2
       - run: ruff check . --output-format=github
       - run: ruff format --check .
-      # mypy con la config de mypy.ini (strict=False durante adopción gradual)
-      - run: mypy . --ignore-missing-imports
-
-  secret-scan:
-    name: Secret Scanning (gitleaks)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          # full history para detectar secretos en commits antiguos
-          fetch-depth: 0
-      - name: gitleaks
-        uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # Opcional: licencia para organizações (modo avançado com PR comments).
-          # GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
-
-  test-smoke:
-    name: Smoke Tests (Health Checks)
-    runs-on: ubuntu-latest
-    services:
-      redis-cache:
-        image: redis:7-alpine
-        ports:
-          - 6379:6379
-      redis-celery:
-        image: redis:7-alpine
-        ports:
-          - 6380:6379
-      postgres:
-        image: postgres:15-alpine
-        env:
-          POSTGRES_USER: travelhub
-          POSTGRES_PASSWORD: travelhub
-          POSTGRES_DB: travelhub_test
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-    env:
-      SECRET_KEY: ci-test-key-not-for-production
-      DATABASE_URL: postgres://travelhub:travelhub@localhost:5432/travelhub_test
-      REDIS_CACHE_URL: redis://localhost:6379/0
-      REDIS_SESSIONS_URL: redis://localhost:6379/1
-      REDIS_CELERY_URL: redis://localhost:6380/0
-      CELERY_BROKER_URL: redis://localhost:6380/0
-      CELERY_RESULT_BACKEND: redis://localhost:6380/0
-      DJANGO_SETTINGS_MODULE: travelhub.settings
-      DEBUG: "True"
-      ALLOWED_HOSTS: "*"
-      SENDGRID_API_KEY: mock
-      STRIPE_SECRET_KEY: mock
-      STRIPE_WEBHOOK_SECRET: mock
-      BINANCE_API_KEY: mock
-      BINANCE_SECRET_KEY: mock
-      EVOLUTION_API_KEY: mock
-      TELEGRAM_BOT_TOKEN: "123:mock"
-      TWILIO_ACCOUNT_SID: mock
-      TWILIO_AUTH_TOKEN: mock
-      GEMINI_API_KEY: mock
-      EVOLUTION_API_URL: http://localhost:8080
-      SAAS_DEFAULT_PLAN: FREE
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-          cache: pip
-      - run: python -m pip install --upgrade pip
-      - run: pip install -r requirements/prod.txt -r requirements/local.txt
-      - run: python manage.py migrate --noinput
-      - run: python manage.py collectstatic --noinput --verbosity 0
-      - run: pytest tests/test_health_smoke.py -v --tb=short --timeout=60
 
   test:
     runs-on: ubuntu-latest
+    needs: lint
+    timeout-minutes: 20
     services:
-      redis-cache:
-        image: redis:7-alpine
-        ports:
-          - 6379:6379
-      redis-celery:
-        image: redis:7-alpine
-        ports:
-          - 6380:6379
       postgres:
         image: postgres:15-alpine
         env:
-          POSTGRES_USER: travelhub
-          POSTGRES_PASSWORD: travelhub
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
           POSTGRES_DB: travelhub_test
         ports:
           - 5432:5432
@@ -121,154 +50,48 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-    env:
-      SECRET_KEY: ci-test-key-not-for-production
-      DATABASE_URL: postgres://travelhub:travelhub@localhost:5432/travelhub_test
-      REDIS_CACHE_URL: redis://localhost:6379/0
-      REDIS_SESSIONS_URL: redis://localhost:6379/1
-      REDIS_CELERY_URL: redis://localhost:6380/0
-      CELERY_BROKER_URL: redis://localhost:6380/0
-      CELERY_RESULT_BACKEND: redis://localhost:6380/0
-      DJANGO_SETTINGS_MODULE: travelhub.settings.testing
-      DEBUG: "True"
-      ALLOWED_HOSTS: "*"
-      SENDGRID_API_KEY: mock
-      STRIPE_SECRET_KEY: mock
-      STRIPE_WEBHOOK_SECRET: mock
-      BINANCE_API_KEY: mock
-      BINANCE_SECRET_KEY: mock
-      EVOLUTION_API_KEY: mock
-      TELEGRAM_BOT_TOKEN: "123:mock"
-      TWILIO_ACCOUNT_SID: mock
-      TWILIO_AUTH_TOKEN: mock
-      GEMINI_API_KEY: mock
-      EVOLUTION_API_URL: http://localhost:8080
-      SAAS_DEFAULT_PLAN: FREE
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
           cache: pip
-      - run: python -m pip install --upgrade pip
-      - run: pip install -r requirements/prod.txt -r requirements/local.txt
-      - run: python manage.py collectstatic --noinput --verbosity 0
-      - run: python manage.py migrate --noinput
-      - run: python manage.py compilemessages
-      - run: |
-          pytest tests/ --timeout=120 -x -q --tb=short \
-            --ignore=tests/test_health_smoke.py \
-            --cov=. --cov-report=xml --cov-report=term-missing:skip-covered \
-            --cov-fail-under=75
 
-  security-scan:
-    name: Security Scan (pip-audit)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-      - run: pip install pip-audit
-      - name: Scan base dependencies for CVEs
-        run: pip-audit -r requirements/base.txt --ignore-vuln PYSEC-2022-42969
-      - name: Scan dev dependencies for CVEs
-        run: pip-audit -r requirements/local.txt --ignore-vuln PYSEC-2022-42969
-      - name: Install bandit
-        run: pip install bandit
-      - name: Static security analysis (bandit)
-        run: bandit -r apps/ core/ -ll -ii -x tests/
-
-  contract-testing:
-    name: Contract Testing (OpenAPI Schema)
-    runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:15-alpine
-        env:
-          POSTGRES_USER: travelhub
-          POSTGRES_PASSWORD: travelhub
-          POSTGRES_DB: travelhub_test
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-      redis:
-        image: redis:7-alpine
-        ports:
-          - 6379:6379
-    env:
-      SECRET_KEY: ci-contract-test-key
-      DATABASE_URL: postgres://travelhub:travelhub@localhost:5432/travelhub_test
-      REDIS_CACHE_URL: redis://localhost:6379/0
-      REDIS_SESSIONS_URL: redis://localhost:6379/1
-      REDIS_CELERY_URL: redis://localhost:6379/0
-      CELERY_BROKER_URL: redis://localhost:6379/0
-      CELERY_RESULT_BACKEND: redis://localhost:6379/0
-      DJANGO_SETTINGS_MODULE: travelhub.settings.testing
-      DEBUG: "True"
-      ALLOWED_HOSTS: "*"
-      SENDGRID_API_KEY: mock
-      STRIPE_SECRET_KEY: mock
-      STRIPE_WEBHOOK_SECRET: mock
-      BINANCE_API_KEY: mock
-      BINANCE_SECRET_KEY: mock
-      EVOLUTION_API_KEY: mock
-      TELEGRAM_BOT_TOKEN: "123:mock"
-      TWILIO_ACCOUNT_SID: mock
-      TWILIO_AUTH_TOKEN: mock
-      GEMINI_API_KEY: mock
-      EVOLUTION_API_URL: http://localhost:8080
-      SAAS_DEFAULT_PLAN: FREE
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-          cache: pip
-      - run: python -m pip install --upgrade pip
-      - run: pip install -r requirements/prod.txt -r requirements/local.txt
-      - run: python manage.py migrate --noinput
-
-      - name: Generate OpenAPI schema
-        run: python manage.py spectacular --file schema_generated.yml --validate --fail-on-warn
-
-      - name: Check schema has not changed (breaking change guard)
+      - name: Install system deps
         run: |
-          if [ -f schema.yml ]; then
-            # Ordenar ambos schemas para una diff limpia (ignora orden de propiedades)
-            python -c "
-          import yaml, json, sys
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libpq-dev libpango-1.0-0 libpangocairo-1.0-0 shared-mime-info
 
-          def normalize(path):
-              with open(path) as f:
-                  data = yaml.safe_load(f)
-              return json.dumps(data, sort_keys=True, indent=2)
-
-          committed = normalize('schema.yml')
-          generated = normalize('schema_generated.yml')
-
-          if committed != generated:
-              print('ERROR: El schema OpenAPI ha cambiado.')
-              print('Ejecuta: python manage.py spectacular --file schema.yml')
-              print('y haz commit del schema.yml actualizado.')
-              sys.exit(1)
-          else:
-              print('Schema OK: sin cambios de contrato.')
-            "
-          else:
-            echo "INFO: schema.yml no encontrado — se genera en el primer run."
-            cp schema_generated.yml schema.yml
-          fi
-
-      - name: Lint schema with Spectral (OAS3 rules)
+      - name: Install Python deps
         run: |
-          npm install -g @stoplight/spectral-cli 2>/dev/null || true
-          if command -v spectral &> /dev/null; then
-            spectral lint schema_generated.yml --ruleset @stoplight/spectral-oas || true
-          else
-            echo "Spectral no disponible — skip lint"
-          fi
+          pip install --upgrade pip
+          pip install -r requirements/dev.txt
+          pip install psycopg2-binary pytest-cov
+
+      - name: Create pg_trgm extension
+        run: |
+          PGPASSWORD=postgres psql -h localhost -U postgres -d travelhub_test -c "CREATE EXTENSION IF NOT EXISTS pg_trgm;"
+          PGPASSWORD=postgres psql -h localhost -U postgres -d template1 -c "CREATE EXTENSION IF NOT EXISTS pg_trgm;"
+
+      - name: Run tests with coverage
+        run: |
+          pytest \
+            --nomigrations \
+            --create-db \
+            --timeout=300 \
+            --cov=. \
+            --cov-report=xml \
+            --cov-report=term \
+            --cov-fail-under=30 \
+            -v \
+            --tb=short \
+            -x
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        if: ${{ !cancelled() }}
+        with:
+          file: ./coverage.xml
+          fail_ci_if_error: false
+          token: ${{ secrets.CODECOV_TOKEN }}

@@ -21,6 +21,19 @@ Gestiona el ciclo completo: cotización → venta → emisión de boletos aéreo
 - `SaaSLimitMiddleware` en `core/middleware_saas.py` intercepta requests cuando se exceden cuotas
 - [VERIFICAR] Stripe no tiene lógica de downgrade/upgrade forzada visible en el código leído — los endpoints `change-plan/preview-change` probablemente llaman Stripe API, pero los handlers están en `apps/finance/views/` sin leer. Si un pago falla, Stripe desactiva la subscripción y `SaaSLimitMiddleware` bloquea al usuario — pero la lógica exacta de Stripe webhook no fue verificada.
 
+**Flujo de pagos Binance Pay:**
+- Binance Pay permite pagos cripto (USDT/USD) directamente en la plataforma, complementando a Stripe.
+- Config: `BINANCE_PAY_API_KEY`, `BINANCE_PAY_SECRET_KEY`, `BINANCE_WEBHOOK_SECRET` en `base.py:376-378`
+- Webhook entrante: `POST /finance/webhooks/binance/` registrado en `apps/finance/urls.py:94`
+- Handler activo: `BinanceWebhookView` en `apps/finance/views/views_webhooks.py` — DRF `APIView` con verificación HMAC-SHA256 sobre el body crudo usando `X-Binance-Signature` header. Fail-closed: si `BINANCE_WEBHOOK_SECRET` falta → HTTP 503.
+- Idempotencia: usa `select_for_update()` sobre `TransaccionPago.webhook_transaction_id` para detectar duplicados.
+- Creación de orden: `BinancePayService` (`apps/finance/services/binance_service.py`) llama a `POST https://bpay.binanceapi.com/binancepay/openapi/v2/order` firmando con HMAC-SHA512 del payload (`{timestamp}\n{nonce}\n{payload}\n`).
+- Orquestación: `create_binance_order_task` (`apps/common/tasks.py:708`) — tarea Celery idempotente que crea la orden Binance y cachea el resultado en Redis por 1h.
+- Modelo: `PagoBinance` en `apps/finance/models_stubs.py:476` — managed=False, tabla `finance_pagobinance` existente.
+- `BinanceOrderCreateView` en `apps/finance/views/payment_views.py` (NO registrada en urls — draft/incompleto, referencia métodos `verify_webhook`/`process_payment_notification` que no existen en `BinancePayService`).
+- RBAC: `contador` puede editar `PagoBinance` (`core/mixins.py:154`).
+- Tests: `TestBinanceWebhookFailClosed` en `tests/test_webhooks_hardening_pytest.py` (6 tests: missing secret, missing signature, invalid HMAC, valid HMAC, no DEBUG bypass). Verifica fail-closed y validación HMAC-SHA256.
+
 ---
 
 ## 2. GLOSARIO DE DOMINIO
@@ -128,7 +141,7 @@ core/
 │   ├── base.py              # 291 líneas — AgenciaMixin, AgenciaManager, SoftDeleteModel, SoftDeleteQuerySet, GlobalAwareAgenciaManager
 │   ├── agencia.py           # 556 líneas — Agencia, AgenciaBranding, AgenciaConfiguracion, UsuarioAgencia
 │   ├── cron_api_key.py      # 106 líneas— CronApiKey (PBKDF2 + lookup_hash)
-│   ├── api_keys.py          # 222 líneas— APIKey (dead code, tabla eliminada en 0049)
+│   ├── api_keys.py          # 222 líneas— APIKey DEPRECATED (tabla eliminada en migración 0049, ver CronApiKey)
 │   ├── audit.py             # AuditLog
 │   ├── ai.py                # AIUsageLog
 │   ├── aeropuerto.py        # Aeropuerto
@@ -328,7 +341,7 @@ Todos los modelos en `apps/` (Venta, ItemVenta, Factura, ItemFactura, BoletoImpo
 
 1. **Cifrado Fernet** (`core/fields.py`): `EncryptedCharField`/`EncryptedTextField` cifran datos en reposo con `ENCRYPTION_KEY`. Detecta doble cifrado (no recifra si el string empieza con `gAAAAA`). `_decrypt()` reporta errores a Sentry.
 
-2. **API Keys con PBKDF2**: `CronApiKey` (vivo) y `APIKey` (muerto) usan `pbkdf2_hmac("sha256", ..., 600_000)`. `lookup_hash` (SHA-256 del raw key) para O(1) lookup. Fallback a iteración por prefijo para keys legacy.
+2. **API Keys con PBKDF2**: `CronApiKey` (vivo, recomenda) usa `pbkdf2_hmac("sha256", ..., 600_000)`. `lookup_hash` (SHA-256 del raw key) para O(1) lookup. Fallback a iteración por prefijo para keys legacy. `APIKey` (en `core/models/api_keys.py`) es dead code — tabla eliminada en migración 0049, marcado `# DEPRECATED`.
 
 3. **Anti-fuerza bruta (django-axes)**: 5 intentos fallidos, 1 hora de cooloff, por username+ip. Reset on success.
 
@@ -362,7 +375,7 @@ Todos los modelos en `apps/` (Venta, ItemVenta, Factura, ItemFactura, BoletoImpo
 
 1. **`FacturaFiscal` (stub) sin tabla**: `models_stubs.py` define `FacturaFiscal` con `managed = False` y `db_table = "finance_facturafiscal"`, pero esa tabla no existe en producción (`TestFacturaFiscal` está `@pytest.mark.skip`).
 
-2. **`APIKey` es dead code**: Migración `0049` eliminó la tabla `core_apikey`. El modelo Python en `core/models/api_keys.py` existe pero no tiene backing table. Si se reactiva, requiere nueva migración.
+2. **`APIKey` es dead code**: Migración `0049` eliminó la tabla `core_apikey`. El modelo Python en `core/models/api_keys.py` existe pero no tiene backing table. Marcado `# DEPRECATED` con `DeprecationWarning` en su docstring. 5 archivos aún lo importan (`public_auth.py`, `public_views.py`, `public_serializers.py`, `test_api_keys_webhooks.py`). Usar `CronApiKey` como reemplazo.
 
 3. **Tests de integración rotos**: `test_realtime_audit_and_payments` (1 test) y `test_unified_invoicing_flow` (1 test) marcan `xfail` porque referencian campos/choices de `CuentaContable` y `AsientoContable` que no existen en los modelos reales (`nivel`, `naturaleza`, `TipoCuentaChoices`, etc.).
 
@@ -391,6 +404,7 @@ Todos los modelos en `apps/` (Venta, ItemVenta, Factura, ItemFactura, BoletoImpo
 | **Encryption key rotation** | `core/management/commands/rotate_encryption_key.py` | Nuevo comando que descubre modelos con `EncryptedField` y re-cifra en batches |
 | **Test model regression** | `apps/finance/tests/test_modelos_financieros.py` | 27 tests reparados: migrados a `Venta` (tiene SoftDeleteModel) o `NewFactura` (solo AgenciaMixin). 3 tests de `TaxRefundOpportunity` arreglados con defaults en stub. |
 | **APIKey.verify() lookup_hash** | `core/models/cron_api_key.py`, `core/models/api_keys.py`, `core/migrations/0052_cronapikey_lookup_hash.py` | lookup_hash (SHA-256) añadido a CronApiKey y APIKey. `generate()` lo computa. `verify()` hace O(1) lookup por hash con fallback a prefijo para keys legacy. Migration 0052 aplicada. |
+| **APIKey dead code marcado DEPRECATED** | `core/models/api_keys.py` | Docstring actualizado con advertencia y `DeprecationWarning`. Backward compat mantenida para importadores existentes. |
 
 ### ⏳ En progreso
 

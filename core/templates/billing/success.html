@@ -19,7 +19,7 @@
     </style>
 </head>
 <body class="antialiased min-h-screen flex flex-col items-center justify-center p-6 relative overflow-hidden">
-    
+
     <!-- Background Effects -->
     <div class="fixed inset-0 z-0 pointer-events-none">
         <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full blur-[120px] opacity-20 bg-emerald-500"></div>
@@ -32,7 +32,13 @@
         </div>
 
         <h1 class="text-4xl md:text-5xl font-black text-white mb-4 tracking-tight uppercase">¡Bienvenido a Bordo!</h1>
-        <p class="text-slate-400 text-lg mb-10">Tu agencia ha sido provisionada exitosamente. El sistema está configurando tu entorno seguro en este momento.</p>
+        <p class="text-slate-400 text-lg mb-10">
+            {% if onboarding %}
+                Tu agencia ha sido creada. Te hemos enviado un enlace mágico a <strong class="text-white">{{ email }}</strong> para que accedas a tu panel.
+            {% else %}
+                Tu agencia ha sido provisionada exitosamente. El sistema está configurando tu entorno seguro.
+            {% endif %}
+        </p>
 
         <div class="glass-panel p-8 rounded-3xl text-left border border-slate-700/50 mb-8">
             <h3 class="text-xs font-black text-slate-500 uppercase tracking-widest mb-4">Próximos Pasos</h3>
@@ -40,8 +46,8 @@
                 <div class="flex gap-4">
                     <div class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-xs font-bold text-white shrink-0">1</div>
                     <div>
-                        <p class="text-white font-bold text-sm">Recibirás un Email de Confirmación</p>
-                        <p class="text-slate-400 text-xs">Enviamos los detalles de acceso a tu correo.</p>
+                        <p class="text-white font-bold text-sm">{% if onboarding %}Revisa tu Email{% else %}Recibirás un Email de Confirmación{% endif %}</p>
+                        <p class="text-slate-400 text-xs">{% if onboarding %}Hemos enviado un enlace mágico a tu correo. Haz clic para acceder.{% else %}Enviamos los detalles de acceso a tu correo.{% endif %}</p>
                     </div>
                 </div>
                 <div class="flex gap-4">
@@ -55,14 +61,19 @@
         </div>
 
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            {% if not onboarding %}
             <a href="/dashboard/modern/" class="bg-white text-slate-900 font-black py-4 px-8 rounded-xl shadow-xl transition-all hover:scale-105 active:scale-95 flex items-center justify-center gap-2">
                 Ir al Dashboard <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+            </a>
+            {% endif %}
+            <a href="/login/" class="bg-white text-slate-900 font-black py-4 px-8 rounded-xl shadow-xl transition-all hover:scale-105 active:scale-95 flex items-center justify-center gap-2">
+                {% if onboarding %}Iniciar Sesión{% else %}Ir al Dashboard{% endif %} <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
             </a>
             <a href="/" class="text-slate-400 font-bold py-4 px-8 hover:text-white transition-colors">
                 Volver al Inicio
             </a>
         </div>
-        
+
         <p class="mt-12 text-slate-600 text-[10px] font-bold uppercase tracking-widest">Powered by TravelHub AI Infrastructure</p>
     </div>
 

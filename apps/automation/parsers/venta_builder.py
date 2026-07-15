@@ -5,8 +5,8 @@ from django.db.models import Sum
 from django.utils import timezone
 
 from apps.bookings.models import BoletoImportado, ItemVenta, ProductoServicio, Venta
+from apps.common.models import Moneda
 from apps.crm.models import Cliente
-from apps.finance.models.currencies import Moneda
 
 logger = logging.getLogger(__name__)
 

@@ -5,8 +5,8 @@ from django.db import models
 from django.utils import timezone
 
 from apps.bookings.models import Proveedor, TarifarioProveedor
+from apps.common.models import Moneda
 from apps.common.utils import clean_currency
-from apps.finance.models.currencies import Moneda
 
 logger = logging.getLogger(__name__)
 

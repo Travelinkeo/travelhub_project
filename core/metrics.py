@@ -26,7 +26,7 @@ db_max_connections = Gauge(
     "PostgreSQL max_connections setting",
 )
 
-QUEUES = ["celery", "ia_fast", "ia_heavy", "notifications", "beat"]
+QUEUES = ["celery", "notifications", "beat"]
 DB_POOL_ALERT_PCT = 80
 
 

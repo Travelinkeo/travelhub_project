@@ -3,6 +3,9 @@ API Keys para la API pública de TravelHub.
 
 Cada agencia puede generar múltiples API keys con rate limits
 diferentes según su plan de suscripción.
+
+Las API keys se almacenan usando PBKDF2-HMAC-SHA256 con salt aleatorio
+para proteger contra ataques de rainbow table.
 """
 
 import hashlib
@@ -15,6 +18,43 @@ from django.db import models
 from django.utils import timezone
 
 logger = logging.getLogger(__name__)
+
+PBKDF2_ITERATIONS = 600_000
+
+
+def _hash_key(raw_key: str, salt: str | None = None) -> tuple[str, str]:
+    """
+    Genera un hash PBKDF2 de la clave.
+
+    Args:
+        raw_key: La clave en texto plano.
+        salt: Salt hexadecimal (opcional; se genera una nueva si no se provee).
+
+    Returns:
+        Tuple de (salt_hex, hash_hex).
+    """
+    if salt is None:
+        salt = secrets.token_hex(16)
+    key_bytes = raw_key.encode("utf-8")
+    salt_bytes = salt.encode("utf-8")
+    dk = hashlib.pbkdf2_hmac("sha256", key_bytes, salt_bytes, PBKDF2_ITERATIONS)
+    return salt, dk.hex()
+
+
+def _verify_key(raw_key: str, stored_hash: str) -> bool:
+    """
+    Verifica una clave contra un hash almacenado.
+
+    Soporta dos formatos:
+    - Nuevo: ``salt_hex$hash_hex`` (PBKDF2)
+    - Legacy: ``hash_hex`` (SHA256 directo, para migración)
+    """
+    if "$" in stored_hash:
+        salt, expected_hash = stored_hash.split("$", 1)
+        _, computed_hash = _hash_key(raw_key, salt)
+        return computed_hash == expected_hash
+    else:
+        return hashlib.sha256(raw_key.encode()).hexdigest() == stored_hash
 
 
 class APIKeyPlan(models.TextChoices):
@@ -55,11 +95,25 @@ class APIKey(models.Model):
         related_name="api_keys",
         help_text="Usuario que creó la API key",
     )
+    salt = models.CharField(
+        max_length=32,
+        default="",
+        editable=False,
+        help_text="Salt aleatorio para PBKDF2 (hex). Vacío para keys legacy con SHA256.",
+    )
+    lookup_hash = models.CharField(
+        max_length=64,
+        unique=True,
+        null=True,
+        blank=True,
+        editable=False,
+        help_text="SHA-256 del raw key para O(1) lookup en verify()",
+    )
     key_hash = models.CharField(
-        max_length=128,
+        max_length=256,
         unique=True,
         editable=False,
-        help_text="SHA-256 hash de la API key",
+        help_text="Hash de la API key (formato salt$hash para PBKDF2, o SHA256 legacy)",
     )
     prefix = models.CharField(
         max_length=12,
@@ -126,8 +180,9 @@ class APIKey(models.Model):
         raw_key solo se muestra una vez al usuario.
         """
         raw_key = f"th_{secrets.token_urlsafe(32)}"
-        key_hash = hashlib.sha256(raw_key.encode()).hexdigest()
+        salt, key_hash_pbkdf2 = _hash_key(raw_key)
         prefix = raw_key[:10]
+        lookup_hash = hashlib.sha256(raw_key.encode()).hexdigest()
         rate_limit = RATE_LIMITS.get(plan, 100)
         expires_at = (
             timezone.now() + timezone.timedelta(days=expires_days) if expires_days else None
@@ -136,7 +191,9 @@ class APIKey(models.Model):
         instance = cls.objects.create(
             agencia=agencia,
             user=user,
-            key_hash=key_hash,
+            salt=salt,
+            lookup_hash=lookup_hash,
+            key_hash=f"{salt}${key_hash_pbkdf2}",
             prefix=prefix,
             name=name,
             plan=plan,
@@ -156,21 +213,32 @@ class APIKey(models.Model):
         if not token:
             return None
 
-        key_hash = hashlib.sha256(token.encode()).hexdigest()
-        try:
-            api_key = cls.objects.select_related("agencia").get(key_hash=key_hash, is_active=True)
-            # Verificar expiración
+        computed_lookup = hashlib.sha256(token.encode()).hexdigest()
+        api_key = cls.objects.filter(lookup_hash=computed_lookup, is_active=True).first()
+        if api_key:
             if api_key.expires_at and api_key.expires_at < timezone.now():
                 logger.warning(f"APIKey expirada: {api_key.name}")
                 return None
-            # Actualizar uso
             cls.objects.filter(pk=api_key.pk).update(
                 last_used_at=timezone.now(),
                 request_count=models.F("request_count") + 1,
             )
             return api_key
-        except cls.DoesNotExist:
-            return None
+
+        prefix = token[:10]
+        candidates = cls.objects.filter(prefix=prefix, is_active=True, lookup_hash__isnull=True)
+        for api_key in candidates:
+            if not _verify_key(token, api_key.key_hash):
+                continue
+            if api_key.expires_at and api_key.expires_at < timezone.now():
+                logger.warning(f"APIKey expirada: {api_key.name}")
+                continue
+            cls.objects.filter(pk=api_key.pk).update(
+                last_used_at=timezone.now(),
+                request_count=models.F("request_count") + 1,
+            )
+            return api_key
+        return None
 
     def revoke(self):
         """Deshabilita la API key."""

@@ -11,7 +11,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "travelhub.settings")
 django.setup()
 
 from apps.bookings.models import BoletoImportado, Proveedor
-from apps.finance.models import ItemReporte, ReporteProveedor
+from apps.finance.models_stubs import ItemReporte, ReporteProveedor
 from apps.finance.services.reconciliation_service import ReconciliationService
 
 
@@ -69,14 +69,12 @@ def verify_reconciliation():
 
     # Validaciones
     item_match = items.get(numero_boleto=boleto_num)
-    assert item_match.estado == ItemReporte.EstadoConciliacion.MATCH, (
-        "El boleto existente debió conciliarse"
-    )
+    if item_match.estado != ItemReporte.EstadoConciliacion.MATCH:
+        raise AssertionError("El boleto existente debió conciliarse")
 
     item_no_exist = items.get(numero_boleto="9990000000000")
-    assert item_no_exist.estado == ItemReporte.EstadoConciliacion.MISSING_INTERNAL, (
-        "El boleto inexistente debió marcarse como MISSING_INTERNAL"
-    )
+    if item_no_exist.estado != ItemReporte.EstadoConciliacion.MISSING_INTERNAL:
+        raise AssertionError("El boleto inexistente debió marcarse como MISSING_INTERNAL")
 
     print("\n🎉 VERIFICACIÓN EXITOSA: La lógica de conciliación funciona.")
 

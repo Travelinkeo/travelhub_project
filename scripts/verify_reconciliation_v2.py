@@ -11,7 +11,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "travelhub.settings")
 django.setup()
 
 from apps.bookings.models import BoletoImportado
-from apps.finance.models import ReporteProveedor
+from apps.finance.models_stubs import ReporteProveedor
 from apps.finance.services.reconciliation_service import ReconciliationService
 from core.models import Agencia, Proveedor
 

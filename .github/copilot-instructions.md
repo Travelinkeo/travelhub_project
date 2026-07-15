@@ -3,10 +3,10 @@
 Concise project-specific guidance for AI coding agents. Focus on existing patterns; avoid inventing new architectural styles unless explicitly requested.
 
 ## Big Picture
-TravelHub is a Spanish-language Django 5.2 + DRF SaaS backend with an HTMX + Alpine.js + TailwindCSS frontend (SSR templates in `templates/` and `core/templates/`). Domain = travel agency CRM/ERP/CMS: sales (`Venta`), accounting (`AsientoContable`), invoices (`Factura`), ticket ingestion & normalization (GDS parsers KIU/Sabre/Amadeus/Copa/Wingo/TKConnect), and CMS pages. Core logic lives in `core/` (models, parsers, PDF generation via Gotenberg, audit logging). SQLite used locally; Postgres via `docker-compose` for production.
+TravelHub is a Spanish-language Django 5.2 + DRF SaaS backend with an HTMX + Alpine.js + TailwindCSS frontend (SSR templates in `templates/` and `core/templates/`). Domain = travel agency CRM/ERP/CMS: sales (`Venta`), accounting (`AsientoContable`), invoices (`Factura`), ticket ingestion & normalization (GDS parsers KIU/Sabre/Amadeus/Copa/Wingo/TKConnect), and CMS pages. Core logic lives in `core/` (models, parsers, PDF generation via WeasyPrint, audit logging). SQLite used locally; Postgres via `docker-compose` for production.
 
 ## Architecture & Data Flow
-1. File (PDF/TXT/EML) upload -> `BoletoImportado` model instance -> Celery task `parsear_boleto_individual()` -> `TicketParserService` orchestrates: extraction, AI/GDS parsing, normalization, persistence -> `VentaAutomationService` creates `Venta` -> PDF generation via Gotenberg -> notifications (WhatsApp/Telegram/Email).
+1. File (PDF/TXT/EML) upload -> `BoletoImportado` model instance -> Celery task `parsear_boleto_individual()` -> `TicketParserService` orchestrates: extraction, AI/GDS parsing, normalization, persistence -> `VentaAutomationService` creates `Venta` -> PDF generation via WeasyPrint -> notifications (WhatsApp/Telegram/Email).
 2. Financial core: `Venta` aggregates `ItemVenta` via signals (`post_save`) to recalc totals & state. State machine: `PENDIENTE_PAGO -> PAGADA_PARCIAL -> PAGADA_TOTAL -> CONFIRMADA -> EN_PROCESO_VIAJE -> COMPLETADA`.
 3. Audit trail: `AuditLog` with hash chaining (`previous_hash`/`record_hash`) provides tamper evidence. `_crear_audit_log()` centralized in `core/models/audit.py`.
 4. Multi-tenancy via `AgenciaMixin` + `AgenciaManager` (auto-filters by agency). Thread-local context via `ThreadLocalContextMiddleware`. Never use `objects.all()` without tenant context.
@@ -15,7 +15,7 @@ TravelHub is a Spanish-language Django 5.2 + DRF SaaS backend with an HTMX + Alp
 - Language: models, fields, API responses in Spanish. Keep new identifiers consistent (snake_case, Spanish).
 - Monetary consistency: when fare + taxes != total (tolerance 0.01) parser sets `amount_consistency='MISMATCH'`.
 - Security headers & CSP via `SecurityHeadersMiddleware`; template JS needs `nonce` from `request.META['CSP_NONCE']`.
-- PDF templates: Gotenberg renders HTML templates from `core/templates/core/tickets/`. One template per GDS system.
+- PDF templates: WeasyPrint renders HTML templates from `core/templates/core/tickets/`. One template per GDS system.
 - Encryption: `core/fields.py` `EncryptedCharField`/`EncryptedTextField` require `ENCRYPTION_KEY` in settings.
 
 ## Developer Workflows
@@ -53,5 +53,5 @@ Tests: `pytest -q` (CI threshold 77%), `ruff check .` and `ruff format .` for li
 
 ## Good First Enhancements (if asked)
 - Add tests for uncovered parser edge cases.
-- Improve Gotenberg health check resilience.
+- Improve WeasyPrint health check resilience.
 - Add structured logging with structlog.

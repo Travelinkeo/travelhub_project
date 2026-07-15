@@ -52,7 +52,7 @@
 {% block content %}
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <div class="flex flex-col md:flex-row gap-6">
-        
+
         <!-- Sidebar: Context & Actions -->
         <div class="w-full md:w-80 space-y-6">
             <div class="glass-card rounded-2xl p-6 shadow-2xl">
@@ -64,43 +64,43 @@
                     </div>
                     <h2 class="text-xl font-bold text-white">CFO Virtual</h2>
                 </div>
-                
+
                 <p class="text-emerald-100/70 text-sm mb-6">
                     Tu asistente de inteligencia financiera. Consulta saldos, analiza gastos o solicita sugerencias contables.
                 </p>
 
                 <div class="space-y-3">
-                    <button hx-post="{% url 'finance:ai_chat_htmx' %}" 
+                    <button hx-post="#"
                             hx-vals='{"message": "¿Cuál es el resumen de KPIs de este mes?"}'
-                            hx-target="#chat-messages" 
+                            hx-target="#chat-messages"
                             hx-swap="beforeend"
                             class="ai-preset-btn w-full text-left p-3 rounded-xl bg-emerald-900/20 border border-emerald-500/20 text-emerald-300 text-sm hover:bg-emerald-800/40 transition-all">
                         🚀 Resumen de KPIs del mes
                     </button>
-                    <button hx-post="{% url 'finance:ai_chat_htmx' %}" 
+                    <button hx-post="#"
                             hx-vals='{"message": "¿Qué clientes tienen facturas vencidas?"}'
-                            hx-target="#chat-messages" 
+                            hx-target="#chat-messages"
                             hx-swap="beforeend"
                             class="ai-preset-btn w-full text-left p-3 rounded-xl bg-emerald-900/20 border border-emerald-500/20 text-emerald-300 text-sm hover:bg-emerald-800/40 transition-all">
                         ⚖️ Listar deudas pendientes
                     </button>
-                    <button hx-post="{% url 'finance:ai_chat_htmx' %}" 
+                    <button hx-post="#"
                             hx-vals='{"message": "Analiza las últimas discrepancias de conciliación"}'
-                            hx-target="#chat-messages" 
+                            hx-target="#chat-messages"
                             hx-swap="beforeend"
                             class="ai-preset-btn w-full text-left p-3 rounded-xl bg-emerald-900/20 border border-emerald-500/20 text-emerald-300 text-sm hover:bg-emerald-800/40 transition-all">
                         🔍 Revisar conciliación
                     </button>
-                    <button hx-post="{% url 'finance:ai_chat_htmx' %}" 
+                    <button hx-post="#"
                             hx-vals='{"message": "¿Cómo se ve el flujo de caja para los próximos 30 días?"}'
-                            hx-target="#chat-messages" 
+                            hx-target="#chat-messages"
                             hx-swap="beforeend"
                             class="ai-preset-btn w-full text-left p-3 rounded-xl bg-indigo-900/20 border border-indigo-500/20 text-indigo-300 text-sm hover:bg-indigo-800/40 transition-all">
                         💰 Predicción Cashflow (30d)
                     </button>
-                    <button hx-post="{% url 'finance:ai_chat_htmx' %}" 
+                    <button hx-post="#"
                             hx-vals='{"message": "Genera borradores de recordatorios para las facturas vencidas"}'
-                            hx-target="#chat-messages" 
+                            hx-target="#chat-messages"
                             hx-swap="beforeend"
                             class="ai-preset-btn w-full text-left p-3 rounded-xl bg-rose-900/20 border border-rose-500/20 text-rose-300 text-sm hover:bg-rose-800/40 transition-all">
                         📱 Generar Recordatorios (IA)
@@ -123,9 +123,9 @@
                 <p class="text-emerald-100/60 text-[11px] leading-relaxed">
                     Acciones contables sugeridas por IA que requieren aprobación explícita humana para su ejecución determinista.
                 </p>
-                <div id="pending-proposals-container" 
-                     hx-get="{% url 'finance:ai_proposals_partial' %}" 
-                     hx-trigger="load, proposalChanged from:body" 
+                <div id="pending-proposals-container"
+                     hx-get="#"
+                     hx-trigger="load, proposalChanged from:body"
                      hx-swap="innerHTML"
                      class="space-y-4 max-h-[350px] overflow-y-auto pr-1">
                     <div class="text-center py-4 text-emerald-100/40 text-xs">Cargando propuestas del buffer...</div>
@@ -144,7 +144,7 @@
         <!-- Main Chat Area -->
         <div class="flex-1 flex flex-col h-full">
             <div class="glass-card rounded-3xl flex-1 flex flex-col shadow-2xl overflow-hidden border-emerald-500/10">
-                
+
                 <!-- Messages Area -->
                 <div id="chat-messages" class="chat-container flex-1 overflow-y-auto p-6 space-y-6">
                     <!-- Initial AI Welcome -->
@@ -154,9 +154,9 @@
                         </div>
                         <div class="bg-emerald-900/30 rounded-2xl p-4 border border-emerald-500/10 max-w-[80%]">
                             <p class="text-white text-sm">
-                                Hola {{ user.first_name }}. Estoy conectado a la base financiera de **{{ user_agencia.nombre }}**. 
+                                Hola {{ user.first_name }}. Estoy conectado a la base financiera de **{{ user_agencia.nombre }}**.
                                 <br><br>
-                                Tengo acceso a tus **facturas**, **gastos**, **vencimientos** y **conciliaciones**. 
+                                Tengo acceso a tus **facturas**, **gastos**, **vencimientos** y **conciliaciones**.
                                 ¿Quieres que analice tu flujo de caja o que redacte recordatorios de pago para tus deudores?
                             </p>
                         </div>
@@ -173,21 +173,21 @@
 
                 <!-- Input area -->
                 <div class="p-6 bg-black/20 border-t border-emerald-500/10">
-                    <form hx-post="{% url 'finance:ai_chat_htmx' %}" 
-                          hx-target="#chat-messages" 
+                    <form hx-post="#"
+                          hx-target="#chat-messages"
                           hx-swap="beforeend"
                           id="ai-chat-form"
                           class="relative flex items-center gap-4">
                         {% csrf_token %}
                         <div class="relative flex-1">
-                            <input type="text" 
+                            <input type="text"
                                    id="chat-input"
-                                   name="message" 
-                                   placeholder="Pregunta sobre saldos, facturas o contabilidad..." 
+                                   name="message"
+                                   placeholder="Pregunta sobre saldos, facturas o contabilidad..."
                                    class="w-full bg-emerald-950/50 border border-emerald-500/30 rounded-2xl py-4 pl-6 pr-14 text-white placeholder-emerald-500/50 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all font-light shadow-inner"
                                    required>
                         </div>
-                        <button type="submit" 
+                        <button type="submit"
                                 class="p-4 rounded-xl obsidian-emerald-gradient text-emerald-400 hover:text-white transition-all shadow-xl group">
                             <svg class="w-6 h-6 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>

@@ -22,6 +22,53 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        # FIX: These models were deleted by migration 0012 but must exist in the
+        # state for AddField below. The DB tables already exist (0033 was applied).
+        # These CreateModel operations are solely to make state_forwards work.
+        migrations.CreateModel(
+            name="FacturaConsolidada",
+            fields=[
+                ("id_factura", models.AutoField(primary_key=True, serialize=False)),
+                ("fecha_emision", models.DateField()),
+                ("estado", models.CharField(max_length=3)),
+                (
+                    "agencia",
+                    models.ForeignKey(null=True, on_delete=models.CASCADE, to="core.agencia"),
+                ),
+            ],
+            options={"managed": False, "db_table": "finance_facturaconsolidada"},
+        ),
+        migrations.CreateModel(
+            name="ItemFacturaConsolidada",
+            fields=[
+                ("id_item_factura", models.AutoField(primary_key=True, serialize=False)),
+                (
+                    "factura",
+                    models.ForeignKey(
+                        null=True, on_delete=models.CASCADE, to="finance.facturaconsolidada"
+                    ),
+                ),
+                ("descripcion", models.CharField(max_length=500)),
+                ("cantidad", models.DecimalField(max_digits=10, decimal_places=2, default=1)),
+                ("precio_unitario", models.DecimalField(max_digits=12, decimal_places=2)),
+            ],
+            options={"managed": False, "db_table": "finance_itemfacturaconsolidada"},
+        ),
+        migrations.CreateModel(
+            name="DocumentoExportacionConsolidado",
+            fields=[
+                ("id", models.AutoField(primary_key=True, serialize=False)),
+                (
+                    "factura",
+                    models.ForeignKey(
+                        null=True, on_delete=models.CASCADE, to="finance.facturaconsolidada"
+                    ),
+                ),
+                ("tipo_documento", models.CharField(max_length=20)),
+                ("numero_documento", models.CharField(max_length=100)),
+            ],
+            options={"managed": False, "db_table": "finance_documentoexportacionconsolidado"},
+        ),
         migrations.AddField(
             model_name="itemfacturaconsolidada",
             name="agencia",

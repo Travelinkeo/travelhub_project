@@ -27,7 +27,7 @@ class TestTelegramWebhookFailClosed(TestCase):
 
     def setUp(self):
         self.client = APIClient()
-        self.url = reverse("webhook_telegram_staff_control")
+        self.url = reverse("finance:webhook_telegram_staff_control")
 
     @override_settings(TELEGRAM_WEBHOOK_SECRET=None)
     def test_rejects_when_secret_not_configured(self):
@@ -92,8 +92,8 @@ class TestTelegramWebhookFailClosed(TestCase):
         TELEGRAM_WEBHOOK_SECRET="correct_secret_long_enough",
         TELEGRAM_BOT_TOKEN="mock_token",
     )
-    @mock.patch("apps.finance.views.telegram_views.answer_telegram_callback_task.delay")
-    @mock.patch("apps.finance.views.telegram_views.edit_telegram_message_task.delay")
+    @mock.patch("apps.common.tasks.answer_telegram_callback_task.delay")
+    @mock.patch("apps.common.tasks.edit_telegram_message_task.delay")
     def test_accepts_valid_callback_query(self, mock_edit, mock_answer):
         """Accept valid callback_query with correct secret."""
         # Mock Pago to exist
@@ -149,7 +149,7 @@ class TestBinanceWebhookFailClosed(TestCase):
 
     def setUp(self):
         self.client = APIClient()
-        self.url = reverse("webhook_binance_resilient")
+        self.url = reverse("finance:webhook_binance_resilient")
 
     @override_settings(BINANCE_WEBHOOK_SECRET=None)
     def test_rejects_when_secret_not_configured(self):
@@ -219,7 +219,7 @@ class TestBinanceWebhookFailClosed(TestCase):
                 mock_trans.create.return_value = mock.Mock()
 
                 response = self.client.post(
-                    reverse("webhook_binance_resilient"),
+                    reverse("finance:webhook_binance_resilient"),
                     data=json.dumps(
                         {"bizId": "bin_123", "custom_venta_id": 999, "amount": "100.00"}
                     ),
@@ -255,7 +255,7 @@ class TestStripeWebhookFailClosed(TestCase):
     @override_settings(STRIPE_WEBHOOK_SECRET=None)
     def test_rejects_when_secret_not_configured(self):
         response = self.client.post(
-            reverse("webhook_stripe_resilient"),
+            reverse("finance:webhook_stripe_resilient"),
             data=json.dumps({"id": "evt_123", "type": "payment_intent.succeeded"}),
             content_type="application/json",
         )
@@ -266,7 +266,7 @@ class TestStripeWebhookFailClosed(TestCase):
     @override_settings(STRIPE_WEBHOOK_SECRET="")
     def test_rejects_empty_secret(self):
         response = self.client.post(
-            reverse("webhook_stripe_resilient"),
+            reverse("finance:webhook_stripe_resilient"),
             data=json.dumps({"id": "evt_123"}),
             content_type="application/json",
         )
@@ -275,7 +275,7 @@ class TestStripeWebhookFailClosed(TestCase):
     @override_settings(STRIPE_WEBHOOK_SECRET="whsec_test_secret_long")
     def test_rejects_missing_stripe_signature(self):
         response = self.client.post(
-            reverse("webhook_stripe_resilient"),
+            reverse("finance:webhook_stripe_resilient"),
             data=json.dumps({"id": "evt_123"}),
             content_type="application/json",
         )
@@ -285,15 +285,15 @@ class TestStripeWebhookFailClosed(TestCase):
 
     @override_settings(STRIPE_WEBHOOK_SECRET="whsec_test_secret_long")
     def test_rejects_invalid_signature(self):
-        with mock.patch("stripe.webhook.construct_event") as mock_construct:
+        with mock.patch("stripe.Webhook.construct_event") as mock_construct:
             import stripe
 
-            mock_construct.side_effect = stripe.error.SignatureVerificationError(
+            mock_construct.side_effect = stripe.SignatureVerificationError(
                 "Invalid signature", "sig"
             )
 
             response = self.client.post(
-                reverse("webhook_stripe_resilient"),
+                reverse("finance:webhook_stripe_resilient"),
                 data=json.dumps({"id": "evt_123"}),
                 content_type="application/json",
                 HTTP_STRIPE_SIGNATURE="t=123,v1=invalid",
@@ -309,7 +309,7 @@ class TestStripeWebhookFailClosed(TestCase):
     def test_no_bypass_in_debug(self):
         """DEBUG=True does NOT bypass signature verification."""
         response = self.client.post(
-            reverse("webhook_stripe_resilient"),
+            reverse("finance:webhook_stripe_resilient"),
             data=json.dumps({"id": "evt_123"}),
             content_type="application/json",
         )
@@ -408,7 +408,7 @@ class TestAntiRegressionDebugBypass(TestCase):
         """Telegram webhook no longer falls back to bot token only."""
         from apps.finance.views import telegram_views
 
-        source = open(telegram_views.__file__).read()
+        source = open(telegram_views.__file__, encoding="utf-8").read()
 
         # Old code: "Si no hay secret configurado, solo verifica que el bot_token exista"
         self.assertNotIn("solo verifica que el bot_token exista", source)

@@ -4,7 +4,7 @@ from decimal import Decimal
 from django.db import transaction
 
 from apps.bookings.models import Venta
-from apps.finance.models.commissions import ComisionVenta, ReglaComision
+from apps.finance.models_stubs import ComisionVenta, ReglaComision
 
 logger = logging.getLogger(__name__)
 

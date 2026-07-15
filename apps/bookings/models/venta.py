@@ -305,25 +305,28 @@ class Venta(AgenciaMixin, SoftDeleteModel, models.Model):
     def save(self, *args, **kwargs):
         self.full_clean()
         if not self.localizador:
-            # FIX SEGURIDAD: Generación atómica de localizador para evitar TOCTOU race
-            # Usamos select_for_update() dentro de transacción atómica
+            # FIX CONCURRENCIA (P2-011): Generación atómica del localizador usando SecuenciaVentaDiaria con select_for_update()
             prefix = f"VTA-{self.fecha_venta.strftime('%Y%m%d')}"
-            max_retries = 5
-            for _ in range(max_retries):
+            try:
+                from apps.bookings.models.secuencia import SecuenciaVentaDiaria
+
                 with transaction.atomic():
-                    # Bloquear la tabla para esta agencia hoy
-                    daily_count = Venta.objects.filter(
-                        fecha_venta__date=self.fecha_venta.date()
-                    ).count()
-                    candidate = f"{prefix}-{daily_count + 1:04d}"
-                    # Verificar que no exista ya (doble seguridad)
-                    if not Venta.objects.filter(localizador=candidate).exists():
-                        self.localizador = candidate
-                        break
-            else:
-                # Si después de 5 intentos sigue habiendo colisión, añadir sufijo aleatorio
+                    # select_for_update() bloquea la secuencia para esta agencia y fecha de forma segura y atómica
+                    seq, created = SecuenciaVentaDiaria.objects.select_for_update().get_or_create(
+                        agencia=self.agencia,
+                        fecha=self.fecha_venta.date(),
+                        defaults={"contador": 0},
+                    )
+                    seq.contador += 1
+                    seq.save()
+                    self.localizador = f"{prefix}-{seq.contador:04d}"
+            except Exception as e:
+                # Fallback seguro con sufijo aleatorio en caso de algún fallo de base de datos
                 import secrets
 
+                logger.error(
+                    f"Error generando localizador atómico en Venta.save(): {e}. Usando fallback aleatorio."
+                )
                 self.localizador = f"{prefix}-{secrets.randbelow(9000) + 1000:04d}"
 
         if not self.pk:

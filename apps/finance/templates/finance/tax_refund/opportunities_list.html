@@ -11,7 +11,7 @@
             </h1>
             <p class="text-text-muted text-sm mt-1">Oportunidades de Tax Refund detectadas por el Motor de IA.</p>
         </div>
-        
+
         <div class="flex items-center gap-6 bg-surface-main/30 border border-white/5 p-4 rounded-xl backdrop-blur-sm">
             <div class="text-center">
                 <p class="text-[10px] text-text-muted uppercase font-bold tracking-widest mb-1">Total Recuperable</p>
@@ -52,7 +52,7 @@
                         </div>
                     </td>
                     <td class="px-6 py-4 text-right">
-                        <button hx-post="{% url 'finance:iniciar_tax_refund' op.pk %}"
+                        <button hx-post="#"
                                 hx-target="#reclamo-{{ op.pk }}"
                                 hx-swap="outerHTML"
                                 class="btn-primary h-8 px-4 text-[10px] flex items-center gap-2 bg-text-main border-text-main hover:bg-black group-hover:scale-105 transition-transform">

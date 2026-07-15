@@ -115,7 +115,7 @@ def crear_venta_desde_boleto(request, boleto_id):
         )
 
     from apps.bookings.models import ProductoServicio
-    from apps.finance.models.currencies import Moneda
+    from apps.common.models import Moneda
 
     moneda_usd, _ = Moneda.objects.get_or_create(
         codigo_iso="USD", defaults={"nombre": "Dólar Estadounidense"}

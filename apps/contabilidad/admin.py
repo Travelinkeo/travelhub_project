@@ -1,117 +1,43 @@
-# contabilidad/admin.py
-"""
-Configuración del admin para el módulo de contabilidad.
-Incluye gestión de Plan de Cuentas, Asientos Contables y Tasas BCV.
-"""
-
 from django.contrib import admin
-from django.utils.html import format_html
-from django.utils.translation import gettext_lazy as _
 
 from core.api import SaaSAdminMixin
 
-from .models import AsientoContable, DetalleAsiento, PlanContable, TasaCambioBCV
+from .models import AsientoContable, CuentaContable, MovimientoContable
 
 
-class DetalleAsientoInline(admin.TabularInline):
-    model = DetalleAsiento
+class MovimientoContableInline(admin.TabularInline):
+    model = MovimientoContable
     extra = 2
-    fields = (
-        "linea",
-        "cuenta_contable",
-        "debe",
-        "haber",
-        "debe_bsd",
-        "haber_bsd",
-        "descripcion_linea",
-    )
-    readonly_fields = ()
+    fields = ("cuenta", "tipo", "monto_ves", "monto_usd")
 
 
-@admin.register(PlanContable)
-class PlanContableAdmin(SaaSAdminMixin, admin.ModelAdmin):
-    list_display = (
-        "codigo_cuenta",
-        "nombre_cuenta",
-        "tipo_cuenta",
-        "naturaleza",
-        "permite_movimientos",
-        "nivel",
-    )
-    list_filter = ("tipo_cuenta", "naturaleza", "permite_movimientos", "nivel")
-    search_fields = ("codigo_cuenta", "nombre_cuenta")
-    ordering = ("codigo_cuenta",)
+@admin.register(CuentaContable)
+class CuentaContableAdmin(SaaSAdminMixin, admin.ModelAdmin):
+    list_display = ("codigo", "nombre", "tipo", "cuenta_padre", "acepta_movimientos")
+    list_filter = ("tipo", "acepta_movimientos")
+    search_fields = ("codigo", "nombre")
+    ordering = ("codigo",)
 
     fieldsets = (
-        (_("Información Básica"), {"fields": ("codigo_cuenta", "nombre_cuenta", "tipo_cuenta")}),
-        (_("Jerarquía"), {"fields": ("nivel", "cuenta_padre", "permite_movimientos")}),
-        (_("Características"), {"fields": ("naturaleza", "descripcion")}),
+        ("Información Básica", {"fields": ("codigo", "nombre", "tipo")}),
+        ("Jerarquía", {"fields": ("cuenta_padre", "acepta_movimientos")}),
     )
 
 
 @admin.register(AsientoContable)
 class AsientoContableAdmin(SaaSAdminMixin, admin.ModelAdmin):
-    list_display = (
-        "numero_asiento",
-        "fecha_contable",
-        "tipo_asiento",
-        "descripcion_general",
-        "total_debe",
-        "total_haber",
-        "estado",
-        "esta_cuadrado_display",
-    )
-    list_filter = ("tipo_asiento", "estado", "fecha_contable")
-    search_fields = ("numero_asiento", "descripcion_general", "referencia_documento")
+    list_display = ("id", "fecha_contable", "glosa", "content_object")
+    list_filter = ("fecha_contable",)
+    search_fields = ("glosa",)
     date_hierarchy = "fecha_contable"
-    ordering = ("-fecha_contable", "-numero_asiento")
-    readonly_fields = ("total_debe", "total_haber", "fecha_creacion", "esta_cuadrado_display")
+    ordering = ("-fecha_contable",)
 
-    inlines = [DetalleAsientoInline]
-
-    fieldsets = (
-        (
-            _("Información del Asiento"),
-            {"fields": ("numero_asiento", "fecha_contable", "tipo_asiento", "estado")},
-        ),
-        (_("Descripción"), {"fields": ("descripcion_general", "referencia_documento")}),
-        (_("Moneda y Tasa"), {"fields": ("moneda", "tasa_cambio_aplicada")}),
-        (
-            _("Totales"),
-            {
-                "fields": ("total_debe", "total_haber", "esta_cuadrado_display"),
-                "classes": ("collapse",),
-            },
-        ),
-        (_("Auditoría"), {"fields": ("fecha_creacion",), "classes": ("collapse",)}),
-    )
-
-    def esta_cuadrado_display(self, obj):
-        if obj.esta_cuadrado:
-            return format_html('<span style="color: green;">✓ Cuadrado</span>')
-        return format_html('<span style="color: red;">✗ Descuadrado</span>')
-
-    esta_cuadrado_display.short_description = _("Estado Balance")
-
-    def save_model(self, request, obj, form, change):
-        super().save_model(request, obj, form, change)
-        obj.calcular_totales()
-
-
-@admin.register(TasaCambioBCV)
-class TasaCambioBCVAdmin(admin.ModelAdmin):
-    list_display = ("fecha", "tasa_bsd_por_usd", "fuente", "actualizado")
-    list_filter = ("fuente", "fecha")
-    search_fields = ("fecha",)
-    date_hierarchy = "fecha"
-    ordering = ("-fecha",)
-    readonly_fields = ("creado", "actualizado")
+    inlines = [MovimientoContableInline]
 
     fieldsets = (
-        (_("Tasa de Cambio"), {"fields": ("fecha", "tasa_bsd_por_usd", "fuente")}),
-        (_("Auditoría"), {"fields": ("creado", "actualizado"), "classes": ("collapse",)}),
+        ("Información del Asiento", {"fields": ("fecha_contable", "glosa")}),
+        ("Documento Origen", {"fields": ("content_type", "object_id")}),
     )
 
-    def has_delete_permission(self, request, obj=None):
-        # Prevenir eliminación accidental de tasas históricas
-        return request.user.is_superuser
+
+admin.site.register(MovimientoContable)

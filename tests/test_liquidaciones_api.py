@@ -6,9 +6,9 @@ from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
 
 from apps.bookings.models import Proveedor, Venta
+from apps.common.models import Moneda
 from apps.contabilidad.models import LiquidacionProveedor
 from apps.crm.models import Cliente
-from apps.finance.models.currencies import Moneda
 
 pytestmark = pytest.mark.skip(reason="Endpoints de liquidaciones no registrados en URLs")
 

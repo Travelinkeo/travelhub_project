@@ -1,0 +1,37 @@
+# core/locale_patch.py
+import locale
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+def apply_locale_patch():
+    """
+    Aplica un parche de seguridad al runtime de locale.setlocale (SRE L3).
+    Esto intercepta llamadas globales de setlocale que puedan arrojar
+    'unsupported locale setting' en sistemas sin locale configurado (como Docker minimalista).
+    """
+    try:
+        original_setlocale = locale.setlocale
+
+        def safe_setlocale(category, locale_name=None):
+            try:
+                return original_setlocale(category, locale_name)
+            except Exception as e:
+                logger.warning(
+                    f"⚠️ [SRE L3 Locale Patch] Blocked unsupported locale setting '{locale_name}': {e}"
+                )
+                try:
+                    return original_setlocale(category, "")
+                except Exception:
+                    try:
+                        return original_setlocale(category, "C")
+                    except Exception:
+                        return "C"
+
+        locale.setlocale = safe_setlocale
+        logger.info(
+            "✅ [SRE L3] Global locale.setlocale monkey patch applied successfully via ready()."
+        )
+    except Exception as e_patch:
+        logger.error(f"❌ [SRE L3] Failed to apply locale monkey patch: {e_patch}")

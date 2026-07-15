@@ -3,8 +3,7 @@ from django.contrib.auth.models import User
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
-from apps.finance.models.currencies import Moneda
-from apps.finance.models.recaudacion import CanalRecaudacion
+from apps.finance.models_stubs import CanalRecaudacion, Moneda
 from core.models.agencia import Agencia, AgenciaConfiguracion
 
 

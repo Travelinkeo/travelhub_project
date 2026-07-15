@@ -22,8 +22,6 @@ import os
 from .base import *  # noqa: F401, F403
 from .base import DEBUG, INSTALLED_APPS, MIDDLEWARE  # noqa: F401
 
-__all__ = []
-
 # ---------------------------------------------------------------------------
 # Override DEBUG (permite forzar DEBUG=False en dev si se necesita)
 # ---------------------------------------------------------------------------
@@ -46,8 +44,9 @@ X_FRAME_OPTIONS = "SAMEORIGIN"
 SESSION_COOKIE_SECURE = False
 CSRF_COOKIE_SECURE = False
 
-# Axes: deshabilitar en dev para no bloquear en desarrollo
-AXES_ENABLED = os.getenv("AXES_ENABLED_DEV", "False").lower() == "true"
+# Axes: habilitado en dev por defecto. Deshabilitar con AXES_ENABLED_DEV=false
+# si es necesario para desarrollo local.
+AXES_ENABLED = os.getenv("AXES_ENABLED_DEV", "True").lower() == "true"
 
 # ---------------------------------------------------------------------------
 # Whitenoise

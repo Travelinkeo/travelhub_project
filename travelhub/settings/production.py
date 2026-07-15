@@ -20,9 +20,6 @@ import os
 from .base import *  # noqa: F401, F403
 from .base import DEBUG, ENCRYPTION_KEY, SECRET_KEY, SENTRY_DSN  # noqa: F401
 
-# Silenciar F401 para importaciones usadas por Django al cargar settings
-__all__ = []  # Evita que linters marquen los imports del * como no usados
-
 # ---------------------------------------------------------------------------
 # Validaciones de producción — falla rápido si falta algo crítico
 # ---------------------------------------------------------------------------

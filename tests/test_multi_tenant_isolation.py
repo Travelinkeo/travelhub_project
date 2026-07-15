@@ -20,7 +20,7 @@ from apps.communications.models import NotificationLog, NotificationTemplate
 from apps.contabilidad.models import AsientoContable, LiquidacionProveedor
 from apps.crm.models import Cliente, MensajeWhatsApp, OportunidadViaje
 from apps.finance.models import Factura, ItemFactura
-from apps.finance.models.facturacion import FacturaConsolidada
+from apps.finance.models_stubs import FacturaConsolidada
 from core.middleware import agency_context, agency_var, get_current_agency
 from core.models import Agencia, UsuarioAgencia
 
@@ -462,7 +462,7 @@ class TestFacturaConsolidadaIsolation(MultiTenantIsolationTestCase):
             agencia=self.agency1,
             cliente=cliente1,
             fecha_emision="2024-01-01",
-            total_factura=Decimal("1000"),
+            monto_total=Decimal("1000"),
             estado="PEN",
         )
 
@@ -474,7 +474,7 @@ class TestFacturaConsolidadaIsolation(MultiTenantIsolationTestCase):
             agencia=self.agency2,
             cliente=cliente2,
             fecha_emision="2024-01-01",
-            total_factura=Decimal("2000"),
+            monto_total=Decimal("2000"),
             estado="PEN",
         )
 

@@ -21,6 +21,7 @@ USO EN CLASS-BASED VIEWS:
     en get_queryset() automáticamente.
 """
 
+import sys
 from functools import wraps
 
 from django.core.cache import cache
@@ -29,9 +30,17 @@ from django.shortcuts import get_object_or_404
 
 from core.middleware import agency_var
 
+# 🛡️ P2-006: Constantes a nivel de módulo para evitar re-evaluar sys.argv en cada query
+_IS_PYTEST = "pytest" in sys.modules
+_IS_MANAGEMENT_COMMAND = bool(
+    sys.argv
+    and "manage.py" in sys.argv[0]
+    and any(arg in sys.argv for arg in ["makemigrations", "migrate", "shell", "check", "test"])
+)
+
 # Constantes de cache para sesiones de agencia
 _USER_AGENCIA_CACHE_PREFIX = "th:user_agencia:"
-_USER_AGENCIA_CACHE_TIMEOUT = 120  # 2 minutos
+_USER_AGENCIA_CACHE_TIMEOUT = 30  # 30 segundos — reducido de 120s (P1-004 fix)
 
 
 def get_user_active_agency(user):

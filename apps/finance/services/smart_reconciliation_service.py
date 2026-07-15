@@ -9,7 +9,7 @@ from django.utils import timezone
 from pydantic import BaseModel, Field
 
 from apps.bookings.models import BoletoImportado
-from apps.finance.models.reconciliacion import (
+from apps.finance.models_stubs import (
     ConciliacionBoleto,
     LineaReporteReconciliacion,
     ReporteReconciliacion,
@@ -167,10 +167,10 @@ class SmartReconciliationService:
         prompt = f"""
         Analiza las columnas de este reporte de ventas del proveedor {proveedor_hint}.
         Identifica a qué campo estándar de TravelHub corresponde cada columna del Excel.
-        
+
         COLUMNAS ENCONTRADAS: {cabecera}
         MUESTRA DE DATOS: {json.dumps(muestra, default=str)}
-        
+
         CAMPOS REQUERIDOS:
         - numero_boleto: El número de ticket (13 dígitos).
         - pnr: Localizador de reserva.
@@ -179,7 +179,7 @@ class SmartReconciliationService:
         - impuestos: Suma de tasas/taxes.
         - comision_monto: Comisión a favor de la agencia.
         - total_pagar: Lo que se le debe al proveedor.
-        
+
         Responde con un JSON que mapee el nombre de la columna original al campo estándar.
         Ejemplo: {{"COL_TICKET_ID": "numero_boleto", "BASE_FARE": "tarifa_neta", ...}}
         """
@@ -504,7 +504,7 @@ class SmartReconciliationService:
 
         AsientoContable = apps.get_model("contabilidad", "AsientoContable")
         DetalleAsiento = apps.get_model("contabilidad", "DetalleAsiento")
-        from apps.finance.models.currencies import Moneda
+        from apps.finance.models_stubs import Moneda
 
         if (
             conciliacion.estado != ConciliacionBoleto.EstadosCruce.DISCREPANCIA
@@ -668,15 +668,15 @@ class SmartReconciliationService:
         prompt = f"""
         Identifica si alguno de estos boletos locales coincide con la línea del reporte del proveedor.
         El número de boleto puede tener errores tipográficos o estar truncado. Confía en el nombre y monto.
-        
+
         LÍNEA DEL REPORTE:
         - Número Reportado: {linea.numero_boleto_reportado}
         - Total Cobrado: {linea.total_cobrado}
         - Datos Crudos: {linea.raw_data}
-        
+
         CANDIDATOS LOCALES:
         {json.dumps(contexto_candidatos, indent=2)}
-        
+
         Responde con un JSON:
         {{
             "match_encontrado": bool,

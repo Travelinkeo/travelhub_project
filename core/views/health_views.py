@@ -4,7 +4,6 @@ import shutil
 import time
 
 from django.conf import settings
-from django.contrib.admin.views.decorators import staff_member_required
 from django.core.cache import cache
 from django.db import connections
 from django.http import JsonResponse
@@ -48,20 +47,17 @@ def _check_celery():
         return {"ok": False, "error": str(e)[:200]}
 
 
-def _check_gotenberg():
-    gotenberg_url = (
-        getattr(settings, "GOTENBERG_URL", None)
-        or "http://gotenberg:3000/forms/chromium/convert/html"
-    )
+def _check_weasyprint():
+    """
+    Verifica que WeasyPrint (generador de PDF local) esté instalado.
+    Reemplaza a _check_gotenberg() eliminado en Fase 5.
+    """
     try:
-        import urllib.request
+        import weasyprint  # noqa: F401
 
-        base_url = gotenberg_url.split("/forms")[0]
-        req = urllib.request.Request(f"{base_url}/health", method="GET")  # noqa: S310
-        with urllib.request.urlopen(req, timeout=3) as resp:  # noqa: S310
-            return {"ok": resp.status == 200}
-    except Exception as e:
-        return {"ok": False, "error": str(e)[:200]}
+        return {"ok": True, "engine": "weasyprint"}
+    except ImportError:
+        return {"ok": False, "error": "weasyprint no instalado"}
 
 
 def _check_disk():
@@ -127,28 +123,31 @@ def _check_db_pool():
 
 
 @require_GET
-@staff_member_required
 def health_check(request):
     """
-    Health check unificado para monitoreo externo.
-    Verifica: DB, Redis, Celery, Gotenberg, Disco, Celery queue depth, DB pool.
-    Retorna 200 si todo OK, 503 si algo degradado.
+    Health check unificado para monitoreo externo (endpoint público).
+    Verifica: DB, Redis, Celery, PDF engine, Disco, Celery queue depth, DB pool.
+    Las dependencias críticas (database, redis, disk, db_pool) determinan el
+    estado 200/503. Los servicios externos opcionales (celery, pdf_engine,
+    celery_queue_depth) se reportan pero no degradan el endpoint, para no
+    provocar reinicios de pods por caídas parciales de servicios satélite.
     """
     checks = {
         "database": _check_database(),
         "redis": _check_redis(),
         "celery": _check_celery(),
-        "gotenberg": _check_gotenberg(),
+        "pdf_engine": _check_weasyprint(),
         "disk": _check_disk(),
         "celery_queue_depth": _check_celery_queue_depth(),
         "db_pool": _check_db_pool(),
     }
 
-    all_ok = all(v.get("ok") for v in checks.values())
+    critical_checks = ("database", "redis", "disk", "db_pool")
+    all_ok = all(checks[name].get("ok") for name in critical_checks)
     status_code = 200 if all_ok else 503
 
     response = {
-        "status": "ok" if all_ok else "degraded",
+        "status": "healthy" if all_ok else "degraded",
         "timestamp": time.time(),
         "checks": checks,
     }

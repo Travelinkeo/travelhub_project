@@ -4,8 +4,7 @@ from django.core.cache import cache
 from django.core.management.base import BaseCommand
 
 from apps.bookings.models import ProductoServicio
-from apps.common.models import Aerolinea, Ciudad, Pais
-from apps.finance.models.currencies import Moneda
+from apps.common.models import Aerolinea, Ciudad, Moneda, Pais
 
 
 class Command(BaseCommand):

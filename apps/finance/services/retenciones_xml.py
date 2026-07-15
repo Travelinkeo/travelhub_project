@@ -4,7 +4,7 @@ from decimal import Decimal
 
 from defusedxml.minidom import parseString as minidom_parse_string
 
-from apps.finance.models.retenciones import RetencionISLR
+from apps.finance.models_stubs import RetencionISLR
 
 logger = logging.getLogger(__name__)
 

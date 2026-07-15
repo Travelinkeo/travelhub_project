@@ -59,9 +59,13 @@ class OnboardingRedirectMiddleware:
         if ONBOARDING_SKIP_PATHS.match(path):
             return self.get_response(request)
 
+        # No interceptar requests HTMX (navegación parcial del wizard)
+        if request.headers.get("HX-Request"):
+            return self.get_response(request)
+
         # Verificar si el usuario ha completado onboarding
         if self._needs_onboarding(request.user):
-            return redirect("onboarding_start")
+            return redirect("onboarding_welcome")
 
         return self.get_response(request)
 
@@ -69,10 +73,21 @@ class OnboardingRedirectMiddleware:
     def _needs_onboarding(user):
         """True si el usuario necesita completar onboarding.
 
-        El onboarding se completa cuando el usuario tiene al menos
-        una relación UsuarioAgencia (está asociado a una agencia).
+        El onboarding se considera completado si el usuario ya tiene una
+        relación UsuarioAgencia (está asociado a una agencia) o si su
+        UserProgress del wizard alcanzó el paso final (STEP_COMPLETE).
         """
         try:
-            return not UsuarioAgencia.objects.filter(usuario=user).exists()
+            has_agency = UsuarioAgencia.objects.filter(usuario=user).exists()
         except Exception:
+            has_agency = False
+        if has_agency:
             return False
+
+        from apps.common.models import UserProgress
+
+        try:
+            progress = UserProgress.objects.get(user=user)
+        except UserProgress.DoesNotExist:
+            return True
+        return not progress.onboarding_completed

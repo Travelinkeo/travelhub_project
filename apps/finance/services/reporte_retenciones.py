@@ -7,7 +7,7 @@ from decimal import Decimal
 
 from django.db.models import Count, Sum
 
-from apps.finance.models.retenciones import RetencionISLR
+from apps.finance.models_stubs import RetencionISLR
 
 
 class ReporteRetencionesService:

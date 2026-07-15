@@ -2,34 +2,10 @@
 # Maintained by: Antigravity/Gemini
 # -----------------------------------------------------
 import hashlib
-import locale
 import logging
 import time
 
 logger = logging.getLogger(__name__)
-
-# 🛡️ SAFE LOCALE MONKEY PATCH (SRE L3)
-# Intercepts setlocale globally to prevent "unsupported locale setting" crash
-try:
-    original_setlocale = locale.setlocale
-
-    def safe_setlocale(category, locale_name=None):
-        try:
-            return original_setlocale(category, locale_name)
-        except Exception as e:
-            logger.warning(f"⚠️ [SRE L3] Blocked unsupported locale setting '{locale_name}': {e}")
-            try:
-                return original_setlocale(category, "")
-            except Exception:
-                try:
-                    return original_setlocale(category, "C")
-                except Exception:
-                    return "C"
-
-    locale.setlocale = safe_setlocale
-    logger.info("✅ [SRE L3] Global locale.setlocale monkey patch applied successfully.")
-except Exception as e_patch:
-    logger.error(f"❌ [SRE L3] Failed to apply locale monkey patch: {e_patch}")
 
 from django.core.cache import cache  # noqa: E402
 from django.db import OperationalError, transaction  # noqa: E402
@@ -66,6 +42,17 @@ def _is_celery_available() -> bool:
         return False
 
 
+def _safe_concat_log(original_log, new_entry, max_len=4000) -> str:
+    """Concatena y trunca logs de parseo de forma segura para no exceder los limites de la DB."""
+    orig = str(original_log or "").strip()
+    entry = str(new_entry or "").strip()
+    if orig:
+        combined = f"{orig} | {entry}"
+    else:
+        combined = entry
+    return combined[-max_len:]
+
+
 def _generate_pdf_sync(boleto) -> None:
     """
     Genera el PDF de un boleto de forma síncrona usando WeasyPrint.
@@ -84,8 +71,9 @@ def _generate_pdf_sync(boleto) -> None:
             )
             BoletoImportado.all_objects.filter(pk=boleto.pk).update(
                 estado_parseo="ERR",
-                log_parseo=(str(boleto.log_parseo or ""))
-                + " | Sin datos para generar PDF. Vuelve a parsear.",
+                log_parseo=_safe_concat_log(
+                    boleto.log_parseo, "Sin datos para generar PDF. Vuelve a parsear."
+                ),
             )
             return
 
@@ -104,8 +92,9 @@ def _generate_pdf_sync(boleto) -> None:
             )
             BoletoImportado.all_objects.filter(pk=boleto.pk).update(
                 estado_parseo="ERR",
-                log_parseo=(str(boleto.log_parseo or ""))
-                + " | PDF vacío generado. Usa el botón Reintentar.",
+                log_parseo=_safe_concat_log(
+                    boleto.log_parseo, "PDF vacío generado. Usa el botón Reintentar."
+                ),
             )
     except Exception as e:
         logger.error(f"❌ [SYNC] Error generando PDF para boleto {boleto.pk}: {e}", exc_info=True)
@@ -113,7 +102,7 @@ def _generate_pdf_sync(boleto) -> None:
         try:
             BoletoImportado.all_objects.filter(pk=boleto.pk).update(
                 estado_parseo="ERR",
-                log_parseo=(str(boleto.log_parseo or "")) + f" | Error en PDF: {str(e)[:300]}",
+                log_parseo=_safe_concat_log(boleto.log_parseo, f"Error en PDF: {str(e)[:300]}"),
             )
         except Exception as e_log:
             logger.error(f"No se pudo actualizar log_parseo del boleto {boleto.pk}: {e_log}")
@@ -753,10 +742,7 @@ class TicketParserService:
         # De lo contrario, marcamos como ERR
         if boleto.estado_parseo not in ("REV", "ERR"):
             boleto.estado_parseo = "REV"  # Preferimos REV para que el usuario pueda corregir
-        if boleto.log_parseo:
-            boleto.log_parseo = f"{boleto.log_parseo} | {str(error_msg)}"[:2000]
-        else:
-            boleto.log_parseo = str(error_msg)[:2000]  # Truncar para no sobrepasar el campo
+        boleto.log_parseo = _safe_concat_log(boleto.log_parseo, error_msg)
         try:
             boleto.save(update_fields=["estado_parseo", "log_parseo"])
         except Exception as e_save:

@@ -8,7 +8,7 @@ from django.utils import timezone
 
 if TYPE_CHECKING:
     from apps.bookings.models import ItemVenta, Venta
-    from apps.finance.models import TaxRefundOpportunity
+from apps.finance.models_stubs import TaxRefundOpportunity
 
 
 def __getattr__(name: str) -> Any:

@@ -223,10 +223,10 @@ class TestStripeWebhookFailClosed:
     def test_rechaza_cuando_signature_invalida(self, api_client):
         with override_settings(STRIPE_WEBHOOK_SECRET="whsec_test_secret_largo"):
             # Mock stripe.webhook.construct_event para lanzar SignatureVerificationError
-            with mock.patch("stripe.webhook.construct_event") as mock_construct:
+            with mock.patch("stripe.Webhook.construct_event") as mock_construct:
                 import stripe
 
-                mock_construct.side_effect = stripe.error.SignatureVerificationError(
+                mock_construct.side_effect = stripe.SignatureVerificationError(
                     "Invalid signature", "sig"
                 )
                 response = api_client.post(

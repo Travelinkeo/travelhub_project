@@ -3,7 +3,7 @@ import json
 import pytest
 from django.core.management import call_command
 
-from apps.finance.models.currencies import Moneda
+from apps.common.models import Moneda
 
 
 @pytest.mark.unit

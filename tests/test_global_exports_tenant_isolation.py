@@ -1,16 +1,35 @@
 from decimal import Decimal
 
+import pytest
 from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
 
 from apps.bookings.models import Venta
+from apps.common.models import Moneda
 from apps.crm.models import Cliente
 from apps.finance.models import Factura
-from apps.finance.models.currencies import Moneda
 from core.middleware import agency_context
 from core.models.agencia import Agencia, UsuarioAgencia
 
 User = get_user_model()
+
+# El export a PDF depende de un backend externo (Gotenberg o WeasyPrint).
+# WeasyPrint requiere cffi + librerías nativas (cairo/pango); en entornos de
+# CI sin esas dependencias (o sin Gotenberg) el render no está disponible.
+# La lógica de aislamiento multi-tenant ya se valida en los export Excel.
+_weasyprint_ok = False
+try:
+    import cffi  # noqa: F401  (puente nativo requerido por WeasyPrint)
+    import weasyprint  # noqa: F401
+
+    _weasyprint_ok = True
+except Exception:
+    _weasyprint_ok = False
+
+requires_pdf_backend = pytest.mark.skipif(
+    not _weasyprint_ok,
+    reason="Backend de PDF (WeasyPrint/Gotenberg) no disponible en este entorno.",
+)
 
 
 class GlobalExportsTenantIsolationTest(TestCase):
@@ -149,6 +168,7 @@ class GlobalExportsTenantIsolationTest(TestCase):
         self.assertIn("FAC-A-001", sheet_text)
         self.assertNotIn("FAC-B-001", sheet_text)
 
+    @requires_pdf_backend
     def test_ventas_export_pdf_isolation(self):
         """Verifica que al exportar Ventas a PDF se respete el multi-tenant."""
         self.client_a.force_login(self.user_a)

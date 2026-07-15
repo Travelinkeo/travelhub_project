@@ -188,7 +188,7 @@ class CotizacionForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        from apps.finance.models.currencies import Moneda
+        from apps.common.models import Moneda
 
         # Order currencies: Local first, then by name
         self.fields["moneda"].queryset = Moneda.objects.order_by("-es_moneda_local", "nombre")

@@ -7,8 +7,8 @@ from django.test.utils import CaptureQueriesContext
 from rest_framework.test import APIClient
 
 from apps.bookings.models import BoletoImportado, Venta
+from apps.common.models import Moneda
 from apps.crm.models import Cliente
-from apps.finance.models.currencies import Moneda
 
 pytestmark = pytest.mark.skip(reason="Tests requieren configuración completa o refactorización")
 

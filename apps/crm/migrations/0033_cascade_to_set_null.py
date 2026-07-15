@@ -39,7 +39,7 @@ class Migration(migrations.Migration):
                 null=True,
                 on_delete=models.SET_NULL,
                 related_name="perfil_freelancer",
-                to="core.user",
+                to="auth.User",
             ),
         ),
         migrations.AlterField(

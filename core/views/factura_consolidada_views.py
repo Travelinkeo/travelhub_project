@@ -10,7 +10,7 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from apps.bookings.models import Venta
-from apps.finance.models import FacturaConsolidada, ItemFacturaConsolidada
+from apps.finance.models_stubs import FacturaConsolidada, ItemFacturaConsolidada
 from core.api.mixins.tenant import TenantViewSetMixin
 from core.serializers_facturacion_consolidada import (
     FacturaConsolidadaSerializer,

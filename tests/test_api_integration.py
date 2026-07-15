@@ -7,7 +7,7 @@ import pytest
 from django.contrib.auth import get_user_model
 
 from apps.bookings.models import Venta
-from apps.finance.models.currencies import Moneda
+from apps.common.models import Moneda
 
 User = get_user_model()
 
@@ -107,7 +107,7 @@ class TestCalculosFinancierosAvanzados:
         from datetime import date
         from decimal import Decimal
 
-        from apps.finance.models.core_finance import Factura, ItemFactura
+        from apps.finance.models import Factura, ItemFactura
 
         moneda, _ = Moneda.objects.get_or_create(
             codigo_iso="USD", defaults={"nombre": "Dólar", "simbolo": "$"}

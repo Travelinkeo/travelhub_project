@@ -18,8 +18,8 @@ from django.contrib.auth import get_user_model
 from django.test import override_settings
 
 from apps.bookings.models import BoletoImportado, Venta
+from apps.common.models import Moneda
 from apps.crm.models import Cliente
-from apps.finance.models.currencies import Moneda
 
 pytestmark = pytest.mark.skip(reason="Tests requieren configuración completa - pendiente")
 
@@ -430,8 +430,8 @@ class TestShimModelos:
     """
 
     def test_moneda_via_shim_es_mismo_modelo(self):
-        from apps.finance.models.currencies import Moneda as RealMoneda
-        from apps.finance.models.currencies import Moneda as ShimMoneda
+        from apps.common.models import Moneda as RealMoneda
+        from apps.common.models import Moneda as ShimMoneda
 
         assert ShimMoneda is RealMoneda
 
@@ -461,7 +461,7 @@ class TestShimModelos:
 
     def test_crud_moneda_via_shim(self, db):
         """Operaciones reales en BD a través del shim."""
-        from apps.finance.models.currencies import Moneda
+        from apps.common.models import Moneda
 
         moneda, created = Moneda.objects.get_or_create(
             codigo_iso="EUR", defaults={"nombre": "Euro", "simbolo": "€"}

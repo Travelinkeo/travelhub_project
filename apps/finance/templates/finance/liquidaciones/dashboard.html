@@ -15,7 +15,7 @@
             <h1 class="text-3xl font-black text-text-main tracking-tight uppercase">Control de Liquidaciones</h1>
             <p class="text-text-muted text-sm mt-1">Monitoreo de saldos pendientes y ejecución de pagos a proveedores.</p>
         </div>
-        <a href="{% url 'finance:liquidacion_create' %}" class="btn-primary !h-12 !px-6 shadow-xl shadow-primary/20">
+        <a href="#" class="btn-primary !h-12 !px-6 shadow-xl shadow-primary/20">
             <span class="material-symbols-outlined text-[20px]">add_circle</span>
             <span>Nueva Liquidación</span>
         </a>
@@ -64,7 +64,7 @@
                 <input type="text" name="q" value="{{ request.GET.q }}" placeholder="Buscar por proveedor o ID..."
                     class="input-base !pl-12 !h-12 w-full">
             </div>
-            
+
             <div class="w-full md:w-64">
                 <select name="estado" class="input-base !h-12 w-full appearance-none bg-surface-1">
                     <option value="">Todos los estados</option>
@@ -73,7 +73,7 @@
                     {% endfor %}
                 </select>
             </div>
-            
+
             <button type="submit" class="btn-primary !h-12 !px-8 w-full md:w-auto">
                 <span class="material-symbols-outlined">filter_alt</span>
                 <span>Filtrar</span>
@@ -90,7 +90,7 @@
                 </div>
                 <h2 class="text-sm font-black text-text-main uppercase tracking-widest">Listado de Liquidaciones</h2>
             </div>
-            
+
             <div class="flex items-center gap-2">
                 <a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.estado %}estado={{ request.GET.estado }}&{% endif %}export=excel" class="btn-secondary flex items-center justify-center !h-9 !px-3 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/10 text-[10px] font-black uppercase tracking-wider gap-1.5" title="Exportar Excel">
                     <span class="material-symbols-outlined text-[14px]">download</span> Excel
@@ -156,7 +156,7 @@
                         </td>
                         <td class="px-8 py-5">
                             <div class="flex justify-end">
-                                <a href="{% url 'finance:liquidacion_detail' liquidacion.pk %}"
+                                <a href="#"
                                     class="size-9 flex items-center justify-center text-text-muted hover:text-primary hover:bg-primary/10 rounded-xl transition-all border border-transparent hover:border-primary/20"
                                     title="Ver Detalle">
                                     <span class="material-symbols-outlined text-[20px]">visibility</span>

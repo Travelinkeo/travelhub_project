@@ -19,8 +19,11 @@ from django.db import transaction
 from django.utils import timezone
 
 # Resolved dynamically to avoid architectural violations
-from apps.finance.models.ai_accounting_schemas import AsientoContableSchema
-from apps.finance.models.currencies import Moneda
+# TODO: AsientoContableSchema was removed in model refactor
+# from apps.finance.models.ai_accounting_schemas import AsientoContableSchema
+from apps.common.models import Moneda
+
+AsientoContableSchema = None  # stub
 
 if TYPE_CHECKING:
     from contabilidad.models import AsientoContable
@@ -67,8 +70,8 @@ class AccountingAIService:
                 "apps.automation.services.prompts.ACCOUNTING_SYSTEM_PROMPT"
             )
             AsientoContable = apps.get_model("contabilidad", "AsientoContable")
-            DetalleAsiento = apps.get_model("contabilidad", "DetalleAsiento")
-            PlanContable = apps.get_model("contabilidad", "PlanContable")
+            MovimientoContable = apps.get_model("contabilidad", "MovimientoContable")
+            CuentaContable = apps.get_model("contabilidad", "CuentaContable")
 
             # 2. Invocación al Motor IA con Esquema de Partida Doble
             # Temperatura 0.0 para garantizar que la contabilidad sea determinística
@@ -101,11 +104,11 @@ class AccountingAIService:
             # 5. PROCESAMIENTO DE LÍNEAS Y RESOLUCIÓN DE CUENTAS
             for i, l_schema in enumerate(datos_asiento["lineas"], 1):
                 # Estrategia de búsqueda de cuenta: Código > Nombre Exacto > Similar
-                cuenta = PlanContable.objects.filter(
+                cuenta = CuentaContable.objects.filter(
                     codigo_cuenta=l_schema["codigo_cuenta"]
                 ).first()
                 if not cuenta:
-                    cuenta = PlanContable.objects.filter(
+                    cuenta = CuentaContable.objects.filter(
                         nombre_cuenta__icontains=l_schema["nombre_cuenta"]
                     ).first()
 
@@ -115,7 +118,7 @@ class AccountingAIService:
                     raise ValueError(error_msg)
 
                 # Persistir la línea de detalle
-                DetalleAsiento.objects.create(
+                MovimientoContable.objects.create(
                     asiento=asiento,
                     linea=i,
                     cuenta_contable=cuenta,

@@ -16,7 +16,6 @@ _SERIALIZER_MAPPINGS = {
     "ComunicacionProveedorSerializer": "apps.common.serializers",
     # apps.finance.serializers
     "MonedaSerializer": "apps.finance.serializers",
-    "TipoCambioSerializer": "apps.finance.serializers",
     "ItemFacturaSerializer": "apps.finance.serializers",
     "FacturaSerializer": "apps.finance.serializers",
     # apps.crm.serializers
@@ -47,8 +46,6 @@ _SERIALIZER_MAPPINGS = {
     # apps.contabilidad.serializers
     "DetalleAsientoSerializer": "apps.contabilidad.serializers",
     "AsientoContableSerializer": "apps.contabilidad.serializers",
-    "ItemLiquidacionSerializer": "apps.contabilidad.serializers",
-    "LiquidacionProveedorSerializer": "apps.contabilidad.serializers",
 }
 
 

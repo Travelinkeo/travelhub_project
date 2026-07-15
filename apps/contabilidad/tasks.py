@@ -46,9 +46,9 @@ def sync_bcv_rates():
 
     from django.core.cache import cache
 
-    from apps.contabilidad.models import TasaCambioBCV
+    from apps.common.models import Moneda, TasaCambio, TipoCambio
     from apps.contabilidad.tasas_venezuela_client import TasasVenezuelaClient
-    from apps.finance.models.currencies import Moneda, TasaCambio, TipoCambio
+    from apps.finance.models import TasaCambioBCV
 
     logger.info("Iniciando sincronización de tasas BCV...")
     hoy = date.today()

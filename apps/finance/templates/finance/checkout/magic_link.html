@@ -49,7 +49,7 @@
             <!-- Lista de Items -->
             <div class="space-y-6 mb-8">
                 <h3 class="text-xs font-black text-slate-500 uppercase tracking-widest border-b border-slate-800 pb-2">Tu Itinerario (PNR: {{ venta.localizador }})</h3>
-                
+
                 {% for item in items %}
                 <div class="flex items-start gap-4">
                     <div class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center flex-shrink-0 text-blue-400 border border-slate-700">
@@ -75,7 +75,7 @@
 
     <!-- LADO DERECHO: Métodos de Pago (Alpine.js) -->
     <div class="w-full md:w-3/5 bg-white p-6 md:p-12 lg:p-20 overflow-y-auto">
-        
+
         {% if is_expired %}
             <!-- ESTADO: EXPIRADO -->
             <div class="h-full flex flex-col items-center justify-center text-center max-w-md mx-auto">
@@ -103,7 +103,7 @@
         {% else %}
             <!-- ESTADO: PENDIENTE DE PAGO -->
             <div x-data="{ tab: 'zelle' }" class="max-w-lg mx-auto w-full">
-                
+
                 <h2 class="text-2xl font-black text-slate-800 mb-2">Selecciona un método de pago</h2>
                 <p class="text-slate-500 text-sm font-medium mb-8">Selecciona la opción de tu preferencia para emitir tus boletos de forma segura.</p>
 
@@ -122,7 +122,7 @@
 
                 <!-- CONTENIDO: ZELLE (Con HTMX) -->
                 <div x-show="tab === 'zelle'" x-transition.opacity.duration.300ms id="zelle-container">
-                    
+
                     <div class="bg-blue-50 border border-blue-100 rounded-3xl p-6 mb-8 text-center relative overflow-hidden">
                         <div class="absolute -right-4 -top-4 w-24 h-24 bg-blue-500 opacity-5 rounded-full blur-2xl"></div>
                         <p class="text-xs font-black uppercase tracking-widest text-blue-400 mb-2">Enviar pago a la cuenta:</p>
@@ -130,13 +130,13 @@
                         <p class="text-sm font-bold text-blue-600">{{ agencia.nombre_comercial|default:"Tu Agencia Travel" }}</p>
                     </div>
 
-                    <form hx-post="{% url 'finance:magic_link_checkout' link.id %}" 
-                          hx-target="#zelle-container" 
-                          hx-swap="outerHTML" 
+                    <form hx-post="#"
+                          hx-target="#zelle-container"
+                          hx-swap="outerHTML"
                           hx-encoding="multipart/form-data"
                           class="space-y-5">
                         {% csrf_token %}
-                        
+
                         <div>
                             <label class="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Número de Referencia Zelle</label>
                             <input type="text" name="referencia" required placeholder="Ej. 1293847ABC" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-4 text-slate-800 font-bold focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all outline-none placeholder-slate-400">
@@ -158,22 +158,22 @@
                 <div x-show="tab === 'card'" x-transition.opacity.duration.300ms style="display: none;">
                     <div class="border border-slate-200 bg-slate-50 rounded-3xl p-8 text-center flex flex-col items-center justify-center relative overflow-hidden shadow-inner">
                         <div class="absolute -left-4 -top-4 w-24 h-24 bg-indigo-500 opacity-5 rounded-full blur-2xl"></div>
-                        
+
                         <div class="flex gap-2 mb-6 opacity-80 text-indigo-900">
                             <span class="material-symbols-outlined text-4xl">credit_card</span>
                             <span class="material-symbols-outlined text-4xl">contactless</span>
                         </div>
                         <h3 class="text-lg font-black text-slate-800 mb-2">Pago con Tarjeta Internacional</h3>
                         <p class="text-sm font-medium text-slate-500 mb-6">Paga de forma segura con Visa, Mastercard o American Express mediante nuestra pasarela encriptada.</p>
-                        
+
                         <!-- Formulario conectado a la Vista de Stripe -->
-                        <form action="{% url 'finance:stripe_checkout' link.id %}" method="POST" class="w-full">
+                        <form action="#" method="POST" class="w-full">
                             {% csrf_token %}
                             <button type="submit" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-black py-4 px-6 rounded-xl shadow-lg shadow-slate-900/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2">
                                 Pagar {{ link.monto_total }} {{ link.moneda }} <span class="material-symbols-outlined text-[18px]">lock</span>
                             </button>
                         </form>
-                        
+
                         <div class="flex items-center justify-center gap-2 mt-4 opacity-50">
                             <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Powered by Stripe</p>
                         </div>
@@ -190,7 +190,7 @@
                         </div>
                         <h3 class="text-lg font-black text-amber-900 mb-1">Pagar con USDT (TRC20)</h3>
                         <p class="text-xs font-medium text-amber-700/80 mb-6">Escanea el código QR o copia la dirección de nuestra billetera en la red Tron (TRC20).</p>
-                        
+
                         <!-- QR Code Dinámico -->
                         <div class="bg-white p-3 rounded-2xl inline-block border border-amber-100 mb-4 shadow-sm">
                             <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data={{ agencia.configuracion_api.billetera_usdt|default:'TXUje5hXkwyZ2Q6P8HjK8mK9k2P' }}" alt="QR USDT" class="w-32 h-32 md:w-40 md:h-40 rounded-lg">
@@ -210,13 +210,13 @@
                         </div>
 
                         <!-- Formulario Reporte Crypto (HTMX) -->
-                        <form hx-post="{% url 'finance:magic_link_checkout' link.id %}" 
-                              hx-target="#crypto-container" 
-                              hx-swap="outerHTML" 
+                        <form hx-post="#"
+                              hx-target="#crypto-container"
+                              hx-swap="outerHTML"
                               class="space-y-4 text-left">
                             {% csrf_token %}
                             <input type="hidden" name="metodo_pago" value="CRYPTO">
-                            
+
                             <div>
                                 <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1 pl-1">Hash de Transacción (TxID) o ID Binance</label>
                                 <input type="text" name="referencia" required placeholder="Ej. 8a9b...f12c" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-800 font-mono text-sm focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 transition-all outline-none placeholder-slate-300 shadow-sm">

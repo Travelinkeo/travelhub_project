@@ -3,7 +3,8 @@ from django.core.management.base import BaseCommand
 from django.utils import timezone
 
 from apps.bookings.models import ProductoServicio, Proveedor
-from apps.finance.models.currencies import Moneda
+from apps.common.models import Moneda
+from apps.finance.models_stubs import TipoCambio
 from core.middleware import system_context
 from core.models.agencia import Agencia
 
@@ -52,7 +53,6 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS("💰 Monedas creadas"))
 
         # 3.1 Tipos de Cambio
-        from apps.finance.models.currencies import TipoCambio
 
         TipoCambio.objects.get_or_create(
             moneda_origen=moneda_usd,

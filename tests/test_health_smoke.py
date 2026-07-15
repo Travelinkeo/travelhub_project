@@ -49,7 +49,7 @@ class HealthCheckSmokeTests(TestCase):
     @patch("core.views.health_views._check_database")
     @patch("core.views.health_views._check_redis")
     @patch("core.views.health_views._check_celery")
-    @patch("core.views.health_views._check_gotenberg")
+    @patch("core.views.health_views._check_weasyprint")
     @patch("core.views.health_views._check_disk")
     @patch("core.views.health_views._check_celery_queue_depth")
     @patch("core.views.health_views._check_db_pool")
@@ -58,7 +58,7 @@ class HealthCheckSmokeTests(TestCase):
         mock_db_pool,
         mock_queue_depth,
         mock_disk,
-        mock_gotenberg,
+        mock_weasyprint,
         mock_celery,
         mock_redis,
         mock_db,
@@ -67,7 +67,7 @@ class HealthCheckSmokeTests(TestCase):
         mock_db.return_value = {"ok": True}
         mock_redis.return_value = {"ok": True}
         mock_celery.return_value = {"ok": True, "workers": 2}
-        mock_gotenberg.return_value = {"ok": True}
+        mock_weasyprint.return_value = {"ok": True, "engine": "weasyprint"}
         mock_disk.return_value = {"ok": True, "free_gb": 10}
         mock_queue_depth.return_value = {"ok": True, "queues": {"default": 5}}
         mock_db_pool.return_value = {"ok": True, "used_pct": 30}
@@ -183,7 +183,7 @@ class CeleryConnectivityTests(TestCase):
         from travelhub.celery import app as celery_app
 
         queue_names = [q.name for q in celery_app.conf.task_queues]
-        expected = {"default", "ia_fast", "ia_heavy", "notifications"}
+        expected = {"celery", "notifications"}
         assert expected.issubset(set(queue_names))
 
 

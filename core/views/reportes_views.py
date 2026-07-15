@@ -10,7 +10,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from apps.contabilidad.models import AsientoContable, DetalleAsiento
+from apps.contabilidad.models import AsientoContable, MovimientoContable
 from core.auth_helpers import internal_auth
 
 
@@ -121,7 +121,7 @@ def balance_comprobacion(request):
     """
     fecha_hasta = request.GET.get("fecha_hasta")
 
-    detalles_qs = DetalleAsiento.objects.select_related("cuenta_contable", "asiento")
+    detalles_qs = MovimientoContable.objects.select_related("cuenta_contable", "asiento")
 
     if fecha_hasta:
         detalles_qs = detalles_qs.filter(asiento__fecha_contable__lte=fecha_hasta)
@@ -353,7 +353,7 @@ def estado_resultados(request):
     fecha_hasta = request.GET.get("fecha_hasta")
 
     # Base Query: Todos los detalles de asientos confirmados
-    detalles = DetalleAsiento.objects.filter(asiento__estado="CON").select_related(
+    detalles = MovimientoContable.objects.filter(asiento__estado="CON").select_related(
         "cuenta_contable"
     )
 

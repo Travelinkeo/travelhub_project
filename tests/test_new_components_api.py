@@ -11,9 +11,8 @@ from apps.bookings.models import (
     ServicioAdicionalDetalle,
     Venta,
 )
-from apps.common.models import Ciudad, Pais
+from apps.common.models import Ciudad, Moneda, Pais
 from apps.crm.models import Cliente
-from apps.finance.models.currencies import Moneda
 
 pytestmark = pytest.mark.skip(reason="Tests requieren configuración completa - pendiente")
 

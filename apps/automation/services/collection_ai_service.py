@@ -4,7 +4,7 @@ from datetime import timedelta
 from django.db.models import Q, Sum
 from django.utils import timezone
 
-from apps.finance.models.core_finance import Factura
+from apps.finance.models import Factura
 
 logger = logging.getLogger(__name__)
 

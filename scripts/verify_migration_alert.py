@@ -12,7 +12,7 @@ from django.contrib.auth.models import User
 from personas.models import Pasajero
 
 from apps.bookings.models import Venta
-from apps.finance.models.currencies import Moneda
+from apps.common.models import Moneda
 from core.models import Agencia, MigrationCheck, UsuarioAgencia
 
 

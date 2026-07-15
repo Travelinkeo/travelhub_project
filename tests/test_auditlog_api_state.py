@@ -4,8 +4,8 @@ import pytest
 from django.urls import reverse
 
 from apps.bookings.models import Venta
+from apps.common.models import Moneda
 from apps.crm.models import Cliente
-from apps.finance.models.currencies import Moneda
 
 pytestmark = pytest.mark.skip(reason="Tests requieren configuración completa - pendiente")
 

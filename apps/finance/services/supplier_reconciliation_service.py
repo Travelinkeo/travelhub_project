@@ -18,7 +18,7 @@ class LineaLiquidacionSchema(BaseModel):
     passenger: str | None = Field(None, description="Nombre del pasajero, si aparece")
 
 
-class LiquidacionProveedorSchema(BaseModel):
+class ConciliacionProveedorSchema(BaseModel):
     lineas: list[LineaLiquidacionSchema] = Field(
         description="Lista de servicios o boletos cobrados"
     )
@@ -114,7 +114,7 @@ class SupplierReconciliationService:
 
             res = ai_engine.parse_structured_data(
                 text=f"Analiza este reporte de liquidación y extrae los servicios cobrados:\n\n{text}",
-                schema=LiquidacionProveedorSchema,
+                schema=ConciliacionProveedorSchema,
                 system_prompt=system_prompt,
             )
 

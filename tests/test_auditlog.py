@@ -4,8 +4,8 @@ import pytest
 from django.core.exceptions import ValidationError
 
 from apps.bookings.models import AuditLog, ItemVenta, ProductoServicio, Venta
+from apps.common.models import Moneda
 from apps.crm.models import Cliente
-from apps.finance.models.currencies import Moneda
 
 pytestmark = pytest.mark.skip(reason="Tests requieren configuración completa o refactorización")
 

@@ -60,7 +60,7 @@ def generar_pdf_factura_consolidada(factura):
             },
         )
 
-        # Generar PDF con Gotenberg
+        # Generar PDF con WeasyPrint
         pdf_file = PdfRendererService.render_html_to_pdf(html_string)
 
         logger.info(f"PDF generado exitosamente para factura {factura.numero_factura}")

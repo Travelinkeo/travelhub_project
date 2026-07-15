@@ -37,7 +37,7 @@ def agencia_estandar(db):
 
 @pytest.fixture
 def moneda_usd(db):
-    from apps.finance.models.currencies import Moneda
+    from apps.common.models import Moneda
 
     moneda, _ = Moneda.objects.get_or_create(
         codigo_iso="USD", defaults={"nombre": "Dólar Americano", "simbolo": "$"}

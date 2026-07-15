@@ -11,8 +11,7 @@ from typing import TYPE_CHECKING
 from django.db import transaction
 
 if TYPE_CHECKING:
-    from apps.finance.models import Factura as FacturaConsolidada
-    from apps.finance.models import ItemFactura as ItemFacturaConsolidada
+    from apps.finance.models_stubs import FacturaConsolidada, ItemFacturaConsolidada
 
 
 def __getattr__(name):

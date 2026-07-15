@@ -9,7 +9,7 @@ from django.test import Client
 from django.urls import reverse
 
 from apps.bookings.models import BoletoImportado
-from apps.finance.models.reconciliacion import (
+from apps.finance.models_stubs import (
     ConciliacionBoleto,
     LineaReporteReconciliacion,
     ReporteReconciliacion,

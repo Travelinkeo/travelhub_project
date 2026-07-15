@@ -117,7 +117,7 @@ class WhatsAppWebhookView(View):
                                     from apps.crm.tasks_bot import whatsapp_ai_task
 
                                     whatsapp_ai_task.apply_async(
-                                        args=[telefono, nombre_perfil, texto], queue="ia_fast"
+                                        args=[telefono, nombre_perfil, texto]
                                     )
                                 except Exception as e:
                                     logger.error(
@@ -162,7 +162,6 @@ class WhatsAppWebhookView(View):
                                             mime_type,
                                             agencia.id if agencia else None,
                                         ],
-                                        queue="ia_fast",
                                     )
                                 except Exception as e:
                                     logger.error(f"Error al encolar whatsapp_media_ocr_task: {e}")
@@ -272,7 +271,7 @@ class EvolutionWebhookView(View):
             try:
                 from apps.crm.tasks_bot import whatsapp_ai_task
 
-                whatsapp_ai_task.apply_async(args=[telefono, push_name, texto], queue="ia_fast")
+                whatsapp_ai_task.apply_async(args=[telefono, push_name, texto])
             except Exception as e:
                 logger.error(f"Error encolando IA para Evolution inbound: {e}")
 

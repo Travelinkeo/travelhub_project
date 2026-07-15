@@ -46,12 +46,12 @@
     </header>
 
     <main class="relative z-10 flex-1 flex flex-col items-center justify-center p-4 w-full max-w-5xl mx-auto">
-        
+
         <!-- STEP INDICATOR -->
         <div class="w-full max-w-md mx-auto mb-10 flex items-center justify-between relative" x-show="step < 5">
             <div class="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-surface-2 z-0 rounded-full"></div>
             <div class="absolute left-0 top-1/2 -translate-y-1/2 h-1 dynamic-brand-bg z-0 rounded-full transition-all duration-500" :style="`width: ${(step - 1) * 33.33}%`"></div>
-            
+
             <template x-for="i in 4">
                 <div class="relative z-10 w-8 h-8 rounded-full flex items-center justify-center text-xs font-black transition-all duration-500"
                      :class="step >= i ? 'dynamic-brand-bg text-white shadow-lg' : 'bg-surface-2 text-text-muted border border-border-color'">
@@ -79,7 +79,24 @@
                 <p class="text-text-muted text-lg">Paga solo por lo que necesitas. Sin cuotas de mantenimiento ocultas.</p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 max-w-6xl mx-auto">
+                <!-- Free -->
+                <label class="cursor-pointer relative group">
+                    <input type="radio" value="FREE" x-model="selectedPlan" class="peer plan-radio sr-only">
+                    <div class="glass-panel p-8 rounded-3xl transition-all duration-300 border-2 border-transparent h-full flex flex-col bg-surface-2/50 hover:bg-surface-2/80">
+                        <h3 class="text-xl font-black text-text-main mb-1">Gratuito</h3>
+                        <p class="text-[10px] font-black text-text-muted uppercase tracking-widest mb-6">Prueba 30 días</p>
+                        <div class="flex items-end gap-1 mb-6">
+                            <span class="text-4xl font-black text-text-main">$0</span><span class="text-text-muted font-medium mb-1">/mes</span>
+                        </div>
+                        <ul class="space-y-3 mb-8 flex-1">
+                            <li class="flex items-center gap-2 text-sm text-text-secondary"><span class="material-symbols-outlined text-emerald-400 text-[16px]">check</span> 1 Usuario</li>
+                            <li class="flex items-center gap-2 text-sm text-text-secondary"><span class="material-symbols-outlined text-emerald-400 text-[16px]">check</span> God Mode IA (20 Boletos)</li>
+                            <li class="flex items-center gap-2 text-sm text-text-secondary"><span class="material-symbols-outlined text-emerald-400 text-[16px]">check</span> Facturación Estándar</li>
+                            <li class="flex items-center gap-2 text-sm text-text-secondary"><span class="material-symbols-outlined text-emerald-400 text-[16px]">check</span> Sin tarjeta de crédito</li>
+                        </ul>
+                    </div>
+                </label>
                 <!-- Starter -->
                 <label class="cursor-pointer relative group">
                     <input type="radio" value="BASIC" x-model="selectedPlan" class="peer plan-radio sr-only">
@@ -136,7 +153,7 @@
             </div>
 
             <div class="mt-10 text-center">
-                <button @click="nextStep()" :disabled="!selectedPlan" 
+                <button @click="nextStep()" :disabled="!selectedPlan"
                         class="dynamic-brand-bg text-white font-black py-4 px-12 rounded-xl shadow-lg dynamic-brand-shadow transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105 active:scale-95">
                     Proceder al Registro →
                 </button>
@@ -183,7 +200,7 @@
 
             <div class="mt-8 flex justify-between gap-4">
                 <button @click="prevStep()" class="text-text-muted font-bold py-4 px-6 hover:text-white transition-colors">Volver</button>
-                <button @click="nextStep()" :disabled="!agencyName || !adminEmail || !adminPass" 
+                <button @click="nextStep()" :disabled="!agencyName || !adminEmail || !adminPass"
                         class="flex-1 dynamic-brand-bg text-white font-black py-4 px-6 rounded-xl shadow-lg dynamic-brand-shadow transition-all disabled:opacity-50 hover:scale-[1.02]">
                     Escoger Branding →
                 </button>
@@ -237,7 +254,7 @@
 
             <div class="mt-8 flex justify-between gap-4">
                 <button @click="prevStep()" class="text-text-muted font-bold py-4 px-6 hover:text-white transition-colors">Volver</button>
-                <button @click="nextStep()" 
+                <button @click="nextStep()"
                         class="flex-1 dynamic-brand-bg text-white font-black py-4 px-6 rounded-xl shadow-lg dynamic-brand-shadow transition-all hover:scale-[1.02] flex justify-center items-center gap-2">
                     Continuar al Pago Seguro <span class="material-symbols-outlined text-[18px]">lock</span>
                 </button>
@@ -251,7 +268,7 @@
                     <h2 class="text-xl font-black text-text-main">Activar Licencia</h2>
                     <span class="dynamic-brand-bg text-white text-[10px] font-black px-2 py-1 rounded uppercase tracking-widest" x-text="selectedPlan"></span>
                 </div>
-                
+
                 <div class="flex items-end gap-1 mb-8 pb-6 border-b border-surface-2">
                     <span class="text-4xl font-black text-text-main" x-text="selectedPlan === 'BASIC' ? '$29' : (selectedPlan === 'PRO' ? '$99' : '$299')"></span>
                     <span class="text-text-muted font-medium mb-1">/ mes</span>
@@ -261,7 +278,7 @@
                     <p class="text-xs text-text-muted text-center italic">Esto redirigirá a la pasarela segura de Stripe para confirmar tu identidad corporativa.</p>
                 </div>
 
-                <button @click="submitForm()" 
+                <button @click="submitForm()"
                         class="w-full dynamic-brand-bg text-white font-black py-4 rounded-xl shadow-lg dynamic-brand-shadow transition-all hover:scale-[1.02] active:scale-95 flex justify-center items-center gap-2">
                     Pagar y Desplegar ERP <span class="material-symbols-outlined text-[18px]">bolt</span>
                 </button>
@@ -281,10 +298,10 @@
                 adminEmail: '',
                 adminPass: '',
                 brandColor: '#3b82f6',
-                
+
                 nextStep() { window.scrollTo(0, 0); this.step++; },
                 prevStep() { window.scrollTo(0, 0); this.step--; },
-                
+
                 generateSubdomain() {
                     if (!this.agencyName) return 'mi-agencia';
                     return this.agencyName.toLowerCase()

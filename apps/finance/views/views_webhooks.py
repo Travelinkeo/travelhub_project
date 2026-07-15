@@ -143,9 +143,9 @@ class StripeWebhookView(WebhookPagoBaseView):
         try:
             import stripe
 
-            event = stripe.webhook.construct_event(request.body, sig_header, webhook_secret)
+            event = stripe.Webhook.construct_event(request.body, sig_header, webhook_secret)
             request.data["_stripe_verified_event"] = event
-        except stripe.error.SignatureVerificationError:
+        except stripe.SignatureVerificationError:
             logger.error("Stripe webhook: firma invalida")
             return Response({"error": "Invalid signature"}, status=status.HTTP_401_UNAUTHORIZED)
         except Exception as e:

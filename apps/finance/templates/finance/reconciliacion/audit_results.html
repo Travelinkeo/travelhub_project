@@ -5,10 +5,10 @@
 
 {% block content %}
 <div class="p-6 space-y-6 max-w-[1600px] mx-auto">
-    
+
     <!-- Sección KPIs de Auditoría (Cabecera Visual) -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        
+
         <div class="card-base p-5 flex items-center justify-between">
             <div class="space-y-1">
                 <p class="text-[10px] font-black text-text-muted uppercase tracking-widest">Total Boletos Analizados</p>
@@ -69,20 +69,20 @@
             </h4>
             <div class="flex gap-2">
                  <button class="btn-secondary h-8 px-3 text-[10px]">Filtrar Hallazgos</button>
-                 <a href="{% url 'finance:reconciliacion_report_pdf' reporte.pk %}" 
+                 <a href="#"
                     hx-boost="false"
                     class="btn-primary h-8 px-4 text-[10px] flex items-center gap-2">
                      <span class="material-symbols-outlined text-[16px]">picture_as_pdf</span>
                      Descargar Reporte PDF
                  </a>
-                 <button hx-post="{% url 'finance:reconciliacion_report_email' reporte.pk %}"
+                 <button hx-post="#"
                          hx-target="this"
                          hx-swap="outerHTML"
                          class="btn-primary h-8 px-4 text-[10px] flex items-center gap-2 bg-text-main border-text-main hover:bg-black">
                      <span class="material-symbols-outlined text-[16px]">mail</span>
                      Enviar a Gerencia
                  </button>
-                 <a href="{% url 'finance:reconciliacion_dashboard_htmx' %}" class="btn-secondary h-8 px-3 text-[10px]">Cerrar Auditoría</a>
+                 <a href="#" class="btn-secondary h-8 px-3 text-[10px]">Cerrar Auditoría</a>
             </div>
         </div>
 
@@ -138,8 +138,8 @@
                                     Cuadrado
                                 </div>
                             {% else %}
-                                <form hx-post="{% url 'finance:audit_approve_adjustment' item.id_conciliacion %}" 
-                                      hx-target="#row-{{ item.id_conciliacion }}" 
+                                <form hx-post="#"
+                                      hx-target="#row-{{ item.id_conciliacion }}"
                                       hx-swap="outerHTML swap:500ms"
                                        >
                                     {% csrf_token %}

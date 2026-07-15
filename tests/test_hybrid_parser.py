@@ -50,10 +50,11 @@ MOCK_AI_RESPONSE = {
 }
 
 
+@patch("apps.automation.services.ticket_parser_service._generate_pdf_sync")
 class TestHybridParser:
     @patch("apps.automation.services.ticket_parser_service.extract_data_from_text")
     @patch("apps.automation.parsers.ai_universal_parser.UniversalAIParser.parse")
-    def test_regex_first_strategy_success(self, mock_ai_parse, mock_extract_regex):
+    def test_regex_first_strategy_success(self, mock_ai_parse, mock_extract_regex, mock_pdf_sync):
         """
         Verifica que si el Regex local devuelve un resultado completo y válido,
         se utiliza ese resultado y NO se llama a la IA.
@@ -105,7 +106,9 @@ class TestHybridParser:
 
     @patch("apps.automation.services.ticket_parser_service.extract_data_from_text")
     @patch("apps.automation.parsers.ai_universal_parser.UniversalAIParser.parse")
-    def test_regex_first_fallback_on_failure(self, mock_ai_parse, mock_extract_regex):
+    def test_regex_first_fallback_on_failure(
+        self, mock_ai_parse, mock_extract_regex, mock_pdf_sync
+    ):
         """
         Verifica que si el Regex local falla o devuelve un error, se ejecuta el fallback a la IA.
         """
@@ -139,7 +142,9 @@ class TestHybridParser:
 
     @patch("apps.automation.services.ticket_parser_service.extract_data_from_text")
     @patch("apps.automation.parsers.ai_universal_parser.UniversalAIParser.parse")
-    def test_regex_first_fallback_on_incomplete(self, mock_ai_parse, mock_extract_regex):
+    def test_regex_first_fallback_on_incomplete(
+        self, mock_ai_parse, mock_extract_regex, mock_pdf_sync
+    ):
         """
         Verifica que si el Regex local extrae datos pero están incompletos (p. ej. sin segmentos de vuelo),
         el pipeline ejecuta el fallback a la IA.

@@ -8,9 +8,12 @@ class CoreConfig(AppConfig):
     def ready(self):
         import core.signals  # noqa: F401
         import core.signals_audit  # noqa: F401
-        import core.signals_contabilidad  # noqa: F401
         import core.signals_passport  # noqa: F401
+        from core.locale_patch import apply_locale_patch
         from core.services.agency_cache_service import setup_cache_signals
+
+        # Aplicar el patch de locale al inicializar Django
+        apply_locale_patch()
 
         setup_cache_signals()
 

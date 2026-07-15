@@ -264,9 +264,8 @@ class VentaAdmin(SaaSAdminMixin, admin.ModelAdmin):
 
     @admin.action(description="Generar Link de Pago B2C para Ventas seleccionadas")
     def generar_links_de_pago(self, request, queryset):
-        from django.apps import apps
+        from apps.finance.models_stubs import LinkDePago
 
-        LinkDePago = apps.get_model("finance", "LinkDePago")
         creados = 0
         existentes = 0
         for venta in queryset:
@@ -375,43 +374,9 @@ class VentaAdmin(SaaSAdminMixin, admin.ModelAdmin):
 
     @admin.action(description="Generar Liquidación a Proveedor(es)")
     def generar_liquidaciones_proveedor(self, request, queryset):
-        from collections import defaultdict
-
-        from django.apps import apps
-
-        ItemLiquidacion = apps.get_model("contabilidad", "ItemLiquidacion")
-        LiquidacionProveedor = apps.get_model("contabilidad", "LiquidacionProveedor")
-        liquidaciones_creadas = 0
-        for venta in queryset:
-            items_por_proveedor = defaultdict(list)
-            for item in venta.items_venta.all():
-                if item.proveedor_servicio and item.costo_neto_proveedor is not None:
-                    items_por_proveedor[item.proveedor_servicio].append(item)
-            for proveedor, items in items_por_proveedor.items():
-                if not LiquidacionProveedor.objects.filter(
-                    proveedor=proveedor, venta=venta
-                ).exists():
-                    monto_total = sum(
-                        (i.costo_neto_proveedor or 0)
-                        + (i.fee_proveedor or 0)
-                        - (i.comision_agencia_monto or 0)
-                        for i in items
-                    )
-                    if monto_total > 0:
-                        liquidacion = LiquidacionProveedor.objects.create(
-                            proveedor=proveedor, venta=venta, monto_total=monto_total
-                        )
-                        for i in items:
-                            ItemLiquidacion.objects.create(
-                                liquidacion=liquidacion,
-                                item_venta=i,
-                                descripcion=i.descripcion_personalizada,
-                                monto=(i.costo_neto_proveedor or 0)
-                                + (i.fee_proveedor or 0)
-                                - (i.comision_agencia_monto or 0),
-                            )
-                        liquidaciones_creadas += 1
-        self.message_user(request, f"Se generaron {liquidaciones_creadas} liquidaciones.")
+        # ELIMINADO: LiquidacionProveedor/ItemLiquidacion creation
+        # Feature de liquidaciones a proveedores eliminada en refactor
+        self.message_user(request, "Función de liquidaciones desactivada (refactor en curso).")
 
 
 @admin.register(VentaParseMetadata)

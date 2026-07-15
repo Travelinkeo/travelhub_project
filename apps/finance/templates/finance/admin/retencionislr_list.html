@@ -25,7 +25,7 @@
                 <input type="text" name="q" value="{{ request.GET.q|default:'' }}" placeholder="{% trans 'Buscar comprobante, cliente o factura...' %}"
                     class="input-base !pl-12 !h-12 w-full md:w-80">
             </form>
-            <a href="{% url 'finance_admin:retencionislr_create' %}" class="btn-primary h-12">
+            <a href="#" class="btn-primary h-12">
                 <span class="material-symbols-outlined">add</span>
                 {% trans "Nueva Retención" %}
             </a>
@@ -69,7 +69,7 @@
                             <span class="font-mono text-text-muted">{{ retencion.cliente.nombre_completo }}</span>
                         </td>
                         <td class="px-8 py-5">
-                            <a href="{% url 'finance:factura_detail' retencion.factura.pk %}" class="text-sm text-primary hover:underline">{{ retencion.factura.numero_factura }}</a>
+                            <a href="#" class="text-sm text-primary hover:underline">{{ retencion.factura.numero_factura }}</a>
                         </td>
                         <td class="px-8 py-5">
                             <span class="text-sm text-text-main">{{ retencion.fecha_emision|date:"d M Y" }}</span>
@@ -84,12 +84,12 @@
                         </td>
                         <td class="px-8 py-5 text-right">
                             <div class="flex justify-end items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <a href="{% url 'finance_admin:retencionislr_update' retencion.pk %}"
+                                <a href="#"
                                     class="size-9 flex items-center justify-center text-text-muted hover:text-primary hover:bg-primary/10 rounded-xl transition-all border border-transparent hover:border-primary/20"
                                     title="{% trans 'Editar Retención' %}">
                                     <span class="material-symbols-outlined text-[20px]">edit</span>
                                 </a>
-                                <a href="{% url 'finance_admin:retencionislr_delete' retencion.pk %}"
+                                <a href="#"
                                     class="size-9 flex items-center justify-center text-text-muted hover:text-status-danger hover:bg-status-danger-bg rounded-xl transition-all border border-transparent hover:border-status-danger/20"
                                     title="{% trans 'Eliminar Retención' %}">
                                     <span class="material-symbols-outlined text-[20px]">delete</span>

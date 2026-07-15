@@ -34,8 +34,8 @@ def generar_asiento_factura(factura):
     from django.apps import apps
 
     AsientoContable = apps.get_model("contabilidad", "AsientoContable")
-    DetalleAsiento = apps.get_model("contabilidad", "DetalleAsiento")
-    PlanContable = apps.get_model("contabilidad", "PlanContable")
+    MovimientoContable = apps.get_model("contabilidad", "MovimientoContable")
+    CuentaContable = apps.get_model("contabilidad", "CuentaContable")
     try:
         with transaction.atomic():
             # Reutilizar o crear asiento contable
@@ -70,7 +70,7 @@ def generar_asiento_factura(factura):
             linea_idx = 1
 
             # DEBE: Cuentas por Cobrar
-            cuenta_cxc = PlanContable.objects.filter(
+            cuenta_cxc = CuentaContable.objects.filter(
                 codigo_cuenta__startswith="1.1.2",  # Cuentas por Cobrar
                 permite_movimientos=True,
                 agencia=factura.agencia,
@@ -78,7 +78,7 @@ def generar_asiento_factura(factura):
 
             if not cuenta_cxc:
                 # Fallback to any active account starting with 1
-                cuenta_cxc = PlanContable.objects.filter(
+                cuenta_cxc = CuentaContable.objects.filter(
                     codigo_cuenta__startswith="1",
                     permite_movimientos=True,
                     agencia=factura.agencia,
@@ -86,7 +86,7 @@ def generar_asiento_factura(factura):
 
             if cuenta_cxc:
                 monto_total_bsd = (factura.monto_total * tasa).quantize(Decimal("0.01"))
-                DetalleAsiento.objects.create(
+                MovimientoContable.objects.create(
                     asiento=asiento,
                     linea=linea_idx,
                     cuenta_contable=cuenta_cxc,
@@ -100,14 +100,14 @@ def generar_asiento_factura(factura):
                 linea_idx += 1
 
             # HABER: Ingresos por Ventas
-            cuenta_ingresos = PlanContable.objects.filter(
+            cuenta_ingresos = CuentaContable.objects.filter(
                 codigo_cuenta__startswith="4.1",  # Ingresos
                 permite_movimientos=True,
                 agencia=factura.agencia,
             ).first()
 
             if not cuenta_ingresos:
-                cuenta_ingresos = PlanContable.objects.filter(
+                cuenta_ingresos = CuentaContable.objects.filter(
                     codigo_cuenta__startswith="4",
                     permite_movimientos=True,
                     agencia=factura.agencia,
@@ -121,7 +121,7 @@ def generar_asiento_factura(factura):
                 )
                 if monto_ingresos > 0:
                     monto_ingresos_bsd = (monto_ingresos * tasa).quantize(Decimal("0.01"))
-                    DetalleAsiento.objects.create(
+                    MovimientoContable.objects.create(
                         asiento=asiento,
                         linea=linea_idx,
                         cuenta_contable=cuenta_ingresos,
@@ -139,14 +139,14 @@ def generar_asiento_factura(factura):
                 getattr(factura, "monto_iva_adicional", Decimal("0.00")) or Decimal("0.00")
             )
             if monto_iva_total > 0:
-                cuenta_iva = PlanContable.objects.filter(
+                cuenta_iva = CuentaContable.objects.filter(
                     codigo_cuenta__startswith="2.1.4",  # IVA por Pagar
                     permite_movimientos=True,
                     agencia=factura.agencia,
                 ).first()
 
                 if not cuenta_iva:
-                    cuenta_iva = PlanContable.objects.filter(
+                    cuenta_iva = CuentaContable.objects.filter(
                         codigo_cuenta__startswith="2",
                         permite_movimientos=True,
                         agencia=factura.agencia,
@@ -154,7 +154,7 @@ def generar_asiento_factura(factura):
 
                 if cuenta_iva:
                     monto_iva_bsd = (monto_iva_total * tasa).quantize(Decimal("0.01"))
-                    DetalleAsiento.objects.create(
+                    MovimientoContable.objects.create(
                         asiento=asiento,
                         linea=linea_idx,
                         cuenta_contable=cuenta_iva,
@@ -169,14 +169,14 @@ def generar_asiento_factura(factura):
 
             # HABER: IGTF por Pagar
             if getattr(factura, "monto_igtf", Decimal("0.00")) > 0:
-                cuenta_igtf = PlanContable.objects.filter(
+                cuenta_igtf = CuentaContable.objects.filter(
                     codigo_cuenta__startswith="2.1.5",  # IGTF por Pagar
                     permite_movimientos=True,
                     agencia=factura.agencia,
                 ).first()
 
                 if not cuenta_igtf:
-                    cuenta_igtf = PlanContable.objects.filter(
+                    cuenta_igtf = CuentaContable.objects.filter(
                         codigo_cuenta__startswith="2",
                         permite_movimientos=True,
                         agencia=factura.agencia,
@@ -184,7 +184,7 @@ def generar_asiento_factura(factura):
 
                 if cuenta_igtf:
                     monto_igtf_bsd = (factura.monto_igtf * tasa).quantize(Decimal("0.01"))
-                    DetalleAsiento.objects.create(
+                    MovimientoContable.objects.create(
                         asiento=asiento,
                         linea=linea_idx,
                         cuenta_contable=cuenta_igtf,
@@ -259,8 +259,8 @@ def generar_asiento_pago(pago_venta):
     from django.apps import apps
 
     AsientoContable = apps.get_model("contabilidad", "AsientoContable")
-    DetalleAsiento = apps.get_model("contabilidad", "DetalleAsiento")
-    PlanContable = apps.get_model("contabilidad", "PlanContable")
+    MovimientoContable = apps.get_model("contabilidad", "MovimientoContable")
+    CuentaContable = apps.get_model("contabilidad", "CuentaContable")
 
     referencia = f"PAGO-{pago_venta.pk}"
     asiento = AsientoContable.objects.filter(
@@ -304,35 +304,35 @@ def generar_asiento_pago(pago_venta):
             # Buscar cuenta de Disponibilidades (Caja o Banco)
             if pago_venta.metodo == "EFE":
                 # Caja
-                cuenta_debe = PlanContable.objects.filter(
+                cuenta_debe = CuentaContable.objects.filter(
                     codigo_cuenta__startswith="1.1.1",
                     permite_movimientos=True,
                     agencia=pago_venta.agencia,
                 ).first()
             else:
                 # Banco
-                cuenta_debe = PlanContable.objects.filter(
+                cuenta_debe = CuentaContable.objects.filter(
                     codigo_cuenta__startswith="1.1.2",
                     permite_movimientos=True,
                     agencia=pago_venta.agencia,
                 ).first()
 
             if not cuenta_debe:
-                cuenta_debe = PlanContable.objects.filter(
+                cuenta_debe = CuentaContable.objects.filter(
                     codigo_cuenta__startswith="1",
                     permite_movimientos=True,
                     agencia=pago_venta.agencia,
                 ).first()
 
             # Cuenta por Cobrar Clientes (Haber)
-            cuenta_haber = PlanContable.objects.filter(
+            cuenta_haber = CuentaContable.objects.filter(
                 codigo_cuenta__startswith="1.1.2.01",
                 permite_movimientos=True,
                 agencia=pago_venta.agencia,
             ).first()
 
             if not cuenta_haber:
-                cuenta_haber = PlanContable.objects.filter(
+                cuenta_haber = CuentaContable.objects.filter(
                     codigo_cuenta__startswith="1",
                     permite_movimientos=True,
                     agencia=pago_venta.agencia,
@@ -344,7 +344,7 @@ def generar_asiento_pago(pago_venta):
 
             # Crear movimientos
             if cuenta_debe:
-                DetalleAsiento.objects.create(
+                MovimientoContable.objects.create(
                     asiento=asiento,
                     linea=1,
                     cuenta_contable=cuenta_debe,
@@ -357,7 +357,7 @@ def generar_asiento_pago(pago_venta):
                 )
 
             if cuenta_haber:
-                DetalleAsiento.objects.create(
+                MovimientoContable.objects.create(
                     asiento=asiento,
                     linea=2,
                     cuenta_contable=cuenta_haber,

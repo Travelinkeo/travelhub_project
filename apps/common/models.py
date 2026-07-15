@@ -82,7 +82,8 @@ class UserProgress(models.Model):
         return int((completed / total) * 100)
 
     def __str__(self) -> str:
-        return f"Onboarding {self.user} - {self.get_progress_percentage()}%"
+        status = "Completado" if self.onboarding_completed else f"{self.get_progress_percentage()}%"
+        return f"Onboarding {self.user} - {status}"
 
 
 class Pais(models.Model):

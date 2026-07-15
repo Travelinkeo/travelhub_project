@@ -117,20 +117,31 @@ def validate_filename_safe(value):
 
 def antivirus_hook(value):
     """
-    Hook para escaneo de antivirus.
-
-    Actualmente es un placeholder con la estructura lista para ClamAV.
-    Para activar, instala clamd y descomenta el codigo.
+    Escanea un archivo con ClamAV si está disponible.
+    Si clamd no está instalado, registra una advertencia.
+    Si ClamAV detecta un virus, rechaza el archivo.
     """
-    # try:
-    #     import clamd
-    #     cd = clamd.ClamdUnixSocket()
-    #     scan_result = cd.instream(value)
-    #     if scan_result['stream'][0] == 'FOUND':
-    #         raise ValidationError(_('Se detecto un virus en el archivo.'))
-    # except Exception as e:
-    #     logger.error(f"Error en el hook de antivirus: {e}")
-    pass
+    try:
+        import clamd
+
+        cd = clamd.ClamdUnixSocket()
+        scan_result = cd.instream(value)
+        if scan_result["stream"][0] == "FOUND":
+            virus_name = scan_result["stream"][1]
+            logger.error(f"Antivirus detecto amenaza: {virus_name} en archivo subido")
+            raise ValidationError(
+                _("El archivo contiene software malicioso detectado: %(virus)s."),
+                params={"virus": virus_name},
+            )
+    except ImportError:
+        logger.warning(
+            "ClamAV (clamd) no está instalado. Las subidas de archivos NO tienen escaneo antivirus. "
+            "Instala pyclamd para activar la protección."
+        )
+    except ValidationError:
+        raise
+    except Exception as e:
+        logger.error(f"Error conectando con ClamAV durante escaneo antivirus: {e}")
 
 
 def validar_no_vacio_o_espacios(value):
@@ -181,12 +192,17 @@ ALLOWED_HTML_ATTRS = {
 def sanitize_html(value, tags=None, attributes=None):
     """
     Sanitiza HTML para prevenir XSS usando bleach.
-    Si bleach no está instalado, retorna el valor original.
+    Si bleach no está instalado, elimina TODAS las etiquetas HTML (fallback seguro).
     """
     if not value:
         return ""
     if not HAS_BLEACH:
-        return value
+        logger.warning(
+            "bleach no está instalado — se eliminarán TODAS las etiquetas HTML como fallback seguro"
+        )
+        import django.utils.html
+
+        return django.utils.html.strip_tags(value)
     allowed_tags = tags or ALLOWED_HTML_TAGS
     allowed_attrs = attributes or ALLOWED_HTML_ATTRS
     return bleach.clean(value, tags=allowed_tags, attributes=allowed_attrs, strip=True)

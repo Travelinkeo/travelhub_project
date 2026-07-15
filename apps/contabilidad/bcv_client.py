@@ -66,7 +66,7 @@ class BCVClient:
             logger.error(f"⚠️ FALLO EN ENDPOINT BCV: {str(e)}. Activando fallback de base de datos.")
 
             try:
-                from .models import TasaCambioBCV
+                from apps.finance.models import TasaCambioBCV
 
                 ultima_tasa = TasaCambioBCV.objects.order_by("-fecha", "-id_tasa").first()
 
@@ -88,7 +88,7 @@ class BCVClient:
         Actualiza la tasa en la base de datos central.
         """
         try:
-            from .models import TasaCambioBCV
+            from apps.finance.models import TasaCambioBCV
 
             if tasa is None:
                 tasa = BCVClient.obtener_tasa_actual()

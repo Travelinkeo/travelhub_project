@@ -13,38 +13,11 @@ from django.views.generic.edit import CreateView
 from apps.bookings.models import AuditLog, BoletoImportado
 from apps.common.services.analytics_service import AnalyticsService
 from apps.communications.models import ComunicacionProveedor
-from apps.contabilidad.models import LiquidacionProveedor
 from apps.crm.models import PasaporteEscaneado
 from core.mixins import SaaSMixin
 from core.security import get_agencia_from_request
 
 from ..forms import BoletoManualForm
-
-
-class LiquidacionesListView(SaaSMixin, LoginRequiredMixin, ListView):
-    model = LiquidacionProveedor
-    template_name = "core/erp/liquidaciones.html"
-    context_object_name = "liquidaciones"
-    paginate_by = 20
-
-    def get_queryset(self):
-        queryset = (
-            super().get_queryset().select_related("proveedor", "venta").order_by("-fecha_emision")
-        )
-
-        # Filters
-        estado = self.request.GET.get("estado")
-        search = self.request.GET.get("search")
-
-        if estado:
-            queryset = queryset.filter(estado=estado)
-
-        if search:
-            queryset = queryset.filter(
-                proveedor__nombre_comercial__icontains=search
-            ) | queryset.filter(venta__localizador__icontains=search)
-
-        return queryset
 
 
 class PasaportesListView(SaaSMixin, LoginRequiredMixin, ListView):

@@ -5,7 +5,7 @@ import logging
 
 from django.conf import settings
 from django.db import transaction
-from django.http import HttpResponseForbidden, JsonResponse
+from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
@@ -54,7 +54,7 @@ class TelegramBotWebhookView(View):
         verified, error_msg = _verify_telegram_webhook(request)
         if not verified:
             logger.error(f"Webhook de Telegram rechazado: {error_msg}")
-            return HttpResponseForbidden({"error": error_msg})
+            return JsonResponse({"error": error_msg}, status=403)
 
         from core.api import system_context
 

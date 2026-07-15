@@ -30,7 +30,7 @@ from .pdf_service import generar_pdf_cotizacion
 from .serializers import CotizacionSerializer, ItemCotizacionSerializer
 
 try:
-    from apps.contabilidad.models import TasaCambioBCV
+    from apps.finance.models import TasaCambioBCV
 except ImportError:
     TasaCambioBCV = None
 
@@ -317,7 +317,7 @@ class CotizacionHTMXCalculateTotalsView(SaaSMixin, LoginRequiredMixin, View):
         moneda_symbol = "$"
         if moneda_id:
             try:
-                from apps.finance.models.currencies import Moneda
+                from apps.common.models import Moneda
 
                 moneda = Moneda.objects.get(pk=moneda_id)
                 moneda_symbol = moneda.simbolo or moneda.codigo_iso
@@ -687,7 +687,7 @@ class MagicQuoterSaveView(SaaSMixin, LoginRequiredMixin, View):
                 lead = OportunidadViaje.objects.filter(id=lead_id).first()
 
             # Asegurar Moneda (Evitar nulos en codigo_iso)
-            from apps.finance.models.currencies import Moneda
+            from apps.common.models import Moneda
 
             currency_raw = ai_data.get("currency") or "USD"
             currency_code = str(currency_raw).strip().upper()[:3]

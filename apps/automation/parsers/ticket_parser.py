@@ -373,22 +373,9 @@ def _parse_date_robust(date_str):
     # Limpieza de ruidos comunes
     date_str = re.sub(r"^(?:EMISION|ISSUED|DATE|FECHA)[:\s]+", "", date_str)
 
-    # Diccionario de meses en español
-    meses_es = {
-        "ENE": "JAN",
-        "FEB": "FEB",
-        "MAR": "MAR",
-        "ABR": "APR",
-        "MAY": "MAY",
-        "JUN": "JUN",
-        "JUL": "JUL",
-        "AGO": "AUG",
-        "SEP": "SEP",
-        "OCT": "OCT",
-        "NOV": "NOV",
-        "DIC": "DEC",
-    }
-    for es, en in meses_es.items():
+    from core.models.ai_schemas import MESES_ES_TO_EN
+
+    for es, en in MESES_ES_TO_EN.items():
         if es in date_str:
             date_str = date_str.replace(es, en)
 

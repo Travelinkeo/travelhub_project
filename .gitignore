@@ -175,8 +175,14 @@ fix_produccion_*.sh
 
 # Temporal / review folder (scripts temporales, backups, datos de prueba)
 _para_revisar/
+scratch_scripts/
 
 boletos_importados/
 boletos_generados/
 /boletos_importados/
 /boletos_generados/
+
+# Junk / scratch scripts (no commitear)
+.tmp.drivedownload/
+deploy_fixes.py
+find_bad_urls.py

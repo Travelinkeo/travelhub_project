@@ -2,17 +2,12 @@ import logging
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse, JsonResponse
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import redirect, render
 from django.views.generic import DetailView, ListView, TemplateView, View
 
 from apps.common.mixins.export_mixin import ExportMixin
 from apps.finance.models import Factura
-from apps.finance.models.reconciliacion import (
-    ConciliacionBoleto,
-    ReporteReconciliacion,
-)
 from apps.finance.services.analytics_service import FinancialAnalyticsService
-from apps.finance.services.smart_reconciliation_service import SmartReconciliationService
 from core.api import AuditLog, SaaSMixin
 
 logger = logging.getLogger(__name__)
@@ -118,70 +113,6 @@ class InvoiceUpdateView(SaaSMixin, LoginRequiredMixin, View):
 
             return HttpResponse("Factura actualizada", status=200)
         return HttpResponse("No se puede editar una factura emitida.", status=400)
-
-
-# --- RECONCILIACIÓN ---
-
-
-class ReportListView(SaaSMixin, LoginRequiredMixin, ListView):
-    model = ReporteReconciliacion
-    template_name = "finance/reconciliation/report_list.html"
-    context_object_name = "reports"
-    ordering = ["-fecha_subida"]
-
-    def get_queryset(self):
-        return super().get_queryset().select_related("agencia")
-
-
-class ReportUploadView(LoginRequiredMixin, View):
-    def post(self, request):
-        proveedor = request.POST.get("proveedor", "Desconocido")
-        archivo = request.FILES.get("archivo")
-
-        if not archivo:
-            return HttpResponse("Faltan campos obligatorios", status=400)
-
-        reporte = ReporteReconciliacion.objects.create(
-            agencia=request.agencia, archivo=archivo, proveedor=proveedor, estado="PENDIENTE"
-        )
-
-        try:
-            SmartReconciliationService.procesar_reporte(str(reporte.id_reporte))
-            return redirect("finance:report_detail", pk=reporte.pk)
-        except Exception as e:
-            logger.error(f"Error procesando reporte: {e}")
-            return HttpResponse(f"Error procesando: {str(e)}", status=500)
-
-
-class ReconciliationDetailView(SaaSMixin, LoginRequiredMixin, DetailView):
-    model = ReporteReconciliacion
-    template_name = "finance/reconciliation/report_detail.html"
-    context_object_name = "report"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["lineas"] = self.object.lineas.all().order_by("numero_boleto_reportado")
-        context["conciliaciones"] = (
-            self.object.conciliaciones.all().select_related("boleto_local").order_by("estado")
-        )
-        return context
-
-
-class ResolveDiscrepancyAIView(LoginRequiredMixin, View):
-    """
-    Endpoint HTMX para obtener sugerencia de la IA.
-    """
-
-    def get(self, request, pk):
-        conciliacion = get_object_or_404(ConciliacionBoleto, pk=pk)
-
-        suggestion = conciliacion.ia_razonamiento or "Sin sugerencia de IA disponible."
-
-        return render(
-            request,
-            "finance/reconciliation/partials/ai_suggestion.html",
-            {"suggestion": suggestion, "diff": conciliacion},
-        )
 
 
 class ProfitabilityDashboardView(LoginRequiredMixin, TemplateView):

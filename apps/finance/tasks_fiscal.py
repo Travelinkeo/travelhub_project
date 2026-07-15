@@ -2,7 +2,7 @@ import logging
 
 from celery import shared_task
 
-from apps.finance.models.fiscal import FacturaFiscal
+from apps.finance.models_stubs import FacturaFiscal
 from apps.finance.services.fiscal_provider_service import ElectronicInvoiceService
 
 logger = logging.getLogger(__name__)

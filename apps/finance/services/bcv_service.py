@@ -4,7 +4,7 @@ from decimal import Decimal, InvalidOperation
 
 from django.core.cache import cache
 
-from apps.finance.models.currencies import TasaCambio
+from apps.finance.models_stubs import TasaCambio
 from core.tasks import send_telegram_task
 
 logger = logging.getLogger(__name__)

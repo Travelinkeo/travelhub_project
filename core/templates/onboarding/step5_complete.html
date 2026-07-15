@@ -1,4 +1,5 @@
 {% extends "onboarding/base_wizard.html" %}
+{% load i18n %}
 
 {% block title %}{% trans "¡Listo!" %} - TravelHub{% endblock %}
 
@@ -11,45 +12,45 @@
         </div>
         <div class="absolute -top-2 -right-2 text-4xl animate-bounce">🎉</div>
     </div>
-    
+
     <h1 class="text-3xl font-bold mb-4 text-white">
         {% trans "¡Todo Listo!" %}
     </h1>
-    
+
     <p class="text-slate-400 text-lg mb-8">
         {% trans "Tu agencia" %} <span class="text-blue-400 font-semibold">{{ agency.nombre|default:"está configurada" }}</span> {% trans "y lista para operar" %}
     </p>
-    
+
     <!-- Summary Card -->
     <div class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl p-6 mb-8 text-left border border-slate-700">
         <h3 class="font-semibold text-white mb-4 flex items-center gap-2">
             <span class="material-symbols-outlined text-blue-400">summarize</span>
             {% trans "Resumen de tu Configuración" %}
         </h3>
-        
+
         <div class="space-y-3">
             <div class="flex justify-between items-center py-2 border-b border-slate-700">
                 <span class="text-slate-400 text-sm">{% trans "Agencia" %}</span>
                 <span class="text-white font-semibold text-sm">{{ agency.nombre|default:_("No configurada") }}</span>
             </div>
-            
+
             <div class="flex justify-between items-center py-2 border-b border-slate-700">
                 <span class="text-slate-400 text-sm">{% trans "Subdominio" %}</span>
                 <span class="text-white font-semibold text-sm">{{ agency.subdominio_slug|default:"N/A" }}.travelhub.cc</span>
             </div>
-            
+
             <div class="flex justify-between items-center py-2 border-b border-slate-700">
                 <span class="text-slate-400 text-sm">{% trans "Plan" %}</span>
                 <span class="text-white font-semibold text-sm">{{ agency.plan|default:"FREE" }}</span>
             </div>
-            
+
             <div class="flex justify-between items-center py-2">
                 <span class="text-slate-400 text-sm">{% trans "Tu Rol" %}</span>
                 <span class="text-white font-semibold text-sm">Admin 👑</span>
             </div>
         </div>
     </div>
-    
+
     <!-- Quick Actions -->
     <div class="grid grid-cols-2 gap-4 mb-8">
         <a href="/bookings/ventas/" class="feature-card text-center hover:border-blue-500 transition-colors">
@@ -57,26 +58,26 @@
             <div class="font-semibold text-white text-sm mt-2">{% trans "Registrar Boleto" %}</div>
             <div class="text-slate-400 text-xs">{% trans "Crea tu primera venta" %}</div>
         </a>
-        
+
         <a href="/crm/" class="feature-card text-center hover:border-green-500 transition-colors">
             <span class="material-symbols-outlined text-2xl text-green-400">people</span>
             <div class="font-semibold text-white text-sm mt-2">{% trans "Clientes" %}</div>
             <div class="text-slate-400 text-xs">{% trans "Gestiona tu cartera" %}</div>
         </a>
-        
+
         <a href="/finance/" class="feature-card text-center hover:border-purple-500 transition-colors">
             <span class="material-symbols-outlined text-2xl text-purple-400">payments</span>
             <div class="font-semibold text-white text-sm mt-2">{% trans "Finanzas" %}</div>
             <div class="text-slate-400 text-xs">{% trans "Pagos y facturación" %}</div>
         </a>
-        
+
         <a href="/dashboard/" class="feature-card text-center hover:border-orange-500 transition-colors">
             <span class="material-symbols-outlined text-2xl text-orange-400">analytics</span>
             <div class="font-semibold text-white text-sm mt-2">{% trans "Dashboard" %}</div>
             <div class="text-slate-400 text-xs">{% trans "Métricas en tiempo real" %}</div>
         </a>
     </div>
-    
+
     <!-- Final CTA -->
     <form method="post">
         {% csrf_token %}
@@ -85,7 +86,7 @@
             {% trans "Ir al Dashboard" %}
         </button>
     </form>
-    
+
     <!-- Help -->
     <div class="mt-8 p-4 bg-slate-800/50 rounded-xl">
         <div class="flex items-center justify-center gap-2 text-slate-400 mb-2">

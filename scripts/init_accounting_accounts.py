@@ -6,7 +6,7 @@ import django
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "travelhub.settings")
 django.setup()
 
-from apps.contabilidad.models import PlanContable
+from apps.contabilidad.models import CuentaContable
 
 
 def initialize_accounts():
@@ -59,7 +59,7 @@ def initialize_accounts():
     ]
 
     for acc in accounts:
-        obj, created = PlanContable.objects.get_or_create(
+        obj, created = CuentaContable.objects.get_or_create(
             codigo_cuenta=acc["codigo"],
             defaults={
                 "nombre_cuenta": acc["nombre"],

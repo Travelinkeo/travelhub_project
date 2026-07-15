@@ -8,7 +8,7 @@
         <div>
             <div class="flex items-center gap-3 mb-2">
                 <h1 class="text-3xl font-bold text-text-main">Liquidación #{{ liquidacion.pk }}</h1>
-                <span class="px-3 py-1 text-sm font-semibold rounded-full 
+                <span class="px-3 py-1 text-sm font-semibold rounded-full
                     {% if liquidacion.estado == 'PEN' %}bg-yellow-900 text-yellow-200
                     {% elif liquidacion.estado == 'PAG' %}bg-green-900 text-green-200
                     {% elif liquidacion.estado == 'PAR' %}bg-blue-900 text-blue-200
@@ -19,7 +19,7 @@
             <p class="text-text-muted">Proveedor: <span class="text-text-main font-medium">{{ liquidacion.proveedor.nombre
                     }}</span></p>
         </div>
-        <a href="{% url 'finance:liquidacion_list' %}"
+        <a href="#"
             class="text-text-muted hover:text-text-main transition-colors flex items-center">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18">

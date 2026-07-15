@@ -9,12 +9,9 @@ from decimal import Decimal
 from django.test import TestCase
 
 from apps.bookings.models import BoletoImportado
+from apps.common.models import Moneda
 from apps.crm.models import Cliente
-from apps.finance.models import (
-    FacturaConsolidada,
-    ItemFacturaConsolidada,
-)
-from apps.finance.models.currencies import Moneda
+from apps.finance.models_stubs import FacturaConsolidada, ItemFacturaConsolidada
 from apps.finance.services.tax_eligibility import es_itinerario_internacional
 
 

@@ -3,6 +3,7 @@ from unittest.mock import patch
 
 import pytest
 
+from apps.finance.models_stubs import TasaCambio
 from apps.marketing.models import Campania
 from core.middleware import agency_context
 from core.models import Agencia
@@ -100,7 +101,6 @@ def test_agencia_form_save(agencias_test, sample_pais):
 def test_bcv_resilient_service_survival_cache():
     from datetime import date
 
-    from apps.finance.models.currencies import TasaCambio
     from apps.finance.services.bcv_service import obtener_tasa_bcv_resiliente
 
     # 1. Preparar caché de supervivencia

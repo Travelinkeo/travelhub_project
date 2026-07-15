@@ -49,6 +49,10 @@ CELERY_TASK_EAGER_PROPAGATES = True
 
 STORAGES["default"] = {"BACKEND": "django.core.files.storage.FileSystemStorage"}
 
+# Sin R2 en tests: RawFileStorage (core/storage.py) cae a FileSystemStorage local
+# y evita llamadas a S3/botocore que no existen en el entorno de CI.
+USE_R2 = False
+
 # ---------------------------------------------------------------------------
 # Cache: en memoria (sin Redis)
 # ---------------------------------------------------------------------------
@@ -101,3 +105,8 @@ PASSWORD_HASHERS = [
 import logging  # noqa: E402
 
 logging.disable(logging.CRITICAL)
+
+# ---------------------------------------------------------------------------
+# Criptografía: Clave estática Fernet válida para tests unitarios
+# ---------------------------------------------------------------------------
+ENCRYPTION_KEY = "ujK9r7o7B-B-jH87L2K0XvB4oK9zB_M3_z6vG1T_P5U="

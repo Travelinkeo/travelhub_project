@@ -13,11 +13,7 @@ from apps.contabilidad.models import AsientoContable, DetalleAsiento, PlanContab
 from apps.contabilidad.reportes import ReportesContables
 from apps.crm.models import Cliente
 from apps.finance.models import Factura
-from apps.finance.models.core_finance import GastoOperativo
-from apps.finance.models.reconciliacion import (
-    ConciliacionBoleto,
-    ReporteReconciliacion,
-)
+from apps.finance.models_stubs import ConciliacionBoleto, GastoOperativo, ReporteReconciliacion
 from core.api import get_current_agency
 from core.models.aeropuerto import Aeropuerto
 
@@ -557,7 +553,7 @@ class AgentTools:
             if not agencia:
                 return "Error: No hay una agencia en el contexto actual."
 
-            from apps.finance.models import PropuestaTransaccionIA
+            from apps.finance.models_stubs import PropuestaTransaccionIA
 
             justificacion = (
                 ia_justificacion
@@ -608,7 +604,7 @@ class AgentTools:
             except Exception as e_json:
                 return f"Error de formato: detalles_cuentas_json debe ser un JSON válido. Error: {e_json}"
 
-            from apps.finance.models import PropuestaTransaccionIA
+            from apps.finance.models_stubs import PropuestaTransaccionIA
 
             # Validar balance de la propuesta contable
             total_debe = sum(Decimal(str(d.get("debe", 0))) for d in detalles_cuentas)

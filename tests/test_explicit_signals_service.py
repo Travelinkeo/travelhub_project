@@ -69,7 +69,7 @@ def test_venta_signals_delegation(mock_dispatch, django_user_model):
     Validates that Venta save actions delegate to VentaService.
     """
     from apps.bookings.models import Venta
-    from apps.finance.models.currencies import Moneda
+    from apps.common.models import Moneda
     from core.models import Agencia
 
     agencia = Agencia.objects.create(nombre="Test Agency Venta")
@@ -99,9 +99,9 @@ def test_factura_signals_delegation(mock_send, mock_capture, django_user_model):
     Validates that Factura pre_save and post_save hooks delegate to FacturaService.
     """
     from apps.bookings.models import Venta
+    from apps.common.models import Moneda
     from apps.crm.models import Cliente
     from apps.finance.models import Factura
-    from apps.finance.models.currencies import Moneda
     from core.models import Agencia
 
     agencia = Agencia.objects.create(nombre="Test Agency Factura")

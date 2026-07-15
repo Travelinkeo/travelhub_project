@@ -8,7 +8,8 @@ from decimal import Decimal
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
-from apps.finance.models import Factura, FacturaConsolidada, ItemFacturaConsolidada
+from apps.finance.models import Factura
+from apps.finance.models_stubs import FacturaConsolidada, ItemFacturaConsolidada
 
 
 class Command(BaseCommand):

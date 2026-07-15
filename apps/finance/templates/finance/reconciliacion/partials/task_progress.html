@@ -1,13 +1,13 @@
-<div id="celery-monitor" 
+<div id="celery-monitor"
      class="space-y-6 text-center animate-in fade-in zoom-in duration-300"
      x-data="{ polls: 0 }"
      x-init="{% if not task_finished %}$watch('polls', v => { if (v >= 150) $el.removeAttribute('hx-trigger')}){% endif %}"
-     hx-get="{% url 'finance:reconciliacion_task_status' task_id %}" 
-     hx-trigger="{% if not task_finished %}every 2s{% endif %}" 
-     hx-target="this" 
+     hx-get="#"
+     hx-trigger="{% if not task_finished %}every 2s{% endif %}"
+     hx-target="this"
      hx-swap="outerHTML"
      @htmx:after-request="{% if not task_finished %}polls++{% endif %}">
-    
+
     <div class="space-y-3">
         <h2 class="text-lg font-black text-text-main flex items-center justify-center gap-2">
             <span class="material-symbols-outlined text-primary animate-spin">sync</span>
@@ -33,7 +33,7 @@
             </div>
         </div>
         <div class="overflow-hidden h-3 mb-4 text-xs flex rounded-full bg-surface-2 border border-border-color shadow-inner">
-            <div style="width:{{ progress|default:'10' }}%" 
+            <div style="width:{{ progress|default:'10' }}%"
                  class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-primary transition-all duration-700 ease-out relative">
                 <!-- Efecto Glow en el extremo -->
                 <div class="absolute right-0 top-0 bottom-0 w-2 bg-white/40 blur-sm"></div>
@@ -49,7 +49,7 @@
             </p>
             <p class="text-[10px] text-text-muted font-mono break-all">{{ error|default:"Falla desconocida" }}</p>
             <div class="mt-4 text-center">
-                 <a href="{% url 'finance:reconciliacion_upload' %}" class="btn-secondary text-[10px] px-3">
+                 <a href="#" class="btn-secondary text-[10px] px-3">
                      Reintentar Subida
                  </a>
             </div>

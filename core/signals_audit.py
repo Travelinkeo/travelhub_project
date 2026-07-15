@@ -168,12 +168,14 @@ def audit_post_save_pasajero(sender, instance, created, **kwargs):
 def audit_delete_factura(sender, instance, **kwargs):
     if are_signals_blocked():
         return
+    venta = getattr(instance, "venta_asociada", None) or getattr(instance, "venta", None)
+    numero = getattr(instance, "numero_factura", None) or getattr(instance, "numero_control", None)
     crear_audit_log(
         modelo="Factura",
         object_id=instance.pk,
         accion=AuditLog.Accion.DELETE,
-        venta=instance.venta_asociada,
-        descripcion=f"Borrado de Factura {instance.numero_factura}",
+        venta=venta,
+        descripcion=f"Borrado de Factura {numero}",
     )
 
 
@@ -192,14 +194,16 @@ def audit_pre_save_factura(sender, instance, **kwargs):
 def audit_post_save_factura(sender, instance, created, **kwargs):
     if are_signals_blocked():
         return
+    venta = getattr(instance, "venta_asociada", None) or getattr(instance, "venta", None)
+    numero = getattr(instance, "numero_factura", None) or getattr(instance, "numero_control", None)
     if created:
         crear_audit_log(
             modelo="Factura",
             object_id=instance.pk,
             accion=AuditLog.Accion.CREATE,
-            venta=instance.venta_asociada,
-            descripcion=f"Creacion de Factura {instance.numero_factura}",
-            datos_nuevos={"id": instance.pk, "numero": instance.numero_factura},
+            venta=venta,
+            descripcion=f"Creacion de Factura {numero}",
+            datos_nuevos={"id": instance.pk, "numero": str(numero)},
         )
     elif hasattr(instance, "_pre_save_instance") and instance._pre_save_instance:
         diff = _calcular_diff(instance._pre_save_instance, instance)
@@ -208,8 +212,8 @@ def audit_post_save_factura(sender, instance, created, **kwargs):
                 modelo="Factura",
                 object_id=instance.pk,
                 accion=AuditLog.Accion.UPDATE,
-                venta=instance.venta_asociada,
-                descripcion=f"Actualizacion de Factura {instance.numero_factura}",
+                venta=venta,
+                descripcion=f"Actualizacion de Factura {numero}",
                 datos_previos={k: v["old"] for k, v in diff.items()},
                 datos_nuevos={k: v["new"] for k, v in diff.items()},
             )

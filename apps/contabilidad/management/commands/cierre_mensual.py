@@ -14,7 +14,7 @@ from decimal import Decimal
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
-from apps.contabilidad.models import AsientoContable, DetalleAsiento, PlanContable
+from apps.contabilidad.models import AsientoContable, CuentaContable, MovimientoContable
 from apps.contabilidad.reportes import ReportesContables
 from apps.contabilidad.services import ContabilidadService
 
@@ -132,7 +132,7 @@ class Command(BaseCommand):
         )
 
         # Obtener cuenta de resultados acumulados
-        cuenta_resultados = PlanContable.objects.filter(
+        cuenta_resultados = CuentaContable.objects.filter(
             codigo_cuenta__startswith="3.2"  # Resultados Acumulados
         ).first()
 
@@ -142,7 +142,7 @@ class Command(BaseCommand):
         if utilidad > 0:
             # Utilidad: Débito Ingresos, Crédito Resultados
             # Simplificado: solo trasladar neto
-            DetalleAsiento.objects.create(
+            MovimientoContable.objects.create(
                 asiento=asiento,
                 linea=1,
                 cuenta_contable=cuenta_resultados,
@@ -154,7 +154,7 @@ class Command(BaseCommand):
             )
         else:
             # Pérdida: Débito Resultados, Crédito Gastos
-            DetalleAsiento.objects.create(
+            MovimientoContable.objects.create(
                 asiento=asiento,
                 linea=1,
                 cuenta_contable=cuenta_resultados,

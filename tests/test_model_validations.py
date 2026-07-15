@@ -9,8 +9,8 @@ import pytest
 from django.core.exceptions import ValidationError
 
 from apps.bookings.models import FeeVenta, PagoVenta, Venta
+from apps.common.models import Moneda
 from apps.finance.models import Factura
-from apps.finance.models.currencies import Moneda
 
 
 @pytest.mark.django_db
@@ -82,7 +82,7 @@ class TestFacturaValidaciones:
 
     def test_factura_monto_negativo_raises_validation_error(self):
         """Factura con monto total negativo debe lanzar ValidationError"""
-        from apps.finance.models.currencies import Moneda
+        from apps.common.models import Moneda
 
         moneda, _ = Moneda.objects.get_or_create(
             codigo_iso="USD", defaults={"nombre": "Dólar", "simbolo": "$"}
@@ -99,7 +99,7 @@ class TestFacturaValidaciones:
 
     def test_factura_saldo_negativo_raises_validation_error(self):
         """Factura con saldo pendiente negativo debe lanzar ValidationError"""
-        from apps.finance.models.currencies import Moneda
+        from apps.common.models import Moneda
 
         moneda, _ = Moneda.objects.get_or_create(
             codigo_iso="USD", defaults={"nombre": "Dólar", "simbolo": "$"}

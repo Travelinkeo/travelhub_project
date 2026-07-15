@@ -5,7 +5,7 @@ from celery import shared_task
 logger = logging.getLogger(__name__)
 
 
-@shared_task(bind=True, max_retries=3, queue="ia_fast", soft_time_limit=20, time_limit=30)
+@shared_task(bind=True, max_retries=3, soft_time_limit=20, time_limit=30)
 def process_web_uploaded_ticket(self, boleto_id, agencia_id=None):
     from celery.exceptions import SoftTimeLimitExceeded
 

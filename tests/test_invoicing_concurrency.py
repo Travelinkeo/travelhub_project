@@ -5,10 +5,9 @@ from decimal import Decimal
 import pytest
 from django.db import IntegrityError, transaction
 
+from apps.common.models import Moneda
 from apps.crm.models import Cliente
-from apps.finance.models import Factura
-from apps.finance.models.core_finance import generar_numero_factura_atomico
-from apps.finance.models.currencies import Moneda
+from apps.finance.models import Factura, generar_numero_factura_atomico
 from core.models.agencia import Agencia
 
 

@@ -24,7 +24,7 @@
                         <img src="{{ current_agency.logo.url }}" class="w-8 h-8 object-contain rounded-lg shrink-0 border border-border-color" alt="Logo">
                     {% endif %}
                 {% endif %}
-                
+
                 {% if not current_agency.logo_light and not current_agency.logo_dark and not current_agency.logo %}
                     <div class="shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-[var(--text-on-primary)] font-black text-xs shadow-[var(--btn-shadow)]"
                          style="background-color: var(--primary)">
@@ -42,7 +42,7 @@
                 <p class="text-[10px] text-text-muted mt-0.5">Gestión ERP</p>
             </div>
         </div>
-        
+
         <button @click="sidebarOpen = !sidebarOpen"
             class="hidden md:flex w-7 h-7 rounded-lg text-text-muted hover:text-text-main hover:bg-surface-2 items-center justify-center transition-all bg-surface-1 border border-border-color absolute -right-3.5 top-4 shadow-sm z-10">
             <span class="material-symbols-outlined text-[16px]" x-text="sidebarOpen ? 'chevron_left' : 'chevron_right'"></span>
@@ -159,7 +159,7 @@
             <span class="material-symbols-outlined text-[20px] shrink-0">shopping_cart</span>
             <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">{% trans "Ventas" %}</span>
         </a>
-        
+
         <a href="{% url 'bookings:cotizacion_dashboard' %}"
             class="nav-item {% if 'cotizaciones' in request.path %}nav-active{% endif %}"
             :class="!sidebarOpen && 'justify-center'">
@@ -249,7 +249,7 @@
 
         <!-- CATEGORÍA: FINANZAS Y CONTABILIDAD (ROLES: ADMIN, GERENTE, CONTADOR) -->
         {% if user_agency_role in 'admin,gerente,contador' %}
-        
+
         <button @click="openCategories.finanzas = !openCategories.finanzas"
             x-show="sidebarOpen" x-transition
             class="w-full flex items-center justify-between mt-5 mb-1.5 px-2 text-[10px] font-black text-text-muted hover:text-primary transition-all uppercase tracking-widest text-left select-none">
@@ -267,7 +267,7 @@
             <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">{% trans "Facturación" %}</span>
         </a>
 
-        <a href="{% url 'finance:liquidacion_list' %}"
+        <a href="#"
             class="nav-item {% if 'liquidaciones' in request.path %}nav-active{% endif %}"
             :class="!sidebarOpen && 'justify-center'">
             <span class="material-symbols-outlined text-[20px] shrink-0">account_balance_wallet</span>
@@ -281,7 +281,7 @@
             <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">{% trans "Rentabilidad" %}</span>
         </a>
 
-        <a href="{% url 'finance:reconciliacion_dashboard_htmx' %}"
+        <a href="#"
             class="nav-item {% if 'reconciliacion' in request.path %}nav-active{% endif %}"
             :class="!sidebarOpen && 'justify-center'">
             <span class="material-symbols-outlined text-[20px] shrink-0">auto_awesome</span>
@@ -416,7 +416,7 @@
             <span class="material-symbols-outlined text-[20px] shrink-0">category</span>
             <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">{% trans "Catálogos" %}</span>
         </a>
-        
+
         <a href="{% url 'core:agencia_settings' %}"
             class="nav-item {% if 'agencia/configuracion' in request.path %}nav-active{% endif %}"
             :class="!sidebarOpen && 'justify-center'">
@@ -478,7 +478,7 @@
             <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">{% trans "Monedas y Tasas" %}</span>
         </a>
 
-        <a href="{% url 'finance_admin:retencionislr_list' %}"
+        <a href="#"
             class="nav-item {% if 'retencionesislr' in request.path %}nav-active{% endif %}"
             :class="!sidebarOpen && 'justify-center'">
             <span class="material-symbols-outlined text-[20px] shrink-0">receipt_long</span>
@@ -524,7 +524,7 @@
             <span x-show="sidebarOpen" x-transition class="material-symbols-outlined text-[16px] text-text-muted shrink-0">translate</span>
             <div class="flex items-center gap-1" x-show="sidebarOpen" x-transition>
                 {% get_current_language as CURRENT_LANG %}
-                <form method="post" action="{% url 'set_language' %}">
+                <form method="post" action="#">
                     {% csrf_token %}
                     <input type="hidden" name="language" value="es">
                     <input type="hidden" name="next" value="{{ request.get_full_path }}">
@@ -533,7 +533,7 @@
                         {% if CURRENT_LANG == 'es' %}bg-primary text-[var(--text-on-primary)] shadow-sm{% else %}text-text-muted hover:text-text-main hover:bg-surface-3{% endif %}"
                         title="Español">ES</button>
                 </form>
-                <form method="post" action="{% url 'set_language' %}">
+                <form method="post" action="#">
                     {% csrf_token %}
                     <input type="hidden" name="language" value="en">
                     <input type="hidden" name="next" value="{{ request.get_full_path }}">
@@ -556,7 +556,7 @@
     <div class="shrink-0 p-3 border-t border-border-color bg-surface-2/50">
 
         <div class="flex items-center gap-2.5" :class="!sidebarOpen && 'justify-center'">
-            <a href="{% url 'core:user_profile' %}" 
+            <a href="{% url 'core:user_profile' %}"
                 class="w-8 h-8 rounded-lg bg-surface-base border border-border-color text-primary flex items-center justify-center text-[12px] font-black hover:bg-surface-3 transition-colors shrink-0 shadow-sm">
                 {{ user.username|slice:":2"|upper }}
             </a>

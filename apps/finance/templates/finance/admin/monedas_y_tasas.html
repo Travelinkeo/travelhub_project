@@ -24,7 +24,7 @@
                 <span class="material-symbols-outlined">add</span>
                 {% trans "Nueva Moneda" %}
             </a>
-            <a href="{% url 'finance_admin:tipocambio_create' %}" class="btn-primary h-12">
+            <a href="#" class="btn-primary h-12">
                 <span class="material-symbols-outlined">add</span>
                 {% trans "Nueva Tasa" %}
             </a>
@@ -98,10 +98,10 @@
                             <td><span class="font-mono font-bold">{{ tasa.tasa_conversion }}</span></td>
                             <td class="text-right">
                                 <div class="flex justify-end items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <a href="{% url 'finance_admin:tipocambio_update' tasa.pk %}" class="p-1.5 rounded-md text-text-muted hover:text-primary transition-colors" title="{% trans 'Editar Tasa' %}">
+                                    <a href="#" class="p-1.5 rounded-md text-text-muted hover:text-primary transition-colors" title="{% trans 'Editar Tasa' %}">
                                         <span class="material-symbols-outlined text-[18px]">edit</span>
                                     </a>
-                                    <a href="{% url 'finance_admin:tipocambio_delete' tasa.pk %}" class="p-1.5 rounded-md text-text-muted hover:text-status-danger transition-colors" title="{% trans 'Eliminar Tasa' %}">
+                                    <a href="#" class="p-1.5 rounded-md text-text-muted hover:text-status-danger transition-colors" title="{% trans 'Eliminar Tasa' %}">
                                         <span class="material-symbols-outlined text-[18px]">delete</span>
                                     </a>
                                 </div>

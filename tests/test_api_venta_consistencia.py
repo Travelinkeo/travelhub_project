@@ -3,8 +3,8 @@ from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
 
 from apps.bookings.models import Venta
+from apps.common.models import Moneda
 from apps.crm.models import Cliente
-from apps.finance.models.currencies import Moneda
 
 pytestmark = pytest.mark.skip(reason="Tests requieren configuración completa o refactorización")
 

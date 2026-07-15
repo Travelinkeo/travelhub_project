@@ -11,14 +11,13 @@ logger = logging.getLogger(__name__)
 
 class PdfGenerationService:
     """
-    Microservicio dedicado a la renderización de boletos en formato PDF A4.
-    Usa Gotenberg (Chromium) para garantizar fidelidad y soporte moderno de CSS.
+    Renderiza boletos en PDF A4 usando WeasyPrint (local).
     """
 
     @staticmethod
     def generate_ticket(data: dict[str, Any], agencia_obj=None, **kwargs) -> tuple[bytes, str]:
         """
-        Genera el PDF del boleto usando la plantilla unificada y Gotenberg.
+        Genera el PDF del boleto usando la plantilla unificada y WeasyPrint.
         """
         try:
             # Selección de plantilla
@@ -31,7 +30,7 @@ class PdfGenerationService:
             # Renderizado HTML
             html_out = render_to_string(template_name, context)
 
-            # --- RENDERIZADO DE PDF (Gotenberg → WeasyPrint fallback) ---
+            # --- RENDERIZADO DE PDF (WeasyPrint) ---
             logger.info(f"🖨️ Generando PDF para PNR: {context.get('CODIGO_RESERVA')}")
             pdf_bytes = PdfRendererService.render_html_to_pdf(html_out)
 
@@ -108,8 +107,9 @@ class PdfGenerationService:
         if not f_emision or str(f_emision).strip().lower() == "no encontrado":
             f_emision = dt.datetime.now().strftime("%d%b%y").upper()
             # Traducir meses a inglés si es necesario
-            meses_es = {"ENE": "JAN", "ABR": "APR", "AGO": "AUG", "DIC": "DEC"}
-            for es, en in meses_es.items():
+            from core.models.ai_schemas import MESES_ES_TO_EN
+
+            for es, en in MESES_ES_TO_EN.items():
                 f_emision = f_emision.replace(es, en)
         else:
             try:

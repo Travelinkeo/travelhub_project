@@ -20,7 +20,7 @@
     </td>
     <td class="py-4 px-4 text-center">
         {% if reclamo.estado == 'ELE' %}
-            <button hx-post="{% url 'finance:iniciar_tax_refund' reclamo.id %}"
+            <button hx-post="#"
                     hx-target="#reclamo-{{ reclamo.id }}"
                     hx-swap="outerHTML"
                     hx-indicator=".htmx-indicator-{{ reclamo.id }}"

@@ -10,8 +10,8 @@ from django.contrib.auth import get_user_model
 from django.utils import timezone
 
 from apps.bookings.models import BoletoImportado, ProductoServicio, Proveedor, Venta
+from apps.common.models import Moneda
 from apps.crm.models import Cliente
-from apps.finance.models.currencies import Moneda
 
 # Imports actualizados apuntando a las nuevas rutas modulares (apps/*)
 from core.models import Agencia  # Agencia se mantiene en el core por el multi-tenant

@@ -1,78 +1,134 @@
 # core/tasks.py
-# Lazy loading facade for backward compatibility to avoid circular imports.
-# NEW TASKS: After adding a task to apps/*/tasks.py, add its name here
-# mapped to its canonical module so `from core.tasks import new_task` works.
-# Example: 'my_new_task': 'apps.common.tasks',
+# Facade de compatibilidad hacia atrás: re-exporta tareas de sus módulos
+# canónicos para que `from core.tasks import X` siga funcionando.
+#
+# ⚠️  Ya no usa __getattr__: todas las tareas están importadas explícitamente,
+#      lo que permite análisis estático, type hints, y que mypy/IDE resuelvan
+#      correctamente los símbolos. Si una tarea nueva se añade en apps/*/tasks.py,
+#      agrégala AQUÍ como import explícito.
+#
+# CELERY DESCUBRE TAREAS AUTOMÁTICAMENTE vía app.autodiscover_tasks()
+# en travelhub/celery.py. Estas re-exportaciones son SOLO para compatibilidad
+# de imports legacy. No afectan el enrutamiento ni la ejecución de tareas.
 
-import importlib
+# ── apps.common.tasks ────────────────────────────────────────────────────────
+# ── apps.automation.tasks ────────────────────────────────────────────────────
+from apps.automation.tasks import ejecutar_cobranza_ia_task
 
-_TASK_MAPPINGS = {
+# ── apps.bookings.tasks ──────────────────────────────────────────────────────
+from apps.bookings.tasks import (
+    check_upcoming_flights,
+    enviar_recordatorios_vuelo_task,
+    generar_pdf_ticket_async_task,
+    parsear_boleto_individual,
+    retry_queued_boletos,
+    send_ticket_notification,
+)
+from apps.common.tasks import (
+    answer_telegram_callback_task,
+    backup_database_task,
+    cleanup_temporary_storage_files,
+    create_binance_order_task,
+    download_twilio_media_task,
+    edit_telegram_message_task,
+    enviar_bienvenida_agencia_task,
+    enviar_notificacion_whatsapp_task,
+    fetch_airline_logo_task,
+    fetch_all_qr_codes_task,
+    fetch_bcv_rates_task,
+    fetch_evolution_qr_task,
+    fetch_image_base64_task,
+    fetch_tasas_venezuela_task,
+    fetch_unsplash_image_task,
+    generate_pdf_task,
+    get_filename_from_header,
+    get_telegram_file_url_task,
+    limpiar_axes_logs,
+    limpiar_celery_results,
+    limpiar_sesiones_expiradas,
+    migrar_logos_agencia_task,
+    notificar_boleto_procesado_task,
+    notificar_confirmacion_pago_task,
+    notificar_recordatorio_pago_task,
+    notify_migration_alert_task,
+    procesar_correo_individual_agencia,
+    process_incoming_emails,
+    process_twilio_voice_quote_task,
+    send_email_task,
+    send_evolution_document_task,
+    send_evolution_message_task,
+    send_factura_to_telegram_task,
+    send_telegram_document_task,
+    send_telegram_photo_task,
+    send_telegram_task,
+    send_whatsapp_meta_task,
+    send_whatsapp_task,
+)
+
+# ── apps.contabilidad.tasks ──────────────────────────────────────────────────
+from apps.contabilidad.tasks import sync_bcv_rates
+
+# ── apps.finance.tasks ───────────────────────────────────────────────────────
+from apps.finance.tasks import (
+    check_pending_payments,
+    create_invoice_from_sale_task,
+    procesar_facturacion_masiva_task,
+)
+
+# ── Lista completa para inspección programática ──────────────────────────────
+__all__ = [
     # apps.common.tasks
-    "get_filename_from_header": "apps.common.tasks",
-    "procesar_correo_individual_agencia": "apps.common.tasks",
-    "process_incoming_emails": "apps.common.tasks",
-    "enviar_notificacion_whatsapp_task": "apps.common.tasks",
-    "migrar_logos_agencia_task": "apps.common.tasks",
-    "cleanup_temporary_storage_files": "apps.common.tasks",
-    "backup_database_task": "apps.common.tasks",
-    "send_telegram_task": "apps.common.tasks",
-    "send_whatsapp_task": "apps.common.tasks",
-    "generate_pdf_task": "apps.common.tasks",
-    "send_telegram_document_task": "apps.common.tasks",
-    "send_telegram_photo_task": "apps.common.tasks",
-    "send_factura_to_telegram_task": "apps.common.tasks",
-    "create_binance_order_task": "apps.common.tasks",
-    "notify_migration_alert_task": "apps.common.tasks",
-    "answer_telegram_callback_task": "apps.common.tasks",
-    "edit_telegram_message_task": "apps.common.tasks",
-    "send_evolution_message_task": "apps.common.tasks",
-    "send_evolution_document_task": "apps.common.tasks",
-    "fetch_unsplash_image_task": "apps.common.tasks",
-    "fetch_airline_logo_task": "apps.common.tasks",
-    "download_twilio_media_task": "apps.common.tasks",
-    "send_whatsapp_meta_task": "apps.common.tasks",
-    "get_telegram_file_url_task": "apps.common.tasks",
-    "fetch_bcv_rates_task": "apps.common.tasks",
-    "fetch_tasas_venezuela_task": "apps.common.tasks",
-    "fetch_image_base64_task": "apps.common.tasks",
-    "send_email_task": "apps.common.tasks",
-    "enviar_bienvenida_agencia_task": "apps.common.tasks",
-    "notificar_confirmacion_pago_task": "apps.common.tasks",
-    "notificar_recordatorio_pago_task": "apps.common.tasks",
-    "notificar_boleto_procesado_task": "apps.common.tasks",
-    "process_twilio_voice_quote_task": "apps.common.tasks",
-    "fetch_evolution_qr_task": "apps.common.tasks",
-    "fetch_all_qr_codes_task": "apps.common.tasks",
+    "answer_telegram_callback_task",
+    "backup_database_task",
+    "cleanup_temporary_storage_files",
+    "create_binance_order_task",
+    "download_twilio_media_task",
+    "edit_telegram_message_task",
+    "enviar_bienvenida_agencia_task",
+    "enviar_notificacion_whatsapp_task",
+    "fetch_airline_logo_task",
+    "fetch_all_qr_codes_task",
+    "fetch_bcv_rates_task",
+    "fetch_evolution_qr_task",
+    "fetch_image_base64_task",
+    "fetch_tasas_venezuela_task",
+    "fetch_unsplash_image_task",
+    "generate_pdf_task",
+    "get_filename_from_header",
+    "get_telegram_file_url_task",
+    "limpiar_axes_logs",
+    "limpiar_celery_results",
+    "limpiar_sesiones_expiradas",
+    "migrar_logos_agencia_task",
+    "notificar_boleto_procesado_task",
+    "notificar_confirmacion_pago_task",
+    "notificar_recordatorio_pago_task",
+    "notify_migration_alert_task",
+    "procesar_correo_individual_agencia",
+    "process_incoming_emails",
+    "process_twilio_voice_quote_task",
+    "send_email_task",
+    "send_evolution_document_task",
+    "send_evolution_message_task",
+    "send_factura_to_telegram_task",
+    "send_telegram_document_task",
+    "send_telegram_photo_task",
+    "send_telegram_task",
+    "send_whatsapp_meta_task",
+    "send_whatsapp_task",
     # apps.bookings.tasks
-    "parsear_boleto_individual": "apps.bookings.tasks",
-    "retry_queued_boletos": "apps.bookings.tasks",
-    "send_ticket_notification": "apps.bookings.tasks",
-    "check_upcoming_flights": "apps.bookings.tasks",
-    "enviar_recordatorios_vuelo_task": "apps.bookings.tasks",
-    "generar_pdf_ticket_async_task": "apps.bookings.tasks",
-    # apps.crm.tasks
-    "check_passport_expiry": "apps.crm.tasks",
-    "check_client_birthdays": "apps.crm.tasks",
-    "task_ocr_passport_fast": "apps.crm.tasks",
-    "process_passport_ocr": "apps.crm.tasks",
+    "check_upcoming_flights",
+    "enviar_recordatorios_vuelo_task",
+    "generar_pdf_ticket_async_task",
+    "parsear_boleto_individual",
+    "retry_queued_boletos",
+    "send_ticket_notification",
     # apps.finance.tasks
-    "check_pending_payments": "apps.finance.tasks",
-    "procesar_facturacion_masiva_task": "apps.finance.tasks",
-    "create_invoice_from_sale_task": "apps.finance.tasks",
+    "check_pending_payments",
+    "create_invoice_from_sale_task",
+    "procesar_facturacion_masiva_task",
     # apps.contabilidad.tasks
-    "sync_bcv_rates": "apps.contabilidad.tasks",
+    "sync_bcv_rates",
     # apps.automation.tasks
-    "ejecutar_cobranza_ia_task": "apps.automation.tasks",
-    # cleanup tasks
-    "limpiar_axes_logs": "apps.common.tasks",
-    "limpiar_sesiones_expiradas": "apps.common.tasks",
-    "limpiar_celery_results": "apps.common.tasks",
-}
-
-
-def __getattr__(name):
-    if name in _TASK_MAPPINGS:
-        module_path = _TASK_MAPPINGS[name]
-        module = importlib.import_module(module_path)
-        return getattr(module, name)
-    raise AttributeError(f"module {__name__} has no attribute {name}")
+    "ejecutar_cobranza_ia_task",
+]

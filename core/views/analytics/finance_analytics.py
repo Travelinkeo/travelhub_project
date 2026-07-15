@@ -3,7 +3,7 @@ from decimal import Decimal
 from django.shortcuts import render
 from django.utils import timezone
 
-from apps.contabilidad.models import DetalleAsiento
+from apps.contabilidad.models import MovimientoContable
 
 
 def finance_analytics_view(request):
@@ -20,7 +20,7 @@ def finance_analytics_view(request):
         fecha_hasta = timezone.now().strftime("%Y-%m-%d")
 
     # Base Query: Movimientos confirmados
-    detalles = DetalleAsiento.objects.filter(asiento__estado="CON").select_related(
+    detalles = MovimientoContable.objects.filter(asiento__estado="CON").select_related(
         "cuenta_contable"
     )
 

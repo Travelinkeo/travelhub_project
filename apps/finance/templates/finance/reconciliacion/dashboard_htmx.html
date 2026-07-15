@@ -18,7 +18,7 @@
             <p class="text-text-secondary text-sm mt-1 font-medium tracking-wide">Detección automática de discrepancias tarifarias y fugas financieras con IA.</p>
         </div>
         <div class="flex gap-3">
-            <a href="{% url 'finance:reconciliacion_create' %}" class="relative group px-6 py-3 bg-primary hover:bg-primary-hover text-on-primary rounded-xl font-bold transition-all shadow-lg shadow-primary/20 overflow-hidden flex items-center gap-2">
+            <a href="#" class="relative group px-6 py-3 bg-primary hover:bg-primary-hover text-on-primary rounded-xl font-bold transition-all shadow-lg shadow-primary/20 overflow-hidden flex items-center gap-2">
                 <div class="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                 <span class="material-symbols-outlined text-[20px]">upload_cloud</span>
                 <span>Sincronizar Reporte</span>
@@ -148,13 +148,13 @@
                                 <td class="px-8 py-5 text-right">
                                     <div class="flex justify-end gap-2">
                                         {% if rep.estado == 'PENDIENTE' or rep.estado == 'ERROR' %}
-                                        <a href="{% url 'finance:reconciliacion_process' rep.pk %}"
+                                        <a href="#"
                                             class="size-9 flex items-center justify-center text-primary bg-primary/10 hover:bg-primary-hover hover:text-on-primary rounded-xl transition-all border border-primary/20 shadow-lg shadow-primary/5"
                                             title="Procesar con IA">
                                             <span class="material-symbols-outlined text-[20px]">smart_toy</span>
                                         </a>
                                         {% else %}
-                                        <a href="{% url 'finance:reconciliacion_detail' rep.pk %}"
+                                        <a href="#"
                                             class="size-9 flex items-center justify-center text-text-muted hover:text-primary hover:bg-primary/10 rounded-xl transition-all border border-transparent hover:border-primary/20"
                                             title="Ver Cruce">
                                             <span class="material-symbols-outlined text-[20px]">read_more</span>
@@ -195,7 +195,7 @@
                 </div>
                 <h2 class="text-sm font-black text-text-main uppercase tracking-widest opacity-80">Fugas Críticas</h2>
             </div>
-            
+
             <div class="card-base p-6 space-y-4">
                 {% for alerta in alertas_criticas %}
                 <div class="group p-4 bg-surface-2 border border-border-color hover:border-red-500/50 rounded-2xl transition-all hover:bg-red-500/[0.03] flex items-center justify-between">
@@ -210,7 +210,7 @@
                     </div>
                     <div class="text-right">
                         <p class="text-lg font-black text-red-500 tabular-nums">-${{ alerta.diferencia_total|abs|intcomma }}</p>
-                        <a href="{% url 'finance:reconciliacion_detail' alerta.reporte.pk %}"
+                        <a href="#"
                             class="inline-flex items-center gap-1 text-[9px] font-black text-primary hover:text-primary-hover transition-colors uppercase tracking-widest mt-1">
                             Auditar <span class="material-symbols-outlined text-[12px]">arrow_right_alt</span>
                         </a>

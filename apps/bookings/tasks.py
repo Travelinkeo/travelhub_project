@@ -675,3 +675,40 @@ def generar_pdf_ticket_async_task(boleto_id, **kwargs):
                 f"No se pudo actualizar estado_parseo a ERR para boleto {boleto_id}: {e_inner}"
             )
         raise e
+
+
+@shared_task(queue="celery", time_limit=300)
+def retry_queued_boletos_task():
+    """
+    Tarea periódica (P3-001) que busca boletos en estado QUE (Cola Llena)
+    y los vuelve a encolar para parseo asíncrono.
+    """
+    from apps.bookings.models import BoletoImportado
+    from core.api import parsear_boleto_individual
+    from core.middleware import system_context
+
+    logger.info("⏳ Iniciando reintento de boletos encolados en estado QUE (Cola Llena)...")
+
+    # 🔓 system_context obligatorio con motivo para bypassear RLS
+    with system_context(reason="retry_queued_boletos"):
+        boletos_stuck = BoletoImportado.all_objects.filter(
+            estado_parseo=BoletoImportado.EstadoParseo.COLA_LLENA, is_deleted=False
+        ).order_by("fecha_subida")[:50]
+
+        count = 0
+        for boleto in boletos_stuck:
+            logger.info(f"🔄 Re-encolando boleto stuck ID={boleto.pk} (Agencia: {boleto.agencia})")
+            # Cambiar a PRO para que no sea seleccionado de nuevo en la siguiente iteración
+            BoletoImportado.all_objects.filter(pk=boleto.pk).update(
+                estado_parseo=BoletoImportado.EstadoParseo.EN_PROCESO,
+                log_parseo="Re-encolado automático por tarea programada.",
+            )
+            parsear_boleto_individual.delay(boleto.pk)
+            count += 1
+
+        if count > 0:
+            logger.info(f"✅ Se re-encolaron {count} boletos que estaban en cola de espera.")
+        else:
+            logger.info("ℹ️ No se encontraron boletos en estado QUE (Cola Llena).")
+
+        return count

@@ -5,7 +5,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404, render
 from django.views import View
 
-from apps.finance.models.tax_refund import TaxRefundOpportunity
+# TaxRefundOpportunity vive en apps.finance.models_stubs tras el refactor
+from apps.finance.models_stubs import TaxRefundOpportunity
 from core.api import get_agencia_from_request
 
 logger = logging.getLogger(__name__)

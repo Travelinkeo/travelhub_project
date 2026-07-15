@@ -224,32 +224,7 @@ services:
           cpus: '0.5'
 
   # ---------------------------------------------------------------------------
-  # 6. GENERADOR DE PDF (Gotenberg)
-  # ---------------------------------------------------------------------------
-  gotenberg:
-    image: gotenberg/gotenberg:8
-    container_name: travelhub_gotenberg
-    restart: unless-stopped
-    command:
-      - "gotenberg"
-      - "--chromium-disable-routes=false"
-      - "--api-timeout=120s"
-    healthcheck:
-      test: ["CMD", "gotenberg", "--help"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 20s
-    networks:
-      - travelhub_private
-    deploy:
-      resources:
-        limits:
-          memory: 1G
-          cpus: '1.0'
-
-  # ---------------------------------------------------------------------------
-  # 6.5. TRACING DISTRIBUIDO (Jaeger — OpenTelemetry backend)
+  # 6. TRACING DISTRIBUIDO (Jaeger — OpenTelemetry backend)
   # ---------------------------------------------------------------------------
   jaeger:
     image: jaegertracing/all-in-one:1.58
@@ -286,7 +261,7 @@ services:
       target: runtime
     container_name: travelhub_worker
     restart: unless-stopped
-    command: celery -A travelhub worker --loglevel=info -Q default,ia_fast,celery --concurrency=4 --max-tasks-per-child=1000 --max-memory-per-child=512000
+    command: celery -A travelhub worker --loglevel=info -Q celery --concurrency=4 --max-tasks-per-child=1000 --max-memory-per-child=512000
     env_file:
       - .env.local
     environment:

@@ -39,9 +39,11 @@ class FreelancerDashboardView(LoginRequiredMixin, View):
         )
 
         # 3. Links de Pago Pendientes (De las ventas asociadas al freelancer)
+
         from django.apps import apps
 
         LinkDePago = apps.get_model("finance", "LinkDePago")
+
         links_pendientes = (
             LinkDePago.objects.filter(venta__comision_asignada__freelancer=freelancer, estado="PEN")
             .select_related("venta")

@@ -12,9 +12,9 @@ from django.db import transaction
 from django.utils import timezone
 
 from apps.bookings.models import PagoVenta
-from apps.finance.models import Factura, ItemFactura
+from apps.finance.models import Factura, ItemFactura, TasaCambioBCV
 
-from .models import AsientoContable, DetalleAsiento, PlanContable, TasaCambioBCV
+from .models import AsientoContable, CuentaContable, MovimientoContable
 
 logger = logging.getLogger(__name__)
 
@@ -22,11 +22,11 @@ logger = logging.getLogger(__name__)
 class ContabilidadService:
     @staticmethod
     def _buscar_cuenta(codigo_cuenta: str):
-        cuenta = PlanContable.objects.filter(codigo_cuenta=codigo_cuenta).first()
+        cuenta = CuentaContable.objects.filter(codigo_cuenta=codigo_cuenta).first()
         if cuenta:
             return cuenta
         prefijo = codigo_cuenta[:5]
-        cuenta = PlanContable.objects.filter(
+        cuenta = CuentaContable.objects.filter(
             codigo_cuenta__startswith=prefijo, permite_movimientos=True
         ).first()
         if cuenta:
@@ -152,7 +152,7 @@ class ContabilidadService:
         comision_usd = factura.base_imponible  # Asumimos que la base gravada es la comisión
 
         # Línea 1: DÉBITO - Cuenta por Cobrar
-        DetalleAsiento.objects.create(
+        MovimientoContable.objects.create(
             asiento=asiento,
             linea=linea_num,
             cuenta_contable=ContabilidadService._buscar_cuenta(
@@ -167,7 +167,7 @@ class ContabilidadService:
         linea_num += 1
 
         # Línea 2: CRÉDITO - Ingreso por Comisiones
-        DetalleAsiento.objects.create(
+        MovimientoContable.objects.create(
             asiento=asiento,
             linea=linea_num,
             cuenta_contable=ContabilidadService._buscar_cuenta(
@@ -185,7 +185,7 @@ class ContabilidadService:
         # Nota: En Factura (base) no tenemos tercero_razon_social, usamos descripcion generica o accedemos a boleto
         monto_tercero = factura.monto_total - comision_usd - factura.iva_monto - factura.igtf_monto
         if monto_tercero > 0:
-            DetalleAsiento.objects.create(
+            MovimientoContable.objects.create(
                 asiento=asiento,
                 linea=linea_num,
                 cuenta_contable=ContabilidadService._buscar_cuenta(
@@ -201,7 +201,7 @@ class ContabilidadService:
 
         # Línea 4: CRÉDITO - IVA Débito Fiscal
         if factura.monto_iva_16 > 0:
-            DetalleAsiento.objects.create(
+            MovimientoContable.objects.create(
                 asiento=asiento,
                 linea=linea_num,
                 cuenta_contable=ContabilidadService._buscar_cuenta(
@@ -217,7 +217,7 @@ class ContabilidadService:
 
         # Línea 5: CRÉDITO - IGTF por Pagar (si aplica)
         if factura.monto_igtf > 0:
-            DetalleAsiento.objects.create(
+            MovimientoContable.objects.create(
                 asiento=asiento,
                 linea=linea_num,
                 cuenta_contable=ContabilidadService._buscar_cuenta(
@@ -242,7 +242,7 @@ class ContabilidadService:
         Registra: Cuenta por Cobrar (Débito), Ingreso Bruto (Crédito), IVA (Crédito).
         """
         # Línea 1: DÉBITO - Cuenta por Cobrar
-        DetalleAsiento.objects.create(
+        MovimientoContable.objects.create(
             asiento=asiento,
             linea=linea_num,
             cuenta_contable=ContabilidadService._buscar_cuenta(
@@ -258,7 +258,7 @@ class ContabilidadService:
 
         # Línea 2: CRÉDITO - Ingreso por Venta de Paquetes
         subtotal = factura.base_imponible + factura.base_exenta
-        DetalleAsiento.objects.create(
+        MovimientoContable.objects.create(
             asiento=asiento,
             linea=linea_num,
             cuenta_contable=ContabilidadService._buscar_cuenta(
@@ -274,7 +274,7 @@ class ContabilidadService:
 
         # Línea 3: CRÉDITO - IVA Débito Fiscal
         if factura.monto_iva_16 > 0:
-            DetalleAsiento.objects.create(
+            MovimientoContable.objects.create(
                 asiento=asiento,
                 linea=linea_num,
                 cuenta_contable=ContabilidadService._buscar_cuenta(
@@ -290,7 +290,7 @@ class ContabilidadService:
 
         # Línea 4: CRÉDITO - IGTF por Pagar (si aplica)
         if factura.monto_igtf > 0:
-            DetalleAsiento.objects.create(
+            MovimientoContable.objects.create(
                 asiento=asiento,
                 linea=linea_num,
                 cuenta_contable=ContabilidadService._buscar_cuenta(
@@ -350,7 +350,7 @@ class ContabilidadService:
 
             # Línea 1: DÉBITO - Banco/Caja
             cuenta_banco = ContabilidadService._buscar_cuenta("1.1.01.04")
-            DetalleAsiento.objects.create(
+            MovimientoContable.objects.create(
                 asiento=asiento,
                 linea=linea_num,
                 cuenta_contable=cuenta_banco,
@@ -364,7 +364,7 @@ class ContabilidadService:
 
             # Línea 2: CRÉDITO - Cuenta por Cobrar (al valor histórico)
             bsd_factura = pago.monto * tasa_factura
-            DetalleAsiento.objects.create(
+            MovimientoContable.objects.create(
                 asiento=asiento,
                 linea=linea_num,
                 cuenta_contable=ContabilidadService._buscar_cuenta(codigo_cuenta="1.1.02.02"),
@@ -383,7 +383,7 @@ class ContabilidadService:
             if abs(diferencial_bsd) > Decimal("0.01"):  # Tolerancia
                 if diferencial_bsd > 0:
                     # GANANCIA CAMBIARIA
-                    DetalleAsiento.objects.create(
+                    MovimientoContable.objects.create(
                         asiento=asiento,
                         linea=linea_num,
                         cuenta_contable=ContabilidadService._buscar_cuenta(
@@ -408,7 +408,7 @@ class ContabilidadService:
 
                     if nota_debito:
                         # Registrar IVA de la nota de débito en el asiento
-                        DetalleAsiento.objects.create(
+                        MovimientoContable.objects.create(
                             asiento=asiento,
                             linea=linea_num,
                             cuenta_contable=ContabilidadService._buscar_cuenta(
@@ -422,7 +422,7 @@ class ContabilidadService:
                         )
                         linea_num += 1
 
-                        DetalleAsiento.objects.create(
+                        MovimientoContable.objects.create(
                             asiento=asiento,
                             linea=linea_num,
                             cuenta_contable=ContabilidadService._buscar_cuenta(
@@ -442,7 +442,7 @@ class ContabilidadService:
 
                 else:
                     # PÉRDIDA CAMBIARIA
-                    DetalleAsiento.objects.create(
+                    MovimientoContable.objects.create(
                         asiento=asiento,
                         linea=linea_num,
                         cuenta_contable=ContabilidadService._buscar_cuenta(
@@ -495,9 +495,9 @@ class ContabilidadService:
                 ultimo_dia = date(anio, mes + 1, 1) - timezone.timedelta(days=1)
 
             # Sumar ingresos del mes (en BSD)
-            ingresos_mes = DetalleAsiento.objects.filter(
+            ingresos_mes = MovimientoContable.objects.filter(
                 asiento__fecha_contable__range=(primer_dia, ultimo_dia),
-                cuenta_contable__tipo_cuenta=PlanContable.TipoCuentaChoices.INGRESO,
+                cuenta_contable__tipo_cuenta=CuentaContable.TipoCuentaChoices.INGRESO,
                 asiento__estado=AsientoContable.EstadoAsiento.CONTABILIZADO,
             ).aggregate(total=Sum("haber_bsd"))["total"] or Decimal("0.00")
 
@@ -516,7 +516,7 @@ class ContabilidadService:
             )
 
             # Línea 1: DÉBITO - Gasto INATUR
-            DetalleAsiento.objects.create(
+            MovimientoContable.objects.create(
                 asiento=asiento,
                 linea=1,
                 cuenta_contable=ContabilidadService._buscar_cuenta(
@@ -530,7 +530,7 @@ class ContabilidadService:
             )
 
             # Línea 2: CRÉDITO - Pasivo INATUR por Pagar
-            DetalleAsiento.objects.create(
+            MovimientoContable.objects.create(
                 asiento=asiento,
                 linea=2,
                 cuenta_contable=ContabilidadService._buscar_cuenta(

@@ -14,7 +14,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from apps.common.models import Aerolinea
-from apps.contabilidad.models import TasaCambioBCV
+from apps.finance.models import TasaCambioBCV
 from core.auth_helpers import internal_auth
 
 from ..itinerary_translator import ItineraryTranslator, TicketCalculator
@@ -585,7 +585,7 @@ def create_quote_from_gds_api(request):
                     telefono_principal="0000000000",
                 )
 
-        from apps.finance.models.currencies import Moneda
+        from apps.common.models import Moneda
 
         moneda_usd = Moneda.objects.filter(codigo_iso="USD").first()
         if not moneda_usd:

@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 
-from apps.finance.models.currencies import Moneda
+from apps.common.models import Moneda
 
 
 class Command(BaseCommand):

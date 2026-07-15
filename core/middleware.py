@@ -2,6 +2,7 @@ import contextvars
 import logging
 import os
 import secrets
+import time
 from contextlib import contextmanager
 from datetime import datetime, timedelta
 
@@ -52,7 +53,7 @@ def get_impersonator():
 
 
 @contextmanager
-def agency_context(agency):
+def agency_context(agency, reason: str = "unspecified"):
     """
     Context manager para establecer manualmente el contexto de la agencia.
     Útil para tareas de Celery o scripts de gestión donde no hay request.
@@ -65,16 +66,52 @@ def agency_context(agency):
 
 
 @contextmanager
-def system_context():
+def system_context(reason: str = "unspecified", max_seconds: float = 60.0):
     """
-    Context manager para habilitar acceso global (System Mode).
-    Usar con extrema precaución solo en tareas de fondo administrativas.
+    Context manager para habilitar acceso global sin filtro de tenant (System Mode).
+
+    ⚠️  PRECAUCIÓN EXTREMA — SOLO PARA TAREAS DE FONDO ADMINISTRATIVAS.
+    Deshabilita TODOS los filtros de multi-tenancy durante el bloque.
+
+    Args:
+        reason:      Descripción obligatoria del motivo (registrada en logs de auditoría).
+        max_seconds: Alerta si el bloque tarda más de este tiempo (default: 60s).
+
+    Uso correcto:
+        with system_context(reason="retry_queued_boletos"):
+            BoletoImportado.all_objects.filter(...).update(...)
     """
+    audit_logger = logging.getLogger("core.security.audit")
+    audit_logger.warning(f"🔓 [SYSTEM_CONTEXT OPEN] reason={reason!r} caller={_get_caller_info()}")
     token = system_context_var.set(True)
+    start = time.monotonic()
     try:
         yield
     finally:
+        elapsed = time.monotonic() - start
         system_context_var.reset(token)
+        if elapsed > max_seconds:
+            audit_logger.error(
+                f"⚠️  [SYSTEM_CONTEXT EXCEEDED] reason={reason!r} "
+                f"elapsed={elapsed:.2f}s limit={max_seconds}s — "
+                f"Posible fuga de bypass de seguridad."
+            )
+        else:
+            audit_logger.info(
+                f"🔒 [SYSTEM_CONTEXT CLOSED] reason={reason!r} elapsed={elapsed:.2f}s"
+            )
+
+
+def _get_caller_info() -> str:
+    """Retorna module:lineno del llamador de system_context para auditoría."""
+    import traceback
+
+    stack = traceback.extract_stack()
+    # El índice [-3] suele ser el código que llama 'with system_context(...)'
+    if len(stack) >= 3:
+        frame = stack[-3]
+        return f"{frame.filename.split('/')[-1]}:{frame.lineno}"
+    return "unknown"
 
 
 # =========================================================================================

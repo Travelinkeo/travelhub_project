@@ -8,7 +8,7 @@ from django.db import transaction
 from django.db.models import Count, Sum
 from django.utils import timezone
 
-from apps.finance.models.commissions import ComisionVenta, LiquidacionAgente
+from apps.finance.models_stubs import ComisionVenta, LiquidacionAgente
 
 logger = logging.getLogger(__name__)
 

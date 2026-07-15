@@ -16,7 +16,7 @@
     .leak-card.critical { border-right-color: #ef4444; }
     .leak-card.warning { border-right-color: #f59e0b; }
     .leak-card.info { border-right-color: #3b82f6; }
-    
+
     .glass-kpi {
         background: rgba(var(--surface-1-rgb), 0.7);
         backdrop-filter: blur(12px);
@@ -38,7 +38,7 @@
             <p class="text-text-muted text-sm capitalize">Escaneo profundo de anomalías en el ciclo de vida de la venta.</p>
         </div>
         <div class="flex gap-3">
-            <a href="{% url 'finance:reconciliacion_upload' %}" class="btn-secondary !h-12 !px-6 border-border-color group">
+            <a href="#" class="btn-secondary !h-12 !px-6 border-border-color group">
                 <span class="material-symbols-outlined !text-[20px] group-hover:scale-110 transition-transform">cloud_upload</span>
                 <span>Conciliar Proveedores</span>
             </a>
@@ -138,7 +138,7 @@
                         </td>
                         <td class="px-6 py-5">
                             <div class="flex items-start gap-3">
-                                <div class="mt-1 size-2 rounded-full 
+                                <div class="mt-1 size-2 rounded-full
                                     {% if f.tipo == 'CZS' or f.tipo == 'MSC' %}bg-red-500
                                     {% elif f.tipo == 'GED' %}bg-amber-500
                                     {% else %}bg-blue-500{% endif %}"></div>
@@ -149,7 +149,7 @@
                             </div>
                         </td>
                         <td class="px-6 py-5">
-                            <span class="px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-widest 
+                            <span class="px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-widest
                                 {% if f.tipo == 'CZS' %}bg-red-500/10 text-red-500 border border-red-500/20
                                 {% elif f.tipo == 'GED' %}bg-amber-500/10 text-amber-500 border border-amber-500/20
                                 {% else %}bg-slate-500/10 text-text-muted border border-border-color{% endif %}">
@@ -159,7 +159,7 @@
                         <td class="px-6 py-5">
                             <div class="flex items-center justify-end gap-2" id="finding-actions-{{ f.pk }}">
                                 {% if f.estado == 'PEN' %}
-                                    <button 
+                                    <button
                                         hx-post="{% url 'bookings:resolve_finding' f.pk %}"
                                         hx-vals='{"action": "resolve"}'
                                         hx-target="#finding-actions-{{ f.pk }}"
@@ -169,7 +169,7 @@
                                         <span class="material-symbols-outlined !text-[16px]">check_circle</span>
                                         <span>Resolver</span>
                                     </button>
-                                    <button 
+                                    <button
                                         hx-post="{% url 'bookings:resolve_finding' f.pk %}"
                                         hx-vals='{"action": "ignore"}'
                                         hx-target="#finding-actions-{{ f.pk }}"
@@ -180,7 +180,7 @@
                                         <span>Ignorar</span>
                                     </button>
                                 {% else %}
-                                    <span class="px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-widest 
+                                    <span class="px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-widest
                                         {% if f.estado == 'SOL' %}bg-emerald-500/10 text-emerald-500 border border-emerald-500/20
                                         {% else %}bg-slate-500/10 text-text-muted border border-border-color{% endif %}">
                                         {{ f.get_estado_display }}

@@ -29,7 +29,7 @@ class GodModeDashboardView(UserPassesTestMixin, View):
         return self.request.user.is_superuser
 
     def get(self, request, *args, **kwargs):
-        from apps.finance.models.reconciliacion import ConciliacionBoleto
+        from apps.finance.models_stubs import ConciliacionBoleto
         from core.models.ai import AIUsageLog
 
         total_agencias = Agencia.objects.count()

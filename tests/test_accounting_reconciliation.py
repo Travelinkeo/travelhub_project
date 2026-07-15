@@ -5,11 +5,11 @@ import pytest
 from django.db import transaction
 
 from apps.bookings.models import ItemVenta, PagoVenta, ProductoServicio, Venta
-from apps.contabilidad.models import AsientoContable, TasaCambioBCV
+from apps.common.models import Moneda
+from apps.contabilidad.models import AsientoContable
 from apps.contabilidad.reconciliation import ContabilidadReconciliationService
 from apps.crm.models import Cliente
-from apps.finance.models import Factura, ItemFactura
-from apps.finance.models.currencies import Moneda
+from apps.finance.models import Factura, ItemFactura, TasaCambioBCV
 from core.models import Agencia
 
 pytestmark = pytest.mark.django_db(transaction=True)

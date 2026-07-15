@@ -18,6 +18,40 @@ def _to_float(v) -> float:
         return 0.0
 
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Constantes compartidas para conversión GDS
+# ─────────────────────────────────────────────────────────────────────────────
+MESES_GDS = {
+    1: "ENE",
+    2: "FEB",
+    3: "MAR",
+    4: "ABR",
+    5: "MAY",
+    6: "JUN",
+    7: "JUL",
+    8: "AGO",
+    9: "SEP",
+    10: "OCT",
+    11: "NOV",
+    12: "DIC",
+}
+
+MESES_ES_TO_EN = {
+    "ENE": "JAN",
+    "FEB": "FEB",
+    "MAR": "MAR",
+    "ABR": "APR",
+    "MAY": "MAY",
+    "JUN": "JUN",
+    "JUL": "JUL",
+    "AGO": "AUG",
+    "SEP": "SEP",
+    "OCT": "OCT",
+    "NOV": "NOV",
+    "DIC": "DEC",
+}
+
+
 class TramoVueloSchema(BaseModel):
     aerolinea: str = Field(description="Código IATA o nombre de la aerolínea del tramo")
     numero_vuelo: str | None = Field(
@@ -94,21 +128,7 @@ class TramoVueloSchema(BaseModel):
             dia = iso_match.group(2)
             year = v[:4]
             year_gds = year[-2:]
-            meses_gds = {
-                1: "ENE",
-                2: "FEB",
-                3: "MAR",
-                4: "ABR",
-                5: "MAY",
-                6: "JUN",
-                7: "JUL",
-                8: "AGO",
-                9: "SEP",
-                10: "OCT",
-                11: "NOV",
-                12: "DIC",
-            }
-            mes_gds = meses_gds.get(mes_num, "ENE")
+            mes_gds = MESES_GDS.get(mes_num, "ENE")
             return f"{dia}{mes_gds}{year_gds}"
         # Formato DD/MM/YYYY
         slash_match = re.match(r"^(\d{2})/(\d{2})/(\d{4})$", v)
@@ -116,21 +136,7 @@ class TramoVueloSchema(BaseModel):
             dia = slash_match.group(1)
             mes_num = int(slash_match.group(2))
             year_gds = slash_match.group(3)[-2:]
-            meses_gds = {
-                1: "ENE",
-                2: "FEB",
-                3: "MAR",
-                4: "ABR",
-                5: "MAY",
-                6: "JUN",
-                7: "JUL",
-                8: "AGO",
-                9: "SEP",
-                10: "OCT",
-                11: "NOV",
-                12: "DIC",
-            }
-            mes_gds = meses_gds.get(mes_num, "ENE")
+            mes_gds = MESES_GDS.get(mes_num, "ENE")
             return f"{dia}{mes_gds}{year_gds}"
         # Formato DD-MM-YYYY
         dash_match = re.match(r"^(\d{2})-(\d{2})-(\d{4})$", v)
@@ -138,21 +144,7 @@ class TramoVueloSchema(BaseModel):
             dia = dash_match.group(1)
             mes_num = int(dash_match.group(2))
             year_gds = dash_match.group(3)[-2:]
-            meses_gds = {
-                1: "ENE",
-                2: "FEB",
-                3: "MAR",
-                4: "ABR",
-                5: "MAY",
-                6: "JUN",
-                7: "JUL",
-                8: "AGO",
-                9: "SEP",
-                10: "OCT",
-                11: "NOV",
-                12: "DIC",
-            }
-            mes_gds = meses_gds.get(mes_num, "ENE")
+            mes_gds = MESES_GDS.get(mes_num, "ENE")
             return f"{dia}{mes_gds}{year_gds}"
         # Fallback: devolver tal cual
         return v

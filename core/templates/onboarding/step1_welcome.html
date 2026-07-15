@@ -1,4 +1,5 @@
 {% extends "onboarding/base_wizard.html" %}
+{% load i18n %}
 
 {% block title %}{% trans "Bienvenido a TravelHub" %}{% endblock %}
 
@@ -8,15 +9,15 @@
     <div class="icon-circle blue mx-auto" style="width: 80px; height: 80px;">
         <span class="material-symbols-outlined text-4xl">waving_hand</span>
     </div>
-    
+
     <h1 class="text-3xl font-bold mb-4">
         {% trans "¡Hola" %}, {{ user.first_name|default:user.username }}! 👋
     </h1>
-    
+
     <p class="text-slate-400 text-lg mb-8">
         {% trans "Bienvenido a" %} <span class="text-blue-400 font-semibold">TravelHub</span>, {% trans "la plataforma SaaS que transformará la forma en que gestionas tu agencia de viajes." %}
     </p>
-    
+
     <!-- Features Grid -->
     <div class="grid grid-cols-2 gap-4 mb-8">
         <div class="feature-card text-left">
@@ -26,7 +27,7 @@
             <h3 class="font-semibold text-sm">{% trans "Dashboard Inteligente" %}</h3>
             <p class="text-slate-400 text-xs mt-1">{% trans "Métricas en tiempo real de tu negocio" %}</p>
         </div>
-        
+
         <div class="feature-card text-left">
             <div class="icon-circle green" style="width: 40px; height: 40px;">
                 <span class="material-symbols-outlined text-xl">smart_toy</span>
@@ -34,7 +35,7 @@
             <h3 class="font-semibold text-sm">{% trans "IA Automatizada" %}</h3>
             <p class="text-slate-400 text-xs mt-1">{% trans "Parsing de boletos con inteligencia artificial" %}</p>
         </div>
-        
+
         <div class="feature-card text-left">
             <div class="icon-circle purple" style="width: 40px; height: 40px;">
                 <span class="material-symbols-outlined text-xl">whatsapp</span>
@@ -42,7 +43,7 @@
             <h3 class="font-semibold text-sm">{% trans "WhatsApp Bot" %}</h3>
             <p class="text-slate-400 text-xs mt-1">{% trans "Automatiza la comunicación con clientes" %}</p>
         </div>
-        
+
         <div class="feature-card text-left">
             <div class="icon-circle orange" style="width: 40px; height: 40px;">
                 <span class="material-symbols-outlined text-xl">payments</span>
@@ -51,7 +52,7 @@
             <p class="text-slate-400 text-xs mt-1">{% trans "Cobros, pagos y conciliación integrada" %}</p>
         </div>
     </div>
-    
+
     <!-- CTA -->
     <form method="post">
         {% csrf_token %}
@@ -60,7 +61,7 @@
             {% trans "Comenzar Configuración" %}
         </button>
     </form>
-    
+
     <p class="text-slate-500 text-xs mt-4">
         ⏱️ Takes less than 5 minutes
     </p>

@@ -183,8 +183,9 @@ class SaaSOnboardingView(View):
         admin_email = request.POST.get("admin_email")
         agency_name = request.POST.get("agency_name")
         subdomain = request.POST.get("subdomain")
-        plan = request.POST.get("plan", "BASIC")
+        plan = request.POST.get("plan", "FREE")
         brand_color = request.POST.get("brand_color", "#3b82f6")
+        admin_password = request.POST.get("admin_password")
 
         if User.objects.filter(email=admin_email).exists():
             return render(request, self.template_name, {"error": "El email ya esta registrado."})
@@ -192,11 +193,13 @@ class SaaSOnboardingView(View):
         if Agencia.objects.filter(subdominio_slug=subdomain).exists():
             return render(request, self.template_name, {"error": "El subdominio ya esta en uso."})
 
-        plan_data = PLAN_CONFIG.get(plan, PLAN_CONFIG["BASIC"])
+        plan_data = PLAN_CONFIG.get(plan, PLAN_CONFIG["FREE"])
         price_id = plan_data.get("stripe_price_id")
 
         if not price_id and plan != "FREE":
-            return JsonResponse({"error": "Configuracion de precios no disponible"}, status=500)
+            return render(
+                request, self.template_name, {"error": "Configuracion de precios no disponible"}
+            )
 
         try:
             metadata = {
@@ -206,34 +209,21 @@ class SaaSOnboardingView(View):
                 "brand_color": brand_color,
                 "plan": plan,
                 "onboarding": "true",
-                "auth_method": "magic_link",
+                "auth_method": "password",
+                "admin_password": admin_password or "",
             }
 
             if plan == "FREE":
-                self._provision_agency(admin_email, agency_name, subdomain, plan, brand_color)
-                return redirect(reverse("billing_success"))
+                user, agencia = self._provision_agency(
+                    admin_email, agency_name, subdomain, plan, brand_color, admin_password
+                )
+                login(request, user, backend="django.contrib.auth.backends.ModelBackend")
+                return redirect("/dashboard/")
 
             stripe.api_key = getattr(settings, "STRIPE_SECRET_KEY", "")
             checkout_session = stripe.checkout.Session.create(
                 payment_method_types=["card"],
-                line_items=[
-                    {
-                        "price": price_id,
-                        "quantity": 1,
-                    }
-                ]
-                if price_id
-                else [
-                    {
-                        "price_data": {
-                            "currency": "usd",
-                            "product_data": {"name": f"TravelHub ERP - Plan {plan} (Trial)"},
-                            "unit_amount": 0,
-                            "recurring": {"interval": "month"},
-                        },
-                        "quantity": 1,
-                    }
-                ],
+                line_items=[{"price": price_id, "quantity": 1}],
                 mode="subscription",
                 success_url=request.build_absolute_uri(reverse("billing_success"))
                 + "?session_id={CHECKOUT_SESSION_ID}",
@@ -245,24 +235,39 @@ class SaaSOnboardingView(View):
 
         except Exception as e:
             logger.error("Error SaaSOnboardingView Stripe: %s", e)
-            return render(request, self.template_name, {"error": f"Error al iniciar el pago: {e}"})
+            return render(
+                request,
+                self.template_name,
+                {"error": "Error al iniciar el pago. Intenta de nuevo."},
+            )
 
-    def _provision_agency(self, email, agency_name, subdomain, plan, brand_color):
+    def _provision_agency(self, email, agency_name, subdomain, plan, brand_color, password=None):
         user, created = User.objects.get_or_create(
             email=email,
             defaults={"username": email, "is_active": True},
         )
+        if password:
+            user.set_password(password)
+        elif created:
+            user.set_unusable_password()
+        user.save()
+
         agencia = Agencia.objects.create(
             nombre=agency_name,
             subdominio_slug=subdomain,
             plan=plan,
             color_primario=brand_color,
+            email_principal=email,
         )
+        agencia.propietario = user
+        agencia.save()
+
         UsuarioAgencia.objects.create(
             usuario=user,
             agencia=agencia,
             rol="admin",
         )
+        agencia.actualizar_limites_por_plan()
         return user, agencia
 
 

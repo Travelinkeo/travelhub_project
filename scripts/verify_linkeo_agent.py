@@ -19,8 +19,8 @@ from django.contrib.auth.models import User
 
 from apps.automation.services.linkeo_agent_service import LinkeoAgentService
 from apps.bookings.models import Venta
+from apps.common.models import Moneda
 from apps.crm.models import Cliente
-from apps.finance.models.currencies import Moneda
 from core.models.agencia import Agencia
 
 # Configurar Logging

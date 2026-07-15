@@ -8,9 +8,11 @@ from kombu import Exchange, Queue
 logger = logging.getLogger(__name__)
 
 # Configurar Django settings
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "travelhub.settings")
+# P2-004: Usar development por defecto local, production en server real
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "travelhub.settings.development")
 
 app = Celery("travelhub")
+
 
 # Cargar configuración desde Django settings con prefijo CELERY_
 app.config_from_object("django.conf:settings", namespace="CELERY")
@@ -18,22 +20,25 @@ app.config_from_object("django.conf:settings", namespace="CELERY")
 # ==========================================
 # 🧠 ARQUITECTURA DE COLAS (QUEUE ROUTING)
 # ==========================================
+# Optimizado Fase 5: de 4 colas a 2.
+#
+#   Queue       │ Uso                                         │ Workers
+#   ────────────┼─────────────────────────────────────────────┼────────
+#   celery      │ Tareas generales + IA pesada + IA rápida   │ 2-4
+#   notifications│ WhatsApp, Telegram, Email (aislado)         │ 1-2
+#
+# ❌ Eliminadas: ia_fast (se unifica a celery), ia_heavy (se unifica a celery)
+# La separación de notifications evita que notificaciones urgentes (cobranza,
+# confirmación de pago) se bloqueen detrás de tareas batch pesadas.
 
-# Definimos los "carriles" por donde viajarán las tareas
 app.conf.task_queues = (
-    Queue("default", Exchange("default"), routing_key="default"),
-    # 🏎️ CARRIL RÁPIDO: Tareas IA que el usuario está esperando en pantalla (< 5 segs)
-    Queue("ia_fast", Exchange("ia_fast"), routing_key="ia_fast"),
-    # 🐢 CARRIL PESADO: Tareas masivas de IA que corren en segundo plano (> 1 min)
-    Queue("ia_heavy", Exchange("ia_heavy"), routing_key="ia_heavy"),
-    # 📱 CARRIL NOTIFICACIONES: WhatsApp y Correos (Aislado para que nunca se retrase)
+    Queue("celery", Exchange("celery"), routing_key="celery"),
     Queue("notifications", Exchange("notifications"), routing_key="notifications"),
 )
 
-# default exchange/queue
-app.conf.task_default_queue = "default"
-app.conf.task_default_exchange = "default"
-app.conf.task_default_routing_key = "default"
+app.conf.task_default_queue = "celery"
+app.conf.task_default_exchange = "celery"
+app.conf.task_default_routing_key = "celery"
 
 # ==========================================
 # 🚦 ENRUTADOR AUTOMÁTICO DE TAREAS

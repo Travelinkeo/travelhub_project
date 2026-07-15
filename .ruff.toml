@@ -24,10 +24,10 @@ ignore = [
 "**/test_*.py" = ["S101"]
 "conftest.py" = ["S101"]
 "**/conftest.py" = ["S101"]
-"scripts/*" = ["E402", "S", "F841", "E722", "B007", "UP038", "F821"]
-"scripts/testing/*" = ["E402", "S", "F841", "E722", "B007", "UP038", "F821"]
-"scripts/tools/*" = ["E402", "S", "F841", "E722", "B007", "UP038", "F821"]
-"scripts/diagnostics/*" = ["E402", "S", "F841", "E722", "B007", "UP038", "F821"]
+"scripts/*" = ["E402", "F841", "E722", "B007", "UP038", "F821"]
+"scripts/testing/*" = ["E402", "F841", "E722", "B007", "UP038", "F821"]
+"scripts/tools/*" = ["E402", "F841", "E722", "B007", "UP038", "F821"]
+"scripts/diagnostics/*" = ["E402", "F841", "E722", "B007", "UP038", "F821"]
 
 [format]
 quote-style = "double"

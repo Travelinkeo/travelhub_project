@@ -70,11 +70,7 @@ class ParsedTicketData:
         Returns:
             Dict[str, Any]: El diccionario masivo con alias retro-compatibles para el dashboard de ERP.
         """
-
-        # ... (lógica existente) ...
-        # [OMITIDO PARA BREVEDAD, el resto del to_dict se mantiene igual pero incluyendo es_remision]
-        # Re-implementar el to_dict completo para asegurar integridad
-
+        # Inicializa y construye el diccionario de salida normalizado mapeando todas las propiedades del DTO.
         # 1. Aerolínea del primer vuelo (o del raw_data)
         airline_name = self.raw_data.get("airline_name") or self.raw_data.get("reserva", {}).get(
             "aerolinea_emisora"
@@ -205,6 +201,10 @@ class ParsedTicketData:
             "IMPUESTOS": impuestos,
             "TOTAL": total_str,
             "es_remision": self.es_remision,  # NUEVO CAMPO
+            "localizador_aerolinea": self.raw_data.get("localizador_aerolinea")
+            or self.raw_data.get("airline_pnr"),
+            "airline_pnr": self.raw_data.get("localizador_aerolinea")
+            or self.raw_data.get("airline_pnr"),
             # Aliases para compatibilidad con código antiguo/templates
             "pnr": self.pnr,
             "ticket_number": self.ticket_number,
@@ -347,7 +347,8 @@ class ParsedTicketData:
             numero_iata=self.agency.get("iata") or self.agency.get("numero_iata"),
             codigo_reserva=self.pnr,
             codigo_reserva_aerolinea=self.raw_data.get("airline_pnr")
-            or self.raw_data.get("pnr_aerolinea"),
+            or self.raw_data.get("pnr_aerolinea")
+            or self.raw_data.get("localizador_aerolinea"),
             nombre_aerolinea=airline_name,
             direccion_aerolinea=self.raw_data.get("direccion_aerolinea"),
             itinerario=itinerario_pydantic,

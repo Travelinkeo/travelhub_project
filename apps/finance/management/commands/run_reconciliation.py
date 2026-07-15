@@ -5,7 +5,7 @@ Usa el servicio unificado SmartReconciliationService.
 
 from django.core.management.base import BaseCommand
 
-from apps.finance.models.reconciliacion import ReporteReconciliacion
+from apps.finance.models_stubs import ReporteReconciliacion
 from apps.finance.services.smart_reconciliation_service import SmartReconciliationService
 
 

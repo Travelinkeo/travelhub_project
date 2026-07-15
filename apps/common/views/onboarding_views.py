@@ -39,7 +39,6 @@ def get_or_create_progress(user):
         defaults={
             "current_step": UserProgress.STEP_WELCOME,
             "completed_steps": [],
-            "onboarding_completed": False,
         },
     )
     return progress
@@ -397,7 +396,7 @@ def skip_onboarding(request):
             progress.completed_steps.append(step)
 
     progress.current_step = UserProgress.STEP_COMPLETE
-    progress.save(update_fields=["completed_steps", "current_step", "updated_at"])
+    progress.save(update_fields=["completed_steps_json", "current_step", "updated_at"])
 
     messages.info(
         request, _("Onboarding saltado. Puedes acceder a la configuración desde el menú.")

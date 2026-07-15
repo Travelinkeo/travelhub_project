@@ -6,7 +6,7 @@ from django.template.loader import render_to_string
 from django.utils import timezone
 
 from apps.common.services.pdf_renderer import PdfRendererService
-from apps.finance.models.reconciliacion import ReporteReconciliacion
+from apps.finance.models_stubs import ReporteReconciliacion
 
 logger = logging.getLogger(__name__)
 

@@ -7,7 +7,7 @@
 <div class="p-6 max-w-4xl mx-auto">
     <!-- Contenedor Principal de Acción -->
     <div id="reconciliation-container" class="card-base p-8 space-y-6">
-        
+
         <div class="text-center space-y-2">
             <span class="material-symbols-outlined text-[48px] text-primary">auto_awesome</span>
             <h1 class="text-2xl font-black text-text-main">Subir Reporte de Proveedor</h1>
@@ -18,12 +18,12 @@
 
         <!-- El Formulario HTMX Reactivo -->
         <div id="monitor-container">
-            <form hx-post="{% url 'finance:reconciliacion_process_upload' %}" 
-                  hx-encoding="multipart/form-data" 
-                  hx-target="#monitor-container" 
+            <form hx-post="#"
+                  hx-encoding="multipart/form-data"
+                  hx-target="#monitor-container"
                   hx-swap="innerHTML"
                   class="space-y-6 bg-surface-base/40 p-6 rounded-xl border border-border-color">
-                
+
                 {% csrf_token %}
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="space-y-1.5">
@@ -50,7 +50,7 @@
                 </div>
 
                 <div class="pt-4 flex justify-end gap-3">
-                    <a href="{% url 'finance:reconciliacion_dashboard_htmx' %}" class="btn-secondary">
+                    <a href="#" class="btn-secondary">
                         Cancelar
                     </a>
                     <button type="submit" class="btn-primary min-w-[160px]">

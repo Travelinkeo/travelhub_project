@@ -5,7 +5,7 @@ from django.db import transaction
 from django.utils import timezone
 
 from apps.bookings.models import Venta
-from apps.finance.models.fiscal import FacturaFiscal
+from apps.finance.models_stubs import FacturaFiscal
 
 logger = logging.getLogger(__name__)
 

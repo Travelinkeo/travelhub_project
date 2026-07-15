@@ -1,10 +1,19 @@
 import logging
 from functools import partial
 
+from django.core.signals import request_finished
 from django.db import transaction
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 
+from core.middleware import (
+    agency_var,
+    impersonator_var,
+    is_impersonating_var,
+    meta_var,
+    system_context_var,
+    user_var,
+)
 from core.signals_bypass import are_signals_blocked
 
 
@@ -22,36 +31,31 @@ logger = logging.getLogger(__name__)
 
 
 @receiver(post_save, sender="bookings.BoletoImportado")
-def crear_o_actualizar_venta_desde_boleto(sender, instance, created, **kwargs):
+def on_boleto_importado_post_save(sender, instance, created, **kwargs):
+    """
+    Señal única consolidada (P1-001) para BoletoImportado.
+    Orquesta tanto el trigger de parsing como el post-parse automation de manera segura.
+    """
     if are_signals_blocked():
         logger.info(
-            f"⏭️ SIGNAL: Signals blocked. Bypassing crear_o_actualizar_venta_desde_boleto for Boleto {instance.pk}"
+            f"⏭️ SIGNAL: Signals blocked. Bypassing post-save automation for Boleto {instance.pk}"
         )
         return
 
-    # Evitar recursión si solo estamos actualizando la venta_asociada
+    # Evitar recursión infinita cuando solo se asocia la venta al boleto
     update_fields = kwargs.get("update_fields") or set()
     if "venta_asociada" in update_fields and len(update_fields) == 1:
         return
 
-    # Permitir bypass explícito de la señal
+    # Permitir bypass explícito de automatización
     if getattr(instance, "_skip_auto_parse", False):
         logger.info(
-            f"⏭️ SIGNAL: Bypass activado para Boleto {instance.pk}. No se disparará la cola por defecto."
+            f"⏭️ SIGNAL: Bypass activado para Boleto {instance.pk}. Omitiendo parsing y automatización."
         )
         return
 
+    # Encolar ambas acciones seguras tras el commit de la transacción actual
     _on_commit(_trigger_parsing, instance.pk)
-
-
-@receiver(post_save, sender="bookings.BoletoImportado")
-def post_save_boleto_importado(sender, instance, created, **kwargs):
-    if are_signals_blocked():
-        logger.info(
-            f"⏭️ SIGNAL: Signals blocked. Bypassing post_save_boleto_importado for Boleto {instance.pk}"
-        )
-        return
-
     _on_commit(_post_parse_automation, instance.pk)
 
 
@@ -84,13 +88,42 @@ def enviar_alerta_migratoria(sender, instance, created, **kwargs):
     _on_commit(_trigger_migration_alert, instance.pk, created)
 
 
+# 🔒 P1-004 FIX: Invalidación inmediata del cache de agencia al desactivar
+@receiver(post_save, sender="core.Agencia")
+def on_agencia_status_changed(sender, instance, **kwargs):
+    """
+    Cuando una Agencia se desactiva, invalida el cache de TODOS sus usuarios inmediatamente.
+    Esto cierra la ventana de acceso no autorizado de hasta 120 segundos.
+    """
+    if kwargs.get("raw", False):
+        return
+    if not instance.activa:
+        logger.warning(
+            f"🚨 [SECURITY] Agencia '{instance.nombre}' (pk={instance.pk}) DESACTIVADA. "
+            f"Invalidando cache de acceso para todos sus usuarios."
+        )
+        from core.security import invalidate_all_agency_caches
+
+        invalidate_all_agency_caches(instance.pk)
+
+
+@receiver(post_save, sender="core.UsuarioAgencia")
+def on_usuario_agencia_changed(sender, instance, **kwargs):
+    """Invalida el cache cuando cambia la relación usuario-agencia (activación, cambio de rol, etc.)."""
+    if kwargs.get("raw", False):
+        return
+    from core.security import invalidate_user_agencia_cache
+
+    invalidate_user_agencia_cache(instance.usuario_id)
+
+
 @receiver(pre_save, sender="finance.Factura")
 def capturar_pdf_factura_anterior(sender, instance, **kwargs):
     if are_signals_blocked():
         return
 
     try:
-        from apps.finance.models.core_finance import Factura
+        from apps.finance.models import Factura
         from apps.finance.services.factura_service import FacturaService
 
         if instance.pk:
@@ -115,6 +148,31 @@ def post_save_factura(sender, instance, created, **kwargs):
 
     _on_commit(_send_factura_telegram, instance.pk)
     _on_commit(_send_factura_whatsapp, instance.pk)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 🛡️ REDUNDANCIA DE SEGURIDAD MULTI-TENANT (Defensa en Profundidad)
+# ═══════════════════════════════════════════════════════════════════════════════
+@receiver(request_finished)
+def purgar_contextvars_de_seguridad(sender, **kwargs):
+    """
+    Última línea de defensa de TravelHub.
+    Se dispara al nivel más bajo del framework justo antes de que Django envíe
+    la respuesta al servidor WSGI/ASGI y cierre el request.
+
+    Si ThreadLocalContextMiddleware falla por un OOM, un segfault en una librería C,
+    o un Middleware superior interrumpe la cadena, este listener garantiza
+    que el hilo (thread) quede esterilizado antes de ser reciclado por Gunicorn.
+    """
+    try:
+        agency_var.set(None)
+        user_var.set(None)
+        meta_var.set(None)
+        is_impersonating_var.set(False)
+        impersonator_var.set(None)
+        system_context_var.set(False)
+    except Exception as e:
+        logger.critical(f"FATAL: Error al purgar ContextVars en request_finished: {e}")
 
 
 # ── Helper functions for on_commit callbacks ──────────────
@@ -159,7 +217,7 @@ def _trigger_migration_alert(check_id, created):
 
 
 def _capturar_pdf_anterior(factura_id):
-    from apps.finance.models.core_finance import Factura
+    from apps.finance.models import Factura
     from apps.finance.services.factura_service import FacturaService
 
     try:
@@ -176,11 +234,9 @@ def _send_factura_telegram(factura_id):
 
 
 def _send_factura_whatsapp(factura_id):
-    from apps.finance.models.core_finance import Factura
-    from apps.finance.services.factura_service import FacturaService
+    from apps.common.tasks import send_factura_to_whatsapp_task
 
     try:
-        factura = Factura.objects.get(pk=factura_id)
-        FacturaService.send_to_whatsapp_if_needed(factura)
+        send_factura_to_whatsapp_task.delay(factura_id)
     except Exception as e:
-        logger.error(f"Error sending factura {factura_id} to WhatsApp: {e}")
+        logger.error(f"Error encolando envío de factura {factura_id} a WhatsApp: {e}")

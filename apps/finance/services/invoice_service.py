@@ -5,8 +5,8 @@ from django.db import transaction
 from django.utils import timezone
 
 from apps.bookings.models import BoletoImportado, Proveedor, Venta
+from apps.common.models import Moneda
 from apps.finance.models import Factura, ItemFactura
-from apps.finance.models.currencies import Moneda
 from apps.finance.services.tax_eligibility import es_itinerario_internacional
 
 logger = logging.getLogger(__name__)

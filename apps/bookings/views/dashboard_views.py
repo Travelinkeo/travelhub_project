@@ -101,15 +101,15 @@ def dashboard_metricas(request):
         ventas_qs.values("canal_origen").annotate(count=Count("id_venta"), total=Sum("total_venta"))
     )
 
-    LiquidacionProveedor = apps.get_model("contabilidad", "LiquidacionProveedor")
-    liquidaciones_pendientes = LiquidacionProveedor.objects.filter(estado="PEN").aggregate(
-        count=Count("id_liquidacion"), total=Sum("monto_total")
-    )
-
     Factura = apps.get_model("finance", "Factura")
     facturas_pendientes = Factura.objects.filter(estado__in=["EMI", "PAR"]).aggregate(
         count=Count("id_factura"), total=Sum("saldo_pendiente")
     )
+
+    LiquidacionAgente = apps.get_model("finance", "LiquidacionAgente")
+    liquidaciones_pendientes = LiquidacionAgente.objects.filter(
+        agencia=agencia, pagado=False
+    ).aggregate(count=Count("id"), total=Sum("total_comisiones"))
 
     hoy = timezone.now().date()
     hace_7_dias = hoy - timedelta(days=7)
@@ -196,9 +196,10 @@ def dashboard_alertas(request):
     ).count()
 
     hace_30_dias = timezone.now() - timedelta(days=30)
-    LiquidacionProveedor = apps.get_model("contabilidad", "LiquidacionProveedor")
-    liquidaciones_vencidas = LiquidacionProveedor.objects.filter(
-        agencia=agencia, estado="PEN", fecha_emision__lt=hace_30_dias
+
+    LiquidacionAgente = apps.get_model("finance", "LiquidacionAgente")
+    liquidaciones_vencidas = LiquidacionAgente.objects.filter(
+        agencia=agencia, pagado=False, fecha_generacion__lt=hace_30_dias
     ).count()
 
     return Response(
@@ -339,7 +340,8 @@ class DashboardView(LoginRequiredMixin, View):
         }
 
         # Tasas de cambio para el sidebar
-        TipoCambio = apps.get_model("finance", "TipoCambio")
+        from apps.finance.models_stubs import TipoCambio
+
         tasas_sidebar = (
             TipoCambio.objects.select_related("moneda_destino")
             .filter(moneda_destino__codigo_iso="VES")

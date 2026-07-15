@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
-from apps.contabilidad.models import PlanContable
+from apps.contabilidad.models import CuentaContable
 from core.middleware import system_context
 
 
@@ -277,9 +277,9 @@ class Command(BaseCommand):
                 for c in cuentas:
                     padre = None
                     if c["padre"]:
-                        padre = PlanContable.objects.filter(codigo_cuenta=c["padre"]).first()
+                        padre = CuentaContable.objects.filter(codigo_cuenta=c["padre"]).first()
 
-                    obj, created = PlanContable.objects.get_or_create(
+                    obj, created = CuentaContable.objects.get_or_create(
                         codigo_cuenta=c["codigo"],
                         defaults={
                             "nombre_cuenta": c["nombre"],

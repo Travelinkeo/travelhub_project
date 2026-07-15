@@ -15,6 +15,7 @@ from .componentes import (
 )
 from .importacion import BoletoImportado, BoletoImportadoTransito, SolicitudAnulacion
 from .pagos import FeeVenta, PagoVenta
+from .secuencia import SecuenciaVentaDiaria
 from .servicios import ComisionProveedorServicio, ProductoServicio, ProductoTerrestre, Proveedor
 from .tarifario import (
     Amenity,
@@ -32,6 +33,7 @@ __all__ = [
     "ItemVenta",
     "VentaParseMetadata",
     "VentaAuditFinding",
+    "SecuenciaVentaDiaria",
     "AuditLog",
     "AlojamientoReserva",
     "TrasladoServicio",

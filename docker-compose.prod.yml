@@ -249,32 +249,7 @@ services:
           cpus: '0.5'
 
   # ---------------------------------------------------------------------------
-  # 6. GENERADOR DE PDF (Gotenberg)
-  # ---------------------------------------------------------------------------
-  gotenberg:
-    image: gotenberg/gotenberg:8
-    container_name: travelhub_gotenberg
-    restart: unless-stopped
-    command:
-      - "gotenberg"
-      - "--chromium-disable-routes=false"
-      - "--api-timeout=120s"
-    healthcheck:
-      test: ["CMD", "gotenberg", "--help"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 20s
-    networks:
-      - travelhub_private
-    deploy:
-      resources:
-        limits:
-          memory: 1G
-          cpus: '1.0'
-
-  # ---------------------------------------------------------------------------
-  # 7. WORKER ASÍNCRONO (Celery - PNR Parsing, Telegram, WhatsApp Webhooks)
+  # 6. WORKER ASÍNCRONO (Celery - PNR Parsing, Telegram, WhatsApp Webhooks)
   # ---------------------------------------------------------------------------
   celery_worker:
     build:
@@ -282,7 +257,7 @@ services:
       dockerfile: Dockerfile
     container_name: travelhub_worker
     restart: unless-stopped
-    command: celery -A travelhub worker --loglevel=info -Q default,notifications,ia_fast,celery --concurrency=4 --max-tasks-per-child=1000 --max-memory-per-child=512000
+    command: celery -A travelhub worker --loglevel=info -Q celery,notifications --concurrency=4 --max-tasks-per-child=1000 --max-memory-per-child=512000
     env_file:
       - .env.production
     environment:

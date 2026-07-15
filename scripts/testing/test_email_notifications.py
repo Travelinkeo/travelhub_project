@@ -15,7 +15,7 @@ from django.utils import timezone
 from personas.models import Cliente
 
 from apps.bookings.models import PagoVenta, Venta
-from apps.finance.models.currencies import Moneda
+from apps.common.models import Moneda
 
 
 def test_notifications():

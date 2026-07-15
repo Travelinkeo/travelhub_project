@@ -215,15 +215,36 @@ TEMPLATES = [
 # ---------------------------------------------------------------------------
 
 DATABASES = {"default": dj_database_url.parse(DATABASE_URL)}
-DATABASES["default"]["CONN_MAX_AGE"] = 600
+
+# 🛡️ P1-003: Si se usa PgBouncer en pool_mode = transaction, CONN_MAX_AGE debe ser 0
+# para evitar que variables RLS de sesión (SET LOCAL) se fuguen al reutilizar conexiones.
+USE_PGBOUNCER = env.bool("USE_PGBOUNCER", default=False)
+conn_max_age_val = 0 if USE_PGBOUNCER else 600
+
+DATABASES["default"]["CONN_MAX_AGE"] = conn_max_age_val
 DATABASES["default"]["CONN_HEALTH_CHECKS"] = True
 DATABASES["default"]["DISABLE_SERVER_SIDE_CURSORS"] = True
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 🛡️ PARCHE CRÍTICO RLS: ATOMIC_REQUESTS
+# ═══════════════════════════════════════════════════════════════════════════════
+# Envuelve CADA request en una transacción. El SET LOCAL app.current_agencia_id
+# hecho por ThreadLocalContextMiddleware queda ACOPLADO a la vida de esta
+# transacción. Al finalizar (commit/rollback), Postgres purga automáticamente
+# TODAS las variables locales de sesión. Esto elimina la fuga de RLS si un
+# worker colapsa antes del bloque finally del middleware.
+#
+# ⚠️ ATOMIC_REQUESTS = True  tiene costo: una transacción extra por request.
+# Para endpoints de solo lectura pública (health, landing, status), añadir
+# la anotación @transaction.non_atomic_requests al view correspondiente.
+# ═══════════════════════════════════════════════════════════════════════════════
+DATABASES["default"]["ATOMIC_REQUESTS"] = True
 
 # --- READ REPLICA (opcional) ---
 # Configurar DATABASE_REPLICA_URL en el entorno para activar la réplica.
 _replica_url = env("DATABASE_REPLICA_URL", default=DATABASE_URL)
 DATABASES["replica"] = dj_database_url.parse(_replica_url)
-DATABASES["replica"]["CONN_MAX_AGE"] = 600
+DATABASES["replica"]["CONN_MAX_AGE"] = conn_max_age_val
 DATABASES["replica"]["CONN_HEALTH_CHECKS"] = True
 DATABASES["replica"]["DISABLE_SERVER_SIDE_CURSORS"] = True
 DATABASES["replica"]["TEST"] = {"MIRROR": "default"}
@@ -356,7 +377,6 @@ BINANCE_PAY_API_KEY = env("BINANCE_PAY_API_KEY", default="")
 BINANCE_PAY_SECRET_KEY = env("BINANCE_PAY_SECRET_KEY", default="")
 BINANCE_WEBHOOK_SECRET = env("BINANCE_WEBHOOK_SECRET", default="")
 
-GOTENBERG_URL = env("GOTENBERG_URL", default="")
 GCP_JSON_CREDENTIALS = env("GCP_JSON_CREDENTIALS", default="")
 GCP_PROJECT_ID = env("GCP_PROJECT_ID", default="")
 GCP_LOCATION = env("GCP_LOCATION", default="")
@@ -592,12 +612,22 @@ CELERY_TASK_ACKS_LATE = True
 CELERY_WORKER_MAX_TASKS_PER_CHILD = 500
 
 CELERY_TASK_ROUTES = {
+    # ── Cola notifications (WhatsApp, Telegram, Email) ──────────────
     "apps.common.tasks.send_whatsapp_task": {"queue": "notifications"},
     "apps.common.tasks.send_telegram_task": {"queue": "notifications"},
     "apps.common.tasks.send_email_task": {"queue": "notifications"},
     "apps.common.tasks.enviar_notificacion_whatsapp_task": {"queue": "notifications"},
     "apps.bookings.tasks.notificar_pago_whatsapp_task": {"queue": "notifications"},
     "apps.automation.tasks.send_ticket_notification": {"queue": "notifications"},
+    "apps.common.tasks.send_whatsapp_meta_task": {"queue": "notifications"},
+    "apps.common.tasks.send_evolution_message_task": {"queue": "notifications"},
+    "apps.common.tasks.send_evolution_document_task": {"queue": "notifications"},
+    "apps.common.tasks.send_factura_to_telegram_task": {"queue": "notifications"},
+    "apps.common.tasks.send_telegram_document_task": {"queue": "notifications"},
+    "apps.common.tasks.send_telegram_photo_task": {"queue": "notifications"},
+    # ── Cola celery (todo lo demás: IA, batch, parsing) ────────────
+    # No se necesita entrada explícita porque "celery" es la cola default.
+    # apps.automation.tasks.process_web_uploaded_ticket → ia_fast removido, va a default
 }
 
 try:
@@ -700,6 +730,9 @@ SECURE_PROXY_SSL_HEADER = None
 SECURE_REDIRECT_EXEMPT = [r"^health/$", r"^health$"]
 
 # JWT
+# Usar JWT_SIGNING_KEY separada de SECRET_KEY para limitar el impacto
+# si SECRET_KEY se ve comprometida (SECRET_KEY también firma sesiones, CSRF, etc.)
+_JWT_SIGNING_KEY = env("JWT_SIGNING_KEY", default=SECRET_KEY)
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
@@ -707,7 +740,7 @@ SIMPLE_JWT = {
     "BLACKLIST_AFTER_ROTATION": True,
     "UPDATE_LAST_LOGIN": True,
     "ALGORITHM": "HS256",
-    "SIGNING_KEY": SECRET_KEY,
+    "SIGNING_KEY": _JWT_SIGNING_KEY,
     "AUTH_HEADER_TYPES": ("Bearer",),
     "AUTH_HEADER_NAME": "HTTP_AUTHORIZATION",
 }

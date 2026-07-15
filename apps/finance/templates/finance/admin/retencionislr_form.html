@@ -9,16 +9,16 @@
     <div class="mb-8 flex items-end justify-between gap-4 border-b border-border-color pb-6">
         <div>
             <div class="flex items-center gap-2 text-xs text-text-muted font-medium mb-2 uppercase tracking-wider">
-                <a href="{% url 'finance_admin:retencionislr_list' %}" class="hover:text-primary transition-colors">{% trans "Administración" %}</a>
+                <a href="#" class="hover:text-primary transition-colors">{% trans "Administración" %}</a>
                 <span class="material-symbols-outlined text-[10px]">chevron_right</span>
-                <a href="{% url 'finance_admin:retencionislr_list' %}" class="hover:text-primary transition-colors">{% trans "Retenciones ISLR" %}</a>
+                <a href="#" class="hover:text-primary transition-colors">{% trans "Retenciones ISLR" %}</a>
                 <span class="material-symbols-outlined text-[10px]">chevron_right</span>
                 <span class="text-primary">{% if form.instance.pk %}{% trans "Editar" %}{% else %}{% trans "Nueva" %}{% endif %}</span>
             </div>
             <h1 class="text-3xl font-bold text-text-main tracking-tight">{% if form.instance.pk %}{{ form.instance.numero_comprobante }}{% else %}{% trans "Registrar Nueva Retención ISLR" %}{% endif %}</h1>
         </div>
         <div class="flex items-center gap-3">
-            <a href="{% url 'finance_admin:retencionislr_list' %}" class="btn-secondary h-[36px] px-4 text-xs">
+            <a href="#" class="btn-secondary h-[36px] px-4 text-xs">
                 <span class="material-symbols-outlined text-[18px]">arrow_back</span> {% trans "Volver al listado" %}
             </a>
         </div>
@@ -87,7 +87,7 @@
 
             <!-- Actions -->
             <div class="flex items-center justify-end gap-4 mt-8 pt-6 border-t border-border-color">
-                <a href="{% url 'finance_admin:retencionislr_list' %}" class="btn-secondary h-[40px] px-6">
+                <a href="#" class="btn-secondary h-[40px] px-6">
                     {% trans "Cancelar" %}
                 </a>
                 <button type="submit" class="btn-primary h-[40px] px-8">

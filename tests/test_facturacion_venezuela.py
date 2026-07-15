@@ -9,13 +9,13 @@ from decimal import Decimal
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 
+from apps.common.models import Moneda
 from apps.crm.models import Cliente
-from apps.finance.models import (
+from apps.finance.models_stubs import (
     DocumentoExportacionConsolidado,
     FacturaConsolidada,
     ItemFacturaConsolidada,
 )
-from apps.finance.models.currencies import Moneda
 
 
 class TestFacturaConsolidada(TestCase):
@@ -54,8 +54,8 @@ class TestFacturaConsolidada(TestCase):
         )
 
         self.assertEqual(factura.emisor_rif, "J-12345678-9")
-        self.assertEqual(factura.tipo_operacion, "VENTA_PROPIA")
-        self.assertEqual(factura.moneda_operacion, "DIVISA")
+        self.assertEqual(factura.tipo_operacion, FacturaConsolidada.TipoOperacion.VENTA_PROPIA)
+        self.assertEqual(factura.moneda_operacion, FacturaConsolidada.MonedaOperacion.DIVISA)
         self.assertTrue(factura.cliente_es_residente)
 
     def test_calculo_iva_servicio_gravado_25(self):

@@ -7,7 +7,7 @@ from django.conf import settings
 from django.db import models
 
 from core.models import Agencia
-from core.models.base import AgenciaManager
+from core.models.base import GlobalAwareAgenciaManager
 
 
 class NotificationPreference(models.Model):
@@ -162,8 +162,8 @@ class NotificationTemplate(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     # Aislamiento multi-tenant: filtra por agencia del contexto (incluye
-    # plantillas globales con agencia=None). Ver core.models.base.AgenciaManager.
-    objects = AgenciaManager()
+    # plantillas globales con agencia=None).
+    objects = GlobalAwareAgenciaManager()
     all_objects = models.Manager()
 
     class Meta:
@@ -248,8 +248,8 @@ class NotificationLog(models.Model):
     object_id = models.CharField(max_length=100, blank=True, help_text="ID del objeto relacionado")
 
     # Aislamiento multi-tenant: filtra por agencia del contexto (incluye
-    # logs globales con agencia=None). Ver core.models.base.AgenciaManager.
-    objects = AgenciaManager()
+    # logs globales con agencia=None).
+    objects = GlobalAwareAgenciaManager()
     all_objects = models.Manager()
 
     class Meta:

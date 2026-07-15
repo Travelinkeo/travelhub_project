@@ -3,7 +3,7 @@ import logging
 from decimal import Decimal
 from io import StringIO
 
-from apps.finance.models.facturas_proveedores import FacturaProveedor
+from apps.finance.models_stubs import FacturaProveedor
 
 logger = logging.getLogger(__name__)
 

@@ -64,7 +64,7 @@
         </a>
 
         <!-- Conciliación IA -->
-        <a href="{% url 'finance:reconciliacion_upload' %}" class="group flex items-center gap-2 bg-gradient-to-br from-emerald-600 to-teal-800 rounded-xl p-2.5 shadow-md hover:shadow-emerald-500/20 transition-all hover:-translate-y-0.5 active:scale-[0.98] duration-150">
+        <a href="#" class="group flex items-center gap-2 bg-gradient-to-br from-emerald-600 to-teal-800 rounded-xl p-2.5 shadow-md hover:shadow-emerald-500/20 transition-all hover:-translate-y-0.5 active:scale-[0.98] duration-150">
             <div class="bg-white/10 p-1.5 rounded-lg group-hover:bg-white/20 transition shrink-0 flex items-center justify-center">
                 <span class="material-symbols-outlined text-white text-[18px]">auto_awesome</span>
             </div>
@@ -122,7 +122,7 @@
             <h3 class="text-[10px] font-bold text-primary uppercase tracking-[0.2em] mb-1">{% trans "Eficiencia Operativa" %}</h3>
             <div class="text-3xl font-black text-white tracking-tighter">{{ stats.automatización.count_auto }}</div>
             <p class="text-[11px] text-text-muted mt-1">{% trans "Ventas procesadas por IA" %}</p>
-            
+
             <div class="mt-4 flex items-center justify-between text-[10px] font-mono">
                 <span class="text-text-muted">{% trans "Manual" %}: {{ stats.automatización.count_manual }}</span>
                 <span class="text-primary">{% trans "Ahorro" %}: {{ stats.automatización.count_auto|multiply:5 }} min*</span>
@@ -154,7 +154,7 @@
                 <span class="material-symbols-outlined text-6xl text-status-danger">warning</span>
             </div>
             <h3 class="text-xs font-semibold text-status-danger uppercase tracking-wider mb-3">{% trans "Atención Requerida" %}</h3>
-            
+
             <div class="flex-1 space-y-2 relative z-10" id="atencion-requerida-content">
                 {% if alertas.sin_cliente > 0 %}
                 <div class="flex items-center gap-2 text-sm text-text-secondary">
@@ -246,7 +246,7 @@
                         <td class="px-6 py-4 text-right">
                             <div class="flex items-center justify-end gap-4">
                                 <span class="font-black text-text-main text-sm font-mono">${{ venta.total_venta|floatformat:2|intcomma }}</span>
-                                <a href="{% url 'bookings:venta_delete' venta.pk %}" 
+                                <a href="{% url 'bookings:venta_delete' venta.pk %}"
                                    class="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white transition-all delete-venta-btn"
                                    title="Eliminar permanentemente">
                                     <span class="material-symbols-outlined text-[18px]">delete_forever</span>
@@ -273,7 +273,7 @@
         {% csrf_token %}
         <input id="dropzone-file" type="file" name="archivo" class="hidden">
     </form>
-    
+
     <div id="notificaciones-area" class="fixed bottom-4 right-4 z-50"></div>
 </div>
 {% endblock %}
@@ -345,7 +345,7 @@
     // OCR Pasaporte Original Script
     document.addEventListener('DOMContentLoaded', function () {
         const inputScan = document.getElementById('passport-file-input');
-        
+
         if (inputScan) {
             inputScan.addEventListener('change', async function () {
                 if (this.files.length === 0) return;

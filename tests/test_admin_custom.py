@@ -8,8 +8,8 @@ from apps.bookings.admin import BoletoImportadoAdmin, VentaAdmin
 
 # Updated imports - models moved to apps/
 from apps.bookings.models import BoletoImportado, Venta
+from apps.common.models import Moneda
 from apps.crm.models import Cliente
-from apps.finance.models.currencies import Moneda
 
 pytestmark = pytest.mark.skip(reason="Métodos de admin refactorizados - pendiente actualización")
 

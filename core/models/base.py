@@ -1,8 +1,19 @@
+import sys
+
 from django.core.exceptions import PermissionDenied
 from django.db import models
 from django.utils import timezone
 
 from core.middleware import get_current_agency, get_current_user
+
+# 🛡️ P2-006: Constantes de módulo para evitar re-evaluar sys.argv en cada query al DB
+# Estas se evalúan UNA VEZ al importar el módulo, no en cada llamada a get_queryset().
+_IS_PYTEST = "pytest" in sys.modules
+_IS_MANAGEMENT_COMMAND = bool(
+    sys.argv
+    and sys.argv[0].endswith("manage.py")
+    and any(arg in sys.argv for arg in ["makemigrations", "migrate", "shell", "check", "test"])
+)
 
 
 class SaasQuerySet(models.QuerySet):
@@ -33,7 +44,19 @@ class SaasQuerySet(models.QuerySet):
 
 
 class AgenciaManager(models.Manager):
-    """Manager Maestro: Filtra automáticamente por Agencia Y por estado de eliminación."""
+    """
+    Manager Maestro: Filtra automáticamente por Agencia y soft-delete.
+
+    ⚠️  REGLA ABSOLUTA  ⚠️
+    Este manager NUNCA expone registros con agencia=null a usuarios de tenant.
+    Los registros globales se modelan con FK manual a Agencia (no AgenciaMixin)
+    y usan sus propios managers que explícitamente incluyen Q(agencia__isnull=True)
+    cuando corresponde (NotificationTemplate, FeatureFlag, AuditLog).
+
+    Si un modelo necesita datos globales compartidos entre agencias, NO debe
+    heredar AgenciaMixin. Debe tener un agencia FK manual (nullable) con su
+    propio manager que gestione explícitamente el filtro.
+    """
 
     def get_queryset(self):
         from core.middleware import is_system_context
@@ -57,14 +80,54 @@ class AgenciaManager(models.Manager):
 
         # Caso A: Hay una agencia en el contexto (Contexto activo)
         if agency:
-            # Retorna registros de la agencia + registros globales (sin agencia asignada)
-            return queryset.filter(models.Q(agencia=agency) | models.Q(agencia__isnull=True))
+            # 🛡️ SOLO registros de la agencia. NUNCA agencia=null.
+            # Los registros globales no pertenecen a modelos con AgenciaMixin.
+            return queryset.filter(agencia=agency)
 
         # Caso B: No hay agencia pero es un SUPERUSER (God Mode Global)
         if user and user.is_superuser:
             return queryset
 
         # Caso C: Comandos de gestión (Migrations, Shell, etc.)
+        # Usar constantes de módulo — evita parsear sys.argv en cada query (P2-006)
+        if _IS_PYTEST or _IS_MANAGEMENT_COMMAND:
+            return queryset
+
+        # Caso D: Seguridad por defecto
+        return queryset.none()
+
+
+class GlobalAwareAgenciaManager(AgenciaManager):
+    """
+    Manager para modelos con FK a Agencia nullable que SÍ necesitan
+    exponer registros globales (agencia=null) a todos los tenants.
+
+    EJEMPLOS DE USO:
+      - NotificationTemplate (plantillas globales con fallback por agencia)
+      - NotificationLog (logs que pueden ser globales o por agencia)
+      - NotificationPreference (preferencias globales del sistema)
+
+    Estos modelos NO heredan AgenciaMixin (tienen FK manual a Agencia).
+    Úsalo SOLO cuando el diseño explícitamente requiera datos compartidos.
+    """
+
+    def get_queryset(self):
+        from core.middleware import is_system_context
+
+        queryset = SaasQuerySet(self.model, using=self._db)
+
+        if is_system_context():
+            return queryset
+
+        agency = get_current_agency()
+        user = get_current_user()
+
+        if agency:
+            return queryset.filter(models.Q(agencia=agency) | models.Q(agencia__isnull=True))
+
+        if user and user.is_superuser:
+            return queryset
+
         import sys
 
         if "pytest" in sys.modules or (
@@ -75,7 +138,6 @@ class AgenciaManager(models.Manager):
         ):
             return queryset
 
-        # Caso D: Seguridad por defecto
         return queryset.none()
 
 

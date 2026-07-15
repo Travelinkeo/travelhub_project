@@ -1,6 +1,7 @@
 # Archivo: apps/bookings/views/boleto_views.py
 
 import logging
+import uuid
 
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
@@ -122,10 +123,11 @@ class BoletoUploadAPIView(InternalAPIAuthMixin, APIView):
                 status=status.HTTP_201_CREATED,
             )
 
-        except Exception as e:
-            logger.error(f"❌ Error al procesar subida de boleto: {e}")
+        except Exception:
+            error_id = uuid.uuid4().hex[:8].upper()
+            logger.exception(f"[{error_id}] Error al procesar subida de boleto")
             return Response(
-                {"error": f"Fallo al recibir el archivo: {str(e)}"},
+                {"error": f"Error interno al procesar el archivo. Referencia: TH-{error_id}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
@@ -158,7 +160,15 @@ class BoletoRetryParseAPIView(InternalAPIAuthMixin, APIView):
 
     def post(self, request, pk):
         try:
-            boleto = BoletoImportado.objects.select_related("agencia", "proveedor").get(pk=pk)
+            # 🔒 P0-002 FIX: Verificación explícita de tenant para prevenir IDOR
+            from core.api import get_agencia_from_request, get_object_tenant_or_404
+
+            agencia = get_agencia_from_request(request)
+            boleto = get_object_tenant_or_404(
+                BoletoImportado.all_objects.select_related("agencia", "proveedor"),
+                agencia,
+                pk=pk,
+            )
 
             # Detectar si Celery está disponible para elegir modo de procesamiento
             from apps.common.utils.celery_utils import _is_celery_available
@@ -209,10 +219,12 @@ class BoletoRetryParseAPIView(InternalAPIAuthMixin, APIView):
 
         except BoletoImportado.DoesNotExist:
             return Response({"error": "Boleto no encontrado."}, status=status.HTTP_404_NOT_FOUND)
-        except Exception as e:
-            logger.exception(f"Error fatal en re-procesamiento de boleto {pk}")
+        except Exception:
+            error_id = uuid.uuid4().hex[:8].upper()
+            logger.exception(f"[{error_id}] Error fatal en re-procesamiento de boleto {pk}")
             return Response(
-                {"error": f"Fallo Crítico: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                {"error": f"Error interno al re-procesar boleto. Referencia: TH-{error_id}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
 
@@ -346,7 +358,11 @@ class VentaDoubleInvoiceAPIView(InternalAPIAuthMixin, APIView):
         try:
             from apps.finance.services.invoice_service import InvoiceService
 
-            venta = Venta.objects.get(pk=pk)
+            # 🔒 P0-003 FIX: Verificación explícita de tenant para prevenir IDOR en Ventas
+            from core.api import get_agencia_from_request, get_object_tenant_or_404
+
+            agencia = get_agencia_from_request(request)
+            venta = get_object_tenant_or_404(Venta, agencia, pk=pk)
             f_tercero, f_propia = InvoiceService.generate_double_invoice(venta)
             return Response(
                 {
@@ -358,8 +374,13 @@ class VentaDoubleInvoiceAPIView(InternalAPIAuthMixin, APIView):
             )
         except Venta.DoesNotExist:
             return Response({"error": "Venta no encontrada"}, status=404)
-        except Exception as e:
-            return Response({"error": str(e)}, status=500)
+        except Exception:
+            error_id = uuid.uuid4().hex[:8].upper()
+            logger.exception(f"[{error_id}] Error en VentaDoubleInvoiceAPIView pk={pk}")
+            return Response(
+                {"error": f"Error interno al generar facturas. Referencia: TH-{error_id}"},
+                status=500,
+            )
 
 
 @extend_schema(
@@ -437,14 +458,14 @@ class BoletoDeleteAPIView(InternalAPIAuthMixin, APIView):
             from core.api import get_user_active_agency
 
             agencia = get_user_active_agency(request.user)
-            if not agencia:
+            if not request.user.is_superuser and not agencia:
                 return Response(
                     {"error": "No se pudo determinar la agencia"}, status=status.HTTP_403_FORBIDDEN
                 )
 
             boleto = BoletoImportado.all_objects.get(pk=pk)
 
-            if boleto.agencia_id != agencia.id:
+            if not request.user.is_superuser and boleto.agencia_id != agencia.id:
                 return Response({"error": "Boleto no encontrado"}, status=status.HTTP_404_NOT_FOUND)
 
             physical = request.query_params.get("physical", "false").lower() == "true"
@@ -460,5 +481,10 @@ class BoletoDeleteAPIView(InternalAPIAuthMixin, APIView):
             )
         except BoletoImportado.DoesNotExist:
             return Response({"error": "Boleto no encontrado"}, status=status.HTTP_404_NOT_FOUND)
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except Exception:
+            error_id = uuid.uuid4().hex[:8].upper()
+            logger.exception(f"[{error_id}] Error en BoletoDeleteAPIView pk={pk}")
+            return Response(
+                {"error": f"Error interno al eliminar boleto. Referencia: TH-{error_id}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )

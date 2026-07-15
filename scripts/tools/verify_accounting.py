@@ -8,7 +8,7 @@ sys.path.append(r"C:\Users\ARMANDO\travelhub_project")
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "travelhub.settings")
 django.setup()
 
-from apps.finance.models.reconciliacion import ConciliacionBoleto
+from apps.finance.models_stubs import ConciliacionBoleto
 from apps.finance.services.smart_reconciliation_service import SmartReconciliationService
 
 

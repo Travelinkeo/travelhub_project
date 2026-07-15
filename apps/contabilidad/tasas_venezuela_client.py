@@ -162,9 +162,8 @@ class TasasVenezuelaClient:
 
         from django.core.cache import cache
 
-        from apps.finance.models.currencies import Moneda, TasaCambio, TipoCambio
-
-        from .models import TasaCambioBCV
+        from apps.common.models import Moneda, TasaCambio, TipoCambio
+        from apps.finance.models import TasaCambioBCV
 
         resultados = {}
         tasas = cls.obtener_todas_tasas()

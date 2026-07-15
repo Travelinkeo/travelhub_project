@@ -4,8 +4,7 @@ import pytest
 from django.core.cache import cache
 from rest_framework.test import APIClient
 
-from apps.common.models import Pais
-from apps.finance.models.currencies import Moneda
+from apps.common.models import Moneda, Pais
 
 pytestmark = pytest.mark.skip(reason="Middleware de cache no activo en entorno de tests")
 

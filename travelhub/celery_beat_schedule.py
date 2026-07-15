@@ -92,4 +92,10 @@ CELERY_BEAT_SCHEDULE = {
         "schedule": 60.0,  # cada minuto
         "args": (),
     },
+    # P3-001: Reintentar boletos que quedaron en cola/tránsito (cada 10 min)
+    "retry-queued-boletos-every-10-minutes": {
+        "task": "apps.bookings.tasks.retry_queued_boletos_task",
+        "schedule": 600.0,  # cada 10 minutos
+        "args": (),
+    },
 }

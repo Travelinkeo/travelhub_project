@@ -668,7 +668,7 @@ def send_telegram_photo_task(self, agencia_id, filename="logo.png"):
     soft_time_limit=100,
 )
 def send_factura_to_telegram_task(self, factura_id):
-    from apps.finance.models.core_finance import Factura
+    from apps.finance.models import Factura
     from apps.finance.services.factura_service import FacturaService
 
     try:
@@ -683,6 +683,29 @@ def send_factura_to_telegram_task(self, factura_id):
 
 
 @shared_task(
+    bind=True,
+    queue="notifications",
+    max_retries=3,
+    default_retry_delay=30,
+    time_limit=120,
+    soft_time_limit=100,
+)
+def send_factura_to_whatsapp_task(self, factura_id):
+    from apps.finance.models import Factura
+    from apps.finance.services.factura_service import FacturaService
+
+    try:
+        factura = Factura.objects.get(pk=factura_id)
+        result = FacturaService.send_to_whatsapp_if_needed(factura)
+        if result:
+            logger.info(f"Factura {factura_id} enviada a WhatsApp")
+        return result
+    except Exception as exc:
+        logger.error(f"Error sending factura {factura_id} to WhatsApp: {exc}")
+        self.retry(exc=exc)
+
+
+@shared_task(
     queue="default", max_retries=2, default_retry_delay=5, time_limit=60, soft_time_limit=50
 )
 @idempotent_task(timeout=3600, key_prefix="celery_binance_order")
@@ -690,7 +713,7 @@ def create_binance_order_task(factura_id):
     from celery import current_task
     from django.core.cache import cache
 
-    from apps.finance.models.core_finance import Factura
+    from apps.finance.models import Factura
     from apps.finance.services.binance_service import BinancePayService
 
     try:
@@ -1095,7 +1118,6 @@ def fetch_image_base64_task(self, image_source):
 
 @shared_task(
     bind=True,
-    queue="ia_fast",
     max_retries=2,
     default_retry_delay=10,
     time_limit=120,

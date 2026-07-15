@@ -31,13 +31,13 @@
 
     <!-- FILA 1: KPIs ESTRATÉGICOS -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-        
+
         <!-- Ventas Mes -->
         <div class="bg-surface-1 border border-border-color rounded-3xl p-6 shadow-sm relative overflow-hidden group">
             <div class="absolute top-0 right-0 w-24 h-24 bg-blue-500 opacity-5 rounded-bl-full group-hover:scale-110 transition-transform duration-500"></div>
             <p class="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] mb-2">Ventas {{ kpis.mes_actual_nombre }}</p>
             <h3 class="text-3xl font-black text-text-main">${{ kpis.ventas_mes_actual|floatformat:"2" }}</h3>
-            
+
             <div class="mt-4 flex items-center gap-2 text-[10px] font-bold">
                 {% if kpis.crecimiento_porcentaje >= 0 %}
                     <span class="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 px-2.5 py-1 rounded-lg flex items-center gap-1">
@@ -77,13 +77,13 @@
         <div class="bg-surface-2 dark:bg-blue-600 rounded-3xl p-6 shadow-2xl relative overflow-hidden group">
             <!-- Efecto Decorativo -->
             <div class="absolute -right-4 -bottom-4 w-28 h-28 bg-white opacity-[0.03] rounded-full group-hover:scale-125 transition-transform duration-700"></div>
-            
+
             <p class="text-[10px] font-black text-blue-200 uppercase tracking-[0.2em] mb-2">Tax Refund Disponible</p>
             <h3 class="text-3xl font-black text-text-main">${{ kpis.tax_refund_disponible|floatformat:"2" }}</h3>
-            
-            <a href="{% url 'finance:tax_refund_dashboard' %}" 
+
+            <a href="#"
                class="mt-4 inline-flex items-center gap-2 text-[10px] font-black bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-xl border border-white/10 transition-all active:scale-95 group/btn">
-                RECUPERAR AHORA 
+                RECUPERAR AHORA
                 <span class="material-symbols-outlined text-[16px] group-hover/btn:translate-x-1 transition-transform">arrow_right_alt</span>
             </a>
         </div>
@@ -91,7 +91,7 @@
 
     <!-- FILA 2: GRÁFICO E INTELIGENCIA ARTIFICIAL -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
+
         <!-- Gráfico del Histórico (Chart.js) -->
         <div class="lg:col-span-2 bg-surface-1 border border-border-color rounded-3xl p-8 shadow-sm">
             <div class="flex items-center justify-between mb-8">
@@ -114,12 +114,12 @@
                 </h3>
                 <span class="text-[10px] font-black text-blue-500 bg-blue-50 dark:bg-blue-900/40 px-2 py-0.5 rounded-md border border-blue-100 dark:border-blue-800">BETA 1.5 PRO</span>
             </div>
-            
+
             <!-- Contenedor HTMX que dispara la llamada al cargar -->
-            <div hx-get="{% url 'core:ai_business_advisor' %}" 
-                 hx-trigger="load" 
+            <div hx-get="{% url 'core:ai_business_advisor' %}"
+                 hx-trigger="load"
                  class="flex-1 flex flex-col">
-                 
+
                  <!-- Skeleton Loader Principal -->
                  <div class="space-y-6">
                      <div class="space-y-2">
@@ -149,7 +149,7 @@
     document.addEventListener("DOMContentLoaded", function() {
         const ctx = document.getElementById('revenueChart').getContext('2d');
         const isDark = document.documentElement.classList.contains('dark');
-        
+
         // Colores según el tema
         const textColor = isDark ? '#94a3b8' : '#64748b';
         const gridColor = isDark ? 'rgba(51, 65, 85, 0.4)' : '#e2e8f0';

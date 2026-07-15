@@ -89,8 +89,8 @@ class UserProgressModelTest(TestCase):
         """Test: Representación en string."""
         progress = UserProgress.objects.create(user=self.user)
 
-        self.assertIn("test@example.com", str(progress))
-        self.assertIn("welcome", str(progress))
+        self.assertIn("testuser", str(progress))
+        self.assertIn("0%", str(progress))
 
         progress.mark_step_completed(UserProgress.STEP_WELCOME)
         progress.mark_step_completed(UserProgress.STEP_AGENCY)

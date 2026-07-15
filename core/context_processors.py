@@ -33,8 +33,9 @@ def agency_context(request):
     try:
         from datetime import date
 
-        from apps.finance.models.currencies import TasaCambio
+        from django.apps import apps
 
+        TasaCambio = apps.get_model("finance", "TasaCambio")
         tasa_usd_obj = TasaCambio.objects.filter(moneda="USD").order_by("-fecha").first()
         tasa_eur_obj = TasaCambio.objects.filter(moneda="EUR").order_by("-fecha").first()
 

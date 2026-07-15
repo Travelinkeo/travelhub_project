@@ -77,6 +77,7 @@ class DataNormalizationService:
                 "pnr_aerolinea",
                 "CODIGO_RESERVA_AEROLINEA",
                 "airline_reservation_code",
+                "localizador_aerolinea",
             ],
         }
 
@@ -172,14 +173,21 @@ class DataNormalizationService:
                 or normalized.get("vuelos")
                 or []
             )
-            normalized["segmentos"] = DataNormalizationService._normalize_itinerary(raw_itinerary)
+            default_airline_pnr = (
+                normalized.get("airline_pnr")
+                or normalized.get("localizador_aerolinea")
+                or normalized.get("pnr_aerolinea")
+            )
+            normalized["segmentos"] = DataNormalizationService._normalize_itinerary(
+                raw_itinerary, default_airline_pnr=default_airline_pnr
+            )
             # Para compatibilidad con legacy
             normalized["ItinerarioFinalLimpio"] = json.dumps(raw_itinerary)
 
         return DataNormalizationService.sanitize_for_json(normalized)
 
     @staticmethod
-    def _normalize_itinerary(raw_itinerary):
+    def _normalize_itinerary(raw_itinerary, default_airline_pnr=None):
         segmentos = []
         from apps.common.services.catalog_service import CatalogNormalizationService
 
@@ -294,9 +302,17 @@ class DataNormalizationService:
                 "aerolinea": tramo.get("airline") or tramo.get("aerolinea"),
                 "vuelo": vuelo_num,
                 "numero_vuelo": vuelo_num,
-                "origen": ciudad_origen_obj.nombre if ciudad_origen_obj else origen_raw,
+                "origen": (
+                    ciudad_origen_obj.nombre.upper()
+                    if (ciudad_origen_obj and ciudad_origen_obj.nombre)
+                    else str(origen_raw or "").upper()
+                ),
                 "codigo_iata_origen": iata_origen,
-                "destino": ciudad_destino_obj.nombre if ciudad_destino_obj else destino_raw,
+                "destino": (
+                    ciudad_destino_obj.nombre.upper()
+                    if (ciudad_destino_obj and ciudad_destino_obj.nombre)
+                    else str(destino_raw or "").upper()
+                ),
                 "codigo_iata_destino": iata_destino,
                 "fecha_salida": dep.get("date") or tramo.get("fecha_salida") or tramo.get("date"),
                 "hora_salida": h_salida,
@@ -306,7 +322,8 @@ class DataNormalizationService:
                 "localizador_aerolinea": det.get("airlineReservationCode")
                 or tramo.get("localizador_aerolinea")
                 or tramo.get("airline_pnr")
-                or tramo.get("pnr_aerolinea"),
+                or tramo.get("pnr_aerolinea")
+                or default_airline_pnr,
             }
             segmentos.append(segmento)
         return segmentos

@@ -1,16 +1,13 @@
 from rest_framework import serializers
 
-from apps.bookings.serializers import ItemVentaSerializer, ProveedorSerializer
 from apps.contabilidad.models import (
     AsientoContable,
-    DetalleAsiento,
-    ItemLiquidacion,
-    LiquidacionProveedor,
+    MovimientoContable,
 )
 from apps.finance.serializers import MonedaSerializer
 
 
-class DetalleAsientoSerializer(serializers.ModelSerializer):
+class MovimientoContableSerializer(serializers.ModelSerializer):
     cuenta_contable_codigo = serializers.CharField(
         source="cuenta_contable.codigo_cuenta", read_only=True
     )
@@ -19,7 +16,7 @@ class DetalleAsientoSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        model = DetalleAsiento
+        model = MovimientoContable
         fields = [
             "id_detalle_asiento",
             "linea",
@@ -34,7 +31,7 @@ class DetalleAsientoSerializer(serializers.ModelSerializer):
 
 
 class AsientoContableSerializer(serializers.ModelSerializer):
-    detalles_asiento = DetalleAsientoSerializer(many=True)
+    detalles_asiento = MovimientoContableSerializer(many=True)
     moneda_detalle = MonedaSerializer(source="moneda", read_only=True)
     estado_display = serializers.CharField(source="get_estado_display", read_only=True)
     tipo_asiento_display = serializers.CharField(source="get_tipo_asiento_display", read_only=True)
@@ -75,10 +72,10 @@ class AsientoContableSerializer(serializers.ModelSerializer):
         asiento = AsientoContable.objects.create(**validated_data)
 
         detalles_to_create = [
-            DetalleAsiento(asiento=asiento, **detalle_data) for detalle_data in detalles_data
+            MovimientoContable(asiento=asiento, **detalle_data) for detalle_data in detalles_data
         ]
         if detalles_to_create:
-            DetalleAsiento.objects.bulk_create(detalles_to_create)
+            MovimientoContable.objects.bulk_create(detalles_to_create)
 
         asiento.calcular_totales()
         return asiento
@@ -102,51 +99,11 @@ class AsientoContableSerializer(serializers.ModelSerializer):
         if detalles_data is not None:
             instance.detalles_asiento.all().delete()
             detalles_to_create = [
-                DetalleAsiento(asiento=instance, **detalle_data) for detalle_data in detalles_data
+                MovimientoContable(asiento=instance, **detalle_data)
+                for detalle_data in detalles_data
             ]
             if detalles_to_create:
-                DetalleAsiento.objects.bulk_create(detalles_to_create)
+                MovimientoContable.objects.bulk_create(detalles_to_create)
 
         instance.calcular_totales()
         return instance
-
-
-class ItemLiquidacionSerializer(serializers.ModelSerializer):
-    item_venta_detalle = ItemVentaSerializer(source="item_venta", read_only=True)
-
-    class Meta:
-        model = ItemLiquidacion
-        fields = [
-            "id_item_liquidacion",
-            "liquidacion",
-            "item_venta",
-            "item_venta_detalle",
-            "descripcion",
-            "monto",
-        ]
-        read_only_fields = ["id_item_liquidacion"]
-
-
-class LiquidacionProveedorSerializer(serializers.ModelSerializer):
-    proveedor_detalle = ProveedorSerializer(source="proveedor", read_only=True)
-    venta_detalle = serializers.StringRelatedField(source="venta", read_only=True)
-    items_liquidacion = ItemLiquidacionSerializer(many=True, read_only=True)
-    estado_display = serializers.CharField(source="get_estado_display", read_only=True)
-
-    class Meta:
-        model = LiquidacionProveedor
-        fields = [
-            "id_liquidacion",
-            "proveedor",
-            "proveedor_detalle",
-            "venta",
-            "venta_detalle",
-            "fecha_emision",
-            "monto_total",
-            "saldo_pendiente",
-            "estado",
-            "estado_display",
-            "notas",
-            "items_liquidacion",
-        ]
-        read_only_fields = ["id_liquidacion", "fecha_emision", "saldo_pendiente"]

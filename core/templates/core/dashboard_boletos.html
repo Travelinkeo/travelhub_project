@@ -22,7 +22,7 @@
                 <span class="material-symbols-outlined text-[20px]">upload_file</span>
                 <span>Importar Boletos</span>
             </a>
-            <a href="{% url 'finance:reconciliacion_dashboard_htmx' %}" class="relative group px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold transition-all shadow-lg shadow-emerald-500/20 overflow-hidden flex items-center gap-2">
+            <a href="#" class="relative group px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold transition-all shadow-lg shadow-emerald-500/20 overflow-hidden flex items-center gap-2">
                 <div class="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                 <span class="material-symbols-outlined text-[20px]">calculate</span>
                 <span>Cruce Masivo</span>
@@ -196,7 +196,7 @@
                             </div>
                         </td>
                     </tr>
-                    
+
                     <!-- Expanded Items Row -->
                     <tr id="items-{{ venta.id_venta }}" class="hidden">
                         <td colspan="6" class="px-8 py-6 bg-emerald-500/[0.03] border-t border-emerald-500/10 shadow-inner">
@@ -206,7 +206,7 @@
                                 </div>
                                 <h4 class="text-[11px] font-black text-text-main uppercase tracking-[0.2em] opacity-80">Desglose Técnico & Auditoría</h4>
                             </div>
-                            
+
                             <div class="rounded-xl border border-emerald-500/10 bg-black overflow-hidden shadow-2xl">
                                 <table class="w-full text-xs border-collapse">
                                     <thead>
@@ -307,12 +307,12 @@ document.addEventListener('DOMContentLoaded', function () {
 function editField(itemId, campo, element) {
     const valorActual = element.textContent.trim();
     const nuevoValor = prompt('Ingrese nuevo valor para ' + campo + ' (Audit Engine):', valorActual);
-    
+
     if (nuevoValor === null || nuevoValor === valorActual) return;
-    
+
     // Feedback visual inmediato
     element.classList.add('animate-pulse', 'opacity-50');
-    
+
     fetch('{% url "bookings:actualizar_item_boleto" %}', {
         method: 'POST',
         headers: {
@@ -327,7 +327,7 @@ function editField(itemId, campo, element) {
             element.textContent = parseFloat(data.nuevo_valor).toFixed(2);
             element.classList.remove('animate-pulse', 'opacity-50');
             // Nota: Recargar opcional si queremos ver reflejados los totales agregados de la fila superior
-            location.reload(); 
+            location.reload();
         } else {
             window.dispatchEvent(new CustomEvent('notify', { detail: { message: 'Error Auditoría: ' + data.error, type: 'error' } }));
             element.classList.remove('animate-pulse', 'opacity-50');

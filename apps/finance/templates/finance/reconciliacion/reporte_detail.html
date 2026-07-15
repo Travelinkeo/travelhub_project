@@ -8,19 +8,19 @@
 
 {% block content %}
 <div class="px-6 py-8 max-w-[1440px] mx-auto space-y-8 overflow-y-auto h-full">
-    
+
     <!-- Header: Theme Adaptive -->
     <div class="relative overflow-hidden bg-surface-1 rounded-3xl p-8 border border-border-color shadow-2xl">
         <div class="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full -mr-32 -mt-32 blur-3xl"></div>
-        
+
         <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
             <div class="space-y-4">
                 <nav class="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-text-muted">
-                    <a href="{% url 'finance:reconciliacion_dashboard_htmx' %}" class="hover:text-primary transition-colors">Infraestructura</a>
+                    <a href="#" class="hover:text-primary transition-colors">Infraestructura</a>
                     <span class="material-symbols-outlined text-[10px]">chevron_right</span>
                     <span class="text-text-main">{{ reporte.proveedor }}</span>
                 </nav>
-                
+
                 <div class="space-y-1">
                     <h1 class="text-4xl font-black text-text-main tracking-tighter uppercase flex items-center gap-4">
                         <span class="bg-gradient-to-r from-primary to-primary-hover bg-clip-text text-transparent">Liquidación de Vuelo</span>
@@ -30,14 +30,14 @@
                     <p class="text-text-muted font-mono text-xs tracking-widest uppercase">ID: #{{ reporte.pk|truncatechars:12 }} — Proceso IA Activo</p>
                 </div>
             </div>
-            
-            <div class="flex items-center gap-4" 
+
+            <div class="flex items-center gap-4"
                  {% if reporte.estado == 'PROCESANDO' or reporte.estado == 'PENDIENTE' %}
-                 hx-get="{% url 'finance:reconciliacion_detail' reporte.pk %}"
+                 hx-get="#"
                  hx-trigger="every 3s"
                  hx-target="body"
                  {% endif %}>
-                
+
                 <div class="flex flex-col items-end gap-1">
                     <span class="text-[9px] font-black uppercase tracking-widest text-text-muted mb-1">Estatus Financiero</span>
                     <span class="px-5 py-2 rounded-xl text-sm font-black uppercase tracking-widest border shadow-lg
@@ -52,10 +52,10 @@
                         <p class="text-[10px] text-primary font-black uppercase tracking-tighter mt-1 animate-bounce">Analizando con IA...</p>
                     {% endif %}
                 </div>
-                
+
                 {% if reporte.estado == 'PENDIENTE' or reporte.estado == 'ERROR' %}
                 <div class="flex items-center pt-5">
-                    <a href="{% url 'finance:reconciliacion_process' reporte.pk %}" class="group relative px-6 py-3 bg-primary hover:bg-primary-hover text-on-primary rounded-xl font-black uppercase tracking-widest transition-all shadow-xl shadow-primary/20 overflow-hidden flex items-center gap-2">
+                    <a href="#" class="group relative px-6 py-3 bg-primary hover:bg-primary-hover text-on-primary rounded-xl font-black uppercase tracking-widest transition-all shadow-xl shadow-primary/20 overflow-hidden flex items-center gap-2">
                         <div class="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                         <span class="material-symbols-outlined text-[20px] group-hover:rotate-12 transition-transform">smart_toy</span>
                         <span>Analizar con IA</span>
@@ -75,7 +75,7 @@
             <p class="text-xs font-bold uppercase tracking-wide">{{ message }}</p>
         </div>
         {% endfor %}
-        
+
         {% if reporte.error_log %}
         <div class="p-6 rounded-2xl bg-status-danger-bg border border-status-danger/20 space-y-3">
             <h3 class="text-status-danger font-black uppercase tracking-widest text-xs flex items-center gap-2">
@@ -165,7 +165,7 @@
                                 {% else %}bg-status-danger-bg text-status-danger border-status-danger/20{% endif %}">
                                 {{ rec.estado }}
                             </span>
-                            
+
                             {% if rec.ia_razonamiento %}
                             <div class="mt-2 flex justify-center cursor-help">
                                 <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-4 bg-surface-1 border border-primary/20 rounded-2xl shadow-2xl opacity-0 group-hover/status:opacity-100 transition-all pointer-events-none z-50">
@@ -180,7 +180,7 @@
 
                         <td class="px-8 py-5 text-center">
                             {% if rec.sugerencia_asiento %}
-                            <a href="{% url 'admin:contabilidad_asientocontable_change' rec.sugerencia_asiento.id_asiento %}" class="size-8 rounded-lg bg-primary/10 hover:bg-primary-hover hover:text-on-primary border border-primary/20 transition-all inline-flex items-center justify-center group-hover:scale-110">
+                            <a href="#" class="size-8 rounded-lg bg-primary/10 hover:bg-primary-hover hover:text-on-primary border border-primary/20 transition-all inline-flex items-center justify-center group-hover:scale-110">
                                 <span class="material-symbols-outlined text-[18px]">account_balance_wallet</span>
                             </a>
                             {% else %}

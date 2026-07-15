@@ -74,17 +74,13 @@ def _check_storage():
         return {"ok": True, "detail": str(e)[:100]}
 
 
-def _check_gotenberg():
-    import urllib.request
-
-    gotenberg_url = getattr(settings, "GOTENBERG_URL", "")
-    if not gotenberg_url:
-        return {"ok": True, "detail": "Not configured"}
+def _check_pdf_engine():
     try:
-        urllib.request.urlopen(f"{gotenberg_url}/health", timeout=3)  # noqa: S310
-        return {"ok": True}
-    except Exception as e:
-        return {"ok": True, "detail": str(e)[:100]}  # non-critical
+        import weasyprint  # noqa: F401
+
+        return {"ok": True, "detail": "WeasyPrint (local)"}
+    except ImportError:
+        return {"ok": False, "detail": "WeasyPrint no instalado"}
 
 
 # --------------------------------------------------------------------------
@@ -106,7 +102,7 @@ def _run_checks():
         "cache": _check_redis(),
         "celery": _check_celery(),
         "storage": _check_storage(),
-        "pdf": _check_gotenberg(),
+        "pdf": _check_pdf_engine(),
     }
     # Adjuntar metadata de UI
     for key, meta in SERVICE_META.items():

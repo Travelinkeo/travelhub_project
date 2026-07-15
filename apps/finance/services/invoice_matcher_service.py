@@ -2,7 +2,7 @@ import logging
 from decimal import Decimal
 
 from apps.bookings.models.venta import ItemVenta
-from apps.finance.models.facturas_proveedores import FacturaProveedor
+from apps.finance.models_stubs import FacturaProveedor
 
 logger = logging.getLogger(__name__)
 

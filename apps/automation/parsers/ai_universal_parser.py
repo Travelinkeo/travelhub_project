@@ -87,7 +87,14 @@ class UniversalAIParser:
             text_limpio = re.sub(r"\s+", " ", text_limpio).strip()
 
             # Truncar a 15,000 caracteres para proteger los límites de tokens de Gemini
+            # P1-006 FIX: Loguear el truncamiento para que no sea silencioso
+            _text_was_truncated = False
             if len(text_limpio) > 15000:
+                _text_was_truncated = True
+                logger.warning(
+                    f"⚠️ [P1-006] Texto truncado de {len(text_limpio):,} → 15,000 chars. "
+                    f"El parseo puede estar incompleto. Archivo: {pdf_path or 'texto plano'}"
+                )
                 text_limpio = text_limpio[:15000]
 
             # --- 1. CACHÉ POR HASH (SaaS Cost Efficiency) ---

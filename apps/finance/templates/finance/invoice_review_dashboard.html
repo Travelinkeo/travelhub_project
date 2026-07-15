@@ -19,7 +19,7 @@
                 Revisión <span class="text-primary">Gemini</span> Invoice
             </h1>
             <p class="text-slate-400 mt-2 max-w-2xl text-lg">
-                Resuelve discrepancias entre facturas recibidas y costos registrados. 
+                Resuelve discrepancias entre facturas recibidas y costos registrados.
                 <span class="text-slate-200">La IA sugiere, tú decides.</span>
             </p>
         </div>
@@ -42,12 +42,12 @@
         {% for item in facturas_con_matches %}
         {% with f=item.factura %}
         <div id="factura-row-{{ f.pk }}" class="group/row grid grid-cols-1 lg:grid-cols-2 gap-12 border-b border-slate-800/40 pb-20 last:border-0">
-            
+
             <!-- COLUMNA IZQUIERDA: DATOS IA & VISOR PDF -->
             <div class="space-y-8">
                 <div class="bg-gradient-to-br from-slate-900/80 to-slate-900/40 border border-slate-800 rounded-[2.5rem] p-8 relative overflow-hidden shadow-2xl">
                     <div class="absolute -top-10 -right-10 w-40 h-40 bg-primary/5 blur-3xl rounded-full"></div>
-                    
+
                     <div class="flex justify-between items-start mb-8">
                         <h3 class="text-2xl font-black text-white flex items-center gap-4">
                             <div class="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
@@ -107,10 +107,10 @@
                         </div>
                         Candidatos ERP
                     </h3>
-                    
+
                     <!-- Search Bar Manual (Mockup funcional con HTMX) -->
                     <div class="relative">
-                        <input type="text" name="q" placeholder="Buscar Localizador..." 
+                        <input type="text" name="q" placeholder="Buscar Localizador..."
                                class="bg-slate-900/50 border border-slate-800 rounded-2xl pl-12 pr-4 py-3 text-sm w-full md:w-64 focus:w-full md:focus:w-80 transition-all duration-500 focus:border-primary focus:ring-4 focus:ring-primary/5 outline-none text-slate-200">
                         <svg class="w-5 h-5 absolute left-4 top-3.5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                     </div>
@@ -135,7 +135,7 @@
                                             <span class="w-1 h-1 bg-slate-700 rounded-full"></span>
                                             <span class="text-sm text-primary font-bold uppercase">{{ match.item.venta.localizador }}</span>
                                         </div>
-                                        
+
                                         <p class="text-slate-400 text-sm leading-relaxed mb-6 font-medium">
                                             {{ match.item.descripcion_personalizada|truncatechars:80 }}
                                         </p>
@@ -155,9 +155,9 @@
                                             </div>
                                         </div>
                                     </div>
-                                    
+
                                     <div class="flex flex-col gap-2">
-                                        <button hx-post="{% url 'finance:force_match_invoice' f.pk %}"
+                                        <button hx-post="#"
                                                 hx-vals='{"item_venta_id": "{{ match.item.id_item_venta }}"}'
                                                 hx-target="#factura-row-{{ f.pk }}"
                                                 hx-swap="outerHTML"

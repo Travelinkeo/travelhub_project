@@ -9,7 +9,7 @@ from decimal import Decimal
 
 from django.db.models import Sum
 
-from .models import AsientoContable, DetalleAsiento, PlanContable
+from .models import AsientoContable, CuentaContable, MovimientoContable
 
 
 class ReportesContables:
@@ -31,7 +31,7 @@ class ReportesContables:
         campo_debe = "debe_bsd" if moneda == "BSD" else "debe"
         campo_haber = "haber_bsd" if moneda == "BSD" else "haber"
 
-        cuentas = PlanContable.objects.filter(permite_movimientos=True).order_by("codigo_cuenta")
+        cuentas = CuentaContable.objects.filter(permite_movimientos=True).order_by("codigo_cuenta")
 
         resultado = {
             "periodo": {"desde": fecha_desde, "hasta": fecha_hasta},
@@ -41,7 +41,7 @@ class ReportesContables:
         }
 
         for cuenta in cuentas:
-            movimientos = DetalleAsiento.objects.filter(
+            movimientos = MovimientoContable.objects.filter(
                 cuenta_contable=cuenta,
                 asiento__fecha_contable__range=(fecha_desde, fecha_hasta),
                 asiento__estado=AsientoContable.EstadoAsiento.CONTABILIZADO,
@@ -80,15 +80,15 @@ class ReportesContables:
         campo_haber = "haber_bsd" if moneda == "BSD" else "haber"
 
         # Ingresos (naturaleza acreedora)
-        ingresos = DetalleAsiento.objects.filter(
-            cuenta_contable__tipo_cuenta=PlanContable.TipoCuentaChoices.INGRESO,
+        ingresos = MovimientoContable.objects.filter(
+            cuenta_contable__tipo_cuenta=CuentaContable.TipoCuentaChoices.INGRESO,
             asiento__fecha_contable__range=(fecha_desde, fecha_hasta),
             asiento__estado=AsientoContable.EstadoAsiento.CONTABILIZADO,
         ).aggregate(total=Sum(campo_haber))["total"] or Decimal("0")
 
         # Gastos (naturaleza deudora)
-        gastos = DetalleAsiento.objects.filter(
-            cuenta_contable__tipo_cuenta=PlanContable.TipoCuentaChoices.GASTO,
+        gastos = MovimientoContable.objects.filter(
+            cuenta_contable__tipo_cuenta=CuentaContable.TipoCuentaChoices.GASTO,
             asiento__fecha_contable__range=(fecha_desde, fecha_hasta),
             asiento__estado=AsientoContable.EstadoAsiento.CONTABILIZADO,
         ).aggregate(total=Sum(campo_debe))["total"] or Decimal("0")
@@ -115,24 +115,24 @@ class ReportesContables:
         campo_haber = "haber_bsd" if moneda == "BSD" else "haber"
 
         # Activos (saldo deudor)
-        activos = DetalleAsiento.objects.filter(
-            cuenta_contable__tipo_cuenta=PlanContable.TipoCuentaChoices.ACTIVO,
+        activos = MovimientoContable.objects.filter(
+            cuenta_contable__tipo_cuenta=CuentaContable.TipoCuentaChoices.ACTIVO,
             asiento__fecha_contable__lte=fecha_corte,
             asiento__estado=AsientoContable.EstadoAsiento.CONTABILIZADO,
         ).aggregate(debe=Sum(campo_debe), haber=Sum(campo_haber))
         total_activos = (activos["debe"] or Decimal("0")) - (activos["haber"] or Decimal("0"))
 
         # Pasivos (saldo acreedor)
-        pasivos = DetalleAsiento.objects.filter(
-            cuenta_contable__tipo_cuenta=PlanContable.TipoCuentaChoices.PASIVO,
+        pasivos = MovimientoContable.objects.filter(
+            cuenta_contable__tipo_cuenta=CuentaContable.TipoCuentaChoices.PASIVO,
             asiento__fecha_contable__lte=fecha_corte,
             asiento__estado=AsientoContable.EstadoAsiento.CONTABILIZADO,
         ).aggregate(debe=Sum(campo_debe), haber=Sum(campo_haber))
         total_pasivos = (pasivos["haber"] or Decimal("0")) - (pasivos["debe"] or Decimal("0"))
 
         # Patrimonio (saldo acreedor)
-        patrimonio = DetalleAsiento.objects.filter(
-            cuenta_contable__tipo_cuenta=PlanContable.TipoCuentaChoices.PATRIMONIO,
+        patrimonio = MovimientoContable.objects.filter(
+            cuenta_contable__tipo_cuenta=CuentaContable.TipoCuentaChoices.PATRIMONIO,
             asiento__fecha_contable__lte=fecha_corte,
             asiento__estado=AsientoContable.EstadoAsiento.CONTABILIZADO,
         ).aggregate(debe=Sum(campo_debe), haber=Sum(campo_haber))
@@ -215,10 +215,10 @@ class ReportesContables:
         campo_debe = "debe_bsd" if moneda == "BSD" else "debe"
         campo_haber = "haber_bsd" if moneda == "BSD" else "haber"
 
-        cuenta = PlanContable.objects.get(id_cuenta=cuenta_id)
+        cuenta = CuentaContable.objects.get(id_cuenta=cuenta_id)
 
         # Saldo inicial (antes del período)
-        saldo_inicial_data = DetalleAsiento.objects.filter(
+        saldo_inicial_data = MovimientoContable.objects.filter(
             cuenta_contable=cuenta,
             asiento__fecha_contable__lt=fecha_desde,
             asiento__estado=AsientoContable.EstadoAsiento.CONTABILIZADO,
@@ -230,7 +230,7 @@ class ReportesContables:
 
         # Movimientos del período
         movimientos = (
-            DetalleAsiento.objects.filter(
+            MovimientoContable.objects.filter(
                 cuenta_contable=cuenta,
                 asiento__fecha_contable__range=(fecha_desde, fecha_hasta),
                 asiento__estado=AsientoContable.EstadoAsiento.CONTABILIZADO,

@@ -4,34 +4,8 @@ from celery import shared_task
 
 from apps.common.utils.celery_utils import idempotent_task, tenant_task
 from apps.communications.services.telegram_unified import enviar_alerta_telegram
-from apps.finance.models import LinkDePago
 
 logger = logging.getLogger(__name__)
-
-
-@tenant_task(queue="notifications", max_retries=3, time_limit=120, soft_time_limit=90)
-@idempotent_task(timeout=1800, key_prefix="celery_notif_zelle")
-def notificar_pago_zelle_task(link_id, **kwargs):
-    try:
-        link = LinkDePago.objects.select_related("venta__cliente", "venta__agencia").get(id=link_id)
-        venta = link.venta
-
-        mensaje = (
-            f"💸 *NUEVO PAGO REPORTADO*\n\n"
-            f"🎫 *PNR:* {venta.localizador}\n"
-            f"👤 *Cliente:* {venta.cliente.nombres.title()}\n"
-            f"💰 *Monto a Conciliar:* {link.monto_total} {link.moneda}\n"
-            f"🧾 *Referencia:* `{link.referencia_pago}`\n\n"
-            f"⚡ *Acción Requerida:* Por favor, verifica tu estado de cuenta bancario y marca la venta como PAGADA en el Dashboard."
-        )
-
-        enviar_alerta_telegram(mensaje)
-        logger.info(f"Notificación de pago enviada para Link {link_id}")
-        return f"Notificación enviada (Ref: {link.referencia_pago})"
-
-    except Exception as e:
-        logger.error(f"Fallo enviando notificación de pago: {str(e)}")
-        raise e
 
 
 @tenant_task(

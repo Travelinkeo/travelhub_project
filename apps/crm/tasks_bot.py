@@ -7,7 +7,7 @@ from apps.communications.services.whatsapp_unified import procesar_mensaje_entra
 logger = logging.getLogger(__name__)
 
 
-@shared_task(bind=True, queue="ia_fast", max_retries=5, time_limit=120, soft_time_limit=90)
+@shared_task(bind=True, max_retries=5, time_limit=120, soft_time_limit=90)
 def whatsapp_ai_task(self, telefono_cliente, nombre_perfil, mensaje_texto, agencia_id=None):
     from core.api import Agencia, agency_context, system_context
 
@@ -28,7 +28,7 @@ def whatsapp_ai_task(self, telefono_cliente, nombre_perfil, mensaje_texto, agenc
         raise self.retry(exc=e, countdown=60) from e
 
 
-@shared_task(bind=True, queue="ia_fast", max_retries=3, time_limit=180, soft_time_limit=150)
+@shared_task(bind=True, max_retries=3, time_limit=180, soft_time_limit=150)
 def whatsapp_media_ocr_task(
     self, telefono_cliente, nombre_perfil, media_id, mime_type, agencia_id=None
 ):

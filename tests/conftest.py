@@ -8,8 +8,8 @@ from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
 
 from apps.bookings.models import Venta
+from apps.common.models import Moneda
 from apps.crm.models import Cliente
-from apps.finance.models.currencies import Moneda
 
 # Asegurar configuración de Django incluso si pytest-django no se auto-carga
 if "DJANGO_SETTINGS_MODULE" not in os.environ:
@@ -154,6 +154,41 @@ def _require_pg(request):
             "PostgreSQL not available for tests. "
             "Start test containers with: docker compose -f docker-compose.test.yml up -d"
         )
+
+
+@pytest.fixture(scope="session", autouse=True)
+def create_stub_tables(django_db_setup, django_db_blocker):
+    """Create tables for managed=False stub models so tests can use them."""
+    with django_db_blocker.unblock():
+        from django.db import connection, models
+
+        from apps.finance import models_stubs as m
+
+        stub_models = []
+        for _nm in dir(m):
+            _cls = getattr(m, _nm)
+            if (
+                isinstance(_cls, type)
+                and issubclass(_cls, models.Model)
+                and _cls._meta.managed is False
+                and _cls._meta.db_table
+            ):
+                stub_models.append(_cls)
+
+        table_names = connection.introspection.table_names()
+        remaining = {mdl for mdl in stub_models if mdl._meta.db_table not in table_names}
+
+        while remaining:
+            batch = set(remaining)
+            for _mdl in batch:
+                try:
+                    with connection.schema_editor(atomic=False) as schema_editor:
+                        schema_editor.create_model(_mdl)
+                    remaining.discard(_mdl)
+                except Exception:
+                    pass
+            if remaining == batch:
+                break
 
 
 @pytest.fixture(autouse=True)
@@ -396,7 +431,7 @@ def agencia_estandar(db):
 
 @pytest.fixture
 def moneda_usd(db):
-    from apps.finance.models.currencies import Moneda
+    from apps.common.models import Moneda
 
     moneda, _ = Moneda.objects.get_or_create(
         codigo_iso="USD", defaults={"nombre": "Dólar Americano", "simbolo": "$"}
@@ -406,7 +441,7 @@ def moneda_usd(db):
 
 @pytest.fixture
 def moneda_ves(db):
-    from apps.finance.models.currencies import Moneda
+    from apps.common.models import Moneda
 
     moneda, _ = Moneda.objects.get_or_create(
         codigo_iso="VES", defaults={"nombre": "Bolívares", "simbolo": "Bs"}

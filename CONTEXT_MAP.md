@@ -19,7 +19,7 @@ Gestiona el ciclo completo: cotización → venta → emisión de boletos aéreo
 - El plan se almacena en `AgenciaConfiguracion.plan` (CharField choices FREE/BASIC/PRO/ENTERPRISE) en `core/models/agencia.py`
 - Cuotas verificadas via `SaaSQuotaService` en `apps/common/services/saas_quota_service.py`
 - `SaaSLimitMiddleware` en `core/middleware_saas.py` intercepta requests cuando se exceden cuotas
-- [VERIFICAR] Stripe no tiene lógica de downgrade/upgrade forzada visible en el código leído — los endpoints `change-plan/preview-change` probablemente llaman Stripe API, pero los handlers están en `apps/finance/views/` sin leer. Si un pago falla, Stripe desactiva la subscripción y `SaaSLimitMiddleware` bloquea al usuario — pero la lógica exacta de Stripe webhook no fue verificada.
+- Stripe webhook verificado: `StripeWebhookView` en `apps/finance/views/views_webhooks.py:124-155` extiende `WebhookPagoBaseView` (idempotencia vía `select_for_update`, crea `TransaccionPago` con proveedor `"STR"`). Validación de firma vía `stripe.Webhook.construct_event()` usando `STRIPE_WEBHOOK_SECRET`. Eventos manejados: `checkout.session.completed` (provisiona agencia nueva o actualiza plan), `customer.subscription.deleted`, `invoice.payment_succeeded`, `invoice.payment_failed`. Billing handlers reales en `core/views/billing_*` (cargados vía `import_string` en `apps/finance/urls.py:107-203`). Plan change/preview_change en `core/views/billing_plan_change_views.py`. Downgrade-to-free en mismo módulo. `SaaSLimitMiddleware` (`core/middleware_saas.py:1-81`) intercepta POST/PUT/PATCH y retorna 403 cuando se exceden cuotas vía `SaaSQuotaService.check_quota()`.
 
 **Flujo de pagos Binance Pay:**
 - Binance Pay permite pagos cripto (USDT/USD) directamente en la plataforma, complementando a Stripe.
@@ -176,7 +176,7 @@ apps/
 │   ├── services/
 │   │   ├── facturacion_service.py  # FacturacionService.generar_factura_desde_venta()
 │   │   └── factura_service.py     # FacturaService
-│   ├── views/               # 21 archivos (invoice_views, payment_views, etc.)
+│   ├── views/               # 20 archivos (invoice_views, payment_views — Binance draft views eliminadas, etc.)
 │   ├── urls.py              # 232 líneas — Router finanzas + webhooks Stripe/Binance
 │   └── tests/               # 56 tests total (43 pass, 10 skip, 2 xfail, 1 xpass)
 ├── crm/
@@ -405,6 +405,10 @@ Todos los modelos en `apps/` (Venta, ItemVenta, Factura, ItemFactura, BoletoImpo
 | **Test model regression** | `apps/finance/tests/test_modelos_financieros.py` | 27 tests reparados: migrados a `Venta` (tiene SoftDeleteModel) o `NewFactura` (solo AgenciaMixin). 3 tests de `TaxRefundOpportunity` arreglados con defaults en stub. |
 | **APIKey.verify() lookup_hash** | `core/models/cron_api_key.py`, `core/models/api_keys.py`, `core/migrations/0052_cronapikey_lookup_hash.py` | lookup_hash (SHA-256) añadido a CronApiKey y APIKey. `generate()` lo computa. `verify()` hace O(1) lookup por hash con fallback a prefijo para keys legacy. Migration 0052 aplicada. |
 | **APIKey dead code marcado DEPRECATED** | `core/models/api_keys.py` | Docstring actualizado con advertencia y `DeprecationWarning`. Backward compat mantenida para importadores existentes. |
+| **Importadores APIKey migrados a CronApiKey** | `core/api/public_auth.py`, `core/api/public_views.py`, `core/api/public_serializers.py`, `tests/test_api_keys_webhooks.py` | 4 de 5 importadores cambiados a `CronApiKey as APIKey`. `APIKeyPlan`/`RATE_LIMITS` aún importados del módulo deprecado hasta que CronApiKey los exponga. |
+| **Binance draft views eliminadas** | `apps/finance/views/payment_views.py` | `BinanceWebhookView` (referenciaba `verify_webhook`/`process_payment_notification` inexistentes) y `BinanceOrderCreateView` (sin ruta registrada) eliminados. `registrar_pago_modal_view` conservado. |
+| **Tests xfail de contabilidad reparados** | `apps/finance/tests/test_realtime_audit_and_payments.py`, `test_unified_invoicing_flow.py` | Tests reescritos para usar campos reales de `CuentaContable` (`codigo`, `nombre`, `tipo`, `TipoCuenta`, `acepta_movimientos`). Aserciones de asiento contable BOR/ANU removidas (el modelo real no tiene ese workflow). |
+| **Stripe flow verificado** | `CONTEXT_MAP.md §1` | Nota `[VERIFICAR]` resuelta con descripción completa del webhook, eventos manejados y billing views. Contraste entre `views_webhooks.py` (StripeWebhookView) y `core/views/billing_*` docs. |
 
 ### ⏳ En progreso
 

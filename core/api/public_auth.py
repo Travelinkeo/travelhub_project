@@ -11,7 +11,7 @@ from rest_framework import exceptions
 from rest_framework.authentication import BaseAuthentication
 from rest_framework.permissions import BasePermission
 
-from core.models.api_keys import APIKey
+from core.models.cron_api_key import CronApiKey as APIKey
 
 logger = logging.getLogger(__name__)
 

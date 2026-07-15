@@ -4,7 +4,8 @@ Serializers para la gestión de API Keys y Webhooks.
 
 from rest_framework import serializers
 
-from core.models.api_keys import APIKey, APIKeyPlan
+from core.models.api_keys import APIKeyPlan  # DEPRECATED: CronApiKey has no Plan yet
+from core.models.cron_api_key import CronApiKey as APIKey
 from core.models.webhooks import Webhook, WebhookDelivery, WebhookEvent
 
 

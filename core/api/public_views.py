@@ -23,7 +23,7 @@ from core.api.public_serializers import (
     WebhookDeliverySerializer,
     WebhookSerializer,
 )
-from core.models.api_keys import APIKey
+from core.models.cron_api_key import CronApiKey as APIKey
 from core.models.webhooks import Webhook, WebhookEvent
 
 logger = logging.getLogger(__name__)
@@ -113,7 +113,7 @@ class APIKeyViewSet(TenantViewSetMixin, viewsets.ModelViewSet):
         api_key = self.get_object()
         new_plan = request.data.get("plan")
         if new_plan not in dict(APIKey.choices if hasattr(APIKey, "choices") else []):
-            from core.models.api_keys import APIKeyPlan
+            from core.models.api_keys import APIKeyPlan  # DEPRECATED: CronApiKey has no Plan yet
 
             if new_plan not in dict(APIKeyPlan.choices):
                 return Response(

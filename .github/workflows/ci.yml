@@ -89,7 +89,7 @@ jobs:
             -x
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v7
         if: ${{ !cancelled() }}
         with:
           file: ./coverage.xml

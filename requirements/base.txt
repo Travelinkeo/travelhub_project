@@ -34,7 +34,7 @@ django-redis==5.4.0
 
 # AI & Parsing
 google-genai==1.59.0
-PyMuPDF==1.26.3
+PyMuPDF==1.28.0
 google-cloud-aiplatform==1.133.0
 markdown==3.10.2
 

@@ -63,7 +63,7 @@ bleach==6.2.0
 defusedxml==0.7.1  # Parser XML seguro (retenciones SENIAT) — mitiga XXE / billion-laughs
 websocket-client==1.9.0
 pypdf==6.10.2
-python-telegram-bot==21.11
+python-telegram-bot==22.8
 django-waffle==4.1.0
 django-widget-tweaks==1.5.1
 django-extensions==3.2.3

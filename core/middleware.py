@@ -371,27 +371,16 @@ class SecurityHeadersMiddleware:
             static_origin = f"https://{static_domain}" if static_domain else ""
             r2_wildcard = "https://*.r2.cloudflarestorage.com"
             is_debug = getattr(dj_settings, "DEBUG", True)
-            is_admin_path = request.path.startswith("/admin/") or request.path.startswith(
-                "/system/"
-            )
 
-            # CSP unificado (debug + producción): nonce-based, SIN 'unsafe-eval'
-            # en script-src. 'unsafe-inline' solo en style-src.
-            #
-            # Excepción: rutas /admin/ y /system/ (Django admin + Unfold) requieren
-            # Alpine.js, que internamente usa eval()/new Function() para evaluar
-            # bindings x-data/x-text. Alpine.js no puede funcionar sin 'unsafe-eval'
-            # salvo que se cambie al bundle @alpinejs/csp-bundle (tarea pendiente).
-            # Hasta entonces, admin mantiene 'unsafe-eval' solo en script-src; el
-            # resto del ERP (login, pages SSR, API) permanece sin 'unsafe-eval'.
+            # CSP unificado: nonce-based + 'unsafe-eval' requerido por Alpine.js
+            # (usa new Function() para evaluar bindings x-data/x-on/x-text).
+            # Pendiente: migrar a @alpinejs/csp-bundle para eliminar unsafe-eval.
             script_src = (
-                f"'self' 'nonce-{nonce}' 'strict-dynamic' "
+                f"'self' 'nonce-{nonce}' 'strict-dynamic' 'unsafe-eval' "
                 f"{static_origin} https://cdn.jsdelivr.net https://cdn.tailwindcss.com "
                 f"https://unpkg.com https://static.cloudflareinsights.com"
             )
-            if is_admin_path:
-                script_src += " 'unsafe-eval'"
-            elif is_debug:
+            if is_debug:
                 # En debug añadimos webpack/vite HMR y debug-toolbar
                 script_src += " http://localhost:3000 ws://localhost:3000"
             csp = "; ".join(

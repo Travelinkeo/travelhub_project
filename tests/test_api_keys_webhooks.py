@@ -6,11 +6,7 @@ from django.contrib.auth.models import User
 from django.test import TestCase
 
 from core.models.agencia import Agencia
-from core.models.api_keys import (  # DEPRECATED: no CronApiKey equivalents yet
-    RATE_LIMITS,
-    APIKeyPlan,
-)
-from core.models.cron_api_key import CronApiKey as APIKey
+from core.models.api_keys import RATE_LIMITS, APIKey, APIKeyPlan
 from core.models.webhooks import Webhook, WebhookDelivery, WebhookEvent
 
 

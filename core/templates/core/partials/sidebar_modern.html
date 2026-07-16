@@ -524,7 +524,7 @@
             <span x-show="sidebarOpen" x-transition class="material-symbols-outlined text-[16px] text-text-muted shrink-0">translate</span>
             <div class="flex items-center gap-1" x-show="sidebarOpen" x-transition>
                 {% get_current_language as CURRENT_LANG %}
-                <form method="post" action="#">
+                <form method="post" action="{% url 'set_language' %}">
                     {% csrf_token %}
                     <input type="hidden" name="language" value="es">
                     <input type="hidden" name="next" value="{{ request.get_full_path }}">
@@ -533,7 +533,7 @@
                         {% if CURRENT_LANG == 'es' %}bg-primary text-[var(--text-on-primary)] shadow-sm{% else %}text-text-muted hover:text-text-main hover:bg-surface-3{% endif %}"
                         title="Español">ES</button>
                 </form>
-                <form method="post" action="#">
+                <form method="post" action="{% url 'set_language' %}">
                     {% csrf_token %}
                     <input type="hidden" name="language" value="en">
                     <input type="hidden" name="next" value="{{ request.get_full_path }}">

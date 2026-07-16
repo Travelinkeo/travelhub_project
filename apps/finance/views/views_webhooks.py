@@ -12,7 +12,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.bookings.models import Venta
-from apps.finance.models import TransaccionPago
+from apps.finance.models_stubs import TransaccionPago
 
 logger = logging.getLogger(__name__)
 

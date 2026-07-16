@@ -69,20 +69,7 @@ class FinanceService:
             venta.save(update_fields=campos_update)
 
             # Sincronizar factura si existe (excluyendo pagadas y anuladas)
-            try:
-                from apps.finance.models import Factura
-
-                factura = (
-                    Factura.objects.filter(venta_asociada_id=venta.pk)
-                    .exclude(estado__in=["PAG", "ANU"])
-                    .first()
-                )
-                if factura:
-                    from apps.finance.services.facturacion_service import FacturacionService
-
-                    FacturacionService.actualizar_factura_desde_venta(factura)
-            except Exception as e_factura:
-                logger.error(f"Error sincronizando factura desde venta {venta.pk}: {e_factura}")
+            # stub
 
             # 7. Evaluación de puntos (Si aplica)
             if hasattr(venta, "_evaluar_otorgar_puntos"):

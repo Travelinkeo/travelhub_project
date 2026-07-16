@@ -71,7 +71,9 @@ RUN chmod +x ./entrypoint.sh && sed -i 's/\r$//' ./entrypoint.sh && groupadd -r 
 
 EXPOSE 8000
 
-USER appuser
+# Entrypoint runs as root to fix permissions, then drops to appuser
+# USER appuser  # removed — applied via su in entrypoint.sh
+ENV APP_USER=appuser
 
 ENTRYPOINT ["./entrypoint.sh"]
 CMD ["gunicorn", "travelhub.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3", "--timeout", "120"]

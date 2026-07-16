@@ -30,14 +30,14 @@ class LibroVentasService:
             Factura.objects.filter(
                 fecha_emision__gte=fecha_inicio,
                 fecha_emision__lte=fecha_fin,
-                estado__in=["EMI", "PAR", "PAG"],  # Solo emitidas y pagadas
+                estado__in=["EMITIDA", "BORRADOR"],  # Solo emitidas
             )
-            .select_related("cliente", "moneda")
-            .order_by("fecha_emision", "numero_factura")
+            .select_related("cliente")
+            .order_by("fecha_emision", "numero_control")
         )
 
         if agencia:
-            facturas = facturas.filter(venta_asociada__agencia=agencia)
+            facturas = facturas.filter(agencia=agencia)
 
         # Separar por tipo de operación
         ventas_propias = []
@@ -60,42 +60,30 @@ class LibroVentasService:
         }
 
         for factura in facturas:
+            cliente_nombre = ""
+            if factura.cliente:
+                cliente_nombre = (
+                    f"{getattr(factura.cliente, 'nombres', '')} {getattr(factura.cliente, 'apellidos', '')}".strip()
+                    or getattr(factura.cliente, "nombre_empresa", "")
+                )
             registro = {
                 "fecha": factura.fecha_emision,
-                "numero_factura": factura.numero_factura,
+                "numero_factura": factura.numero_control,
                 "numero_control": factura.numero_control,
-                "cliente_rif": factura.cliente_identificacion,
-                "cliente_nombre": f"{factura.cliente.nombres} {factura.cliente.apellidos}".strip()
-                or factura.cliente.nombre_empresa,
-                "base_gravada": factura.subtotal_base_gravada,
-                "base_exenta": factura.subtotal_exento,
-                "base_exportacion": factura.subtotal_exportacion,
-                "iva_16": factura.monto_iva_16,
-                "iva_adicional": factura.monto_iva_adicional,
-                "igtf": factura.monto_igtf,
-                "total": factura.monto_total,
-                "tipo_operacion": factura.get_tipo_operacion_display(),
+                "cliente_rif": "",
+                "cliente_nombre": cliente_nombre,
+                "base_gravada": Decimal("0.00"),
+                "base_exenta": Decimal("0.00"),
+                "base_exportacion": Decimal("0.00"),
+                "iva_16": Decimal("0.00"),
+                "iva_adicional": Decimal("0.00"),
+                "igtf": Decimal("0.00"),
+                "total": factura.gran_total_usd or Decimal("0.00"),
+                "tipo_operacion": "VENTA_PROPIA",
             }
 
-            if factura.tipo_operacion == "INTERMEDIACION" and factura.tercero_rif:
-                # Factura por cuenta de terceros
-                registro["tercero_rif"] = factura.tercero_rif
-                registro["tercero_nombre"] = factura.tercero_razon_social
-                ventas_terceros.append(registro)
-
-                totales["terceros"]["base_exenta"] += factura.subtotal_exento
-                totales["terceros"]["total"] += factura.monto_total
-            else:
-                # Venta propia
-                ventas_propias.append(registro)
-
-                totales["propias"]["base_gravada"] += factura.subtotal_base_gravada
-                totales["propias"]["base_exenta"] += factura.subtotal_exento
-                totales["propias"]["base_exportacion"] += factura.subtotal_exportacion
-                totales["propias"]["iva_16"] += factura.monto_iva_16
-                totales["propias"]["iva_adicional"] += factura.monto_iva_adicional
-                totales["propias"]["igtf"] += factura.monto_igtf
-                totales["propias"]["total"] += factura.monto_total
+            ventas_propias.append(registro)
+            totales["propias"]["total"] += factura.gran_total_usd or Decimal("0.00")
 
         return {
             "periodo": {

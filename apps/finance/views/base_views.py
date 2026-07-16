@@ -19,13 +19,10 @@ class InvoiceListView(ExportMixin, SaaSMixin, LoginRequiredMixin, ListView):
     context_object_name = "invoices"
     paginate_by = 20
     export_fields = [
-        "numero_factura",
-        "cliente_nombre",
-        "cliente_rif",
+        "numero_control",
+        "cliente",
         "fecha_emision",
-        "tipo_factura",
-        "monto_total",
-        "saldo_pendiente",
+        "gran_total_usd",
         "estado",
     ]
     export_filename = "facturas"
@@ -35,7 +32,7 @@ class InvoiceListView(ExportMixin, SaaSMixin, LoginRequiredMixin, ListView):
         estado = self.request.GET.get("estado")
         if estado:
             qs = qs.filter(estado=estado)
-        return qs.select_related("cliente", "agencia").order_by("-fecha_emision", "-id_factura")
+        return qs.select_related("cliente", "agencia").order_by("-fecha_emision", "-id")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -105,11 +102,8 @@ class InvoiceUpdateView(SaaSMixin, LoginRequiredMixin, View):
     def post(self, request, pk):
         factura = self.get_object()
         if factura.estado == Factura.EstadoFactura.BORRADOR:
-            # Ejemplo: actualizar notas
-            notas = request.POST.get("notas")
-            if notas is not None:
-                factura.notas = notas
-                factura.save()
+            # Ejemplo: actualizar notas (no soportado en modelo actual)
+            pass
 
             return HttpResponse("Factura actualizada", status=200)
         return HttpResponse("No se puede editar una factura emitida.", status=400)

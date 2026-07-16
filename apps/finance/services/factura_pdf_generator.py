@@ -4,7 +4,6 @@ Servicio para generar PDFs de facturas consolidadas con formato legal venezolano
 
 import logging
 
-from django.conf import settings
 from django.template.loader import render_to_string
 
 # resolved dynamically to avoid circular dependencies
@@ -63,58 +62,32 @@ def generar_pdf_factura_consolidada(factura):
         # Generar PDF con WeasyPrint
         pdf_file = PdfRendererService.render_html_to_pdf(html_string)
 
-        logger.info(f"PDF generado exitosamente para factura {factura.numero_factura}")
+        logger.info(f"PDF generado exitosamente para factura {factura.numero_control}")
         return pdf_file
 
     except Exception as e:
-        logger.error(f"Error generando PDF para factura {factura.numero_factura}: {str(e)}")
+        logger.error(f"Error generando PDF para factura {factura.numero_control}: {str(e)}")
         raise
 
 
 def guardar_pdf_factura(factura):
     """
-    Genera y guarda el PDF de la factura en el campo archivo_pdf.
+    Genera el PDF de la factura y lo retorna como bytes.
 
     Args:
-        factura: Instancia de FacturaConsolidada
+        factura: Instancia de Factura
 
     Returns:
-        bool: True si se guardó exitosamente
+        bytes: Contenido del PDF o None si falla
     """
     try:
-        from django.core.files.base import ContentFile
-        from django.core.files.storage import default_storage
-
-        logger.info(f"Iniciando generación de PDF para factura {factura.numero_factura}")
-        logger.info(f"Storage backend: {default_storage.__class__.__name__}")
-        logger.info(f"USE_CLOUDINARY: {getattr(settings, 'USE_CLOUDINARY', False)}")
-
-        # Generar PDF
+        logger.info(f"Iniciando generación de PDF para factura {factura.numero_control}")
         pdf_content = generar_pdf_factura_consolidada(factura)
         logger.info(f"PDF generado, tamaño: {len(pdf_content)} bytes")
-
-        # Nombre del archivo
-        filename = f"factura_{factura.numero_factura.replace('/', '_')}.pdf"
-        logger.info(f"Nombre de archivo: {filename}")
-
-        # Guardar en el modelo
-        factura.archivo_pdf.save(filename, ContentFile(pdf_content), save=True)
-
-        # Verificar que se guardó
-        if factura.archivo_pdf:
-            url = factura.archivo_pdf.url
-            logger.info("✅ PDF guardado exitosamente")
-            logger.info(f"   Ruta: {factura.archivo_pdf.name}")
-            logger.info(f"   URL: {url}")
-            logger.info(f"   Storage: {factura.archivo_pdf.storage.__class__.__name__}")
-        else:
-            logger.warning("⚠️ archivo_pdf está vacío después de guardar")
-
-        return True
-
+        return pdf_content
     except Exception as e:
         logger.error(f"❌ Error guardando PDF: {str(e)}")
         import traceback
 
         logger.error(traceback.format_exc())
-        return False
+        return None

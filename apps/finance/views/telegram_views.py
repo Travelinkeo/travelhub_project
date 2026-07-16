@@ -106,9 +106,7 @@ class TelegramBotWebhookView(View):
                 # Bloqueo de fila para evitar race conditions
                 try:
                     pago = (
-                        Pago.objects.select_for_update()
-                        .select_related("venta", "canal_recaudacion", "agencia", "moneda")
-                        .get(id_pago=pago_id)
+                        Pago.objects.select_for_update().select_related("agencia").get(pk=pago_id)
                     )
                 except Pago.DoesNotExist:
                     pago = None
@@ -118,75 +116,28 @@ class TelegramBotWebhookView(View):
                     popup_text = "El pago ya no existe."
                     message_html = f"⚠️ <b>El pago con ID {pago_id} ya no existe o fue eliminado previamente.</b>"
                 else:
-                    # Capturamos datos para el mensaje antes de cualquier posible eliminación
                     agencia_nombre = html.escape(
                         pago.agencia.nombre.upper() if pago.agencia else "N/A"
                     )
-                    localizador = html.escape(pago.venta.localizador if pago.venta else "N/A")
-                    canal = html.escape(
-                        pago.canal_recaudacion.nombre if pago.canal_recaudacion else "N/A"
-                    )
-                    canal_tipo = html.escape(
-                        pago.canal_recaudacion.get_tipo_display()
-                        if pago.canal_recaudacion
-                        else "N/A"
-                    )
-                    monto = html.escape(f"{pago.monto}")
-                    moneda = html.escape(pago.moneda.codigo_iso if pago.moneda else "")
-                    igtf = html.escape(f"{pago.igtf_monto}")
-                    igtf_status = "✅" if pago.igtf_aplicado else "❌"
+                    monto = html.escape(f"{pago.monto_usd}")
                     ref = html.escape(pago.referencia or "Ninguna")
                     fecha_pago = html.escape(str(pago.fecha_pago))
 
                     if action == "approve":
-                        if pago.confirmado:
-                            status_text = "✅ Ya confirmado previamente"
-                            popup_text = "El pago ya está confirmado."
-                        else:
-                            pago.confirmado = True
-                            pago.save()
-                            status_text = "✅ Aprobado por Finanzas"
-                            popup_text = "¡Pago aprobado con éxito!"
-
+                        status_text = "✅ Aprobado por Finanzas"
+                        popup_text = "¡Pago aprobado con éxito!"
                         success = True
                     elif action == "reject":
-                        cliente = pago.venta.cliente if pago.venta else None
                         pago.delete()
                         status_text = "❌ Rechazado y Anulado"
                         popup_text = "El pago ha sido rechazado y anulado."
                         success = True
 
-                        if cliente and cliente.telefono_principal:
-                            try:
-                                from apps.communications.services.whatsapp_unified import (
-                                    enviar_whatsapp,
-                                )
-
-                                agencia = (
-                                    getattr(pago.venta, "agencia", None) if pago.venta else None
-                                )
-                                mensaje = (
-                                    f"❌ *Pago No Aprobado*\n\n"
-                                    f"Estimado/a *{cliente.get_nombre_completo()}*,\n\n"
-                                    f"Su pago de {monto} {moneda} con referencia *{ref}* "
-                                    f"no pudo ser procesado.\n\n"
-                                    f"Si tiene preguntas, por favor contáctenos."
-                                )
-                                enviar_whatsapp(
-                                    cliente.telefono_principal, mensaje, agencia=agencia
-                                )
-                            except Exception as e:
-                                logger.warning(f"Error enviando WhatsApp de rechazo de pago: {e}")
-
-                    # Reconstruimos la plantilla de mensaje con formato HTML estético y premium
                     message_html = (
                         f"🚨 <b>CONTROL FINANCIERO | {agencia_nombre}</b>\n"
                         f"===================================\n"
                         f"💰 <b>Pago Procesado</b>\n\n"
-                        f"• <b>Localizador Venta:</b> <code>{localizador}</code>\n"
-                        f"• <b>Canal Receptora:</b> {canal} ({canal_tipo})\n"
-                        f"• <b>Monto Cobrado:</b> {monto} {moneda}\n"
-                        f"• <b>IGTF Calcularizado:</b> Bs. {igtf} {igtf_status}\n"
+                        f"• <b>Monto Cobrado:</b> {monto} USD\n"
                         f"• <b>Referencia / Ref:</b> <code>{ref}</code>\n"
                         f"• <b>Fecha Registro:</b> {fecha_pago}\n"
                         f"===================================\n"

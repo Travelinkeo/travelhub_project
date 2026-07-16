@@ -57,15 +57,15 @@ class VentaDoubleInvoiceAPIView(InternalAPIAuthMixin, APIView):
 
 class FacturaViewSet(TenantViewSetMixin, viewsets.ModelViewSet):
     queryset = (
-        Factura.objects.select_related("cliente", "moneda", "asiento_contable_factura")
-        .prefetch_related("items_factura")
+        Factura.objects.select_related("cliente")
+        .prefetch_related("items")
         .order_by("-fecha_emision")
     )
     serializer_class = FacturaSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [filters.SearchFilter]
     search_fields = [
-        "numero_factura",
+        "numero_control",
         "cliente__nombres",
         "cliente__apellidos",
         "cliente__nombre_empresa",

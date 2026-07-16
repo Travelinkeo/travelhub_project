@@ -163,6 +163,6 @@
     {% block extra_scripts %}{% endblock %}
     {% include "core/partials/_chat_live.html" %}
     {% include "core/partials/_sw_kill_switch.html" %}
-    <script src="{% static 'js/csp-events.js' %}"></script>
+    <script nonce="{{ request.csp_nonce }}" src="{% static 'js/csp-events.js' %}"></script>
 </body>
 </html>

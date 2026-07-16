@@ -21,21 +21,19 @@ logger = logging.getLogger(__name__)
 
 class ContabilidadService:
     @staticmethod
-    def _buscar_cuenta(codigo_cuenta: str):
-        cuenta = CuentaContable.objects.filter(codigo_cuenta=codigo_cuenta).first()
+    def _buscar_cuenta(codigo: str):
+        cuenta = CuentaContable.objects.filter(codigo=codigo).first()
         if cuenta:
             return cuenta
-        prefijo = codigo_cuenta[:5]
+        prefijo = codigo[:5]
         cuenta = CuentaContable.objects.filter(
-            codigo_cuenta__startswith=prefijo, permite_movimientos=True
+            codigo__startswith=prefijo, acepta_movimientos=True
         ).first()
         if cuenta:
-            logger.warning(
-                f"Cuenta {codigo_cuenta} no encontrada, usando fallback {cuenta.codigo_cuenta}"
-            )
+            logger.warning(f"Cuenta {codigo} no encontrada, usando fallback {cuenta.codigo}")
             return cuenta
         raise ValueError(
-            f"Cuenta contable {codigo_cuenta} (ni prefijo {prefijo}) no encontrada en Plan Contable"
+            f"Cuenta contable {codigo} (ni prefijo {prefijo}) no encontrada en Plan Contable"
         )
 
     """
@@ -155,9 +153,7 @@ class ContabilidadService:
         MovimientoContable.objects.create(
             asiento=asiento,
             linea=linea_num,
-            cuenta_contable=ContabilidadService._buscar_cuenta(
-                codigo_cuenta="1.1.02.02"
-            ),  # Cuentas por Cobrar USD
+            cuenta=ContabilidadService._buscar_cuenta(codigo="1.1.02.02"),  # Cuentas por Cobrar USD
             debe=comision_usd + factura.monto_iva_16 + factura.monto_igtf,
             debe_bsd=(comision_usd + factura.monto_iva_16 + factura.monto_igtf) * tasa,
             haber=Decimal("0.00"),
@@ -170,9 +166,7 @@ class ContabilidadService:
         MovimientoContable.objects.create(
             asiento=asiento,
             linea=linea_num,
-            cuenta_contable=ContabilidadService._buscar_cuenta(
-                codigo_cuenta="4.1.01"
-            ),  # Comisiones Boletos Aéreos
+            cuenta=ContabilidadService._buscar_cuenta(codigo="4.1.01"),  # Comisiones Boletos Aéreos
             debe=Decimal("0.00"),
             debe_bsd=Decimal("0.00"),
             haber=comision_usd,
@@ -188,8 +182,8 @@ class ContabilidadService:
             MovimientoContable.objects.create(
                 asiento=asiento,
                 linea=linea_num,
-                cuenta_contable=ContabilidadService._buscar_cuenta(
-                    codigo_cuenta="2.1.01.02"
+                cuenta=ContabilidadService._buscar_cuenta(
+                    codigo="2.1.01.02"
                 ),  # Cuentas por Pagar USD
                 debe=Decimal("0.00"),
                 debe_bsd=Decimal("0.00"),
@@ -204,9 +198,7 @@ class ContabilidadService:
             MovimientoContable.objects.create(
                 asiento=asiento,
                 linea=linea_num,
-                cuenta_contable=ContabilidadService._buscar_cuenta(
-                    codigo_cuenta="2.1.02.01"
-                ),  # IVA Débito Fiscal
+                cuenta=ContabilidadService._buscar_cuenta(codigo="2.1.02.01"),  # IVA Débito Fiscal
                 debe=Decimal("0.00"),
                 debe_bsd=Decimal("0.00"),
                 haber=factura.monto_iva_16,
@@ -220,9 +212,7 @@ class ContabilidadService:
             MovimientoContable.objects.create(
                 asiento=asiento,
                 linea=linea_num,
-                cuenta_contable=ContabilidadService._buscar_cuenta(
-                    codigo_cuenta="2.1.02.03"
-                ),  # IGTF por Pagar
+                cuenta=ContabilidadService._buscar_cuenta(codigo="2.1.02.03"),  # IGTF por Pagar
                 debe=Decimal("0.00"),
                 debe_bsd=Decimal("0.00"),
                 haber=factura.monto_igtf,
@@ -245,9 +235,7 @@ class ContabilidadService:
         MovimientoContable.objects.create(
             asiento=asiento,
             linea=linea_num,
-            cuenta_contable=ContabilidadService._buscar_cuenta(
-                codigo_cuenta="1.1.02.02"
-            ),  # Cuentas por Cobrar USD
+            cuenta=ContabilidadService._buscar_cuenta(codigo="1.1.02.02"),  # Cuentas por Cobrar USD
             debe=factura.monto_total,
             debe_bsd=factura.monto_total * tasa,
             haber=Decimal("0.00"),
@@ -261,8 +249,8 @@ class ContabilidadService:
         MovimientoContable.objects.create(
             asiento=asiento,
             linea=linea_num,
-            cuenta_contable=ContabilidadService._buscar_cuenta(
-                codigo_cuenta="4.2"
+            cuenta=ContabilidadService._buscar_cuenta(
+                codigo="4.2"
             ),  # Ingresos por Venta de Paquetes
             debe=Decimal("0.00"),
             debe_bsd=Decimal("0.00"),
@@ -277,9 +265,7 @@ class ContabilidadService:
             MovimientoContable.objects.create(
                 asiento=asiento,
                 linea=linea_num,
-                cuenta_contable=ContabilidadService._buscar_cuenta(
-                    codigo_cuenta="2.1.02.01"
-                ),  # IVA Débito Fiscal
+                cuenta=ContabilidadService._buscar_cuenta(codigo="2.1.02.01"),  # IVA Débito Fiscal
                 debe=Decimal("0.00"),
                 debe_bsd=Decimal("0.00"),
                 haber=factura.monto_iva_16,
@@ -293,9 +279,7 @@ class ContabilidadService:
             MovimientoContable.objects.create(
                 asiento=asiento,
                 linea=linea_num,
-                cuenta_contable=ContabilidadService._buscar_cuenta(
-                    codigo_cuenta="2.1.02.03"
-                ),  # IGTF por Pagar
+                cuenta=ContabilidadService._buscar_cuenta(codigo="2.1.02.03"),  # IGTF por Pagar
                 debe=Decimal("0.00"),
                 debe_bsd=Decimal("0.00"),
                 haber=factura.monto_igtf,
@@ -353,7 +337,7 @@ class ContabilidadService:
             MovimientoContable.objects.create(
                 asiento=asiento,
                 linea=linea_num,
-                cuenta_contable=cuenta_banco,
+                cuenta=cuenta_banco,
                 debe=pago.monto,
                 debe_bsd=pago.monto * tasa_pago,
                 haber=Decimal("0.00"),
@@ -367,7 +351,7 @@ class ContabilidadService:
             MovimientoContable.objects.create(
                 asiento=asiento,
                 linea=linea_num,
-                cuenta_contable=ContabilidadService._buscar_cuenta(codigo_cuenta="1.1.02.02"),
+                cuenta=ContabilidadService._buscar_cuenta(codigo="1.1.02.02"),
                 debe=Decimal("0.00"),
                 debe_bsd=Decimal("0.00"),
                 haber=pago.monto,
@@ -386,8 +370,8 @@ class ContabilidadService:
                     MovimientoContable.objects.create(
                         asiento=asiento,
                         linea=linea_num,
-                        cuenta_contable=ContabilidadService._buscar_cuenta(
-                            codigo_cuenta="7.1.01"
+                        cuenta=ContabilidadService._buscar_cuenta(
+                            codigo="7.1.01"
                         ),  # Ingreso Diferencial
                         debe=Decimal("0.00"),
                         debe_bsd=Decimal("0.00"),
@@ -411,8 +395,8 @@ class ContabilidadService:
                         MovimientoContable.objects.create(
                             asiento=asiento,
                             linea=linea_num,
-                            cuenta_contable=ContabilidadService._buscar_cuenta(
-                                codigo_cuenta="1.1.02.02"
+                            cuenta=ContabilidadService._buscar_cuenta(
+                                codigo="1.1.02.02"
                             ),  # Cuentas por Cobrar
                             debe=Decimal("0.00"),
                             debe_bsd=nota_debito.monto_iva_bsd,
@@ -425,8 +409,8 @@ class ContabilidadService:
                         MovimientoContable.objects.create(
                             asiento=asiento,
                             linea=linea_num,
-                            cuenta_contable=ContabilidadService._buscar_cuenta(
-                                codigo_cuenta="2.1.02.01"
+                            cuenta=ContabilidadService._buscar_cuenta(
+                                codigo="2.1.02.01"
                             ),  # IVA Débito Fiscal
                             debe=Decimal("0.00"),
                             debe_bsd=Decimal("0.00"),
@@ -445,8 +429,8 @@ class ContabilidadService:
                     MovimientoContable.objects.create(
                         asiento=asiento,
                         linea=linea_num,
-                        cuenta_contable=ContabilidadService._buscar_cuenta(
-                            codigo_cuenta="7.2.01"
+                        cuenta=ContabilidadService._buscar_cuenta(
+                            codigo="7.2.01"
                         ),  # Pérdida Diferencial
                         debe=Decimal("0.00"),  # Solo en BSD
                         debe_bsd=abs(diferencial_bsd),
@@ -497,7 +481,7 @@ class ContabilidadService:
             # Sumar ingresos del mes (en BSD)
             ingresos_mes = MovimientoContable.objects.filter(
                 asiento__fecha_contable__range=(primer_dia, ultimo_dia),
-                cuenta_contable__tipo_cuenta=CuentaContable.TipoCuentaChoices.INGRESO,
+                cuenta__tipo_cuenta=CuentaContable.TipoCuentaChoices.INGRESO,
                 asiento__estado=AsientoContable.EstadoAsiento.CONTABILIZADO,
             ).aggregate(total=Sum("haber_bsd"))["total"] or Decimal("0.00")
 
@@ -519,9 +503,7 @@ class ContabilidadService:
             MovimientoContable.objects.create(
                 asiento=asiento,
                 linea=1,
-                cuenta_contable=ContabilidadService._buscar_cuenta(
-                    codigo_cuenta="6.1.05"
-                ),  # Gasto INATUR
+                cuenta=ContabilidadService._buscar_cuenta(codigo="6.1.05"),  # Gasto INATUR
                 debe=Decimal("0.00"),
                 debe_bsd=contribucion,
                 haber=Decimal("0.00"),
@@ -533,9 +515,7 @@ class ContabilidadService:
             MovimientoContable.objects.create(
                 asiento=asiento,
                 linea=2,
-                cuenta_contable=ContabilidadService._buscar_cuenta(
-                    codigo_cuenta="2.1.02.02"
-                ),  # INATUR por Pagar
+                cuenta=ContabilidadService._buscar_cuenta(codigo="2.1.02.02"),  # INATUR por Pagar
                 debe=Decimal("0.00"),
                 debe_bsd=Decimal("0.00"),
                 haber=Decimal("0.00"),

@@ -39,34 +39,28 @@ def generar_asiento_factura(factura):
     try:
         with transaction.atomic():
             # Reutilizar o crear asiento contable
-            asiento = factura.asiento_contable_factura
-            if not asiento and factura.numero_factura:
-                asiento = AsientoContable.objects.filter(
-                    referencia_documento=factura.numero_factura, agencia=factura.agencia
-                ).first()
-                if asiento:
-                    factura.asiento_contable_factura = asiento
-                    factura.save(update_fields=["asiento_contable_factura"])
+            asiento = AsientoContable.objects.filter(
+                referencia_documento=factura.numero_control, agencia=factura.agencia
+            ).first()
 
             if asiento:
                 asiento.detalles_asiento.all().delete()
                 asiento.fecha_contable = factura.fecha_emision
-                asiento.tasa_cambio_aplicada = factura.tasa_cambio_bcv or Decimal("1.00")
-                asiento.descripcion_general = f"Factura {factura.numero_factura} - {factura.cliente.nombres if factura.cliente else ''} {factura.cliente.apellidos if factura.cliente and factura.cliente.apellidos else ''}"
+                asiento.tasa_cambio_aplicada = factura.tasa_bcv_aplicada or Decimal("1.00")
+                asiento.descripcion_general = f"Factura {factura.numero_control} - {factura.cliente.nombres if factura.cliente else ''} {factura.cliente.apellidos if factura.cliente and factura.cliente.apellidos else ''}"
                 asiento.save()
             else:
                 asiento = AsientoContable.objects.create(
                     tipo_asiento=AsientoContable.TipoAsiento.VENTAS,
                     fecha_contable=factura.fecha_emision,
-                    descripcion_general=f"Factura {factura.numero_factura} - {factura.cliente.nombres if factura.cliente else ''} {factura.cliente.apellidos if factura.cliente and factura.cliente.apellidos else ''}",
-                    moneda=factura.moneda,
-                    tasa_cambio_aplicada=factura.tasa_cambio_bcv or Decimal("1.00"),
-                    referencia_documento=factura.numero_factura,
+                    descripcion_general=f"Factura {factura.numero_control} - {factura.cliente.nombres if factura.cliente else ''} {factura.cliente.apellidos if factura.cliente and factura.cliente.apellidos else ''}",
+                    tasa_cambio_aplicada=factura.tasa_bcv_aplicada or Decimal("1.00"),
+                    referencia_documento=factura.numero_control,
                     estado=AsientoContable.EstadoAsiento.BORRADOR,
                     agencia=factura.agencia,
                 )
 
-            tasa = factura.tasa_cambio_bcv or Decimal("1.00")
+            tasa = factura.tasa_bcv_aplicada or Decimal("1.00")
             linea_idx = 1
 
             # DEBE: Cuentas por Cobrar
@@ -77,7 +71,6 @@ def generar_asiento_factura(factura):
             ).first()
 
             if not cuenta_cxc:
-                # Fallback to any active account starting with 1
                 cuenta_cxc = CuentaContable.objects.filter(
                     codigo_cuenta__startswith="1",
                     permite_movimientos=True,
@@ -85,12 +78,13 @@ def generar_asiento_factura(factura):
                 ).first()
 
             if cuenta_cxc:
-                monto_total_bsd = (factura.monto_total * tasa).quantize(Decimal("0.01"))
+                monto_total = factura.gran_total_usd or Decimal("0.00")
+                monto_total_bsd = (monto_total * tasa).quantize(Decimal("0.01"))
                 MovimientoContable.objects.create(
                     asiento=asiento,
                     linea=linea_idx,
                     cuenta_contable=cuenta_cxc,
-                    debe=factura.monto_total,
+                    debe=monto_total,
                     haber=Decimal("0.00"),
                     debe_bsd=monto_total_bsd,
                     haber_bsd=Decimal("0.00"),
@@ -114,11 +108,7 @@ def generar_asiento_factura(factura):
                 ).first()
 
             if cuenta_ingresos:
-                monto_ingresos = (
-                    (factura.subtotal_base_gravada or Decimal("0.00"))
-                    + (factura.subtotal_exento or Decimal("0.00"))
-                    + (factura.subtotal_exportacion or Decimal("0.00"))
-                )
+                monto_ingresos = factura.subtotal_usd or Decimal("0.00")
                 if monto_ingresos > 0:
                     monto_ingresos_bsd = (monto_ingresos * tasa).quantize(Decimal("0.01"))
                     MovimientoContable.objects.create(
@@ -129,15 +119,13 @@ def generar_asiento_factura(factura):
                         haber=monto_ingresos,
                         debe_bsd=Decimal("0.00"),
                         haber_bsd=monto_ingresos_bsd,
-                        descripcion_linea=f"Ingresos Factura {factura.numero_factura}",
+                        descripcion_linea=f"Ingresos Factura {factura.numero_control}",
                         agencia=factura.agencia,
                     )
                     linea_idx += 1
 
             # HABER: IVA por Pagar
-            monto_iva_total = (factura.monto_iva_16 or Decimal("0.00")) + (
-                getattr(factura, "monto_iva_adicional", Decimal("0.00")) or Decimal("0.00")
-            )
+            monto_iva_total = factura.total_iva_usd or Decimal("0.00")
             if monto_iva_total > 0:
                 cuenta_iva = CuentaContable.objects.filter(
                     codigo_cuenta__startswith="2.1.4",  # IVA por Pagar
@@ -162,13 +150,14 @@ def generar_asiento_factura(factura):
                         haber=monto_iva_total,
                         debe_bsd=Decimal("0.00"),
                         haber_bsd=monto_iva_bsd,
-                        descripcion_linea=f"IVA Factura {factura.numero_factura}",
+                        descripcion_linea=f"IVA Factura {factura.numero_control}",
                         agencia=factura.agencia,
                     )
                     linea_idx += 1
 
             # HABER: IGTF por Pagar
-            if getattr(factura, "monto_igtf", Decimal("0.00")) > 0:
+            monto_igtf = factura.total_igtf_usd or Decimal("0.00")
+            if monto_igtf > 0:
                 cuenta_igtf = CuentaContable.objects.filter(
                     codigo_cuenta__startswith="2.1.5",  # IGTF por Pagar
                     permite_movimientos=True,
@@ -183,33 +172,29 @@ def generar_asiento_factura(factura):
                     ).first()
 
                 if cuenta_igtf:
-                    monto_igtf_bsd = (factura.monto_igtf * tasa).quantize(Decimal("0.01"))
+                    monto_igtf_bsd = (monto_igtf * tasa).quantize(Decimal("0.01"))
                     MovimientoContable.objects.create(
                         asiento=asiento,
                         linea=linea_idx,
                         cuenta_contable=cuenta_igtf,
                         debe=Decimal("0.00"),
-                        haber=factura.monto_igtf,
+                        haber=monto_igtf,
                         debe_bsd=Decimal("0.00"),
                         haber_bsd=monto_igtf_bsd,
-                        descripcion_linea=f"IGTF 3% Factura {factura.numero_factura}",
+                        descripcion_linea=f"IGTF 3% Factura {factura.numero_control}",
                         agencia=factura.agencia,
                     )
 
             # Calcular totales y cuadrar el asiento
             asiento.calcular_totales()
 
-            # Actualizar factura con asiento
-            factura.asiento_contable_factura = asiento
-            factura.save(update_fields=["asiento_contable_factura"])
-
             logger.info(
-                f"Asiento contable generado: {asiento.id_asiento} para factura {factura.numero_factura}"
+                f"Asiento contable generado: {asiento.id_asiento} para factura {factura.numero_control}"
             )
             return asiento
 
     except Exception as e:
-        logger.error(f"Error generando asiento para factura {factura.numero_factura}: {str(e)}")
+        logger.error(f"Error generando asiento para factura {factura.numero_control}: {str(e)}")
         raise
 
 
@@ -227,24 +212,21 @@ def contabilizar_factura(factura):
 
     AsientoContable = apps.get_model("contabilidad", "AsientoContable")
     try:
-        # Generar asiento si no existe
-        if not factura.asiento_contable_factura:
-            asiento = generar_asiento_factura(factura)
-        else:
-            asiento = factura.asiento_contable_factura
+        # Generar asiento siempre (no hay FK para lookup)
+        asiento = generar_asiento_factura(factura)
 
         # Aprobar asiento
-        if asiento.estado == AsientoContable.EstadoAsiento.BORRADOR:
+        if asiento and asiento.estado == AsientoContable.EstadoAsiento.BORRADOR:
             asiento.estado = AsientoContable.EstadoAsiento.CONTABILIZADO
             asiento.save()
             logger.info(
-                f"Asiento {asiento.id_asiento} aprobado para factura {factura.numero_factura}"
+                f"Asiento {asiento.id_asiento} aprobado para factura {factura.numero_control}"
             )
 
         return True
 
     except Exception as e:
-        logger.error(f"Error contabilizando factura {factura.numero_factura}: {str(e)}")
+        logger.error(f"Error contabilizando factura {factura.numero_control}: {str(e)}")
         return False
 
 

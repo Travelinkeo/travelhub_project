@@ -3,7 +3,7 @@
 import django.utils.timezone
 from django.db import migrations, models
 
-import apps.contabilidad.models
+import core.validators
 
 
 class Migration(migrations.Migration):
@@ -203,7 +203,7 @@ class Migration(migrations.Migration):
                     models.CharField(
                         max_length=30,
                         unique=True,
-                        validators=[apps.contabilidad.models.validar_no_vacio_o_espacios],
+                        validators=[core.validators.validar_no_vacio_o_espacios],
                         verbose_name="Código de Cuenta",
                     ),
                 ),
@@ -211,7 +211,7 @@ class Migration(migrations.Migration):
                     "nombre_cuenta",
                     models.CharField(
                         max_length=100,
-                        validators=[apps.contabilidad.models.validar_no_vacio_o_espacios],
+                        validators=[core.validators.validar_no_vacio_o_espacios],
                         verbose_name="Nombre de la Cuenta",
                     ),
                 ),

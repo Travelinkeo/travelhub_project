@@ -39,6 +39,18 @@ if ENCRYPTION_KEY and len(ENCRYPTION_KEY) < 32:
 
     raise ImproperlyConfigured("ENCRYPTION_KEY debe tener al menos 32 caracteres")
 
+try:
+    from cryptography.fernet import Fernet
+
+    Fernet(ENCRYPTION_KEY.encode() if isinstance(ENCRYPTION_KEY, str) else ENCRYPTION_KEY)
+except Exception:
+    from django.core.exceptions import ImproperlyConfigured
+
+    raise ImproperlyConfigured(
+        "ENCRYPTION_KEY no es una clave Fernet válida. "
+        'Genera una con: python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"'
+    ) from None
+
 if not os.getenv("WHATSAPP_MICROSERVICE_TOKEN"):
     from django.core.exceptions import ImproperlyConfigured
 

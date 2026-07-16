@@ -21,13 +21,11 @@ def enviar_alerta_pago_telegram_task(pago_id, **kwargs):
     import requests
     from django.conf import settings
 
-    from .models.recaudacion import Pago
+    from apps.finance.models import Pago
 
     try:
         try:
-            pago = Pago.objects.select_related(
-                "venta", "canal_recaudacion", "agencia", "moneda"
-            ).get(id_pago=pago_id)
+            pago = Pago.objects.select_related("agencia").get(pk=pago_id)
         except Pago.DoesNotExist:
             return f"Pago {pago_id} no encontrado."
 
@@ -37,18 +35,7 @@ def enviar_alerta_pago_telegram_task(pago_id, **kwargs):
         if not bot_token or not chat_id:
             return "Configuración de Telegram ausente en settings."
 
-        localizador = (
-            pago.venta.localizador.replace("-", "\\-")
-            if (pago.venta and pago.venta.localizador)
-            else "N/A"
-        )
-        monto = f"{pago.monto}".replace(".", "\\.") if pago.monto else "0\\.00"
-        igtf = f"{pago.igtf_monto}".replace(".", "\\.") if pago.igtf_monto else "0\\.00"
-        canal = (
-            pago.canal_recaudacion.nombre.replace("-", "\\-")
-            if (pago.canal_recaudacion and pago.canal_recaudacion.nombre)
-            else "N/A"
-        )
+        monto = f"{pago.monto_usd}".replace(".", "\\.") if pago.monto_usd else "0\\.00"
         agencia_nombre = (
             pago.agencia.nombre.replace("-", "\\-")
             if (pago.agencia and pago.agencia.nombre)
@@ -60,10 +47,7 @@ def enviar_alerta_pago_telegram_task(pago_id, **kwargs):
             f"🚨 *CONTROL FINANCIERO \\| {agencia_nombre.upper()}*\n"
             f"===================================\n"
             f"💰 *Nuevo Pago por Verificar*\n\n"
-            f"• *Localizador Venta:* `{localizador}`\n"
-            f"• *Canal Receptora:* {canal} \\({pago.canal_recaudacion.get_tipo_display() if pago.canal_recaudacion else ''}\\)\n"
-            f"• *Monto Cobrado:* {monto} {pago.moneda.codigo_iso if pago.moneda else ''}\n"
-            f"• *IGTF Calcularizado:* Bs\\. {igtf} {'✅' if pago.igtf_aplicado else '❌'}\n"
+            f"• *Monto Cobrado:* {monto} USD\n"
             f"• *Referencia / Ref:* `{ref}`\n"
             f"• *Fecha Registro:* {pago.fecha_pago}\n"
             f"===================================\n"
@@ -81,9 +65,9 @@ def enviar_alerta_pago_telegram_task(pago_id, **kwargs):
                     [
                         {
                             "text": "✅ Aprobar Transacción",
-                            "callback_data": f"pago_appr_{pago.id_pago}",
+                            "callback_data": f"pago_appr_{pago.pk}",
                         },
-                        {"text": "❌ Rechazar", "callback_data": f"pago_rejh_{pago.id_pago}"},
+                        {"text": "❌ Rechazar", "callback_data": f"pago_rejh_{pago.pk}"},
                     ]
                 ]
             },

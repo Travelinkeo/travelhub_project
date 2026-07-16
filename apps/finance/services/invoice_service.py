@@ -7,7 +7,6 @@ from django.utils import timezone
 from apps.bookings.models import BoletoImportado, Proveedor, Venta
 from apps.common.models import Moneda
 from apps.finance.models import Factura, ItemFactura
-from apps.finance.services.tax_eligibility import es_itinerario_internacional
 
 logger = logging.getLogger(__name__)
 
@@ -50,160 +49,74 @@ class InvoiceService:
 
             # Look for existing intermediation invoice for this sale
             factura_tercero = Factura.objects.filter(
-                venta_asociada=venta, tipo_operacion=Factura.TipoOperacion.INTERMEDIACION
+                cliente=venta.cliente,
             ).first()
 
             if not factura_tercero:
-                # Create a new one if it doesn't exist
                 factura_tercero = Factura.objects.create(
-                    venta_asociada=venta,
                     cliente=venta.cliente,
-                    moneda=venta.moneda,
-                    tipo_operacion=Factura.TipoOperacion.INTERMEDIACION,
-                    tasa_cambio_bcv=venta.tasa_cambio_bcv,
+                    tasa_bcv_aplicada=getattr(venta, "tasa_cambio_bcv", Decimal("1.00")),
                     fecha_emision=timezone.localtime(timezone.now()).date(),
-                    tercero_rif=proveedor_emisor.rif if proveedor_emisor else "J-00000000-0",
-                    tercero_razon_social=proveedor_emisor.nombre
-                    if proveedor_emisor
-                    else (first_boleto.aerolinea_emisora or "Aerolínea Genérica"),
-                    cliente_identificacion=venta.cliente.numero_documento or "N/A",
-                    cliente_direccion=venta.cliente.direccion_linea1 or "N/A",
-                    emisor_rif=venta.agencia.rif if venta.agencia else "J-00000000-0",
-                    emisor_razon_social=venta.agencia.nombre
-                    if venta.agencia
-                    else "Agencia de Viajes",
-                    emisor_direccion_fiscal=venta.agencia.direccion
-                    if venta.agencia
-                    else "Dirección Agencia",
                     agencia=venta.agencia,
                 )
             else:
-                # Update client info on existing invoice if changed
                 factura_tercero.cliente = venta.cliente
-                factura_tercero.cliente_identificacion = venta.cliente.numero_documento or "N/A"
-                factura_tercero.cliente_direccion = venta.cliente.direccion_linea1 or "N/A"
-                factura_tercero.save(
-                    update_fields=["cliente", "cliente_identificacion", "cliente_direccion"]
-                )
+                factura_tercero.save(update_fields=["cliente"])
 
             # Synchronize items for each boleto
-            existing_items = {
-                item.numero_boleto: item
-                for item in factura_tercero.items_factura.all()
-                if item.numero_boleto
-            }
-            processed_tickets = set()
+            factura_tercero.items.all().delete()
 
             for boleto in boletos:
-                ticket_num = boleto.numero_boleto
-                if not ticket_num:
-                    continue
-                processed_tickets.add(ticket_num)
                 nombre_pax = (
                     getattr(boleto, "nombre_pasajero_completo", "")
                     or getattr(boleto, "nombre_pasajero_procesado", "")
                     or "Pasajero"
                 )
+                ticket_num = boleto.numero_boleto or "N/A"
 
-                item_data = {
-                    "descripcion": f"Boleto {ticket_num} - {nombre_pax}",
-                    "cantidad": 1,
-                    "precio_unitario": boleto.total_boleto or 0,
-                    "tipo_servicio": ItemFactura.TipoServicio.TRANSPORTE_AEREO_INTERNACIONAL
-                    if es_itinerario_internacional(boleto)
-                    else ItemFactura.TipoServicio.TRANSPORTE_AEREO_NACIONAL,
-                    "es_gravado": False,
-                    "nombre_pasajero": nombre_pax,
-                    "itinerario": boleto.ruta_vuelo or "",
-                    "codigo_aerolinea": boleto.aerolinea_emisora[:10]
-                    if boleto.aerolinea_emisora
-                    else "",
-                }
+                ItemFactura.objects.create(
+                    factura=factura_tercero,
+                    agencia=venta.agencia,
+                    descripcion=f"Boleto {ticket_num} - {nombre_pax}",
+                    cantidad=1,
+                    precio_unitario_usd=boleto.total_boleto or 0,
+                    exento=True,
+                )
 
-                if ticket_num in existing_items:
-                    # Update existing item
-                    item = existing_items[ticket_num]
-                    for key, val in item_data.items():
-                        setattr(item, key, val)
-                    item.save()
-                else:
-                    # Create new item
-                    ItemFactura.objects.create(
-                        factura=factura_tercero,
-                        numero_boleto=ticket_num,
-                        agencia=venta.agencia,
-                        **item_data,
-                    )
-
-            # Remove items from the invoice that are no longer in the sale's boletos
-            for ticket_num, item in existing_items.items():
-                if ticket_num not in processed_tickets:
-                    item.delete()
-
-            # Recalculate totals of the invoice
-            if hasattr(factura_tercero, "calcular_impuestos_venezuela"):
-                factura_tercero.calcular_impuestos_venezuela()
-            else:
-                factura_tercero.recalcular_totales()
-                factura_tercero.save()
+            factura_tercero.save()
 
         # 2. Agency Fee Invoice (Venta Propia)
         fees = venta.fees_venta.all()
         factura_propia = None
 
         if fees.exists() or not factura_tercero:
-            factura_propia = Factura.objects.filter(
-                venta_asociada=venta, tipo_operacion=Factura.TipoOperacion.VENTA_PROPIA
-            ).first()
+            factura_propia = Factura.objects.filter(cliente=venta.cliente).first()
 
             if not factura_propia:
                 factura_propia = Factura.objects.create(
-                    venta_asociada=venta,
                     cliente=venta.cliente,
-                    moneda=venta.moneda,
-                    tipo_operacion=Factura.TipoOperacion.VENTA_PROPIA,
-                    tasa_cambio_bcv=venta.tasa_cambio_bcv,
+                    tasa_bcv_aplicada=getattr(venta, "tasa_cambio_bcv", Decimal("1.00")),
                     fecha_emision=timezone.localtime(timezone.now()).date(),
-                    cliente_identificacion=venta.cliente.numero_documento or "N/A",
-                    cliente_direccion=venta.cliente.direccion_linea1 or "N/A",
-                    emisor_rif=venta.agencia.rif if venta.agencia else "J-00000000-0",
-                    emisor_razon_social=venta.agencia.nombre
-                    if venta.agencia
-                    else "Agencia de Viajes",
-                    emisor_direccion_fiscal=venta.agencia.direccion
-                    if venta.agencia
-                    else "Dirección Agencia",
                     agencia=venta.agencia,
                 )
             else:
                 factura_propia.cliente = venta.cliente
-                factura_propia.cliente_identificacion = venta.cliente.numero_documento or "N/A"
-                factura_propia.cliente_direccion = venta.cliente.direccion_linea1 or "N/A"
-                factura_propia.save(
-                    update_fields=["cliente", "cliente_identificacion", "cliente_direccion"]
-                )
+                factura_propia.save(update_fields=["cliente"])
 
             # Sync fee items: delete and recreate
-            factura_propia.items_factura.all().hard_delete()
+            factura_propia.items.all().delete()
 
             for fee in fees:
                 ItemFactura.objects.create(
                     factura=factura_propia,
                     descripcion=f"Fee de Gestión: {fee.get_tipo_fee_display()}",
                     cantidad=1,
-                    precio_unitario=fee.monto,
-                    tipo_servicio=ItemFactura.TipoServicio.ALOJAMIENTO_Y_OTROS_GRAVADOS,
-                    es_gravado=True,
-                    alicuota_iva=Decimal("25.00"),
+                    precio_unitario_usd=fee.monto,
+                    exento=False,
                     agencia=venta.agencia,
                 )
 
-            # Recalculate totals of own invoice
-            if hasattr(factura_propia, "calcular_impuestos_venezuela"):
-                factura_propia.calcular_impuestos_venezuela()
-            else:
-                factura_propia.recalcular_totales()
-                factura_propia.save()
+            factura_propia.save()
 
         return factura_tercero, factura_propia
 

@@ -67,6 +67,24 @@ class AsientoContable(AgenciaMixin, models.Model):
     object_id = models.PositiveIntegerField(null=True, blank=True)
     content_object = GenericForeignKey("content_type", "object_id")
 
+    class EstadoAsiento(models.TextChoices):
+        BORRADOR = "BORRADOR", "Borrador"
+        CONTABILIZADO = "CONTABILIZADO", "Contabilizado"
+        ANULADO = "ANULADO", "Anulado"
+
+    class TipoAsiento(models.TextChoices):
+        DIARIO = "DIARIO", "Diario"
+        VENTAS = "VENTAS", "Ventas"
+        AJUSTE = "AJUSTE", "Ajuste"
+        CIERRE = "CIERRE", "Cierre"
+
+    estado = models.CharField(
+        max_length=20, choices=EstadoAsiento.choices, default=EstadoAsiento.BORRADOR
+    )
+    tipo_asiento = models.CharField(
+        max_length=7, choices=TipoAsiento.choices, default=TipoAsiento.DIARIO
+    )
+
     class Meta:
         verbose_name = "Asiento Contable"
         verbose_name_plural = "Asientos Contables"

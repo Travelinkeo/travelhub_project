@@ -30,19 +30,18 @@ class FacturacionDashboardView(HtmxResponseMixin, SaaSMixin, LoginRequiredMixin,
     paginate_by = 20
 
     def get_queryset(self):
-        # 🔐 SaaSMixin ya filtra por agencia en super().get_queryset()
         queryset = (
             super()
             .get_queryset()
-            .select_related("cliente", "moneda", "agencia")
-            .prefetch_related("items_factura", "pagos_factura")
+            .select_related("cliente", "agencia")
+            .prefetch_related("items", "pagos")
             .order_by("-fecha_emision")
         )
 
         q = self.request.GET.get("q")
         if q:
             queryset = queryset.filter(
-                Q(numero_factura__icontains=q)
+                Q(numero_control__icontains=q)
                 | Q(cliente__nombres__icontains=q)
                 | Q(cliente__apellidos__icontains=q)
                 | Q(cliente__numero_documento__icontains=q)
@@ -61,7 +60,7 @@ class FacturacionDashboardView(HtmxResponseMixin, SaaSMixin, LoginRequiredMixin,
         # dependiente de self.request.agencia (no siempre seteado por el middleware).
         base_qs = self.get_queryset()
         context["total_facturas"] = base_qs.count()
-        context["facturas_pendientes"] = base_qs.filter(estado="PEN").count()
+        context["facturas_pendientes"] = base_qs.filter(estado="BORRADOR").count()
         return context
 
 
@@ -74,7 +73,7 @@ class FacturaDetailView(HtmxResponseMixin, SaaSMixin, LoginRequiredMixin, Detail
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["items"] = self.object.items_factura.select_related("producto_servicio").all()
+        context["items"] = self.object.items.all()
         return context
 
 
@@ -110,7 +109,7 @@ def generar_factura_desde_venta(request, pk):
                 request, "finance/partials/invoice_detail_modal.html", {"invoice": factura}
             )
 
-        messages.success(request, f"Factura {factura.numero_factura} generada exitosamente.")
+        messages.success(request, f"Factura {factura.numero_control} generada exitosamente.")
         return redirect("core:factura_detalle", pk=factura.pk)
     except Exception:
         logger.exception("Error generando factura desde venta %s", pk)
@@ -125,25 +124,22 @@ def generar_factura_desde_venta(request, pk):
 
 
 def descargar_pdf_factura(request, pk):
-    # 🔐 CANDADO: Verifica que la factura pertenezca a la agencia del usuario.
     agencia = get_agencia_or_403(request)
     factura = get_object_tenant_or_404(Factura, agencia, pk=pk)
-    if not factura.archivo_pdf:
-        try:
-            from apps.finance.services.factura_pdf_generator import guardar_pdf_factura
+    try:
+        from apps.finance.services.factura_pdf_generator import guardar_pdf_factura
 
-            guardar_pdf_factura(factura)
-            factura.refresh_from_db()
-        except Exception:
-            logger.exception("Error al generar PDF de factura %s", pk)
-
-    if factura.archivo_pdf:
-        response = HttpResponse(factura.archivo_pdf, content_type="application/pdf")
-        response["Content-Disposition"] = f'attachment; filename="{factura.archivo_pdf.name}"'
-        return response
-    else:
-        messages.error(request, _("El PDF de esta factura no está disponible."))
-        return redirect("core:factura_detalle", pk=pk)
+        pdf_content = guardar_pdf_factura(factura)
+        if pdf_content:
+            response = HttpResponse(pdf_content, content_type="application/pdf")
+            response["Content-Disposition"] = (
+                f'attachment; filename="factura-{factura.numero_control}.pdf"'
+            )
+            return response
+    except Exception:
+        logger.exception("Error al generar PDF de factura %s", pk)
+    messages.error(request, _("El PDF de esta factura no está disponible."))
+    return redirect("core:factura_detalle", pk=pk)
 
 
 @agency_role_required(
@@ -158,16 +154,14 @@ def emitir_factura_definitiva(request, pk):
     factura = get_object_tenant_or_404(Factura, agencia, pk=pk)
 
     if factura.estado != Factura.EstadoFactura.BORRADOR:
-        messages.warning(request, f"La factura {factura.numero_factura} ya no está en borrador.")
+        messages.warning(request, f"La factura {factura.numero_control} ya no está en borrador.")
         return redirect("core:factura_detalle", pk=pk)
 
     try:
-        # Lógica de emisión
         factura.estado = Factura.EstadoFactura.EMITIDA
-        # Aquí se podría asignar un número de control fiscal real si fuese necesario
         factura.save()
 
-        messages.success(request, f"Factura {factura.numero_factura} emitida correctamente.")
+        messages.success(request, f"Factura {factura.numero_control} emitida correctamente.")
         return redirect("core:factura_detalle", pk=pk)
     except Exception as e:
         logger.exception("Error emitiendo factura %s", pk)

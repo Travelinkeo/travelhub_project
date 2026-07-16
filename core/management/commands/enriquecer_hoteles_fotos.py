@@ -27,6 +27,9 @@ class Command(BaseCommand):
         parser.add_argument("--hotel-id", type=int, default=None)
         parser.add_argument("--dry-run", action="store_true")
         parser.add_argument(
+            "--force", action="store_true", help="Forzar descarga y reemplazar fotos existentes"
+        )
+        parser.add_argument(
             "--max-photos", type=int, default=3, help="Max fotos por hotel (default 3)"
         )
         parser.add_argument(
@@ -39,11 +42,14 @@ class Command(BaseCommand):
             self.stdout.write(self.style.ERROR("GOOGLE_PLACES_API_KEY no configurada"))
             return
 
-        # Filtrar hoteles sin foto principal (usar all_objects para bypass tenant filter)
-        qs = HotelTarifario.all_objects.filter(
-            activo=True,
-            imagen_principal="",
-        )
+        # Filtrar hoteles (usar all_objects para bypass tenant filter)
+        if options.get("force"):
+            qs = HotelTarifario.all_objects.filter(activo=True)
+        else:
+            qs = HotelTarifario.all_objects.filter(
+                activo=True,
+                imagen_principal="",
+            )
         if options.get("agencia_id"):
             qs = qs.filter(agencia_id=options["agencia_id"])
         if options.get("hotel_id"):
@@ -91,6 +97,22 @@ class Command(BaseCommand):
                     if place.get("formattedAddress") and not hotel.direccion:
                         hotel.direccion = place["formattedAddress"][:500]
                         hotel.save(update_fields=["direccion"])
+
+                    if options.get("force"):
+                        # Borrar fotos viejas de la galería
+                        ImagenHotel.objects.filter(hotel=hotel).delete()
+                        # Vaciar imagen principal anterior para permitir descarga
+                        if hotel.imagen_principal:
+                            try:
+                                hotel.imagen_principal.delete(save=False)
+                            except Exception as e:
+                                self.stdout.write(
+                                    self.style.WARNING(
+                                        f"      No se pudo borrar archivo físico: {e}"
+                                    )
+                                )
+                            hotel.imagen_principal = ""
+                            hotel.save(update_fields=["imagen_principal"])
 
                 # Step 2: Get photos (Places API New)
                 photos = place.get("photos", [])

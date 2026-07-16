@@ -69,21 +69,22 @@ class _FernetMixin:
             raise ValueError(f"Fallo crítico al cifrar campo sensible: {e}") from e
 
     def _decrypt(self, value: str) -> str:
-        """Descifra un string. Lanza ValueError si el token es inválido."""
+        """Descifra un string. Si falla, registra el error y retorna una cadena vacía para evitar romper la app."""
         try:
             return self.fernet.decrypt(value.encode()).decode("utf-8")
         except Exception as e:
-            logger.critical("Error descifrando campo %s: %s", self.name, e)
+            logger.critical(
+                "Error descifrando campo %s: %s. La clave de cifrado podría haber cambiado.",
+                self.name,
+                e,
+            )
             try:
                 import sentry_sdk
 
                 sentry_sdk.capture_exception(e)
             except ImportError:
                 pass
-            raise ValueError(
-                f"Fallo al descifrar campo sensible '{self.name}': el token es inválido o la clave "
-                f"de cifrado ha cambiado. Contacta al administrador del sistema."
-            ) from e
+            return ""
 
     def get_prep_value(self, value):
         if value is None or value == "":

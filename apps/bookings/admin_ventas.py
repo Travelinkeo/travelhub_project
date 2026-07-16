@@ -167,7 +167,7 @@ class VentaAdmin(SaaSAdminMixin, admin.ModelAdmin):
             .select_related("cliente", "moneda", "agencia", "creado_por")
             .prefetch_related(
                 "items_venta__proveedor_servicio",
-                "boletoimportado_set",
+                "boletos_adjuntos",
                 "pagos_venta",
             )
         )

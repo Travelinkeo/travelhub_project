@@ -44,7 +44,7 @@ class Command(BaseCommand):
             self.stdout.write(
                 self.style.SUCCESS(
                     f"[OK] Provision INATUR completada\n"
-                    f"  Asiento: {asiento.numero_asiento}\n"
+                    f"  Asiento: {asiento.id}\n"
                     f"  Total Debe: {asiento.total_debe} BSD\n"
                     f"  Total Haber: {asiento.total_haber} BSD"
                 )

@@ -8,9 +8,9 @@
                 <p class="text-[11px] font-black text-status-success uppercase tracking-widest">Ajuste Contable Generado Exitosamente</p>
                 <div class="flex items-center gap-2 mt-0.5">
                     <span class="text-[10px] text-text-muted font-bold">Asiento Ref:</span>
-                    <a href="{% url 'contabilidad:libro_diario' %}?highlight={{ asiento_id }}" 
+                    <a href="{% url 'contabilidad:libro_diario' %}?highlight={{ asiento_id }}"
                        class="text-[10px] text-primary font-black hover:underline tabular-nums">
-                        {{ numero_asiento }}
+                        {{ id }}
                     </a>
                     <span class="text-[10px] text-text-muted italic">— Discrepancia conciliada y cuadrado contablemente al instante.</span>
                 </div>

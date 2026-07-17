@@ -63,7 +63,7 @@ class ContabilidadReconciliationService:
                         factura.asiento_contable_factura = asiento
                         factura.save(update_fields=["asiento_contable_factura"])
                     logger.info(
-                        f"Factura {factura.numero_factura} vinculada a asiento existente {asiento.numero_asiento}"
+                        f"Factura {factura.numero_factura} vinculada a asiento existente {asiento.id}"
                     )
                 else:
                     # Generar nuevo asiento contable y vincularlo a la factura

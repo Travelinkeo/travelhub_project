@@ -41,7 +41,7 @@ class AsientoContableSerializer(serializers.ModelSerializer):
         model = AsientoContable
         fields = [
             "id_asiento",
-            "numero_asiento",
+            "id",
             "fecha_contable",
             "descripcion_general",
             "tipo_asiento",
@@ -59,7 +59,7 @@ class AsientoContableSerializer(serializers.ModelSerializer):
             "detalles_asiento",
         ]
         read_only_fields = (
-            "numero_asiento",
+            "id",
             "total_debe",
             "total_haber",
             "fecha_creacion",

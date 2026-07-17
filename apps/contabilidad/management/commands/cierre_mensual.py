@@ -166,4 +166,4 @@ class Command(BaseCommand):
             )
 
         asiento.calcular_totales()
-        logger.info(f"Asiento de cierre {asiento.numero_asiento} generado")
+        logger.info(f"Asiento de cierre {asiento.id} generado")

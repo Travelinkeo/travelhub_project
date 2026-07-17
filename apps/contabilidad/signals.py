@@ -55,9 +55,7 @@ def _generar_asiento_contable(factura_id):
     try:
         factura = FacturaModel.objects.get(pk=factura_id)
         asiento = ContabilidadService.generar_asiento_desde_factura(factura)
-        logger.info(
-            f"Asiento {asiento.numero_asiento} generado para factura {factura.numero_factura}"
-        )
+        logger.info(f"Asiento {asiento.id} generado para factura {factura.numero_factura}")
     except Exception as e:
         logger.error(f"Error generando asiento para factura {factura_id}: {e}")
 
@@ -87,6 +85,6 @@ def _registrar_pago_contable(pago_id):
         pago = PagoVentaModel.objects.get(pk=pago_id)
         asiento = ContabilidadService.registrar_pago_y_diferencial(pago)
         if asiento:
-            logger.info(f"Asiento de pago {asiento.numero_asiento} generado para pago {pago_id}")
+            logger.info(f"Asiento de pago {asiento.id} generado para pago {pago_id}")
     except Exception as e:
         logger.error(f"Error registrando pago {pago_id}: {e}")

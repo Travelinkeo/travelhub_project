@@ -164,7 +164,7 @@ class ReportesContables:
         asientos = AsientoContable.objects.filter(
             fecha_contable__range=(fecha_desde, fecha_hasta),
             estado=AsientoContable.EstadoAsiento.CONTABILIZADO,
-        ).order_by("fecha_contable", "numero_asiento")
+        ).order_by("fecha_contable", "id")
 
         resultado = []
 
@@ -186,7 +186,7 @@ class ReportesContables:
 
             resultado.append(
                 {
-                    "numero": asiento.numero_asiento,
+                    "numero": asiento.id,
                     "fecha": asiento.fecha_contable,
                     "descripcion": asiento.descripcion_general,
                     "tipo": asiento.get_tipo_asiento_display(),
@@ -250,7 +250,7 @@ class ReportesContables:
             detalle_movimientos.append(
                 {
                     "fecha": mov.asiento.fecha_contable,
-                    "asiento": mov.asiento.numero_asiento,
+                    "asiento": mov.asiento.id,
                     "descripcion": mov.descripcion_linea or mov.asiento.descripcion_general,
                     "debe": debe,
                     "haber": haber,

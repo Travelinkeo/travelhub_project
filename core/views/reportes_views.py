@@ -54,13 +54,13 @@ def libro_diario(request):
     if fecha_hasta:
         asientos_qs = asientos_qs.filter(fecha_contable__lte=fecha_hasta)
 
-    asientos_qs = asientos_qs.order_by("fecha_contable", "numero_asiento")
+    asientos_qs = asientos_qs.order_by("fecha_contable", "id")
 
     libro = []
     for asiento in asientos_qs:
         libro.append(
             {
-                "numero_asiento": asiento.numero_asiento,
+                "id": asiento.id,
                 "fecha": asiento.fecha_contable,
                 "descripcion": asiento.descripcion_general,
                 "total_debe": asiento.total_debe,
@@ -208,7 +208,7 @@ def validar_cuadre(request):
     for asiento in asientos_descuadrados:
         problemas.append(
             {
-                "numero_asiento": asiento.numero_asiento,
+                "id": asiento.id,
                 "fecha": asiento.fecha_contable,
                 "debe": asiento.total_debe,
                 "haber": asiento.total_haber,
@@ -297,7 +297,7 @@ def exportar_excel(request):
             ws.append(
                 [
                     asiento.fecha_contable.strftime("%Y-%m-%d"),
-                    asiento.numero_asiento,
+                    asiento.id,
                     detalle.cuenta_contable.codigo_cuenta,
                     detalle.descripcion_linea,
                     float(detalle.debe),

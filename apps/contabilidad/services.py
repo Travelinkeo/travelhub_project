@@ -127,9 +127,7 @@ class ContabilidadService:
                 factura.venta_asociada.asiento_contable_venta = asiento
                 factura.venta_asociada.save(update_fields=["asiento_contable_venta_id"])
 
-            logger.info(
-                f"Asiento {asiento.numero_asiento} generado para factura {factura.numero_factura}"
-            )
+            logger.info(f"Asiento {asiento.id} generado para factura {factura.numero_factura}")
             return asiento
 
         except Exception as e:
@@ -444,7 +442,7 @@ class ContabilidadService:
             asiento.calcular_totales()
 
             logger.info(
-                f"Asiento de pago {asiento.numero_asiento} generado con diferencial {diferencial_bsd} BSD"
+                f"Asiento de pago {asiento.id} generado con diferencial {diferencial_bsd} BSD"
             )
             return asiento
 

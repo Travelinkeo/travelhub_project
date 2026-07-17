@@ -37,7 +37,7 @@ def test_asiento_contable_concurrency(db):
                     moneda=moneda_usd,
                 )
                 asiento.save()
-                created_asientos.append(asiento.numero_asiento)
+                created_asientos.append(asiento.id)
         except Exception as e:
             errors.append(e)
         finally:

@@ -108,7 +108,9 @@ def wiki_gds_reader(request, category, filename="README.md"):
     wiki_root = Path(settings.BASE_DIR) / "docs" / "wiki" / "GDS"
     wiki_path = (wiki_root / category / filename).resolve()
 
-    if not str(wiki_path).startswith(str(wiki_root.resolve())):
+    wiki_path_str = os.path.normcase(str(wiki_path))
+    wiki_root_str = os.path.normcase(str(wiki_root.resolve()))
+    if not wiki_path_str.startswith(wiki_root_str):
         raise Http404("El artículo de la Wiki no existe.")
 
     if not wiki_path.exists() or not wiki_path.is_file():

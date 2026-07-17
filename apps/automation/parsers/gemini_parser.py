@@ -20,7 +20,7 @@ class GeminiParser(BaseTicketParser):
     """
 
     def __init__(self):
-        self.model_name = "gemini-1.5-flash"
+        self.model_name = "gemini-2.5-flash"
 
     def can_parse(self, text: str) -> bool:
         # Gemini puede parsear CUALQUIER boleto, siempre que haya texto legíble.

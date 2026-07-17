@@ -28,7 +28,7 @@ class AudioTranscriptionService:
         try:
             genai = _get_genai()
             self.client = genai.Client(api_key=self.api_key)
-            self.model_name = "gemini-1.5-flash"
+            self.model_name = "gemini-2.5-flash"
         except Exception as e:
             logger.error(f"Error configurando Gemini AI: {e}")
             self.client = None

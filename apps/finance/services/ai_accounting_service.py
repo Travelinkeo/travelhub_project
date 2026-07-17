@@ -33,7 +33,7 @@ class AIAccountingService:
 
         self.api_key = get_gemini_api_key(agencia)
         self.client = genai.Client(api_key=self.api_key)
-        self.model_id = "gemini-1.5-flash"
+        self.model_id = "gemini-2.5-flash"
 
         AgentTools = import_string("apps.automation.services.ai_tools.AgentTools")
         # Lista de herramientas disponibles para la IA

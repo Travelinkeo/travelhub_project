@@ -240,7 +240,7 @@ class LinkeoService:
             """
 
             # 3. Generar
-            response = model.models.generate_content(model="gemini-1.5-flash", contents=prompt)
+            response = model.models.generate_content(model="gemini-2.5-flash", contents=prompt)
             return response.text
 
         except Exception as e:

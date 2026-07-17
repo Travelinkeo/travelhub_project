@@ -27,7 +27,7 @@ class CollectionAIService:
         api_key = get_gemini_api_key(self.agencia)
         genai = _get_genai()
         self.client = genai.Client(api_key=api_key) if api_key else None
-        self.model_name = "gemini-1.5-flash"
+        self.model_name = "gemini-2.5-flash"
 
     def get_pending_portfolio(self, days_threshold=0):
         """

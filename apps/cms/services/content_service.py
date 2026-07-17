@@ -25,7 +25,7 @@ class AIContentService:
         genai = _get_genai()
         api_key = getattr(settings, "GEMINI_API_KEY", None)
         self.client = genai.Client(api_key=api_key)
-        self.model_name = "gemini-1.5-flash"
+        self.model_name = "gemini-2.5-flash"
 
     def generate_article(self, destination, keywords=None):
         """

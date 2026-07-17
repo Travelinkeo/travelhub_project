@@ -115,7 +115,7 @@ def extract_quote_intent_from_audio(file_path: str) -> dict:
             mime = "audio/amr"
 
         response = client.models.generate_content(
-            model="gemini-1.5-flash",
+            model="gemini-2.5-flash",
             contents=[
                 _get_genai_types().Part.from_bytes(data=audio_bytes, mime_type=mime),
                 json_prompt,
@@ -175,7 +175,7 @@ def process_twilio_text_message(text_body: str) -> dict:
     """
     try:
         response = client.models.generate_content(
-            model="gemini-1.5-flash",
+            model="gemini-2.5-flash",
             contents=json_prompt,
             config=_get_genai_types().GenerateContentConfig(response_mime_type="application/json"),
         )

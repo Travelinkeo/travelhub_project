@@ -128,14 +128,7 @@ class GlobalAwareAgenciaManager(AgenciaManager):
         if user and user.is_superuser:
             return queryset
 
-        import sys
-
-        if "pytest" in sys.modules or (
-            "manage.py" in sys.argv
-            and any(
-                arg in sys.argv for arg in ["makemigrations", "migrate", "shell", "check", "test"]
-            )
-        ):
+        if _IS_PYTEST or _IS_MANAGEMENT_COMMAND:
             return queryset
 
         return queryset.none()
@@ -254,11 +247,7 @@ class AgenciaMixin(models.Model):
                         "God Mode: No puedes crear registros globales. Por favor, selecciona una agencia (impersonación) primero."
                     )
 
-                import sys
-
-                is_test = "pytest" in sys.modules or (
-                    "manage.py" in sys.argv and "test" in sys.argv
-                )
+                is_test = _IS_PYTEST or _IS_MANAGEMENT_COMMAND
 
                 if not is_system_context() and not is_test and (not user or not user.is_superuser):
                     raise PermissionDenied("Se requiere una agencia para guardar este registro.")

@@ -136,6 +136,12 @@ Esto usará la configuración definida en `mypy.ini` y el plugin `django-stubs`.
 - [x] Docker Compose para desarrollo
 - [x] Scripts de migración de datos
 
+### Fase 7: Remediación de Deuda Técnica y Estabilidad Web (Sprints 1-3)
+- [x] **Sprint 1:** Saneamiento de `locale.setlocale` para prevenir errores de concurrencia y refactor de imports de settings en `celery.py`.
+- [x] **Sprint 2:** Centralización del mapa de meses GDS y optimización del queryset en `AgenciaManager`.
+- [x] **Sprint 3:** Implementación de Service Worker y PWA, Refuerzo de CSP eliminando `unsafe-eval` de Alpine.js, Integración de traducciones en español y validación de vulnerabilidades de SSO (OIDC/SAML).
+- [x] **Riesgos Residuales:** Control de compatibilidad con PgBouncer, reemplazo del modelo `APIKey` descontinuado por `CronApiKey`, y consolidación del descubrimiento de tareas de Celery.
+
 ---
 
 ## ⚠️ Reglas del Repo

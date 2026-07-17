@@ -1,6 +1,7 @@
 import re
 
 from pydantic import BaseModel, Field, field_validator, model_validator
+from apps.automation.parsers.normalization import GDS_MONTH_NUM as MESES_GDS
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -21,35 +22,6 @@ def _to_float(v) -> float:
 # ─────────────────────────────────────────────────────────────────────────────
 # Constantes compartidas para conversión GDS
 # ─────────────────────────────────────────────────────────────────────────────
-MESES_GDS = {
-    1: "ENE",
-    2: "FEB",
-    3: "MAR",
-    4: "ABR",
-    5: "MAY",
-    6: "JUN",
-    7: "JUL",
-    8: "AGO",
-    9: "SEP",
-    10: "OCT",
-    11: "NOV",
-    12: "DIC",
-}
-
-MESES_ES_TO_EN = {
-    "ENE": "JAN",
-    "FEB": "FEB",
-    "MAR": "MAR",
-    "ABR": "APR",
-    "MAY": "MAY",
-    "JUN": "JUN",
-    "JUL": "JUL",
-    "AGO": "AUG",
-    "SEP": "SEP",
-    "OCT": "OCT",
-    "NOV": "NOV",
-    "DIC": "DEC",
-}
 
 
 class TramoVueloSchema(BaseModel):

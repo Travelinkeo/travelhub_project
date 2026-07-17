@@ -336,24 +336,7 @@ class PNRParserService:
         if not base_date:
             base_date = timezone.now()
 
-        months = {
-            "JAN": 1,
-            "FEB": 2,
-            "MAR": 3,
-            "APR": 4,
-            "MAY": 5,
-            "JUN": 6,
-            "JUL": 7,
-            "AUG": 8,
-            "SEP": 9,
-            "OCT": 10,
-            "NOV": 11,
-            "DEC": 12,
-            "ENE": 1,
-            "ABR": 4,
-            "AGO": 8,
-            "DIC": 12,
-        }
+        from apps.automation.parsers.normalization import GDS_SHORT_TO_NUM as months
 
         # Con año
         match_with_year = re.match(r"(\d{1,2})\s*([A-Z]{3})\s*(\d{2,4})", date_str)

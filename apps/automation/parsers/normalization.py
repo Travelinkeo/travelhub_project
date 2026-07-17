@@ -7,6 +7,74 @@ from apps.common.utils import clean_currency
 
 logger = logging.getLogger(__name__)
 
+# --- MAPAS CENTRALIZADOS DE MESES GDS (S2-A) ---
+GDS_MONTH_EN = {
+    "ENE": "JAN",
+    "FEB": "FEB",
+    "MAR": "MAR",
+    "ABR": "APR",
+    "MAY": "MAY",
+    "JUN": "JUN",
+    "JUL": "JUL",
+    "AGO": "AUG",
+    "SEP": "SEP",
+    "OCT": "OCT",
+    "NOV": "NOV",
+    "DIC": "DEC",
+}
+
+GDS_MONTH_ES = {
+    "enero": "ENE",
+    "febrero": "FEB",
+    "marzo": "MAR",
+    "abril": "ABR",
+    "mayo": "MAY",
+    "junio": "JUN",
+    "julio": "JUL",
+    "agosto": "AGO",
+    "septiembre": "SEP",
+    "octubre": "OCT",
+    "noviembre": "NOV",
+    "diciembre": "DIC",
+}
+
+GDS_MONTH_NUM = {
+    1: "ENE",
+    2: "FEB",
+    3: "MAR",
+    4: "ABR",
+    5: "MAY",
+    6: "JUN",
+    7: "JUL",
+    8: "AGO",
+    9: "SEP",
+    10: "OCT",
+    11: "NOV",
+    12: "DIC",
+}
+
+# Alias para compatibilidad con el plan de remediación original
+GDS_MONTH_MAP = GDS_MONTH_ES
+
+GDS_SHORT_TO_NUM = {
+    "JAN": 1,
+    "FEB": 2,
+    "MAR": 3,
+    "APR": 4,
+    "MAY": 5,
+    "JUN": 6,
+    "JUL": 7,
+    "AUG": 8,
+    "SEP": 9,
+    "OCT": 10,
+    "NOV": 11,
+    "DEC": 12,
+    "ENE": 1,
+    "ABR": 4,
+    "AGO": 8,
+    "DIC": 12,
+}
+
 
 class DataNormalizationService:
     """

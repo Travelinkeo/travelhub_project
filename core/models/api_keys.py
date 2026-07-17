@@ -93,6 +93,13 @@ class APIKey(models.Model):
     El prefijo ( primeros 8 chars) se guarda para identificación.
     """
 
+    def __init__(self, *args, **kwargs):
+        from django.conf import settings
+
+        if not getattr(settings, "DEBUG", True):
+            raise RuntimeError("APIKey no se puede instanciar en produccion. Usa CronApiKey.")
+        super().__init__(*args, **kwargs)
+
     agencia = models.ForeignKey(
         "core.Agencia",
         on_delete=models.CASCADE,

@@ -9,18 +9,34 @@
 
     <link rel="stylesheet" href="{% static 'core/css/tailwind-built.css' %}">
     <link rel="stylesheet" href="{% static 'core/css/responsive.css' %}">
+    <link rel="manifest" href="{% static 'manifest.json' %}">
 
     <script nonce="{{ request.csp_nonce }}" src="{% static 'vendor/htmx_v2.js' %}"></script>
-    <script nonce="{{ request.csp_nonce }}" src="{% static 'vendor/alpine_v2.js' %}" defer></script>
+    <script nonce="{{ request.csp_nonce }}" src="https://cdn.jsdelivr.net/npm/@alpinejs/csp@3.14.1/dist/cdn.min.js" defer></script>
 
     {% include "core/partials/_htmx_csrf_and_errors.html" %}
 
-    <style nonce="{{ request.csp_nonce }}">
-        #omnisearch-modal-overlay { display: none !important; }
-        [x-cloak] { display: none !important; }
-        #ai-panel-dialog { display: none; }
-    </style>
-    <script nonce="{{ request.csp_nonce }}" src="{% static 'vendor/html2canvas_v2.js' %}"></script>
+    <script nonce="{{ request.csp_nonce }}">
+        // Initialize SweetAlert configuration
+        const swalConfig = {
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33'
+        };
+    </script>
+    <script nonce="{{ request.csp_nonce }}" src="{% static 'js/csp-events.js' %}"></script>
+    <script nonce="{{ request.csp_nonce }}">
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/static/serviceworker.js')
+                    .then(registration => {
+                        console.log('SW registered: ', registration);
+                    })
+                    .catch(registrationError => {
+                        console.log('SW registration failed: ', registrationError);
+                    });
+            });
+        }
+    </script>
     <script nonce="{{ request.csp_nonce }}" src="{% static 'vendor/lucide_v2.js' %}"></script>
     <script nonce="{{ request.csp_nonce }}" src="{% static 'vendor/chart_v2.js' %}"></script>
     <script nonce="{{ request.csp_nonce }}" src="{% static 'vendor/sweetalert2_v2.js' %}"></script>

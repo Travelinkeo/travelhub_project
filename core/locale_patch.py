@@ -11,6 +11,10 @@ def apply_locale_patch():
     Esto intercepta llamadas globales de setlocale que puedan arrojar
     'unsupported locale setting' en sistemas sin locale configurado (como Docker minimalista).
     """
+    if getattr(locale.setlocale, "_is_safe_patch", False):
+        logger.debug("locale.setlocale ya parchado, omitiendo doble patch.")
+        return
+
     try:
         original_setlocale = locale.setlocale
 
@@ -29,6 +33,7 @@ def apply_locale_patch():
                     except Exception:
                         return "C"
 
+        safe_setlocale._is_safe_patch = True
         locale.setlocale = safe_setlocale
         logger.info(
             "✅ [SRE L3] Global locale.setlocale monkey patch applied successfully via ready()."

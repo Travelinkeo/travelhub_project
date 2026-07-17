@@ -1,4 +1,5 @@
 import logging
+import uuid
 
 from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework import filters, serializers, viewsets
@@ -39,7 +40,17 @@ class VentaDoubleInvoiceAPIView(InternalAPIAuthMixin, APIView):
     )
     def post(self, request, pk):
         try:
-            venta = Venta.objects.select_related("cliente", "agencia", "moneda").get(pk=pk)
+            # P0-003 FIX: Verificación explícita de tenant para prevenir IDOR en Ventas.
+            # Devuelve 404 (no 403) si la venta no pertenece a la agencia, para no
+            # revelar que el objeto existe en otra agencia.
+            from core.api import get_agencia_from_request, get_object_tenant_or_404
+
+            agencia = get_agencia_from_request(request)
+            venta = get_object_tenant_or_404(
+                Venta.objects.select_related("cliente", "agencia", "moneda"),
+                agencia,
+                pk=pk,
+            )
             f_tercero, f_propia = InvoiceService.generate_double_invoice(venta)
             return Response(
                 {
@@ -51,8 +62,14 @@ class VentaDoubleInvoiceAPIView(InternalAPIAuthMixin, APIView):
             )
         except Venta.DoesNotExist:
             return Response({"error": "Venta no encontrada"}, status=404)
-        except Exception as e:
-            return Response({"error": str(e)}, status=500)
+        except Exception:
+            # P0-006 FIX: No exponer str(e). Log con error_id y mensaje genérico al cliente.
+            error_id = uuid.uuid4().hex[:8].upper()
+            logger.exception(f"[{error_id}] Error en VentaDoubleInvoiceAPIView pk={pk}")
+            return Response(
+                {"error": f"Error interno al generar facturas. Referencia: TH-{error_id}"},
+                status=500,
+            )
 
 
 class FacturaViewSet(TenantViewSetMixin, viewsets.ModelViewSet):

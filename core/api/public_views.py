@@ -23,7 +23,7 @@ from core.api.public_serializers import (
     WebhookDeliverySerializer,
     WebhookSerializer,
 )
-from core.models.api_keys import APIKey, APIKeyPlan
+from core.models.cron_api_key import CronApiKey
 from core.models.webhooks import Webhook, WebhookEvent
 
 logger = logging.getLogger(__name__)
@@ -31,12 +31,7 @@ logger = logging.getLogger(__name__)
 
 class APIKeyViewSet(TenantViewSetMixin, viewsets.ModelViewSet):
     """
-    CRUD de API Keys.
-
-    - Crear: genera una key raw que solo se muestra una vez
-    - Listar: muestra metadata sin exponer la key
-    - Revocar: desactivar sin eliminar
-    - Actualizar plan: cambiar rate limits
+    CRUD de API Keys. Adaptado a CronApiKey (legacy APIKey está deprecado).
     """
 
     authentication_classes = [APIKeyAuthentication]
@@ -45,7 +40,7 @@ class APIKeyViewSet(TenantViewSetMixin, viewsets.ModelViewSet):
     http_method_names = ["get", "post", "patch", "delete"]
 
     def get_queryset(self):
-        return APIKey.objects.filter(
+        return CronApiKey.objects.filter(
             agencia=self.request.user.usuarioagencia_set.first().agencia
             if hasattr(self.request.user, "usuarioagencia_set")
             else None,
@@ -76,12 +71,9 @@ class APIKeyViewSet(TenantViewSetMixin, viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        api_key, raw_key = APIKey.generate(
-            agencia=agencia,
-            user=request.user,
+        api_key, raw_key = CronApiKey.generate(
             name=data["name"],
-            plan=data["plan"],
-            scopes=data.get("scopes", []),
+            agencia=agencia,
             expires_days=data.get("expires_days", 90),
         )
 
@@ -91,8 +83,8 @@ class APIKeyViewSet(TenantViewSetMixin, viewsets.ModelViewSet):
                     "id": api_key.id,
                     "name": api_key.name,
                     "prefix": api_key.prefix,
-                    "plan": api_key.plan,
-                    "rate_limit": api_key.rate_limit,
+                    "plan": "legacy",
+                    "rate_limit": 100,
                     "raw_key": raw_key,
                     "expires_at": api_key.expires_at,
                 }
@@ -110,20 +102,9 @@ class APIKeyViewSet(TenantViewSetMixin, viewsets.ModelViewSet):
     @action(detail=True, methods=["post"])
     def change_plan(self, request, pk=None):
         """Cambiar el plan y rate limit de una API key."""
-        api_key = self.get_object()
-        new_plan = request.data.get("plan")
-        if new_plan not in dict(APIKey.choices):
-            if new_plan not in dict(APIKeyPlan.choices):
-                return Response(
-                    {"error": f"Plan inválido: {new_plan}"},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-        api_key.update_plan(new_plan)
         return Response(
-            {
-                "plan": api_key.plan,
-                "rate_limit": api_key.rate_limit,
-            }
+            {"error": "Planes deprecados para CronApiKey"},
+            status=status.HTTP_400_BAD_REQUEST,
         )
 
 

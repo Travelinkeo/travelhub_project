@@ -11,7 +11,7 @@ from rest_framework import exceptions
 from rest_framework.authentication import BaseAuthentication
 from rest_framework.permissions import BasePermission
 
-from core.models.api_keys import APIKey
+from core.models.cron_api_key import CronApiKey
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +33,7 @@ class APIKeyAuthentication(BaseAuthentication):
         if not api_key_raw:
             return None  # No autenticar — dejar que otros métodos intenten
 
-        api_key = APIKey.verify(api_key_raw)
+        api_key = CronApiKey.verify(api_key_raw)
         if api_key is None:
             raise exceptions.AuthenticationFailed(
                 "API key inválida o expirada.",

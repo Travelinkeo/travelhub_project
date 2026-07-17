@@ -627,7 +627,8 @@ class KIUParser(BaseTicketParser):
         if not date_str:
             return ""
         date_upper = date_str.upper().strip()
-        month_map = {"ENE": "JAN", "ABR": "APR", "AGO": "AUG", "DIC": "DEC"}
+        from apps.automation.parsers.normalization import GDS_MONTH_EN as month_map
+
         for es, en in month_map.items():
             date_upper = date_upper.replace(es, en)
 

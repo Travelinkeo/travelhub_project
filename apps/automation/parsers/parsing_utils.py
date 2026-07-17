@@ -221,8 +221,8 @@ def _parse_date_flexible(
 
     date_upper = date_str.upper().strip()
 
-    # Mapa de meses español (KIU a veces mezcla)
-    month_map_es = {"ENE": "JAN", "ABR": "APR", "AGO": "AUG", "DIC": "DEC"}
+    from apps.automation.parsers.normalization import GDS_MONTH_EN as month_map_es
+
     for es, en in month_map_es.items():
         date_upper = date_upper.replace(es, en)
 

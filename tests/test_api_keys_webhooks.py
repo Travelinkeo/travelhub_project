@@ -2,108 +2,33 @@
 Tests para API Keys y Webhooks.
 """
 
-from django.contrib.auth.models import User
-from django.test import TestCase
+from django.test import TestCase, override_settings
 
 from core.models.agencia import Agencia
-from core.models.api_keys import RATE_LIMITS, APIKey, APIKeyPlan
+from core.models.api_keys import APIKey
 from core.models.webhooks import Webhook, WebhookDelivery, WebhookEvent
 
 
-class APIKeyModelTest(TestCase):
-    """Tests para el modelo APIKey."""
+class DeprecatedAPIKeyModelTest(TestCase):
+    """Tests para validar que APIKey (SaaS) está deprecado."""
 
     def setUp(self):
-        self.user = User.objects.create_user(username="test_user", password="test123")
         self.agencia = Agencia.objects.create(
             nombre="Test Agency",
         )
 
-    def test_generate_api_key(self):
-        """Genera una API key y retorna instance + raw_key."""
-        api_key, raw_key = APIKey.generate(
-            agencia=self.agencia,
-            user=self.user,
-            name="Test Key",
-            plan=APIKeyPlan.TRIAL,
-        )
-        self.assertIsNotNone(raw_key)
-        self.assertTrue(raw_key.startswith("th_"))
-        self.assertEqual(api_key.plan, APIKeyPlan.TRIAL)
-        self.assertEqual(api_key.rate_limit, 100)
-        self.assertTrue(api_key.is_active)
+    @override_settings(DEBUG=False)
+    def test_cannot_instantiate_in_production(self):
+        """Valida que APIKey no se puede instanciar en producción."""
+        with self.assertRaises(RuntimeError) as context:
+            APIKey(agencia=self.agencia, name="Test")
+        self.assertTrue("APIKey no se puede instanciar en produccion" in str(context.exception))
 
-    def test_verify_api_key(self):
-        """Verifica una API key válida."""
-        api_key, raw_key = APIKey.generate(
-            agencia=self.agencia,
-            user=self.user,
-            name="Test Key",
-        )
-        verified = APIKey.verify(raw_key)
-        self.assertIsNotNone(verified)
-        self.assertEqual(verified.id, api_key.id)
-
-    def test_verify_invalid_key(self):
-        """Rechaza una API key inválida."""
-        verified = APIKey.verify("invalid_key_123")
-        self.assertIsNone(verified)
-
-    def test_verify_expired_key(self):
-        """Rechaza una API key expirada."""
-        api_key, raw_key = APIKey.generate(
-            agencia=self.agencia,
-            user=self.user,
-            name="Expired Key",
-            expires_days=-1,  # Ya expirada
-        )
-        verified = APIKey.verify(raw_key)
-        self.assertIsNone(verified)
-
-    def test_revoke_api_key(self):
-        """Revoca una API key."""
-        api_key, raw_key = APIKey.generate(
-            agencia=self.agencia,
-            user=self.user,
-            name="Revoke Key",
-        )
-        api_key.revoke()
-        self.assertFalse(api_key.is_active)
-        # Verificar que ya no se puede usar
-        verified = APIKey.verify(raw_key)
-        self.assertIsNone(verified)
-
-    def test_update_plan(self):
-        """Actualiza el plan y rate limit."""
-        api_key, _ = APIKey.generate(
-            agencia=self.agencia,
-            user=self.user,
-            name="Plan Key",
-            plan=APIKeyPlan.TRIAL,
-        )
-        api_key.update_plan(APIKeyPlan.PROFESIONAL)
-        api_key.refresh_from_db()
-        self.assertEqual(api_key.plan, APIKeyPlan.PROFESIONAL)
-        self.assertEqual(api_key.rate_limit, 5000)
-
-    def test_rate_limits(self):
-        """Verifica que los rate limits están correctos."""
-        self.assertEqual(RATE_LIMITS[APIKeyPlan.TRIAL], 100)
-        self.assertEqual(RATE_LIMITS[APIKeyPlan.BASICO], 1000)
-        self.assertEqual(RATE_LIMITS[APIKeyPlan.PROFESIONAL], 5000)
-        self.assertEqual(RATE_LIMITS[APIKeyPlan.ENTERPRISE], 50000)
-
-    def test_request_count_increments(self):
-        """El contador de requests se incrementa."""
-        api_key, raw_key = APIKey.generate(
-            agencia=self.agencia,
-            user=self.user,
-            name="Count Key",
-        )
-        self.assertEqual(api_key.request_count, 0)
-        APIKey.verify(raw_key)
-        api_key.refresh_from_db()
-        self.assertEqual(api_key.request_count, 1)
+    @override_settings(DEBUG=True)
+    def test_can_instantiate_in_debug(self):
+        """Solo para que Django no falle si necesita migrar en dev."""
+        key = APIKey(agencia=self.agencia, name="Test")
+        self.assertEqual(key.name, "Test")
 
 
 class WebhookModelTest(TestCase):

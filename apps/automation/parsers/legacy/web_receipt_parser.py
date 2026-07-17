@@ -1235,20 +1235,7 @@ class WebReceiptParser(BaseTicketParser):
             "noviembre": "11",
             "diciembre": "12",
         }
-        meses_gds = {
-            "enero": "ENE",
-            "febrero": "FEB",
-            "marzo": "MAR",
-            "abril": "ABR",
-            "mayo": "MAY",
-            "junio": "JUN",
-            "julio": "JUL",
-            "agosto": "AGO",
-            "septiembre": "SEP",
-            "octubre": "OCT",
-            "noviembre": "NOV",
-            "diciembre": "DIC",
-        }
+        from apps.automation.parsers.normalization import GDS_MONTH_ES as meses_gds
 
         for row in valid_tables:
             cols = row.find_all("td", recursive=False)

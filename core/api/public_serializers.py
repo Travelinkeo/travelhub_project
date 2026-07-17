@@ -4,7 +4,7 @@ Serializers para la gestión de API Keys y Webhooks.
 
 from rest_framework import serializers
 
-from core.models.api_keys import APIKey, APIKeyPlan
+from core.models.cron_api_key import CronApiKey
 from core.models.webhooks import Webhook, WebhookDelivery, WebhookEvent
 
 
@@ -12,15 +12,6 @@ class APIKeyCreateSerializer(serializers.Serializer):
     """Serializer para crear una nueva API key."""
 
     name = serializers.CharField(max_length=100)
-    plan = serializers.ChoiceField(
-        choices=APIKeyPlan.choices,
-        default=APIKeyPlan.TRIAL,
-    )
-    scopes = serializers.ListField(
-        child=serializers.CharField(),
-        required=False,
-        default=list,
-    )
     expires_days = serializers.IntegerField(
         required=False,
         default=90,
@@ -36,7 +27,7 @@ class APIKeySerializer(serializers.ModelSerializer):
     is_expired = serializers.SerializerMethodField()
 
     class Meta:
-        model = APIKey
+        model = CronApiKey
         fields = [
             "id",
             "name",

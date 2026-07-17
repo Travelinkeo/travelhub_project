@@ -90,17 +90,22 @@ def _create_or_get_user(email: str, name: str, provider):
         return None
 
     username = email.split("@")[0]
+    from django.db import IntegrityError
+
     base_username = username
     suffix = 1
-    while User.objects.filter(username=username).exists():
-        username = f"{base_username}{suffix}"
-        suffix += 1
 
-    user = User.objects.create_user(
-        username=username,
-        email=email,
-        is_active=True,
-    )
+    while True:
+        try:
+            user = User.objects.create_user(
+                username=username,
+                email=email,
+                is_active=True,
+            )
+            break
+        except IntegrityError:
+            username = f"{base_username}{suffix}"
+            suffix += 1
     if name:
         parts = name.strip().split(" ", 1)
         user.first_name = parts[0]
@@ -167,6 +172,12 @@ def sso_callback(request, provider_id):
 
 def _oidc_callback(request, provider):
     """Intercambia el código de autorización por tokens y autentica."""
+    # Manejo de error de IdP
+    error = request.GET.get("error")
+    if error:
+        logger.warning(f"OIDC error response: {error}")
+        return render(request, "sso/error.html", {"error": f"Identity Provider Error: {error}"})
+
     # Validar state
     saved = request.session.pop(SESSION_KEY_SSO_STATE, {})
     if saved.get("state") != request.GET.get("state"):
@@ -233,6 +244,10 @@ def _oidc_callback(request, provider):
 
     if not email:
         return HttpResponseBadRequest("No email in token")
+
+    email_verified = payload.get("email_verified")
+    if email_verified is not None and not email_verified:
+        return HttpResponseBadRequest("Email not verified by IdP")
 
     user = _create_or_get_user(email, name, provider)
     if not user:

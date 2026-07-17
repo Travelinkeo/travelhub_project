@@ -2,7 +2,6 @@ import logging
 import os
 
 from celery import Celery
-from django.conf import settings  # Importar settings
 from kombu import Exchange, Queue
 
 logger = logging.getLogger(__name__)
@@ -48,15 +47,21 @@ app.conf.task_default_routing_key = "celery"
 # las rutas de settings, causando conflictos. Ahora solo se usa settings.
 
 # Auto-descubrir tareas en todas las apps
-app.autodiscover_tasks()
-app.autodiscover_tasks(packages=["apps.finance"], related_name="tasks_tax_refund")  # noqa: F811
+app.autodiscover_tasks(packages=["apps", "apps.finance"])
 
 # ==========================================
 
 
-# Cargar CELERY_BEAT_SCHEDULE desde settings o desde el módulo dedicado (fallback seguro)
-# Usamos getattr para evitar AttributeError si el settings.py no tiene la variable
-_beat_schedule = getattr(settings, "CELERY_BEAT_SCHEDULE", None)
+# Cargar CELERY_BEAT_SCHEDULE — import de settings diferido para evitar
+# AppRegistryNotReady si celery.py se importa antes de django.setup()
+_beat_schedule = None
+try:
+    from django.conf import settings as _dj_settings
+
+    _beat_schedule = getattr(_dj_settings, "CELERY_BEAT_SCHEDULE", None)
+except Exception as e:
+    logger.debug(f"Django no esta configurado aun; usamos fallback: {e}")
+
 if _beat_schedule is None:
     try:
         from travelhub.celery_beat_schedule import CELERY_BEAT_SCHEDULE as _beat_schedule

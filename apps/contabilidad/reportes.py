@@ -31,7 +31,7 @@ class ReportesContables:
         campo_debe = "debe_bsd" if moneda == "BSD" else "debe"
         campo_haber = "haber_bsd" if moneda == "BSD" else "haber"
 
-        cuentas = CuentaContable.objects.filter(permite_movimientos=True).order_by("codigo_cuenta")
+        cuentas = CuentaContable.objects.filter(acepta_movimientos=True).order_by("codigo_cuenta")
 
         resultado = {
             "periodo": {"desde": fecha_desde, "hasta": fecha_hasta},

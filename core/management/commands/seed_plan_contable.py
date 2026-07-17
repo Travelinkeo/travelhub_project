@@ -286,7 +286,7 @@ class Command(BaseCommand):
                             "tipo_cuenta": c["tipo"],
                             "nivel": c["nivel"],
                             "cuenta_padre": padre,
-                            "permite_movimientos": c["movimiento"],
+                            "acepta_movimientos": c["movimiento"],
                             "naturaleza": c["nat"],
                         },
                     )

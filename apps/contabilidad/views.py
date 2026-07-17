@@ -142,7 +142,7 @@ def reporte_libro_mayor(request):
     cuenta_id = request.GET.get("cuenta")
     if not cuenta_id:
         # Mostrar selector de cuenta
-        cuentas = CuentaContable.objects.filter(permite_movimientos=True).order_by("codigo_cuenta")
+        cuentas = CuentaContable.objects.filter(acepta_movimientos=True).order_by("codigo_cuenta")
         return render(request, "contabilidad/libro_mayor_selector.html", {"cuentas": cuentas})
 
     hoy = date.today()

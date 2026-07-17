@@ -48,7 +48,7 @@ class StagingLedgerBufferTest(TestCase):
             nombre_cuenta="Banco Principal",
             tipo_cuenta=PlanContable.TipoCuentaChoices.ACTIVO,
             naturaleza=PlanContable.NaturalezaChoices.DEUDORA,
-            permite_movimientos=True,
+            acepta_movimientos=True,
         )
         self.cuenta_ingreso = PlanContable.objects.create(
             agencia=self.agencia,
@@ -56,7 +56,7 @@ class StagingLedgerBufferTest(TestCase):
             nombre_cuenta="Ingresos por Ventas",
             tipo_cuenta=PlanContable.TipoCuentaChoices.INGRESO,
             naturaleza=PlanContable.NaturalezaChoices.ACREEDORA,
-            permite_movimientos=True,
+            acepta_movimientos=True,
         )
 
     def test_propuesta_model_justificacion_property(self):

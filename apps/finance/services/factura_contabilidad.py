@@ -66,14 +66,14 @@ def generar_asiento_factura(factura):
             # DEBE: Cuentas por Cobrar
             cuenta_cxc = CuentaContable.objects.filter(
                 codigo_cuenta__startswith="1.1.2",  # Cuentas por Cobrar
-                permite_movimientos=True,
+                acepta_movimientos=True,
                 agencia=factura.agencia,
             ).first()
 
             if not cuenta_cxc:
                 cuenta_cxc = CuentaContable.objects.filter(
                     codigo_cuenta__startswith="1",
-                    permite_movimientos=True,
+                    acepta_movimientos=True,
                     agencia=factura.agencia,
                 ).first()
 
@@ -96,14 +96,14 @@ def generar_asiento_factura(factura):
             # HABER: Ingresos por Ventas
             cuenta_ingresos = CuentaContable.objects.filter(
                 codigo_cuenta__startswith="4.1",  # Ingresos
-                permite_movimientos=True,
+                acepta_movimientos=True,
                 agencia=factura.agencia,
             ).first()
 
             if not cuenta_ingresos:
                 cuenta_ingresos = CuentaContable.objects.filter(
                     codigo_cuenta__startswith="4",
-                    permite_movimientos=True,
+                    acepta_movimientos=True,
                     agencia=factura.agencia,
                 ).first()
 
@@ -129,14 +129,14 @@ def generar_asiento_factura(factura):
             if monto_iva_total > 0:
                 cuenta_iva = CuentaContable.objects.filter(
                     codigo_cuenta__startswith="2.1.4",  # IVA por Pagar
-                    permite_movimientos=True,
+                    acepta_movimientos=True,
                     agencia=factura.agencia,
                 ).first()
 
                 if not cuenta_iva:
                     cuenta_iva = CuentaContable.objects.filter(
                         codigo_cuenta__startswith="2",
-                        permite_movimientos=True,
+                        acepta_movimientos=True,
                         agencia=factura.agencia,
                     ).first()
 
@@ -160,14 +160,14 @@ def generar_asiento_factura(factura):
             if monto_igtf > 0:
                 cuenta_igtf = CuentaContable.objects.filter(
                     codigo_cuenta__startswith="2.1.5",  # IGTF por Pagar
-                    permite_movimientos=True,
+                    acepta_movimientos=True,
                     agencia=factura.agencia,
                 ).first()
 
                 if not cuenta_igtf:
                     cuenta_igtf = CuentaContable.objects.filter(
                         codigo_cuenta__startswith="2",
-                        permite_movimientos=True,
+                        acepta_movimientos=True,
                         agencia=factura.agencia,
                     ).first()
 
@@ -288,35 +288,35 @@ def generar_asiento_pago(pago_venta):
                 # Caja
                 cuenta_debe = CuentaContable.objects.filter(
                     codigo_cuenta__startswith="1.1.1",
-                    permite_movimientos=True,
+                    acepta_movimientos=True,
                     agencia=pago_venta.agencia,
                 ).first()
             else:
                 # Banco
                 cuenta_debe = CuentaContable.objects.filter(
                     codigo_cuenta__startswith="1.1.2",
-                    permite_movimientos=True,
+                    acepta_movimientos=True,
                     agencia=pago_venta.agencia,
                 ).first()
 
             if not cuenta_debe:
                 cuenta_debe = CuentaContable.objects.filter(
                     codigo_cuenta__startswith="1",
-                    permite_movimientos=True,
+                    acepta_movimientos=True,
                     agencia=pago_venta.agencia,
                 ).first()
 
             # Cuenta por Cobrar Clientes (Haber)
             cuenta_haber = CuentaContable.objects.filter(
                 codigo_cuenta__startswith="1.1.2.01",
-                permite_movimientos=True,
+                acepta_movimientos=True,
                 agencia=pago_venta.agencia,
             ).first()
 
             if not cuenta_haber:
                 cuenta_haber = CuentaContable.objects.filter(
                     codigo_cuenta__startswith="1",
-                    permite_movimientos=True,
+                    acepta_movimientos=True,
                     agencia=pago_venta.agencia,
                 ).first()
 

@@ -281,7 +281,7 @@
             <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">{% trans "Rentabilidad" %}</span>
         </a>
 
-        <a href="#"
+        <a href="{% url 'contabilidad:reconciliation' %}"
             class="nav-item {% if 'reconciliacion' in request.path %}nav-active{% endif %}"
             :class="!sidebarOpen && 'justify-center'">
             <span class="material-symbols-outlined text-[20px] shrink-0">auto_awesome</span>

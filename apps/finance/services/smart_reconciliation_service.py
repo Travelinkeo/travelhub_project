@@ -484,7 +484,7 @@ class SmartReconciliationService:
                 f"Cuenta {codigo} (key: {config_key}) no encontrada para agencia {agencia.nombre}. Usando fallback por tipo {tipo_cuenta_fallback}."
             )
             cuenta = PlanContable.objects.filter(
-                tipo_cuenta=tipo_cuenta_fallback, permite_movimientos=True
+                tipo_cuenta=tipo_cuenta_fallback, acepta_movimientos=True
             ).first()
             if not cuenta:
                 logger.error(

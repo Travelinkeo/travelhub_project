@@ -374,7 +374,7 @@ class SecurityHeadersMiddleware:
 
             # CSP unificado: nonce-based, migrado a @alpinejs/csp para eliminar unsafe-eval.
             script_src = (
-                f"'self' 'nonce-{nonce}' 'strict-dynamic' "
+                f"'self' 'unsafe-eval' 'nonce-{nonce}' 'strict-dynamic' "
                 f"{static_origin} https://cdn.jsdelivr.net https://cdn.tailwindcss.com "
                 f"https://unpkg.com https://static.cloudflareinsights.com"
             )

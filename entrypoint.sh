@@ -24,4 +24,4 @@ python manage.py collectstatic --noinput &
 echo "📦 collectstatic lanzado en background. Iniciando servidor..."
 
 # Drop privileges to appuser for the main process
-exec su appuser -c 'exec "$@"' appuser "$@"
+exec runuser -u appuser -- "$@"

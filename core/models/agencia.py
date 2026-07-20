@@ -111,6 +111,11 @@ class Agencia(models.Model):
 
     # --- CAPA DE COMPATIBILIDAD (READ-ONLY PROPERTIES) ---
     @property
+    def activo(self):
+        """Alias para compatibilidad con código que consulta 'activo'."""
+        return self.activa
+
+    @property
     def plan(self):
         return self.configuracion.plan if self.configuracion else "FREE"
 

@@ -51,7 +51,6 @@ from .views import (
     health_views,
     intelligence_views,
     notifications,
-    search_views,
     settings_views,
     translator_views,
     user_profile_views,
@@ -162,7 +161,6 @@ urlpatterns = [
     path("ceo-dashboard/", dashboard.CEODashboardView.as_view(), name="ceo_dashboard"),
     path("api/ai-advisor/", dashboard.AIBusinessAdvisorView.as_view(), name="ai_business_advisor"),
     # Omnisearch
-    path("omnisearch/", search_views.GlobalOmnisearchView.as_view(), name="omnisearch"),
     # WhatsApp / Evolution
     path(
         "whatsapp/qr-img/<str:instance_name>/",

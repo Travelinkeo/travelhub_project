@@ -36,7 +36,7 @@ def generar_liquidaciones_mensuales_task(anio=None, mes=None, agencia_id=None):
     if agencia_id:
         agencias = [Agencia.objects.get(pk=agencia_id)]
     else:
-        agencias = Agencia.objects.filter(activo=True).iterator(chunk_size=50)
+        agencias = Agencia.objects.filter(activa=True).iterator(chunk_size=50)
 
     liquidaciones_creadas = 0
 

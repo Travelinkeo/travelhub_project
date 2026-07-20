@@ -1,6 +1,7 @@
 import re
 
 from pydantic import BaseModel, Field, field_validator, model_validator
+
 from apps.automation.parsers.normalization import GDS_MONTH_NUM as MESES_GDS
 
 

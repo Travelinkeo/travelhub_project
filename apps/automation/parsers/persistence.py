@@ -1,5 +1,7 @@
 import logging
 
+from django.db import transaction
+
 from apps.bookings.models import BoletoImportado, Proveedor
 from apps.common.models import Aerolinea
 
@@ -14,6 +16,7 @@ class BoletoPersistenceService:
     """
 
     @staticmethod
+    @transaction.atomic
     def update_boleto_from_data(boleto, data):
         """Actualiza los campos del modelo BoletoImportado con la data normalizada."""
         try:

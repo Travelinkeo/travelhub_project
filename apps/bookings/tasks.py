@@ -227,7 +227,7 @@ def monitorear_tiempos_limite_periodico_task(**kwargs):
     if agencia_activa:
         agencias = [agencia_activa]
     else:
-        agencias = Agencia.objects.filter(activo=True).iterator(chunk_size=50)
+        agencias = Agencia.objects.filter(activa=True).iterator(chunk_size=50)
 
     alertas_enviadas = 0
     for agencia in agencias:

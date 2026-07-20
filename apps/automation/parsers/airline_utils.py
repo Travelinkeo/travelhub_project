@@ -2,6 +2,8 @@
 
 import logging
 
+from django.db.utils import OperationalError
+
 from apps.common.models import Aerolinea
 
 logger = logging.getLogger(__name__)
@@ -124,7 +126,7 @@ def normalize_airline_name(
                 if aerolinea:
                     logger.info(f"Aerolínea identificada por placa {prefix}: {aerolinea.nombre}")
                     return aerolinea.nombre
-            except Exception as e:
+            except (OperationalError, Exception) as e:
                 logger.error(f"Error buscando aerolínea por placa {prefix}: {e}")
 
     # PRIORIDAD 0: Chequeo de texto directo (Para evitar confusiones AV vs AVIOR)

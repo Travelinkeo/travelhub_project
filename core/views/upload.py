@@ -385,16 +385,12 @@ class BoletoPdfStatusView(View):
                     return HttpResponse(html)
 
         if boleto.estado_parseo == BoletoImportado.EstadoParseo.ERROR_PARSEO:
-            url = reverse("core:boleto_pdf_status", kwargs={"pk": boleto.pk}) + "?retry=1&poll=0"
             html = f"""
             <div id="pdf-status-container-{boleto.pk}"
-                 hx-get="{url}"
-                 hx-trigger="click"
-                 hx-swap="outerHTML"
-                 class="flex-1 h-10 px-4 rounded-xl bg-red-500/5 border border-red-500/20 flex items-center justify-center gap-2 text-red-500 group cursor-pointer"
-                 title="Error al generar PDF. Clic para reintentar.">
+                 class="flex-1 h-10 px-4 rounded-xl bg-red-500/5 border border-red-500/20 flex items-center justify-center gap-2 text-red-500 group"
+                 title="Error en el parseo. Use el botón superior para re-extraer con IA.">
                 <span class="material-symbols-outlined text-[16px]">error</span>
-                <span class="text-[9px] font-black uppercase tracking-wider">Error TKT — Clic para reintentar</span>
+                <span class="text-[9px] font-black uppercase tracking-wider">ERROR PARSEO — NO TKT</span>
             </div>
             """
             return HttpResponse(html)

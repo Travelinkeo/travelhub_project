@@ -76,8 +76,11 @@ class KIUParser(BaseTicketParser):
             except Exception as e:
                 logger.error(f"Fallo en AI Reinforcement de KIU: {e}")
 
-        # Extraer vuelos (lógica simplificada para este ejemplo, se puede expandir)
-        flights = self._extract_flights(text, html_text, issue_date=issue_date)
+        try:
+            flights = self._extract_flights(text, html_text, issue_date=issue_date)
+        except Exception:
+            logger.error("Error extrañendo vuelos KIU", exc_info=True)
+            flights = []
 
         # HEURÍSTICA DE REPARACIÓN
         # Si el nombre es 'S BOLETO NRO' (error típico), intentar buscar otro nombre

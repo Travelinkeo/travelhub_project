@@ -373,6 +373,17 @@ WHATSAPP_PHONE_ID = env("WHATSAPP_PHONE_ID", default="")
 TWILIO_WHATSAPP_NUMBER = env("TWILIO_WHATSAPP_NUMBER", default="")
 TWILIO_AUTH_TOKEN = env("TWILIO_AUTH_TOKEN", default="")
 
+# Endpoint interno donde el monitor proactivo puede llamar al health-check
+# del flujo WhatsApp/Evolution. Por defecto localhost si Django y Celery
+# corren en el mismo contenedor (web). En setups con Django separado,
+# configurar DJANGO_BASE_URL=http://web:8000 o similar.
+DJANGO_BASE_URL = os.getenv("DJANGO_BASE_URL", "http://localhost:8000")
+
+# Token opcional para autenticar requests del monitor worker al health-check
+# (no es auth, solo previene que cualquiera pueda triggerear load innecesario).
+# Si está vacío, el monitor hace requests sin autenticación extra.
+MONITOR_SERVICE_TOKEN = os.getenv("MONITOR_SERVICE_TOKEN", "")
+
 BINANCE_PAY_API_KEY = env("BINANCE_PAY_API_KEY", default="")
 BINANCE_PAY_SECRET_KEY = env("BINANCE_PAY_SECRET_KEY", default="")
 BINANCE_WEBHOOK_SECRET = env("BINANCE_WEBHOOK_SECRET", default="")

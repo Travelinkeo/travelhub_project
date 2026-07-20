@@ -2,7 +2,7 @@
 from celery.schedules import crontab
 
 QR_CACHE_KEY = "evo_qr:{instance}"
-QR_CACHE_TTL = 300  # 5 minutos — suficiente margen antes del refresh automático (90s)
+QR_CACHE_TTL = 120  # 2 minutos — Cache siempre caliente porque Beat refresca cada 60s
 
 CELERY_BEAT_SCHEDULE = {
     "process-incoming-emails-every-2-minutes": {
@@ -80,10 +80,19 @@ CELERY_BEAT_SCHEDULE = {
         "schedule": crontab(hour=20, minute=0),  # Todos los días 8:00 PM
         "args": (),
     },
-    # Renovar QR de WhatsApp para todas las agencias activas (cada 5 min)
+    # Renovar QR de WhatsApp para todas las agencias activas (cada 60s)
+    # El caché tiene TTL 120s, así el siguiente refresh siempre llega antes del TTL
+    # para evitar que el iframe muestre el fallback del Evolution Manager UI (404).
     "refresh-whatsapp-qr-all": {
         "task": "apps.common.tasks.fetch_all_qr_codes_task",
-        "schedule": 300.0,  # cada 5 minutos — Evolution API no soporta polling agresivo
+        "schedule": 60.0,
+        "args": (),
+    },
+    # Monitor proactivo del flujo WhatsApp — alerta a Telegram si degradado/down
+    # (cada 5 min para no spamear; tolera <2 min de caída antes de notificar)
+    "monitor-whatsapp-health": {
+        "task": "apps.common.tasks.monitor_whatsapp_health_task",
+        "schedule": crontab(minute="*/5"),
         "args": (),
     },
     # Enviar mensajes de WhatsApp programados (cada minuto)

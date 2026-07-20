@@ -106,6 +106,52 @@ class EvolutionService:
         return cls.get_instance_state(instance_name) == "open"
 
     @classmethod
+    def get_connection_qr_base64(cls, instance_name: str, timeout: int = 12):
+        """Llama a Evolution /instance/connect y devuelve el QR en base64.
+
+        Devuelve None si no hay QR disponible (versión exhaustiva de la API).
+
+        Útil como fallback para garantizar que el frontend tenga SIEMPRE un data:image
+        en cache, evitando el iframe roto (404) del Evolution Manager UI proxy.
+        """
+        from django.core.cache import cache
+
+        url = f"{cls._get_base_url()}/instance/connect/{instance_name}"
+        cache_key = f"evo_qr:{instance_name}"
+
+        # Si ya está conectado a WhatsApp, no hay QR que mostrar.
+        if cls.get_instance_state(instance_name) == "open":
+            cache.delete(cache_key)
+            return None
+
+        try:
+            session = cls._get_session()
+            headers = cls._get_headers()
+            headers.pop("Content-Type", None)
+            response = session.get(url, headers=headers, timeout=(3.05, timeout))
+
+            if response.status_code == 404:
+                # La instancia no existe — intentar crearla y re-intentar
+                cls.create_instance(instance_name)
+                response = session.get(url, headers=headers, timeout=(3.05, timeout))
+
+            if response.status_code == 200:
+                data = response.json()
+                qr_b64 = data.get("base64")
+                if not qr_b64 and isinstance(data.get("qrcode"), dict):
+                    qr_b64 = data["qrcode"].get("base64")
+                if qr_b64:
+                    if qr_b64.startswith("data:image"):
+                        raw = qr_b64.split(",", 1)[1]
+                    else:
+                        raw = qr_b64
+                    cache.set(cache_key, raw, 120)
+                    return raw
+        except Exception as e:
+            logger.error(f"get_connection_qr_base64 error: {e}")
+        return None
+
+    @classmethod
     def get_qr_code(cls, instance_name: str):
         """Obtiene el QR para conectar la instancia."""
         url = f"{cls._get_base_url()}/instance/connect/{instance_name}"

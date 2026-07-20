@@ -179,6 +179,32 @@ urlpatterns = [
         evolution_proxy_views.evolution_manager_proxy,
         name="evolution_qr_assets",
     ),
+    # Health-check dedicado del flujo WhatsApp (sin auth, devuelve JSON)
+    # Pensado para monitors externos (UptimeRobot, Prometheus blackbox, etc.)
+    #
+    # IMPORTANTE: Las rutas /alert/ y /alert/<slug>/ DEBEN ir ANTES de
+    # /<slug>/ para evitar que Django matchee "alert" como instance_name.
+    path(
+        "whatsapp/health/",
+        evolution_qr_view.whatsapp_qr_health,
+        name="evolution_qr_health",
+    ),
+    path(
+        "whatsapp/health/alert/",
+        evolution_qr_view.whatsapp_health_alert_webhook,
+        name="whatsapp_health_alert_webhook",
+    ),
+    path(
+        "whatsapp/health/alert/<str:instance_name>/",
+        evolution_qr_view.whatsapp_health_alert_webhook,
+        name="whatsapp_health_alert_webhook_instance",
+    ),
+    # wildcard DEBE ir al final (lowest priority)
+    path(
+        "whatsapp/health/<str:instance_name>/",
+        evolution_qr_view.whatsapp_qr_health,
+        name="evolution_qr_health_instance",
+    ),
     # Notificaciones & Monitor
     path("notifications/live/", notifications.notificaciones_live_view, name="notificaciones_live"),
     path(

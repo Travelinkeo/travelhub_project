@@ -450,14 +450,20 @@ def notificar_boleto_procesado(boleto):
     except Exception as e:
         logger.error(f"Error generando URL del PDF para boleto: {e}")
 
-    # WhatsApp al Admin
+    # Configuración del canal de notificación (WhatsApp, Telegram o Ambos)
+    canal = "both"
+    if agencia and hasattr(agencia, "configuracion") and agencia.configuracion:
+        canal = agencia.configuracion.canal_notificaciones_mailbot
+        if not canal:
+            canal = "both"
+
     admin_phone = getattr(settings, "ADMIN_WHATSAPP_NUMBER", "+584126080861")
     is_enabled = getattr(settings, "WHATSAPP_NOTIFICATIONS_ENABLED", False)
 
-    if is_enabled and admin_phone:
-        mensaje = f"""✈️ *Boleto Generado - {agencia_nombre}*
+    # 1. NOTIFICACIÓN AL ADMIN
+    mensaje_admin = f"""✈️ *Boleto Generado - {agencia_nombre}*
 
-Estimado Armando,
+Estimado Administrador,
 
 Se ha procesado un nuevo boleto de forma automática.
 
@@ -467,22 +473,36 @@ Se ha procesado un nuevo boleto de forma automática.
 • Aerolínea: {boleto.aerolinea_emisora or "N/A"}
 • Boleto: {boleto.numero_boleto}
 """
-
+    if canal in ["whatsapp", "both"] and is_enabled and admin_phone:
         try:
             from apps.common.tasks import send_whatsapp_task
 
             send_whatsapp_task.delay(
                 sender_id=admin_phone,
                 recipient_number=admin_phone,
-                message_text=mensaje,
+                message_text=mensaje_admin,
                 agencia_id=agencia_id,
             )
             logger.info(f"Tarea WhatsApp encolada para Admin ({admin_phone})")
         except Exception as e:
             logger.error(f"Error encolando WhatsApp para Admin ({admin_phone}): {e}")
 
-    # WhatsApp al Cliente
-    if is_enabled and cliente and cliente.telefono_principal:
+    if canal in ["telegram", "both"]:
+        try:
+            from apps.communications.services.telegram_unified import TelegramNotificationService
+
+            if pdf_url:
+                TelegramNotificationService.send_document(
+                    file_path=pdf_url, caption=mensaje_admin, agencia=agencia
+                )
+            else:
+                TelegramNotificationService.send_message(message=mensaje_admin, agencia=agencia)
+            logger.info("Notificación de Telegram enviada al Admin")
+        except Exception as e:
+            logger.error(f"Error enviando Telegram al Admin: {e}")
+
+    # 2. NOTIFICACIÓN AL CLIENTE
+    if cliente:
         mensaje_cliente = f"""✈️ *¡Tu boleto está listo! - {agencia_nombre}*
 
 Hola *{cliente.get_nombre_completo()}*,
@@ -500,26 +520,50 @@ Adjunto encontrarás tu boleto unificado en formato PDF.
 ¡Que disfrutes tu viaje!
 _{agencia_nombre}_
 """
-        try:
-            from django.db import transaction
+        # WhatsApp al Cliente
+        if canal in ["whatsapp", "both"] and is_enabled and cliente.telefono_principal:
+            try:
+                from django.db import transaction
 
-            from core.api import enviar_notificacion_whatsapp_task
+                from core.api import enviar_notificacion_whatsapp_task
 
-            transaction.on_commit(
-                lambda: enviar_notificacion_whatsapp_task.delay(
-                    numero_cliente=cliente.telefono_principal,
-                    mensaje=mensaje_cliente,
-                    email_cliente=cliente.email,
-                    agencia_id=agencia_id,
-                    media_url=pdf_url if pdf_url else None,
-                    file_name=f"Boleto_{pasajero.replace('/', '_')}_{pnr}.pdf",
+                transaction.on_commit(
+                    lambda: enviar_notificacion_whatsapp_task.delay(
+                        numero_cliente=cliente.telefono_principal,
+                        mensaje=mensaje_cliente,
+                        email_cliente=cliente.email,
+                        agencia_id=agencia_id,
+                        media_url=pdf_url if pdf_url else None,
+                        file_name=f"Boleto_{pasajero.replace('/', '_')}_{pnr}.pdf",
+                    )
                 )
-            )
-            logger.info(
-                f"Encolada tarea WhatsApp para cliente {cliente.get_nombre_completo()} ({cliente.telefono_principal})"
-            )
-        except Exception as e_celery:
-            logger.error(f"Error encolando tarea de WhatsApp para cliente: {e_celery}")
+                logger.info(f"Encolada tarea WhatsApp para cliente {cliente.get_nombre_completo()}")
+            except Exception as e_celery:
+                logger.error(f"Error encolando tarea de WhatsApp para cliente: {e_celery}")
+
+        # Telegram al Cliente
+        if canal in ["telegram", "both"] and getattr(cliente, "telegram_chat_id", None):
+            try:
+                from apps.communications.services.telegram_unified import (
+                    TelegramNotificationService,
+                )
+
+                if pdf_url:
+                    TelegramNotificationService.send_document(
+                        file_path=pdf_url,
+                        caption=mensaje_cliente,
+                        chat_id=cliente.telegram_chat_id,
+                        agencia=agencia,
+                    )
+                else:
+                    TelegramNotificationService.send_message(
+                        message=mensaje_cliente, chat_id=cliente.telegram_chat_id, agencia=agencia
+                    )
+                logger.info(
+                    f"Notificación Telegram enviada a cliente {cliente.get_nombre_completo()}"
+                )
+            except Exception as e:
+                logger.error(f"Error enviando Telegram al cliente: {e}")
 
     # Email al cliente
     if cliente and cliente.email:

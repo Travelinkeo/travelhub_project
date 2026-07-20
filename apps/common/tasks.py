@@ -1527,3 +1527,168 @@ def limpiar_celery_results(days=30):
     except Exception as e:
         logger.error(f"Error limpiando celery results: {e}")
         return f"Error limpiando celery results: {e}"
+
+
+# ============================================================
+#   MONITOR DE SALUD DEL FLUJO WHATSAPP/BAILEYS
+# ============================================================
+#
+# Cada 5 minutos llama al endpoint interno /system/whatsapp/health/.
+# Si el status agregado es "degraded" o "down", envía una alerta al
+# Telegram del admin (TELEGRAM_ADMIN_ID) con los detalles para diagnóstico.
+#
+# Esto evita depender de UptimeMonitor externo y permite alertas proactivas
+# desde la infraestructura del propio proyecto — sin necesidad de contar con
+# Datadog / UptimeRobot configurados.
+#
+# El status "ok" también se loggea (info) para auditoría. Las alertas se
+# almacenan en Redis (con TTL 1h) para evitar spam: una alerta solo se
+# envía cuando la salud PASA de "ok" a "down/degraded".
+
+
+_WHATSAPP_HEALTH_LAST_STATE_KEY = "monitor:whatsapp_health:last_state"
+_WHATSAPP_HEALTH_LAST_STATE_TTL = 3600  # 1 hora de gracia (evita reset)
+
+
+@shared_task(name="apps.common.tasks.monitor_whatsapp_health_task", queue="default", time_limit=60)
+def monitor_whatsapp_health_task():
+    """Monitor proactivo del flujo WhatsApp/Evolution. Alerta a Telegram si down/degraded."""
+    from django.core.cache import cache
+
+    # 1. Llamar al endpoint interno en lugar de re-implementar la lógica
+    base_url = getattr(settings, "WHATSAPP_MICROSERVICE_URL", None) or os.getenv(
+        "WHATSAPP_MICROSERVICE_URL", "http://evolution:8080"
+    )
+    # Calculamos el host Django correctamente desde settings.
+    # Como esto corre en web container, apuntamos a localhost:8000.
+    django_base = "http://localhost:8000"
+    health_url = f"{django_base}/system/whatsapp/health/"
+
+    started_ts = datetime.datetime.now(datetime.UTC)
+    health_data = None
+    http_status = None
+
+    try:
+        import requests
+
+        # Backend URL desde settings Django
+        django_base = (
+            getattr(settings, "DJANGO_BASE_URL", None)
+            or os.getenv("DJANGO_BASE_URL")
+            or "http://localhost:8000"
+        )
+        health_url = f"{django_base}/system/whatsapp/health/"
+
+        # Generar headers de service-account si existen
+        headers = {"User-Agent": "travelhub-monitor/1.0"}
+        service_token = os.getenv("MONITOR_SERVICE_TOKEN")
+        if service_token:
+            headers["Authorization"] = f"Bearer {service_token}"
+
+        response = requests.get(health_url, headers=headers, timeout=30)
+        http_status = response.status_code
+        if response.status_code == 200:
+            health_data = response.json()
+        else:
+            health_data = {"error": f"HTTP {http_status}", "raw": response.text[:500]}
+    except Exception as e:
+        logger.exception("monitor_whatsapp_health_task: error fetching health endpoint")
+        health_data = {"error": str(e), "status": "down"}
+
+    # 2. Evaluar estado
+    overall = (health_data or {}).get("status", "down")
+    checks = (health_data or {}).get("checks", {})
+
+    # 3. Construir resumen
+    if overall == "ok":
+        summary = "✅ Todos los flujos WhatsApp OK"
+    else:
+        affected = [
+            f"• {slug}: {info.get('status')} (state={info['checks'].get('evolution_state')}, qr_gen={info['checks'].get('qr_generable')})"
+            for slug, info in checks.items()
+        ]
+        summary = (
+            f"❌ Estado: <b>{overall.upper()}</b>\n"
+            + ("Instances afectadas:\n" + "\n".join(affected) if affected else "")
+            + f"\nDebug: `{django_base.rstrip('/')}/system/whatsapp/health/`"
+        )
+
+    # 4. Resumir performance
+    overall_ms = (health_data or {}).get("overall_ms", "?")
+
+    # 5. Detectar cambios de estado para evitar spam
+    last_state = cache.get(_WHATSAPP_HEALTH_LAST_STATE_KEY)
+    alert_needed = last_state != overall and overall in ("degraded", "down")
+
+    if not alert_needed:
+        # Loggear igual para auditoría
+        logger.info(
+            "monitor_whatsapp_health: state=%s elapsed_ms=%s affected=%d",
+            overall,
+            overall_ms,
+            len(checks),
+        )
+        cache.set(_WHATSAPP_HEALTH_LAST_STATE_KEY, overall, _WHATSAPP_HEALTH_LAST_STATE_TTL)
+        return {"status": overall, "alert_sent": False, "overall_ms": overall_ms}
+
+    # 6. Construir mensaje de Telegram
+    elapsed = (datetime.datetime.now(datetime.UTC) - started_ts).total_seconds()
+    telegram_msg = (
+        f"🚨 <b>WhatsApp Health Alert</b>\n"
+        f"⏰ {started_ts.strftime('%Y-%m-%d %H:%M:%S UTC')}\n"
+        f"⏱ Verificado en {elapsed:.2f}s ({overall_ms}ms en endpoint)\n"
+        f"\n{summary}"
+    )
+
+    # 7. Enviar alerta (USAR SEND TELEGRAM TASK para no bloquear)
+    try:
+        from django.conf import settings as dj_settings
+
+        from apps.common.tasks import send_telegram_task
+
+        admin_chat_id = getattr(dj_settings, "TELEGRAM_ADMIN_ID", None)
+        if admin_chat_id:
+            send_telegram_task.delay(telegram_msg, chat_id=str(admin_chat_id))
+            logger.error(
+                "monitor_whatsapp_health: Alert sent to Telegram admin=%s state=%s",
+                admin_chat_id,
+                overall,
+            )
+        else:
+            logger.warning(
+                "monitor_whatsapp_health: state=%s but TELEGRAM_ADMIN_ID not configured",
+                overall,
+            )
+    except Exception as e:
+        logger.error("monitor_whatsapp_health: error sending telegram alert: %s", e)
+
+    # 7b. Log a Sentry también si está disponible
+    try:
+        import sentry_sdk
+
+        with sentry_sdk.push_scope() as scope:
+            scope.set_tag("component", "whatsapp_monitor")
+            scope.set_tag("state", overall)
+            scope.set_extra("health_data", health_data)
+            sentry_sdk.capture_message(
+                f"whatsapp health {overall}",
+                level="error" if overall == "down" else "warning",
+            )
+    except Exception:
+        pass
+
+    # 8. Update cache con nuevo estado
+    cache.set(_WHATSAPP_HEALTH_LAST_STATE_KEY, overall, _WHATSAPP_HEALTH_LAST_STATE_TTL)
+
+    kpis = {
+        "ok": sum(1 for c in checks.values() if c.get("status") == "ok"),
+        "degraded": sum(1 for c in checks.values() if c.get("status") == "degraded"),
+        "down": sum(1 for c in checks.values() if c.get("status") == "down"),
+    }
+
+    return {
+        "status": overall,
+        "alert_sent": alert_needed,
+        "overall_ms": overall_ms,
+        "instances": kpis,
+    }

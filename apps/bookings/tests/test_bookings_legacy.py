@@ -5,9 +5,8 @@ from django.test import TestCase, override_settings
 from django.utils.module_loading import import_string
 
 from apps.bookings.models import FeeVenta, ItemVenta, PagoVenta, ProductoServicio, Venta
+from apps.common.models import Moneda
 from core.models.agencia import Agencia
-
-Moneda = import_string("apps.finance.models.Moneda")
 
 
 @override_settings(CELERY_TASK_ALWAYS_EAGER=True, CELERY_TASK_EAGER_PROPAGATES=True)
@@ -265,7 +264,6 @@ class BIContableTest(TestCase):
             )
 
         # Ejecutar la tarea de Celery
-        from django.utils.module_loading import import_string
 
         auditar_fuga_ingresos_task = import_string("apps.finance.tasks.auditar_fuga_ingresos_task")
         resultado = auditar_fuga_ingresos_task()

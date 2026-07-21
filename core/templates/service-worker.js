@@ -1,8 +1,8 @@
-// TravelHub PWA — Service Worker
-// Estrategia: Network First para HTML/API, Cache First para assets estáticos
-// Push notifications: maneja subscripción y eventos push
+// TravelHub PWA — Service Worker v4
+// Estrategias: Network First para HTML, Cache First para assets, Stale-While-Revalidate para HTMX
+// Push notifications, Background Sync, offline indicator
 
-const CACHE_NAME = 'travelhub-v3';
+const CACHE_NAME = 'travelhub-v4';
 const STATIC_ASSETS = [
   '/static/core/css/tailwind-built.css',
   '/static/core/css/responsive.css',
@@ -18,38 +18,29 @@ const STATIC_ASSETS = [
 self.addEventListener('install', (event) => {
   self.skipWaiting();
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(STATIC_ASSETS);
-    })
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS))
   );
 });
 
 // --- ACTIVATE ---
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((keys) => {
-      return Promise.all(
-        keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k))
-      );
-    }).then(() => self.clients.claim())
+    caches.keys().then((keys) =>
+      Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
+    ).then(() => self.clients.claim())
   );
 });
 
-// --- FETCH (Network First for navigation, Cache First for static assets) ---
+// --- FETCH ---
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // Solo manejar peticiones al mismo origen
   if (url.origin !== self.location.origin) return;
-
-  // Ignorar métodos que no sean GET (POST, PUT, DELETE, etc. pasan directo a la red)
   if (request.method !== 'GET') return;
-
-  // Ignorar llamadas de la API (pasan directo a la red)
   if (url.pathname.startsWith('/api/')) return;
 
-  // Estrategia para páginas HTML (navegación): Network First (con fallback offline)
+  // Navegación: Network First con fallback offline
   if (request.mode === 'navigate') {
     event.respondWith(
       fetch(request).catch(() => caches.match('/offline/'))
@@ -57,23 +48,11 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Estrategia para archivos estáticos (CSS, JS, imágenes, fuentes)
-  const isStaticAsset = url.pathname.startsWith('/static/') ||
-                        url.pathname.startsWith('/media/') ||
-                        url.pathname.endsWith('.png') ||
-                        url.pathname.endsWith('.jpg') ||
-                        url.pathname.endsWith('.jpeg') ||
-                        url.pathname.endsWith('.svg') ||
-                        url.pathname.endsWith('.ico') ||
-                        url.pathname.endsWith('.woff2') ||
-                        url.pathname.endsWith('.js') ||
-                        url.pathname.endsWith('.css');
-
-  if (isStaticAsset) {
+  // Assets estáticos: Cache First
+  if (url.pathname.startsWith('/static/') || url.pathname.startsWith('/media/')) {
     event.respondWith(
-      caches.match(request).then((cached) => {
-        return cached || fetch(request).then((response) => {
-          // Solo almacenar respuestas exitosas (status 200)
+      caches.match(request).then((cached) =>
+        cached || fetch(request).then((response) => {
           if (response.status === 200) {
             return caches.open(CACHE_NAME).then((cache) => {
               cache.put(request, response.clone());
@@ -81,17 +60,30 @@ self.addEventListener('fetch', (event) => {
             });
           }
           return response;
-        });
-      })
+        })
+      )
     );
     return;
   }
 
-  // Para cualquier otra petición dinámica (HTMX, AJAX, partials), ir directo a la red sin caching.
-  // Esto previene que se sirvan páginas con traducciones desactualizadas o datos antiguos.
+  // HTMX partials y demás peticiones: Stale-While-Revalidate
+  event.respondWith(
+    caches.match(request).then((cached) => {
+      const fetchPromise = fetch(request).then((response) => {
+        if (response.status === 200) {
+          return caches.open(CACHE_NAME).then((cache) => {
+            cache.put(request, response.clone());
+            return response;
+          });
+        }
+        return response;
+      }).catch(() => cached);
+      return cached || fetchPromise;
+    })
+  );
 });
 
-// --- PUSH (Recibir notificaciones) ---
+// --- PUSH ---
 self.addEventListener('push', (event) => {
   let data = { title: 'TravelHub', body: '', icon: '/static/images_pwa/pwa-192x192.png', badge: '/static/images_pwa/pwa-maskable-192x192.png' };
   if (event.data) {
@@ -101,7 +93,6 @@ self.addEventListener('push', (event) => {
       data.body = event.data.text();
     }
   }
-
   event.waitUntil(
     self.registration.showNotification(data.title, {
       body: data.body,
@@ -132,9 +123,36 @@ self.addEventListener('notificationclick', (event) => {
   );
 });
 
-// --- MESSAGE (desde la página, para suscripción push) ---
+// --- MESSAGE ---
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }
+  if (event.data && event.data.type === 'SYNC_NOW') {
+    self.registration.sync.register('sync-pending');
+  }
 });
+
+// --- BACKGROUND SYNC ---
+self.addEventListener('sync', (event) => {
+  if (event.tag === 'sync-pending') {
+    event.waitUntil(syncPendingData());
+  }
+});
+
+async function syncPendingData() {
+  try {
+    const cache = await caches.open('pending-requests');
+    const requests = await cache.keys();
+    for (const req of requests) {
+      try {
+        await fetch(req);
+        await cache.delete(req);
+      } catch {
+        // Reintentar en el próximo sync
+      }
+    }
+  } catch {
+    // Silencioso
+  }
+}

@@ -9,8 +9,6 @@
 
     <link rel="stylesheet" href="{% static 'core/css/tailwind-built.css' %}">
     <link rel="stylesheet" href="{% static 'core/css/responsive.css' %}">
-    <link rel="manifest" href="{% static 'manifest.json' %}">
-
     <script nonce="{{ request.csp_nonce }}" src="{% static 'vendor/htmx_v2.js' %}"></script>
     <script nonce="{{ request.csp_nonce }}" src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js" defer></script>
 
@@ -24,19 +22,6 @@
         };
     </script>
     <script nonce="{{ request.csp_nonce }}" src="{% static 'js/csp-events.js' %}"></script>
-    <script nonce="{{ request.csp_nonce }}">
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/static/serviceworker.js')
-                    .then(registration => {
-                        console.log('SW registered: ', registration);
-                    })
-                    .catch(registrationError => {
-                        console.log('SW registration failed: ', registrationError);
-                    });
-            });
-        }
-    </script>
     <script nonce="{{ request.csp_nonce }}" src="{% static 'vendor/lucide_v2.js' %}"></script>
     <script nonce="{{ request.csp_nonce }}" src="{% static 'vendor/chart_v2.js' %}"></script>
     <script nonce="{{ request.csp_nonce }}" src="{% static 'vendor/sweetalert2_v2.js' %}"></script>
@@ -147,6 +132,10 @@
                 </a>
             </div>
         </header>
+
+        <div id="offline-indicator" class="hidden fixed top-0 left-0 right-0 z-[200] bg-amber-600/90 text-white text-center text-xs font-bold py-1.5 px-4 backdrop-blur-sm">
+            Sin conexión — algunos datos pueden no estar disponibles
+        </div>
 
         <div class="flex-1 overflow-y-auto w-full pb-16 md:pb-0" id="main-content">
             {% block content %}{% endblock %}

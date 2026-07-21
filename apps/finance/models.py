@@ -1,5 +1,6 @@
 from django.db import models
 
+from apps.common.models import Moneda  # noqa: F401 re-export for backwards compatibility
 from core.models.base import AgenciaMixin
 
 # Stubs for migration & apps.get_model compatibility

@@ -47,7 +47,7 @@ logger = logging.getLogger(__name__)
 class CotizacionViewSet(InternalAPIAuthMixin, TenantViewSetMixin, viewsets.ModelViewSet):
     queryset = (
         Cotizacion.objects.select_related("cliente", "consultor")
-        .prefetch_related("items_cotizacion")
+        .prefetch_related("items")
         .order_by("-fecha_emision")
     )
     serializer_class = CotizacionSerializer

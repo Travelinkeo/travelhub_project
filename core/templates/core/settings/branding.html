@@ -249,6 +249,33 @@
                         </div>
                     </section>
 
+                    <!-- ──── SECCIÓN 4.5: WHITE LABEL ──── -->
+                    <section>
+                        <h3 class="text-sm font-black uppercase tracking-widest text-text-muted mb-4 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-[16px]">brand_awareness</span>
+                            White Label &amp; Avanzado
+                        </h3>
+                        <div class="bg-surface-2 border border-border-color p-6 rounded-2xl space-y-5">
+                            <div>
+                                <label class="block text-xs font-bold text-text-muted mb-1.5">Template Pack (carpeta personalizada)</label>
+                                <input type="text" name="template_pack" value="{{ branding.template_pack|default:'' }}"
+                                       placeholder="ej: agencia_{id}"
+                                       class="w-full bg-surface-3 border border-border-color rounded-xl px-4 py-2.5 text-sm text-text-main
+                                              placeholder:text-text-muted/40 focus:outline-none focus:border-primary/50 transition-colors font-mono">
+                                <p class="text-[10px] text-text-muted/60 mt-1">
+                                    Sobre-escribe templates globales con una carpeta propia en <code class="text-primary">core/templates/&lt;template_pack&gt;/</code>.
+                                    Déjalo vacío para usar los templates por defecto.
+                                </p>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-text-muted mb-1.5">Color Secundario</label>
+                                <input type="color" name="color_secundario" value="{{ branding.color_secundario|default:'#88081f' }}"
+                                       class="w-12 h-12 rounded-xl cursor-pointer border-0 bg-transparent p-0">
+                                <span class="text-xs font-mono text-text-muted ml-2">{{ branding.color_secundario|default:'#88081f' }}</span>
+                            </div>
+                        </div>
+                    </section>
+
                     <!-- ──── SECCIÓN 4: FACTURAS ──── -->
                     <section>
                         <h3 class="text-sm font-black uppercase tracking-widest text-text-muted mb-4 flex items-center gap-2">

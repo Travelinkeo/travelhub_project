@@ -144,7 +144,7 @@ class Cotizacion(AgenciaMixin, SoftDeleteModel):
         import urllib.parse
 
         # Obtener nombre del cliente
-        nombre = self.nombre_cliente_manual or (self.cliente.nombre if self.cliente else "Viajero")
+        nombre = self.nombre_cliente_manual or (str(self.cliente) if self.cliente else "Viajero")
         telefono = ""
         if self.cliente and hasattr(self.cliente, "telefono") and self.cliente.telefono:
             telefono = "".join(filter(str.isdigit, str(self.cliente.telefono)))

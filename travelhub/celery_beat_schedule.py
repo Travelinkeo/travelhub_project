@@ -107,4 +107,9 @@ CELERY_BEAT_SCHEDULE = {
         "schedule": 600.0,  # cada 10 minutos
         "args": (),
     },
+    "send-lead-followup-every-hour": {
+        "task": "apps.communications.tasks.send_lead_followup_email",
+        "schedule": 3600.0,  # cada hora — revisa si hay leads que necesiten follow-up
+        "args": (),
+    },
 }

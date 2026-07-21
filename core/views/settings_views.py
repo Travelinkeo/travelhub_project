@@ -17,7 +17,16 @@ class BrandingSettingsView(LoginRequiredMixin, View):
         return get_agencia_from_request(request)
 
     def get(self, request, *args, **kwargs):
-        return render(request, self.template_name)
+        agencia = self._get_agencia(request)
+        branding = agencia.branding if agencia else None
+        return render(
+            request,
+            self.template_name,
+            {
+                "current_agency": agencia,
+                "branding": branding,
+            },
+        )
 
     def post(self, request, *args, **kwargs):
         agencia = self._get_agencia(request)
@@ -51,15 +60,25 @@ class BrandingSettingsView(LoginRequiredMixin, View):
         if theme:
             branding.ui_theme = theme
 
+        template_pack = request.POST.get("template_pack", "")
+        if template_pack:
+            branding.template_pack = template_pack
+
+        color_secundario = request.POST.get("color_secundario", "")
+        if color_secundario:
+            branding.color_secundario = color_secundario
+
         branding.save(
             update_fields=[
                 f
                 for f in [
                     "color_primario",
+                    "color_secundario",
                     "plantilla_boletos",
                     "plantilla_vouchers",
                     "plantilla_facturas",
                     "ui_theme",
+                    "template_pack",
                 ]
                 if request.POST.get(f)
             ]

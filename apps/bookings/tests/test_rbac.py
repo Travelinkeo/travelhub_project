@@ -7,9 +7,9 @@ from django.urls import reverse
 from django.utils.module_loading import import_string
 
 from apps.bookings.models import Venta
+from apps.common.models import Moneda
 from core.models.agencia import Agencia, UsuarioAgencia
 
-Moneda = import_string("apps.finance.models.Moneda")
 Factura = import_string("apps.finance.models.Factura")
 
 

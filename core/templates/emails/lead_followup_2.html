@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+        .content { background: #f9fafb; padding: 30px; }
+        .button { display: inline-block; background: #667eea; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; margin: 20px 0; }
+        .button-secondary { display: inline-block; background: #10b981; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; margin: 20px 0; }
+        .footer { text-align: center; padding: 20px; color: #6b7280; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 Demo personalizada para ti</h1>
+        </div>
+        <div class="content">
+            <p>Hola {{ nombre }},</p>
+            <p>Queremos mostrarte exactamente cómo TravelHub puede transformar tu agencia.</p>
+            <p>Agenda una demo de <strong>15 minutos</strong> y te enseñaremos:</p>
+            <ul>
+                <li>Cómo parsear tu primer boleto en segundos</li>
+                <li>Cómo configurar tu facturación VEN-NIF automatizada</li>
+                <li>Cómo activar WhatsApp para tus clientes</li>
+            </ul>
+            <center>
+                <a href="https://travelhub.cc/onboarding/" class="button-secondary">Agendar mi demo →</a>
+            </center>
+            <p>¿Prefieres probar por tu cuenta? <a href="https://travelhub.cc/onboarding/">Crea tu cuenta gratis aquí</a> — sin tarjeta de crédito.</p>
+            <p>— El equipo de TravelHub</p>
+        </div>
+        <div class="footer">
+            <p>TravelHub - Sistema de Gestión para Agencias de Viajes</p>
+        </div>
+    </div>
+</body>
+</html>

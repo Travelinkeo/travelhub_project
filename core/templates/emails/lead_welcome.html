@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+        .content { background: #f9fafb; padding: 30px; }
+        .button { display: inline-block; background: #667eea; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; margin: 20px 0; }
+        .footer { text-align: center; padding: 20px; color: #6b7280; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎫 Guía de Digitalización para Agencias de Viajes</h1>
+        </div>
+        <div class="content">
+            <p>Hola {{ nombre }},</p>
+            <p>Gracias por descargar nuestra guía <strong>"Cómo digitalizar tu agencia de viajes en {{ year }}"</strong>.</p>
+            <p>En TravelHub te ayudamos a:</p>
+            <ul>
+                <li>Parsear boletos KIU, Sabre, Amadeus y Travelport automáticamente</li>
+                <li>Facturar VEN-NIF con doble moneda, IVA e IGTF sin esfuerzo</li>
+                <li>Automatizar WhatsApp con confirmaciones e itinerarios</li>
+                <li>Centralizar tu CRM, contabilidad y reportes en un solo lugar</li>
+            </ul>
+            <center>
+                <a href="https://travelhub.cc/onboarding/" class="button">Comenzar prueba gratis →</a>
+            </center>
+            <p>¿Tienes dudas? Responde a este correo o escríbenos por WhatsApp.</p>
+            <p>— El equipo de TravelHub</p>
+        </div>
+        <div class="footer">
+            <p>TravelHub - Sistema de Gestión para Agencias de Viajes</p>
+            <p><a href="%(unsubscribe_url)s">Cancelar suscripción</a></p>
+        </div>
+    </div>
+</body>
+</html>

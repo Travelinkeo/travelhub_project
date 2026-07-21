@@ -18,9 +18,9 @@ from core.middleware import csp_report_view
 from core.sso.views import sso_callback, sso_login
 from core.views.auditoria_views import api_audit_logs
 from core.views.auth_views import MagicLinkRequestView, MagicLinkVerifyView, TokenLogoutView
+from core.views.dev_portal_views import developer_portal
 from core.views.docs_views import docs_index, docs_page, public_manual
 from core.views.health_views import health_check
-from core.views.dev_portal_views import developer_portal
 from core.views.marketing_views import (
     lead_magnet_download,
     parse_demo,
@@ -66,8 +66,6 @@ urlpatterns = [
     path("logout/", auth_views.LogoutView.as_view(), name="logout"),
     path("api/auth/jwt/obtain/", TokenObtainPairView.as_view(), name="jwt_obtain_pair"),
     path("api/auth/jwt/logout/", TokenLogoutView.as_view(), name="jwt_logout"),
-    # Audit Logs
-    path("api/audit-logs/", api_audit_logs, name="api_audit_logs"),
     # Magic Links
     path("auth/magic-request/", MagicLinkRequestView.as_view(), name="magic_link_request"),
     path("auth/magic/<str:token>/", MagicLinkVerifyView.as_view(), name="magic_link_verify"),
@@ -85,7 +83,8 @@ urlpatterns = [
     path("marketing/", include("apps.marketing.urls")),
     path("cotizaciones/", include("apps.cotizaciones.urls")),
     path("api/", include("travelhub.urls_api")),
-    # --- DOCUMENTACIÓN API (PROTEGIDA EN PRODUCCIÓN) ---
+    path("api/v1/", include("travelhub.urls_api")),
+    # --- INLINE API ROUTES (disponibles bajo /api/ y /api/v1/) ---
     path("api/schema/", _protect_docs(SpectacularAPIView.as_view()), name="schema"),
     path(
         "api/docs/",
@@ -97,6 +96,27 @@ urlpatterns = [
         _protect_docs(SpectacularRedocView.as_view(url_name="schema")),
         name="redoc-direct",
     ),
+    path("api/audit-logs/", api_audit_logs, name="api_audit_logs"),
+    path("api/parse-demo/", parse_demo, name="parse_demo"),
+    path("api/lead-magnet/", lead_magnet_download, name="lead_magnet_download"),
+    path("api/push/subscribe/", push_subscribe, name="push_subscribe"),
+    path("api/push/unsubscribe/", push_unsubscribe, name="push_unsubscribe"),
+    path("api/v1/schema/", _protect_docs(SpectacularAPIView.as_view()), name="schema_v1"),
+    path(
+        "api/v1/docs/",
+        _protect_docs(SpectacularSwaggerView.as_view(url_name="schema_v1")),
+        name="swagger-ui-v1",
+    ),
+    path(
+        "api/v1/redoc/",
+        _protect_docs(SpectacularRedocView.as_view(url_name="schema_v1")),
+        name="redoc-v1",
+    ),
+    path("api/v1/audit-logs/", api_audit_logs, name="api_audit_logs_v1"),
+    path("api/v1/parse-demo/", parse_demo, name="parse_demo_v1"),
+    path("api/v1/lead-magnet/", lead_magnet_download, name="lead_magnet_download_v1"),
+    path("api/v1/push/subscribe/", push_subscribe, name="push_subscribe_v1"),
+    path("api/v1/push/unsubscribe/", push_unsubscribe, name="push_unsubscribe_v1"),
     # Public routes (no /api/ prefix) for external consumers
     path("schema/", _protect_docs(SpectacularAPIView.as_view()), name="schema_root"),
     path(
@@ -134,11 +154,6 @@ urlpatterns = [
     path("manual/", public_manual, name="public_manual"),
     # Public Marketing
     path("pricing/", public_pricing, name="public_pricing"),
-    path("api/parse-demo/", parse_demo, name="parse_demo"),
-    path("api/lead-magnet/", lead_magnet_download, name="lead_magnet_download"),
-    # Push Notifications API
-    path("api/push/subscribe/", push_subscribe, name="push_subscribe"),
-    path("api/push/unsubscribe/", push_unsubscribe, name="push_unsubscribe"),
     # SSO / SAML / OIDC
     path("sso/login/<int:provider_id>/", sso_login, name="sso_login"),
     path("sso/callback/<int:provider_id>/", sso_callback, name="sso_callback"),

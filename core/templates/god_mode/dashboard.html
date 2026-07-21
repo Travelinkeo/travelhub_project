@@ -88,6 +88,37 @@
         </div>
     </div>
 
+    <!-- LTV SECTION -->
+    <div class="bg-surface-2/40 border border-border-color p-8 rounded-3xl">
+        <div class="flex items-center gap-3 mb-6">
+            <span class="material-symbols-outlined text-yellow-500">trending_up</span>
+            <h2 class="text-sm font-black text-text-main uppercase tracking-widest">Lifetime Value (LTV)</h2>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <div>
+                <p class="text-[10px] font-black text-text-muted uppercase tracking-widest">LTV Total (Todas las Agencias)</p>
+                <h3 class="text-3xl font-black text-text-main mt-1">${{ metrics.ltv_total|floatformat:2 }}</h3>
+            </div>
+            <div>
+                <p class="text-[10px] font-black text-text-muted uppercase tracking-widest">LTV Promedio por Agencia</p>
+                <h3 class="text-3xl font-black text-text-main mt-1">${{ metrics.ltv_promedio|floatformat:2 }}</h3>
+            </div>
+            <div>
+                <p class="text-[10px] font-black text-text-muted uppercase tracking-widest">Agencias con Ventas</p>
+                <h3 class="text-3xl font-black text-text-main mt-1">{{ metrics.agencias_con_ventas }}</h3>
+            </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            {% for item in metrics.ltv_por_plan %}
+            <div class="bg-surface-2/60 border border-border-color p-4 rounded-2xl">
+                <p class="text-[10px] font-black text-text-muted uppercase tracking-widest">{{ item.plan }}</p>
+                <p class="text-xl font-black text-text-main mt-1">${{ item.total|floatformat:2 }}</p>
+                <p class="text-[10px] text-text-muted mt-1">{{ item.agencias }} agencias · ${{ item.promedio }} avg</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
     <!-- MAIN GRID -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <!-- Agencies Table -->
@@ -96,7 +127,7 @@
                 <h2 class="text-xl font-black text-text-main uppercase tracking-tight">Últimas Agencias Onboarded</h2>
                 <a href="/admin/core/agencia/" class="text-[10px] font-black text-yellow-500 uppercase tracking-widest hover:underline">Ver todas las agencias</a>
             </div>
-            
+
             <div class="bg-surface-2/40 border border-border-color rounded-3xl overflow-hidden">
                 <table class="w-full text-left">
                     <thead>
@@ -140,7 +171,7 @@
                                 {{ agencia.fecha_creacion|date:"d M Y" }}
                             </td>
                             <td class="px-6 py-4 text-right flex items-center justify-end gap-2">
-                                <a href="{% url 'core:god_mode_impersonate' agencia.id %}" 
+                                <a href="{% url 'core:god_mode_impersonate' agencia.id %}"
                                    class="flex items-center gap-2 px-3 py-1.5 bg-yellow-500/10 hover:bg-yellow-500 text-yellow-500 hover:text-slate-950 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all border border-yellow-500/20"
                                    title="Login as Administrator">
                                     <span class="material-symbols-outlined text-[16px]">login</span>

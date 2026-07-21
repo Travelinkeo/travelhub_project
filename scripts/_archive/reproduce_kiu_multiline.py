@@ -17,25 +17,25 @@ def test_kiu_multiline():
     # Simulate Ticket with Multiline Layout (Common in Automation/HTML-to-text)
     text = """
     COMPAÑIA: CONVIASA
-    
+
     FECHA DE EMISION:
     05 FEB 2026
-    
+
     AGENTE EMISOR:
     BLA12345
-    
+
     DIRECCION:
     PRINCIPAL AV VENEZUELA
-    
+
     TICKET NUMBER:
     308-0201387528
-    
+
     IATA:
     99999999
-    
+
     PASAJERO:
     PEREZ/JUAN
-    
+
     ISSUING AIRLINE:
     CONVIASA
     """

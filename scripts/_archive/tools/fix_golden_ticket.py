@@ -34,7 +34,7 @@ def fix_golden_ticket():
                     {% if is_dark_color and agencia.logo_pdf_dark_base64 %}
                         <img src="{% if 'data:image' in agencia.logo_pdf_dark_base64 %}{{ agencia.logo_pdf_dark_base64 }}{% else %}data:image/png;base64,{{ agencia.logo_pdf_dark_base64 }}{% endif %}">
                     {% elif agencia.logo_pdf_base64 %}
-                        <img src="{% if 'data:image' in agencia.logo_pdf_base64 %}{{ agencia.logo_pdf_base64 }}{% else %}data:image/png;base64,{{ agencia.logo_pdf_base64 }}{% endif %}" 
+                        <img src="{% if 'data:image' in agencia.logo_pdf_base64 %}{{ agencia.logo_pdf_base64 }}{% else %}data:image/png;base64,{{ agencia.logo_pdf_base64 }}{% endif %}"
                              class="{{ 'logo-invertido' if is_dark_color else 'logo-oscuro' }}">
                     {% elif (agencia.logo_light or agencia.logo_dark) %}
                         {% set logo_file = (agencia.logo_dark if is_dark_color else agencia.logo_light) or agencia.logo %}
@@ -48,7 +48,7 @@ def fix_golden_ticket():
                     {% if is_dark_color and agencia.logo_pdf_dark_base64 %}
                         <img src="{% if 'data:image' in agencia.logo_pdf_dark_base64 %}{{ agencia.logo_pdf_dark_base64 }}{% else %}data:image/png;base64,{{ agencia.logo_pdf_dark_base64 }}{% endif %}">
                     {% elif agencia.logo_pdf_base64 %}
-                        <img src="{% if 'data:image' in agencia.logo_pdf_base64 %}{{ agencia.logo_pdf_base64 }}{% else %}data:image/png;base64,{{ agencia.logo_pdf_base64 }}{% endif %}" 
+                        <img src="{% if 'data:image' in agencia.logo_pdf_base64 %}{{ agencia.logo_pdf_base64 }}{% else %}data:image/png;base64,{{ agencia.logo_pdf_base64 }}{% endif %}"
                              class="{% if is_dark_color %}logo-invertido{% else %}logo-oscuro{% endif %}">
                     {% elif agencia.logo_dark or agencia.logo_light %}
                         <img src="{% if is_dark_color %}{{ agencia.logo_dark.url }}{% else %}{{ agencia.logo_light.url }}{% endif %}" class="{% if is_dark_color %}logo-invertido{% else %}logo-oscuro{% endif %}">

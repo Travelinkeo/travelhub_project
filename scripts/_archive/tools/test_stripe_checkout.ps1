@@ -40,7 +40,7 @@ try {
     Write-Host "URL: $($checkout.checkout_url)" -ForegroundColor Cyan
     Write-Host "`nAbre esta URL en tu navegador para completar el pago de prueba" -ForegroundColor Yellow
     Write-Host "Tarjeta de prueba: 4242 4242 4242 4242" -ForegroundColor Yellow
-    
+
     # Abrir automáticamente en el navegador
     Start-Process $checkout.checkout_url
 } catch {

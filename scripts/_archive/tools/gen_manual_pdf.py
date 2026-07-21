@@ -158,9 +158,9 @@ html_content = f"""
 
     <h2>Capítulo 1: Inteligencia de Negocios (Dashboard)</h2>
     <p>El Dashboard de TravelHub (Estilo Obsidian Emerald) centraliza la salud de tu agencia en una sola pantalla.</p>
-    
+
     <img src="file:///{images["kpi"]}" class="screenshot" alt="Dashboard KPI">
-    
+
     <div class="feature-card">
         <h3>1.1 Análisis de Métricas KPI</h3>
         <ul>
@@ -204,7 +204,7 @@ html_content = f"""
 
     <h2>Capítulo 3: El Cotizador Mágico 2.0</h2>
     <p>Diseñado para generar "Wows" en los clientes. Convierte una charla de WhatsApp en una reserva cerrada.</p>
-    
+
     <img src="file:///{images["quoter"]}" class="screenshot" alt="Magic Quoter">
 
     <h3>3.1 Pasos para una Cotización de Éxito</h3>
@@ -223,7 +223,7 @@ html_content = f"""
     <div style="page-break-after: always;"></div>
 
     <h2>Capítulo 4: Motores de Reservas Integrados</h2>
-    
+
     <img src="file:///{images["airlines"]}" class="screenshot" alt="Airlines">
 
     <h3>4.1 Google Flights Integration (Fli Engine)</h3>

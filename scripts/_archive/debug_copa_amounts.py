@@ -43,7 +43,7 @@ text_spanish = """
     Boleto Electrónico para ANDRES FELIPE GOMEZ
     Número de Documento: 2302013874530
     Fecha de Emisión: 04FEB26
-    
+
     Total Amount: USD 500.00
     Taxes: USD 50.00
 """

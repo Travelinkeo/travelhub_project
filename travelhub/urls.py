@@ -20,7 +20,12 @@ from core.views.auditoria_views import api_audit_logs
 from core.views.auth_views import MagicLinkRequestView, MagicLinkVerifyView, TokenLogoutView
 from core.views.docs_views import docs_index, docs_page, public_manual
 from core.views.health_views import health_check
-from core.views.marketing_views import public_landing, public_pricing
+from core.views.marketing_views import (
+    lead_magnet_download,
+    parse_demo,
+    public_landing,
+    public_pricing,
+)
 from core.views.onboarding_views import OnboardingAgencyView, SaaSOnboardingView
 from core.views.pwa_views import manifest, offline, service_worker
 from core.views.status_views import status_api, status_page
@@ -126,6 +131,8 @@ urlpatterns = [
     path("manual/", public_manual, name="public_manual"),
     # Public Marketing
     path("pricing/", public_pricing, name="public_pricing"),
+    path("api/parse-demo/", parse_demo, name="parse_demo"),
+    path("api/lead-magnet/", lead_magnet_download, name="lead_magnet_download"),
     # Push Notifications API
     path("api/push/subscribe/", push_subscribe, name="push_subscribe"),
     path("api/push/unsubscribe/", push_unsubscribe, name="push_unsubscribe"),

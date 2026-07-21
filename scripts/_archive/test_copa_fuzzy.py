@@ -18,20 +18,20 @@ def test_copa_fuzzy():
     text_spanish = """
     Copa Airlines
     Itinerario para localizador de reserva KAAAF7
-    
+
     Pasajero: ANDRES FELIPE GOMEZ (ADT)
-    
+
     Agencia de Viajes
     GRUPO SOPORTE GLOBAL INC
     IATA: 10617390
-    
+
     Detalles del vuelo:
     ...
-    
+
     Boleto Electrónico para ANDRES FELIPE GOMEZ
     Número de Documento: 2302013874530
     Fecha de Emisión: 04FEB26
-    
+
     Total Amount: USD 500.00
     Taxes: USD 50.00
     """

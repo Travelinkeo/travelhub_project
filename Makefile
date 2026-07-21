@@ -56,3 +56,9 @@ setup: ## Install dev dependencies and run migrations
 
 requirements: ## Install dev dependencies
 	pip install -r requirements/dev.txt
+
+e2e: ## Run E2E tests (Playwright) — requires PostgreSQL running
+	pytest tests/e2e/ -m e2e -v --tb=short --timeout=120 --nomigrations
+
+e2e-install: ## Install Playwright browsers
+	python -m playwright install chromium --with-deps

@@ -29,13 +29,22 @@ class Migration(migrations.Migration):
             name="documentoexportacion",
             table="finance_documentoexportacion",
         ),
-        migrations.AlterModelTable(
-            name="documentoexportacionconsolidado",
-            table="finance_documentoexportacionconsolidado",
-        ),
-        migrations.AlterModelTable(
-            name="facturaconsolidada",
-            table="finance_facturaconsolidada",
+        migrations.SeparateDatabaseAndState(
+            state_operations=[
+                migrations.AlterModelTable(
+                    name="documentoexportacionconsolidado",
+                    table="finance_documentoexportacionconsolidado",
+                ),
+                migrations.AlterModelTable(
+                    name="facturaconsolidada",
+                    table="finance_facturaconsolidada",
+                ),
+                migrations.AlterModelTable(
+                    name="itemfacturaconsolidada",
+                    table="finance_itemfacturaconsolidada",
+                ),
+            ],
+            database_operations=[],
         ),
         migrations.AlterModelTable(
             name="facturafiscal",
@@ -48,10 +57,6 @@ class Migration(migrations.Migration):
         migrations.AlterModelTable(
             name="gastooperativo",
             table="finance_gastooperativo",
-        ),
-        migrations.AlterModelTable(
-            name="itemfacturaconsolidada",
-            table="finance_itemfacturaconsolidada",
         ),
         migrations.AlterModelTable(
             name="itemreporte",

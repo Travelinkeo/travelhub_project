@@ -24,8 +24,9 @@ COPY static/ ./static/
 COPY templates/ ./templates/
 COPY locale/ ./locale/
 COPY docs/ ./docs/
+COPY tests/ ./tests/
+COPY fixtures/ ./fixtures/
 COPY tailwind.config.js ./
-COPY tests/test_health_smoke.py ./tests/test_health_smoke.py
 
 COPY compilar.sh ./compilar.sh
 COPY compile_i18n.py ./compile_i18n.py
@@ -64,6 +65,8 @@ COPY --from=builder /build/staticfiles ./staticfiles/
 COPY --from=builder /build/templates ./templates/
 COPY --from=builder /build/locale ./locale/
 COPY --from=builder /build/docs ./docs/
+COPY --from=builder /build/tests ./tests/
+COPY --from=builder /build/fixtures ./fixtures/
 RUN pip install --no-cache-dir "setuptools<70"
 COPY entrypoint.sh ./entrypoint.sh
 

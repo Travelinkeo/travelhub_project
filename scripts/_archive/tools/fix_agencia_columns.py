@@ -12,7 +12,7 @@ conn = psycopg.connect(
 cur = conn.cursor()
 
 sql = """
-    ALTER TABLE core_agencia 
+    ALTER TABLE core_agencia
         ADD COLUMN IF NOT EXISTS correo_emisiones varchar(254) NULL,
         ADD COLUMN IF NOT EXISTS password_app_correo varchar(255) NULL,
         ADD COLUMN IF NOT EXISTS telegram_bot_token varchar(255) NULL,

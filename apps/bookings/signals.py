@@ -61,6 +61,8 @@ def signal_boleto_post_save(sender, instance, created, **kwargs):
         return
 
     _on_commit(_evaluar_tax_refund, instance.pk)
+    if created:
+        _on_commit(_notificar_boleto_importado, instance.pk)
 
 
 @receiver(post_save, sender=PagoVenta)
@@ -76,6 +78,8 @@ def signal_pago_post_save(sender, instance, created, **kwargs):
         _on_commit(_recalcular_sync, instance.venta_id)
         _on_commit(_evaluar_loyalty_sync, instance.pk)
         _on_commit(_emitir_pago_evento, pago_id, "save", agencia_id)
+        if created:
+            _on_commit(_notificar_pago_confirmado, instance.pk)
 
 
 @receiver(post_delete, sender=PagoVenta)
@@ -201,6 +205,10 @@ def _disparar_post_save_actions(venta_id, created, estado_anterior):
     try:
         venta = Venta.objects.get(pk=venta_id)
         VentaService.dispatch_post_save_actions(venta, created, estado_anterior)
+        if created:
+            from core.api.webhook_dispatcher import notify_venta_creada
+
+            notify_venta_creada(venta)
     except Venta.DoesNotExist:
         logger.warning(f"Venta {venta_id} no existe para dispatch_post_save_actions")
 
@@ -214,3 +222,27 @@ def _update_circuit_days_sync(circuito_dia_id):
         VentaService.update_circuit_days(cd)
     except Exception as e:
         logger.error(f"Error actualizando circuit days: {e}")
+
+
+def _notificar_pago_confirmado(pago_id):
+    from apps.bookings.models import PagoVenta
+
+    try:
+        pago = PagoVenta.objects.get(pk=pago_id)
+        from core.api.webhook_dispatcher import notify_pago_confirmado
+
+        notify_pago_confirmado(pago)
+    except PagoVenta.DoesNotExist:
+        logger.warning(f"PagoVenta {pago_id} no existe para webhook")
+
+
+def _notificar_boleto_importado(boleto_id):
+    from apps.bookings.models import BoletoImportado
+
+    try:
+        boleto = BoletoImportado.objects.get(pk=boleto_id)
+        from core.api.webhook_dispatcher import notify_boleto_importado
+
+        notify_boleto_importado(boleto)
+    except BoletoImportado.DoesNotExist:
+        logger.warning(f"BoletoImportado {boleto_id} no existe para webhook")

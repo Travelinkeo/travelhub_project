@@ -20,10 +20,10 @@ def generar_y_enviar():
     <head>
         <style>
             @page { size: A4; margin: 2cm; }
-            body { 
-                font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
-                line-height: 1.6; 
-                color: #333; 
+            body {
+                font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+                line-height: 1.6;
+                color: #333;
             }
             .header { border-bottom: 2px solid #00D1FF; padding-bottom: 10px; margin-bottom: 30px; }
             h1 { color: #0081C4; font-size: 28pt; margin-bottom: 5pt; }
@@ -58,7 +58,7 @@ def generar_y_enviar():
 
         <h2>🔄 EL FLUJO DEL ÉXITO (End-to-End)</h2>
         <p>Lead &rarr; Cotización &rarr; Venta &rarr; Boletos &rarr; Factura &rarr; Pago &rarr; Rentabilidad.</p>
-        
+
         <h2>🤖 INTELIGENCIA ARTIFICIAL: Tu Ventaja Competitiva</h2>
         <p>TravelHub identifica boletos de Sabre y KIU automáticamente <span class="badge">LIVE</span>. No más errores de digitación.</p>
 

@@ -4,23 +4,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TravelHub — CRM/ERP Inteligente para Agencias de Viajes</title>
-    <meta name="description" content="La plataforma SaaS todo-en-uno para agencias de viajes. Gestión de boletos con IA, facturación VEN-NIF, CRM inteligente, conciliación automática y más.">
-    <meta property="og:title" content="TravelHub — CRM/ERP Inteligente para Agencias de Viajes">
-    <meta property="og:description" content="Gestión de boletos con IA, facturación VEN-NIF, CRM inteligente, conciliación automática y más. Todo en un solo lugar.">
+    <title>TravelHub — Pega un ticket, todo lo demás se hace solo</title>
+    <meta name="description" content="Pega un ticket de KIU, Sabre o Amadeus y en segundos tienes la venta, la factura VEN-NIF y el WhatsApp del cliente. SaaS multi-tenant para agencias de viajes LATAM.">
+    <meta property="og:title" content="TravelHub — Pega un ticket, todo lo demás se hace solo">
+    <meta property="og:description" content="Parsing IA de boletos, facturación VEN-NIF, CRM con WhatsApp Bot. Pruébalo gratis 30 días.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="{{ request.build_absolute_uri }}">
     <meta property="og:image" content="{% static 'images_pwa/pwa-512x512.png' %}">
     <meta property="og:locale" content="es_ES">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="TravelHub — CRM/ERP Inteligente para Agencias de Viajes">
-    <meta name="twitter:description" content="Gestión de boletos con IA, facturación VEN-NIF, CRM inteligente, conciliación automática y más.">
+    <meta name="twitter:title" content="TravelHub — Pega un ticket, todo lo demás se hace solo">
+    <meta name="twitter:description" content="Parsing IA de boletos, facturación VEN-NIF, CRM con WhatsApp Bot.">
     <link rel="canonical" href="https://travelhub.cc/">
     <link rel="icon" href="{% static 'favicon.ico' %}" sizes="any">
     <link rel="icon" href="{% static 'images_pwa/pwa-192x192.png' %}" sizes="192x192" type="image/png">
     <link rel="apple-touch-icon" href="{% static 'images_pwa/apple-touch-icon.png' %}">
-    {# CSS local compilado #}
     <link rel="stylesheet" href="{% static 'core/css/tailwind-built.css' %}">
+    <script src="https://unpkg.com/htmx.org@2.0.4" integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVAtPT8dSODv+DQcGqD4jvVK4N6jrX0i3rP" crossorigin="anonymous"></script>
     <style nonce="{{ csp_nonce }}">
         body { background: #0F172A; color: #E2E8F0; font-family: system-ui, -apple-system, sans-serif; }
         .gradient-text { background: linear-gradient(135deg, #60A5FA, #A78BFA); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
@@ -28,17 +28,23 @@
         .pricing-card:hover { transform: translateY(-4px); box-shadow: 0 20px 40px -12px rgba(59,130,246,0.3); }
         .pricing-highlight { border: 2px solid #3B82F6; position: relative; }
         .pricing-highlight::before { content: "MÁS POPULAR"; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: #3B82F6; color: white; padding: 2px 16px; border-radius: 9999px; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.05em; }
-        .feature-icon { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border-radius: 12px; font-size: 1.5rem; background: #1E293B; }
         .btn-primary { background: #3B82F6; color: white; padding: 0.75rem 2rem; border-radius: 0.5rem; font-weight: 600; transition: all 0.2s; display: inline-block; text-align: center; }
-        .btn-primary:hover { background: #2563EB; }
-        .btn-secondary { background: #1E293B; color: #E2E8F0; padding: 0.75rem 2rem; border-radius: 0.5rem; font-weight: 600; transition: all 0.2s; display: inline-block; text-align: center; border: 1px solid #334155; }
+        .btn-primary:hover { background: #2563EB; transform: translateY(-1px); }
+        .btn-secondary { background: #1E293B; color: #E2E8F0; padding: 0.75rem 2rem; border-radius: 0.5rem; font-weight: 600; display: inline-block; text-align: center; border: 1px solid #334155; transition: all 0.2s; }
         .btn-secondary:hover { background: #334155; }
+        .hero-glow { position: absolute; width: 600px; height: 600px; border-radius: 50%; filter: blur(120px); opacity: 0.15; pointer-events: none; }
+        .demo-textarea { background: #1E293B; border: 1px solid #334155; color: #E2E8F0; border-radius: 12px; padding: 1rem; font-family: 'Courier New', monospace; font-size: 0.875rem; width: 100%; min-height: 120px; resize: vertical; }
+        .demo-textarea:focus { outline: none; border-color: #3B82F6; box-shadow: 0 0 0 3px rgba(59,130,246,0.2); }
+        .feature-icon { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border-radius: 12px; font-size: 1.5rem; background: #1E293B; }
+        .use-case-card { transition: all 0.3s; }
+        .use-case-card:hover { transform: translateY(-2px); }
         @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-10px); } }
         .float-anim { animation: float 6s ease-in-out infinite; }
     </style>
 </head>
 <body>
     {% if not show_pricing_only %}
+
     <!-- Nav -->
     <header class="fixed top-0 left-0 right-0 z-50 bg-slate-900/80 backdrop-blur-lg border-b border-slate-800">
         <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
@@ -46,8 +52,11 @@
                 <img src="{% static 'images/Logo TravelHub.png' %}" alt="TravelHub" class="h-10 w-auto">
             </a>
             <nav class="hidden md:flex items-center gap-6 text-sm text-slate-300">
+                <a href="#demo" class="hover:text-white transition">Demo</a>
+                <a href="#use-cases" class="hover:text-white transition">Casos de uso</a>
                 <a href="#features" class="hover:text-white transition">Funcionalidades</a>
                 <a href="/pricing/" class="hover:text-white transition">Precios</a>
+                <a href="/blog/" class="hover:text-white transition">Blog</a>
             </nav>
             <div class="flex items-center gap-3">
                 <a href="/accounts/login/" class="text-sm text-slate-300 hover:text-white transition">Iniciar sesión</a>
@@ -58,23 +67,118 @@
 
     <!-- Hero -->
     <section class="pt-36 pb-20 px-4 text-center relative overflow-hidden">
-        <div class="absolute inset-0 bg-gradient-to-b from-blue-950/20 to-transparent pointer-events-none"></div>
-        <div class="max-w-4xl mx-auto relative">
-            <div class="inline-flex items-center gap-2 bg-blue-950/50 border border-blue-800/40 rounded-full px-4 py-1.5 text-sm text-blue-300 mb-8">
-                🚀 SaaS B2B multi-tenant para agencias de viajes
+        <div class="hero-glow bg-blue-500 -top-20 -left-20"></div>
+        <div class="hero-glow bg-purple-500 -bottom-20 -right-20"></div>
+        <div class="max-w-5xl mx-auto relative">
+            <div class="inline-flex items-center gap-2 bg-emerald-950/50 border border-emerald-800/40 rounded-full px-4 py-1.5 text-sm text-emerald-300 mb-8">
+                <span>⚡</span> Pega un ticket KIU / Sabre / Amadeus → todo listo en 5 segundos
             </div>
             <h1 class="text-5xl md:text-7xl font-bold tracking-tight leading-tight mb-6">
-                La plataforma que tu<br>
-                <span class="gradient-text">agencia necesita</span>
+                Pega un ticket.<br>
+                <span class="gradient-text">Todo lo demás se hace solo.</span>
             </h1>
-            <p class="text-xl text-slate-400 max-w-2xl mx-auto mb-10 leading-relaxed">
-                Gestión de boletos con IA, facturación VEN-NIF, CRM inteligente,<br>
-                conciliación automática y más — todo en un solo lugar.
+            <p class="text-xl text-slate-400 max-w-3xl mx-auto mb-10 leading-relaxed">
+                ¿Sigues digitando tickets a mano? TravelHub parsea boletos con IA, genera facturas VEN-NIF,<br class="hidden md:block">
+                envía WhatsApp a tus clientes y concilia tus pagos — todo automáticamente.
             </p>
             <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <a href="/onboarding/" class="btn-primary text-lg px-8 py-4">Comenzar prueba gratuita →</a>
+                <a href="#demo" class="btn-primary text-lg px-8 py-4">Ver demo en vivo →</a>
+                <a href="/onboarding/" class="btn-secondary text-lg px-8 py-4">Probar gratis 30 días</a>
             </div>
-            <p class="mt-4 text-sm text-slate-600">Sin tarjeta de crédito · 30 días gratis · Cancela cuando quieras</p>
+            <p class="mt-4 text-sm text-slate-600">Sin tarjeta de crédito · Configuración en 5 minutos · Cancela cuando quieras</p>
+        </div>
+    </section>
+
+    <!-- Demo Interactiva -->
+    <section id="demo" class="py-20 px-4 bg-slate-900/30">
+        <div class="max-w-4xl mx-auto text-center">
+            <h2 class="text-3xl md:text-4xl font-bold mb-4">Pruébalo sin registrarte</h2>
+            <p class="text-lg text-slate-400 mb-10 max-w-2xl mx-auto">Pega el texto de un boleto aéreo real (KIU, Sabre o Amadeus) y mira cómo TravelHub lo parsea al instante.</p>
+            <div class="bg-slate-800/40 border border-slate-700/50 rounded-2xl p-8 text-left">
+                <form hx-post="{% url 'core:parse_demo' %}" hx-target="#demo-result" hx-indicator="#demo-spinner">
+                    {% csrf_token %}
+                    <label class="text-sm font-semibold text-slate-300 mb-2 block">Pega tu ticket aquí:</label>
+                    <textarea name="ticket_text" class="demo-textarea" placeholder="Ej: BSP*K3V3K9  MARIA GONZALEZ&#10;CCS  MAD  AV0001  Y  15MAR 0800 1100&#10;MAD  CCS  AV0002  Y  20MAR 2000 0600+1&#10;TICKET  045-1234567890&#10;TOTAL  USD 850.00"></textarea>
+                    <div class="flex items-center gap-3 mt-4">
+                        <button type="submit" class="btn-primary text-sm">Parsear ticket →</button>
+                        <span id="demo-spinner" class="htmx-indicator text-blue-400 text-sm">Procesando...</span>
+                    </div>
+                </form>
+                <div id="demo-result" class="mt-6 text-sm text-slate-400">El resultado aparecerá aquí...</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Casos de Uso por Perfil -->
+    <section id="use-cases" class="py-20 px-4">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">Diseñado para cada tipo de agencia</h2>
+                <p class="text-lg text-slate-400 max-w-2xl mx-auto">Sin importar el tamaño de tu operación, TravelHub se adapta a tu flujo de trabajo.</p>
+            </div>
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="use-case-card bg-slate-800/40 border border-slate-700/50 rounded-2xl p-8">
+                    <div class="text-3xl mb-4">🏢</div>
+                    <h3 class="text-lg font-bold mb-2">Agencias pequeñas</h3>
+                    <p class="text-sm text-slate-400 mb-4">Facturación VEN-NIF sin complicaciones. Deja de hacer cuentas en Excel y evita multas del SENIAT.</p>
+                    <ul class="space-y-2 text-sm text-slate-400">
+                        <li class="flex items-start gap-2"><span class="text-emerald-400">✓</span> Parsing automático de boletos</li>
+                        <li class="flex items-start gap-2"><span class="text-emerald-400">✓</span> Factura electrónica con IVA + IGTF</li>
+                        <li class="flex items-start gap-2"><span class="text-emerald-400">✓</span> CRM simple con WhatsApp</li>
+                        <li class="flex items-start gap-2"><span class="text-emerald-400">✓</span> 1 agente · 10 tickets/mes gratis</li>
+                    </ul>
+                </div>
+                <div class="use-case-card bg-slate-800/40 border border-slate-700/50 rounded-2xl p-8">
+                    <div class="text-3xl mb-4">📈</div>
+                    <h3 class="text-lg font-bold mb-2">Agencias en crecimiento</h3>
+                    <p class="text-sm text-slate-400 mb-4">Escala tu operación con automatización, reportes y API abierta para conectar con tus herramientas.</p>
+                    <ul class="space-y-2 text-sm text-slate-400">
+                        <li class="flex items-start gap-2"><span class="text-emerald-400">✓</span> Todo lo del plan Básico +</li>
+                        <li class="flex items-start gap-2"><span class="text-emerald-400">✓</span> API REST + Webhooks en tiempo real</li>
+                        <li class="flex items-start gap-2"><span class="text-emerald-400">✓</span> Integración Xero / contabilidad</li>
+                        <li class="flex items-start gap-2"><span class="text-emerald-400">✓</span> Hasta 15 agentes</li>
+                    </ul>
+                </div>
+                <div class="use-case-card bg-slate-800/40 border border-slate-700/50 rounded-2xl p-8">
+                    <div class="text-3xl mb-4">🌐</div>
+                    <h3 class="text-lg font-bold mb-2">Mayoristas y grupos grandes</h3>
+                    <p class="text-sm text-slate-400 mb-4">White label con tu marca. Multi-tenancy, SLA personalizado y agente IA conversacional incluido.</p>
+                    <ul class="space-y-2 text-sm text-slate-400">
+                        <li class="flex items-start gap-2"><span class="text-emerald-400">✓</span> Todo lo del plan Pro +</li>
+                        <li class="flex items-start gap-2"><span class="text-emerald-400">✓</span> SSO / SAML · Usuarios ilimitados</li>
+                        <li class="flex items-start gap-2"><span class="text-emerald-400">✓</span> On-premise disponible</li>
+                        <li class="flex items-start gap-2"><span class="text-emerald-400">✓</span> Soporte 24/7 dedicado</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Comparativa -->
+    <section class="py-20 px-4 bg-slate-900/30">
+        <div class="max-w-4xl mx-auto text-center">
+            <h2 class="text-3xl md:text-4xl font-bold mb-4">¿Por qué TravelHub?</h2>
+            <p class="text-lg text-slate-400 mb-10">Mientras otros sistemas te hacen el trabajo más fácil, TravelHub lo hace por ti.</p>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left bg-slate-800/40 border border-slate-700/50 rounded-2xl overflow-hidden">
+                    <thead>
+                        <tr class="bg-slate-800/80 border-b border-slate-700/50">
+                            <th class="px-6 py-4 font-bold text-slate-300"></th>
+                            <th class="px-6 py-4 font-bold text-blue-400 text-center">TravelHub</th>
+                            <th class="px-6 py-4 font-bold text-slate-500 text-center">Excel / Manual</th>
+                            <th class="px-6 py-4 font-bold text-slate-500 text-center">Otros ERP</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-800/50">
+                        <tr><td class="px-6 py-4 font-medium">Parsing de boletos</td><td class="px-6 py-4 text-center text-emerald-400">Automático con IA</td><td class="px-6 py-4 text-center text-red-500">Manual</td><td class="px-6 py-4 text-center text-yellow-500">Parcial</td></tr>
+                        <tr><td class="px-6 py-4 font-medium">Facturación VEN-NIF</td><td class="px-6 py-4 text-center text-emerald-400">1 clic</td><td class="px-6 py-4 text-center text-red-500">Horas</td><td class="px-6 py-4 text-center text-red-500">No soportado</td></tr>
+                        <tr><td class="px-6 py-4 font-medium">WhatsApp a clientes</td><td class="px-6 py-4 text-center text-emerald-400">Automático</td><td class="px-6 py-4 text-center text-red-500">Manual</td><td class="px-6 py-4 text-center text-red-500">No incluido</td></tr>
+                        <tr><td class="px-6 py-4 font-medium">Conciliación automática</td><td class="px-6 py-4 text-center text-emerald-400">Tiempo real</td><td class="px-6 py-4 text-center text-red-500">Nunca</td><td class="px-6 py-4 text-center text-yellow-500">Limitada</td></tr>
+                        <tr><td class="px-6 py-4 font-medium">Multi-tenancy</td><td class="px-6 py-4 text-center text-emerald-400">Nativo</td><td class="px-6 py-4 text-center text-red-500">N/A</td><td class="px-6 py-4 text-center text-yellow-500">Costoso</td></tr>
+                        <tr><td class="px-6 py-4 font-medium">Precio inicial</td><td class="px-6 py-4 text-center text-emerald-400">$29/mes</td><td class="px-6 py-4 text-center text-slate-400">$0 (tu tiempo)</td><td class="px-6 py-4 text-center text-red-500">$200+/mes</td></tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </section>
 
@@ -109,6 +213,20 @@
                 </div>
                 {% endfor %}
             </div>
+        </div>
+    </section>
+
+    <!-- Lead Magnet -->
+    <section class="py-20 px-4 bg-gradient-to-b from-blue-950/20 to-slate-900/40">
+        <div class="max-w-3xl mx-auto text-center">
+            <h2 class="text-3xl md:text-4xl font-bold mb-4">📘 Guía completa de facturación electrónica para agencias de viaje en Venezuela</h2>
+            <p class="text-lg text-slate-400 mb-8">Aprende a facturar boletos aéreos con IVA, IGTF y retenciones ISLR. Incluye ejemplos reales KIU, Sabre y Amadeus.</p>
+            <form hx-post="{% url 'core:lead_magnet_download' %}" hx-target="#lead-result" class="flex flex-col sm:flex-row items-center justify-center gap-4 max-w-lg mx-auto">
+                {% csrf_token %}
+                <input type="email" name="email" placeholder="tu@email.com" required class="w-full sm:w-auto flex-1 bg-slate-800 border border-slate-600 rounded-lg px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500">
+                <button type="submit" class="btn-primary text-sm whitespace-nowrap px-6 py-3">Descargar guía gratis →</button>
+            </form>
+            <p id="lead-result" class="mt-4 text-sm text-slate-500">Sin spam. Solo contenido útil para tu agencia.</p>
         </div>
     </section>
     {% endif %}
@@ -147,11 +265,42 @@
     </section>
 
     {% if not show_pricing_only %}
+
+    <!-- Blog Preview -->
+    <section class="py-20 px-4">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">Recursos para tu agencia</h2>
+                <p class="text-lg text-slate-400">Guías, tutoriales y análisis del mercado de viajes LATAM.</p>
+            </div>
+            <div class="grid md:grid-cols-3 gap-6">
+                <a href="/blog/facturacion-boletos-aereos-venezuela-2026/" class="bg-slate-800/40 border border-slate-700/50 rounded-2xl p-6 hover:bg-slate-800/60 transition block">
+                    <div class="text-2xl mb-3">🇻🇪</div>
+                    <h3 class="font-bold mb-2">Cómo facturar boletos aéreos en Venezuela 2026</h3>
+                    <p class="text-sm text-slate-400">Guía paso a paso con IVA, IGTF y retenciones ISLR para agencias de viaje.</p>
+                </a>
+                <a href="/blog/comparativa-kiu-sabre-amadeus/" class="bg-slate-800/40 border border-slate-700/50 rounded-2xl p-6 hover:bg-slate-800/60 transition block">
+                    <div class="text-2xl mb-3">✈️</div>
+                    <h3 class="font-bold mb-2">Comparativa: KIU vs Sabre vs Amadeus</h3>
+                    <p class="text-sm text-slate-400">Diferencias, costos y cuál elegir según el perfil de tu agencia.</p>
+                </a>
+                <a href="/blog/guia-igtf-agencias-2026/" class="bg-slate-800/40 border border-slate-700/50 rounded-2xl p-6 hover:bg-slate-800/60 transition block">
+                    <div class="text-2xl mb-3">💰</div>
+                    <h3 class="font-bold mb-2">Guía completa del IGTF para agencias</h3>
+                    <p class="text-sm text-slate-400">Todo lo que necesitas saber sobre el Impuesto a Grandes Transacciones Financieras.</p>
+                </a>
+            </div>
+            <div class="text-center mt-8">
+                <a href="/blog/" class="btn-secondary text-sm">Ver todos los artículos →</a>
+            </div>
+        </div>
+    </section>
+
     <!-- CTA -->
     <section class="py-24 px-4 text-center">
         <div class="max-w-3xl mx-auto">
-            <h2 class="text-3xl md:text-4xl font-bold mb-4">¿Listo para transformar tu agencia?</h2>
-            <p class="text-lg text-slate-400 mb-8">Únete a las agencias que ya optimizan sus operaciones con TravelHub.</p>
+            <h2 class="text-3xl md:text-4xl font-bold mb-4">¿Listo para dejar de digitar tickets?</h2>
+            <p class="text-lg text-slate-400 mb-8">Únete a las agencias que ya ahorran horas todos los días con TravelHub.</p>
             <a href="/onboarding/" class="btn-primary text-lg px-10 py-4">Comenzar prueba gratuita →</a>
             <p class="mt-4 text-sm text-slate-600">Sin compromiso · 30 días gratis · Soporte incluido</p>
         </div>
@@ -167,20 +316,24 @@
             <div>
                 <div class="font-semibold mb-3">Producto</div>
                 <div class="flex flex-col gap-2 text-slate-400">
+                    <a href="#demo" class="hover:text-white transition">Demo</a>
                     <a href="#features" class="hover:text-white transition">Funcionalidades</a>
                     <a href="/pricing/" class="hover:text-white transition">Precios</a>
+                    <a href="/api/docs/" class="hover:text-white transition">API</a>
                 </div>
             </div>
             <div>
                 <div class="font-semibold mb-3">Recursos</div>
                 <div class="flex flex-col gap-2 text-slate-400">
-                    <a href="#" class="hover:text-white transition">API Reference</a>
+                    <a href="/blog/" class="hover:text-white transition">Blog</a>
+                    <a href="#" class="hover:text-white transition">Guía de facturación VEN-NIF</a>
+                    <a href="#" class="hover:text-white transition">Video tutorial</a>
                 </div>
             </div>
             <div>
                 <div class="font-semibold mb-3">Legal</div>
                 <div class="flex flex-col gap-2 text-slate-400">
-                    <a href="#" class="hover:text-white transition">Términos</a>
+                    <a href="#" class="hover:text-white transition">Términos del servicio</a>
                     <a href="#" class="hover:text-white transition">Privacidad</a>
                     <a href="#" class="hover:text-white transition">SLA</a>
                 </div>

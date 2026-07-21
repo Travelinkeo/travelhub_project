@@ -29,7 +29,7 @@ def test_ai_router():
     FROM /TO             FLIGHT  CL DATE   DEP      FARE BASIS   NVB   NVA   BAG  ST
     MADRID BARAJAS       AA 37   Q  20FEB  1100     QLE7M2Z      20FEB 20FEB 1PC  OK
     DALLAS FT WORTH      AA 38   Q  28FEB  1800     QLE7M2Z      28FEB 28FEB 1PC  OK
-    
+
     FARE CALC : MAD AA DFW 200.00NUC200.00END ROE1.00
     AIR FARE  : USD 400.00
     TAX       : USD 50.00 YQ
@@ -59,7 +59,7 @@ def test_ai_router():
     # Sample 2: Marketing Email
     marketing_text = """
     Subject: Don't miss our summer sale!
-    Hi John, 
+    Hi John,
     Fly to Cancun for only $299! Book now before it's too late.
     Contact us at sales@agency.com
     """

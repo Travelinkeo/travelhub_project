@@ -10,7 +10,7 @@ from django.shortcuts import redirect, render
 from django.utils import timezone
 from django.views import View
 
-from apps.bookings.models import BoletoImportado, HotelTarifario, TipoHabitacion
+from apps.bookings.models import BoletoImportado, HotelTarifario, TipoHabitacion, Venta
 from core.models.agencia import Agencia
 from core.models.audit import AuditLog, crear_audit_log
 from core.views.health_views import _check_celery, _check_database, _check_disk, _check_redis
@@ -37,11 +37,39 @@ class GodModeDashboardView(UserPassesTestMixin, View):
         agencias_activas = agencias_activas_objs.count()
         total_usuarios = User.objects.count()
 
-        from apps.bookings.models import Venta, VentaAuditFinding
+        from apps.bookings.models import VentaAuditFinding
 
         total_ventas = Venta.all_objects.count()
         volumen_ventas = Venta.all_objects.aggregate(total=Sum("total_venta"))["total"] or 0
         hallazgos_criticos = VentaAuditFinding.all_objects.filter(estado="PEN").count()
+
+        ltv_por_agencia = (
+            Venta.all_objects.values("agencia_id")
+            .annotate(total=Sum("total_venta"))
+            .filter(total__gt=0)
+        )
+        ltv_total = sum(item["total"] for item in ltv_por_agencia)
+        agencias_con_ventas = len(ltv_por_agencia)
+        ltv_promedio = ltv_total // agencias_con_ventas if agencias_con_ventas else 0
+
+        ltv_por_plan = []
+        for plan in ["FREE", "BASIC", "PRO", "ENTERPRISE"]:
+            ids = Agencia.objects.filter(plan=plan).values_list("id", flat=True)
+            total = (
+                Venta.all_objects.filter(agencia_id__in=ids).aggregate(total=Sum("total_venta"))[
+                    "total"
+                ]
+                or 0
+            )
+            count = len(ids)
+            ltv_por_plan.append(
+                {
+                    "plan": plan,
+                    "total": total,
+                    "agencias": count,
+                    "promedio": total // count if count else 0,
+                }
+            )
 
         plan_prices = {"FREE": 0, "BASIC": 29, "PRO": 99, "ENTERPRISE": 299}
         revenue_mensual = 0
@@ -129,6 +157,10 @@ class GodModeDashboardView(UserPassesTestMixin, View):
                 "total_leakage": total_leakage,
                 "total_hoteles": total_hoteles,
                 "total_habitaciones": total_habitaciones,
+                "ltv_total": ltv_total,
+                "ltv_promedio": ltv_promedio,
+                "agencias_con_ventas": agencias_con_ventas,
+                "ltv_por_plan": ltv_por_plan,
             },
             "agencias": agencias,
             "plan_dist": plan_dist,

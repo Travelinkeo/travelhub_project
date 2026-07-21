@@ -16,7 +16,7 @@ def test_json_output():
     # Simulated text based on 11 Marzo PDF structure and "Shanghai" case
     raw_text = """
     Información De Vuelo
-    
+
     Salida: 11 mar 26
     China Eastern
     MU710
@@ -28,7 +28,7 @@ def test_json_output():
     06:20
     Cabina: TURISTA
     Status: CONFIRMADO
-    
+
     Salida: 24 mar 26
     China Eastern
     MU569
@@ -40,7 +40,7 @@ def test_json_output():
     12:25
     18:05
     Cabina: TURISTA
-    
+
     Detalles De Pago
     """
 

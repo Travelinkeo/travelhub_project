@@ -13,7 +13,7 @@ from apps.automation.parsers.kiu_parser import KIUParser
 sample_text = """
 KIUSYS.COM                       ITINERARY RECEIPT                      05 FEB 2026
                                  RECIBO DE ITINERARIO
- 
+
 Issue Agent/Agente Emisor:       AGENCIA DE VIAJES TRAVELHUB
                                  BLA12345
 Name/Nombre:                     PEREZ/JUAN MR

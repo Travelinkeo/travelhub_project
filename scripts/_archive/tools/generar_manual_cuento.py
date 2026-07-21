@@ -197,7 +197,7 @@ Es una línea que muestra los últimos 6 meses. Te permite ver si las ventas est
 
 ### El CFO Virtual (tu contador de IA)
 
-En la parte inferior del Dashboard CEO hay una sección llamada **"CFO VIRTUAL (GEMINI)"**. 
+En la parte inferior del Dashboard CEO hay una sección llamada **"CFO VIRTUAL (GEMINI)"**.
 
 *¿Qué es esto?* Es un asistente financiero con Inteligencia Artificial. Puedes hacerle preguntas en español normal y él te responde con datos reales de tu negocio.
 
@@ -548,7 +548,7 @@ Los 4 contadores de arriba te muestran de un vistazo:
 - RIF de la empresa
 - Dirección de facturación
 
-**Paso 4:** Haz clic en **"Guardar Cliente"**. 
+**Paso 4:** Haz clic en **"Guardar Cliente"**.
 
 ### Buscar un Cliente Existente
 

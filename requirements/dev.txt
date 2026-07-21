@@ -32,3 +32,6 @@ flower==2.0.1                  # Monitor de tareas Celery (UI en :5555)
 # --- Load Testing & Coverage ---
 locust==2.31.0
 pytest-cov==6.1.0
+
+# --- E2E Tests ---
+pytest-playwright==0.6.2

@@ -315,3 +315,45 @@ class TestPushSubscription:
                 auth_key="auth2",
                 p256dh_key="p256dh2",
             )
+
+
+@pytest.mark.django_db
+class TestLeadModel:
+    def test_crear_lead(self):
+        from apps.communications.models.lead import Lead
+
+        lead = Lead.objects.create(email="test@example.com", nombre="Test")
+        assert lead.pk is not None
+        assert str(lead) == "test@example.com"
+        assert lead.fuente == "landing_page"
+        assert lead.guia_descargada is False
+
+    def test_lead_unique_email(self):
+        from apps.communications.models.lead import Lead
+
+        Lead.objects.create(email="dup@example.com")
+        with pytest.raises(IntegrityError):
+            Lead.objects.create(email="dup@example.com")
+
+    def test_lead_ordering(self):
+        from datetime import timedelta
+
+        from django.utils import timezone
+
+        from apps.communications.models.lead import Lead
+
+        l1 = Lead.objects.create(email="first@example.com")
+        l2 = Lead.objects.create(email="second@example.com")
+        Lead.objects.filter(pk=l1.pk).update(created_at=timezone.now() - timedelta(hours=1))
+        leads = Lead.objects.all()
+        assert leads[0] == l2
+        assert leads[1] == l1
+
+    def test_lead_default_fields(self):
+        from apps.communications.models.lead import Lead
+
+        lead = Lead.objects.create(email="defaults@example.com")
+        assert lead.nombre == ""
+        assert lead.ip_origen == ""
+        assert lead._followup_1_sent is False
+        assert lead._followup_2_sent is False

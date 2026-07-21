@@ -159,18 +159,13 @@ class MagicLinkVerifyView(View):
         try:
             user = User.objects.get(email=token_obj.email)
         except User.DoesNotExist:
-            logger.warning(
-                f"Intento de login con magic link para email no registrado: {token_obj.email}"
-            )
-            return render(
-                request,
-                "auth/magic_link_error.html",
-                {
-                    "error": "Enlace invalido",
-                    "error_detail": "Este enlace no es valido o expiro. Solicita uno nuevo.",
-                },
-                status=400,
-            )
+            username = token_obj.email.split("@")[0]
+            base_username = username
+            count = 1
+            while User.objects.filter(username=username).exists():
+                username = f"{base_username}_{count}"
+                count += 1
+            user = User.objects.create_user(username=username, email=token_obj.email)
 
         if not user.is_active:
             logger.warning(

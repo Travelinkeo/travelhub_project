@@ -72,8 +72,13 @@ class Migration(migrations.Migration):
                 blank=True, default="", null=True, verbose_name="Notas de la Venta"
             ),
         ),
-        migrations.AddIndex(
-            model_name="pagoventa",
-            index=models.Index(fields=["creado"], name="idx_pagoventa_creado"),
+        migrations.SeparateDatabaseAndState(
+            state_operations=[
+                migrations.AddIndex(
+                    model_name="pagoventa",
+                    index=models.Index(fields=["creado"], name="idx_pagoventa_creado"),
+                ),
+            ],
+            database_operations=[],
         ),
     ]

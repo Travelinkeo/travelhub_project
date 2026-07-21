@@ -6,8 +6,9 @@ from django.contrib.auth import get_user_model
 from django.urls import reverse
 from rest_framework.test import APIClient
 
-from apps.finance.models.core_finance import Factura
-from apps.finance.models_stubs import FacturaProveedor, Moneda, RetencionISLR
+from apps.common.models import Moneda
+from apps.finance.models import Factura
+from apps.finance.models_stubs import FacturaProveedor, RetencionISLR
 from core.models import Agencia
 
 User = get_user_model()

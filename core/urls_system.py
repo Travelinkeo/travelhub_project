@@ -121,6 +121,7 @@ urlpatterns = [
     path("api/cron/health/", cron_views.health_check, name="cron_health"),
     # Tools & Intelligence
     path("tools/traductor/", translator_views.TraductorView.as_view(), name="traductor_tool"),
+    path("translator/", include(("core.translator_urls", "translator"))),
     path(
         "intelligence/gds-analyzer/",
         intelligence_views.GDSAnalyzerView.as_view(),

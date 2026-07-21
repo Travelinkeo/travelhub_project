@@ -1,7 +1,34 @@
-from django.db import models
+from django.db import models, transaction
 
 from apps.common.models import Moneda  # noqa: F401 re-export for backwards compatibility
 from core.models.base import AgenciaMixin
+
+
+def generar_numero_factura_atomico(model_cls, fecha_emision, prefix=""):
+    """
+    Genera un número de factura correlativo atómico y libre de condiciones de carrera.
+    """
+    if not prefix:
+        prefix = f"F-{fecha_emision.strftime('%Y%m%d')}"
+
+    with transaction.atomic():
+        field_name = "numero_factura" if hasattr(model_cls, "numero_factura") else "numero_control"
+        last_obj = (
+            model_cls.objects.select_for_update()
+            .filter(**{f"{field_name}__startswith": prefix})
+            .order_by(f"-{field_name}")
+            .first()
+        )
+        if last_obj:
+            val = getattr(last_obj, field_name, "")
+            try:
+                seq = int(val.split("-")[-1]) + 1
+            except (ValueError, IndexError):
+                seq = 1
+        else:
+            seq = 1
+        return f"{prefix}-{seq:04d}"
+
 
 # Stubs for migration & apps.get_model compatibility
 

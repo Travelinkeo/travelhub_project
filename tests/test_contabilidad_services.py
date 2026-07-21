@@ -1,6 +1,8 @@
 """Tests para servicios de contabilidad integrada VEN-NIF."""
 
+from datetime import date
 from decimal import Decimal
+from unittest.mock import patch
 
 import pytest
 
@@ -10,6 +12,8 @@ from apps.contabilidad.models import (
     MovimientoContable,
 )
 from apps.contabilidad.services import ContabilidadService, _acreditar, _debitar
+
+pytestmark = pytest.mark.django_db
 
 
 @pytest.mark.django_db
@@ -257,3 +261,273 @@ class TestProveedorInatur:
         assert movs.count() == 2
         assert movs.filter(tipo=MovimientoContable.TipoMovimiento.DEBITO).count() == 1
         assert movs.filter(tipo=MovimientoContable.TipoMovimiento.CREDITO).count() == 1
+
+
+class TestObtenerTasaBCV:
+    def test_tasa_exacta(self, agencia_premium):
+        from apps.finance.models import TasaCambioBCV
+
+        TasaCambioBCV.objects.create(
+            fecha=date(2026, 6, 15),
+            tasa_bsd_por_usd=Decimal("50.00"),
+            fuente="BCV",
+        )
+        tasa = ContabilidadService.obtener_tasa_bcv(date(2026, 6, 15))
+        assert tasa == Decimal("50.00")
+
+    def test_tasa_fallback_fecha_cercana(self, agencia_premium):
+        from apps.finance.models import TasaCambioBCV
+
+        TasaCambioBCV.objects.create(
+            fecha=date(2026, 6, 14),
+            tasa_bsd_por_usd=Decimal("49.50"),
+            fuente="BCV",
+        )
+        tasa = ContabilidadService.obtener_tasa_bcv(date(2026, 6, 15))
+        assert tasa == Decimal("49.50")
+
+    def test_tasa_sin_datos_raise(self):
+        with pytest.raises(ValueError, match="No hay tasa BCV"):
+            ContabilidadService.obtener_tasa_bcv(date(2026, 1, 1))
+
+
+class TestGenerarAsientoDesdeFactura:
+    def _setup_cuentas(self):
+        CuentaContable.objects.create(
+            codigo="1.1.02.02",
+            nombre="CxC USD",
+            tipo_cuenta=CuentaContable.TipoCuenta.ACTIVO,
+            acepta_movimientos=True,
+        )
+        CuentaContable.objects.create(
+            codigo="4.1.01",
+            nombre="Comisiones",
+            tipo_cuenta=CuentaContable.TipoCuenta.INGRESO,
+            acepta_movimientos=True,
+        )
+        CuentaContable.objects.create(
+            codigo="2.1.01.02",
+            nombre="CxP USD",
+            tipo_cuenta=CuentaContable.TipoCuenta.PASIVO,
+            acepta_movimientos=True,
+        )
+        CuentaContable.objects.create(
+            codigo="2.1.02.01",
+            nombre="IVA Débito",
+            tipo_cuenta=CuentaContable.TipoCuenta.PASIVO,
+            acepta_movimientos=True,
+        )
+        CuentaContable.objects.create(
+            codigo="2.1.02.03",
+            nombre="IGTF",
+            tipo_cuenta=CuentaContable.TipoCuenta.PASIVO,
+            acepta_movimientos=True,
+        )
+        CuentaContable.objects.create(
+            codigo="4.2",
+            nombre="Ingresos Ventas",
+            tipo_cuenta=CuentaContable.TipoCuenta.INGRESO,
+            acepta_movimientos=True,
+        )
+
+    def test_genera_asiento_intermediacion(self, agencia_premium):
+        from apps.finance.models import Factura
+
+        self._setup_cuentas()
+        factura = Factura.objects.create(
+            agencia=agencia_premium,
+            numero_factura="F-INTER-001",
+            tipo_factura=Factura.TipoFactura.TERCEROS,
+            base_imponible=Decimal("100"),
+            monto_iva_16=Decimal("16"),
+            monto_igtf=Decimal("3"),
+            monto_total=Decimal("119"),
+            iva_monto=Decimal("16"),
+            igtf_monto=Decimal("3"),
+            tasa_cambio=Decimal("50"),
+        )
+        with patch.object(ContabilidadService, "obtener_tasa_bcv", return_value=Decimal("50")):
+            asiento = ContabilidadService.generar_asiento_desde_factura(factura)
+        assert asiento is not None
+        assert asiento.tipo_asiento == AsientoContable.TipoAsiento.VENTAS
+        movs = MovimientoContable.objects.filter(asiento=asiento)
+        assert movs.count() >= 4
+        debito_total = sum(
+            m.monto_usd for m in movs.filter(tipo=MovimientoContable.TipoMovimiento.DEBITO)
+        )
+        credito_total = sum(
+            m.monto_usd for m in movs.filter(tipo=MovimientoContable.TipoMovimiento.CREDITO)
+        )
+        assert abs(debito_total - credito_total) < Decimal("0.01")
+
+    def test_genera_asiento_venta_propia(self, agencia_premium):
+        from apps.finance.models import Factura
+
+        self._setup_cuentas()
+        factura = Factura.objects.create(
+            agencia=agencia_premium,
+            numero_factura="F-PROPIA-001",
+            tipo_factura=Factura.TipoFactura.PRINCIPAL,
+            base_imponible=Decimal("200"),
+            monto_iva_16=Decimal("32"),
+            monto_igtf=Decimal("6"),
+            monto_total=Decimal("238"),
+            iva_monto=Decimal("32"),
+            igtf_monto=Decimal("6"),
+            tasa_cambio=Decimal("50"),
+        )
+        with patch.object(ContabilidadService, "obtener_tasa_bcv", return_value=Decimal("50")):
+            asiento = ContabilidadService.generar_asiento_desde_factura(factura)
+        assert asiento is not None
+        movs = MovimientoContable.objects.filter(asiento=asiento)
+        debito_total = sum(
+            m.monto_usd for m in movs.filter(tipo=MovimientoContable.TipoMovimiento.DEBITO)
+        )
+        credito_total = sum(
+            m.monto_usd for m in movs.filter(tipo=MovimientoContable.TipoMovimiento.CREDITO)
+        )
+        assert abs(debito_total - credito_total) < Decimal("0.01")
+
+    def test_asiento_reentrante_actualiza(self, agencia_premium):
+        from apps.finance.models import Factura
+
+        self._setup_cuentas()
+        factura = Factura.objects.create(
+            agencia=agencia_premium,
+            numero_factura="F-REEN-001",
+            tipo_factura=Factura.TipoFactura.PRINCIPAL,
+            base_imponible=Decimal("100"),
+            monto_iva_16=Decimal("16"),
+            monto_total=Decimal("116"),
+            iva_monto=Decimal("16"),
+            tasa_cambio=Decimal("50"),
+        )
+        with patch.object(ContabilidadService, "obtener_tasa_bcv", return_value=Decimal("50")):
+            asiento1 = ContabilidadService.generar_asiento_desde_factura(factura)
+            asiento2 = ContabilidadService.generar_asiento_desde_factura(factura)
+        assert asiento1.id == asiento2.id
+        movs = MovimientoContable.objects.filter(asiento=asiento1)
+        assert movs.count() >= 3
+
+
+class TestRegistrarPagoYDiferencial:
+    def _setup_cuentas(self):
+        CuentaContable.objects.create(
+            codigo="1.1.01.04",
+            nombre="Banco",
+            tipo_cuenta=CuentaContable.TipoCuenta.ACTIVO,
+            acepta_movimientos=True,
+        )
+        CuentaContable.objects.create(
+            codigo="1.1.02.02",
+            nombre="CxC USD",
+            tipo_cuenta=CuentaContable.TipoCuenta.ACTIVO,
+            acepta_movimientos=True,
+        )
+        CuentaContable.objects.create(
+            codigo="7.1.01",
+            nombre="Ganancia Cambiaria",
+            tipo_cuenta=CuentaContable.TipoCuenta.INGRESO,
+            acepta_movimientos=True,
+        )
+        CuentaContable.objects.create(
+            codigo="7.2.01",
+            nombre="Pérdida Cambiaria",
+            tipo_cuenta=CuentaContable.TipoCuenta.GASTO,
+            acepta_movimientos=True,
+        )
+        CuentaContable.objects.create(
+            codigo="2.1.02.01",
+            nombre="IVA Débito",
+            tipo_cuenta=CuentaContable.TipoCuenta.PASIVO,
+            acepta_movimientos=True,
+        )
+
+    def test_registra_pago_sin_diferencial(self, agencia_premium, moneda_usd):
+        from apps.bookings.models import PagoVenta, Venta
+
+        self._setup_cuentas()
+        venta = Venta.objects.create(
+            agencia=agencia_premium,
+            moneda=moneda_usd,
+            total_venta=Decimal("500"),
+            saldo_pendiente=Decimal("0"),
+        )
+        pago = PagoVenta.objects.create(
+            agencia=agencia_premium, venta=venta, monto=Decimal("500"), moneda=moneda_usd
+        )
+        with patch.object(ContabilidadService, "obtener_tasa_bcv", return_value=Decimal("50")):
+            asiento = ContabilidadService.registrar_pago_y_diferencial(pago)
+        assert asiento is not None
+        assert asiento.tipo_asiento == AsientoContable.TipoAsiento.DIARIO
+
+    def test_registra_pago_sin_factura_retorna_none(self, agencia_premium, moneda_usd):
+        from apps.bookings.models import PagoVenta, Venta
+
+        venta = Venta.objects.create(
+            agencia=agencia_premium,
+            moneda=moneda_usd,
+            total_venta=Decimal("500"),
+            saldo_pendiente=Decimal("500"),
+        )
+        pago = PagoVenta.objects.create(
+            agencia=agencia_premium, venta=venta, monto=Decimal("100"), moneda=moneda_usd
+        )
+        result = ContabilidadService.registrar_pago_y_diferencial(pago)
+        assert result is None
+
+    def test_registra_pago_con_ganancia_cambiaria(self, agencia_premium, moneda_usd):
+        from apps.bookings.models import PagoVenta, Venta
+        from apps.finance.models import Factura
+
+        self._setup_cuentas()
+        venta = Venta.objects.create(
+            agencia=agencia_premium,
+            moneda=moneda_usd,
+            total_venta=Decimal("1000"),
+            saldo_pendiente=Decimal("0"),
+        )
+        factura = Factura.objects.create(
+            agencia=agencia_premium,
+            numero_factura="F-GAN-001",
+            tipo_factura=Factura.TipoFactura.PRINCIPAL,
+            base_imponible=Decimal("1000"),
+            monto_total=Decimal("1000"),
+            tasa_cambio=Decimal("40"),
+            cliente=None,
+        )
+        venta.factura = factura
+        venta.save()
+        pago = PagoVenta.objects.create(
+            agencia=agencia_premium, venta=venta, monto=Decimal("1000"), moneda=moneda_usd
+        )
+        with patch.object(ContabilidadService, "obtener_tasa_bcv", return_value=Decimal("50")):
+            asiento = ContabilidadService.registrar_pago_y_diferencial(pago)
+        assert asiento is not None
+        assert MovimientoContable.objects.filter(asiento=asiento, cuenta__codigo="7.1.01").exists()
+
+
+class TestGenerarNotaDebitoDiferencial:
+    def test_genera_nota_debito_con_iva(self, agencia_premium, moneda_usd):
+        from apps.finance.models import Factura
+
+        factura = Factura.objects.create(
+            agencia=agencia_premium,
+            numero_factura="F-ND-001",
+            tipo_factura=Factura.TipoFactura.PRINCIPAL,
+            base_imponible=Decimal("500"),
+            monto_total=Decimal("500"),
+            moneda=moneda_usd,
+            tasa_cambio=Decimal("50"),
+            cliente=None,
+        )
+        nd = ContabilidadService._generar_nota_debito_diferencial(
+            factura=factura,
+            pago=None,
+            ganancia_bsd=Decimal("100"),
+            tasa_factura=Decimal("50"),
+            tasa_pago=Decimal("55"),
+        )
+        assert nd is not None
+        assert nd.tipo_factura == Factura.TipoFactura.NOTA_DEBITO
+        assert nd.iva_monto > 0

@@ -9,6 +9,8 @@ from rest_framework.test import APIClient
 from apps.cotizaciones.models import Cotizacion, ItemCotizacion
 from apps.cotizaciones.serializers import CotizacionSerializer
 
+pytestmark = pytest.mark.django_db
+
 
 @pytest.mark.django_db
 class TestCotizacionModel:
@@ -390,3 +392,233 @@ class TestCotizacionAPI:
         client.force_authenticate(user=usuario_staff)
         response = client.delete(f"/cotizaciones/api/cotizaciones/{cotizacion.id_cotizacion}/")
         assert response.status_code == status.HTTP_204_NO_CONTENT
+
+    def test_create_cotizacion_sin_moneda(self, agencia_premium, usuario_staff):
+        self._setup_user_agencia(usuario_staff, agencia_premium)
+        client = APIClient()
+        client.force_authenticate(user=usuario_staff)
+        from datetime import date
+
+        response = client.post(
+            "/cotizaciones/api/cotizaciones/",
+            {"destino": "Miami", "fecha_emision": date.today().isoformat()},
+            format="json",
+        )
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+    def test_update_cotizacion(self, agencia_premium, moneda_usd, usuario_staff):
+        self._setup_user_agencia(usuario_staff, agencia_premium)
+        cotizacion = Cotizacion.objects.create(
+            agencia=agencia_premium, moneda=moneda_usd, destino="Miami"
+        )
+        client = APIClient()
+        client.force_authenticate(user=usuario_staff)
+        response = client.patch(
+            f"/cotizaciones/api/cotizaciones/{cotizacion.id_cotizacion}/",
+            {"destino": "Cancún"},
+            format="json",
+        )
+        assert response.status_code == status.HTTP_200_OK
+        cotizacion.refresh_from_db()
+        assert cotizacion.destino == "Cancún"
+
+
+@pytest.mark.django_db
+class TestCotizacionMultiTenant:
+    def _setup_user_agencia(self, usuario, agencia):
+        from core.api import UsuarioAgencia
+
+        UsuarioAgencia.objects.get_or_create(
+            usuario=usuario, agencia=agencia, defaults={"rol": "admin"}
+        )
+
+    def test_no_accede_cotizacion_otra_agencia(
+        self, agencia_premium, agencia_estandar, moneda_usd, usuario_staff
+    ):
+        self._setup_user_agencia(usuario_staff, agencia_premium)
+        cotizacion_otra = Cotizacion.objects.create(
+            agencia=agencia_estandar, moneda=moneda_usd, destino="Secreta"
+        )
+        client = APIClient()
+        client.force_authenticate(user=usuario_staff)
+        response = client.get(f"/cotizaciones/api/cotizaciones/{cotizacion_otra.id_cotizacion}/")
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+
+    def test_list_solo_agencia_actual(
+        self, agencia_premium, agencia_estandar, moneda_usd, usuario_staff
+    ):
+        self._setup_user_agencia(usuario_staff, agencia_premium)
+        Cotizacion.objects.create(agencia=agencia_premium, moneda=moneda_usd, destino="Miami")
+        Cotizacion.objects.create(agencia=agencia_estandar, moneda=moneda_usd, destino="Secreta")
+        client = APIClient()
+        client.force_authenticate(user=usuario_staff)
+        response = client.get("/cotizaciones/api/cotizaciones/")
+        assert response.status_code == status.HTTP_200_OK
+        destinos = [c["destino"] for c in response.data["results"]]
+        assert "Miami" in destinos
+        assert "Secreta" not in destinos
+
+
+class TestAiSchemas:
+    def test_flight_quote_segment_schema(self):
+        from apps.cotizaciones.ai_schemas import FlightQuoteSegmentSchema
+
+        seg = FlightQuoteSegmentSchema(
+            airline="Avior",
+            departureDate="20 Abr",
+            departureCode="CCS",
+            arrivalCode="MAD",
+            departureCity="Caracas",
+            arrivalCity="Madrid",
+            departureTime="14:30",
+            arrivalTime="17:00",
+            stops="Directo",
+        )
+        assert seg.airline == "Avior"
+        assert seg.stops == "Directo"
+        assert seg.baggage == "1 Maleta 23kg"
+
+    def test_cotizacion_magic_schema(self):
+        from apps.cotizaciones.ai_schemas import CotizacionMagicSchema, FlightQuoteSegmentSchema
+
+        esquema = CotizacionMagicSchema(
+            destination="Madrid",
+            destination_description="Descubre la magia de Madrid",
+            type="Vuelo Redondo",
+            outboundDate="15 Oct",
+            returnDate="22 Oct",
+            totalPrice=850.50,
+            currency="USD",
+            flights=[
+                FlightQuoteSegmentSchema(
+                    airline="Iberia",
+                    departureDate="15 Oct",
+                    departureCode="CCS",
+                    arrivalCode="MAD",
+                    departureCity="Caracas",
+                    arrivalCity="Madrid",
+                    departureTime="14:30",
+                    arrivalTime="17:00",
+                    stops="Directo",
+                )
+            ],
+            image_search_query="Madrid Cityscape",
+        )
+        assert esquema.destination == "Madrid"
+        assert esquema.totalPrice == 850.50
+        assert len(esquema.flights) == 1
+        assert esquema.flights[0].airline == "Iberia"
+
+    def test_cotizacion_magic_schema_sin_retorno(self):
+        from apps.cotizaciones.ai_schemas import CotizacionMagicSchema, FlightQuoteSegmentSchema
+
+        esquema = CotizacionMagicSchema(
+            destination="Bogotá",
+            destination_description="Visita Bogotá",
+            type="Solo Ida",
+            outboundDate="10 Jun",
+            totalPrice=320.00,
+            currency="USD",
+            flights=[
+                FlightQuoteSegmentSchema(
+                    airline="Wingo",
+                    departureDate="10 Jun",
+                    departureCode="CCS",
+                    arrivalCode="BOG",
+                    departureCity="Caracas",
+                    arrivalCity="Bogotá",
+                    departureTime="08:00",
+                    arrivalTime="09:30",
+                    stops="Directo",
+                )
+            ],
+            image_search_query="Bogota Skyline",
+        )
+        assert esquema.returnDate is None
+        assert esquema.type == "Solo Ida"
+
+
+class TestPdfService:
+    def test_generar_pdf_cotizacion_llama_renderer(self, agencia_premium, moneda_usd):
+        cotizacion = Cotizacion.objects.create(
+            agencia=agencia_premium, moneda=moneda_usd, destino="Miami"
+        )
+        with (
+            patch(
+                "apps.cotizaciones.pdf_service.render_to_string", return_value="<html>PDF</html>"
+            ) as mock_render,
+            patch(
+                "apps.cotizaciones.pdf_service.PdfRendererService.render_html_to_pdf",
+                return_value=b"%PDF-1.4",
+            ) as mock_pdf,
+        ):
+            from apps.cotizaciones.pdf_service import generar_pdf_cotizacion
+
+            result = generar_pdf_cotizacion(cotizacion)
+            assert result == b"%PDF-1.4"
+            mock_render.assert_called_once_with(
+                "cotizaciones/plantilla_cotizacion.html",
+                {"cotizacion": cotizacion},
+            )
+            mock_pdf.assert_called_once_with("<html>PDF</html>")
+
+
+class TestWhatsAppWebhook:
+    def test_webhook_sin_token_retorna_503(self):
+        from django.http import HttpRequest
+
+        from apps.cotizaciones.views_whatsapp import IncomingWhatsAppWebhook
+
+        req = HttpRequest()
+        req.method = "POST"
+        req.POST = {"From": "whatsapp:+584141234567", "Body": "Hola"}
+        with (
+            patch.object(IncomingWhatsAppWebhook, "_verify_signature", return_value=True),
+            patch("apps.cotizaciones.views_whatsapp.settings.TWILIO_AUTH_TOKEN", None),
+        ):
+            view = IncomingWhatsAppWebhook()
+            resp = view.post(req)
+            assert resp.status_code == 503
+
+    def test_webhook_firma_invalida_retorna_401(self):
+        from django.http import HttpRequest
+
+        from apps.cotizaciones.views_whatsapp import IncomingWhatsAppWebhook
+
+        req = HttpRequest()
+        req.method = "POST"
+        req.POST = {"From": "whatsapp:+584141234567", "Body": "Hola"}
+        with (
+            patch.object(IncomingWhatsAppWebhook, "_verify_signature", return_value=False),
+            patch("apps.cotizaciones.views_whatsapp.settings.TWILIO_AUTH_TOKEN", "token_valido"),
+        ):
+            view = IncomingWhatsAppWebhook()
+            resp = view.post(req)
+            assert resp.status_code == 401
+
+    def test_webhook_valido_encola_tarea(self):
+        from django.http import HttpRequest
+
+        from apps.cotizaciones.views_whatsapp import IncomingWhatsAppWebhook
+
+        req = HttpRequest()
+        req.method = "POST"
+        req.POST = {"From": "whatsapp:+584141234567", "Body": "Quiero un vuelo a Madrid"}
+        with (
+            patch.object(IncomingWhatsAppWebhook, "_verify_signature", return_value=True),
+            patch("apps.cotizaciones.views_whatsapp.settings.TWILIO_AUTH_TOKEN", "token_valido"),
+            patch(
+                "apps.cotizaciones.views_whatsapp.process_twilio_voice_quote_task.delay"
+            ) as mock_task,
+        ):
+            view = IncomingWhatsAppWebhook()
+            resp = view.post(req)
+            assert resp.status_code == 200
+            mock_task.assert_called_once_with(
+                sender_id="whatsapp:+584141234567",
+                raw_phone="+584141234567",
+                body_text="Quiero un vuelo a Madrid",
+                num_media=0,
+                media_url="",
+                media_type="",
+            )

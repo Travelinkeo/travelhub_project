@@ -57,7 +57,7 @@ class BoletoRetryParseIDORTest(TestCase):
         )
 
         # Usuario perteneciente a la Agencia Beta (el atacante)
-        self.user_b = User.objects.create_user(username="user_beta_idor", password="pw123")
+        self.user_b = User.objects.create_user(username="user_beta_idor", password="pw123")  # noqa: S106
         UsuarioAgencia.objects.create(
             usuario=self.user_b, agencia=self.agencia_b, rol="vendedor", activo=True
         )
@@ -83,24 +83,19 @@ class BoletoRetryParseIDORTest(TestCase):
 
         # El flujo de Celery nunca debe ejecutarse porque get_object_tenant_or_404
         # corta antes. Aun así, silenciamos el helper por si una regresión lo invoca.
-        with (
-            patch("apps.common.utils.celery_utils._is_celery_available", return_value=False),
-            patch("core.api.parsear_boleto_individual.apply") as mock_apply,
-        ):
+        with patch("apps.common.utils.celery_utils.safe_delay") as mock_safe_delay:
             response = self.client.post(url, secure=True)
 
-        # 🎯 Asertación central: 404, no 200 (IDOR), no 403 (revela existencia)
         self.assertEqual(
             response.status_code,
             404,
             "IDOR NO corregido: un usuario de otra agencia pudo alcanzar el boleto.",
         )
-        # El worker de parseo nunca debe haberse invocado sobre el boleto víctima
-        mock_apply.assert_not_called()
+        mock_safe_delay.assert_not_called()
 
     def test_usuario_alpha_si_puede_reintentar_parseo_de_su_propio_boleto(self):
         """Controles de sanity: el propietario sí alcanza su boleto (no rompimos acceso legítimo)."""
-        user_a = User.objects.create_user(username="user_alpha_idor", password="pw123")
+        user_a = User.objects.create_user(username="user_alpha_idor", password="pw123")  # noqa: S106
         UsuarioAgencia.objects.create(
             usuario=user_a, agencia=self.agencia_a, rol="vendedor", activo=True
         )
@@ -108,16 +103,12 @@ class BoletoRetryParseIDORTest(TestCase):
 
         url = reverse("bookings:api_boleto_retry", kwargs={"pk": self.boleto_alpha.pk})
 
-        with (
-            patch("apps.common.utils.celery_utils._is_celery_available", return_value=False),
-            patch("core.api.parsear_boleto_individual.apply") as mock_apply,
-        ):
-            mock_apply.return_value = None  # sync mode no-op
+        with patch("apps.common.utils.celery_utils.safe_delay") as mock_safe_delay:
+            mock_safe_delay.return_value = True
             response = self.client.post(url, secure=True)
 
-        # Celery falso -> entra rama SYNC y retorna 200 con estado_parseo actual
         self.assertIn(response.status_code, (200, 202))
-        mock_apply.assert_called_once()
+        mock_safe_delay.assert_called_once()
 
 
 class VentaDoubleInvoiceIDORTest(TestCase):
@@ -147,7 +138,7 @@ class VentaDoubleInvoiceIDORTest(TestCase):
         )
 
         # Atacante (Agencia B)
-        self.user_b = User.objects.create_user(username="user_beta_fin_idor", password="pw123")
+        self.user_b = User.objects.create_user(username="user_beta_fin_idor", password="pw123")  # noqa: S106
         UsuarioAgencia.objects.create(
             usuario=self.user_b, agencia=self.agencia_b, rol="contador", activo=True
         )
@@ -187,7 +178,7 @@ class VentaDoubleInvoiceIDORTest(TestCase):
 
     def test_usuario_alpha_si_puede_facturar_su_propia_venta(self):
         """Sanity: el propietario sí puede invocar el endpoint sin 404."""
-        user_a = User.objects.create_user(username="user_alpha_fin_idor", password="pw123")
+        user_a = User.objects.create_user(username="user_alpha_fin_idor", password="pw123")  # noqa: S106
         UsuarioAgencia.objects.create(
             usuario=user_a, agencia=self.agencia_a, rol="contador", activo=True
         )

@@ -20,12 +20,16 @@ urlpatterns = [
     path("itinerary/", translate_itinerary_api, name="translate_itinerary"),
     # Cálculo de precios
     path("calculate/", calculate_ticket_price_api, name="calculate_price"),
-    # Catálogos y información
+    # Catálogos e información
     path("gds/", get_supported_gds_api, name="supported_gds"),
+    path("gds/", get_supported_gds_api, name="get_supported_gds"),
     path("airlines/", get_airlines_catalog_api, name="airlines_catalog"),
+    path("airlines/", get_airlines_catalog_api, name="get_airlines"),
     path("airports/", get_airports_catalog_api, name="airports_catalog"),
+    path("airports/", get_airports_catalog_api, name="get_airports"),
     # Validación
     path("validate/", validate_itinerary_format_api, name="validate_format"),
+    path("validate/", validate_itinerary_format_api, name="validate_itinerary"),
     # Procesamiento en lote
     path("batch/", batch_translate_api, name="batch_translate"),
     # Integración CRM

@@ -293,78 +293,51 @@ class DataNormalizationService:
                 destino_raw if len(str(destino_raw)) == 3 else None
             )
 
-            # Búsqueda inversa de IATA por nombre de ciudad si no se tiene el código de 3 letras
-            if not iata_origen and origen_raw:
-                origen_raw_upper = str(origen_raw).upper()
-                clean_city_name = origen_raw_upper.split(",")[0].strip()
-                city_words = clean_city_name.split()
-                if city_words and len(city_words[-1]) == 2 and city_words[-1].isalpha():
-                    clean_city_name = " ".join(city_words[:-1])
-
-                master_airports = CatalogNormalizationService._load_airports()
-                if master_airports:
-                    candidatos = []
-                    for code, info in master_airports.items():
-                        city = info.get("city")
-                        if city and city.upper() == clean_city_name:
-                            iata_val = info.get("iata") or code
-                            if len(iata_val) == 3:
-                                candidatos.append((iata_val, info))
-                    if candidatos:
-                        match_found = False
-                        for iata_val, info in candidatos:
-                            country = info.get("country")
-                            if country and (
-                                country.upper() in origen_raw_upper
-                                or info.get("name", "").upper() in origen_raw_upper
-                            ):
-                                iata_origen = iata_val
-                                match_found = True
-                                break
-                        if not match_found:
-                            iata_origen = candidatos[0][0]
-
-            if not iata_destino and destino_raw:
-                destino_raw_upper = str(destino_raw).upper()
-                clean_city_name = destino_raw_upper.split(",")[0].strip()
-                city_words = clean_city_name.split()
-                if city_words and len(city_words[-1]) == 2 and city_words[-1].isalpha():
-                    clean_city_name = " ".join(city_words[:-1])
-
-                master_airports = CatalogNormalizationService._load_airports()
-                if master_airports:
-                    candidatos = []
-                    for code, info in master_airports.items():
-                        city = info.get("city")
-                        if city and city.upper() == clean_city_name:
-                            iata_val = info.get("iata") or code
-                            if len(iata_val) == 3:
-                                candidatos.append((iata_val, info))
-                    if candidatos:
-                        match_found = False
-                        for iata_val, info in candidatos:
-                            country = info.get("country")
-                            if country and (
-                                country.upper() in destino_raw_upper
-                                or info.get("name", "").upper() in destino_raw_upper
-                            ):
-                                iata_destino = iata_val
-                                match_found = True
-                                break
-                        if not match_found:
-                            iata_destino = candidatos[0][0]
+            # 🏙️ Búsqueda inversa de IATA por nombre de ciudad si no se tiene el código de 3 letras.
+            # IMPORTANTE: varios GDS (KIU/Turpial, Estelar) imprimen el NOMBRE de ciudad en
+            # la columna FROM/TO en lugar del código IATA — particularmente para rutas
+            # domésticas Venezolanas. Antes iterábamos 29.305 aeropuertos por tramo y
+            # menudo tomábamos el primero ambiguo (ej: "San Antonio" → Texas/US en vez de
+            # San Antonio del Táchira/SVZ). Ahora usamos:
+            #   1. Alias manuales por nombre (LatAm/Venezuela) → O(1).
+            #   2. Índice city→[aeropuertos] precomputado → O(1) + desempate por país.
+            #   3. Si hay múltiples candidatos sin desempate claro, NO inventamos IATA
+            #      (preferimos dejar el nombre limpio a poner un IATA equivocado que
+            #      ensucie la venta y el PDF).
+            iata_origen = DataNormalizationService._resolve_iata_from_city(
+                origen_raw,
+                current_iata=iata_origen,
+            )
+            iata_destino = DataNormalizationService._resolve_iata_from_city(
+                destino_raw,
+                current_iata=iata_destino,
+            )
 
             # Resolver nombres vía catálogo si tenemos IATA
-            ciudad_origen_obj = (
-                CatalogNormalizationService.get_or_create_ciudad_by_iata(iata_origen)
-                if iata_origen
-                else None
-            )
-            ciudad_destino_obj = (
-                CatalogNormalizationService.get_or_create_ciudad_by_iata(iata_destino)
-                if iata_destino
-                else None
-            )
+            try:
+                ciudad_origen_obj = (
+                    CatalogNormalizationService.get_or_create_ciudad_by_iata(iata_origen)
+                    if iata_origen
+                    else None
+                )
+            except Exception as e_city_o:
+                logger.warning(
+                    f"⚠️ _normalize_itinerary: fallo resolviendo ciudad origen "
+                    f"(iata={iata_origen}, raw={origen_raw!r}): {e_city_o}. Continuando sin ciudad."
+                )
+                ciudad_origen_obj = None
+            try:
+                ciudad_destino_obj = (
+                    CatalogNormalizationService.get_or_create_ciudad_by_iata(iata_destino)
+                    if iata_destino
+                    else None
+                )
+            except Exception as e_city_d:
+                logger.warning(
+                    f"⚠️ _normalize_itinerary: fallo resolviendo ciudad destino "
+                    f"(iata={iata_destino}, raw={destino_raw!r}): {e_city_d}. Continuando sin ciudad."
+                )
+                ciudad_destino_obj = None
 
             segmento = {
                 "aerolinea": tramo.get("airline") or tramo.get("aerolinea"),
@@ -395,6 +368,101 @@ class DataNormalizationService:
             }
             segmentos.append(segmento)
         return segmentos
+
+    @staticmethod
+    def _resolve_iata_from_city(
+        raw_value, current_iata: str | None = None
+    ) -> str | None:
+        """
+        Resuelve el código IATA de 3 letras a partir de un valor crudo (puede ser
+        nombre de ciudad, código IATA, o una cadena compuesta "CIUDAD, PAIS").
+
+        Estrategia (en orden, primera que gana):
+          0. Si `current_iata` ya viene seteado desde el parser, respetarlo.
+          1. Si el valor crudo ya es IATA de 3 letras, usarlo tras validarlo contra
+             el índice O(1) del airports_master.
+          2. Alias manuales LatAm/Venezuela (CITY_NAME_ALIASES) — el GDS KIU/Turpial
+             imprime el NOMBRE de ciudad en la columna FROM/TO para rutas domésticas.
+          3. Índice city→[aeropuertos] del maestro:
+             - Si hay 1 candidato, usarlo.
+             - Si hay múltiples, intentar desempate por país/name si están en el raw.
+             - Si no hay desempate claro, NO inventar IATA (devolver current_iata
+               o None) — preferimos dejar el nombre bien a tener un IATA equivocado
+               que contamine la venta/PDF/búsqueda.
+          4. Como último recurso, devolver current_iata (None por defecto).
+
+        Esto reemplaza el loop O(N) anterior que iteraba 29.305 aeropuertos por tramo.
+        """
+        if current_iata:
+            return current_iata
+        if not raw_value:
+            return None
+
+        raw_str = str(raw_value).strip()
+        raw_upper = raw_str.upper()
+        # Limpiar el componente país (ej: "VALENCIA, VENEZUELA")
+        clean_city = raw_upper.split(",")[0].strip()
+        # Quitar sufijo de estado de 2 letras (ej: "SAN ANTONIO TX" -> "SAN ANTONIO")
+        words = clean_city.split()
+        if words and len(words[-1]) == 2 and words[-1].isalpha() and len(words) > 1:
+            clean_city = " ".join(words[:-1])
+
+        # 1. ¿El valor crudo ya es IATA de 3 letras?
+        if len(raw_str) == 3 and raw_str.isalpha():
+            from apps.common.services.catalog_service import CatalogNormalizationService
+
+            if CatalogNormalizationService._get_airports_by_iata(raw_upper):
+                return raw_upper
+            # Aunque no esté en el maestro, podría existir en DB (RLS/contexto).
+            # Lo dejamos pasar: la get_or_create lo validará contra DB.
+            return raw_upper
+
+        # 2. Alias manuales (alta prioridad para LatAm/Venezuela doméstica)
+        from apps.common.services.catalog_service import CatalogNormalizationService
+
+        alias_iata = CatalogNormalizationService.CITY_NAME_ALIASES.get(clean_city)
+        if alias_iata:
+            # Validar que existe en el maestro o en DB (si no, igual lo dejamos,
+            # get_or_create_ciudad_by_iata lo resolverá).
+            return alias_iata
+
+        # 3. Índice city→[aeropuertos] (O(1))
+        candidatos = CatalogNormalizationService._get_airports_by_city(clean_city)
+        if not candidatos:
+            return None
+
+        # Filtrar sólo los que tengan un IATA de 3 letras válido
+        candidatos_validos = []
+        for info in candidatos:
+            iata_val = (info.get("iata") or "").strip().upper()
+            if iata_val and len(iata_val) == 3:
+                candidatos_validos.append((iata_val, info))
+
+        if not candidatos_validos:
+            return None
+        if len(candidatos_validos) == 1:
+            return candidatos_validos[0][0]
+
+        # Desempate por país o nombre del aeropuerto que aparezca en el raw_upper
+        raw_with_country = raw_upper
+        for iata_val, info in candidatos_validos:
+            country = (info.get("country") or "").upper()
+            airport_name = (info.get("name") or "").upper()
+            state = (info.get("state") or "").upper()
+            if (
+                (country and country in raw_with_country)
+                or (airport_name and airport_name in raw_with_country)
+                or (state and state in raw_with_country)
+            ):
+                return iata_val
+
+        # No hay desempate confiable. NO inventar: devolver None para que el
+        # segmento se quede con el nombre limpio (no con un IATA ambiguo/equivocado).
+        logger.info(
+            f"ℹ️ _resolve_iata_from_city: ciudad ambigua '{clean_city}' con "
+            f"{len(candidatos_validos)} IATA candidatos — manteniendo None para evitar mapeo erróneo."
+        )
+        return None
 
     @staticmethod
     def _normalize_time(time_str):

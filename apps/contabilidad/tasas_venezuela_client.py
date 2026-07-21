@@ -1,9 +1,8 @@
-# contabilidad/tasas_venezuela_client.py
 """
 Cliente mejorado para obtener múltiples tasas de cambio de Venezuela:
 - BCV (oficial)
 - Promedio (mercado)
-- P2P (peer-to-peer)
+- P2P (peer-to-peer vía Binance)
 - Otras monedas (EUR, COP, etc.)
 """
 
@@ -13,7 +12,6 @@ from decimal import Decimal
 
 import requests
 
-# 🛡️ RESILIENT INFRASTRUCTURE: DolarApi & BCV Scraper based
 PY_DOLAR_VENEZUELA_AVAILABLE = False
 
 logger = logging.getLogger(__name__)
@@ -22,20 +20,83 @@ logger = logging.getLogger(__name__)
 class TasasVenezuelaClient:
     """Cliente para obtener tasas de cambio de múltiples fuentes"""
 
-    # API principal: DolarApi Venezuela (gratuita y confiable)
     API_URL = "https://ve.dolarapi.com/v1/dolares"
+    BINANCE_P2P_URL = "https://p2p.binance.com/bapi/c2c/v2/friendly/c2c/adv/search"
     TIMEOUT = 10
+
+    @classmethod
+    def obtener_tasa_binance_p2p(cls) -> dict | None:
+        """
+        Obtiene la tasa P2P desde Binance (USDT/VES).
+        Toma el mejor precio de venta (promedio top 3).
+        """
+        try:
+            payload = {
+                "page": 1,
+                "rows": 5,
+                "payTypes": [],
+                "asset": "USDT",
+                "fiat": "VES",
+                "tradeType": "SELL",
+                "publisherType": None,
+            }
+            logger.info(f"Consultando Binance P2P: {cls.BINANCE_P2P_URL}")
+            response = requests.post(
+                cls.BINANCE_P2P_URL,
+                json=payload,
+                timeout=cls.TIMEOUT,
+                headers={"Content-Type": "application/json"},
+            )
+            response.raise_for_status()
+            data = response.json()
+
+            ads = data.get("data", [])
+            if not ads:
+                logger.warning("Binance P2P: no se encontraron anuncios")
+                return None
+
+            prices = []
+            for adv in ads:
+                adv_data = adv.get("adv", {})
+                price = adv_data.get("price")
+                if price:
+                    prices.append(Decimal(str(price)))
+
+            if not prices:
+                logger.warning("Binance P2P: no se pudieron extraer precios")
+                return None
+
+            # Promedio de los top N mejores precios
+            prices.sort(reverse=True)
+            top = prices[:3]
+            promedio = sum(top) / len(top)
+
+            return {
+                "price": promedio.quantize(Decimal("0.01")),
+                "last_update": datetime.now().isoformat(),
+                "title": "Binance P2P (USDT/VES)",
+                "symbol": "Bs.",
+            }
+
+        except requests.RequestException as e:
+            logger.error(f"Error HTTP consultando Binance P2P: {e}")
+            return None
+        except Exception as e:
+            logger.error(f"Error procesando respuesta Binance P2P: {e}")
+            return None
 
     @classmethod
     def obtener_todas_tasas(cls) -> dict | None:
         """
-        Obtiene todas las tasas disponibles desde DolarApi Venezuela.
+        Obtiene todas las tasas disponibles desde DolarApi Venezuela
+        + Binance P2P.
 
         Returns:
             Dict con estructura:
             {
                 'oficial': {'price': Decimal, 'last_update': str, 'title': str},
                 'paralelo': {'price': Decimal, 'last_update': str, 'title': str},
+                'p2p': {'price': Decimal, 'last_update': str, 'title': str},
                 'bitcoin': {'price': Decimal, 'last_update': str, 'title': str}
             }
         """
@@ -50,8 +111,7 @@ class TasasVenezuelaClient:
 
             tasas = {}
 
-            # 1. Intentar obtener Tasa Oficial DIRECTAMENTE del BCV (Más precisa)
-            # Intentar primero con Scraper personalizado, luego con pyDolarVenezuela
+            # 1. Intentar obtener Tasa Oficial DIRECTAMENTE del BCV
             try:
                 from apps.finance.services.bcv_scraper import obtener_tasas_bcv
 
@@ -85,7 +145,6 @@ class TasasVenezuelaClient:
                 try:
                     fuente = item.get("fuente", "unknown")
 
-                    # Si ya tenemos oficial del BCV directo, saltar el de la API si es redundante
                     if fuente == "oficial" and "oficial" in tasas:
                         continue
 
@@ -108,9 +167,13 @@ class TasasVenezuelaClient:
                     logger.warning(f"Error procesando item: {e}")
                     continue
 
-            # 3. Fallback final para Paralelo si DolarApi falla totalmente
-            if "paralelo" not in tasas:
-                logger.warning("No se pudo obtener tasa paralela de DolarApi.")
+            # 3. Obtener tasa Binance P2P
+            p2p = cls.obtener_tasa_binance_p2p()
+            if p2p:
+                tasas["p2p"] = p2p
+                logger.info(f"Tasa Binance P2P obtenida: {p2p['price']}")
+            else:
+                logger.warning("No se pudo obtener tasa Binance P2P.")
 
             if tasas:
                 logger.info(f"Tasas obtenidas: {len(tasas)} fuentes")
@@ -151,6 +214,14 @@ class TasasVenezuelaClient:
         return None
 
     @classmethod
+    def obtener_tasa_p2p(cls) -> Decimal | None:
+        """Obtiene la tasa Binance P2P (USDT/VES)"""
+        tasas = cls.obtener_todas_tasas()
+        if tasas and "p2p" in tasas:
+            return tasas["p2p"]["price"]
+        return None
+
+    @classmethod
     def actualizar_tasas_db(cls) -> dict[str, bool]:
         """
         Actualiza la tasa oficial (BCV) en la base de datos y TipoCambio (Core).
@@ -161,9 +232,11 @@ class TasasVenezuelaClient:
         from datetime import date
 
         from django.core.cache import cache
+        from django.utils import timezone
 
-        from apps.common.models import Moneda, TasaCambio, TipoCambio
+        from apps.common.models import Moneda
         from apps.finance.models import TasaCambioBCV
+        from apps.finance.models_stubs import TasaCambio, TipoCambio
 
         resultados = {}
         tasas = cls.obtener_todas_tasas()
@@ -180,8 +253,7 @@ class TasasVenezuelaClient:
                 TasaCambioBCV.objects.update_or_create(
                     fecha=hoy,
                     defaults={
-                        "tasa_bsd_por_usd": tasas["oficial"]["price"],
-                        "fuente": "DolarApi - BCV Oficial",
+                        "tasa": tasas["oficial"]["price"],
                     },
                 )
                 resultados["oficial"] = True
@@ -191,10 +263,13 @@ class TasasVenezuelaClient:
                 resultados["oficial"] = False
 
         # 1.1 Actualizar tabla central TasaCambio (Caché de UI)
+        now = timezone.now()
         if "oficial" in tasas:
             try:
                 TasaCambio.objects.update_or_create(
-                    fecha=hoy, moneda="USD", defaults={"monto": tasas["oficial"]["price"]}
+                    fecha=hoy,
+                    moneda="USD",
+                    defaults={"monto": tasas["oficial"]["price"], "ultima_actualizacion": now},
                 )
                 logger.info(f"TasaCambio UI (USD) actualizada: {tasas['oficial']['price']}")
             except Exception as e:
@@ -203,11 +278,25 @@ class TasasVenezuelaClient:
         if "euro_bcv" in tasas:
             try:
                 TasaCambio.objects.update_or_create(
-                    fecha=hoy, moneda="EUR", defaults={"monto": tasas["euro_bcv"]["price"]}
+                    fecha=hoy,
+                    moneda="EUR",
+                    defaults={"monto": tasas["euro_bcv"]["price"], "ultima_actualizacion": now},
                 )
                 logger.info(f"TasaCambio UI (EUR) actualizada: {tasas['euro_bcv']['price']}")
             except Exception as e:
                 logger.error(f"Error guardando TasaCambio UI (EUR): {e}")
+
+        # 1.2 Persistir tasa Binance P2P
+        if "p2p" in tasas:
+            try:
+                TasaCambio.objects.update_or_create(
+                    fecha=hoy,
+                    moneda="P2P",
+                    defaults={"monto": tasas["p2p"]["price"], "ultima_actualizacion": now},
+                )
+                logger.info(f"TasaCambio UI (P2P) actualizada: {tasas['p2p']['price']}")
+            except Exception as e:
+                logger.error(f"Error guardando TasaCambio UI (P2P): {e}")
 
         # Limpiar caché de la UI
         try:
@@ -217,14 +306,12 @@ class TasasVenezuelaClient:
             logger.warning(f"No se pudo limpiar caché tasa_bcv_context: {cache_err}")
 
         # 2. Actualizar tabla central TipoCambio (USD y EUR)
-        # Buscar moneda destino (VES)
         moneda_ves = Moneda.objects.filter(codigo_iso="VES").first()
 
         if not moneda_ves:
             logger.error("No se encontró moneda VES para actualizar tasas.")
             return resultados
 
-        # Mapeo de claves con Moneda Origen ISO
         mapa_monedas = {"oficial": "USD", "euro_bcv": "EUR"}
 
         for clave_tasa, codigo_iso_origen in mapa_monedas.items():
@@ -234,7 +321,7 @@ class TasasVenezuelaClient:
                     if moneda_origen:
                         valor_tasa = tasas[clave_tasa]["price"]
 
-                        tipo_cambio, created = TipoCambio.objects.update_or_create(
+                        TipoCambio.objects.update_or_create(
                             moneda_origen=moneda_origen,
                             moneda_destino=moneda_ves,
                             fecha_efectiva=hoy,
@@ -257,6 +344,7 @@ class TasasVenezuelaClient:
             {
                 'oficial': {'valor': Decimal, 'fecha': str, 'nombre': str},
                 'paralelo': {'valor': Decimal, 'fecha': str, 'nombre': str},
+                'p2p': {'valor': Decimal, 'fecha': str, 'nombre': str},
                 'bitcoin': {'valor': Decimal, 'fecha': str, 'nombre': str}
             }
         """
@@ -266,7 +354,6 @@ class TasasVenezuelaClient:
         if not tasas:
             return resumen
 
-        # Oficial (BCV)
         if "oficial" in tasas:
             resumen["oficial"] = {
                 "valor": float(tasas["oficial"]["price"]),
@@ -274,7 +361,6 @@ class TasasVenezuelaClient:
                 "nombre": "BCV Oficial",
             }
 
-        # Paralelo (mostrar como "No Oficial")
         if "paralelo" in tasas:
             resumen["paralelo"] = {
                 "valor": float(tasas["paralelo"]["price"]),
@@ -282,7 +368,13 @@ class TasasVenezuelaClient:
                 "nombre": "Dólar No Oficial",
             }
 
-        # Bitcoin
+        if "p2p" in tasas:
+            resumen["p2p"] = {
+                "valor": float(tasas["p2p"]["price"]),
+                "fecha": tasas["p2p"]["last_update"],
+                "nombre": "Binance P2P (USDT/VES)",
+            }
+
         if "bitcoin" in tasas:
             resumen["bitcoin"] = {
                 "valor": float(tasas["bitcoin"]["price"]),

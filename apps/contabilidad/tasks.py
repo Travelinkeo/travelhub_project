@@ -46,9 +46,10 @@ def sync_bcv_rates():
 
     from django.core.cache import cache
 
-    from apps.common.models import Moneda, TasaCambio, TipoCambio
+    from apps.common.models import Moneda
     from apps.contabilidad.tasas_venezuela_client import TasasVenezuelaClient
     from apps.finance.models import TasaCambioBCV
+    from apps.finance.models_stubs import TasaCambio, TipoCambio
 
     logger.info("Iniciando sincronización de tasas BCV...")
     hoy = date.today()
@@ -57,13 +58,7 @@ def sync_bcv_rates():
         resultados = TasasVenezuelaClient.actualizar_tasas_db()
 
         if resultados.get("oficial"):
-            tasa = resultados["oficial"]
-            if hasattr(tasa, "tasa"):
-                logger.info(f"Tasa BCV actualizada: {tasa.tasa} (Fecha: {tasa.fecha_validez})")
-                return f"Sincronización exitosa. Tasa: {tasa.tasa}"
-            else:
-                logger.info(f"Tasa BCV actualizada (Valor Crudo): {tasa}")
-                return f"Sincronización exitosa. Valor: {tasa}"
+            return "Sincronización exitosa. Tasa BCV actualizada."
         else:
             raise ValueError(
                 "No se pudo obtener/guardar la tasa oficial desde las fuentes activas."
@@ -82,18 +77,21 @@ def sync_bcv_rates():
                 )
                 return f"Error: Sincronización falló y no hay histórico disponible ({e})"
 
-            valor_tasa = ultima_tasa.tasa_bsd_por_usd
+            valor_tasa = ultima_tasa.tasa
 
             TasaCambioBCV.objects.update_or_create(
                 fecha=hoy,
                 defaults={
-                    "tasa_bsd_por_usd": valor_tasa,
-                    "fuente": f"FALLBACK HISTÓRICO (de {ultima_tasa.fecha})",
+                    "tasa": valor_tasa,
                 },
             )
 
+            from django.utils import timezone
+
             TasaCambio.objects.update_or_create(
-                fecha=hoy, moneda="USD", defaults={"monto": valor_tasa}
+                fecha=hoy,
+                moneda="USD",
+                defaults={"monto": valor_tasa, "ultima_actualizacion": timezone.now()},
             )
 
             moneda_ves = Moneda.objects.filter(codigo_iso="VES").first()

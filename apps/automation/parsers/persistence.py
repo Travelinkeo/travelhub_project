@@ -111,10 +111,13 @@ class BoletoPersistenceService:
 
         ultimo = duplicados.first()
         if ultimo:
-            boleto.version = ultimo.version + 1
-            boleto.boleto_padre = ultimo
-            boleto.estado_emision = BoletoImportado.EstadoEmision.REEMISION
-            boleto.save(update_fields=["version", "boleto_padre", "estado_emision"])
+            # Si el boleto anterior fue anulado (VOID), no es una re-emisión legítima
+            is_anulado = getattr(ultimo, "estado_emision", None) == BoletoImportado.EstadoEmision.ANULADO
+            if not is_anulado:
+                boleto.version = ultimo.version + 1
+                boleto.boleto_padre = ultimo
+                boleto.estado_emision = BoletoImportado.EstadoEmision.REEMISION
+                boleto.save(update_fields=["version", "boleto_padre", "estado_emision"])
 
     @staticmethod
     def _truncate(val, max_len):

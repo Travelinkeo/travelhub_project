@@ -101,9 +101,7 @@ class TestGetAgenciaFromRequest:
             get_agencia_from_request(req)
 
     def test_superuser_retorna_none(self):
-        user = User.objects.create_user(
-            username="su", password="pw", is_superuser=True
-        )
+        user = User.objects.create_user(username="su", password="pw", is_superuser=True)
         req = type("Req", (), {"user": user})
         assert get_agencia_from_request(req) is None
 
@@ -176,9 +174,7 @@ class TestAgencyRoleRequired:
             decorator(lambda r: "ok")(req)
 
     def test_superuser_bypass(self):
-        user = User.objects.create_user(
-            username="su_bypass", password="pw", is_superuser=True
-        )
+        user = User.objects.create_user(username="su_bypass", password="pw", is_superuser=True)
         req = type("Req", (), {"user": user})
         decorator = agency_role_required(["admin"])
         result = decorator(lambda r: "ok")(req)

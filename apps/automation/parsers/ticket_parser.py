@@ -9,16 +9,20 @@ logger = logging.getLogger(__name__)
 
 
 def _get_solo_nombre_pasajero(nombre_completo: str) -> str:
-    """Extrae el primer nombre de un formato APELLIDO/NOMBRE o similar."""
+    """Extrae el nombre (o nombres) de un formato APELLIDO/NOMBRE o similar, eliminando títulos de cortesía."""
     if not nombre_completo or nombre_completo == "No encontrado":
         return "Cliente"
-    # Formato GDS: APELLIDO/NOMBRE o APELLIDO/NOMBRE MR
+    # Formato GDS: APELLIDO/NOMBRE o APELLIDO/NOMBRE MR / MRS / CHD
     if "/" in nombre_completo:
         parts = nombre_completo.split("/")
         if len(parts) > 1:
-            # Tomar la parte del nombre y quitar títulos (MR, MRS, etc)
-            nombre_part = parts[1].strip().split()[0]
-            return nombre_part.title()
+            nombre_words = parts[1].strip().split()
+            titulos = {"MR", "MRS", "MS", "MISS", "MSTR", "DR", "PROF", "CHD", "INF", "SR", "SRA"}
+            clean_words = [w for w in nombre_words if w.upper() not in titulos]
+            if clean_words:
+                return " ".join(clean_words).title()
+            if nombre_words:
+                return nombre_words[0].title()
     return nombre_completo.strip().split()[0].title()
 
 
@@ -131,6 +135,26 @@ class FastDeterministicParsers:
             data["aerolinea_emisora"] = "COPA AIRLINES"
         elif "AVIANCA" in text_upper or "AEROVIAS DEL CONTINENTE" in text_upper:
             data["aerolinea_emisora"] = "AVIANCA"
+        elif "IBERIA" in text_upper:
+            data["aerolinea_emisora"] = "IBERIA"
+        elif "LATAM" in text_upper:
+            data["aerolinea_emisora"] = "LATAM AIRLINES"
+        elif "AIR EUROPA" in text_upper:
+            data["aerolinea_emisora"] = "AIR EUROPA"
+        elif "CONVIASA" in text_upper:
+            data["aerolinea_emisora"] = "CONVIASA"
+        elif "RUTACA" in text_upper:
+            data["aerolinea_emisora"] = "RUTACA AIRLINES"
+        elif "ESTELAR" in text_upper:
+            data["aerolinea_emisora"] = "AEROVÍAS ESTELAR"
+        elif "FLYBONDI" in text_upper:
+            data["aerolinea_emisora"] = "FLYBONDI"
+        elif "JETSMART" in text_upper:
+            data["aerolinea_emisora"] = "JETSMART"
+        elif "SKY AIRLINE" in text_upper or "SKYAIRLINE" in text_upper:
+            data["aerolinea_emisora"] = "SKY AIRLINE"
+        elif "TAP PORTUGAL" in text_upper or "TAP AIR" in text_upper:
+            data["aerolinea_emisora"] = "TAP AIR PORTUGAL"
 
         # 5. Extraer Fecha de Emisión
         date_match = re.search(

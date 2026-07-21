@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.2.0 (2026-07-21) — Ticket Processing Pipeline Audit & Hardening
+
+### Ticket Ingestion & Processing Pipeline
+- **Transaction Safety (`transaction.on_commit`)**:
+  - `BoletoUploadAPIView`: Enqueued Celery task `parsear_boleto_individual` inside `transaction.on_commit` callback, resolving DB race condition (`DoesNotExist`) on async file uploads.
+  - `TicketParserService`: Enqueued `generar_pdf_ticket_async_task` inside `transaction.on_commit` callback.
+- **Deterministic Airline Detection Expansion**:
+  - `FastDeterministicParsers`: Added fast regex matching for major airlines including Iberia, LATAM, Air Europa, Conviasa, Rutaca, Estelar, Flybondi, JetSMART, Sky Airline, and TAP Air Portugal.
+- **Name Parsing Refinement**:
+  - `_get_solo_nombre_pasajero`: Improved compound name extraction to strip courtesy titles (`MR`, `MRS`, `MS`, `MISS`, `MSTR`, `DR`, `PROF`, `CHD`, `INF`, `SR`, `SRA`) while preserving full compound first names (e.g. `"Juan Carlos"`).
+- **Status & Versioning Standardization**:
+  - `_generate_pdf_sync`: Standardized PDF error fallback status to `BoletoImportado.EstadoParseo.REVISION_REQUERIDA` (`REV`) matching `_process_single_ticket` flow.
+  - `handle_versioning`: Added check for voided/annulled prior tickets (`EstadoEmision.ANULADO`) to prevent invalid re-issuance tracking.
+
 ## 1.1.0 (2026-07-11) — Security Hardening Sprint
 
 ### Security — Webhooks & Authentication

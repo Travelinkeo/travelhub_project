@@ -227,9 +227,28 @@ class ParsedTicketData:
         }
 
         # Generar la versión normalizada
+        # 🛡️ BULLETPROOF: La normalización accede a DB (Ciudad/Pais) y a catálogos
+        # maestros. Si algo falla (DB caída, IATA ambiguo, RLS multi-tenant, etc.),
+        # NO debe tragar todo el parseo: devolvemos los datos crudos extraídos por
+        # el parser (que ya son válidos vía to_pydantic). Un boleto "sin normalizar"
+        # sigue siendo usable en el Buffer de Revisión; un boleto sin datos, no.
         from apps.automation.parsers.normalization import DataNormalizationService
 
-        res["normalized"] = DataNormalizationService.normalize_ticket_data(res)
+        try:
+            res["normalized"] = DataNormalizationService.normalize_ticket_data(res)
+        except Exception as e_norm:
+            logger.error(
+                "❌ Normalización falló en to_dict() — devolviendo datos crudos para "
+                "no perder el parseo. Causa: %s",
+                e_norm,
+                exc_info=True,
+            )
+            # Fallback: la versión "normalizada" es el propio res sin segmentos
+            # normalizados (se mantienen los vuelos crudos del parser).
+            try:
+                res["normalized"] = DataNormalizationService.sanitize_for_json(res)
+            except Exception:
+                res["normalized"] = res
         return res
 
     def to_pydantic(self) -> Any:

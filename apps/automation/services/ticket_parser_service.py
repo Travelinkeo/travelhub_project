@@ -70,7 +70,7 @@ def _generate_pdf_sync(boleto) -> None:
                 f"⚠️ [SYNC] Boleto {boleto.pk} no tiene datos_parseados. No se puede generar PDF."
             )
             BoletoImportado.all_objects.filter(pk=boleto.pk).update(
-                estado_parseo="ERR",
+                estado_parseo=BoletoImportado.EstadoParseo.REVISION_REQUERIDA,
                 log_parseo=_safe_concat_log(
                     boleto.log_parseo, "Sin datos para generar PDF. Vuelve a parsear."
                 ),
@@ -91,7 +91,7 @@ def _generate_pdf_sync(boleto) -> None:
                 "Posible fallo de WeasyPrint o plantilla HTML con error."
             )
             BoletoImportado.all_objects.filter(pk=boleto.pk).update(
-                estado_parseo="ERR",
+                estado_parseo=BoletoImportado.EstadoParseo.REVISION_REQUERIDA,
                 log_parseo=_safe_concat_log(
                     boleto.log_parseo, "PDF vacío generado. Usa el botón Reintentar."
                 ),
@@ -101,7 +101,7 @@ def _generate_pdf_sync(boleto) -> None:
         # Registrar el error en el log del boleto para que sea visible en la UI
         try:
             BoletoImportado.all_objects.filter(pk=boleto.pk).update(
-                estado_parseo="ERR",
+                estado_parseo=BoletoImportado.EstadoParseo.REVISION_REQUERIDA,
                 log_parseo=_safe_concat_log(boleto.log_parseo, f"Error en PDF: {str(e)[:300]}"),
             )
         except Exception as e_log:
@@ -673,7 +673,8 @@ class TicketParserService:
                     from apps.common.utils.celery_utils import safe_delay
                     from core.tasks import generar_pdf_ticket_async_task
 
-                    safe_delay(generar_pdf_ticket_async_task, boleto.pk)
+                    b_pk = boleto.pk
+                    transaction.on_commit(lambda: safe_delay(generar_pdf_ticket_async_task, b_pk))
                 else:
                     logger.info(
                         f"📄 Celery no disponible — generando PDF síncronamente para Boleto {boleto.pk}..."

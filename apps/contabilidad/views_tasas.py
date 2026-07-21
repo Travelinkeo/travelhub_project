@@ -62,7 +62,7 @@ def obtener_tasas_actuales(request):
         if tasa_bcv_db:
             tasas = {
                 "bcv": {
-                    "valor": float(tasa_bcv_db.tasa_bsd_por_usd),
+                    "valor": float(tasa_bcv_db.tasa),
                     "fecha": tasa_bcv_db.fecha.strftime("%Y-%m-%d"),
                     "nombre": "BCV Oficial (DB)",
                 }
@@ -109,7 +109,7 @@ def obtener_tasa_bcv_simple(request):
                 tasa_db = TasaCambioBCV.objects.latest("fecha")
 
             resultado = {
-                "valor": float(tasa_db.tasa_bsd_por_usd),
+                "valor": float(tasa_db.tasa),
                 "fecha": tasa_db.fecha.strftime("%Y-%m-%d"),
             }
         except TasaCambioBCV.DoesNotExist:

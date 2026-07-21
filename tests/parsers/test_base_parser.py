@@ -60,6 +60,127 @@ class TestBaseParserMethods:
         assert result == "No encontrado"
 
 
+class TestResolveIataFromCity:
+    """Tests para DataNormalizationService._resolve_iata_from_city.
+
+    Estos tests NO requieren DB: el método usa solo índices pre-cargados en
+    memoria (airports_master) + alias manuales. Garantizan que el parser no se
+    quede a ciegas cuando el GDS imprime el NOMBRE de la ciudad en lugar del
+    código IATA (caso Turpial/Estelar en rutas domésticas Venezolanas).
+    """
+
+    def test_resolve_alias_san_antonio_to_svz(self):
+        """San Antonio (VE, Turpial) debe resolver a SVZ, NO a Texas/US."""
+        from apps.automation.parsers.normalization import DataNormalizationService
+
+        assert DataNormalizationService._resolve_iata_from_city("SAN ANTONIO") == "SVZ"
+
+    def test_resolve_alias_valencia_to_vln(self):
+        """Valencia (VE) debe resolver a VLN, NO a VLC (España)."""
+        from apps.automation.parsers.normalization import DataNormalizationService
+
+        assert DataNormalizationService._resolve_iata_from_city("VALENCIA") == "VLN"
+
+    def test_resolve_alias_santo_domingo_to_std(self):
+        from apps.automation.parsers.normalization import DataNormalizationService
+
+        assert DataNormalizationService._resolve_iata_from_city("SANTO DOMINGO") == "STD"
+
+    def test_resolve_explicit_3_letter_iata_passes_through(self):
+        from apps.automation.parsers.normalization import DataNormalizationService
+
+        assert DataNormalizationService._resolve_iata_from_city("MAD") == "MAD"
+        assert DataNormalizationService._resolve_iata_from_city("BOG") == "BOG"
+
+    def test_resolve_respects_current_iata_when_provided(self):
+        """Si el parser ya extrajo el IATA, no se sobreescribe."""
+        from apps.automation.parsers.normalization import DataNormalizationService
+
+        assert (
+            DataNormalizationService._resolve_iata_from_city("VALENCIA", current_iata="VLC")
+            == "VLC"
+        )
+
+    def test_resolve_handles_city_with_country_suffix(self):
+        """"VALENCIA, VENEZUELA" debe resolverse correctamente despreciando el país."""
+        from apps.automation.parsers.normalization import DataNormalizationService
+
+        assert (
+            DataNormalizationService._resolve_iata_from_city("VALENCIA, VENEZUELA")
+            == "VLN"
+        )
+
+    def test_resolve_handles_city_with_state_suffix(self):
+        """"SAN ANTONIO TX" no debe machacar el alias VE con Texas."""
+        from apps.automation.parsers.normalization import DataNormalizationService
+
+        # El alias manual SVZ tiene prioridad — incluso si appended TX.
+        assert DataNormalizationService._resolve_iata_from_city("SAN ANTONIO TX") == "SVZ"
+
+    def test_resolve_empty_returns_none(self):
+        from apps.automation.parsers.normalization import DataNormalizationService
+
+        assert DataNormalizationService._resolve_iata_from_city("") is None
+        assert DataNormalizationService._resolve_iata_from_city(None) is None
+
+    def test_resolve_unknown_city_returns_none_not_random_iata(self):
+        """Ciudad ambigua sin alias NO debe inventar un IATA incorrecto."""
+        from apps.automation.parsers.normalization import DataNormalizationService
+
+        # Springifeld existe en muchos estados — debe devolver None en lugar de
+        # tomar el primer candidatoEquívoco.
+        assert (
+            DataNormalizationService._resolve_iata_from_city("CIUDAD_QUE_NO_EXISTE_XYZ")
+            is None
+        )
+
+
+class TestCatalogNormalizationServiceIndices:
+    """Tests para los índices O(1) de CatalogNormalizationService.
+
+    NO requieren DB: solo verifican que los índices secundarios (airports_by_iata
+    y airports_by_city) se construyen correctamente y aceleran los lookups.
+    """
+
+    def test_airports_by_iata_index_has_vln(self):
+        from apps.common.services.catalog_service import CatalogNormalizationService
+
+        CatalogNormalizationService._load_airports()
+        assert CatalogNormalizationService._airports_by_iata is not None
+        assert "VLN" in CatalogNormalizationService._airports_by_iata
+        assert "CCS" in CatalogNormalizationService._airports_by_iata
+        assert "MAD" in CatalogNormalizationService._airports_by_iata
+
+    def test_airports_by_city_index_has_valencia(self):
+        from apps.common.services.catalog_service import CatalogNormalizationService
+
+        CatalogNormalizationService._load_airports()
+        assert CatalogNormalizationService._airports_by_city is not None
+        assert "VALENCIA" in CatalogNormalizationService._airports_by_city
+        # Debe contener tanto Venezuela (VLN) como España (VLC)
+        valencia_airports = CatalogNormalizationService._airports_by_city["VALENCIA"]
+        iatas = {(a.get("iata") or "").upper() for a in valencia_airports if a.get("iata")}
+        assert "VLN" in iatas
+        assert "VLC" in iatas
+
+    def test_get_airports_by_iata_returns_dict_or_none(self):
+        from apps.common.services.catalog_service import CatalogNormalizationService
+
+        info = CatalogNormalizationService._get_airports_by_iata("VLN")
+        assert info is not None
+        assert info["iata"] == "VLN"
+        assert info["country"] == "VE"
+        assert CatalogNormalizationService._get_airports_by_iata("ZZZ") is None
+
+    def test_get_airports_by_city_returns_list(self):
+        from apps.common.services.catalog_service import CatalogNormalizationService
+
+        results = CatalogNormalizationService._get_airports_by_city("Caracas")
+        assert isinstance(results, list)
+        assert len(results) >= 1
+        assert any((r.get("iata") or "").upper() == "CCS" for r in results)
+
+
 class TestParsedTicketData:
     """Tests para ParsedTicketData"""
 

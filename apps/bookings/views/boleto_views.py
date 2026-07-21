@@ -86,25 +86,25 @@ class BoletoUploadAPIView(InternalAPIAuthMixin, APIView):
             celery_ok = _is_celery_available()
 
             if celery_ok:
-                # MODO ASYNC: Encolar en Celery (producción)
+                # MODO ASYNC: Encolar en Celery (producción con guarda on_commit)
+                from django.db import transaction
                 from core.api import parsear_boleto_individual
 
-                task_id = safe_delay(
-                    parsear_boleto_individual, boleto_importado.id_boleto_importado
+                b_id = boleto_importado.id_boleto_importado
+                transaction.on_commit(
+                    lambda: safe_delay(parsear_boleto_individual, b_id)
                 )
-                if task_id:
-                    logger.info(
-                        f"✅ Boleto {boleto_importado.pk} encolado async. TaskID: {task_id}"
-                    )
-                    return Response(
-                        {
-                            "mensaje": "Boleto recibido. El procesamiento se realizará en segundo plano.",
-                            "id_boleto_importado": boleto_importado.id_boleto_importado,
-                            "task_id": task_id,
-                            "estado": "PRO",
-                        },
-                        status=status.HTTP_202_ACCEPTED,
-                    )
+                logger.info(
+                    f"✅ Boleto {boleto_importado.pk} preparado para encolar en Celery (on_commit)."
+                )
+                return Response(
+                    {
+                        "mensaje": "Boleto recibido. El procesamiento se realizará en segundo plano.",
+                        "id_boleto_importado": boleto_importado.id_boleto_importado,
+                        "estado": "PRO",
+                    },
+                    status=status.HTTP_202_ACCEPTED,
+                )
 
             # MODO SYNC: Procesar inline (desarrollo / Celery offline)
             logger.info(f"⚡ [SYNC MODE] Procesando boleto {boleto_importado.pk} síncronamente...")

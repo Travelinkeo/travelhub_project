@@ -20,6 +20,7 @@ from core.views.auditoria_views import api_audit_logs
 from core.views.auth_views import MagicLinkRequestView, MagicLinkVerifyView, TokenLogoutView
 from core.views.docs_views import docs_index, docs_page, public_manual
 from core.views.health_views import health_check
+from core.views.dev_portal_views import developer_portal
 from core.views.marketing_views import (
     lead_magnet_download,
     parse_demo,
@@ -101,6 +102,8 @@ urlpatterns = [
     path(
         "redoc/", _protect_docs(SpectacularRedocView.as_view(url_name="schema_root")), name="redoc"
     ),
+    # Developer Portal
+    path("developers/", developer_portal, name="developer_portal"),
     # --- DASHBOARD PRINCIPAL ---
     # Landing page pública — si autenticado, redirige al dashboard
     path("", public_landing, name="home"),

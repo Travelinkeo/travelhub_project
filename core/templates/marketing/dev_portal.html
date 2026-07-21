@@ -1,0 +1,248 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TravelHub API — Documentación para Desarrolladores</title>
+    <meta name="description" content="API REST de TravelHub. Documentación pública con auth JWT, endpoints, rate limits y webhooks para integración con agencias de viajes.">
+    <link rel="icon" href="{% static 'favicon.ico' %}" sizes="any">
+    <link rel="stylesheet" href="{% static 'core/css/tailwind-built.css' %}">
+    <style nonce="{{ csp_nonce }}">
+        body { background: #0F172A; color: #E2E8F0; font-family: system-ui, -apple-system, sans-serif; }
+        code { font-family: 'JetBrains Mono', 'Fira Code', monospace; }
+        details summary::-webkit-details-marker { display: none; }
+        .btn-primary { background: #3B82F6; color: white; padding: 0.75rem 2rem; border-radius: 0.5rem; font-weight: 600; transition: all 0.2s; display: inline-block; text-align: center; }
+        .btn-primary:hover { background: #2563EB; }
+        .btn-secondary { background: #1E293B; color: #E2E8F0; padding: 0.75rem 2rem; border-radius: 0.5rem; font-weight: 600; display: inline-block; text-align: center; border: 1px solid #334155; }
+        .btn-secondary:hover { background: #334155; }
+    </style>
+</head>
+<body>
+    <!-- Nav -->
+    <header class="fixed top-0 left-0 right-0 z-50 bg-slate-900/80 backdrop-blur-lg border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+            <a href="/" class="flex items-center gap-2">
+                <img src="{% static 'images/Logo TravelHub.png' %}" alt="TravelHub" class="h-10 w-auto">
+            </a>
+            <nav class="hidden md:flex items-center gap-6 text-sm text-slate-300">
+                <a href="#overview" class="hover:text-white transition">Overview</a>
+                <a href="#auth" class="hover:text-white transition">Auth</a>
+                <a href="#endpoints" class="hover:text-white transition">Endpoints</a>
+                <a href="#webhooks" class="hover:text-white transition">Webhooks</a>
+                <a href="{% url 'swagger-ui-direct' %}" class="text-blue-400 hover:text-blue-300 transition font-semibold">Swagger UI</a>
+            </nav>
+            <div class="flex items-center gap-3">
+                <a href="/accounts/login/" class="text-sm text-slate-300 hover:text-white transition">Iniciar sesión</a>
+                <a href="/onboarding/" class="btn-primary text-sm px-5 py-2.5">Probar gratis</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero -->
+    <section class="pt-32 pb-16 px-4 text-center">
+        <div class="max-w-4xl mx-auto">
+            <div class="inline-flex items-center gap-2 bg-blue-950/50 border border-blue-800/40 rounded-full px-4 py-1.5 text-sm text-blue-300 mb-6">
+                <span class="material-symbols-outlined text-base">api</span>
+                TravelHub REST API v2.0.0
+            </div>
+            <h1 class="text-4xl md:text-6xl font-bold tracking-tight mb-4">API Reference</h1>
+            <p class="text-lg text-slate-400 max-w-2xl mx-auto">Integra tu sistema con el motor de viajes de TravelHub: parsing de boletos, facturación VEN-NIF, CRM, contabilidad y webhooks en tiempo real.</p>
+            <div class="flex flex-wrap justify-center gap-4 mt-8">
+                <a href="{% url 'swagger-ui-direct' %}" class="btn-primary">Explorar Swagger UI →</a>
+                <a href="{% url 'redoc-direct' %}" class="btn-secondary">ReDoc</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Content -->
+    <div class="max-w-5xl mx-auto px-4 pb-24 space-y-20">
+
+        <!-- Overview -->
+        <section id="overview">
+            <h2 class="text-2xl font-bold mb-6">Visión General</h2>
+            <div class="grid md:grid-cols-3 gap-4">
+                <div class="bg-slate-800/40 border border-slate-700/50 rounded-xl p-6">
+                    <p class="text-xs uppercase tracking-widest text-slate-500 font-bold mb-2">Base URL</p>
+                    <code class="text-emerald-400 text-sm">https://travelhub.cc/api/</code>
+                </div>
+                <div class="bg-slate-800/40 border border-slate-700/50 rounded-xl p-6">
+                    <p class="text-xs uppercase tracking-widest text-slate-500 font-bold mb-2">Formato</p>
+                    <code class="text-slate-300 text-sm">JSON</code>
+                </div>
+                <div class="bg-slate-800/40 border border-slate-700/50 rounded-xl p-6">
+                    <p class="text-xs uppercase tracking-widest text-slate-500 font-bold mb-2">Versión</p>
+                    <code class="text-slate-300 text-sm">v2.0.0</code>
+                </div>
+            </div>
+        </section>
+
+        <!-- Auth -->
+        <section id="auth">
+            <h2 class="text-2xl font-bold mb-6">Autenticación</h2>
+            <p class="text-slate-400 mb-6">La API usa JWT (Bearer Token). Obtén tu token autenticándote con tu usuario y contraseña.</p>
+
+            <div class="bg-slate-800/40 border border-slate-700/50 rounded-xl overflow-hidden mb-6">
+                <div class="bg-slate-900/80 px-6 py-3 border-b border-slate-700/50 flex items-center gap-3">
+                    <span class="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-emerald-500/20 text-emerald-400">POST</span>
+                    <code class="text-sm text-slate-300 font-mono">/api/auth/jwt/obtain/</code>
+                </div>
+                <div class="p-6">
+                    <pre class="text-sm font-mono text-slate-300 overflow-x-auto"><span class="text-slate-500"># Obtener token JWT</span>
+curl -X POST https://travelhub.cc/api/auth/jwt/obtain/ \
+  -H "Content-Type: application/json" \
+  -d '{"username": "agencia@ejemplo.com", "password": "tu_password"}'</pre>
+                </div>
+            </div>
+
+            <div class="bg-slate-800/40 border border-slate-700/50 rounded-xl overflow-hidden">
+                <div class="bg-slate-900/80 px-6 py-3 border-b border-slate-700/50 text-sm text-slate-400">Usar el token en cada request</div>
+                <div class="p-6">
+                    <pre class="text-sm font-mono text-slate-300 overflow-x-auto">curl -H "Authorization: Bearer eyJhbGciOi..." \
+  https://travelhub.cc/api/ventas/</pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- Rate Limits -->
+        <section id="rate-limits">
+            <h2 class="text-2xl font-bold mb-6">Rate Limits</h2>
+            <div class="bg-slate-800/40 border border-slate-700/50 rounded-xl overflow-hidden">
+                <table class="w-full text-sm">
+                    <thead><tr class="bg-slate-900/80 border-b border-slate-700/50">
+                        <th class="px-6 py-3 text-left text-xs uppercase tracking-widest text-slate-500 font-bold">Endpoint</th>
+                        <th class="px-6 py-3 text-left text-xs uppercase tracking-widest text-slate-500 font-bold">Límite</th>
+                        <th class="px-6 py-3 text-left text-xs uppercase tracking-widest text-slate-500 font-bold">Plan</th>
+                    </tr></thead>
+                    <tbody class="divide-y divide-slate-800/50">
+                        <tr><td class="px-6 py-3 font-mono text-xs">General (Anónimo)</td><td class="px-6 py-3">50/min</td><td class="px-6 py-3">—</td></tr>
+                        <tr><td class="px-6 py-3 font-mono text-xs">General (Autenticado)</td><td class="px-6 py-3">200/min</td><td class="px-6 py-3">Todos</td></tr>
+                        <tr><td class="px-6 py-3 font-mono text-xs">Parser IA</td><td class="px-6 py-3">20/min · 200/día</td><td class="px-6 py-3">PRO+</td></tr>
+                        <tr><td class="px-6 py-3 font-mono text-xs">Dashboard / Reportes</td><td class="px-6 py-3">100/hora</td><td class="px-6 py-3">PRO+</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Endpoints -->
+        <section id="endpoints">
+            <h2 class="text-2xl font-bold mb-6">Endpoints Principales</h2>
+            <div class="space-y-3">
+                <details class="bg-slate-800/40 border border-slate-700/50 rounded-xl overflow-hidden">
+                    <summary class="px-6 py-4 cursor-pointer hover:bg-slate-800/80 transition flex items-center gap-3">
+                        <span class="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-emerald-500/20 text-emerald-400">GET</span>
+                        <code class="text-sm font-mono">/api/ventas/</code>
+                        <span class="text-slate-500 text-sm ml-auto">Listar ventas</span>
+                    </summary>
+                    <div class="px-6 py-4 border-t border-slate-700/50 text-sm text-slate-400 space-y-2">
+                        <p>Parámetros: <code class="text-xs text-slate-300">?page=1&page_size=25&estado=CONFIRMADA</code></p>
+                        <pre class="text-xs font-mono text-slate-300 bg-slate-900/60 p-4 rounded-lg overflow-x-auto">[
+  {"id": 1, "numero": "V-2026-0001", "cliente": "Juan Pérez",
+   "total_venta": "850.00", "estado": "CONFIRMADA"}
+]</pre>
+                    </div>
+                </details>
+                <details class="bg-slate-800/40 border border-slate-700/50 rounded-xl overflow-hidden">
+                    <summary class="px-6 py-4 cursor-pointer hover:bg-slate-800/80 transition flex items-center gap-3">
+                        <span class="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-blue-500/20 text-blue-400">POST</span>
+                        <code class="text-sm font-mono">/api/boletos/importar/</code>
+                        <span class="text-slate-500 text-sm ml-auto">Importar boleto</span>
+                    </summary>
+                    <div class="px-6 py-4 border-t border-slate-700/50 text-sm text-slate-400">
+                        <p>Acepta texto plano o PDF de KIU, Sabre, Amadeus y Travelport.</p>
+                        <pre class="text-xs font-mono text-slate-300 bg-slate-900/60 p-4 rounded-lg mt-2 overflow-x-auto">curl -X POST https://travelhub.cc/api/boletos/importar/ \
+  -H "Authorization: Bearer TOKEN" \
+  -F "archivo=@ticket.pdf"</pre>
+                    </div>
+                </details>
+                <details class="bg-slate-800/40 border border-slate-700/50 rounded-xl overflow-hidden">
+                    <summary class="px-6 py-4 cursor-pointer hover:bg-slate-800/80 transition flex items-center gap-3">
+                        <span class="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-purple-500/20 text-purple-400">POST</span>
+                        <code class="text-sm font-mono">/api/facturas/emitir/</code>
+                        <span class="text-slate-500 text-sm ml-auto">Emitir factura VEN-NIF</span>
+                    </summary>
+                    <div class="px-6 py-4 border-t border-slate-700/50 text-sm text-slate-400">
+                        <p>Genera factura electrónica venezolana con IVA, IGTF y retenciones ISLR. Corporativo y consumidor final.</p>
+                    </div>
+                </details>
+                <details class="bg-slate-800/40 border border-slate-700/50 rounded-xl overflow-hidden">
+                    <summary class="px-6 py-4 cursor-pointer hover:bg-slate-800/80 transition flex items-center gap-3">
+                        <span class="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-amber-500/20 text-amber-400">GET</span>
+                        <code class="text-sm font-mono">/api/tasas/bcv/</code>
+                        <span class="text-slate-500 text-sm ml-auto">Tasas BCV</span>
+                    </summary>
+                    <div class="px-6 py-4 border-t border-slate-700/50 text-sm text-slate-400">
+                        <p>Tasas de cambio oficiales del Banco Central de Venezuela (EUR, CNY, TRY, RUB).</p>
+                    </div>
+                </details>
+            </div>
+            <div class="mt-8 text-center">
+                <a href="{% url 'swagger-ui-direct' %}" class="btn-primary">Ver todos los endpoints →</a>
+            </div>
+        </section>
+
+        <!-- Webhooks -->
+        <section id="webhooks">
+            <h2 class="text-2xl font-bold mb-6">Webhooks</h2>
+            <p class="text-slate-400 mb-6">Recibe notificaciones en tiempo real cuando ocurren eventos en tu agencia. Configura las URLs desde el panel de administración.</p>
+            <div class="bg-slate-800/40 border border-slate-700/50 rounded-xl overflow-hidden mb-6">
+                <table class="w-full text-sm">
+                    <thead><tr class="bg-slate-900/80 border-b border-slate-700/50">
+                        <th class="px-6 py-3 text-left text-xs uppercase tracking-widest text-slate-500 font-bold">Evento</th>
+                        <th class="px-6 py-3 text-left text-xs uppercase tracking-widest text-slate-500 font-bold">Disparador</th>
+                    </tr></thead>
+                    <tbody class="divide-y divide-slate-800/50">
+                        <tr><td class="px-6 py-3 font-mono">venta.creada</td><td class="px-6 py-3">Nueva venta creada</td></tr>
+                        <tr><td class="px-6 py-3 font-mono">pago.confirmado</td><td class="px-6 py-3">Pago confirmado</td></tr>
+                        <tr><td class="px-6 py-3 font-mono">boleto.importado</td><td class="px-6 py-3">Boleto importado</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="bg-slate-800/40 border border-slate-700/50 rounded-xl p-6">
+                <p class="text-xs uppercase tracking-widest text-slate-500 font-bold mb-3">Payload de ejemplo</p>
+                <pre class="text-xs font-mono text-slate-300 overflow-x-auto">{
+  "event": "venta.creada",
+  "timestamp": "2026-07-20T12:00:00Z",
+  "agencia_id": 1,
+  "data": {
+    "venta_id": 42,
+    "total": "850.00",
+    "cliente": "Juan Pérez"
+  }
+}</pre>
+                <p class="text-xs text-slate-500 mt-3">Los webhooks se firman con HMAC-SHA256. Valida la firma en la cabecera <code>X-Webhook-Signature</code>.</p>
+            </div>
+        </section>
+
+        <!-- Errors -->
+        <section id="errors">
+            <h2 class="text-2xl font-bold mb-6">Códigos de Error</h2>
+            <div class="bg-slate-800/40 border border-slate-700/50 rounded-xl overflow-hidden">
+                <table class="w-full text-sm">
+                    <thead><tr class="bg-slate-900/80 border-b border-slate-700/50">
+                        <th class="px-6 py-3 text-left text-xs uppercase tracking-widest text-slate-500 font-bold">Código</th>
+                        <th class="px-6 py-3 text-left text-xs uppercase tracking-widest text-slate-500 font-bold">Significado</th>
+                    </tr></thead>
+                    <tbody class="divide-y divide-slate-800/50">
+                        <tr><td class="px-6 py-3 font-mono">400</td><td class="px-6 py-3">Solicitud inválida</td></tr>
+                        <tr><td class="px-6 py-3 font-mono">401</td><td class="px-6 py-3">No autenticado — token faltante o inválido</td></tr>
+                        <tr><td class="px-6 py-3 font-mono">403</td><td class="px-6 py-3">Sin permisos para este endpoint</td></tr>
+                        <tr><td class="px-6 py-3 font-mono">404</td><td class="px-6 py-3">Recurso no encontrado</td></tr>
+                        <tr><td class="px-6 py-3 font-mono">429</td><td class="px-6 py-3">Rate limit excedido</td></tr>
+                        <tr><td class="px-6 py-3 font-mono">500</td><td class="px-6 py-3">Error interno del servidor</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-800 py-12 px-4">
+        <div class="max-w-6xl mx-auto text-center text-sm text-slate-500">
+            <p>¿Preguntas? <a href="mailto:api@travelhub.cc" class="text-blue-400 hover:underline">api@travelhub.cc</a></p>
+            <p class="mt-2 text-xs">&copy; {% now "Y" %} TravelHub. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+</body>
+</html>

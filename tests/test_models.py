@@ -74,7 +74,10 @@ class AgenciaModelTest(TestCase):
             mock_check.assert_called_once_with(agencia, "users")
 
     @override_settings(
-        SAAS_PLAN_LIMITS={"PRO": {"users": 15, "sales_per_month": 500}, "FREE": {"users": 3, "sales_per_month": 20}}
+        SAAS_PLAN_LIMITS={
+            "PRO": {"users": 15, "sales_per_month": 500},
+            "FREE": {"users": 3, "sales_per_month": 20},
+        }
     )
     def test_actualizar_limites_por_plan_pro(self):
         agencia = Agencia.objects.create(nombre="PlanTest", email_principal="plan@test.com")
@@ -86,7 +89,10 @@ class AgenciaModelTest(TestCase):
         self.assertEqual(agencia.configuracion.limite_ventas_mes, 500)
 
     @override_settings(
-        SAAS_PLAN_LIMITS={"PRO": {"users": 15, "sales_per_month": 500}, "FREE": {"users": 3, "sales_per_month": 20}}
+        SAAS_PLAN_LIMITS={
+            "PRO": {"users": 15, "sales_per_month": 500},
+            "FREE": {"users": 3, "sales_per_month": 20},
+        }
     )
     def test_actualizar_limites_por_plan_free_default(self):
         agencia = Agencia.objects.create(nombre="FreeTest", email_principal="free@test.com")

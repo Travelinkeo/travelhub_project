@@ -379,36 +379,55 @@ class SecurityHeadersMiddleware:
                 f"https://unpkg.com https://static.cloudflareinsights.com"
             )
             if is_debug:
-                # En debug añadimos webpack/vite HMR y debug-toolbar
                 script_src += " http://localhost:3000 ws://localhost:3000"
-            csp = "; ".join(
-                [
-                    "default-src 'self' data: blob:",
-                    f"script-src {script_src}",
-                    (
-                        f"style-src 'self' 'unsafe-inline' {static_origin} "
-                        "https://fonts.googleapis.com https://cdn.jsdelivr.net "
-                        "https://cdn.tailwindcss.com https://unpkg.com"
-                    ),
-                    f"font-src 'self' {static_origin} https://fonts.gstatic.com data:",
-                    (
-                        "img-src 'self' data: blob: "
-                        f"{static_origin} https://res.cloudinary.com {r2_wildcard} "
-                        "https://images.unsplash.com https://pics.avs.io "
-                        "https://ui-avatars.com https://placehold.co"
-                    ),
-                    "frame-src 'self' https://js.stripe.com http://evolution:8080",
-                    (
-                        "connect-src 'self' "
-                        f"{static_origin} https://*.cloudflarestorage.com "
-                        "https://api.stripe.com https://generativelanguage.googleapis.com "
-                        "https://cloudflareinsights.com https://cdn.jsdelivr.net"
-                    ),
-                    "form-action 'self'",
-                    "frame-ancestors 'none'",
-                    "base-uri 'self'",
-                ]
-            )
+            csp_dict = {
+                "default-src": "'self' data: blob:",
+                "script-src": script_src,
+                "style-src": (
+                    f"'self' 'unsafe-inline' {static_origin} "
+                    "https://fonts.googleapis.com https://cdn.jsdelivr.net "
+                    "https://cdn.tailwindcss.com https://unpkg.com"
+                ),
+                "font-src": f"'self' {static_origin} https://fonts.gstatic.com data:",
+                "img-src": (
+                    f"'self' data: blob: "
+                    f"{static_origin} https://res.cloudinary.com {r2_wildcard} "
+                    "https://images.unsplash.com https://pics.avs.io "
+                    "https://ui-avatars.com https://placehold.co"
+                ),
+                "frame-src": "'self' https://js.stripe.com http://evolution:8080",
+                "connect-src": (
+                    f"'self' "
+                    f"{static_origin} https://*.cloudflarestorage.com "
+                    "https://api.stripe.com https://generativelanguage.googleapis.com "
+                    "https://cloudflareinsights.com https://cdn.jsdelivr.net"
+                ),
+                "form-action": "'self'",
+                "frame-ancestors": "'none'",
+                "base-uri": "'self'",
+            }
+
+            # Fusionar directivas CSP específicas de la agencia (White Label)
+            agencia = getattr(request, "agencia", None)
+            if agencia:
+                try:
+                    extra_csp = agencia.configuracion_v2.csp_directives or {}
+                    if isinstance(extra_csp, dict):
+                        for directive, values in extra_csp.items():
+                            if directive in csp_dict:
+                                existing = csp_dict[directive]
+                                if isinstance(values, list):
+                                    extra = " ".join(values)
+                                    csp_dict[directive] = f"{existing} {extra}"
+                                elif isinstance(values, str) and values:
+                                    csp_dict[directive] = f"{existing} {values}"
+                            elif isinstance(values, (list, str)):
+                                val = " ".join(values) if isinstance(values, list) else values
+                                csp_dict[directive] = val
+                except Exception:
+                    logger.warning(f"Error al aplicar CSP específico para agencia {agencia.id}")
+
+            csp = "; ".join(f"{k} {v}" for k, v in csp_dict.items())
 
             response["Content-Security-Policy"] = csp
             response["X-Content-Type-Options"] = "nosniff"

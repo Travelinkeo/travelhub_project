@@ -428,35 +428,91 @@ class TicketParserService:
 
                 # 🧠 PASO 2: FALLBACK A IA (Solo si el regex no fue suficiente o confiable)
                 if datos is None:
-                    try:
-                        from apps.automation.parsers.ai_universal_parser import UniversalAIParser
-                        from apps.automation.services.ai_engine import QuotaExhaustedException
+                    # Verificar estado del Circuit Breaker de IA antes de llamar
+                    from apps.common.services.circuit_breaker import (
+                        CircuitState,
+                        ai_circuit_breaker,
+                    )
 
-                        logger.info(
-                            f"🧠 Usando IA Primaria (Structured Outputs) de Fallback para Boleto {boleto_id}..."
+                    if ai_circuit_breaker.state == CircuitState.OPEN:
+                        logger.warning(
+                            f"🚫 Circuit Breaker de IA OPEN. Omitiendo fallback a IA para Boleto {boleto_id}. "
+                            "Usando datos parciales de Regex."
                         )
-                        ai_start = time.time()
-                        datos_ia = UniversalAIParser().parse(
-                            texto, pdf_path=path_pdf, bypass_cache=bypass_cache
-                        )
-                        ai_duration = time.time() - ai_start
-                        logger.info(f"⏱️ [PROFILING] IA Engine parse duration: {ai_duration:.2f}s")
-
-                        if datos_ia and "error" not in datos_ia:
-                            datos = datos_ia
-                            logger.info("✅ IA de Fallback procesó el boleto exitosamente.")
+                        if (
+                            "datos_regex" in locals()
+                            and datos_regex
+                            and not datos_regex.get("error")
+                        ):
+                            datos = datos_regex
+                            datos["_requiere_revision"] = True
                             boleto.log_parseo = (
-                                boleto.log_parseo or ""
-                            ) + " | IA de Fallback exitosa."
+                                f"Circuit Breaker IA OPEN. Usando datos parciales de Regex. "
+                            )
                             boleto.save(update_fields=["log_parseo"])
                         else:
-                            error_detail = (
-                                datos_ia.get("status_detail") or datos_ia.get("error")
-                                if datos_ia
-                                else "Unknown Error"
+                            msg_error = (
+                                "Parseo cancelado: Circuit Breaker IA abierto y sin datos de Regex."
                             )
-                            logger.warning(f"⚠️ IA devolvió error o datos vacíos: {error_detail}")
-                            # Si IA falló, intentamos usar los datos parciales de regex
+                            return self._finalize_error(boleto, msg_error)
+                    else:
+                        try:
+                            from apps.automation.parsers.ai_universal_parser import (
+                                UniversalAIParser,
+                            )
+                            from apps.automation.services.ai_engine import QuotaExhaustedException
+
+                            logger.info(
+                                f"🧠 Usando IA Primaria (Structured Outputs) de Fallback para Boleto {boleto_id}..."
+                            )
+                            ai_start = time.time()
+                            datos_ia = UniversalAIParser().parse(
+                                texto, pdf_path=path_pdf, bypass_cache=bypass_cache
+                            )
+                            ai_duration = time.time() - ai_start
+                            logger.info(
+                                f"⏱️ [PROFILING] IA Engine parse duration: {ai_duration:.2f}s"
+                            )
+
+                            if datos_ia and "error" not in datos_ia:
+                                datos = datos_ia
+                                logger.info("✅ IA de Fallback procesó el boleto exitosamente.")
+                                boleto.log_parseo = (
+                                    boleto.log_parseo or ""
+                                ) + " | IA de Fallback exitosa."
+                                boleto.save(update_fields=["log_parseo"])
+                            else:
+                                error_detail = (
+                                    datos_ia.get("status_detail") or datos_ia.get("error")
+                                    if datos_ia
+                                    else "Unknown Error"
+                                )
+                                logger.warning(
+                                    f"⚠️ IA devolvió error o datos vacíos: {error_detail}"
+                                )
+                                if (
+                                    "datos_regex" in locals()
+                                    and datos_regex
+                                    and not datos_regex.get("error")
+                                ):
+                                    datos = datos_regex
+                                    datos["_requiere_revision"] = True
+                                    logger.info(
+                                        "⚠️ Recuperando datos parciales de Regex ante fallo de IA."
+                                    )
+                                    boleto.log_parseo = (
+                                        (boleto.log_parseo or "")
+                                        + f" | IA Falló: {error_detail}. Usando datos parciales de Regex."
+                                    )
+                                    boleto.save(update_fields=["log_parseo"])
+                                else:
+                                    msg_error = f"Parseo Inteligente falló: {error_detail}"
+                                    return self._finalize_error(boleto, msg_error)
+
+                        except QuotaExhaustedException:
+                            logger.warning(
+                                f"🚨 Cuota de IA agotada para agencia {boleto.agencia.nombre}."
+                            )
                             if (
                                 "datos_regex" in locals()
                                 and datos_regex
@@ -464,53 +520,31 @@ class TicketParserService:
                             ):
                                 datos = datos_regex
                                 datos["_requiere_revision"] = True
-                                logger.info(
-                                    "⚠️ Recuperando datos parciales de Regex ante fallo de IA."
-                                )
                                 boleto.log_parseo = (
                                     boleto.log_parseo or ""
-                                ) + f" | IA Falló: {error_detail}. Usando datos parciales de Regex."
+                                ) + " | Cuota IA agotada. Usando datos parciales de Regex."
                                 boleto.save(update_fields=["log_parseo"])
                             else:
-                                msg_error = f"Parseo Inteligente falló: {error_detail}"
-                                return self._finalize_error(boleto, msg_error)
-
-                    except QuotaExhaustedException:
-                        logger.warning(
-                            f"🚨 Cuota de IA agotada para agencia {boleto.agencia.nombre}."
-                        )
-                        if (
-                            "datos_regex" in locals()
-                            and datos_regex
-                            and not datos_regex.get("error")
-                        ):
-                            datos = datos_regex
-                            datos["_requiere_revision"] = True
-                            boleto.log_parseo = (
-                                boleto.log_parseo or ""
-                            ) + " | Cuota IA agotada. Usando datos parciales de Regex."
-                            boleto.save(update_fields=["log_parseo"])
-                        else:
-                            return self._finalize_error(
-                                boleto, "Cuota de IA agotada y sin datos de Regex."
-                            )
-                    except Exception as e_ai:
-                        logger.error(f"❌ Fallo crítico en motor de IA: {e_ai}")
-                        if (
-                            "datos_regex" in locals()
-                            and datos_regex
-                            and not datos_regex.get("error")
-                        ):
-                            datos = datos_regex
-                            datos["_requiere_revision"] = True
-                            boleto.log_parseo = (
-                                boleto.log_parseo or ""
-                            ) + f" | Error IA: {str(e_ai)}. Usando datos parciales de Regex."
-                            boleto.save(update_fields=["log_parseo"])
-                        else:
-                            return self._finalize_error(
-                                boleto, f"Error en motor de IA de Fallback: {str(e_ai)}"
-                            )
+                                return self._finalize_error(
+                                    boleto, "Cuota de IA agotada y sin datos de Regex."
+                                )
+                        except Exception as e_ai:
+                            logger.error(f"❌ Fallo crítico en motor de IA: {e_ai}")
+                            if (
+                                "datos_regex" in locals()
+                                and datos_regex
+                                and not datos_regex.get("error")
+                            ):
+                                datos = datos_regex
+                                datos["_requiere_revision"] = True
+                                boleto.log_parseo = (
+                                    boleto.log_parseo or ""
+                                ) + f" | Error IA: {str(e_ai)}. Usando datos parciales de Regex."
+                                boleto.save(update_fields=["log_parseo"])
+                            else:
+                                return self._finalize_error(
+                                    boleto, f"Error en motor de IA de Fallback: {str(e_ai)}"
+                                )
 
                 # 4c. Guardar en caché Redis el resultado final (sea IA o Regex)
                 if datos and "error" not in datos:

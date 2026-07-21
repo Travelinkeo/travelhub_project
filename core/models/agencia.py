@@ -438,6 +438,13 @@ class AgenciaBranding(models.Model):
 
     # UI/Theme
     ui_theme = models.CharField(max_length=20, choices=Agencia.THEME_CHOICES, default="obsidian")
+    template_pack = models.CharField(
+        max_length=50,
+        blank=True,
+        default="",
+        help_text="Sobre-escribe templates globales con una carpeta 'templates/{template_pack}/' específica de la agencia. "
+        "Ej: 'agencia_1' busca en core/templates/agencia_1/ antes de fallback a global.",
+    )
     plantilla_boletos = models.CharField(
         max_length=2, choices=Agencia.PLANTILLAS_BOLETOS_CHOICES, default="m1"
     )
@@ -552,6 +559,13 @@ class AgenciaConfiguracion(models.Model):
     es_demo = models.BooleanField(default=False)
 
     bi_insights = models.JSONField(default=dict, blank=True)
+
+    csp_directives = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text="Directivas CSP adicionales específicas de la agencia. "
+        "Ej: {'script-src': ['https://miwidget.com'], 'img-src': ['https://imagenes.miagencia.com']}",
+    )
 
     class Meta:
         verbose_name = "Agencia - Configuración"

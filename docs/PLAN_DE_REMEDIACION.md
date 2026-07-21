@@ -1,7 +1,7 @@
 # Plan de Remediación Técnica y de Negocio — TravelHub
 
-> **Versión:** 2.0 — Julio 2026
-> **Estado:** ✅ COMPLETADO — Todas las fases ejecutadas
+> **Versión:** 2.1 — Julio 2026
+> **Estado:** ✅ COMPLETADO — Todas las fases ejecutadas + items post-remediación
 
 ---
 
@@ -126,18 +126,26 @@ dashboard CEO con LTV.
 
 | # | Acción | Estado | Detalle |
 |---|--------|--------|---------|
-| 4.1 | Módulo White Label completo | ⏭️ | Pospuesto — requiere dominio personalizado y CSP multi-tenant |
-| 4.2 | API Pública documentada | ⏭️ | Pospuesto — drf-spectacular ya configurado, falta portal developer |
+| 4.1 | Módulo White Label completo | ✅ | `csp_directives` (JSONField) en `AgenciaConfiguracion`, `template_pack` en `AgenciaBranding`. CSP middleware fusiona directivas por agencia. Migración 0054 |
+| 4.2 | API Pública documentada | ✅ | Portal desarrollador en `/developers/` con auth JWT, rate limits, endpoints, webhooks. Links a Swagger UI y ReDoc |
 | 4.3 | Webhooks salientes integrados | ✅ | `notify_venta_creada()`, `notify_pago_confirmado()`, `notify_boleto_importado()` conectados vía `transaction.on_commit` en `apps/bookings/signals.py` |
-| 4.4 | Modo offline para parser | ⏭️ | Pospuesto — requiere circuit breaker en `ai_universal_parser.py` |
+| 4.4 | Modo offline para parser | ✅ | Circuit breaker verificado antes de llamar a Gemini. Si OPEN, usa regex parcial con flag `_requiere_revision` |
 | 4.5 | Portal del pasajero | ✅ | Creado `core/views/public_views.py` con 3 vistas: `PublicItineraryView`, `PublicVoucherPDFView`, `PublicHotelVoucherPDFView`. URLs legacy `v/<uuid:token>/`, `v/<uuid:token>/pdf/`, `v/hotel/<int:alojamiento_id>/pdf/` ahora funcionales |
 | 4.6 | Dashboard CEO con LTV | ✅ | Añadido LTV total ($), LTV promedio por agencia, LTV por plan (FREE/BASIC/PRO/ENTERPRISE) en `god_mode_views.py`. Template actualizado con sección visual de LTV |
 
 ### Archivos modificados/creados
 - **Creado:** `core/views/public_views.py` — 3 vistas para portal pasajero
+- **Creado:** `core/views/dev_portal_views.py` — portal desarrollador
+- **Creado:** `core/templates/marketing/dev_portal.html` — template portal API
+- **Creado:** `core/migrations/0054_agencia_whitelabel_fields.py` — campos CSP + template_pack
 - **Modificado:** `apps/bookings/signals.py` — 3 webhook dispatches en `_on_commit`
 - **Modificado:** `core/views/god_mode_views.py` — LTV metrics + import Venta
 - **Modificado:** `core/templates/god_mode/dashboard.html` — sección LTV
+- **Modificado:** `core/models/agencia.py` — `csp_directives` + `template_pack`
+- **Modificado:** `core/middleware.py` — CSP per-agencia en SecurityHeadersMiddleware
+- **Modificado:** `apps/automation/services/ticket_parser_service.py` — circuit breaker check antes de IA
+- **Modificado:** `travelhub/urls.py` — ruta `/developers/`
+- **Modificado:** `requirements/dev.txt` — pytest-vcr
 
 ### Arquitectura de webhooks integrada
 ```
@@ -208,9 +216,16 @@ sin casos de uso, sin lead capture.
 | `tests/e2e/test_ticket_import.py` | Creado | F3 |
 | `tests/e2e/test_multi_tenancy.py` | Creado | F3 |
 | `core/views/public_views.py` | **Creado** | F4 |
+| `core/views/dev_portal_views.py` | **Creado** | F4 |
+| `core/templates/marketing/dev_portal.html` | **Creado** | F4 |
+| `core/migrations/0054_agencia_whitelabel_fields.py` | **Creado** | F4 |
 | `apps/bookings/signals.py` | Modificado | F4 |
 | `core/views/god_mode_views.py` | Modificado | F4 |
 | `core/templates/god_mode/dashboard.html` | Modificado | F4 |
+| `core/models/agencia.py` | Modificado | F4 |
+| `core/middleware.py` | Modificado | F4 |
+| `apps/automation/services/ticket_parser_service.py` | Modificado | F4 |
+| `tests/test_ai_parser.py` | Modificado | F4 |
 | `core/templates/marketing/public_landing.html` | Modificado | F5 |
 | `core/views/marketing_views.py` | Modificado | F5 |
 | `travelhub/urls.py` | Modificado | F5 |
@@ -225,7 +240,7 @@ sin casos de uso, sin lead capture.
 | F1: Scripts | 2 semanas | ~1 día | Acelerado por IA |
 | F2: CI/CD | 2 semanas | ~1 día | Acelerado por IA |
 | F3: E2E | 2 semanas | ~1 día | Acelerado por IA |
-| F4: Producto | 4 semanas | ~1 día | Parcial (3 de 6 items) |
+| F4: Producto | 4 semanas | ~1 día | 6 de 6 items completados |
 | F5: Marketing | 2 semanas | ~1 día | Acelerado por IA |
 | **Total** | **~10 semanas** | **~1 semana** | **90% más rápido** |
 
@@ -233,9 +248,12 @@ sin casos de uso, sin lead capture.
 
 ## Próximos Pasos (Post-Remediación)
 
-1. **Módulo White Label** (F4.1) — dominio personalizado, CSP por agencia
-2. **API Pública con portal developer** (F4.2) — exponer drf-spectacular
-3. **Modo offline parser** (F4.4) — circuit breaker para Gemini
-4. **Video de 90s** (F5.3) — grabación del flujo mágico
-5. **VCR cassettes** (F3.6) — pytest-vcr para tests de parser sin Gemini real
-6. **Stripe real** — MRR dinámico en dashboard CEO
+### ✅ Completados en sesión posterior
+- ~~**F4.1 Módulo White Label**~~ — `csp_directives` + `template_pack`, CSP por agencia
+- ~~**F4.2 API Pública + portal developer**~~ — `/developers/` con docs, Swagger UI, ReDoc
+- ~~**F4.4 Modo offline parser**~~ — circuit breaker check antes de Gemini, fallback a regex parcial
+- ~~**F3.6 VCR cassettes**~~ — pytest-vcr instalado, test reactivado
+
+### Pendientes
+1. **Video de 90s** (F5.3) — grabación del flujo mágico (externo)
+2. **Stripe real** — MRR dinámico en dashboard CEO

@@ -20,6 +20,7 @@ from .feature_flags import FeatureFlag
 from .historial_boletos import AnulacionBoleto, HistorialCambioBoleto
 from .magic_link import MagicLinkToken
 from .migration_checks import MigrationCheck
+from .webhooks import Webhook, WebhookDelivery, WebhookEvent
 
 __all__ = [
     "Agencia",
@@ -35,4 +36,7 @@ __all__ = [
     "AnulacionBoleto",
     "MagicLinkToken",
     "Aeropuerto",
+    "Webhook",
+    "WebhookDelivery",
+    "WebhookEvent",
 ]

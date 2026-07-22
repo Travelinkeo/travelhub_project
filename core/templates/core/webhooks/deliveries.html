@@ -1,0 +1,176 @@
+{% extends "base_modern.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Entregas" %} — {{ webhook.description|default:webhook.url }} — TravelHub{% endblock %}
+{% block page_title %}{% trans "Historial de Entregas" %}{% endblock %}
+{% block page_subtitle %}
+    {{ webhook.description|default:_("(sin nombre)") }} — 
+    <span class="font-mono text-xs">{{ webhook.url }}</span>
+{% endblock %}
+
+{% block content %}
+<div class="flex-1 w-full max-w-[1400px] mx-auto p-6 md:p-8">
+
+    <!-- Back button -->
+    <a href="{% url 'core:webhooks_list' %}" class="inline-flex items-center gap-2 text-sm text-text-muted hover:text-text-main mb-6 transition-colors">
+        <span class="material-symbols-outlined text-[16px]">arrow_back</span>
+        {% trans "Volver a Webhooks" %}
+    </a>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div class="card-base p-4">
+            <p class="text-xs font-semibold text-text-muted uppercase tracking-wider">{% trans "Total" %}</p>
+            <p class="text-2xl font-bold text-text-main font-mono mt-1">{{ stats.total }}</p>
+        </div>
+        <div class="card-base p-4">
+            <p class="text-xs font-semibold text-text-muted uppercase tracking-wider">{% trans "Exitosas" %}</p>
+            <p class="text-2xl font-bold text-emerald-400 font-mono mt-1">{{ stats.exitosas }}</p>
+        </div>
+        <div class="card-base p-4">
+            <p class="text-xs font-semibold text-text-muted uppercase tracking-wider">{% trans "Fallidas" %}</p>
+            <p class="text-2xl font-bold text-red-400 font-mono mt-1">{{ stats.fallidas }}</p>
+        </div>
+        <div class="card-base p-4">
+            <p class="text-xs font-semibold text-text-muted uppercase tracking-wider">{% trans "Latencia prom." %}</p>
+            <p class="text-2xl font-bold text-text-main font-mono mt-1">{{ stats.avg_ms }}ms</p>
+        </div>
+    </div>
+
+    <!-- Info: Webhook details -->
+    <div class="card-base p-4 mb-6 flex flex-wrap items-center gap-4 text-sm">
+        <span class="flex items-center gap-1.5">
+            <span class="text-text-muted">{% trans "Estado:" %}</span>
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold
+                {% if webhook.is_active %}bg-emerald-500/10 text-emerald-400 border border-emerald-500/20
+                {% else %}bg-red-500/10 text-red-400 border border-red-500/20{% endif %}">
+                {{ webhook.is_active|yesno:_("Activo,Pausado") }}
+            </span>
+        </span>
+        <span class="flex items-center gap-1.5">
+            <span class="text-text-muted">{% trans "Secret:" %}</span>
+            <span class="font-mono text-xs text-text-muted">{{ webhook.secret|truncatechars:20 }}</span>
+        </span>
+        <span class="flex items-center gap-1.5">
+            <span class="text-text-muted">{% trans "Eventos:" %}</span>
+            {% for e in webhook.events %}
+                <span class="px-1.5 py-0.5 bg-surface-2 rounded text-[10px] font-mono text-text-muted">{{ e }}</span>
+            {% empty %}
+                <span class="text-text-muted text-xs">{% trans "Todos" %}</span>
+            {% endfor %}
+        </span>
+        <span class="flex items-center gap-1.5">
+            <span class="text-text-muted">{% trans "Creado:" %}</span>
+            <span class="text-text-main">{{ webhook.created_at|date:"d/m/Y H:i" }}</span>
+        </span>
+    </div>
+
+    <!-- Deliveries Table -->
+    <div class="card-base overflow-hidden">
+        <div class="px-6 py-5 border-b border-border-color">
+            <h3 class="text-lg font-bold text-text-main">{% trans "Últimas 100 entregas" %}</h3>
+        </div>
+
+        {% if deliveries %}
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead>
+                    <tr class="border-b border-border-color bg-surface-2/50">
+                        <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-text-muted">{% trans "Estado" %}</th>
+                        <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-text-muted">{% trans "Evento" %}</th>
+                        <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-text-muted">{% trans "HTTP" %}</th>
+                        <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-text-muted">{% trans "Duración" %}</th>
+                        <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-text-muted">{% trans "Fecha" %}</th>
+                        <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-text-muted">{% trans "Detalle" %}</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-border-color/50">
+                    {% for d in deliveries %}
+                    <tr class="hover:bg-surface-2/30 transition-colors" x-data="{ showPayload: false }">
+                        <td class="px-6 py-4">
+                            {% if d.success %}
+                            <span class="inline-flex items-center gap-1 text-emerald-400 font-bold text-xs">
+                                <span class="material-symbols-outlined text-[16px]">check_circle</span>
+                                OK
+                            </span>
+                            {% else %}
+                            <span class="inline-flex items-center gap-1 text-red-400 font-bold text-xs">
+                                <span class="material-symbols-outlined text-[16px]">error</span>
+                                FAIL
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="font-mono text-xs text-text-main">{{ d.event_type }}</span>
+                        </td>
+                        <td class="px-6 py-4">
+                            {% if d.response_status %}
+                            <span class="font-mono text-xs px-2 py-0.5 rounded border
+                                {% if d.response_status >= 200 and d.response_status < 300 %}bg-emerald-500/10 text-emerald-400 border-emerald-500/20
+                                {% elif d.response_status >= 400 %}bg-red-500/10 text-red-400 border-red-500/20
+                                {% else %}bg-amber-500/10 text-amber-400 border-amber-500/20{% endif %}">
+                                {{ d.response_status }}
+                            </span>
+                            {% else %}
+                            <span class="text-text-muted text-xs">—</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 font-mono text-xs text-text-muted">
+                            {% if d.duration_ms %}{{ d.duration_ms }}ms{% else %}—{% endif %}
+                        </td>
+                        <td class="px-6 py-4 text-xs text-text-muted">
+                            {{ d.created_at|date:"d/m/Y H:i:s" }}
+                        </td>
+                        <td class="px-6 py-4">
+                            <button @click="showPayload = !showPayload"
+                                class="text-xs text-primary hover:text-primary-hover font-bold flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[14px]" x-show="!showPayload">expand_more</span>
+                                <span class="material-symbols-outlined text-[14px]" x-show="showPayload">expand_less</span>
+                                {% trans "Payload" %}
+                            </button>
+                        </td>
+                    </tr>
+                    <tr x-show="showPayload" x-cloak>
+                        <td colspan="6" class="px-6 py-4 bg-surface-base">
+                            <div class="rounded-xl border border-border-color overflow-hidden">
+                                <div class="px-4 py-2 bg-surface-2 text-[10px] font-bold uppercase tracking-wider text-text-muted border-b border-border-color">
+                                    {% trans "Payload enviado" %}
+                                </div>
+                                <pre class="p-4 text-xs font-mono text-text-main overflow-x-auto max-h-64 overflow-y-auto">{{ d.payload|pprint }}</pre>
+                                {% if d.response_body %}
+                                <div class="px-4 py-2 bg-surface-2 text-[10px] font-bold uppercase tracking-wider text-text-muted border-t border-border-color">
+                                    {% trans "Respuesta" %}
+                                </div>
+                                <pre class="p-4 text-xs font-mono text-text-main overflow-x-auto max-h-32">{{ d.response_body|truncatechars:500 }}</pre>
+                                {% endif %}
+                                {% if d.error_message %}
+                                <div class="px-4 py-2 bg-red-500/10 text-[10px] font-bold uppercase tracking-wider text-red-400 border-t border-border-color">
+                                    {% trans "Error" %}
+                                </div>
+                                <pre class="p-4 text-xs font-mono text-red-400 overflow-x-auto">{{ d.error_message }}</pre>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="px-6 py-16 text-center">
+            <div class="flex flex-col items-center gap-4">
+                <div class="size-20 rounded-3xl bg-surface-2 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-[48px] text-text-muted/50">history</span>
+                </div>
+                <h3 class="text-xl font-black text-text-main uppercase">{% trans "Sin entregas" %}</h3>
+                <p class="text-sm text-text-muted max-w-md">{% trans "Este webhook aún no ha recibido ninguna entrega. Usa el botón de prueba para verificar la conexión." %}</p>
+                <a href="{% url 'core:webhooks_list' %}" class="btn-primary">
+                    <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+                    <span>{% trans "Volver" %}</span>
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

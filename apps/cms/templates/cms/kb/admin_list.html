@@ -1,0 +1,149 @@
+{% extends "base_modern.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Administrar KB" %} — TravelHub{% endblock %}
+{% block page_title %}{% trans "Base de Conocimiento" %}{% endblock %}
+{% block page_subtitle %}{% trans "Administra los artículos de ayuda para tu agencia" %}{% endblock %}
+
+{% block content %}
+<div class="flex-1 w-full max-w-[1400px] mx-auto p-6 md:p-8">
+
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+        <div>
+            <p class="text-sm text-text-muted">{{ page_obj.paginator.count }} {% trans "artículos" %}</p>
+        </div>
+        <a href="{% url 'cms:kb_article_create' %}" class="btn-primary flex items-center gap-2">
+            <span class="material-symbols-outlined text-[18px]">add</span>
+            {% trans "Nuevo Artículo" %}
+        </a>
+    </div>
+
+    <!-- Filters -->
+    <div class="card-base p-4 mb-6">
+        <form method="get" class="flex flex-wrap gap-4 items-end">
+            <div class="flex-1 min-w-[200px]">
+                <label class="text-xs text-text-muted mb-1 block">{% trans "Buscar" %}</label>
+                <input type="text" name="q" value="{{ request.GET.q }}" placeholder="{% trans "Título, contenido..." %}" class="input-base w-full">
+            </div>
+            <div class="w-48">
+                <label class="text-xs text-text-muted mb-1 block">{% trans "Categoría" %}</label>
+                <select name="category" class="input-base w-full">
+                    <option value="">{% trans "Todas" %}</option>
+                    {% for c in categories %}
+                    <option value="{{ c.id }}" {% if request.GET.category == c.id|stringformat:"s" %}selected{% endif %}>{{ c.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="btn-primary">{% trans "Filtrar" %}</button>
+        </form>
+    </div>
+
+    <!-- Table -->
+    <div class="card-base overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead>
+                    <tr class="border-b border-border-color bg-surface-2/50">
+                        <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-text-muted">{% trans "Título" %}</th>
+                        <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-text-muted">{% trans "Categoría" %}</th>
+                        <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-text-muted">{% trans "Estado" %}</th>
+                        <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-text-muted">{% trans "Visitas" %}</th>
+                        <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-text-muted">{% trans "Fecha" %}</th>
+                        <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-text-muted">{% trans "Acciones" %}</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-border-color/50">
+                    {% for a in articles %}
+                    <tr class="hover:bg-surface-2/30 transition-colors">
+                        <td class="px-6 py-4">
+                            <p class="font-bold text-text-main">{{ a.title }}</p>
+                            {% if a.tags %}
+                            <p class="text-xs text-text-muted mt-0.5">{{ a.tags }}</p>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4">
+                            {% if a.category %}
+                            <span class="text-xs text-text-muted font-mono">{{ a.category.name }}</span>
+                            {% else %}
+                            <span class="text-xs text-text-muted">—</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex gap-1">
+                                {% if a.is_published %}
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">{% trans "Publicado" %}</span>
+                                {% else %}
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">{% trans "Borrador" %}</span>
+                                {% endif %}
+                                {% if a.is_public %}
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20">{% trans "Público" %}</span>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 font-mono text-xs text-text-muted">{{ a.view_count }}</td>
+                        <td class="px-6 py-4 text-xs text-text-muted">{{ a.updated_at|date:"d/m/Y" }}</td>
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-2">
+                                <a href="{% url 'cms:kb_article_edit' a.pk %}" class="btn-secondary text-xs px-3 py-1.5">
+                                    <span class="material-symbols-outlined text-[14px]">edit</span>
+                                </a>
+                                <a href="{% url 'cms:kb_detail' a.slug %}" class="btn-secondary text-xs px-3 py-1.5" target="_blank">
+                                    <span class="material-symbols-outlined text-[14px]">open_in_new</span>
+                                </a>
+                                <form method="post" action="{% url 'cms:kb_article_delete' a.pk %}" onsubmit="return confirm('{% trans "¿Eliminar este artículo?" %}')" class="inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn-secondary text-xs px-3 py-1.5 text-red-400 hover:bg-red-500/10">
+                                        <span class="material-symbols-outlined text-[14px]">delete</span>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="px-6 py-16 text-center">
+                            <div class="flex flex-col items-center gap-4">
+                                <div class="size-16 rounded-2xl bg-surface-2 flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-[32px] text-text-muted/50">import_contacts</span>
+                                </div>
+                                <p class="text-sm text-text-muted">{% trans "No hay artículos aún" %}</p>
+                                <a href="{% url 'cms:kb_article_create' %}" class="btn-primary text-sm">{% trans "Crear el primero" %}</a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <div class="flex justify-center gap-2 mt-6">
+        {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}" class="btn-secondary text-sm">{% trans "Anterior" %}</a>
+        {% endif %}
+        <span class="px-4 py-2 text-sm text-text-muted">{% trans "Página" %} {{ page_obj.number }} {% trans "de" %} {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}" class="btn-secondary text-sm">{% trans "Siguiente" %}</a>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- Categories Management -->
+    <div class="card-base p-6 mt-8">
+        <h3 class="text-lg font-bold text-text-main mb-4">{% trans "Categorías" %}</h3>
+        <div class="flex flex-wrap gap-2">
+            {% for c in categories %}
+            <span class="px-3 py-1.5 bg-surface-2 rounded-full text-xs text-text-muted font-mono">
+                {{ c.name }}
+                <span class="ml-1 text-text-muted/50">({{ c.articles.count }})</span>
+            </span>
+            {% empty %}
+            <p class="text-sm text-text-muted">{% trans "Sin categorías configuradas" %}</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

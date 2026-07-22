@@ -1,0 +1,102 @@
+{% extends "base_modern.html" %}
+{% load i18n %}
+
+{% block title %}{{ article.title }} — TravelHub{% endblock %}
+{% block page_title %}{{ article.title }}{% endblock %}
+
+{% block content %}
+<div class="flex-1 w-full max-w-[1000px] mx-auto p-6 md:p-8">
+
+    <!-- Breadcrumb -->
+    <nav class="flex items-center gap-2 text-sm text-text-muted mb-6">
+        <a href="{% url 'cms:kb_list' %}" class="hover:text-text-main transition-colors">{% trans "Centro de Ayuda" %}</a>
+        <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+        {% if article.category %}
+        <span class="text-text-main">{{ article.category.name }}</span>
+        <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+        {% endif %}
+        <span class="text-text-main truncate">{{ article.title }}</span>
+    </nav>
+
+    <div class="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-8">
+        <!-- Main Content -->
+        <article class="card-base p-8">
+            <!-- Meta -->
+            <div class="flex flex-wrap items-center gap-4 text-xs text-text-muted mb-6 pb-6 border-b border-border-color">
+                {% if article.category %}
+                <span class="px-2 py-1 bg-surface-2 rounded-full font-mono">{{ article.category.name }}</span>
+                {% endif %}
+                <span class="flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[14px]">schedule</span>
+                    {{ article.published_at|date:"d/m/Y" }}
+                </span>
+                <span class="flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[14px]">visibility</span>
+                    {{ article.view_count }}
+                </span>
+                {% if article.tags %}
+                <span class="flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[14px]">local_offer</span>
+                    {% for tag in article.tags.split %}
+                    <span class="px-1.5 py-0.5 bg-surface-2 rounded text-[10px]">{{ tag }}</span>
+                    {% endfor %}
+                </span>
+                {% endif %}
+                <span class="ml-auto">
+                    <span class="material-symbols-outlined text-[14px]">update</span>
+                    {{ article.updated_at|date:"d/m/Y" }}
+                </span>
+            </div>
+
+            <!-- Content -->
+            <div class="prose prose-invert max-w-none text-text-main leading-relaxed whitespace-pre-wrap">
+                {{ article.content|linebreaks }}
+            </div>
+
+            <!-- Helpful / Not Helpful -->
+            <div class="mt-10 pt-6 border-t border-border-color">
+                <p class="text-sm text-text-muted mb-3">{% trans "¿Te fue útil este artículo?" %}</p>
+                <form action="{% url 'cms:kb_helpful' article.slug %}" method="post" class="flex items-center gap-3">
+                    {% csrf_token %}
+                    <button type="submit" name="action" value="yes"
+                        class="btn-secondary flex items-center gap-1.5 text-sm">
+                        <span class="material-symbols-outlined text-[16px]">thumb_up</span>
+                        {% trans "Sí" %} ({{ article.helpful_count }})
+                    </button>
+                    <button type="submit" name="action" value="no"
+                        class="btn-secondary flex items-center gap-1.5 text-sm">
+                        <span class="material-symbols-outlined text-[16px]">thumb_down</span>
+                        {% trans "No" %} ({{ article.not_helpful_count }})
+                    </button>
+                </form>
+            </div>
+        </article>
+
+        <!-- Sidebar -->
+        <aside class="space-y-6">
+            {% if related_articles %}
+            <div class="card-base p-5">
+                <h3 class="text-sm font-black text-text-main uppercase tracking-wider mb-4">{% trans "Artículos Relacionados" %}</h3>
+                <div class="space-y-2">
+                    {% for a in related_articles %}
+                    <a href="{% url 'cms:kb_detail' a.slug %}" class="block p-3 rounded-xl hover:bg-surface-2 transition-colors">
+                        <p class="text-sm font-bold text-text-main hover:text-primary transition-colors">{{ a.title }}</p>
+                        <p class="text-xs text-text-muted mt-1 line-clamp-1">{{ a.content|striptags|truncatewords:10 }}</p>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="card-base p-5">
+                <h3 class="text-sm font-black text-text-main uppercase tracking-wider mb-3">{% trans "¿Necesitas más ayuda?" %}</h3>
+                <p class="text-xs text-text-muted mb-4">{% trans "Si no encontraste lo que buscas, contacta a nuestro equipo de soporte." %}</p>
+                <a href="#" class="btn-primary w-full text-sm flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined text-[16px]">mail</span>
+                    {% trans "Contactar Soporte" %}
+                </a>
+            </div>
+        </aside>
+    </div>
+</div>
+{% endblock %}

@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="{% static 'core/css/tailwind-built.css' %}">
     <link rel="stylesheet" href="{% static 'core/css/responsive.css' %}">
     <script nonce="{{ request.csp_nonce }}" src="{% static 'vendor/htmx_v2.js' %}"></script>
-    <script nonce="{{ request.csp_nonce }}" src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js" defer></script>
+    <script nonce="{{ request.csp_nonce }}" src="{% static 'vendor/alpine_v3_csp.js' %}" defer></script>
 
     {% include "core/partials/_htmx_csrf_and_errors.html" %}
 
@@ -99,15 +99,19 @@
             <div class="flex items-center gap-2 md:gap-3">
                 <div class="hidden md:flex items-center gap-3 mr-2 border-r border-border-color pr-4">
                     <div class="text-right hidden sm:block">
-                        <p class="text-[10px] text-text-muted uppercase font-bold">BCV HOY</p>
+                        <p class="text-[10px] text-text-muted uppercase font-bold">TASAS</p>
                     </div>
                     <div class="text-right">
                         <p class="text-[10px] text-text-muted font-bold uppercase">USD</p>
-                        <p class="text-xs font-black text-status-success">{{ tasa_usd|default:"0.00" }}</p>
+                        <p class="text-xs font-black text-status-success">{{ tasa_usd|default:"N/D" }}</p>
                     </div>
                     <div class="text-right">
                         <p class="text-[10px] text-text-muted font-bold uppercase">EUR</p>
-                        <p class="text-xs font-black text-status-success">{{ tasa_eur|default:"0.00" }}</p>
+                        <p class="text-xs font-black text-status-success">{{ tasa_eur|default:"N/D" }}</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-[10px] text-text-muted font-bold uppercase">P2P</p>
+                        <p class="text-xs font-black text-status-warning">{{ tasa_p2p|default:"N/D" }}</p>
                     </div>
                 </div>
 

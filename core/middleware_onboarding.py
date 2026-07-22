@@ -67,6 +67,11 @@ class OnboardingRedirectMiddleware:
         if self._needs_onboarding(request.user):
             return redirect("onboarding_welcome")
 
+        # Verificar si la agencia necesita setup post-registro (wizard)
+        agencia = getattr(request, "agencia", None)
+        if path != "/onboarding/wizard/" and self._needs_agency_setup(agencia):
+            return redirect("core:onboarding_wizard")
+
         return self.get_response(request)
 
     @staticmethod
@@ -75,7 +80,7 @@ class OnboardingRedirectMiddleware:
 
         El onboarding se considera completado si el usuario ya tiene una
         relación UsuarioAgencia (está asociado a una agencia) o si su
-        UserProgress del wizard alcanzó el paso final (STEP_COMPLETE).
+        UserProgress del wizard llegó al paso final (STEP_COMPLETE).
         """
         try:
             has_agency = UsuarioAgencia.objects.filter(usuario=user).exists()
@@ -91,3 +96,12 @@ class OnboardingRedirectMiddleware:
         except UserProgress.DoesNotExist:
             return True
         return not progress.onboarding_completed
+
+    @staticmethod
+    def _needs_agency_setup(agencia):
+        """True si la agencia necesita el wizard de setup post-registro."""
+        if not agencia:
+            return False
+        from core.models.onboarding import AgenciaSetupProgress
+        progress = AgenciaSetupProgress.objects.filter(agencia=agencia).first()
+        return progress is not None and not progress.is_completed

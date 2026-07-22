@@ -17,7 +17,9 @@ document.addEventListener('alpine:init', () => {
         init() {
             const ds = this.$el.dataset;
             this.proveedorId = ds.proveedorId ? parseInt(ds.proveedorId) : null;
-            this._comisionesUrl = ds.comisionesUrl || '/core/api/comisiones/';
+            let url = ds.comisionesUrl || '/api/comisiones/';
+            if (!url.endsWith('/')) url += '/';
+            this._comisionesUrl = url;
             this._csrf = ds.csrf || document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
 
             const tiposEl = document.getElementById('tipos-servicio');
@@ -34,10 +36,13 @@ document.addEventListener('alpine:init', () => {
             try {
                 const response = await fetch(`${this._comisionesUrl}?proveedor=${this.proveedorId}`);
                 if (!response.ok) throw new Error('Error cargando comisiones');
-                this.comisionesList = await response.json();
+                const data = await response.json();
+                this.comisionesList = Array.isArray(data) ? data : (data.results || []);
                 this.comisionesIds = this.comisionesList.map(c => c.id_comision);
             } catch (error) {
                 console.error(error);
+                this.comisionesList = [];
+                this.comisionesIds = [];
             }
         },
 
@@ -53,6 +58,14 @@ document.addEventListener('alpine:init', () => {
                 }));
                 return;
             }
+            const payload = {
+                tipo_servicio: this.newRegla.tipo_servicio,
+                comision_porcentaje: this.newRegla.comision_porcentaje !== '' && this.newRegla.comision_porcentaje !== null ? parseFloat(this.newRegla.comision_porcentaje) : null,
+                comision_monto_fijo: this.newRegla.comision_monto_fijo !== '' && this.newRegla.comision_monto_fijo !== null ? parseFloat(this.newRegla.comision_monto_fijo) : null,
+                moneda: this.newRegla.moneda !== '' && this.newRegla.moneda !== null ? parseInt(this.newRegla.moneda) : null,
+                notas: this.newRegla.notas || null,
+                proveedor: this.proveedorId
+            };
             try {
                 const response = await fetch(this._comisionesUrl, {
                     method: 'POST',
@@ -60,7 +73,7 @@ document.addEventListener('alpine:init', () => {
                         'Content-Type': 'application/json',
                         'X-CSRFToken': this._csrf
                     },
-                    body: JSON.stringify(this.newRegla)
+                    body: JSON.stringify(payload)
                 });
                 if (response.ok) {
                     this.showModal = false;

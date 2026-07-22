@@ -14,6 +14,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 from django.utils.html import format_html
+from unfold.admin import ModelAdmin, StackedInline, TabularInline
 
 from apps.crm.models import Cliente
 from core.api import MigrationCheckInline, SaaSAdminMixin, validate_migration_requirements_action
@@ -37,18 +38,36 @@ logger = logging.getLogger(__name__)
 
 
 # ---------------------------------------------------------------------------
+@admin.register(ItemVenta)
+class ItemVentaAdmin(SaaSAdminMixin, ModelAdmin):
+    list_display = (
+        "id_item_venta",
+        "venta",
+        "producto_servicio",
+        "descripcion_personalizada",
+        "cantidad",
+        "precio_unitario_venta",
+        "total_item_venta",
+    )
+    search_fields = ("descripcion_personalizada", "codigo_reserva_proveedor")
+    list_filter = ("fecha_inicio_servicio",)
+
+
+# ---------------------------------------------------------------------------
 # Formulario de selección de cliente para acción de facturación
 # ---------------------------------------------------------------------------
-class ClienteSelectionForm(forms.Form):
+class FacturaClienteSelectionForm(forms.Form):
     cliente = forms.ModelChoiceField(
-        queryset=Cliente.objects.all(), label="Seleccionar Cliente para facturar", required=True
+        queryset=Cliente.objects.all(),
+        label="Cliente a Facturar",
+        help_text="Seleccione el cliente que asumirá el cobro de la factura consolidada.",
     )
 
 
 # ---------------------------------------------------------------------------
 # Inlines de Venta
 # ---------------------------------------------------------------------------
-class ItemVentaInline(admin.TabularInline):
+class ItemVentaInline(TabularInline):
     model = ItemVenta
     extra = 1
     autocomplete_fields = ["producto_servicio", "proveedor_servicio"]
@@ -69,19 +88,19 @@ class ItemVentaInline(admin.TabularInline):
     )
 
 
-class SegmentoVueloInline(admin.TabularInline):
+class SegmentoVueloInline(TabularInline):
     model = SegmentoVuelo
     extra = 0
     autocomplete_fields = ["origen", "destino"]
 
 
-class AlojamientoReservaInline(admin.StackedInline):
+class AlojamientoReservaInline(StackedInline):
     model = AlojamientoReserva
     extra = 0
     autocomplete_fields = ["proveedor", "ciudad"]
 
 
-class AlquilerAutoReservaInline(admin.StackedInline):
+class AlquilerAutoReservaInline(StackedInline):
     model = AlquilerAutoReserva
     extra = 0
     autocomplete_fields = ["proveedor", "ciudad_retiro", "ciudad_devolucion"]
@@ -106,7 +125,7 @@ class AlquilerAutoReservaInline(admin.StackedInline):
     )
 
 
-class ServicioAdicionalDetalleInline(admin.StackedInline):
+class ServicioAdicionalDetalleInline(StackedInline):
     model = ServicioAdicionalDetalle
     extra = 0
     autocomplete_fields = ["proveedor"]
@@ -125,25 +144,25 @@ class ServicioAdicionalDetalleInline(admin.StackedInline):
     )
 
 
-class TrasladoServicioInline(admin.TabularInline):
+class TrasladoServicioInline(TabularInline):
     model = TrasladoServicio
     extra = 0
     autocomplete_fields = ["proveedor"]
 
 
-class ActividadServicioInline(admin.TabularInline):
+class ActividadServicioInline(TabularInline):
     model = ActividadServicio
     extra = 0
     autocomplete_fields = ["proveedor"]
 
 
-class FeeVentaInline(admin.TabularInline):
+class FeeVentaInline(TabularInline):
     model = FeeVenta
     extra = 0
     autocomplete_fields = ["moneda"]
 
 
-class PagoVentaInline(admin.TabularInline):
+class PagoVentaInline(TabularInline):
     model = PagoVenta
     extra = 0
     autocomplete_fields = ["moneda"]
@@ -159,7 +178,7 @@ class VentaAdminForm(forms.ModelForm):
 # VentaAdmin
 # ---------------------------------------------------------------------------
 @admin.register(Venta)
-class VentaAdmin(SaaSAdminMixin, admin.ModelAdmin):
+class VentaAdmin(SaaSAdminMixin, ModelAdmin):
     def get_queryset(self, request):
         return (
             super()
@@ -380,7 +399,7 @@ class VentaAdmin(SaaSAdminMixin, admin.ModelAdmin):
 
 
 @admin.register(VentaParseMetadata)
-class VentaParseMetadataAdmin(SaaSAdminMixin, admin.ModelAdmin):
+class VentaParseMetadataAdmin(SaaSAdminMixin, ModelAdmin):
     saas_agency_field = "venta__agencia"
     list_display = ("id_metadata", "venta", "fuente", "creado")
     readonly_fields = ("raw_normalized_json", "segments_json", "creado")

@@ -130,22 +130,29 @@
                     <h3 class="text-lg font-bold text-text-main">{% trans "Webhooks" %}</h3>
                     <p class="text-sm text-text-muted mt-1">{% trans "Recibe notificaciones cuando ocurran eventos" %}</p>
                 </div>
-                <button @click="showCreateWebhook = true"
-                    class="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-xl text-sm font-bold hover:opacity-90 transition-all">
-                    <span class="material-symbols-outlined text-[16px]">add</span>
-                    {% trans "Crear Webhook" %}
-                </button>
+                <div class="flex items-center gap-2">
+                    <a href="{% url 'core:webhooks_list' %}"
+                        class="flex items-center gap-2 bg-surface-2 text-text-main px-4 py-2 rounded-xl text-sm font-bold hover:bg-primary hover:text-white transition-all">
+                        <span class="material-symbols-outlined text-[16px]">open_in_new</span>
+                        {% trans "Gestión Avanzada" %}
+                    </a>
+                    <button @click="showCreateWebhook = true"
+                        class="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-xl text-sm font-bold hover:opacity-90 transition-all">
+                        <span class="material-symbols-outlined text-[16px]">add</span>
+                        {% trans "Crear Webhook" %}
+                    </button>
+                </div>
             </div>
 
             <!-- Create Form -->
             <div x-show="showCreateWebhook" x-transition class="mb-6 bg-surface-2 rounded-xl p-4">
                 <h4 class="text-sm font-bold text-text-main mb-3">{% trans "Nuevo Webhook" %}</h4>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <div>
-                        <label class="text-xs text-text-muted mb-1 block">{% trans "Nombre" %}</label>
-                        <input type="text" x-model="newWebhookName" class="w-full bg-surface-base border border-border-color rounded-lg px-3 py-2 text-sm text-text-main" placeholder="Mi Webhook">
-                    </div>
-                    <div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div>
+                            <label class="text-xs text-text-muted mb-1 block">{% trans "Descripción" %}</label>
+                            <input type="text" x-model="newWebhookDescription" class="w-full bg-surface-base border border-border-color rounded-lg px-3 py-2 text-sm text-text-main" placeholder="Mi Webhook">
+                        </div>
+                        <div>
                         <label class="text-xs text-text-muted mb-1 block">{% trans "URL de destino" %}</label>
                         <input type="url" x-model="newWebhookUrl" class="w-full bg-surface-base border border-border-color rounded-lg px-3 py-2 text-sm text-text-main" placeholder="https://miapp.com/webhook">
                     </div>
@@ -182,7 +189,10 @@
                     <tbody>
                         <template x-for="wh in webhooks" :key="wh.id">
                             <tr class="border-b border-border-color/50 hover:bg-surface-2/50">
-                                <td class="py-3 px-4 font-bold text-text-main" x-text="wh.name"></td>
+                                <td class="py-3 px-4 font-bold text-text-main">
+                                    <span x-text="wh.description || wh.url"></span>
+                                    <span class="block text-[10px] text-text-muted font-mono" x-text="wh.id ? 'ID: ' + wh.id : ''"></span>
+                                </td>
                                 <td class="py-3 px-4 font-mono text-xs text-text-muted truncate max-w-[200px]" x-text="wh.url"></td>
                                 <td class="py-3 px-4">
                                     <div class="flex flex-wrap gap-1">
@@ -268,7 +278,7 @@ function integracionesApp() {
         newKeyName: '',
         newKeyPlan: 'basico',
         createdKey: null,
-        newWebhookName: '',
+        newWebhookDescription: '',
         newWebhookUrl: '',
         newWebhookEvents: [],
         savingPrefs: false,
@@ -339,11 +349,11 @@ function integracionesApp() {
                 const res = await fetch('/api/webhooks/', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-CSRFToken': this.getCsrfToken() },
-                    body: JSON.stringify({ name: this.newWebhookName, url: this.newWebhookUrl, events: this.newWebhookEvents })
+                    body: JSON.stringify({ description: this.newWebhookDescription, url: this.newWebhookUrl, events: this.newWebhookEvents })
                 });
                 if (res.ok) {
                     this.showCreateWebhook = false;
-                    this.newWebhookName = '';
+                    this.newWebhookDescription = '';
                     this.newWebhookUrl = '';
                     this.newWebhookEvents = [];
                     await this.loadWebhooks();

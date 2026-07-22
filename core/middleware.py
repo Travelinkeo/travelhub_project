@@ -372,9 +372,9 @@ class SecurityHeadersMiddleware:
             r2_wildcard = "https://*.r2.cloudflarestorage.com"
             is_debug = getattr(dj_settings, "DEBUG", True)
 
-            # CSP unificado: nonce-based, migrado a @alpinejs/csp para eliminar unsafe-eval.
+            # Alpine.js (v2/v3) y HTMX requieren 'unsafe-eval' y 'unsafe-inline' para evaluar expresiones inline y scripts dinamicos de HTMX/Unfold
             script_src = (
-                f"'self' 'unsafe-eval' 'nonce-{nonce}' 'strict-dynamic' "
+                f"'self' 'nonce-{nonce}' 'unsafe-eval' 'unsafe-inline' "
                 f"{static_origin} https://cdn.jsdelivr.net https://cdn.tailwindcss.com "
                 f"https://unpkg.com https://static.cloudflareinsights.com"
             )

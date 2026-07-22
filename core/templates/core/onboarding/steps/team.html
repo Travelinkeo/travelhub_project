@@ -1,0 +1,61 @@
+{% load i18n %}
+
+<div>
+    <h2 class="text-2xl font-black text-text-main uppercase mb-1">{{ current_step_data.title }}</h2>
+    <p class="text-text-muted mb-4">{{ current_step_data.subtitle }}</p>
+
+    {% if usuarios %}
+    <div class="mb-6">
+        <p class="text-sm font-bold text-text-main mb-2">{% trans "Miembros actuales" %}</p>
+        <div class="space-y-2">
+            {% for ua in usuarios %}
+            <div class="flex items-center gap-3 px-4 py-3 rounded-xl bg-surface-1">
+                <div class="size-10 rounded-full bg-primary/20 flex items-center justify-center text-sm font-bold text-primary">
+                    {{ ua.usuario.email|first|upper }}
+                </div>
+                <div class="flex-1">
+                    <p class="text-sm font-bold text-text-main">{{ ua.usuario.email }}</p>
+                    <p class="text-xs text-text-muted">{{ ua.get_rol_display }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <form method="post" action="{% url 'core:onboarding_wizard' %}"
+          hx-post="{% url 'core:onboarding_wizard' %}"
+          hx-target="#step-content" hx-swap="innerHTML"
+          class="space-y-5">
+        {% csrf_token %}
+        <input type="hidden" name="step" value="team">
+
+        <div>
+            <label class="block text-sm font-bold text-text-main mb-1.5">{% trans "Correos electrónicos (uno por línea)" %}</label>
+            <textarea name="emails" rows="5" class="input-base w-full font-mono text-sm"
+                      placeholder="colaborador1@ejemplo.com&#10;colaborador2@ejemplo.com">{% if request.POST.emails %}{{ request.POST.emails }}{% endif %}</textarea>
+        </div>
+
+        <div>
+            <label class="block text-sm font-bold text-text-main mb-1.5">{% trans "Rol por defecto" %}</label>
+            <select name="role" class="input-base w-full">
+                <option value="vendedor">{% trans "Vendedor" %}</option>
+                <option value="admin">{% trans "Admin" %}</option>
+                <option value="operador">{% trans "Operador" %}</option>
+            </select>
+        </div>
+
+        <div class="flex justify-between gap-3 pt-6 border-t border-border-color">
+            <button type="submit" name="action" value="skip"
+                    hx-post="{% url 'core:onboarding_wizard' %}"
+                    hx-target="#step-content" hx-swap="innerHTML"
+                    class="btn-secondary">
+                {% trans "Omitir este paso" %}
+            </button>
+            <button type="submit" class="btn-primary">
+                {% trans "Continuar" %}
+                <span class="material-symbols-outlined">arrow_forward</span>
+            </button>
+        </div>
+    </form>
+</div>

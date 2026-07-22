@@ -26,14 +26,12 @@ class TenantViewSetMixin:
 
     def perform_create(self, serializer):
         """
-        Asegura que al crear un objeto, se asigne la agencia del usuario.
+        Asegura que al crear un objeto, se asigne la agencia activa del usuario.
         """
-        user = self.request.user
-        if not user.is_superuser:
-            agencia = get_agencia_from_request(self.request)
-            if agencia:
-                serializer.save(agencia=agencia)
-                return
+        agencia = get_agencia_from_request(self.request)
+        if agencia:
+            serializer.save(agencia=agencia)
+        elif self.request.user.is_superuser:
+            serializer.save()
+        else:
             raise PermissionDenied("No tienes una agencia activa asignada.")
-
-        serializer.save()

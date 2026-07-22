@@ -7,8 +7,6 @@ Balance de Comprobación, Estado de Resultados, Balance General, Libro Diario/Ma
 from datetime import date
 from decimal import Decimal
 
-from django.db.models import Sum
-
 from .models import AsientoContable, CuentaContable, MovimientoContable
 
 
@@ -17,21 +15,9 @@ class ReportesContables:
 
     @staticmethod
     def balance_comprobacion(fecha_desde: date, fecha_hasta: date, moneda: str = "USD") -> dict:
-        """
-        Balance de Comprobación para un período.
+        monto_field = "monto_ves" if moneda in ("BSD", "VES") else "monto_usd"
 
-        Args:
-            fecha_desde: Fecha inicial
-            fecha_hasta: Fecha final
-            moneda: 'USD' o 'BSD'
-
-        Returns:
-            Dict con cuentas y sus saldos
-        """
-        campo_debe = "debe_bsd" if moneda == "BSD" else "debe"
-        campo_haber = "haber_bsd" if moneda == "BSD" else "haber"
-
-        cuentas = CuentaContable.objects.filter(acepta_movimientos=True).order_by("codigo_cuenta")
+        cuentas = CuentaContable.objects.filter(acepta_movimientos=True).order_by("codigo")
 
         resultado = {
             "periodo": {"desde": fecha_desde, "hasta": fecha_hasta},
@@ -42,24 +28,37 @@ class ReportesContables:
 
         for cuenta in cuentas:
             movimientos = MovimientoContable.objects.filter(
-                cuenta_contable=cuenta,
+                cuenta=cuenta,
                 asiento__fecha_contable__range=(fecha_desde, fecha_hasta),
                 asiento__estado=AsientoContable.EstadoAsiento.CONTABILIZADO,
-            ).aggregate(total_debe=Sum(campo_debe), total_haber=Sum(campo_haber))
+            )
 
-            debe = movimientos["total_debe"] or Decimal("0")
-            haber = movimientos["total_haber"] or Decimal("0")
+            debe = Decimal("0")
+            haber = Decimal("0")
+            for mov in movimientos:
+                val = getattr(mov, monto_field) or Decimal("0")
+                if mov.tipo == MovimientoContable.TipoMovimiento.DEBITO:
+                    debe += val
+                else:
+                    haber += val
+
             saldo = debe - haber
 
             if debe != 0 or haber != 0:
                 resultado["cuentas"].append(
                     {
-                        "codigo": cuenta.codigo_cuenta,
-                        "nombre": cuenta.nombre_cuenta,
+                        "codigo": cuenta.codigo,
+                        "nombre": cuenta.nombre,
                         "debe": debe,
                         "haber": haber,
                         "saldo": saldo,
-                        "naturaleza": cuenta.naturaleza,
+                        "naturaleza": cuenta.tipo,
+                        "cuenta": {
+                            "codigo": cuenta.codigo,
+                            "nombre": cuenta.nombre,
+                            "codigo_cuenta": cuenta.codigo,
+                            "nombre_cuenta": cuenta.nombre,
+                        },
                     }
                 )
 
@@ -70,28 +69,33 @@ class ReportesContables:
 
     @staticmethod
     def estado_resultados(fecha_desde: date, fecha_hasta: date, moneda: str = "USD") -> dict:
-        """
-        Estado de Resultados (P&L) para un período.
+        monto_field = "monto_ves" if moneda in ("BSD", "VES") else "monto_usd"
 
-        Returns:
-            Dict con ingresos, costos, gastos y utilidad
-        """
-        campo_debe = "debe_bsd" if moneda == "BSD" else "debe"
-        campo_haber = "haber_bsd" if moneda == "BSD" else "haber"
-
-        # Ingresos (naturaleza acreedora)
-        ingresos = MovimientoContable.objects.filter(
-            cuenta_contable__tipo_cuenta=CuentaContable.TipoCuentaChoices.INGRESO,
+        movs_ingreso = MovimientoContable.objects.filter(
+            cuenta__tipo=CuentaContable.TipoCuenta.INGRESO,
             asiento__fecha_contable__range=(fecha_desde, fecha_hasta),
             asiento__estado=AsientoContable.EstadoAsiento.CONTABILIZADO,
-        ).aggregate(total=Sum(campo_haber))["total"] or Decimal("0")
+        )
+        ingresos = Decimal("0")
+        for m in movs_ingreso:
+            val = getattr(m, monto_field) or Decimal("0")
+            if m.tipo == MovimientoContable.TipoMovimiento.CREDITO:
+                ingresos += val
+            else:
+                ingresos -= val
 
-        # Gastos (naturaleza deudora)
-        gastos = MovimientoContable.objects.filter(
-            cuenta_contable__tipo_cuenta=CuentaContable.TipoCuentaChoices.GASTO,
+        movs_gasto = MovimientoContable.objects.filter(
+            cuenta__tipo=CuentaContable.TipoCuenta.GASTO,
             asiento__fecha_contable__range=(fecha_desde, fecha_hasta),
             asiento__estado=AsientoContable.EstadoAsiento.CONTABILIZADO,
-        ).aggregate(total=Sum(campo_debe))["total"] or Decimal("0")
+        )
+        gastos = Decimal("0")
+        for m in movs_gasto:
+            val = getattr(m, monto_field) or Decimal("0")
+            if m.tipo == MovimientoContable.TipoMovimiento.DEBITO:
+                gastos += val
+            else:
+                gastos -= val
 
         utilidad = ingresos - gastos
 
@@ -105,40 +109,37 @@ class ReportesContables:
 
     @staticmethod
     def balance_general(fecha_corte: date, moneda: str = "USD") -> dict:
-        """
-        Balance General (Estado de Situación Financiera) a una fecha.
+        monto_field = "monto_ves" if moneda in ("BSD", "VES") else "monto_usd"
 
-        Returns:
-            Dict con activos, pasivos y patrimonio
-        """
-        campo_debe = "debe_bsd" if moneda == "BSD" else "debe"
-        campo_haber = "haber_bsd" if moneda == "BSD" else "haber"
-
-        # Activos (saldo deudor)
-        activos = MovimientoContable.objects.filter(
-            cuenta_contable__tipo_cuenta=CuentaContable.TipoCuentaChoices.ACTIVO,
+        movs_activo = MovimientoContable.objects.filter(
+            cuenta__tipo=CuentaContable.TipoCuenta.ACTIVO,
             asiento__fecha_contable__lte=fecha_corte,
             asiento__estado=AsientoContable.EstadoAsiento.CONTABILIZADO,
-        ).aggregate(debe=Sum(campo_debe), haber=Sum(campo_haber))
-        total_activos = (activos["debe"] or Decimal("0")) - (activos["haber"] or Decimal("0"))
-
-        # Pasivos (saldo acreedor)
-        pasivos = MovimientoContable.objects.filter(
-            cuenta_contable__tipo_cuenta=CuentaContable.TipoCuentaChoices.PASIVO,
-            asiento__fecha_contable__lte=fecha_corte,
-            asiento__estado=AsientoContable.EstadoAsiento.CONTABILIZADO,
-        ).aggregate(debe=Sum(campo_debe), haber=Sum(campo_haber))
-        total_pasivos = (pasivos["haber"] or Decimal("0")) - (pasivos["debe"] or Decimal("0"))
-
-        # Patrimonio (saldo acreedor)
-        patrimonio = MovimientoContable.objects.filter(
-            cuenta_contable__tipo_cuenta=CuentaContable.TipoCuentaChoices.PATRIMONIO,
-            asiento__fecha_contable__lte=fecha_corte,
-            asiento__estado=AsientoContable.EstadoAsiento.CONTABILIZADO,
-        ).aggregate(debe=Sum(campo_debe), haber=Sum(campo_haber))
-        total_patrimonio = (patrimonio["haber"] or Decimal("0")) - (
-            patrimonio["debe"] or Decimal("0")
         )
+        total_activos = Decimal("0")
+        for m in movs_activo:
+            val = getattr(m, monto_field) or Decimal("0")
+            total_activos += val if m.tipo == MovimientoContable.TipoMovimiento.DEBITO else -val
+
+        movs_pasivo = MovimientoContable.objects.filter(
+            cuenta__tipo=CuentaContable.TipoCuenta.PASIVO,
+            asiento__fecha_contable__lte=fecha_corte,
+            asiento__estado=AsientoContable.EstadoAsiento.CONTABILIZADO,
+        )
+        total_pasivos = Decimal("0")
+        for m in movs_pasivo:
+            val = getattr(m, monto_field) or Decimal("0")
+            total_pasivos += val if m.tipo == MovimientoContable.TipoMovimiento.CREDITO else -val
+
+        movs_patrimonio = MovimientoContable.objects.filter(
+            cuenta__tipo=CuentaContable.TipoCuenta.PATRIMONIO,
+            asiento__fecha_contable__lte=fecha_corte,
+            asiento__estado=AsientoContable.EstadoAsiento.CONTABILIZADO,
+        )
+        total_patrimonio = Decimal("0")
+        for m in movs_patrimonio:
+            val = getattr(m, monto_field) or Decimal("0")
+            total_patrimonio += val if m.tipo == MovimientoContable.TipoMovimiento.CREDITO else -val
 
         return {
             "fecha_corte": fecha_corte,
@@ -152,14 +153,7 @@ class ReportesContables:
 
     @staticmethod
     def libro_diario(fecha_desde: date, fecha_hasta: date, moneda: str = "USD") -> list[dict]:
-        """
-        Libro Diario para un período.
-
-        Returns:
-            Lista de asientos con sus detalles
-        """
-        campo_debe = "debe_bsd" if moneda == "BSD" else "debe"
-        campo_haber = "haber_bsd" if moneda == "BSD" else "haber"
+        monto_field = "monto_ves" if moneda in ("BSD", "VES") else "monto_usd"
 
         asientos = AsientoContable.objects.filter(
             fecha_contable__range=(fecha_desde, fecha_hasta),
@@ -167,20 +161,29 @@ class ReportesContables:
         ).order_by("fecha_contable", "id")
 
         resultado = []
-
         for asiento in asientos:
             detalles = []
-            for detalle in asiento.detalles_asiento.all():
-                debe = getattr(detalle, campo_debe)
-                haber = getattr(detalle, campo_haber)
-
+            t_debe = Decimal("0")
+            t_haber = Decimal("0")
+            for mov in asiento.movimientos.all():
+                val = getattr(mov, monto_field) or Decimal("0")
+                debe = val if mov.tipo == MovimientoContable.TipoMovimiento.DEBITO else Decimal("0")
+                haber = val if mov.tipo == MovimientoContable.TipoMovimiento.CREDITO else Decimal("0")
+                t_debe += debe
+                t_haber += haber
                 detalles.append(
                     {
-                        "cuenta_codigo": detalle.cuenta_contable.codigo_cuenta,
-                        "cuenta_nombre": detalle.cuenta_contable.nombre_cuenta,
+                        "cuenta_codigo": mov.cuenta.codigo,
+                        "cuenta_nombre": mov.cuenta.nombre,
+                        "cuenta_contable": {
+                            "codigo": mov.cuenta.codigo,
+                            "nombre": mov.cuenta.nombre,
+                            "codigo_cuenta": mov.cuenta.codigo,
+                            "nombre_cuenta": mov.cuenta.nombre,
+                        },
                         "debe": debe,
                         "haber": haber,
-                        "descripcion": detalle.descripcion_linea,
+                        "descripcion": mov.cuenta.nombre,
                     }
                 )
 
@@ -188,15 +191,11 @@ class ReportesContables:
                 {
                     "numero": asiento.id,
                     "fecha": asiento.fecha_contable,
-                    "descripcion": asiento.descripcion_general,
+                    "descripcion": asiento.glosa,
                     "tipo": asiento.get_tipo_asiento_display(),
                     "detalles": detalles,
-                    "total_debe": asiento.total_debe
-                    if moneda == "USD"
-                    else sum(d["debe"] for d in detalles),
-                    "total_haber": asiento.total_haber
-                    if moneda == "USD"
-                    else sum(d["haber"] for d in detalles),
+                    "total_debe": t_debe,
+                    "total_haber": t_haber,
                 }
             )
 
@@ -206,32 +205,22 @@ class ReportesContables:
     def libro_mayor(
         cuenta_id: int, fecha_desde: date, fecha_hasta: date, moneda: str = "USD"
     ) -> dict:
-        """
-        Libro Mayor para una cuenta específica.
+        monto_field = "monto_ves" if moneda in ("BSD", "VES") else "monto_usd"
+        cuenta = CuentaContable.objects.get(id=cuenta_id)
 
-        Returns:
-            Dict con movimientos y saldo de la cuenta
-        """
-        campo_debe = "debe_bsd" if moneda == "BSD" else "debe"
-        campo_haber = "haber_bsd" if moneda == "BSD" else "haber"
-
-        cuenta = CuentaContable.objects.get(id_cuenta=cuenta_id)
-
-        # Saldo inicial (antes del período)
-        saldo_inicial_data = MovimientoContable.objects.filter(
-            cuenta_contable=cuenta,
+        movs_prev = MovimientoContable.objects.filter(
+            cuenta=cuenta,
             asiento__fecha_contable__lt=fecha_desde,
             asiento__estado=AsientoContable.EstadoAsiento.CONTABILIZADO,
-        ).aggregate(debe=Sum(campo_debe), haber=Sum(campo_haber))
-
-        saldo_inicial = (saldo_inicial_data["debe"] or Decimal("0")) - (
-            saldo_inicial_data["haber"] or Decimal("0")
         )
+        saldo_inicial = Decimal("0")
+        for m in movs_prev:
+            val = getattr(m, monto_field) or Decimal("0")
+            saldo_inicial += val if m.tipo == MovimientoContable.TipoMovimiento.DEBITO else -val
 
-        # Movimientos del período
         movimientos = (
             MovimientoContable.objects.filter(
-                cuenta_contable=cuenta,
+                cuenta=cuenta,
                 asiento__fecha_contable__range=(fecha_desde, fecha_hasta),
                 asiento__estado=AsientoContable.EstadoAsiento.CONTABILIZADO,
             )
@@ -243,15 +232,16 @@ class ReportesContables:
         saldo_acumulado = saldo_inicial
 
         for mov in movimientos:
-            debe = getattr(mov, campo_debe)
-            haber = getattr(mov, campo_haber)
+            val = getattr(mov, monto_field) or Decimal("0")
+            debe = val if mov.tipo == MovimientoContable.TipoMovimiento.DEBITO else Decimal("0")
+            haber = val if mov.tipo == MovimientoContable.TipoMovimiento.CREDITO else Decimal("0")
             saldo_acumulado += debe - haber
 
             detalle_movimientos.append(
                 {
                     "fecha": mov.asiento.fecha_contable,
                     "asiento": mov.asiento.id,
-                    "descripcion": mov.descripcion_linea or mov.asiento.descripcion_general,
+                    "descripcion": mov.asiento.glosa or mov.cuenta.nombre,
                     "debe": debe,
                     "haber": haber,
                     "saldo": saldo_acumulado,
@@ -260,9 +250,11 @@ class ReportesContables:
 
         return {
             "cuenta": {
-                "codigo": cuenta.codigo_cuenta,
-                "nombre": cuenta.nombre_cuenta,
-                "naturaleza": cuenta.get_naturaleza_display(),
+                "codigo": cuenta.codigo,
+                "nombre": cuenta.nombre,
+                "codigo_cuenta": cuenta.codigo,
+                "nombre_cuenta": cuenta.nombre,
+                "naturaleza": cuenta.get_tipo_display(),
             },
             "periodo": {"desde": fecha_desde, "hasta": fecha_hasta},
             "moneda": moneda,

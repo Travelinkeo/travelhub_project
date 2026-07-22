@@ -1,0 +1,34 @@
+{% load i18n %}
+
+<div class="text-center">
+    <div class="size-24 rounded-3xl bg-emerald-500/10 flex items-center justify-center mx-auto mb-8">
+        <span class="material-symbols-outlined text-6xl text-emerald-400">celebration</span>
+    </div>
+
+    <h1 class="text-4xl font-black text-text-main uppercase tracking-tight mb-4">
+        {% trans "¡Todo listo!" %}
+    </h1>
+    <p class="text-lg text-text-muted max-w-lg mx-auto mb-8">
+        {% trans "Tu agencia está configurada y lista para operar. Puedes acceder al dashboard cuando quieras." %}
+    </p>
+
+    <div class="card-base p-6 max-w-md mx-auto mb-10 text-left space-y-4">
+        <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-emerald-400">check_circle</span>
+            <span class="text-sm text-text-main">{% trans "Perfil de agencia completado" %}</span>
+        </div>
+        <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-emerald-400">check_circle</span>
+            <span class="text-sm text-text-main">{% trans "Configuración fiscal" %}</span>
+        </div>
+        <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-emerald-400">check_circle</span>
+            <span class="text-sm text-text-main">{% trans "Equipo listo" %}</span>
+        </div>
+    </div>
+
+    <a href="{% url 'bookings:modern_dashboard' %}" class="btn-primary text-lg px-10 py-4 inline-flex items-center gap-2">
+        {% trans "Ir al Dashboard" %}
+        <span class="material-symbols-outlined">arrow_forward</span>
+    </a>
+</div>

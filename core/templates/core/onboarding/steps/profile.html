@@ -1,0 +1,50 @@
+{% load i18n %}
+
+<div>
+    <h2 class="text-2xl font-black text-text-main uppercase mb-1">{{ current_step_data.title }}</h2>
+    <p class="text-text-muted mb-8">{{ current_step_data.subtitle }}</p>
+
+    <form method="post" action="{% url 'core:onboarding_wizard' %}"
+          hx-post="{% url 'core:onboarding_wizard' %}"
+          hx-target="#step-content" hx-swap="innerHTML"
+          class="space-y-5">
+        {% csrf_token %}
+        <input type="hidden" name="step" value="profile">
+
+        <div>
+            <label class="block text-sm font-bold text-text-main mb-1.5">{% trans "Nombre comercial" %}</label>
+            <input type="text" name="nombre_comercial" value="{{ agencia.nombre_comercial|default:agencia.nombre }}"
+                   class="input-base w-full" placeholder="Mi Agencia de Viajes">
+        </div>
+
+        <div>
+            <label class="block text-sm font-bold text-text-main mb-1.5">{% trans "Teléfono principal" %}</label>
+            <input type="text" name="telefono_principal" value="{{ agencia.telefono_principal|default:'' }}"
+                   class="input-base w-full" placeholder="+58 412 000 0000">
+        </div>
+
+        <div>
+            <label class="block text-sm font-bold text-text-main mb-1.5">{% trans "Dirección" %}</label>
+            <textarea name="direccion" rows="3" class="input-base w-full" placeholder="{% trans "Dirección de la agencia" %}">{{ agencia.direccion|default:'' }}</textarea>
+        </div>
+
+        <div>
+            <label class="block text-sm font-bold text-text-main mb-1.5">{% trans "Sitio web" %}</label>
+            <input type="url" name="website" value="{{ agencia.website|default:'' }}"
+                   class="input-base w-full" placeholder="https://miagencia.com">
+        </div>
+
+        <div class="flex justify-between gap-3 pt-6 border-t border-border-color">
+            <button type="submit" name="action" value="skip"
+                    hx-post="{% url 'core:onboarding_wizard' %}"
+                    hx-target="#step-content" hx-swap="innerHTML"
+                    class="btn-secondary">
+                {% trans "Omitir este paso" %}
+            </button>
+            <button type="submit" class="btn-primary">
+                {% trans "Continuar" %}
+                <span class="material-symbols-outlined">arrow_forward</span>
+            </button>
+        </div>
+    </form>
+</div>

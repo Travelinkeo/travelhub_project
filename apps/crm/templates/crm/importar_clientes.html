@@ -1,0 +1,76 @@
+{% extends "base_modern.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Importar Clientes" %} — TravelHub{% endblock %}
+{% block page_title %}{% trans "Importar Clientes" %}{% endblock %}
+{% block page_subtitle %}{% trans "Sube un archivo Excel o CSV con los datos de tus clientes" %}{% endblock %}
+
+{% block content %}
+<div class="flex-1 w-full max-w-[800px] mx-auto p-6 md:p-8">
+
+    <a href="{% url 'crm:cliente_list' %}" class="inline-flex items-center gap-2 text-sm text-text-muted hover:text-text-main mb-6 transition-colors">
+        <span class="material-symbols-outlined text-[16px]">arrow_back</span>
+        {% trans "Volver a Clientes" %}
+    </a>
+
+    <div class="card-base p-8">
+        <form method="post" enctype="multipart/form-data" class="space-y-6">
+            {% csrf_token %}
+
+            <!-- Instructions -->
+            <div class="bg-surface-2 rounded-xl p-5 border border-border-color">
+                <h3 class="text-sm font-bold text-text-main mb-2 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary text-[18px]">info</span>
+                    {% trans "Instrucciones" %}
+                </h3>
+                <ul class="text-sm text-text-muted space-y-1.5 ml-7 list-disc">
+                    <li>{% trans "Formatos aceptados: .xlsx, .xls, .csv" %}</li>
+                    <li>{% trans "La columna de Nombres es obligatoria" %}</li>
+                    <li>{% trans "Los duplicados se detectan por email, teléfono o nombre+apellido" %}</li>
+                    <li>{% trans "Máximo 10,000 registros por importación" %}</li>
+                </ul>
+            </div>
+
+            <!-- File Upload -->
+            <div>
+                <label class="block text-sm font-bold text-text-main mb-2">{% trans "Archivo" %}</label>
+                <div class="border-2 border-dashed border-border-color rounded-2xl p-8 text-center hover:border-primary/40 transition-colors cursor-pointer"
+                     x-data="{ dragging: false }"
+                     @dragover.prevent="dragging = true"
+                     @dragleave.prevent="dragging = false"
+                     @drop.prevent="dragging = false; $refs.file.files = $event.dataTransfer.files; $refs.file.dispatchEvent(new Event('change'))">
+                    <input type="file" name="archivo" accept=".xlsx,.xls,.csv" required
+                           class="hidden" ref="file"
+                           @change="document.getElementById('file-name').textContent = $el.files[0]?.name || '{% trans "Ningún archivo seleccionado" %}'">
+                    <span class="material-symbols-outlined text-4xl text-text-muted mb-3">upload_file</span>
+                    <p class="text-text-muted text-sm">{% trans "Arrastra tu archivo aquí o" %}
+                        <button type="button" @click="$refs.file.click()" class="text-primary font-bold hover:underline">{% trans "selecciona" %}</button>
+                    </p>
+                    <p id="file-name" class="text-xs text-text-muted mt-2">{% trans "Ningún archivo seleccionado" %}</p>
+                </div>
+            </div>
+
+            <!-- Submit -->
+            <div class="flex justify-end gap-3 pt-4 border-t border-border-color">
+                <a href="{% url 'crm:cliente_list' %}" class="btn-secondary">{% trans "Cancelar" %}</a>
+                <button type="submit" class="btn-primary">
+                    <span class="material-symbols-outlined text-[18px]">cloud_upload</span>
+                    {% trans "Subir y Previsualizar" %}
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Quick template download -->
+    <div class="card-base p-5 mt-6 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-text-muted">download</span>
+            <div>
+                <p class="text-sm font-bold text-text-main">{% trans "¿No tienes un archivo listo?" %}</p>
+                <p class="text-xs text-text-muted">{% trans "Descarga una plantilla de ejemplo para llenar con tus datos" %}</p>
+            </div>
+        </div>
+        <a href="#" class="btn-secondary text-sm">{% trans "Descargar Plantilla" %}</a>
+    </div>
+</div>
+{% endblock %}

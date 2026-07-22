@@ -14,6 +14,7 @@ from django.contrib import admin, messages
 from django.http import HttpResponse
 from django.urls import reverse
 from django.utils.html import format_html
+from unfold.admin import ModelAdmin
 
 from core.api import SaaSAdminMixin
 
@@ -56,7 +57,7 @@ def _generar_voucher_pdf(request, pdf_bytes, filename, error_label):
 # Servicios de viaje
 # ---------------------------------------------------------------------------
 @admin.register(AlojamientoReserva)
-class AlojamientoReservaAdmin(SaaSAdminMixin, admin.ModelAdmin):
+class AlojamientoReservaAdmin(SaaSAdminMixin, ModelAdmin):
     saas_agency_field = "venta__agencia"
     list_display = (
         "id_alojamiento_reserva",
@@ -86,7 +87,7 @@ class AlojamientoReservaAdmin(SaaSAdminMixin, admin.ModelAdmin):
 
 
 @admin.register(AlquilerAutoReserva)
-class AlquilerAutoReservaAdmin(SaaSAdminMixin, admin.ModelAdmin):
+class AlquilerAutoReservaAdmin(SaaSAdminMixin, ModelAdmin):
     saas_agency_field = "venta__agencia"
     list_display = ("id_alquiler_auto", "venta", "compania_rentadora", "fecha_hora_retiro")
     autocomplete_fields = ["venta", "proveedor", "ciudad_retiro", "ciudad_devolucion"]
@@ -107,14 +108,14 @@ class AlquilerAutoReservaAdmin(SaaSAdminMixin, admin.ModelAdmin):
 
 
 @admin.register(EventoServicio)
-class EventoServicioAdmin(SaaSAdminMixin, admin.ModelAdmin):
+class EventoServicioAdmin(SaaSAdminMixin, ModelAdmin):
     saas_agency_field = "venta__agencia"
     list_display = ("id_evento_servicio", "venta", "nombre_evento", "fecha_evento")
     autocomplete_fields = ["venta", "proveedor"]
 
 
 @admin.register(CircuitoTuristico)
-class CircuitoTuristicoAdmin(SaaSAdminMixin, admin.ModelAdmin):
+class CircuitoTuristicoAdmin(SaaSAdminMixin, ModelAdmin):
     saas_agency_field = "venta__agencia"
     list_display = ("id_circuito", "venta", "nombre_circuito", "fecha_inicio")
     search_fields = ("nombre_circuito",)
@@ -122,14 +123,14 @@ class CircuitoTuristicoAdmin(SaaSAdminMixin, admin.ModelAdmin):
 
 
 @admin.register(PaqueteAereo)
-class PaqueteAereoAdmin(SaaSAdminMixin, admin.ModelAdmin):
+class PaqueteAereoAdmin(SaaSAdminMixin, ModelAdmin):
     saas_agency_field = "venta__agencia"
     list_display = ("id_paquete_aereo", "venta", "nombre_paquete")
     autocomplete_fields = ["venta"]
 
 
 @admin.register(ServicioAdicionalDetalle)
-class ServicioAdicionalDetalleAdmin(SaaSAdminMixin, admin.ModelAdmin):
+class ServicioAdicionalDetalleAdmin(SaaSAdminMixin, ModelAdmin):
     saas_agency_field = "venta__agencia"
     list_display = ("id_servicio_adicional", "venta", "tipo_servicio", "codigo_referencia")
     autocomplete_fields = ["venta", "proveedor"]
@@ -150,7 +151,7 @@ class ServicioAdicionalDetalleAdmin(SaaSAdminMixin, admin.ModelAdmin):
 
 
 @admin.register(TrasladoServicio)
-class TrasladoServicioAdmin(SaaSAdminMixin, admin.ModelAdmin):
+class TrasladoServicioAdmin(SaaSAdminMixin, ModelAdmin):
     saas_agency_field = "venta__agencia"
     list_display = (
         "id_traslado_servicio",
@@ -178,7 +179,7 @@ class TrasladoServicioAdmin(SaaSAdminMixin, admin.ModelAdmin):
 
 
 @admin.register(ActividadServicio)
-class ActividadServicioAdmin(SaaSAdminMixin, admin.ModelAdmin):
+class ActividadServicioAdmin(SaaSAdminMixin, ModelAdmin):
     saas_agency_field = "venta__agencia"
     list_display = ("id_actividad_servicio", "venta", "nombre", "fecha", "proveedor")
     autocomplete_fields = ["venta", "proveedor"]
@@ -199,7 +200,7 @@ class ActividadServicioAdmin(SaaSAdminMixin, admin.ModelAdmin):
 
 
 @admin.register(CircuitoDia)
-class CircuitoDiaAdmin(SaaSAdminMixin, admin.ModelAdmin):
+class CircuitoDiaAdmin(SaaSAdminMixin, ModelAdmin):
     saas_agency_field = "circuito__agencia"
     list_display = ["circuito", "dia_numero", "titulo", "ciudad"]
     list_filter = ["circuito"]
@@ -257,13 +258,13 @@ class ImagenHotelInline(admin.TabularInline):
 
 
 @admin.register(Amenity)
-class AmenityAdmin(admin.ModelAdmin):
+class AmenityAdmin(ModelAdmin):
     list_display = ["nombre", "icono_lucide"]
     search_fields = ["nombre"]
 
 
 @admin.register(TarifarioProveedor)
-class TarifarioProveedorAdmin(SaaSAdminMixin, admin.ModelAdmin):
+class TarifarioProveedorAdmin(SaaSAdminMixin, ModelAdmin):
     saas_agency_field = "proveedor__agencia"
     list_display = [
         "id",
@@ -279,7 +280,7 @@ class TarifarioProveedorAdmin(SaaSAdminMixin, admin.ModelAdmin):
 
 
 @admin.register(HotelTarifario)
-class HotelTarifarioAdmin(SaaSAdminMixin, admin.ModelAdmin):
+class HotelTarifarioAdmin(SaaSAdminMixin, ModelAdmin):
     saas_agency_field = "tarifario__proveedor__agencia"
     list_display = ["nombre", "destino", "categoria", "regimen_default", "activo", "destacado"]
     list_filter = ["activo", "destacado", "destino", "categoria"]
@@ -314,7 +315,7 @@ class HotelTarifarioAdmin(SaaSAdminMixin, admin.ModelAdmin):
 
 
 @admin.register(TarifaHabitacion)
-class TarifaHabitacionAdmin(SaaSAdminMixin, admin.ModelAdmin):
+class TarifaHabitacionAdmin(SaaSAdminMixin, ModelAdmin):
     saas_agency_field = "tipo_habitacion__hotel__tarifario__proveedor__agencia"
     list_display = [
         "tipo_habitacion",
@@ -329,7 +330,7 @@ class TarifaHabitacionAdmin(SaaSAdminMixin, admin.ModelAdmin):
 
 
 @admin.register(TipoHabitacion)
-class TipoHabitacionAdmin(SaaSAdminMixin, admin.ModelAdmin):
+class TipoHabitacionAdmin(SaaSAdminMixin, ModelAdmin):
     """Permite editar tarifas directamente desde el Tipo de Habitación."""
 
     saas_agency_field = "hotel__tarifario__proveedor__agencia"
@@ -344,7 +345,7 @@ class TipoHabitacionAdmin(SaaSAdminMixin, admin.ModelAdmin):
 # Catálogos base (requeridos por autocomplete_fields en otros admins)
 # ---------------------------------------------------------------------------
 @admin.register(Proveedor)
-class ProveedorAdmin(SaaSAdminMixin, admin.ModelAdmin):
+class ProveedorAdmin(SaaSAdminMixin, ModelAdmin):
     list_display = ["nombre", "tipo_proveedor", "activo"]
     search_fields = ["nombre", "rif"]
     list_filter = ["tipo_proveedor", "activo"]
@@ -352,7 +353,7 @@ class ProveedorAdmin(SaaSAdminMixin, admin.ModelAdmin):
 
 
 @admin.register(ProductoServicio)
-class ProductoServicioAdmin(SaaSAdminMixin, admin.ModelAdmin):
+class ProductoServicioAdmin(SaaSAdminMixin, ModelAdmin):
     list_display = ["nombre", "tipo_producto", "activo"]
     search_fields = ["nombre", "codigo_interno"]
     list_filter = ["tipo_producto", "activo"]

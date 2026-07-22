@@ -10,10 +10,10 @@ from django.views.generic import CreateView, DeleteView, ListView, UpdateView, V
 
 from core.api import SaaSMixin, get_user_active_agency
 
-from .forms import ArticuloForm, GuiaDestinoForm
-from .models import Articulo, GuiaDestino
-from .services.cms_ai_service import CMSContentService
-from .services.content_service import AIContentService
+from ..forms import ArticuloForm, GuiaDestinoForm
+from ..models import Articulo, GuiaDestino
+from ..services.cms_ai_service import CMSContentService
+from ..services.content_service import AIContentService
 
 logger = logging.getLogger(__name__)
 
@@ -67,9 +67,6 @@ class GenerateSocialPostsView(LoginRequiredMixin, View):
             return HttpResponse(f"Error: {e}", status=500)
 
 
-# --- Articulo CRUD ---
-
-
 class ArticuloCreateView(SaaSMixin, LoginRequiredMixin, CreateView):
     model = Articulo
     form_class = ArticuloForm
@@ -100,9 +97,6 @@ class ArticuloDeleteView(SaaSMixin, LoginRequiredMixin, DeleteView):
     def delete(self, request, *args, **kwargs):
         messages.success(self.request, "Artículo eliminado.")
         return super().delete(request, *args, **kwargs)
-
-
-# --- GuiaDestino CRUD ---
 
 
 class GuiaDestinoCreateView(SaaSMixin, LoginRequiredMixin, CreateView):
@@ -138,11 +132,6 @@ class GuiaDestinoDeleteView(SaaSMixin, LoginRequiredMixin, DeleteView):
 
 
 class AIGenerateSuggestionView(LoginRequiredMixin, View):
-    """
-    Endpoint para generar sugerencias específicas de campos (Título, Resumen, etc.)
-    mediante Gemini 2.0 Flash.
-    """
-
     def post(self, request, *args, **kwargs):
         field = request.POST.get("field")
         context = request.POST.get("context")
@@ -161,18 +150,14 @@ class AIGenerateSuggestionView(LoginRequiredMixin, View):
             elif field == "descripcion_guia":
                 prompt = f"Escribe una descripción introductoria cautivadora para una guía de viajes de: {context}. Máximo 3 líneas."
             elif field == "caption":
-                # Usamos el método existente para social posts
                 result = service.generate_social_post(context)
                 if isinstance(result, str):
-                    import json
-
                     data = json.loads(result)
                     return JsonResponse({"suggestion": data.get("caption", "")})
                 return JsonResponse({"suggestion": result.get("caption", "")})
             else:
                 return JsonResponse({"error": "Campo no soportado"}, status=400)
 
-            # Para campos genéricos usamos el modelo directamente
             response = service.client.models.generate_content(
                 model=service.model_name, contents=prompt
             )

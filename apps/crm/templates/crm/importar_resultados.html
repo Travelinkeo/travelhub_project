@@ -1,0 +1,118 @@
+{% extends "base_modern.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Importación en Progreso" %} — TravelHub{% endblock %}
+{% block page_title %}{% trans "Importación de Clientes" %}{% endblock %}
+{% block page_subtitle %}{% trans "Procesando archivo..." %}{% endblock %}
+
+{% block content %}
+<div class="flex-1 w-full max-w-[600px] mx-auto p-6 md:p-8"
+     x-data="resultadosApp('{{ task_id }}')">
+
+    <div class="card-base p-8 text-center">
+        <div x-show="!ready">
+            <div class="flex justify-center mb-6">
+                <span class="material-symbols-outlined text-6xl text-primary animate-pulse">sync</span>
+            </div>
+            <h3 class="text-xl font-black text-text-main uppercase">{% trans "Importando..." %}</h3>
+            <p class="text-sm text-text-muted mt-2">{% trans "Procesando {{ total_filas }} registros. Esto puede tomar unos segundos." %}</p>
+            <div class="mt-6 w-full bg-surface-2 rounded-full h-2 overflow-hidden">
+                <div class="h-full bg-primary rounded-full animate-pulse" style="width: 60%"></div>
+            </div>
+        </div>
+
+        <div x-show="ready && success">
+            <div class="flex justify-center mb-6">
+                <span class="material-symbols-outlined text-6xl text-emerald-400">check_circle</span>
+            </div>
+            <h3 class="text-xl font-black text-text-main uppercase">{% trans "Importación Completada" %}</h3>
+            <div class="grid grid-cols-3 gap-4 mt-8">
+                <div class="card-base p-4">
+                    <p class="text-2xl font-bold text-emerald-400 font-mono" x-text="data.creados">0</p>
+                    <p class="text-xs text-text-muted mt-1">{% trans "Creados" %}</p>
+                </div>
+                <div class="card-base p-4">
+                    <p class="text-2xl font-bold text-amber-400 font-mono" x-text="data.duplicados">0</p>
+                    <p class="text-xs text-text-muted mt-1">{% trans "Duplicados" %}</p>
+                </div>
+                <div class="card-base p-4">
+                    <p class="text-2xl font-bold text-red-400 font-mono" x-text="data.errores?.length || 0">0</p>
+                    <p class="text-xs text-text-muted mt-1">{% trans "Errores" %}</p>
+                </div>
+            </div>
+
+            <div x-show="data.errores?.length" class="mt-6 text-left">
+                <h4 class="text-sm font-bold text-text-main mb-2">{% trans "Detalle de errores:" %}</h4>
+                <div class="bg-red-500/5 border border-red-500/20 rounded-xl p-4 max-h-40 overflow-y-auto">
+                    <template x-for="err in data.errores" :key="err.fila">
+                        <p class="text-xs text-red-400 mb-1">
+                            <span class="font-bold">{% trans "Fila" %} <span x-text="err.fila"></span>:</span>
+                            <span x-text="err.error"></span>
+                        </p>
+                    </template>
+                </div>
+            </div>
+
+            <div class="flex justify-center gap-3 mt-8">
+                <a href="{% url 'crm:cliente_list' %}" class="btn-primary">
+                    <span class="material-symbols-outlined text-[18px]">group</span>
+                    {% trans "Ver Clientes" %}
+                </a>
+                <a href="{% url 'crm:importar_clientes' %}" class="btn-secondary">
+                    <span class="material-symbols-outlined text-[18px]">add</span>
+                    {% trans "Importar otro" %}
+                </a>
+            </div>
+        </div>
+
+        <div x-show="ready && !success">
+            <div class="flex justify-center mb-6">
+                <span class="material-symbols-outlined text-6xl text-red-400">error</span>
+            </div>
+            <h3 class="text-xl font-black text-text-main uppercase">{% trans "Error en Importación" %}</h3>
+            <p class="text-sm text-text-muted mt-2">{% trans "Ocurrió un error procesando el archivo." %}</p>
+            <div x-show="data.errores?.length" class="mt-4 text-left bg-red-500/5 border border-red-500/20 rounded-xl p-4">
+                <template x-for="err in data.errores" :key="err.fila">
+                    <p class="text-xs text-red-400 mb-1" x-text="err.error"></p>
+                </template>
+            </div>
+            <a href="{% url 'crm:importar_clientes' %}" class="btn-primary mt-6 inline-flex items-center gap-2">
+                {% trans "Intentar de nuevo" %}
+            </a>
+        </div>
+    </div>
+</div>
+
+<script nonce="{{ request.csp_nonce }}">
+function resultadosApp(taskId) {
+    return {
+        taskId: taskId,
+        ready: false,
+        success: false,
+        data: {},
+
+        init() {
+            this.poll();
+        },
+
+        async poll() {
+            while (!this.ready) {
+                try {
+                    const res = await fetch('/crm/clientes/importar/progreso/' + this.taskId + '/');
+                    const json = await res.json();
+                    if (json.ready) {
+                        this.ready = true;
+                        this.success = json.success;
+                        this.data = json;
+                    } else {
+                        await new Promise(r => setTimeout(r, 1000));
+                    }
+                } catch(e) {
+                    await new Promise(r => setTimeout(r, 2000));
+                }
+            }
+        }
+    };
+}
+</script>
+{% endblock %}

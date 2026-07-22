@@ -1,0 +1,136 @@
+{% extends "base_modern.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Mapear Columnas" %} — TravelHub{% endblock %}
+{% block page_title %}{% trans "Mapear Columnas" %}{% endblock %}
+{% block page_subtitle %}{% trans "Indica qué columna del archivo corresponde a cada campo" %}{% endblock %}
+
+{% block content %}
+<div class="flex-1 w-full max-w-[1000px] mx-auto p-6 md:p-8"
+     x-data="mapeoApp()">
+
+    <a href="{% url 'crm:importar_clientes' %}" class="inline-flex items-center gap-2 text-sm text-text-muted hover:text-text-main mb-6 transition-colors">
+        <span class="material-symbols-outlined text-[16px]">arrow_back</span>
+        {% trans "Volver" %}
+    </a>
+
+    <!-- Progress indicator -->
+    <div class="flex items-center gap-3 mb-6 text-sm">
+        <span class="px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-bold">{% trans "Paso 1: Archivo subido" %}</span>
+        <span class="material-symbols-outlined text-text-muted text-[16px]">arrow_forward</span>
+        <span class="px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 text-xs font-bold">{% trans "Paso 2: Mapear columnas" %}</span>
+        <span class="material-symbols-outlined text-text-muted text-[16px]">arrow_forward</span>
+        <span class="px-3 py-1 rounded-full bg-surface-2 text-text-muted text-xs font-bold">{% trans "Paso 3: Importar" %}</span>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-6">
+        <!-- Column Mapping Form -->
+        <div class="card-base p-6">
+            <h3 class="text-lg font-bold text-text-main mb-1">{% trans "Mapeo de Columnas" %}</h3>
+            <p class="text-sm text-text-muted mb-6">{{ total_filas }} {% trans "filas encontradas" %}</p>
+
+            <form id="mapping-form" method="post" action="{% url 'crm:importar_clientes_mapeo' %}"
+                  @submit.prevent="submitMapping()">
+                {% csrf_token %}
+                <div class="space-y-4">
+                    {% for campo in campos %}
+                    <div>
+                        <label class="block text-xs font-bold text-text-main mb-1.5">
+                            {{ campo.label }}
+                            {% if campo.required %}<span class="text-red-400">*</span>{% endif %}
+                        </label>
+                        <select class="input-base w-full"
+                                x-model="mapping['{{ campo.value }}']">
+                            <option value="">— {% trans "No importar" %} —</option>
+                            {% for col in columnas_origen %}
+                            <option value="{{ col }}">{{ col }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="flex justify-end gap-3 mt-8 pt-6 border-t border-border-color">
+                    <a href="{% url 'crm:importar_clientes' %}" class="btn-secondary">{% trans "Cancelar" %}</a>
+                    <button type="submit" class="btn-primary" :disabled="!canSubmit" x-text="importing ? '{% trans "Importando..." %}' : '{% trans "Iniciar Importación" %}'">
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Preview Panel -->
+        <div class="card-base p-6">
+            <h3 class="text-lg font-bold text-text-main mb-4">{% trans "Vista Previa" %}</h3>
+            <p class="text-sm text-text-muted mb-4">{% trans "Primeras 10 filas" %}</p>
+
+            <div class="overflow-x-auto max-h-96 overflow-y-auto">
+                <table class="w-full text-xs">
+                    <thead>
+                        <tr class="border-b border-border-color">
+                            {% for col in columnas_origen %}
+                            <th class="px-2 py-1.5 text-left font-mono text-text-muted font-bold whitespace-nowrap">{{ col|truncatechars:15 }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-border-color/50">
+                        <template x-for="(row, i) in previewRows" :key="i">
+                            <tr>
+                                {% for col in columnas_origen %}
+                                <td class="px-2 py-1.5 text-text-main font-mono whitespace-nowrap" x-text="String(row['{{ col|escapejs }}'] || '').substring(0, 20)"></td>
+                                {% endfor %}
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+
+            <p class="text-xs text-text-muted mt-4 flex items-center gap-1">
+                <span class="material-symbols-outlined text-[14px]">info</span>
+                {% trans "Solo las columnas mapeadas serán importadas" %}
+            </p>
+        </div>
+    </div>
+</div>
+
+<script nonce="{{ request.csp_nonce }}">
+function mapeoApp() {
+    return {
+        mapping: {},
+        campos: {{ campos_json|safe }},
+        previewRows: {{ preview_rows_json|safe }},
+        importing: false,
+
+        get canSubmit() {
+            return this.mapping['nombres'] && this.mapping['nombres'].length > 0;
+        },
+
+        init() {
+            this.campos.forEach(c => { this.mapping[c.value] = ''; });
+        },
+
+        async submitMapping() {
+            if (!this.canSubmit || this.importing) return;
+            this.importing = true;
+
+            const fd = new FormData();
+            fd.append('mapping', JSON.stringify(this.mapping));
+            fd.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]')?.value || '');
+
+            try {
+                const res = await fetch('{% url "crm:importar_clientes_mapeo" %}', {
+                    method: 'POST',
+                    body: fd
+                });
+                const html = await res.text();
+                document.open();
+                document.write(html);
+                document.close();
+            } catch(e) {
+                this.importing = false;
+                alert('{% trans "Error al iniciar importación" %}');
+            }
+        }
+    };
+}
+</script>
+{% endblock %}

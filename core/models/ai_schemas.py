@@ -23,6 +23,32 @@ def _to_float(v) -> float:
 # ─────────────────────────────────────────────────────────────────────────────
 # Constantes compartidas para conversión GDS
 # ─────────────────────────────────────────────────────────────────────────────
+MESES_ES_TO_EN = {
+    "ENE": "JAN",
+    "FEB": "FEB",
+    "MAR": "MAR",
+    "ABR": "APR",
+    "MAY": "MAY",
+    "JUN": "JUN",
+    "JUL": "JUL",
+    "AGO": "AUG",
+    "SEP": "SEP",
+    "OCT": "OCT",
+    "NOV": "NOV",
+    "DIC": "DEC",
+    "ENERO": "JANUARY",
+    "FEBRERO": "FEBRUARY",
+    "MARZO": "MARCH",
+    "ABRIL": "APRIL",
+    "MAYO": "MAY",
+    "JUNIO": "JUNE",
+    "JULIO": "JULY",
+    "AGOSTO": "AUGUST",
+    "SEPTIEMBRE": "SEPTEMBER",
+    "OCTUBRE": "OCTOBER",
+    "NOVIEMBRE": "NOVEMBER",
+    "DICIEMBRE": "DECEMBER",
+}
 
 
 class TramoVueloSchema(BaseModel):

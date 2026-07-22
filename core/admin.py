@@ -1,7 +1,7 @@
-# Archivo: core/admin.py
 import logging
 
 from django.contrib import admin
+from unfold.admin import ModelAdmin, StackedInline
 
 from apps.common.models import Aerolinea, Ciudad, Moneda, Pais
 
@@ -19,13 +19,13 @@ logger = logging.getLogger(__name__)
 
 
 @admin.register(Pais)
-class PaisAdmin(admin.ModelAdmin):
+class PaisAdmin(ModelAdmin):
     list_display = ("nombre", "codigo_iso_2", "codigo_iso_3")
     search_fields = ("nombre", "codigo_iso_2", "codigo_iso_3")
 
 
 @admin.register(Ciudad)
-class CiudadAdmin(admin.ModelAdmin):
+class CiudadAdmin(ModelAdmin):
     list_display = ("nombre", "pais", "codigo_iata")
     search_fields = ("nombre", "codigo_iata", "pais__nombre")
     list_filter = ("pais",)
@@ -33,14 +33,14 @@ class CiudadAdmin(admin.ModelAdmin):
 
 
 @admin.register(Moneda)
-class MonedaAdmin(admin.ModelAdmin):
+class MonedaAdmin(ModelAdmin):
     list_display = ("nombre", "codigo_iso", "simbolo", "es_moneda_local")
     search_fields = ("nombre", "codigo_iso")
     list_filter = ("es_moneda_local",)
 
 
 @admin.register(Aerolinea)
-class AerolineaAdmin(admin.ModelAdmin):
+class AerolineaAdmin(ModelAdmin):
     list_display = ("nombre", "codigo_iata", "activa")
     search_fields = ("nombre", "codigo_iata")
     list_filter = ("activa",)
@@ -76,20 +76,20 @@ class AerolineaAdmin(admin.ModelAdmin):
 
 
 # --- SaaS / Multi-tenant ---
-class AgenciaBrandingInline(admin.StackedInline):
+class AgenciaBrandingInline(StackedInline):
     model = AgenciaBranding
     can_delete = False
     verbose_name_plural = "Branding y Assets"
 
 
-class AgenciaConfiguracionInline(admin.StackedInline):
+class AgenciaConfiguracionInline(StackedInline):
     model = AgenciaConfiguracion
     can_delete = False
     verbose_name_plural = "Configuración de Negocio y SaaS"
 
 
 @admin.register(Agencia)
-class AgenciaAdmin(admin.ModelAdmin):
+class AgenciaAdmin(ModelAdmin):
     list_display = ["nombre", "rif", "iata", "email_principal", "activa"]
     list_filter = ["activa", "pais"]
     search_fields = ["nombre", "rif", "iata"]
@@ -104,19 +104,19 @@ class AgenciaAdmin(admin.ModelAdmin):
 
 
 @admin.register(AgenciaBranding)
-class AgenciaBrandingAdmin(admin.ModelAdmin):
+class AgenciaBrandingAdmin(ModelAdmin):
     list_display = ["agencia_master", "ui_theme", "color_primario"]
     search_fields = ["agencia_master__nombre"]
 
 
 @admin.register(AgenciaConfiguracion)
-class AgenciaConfiguracionAdmin(admin.ModelAdmin):
+class AgenciaConfiguracionAdmin(ModelAdmin):
     list_display = ["agencia_master", "plan", "subdominio_slug"]
     search_fields = ["agencia_master__nombre", "subdominio_slug"]
 
 
 @admin.register(UsuarioAgencia)
-class UsuarioAgenciaAdmin(admin.ModelAdmin):
+class UsuarioAgenciaAdmin(ModelAdmin):
     list_display = ["usuario", "agencia", "rol", "activo"]
     list_filter = ["rol", "activo", "agencia"]
     autocomplete_fields = ["usuario", "agencia"]

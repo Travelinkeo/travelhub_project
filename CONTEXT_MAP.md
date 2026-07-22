@@ -1,9 +1,9 @@
 # CONTEXT_MAP.md — TravelHub SaaS
 
 ```
-Última verificación contra código real: 2026-07-21
-Rama/commit revisado: hardening/operational-risks @ ba11ca05
-Verificado por: IA (Claude Opus 4.6 Thinking / Antigravity)
+Última verificación contra código real: 2026-07-22
+Rama/commit revisado: hardening/operational-risks @ e3abfa5
+Verificado por: IA (Gemini 3.6 Flash / Antigravity)
 Archivos leídos en esta sesión: travelhub/settings/base.py (783 líneas),
   core/models/base.py (281 líneas), core/middleware.py (538 líneas),
   core/security.py (230 líneas), core/fields.py (137 líneas),
@@ -12,11 +12,13 @@ Archivos leídos en esta sesión: travelhub/settings/base.py (783 líneas),
   core/models/cron_api_key.py (125 líneas), core/models/agencia.py (576 líneas),
   apps/automation/services/ai_engine.py (632 líneas),
   apps/automation/parsers/ai_universal_parser.py (356 líneas),
+  apps/automation/parsers/normalization.py (521 líneas),
   travelhub/urls.py (173 líneas), travelhub/urls_api.py (48 líneas),
   travelhub/celery.py (117 líneas), travelhub/celery_beat_schedule.py (116 líneas),
   docker-compose.yml (463 líneas), .env.example (137 líneas),
   CHANGELOG.md (65 líneas), TECH_DEBT_REMEDIATION.md (629 líneas),
-  REMEDIATION_PLAN.md (516 líneas)
+  REMEDIATION_PLAN.md (516 líneas), locale/es/LC_MESSAGES/django.po (1191 líneas),
+  compile_i18n.py (123 líneas)
 ```
 
 ---
@@ -824,7 +826,6 @@ Manejo de errores: try/except Exception devuelve string descriptivo al usuario s
 
 | Brecha | Prioridad | Notas |
 |---|---|---|
-| i18n español | ✅ RESUELTO — 325 cadenas traducidas en .po y compiladas a .mo con compile_i18n.py |
 | alpinejs/csp-bundle | P3 | Eliminar unsafe-eval de CSP (actualmente global en script-src) |
 | SSO end-to-end audit | P3 | Auditar flow completo de sso_callback |
 

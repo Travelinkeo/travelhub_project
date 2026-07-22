@@ -10,6 +10,8 @@ import logging
 
 from django.contrib import admin, messages
 from django.utils.html import format_html
+from unfold.admin import ModelAdmin
+from unfold.decorators import action
 
 from core.api import SaaSAdminMixin
 
@@ -26,7 +28,7 @@ logger = logging.getLogger(__name__)
 
 
 @admin.register(BoletoImportado)
-class BoletoImportadoAdmin(SaaSAdminMixin, admin.ModelAdmin):
+class BoletoImportadoAdmin(SaaSAdminMixin, ModelAdmin):
     list_display = (
         "id_boleto_importado",
         "archivo_boleto_link",
@@ -49,6 +51,13 @@ class BoletoImportadoAdmin(SaaSAdminMixin, admin.ModelAdmin):
     )
     autocomplete_fields = ["venta_asociada"]
     actions = ["reprocesar_boletos", "hard_delete_boletos"]
+    actions_list = ["subir_boleto_action"]
+
+    @action(description="📤 Subir Boleto (IA)")
+    def subir_boleto_action(self, request):
+        from django.http import HttpResponseRedirect
+        from django.urls import reverse
+        return HttpResponseRedirect(reverse("core:boletos_importar"))
 
     def get_queryset(self, request):
         return super().get_queryset(request).select_related("venta_asociada")
@@ -161,7 +170,7 @@ class BoletoImportadoAdmin(SaaSAdminMixin, admin.ModelAdmin):
 
 
 @admin.register(BoletoImportadoTransito)
-class BoletoImportadoTransitoAdmin(SaaSAdminMixin, admin.ModelAdmin):
+class BoletoImportadoTransitoAdmin(SaaSAdminMixin, ModelAdmin):
     list_display = (
         "id_transito",
         "boleto_origen",
@@ -177,7 +186,7 @@ class BoletoImportadoTransitoAdmin(SaaSAdminMixin, admin.ModelAdmin):
 
 
 @admin.register(AuditLog)
-class AuditLogAdmin(SaaSAdminMixin, admin.ModelAdmin):
+class AuditLogAdmin(SaaSAdminMixin, ModelAdmin):
     saas_agency_field = "venta__agencia"
     list_display = ("id_audit_log", "modelo", "object_id", "accion", "venta", "creado")
     list_filter = ("modelo", "accion", "creado")
@@ -196,7 +205,7 @@ class AuditLogAdmin(SaaSAdminMixin, admin.ModelAdmin):
 
 
 @admin.register(SegmentoVuelo)
-class SegmentoVueloAdmin(SaaSAdminMixin, admin.ModelAdmin):
+class SegmentoVueloAdmin(SaaSAdminMixin, ModelAdmin):
     saas_agency_field = "venta__agencia"
     list_display = (
         "id_segmento_vuelo",
@@ -210,14 +219,14 @@ class SegmentoVueloAdmin(SaaSAdminMixin, admin.ModelAdmin):
 
 
 @admin.register(FeeVenta)
-class FeeVentaAdmin(SaaSAdminMixin, admin.ModelAdmin):
+class FeeVentaAdmin(SaaSAdminMixin, ModelAdmin):
     saas_agency_field = "venta__agencia"
     list_display = ("id_fee_venta", "venta", "tipo_fee", "monto", "moneda")
     autocomplete_fields = ["venta", "moneda"]
 
 
 @admin.register(PagoVenta)
-class PagoVentaAdmin(SaaSAdminMixin, admin.ModelAdmin):
+class PagoVentaAdmin(SaaSAdminMixin, ModelAdmin):
     saas_agency_field = "venta__agencia"
     list_display = ("id_pago_venta", "venta", "metodo", "monto", "moneda", "fecha_pago")
     autocomplete_fields = ["venta", "moneda"]

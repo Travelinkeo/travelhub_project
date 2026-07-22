@@ -166,9 +166,12 @@ class ProveedorSerializer(serializers.ModelSerializer):
 
 class ComisionProveedorServicioSerializer(serializers.ModelSerializer):
     tipo_servicio_display = serializers.CharField(
-        source="get_tipo_servicio_display", read_only=True
+        source="get_tipo_servicio_display", read_only=True, default=""
     )
-    moneda_codigo = serializers.CharField(source="moneda.codigo_iso", read_only=True)
+    moneda_codigo = serializers.SerializerMethodField()
+
+    def get_moneda_codigo(self, obj):
+        return obj.moneda.codigo_iso if obj.moneda else ""
 
     class Meta:
         model = ComisionProveedorServicio

@@ -211,6 +211,7 @@ class ComisionProveedorServicio(AgenciaMixin, SoftDeleteModel, models.Model):
         _("Comisión Monto Fijo"), max_digits=10, decimal_places=2, blank=True, null=True
     )
     moneda = models.ForeignKey("common.Moneda", on_delete=models.PROTECT, blank=True, null=True)
+    notas = models.TextField(_("Notas"), blank=True, default="")
     activo = models.BooleanField(_("Activo"), default=True)
 
     class Meta:

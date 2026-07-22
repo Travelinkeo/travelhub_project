@@ -8,7 +8,7 @@
 {% block content %}
 <main class="flex-1 w-full max-w-[1400px] mx-auto p-6 md:p-8 lg:p-10" x-data="proveedorForm"
       data-proveedor-id="{{ proveedor_id|default:'' }}"
-      data-comisiones-url="/core/api/comisiones/"
+      data-comisiones-url="{% url 'comisiones-list' %}"
       data-csrf="{{ csrf_token }}">
     <!-- Header -->
     <div class="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-border-color pb-6">
@@ -373,5 +373,5 @@
 {% endblock %}
 
 {% block extra_scripts %}
-<script nonce="{{ request.csp_nonce }}" src="{% static 'js/proveedor_form.js' %}"></script>
+<script nonce="{{ request.csp_nonce }}" src="{% static 'js/proveedor_form.js' %}?v=1.0.1"></script>
 {% endblock %}

@@ -1,0 +1,43 @@
+{% load i18n %}
+
+<div>
+    <h2 class="text-2xl font-black text-text-main uppercase mb-1">{{ current_step_data.title }}</h2>
+    <p class="text-text-muted mb-8">{{ current_step_data.subtitle }}</p>
+
+    <form method="post" action="{% url 'core:onboarding_wizard' %}"
+          hx-post="{% url 'core:onboarding_wizard' %}"
+          hx-target="#step-content" hx-swap="innerHTML"
+          class="space-y-5">
+        {% csrf_token %}
+        <input type="hidden" name="step" value="fiscal">
+
+        <div>
+            <label class="block text-sm font-bold text-text-main mb-1.5">{% trans "País de operación" %}</label>
+            <select name="pais" class="input-base w-full">
+                <option value="VEN" {% if config_fiscal.pais == 'VEN' %}selected{% endif %}>{% trans "Venezuela" %}</option>
+                <option value="COL" {% if config_fiscal.pais == 'COL' %}selected{% endif %}>{% trans "Colombia" %}</option>
+                <option value="MEX" {% if config_fiscal.pais == 'MEX' %}selected{% endif %}>{% trans "México" %}</option>
+            </select>
+            <p class="text-xs text-text-muted mt-1">{% trans "Define el régimen fiscal para facturación y reportes" %}</p>
+        </div>
+
+        <div>
+            <label class="block text-sm font-bold text-text-main mb-1.5">{% trans "IVA / Impuesto por defecto (%)" %}</label>
+            <input type="number" name="iva_por_defecto" value="{{ config_fiscal.iva_por_defecto|default:'16.00' }}"
+                   class="input-base w-full" step="0.01" min="0" max="100" placeholder="16.00">
+        </div>
+
+        <div class="flex justify-between gap-3 pt-6 border-t border-border-color">
+            <button type="submit" name="action" value="skip"
+                    hx-post="{% url 'core:onboarding_wizard' %}"
+                    hx-target="#step-content" hx-swap="innerHTML"
+                    class="btn-secondary">
+                {% trans "Omitir este paso" %}
+            </button>
+            <button type="submit" class="btn-primary">
+                {% trans "Continuar" %}
+                <span class="material-symbols-outlined">arrow_forward</span>
+            </button>
+        </div>
+    </form>
+</div>

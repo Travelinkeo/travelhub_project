@@ -1,4 +1,5 @@
 from django.contrib import admin
+from unfold.admin import ModelAdmin
 
 from core.api import SaaSAdminMixin
 
@@ -14,21 +15,21 @@ from .models import (
 
 
 @admin.register(OportunidadViaje)
-class OportunidadViajeAdmin(SaaSAdminMixin, admin.ModelAdmin):
+class OportunidadViajeAdmin(SaaSAdminMixin, ModelAdmin):
     list_display = ("cliente", "destino", "etapa", "creado_en")
     list_filter = ("etapa", "creado_en")
     search_fields = ("cliente__nombres", "cliente__apellidos", "destino")
 
 
 @admin.register(Pasajero)
-class PasajeroAdmin(SaaSAdminMixin, admin.ModelAdmin):
+class PasajeroAdmin(SaaSAdminMixin, ModelAdmin):
     list_display = ("nombres", "apellidos", "cedula_identidad", "numero_pasaporte", "email")
     search_fields = ("nombres", "apellidos", "cedula_identidad", "numero_pasaporte", "email")
     list_filter = ("agencia",)
 
 
 @admin.register(Cliente)
-class ClienteAdmin(SaaSAdminMixin, admin.ModelAdmin):
+class ClienteAdmin(SaaSAdminMixin, ModelAdmin):
     list_display = (
         "nombres",
         "apellidos",
@@ -45,7 +46,7 @@ class ClienteAdmin(SaaSAdminMixin, admin.ModelAdmin):
 
 
 @admin.register(FreelancerProfile)
-class FreelancerProfileAdmin(SaaSAdminMixin, admin.ModelAdmin):
+class FreelancerProfileAdmin(SaaSAdminMixin, ModelAdmin):
     list_display = (
         "usuario",
         "agencia",
@@ -59,7 +60,7 @@ class FreelancerProfileAdmin(SaaSAdminMixin, admin.ModelAdmin):
 
 
 @admin.register(ComisionFreelancer)
-class ComisionFreelancerAdmin(SaaSAdminMixin, admin.ModelAdmin):
+class ComisionFreelancerAdmin(SaaSAdminMixin, ModelAdmin):
     list_display = (
         "venta",
         "freelancer",
@@ -100,7 +101,7 @@ class ComisionFreelancerAdmin(SaaSAdminMixin, admin.ModelAdmin):
 
 
 @admin.register(MensajeWhatsApp)
-class MensajeWhatsAppAdmin(SaaSAdminMixin, admin.ModelAdmin):
+class MensajeWhatsAppAdmin(SaaSAdminMixin, ModelAdmin):
     list_display = ("id", "cliente", "direccion", "estado", "tipo_mensaje", "timestamp")
     list_filter = ("direccion", "estado", "tipo_mensaje", "timestamp")
     search_fields = ("cliente__nombres", "cliente__apellidos", "texto")
@@ -109,7 +110,7 @@ class MensajeWhatsAppAdmin(SaaSAdminMixin, admin.ModelAdmin):
 
 
 @admin.register(WhatsAppScheduledMessage)
-class WhatsAppScheduledMessageAdmin(SaaSAdminMixin, admin.ModelAdmin):
+class WhatsAppScheduledMessageAdmin(SaaSAdminMixin, ModelAdmin):
     list_display = ("id", "telefono", "programado_para", "estado", "created_by")
     list_filter = ("estado", "programado_para")
     search_fields = ("telefono", "texto")

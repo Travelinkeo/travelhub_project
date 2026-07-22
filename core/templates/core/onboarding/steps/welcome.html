@@ -1,0 +1,43 @@
+{% load i18n %}
+
+<div class="text-center">
+    <div class="size-24 rounded-3xl bg-primary/10 flex items-center justify-center mx-auto mb-8">
+        <span class="material-symbols-outlined text-6xl text-primary">rocket_launch</span>
+    </div>
+
+    <h1 class="text-4xl font-black text-text-main uppercase tracking-tight mb-4">
+        {% trans "Bienvenido a TravelHub" %}
+    </h1>
+    <p class="text-lg text-text-muted max-w-lg mx-auto mb-8">
+        {% trans "En unos minutos tendrás tu agencia lista para operar. Te guiaremos paso a paso." %}
+    </p>
+
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-xl mx-auto mb-10">
+        <div class="card-base p-4 text-center">
+            <span class="material-symbols-outlined text-2xl text-primary mb-2">business</span>
+            <p class="text-xs font-bold text-text-main">{% trans "Perfil" %}</p>
+            <p class="text-[10px] text-text-muted">{% trans "Datos de tu agencia" %}</p>
+        </div>
+        <div class="card-base p-4 text-center">
+            <span class="material-symbols-outlined text-2xl text-primary mb-2">group</span>
+            <p class="text-xs font-bold text-text-main">{% trans "Equipo" %}</p>
+            <p class="text-[10px] text-text-muted">{% trans "Invita a tu equipo" %}</p>
+        </div>
+        <div class="card-base p-4 text-center">
+            <span class="material-symbols-outlined text-2xl text-primary mb-2">receipt</span>
+            <p class="text-xs font-bold text-text-main">{% trans "Fiscal" %}</p>
+            <p class="text-[10px] text-text-muted">{% trans "Configuración fiscal" %}</p>
+        </div>
+    </div>
+
+    <form method="post" action="{% url 'core:onboarding_wizard' %}"
+          hx-post="{% url 'core:onboarding_wizard' %}"
+          hx-target="#step-content" hx-swap="innerHTML">
+        {% csrf_token %}
+        <input type="hidden" name="step" value="welcome">
+        <button type="submit" class="btn-primary text-lg px-10 py-4">
+            {% trans "Comenzar" %}
+            <span class="material-symbols-outlined">arrow_forward</span>
+        </button>
+    </form>
+</div>

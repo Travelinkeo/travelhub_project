@@ -2,8 +2,9 @@
 // Estrategias: Network First para HTML, Cache First para assets, Stale-While-Revalidate para HTMX
 // Push notifications, Background Sync, offline indicator
 
-const CACHE_NAME = 'travelhub-v4';
+const CACHE_NAME = 'travelhub-v6';
 const STATIC_ASSETS = [
+  '/offline/',
   '/static/core/css/tailwind-built.css',
   '/static/core/css/responsive.css',
   '/static/vendor/htmx_v2.js',
@@ -38,12 +39,19 @@ self.addEventListener('fetch', (event) => {
 
   if (url.origin !== self.location.origin) return;
   if (request.method !== 'GET') return;
-  if (url.pathname.startsWith('/api/')) return;
+  if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/admin/') || url.pathname.startsWith('/system/') || url.pathname.startsWith('/erp/')) return;
 
-  // Navegación: Network First con fallback offline
+  // Navegación: Network First con fallback offline seguro (NUNCA devuelve undefined)
   if (request.mode === 'navigate') {
     event.respondWith(
-      fetch(request).catch(() => caches.match('/offline/'))
+      fetch(request).catch(async () => {
+        const offlinePage = await caches.match('/offline/');
+        if (offlinePage) return offlinePage;
+        return new Response(
+          '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Offline</title></head><body style="font-family:sans-serif;text-align:center;padding:50px;"><h2>Sin conexión a Internet</h2><p>Comprueba tu conexión y vuelve a intentarlo.</p><button onclick="window.location.reload()">Reintentar</button></body></html>',
+          { status: 503, headers: { 'Content-Type': 'text/html; charset=utf-8' } }
+        );
+      })
     );
     return;
   }

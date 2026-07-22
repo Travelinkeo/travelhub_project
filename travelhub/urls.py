@@ -84,6 +84,7 @@ urlpatterns = [
     path("cotizaciones/", include("apps.cotizaciones.urls")),
     path("api/", include("travelhub.urls_api")),
     path("api/v1/", include("travelhub.urls_api")),
+    path("core/api/", include("travelhub.urls_api")),
     # --- INLINE API ROUTES (disponibles bajo /api/ y /api/v1/) ---
     path("api/schema/", _protect_docs(SpectacularAPIView.as_view()), name="schema"),
     path(

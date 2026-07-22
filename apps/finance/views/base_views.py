@@ -109,7 +109,7 @@ class InvoiceUpdateView(SaaSMixin, LoginRequiredMixin, View):
         return HttpResponse("No se puede editar una factura emitida.", status=400)
 
 
-class ProfitabilityDashboardView(LoginRequiredMixin, TemplateView):
+class ProfitabilityDashboardView(SaaSMixin, LoginRequiredMixin, TemplateView):
     template_name = "finance/profitability_dashboard.html"
 
     def get_context_data(self, **kwargs):
@@ -120,7 +120,7 @@ class ProfitabilityDashboardView(LoginRequiredMixin, TemplateView):
         return context
 
 
-class ProfitSeriesDataView(LoginRequiredMixin, View):
+class ProfitSeriesDataView(SaaSMixin, LoginRequiredMixin, View):
     def get(self, request):
         data = FinancialAnalyticsService.get_monthly_profitability()
         return JsonResponse(data, safe=False)

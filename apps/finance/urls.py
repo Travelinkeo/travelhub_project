@@ -15,21 +15,27 @@ logger = logging.getLogger(__name__)
 
 
 class PaisViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Pais.objects.all()
     serializer_class = PaisSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
+    def get_queryset(self):
+        return Pais.objects.all()
+
 
 class CiudadViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Ciudad.objects.all()
     serializer_class = CiudadSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
+    def get_queryset(self):
+        return Ciudad.objects.all()
+
 
 class AerolineaViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Aerolinea.objects.filter(activa=True)
     serializer_class = AerolineaSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get_queryset(self):
+        return Aerolinea.objects.filter(activa=True)
 
 
 router = DefaultRouter()

@@ -6,14 +6,18 @@ from django.views.generic import RedirectView
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 from core.views.auth_views import MagicLinkRequestView, MagicLinkVerifyView, TokenLogoutView
-
-# Importaciones mínimas para rutas core
+from core.views.marketing_views import lead_magnet_download, parse_demo
 from core.views.onboarding_views import OnboardingAgencyView, SaaSOnboardingView
+from core.views.onboarding_wizard_views import OnboardingWizardView
+from core.views.webhooks_views_ui import WebhookDeliveryListView, WebhookListView
 
 logger = logging.getLogger(__name__)
 app_name = "core"
 
 urlpatterns = [
+    # --- MARKETING & DEMO ---
+    path("api/parse-demo/", parse_demo, name="parse_demo"),
+    path("api/lead-magnet/", lead_magnet_download, name="lead_magnet_download"),
     # --- ADMINISTRACIÓN Y AUTENTICACIÓN ---
     path("login/", auth_views.LoginView.as_view(), name="login"),
     path("logout/", auth_views.LogoutView.as_view(), name="logout"),
@@ -25,6 +29,10 @@ urlpatterns = [
     # --- ONBOARDING (SaaS) ---
     path("onboarding/", SaaSOnboardingView.as_view(), name="onboarding_start"),
     path("onboarding/agency/", OnboardingAgencyView.as_view(), name="onboarding_agency"),
+    path("onboarding/wizard/", OnboardingWizardView.as_view(), name="onboarding_wizard"),
+    # --- WEBHOOKS ---
+    path("webhooks/", WebhookListView.as_view(), name="webhooks_list"),
+    path("webhooks/<int:webhook_id>/deliveries/", WebhookDeliveryListView.as_view(), name="webhooks_deliveries"),
     # --- DASHBOARD PRINCIPAL ---
     # Redirige a la vista modern_dashboard que ahora reside en bookings
     path(

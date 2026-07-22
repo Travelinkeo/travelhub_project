@@ -1,0 +1,51 @@
+{% extends "base_modern.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Onboarding" %} — TravelHub{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex flex-col lg:flex-row" x-data="{ step: '{{ current_step }}' }">
+
+    <!-- Sidebar Steps -->
+    <div class="lg:w-80 bg-surface-1 border-r border-border-color p-8 shrink-0">
+        <div class="flex items-center gap-3 mb-10">
+            <div class="size-10 rounded-xl bg-primary flex items-center justify-center">
+                <span class="material-symbols-outlined text-white">travel</span>
+            </div>
+            <div>
+                <p class="font-bold text-text-main">TravelHub</p>
+                <p class="text-xs text-text-muted">{% trans "Configuración inicial" %}</p>
+            </div>
+        </div>
+
+        <div class="space-y-2">
+            {% for key, label in progress.STEPS %}
+            <div class="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors
+                {% if key == current_step %}bg-primary/10 text-primary font-bold border border-primary/20
+                {% elif key in progress.completed_steps %}text-emerald-400
+                {% else %}text-text-muted{% endif %}">
+
+                <div class="size-8 rounded-lg flex items-center justify-center text-sm font-bold
+                    {% if key == current_step %}bg-primary text-white
+                    {% elif key in progress.completed_steps %}bg-emerald-500/20 text-emerald-400
+                    {% else %}bg-surface-2 text-text-muted{% endif %}">
+                    {% if key in progress.completed_steps %}
+                    <span class="material-symbols-outlined text-[16px]">check</span>
+                    {% else %}
+                    {{ forloop.counter }}
+                    {% endif %}
+                </div>
+                <span class="text-sm">{{ label }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex items-center justify-center p-8 bg-surface-base">
+        <div id="step-content" class="w-full max-w-2xl">
+            {% include "core/onboarding/steps/"|add:current_step|add:".html" %}
+        </div>
+    </div>
+</div>
+{% endblock %}

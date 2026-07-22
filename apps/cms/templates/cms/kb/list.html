@@ -1,0 +1,93 @@
+{% extends "base_modern.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Centro de Ayuda" %} — TravelHub{% endblock %}
+{% block page_title %}{% trans "Centro de Ayuda" %}{% endblock %}
+{% block page_subtitle %}{% trans "Encuentra respuestas, guías y tutoriales" %}{% endblock %}
+
+{% block content %}
+<div class="flex-1 w-full max-w-[1200px] mx-auto p-6 md:p-8">
+
+    <!-- Search Bar -->
+    <div class="max-w-2xl mx-auto mb-12">
+        <form action="{% url 'cms:kb_search' %}" method="get" class="relative">
+            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted">
+                <span class="material-symbols-outlined text-[22px]">search</span>
+            </span>
+            <input type="text" name="q" placeholder="{% trans "Buscar en la base de conocimiento..." %}"
+                class="input-base w-full pl-12 py-4 text-base"
+                hx-get="{% url 'cms:kb_search' %}"
+                hx-trigger="keyup changed delay:500ms"
+                hx-target="#search-results"
+                hx-push-url="true">
+        </form>
+    </div>
+
+    {% if featured_articles %}
+    <!-- Featured Articles -->
+    <div class="mb-12">
+        <h3 class="text-lg font-black text-text-main uppercase tracking-wider mb-5">{% trans "Artículos Destacados" %}</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {% for a in featured_articles %}
+            <a href="{% url 'cms:kb_detail' a.slug %}" class="card-base p-6 hover:border-primary/30 transition-all group">
+                <div class="flex items-start gap-3">
+                    <span class="material-symbols-outlined text-primary text-2xl">star</span>
+                    <div>
+                        <h4 class="font-bold text-text-main group-hover:text-primary transition-colors">{{ a.title }}</h4>
+                        {% if a.category %}
+                        <p class="text-xs text-text-muted mt-1">{{ a.category.name }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Categories Grid -->
+    {% for cat in categories %}
+    <div class="mb-10">
+        <h3 class="text-lg font-black text-text-main uppercase tracking-wider mb-5 flex items-center gap-2">
+            {% if cat.icon %}<span class="material-symbols-outlined text-primary">{{ cat.icon }}</span>{% endif %}
+            {{ cat.name }}
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {% for a in cat.articles.all %}
+            {% if a.is_public and a.is_published %}
+            <a href="{% url 'cms:kb_detail' a.slug %}" class="card-base p-4 hover:border-primary/20 transition-all group">
+                <h4 class="font-bold text-sm text-text-main group-hover:text-primary transition-colors">{{ a.title }}</h4>
+                <p class="text-xs text-text-muted mt-1 line-clamp-2">{{ a.content|striptags|truncatewords:20 }}</p>
+            </a>
+            {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+    {% empty %}
+    <div class="text-center py-16">
+        <div class="flex flex-col items-center gap-4">
+            <div class="size-20 rounded-3xl bg-surface-2 flex items-center justify-center">
+                <span class="material-symbols-outlined text-[48px] text-text-muted/50">import_contacts</span>
+            </div>
+            <h3 class="text-xl font-black text-text-main uppercase">{% trans "Base de Conocimiento Vacía" %}</h3>
+            <p class="text-sm text-text-muted">{% trans "Aún no hay artículos publicados. Vuelve pronto." %}</p>
+        </div>
+    </div>
+    {% endfor %}
+
+    <!-- Recent Articles (sidebar-style at bottom) -->
+    {% if recent_articles %}
+    <div class="card-base p-6 mt-8">
+        <h3 class="text-sm font-black text-text-main uppercase tracking-wider mb-4">{% trans "Últimos Artículos" %}</h3>
+        <div class="divide-y divide-border-color/50">
+            {% for a in recent_articles %}
+            <a href="{% url 'cms:kb_detail' a.slug %}" class="flex items-center justify-between py-3 hover:text-primary transition-colors">
+                <span class="text-sm text-text-main">{{ a.title }}</span>
+                <span class="text-xs text-text-muted">{{ a.published_at|date:"d/m/Y" }}</span>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

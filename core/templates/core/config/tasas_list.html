@@ -32,6 +32,25 @@
 
     <!-- Live Rates Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+        {% if tasa_p2p %}
+        <div class="card-base p-6 bg-surface-1 border-l-4 border-l-amber-500 shadow-lg group relative overflow-hidden transition-all hover:scale-[1.02]">
+            <div class="absolute -right-2 -top-2 opacity-5 group-hover:opacity-10 transition-opacity">
+                <span class="material-symbols-outlined text-7xl text-amber-500">currency_bitcoin</span>
+            </div>
+            <div class="flex justify-between items-start mb-4 relative z-10">
+                <span class="text-[9px] font-black text-amber-500 uppercase tracking-[0.2em] bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">P2P</span>
+                <span class="text-[9px] text-text-muted font-bold uppercase tracking-widest">{% now "d M Y" %}</span>
+            </div>
+            <div class="flex flex-col gap-1 relative z-10">
+                <p class="text-3xl font-black text-text-main tabular-nums tracking-tighter">{{ tasa_p2p|floatformat:2|intcomma }}</p>
+                <p class="text-[10px] font-black text-text-muted uppercase tracking-widest">VES / USDT</p>
+            </div>
+            <div class="mt-6 pt-4 border-t border-border-color/30 flex items-center justify-between relative z-10">
+                <span class="text-[9px] text-text-muted font-bold uppercase tracking-widest">Binance P2P</span>
+                <span class="material-symbols-outlined text-[14px] text-amber-500">currency_exchange</span>
+            </div>
+        </div>
+        {% endif %}
         {% for tasa in tasas_actuales %}
         <div class="card-base p-6 bg-surface-1 border-l-4 border-l-primary shadow-lg group relative overflow-hidden transition-all hover:scale-[1.02]">
             <div class="absolute -right-2 -top-2 opacity-5 group-hover:opacity-10 transition-opacity">

@@ -33,24 +33,22 @@ def agency_context(request):
     try:
         from datetime import date
 
-        from django.apps import apps
+        from apps.finance.models_stubs import TasaCambio
 
-        TasaCambio = apps.get_model("finance", "TasaCambio")
         tasa_usd_obj = TasaCambio.objects.filter(moneda="USD").order_by("-fecha").first()
         tasa_eur_obj = TasaCambio.objects.filter(moneda="EUR").order_by("-fecha").first()
+        tasa_p2p_obj = TasaCambio.objects.filter(moneda="P2P").order_by("-fecha").first()
 
-        # 🛡️ Sincronización pasiva en segundo plano
-        # Si la base de datos está vacía, o si la tasa más reciente es de un día anterior,
-        # y no hay un hilo de sincronización ejecutándose/bloqueado recientemente.
         es_obsoleta = False
         hoy = date.today()
         if not tasa_usd_obj or tasa_usd_obj.fecha < hoy:
             es_obsoleta = True
         elif not tasa_eur_obj or tasa_eur_obj.fecha < hoy:
             es_obsoleta = True
+        elif not tasa_p2p_obj or tasa_p2p_obj.fecha < hoy:
+            es_obsoleta = True
 
         if es_obsoleta and not cache.get("bcv_sync_lock"):
-            # Establecer un bloqueo temporal de 30 minutos para evitar hilos concurrentes
             cache.set("bcv_sync_lock", True, timeout=1800)
 
             try:
@@ -63,15 +61,18 @@ def agency_context(request):
         tasas = cache.get("tasa_bcv_context")
         if tasas is None:
             tasas = {
-                "usd": f"{tasa_usd_obj.monto:,.2f}" if tasa_usd_obj else "474.05",
-                "eur": f"{tasa_eur_obj.monto:,.2f}" if tasa_eur_obj else "550.89",
+                "usd": f"{tasa_usd_obj.monto:,.2f}" if tasa_usd_obj else "N/D",
+                "eur": f"{tasa_eur_obj.monto:,.2f}" if tasa_eur_obj else "N/D",
+                "p2p": f"{tasa_p2p_obj.monto:,.2f}" if tasa_p2p_obj else "N/D",
             }
             cache.set("tasa_bcv_context", tasas, timeout=300)
         tasa_usd = tasas["usd"]
         tasa_eur = tasas["eur"]
+        tasa_p2p = tasas["p2p"]
     except Exception:
-        tasa_usd = "474.05"
-        tasa_eur = "550.89"
+        tasa_usd = "N/D"
+        tasa_eur = "N/D"
+        tasa_p2p = "N/D"
 
     session = getattr(request, "session", {})
     return {
@@ -81,6 +82,7 @@ def agency_context(request):
         "is_superuser": request.user.is_authenticated and request.user.is_superuser,
         "tasa_usd": tasa_usd,
         "tasa_eur": tasa_eur,
+        "tasa_p2p": tasa_p2p,
         "is_impersonating": "impersonated_agencia_id" in session,
         "impersonated_agencia_name": session.get("impersonated_agencia_name")
         if hasattr(session, "get")

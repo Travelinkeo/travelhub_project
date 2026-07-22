@@ -16,6 +16,7 @@ class ComisionProveedorServicioViewSet(
     queryset = ComisionProveedorServicio.objects.all().select_related("proveedor", "moneda")
     serializer_class = ComisionProveedorServicioSerializer
     permission_classes = [permissions.IsAuthenticated]
+    pagination_class = None
     filter_backends = [filters.SearchFilter]
     search_fields = ["proveedor__nombre", "tipo_servicio"]
 

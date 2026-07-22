@@ -44,33 +44,51 @@ def _discover_oidc(config_url: str) -> dict:
 
 
 def _verify_jwt(id_token: str, provider) -> bool:
-    """Verifica la firma del id_token JWT contra JWKS del proveedor."""
+    """
+    Verifica la firma del id_token JWT contra JWKS del proveedor.
+
+    SEGURIDAD (fail-closed): Si no se puede obtener el JWKS del proveedor,
+    el token es RECHAZADO. No existe un fallback que acepte tokens sin firma,
+    ya que eso permitiría a un atacante fabricar tokens válidos provocando
+    un timeout en el servidor JWKS.
+    """
     try:
         unverified_header = jwt.get_unverified_header(id_token)
         config_url = provider.oidc_config_url
-        if config_url:
-            config = _discover_oidc(config_url)
-            jwks_uri = config.get("jwks_uri")
-            if jwks_uri:
-                resp = requests.get(jwks_uri, timeout=10)
-                resp.raise_for_status()
-                jwks = resp.json()
-                jwk_data = [
-                    k for k in jwks.get("keys", []) if k.get("kid") == unverified_header.get("kid")
-                ]
-                if jwk_data:
-                    public_key = jwt.algorithms.RSAAlgorithm.from_jwk(json.dumps(jwk_data[0]))
-                    jwt.decode(
-                        id_token, public_key, algorithms=["RS256"], options={"verify_exp": True}
-                    )
-                    return True
-        # Fallback: al menos verificar exp si no se pudo obtener JWKS
-        payload = jwt.decode(id_token, options={"verify_signature": False, "verify_exp": True})
-        if payload.get("exp", 0) < time.time():
+        if not config_url:
+            logger.error(
+                "SSO RECHAZADO: proveedor %s no tiene oidc_config_url configurado.", provider
+            )
             return False
+
+        config = _discover_oidc(config_url)
+        jwks_uri = config.get("jwks_uri")
+        if not jwks_uri:
+            logger.error(
+                "SSO RECHAZADO: no se encontró jwks_uri en la configuración OIDC de %s.", provider
+            )
+            return False
+
+        resp = requests.get(jwks_uri, timeout=10)
+        resp.raise_for_status()
+        jwks = resp.json()
+
+        kid = unverified_header.get("kid")
+        jwk_data = [k for k in jwks.get("keys", []) if k.get("kid") == kid]
+        if not jwk_data:
+            logger.error(
+                "SSO RECHAZADO: kid='%s' no encontrado en JWKS de %s.", kid, provider
+            )
+            return False
+
+        public_key = jwt.algorithms.RSAAlgorithm.from_jwk(json.dumps(jwk_data[0]))
+        jwt.decode(
+            id_token, public_key, algorithms=["RS256"], options={"verify_exp": True}
+        )
         return True
+
     except Exception as e:
-        logger.warning("JWT verification failed: %s", e)
+        logger.warning("SSO RECHAZADO: JWT verification failed para %s: %s", provider, e)
         return False
 
 

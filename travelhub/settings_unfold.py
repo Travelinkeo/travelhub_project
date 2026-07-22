@@ -31,12 +31,12 @@ UNFOLD = {
                     {
                         "title": "Subir Boleto (IA)",
                         "icon": "upload_file",
-                        "link": "/erp/boletos-importar/",
+                        "link": "/system/dashboard/erp/boletos/importar/",
                     },
                     {
                         "title": "Buffer de Revision",
                         "icon": "rate_review",
-                        "link": "/erp/boletos-importados/",
+                        "link": "/admin/bookings/boletoimportado/",
                     },
                 ],
             },
@@ -78,7 +78,7 @@ UNFOLD = {
                     {
                         "title": "Alquiler de Autos",
                         "icon": "directions_car",
-                        "link": "/admin/bookings/alquileroautoreserva/",
+                        "link": "/admin/bookings/alquilerautoreserva/",
                     },
                     {
                         "title": "Circuitos",
@@ -88,7 +88,7 @@ UNFOLD = {
                     {
                         "title": "Paquetes Aereos",
                         "icon": "flight_takeoff",
-                        "link": "/admin/bookings/paquetesereo/",
+                        "link": "/admin/bookings/paqueteaereo/",
                     },
                     {
                         "title": "Cruceros",
@@ -192,7 +192,7 @@ UNFOLD = {
                         "icon": "description",
                         "link": "/admin/finance/facturaconsolidada/",
                     },
-                    {"title": "Libro de Ventas", "icon": "menu_book", "link": "/api/libro-ventas/"},
+                    {"title": "Libro de Ventas", "icon": "menu_book", "link": "/admin/finance/factura/"},
                     {
                         "title": "Gastos Operativos",
                         "icon": "money_off",
@@ -234,7 +234,7 @@ UNFOLD = {
                         "icon": "currency_exchange",
                         "link": "/admin/contabilidad/tasacambiobcv/",
                     },
-                    {"title": "Reportes Contables", "icon": "assessment", "link": "/reportes/"},
+                    {"title": "Reportes Contables", "icon": "assessment", "link": "/admin/contabilidad/asientocontable/"},
                 ],
             },
             {
@@ -255,7 +255,7 @@ UNFOLD = {
                     {
                         "title": "Centro de Marketing",
                         "icon": "auto_awesome",
-                        "link": "/marketing/hub/",
+                        "link": "/bookings/marketing/hub/",
                     },
                 ],
             },

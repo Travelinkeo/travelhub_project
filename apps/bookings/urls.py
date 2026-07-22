@@ -67,11 +67,13 @@ try:
     ItemCotizacionViewSet = import_string("apps.cotizaciones.views.ItemCotizacionViewSet")
 
     class ProductoServicioViewSet(InternalAPIAuthMixin, TenantViewSetMixin, viewsets.ModelViewSet):
-        queryset = ProductoServicio.objects.filter(activo=True)
         serializer_class = ProductoServicioSerializer
         permission_classes = [permissions.IsAuthenticated]
         filter_backends = [filters.SearchFilter]
         search_fields = ["nombre", "codigo_interno", "descripcion"]
+
+        def get_queryset(self):
+            return ProductoServicio.objects.filter(activo=True)
 
     from apps.bookings.views.proveedores_views import ProveedorViewSet
 

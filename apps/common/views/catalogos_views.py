@@ -266,7 +266,6 @@ class TipoCambioListView(HtmxResponseMixin, SaaSMixin, LoginRequiredMixin, ListV
         context = super().get_context_data(**kwargs)
         context["active_tab"] = "configuracion"
         context["title"] = "Tasas de Cambio"
-        # Obtener las últimas tasas únicas por par de monedas
         recientes = []
         pares_vistos = set()
         for t in self.get_queryset():
@@ -277,6 +276,12 @@ class TipoCambioListView(HtmxResponseMixin, SaaSMixin, LoginRequiredMixin, ListV
             if len(recientes) >= 5:
                 break
         context["tasas_actuales"] = recientes
+        try:
+            from apps.finance.models_stubs import TasaCambio
+            p2p = TasaCambio.objects.filter(moneda="P2P").order_by("-fecha").first()
+            context["tasa_p2p"] = p2p.monto if p2p else None
+        except Exception:
+            context["tasa_p2p"] = None
         return context
 
 

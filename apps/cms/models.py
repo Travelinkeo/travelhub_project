@@ -81,3 +81,53 @@ class PostRedesSociales(AgenciaMixin, models.Model):
 
     def __str__(self):
         return f"{self.get_plataforma_display()} - {self.articulo.titulo if self.articulo else 'Promo'}"
+
+
+class KBCategory(AgenciaMixin, models.Model):
+    name = models.CharField(_("Nombre"), max_length=100)
+    slug = models.SlugField(max_length=120)
+    description = models.TextField(_("Descripción"), blank=True)
+    icon = models.CharField(max_length=50, blank=True, help_text="Material Symbols icon name")
+    sort_order = models.IntegerField(default=0)
+
+    class Meta:
+        verbose_name = _("Categoría KB")
+        verbose_name_plural = _("Categorías KB")
+        ordering = ["sort_order", "name"]
+        unique_together = [("agencia", "slug")]
+
+    def __str__(self):
+        return self.name
+
+
+class KBArticle(AgenciaMixin, models.Model):
+    title = models.CharField(_("Título"), max_length=255)
+    slug = models.SlugField(max_length=280)
+    content = models.TextField(_("Contenido (Markdown)"))
+    category = models.ForeignKey(
+        KBCategory, on_delete=models.SET_NULL, null=True, blank=True, related_name="articles"
+    )
+    tags = models.CharField(max_length=500, blank=True, help_text="Comma-separated")
+
+    is_public = models.BooleanField(_("Público"), default=False)
+    is_published = models.BooleanField(_("Publicado"), default=False)
+
+    published_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    view_count = models.PositiveIntegerField(default=0)
+    helpful_count = models.PositiveIntegerField(default=0)
+    not_helpful_count = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        verbose_name = _("Artículo KB")
+        verbose_name_plural = _("Artículos KB")
+        ordering = ["-is_published", "-published_at"]
+        unique_together = [("agencia", "slug")]
+        indexes = [
+            models.Index(fields=["is_public", "is_published"]),
+        ]
+
+    def __str__(self):
+        return self.title

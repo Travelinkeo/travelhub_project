@@ -20,7 +20,7 @@
                     <option value="">-- {% trans "Seleccione una cuenta" %} --</option>
                     {% for cuenta in cuentas %}
                     <option value="{{ cuenta.id }}">
-                        {{ cuenta.codigo_cuenta }} - {{ cuenta.nombre_cuenta }}
+                        {{ cuenta.codigo }} - {{ cuenta.nombre }}
                     </option>
                     {% endfor %}
                 </select>

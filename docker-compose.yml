@@ -394,6 +394,7 @@ services:
       - CACHE_REDIS_ENABLED=true
       - CACHE_REDIS_URI=redis://redis:6379/1
       - CACHE_REDIS_PREFIX_KEY=travelhub_evolution
+      - CONFIG_SESSION_PHONE_VERSION=2.3000.1035194821
       - LOG_LEVEL=INFO
     depends_on:
       redis:

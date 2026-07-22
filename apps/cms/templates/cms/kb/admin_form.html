@@ -1,0 +1,83 @@
+{% extends "base_modern.html" %}
+{% load i18n %}
+
+{% block title %}{% if is_new %}{% trans "Nuevo Artículo" %}{% else %}{% trans "Editar Artículo" %}{% endif %} — TravelHub{% endblock %}
+{% block page_title %}{% if is_new %}{% trans "Nuevo Artículo" %}{% else %}{% trans "Editar Artículo" %}{% endif %}{% endblock %}
+{% block page_subtitle %}{% trans "Base de Conocimiento" %}{% endblock %}
+
+{% block content %}
+<div class="flex-1 w-full max-w-[1000px] mx-auto p-6 md:p-8">
+
+    <a href="{% url 'cms:kb_admin_list' %}" class="inline-flex items-center gap-2 text-sm text-text-muted hover:text-text-main mb-6 transition-colors">
+        <span class="material-symbols-outlined text-[16px]">arrow_back</span>
+        {% trans "Volver" %}
+    </a>
+
+    <div class="card-base p-8">
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-bold text-text-main mb-1.5">{{ form.title.label }}</label>
+                    <input type="text" name="title" value="{{ form.title.value|default:'' }}"
+                        class="input-base w-full" placeholder="{% trans "Título del artículo" %}" required>
+                    {% if form.title.errors %}<p class="text-xs text-red-400 mt-1">{{ form.title.errors.0 }}</p>{% endif %}
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-text-main mb-1.5">{{ form.slug.label }}</label>
+                    <input type="text" name="slug" value="{{ form.slug.value|default:'' }}"
+                        class="input-base w-full" placeholder="mi-articulo">
+                    {% if form.slug.errors %}<p class="text-xs text-red-400 mt-1">{{ form.slug.errors.0 }}</p>{% endif %}
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-text-main mb-1.5">{{ form.category.label }}</label>
+                    <select name="category" class="input-base w-full">
+                        <option value="">{% trans "Sin categoría" %}</option>
+                        {% for c in form.category.field.queryset %}
+                        <option value="{{ c.id }}" {% if form.category.value == c.id %}selected{% endif %}>{{ c.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-text-main mb-1.5">{{ form.tags.label }}</label>
+                    <input type="text" name="tags" value="{{ form.tags.value|default:'' }}"
+                        class="input-base w-full" placeholder="tag1, tag2, tag3">
+                    <p class="text-xs text-text-muted mt-1">{% trans "Separados por coma" %}</p>
+                </div>
+
+                <div class="flex items-center gap-6 pt-6">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" name="is_public" {% if form.is_public.value %}checked{% endif %}
+                            class="w-4 h-4 rounded border-border-color text-primary focus:ring-primary">
+                        <span class="text-sm text-text-main">{% trans "Público" %}</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" name="is_published" {% if form.is_published.value %}checked{% endif %}
+                            class="w-4 h-4 rounded border-border-color text-primary focus:ring-primary">
+                        <span class="text-sm text-text-main">{% trans "Publicado" %}</span>
+                    </label>
+                </div>
+
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-bold text-text-main mb-1.5">{{ form.content.label }}</label>
+                    <textarea name="content" rows="16"
+                        class="input-base w-full font-mono text-sm"
+                        placeholder="{% trans "Escribe el contenido aquí..." %}">{{ form.content.value|default:'' }}</textarea>
+                    {% if form.content.errors %}<p class="text-xs text-red-400 mt-1">{{ form.content.errors.0 }}</p>{% endif %}
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-3 mt-8 pt-6 border-t border-border-color">
+                <a href="{% url 'cms:kb_admin_list' %}" class="btn-secondary">{% trans "Cancelar" %}</a>
+                <button type="submit" class="btn-primary">
+                    {% if is_new %}{% trans "Crear Artículo" %}{% else %}{% trans "Guardar Cambios" %}{% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

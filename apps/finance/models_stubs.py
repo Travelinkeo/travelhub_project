@@ -146,124 +146,10 @@ class DocumentoExportacionConsolidado(models.Model):
         db_table = "finance_documentoexportacionconsolidado"
 
 
-class FacturaConsolidada(models.Model):
-    class TipoOperacion(models.TextChoices):
-        VENTA_PROPIA = "VP", "Venta Propia"
-        INTERMEDIACION = "IN", "Intermediacion"
+# FacturaConsolidada e ItemFacturaConsolidada fueron migrados a models.py (managed=True).
+# Re-exportados aquí para backwards-compatibility con módulos que importan desde models_stubs.
+from apps.finance.models import FacturaConsolidada, ItemFacturaConsolidada  # noqa: F401, E402
 
-    class MonedaOperacion(models.TextChoices):
-        DIVISA = "DIV", "Divisa"
-        BOLIVAR = "BS", "Bolivar"
-
-    class EstadoFactura(models.TextChoices):
-        EMITIDA = "EMI", "Emitida"
-        BORRADOR = "BOR", "Borrador"
-        PAGADA = "PAG", "Pagada"
-        PARCIAL = "PAR", "Parcial"
-        VENCIDA = "VEN", "Vencida"
-        ANULADA = "ANU", "Anulada"
-
-    id_factura = models.AutoField(primary_key=True)
-    numero_factura = models.CharField(unique=True, max_length=50, default="")
-    numero_control = models.CharField(max_length=50, default="")
-    fecha_emision = models.DateField(default=date.today)
-    fecha_vencimiento = models.DateField(blank=True, null=True)
-    emisor_rif = models.CharField(max_length=20, default="")
-    emisor_razon_social = models.CharField(max_length=200, default="")
-    emisor_direccion_fiscal = models.TextField(default="")
-    es_sujeto_pasivo_especial = models.BooleanField(default=False)
-    esta_inscrita_rtn = models.BooleanField(default=False)
-    cliente_es_residente = models.BooleanField(default=True)
-    cliente_identificacion = models.CharField(max_length=50, default="")
-    cliente_direccion = models.TextField(default="")
-    tipo_operacion = models.CharField(
-        max_length=20, choices=TipoOperacion.choices, default=TipoOperacion.VENTA_PROPIA
-    )
-    moneda_operacion = models.CharField(
-        max_length=10, choices=MonedaOperacion.choices, default=MonedaOperacion.DIVISA
-    )
-    tasa_cambio_bcv = models.DecimalField(max_digits=12, decimal_places=4, blank=True, null=True)
-    subtotal_base_gravada = models.DecimalField(
-        max_digits=12, decimal_places=2, default=Decimal("0.00")
-    )
-    subtotal_exento = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal("0.00"))
-    subtotal_exportacion = models.DecimalField(
-        max_digits=12, decimal_places=2, default=Decimal("0.00")
-    )
-    monto_iva_16 = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal("0.00"))
-    monto_iva_adicional = models.DecimalField(
-        max_digits=12, decimal_places=2, default=Decimal("0.00")
-    )
-    monto_igtf = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal("0.00"))
-    subtotal = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal("0.00"))
-    monto_total = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal("0.00"))
-    saldo_pendiente = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal("0.00"))
-    subtotal_base_gravada_bs = models.DecimalField(
-        max_digits=15, decimal_places=2, blank=True, null=True
-    )
-    subtotal_exento_bs = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
-    monto_iva_16_bs = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
-    monto_igtf_bs = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
-    monto_total_bs = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
-    tercero_rif = models.CharField(max_length=20, default="")
-    tercero_razon_social = models.CharField(max_length=200, default="")
-    modalidad_emision = models.CharField(max_length=20, default="")
-    firma_digital = models.TextField(blank=True, null=True)
-    estado = models.CharField(
-        max_length=3, choices=EstadoFactura.choices, default=EstadoFactura.BORRADOR
-    )
-    archivo_pdf = models.CharField(max_length=100, blank=True, null=True)
-    notas = models.TextField(default="")
-    agencia = models.ForeignKey("core.Agencia", models.DO_NOTHING, blank=True, null=True)
-    asiento_contable_factura_id = models.IntegerField(blank=True, null=True)
-    cliente = models.ForeignKey("crm.Cliente", models.DO_NOTHING, blank=True, null=True)
-    moneda = models.ForeignKey("common.Moneda", models.DO_NOTHING, blank=True, null=True)
-    venta_asociada = models.ForeignKey("bookings.Venta", models.DO_NOTHING, blank=True, null=True)
-
-    def calcular_impuestos_venezuela(self):
-        gravada = Decimal("0.00")
-        exenta = Decimal("0.00")
-        iva_16 = Decimal("0.00")
-        for item in self.itemfacturaconsolidada_set.all():
-            subtotal_item = item.cantidad * item.precio_unitario
-            if (
-                item.tipo_servicio
-                == ItemFacturaConsolidada.TipoServicio.TRANSPORTE_AEREO_INTERNACIONAL
-            ):
-                gravada += subtotal_item / Decimal("2")
-                exenta += subtotal_item / Decimal("2")
-                iva_16 += (subtotal_item / Decimal("2")) * item.alicuota_iva / Decimal("100")
-            elif item.es_gravado:
-                gravada += subtotal_item
-                iva_16 += subtotal_item * item.alicuota_iva / Decimal("100")
-            else:
-                exenta += subtotal_item
-        self.subtotal_base_gravada = gravada
-        self.subtotal_exento = exenta
-        self.monto_iva_16 = iva_16
-        base_igtf = gravada + iva_16
-        if self.es_sujeto_pasivo_especial:
-            self.monto_igtf = base_igtf * Decimal("0.03")
-        else:
-            self.monto_igtf = Decimal("0.00")
-        self.monto_total = gravada + exenta + iva_16 + self.monto_igtf
-        if self.tasa_cambio_bcv:
-            self.subtotal_base_gravada_bs = gravada * self.tasa_cambio_bcv
-            self.subtotal_exento_bs = exenta * self.tasa_cambio_bcv
-            self.monto_iva_16_bs = iva_16 * self.tasa_cambio_bcv
-            self.monto_igtf_bs = self.monto_igtf * self.tasa_cambio_bcv
-            self.monto_total_bs = self.monto_total * self.tasa_cambio_bcv
-
-    def clean(self):
-        if self.tipo_operacion == self.TipoOperacion.INTERMEDIACION:
-            if not self.tercero_rif or not self.tercero_razon_social:
-                raise ValidationError("Intermediacion requiere tercero_rif y tercero_razon_social")
-        if self.moneda_operacion == self.MonedaOperacion.DIVISA and not self.tasa_cambio_bcv:
-            raise ValidationError("Facturas en divisa requieren tasa_cambio_bcv")
-
-    class Meta:
-        managed = False
-        db_table = "finance_facturaconsolidada"
 
 
 class FacturaFiscal(models.Model):
@@ -288,68 +174,12 @@ class FacturaProveedor(models.Model):
         db_table = "finance_facturaproveedor"
 
 
-class GastoOperativo(models.Model):
-    id_gasto = models.AutoField(primary_key=True)
-    descripcion = models.CharField(max_length=255)
-    monto = models.DecimalField(max_digits=12, decimal_places=2)
-    fecha = models.DateField()
-    categoria = models.CharField(max_length=100, blank=True, null=True)
-    comprobante = models.CharField(max_length=100, blank=True, null=True)
-    fecha_registro = models.DateTimeField()
-    is_deleted = models.BooleanField()
-    deleted_at = models.DateTimeField(blank=True, null=True)
-    estado_contable = models.CharField(max_length=3)
-    error_contable_msg = models.TextField(blank=True, null=True)
-    asiento_contable_id = models.IntegerField(blank=True, null=True)
-    agencia = models.ForeignKey("core.Agencia", models.DO_NOTHING, blank=True, null=True)
-    creado_por = models.ForeignKey("auth.User", models.DO_NOTHING, blank=True, null=True)
-    moneda = models.ForeignKey("common.Moneda", models.DO_NOTHING)
-
-    class Meta:
-        managed = False
-        db_table = "finance_gastooperativo"
+# GastoOperativo fue migrado a models.py (managed=True).
+# Re-exportado aquí para backwards-compatibility.
+from apps.finance.models import GastoOperativo  # noqa: F401, E402
 
 
-class ItemFacturaConsolidada(models.Model):
-    class TipoServicio(models.TextChoices):
-        TRANSPORTE_AEREO_INTERNACIONAL = "TAI", "Transporte Aereo Internacional"
-        TRANSPORTE_AEREO_NACIONAL = "TAN", "Transporte Aereo Nacional"
-        ALOJAMIENTO_Y_OTROS_GRAVADOS = "AOG", "Alojamiento y otros"
-        COMISION_INTERMEDIACION = "CIN", "Comision Intermediacion"
 
-    id_item_factura = models.AutoField(primary_key=True)
-    descripcion = models.CharField(max_length=500, default="")
-    cantidad = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal("1.00"))
-    precio_unitario = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal("0.00"))
-    subtotal_item = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal("0.00"))
-    tipo_servicio = models.CharField(
-        max_length=30,
-        choices=TipoServicio.choices,
-        default=TipoServicio.ALOJAMIENTO_Y_OTROS_GRAVADOS,
-    )
-    es_gravado = models.BooleanField(default=True)
-    alicuota_iva = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal("16.00"))
-    nombre_pasajero = models.CharField(max_length=200, blank=True, default="")
-    numero_boleto = models.CharField(max_length=50, blank=True, default="")
-    itinerario = models.TextField(blank=True, default="")
-    codigo_aerolinea = models.CharField(max_length=10, blank=True, default="")
-    factura = models.ForeignKey(
-        "finance.FacturaConsolidada", models.DO_NOTHING, blank=True, null=True
-    )
-
-    def clean(self):
-        if self.tipo_servicio in (
-            ItemFacturaConsolidada.TipoServicio.TRANSPORTE_AEREO_INTERNACIONAL,
-            ItemFacturaConsolidada.TipoServicio.TRANSPORTE_AEREO_NACIONAL,
-        ):
-            if not self.nombre_pasajero or not self.numero_boleto or not self.itinerario:
-                raise ValidationError(
-                    "Items de transporte aereo requieren nombre_pasajero, numero_boleto e itinerario"
-                )
-
-    class Meta:
-        managed = False
-        db_table = "finance_itemfacturaconsolidada"
 
 
 class ItemReporte(models.Model):
@@ -584,53 +414,10 @@ class ReporteReconciliacion(models.Model):
         db_table = "finance_reportereconciliacion"
 
 
-class RetencionISLR(models.Model):
-    class TipoOperacion(models.TextChoices):
-        COMISIONES_MERCANTILES = "CM", "Comisiones Mercantiles"
-        HONORARIOS_PROFESIONALES = "HP", "Honorarios Profesionales"
-        ARRENDAMIENTO = "AR", "Arrendamiento"
-        DIVIDENDOS = "DV", "Dividendos"
-        OTROS = "OT", "Otros"
+# RetencionISLR fue migrado a models.py (managed=True).
+# Re-exportado aquí para backwards-compatibility.
+from apps.finance.models import RetencionISLR  # noqa: F401, E402
 
-    class Estado(models.TextChoices):
-        PENDIENTE = "PEN", "Pendiente"
-        APLICADA = "APL", "Aplicada"
-
-    id_retencion = models.AutoField(primary_key=True)
-    numero_comprobante = models.CharField(unique=True, max_length=50)
-    fecha_emision = models.DateField(default=date.today)
-    fecha_operacion = models.DateField(blank=True, null=True)
-    periodo_fiscal = models.CharField(max_length=7, blank=True, null=True)
-    tipo_operacion = models.CharField(
-        max_length=3, choices=TipoOperacion.choices, default=TipoOperacion.COMISIONES_MERCANTILES
-    )
-    codigo_concepto = models.CharField(max_length=10, default="")
-    base_imponible = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
-    porcentaje_retencion = models.DecimalField(
-        max_digits=5, decimal_places=2, default=Decimal("0.00")
-    )
-    monto_retenido = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
-    estado = models.CharField(max_length=3, choices=Estado.choices, default=Estado.PENDIENTE)
-    archivo_comprobante = models.CharField(max_length=100, blank=True, null=True)
-    observaciones = models.TextField(default="")
-    creado = models.DateTimeField(auto_now_add=True)
-    actualizado = models.DateTimeField(auto_now=True)
-    cliente = models.ForeignKey("crm.Cliente", models.DO_NOTHING, blank=True, null=True)
-    factura = models.ForeignKey(
-        "finance.FacturaConsolidada", models.DO_NOTHING, blank=True, null=True
-    )
-    agencia = models.ForeignKey("core.Agencia", models.DO_NOTHING, blank=True, null=True)
-
-    def save(self, *args, **kwargs):
-        if self.base_imponible is not None and self.porcentaje_retencion:
-            self.monto_retenido = self.base_imponible * self.porcentaje_retencion / Decimal("100")
-        if self.fecha_emision and not self.periodo_fiscal:
-            self.periodo_fiscal = self.fecha_emision.strftime("%Y-%m")
-        super().save(*args, **kwargs)
-
-    class Meta:
-        managed = False
-        db_table = "finance_retencionislr"
 
 
 class TasaCambio(models.Model):

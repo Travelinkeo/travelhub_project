@@ -25,16 +25,18 @@ def manifest(request):
 
 
 @require_GET
-@cache_control(max_age=3600, public=True)
+@cache_control(max_age=0, no_cache=True, no_store=True, must_revalidate=True)
 def service_worker(request):
-    """Sirve el service-worker.js."""
+    """Sirve el service-worker.js sin almacenamiento en cache."""
     sw_path = settings.BASE_DIR / "core" / "templates" / "service-worker.js"
     with open(sw_path, encoding="utf-8") as f:
         content = f.read()
-    return HttpResponse(
+    response = HttpResponse(
         content,
         content_type="application/javascript; charset=utf-8",
     )
+    response["Service-Worker-Allowed"] = "/"
+    return response
 
 
 @require_GET

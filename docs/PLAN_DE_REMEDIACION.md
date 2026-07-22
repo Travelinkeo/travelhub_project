@@ -261,6 +261,11 @@ sin casos de uso, sin lead capture.
 - ~~**Fix test existente**~~ — `test_is_staff_or_group_write_allows_group_keyword` corregido (assert `True` para grupo "Operaciones" que contiene keyword "oper")
 - ~~**Tests `core/security.py`**~~ — 22 tests nuevos: `get_user_active_agency` (anon, cache, invalidate), `get_agencia_from_request`, `get_object_tenant_or_404`, `filter_queryset_by_tenant`, `agency_role_required` (anon, superuser bypass, rol permitido/denegado)
 
+### ✅ Sesión 3 (Jul 21) — Fix sincronización BCV + Integración Binance P2P
+- ~~**Fix sync_bcv_rates (crítico)**~~ — Import incorrecto `TasaCambio` desde `apps.common.models` (está en `apps.finance.models_stubs`). Referencia a campo `tasa_bsd_por_usd` inexistente (cambiado a `tasa`). `ultima_actualizacion` NOT NULL sin default en `update_or_create`.
+- ~~**Fix views_tasas.py**~~ — Misma referencia a `tasa_bsd_por_usd` corregida.
+- ~~**Nueva fuente: Binance P2P**~~ — `TasasVenezuelaClient.obtener_tasa_binance_p2p()` consulta API pública de Binance P2P (USDT/VES), promedio top 3 ofertas. Persistida en `TasaCambio` como moneda `"P2P"`. Expuesta en `obtener_todas_tasas()`, `obtener_resumen_tasas()`, y endpoint `api/tasas/actuales/`.
+
 ### Pendientes
 1. **Video de 90s** (F5.3) — grabación del flujo mágico (externo)
 2. **Stripe real** — MRR dinámico en dashboard CEO

@@ -88,12 +88,11 @@ class BoletoUploadAPIView(InternalAPIAuthMixin, APIView):
             if celery_ok:
                 # MODO ASYNC: Encolar en Celery (producción con guarda on_commit)
                 from django.db import transaction
+
                 from core.api import parsear_boleto_individual
 
                 b_id = boleto_importado.id_boleto_importado
-                transaction.on_commit(
-                    lambda: safe_delay(parsear_boleto_individual, b_id)
-                )
+                transaction.on_commit(lambda: safe_delay(parsear_boleto_individual, b_id))
                 logger.info(
                     f"✅ Boleto {boleto_importado.pk} preparado para encolar en Celery (on_commit)."
                 )

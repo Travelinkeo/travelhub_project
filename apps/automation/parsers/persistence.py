@@ -112,7 +112,9 @@ class BoletoPersistenceService:
         ultimo = duplicados.first()
         if ultimo:
             # Si el boleto anterior fue anulado (VOID), no es una re-emisión legítima
-            is_anulado = getattr(ultimo, "estado_emision", None) == BoletoImportado.EstadoEmision.ANULADO
+            is_anulado = (
+                getattr(ultimo, "estado_emision", None) == BoletoImportado.EstadoEmision.ANULADO
+            )
             if not is_anulado:
                 boleto.version = ultimo.version + 1
                 boleto.boleto_padre = ultimo

@@ -763,21 +763,21 @@ Manejo de errores: try/except Exception devuelve string descriptivo al usuario s
 | APIKey | DEPRECATED, tabla eliminada (migración 0049) | core/models/api_keys.py |
 | FacturaConsolidada | Stub legacy solo para tests | apps/finance/models_stubs.py |
 
-### Deuda técnica residual (parcialmente resueltas — REMEDIATION_PLAN.md)
+### Deuda técnica residual (completamente resueltas — REMEDIATION_PLAN.md)
 
 | ID | Descripción | Estado |
 |---|---|---|
-| P1-002 | celery.py importa `settings` a nivel de módulo — puede causar AppRegistryNotReady en tests | PARCIAL — `django.setup()` no aparece pero import temprano persiste |
-| P1-005 | `locale.setlocale` monkey patch doble — `core/locale_patch.py` + `travelhub/__init__.py:12-30` | PARCIAL — riesgo de doble wrap |
-| P2-006 | AgenciaManager parsea sys.argv — constante de módulo en base.py:9-15 pero 3 usos inline residuales | PARCIAL — mayoría corregidos |
-| P2-005 | Mapa de meses GDS duplicado en 5 archivos (kiu_parser, web_receipt_parser, receipt_parsers/utils, pnr_parser_service, ai_schemas) | PARCIAL — sin consolidar |
+| P1-002 | celery.py importa `settings` a nivel de módulo | ✅ RESUELTO — import diferido con try/except |
+| P1-005 | `locale.setlocale` monkey patch doble | ✅ RESUELTO — eliminado de travelhub/__init__.py, consolidado en core/apps.py con guard _is_safe_patch |
+| P2-006 | AgenciaManager parsea sys.argv | ✅ RESUELTO — constantes de módulo _IS_PYTEST y _IS_MANAGEMENT_COMMAND usadas universalmente |
+| P2-005 | Mapa de meses GDS duplicado | ✅ RESUELTO — centralizado en apps.automation.parsers.normalization (GDS_MONTH_EN, GDS_NUM_TO_EN, GDS_SHORT_TO_NUM) |
 
 ### Integraciones incompletas
 
 | Item | Estado |
 |---|---|
-| PWA cache offline (service worker) | service-worker.js sin estrategia de cache |
-| i18n español (42/300+ entradas) | Sin traducciones suficientes |
+| PWA cache offline (service worker) | ✅ RESUELTO — Service Worker v4 con Cache-First para static/media y Network-First/Stale-While-Revalidate |
+| i18n español | ✅ RESUELTO — 325 cadenas traducidas y compiladas (.po / .mo) |
 | CSP unsafe-eval en admin (Alpine.js) | Pendiente migración @alpinejs/csp-bundle, middleware.py:377 |
 | SSO sso_callback flow completo | Modelo y views existen pero flow end-to-end no auditado |
 
@@ -785,7 +785,7 @@ Manejo de errores: try/except Exception devuelve string descriptivo al usuario s
 
 ## 11. BRECHAS EN REPARACIÓN (trabajo activo — rama hardening/operational-risks)
 
-### ✅ Resueltas (verificado en REMEDIATION_PLAN.md, auditoría 2026-07-16)
+### ✅ Resueltas (verificado en REMEDIATION_PLAN.md, auditoría 2026-07-21)
 
 | ID | Brecha | Fix verificado |
 |---|---|---|
@@ -793,12 +793,16 @@ Manejo de errores: try/except Exception devuelve string descriptivo al usuario s
 | P0-003 | IDOR VentaDoubleInvoiceAPIView | ✅ `get_object_tenant_or_404(Venta, agencia)` en boleto_views.py:365 |
 | P0-006 | Traceback expuesto en respuesta 500 | ✅ `error_id` + `logger.exception()`, sin `str(e)` |
 | P1-001 | Doble signal post_save BoletoImportado | ✅ Señal única consolidada (signals.py:33-59, comentario P1-001) |
+| P1-002 | celery.py import temprano de settings | ✅ Import de settings diferido y protegido con try/except |
 | P1-003 | PgBouncer + CONN_MAX_AGE fuga RLS | ✅ `USE_PGBOUNCER` condicional en base.py:221-224 |
 | P1-004 | Cache agencia TTL=120s | ✅ Reducido a 30s + `invalidate_all_agency_caches()` (security.py:43) |
+| P1-005 | Doble implementación locale patch | ✅ Removido de travelhub/__init__.py, resuelto vía `core/apps.py` |
 | P1-006 | UniversalAIParser truncado silencioso | ✅ `logger.warning` + flag `_text_was_truncated` |
 | P1-007 | `_send_factura_whatsapp` `.apply()` síncrono | ✅ Usa `.delay()` con try/except (signals.py:239-242) |
 | P2-002 | Archivos debug en raíz con credenciales | ✅ No hay archivos debug_* ni temp_* en raíz |
 | P2-004 | celery.py default `settings.production` | ✅ Default cambiado a `travelhub.settings.development` (celery.py:11) |
+| P2-005 | Mapa de meses GDS duplicado | ✅ Centralizado en `apps.automation.parsers.normalization` |
+| P2-006 | sys.argv inline residuales | ✅ Reemplazados por `_IS_MANAGEMENT_COMMAND` constante de módulo |
 | — | Antivirus hook sin fallback | ✅ `antivirus_hook()` usa try/except, logea warning si ClamAV no disponible |
 | — | Bleach fallback inseguro | ✅ `sanitize_html()` usa `strip_tags()` como fallback seguro |
 | — | Decryption failure silencioso | ✅ `_decrypt()` reporta a Sentry y retorna cadena vacía |
@@ -816,20 +820,11 @@ Manejo de errores: try/except Exception devuelve string descriptivo al usuario s
 | — | system_context() sin timeout | ✅ max_seconds=60, stack trace del caller en audit logger |
 | — | mypy sin adoption plan | ✅ 5 módulos con strict=True pasando sin errores |
 
-### ⏳ En progreso
-
-| ID | Brecha | Prioridad | Sprint |
-|---|---|---|---|
-| P1-002 | celery.py import temprano de settings | P1 | Sprint 1 |
-| P1-005 | Doble implementación locale patch | P1 | Sprint 1 |
-| P2-006 | sys.argv inline residuales (3 usos) | P2 | Sprint 2 |
-| P2-005 | Mapa de meses GDS duplicado (5 archivos) | P2 | Sprint 2 |
-
 ### ❌ Pendiente
 
 | Brecha | Prioridad | Notas |
 |---|---|---|
-| PWA cache offline | P3 | Conectar service worker con estrategia de cache |
-| i18n español | P3 | Completar de 42 a 300+ entradas .po |
+| i18n español | ✅ RESUELTO — 325 cadenas traducidas en .po y compiladas a .mo con compile_i18n.py |
 | alpinejs/csp-bundle | P3 | Eliminar unsafe-eval de CSP (actualmente global en script-src) |
 | SSO end-to-end audit | P3 | Auditar flow completo de sso_callback |
+

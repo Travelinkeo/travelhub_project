@@ -12,6 +12,8 @@ from apps.common.services.customer_service import CustomerService
 from apps.crm.models import Pasajero
 from core.api import agency_context
 
+from apps.automation.parsers.normalization import GDS_SHORT_TO_NUM
+
 logger = logging.getLogger(__name__)
 
 
@@ -89,23 +91,7 @@ class PNRParserService:
             else:
                 # Búsqueda libre de código de 6 caracteres alfanuméricos
                 free_match = re.search(r"\b([A-Z0-9]{6})\b", text_upper)
-                if free_match and not any(
-                    m in free_match.group(1)
-                    for m in [
-                        "JAN",
-                        "FEB",
-                        "MAR",
-                        "APR",
-                        "MAY",
-                        "JUN",
-                        "JUL",
-                        "AUG",
-                        "SEP",
-                        "OCT",
-                        "NOV",
-                        "DEC",
-                    ]
-                ):
+                if free_match and not any(m in free_match.group(1) for m in GDS_SHORT_TO_NUM):
                     pnr_data["localizador"] = free_match.group(1)
 
         # 2. Extraer Pasajeros

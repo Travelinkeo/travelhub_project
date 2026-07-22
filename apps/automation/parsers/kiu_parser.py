@@ -544,6 +544,8 @@ class KIUParser(BaseTicketParser):
                         airline = "ASERCA"
                     elif code == "Q6":
                         airline = "VIO"
+                    elif code == "T9":
+                        airline = "TURPIAL AIRLINES"
                     elif code == "G6":
                         airline = "GLOBAL AIRLINES"
                     else:

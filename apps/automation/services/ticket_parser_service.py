@@ -447,7 +447,7 @@ class TicketParserService:
                             datos = datos_regex
                             datos["_requiere_revision"] = True
                             boleto.log_parseo = (
-                                f"Circuit Breaker IA OPEN. Usando datos parciales de Regex. "
+                                "Circuit Breaker IA OPEN. Usando datos parciales de Regex. "
                             )
                             boleto.save(update_fields=["log_parseo"])
                         else:

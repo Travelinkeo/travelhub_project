@@ -102,16 +102,13 @@ class TestResolveIataFromCity:
         )
 
     def test_resolve_handles_city_with_country_suffix(self):
-        """"VALENCIA, VENEZUELA" debe resolverse correctamente despreciando el país."""
+        """ "VALENCIA, VENEZUELA" debe resolverse correctamente despreciando el país."""
         from apps.automation.parsers.normalization import DataNormalizationService
 
-        assert (
-            DataNormalizationService._resolve_iata_from_city("VALENCIA, VENEZUELA")
-            == "VLN"
-        )
+        assert DataNormalizationService._resolve_iata_from_city("VALENCIA, VENEZUELA") == "VLN"
 
     def test_resolve_handles_city_with_state_suffix(self):
-        """"SAN ANTONIO TX" no debe machacar el alias VE con Texas."""
+        """ "SAN ANTONIO TX" no debe machacar el alias VE con Texas."""
         from apps.automation.parsers.normalization import DataNormalizationService
 
         # El alias manual SVZ tiene prioridad — incluso si appended TX.
@@ -129,10 +126,7 @@ class TestResolveIataFromCity:
 
         # Springifeld existe en muchos estados — debe devolver None en lugar de
         # tomar el primer candidatoEquívoco.
-        assert (
-            DataNormalizationService._resolve_iata_from_city("CIUDAD_QUE_NO_EXISTE_XYZ")
-            is None
-        )
+        assert DataNormalizationService._resolve_iata_from_city("CIUDAD_QUE_NO_EXISTE_XYZ") is None
 
 
 class TestCatalogNormalizationServiceIndices:

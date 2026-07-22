@@ -115,23 +115,11 @@ class PdfGenerationService:
             try:
                 import dateutil.parser as date_parser
 
+                from apps.automation.parsers.normalization import GDS_NUM_TO_EN
+
                 dt_obj = date_parser.parse(str(f_emision))
-                meses_en = [
-                    "JAN",
-                    "FEB",
-                    "MAR",
-                    "APR",
-                    "MAY",
-                    "JUN",
-                    "JUL",
-                    "AUG",
-                    "SEP",
-                    "OCT",
-                    "NOV",
-                    "DEC",
-                ]
                 day = dt_obj.strftime("%d")
-                month = meses_en[dt_obj.month - 1]
+                month = GDS_NUM_TO_EN.get(dt_obj.month, "JAN")
                 year = dt_obj.strftime("%y")
                 f_emision = f"{day}{month}{year}"
             except Exception as e:

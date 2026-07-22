@@ -300,5 +300,6 @@
     {"model": "core.aerolinea", "pk": 299, "fields": {"codigo_iata": "9V", "nombre": "Avior Airlines", "activa": true}},
     {"model": "core.aerolinea", "pk": 300, "fields": {"codigo_iata": "AG", "nombre": "Aruba Airlines", "activa": true}},
     {"model": "core.aerolinea", "pk": 301, "fields": {"codigo_iata": "G2", "nombre": "Albatros", "activa": true}},
-    {"model": "core.aerolinea", "pk": 302, "fields": {"codigo_iata": "G6", "nombre": "Global Air", "activa": true}}
+    {"model": "core.aerolinea", "pk": 302, "fields": {"codigo_iata": "G6", "nombre": "Global Air", "activa": true}},
+    {"model": "core.aerolinea", "pk": 303, "fields": {"codigo_iata": "T9", "codigo_numerico": "067", "nombre": "Turpial Airlines", "activa": true}}
 ]

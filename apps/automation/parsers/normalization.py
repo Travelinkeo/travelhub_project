@@ -53,6 +53,21 @@ GDS_MONTH_NUM = {
     12: "DIC",
 }
 
+GDS_NUM_TO_EN = {
+    1: "JAN",
+    2: "FEB",
+    3: "MAR",
+    4: "APR",
+    5: "MAY",
+    6: "JUN",
+    7: "JUL",
+    8: "AUG",
+    9: "SEP",
+    10: "OCT",
+    11: "NOV",
+    12: "DEC",
+}
+
 # Alias para compatibilidad con el plan de remediación original
 GDS_MONTH_MAP = GDS_MONTH_ES
 
@@ -370,9 +385,7 @@ class DataNormalizationService:
         return segmentos
 
     @staticmethod
-    def _resolve_iata_from_city(
-        raw_value, current_iata: str | None = None
-    ) -> str | None:
+    def _resolve_iata_from_city(raw_value, current_iata: str | None = None) -> str | None:
         """
         Resuelve el código IATA de 3 letras a partir de un valor crudo (puede ser
         nombre de ciudad, código IATA, o una cadena compuesta "CIUDAD, PAIS").

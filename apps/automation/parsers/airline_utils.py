@@ -52,10 +52,10 @@ def extract_airline_code_from_flight(numero_vuelo: str) -> str | None:
     if not numero_vuelo:
         return None
 
-    # Buscar patrón de 2 letras al inicio del número de vuelo
+    # Buscar patrón de 2 caracteres (letras/números) al inicio del número de vuelo (ej: "AA1234", "T96471", "5R300")
     import re
 
-    match = re.match(r"^([A-Z]{2})", numero_vuelo.upper().strip())
+    match = re.match(r"^([A-Z0-9]{2})", numero_vuelo.upper().strip())
 
     if match:
         return match.group(1)

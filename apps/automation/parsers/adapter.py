@@ -116,7 +116,7 @@ def _build_minimal_dict(parsed_data) -> dict[str, Any]:
         airline_name = parsed_data.flights[0].get("aerolinea")
 
     vuelos_out = []
-    for f in (parsed_data.flights or []):
+    for f in parsed_data.flights or []:
         if not isinstance(f, dict):
             continue
         # Asegurar origen/destino como dict (compat PDF/templates)
@@ -133,7 +133,9 @@ def _build_minimal_dict(parsed_data) -> dict[str, Any]:
         vuelos_out.append({**f, "origen": origen, "destino": destino})
 
     fares = parsed_data.fares or {}
-    moneda = fares.get("fare_currency") or fares.get("currency") or fares.get("total_currency") or "USD"
+    moneda = (
+        fares.get("fare_currency") or fares.get("currency") or fares.get("total_currency") or "USD"
+    )
     tarifa = fares.get("fare_amount")
     total = fares.get("total_amount")
     impuestos = fares.get("tax_amount")
@@ -156,16 +158,24 @@ def _build_minimal_dict(parsed_data) -> dict[str, Any]:
         "fecha_emision": parsed_data.issue_date,
         "fecha_emision_iso": parsed_data.issue_date,
         "CODIGO RESERVA": parsed_data.pnr,
-        "SOLO CODIGO RESERVA": (parsed_data.pnr.split("/")[-1] if parsed_data.pnr and "/" in parsed_data.pnr else parsed_data.pnr),
+        "SOLO CODIGO RESERVA": (
+            parsed_data.pnr.split("/")[-1]
+            if parsed_data.pnr and "/" in parsed_data.pnr
+            else parsed_data.pnr
+        ),
         "pnr": parsed_data.pnr,
         "NOMBRE AEROLINEA": airline_name or "No encontrado",
         "aerolinea_emisora": airline_name or "No encontrado",
         "vuelos": vuelos_out,
-        "TARIFA": f"{moneda} {tarifa}" if tarifa and moneda else (str(tarifa) if tarifa else "No encontrado"),
+        "TARIFA": f"{moneda} {tarifa}"
+        if tarifa and moneda
+        else (str(tarifa) if tarifa else "No encontrado"),
         "TARIFA_IMPORTE": tarifa,
         "TARIFA_MONEDA": moneda,
         "IMPUESTOS": impuestos,
-        "TOTAL": f"{moneda} {total}" if total and moneda else (str(total) if total else "No encontrado"),
+        "TOTAL": f"{moneda} {total}"
+        if total and moneda
+        else (str(total) if total else "No encontrado"),
         "TOTAL_IMPORTE": total,
         "TOTAL_MONEDA": moneda,
         "agencia": parsed_data.agency or {},

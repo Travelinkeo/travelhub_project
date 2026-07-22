@@ -155,6 +155,8 @@ class FastDeterministicParsers:
             data["aerolinea_emisora"] = "SKY AIRLINE"
         elif "TAP PORTUGAL" in text_upper or "TAP AIR" in text_upper:
             data["aerolinea_emisora"] = "TAP AIR PORTUGAL"
+        elif "TURPIAL" in text_upper:
+            data["aerolinea_emisora"] = "TURPIAL AIRLINES"
 
         # 5. Extraer Fecha de Emisión
         date_match = re.search(

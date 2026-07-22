@@ -63,7 +63,8 @@
     "model": "core.aerolinea",
     "pk": 6,
     "fields": {
-      "codigo_iata": "T3",
+      "codigo_iata": "T9",
+      "codigo_numerico": "067",
       "codigo_icao": "TUR",
       "nombre": "Turpial Airlines",
       "pais_origen": "Venezuela",

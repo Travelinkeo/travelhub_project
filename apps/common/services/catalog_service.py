@@ -111,7 +111,9 @@ class CatalogNormalizationService:
     def _get_airports_by_iata(cls, iata_code: str) -> dict[str, Any] | None:
         """Lookup O(1) por código IATA explícito (en el campo 'iata' del JSON)."""
         cls._load_airports()
-        return cls._airports_by_iata.get((iata_code or "").upper()) if cls._airports_by_iata else None
+        return (
+            cls._airports_by_iata.get((iata_code or "").upper()) if cls._airports_by_iata else None
+        )
 
     @classmethod
     def _get_airports_by_city(cls, city_name: str) -> list[dict[str, Any]]:
@@ -163,7 +165,9 @@ class CatalogNormalizationService:
             try:
                 return Ciudad.objects.filter(nombre__icontains=iata_code).first()
             except Exception as e_db:
-                logger.warning(f"⚠️ Fallback nombre también falló (DB) para IATA {iata_code}: {e_db}")
+                logger.warning(
+                    f"⚠️ Fallback nombre también falló (DB) para IATA {iata_code}: {e_db}"
+                )
                 return None
 
         city_name: str | None = info.get("city") or info.get("name")
@@ -176,7 +180,10 @@ class CatalogNormalizationService:
             if country_iso:
                 pais_obj, _ = Pais.objects.get_or_create(
                     codigo_iso_2=country_iso.upper(),
-                    defaults={"nombre": country_iso.upper(), "codigo_iso_3": country_iso.upper() + "X"},
+                    defaults={
+                        "nombre": country_iso.upper(),
+                        "codigo_iso_3": country_iso.upper() + "X",
+                    },
                 )
 
             # 4. Obtener o crear Ciudad y asegurar el código IATA

@@ -6,8 +6,10 @@
 - **Transaction Safety (`transaction.on_commit`)**:
   - `BoletoUploadAPIView`: Enqueued Celery task `parsear_boleto_individual` inside `transaction.on_commit` callback, resolving DB race condition (`DoesNotExist`) on async file uploads.
   - `TicketParserService`: Enqueued `generar_pdf_ticket_async_task` inside `transaction.on_commit` callback.
-- **Deterministic Airline Detection Expansion**:
-  - `FastDeterministicParsers`: Added fast regex matching for major airlines including Iberia, LATAM, Air Europa, Conviasa, Rutaca, Estelar, Flybondi, JetSMART, Sky Airline, and TAP Air Portugal.
+- **Turpial Airlines (T9) Support**:
+  - `airline_utils.py`: Fixed `extract_airline_code_from_flight` regex `^([A-Z0-9]{2})` to support alphanumeric IATA codes (e.g., `T9`, `5R`, `9V`, `V0`), and corrected corrupted `"TURPIAL"` key in `KIU_AIRLINES_MASTER`.
+  - `kiu_parser.py`: Added explicit fallback `T9` -> `"TURPIAL AIRLINES"`.
+  - Fixtures: Corrected `codigo_iata` from `"T3"` to `"T9"` with numerical prefix `"067"` in `aerolineas_venezuela.json` and added `T9` entry to `aerolineas.json`.
 - **Name Parsing Refinement**:
   - `_get_solo_nombre_pasajero`: Improved compound name extraction to strip courtesy titles (`MR`, `MRS`, `MS`, `MISS`, `MSTR`, `DR`, `PROF`, `CHD`, `INF`, `SR`, `SRA`) while preserving full compound first names (e.g. `"Juan Carlos"`).
 - **Status & Versioning Standardization**:

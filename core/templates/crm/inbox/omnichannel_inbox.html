@@ -13,7 +13,7 @@
     }
     .bubble-client { border-top-left-radius: 4px; }
     .bubble-agent { border-top-right-radius: 4px; }
-    
+
     @keyframes popIn {
         0% { opacity: 0; transform: translateY(10px) scale(0.95); }
         100% { opacity: 1; transform: translateY(0) scale(1); }
@@ -31,7 +31,7 @@
 {% block content %}
 <!-- Eliminamos el margen estándar del content para que el inbox ocupe toda la pantalla -->
 <div class="flex-1 flex overflow-hidden h-[calc(100vh-90px)] -mt-4 -mx-4 rounded-xl border border-border-color shadow-xl" x-data="inboxMaster()">
-    
+
     <!-- COLUMNA 1: LISTA DE CHATS (Sidebar) -->
     <aside class="w-80 lg:w-96 bg-surface-1 border-r border-border-color flex flex-col shrink-0 relative z-10">
         <!-- Buscador y Filtros -->
@@ -46,44 +46,24 @@
             </div>
             <div class="relative">
                 <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-muted text-[18px]">search</span>
-                <input type="text" placeholder="Buscar cliente..." class="w-full bg-surface-2 border border-border-color rounded-xl py-2 pl-10 pr-4 text-sm text-text-main focus:outline-none focus:border-emerald-500 transition-colors">
+                <input type="text"
+                       placeholder="Buscar cliente..."
+                       hx-get="{% url 'crm:inbox_search' %}"
+                       hx-trigger="keyup changed delay:300ms, search"
+                       hx-target="#client-list"
+                       hx-swap="innerHTML"
+                       hx-indicator="#search-spinner"
+                       name="q"
+                       class="w-full bg-surface-2 border border-border-color rounded-xl py-2 pl-10 pr-10 text-sm text-text-main focus:outline-none focus:border-emerald-500 transition-colors">
+                <span id="search-spinner" class="htmx-indicator absolute right-3 top-1/2 -translate-y-1/2">
+                    <span class="material-symbols-outlined text-emerald-400 text-[18px] animate-spin">sync</span>
+                </span>
             </div>
         </div>
 
         <!-- Lista de Conversaciones Dinámica -->
-        <div class="flex-1 overflow-y-auto custom-scrollbar">
-            {% for cliente in clientes_activos %}
-            <div hx-get="{% url 'crm:chat_thread' cliente.id_cliente %}" 
-                 hx-target="#chat-workspace" 
-                 hx-swap="innerHTML"
-                 @click="activeChat = {{ cliente.id_cliente }}; scrollToBottom();"
-                 :class="activeChat === {{ cliente.id_cliente }} ? 'border-emerald-500 bg-surface-2/50' : 'border-transparent hover:bg-surface-2'"
-                 class="p-4 border-l-4 cursor-pointer transition-colors border-b border-border-color relative">
-                
-                <div class="flex items-center gap-3">
-                    <div class="relative">
-                        <div class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-black text-lg shadow-md">
-                            {{ cliente.nombres|make_list|first|upper }}
-                        </div>
-                        <div class="absolute -bottom-1 -right-1 bg-surface-1 rounded-full p-0.5">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/WhatsApp.svg/1024px-WhatsApp.svg.png" class="w-4 h-4">
-                        </div>
-                    </div>
-                    <div class="flex-1 min-w-0">
-                        <div class="flex justify-between items-center mb-0.5">
-                            <h3 class="text-sm font-bold text-text-main truncate">{{ cliente.get_nombre_completo|title }}</h3>
-                            <span class="text-[10px] font-bold text-emerald-500">Activo</span>
-                        </div>
-                        <p class="text-xs text-text-muted truncate">{{ cliente.telefono_principal }}</p>
-                    </div>
-                </div>
-            </div>
-            {% empty %}
-            <div class="p-8 text-center opacity-50">
-                <span class="material-symbols-outlined text-4xl mb-2 text-text-muted">speaker_notes_off</span>
-                <p class="text-sm font-bold text-text-muted">No hay chats activos</p>
-            </div>
-            {% endfor %}
+        <div id="client-list" class="flex-1 overflow-y-auto custom-scrollbar">
+            {% include "crm/inbox/partials/client_list.html" with clientes=clientes_activos %}
         </div>
     </aside>
 
@@ -104,8 +84,27 @@
 <script nonce="{{ request.csp_nonce }}">
     document.addEventListener('alpine:init', () => {
         Alpine.data('inboxMaster', () => ({
-            activeChat: null,
-            
+            activeChat: {{ chat_id|default:"null" }},
+
+            init() {
+                // Auto-cargar chat si viene ?chat=ID
+                if (this.activeChat) {
+                    setTimeout(() => {
+                        const el = document.querySelector(`[data-chat-id="${this.activeChat}"]`);
+                        if (el) {
+                            el.click();
+                        } else {
+                            // Cargar via HTMX directo
+                            htmx.ajax('GET', `/crm/inbox/chat/${this.activeChat}/`, {
+                                target: '#chat-workspace',
+                                swap: 'innerHTML'
+                            });
+                        }
+                        this.scrollToBottom();
+                    }, 200);
+                }
+            },
+
             // Función llamada por HTMX tras cargar un chat o un mensaje
             scrollToBottom() {
                 setTimeout(() => {
@@ -115,7 +114,7 @@
                     }
                 }, 100);
             },
-            
+
             // Función para inyectar la sugerencia de la IA en el textarea
             useSuggestion(texto) {
                 const input = document.getElementById('msg-input');

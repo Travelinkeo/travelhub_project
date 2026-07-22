@@ -11,13 +11,14 @@ from .views import (
     actions_views,
     clientes_views,
     freelancer_views,
+    import_views,
     kanban_views,
     ocr_views,
     pasajeros_views,
     webhook_views,
 )
 from .views.ai_chat_views import GenerateSuggestedReplyView
-from .views.inbox_views import ChatThreadView, InboxView, SendMessageView
+from .views.inbox_views import ChatThreadView, InboxSearchView, InboxView, SendMessageView
 from .views.marketing_views import AnalyzeCampaignPromptView, DispatchCampaignView, MarketingHubView
 
 app_name = "crm"
@@ -120,6 +121,7 @@ urlpatterns = [
     path("marketing/dispatch/", DispatchCampaignView.as_view(), name="dispatch_campaign"),
     # --- INBOX OMNICANAL (WA + CRM + IA) ---
     path("inbox/", InboxView.as_view(), name="inbox"),
+    path("inbox/search/", InboxSearchView.as_view(), name="inbox_search"),
     path("inbox/chat/<int:cliente_id>/", ChatThreadView.as_view(), name="chat_thread"),
     path("inbox/send/<int:cliente_id>/", SendMessageView.as_view(), name="send_message"),
     path(
@@ -145,6 +147,22 @@ urlpatterns = [
     ),
     path(
         "api/ocr/scan-id/", dynamic_view("core.views.ocr_views.OCRPassportView"), name="api_scan_id"
+    ),
+    # Importación Excel
+    path(
+        "clientes/importar/",
+        import_views.ImportarClientesView.as_view(),
+        name="importar_clientes",
+    ),
+    path(
+        "clientes/importar/mapeo/",
+        import_views.MapeoColumnasView.as_view(),
+        name="importar_clientes_mapeo",
+    ),
+    path(
+        "clientes/importar/progreso/<str:task_id>/",
+        import_views.ImportarClientesProgressView.as_view(),
+        name="importar_clientes_progreso",
     ),
     # API
     path("api/", include(router.urls)),

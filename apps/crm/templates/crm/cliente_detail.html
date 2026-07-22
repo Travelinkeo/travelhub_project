@@ -36,9 +36,17 @@
                         <span class="material-symbols-outlined w-4 h-4 mr-2">mail</span>
                         {{ cliente.email }}
                     </div>
-                    <div class="flex items-center">
-                        <span class="material-symbols-outlined w-4 h-4 mr-2">phone</span>
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined w-4 h-4 mr-1">phone</span>
                         {{ cliente.telefono_principal }}
+                        {% if cliente.telefono_principal %}
+                        <a href="{% url 'crm:inbox' %}?chat={{ cliente.id_cliente }}"
+                           class="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 rounded-lg text-[10px] font-bold transition-all border border-emerald-500/20"
+                           title="Enviar WhatsApp">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/WhatsApp.svg/1024px-WhatsApp.svg.png" class="w-3 h-3">
+                            Chat
+                        </a>
+                        {% endif %}
                     </div>
                     <div class="flex items-center">
                         <span class="material-symbols-outlined w-4 h-4 mr-2">location_on</span>

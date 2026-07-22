@@ -1,7 +1,7 @@
 import logging
 
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Max
+from django.db.models import Max, Q
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render
 from django.views.generic import TemplateView, View
@@ -20,14 +20,29 @@ class InboxView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # Obtenemos clientes que tienen mensajes de WhatsApp, ordenados por el más reciente
-        clientes_activos = (
+        # Clientes con mensajes, ordenados por el más reciente
+        clientes_con_mensajes = (
             Cliente.objects.annotate(ultimo_mensaje_at=Max("mensajes_whatsapp__timestamp"))
             .filter(ultimo_mensaje_at__isnull=False)
             .order_by("-ultimo_mensaje_at")
         )
-
-        context["clientes_activos"] = clientes_activos
+        # Clientes con teléfono pero sin mensajes (para iniciar conversaciones)
+        clientes_sin_mensajes = (
+            Cliente.objects.filter(
+                mensajes_whatsapp__isnull=True,
+                telefono_principal__isnull=False,
+            )
+            .exclude(telefono_principal__exact="")
+            .order_by("nombres")
+        )
+        context["clientes_activos"] = list(clientes_con_mensajes) + list(clientes_sin_mensajes)
+        # Si viene ?chat=ID, pre-seleccionar ese cliente
+        chat_id = self.request.GET.get("chat")
+        if chat_id:
+            try:
+                context["chat_id"] = int(chat_id)
+            except (ValueError, TypeError):
+                pass
         return context
 
 
@@ -52,6 +67,44 @@ class ChatThreadView(LoginRequiredMixin, View):
         )
 
 
+class InboxSearchView(LoginRequiredMixin, View):
+    """
+    Endpoint HTMX para buscar clientes en el inbox.
+    """
+
+    def get(self, request, *args, **kwargs):
+        q = request.GET.get("q", "").strip()
+        if not q:
+            # Sin búsqueda, devolver la lista completa (como InboxView)
+            clientes_con_mensajes = (
+                Cliente.objects.annotate(ultimo_mensaje_at=Max("mensajes_whatsapp__timestamp"))
+                .filter(ultimo_mensaje_at__isnull=False)
+                .order_by("-ultimo_mensaje_at")
+            )
+            clientes_sin_mensajes = (
+                Cliente.objects.filter(
+                    mensajes_whatsapp__isnull=True,
+                    telefono_principal__isnull=False,
+                )
+                .exclude(telefono_principal__exact="")
+                .order_by("nombres")
+            )
+            clientes = list(clientes_con_mensajes) + list(clientes_sin_mensajes)
+        else:
+            clientes = (
+                Cliente.objects.filter(
+                    Q(nombres__icontains=q)
+                    | Q(apellidos__icontains=q)
+                    | Q(telefono_principal__icontains=q)
+                    | Q(email__icontains=q),
+                    telefono_principal__isnull=False,
+                )
+                .exclude(telefono_principal__exact="")
+                .order_by("nombres")[:20]
+            )
+        return render(request, "crm/inbox/partials/client_list.html", {"clientes": clientes})
+
+
 class SendMessageView(LoginRequiredMixin, View):
     """
     Endpoint HTMX para enviar un mensaje manual.
@@ -59,20 +112,19 @@ class SendMessageView(LoginRequiredMixin, View):
 
     def post(self, request, cliente_id, *args, **kwargs):
         cliente = get_object_or_404(Cliente, pk=cliente_id)
-        texto = request.POST.get("texto")  # Nombre del campo en el HTML
+        texto = request.POST.get("texto")
 
         if not texto:
             return HttpResponse(status=400)
 
-        # 1. Enviar vía Celery task (WhatsApp)
+        # 1. Enviar vía Celery task (Evolution API)
         try:
-            from apps.common.tasks import send_whatsapp_task
+            from apps.common.tasks.evolution import send_evolution_message_task
 
-            send_whatsapp_task.delay(
-                sender_id=cliente.telefono_principal,
-                recipient_number=cliente.telefono_principal,
-                message_text=texto,
+            send_evolution_message_task.delay(
                 agencia_id=cliente.agencia_id,
+                phone_number=cliente.telefono_principal,
+                text=texto,
             )
         except Exception as e:
             logger.error(f"Error encolando WhatsApp en inbox_views: {e}")

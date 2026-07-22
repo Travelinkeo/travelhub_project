@@ -1,0 +1,33 @@
+{% for cliente in clientes %}
+<div data-chat-id="{{ cliente.id_cliente }}"
+     hx-get="{% url 'crm:chat_thread' cliente.id_cliente %}"
+     hx-target="#chat-workspace"
+     hx-swap="innerHTML"
+     @click="activeChat = {{ cliente.id_cliente }}; scrollToBottom();"
+     :class="activeChat === {{ cliente.id_cliente }} ? 'border-emerald-500 bg-surface-2/50' : 'border-transparent hover:bg-surface-2'"
+     class="p-4 border-l-4 cursor-pointer transition-colors border-b border-border-color relative">
+
+    <div class="flex items-center gap-3">
+        <div class="relative">
+            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-black text-lg shadow-md">
+                {{ cliente.nombres|make_list|first|upper }}
+            </div>
+            <div class="absolute -bottom-1 -right-1 bg-surface-1 rounded-full p-0.5">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/WhatsApp.svg/1024px-WhatsApp.svg.png" class="w-4 h-4">
+            </div>
+        </div>
+        <div class="flex-1 min-w-0">
+            <div class="flex justify-between items-center mb-0.5">
+                <h3 class="text-sm font-bold text-text-main truncate">{{ cliente.get_nombre_completo|title }}</h3>
+                <span class="text-[10px] font-bold text-emerald-500">{% if cliente.mensajes_whatsapp.exists %}Activo{% else %}Nuevo{% endif %}</span>
+            </div>
+            <p class="text-xs text-text-muted truncate">{{ cliente.telefono_principal }}</p>
+        </div>
+    </div>
+</div>
+{% empty %}
+<div class="p-8 text-center opacity-50">
+    <span class="material-symbols-outlined text-4xl mb-2 text-text-muted">search_off</span>
+    <p class="text-sm font-bold text-text-muted">Sin resultados</p>
+</div>
+{% endfor %}

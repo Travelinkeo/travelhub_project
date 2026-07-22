@@ -88,15 +88,9 @@ class KIUParser(BaseTicketParser):
         if "BOLETO NRO" in passenger_name:
             passenger_name = "PENDIENTE / REVISAR"  # Fallback
 
-        # Calcular SOLO_NOMBRE (Primer nombre) para el saludo
-        solo_nombre = passenger_name
-        if "/" in passenger_name:
-            try:
-                parts = passenger_name.split("/")
-                if len(parts) > 1:
-                    solo_nombre = parts[1].strip().split()[0]  # Tomar primer token del nombre
-            except Exception as e:
-                logger.warning(f"⚠️ Error al extraer solo_nombre de {passenger_name}: {e}")
+        # Calcular SOLO_NOMBRE (Nombre/s de pila sin títulos) para el saludo
+        from apps.automation.parsers.ticket_parser import _get_solo_nombre_pasajero
+        solo_nombre = _get_solo_nombre_pasajero(passenger_name)
 
         return ParsedTicketData(
             source_system="KIU",

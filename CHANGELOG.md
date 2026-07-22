@@ -12,6 +12,8 @@
   - Fixtures: Corrected `codigo_iata` from `"T3"` to `"T9"` with numerical prefix `"067"` in `aerolineas_venezuela.json` and added `T9` entry to `aerolineas.json`.
 - **Name Parsing Refinement**:
   - `_get_solo_nombre_pasajero`: Improved compound name extraction to strip courtesy titles (`MR`, `MRS`, `MS`, `MISS`, `MSTR`, `DR`, `PROF`, `CHD`, `INF`, `SR`, `SRA`) while preserving full compound first names (e.g. `"Juan Carlos"`).
+- **Flight Alias Normalization**:
+  - `DataNormalizationService`: Expanded `vuelo_ref` extraction to check all flight list aliases (`segmentos`, `itinerario`, `flights`, `vuelos`) and field keys (`vuelo`, `numero_vuelo`, `flightNumber`), enabling robust airline normalization by flight number across all parsers.
 - **Status & Versioning Standardization**:
   - `_generate_pdf_sync`: Standardized PDF error fallback status to `BoletoImportado.EstadoParseo.REVISION_REQUERIDA` (`REV`) matching `_process_single_ticket` flow.
   - `handle_versioning`: Added check for voided/annulled prior tickets (`EstadoEmision.ANULADO`) to prevent invalid re-issuance tracking.

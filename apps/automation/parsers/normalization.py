@@ -179,14 +179,22 @@ class DataNormalizationService:
             raw_aero = normalized.get("issuing_airline")
             vuelo_ref = None
             # Intentar obtener el primer vuelo para ayudar a la normalización
-            if "segmentos" in normalized and normalized["segmentos"]:
-                vuelo_ref = normalized["segmentos"][0].get("vuelo")
-            elif (
-                "itinerario" in normalized
-                and normalized["itinerario"]
-                and isinstance(normalized["itinerario"], list)
-            ):
-                vuelo_ref = normalized["itinerario"][0].get("vuelo")
+            vuelos_list = (
+                normalized.get("segmentos")
+                or normalized.get("itinerario")
+                or normalized.get("flights")
+                or normalized.get("vuelos")
+                or []
+            )
+            if vuelos_list and isinstance(vuelos_list, list) and len(vuelos_list) > 0:
+                primer_vuelo = vuelos_list[0]
+                if isinstance(primer_vuelo, dict):
+                    vuelo_ref = (
+                        primer_vuelo.get("vuelo")
+                        or primer_vuelo.get("numero_vuelo")
+                        or primer_vuelo.get("flightNumber")
+                        or primer_vuelo.get("flight_number")
+                    )
 
             normalized["issuing_airline"] = normalize_airline_name(
                 raw_aero, flight_number=vuelo_ref, ticket_number=normalized.get("ticket_number")

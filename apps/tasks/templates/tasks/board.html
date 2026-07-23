@@ -1,0 +1,104 @@
+{% extends "base_modern.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Tareas" %} — TravelHub{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-8 space-y-6">
+
+  <!-- Header -->
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-black uppercase tracking-tight text-text-main">
+        <span class="material-symbols-outlined align-middle text-3xl text-primary">assignment</span>
+        {% trans "Tareas" %}
+      </h1>
+      <p class="text-text-muted text-sm">{{ total }} {% trans "tareas en total" %}</p>
+    </div>
+    <a href="{% url 'tasks:create' %}" class="btn-primary text-sm"
+       hx-get="{% url 'tasks:create' %}" hx-target="#modal-content" hx-trigger="click"
+       @click="$dispatch('open-modal')">
+      <span class="material-symbols-outlined text-lg">add</span> {% trans "Nueva Tarea" %}
+    </a>
+  </div>
+
+  {% if sin_agencia %}
+  <div class="card-base p-8 text-center text-text-muted">{% trans "No hay agencia activa." %}</div>
+  {% else %}
+
+  <!-- Kanban Columns -->
+  <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 overflow-x-auto">
+    {% for estado, col in columnas.items %}
+    <div class="min-w-[220px]">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-sm font-bold text-text-main">{{ col.label }}</h3>
+        <span class="text-xs text-text-muted bg-surface-2 px-2 py-0.5 rounded-full">{{ col.tareas|length }}</span>
+      </div>
+
+      <div class="space-y-3 min-h-[300px]">
+        {% for tarea in col.tareas %}
+        <div class="card-base p-4 cursor-pointer hover:ring-1 hover:ring-primary/30 transition-all"
+             hx-get="{% url 'tasks:detail' tarea.id %}" hx-target="#modal-content" hx-trigger="click"
+             @click="$dispatch('open-modal')"
+             id="tarea-{{ tarea.id }}">
+          <div class="flex items-start justify-between gap-2">
+            <p class="text-sm font-bold text-text-main leading-tight">{{ tarea.titulo }}</p>
+            <span class="material-symbols-outlined text-[14px] shrink-0
+              {% if tarea.prioridad == 'urgente' %}text-red-400
+              {% elif tarea.prioridad == 'alta' %}text-amber-400
+              {% elif tarea.prioridad == 'media' %}text-blue-400
+              {% else %}text-text-muted{% endif %}">
+              {% if tarea.prioridad == 'urgente' %}priority_high{% else %}flag{% endif %}
+            </span>
+          </div>
+
+          {% if tarea.descripcion %}
+          <p class="text-xs text-text-muted mt-1 line-clamp-2">{{ tarea.descripcion }}</p>
+          {% endif %}
+
+          <div class="flex items-center justify-between mt-3 pt-2 border-t border-border-color">
+            <div class="flex items-center gap-1.5">
+              {% if tarea.asignado_a %}
+              <div class="size-5 rounded-full bg-primary/20 flex items-center justify-center text-[9px] font-bold text-primary">
+                {{ tarea.asignado_a.email|first|upper }}
+              </div>
+              <span class="text-[10px] text-text-muted truncate max-w-[80px]">{{ tarea.asignado_a.email|truncatechars:12 }}</span>
+              {% else %}
+              <span class="text-[10px] text-text-muted italic">{% trans "Sin asignar" %}</span>
+              {% endif %}
+            </div>
+            {% if tarea.fecha_vencimiento %}
+            <span class="text-[10px] text-text-muted">{{ tarea.fecha_vencimiento|date:"d/m" }}</span>
+            {% endif %}
+          </div>
+        </div>
+        {% empty %}
+        <div class="card-base p-4 text-center text-text-muted text-xs italic">
+          {% trans "Sin tareas" %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  {% endif %}
+</div>
+
+<!-- Modal -->
+<div id="modal-overlay" class="fixed inset-0 bg-black/50 z-[60] hidden"
+     @open-modal.window="document.getElementById('modal-overlay').classList.remove('hidden')"
+     @keydown.escape="document.getElementById('modal-overlay').classList.add('hidden')"
+     x-data @click.self="document.getElementById('modal-overlay').classList.add('hidden')">
+  <div class="fixed inset-0 flex items-start justify-center pt-20 overflow-y-auto">
+    <div class="bg-surface-1 rounded-2xl shadow-2xl w-full max-w-lg mx-4 border border-border-color" @click.stop>
+      <div class="flex justify-end p-2">
+        <button @click="document.getElementById('modal-overlay').classList.add('hidden')" class="text-text-muted hover:text-text-main p-1">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <div id="modal-content" class="px-6 pb-6"></div>
+    </div>
+  </div>
+</div>
+{% endblock %}

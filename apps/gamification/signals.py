@@ -3,7 +3,7 @@ import logging
 from django.db.models.signals import post_save
 from django.dispatch import Signal, receiver
 
-from core.security import get_current_agency, get_current_user
+from core.middleware import get_current_agency, get_current_user
 
 logger = logging.getLogger(__name__)
 

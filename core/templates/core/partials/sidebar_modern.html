@@ -431,6 +431,13 @@
             <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">{% trans "KPIs" %}</span>
         </a>
 
+        <a href="{% url 'tasks:board' %}"
+            class="nav-item {% if 'tasks' in request.path %}nav-active{% endif %}"
+            :class="!sidebarOpen && 'justify-center'">
+            <span class="material-symbols-outlined text-[20px] shrink-0">assignment</span>
+            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">{% trans "Tareas" %}</span>
+        </a>
+
         <a href="{% url 'core:agencia_settings' %}"
             class="nav-item {% if 'agencia/configuracion' in request.path %}nav-active{% endif %}"
             :class="!sidebarOpen && 'justify-center'">

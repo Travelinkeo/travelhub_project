@@ -1,0 +1,120 @@
+{% load i18n %}
+
+<div x-data="{ editing: false }">
+  <div class="flex items-center justify-between mb-4">
+    <span class="text-[10px] uppercase tracking-wider text-text-muted bg-surface-2 px-2 py-1 rounded-full">
+      {{ tarea.get_estado_display }}
+    </span>
+    <div class="flex gap-1">
+      <button @click="editing = !editing" class="text-text-muted hover:text-text-main">
+        <span class="material-symbols-outlined text-lg">edit</span>
+      </button>
+      <form method="post" action="{% url 'tasks:delete' tarea.id %}"
+            hx-post="{% url 'tasks:delete' tarea.id %}"
+            hx-target="body" hx-confirm="{% trans '¿Eliminar esta tarea?' %}">
+        {% csrf_token %}
+        <button type="submit" class="text-text-muted hover:text-red-400">
+          <span class="material-symbols-outlined text-lg">delete</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Read mode -->
+  <div x-show="!editing">
+    <h2 class="text-xl font-black text-text-main mb-2">{{ tarea.titulo }}</h2>
+
+    <div class="flex flex-wrap gap-4 mb-4 text-xs text-text-muted">
+      <span class="flex items-center gap-1">
+        <span class="material-symbols-outlined text-[14px]">person</span>
+        {{ tarea.asignado_a.email|default:"Sin asignar" }}
+      </span>
+      <span class="flex items-center gap-1">
+        <span class="material-symbols-outlined text-[14px]">calendar_today</span>
+        {{ tarea.fecha_vencimiento|date:"d/m/Y"|default:"Sin fecha" }}
+      </span>
+      <span class="flex items-center gap-1">
+        <span class="material-symbols-outlined text-[14px]">person_add</span>
+        {{ tarea.creado_por.email }}
+      </span>
+    </div>
+
+    {% if tarea.descripcion %}
+    <p class="text-sm text-text-main whitespace-pre-wrap mb-6">{{ tarea.descripcion }}</p>
+    {% endif %}
+
+    <!-- Change status buttons -->
+    <div class="flex flex-wrap gap-2 mb-6">
+      {% for estado, label in tarea.ESTADOS %}
+      {% if estado != tarea.estado %}
+      <form method="post" action="{% url 'tasks:update' tarea.id %}"
+            hx-post="{% url 'tasks:update' tarea.id %}" hx-target="#modal-content">
+        {% csrf_token %}
+        <input type="hidden" name="estado" value="{{ estado }}">
+        <button type="submit" class="btn-secondary text-[10px]">{{ label }}</button>
+      </form>
+      {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Edit mode -->
+  <div x-show="editing" x-cloak>
+    <form method="post" action="{% url 'tasks:update' tarea.id %}"
+          hx-post="{% url 'tasks:update' tarea.id %}" hx-target="#modal-content"
+          class="space-y-4">
+      {% csrf_token %}
+      <input type="text" name="titulo" value="{{ tarea.titulo }}" class="input-base w-full">
+      <textarea name="descripcion" rows="4" class="input-base w-full">{{ tarea.descripcion }}</textarea>
+      <div class="grid grid-cols-2 gap-3">
+        <select name="prioridad" class="input-base">
+          {% for key, label in tarea.PRIORIDADES %}
+          <option value="{{ key }}" {% if tarea.prioridad == key %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+        <select name="estado" class="input-base">
+          {% for key, label in tarea.ESTADOS %}
+          <option value="{{ key }}" {% if tarea.estado == key %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="flex justify-end gap-2 pt-2">
+        <button type="button" @click="editing = false" class="btn-secondary text-sm">{% trans "Cancelar" %}</button>
+        <button type="submit" class="btn-primary text-sm">{% trans "Guardar" %}</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Comments -->
+  <div id="comentarios" class="mt-6 pt-6 border-t border-border-color">
+    <h3 class="text-sm font-bold text-text-main mb-4">{% trans "Comentarios" %}</h3>
+
+    <div class="space-y-3 mb-4">
+      {% for c in comentarios %}
+      <div class="flex gap-3">
+        <div class="size-8 rounded-full bg-surface-2 flex items-center justify-center text-xs font-bold text-text-main shrink-0">
+          {{ c.usuario.email|first|upper }}
+        </div>
+        <div>
+          <p class="text-xs font-bold text-text-main">{{ c.usuario.email }}</p>
+          <p class="text-xs text-text-muted">{{ c.created_at|date:"d/m/Y H:i" }}</p>
+          <p class="text-sm text-text-main mt-1">{{ c.texto }}</p>
+        </div>
+      </div>
+      {% empty %}
+      <p class="text-xs text-text-muted italic">{% trans "Sin comentarios aún." %}</p>
+      {% endfor %}
+    </div>
+
+    <form method="post" action="{% url 'tasks:comment' tarea.id %}"
+          hx-post="{% url 'tasks:comment' tarea.id %}" hx-target="#modal-content"
+          class="flex gap-2">
+      {% csrf_token %}
+      <input type="text" name="texto" placeholder="{% trans 'Escribe un comentario...' %}" required
+             class="input-base flex-1 text-sm" autocomplete="off">
+      <button type="submit" class="btn-primary text-sm">
+        <span class="material-symbols-outlined text-lg">send</span>
+      </button>
+    </form>
+  </div>
+</div>

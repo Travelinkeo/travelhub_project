@@ -9,6 +9,7 @@ from core.views.auth_views import MagicLinkRequestView, MagicLinkVerifyView, Tok
 from core.views.marketing_views import lead_magnet_download, parse_demo
 from core.views.onboarding_views import OnboardingAgencyView, SaaSOnboardingView
 from core.views.onboarding_wizard_views import OnboardingWizardView
+from core.views.portal_views import PortalHomeView, PortalLookupView, PortalTokenRedirectView
 from core.views.webhooks_views_ui import WebhookDeliveryListView, WebhookListView
 
 logger = logging.getLogger(__name__)
@@ -33,6 +34,10 @@ urlpatterns = [
     # --- WEBHOOKS ---
     path("webhooks/", WebhookListView.as_view(), name="webhooks_list"),
     path("webhooks/<int:webhook_id>/deliveries/", WebhookDeliveryListView.as_view(), name="webhooks_deliveries"),
+    # --- PORTAL DEL PASAJERO ---
+    path("portal/", PortalHomeView.as_view(), name="portal_home"),
+    path("portal/lookup/", PortalLookupView.as_view(), name="portal_lookup"),
+    path("portal/r/<uuid:uuid_token>/", PortalTokenRedirectView.as_view(), name="portal_token_redirect"),
     # --- DASHBOARD PRINCIPAL ---
     # Redirige a la vista modern_dashboard que ahora reside en bookings
     path(

@@ -295,6 +295,17 @@ urlpatterns = [
         dynamic_fb_view("apps.bookings.views.passenger_portal.public_itinerary_cross_sell"),
         name="public_itinerary_cross_sell",
     ),
+    # --- ITINERARIO INTERACTIVO ---
+    path(
+        "itinerary/v2/<str:token>/",
+        dynamic_fb_view("apps.bookings.views.itinerary_interactive.public_itinerary_interactive_view"),
+        name="public_itinerary_interactive",
+    ),
+    path(
+        "itinerary/v2/<str:token>/map-data/",
+        dynamic_view("apps.bookings.views.itinerary_interactive.ItineraryMapDataView"),
+        name="itinerary_map_data",
+    ),
     # API
     path("api/", include(router.urls)),
     path("api/v1/gds/ingest-pnr/", api_ingest_pnr_view, name="api_gds_ingest_pnr"),

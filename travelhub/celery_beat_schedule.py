@@ -112,4 +112,9 @@ CELERY_BEAT_SCHEDULE = {
         "schedule": 3600.0,  # cada hora — revisa si hay leads que necesiten follow-up
         "args": (),
     },
+    "enviar-reportes-programados-cada-hora": {
+        "task": "apps.reports.tasks.enviar_reportes_programados_task",
+        "schedule": 3600.0,  # cada hora — evalúa qué reportes están pendientes
+        "args": (),
+    },
 }

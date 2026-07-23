@@ -1,0 +1,132 @@
+{% load i18n humanize %}
+<div class="space-y-3">
+
+    <!-- Vuelos -->
+    {% if venta.segmentos_vuelo.all %}
+    <h4 class="text-[10px] font-black text-white/40 uppercase tracking-widest flex items-center gap-1.5 mb-2">
+        <span class="material-symbols-outlined text-[16px]">flight_takeoff</span> Vuelos
+    </h4>
+    {% for seg in venta.segmentos_vuelo.all %}
+    <div class="glass rounded-[20px] p-4 relative overflow-hidden animate-slide" style="animation-delay:{{ forloop.counter0|floatformat:1 }}s">
+        <div class="absolute top-0 left-0 w-1 h-full" style="background:var(--brand,#6366f1);"></div>
+        <div class="flex items-start justify-between mb-3">
+            <div class="flex items-center gap-2">
+                <span class="text-[10px] font-black font-mono bg-white/10 text-white/80 px-2 py-0.5 rounded-full">{{ seg.aerolinea|default:"Vuelo" }} {{ seg.numero_vuelo }}</span>
+                <span class="text-[9px] text-white/40">{{ seg.fecha_salida|date:"d M Y, H:i" }}</span>
+            </div>
+            <span class="text-[9px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider
+                {% if seg.fecha_salida and seg.fecha_salida > now %}bg-emerald-500/20 text-emerald-300 border border-emerald-500/30
+                {% elif seg.fecha_llegada and seg.fecha_llegada < now %}bg-white/10 text-white/40
+                {% else %}bg-amber-500/20 text-amber-300 border border-amber-500/30{% endif %}">
+                {% if seg.fecha_salida and seg.fecha_salida > now %}Próximo
+                {% elif seg.fecha_llegada and seg.fecha_llegada < now %}Completado
+                {% else %}En Curso{% endif %}
+            </span>
+        </div>
+
+        <div class="flex items-center justify-between">
+            <div class="text-center">
+                <p class="text-2xl font-black text-white tracking-tight font-mono">{{ seg.origen.codigo_iata|default:"???" }}</p>
+                <p class="text-[9px] text-white/40 font-medium">{{ seg.origen.nombre|default:"Origen"|truncatechars:18 }}</p>
+            </div>
+            <div class="flex-1 mx-4 flex flex-col items-center">
+                <div class="w-full border-t border-dashed border-white/10 relative my-2">
+                    <span class="material-symbols-outlined absolute -top-3 left-1/2 -ml-3 text-white/20 text-[18px] rotate-90">flight</span>
+                </div>
+                <span class="text-[8px] text-white/30 uppercase tracking-widest">{{ seg.clase_reserva|default:"Y" }}</span>
+            </div>
+            <div class="text-center">
+                <p class="text-2xl font-black text-white tracking-tight font-mono">{{ seg.destino.codigo_iata|default:"???" }}</p>
+                <p class="text-[9px] text-white/40 font-medium">{{ seg.destino.nombre|default:"Destino"|truncatechars:18 }}</p>
+            </div>
+        </div>
+
+        {% if forloop.first and seg.fecha_salida %}
+        <div class="mt-3 pt-3 border-t border-white/5 flex justify-between text-[10px] text-white/30">
+            <span>🕒 Sale en <strong class="text-white/70 countdown-digit" data-countdown="{{ seg.fecha_salida|date:'Y-m-d H:i:s' }}"></strong></span>
+            <span>✈️ Clase {{ seg.clase_reserva|default:"Económica" }}</span>
+        </div>
+        {% endif %}
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <!-- Hoteles -->
+    {% if venta.alojamientos.all %}
+    <h4 class="text-[10px] font-black text-white/40 uppercase tracking-widest flex items-center gap-1.5 mb-2 mt-5">
+        <span class="material-symbols-outlined text-[16px]">hotel</span> Alojamiento
+    </h4>
+    {% for h in venta.alojamientos.all %}
+    <div class="glass rounded-[20px] p-4 relative overflow-hidden animate-slide">
+        <div class="absolute top-0 left-0 w-1 h-full bg-emerald-500"></div>
+        <div class="flex items-center justify-between mb-2">
+            <h5 class="text-sm font-bold text-white">{{ h.nombre_establecimiento }}</h5>
+            <span class="text-[9px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold uppercase">Confirmado</span>
+        </div>
+        <div class="flex gap-4 text-[11px] text-white/50">
+            <span>🛏️ {{ h.habitaciones }} Hab.</span>
+            <span>📅 {{ h.check_in|date:"d M" }} → {{ h.check_out|date:"d M" }}</span>
+            {% if h.regimen_alimentacion %}
+            <span>🍽️ {{ h.regimen_alimentacion }}</span>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <!-- Alquiler Autos -->
+    {% if venta.alquileres_autos.all %}
+    <h4 class="text-[10px] font-black text-white/40 uppercase tracking-widest flex items-center gap-1.5 mb-2 mt-5">
+        <span class="material-symbols-outlined text-[16px]">directions_car</span> Alquiler de Auto
+    </h4>
+    {% for a in venta.alquileres_autos.all %}
+    <div class="glass rounded-[20px] p-4 relative overflow-hidden animate-slide">
+        <div class="absolute top-0 left-0 w-1 h-full bg-amber-500"></div>
+        <div class="flex items-center justify-between">
+            <div>
+                <h5 class="text-sm font-bold text-white">{{ a.categoria_auto|default:"Estándar" }}</h5>
+                <p class="text-[10px] text-white/40">{{ a.compania_rentadora }}</p>
+            </div>
+            {% if a.numero_confirmacion %}
+            <span class="text-[9px] font-mono bg-amber-500/20 text-amber-300 px-2 py-1 rounded-lg">REF: {{ a.numero_confirmacion }}</span>
+            {% endif %}
+        </div>
+        <div class="mt-2 text-[10px] text-white/30">
+            📍 {{ a.ciudad_retiro.nombre|default:"N/A" }} → {{ a.ciudad_devolucion.nombre|default:"N/A" }}
+        </div>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <!-- Servicios Adicionales -->
+    {% if venta.servicios_adicionales.all %}
+    <h4 class="text-[10px] font-black text-white/40 uppercase tracking-widest flex items-center gap-1.5 mb-2 mt-5">
+        <span class="material-symbols-outlined text-[16px]">verified</span> Servicios
+    </h4>
+    {% for s in venta.servicios_adicionales.all %}
+    <div class="glass rounded-[20px] p-3 relative overflow-hidden animate-slide">
+        <div class="absolute top-0 left-0 w-1 h-full bg-purple-500"></div>
+        <div class="flex items-center justify-between">
+            <div>
+                <h5 class="text-xs font-bold text-white">{{ s.get_tipo_servicio_display }}</h5>
+                <p class="text-[10px] text-white/40">{{ s.descripcion|truncatechars:60 }}</p>
+            </div>
+            <span class="text-[9px] text-white/30 whitespace-nowrap">{{ s.fecha_inicio|date:"d M" }}</span>
+        </div>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    {% if not venta.segmentos_vuelo.all and not venta.alojamientos.all and not venta.alquileres_autos.all and not venta.servicios_adicionales.all %}
+    <div class="text-center py-12 text-white/30 text-sm">
+        <span class="material-symbols-outlined text-4xl mb-2">explore</span>
+        <p>No hay servicios registrados en este itinerario.</p>
+    </div>
+    {% endif %}
+
+    <!-- Timestamp de última actualización -->
+    <div class="text-center mt-6">
+        <span class="text-[8px] text-white/20 font-mono">Actualizado: {{ now|date:"H:i:s" }}</span>
+    </div>
+
+</div>

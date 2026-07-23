@@ -1,0 +1,94 @@
+{% extends "base_modern.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Logros" %} — TravelHub{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 py-8 space-y-8">
+
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-black uppercase tracking-tight text-text-main">
+        <span class="material-symbols-outlined align-middle text-3xl text-primary">military_tech</span>
+        {% trans "Logros" %}
+      </h1>
+      <p class="text-text-muted text-sm">{% trans "Todos los logros disponibles. ¡A conquistarlos!" %}</p>
+    </div>
+    <a href="{% url 'gamification:dashboard' %}" class="btn-secondary text-sm">
+      <span class="material-symbols-outlined text-lg">arrow_back</span> {% trans "Volver" %}
+    </a>
+  </div>
+
+  {% if sin_agencia %}
+  <div class="card-base p-8 text-center text-text-muted">{% trans "No hay agencia activa." %}</div>
+  {% else %}
+
+  <!-- Completados -->
+  {% if completados %}
+  <section>
+    <h2 class="text-lg font-bold text-text-main mb-4 flex items-center gap-2">
+      <span class="material-symbols-outlined text-emerald-400">check_circle</span>
+      {% trans "Conquistados" %} ({{ completados|length }})
+    </h2>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      {% for p in completados %}
+      <div class="card-base p-4 ring-1 ring-emerald-500/30 text-center">
+        <span class="material-symbols-outlined text-4xl text-emerald-400">{{ p.logro.icono }}</span>
+        <p class="text-sm font-bold text-text-main mt-2">{{ p.logro.nombre }}</p>
+        <p class="text-[10px] text-text-muted">{{ p.logro.categoria }}</p>
+        <p class="text-xs text-emerald-400 mt-1">+{{ p.logro.puntos }} pts</p>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- En Progreso -->
+  {% if pendientes %}
+  <section>
+    <h2 class="text-lg font-bold text-text-main mb-4 flex items-center gap-2">
+      <span class="material-symbols-outlined text-primary">sync</span>
+      {% trans "En Progreso" %} ({{ pendientes|length }})
+    </h2>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      {% for p in pendientes %}
+      <div class="card-base p-4">
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-2xl text-text-muted">{{ p.logro.icono }}</span>
+          <div class="flex-1">
+            <p class="text-sm font-bold text-text-main">{{ p.logro.nombre }}</p>
+            <div class="mt-1 h-1.5 rounded-full bg-surface-2 overflow-hidden">
+              <div class="h-full rounded-full bg-primary transition-all" style="width: {{ p.progreso }}%"></div>
+            </div>
+            <p class="text-[10px] text-text-muted mt-0.5">{{ p.progreso }}%</p>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- Por Conquistar -->
+  {% if sin_iniciar %}
+  <section>
+    <h2 class="text-lg font-bold text-text-main mb-4 flex items-center gap-2">
+      <span class="material-symbols-outlined">explore</span>
+      {% trans "Por Conquistar" %} ({{ sin_iniciar|length }})
+    </h2>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      {% for logro in sin_iniciar %}
+      <div class="card-base p-4 opacity-50 text-center">
+        <span class="material-symbols-outlined text-4xl text-text-muted">{{ logro.icono }}</span>
+        <p class="text-sm font-bold text-text-main mt-2">{{ logro.nombre }}</p>
+        <p class="text-[10px] text-text-muted">{{ logro.descripcion|truncatewords:10 }}</p>
+        <p class="text-xs text-primary mt-1">+{{ logro.puntos }} pts</p>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  {% endif %}
+</div>
+{% endblock %}

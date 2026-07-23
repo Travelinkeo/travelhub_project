@@ -475,15 +475,14 @@ Se ha procesado un nuevo boleto de forma automática.
 """
     if canal in ["whatsapp", "both"] and is_enabled and admin_phone:
         try:
-            from apps.common.tasks import send_whatsapp_task
+            from apps.common.tasks.evolution import send_evolution_message_task
 
-            send_whatsapp_task.delay(
-                sender_id=admin_phone,
-                recipient_number=admin_phone,
-                message_text=mensaje_admin,
+            send_evolution_message_task.delay(
                 agencia_id=agencia_id,
+                phone_number=admin_phone,
+                text=mensaje_admin,
             )
-            logger.info(f"Tarea WhatsApp encolada para Admin ({admin_phone})")
+            logger.info(f"Tarea WhatsApp Evolution encolada para Admin ({admin_phone})")
         except Exception as e:
             logger.error(f"Error encolando WhatsApp para Admin ({admin_phone}): {e}")
 

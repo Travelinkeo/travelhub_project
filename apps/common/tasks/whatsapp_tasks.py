@@ -16,16 +16,28 @@ logger = logging.getLogger(__name__)
     soft_time_limit=90,
 )
 def enviar_notificacion_whatsapp_task(
-    self, numero_cliente, mensaje, email_cliente=None, media_url=None, file_name=None, **kwargs
+    self, numero_cliente, mensaje, email_cliente=None, media_url=None, file_name=None, agencia_id=None, **kwargs
 ):
     from django.core.mail import send_mail
 
     from apps.communications.services.telegram_unified import enviar_alerta_telegram
     from apps.communications.services.whatsapp_unified import send_whatsapp_message
-    from core.middleware import get_current_agency
 
-    agencia = get_current_agency()
-    agencia_nombre = agencia.nombre if agencia else "TravelHub"
+    agencia = None
+    agencia_nombre = "TravelHub"
+
+    if agencia_id:
+        try:
+            from core.models import Agencia
+            agencia = Agencia.objects.get(id=agencia_id)
+            agencia_nombre = agencia.nombre
+        except Exception:
+            pass
+
+    if not agencia:
+        from core.middleware import get_current_agency
+        agencia = get_current_agency()
+        agencia_nombre = agencia.nombre if agencia else "TravelHub"
 
     try:
         logger.info(

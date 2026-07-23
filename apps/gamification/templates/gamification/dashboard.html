@@ -1,0 +1,136 @@
+{% extends "base_modern.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Gamificación" %} — TravelHub{% endblock %}
+
+{% block extra_css %}
+<style>
+  .progress-ring { transition: stroke-dashoffset 0.5s ease; }
+  .level-card { background: linear-gradient(135deg, var(--surface-1) 0%, var(--surface-base) 100%); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-8 space-y-8">
+
+  <!-- Header -->
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-black uppercase tracking-tight text-text-main">
+        <span class="material-symbols-outlined align-middle text-3xl text-primary">emoji_events</span>
+        {% trans "Gamificación" %}
+      </h1>
+      <p class="text-text-muted text-sm">{% trans "Gana puntos, sube de nivel y desbloquea logros mientras operas." %}</p>
+    </div>
+    <div class="flex gap-2">
+      <a href="{% url 'gamification:badges' %}" class="btn-secondary text-sm">
+        <span class="material-symbols-outlined text-lg">military_tech</span> {% trans "Logros" %}
+      </a>
+      <a href="{% url 'gamification:leaderboard' %}" class="btn-secondary text-sm">
+        <span class="material-symbols-outlined text-lg">leaderboard</span> {% trans "Ranking" %}
+      </a>
+    </div>
+  </div>
+
+  {% if sin_agencia %}
+  <div class="card-base p-8 text-center text-text-muted">{% trans "No hay agencia activa." %}</div>
+  {% else %}
+
+  <!-- Score + Level -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div class="card-base p-6 level-card col-span-2">
+      <div class="flex items-center gap-6">
+        <div class="relative size-24">
+          <svg class="size-24 -rotate-90" viewBox="0 0 36 36">
+            <circle cx="18" cy="18" r="15.5" fill="none" stroke="var(--surface-2)" stroke-width="3"/>
+            <circle id="xp-circle" cx="18" cy="18" r="15.5" fill="none"
+                    stroke="currentColor" stroke-width="3" stroke-dasharray="97.4"
+                    stroke-dashoffset="{{ siguiente_nivel|yesno:'97.4,0'|default:'0' }}"
+                    class="text-primary progress-ring"/>
+          </svg>
+          <div class="absolute inset-0 flex items-center justify-center">
+            <span class="material-symbols-outlined text-3xl" style="color: {{ puntuacion.nivel.color|default:'#6B7280' }};">
+              {{ puntuacion.nivel.icono|default:"stars" }}
+            </span>
+          </div>
+        </div>
+        <div>
+          <p class="text-xs text-text-muted uppercase tracking-wider">{% trans "NIVEL" %}</p>
+          <p class="text-2xl font-black text-text-main">{{ puntuacion.nivel.nombre|default:"Sin nivel" }}</p>
+          <p class="text-sm text-text-muted mt-1">
+            {{ puntuacion.puntos_total }} pts
+            {% if siguiente_nivel %}
+            — {% trans "Faltan" %} {{ siguiente_nivel.puntos_minimos|add:puntuacion.puntos_total|add:"0" }} pts
+            {% endif %}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-base p-6 text-center">
+      <span class="material-symbols-outlined text-4xl text-primary">military_tech</span>
+      <p class="text-3xl font-black text-text-main mt-2">{{ puntuacion.logros_completados }}</p>
+      <p class="text-xs text-text-muted uppercase tracking-wider">{% trans "Logros Completados" %}</p>
+    </div>
+  </div>
+
+  <!-- Logros Recientes -->
+  <div>
+    <h2 class="text-lg font-bold text-text-main mb-4 flex items-center gap-2">
+      <span class="material-symbols-outlined text-primary">check_circle</span>
+      {% trans "Logros Recientes" %}
+    </h2>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      {% for p in progresos|slice:":4" %}
+      <div class="card-base p-4 {% if p.completado %}ring-1 ring-primary/30{% endif %}">
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-2xl {% if p.completado %}text-primary{% else %}text-text-muted{% endif %}">
+            {{ p.logro.icono }}
+          </span>
+          <div>
+            <p class="text-sm font-bold text-text-main">{{ p.logro.nombre }}</p>
+            <p class="text-xs text-text-muted">
+              {% if p.completado %}
+              <span class="text-emerald-400">✅ {{ p.fecha_completado|date:"d/m/Y" }}</span>
+              {% else %}
+              {{ p.progreso }}%
+              {% endif %}
+            </p>
+          </div>
+        </div>
+      </div>
+      {% empty %}
+      <p class="text-text-muted text-sm col-span-full">{% trans "Aún no has empezado. ¡Realiza tu primera venta!" %}</p>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Ranking Top 5 -->
+  <div>
+    <h2 class="text-lg font-bold text-text-main mb-4 flex items-center gap-2">
+      <span class="material-symbols-outlined text-primary">leaderboard</span>
+      {% trans "Ranking del Equipo" %}
+    </h2>
+    <div class="card-base divide-y divide-border-color">
+      {% for pos in ranking|slice:":5" %}
+      <div class="flex items-center gap-4 px-6 py-3 {% if pos.usuario == request.user %}bg-primary/5{% endif %}">
+        <span class="text-lg font-black text-text-muted w-8">#{{ forloop.counter }}</span>
+        <div class="size-10 rounded-full bg-surface-2 flex items-center justify-center text-sm font-bold text-text-main">
+          {{ pos.usuario.email|first|upper }}
+        </div>
+        <div class="flex-1">
+          <p class="text-sm font-bold text-text-main">{{ pos.usuario.email }}</p>
+          <p class="text-xs text-text-muted">{{ pos.nivel.nombre|default:"-" }}</p>
+        </div>
+        <span class="text-sm font-bold text-primary">{{ pos.puntos_total }} pts</span>
+        <span class="text-xs text-text-muted">{{ pos.logros_completados }} logros</span>
+      </div>
+      {% empty %}
+      <p class="px-6 py-4 text-text-muted text-sm">{% trans "Solo hay un miembro en el equipo por ahora." %}</p>
+      {% endfor %}
+    </div>
+  </div>
+
+  {% endif %}
+</div>
+{% endblock %}

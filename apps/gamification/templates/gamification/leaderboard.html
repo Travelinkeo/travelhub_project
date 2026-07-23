@@ -1,0 +1,67 @@
+{% extends "base_modern.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Ranking" %} — TravelHub{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-8 space-y-8">
+
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-black uppercase tracking-tight text-text-main">
+        <span class="material-symbols-outlined align-middle text-3xl text-primary">leaderboard</span>
+        {% trans "Ranking del Equipo" %}
+      </h1>
+      <p class="text-text-muted text-sm">{% trans "¿Quién suma más puntos en la agencia?" %}</p>
+    </div>
+    <a href="{% url 'gamification:dashboard' %}" class="btn-secondary text-sm">
+      <span class="material-symbols-outlined text-lg">arrow_back</span> {% trans "Volver" %}
+    </a>
+  </div>
+
+  {% if sin_agencia %}
+  <div class="card-base p-8 text-center text-text-muted">{% trans "No hay agencia activa." %}</div>
+  {% elif not ranking %}
+  <div class="card-base p-8 text-center text-text-muted">{% trans "No hay participantes en el ranking todavía." %}</div>
+  {% else %}
+
+  <!-- Podium Top 3 -->
+  <div class="grid grid-cols-3 gap-4 items-end mb-8">
+    {% for pos in ranking|slice:":3" %}
+    <div class="text-center {% if forloop.counter == 2 %}order-1{% elif forloop.counter == 1 %}order-2{% else %}order-3{% endif %}">
+      {% if forloop.counter == 1 %}
+      <span class="material-symbols-outlined text-5xl text-yellow-400">workspace_premium</span>
+      {% elif forloop.counter == 2 %}
+      <span class="material-symbols-outlined text-4xl text-slate-300">workspace_premium</span>
+      {% else %}
+      <span class="material-symbols-outlined text-4xl text-amber-600">workspace_premium</span>
+      {% endif %}
+      <div class="size-16 rounded-full bg-surface-2 mx-auto flex items-center justify-center text-xl font-black text-text-main mt-1">
+        {{ pos.usuario.email|first|upper }}
+      </div>
+      <p class="text-sm font-bold text-text-main mt-2 truncate">{{ pos.usuario.email }}</p>
+      <p class="text-lg font-black text-primary">{{ pos.puntos_total }} pts</p>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Resto del ranking -->
+  <div class="card-base divide-y divide-border-color">
+    {% for pos in ranking|slice:"3:" %}
+    <div class="flex items-center gap-4 px-6 py-3 {% if pos.usuario == request.user %}bg-primary/5{% endif %}">
+      <span class="text-lg font-black text-text-muted w-8">#{{ forloop.counter|add:"3" }}</span>
+      <div class="size-10 rounded-full bg-surface-2 flex items-center justify-center text-sm font-bold text-text-main">
+        {{ pos.usuario.email|first|upper }}
+      </div>
+      <div class="flex-1">
+        <p class="text-sm font-bold text-text-main">{{ pos.usuario.email }}</p>
+        <p class="text-xs text-text-muted">{{ pos.nivel.nombre|default:"-" }} · {{ pos.logros_completados }} logros</p>
+      </div>
+      <span class="text-sm font-bold text-primary">{{ pos.puntos_total }} pts</span>
+    </div>
+    {% endfor %}
+  </div>
+
+  {% endif %}
+</div>
+{% endblock %}

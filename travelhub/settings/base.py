@@ -148,6 +148,7 @@ INSTALLED_APPS = [
     "apps.marketing.apps.MarketingConfig",
     "apps.cms.apps.CmsConfig",
     "apps.crm.apps.CrmConfig",
+    "apps.gamification.apps.GamificationConfig",
     "apps.communications.apps.CommunicationsConfig",
     "apps.automation.apps.AutomationConfig",
     "django_celery_results",

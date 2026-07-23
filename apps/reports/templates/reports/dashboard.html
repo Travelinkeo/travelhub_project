@@ -1,0 +1,110 @@
+{% extends "base_modern.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "KPIs" %} — TravelHub{% endblock %}
+
+{% block extra_css %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<style>
+  .kpi-card { transition: transform 0.15s ease, box-shadow 0.15s ease; }
+  .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-8 space-y-8"
+     x-data="kpiDashboard()"
+     x-init="init()">
+
+  <!-- Header -->
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-black uppercase tracking-tight text-text-main">
+        <span class="material-symbols-outlined align-middle text-3xl text-primary">monitoring</span>
+        {% trans "KPIs y Reportes" %}
+      </h1>
+      <p class="text-text-muted text-sm">{% trans "Métricas clave de tu agencia en tiempo real." %}</p>
+    </div>
+    <div class="flex gap-2">
+      <button @click="refreshCharts()" class="btn-secondary text-sm">
+        <span class="material-symbols-outlined text-lg">refresh</span> {% trans "Actualizar" %}
+      </button>
+      <a href="{% url 'reports:kpi_export' %}" class="btn-secondary text-sm">
+        <span class="material-symbols-outlined text-lg">download</span> CSV
+      </a>
+    </div>
+  </div>
+
+  {% if sin_agencia %}
+  <div class="card-base p-8 text-center text-text-muted">{% trans "No hay agencia activa." %}</div>
+  {% else %}
+
+  <!-- KPI Cards -->
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+    {% for card in cards %}
+    <div class="card-base p-4 kpi-card">
+      <div class="flex items-center justify-between mb-2">
+        <span class="material-symbols-outlined text-2xl text-{{ card.color }}">
+          {{ card.icono }}
+        </span>
+        <span class="text-[10px] uppercase tracking-wider text-text-muted">{{ card.titulo }}</span>
+      </div>
+      <p class="text-2xl font-black text-text-main">{{ card.valor }}</p>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Charts Row -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="card-base p-6">
+      <h3 class="text-sm font-bold text-text-main mb-4">{% trans "Ventas por Día (últimos 30 días)" %}</h3>
+      <div class="h-64">
+        <canvas id="chart-ventas-diarias"></canvas>
+      </div>
+    </div>
+    <div class="card-base p-6">
+      <h3 class="text-sm font-bold text-text-main mb-4">{% trans "Ventas por Vendedor" %}</h3>
+      <div class="h-64">
+        <canvas id="chart-ventas-vendedor"></canvas>
+      </div>
+    </div>
+    <div class="card-base p-6 lg:col-span-2">
+      <h3 class="text-sm font-bold text-text-main mb-4">{% trans "Boletos por Aerolínea" %}</h3>
+      <div class="h-64 max-w-md mx-auto">
+        <canvas id="chart-boletos-aerolinea"></canvas>
+      </div>
+    </div>
+  </div>
+
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function kpiDashboard() {
+  return {
+    charts: {},
+    init() {
+      this.renderChart('chart-ventas-diarias', {{ chart_ventas_diarias|safe }});
+      this.renderChart('chart-ventas-vendedor', {{ chart_ventas_vendedor|safe }});
+      this.renderChart('chart-boletos-aerolinea', {{ chart_boletos_aerolinea|safe }});
+    },
+    renderChart(canvasId, config) {
+      const canvas = document.getElementById(canvasId);
+      if (!canvas) return;
+      if (this.charts[canvasId]) this.charts[canvasId].destroy();
+      this.charts[canvasId] = new Chart(canvas, config);
+    },
+    refreshCharts() {
+      fetch('{% url "reports:kpi_chart_data" %}?chart=ventas_diarias')
+        .then(r => r.json()).then(d => this.renderChart('chart-ventas-diarias', d));
+      fetch('{% url "reports:kpi_chart_data" %}?chart=ventas_vendedor')
+        .then(r => r.json()).then(d => this.renderChart('chart-ventas-vendedor', d));
+      fetch('{% url "reports:kpi_chart_data" %}?chart=boletos_aerolinea')
+        .then(r => r.json()).then(d => this.renderChart('chart-boletos-aerolinea', d));
+    },
+  };
+}
+</script>
+{% endblock %}

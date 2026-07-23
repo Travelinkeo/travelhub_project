@@ -81,6 +81,7 @@ urlpatterns = [
     path("accounting/", include("apps.contabilidad.urls")),
     path("cms/", include("apps.cms.urls")),
     path("gamification/", include("apps.gamification.urls")),
+    path("reports/", include("apps.reports.urls")),
     path("marketing/", include("apps.marketing.urls")),
     path("cotizaciones/", include("apps.cotizaciones.urls")),
     path("api/", include("travelhub.urls_api")),

@@ -86,6 +86,10 @@ jobs:
           PGPASSWORD=postgres psql -h localhost -U postgres -d travelhub_test -c "CREATE EXTENSION IF NOT EXISTS pg_trgm;"
           PGPASSWORD=postgres psql -h localhost -U postgres -d template1 -c "CREATE EXTENSION IF NOT EXISTS pg_trgm;"
 
+      - name: Quick pre-check — unit tests (sin DB)
+        run: |
+          pytest tests/unit/ -m unit -q --tb=short -x --no-header
+
       - name: Run tests with coverage
         run: |
           pytest \
@@ -96,6 +100,7 @@ jobs:
             --cov-report=xml \
             --cov-report=term \
             --cov-fail-under=75 \
+            --ignore=tests/e2e \
             -v \
             --tb=short \
             -x

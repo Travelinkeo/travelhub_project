@@ -1,0 +1,128 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agenda una Demo — TravelHub</title>
+    <meta name="description" content="Descubre cómo TravelHub puede automatizar tu agencia de viajes. Agenda una demo personalizada sin compromiso.">
+    <link rel="stylesheet" href="{% static 'core/css/tailwind-built.css' %}">
+    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #0F172A; color: #E2E8F0; }
+        .gradient-text { background: linear-gradient(135deg, #60A5FA, #A78BFA); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .btn-primary { background: #3B82F6; color: white; padding: 0.75rem 2rem; border-radius: 0.5rem; font-weight: 600; transition: all 0.2s; display: inline-block; text-align: center; }
+        .btn-primary:hover { background: #2563EB; }
+        .input-field { background: #1E293B; border: 1px solid #334155; color: #E2E8F0; border-radius: 12px; padding: 0.875rem 1rem; width: 100%; font-size: 0.875rem; transition: border-color 0.2s; }
+        .input-field:focus { outline: none; border-color: #3B82F6; box-shadow: 0 0 0 3px rgba(59,130,246,0.2); }
+        label { display: block; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #94A3B8; margin-bottom: 0.5rem; }
+    </style>
+</head>
+<body class="min-h-screen antialiased">
+    <div class="max-w-6xl mx-auto px-4 py-8">
+        <a href="/" class="inline-flex items-center gap-2 text-slate-400 hover:text-white transition mb-12">
+            <span>&larr;</span> Volver a TravelHub
+        </a>
+    </div>
+
+    <div class="max-w-5xl mx-auto px-4 grid md:grid-cols-2 gap-12 items-start pb-24">
+        <!-- Left: Info -->
+        <div>
+            <h1 class="text-4xl md:text-5xl font-black tracking-tight mb-4">
+                Descubre cómo <span class="gradient-text">automatizar tu agencia</span>
+            </h1>
+            <p class="text-lg text-slate-400 mb-8 leading-relaxed">
+                En 30 minutos te mostramos cómo TravelHub parsea boletos, factura VEN-NIF, envía WhatsApp y concilia pagos — todo automáticamente.
+            </p>
+
+            <div class="space-y-6">
+                <div class="flex items-start gap-4">
+                    <div class="w-10 h-10 rounded-xl bg-blue-500/20 border border-blue-500/30 flex items-center justify-center text-blue-400 shrink-0">🎫</div>
+                    <div>
+                        <h3 class="font-bold text-white">Demo en vivo con tu ticket</h3>
+                        <p class="text-sm text-slate-400">Trae un boleto real de tu agencia y verás el parsing IA en acción.</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-4">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">📊</div>
+                    <div>
+                        <h3 class="font-bold text-white">Configuración personalizada</h3>
+                        <p class="text-sm text-slate-400">Te ayudamos a configurar tu agencia, facturación y WhatsApp en la llamada.</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-4">
+                    <div class="w-10 h-10 rounded-xl bg-purple-500/20 border border-purple-500/30 flex items-center justify-center text-purple-400 shrink-0">🚀</div>
+                    <div>
+                        <h3 class="font-bold text-white">Sin compromiso</h3>
+                        <p class="text-sm text-slate-400">Prueba gratuita de 30 días después de la demo. Sin tarjeta de crédito.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Form -->
+        <div class="bg-slate-800/40 border border-slate-700/50 rounded-2xl p-8">
+            <h2 class="text-xl font-bold mb-6">Agenda tu demo</h2>
+            <form hx-post="{% url 'core:demo_request' %}" hx-target="#demo-form-result" class="space-y-5">
+                {% csrf_token %}
+                <div>
+                    <label>Nombre completo</label>
+                    <input type="text" name="nombre" required class="input-field" placeholder="Tu nombre">
+                </div>
+                <div>
+                    <label>Email</label>
+                    <input type="email" name="email" required class="input-field" placeholder="tu@agencia.com">
+                </div>
+                <div>
+                    <label>Teléfono (WhatsApp)</label>
+                    <input type="tel" name="telefono" class="input-field" placeholder="+58 412 123 4567">
+                </div>
+                <div>
+                    <label>Agencia</label>
+                    <input type="text" name="agencia_nombre" class="input-field" placeholder="Nombre de tu agencia">
+                </div>
+                <div>
+                    <label>¿Cuántos boletos gestionas al mes?</label>
+                    <select name="volumen" class="input-field">
+                        <option value="1-50">1 — 50 boletos</option>
+                        <option value="51-200">51 — 200 boletos</option>
+                        <option value="201-1000">201 — 1000 boletos</option>
+                        <option value="1000+">Más de 1000 boletos</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Mensaje (opcional)</label>
+                    <textarea name="mensaje" class="input-field" rows="3" placeholder="Cuéntanos sobre tu agencia..."></textarea>
+                </div>
+
+                <div id="demo-form-result"></div>
+
+                <button type="submit" class="btn-primary w-full text-sm py-4">
+                    Solicitar mi demo →
+                </button>
+                <p class="text-xs text-slate-500 text-center mt-3">Te confirmaremos la fecha por email en menos de 24h.</p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Trust bar -->
+    <div class="border-t border-slate-800 py-12 px-4">
+        <div class="max-w-6xl mx-auto text-center">
+            <p class="text-sm text-slate-500 mb-6">Agencias de viajes confían en TravelHub</p>
+            <div class="flex flex-wrap justify-center gap-x-12 gap-y-4 text-slate-500 text-sm font-medium">
+                <span>🇻🇪 Venezuela</span>
+                <span>🇨🇴 Colombia</span>
+                <span>🇲🇽 México</span>
+                <span>🇵🇦 Panamá</span>
+                <span>🇪🇸 España</span>
+                <span>🇺🇸 Estados Unidos</span>
+            </div>
+        </div>
+    </div>
+
+    <footer class="max-w-6xl mx-auto px-4 pb-12 text-center text-xs text-slate-600">
+        &copy; {% now "Y" %} TravelHub. Todos los derechos reservados.
+    </footer>
+</body>
+</html>

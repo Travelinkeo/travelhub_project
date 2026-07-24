@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #3B82F6, #8B5CF6); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+        .content { background: #f9fafb; padding: 30px; }
+        .field { margin-bottom: 16px; }
+        .field-label { font-size: 12px; text-transform: uppercase; color: #6b7280; font-weight: 700; letter-spacing: 0.05em; }
+        .field-value { font-size: 16px; color: #111827; margin-top: 4px; }
+        .button { display: inline-block; background: #3B82F6; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; margin: 20px 0; }
+        .footer { text-align: center; padding: 20px; color: #6b7280; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 Nueva Solicitud de Demo</h1>
+        </div>
+        <div class="content">
+            <div class="field">
+                <div class="field-label">Nombre</div>
+                <div class="field-value">{{ nombre }}</div>
+            </div>
+            <div class="field">
+                <div class="field-label">Email</div>
+                <div class="field-value">{{ email }}</div>
+            </div>
+            {% if telefono %}
+            <div class="field">
+                <div class="field-label">Teléfono</div>
+                <div class="field-value">{{ telefono }}</div>
+            </div>
+            {% endif %}
+            {% if agencia %}
+            <div class="field">
+                <div class="field-label">Agencia</div>
+                <div class="field-value">{{ agencia }}</div>
+            </div>
+            {% endif %}
+            {% if volumen %}
+            <div class="field">
+                <div class="field-label">Volumen mensual</div>
+                <div class="field-value">{{ volumen }} boletos/mes</div>
+            </div>
+            {% endif %}
+            {% if mensaje %}
+            <div class="field">
+                <div class="field-label">Mensaje</div>
+                <div class="field-value">{{ mensaje }}</div>
+            </div>
+            {% endif %}
+            <center>
+                <a href="{{ admin_url }}" class="button">Ver en administración →</a>
+            </center>
+        </div>
+        <div class="footer">
+            <p>TravelHub — Sistema de Gestión para Agencias de Viajes</p>
+        </div>
+    </div>
+</body>
+</html>

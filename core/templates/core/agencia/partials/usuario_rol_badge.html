@@ -6,12 +6,12 @@
     {% csrf_token %}
     <select name="rol"
         class="mt-1 block w-full py-1 pl-2 pr-8 text-xs border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-xs rounded-md shadow-sm">
-        <option value="admin" {% if usuario_agencia.rol=='admin' %}selected{% endif %}>Admin</option>
-        <option value="gerente" {% if usuario_agencia.rol=='gerente' %}selected{% endif %}>Gerente</option>
-        <option value="vendedor" {% if usuario_agencia.rol=='vendedor' %}selected{% endif %}>Vendedor</option>
-        <option value="contador" {% if usuario_agencia.rol=='contador' %}selected{% endif %}>Contador</option>
-        <option value="operador" {% if usuario_agencia.rol=='operador' %}selected{% endif %}>Operador</option>
-        <option value="consulta" {% if usuario_agencia.rol=='consulta' %}selected{% endif %}>Solo Consulta</option>
+        <option value="admin" {% if usuario_agencia.rol == 'admin' %}selected{% endif %}>Admin</option>
+        <option value="gerente" {% if usuario_agencia.rol == 'gerente' %}selected{% endif %}>Gerente</option>
+        <option value="vendedor" {% if usuario_agencia.rol == 'vendedor' %}selected{% endif %}>Vendedor</option>
+        <option value="contador" {% if usuario_agencia.rol == 'contador' %}selected{% endif %}>Contador</option>
+        <option value="operador" {% if usuario_agencia.rol == 'operador' %}selected{% endif %}>Operador</option>
+        <option value="consulta" {% if usuario_agencia.rol == 'consulta' %}selected{% endif %}>Solo Consulta</option>
     </select>
 </form>
 <script nonce="{{ request.csp_nonce }}">

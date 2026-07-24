@@ -14,7 +14,7 @@ from django.utils.safestring import mark_safe
 
 from core.api import SaaSAdminMixin
 
-from .models import EmailMonitorLog
+from .models import DemoRequest, EmailMonitorLog
 
 logger = logging.getLogger(__name__)
 
@@ -311,3 +311,82 @@ class EmailMonitorLogAdmin(SaaSAdminMixin, admin.ModelAdmin):
         }
 
         return super().changelist_view(request, extra_context=extra_context)
+
+
+@admin.register(DemoRequest)
+class DemoRequestAdmin(SaaSAdminMixin, admin.ModelAdmin):
+    list_display = [
+        "atendido_badge",
+        "nombre",
+        "email",
+        "agencia_nombre",
+        "telefono",
+        "volumen",
+        "mensaje_corto",
+        "created_at",
+    ]
+    list_display_links = ["nombre", "email"]
+    list_filter = ["atendido", "volumen", "created_at"]
+    search_fields = ["nombre", "email", "agencia_nombre", "telefono"]
+    date_hierarchy = "created_at"
+    readonly_fields = ["created_at"]
+    ordering = ["atendido", "-created_at"]
+    actions = ["marcar_atendido", "marcar_no_atendido"]
+
+    fieldsets = [
+        (
+            "Contacto",
+            {
+                "fields": [
+                    "nombre",
+                    "email",
+                    "telefono",
+                    "agencia_nombre",
+                ]
+            },
+        ),
+        (
+            "Información",
+            {
+                "fields": [
+                    "volumen",
+                    "mensaje",
+                    ("atendido", "created_at"),
+                ]
+            },
+        ),
+    ]
+
+    @admin.display(description="", ordering="atendido")
+    def atendido_badge(self, obj):
+        if obj.atendido:
+            return format_html(
+                '<span style="background:#D1FAE5;color:#065F46;padding:2px 8px;'
+                'border-radius:4px;font-size:11px;font-weight:600;">✓ Atendido</span>'
+            )
+        return format_html(
+            '<span style="background:#FEE2E2;color:#991B1B;padding:2px 8px;'
+            'border-radius:4px;font-size:11px;font-weight:600;">◌ Pendiente</span>'
+        )
+
+    @admin.display(description="Mensaje")
+    def mensaje_corto(self, obj):
+        if not obj.mensaje:
+            return "—"
+        if len(obj.mensaje) <= 80:
+            return obj.mensaje
+        return format_html(
+            '<span title="{}">{}&hellip;</span>',
+            obj.mensaje,
+            obj.mensaje[:80],
+        )
+
+    @admin.action(description="Marcar como atendidas")
+    def marcar_atendido(self, request, queryset):
+        updated = queryset.update(atendido=True)
+        self.message_user(request, f"{updated} solicitud(es) marcada(s) como atendida(s).")
+
+    @admin.action(description="Marcar como no atendidas")
+    def marcar_no_atendido(self, request, queryset):
+        updated = queryset.update(atendido=False)
+        self.message_user(request, f"{updated} solicitud(es) marcada(s) como pendiente(s).")

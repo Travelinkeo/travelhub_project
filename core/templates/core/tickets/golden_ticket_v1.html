@@ -50,7 +50,7 @@
             max-width: 800px;
             margin: 0 auto;
         }
-        
+
         /* Header Section */
         .header {
             background-color: var(--tk-primary);
@@ -371,11 +371,7 @@
             <div class="footer-line">Gracias por elegirnos. ¡Te deseamos un excelente viaje!</div>
             <div class="footer-subline">
                 {% if agencia.instagram %}
-                    {% if 'instagram.com' in agencia.instagram.lower() %}
-                        @{{ agencia.instagram.split('/')[-1]|upper }}
-                    {% else %}
-                        @{{ agencia.instagram|upper }}
-                    {% endif %}
+                    @{{ agencia.instagram|upper }}
                 {% else %}
                     @{{ agencia.nombre_comercial|default:agencia.nombre|upper }}
                 {% endif %}
@@ -383,7 +379,7 @@
                 {{ agencia.direccion|upper }}
             </div>
             <div class="iata-line">
-                Recibo electrónico IATA: {{ AGENTE_EMISOR if (AGENTE_EMISOR and AGENTE_EMISOR != 'No encontrado') else (agencia.iata|default:"10617390") }} | Generado por {{ agencia.nombre_comercial|default:"TravelHub" }}
+                Recibo electrónico IATA: {% if AGENTE_EMISOR and AGENTE_EMISOR != 'No encontrado' %}{{ AGENTE_EMISOR }}{% else %}{{ agencia.iata|default:"10617390" }}{% endif %} | Generado por {{ agencia.nombre_comercial|default:"TravelHub" }}
             </div>
         </footer>
     </div>

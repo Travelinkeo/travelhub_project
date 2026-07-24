@@ -246,16 +246,16 @@
 <div class="space-y-4">
 <h4 class="font-headline font-bold text-sm uppercase tracking-tight">Check-In and Boarding</h4>
 <p class="font-body text-xs leading-relaxed text-on-surface-variant">
-                                Passengers are advised to arrive at the airport at least 3 hours prior to scheduled departure. 
-                                Online check-in opens 24 hours before flight time. Boarding gates close 20 minutes prior to departure. 
+                                Passengers are advised to arrive at the airport at least 3 hours prior to scheduled departure.
+                                Online check-in opens 24 hours before flight time. Boarding gates close 20 minutes prior to departure.
                                 Late arrivals may result in forfeiture of seat without refund.
                             </p>
 </div>
 <div class="space-y-4">
 <h4 class="font-headline font-bold text-sm uppercase tracking-tight">Identification &amp; Documents</h4>
 <p class="font-body text-xs leading-relaxed text-on-surface-variant">
-                                A valid government-issued photo ID or passport is mandatory for all flights. 
-                                For international journeys, ensure all visas and health certificates are in order. 
+                                A valid government-issued photo ID or passport is mandatory for all flights.
+                                For international journeys, ensure all visas and health certificates are in order.
                                 TravelHub is not responsible for denial of boarding due to improper documentation.
                             </p>
 </div>
@@ -269,7 +269,7 @@
 <div>
 <p class="font-label text-[9px] text-secondary uppercase tracking-[0.2em] mb-1">Validation String</p>
 <code class="font-label text-[10px] break-all leading-none text-on-surface-variant">
-                                TH-{{ pnr }}-{{ passenger_name | replace(' ', '-') }}-CRC32-F0A92E11-SECURE-PRINT-STAMP-{{ "now"|date("Ymd") }}
+                                TH-{{ pnr }}-{{ passenger_name|slugify|upper }}-CRC32-F0A92E11-SECURE-PRINT-STAMP-{% now "Ymd" %}
                             </code>
 </div>
 </div>

@@ -258,9 +258,12 @@
                     <div class="info-label">DETALLES DE PAGO</div>
                     <div class="info-value">
                         Moneda: {{ factura.moneda.nombre }} ({{ factura.moneda.simbolo }})<br>
-                        Estado: <span style="color: {{ '#38a169' if factura.monto_total == factura.monto_pagado else '#e53e3e' }};">
-                            {{ 'PAGADA' if factura.monto_total == factura.monto_pagado else 'PENDIENTE' }}
-                        </span>
+                        Estado:
+                        {% if factura.monto_total == factura.monto_pagado %}
+                            <span style="color: #38a169;">PAGADA</span>
+                        {% else %}
+                            <span style="color: #e53e3e;">PENDIENTE</span>
+                        {% endif %}
                     </div>
                 </div>
             </div>

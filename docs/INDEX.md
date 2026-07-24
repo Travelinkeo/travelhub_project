@@ -13,6 +13,7 @@ Bienvenido a la documentación oficial de TravelHub. Este índice organiza todos
 Documentos para entender qué es TravelHub y cómo está construido.
 
 - **[manual_del_usuario.md](manual_del_usuario.md)** — Manual completo para agencias de viaje. Explica paso a paso cómo usar el sistema, sin tecnicismos.
+- **[MANUAL_REPORTES_PROVEEDORES.md](MANUAL_REPORTES_PROVEEDORES.md)** — Manual de operación e integración del Lector de Reportes de Ventas de Proveedores (CTG, MY DESTINY).
 - **[business_model.md](business_model.md)** — Modelo de negocio SaaS: cómo funciona la plataforma, quiénes son los clientes y cómo se generan ingresos.
 - **[architecture_map.md](architecture_map.md)** — Mapa visual de la arquitectura con diagramas. Ideal para entender todos los componentes del sistema de un vistazo.
 - **[reporte_arquitectura_2026.md](reporte_arquitectura_2026.md)** — Documento maestro de arquitectura. La fuente de verdad detallada sobre el estado actual del ecosistema.

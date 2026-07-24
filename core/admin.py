@@ -1,21 +1,24 @@
 import logging
 
 from django.contrib import admin
+from django.utils.html import format_html
 from unfold.admin import ModelAdmin, StackedInline
 
 from apps.common.models import Aerolinea, Ciudad, Moneda, Pais
 
-# Importar inlines compartidos
+# Módulos admin organizados en subdirectorio core/admin/
+from .admin.api_secret_admin import APISecretAdmin  # noqa: F401
+from .admin_saas import SaaSAdminMixin
 from .models import (
     Agencia,
     AgenciaBranding,
     AgenciaConfiguracion,
+    CronApiKey,
+    FeatureFlag,
     UsuarioAgencia,
 )
 
 logger = logging.getLogger(__name__)
-
-# --- Clases Admin para Configuración Global (Catálogos) ---
 
 
 @admin.register(Pais)
@@ -47,35 +50,6 @@ class AerolineaAdmin(ModelAdmin):
     ordering = ("nombre",)
 
 
-# @admin.register(Proveedor)
-# class ProveedorAdmin(SaaSAdminMixin, admin.ModelAdmin):
-#     list_display = ('nombre', 'rif', 'tipo_proveedor', 'nivel_proveedor', 'activo')
-#     search_fields = ('nombre', 'rif')
-#     list_filter = ('tipo_proveedor', 'nivel_proveedor', 'activo')
-
-#     fieldsets = (
-#         ('Información Básica', {
-#             'fields': ('nombre', 'rif', 'tipo_proveedor', 'nivel_proveedor', 'activo')
-#         }),
-#         ('Contacto', {
-#             'fields': ('contacto_nombre', 'contacto_email', 'contacto_telefono', 'direccion', 'ciudad')
-#         }),
-#         ('GDS / Conectividad', {
-#             'fields': ('iata', 'seudo_sabre', 'office_id_kiu', 'office_id_amadeus', 'office_id_travelport', 'office_id_hotelbeds', 'office_id_expedia'),
-#             'classes': ('collapse',)
-#         }),
-#     )
-
-# @admin.register(ProductoServicio)
-# class ProductoServicioAdmin(SaaSAdminMixin, admin.ModelAdmin):
-#     saas_agency_field = 'proveedor_principal__agencia'
-#     list_display = ('nombre', 'tipo_producto', 'proveedor_principal', 'activo')
-#     search_fields = ('nombre',)
-#     list_filter = ('tipo_producto', 'activo')
-#     autocomplete_fields = ['proveedor_principal', 'moneda_referencial']
-
-
-# --- SaaS / Multi-tenant ---
 class AgenciaBrandingInline(StackedInline):
     model = AgenciaBranding
     can_delete = False
@@ -97,7 +71,6 @@ class AgenciaAdmin(ModelAdmin):
     inlines = [AgenciaBrandingInline, AgenciaConfiguracionInline]
 
     def get_readonly_fields(self, request, obj=None):
-        # DOCTRINA ANTIGRAVITY: Solo superusuarios pueden cambiar el RIF o IATA de una agencia
         if not request.user.is_superuser:
             return self.readonly_fields + ["rif", "iata"]
         return self.readonly_fields
@@ -111,8 +84,145 @@ class AgenciaBrandingAdmin(ModelAdmin):
 
 @admin.register(AgenciaConfiguracion)
 class AgenciaConfiguracionAdmin(ModelAdmin):
-    list_display = ["agencia_master", "plan", "subdominio_slug"]
+    list_display = ["agencia_master", "plan", "subdominio_slug", "short_keys_status"]
     search_fields = ["agencia_master__nombre", "subdominio_slug"]
+    readonly_fields = ["ventas_mes_actual"]
+
+    fieldsets = [
+        (
+            "Plan y Límites",
+            {
+                "fields": [
+                    ("plan", "plan_status"),
+                    ("limite_mensual_boletos", "limite_usuarios", "limite_ventas_mes"),
+                    "ventas_mes_actual",
+                    "subscription_end_date",
+                ]
+            },
+        ),
+        (
+            "Localización",
+            {
+                "fields": [
+                    "moneda_principal",
+                    "zona_horaria",
+                    "idioma",
+                    (
+                        "imprenta_digital_nombre",
+                        "imprenta_digital_rif",
+                        "imprenta_digital_providencia",
+                    ),
+                    "es_sujeto_pasivo_especial",
+                    "esta_inscrita_rtn",
+                ]
+            },
+        ),
+        (
+            "WhatsApp Evolution API",
+            {
+                "classes": ("collapse",),
+                "fields": [
+                    "evolution_api_url",
+                    "evolution_api_key_display",
+                    "evolution_instance_name",
+                ],
+                "description": "Claves para integración WhatsApp multi-tenencia",
+            },
+        ),
+        (
+            "Gemini AI",
+            {
+                "classes": ("collapse",),
+                "fields": ["gemini_api_key_display"],
+                "description": "Clave API de Gemini específica para esta agencia (opcional, si no se usa la global)",
+            },
+        ),
+        (
+            "Mailbot & Telegram",
+            {
+                "classes": ("collapse",),
+                "fields": [
+                    "correo_emisiones",
+                    "password_app_correo_display",
+                    ("telegram_bot_token_display", "telegram_chat_id"),
+                    "canal_notificaciones_mailbot",
+                ],
+            },
+        ),
+        (
+            "Monitor IMAP",
+            {
+                "classes": ("collapse",),
+                "fields": [
+                    ("email_monitor_host", "email_monitor_port"),
+                    "email_monitor_user",
+                    "email_monitor_password_display",
+                    "email_monitor_active",
+                    "email_monitor_last_check",
+                ],
+            },
+        ),
+        (
+            "Configuraciones Avanzadas (JSON)",
+            {
+                "classes": ("collapse",),
+                "fields": ["configuracion_correo", "configuracion_api", "configuracion_contable"],
+            },
+        ),
+    ]
+
+    @admin.display(description="Claves")
+    def short_keys_status(self, obj):
+        parts = []
+        if obj.gemini_api_key:
+            parts.append("🤖")
+        if obj.evolution_api_key:
+            parts.append("📱")
+        if obj.telegram_bot_token:
+            parts.append("✈️")
+        if obj.email_monitor_password:
+            parts.append("📧")
+        return " ".join(parts) if parts else "—"
+
+    @admin.display(description="API Key Evolution")
+    def evolution_api_key_display(self, obj):
+        return self._masked_field(obj.evolution_api_key)
+
+    @admin.display(description="API Key Gemini")
+    def gemini_api_key_display(self, obj):
+        return self._masked_field(obj.gemini_api_key)
+
+    @admin.display(description="Password App Correo")
+    def password_app_correo_display(self, obj):
+        return self._masked_field(obj.password_app_correo)
+
+    @admin.display(description="Token Telegram")
+    def telegram_bot_token_display(self, obj):
+        return self._masked_field(obj.telegram_bot_token)
+
+    @admin.display(description="Password IMAP")
+    def email_monitor_password_display(self, obj):
+        return self._masked_field(obj.email_monitor_password)
+
+    def _masked_field(self, value):
+        if not value:
+            return format_html('<span style="color:#9CA3AF;">—</span>')
+        visible = str(value)[:8]
+        return format_html(
+            '<span style="font-family:monospace;color:#6B7280;">{}</span>',
+            visible + "••••",
+        )
+
+    def get_fieldsets(self, request, obj=None):
+        if obj is None:
+            return [(None, {"fields": ["agencia_master", "plan"]})]
+        return super().get_fieldsets(request, obj)
+
+    def has_add_permission(self, request):
+        return request.user.is_superuser
+
+    def has_delete_permission(self, request, obj=None):
+        return request.user.is_superuser
 
 
 @admin.register(UsuarioAgencia)
@@ -122,42 +232,139 @@ class UsuarioAgenciaAdmin(ModelAdmin):
     autocomplete_fields = ["usuario", "agencia"]
 
     def get_readonly_fields(self, request, obj=None):
-        # Evitar escalada de privilegios: Solo superusuarios pueden cambiar roles
         if not request.user.is_superuser:
             return ["usuario", "agencia", "rol"]
         return []
 
 
-# --- Admin Importados (y Activados) ---
-# from core import admin_facturacion_consolidada
-# from core import admin_tarifario
+# --- FeatureFlags ---
 
-# @admin.register(CruceroReserva)
-# class CruceroReservaAdmin(SaaSAdminMixin, admin.ModelAdmin):
-#     saas_agency_field = 'venta__agencia'
-#     list_display = ['nombre_crucero', 'naviera', 'fecha_embarque', 'venta']
-#     search_fields = ['nombre_crucero', 'naviera']
-#     list_filter = ['naviera', 'fecha_embarque']
-#     autocomplete_fields = ['venta', 'proveedor', 'moneda']
 
-# @admin.register(RetencionISLR)
-# class RetencionISLRAdmin(admin.ModelAdmin):
-#     list_display = ['numero_comprobante', 'fecha_emision', 'cliente', 'estado']
-#     list_filter = ['estado', 'periodo_fiscal']
-#     autocomplete_fields = ['factura', 'cliente']
+@admin.register(FeatureFlag)
+class FeatureFlagAdmin(SaaSAdminMixin, ModelAdmin):
+    list_display = ["nombre", "agencia", "enabled_badge", "rollout_percentage", "updated_at"]
+    list_filter = ["enabled", "agencia"]
+    search_fields = ["nombre", "description"]
+    list_editable = ["rollout_percentage"]
+    readonly_fields = ["created_at", "updated_at"]
+    ordering = ["nombre"]
 
-# @admin.register(FeatureFlag)
-# class FeatureFlagAdmin(admin.ModelAdmin):
-#     list_display = ['nombre', 'agencia', 'enabled', 'rollout_percentage', 'updated_at']
-#     list_filter = ['enabled', 'agencia']
-#     search_fields = ['nombre', 'description']
-#     list_editable = ['enabled', 'rollout_percentage']
+    fieldsets = [
+        (
+            None,
+            {
+                "fields": [
+                    "nombre",
+                    "description",
+                    ("enabled", "rollout_percentage"),
+                    "agencia",
+                ]
+            },
+        ),
+        ("Auditoría", {"classes": ("collapse",), "fields": ("created_at", "updated_at")}),
+    ]
 
-# @admin.register(CronApiKey)
-# class CronApiKeyAdmin(admin.ModelAdmin):
-#     list_display = ['name', 'prefix', 'is_active', 'last_used', 'expires_at', 'agencia']
-#     list_filter = ['is_active', 'agencia']
-#     search_fields = ['name']
-#     readonly_fields = ['key_hash', 'prefix', 'last_used']
+    @admin.display(description="Activo")
+    def enabled_badge(self, obj):
+        if obj.enabled:
+            return format_html(
+                '<span style="background:#D1FAE5;color:#065F46;padding:2px 8px;'
+                'border-radius:4px;font-size:11px;">ON</span>'
+            )
+        return format_html(
+            '<span style="background:#FEE2E2;color:#991B1B;padding:2px 8px;'
+            'border-radius:4px;font-size:11px;">OFF</span>'
+        )
 
-# Nota: Los modelos de negocio (Venta, Boleto, Factura, Cliente) están en sus propias aplicaciones.
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related("agencia")
+
+
+# --- CronApiKeys ---
+
+
+@admin.register(CronApiKey)
+class CronApiKeyAdmin(SaaSAdminMixin, ModelAdmin):
+    list_display = ["name", "prefix_display", "agencia", "is_active", "expires_at", "last_used"]
+    list_filter = ["is_active", "agencia"]
+    search_fields = ["name", "prefix"]
+    readonly_fields = [
+        "salt",
+        "lookup_hash",
+        "key_hash",
+        "prefix",
+        "created_at",
+        "last_used",
+    ]
+    ordering = ["-created_at"]
+    actions = ["generate_key_action"]
+
+    fieldsets = [
+        (
+            None,
+            {"fields": ["name", "agencia", "is_active"]},
+        ),
+        (
+            "Clave (solo lectura)",
+            {
+                "fields": ["prefix", "salt", "lookup_hash", "key_hash"],
+                "classes": ("collapse",),
+            },
+        ),
+        (
+            "Vigencia",
+            {
+                "fields": ["expires_at", "last_used"],
+                "classes": ("collapse",),
+            },
+        ),
+        ("Auditoría", {"classes": ("collapse",), "fields": ("created_at",)}),
+    ]
+
+    @admin.display(description="Prefijo")
+    def prefix_display(self, obj):
+        return format_html(
+            '<code style="background:#F3F4F6;padding:2px 6px;border-radius:3px;font-size:12px;">{}</code>',
+            obj.prefix,
+        )
+
+    @admin.action(description="Generar nueva clave API")
+    def generate_key_action(self, request, queryset):
+        if queryset.count() != 1:
+            self.message_user(
+                request, "Selecciona exactamente 1 fila para generar una clave.", level="error"
+            )
+            return
+        obj = queryset.first()
+        new_obj, raw_key = CronApiKey.generate(name=obj.name, agencia=obj.agencia)
+        self.message_user(
+            request,
+            f"Clave generada para '{new_obj.name}'. "
+            f"COPIA AHORA: {raw_key} (no se mostrará de nuevo)",
+        )
+
+    def save_model(self, request, obj, form, change):
+        if not change:
+            obj, raw_key = CronApiKey.generate(name=obj.name, agencia=obj.agencia)
+            obj._raw_key = raw_key
+            return
+        super().save_model(request, obj, form, change)
+
+    def response_add(self, request, obj, post_url_continue=None):
+        if hasattr(obj, "_raw_key"):
+            self.message_user(
+                request,
+                f"Clave creada. COPIA AHORA: {obj._raw_key} (no se mostrará de nuevo)",
+                level="warning",
+            )
+        return super().response_add(request, obj, post_url_continue)
+
+    def get_readonly_fields(self, request, obj=None):
+        if obj is None:
+            return []
+        return self.readonly_fields
+
+    def get_fieldsets(self, request, obj=None):
+        if obj is None:
+            return [(None, {"fields": ["name", "agencia"]})]
+        return super().get_fieldsets(request, obj)

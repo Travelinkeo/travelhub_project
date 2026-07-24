@@ -192,7 +192,11 @@ UNFOLD = {
                         "icon": "description",
                         "link": "/admin/finance/facturaconsolidada/",
                     },
-                    {"title": "Libro de Ventas", "icon": "menu_book", "link": "/admin/finance/factura/"},
+                    {
+                        "title": "Libro de Ventas",
+                        "icon": "menu_book",
+                        "link": "/admin/finance/factura/",
+                    },
                     {
                         "title": "Gastos Operativos",
                         "icon": "money_off",
@@ -234,7 +238,11 @@ UNFOLD = {
                         "icon": "currency_exchange",
                         "link": "/admin/contabilidad/tasacambiobcv/",
                     },
-                    {"title": "Reportes Contables", "icon": "assessment", "link": "/admin/contabilidad/asientocontable/"},
+                    {
+                        "title": "Reportes Contables",
+                        "icon": "assessment",
+                        "link": "/admin/contabilidad/asientocontable/",
+                    },
                 ],
             },
             {
@@ -251,6 +259,11 @@ UNFOLD = {
                         "title": "Config Marketing",
                         "icon": "settings",
                         "link": "/admin/marketing/configuracionmarketing/",
+                    },
+                    {
+                        "title": "Solicitudes de Demo",
+                        "icon": "preview",
+                        "link": "/admin/communications/demorequest/",
                     },
                     {
                         "title": "Centro de Marketing",
@@ -298,6 +311,11 @@ UNFOLD = {
                     },
                     {"title": "Cron API Keys", "icon": "key", "link": "/admin/core/cronapikey/"},
                     {"title": "Audit Logs", "icon": "history", "link": "/admin/core/auditlog/"},
+                    {
+                        "title": "Claves API (encriptadas)",
+                        "icon": "encrypted",
+                        "link": "/admin/core/apisecret/",
+                    },
                 ],
             },
             {
@@ -319,6 +337,11 @@ UNFOLD = {
                         "title": "Conciliacion Proveedores",
                         "icon": "account_balance",
                         "link": "/finance/supplier-reconciliation/",
+                    },
+                    {
+                        "title": "Salud del Sistema",
+                        "icon": "monitor_heart",
+                        "link": "/admin/custom/core/health/",
                     },
                 ],
             },

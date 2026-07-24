@@ -22,6 +22,8 @@ from core.views.dev_portal_views import developer_portal
 from core.views.docs_views import docs_index, docs_page, public_manual
 from core.views.health_views import health_check
 from core.views.marketing_views import (
+    demo_page,
+    demo_request,
     lead_magnet_download,
     parse_demo,
     public_landing,
@@ -158,6 +160,8 @@ urlpatterns = [
     path("manual/", public_manual, name="public_manual"),
     # Public Marketing
     path("pricing/", public_pricing, name="public_pricing"),
+    path("demo/", demo_page, name="demo_page"),
+    path("api/demo-request/", demo_request, name="demo_request"),
     # SSO / SAML / OIDC
     path("sso/login/<int:provider_id>/", sso_login, name="sso_login"),
     path("sso/callback/<int:provider_id>/", sso_callback, name="sso_callback"),

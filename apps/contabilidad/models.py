@@ -124,3 +124,80 @@ class MovimientoContable(AgenciaMixin, models.Model):
 
     def __str__(self):
         return f"{self.tipo} — VES {self.monto_ves} / USD {self.monto_usd} | {self.cuenta.nombre}"
+
+
+class ReporteVentaProveedor(AgenciaMixin, models.Model):
+    """
+    Encabezado de Reporte de Ventas Semanal/Mensual enviado por Proveedores (CTG, MY DESTINY, etc.).
+    Multi-tenant por AgenciaMixin.
+    """
+
+    class EstadoReporte(models.TextChoices):
+        PROCESADO = "PROCESADO", "Procesado"
+        CONCILIADO = "CONCILIADO", "Conciliado"
+        DIFERENCIA = "DIFERENCIA", "Con Diferencias"
+        ERROR = "ERROR", "Error"
+
+    proveedor_nombre = models.CharField(max_length=100, db_index=True)
+    codigo_agencia_proveedor = models.CharField(max_length=50, blank=True, default="")
+    asunto_correo = models.CharField(max_length=255, blank=True, default="")
+    emisor_correo = models.CharField(max_length=150, blank=True, default="")
+    fecha_reporte_desde = models.DateField(null=True, blank=True)
+    fecha_reporte_hasta = models.DateField(null=True, blank=True)
+    fecha_procesamiento = models.DateTimeField(auto_now_add=True)
+    nombre_archivo_adjunto = models.CharField(max_length=255, blank=True, default="")
+
+    saldo_anterior = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    monto_total_ventas = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    saldo_final = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+
+    estado = models.CharField(
+        max_length=25, choices=EstadoReporte.choices, default=EstadoReporte.PROCESADO
+    )
+    raw_data = models.JSONField(default=dict, blank=True)
+
+    class Meta:
+        verbose_name = "Reporte de Venta de Proveedor"
+        verbose_name_plural = "Reportes de Ventas de Proveedores"
+        ordering = ["-fecha_procesamiento"]
+
+    def __str__(self):
+        return f"Reporte {self.proveedor_nombre} [{self.fecha_reporte_desde} a {self.fecha_reporte_hasta}] — {self.agencia.nombre if self.agencia else 'Global'}"
+
+
+class ItemReporteVentaProveedor(AgenciaMixin, models.Model):
+    """
+    Línea de Boleto/Servicio dentro de un Reporte de Venta de Proveedor.
+    Multi-tenant por AgenciaMixin.
+    """
+
+    reporte = models.ForeignKey(
+        ReporteVentaProveedor,
+        on_delete=models.CASCADE,
+        related_name="items",
+    )
+    fecha_emision = models.DateField(null=True, blank=True)
+    numero_factura = models.CharField(max_length=50, blank=True, default="")
+    numero_boleto = models.CharField(max_length=50, db_index=True)
+    pasajero = models.CharField(max_length=150, blank=True, default="")
+    aerolinea = models.CharField(max_length=100, blank=True, default="")
+    fecha_vuelo = models.DateField(null=True, blank=True)
+    ruta_itinerario = models.CharField(max_length=100, blank=True, default="")
+
+    monto_fare = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    monto_tax = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    monto_subtotal = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    monto_fee = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    porcentaje_comision = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    monto_comision = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    monto_neto_pagar = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+
+    remarks = models.CharField(max_length=255, blank=True, default="")
+
+    class Meta:
+        verbose_name = "Item de Reporte de Proveedor"
+        verbose_name_plural = "Items de Reportes de Proveedores"
+        ordering = ["reporte", "pk"]
+
+    def __str__(self):
+        return f"Boleto #{self.numero_boleto} ({self.pasajero}) — {self.aerolinea} (${self.monto_neto_pagar})"

@@ -8,6 +8,7 @@ y captura de leads.
 
 import logging
 
+from django.conf import settings
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
@@ -261,6 +262,73 @@ def parse_demo(request):
     """
 
     return HttpResponse(html)
+
+
+@require_GET
+def demo_page(request):
+    """Página pública de agendamiento de demo."""
+    return render(request, "marketing/demo.html")
+
+
+@require_POST
+@csrf_exempt
+def demo_request(request):
+    """
+    Endpoint HTMX para solicitar una demo.
+    Guarda la solicitud en DemoRequest y notifica al equipo.
+    """
+    from apps.communications.models import DemoRequest
+    from apps.communications.services.email_unified import send_custom_email
+
+    nombre = request.POST.get("nombre", "").strip()
+    email = request.POST.get("email", "").strip()
+    telefono = request.POST.get("telefono", "").strip()
+    agencia_nombre = request.POST.get("agencia_nombre", "").strip()
+    volumen = request.POST.get("volumen", "").strip()
+    mensaje = request.POST.get("mensaje", "").strip()
+
+    if not nombre or not email or "@" not in email:
+        return HttpResponse(
+            '<div class="text-red-400 text-sm">Completa tu nombre y un email válido.</div>'
+        )
+
+    demo = DemoRequest.objects.create(
+        nombre=nombre,
+        email=email,
+        telefono=telefono,
+        agencia_nombre=agencia_nombre,
+        volumen=volumen,
+        mensaje=mensaje,
+    )
+
+    # Notificar al equipo
+    try:
+        send_custom_email(
+            subject=f"🎯 Nueva solicitud de demo: {nombre} — {agencia_nombre or 'Sin agencia'}",
+            recipient=settings.DEMO_NOTIFY_EMAIL or "ventas@travelhub.app",
+            template_name="emails/demo_notification.html",
+            context={
+                "nombre": nombre,
+                "email": email,
+                "telefono": telefono,
+                "agencia": agencia_nombre,
+                "volumen": volumen,
+                "mensaje": mensaje,
+                "admin_url": f"{settings.SITE_URL}/admin/communications/demorequest/{demo.id}/change/",
+            },
+        )
+    except Exception as e:
+        logger.warning(f"No se pudo notificar demo: {e}")
+
+    logger.info(f"Demo solicitado: {nombre} <{email}> (agencia: {agencia_nombre})")
+
+    return HttpResponse(
+        '<div class="bg-emerald-900/40 border border-emerald-700/50 rounded-xl p-6 text-center">'
+        '<div class="text-4xl mb-3">🎉</div>'
+        '<p class="text-emerald-300 font-bold text-lg mb-2">¡Solicitud recibida!</p>'
+        '<p class="text-sm text-slate-300">Te contactaremos en menos de 24 horas para coordinar tu demo personalizada.</p>'
+        "</div>"
+    )
 
 
 @require_POST

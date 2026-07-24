@@ -14,6 +14,7 @@ REGLAS:
 from .aeropuerto import Aeropuerto
 from .agencia import Agencia, AgenciaBranding, AgenciaConfiguracion, UsuarioAgencia
 from .ai import AIUsageLog
+from .api_secret import APISecret
 from .audit import AuditLog
 from .cron_api_key import CronApiKey
 from .feature_flags import FeatureFlag
@@ -27,6 +28,7 @@ __all__ = [
     "UsuarioAgencia",
     "AgenciaBranding",
     "AgenciaConfiguracion",
+    "APISecret",
     "MigrationCheck",
     "AuditLog",
     "AIUsageLog",

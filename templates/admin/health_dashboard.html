@@ -1,0 +1,304 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+  .health-grid { display: flex; gap: 16px; flex-wrap: wrap; margin: 20px 0; }
+  .health-card {
+    background: #fff; border: 1px solid #e5e7eb; border-radius: 8px;
+    padding: 16px; min-width: 200px; flex: 1;
+  }
+  .health-card h3 { margin: 0 0 8px; font-size: 14px; color: #374151; }
+  .health-card .value { font-size: 24px; font-weight: 700; }
+  .health-card .value.ok { color: #059669; }
+  .health-card .value.fail { color: #DC2626; }
+  .health-card .value.unknown { color: #6B7280; }
+  .provider-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 8px 0; border-bottom: 1px solid #f3f4f6;
+  }
+  .provider-dot {
+    width: 10px; height: 10px; border-radius: 50%; display: inline-block;
+  }
+  .provider-dot.open { background: #EF4444; }
+  .provider-dot.closed { background: #10B981; }
+  .chart-grid { display: flex; gap: 16px; flex-wrap: wrap; margin: 20px 0; }
+  .chart-box {
+    background: #fff; border: 1px solid #e5e7eb; border-radius: 8px;
+    padding: 16px; flex: 1; min-width: 300px;
+  }
+  .chart-box h3 { margin: 0 0 12px; font-size: 14px; color: #374151; }
+  .chart-box canvas { max-height: 250px; }
+  .no-data { color: #9CA3AF; text-align: center; padding: 40px; }
+  pre { background: #1f2937; color: #e5e7eb; padding: 16px; border-radius: 8px; overflow-x: auto; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+  <h1>{{ title }}</h1>
+
+  <!-- Summary Cards -->
+  <div class="health-grid">
+    <div class="health-card">
+      <h3>Proveedores IA</h3>
+      <div class="value ok">{{ summary.providers|length }}</div>
+      <small>registrados</small>
+    </div>
+    <div class="health-card">
+      <h3>Circuit Breakers</h3>
+      <div class="value {% if summary.providers_open > 0 %}fail{% else %}ok{% endif %}">
+        {{ summary.providers_open|default:"0" }}
+      </div>
+      <small>abiertos</small>
+    </div>
+    <div class="health-card">
+      <h3>Claves API</h3>
+      <div class="value {% if summary.api_secrets.fail > 0 %}fail{% else %}ok{% endif %}">
+        {{ summary.api_secrets.ok }}/{{ summary.api_secrets.total }}
+      </div>
+      <small>OK</small>
+    </div>
+    <div class="health-card">
+      <h3>Fallos</h3>
+      <div class="value fail">{{ summary.api_secrets.fail }}</div>
+      <small>claves con error</small>
+    </div>
+  </div>
+
+  <!-- Charts -->
+  <div class="chart-grid">
+    <div class="chart-box">
+      <h3>Disponibilidad de Proveedores (72h)</h3>
+      <canvas id="providerChart"></canvas>
+      <p class="no-data" id="providerNoData" style="display:none;">Sin datos históricos aún. Los health checks se registran cada hora.</p>
+    </div>
+    <div class="chart-box">
+      <h3>Estado de Claves API</h3>
+      <canvas id="secretsChart"></canvas>
+    </div>
+  </div>
+
+  <div class="chart-grid">
+    <div class="chart-box">
+      <h3>Tasa de Éxito/Fallo (72h)</h3>
+      <canvas id="successRateChart"></canvas>
+      <p class="no-data" id="rateNoData" style="display:none;">Sin datos históricos aún.</p>
+    </div>
+    <div class="chart-box">
+      <h3>Proveedores IA: Tests OK consecutivos</h3>
+      <canvas id="providerOkChart"></canvas>
+      <p class="no-data" id="providerOkNoData" style="display:none;">Sin datos históricos aún.</p>
+    </div>
+  </div>
+
+  <!-- Provider Status -->
+  <h2>Proveedores</h2>
+  <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:16px;">
+    {% for p in summary.providers %}
+    <div class="provider-row">
+      <span class="provider-dot {% if p.circuit_open %}open{% else %}closed{% endif %}"></span>
+      <strong>{{ p.name }}</strong>
+      <span style="color:#6B7280;font-size:13px;">
+        {% if p.supports_structured %}Estructurado{% else %}Solo texto{% endif %}
+        {% if p.is_emergency %}| Emergencia{% endif %}
+      </span>
+      {% if p.circuit_open %}
+      <span style="color:#DC2626;font-weight:600;margin-left:auto;">⛔ Circuito abierto</span>
+      {% else %}
+      <span style="color:#059669;margin-left:auto;">✓ Disponible</span>
+      {% endif %}
+    </div>
+    {% empty %}
+    <p style="color:#9CA3AF;">No hay proveedores registrados.</p>
+    {% endfor %}
+  </div>
+
+  <!-- API Secrets Table -->
+  <h2>Claves API</h2>
+  <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:16px;">
+    <table style="width:100%;border-collapse:collapse;">
+      <thead>
+        <tr style="text-align:left;border-bottom:2px solid #e5e7eb;">
+          <th style="padding:8px;">Estado</th>
+          <th style="padding:8px;">Cantidad</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom:1px solid #f3f4f6;">
+          <td style="padding:8px;"><span style="color:#059669;">✓ OK</span></td>
+          <td style="padding:8px;">{{ summary.api_secrets.ok }}</td>
+        </tr>
+        <tr style="border-bottom:1px solid #f3f4f6;">
+          <td style="padding:8px;"><span style="color:#DC2626;">✗ Fail</span></td>
+          <td style="padding:8px;">{{ summary.api_secrets.fail }}</td>
+        </tr>
+        <tr>
+          <td style="padding:8px;"><span style="color:#6B7280;">◯ Sin probar</span></td>
+          <td style="padding:8px;">{{ summary.api_secrets.unknown }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Raw JSON -->
+  <h2>Diagnóstico (JSON)</h2>
+  <pre>{{ summary_json }}</pre>
+</div>
+{% endblock %}
+
+{% block extrajs %}
+{{ block.super }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<script>
+(function() {
+  const history = {{ history|safe }};
+  const colors = { ok: '#10B981', fail: '#EF4444', unknown: '#9CA3AF' };
+  const providerNames = ['gemini', 'openai', 'deepseek'];
+
+  if (!history || history.length === 0) {
+    document.getElementById('providerNoData').style.display = 'block';
+    document.getElementById('rateNoData').style.display = 'block';
+    document.getElementById('providerOkNoData').style.display = 'block';
+    return;
+  }
+
+  // Sort oldest first
+  history.sort((a, b) => new Date(a.ts) - new Date(b.ts));
+  const labels = history.map(h => {
+    const d = new Date(h.ts);
+    return d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0');
+  });
+
+  // --- Provider Availability Chart (stacked bar: ok/fail per provider per run) ---
+  function buildProviderTimeline() {
+    const datasets = [];
+    providerNames.forEach((name, idx) => {
+      const data = history.map(h => {
+        const r = (h.results || []).find(r => r.type === 'provider' && r.name === name);
+        return r ? (r.status === 'ok' ? 1 : 0) : null;
+      });
+      datasets.push({
+        label: name,
+        data: data,
+        backgroundColor: colors.ok,
+        borderColor: colors.ok,
+        borderWidth: 1,
+        pointRadius: 2,
+        tension: 0.2,
+        spanGaps: false,
+      });
+    });
+    return datasets;
+  }
+
+  new Chart(document.getElementById('providerChart'), {
+    type: 'line',
+    data: { labels: labels, datasets: buildProviderTimeline() },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: { min: 0, max: 1.2, ticks: { stepSize: 1, callback: v => v === 1 ? 'OK' : 'FAIL' } },
+        x: { ticks: { maxTicksLimit: 12 } }
+      },
+      plugins: { legend: { position: 'top' } }
+    }
+  });
+
+  // --- API Secrets Donut ---
+  const secretsData = {{ summary.api_secrets|safe }};
+  new Chart(document.getElementById('secretsChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['OK', 'Fallos', 'Sin probar'],
+      datasets: [{
+        data: [secretsData.ok, secretsData.fail, secretsData.unknown],
+        backgroundColor: [colors.ok, colors.fail, colors.unknown],
+        borderWidth: 0,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { position: 'bottom' } }
+    }
+  });
+
+  // --- Success Rate Bar Chart ---
+  function buildRateData() {
+    const okCounts = [];
+    const failCounts = [];
+    history.forEach(h => {
+      const results = h.results || [];
+      const ok = results.filter(r => r.status === 'ok').length;
+      const fail = results.filter(r => r.status === 'fail').length;
+      okCounts.push(ok);
+      failCounts.push(fail);
+    });
+    return { okCounts, failCounts };
+  }
+
+  const rateData = buildRateData();
+  new Chart(document.getElementById('successRateChart'), {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [
+        { label: 'OK', data: rateData.okCounts, backgroundColor: colors.ok },
+        { label: 'FAIL', data: rateData.failCounts, backgroundColor: colors.fail },
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } },
+      plugins: { legend: { position: 'top' } }
+    }
+  });
+
+  // --- Provider OK streak ---
+  function buildProviderOkData() {
+    const datasets = [];
+    providerNames.forEach(name => {
+      const data = history.map(h => {
+        const r = (h.results || []).find(r => r.type === 'provider' && r.name === name);
+        return r ? (r.status === 'ok' ? 1 : 0) : null;
+      });
+      // running count
+      let streak = 0;
+      const streakData = data.map(v => {
+        if (v === 1) { streak++; return streak; }
+        if (v === 0) { streak = 0; return 0; }
+        return null;
+      });
+      datasets.push({
+        label: name,
+        data: streakData,
+        borderColor: name === 'gemini' ? '#8B5CF6' : name === 'openai' ? '#10B981' : '#F59E0B',
+        backgroundColor: 'transparent',
+        borderWidth: 2,
+        pointRadius: 1,
+        tension: 0.3,
+      });
+    });
+    return datasets;
+  }
+
+  new Chart(document.getElementById('providerOkChart'), {
+    type: 'line',
+    data: { labels: labels, datasets: buildProviderOkData() },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: { beginAtZero: true, title: { display: true, text: 'Checks OK consecutivos' } },
+        x: { ticks: { maxTicksLimit: 12 } }
+      },
+      plugins: { legend: { position: 'top' } }
+    }
+  });
+})();
+</script>
+{% endblock %}

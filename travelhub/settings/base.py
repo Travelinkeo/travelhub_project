@@ -555,6 +555,8 @@ else:
 
 DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "TravelHub <noreply@travelhub.cc>")
 SERVER_EMAIL = DEFAULT_FROM_EMAIL
+SITE_URL = os.getenv("SITE_URL", "https://travelhub.cc")
+DEMO_NOTIFY_EMAIL = os.getenv("DEMO_NOTIFY_EMAIL", "ventas@travelhub.app")
 
 # ---------------------------------------------------------------------------
 # Redis helpers

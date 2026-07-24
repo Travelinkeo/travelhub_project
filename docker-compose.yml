@@ -156,7 +156,9 @@ services:
       - .env.local
     volumes:
       - static_volume:/app/staticfiles
-      - media_volume:/app/media
+      - ./media:/app/media
+      - ./apps:/app/apps
+      - ./core:/app/core
       - ./boletos_importados:/app/boletos_importados
       - ./entrypoint.sh:/app/entrypoint.sh
       - ./compose/healthcheck.py:/app/compose/healthcheck.py

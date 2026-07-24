@@ -1,18 +1,26 @@
-</p>
+{% extends "base_modern.html" %}
+{% load i18n %}
 
-<form method="post">
-    {% csrf_token %}
-    <div class="flex justify-end space-x-3">
-        <a href="{% url 'core:usuarios_list' %}"
-            class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded">
-            Cancelar
-        </a>
-        <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded shadow">
-            Confirmar Eliminación
-        </button>
+{% block content %}
+<div class="max-w-xl mx-auto py-12 px-4">
+    <div class="bg-gray-800 rounded-xl shadow-lg border border-gray-700 p-6">
+        <h2 class="text-xl font-bold text-white mb-4">{% trans "Confirmar Eliminación" %}</h2>
+        <p class="text-gray-300 mb-6">
+            {% trans "¿Está seguro de que desea eliminar al usuario" %} <strong class="text-white">{{ object.username }}</strong>?
+        </p>
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="flex justify-end space-x-3">
+                <a href="{% url 'core:usuarios_list' %}"
+                    class="bg-gray-700 hover:bg-gray-600 text-gray-300 font-medium py-2 px-4 rounded-lg transition-colors">
+                    {% trans "Cancelar" %}
+                </a>
+                <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition-colors shadow">
+                    {% trans "Confirmar Eliminación" %}
+                </button>
+            </div>
+        </form>
     </div>
-</form>
-</div>
-</div>
 </div>
 {% endblock %}

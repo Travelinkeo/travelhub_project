@@ -766,7 +766,36 @@ class EmailMonitorService:
         logger.info(f"PDF adjunto: {tiene_pdf}")
 
         if tiene_pdf:
-            logger.info("Procesando PDF adjunto (Prioridad Reenvío)")
+            logger.info("Procesando PDF adjunto...")
+
+            # 1. Intentar procesar como Reporte de Ventas de Proveedor (CTG, MY DESTINY, etc.)
+            try:
+                from apps.contabilidad.supplier_report_service import SupplierReportProcessorService
+
+                for part in message.walk():
+                    fn = part.get_filename()
+                    if fn and fn.lower().endswith(".pdf"):
+                        pdf_data = part.get_payload(decode=True)
+                        if pdf_data:
+                            reporte = SupplierReportProcessorService.procesar_pdf_reporte(
+                                pdf_bytes=pdf_data,
+                                filename=fn,
+                                subject=subject,
+                                sender_email=from_addr,
+                                agencia=self.agencia,
+                            )
+                            if reporte:
+                                logger.info(
+                                    f"✅ Reporte de proveedor {reporte.proveedor_nombre} "
+                                    f"procesado desde Email Monitor para {self.agencia.nombre}."
+                                )
+                                if self.mark_as_read and mail_connection:
+                                    mail_connection.store(msg_num, "+FLAGS", "\\Seen")
+                                return True
+            except Exception as e_sup:
+                logger.debug(f"Email no es reporte de proveedor o falló parseo: {e_sup}")
+
+            # 2. Procesamiento estándar de boletos de avión individuales en PDF
             if self._procesar_boleto_pdf(message, msg_num, mail_connection):
                 if self.mark_as_read and mail_connection:
                     mail_connection.store(msg_num, "+FLAGS", "\\Seen")

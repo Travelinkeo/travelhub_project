@@ -34,7 +34,7 @@ from core.views.hotel_views import (
     HotelListView,
     download_story_view,
 )
-from core.views.marketing_views import lead_magnet_download, parse_demo
+from core.views.marketing_views import demo_page, demo_request, lead_magnet_download, parse_demo
 from core.views.voucher_views import generar_voucher
 
 from .views import (
@@ -64,8 +64,10 @@ app_name = "core"
 
 urlpatterns = [
     # Demo & Marketing HTMX Endpoints
+    path("demo/", demo_page, name="demo_page"),
     path("api/parse-demo/", parse_demo, name="parse_demo"),
     path("api/lead-magnet/", lead_magnet_download, name="lead_magnet_download"),
+    path("api/demo-request/", demo_request, name="demo_request"),
     # Configuración Agencia
     path(
         "agencia/configuracion/",

@@ -159,7 +159,7 @@
                                     </span>
                                     {% endfor %}
                                     {% if venta.pasajeros|length > 2 %}
-                                    <span class="text-[9px] text-white/20 font-black">+{{ venta.pasajeros|length|sub:2 }}</span>
+                                    <span class="text-[9px] text-white/20 font-black">+{{ venta.pasajeros|length|add:"-2" }}</span>
                                     {% endif %}
                                 </div>
                             </div>
@@ -243,11 +243,11 @@
                                                 </span>
                                             </td>
                                             <td class="px-6 py-4 text-right">
-                                                <span class="text-text-main font-black tabular-nums opacity-80">
-                                                    {% with item_margen=item.precio_unitario_venta|sub:item.costo_neto_proveedor|add:item.comision_agencia_monto|add:item.fee_agencia_interno %}
-                                                    ${{ item_margen|floatformat:2 }}
-                                                    {% endwith %}
-                                                </span>
+                                                 <span class="text-text-main font-black tabular-nums opacity-80">
+                                                     {% with item_margen=item.margen|default:0 %}
+                                                     ${{ item_margen|floatformat:2 }}
+                                                     {% endwith %}
+                                                 </span>
                                             </td>
                                         </tr>
                                         {% endfor %}

@@ -117,4 +117,10 @@ CELERY_BEAT_SCHEDULE = {
         "schedule": 3600.0,  # cada hora — evalúa qué reportes están pendientes
         "args": (),
     },
+    # Health checks de proveedores IA y claves API cada 60 minutos
+    "health-check-providers": {
+        "task": "apps.automation.tasks.health_check_providers_task",
+        "schedule": crontab(minute="0"),  # cada hora en punto
+        "args": (),
+    },
 }

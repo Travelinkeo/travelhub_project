@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="{% static 'core/css/tailwind-built.css' %}">
     <link rel="stylesheet" href="{% static 'core/css/responsive.css' %}">
     <script nonce="{{ request.csp_nonce }}" src="{% static 'vendor/htmx_v2.js' %}"></script>
-    <script nonce="{{ request.csp_nonce }}" src="{% static 'vendor/alpine_v3_csp.js' %}" defer></script>
+    <script nonce="{{ request.csp_nonce }}" src="{% static 'vendor/alpine.min.js' %}" defer></script>
 
     {% include "core/partials/_htmx_csrf_and_errors.html" %}
 
@@ -73,7 +73,7 @@
             marketing: {% if 'marketing' in request.path or 'cms' in request.path %}true{% else %}false{% endif %},
             inteligencia: {% if 'asistente' in request.path or 'gds-analyzer' in request.path or 'auditoria' in request.path or 'wiki/gds' in request.path %}true{% else %}false{% endif %},
             sistema: {% if 'catalogos' in request.path or 'agencia/configuracion' in request.path or 'billing' in request.path or 'auditoria' in request.path and 'bookings' not in request.resolver_match.namespace %}true{% else %}false{% endif %},
-            custom: {% if 'aerolineas' in request.path or 'geografia' in request.path or 'monedas' in request.path or 'tipocambio' in request.path or 'retencionesislr' in request.path or 'featureflags' in request.path or 'cronapikeys' in request.path or 'productoservicio' in request.path or 'cruceros' in request.path %}true{% else %}false{% endif %}
+            custom: {% if 'aerolineas' in request.path or 'geografia' in request.path or 'monedas' in request.path or 'tipocambio' in request.path or 'retencionesislr' in request.path or 'featureflag' in request.path or 'cronapikey' in request.path or 'productoservicio' in request.path or 'cruceros' in request.path %}true{% else %}false{% endif %}
         }
     }">
 

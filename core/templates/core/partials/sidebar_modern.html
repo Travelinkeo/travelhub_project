@@ -506,15 +506,15 @@
             <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">{% trans "Retenciones ISLR" %}</span>
         </a>
 
-        <a href="{% url 'core_admin:featureflag_list' %}"
-            class="nav-item {% if 'featureflags' in request.path %}nav-active{% endif %}"
+        <a href="{% url 'admin:core_featureflag_changelist' %}"
+            class="nav-item {% if 'featureflag' in request.path %}nav-active{% endif %}"
             :class="!sidebarOpen && 'justify-center'">
             <span class="material-symbols-outlined text-[20px] shrink-0">toggle_on</span>
             <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">{% trans "Feature Flags" %}</span>
         </a>
 
-        <a href="{% url 'core_admin:cronapikey_list' %}"
-            class="nav-item {% if 'cronapikeys' in request.path %}nav-active{% endif %}"
+        <a href="{% url 'admin:core_cronapikey_changelist' %}"
+            class="nav-item {% if 'cronapikey' in request.path %}nav-active{% endif %}"
             :class="!sidebarOpen && 'justify-center'">
             <span class="material-symbols-outlined text-[20px] shrink-0">vpn_key</span>
             <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">{% trans "Cron API Keys" %}</span>

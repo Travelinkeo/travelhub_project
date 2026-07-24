@@ -4,7 +4,7 @@ Admin de SSO/SAML/OIDC.
 
 from django.contrib import admin
 
-from core.admin_saas import SaaSAdminMixin
+from core.api import SaaSAdminMixin
 from core.sso.models import SSOProvider
 
 

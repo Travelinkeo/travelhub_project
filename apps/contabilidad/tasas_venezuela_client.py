@@ -22,6 +22,8 @@ class TasasVenezuelaClient:
 
     API_URL = "https://ve.dolarapi.com/v1/dolares"
     BINANCE_P2P_URL = "https://p2p.binance.com/bapi/c2c/v2/friendly/c2c/adv/search"
+    CRIPTOYA_P2P_URL = "https://criptoya.com/api/binancep2p/usdt/ves/1"
+    YADIO_P2P_URL = "https://api.yadio.io/json"
     TIMEOUT = 10
 
     @classmethod
@@ -86,19 +88,74 @@ class TasasVenezuelaClient:
             return None
 
     @classmethod
+    def obtener_tasa_p2p_fallback(cls) -> dict | None:
+        """
+        Fallback secundario y terciario para la tasa P2P:
+        1. CriptoYa API (proxy dedicado a Binance P2P USDT/VES)
+        2. Yadio API (agregador P2P Venezuela)
+        """
+        # Fallback 1: CriptoYa
+        try:
+            logger.info(f"Consultando fallback CriptoYa P2P: {cls.CRIPTOYA_P2P_URL}")
+            res = requests.get(
+                cls.CRIPTOYA_P2P_URL,
+                timeout=cls.TIMEOUT,
+                headers={"User-Agent": "TravelHub/1.0"},
+            )
+            if res.status_code == 200:
+                data = res.json()
+                ask = data.get("ask")
+                bid = data.get("bid")
+                if ask and bid:
+                    promedio = (Decimal(str(ask)) + Decimal(str(bid))) / Decimal("2")
+                elif ask:
+                    promedio = Decimal(str(ask))
+                elif bid:
+                    promedio = Decimal(str(bid))
+                else:
+                    promedio = None
+
+                if promedio:
+                    logger.info(f"Tasa P2P obtenida vía CriptoYa: {promedio}")
+                    return {
+                        "price": promedio.quantize(Decimal("0.01")),
+                        "last_update": datetime.now().isoformat(),
+                        "title": "Binance P2P (CriptoYa)",
+                        "symbol": "Bs.",
+                    }
+        except Exception as e:
+            logger.warning(f"Fallback CriptoYa P2P falló: {e}")
+
+        # Fallback 2: Yadio
+        try:
+            logger.info(f"Consultando fallback Yadio P2P: {cls.YADIO_P2P_URL}")
+            res = requests.get(
+                cls.YADIO_P2P_URL,
+                timeout=cls.TIMEOUT,
+                headers={"User-Agent": "TravelHub/1.0"},
+            )
+            if res.status_code == 200:
+                data = res.json()
+                p2p_rate = data.get("USD", {}).get("other", {}).get("p2p_usdt", {}).get("rate")
+                if p2p_rate:
+                    monto = Decimal(str(p2p_rate))
+                    logger.info(f"Tasa P2P obtenida vía Yadio: {monto}")
+                    return {
+                        "price": monto.quantize(Decimal("0.01")),
+                        "last_update": datetime.now().isoformat(),
+                        "title": "Binance P2P (Yadio)",
+                        "symbol": "Bs.",
+                    }
+        except Exception as e:
+            logger.warning(f"Fallback Yadio P2P falló: {e}")
+
+        return None
+
+    @classmethod
     def obtener_todas_tasas(cls) -> dict | None:
         """
         Obtiene todas las tasas disponibles desde DolarApi Venezuela
-        + Binance P2P.
-
-        Returns:
-            Dict con estructura:
-            {
-                'oficial': {'price': Decimal, 'last_update': str, 'title': str},
-                'paralelo': {'price': Decimal, 'last_update': str, 'title': str},
-                'p2p': {'price': Decimal, 'last_update': str, 'title': str},
-                'bitcoin': {'price': Decimal, 'last_update': str, 'title': str}
-            }
+        + Binance P2P (con fallbacks).
         """
         try:
             logger.info(f"Consultando DolarApi Venezuela: {cls.API_URL}")
@@ -167,13 +224,19 @@ class TasasVenezuelaClient:
                     logger.warning(f"Error procesando item: {e}")
                     continue
 
-            # 3. Obtener tasa Binance P2P
+            # 3. Obtener tasa Binance P2P (con fallbacks resilientes)
             p2p = cls.obtener_tasa_binance_p2p()
+            if not p2p:
+                logger.warning(
+                    "No se pudo obtener tasa Binance P2P directa. Intentando fallbacks..."
+                )
+                p2p = cls.obtener_tasa_p2p_fallback()
+
             if p2p:
                 tasas["p2p"] = p2p
-                logger.info(f"Tasa Binance P2P obtenida: {p2p['price']}")
+                logger.info(f"Tasa P2P obtenida ({p2p.get('title', 'P2P')}): {p2p['price']}")
             else:
-                logger.warning("No se pudo obtener tasa Binance P2P.")
+                logger.warning("No se pudo obtener tasa Binance P2P de ninguna fuente.")
 
             if tasas:
                 logger.info(f"Tasas obtenidas: {len(tasas)} fuentes")

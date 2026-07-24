@@ -1,7 +1,6 @@
 import json
 import logging
 import os
-import traceback
 from typing import Any
 
 from django.conf import settings
@@ -27,21 +26,14 @@ class CircuitBreakerException(Exception):
 
 
 class QuotaExhaustedException(Exception):
-    """Lanzada cuando la cuota de la API de IA se ha agotado (Error 429)."""
-
     pass
 
 
 class GeminiConfigurationError(RuntimeError):
-    """Se lanza cuando la clave de API de Gemini no esta configurada."""
+    pass
 
 
 def get_gemini_api_key(agency=None) -> str | None:
-    """
-    Resuelve de manera dinámica la clave API de Gemini.
-    1. Si hay una agencia en contexto (o provista), busca en su AgenciaConfiguracion.
-    2. Si no, cae de vuelta a la clave global (entorno o settings).
-    """
     try:
         from core.api import get_current_agency
 
@@ -57,59 +49,29 @@ def get_gemini_api_key(agency=None) -> str | None:
     except Exception as e_middleware:
         logger.debug(f"Error importando o resolviendo middleware de agencia: {e_middleware}")
 
-    # Fallback global
     return os.environ.get("GEMINI_API_KEY") or getattr(settings, "GEMINI_API_KEY", None)
 
 
 class AIEngine:
     """
     Motor centralizado de Inteligencia Artificial para TravelHub.
-    Gestiona la configuración, modelos y llamadas estructuradas a Gemini.
+    Usa internamente la cadena de proveedores (ProviderChain) con fallback automático:
+    Gemini → OpenAI → DeepSeek.
     """
 
     DEFAULT_MODEL = "gemini-2.5-flash"
-    # El modelo Pro es mejor para razonamiento complejo
     PRO_MODEL = "gemini-1.5-pro"
     VISION_MODEL = "gemini-2.5-flash"
     FALLBACK_MODEL = "gemini-2.5-flash"
 
     @classmethod
     def _ensure_configured(cls):
-        """Asegura que haya al menos una clave API de Gemini disponible (global o de agencia)."""
-        api_key = get_gemini_api_key()
-        return bool(api_key)
+        from core.api import get_api_secret
 
-    def _get_client(self, agency=None):
-        """
-        Retorna un cliente de genai configurado para la clave API correspondiente (agencia o global).
-        """
-        api_key = get_gemini_api_key(agency)
-        if not api_key:
-            raise GeminiConfigurationError("GEMINI_API_KEY no configurada.")
-
-        if not hasattr(self, "_clients_cache"):
-            self._clients_cache = {}
-
-        if api_key not in self._clients_cache:
-            try:
-                genai = _get_genai()
-                types = _get_genai_types()
-                http_options = types.HttpOptions(timeout=30000)  # 30 segundos
-                client = genai.Client(api_key=api_key, http_options=http_options)
-                self._clients_cache[api_key] = client
-                logger.info(
-                    f"AIEngine: Cliente genai instanciado para la clave terminada en ...{api_key[-6:] if len(api_key) > 6 else ''}"
-                )
-            except Exception as e:
-                logger.error(f"Error instanciando cliente genai: {e}")
-                raise GeminiConfigurationError(f"Error instanciando cliente genai: {e}") from e
-
-        return self._clients_cache[api_key]
+        return bool(get_api_secret("GEMINI_API_KEY") or get_gemini_api_key())
 
     def __init__(self):
-        # El constructor es ahora extremadamente ligero
-        self.is_ready = False  # Se evaluará en tiempo de ejecución
-        self._clients_cache = {}
+        self.is_ready = False
 
     def call_gemini(
         self,
@@ -123,101 +85,123 @@ class AIEngine:
         agency: Any | None = None,
     ) -> dict[str, Any]:
         """
-        Llamada unificada a Gemini (Protegida por Circuit Breaker nativo de Django).
-        feature: Indica qué funcionalidad está usando la IA (para tracking de costos).
+        Punto de entrada unificado. Delega en la ProviderChain (fallback automático).
+        Retorna dict con 'text' o el schema parseado, o {'error': ...}.
         """
         from django.core.cache import cache
 
-        # 1. Comprobar si el circuito está abierto (Gemini está caído)
+        # 1. Circuit breaker check
         try:
             if cache.get("gemini_circuit_open"):
-                logger.critical(
-                    "🛑 CIRCUIT BREAKER ACTIVO: Gemini API está inalcanzable. Abortando request para proteger workers."
-                )
-                raise CircuitBreakerException("Servicio de IA temporalmente degradado.")
-        except Exception as e_cache:
-            logger.warning(
-                f"⚠️ Error accediendo al cache (Redis): {e_cache}. Continuando sin cache."
-            )
+                logger.critical("Circuit breaker activo para Gemini. Usando cadena de fallback.")
+        except Exception as e:
+            logger.warning("Error checking circuit breaker: %s", e)
 
-        try:
-            # 2. Intentar llamar a la IA
-            from apps.common.services.circuit_breaker import ai_circuit_breaker
+        # 2. Invocar cadena de proveedores vía FallbackRouter
+        from apps.automation.providerchain.fallback_router import fallback_router
 
-            response = ai_circuit_breaker.call(
-                self._execute_call_gemini,
-                prompt,
-                content_list,
-                response_schema,
-                model_name,
-                temperature,
-                system_instruction,
-                feature,
-                agency,
-            )
-            # Si tiene éxito, reseteamos el contador de fallos
+        images = self._prepare_images(content_list)
+
+        result = fallback_router.generate(
+            prompt=prompt,
+            images=images,
+            schema=response_schema,
+            agency_id=getattr(agency, "id", None) if agency else None,
+            feature=feature,
+        )
+
+        if result.success:
+            # 3. Post-procesamiento (JSON cleaning, schema validation)
+            parsed = self._postprocess_result(result.text, response_schema)
+            if isinstance(parsed, dict) and "error" in parsed:
+                return parsed
+
+            # 4. Resetear contador de fallos
             try:
                 cache.delete("gemini_fail_count")
-            except Exception as e_cache_del:
-                logger.warning(
-                    f"No se pudo limpiar contador de fallos de Gemini en cache: {e_cache_del}"
-                )
-            return response
+            except Exception as e:
+                logger.warning("Error resetting fail count: %s", e)
 
+            # 5. Logging de uso
+            self._log_usage(
+                agency, result.model, feature, result.input_tokens, result.output_tokens, "SUCCESS"
+            )
+
+            if response_schema:
+                return parsed if isinstance(parsed, dict) else {"data": parsed}
+            return {"text": parsed if isinstance(parsed, str) else result.text}
+
+        # 6. Error: incrementar contador y posiblemente abrir circuito
+        try:
+            fails = cache.get("gemini_fail_count", 0) + 1
+            cache.set("gemini_fail_count", fails, timeout=600)
+            if fails >= 5:
+                logger.critical(
+                    "5 fallos consecutivos en la cadena de IA. Abriendo circuito por 5 min."
+                )
+                cache.set("gemini_circuit_open", True, timeout=300)
         except Exception as e:
-            # 3. Si falla, sumamos 1 al contador
+            logger.warning("Error managing circuit breaker: %s", e)
+
+        logger.error("Todos los proveedores de IA fallaron: %s", result.error)
+        return {"error": result.error or "Todos los proveedores de IA fallaron."}
+
+    def _prepare_images(self, content_list: list[Any] | None) -> list[bytes] | None:
+        """Convierte content_list (formato legacy) a lista de bytes para los providers."""
+        if not content_list:
+            return None
+
+        images = []
+        for item in content_list:
+            if isinstance(item, dict) and "data" in item:
+                data = item["data"]
+                images.append(data if isinstance(data, bytes) else str(data).encode())
+            elif hasattr(item, "save"):
+                import io
+
+                buf = io.BytesIO()
+                item.save(buf, format=getattr(item, "format", None) or "PNG")
+                images.append(buf.getvalue())
+            elif isinstance(item, bytes):
+                images.append(item)
+        return images if images else None
+
+    def _postprocess_result(self, text: str, schema: type[BaseModel] | None) -> Any:
+        """Limpia y valida la respuesta JSON contra el schema."""
+        if not schema:
+            return text
+
+        cleaned = self._clean_json_response(text)
+        try:
+            parsed_data = json.loads(cleaned)
+        except json.JSONDecodeError:
+            second = self._extract_json_aggressive(cleaned)
+            if second:
+                try:
+                    parsed_data = json.loads(second)
+                except json.JSONDecodeError:
+                    return {"error": "Formato JSON inválido", "raw_output": text}
+            else:
+                return {"error": "Formato JSON inválido", "raw_output": text}
+
+        if isinstance(parsed_data, dict) and "error" in parsed_data:
+            return parsed_data
+
+        if schema.__name__ == "ResultadoParseoSchema":
+            if isinstance(parsed_data, list):
+                parsed_data = {"boletos": parsed_data}
+            elif isinstance(parsed_data, dict) and "boletos" not in parsed_data:
+                parsed_data = {"boletos": [parsed_data]}
+
+        try:
+            return schema(**parsed_data)
+        except Exception:
             try:
-                fails = cache.get("gemini_fail_count", 0) + 1
-                cache.set("gemini_fail_count", fails, timeout=600)  # Expira en 10 min
-
-                # 4. Si llegamos a 5 fallos seguidos, ABRIMOS el circuito por 5 minutos
-                if fails >= 5:
-                    logger.critical(
-                        "💥 5 Fallos consecutivos. APAGANDO conexión a Gemini por 5 minutos."
-                    )
-                    cache.set("gemini_circuit_open", True, timeout=300)  # 5 minutos de bloqueo
+                return schema.model_validate(parsed_data)
             except Exception:
-                fails = "N/A"
-
-            logger.warning(f"⚠️ Fallo en Gemini API (Intento {fails}/5): {str(e)}")
-
-            # 5. INTENTO DE RESCATE: Si es un error de cuota (429), intentar con el modelo de respaldo
-            if "429" in str(e) and model_name != self.FALLBACK_MODEL:
-                logger.info(
-                    f"🔄 Cuota agotada en {model_name or self.DEFAULT_MODEL}. Reintentando con {self.FALLBACK_MODEL}..."
-                )
-                return self.call_gemini(
-                    prompt=prompt,
-                    content_list=content_list,
-                    response_schema=response_schema,
-                    model_name=self.FALLBACK_MODEL,
-                    temperature=temperature,
-                    system_instruction=system_instruction,
-                    feature=feature,
-                    agency=agency,
-                )
-
-            # 6. ÚLTIMO RECURSO: Intentar sin esquema si el 404 persiste (problemas de habilitación/versión)
-            if "404" in str(e) and response_schema:
-                logger.warning("🔄 Error 404 en modo esquema. Reintentando en modo texto plano...")
-                return self.call_gemini(
-                    prompt=prompt,
-                    content_list=content_list,
-                    response_schema=None,
-                    model_name=model_name,
-                    temperature=temperature,
-                    system_instruction=system_instruction,
-                    feature=feature,
-                    agency=agency,
-                )
-
-            raise e
+                return parsed_data
 
     def analyze_gds_terminal(self, raw_text: str, gds_type: str = "SABRE") -> dict[str, Any]:
-        """
-        Analiza texto crudo de terminales GDS (Sabre, KIU, Amadeus) y devuelve
-        un JSON estructurado usando ResultadoParseoSchema.
-        """
         from core.api import ResultadoParseoSchema
 
         system_prompt = (
@@ -236,15 +220,12 @@ class AIEngine:
             "7. Devuelve un objeto JSON que cumpla estrictamente con el esquema ResultadoParseoSchema."
         )
 
-        raw_response = self.call_gemini(
+        return self.call_gemini(
             prompt=f"Analiza este texto de terminal GDS:\n\n{raw_text}",
             system_instruction=system_prompt,
             response_schema=ResultadoParseoSchema,
             feature="gds_parsing",
         )
-
-        # Devolvemos el schema completo (con la lista 'boletos') para el Analyzer
-        return raw_response
 
     def parse_structured_data(
         self,
@@ -253,10 +234,6 @@ class AIEngine:
         system_prompt: str | None = None,
         images: list[Any] | None = None,
     ) -> dict[str, Any]:
-        """
-        Extrae datos estructurados de un texto (e imágenes opcionales)
-        basándose en un esquema de Pydantic.
-        """
         return self.call_gemini(
             prompt=text,
             content_list=images,
@@ -264,216 +241,24 @@ class AIEngine:
             system_instruction=system_prompt,
         )
 
-    def _execute_call_gemini(
-        self,
-        prompt: str,
-        content_list: list[Any] | None = None,
-        response_schema: type[BaseModel] | None = None,
-        model_name: str | None = None,
-        temperature: float = 0.1,
-        system_instruction: str | None = None,
-        feature: str = "generic",
-        agency: Any | None = None,
-    ) -> dict[str, Any]:
-        """
-        Ejecución real de la llamada (Privada para el Circuit Breaker).
-        """
-        # Resolve client dynamically for this call
-        try:
-            client = self._get_client(agency=agency)
-        except GeminiConfigurationError as config_err:
-            return {"error": f"IA no configurada: {config_err}"}
-
-        try:
-            # Si hay contenido multimedia, usamos el modelo de visión
-            is_media = self._has_media(content_list)
-            selected_model = model_name or (self.VISION_MODEL if is_media else self.DEFAULT_MODEL)
-
-            # Preparar inputs
-            contents = []
-            types_module = _get_genai_types()
-            if content_list:
-                for item in content_list:
-                    if isinstance(item, dict):
-                        mime_type = item.get("mime_type", "")
-                        data = item.get("data")
-                        if data and mime_type.startswith("image/"):
-                            try:
-                                part = types_module.Part.from_bytes(data=data, mime_type=mime_type)
-                                contents.append(part)
-                            except Exception as e_img:
-                                logger.warning(
-                                    f"[AIEngine] Could not create Part from image data: {e_img}"
-                                )
-                                contents.append(str(item))
-                        else:
-                            contents.append(item)
-                    elif hasattr(item, "save"):  # PIL Image
-                        try:
-                            import io
-
-                            buf = io.BytesIO()
-                            item.save(buf, format=item.format or "PNG")
-                            part = types_module.Part.from_bytes(
-                                data=buf.getvalue(), mime_type=f"image/{item.format.lower()}"
-                            )
-                            contents.append(part)
-                        except Exception as e_pil:
-                            logger.warning(
-                                f"[AIEngine] Could not create Part from PIL image: {e_pil}"
-                            )
-                            contents.append(str(item))
-                    elif isinstance(item, list):
-                        contents.append(item)
-                    else:
-                        contents.append(str(item))
-
-            if prompt:
-                contents.append(prompt)
-
-            # Generación estructurada si hay schema
-            try:
-                types = _get_genai_types()
-                config = types.GenerateContentConfig(
-                    temperature=temperature,
-                )
-                if system_instruction:
-                    config.system_instruction = system_instruction
-                if response_schema:
-                    config.response_mime_type = "application/json"
-                    config.response_schema = response_schema
-                else:
-                    config.response_mime_type = "text/plain"
-
-                response = client.models.generate_content(
-                    model=selected_model, contents=contents, config=config
-                )
-                self._log_usage(None, selected_model, feature, 0, 0, "SUCCESS")
-            except Exception as e:
-                error_str = str(e)
-                if "429" in error_str and selected_model != self.FALLBACK_MODEL:
-                    logger.info(
-                        f"🔄 Cuota agotada en {selected_model}. Reintentando con {self.FALLBACK_MODEL}..."
-                    )
-                    return self._execute_call_gemini(
-                        prompt,
-                        content_list,
-                        response_schema,
-                        self.FALLBACK_MODEL,
-                        temperature,
-                        system_instruction,
-                        agency=agency,
-                    )
-
-                if "404" in error_str or "API has not been used" in error_str:
-                    logger.error(f"❌ API DESHABILITADA o MODELO NO ENCONTRADO: {error_str}")
-                    return {
-                        "error": f"La API de Gemini o el modelo {selected_model} no están disponibles."
-                    }
-
-                if response_schema:
-                    types = _get_genai_types()
-                    config_fallback = types.GenerateContentConfig(
-                        temperature=temperature, response_mime_type="application/json"
-                    )
-                    if system_instruction:
-                        config_fallback.system_instruction = system_instruction
-                    response = client.models.generate_content(
-                        model=selected_model, contents=contents, config=config_fallback
-                    )
-                    self._log_usage(None, selected_model, feature, 0, 0, "SUCCESS_WITHOUT_SCHEMA")
-                else:
-                    raise e
-
-            raw_text = response.text
-
-            if response_schema:
-                try:
-                    cleaned_json = self._clean_json_response(raw_text)
-                    parsed_data = json.loads(cleaned_json)
-                    if isinstance(parsed_data, dict) and "error" in parsed_data:
-                        return parsed_data
-
-                    # Structural Healing for ResultadoParseoSchema
-                    if response_schema.__name__ == "ResultadoParseoSchema":
-                        if isinstance(parsed_data, list):
-                            parsed_data = {"boletos": parsed_data}
-                        elif isinstance(parsed_data, dict) and "boletos" not in parsed_data:
-                            parsed_data = {"boletos": [parsed_data]}
-
-                    try:
-                        return response_schema(**parsed_data)
-                    except Exception as validation_err:
-                        logger.warning(
-                            f"[AIEngine] Schema validation failed, attempting partial validation: {validation_err}"
-                        )
-                        try:
-                            return response_schema.model_validate(parsed_data)
-                        except Exception:
-                            return parsed_data
-                except Exception as parse_err:
-                    # 🛡️ Audit Step 3.1: Robustez de IA - Logging detallado en fallo
-                    logger.error("❌ [AIEngine] Error crítico parseando JSON de IA.")
-                    logger.error(f"Error detallado: {parse_err}")
-                    # Grabamos el output completo en un archivo temporal para análisis si es muy grande
-                    logger.error(f"RAW OUTPUT (Preview): {raw_text[:500]}...")
-
-                    # Intentamos una extracción secundaria más agresiva
-                    try:
-                        second_chance = self._extract_json_aggressive(raw_text)
-                        if second_chance:
-                            return json.loads(second_chance)
-                    except Exception as e_agg:
-                        logger.warning(f"Extraccion JSON agresiva tambien fallo: {e_agg}")
-
-                    return {
-                        "error": f"Error de formato en la respuesta de IA: {str(parse_err)}",
-                        "status": "PARSE_ERROR",
-                        "raw_output": raw_text,  # Incluimos el raw en el dict para que el llamador decida
-                    }
-
-            return {"text": raw_text}
-
-        except Exception as e:
-            error_str = str(e)
-            if "429" in error_str or "Resource exhausted" in error_str:
-                logger.error(f"🚨 CUOTA AGOTADA en Gemini: {error_str}")
-                raise QuotaExhaustedException("La cuota de la API de IA se ha agotado.") from e
-
-            self._log_usage(None, selected_model, feature, 0, 0, f"FAILED: {error_str[:20]}")
-            logger.error(f"AIEngine Call Error: {traceback.format_exc()}")
-            return {"error": str(e)}
-
     def _clean_json_response(self, text: str) -> str:
-        """
-        Limpia la respuesta de la IA de forma robusta.
-        Elimina marcadores markdown, comentarios de estilo JS y busca el bloque JSON.
-        """
         if not text:
             return "{}"
 
         import re
 
-        # 1. Eliminar marcadores markdown y texto circundante obvio
         text = re.sub(r"```(?:json)?", "", text)
         text = text.replace("```", "")
-
-        # 2. Eliminar comentarios de una línea (// ...) que a veces la IA incluye
-        # Solo si no están dentro de strings (esto es una aproximación simple)
         text = re.sub(r"^\s*//.*$", "", text, flags=re.MULTILINE)
 
-        # 3. Buscar el bloque JSON más externo (greedy match)
-        # Intentamos encontrar el primer '{' y el último '}'
         start = text.find("{")
         end = text.rfind("}")
 
         if start != -1 and end != -1:
             candidate = text[start : end + 1]
-            # Limpieza de caracteres de control e invisibles
             candidate = candidate.replace("\u200b", "").replace("\ufeff", "")
             return candidate.strip()
 
-        # Si no hay llaves, probamos con corchetes (arrays)
         start = text.find("[")
         end = text.rfind("]")
         if start != -1 and end != -1:
@@ -482,17 +267,10 @@ class AIEngine:
         return text.strip()
 
     def _extract_json_aggressive(self, text: str) -> str | None:
-        """
-        Intento secundario de extracción usando Regex más agresiva para limpiar basura al final.
-        """
         import re
 
-        # Busca el bloque que empieza por { y termina por } ignorando lo que haya fuera
-        # El patrón [^{]* y [^}]* ayuda a ser un poco más selectivo si hay múltiples bloques,
-        # pero para Gemini el greedy suele ser mejor para capturar el objeto raíz.
         match = re.search(r"(\{.*\})", text, re.DOTALL)
         if match:
-            # Limpiar posibles comas finales antes de cerrar llaves/corchetes (un error común de IA)
             content = match.group(1)
             content = re.sub(r",\s*([\}\]])", r"\1", content)
             return content
@@ -509,24 +287,20 @@ class AIEngine:
         return False
 
     def _log_usage(self, agencia, model_name, feature, input_tokens, output_tokens, status):
-        """
-        Registra el uso de la IA en la base de datos de forma segura.
-        """
         try:
             from core.api import AIUsageLog, get_current_agency
 
             target_agencia = agencia or get_current_agency()
 
-            # Estimación simple de costos (Referencial)
             cost = 0
-            if "pro" in model_name:
+            if "pro" in (model_name or ""):
                 cost = 0.01
-            elif "flash" in model_name:
+            elif "flash" in (model_name or ""):
                 cost = 0.001
 
             AIUsageLog.objects.create(
                 agencia=target_agencia,
-                model_name=model_name,
+                model_name=model_name or "unknown",
                 feature=feature,
                 input_tokens=input_tokens,
                 output_tokens=output_tokens,
@@ -537,14 +311,12 @@ class AIEngine:
             logger.error(f"Error logging AI usage: {e}")
 
 
-# Instancia singleton
 ai_engine = AIEngine()
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 
 def generate_content(prompt: str, model_name: str = "gemini-2.5-flash") -> str:
-    """Wrapper de compatibilidad (antes en gemini.py). Delega en AIEngine."""
     try:
         res = ai_engine.call_gemini(prompt, model_name=model_name)
         if isinstance(res, dict) and "text" in res:
@@ -557,7 +329,6 @@ def generate_content(prompt: str, model_name: str = "gemini-2.5-flash") -> str:
 
 
 def generate_text_from_prompt(prompt: str, model_name: str = "gemini-2.5-flash") -> str:
-    """Wrapper de compatibilidad (antes en gemini_client.py). Delega en AIEngine."""
     try:
         res = ai_engine.call_gemini(prompt, model_name=model_name)
         if isinstance(res, dict) and "text" in res:
@@ -572,7 +343,6 @@ def generate_text_from_prompt(prompt: str, model_name: str = "gemini-2.5-flash")
 
 
 def generate_structured_data(prompt: str, model_name: str = "gemini-2.5-flash") -> str:
-    """Envía un prompt a Gemini y fuerza respuesta en formato JSON."""
     try:
         result = ai_engine.call_gemini(prompt, model_name=model_name)
         if isinstance(result, dict):
@@ -588,33 +358,25 @@ def analizar_documento_con_gemini_estructurado(
     prompt_text: str,
     response_schema: type,
 ) -> dict:
-    """Analiza un documento (PDF/imagen) con Gemini Vision y retorna dict."""
-    genai = _get_genai()
-    genai_types = _get_genai_types()
+    """Analiza un documento (PDF/imagen) con la cadena de proveedores."""
+    from apps.automation.providerchain.fallback_router import fallback_router
 
-    api_key = get_gemini_api_key()
-    if not api_key:
-        raise GeminiConfigurationError("GEMINI_API_KEY no configurada.")
-
-    client = genai.Client(api_key=api_key)
-    response = client.models.generate_content(
-        model="gemini-2.5-flash",
-        contents=[
-            genai_types.Part.from_bytes(data=file_bytes, mime_type=mime_type),
-            prompt_text,
-        ],
-        config=genai_types.GenerateContentConfig(
-            temperature=0.1,
-            response_mime_type="application/json",
-            response_schema=response_schema,
-        ),
+    result = fallback_router.generate(
+        prompt=prompt_text,
+        images=[file_bytes],
+        schema=response_schema,
+        feature="document_analysis",
     )
-    try:
-        return json.loads(response.text)
-    except Exception as e:
-        raise ValueError(
-            f"Gemini no devolvio un JSON valido. Respuesta: {getattr(response, 'text', '')}"
-        ) from e
+
+    if result.success:
+        try:
+            import json
+
+            return json.loads(result.text)
+        except json.JSONDecodeError as e:
+            raise ValueError(f"El proveedor no devolvió un JSON válido: {result.text[:200]}") from e
+    else:
+        raise ValueError(f"Todos los proveedores fallaron: {result.error}")
 
 
 def list_available_models():

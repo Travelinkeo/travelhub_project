@@ -342,12 +342,10 @@
                     </thead>
                     <tbody>
                         {% for v in vuelos %}
-                        {% set org = v.origen.ciudad if v.origen is mapping and v.origen.ciudad else v.origen %}
-                        {% set dst = v.destino.ciudad if v.destino is mapping and v.destino.ciudad else v.destino %}
                         <tr>
                             <td
                                 style="padding: 6px; border-bottom: 1px solid #eee; word-wrap: break-word; white-space: normal; line-height: 1.2;">
-                                {{ org|upper }}/<br>{{ dst|upper }}
+                                {{ v.origen.ciudad|default:v.origen|upper }}/<br>{{ v.destino.ciudad|default:v.destino|upper }}
                             </td>
                             <td style="padding: 6px; border-bottom: 1px solid #eee;">{{ v.numero_vuelo }}</td>
                             <td style="padding: 6px; border-bottom: 1px solid #eee;">{{ v.clase|default:'Y' }}</td>

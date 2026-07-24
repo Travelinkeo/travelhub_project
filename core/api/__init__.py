@@ -56,6 +56,7 @@ from core.models.ai_schemas import (
     TramoVueloSchema,
 )
 from core.models.anulaciones import AnulacionBoleto
+from core.models.api_secret import APISecret
 from core.models.audit import AuditLog, crear_audit_log
 
 # --- Base Models, Managers & Mixins ---
@@ -75,6 +76,8 @@ from core.security import (
     get_object_tenant_or_404,
     get_user_active_agency,
 )
+from core.services.api_secrets import get_api_secret
+from core.services.api_testers import test_api_secret
 
 # --- Signal Bypass ---
 from core.signals_bypass import (
@@ -105,6 +108,10 @@ from core.validators import (
 )
 
 __all__ = [
+    # API Secrets
+    "APISecret",
+    "get_api_secret",
+    "test_api_secret",
     # Context & Middleware
     "get_current_agency",
     "get_current_user",

@@ -127,3 +127,19 @@ def ejecutar_cobranza_ia_task(self):
     except Exception as e:
         logger.error(f"Error ejecutando cobranza IA: {e}")
         raise self.retry(exc=e, countdown=3600) from e
+
+
+@shared_task(bind=True, max_retries=2, soft_time_limit=30, time_limit=45)
+def health_check_providers_task(self):
+    """Ejecuta health checks de proveedores IA y claves API (programado cada 60 min)."""
+    from apps.automation.providerchain.health import run_health_checks
+
+    try:
+        results = run_health_checks(force=True)
+        ok = sum(1 for r in results if r["status"] == "ok")
+        fail = sum(1 for r in results if r["status"] == "fail")
+        logger.info("HealthCheck: %d OK, %d FAIL (total %d)", ok, fail, len(results))
+        return {"ok": ok, "fail": fail, "total": len(results)}
+    except Exception as e:
+        logger.error("HealthCheck task failed: %s", e)
+        raise self.retry(exc=e, countdown=300) from e

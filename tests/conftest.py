@@ -447,3 +447,134 @@ def moneda_ves(db):
         codigo_iso="VES", defaults={"nombre": "Bolívares", "simbolo": "Bs"}
     )
     return moneda
+
+
+# ============================================
+# FIXTURES COMPARTIDAS — FASE 0+
+# ============================================
+
+
+@pytest.fixture
+def superuser(db):
+    """Crea un superusuario para tests de admin."""
+    User = get_user_model()
+    user = User.objects.create_superuser(
+        username=f"admin_{__import__('time').time()}",
+        email="admin@test.com",
+        password="testpass123",
+    )
+    return user
+
+
+@pytest.fixture
+def admin_client(client, superuser):
+    """Django test client autenticado como superuser."""
+    client.force_login(superuser)
+    return client
+
+
+@pytest.fixture
+def agencia(db):
+    """Crea una agencia de prueba."""
+    from tests.helpers import create_test_agencia
+
+    return create_test_agencia()
+
+
+@pytest.fixture
+def usuario_agente(db, agencia):
+    """Crea un usuario agente perteneciente a una agencia."""
+    User = get_user_model()
+    user = User.objects.create_user(
+        username=f"agente_{__import__('time').time()}",
+        email="agente@test.com",
+        password="testpass123",
+    )
+    from core.models.agencia import UsuarioAgencia
+
+    UsuarioAgencia.objects.create(usuario=user, agencia=agencia, rol="AGENTE")
+    return user
+
+
+@pytest.fixture
+def mock_http_requests(monkeypatch):
+    """Mock genérico de requests.post/get para evitar llamadas HTTP reales.
+
+    Uso: mock_http_requests.post(requests.post)  # reemplaza llamadas reales
+    """
+    import unittest.mock
+
+    mock = unittest.mock.MagicMock()
+    monkeypatch.setattr("requests.post", mock)
+    monkeypatch.setattr("requests.get", mock)
+    monkeypatch.setattr("requests.put", mock)
+    return mock
+
+
+@pytest.fixture
+def mock_provider_chain(monkeypatch):
+    """
+    Mock de ProviderChain/FallbackRouter para tests que necesitan
+    resultados de IA pero no quieren ejecutar la cadena real.
+    """
+    import json
+    import unittest.mock
+
+    from apps.automation.providerchain.base import ProviderResult
+
+    def fake_generate(**kwargs):
+        return ProviderResult(
+            text=json.dumps({
+                "status": "ok",
+                "data": "test response",
+                "confidence": 0.95,
+            }),
+            provider="gemini",
+            model="gemini-2.0-flash",
+            input_tokens=10,
+            output_tokens=20,
+            duration_ms=100,
+            success=True,
+        )
+
+    mock_router = unittest.mock.MagicMock()
+    mock_router.generate = fake_generate
+
+    monkeypatch.setattr(
+        "apps.automation.providerchain.fallback_router.fallback_router",
+        mock_router,
+    )
+    monkeypatch.setattr(
+        "apps.automation.services.ai_engine.fallback_router",
+        mock_router,
+    )
+    return mock_router
+
+
+@pytest.fixture
+def mock_stripe(monkeypatch):
+    """Mock de operaciones Stripe para tests de finance."""
+    import unittest.mock
+
+    mock_balance = unittest.mock.MagicMock()
+    mock_balance.retrieve.return_value = {"available": [{"amount": 10000, "currency": "usd"}]}
+
+    mock_stripe = unittest.mock.MagicMock()
+    mock_stripe.Balance = mock_balance
+    mock_stripe.Charge.create.return_value = {"id": "ch_mock", "status": "succeeded"}
+    mock_stripe.PaymentIntent.create.return_value = {
+        "id": "pi_mock",
+        "status": "succeeded",
+        "client_secret": "secret_mock",
+    }
+
+    monkeypatch.setattr("apps.finance.services.stripe_service.stripe", mock_stripe)
+    monkeypatch.setattr("core.services.api_testers.stripe", mock_stripe)
+    return mock_stripe
+
+
+@pytest.fixture
+def enable_db_trgm(settings):
+    """Fuerza desactivación de búsqueda trigram si no disponible en test DB."""
+    settings.USE_PG_TRGM = False
+    return settings

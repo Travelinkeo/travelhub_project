@@ -11,7 +11,8 @@ CIRCUIT_TTL = 60 * 60
 
 
 class ProviderRegistry:
-    _providers: dict[str, AbstractBaseProvider] = {}
+    def __init__(self):
+        self._providers: dict[str, AbstractBaseProvider] = {}
 
     def register(self, provider: AbstractBaseProvider) -> None:
         self._providers[provider.provider_name] = provider

@@ -66,9 +66,12 @@ def record_call(
         pipe[f"ai_metrics:{hour_key}:error_provider:{provider}"] = 1
 
     try:
-        for key, incr in pipe.items():
-            cache.incr(key, incr)
-            cache.expire(key, METRICS_TTL)
+        for key, delta in pipe.items():
+            try:
+                new_val = (cache.get(key) or 0) + delta
+                cache.set(key, new_val, METRICS_TTL)
+            except Exception:
+                cache.set(key, delta, METRICS_TTL)
 
         _record_latency_sample(hour_key, provider, duration_ms)
     except Exception as e:
@@ -97,12 +100,19 @@ def _record_latency_sample(hour_key: str, provider: str, duration_ms: int) -> No
     """Almacena muestra de latencia para cálculos de percentiles."""
     key = f"ai_metrics:{hour_key}:latency:{provider}"
     try:
-        length = cache.client.get_client().llen(key)
-        if length < LATENCY_SAMPLE_SIZE:
-            cache.client.get_client().rpush(key, duration_ms)
-            cache.client.get_client().expire(key, LATENCY_TTL)
+        samples = cache.get(key) or []
+        if isinstance(samples, list) and len(samples) < LATENCY_SAMPLE_SIZE:
+            samples.append(duration_ms)
+            cache.set(key, samples, LATENCY_TTL)
     except Exception:
         logger.exception("Error almacenando muestra de latencia para %s", provider)
+
+
+def _get_latency_samples(hour_key: str, provider: str) -> list[int]:
+    try:
+        return cache.get(f"ai_metrics:{hour_key}:latency:{provider}") or []
+    except Exception:
+        return []
 
 
 def _get_percentiles(values: list[int]) -> dict[str, float]:
@@ -164,11 +174,3 @@ def get_hourly_metrics(hours: int = 24) -> dict:
         "error_types": dict(error_types),
         "latency_percentiles": percentiles,
     }
-
-
-def _get_latency_samples(hour_key: str, provider: str) -> list[int]:
-    try:
-        raw = cache.client.get_client().lrange(f"ai_metrics:{hour_key}:latency:{provider}", 0, -1)
-        return [int(v) for v in raw]
-    except Exception:
-        return []

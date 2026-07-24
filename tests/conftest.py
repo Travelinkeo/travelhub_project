@@ -37,7 +37,7 @@ def pytest_configure(config):
     pg_available = False
     # Intentar hosts: directo DB, luego pgbouncer, luego localhost
     # NOTA: test_db solo existe en docker-compose.test.yml, no en red producción
-    hosts = ["travelhub_db", "pgbouncer", "localhost", "127.0.0.1"]
+    hosts = ["test_db", "travelhub_db", "pgbouncer", "localhost", "127.0.0.1"]
     # Credenciales: probar primero las reales del entorno, luego defaults
     creds = set()
     db_user = _os.environ.get("DB_USER", "postgres")
@@ -524,11 +524,13 @@ def mock_provider_chain(monkeypatch):
 
     def fake_generate(**kwargs):
         return ProviderResult(
-            text=json.dumps({
-                "status": "ok",
-                "data": "test response",
-                "confidence": 0.95,
-            }),
+            text=json.dumps(
+                {
+                    "status": "ok",
+                    "data": "test response",
+                    "confidence": 0.95,
+                }
+            ),
             provider="gemini",
             model="gemini-2.0-flash",
             input_tokens=10,

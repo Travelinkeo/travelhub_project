@@ -1,6 +1,5 @@
 import logging
 import os
-from functools import lru_cache
 
 from django.core.cache import cache
 
@@ -9,7 +8,6 @@ logger = logging.getLogger(__name__)
 CACHE_TTL = 300  # 5 minutos
 
 
-@lru_cache(maxsize=128)
 def _get_from_cache(service: str) -> str | None:
     """Lee de caché Redis"""
     return cache.get(f"api_secret:{service}")

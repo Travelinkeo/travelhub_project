@@ -1,45 +1,86 @@
-"""Tests para core/security.py — helpers de tenant y permisos."""
-
 import pytest
+from django.core.exceptions import PermissionDenied
 
 pytestmark = [pytest.mark.unit]
 
 
 class TestFilterQuerysetByTenant:
-    def test_returns_queryset_unchanged(self):
+    def test_filters_by_agencia(self):
         from core.security import filter_queryset_by_tenant
 
-        class FakeQuerySet:
+        calls = []
+
+        class FakeQS:
             def filter(self, **kwargs):
-                return kwargs
+                calls.append(kwargs)
+                return self
 
-        result = filter_queryset_by_tenant(FakeQuerySet(), agencia_id=1)
-        assert result == {"agencia_id": 1}
+        result = filter_queryset_by_tenant(FakeQS(), agencia="agencia_obj")
+        assert result is not None
+        assert calls == [{"agencia": "agencia_obj"}]
 
-    def test_handles_none_agencia(self):
+    def test_skips_filter_when_agencia_none(self):
         from core.security import filter_queryset_by_tenant
 
-        class FakeQuerySet:
-            def filter(self, **kwargs):
-                return kwargs
+        called = False
 
-        result = filter_queryset_by_tenant(FakeQuerySet(), agencia_id=None)
-        assert result == {}
+        class FakeQS:
+            def filter(self, **kwargs):
+                nonlocal called
+                called = True
+                return self
+
+        filter_queryset_by_tenant(FakeQS(), agencia=None)
+        assert called is False
 
 
 class TestGetAgenciaFromRequest:
-    def test_returns_none_without_request(self):
+    def test_raises_for_none_request(self):
         from core.security import get_agencia_from_request
 
-        assert get_agencia_from_request(None) is None
+        with pytest.raises(AttributeError):
+            get_agencia_from_request(None)
 
-    def test_returns_none_without_user(self):
+    def test_raises_for_none_user(self):
         from core.security import get_agencia_from_request
 
         class FakeRequest:
             user = None
 
-        assert get_agencia_from_request(FakeRequest()) is None
+        with pytest.raises(AttributeError):
+            get_agencia_from_request(FakeRequest())
+
+    def test_raises_for_unauthenticated_user(self, rf):
+        from django.contrib.auth.models import AnonymousUser
+
+        from core.security import get_agencia_from_request
+
+        req = rf.get("/")
+        req.user = AnonymousUser()
+        with pytest.raises(PermissionDenied, match="Autenticación requerida"):
+            get_agencia_from_request(req)
+
+    def test_returns_none_for_superuser(self, rf, db):
+        from django.contrib.auth import get_user_model
+
+        from core.security import get_agencia_from_request
+
+        User = get_user_model()
+        user = User.objects.create(is_superuser=True, username="admin")
+        req = rf.get("/")
+        req.user = user
+        result = get_agencia_from_request(req)
+        assert result is None
+
+    def test_raises_for_user_without_agencia(self, rf, monkeypatch):
+        from core.security import get_agencia_from_request
+
+        user = type("FakeUser", (), {"is_authenticated": True, "is_superuser": False})()
+        monkeypatch.setattr("core.security.get_user_active_agency", lambda u: None)
+        req = rf.get("/")
+        req.user = user
+        with pytest.raises(PermissionDenied, match="agencia activa"):
+            get_agencia_from_request(req)
 
 
 class TestGetAgenciaOr403:

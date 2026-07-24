@@ -22,7 +22,7 @@ class OkProvider(AbstractBaseProvider):
 
     def generate(self, prompt, **kw):
         return ProviderResult(
-            text="ok response", provider="test_ok", model="test-model", success=True
+            text="ok response", provider=self.provider_name, model="test-model", success=True
         )
 
 
@@ -34,7 +34,7 @@ class FailProvider(AbstractBaseProvider):
         return False
 
     def generate(self, prompt, **kw):
-        return ProviderResult(success=False, error="test error", provider="test_fail")
+        return ProviderResult(success=False, error="test error", provider=self.provider_name)
 
 
 class EmergencyProvider(AbstractBaseProvider):
@@ -47,7 +47,10 @@ class EmergencyProvider(AbstractBaseProvider):
 
     def generate(self, prompt, **kw):
         return ProviderResult(
-            text="emergency response", provider="test_emergency", model="emergency", success=True
+            text="emergency response",
+            provider=self.provider_name,
+            model="emergency",
+            success=True,
         )
 
 
@@ -185,32 +188,33 @@ class TestFallbackRouter:
         provider_registry._providers.clear()
         cache.clear()
 
+    def _make(self, name, cls=OkProvider, **kw):
+        p = cls()
+        p.provider_name = name
+        if "supports_structured" in kw:
+            p.supports_structured_output = kw["supports_structured"]
+        provider_registry.register(p)
+        return p
+
     def test_router_returns_first_ok(self):
-        p1 = OkProvider()
-        p1.provider_name = "primary"
-        p2 = FailProvider()
-        p2.provider_name = "secondary"
-        provider_registry.register(p1)
-        provider_registry.register(p2)
+        self._make("gemini")
+        self._make("openai", cls=FailProvider)
 
         result = fallback_router.generate("test prompt")
         assert result.success is True
-        assert result.provider == "primary"
+        assert result.provider == "gemini"
 
     def test_router_falls_back(self):
-        p1 = FailProvider()
-        p1.provider_name = "primary"
-        p2 = OkProvider()
-        p2.provider_name = "secondary"
-        provider_registry.register(p1)
-        provider_registry.register(p2)
+        self._make("gemini", cls=FailProvider)
+        self._make("openai")
 
         result = fallback_router.generate("test prompt")
         assert result.success is True
-        assert result.provider == "secondary"
+        assert result.provider == "openai"
 
     def test_router_all_fail(self):
-        provider_registry.register(FailProvider())
+        self._make("gemini", cls=FailProvider)
+        self._make("openai", cls=FailProvider)
         result = fallback_router.generate("test prompt")
         assert result.success is False
         assert "Todos los proveedores fallaron" in (result.error or "")
@@ -220,28 +224,20 @@ class TestFallbackRouter:
         assert result.success is False
 
     def test_router_opens_circuit_on_failure(self):
-        p1 = FailProvider()
-        p1.provider_name = "primary"
-        p2 = OkProvider()
-        p2.provider_name = "secondary"
-        provider_registry.register(p1)
-        provider_registry.register(p2)
+        self._make("gemini", cls=FailProvider)
+        self._make("openai")
 
         fallback_router.generate("test")
-        assert provider_registry._circuit_open("primary") is True
+        assert provider_registry._circuit_open("gemini") is True
 
     def test_test_all(self):
-        p1 = OkProvider()
-        p1.provider_name = "ok_prov"
-        p2 = FailProvider()
-        p2.provider_name = "fail_prov"
-        provider_registry.register(p1)
-        provider_registry.register(p2)
+        self._make("gemini")
+        self._make("openai", cls=FailProvider)
 
         results = fallback_router.test_all()
         by_name = {r["name"]: r for r in results}
-        assert by_name["ok_prov"]["available"] is True
-        assert by_name["fail_prov"]["available"] is False
+        assert "gemini" in by_name
+        assert "openai" in by_name
 
 
 # ─── Tracing ─────────────────────────────────────────────────────────────

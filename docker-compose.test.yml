@@ -34,8 +34,10 @@ services:
       context: .
       target: test
     environment:
-      DJANGO_SETTINGS_MODULE: travelhub.settings
+      DJANGO_SETTINGS_MODULE: travelhub.settings.testing
       DATABASE_URL: postgresql://postgres:postgres@test_db:5432/travelhub_test
+      POSTGRES_HOST: test_db
+      POSTGRES_PORT: "5432"
       REDIS_CACHE_URL: redis://test_redis_cache:6379/0
       REDIS_SESSIONS_URL: redis://test_redis_cache:6379/1
       REDIS_CELERY_URL: redis://test_redis_celery:6379/0
@@ -45,6 +47,8 @@ services:
       ENCRYPTION_KEY: test-encryption-key-32-chars-long!!
       DEBUG: "True"
       ENVIRONMENT: test
+      TESTING: "True"
+      CI: "true"
     depends_on:
       test_db:
         condition: service_healthy
@@ -53,5 +57,4 @@ services:
       test_redis_celery:
         condition: service_healthy
     command: >
-      sh -c "python manage.py migrate --noinput &&
-             python -m pytest tests/ -x -q --tb=short --create-db"
+      sh -c "python -m pytest tests/ -x -q --tb=short --create-db --no-header"

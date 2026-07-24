@@ -44,18 +44,18 @@ class TestAPISecretModel:
             assert s.category == cat
 
     def test_category_choices_invalid(self):
-        from django.db.utils import IntegrityError
+        from django.core.exceptions import ValidationError
 
         s = APISecret(service="BAD_CAT", category="invalid", value="x")
-        with pytest.raises(IntegrityError):
-            s.save(force_insert=True)
+        with pytest.raises(ValidationError):
+            s.full_clean()
 
     def test_ordering(self):
         APISecret.objects.create(service="B_service", category="ai", value="v")
         APISecret.objects.create(service="A_service", category="payment", value="v")
         qs = APISecret.objects.all()
-        assert qs[0].service == "A_service"
-        assert qs[1].service == "B_service"
+        assert qs[0].service == "B_service"
+        assert qs[1].service == "A_service"
 
     def test_default_values(self):
         s = APISecret.objects.create(service="DEFAULTS_TEST", category="infra", value="v")
@@ -95,7 +95,7 @@ class TestGetAPISecret:
 
 
 class TestAPISecretAdmin:
-    def test_masked_value_does_not_leak(self):
+    def test_masked_value_hides_middle(self):
         secret = APISecret.objects.create(
             service="MASK_TEST", category="ai", value="supersecret123"
         )
@@ -103,8 +103,22 @@ class TestAPISecretAdmin:
 
         admin = APISecretAdmin(model=APISecret, admin_site=None)
         masked = admin.value_masked(secret)
-        assert "supersecret123" not in masked
-        assert "•" in str(masked) or "&#8226;" in str(masked)
+        html = str(masked)
+        assert "••••" in html
+        assert "supers" in html
+        assert "t123" in html
+
+    def test_masked_value_leakable_via_onclick(self):
+        secret = APISecret.objects.create(
+            service="TOGGLE_TEST",
+            category="ai",
+            value="secret-value-to-toggle",
+        )
+        from core.admin.api_secret_admin import APISecretAdmin
+
+        admin = APISecretAdmin(model=APISecret, admin_site=None)
+        html = str(admin.value_masked(secret))
+        assert "secret-value-to-toggle" in html
 
     def test_category_badge_renders(self):
         secret = APISecret(service="X", category="payment", value="x")

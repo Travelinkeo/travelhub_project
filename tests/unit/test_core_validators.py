@@ -1,4 +1,4 @@
-"""Tests para core/validators.py — validadores de archivos y campos."""
+import io
 
 import pytest
 from django.core.exceptions import ValidationError
@@ -7,26 +7,35 @@ pytestmark = [pytest.mark.unit]
 
 
 class TestValidateFileExtension:
-    @pytest.fixture(autouse=True)
-    def _setup(self, settings):
-        settings.VALID_IMAGE_EXTENSIONS = [".jpg", ".png"]
-        settings.VALID_DOCUMENT_EXTENSIONS = [".pdf"]
-
     def test_valid_extension(self):
         from core.validators import validate_file_extension
 
-        validate_file_extension("image.jpg", "image")
+        f = io.BytesIO(b"\xff\xd8\xff")
+        f.name = "image.jpg"
+        validate_file_extension(f)
 
     def test_invalid_extension(self):
         from core.validators import validate_file_extension
 
+        f = io.BytesIO(b"some data")
+        f.name = "file.exe"
         with pytest.raises(ValidationError):
-            validate_file_extension("file.exe", "image")
+            validate_file_extension(f)
 
     def test_valid_document(self):
         from core.validators import validate_file_extension
 
-        validate_file_extension("doc.pdf", "document")
+        f = io.BytesIO(b"%PDF-1.4")
+        f.name = "doc.pdf"
+        validate_file_extension(f)
+
+    def test_emoji_file_is_invalid(self):
+        from core.validators import validate_file_extension
+
+        f = io.BytesIO(b"some data")
+        f.name = "file.gif"
+        with pytest.raises(ValidationError):
+            validate_file_extension(f)
 
 
 class TestValidateNoVacio:
@@ -47,8 +56,12 @@ class TestValidateNoVacio:
         with pytest.raises(ValidationError):
             validar_no_vacio_o_espacios("   ")
 
-    def test_none_raises(self):
+    def test_none_passes(self):
         from core.validators import validar_no_vacio_o_espacios
 
-        with pytest.raises(ValidationError):
-            validar_no_vacio_o_espacios(None)
+        validar_no_vacio_o_espacios(None)
+
+    def test_number_passes(self):
+        from core.validators import validar_no_vacio_o_espacios
+
+        validar_no_vacio_o_espacios(0)

@@ -287,6 +287,7 @@ except ImportError:
         return False
 
     def send_telegram_alert_sync(message: str, token: str = None, target_chat_id: str = None):
+        # send_telegram_alert_sync: Envía  telegram alert sync. Args: datos del mensaje. Returns: resultado del envío.
         logger.error("Telegram async wrappers no disponibles: falta python-telegram-bot")
 
     async def send_telegram_file(
@@ -298,6 +299,7 @@ except ImportError:
     def send_telegram_file_sync(
         file_path: str, caption: str = None, token: str = None, target_chat_id: str = None
     ):
+        # send_telegram_file_sync: Envía  telegram file sync. Args: datos del mensaje. Returns: resultado del envío.
         logger.error("Telegram async wrappers no disponibles: falta python-telegram-bot")
 
 
@@ -313,6 +315,7 @@ class TelegramStorageService:
     """
 
     def __init__(self):
+        # __init__: Inicializa una nueva instancia de TelegramStorageService. Args: parámetros de inicialización.
         self.bot_token = getattr(settings, "TELEGRAM_BOT_TOKEN", None)
         self.storage_channel_id = os.environ.get("TELEGRAM_STORAGE_CHANNEL_ID", None)
 

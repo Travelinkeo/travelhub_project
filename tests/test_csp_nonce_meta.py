@@ -1,8 +1,10 @@
+"""Tests para Csp nonce meta."""
 import pytest
 
 
 @pytest.mark.django_db
 def test_home_csp_nonce_meta_and_header(client):
+    """Home csp nonce meta and header."""
     resp = client.get("/")
     assert resp.status_code in [200, 302]
     csp = resp.headers.get("Content-Security-Policy")

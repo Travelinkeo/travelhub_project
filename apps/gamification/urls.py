@@ -1,3 +1,6 @@
+"""Configuración de rutas (URLs) para la aplicación gamification.
+"""
+
 from django.urls import path
 
 from . import views

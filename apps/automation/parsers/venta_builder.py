@@ -1,3 +1,6 @@
+"""Parser/procesador de venta builder para la aplicación automation.
+"""
+
 import logging
 from decimal import Decimal
 

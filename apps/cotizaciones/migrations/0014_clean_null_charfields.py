@@ -36,7 +36,9 @@ def clean_null_charfields(apps, schema_editor):
             pass
 
 
-class Migration(migrations.Migration):
+class Migration:
+    """Clase Migration. Uso: según contexto de la aplicación.
+    """
     dependencies = [
         ("cotizaciones", "0013_alter_cotizacion_archivo_pdf"),
     ]

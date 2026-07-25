@@ -1,4 +1,7 @@
 # apps/bookings/views/admin_views.py
+"""Vistas (views) de la aplicación bookings.
+"""
+
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
@@ -11,13 +14,16 @@ from core.api import SaaSMixin
 # --- Vistas para ProductoServicio ---
 
 
-class ProductoServicioListView(SaaSMixin, LoginRequiredMixin, ListView):
+class ProductoServicioListView:
+    """Vista para gestionar productoserviciolist. Uso: instanciar según necesidad del dominio.
+    """
     model = ProductoServicio
     template_name = "bookings/admin/productoservicio_list.html"
     context_object_name = "productos"
     paginate_by = 30
 
     def get_queryset(self):
+        # get_queryset: Obtiene/recupera queryset. Args: según implementación. Returns: dato solicitado.
         q = self.request.GET.get("q")
         queryset = ProductoServicio.objects.select_related(
             "proveedor_principal", "moneda_referencial"
@@ -27,7 +33,9 @@ class ProductoServicioListView(SaaSMixin, LoginRequiredMixin, ListView):
         return queryset
 
 
-class ProductoServicioCreateView(SaaSMixin, LoginRequiredMixin, CreateView):
+class ProductoServicioCreateView:
+    """Vista para gestionar productoserviciocreate. Uso: instanciar según necesidad del dominio.
+    """
     model = ProductoServicio
     template_name = "bookings/admin/productoservicio_form.html"
     fields = [
@@ -42,17 +50,21 @@ class ProductoServicioCreateView(SaaSMixin, LoginRequiredMixin, CreateView):
     success_url = reverse_lazy("bookings_admin:productoservicio_list")
 
     def get_form(self, form_class=None):
+        # get_form: Obtiene/recupera form. Args: según implementación. Returns: dato solicitado.
         form = super().get_form(form_class)
         for field in form.fields.values():
             field.widget.attrs["class"] = "input-base"
         return form
 
     def form_valid(self, form):
+        # form_valid: Form valid. Args: según implementación. Returns: según implementación.
         messages.success(self.request, "Producto/Servicio creado exitosamente.")
         return super().form_valid(form)
 
 
-class ProductoServicioUpdateView(SaaSMixin, LoginRequiredMixin, UpdateView):
+class ProductoServicioUpdateView:
+    """Vista para gestionar productoservicioupdate. Uso: instanciar según necesidad del dominio.
+    """
     model = ProductoServicio
     template_name = "bookings/admin/productoservicio_form.html"
     fields = [
@@ -67,22 +79,27 @@ class ProductoServicioUpdateView(SaaSMixin, LoginRequiredMixin, UpdateView):
     success_url = reverse_lazy("bookings_admin:productoservicio_list")
 
     def get_form(self, form_class=None):
+        # get_form: Obtiene/recupera form. Args: según implementación. Returns: dato solicitado.
         form = super().get_form(form_class)
         for field in form.fields.values():
             field.widget.attrs["class"] = "input-base"
         return form
 
     def form_valid(self, form):
+        # form_valid: Form valid. Args: según implementación. Returns: según implementación.
         messages.success(self.request, "Producto/Servicio actualizado exitosamente.")
         return super().form_valid(form)
 
 
-class ProductoServicioDeleteView(SaaSMixin, LoginRequiredMixin, DeleteView):
+class ProductoServicioDeleteView:
+    """Vista para gestionar productoserviciodelete. Uso: instanciar según necesidad del dominio.
+    """
     model = ProductoServicio
     template_name = "core/erp/catalogos/confirm_delete_generic.html"
     success_url = reverse_lazy("bookings_admin:productoservicio_list")
 
     def get_context_data(self, **kwargs):
+        # get_context_data: Obtiene/recupera context data. Args: según implementación. Returns: dato solicitado.
         context = super().get_context_data(**kwargs)
         context["object_name"] = "Producto/Servicio"
         context["object_instance"] = self.object.nombre
@@ -90,6 +107,7 @@ class ProductoServicioDeleteView(SaaSMixin, LoginRequiredMixin, DeleteView):
         return context
 
     def delete(self, request, *args, **kwargs):
+        # delete: Elimina el objeto de la base de datos. Args: None. Returns: None.
         messages.success(self.request, "Producto/Servicio eliminado correctamente.")
         return super().delete(request, *args, **kwargs)
 
@@ -97,13 +115,16 @@ class ProductoServicioDeleteView(SaaSMixin, LoginRequiredMixin, DeleteView):
 # --- Vistas para CruceroReserva ---
 
 
-class CruceroReservaListView(SaaSMixin, LoginRequiredMixin, ListView):
+class CruceroReservaListView:
+    """Vista para gestionar cruceroreservalist. Uso: instanciar según necesidad del dominio.
+    """
     model = CruceroReserva
     template_name = "bookings/admin/cruceroreserva_list.html"
     context_object_name = "cruceros"
     paginate_by = 30
 
     def get_queryset(self):
+        # get_queryset: Obtiene/recupera queryset. Args: según implementación. Returns: dato solicitado.
         q = self.request.GET.get("q")
         queryset = CruceroReserva.objects.select_related("venta", "proveedor", "moneda").order_by(
             "-fecha_embarque"
@@ -117,7 +138,9 @@ class CruceroReservaListView(SaaSMixin, LoginRequiredMixin, ListView):
         return queryset
 
 
-class CruceroReservaCreateView(SaaSMixin, LoginRequiredMixin, CreateView):
+class CruceroReservaCreateView:
+    """Vista para gestionar cruceroreservacreate. Uso: instanciar según necesidad del dominio.
+    """
     model = CruceroReserva
     template_name = "bookings/admin/cruceroreserva_form.html"
     fields = [
@@ -136,17 +159,21 @@ class CruceroReservaCreateView(SaaSMixin, LoginRequiredMixin, CreateView):
     success_url = reverse_lazy("bookings_admin:cruceroreserva_list")
 
     def get_form(self, form_class=None):
+        # get_form: Obtiene/recupera form. Args: según implementación. Returns: dato solicitado.
         form = super().get_form(form_class)
         for field in form.fields.values():
             field.widget.attrs["class"] = "input-base"
         return form
 
     def form_valid(self, form):
+        # form_valid: Form valid. Args: según implementación. Returns: según implementación.
         messages.success(self.request, "Reserva de Crucero creada exitosamente.")
         return super().form_valid(form)
 
 
-class CruceroReservaUpdateView(SaaSMixin, LoginRequiredMixin, UpdateView):
+class CruceroReservaUpdateView:
+    """Vista para gestionar cruceroreservaupdate. Uso: instanciar según necesidad del dominio.
+    """
     model = CruceroReserva
     template_name = "bookings/admin/cruceroreserva_form.html"
     fields = [
@@ -165,22 +192,27 @@ class CruceroReservaUpdateView(SaaSMixin, LoginRequiredMixin, UpdateView):
     success_url = reverse_lazy("bookings_admin:cruceroreserva_list")
 
     def get_form(self, form_class=None):
+        # get_form: Obtiene/recupera form. Args: según implementación. Returns: dato solicitado.
         form = super().get_form(form_class)
         for field in form.fields.values():
             field.widget.attrs["class"] = "input-base"
         return form
 
     def form_valid(self, form):
+        # form_valid: Form valid. Args: según implementación. Returns: según implementación.
         messages.success(self.request, "Reserva de Crucero actualizada exitosamente.")
         return super().form_valid(form)
 
 
-class CruceroReservaDeleteView(SaaSMixin, LoginRequiredMixin, DeleteView):
+class CruceroReservaDeleteView:
+    """Vista para gestionar cruceroreservadelete. Uso: instanciar según necesidad del dominio.
+    """
     model = CruceroReserva
     template_name = "core/erp/catalogos/confirm_delete_generic.html"
     success_url = reverse_lazy("bookings_admin:cruceroreserva_list")
 
     def get_context_data(self, **kwargs):
+        # get_context_data: Obtiene/recupera context data. Args: según implementación. Returns: dato solicitado.
         context = super().get_context_data(**kwargs)
         context["object_name"] = "Reserva de Crucero"
         context["object_instance"] = f"{self.object.nombre_crucero} ({self.object.naviera})"
@@ -188,5 +220,6 @@ class CruceroReservaDeleteView(SaaSMixin, LoginRequiredMixin, DeleteView):
         return context
 
     def delete(self, request, *args, **kwargs):
+        # delete: Elimina el objeto de la base de datos. Args: None. Returns: None.
         messages.success(self.request, "Reserva de Crucero eliminada correctamente.")
         return super().delete(request, *args, **kwargs)

@@ -1,3 +1,6 @@
+"""Parser/procesador de gemini parser para la aplicación automation.
+"""
+
 import concurrent.futures
 import json
 import logging
@@ -8,6 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 def _get_genai():
+    # _get_genai:  get genai. Args: según implementación. Returns: según implementación.
     from google import genai
 
     return genai
@@ -20,6 +24,7 @@ class GeminiParser(BaseTicketParser):
     """
 
     def __init__(self):
+        # __init__: Inicializa una nueva instancia de GeminiParser. Args: parámetros de inicialización.
         self.model_name = "gemini-2.5-flash"
 
     def can_parse(self, text: str) -> bool:
@@ -28,6 +33,7 @@ class GeminiParser(BaseTicketParser):
         return len(text) > 50
 
     def parse(self, text: str, html_text: str = "", pdf_path: str = None) -> ParsedTicketData:
+        # parse: Analiza/parsea . Args: datos de entrada. Returns: resultado del parseo.
         from apps.automation.services.ai_engine import _get_genai, get_gemini_api_key
 
         api_key = get_gemini_api_key()

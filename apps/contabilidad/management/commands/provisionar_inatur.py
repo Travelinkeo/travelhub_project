@@ -18,14 +18,18 @@ from apps.contabilidad.services import ContabilidadService
 logger = logging.getLogger(__name__)
 
 
-class Command(BaseCommand):
+class Command:
+    """Clase Command. Uso: según contexto de la aplicación.
+    """
     help = "Provisiona la contribución del 1% a INATUR para un mes específico"
 
     def add_arguments(self, parser):
+        # add_arguments: Add arguments. Args: según implementación. Returns: según implementación.
         parser.add_argument("--mes", type=int, help="Mes a procesar (1-12, default: mes actual)")
         parser.add_argument("--anio", type=int, help="Año a procesar (default: año actual)")
 
     def handle(self, *args, **options):
+        # handle: Maneja/gestiona . Args: evento/datos. Returns: respuesta.
         try:
             hoy = timezone.now().date()
             mes = options["mes"] or hoy.month

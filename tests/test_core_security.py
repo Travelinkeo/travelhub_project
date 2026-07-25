@@ -25,15 +25,19 @@ pytestmark = pytest.mark.django_db
 
 
 class TestGetUserActiveAgency:
+    """Test Get User Active Agency."""
     def test_return_none_si_no_autenticado(self):
+        """Return none si no autenticado."""
         user = AnonymousUser()
         assert get_user_active_agency(user) is None
 
     def test_return_none_sin_relation_manager(self):
+        """Return none sin relation manager."""
         user = User.objects.create_user(username="test_no_rel", password="pw")
         assert get_user_active_agency(user) is None
 
     def test_prioridad_agency_var(self, agencia_premium):
+        """Prioridad agency var."""
         user = User.objects.create_user(username="test", password="pw")
         UsuarioAgencia.objects.create(usuario=user, agencia=agencia_premium, rol="vendedor")
         token = agency_var.set(agencia_premium)
@@ -44,6 +48,7 @@ class TestGetUserActiveAgency:
             agency_var.reset(token)
 
     def test_cache_miss_fallback_db(self, agencia_premium):
+        """Cache miss fallback db."""
         user = User.objects.create_user(username="test2", password="pw")
         UsuarioAgencia.objects.create(usuario=user, agencia=agencia_premium, rol="vendedor")
         with patch("django.core.cache.cache.get", return_value=None):
@@ -51,23 +56,27 @@ class TestGetUserActiveAgency:
             assert result == agencia_premium
 
     def test_cache_golpe_devuelve_agencia(self, agencia_premium):
+        """Cache golpe devuelve agencia."""
         user = User.objects.create_user(username="test3", password="pw")
         with patch("django.core.cache.cache.get", return_value=agencia_premium.pk):
             result = get_user_active_agency(user)
             assert result == agencia_premium
 
     def test_cache_golpe_none_retorna_none(self):
+        """Cache golpe none retorna none."""
         user = User.objects.create_user(username="test4", password="pw")
         with patch("django.core.cache.cache.get", return_value="none"):
             result = get_user_active_agency(user)
             assert result is None
 
     def test_sin_usuariouser_agencia_retorna_none(self):
+        """Sin usuariouser agencia retorna none."""
         user = User.objects.create_user(username="orphan", password="pw")
         result = get_user_active_agency(user)
         assert result is None
 
     def test_cache_invalidate(self, agencia_premium):
+        """Cache invalidate."""
         user = User.objects.create_user(username="test5", password="pw")
         UsuarioAgencia.objects.create(usuario=user, agencia=agencia_premium, rol="admin")
         result = get_user_active_agency(user)
@@ -79,7 +88,9 @@ class TestGetUserActiveAgency:
 
 
 class TestInvalidateCaches:
+    """Test Invalidate Caches."""
     def test_invalidate_all_agency_caches(self, agencia_premium):
+        """Invalidate all agency caches."""
         users = []
         for i in range(3):
             u = User.objects.create_user(username=f"inval_{i}", password="pw")
@@ -95,23 +106,28 @@ class TestInvalidateCaches:
 
 
 class TestGetAgenciaFromRequest:
+    """Test Get Agencia From Request."""
     def test_anonimo_raise(self):
+        """Anonimo raise."""
         req = type("Req", (), {"user": AnonymousUser()})
         with pytest.raises(PermissionDenied, match="Autenticaci"):
             get_agencia_from_request(req)
 
     def test_superuser_retorna_none(self):
+        """Superuser retorna none."""
         user = User.objects.create_user(username="su", password="pw", is_superuser=True)
         req = type("Req", (), {"user": user})
         assert get_agencia_from_request(req) is None
 
     def test_sin_agencia_raise(self):
+        """Sin agencia raise."""
         user = User.objects.create_user(username="sinagencia", password="pw")
         req = type("Req", (), {"user": user})
         with pytest.raises(PermissionDenied, match="agencia activa"):
             get_agencia_from_request(req)
 
     def test_con_agencia_retorna(self, agencia_premium):
+        """Con agencia retorna."""
         user = User.objects.create_user(username="conagencia", password="pw")
         UsuarioAgencia.objects.create(usuario=user, agencia=agencia_premium, rol="admin")
         req = type("Req", (), {"user": user})
@@ -120,7 +136,9 @@ class TestGetAgenciaFromRequest:
 
 
 class TestGetObjectTenantOr404:
+    """Test Get Object Tenant Or404."""
     def test_superuser_sin_filtro(self, agencia_premium):
+        """Superuser sin filtro."""
         from apps.bookings.models import Venta
         from apps.finance.models import Moneda
 
@@ -130,6 +148,7 @@ class TestGetObjectTenantOr404:
         assert result == venta
 
     def test_filtra_por_agencia(self, agencia_premium, agencia_estandar):
+        """Filtra por agencia."""
         from apps.bookings.models import Venta
         from apps.finance.models import Moneda
 
@@ -140,12 +159,15 @@ class TestGetObjectTenantOr404:
             get_object_tenant_or_404(Venta, agencia_premium, pk=venta_a.pk + 1)
 
     def test_objeto_no_existe_404(self):
+        """Objeto no existe 404."""
         with pytest.raises(Http404):
             get_object_tenant_or_404(Agencia, None, pk=99999)
 
 
 class TestFilterQuerysetByTenant:
+    """Test Filter Queryset By Tenant."""
     def test_superuser_sin_filtro(self, agencia_premium, agencia_estandar):
+        """Superuser sin filtro."""
         from apps.finance.models import Moneda
 
         Moneda.objects.create(codigo_iso="USD", nombre="Dolar", simbolo="$")
@@ -155,6 +177,7 @@ class TestFilterQuerysetByTenant:
         assert result.count() >= 2
 
     def test_filtra_por_agencia(self, agencia_premium, agencia_estandar):
+        """Filtra por agencia."""
         from apps.bookings.models import Venta
         from apps.finance.models import Moneda
 
@@ -167,13 +190,16 @@ class TestFilterQuerysetByTenant:
 
 
 class TestAgencyRoleRequired:
+    """Test Agency Role Required."""
     def test_anonimo_raise(self):
+        """Anonimo raise."""
         req = type("Req", (), {"user": AnonymousUser()})
         decorator = agency_role_required(["admin"])
         with pytest.raises(PermissionDenied):
             decorator(lambda r: "ok")(req)
 
     def test_superuser_bypass(self):
+        """Superuser bypass."""
         user = User.objects.create_user(username="su_bypass", password="pw", is_superuser=True)
         req = type("Req", (), {"user": user})
         decorator = agency_role_required(["admin"])
@@ -181,6 +207,7 @@ class TestAgencyRoleRequired:
         assert result == "ok"
 
     def test_rol_permitido(self, agencia_premium):
+        """Rol permitido."""
         user = User.objects.create_user(username="admin_user", password="pw")
         UsuarioAgencia.objects.create(usuario=user, agencia=agencia_premium, rol="admin")
         req = type("Req", (), {"user": user})
@@ -189,6 +216,7 @@ class TestAgencyRoleRequired:
         assert result == "granted"
 
     def test_rol_denegado_raise(self, agencia_premium):
+        """Rol denegado raise."""
         user = User.objects.create_user(username="vendedor_noop", password="pw")
         UsuarioAgencia.objects.create(usuario=user, agencia=agencia_premium, rol="vendedor")
         req = type("Req", (), {"user": user})

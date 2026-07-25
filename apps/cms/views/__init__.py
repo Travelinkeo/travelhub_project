@@ -1,3 +1,6 @@
+"""Inicialización del paquete cms.
+"""
+
 import json
 import logging
 
@@ -18,12 +21,15 @@ from ..services.content_service import AIContentService
 logger = logging.getLogger(__name__)
 
 
-class ContentDashboardView(SaaSMixin, LoginRequiredMixin, ListView):
+class ContentDashboardView:
+    """Vista para gestionar contentdashboard. Uso: instanciar según necesidad del dominio.
+    """
     model = Articulo
     template_name = "cms/dashboard.html"
     context_object_name = "articulos"
 
     def get_context_data(self, **kwargs):
+        # get_context_data: Obtiene/recupera context data. Args: según implementación. Returns: dato solicitado.
         context = super().get_context_data(**kwargs)
         agencia = get_user_active_agency(self.request.user)
         if agencia:
@@ -33,8 +39,11 @@ class ContentDashboardView(SaaSMixin, LoginRequiredMixin, ListView):
         return context
 
 
-class GenerateArticleView(LoginRequiredMixin, View):
+class GenerateArticleView:
+    """Vista para gestionar generatearticle. Uso: instanciar según necesidad del dominio.
+    """
     def post(self, request, *args, **kwargs):
+        # post: Post. Args: según implementación. Returns: según implementación.
         destination = request.POST.get("destination")
         keywords = request.POST.get("keywords", "")
 
@@ -57,8 +66,11 @@ class GenerateArticleView(LoginRequiredMixin, View):
             return response
 
 
-class GenerateSocialPostsView(LoginRequiredMixin, View):
+class GenerateSocialPostsView:
+    """Vista para gestionar generatesocialposts. Uso: instanciar según necesidad del dominio.
+    """
     def post(self, request, pk, *args, **kwargs):
+        # post: Post. Args: según implementación. Returns: según implementación.
         service = AIContentService()
         try:
             posts = service.generate_social_posts(pk)
@@ -67,72 +79,93 @@ class GenerateSocialPostsView(LoginRequiredMixin, View):
             return HttpResponse(f"Error: {e}", status=500)
 
 
-class ArticuloCreateView(SaaSMixin, LoginRequiredMixin, CreateView):
+class ArticuloCreateView:
+    """Vista para gestionar articulocreate. Uso: instanciar según necesidad del dominio.
+    """
     model = Articulo
     form_class = ArticuloForm
     template_name = "cms/articulo_form.html"
     success_url = reverse_lazy("cms:dashboard")
 
     def form_valid(self, form):
+        # form_valid: Form valid. Args: según implementación. Returns: según implementación.
         messages.success(self.request, "Artículo creado exitosamente.")
         return super().form_valid(form)
 
 
-class ArticuloUpdateView(SaaSMixin, LoginRequiredMixin, UpdateView):
+class ArticuloUpdateView:
+    """Vista para gestionar articuloupdate. Uso: instanciar según necesidad del dominio.
+    """
     model = Articulo
     form_class = ArticuloForm
     template_name = "cms/articulo_form.html"
     success_url = reverse_lazy("cms:dashboard")
 
     def form_valid(self, form):
+        # form_valid: Form valid. Args: según implementación. Returns: según implementación.
         messages.success(self.request, "Artículo actualizado exitosamente.")
         return super().form_valid(form)
 
 
-class ArticuloDeleteView(SaaSMixin, LoginRequiredMixin, DeleteView):
+class ArticuloDeleteView:
+    """Vista para gestionar articulodelete. Uso: instanciar según necesidad del dominio.
+    """
     model = Articulo
     template_name = "cms/confirm_delete.html"
     success_url = reverse_lazy("cms:dashboard")
 
     def delete(self, request, *args, **kwargs):
+        # delete: Elimina el objeto de la base de datos. Args: None. Returns: None.
         messages.success(self.request, "Artículo eliminado.")
         return super().delete(request, *args, **kwargs)
 
 
-class GuiaDestinoCreateView(SaaSMixin, LoginRequiredMixin, CreateView):
+class GuiaDestinoCreateView:
+    """Vista para gestionar guiadestinocreate. Uso: instanciar según necesidad del dominio.
+    """
     model = GuiaDestino
     form_class = GuiaDestinoForm
     template_name = "cms/guia_destino_form.html"
     success_url = reverse_lazy("cms:dashboard")
 
     def form_valid(self, form):
+        # form_valid: Form valid. Args: según implementación. Returns: según implementación.
         messages.success(self.request, "Guía de destino creada exitosamente.")
         return super().form_valid(form)
 
 
-class GuiaDestinoUpdateView(SaaSMixin, LoginRequiredMixin, UpdateView):
+class GuiaDestinoUpdateView:
+    """Vista para gestionar guiadestinoupdate. Uso: instanciar según necesidad del dominio.
+    """
     model = GuiaDestino
     form_class = GuiaDestinoForm
     template_name = "cms/guia_destino_form.html"
     success_url = reverse_lazy("cms:dashboard")
 
     def form_valid(self, form):
+        # form_valid: Form valid. Args: según implementación. Returns: según implementación.
         messages.success(self.request, "Guía de destino actualizada exitosamente.")
         return super().form_valid(form)
 
 
-class GuiaDestinoDeleteView(SaaSMixin, LoginRequiredMixin, DeleteView):
+class GuiaDestinoDeleteView:
+    """Vista para gestionar guiadestinodelete. Uso: instanciar según necesidad del dominio.
+    """
     model = GuiaDestino
     template_name = "cms/confirm_delete.html"
     success_url = reverse_lazy("cms:dashboard")
 
     def delete(self, request, *args, **kwargs):
+        # delete: Elimina el objeto de la base de datos. Args: None. Returns: None.
         messages.success(self.request, "Guía de destino eliminada.")
         return super().delete(request, *args, **kwargs)
 
 
-class AIGenerateSuggestionView(LoginRequiredMixin, View):
+class AIGenerateSuggestionView:
+    """Vista para gestionar aigeneratesuggestion. Uso: instanciar según necesidad del dominio.
+    """
     def post(self, request, *args, **kwargs):
+        # post: Post. Args: según implementación. Returns: según implementación.
         field = request.POST.get("field")
         context = request.POST.get("context")
 

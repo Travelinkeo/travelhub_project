@@ -1,3 +1,6 @@
+"""Servicio de freelancer service para la aplicación crm.
+"""
+
 import logging
 from decimal import Decimal
 

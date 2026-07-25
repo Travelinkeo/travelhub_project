@@ -1,10 +1,15 @@
+"""Modelos de base de datos para la aplicación tasks.
+"""
+
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from core.models.base import AgenciaMixin
 
 
-class Tarea(AgenciaMixin):
+class Tarea:
+    """Clase Tarea. Uso: según contexto de la aplicación.
+    """
     PRIORIDADES = [
         ("baja", _("Baja")),
         ("media", _("Media")),
@@ -38,10 +43,13 @@ class Tarea(AgenciaMixin):
         ordering = ["-prioridad", "created_at"]
 
     def __str__(self):
+        # __str__: Representación en string del objeto. Returns: str.
         return self.titulo
 
 
-class ComentarioTarea(AgenciaMixin):
+class ComentarioTarea:
+    """Clase ComentarioTarea. Uso: según contexto de la aplicación.
+    """
     tarea = models.ForeignKey(Tarea, on_delete=models.CASCADE, related_name="comentarios")
     usuario = models.ForeignKey("auth.User", on_delete=models.CASCADE)
     texto = models.TextField()
@@ -53,4 +61,5 @@ class ComentarioTarea(AgenciaMixin):
         ordering = ["created_at"]
 
     def __str__(self):
+        # __str__: Representación en string del objeto. Returns: str.
         return f"{self.usuario} - {self.created_at}"

@@ -2,10 +2,15 @@
 # Edited 2026-06-06: removed AlterModelTable(table=None) so state keeps
 # db_table='core_xxx' for the renamed model.
 
+"""Migración de base de datos para communications.
+"""
+
 from django.db import migrations
 
 
-class Migration(migrations.Migration):
+class Migration:
+    """Clase Migration. Uso: según contexto de la aplicación.
+    """
     dependencies = [
         ("communications", "0001_initial"),
     ]

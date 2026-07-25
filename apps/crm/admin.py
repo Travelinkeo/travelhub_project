@@ -1,3 +1,6 @@
+"""Configuración del panel de administración para crm.
+"""
+
 from django.contrib import admin
 from unfold.admin import ModelAdmin
 
@@ -15,21 +18,27 @@ from .models import (
 
 
 @admin.register(OportunidadViaje)
-class OportunidadViajeAdmin(SaaSAdminMixin, ModelAdmin):
+class OportunidadViajeAdmin:
+    """Configuración de administración para oportunidadviaje. Uso: instanciar según necesidad del dominio.
+    """
     list_display = ("cliente", "destino", "etapa", "creado_en")
     list_filter = ("etapa", "creado_en")
     search_fields = ("cliente__nombres", "cliente__apellidos", "destino")
 
 
 @admin.register(Pasajero)
-class PasajeroAdmin(SaaSAdminMixin, ModelAdmin):
+class PasajeroAdmin:
+    """Configuración de administración para pasajero. Uso: instanciar según necesidad del dominio.
+    """
     list_display = ("nombres", "apellidos", "cedula_identidad", "numero_pasaporte", "email")
     search_fields = ("nombres", "apellidos", "cedula_identidad", "numero_pasaporte", "email")
     list_filter = ("agencia",)
 
 
 @admin.register(Cliente)
-class ClienteAdmin(SaaSAdminMixin, ModelAdmin):
+class ClienteAdmin:
+    """Configuración de administración para cliente. Uso: instanciar según necesidad del dominio.
+    """
     list_display = (
         "nombres",
         "apellidos",
@@ -46,7 +55,9 @@ class ClienteAdmin(SaaSAdminMixin, ModelAdmin):
 
 
 @admin.register(FreelancerProfile)
-class FreelancerProfileAdmin(SaaSAdminMixin, ModelAdmin):
+class FreelancerProfileAdmin:
+    """Configuración de administración para freelancerprofile. Uso: instanciar según necesidad del dominio.
+    """
     list_display = (
         "usuario",
         "agencia",
@@ -60,7 +71,9 @@ class FreelancerProfileAdmin(SaaSAdminMixin, ModelAdmin):
 
 
 @admin.register(ComisionFreelancer)
-class ComisionFreelancerAdmin(SaaSAdminMixin, ModelAdmin):
+class ComisionFreelancerAdmin:
+    """Configuración de administración para comisionfreelancer. Uso: instanciar según necesidad del dominio.
+    """
     list_display = (
         "venta",
         "freelancer",
@@ -76,6 +89,7 @@ class ComisionFreelancerAdmin(SaaSAdminMixin, ModelAdmin):
 
     @admin.action(description="Liquidar comisiones seleccionadas")
     def liquidar_comisiones(self, request, queryset):
+        # liquidar_comisiones: Liquidar comisiones. Args: según implementación. Returns: según implementación.
         from django.utils import timezone
 
         from apps.crm.services.freelancer_service import FreelancerService
@@ -101,7 +115,9 @@ class ComisionFreelancerAdmin(SaaSAdminMixin, ModelAdmin):
 
 
 @admin.register(MensajeWhatsApp)
-class MensajeWhatsAppAdmin(SaaSAdminMixin, ModelAdmin):
+class MensajeWhatsAppAdmin:
+    """Configuración de administración para mensajewhatsapp. Uso: instanciar según necesidad del dominio.
+    """
     list_display = ("id", "cliente", "direccion", "estado", "tipo_mensaje", "timestamp")
     list_filter = ("direccion", "estado", "tipo_mensaje", "timestamp")
     search_fields = ("cliente__nombres", "cliente__apellidos", "texto")
@@ -110,7 +126,9 @@ class MensajeWhatsAppAdmin(SaaSAdminMixin, ModelAdmin):
 
 
 @admin.register(WhatsAppScheduledMessage)
-class WhatsAppScheduledMessageAdmin(SaaSAdminMixin, ModelAdmin):
+class WhatsAppScheduledMessageAdmin:
+    """Configuración de administración para whatsappscheduledmessage. Uso: instanciar según necesidad del dominio.
+    """
     list_display = ("id", "telefono", "programado_para", "estado", "created_by")
     list_filter = ("estado", "programado_para")
     search_fields = ("telefono", "texto")
@@ -119,5 +137,6 @@ class WhatsAppScheduledMessageAdmin(SaaSAdminMixin, ModelAdmin):
 
     @admin.action(description="Cancelar mensajes programados seleccionados")
     def cancelar_mensajes(self, request, queryset):
+        # cancelar_mensajes: Cancelar mensajes. Args: según implementación. Returns: según implementación.
         actualizados = queryset.filter(estado="scheduled").update(estado="cancelled")
         self.message_user(request, f"{actualizados} mensajes cancelados.")

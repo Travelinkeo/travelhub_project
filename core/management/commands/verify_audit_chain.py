@@ -4,9 +4,11 @@ from apps.common.utils import verify_audit_chain
 
 
 class Command(BaseCommand):
+    """Comando de gestión personalizado."""
     help = "Verifica la integridad de la cadena de hashes de AuditLog."
 
     def add_arguments(self, parser):
+        """Método: add arguments."""
         parser.add_argument(
             "--limit",
             type=int,
@@ -14,6 +16,7 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
+        """Método: handle."""
         limit = options.get("limit")
         ok, break_id, reason = verify_audit_chain(limit=limit)
         if ok:

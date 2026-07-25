@@ -9,9 +9,11 @@ from apps.finance.services.reporte_retenciones import ReporteRetencionesService
 
 
 class Command(BaseCommand):
+    """Comando de gestión personalizado."""
     help = "Genera reporte de Retenciones ISLR para un período"
 
     def add_arguments(self, parser):
+        """Método: add arguments."""
         parser.add_argument("--mes", type=int, help="Mes (1-12)")
         parser.add_argument("--anio", type=int, help="Año (YYYY)")
         parser.add_argument("--fecha-inicio", type=str, help="Fecha inicio (YYYY-MM-DD)")
@@ -29,6 +31,7 @@ class Command(BaseCommand):
         parser.add_argument("--archivo", type=str, help="Nombre del archivo CSV")
 
     def handle(self, *args, **options):
+        """Método: handle."""
         # Determinar período
         if options["mes"] and options["anio"]:
             from calendar import monthrange

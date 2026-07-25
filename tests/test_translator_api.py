@@ -1,3 +1,4 @@
+"""Tests para Translator api."""
 import pytest
 from django.contrib.auth.models import User
 from django.test import TestCase
@@ -11,7 +12,9 @@ pytestmark = pytest.mark.skip(reason="Funciones de parser refactorizadas - pendi
 
 
 class TranslatorAPITestCase(TestCase):
+    """Translator Apitest Case."""
     def setUp(self):
+        """SetUp."""
         self.client = APIClient()
         self.user = User.objects.create_user(username="testuser", password="testpass123")
         self.pais = Pais.objects.create(
@@ -23,6 +26,7 @@ class TranslatorAPITestCase(TestCase):
         self.client.force_authenticate(user=self.user)
 
     def test_translate_itinerary_success(self):
+        """Translate itinerary success."""
         url = reverse("core:translator:translate_itinerary")
         data = {"itinerary": "1 AA 1234 15JAN W MIABOG 0800 1200", "gds_system": "SABRE"}
         response = self.client.post(url, data, format="json")
@@ -30,12 +34,14 @@ class TranslatorAPITestCase(TestCase):
         self.assertTrue(response.data["success"])
 
     def test_translate_itinerary_empty(self):
+        """Translate itinerary empty."""
         url = reverse("core:translator:translate_itinerary")
         data = {"itinerary": "", "gds_system": "SABRE"}
         response = self.client.post(url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_unauthenticated_access(self):
+        """Unauthenticated access."""
         url = reverse("core:translator:translate_itinerary")
         self.client.force_authenticate(user=None)
         data = {"itinerary": "test", "gds_system": "SABRE"}
@@ -43,57 +49,67 @@ class TranslatorAPITestCase(TestCase):
         self.assertIn(response.status_code, [401, 403])
 
     def test_validate_itinerary_format_valid(self):
+        """Validate itinerary format valid."""
         url = reverse("core:translator:validate_itinerary")
         data = {"itinerary": "1 AA 1234 15JAN W MIABOG 0800 1200"}
         response = self.client.post(url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_validate_itinerary_format_invalid(self):
+        """Validate itinerary format invalid."""
         url = reverse("core:translator:validate_itinerary")
         data = {"itinerary": ""}
         response = self.client.post(url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_get_supported_gds(self):
+        """Get supported gds."""
         url = reverse("core:translator:get_supported_gds")
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_get_airports_catalog(self):
+        """Get airports catalog."""
         url = reverse("core:translator:get_airports")
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_get_airlines_catalog(self):
+        """Get airlines catalog."""
         url = reverse("core:translator:get_airlines")
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_batch_translate_success(self):
+        """Batch translate success."""
         url = reverse("core:translator:batch_translate")
         data = {"itineraries": ["1 AA 1234 15JAN W MIABOG 0800 1200"]}
         response = self.client.post(url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_batch_translate_empty_list(self):
+        """Batch translate empty list."""
         url = reverse("core:translator:batch_translate")
         data = {"itineraries": []}
         response = self.client.post(url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_batch_translate_limit_exceeded(self):
+        """Batch translate limit exceeded."""
         url = reverse("core:translator:batch_translate")
         data = {"itineraries": ["1 AA 1234 15JAN W MIABOG 0800 1200"] * 51}
         response = self.client.post(url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_calculate_ticket_price_success(self):
+        """Calculate ticket price success."""
         url = reverse("core:translator:calculate_ticket_price")
         data = {"base_price": 140.0, "tax_percentage": 10}
         response = self.client.post(url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_calculate_ticket_price_negative_values(self):
+        """Calculate ticket price negative values."""
         url = reverse("core:translator:calculate_ticket_price")
         data = {"base_price": -100, "tax_percentage": 10}
         response = self.client.post(url, data, format="json")
@@ -101,5 +117,7 @@ class TranslatorAPITestCase(TestCase):
 
 
 class TestTranslatorAPIIntegration(TestCase):
+    """Test Translator Apiintegration."""
     def test_full_workflow(self):
+        """Full workflow."""
         pass

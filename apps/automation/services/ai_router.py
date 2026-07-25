@@ -1,3 +1,6 @@
+"""Servicio de ai router para la aplicación automation.
+"""
+
 import logging
 from datetime import datetime
 from decimal import Decimal
@@ -12,7 +15,9 @@ logger = logging.getLogger(__name__)
 # --- 1. Data Models (The "Truth") ---
 
 
-class EmailType(StrEnum):
+class EmailType:
+    """Clase EmailType. Uso: según contexto de la aplicación.
+    """
     TICKET_ISSUANCE = "ticket_issuance"
     SCHEDULE_CHANGE = "schedule_change"
     QUOTE_REQUEST = "quote_request"
@@ -20,7 +25,9 @@ class EmailType(StrEnum):
     OTHER = "other"
 
 
-class FlightSegment(BaseModel):
+class FlightSegment:
+    """Clase FlightSegment. Uso: según contexto de la aplicación.
+    """
     airline_code: str = Field(..., description="2-letter IATA code (e.g., LA, AV, CM)")
     flight_number: str = Field(..., description="Flight number without airline code")
     origin: str = Field(..., min_length=3, max_length=3, description="3-letter IATA airport code")
@@ -31,7 +38,9 @@ class FlightSegment(BaseModel):
     arrival_date: datetime | None = None
 
 
-class TicketSchema(BaseModel):
+class TicketSchema:
+    """Clase TicketSchema. Uso: según contexto de la aplicación.
+    """
     pnr: str = Field(
         ..., min_length=6, max_length=6, description="6-character alphanumeric PNR/Record Locator"
     )
@@ -47,7 +56,10 @@ class TicketSchema(BaseModel):
 
 
 class GeminiRouter:
+    """Clase GeminiRouter. Uso: según contexto de la aplicación.
+    """
     def __init__(self, agency=None):
+        # __init__: Inicializa una nueva instancia de GeminiRouter. Args: parámetros de inicialización.
         from apps.automation.services.ai_engine import get_gemini_api_key
 
         api_key = get_gemini_api_key(agency)
@@ -107,6 +119,7 @@ class GeminiRouter:
 # --- 3. The Validator (Sanitizer) ---
 # Placeholder for now - will verify PNRs against DB later
 def validate_ticket(ticket: TicketSchema) -> bool:
+    # validate_ticket: Valida  ticket. Args: datos a validar. Returns: True/False o errores.
     if not ticket:
         return False
     # Example logic: PNR must be 6 chars (already handled by Pydantic)

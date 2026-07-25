@@ -1,3 +1,6 @@
+"""Parser/procesador de extraction para la aplicación automation.
+"""
+
 import logging
 import os
 from email import policy
@@ -47,6 +50,7 @@ class ExtractionService:
 
     @staticmethod
     def _extract_pdf(file_obj):
+        # _extract_pdf:  extract pdf. Args: según implementación. Returns: según implementación.
         if fitz is None:
             logger.error("PyMuPDF (fitz) no está instalado. No se puede extraer texto de PDF.")
             return None
@@ -71,6 +75,7 @@ class ExtractionService:
 
     @staticmethod
     def _extract_eml(file_obj):
+        # _extract_eml:  extract eml. Args: según implementación. Returns: según implementación.
         msg = BytesParser(policy=policy.default).parse(file_obj)
         texto_final = "--- HEADERS START ---\n"
         essential_headers = ["Subject", "From", "To", "Date"]
@@ -196,6 +201,7 @@ class ExtractionService:
 
     @staticmethod
     def _clean_html(html_content: str) -> str:
+        # _clean_html:  clean html. Args: según implementación. Returns: según implementación.
         if BeautifulSoup is None:
             return html_content
         try:

@@ -7,6 +7,7 @@ TIMEOUT = 10  # segundos
 
 
 def _test_openai(key: str) -> tuple[bool, str]:
+    """Función interna: test openai."""
     import openai
 
     client = openai.OpenAI(api_key=key, timeout=TIMEOUT)
@@ -15,6 +16,7 @@ def _test_openai(key: str) -> tuple[bool, str]:
 
 
 def _test_deepseek(key: str) -> tuple[bool, str]:
+    """Función interna: test deepseek."""
     import openai
 
     client = openai.OpenAI(api_key=key, base_url="https://api.deepseek.com", timeout=TIMEOUT)
@@ -23,6 +25,7 @@ def _test_deepseek(key: str) -> tuple[bool, str]:
 
 
 def _test_stripe(key: str) -> tuple[bool, str]:
+    """Función interna: test stripe."""
     import stripe
 
     stripe.api_key = key
@@ -31,6 +34,7 @@ def _test_stripe(key: str) -> tuple[bool, str]:
 
 
 def _test_resend(key: str) -> tuple[bool, str]:
+    """Función interna: test resend."""
     import requests
 
     r = requests.get(
@@ -43,6 +47,7 @@ def _test_resend(key: str) -> tuple[bool, str]:
 
 
 def _test_telegram(key: str) -> tuple[bool, str]:
+    """Función interna: test telegram."""
     import requests
 
     r = requests.get(f"https://api.telegram.org/bot{key}/getMe", timeout=TIMEOUT)
@@ -55,6 +60,7 @@ def _test_telegram(key: str) -> tuple[bool, str]:
 
 
 def _test_google_maps(key: str) -> tuple[bool, str]:
+    """Función interna: test google maps."""
     import requests
 
     r = requests.get(
@@ -70,30 +76,35 @@ def _test_google_maps(key: str) -> tuple[bool, str]:
 
 
 def _test_sentry(key: str) -> tuple[bool, str]:
+    """Función interna: test sentry."""
     if key.startswith("https://"):
         return True, "Formato DSN válido (no se puede probar conexión sin enviar evento)"
     return False, "Formato de DSN inválido"
 
 
 def _test_cloudflare_r2(key_id: str, secret: str | None = None) -> tuple[bool, str]:
+    """Función interna: test cloudflare r2."""
     if secret:
         return True, f"Credencial R2 presente (Access Key: {key_id[:8]}...)"
     return True, f"Access Key ID presente ({key_id[:8]}...)"
 
 
 def _test_evolution(key: str) -> tuple[bool, str]:
+    """Función interna: test evolution."""
     if len(key) >= 16:
         return True, "Formato de API Key Evolution válido"
     return False, "API Key demasiado corta"
 
 
 def _test_google_oauth(key: str) -> tuple[bool, str]:
+    """Función interna: test google oauth."""
     if key.startswith(("AIza", "ya29.")):
         return True, "Formato de cliente OAuth válido"
     return True, "Cliente ID presente (no se puede probar OAuth sin redirect URI)"
 
 
 def _test_generic(key: str) -> tuple[bool, str]:
+    """Función interna: test generic."""
     if len(key) >= 8:
         return True, "Formato parece válido"
     return False, "Clave demasiado corta (mín 8 caracteres)"

@@ -1,3 +1,4 @@
+"""Tests para Ai engine (Services)."""
 import json
 import unittest.mock
 from decimal import Decimal
@@ -12,25 +13,30 @@ from apps.automation.providerchain.base import ProviderResult
 
 
 class TestCleanJsonResponse:
+    """Test Clean Json Response."""
     def test_removes_markdown_fences(self):
+        """Removes markdown fences."""
         from apps.automation.services.ai_engine import _clean_json_response
 
         text = "```json\n{\"key\": \"value\"}\n```"
         assert _clean_json_response(text) == '{"key": "value"}'
 
     def test_removes_trailing_comment(self):
+        """Removes trailing comment."""
         from apps.automation.services.ai_engine import _clean_json_response
 
         text = '{"key": "value" // comentario\n}'
         assert _clean_json_response(text) == '{"key": "value" \n}'
 
     def test_removes_zero_width_chars(self):
+        """Removes zero width chars."""
         from apps.automation.services.ai_engine import _clean_json_response
 
         text = '{\n\u200b"key": "value"\n}'
         assert _clean_json_response(text) == '{\n"key": "value"\n}'
 
     def test_returns_empty_object_on_empty_input(self):
+        """Returns empty object on empty input."""
         from apps.automation.services.ai_engine import _clean_json_response
 
         assert _clean_json_response("") == "{}"
@@ -38,12 +44,14 @@ class TestCleanJsonResponse:
         assert _clean_json_response("   ") == "{}"
 
     def test_prefers_curly_braces_over_square(self):
+        """Prefers curly braces over square."""
         from apps.automation.services.ai_engine import _clean_json_response
 
         text = '{"key": "value"}\n["other"]'
         assert _clean_json_response(text) == '{"key": "value"}'
 
     def test_handles_array_only_response(self):
+        """Handles array only response."""
         from apps.automation.services.ai_engine import _clean_json_response
 
         text = '```\n["item1", "item2"]\n```'
@@ -52,6 +60,7 @@ class TestCleanJsonResponse:
         assert '"item2"' in result
 
     def test_removes_single_line_comment_on_own_line(self):
+        """Removes single line comment on own line."""
         from apps.automation.services.ai_engine import _clean_json_response
 
         text = '{\n// esto es un comentario\n"key": "value"\n}'
@@ -62,18 +71,22 @@ class TestCleanJsonResponse:
 
 
 class TestExtractJsonAggressive:
+    """Test Extract Json Aggressive."""
     def test_extracts_json_from_noisy_text(self):
+        """Extracts json from noisy text."""
         from apps.automation.services.ai_engine import _extract_json_aggressive
 
         text = "Some preamble text\n{\"key\": \"value\"}\ntrailing"
         assert _extract_json_aggressive(text) is not None
 
     def test_returns_none_when_no_json(self):
+        """Returns none when no json."""
         from apps.automation.services.ai_engine import _extract_json_aggressive
 
         assert _extract_json_aggressive("no json here") is None
 
     def test_removes_trailing_commas(self):
+        """Removes trailing commas."""
         from apps.automation.services.ai_engine import _extract_json_aggressive
 
         text = '{"a": 1, "b": 2,}'
@@ -84,6 +97,7 @@ class TestExtractJsonAggressive:
         assert _json.loads(result) == {"a": 1, "b": 2}
 
     def test_handles_trailing_comma_in_nested(self):
+        """Handles trailing comma in nested."""
         from apps.automation.services.ai_engine import _extract_json_aggressive
 
         text = '{"a": {"b": 1,}}'
@@ -98,7 +112,9 @@ class TestExtractJsonAggressive:
 
 
 class TestPrepareImages:
+    """Test Prepare Images."""
     def test_returns_none_when_none_input(self):
+        """Returns none when none input."""
         from apps.automation.services.ai_engine import AIEngine
 
         engine = AIEngine()
@@ -106,6 +122,7 @@ class TestPrepareImages:
         assert engine._prepare_images([]) is None
 
     def test_handles_dict_with_data_key(self):
+        """Handles dict with data key."""
         from apps.automation.services.ai_engine import AIEngine
 
         engine = AIEngine()
@@ -113,6 +130,7 @@ class TestPrepareImages:
         assert result == [b"hello"]
 
     def test_handles_raw_bytes(self):
+        """Handles raw bytes."""
         from apps.automation.services.ai_engine import AIEngine
 
         engine = AIEngine()
@@ -120,6 +138,7 @@ class TestPrepareImages:
         assert result == [b"raw_bytes"]
 
     def test_handles_file_like_object(self):
+        """Handles file like object."""
         from apps.automation.services.ai_engine import AIEngine
         import io
 
@@ -130,6 +149,7 @@ class TestPrepareImages:
         assert result == [b"file_content"]
 
     def test_skips_dict_without_data_key(self):
+        """Skips dict without data key."""
         from apps.automation.services.ai_engine import AIEngine
 
         engine = AIEngine()
@@ -141,24 +161,29 @@ class TestPrepareImages:
 
 
 class TestHasMedia:
+    """Test Has Media."""
     def test_false_for_none(self):
+        """False for none."""
         from apps.automation.services.ai_engine import AIEngine
 
         assert not AIEngine()._has_media(None)
         assert not AIEngine()._has_media([])
 
     def test_true_for_dict_with_mime_type(self):
+        """True for dict with mime type."""
         from apps.automation.services.ai_engine import AIEngine
 
         assert AIEngine()._has_media([{"mime_type": "image/png"}])
 
     def test_true_for_file_like(self):
+        """True for file like."""
         from apps.automation.services.ai_engine import AIEngine
         import io
 
         assert AIEngine()._has_media([io.BytesIO(b"data")])
 
     def test_false_for_plain_dict(self):
+        """False for plain dict."""
         from apps.automation.services.ai_engine import AIEngine
 
         assert not AIEngine()._has_media([{"key": "value"}])
@@ -168,18 +193,22 @@ class TestHasMedia:
 
 
 class SampleSchema(BaseModel):
+    """Sample Schema."""
     name: str
     age: int
 
 
 class TestPostprocessResult:
+    """Test Postprocess Result."""
     def test_returns_text_when_no_schema(self):
+        """Returns text when no schema."""
         from apps.automation.services.ai_engine import AIEngine
 
         engine = AIEngine()
         assert engine._postprocess_result("hello", None) == "hello"
 
     def test_validates_against_schema(self):
+        """Validates against schema."""
         from apps.automation.services.ai_engine import AIEngine
 
         engine = AIEngine()
@@ -190,6 +219,7 @@ class TestPostprocessResult:
         assert result.age == 30
 
     def test_returns_error_dict_on_invalid_json(self):
+        """Returns error dict on invalid json."""
         from apps.automation.services.ai_engine import AIEngine
 
         engine = AIEngine()
@@ -199,6 +229,7 @@ class TestPostprocessResult:
         assert "error" in result
 
     def test_passes_through_error_dict(self):
+        """Passes through error dict."""
         from apps.automation.services.ai_engine import AIEngine
 
         engine = AIEngine()
@@ -207,6 +238,7 @@ class TestPostprocessResult:
         assert result == {"error": "something went wrong"}
 
     def test_wraps_list_for_resultado_parseo(self):
+        """Wraps list for resultado parseo."""
         from apps.automation.services.ai_engine import AIEngine
         from core.api import ResultadoParseoSchema
 
@@ -217,6 +249,7 @@ class TestPostprocessResult:
         assert len(result.boletos) == 1
 
     def test_wraps_dict_for_resultado_parseo(self):
+        """Wraps dict for resultado parseo."""
         from apps.automation.services.ai_engine import AIEngine
         from core.api import ResultadoParseoSchema
 
@@ -233,7 +266,9 @@ class TestPostprocessResult:
 
 class TestCallGemini:
     @pytest.fixture(autouse=True)
+    """Test Call Gemini."""
     def _setup_mocks(self, monkeypatch):
+        """Setup mocks."""
         self.mock_cache = unittest.mock.MagicMock()
         self.mock_cache.get.return_value = None
         monkeypatch.setattr("django.core.cache.cache", self.mock_cache)
@@ -245,6 +280,7 @@ class TestCallGemini:
         )
 
     def test_success_no_schema(self):
+        """Success no schema."""
         from apps.automation.services.ai_engine import AIEngine
 
         self.mock_router.generate.return_value = ProviderResult(
@@ -258,6 +294,7 @@ class TestCallGemini:
         assert result == {"text": "Hello world"}
 
     def test_success_with_schema(self):
+        """Success with schema."""
         from apps.automation.services.ai_engine import AIEngine
 
         self.mock_router.generate.return_value = ProviderResult(
@@ -272,6 +309,7 @@ class TestCallGemini:
         assert result.name == "Juan"
 
     def test_failure_returns_error_dict(self):
+        """Failure returns error dict."""
         from apps.automation.services.ai_engine import AIEngine
 
         self.mock_router.generate.return_value = ProviderResult(
@@ -285,6 +323,7 @@ class TestCallGemini:
         assert "API error" in result["error"]
 
     def test_circuit_breaker_triggers_after_5_fails(self):
+        """Circuit breaker triggers after 5 fails."""
         from apps.automation.services.ai_engine import AIEngine
 
         self.mock_cache.get.return_value = None
@@ -299,6 +338,7 @@ class TestCallGemini:
 
     @pytest.mark.skip(reason="Requiere mock de AIUsageLog")
     def test_logs_usage_on_success(self):
+        """Logs usage on success."""
         pass
 
 
@@ -307,7 +347,9 @@ class TestCallGemini:
 
 class TestGenerateContent:
     @pytest.fixture(autouse=True)
+    """Test Generate Content."""
     def _mock_ai_engine(self, monkeypatch):
+        """Mock ai engine."""
         self.mock_result = {"text": "hola mundo"}
         monkeypatch.setattr(
             "apps.automation.services.ai_engine.ai_engine",
@@ -319,12 +361,14 @@ class TestGenerateContent:
         )
 
     def test_returns_text_from_dict(self):
+        """Returns text from dict."""
         from apps.automation.services.ai_engine import generate_content
 
         result = generate_content("test prompt")
         assert result == "hola mundo"
 
     def test_returns_string_on_exception(self):
+        """Returns string on exception."""
         from apps.automation.services.ai_engine import generate_content
 
         import apps.automation.services.ai_engine as engine_mod
@@ -339,7 +383,9 @@ class TestGenerateContent:
 
 class TestAnalizarDocumento:
     @pytest.fixture(autouse=True)
+    """Test Analizar Documento."""
     def _mock_router(self, monkeypatch):
+        """Mock router."""
         self.mock_router = unittest.mock.MagicMock()
         monkeypatch.setattr(
             "apps.automation.services.ai_engine.fallback_router",
@@ -347,6 +393,7 @@ class TestAnalizarDocumento:
         )
 
     def test_success_returns_parsed_json(self):
+        """Success returns parsed json."""
         from apps.automation.services.ai_engine import (
             analizar_documento_con_gemini_estructurado,
         )
@@ -362,6 +409,7 @@ class TestAnalizarDocumento:
         assert result == {"status": "ok"}
 
     def test_raises_value_error_on_bad_json(self):
+        """Raises value error on bad json."""
         from apps.automation.services.ai_engine import (
             analizar_documento_con_gemini_estructurado,
         )
@@ -375,6 +423,7 @@ class TestAnalizarDocumento:
             )
 
     def test_raises_value_error_on_failure(self):
+        """Raises value error on failure."""
         from apps.automation.services.ai_engine import (
             analizar_documento_con_gemini_estructurado,
         )
@@ -392,7 +441,9 @@ class TestAnalizarDocumento:
 
 
 class TestGetGeminiApiKey:
+    """Test Get Gemini Api Key."""
     def test_returns_api_secret_when_no_agency(self, monkeypatch):
+        """Returns api secret when no agency."""
         monkeypatch.setattr(
             "apps.automation.services.ai_engine.get_api_secret",
             lambda svc, default=None: "mock-key-from-secret",
@@ -407,6 +458,7 @@ class TestGetGeminiApiKey:
         assert key == "mock-key-from-secret"
 
     def test_returns_none_when_no_key_available(self, monkeypatch):
+        """Returns none when no key available."""
         monkeypatch.setattr(
             "apps.automation.services.ai_engine.get_api_secret",
             lambda svc, default=None: None,
@@ -426,7 +478,9 @@ class TestGetGeminiApiKey:
 
 
 class TestListAvailableModels:
+    """Test List Available Models."""
     def test_returns_error_when_no_key(self, monkeypatch):
+        """Returns error when no key."""
         monkeypatch.setattr(
             "apps.automation.services.ai_engine.get_gemini_api_key",
             lambda agency=None: None,
@@ -442,7 +496,9 @@ class TestListAvailableModels:
 
 class TestLogUsage:
     @pytest.fixture(autouse=True)
+    """Test Log Usage."""
     def _mock_ai_usage_log(self, monkeypatch):
+        """Mock ai usage log."""
         mock_model = unittest.mock.MagicMock()
         mock_model.objects.create.return_value = unittest.mock.MagicMock()
         monkeypatch.setattr(
@@ -452,6 +508,7 @@ class TestLogUsage:
         return mock_model
 
     def test_creates_log_record(self, db, _mock_ai_usage_log):
+        """Creates log record."""
         from apps.automation.services.ai_engine import AIEngine
 
         engine = AIEngine()
@@ -462,7 +519,9 @@ class TestLogUsage:
 
 
 class TestParseStructuredData:
+    """Test Parse Structured Data."""
     def test_delegates_to_call_gemini(self, monkeypatch):
+        """Delegates to call gemini."""
         from apps.automation.services.ai_engine import AIEngine
 
         mock_call = unittest.mock.MagicMock(return_value={"text": "ok"})
@@ -478,7 +537,9 @@ class TestParseStructuredData:
 
 
 class TestAnalyzeGdsTerminal:
+    """Test Analyze Gds Terminal."""
     def test_delegates_to_call_gemini(self, monkeypatch):
+        """Delegates to call gemini."""
         from apps.automation.services.ai_engine import AIEngine
 
         mock_call = unittest.mock.MagicMock(return_value={"text": "ok"})

@@ -1,3 +1,6 @@
+"""Configuración del panel de administración para cms.
+"""
+
 from django.contrib import admin
 
 from core.api import SaaSAdminMixin
@@ -6,7 +9,9 @@ from .models import Articulo, GuiaDestino, KBArticle, KBCategory, PostRedesSocia
 
 
 @admin.register(Articulo)
-class ArticuloAdmin(SaaSAdminMixin, admin.ModelAdmin):
+class ArticuloAdmin:
+    """Configuración de administración para articulo. Uso: instanciar según necesidad del dominio.
+    """
     list_display = ("titulo", "destino", "estado", "fecha_creacion", "generado_por_ia")
     list_filter = ("estado", "generado_por_ia", "destino")
     search_fields = ("titulo", "contenido", "destino")
@@ -14,30 +19,39 @@ class ArticuloAdmin(SaaSAdminMixin, admin.ModelAdmin):
 
 
 @admin.register(GuiaDestino)
-class GuiaDestinoAdmin(SaaSAdminMixin, admin.ModelAdmin):
+class GuiaDestinoAdmin:
+    """Configuración de administración para guiadestino. Uso: instanciar según necesidad del dominio.
+    """
     list_display = ("nombre", "mejor_epoca", "idioma")
     search_fields = ("nombre", "descripcion")
 
 
 @admin.register(PostRedesSociales)
-class PostRedesSocialesAdmin(SaaSAdminMixin, admin.ModelAdmin):
+class PostRedesSocialesAdmin:
+    """Configuración de administración para postredessociales. Uso: instanciar según necesidad del dominio.
+    """
     list_display = ("plataforma", "articulo", "publicado", "fecha_programada")
     list_filter = ("plataforma", "publicado")
 
 
 @admin.register(KBCategory)
-class KBCategoryAdmin(SaaSAdminMixin, admin.ModelAdmin):
+class KBCategoryAdmin:
+    """Configuración de administración para kbcategory. Uso: instanciar según necesidad del dominio.
+    """
     list_display = ("name", "sort_order", "article_count")
     search_fields = ("name",)
     prepopulated_fields = {"slug": ("name",)}
 
     def article_count(self, obj):
+        # article_count: Article count. Args: según implementación. Returns: según implementación.
         return obj.articles.count()
     article_count.short_description = "Artículos"
 
 
 @admin.register(KBArticle)
-class KBArticleAdmin(SaaSAdminMixin, admin.ModelAdmin):
+class KBArticleAdmin:
+    """Configuración de administración para kbarticle. Uso: instanciar según necesidad del dominio.
+    """
     list_display = ("title", "category", "is_public", "is_published", "view_count", "created_at")
     list_filter = ("is_public", "is_published", "category")
     search_fields = ("title", "content", "tags")

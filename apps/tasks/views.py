@@ -1,3 +1,6 @@
+"""Vistas (views) de la aplicación tasks.
+"""
+
 import logging
 
 from django.contrib import messages
@@ -20,6 +23,7 @@ class TaskBoardView(LoginRequiredMixin, View):
     template_name = "tasks/board.html"
 
     def get(self, request):
+        # get: Get. Args: según implementación. Returns: según implementación.
         agencia = get_agencia_from_request(request)
         if not agencia:
             return render(request, self.template_name, {"sin_agencia": True})
@@ -47,9 +51,11 @@ class TaskCreateView(LoginRequiredMixin, View):
     template_name = "tasks/form.html"
 
     def get(self, request):
+        # get: Get. Args: según implementación. Returns: según implementación.
         return render(request, self.template_name, {"current_agency": get_agencia_from_request(request)})
 
     def post(self, request):
+        # post: Post. Args: según implementación. Returns: según implementación.
         agencia = get_agencia_from_request(request)
         if not agencia:
             return HttpResponse("No agency", status=400)
@@ -75,10 +81,12 @@ class TaskUpdateView(LoginRequiredMixin, View):
     template_name = "tasks/form.html"
 
     def get(self, request, pk):
+        # get: Get. Args: según implementación. Returns: según implementación.
         tarea = get_object_or_404(Tarea, pk=pk, agencia=get_agencia_from_request(request))
         return render(request, "tasks/form.html", {"tarea": tarea, "editing": True})
 
     def post(self, request, pk):
+        # post: Post. Args: según implementación. Returns: según implementación.
         tarea = get_object_or_404(Tarea, pk=pk, agencia=get_agencia_from_request(request))
         tarea.titulo = request.POST.get("titulo", tarea.titulo)
         tarea.descripcion = request.POST.get("descripcion", tarea.descripcion)
@@ -103,6 +111,7 @@ class TaskDetailView(LoginRequiredMixin, View):
     template_name = "tasks/detail.html"
 
     def get(self, request, pk):
+        # get: Get. Args: según implementación. Returns: según implementación.
         agencia = get_agencia_from_request(request)
         tarea = get_object_or_404(Tarea, pk=pk, agencia=agencia)
         comentarios = tarea.comentarios.select_related("usuario").all()
@@ -117,6 +126,7 @@ class TaskDeleteView(LoginRequiredMixin, View):
     """Eliminar tarea."""
 
     def post(self, request, pk):
+        # post: Post. Args: según implementación. Returns: según implementación.
         tarea = get_object_or_404(Tarea, pk=pk, agencia=get_agencia_from_request(request))
         tarea.delete()
         messages.success(request, "Tarea eliminada")
@@ -127,6 +137,7 @@ class TaskCommentView(LoginRequiredMixin, View):
     """Agregar comentario a tarea (HTMX)."""
 
     def post(self, request, pk):
+        # post: Post. Args: según implementación. Returns: según implementación.
         tarea = get_object_or_404(Tarea, pk=pk, agencia=get_agencia_from_request(request))
         texto = request.POST.get("texto", "").strip()
         if texto:

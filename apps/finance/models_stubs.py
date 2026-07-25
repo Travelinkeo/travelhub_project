@@ -1,3 +1,6 @@
+"""Módulo models stubs de la aplicación finance.
+"""
+
 import uuid
 from datetime import date
 from decimal import Decimal
@@ -7,20 +10,29 @@ from django.core.exceptions import ValidationError
 from django.db import models
 
 
-class StubQuerySet(models.QuerySet):
+class StubQuerySet:
+    """Clase StubQuerySet. Uso: según contexto de la aplicación.
+    """
     def hard_delete(self):
+        # hard_delete: Hard delete. Args: según implementación. Returns: según implementación.
         return super().delete()
 
     def restore(self):
+        # restore: Restore. Args: según implementación. Returns: según implementación.
         self.update(is_deleted=False, deleted_at=None)
 
 
-class StubManager(models.Manager):
+class StubManager:
+    """Clase StubManager. Uso: según contexto de la aplicación.
+    """
     def get_queryset(self):
+        # get_queryset: Obtiene/recupera queryset. Args: según implementación. Returns: dato solicitado.
         return StubQuerySet(self.model, using=self._db)
 
 
-class CanalRecaudacion(models.Model):
+class CanalRecaudacion:
+    """Clase CanalRecaudacion. Uso: según contexto de la aplicación.
+    """
     class TipoCanal(models.TextChoices):
         EFECTIVO = "EFE", "Efectivo"
         CONSOLIDADOR = "CON", "Consolidador"
@@ -39,7 +51,9 @@ class CanalRecaudacion(models.Model):
         db_table = "finance_canalrecaudacion"
 
 
-class ComisionVenta(models.Model):
+class ComisionVenta:
+    """Clase ComisionVenta. Uso: según contexto de la aplicación.
+    """
     class EstadoComision(models.TextChoices):
         PENDIENTE = "PEN", "Pendiente"
         LIQUIDADO = "LIQ", "Liquidado"
@@ -67,7 +81,9 @@ class ComisionVenta(models.Model):
         db_table = "finance_comisionventa"
 
 
-class ConciliacionBoleto(models.Model):
+class ConciliacionBoleto:
+    """Clase ConciliacionBoleto. Uso: según contexto de la aplicación.
+    """
     class EstadosCruce(models.TextChoices):
         OK = "OK", "Ok"
         DISCREPANCIA = "DIS", "Discrepancia"
@@ -102,6 +118,7 @@ class ConciliacionBoleto(models.Model):
     agencia = models.ForeignKey("core.Agencia", models.DO_NOTHING, blank=True, null=True)
 
     def __str__(self):
+        # __str__: Representación en string del objeto. Returns: str.
         return f"{self.estado} - ${self.diferencia_total}"
 
     class Meta:
@@ -109,7 +126,9 @@ class ConciliacionBoleto(models.Model):
         db_table = "finance_conciliacionboleto"
 
 
-class DiferenciaFinanciera(models.Model):
+class DiferenciaFinanciera:
+    """Clase DiferenciaFinanciera. Uso: según contexto de la aplicación.
+    """
     id = models.BigAutoField(primary_key=True)
     campo_discrepancia = models.CharField(max_length=50)
     valor_sistema = models.DecimalField(max_digits=12, decimal_places=2)
@@ -125,13 +144,17 @@ class DiferenciaFinanciera(models.Model):
         db_table = "finance_diferenciafinanciera"
 
 
-class DocumentoExportacion(models.Model):
+class DocumentoExportacion:
+    """Clase DocumentoExportacion. Uso: según contexto de la aplicación.
+    """
     class Meta:
         managed = False
         db_table = "finance_documentoexportacion"
 
 
-class DocumentoExportacionConsolidado(models.Model):
+class DocumentoExportacionConsolidado:
+    """Clase DocumentoExportacionConsolidado. Uso: según contexto de la aplicación.
+    """
     id = models.BigAutoField(primary_key=True)
     tipo_documento = models.CharField(max_length=20, default="")
     numero_documento = models.CharField(max_length=100, default="")
@@ -152,7 +175,9 @@ from apps.finance.models import FacturaConsolidada, ItemFacturaConsolidada  # no
 
 
 
-class FacturaFiscal(models.Model):
+class FacturaFiscal:
+    """Clase FacturaFiscal. Uso: según contexto de la aplicación.
+    """
     class EstadoFiscal(models.TextChoices):
         PENDIENTE = "PEN", "Pendiente"
         EN_PROCESO = "PRO", "En Proceso"
@@ -164,7 +189,9 @@ class FacturaFiscal(models.Model):
         db_table = "finance_facturafiscal"
 
 
-class FacturaProveedor(models.Model):
+class FacturaProveedor:
+    """Clase FacturaProveedor. Uso: según contexto de la aplicación.
+    """
     class EstadoFactura(models.TextChoices):
         CONCILIADA = "CON", "Conciliada"
         REQUIERE_REVISION = "REV", "Requiere Revision"
@@ -182,7 +209,9 @@ from apps.finance.models import GastoOperativo  # noqa: F401, E402
 
 
 
-class ItemReporte(models.Model):
+class ItemReporte:
+    """Clase ItemReporte. Uso: según contexto de la aplicación.
+    """
     class EstadoConciliacion(models.TextChoices):
         MATCH = "MAT", "Match"
         MISSING_INTERNAL = "MIS", "Missing Internal"
@@ -209,7 +238,9 @@ class ItemReporte(models.Model):
         db_table = "finance_itemreporte"
 
 
-class LineaReporteReconciliacion(models.Model):
+class LineaReporteReconciliacion:
+    """Clase LineaReporteReconciliacion. Uso: según contexto de la aplicación.
+    """
     id_linea = models.AutoField(primary_key=True)
     numero_boleto_reportado = models.CharField(max_length=150)
     tarifa_base_cobrada = models.DecimalField(
@@ -227,6 +258,7 @@ class LineaReporteReconciliacion(models.Model):
     agencia = models.ForeignKey("core.Agencia", models.DO_NOTHING, blank=True, null=True)
 
     def __str__(self):
+        # __str__: Representación en string del objeto. Returns: str.
         return f"{self.numero_boleto_reportado} - ${self.total_cobrado}"
 
     class Meta:
@@ -234,7 +266,9 @@ class LineaReporteReconciliacion(models.Model):
         db_table = "finance_lineareportereconciliacion"
 
 
-class LinkDePago(models.Model):
+class LinkDePago:
+    """Clase LinkDePago. Uso: según contexto de la aplicación.
+    """
     class EstadoPago(models.TextChoices):
         PENDIENTE = "PEN", "Pendiente"
         PAGADO = "PAG", "Pagado"
@@ -257,12 +291,14 @@ class LinkDePago(models.Model):
     agencia = models.ForeignKey("core.Agencia", models.DO_NOTHING, blank=True, null=True)
 
     def save(self, *args, **kwargs):
+        # save: Guarda/persiste . Args: datos a guardar. Returns: objeto guardado.
         if not self.expira_en:
             self.expira_en = django.utils.timezone.now() + django.utils.timezone.timedelta(hours=24)
         super().save(*args, **kwargs)
 
     @property
     def esta_activo(self):
+        # esta_activo: Esta activo. Args: según implementación. Returns: según implementación.
         return (
             self.estado == self.EstadoPago.PENDIENTE
             and self.expira_en > django.utils.timezone.now()
@@ -273,7 +309,9 @@ class LinkDePago(models.Model):
         db_table = "finance_linkdepago"
 
 
-class LiquidacionAgente(models.Model):
+class LiquidacionAgente:
+    """Clase LiquidacionAgente. Uso: según contexto de la aplicación.
+    """
     id = models.BigAutoField(primary_key=True)
     is_deleted = models.BooleanField()
     deleted_at = models.DateTimeField(blank=True, null=True)
@@ -293,7 +331,9 @@ class LiquidacionAgente(models.Model):
         unique_together = (("agente", "periodo_mes", "periodo_anio"),)
 
 
-class Moneda(models.Model):
+class Moneda:
+    """Clase Moneda. Uso: según contexto de la aplicación.
+    """
     codigo_iso = models.CharField(max_length=3)
     nombre = models.CharField(max_length=50)
     simbolo = models.CharField(max_length=5)
@@ -303,7 +343,9 @@ class Moneda(models.Model):
         db_table = "finance_moneda"
 
 
-class PagoBinance(models.Model):
+class PagoBinance:
+    """Clase PagoBinance. Uso: según contexto de la aplicación.
+    """
     id_pago_binance = models.AutoField(primary_key=True)
     prepay_id = models.CharField(max_length=100, blank=True, null=True)
     merchant_trade_no = models.CharField(unique=True, max_length=50)
@@ -324,7 +366,9 @@ class PagoBinance(models.Model):
         db_table = "finance_pagobinance"
 
 
-class PropuestaTransaccionIA(models.Model):
+class PropuestaTransaccionIA:
+    """Clase PropuestaTransaccionIA. Uso: según contexto de la aplicación.
+    """
     class EstadoPropuesta(models.TextChoices):
         PENDIENTE = "PEN", "Pendiente"
         RECHAZADA = "REC", "Rechazada"
@@ -335,7 +379,9 @@ class PropuestaTransaccionIA(models.Model):
         db_table = "finance_propuestatransaccionia"
 
 
-class ReglaComision(models.Model):
+class ReglaComision:
+    """Clase ReglaComision. Uso: según contexto de la aplicación.
+    """
     class TipoCalculo(models.TextChoices):
         PORCENTAJE_UTILIDAD = "UTI", "% Utilidad"
         PORCENTAJE_VENTA = "VEN", "% Venta"
@@ -357,7 +403,9 @@ class ReglaComision(models.Model):
         unique_together = (("agencia", "agente"),)
 
 
-class ReporteProveedor(models.Model):
+class ReporteProveedor:
+    """Clase ReporteProveedor. Uso: según contexto de la aplicación.
+    """
     class EstadoReporte(models.TextChoices):
         PENDIENTE = "PEN", "Pendiente"
 
@@ -376,7 +424,9 @@ class ReporteProveedor(models.Model):
         db_table = "finance_reporteproveedor"
 
 
-class ReporteReconciliacion(models.Model):
+class ReporteReconciliacion:
+    """Clase ReporteReconciliacion. Uso: según contexto de la aplicación.
+    """
     class Estados(models.TextChoices):
         PROCESADO = "PRO", "Procesado"
         PENDIENTE = "PEN", "Pendiente"
@@ -401,11 +451,13 @@ class ReporteReconciliacion(models.Model):
 
     @property
     def discrepancias_count(self):
+        # discrepancias_count: Discrepancias count. Args: según implementación. Returns: según implementación.
         return self.conciliaciones.filter(
             estado=ConciliacionBoleto.EstadosCruce.DISCREPANCIA
         ).count()
 
     def __str__(self):
+        # __str__: Representación en string del objeto. Returns: str.
         agencia_nombre = self.agencia.nombre if self.agencia else "N/A"
         return f"Reporte {self.proveedor} - {self.fecha_subida.strftime('%d/%m/%Y')} ({agencia_nombre})"
 
@@ -420,7 +472,9 @@ from apps.finance.models import RetencionISLR  # noqa: F401, E402
 
 
 
-class TasaCambio(models.Model):
+class TasaCambio:
+    """Clase TasaCambio. Uso: según contexto de la aplicación.
+    """
     id = models.BigAutoField(primary_key=True)
     fecha = models.DateField()
     moneda = models.CharField(max_length=3)
@@ -433,7 +487,9 @@ class TasaCambio(models.Model):
         unique_together = (("fecha", "moneda"),)
 
 
-class TaxRefundOpportunity(models.Model):
+class TaxRefundOpportunity:
+    """Clase TaxRefundOpportunity. Uso: según contexto de la aplicación.
+    """
     class Estado(models.TextChoices):
         ELEGIBLE = "ELE", "Elegible"
         TRAMITANDO = "TRA", "Tramitando"
@@ -454,7 +510,9 @@ class TaxRefundOpportunity(models.Model):
         db_table = "finance_taxrefundopportunity"
 
 
-class TipoCambio(models.Model):
+class TipoCambio:
+    """Clase TipoCambio. Uso: según contexto de la aplicación.
+    """
     id_tipo_cambio = models.AutoField(primary_key=True)
     fecha_efectiva = models.DateField()
     tasa_conversion = models.DecimalField(max_digits=18, decimal_places=8)
@@ -473,7 +531,9 @@ class TipoCambio(models.Model):
         unique_together = (("moneda_origen", "moneda_destino", "fecha_efectiva"),)
 
 
-class TransaccionPago(models.Model):
+class TransaccionPago:
+    """Clase TransaccionPago. Uso: según contexto de la aplicación.
+    """
     id_transaccion = models.AutoField(primary_key=True)
     proveedor = models.CharField(max_length=3)
     monto = models.DecimalField(max_digits=12, decimal_places=2)

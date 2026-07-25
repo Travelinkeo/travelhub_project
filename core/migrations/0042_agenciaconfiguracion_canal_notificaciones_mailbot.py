@@ -1,7 +1,8 @@
 from django.db import migrations, models
 
 
-class Migration(migrations.Migration):
+class Migration:
+    """Migración de base de datos generada por Django."""
     dependencies = [
         ("core", "0041_remove_legacy_tables"),
     ]

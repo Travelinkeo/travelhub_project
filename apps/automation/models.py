@@ -1,3 +1,6 @@
+"""Modelos de base de datos para la aplicación automation.
+"""
+
 from django.contrib.auth.models import User
 from django.db import models
 from django.utils.translation import gettext_lazy as _
@@ -40,6 +43,7 @@ class NotificacionInteligente(AgenciaMixin, models.Model):
         ]
 
     def __str__(self):
+        # __str__: Representación en string del objeto. Returns: str.
         return f"{self.titulo} - {self.usuario.username}"
 
 
@@ -74,4 +78,5 @@ class NotificacionAgente(AgenciaMixin, models.Model):
         ordering = ["-creado_en"]
 
     def __str__(self):
+        # __str__: Representación en string del objeto. Returns: str.
         return f"{self.titulo} -> {self.usuario.username}"

@@ -13,6 +13,7 @@ class ItineraryGeneratorView(InternalAPIAuthMixin, APIView):
     """
 
     def post(self, request, *args, **kwargs):
+        """Método: post."""
         user_query = request.data.get("query")
 
         if not user_query:

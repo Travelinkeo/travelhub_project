@@ -1,3 +1,4 @@
+"""Tests para Metadata parseo venta."""
 import pytest
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
@@ -11,6 +12,7 @@ pytestmark = pytest.mark.skip(reason="Tests requieren configuración completa o 
 
 @pytest.mark.django_db
 def test_metadata_creacion_reflejada_en_venta_detalle():
+    """Metadata creacion reflejada en venta detalle."""
     User = get_user_model()
     User.objects.create_user(username="metauser", password="pass123", is_staff=True)
     c = APIClient()
@@ -53,6 +55,7 @@ def test_metadata_creacion_reflejada_en_venta_detalle():
 
 @pytest.mark.django_db
 def test_metadata_se_toma_la_mas_reciente():
+    """Metadata se toma la mas reciente."""
     User = get_user_model()
     User.objects.create_user(username="metauser2", password="pass123", is_staff=True)
     c = APIClient()

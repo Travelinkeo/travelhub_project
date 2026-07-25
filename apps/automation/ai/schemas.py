@@ -1,3 +1,6 @@
+"""Módulo schemas de la aplicación automation.
+"""
+
 import re
 
 from pydantic import BaseModel, Field, field_validator, model_validator
@@ -7,6 +10,7 @@ from pydantic import BaseModel, Field, field_validator, model_validator
 # HELPERS
 # ─────────────────────────────────────────────────────────────────────────────
 def _to_float(v) -> float:
+    # _to_float:  to float. Args: según implementación. Returns: según implementación.
     if v is None:
         return 0.0
     if isinstance(v, int | float):
@@ -23,7 +27,9 @@ def _to_float(v) -> float:
 # ─────────────────────────────────────────────────────────────────────────────
 
 
-class TramoVueloSchema(BaseModel):
+class TramoVueloSchema:
+    """Clase TramoVueloSchema. Uso: según contexto de la aplicación.
+    """
     aerolinea: str = Field(description="Código IATA o nombre de la aerolínea del tramo")
     numero_vuelo: str | None = Field(
         description="Número de vuelo INCLUYENDO EL CÓDIGO DE AEROLÍNEA (ej: TK0224, CM062)"
@@ -57,6 +63,7 @@ class TramoVueloSchema(BaseModel):
 
     @field_validator("hora_salida", "hora_llegada", mode="before")
     def normalize_time(cls, v):
+        # normalize_time: Normalize time. Args: según implementación. Returns: según implementación.
         if not v:
             return "00:00"
         v = str(v).strip()
@@ -74,7 +81,9 @@ class TramoVueloSchema(BaseModel):
         return v
 
 
-class BoletoAereoSchema(BaseModel):
+class BoletoAereoSchema:
+    """Clase BoletoAereoSchema. Uso: según contexto de la aplicación.
+    """
     nombre_pasajero: str = Field(
         description="Nombre completo del pasajero (Formato GDS: APELLIDO/NOMBRE). Máximo 80 caracteres."
     )
@@ -120,10 +129,12 @@ class BoletoAereoSchema(BaseModel):
 
     @field_validator("tarifa", "impuestos", "total", mode="before")
     def parse_monetary(cls, v):
+        # parse_monetary: Analiza/parsea  monetary. Args: datos de entrada. Returns: resultado del parseo.
         return _to_float(v)
 
     @field_validator("nombre_pasajero")
     def validate_passenger_name(cls, v):
+        # validate_passenger_name: Valida  passenger name. Args: datos a validar. Returns: True/False o errores.
         v = v.upper().strip()
         stop_keywords = [
             "NÚMERO DE",
@@ -166,6 +177,7 @@ class BoletoAereoSchema(BaseModel):
 
     @field_validator("codigo_reserva")
     def clean_pnr(cls, v):
+        # clean_pnr: Clean pnr. Args: según implementación. Returns: según implementación.
         if not v:
             return "UNKNOWN"
         clean = re.sub(r"^C1/", "", str(v).upper())
@@ -174,6 +186,7 @@ class BoletoAereoSchema(BaseModel):
 
     @field_validator("numero_boleto", mode="before")
     def validate_ticket_number(cls, v):
+        # validate_ticket_number: Valida  ticket number. Args: datos a validar. Returns: True/False o errores.
         if not v or str(v).strip().lower() in (
             "null",
             "none",
@@ -190,6 +203,7 @@ class BoletoAereoSchema(BaseModel):
 
     @field_validator("moneda", mode="before")
     def validate_currency(cls, v):
+        # validate_currency: Valida  currency. Args: datos a validar. Returns: True/False o errores.
         if not v:
             return "USD"
         raw = str(v).strip().upper()
@@ -266,12 +280,14 @@ class BoletoAereoSchema(BaseModel):
 
     @field_validator("itinerario")
     def check_itinerary_not_empty(cls, v):
+        # check_itinerary_not_empty: Check itinerary not empty. Args: según implementación. Returns: según implementación.
         if not v:
             raise ValueError("El itinerario no puede estar vacío.")
         return v[:8]
 
     @model_validator(mode="after")
     def validate_math(self):
+        # validate_math: Valida  math. Args: datos a validar. Returns: True/False o errores.
         tarifa = getattr(self, "tarifa", 0.0)
         impuestos = getattr(self, "impuestos", 0.0)
         expected = round(tarifa + impuestos, 2)
@@ -281,6 +297,7 @@ class BoletoAereoSchema(BaseModel):
 
     @model_validator(mode="after")
     def auto_compute_confidence(self):
+        # auto_compute_confidence: Auto compute confidence. Args: según implementación. Returns: según implementación.
         if self.confidence_score < 1.0:
             self.confidence_score = max(0.0, min(1.0, self.confidence_score))
             return self
@@ -305,7 +322,9 @@ class BoletoAereoSchema(BaseModel):
         return self
 
 
-class ResultadoParseoSchema(BaseModel):
+class ResultadoParseoSchema:
+    """Clase ResultadoParseoSchema. Uso: según contexto de la aplicación.
+    """
     boletos: list[BoletoAereoSchema] = Field(
         description="Lista de boletos extraídos (uno por pasajero). Mínimo 1 boleto."
     )
@@ -316,14 +335,18 @@ class ResultadoParseoSchema(BaseModel):
 # ─────────────────────────────────────────────────────────────────────────────
 
 
-class AuditFinding(BaseModel):
+class AuditFinding:
+    """Clase AuditFinding. Uso: según contexto de la aplicación.
+    """
     category: str = Field(description="Categoría del hallazgo (TASAS, NOMBRES, FEES, ITINERARIO)")
     severity: str = Field(description="Severidad (INFO, WARNING, CRITICAL)")
     message: str = Field(description="Mensaje explicativo para el agente")
     suggestion: str | None = Field(description="Sugerencia de corrección si aplica")
 
 
-class AuditReport(BaseModel):
+class AuditReport:
+    """Clase AuditReport. Uso: según contexto de la aplicación.
+    """
     is_compliant: bool = Field(description="Si el boleto cumple con todas las reglas básicas")
     findings: list[AuditFinding] = Field(description="Lista de hallazgos")
     calculated_fees_suggested: dict[str, float] = Field(
@@ -337,7 +360,9 @@ class AuditReport(BaseModel):
 # ─────────────────────────────────────────────────────────────────────────────
 
 
-class InformeProveedorItemSchema(BaseModel):
+class InformeProveedorItemSchema:
+    """Clase InformeProveedorItemSchema. Uso: según contexto de la aplicación.
+    """
     fecha_emision: str | None = Field(description="Fecha de emisión según el reporte")
     pnr: str | None = Field(description="Localizador/PNR")
     numero_boleto: str | None = Field(description="Número de boleto (13 dígitos)")
@@ -350,7 +375,9 @@ class InformeProveedorItemSchema(BaseModel):
     moneda: str = Field(description="Moneda del reporte")
 
 
-class InformeProveedorSchema(BaseModel):
+class InformeProveedorSchema:
+    """Clase InformeProveedorSchema. Uso: según contexto de la aplicación.
+    """
     proveedor_nombre: str = Field(..., description="Nombre del proveedor (CTG, MY DESTINY, etc.)")
     periodo_desde: str | None = Field(description="Fecha inicio del reporte")
     periodo_hasta: str | None = Field(description="Fecha fin del reporte")
@@ -358,7 +385,9 @@ class InformeProveedorSchema(BaseModel):
     total_reporte: float = Field(description="Monto total del reporte")
 
 
-class MatchExitosoSchema(BaseModel):
+class MatchExitosoSchema:
+    """Clase MatchExitosoSchema. Uso: según contexto de la aplicación.
+    """
     venta_id: int = Field(description="ID de la Venta/Boleto en TravelHub")
     proveedor_item_id: str = Field(
         description="Identificador del ítem en el reporte del proveedor (ej: numero_boleto)"
@@ -372,7 +401,9 @@ class MatchExitosoSchema(BaseModel):
     )
 
 
-class BoletoHuerfanoSchema(BaseModel):
+class BoletoHuerfanoSchema:
+    """Clase BoletoHuerfanoSchema. Uso: según contexto de la aplicación.
+    """
     proveedor_item_id: str = Field(description="ID del registro del proveedor")
     pasajero: str = Field(description="Nombre en el reporte")
     monto: float = Field(description="Monto reclamado por el proveedor")
@@ -381,7 +412,9 @@ class BoletoHuerfanoSchema(BaseModel):
     )
 
 
-class ConciliacionLoteSchema(BaseModel):
+class ConciliacionLoteSchema:
+    """Clase ConciliacionLoteSchema. Uso: según contexto de la aplicación.
+    """
     matches: list[MatchExitosoSchema] = Field(description="Emparejamientos encontrados por IA")
     huerfanos: list[BoletoHuerfanoSchema] = Field(
         description="Registros del proveedor sin pareja en la agencia"
@@ -394,7 +427,9 @@ class ConciliacionLoteSchema(BaseModel):
 # ─────────────────────────────────────────────────────────────────────────────
 
 
-class PasaporteOCRSchema(BaseModel):
+class PasaporteOCRSchema:
+    """Clase PasaporteOCRSchema. Uso: según contexto de la aplicación.
+    """
     nombres: str = Field(
         description="Nombres del pasajero tal como aparecen en el pasaporte (limpio)"
     )
@@ -410,14 +445,18 @@ class PasaporteOCRSchema(BaseModel):
 
     @field_validator("nombres", "apellidos")
     def capitalize_names(cls, v):
+        # capitalize_names: Capitalize names. Args: según implementación. Returns: según implementación.
         return v.strip().upper()
 
     @field_validator("numero_pasaporte")
     def clean_doc(cls, v):
+        # clean_doc: Clean doc. Args: según implementación. Returns: según implementación.
         return re.sub(r"[^A-Z0-9]", "", str(v).upper())
 
 
-class CedulaOCRSchema(BaseModel):
+class CedulaOCRSchema:
+    """Clase CedulaOCRSchema. Uso: según contexto de la aplicación.
+    """
     apellidos: str | None = Field(
         default=None, description="Solo los apellidos del titular, en mayúsculas."
     )
@@ -435,6 +474,7 @@ class CedulaOCRSchema(BaseModel):
 
     @field_validator("nombres", "apellidos", mode="before")
     def clean_names(cls, v):
+        # clean_names: Clean names. Args: según implementación. Returns: según implementación.
         if not v:
             return ""
         cleaned = str(v).strip().upper()
@@ -444,6 +484,7 @@ class CedulaOCRSchema(BaseModel):
 
     @field_validator("cedula", mode="before")
     def clean_cedula(cls, v):
+        # clean_cedula: Clean cedula. Args: según implementación. Returns: según implementación.
         if not v:
             return None
         num = re.sub(r"[^0-9]", "", str(v))
@@ -455,7 +496,9 @@ class CedulaOCRSchema(BaseModel):
 # ─────────────────────────────────────────────────────────────────────────────
 
 
-class ConsejosIASchema(BaseModel):
+class ConsejosIASchema:
+    """Clase ConsejosIASchema. Uso: según contexto de la aplicación.
+    """
     saludo: str = Field(
         description="Un saludo enérgico para el CEO (ej. '¡Buen día, equipo directivo!')"
     )

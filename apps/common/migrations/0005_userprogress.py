@@ -1,9 +1,14 @@
+"""Migración de base de datos para common.
+"""
+
 import django.db.models.deletion
 from django.conf import settings
 from django.db import migrations, models
 
 
-class Migration(migrations.Migration):
+class Migration:
+    """Clase Migration. Uso: según contexto de la aplicación.
+    """
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
         ("common", "0004_alter_aerolinea_table_alter_ciudad_table_and_more"),

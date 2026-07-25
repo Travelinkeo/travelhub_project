@@ -59,9 +59,11 @@ ENV_TO_SECRET = {
 
 
 class Command(BaseCommand):
+    """Comando de gestión personalizado."""
     help = "Siembra en APISecret las claves definidas en variables de entorno"
 
     def handle(self, *args, **options):
+        """Método: handle."""
         from core.models import APISecret
 
         created = 0

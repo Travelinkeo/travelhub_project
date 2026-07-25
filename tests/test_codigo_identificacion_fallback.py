@@ -1,3 +1,4 @@
+"""Tests para Codigo identificacion fallback."""
 from apps.common.utils.identification_utils import (
     extract_codigo_identificacion_anywhere,
     normalize_codigo_identificacion,
@@ -15,6 +16,7 @@ CASOS_INLINE = [
 
 def test_normalize_codigo_identificacion_inline():
     # normalize directo sobre la línea completa (con otros campos) puede fallar; fallback lo rescata
+    """Normalize codigo identificacion inline."""
     for texto, esperado in CASOS_INLINE:
         # La función normalize espera una linea que contenga FOID; aquí puede estar inline
         norm = normalize_codigo_identificacion(texto)

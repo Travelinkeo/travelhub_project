@@ -5,12 +5,15 @@ from apps.bookings.models import TarifarioProveedor
 
 
 class Command(BaseCommand):
+    """Comando de gestión personalizado."""
     help = "Procesa un Tarifario de Proveedor usando Gemini Vision"
 
     def add_arguments(self, parser):
+        """Método: add arguments."""
         parser.add_argument("tarifario_id", type=int, help="ID del TarifarioProveedor a procesar")
 
     def handle(self, *args, **options):
+        """Método: handle."""
         tarifario_id = options["tarifario_id"]
         try:
             tarifario = TarifarioProveedor.objects.get(pk=tarifario_id)

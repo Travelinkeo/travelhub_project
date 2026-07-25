@@ -1,151 +1,91 @@
-# TravelHub SaaS Platform 🚀
+# TravelHub
 
-**Sistema de Gestión Integral (ERP/SaaS) para Agencias de Viajes con Inteligencia Artificial.**
+Plataforma de gestión de agencias de viajes multi-tenencia con automatización, CRM, facturación electrónica y más.
 
-TravelHub es una plataforma B2B multi-tenant diseñada para automatizar la operación completa de agencias de viajes. Combina Django con Google Gemini para resolver la fricción operativa, financiera y de marketing.
+## Arquitectura
 
----
+- Django + PostgreSQL + Redis + Celery
+- Multi-tenencia (por agencia)
+- Panel admin con Unfold
+- API REST con DRF
 
-## 🏛️ Arquitectura y Estado Actual (Julio 2026)
+## Estructura del proyecto
 
-### 1. Multi-tenant SaaS & Onboarding
-- **Aislamiento de Datos:** `AgenciaMixin` + `AgenciaManager` + `ThreadLocalContextMiddleware`. Cada agencia opera en su propio contexto.
-- **Onboarding Autónomo:** Registro self-service con Stripe. Planes: Basic, Pro y Enterprise, con Trial gratuito de 30 días.
-- **Aprovisionamiento:** Webhook de Stripe activa creación de agencia, admin y límites de uso.
+| Directorio | Descripción |
+|---|---|
+| `travelhub/` | Configuración Django (settings, urls, wsgi, celery) |
+| `core/` | Módulo central (modelos, servicios, admin, seguridad, cifrado) |
+| `apps/bookings/` | Gestión de reservas, boletos aéreos, hoteles, autos |
+| `apps/crm/` | Gestión de clientes, historial, relaciones |
+| `apps/finance/` | Facturación electrónica, conciliación, comisiones |
+| `apps/automation/` | Automatización con IA, proveedores Gemini/OpenAI/DeepSeek |
+| `apps/communications/` | Notificaciones email (Resend), WhatsApp, Telegram |
+| `apps/contabilidad/` | Contabilidad venezolana (BCV, IVA, fiscal) |
+| `apps/cotizaciones/` | Cotizaciones y presupuestos |
+| `apps/cms/` | Gestión de contenido (artículos) |
+| `apps/gamification/` | Gamificación, logros, puntajes |
+| `apps/marketing/` | Campañas de marketing |
+| `apps/reports/` | Reportes programados y KPIs |
+| `apps/tasks/` | Tareas internas |
+| `tests/` | Tests unitarios, de servicios, E2E Playwright |
 
-### 2. Automatización & IA
-- **Ticket Parser Pro:** Extracción multi-GDS (Sabre, Amadeus, KIU, Copa, Wingo, TK Connect) con motor híbrido Regex + Gemini.
-- **AI Copywriter:** Generación de captions para redes sociales.
-- **AI Agent:** Asistente conversacional con function calling integrado al ERP.
+## Requisitos
 
-### 3. Centro de Control (God Mode)
-- Dashboard de superadmin con métricas globales, MRR, churn, uso de IA, y logs de actividad.
-- Impersonación controlada con auditoría criptográfica y timeout.
+- Docker y Docker Compose
+- Python 3.12+
+- PostgreSQL 15, Redis 7
 
-### 4. Sistema de Vouchers
-- Generación de vouchers PDF por tipo de servicio (hotel, traslado, actividad, auto, seguro) vía Gotenberg.
-- 5 variaciones de diseño por agencia.
-
----
-
-## 📚 Documentación
-
-| Documento | Descripción |
-|-----------|-------------|
-| [Índice Maestro](docs/INDEX.md) | Mapa central de documentación |
-| [Reporte de Arquitectura](docs/reporte_arquitectura_2026.md) | Arquitectura técnica detallada |
-| [Manual del Usuario](docs/manual_del_usuario.md) | Guía para usuarios finales |
-| [Reglas de Parseo](docs/parsing_rules.md) | Estándares de extracción GDS |
-| [Multi-tenancy](docs/multi_tenancy.md) | Aislamiento de datos |
-| [Modelo de Negocio](docs/business_model.md) | Planes y precios |
-| [Chequeo de Tipos](docs/mypy.md) | Ejecutar mypy localmente |
-| [Despliegue](docs/deployment/deployment.md) | Guía WSL2 + Docker + Cloudflare Tunnel |
-
----
-
-## 🔍 Chequeo de Tipos con mypy
-
-Para ejecutar el verificador de tipos en tu entorno local:
+## Inicio rápido
 
 ```bash
-pip install -r requirements/dev.txt
-mypy .
+# Clonar
+git clone <repo>
+cd travelhub
+
+# Variables de entorno
+cp .env.example .env
+# Editar .env con tus claves
+
+# Iniciar con Docker
+docker compose up -d
+
+# Migraciones
+docker compose exec web python manage.py migrate
+
+# Tests
+docker compose -f docker-compose.test.yml run --rm web
 ```
 
-Esto usará la configuración definida en `mypy.ini` y el plugin `django-stubs`.
+## Tests
 
-> **Nota:** `mypy.ini` tiene `strict = False` durante la fase de adopción
-> gradual del checkeo de tipos. Ver `docs/mypy.md` para el detalle de los
-> error codes temporalmentedesactivados y el plan de activación.
+- Framework: pytest
+- Cobertura mínima: 75% (`--cov-fail-under=75`)
+- Tests unitarios: `pytest tests/unit/`
+- Tests servicios: `pytest tests/services/`
+- Tests E2E: `pytest tests/e2e/` (requiere `E2E_TESTS=1`)
+- Ver cobertura: `pytest --cov=. --cov-report=term-missing`
 
----
+### CI/CD
 
-## 🛠️ Stack Tecnológico
+GitHub Actions ejecuta:
+1. Pre-check rápido en `tests/unit/`
+2. Suite completa con PostgreSQL service
+3. Verificación de cobertura >= 75%
 
-| Capa | Tecnología |
-|------|-----------|
-| **Backend** | Django 5.2.14, Python 3.13, Django REST Framework |
-| **Frontend** | TailwindCSS, HTMX, Alpine.js (SSR) |
-| **Base de Datos** | PostgreSQL 16 + Redis 7 |
-| **IA** | Google Gemini (genai SDK v1.x) |
-| **Async** | Celery 5.5 + Redis broker |
-| **PDF** | Gotenberg (HTML → PDF headless) |
-| **Billing** | Stripe (suscripciones SaaS) |
-| **Comunicaciones** | Evolution API (WhatsApp), Resend (email), Telegram |
-| **Infraestructura** | Docker Compose, WSL2, Cloudflare Tunnel |
-| **CI/CD** | GitHub Actions: ruff, pytest (77%+ cobertura), bandit, pip-audit |
+## Características principales
 
----
+- **Multi-tenencia**: Agencias aisladas con cifrado de datos sensibles
+- **IA integrada**: Gemini, OpenAI, DeepSeek con fallback automático
+- **GDS**: Parsers para Sabre, KIU, Amadeus
+- **Facturación**: Factura electrónica venezolana (SENIAT/IVSS)
+- **BCV**: Tasas de cambio del Banco Central de Venezuela
+- **Notificaciones**: Email (Resend), WhatsApp (Evolution API), Telegram
+- **Seguridad**: Cifrado Fernet, API keys rotables, auditoría, SSO
+- **Dashboard admin**: Panel unificado con monitoreo de salud del sistema
 
-## 🔒 Seguridad
+## Despliegue
 
-- **CSP:** Content-Security-Policy con nonces rotativos por request
-- **Headers:** HSTS, X-Frame-Options: DENY, X-Content-Type-Options, Referrer-Policy
-- **Campos Encriptados:** `EncryptedCharField`/`EncryptedTextField` con Fernet (ENCRYPTION_KEY dedicada)
-- **Rate Limiting:** Throttling por vista + límites por plan SaaS
-- **Fuerza Bruta:** django-axes (5 intentos máx, 1h bloqueo)
-- **Auditoría:** AuditLog con encadenamiento criptográfico SHA-256
-- **Multi-tenancy:** PostgreSQL Row-Level Security + ORM filtering
-
----
-
-## 📋 Mejoras Implementadas (Fases 0-6)
-
-### Fase 0: Emergencia de Seguridad
-- [x] Agregado `@login_required` a vistas de upload/dissociate
-- [x] Verificación HMAC en webhooks de Binance
-- [x] Bloqueo de magic links para usuarios inactivos
-- [x] Eliminación de tokens hardcodeados
-- [x] Script de rotación de credenciales
-
-### Fase 1: Seguridad y Estabilidad
-- [x] Corrección de cadena de hash de auditoría
-- [x] Cambio de CASCADE a SET_NULL en `AuditLog.venta`
-- [x] Índices en 7 campos frecuentemente filtrados
-- [x] Timeout y retry en 11 tareas Celery
-- [x] Rate limiting en solicitud de magic links
-- [x] Validación de MIME type en uploads
-
-### Fase 2: Integridad de Datos
-- [x] Fix TOCTOU race en `Venta.localizador` y `Factura.numero_factura`
-- [x] Métodos `clean()` en modelos críticos
-- [x] `.quantize(Decimal('0.01'))` en todos los cálculos financieros
-- [x] Señales de auditoría para `PagoVenta`, `FeeVenta`, `Cliente`, `Proveedor`
-
-### Fase 3: Performance y Seguridad Web
-- [x] Optimización N+1 queries con `select_related`/`prefetch_related`
-- [x] Idempotencia en tareas Celery críticas
-- [x] Sanitización XSS con `bleach` y template filter
-- [x] Protección SSRF en proxy de Evolution API
-
-### Fase 4: Deuda Técnica
-- [x] Centralización de `get_user_active_agency()` (patrón repetido 39+ veces)
-- [x] Cleanup de imports no usados
-- [x] Documentación API con `drf-spectacular`
-- [x] Estructura mejorada de `settings.py`
-
-### Fase 5: Testing
-- [x] Tests unitarios para validaciones de modelos
-- [x] Tests de integración para APIs REST
-- [x] Tests de seguridad (XSS, SSRF, sanitización)
-- [x] Pipeline CI/CD con GitHub Actions
-
-### Fase 6: Documentación y Despliegue
-- [x] Documentación técnica actualizada
-- [x] Guía de despliegue para producción
-- [x] Docker Compose para desarrollo
-- [x] Scripts de migración de datos
-
-### Fase 7: Remediación de Deuda Técnica y Estabilidad Web (Sprints 1-3)
-- [x] **Sprint 1:** Saneamiento de `locale.setlocale` para prevenir errores de concurrencia y refactor de imports de settings en `celery.py`.
-- [x] **Sprint 2:** Centralización del mapa de meses GDS y optimización del queryset en `AgenciaManager`.
-- [x] **Sprint 3:** Implementación de Service Worker y PWA, Refuerzo de CSP eliminando `unsafe-eval` de Alpine.js, Integración de traducciones en español y validación de vulnerabilidades de SSO (OIDC/SAML).
-- [x] **Riesgos Residuales:** Control de compatibilidad con PgBouncer, reemplazo del modelo `APIKey` descontinuado por `CronApiKey`, y consolidación del descubrimiento de tareas de Celery.
-
----
-
-## ⚠️ Reglas del Repo
-
-- **Cero Secretos:** Nunca commitear `.env`, credenciales JSON, o `db.sqlite3`
-- **Historial Limpio:** Purga de claves en commits históricos
-- **Linting:** `ruff check . && ruff format .` antes de commit
+- Producción: Docker Compose con Nginx, Gunicorn, Uvicorn
+- Base de datos: PostgreSQL 15 (RDS en AWS)
+- Cache: Redis 7 (ElastiCache)
+- Archivos: R2 (Cloudflare) o S3

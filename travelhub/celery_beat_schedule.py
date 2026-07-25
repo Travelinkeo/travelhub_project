@@ -1,4 +1,5 @@
-# travelhub/celery_beat_schedule.py
+"""Programación de tareas periódicas de Celery Beat — define intervalos, horarios y rutas de cada tarea."""
+
 from celery.schedules import crontab
 
 QR_CACHE_KEY = "evo_qr:{instance}"

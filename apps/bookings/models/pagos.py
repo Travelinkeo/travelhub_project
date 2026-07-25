@@ -1,3 +1,6 @@
+"""Módulo pagos de la aplicación bookings.
+"""
+
 from __future__ import annotations
 
 from decimal import Decimal
@@ -10,7 +13,9 @@ from apps.common.models import Moneda
 from core.api import AgenciaMixin, SoftDeleteModel
 
 
-class FeeVenta(AgenciaMixin, SoftDeleteModel, models.Model):
+class FeeVenta:
+    """Clase FeeVenta. Uso: según contexto de la aplicación.
+    """
     id_fee_venta = models.AutoField(primary_key=True, verbose_name=_("ID Fee"))
     venta = models.ForeignKey(
         "bookings.Venta",
@@ -46,10 +51,13 @@ class FeeVenta(AgenciaMixin, SoftDeleteModel, models.Model):
         ordering = ["-creado"]
 
     def __str__(self):
+        # __str__: Representación en string del objeto. Returns: str.
         return f"{self.get_tipo_fee_display()} {self.monto} {self.moneda.codigo_iso if self.moneda else ''}"
 
 
-class PagoVenta(AgenciaMixin, models.Model):
+class PagoVenta:
+    """Clase PagoVenta. Uso: según contexto de la aplicación.
+    """
     id_pago_venta = models.AutoField(primary_key=True, verbose_name=_("ID Pago"))
     venta = models.ForeignKey(
         "bookings.Venta",
@@ -98,9 +106,11 @@ class PagoVenta(AgenciaMixin, models.Model):
         ]
 
     def __str__(self):
+        # __str__: Representación en string del objeto. Returns: str.
         return f"Pago {self.monto} {self.moneda.codigo_iso if self.moneda else ''}"
 
     def save(self, *args, **kwargs):
+        # save: Guarda/persiste . Args: datos a guardar. Returns: objeto guardado.
         if self.aplica_igtf and self.monto:
             self.monto_igtf = (self.monto * (self.tasa_igtf / Decimal("100"))).quantize(
                 Decimal("0.01")

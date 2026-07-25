@@ -1,3 +1,6 @@
+"""Servicio de transaction service para la aplicación common.
+"""
+
 import logging
 from typing import TYPE_CHECKING
 

@@ -1,10 +1,14 @@
+"""Migración de base de datos para gamification.
+"""
+
 import django.db.models.deletion
 from django.conf import settings
 from django.db import migrations, models
 
 
-class Migration(migrations.Migration):
-
+class Migration:
+    """Clase Migration. Uso: según contexto de la aplicación.
+    """
     initial = True
 
     dependencies = [

@@ -1,3 +1,4 @@
+"""Tests para Sso security."""
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -13,6 +14,7 @@ User = get_user_model()
 
 @pytest.fixture
 def oidc_provider(db):
+    """Oidc provider."""
     return SSOProvider.objects.create(
         agencia=None,  # Global provider for tests
         name="Test Provider",
@@ -26,7 +28,9 @@ def oidc_provider(db):
 
 
 class TestSSOCallback:
+    """Test Ssocallback."""
     def test_invalid_state_rejected(self, rf, oidc_provider):
+        """Invalid state rejected."""
         request = rf.get("/sso/callback/1/", {"state": "invalid-state", "code": "some-code"})
         request.session = {
             "sso_oauth_state": {"state": "valid-state", "provider_id": oidc_provider.id}
@@ -37,6 +41,7 @@ class TestSSOCallback:
         assert response.content == b"Invalid state (CSRF check failed)"
 
     def test_idp_error_handled_gracefully(self, rf, oidc_provider):
+        """Idp error handled gracefully."""
         request = rf.get("/sso/callback/1/", {"error": "access_denied"})
         request.session = {}
 
@@ -46,6 +51,7 @@ class TestSSOCallback:
 
     def test_auto_provision_false_blocks_new_users(self, rf, db):
         # We need a provider with auto_provision=False
+        """Auto provision false blocks new users."""
         provider = SSOProvider.objects.create(
             agencia=None,
             name="No Provision",
@@ -60,6 +66,7 @@ class TestSSOCallback:
         assert not User.objects.filter(email="newuser@example.com").exists()
 
     def test_email_verified_validation(self, rf, oidc_provider):
+        """Email verified validation."""
         request = rf.get("/sso/callback/1/", {"state": "valid-state", "code": "code"})
         request.session = {
             "sso_oauth_state": {"state": "valid-state", "provider_id": oidc_provider.id}

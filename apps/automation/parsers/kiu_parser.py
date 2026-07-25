@@ -1,3 +1,6 @@
+"""Parser/procesador de kiu parser para la aplicación automation.
+"""
+
 import logging
 import re
 from decimal import Decimal
@@ -332,6 +335,7 @@ class KIUParser(BaseTicketParser):
         return self.extract_passenger_name_robust(text)
 
     def _extract_agency_iata(self, text: str) -> str:
+        # _extract_agency_iata:  extract agency iata. Args: según implementación. Returns: según implementación.
         return self.extract_field(text, [r"IATA\s*[:\s]*([0-9]{8})"])
 
     def _extract_agency_name(self, text: str) -> str:

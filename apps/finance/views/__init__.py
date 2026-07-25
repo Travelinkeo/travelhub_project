@@ -1,3 +1,6 @@
+"""Inicialización del paquete finance.
+"""
+
 from .ai_views import AIAccountingDashboardView
 from .base_views import (
     AuditTimelineView,

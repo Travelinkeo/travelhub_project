@@ -1,3 +1,4 @@
+"""Tests para Splitting pax atomic."""
 from unittest.mock import patch
 
 import pytest
@@ -10,8 +11,10 @@ from core.models import Agencia
 
 @pytest.mark.django_db(transaction=True)
 class TestSplittingPaxAtomic:
+    """Test Splitting Pax Atomic."""
     def test_multi_pax_split_success(self):
         # Setup agency
+        """Multi pax split success."""
         agencia = Agencia.objects.create(nombre="Agencia Test", email_principal="test@agency.com")
 
         # Setup source BoletoImportado
@@ -102,6 +105,7 @@ class TestSplittingPaxAtomic:
             assert mock_safe_delay.call_count >= 1
 
     def test_multi_pax_split_atomic_rollback(self):
+        """Multi pax split atomic rollback."""
         agencia = Agencia.objects.create(
             nombre="Agencia Rollback", email_principal="rollback@agency.com"
         )
@@ -132,6 +136,7 @@ class TestSplittingPaxAtomic:
         original_process = service._process_single_ticket
 
         def side_effect(b, data, client_id):
+            """Side effect."""
             if data.get("passenger_name") == "ISAZA/JUAN" or (
                 b.estado_parseo == "PEN" and b.pk != boleto.pk
             ):

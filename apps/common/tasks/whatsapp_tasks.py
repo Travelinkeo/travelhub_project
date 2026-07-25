@@ -1,3 +1,6 @@
+"""Tareas asíncronas (Celery) para la aplicación common.
+"""
+
 import logging
 
 from celery import shared_task
@@ -18,6 +21,7 @@ logger = logging.getLogger(__name__)
 def enviar_notificacion_whatsapp_task(
     self, numero_cliente, mensaje, email_cliente=None, media_url=None, file_name=None, agencia_id=None, **kwargs
 ):
+    # enviar_notificacion_whatsapp_task: Envía ar notificacion whatsapp task. Args: datos del mensaje. Returns: resultado del envío.
     from django.core.mail import send_mail
 
     from apps.communications.services.telegram_unified import enviar_alerta_telegram
@@ -100,6 +104,7 @@ def enviar_notificacion_whatsapp_task(
     soft_time_limit=100,
 )
 def send_whatsapp_task(self, sender_id, recipient_number, message_text, agencia_id=None):
+    # send_whatsapp_task: Envía  whatsapp task. Args: datos del mensaje. Returns: resultado del envío.
     from apps.communications.services.whatsapp_unified import enviar_whatsapp
 
     try:
@@ -120,6 +125,7 @@ def send_whatsapp_task(self, sender_id, recipient_number, message_text, agencia_
     soft_time_limit=100,
 )
 def send_factura_to_whatsapp_task(self, factura_id):
+    # send_factura_to_whatsapp_task: Envía  factura to whatsapp task. Args: datos del mensaje. Returns: resultado del envío.
     from apps.finance.models import Factura
     from apps.finance.services.factura_service import FacturaService
 
@@ -143,6 +149,7 @@ def send_factura_to_whatsapp_task(self, factura_id):
     soft_time_limit=100,
 )
 def download_twilio_media_task(self, media_url):
+    # download_twilio_media_task: Download twilio media task. Args: según implementación. Returns: según implementación.
     from apps.automation.services.voice_parser_service import (
         download_twilio_media,
         extract_quote_intent_from_audio,
@@ -170,6 +177,7 @@ def download_twilio_media_task(self, media_url):
     soft_time_limit=50,
 )
 def send_whatsapp_meta_task(self, numero_cliente, mensaje, agencia_id=None):
+    # send_whatsapp_meta_task: Envía  whatsapp meta task. Args: datos del mensaje. Returns: resultado del envío.
     from apps.communications.services.whatsapp_unified import enviar_mensaje_meta_api
 
     try:

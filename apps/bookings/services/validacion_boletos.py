@@ -13,6 +13,7 @@ class ValidadorBoleto:
     """Valida boletos antes de enviar al cliente"""
 
     def __init__(self, boleto):
+        # __init__: Inicializa una nueva instancia de ValidadorBoleto. Args: parámetros de inicialización.
         self.boleto = boleto
         self.errores = []
         self.advertencias = []

@@ -1,3 +1,6 @@
+"""Servicio de invoice schemas para la aplicación automation.
+"""
+
 from pydantic import BaseModel, Field
 
 

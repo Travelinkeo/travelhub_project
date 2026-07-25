@@ -29,6 +29,7 @@ class Amenity(models.Model):
         verbose_name_plural = _("Servicios/Amenidades")
 
     def __str__(self):
+        # __str__: Representación en string del objeto. Returns: str.
         return self.nombre
 
 
@@ -64,6 +65,7 @@ class TarifarioProveedor(AgenciaMixin, models.Model):
         ordering = ["-fecha_carga"]
 
     def __str__(self):
+        # __str__: Representación en string del objeto. Returns: str.
         return f"{self.proveedor.nombre} - {self.nombre}"
 
 
@@ -90,6 +92,7 @@ class ComisionOverrideAerolinea(models.Model):
         unique_together = ("tarifario", "aerolinea")
 
     def __str__(self):
+        # __str__: Representación en string del objeto. Returns: str.
         return f"{self.aerolinea.nombre}: {self.comision_porcentaje}%"
 
 
@@ -176,6 +179,7 @@ class HotelTarifario(AgenciaMixin, models.Model):
         unique_together = ("agencia", "slug")
 
     def save(self, *args, **kwargs):
+        # save: Guarda/persiste . Args: datos a guardar. Returns: objeto guardado.
         if not self.slug:
             base_slug = slugify(f"{self.nombre}-{self.destino}")
             slug = base_slug
@@ -192,6 +196,7 @@ class HotelTarifario(AgenciaMixin, models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
+        # __str__: Representación en string del objeto. Returns: str.
         return f"{self.nombre} ({self.destino})"
 
 
@@ -218,6 +223,7 @@ class ImagenHotel(models.Model):
         verbose_name_plural = _("Imágenes de Hoteles")
 
     def __str__(self):
+        # __str__: Representación en string del objeto. Returns: str.
         return f"Foto {self.hotel.nombre} - {self.tipo}"
 
 
@@ -250,6 +256,7 @@ class TipoHabitacion(models.Model):
         ordering = ["hotel", "nombre"]
 
     def __str__(self):
+        # __str__: Representación en string del objeto. Returns: str.
         return f"{self.hotel.nombre} - {self.nombre}"
 
 
@@ -310,4 +317,5 @@ class TarifaHabitacion(models.Model):
         ordering = ["tipo_habitacion", "fecha_inicio"]
 
     def __str__(self):
+        # __str__: Representación en string del objeto. Returns: str.
         return f"{self.tipo_habitacion} - {self.fecha_inicio:%d/%m} al {self.fecha_fin:%d/%m}"

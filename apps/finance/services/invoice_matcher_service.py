@@ -1,3 +1,6 @@
+"""Servicio de invoice matcher service para la aplicación finance.
+"""
+
 import logging
 from decimal import Decimal
 

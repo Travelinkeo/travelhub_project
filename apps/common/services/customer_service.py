@@ -1,3 +1,6 @@
+"""Servicio de customer service para la aplicación common.
+"""
+
 import logging
 import re
 from hashlib import sha256
@@ -7,12 +10,14 @@ from django.db import models
 
 # Use helper function to get Cliente and Pasajero dynamically to avoid circular imports during module loading
 def get_cliente_model():
+    # get_cliente_model: Obtiene/recupera cliente model. Args: según implementación. Returns: dato solicitado.
     from django.apps import apps
 
     return apps.get_model("crm", "Cliente")
 
 
 def get_pasajero_model():
+    # get_pasajero_model: Obtiene/recupera pasajero model. Args: según implementación. Returns: dato solicitado.
     from django.apps import apps
 
     return apps.get_model("crm", "Pasajero")
@@ -22,6 +27,8 @@ logger = logging.getLogger(__name__)
 
 
 class CustomerService:
+    """Servicio para customer. Uso: instanciar según necesidad del dominio.
+    """
     @staticmethod
     def identify_or_create(data, agencia, forced_cliente_id=None):
         """

@@ -1,3 +1,6 @@
+"""Serializadores para la API de bookings.
+"""
+
 from rest_framework import serializers
 
 from apps.bookings.models import (
@@ -32,7 +35,9 @@ from apps.finance.serializers import MonedaSerializer
 # --- Original Bookings Serializers ---
 
 
-class TarifaHabitacionSerializer(serializers.ModelSerializer):
+class TarifaHabitacionSerializer:
+    """Serializador para tarifahabitacion. Uso: instanciar según necesidad del dominio.
+    """
     class Meta:
         model = TarifaHabitacion
         fields = [
@@ -48,7 +53,9 @@ class TarifaHabitacionSerializer(serializers.ModelSerializer):
         ]
 
 
-class TipoHabitacionSerializer(serializers.ModelSerializer):
+class TipoHabitacionSerializer:
+    """Serializador para tipohabitacion. Uso: instanciar según necesidad del dominio.
+    """
     tarifas = TarifaHabitacionSerializer(many=True, read_only=True)
 
     class Meta:
@@ -64,7 +71,9 @@ class TipoHabitacionSerializer(serializers.ModelSerializer):
         ]
 
 
-class HotelTarifarioSerializer(serializers.ModelSerializer):
+class HotelTarifarioSerializer:
+    """Serializador para hoteltarifario. Uso: instanciar según necesidad del dominio.
+    """
     tipos_habitacion = TipoHabitacionSerializer(many=True, read_only=True)
     regimen_display = serializers.CharField(source="get_regimen_default_display", read_only=True)
 
@@ -85,7 +94,9 @@ class HotelTarifarioSerializer(serializers.ModelSerializer):
         ]
 
 
-class TarifarioProveedorSerializer(serializers.ModelSerializer):
+class TarifarioProveedorSerializer:
+    """Serializador para tarifarioproveedor. Uso: instanciar según necesidad del dominio.
+    """
     proveedor_nombre = serializers.CharField(source="proveedor.nombre", read_only=True)
 
     class Meta:
@@ -103,7 +114,9 @@ class TarifarioProveedorSerializer(serializers.ModelSerializer):
         ]
 
 
-class CotizacionHotelSerializer(serializers.Serializer):
+class CotizacionHotelSerializer:
+    """Serializador para cotizacionhotel. Uso: instanciar según necesidad del dominio.
+    """
     destino = serializers.CharField(required=True)
     fecha_entrada = serializers.DateField(required=True)
     fecha_salida = serializers.DateField(required=True)
@@ -113,7 +126,9 @@ class CotizacionHotelSerializer(serializers.Serializer):
     )
 
 
-class ResultadoCotizacionSerializer(serializers.Serializer):
+class ResultadoCotizacionSerializer:
+    """Serializador para resultadocotizacion. Uso: instanciar según necesidad del dominio.
+    """
     hotel = serializers.CharField()
     destino = serializers.CharField()
     regimen = serializers.CharField()
@@ -127,7 +142,9 @@ class ResultadoCotizacionSerializer(serializers.Serializer):
 # --- Bookings Serializers Transferred from core ---
 
 
-class ProveedorSerializer(serializers.ModelSerializer):
+class ProveedorSerializer:
+    """Serializador para proveedor. Uso: instanciar según necesidad del dominio.
+    """
     class Meta:
         model = Proveedor
         fields = [
@@ -164,13 +181,16 @@ class ProveedorSerializer(serializers.ModelSerializer):
         read_only_fields = ["agencia", "is_deleted", "deleted_at"]
 
 
-class ComisionProveedorServicioSerializer(serializers.ModelSerializer):
+class ComisionProveedorServicioSerializer:
+    """Serializador para comisionproveedorservicio. Uso: instanciar según necesidad del dominio.
+    """
     tipo_servicio_display = serializers.CharField(
         source="get_tipo_servicio_display", read_only=True, default=""
     )
     moneda_codigo = serializers.SerializerMethodField()
 
     def get_moneda_codigo(self, obj):
+        # get_moneda_codigo: Obtiene/recupera moneda codigo. Args: según implementación. Returns: dato solicitado.
         return obj.moneda.codigo_iso if obj.moneda else ""
 
     class Meta:
@@ -189,7 +209,9 @@ class ComisionProveedorServicioSerializer(serializers.ModelSerializer):
         extra_kwargs = {"proveedor": {"required": True}, "tipo_servicio": {"required": True}}
 
 
-class ProductoServicioSerializer(serializers.ModelSerializer):
+class ProductoServicioSerializer:
+    """Serializador para productoservicio. Uso: instanciar según necesidad del dominio.
+    """
     tipo_producto_display = serializers.CharField(
         source="get_tipo_producto_display", read_only=True
     )
@@ -205,7 +227,9 @@ class ProductoServicioSerializer(serializers.ModelSerializer):
         ]
 
 
-class BoletoImportadoSerializer(serializers.ModelSerializer):
+class BoletoImportadoSerializer:
+    """Serializador para boletoimportado. Uso: instanciar según necesidad del dominio.
+    """
     formato_detectado_display = serializers.CharField(
         source="get_formato_detectado_display", read_only=True
     )
@@ -272,6 +296,7 @@ class BoletoImportadoSerializer(serializers.ModelSerializer):
         ]
 
     def get_archivo_pdf_generado(self, obj):
+        # get_archivo_pdf_generado: Obtiene/recupera archivo pdf generado. Args: según implementación. Returns: dato solicitado.
         if obj.archivo_pdf_generado:
             from django.conf import settings
 
@@ -285,6 +310,7 @@ class BoletoImportadoSerializer(serializers.ModelSerializer):
         return None
 
     def create(self, validated_data):
+        # create: Create. Args: según implementación. Returns: según implementación.
         if not validated_data.get("archivo_boleto"):
             validated_data["estado_parseo"] = BoletoImportado.EstadoParseo.COMPLETADO
 
@@ -338,7 +364,9 @@ class BoletoImportadoSerializer(serializers.ModelSerializer):
         return instance
 
 
-class ItemVentaSerializer(serializers.ModelSerializer):
+class ItemVentaSerializer:
+    """Serializador para itemventa. Uso: instanciar según necesidad del dominio.
+    """
     producto_servicio_detalle = ProductoServicioSerializer(
         source="producto_servicio", read_only=True
     )
@@ -392,7 +420,9 @@ class ItemVentaSerializer(serializers.ModelSerializer):
         }
 
 
-class SegmentoVueloSerializer(serializers.ModelSerializer):
+class SegmentoVueloSerializer:
+    """Serializador para segmentovuelo. Uso: instanciar según necesidad del dominio.
+    """
     origen_detalle = CiudadSerializer(source="origen", read_only=True)
     destino_detalle = CiudadSerializer(source="destino", read_only=True)
 
@@ -416,7 +446,9 @@ class SegmentoVueloSerializer(serializers.ModelSerializer):
         extra_kwargs = {"venta": {"write_only": True, "required": True}}
 
 
-class AlojamientoReservaSerializer(serializers.ModelSerializer):
+class AlojamientoReservaSerializer:
+    """Serializador para alojamientoreserva. Uso: instanciar según necesidad del dominio.
+    """
     ciudad_detalle = CiudadSerializer(source="ciudad", read_only=True)
     proveedor_detalle = serializers.StringRelatedField(source="proveedor", read_only=True)
 
@@ -439,7 +471,9 @@ class AlojamientoReservaSerializer(serializers.ModelSerializer):
         extra_kwargs = {"venta": {"write_only": True, "required": True}}
 
 
-class TrasladoServicioSerializer(serializers.ModelSerializer):
+class TrasladoServicioSerializer:
+    """Serializador para trasladoservicio. Uso: instanciar según necesidad del dominio.
+    """
     proveedor_detalle = serializers.StringRelatedField(source="proveedor", read_only=True)
     tipo_traslado_display = serializers.CharField(
         source="get_tipo_traslado_display", read_only=True
@@ -463,7 +497,9 @@ class TrasladoServicioSerializer(serializers.ModelSerializer):
         extra_kwargs = {"venta": {"write_only": True, "required": True}}
 
 
-class ActividadServicioSerializer(serializers.ModelSerializer):
+class ActividadServicioSerializer:
+    """Serializador para actividadservicio. Uso: instanciar según necesidad del dominio.
+    """
     proveedor_detalle = serializers.StringRelatedField(source="proveedor", read_only=True)
 
     class Meta:
@@ -483,7 +519,9 @@ class ActividadServicioSerializer(serializers.ModelSerializer):
         extra_kwargs = {"venta": {"write_only": True, "required": True}}
 
 
-class AlquilerAutoReservaSerializer(serializers.ModelSerializer):
+class AlquilerAutoReservaSerializer:
+    """Serializador para alquilerautoreserva. Uso: instanciar según necesidad del dominio.
+    """
     margen_amount = serializers.DecimalField(max_digits=12, decimal_places=2, read_only=True)
     margen_pct = serializers.SerializerMethodField()
 
@@ -515,10 +553,13 @@ class AlquilerAutoReservaSerializer(serializers.ModelSerializer):
         read_only_fields = ["agencia", "is_deleted", "deleted_at"]
 
     def get_margen_pct(self, obj):
+        # get_margen_pct: Obtiene/recupera margen pct. Args: según implementación. Returns: dato solicitado.
         return float(obj.margen_pct) if obj.margen_pct is not None else None
 
 
-class EventoServicioSerializer(serializers.ModelSerializer):
+class EventoServicioSerializer:
+    """Serializador para eventoservicio. Uso: instanciar según necesidad del dominio.
+    """
     margen_amount = serializers.DecimalField(max_digits=12, decimal_places=2, read_only=True)
     margen_pct = serializers.SerializerMethodField()
 
@@ -546,10 +587,13 @@ class EventoServicioSerializer(serializers.ModelSerializer):
         read_only_fields = ["agencia", "is_deleted", "deleted_at"]
 
     def get_margen_pct(self, obj):
+        # get_margen_pct: Obtiene/recupera margen pct. Args: según implementación. Returns: dato solicitado.
         return float(obj.margen_pct) if obj.margen_pct is not None else None
 
 
-class CircuitoDiaSerializer(serializers.ModelSerializer):
+class CircuitoDiaSerializer:
+    """Serializador para circuitodia. Uso: instanciar según necesidad del dominio.
+    """
     class Meta:
         model = CircuitoDia
         fields = [
@@ -566,7 +610,9 @@ class CircuitoDiaSerializer(serializers.ModelSerializer):
         read_only_fields = ["agencia"]
 
 
-class CircuitoTuristicoSerializer(serializers.ModelSerializer):
+class CircuitoTuristicoSerializer:
+    """Serializador para circuitoturistico. Uso: instanciar según necesidad del dominio.
+    """
     dias = CircuitoDiaSerializer(many=True, read_only=True)
     margen_amount = serializers.DecimalField(max_digits=12, decimal_places=2, read_only=True)
     margen_pct = serializers.SerializerMethodField()
@@ -594,10 +640,13 @@ class CircuitoTuristicoSerializer(serializers.ModelSerializer):
         read_only_fields = ["agencia"]
 
     def get_margen_pct(self, obj):
+        # get_margen_pct: Obtiene/recupera margen pct. Args: según implementación. Returns: dato solicitado.
         return float(obj.margen_pct) if obj.margen_pct is not None else None
 
 
-class PaqueteAereoSerializer(serializers.ModelSerializer):
+class PaqueteAereoSerializer:
+    """Serializador para paqueteaereo. Uso: instanciar según necesidad del dominio.
+    """
     margen_amount = serializers.DecimalField(max_digits=12, decimal_places=2, read_only=True)
     margen_pct = serializers.SerializerMethodField()
 
@@ -623,10 +672,13 @@ class PaqueteAereoSerializer(serializers.ModelSerializer):
         read_only_fields = ["agencia"]
 
     def get_margen_pct(self, obj):
+        # get_margen_pct: Obtiene/recupera margen pct. Args: según implementación. Returns: dato solicitado.
         return float(obj.margen_pct) if obj.margen_pct is not None else None
 
 
-class ServicioAdicionalDetalleSerializer(serializers.ModelSerializer):
+class ServicioAdicionalDetalleSerializer:
+    """Serializador para servicioadicionaldetalle. Uso: instanciar según necesidad del dominio.
+    """
     margen_amount = serializers.DecimalField(max_digits=12, decimal_places=2, read_only=True)
     margen_pct = serializers.SerializerMethodField()
 
@@ -653,10 +705,13 @@ class ServicioAdicionalDetalleSerializer(serializers.ModelSerializer):
         read_only_fields = ["agencia"]
 
     def get_margen_pct(self, obj):
+        # get_margen_pct: Obtiene/recupera margen pct. Args: según implementación. Returns: dato solicitado.
         return float(obj.margen_pct) if obj.margen_pct is not None else None
 
 
-class FeeVentaSerializer(serializers.ModelSerializer):
+class FeeVentaSerializer:
+    """Serializador para feeventa. Uso: instanciar según necesidad del dominio.
+    """
     tipo_fee_display = serializers.CharField(source="get_tipo_fee_display", read_only=True)
     moneda_detalle = MonedaSerializer(source="moneda", read_only=True)
 
@@ -682,7 +737,9 @@ class FeeVentaSerializer(serializers.ModelSerializer):
         }
 
 
-class PagoVentaSerializer(serializers.ModelSerializer):
+class PagoVentaSerializer:
+    """Serializador para pagoventa. Uso: instanciar según necesidad del dominio.
+    """
     metodo_display = serializers.CharField(source="get_metodo_display", read_only=True)
     moneda_detalle = MonedaSerializer(source="moneda", read_only=True)
 
@@ -712,7 +769,9 @@ class PagoVentaSerializer(serializers.ModelSerializer):
         }
 
 
-class VentaSerializer(serializers.ModelSerializer):
+class VentaSerializer:
+    """Serializador para venta. Uso: instanciar según necesidad del dominio.
+    """
     items_venta = ItemVentaSerializer(many=True)
     segmentos_vuelo = SegmentoVueloSerializer(many=True, read_only=True)
     alojamientos = AlojamientoReservaSerializer(many=True, read_only=True)
@@ -808,6 +867,7 @@ class VentaSerializer(serializers.ModelSerializer):
         }
 
     def create(self, validated_data):
+        # create: Create. Args: según implementación. Returns: según implementación.
         import logging
 
         logger = logging.getLogger(__name__)
@@ -971,6 +1031,7 @@ class VentaSerializer(serializers.ModelSerializer):
         return venta
 
     def update(self, instance, validated_data):
+        # update: Update. Args: según implementación. Returns: según implementación.
         items_data = validated_data.pop("items_venta", None)
         for attr in [
             "cliente",
@@ -1008,7 +1069,9 @@ class VentaSerializer(serializers.ModelSerializer):
         return instance
 
 
-class VentaParseMetadataSerializer(serializers.ModelSerializer):
+class VentaParseMetadataSerializer:
+    """Serializador para ventaparsemetadata. Uso: instanciar según necesidad del dominio.
+    """
     class Meta:
         model = VentaParseMetadata
         fields = [
@@ -1030,7 +1093,9 @@ class VentaParseMetadataSerializer(serializers.ModelSerializer):
         read_only_fields = ("creado",)
 
 
-class ItinerarioSegmentoSerializer(serializers.Serializer):
+class ItinerarioSegmentoSerializer:
+    """Serializador para itinerariosegmento. Uso: instanciar según necesidad del dominio.
+    """
     origen_iata = serializers.CharField(max_length=3, required=False)
     destino_iata = serializers.CharField(max_length=3, required=False)
     numero_vuelo = serializers.CharField(max_length=10, required=False)
@@ -1040,7 +1105,9 @@ class ItinerarioSegmentoSerializer(serializers.Serializer):
         fields = ["origen_iata", "destino_iata", "numero_vuelo", "fecha_salida"]
 
 
-class GeminiBoletoParseadoSerializer(serializers.Serializer):
+class GeminiBoletoParseadoSerializer:
+    """Serializador para geminiboletoparseado. Uso: instanciar según necesidad del dominio.
+    """
     localizador_pnr = serializers.CharField(max_length=10)
     nombre_pasajero_completo = serializers.CharField(max_length=150)
     numero_boleto = serializers.CharField(max_length=50, required=False, allow_null=True)
@@ -1055,4 +1122,5 @@ class GeminiBoletoParseadoSerializer(serializers.Serializer):
     itinerario = ItinerarioSegmentoSerializer(many=True, required=False)
 
     def create(self, validated_data):
+        # create: Create. Args: según implementación. Returns: según implementación.
         return validated_data

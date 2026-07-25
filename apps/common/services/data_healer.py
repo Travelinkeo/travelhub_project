@@ -1,3 +1,6 @@
+"""Servicio de data healer para la aplicación common.
+"""
+
 import logging
 from typing import Any, TypeVar
 

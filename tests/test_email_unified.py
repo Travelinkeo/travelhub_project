@@ -16,6 +16,7 @@ class TestEmailUnified:
     @patch("apps.communications.services.email_unified.resend.Emails.send")
     @patch.dict("os.environ", {"RESEND_API_KEY": "test_key"})
     def test_send_custom_email_resend_success(self, mock_resend, mock_render):
+        """Send custom email resend success."""
         import apps.communications.services.email_unified as email_mod
 
         email_mod.RESEND_API_KEY = "test_key"
@@ -29,6 +30,7 @@ class TestEmailUnified:
     @patch("apps.communications.services.email_unified.render_to_string")
     @patch("apps.communications.services.email_unified.send_mail")
     def test_send_custom_email_django_fallback(self, mock_send, mock_render, settings):
+        """Send custom email django fallback."""
         import apps.communications.services.email_unified as email_mod
 
         original_key = email_mod.RESEND_API_KEY
@@ -42,11 +44,13 @@ class TestEmailUnified:
             email_mod.RESEND_API_KEY = original_key
 
     def test_send_custom_email_no_recipient(self):
+        """Send custom email no recipient."""
         result = send_custom_email("Test", None, "template.html", {})
         assert result is False
 
     @patch("apps.communications.services.email_unified.EmailMultiAlternatives")
     def test_enviar_email_generico_success(self, mock_email_class):
+        """Enviar email generico success."""
         mock_email = Mock()
         mock_email_class.return_value = mock_email
 
@@ -57,6 +61,7 @@ class TestEmailUnified:
 
     @patch("apps.communications.services.email_unified.EmailMultiAlternatives")
     def test_enviar_email_generico_failure(self, mock_email_class):
+        """Enviar email generico failure."""
         mock_email_class.side_effect = Exception("SMTP error")
 
         result = enviar_email_generico("test@example.com", "Subject", "Message")
@@ -68,6 +73,7 @@ class TestEmailMonitorService:
     """Tests para EmailMonitorService"""
 
     def test_init_default_values(self):
+        """Init default values."""
         agencia = Mock()
         agencia.correo_emisiones = "test@example.com"
         agencia.password_app_correo = "password"
@@ -82,6 +88,7 @@ class TestEmailMonitorService:
         assert service.process_all is False
 
     def test_init_custom_values(self):
+        """Init custom values."""
         agencia = Mock()
         agencia.correo_emisiones = "test@example.com"
         agencia.password_app_correo = "password"
@@ -104,6 +111,7 @@ class TestEmailMonitorService:
         assert service.process_all is True
 
     def test_procesar_una_vez_no_credentials(self):
+        """Procesar una vez no credentials."""
         agencia = Mock()
         agencia.correo_emisiones = None
         agencia.password_app_correo = None
@@ -116,6 +124,7 @@ class TestEmailMonitorService:
 
     @patch("apps.communications.services.email_unified.imaplib.IMAP4_SSL")
     def test_procesar_correos_dynamic_host_port(self, mock_imap_ssl):
+        """Procesar correos dynamic host port."""
         agencia = Mock()
         agencia.correo_emisiones = "test@example.com"
         agencia.password_app_correo = "password"
@@ -143,6 +152,7 @@ class TestEmailMonitorService:
 
     @patch("apps.communications.services.email_unified.imaplib.IMAP4_SSL")
     def test_procesar_correos_fallback_host_port(self, mock_imap_ssl):
+        """Procesar correos fallback host port."""
         agencia = Mock()
         agencia.correo_emisiones = "test@example.com"
         agencia.password_app_correo = "password"
@@ -163,6 +173,7 @@ class TestEmailMonitorService:
         mock_imap_ssl.assert_called_once_with("imap.gmail.com", 993)
 
     def test_tiene_pdf_adjunto_no_multipart(self):
+        """Tiene pdf adjunto no multipart."""
         agencia = Mock()
         agencia.correo_emisiones = "test@example.com"
         agencia.password_app_correo = "password"
@@ -175,6 +186,7 @@ class TestEmailMonitorService:
         assert result is False
 
     def test_extraer_texto_no_multipart(self):
+        """Extraer texto no multipart."""
         agencia = Mock()
         agencia.correo_emisiones = "test@example.com"
         agencia.password_app_correo = "password"
@@ -188,6 +200,7 @@ class TestEmailMonitorService:
         assert result == "Test text content"
 
     def test_extraer_html_no_multipart_not_html(self):
+        """Extraer html no multipart not html."""
         agencia = Mock()
         agencia.correo_emisiones = "test@example.com"
         agencia.password_app_correo = "password"
@@ -203,6 +216,7 @@ class TestEmailMonitorService:
     @patch("apps.communications.services.email_unified.pypdf.PdfReader")
     def test_es_pdf_boleto_valido_success(self, mock_pdf_reader):
         # Configurar el lector simulado para retornar texto con palabras clave fuertes y de soporte
+        """Es pdf boleto valido success."""
         mock_page = MagicMock()
         mock_page.extract_text.return_value = "PASSENGER ITINERARY RECORD PNR: ASD123"
 
@@ -218,6 +232,7 @@ class TestEmailMonitorService:
     @patch("apps.communications.services.email_unified.pypdf.PdfReader")
     def test_es_pdf_boleto_valido_noise(self, mock_pdf_reader):
         # Configurar el lector para retornar texto sin palabras clave de boletos
+        """Es pdf boleto valido noise."""
         mock_page = MagicMock()
         mock_page.extract_text.return_value = (
             "This is a invoice billing document for monthly subscription of service."
@@ -236,6 +251,7 @@ class TestEmailMonitorService:
     @patch("apps.bookings.models.BoletoImportado")
     def test_procesar_boleto_pdf_skips_noise(self, mock_boleto_class, mock_es_pdf_valido):
         # Configurar el filtro anti-ruido para retornar False
+        """Procesar boleto pdf skips noise."""
         mock_es_pdf_valido.return_value = False
 
         agencia = Mock()

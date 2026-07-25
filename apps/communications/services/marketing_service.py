@@ -1,3 +1,6 @@
+"""Servicio de marketing service para la aplicación communications.
+"""
+
 import base64
 import io
 import logging
@@ -17,6 +20,8 @@ logger = logging.getLogger(__name__)
 
 
 class MarketingService:
+    """Servicio para marketing. Uso: instanciar según necesidad del dominio.
+    """
     @staticmethod
     def generate_instagram_story(hotel_id: int, agencia_id: int | None = None) -> io.BytesIO:
         """
@@ -103,6 +108,7 @@ class MarketingService:
 
         # Fonts (Try to load system fonts or fallback)
         def load_font(size):
+            # load_font: Carga  font. Args: fuente/origen. Returns: datos cargados.
             try:
                 # Windows standard path
                 return ImageFont.truetype("arial.ttf", size)

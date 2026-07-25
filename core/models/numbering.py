@@ -30,6 +30,7 @@ class NumberingSequence(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
+        """Meta definición del modelo."""
         app_label = "core"
         verbose_name = "Secuencia numérica"
         verbose_name_plural = "Secuencias numéricas"

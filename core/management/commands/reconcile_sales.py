@@ -11,14 +11,17 @@ logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
+    """Comando de gestión personalizado."""
     help = "Reconcilia un reporte de ventas de Travelinkeo con los boletos en la base de datos."
 
     def add_arguments(self, parser: CommandParser) -> None:
+        """Método: add arguments."""
         parser.add_argument(
             "report_path", type=str, help="La ruta absoluta al archivo PDF del reporte."
         )
 
     def handle(self, *args, **options):
+        """Método: handle."""
         report_path = options["report_path"]
         self.stdout.write(
             self.style.SUCCESS(f"Iniciando conciliación para el reporte: {report_path}")

@@ -1,3 +1,6 @@
+"""Servicio de libro compras para la aplicación finance.
+"""
+
 import csv
 import logging
 from decimal import Decimal

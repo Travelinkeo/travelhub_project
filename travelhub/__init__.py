@@ -1,6 +1,4 @@
-"""Inicialización de TravelHub"""
-
-# Cargar Celery app para que Django lo reconozca
+"""Inicialización de TravelHub — Configura la app Celery para que Django la reconozca al iniciar."""
 try:
     from .celery import app as celery_app  # noqa: E402
 

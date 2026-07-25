@@ -1,10 +1,15 @@
+"""Modelos de base de datos para la aplicación cms.
+"""
+
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from core.api import AgenciaMixin
 
 
-class Articulo(AgenciaMixin, models.Model):
+class Articulo:
+    """Clase Articulo. Uso: según contexto de la aplicación.
+    """
     class EstadoArticulo(models.TextChoices):
         BORRADOR = "BOR", _("Borrador")
         PUBLICADO = "PUB", _("Publicado")
@@ -36,10 +41,13 @@ class Articulo(AgenciaMixin, models.Model):
         ordering = ["-fecha_creacion"]
 
     def __str__(self):
+        # __str__: Representación en string del objeto. Returns: str.
         return self.titulo
 
 
-class GuiaDestino(AgenciaMixin, models.Model):
+class GuiaDestino:
+    """Clase GuiaDestino. Uso: según contexto de la aplicación.
+    """
     nombre = models.CharField(_("Nombre del Destino"), max_length=100)
     descripcion = models.TextField(_("Descripción General"))
     mejor_epoca = models.CharField(_("Mejor época para viajar"), max_length=255, blank=True)
@@ -55,10 +63,13 @@ class GuiaDestino(AgenciaMixin, models.Model):
         verbose_name_plural = _("Guías de Destino")
 
     def __str__(self):
+        # __str__: Representación en string del objeto. Returns: str.
         return self.nombre
 
 
-class PostRedesSociales(AgenciaMixin, models.Model):
+class PostRedesSociales:
+    """Clase PostRedesSociales. Uso: según contexto de la aplicación.
+    """
     class Plataforma(models.TextChoices):
         INSTAGRAM = "INS", "Instagram"
         FACEBOOK = "FAC", "Facebook"
@@ -80,10 +91,13 @@ class PostRedesSociales(AgenciaMixin, models.Model):
         verbose_name_plural = _("Posts en Redes Sociales")
 
     def __str__(self):
+        # __str__: Representación en string del objeto. Returns: str.
         return f"{self.get_plataforma_display()} - {self.articulo.titulo if self.articulo else 'Promo'}"
 
 
-class KBCategory(AgenciaMixin, models.Model):
+class KBCategory:
+    """Clase KBCategory. Uso: según contexto de la aplicación.
+    """
     name = models.CharField(_("Nombre"), max_length=100)
     slug = models.SlugField(max_length=120)
     description = models.TextField(_("Descripción"), blank=True)
@@ -97,10 +111,13 @@ class KBCategory(AgenciaMixin, models.Model):
         unique_together = [("agencia", "slug")]
 
     def __str__(self):
+        # __str__: Representación en string del objeto. Returns: str.
         return self.name
 
 
-class KBArticle(AgenciaMixin, models.Model):
+class KBArticle:
+    """Clase KBArticle. Uso: según contexto de la aplicación.
+    """
     title = models.CharField(_("Título"), max_length=255)
     slug = models.SlugField(max_length=280)
     content = models.TextField(_("Contenido (Markdown)"))
@@ -130,4 +147,5 @@ class KBArticle(AgenciaMixin, models.Model):
         ]
 
     def __str__(self):
+        # __str__: Representación en string del objeto. Returns: str.
         return self.title

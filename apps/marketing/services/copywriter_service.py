@@ -1,3 +1,6 @@
+"""Servicio de copywriter service para la aplicación marketing.
+"""
+
 import logging
 from typing import Any
 
@@ -5,12 +8,14 @@ from pydantic import BaseModel, Field
 
 
 def _get_ai_engine():
+    # _get_ai_engine:  get ai engine. Args: según implementación. Returns: según implementación.
     from django.utils.module_loading import import_string
 
     return import_string("apps.automation.services.ai_engine.ai_engine")
 
 
 def _get_hotel_tarifario_model():
+    # _get_hotel_tarifario_model:  get hotel tarifario model. Args: según implementación. Returns: según implementación.
     from django.apps import apps
 
     return apps.get_model("bookings", "HotelTarifario")
@@ -19,12 +24,16 @@ def _get_hotel_tarifario_model():
 logger = logging.getLogger(__name__)
 
 
-class CaptionVariant(BaseModel):
+class CaptionVariant:
+    """Clase CaptionVariant. Uso: según contexto de la aplicación.
+    """
     tone_name: str = Field(description="Nombre del tono (Ej: Emocional, Enganchador, Minimalista)")
     text: str = Field(description="El texto del caption")
 
 
-class SocialMediaPackage(BaseModel):
+class SocialMediaPackage:
+    """Clase SocialMediaPackage. Uso: según contexto de la aplicación.
+    """
     variants: list[CaptionVariant] = Field(description="3 variaciones del caption")
     hashtags: list[str] = Field(description="Lista de hashtags optimizados para alcance")
     best_time_to_post: str = Field(description="Recomendación de horario (Ej: Hoy, 6:30 PM)")
@@ -37,6 +46,7 @@ class CopywriterService:
     """
 
     def __init__(self):
+        # __init__: Inicializa una nueva instancia de CopywriterService. Args: parámetros de inicialización.
         pass
 
     def generate_caption(self, hotel_id, tone="PROFESIONAL_AVENTURERO"):

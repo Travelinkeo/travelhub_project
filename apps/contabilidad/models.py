@@ -1,3 +1,6 @@
+"""Modelos de base de datos para la aplicación contabilidad.
+"""
+
 import datetime
 
 from django.contrib.contenttypes.fields import GenericForeignKey
@@ -8,27 +11,37 @@ from core.models.base import AgenciaMixin
 
 
 # Stub for migration compatibility — will be removed after squashing
-class DetalleAsiento(models.Model):
+class DetalleAsiento:
+    """Clase DetalleAsiento. Uso: según contexto de la aplicación.
+    """
     class Meta:
         managed = False
 
 
-class PlanContable(models.Model):
+class PlanContable:
+    """Clase PlanContable. Uso: según contexto de la aplicación.
+    """
     class Meta:
         managed = False
 
 
-class ItemLiquidacion(models.Model):
+class ItemLiquidacion:
+    """Clase ItemLiquidacion. Uso: según contexto de la aplicación.
+    """
     class Meta:
         managed = False
 
 
-class LiquidacionProveedor(models.Model):
+class LiquidacionProveedor:
+    """Clase LiquidacionProveedor. Uso: según contexto de la aplicación.
+    """
     class Meta:
         managed = False
 
 
-class CuentaContable(AgenciaMixin, models.Model):
+class CuentaContable:
+    """Clase CuentaContable. Uso: según contexto de la aplicación.
+    """
     codigo = models.CharField(max_length=30)
     nombre = models.CharField(max_length=100)
 
@@ -56,10 +69,13 @@ class CuentaContable(AgenciaMixin, models.Model):
         unique_together = [("agencia", "codigo")]
 
     def __str__(self):
+        # __str__: Representación en string del objeto. Returns: str.
         return f"{self.codigo} — {self.nombre}"
 
 
-class AsientoContable(AgenciaMixin, models.Model):
+class AsientoContable:
+    """Clase AsientoContable. Uso: según contexto de la aplicación.
+    """
     fecha_contable = models.DateField(default=datetime.date.today)
     glosa = models.CharField(max_length=255, blank=True, default="")
 
@@ -94,10 +110,13 @@ class AsientoContable(AgenciaMixin, models.Model):
         ]
 
     def __str__(self):
+        # __str__: Representación en string del objeto. Returns: str.
         return f"Asiento #{self.pk} — {self.glosa[:60]}"
 
 
-class MovimientoContable(AgenciaMixin, models.Model):
+class MovimientoContable:
+    """Clase MovimientoContable. Uso: según contexto de la aplicación.
+    """
     asiento = models.ForeignKey(
         AsientoContable,
         on_delete=models.CASCADE,
@@ -123,6 +142,7 @@ class MovimientoContable(AgenciaMixin, models.Model):
         ordering = ["asiento", "pk"]
 
     def __str__(self):
+        # __str__: Representación en string del objeto. Returns: str.
         return f"{self.tipo} — VES {self.monto_ves} / USD {self.monto_usd} | {self.cuenta.nombre}"
 
 
@@ -162,6 +182,7 @@ class ReporteVentaProveedor(AgenciaMixin, models.Model):
         ordering = ["-fecha_procesamiento"]
 
     def __str__(self):
+        # __str__: Representación en string del objeto. Returns: str.
         return f"Reporte {self.proveedor_nombre} [{self.fecha_reporte_desde} a {self.fecha_reporte_hasta}] — {self.agencia.nombre if self.agencia else 'Global'}"
 
 
@@ -200,4 +221,5 @@ class ItemReporteVentaProveedor(AgenciaMixin, models.Model):
         ordering = ["reporte", "pk"]
 
     def __str__(self):
+        # __str__: Representación en string del objeto. Returns: str.
         return f"Boleto #{self.numero_boleto} ({self.pasajero}) — {self.aerolinea} (${self.monto_neto_pagar})"

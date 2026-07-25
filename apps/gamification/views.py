@@ -1,3 +1,6 @@
+"""Vistas (views) de la aplicación gamification.
+"""
+
 import logging
 
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -18,6 +21,7 @@ class GamificationDashboardView(LoginRequiredMixin, View):
     template_name = "gamification/dashboard.html"
 
     def get(self, request):
+        # get: Get. Args: según implementación. Returns: según implementación.
         agencia = get_agencia_from_request(request)
         if not agencia:
             return render(request, self.template_name, {"sin_agencia": True})
@@ -69,6 +73,7 @@ class GamificationBadgesView(LoginRequiredMixin, View):
     template_name = "gamification/badges.html"
 
     def get(self, request):
+        # get: Get. Args: según implementación. Returns: según implementación.
         agencia = get_agencia_from_request(request)
         if not agencia:
             return render(request, self.template_name, {"sin_agencia": True})
@@ -100,6 +105,7 @@ class GamificationLeaderboardView(LoginRequiredMixin, View):
     template_name = "gamification/leaderboard.html"
 
     def get(self, request):
+        # get: Get. Args: según implementación. Returns: según implementación.
         agencia = get_agencia_from_request(request)
         if not agencia:
             return render(request, self.template_name, {"sin_agencia": True})

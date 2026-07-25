@@ -45,6 +45,7 @@ logger = logging.getLogger(__name__)
 # Helpers privados — reutilizado por múltiples acciones de vouchers
 # ---------------------------------------------------------------------------
 def _generar_voucher_pdf(request, pdf_bytes, filename, error_label):
+    # _generar_voucher_pdf:  generar voucher pdf. Args: según implementación. Returns: según implementación.
     if pdf_bytes:
         response = HttpResponse(pdf_bytes, content_type="application/pdf")
         response["Content-Disposition"] = f'attachment; filename="{filename}"'
@@ -57,7 +58,9 @@ def _generar_voucher_pdf(request, pdf_bytes, filename, error_label):
 # Servicios de viaje
 # ---------------------------------------------------------------------------
 @admin.register(AlojamientoReserva)
-class AlojamientoReservaAdmin(SaaSAdminMixin, ModelAdmin):
+class AlojamientoReservaAdmin:
+    """Configuración de administración para alojamientoreserva. Uso: instanciar según necesidad del dominio.
+    """
     saas_agency_field = "venta__agencia"
     list_display = (
         "id_alojamiento_reserva",
@@ -74,6 +77,7 @@ class AlojamientoReservaAdmin(SaaSAdminMixin, ModelAdmin):
 
     @admin.action(description="Generar Voucher de Hotel (PDF)")
     def generar_voucher_hotel(self, request, queryset):
+        # generar_voucher_hotel: Genera voucher hotel. Args: parámetros de generación. Returns: resultado generado.
         if queryset.count() != 1:
             messages.error(
                 request, "Por favor, seleccione exactamente una reserva para generar el voucher."
@@ -87,7 +91,9 @@ class AlojamientoReservaAdmin(SaaSAdminMixin, ModelAdmin):
 
 
 @admin.register(AlquilerAutoReserva)
-class AlquilerAutoReservaAdmin(SaaSAdminMixin, ModelAdmin):
+class AlquilerAutoReservaAdmin:
+    """Configuración de administración para alquilerautoreserva. Uso: instanciar según necesidad del dominio.
+    """
     saas_agency_field = "venta__agencia"
     list_display = ("id_alquiler_auto", "venta", "compania_rentadora", "fecha_hora_retiro")
     autocomplete_fields = ["venta", "proveedor", "ciudad_retiro", "ciudad_devolucion"]
@@ -95,6 +101,7 @@ class AlquilerAutoReservaAdmin(SaaSAdminMixin, ModelAdmin):
 
     @admin.action(description="Generar Voucher de Auto (PDF)")
     def generar_voucher_auto(self, request, queryset):
+        # generar_voucher_auto: Genera voucher auto. Args: parámetros de generación. Returns: resultado generado.
         if queryset.count() != 1:
             messages.error(
                 request, "Por favor, seleccione exactamente un alquiler para generar el voucher."
@@ -108,14 +115,18 @@ class AlquilerAutoReservaAdmin(SaaSAdminMixin, ModelAdmin):
 
 
 @admin.register(EventoServicio)
-class EventoServicioAdmin(SaaSAdminMixin, ModelAdmin):
+class EventoServicioAdmin:
+    """Configuración de administración para eventoservicio. Uso: instanciar según necesidad del dominio.
+    """
     saas_agency_field = "venta__agencia"
     list_display = ("id_evento_servicio", "venta", "nombre_evento", "fecha_evento")
     autocomplete_fields = ["venta", "proveedor"]
 
 
 @admin.register(CircuitoTuristico)
-class CircuitoTuristicoAdmin(SaaSAdminMixin, ModelAdmin):
+class CircuitoTuristicoAdmin:
+    """Configuración de administración para circuitoturistico. Uso: instanciar según necesidad del dominio.
+    """
     saas_agency_field = "venta__agencia"
     list_display = ("id_circuito", "venta", "nombre_circuito", "fecha_inicio")
     search_fields = ("nombre_circuito",)
@@ -123,14 +134,18 @@ class CircuitoTuristicoAdmin(SaaSAdminMixin, ModelAdmin):
 
 
 @admin.register(PaqueteAereo)
-class PaqueteAereoAdmin(SaaSAdminMixin, ModelAdmin):
+class PaqueteAereoAdmin:
+    """Configuración de administración para paqueteaereo. Uso: instanciar según necesidad del dominio.
+    """
     saas_agency_field = "venta__agencia"
     list_display = ("id_paquete_aereo", "venta", "nombre_paquete")
     autocomplete_fields = ["venta"]
 
 
 @admin.register(ServicioAdicionalDetalle)
-class ServicioAdicionalDetalleAdmin(SaaSAdminMixin, ModelAdmin):
+class ServicioAdicionalDetalleAdmin:
+    """Configuración de administración para servicioadicionaldetalle. Uso: instanciar según necesidad del dominio.
+    """
     saas_agency_field = "venta__agencia"
     list_display = ("id_servicio_adicional", "venta", "tipo_servicio", "codigo_referencia")
     autocomplete_fields = ["venta", "proveedor"]
@@ -138,6 +153,7 @@ class ServicioAdicionalDetalleAdmin(SaaSAdminMixin, ModelAdmin):
 
     @admin.action(description="Generar Voucher de Servicio (PDF)")
     def generar_voucher_servicio_action(self, request, queryset):
+        # generar_voucher_servicio_action: Genera voucher servicio action. Args: parámetros de generación. Returns: resultado generado.
         if queryset.count() != 1:
             messages.error(
                 request, "Por favor, seleccione exactamente un servicio para generar el voucher."
@@ -151,7 +167,9 @@ class ServicioAdicionalDetalleAdmin(SaaSAdminMixin, ModelAdmin):
 
 
 @admin.register(TrasladoServicio)
-class TrasladoServicioAdmin(SaaSAdminMixin, ModelAdmin):
+class TrasladoServicioAdmin:
+    """Configuración de administración para trasladoservicio. Uso: instanciar según necesidad del dominio.
+    """
     saas_agency_field = "venta__agencia"
     list_display = (
         "id_traslado_servicio",
@@ -166,6 +184,7 @@ class TrasladoServicioAdmin(SaaSAdminMixin, ModelAdmin):
 
     @admin.action(description="Generar Voucher de Traslado (PDF)")
     def generar_voucher_traslado_action(self, request, queryset):
+        # generar_voucher_traslado_action: Genera voucher traslado action. Args: parámetros de generación. Returns: resultado generado.
         if queryset.count() != 1:
             messages.error(
                 request, "Por favor, seleccione exactamente un traslado para generar el voucher."
@@ -179,7 +198,9 @@ class TrasladoServicioAdmin(SaaSAdminMixin, ModelAdmin):
 
 
 @admin.register(ActividadServicio)
-class ActividadServicioAdmin(SaaSAdminMixin, ModelAdmin):
+class ActividadServicioAdmin:
+    """Configuración de administración para actividadservicio. Uso: instanciar según necesidad del dominio.
+    """
     saas_agency_field = "venta__agencia"
     list_display = ("id_actividad_servicio", "venta", "nombre", "fecha", "proveedor")
     autocomplete_fields = ["venta", "proveedor"]
@@ -187,6 +208,7 @@ class ActividadServicioAdmin(SaaSAdminMixin, ModelAdmin):
 
     @admin.action(description="Generar Voucher de Actividad (PDF)")
     def generar_voucher_actividad_action(self, request, queryset):
+        # generar_voucher_actividad_action: Genera voucher actividad action. Args: parámetros de generación. Returns: resultado generado.
         if queryset.count() != 1:
             messages.error(
                 request, "Por favor, seleccione exactamente una actividad para generar el voucher."
@@ -200,7 +222,9 @@ class ActividadServicioAdmin(SaaSAdminMixin, ModelAdmin):
 
 
 @admin.register(CircuitoDia)
-class CircuitoDiaAdmin(SaaSAdminMixin, ModelAdmin):
+class CircuitoDiaAdmin:
+    """Configuración de administración para circuitodia. Uso: instanciar según necesidad del dominio.
+    """
     saas_agency_field = "circuito__agencia"
     list_display = ["circuito", "dia_numero", "titulo", "ciudad"]
     list_filter = ["circuito"]
@@ -210,7 +234,9 @@ class CircuitoDiaAdmin(SaaSAdminMixin, ModelAdmin):
 # ---------------------------------------------------------------------------
 # Tarifarios y Hoteles
 # ---------------------------------------------------------------------------
-class TarifaHabitacionInline(admin.TabularInline):
+class TarifaHabitacionInline:
+    """Clase TarifaHabitacionInline. Uso: según contexto de la aplicación.
+    """
     model = TarifaHabitacion
     extra = 1
     fields = [
@@ -227,7 +253,9 @@ class TarifaHabitacionInline(admin.TabularInline):
     ]
 
 
-class TipoHabitacionInline(admin.TabularInline):
+class TipoHabitacionInline:
+    """Clase TipoHabitacionInline. Uso: según contexto de la aplicación.
+    """
     model = TipoHabitacion
     extra = 1
     fields = [
@@ -240,6 +268,7 @@ class TipoHabitacionInline(admin.TabularInline):
     readonly_fields = ["edit_rates_link"]
 
     def edit_rates_link(self, obj):
+        # edit_rates_link: Edit rates link. Args: según implementación. Returns: según implementación.
         if obj.id:
             url = reverse("admin:bookings_tipohabitacion_change", args=[obj.id])
             return format_html(
@@ -251,20 +280,26 @@ class TipoHabitacionInline(admin.TabularInline):
     edit_rates_link.short_description = "Tarifas"
 
 
-class ImagenHotelInline(admin.TabularInline):
+class ImagenHotelInline:
+    """Clase ImagenHotelInline. Uso: según contexto de la aplicación.
+    """
     model = ImagenHotel
     extra = 2
     fields = ["imagen", "titulo", "tipo", "es_portada"]
 
 
 @admin.register(Amenity)
-class AmenityAdmin(ModelAdmin):
+class AmenityAdmin:
+    """Configuración de administración para amenity. Uso: instanciar según necesidad del dominio.
+    """
     list_display = ["nombre", "icono_lucide"]
     search_fields = ["nombre"]
 
 
 @admin.register(TarifarioProveedor)
-class TarifarioProveedorAdmin(SaaSAdminMixin, ModelAdmin):
+class TarifarioProveedorAdmin:
+    """Configuración de administración para tarifarioproveedor. Uso: instanciar según necesidad del dominio.
+    """
     saas_agency_field = "proveedor__agencia"
     list_display = [
         "id",
@@ -280,7 +315,9 @@ class TarifarioProveedorAdmin(SaaSAdminMixin, ModelAdmin):
 
 
 @admin.register(HotelTarifario)
-class HotelTarifarioAdmin(SaaSAdminMixin, ModelAdmin):
+class HotelTarifarioAdmin:
+    """Configuración de administración para hoteltarifario. Uso: instanciar según necesidad del dominio.
+    """
     saas_agency_field = "tarifario__proveedor__agencia"
     list_display = ["nombre", "destino", "categoria", "regimen_default", "activo", "destacado"]
     list_filter = ["activo", "destacado", "destino", "categoria"]
@@ -315,7 +352,9 @@ class HotelTarifarioAdmin(SaaSAdminMixin, ModelAdmin):
 
 
 @admin.register(TarifaHabitacion)
-class TarifaHabitacionAdmin(SaaSAdminMixin, ModelAdmin):
+class TarifaHabitacionAdmin:
+    """Configuración de administración para tarifahabitacion. Uso: instanciar según necesidad del dominio.
+    """
     saas_agency_field = "tipo_habitacion__hotel__tarifario__proveedor__agencia"
     list_display = [
         "tipo_habitacion",
@@ -345,7 +384,9 @@ class TipoHabitacionAdmin(SaaSAdminMixin, ModelAdmin):
 # Catálogos base (requeridos por autocomplete_fields en otros admins)
 # ---------------------------------------------------------------------------
 @admin.register(Proveedor)
-class ProveedorAdmin(SaaSAdminMixin, ModelAdmin):
+class ProveedorAdmin:
+    """Configuración de administración para proveedor. Uso: instanciar según necesidad del dominio.
+    """
     list_display = ["nombre", "tipo_proveedor", "activo"]
     search_fields = ["nombre", "rif"]
     list_filter = ["tipo_proveedor", "activo"]
@@ -353,7 +394,9 @@ class ProveedorAdmin(SaaSAdminMixin, ModelAdmin):
 
 
 @admin.register(ProductoServicio)
-class ProductoServicioAdmin(SaaSAdminMixin, ModelAdmin):
+class ProductoServicioAdmin:
+    """Configuración de administración para productoservicio. Uso: instanciar según necesidad del dominio.
+    """
     list_display = ["nombre", "tipo_producto", "activo"]
     search_fields = ["nombre", "codigo_interno"]
     list_filter = ["tipo_producto", "activo"]

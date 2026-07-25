@@ -1,3 +1,6 @@
+"""Pruebas para unified invoicing flow en finance.
+"""
+
 from decimal import Decimal
 
 import pytest
@@ -11,6 +14,8 @@ from core.middleware import agency_context
 
 @pytest.mark.django_db(transaction=True)
 class TestUnifiedInvoicingFlow:
+    """Clase TestUnifiedInvoicingFlow. Uso: según contexto de la aplicación.
+    """
     def test_generar_factura_con_iva_25_y_fees_separados(self, agencia_premium, moneda_usd):
         """
         Prueba que al generar una factura desde una venta:

@@ -1,3 +1,6 @@
+"""Módulo views webhooks de la aplicación finance.
+"""
+
 import hashlib
 import hmac
 import logging
@@ -17,10 +20,13 @@ from apps.finance.models_stubs import TransaccionPago
 logger = logging.getLogger(__name__)
 
 
-class WebhookPagoBaseView(APIView):
+class WebhookPagoBaseView:
+    """Vista para gestionar webhookpagobase. Uso: instanciar según necesidad del dominio.
+    """
     permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
+        # post: Post. Args: según implementación. Returns: según implementación.
         provider_data = request.data
 
         webhook_id = provider_data.get("bizId") or provider_data.get("id")
@@ -86,17 +92,23 @@ class WebhookPagoBaseView(APIView):
         )
 
     def get_provider_key(self):
+        # get_provider_key: Obtiene/recupera provider key. Args: según implementación. Returns: dato solicitado.
         return "OTR"
 
     def procesar_logica_contable(self, transaccion):
+        # procesar_logica_contable: Procesa r logica contable. Args: datos a procesar. Returns: resultado procesado.
         pass
 
 
-class BinanceWebhookView(WebhookPagoBaseView):
+class BinanceWebhookView:
+    """Vista para gestionar binancewebhook. Uso: instanciar según necesidad del dominio.
+    """
     def get_provider_key(self):
+        # get_provider_key: Obtiene/recupera provider key. Args: según implementación. Returns: dato solicitado.
         return "BIN"
 
     def post(self, request, *args, **kwargs):
+        # post: Post. Args: según implementación. Returns: según implementación.
         webhook_secret = getattr(settings, "BINANCE_WEBHOOK_SECRET", None)
         if not webhook_secret:
             logger.error(
@@ -121,11 +133,15 @@ class BinanceWebhookView(WebhookPagoBaseView):
         return super().post(request, *args, **kwargs)
 
 
-class StripeWebhookView(WebhookPagoBaseView):
+class StripeWebhookView:
+    """Vista para gestionar stripewebhook. Uso: instanciar según necesidad del dominio.
+    """
     def get_provider_key(self):
+        # get_provider_key: Obtiene/recupera provider key. Args: según implementación. Returns: dato solicitado.
         return "STR"
 
     def post(self, request, *args, **kwargs):
+        # post: Post. Args: según implementación. Returns: según implementación.
         webhook_secret = getattr(settings, "STRIPE_WEBHOOK_SECRET", None)
         if not webhook_secret:
             logger.error(

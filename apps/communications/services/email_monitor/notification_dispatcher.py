@@ -1,3 +1,6 @@
+"""Servicio de notification dispatcher para la aplicación communications.
+"""
+
 import logging
 import os
 
@@ -10,6 +13,7 @@ logger = logging.getLogger(__name__)
 def enviar_notificacion_telegram(
     agencia, sistema, localizador, numero_boleto, pasajero, aerolinea, pdf_path
 ):
+    # enviar_notificacion_telegram: Envía ar notificacion telegram. Args: datos del mensaje. Returns: resultado del envío.
     from apps.communications.services.telegram_unified import send_telegram_file_sync
 
     mensaje = (
@@ -33,6 +37,7 @@ def enviar_notificacion_telegram(
 def enviar_notificacion_whatsapp(
     destination, sistema, localizador, numero_boleto, pasajero, aerolinea, pdf_filename
 ):
+    # enviar_notificacion_whatsapp: Envía ar notificacion whatsapp. Args: datos del mensaje. Returns: resultado del envío.
     from apps.communications.services.whatsapp_unified import enviar_whatsapp
 
     mensaje = f"""✈️ *Boleto {sistema} Procesado*
@@ -51,6 +56,7 @@ _TravelHub - Sistema Automático_"""
 def enviar_notificacion_email(
     agencia, destination, sistema, localizador, numero_boleto, pasajero, aerolinea, pdf_path
 ):
+    # enviar_notificacion_email: Envía ar notificacion email. Args: datos del mensaje. Returns: resultado del envío.
     try:
         email_msg = EmailMessage(
             subject=f"Boleto {sistema} Procesado - {localizador}",
@@ -82,6 +88,7 @@ TravelHub - Sistema Automático""",
 
 
 def enviar_respaldo_email(agencia, boleto, pdf_path):
+    # enviar_respaldo_email: Envía ar respaldo email. Args: datos del mensaje. Returns: resultado del envío.
     try:
         destino = getattr(agencia, "email_soporte", None)
         if not destino:

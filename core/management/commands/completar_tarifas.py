@@ -8,9 +8,11 @@ from apps.bookings.models import HotelTarifario, TarifaHabitacion, TipoHabitacio
 
 
 class Command(BaseCommand):
+    """Comando de gestión personalizado."""
     help = "Completa tarifas para hoteles sin tarifas"
 
     def handle(self, *args, **options):
+        """Método: handle."""
         hoteles = HotelTarifario.objects.filter(activo=True).iterator(chunk_size=200)
 
         # Precios base por destino y régimen

@@ -145,6 +145,7 @@ class ThreadLocalContextMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
+        """Método interna: call."""
         request.agencia = None
         request.agency = None
         request.is_impersonating = False
@@ -360,6 +361,7 @@ class SecurityHeadersMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
+        """Método interna: call."""
         nonce = secrets.token_hex(16)
         request.csp_nonce = nonce
         request.META["CSP_NONCE"] = nonce
@@ -502,6 +504,7 @@ class MultiTenantDomainMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
+        """Método interna: call."""
         host = request.get_host().split(":")[0].lower()
         main_domain = os.getenv("MAIN_DOMAIN", "travelhub.cc").lower()
 

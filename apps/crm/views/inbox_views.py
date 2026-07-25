@@ -1,3 +1,6 @@
+"""Vistas (views) de la aplicación crm.
+"""
+
 import logging
 
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -19,6 +22,7 @@ class InboxView(LoginRequiredMixin, TemplateView):
     template_name = "crm/inbox/omnichannel_inbox.html"
 
     def get_context_data(self, **kwargs):
+        # get_context_data: Obtiene/recupera context data. Args: según implementación. Returns: dato solicitado.
         context = super().get_context_data(**kwargs)
         # Clientes con mensajes, ordenados por el más reciente
         clientes_con_mensajes = (
@@ -52,6 +56,7 @@ class ChatThreadView(LoginRequiredMixin, View):
     """
 
     def get(self, request, cliente_id, *args, **kwargs):
+        # get: Get. Args: según implementación. Returns: según implementación.
         cliente = get_object_or_404(Cliente, pk=cliente_id)
         mensajes = cliente.mensajes_whatsapp.all().order_by("timestamp")
 
@@ -73,6 +78,7 @@ class InboxSearchView(LoginRequiredMixin, View):
     """
 
     def get(self, request, *args, **kwargs):
+        # get: Get. Args: según implementación. Returns: según implementación.
         q = request.GET.get("q", "").strip()
         if not q:
             # Sin búsqueda, devolver la lista completa (como InboxView)
@@ -111,6 +117,7 @@ class SendMessageView(LoginRequiredMixin, View):
     """
 
     def post(self, request, cliente_id, *args, **kwargs):
+        # post: Post. Args: según implementación. Returns: según implementación.
         cliente = get_object_or_404(Cliente, pk=cliente_id)
         texto = request.POST.get("texto")
 

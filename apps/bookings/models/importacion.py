@@ -1,3 +1,6 @@
+"""Módulo importacion de la aplicación bookings.
+"""
+
 from __future__ import annotations
 
 import logging
@@ -19,7 +22,9 @@ from core.api import (
 logger = logging.getLogger(__name__)
 
 
-class BoletoImportado(AgenciaMixin, SoftDeleteModel, models.Model):
+class BoletoImportado:
+    """Clase BoletoImportado. Uso: según contexto de la aplicación.
+    """
     id_boleto_importado = models.AutoField(primary_key=True, verbose_name=_("ID Boleto Importado"))
 
     @property
@@ -29,6 +34,7 @@ class BoletoImportado(AgenciaMixin, SoftDeleteModel, models.Model):
 
     @id.setter
     def id(self, value):
+        # id: Id. Args: según implementación. Returns: según implementación.
         self.id_boleto_importado = value
 
     archivo_boleto = models.FileField(
@@ -261,6 +267,7 @@ class BoletoImportado(AgenciaMixin, SoftDeleteModel, models.Model):
         ]
 
     def __str__(self):
+        # __str__: Representación en string del objeto. Returns: str.
         return f"Boleto {self.id_boleto_importado} ({self.archivo_boleto.name if self.archivo_boleto else 'N/A'})"
 
     def get_pdf_url(self):
@@ -274,38 +281,48 @@ class BoletoImportado(AgenciaMixin, SoftDeleteModel, models.Model):
 
     @property
     def pasajero_nombre_completo(self):
+        # pasajero_nombre_completo: Pasajero nombre completo. Args: según implementación. Returns: según implementación.
         return self.nombre_pasajero_completo
 
     @pasajero_nombre_completo.setter
     def pasajero_nombre_completo(self, value):
+        # pasajero_nombre_completo: Pasajero nombre completo. Args: según implementación. Returns: según implementación.
         self.nombre_pasajero_completo = value
 
     @property
     def pnr(self):
+        # pnr: Pnr. Args: según implementación. Returns: según implementación.
         return self.localizador_pnr
 
     @pnr.setter
     def pnr(self, value):
+        # pnr: Pnr. Args: según implementación. Returns: según implementación.
         self.localizador_pnr = value
 
     @property
     def id_boleto(self):
+        # id_boleto: Id boleto. Args: según implementación. Returns: según implementación.
         return self.id_boleto_importado
 
     @id_boleto.setter
     def id_boleto(self, value):
+        # id_boleto: Id boleto. Args: según implementación. Returns: según implementación.
         self.id_boleto_importado = value
 
     @property
     def fecha_emision(self):
+        # fecha_emision: Fecha emision. Args: según implementación. Returns: según implementación.
         return self.fecha_emision_boleto
 
     @fecha_emision.setter
     def fecha_emision(self, value):
+        # fecha_emision: Fecha emision. Args: según implementación. Returns: según implementación.
         self.fecha_emision_boleto = value
 
 
-class SolicitudAnulacion(AgenciaMixin, models.Model):
+class SolicitudAnulacion:
+    """Clase SolicitudAnulacion. Uso: según contexto de la aplicación.
+    """
     id_anulacion = models.AutoField(primary_key=True, verbose_name=_("ID Anulación"))
     boleto = models.ForeignKey(
         BoletoImportado,
@@ -366,10 +383,13 @@ class SolicitudAnulacion(AgenciaMixin, models.Model):
         ordering = ["-fecha_solicitud"]
 
     def __str__(self):
+        # __str__: Representación en string del objeto. Returns: str.
         return f"Anulación {self.id_anulacion} - Boleto {self.id_anulacion}"
 
 
-class BoletoImportadoTransito(AgenciaMixin, models.Model):
+class BoletoImportadoTransito:
+    """Clase BoletoImportadoTransito. Uso: según contexto de la aplicación.
+    """
     id_transito = models.AutoField(primary_key=True, verbose_name=_("ID Tránsito"))
     boleto_origen = models.ForeignKey(
         BoletoImportado,
@@ -396,4 +416,5 @@ class BoletoImportadoTransito(AgenciaMixin, models.Model):
         ]
 
     def __str__(self):
+        # __str__: Representación en string del objeto. Returns: str.
         return f"Tránsito {self.id_transito} - Boleto {self.numero_boleto or 'N/A'} ({self.nombre_pasajero or 'N/A'})"

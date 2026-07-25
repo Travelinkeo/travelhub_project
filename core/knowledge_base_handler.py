@@ -1,5 +1,7 @@
 # Archivo: core/knowledge_base_handler.py
 
+"""Manejador para crear artículos en la base de conocimiento desde Gemini."""
+
 import logging
 
 from django.utils import timezone

@@ -5,6 +5,9 @@
 #   3. Uses the correct FK target PK column
 # This makes the migration safe in fresh DB (where tables are core_xxx) and in
 # the dev/prod DB (where some bookings_xxx copies also exist).
+"""Migración de base de datos para bookings.
+"""
+
 from django.db import migrations
 
 
@@ -57,6 +60,7 @@ def _col_restrict(target_table_var, column, type_def, fk_table, fk_col):
 
 
 def _build_forward_sql():
+    # _build_forward_sql:  build forward sql. Args: según implementación. Returns: según implementación.
     return [
         # 1. tarifarioproveedor: agencia_id (CASCADE) + proveedor_id (CASCADE)
         f"""DO $$ BEGIN {_col("tarifarioproveedor", "agencia_id", "bigint", "core_agencia", "id")} END $$;""",
@@ -83,6 +87,7 @@ def _build_forward_sql():
 
 
 def _build_reverse_sql():
+    # _build_reverse_sql:  build reverse sql. Args: según implementación. Returns: según implementación.
     bare_cols = [
         ("tarifarioproveedor", ["agencia_id", "proveedor_id"]),
         ("hoteltarifario", ["agencia_id", "tarifario_id"]),
@@ -108,7 +113,9 @@ END $$;""")
     return sql
 
 
-class Migration(migrations.Migration):
+class Migration:
+    """Clase Migration. Uso: según contexto de la aplicación.
+    """
     dependencies = [
         ("bookings", "0029_venta_monto_neto_proveedor_venta_monto_venta_cliente_and_more"),
     ]

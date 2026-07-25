@@ -1,3 +1,6 @@
+"""Módulo tasks reconciliation de la aplicación finance.
+"""
+
 import logging
 
 from celery import shared_task

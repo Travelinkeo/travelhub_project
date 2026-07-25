@@ -5,9 +5,11 @@ from django.core.management.base import BaseCommand
 
 
 class Command(BaseCommand):
+    """Comando de gestión personalizado."""
     help = "Carga el catálogo de aerolíneas con RIFs venezolanos e internacionales"
 
     def handle(self, *args, **options):
+        """Método: handle."""
         self.stdout.write("Cargando aerolineas...")
         call_command("loaddata", "aerolineas_venezuela.json")
         self.stdout.write(self.style.SUCCESS("[OK] 25 aerolineas cargadas exitosamente"))

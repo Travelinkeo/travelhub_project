@@ -1,3 +1,6 @@
+"""Vistas (views) de la aplicación bookings.
+"""
+
 import logging
 
 from django.contrib import messages
@@ -24,7 +27,9 @@ from core.api import (
 logger = logging.getLogger(__name__)
 
 
-class VentaUpdateView(SaaSMixin, LoginRequiredMixin, UpdateView):
+class VentaUpdateView:
+    """Vista para gestionar ventaupdate. Uso: instanciar según necesidad del dominio.
+    """
     model = Venta
     template_name = "core/venta_edit_glass_v2.html"
     fields = ["cliente", "localizador", "estado"]
@@ -42,6 +47,7 @@ class VentaUpdateView(SaaSMixin, LoginRequiredMixin, UpdateView):
         return reverse_lazy("core:modern_dashboard")
 
     def get_context_data(self, **kwargs):
+        # get_context_data: Obtiene/recupera context data. Args: según implementación. Returns: dato solicitado.
         context = super().get_context_data(**kwargs)
         # Pass 'next' to template to preserve it in POST
         context["next"] = self.request.GET.get("next")
@@ -52,6 +58,7 @@ class VentaUpdateView(SaaSMixin, LoginRequiredMixin, UpdateView):
         return context
 
     def form_valid(self, form):
+        # form_valid: Form valid. Args: según implementación. Returns: según implementación.
         response = super().form_valid(form)
 
         # Actualizar datos del Item (Financieros) - usar select_related
@@ -89,7 +96,9 @@ class VentaUpdateView(SaaSMixin, LoginRequiredMixin, UpdateView):
         return response
 
 
-class VentasDashboardView(HtmxResponseMixin, SaaSMixin, LoginRequiredMixin, ListView):
+class VentasDashboardView:
+    """Vista para gestionar ventasdashboard. Uso: instanciar según necesidad del dominio.
+    """
     model = Venta
     template_name = "core/erp/ventas/dashboard.html"
     htmx_template_name = "bookings/partials/venta_list_htmx.html"
@@ -125,6 +134,7 @@ class VentasDashboardView(HtmxResponseMixin, SaaSMixin, LoginRequiredMixin, List
         return queryset
 
     def get_context_data(self, **kwargs):
+        # get_context_data: Obtiene/recupera context data. Args: según implementación. Returns: dato solicitado.
         context = super().get_context_data(**kwargs)
         context["active_tab"] = "ventas"
 
@@ -142,20 +152,25 @@ class VentasDashboardView(HtmxResponseMixin, SaaSMixin, LoginRequiredMixin, List
         return context
 
 
-class VentaCreateView(SaaSMixin, LoginRequiredMixin, CreateView):
+class VentaCreateView:
+    """Vista para gestionar ventacreate. Uso: instanciar según necesidad del dominio.
+    """
     model = Venta
     template_name = "core/erp/ventas/form.html"
     fields = ["cliente", "moneda", "estado"]
     success_url = reverse_lazy("core:ventas_dashboard")
 
     def get_context_data(self, **kwargs):
+        # get_context_data: Obtiene/recupera context data. Args: según implementación. Returns: dato solicitado.
         context = super().get_context_data(**kwargs)
         context["active_tab"] = "ventas"
         context["title"] = "Nueva Venta"
         return context
 
 
-class VentaDetailView(HtmxResponseMixin, SaaSMixin, LoginRequiredMixin, DetailView):
+class VentaDetailView:
+    """Vista para gestionar ventadetail. Uso: instanciar según necesidad del dominio.
+    """
     model = Venta
     template_name = "core/erp/ventas/detalle_final.html"
     # Esta es la magia reactiva: si HTMX pide la vista, devolvemos solo este fragmento
@@ -163,6 +178,7 @@ class VentaDetailView(HtmxResponseMixin, SaaSMixin, LoginRequiredMixin, DetailVi
     context_object_name = "venta"
 
     def get_context_data(self, **kwargs):
+        # get_context_data: Obtiene/recupera context data. Args: según implementación. Returns: dato solicitado.
         context = super().get_context_data(**kwargs)
         context["active_tab"] = "ventas"
 
@@ -203,7 +219,9 @@ class VentaDetailView(HtmxResponseMixin, SaaSMixin, LoginRequiredMixin, DetailVi
         return context
 
 
-class VentaAssignClientView(LoginRequiredMixin, View):
+class VentaAssignClientView:
+    """Vista para gestionar ventaassignclient. Uso: instanciar según necesidad del dominio.
+    """
     def post(self, request, pk):
         # 🔐 CANDADO: Solo accede a ventas de la agencia del usuario.
         agencia = get_agencia_or_403(request)
@@ -221,7 +239,9 @@ class VentaAssignClientView(LoginRequiredMixin, View):
         return redirect("bookings:venta_detail", pk=pk)
 
 
-class VentaAddFeeView(LoginRequiredMixin, CreateView):
+class VentaAddFeeView:
+    """Vista para gestionar ventaaddfee. Uso: instanciar según necesidad del dominio.
+    """
     model = FeeVenta
     form_class = FeeVentaForm
     template_name = "core/erp/ventas/fee_form.html"
@@ -233,6 +253,7 @@ class VentaAddFeeView(LoginRequiredMixin, CreateView):
         return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
+        # form_valid: Form valid. Args: según implementación. Returns: según implementación.
         fee = form.save(commit=False)
         fee.venta = self.venta
         fee.save()
@@ -244,6 +265,7 @@ class VentaAddFeeView(LoginRequiredMixin, CreateView):
         return redirect("bookings:venta_detail", pk=self.venta.pk)
 
     def get_context_data(self, **kwargs):
+        # get_context_data: Obtiene/recupera context data. Args: según implementación. Returns: dato solicitado.
         context = super().get_context_data(**kwargs)
         context["venta"] = self.venta
         return context

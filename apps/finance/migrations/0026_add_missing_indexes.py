@@ -1,7 +1,12 @@
+"""Migración de base de datos para finance.
+"""
+
 from django.db import migrations, models
 
 
-class Migration(migrations.Migration):
+class Migration:
+    """Clase Migration. Uso: según contexto de la aplicación.
+    """
     dependencies = [
         ("finance", "0025_add_missing_agencia_columns"),
     ]

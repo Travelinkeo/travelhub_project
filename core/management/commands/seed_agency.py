@@ -7,9 +7,11 @@ from core.models.agencia import Agencia
 
 
 class Command(BaseCommand):
+    """Comando de gestión personalizado."""
     help = "Crea/actualiza la agencia piloto por defecto para el dominio principal (MAIN_DOMAIN)"
 
     def add_arguments(self, parser):
+        """Método: add arguments."""
         parser.add_argument(
             "--domain",
             type=str,
@@ -24,6 +26,7 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
+        """Método: handle."""
         main_domain = options["domain"] or os.getenv("MAIN_DOMAIN", "travelhub.cc")
         username = options["superuser"]
 

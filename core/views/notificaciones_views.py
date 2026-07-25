@@ -13,6 +13,7 @@ class HTMXNotificacionesVivasView(LoginRequiredMixin, View):
     """
 
     def get(self, request, *args, **kwargs):
+        """Método: get."""
         # Obtenemos las notificaciones no leídas
         notificaciones = NotificacionInteligente.objects.filter(
             usuario=request.user, leida=False

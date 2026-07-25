@@ -1,3 +1,6 @@
+"""Servicio de audit service para la aplicación common.
+"""
+
 import json
 import logging
 from typing import TYPE_CHECKING, Any

@@ -1,3 +1,6 @@
+"""Módulo supplier report service de la aplicación contabilidad.
+"""
+
 import logging
 
 from django.db import transaction
@@ -10,6 +13,8 @@ logger = logging.getLogger(__name__)
 
 
 class SupplierReportProcessorService:
+    """Servicio para supplierreportprocessor. Uso: instanciar según necesidad del dominio.
+    """
     @classmethod
     def process_pdf_report(
         cls,
@@ -19,6 +24,7 @@ class SupplierReportProcessorService:
         subject: str = "",
         sender_email: str = "",
     ) -> ReporteVentaProveedor:
+        # process_pdf_report: Procesa  pdf report. Args: datos a procesar. Returns: resultado procesado.
         parser = SupplierReportParserFactory.get_parser(
             pdf_bytes=pdf_bytes,
             filename=filename,

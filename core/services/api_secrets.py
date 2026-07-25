@@ -14,6 +14,7 @@ def _get_from_cache(service: str) -> str | None:
 
 
 def _set_cache(service: str, value: str) -> None:
+    """Función interna: set cache."""
     cache.set(f"api_secret:{service}", value, CACHE_TTL)
 
 

@@ -13,7 +13,9 @@ pytestmark = [pytest.mark.django_db, pytest.mark.services]
 
 class TestStripeService:
     @pytest.fixture(autouse=True)
+    """Test Stripe Service."""
     def _setup(self, monkeypatch):
+        """Setup."""
         self.mock_stripe = unittest.mock.MagicMock()
         monkeypatch.setattr(
             "apps.finance.services.stripe_service.stripe",
@@ -24,6 +26,7 @@ class TestStripeService:
         self.service = StripeService()
 
     def test_create_checkout_session(self, db):
+        """Create checkout session."""
         from core.models.agencia import Agencia
 
         agencia = Agencia.objects.create(
@@ -38,6 +41,7 @@ class TestStripeService:
         self.mock_stripe.checkout.Session.create.assert_called_once()
 
     def test_create_checkout_session_creates_customer(self, db):
+        """Create checkout session creates customer."""
         from core.models.agencia import Agencia
 
         agencia = Agencia.objects.create(
@@ -53,6 +57,7 @@ class TestStripeService:
         self.mock_stripe.Customer.create.assert_called_once()
 
     def test_create_portal_session(self, db):
+        """Create portal session."""
         from core.models.agencia import Agencia
 
         agencia = Agencia.objects.create(
@@ -66,6 +71,7 @@ class TestStripeService:
         assert url == "https://portal.stripe.com/test"
 
     def test_handle_webhook(self, db, monkeypatch):
+        """Handle webhook."""
         mock_event = unittest.mock.MagicMock()
         mock_event.type = "checkout.session.completed"
         mock_event.data.object.id = "cs_mock"
@@ -77,6 +83,7 @@ class TestStripeService:
         self.service.handle_webhook(mock_event)
 
     def test_handle_webhook_ignores_unknown_event(self, db):
+        """Handle webhook ignores unknown event."""
         mock_event = unittest.mock.MagicMock()
         mock_event.type = "unknown.event.type"
 
@@ -87,7 +94,9 @@ class TestStripeService:
 
 
 class TestBcvService:
+    """Test Bcv Service."""
     def test_obtener_tasa_bcv_devuelve_tasa(self, monkeypatch):
+        """Obtener tasa bcv devuelve tasa."""
         mock_monitor = unittest.mock.MagicMock()
         mock_monitor.get_all_monitors.return_value = {
             "USD": {"price": 55.25, "price_old": 54.50},
@@ -108,6 +117,7 @@ class TestBcvService:
         assert result > 0
 
     def test_obtener_tasa_bcv_fallback_en_error(self, monkeypatch):
+        """Obtener tasa bcv fallback en error."""
         monkeypatch.setattr(
             "apps.finance.services.bcv_service.pyDolarVenezuela",
             unittest.mock.MagicMock(),
@@ -127,7 +137,9 @@ class TestBcvService:
 
 
 class TestCommissionService:
+    """Test Commission Service."""
     def test_calcular_comision_sin_venta(self, db):
+        """Calcular comision sin venta."""
         from apps.finance.services.commission_service import CommissionService
 
         result = CommissionService.calcular_comision_venta(99999)
@@ -138,7 +150,9 @@ class TestCommissionService:
 
 
 class TestFacturaService:
+    """Test Factura Service."""
     def test_capture_previous_pdf(self):
+        """Capture previous pdf."""
         from apps.finance.services.factura_service import FacturaService
 
         result = FacturaService.capture_previous_pdf(None)

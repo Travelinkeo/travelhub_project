@@ -1,3 +1,6 @@
+"""Servicio de marketing service para la aplicación crm.
+"""
+
 import logging
 from datetime import timedelta
 
@@ -9,6 +12,7 @@ from apps.crm.models import Cliente
 
 
 def _get_ai_engine():
+    # _get_ai_engine:  get ai engine. Args: según implementación. Returns: según implementación.
     from django.utils.module_loading import import_string
 
     return import_string("apps.automation.services.ai_engine.ai_engine")
@@ -18,7 +22,9 @@ logger = logging.getLogger(__name__)
 
 
 # ─── MODO 1: CAMPAÑA A CLIENTES ────────────────────────────────────────────────
-class CampanaMarketingSchema(BaseModel):
+class CampanaMarketingSchema:
+    """Clase CampanaMarketingSchema. Uso: según contexto de la aplicación.
+    """
     destinos_clave: list[str] = Field(
         description="Ciudades o países mencionados (ej. ['MADRID', 'EUROPA']). Vacío si no aplica."
     )
@@ -42,7 +48,9 @@ MUY IMPORTANTE: Usa la variable exacta {{ nombre_cliente }} donde deba ir el nom
 
 
 # ─── MODO 2: CONTENIDO CREATIVO (BRANDING / COPY / SOCIAL) ─────────────────────
-class ContenidoCreativoSchema(BaseModel):
+class ContenidoCreativoSchema:
+    """Clase ContenidoCreativoSchema. Uso: según contexto de la aplicación.
+    """
     tipo_contenido: str = Field(
         description="Tipo de contenido: 'branding', 'post_instagram', 'post_facebook', 'slogan', 'copy_web', 'email_generico', 'guion_video', 'descripcion_destino', 'otro'."
     )
@@ -73,7 +81,9 @@ Si el usuario pide algo específico de un destino o sitio web, hazlo centrado en
 
 
 # ─── CLASIFICADOR: ¿Es campaña o contenido creativo? ───────────────────────────
-class ClasificadorSchema(BaseModel):
+class ClasificadorSchema:
+    """Clase ClasificadorSchema. Uso: según contexto de la aplicación.
+    """
     modo: str = Field(
         description="'campana' si el usuario quiere enviar correos a clientes específicos de la base de datos. 'creativo' si quiere generar branding, copy, posts, slogans, textos web u otro contenido creativo sin buscar clientes."
     )
@@ -90,6 +100,8 @@ Analiza el texto y responde con precisión.
 
 
 class MarketingAIEngine:
+    """Clase MarketingAIEngine. Uso: según contexto de la aplicación.
+    """
     @staticmethod
     def _clasificar_intencion(prompt: str) -> str:
         """Retorna 'campana' o 'creativo' según el prompt del usuario."""

@@ -1,3 +1,6 @@
+"""Tareas asíncronas (Celery) para la aplicación communications.
+"""
+
 import logging
 
 from celery import shared_task

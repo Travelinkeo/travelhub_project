@@ -4,9 +4,11 @@ from apps.automation.services.marketing_intelligence_service import MarketingInt
 
 
 class Command(BaseCommand):
+    """Comando de gestión personalizado."""
     help = "Ejecuta el motor de Marketing Intelligence para generar contenido automático basado en tendencias de reserva."
 
     def add_arguments(self, parser):
+        """Método: add arguments."""
         parser.add_argument(
             "--agency-id",
             type=int,
@@ -14,6 +16,7 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
+        """Método: handle."""
         agency_id = options["agency_id"]
         self.stdout.write(self.style.NOTICE("Iniciando Marketing Intelligence Hub..."))
 

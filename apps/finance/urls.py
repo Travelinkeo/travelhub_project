@@ -1,3 +1,6 @@
+"""Configuración de rutas (URLs) para la aplicación finance.
+"""
+
 import logging
 
 from django.urls import include, path
@@ -14,27 +17,36 @@ from .views import invoice_views, payment_views
 logger = logging.getLogger(__name__)
 
 
-class PaisViewSet(viewsets.ReadOnlyModelViewSet):
+class PaisViewSet:
+    """Clase PaisViewSet. Uso: según contexto de la aplicación.
+    """
     serializer_class = PaisSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     def get_queryset(self):
+        # get_queryset: Obtiene/recupera queryset. Args: según implementación. Returns: dato solicitado.
         return Pais.objects.all()
 
 
-class CiudadViewSet(viewsets.ReadOnlyModelViewSet):
+class CiudadViewSet:
+    """Clase CiudadViewSet. Uso: según contexto de la aplicación.
+    """
     serializer_class = CiudadSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     def get_queryset(self):
+        # get_queryset: Obtiene/recupera queryset. Args: según implementación. Returns: dato solicitado.
         return Ciudad.objects.all()
 
 
-class AerolineaViewSet(viewsets.ReadOnlyModelViewSet):
+class AerolineaViewSet:
+    """Clase AerolineaViewSet. Uso: según contexto de la aplicación.
+    """
     serializer_class = AerolineaSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     def get_queryset(self):
+        # get_queryset: Obtiene/recupera queryset. Args: según implementación. Returns: dato solicitado.
         return Aerolinea.objects.filter(activa=True)
 
 

@@ -1,3 +1,6 @@
+"""Vistas (views) de la aplicación finance.
+"""
+
 import logging
 
 from django.contrib import messages
@@ -22,7 +25,9 @@ from core.api import (
 logger = logging.getLogger(__name__)
 
 
-class FacturacionDashboardView(HtmxResponseMixin, SaaSMixin, LoginRequiredMixin, ListView):
+class FacturacionDashboardView:
+    """Vista para gestionar facturaciondashboard. Uso: instanciar según necesidad del dominio.
+    """
     model = Factura
     template_name = "core/erp/facturacion/dashboard.html"
     htmx_template_name = "finance/partials/factura_list_htmx.html"
@@ -30,6 +35,7 @@ class FacturacionDashboardView(HtmxResponseMixin, SaaSMixin, LoginRequiredMixin,
     paginate_by = 20
 
     def get_queryset(self):
+        # get_queryset: Obtiene/recupera queryset. Args: según implementación. Returns: dato solicitado.
         queryset = (
             super()
             .get_queryset()
@@ -54,6 +60,7 @@ class FacturacionDashboardView(HtmxResponseMixin, SaaSMixin, LoginRequiredMixin,
         return queryset
 
     def get_context_data(self, **kwargs):
+        # get_context_data: Obtiene/recupera context data. Args: según implementación. Returns: dato solicitado.
         context = super().get_context_data(**kwargs)
         # Stats reusing the agency-filtered queryset from SaaSMixin.get_queryset()
         # Evita .model.objects.all() (que omite el SaaSMixin) y el filtro manual
@@ -64,7 +71,9 @@ class FacturacionDashboardView(HtmxResponseMixin, SaaSMixin, LoginRequiredMixin,
         return context
 
 
-class FacturaDetailView(HtmxResponseMixin, SaaSMixin, LoginRequiredMixin, DetailView):
+class FacturaDetailView:
+    """Vista para gestionar facturadetail. Uso: instanciar según necesidad del dominio.
+    """
     model = Factura
     template_name = "core/erp/facturacion/detalle.html"
     htmx_template_name = "finance/partials/factura_detalle_htmx.html"
@@ -72,6 +81,7 @@ class FacturaDetailView(HtmxResponseMixin, SaaSMixin, LoginRequiredMixin, Detail
     # 🔐 SaaSMixin.get_queryset() filtra por agencia — Django usa ese QS en DetailView
 
     def get_context_data(self, **kwargs):
+        # get_context_data: Obtiene/recupera context data. Args: según implementación. Returns: dato solicitado.
         context = super().get_context_data(**kwargs)
         context["items"] = self.object.items.all()
         return context
@@ -124,6 +134,7 @@ def generar_factura_desde_venta(request, pk):
 
 
 def descargar_pdf_factura(request, pk):
+    # descargar_pdf_factura: Descargar pdf factura. Args: según implementación. Returns: según implementación.
     agencia = get_agencia_or_403(request)
     factura = get_object_tenant_or_404(Factura, agencia, pk=pk)
     try:

@@ -12,9 +12,11 @@ logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
+    """Comando de gestión personalizado."""
     help = "Recover BoletoImportado records from media folder and link to existing Ventas"
 
     def handle(self, *args, **options):
+        """Método: handle."""
         media_root = settings.MEDIA_ROOT
         boletos_dir = os.path.join(media_root, "boletos_importados")
 

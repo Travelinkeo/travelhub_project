@@ -12,7 +12,9 @@ from django.utils.translation import gettext_lazy as _
 from core.api import AgenciaMixin, SoftDeleteModel, validar_no_vacio_o_espacios
 
 
-class Proveedor(AgenciaMixin, SoftDeleteModel, models.Model):
+class Proveedor:
+    """Clase Proveedor. Uso: según contexto de la aplicación.
+    """
     id_proveedor = models.AutoField(primary_key=True, verbose_name=_("ID Proveedor"))
     nombre = models.CharField(
         _("Nombre del Proveedor"),
@@ -134,10 +136,13 @@ class Proveedor(AgenciaMixin, SoftDeleteModel, models.Model):
         ordering = ["nombre"]
 
     def __str__(self):
+        # __str__: Representación en string del objeto. Returns: str.
         return f"{self.nombre} ({self.get_tipo_proveedor_display()})"
 
 
-class ProductoServicio(AgenciaMixin, SoftDeleteModel, models.Model):
+class ProductoServicio:
+    """Clase ProductoServicio. Uso: según contexto de la aplicación.
+    """
     id_producto_servicio = models.AutoField(
         primary_key=True, verbose_name=_("ID Producto/Servicio")
     )
@@ -193,10 +198,13 @@ class ProductoServicio(AgenciaMixin, SoftDeleteModel, models.Model):
         unique_together = ("agencia", "nombre", "tipo_producto", "proveedor_principal")
 
     def __str__(self):
+        # __str__: Representación en string del objeto. Returns: str.
         return f"{self.nombre} ({self.get_tipo_producto_display()})"
 
 
-class ComisionProveedorServicio(AgenciaMixin, SoftDeleteModel, models.Model):
+class ComisionProveedorServicio:
+    """Clase ComisionProveedorServicio. Uso: según contexto de la aplicación.
+    """
     id_comision = models.AutoField(primary_key=True, verbose_name=_("ID Comisión"))
     proveedor = models.ForeignKey(
         Proveedor, on_delete=models.CASCADE, related_name="comisiones", null=True, blank=True
@@ -220,10 +228,13 @@ class ComisionProveedorServicio(AgenciaMixin, SoftDeleteModel, models.Model):
         unique_together = ("agencia", "proveedor", "tipo_servicio")
 
     def __str__(self):
+        # __str__: Representación en string del objeto. Returns: str.
         return f"{self.proveedor.nombre} - {self.get_tipo_servicio_display()}"
 
 
-class ProductoTerrestre(AgenciaMixin, SoftDeleteModel, models.Model):
+class ProductoTerrestre:
+    """Clase ProductoTerrestre. Uso: según contexto de la aplicación.
+    """
     class TipoServicio(models.TextChoices):
         HOTEL = "HOTEL", _("Hotel / Alojamiento")
         TOUR = "TOUR", _("Tour / Excursión")
@@ -270,10 +281,12 @@ class ProductoTerrestre(AgenciaMixin, SoftDeleteModel, models.Model):
         ordering = ["-fecha_creacion"]
 
     def save(self, *args, **kwargs):
+        # save: Guarda/persiste . Args: datos a guardar. Returns: objeto guardado.
         self.precio_venta_calculado = (
             self.costo_neto + (self.costo_neto * (self.markup_porcentaje / Decimal("100.00")))
         ).quantize(Decimal("0.01"))
         super().save(*args, **kwargs)
 
     def __str__(self):
+        # __str__: Representación en string del objeto. Returns: str.
         return f"{self.nombre} ({self.get_tipo_servicio_display()})"

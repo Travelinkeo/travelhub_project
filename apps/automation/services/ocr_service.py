@@ -1,3 +1,6 @@
+"""Servicio de ocr service para la aplicación automation.
+"""
+
 import base64
 import logging
 from io import BytesIO

@@ -1,3 +1,6 @@
+"""Modelos de base de datos para la aplicación common.
+"""
+
 import json
 
 from django.contrib.auth import get_user_model
@@ -7,7 +10,9 @@ from django.utils.translation import gettext_lazy as _
 from core.api import validar_no_vacio_o_espacios
 
 
-class UserProgress(models.Model):
+class UserProgress:
+    """Clase UserProgress. Uso: según contexto de la aplicación.
+    """
     STEP_WELCOME = "welcome"
     STEP_AGENCY = "agency"
     STEP_FIRST_TICKET = "first_ticket"
@@ -36,17 +41,21 @@ class UserProgress(models.Model):
 
     @property
     def completed_steps(self) -> list[str]:
+        # completed_steps: Completed steps. Args: según implementación. Returns: según implementación.
         return json.loads(self.completed_steps_json)
 
     @completed_steps.setter
     def completed_steps(self, value: list[str]) -> None:
+        # completed_steps: Completed steps. Args: según implementación. Returns: según implementación.
         self.completed_steps_json = json.dumps(value)
 
     @property
     def onboarding_completed(self) -> bool:
+        # onboarding_completed: Onboarding completed. Args: según implementación. Returns: según implementación.
         return self.current_step == self.STEP_COMPLETE
 
     def mark_step_completed(self, step: str) -> None:
+        # mark_step_completed: Mark step completed. Args: según implementación. Returns: según implementación.
         if step not in self.ALL_STEPS:
             raise ValueError(f"Paso inválido: {step}")
         steps = self.completed_steps
@@ -60,6 +69,7 @@ class UserProgress(models.Model):
         self.save(update_fields=["completed_steps_json", "current_step"])
 
     def is_step_completed(self, step: str) -> bool:
+        # is_step_completed: Is step completed. Args: según implementación. Returns: según implementación.
         return step in self.completed_steps
 
     def reset(self) -> None:
@@ -69,6 +79,7 @@ class UserProgress(models.Model):
         self.save(update_fields=["completed_steps_json", "current_step", "updated_at"])
 
     def get_next_step(self) -> str | None:
+        # get_next_step: Obtiene/recupera next step. Args: según implementación. Returns: dato solicitado.
         if self.onboarding_completed:
             return None
         for step in self.ALL_STEPS:
@@ -77,16 +88,20 @@ class UserProgress(models.Model):
         return None
 
     def get_progress_percentage(self) -> int:
+        # get_progress_percentage: Obtiene/recupera progress percentage. Args: según implementación. Returns: dato solicitado.
         completed = len(self.completed_steps)
         total = len(self.ALL_STEPS)
         return int((completed / total) * 100)
 
     def __str__(self) -> str:
+        # __str__: Representación en string del objeto. Returns: str.
         status = "Completado" if self.onboarding_completed else f"{self.get_progress_percentage()}%"
         return f"Onboarding {self.user} - {status}"
 
 
-class Pais(models.Model):
+class Pais:
+    """Clase Pais. Uso: según contexto de la aplicación.
+    """
     id_pais = models.AutoField(primary_key=True, verbose_name=_("ID País"))
     codigo_iso_2 = models.CharField(
         _("Código ISO 2"),
@@ -110,10 +125,13 @@ class Pais(models.Model):
         ordering = ["nombre"]
 
     def __str__(self) -> str:
+        # __str__: Representación en string del objeto. Returns: str.
         return self.nombre
 
 
-class Ciudad(models.Model):
+class Ciudad:
+    """Clase Ciudad. Uso: según contexto de la aplicación.
+    """
     id_ciudad = models.AutoField(primary_key=True, verbose_name=_("ID Ciudad"))
     nombre = models.CharField(
         _("Nombre de la Ciudad"), max_length=100, validators=[validar_no_vacio_o_espacios]
@@ -138,10 +156,13 @@ class Ciudad(models.Model):
         unique_together = ("nombre", "pais", "region_estado")
 
     def __str__(self) -> str:
+        # __str__: Representación en string del objeto. Returns: str.
         return f"{self.nombre}{f', {self.region_estado}' if self.region_estado else ''} ({self.pais.nombre})"
 
 
-class Aerolinea(models.Model):
+class Aerolinea:
+    """Clase Aerolinea. Uso: según contexto de la aplicación.
+    """
     id_aerolinea = models.AutoField(primary_key=True, verbose_name=_("ID Aerolínea"))
     codigo_iata = models.CharField(
         _("Código IATA"),
@@ -182,11 +203,14 @@ class Aerolinea(models.Model):
         ordering = ["nombre"]
 
     def __str__(self) -> str:
+        # __str__: Representación en string del objeto. Returns: str.
         return f"{self.nombre} ({self.codigo_iata})"
 
 
 # --- MODELO MOVIDO DESDE FINANCE ---
-class Moneda(models.Model):
+class Moneda:
+    """Clase Moneda. Uso: según contexto de la aplicación.
+    """
     id_moneda = models.AutoField(primary_key=True, verbose_name=_("ID Moneda"))
     codigo_iso = models.CharField(
         _("Código ISO"),
@@ -220,4 +244,5 @@ class Moneda(models.Model):
         db_table = "core_moneda"
 
     def __str__(self) -> str:
+        # __str__: Representación en string del objeto. Returns: str.
         return f"{self.nombre} ({self.codigo_iso})"

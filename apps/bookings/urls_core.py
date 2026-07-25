@@ -1,3 +1,6 @@
+"""Módulo urls core de la aplicación bookings.
+"""
+
 from django.urls import path
 from django.utils.module_loading import import_string
 
@@ -12,7 +15,9 @@ from apps.bookings.views.dashboard_boletos import actualizar_item_boleto
 
 
 def dynamic_view(view_path):
+    # dynamic_view: Dynamic view. Args: según implementación. Returns: según implementación.
     def lazy_view_handler(request, *args, **kwargs):
+        # lazy_view_handler: Lazy view handler. Args: según implementación. Returns: según implementación.
         view_class = import_string(view_path)
         return view_class.as_view()(request, *args, **kwargs)
 
@@ -20,7 +25,9 @@ def dynamic_view(view_path):
 
 
 def dynamic_fb_view(view_path):
+    # dynamic_fb_view: Dynamic fb view. Args: según implementación. Returns: según implementación.
     def lazy_view_handler(request, *args, **kwargs):
+        # lazy_view_handler: Lazy view handler. Args: según implementación. Returns: según implementación.
         view_fn = import_string(view_path)
         return view_fn(request, *args, **kwargs)
 

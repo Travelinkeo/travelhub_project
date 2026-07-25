@@ -1,3 +1,6 @@
+"""Parser/procesador de travelport parser para la aplicación automation.
+"""
+
 import logging
 import re
 
@@ -162,6 +165,7 @@ class TravelportParser(BaseTicketParser):
 
                 # Normalizar horas (0915 -> 09:15)
                 def norm_h(h):
+                    # norm_h: Norm h. Args: según implementación. Returns: según implementación.
                     h = re.sub(r"[A-Z]", "", h)
                     if len(h) == 4:
                         return f"{h[:2]}:{h[2:]}"

@@ -1,3 +1,6 @@
+"""Servicio de report data aggregator para la aplicación common.
+"""
+
 def __getattr__(name):
     if name == "Venta":
         from django.apps import apps

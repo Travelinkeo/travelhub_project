@@ -1,3 +1,6 @@
+"""Configuración de rutas (URLs) para la aplicación crm.
+"""
+
 from django.urls import include, path
 from django.utils.module_loading import import_string
 from django.views.generic import RedirectView
@@ -25,7 +28,9 @@ app_name = "crm"
 
 
 def dynamic_view(view_path):
+    # dynamic_view: Dynamic view. Args: según implementación. Returns: según implementación.
     def lazy_view_handler(request, *args, **kwargs):
+        # lazy_view_handler: Lazy view handler. Args: según implementación. Returns: según implementación.
         view_class = import_string(view_path)
         return view_class.as_view()(request, *args, **kwargs)
 

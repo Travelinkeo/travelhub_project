@@ -8,9 +8,11 @@ from core.models.agencia import Agencia, AgenciaConfiguracion
 
 
 class Command(BaseCommand):
+    """Comando de gestión personalizado."""
     help = "Aprovisiona de forma atómica y segura un nuevo inquilino (Agencia SaaS) con su entorno financiero inicial."
 
     def add_arguments(self, parser):
+        """Método: add arguments."""
         parser.add_argument(
             "--nombre", type=str, required=True, help="Nombre comercial de la agencia piloto."
         )
@@ -48,6 +50,7 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
+        """Método: handle."""
         nombre = options["nombre"]
         subdominio = options["subdominio"].lower().strip()
         es_especial = options["contribuyente_especial"]

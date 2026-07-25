@@ -1,3 +1,6 @@
+"""Módulo monitor log de la aplicación communications.
+"""
+
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -28,6 +31,7 @@ class EmailMonitorLog(AgenciaMixin, models.Model):
         ordering = ["-fecha_ejecucion"]
 
     def __str__(self):
+        # __str__: Representación en string del objeto. Returns: str.
         fecha_str = (
             self.fecha_ejecucion.strftime("%Y-%m-%d %H:%M:%S") if self.fecha_ejecucion else "N/A"
         )

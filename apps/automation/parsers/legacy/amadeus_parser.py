@@ -1,3 +1,6 @@
+"""Parser/procesador de amadeus parser para la aplicación automation.
+"""
+
 import logging
 import re
 
@@ -140,6 +143,7 @@ class AmadeusParser(BaseTicketParser):
         return None
 
     def _extract_itinerary(self, text: str) -> list[dict]:
+        # _extract_itinerary:  extract itinerary. Args: según implementación. Returns: según implementación.
         segments = []
         lines = text.splitlines()
 

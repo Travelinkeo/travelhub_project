@@ -1,3 +1,6 @@
+"""Módulo itinerary interactive de la aplicación bookings.
+"""
+
 import logging
 
 from django.core.signing import BadSignature, SignatureExpired
@@ -98,6 +101,7 @@ class ItineraryMapDataView(View):
     """Endpoint JSON con datos geo para el mapa Leaflet."""
 
     def get(self, request, token):
+        # get: Get. Args: según implementación. Returns: según implementación.
         try:
             venta_id, agencia_id = ItineraryCryptoService.verificar_y_desempaquetar_token(
                 token, max_age_days=30

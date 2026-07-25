@@ -6,13 +6,16 @@ logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
+    """Comando de gestión personalizado."""
     help = "Provisiona instancias de WhatsApp por agencia en Evolution API"
 
     def add_arguments(self, parser):
+        """Método: add arguments."""
         parser.add_argument("--force", action="store_true", default=False)
         parser.add_argument("--slug", type=str, default=None)
 
     def handle(self, *args, **options):
+        """Método: handle."""
         from apps.common.tasks import fetch_evolution_qr_task
         from apps.communications.services.evolution_api_service import EvolutionService
         from core.models.agencia import Agencia

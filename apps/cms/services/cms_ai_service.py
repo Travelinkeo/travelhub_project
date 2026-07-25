@@ -1,3 +1,6 @@
+"""Servicio de cms ai service para la aplicación cms.
+"""
+
 import logging
 
 from django.utils.text import slugify
@@ -8,12 +11,14 @@ logger = logging.getLogger(__name__)
 
 
 def _get_genai():
+    # _get_genai:  get genai. Args: según implementación. Returns: según implementación.
     from google import genai
 
     return genai
 
 
 def _get_genai_types():
+    # _get_genai_types:  get genai types. Args: según implementación. Returns: según implementación.
     from google.genai import types
 
     return types
@@ -26,6 +31,7 @@ class CMSContentService:
     """
 
     def __init__(self):
+        # __init__: Inicializa una nueva instancia de CMSContentService. Args: parámetros de inicialización.
         from django.conf import settings
 
         self.api_key = getattr(settings, "GEMINI_API_KEY", None)

@@ -17,6 +17,7 @@ class ItemFacturaConsolidadaSerializer(serializers.ModelSerializer):
     """Serializer para items de factura consolidada"""
 
     class Meta:
+        """Configuración del modelo."""
         model = ItemFacturaConsolidada
         fields = [
             "id_item_factura",
@@ -39,6 +40,7 @@ class DocumentoExportacionConsolidadoSerializer(serializers.ModelSerializer):
     """Serializer para documentos de exportación"""
 
     class Meta:
+        """Configuración del modelo."""
         model = DocumentoExportacionConsolidado
         fields = "__all__"
 
@@ -62,6 +64,7 @@ class FacturaConsolidadaSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
+        """Configuración del modelo."""
         model = FacturaConsolidada
         fields = [
             # IDs y referencias

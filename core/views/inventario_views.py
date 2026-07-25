@@ -18,6 +18,7 @@ class CatalogoTerrestreListView(LoginRequiredMixin, ListView):
     context_object_name = "productos"
 
     def get_queryset(self):
+        """Método que obtiene queryset. Args: según implementación. Returns: datos solicitados."""
         agency = get_current_agency()
         if agency:
             # El TenantManager ya filtra por agencia, pero somos explícitos aquí por claridad.
@@ -25,6 +26,7 @@ class CatalogoTerrestreListView(LoginRequiredMixin, ListView):
         return ProductoTerrestre.objects.none()
 
     def get_context_data(self, **kwargs):
+        """Método que obtiene context data. Args: según implementación. Returns: datos solicitados."""
         context = super().get_context_data(**kwargs)
         context["page_title"] = "Catálogo Terrestre"
         context["page_subtitle"] = "Inventario Propio"
@@ -50,6 +52,7 @@ class ProductoTerrestreCreateView(LoginRequiredMixin, CreateView):
     success_url = reverse_lazy("core:catalogo_terrestre")
 
     def form_valid(self, form):
+        """Método: form valid."""
         agency = get_current_agency()
         if not agency:
             return HttpResponse("No se detectó una agencia activa en el contexto.", status=403)
@@ -59,5 +62,6 @@ class ProductoTerrestreCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
     def form_invalid(self, form):
+        """Método: form invalid."""
         # Para depuración con HTMX o formularios complejos
         return super().form_invalid(form)

@@ -1,3 +1,6 @@
+"""Vistas (views) de la aplicación crm.
+"""
+
 import logging
 
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -17,6 +20,7 @@ class GenerateSuggestedReplyView(LoginRequiredMixin, View):
     """
 
     def get(self, request, cliente_id, *args, **kwargs):
+        # get: Get. Args: según implementación. Returns: según implementación.
         cliente = get_object_or_404(Cliente, pk=cliente_id)
 
         # 1. Obtener los últimos mensajes del chat para contexto

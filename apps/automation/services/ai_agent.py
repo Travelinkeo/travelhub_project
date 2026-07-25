@@ -1,3 +1,6 @@
+"""Servicio de ai agent para la aplicación automation.
+"""
+
 import logging
 
 from .ai_tools import AgentTools
@@ -6,12 +9,14 @@ logger = logging.getLogger(__name__)
 
 
 def _get_genai():
+    # _get_genai:  get genai. Args: según implementación. Returns: según implementación.
     from google import genai
 
     return genai
 
 
 def _get_genai_types():
+    # _get_genai_types:  get genai types. Args: según implementación. Returns: según implementación.
     from google.genai import types
 
     return types
@@ -24,6 +29,7 @@ class TravelHubAgent:
     """
 
     def __init__(self, agency=None):
+        # __init__: Inicializa una nueva instancia de TravelHubAgent. Args: parámetros de inicialización.
         from apps.automation.services.ai_engine import get_gemini_api_key
 
         api_key = get_gemini_api_key(agency)
@@ -61,6 +67,7 @@ class TravelHubAgent:
         self._system_prompt = self._get_system_prompt()
 
     def _get_system_prompt(self) -> str:
+        # _get_system_prompt:  get system prompt. Args: según implementación. Returns: según implementación.
         return """
         Usted es el Agente Inteligente de TravelHub, el cerebro contable y operativo de Travelinkeo.
         Su misión es ayudar a los agentes de viajes y contadores a gestionar la agencia de forma eficiente.

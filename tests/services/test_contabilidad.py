@@ -9,7 +9,9 @@ pytestmark = [pytest.mark.django_db, pytest.mark.services]
 
 
 class TestBcvClient:
+    """Test Bcv Client."""
     def test_obtener_tasas(self, monkeypatch):
+        """Obtener tasas."""
         mock_response = unittest.mock.MagicMock()
         mock_response.status_code = 200
         mock_response.json.return_value = {
@@ -24,7 +26,9 @@ class TestBcvClient:
 
 
 class TestSupplierReportService:
+    """Test Supplier Report Service."""
     def test_parse_report(self, monkeypatch):
+        """Parse report."""
         mock_parser = unittest.mock.MagicMock()
         mock_parser.can_parse.return_value = True
         mock_parser.parse.return_value = {"status": "ok"}

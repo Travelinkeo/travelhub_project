@@ -1,9 +1,14 @@
+"""Formularios Django para la aplicación bookings.
+"""
+
 from django import forms
 
 from apps.bookings.models import BoletoImportado, FeeVenta
 
 
-class FeeVentaForm(forms.ModelForm):
+class FeeVentaForm:
+    """Formulario para feeventa. Uso: instanciar según necesidad del dominio.
+    """
     class Meta:
         model = FeeVenta
         fields = ["tipo_fee", "monto", "moneda", "descripcion", "es_comision_agencia"]
@@ -38,7 +43,9 @@ class FeeVentaForm(forms.ModelForm):
         }
 
 
-class BoletoManualForm(forms.ModelForm):
+class BoletoManualForm:
+    """Formulario para boletomanual. Uso: instanciar según necesidad del dominio.
+    """
     class Meta:
         model = BoletoImportado
         fields = [
@@ -62,13 +69,17 @@ class BoletoManualForm(forms.ModelForm):
         }
 
 
-class BoletoFileUploadForm(forms.ModelForm):
+class BoletoFileUploadForm:
+    """Formulario para boletofileupload. Uso: instanciar según necesidad del dominio.
+    """
     class Meta:
         model = BoletoImportado
         fields = ["archivo_boleto"]
 
 
-class BoletoAereoUpdateForm(forms.ModelForm):
+class BoletoAereoUpdateForm:
+    """Formulario para boletoaereoupdate. Uso: instanciar según necesidad del dominio.
+    """
     class Meta:
         model = BoletoImportado
         fields = [
@@ -109,6 +120,7 @@ class BoletoAereoUpdateForm(forms.ModelForm):
         }
 
     def clean(self):
+        # clean: Limpia/valida los campos del modelo. Args: None. Returns: None.
         cleaned = super().clean()
         tarifa = cleaned.get("tarifa_base")
         impuestos = cleaned.get("impuestos_total_calculado")

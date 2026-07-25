@@ -1,7 +1,12 @@
+"""Migración de base de datos para finance.
+"""
+
 from django.db import migrations
 
 
-class Migration(migrations.Migration):
+class Migration:
+    """Clase Migration. Uso: según contexto de la aplicación.
+    """
     dependencies = [
         ("finance", "0027_remove_factura_finance_fac_venta_a_295412_idx_and_more"),
     ]

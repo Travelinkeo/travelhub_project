@@ -1,3 +1,6 @@
+"""Servicio de pnr parser service para la aplicación bookings.
+"""
+
 import datetime
 import logging
 import re
@@ -156,6 +159,7 @@ class PNRParserService:
         for flight in flight_matches:
             # Normalizar horas (0700A -> 07:00, 2330 -> 23:30)
             def norm_h(h):
+                # norm_h: Norm h. Args: según implementación. Returns: según implementación.
                 h = re.sub(r"[A-Z\+\*\d]", "", h)  # Limpiar letras y offsets
                 if len(h) == 4:
                     return f"{h[:2]}:{h[2:]}"

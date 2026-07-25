@@ -1,3 +1,6 @@
+"""Vistas (views) de la aplicación crm.
+"""
+
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
@@ -9,16 +12,21 @@ from apps.crm.models import Pasajero
 from core.api import HtmxResponseMixin, SaaSMixin
 
 
-class CRMBaseMixin(SaaSMixin, LoginRequiredMixin):
+class CRMBaseMixin:
+    """Mixin que agrega funcionalidad de crmbase. Uso: instanciar según necesidad del dominio.
+    """
     context_object_name = "object"
 
     def get_context_data(self, **kwargs):
+        # get_context_data: Obtiene/recupera context data. Args: según implementación. Returns: dato solicitado.
         context = super().get_context_data(**kwargs)
         context["active_tab"] = "crm"
         return context
 
 
-class PasajeroListView(HtmxResponseMixin, CRMBaseMixin, ListView):
+class PasajeroListView:
+    """Vista para gestionar pasajerolist. Uso: instanciar según necesidad del dominio.
+    """
     model = Pasajero
     template_name = "crm/pasajero_list.html"
     htmx_template_name = "crm/partials/pasajero_list_rows.html"
@@ -26,6 +34,7 @@ class PasajeroListView(HtmxResponseMixin, CRMBaseMixin, ListView):
     paginate_by = 25
 
     def get_queryset(self):
+        # get_queryset: Obtiene/recupera queryset. Args: según implementación. Returns: dato solicitado.
         queryset = (
             super()
             .get_queryset()
@@ -44,61 +53,77 @@ class PasajeroListView(HtmxResponseMixin, CRMBaseMixin, ListView):
         return queryset
 
     def get_context_data(self, **kwargs):
+        # get_context_data: Obtiene/recupera context data. Args: según implementación. Returns: dato solicitado.
         context = super().get_context_data(**kwargs)
         context["title"] = "Pasajeros"
         return context
 
 
-class PasajeroDetailView(CRMBaseMixin, DetailView):
+class PasajeroDetailView:
+    """Vista para gestionar pasajerodetail. Uso: instanciar según necesidad del dominio.
+    """
     model = Pasajero
     template_name = "crm/pasajero_detail.html"
     context_object_name = "pasajero"
 
     def get_context_data(self, **kwargs):
+        # get_context_data: Obtiene/recupera context data. Args: según implementación. Returns: dato solicitado.
         context = super().get_context_data(**kwargs)
         context["title"] = f"Pasajero: {self.object.nombre_completo}"
         return context
 
 
-class PasajeroCreateView(CRMBaseMixin, CreateView):
+class PasajeroCreateView:
+    """Vista para gestionar pasajerocreate. Uso: instanciar según necesidad del dominio.
+    """
     model = Pasajero
     template_name = "crm/pasajero_form.html"
     form_class = PasajeroForm
     success_url = reverse_lazy("crm:pasajero_list")
 
     def get_context_data(self, **kwargs):
+        # get_context_data: Obtiene/recupera context data. Args: según implementación. Returns: dato solicitado.
         context = super().get_context_data(**kwargs)
         context["title"] = "Nuevo Pasajero"
         return context
 
     def form_valid(self, form):
+        # form_valid: Form valid. Args: según implementación. Returns: según implementación.
         messages.success(self.request, "Pasajero creado exitosamente.")
         return super().form_valid(form)
 
 
-class PasajeroUpdateView(CRMBaseMixin, UpdateView):
+class PasajeroUpdateView:
+    """Vista para gestionar pasajeroupdate. Uso: instanciar según necesidad del dominio.
+    """
     model = Pasajero
     template_name = "crm/pasajero_form.html"
     form_class = PasajeroForm
 
     def get_success_url(self):
+        # get_success_url: Obtiene/recupera success url. Args: según implementación. Returns: dato solicitado.
         return reverse_lazy("crm:pasajero_detail", kwargs={"pk": self.object.pk})
 
     def get_context_data(self, **kwargs):
+        # get_context_data: Obtiene/recupera context data. Args: según implementación. Returns: dato solicitado.
         context = super().get_context_data(**kwargs)
         context["title"] = "Editar Pasajero"
         return context
 
     def form_valid(self, form):
+        # form_valid: Form valid. Args: según implementación. Returns: según implementación.
         messages.success(self.request, "Pasajero actualizado exitosamente.")
         return super().form_valid(form)
 
 
-class PasajeroDeleteView(CRMBaseMixin, DeleteView):
+class PasajeroDeleteView:
+    """Vista para gestionar pasajerodelete. Uso: instanciar según necesidad del dominio.
+    """
     model = Pasajero
     template_name = "crm/pasajero_confirm_delete.html"
     success_url = reverse_lazy("crm:pasajero_list")
 
     def delete(self, request, *args, **kwargs):
+        # delete: Elimina el objeto de la base de datos. Args: None. Returns: None.
         messages.success(self.request, "Pasajero eliminado correctamente.")
         return super().delete(request, *args, **kwargs)

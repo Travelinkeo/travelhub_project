@@ -1,3 +1,6 @@
+"""Vistas (views) de la aplicación crm.
+"""
+
 import logging
 
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -67,6 +70,7 @@ class UpdateLeadStageView(LoginRequiredMixin, View):
     """
 
     def post(self, request, *args, **kwargs):
+        # post: Post. Args: según implementación. Returns: según implementación.
         lead_id = request.POST.get("lead_id")
         new_stage = request.POST.get("new_stage")
 

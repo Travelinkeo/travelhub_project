@@ -1,3 +1,6 @@
+"""Pruebas para rbac en bookings.
+"""
+
 from decimal import Decimal
 from unittest.mock import patch
 

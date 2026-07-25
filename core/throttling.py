@@ -6,6 +6,7 @@ _THROTTLE_RATES = getattr(settings, "REST_FRAMEWORK", {}).get("DEFAULT_THROTTLE_
 
 
 class DashboardRateThrottle(UserRateThrottle):
+    """Función: DashboardRateThrottle."""
     scope = "dashboard"
 
     @property
@@ -13,27 +14,34 @@ class DashboardRateThrottle(UserRateThrottle):
         return _THROTTLE_RATES.get(self.scope, "100/hour")
 
 
+        """Método: rate."""
 class LiquidacionRateThrottle(UserRateThrottle):
+    """Función: LiquidacionRateThrottle."""
     scope = "liquidacion"
 
     @property
     def rate(self):
         return _THROTTLE_RATES.get(self.scope, "50/hour")
 
+        """Método: rate."""
 
 class ReportesRateThrottle(UserRateThrottle):
+    """Función: ReportesRateThrottle."""
     scope = "reportes"
 
     @property
     def rate(self):
         return _THROTTLE_RATES.get(self.scope, "20/hour")
+        """Método: rate."""
 
 
 class UploadRateThrottle(UserRateThrottle):
+    """Función: UploadRateThrottle."""
     scope = "upload"
 
     @property
     def rate(self):
+        """Método: rate."""
         return _THROTTLE_RATES.get(self.scope, "30/hour")
 
 
@@ -48,6 +56,7 @@ class AgenciaAIParserThrottle(SimpleRateThrottle):
     scope = "ai_parser_quota"
 
     def get_cache_key(self, request, view):
+        """Método que obtiene cache key. Args: según implementación. Returns: datos solicitados."""
         # Resolver la agencia desde el request o desde la relación de usuario si está autenticado
         agencia = getattr(request, "agencia", getattr(request, "agency", None))
 

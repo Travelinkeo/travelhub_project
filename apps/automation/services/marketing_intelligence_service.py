@@ -1,3 +1,6 @@
+"""Servicio de marketing intelligence service para la aplicación automation.
+"""
+
 import logging
 from datetime import timedelta
 
@@ -11,6 +14,7 @@ from core.api import Agencia
 
 
 def _get_marketing_models():
+    # _get_marketing_models:  get marketing models. Args: según implementación. Returns: según implementación.
     from django.apps import apps
 
     return apps.get_model("marketing", "Campania"), apps.get_model("marketing", "ActivoMarketing")

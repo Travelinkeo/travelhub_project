@@ -13,9 +13,11 @@ from apps.communications.services.notification_dispatcher import notificar_recor
 
 
 class Command(BaseCommand):
+    """Comando de gestión personalizado."""
     help = "Envía recordatorios de pago a ventas con saldo pendiente"
 
     def add_arguments(self, parser):
+        """Método: add arguments."""
         parser.add_argument(
             "--dias",
             type=int,
@@ -27,6 +29,7 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
+        """Método: handle."""
         dias = options["dias"]
         dry_run = options["dry_run"]
         fecha_limite = timezone.now() - timedelta(days=dias)

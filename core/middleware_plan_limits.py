@@ -38,6 +38,7 @@ class PlanLimitMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
+        """Método interna: call."""
         if not request.user.is_authenticated:
             return self.get_response(request)
 

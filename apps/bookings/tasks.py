@@ -1,3 +1,6 @@
+"""Tareas asíncronas (Celery) para la aplicación bookings.
+"""
+
 import logging
 
 import requests
@@ -11,6 +14,7 @@ logger = logging.getLogger(__name__)
 @tenant_task(queue="notifications", time_limit=120, soft_time_limit=90)
 @idempotent_task(timeout=1800, key_prefix="celery_notif_whatsapp")
 def notificar_pago_whatsapp_task(venta_id, **kwargs):
+    # notificar_pago_whatsapp_task: Notificar pago whatsapp task. Args: según implementación. Returns: según implementación.
     from apps.bookings.models import Venta
     from apps.communications.services.whatsapp_unified import send_whatsapp_message
 
@@ -52,6 +56,7 @@ def notificar_pago_whatsapp_task(venta_id, **kwargs):
 
 
 def cls_notificar_infraccion_pasaporte(venta, pasajero, fecha_viaje):
+    # cls_notificar_infraccion_pasaporte: Cls notificar infraccion pasaporte. Args: según implementación. Returns: según implementación.
     from django.conf import settings
 
     bot_token = getattr(settings, "TELEGRAM_BOT_TOKEN", None)
@@ -88,6 +93,7 @@ def cls_notificar_infraccion_pasaporte(venta, pasajero, fecha_viaje):
 
 
 def cls_notificar_urgency_time_limit(venta):
+    # cls_notificar_urgency_time_limit: Cls notificar urgency time limit. Args: según implementación. Returns: según implementación.
     from django.conf import settings
     from django.utils import timezone
 
@@ -151,6 +157,7 @@ def cls_notificar_urgency_time_limit(venta):
     soft_time_limit=270,
 )
 def verificar_cumplimiento_pasaportes_reserva_task(venta_id, **kwargs):
+    # verificar_cumplimiento_pasaportes_reserva_task: Verificar cumplimiento pasaportes reserva task. Args: según implementación. Returns: según implementación.
     from datetime import timedelta
 
     from apps.bookings.models import Venta
@@ -212,6 +219,7 @@ def verificar_cumplimiento_pasaportes_reserva_task(venta_id, **kwargs):
     soft_time_limit=270,
 )
 def monitorear_tiempos_limite_periodico_task(**kwargs):
+    # monitorear_tiempos_limite_periodico_task: Monitorear tiempos limite periodico task. Args: según implementación. Returns: según implementación.
     from datetime import timedelta
 
     from django.utils import timezone
@@ -257,6 +265,7 @@ def monitorear_tiempos_limite_periodico_task(**kwargs):
     acks_late=True,
 )
 def parsear_boleto_individual(boleto_id, **kwargs):
+    # parsear_boleto_individual: Analiza/parsea ar boleto individual. Args: datos de entrada. Returns: resultado del parseo.
     from apps.bookings.models import BoletoImportado
 
     try:
@@ -301,6 +310,7 @@ def parsear_boleto_individual(boleto_id, **kwargs):
     default_retry_delay=600,
 )
 def retry_queued_boletos(agencia_id=None):
+    # retry_queued_boletos: Retry queued boletos. Args: según implementación. Returns: según implementación.
     from apps.bookings.models import BoletoImportado
     from apps.common.utils.celery_utils import safe_delay
     from core.middleware import agency_context
@@ -337,6 +347,7 @@ def retry_queued_boletos(agencia_id=None):
     acks_late=True,
 )
 def send_ticket_notification(boleto_id, **kwargs):
+    # send_ticket_notification: Envía  ticket notification. Args: datos del mensaje. Returns: resultado del envío.
     import os
 
     from django.conf import settings
@@ -421,6 +432,7 @@ def send_ticket_notification(boleto_id, **kwargs):
     default_retry_delay=600,
 )
 def check_upcoming_flights():
+    # check_upcoming_flights: Check upcoming flights. Args: según implementación. Returns: según implementación.
     import json
     from datetime import timedelta
 
@@ -599,6 +611,7 @@ def enviar_recordatorios_vuelo_task():
     acks_late=True,
 )
 def generar_pdf_ticket_async_task(boleto_id, **kwargs):
+    # generar_pdf_ticket_async_task: Genera pdf ticket async task. Args: parámetros de generación. Returns: resultado generado.
     import time
 
     from django.core.files.base import ContentFile

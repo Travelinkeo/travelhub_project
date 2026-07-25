@@ -1,3 +1,5 @@
+"""Configuración global de pytest — fixtures compartidos, mocks, y configuración de base de datos para todos los tests."""
+
 import logging
 import os
 import unittest.mock
@@ -11,7 +13,7 @@ from apps.bookings.models import Venta
 from apps.common.models import Moneda
 from apps.crm.models import Cliente
 
-# Asegurar configuración de Django incluso si pytest-django no se auto-carga
+# Asegura configuración de Django incluso si pytest-django no se auto-carga
 if "DJANGO_SETTINGS_MODULE" not in os.environ:
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "travelhub.settings")
 try:
@@ -28,7 +30,7 @@ logger = logging.getLogger(__name__)
 
 
 def pytest_configure(config):
-    """Override settings for tests globally."""
+    """Override de settings para tests globales. Detecta PostgreSQL disponible, configura caché local y parchea flush con CASCADE."""
     import os as _os
     import socket
 
@@ -134,7 +136,8 @@ def pytest_configure(config):
 
     org_execute_sql_flush = BaseDatabaseOperations.execute_sql_flush
 
-    def new_execute_sql_flush(self, sql_list):
+    def new_execute_sql_flush(self, sql_list):  # noqa: E306
+        """Parchea TRUNCATE para agregar CASCADE y evitar errores de FK en tests."""
         new_sql_list = []
         for sql in sql_list:
             if "TRUNCATE" in sql and "CASCADE" not in sql:
@@ -148,7 +151,7 @@ def pytest_configure(config):
 
 @pytest.fixture(autouse=True, scope="session")
 def _require_pg(request):
-    """Skip all tests when PostgreSQL is unavailable."""
+    """Salta todos los tests si PostgreSQL no está disponible."""
     if getattr(request.config, "_pg_unavailable", False):
         pytest.skip(
             "PostgreSQL not available for tests. "
@@ -158,7 +161,7 @@ def _require_pg(request):
 
 @pytest.fixture(scope="session", autouse=True)
 def create_stub_tables(django_db_setup, django_db_blocker):
-    """Create tables for managed=False stub models so tests can use them."""
+    """Crea tablas para modelos stub con managed=False para que los tests puedan usarlas."""
     with django_db_blocker.unblock():
         from django.db import connection, models
 
@@ -193,12 +196,7 @@ def create_stub_tables(django_db_setup, django_db_blocker):
 
 @pytest.fixture(autouse=True)
 def use_simple_static_storage(settings):
-    """For tests force a simple staticfiles storage without triggering Django 5 deprecation.
-
-    Antes se usaba STATICFILES_STORAGE (deprecado en Django 5). Ahora ajustamos
-    settings.STORAGES['staticfiles'] directamente. Mantenemos WHITENOISE_USE_FINDERS
-    para compatibilidad cuando WhiteNoise está presente.
-    """
+    """Fuerza un storage simple de staticfiles en tests para evitar deprecation de Django 5."""
     # Asegurar estructura STORAGES exista (definida en settings del proyecto)
     if hasattr(settings, "STORAGES"):
         settings.STORAGES["staticfiles"] = {
@@ -212,20 +210,17 @@ def use_simple_static_storage(settings):
 
 @pytest.fixture(autouse=True)
 def mock_ai_engine(monkeypatch):
-    """
-    Mock global de AIEngine para evitar llamadas reales a Gemini en tests.
-    Retorna un resultado de parseo exitoso por defecto.
-    """
-    # Mock de _ensure_configured
+    """Mock global de AIEngine — evita llamadas reales a Gemini. Retorna resultado de parseo exitoso por defecto."""
+    # Mock de _ensure_configured para que siempre retorne True
     monkeypatch.setattr(
         "apps.automation.services.ai_engine.AIEngine._ensure_configured",
         lambda *args, **kwargs: True,
     )
 
-    # Mock de la llamada principal
+    # Mock de la llamada principal a Gemini
     from apps.automation.services.ai_engine import ai_engine
 
-    # Respuesta por defecto compatible con ResultadoParseoSchema
+    # Respuesta mock por defecto compatible con ResultadoParseoSchema
     default_res = {
         "boletos": [
             {
@@ -270,13 +265,14 @@ def mock_ai_engine(monkeypatch):
         ]
     }
 
+    # Crea mock de call_gemini con respuesta por defecto
     mock_call = unittest.mock.MagicMock(return_value=default_res)
     monkeypatch.setattr(ai_engine, "call_gemini", mock_call)
 
     # Mock de generate_content (usado por ai_parser.py)
     import json
 
-    # Respuesta JSON para ai_parser
+    # Respuesta JSON mock para ai_parser
     ai_parser_res = {
         "passenger": {"name": "JUAREZ/RAUL"},
         "bookingDetails": {"ticketNumber": "0457281019415"},
@@ -298,6 +294,7 @@ def mock_ai_engine(monkeypatch):
 
 @pytest.fixture
 def usuario_staff(db):
+    """Crea un usuario staff para tests de admin. Args: db. Returns: User."""
     User = get_user_model()
     user, _ = User.objects.get_or_create(username="staffer")
     user.set_password("staffpass1234")
@@ -308,6 +305,7 @@ def usuario_staff(db):
 
 @pytest.fixture
 def api_client_staff(usuario_staff):
+    """Crea APIClient autenticado como usuario staff. Args: usuario_staff. Returns: APIClient."""
     client = APIClient()
     client.force_login(usuario_staff)
     return client
@@ -315,6 +313,7 @@ def api_client_staff(usuario_staff):
 
 @pytest.fixture
 def usuario_api(db):
+    """Crea un usuario de API genérico. Args: db. Returns: User."""
     User = get_user_model()
     user, _ = User.objects.get_or_create(username="tester")
     user.set_password("pass1234")
@@ -324,6 +323,7 @@ def usuario_api(db):
 
 @pytest.fixture
 def api_client_autenticado(usuario_api):
+    """Crea APIClient autenticado como usuario normal. Args: usuario_api. Returns: APIClient."""
     client = APIClient()
     client.force_login(usuario_api)
     return client
@@ -331,6 +331,7 @@ def api_client_autenticado(usuario_api):
 
 @pytest.fixture
 def venta_base(db):
+    """Crea una venta base con moneda USD y cliente para tests. Args: db. Returns: Venta."""
     moneda, _ = Moneda.objects.get_or_create(
         codigo_iso="USD", defaults={"nombre": "Dólar", "simbolo": "$"}
     )
@@ -355,7 +356,7 @@ def venta_base(db):
 
 @pytest.fixture
 def mock_redis(monkeypatch):
-    """Mock de Redis para tests de caché"""
+    """Mock de Redis para tests de caché. Args: monkeypatch. Returns: MagicMock."""
     mock = unittest.mock.MagicMock()
     mock.get.return_value = None
     mock.set.return_value = True
@@ -371,7 +372,7 @@ def mock_redis(monkeypatch):
 
 @pytest.fixture
 def mock_celery_task(monkeypatch):
-    """Mock de tareas Celery"""
+    """Mock de tareas Celery. Args: monkeypatch. Returns: MagicMock."""
     mock = unittest.mock.MagicMock()
     monkeypatch.setattr("core.tasks.process_ticket_async.delay", mock)
     return mock
@@ -379,7 +380,7 @@ def mock_celery_task(monkeypatch):
 
 @pytest.fixture
 def sample_pais(db):
-    """País de ejemplo para tests"""
+    """País de ejemplo (Venezuela) para tests. Args: db. Returns: Pais."""
     from apps.common.models import Pais
 
     pais, _ = Pais.objects.get_or_create(
@@ -390,7 +391,7 @@ def sample_pais(db):
 
 @pytest.fixture
 def sample_ciudad(db, sample_pais):
-    """Ciudad de ejemplo para tests"""
+    """Ciudad de ejemplo (Caracas) para tests. Args: db, sample_pais. Returns: Ciudad."""
     from apps.common.models import Ciudad
 
     ciudad, _ = Ciudad.objects.get_or_create(
@@ -401,7 +402,7 @@ def sample_ciudad(db, sample_pais):
 
 @pytest.fixture
 def agencia_premium(db):
-    """Crea una agencia configurada como Contribuyente Especial (Tenant A)."""
+    """Crea agencia configurada como Contribuyente Especial (Tenant A). Args: db. Returns: Agencia."""
     from core.models.agencia import Agencia
 
     agencia = Agencia.objects.create(
@@ -416,7 +417,7 @@ def agencia_premium(db):
 
 @pytest.fixture
 def agencia_estandar(db):
-    """Crea una agencia estándar (Tenant B)."""
+    """Crea una agencia estándar (Tenant B). Args: db. Returns: Agencia."""
     from core.models.agencia import Agencia
 
     agencia = Agencia.objects.create(
@@ -431,6 +432,7 @@ def agencia_estandar(db):
 
 @pytest.fixture
 def moneda_usd(db):
+    """Crea moneda USD para tests. Args: db. Returns: Moneda."""
     from apps.common.models import Moneda
 
     moneda, _ = Moneda.objects.get_or_create(
@@ -441,6 +443,7 @@ def moneda_usd(db):
 
 @pytest.fixture
 def moneda_ves(db):
+    """Crea moneda VES para tests. Args: db. Returns: Moneda."""
     from apps.common.models import Moneda
 
     moneda, _ = Moneda.objects.get_or_create(
@@ -456,7 +459,7 @@ def moneda_ves(db):
 
 @pytest.fixture
 def superuser(db):
-    """Crea un superusuario para tests de admin."""
+    """Crea un superusuario para tests de admin. Args: db. Returns: User."""
     User = get_user_model()
     user = User.objects.create_superuser(
         username=f"admin_{__import__('time').time()}",
@@ -468,14 +471,14 @@ def superuser(db):
 
 @pytest.fixture
 def admin_client(client, superuser):
-    """Django test client autenticado como superuser."""
+    """Django test client autenticado como superuser. Args: client, superuser. Returns: Client."""
     client.force_login(superuser)
     return client
 
 
 @pytest.fixture
 def agencia(db):
-    """Crea una agencia de prueba."""
+    """Crea una agencia de prueba. Args: db. Returns: Agencia."""
     from tests.helpers import create_test_agencia
 
     return create_test_agencia()
@@ -483,7 +486,7 @@ def agencia(db):
 
 @pytest.fixture
 def usuario_agente(db, agencia):
-    """Crea un usuario agente perteneciente a una agencia."""
+    """Crea un usuario agente perteneciente a una agencia. Args: db, agencia. Returns: User."""
     User = get_user_model()
     user = User.objects.create_user(
         username=f"agente_{__import__('time').time()}",
@@ -498,10 +501,7 @@ def usuario_agente(db, agencia):
 
 @pytest.fixture
 def mock_http_requests(monkeypatch):
-    """Mock genérico de requests.post/get para evitar llamadas HTTP reales.
-
-    Uso: mock_http_requests.post(requests.post)  # reemplaza llamadas reales
-    """
+    """Mock genérico de requests.post/get/put para evitar llamadas HTTP reales. Args: monkeypatch. Returns: MagicMock."""
     import unittest.mock
 
     mock = unittest.mock.MagicMock()
@@ -513,16 +513,14 @@ def mock_http_requests(monkeypatch):
 
 @pytest.fixture
 def mock_provider_chain(monkeypatch):
-    """
-    Mock de ProviderChain/FallbackRouter para tests que necesitan
-    resultados de IA pero no quieren ejecutar la cadena real.
-    """
+    """Mock de ProviderChain/FallbackRouter para tests de IA sin ejecutar cadena real. Args: monkeypatch. Returns: MagicMock."""
     import json
     import unittest.mock
 
     from apps.automation.providerchain.base import ProviderResult
 
-    def fake_generate(**kwargs):
+    def fake_generate(**kwargs):  # noqa: E306
+        """Función fake que retorna un ProviderResult exitoso simulado."""
         return ProviderResult(
             text=json.dumps(
                 {
@@ -555,7 +553,7 @@ def mock_provider_chain(monkeypatch):
 
 @pytest.fixture
 def mock_stripe(monkeypatch):
-    """Mock de operaciones Stripe para tests de finance."""
+    """Mock de operaciones Stripe para tests de finance. Args: monkeypatch. Returns: MagicMock."""
     import unittest.mock
 
     mock_balance = unittest.mock.MagicMock()
@@ -577,6 +575,6 @@ def mock_stripe(monkeypatch):
 
 @pytest.fixture
 def enable_db_trgm(settings):
-    """Fuerza desactivación de búsqueda trigram si no disponible en test DB."""
+    """Fuerza desactivación de búsqueda trigram si no disponible en DB de test. Args: settings. Returns: settings."""
     settings.USE_PG_TRGM = False
     return settings

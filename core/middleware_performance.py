@@ -40,6 +40,7 @@ class QueryCountDebugMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
+        """Método interna: call."""
         connection.queries_log.clear()
         start_time = time.time()
 
@@ -81,6 +82,7 @@ class CacheHeaderMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
+        """Método interna: call."""
         response = self.get_response(request)
 
         if (

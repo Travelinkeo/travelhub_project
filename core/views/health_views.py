@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 def _check_database():
+    """Función interna: check database."""
     try:
         conn = connections["default"]
         with conn.cursor() as cursor:
@@ -24,6 +25,7 @@ def _check_database():
 
 
 def _check_redis():
+    """Función interna: check redis."""
     try:
         cache.set("health_check", "ok", timeout=10)
         if cache.get("health_check") == "ok":
@@ -34,6 +36,7 @@ def _check_redis():
 
 
 def _check_celery():
+    """Función interna: check celery."""
     try:
         from travelhub.celery import app as celery_app
 
@@ -61,6 +64,7 @@ def _check_weasyprint():
 
 
 def _check_disk():
+    """Función interna: check disk."""
     try:
         media_path = settings.MEDIA_ROOT or os.path.join(settings.BASE_DIR, "media")
         stat = shutil.disk_usage(media_path)
@@ -79,6 +83,7 @@ def _check_disk():
 
 
 def _check_celery_queue_depth():
+    """Función interna: check celery queue depth."""
     from core.metrics import QUEUES
 
     try:
@@ -101,6 +106,7 @@ def _check_celery_queue_depth():
 
 
 def _check_db_pool():
+    """Función interna: check db pool."""
     from django.db import connection
 
     try:

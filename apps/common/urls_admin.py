@@ -1,4 +1,7 @@
 # apps/common/urls_admin.py
+"""Configuración del panel de administración para common.
+"""
+
 from django.urls import path
 
 from apps.common.views import catalogos_views

@@ -1,3 +1,6 @@
+"""Servicio de evolution api service para la aplicación communications.
+"""
+
 import logging
 import os
 
@@ -19,12 +22,14 @@ class EvolutionService:
 
     @classmethod
     def _get_base_url(cls):
+        # _get_base_url:  get base url. Args: según implementación. Returns: según implementación.
         return getattr(settings, "WHATSAPP_MICROSERVICE_URL", None) or os.getenv(
             "WHATSAPP_MICROSERVICE_URL", "http://evolution:8080"
         )
 
     @classmethod
     def _get_headers(cls):
+        # _get_headers:  get headers. Args: según implementación. Returns: según implementación.
         token = getattr(settings, "WHATSAPP_MICROSERVICE_TOKEN", None) or os.getenv(
             "WHATSAPP_MICROSERVICE_TOKEN"
         )
@@ -37,6 +42,7 @@ class EvolutionService:
 
     @classmethod
     def _get_session(cls) -> requests.Session:
+        # _get_session:  get session. Args: según implementación. Returns: según implementación.
         session = requests.Session()
         retries = Retry(
             total=3,
@@ -336,6 +342,7 @@ class EvolutionService:
 
     @classmethod
     def _clean_number(cls, number: str) -> str:
+        # _clean_number:  clean number. Args: según implementación. Returns: según implementación.
         return "".join(filter(str.isdigit, str(number)))
 
     @classmethod
@@ -358,6 +365,7 @@ class EvolutionService:
     def _send_buttons_internal(
         cls, instance_name: str, number: str, text: str, buttons: list[dict]
     ):
+        # _send_buttons_internal:  send buttons internal. Args: según implementación. Returns: según implementación.
         cls._ensure_instance(instance_name)
         url = f"{cls._get_base_url()}/message/sendButtons/{instance_name}"
         clean_number = cls._clean_number(number)
@@ -424,6 +432,7 @@ class EvolutionService:
         button_text: str,
         sections: list[dict],
     ):
+        # _send_list_internal:  send list internal. Args: según implementación. Returns: según implementación.
         cls._ensure_instance(instance_name)
         url = f"{cls._get_base_url()}/message/sendList/{instance_name}"
         clean_number = cls._clean_number(number)
@@ -469,6 +478,7 @@ class EvolutionService:
 
     @classmethod
     def _send_reaction_internal(cls, instance_name: str, number: str, message_id: str, emoji: str):
+        # _send_reaction_internal:  send reaction internal. Args: según implementación. Returns: según implementación.
         cls._ensure_instance(instance_name)
         url = f"{cls._get_base_url()}/message/sendReaction/{instance_name}"
         clean_number = cls._clean_number(number)
@@ -529,6 +539,7 @@ class EvolutionService:
         latitude: float,
         longitude: float,
     ):
+        # _send_location_internal:  send location internal. Args: según implementación. Returns: según implementación.
         cls._ensure_instance(instance_name)
         url = f"{cls._get_base_url()}/message/sendLocation/{instance_name}"
         clean_number = cls._clean_number(number)
@@ -598,6 +609,7 @@ class EvolutionService:
         email: str = "",
         organization: str = "",
     ):
+        # _send_contact_internal:  send contact internal. Args: según implementación. Returns: según implementación.
         cls._ensure_instance(instance_name)
         url = f"{cls._get_base_url()}/message/sendContact/{instance_name}"
         clean_number = cls._clean_number(number)
@@ -645,6 +657,7 @@ class EvolutionService:
 
     @classmethod
     def _send_sticker_internal(cls, instance_name: str, number: str, sticker_url: str):
+        # _send_sticker_internal:  send sticker internal. Args: según implementación. Returns: según implementación.
         cls._ensure_instance(instance_name)
         url = f"{cls._get_base_url()}/message/sendSticker/{instance_name}"
         clean_number = cls._clean_number(number)

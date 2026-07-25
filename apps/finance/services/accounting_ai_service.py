@@ -1,3 +1,6 @@
+"""Servicio de accounting ai service para la aplicación finance.
+"""
+
 from __future__ import annotations
 
 # ==============================================================================

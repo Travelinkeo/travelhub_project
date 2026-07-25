@@ -11,6 +11,7 @@ class SaaSMixin:
     """
 
     def get_queryset(self):
+        """Método que obtiene queryset. Args: según implementación. Returns: datos solicitados."""
         if hasattr(super(), "get_queryset"):
             qs = super().get_queryset()
         else:
@@ -65,6 +66,7 @@ class SaaSMixin:
         return qs.none()
 
     def get_object(self, queryset=None):
+        """Método que obtiene object. Args: según implementación. Returns: datos solicitados."""
         if hasattr(super(), "get_object"):
             obj = super().get_object(queryset)
         else:
@@ -116,6 +118,7 @@ class SaaSMixin:
         return obj
 
     def dispatch(self, request, *args, **kwargs):
+        """Método: dispatch."""
         user = request.user
         if not user.is_authenticated:
             return super().dispatch(request, *args, **kwargs)
@@ -188,6 +191,7 @@ class AgencyRoleRequiredMixin(AccessMixin, SaaSMixin):
     allowed_roles = []
 
     def dispatch(self, request, *args, **kwargs):
+        """Método: dispatch."""
         if not request.user.is_authenticated:
             return self.handle_no_permission()
 
@@ -210,6 +214,7 @@ class HtmxResponseMixin:
     htmx_template_name = None
 
     def get_template_names(self):
+        """Método que obtiene template names. Args: según implementación. Returns: datos solicitados."""
         if (
             self.request.headers.get("HX-Request")
             and not self.request.headers.get("HX-Boosted")

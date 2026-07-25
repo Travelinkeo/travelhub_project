@@ -16,6 +16,7 @@ class OCRPassportView(LoginRequiredMixin, View):
     """
 
     def post(self, request, *args, **kwargs):
+        """Método: post."""
         # Aceptamos tanto 'archivo' (Legacy/GDS) como 'archivo_identidad' (Nuevo Dashboard)
         archivo = request.FILES.get("archivo") or request.FILES.get("archivo_identidad")
 

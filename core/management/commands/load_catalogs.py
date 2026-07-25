@@ -21,9 +21,11 @@ CATALOG_FILES = {
 
 
 class Command(BaseCommand):
+    """Comando de gestión personalizado."""
     help = "Carga o actualiza catálogos base (paises, monedas, ciudades opcional, aerolineas, proveedores, clientes, productos_servicios) desde JSON o CSV. Idempotente."
 
     def add_arguments(self, parser):
+        """Método: add arguments."""
         parser.add_argument(
             "--only",
             nargs="*",
@@ -50,6 +52,7 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
+        """Método: handle."""
         selected = options.get("only")
         base_dir = Path(options["dir"]).resolve()
         fmt = options["format"]
@@ -114,6 +117,7 @@ class Command(BaseCommand):
             self.stdout.write(f" - {cat}: {stats}")
 
     def _read_csv(self, path: Path):
+        """Método interna: read csv."""
         rows = []
         with path.open(newline="", encoding="utf-8") as f:
             reader = csv.DictReader(f)
@@ -124,6 +128,7 @@ class Command(BaseCommand):
         return rows
 
     def _process_row(self, catalog: str, row: dict, upsert: bool, simulate: bool = False):
+        """Método interna: process row."""
         if "fields" in row and isinstance(row["fields"], dict):
             flat_row = {"pk": row.get("pk")}
             flat_row.update(row["fields"])
@@ -248,6 +253,7 @@ class Command(BaseCommand):
         return 0, 0, 1
 
     def _upsert_model(self, model, lookup: dict, defaults: dict, upsert: bool, simulate: bool):
+        """Método interna: upsert model."""
         if None in lookup.values():
             return 0, 0, 1
         if simulate:
@@ -281,6 +287,7 @@ class Command(BaseCommand):
         return 1, 0, 0
 
     def _to_bool(self, value):
+        """Método interna: to bool."""
         if isinstance(value, bool):
             return value
         if value is None:

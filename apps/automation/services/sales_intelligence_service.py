@@ -1,3 +1,6 @@
+"""Servicio de sales intelligence service para la aplicación automation.
+"""
+
 import logging
 from typing import Any
 
@@ -8,7 +11,9 @@ from apps.automation.services.ai_engine import ai_engine
 logger = logging.getLogger(__name__)
 
 
-class UpsellingOpportunity(BaseModel):
+class UpsellingOpportunity:
+    """Clase UpsellingOpportunity. Uso: según contexto de la aplicación.
+    """
     product_type: str = Field(
         description="Tipo de producto sugerido (Hotel, Seguro, Traslado, Tour, etc.)"
     )
@@ -19,7 +24,9 @@ class UpsellingOpportunity(BaseModel):
     estimated_revenue: str = Field(description="Rango de ingreso estimado (ej. '$50 - $200')")
 
 
-class SalesIntelligenceReport(BaseModel):
+class SalesIntelligenceReport:
+    """Clase SalesIntelligenceReport. Uso: según contexto de la aplicación.
+    """
     summary: str = Field(description="Resumen de la estrategia de venta para este boleto")
     opportunities: list[UpsellingOpportunity] = Field(
         description="Lista de productos complementarios"

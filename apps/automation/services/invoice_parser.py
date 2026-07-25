@@ -1,3 +1,6 @@
+"""Servicio de invoice parser para la aplicación automation.
+"""
+
 import logging
 
 from .ai_engine import analizar_documento_con_gemini_estructurado

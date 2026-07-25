@@ -1,3 +1,6 @@
+"""Serializadores para la API de finance.
+"""
+
 from decimal import Decimal
 
 from rest_framework import serializers
@@ -8,13 +11,17 @@ from apps.crm.serializers import CoreClienteSerializer
 from .models import Factura, ItemFactura, Pago
 
 
-class MonedaSerializer(serializers.ModelSerializer):
+class MonedaSerializer:
+    """Serializador para moneda. Uso: instanciar según necesidad del dominio.
+    """
     class Meta:
         model = Moneda
         fields = ["id", "codigo_iso", "nombre", "simbolo", "es_moneda_local"]
 
 
-class ItemFacturaSerializer(serializers.ModelSerializer):
+class ItemFacturaSerializer:
+    """Serializador para itemfactura. Uso: instanciar según necesidad del dominio.
+    """
     class Meta:
         model = ItemFactura
         fields = [
@@ -30,7 +37,9 @@ class ItemFacturaSerializer(serializers.ModelSerializer):
         extra_kwargs = {"factura": {"write_only": True, "required": False}}
 
 
-class FacturaSerializer(serializers.ModelSerializer):
+class FacturaSerializer:
+    """Serializador para factura. Uso: instanciar según necesidad del dominio.
+    """
     items = ItemFacturaSerializer(many=True, required=False)
     cliente_detalle = CoreClienteSerializer(source="cliente", read_only=True)
     estado_display = serializers.CharField(source="get_estado_display", read_only=True)
@@ -61,6 +70,7 @@ class FacturaSerializer(serializers.ModelSerializer):
         }
 
     def create(self, validated_data):
+        # create: Create. Args: según implementación. Returns: según implementación.
         items_data = validated_data.pop("items", [])
         factura = Factura.objects.create(**validated_data)
 
@@ -78,6 +88,7 @@ class FacturaSerializer(serializers.ModelSerializer):
         return factura
 
     def update(self, instance, validated_data):
+        # update: Update. Args: según implementación. Returns: según implementación.
         items_data = validated_data.pop("items", None)
 
         for attr, value in validated_data.items():
@@ -95,7 +106,9 @@ class FacturaSerializer(serializers.ModelSerializer):
         return instance
 
 
-class PagoSerializer(serializers.ModelSerializer):
+class PagoSerializer:
+    """Serializador para pago. Uso: instanciar según necesidad del dominio.
+    """
     class Meta:
         model = Pago
         fields = [

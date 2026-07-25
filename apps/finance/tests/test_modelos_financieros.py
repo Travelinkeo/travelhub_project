@@ -1,3 +1,6 @@
+"""Pruebas para modelos financieros en finance.
+"""
+
 from datetime import timedelta
 from decimal import Decimal
 
@@ -36,6 +39,8 @@ def _crear_new_factura(agencia, numero_control="FC-TEST-001"):
 
 @pytest.mark.django_db
 class TestLinkDePago:
+    """Clase TestLinkDePago. Uso: según contexto de la aplicación.
+    """
     def test_creacion_link_de_pago(self, agencia_premium, moneda_usd):
         """Un LinkDePago se crea con estado PENDIENTE y expira_en auto-seteado a 24h."""
         with agency_context(agencia_premium):
@@ -137,6 +142,8 @@ class TestLinkDePago:
 @pytest.mark.skip(reason="Stub model FacturaFiscal has no backing table")
 @pytest.mark.django_db
 class TestFacturaFiscal:
+    """Clase TestFacturaFiscal. Uso: según contexto de la aplicación.
+    """
     def test_creacion_factura_fiscal_pendiente(self, agencia_premium, moneda_usd):
         """FacturaFiscal se crea con estado PENDIENTE por defecto."""
         with agency_context(agencia_premium):
@@ -210,6 +217,8 @@ class TestFacturaFiscal:
 
 @pytest.mark.django_db
 class TestRetencionISLR:
+    """Clase TestRetencionISLR. Uso: según contexto de la aplicación.
+    """
     def test_calculo_automatico_monto_retenido(self, agencia_premium, moneda_usd):
         """RetencionISLR calcula monto_retenido = base_imponible * (porcentaje/100)."""
         with agency_context(agencia_premium):
@@ -290,6 +299,8 @@ class TestRetencionISLR:
 
 @pytest.mark.django_db
 class TestPagoVenta:
+    """Clase TestPagoVenta. Uso: según contexto de la aplicación.
+    """
     def test_creacion_pago_venta(self, agencia_premium, moneda_usd):
         """PagoVenta se crea correctamente con monto y metodo."""
         with agency_context(agencia_premium):
@@ -355,6 +366,8 @@ class TestPagoVenta:
 
 @pytest.mark.django_db
 class TestTaxRefundOpportunity:
+    """Clase TestTaxRefundOpportunity. Uso: según contexto de la aplicación.
+    """
     def test_creacion_tax_refund(self, agencia_premium):
         """TaxRefundOpportunity se crea con estado ELEGIBLE por defecto."""
         with agency_context(agencia_premium):
@@ -439,6 +452,8 @@ class TestTaxRefundOpportunity:
 
 @pytest.mark.django_db
 class TestSoftDeleteModel:
+    """Modelo de base de datos para testsoftdelete. Uso: instanciar según necesidad del dominio.
+    """
     def test_soft_delete_marca_is_deleted(self, agencia_premium, moneda_usd):
         """SoftDeleteModel.delete() marca is_deleted=True sin borrar el registro."""
         with agency_context(agencia_premium):
@@ -506,11 +521,14 @@ class TestSoftDeleteModel:
             assert venta.deleted_at is None
 
     def test_default_manager_is_agencia_manager(self):
+        # test_default_manager_is_agencia_manager: Test default manager is agencia manager. Args: según implementación. Returns: según implementación.
         assert Venta._default_manager.__class__.__name__ == "AgenciaManager"
 
 
 @pytest.mark.django_db
 class TestAgenciaMixinAislamiento:
+    """Clase TestAgenciaMixinAislamiento. Uso: según contexto de la aplicación.
+    """
     def test_aislamiento_multitenant_factura(self, agencia_premium, agencia_estandar, moneda_usd):
         """Una Factura de la Agencia A no es visible desde el contexto de la Agencia B."""
         with agency_context(agencia_premium):

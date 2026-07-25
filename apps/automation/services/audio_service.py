@@ -1,3 +1,6 @@
+"""Servicio de audio service para la aplicación automation.
+"""
+
 import json
 import logging
 
@@ -5,6 +8,7 @@ logger = logging.getLogger(__name__)
 
 
 def _get_genai():
+    # _get_genai:  get genai. Args: según implementación. Returns: según implementación.
     from google import genai
 
     return genai
@@ -17,6 +21,7 @@ class AudioTranscriptionService:
     """
 
     def __init__(self, agency=None):
+        # __init__: Inicializa una nueva instancia de AudioTranscriptionService. Args: parámetros de inicialización.
         from apps.automation.services.ai_engine import get_gemini_api_key
 
         self.api_key = get_gemini_api_key(agency)

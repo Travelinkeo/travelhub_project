@@ -1,3 +1,6 @@
+"""Parser/procesador de ticket parser para la aplicación automation.
+"""
+
 import hashlib
 import logging
 import re
@@ -216,6 +219,7 @@ class FastDeterministicParsers:
         for m in matches:
             # Normalizar horas (0700A -> 07:00, 2330 -> 23:30)
             def norm_h(h):
+                # norm_h: Norm h. Args: según implementación. Returns: según implementación.
                 h = re.sub(r"[A-Z]", "", h)  # Quitar A/P
                 if len(h) == 4:
                     return f"{h[:2]}:{h[2:]}"
@@ -375,6 +379,7 @@ def extract_data_from_text(
 
 
 def is_brand_color_dark(hex_color: str) -> bool:
+    # is_brand_color_dark: Is brand color dark. Args: según implementación. Returns: según implementación.
     if not hex_color or not isinstance(hex_color, str):
         return True
     hex_color = hex_color.lstrip("#")
@@ -428,6 +433,7 @@ def _parse_date_robust(date_str):
 
 
 def generate_ticket(data: dict[str, Any], agencia_obj=None, boleto_obj=None):
+    # generate_ticket: Genera  ticket. Args: parámetros de generación. Returns: resultado generado.
     from apps.automation.parsers.pdf_generation import PdfGenerationService
 
     # Siempre pasamos el objeto de boleto si viene en la data para asegurar persistencia

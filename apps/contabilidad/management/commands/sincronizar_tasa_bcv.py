@@ -19,10 +19,13 @@ from apps.contabilidad.tasas_venezuela_client import TasasVenezuelaClient
 logger = logging.getLogger(__name__)
 
 
-class Command(BaseCommand):
+class Command:
+    """Clase Command. Uso: según contexto de la aplicación.
+    """
     help = "Sincroniza tasas de cambio de Venezuela (BCV, Promedio, P2P)"
 
     def add_arguments(self, parser):
+        # add_arguments: Add arguments. Args: según implementación. Returns: según implementación.
         parser.add_argument(
             "--dry-run", action="store_true", help="Simula la sincronización sin guardar en DB"
         )
@@ -31,6 +34,7 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
+        # handle: Maneja/gestiona . Args: evento/datos. Returns: respuesta.
         dry_run = options["dry_run"]
         mostrar_todas = options["todas"]
 

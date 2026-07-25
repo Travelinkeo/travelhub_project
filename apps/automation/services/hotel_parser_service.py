@@ -1,3 +1,6 @@
+"""Servicio de hotel parser service para la aplicación automation.
+"""
+
 import io
 import json
 import logging
@@ -19,6 +22,7 @@ logger = logging.getLogger(__name__)
 
 
 def _get_genai():
+    # _get_genai:  get genai. Args: según implementación. Returns: según implementación.
     from google import genai
 
     return genai
@@ -38,6 +42,7 @@ class HotelParserService:
     """
 
     def __init__(self, tarifario_id):
+        # __init__: Inicializa una nueva instancia de HotelParserService. Args: parámetros de inicialización.
         self.tarifario = TarifarioProveedor.objects.get(pk=tarifario_id)
         from apps.automation.services.ai_engine import get_gemini_api_key
 
@@ -86,6 +91,7 @@ class HotelParserService:
             return False
 
     def _analizar_imagen_ia(self, image):
+        # _analizar_imagen_ia:  analizar imagen ia. Args: según implementación. Returns: según implementación.
         prompt = """
         Eres un experto en turismo y extracción de datos. Analiza esta página de un tarifario hotelero digital y extrae la información estructurada.
 
@@ -144,6 +150,7 @@ class HotelParserService:
             return None
 
     def _guardar_datos_hotel(self, data, source_image):
+        # _guardar_datos_hotel:  guardar datos hotel. Args: según implementación. Returns: según implementación.
         hotel_data = data.get("hotel", {})
         if not hotel_data.get("nombre"):
             return

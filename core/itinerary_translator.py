@@ -1,5 +1,7 @@
 # Archivo: core/itinerary_translator.py
 
+"""Traductor de itinerarios aéreos desde formato GDS a HTML legible."""
+
 import json
 import logging
 import re

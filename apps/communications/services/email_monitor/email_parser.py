@@ -1,3 +1,6 @@
+"""Servicio de email parser para la aplicación communications.
+"""
+
 import logging
 
 logger = logging.getLogger(__name__)
@@ -6,6 +9,7 @@ PYPDF_AVAILABLE = True
 
 
 def extraer_texto_plano(message):
+    # extraer_texto_plano: Extraer texto plano. Args: según implementación. Returns: según implementación.
     if message.is_multipart():
         for part in message.walk():
             if part.get_content_type() == "text/plain":
@@ -16,6 +20,7 @@ def extraer_texto_plano(message):
 
 
 def extraer_html(message):
+    # extraer_html: Extraer html. Args: según implementación. Returns: según implementación.
     if message.is_multipart():
         for part in message.walk():
             if part.get_content_type() == "text/html":
@@ -28,6 +33,7 @@ def extraer_html(message):
 
 
 def extraer_adjuntos_pdf(message):
+    # extraer_adjuntos_pdf: Extraer adjuntos pdf. Args: según implementación. Returns: según implementación.
     pdfs = []
     if message.is_multipart():
         for part in message.walk():
@@ -42,11 +48,13 @@ def extraer_adjuntos_pdf(message):
 
 
 def extraer_primer_pdf(message):
+    # extraer_primer_pdf: Extraer primer pdf. Args: según implementación. Returns: según implementación.
     pdfs = extraer_adjuntos_pdf(message)
     return pdfs[0][1] if pdfs else None
 
 
 def tiene_pdf_adjunto(message):
+    # tiene_pdf_adjunto: Tiene pdf adjunto. Args: según implementación. Returns: según implementación.
     if message.is_multipart():
         for part in message.walk():
             ctype = part.get_content_type()

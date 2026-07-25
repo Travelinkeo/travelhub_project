@@ -25,6 +25,7 @@ class TestReportListView:
 
     @pytest.fixture(autouse=True)
     def setup_data(self):
+        """Setup data."""
         self.client = Client()
         self.agencia = Agencia.objects.create(nombre="Test Agency")
         self.user = User.objects.create_user(
@@ -37,10 +38,12 @@ class TestReportListView:
         )
 
     def test_list_view_requires_login(self):
+        """List view requires login."""
         response = self.client.get(reverse("finance:reconciliacion_dashboard_htmx"))
         assert response.status_code in [302, 401, 403]
 
     def test_list_view_returns_reports(self):
+        """List view returns reports."""
         self.client.force_login(self.user)
 
         ReporteReconciliacion.objects.create(
@@ -55,6 +58,7 @@ class TestReportListView:
         assert "ultimos_reportes" in response.context
 
     def test_list_view_shows_stats(self):
+        """List view shows stats."""
         self.client.force_login(self.user)
 
         response = self.client.get(reverse("finance:reconciliacion_dashboard_htmx"))
@@ -68,6 +72,7 @@ class TestReconciliationDetailView:
 
     @pytest.fixture(autouse=True)
     def setup_data(self):
+        """Setup data."""
         self.client = Client()
         self.agencia = Agencia.objects.create(nombre="Test Agency")
         self.user = User.objects.create_user(
@@ -106,12 +111,14 @@ class TestReconciliationDetailView:
         )
 
     def test_detail_view_requires_login(self):
+        """Detail view requires login."""
         response = self.client.get(
             reverse("finance:reconciliacion_detail", kwargs={"pk": self.reporte.pk})
         )
         assert response.status_code in [302, 401, 403]
 
     def test_detail_view_returns_context(self):
+        """Detail view returns context."""
         self.client.force_login(self.user)
 
         response = self.client.get(
@@ -122,6 +129,7 @@ class TestReconciliationDetailView:
         assert "conciliaciones_lines" in response.context
 
     def test_detail_view_conciliaciones_count(self):
+        """Detail view conciliaciones count."""
         self.client.force_login(self.user)
 
         response = self.client.get(
@@ -136,12 +144,14 @@ class TestReporteReconciliacionModel:
 
     @pytest.fixture(autouse=True)
     def setup_data(self):
+        """Setup data."""
         self.agencia = Agencia.objects.create(nombre="Test Agency")
         self.reporte = ReporteReconciliacion.objects.create(
             agencia=self.agencia, proveedor="KIU", estado="PROCESADO"
         )
 
     def test_discrepancias_count_property(self):
+        """Discrepancias count property."""
         ConciliacionBoleto.objects.create(
             reporte=self.reporte,
             agencia=self.agencia,
@@ -164,6 +174,7 @@ class TestReporteReconciliacionModel:
         assert self.reporte.discrepancias_count == 2
 
     def test_discrepancias_count_zero(self):
+        """Discrepancias count zero."""
         ConciliacionBoleto.objects.create(
             reporte=self.reporte,
             agencia=self.agencia,
@@ -174,6 +185,7 @@ class TestReporteReconciliacionModel:
         assert self.reporte.discrepancias_count == 0
 
     def test_string_representation(self):
+        """String representation."""
         expected = f"Reporte KIU - {self.reporte.fecha_subida.strftime('%d/%m/%Y')} (Test Agency)"
         assert str(self.reporte) == expected
 
@@ -184,12 +196,14 @@ class TestConciliacionBoletoModel:
 
     @pytest.fixture(autouse=True)
     def setup_data(self):
+        """Setup data."""
         self.agencia = Agencia.objects.create(nombre="Test Agency")
         self.reporte = ReporteReconciliacion.objects.create(
             agencia=self.agencia, proveedor="KIU", estado="PROCESADO"
         )
 
     def test_estado_choices(self):
+        """Estado choices."""
         conciliacion = ConciliacionBoleto.objects.create(
             reporte=self.reporte,
             agencia=self.agencia,
@@ -199,6 +213,7 @@ class TestConciliacionBoletoModel:
         assert conciliacion.estado == "OK"
 
     def test_string_representation(self):
+        """String representation."""
         conciliacion = ConciliacionBoleto.objects.create(
             reporte=self.reporte,
             agencia=self.agencia,
@@ -215,12 +230,14 @@ class TestLineaReporteReconciliacionModel:
 
     @pytest.fixture(autouse=True)
     def setup_data(self):
+        """Setup data."""
         self.agencia = Agencia.objects.create(nombre="Test Agency")
         self.reporte = ReporteReconciliacion.objects.create(
             agencia=self.agencia, proveedor="KIU", estado="PROCESADO"
         )
 
     def test_string_representation(self):
+        """String representation."""
         linea = LineaReporteReconciliacion.objects.create(
             reporte=self.reporte,
             agencia=self.agencia,
@@ -237,6 +254,7 @@ class TestReconciliationAsync:
 
     @pytest.fixture(autouse=True)
     def setup_data(self):
+        """Setup data."""
         self.client = Client()
         self.agencia = Agencia.objects.create(nombre="Test Agency")
         self.user = User.objects.create_user(
@@ -258,6 +276,7 @@ class TestReconciliationAsync:
 
     @patch("apps.finance.tasks_reconciliation.conciliar_reporte_batch_task.delay")
     def test_process_reconciliacion_htmx_view_starts_task(self, mock_delay):
+        """Process reconciliacion htmx view starts task."""
         response = self.client.get(
             reverse("finance:reconciliacion_process", kwargs={"pk": self.reporte.pk})
         )

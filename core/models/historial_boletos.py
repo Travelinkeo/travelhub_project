@@ -5,6 +5,7 @@ from core.models.base import AgenciaMixin
 
 
 class HistorialCambioBoleto(AgenciaMixin, models.Model):
+    """Función: HistorialCambioBoleto."""
     TIPO_CAMBIO_CHOICES = [
         ("PRE", "Precio cambiado"),
         ("EST", "Estado cambiado"),
@@ -28,6 +29,7 @@ class HistorialCambioBoleto(AgenciaMixin, models.Model):
 
     class Meta:
         ordering = ["-fecha_cambio"]
+        """Función: Meta."""
         verbose_name = "Historial de Cambio"
         verbose_name_plural = "Historial de Cambios"
 
@@ -36,6 +38,7 @@ class HistorialCambioBoleto(AgenciaMixin, models.Model):
 
 
 class AnulacionBoleto(AgenciaMixin, models.Model):
+    """Función: AnulacionBoleto."""
     TIPO_ANULACION_CHOICES = [
         ("VOL", "Voluntaria"),
         ("INV", "Involutaria"),
@@ -77,6 +80,7 @@ class AnulacionBoleto(AgenciaMixin, models.Model):
     fecha_reembolso = models.DateTimeField(null=True, blank=True)
 
     class Meta:
+        """Meta definición del modelo."""
         ordering = ["-fecha_solicitud"]
         verbose_name = "Anulación"
         verbose_name_plural = "Anulaciones"

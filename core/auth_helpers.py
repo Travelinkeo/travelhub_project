@@ -6,4 +6,5 @@ internal_auth = authentication_classes(INTERNAL_AUTH_CLASSES)
 
 
 class InternalAPIAuthMixin:
+    """Mixin que asigna clases de autenticación para APIs internas."""
     authentication_classes = INTERNAL_AUTH_CLASSES

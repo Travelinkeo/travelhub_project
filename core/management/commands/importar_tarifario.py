@@ -14,9 +14,11 @@ from apps.common.models import Proveedor
 
 
 class Command(BaseCommand):
+    """Comando de gestión personalizado."""
     help = "Importa tarifario de hoteles desde PDF"
 
     def add_arguments(self, parser):
+        """Método: add arguments."""
         parser.add_argument("pdf_path", type=str, help="Ruta al archivo PDF del tarifario")
         parser.add_argument("--proveedor-id", type=int, required=True, help="ID del proveedor")
         parser.add_argument(
@@ -26,6 +28,7 @@ class Command(BaseCommand):
         parser.add_argument("--fecha-fin", type=str, help="Fecha fin vigencia (YYYY-MM-DD)")
 
     def handle(self, *args, **options):
+        """Método: handle."""
         pdf_path = options["pdf_path"]
         proveedor_id = options["proveedor_id"]
         nombre = options["nombre"]

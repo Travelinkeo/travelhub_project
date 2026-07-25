@@ -1,10 +1,12 @@
 def _get_genai_types():
+    """# Importa y retorna tipos de google.genai."""
     from google.genai import types
 
     return types
 
 
 def get_tool_definitions():
+    """# Define function declarations para Gemini. Returns: types.Tool."""
     types = _get_genai_types()
 
     consultar_estado_reserva_func = types.FunctionDeclaration(

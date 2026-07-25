@@ -1,3 +1,6 @@
+"""Migración de base de datos para crm.
+"""
+
 from django.db import connection, migrations
 
 _TABLE_RENAMES = [
@@ -32,6 +35,7 @@ _FK_REFERENCES_REPLACE = [
 
 
 def _get_existing_tables(cursor):
+    # _get_existing_tables:  get existing tables. Args: según implementación. Returns: según implementación.
     cursor.execute(
         "SELECT table_name FROM information_schema.tables "
         "WHERE table_schema = 'public' AND table_type = 'BASE TABLE'"
@@ -40,6 +44,7 @@ def _get_existing_tables(cursor):
 
 
 def _index_exists(cursor, name):
+    # _index_exists:  index exists. Args: según implementación. Returns: según implementación.
     cursor.execute(
         "SELECT 1 FROM pg_indexes WHERE indexname = %s AND schemaname = 'public'",
         [name],
@@ -48,6 +53,7 @@ def _index_exists(cursor, name):
 
 
 def _constraint_exists(cursor, name):
+    # _constraint_exists:  constraint exists. Args: según implementación. Returns: según implementación.
     cursor.execute(
         "SELECT 1 FROM pg_constraint WHERE conname = %s AND connamespace = 'public'::regnamespace",
         [name],
@@ -56,6 +62,7 @@ def _constraint_exists(cursor, name):
 
 
 def _rename_indexes_for(cursor, table):
+    # _rename_indexes_for:  rename indexes for. Args: según implementación. Returns: según implementación.
     cursor.execute(
         "SELECT indexname FROM pg_indexes WHERE tablename = %s AND schemaname = 'public'",
         [table],
@@ -67,6 +74,7 @@ def _rename_indexes_for(cursor, table):
 
 
 def _rename_constraints_for(cursor, table):
+    # _rename_constraints_for:  rename constraints for. Args: según implementación. Returns: según implementación.
     cursor.execute(
         "SELECT conname FROM pg_constraint "
         "WHERE conrelid = %s::regclass AND connamespace = 'public'::regnamespace",
@@ -79,6 +87,7 @@ def _rename_constraints_for(cursor, table):
 
 
 def _rename_fk_references_on_other_tables(cursor):
+    # _rename_fk_references_on_other_tables:  rename fk references on other tables. Args: según implementación. Returns: según implementación.
     cursor.execute(
         "SELECT conrelid::regclass::text AS from_table, conname "
         "FROM pg_constraint "
@@ -95,6 +104,7 @@ def _rename_fk_references_on_other_tables(cursor):
 
 
 def _apply_prefix_map(name, prefix_map):
+    # _apply_prefix_map:  apply prefix map. Args: según implementación. Returns: según implementación.
     for old_prefix, new_prefix in prefix_map.items():
         if name.startswith(old_prefix):
             return new_prefix + name[len(old_prefix) :]
@@ -102,6 +112,7 @@ def _apply_prefix_map(name, prefix_map):
 
 
 def _rename_tables(apps, schema_editor):
+    # _rename_tables:  rename tables. Args: según implementación. Returns: según implementación.
     with connection.cursor() as cursor:
         existing = _get_existing_tables(cursor)
         for old_name, new_name in _TABLE_RENAMES:
@@ -110,6 +121,7 @@ def _rename_tables(apps, schema_editor):
 
 
 def _rename_indexes_and_constraints(apps, schema_editor):
+    # _rename_indexes_and_constraints:  rename indexes and constraints. Args: según implementación. Returns: según implementación.
     with connection.cursor() as cursor:
         existing = _get_existing_tables(cursor)
         for table in _CRM_TABLES:
@@ -121,6 +133,7 @@ def _rename_indexes_and_constraints(apps, schema_editor):
 
 
 def _reverse_rename_tables(apps, schema_editor):
+    # _reverse_rename_tables:  reverse rename tables. Args: según implementación. Returns: según implementación.
     with connection.cursor() as cursor:
         existing = _get_existing_tables(cursor)
         for old_name, new_name in reversed(_TABLE_RENAMES):
@@ -129,10 +142,13 @@ def _reverse_rename_tables(apps, schema_editor):
 
 
 def _reverse_rename_indexes_and_constraints(apps, schema_editor):
+    # _reverse_rename_indexes_and_constraints:  reverse rename indexes and constraints. Args: según implementación. Returns: según implementación.
     _rename_indexes_and_constraints(apps, schema_editor)
 
 
-class Migration(migrations.Migration):
+class Migration:
+    """Clase Migration. Uso: según contexto de la aplicación.
+    """
     dependencies = [
         ("crm", "0021_alter_cliente_table_alter_mensajewhatsapp_table_and_more"),
     ]

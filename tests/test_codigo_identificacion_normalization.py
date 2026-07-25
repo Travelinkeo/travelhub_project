@@ -1,3 +1,4 @@
+"""Tests para Codigo identificacion normalization."""
 import os
 
 import pytest
@@ -36,5 +37,6 @@ FOID/D.IDENTIDAD: {value}\nOTHER LINE
     ],
 )
 def test_internal_normalization(raw, expected):
+    """Internal normalization."""
     text = RAW_TEXT_TEMPLATE.format(value=raw)
     assert internal_get_id(text) == expected

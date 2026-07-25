@@ -1,3 +1,4 @@
+"""Tests para Audit hash chain."""
 import pytest
 
 from apps.bookings.models import AuditLog
@@ -9,6 +10,7 @@ pytestmark = pytest.mark.skip(reason="Tests requieren configuración completa o 
 @pytest.mark.django_db
 def test_audit_hash_chain_creation_sequence():
     # Crear algunos registros manualmente simulando acciones
+    """Audit hash chain creation sequence."""
     a1 = AuditLog.objects.create(
         modelo="X", object_id="1", accion=AuditLog.Accion.CREATE, descripcion="primero"
     )
@@ -31,6 +33,7 @@ def test_audit_hash_chain_creation_sequence():
 
 @pytest.mark.django_db
 def test_audit_hash_chain_tamper_detection():
+    """Audit hash chain tamper detection."""
     AuditLog.objects.create(
         modelo="Y", object_id="10", accion=AuditLog.Accion.CREATE, descripcion="alpha"
     )

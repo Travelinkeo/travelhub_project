@@ -12,6 +12,7 @@ class IsStaffOrGroupWrite(permissions.BasePermission):
     allowed_group_keywords = ["oper", "venta"]
 
     def has_permission(self, request, view):
+        """Método que verifica  permission. Returns: bool."""
         user = request.user
         if not user or not user.is_authenticated:
             return False
@@ -34,6 +35,7 @@ def rol_requerido(nombres_grupos):
     """
 
     def check_group(user):
+        """Función que valida group. Returns: resultado de validación."""
         if user.is_active and (
             user.is_superuser or user.groups.filter(name__in=nombres_grupos).exists()
         ):

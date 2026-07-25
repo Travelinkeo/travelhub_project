@@ -1,3 +1,6 @@
+"""Módulo utils de la aplicación common.
+"""
+
 import json
 import logging
 import os
@@ -19,6 +22,7 @@ logger = logging.getLogger(__name__)
     soft_time_limit=100,
 )
 def generate_pdf_task(self, html_content, margins=0.0):
+    # generate_pdf_task: Genera  pdf task. Args: parámetros de generación. Returns: resultado generado.
     from apps.common.services.pdf_renderer import PdfRendererService
 
     try:
@@ -35,6 +39,7 @@ def generate_pdf_task(self, html_content, margins=0.0):
 )
 @idempotent_task(timeout=3600, key_prefix="celery_binance_order")
 def create_binance_order_task(factura_id):
+    # create_binance_order_task: Crea un nuevo binance order task. Args: datos del objeto. Returns: objeto creado.
     from celery import current_task
     from django.core.cache import cache
 
@@ -76,6 +81,7 @@ def create_binance_order_task(factura_id):
     soft_time_limit=100,
 )
 def fetch_unsplash_image_task(self, query):
+    # fetch_unsplash_image_task: Fetch unsplash image task. Args: según implementación. Returns: según implementación.
     import requests
 
     access_key = os.environ.get("UNSPLASH_ACCESS_KEY")
@@ -122,6 +128,7 @@ def fetch_unsplash_image_task(self, query):
     soft_time_limit=20,
 )
 def fetch_airline_logo_task(self, airline_name):
+    # fetch_airline_logo_task: Fetch airline logo task. Args: según implementación. Returns: según implementación.
     import requests
 
     try:
@@ -172,6 +179,7 @@ def fetch_airline_logo_task(self, airline_name):
     soft_time_limit=50,
 )
 def fetch_bcv_rates_task(self):
+    # fetch_bcv_rates_task: Fetch bcv rates task. Args: según implementación. Returns: según implementación.
     from apps.finance.services.bcv_scraper import obtener_tasas_bcv
 
     try:
@@ -195,6 +203,7 @@ def fetch_bcv_rates_task(self):
     soft_time_limit=50,
 )
 def fetch_tasas_venezuela_task(self):
+    # fetch_tasas_venezuela_task: Fetch tasas venezuela task. Args: según implementación. Returns: según implementación.
     from apps.contabilidad.tasas_venezuela_client import TasasVenezuelaClient
 
     try:
@@ -218,6 +227,7 @@ def fetch_tasas_venezuela_task(self):
     soft_time_limit=50,
 )
 def fetch_image_base64_task(self, image_source):
+    # fetch_image_base64_task: Fetch image base64 task. Args: según implementación. Returns: según implementación.
     from apps.common.utils.images import get_image_as_base64
 
     try:

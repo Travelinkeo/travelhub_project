@@ -8,6 +8,7 @@ class UserProfileForm(forms.ModelForm):
     """Formulario para editar datos personales del usuario."""
 
     class Meta:
+        """Configuración del modelo."""
         model = User
         fields = ["first_name", "last_name", "email"]
         widgets = {
@@ -42,6 +43,7 @@ class AgencyBrandingForm(forms.ModelForm):
     """Formulario para branding y contacto de la agencia."""
 
     class Meta:
+        """Configuración del modelo."""
         from core.models.agencia import AgenciaBranding
 
         model = AgenciaBranding
@@ -76,6 +78,7 @@ class AgencyBasicInfoForm(forms.ModelForm):
     """Formulario para información básica de la agencia (ahora en el modelo Agencia)."""
 
     class Meta:
+        """Configuración del modelo."""
         model = Agencia
         fields = [
             "nombre_comercial",
@@ -136,6 +139,7 @@ class AgencyAutomationForm(forms.ModelForm):
     """Formulario para configurar el Mailbot y APIs."""
 
     class Meta:
+        """Configuración del modelo."""
         from core.models.agencia import AgenciaConfiguracion
 
         model = AgenciaConfiguracion

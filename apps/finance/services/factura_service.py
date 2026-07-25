@@ -1,3 +1,6 @@
+"""Servicio de factura service para la aplicación finance.
+"""
+
 import logging
 
 logger = logging.getLogger(__name__)
@@ -11,10 +14,12 @@ class FacturaService:
 
     @staticmethod
     def capture_previous_pdf(factura):
+        # capture_previous_pdf: Capture previous pdf. Args: según implementación. Returns: según implementación.
         return False
 
     @staticmethod
     def send_to_telegram_if_needed(factura):
+        # send_to_telegram_if_needed: Envía  to telegram if needed. Args: datos del mensaje. Returns: resultado del envío.
         try:
             from apps.communications.services.telegram_unified import (
                 TelegramNotificationService,
@@ -40,6 +45,7 @@ class FacturaService:
 
     @staticmethod
     def send_to_whatsapp_if_needed(factura):
+        # send_to_whatsapp_if_needed: Envía  to whatsapp if needed. Args: datos del mensaje. Returns: resultado del envío.
         from django.conf import settings
 
         cliente = factura.cliente

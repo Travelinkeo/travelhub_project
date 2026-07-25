@@ -3,6 +3,7 @@ from apps.common.models import Moneda
 
 
 class Command(BaseCommand):
+    """Comando de gestión personalizado."""
     help = "Registra monedas de Latinoamérica (COP, MXN, PEN, ARS, BRL)"
 
     MONEDAS = [
@@ -14,6 +15,7 @@ class Command(BaseCommand):
     ]
 
     def handle(self, *args, **options):
+        """Método: handle."""
         creadas = 0
         for data in self.MONEDAS:
             _, created = Moneda.objects.get_or_create(

@@ -1,3 +1,6 @@
+"""Módulo tasks bot de la aplicación crm.
+"""
+
 import logging
 
 from celery import shared_task
@@ -9,6 +12,7 @@ logger = logging.getLogger(__name__)
 
 @shared_task(bind=True, max_retries=5, time_limit=120, soft_time_limit=90)
 def whatsapp_ai_task(self, telefono_cliente, nombre_perfil, mensaje_texto, agencia_id=None):
+    # whatsapp_ai_task: Whatsapp ai task. Args: según implementación. Returns: según implementación.
     from core.api import Agencia, agency_context, system_context
 
     try:
@@ -32,6 +36,7 @@ def whatsapp_ai_task(self, telefono_cliente, nombre_perfil, mensaje_texto, agenc
 def whatsapp_media_ocr_task(
     self, telefono_cliente, nombre_perfil, media_id, mime_type, agencia_id=None
 ):
+    # whatsapp_media_ocr_task: Whatsapp media ocr task. Args: según implementación. Returns: según implementación.
     import requests
     from django.conf import settings
     from django.utils.module_loading import import_string

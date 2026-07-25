@@ -1,3 +1,6 @@
+"""Vistas (views) de la aplicación bookings.
+"""
+
 import logging
 
 from django.contrib import messages
@@ -15,7 +18,9 @@ from core.serializers import ProveedorSerializer
 logger = logging.getLogger(__name__)
 
 
-class ProveedorListView(HtmxResponseMixin, SaaSMixin, LoginRequiredMixin, ListView):
+class ProveedorListView:
+    """Vista para gestionar proveedorlist. Uso: instanciar según necesidad del dominio.
+    """
     model = Proveedor
     template_name = "core/erp/proveedores/list.html"
     htmx_template_name = "common/partials/proveedores_htmx.html"
@@ -23,6 +28,7 @@ class ProveedorListView(HtmxResponseMixin, SaaSMixin, LoginRequiredMixin, ListVi
     paginate_by = 20
 
     def get_queryset(self):
+        # get_queryset: Obtiene/recupera queryset. Args: según implementación. Returns: dato solicitado.
         queryset = (
             super().get_queryset().select_related("ciudad", "ciudad__pais").order_by("nombre")
         )
@@ -44,6 +50,7 @@ class ProveedorListView(HtmxResponseMixin, SaaSMixin, LoginRequiredMixin, ListVi
         return queryset
 
     def get_context_data(self, **kwargs):
+        # get_context_data: Obtiene/recupera context data. Args: según implementación. Returns: dato solicitado.
         context = super().get_context_data(**kwargs)
         context["active_tab"] = "configuracion"
         # Intenta obtener choices de varias fuentes para compatibilidad
@@ -55,7 +62,10 @@ class ProveedorListView(HtmxResponseMixin, SaaSMixin, LoginRequiredMixin, ListVi
 
 
 class ProveedorFormMixin:
+    """Mixin que agrega funcionalidad de proveedorform. Uso: instanciar según necesidad del dominio.
+    """
     def get_form(self, form_class=None):
+        # get_form: Obtiene/recupera form. Args: según implementación. Returns: dato solicitado.
         form = super().get_form(form_class)
         for _field_name, field in form.fields.items():
             input_type = getattr(field.widget, "input_type", None)
@@ -69,6 +79,7 @@ class ProveedorFormMixin:
         return form
 
     def get_context_data(self, **kwargs):
+        # get_context_data: Obtiene/recupera context data. Args: según implementación. Returns: dato solicitado.
         context = super().get_context_data(**kwargs)
         context["active_tab"] = "configuracion"
 
@@ -94,7 +105,9 @@ class ProveedorFormMixin:
         return context
 
 
-class ProveedorCreateView(SaaSMixin, LoginRequiredMixin, ProveedorFormMixin, CreateView):
+class ProveedorCreateView:
+    """Vista para gestionar proveedorcreate. Uso: instanciar según necesidad del dominio.
+    """
     model = Proveedor
     template_name = "core/erp/proveedores/form.html"
     fields = [
@@ -126,16 +139,20 @@ class ProveedorCreateView(SaaSMixin, LoginRequiredMixin, ProveedorFormMixin, Cre
     success_url = reverse_lazy("bookings:proveedor_list")
 
     def get_context_data(self, **kwargs):
+        # get_context_data: Obtiene/recupera context data. Args: según implementación. Returns: dato solicitado.
         context = super().get_context_data(**kwargs)
         context["title"] = "Nuevo Proveedor"
         return context
 
     def form_valid(self, form):
+        # form_valid: Form valid. Args: según implementación. Returns: según implementación.
         messages.success(self.request, "Proveedor creado exitosamente.")
         return super().form_valid(form)
 
 
-class ProveedorUpdateView(SaaSMixin, LoginRequiredMixin, ProveedorFormMixin, UpdateView):
+class ProveedorUpdateView:
+    """Vista para gestionar proveedorupdate. Uso: instanciar según necesidad del dominio.
+    """
     model = Proveedor
     template_name = "core/erp/proveedores/form.html"
     fields = [
@@ -167,27 +184,34 @@ class ProveedorUpdateView(SaaSMixin, LoginRequiredMixin, ProveedorFormMixin, Upd
     success_url = reverse_lazy("bookings:proveedor_list")
 
     def get_context_data(self, **kwargs):
+        # get_context_data: Obtiene/recupera context data. Args: según implementación. Returns: dato solicitado.
         context = super().get_context_data(**kwargs)
         context["title"] = f"Editar Proveedor: {self.object.nombre}"
         context["proveedor_id"] = self.object.pk
         return context
 
     def form_valid(self, form):
+        # form_valid: Form valid. Args: según implementación. Returns: según implementación.
         messages.success(self.request, "Proveedor actualizado exitosamente.")
         return super().form_valid(form)
 
 
-class ProveedorDeleteView(SaaSMixin, LoginRequiredMixin, DeleteView):
+class ProveedorDeleteView:
+    """Vista para gestionar proveedordelete. Uso: instanciar según necesidad del dominio.
+    """
     model = Proveedor
     template_name = "core/erp/catalogos/proveedores_confirm_delete.html"
     success_url = reverse_lazy("bookings:proveedor_list")
 
     def delete(self, request, *args, **kwargs):
+        # delete: Elimina el objeto de la base de datos. Args: None. Returns: None.
         messages.success(self.request, "Proveedor eliminado correctamente.")
         return super().delete(request, *args, **kwargs)
 
 
-class ProveedorViewSet(TenantViewSetMixin, viewsets.ModelViewSet):
+class ProveedorViewSet:
+    """Clase ProveedorViewSet. Uso: según contexto de la aplicación.
+    """
     queryset = Proveedor.objects.all().order_by("nombre")
     serializer_class = ProveedorSerializer
     permission_classes = [permissions.IsAuthenticated]

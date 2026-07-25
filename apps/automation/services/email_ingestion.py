@@ -1,3 +1,6 @@
+"""Servicio de email ingestion para la aplicación automation.
+"""
+
 import email
 import imaplib
 import logging
@@ -15,6 +18,7 @@ class EmailIngestionService:
     """
 
     def __init__(self, host=None, user=None, password=None, port=993):
+        # __init__: Inicializa una nueva instancia de EmailIngestionService. Args: parámetros de inicialización.
         self.host = host or getattr(settings, "IMAP_HOST", "imap.gmail.com")
         self.user = user or getattr(settings, "IMAP_USER", "")
         self.password = password or getattr(settings, "IMAP_PASSWORD", "")

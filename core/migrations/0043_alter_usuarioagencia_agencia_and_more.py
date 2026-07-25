@@ -5,7 +5,8 @@ from django.conf import settings
 from django.db import migrations, models
 
 
-class Migration(migrations.Migration):
+class Migration:
+    """Migración de base de datos generada por Django."""
     dependencies = [
         ("core", "0042_agenciaconfiguracion_canal_notificaciones_mailbot"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),

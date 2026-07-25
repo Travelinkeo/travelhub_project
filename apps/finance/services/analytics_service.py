@@ -1,3 +1,6 @@
+"""Servicio de analytics service para la aplicación finance.
+"""
+
 import logging
 from decimal import Decimal
 

@@ -1,3 +1,6 @@
+"""Servicio de promotion service para la aplicación marketing.
+"""
+
 import base64
 import io
 from decimal import Decimal
@@ -12,6 +15,7 @@ from core.api import Agencia
 
 
 def _get_bookings_models():
+    # _get_bookings_models:  get bookings models. Args: según implementación. Returns: según implementación.
     from django.apps import apps
 
     return apps.get_model("bookings", "HotelTarifario"), apps.get_model(
@@ -27,6 +31,7 @@ class PromotionService:
 
     @staticmethod
     def generate_instagram_story(hotel_id, agencia_id=None):
+        # generate_instagram_story: Genera  instagram story. Args: parámetros de generación. Returns: resultado generado.
         HotelTarifario, TarifaHabitacion = _get_bookings_models()
         hotel = HotelTarifario.objects.get(pk=hotel_id)
         min_price = Decimal(0)
@@ -82,6 +87,7 @@ class PromotionService:
             font_title = font_sub = font_price = ImageFont.load_default()
 
         def draw_text_center(y, text, font, color="white"):
+            # draw_text_center: Draw text center. Args: según implementación. Returns: según implementación.
             bbox = draw.textbbox((0, 0), text, font=font)
             text_w = bbox[2] - bbox[0]
             draw.text(((W - text_w) / 2, y), text, font=font, fill=color)
@@ -103,6 +109,7 @@ class PromotionService:
 
     @staticmethod
     def generate_ai_promo_image(hotel_name, price, style="Luxurious", custom_text=None):
+        # generate_ai_promo_image: Genera  ai promo image. Args: parámetros de generación. Returns: resultado generado.
         try:
             vertexai.init(project=settings.GCP_PROJECT_ID, location=settings.GCP_LOCATION)
             model = ImageGenerationModel.from_pretrained("image-3")

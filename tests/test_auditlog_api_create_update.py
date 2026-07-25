@@ -1,3 +1,4 @@
+"""Tests para Auditlog api create update."""
 from decimal import Decimal
 
 import pytest
@@ -12,6 +13,7 @@ pytestmark = pytest.mark.skip(reason="Tests requieren configuración completa - 
 
 @pytest.mark.django_db
 def test_auditlog_api_filter_create_and_update(api_client_autenticado):
+    """Auditlog api filter create and update."""
     moneda, _ = Moneda.objects.get_or_create(codigo_iso="USD", defaults={"nombre": "Dólar"})
     cliente, _ = Cliente.objects.get_or_create(
         nombres="API", apellidos="CU", email="api_cu@example.com"

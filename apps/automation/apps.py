@@ -1,3 +1,6 @@
+"""Configuración de la aplicación Django automation.
+"""
+
 import logging
 
 from django.apps import AppConfig
@@ -5,13 +8,16 @@ from django.apps import AppConfig
 logger = logging.getLogger(__name__)
 
 
-class AutomationConfig(AppConfig):
+class AutomationConfig:
+    """Configuración de automation. Uso: instanciar según necesidad del dominio.
+    """
     default_auto_field = "django.db.models.BigAutoField"
     name = "apps.automation"
     label = "automation"
     verbose_name = "Automatización y AI Parsing"
 
     def ready(self):
+        # ready: Ready. Args: según implementación. Returns: según implementación.
         _register_providers()
 
 

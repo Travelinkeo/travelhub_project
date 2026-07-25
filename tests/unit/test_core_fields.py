@@ -1,3 +1,4 @@
+"""Tests para Core fields (Unit)."""
 import pytest
 from django.core.exceptions import ImproperlyConfigured
 
@@ -9,16 +10,20 @@ FERNET_KEY = "Vvd7YzIzOlt_Ku2aJ6jlAj-NMsGE3A5AT0nY-kuVaNs="
 
 
 class TestEncryptedCharField:
+    """Test Encrypted Char Field."""
     def setup_method(self):
+        """Setup method."""
         _FernetMixin._fernet_instance = None
 
     def test_multiplies_max_length(self):
+        """Multiplies max length."""
         from core.fields import EncryptedCharField
 
         field = EncryptedCharField(max_length=100)
         assert field.max_length == 400
 
     def test_deconstruct_restores_max_length(self):
+        """Deconstruct restores max length."""
         from core.fields import EncryptedCharField
 
         field = EncryptedCharField(max_length=100)
@@ -26,6 +31,7 @@ class TestEncryptedCharField:
         assert kwargs["max_length"] == 100
 
     def test_encrypt_decrypt_roundtrip(self, settings):
+        """Encrypt decrypt roundtrip."""
         settings.ENCRYPTION_KEY = FERNET_KEY
 
         from core.fields import EncryptedCharField
@@ -40,6 +46,7 @@ class TestEncryptedCharField:
         assert decrypted == "secret-value"
 
     def test_encrypt_already_encrypted(self, settings):
+        """Encrypt already encrypted."""
         settings.ENCRYPTION_KEY = FERNET_KEY
 
         from core.fields import EncryptedCharField
@@ -50,6 +57,7 @@ class TestEncryptedCharField:
         assert double_encrypted == encrypted
 
     def test_raises_error_without_key(self, settings):
+        """Raises error without key."""
         settings.ENCRYPTION_KEY = None
 
         from core.fields import EncryptedCharField
@@ -59,6 +67,7 @@ class TestEncryptedCharField:
             field._encrypt("test")
 
     def test_get_prep_value_none(self, settings):
+        """Get prep value none."""
         settings.ENCRYPTION_KEY = FERNET_KEY
 
         from core.fields import EncryptedCharField
@@ -68,6 +77,7 @@ class TestEncryptedCharField:
         assert field.get_prep_value("") == ""
 
     def test_from_db_value_none(self, settings):
+        """From db value none."""
         settings.ENCRYPTION_KEY = FERNET_KEY
 
         from core.fields import EncryptedCharField

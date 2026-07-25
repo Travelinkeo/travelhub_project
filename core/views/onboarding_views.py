@@ -20,6 +20,7 @@ MAGIC_LINK_RATE_LIMIT_MAX = 5
 
 
 def check_rate_limit(ip_address):
+    """# Verifica rate limit de API key. Args: api_key. Returns: (allowed, remaining)."""
     cache_key = f"magic_link_rate:{ip_address}"
     try:
         count = cache.incr(cache_key)
@@ -30,10 +31,12 @@ def check_rate_limit(ip_address):
 
 
 class MagicLinkRequestView(View):
+    """Función: MagicLinkRequestView."""
     def post(self, request):
         ip_address = request.META.get("HTTP_CF_CONNECTING_IP") or request.META.get("HTTP_X_REAL_IP")
         if not ip_address:
             xff = request.META.get("HTTP_X_FORWARDED_FOR", "")
+        """Método: post."""
             if xff:
                 ip_address = [p.strip() for p in xff.split(",")][-1]
             else:
@@ -99,9 +102,11 @@ class MagicLinkRequestView(View):
 
 
 class MagicLinkVerifyView(View):
+    """Función: MagicLinkVerifyView."""
     def get(self, request, token):
         from apps.common.services.magic_link_service import verify_magic_link
 
+        """Método: get."""
         token_obj, status = verify_magic_link(token)
 
         if status in ("invalid", "expired", "already_used"):
@@ -172,13 +177,16 @@ class MagicLinkVerifyView(View):
 
 
 class SaaSOnboardingView(View):
+    """Función: SaaSOnboardingView."""
     template_name = "onboarding/b2b_onboarding.html"
 
     def get(self, request, *args, **kwargs):
         return render(request, self.template_name)
+        """Método: get."""
 
     def post(self, request, *args, **kwargs):
         import stripe
+        """Método: post."""
 
         admin_email = request.POST.get("admin_email")
         agency_name = request.POST.get("agency_name")
@@ -243,6 +251,7 @@ class SaaSOnboardingView(View):
 
     def _provision_agency(self, email, agency_name, subdomain, plan, brand_color, password=None):
         user, created = User.objects.get_or_create(
+        """Método interna: provision agency."""
             email=email,
             defaults={"username": email, "is_active": True},
         )
@@ -272,9 +281,11 @@ class SaaSOnboardingView(View):
 
 
 class OnboardingAgencyView(View):
+    """Función: OnboardingAgencyView."""
     template_name = "onboarding/step2_agency.html"
 
     def get(self, request):
+        """Método: get."""
         if not request.user.is_authenticated:
             return redirect("/onboarding/")
 
@@ -290,6 +301,7 @@ class OnboardingAgencyView(View):
         )
 
     def post(self, request):
+        """Método: post."""
         if not request.user.is_authenticated:
             return redirect("/onboarding/")
 

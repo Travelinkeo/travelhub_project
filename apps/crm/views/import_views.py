@@ -1,3 +1,6 @@
+"""Vistas (views) de la aplicación crm.
+"""
+
 import json
 import logging
 import os
@@ -40,9 +43,11 @@ class ImportarClientesView(SaaSMixin, LoginRequiredMixin, View):
     template_name = "crm/importar_clientes.html"
 
     def get(self, request):
+        # get: Get. Args: según implementación. Returns: según implementación.
         return render(request, self.template_name, {"campos": CAMPOS_CLIENTE})
 
     def post(self, request):
+        # post: Post. Args: según implementación. Returns: según implementación.
         agencia = get_user_active_agency(request.user)
         if not agencia:
             messages.error(request, "No hay agencia activa")
@@ -109,6 +114,7 @@ class MapeoColumnasView(SaaSMixin, LoginRequiredMixin, View):
     template_result = "crm/importar_resultados.html"
 
     def post(self, request):
+        # post: Post. Args: según implementación. Returns: según implementación.
         agencia = get_user_active_agency(request.user)
         if not agencia:
             return JsonResponse({"error": "No hay agencia activa"}, status=400)
@@ -159,6 +165,7 @@ class ImportarClientesProgressView(View):
     """Verificar estado de una importación en progreso."""
 
     def get(self, request, task_id):
+        # get: Get. Args: según implementación. Returns: según implementación.
         from celery.result import AsyncResult
         result = AsyncResult(task_id)
         if result.ready():

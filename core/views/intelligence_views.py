@@ -19,11 +19,14 @@ logger = logging.getLogger(__name__)
 
 
 class GDSAnalyzerView(LoginRequiredMixin, TemplateView):
+    """Función: GDSAnalyzerView."""
     template_name = "core/intelligence/gds_intelligence.html"
 
 
 class GDSAnalysisAjaxView(LoginRequiredMixin, View):
+    """Función: GDSAnalysisAjaxView."""
     def post(self, request, *args, **kwargs):
+        """Método: post."""
         try:
             terminal_text = request.POST.get("terminal_text")
             gds_type = request.POST.get("gds_type", "SABRE")
@@ -64,6 +67,7 @@ class GDSInjectERPView(LoginRequiredMixin, View):
     """
 
     def post(self, request, *args, **kwargs):
+        """Método: post."""
         try:
             data = json.loads(request.body)
             # 'analysis_data' ahora es el objeto ResultadoParseoSchema -> {'boletos': [...]}

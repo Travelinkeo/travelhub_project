@@ -26,12 +26,14 @@ class TestTelegramWebhookFailClosed(TestCase):
     """Test Telegram webhook fail-closed behavior."""
 
     def setUp(self):
+        """SetUp."""
         self.client = APIClient()
         self.url = reverse("finance:webhook_telegram_staff_control")
 
     @override_settings(TELEGRAM_WEBHOOK_SECRET=None)
     def test_rejects_when_secret_not_configured(self):
         """Fail-closed: reject if TELEGRAM_WEBHOOK_SECRET not set."""
+        """Rejects when secret not configured."""
         response = self.client.post(
             self.url,
             data=json.dumps({"callback_query": {}}),
@@ -44,6 +46,7 @@ class TestTelegramWebhookFailClosed(TestCase):
     @override_settings(TELEGRAM_WEBHOOK_SECRET="")
     def test_rejects_when_secret_empty(self):
         """Reject if secret is empty string."""
+        """Rejects when secret empty."""
         response = self.client.post(
             self.url,
             data=json.dumps({}),
@@ -148,6 +151,7 @@ class TestBinanceWebhookFailClosed(TestCase):
     """Test Binance webhook fail-closed behavior."""
 
     def setUp(self):
+        """Setup."""
         self.client = APIClient()
         self.url = reverse("finance:webhook_binance_resilient")
 
@@ -165,6 +169,7 @@ class TestBinanceWebhookFailClosed(TestCase):
 
     @override_settings(BINANCE_WEBHOOK_SECRET="")
     def test_rejects_when_secret_empty(self):
+        """Rejects when secret empty."""
         response = self.client.post(
             self.url,
             data=json.dumps({"bizId": "bin_123"}),
@@ -187,6 +192,7 @@ class TestBinanceWebhookFailClosed(TestCase):
     @override_settings(BINANCE_WEBHOOK_SECRET="secret_largo_y_secreto")
     def test_rejects_invalid_signature(self):
         """Reject invalid HMAC signature."""
+        """Rejects invalid signature."""
         payload = json.dumps({"bizId": "bin_123", "custom_venta_id": 1, "amount": 100})
         response = self.client.post(
             self.url,
@@ -250,10 +256,12 @@ class TestStripeWebhookFailClosed(TestCase):
     """Test Stripe webhook fail-closed behavior."""
 
     def setUp(self):
+        """Setup."""
         self.client = APIClient()
 
     @override_settings(STRIPE_WEBHOOK_SECRET=None)
     def test_rejects_when_secret_not_configured(self):
+        """Rejects when secret not configured."""
         response = self.client.post(
             reverse("finance:webhook_stripe_resilient"),
             data=json.dumps({"id": "evt_123", "type": "payment_intent.succeeded"}),
@@ -265,6 +273,7 @@ class TestStripeWebhookFailClosed(TestCase):
 
     @override_settings(STRIPE_WEBHOOK_SECRET="")
     def test_rejects_empty_secret(self):
+        """Rejects empty secret."""
         response = self.client.post(
             reverse("finance:webhook_stripe_resilient"),
             data=json.dumps({"id": "evt_123"}),
@@ -274,6 +283,7 @@ class TestStripeWebhookFailClosed(TestCase):
 
     @override_settings(STRIPE_WEBHOOK_SECRET="whsec_test_secret_long")
     def test_rejects_missing_stripe_signature(self):
+        """Rejects missing stripe signature."""
         response = self.client.post(
             reverse("finance:webhook_stripe_resilient"),
             data=json.dumps({"id": "evt_123"}),
@@ -285,6 +295,7 @@ class TestStripeWebhookFailClosed(TestCase):
 
     @override_settings(STRIPE_WEBHOOK_SECRET="whsec_test_secret_long")
     def test_rejects_invalid_signature(self):
+        """Rejects invalid signature."""
         with mock.patch("stripe.Webhook.construct_event") as mock_construct:
             import stripe
 
@@ -321,6 +332,7 @@ class TestTelegramVerificationUnit(TestCase):
 
     @override_settings(TELEGRAM_WEBHOOK_SECRET=None)
     def test_returns_false_when_secret_not_set(self):
+        """Returns false when secret not set."""
         request = mock.Mock()
         request.headers = {}
 
@@ -330,6 +342,7 @@ class TestTelegramVerificationUnit(TestCase):
 
     @override_settings(TELEGRAM_WEBHOOK_SECRET="")
     def test_returns_false_when_secret_empty(self):
+        """Returns false when secret empty."""
         request = mock.Mock()
         request.headers = {}
 
@@ -339,6 +352,7 @@ class TestTelegramVerificationUnit(TestCase):
 
     @override_settings(TELEGRAM_WEBHOOK_SECRET="correct_secret")
     def test_returns_false_when_header_missing(self):
+        """Returns false when header missing."""
         request = mock.Mock()
         request.headers = {}
 
@@ -348,6 +362,7 @@ class TestTelegramVerificationUnit(TestCase):
 
     @override_settings(TELEGRAM_WEBHOOK_SECRET="correct_secret")
     def test_returns_false_when_secret_mismatch(self):
+        """Returns false when secret mismatch."""
         request = mock.Mock()
         request.headers = {"X-Telegram-Bot-Api-Secret-Token": "wrong_secret"}
 
@@ -357,6 +372,7 @@ class TestTelegramVerificationUnit(TestCase):
 
     @override_settings(TELEGRAM_WEBHOOK_SECRET="correct_secret")
     def test_returns_true_when_secret_matches(self):
+        """Returns true when secret matches."""
         request = mock.Mock()
         request.headers = {"X-Telegram-Bot-Api-Secret-Token": "correct_secret"}
 
@@ -422,4 +438,5 @@ pytest_plugins = ["pytest_django"]
 
 
 def pytest_configure(config):
+    """Pytest configure."""
     config.option.django_settings_module = "travelhub.settings"

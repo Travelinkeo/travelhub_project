@@ -1,3 +1,6 @@
+"""Vistas (views) de la aplicación finance.
+"""
+
 import hmac
 import html
 import json
@@ -51,6 +54,7 @@ class TelegramBotWebhookView(View):
     """
 
     def post(self, request, *args, **kwargs):
+        # post: Post. Args: según implementación. Returns: según implementación.
         verified, error_msg = _verify_telegram_webhook(request)
         if not verified:
             logger.error(f"Webhook de Telegram rechazado: {error_msg}")
@@ -159,11 +163,13 @@ class TelegramBotWebhookView(View):
         return JsonResponse({"status": "processed", "success": success, "action": action})
 
     def _answer_callback(self, bot_token, query_id, text):
+        # _answer_callback:  answer callback. Args: según implementación. Returns: según implementación.
         from apps.common.tasks import answer_telegram_callback_task
 
         answer_telegram_callback_task.delay(bot_token, query_id, text)
 
     def _edit_message(self, bot_token, chat_id, message_id, text):
+        # _edit_message:  edit message. Args: según implementación. Returns: según implementación.
         from apps.common.tasks import edit_telegram_message_task
 
         edit_telegram_message_task.delay(bot_token, chat_id, message_id, text)

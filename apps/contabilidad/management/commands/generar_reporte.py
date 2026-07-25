@@ -16,10 +16,13 @@ from django.core.management.base import BaseCommand, CommandError
 from apps.contabilidad.reportes import ReportesContables
 
 
-class Command(BaseCommand):
+class Command:
+    """Clase Command. Uso: según contexto de la aplicación.
+    """
     help = "Genera reportes contables"
 
     def add_arguments(self, parser):
+        # add_arguments: Add arguments. Args: según implementación. Returns: según implementación.
         parser.add_argument(
             "tipo",
             type=str,
@@ -37,6 +40,7 @@ class Command(BaseCommand):
         parser.add_argument("--moneda", type=str, default="USD", choices=["USD", "BSD"])
 
     def handle(self, *args, **options):
+        # handle: Maneja/gestiona . Args: evento/datos. Returns: respuesta.
         tipo = options["tipo"]
         moneda = options["moneda"]
 

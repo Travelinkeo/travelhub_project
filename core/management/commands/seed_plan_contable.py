@@ -6,9 +6,11 @@ from core.middleware import system_context
 
 
 class Command(BaseCommand):
+    """Comando de gestión personalizado."""
     help = "Poblar Plan Contable Básico para Agencia de Viajes (Venezuela)"
 
     def handle(self, *args, **kwargs):
+        """Método: handle."""
         self.stdout.write("Iniciando carga de Plan Contable...")
 
         cuentas = [

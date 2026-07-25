@@ -76,6 +76,7 @@ class OnboardingWelcomeView(View):
     template_name = "onboarding/step1_welcome.html"
 
     def get(self, request):
+        # get: Get. Args: según implementación. Returns: según implementación.
         progress = get_or_create_progress(request.user)
 
         # Si ya completó este paso, saltar al siguiente
@@ -91,6 +92,7 @@ class OnboardingWelcomeView(View):
         return render(request, self.template_name, context)
 
     def post(self, request):
+        # post: Post. Args: según implementación. Returns: según implementación.
         progress = get_or_create_progress(request.user)
         progress.mark_step_completed(UserProgress.STEP_WELCOME)
         messages.success(request, _("¡Bienvenido! Continuemos configurando tu agencia."))
@@ -109,6 +111,7 @@ class OnboardingAgencySetupView(View):
     template_name = "onboarding/step2_agency.html"
 
     def get(self, request):
+        # get: Get. Args: según implementación. Returns: según implementación.
         progress = get_or_create_progress(request.user)
 
         # Verificar que no haya saltado pasos
@@ -153,6 +156,7 @@ class OnboardingAgencySetupView(View):
         return render(request, self.template_name, context)
 
     def post(self, request):
+        # post: Post. Args: según implementación. Returns: según implementación.
         progress = get_or_create_progress(request.user)
 
         agency_name = request.POST.get("agency_name", "").strip()
@@ -222,6 +226,7 @@ class OnboardingFirstTicketView(View):
     template_name = "onboarding/step3_ticket.html"
 
     def get(self, request):
+        # get: Get. Args: según implementación. Returns: según implementación.
         progress = get_or_create_progress(request.user)
 
         # Verificar progreso
@@ -247,6 +252,7 @@ class OnboardingFirstTicketView(View):
         return render(request, self.template_name, context)
 
     def post(self, request):
+        # post: Post. Args: según implementación. Returns: según implementación.
         progress = get_or_create_progress(request.user)
 
         # En una implementación real, aquí se crearía el boleto demo
@@ -277,6 +283,7 @@ class OnboardingInviteTeamView(View):
     template_name = "onboarding/step4_invite.html"
 
     def get(self, request):
+        # get: Get. Args: según implementación. Returns: según implementación.
         progress = get_or_create_progress(request.user)
 
         # Verificar progreso
@@ -294,6 +301,7 @@ class OnboardingInviteTeamView(View):
         return render(request, self.template_name, context)
 
     def post(self, request):
+        # post: Post. Args: según implementación. Returns: según implementación.
         progress = get_or_create_progress(request.user)
 
         emails = request.POST.getlist("emails")
@@ -329,6 +337,7 @@ class OnboardingCompleteView(View):
     template_name = "onboarding/step5_complete.html"
 
     def get(self, request):
+        # get: Get. Args: según implementación. Returns: según implementación.
         progress = get_or_create_progress(request.user)
 
         # Verificar progreso
@@ -350,6 +359,7 @@ class OnboardingCompleteView(View):
         return render(request, self.template_name, context)
 
     def post(self, request):
+        # post: Post. Args: según implementación. Returns: según implementación.
         progress = get_or_create_progress(request.user)
 
         # Marcar onboarding como completado

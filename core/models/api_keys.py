@@ -179,6 +179,7 @@ class APIKey(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
+        """Meta definición del modelo."""
         verbose_name = "API Key"
         verbose_name_plural = "API Keys"
         ordering = ["-created_at"]

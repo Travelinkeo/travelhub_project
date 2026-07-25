@@ -1,3 +1,6 @@
+"""Tareas asíncronas (Celery) para la aplicación reports.
+"""
+
 import logging
 from datetime import date, timedelta
 
@@ -15,6 +18,7 @@ logger = logging.getLogger(__name__)
     soft_time_limit=240,
 )
 def enviar_reportes_programados_task(self):
+    # enviar_reportes_programados_task: Envía ar reportes programados task. Args: datos del mensaje. Returns: resultado del envío.
     from django.utils import timezone
 
     from .models import ReporteProgramado
@@ -50,6 +54,7 @@ def enviar_reportes_programados_task(self):
 
 
 def _debe_enviarse(reporte, hoy):
+    # _debe_enviarse:  debe enviarse. Args: según implementación. Returns: según implementación.
     if not reporte.ultimo_envio:
         return True
 
@@ -76,6 +81,7 @@ def _debe_enviarse(reporte, hoy):
 
 
 def _generar_csv_reporte(reporte):
+    # _generar_csv_reporte:  generar csv reporte. Args: según implementación. Returns: según implementación.
     from .services.kpi_metrics import KPIMetrics
     from .services.report_exporter import exportar_csv
 
@@ -85,6 +91,7 @@ def _generar_csv_reporte(reporte):
 
 
 def _enviar_por_email(reporte, csv_content):
+    # _enviar_por_email:  enviar por email. Args: según implementación. Returns: según implementación.
     if not reporte.destinatarios:
         return
 

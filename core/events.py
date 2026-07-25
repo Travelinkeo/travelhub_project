@@ -17,6 +17,8 @@
 # De esta forma, 'bookings' no sabe ni necesita saber que 'finance' existe.
 # ==============================================================================
 
+"""Definición centralizada de eventos de negocio (Django Signals)."""
+
 from django.dispatch import Signal
 
 # --- Eventos de Bookings ---

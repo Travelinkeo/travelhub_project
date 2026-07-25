@@ -1,3 +1,6 @@
+"""Tareas asíncronas (Celery) para la aplicación crm.
+"""
+
 import json
 import logging
 import os

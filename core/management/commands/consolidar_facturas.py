@@ -13,9 +13,11 @@ from apps.finance.models_stubs import FacturaConsolidada, ItemFacturaConsolidada
 
 
 class Command(BaseCommand):
+    """Comando de gestión personalizado."""
     help = "Migra facturas del modelo antiguo al consolidado FacturaVenezuela"
 
     def add_arguments(self, parser):
+        """Método: add arguments."""
         parser.add_argument(
             "--dry-run",
             action="store_true",
@@ -23,6 +25,7 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
+        """Método: handle."""
         dry_run = options["dry_run"]
 
         if dry_run:

@@ -21,7 +21,9 @@ from core.api import AgenciaMixin, SoftDeleteModel
 # ... (Cotizacion model unchanged)
 
 
-class Cotizacion(AgenciaMixin, SoftDeleteModel):
+class Cotizacion:
+    """Clase Cotizacion. Uso: según contexto de la aplicación.
+    """
     id_cotizacion = models.AutoField(primary_key=True, verbose_name=_("ID Cotización"))
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     numero_cotizacion = models.CharField(
@@ -111,6 +113,7 @@ class Cotizacion(AgenciaMixin, SoftDeleteModel):
         ordering = ["-fecha_emision"]
 
     def __str__(self):
+        # __str__: Representación en string del objeto. Returns: str.
         return self.numero_cotizacion or f"COT-{self.id_cotizacion}"
 
     def save(self, *args, **kwargs):
@@ -135,6 +138,7 @@ class Cotizacion(AgenciaMixin, SoftDeleteModel):
         super().save(*args, **kwargs)
 
     def calcular_total(self):
+        # calcular_total: Calcular total. Args: según implementación. Returns: según implementación.
         total = self.items.aggregate(total=models.Sum("costo"))["total"] or Decimal("0.00")
         self.total_cotizado = total
         self.save(update_fields=["total_cotizado"])
@@ -219,7 +223,9 @@ class Cotizacion(AgenciaMixin, SoftDeleteModel):
         return self.get_whatsapp_link()
 
 
-class ItemCotizacion(AgenciaMixin, SoftDeleteModel):
+class ItemCotizacion:
+    """Clase ItemCotizacion. Uso: según contexto de la aplicación.
+    """
     id_item_cotizacion = models.AutoField(primary_key=True, verbose_name=_("ID Item Cotización"))
     cotizacion = models.ForeignKey(
         Cotizacion, related_name="items", on_delete=models.CASCADE, verbose_name=_("Cotización")
@@ -274,4 +280,5 @@ class ItemCotizacion(AgenciaMixin, SoftDeleteModel):
         ordering = ["id_item_cotizacion"]
 
     def __str__(self):
+        # __str__: Representación en string del objeto. Returns: str.
         return f"{self.get_tipo_item_display()} - {self.descripcion}"

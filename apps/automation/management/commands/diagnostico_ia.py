@@ -1,3 +1,6 @@
+"""Comando de gestión Django para automation: diagnostico_ia.
+"""
+
 import time
 import traceback
 
@@ -7,13 +10,17 @@ from apps.automation.services.ticket_parser_service import TicketParserService
 from apps.bookings.models import BoletoImportado
 
 
-class Command(BaseCommand):
+class Command:
+    """Clase Command. Uso: según contexto de la aplicación.
+    """
     help = "SRE L3 Forensic Diagnostic tool for ticket parser silent failures."
 
     def add_arguments(self, parser):
+        # add_arguments: Add arguments. Args: según implementación. Returns: según implementación.
         parser.add_argument("boleto_id", type=int, help="ID of the BoletoImportado to diagnose.")
 
     def handle(self, *args, **options):
+        # handle: Maneja/gestiona . Args: evento/datos. Returns: respuesta.
         boleto_id = options["boleto_id"]
         # Corregido: Uso de style.WARNING en lugar del inexistente MIGRATE_HEADER
         self.stdout.write(

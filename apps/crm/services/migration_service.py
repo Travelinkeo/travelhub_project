@@ -1,3 +1,6 @@
+"""Servicio de migration service para la aplicación crm.
+"""
+
 import logging
 
 logger = logging.getLogger(__name__)

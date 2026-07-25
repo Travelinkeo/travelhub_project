@@ -1,5 +1,8 @@
 # Archivo: core/airline_utils.py
 
+"""Parser/procesador de airline utils para la aplicación automation.
+"""
+
 import logging
 
 from django.db.utils import OperationalError

@@ -1,3 +1,6 @@
+"""Vistas (views) de la aplicación finance.
+"""
+
 import logging
 
 from django.contrib.auth.decorators import login_required
@@ -8,6 +11,7 @@ logger = logging.getLogger(__name__)
 
 @login_required
 def registrar_pago_modal_view(request, venta_id):
+    # registrar_pago_modal_view: Registrar pago modal view. Args: según implementación. Returns: según implementación.
     from apps.bookings.models import Venta
     from apps.finance.forms import RegistroPagoFastForm
 

@@ -1,3 +1,6 @@
+"""Servicio de circuit breaker para la aplicación common.
+"""
+
 import logging
 import time
 from collections.abc import Callable
@@ -8,7 +11,9 @@ from typing import Any
 logger = logging.getLogger(__name__)
 
 
-class CircuitState(Enum):
+class CircuitState:
+    """Clase CircuitState. Uso: según contexto de la aplicación.
+    """
     CLOSED = "CLOSED"
     OPEN = "OPEN"
     HALF_OPEN = "HALF_OPEN"
@@ -32,6 +37,7 @@ class CircuitBreaker:
     Uso:
         @whatsapp_circuit_breaker
         def send_message(...):
+            # send_message: Envía  message. Args: datos del mensaje. Returns: resultado del envío.
             ...
 
         # O manualmente:
@@ -45,6 +51,7 @@ class CircuitBreaker:
         recovery_timeout: int = 60,
         fallback: Callable[..., Any] | None = None,
     ) -> None:
+        # __init__: Inicializa una nueva instancia de CircuitBreaker. Args: parámetros de inicialización.
         self.name = name
         self.failure_threshold = failure_threshold
         self.recovery_timeout = recovery_timeout
@@ -57,6 +64,7 @@ class CircuitBreaker:
         self.failure_count = 0
 
     def call(self, func: Callable[..., Any], *args: Any, **kwargs: Any) -> Any:
+        # call: Call. Args: según implementación. Returns: según implementación.
         if self.state == CircuitState.OPEN:
             if time.time() - self.last_failure_time > self.recovery_timeout:
                 self.state = CircuitState.HALF_OPEN
@@ -90,6 +98,7 @@ class CircuitBreaker:
             raise e
 
     def _record_success(self) -> None:
+        # _record_success:  record success. Args: según implementación. Returns: según implementación.
         self.success_count += 1
         if self.state != CircuitState.CLOSED:
             logger.info(f"✅ Circuit Breaker [{self.name}] restored. Moving to CLOSED state.")
@@ -97,6 +106,7 @@ class CircuitBreaker:
         self.failures = 0
 
     def _record_failure(self) -> None:
+        # _record_failure:  record failure. Args: según implementación. Returns: según implementación.
         self.failure_count += 1
         self.failures += 1
         self.last_failure_time = time.time()
@@ -126,8 +136,10 @@ class CircuitBreaker:
         logger.info(f"🔧 Circuit Breaker [{self.name}] manually reset.")
 
     def __call__(self, func: Callable[..., Any]) -> Callable[..., Any]:
+        # __call__:   call  . Args: según implementación. Returns: según implementación.
         @wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
+            # wrapper: Wrapper. Args: según implementación. Returns: según implementación.
             return self.call(func, *args, **kwargs)
 
         return wrapper

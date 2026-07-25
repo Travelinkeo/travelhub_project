@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 @shared_task(time_limit=600, soft_time_limit=540)
 @idempotent_task(timeout=7200, key_prefix="celery_cierre_mensual")
 def cierre_mensual_task(agencia_id=None):
+    # cierre_mensual_task: Cierre mensual task. Args: según implementación. Returns: según implementación.
     from core.api import Agencia, agency_context, system_context
 
     try:
@@ -42,6 +43,7 @@ def cierre_mensual_task(agencia_id=None):
 )
 @idempotent_task(timeout=3600, key_prefix="celery_sync_bcv")
 def sync_bcv_rates():
+    # sync_bcv_rates: Sync bcv rates. Args: según implementación. Returns: según implementación.
     from datetime import date
 
     from django.core.cache import cache

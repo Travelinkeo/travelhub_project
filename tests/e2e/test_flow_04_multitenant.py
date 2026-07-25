@@ -1,3 +1,4 @@
+"""Tests para Flow 04 multitenant (E2E)."""
 import pytest
 
 pytestmark = [
@@ -9,6 +10,7 @@ pytestmark = [
 
 @pytest.fixture
 def agencia_a(db):
+    """Agencia a."""
     from core.models.agencia import Agencia
 
     agencia, _ = Agencia.objects.get_or_create(
@@ -25,6 +27,7 @@ def agencia_a(db):
 
 @pytest.fixture
 def agencia_b(db):
+    """Agencia b."""
     from core.models.agencia import Agencia
 
     agencia, _ = Agencia.objects.get_or_create(
@@ -41,6 +44,7 @@ def agencia_b(db):
 
 @pytest.fixture
 def user_agencia_a(db, agencia_a):
+    """User agencia a."""
     from django.contrib.auth import get_user_model
 
     User = get_user_model()
@@ -57,6 +61,7 @@ def user_agencia_a(db, agencia_a):
 
 @pytest.fixture
 def user_agencia_b(db, agencia_b):
+    """User agencia b."""
     from django.contrib.auth import get_user_model
 
     User = get_user_model()
@@ -73,6 +78,7 @@ def user_agencia_b(db, agencia_b):
 
 @pytest.fixture
 def venta_agencia_a(db, agencia_a, moneda_usd, sample_cliente):
+    """Venta agencia a."""
     from apps.bookings.models import Venta
 
     venta = Venta.objects.create(

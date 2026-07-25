@@ -1,3 +1,6 @@
+"""Señales Django para la aplicación bookings.
+"""
+
 import logging
 from functools import partial
 
@@ -18,11 +21,13 @@ logger = logging.getLogger(__name__)
 
 
 def _on_commit(fn, *args, **kwargs):
+    # _on_commit:  on commit. Args: según implementación. Returns: según implementación.
     transaction.on_commit(partial(fn, *args, **kwargs))
 
 
 @receiver([post_save, post_delete], sender=FeeVenta)
 def signal_fee_post_save_delete(sender, instance, **kwargs):
+    # signal_fee_post_save_delete: Signal fee post save delete. Args: según implementación. Returns: según implementación.
     if are_signals_blocked():
         logger.info(
             f"⏭️ SIGNAL: Signals blocked. Bypassing signal_fee_post_save_delete for FeeVenta {instance.pk}"
@@ -34,6 +39,7 @@ def signal_fee_post_save_delete(sender, instance, **kwargs):
 
 
 def _recalcular_sync(venta_id):
+    # _recalcular_sync:  recalcular sync. Args: según implementación. Returns: según implementación.
     from apps.bookings.services.venta_service import VentaService
 
     VentaService.recalculate_finances(venta_id)
@@ -41,6 +47,7 @@ def _recalcular_sync(venta_id):
 
 @receiver([post_save, post_delete], sender=ItemVenta)
 def signal_item_post_save_delete(sender, instance, **kwargs):
+    # signal_item_post_save_delete: Signal item post save delete. Args: según implementación. Returns: según implementación.
     if are_signals_blocked():
         logger.info(
             f"⏭️ SIGNAL: Signals blocked. Bypassing signal_item_post_save_delete for ItemVenta {instance.pk}"
@@ -54,6 +61,7 @@ def signal_item_post_save_delete(sender, instance, **kwargs):
 
 @receiver(post_save, sender=BoletoImportado)
 def signal_boleto_post_save(sender, instance, created, **kwargs):
+    # signal_boleto_post_save: Signal boleto post save. Args: según implementación. Returns: según implementación.
     if are_signals_blocked():
         logger.info(
             f"⏭️ SIGNAL: Signals blocked. Bypassing signal_boleto_post_save for Boleto {instance.pk}"
@@ -67,6 +75,7 @@ def signal_boleto_post_save(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=PagoVenta)
 def signal_pago_post_save(sender, instance, created, **kwargs):
+    # signal_pago_post_save: Signal pago post save. Args: según implementación. Returns: según implementación.
     if are_signals_blocked():
         logger.info(
             f"⏭️ SIGNAL: Signals blocked. Bypassing signal_pago_post_save for PagoVenta {instance.pk}"
@@ -84,6 +93,7 @@ def signal_pago_post_save(sender, instance, created, **kwargs):
 
 @receiver(post_delete, sender=PagoVenta)
 def signal_pago_post_delete(sender, instance, **kwargs):
+    # signal_pago_post_delete: Signal pago post delete. Args: según implementación. Returns: según implementación.
     if are_signals_blocked():
         logger.info(
             f"⏭️ SIGNAL: Signals blocked. Bypassing signal_pago_post_delete for PagoVenta {instance.pk}"
@@ -98,6 +108,7 @@ def signal_pago_post_delete(sender, instance, **kwargs):
 
 @receiver(pre_save, sender=Venta)
 def capturar_estado_anterior_venta(sender, instance, **kwargs):
+    # capturar_estado_anterior_venta: Capturar estado anterior venta. Args: según implementación. Returns: según implementación.
     if are_signals_blocked():
         logger.info(
             f"⏭️ SIGNAL: Signals blocked. Bypassing capturar_estado_anterior_venta for Venta {instance.pk}"
@@ -116,6 +127,7 @@ def capturar_estado_anterior_venta(sender, instance, **kwargs):
 
 @receiver(post_save, sender=Venta)
 def venta_post_save_dispatcher(sender, instance, created, **kwargs):
+    # venta_post_save_dispatcher: Venta post save dispatcher. Args: según implementación. Returns: según implementación.
     if are_signals_blocked():
         logger.info(
             f"⏭️ SIGNAL: Signals blocked. Bypassing venta_post_save_dispatcher for Venta {instance.pk}"
@@ -133,6 +145,7 @@ def venta_post_save_dispatcher(sender, instance, created, **kwargs):
 
 @receiver([post_save, post_delete], sender=CircuitoDia)
 def actualizar_circuito_dias(sender, instance, **kwargs):
+    # actualizar_circuito_dias: Actualiza zar circuito dias. Args: datos actualizados. Returns: objeto actualizado.
     if are_signals_blocked():
         logger.info(
             f"⏭️ SIGNAL: Signals blocked. Bypassing actualizar_circuito_dias for CircuitoDia {instance.pk}"
@@ -146,6 +159,7 @@ def actualizar_circuito_dias(sender, instance, **kwargs):
 
 
 def _auditar_venta_sync(venta_id):
+    # _auditar_venta_sync:  auditar venta sync. Args: según implementación. Returns: según implementación.
     from apps.bookings.services.revenue_auditor import RevenueAuditorService
 
     try:
@@ -158,6 +172,7 @@ def _auditar_venta_sync(venta_id):
 
 
 def _evaluar_tax_refund(boleto_id):
+    # _evaluar_tax_refund:  evaluar tax refund. Args: según implementación. Returns: según implementación.
     from apps.bookings.models import BoletoImportado
     from apps.bookings.services.boleto_service import BoletoImportadoService
 
@@ -171,6 +186,7 @@ def _evaluar_tax_refund(boleto_id):
 
 
 def _evaluar_loyalty_sync(pago_id):
+    # _evaluar_loyalty_sync:  evaluar loyalty sync. Args: según implementación. Returns: según implementación.
     from apps.bookings.models import PagoVenta
     from apps.bookings.services.venta_service import VentaService
 
@@ -182,6 +198,7 @@ def _evaluar_loyalty_sync(pago_id):
 
 
 def _emitir_pago_evento(pago_id, estado_accion, agencia_id):
+    # _emitir_pago_evento:  emitir pago evento. Args: según implementación. Returns: según implementación.
     try:
         from apps.bookings.models import PagoVenta
         from core.api import sale_payment_recorded
@@ -199,6 +216,7 @@ def _emitir_pago_evento(pago_id, estado_accion, agencia_id):
 
 
 def _disparar_post_save_actions(venta_id, created, estado_anterior):
+    # _disparar_post_save_actions:  disparar post save actions. Args: según implementación. Returns: según implementación.
     from apps.bookings.models import Venta
     from apps.bookings.services.venta_service import VentaService
 
@@ -214,6 +232,7 @@ def _disparar_post_save_actions(venta_id, created, estado_anterior):
 
 
 def _update_circuit_days_sync(circuito_dia_id):
+    # _update_circuit_days_sync:  update circuit days sync. Args: según implementación. Returns: según implementación.
     from apps.bookings.models import CircuitoDia
     from apps.bookings.services.venta_service import VentaService
 
@@ -225,6 +244,7 @@ def _update_circuit_days_sync(circuito_dia_id):
 
 
 def _notificar_pago_confirmado(pago_id):
+    # _notificar_pago_confirmado:  notificar pago confirmado. Args: según implementación. Returns: según implementación.
     from apps.bookings.models import PagoVenta
 
     try:
@@ -237,6 +257,7 @@ def _notificar_pago_confirmado(pago_id):
 
 
 def _notificar_boleto_importado(boleto_id):
+    # _notificar_boleto_importado:  notificar boleto importado. Args: según implementación. Returns: según implementación.
     from apps.bookings.models import BoletoImportado
 
     try:

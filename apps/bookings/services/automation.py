@@ -1,3 +1,6 @@
+"""Servicio de automation para la aplicación bookings.
+"""
+
 import logging
 from decimal import Decimal, InvalidOperation
 

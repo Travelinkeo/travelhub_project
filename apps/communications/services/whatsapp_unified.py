@@ -510,6 +510,7 @@ except ImportError as e:
     def procesar_mensaje_entrante(
         telefono_cliente: str, nombre_perfil: str, mensaje_texto: str
     ) -> bool:
+        # procesar_mensaje_entrante: Procesa r mensaje entrante. Args: datos a procesar. Returns: resultado procesado.
         logger.error(
             "WhatsApp Bot no disponible: faltan dependencias (pydantic, ai_engine, crm models)"
         )

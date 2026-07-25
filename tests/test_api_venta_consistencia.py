@@ -1,3 +1,4 @@
+"""Tests para Api venta consistencia."""
 import pytest
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
@@ -13,6 +14,7 @@ pytestmark = pytest.mark.skip(reason="Tests requieren configuración completa o 
 def test_api_venta_includes_consistency_fields():
     # Datos mínimos para crear venta
     # El modelo Cliente usa campos 'nombres' y 'apellidos'; no posee 'tipo_documento' ni 'documento'.
+    """Api venta includes consistency fields."""
     cliente = Cliente.objects.create(
         nombres="Cliente", apellidos="Prueba", email="cliente_prueba@example.com"
     )

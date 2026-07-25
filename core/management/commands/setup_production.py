@@ -5,9 +5,11 @@ from core.middleware import system_context
 
 
 class Command(BaseCommand):
+    """Comando de gestión personalizado."""
     help = "Setup completo de produccion: migrate, static, seed, cron keys"
 
     def handle(self, *args, **options):
+        """Método: handle."""
         self.stdout.write("=" * 60)
         self.stdout.write(self.style.SUCCESS("TRAVELHUB - SETUP COMPLETO"))
         self.stdout.write("=" * 60)
@@ -44,6 +46,7 @@ class Command(BaseCommand):
         self.stdout.write("=" * 60)
 
     def _create_cron_keys(self):
+        """Método interna: create cron keys."""
         from core.models.cron_api_key import CronApiKey
 
         keys_config = [

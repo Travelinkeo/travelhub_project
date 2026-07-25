@@ -3,7 +3,8 @@
 from django.db import migrations
 
 
-class Migration(migrations.Migration):
+class Migration:
+    """Migración de base de datos generada por Django."""
     # Edited 2026-06-07: wrap in SeparateDatabaseAndState with
     # database_operations=[] because the tables named in the original
     # AlterModelTable(table=None) operations were already renamed

@@ -19,6 +19,7 @@ class IntegracionesView(View):
     template_name = "core/integraciones.html"
 
     def get(self, request):
+        """Método: get."""
         context = {
             "active_tab": request.GET.get("tab", "apikeys"),
         }

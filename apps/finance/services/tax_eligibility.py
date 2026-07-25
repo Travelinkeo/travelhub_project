@@ -1,3 +1,6 @@
+"""Servicio de tax eligibility para la aplicación finance.
+"""
+
 import logging
 
 logger = logging.getLogger(__name__)

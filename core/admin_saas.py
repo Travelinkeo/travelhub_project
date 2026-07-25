@@ -11,6 +11,7 @@ class SaaSAdminMixin:
     saas_agency_field = "agencia"
 
     def get_queryset(self, request):
+        """Filtra queryset por agencia para aislamiento multi-tenant. Args: request. Returns: QuerySet."""
         qs = super().get_queryset(request)
         if request.user.is_superuser:
             return qs
@@ -25,6 +26,7 @@ class SaaSAdminMixin:
         return qs.none() if should_isolate else qs
 
     def save_model(self, request, obj, form, change):
+        """Método que actualiza/guarda model."""
         if not request.user.is_superuser and not change:
             if (
                 "__" not in self.saas_agency_field
@@ -35,6 +37,7 @@ class SaaSAdminMixin:
         super().save_model(request, obj, form, change)
 
     def get_fieldsets(self, request, obj=None):
+        """Método que obtiene fieldsets. Args: según implementación. Returns: datos solicitados."""
         fieldsets = super().get_fieldsets(request, obj)
         if fieldsets is None:
             return None
@@ -47,6 +50,7 @@ class SaaSAdminMixin:
         return fieldsets
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        """Método: formfield for foreignkey."""
         if not request.user.is_superuser and hasattr(request, "agencia") and request.agencia:
             related_model = db_field.remote_field.model
             if hasattr(related_model, "agencia"):
@@ -54,6 +58,7 @@ class SaaSAdminMixin:
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
     def formfield_for_manytomany(self, db_field, request, **kwargs):
+        """Método: formfield for manytomany."""
         if not request.user.is_superuser and hasattr(request, "agencia") and request.agencia:
             related_model = db_field.remote_field.model
             if hasattr(related_model, "agencia"):
@@ -61,6 +66,7 @@ class SaaSAdminMixin:
         return super().formfield_for_manytomany(db_field, request, **kwargs)
 
     def has_view_permission(self, request, obj=None):
+        """Método que verifica  view permission. Returns: bool."""
         if not request.user.is_authenticated:
             return False
         if request.user.is_superuser:
@@ -68,6 +74,7 @@ class SaaSAdminMixin:
         return hasattr(request, "agencia") and request.agencia is not None
 
     def has_add_permission(self, request):
+        """Método que verifica  add permission. Returns: bool."""
         if request.user.is_superuser:
             return True
         return hasattr(request, "agencia") and request.agencia is not None
@@ -87,6 +94,7 @@ class SaaSAdminMixin:
         return current
 
     def has_change_permission(self, request, obj=None):
+        """Método que verifica  change permission. Returns: bool."""
         if request.user.is_superuser:
             return True
         if obj is None:
@@ -97,6 +105,7 @@ class SaaSAdminMixin:
         return False
 
     def has_delete_permission(self, request, obj=None):
+        """Método que verifica  delete permission. Returns: bool."""
         if request.user.is_superuser:
             return True
         if obj is None:

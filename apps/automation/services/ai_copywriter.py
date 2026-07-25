@@ -1,3 +1,6 @@
+"""Servicio de ai copywriter para la aplicación automation.
+"""
+
 import logging
 
 from apps.automation.services.ai_engine import ai_engine
@@ -12,6 +15,7 @@ class AICopywriter:
     """
 
     def __init__(self):
+        # __init__: Inicializa una nueva instancia de AICopywriter. Args: parámetros de inicialización.
         pass
 
     def generate_caption(self, hotel_id, tone="PROFESIONAL_AVENTURERO"):

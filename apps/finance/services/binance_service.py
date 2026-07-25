@@ -1,3 +1,6 @@
+"""Servicio de binance service para la aplicación finance.
+"""
+
 import hashlib
 import hmac
 import logging
@@ -17,11 +20,13 @@ class BinancePayService:
     """
 
     def __init__(self):
+        # __init__: Inicializa una nueva instancia de BinancePayService. Args: parámetros de inicialización.
         self.base_url = "https://bpay.binanceapi.com"
         self.api_key = getattr(settings, "BINANCE_PAY_API_KEY", "")
         self.secret_key = getattr(settings, "BINANCE_PAY_SECRET_KEY", "")
 
     def _generate_signature(self, payload: str, timestamp: str, nonce: str) -> str:
+        # _generate_signature:  generate signature. Args: según implementación. Returns: según implementación.
         payload_to_sign = f"{timestamp}\n{nonce}\n{payload}\n"
         signature = (
             hmac.new(
@@ -33,6 +38,7 @@ class BinancePayService:
         return signature
 
     def _get_headers(self, payload: str):
+        # _get_headers:  get headers. Args: según implementación. Returns: según implementación.
         timestamp = str(int(time.time() * 1000))
         nonce = str(uuid.uuid4())[:32]
         signature = self._generate_signature(payload, timestamp, nonce)
@@ -45,6 +51,7 @@ class BinancePayService:
         }
 
     def create_order(self, venta, amount: Decimal, currency: str = "USD") -> dict | None:
+        # create_order: Crea un nuevo order. Args: datos del objeto. Returns: objeto creado.
         merchant_trade_no = f"TH{venta.pk:06d}{int(timezone.now().timestamp())}"
         payload = {
             "env": {"terminalType": "WEB"},

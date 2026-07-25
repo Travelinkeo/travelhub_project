@@ -1,3 +1,6 @@
+"""Vistas (views) de la aplicación common.
+"""
+
 from __future__ import annotations
 
 from django.contrib import messages
@@ -19,17 +22,22 @@ def _get_model(app_label: str, model_name: str):
     return apps.get_model(app_label, model_name)
 
 
-class CatalogosCenterView(SaaSMixin, LoginRequiredMixin, ListView):
+class CatalogosCenterView:
+    """Vista para gestionar catalogoscenter. Uso: instanciar según necesidad del dominio.
+    """
     model = Moneda  # Dummy model to satisfy ListView
     template_name = "core/erp/catalogos/center.html"
 
     def get_context_data(self, **kwargs):
+        # get_context_data: Obtiene/recupera context data. Args: según implementación. Returns: dato solicitado.
         context = super().get_context_data(**kwargs)
         context["active_tab"] = "configuracion"
         return context
 
 
-class AerolineaListView(HtmxResponseMixin, SaaSMixin, LoginRequiredMixin, ListView):
+class AerolineaListView:
+    """Vista para gestionar aerolinealist. Uso: instanciar según necesidad del dominio.
+    """
     model = Aerolinea
     template_name = "core/erp/catalogos/aerolineas_list.html"
     htmx_template_name = "common/partials/aerolineas_htmx.html"
@@ -37,6 +45,7 @@ class AerolineaListView(HtmxResponseMixin, SaaSMixin, LoginRequiredMixin, ListVi
     paginate_by = 30
 
     def get_queryset(self):
+        # get_queryset: Obtiene/recupera queryset. Args: según implementación. Returns: dato solicitado.
         q = self.request.GET.get("q")
         queryset = Aerolinea.objects.all().order_by("nombre")
         if q:
@@ -44,51 +53,64 @@ class AerolineaListView(HtmxResponseMixin, SaaSMixin, LoginRequiredMixin, ListVi
         return queryset
 
 
-class AerolineaCreateView(SaaSMixin, LoginRequiredMixin, CreateView):
+class AerolineaCreateView:
+    """Vista para gestionar aerolineacreate. Uso: instanciar según necesidad del dominio.
+    """
     model = Aerolinea
     template_name = "core/erp/catalogos/aerolinea_form.html"
     fields = ["nombre", "codigo_iata", "activa"]
     success_url = reverse_lazy("common_admin:aerolinea_list")
 
     def get_form(self, form_class=None):
+        # get_form: Obtiene/recupera form. Args: según implementación. Returns: dato solicitado.
         form = super().get_form(form_class)
         for field in form.fields.values():
             field.widget.attrs["class"] = "input-base"
         return form
 
     def form_valid(self, form):
+        # form_valid: Form valid. Args: según implementación. Returns: según implementación.
         messages.success(self.request, "Aerolínea creada exitosamente.")
         return super().form_valid(form)
 
 
-class AerolineaUpdateView(SaaSMixin, LoginRequiredMixin, UpdateView):
+class AerolineaUpdateView:
+    """Vista para gestionar aerolineaupdate. Uso: instanciar según necesidad del dominio.
+    """
     model = Aerolinea
     template_name = "core/erp/catalogos/aerolinea_form.html"
     fields = ["nombre", "codigo_iata", "activa"]
     success_url = reverse_lazy("common_admin:aerolinea_list")
 
     def get_form(self, form_class=None):
+        # get_form: Obtiene/recupera form. Args: según implementación. Returns: dato solicitado.
         form = super().get_form(form_class)
         for field in form.fields.values():
             field.widget.attrs["class"] = "input-base"
         return form
 
     def form_valid(self, form):
+        # form_valid: Form valid. Args: según implementación. Returns: según implementación.
         messages.success(self.request, "Aerolínea actualizada exitosamente.")
         return super().form_valid(form)
 
 
-class AerolineaDeleteView(SaaSMixin, LoginRequiredMixin, DeleteView):
+class AerolineaDeleteView:
+    """Vista para gestionar aerolineadelete. Uso: instanciar según necesidad del dominio.
+    """
     model = Aerolinea
     template_name = "core/erp/catalogos/aerolinea_confirm_delete.html"
     success_url = reverse_lazy("common_admin:aerolinea_list")
 
     def delete(self, request, *args, **kwargs):
+        # delete: Elimina el objeto de la base de datos. Args: None. Returns: None.
         messages.success(self.request, "Aerolínea eliminada correctamente.")
         return super().delete(request, *args, **kwargs)
 
 
-class ProductoServicioListView(HtmxResponseMixin, SaaSMixin, LoginRequiredMixin, ListView):
+class ProductoServicioListView:
+    """Vista para gestionar productoserviciolist. Uso: instanciar según necesidad del dominio.
+    """
     model = None
     template_name = "core/erp/catalogos/productos_list.html"
     htmx_template_name = "common/partials/productos_htmx.html"
@@ -96,6 +118,7 @@ class ProductoServicioListView(HtmxResponseMixin, SaaSMixin, LoginRequiredMixin,
     paginate_by = 30
 
     def get_queryset(self):
+        # get_queryset: Obtiene/recupera queryset. Args: según implementación. Returns: dato solicitado.
         ProductoServicio = _get_model("bookings", "ProductoServicio")
         q = self.request.GET.get("q")
         queryset = ProductoServicio.objects.select_related(
@@ -106,7 +129,9 @@ class ProductoServicioListView(HtmxResponseMixin, SaaSMixin, LoginRequiredMixin,
         return queryset
 
 
-class PaisListView(HtmxResponseMixin, SaaSMixin, LoginRequiredMixin, ListView):
+class PaisListView:
+    """Vista para gestionar paislist. Uso: instanciar según necesidad del dominio.
+    """
     model = Pais
     template_name = "core/erp/catalogos/geografia_list.html"
     htmx_template_name = "common/partials/paises_htmx.html"
@@ -114,6 +139,7 @@ class PaisListView(HtmxResponseMixin, SaaSMixin, LoginRequiredMixin, ListView):
     paginate_by = 30
 
     def get_queryset(self):
+        # get_queryset: Obtiene/recupera queryset. Args: según implementación. Returns: dato solicitado.
         q = self.request.GET.get("q")
         queryset = Pais.objects.all().order_by("nombre")
         if q:
@@ -131,6 +157,7 @@ class GeografiaListView(HtmxResponseMixin, SaaSMixin, LoginRequiredMixin, ListVi
     paginate_by = 30
 
     def get_queryset(self):
+        # get_queryset: Obtiene/recupera queryset. Args: según implementación. Returns: dato solicitado.
         q = self.request.GET.get("q")
         queryset = Ciudad.objects.select_related("pais").all().order_by("pais__nombre", "nombre")
         if q:
@@ -140,52 +167,64 @@ class GeografiaListView(HtmxResponseMixin, SaaSMixin, LoginRequiredMixin, ListVi
         return queryset
 
     def get_context_data(self, **kwargs):
+        # get_context_data: Obtiene/recupera context data. Args: según implementación. Returns: dato solicitado.
         context = super().get_context_data(**kwargs)
         context["paises_count"] = Pais.objects.count()
         return context
 
 
 # --- Vistas CRUD para Pais ---
-class PaisCreateView(SaaSMixin, LoginRequiredMixin, CreateView):
+class PaisCreateView:
+    """Vista para gestionar paiscreate. Uso: instanciar según necesidad del dominio.
+    """
     model = Pais
     template_name = "core/erp/catalogos/pais_form.html"
     fields = ["nombre", "codigo_iso_2", "codigo_iso_3", "prefijo_telefonico"]
     success_url = reverse_lazy("common_admin:geografia_list")
 
     def get_form(self, form_class=None):
+        # get_form: Obtiene/recupera form. Args: según implementación. Returns: dato solicitado.
         form = super().get_form(form_class)
         for field in form.fields.values():
             field.widget.attrs["class"] = "input-base"
         return form
 
     def form_valid(self, form):
+        # form_valid: Form valid. Args: según implementación. Returns: según implementación.
         messages.success(self.request, "País creado exitosamente.")
         return super().form_valid(form)
 
 
-class PaisUpdateView(SaaSMixin, LoginRequiredMixin, UpdateView):
+class PaisUpdateView:
+    """Vista para gestionar paisupdate. Uso: instanciar según necesidad del dominio.
+    """
     model = Pais
     template_name = "core/erp/catalogos/pais_form.html"
     fields = ["nombre", "codigo_iso_2", "codigo_iso_3", "prefijo_telefonico"]
     success_url = reverse_lazy("common_admin:geografia_list")
 
     def get_form(self, form_class=None):
+        # get_form: Obtiene/recupera form. Args: según implementación. Returns: dato solicitado.
         form = super().get_form(form_class)
         for field in form.fields.values():
             field.widget.attrs["class"] = "input-base"
         return form
 
     def form_valid(self, form):
+        # form_valid: Form valid. Args: según implementación. Returns: según implementación.
         messages.success(self.request, "País actualizado exitosamente.")
         return super().form_valid(form)
 
 
-class PaisDeleteView(SaaSMixin, LoginRequiredMixin, DeleteView):
+class PaisDeleteView:
+    """Vista para gestionar paisdelete. Uso: instanciar según necesidad del dominio.
+    """
     model = Pais
     template_name = "core/erp/catalogos/confirm_delete_generic.html"
     success_url = reverse_lazy("common_admin:geografia_list")
 
     def get_context_data(self, **kwargs):
+        # get_context_data: Obtiene/recupera context data. Args: según implementación. Returns: dato solicitado.
         context = super().get_context_data(**kwargs)
         context["object_name"] = "País"
         context["object_instance"] = self.object.nombre
@@ -193,51 +232,63 @@ class PaisDeleteView(SaaSMixin, LoginRequiredMixin, DeleteView):
         return context
 
     def delete(self, request, *args, **kwargs):
+        # delete: Elimina el objeto de la base de datos. Args: None. Returns: None.
         messages.success(self.request, "País eliminado correctamente.")
         return super().delete(request, *args, **kwargs)
 
 
 # --- Vistas CRUD para Ciudad ---
-class CiudadCreateView(SaaSMixin, LoginRequiredMixin, CreateView):
+class CiudadCreateView:
+    """Vista para gestionar ciudadcreate. Uso: instanciar según necesidad del dominio.
+    """
     model = Ciudad
     template_name = "core/erp/catalogos/ciudad_form.html"
     fields = ["nombre", "pais", "codigo_iata", "region_estado"]
     success_url = reverse_lazy("common_admin:geografia_list")
 
     def get_form(self, form_class=None):
+        # get_form: Obtiene/recupera form. Args: según implementación. Returns: dato solicitado.
         form = super().get_form(form_class)
         for field in form.fields.values():
             field.widget.attrs["class"] = "input-base"
         return form
 
     def form_valid(self, form):
+        # form_valid: Form valid. Args: según implementación. Returns: según implementación.
         messages.success(self.request, "Ciudad creada exitosamente.")
         return super().form_valid(form)
 
 
-class CiudadUpdateView(SaaSMixin, LoginRequiredMixin, UpdateView):
+class CiudadUpdateView:
+    """Vista para gestionar ciudadupdate. Uso: instanciar según necesidad del dominio.
+    """
     model = Ciudad
     template_name = "core/erp/catalogos/ciudad_form.html"
     fields = ["nombre", "pais", "codigo_iata", "region_estado"]
     success_url = reverse_lazy("common_admin:geografia_list")
 
     def get_form(self, form_class=None):
+        # get_form: Obtiene/recupera form. Args: según implementación. Returns: dato solicitado.
         form = super().get_form(form_class)
         for field in form.fields.values():
             field.widget.attrs["class"] = "input-base"
         return form
 
     def form_valid(self, form):
+        # form_valid: Form valid. Args: según implementación. Returns: según implementación.
         messages.success(self.request, "Ciudad actualizada exitosamente.")
         return super().form_valid(form)
 
 
-class CiudadDeleteView(SaaSMixin, LoginRequiredMixin, DeleteView):
+class CiudadDeleteView:
+    """Vista para gestionar ciudaddelete. Uso: instanciar según necesidad del dominio.
+    """
     model = Ciudad
     template_name = "core/erp/catalogos/confirm_delete_generic.html"
     success_url = reverse_lazy("common_admin:geografia_list")
 
     def get_context_data(self, **kwargs):
+        # get_context_data: Obtiene/recupera context data. Args: según implementación. Returns: dato solicitado.
         context = super().get_context_data(**kwargs)
         context["object_name"] = "Ciudad"
         context["object_instance"] = self.object.nombre
@@ -245,11 +296,14 @@ class CiudadDeleteView(SaaSMixin, LoginRequiredMixin, DeleteView):
         return context
 
     def delete(self, request, *args, **kwargs):
+        # delete: Elimina el objeto de la base de datos. Args: None. Returns: None.
         messages.success(self.request, "Ciudad eliminada correctamente.")
         return super().delete(request, *args, **kwargs)
 
 
-class TipoCambioListView(HtmxResponseMixin, SaaSMixin, LoginRequiredMixin, ListView):
+class TipoCambioListView:
+    """Vista para gestionar tipocambiolist. Uso: instanciar según necesidad del dominio.
+    """
     model = None
     template_name = "core/config/tasas_list.html"
     htmx_template_name = "common/partials/tasas_htmx.html"
@@ -257,12 +311,14 @@ class TipoCambioListView(HtmxResponseMixin, SaaSMixin, LoginRequiredMixin, ListV
     paginate_by = 30
 
     def get_queryset(self):
+        # get_queryset: Obtiene/recupera queryset. Args: según implementación. Returns: dato solicitado.
         TipoCambio = _get_model("finance", "TipoCambio")
         return TipoCambio.objects.select_related("moneda_origen", "moneda_destino").order_by(
             "-fecha_efectiva", "moneda_origen__codigo_iso"
         )
 
     def get_context_data(self, **kwargs):
+        # get_context_data: Obtiene/recupera context data. Args: según implementación. Returns: dato solicitado.
         context = super().get_context_data(**kwargs)
         context["active_tab"] = "configuracion"
         context["title"] = "Tasas de Cambio"
@@ -285,16 +341,20 @@ class TipoCambioListView(HtmxResponseMixin, SaaSMixin, LoginRequiredMixin, ListV
         return context
 
 
-class TipoCambioCreateView(SaaSMixin, LoginRequiredMixin, CreateView):
+class TipoCambioCreateView:
+    """Vista para gestionar tipocambiocreate. Uso: instanciar según necesidad del dominio.
+    """
     model = None
     template_name = "core/config/tasas_form.html"
     fields = ["moneda_origen", "moneda_destino", "fecha_efectiva", "tasa_conversion"]
     success_url = reverse_lazy("core:tasas_list")
 
     def get_queryset(self):
+        # get_queryset: Obtiene/recupera queryset. Args: según implementación. Returns: dato solicitado.
         return _get_model("finance", "TipoCambio").objects.all()
 
     def get_form(self, form_class=None):
+        # get_form: Obtiene/recupera form. Args: según implementación. Returns: dato solicitado.
         form = super().get_form(form_class)
         for field in form.fields.values():
             field.widget.attrs["class"] = (
@@ -303,12 +363,16 @@ class TipoCambioCreateView(SaaSMixin, LoginRequiredMixin, CreateView):
         return form
 
     def form_valid(self, form):
+        # form_valid: Form valid. Args: según implementación. Returns: según implementación.
         messages.success(self.request, "Tasa de cambio registrada exitosamente.")
         return super().form_valid(form)
 
 
-class SincronizarTasasActionView(LoginRequiredMixin, View):
+class SincronizarTasasActionView:
+    """Vista para gestionar sincronizartasasaction. Uso: instanciar según necesidad del dominio.
+    """
     def post(self, request):
+        # post: Post. Args: según implementación. Returns: según implementación.
         try:
             from django.utils.module_loading import import_string
 
@@ -323,13 +387,16 @@ class SincronizarTasasActionView(LoginRequiredMixin, View):
 # --- Comisiones ---
 
 
-class ComisionProveedorServicioListView(SaaSMixin, LoginRequiredMixin, ListView):
+class ComisionProveedorServicioListView:
+    """Vista para gestionar comisionproveedorserviciolist. Uso: instanciar según necesidad del dominio.
+    """
     model = None
     template_name = "core/erp/catalogos/comisiones_list.html"
     context_object_name = "comisiones"
     paginate_by = 30
 
     def get_queryset(self):
+        # get_queryset: Obtiene/recupera queryset. Args: según implementación. Returns: dato solicitado.
         ComisionProveedorServicio = _get_model("bookings", "ComisionProveedorServicio")
         queryset = (
             ComisionProveedorServicio.objects.select_related("proveedor", "moneda")
@@ -345,6 +412,7 @@ class ComisionProveedorServicioListView(SaaSMixin, LoginRequiredMixin, ListView)
         return queryset
 
     def get_context_data(self, **kwargs):
+        # get_context_data: Obtiene/recupera context data. Args: según implementación. Returns: dato solicitado.
         context = super().get_context_data(**kwargs)
         qs = _get_model("bookings", "Proveedor").objects.all().order_by("nombre")
         if hasattr(self.request, "agencia") and self.request.agencia:
@@ -354,7 +422,9 @@ class ComisionProveedorServicioListView(SaaSMixin, LoginRequiredMixin, ListView)
         return context
 
 
-class ComisionProveedorServicioCreateView(SaaSMixin, LoginRequiredMixin, CreateView):
+class ComisionProveedorServicioCreateView:
+    """Vista para gestionar comisionproveedorserviciocreate. Uso: instanciar según necesidad del dominio.
+    """
     model = None
     template_name = "core/erp/catalogos/comisiones_form.html"
     fields = [
@@ -369,6 +439,7 @@ class ComisionProveedorServicioCreateView(SaaSMixin, LoginRequiredMixin, CreateV
     success_url = reverse_lazy("core:comisiones_list")
 
     def get_initial(self):
+        # get_initial: Obtiene/recupera initial. Args: según implementación. Returns: dato solicitado.
         initial = super().get_initial()
         proveedor_id = self.request.GET.get("proveedor")
         if proveedor_id:
@@ -376,6 +447,7 @@ class ComisionProveedorServicioCreateView(SaaSMixin, LoginRequiredMixin, CreateV
         return initial
 
     def get_form(self, form_class=None):
+        # get_form: Obtiene/recupera form. Args: según implementación. Returns: dato solicitado.
         form = super().get_form(form_class)
         for field in form.fields.values():
             field.widget.attrs["class"] = (
@@ -384,11 +456,14 @@ class ComisionProveedorServicioCreateView(SaaSMixin, LoginRequiredMixin, CreateV
         return form
 
     def form_valid(self, form):
+        # form_valid: Form valid. Args: según implementación. Returns: según implementación.
         messages.success(self.request, "Regla de comisión creada exitosamente.")
         return super().form_valid(form)
 
 
-class ComisionProveedorServicioUpdateView(SaaSMixin, LoginRequiredMixin, UpdateView):
+class ComisionProveedorServicioUpdateView:
+    """Vista para gestionar comisionproveedorservicioupdate. Uso: instanciar según necesidad del dominio.
+    """
     model = None
     template_name = "core/erp/catalogos/comisiones_form.html"
     fields = [
@@ -403,6 +478,7 @@ class ComisionProveedorServicioUpdateView(SaaSMixin, LoginRequiredMixin, UpdateV
     success_url = reverse_lazy("core:comisiones_list")
 
     def get_form(self, form_class=None):
+        # get_form: Obtiene/recupera form. Args: según implementación. Returns: dato solicitado.
         form = super().get_form(form_class)
         for field in form.fields.values():
             field.widget.attrs["class"] = (
@@ -411,11 +487,14 @@ class ComisionProveedorServicioUpdateView(SaaSMixin, LoginRequiredMixin, UpdateV
         return form
 
     def form_valid(self, form):
+        # form_valid: Form valid. Args: según implementación. Returns: según implementación.
         messages.success(self.request, "Regla de comisión actualizada exitosamente.")
         return super().form_valid(form)
 
 
-class ComisionProveedorServicioDeleteView(SaaSMixin, LoginRequiredMixin, DeleteView):
+class ComisionProveedorServicioDeleteView:
+    """Vista para gestionar comisionproveedorserviciodelete. Uso: instanciar según necesidad del dominio.
+    """
     model = None
     template_name = "core/erp/catalogos/comisiones_confirm_delete.html"
     success_url = reverse_lazy("core:comisiones_list")

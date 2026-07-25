@@ -10,7 +10,8 @@ from django.db import migrations, models
 import core.validators
 
 
-class Migration(migrations.Migration):
+class Migration:
+    """Migración de base de datos generada por Django."""
     initial = True
 
     dependencies = [

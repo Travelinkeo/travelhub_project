@@ -39,6 +39,7 @@ DEFAULT_FLAGS = [
 
 
 def seed_feature_flags(apps, schema_editor):
+    """Función: seed feature flags."""
     FeatureFlag = apps.get_model("core", "FeatureFlag")
     for flag_data in DEFAULT_FLAGS:
         FeatureFlag.objects.get_or_create(
@@ -53,12 +54,14 @@ def seed_feature_flags(apps, schema_editor):
 
 
 def remove_feature_flags(apps, schema_editor):
+    """Función que elimina feature flags."""
     FeatureFlag = apps.get_model("core", "FeatureFlag")
     names = [f["nombre"] for f in DEFAULT_FLAGS]
     FeatureFlag.objects.filter(nombre__in=names, agencia=None).delete()
 
 
-class Migration(migrations.Migration):
+class Migration:
+    """Migración de base de datos generada por Django."""
     dependencies = [
         ("core", "0026_featureflag"),
     ]

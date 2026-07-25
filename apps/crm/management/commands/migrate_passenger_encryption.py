@@ -1,3 +1,6 @@
+"""Comando de gestión Django para crm: migrate_passenger_encryption.
+"""
+
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
@@ -6,10 +9,13 @@ from apps.crm.models import Cliente, Pasajero
 CHUNK_SIZE = 500
 
 
-class Command(BaseCommand):
+class Command:
+    """Clase Command. Uso: según contexto de la aplicación.
+    """
     help = "Migrates historical clear-text passenger documents to the new encrypted format"
 
     def handle(self, *args, **options):
+        # handle: Maneja/gestiona . Args: evento/datos. Returns: respuesta.
         self.stdout.write(self.style.NOTICE("Starting passenger document encryption migration..."))
 
         p_count = 0

@@ -1,3 +1,6 @@
+"""Módulo notifications de la aplicación common.
+"""
+
 import logging
 
 from celery import shared_task
@@ -14,6 +17,7 @@ logger = logging.getLogger(__name__)
     soft_time_limit=50,
 )
 def enviar_bienvenida_agencia_task(self, agencia_id, user_id):
+    # enviar_bienvenida_agencia_task: Envía ar bienvenida agencia task. Args: datos del mensaje. Returns: resultado del envío.
     from django.contrib.auth import get_user_model
 
     from apps.communications.services.notification_dispatcher import NotificationService
@@ -40,6 +44,7 @@ def enviar_bienvenida_agencia_task(self, agencia_id, user_id):
     soft_time_limit=100,
 )
 def notificar_confirmacion_pago_task(self, pago_id):
+    # notificar_confirmacion_pago_task: Notificar confirmacion pago task. Args: según implementación. Returns: según implementación.
     from apps.bookings.models import PagoVenta
     from apps.communications.services.notification_dispatcher import notificar_confirmacion_pago
 
@@ -62,6 +67,7 @@ def notificar_confirmacion_pago_task(self, pago_id):
     soft_time_limit=100,
 )
 def notificar_recordatorio_pago_task(self, venta_id):
+    # notificar_recordatorio_pago_task: Notificar recordatorio pago task. Args: según implementación. Returns: según implementación.
     from apps.bookings.models import Venta
     from apps.communications.services.notification_dispatcher import notificar_recordatorio_pago
 
@@ -84,6 +90,7 @@ def notificar_recordatorio_pago_task(self, venta_id):
     soft_time_limit=100,
 )
 def notificar_boleto_procesado_task(self, boleto_id):
+    # notificar_boleto_procesado_task: Notificar boleto procesado task. Args: según implementación. Returns: según implementación.
     from apps.bookings.models import BoletoImportado
     from apps.communications.services.notification_dispatcher import notificar_boleto_procesado
 

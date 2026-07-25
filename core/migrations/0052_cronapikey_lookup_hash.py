@@ -1,7 +1,8 @@
 from django.db import migrations, models
 
 
-class Migration(migrations.Migration):
+class Migration:
+    """Migración de base de datos generada por Django."""
     dependencies = [
         ("core", "0051_api_keys_pbkdf2"),
     ]

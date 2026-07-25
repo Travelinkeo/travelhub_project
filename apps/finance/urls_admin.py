@@ -1,4 +1,7 @@
 # apps/finance/urls_admin.py
+"""Configuración del panel de administración para finance.
+"""
+
 from django.urls import path
 
 from apps.finance.views import admin_views

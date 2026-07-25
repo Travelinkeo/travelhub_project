@@ -1,3 +1,6 @@
+"""Módulo task status view de la aplicación finance.
+"""
+
 import logging
 
 from celery.result import AsyncResult

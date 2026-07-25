@@ -1,3 +1,6 @@
+"""Servicio de email service para la aplicación communications.
+"""
+
 import logging
 import os
 

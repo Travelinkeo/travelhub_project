@@ -106,6 +106,7 @@ class MigrationCheck(models.Model):
     )
 
     class Meta:
+        """Meta definición del modelo."""
         ordering = ["-checked_at"]
         verbose_name = "Validación Migratoria"
         verbose_name_plural = "Validaciones Migratorias"

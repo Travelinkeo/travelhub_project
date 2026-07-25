@@ -1,3 +1,6 @@
+"""Vistas (views) de la aplicación reports.
+"""
+
 import json
 import logging
 
@@ -26,6 +29,7 @@ class KpiDashboardView(LoginRequiredMixin, View):
     template_name = "reports/dashboard.html"
 
     def get(self, request):
+        # get: Get. Args: según implementación. Returns: según implementación.
         agencia = get_agencia_from_request(request)
         if not agencia:
             return render(request, self.template_name, {"sin_agencia": True})
@@ -47,6 +51,7 @@ class KpiChartDataView(LoginRequiredMixin, View):
     """Endpoint JSON para recargar gráficos vía HTMX/JS."""
 
     def get(self, request):
+        # get: Get. Args: según implementación. Returns: según implementación.
         agencia = get_agencia_from_request(request)
         if not agencia:
             return JsonResponse({"error": "No agency"}, status=400)
@@ -66,6 +71,7 @@ class KpiExportView(LoginRequiredMixin, View):
     """Exporta KPIs a CSV."""
 
     def get(self, request):
+        # get: Get. Args: según implementación. Returns: según implementación.
         agencia = get_agencia_from_request(request)
         if not agencia:
             return HttpResponse("No agency", status=400)

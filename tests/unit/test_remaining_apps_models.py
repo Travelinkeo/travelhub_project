@@ -6,7 +6,9 @@ pytestmark = [pytest.mark.django_db, pytest.mark.models]
 
 
 class TestCotizacionesModels:
+    """Test Cotizaciones Models."""
     def test_cotizacion_creation(self, db):
+        """Cotizacion creation."""
         from apps.cotizaciones.models import Cotizacion
         from tests.helpers import create_test_agencia, create_test_cliente, create_test_moneda
 
@@ -25,7 +27,9 @@ class TestCotizacionesModels:
 
 
 class TestGamificationModels:
+    """Test Gamification Models."""
     def test_puntaje_creation(self, db):
+        """Puntaje creation."""
         from apps.gamification.models import Puntaje
         from tests.helpers import create_test_user
 
@@ -38,6 +42,7 @@ class TestGamificationModels:
         assert puntaje.id is not None
 
     def test_logro_creation(self, db):
+        """Logro creation."""
         from apps.gamification.models import Logro
 
         logro = Logro.objects.create(
@@ -49,7 +54,9 @@ class TestGamificationModels:
 
 
 class TestMarketingModels:
+    """Test Marketing Models."""
     def test_campania_creation(self, db):
+        """Campania creation."""
         from apps.marketing.models import Campania
         from tests.helpers import create_test_agencia
 
@@ -64,7 +71,9 @@ class TestMarketingModels:
 
 
 class TestReportsModels:
+    """Test Reports Models."""
     def test_reporte_programado_creation(self, db):
+        """Reporte programado creation."""
         from apps.reports.models import ReporteProgramado
         from tests.helpers import create_test_agencia
 
@@ -81,7 +90,9 @@ class TestReportsModels:
 
 
 class TestTasksModels:
+    """Test Tasks Models."""
     def test_tarea_creation(self, db):
+        """Tarea creation."""
         from apps.tasks.models import Tarea
         from tests.helpers import create_test_agencia, create_test_user
 
@@ -99,7 +110,9 @@ class TestTasksModels:
 
 
 class TestCmsModels:
+    """Test Cms Models."""
     def test_articulo_creation(self, db):
+        """Articulo creation."""
         from apps.cms.models import Articulo
         from tests.helpers import create_test_user
 
@@ -114,7 +127,9 @@ class TestCmsModels:
 
 
 class TestCrmModels:
+    """Test Crm Models."""
     def test_cliente_creation(self, db):
+        """Cliente creation."""
         from apps.crm.models import Cliente
         from tests.helpers import create_test_cliente
 

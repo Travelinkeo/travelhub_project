@@ -1,7 +1,12 @@
+"""Migración de base de datos para crm.
+"""
+
 from django.db import migrations, models
 
 
-class Migration(migrations.Migration):
+class Migration:
+    """Clase Migration. Uso: según contexto de la aplicación.
+    """
     dependencies = [
         ("crm", "0025_add_ocr_fields_pasajero"),
     ]

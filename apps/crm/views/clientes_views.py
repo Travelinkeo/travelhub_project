@@ -1,3 +1,6 @@
+"""Vistas (views) de la aplicación crm.
+"""
+
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
@@ -9,16 +12,21 @@ from apps.crm.models import Cliente
 from core.api import HtmxResponseMixin, SaaSMixin
 
 
-class CRMBaseMixin(SaaSMixin, LoginRequiredMixin):
+class CRMBaseMixin:
+    """Mixin que agrega funcionalidad de crmbase. Uso: instanciar según necesidad del dominio.
+    """
     context_object_name = "object"
 
     def get_context_data(self, **kwargs):
+        # get_context_data: Obtiene/recupera context data. Args: según implementación. Returns: dato solicitado.
         context = super().get_context_data(**kwargs)
         context["active_tab"] = "crm"
         return context
 
 
-class ClienteListView(ExportMixin, HtmxResponseMixin, CRMBaseMixin, ListView):
+class ClienteListView:
+    """Vista para gestionar clientelist. Uso: instanciar según necesidad del dominio.
+    """
     model = Cliente
     template_name = "crm/cliente_list.html"  # Preferring app template
     htmx_template_name = "crm/partials/cliente_list_table.html"
@@ -36,6 +44,7 @@ class ClienteListView(ExportMixin, HtmxResponseMixin, CRMBaseMixin, ListView):
     export_filename = "clientes"
 
     def get_queryset(self):
+        # get_queryset: Obtiene/recupera queryset. Args: según implementación. Returns: dato solicitado.
         queryset = (
             super()
             .get_queryset()
@@ -57,6 +66,7 @@ class ClienteListView(ExportMixin, HtmxResponseMixin, CRMBaseMixin, ListView):
         return queryset
 
     def get_context_data(self, **kwargs):
+        # get_context_data: Obtiene/recupera context data. Args: según implementación. Returns: dato solicitado.
         context = super().get_context_data(**kwargs)
         from django.utils import timezone
 
@@ -71,12 +81,15 @@ class ClienteListView(ExportMixin, HtmxResponseMixin, CRMBaseMixin, ListView):
         return context
 
 
-class ClienteDetailView(CRMBaseMixin, DetailView):
+class ClienteDetailView:
+    """Vista para gestionar clientedetail. Uso: instanciar según necesidad del dominio.
+    """
     model = Cliente
     template_name = "crm/cliente_detail.html"
     context_object_name = "cliente"
 
     def get_context_data(self, **kwargs):
+        # get_context_data: Obtiene/recupera context data. Args: según implementación. Returns: dato solicitado.
         context = super().get_context_data(**kwargs)
         from django.apps import apps
 
@@ -90,7 +103,9 @@ class ClienteDetailView(CRMBaseMixin, DetailView):
         return context
 
 
-class ClienteCreateView(CRMBaseMixin, CreateView):
+class ClienteCreateView:
+    """Vista para gestionar clientecreate. Uso: instanciar según necesidad del dominio.
+    """
     model = Cliente
     template_name = "crm/cliente_form.html"
     fields = [
@@ -109,11 +124,14 @@ class ClienteCreateView(CRMBaseMixin, CreateView):
     success_url = reverse_lazy("crm:cliente_list")
 
     def form_valid(self, form):
+        # form_valid: Form valid. Args: según implementación. Returns: según implementación.
         messages.success(self.request, "Cliente creado correctamente.")
         return super().form_valid(form)
 
 
-class ClienteUpdateView(CRMBaseMixin, UpdateView):
+class ClienteUpdateView:
+    """Vista para gestionar clienteupdate. Uso: instanciar según necesidad del dominio.
+    """
     model = Cliente
     template_name = "crm/cliente_form.html"
     fields = [
@@ -131,14 +149,18 @@ class ClienteUpdateView(CRMBaseMixin, UpdateView):
     ]
 
     def get_success_url(self):
+        # get_success_url: Obtiene/recupera success url. Args: según implementación. Returns: dato solicitado.
         return reverse_lazy("crm:cliente_detail", kwargs={"pk": self.object.pk})
 
     def form_valid(self, form):
+        # form_valid: Form valid. Args: según implementación. Returns: según implementación.
         messages.success(self.request, "Cliente actualizado correctamente.")
         return super().form_valid(form)
 
 
-class ClienteDeleteView(CRMBaseMixin, DeleteView):
+class ClienteDeleteView:
+    """Vista para gestionar clientedelete. Uso: instanciar según necesidad del dominio.
+    """
     model = Cliente
     success_url = reverse_lazy("crm:cliente_list")
     template_name = "crm/cliente_confirm_delete.html"

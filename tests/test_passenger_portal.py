@@ -1,3 +1,4 @@
+"""Tests para Passenger portal."""
 from unittest.mock import patch
 
 import pytest
@@ -21,6 +22,7 @@ class TestPassengerPortal:
 
     @pytest.fixture(autouse=True)
     def setup_data(self):
+        """Setup data."""
         self.client = Client()
 
         # 1. Crear Agencia

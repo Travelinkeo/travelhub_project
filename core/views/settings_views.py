@@ -11,12 +11,15 @@ logger = logging.getLogger(__name__)
 
 
 class BrandingSettingsView(LoginRequiredMixin, View):
+    """Función: BrandingSettingsView."""
     template_name = "core/settings/branding.html"
 
     def _get_agencia(self, request):
+        """Método interna: get agencia."""
         return get_agencia_from_request(request)
 
     def get(self, request, *args, **kwargs):
+        """Método: get."""
         agencia = self._get_agencia(request)
         branding = agencia.branding if agencia else None
         return render(
@@ -29,6 +32,7 @@ class BrandingSettingsView(LoginRequiredMixin, View):
         )
 
     def post(self, request, *args, **kwargs):
+        """Método: post."""
         agencia = self._get_agencia(request)
 
         if not agencia:

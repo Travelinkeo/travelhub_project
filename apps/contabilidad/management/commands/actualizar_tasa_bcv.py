@@ -20,10 +20,13 @@ from apps.finance.models import TasaCambioBCV
 logger = logging.getLogger(__name__)
 
 
-class Command(BaseCommand):
+class Command:
+    """Clase Command. Uso: según contexto de la aplicación.
+    """
     help = "Actualiza o crea la tasa de cambio BCV para una fecha específica"
 
     def add_arguments(self, parser):
+        # add_arguments: Add arguments. Args: según implementación. Returns: según implementación.
         parser.add_argument(
             "--tasa", type=float, required=True, help="Tasa de cambio BSD/USD (ej: 45.50)"
         )
@@ -33,6 +36,7 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
+        # handle: Maneja/gestiona . Args: evento/datos. Returns: respuesta.
         try:
             tasa = Decimal(str(options["tasa"]))
 

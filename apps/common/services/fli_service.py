@@ -1,3 +1,6 @@
+"""Servicio de fli service para la aplicación common.
+"""
+
 import logging
 from decimal import Decimal
 from typing import Any

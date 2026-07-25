@@ -8,13 +8,15 @@ from apps.bookings.models import (
 )
 
 
-class TarifaHabitacionSerializer(serializers.ModelSerializer):
+class TarifaHabitacionSerializer:
+    """Serializer para el modelo correspondiente."""
     class Meta:
         model = TarifaHabitacion
         fields = [
             "id",
             "fecha_inicio",
             "fecha_fin",
+        """Función: Meta."""
             "nombre_temporada",
             "moneda",
             "tipo_tarifa",
@@ -26,7 +28,8 @@ class TarifaHabitacionSerializer(serializers.ModelSerializer):
         ]
 
 
-class TipoHabitacionSerializer(serializers.ModelSerializer):
+class TipoHabitacionSerializer:
+    """Serializer para el modelo correspondiente."""
     tarifas = TarifaHabitacionSerializer(many=True, read_only=True)
 
     class Meta:
@@ -34,6 +37,7 @@ class TipoHabitacionSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "nombre",
+        """Función: Meta."""
             "capacidad_adultos",
             "capacidad_ninos",
             "capacidad_total",
@@ -42,7 +46,8 @@ class TipoHabitacionSerializer(serializers.ModelSerializer):
         ]
 
 
-class HotelTarifarioSerializer(serializers.ModelSerializer):
+class HotelTarifarioSerializer:
+    """Serializer para el modelo correspondiente."""
     tipos_habitacion = TipoHabitacionSerializer(many=True, read_only=True)
     regimen_display = serializers.CharField(source="get_regimen_default_display", read_only=True)
 
@@ -50,6 +55,7 @@ class HotelTarifarioSerializer(serializers.ModelSerializer):
         model = HotelTarifario
         fields = [
             "id",
+        """Función: Meta."""
             "nombre",
             "slug",
             "destino",
@@ -64,12 +70,14 @@ class HotelTarifarioSerializer(serializers.ModelSerializer):
         ]
 
 
-class TarifarioProveedorSerializer(serializers.ModelSerializer):
+class TarifarioProveedorSerializer:
+    """Serializer para el modelo correspondiente."""
     proveedor_nombre = serializers.CharField(source="proveedor.nombre", read_only=True)
 
     class Meta:
         model = TarifarioProveedor
         fields = [
+        """Función: Meta."""
             "id",
             "proveedor",
             "proveedor_nombre",
@@ -82,7 +90,8 @@ class TarifarioProveedorSerializer(serializers.ModelSerializer):
         ]
 
 
-class CotizacionHotelSerializer(serializers.Serializer):
+class CotizacionHotelSerializer:
+    """Serializer para el modelo correspondiente."""
     destino = serializers.CharField(required=True)
     fecha_entrada = serializers.DateField(required=True)
     fecha_salida = serializers.DateField(required=True)
@@ -93,7 +102,8 @@ class CotizacionHotelSerializer(serializers.Serializer):
     )
 
 
-class ResultadoCotizacionSerializer(serializers.Serializer):
+class ResultadoCotizacionSerializer:
+    """Serializer para el modelo correspondiente."""
     hotel = serializers.CharField()
     destino = serializers.CharField()
     regimen = serializers.CharField()

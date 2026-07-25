@@ -10,6 +10,7 @@ logger = logging.getLogger(__name__)
 
 @receiver(post_save, sender="crm.PasaporteEscaneado")
 def process_passport_on_save(sender, instance, created, **kwargs):
+    """Función: process passport on save."""
     if are_signals_blocked():
         return
 

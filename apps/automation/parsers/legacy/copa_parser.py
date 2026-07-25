@@ -1,3 +1,6 @@
+"""Parser/procesador de copa parser para la aplicación automation.
+"""
+
 import logging
 import quopri
 import re
@@ -15,6 +18,7 @@ class CopaParser(BaseTicketParser):
     """Parser para boletos de Copa Airlines (sistema SPRK) - Extracción completa desde HTML"""
 
     def can_parse(self, text: str) -> bool:
+        # can_parse: Can parse. Args: según implementación. Returns: según implementación.
         text_upper = text.upper()
         return (
             "COPA AIRLINES" in text_upper

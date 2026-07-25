@@ -1,14 +1,19 @@
+"""Configuración de pruebas (pytest) para finance.
+"""
+
 import pytest
 from django.conf import settings
 
 
 def pytest_configure(config):
+    # pytest_configure: Pytest configure. Args: según implementación. Returns: según implementación.
     settings.DATABASES["default"]["HOST"] = "db"
     settings.DATABASES["default"]["PORT"] = 5432
 
 
 @pytest.fixture
 def agencia_premium(db):
+    # agencia_premium: Agencia premium. Args: según implementación. Returns: según implementación.
     from core.models.agencia import Agencia
 
     agencia = Agencia.objects.create(
@@ -23,6 +28,7 @@ def agencia_premium(db):
 
 @pytest.fixture
 def agencia_estandar(db):
+    # agencia_estandar: Agencia estandar. Args: según implementación. Returns: según implementación.
     from core.models.agencia import Agencia
 
     agencia = Agencia.objects.create(
@@ -37,6 +43,7 @@ def agencia_estandar(db):
 
 @pytest.fixture
 def moneda_usd(db):
+    # moneda_usd: Moneda usd. Args: según implementación. Returns: según implementación.
     from apps.common.models import Moneda
 
     moneda, _ = Moneda.objects.get_or_create(

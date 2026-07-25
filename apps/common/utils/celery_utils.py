@@ -1,3 +1,6 @@
+"""Utilidades de celery utils para common.
+"""
+
 import logging
 from collections.abc import Callable
 from functools import wraps
@@ -23,10 +26,12 @@ def idempotent_task(timeout: int = 3600, key_prefix: str = "celery_idem") -> Cal
         @shared_task
         @idempotent_task(timeout=3600)
         def procesar_pago(pago_id):
+            # procesar_pago: Procesa r pago. Args: datos a procesar. Returns: resultado procesado.
             ...
     """
 
     def decorator(func: _F) -> _F:
+        # decorator: Decorator. Args: según implementación. Returns: según implementación.
         @wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
             # Generar clave única basada en nombre de tarea + argumentos
@@ -136,6 +141,7 @@ def tenant_task(*task_args: Any, **task_kwargs: Any) -> Callable[[_F], _F]:
     """
 
     def decorator(func: _F) -> _F:
+        # decorator: Decorator. Args: según implementación. Returns: según implementación.
         import inspect
         from functools import wraps
 

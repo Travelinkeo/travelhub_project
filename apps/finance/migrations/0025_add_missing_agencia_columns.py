@@ -1,8 +1,13 @@
+"""Migración de base de datos para finance.
+"""
+
 import django.db.models.deletion
 from django.db import migrations, models
 
 
-class Migration(migrations.Migration):
+class Migration:
+    """Clase Migration. Uso: según contexto de la aplicación.
+    """
     dependencies = [
         ("finance", "0024_alter_documentoexportacion_factura_and_more"),
         ("core", "0037_rename_remaining_core_tables"),

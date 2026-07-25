@@ -6,6 +6,7 @@ from django.utils import timezone
 
 
 class MagicLinkToken(models.Model):
+    """Función: MagicLinkToken."""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     email = models.EmailField(db_index=True)
     token = models.CharField(max_length=64, unique=True, db_index=True)
@@ -17,21 +18,25 @@ class MagicLinkToken(models.Model):
     onboarding_data = models.JSONField(default=dict, blank=True)
 
     class Meta:
+        """Meta definición del modelo."""
         verbose_name = "Magic Link Token"
         verbose_name_plural = "Magic Link Tokens"
         ordering = ["-created_at"]
 
     @property
     def is_valid(self):
+        """Método que verifica valid. Returns: bool."""
         if self.used_at is not None:
             return False
         return timezone.now() < self.expires_at
 
     @classmethod
     def generate_token(cls):
+        """Método que construye/genera token. Returns: resultado generado."""
         return secrets.token_urlsafe(48)
 
     def mark_used(self):
+        """Método: mark used."""
         self.used_at = timezone.now()
         self.save(update_fields=["used_at"])
 

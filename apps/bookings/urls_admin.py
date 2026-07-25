@@ -1,4 +1,7 @@
 # apps/bookings/urls_admin.py
+"""Configuración del panel de administración para bookings.
+"""
+
 from django.urls import path
 
 from apps.bookings.views import admin_views

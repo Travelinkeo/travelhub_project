@@ -3,10 +3,15 @@
 # the state keeps db_table='core_xxx'. Future AlterField migrations need
 # this to correctly target the table created by core.0001.
 
+"""Migración de base de datos para automation.
+"""
+
 from django.db import migrations
 
 
-class Migration(migrations.Migration):
+class Migration:
+    """Clase Migration. Uso: según contexto de la aplicación.
+    """
     dependencies = [
         ("automation", "0002_notificacionagente_agencia_and_more"),
     ]

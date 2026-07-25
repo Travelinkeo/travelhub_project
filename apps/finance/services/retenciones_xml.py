@@ -1,3 +1,6 @@
+"""Servicio de retenciones xml para la aplicación finance.
+"""
+
 import logging
 import xml.etree.ElementTree as ET
 from decimal import Decimal

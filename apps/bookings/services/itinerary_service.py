@@ -1,3 +1,6 @@
+"""Servicio de itinerary service para la aplicación bookings.
+"""
+
 import logging
 import re
 from datetime import datetime
@@ -100,6 +103,8 @@ class ItineraryCryptoService:
 
 
 class ItineraryService:
+    """Servicio para itinerary. Uso: instanciar según necesidad del dominio.
+    """
     @staticmethod
     def sync_segments(data, agencia, venta, item_venta_obj, aerolinea_default):
         """

@@ -1,3 +1,6 @@
+"""Servicio de pdf service para la aplicación common.
+"""
+
 import logging
 
 from django.apps import apps

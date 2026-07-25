@@ -1,3 +1,6 @@
+"""Vistas (views) de la aplicación crm.
+"""
+
 import json
 import logging
 
@@ -18,6 +21,7 @@ class MarketingHubView(LoginRequiredMixin, View):
     template_name = "crm/marketing/hub.html"
 
     def get(self, request, *args, **kwargs):
+        # get: Get. Args: según implementación. Returns: según implementación.
         return render(request, self.template_name)
 
 
@@ -25,6 +29,7 @@ class AnalyzeCampaignPromptView(LoginRequiredMixin, View):
     """Endpoint HTMX que procesa el prompt con IA y devuelve el preview"""
 
     def post(self, request, *args, **kwargs):
+        # post: Post. Args: según implementación. Returns: según implementación.
         prompt = request.POST.get("prompt_marketing")
         formato_imagen = request.POST.get("formato_imagen", "portrait")
 
@@ -71,6 +76,7 @@ class DispatchCampaignView(LoginRequiredMixin, View):
     """Endpoint HTMX que recibe el OK del agente y encola los correos en Celery"""
 
     def post(self, request, *args, **kwargs):
+        # post: Post. Args: según implementación. Returns: según implementación.
         asunto = request.POST.get("asunto")
         cuerpo_html = request.POST.get("cuerpo_html")
         cliente_ids_json = request.POST.get("cliente_ids")

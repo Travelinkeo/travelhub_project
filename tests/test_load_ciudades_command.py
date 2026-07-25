@@ -1,3 +1,4 @@
+"""Tests para Load ciudades command."""
 import json
 
 import pytest
@@ -10,6 +11,7 @@ from apps.common.models import Ciudad, Pais
 @pytest.mark.django_db
 def test_load_ciudades_creates_and_idempotent(tmp_path, settings):
     # Crear paises requeridos primero
+    """Load ciudades creates and idempotent."""
     Pais.objects.create(codigo_iso_2="VE", codigo_iso_3="VEN", nombre="Venezuela")
     Pais.objects.create(codigo_iso_2="CO", codigo_iso_3="COL", nombre="Colombia")
 
@@ -50,6 +52,7 @@ def test_load_ciudades_creates_and_idempotent(tmp_path, settings):
 @pytest.mark.django_db
 def test_load_ciudades_missing_country(tmp_path):
     # Ciudad que referencia pais inexistente debe lanzar error
+    """Load ciudades missing country."""
     ciudades_data = [{"nombre": "Ciudad X", "pais_codigo_iso_2": "ZZ", "region_estado": "Region"}]
     fixtures_dir = tmp_path / "fixtures"
     fixtures_dir.mkdir()

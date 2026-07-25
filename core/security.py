@@ -131,8 +131,10 @@ def agency_role_required(allowed_roles):
     """
 
     def decorator(view_func):
+        """Función: decorator."""
         @wraps(view_func)
         def _wrapped_view(request, *args, **kwargs):
+            """Función interna: wrapped view."""
             if not request.user.is_authenticated:
                 raise PermissionDenied("Autenticación requerida.")
 

@@ -16,7 +16,9 @@ DocumentoExportacionConsolidado.
 from django.db import migrations, models
 
 
-class Migration(migrations.Migration):
+class Migration:
+    """Clase Migration. Uso: según contexto de la aplicación.
+    """
     dependencies = [
         ("finance", "0032_factura_tipo"),
     ]

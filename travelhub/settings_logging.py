@@ -1,3 +1,5 @@
+"""Configuración de logging estructurado con structlog — salida JSON en producción, consola coloreada en desarrollo."""
+
 import os
 
 import structlog
@@ -50,6 +52,7 @@ LOGGING = {
     },
 }
 
+# Configura structlog con procesadores estándar (timestamps, niveles, stack traces)
 structlog.configure(
     processors=[
         structlog.stdlib.filter_by_level,

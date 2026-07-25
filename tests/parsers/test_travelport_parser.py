@@ -1,3 +1,4 @@
+"""Tests para Travelport parser (Parsers)."""
 from unittest.mock import patch
 
 from apps.automation.parsers.base_parser import ParsedTicketData
@@ -48,7 +49,9 @@ MOCK_AI_RESPONSE_TRAVELPORT = {
 
 
 class TestTravelportParser:
+    """Test Travelport Parser."""
     def test_can_parse_valid_travelport(self):
+        """Can parse valid travelport."""
         parser = TravelportParser()
         # Caso 1: Travelport
         assert parser.can_parse("Some text with Travelport inside") is True
@@ -58,6 +61,7 @@ class TestTravelportParser:
         assert parser.can_parse("ELECTRONIC TICKET RECEIPT\nVIEWTRIP DETAILS") is True
 
     def test_can_parse_invalid_travelport(self):
+        """Can parse invalid travelport."""
         parser = TravelportParser()
         # Evitar colisión con KIUSYS
         assert parser.can_parse("KIUSYS SYSTEM ELECTRONIC TICKET RECEIPT") is False
@@ -65,6 +69,7 @@ class TestTravelportParser:
         assert parser.can_parse("Random airline ticket layout") is False
 
     def test_parse_complete_regex(self):
+        """Parse complete regex."""
         parser = TravelportParser()
         res = parser.parse(SAMPLE_TRAVELPORT_TICKET_REGEX)
 
@@ -80,6 +85,7 @@ class TestTravelportParser:
 
     @patch("apps.automation.parsers.ai_universal_parser.UniversalAIParser.parse")
     def test_parse_incomplete_triggers_ai_reinforcement(self, mock_ai_parse):
+        """Parse incomplete triggers ai reinforcement."""
         mock_ai_parse.return_value = MOCK_AI_RESPONSE_TRAVELPORT.copy()
 
         parser = TravelportParser()
@@ -100,6 +106,7 @@ class TestTravelportParser:
     @patch("apps.automation.parsers.ai_universal_parser.UniversalAIParser.parse")
     def test_parse_ai_failure_fallback_to_regex(self, mock_ai_parse):
         # La IA lanza excepción, el parser debe devolver lo que extrajo la regex
+        """Parse ai failure fallback to regex."""
         mock_ai_parse.side_effect = Exception("IA down")
 
         parser = TravelportParser()

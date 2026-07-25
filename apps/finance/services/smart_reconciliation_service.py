@@ -1,3 +1,6 @@
+"""Servicio de smart reconciliation service para la aplicación finance.
+"""
+
 import json
 import logging
 from decimal import Decimal
@@ -20,7 +23,9 @@ logger = logging.getLogger(__name__)
 # --- Pydantic Schemas para extracción de IA ---
 
 
-class LineaCobro(BaseModel):
+class LineaCobro:
+    """Clase LineaCobro. Uso: según contexto de la aplicación.
+    """
     ticket_number: str = Field(
         description="El número de boleto facturado, usualmente 10-13 dígitos. Ej: '1347258019382'. Extraerlo lo más limpio posible."
     )
@@ -41,7 +46,9 @@ class LineaCobro(BaseModel):
     )
 
 
-class ReporteLiquidacionSchema(BaseModel):
+class ReporteLiquidacionSchema:
+    """Clase ReporteLiquidacionSchema. Uso: según contexto de la aplicación.
+    """
     proveedor_detectado: str = Field(
         description="Nombre del proveedor o consolidador (Ej: SABRE, KIU, AMADEUS, TICKET_CONSOLIDATOR)."
     )

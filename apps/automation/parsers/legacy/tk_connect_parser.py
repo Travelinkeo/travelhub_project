@@ -7,12 +7,14 @@ class TKConnectParser(BaseTicketParser):
     """Parser para boletos de Turkish Airlines (TK Connect)"""
 
     def can_parse(self, text: str) -> bool:
+        # can_parse: Can parse. Args: según implementación. Returns: según implementación.
         purified = self.purify_text_for_detection(text)
         return "IDENTIFICACIÓN DEL PEDIDO" in purified and (
             "TK CONNECT" in purified or "TURKISH AIRLINES" in purified
         )
 
     def parse(self, text: str, html_text: str = "") -> ParsedTicketData:
+        # parse: Analiza/parsea . Args: datos de entrada. Returns: resultado del parseo.
         try:
             from django.utils.module_loading import import_string
 

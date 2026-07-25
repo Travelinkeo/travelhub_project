@@ -1,10 +1,15 @@
+"""Modelos de base de datos para la aplicación reports.
+"""
+
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from core.models.base import AgenciaMixin
 
 
-class ReporteKPI(AgenciaMixin):
+class ReporteKPI:
+    """Clase ReporteKPI. Uso: según contexto de la aplicación.
+    """
     TIPOS = [
         ("ventas", _("Ventas")),
         ("rentabilidad", _("Rentabilidad")),
@@ -33,6 +38,7 @@ class ReporteKPI(AgenciaMixin):
         verbose_name_plural = _("Reportes KPI")
 
     def __str__(self):
+        # __str__: Representación en string del objeto. Returns: str.
         return self.nombre
 
 
@@ -66,10 +72,13 @@ class KpiSnapshot(AgenciaMixin):
         ordering = ["-fecha"]
 
     def __str__(self):
+        # __str__: Representación en string del objeto. Returns: str.
         return f"{self.get_metrica_display()}: {self.valor} ({self.fecha})"
 
 
-class ReporteProgramado(AgenciaMixin):
+class ReporteProgramado:
+    """Clase ReporteProgramado. Uso: según contexto de la aplicación.
+    """
     DIAS_SEMANA = [
         (1, _("Lunes")),
         (2, _("Martes")),
@@ -94,4 +103,5 @@ class ReporteProgramado(AgenciaMixin):
         verbose_name_plural = _("Reportes Programados")
 
     def __str__(self):
+        # __str__: Representación en string del objeto. Returns: str.
         return f"{self.nombre} ({self.get_frecuencia_display()})"

@@ -28,7 +28,9 @@ logger = logging.getLogger(__name__)
 
 
 @admin.register(BoletoImportado)
-class BoletoImportadoAdmin(SaaSAdminMixin, ModelAdmin):
+class BoletoImportadoAdmin:
+    """Configuración de administración para boletoimportado. Uso: instanciar según necesidad del dominio.
+    """
     list_display = (
         "id_boleto_importado",
         "archivo_boleto_link",
@@ -55,22 +57,27 @@ class BoletoImportadoAdmin(SaaSAdminMixin, ModelAdmin):
 
     @action(description="📤 Subir Boleto (IA)")
     def subir_boleto_action(self, request):
+        # subir_boleto_action: Subir boleto action. Args: según implementación. Returns: según implementación.
         from django.http import HttpResponseRedirect
         from django.urls import reverse
         return HttpResponseRedirect(reverse("core:boletos_importar"))
 
     def get_queryset(self, request):
+        # get_queryset: Obtiene/recupera queryset. Args: según implementación. Returns: dato solicitado.
         return super().get_queryset(request).select_related("venta_asociada")
 
     def changelist_view(self, request, extra_context=None):
+        # changelist_view: Changelist view. Args: según implementación. Returns: según implementación.
         extra_context = extra_context or {}
         extra_context["show_upload_button"] = True
         return super().changelist_view(request, extra_context=extra_context)
 
     def has_add_permission(self, request):
+        # has_add_permission: Has add permission. Args: según implementación. Returns: según implementación.
         return True
 
     def archivo_boleto_link(self, obj):
+        # archivo_boleto_link: Archivo boleto link. Args: según implementación. Returns: según implementación.
         if obj.archivo_boleto:
             return format_html(
                 "<a href='{url}'>{name}</a>",
@@ -80,12 +87,14 @@ class BoletoImportadoAdmin(SaaSAdminMixin, ModelAdmin):
         return "-"
 
     def pdf_generado_link(self, obj):
+        # pdf_generado_link: Pdf generado link. Args: según implementación. Returns: según implementación.
         url = obj.get_pdf_url()
         if url:
             return format_html('<a href="{}" target="_blank" class="button">📄 Ver PDF</a>', url)
         return "No generado"
 
     def save_model(self, request, obj, form, change):
+        # save_model: Guarda/persiste  model. Args: datos a guardar. Returns: objeto guardado.
         super().save_model(request, obj, form, change)
         if not change:
             return
@@ -133,6 +142,7 @@ class BoletoImportadoAdmin(SaaSAdminMixin, ModelAdmin):
 
     @admin.action(description="🔥 ELIMINACIÓN FÍSICA (Irreversible)")
     def hard_delete_boletos(self, request, queryset):
+        # hard_delete_boletos: Hard delete boletos. Args: según implementación. Returns: según implementación.
         if not request.user.is_superuser:
             self.message_user(
                 request, "Solo superusuarios pueden realizar la eliminación física.", level="error"
@@ -152,6 +162,7 @@ class BoletoImportadoAdmin(SaaSAdminMixin, ModelAdmin):
 
     @admin.action(description="🔄 Reprocesar Boletos Seleccionados")
     def reprocesar_boletos(self, request, queryset):
+        # reprocesar_boletos: Reprocesar boletos. Args: según implementación. Returns: según implementación.
         from django.utils.module_loading import import_string
 
         parsear_boleto_individual = import_string("core.tasks.parsear_boleto_individual")
@@ -170,7 +181,9 @@ class BoletoImportadoAdmin(SaaSAdminMixin, ModelAdmin):
 
 
 @admin.register(BoletoImportadoTransito)
-class BoletoImportadoTransitoAdmin(SaaSAdminMixin, ModelAdmin):
+class BoletoImportadoTransitoAdmin:
+    """Configuración de administración para boletoimportadotransito. Uso: instanciar según necesidad del dominio.
+    """
     list_display = (
         "id_transito",
         "boleto_origen",
@@ -186,7 +199,9 @@ class BoletoImportadoTransitoAdmin(SaaSAdminMixin, ModelAdmin):
 
 
 @admin.register(AuditLog)
-class AuditLogAdmin(SaaSAdminMixin, ModelAdmin):
+class AuditLogAdmin:
+    """Configuración de administración para auditlog. Uso: instanciar según necesidad del dominio.
+    """
     saas_agency_field = "venta__agencia"
     list_display = ("id_audit_log", "modelo", "object_id", "accion", "venta", "creado")
     list_filter = ("modelo", "accion", "creado")
@@ -205,7 +220,9 @@ class AuditLogAdmin(SaaSAdminMixin, ModelAdmin):
 
 
 @admin.register(SegmentoVuelo)
-class SegmentoVueloAdmin(SaaSAdminMixin, ModelAdmin):
+class SegmentoVueloAdmin:
+    """Configuración de administración para segmentovuelo. Uso: instanciar según necesidad del dominio.
+    """
     saas_agency_field = "venta__agencia"
     list_display = (
         "id_segmento_vuelo",
@@ -219,14 +236,18 @@ class SegmentoVueloAdmin(SaaSAdminMixin, ModelAdmin):
 
 
 @admin.register(FeeVenta)
-class FeeVentaAdmin(SaaSAdminMixin, ModelAdmin):
+class FeeVentaAdmin:
+    """Configuración de administración para feeventa. Uso: instanciar según necesidad del dominio.
+    """
     saas_agency_field = "venta__agencia"
     list_display = ("id_fee_venta", "venta", "tipo_fee", "monto", "moneda")
     autocomplete_fields = ["venta", "moneda"]
 
 
 @admin.register(PagoVenta)
-class PagoVentaAdmin(SaaSAdminMixin, ModelAdmin):
+class PagoVentaAdmin:
+    """Configuración de administración para pagoventa. Uso: instanciar según necesidad del dominio.
+    """
     saas_agency_field = "venta__agencia"
     list_display = ("id_pago_venta", "venta", "metodo", "monto", "moneda", "fecha_pago")
     autocomplete_fields = ["venta", "moneda"]

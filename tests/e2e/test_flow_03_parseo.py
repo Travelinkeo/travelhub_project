@@ -1,3 +1,4 @@
+"""Tests para Flow 03 parseo (E2E)."""
 import pytest
 
 pytestmark = [
@@ -29,6 +30,7 @@ def test_subir_ticket_manual(logged_in_page, live_server, moneda_usd, sample_cli
 
 
 def test_pagina_tickets_existe(logged_in_page, live_server):
+    """Pagina tickets existe."""
     boleto_url = f"{live_server.url}/bookings/boletos/"
     logged_in_page.goto(boleto_url)
     logged_in_page.wait_for_timeout(1000)

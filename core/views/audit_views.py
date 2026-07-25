@@ -45,6 +45,7 @@ class AuditLogListView(InternalAPIAuthMixin, APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+        """Método: get."""
         modelo = request.query_params.get("modelo")
         object_id = request.query_params.get("object_id")
         venta_id = request.query_params.get("venta_id")

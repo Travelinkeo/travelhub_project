@@ -1,3 +1,4 @@
+"""Tests para Pdf generator."""
 from unittest.mock import patch
 
 import pytest
@@ -7,6 +8,7 @@ from apps.automation.parsers.pdf_generation import PdfGenerationService, generat
 
 @pytest.fixture
 def sample_ticket_data():
+    """Sample ticket data."""
     return {
         "SOURCE_SYSTEM": "KIU",
         "NOMBRE_DEL_PASAJERO": "DUQUE ECHEVERRY/OSCA FLORIDA",
@@ -36,6 +38,7 @@ def sample_ticket_data():
 
 @pytest.fixture
 def mock_pdf_renderer():
+    """Mock pdf renderer."""
     with patch("apps.automation.parsers.pdf_generation.PdfRendererService") as mock_renderer:
         mock_renderer.check_health.return_value = True
         mock_renderer.render_html_to_pdf.return_value = b"%PDF-1.4 dummy contents"
@@ -44,6 +47,7 @@ def mock_pdf_renderer():
 
 @pytest.mark.django_db
 def test_generate_ticket_success(sample_ticket_data, mock_pdf_renderer):
+    """Generate ticket success."""
     pdf_bytes, filename = PdfGenerationService.generate_ticket(sample_ticket_data)
     assert pdf_bytes == b"%PDF-1.4 dummy contents"
     assert filename.startswith("Boleto_0190000000000_")
@@ -53,6 +57,7 @@ def test_generate_ticket_success(sample_ticket_data, mock_pdf_renderer):
 
 @pytest.mark.django_db
 def test_generate_ticket_gotenberg_offline(sample_ticket_data, mock_pdf_renderer):
+    """Generate ticket gotenberg offline."""
     mock_pdf_renderer.render_html_to_pdf.side_effect = Exception("Gotenberg offline simulation")
     pdf_bytes, filename = PdfGenerationService.generate_ticket(sample_ticket_data)
     assert pdf_bytes == b""
@@ -62,6 +67,7 @@ def test_generate_ticket_gotenberg_offline(sample_ticket_data, mock_pdf_renderer
 @pytest.mark.django_db
 def test_build_context_passenger_name_parsing(sample_ticket_data):
     # Test typical APELLIDO/NOMBRE split
+    """Build context passenger name parsing."""
     context = PdfGenerationService._build_context(
         sample_ticket_data, agencia_obj=None, source_system="KIU"
     )
@@ -74,6 +80,7 @@ def test_build_context_passenger_name_parsing(sample_ticket_data):
 
 @pytest.mark.django_db
 def test_build_context_passenger_name_no_slash():
+    """Build context passenger name no slash."""
     data = {"NOMBRE_DEL_PASAJERO": "JUAN PEREZ", "NUMERO_DE_BOLETO": "123"}
     context = PdfGenerationService._build_context(data, agencia_obj=None, source_system="KIU")
     assert context["solo_nombre_pasajero"] == "JUAN"
@@ -82,6 +89,7 @@ def test_build_context_passenger_name_no_slash():
 @pytest.mark.django_db
 def test_build_context_agency_obj_fallback(sample_ticket_data):
     # Test that context resolves agency attributes with proxy even if agencia_obj is None
+    """Build context agency obj fallback."""
     context = PdfGenerationService._build_context(
         sample_ticket_data, agencia_obj=None, source_system="KIU"
     )
@@ -93,6 +101,7 @@ def test_build_context_agency_obj_fallback(sample_ticket_data):
 
 @pytest.mark.django_db
 def test_module_level_function_shortcut(sample_ticket_data, mock_pdf_renderer):
+    """Module level function shortcut."""
     pdf_bytes, filename = generate_ticket_pdf(sample_ticket_data)
     assert pdf_bytes == b"%PDF-1.4 dummy contents"
     assert filename.startswith("Boleto_0190000000000_")

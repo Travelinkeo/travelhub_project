@@ -1,3 +1,4 @@
+"""Tests para Segments normalized."""
 from apps.automation.parsers.kiu_parser import KIUParser
 from apps.automation.parsers.legacy.sabre_parser import SabreParser
 
@@ -5,6 +6,7 @@ REQUIRED_KEYS = {"aerolinea", "numero_vuelo", "origen", "destino", "fecha_salida
 
 
 def test_sabre_segments_structure():
+    """Sabre segments structure."""
     sample = (
         "Itinerary Details\n"
         "Issue Date 17 Aug 25\n"
@@ -30,6 +32,7 @@ def test_sabre_segments_structure():
 
 def test_kiu_segments_structure():
     # Itinerario KIU simplificado con V0 (Conviasa) para asegurar detección
+    """Kiu segments structure."""
     sample = (
         "TICKET NRO: 308-0201196996\n"
         "NAME/NOMBRE: DUQUE/OSCAR\n"

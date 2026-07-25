@@ -1,4 +1,6 @@
 # core/cache.py
+"""Decoradores y utilidades de cacheo para respuestas de API."""
+
 import hashlib
 import json
 from functools import wraps
@@ -16,8 +18,10 @@ def cache_api_response(timeout=300, key_prefix="api"):
     """
 
     def decorator(func):
+        """Función: decorator."""
         @wraps(func)
         def wrapper(request, *args, **kwargs):
+            """Función: wrapper."""
             # Solo cachear GET requests
             if request.method != "GET":
                 return func(request, *args, **kwargs)

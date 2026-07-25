@@ -6,11 +6,13 @@ from core.models.agencia import Agencia
 
 
 class Command(BaseCommand):
+    """Comando de gestión personalizado."""
     help = (
         "Migra los logos (ImageField o base64 general) a logo_pdf_base64 para uso en reportes PDF"
     )
 
     def handle(self, *args, **options):
+        """Método: handle."""
         agencias = Agencia.objects.all().iterator(chunk_size=100)
         migradas = 0
         errores = 0

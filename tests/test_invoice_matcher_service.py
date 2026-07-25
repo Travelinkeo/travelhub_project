@@ -1,3 +1,4 @@
+"""Tests para Invoice matcher service."""
 from decimal import Decimal
 
 import pytest
@@ -14,8 +15,10 @@ from core.models import Agencia
 @pytest.mark.skip(reason="Stub model FacturaProveedor has no backing table")
 @pytest.mark.django_db
 class TestInvoiceMatcherService:
+    """Test Invoice Matcher Service."""
     def setup_method(self):
         # Crear datos bases requeridos
+        """Setup method."""
         self.agencia = Agencia.objects.create(nombre="Agencia Test")
         self.moneda = Moneda.objects.create(codigo_iso="USD", nombre="Dólares", simbolo="$")
         self.proveedor = Proveedor.objects.create(agencia=self.agencia, nombre="Test Provider")
@@ -40,6 +43,7 @@ class TestInvoiceMatcherService:
 
     def test_get_potential_matches_exact_monto_and_pnr(self):
         # Item 1: Monto exacto y PNR coincide (Score muy alto)
+        """Get potential matches exact monto and pnr."""
         item1 = ItemVenta.objects.create(
             agencia=self.agencia,
             venta=self.venta,

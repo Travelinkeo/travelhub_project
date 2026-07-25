@@ -1,3 +1,6 @@
+"""Señales Django para la aplicación bookings.
+"""
+
 from datetime import date, datetime
 from unittest.mock import patch
 
@@ -11,6 +14,8 @@ from apps.crm.models import Pasajero
 
 @pytest.mark.django_db
 class TestComplianceAndSignals:
+    """Clase TestComplianceAndSignals. Uso: según contexto de la aplicación.
+    """
     @patch("apps.bookings.tasks.requests.post")
     def test_compliance_guard_detecta_pasaporte_proximo_a_vencer(
         self, mock_post, agencia_premium, settings

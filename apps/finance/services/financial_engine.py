@@ -1,3 +1,6 @@
+"""Servicio de financial engine para la aplicación finance.
+"""
+
 import logging
 from decimal import Decimal
 
@@ -12,6 +15,8 @@ logger = logging.getLogger(__name__)
 
 
 class FinancialEngine:
+    """Clase FinancialEngine. Uso: según contexto de la aplicación.
+    """
     MAX_DISCREPANCY = Decimal("0.10")
 
     @staticmethod

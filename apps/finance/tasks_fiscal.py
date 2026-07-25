@@ -1,3 +1,6 @@
+"""Módulo tasks fiscal de la aplicación finance.
+"""
+
 import logging
 
 from celery import shared_task
@@ -17,6 +20,7 @@ logger = logging.getLogger(__name__)
     soft_time_limit=270,
 )
 def emitir_factura_electronica_task(self, venta_id, agencia_id=None):
+    # emitir_factura_electronica_task: Emitir factura electronica task. Args: según implementación. Returns: según implementación.
     from core.api import Agencia, agency_context, system_context
 
     try:

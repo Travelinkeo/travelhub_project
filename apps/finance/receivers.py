@@ -1,4 +1,7 @@
 # apps/finance/receivers.py
+"""Módulo receivers de la aplicación finance.
+"""
+
 import logging
 
 from django.dispatch import receiver

@@ -1,3 +1,4 @@
+"""Tests para Amount consistency."""
 import pytest
 
 from apps.automation.parsers import ticket_parser
@@ -6,6 +7,7 @@ pytestmark = pytest.mark.skip(reason="Funciones de parser refactorizadas - pendi
 
 
 def test_amount_consistency_ok_kiu():
+    """Amount consistency ok kiu."""
     sample = (
         "TICKET NRO: 308-0201196996\n"
         "BOOKING REF: C1/ABC123\n"
@@ -22,6 +24,7 @@ def test_amount_consistency_ok_kiu():
 
 
 def test_amount_consistency_mismatch_sabre():
+    """Amount consistency mismatch sabre."""
     raw = {
         "SOURCE_SYSTEM": "SABRE",
         "numero_boleto": "3080201196996",
@@ -44,6 +47,7 @@ def test_amount_consistency_mismatch_sabre():
 
 
 def test_amount_consistency_tolerance():
+    """Amount consistency tolerance."""
     raw = {
         "SOURCE_SYSTEM": "SABRE",
         "numero_boleto": "3080201196997",

@@ -1,3 +1,6 @@
+"""Servicio de finance service para la aplicación finance.
+"""
+
 import logging
 from decimal import Decimal
 
@@ -9,6 +12,8 @@ logger = logging.getLogger(__name__)
 
 
 class FinanceService:
+    """Servicio para finance. Uso: instanciar según necesidad del dominio.
+    """
     @staticmethod
     def recalculate_sale_finances(venta_id):
         """

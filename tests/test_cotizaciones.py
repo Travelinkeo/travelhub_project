@@ -15,6 +15,7 @@ pytestmark = pytest.mark.django_db
 @pytest.mark.django_db
 class TestCotizacionModel:
     def test_crear_cotizacion_con_numero_auto(self, agencia_premium, moneda_usd):
+        """Crear cotizacion con numero auto."""
         cotizacion = Cotizacion.objects.create(
             agencia=agencia_premium, moneda=moneda_usd, destino="Miami"
         )
@@ -23,6 +24,7 @@ class TestCotizacionModel:
         assert cotizacion.pk is not None
 
     def test_crear_cotizacion_con_prefijo_agencia(self, agencia_premium, moneda_usd):
+        """Crear cotizacion con prefijo agencia."""
         slug = agencia_premium.subdominio_slug.upper()
         cotizacion = Cotizacion.objects.create(
             agencia=agencia_premium, moneda=moneda_usd, destino="Miami"
@@ -30,16 +32,19 @@ class TestCotizacionModel:
         assert slug in cotizacion.numero_cotizacion
 
     def test_str_representation(self, agencia_premium, moneda_usd):
+        """Str representation."""
         cotizacion = Cotizacion.objects.create(
             agencia=agencia_premium, moneda=moneda_usd, destino="Miami"
         )
         assert str(cotizacion) == cotizacion.numero_cotizacion
 
     def test_str_fallback_sin_numero(self):
+        """Str fallback sin numero."""
         cotizacion = Cotizacion()
         assert hasattr(cotizacion, "numero_cotizacion")
 
     def test_calcular_total_con_items(self, agencia_premium, moneda_usd):
+        """Calcular total con items."""
         cotizacion = Cotizacion.objects.create(
             agencia=agencia_premium, moneda=moneda_usd, destino="Miami"
         )
@@ -66,6 +71,7 @@ class TestCotizacionModel:
         assert cotizacion.total_cotizado == Decimal("950.00")
 
     def test_calcular_total_sin_items(self, agencia_premium, moneda_usd):
+        """Calcular total sin items."""
         cotizacion = Cotizacion.objects.create(
             agencia=agencia_premium, moneda=moneda_usd, destino="Miami"
         )
@@ -74,6 +80,7 @@ class TestCotizacionModel:
         assert cotizacion.total_cotizado == Decimal("0.00")
 
     def test_convertir_a_venta_aceptada(self, agencia_premium, moneda_usd, db):
+        """Convertir a venta aceptada."""
         from apps.bookings.models import Venta
         from apps.crm.models import Cliente
 
@@ -99,6 +106,7 @@ class TestCotizacionModel:
         assert cotizacion.estado == Cotizacion.EstadoCotizacion.CONVERTIDA
 
     def test_convertir_a_venta_rechazada_raise(self, agencia_premium, moneda_usd):
+        """Convertir a venta rechazada raise."""
         cotizacion = Cotizacion.objects.create(
             agencia=agencia_premium,
             moneda=moneda_usd,
@@ -109,6 +117,7 @@ class TestCotizacionModel:
             cotizacion.convertir_a_venta()
 
     def test_convertir_a_venta_borrador_raise(self, agencia_premium, moneda_usd):
+        """Convertir a venta borrador raise."""
         cotizacion = Cotizacion.objects.create(
             agencia=agencia_premium,
             moneda=moneda_usd,
@@ -119,6 +128,7 @@ class TestCotizacionModel:
             cotizacion.convertir_a_venta()
 
     def test_get_whatsapp_link_con_cliente(self, agencia_premium, moneda_usd, db):
+        """Get whatsapp link con cliente."""
         from apps.crm.models import Cliente
 
         cli = Cliente.objects.create(
@@ -137,6 +147,7 @@ class TestCotizacionModel:
         assert "text=" in link
 
     def test_get_whatsapp_link_sin_cliente(self, agencia_premium, moneda_usd):
+        """Get whatsapp link sin cliente."""
         cotizacion = Cotizacion.objects.create(
             agencia=agencia_premium,
             moneda=moneda_usd,
@@ -151,6 +162,7 @@ class TestCotizacionModel:
 @pytest.mark.django_db
 class TestItemCotizacionModel:
     def test_crear_item(self, agencia_premium, moneda_usd):
+        """Crear item."""
         cotizacion = Cotizacion.objects.create(
             agencia=agencia_premium, moneda=moneda_usd, destino="Miami"
         )
@@ -167,15 +179,18 @@ class TestItemCotizacionModel:
         assert str(item) == "Vuelo - Vuelo directo"
 
     def test_item_enum_values(self):
+        """Item enum values."""
         assert ItemCotizacion.TipoItem.VUELO == "VUE"
         assert ItemCotizacion.TipoItem.ALOJAMIENTO == "ALO"
         assert ItemCotizacion.TipoItem.ACTIVIDAD == "ACT"
 
     def test_item_default_tipo(self):
+        """Item default tipo."""
         item = ItemCotizacion(tipo_item=ItemCotizacion.TipoItem.OTRO)
         assert item.get_tipo_item_display() == "Otro"
 
     def test_item_str(self, agencia_premium, moneda_usd):
+        """Item str."""
         cotizacion = Cotizacion.objects.create(
             agencia=agencia_premium, moneda=moneda_usd, destino="Miami"
         )
@@ -188,6 +203,7 @@ class TestItemCotizacionModel:
         assert "Hotel" in str(item)
 
     def test_item_soft_delete(self, agencia_premium, moneda_usd):
+        """Item soft delete."""
         cotizacion = Cotizacion.objects.create(
             agencia=agencia_premium, moneda=moneda_usd, destino="Miami"
         )
@@ -206,6 +222,7 @@ class TestItemCotizacionModel:
 @pytest.mark.django_db
 class TestCotizacionSerializer:
     def test_serializer_contains_expected_fields(self, agencia_premium, moneda_usd):
+        """Serializer contains expected fields."""
         from datetime import date
 
         cotizacion = Cotizacion.objects.create(
@@ -225,6 +242,7 @@ class TestCotizacionSerializer:
         assert "estado" in data
 
     def test_serializer_read_only_fields(self, agencia_premium, moneda_usd):
+        """Serializer read only fields."""
         data = {
             "agencia": agencia_premium.id,
             "uuid": str(uuid.uuid4()),
@@ -242,6 +260,7 @@ class TestCotizacionSerializer:
 @pytest.mark.django_db
 class TestCotizacionAPI:
     def _setup_user_agencia(self, usuario_staff, agencia):
+        """Setup user agencia."""
         from core.api import UsuarioAgencia
 
         UsuarioAgencia.objects.get_or_create(
@@ -249,6 +268,7 @@ class TestCotizacionAPI:
         )
 
     def test_list_cotizaciones_authenticated(self, agencia_premium, moneda_usd, usuario_staff):
+        """List cotizaciones authenticated."""
         self._setup_user_agencia(usuario_staff, agencia_premium)
         Cotizacion.objects.create(agencia=agencia_premium, moneda=moneda_usd, destino="Miami")
         client = APIClient()
@@ -257,11 +277,13 @@ class TestCotizacionAPI:
         assert response.status_code == status.HTTP_200_OK
 
     def test_list_cotizaciones_unauthenticated(self):
+        """List cotizaciones unauthenticated."""
         client = APIClient()
         response = client.get("/cotizaciones/api/cotizaciones/")
         assert response.status_code in (status.HTTP_401_UNAUTHORIZED, status.HTTP_403_FORBIDDEN)
 
     def test_create_cotizacion_authenticated(self, agencia_premium, moneda_usd, usuario_staff):
+        """Create cotizacion authenticated."""
         self._setup_user_agencia(usuario_staff, agencia_premium)
         client = APIClient()
         client.force_authenticate(user=usuario_staff)
@@ -282,6 +304,7 @@ class TestCotizacionAPI:
         assert response.data["numero_cotizacion"].startswith("COT")
 
     def test_retrieve_cotizacion(self, agencia_premium, moneda_usd, usuario_staff):
+        """Retrieve cotizacion."""
         self._setup_user_agencia(usuario_staff, agencia_premium)
         cotizacion = Cotizacion.objects.create(
             agencia=agencia_premium, moneda=moneda_usd, destino="Miami"
@@ -321,6 +344,7 @@ class TestCotizacionAPI:
             assert response.status_code == status.HTTP_200_OK
 
     def test_convertir_a_venta_rechazada(self, agencia_premium, moneda_usd, usuario_staff):
+        """Convertir a venta rechazada."""
         self._setup_user_agencia(usuario_staff, agencia_premium)
         cotizacion = Cotizacion.objects.create(
             agencia=agencia_premium,
@@ -336,6 +360,7 @@ class TestCotizacionAPI:
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_marcar_enviada(self, agencia_premium, moneda_usd, usuario_staff):
+        """Marcar enviada."""
         self._setup_user_agencia(usuario_staff, agencia_premium)
         cotizacion = Cotizacion.objects.create(
             agencia=agencia_premium, moneda=moneda_usd, destino="Miami"
@@ -350,6 +375,7 @@ class TestCotizacionAPI:
         assert cotizacion.estado == Cotizacion.EstadoCotizacion.ENVIADA
 
     def test_marcar_vista(self, agencia_premium, moneda_usd, usuario_staff):
+        """Marcar vista."""
         self._setup_user_agencia(usuario_staff, agencia_premium)
         cotizacion = Cotizacion.objects.create(
             agencia=agencia_premium,
@@ -367,6 +393,7 @@ class TestCotizacionAPI:
         assert cotizacion.estado == Cotizacion.EstadoCotizacion.VISTA
 
     def test_marcar_vista_sin_estado_previo(self, agencia_premium, moneda_usd, usuario_staff):
+        """Marcar vista sin estado previo."""
         self._setup_user_agencia(usuario_staff, agencia_premium)
         cotizacion = Cotizacion.objects.create(
             agencia=agencia_premium,
@@ -384,6 +411,7 @@ class TestCotizacionAPI:
         assert cotizacion.estado == Cotizacion.EstadoCotizacion.BORRADOR
 
     def test_delete_cotizacion(self, agencia_premium, moneda_usd, usuario_staff):
+        """Delete cotizacion."""
         self._setup_user_agencia(usuario_staff, agencia_premium)
         cotizacion = Cotizacion.objects.create(
             agencia=agencia_premium, moneda=moneda_usd, destino="Miami"
@@ -394,6 +422,7 @@ class TestCotizacionAPI:
         assert response.status_code == status.HTTP_204_NO_CONTENT
 
     def test_create_cotizacion_sin_moneda(self, agencia_premium, usuario_staff):
+        """Create cotizacion sin moneda."""
         self._setup_user_agencia(usuario_staff, agencia_premium)
         client = APIClient()
         client.force_authenticate(user=usuario_staff)
@@ -407,6 +436,7 @@ class TestCotizacionAPI:
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_update_cotizacion(self, agencia_premium, moneda_usd, usuario_staff):
+        """Update cotizacion."""
         self._setup_user_agencia(usuario_staff, agencia_premium)
         cotizacion = Cotizacion.objects.create(
             agencia=agencia_premium, moneda=moneda_usd, destino="Miami"
@@ -433,6 +463,7 @@ class TestCotizacionMultiTenant:
         )
 
     def test_no_accede_cotizacion_otra_agencia(
+        """No accede cotizacion otra agencia."""
         self, agencia_premium, agencia_estandar, moneda_usd, usuario_staff
     ):
         self._setup_user_agencia(usuario_staff, agencia_premium)
@@ -445,6 +476,7 @@ class TestCotizacionMultiTenant:
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
     def test_list_solo_agencia_actual(
+        """List solo agencia actual."""
         self, agencia_premium, agencia_estandar, moneda_usd, usuario_staff
     ):
         self._setup_user_agencia(usuario_staff, agencia_premium)
@@ -461,6 +493,7 @@ class TestCotizacionMultiTenant:
 
 class TestAiSchemas:
     def test_flight_quote_segment_schema(self):
+        """Flight quote segment schema."""
         from apps.cotizaciones.ai_schemas import FlightQuoteSegmentSchema
 
         seg = FlightQuoteSegmentSchema(
@@ -479,6 +512,7 @@ class TestAiSchemas:
         assert seg.baggage == "1 Maleta 23kg"
 
     def test_cotizacion_magic_schema(self):
+        """Cotizacion magic schema."""
         from apps.cotizaciones.ai_schemas import CotizacionMagicSchema, FlightQuoteSegmentSchema
 
         esquema = CotizacionMagicSchema(
@@ -510,6 +544,7 @@ class TestAiSchemas:
         assert esquema.flights[0].airline == "Iberia"
 
     def test_cotizacion_magic_schema_sin_retorno(self):
+        """Cotizacion magic schema sin retorno."""
         from apps.cotizaciones.ai_schemas import CotizacionMagicSchema, FlightQuoteSegmentSchema
 
         esquema = CotizacionMagicSchema(
@@ -540,6 +575,7 @@ class TestAiSchemas:
 
 class TestPdfService:
     def test_generar_pdf_cotizacion_llama_renderer(self, agencia_premium, moneda_usd):
+        """Generar pdf cotizacion llama renderer."""
         cotizacion = Cotizacion.objects.create(
             agencia=agencia_premium, moneda=moneda_usd, destino="Miami"
         )
@@ -565,6 +601,7 @@ class TestPdfService:
 
 class TestWhatsAppWebhook:
     def test_webhook_sin_token_retorna_503(self):
+        """Webhook sin token retorna 503."""
         from django.http import HttpRequest
 
         from apps.cotizaciones.views_whatsapp import IncomingWhatsAppWebhook
@@ -581,6 +618,7 @@ class TestWhatsAppWebhook:
             assert resp.status_code == 503
 
     def test_webhook_firma_invalida_retorna_401(self):
+        """Webhook firma invalida retorna 401."""
         from django.http import HttpRequest
 
         from apps.cotizaciones.views_whatsapp import IncomingWhatsAppWebhook
@@ -597,6 +635,7 @@ class TestWhatsAppWebhook:
             assert resp.status_code == 401
 
     def test_webhook_valido_encola_tarea(self):
+        """Webhook valido encola tarea."""
         from django.http import HttpRequest
 
         from apps.cotizaciones.views_whatsapp import IncomingWhatsAppWebhook

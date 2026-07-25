@@ -7,9 +7,11 @@ User = get_user_model()
 
 
 class Command(BaseCommand):
+    """Comando de gestión personalizado."""
     help = "Create a superuser from CLI (secure - no web endpoint)"
 
     def add_arguments(self, parser):
+        """Método: add arguments."""
         parser.add_argument("--username", required=True)
         parser.add_argument("--email", required=True)
         parser.add_argument(
@@ -17,6 +19,7 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
+        """Método: handle."""
         if User.objects.filter(is_superuser=True).exists():
             raise CommandError("A superuser already exists. Refusing to create another.")
 

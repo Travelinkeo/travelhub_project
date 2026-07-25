@@ -10,6 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 class AgenciaSetupProgress(AgenciaMixin):
+    """Función: AgenciaSetupProgress."""
     STEPS = [
         ("welcome", _("Bienvenida")),
         ("profile", _("Perfil de Agencia")),
@@ -26,6 +27,7 @@ class AgenciaSetupProgress(AgenciaMixin):
     is_completed = models.BooleanField(default=False)
 
     class Meta:
+        """Meta definición del modelo."""
         verbose_name = _("Progreso de Onboarding")
         verbose_name_plural = _("Progresos de Onboarding")
 

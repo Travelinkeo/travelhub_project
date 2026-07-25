@@ -1,5 +1,8 @@
 # Auto-generated from tasks.py refactor
 
+"""Inicialización del paquete common.
+"""
+
 from .email_tasks import (  # noqa: F403,F405
     _notificar_operador,  # noqa: F401
     _notificar_operador_telegram,  # noqa: F401

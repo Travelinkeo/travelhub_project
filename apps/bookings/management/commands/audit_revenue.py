@@ -1,3 +1,6 @@
+"""Comando de gestión Django para bookings: audit_revenue.
+"""
+
 import json
 
 from django.core.management.base import BaseCommand
@@ -5,14 +8,18 @@ from django.core.management.base import BaseCommand
 from apps.bookings.services.revenue_auditor import RevenueAuditorService
 
 
-class Command(BaseCommand):
+class Command:
+    """Clase Command. Uso: según contexto de la aplicación.
+    """
     help = "Ejecuta el Revenue Leak AI para detectar fugas de dinero en las últimas ventas."
 
     def add_arguments(self, parser):
+        # add_arguments: Add arguments. Args: según implementación. Returns: según implementación.
         parser.add_argument("--days", type=int, default=30, help="Días a auditar (Default: 30)")
         parser.add_argument("--json", action="store_true", help="Salida en formato JSON")
 
     def handle(self, *args, **options):
+        # handle: Maneja/gestiona . Args: evento/datos. Returns: respuesta.
         days = options["days"]
         auditor = RevenueAuditorService()
 

@@ -51,6 +51,7 @@ class EmailChannel(NotificationChannel):
     """Canal de notificación por email"""
 
     def send(self, recipient: str, message: str, **kwargs) -> bool:
+        # send: Envía . Args: datos del mensaje. Returns: resultado del envío.
         try:
             from apps.common.tasks import send_email_task
 
@@ -71,6 +72,7 @@ class EmailChannel(NotificationChannel):
             return False
 
     def is_available(self, agencia=None) -> bool:
+        # is_available: Is available. Args: según implementación. Returns: según implementación.
         if agencia:
             email_config = agencia.configuracion_correo
             if email_config and email_config.get("EMAIL_HOST"):
@@ -82,6 +84,7 @@ class WhatsAppChannel(NotificationChannel):
     """Canal de notificación por WhatsApp"""
 
     def send(self, recipient: str, message: str, **kwargs) -> bool:
+        # send: Envía . Args: datos del mensaje. Returns: resultado del envío.
         try:
             from apps.common.tasks import send_whatsapp_task
 
@@ -101,6 +104,7 @@ class WhatsAppChannel(NotificationChannel):
             return False
 
     def is_available(self, agencia=None) -> bool:
+        # is_available: Is available. Args: según implementación. Returns: según implementación.
         if agencia:
             if getattr(agencia, "subdominio_slug", None):
                 return True
@@ -111,6 +115,7 @@ class TelegramChannel(NotificationChannel):
     """Canal de notificación por Telegram"""
 
     def send(self, recipient: str, message: str, **kwargs) -> bool:
+        # send: Envía . Args: datos del mensaje. Returns: resultado del envío.
         try:
             from apps.common.tasks import send_telegram_task
 
@@ -125,6 +130,7 @@ class TelegramChannel(NotificationChannel):
             return False
 
     def is_available(self, agencia=None) -> bool:
+        # is_available: Is available. Args: según implementación. Returns: según implementación.
         if agencia:
             token = getattr(agencia, "telegram_bot_token", None)
             chat = getattr(agencia, "telegram_chat_id", None)
@@ -140,6 +146,7 @@ class NotificationDispatcher:
     """Servicio centralizado para envío de notificaciones multi-canal"""
 
     def __init__(self):
+        # __init__: Inicializa una nueva instancia de NotificationDispatcher. Args: parámetros de inicialización.
         self.channels = {
             "email": EmailChannel(),
             "whatsapp": WhatsAppChannel(),
@@ -211,6 +218,7 @@ class NotificationDispatcher:
         return str(data)
 
     def _build_venta_message(self, data: dict, channel: str) -> str:
+        # _build_venta_message:  build venta message. Args: según implementación. Returns: según implementación.
         venta = data.get("venta")
         if channel == "whatsapp":
             return (
@@ -219,11 +227,13 @@ class NotificationDispatcher:
         return f"Su venta {venta.localizador} ha sido confirmada."
 
     def _build_estado_message(self, data: dict, channel: str) -> str:
+        # _build_estado_message:  build estado message. Args: según implementación. Returns: según implementación.
         venta = data.get("venta")
         estado = data.get("estado_nuevo")
         return f"Estado de venta {venta.localizador} cambió a: {estado}"
 
     def _build_pago_message(self, data: dict, channel: str) -> str:
+        # _build_pago_message:  build pago message. Args: según implementación. Returns: según implementación.
         venta = data.get("venta")
         return f"Recordatorio: Pago pendiente para venta {venta.localizador}"
 

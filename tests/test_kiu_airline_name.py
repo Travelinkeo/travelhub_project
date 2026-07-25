@@ -1,3 +1,4 @@
+"""Tests para Kiu airline name."""
 import os
 
 import pytest
@@ -19,6 +20,7 @@ EXPECTED_NAME = "RUTAS AEREAS DE VENEZUELA RAV, SA"
 
 
 def test_nombre_aerolinea_no_se_contamina():
+    """Nombre aerolinea no se contamina."""
     nombre = ticket_parser._kiu_get_nombre_aerolinea(SAMPLE_KIU_TEXT)
     assert nombre == EXPECTED_NAME
 
@@ -40,5 +42,6 @@ def test_nombre_aerolinea_no_se_contamina():
     ],
 )
 def test_cortes_por_tokens(line, expected):
+    """Cortes por tokens."""
     nombre = ticket_parser._kiu_get_nombre_aerolinea(line)
     assert nombre == expected

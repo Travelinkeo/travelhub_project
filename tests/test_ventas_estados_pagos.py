@@ -11,6 +11,7 @@ pytestmark = pytest.mark.skip(reason="Tests requieren configuración completa - 
 
 @pytest.fixture
 def api_client(db):
+    """Api client."""
     User = get_user_model()
     user = User.objects.create_user(username="states", password="pass123", is_staff=True)
     c = APIClient()
@@ -20,6 +21,7 @@ def api_client(db):
 
 @pytest.fixture
 def moneda_usd(db):
+    """Moneda usd."""
     return Moneda.objects.create(
         nombre="Dólar", codigo_iso="USD", simbolo="$", es_moneda_local=False
     )
@@ -27,11 +29,13 @@ def moneda_usd(db):
 
 @pytest.fixture
 def cliente(db):
+    """Cliente."""
     return Cliente.objects.create(nombres="Ana", apellidos="Gómez", email="ana@example.com")
 
 
 @pytest.fixture
 def producto(db):
+    """Producto."""
     return ProductoServicio.objects.create(
         nombre="Servicio Test",
         tipo_producto=ProductoServicio.TipoProductoChoices.SERVICIO_ADICIONAL,
@@ -40,6 +44,7 @@ def producto(db):
 
 @pytest.fixture
 def venta_base(api_client, cliente, moneda_usd, producto):
+    """Venta base."""
     payload = {
         "cliente": cliente.id_cliente,
         "moneda": moneda_usd.id_moneda,
@@ -62,6 +67,7 @@ def venta_base(api_client, cliente, moneda_usd, producto):
 @pytest.mark.django_db
 def test_estado_pasa_a_parcial_con_pago(api_client, venta_base, moneda_usd):
     # Pago parcial 40
+    """Estado pasa a parcial con pago."""
     resp = api_client.post(
         "/api/pagos-venta/",
         {
@@ -82,6 +88,7 @@ def test_estado_pasa_a_parcial_con_pago(api_client, venta_base, moneda_usd):
 @pytest.mark.django_db
 def test_estado_pasa_a_pagada_total_y_puntos(api_client, venta_base, moneda_usd, cliente):
     # Pago total 100
+    """Estado pasa a pagada total y puntos."""
     resp = api_client.post(
         "/api/pagos-venta/",
         {
@@ -104,6 +111,7 @@ def test_estado_pasa_a_pagada_total_y_puntos(api_client, venta_base, moneda_usd,
 @pytest.mark.django_db
 def test_no_duplica_puntos_con_pagos_incrementales(api_client, venta_base, moneda_usd, cliente):
     # Pago parcial 60
+    """No duplica puntos con pagos incrementales."""
     r1 = api_client.post(
         "/api/pagos-venta/",
         {
@@ -150,6 +158,7 @@ def test_no_duplica_puntos_con_pagos_incrementales(api_client, venta_base, moned
 
 @pytest.mark.django_db
 def test_completada_manual_antes_de_pagos_otorga_puntos_una_vez(
+    """Completada manual antes de pagos otorga puntos una vez."""
     api_client, venta_base, moneda_usd, cliente
 ):
     # Marcamos manualmente la venta como COMPLETADA (sin pagos aún)
@@ -166,6 +175,7 @@ def test_completada_manual_antes_de_pagos_otorga_puntos_una_vez(
 @pytest.mark.django_db
 def test_confirmada_luego_pagos_total_otorga_puntos(api_client, venta_base, moneda_usd, cliente):
     # Marcar CONFIRMADA (no debe otorgar puntos todavía porque saldo > 0)
+    """Confirmada luego pagos total otorga puntos."""
     r = api_client.patch(f"/api/ventas/{venta_base}/", {"estado": "CNF"}, format="json")
     assert r.status_code in (200, 202, 204), r.content
     cliente.refresh_from_db()
@@ -193,6 +203,7 @@ def test_confirmada_luego_pagos_total_otorga_puntos(api_client, venta_base, mone
 @pytest.mark.django_db
 def test_estado_via_no_se_sobrescribe_con_pagos(api_client, venta_base, moneda_usd, cliente):
     # Pasar a VIA (viaje en curso)
+    """Estado via no se sobrescribe con pagos."""
     r = api_client.patch(f"/api/ventas/{venta_base}/", {"estado": "VIA"}, format="json")
     assert r.status_code in (200, 202, 204), r.content
     venta = api_client.get(f"/api/ventas/{venta_base}/").json()
@@ -250,6 +261,7 @@ def test_estado_via_no_se_sobrescribe_con_pagos(api_client, venta_base, moneda_u
 @pytest.mark.django_db
 def test_venta_total_menor_a_10_no_otorga_puntos(api_client, cliente, moneda_usd, producto):
     # Crear venta con item de total 9.00
+    """Venta total menor a 10 no otorga puntos."""
     payload = {
         "cliente": cliente.id_cliente,
         "moneda": moneda_usd.id_moneda,
@@ -291,6 +303,7 @@ def test_venta_total_menor_a_10_no_otorga_puntos(api_client, cliente, moneda_usd
 @pytest.mark.django_db
 def test_idempotencia_puntos_recalculo_y_pagos_extra(api_client, venta_base, moneda_usd, cliente):
     # Pagar total primero (100) -> gana 10
+    """Idempotencia puntos recalculo y pagos extra."""
     p1 = api_client.post(
         "/api/pagos-venta/",
         {

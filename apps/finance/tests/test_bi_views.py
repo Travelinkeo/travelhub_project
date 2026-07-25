@@ -1,3 +1,6 @@
+"""Vistas (views) de la aplicación finance.
+"""
+
 from decimal import Decimal
 
 import pytest
@@ -11,12 +14,15 @@ from core.models.agencia import UsuarioAgencia
 
 @pytest.fixture
 def no_ssl_redirect(settings):
+    # no_ssl_redirect: No ssl redirect. Args: según implementación. Returns: según implementación.
     settings.SECURE_SSL_REDIRECT = False
 
 
 @pytest.mark.django_db
 @pytest.mark.usefixtures("no_ssl_redirect")
 class TestBIDashboardView:
+    """Vista para gestionar testbidashboard. Uso: instanciar según necesidad del dominio.
+    """
     def test_dashboard_requires_login(self, client):
         """Verificar que la vista del Dashboard de BI requiere login."""
         url = reverse("finance:dashboard_bi")

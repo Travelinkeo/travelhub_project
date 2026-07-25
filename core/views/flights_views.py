@@ -8,13 +8,16 @@ logger = logging.getLogger(__name__)
 
 
 class FlightSearchView(LoginRequiredMixin, View):
+    """Función: FlightSearchView."""
     template_name = "dashboard/flights/flight_search.html"
     partial_template = "dashboard/flights/partials/flight_results.html"
 
     def get(self, request):
+        """Método: get."""
         return render(request, self.template_name)
 
     def post(self, request):
+        """Método: post."""
         trip_type = request.POST.get("trip_type", "ONE_WAY")
         origin = request.POST.get("origin", "").upper()
         destination = request.POST.get("destination", "").upper()

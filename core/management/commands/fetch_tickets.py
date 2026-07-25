@@ -12,9 +12,11 @@ from apps.bookings.models import BoletoImportado
 
 
 class Command(BaseCommand):
+    """Comando de gestión personalizado."""
     help = "Revisa el correo electrónico configurado, descarga nuevos boletos de Kiu y los guarda en la base de datos para ser procesados."
 
     def handle(self, *args, **options):
+        """Método: handle."""
         self.stdout.write(
             self.style.SUCCESS("Iniciando el proceso de revisión de boletos por correo...")
         )

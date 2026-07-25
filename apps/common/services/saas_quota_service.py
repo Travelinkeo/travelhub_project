@@ -1,3 +1,6 @@
+"""Servicio de saas quota service para la aplicación common.
+"""
+
 import logging
 
 from django.conf import settings
@@ -17,6 +20,7 @@ class SaaSQuotaService:
 
     @classmethod
     def get_limits(cls, agencia):
+        # get_limits: Obtiene/recupera limits. Args: según implementación. Returns: dato solicitado.
         plan = getattr(agencia, "plan", "FREE")
         return settings.SAAS_PLAN_LIMITS.get(plan, settings.SAAS_PLAN_LIMITS["FREE"])
 

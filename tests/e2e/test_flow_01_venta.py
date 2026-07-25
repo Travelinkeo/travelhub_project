@@ -1,3 +1,4 @@
+"""Tests para Flow 01 venta (E2E)."""
 import pytest
 
 pytestmark = [
@@ -8,6 +9,7 @@ pytestmark = [
 
 
 def test_login_page_loads(page, live_server):
+    """Login page loads."""
     page.goto(f"{live_server.url}/login/")
     assert page.locator('input[name="username"]').is_visible()
     assert page.locator('input[name="password"]').is_visible()
@@ -15,6 +17,7 @@ def test_login_page_loads(page, live_server):
 
 
 def test_login_success(logged_in_page, live_server):
+    """Login success."""
     logged_in_page.goto(f"{live_server.url}/dashboard/modern/")
     logged_in_page.wait_for_timeout(1000)
     body = logged_in_page.text_content("body") or ""
@@ -22,6 +25,7 @@ def test_login_success(logged_in_page, live_server):
 
 
 def test_crear_venta(logged_in_page, live_server, moneda_usd, sample_cliente):
+    """Crear venta."""
     venta_url = f"{live_server.url}/bookings/ventas/nueva/"
     logged_in_page.goto(venta_url)
     logged_in_page.wait_for_timeout(1000)

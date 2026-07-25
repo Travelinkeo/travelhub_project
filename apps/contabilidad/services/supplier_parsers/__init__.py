@@ -1,3 +1,6 @@
+"""Inicialización del paquete contabilidad.
+"""
+
 from .base_parser import BaseSupplierReportParser
 from .ctg_parser import CTGReportParser
 from .factory import SupplierReportParserFactory

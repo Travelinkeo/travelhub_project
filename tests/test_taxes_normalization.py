@@ -1,3 +1,4 @@
+"""Tests para Taxes normalization."""
 from decimal import Decimal
 
 from apps.automation.parsers.kiu_parser import KIUParser
@@ -5,6 +6,7 @@ from apps.automation.parsers.legacy.sabre_parser import SabreParser
 
 
 def test_kiu_taxes_normalization():
+    """Kiu taxes normalization."""
     sample = (
         "TICKET NRO: 308-0201196996\n"
         "BOOKING REF: C1/ABC123\n"
@@ -25,6 +27,7 @@ def test_kiu_taxes_normalization():
 
 
 def test_sabre_taxes_normalization():
+    """Sabre taxes normalization."""
     sample = (
         "Itinerary Details\n"
         "Issue Date 17 Aug 25\n"

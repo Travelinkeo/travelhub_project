@@ -1,3 +1,6 @@
+"""Servicio de id scanner service para la aplicación automation.
+"""
+
 import io
 import logging
 
@@ -18,6 +21,7 @@ class IDScannerService:
 
     @staticmethod
     def procesar_cedula(image_file, agencia=None):
+        # procesar_cedula: Procesa r cedula. Args: datos a procesar. Returns: resultado procesado.
         try:
             logger.info("Procesando imagen...")
             image_data = image_file.read()

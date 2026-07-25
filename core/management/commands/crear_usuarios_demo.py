@@ -12,9 +12,11 @@ from core.models.agencia import Agencia, UsuarioAgencia
 
 
 class Command(BaseCommand):
+    """Comando de gestión personalizado."""
     help = "Crea usuarios asesores para Travelinkeo y la agencia de pruebas TravelHub Demo"
 
     def handle(self, *args, **options):
+        """Método: handle."""
         sep = "=" * 60
         self.stdout.write(sep)
         self.stdout.write("  CREANDO USUARIOS PARA TRAVELINKEO")

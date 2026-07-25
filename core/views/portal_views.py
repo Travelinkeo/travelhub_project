@@ -15,6 +15,7 @@ class PortalHomeView(View):
     template_name = "core/portal/home.html"
 
     def get(self, request):
+        """Método: get."""
         return render(request, self.template_name)
 
 
@@ -25,6 +26,7 @@ class PortalLookupView(View):
     """
 
     def post(self, request):
+        """Método: post."""
         localizador = request.POST.get("localizador", "").strip().upper()
         apellido = request.POST.get("apellido", "").strip().upper()
 
@@ -73,6 +75,7 @@ class PortalTokenRedirectView(View):
     """
 
     def get(self, request, uuid_token):
+        """Método: get."""
         venta = Venta.all_objects.filter(uuid=uuid_token, is_deleted=False).first()
         if not venta:
             raise Http404("Reserva no encontrada.")

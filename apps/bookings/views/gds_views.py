@@ -1,3 +1,6 @@
+"""Vistas (views) de la aplicación bookings.
+"""
+
 import json
 import logging
 

@@ -22,6 +22,7 @@ try:
     )
 
     def get_logger(name):
+        """# Retorna un logger configurado (structlog o estándar). Args: name (str). Returns: logger."""
         return structlog.get_logger(name)
 
     HAS_STRUCTLOG = True
@@ -30,6 +31,7 @@ except ImportError:
     HAS_STRUCTLOG = False
 
     def get_logger(name):
+        """# Retorna un logger configurado (structlog o estándar). Args: name (str). Returns: logger."""
         logger = logging.getLogger(name)
         return logger
 

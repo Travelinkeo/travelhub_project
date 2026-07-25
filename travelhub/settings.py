@@ -20,6 +20,5 @@ Eliminarlo es seguro una vez que DJANGO_SETTINGS_MODULE esté actualizado
 en todos los entornos (Docker, CI, Render, etc.).
 """
 
-# Re-exportar todo desde el paquete de settings
-# El __init__.py del paquete selecciona el módulo correcto según DJANGO_ENV
+# Re-exporta todo desde el paquete de settings (selecciona según DJANGO_ENV)
 from travelhub.settings import *  # noqa: F401, F403

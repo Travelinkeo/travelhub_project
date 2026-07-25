@@ -1,3 +1,4 @@
+"""Tests para Accounting reconciliation."""
 import threading
 from decimal import Decimal
 
@@ -29,6 +30,7 @@ def test_asiento_contable_concurrency(db):
     created_asientos = []
 
     def save_asiento(index):
+        """Save asiento."""
         try:
             with transaction.atomic():
                 asiento = AsientoContable(

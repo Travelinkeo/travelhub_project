@@ -1,3 +1,6 @@
+"""Vistas (views) de la aplicación cotizaciones.
+"""
+
 import json
 import logging
 import re
@@ -44,7 +47,9 @@ re_airlines = re.compile(
 logger = logging.getLogger(__name__)
 
 
-class CotizacionViewSet(InternalAPIAuthMixin, TenantViewSetMixin, viewsets.ModelViewSet):
+class CotizacionViewSet:
+    """Clase CotizacionViewSet. Uso: según contexto de la aplicación.
+    """
     queryset = (
         Cotizacion.objects.select_related("cliente", "consultor")
         .prefetch_related("items")
@@ -116,20 +121,25 @@ class CotizacionViewSet(InternalAPIAuthMixin, TenantViewSetMixin, viewsets.Model
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-class ItemCotizacionViewSet(InternalAPIAuthMixin, TenantViewSetMixin, viewsets.ModelViewSet):
+class ItemCotizacionViewSet:
+    """Clase ItemCotizacionViewSet. Uso: según contexto de la aplicación.
+    """
     queryset = ItemCotizacion.objects.select_related("cotizacion").all()
     serializer_class = ItemCotizacionSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def perform_create(self, serializer):
+        # perform_create: Perform create. Args: según implementación. Returns: según implementación.
         item = serializer.save()
         item.cotizacion.calcular_total()
 
     def perform_update(self, serializer):
+        # perform_update: Perform update. Args: según implementación. Returns: según implementación.
         item = serializer.save()
         item.cotizacion.calcular_total()
 
     def perform_destroy(self, instance):
+        # perform_destroy: Perform destroy. Args: según implementación. Returns: según implementación.
         cotizacion = instance.cotizacion
         instance.delete()
         cotizacion.calcular_total()
@@ -138,13 +148,16 @@ class ItemCotizacionViewSet(InternalAPIAuthMixin, TenantViewSetMixin, viewsets.M
 # --- VISTAS STANDARD (SSR) ---
 
 
-class CotizacionDashboardView(SaaSMixin, LoginRequiredMixin, ListView):
+class CotizacionDashboardView:
+    """Vista para gestionar cotizaciondashboard. Uso: instanciar según necesidad del dominio.
+    """
     model = Cotizacion
     template_name = "core/erp/cotizaciones/dashboard.html"
     context_object_name = "cotizaciones"
     paginate_by = 20
 
     def get_queryset(self):
+        # get_queryset: Obtiene/recupera queryset. Args: según implementación. Returns: dato solicitado.
         queryset = Cotizacion.objects.select_related("cliente", "moneda").order_by("-fecha_emision")
         q = self.request.GET.get("q")
         if q:
@@ -159,6 +172,7 @@ class CotizacionDashboardView(SaaSMixin, LoginRequiredMixin, ListView):
         return queryset
 
     def get_context_data(self, **kwargs):
+        # get_context_data: Obtiene/recupera context data. Args: según implementación. Returns: dato solicitado.
         context = super().get_context_data(**kwargs)
         context["total_cotizaciones"] = Cotizacion.objects.count()
         context["cotizaciones_pendientes"] = Cotizacion.objects.filter(estado="BOR").count()
@@ -166,12 +180,15 @@ class CotizacionDashboardView(SaaSMixin, LoginRequiredMixin, ListView):
         return context
 
 
-class CotizacionDetailView(SaaSMixin, LoginRequiredMixin, DetailView):
+class CotizacionDetailView:
+    """Vista para gestionar cotizaciondetail. Uso: instanciar según necesidad del dominio.
+    """
     model = Cotizacion
     template_name = "core/erp/cotizaciones/detalle.html"
     context_object_name = "cotizacion"
 
     def get_context_data(self, **kwargs):
+        # get_context_data: Obtiene/recupera context data. Args: según implementación. Returns: dato solicitado.
         context = super().get_context_data(**kwargs)
         context["items"] = self.object.items_cotizacion.select_related(
             "producto_servicio", "moneda"
@@ -179,13 +196,16 @@ class CotizacionDetailView(SaaSMixin, LoginRequiredMixin, DetailView):
         return context
 
 
-class CotizacionCreateView(SaaSMixin, LoginRequiredMixin, CreateView):
+class CotizacionCreateView:
+    """Vista para gestionar cotizacioncreate. Uso: instanciar según necesidad del dominio.
+    """
     model = Cotizacion
     form_class = CotizacionForm
     template_name = "core/erp/cotizaciones/crear_cotizacion_swiss.html"
     success_url = reverse_lazy("bookings:cotizacion_dashboard")
 
     def get_context_data(self, **kwargs):
+        # get_context_data: Obtiene/recupera context data. Args: según implementación. Returns: dato solicitado.
         context = super().get_context_data(**kwargs)
         if self.request.POST:
             context["items_formset"] = ItemCotizacionFormSet(self.request.POST)
@@ -194,6 +214,7 @@ class CotizacionCreateView(SaaSMixin, LoginRequiredMixin, CreateView):
         return context
 
     def form_valid(self, form):
+        # form_valid: Form valid. Args: según implementación. Returns: según implementación.
         context = self.get_context_data()
         items_formset = context["items_formset"]
         with transaction.atomic():
@@ -210,15 +231,19 @@ class CotizacionCreateView(SaaSMixin, LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
-class CotizacionUpdateView(SaaSMixin, LoginRequiredMixin, UpdateView):
+class CotizacionUpdateView:
+    """Vista para gestionar cotizacionupdate. Uso: instanciar según necesidad del dominio.
+    """
     model = Cotizacion
     form_class = CotizacionForm
     template_name = "core/erp/cotizaciones/crear_cotizacion_swiss.html"
 
     def get_success_url(self):
+        # get_success_url: Obtiene/recupera success url. Args: según implementación. Returns: dato solicitado.
         return reverse_lazy("bookings:cotizacion_detalle", kwargs={"pk": self.object.pk})
 
     def get_context_data(self, **kwargs):
+        # get_context_data: Obtiene/recupera context data. Args: según implementación. Returns: dato solicitado.
         context = super().get_context_data(**kwargs)
         if self.request.POST:
             context["items_formset"] = ItemCotizacionFormSet(
@@ -229,6 +254,7 @@ class CotizacionUpdateView(SaaSMixin, LoginRequiredMixin, UpdateView):
         return context
 
     def form_valid(self, form):
+        # form_valid: Form valid. Args: según implementación. Returns: según implementación.
         context = self.get_context_data()
         items_formset = context["items_formset"]
         with transaction.atomic():
@@ -245,8 +271,11 @@ class CotizacionUpdateView(SaaSMixin, LoginRequiredMixin, UpdateView):
         return super().form_valid(form)
 
 
-class CotizacionStatusView(SaaSMixin, LoginRequiredMixin, View):
+class CotizacionStatusView:
+    """Vista para gestionar cotizacionstatus. Uso: instanciar según necesidad del dominio.
+    """
     def post(self, request, pk):
+        # post: Post. Args: según implementación. Returns: según implementación.
         cotizacion = get_object_or_404(Cotizacion, pk=pk, agencia=request.agencia)
         nuevo_estado = request.POST.get("nuevo_estado")
         estado_anterior = cotizacion.estado
@@ -269,8 +298,11 @@ class CotizacionStatusView(SaaSMixin, LoginRequiredMixin, View):
         return redirect("bookings:cotizacion_detalle", pk=pk)
 
 
-class CotizacionPDFView(SaaSMixin, LoginRequiredMixin, View):
+class CotizacionPDFView:
+    """Vista para gestionar cotizacionpdf. Uso: instanciar según necesidad del dominio.
+    """
     def get(self, request, pk):
+        # get: Get. Args: según implementación. Returns: según implementación.
         cotizacion = get_object_or_404(Cotizacion, pk=pk, agencia=request.agencia)
         try:
             pdf_bytes = generar_pdf_cotizacion(cotizacion)
@@ -283,8 +315,11 @@ class CotizacionPDFView(SaaSMixin, LoginRequiredMixin, View):
             return redirect("bookings:cotizacion_detalle", pk=pk)
 
 
-class CotizacionConvertirView(SaaSMixin, LoginRequiredMixin, View):
+class CotizacionConvertirView:
+    """Vista para gestionar cotizacionconvertir. Uso: instanciar según necesidad del dominio.
+    """
     def post(self, request, pk):
+        # post: Post. Args: según implementación. Returns: según implementación.
         cotizacion = get_object_or_404(Cotizacion, pk=pk, agencia=request.agencia)
         try:
             with transaction.atomic():
@@ -296,8 +331,11 @@ class CotizacionConvertirView(SaaSMixin, LoginRequiredMixin, View):
         return redirect("bookings:cotizacion_detalle", pk=pk)
 
 
-class CotizacionHTMXCalculateTotalsView(SaaSMixin, LoginRequiredMixin, View):
+class CotizacionHTMXCalculateTotalsView:
+    """Vista para gestionar cotizacionhtmxcalculatetotals. Uso: instanciar según necesidad del dominio.
+    """
     def post(self, request, *args, **kwargs):
+        # post: Post. Args: según implementación. Returns: según implementación.
         subtotal = 0
         impuestos = 0
         total_forms = int(request.POST.get("items_cotizacion-TOTAL_FORMS", 0))
@@ -336,8 +374,11 @@ class CotizacionHTMXCalculateTotalsView(SaaSMixin, LoginRequiredMixin, View):
         )
 
 
-class CotizacionHTMXAddItemView(LoginRequiredMixin, View):
+class CotizacionHTMXAddItemView:
+    """Vista para gestionar cotizacionhtmxadditem. Uso: instanciar según necesidad del dominio.
+    """
     def get(self, request, *args, **kwargs):
+        # get: Get. Args: según implementación. Returns: según implementación.
         index = int(request.GET.get("index", 0))
         formset = ItemCotizacionFormSet()
         empty_form = formset.empty_form
@@ -360,6 +401,7 @@ class MagicQuoterView(LoginRequiredMixin, TemplateView):
     template_name = "cotizaciones/magic_quoter.html"
 
     def get_context_data(self, **kwargs):
+        # get_context_data: Obtiene/recupera context data. Args: según implementación. Returns: dato solicitado.
         context = super().get_context_data(**kwargs)
         lead_id = self.request.GET.get("lead_id")
         if lead_id:
@@ -665,6 +707,7 @@ class MagicQuoterSaveView(SaaSMixin, LoginRequiredMixin, View):
     """
 
     def post(self, request, *args, **kwargs):
+        # post: Post. Args: según implementación. Returns: según implementación.
         import json
 
         from django.urls import reverse
@@ -816,12 +859,14 @@ class PublicQuoteDetailView(DetailView):
     context_object_name = "quote"
 
     def get_object(self, queryset=None):
+        # get_object: Obtiene/recupera object. Args: según implementación. Returns: dato solicitado.
         from core.middleware import system_context
 
         with system_context():
             return get_object_or_404(Cotizacion, uuid=self.kwargs.get("quote_uuid"))
 
     def get_context_data(self, **kwargs):
+        # get_context_data: Obtiene/recupera context data. Args: según implementación. Returns: dato solicitado.
         context = super().get_context_data(**kwargs)
         quote = context["quote"]
         meta = quote.metadata_ia or {}
@@ -903,6 +948,7 @@ class PublicQuoteDetailView(DetailView):
         return context
 
     def render_to_response(self, context, **response_kwargs):
+        # render_to_response: Renderiza  to response. Args: contexto/datos. Returns: HTML renderizado.
         response = super().render_to_response(context, **response_kwargs)
         quote = context["quote"]
         if quote.estado == Cotizacion.EstadoCotizacion.ENVIADA:

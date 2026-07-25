@@ -1,3 +1,6 @@
+"""Modelos de base de datos para la aplicación finance.
+"""
+
 from django.db import models, transaction
 from decimal import Decimal
 
@@ -34,7 +37,9 @@ def generar_numero_factura_atomico(model_cls, fecha_emision, prefix=""):
 # Stubs for migration & apps.get_model compatibility
 
 
-class TasaCambioBCV(models.Model):
+class TasaCambioBCV:
+    """Clase TasaCambioBCV. Uso: según contexto de la aplicación.
+    """
     fecha = models.DateField(unique=True, db_index=True)
     tasa = models.DecimalField(max_digits=15, decimal_places=4, null=True, blank=True)
 
@@ -44,10 +49,13 @@ class TasaCambioBCV(models.Model):
         ordering = ["-fecha"]
 
     def __str__(self):
+        # __str__: Representación en string del objeto. Returns: str.
         return f"{self.fecha}: {self.tasa} VES/USD"
 
 
-class ConfiguracionFiscal(AgenciaMixin, models.Model):
+class ConfiguracionFiscal:
+    """Clase ConfiguracionFiscal. Uso: según contexto de la aplicación.
+    """
     PAISES = [
         ("VEN", "Venezuela"),
         ("COL", "Colombia"),
@@ -64,10 +72,13 @@ class ConfiguracionFiscal(AgenciaMixin, models.Model):
         verbose_name_plural = "Configuraciones Fiscales"
 
     def __str__(self):
+        # __str__: Representación en string del objeto. Returns: str.
         return f"ConfigFiscal #{self.agencia_id} — IVA={self.iva_por_defecto}%"
 
 
-class Factura(AgenciaMixin, models.Model):
+class Factura:
+    """Clase Factura. Uso: según contexto de la aplicación.
+    """
     cliente = models.ForeignKey(
         "crm.Cliente",
         on_delete=models.PROTECT,
@@ -105,10 +116,13 @@ class Factura(AgenciaMixin, models.Model):
         ordering = ["-fecha_emision"]
 
     def __str__(self):
+        # __str__: Representación en string del objeto. Returns: str.
         return f"Factura #{self.numero_control}"
 
 
-class ItemFactura(AgenciaMixin, models.Model):
+class ItemFactura:
+    """Clase ItemFactura. Uso: según contexto de la aplicación.
+    """
     factura = models.ForeignKey(
         Factura,
         on_delete=models.CASCADE,
@@ -127,10 +141,13 @@ class ItemFactura(AgenciaMixin, models.Model):
         verbose_name_plural = "Items de Factura"
 
     def __str__(self):
+        # __str__: Representación en string del objeto. Returns: str.
         return f"{self.descripcion} x {self.cantidad}"
 
 
-class Pago(AgenciaMixin, models.Model):
+class Pago:
+    """Clase Pago. Uso: según contexto de la aplicación.
+    """
     factura = models.ForeignKey(
         Factura,
         on_delete=models.PROTECT,
@@ -150,6 +167,7 @@ class Pago(AgenciaMixin, models.Model):
         ordering = ["-fecha_pago"]
 
     def __str__(self):
+        # __str__: Representación en string del objeto. Returns: str.
         return f"Pago {self.referencia or self.pk} — {self.monto_usd} USD / {self.monto_ves} VES"
 
 
@@ -241,6 +259,7 @@ class GastoOperativo(AgenciaMixin, models.Model):
         ]
 
     def __str__(self):
+        # __str__: Representación en string del objeto. Returns: str.
         return f"{self.descripcion} — {self.monto} ({self.fecha})"
 
     @property
@@ -377,6 +396,7 @@ class FacturaConsolidada(AgenciaMixin, models.Model):
         ]
 
     def __str__(self):
+        # __str__: Representación en string del objeto. Returns: str.
         return f"FC-{self.numero_factura} | {self.gran_total_usd} USD ({self.estado})"
 
     def calcular_totales(self):
@@ -470,10 +490,12 @@ class ItemFacturaConsolidada(AgenciaMixin, models.Model):
         verbose_name_plural = "Ítems de Factura Consolidada"
 
     def __str__(self):
+        # __str__: Representación en string del objeto. Returns: str.
         return f"{self.descripcion} x {self.cantidad}"
 
     @property
     def subtotal(self):
+        # subtotal: Subtotal. Args: según implementación. Returns: según implementación.
         return (self.cantidad * self.precio_unitario).quantize(Decimal("0.01"))
 
 
@@ -578,6 +600,7 @@ class RetencionISLR(AgenciaMixin, models.Model):
         ]
 
     def __str__(self):
+        # __str__: Representación en string del objeto. Returns: str.
         return f"ISLR {self.numero_comprobante} — {self.monto_retenido} USD ({self.estado})"
 
     def save(self, *args, **kwargs):

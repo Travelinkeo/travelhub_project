@@ -1,3 +1,6 @@
+"""Vistas (views) de la aplicación marketing.
+"""
+
 import base64
 import logging
 
@@ -12,6 +15,7 @@ from apps.marketing.services.forecast_service import AIForecastService
 
 
 def _get_hotel_tarifario():
+    # _get_hotel_tarifario:  get hotel tarifario. Args: según implementación. Returns: según implementación.
     from django.apps import apps
 
     return apps.get_model("bookings", "HotelTarifario")
@@ -20,8 +24,11 @@ def _get_hotel_tarifario():
 logger = logging.getLogger(__name__)
 
 
-class GenerarFlyerView(View):
+class GenerarFlyerView:
+    """Vista para gestionar generarflyer. Uso: instanciar según necesidad del dominio.
+    """
     def post(self, request, *args, **kwargs):
+        # post: Post. Args: según implementación. Returns: según implementación.
         hotel_id = request.POST.get("hotel_id")
         destino = request.POST.get("destino")
         precio = request.POST.get("precio", "$0")
@@ -54,8 +61,11 @@ class GenerarFlyerView(View):
         return HttpResponse(html_response)
 
 
-class GenerarCopyView(View):
+class GenerarCopyView:
+    """Vista para gestionar generarcopy. Uso: instanciar según necesidad del dominio.
+    """
     def post(self, request, *args, **kwargs):
+        # post: Post. Args: según implementación. Returns: según implementación.
         hotel_id = request.POST.get("hotel_id")
         tono = request.POST.get("tono", "AVENTURERO")
 
@@ -68,8 +78,11 @@ class GenerarCopyView(View):
         return HttpResponse(copy)
 
 
-class GenerarSocialMediaAdvancedView(View):
+class GenerarSocialMediaAdvancedView:
+    """Vista para gestionar generarsocialmediaadvanced. Uso: instanciar según necesidad del dominio.
+    """
     def post(self, request, *args, **kwargs):
+        # post: Post. Args: según implementación. Returns: según implementación.
         hotel_id = request.POST.get("hotel_id")
         tono = request.POST.get("tono", "LUXURY")
         extra_prompt = request.POST.get("extra_prompt")
@@ -127,10 +140,13 @@ class GenerarSocialMediaAdvancedView(View):
         )
 
 
-class MarketingFeedView(TemplateView):
+class MarketingFeedView:
+    """Vista para gestionar marketingfeed. Uso: instanciar según necesidad del dominio.
+    """
     template_name = "marketing/partials/feed_gallery.html"
 
     def get_context_data(self, **kwargs):
+        # get_context_data: Obtiene/recupera context data. Args: según implementación. Returns: dato solicitado.
         context = super().get_context_data(**kwargs)
         context["activos"] = (
             ActivoMarketing.objects.filter(generado_por_ia=True)
@@ -140,10 +156,13 @@ class MarketingFeedView(TemplateView):
         return context
 
 
-class AIForecastView(TemplateView):
+class AIForecastView:
+    """Vista para gestionar aiforecast. Uso: instanciar según necesidad del dominio.
+    """
     template_name = "marketing/forecast.html"
 
     def get_context_data(self, **kwargs):
+        # get_context_data: Obtiene/recupera context data. Args: según implementación. Returns: dato solicitado.
         context = super().get_context_data(**kwargs)
         service = AIForecastService()
         forecast_data = service.generate_forecast()

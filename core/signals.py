@@ -18,6 +18,7 @@ from core.signals_bypass import are_signals_blocked
 
 
 def _on_commit(fn, *args, **kwargs):
+    """Función interna: on commit."""
     transaction.on_commit(partial(fn, *args, **kwargs))
 
 
@@ -61,6 +62,7 @@ def on_boleto_importado_post_save(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender="bookings.PagoVenta")
 def enviar_confirmacion_pago_recibido(sender, instance, created, **kwargs):
+    """Función: enviar confirmacion pago recibido."""
     if are_signals_blocked():
         logger.info(
             f"⏭️ SIGNAL: Signals blocked. Bypassing enviar_confirmacion_pago_recibido for PagoVenta {instance.pk}"
@@ -76,6 +78,7 @@ def enviar_confirmacion_pago_recibido(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender="core.MigrationCheck")
 def enviar_alerta_migratoria(sender, instance, created, **kwargs):
+    """Función: enviar alerta migratoria."""
     if are_signals_blocked():
         logger.info(
             f"⏭️ SIGNAL: Signals blocked. Bypassing enviar_alerta_migratoria for MigrationCheck {instance.pk}"
@@ -119,6 +122,7 @@ def on_usuario_agencia_changed(sender, instance, **kwargs):
 
 @receiver(pre_save, sender="finance.Factura")
 def capturar_pdf_factura_anterior(sender, instance, **kwargs):
+    """Función: capturar pdf factura anterior."""
     if are_signals_blocked():
         return
 
@@ -137,6 +141,7 @@ def capturar_pdf_factura_anterior(sender, instance, **kwargs):
 
 @receiver(post_save, sender="finance.Factura")
 def post_save_factura(sender, instance, created, **kwargs):
+    """Función: post save factura."""
     if are_signals_blocked():
         logger.info(
             f"⏭️ SIGNAL: Signals blocked. Bypassing post_save_factura for Factura {instance.pk}"
@@ -179,6 +184,7 @@ def purgar_contextvars_de_seguridad(sender, **kwargs):
 
 
 def _trigger_parsing(boleto_id):
+    """Función interna: trigger parsing."""
     from apps.bookings.models import BoletoImportado
     from apps.bookings.services.boleto_service import BoletoImportadoService
 
@@ -191,6 +197,7 @@ def _trigger_parsing(boleto_id):
 
 
 def _post_parse_automation(boleto_id):
+    """Función interna: post parse automation."""
     from apps.bookings.models import BoletoImportado
     from apps.bookings.services.boleto_service import BoletoImportadoService
 
@@ -203,12 +210,14 @@ def _post_parse_automation(boleto_id):
 
 
 def _notificar_pago(pago_id):
+    """Función interna: notificar pago."""
     from apps.common.tasks import notificar_confirmacion_pago_task
 
     notificar_confirmacion_pago_task.delay(pago_id)
 
 
 def _trigger_migration_alert(check_id, created):
+    """Función interna: trigger migration alert."""
     if not created:
         return
     from apps.common.tasks import notify_migration_alert_task
@@ -217,6 +226,7 @@ def _trigger_migration_alert(check_id, created):
 
 
 def _capturar_pdf_anterior(factura_id):
+    """Función interna: capturar pdf anterior."""
     from apps.finance.models import Factura
     from apps.finance.services.factura_service import FacturaService
 
@@ -228,12 +238,14 @@ def _capturar_pdf_anterior(factura_id):
 
 
 def _send_factura_telegram(factura_id):
+    """Función interna: send factura telegram."""
     from apps.common.tasks import send_factura_to_telegram_task
 
     send_factura_to_telegram_task.delay(factura_id)
 
 
 def _send_factura_whatsapp(factura_id):
+    """Función interna: send factura whatsapp."""
     from apps.common.tasks import send_factura_to_whatsapp_task
 
     try:

@@ -105,9 +105,11 @@ def _generate_reminder_email_content(venta: Venta, weather_forecast: dict) -> di
 
 
 class Command(BaseCommand):
+    """Comando de gestión personalizado."""
     help = "Envía recordatorios de viaje a clientes con viajes próximos en los siguientes 3 días."
 
     def handle(self, *args, **options):
+        """Método: handle."""
         self.stdout.write(
             self.style.SUCCESS("Iniciando tarea de envío de recordatorios de viaje...")
         )

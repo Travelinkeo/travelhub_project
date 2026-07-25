@@ -1,3 +1,4 @@
+"""Tests para Security."""
 import pytest
 from django.test import override_settings
 from django.urls import reverse
@@ -6,6 +7,7 @@ from rest_framework.test import APIClient
 
 @pytest.mark.django_db
 def test_security_headers_present(api_client_staff):
+    """Security headers present."""
     url = reverse("health")
     r = api_client_staff.get(url)
     assert r.status_code == 200
@@ -16,6 +18,7 @@ def test_security_headers_present(api_client_staff):
 @pytest.mark.django_db
 @override_settings(DEBUG=False)
 def test_security_headers_production(api_client_staff):
+    """Security headers production."""
     url = reverse("health")
     r = api_client_staff.get(url)
     assert r.status_code == 200
@@ -27,6 +30,7 @@ def test_security_headers_production(api_client_staff):
 
 @pytest.mark.django_db
 def test_health_endpoint_no_auth():
+    """Health endpoint no auth."""
     client = APIClient()
     url = reverse("health")
     r = client.get(url)
@@ -36,6 +40,7 @@ def test_health_endpoint_no_auth():
 
 @pytest.mark.django_db
 def test_api_requires_authentication():
+    """Api requires authentication."""
     client = APIClient()
     resp = client.get("/api/ventas/")
     if resp.status_code == 404:

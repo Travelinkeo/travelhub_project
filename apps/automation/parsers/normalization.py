@@ -1,3 +1,6 @@
+"""Parser/procesador de normalization para la aplicación automation.
+"""
+
 import json
 import logging
 from datetime import date, datetime
@@ -279,6 +282,7 @@ class DataNormalizationService:
 
     @staticmethod
     def _normalize_itinerary(raw_itinerary, default_airline_pnr=None):
+        # _normalize_itinerary:  normalize itinerary. Args: según implementación. Returns: según implementación.
         segmentos = []
         from apps.common.services.catalog_service import CatalogNormalizationService
 
@@ -515,6 +519,7 @@ class DataNormalizationService:
 
     @staticmethod
     def sanitize_for_json(data):
+        # sanitize_for_json: Sanitize for json. Args: según implementación. Returns: según implementación.
         if isinstance(data, dict):
             return {k: DataNormalizationService.sanitize_for_json(v) for k, v in data.items()}
         elif isinstance(data, list):
@@ -527,4 +532,5 @@ class DataNormalizationService:
 
     @staticmethod
     def safe_decimal(val):
+        # safe_decimal: Safe decimal. Args: según implementación. Returns: según implementación.
         return clean_currency(val)

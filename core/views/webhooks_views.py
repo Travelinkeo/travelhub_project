@@ -24,6 +24,7 @@ class ResendInboundWebhookView(View):
     """
 
     def post(self, request, *args, **kwargs):
+        """Método: post."""
         # --- Signature verification ---
         resend_signing_secret = getattr(dj_settings, "RESEND_SIGNING_SECRET", "")
         if resend_signing_secret:

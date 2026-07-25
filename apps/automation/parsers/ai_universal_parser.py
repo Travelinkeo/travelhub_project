@@ -1,3 +1,6 @@
+"""Parser/procesador de ai universal parser para la aplicación automation.
+"""
+
 import hashlib  # <--- FIX: Import global para el caché
 import logging
 import re  # <--- FIX: Import global para expresiones regulares
@@ -59,6 +62,7 @@ class UniversalAIParser:
     """
 
     def __init__(self):
+        # __init__: Inicializa una nueva instancia de UniversalAIParser. Args: parámetros de inicialización.
         self.engine = ai_engine
 
     def parse(
@@ -176,6 +180,7 @@ class UniversalAIParser:
 
             # Helper para convertir a diccionario de forma segura (soporta Pydantic v1 y v2)
             def get_dict(obj):
+                # get_dict: Obtiene/recupera dict. Args: según implementación. Returns: dato solicitado.
                 if hasattr(obj, "model_dump"):
                     return obj.model_dump()
                 elif hasattr(obj, "dict"):

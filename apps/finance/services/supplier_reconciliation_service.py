@@ -1,3 +1,6 @@
+"""Servicio de supplier reconciliation service para la aplicación finance.
+"""
+
 import logging
 from decimal import Decimal
 
@@ -12,13 +15,17 @@ logger = logging.getLogger(__name__)
 
 
 # Esquemas de extracción para la IA
-class LineaLiquidacionSchema(BaseModel):
+class LineaLiquidacionSchema:
+    """Clase LineaLiquidacionSchema. Uso: según contexto de la aplicación.
+    """
     locator: str = Field(description="El localizador, PNR o ID de reserva/boleto")
     amount: float = Field(description="El costo neto o monto a pagar/cobrado por el proveedor")
     passenger: str | None = Field(None, description="Nombre del pasajero, si aparece")
 
 
-class ConciliacionProveedorSchema(BaseModel):
+class ConciliacionProveedorSchema:
+    """Clase ConciliacionProveedorSchema. Uso: según contexto de la aplicación.
+    """
     lineas: list[LineaLiquidacionSchema] = Field(
         description="Lista de servicios o boletos cobrados"
     )
@@ -31,6 +38,7 @@ class SupplierReconciliationService:
     """
 
     def __init__(self, agencia=None):
+        # __init__: Inicializa una nueva instancia de SupplierReconciliationService. Args: parámetros de inicialización.
         self.agencia = agencia
 
     def reconcile_from_excel(self, excel_file, provider_id):

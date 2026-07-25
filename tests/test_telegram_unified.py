@@ -15,6 +15,7 @@ class TestTelegramNotificationService:
 
     @patch("apps.communications.services.telegram_unified.requests.post")
     def test_send_message_success(self, mock_post, settings):
+        """Send message success."""
         settings.TELEGRAM_BOT_TOKEN = "test_token"
         settings.TELEGRAM_GROUP_ID = "-1001234567890"
         mock_response = Mock()
@@ -29,6 +30,7 @@ class TestTelegramNotificationService:
 
     @patch("apps.communications.services.telegram_unified.requests.post")
     def test_send_message_no_config(self, mock_post, settings):
+        """Send message no config."""
         settings.TELEGRAM_BOT_TOKEN = None
         settings.TELEGRAM_GROUP_ID = None
 
@@ -39,6 +41,7 @@ class TestTelegramNotificationService:
 
     @patch("apps.communications.services.telegram_unified.requests.post")
     def test_send_message_exception(self, mock_post, settings):
+        """Send message exception."""
         settings.TELEGRAM_BOT_TOKEN = "test_token"
         settings.TELEGRAM_GROUP_ID = "-1001234567890"
         mock_post.side_effect = Exception("Network error")
@@ -53,6 +56,7 @@ class TestEnviarAlertaTelegram:
 
     @patch("apps.communications.services.telegram_unified.TelegramNotificationService.send_message")
     def test_enviar_alerta_success(self, mock_send):
+        """Enviar alerta success."""
         mock_send.return_value = True
 
         result = enviar_alerta_telegram("Test alert")
@@ -62,6 +66,7 @@ class TestEnviarAlertaTelegram:
 
     @patch("apps.communications.services.telegram_unified.TelegramNotificationService.send_message")
     def test_enviar_alerta_failure(self, mock_send):
+        """Enviar alerta failure."""
         mock_send.return_value = False
 
         result = enviar_alerta_telegram("Test alert")
@@ -74,6 +79,7 @@ class TestTelegramStorage:
 
     @patch("apps.communications.services.telegram_unified.requests.post")
     def test_upload_logo_success(self, mock_post, settings):
+        """Upload logo success."""
         settings.TELEGRAM_BOT_TOKEN = "test_token"
         settings.TELEGRAM_STORAGE_CHANNEL_ID = "-1001234567890"
 
@@ -95,6 +101,7 @@ class TestTelegramStorage:
 
     @patch("apps.communications.services.telegram_unified.requests.post")
     def test_upload_logo_no_config(self, mock_post, settings):
+        """Upload logo no config."""
         settings.TELEGRAM_BOT_TOKEN = None
         settings.TELEGRAM_STORAGE_CHANNEL_ID = None
 
@@ -105,6 +112,7 @@ class TestTelegramStorage:
         mock_post.assert_not_called()
 
     def test_get_telegram_file_url_success(self, settings):
+        """Get telegram file url success."""
         settings.TELEGRAM_BOT_TOKEN = "test_token"
 
         result = get_telegram_file_url("file_id_123")
@@ -113,6 +121,7 @@ class TestTelegramStorage:
         assert "file_id_123" in result
 
     def test_get_telegram_file_url_no_token(self, settings):
+        """Get telegram file url no token."""
         settings.TELEGRAM_BOT_TOKEN = None
 
         result = get_telegram_file_url("file_id_123")
@@ -120,6 +129,7 @@ class TestTelegramStorage:
         assert result is None
 
     def test_get_telegram_file_url_no_file_id(self, settings):
+        """Get telegram file url no file id."""
         settings.TELEGRAM_BOT_TOKEN = "test_token"
 
         result = get_telegram_file_url(None)

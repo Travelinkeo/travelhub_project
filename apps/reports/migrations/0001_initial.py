@@ -1,9 +1,13 @@
+"""Migración de base de datos para reports.
+"""
+
 import django.db.models.deletion
 from django.db import migrations, models
 
 
-class Migration(migrations.Migration):
-
+class Migration:
+    """Clase Migration. Uso: según contexto de la aplicación.
+    """
     initial = True
 
     dependencies = [

@@ -1,3 +1,6 @@
+"""Módulo tasks tax refund de la aplicación finance.
+"""
+
 import logging
 
 from celery import shared_task
@@ -7,6 +10,7 @@ logger = logging.getLogger(__name__)
 
 @shared_task(max_retries=2, time_limit=60, soft_time_limit=50)
 def evaluar_tax_refund_task(boleto_id, agencia_id=None):
+    # evaluar_tax_refund_task: Evaluar tax refund task. Args: según implementación. Returns: según implementación.
     from apps.finance.services.tax_eligibility import TaxRefundEngine
     from core.api import Agencia, agency_context, system_context
 

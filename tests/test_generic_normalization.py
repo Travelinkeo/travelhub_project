@@ -1,3 +1,4 @@
+"""Tests para Generic normalization."""
 import pytest
 
 from apps.automation.parsers import ticket_parser
@@ -7,6 +8,7 @@ pytestmark = pytest.mark.skip(reason="Funciones de parser refactorizadas - pendi
 
 @pytest.mark.skip(reason="KIU parser is a placeholder")
 def test_kiu_normalized_block_minimal():
+    """Kiu normalized block minimal."""
     sample = (
         "TICKET NRO: 308-0201196996\n"
         "BOOKING REF: C1/ABC123\n"
@@ -31,6 +33,7 @@ def test_kiu_normalized_block_minimal():
 
 
 def test_sabre_normalized_block_minimal():
+    """Sabre normalized block minimal."""
     sample = (
         "Itinerary Details\n"
         "Issue Date 17 Aug 25\n"

@@ -1,3 +1,4 @@
+"""Tests para Fiscal latam."""
 from datetime import date
 from decimal import Decimal
 
@@ -24,6 +25,7 @@ class TestFiscalLatam:
     @pytest.fixture(autouse=True)
     def setup_data(self):
         # 1. Crear Agencia
+        """Setup data."""
         self.agencia = Agencia.objects.create(nombre="Test Fiscal Agency", rif="J123456789")
 
         # 2. Crear Moneda

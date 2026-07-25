@@ -1,3 +1,6 @@
+"""Módulo componentes de la aplicación bookings.
+"""
+
 from __future__ import annotations
 
 import datetime
@@ -17,7 +20,9 @@ from core.api import AgenciaMixin, SoftDeleteModel
 from .servicios import Proveedor
 
 
-class AlojamientoReserva(AgenciaMixin, SoftDeleteModel, models.Model):
+class AlojamientoReserva:
+    """Clase AlojamientoReserva. Uso: según contexto de la aplicación.
+    """
     id_alojamiento_reserva = models.AutoField(primary_key=True, verbose_name=_("ID Alojamiento"))
     venta = models.ForeignKey(
         "bookings.Venta",
@@ -65,10 +70,13 @@ class AlojamientoReserva(AgenciaMixin, SoftDeleteModel, models.Model):
         ]
 
     def __str__(self):
+        # __str__: Representación en string del objeto. Returns: str.
         return f"{self.nombre_establecimiento} ({self.check_in or ''})"
 
 
-class TrasladoServicio(AgenciaMixin, SoftDeleteModel, models.Model):
+class TrasladoServicio:
+    """Clase TrasladoServicio. Uso: según contexto de la aplicación.
+    """
     id_traslado_servicio = models.AutoField(primary_key=True, verbose_name=_("ID Traslado"))
     venta = models.ForeignKey(
         "bookings.Venta",
@@ -113,10 +121,13 @@ class TrasladoServicio(AgenciaMixin, SoftDeleteModel, models.Model):
         ]
 
     def __str__(self):
+        # __str__: Representación en string del objeto. Returns: str.
         return f"Traslado {self.origen or ''}->{self.destino or ''} {self.fecha_hora or ''}".strip()
 
 
-class ActividadServicio(AgenciaMixin, SoftDeleteModel, models.Model):
+class ActividadServicio:
+    """Clase ActividadServicio. Uso: según contexto de la aplicación.
+    """
     id_actividad_servicio = models.AutoField(primary_key=True, verbose_name=_("ID Actividad"))
     venta = models.ForeignKey(
         "bookings.Venta",
@@ -159,10 +170,13 @@ class ActividadServicio(AgenciaMixin, SoftDeleteModel, models.Model):
         ]
 
     def __str__(self):
+        # __str__: Representación en string del objeto. Returns: str.
         return self.nombre
 
 
-class SegmentoVuelo(AgenciaMixin, SoftDeleteModel, models.Model):
+class SegmentoVuelo:
+    """Clase SegmentoVuelo. Uso: según contexto de la aplicación.
+    """
     id_segmento_vuelo = models.AutoField(primary_key=True, verbose_name=_("ID Segmento Vuelo"))
     venta = models.ForeignKey(
         "bookings.Venta",
@@ -219,10 +233,13 @@ class SegmentoVuelo(AgenciaMixin, SoftDeleteModel, models.Model):
         ]
 
     def __str__(self):
+        # __str__: Representación en string del objeto. Returns: str.
         return f"{self.origen} → {self.destino} {self.numero_vuelo or ''}".strip()
 
 
-class AlquilerAutoReserva(AgenciaMixin, SoftDeleteModel, models.Model):
+class AlquilerAutoReserva:
+    """Clase AlquilerAutoReserva. Uso: según contexto de la aplicación.
+    """
     id_alquiler_auto = models.AutoField(primary_key=True, verbose_name=_("ID Alquiler Auto"))
     venta = models.ForeignKey(
         "bookings.Venta",
@@ -290,9 +307,11 @@ class AlquilerAutoReserva(AgenciaMixin, SoftDeleteModel, models.Model):
         ]
 
     def __str__(self):
+        # __str__: Representación en string del objeto. Returns: str.
         return f"Auto {self.categoria_auto or ''} {self.numero_confirmacion or ''}".strip()
 
     def clean(self):
+        # clean: Limpia/valida los campos del modelo. Args: None. Returns: None.
         if (
             self.fecha_hora_retiro
             and self.fecha_hora_devolucion
@@ -307,23 +326,28 @@ class AlquilerAutoReserva(AgenciaMixin, SoftDeleteModel, models.Model):
             )
 
     def save(self, *args, **kwargs):
+        # save: Guarda/persiste . Args: datos a guardar. Returns: objeto guardado.
         self.full_clean()
         super().save(*args, **kwargs)
 
     @property
     def margen_amount(self):
+        # margen_amount: Margen amount. Args: según implementación. Returns: según implementación.
         if self.precio_venta is not None and self.costo_neto is not None:
             return self.precio_venta - self.costo_neto
         return 0
 
     @property
     def margen_pct(self):
+        # margen_pct: Margen pct. Args: según implementación. Returns: según implementación.
         if self.precio_venta and self.precio_venta > 0:
             return (self.margen_amount / self.precio_venta) * 100
         return 0
 
 
-class EventoServicio(AgenciaMixin, SoftDeleteModel, models.Model):
+class EventoServicio:
+    """Clase EventoServicio. Uso: según contexto de la aplicación.
+    """
     id_evento_servicio = models.AutoField(primary_key=True, verbose_name=_("ID Evento/Servicio"))
     venta = models.ForeignKey(
         "bookings.Venta",
@@ -370,22 +394,27 @@ class EventoServicio(AgenciaMixin, SoftDeleteModel, models.Model):
         ]
 
     def __str__(self):
+        # __str__: Representación en string del objeto. Returns: str.
         return f"Evento {self.nombre_evento}"
 
     @property
     def margen_amount(self):
+        # margen_amount: Margen amount. Args: según implementación. Returns: según implementación.
         if self.precio_venta is not None and self.costo_neto is not None:
             return self.precio_venta - self.costo_neto
         return 0
 
     @property
     def margen_pct(self):
+        # margen_pct: Margen pct. Args: según implementación. Returns: según implementación.
         if self.precio_venta and self.precio_venta > 0:
             return (self.margen_amount / self.precio_venta) * 100
         return 0
 
 
-class CircuitoTuristico(AgenciaMixin, models.Model):
+class CircuitoTuristico:
+    """Clase CircuitoTuristico. Uso: según contexto de la aplicación.
+    """
     id_circuito = models.AutoField(primary_key=True, verbose_name=_("ID Circuito"))
     venta = models.ForeignKey(
         "bookings.Venta",
@@ -424,27 +453,33 @@ class CircuitoTuristico(AgenciaMixin, models.Model):
         indexes = [models.Index(fields=["fecha_inicio"])]
 
     def __str__(self):
+        # __str__: Representación en string del objeto. Returns: str.
         return self.nombre_circuito
 
     def save(self, *args, **kwargs):
+        # save: Guarda/persiste . Args: datos a guardar. Returns: objeto guardado.
         if self.fecha_inicio and self.dias_total and not self.fecha_fin:
             self.fecha_fin = self.fecha_inicio + datetime.timedelta(days=self.dias_total - 1)
         super().save(*args, **kwargs)
 
     @property
     def margen_amount(self):
+        # margen_amount: Margen amount. Args: según implementación. Returns: según implementación.
         if self.precio_venta_estimado is not None and self.costo_neto_estimado is not None:
             return self.precio_venta_estimado - self.costo_neto_estimado
         return 0
 
     @property
     def margen_pct(self):
+        # margen_pct: Margen pct. Args: según implementación. Returns: según implementación.
         if self.precio_venta_estimado and self.precio_venta_estimado > 0:
             return (self.margen_amount / self.precio_venta_estimado) * 100
         return 0
 
 
-class CircuitoDia(AgenciaMixin, models.Model):
+class CircuitoDia:
+    """Clase CircuitoDia. Uso: según contexto de la aplicación.
+    """
     id_circuito_dia = models.AutoField(primary_key=True, verbose_name=_("ID Circuito Día"))
     circuito = models.ForeignKey(
         CircuitoTuristico,
@@ -473,10 +508,13 @@ class CircuitoDia(AgenciaMixin, models.Model):
         indexes = [models.Index(fields=["dia_numero"])]
 
     def __str__(self):
+        # __str__: Representación en string del objeto. Returns: str.
         return f"{self.circuito.nombre_circuito} - Día {self.dia_numero}"
 
 
-class PaqueteAereo(AgenciaMixin, models.Model):
+class PaqueteAereo:
+    """Clase PaqueteAereo. Uso: según contexto de la aplicación.
+    """
     id_paquete_aereo = models.AutoField(primary_key=True, verbose_name=_("ID Paquete Aéreo"))
     venta = models.ForeignKey(
         "bookings.Venta",
@@ -520,22 +558,27 @@ class PaqueteAereo(AgenciaMixin, models.Model):
         indexes = [models.Index(fields=["incluye_vuelos", "incluye_hotel"])]
 
     def __str__(self):
+        # __str__: Representación en string del objeto. Returns: str.
         return self.nombre_paquete or f"Paquete Aéreo {self.id_paquete_aereo}"
 
     @property
     def margen_amount(self):
+        # margen_amount: Margen amount. Args: según implementación. Returns: según implementación.
         if self.precio_venta_estimado is not None and self.costo_neto_estimado is not None:
             return self.precio_venta_estimado - self.costo_neto_estimado
         return 0
 
     @property
     def margen_pct(self):
+        # margen_pct: Margen pct. Args: según implementación. Returns: según implementación.
         if self.precio_venta_estimado and self.precio_venta_estimado > 0:
             return (self.margen_amount / self.precio_venta_estimado) * 100
         return 0
 
 
-class CruceroReserva(AgenciaMixin, models.Model):
+class CruceroReserva:
+    """Clase CruceroReserva. Uso: según contexto de la aplicación.
+    """
     id_crucero = models.AutoField(primary_key=True, verbose_name=_("ID Crucero"))
     venta = models.ForeignKey(
         "bookings.Venta",
@@ -628,10 +671,13 @@ class CruceroReserva(AgenciaMixin, models.Model):
         ordering = ["fecha_embarque"]
 
     def __str__(self):
+        # __str__: Representación en string del objeto. Returns: str.
         return f"{self.nombre_crucero} - {self.fecha_embarque}"
 
 
-class ServicioAdicionalDetalle(AgenciaMixin, models.Model):
+class ServicioAdicionalDetalle:
+    """Clase ServicioAdicionalDetalle. Uso: según contexto de la aplicación.
+    """
     class TipoServicioChoices(models.TextChoices):
         SEGURO = "SEG", _("Seguro")
         SIM = "SIM", _("SIM / E-SIM")
@@ -688,16 +734,19 @@ class ServicioAdicionalDetalle(AgenciaMixin, models.Model):
         verbose_name_plural = _("Servicios Adicionales Detalle")
 
     def __str__(self):
+        # __str__: Representación en string del objeto. Returns: str.
         return f"Servicio {self.tipo_servicio} {self.codigo_referencia or ''}".strip()
 
     @property
     def margen_amount(self):
+        # margen_amount: Margen amount. Args: según implementación. Returns: según implementación.
         if self.precio_venta is not None and self.costo_neto is not None:
             return self.precio_venta - self.costo_neto
         return 0
 
     @property
     def margen_pct(self):
+        # margen_pct: Margen pct. Args: según implementación. Returns: según implementación.
         if self.precio_venta and self.precio_venta > 0:
             return (self.margen_amount / self.precio_venta) * 100
         return 0

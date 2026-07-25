@@ -1,10 +1,15 @@
+"""Modelos de base de datos para la aplicación marketing.
+"""
+
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from core.api import AgenciaMixin
 
 
-class Campania(AgenciaMixin, models.Model):
+class Campania:
+    """Clase Campania. Uso: según contexto de la aplicación.
+    """
     class EstadoCampania(models.TextChoices):
         BORRADOR = "BORRADOR", _("Borrador")
         PROGRAMADA = "PROGRAMADA", _("Programada")
@@ -25,6 +30,7 @@ class Campania(AgenciaMixin, models.Model):
     publicar_en_whatsapp = models.BooleanField(default=True)
 
     def __str__(self):
+        # __str__: Representación en string del objeto. Returns: str.
         return self.nombre
 
     class Meta:
@@ -32,7 +38,9 @@ class Campania(AgenciaMixin, models.Model):
         verbose_name_plural = _("Campañas")
 
 
-class ActivoMarketing(AgenciaMixin, models.Model):
+class ActivoMarketing:
+    """Clase ActivoMarketing. Uso: según contexto de la aplicación.
+    """
     class TipoActivo(models.TextChoices):
         FLYER = "FLYER", _("Flyer (Imagen)")
         STORY = "STORY", _("Story (Instagram)")
@@ -70,6 +78,7 @@ class ActivoMarketing(AgenciaMixin, models.Model):
     telegram_file_id = models.CharField(max_length=255, blank=True, null=True)
 
     def __str__(self):
+        # __str__: Representación en string del objeto. Returns: str.
         return f"{self.tipo} - {self.hotel.nombre if self.hotel else 'Genérico'}"
 
     class Meta:
@@ -77,7 +86,9 @@ class ActivoMarketing(AgenciaMixin, models.Model):
         verbose_name_plural = _("Activos de Marketing")
 
 
-class ConfiguracionMarketing(AgenciaMixin, models.Model):
+class ConfiguracionMarketing:
+    """Clase ConfiguracionMarketing. Uso: según contexto de la aplicación.
+    """
     color_primario = models.CharField(max_length=7, default="#0f172a")  # Hexadecimal
     color_secundario = models.CharField(max_length=7, default="#fbbf24")
     fuente_principal = models.CharField(max_length=100, default="Arial")
@@ -87,4 +98,5 @@ class ConfiguracionMarketing(AgenciaMixin, models.Model):
     )
 
     def __str__(self):
+        # __str__: Representación en string del objeto. Returns: str.
         return f"Config Marketing - {self.agencia.nombre}"

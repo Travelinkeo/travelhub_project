@@ -1,3 +1,6 @@
+"""Proveedor de IA/configuración para automation: fallback router.
+"""
+
 import logging
 from typing import Any
 
@@ -22,6 +25,7 @@ class FallbackRouter:
         agency_id: int | None = None,
         feature: str = "unknown",
     ) -> ProviderResult:
+        # generate: Genera . Args: parámetros de generación. Returns: resultado generado.
         chain = provider_registry.fallback_chain(needs_structured=schema is not None)
 
         if not chain:

@@ -27,13 +27,16 @@ class OnboardingWizardView(LoginRequiredMixin, View):
     template_wrapper = "core/onboarding/wizard.html"
 
     def _get_agencia(self, request):
+        """Método interna: get agencia."""
         return get_agencia_from_request(request)
 
     def _get_progress(self, agencia):
+        """Método interna: get progress."""
         progress, _ = AgenciaSetupProgress.objects.get_or_create(agencia=agencia)
         return progress
 
     def get(self, request):
+        """Método: get."""
         agencia = self._get_agencia(request)
         if not agencia:
             return redirect("core:onboarding_start")
@@ -56,6 +59,7 @@ class OnboardingWizardView(LoginRequiredMixin, View):
         })
 
     def post(self, request):
+        """Método: post."""
         agencia = self._get_agencia(request)
         if not agencia:
             return HttpResponse("No hay agencia activa", status=400)
@@ -79,6 +83,7 @@ class OnboardingWizardView(LoginRequiredMixin, View):
         return self._advance(progress, step, request, agencia)
 
     def _advance(self, progress, step, request, agencia):
+        """Método interna: advance."""
         next_step = self._get_next_step(step)
         progress.complete_step(step)
 
@@ -90,6 +95,7 @@ class OnboardingWizardView(LoginRequiredMixin, View):
         return self._render_step(request, agencia, progress, next_step)
 
     def _render_step(self, request, agencia, progress, step):
+        """Método interna: render step."""
         ctx = {
             "progress": progress,
             "current_step": step,
@@ -106,11 +112,13 @@ class OnboardingWizardView(LoginRequiredMixin, View):
         return render(request, f"core/onboarding/steps/{step}.html", ctx)
 
     def _get_next_step(self, current):
+        """Método interna: get next step."""
         steps = [s[0] for s in AgenciaSetupProgress.STEPS]
         idx = steps.index(current)
         return steps[idx + 1] if idx + 1 < len(steps) else "done"
 
     def _save_profile(self, agencia, request):
+        """Método interna: save profile."""
         nombre_comercial = request.POST.get("nombre_comercial", "").strip()
         telefono = request.POST.get("telefono_principal", "").strip()
         direccion = request.POST.get("direccion", "").strip()
@@ -127,6 +135,7 @@ class OnboardingWizardView(LoginRequiredMixin, View):
         agencia.save()
 
     def _save_team(self, agencia, request):
+        """Método interna: save team."""
         emails_raw = request.POST.get("emails", "")
         role = request.POST.get("role", "vendedor")
         from django.contrib.auth import get_user_model
@@ -144,6 +153,7 @@ class OnboardingWizardView(LoginRequiredMixin, View):
             )
 
     def _save_fiscal(self, agencia, request):
+        """Método interna: save fiscal."""
         from apps.finance.models import ConfiguracionFiscal
         config, _ = ConfiguracionFiscal.objects.get_or_create(agencia=agencia)
         config.pais = request.POST.get("pais", "VEN")

@@ -1,5 +1,8 @@
 # Archivo: apps/bookings/views/boleto_views.py
 
+"""Vistas (views) de la aplicación bookings.
+"""
+
 import logging
 import uuid
 
@@ -58,6 +61,7 @@ class BoletoUploadAPIView(InternalAPIAuthMixin, APIView):
     throttle_classes = [AgenciaAIParserThrottle, AIParserDailyQuotaThrottle]
 
     def post(self, request, *args, **kwargs):
+        # post: Post. Args: según implementación. Returns: según implementación.
         logger.info("-> BoletoUploadAPIView.post() - ASYNC MODE ACTIVATED")
 
         archivo_subido = request.FILES.get("boleto_file")
@@ -158,6 +162,7 @@ class BoletoRetryParseAPIView(InternalAPIAuthMixin, APIView):
     throttle_classes = [AgenciaAIParserThrottle, AIParserDailyQuotaThrottle]
 
     def post(self, request, pk):
+        # post: Post. Args: según implementación. Returns: según implementación.
         try:
             # 🔒 P0-002 FIX: Verificación explícita de tenant para prevenir IDOR
             from core.api import get_agencia_from_request, get_object_tenant_or_404
@@ -260,6 +265,7 @@ class BoletoMassActionAPIView(InternalAPIAuthMixin, APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
+        # post: Post. Args: según implementación. Returns: según implementación.
         boleto_ids = request.data.get("boleto_ids", [])
         cliente_id = request.data.get("cliente_id")
 
@@ -354,6 +360,7 @@ class VentaDoubleInvoiceAPIView(InternalAPIAuthMixin, APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, pk):
+        # post: Post. Args: según implementación. Returns: según implementación.
         try:
             from apps.finance.services.invoice_service import InvoiceService
 
@@ -410,6 +417,7 @@ class BoletoAuditAPIView(InternalAPIAuthMixin, APIView):
     throttle_classes = [AgenciaAIParserThrottle, AIParserDailyQuotaThrottle]
 
     def post(self, request):
+        # post: Post. Args: según implementación. Returns: según implementación.
         ticket_data = request.data.get("ticket_data")
         if not ticket_data:
             return Response({"error": "Faltan datos del boleto para auditar."}, status=400)
@@ -453,6 +461,7 @@ class BoletoDeleteAPIView(InternalAPIAuthMixin, APIView):
     permission_classes = [IsAuthenticated]
 
     def delete(self, request, pk):
+        # delete: Elimina el objeto de la base de datos. Args: None. Returns: None.
         try:
             from core.api import get_user_active_agency
 

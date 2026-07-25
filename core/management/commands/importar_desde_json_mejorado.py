@@ -15,13 +15,16 @@ from apps.common.models import Proveedor
 
 
 class Command(BaseCommand):
+    """Comando de gestión personalizado."""
     help = "Importa hoteles desde JSON estructurado del PDF"
 
     def add_arguments(self, parser):
+        """Método: add arguments."""
         parser.add_argument("json_path", type=str, help="Ruta al archivo JSON")
         parser.add_argument("--proveedor-id", type=int, required=True)
 
     def handle(self, *args, **options):
+        """Método: handle."""
         json_path = options["json_path"]
         proveedor_id = options["proveedor_id"]
 

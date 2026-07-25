@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 def is_brand_color_dark(hex_color: str) -> bool:
+    # is_brand_color_dark: Is brand color dark. Args: según implementación. Returns: según implementación.
     if not hex_color or not isinstance(hex_color, str):
         return True
     hex_color = hex_color.lstrip("#")
@@ -314,6 +315,7 @@ def generar_voucher_traslado(traslado):
 
 
 def generar_voucher_actividad(actividad):
+    # generar_voucher_actividad: Genera voucher actividad. Args: parámetros de generación. Returns: resultado generado.
     venta = actividad.venta
     cliente = venta.cliente if venta else None
 

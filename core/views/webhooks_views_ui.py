@@ -22,9 +22,11 @@ class WebhookListView(LoginRequiredMixin, View):
     template_name = "core/webhooks/list.html"
 
     def _get_agencia(self, request):
+        """Método interna: get agencia."""
         return get_agencia_from_request(request)
 
     def get(self, request):
+        """Método: get."""
         agencia = self._get_agencia(request)
         if not agencia:
             return render(request, self.template_name, {"error": "No hay agencia activa"})
@@ -50,6 +52,7 @@ class WebhookListView(LoginRequiredMixin, View):
         return render(request, self.template_name, context)
 
     def post(self, request):
+        """Método: post."""
         agencia = self._get_agencia(request)
         if not agencia:
             return JsonResponse({"error": "No hay agencia activa"}, status=400)
@@ -109,9 +112,11 @@ class WebhookDeliveryListView(LoginRequiredMixin, View):
     template_name = "core/webhooks/deliveries.html"
 
     def _get_agencia(self, request):
+        """Método interna: get agencia."""
         return get_agencia_from_request(request)
 
     def get(self, request, webhook_id):
+        """Método: get."""
         agencia = self._get_agencia(request)
         if not agencia:
             return render(request, self.template_name, {"error": "No hay agencia activa"})

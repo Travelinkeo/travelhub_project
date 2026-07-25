@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 
 # --- ESQUEMAS IA ---
 class ConsejosIASchema(BaseModel):
+    """Función: ConsejosIASchema."""
     saludo: str = Field(
         description="Un saludo enérgico para el CEO (ej. '¡Buen día, equipo directivo!')"
     )
@@ -58,6 +59,7 @@ class CEODashboardView(LoginRequiredMixin, View):
     template_name = "core/dashboard_ceo.html"
 
     def get(self, request, *args, **kwargs):
+        """Método: get."""
         agencia = _get_active_agencia(request.user)
         if not agencia:
             return render(
@@ -85,6 +87,7 @@ class AIBusinessAdvisorView(LoginRequiredMixin, View):
     """
 
     def get(self, request, *args, **kwargs):
+        """Método: get."""
         agencia = _get_active_agencia(request.user)
         if not agencia:
             return HttpResponse("No se detectó agencia.", status=400)

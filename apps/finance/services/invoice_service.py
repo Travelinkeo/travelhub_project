@@ -1,3 +1,6 @@
+"""Servicio de invoice service para la aplicación finance.
+"""
+
 import logging
 from decimal import Decimal
 
@@ -12,6 +15,8 @@ logger = logging.getLogger(__name__)
 
 
 class InvoiceService:
+    """Servicio para invoice. Uso: instanciar según necesidad del dominio.
+    """
     @staticmethod
     def create_invoice_from_sale(venta_id):
         """Wrapper for generate_double_invoice using ID"""

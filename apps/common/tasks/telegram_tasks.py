@@ -1,3 +1,6 @@
+"""Tareas asíncronas (Celery) para la aplicación common.
+"""
+
 import logging
 
 from celery import shared_task
@@ -14,6 +17,7 @@ logger = logging.getLogger(__name__)
     soft_time_limit=50,
 )
 def send_telegram_task(self, message, chat_id=None, parse_mode="HTML", agencia_id=None):
+    # send_telegram_task: Envía  telegram task. Args: datos del mensaje. Returns: resultado del envío.
     from apps.communications.services.telegram_unified import TelegramNotificationService
 
     try:
@@ -44,6 +48,7 @@ def send_telegram_task(self, message, chat_id=None, parse_mode="HTML", agencia_i
     soft_time_limit=100,
 )
 def send_telegram_document_task(self, file_path, caption=None, chat_id=None, agencia_id=None):
+    # send_telegram_document_task: Envía  telegram document task. Args: datos del mensaje. Returns: resultado del envío.
     from apps.communications.services.telegram_unified import TelegramNotificationService
 
     try:
@@ -74,6 +79,7 @@ def send_telegram_document_task(self, file_path, caption=None, chat_id=None, age
     soft_time_limit=100,
 )
 def send_telegram_photo_task(self, agencia_id, filename="logo.png"):
+    # send_telegram_photo_task: Envía  telegram photo task. Args: datos del mensaje. Returns: resultado del envío.
     from apps.communications.services.telegram_unified import upload_logo_to_telegram
     from core.models.agencia import Agencia
 
@@ -104,6 +110,7 @@ def send_telegram_photo_task(self, agencia_id, filename="logo.png"):
     soft_time_limit=100,
 )
 def send_factura_to_telegram_task(self, factura_id):
+    # send_factura_to_telegram_task: Envía  factura to telegram task. Args: datos del mensaje. Returns: resultado del envío.
     from apps.finance.models import Factura
     from apps.finance.services.factura_service import FacturaService
 
@@ -127,6 +134,7 @@ def send_factura_to_telegram_task(self, factura_id):
     soft_time_limit=20,
 )
 def answer_telegram_callback_task(self, bot_token, query_id, text):
+    # answer_telegram_callback_task: Answer telegram callback task. Args: según implementación. Returns: según implementación.
     import requests
 
     url = f"https://api.telegram.org/bot{bot_token}/answerCallbackQuery"
@@ -150,6 +158,7 @@ def answer_telegram_callback_task(self, bot_token, query_id, text):
     soft_time_limit=20,
 )
 def edit_telegram_message_task(self, bot_token, chat_id, message_id, text):
+    # edit_telegram_message_task: Edit telegram message task. Args: según implementación. Returns: según implementación.
     import requests
 
     url = f"https://api.telegram.org/bot{bot_token}/editMessageText"
@@ -179,6 +188,7 @@ def edit_telegram_message_task(self, bot_token, chat_id, message_id, text):
     soft_time_limit=50,
 )
 def get_telegram_file_url_task(self, file_id, agencia_id=None):
+    # get_telegram_file_url_task: Obtiene/recupera telegram file url task. Args: según implementación. Returns: dato solicitado.
     from apps.communications.services.telegram_unified import TelegramNotificationService
 
     try:

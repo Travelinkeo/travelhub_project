@@ -1,8 +1,13 @@
+"""Migración de base de datos para contabilidad.
+"""
+
 import django.db.models.deletion
 from django.db import migrations, models
 
 
-class Migration(migrations.Migration):
+class Migration:
+    """Clase Migration. Uso: según contexto de la aplicación.
+    """
     dependencies = [
         ("core", "0001_initial"),
         ("contabilidad", "0012_asientocontable_estado_asientocontable_tipo_asiento"),

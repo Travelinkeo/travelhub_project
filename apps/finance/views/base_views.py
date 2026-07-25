@@ -1,3 +1,6 @@
+"""Vistas (views) de la aplicación finance.
+"""
+
 import logging
 
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -13,7 +16,9 @@ from core.api import AuditLog, SaaSMixin
 logger = logging.getLogger(__name__)
 
 
-class InvoiceListView(ExportMixin, SaaSMixin, LoginRequiredMixin, ListView):
+class InvoiceListView:
+    """Vista para gestionar invoicelist. Uso: instanciar según necesidad del dominio.
+    """
     model = Factura
     template_name = "finance/invoice_list.html"
     context_object_name = "invoices"
@@ -28,6 +33,7 @@ class InvoiceListView(ExportMixin, SaaSMixin, LoginRequiredMixin, ListView):
     export_filename = "facturas"
 
     def get_queryset(self):
+        # get_queryset: Obtiene/recupera queryset. Args: según implementación. Returns: dato solicitado.
         qs = super().get_queryset()
         estado = self.request.GET.get("estado")
         if estado:
@@ -35,12 +41,15 @@ class InvoiceListView(ExportMixin, SaaSMixin, LoginRequiredMixin, ListView):
         return qs.select_related("cliente", "agencia").order_by("-fecha_emision", "-id")
 
     def get_context_data(self, **kwargs):
+        # get_context_data: Obtiene/recupera context data. Args: según implementación. Returns: dato solicitado.
         context = super().get_context_data(**kwargs)
         context["filtros"] = {"estado": self.request.GET.get("estado", "")}
         return context
 
 
-class InvoiceDetailView(SaaSMixin, LoginRequiredMixin, DetailView):
+class InvoiceDetailView:
+    """Vista para gestionar invoicedetail. Uso: instanciar según necesidad del dominio.
+    """
     model = Factura
     template_name = "finance/partials/invoice_detail_modal.html"
     context_object_name = "invoice"
@@ -62,6 +71,7 @@ class InvoiceIssueView(SaaSMixin, LoginRequiredMixin, View):
     model = Factura
 
     def post(self, request, pk):
+        # post: Post. Args: según implementación. Returns: según implementación.
         factura = self.get_object()
         if factura.estado == Factura.EstadoFactura.BORRADOR:
             factura.estado = Factura.EstadoFactura.EMITIDA
@@ -100,6 +110,7 @@ class InvoiceUpdateView(SaaSMixin, LoginRequiredMixin, View):
     model = Factura
 
     def post(self, request, pk):
+        # post: Post. Args: según implementación. Returns: según implementación.
         factura = self.get_object()
         if factura.estado == Factura.EstadoFactura.BORRADOR:
             # Ejemplo: actualizar notas (no soportado en modelo actual)
@@ -109,10 +120,13 @@ class InvoiceUpdateView(SaaSMixin, LoginRequiredMixin, View):
         return HttpResponse("No se puede editar una factura emitida.", status=400)
 
 
-class ProfitabilityDashboardView(SaaSMixin, LoginRequiredMixin, TemplateView):
+class ProfitabilityDashboardView:
+    """Vista para gestionar profitabilitydashboard. Uso: instanciar según necesidad del dominio.
+    """
     template_name = "finance/profitability_dashboard.html"
 
     def get_context_data(self, **kwargs):
+        # get_context_data: Obtiene/recupera context data. Args: según implementación. Returns: dato solicitado.
         context = super().get_context_data(**kwargs)
         context["metrics"] = FinancialAnalyticsService.get_real_time_metrics()
         context["monthly_stats"] = FinancialAnalyticsService.get_monthly_profitability()
@@ -120,16 +134,22 @@ class ProfitabilityDashboardView(SaaSMixin, LoginRequiredMixin, TemplateView):
         return context
 
 
-class ProfitSeriesDataView(SaaSMixin, LoginRequiredMixin, View):
+class ProfitSeriesDataView:
+    """Vista para gestionar profitseriesdata. Uso: instanciar según necesidad del dominio.
+    """
     def get(self, request):
+        # get: Get. Args: según implementación. Returns: según implementación.
         data = FinancialAnalyticsService.get_monthly_profitability()
         return JsonResponse(data, safe=False)
 
 
-class BIDashboardView(SaaSMixin, LoginRequiredMixin, TemplateView):
+class BIDashboardView:
+    """Vista para gestionar bidashboard. Uso: instanciar según necesidad del dominio.
+    """
     template_name = "finance/dashboard_bi.html"
 
     def get_context_data(self, **kwargs):
+        # get_context_data: Obtiene/recupera context data. Args: según implementación. Returns: dato solicitado.
         context = super().get_context_data(**kwargs)
         from decimal import Decimal
 
@@ -261,13 +281,16 @@ class BIDashboardView(SaaSMixin, LoginRequiredMixin, TemplateView):
         return context
 
 
-class AuditTimelineView(SaaSMixin, LoginRequiredMixin, ListView):
+class AuditTimelineView:
+    """Vista para gestionar audittimeline. Uso: instanciar según necesidad del dominio.
+    """
     model = AuditLog
     template_name = "finance/audit_timeline.html"
     context_object_name = "logs"
     paginate_by = 30
 
     def get_queryset(self):
+        # get_queryset: Obtiene/recupera queryset. Args: según implementación. Returns: dato solicitado.
         qs = super().get_queryset()
 
         accion = self.request.GET.get("accion")
@@ -290,6 +313,7 @@ class AuditTimelineView(SaaSMixin, LoginRequiredMixin, ListView):
         return qs.select_related("user").order_by("-creado")
 
     def get_context_data(self, **kwargs):
+        # get_context_data: Obtiene/recupera context data. Args: según implementación. Returns: dato solicitado.
         from core.api import AuditLog
 
         context = super().get_context_data(**kwargs)

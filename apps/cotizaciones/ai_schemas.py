@@ -1,7 +1,12 @@
+"""Módulo ai schemas de la aplicación cotizaciones.
+"""
+
 from pydantic import BaseModel, Field
 
 
-class FlightQuoteSegmentSchema(BaseModel):
+class FlightQuoteSegmentSchema:
+    """Clase FlightQuoteSegmentSchema. Uso: según contexto de la aplicación.
+    """
     airline: str = Field(..., description="Nombre de la aerolínea")
     departureDate: str = Field(..., description="Fecha del vuelo (formato '20 Abr')")
     departureCode: str = Field(..., description="Código IATA de origen (3 letras, ej: CCS)")

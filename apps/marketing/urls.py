@@ -1,3 +1,6 @@
+"""Configuración de rutas (URLs) para la aplicación marketing.
+"""
+
 from django.urls import path
 
 from apps.marketing.views.dashboard_views import MarketingDashboardView

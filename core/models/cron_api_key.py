@@ -62,6 +62,7 @@ class CronApiKey(models.Model):
     is_active = models.BooleanField(default=True)
 
     class Meta:
+        """Meta definición del modelo."""
         verbose_name = "Cron API Key"
         verbose_name_plural = "Cron API Keys"
 
@@ -70,6 +71,7 @@ class CronApiKey(models.Model):
 
     @classmethod
     def generate(cls, name, agencia=None, expires_days=90):
+        """Método: generate."""
         raw_key = f"cron_{secrets.token_urlsafe(32)}"
         salt, key_hash_pbkdf2 = _hash_key(raw_key)
         prefix = raw_key[:10]
@@ -92,6 +94,7 @@ class CronApiKey(models.Model):
 
     @classmethod
     def verify(cls, token):
+        """Método: verify."""
         if not token:
             return None
 
@@ -119,6 +122,7 @@ class CronApiKey(models.Model):
         return None
 
     def revoke(self):
+        """Método: revoke."""
         self.is_active = False
         self.save(update_fields=["is_active"])
         logger.info(f"CronApiKey revocada: {self.name}")

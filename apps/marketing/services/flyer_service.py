@@ -1,3 +1,6 @@
+"""Servicio de flyer service para la aplicación marketing.
+"""
+
 import logging
 import os
 import random
@@ -17,6 +20,7 @@ class FlyerService:
     """
 
     def __init__(self):
+        # __init__: Inicializa una nueva instancia de FlyerService. Args: parámetros de inicialización.
         self.width = 1080
         self.height = 1920
         self.assets_dir = os.path.join(settings.BASE_DIR, "static", "images")
@@ -25,6 +29,7 @@ class FlyerService:
         os.makedirs(self.output_dir, exist_ok=True)
 
     def _get_unsplash_image(self, query):
+        # _get_unsplash_image:  get unsplash image. Args: según implementación. Returns: según implementación.
         access_key = os.environ.get("UNSPLASH_ACCESS_KEY")
         if not access_key:
             return None
@@ -51,6 +56,7 @@ class FlyerService:
         return None
 
     def _get_random_background(self):
+        # _get_random_background:  get random background. Args: según implementación. Returns: según implementación.
         bg_dir = os.path.join(self.assets_dir, "backgrounds")
         if os.path.exists(bg_dir):
             files = [f for f in os.listdir(bg_dir) if f.lower().endswith((".jpg", ".jpeg", ".png"))]
@@ -66,6 +72,7 @@ class FlyerService:
         hotel_id: int = None,
         agency_logo_path: str = None,
     ) -> BytesIO:
+        # generate_flyer: Genera  flyer. Args: parámetros de generación. Returns: resultado generado.
         try:
             hotel_data = None
             if hotel_id:

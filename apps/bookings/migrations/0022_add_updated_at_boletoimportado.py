@@ -1,8 +1,13 @@
 # Generated migration to add missing updated_at column
+"""Migración de base de datos para bookings.
+"""
+
 from django.db import migrations
 
 
-class Migration(migrations.Migration):
+class Migration:
+    """Clase Migration. Uso: según contexto de la aplicación.
+    """
     dependencies = [
         (
             "bookings",

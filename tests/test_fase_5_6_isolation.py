@@ -1,3 +1,4 @@
+"""Tests para Fase 5 6 isolation."""
 from decimal import Decimal
 from unittest.mock import patch
 
@@ -13,6 +14,7 @@ pytestmark = pytest.mark.skip(reason="Tests requieren configuración completa o 
 
 @pytest.fixture
 def agencias_test(db):
+    """Agencias test."""
     agencia_a = Agencia.objects.create(nombre="Agencia A", rif="J123456789")
     agencia_b = Agencia.objects.create(nombre="Agencia B", rif="J987654321")
     return agencia_a, agencia_b
@@ -20,6 +22,7 @@ def agencias_test(db):
 
 @pytest.mark.django_db
 def test_marketing_isolation(agencias_test):
+    """Marketing isolation."""
     agencia_a, agencia_b = agencias_test
 
     # Crear campaña para Agencia A
@@ -47,6 +50,7 @@ def test_marketing_isolation(agencias_test):
 
 @pytest.mark.django_db
 def test_bcv_scraper_fallback_mock():
+    """Bcv scraper fallback mock."""
     from apps.finance.services.bcv_scraper import obtener_tasas_bcv
 
     # Mock de requests para que falle el sitio del BCV
@@ -66,6 +70,7 @@ def test_bcv_scraper_fallback_mock():
 
 @pytest.mark.django_db
 def test_agencia_form_save(agencias_test, sample_pais):
+    """Agencia form save."""
     from core.forms.agencia_forms import AgenciaSettingsForm
     from core.models import AgenciaBranding, AgenciaConfiguracion
 
@@ -99,6 +104,7 @@ def test_agencia_form_save(agencias_test, sample_pais):
 
 @pytest.mark.django_db
 def test_bcv_resilient_service_survival_cache():
+    """Bcv resilient service survival cache."""
     from datetime import date
 
     from apps.finance.services.bcv_service import obtener_tasa_bcv_resiliente

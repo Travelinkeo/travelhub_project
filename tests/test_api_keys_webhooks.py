@@ -13,6 +13,7 @@ class DeprecatedAPIKeyModelTest(TestCase):
     """Tests para validar que APIKey (SaaS) está deprecado."""
 
     def setUp(self):
+        """SetUp."""
         self.agencia = Agencia.objects.create(
             nombre="Test Agency",
         )
@@ -35,6 +36,7 @@ class WebhookModelTest(TestCase):
     """Tests para el modelo Webhook."""
 
     def setUp(self):
+        """Setup."""
         self.agencia = Agencia.objects.create(
             nombre="Test Agency",
         )
@@ -123,6 +125,7 @@ class WebhookDeliveryTest(TestCase):
     """Tests para WebhookDelivery."""
 
     def setUp(self):
+        """Setup."""
         self.agencia = Agencia.objects.create(
             nombre="Test Agency",
         )

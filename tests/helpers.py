@@ -1,3 +1,5 @@
+"""Funciones helper para crear objetos de prueba (Agencia, Usuario, Cliente, Venta, Boleto, etc.)."""
+
 from decimal import Decimal
 from typing import Any
 
@@ -11,6 +13,7 @@ from core.models.agencia import Agencia
 
 
 def create_test_agencia(**overrides: Any) -> Agencia:
+    """Crea una agencia de prueba con parámetros por defecto. Args: **overrides. Returns: Agencia."""
     params = {
         "nombre": "Agencia Test",
         "nombre_comercial": "Agencia Test",
@@ -26,6 +29,7 @@ def create_test_agencia(**overrides: Any) -> Agencia:
 
 
 def create_test_user(username="testuser", is_staff=False, is_superuser=False, **overrides: Any):
+    """Crea un usuario de prueba. Args: username, is_staff, is_superuser, **overrides. Returns: User."""
     User = get_user_model()
     params = {
         "username": f"{username}_{timezone.now().timestamp()}",
@@ -41,6 +45,7 @@ def create_test_user(username="testuser", is_staff=False, is_superuser=False, **
 
 
 def create_test_cliente(**overrides: Any) -> Cliente:
+    """Crea un cliente de prueba. Args: **overrides. Returns: Cliente."""
     params = {
         "nombres": "Juan",
         "apellidos": "Pérez",
@@ -51,6 +56,7 @@ def create_test_cliente(**overrides: Any) -> Cliente:
 
 
 def create_test_moneda(codigo_iso="USD", **overrides: Any) -> Moneda:
+    """Crea o recupera una moneda de prueba. Args: codigo_iso, **overrides. Returns: Moneda."""
     defaults = {"nombre": "Dólar", "simbolo": "$"}
     defaults.update(overrides)
     moneda, _ = Moneda.objects.get_or_create(codigo_iso=codigo_iso, defaults=defaults)
@@ -58,6 +64,7 @@ def create_test_moneda(codigo_iso="USD", **overrides: Any) -> Moneda:
 
 
 def create_test_pais(**overrides: Any) -> Pais:
+    """Crea o recupera un país de prueba (Venezuela). Args: **overrides. Returns: Pais."""
     params = {
         "codigo_iso_2": "VE",
         "nombre": "Venezuela",
@@ -69,6 +76,7 @@ def create_test_pais(**overrides: Any) -> Pais:
 
 
 def create_test_ciudad(pais: Pais | None = None, **overrides: Any) -> Ciudad:
+    """Crea o recupera una ciudad de prueba asociada a un país. Args: pais, **overrides. Returns: Ciudad."""
     if pais is None:
         pais = create_test_pais()
     params = {"codigo_iata": "CCS", "nombre": "Caracas", "pais": pais}
@@ -78,6 +86,7 @@ def create_test_ciudad(pais: Pais | None = None, **overrides: Any) -> Ciudad:
 
 
 def create_test_venta(agencia=None, cliente=None, moneda=None, **overrides: Any) -> Venta:
+    """Crea una venta de prueba con agencia, cliente y moneda opcionales. Args: agencia, cliente, moneda, **overrides. Returns: Venta."""
     if agencia is None:
         agencia = create_test_agencia()
     if cliente is None:
@@ -98,6 +107,7 @@ def create_test_venta(agencia=None, cliente=None, moneda=None, **overrides: Any)
 
 
 def create_test_boleto(agencia=None, **overrides: Any) -> BoletoImportado:
+    """Crea un boleto importado de prueba. Args: agencia, **overrides. Returns: BoletoImportado."""
     if agencia is None:
         agencia = create_test_agencia()
     params = {
@@ -116,6 +126,7 @@ def create_test_boleto(agencia=None, **overrides: Any) -> BoletoImportado:
 
 
 def parse_drf_response(response) -> dict | list:
+    """Extrae data de una respuesta DRF (response.data o response.content). Args: response. Returns: dict | list."""
     from rest_framework.test import APIClient
 
     if isinstance(response, APIClient):

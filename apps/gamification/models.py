@@ -1,10 +1,15 @@
+"""Modelos de base de datos para la aplicación gamification.
+"""
+
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from core.models.base import AgenciaMixin
 
 
-class Nivel(models.Model):
+class Nivel:
+    """Clase Nivel. Uso: según contexto de la aplicación.
+    """
     nombre = models.CharField(max_length=60)
     icono = models.CharField(max_length=100, default="stars")
     color = models.CharField(max_length=7, default="#6B7280", help_text="Hex color")
@@ -17,10 +22,13 @@ class Nivel(models.Model):
         ordering = ["puntos_minimos"]
 
     def __str__(self):
+        # __str__: Representación en string del objeto. Returns: str.
         return self.nombre
 
 
-class Logro(models.Model):
+class Logro:
+    """Clase Logro. Uso: según contexto de la aplicación.
+    """
     CATEGORIAS = [
         ("ventas", _("Ventas")),
         ("importacion", _("Importación")),
@@ -44,10 +52,13 @@ class Logro(models.Model):
         verbose_name_plural = _("Logros")
 
     def __str__(self):
+        # __str__: Representación en string del objeto. Returns: str.
         return self.nombre
 
 
-class LogroProgreso(AgenciaMixin):
+class LogroProgreso:
+    """Clase LogroProgreso. Uso: según contexto de la aplicación.
+    """
     usuario = models.ForeignKey("auth.User", on_delete=models.CASCADE, related_name="logros")
     logro = models.ForeignKey(Logro, on_delete=models.CASCADE, related_name="progresos")
     progreso = models.PositiveIntegerField(default=0, help_text="Progreso actual (0-100)")
@@ -61,10 +72,13 @@ class LogroProgreso(AgenciaMixin):
         ordering = ["-completado", "-progreso"]
 
     def __str__(self):
+        # __str__: Representación en string del objeto. Returns: str.
         return f"{self.usuario} - {self.logro} ({self.progreso}%)"
 
 
-class PuntuacionUsuario(AgenciaMixin):
+class PuntuacionUsuario:
+    """Clase PuntuacionUsuario. Uso: según contexto de la aplicación.
+    """
     usuario = models.ForeignKey("auth.User", on_delete=models.CASCADE, related_name="puntuacion")
     puntos_total = models.PositiveIntegerField(default=0)
     nivel = models.ForeignKey(Nivel, on_delete=models.SET_NULL, null=True, blank=True)
@@ -77,4 +91,5 @@ class PuntuacionUsuario(AgenciaMixin):
         unique_together = [("usuario", "agencia")]
 
     def __str__(self):
+        # __str__: Representación en string del objeto. Returns: str.
         return f"{self.usuario}: {self.puntos_total} pts"

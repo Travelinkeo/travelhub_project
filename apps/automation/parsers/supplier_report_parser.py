@@ -1,3 +1,6 @@
+"""Parser/procesador de supplier report parser para la aplicación automation.
+"""
+
 import logging
 from typing import Any
 

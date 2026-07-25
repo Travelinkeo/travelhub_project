@@ -1,7 +1,12 @@
+"""Migración de base de datos para bookings.
+"""
+
 from django.db import migrations, models
 
 
-class Migration(migrations.Migration):
+class Migration:
+    """Clase Migration. Uso: según contexto de la aplicación.
+    """
     dependencies = [
         ("bookings", "0043_alter_boletoimportado_raw_hash_and_more"),
     ]

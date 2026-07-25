@@ -1,3 +1,6 @@
+"""Módulo ctg parser de la aplicación contabilidad.
+"""
+
 import io
 import logging
 import re
@@ -13,6 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 def parse_decimal(val_str: str) -> Decimal:
+    # parse_decimal: Analiza/parsea  decimal. Args: datos de entrada. Returns: resultado del parseo.
     if not val_str:
         return Decimal("0.00")
     clean = val_str.replace(",", "").strip()
@@ -23,6 +27,7 @@ def parse_decimal(val_str: str) -> Decimal:
 
 
 def parse_date(date_str: str) -> str | None:
+    # parse_date: Analiza/parsea  date. Args: datos de entrada. Returns: resultado del parseo.
     if not date_str:
         return None
     try:
@@ -32,8 +37,11 @@ def parse_date(date_str: str) -> str | None:
         return None
 
 
-class CTGReportParser(BaseSupplierReportParser):
+class CTGReportParser:
+    """Parser para procesar ctgreport. Uso: instanciar según necesidad del dominio.
+    """
     def parse(self) -> dict[str, Any]:
+        # parse: Analiza/parsea . Args: datos de entrada. Returns: resultado del parseo.
         reader = pypdf.PdfReader(io.BytesIO(self.pdf_bytes))
         full_text = "\n".join([page.extract_text() or "" for page in reader.pages])
 

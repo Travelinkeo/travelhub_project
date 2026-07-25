@@ -26,9 +26,11 @@ class MotorPdfView(AgencyRoleRequiredMixin, UpdateView):
     allowed_roles = ["admin", "gerente"]
 
     def get_object(self, queryset=None):
+        """Método que obtiene object. Args: según implementación. Returns: datos solicitados."""
         return self.request.agencia
 
     def form_valid(self, form):
+        """Método: form valid."""
         messages.success(self.request, "Motor PDF actualizado correctamente.")
         return super().form_valid(form)
 
@@ -43,6 +45,7 @@ class AgenciaSettingsView(AgencyRoleRequiredMixin, UpdateView):
     allowed_roles = ["admin", "gerente"]
 
     def get_object(self, queryset=None):
+        """Método que obtiene object. Args: según implementación. Returns: datos solicitados."""
         # Retorna la agencia del usuario actual de forma defensiva
         req = self.request
         agencia_obj = getattr(req, "agencia", None)
@@ -67,6 +70,7 @@ class AgenciaSettingsView(AgencyRoleRequiredMixin, UpdateView):
         return agencia_obj
 
     def get_context_data(self, **kwargs):
+        """Método que obtiene context data. Args: según implementación. Returns: datos solicitados."""
         context = super().get_context_data(**kwargs)
         agencia = self.get_object()
         # La información de WhatsApp ahora se carga vía HTMX para evitar lentitud en la página principal
@@ -82,6 +86,7 @@ class AgenciaSettingsView(AgencyRoleRequiredMixin, UpdateView):
         return context
 
     def form_valid(self, form):
+        """Método: form valid."""
         logger.info(f"✅ form_valid called for agencia: {self.get_object().nombre}")
         logger.info(f"FILES received: {dict(self.request.FILES)}")
         logger.info(f"logo_light in cleaned_data: {form.cleaned_data.get('logo_light')}")
@@ -90,6 +95,7 @@ class AgenciaSettingsView(AgencyRoleRequiredMixin, UpdateView):
         return super().form_valid(form)
 
     def form_invalid(self, form):
+        """Método: form invalid."""
         logger.warning(f"❌ form_invalid for agencia settings. Errors: {form.errors}")
         logger.warning(f"FILES received in invalid form: {dict(self.request.FILES)}")
         messages.error(self.request, f"Error al guardar la configuración: {form.errors}")
@@ -102,6 +108,7 @@ class WhatsAppStatusView(AgencyRoleRequiredMixin, View):
     allowed_roles = ["admin", "gerente"]
 
     def get(self, request, *args, **kwargs):
+        """Método: get."""
         from django.core.cache import cache
 
         from apps.communications.services.evolution_api_service import EvolutionService
@@ -208,6 +215,7 @@ class AgenciaUsersListView(AgencyRoleRequiredMixin, ListView):
     allowed_roles = ["admin", "gerente"]
 
     def get_queryset(self):
+        """Método que obtiene queryset. Args: según implementación. Returns: datos solicitados."""
         return UsuarioAgencia.objects.filter(agencia=self.request.agencia).select_related("usuario")
 
 
@@ -217,6 +225,7 @@ class UsuarioAgenciaCreateView(AgencyRoleRequiredMixin, View):
     allowed_roles = ["admin", "gerente"]
 
     def post(self, request, *args, **kwargs):
+        """Método: post."""
         agencia = request.agencia
 
         # Verificar límite de usuarios
@@ -270,6 +279,7 @@ class UsuarioAgenciaToggleStatusView(AgencyRoleRequiredMixin, View):
     allowed_roles = ["admin", "gerente"]
 
     def post(self, request, pk, *args, **kwargs):
+        """Método: post."""
         ua = get_object_or_404(UsuarioAgencia, pk=pk, agencia=request.agencia)
 
         if ua.usuario == request.user:
@@ -294,6 +304,7 @@ class UsuarioAgenciaUpdateRoleView(AgencyRoleRequiredMixin, View):
     allowed_roles = ["admin", "gerente"]
 
     def post(self, request, pk, *args, **kwargs):
+        """Método: post."""
         ua = get_object_or_404(UsuarioAgencia, pk=pk, agencia=request.agencia)
         new_role = request.POST.get("rol")
 
@@ -313,6 +324,7 @@ class CambiarAgenciaView(View):
     """
 
     def post(self, request, *args, **kwargs):
+        """Método: post."""
         if not request.user.is_authenticated:
             from django.http import JsonResponse
 

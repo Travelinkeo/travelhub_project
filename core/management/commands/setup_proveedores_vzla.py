@@ -8,9 +8,11 @@ from apps.common.models import Moneda
 
 
 class Command(BaseCommand):
+    """Comando de gestión personalizado."""
     help = "Carga proveedores (Consolidadoras) y sus comisiones base para Venezuela"
 
     def handle(self, *args, **kwargs):
+        """Método: handle."""
         self.stdout.write("Iniciando carga de Consolidadoras...")
 
         # 1. Asegurar Moneda

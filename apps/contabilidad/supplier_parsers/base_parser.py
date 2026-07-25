@@ -1,3 +1,6 @@
+"""Módulo base parser de la aplicación contabilidad.
+"""
+
 from abc import ABC, abstractmethod
 from typing import Any
 
@@ -9,6 +12,7 @@ class BaseSupplierReportParser(ABC):
     """
 
     def __init__(self, pdf_bytes: bytes, filename: str = "", subject: str = ""):
+        # __init__: Inicializa una nueva instancia de BaseSupplierReportParser. Args: parámetros de inicialización.
         self.pdf_bytes = pdf_bytes
         self.filename = filename
         self.subject = subject

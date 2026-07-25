@@ -1,3 +1,6 @@
+"""Pruebas para bookings legacy en bookings.
+"""
+
 from decimal import Decimal
 from unittest.mock import patch
 
@@ -189,6 +192,7 @@ class BIContableTest(TestCase):
         )
 
     def test_calculos_margen_e_igtf(self):
+        # test_calculos_margen_e_igtf: Test calculos margen e igtf. Args: según implementación. Returns: según implementación.
         with patch("core.models.base.get_current_agency", return_value=self.agencia):
             # Crear venta con campos BI de prueba
             venta = Venta.objects.create(
@@ -228,6 +232,7 @@ class BIContableTest(TestCase):
 
     @patch("apps.finance.tasks.enviar_alerta_telegram")
     def test_auditar_fuga_ingresos_task(self, mock_enviar):
+        # test_auditar_fuga_ingresos_task: Test auditar fuga ingresos task. Args: según implementación. Returns: según implementación.
         with patch("core.models.base.get_current_agency", return_value=self.agencia):
             # Caso con fuga (monto_venta_cliente = 1500, pagado = 1000)
             venta_fuga = Venta.objects.create(

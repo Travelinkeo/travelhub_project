@@ -1,3 +1,6 @@
+"""Servicio de email sender para la aplicación communications.
+"""
+
 from apps.communications.services.email_unified import (
     enviar_cambio_estado,
     enviar_confirmacion_pago,

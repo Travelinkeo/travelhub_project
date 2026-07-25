@@ -29,6 +29,7 @@ class AutoModelSerializer(serializers.ModelSerializer):
     """
 
     class Meta:
+        """Configuración del modelo."""
         model = None
         fields = "__all__"
         read_only_fields = ("agencia", "is_deleted", "deleted_at", "record_hash", "estado")
@@ -50,11 +51,13 @@ class AutoModelViewSet(InternalAPIAuthMixin, viewsets.ModelViewSet):
     serializer_class = None  # Se establece dinámicamente
 
     def get_permissions(self):
+        """Método que obtiene permissions. Args: según implementación. Returns: datos solicitados."""
         if self.request.method in permissions.SAFE_METHODS:
             return [permissions.IsAuthenticated()]
         return [permissions.IsAuthenticated(), permissions.IsAdminUser()]
 
     def get_queryset(self):
+        """Método que obtiene queryset. Args: según implementación. Returns: datos solicitados."""
         from core.middleware import get_current_agency
 
         model = self.serializer_class.Meta.model

@@ -77,6 +77,7 @@ def usuario_agente(db, agencia):
 
 @pytest.fixture
 def moneda_usd(db):
+    """Moneda usd."""
     moneda, _ = Moneda.objects.get_or_create(
         codigo_iso="USD", defaults={"nombre": "Dólar Americano", "simbolo": "$"}
     )
@@ -85,6 +86,7 @@ def moneda_usd(db):
 
 @pytest.fixture
 def cliente_base(db, agencia):
+    """Cliente base."""
     cliente, _ = Cliente.objects.get_or_create(
         email="pasajero@example.com",
         defaults={
@@ -136,6 +138,7 @@ class TestBoletoImportadoModelo:
     """Verifica la creación y estado inicial de un BoletoImportado."""
 
     def test_crear_boleto_importado_basico(self, agencia, moneda_usd):
+        """Crear boleto importado basico."""
         boleto = BoletoImportado.objects.create(
             agencia=agencia,
             archivo_boleto="test_sabre.pdf",
@@ -146,6 +149,7 @@ class TestBoletoImportadoModelo:
         assert boleto.agencia == agencia
 
     def test_boleto_tiene_campos_financieros_por_defecto(self, agencia):
+        """Boleto tiene campos financieros por defecto."""
         boleto = BoletoImportado.objects.create(
             agencia=agencia,
             archivo_boleto="test.txt",
@@ -430,30 +434,35 @@ class TestShimModelos:
     """
 
     def test_moneda_via_shim_es_mismo_modelo(self):
+        """Moneda via shim es mismo modelo."""
         from apps.common.models import Moneda as RealMoneda
         from apps.common.models import Moneda as ShimMoneda
 
         assert ShimMoneda is RealMoneda
 
     def test_proveedor_via_shim_es_mismo_modelo(self):
+        """Proveedor via shim es mismo modelo."""
         from apps.bookings.models import Proveedor as ShimProveedor
         from apps.bookings.models.servicios import Proveedor as RealProveedor
 
         assert ShimProveedor is RealProveedor
 
     def test_pais_via_shim_es_mismo_modelo(self):
+        """Pais via shim es mismo modelo."""
         from apps.common.models import Pais as RealPais
         from apps.common.models import Pais as ShimPais
 
         assert ShimPais is RealPais
 
     def test_ciudad_via_shim_es_mismo_modelo(self):
+        """Ciudad via shim es mismo modelo."""
         from apps.common.models import Ciudad as RealCiudad
         from apps.common.models import Ciudad as ShimCiudad
 
         assert ShimCiudad is RealCiudad
 
     def test_aerolinea_via_shim_es_mismo_modelo(self):
+        """Aerolinea via shim es mismo modelo."""
         from apps.common.models import Aerolinea as RealAerolinea
         from apps.common.models import Aerolinea as ShimAerolinea
 

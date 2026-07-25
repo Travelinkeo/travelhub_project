@@ -1,3 +1,6 @@
+"""Servicio de boleto service para la aplicación bookings.
+"""
+
 import logging
 
 from django.db import transaction

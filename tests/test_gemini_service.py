@@ -1,3 +1,4 @@
+"""Tests para Gemini service."""
 # tests/test_gemini_service.py
 import os
 
@@ -9,6 +10,7 @@ from apps.automation.services.ai_engine import generate_text_from_prompt
 # Marcador de Pytest para omitir este test si la API key no está disponible.
 # Esto es útil para entornos de CI/CD donde no se configuran secretos.
 def _has_real_gemini_key() -> bool:
+    """Has real gemini key."""
     key = os.getenv("GEMINI_API_KEY", "")
     if not key:
         return False

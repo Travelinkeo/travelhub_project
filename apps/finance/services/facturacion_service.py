@@ -1,3 +1,6 @@
+"""Servicio de facturacion service para la aplicación finance.
+"""
+
 import logging
 from decimal import Decimal
 
@@ -15,6 +18,7 @@ logger = logging.getLogger(__name__)
 
 
 def obtener_itinerario_limpio(ruta_vuelo):
+    # obtener_itinerario_limpio: Obtener itinerario limpio. Args: según implementación. Returns: según implementación.
     if not ruta_vuelo:
         return ""
     ruta_vuelo_str = str(ruta_vuelo).strip()

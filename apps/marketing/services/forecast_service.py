@@ -1,3 +1,6 @@
+"""Servicio de forecast service para la aplicación marketing.
+"""
+
 import logging
 from datetime import timedelta
 from typing import Any
@@ -9,12 +12,14 @@ from pydantic import BaseModel, Field
 
 
 def _get_ai_engine():
+    # _get_ai_engine:  get ai engine. Args: según implementación. Returns: según implementación.
     from django.utils.module_loading import import_string
 
     return import_string("apps.automation.services.ai_engine.ai_engine")
 
 
 def _get_venta_model():
+    # _get_venta_model:  get venta model. Args: según implementación. Returns: según implementación.
     from django.apps import apps
 
     return apps.get_model("bookings", "Venta")
@@ -23,19 +28,25 @@ def _get_venta_model():
 logger = logging.getLogger(__name__)
 
 
-class ForecastInsight(BaseModel):
+class ForecastInsight:
+    """Clase ForecastInsight. Uso: según contexto de la aplicación.
+    """
     title: str = Field(description="Título corto del insight (Ej: Auge en Caribe)")
     description: str = Field(description="Descripción detallada y recomendación estratégica")
     impact_level: str = Field(description="Nivel de impacto esperado: HIGH, MEDIUM, LOW")
 
 
-class HotDestination(BaseModel):
+class HotDestination:
+    """Clase HotDestination. Uso: según contexto de la aplicación.
+    """
     name: str = Field(description="Nombre del destino o país")
     growth_probability: str = Field(description="Probabilidad de crecimiento (Ej: 85%)")
     reason: str = Field(description="Razón breve de la tendencia")
 
 
-class SalesForecastSchema(BaseModel):
+class SalesForecastSchema:
+    """Clase SalesForecastSchema. Uso: según contexto de la aplicación.
+    """
     predicted_sales_next_month: str = Field(
         description="Monto predicho de ventas para el próximo mes"
     )

@@ -1,3 +1,6 @@
+"""Servicio de drive uploader para la aplicación communications.
+"""
+
 import logging
 import os
 
@@ -17,6 +20,7 @@ except ImportError:
 
 
 def init_drive_service():
+    # init_drive_service: Init drive service. Args: según implementación. Returns: según implementación.
     if not GOOGLE_DRIVE_AVAILABLE:
         return None
     try:
@@ -37,6 +41,7 @@ def init_drive_service():
 
 
 def upload_to_drive(drive_service, pdf_path):
+    # upload_to_drive: Upload to drive. Args: según implementación. Returns: según implementación.
     if not drive_service:
         return None
 
@@ -65,6 +70,7 @@ def upload_to_drive(drive_service, pdf_path):
 def enviar_notificacion_whatsapp_drive(
     drive_service, destination, sistema, localizador, numero_boleto, pasajero, aerolinea, pdf_path
 ):
+    # enviar_notificacion_whatsapp_drive: Envía ar notificacion whatsapp drive. Args: datos del mensaje. Returns: resultado del envío.
     from apps.communications.services.whatsapp_unified import enviar_whatsapp
 
     drive_link = upload_to_drive(drive_service, pdf_path)

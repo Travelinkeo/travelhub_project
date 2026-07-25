@@ -1,3 +1,4 @@
+"""Tests para Script nonces."""
 import os
 from pathlib import Path
 
@@ -5,6 +6,7 @@ TEMPLATES_ROOT = Path(__file__).resolve().parent.parent / "core" / "templates" /
 
 
 def list_html_files(base: Path):
+    """List html files."""
     for root, _dirs, files in os.walk(base):
         for f in files:
             if f.endswith(".html"):

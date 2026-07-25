@@ -13,10 +13,13 @@ from apps.contabilidad.management.commands.sincronizar_tasa_bcv import Command a
 logger = logging.getLogger(__name__)
 
 
-class Command(BaseCommand):
+class Command:
+    """Clase Command. Uso: según contexto de la aplicación.
+    """
     help = "Sincroniza tasas de cambio automáticamente (BCV + otras fuentes)"
 
     def add_arguments(self, parser):
+        # add_arguments: Add arguments. Args: según implementación. Returns: según implementación.
         parser.add_argument(
             "--log-file",
             type=str,
@@ -25,6 +28,7 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
+        # handle: Maneja/gestiona . Args: evento/datos. Returns: respuesta.
         log_file = options["log_file"]
 
         # Configurar logging a archivo

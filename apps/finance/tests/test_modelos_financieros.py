@@ -1,6 +1,8 @@
 from datetime import timedelta
 from decimal import Decimal
 
+from django.db.utils import IntegrityError
+
 import pytest
 from django.utils import timezone
 
@@ -208,7 +210,7 @@ class TestFacturaFiscal:
                 moneda=moneda_usd,
             )
             FacturaFiscal.objects.create(venta=venta)
-            with pytest.raises(Exception):  # noqa: B017
+            with pytest.raises(IntegrityError):
                 FacturaFiscal.objects.create(venta=venta)
 
 

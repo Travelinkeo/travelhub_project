@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.db.utils import IntegrityError
 from django.test import TestCase
 from django.urls import reverse
 
@@ -47,7 +48,7 @@ class LogroModelTest(TestCase):
 
     def test_codigo_unique(self):
         """test_codigo_unique."""
-        with self.assertRaises(Exception):
+        with self.assertRaises(IntegrityError):
             Logro.objects.create(codigo="test_logro", nombre="Duplicado")
 
     def test_defaults(self):
@@ -88,7 +89,7 @@ class LogroProgresoModelTest(TestCase):
 
     def test_unique_together(self):
         """test_unique_together."""
-        with self.assertRaises(Exception):
+        with self.assertRaises(IntegrityError):
             LogroProgreso.objects.create(usuario=self.user, logro=self.logro, agencia=self.agencia)
 
     def test_str(self):
@@ -118,7 +119,7 @@ class PuntuacionUsuarioModelTest(TestCase):
 
     def test_unique_together(self):
         """test_unique_together."""
-        with self.assertRaises(Exception):
+        with self.assertRaises(IntegrityError):
             PuntuacionUsuario.objects.create(usuario=self.user, agencia=self.agencia)
 
 

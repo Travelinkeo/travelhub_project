@@ -364,13 +364,7 @@ def _health_check_one(instance_name):
         cached = cache.get(cache_key)
         if cached:
             out["checks"]["redis_cache"] = True
-            # Cache TTL — intentar estimar cuándo se llenó
-            try:
-                # Si usáramos un cache_backend que soportase TTL: cache._expire_info_by_key[]
-                # Para Redis, calculo heurística desde el .env del Evolution
-                out["checks"]["cache_age_seconds"] = "estimated_since_refresh_under_120s"
-            except Exception:
-                pass
+            out["checks"]["cache_age_seconds"] = "estimated_since_refresh_under_120s"
     except Exception as e:
         out["checks"]["cache_error"] = str(e)
 

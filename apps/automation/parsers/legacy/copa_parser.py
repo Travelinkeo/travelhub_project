@@ -378,10 +378,8 @@ class CopaParser(BaseTicketParser):
                                     }
                                 )
                         except Exception as e:
-                            print(f"DEBUG: Exception extracting flight: {e}, cells: {cells}")
                             logger.debug(f"Ignored error extracting flight: {e}")
                     if flights:
-                        print("DEBUG: Flights found in HTML!")
                         return flights  # Si se encontraron vuelos en HTML, finalizar
         # Fallback al patrón de texto plano (mantener el original)
         flight_pattern = re.compile(

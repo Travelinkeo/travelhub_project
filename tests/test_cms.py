@@ -1,3 +1,4 @@
+from django.db.utils import IntegrityError
 from django.test import TestCase
 
 from apps.cms.models import Articulo, GuiaDestino, KBArticle, KBCategory, PostRedesSociales
@@ -27,7 +28,7 @@ class ArticuloModelTest(TestCase):
 
     def test_slug_unique(self):
         """test_slug_unique."""
-        with self.assertRaises(Exception):
+        with self.assertRaises(IntegrityError):
             Articulo.objects.create(
                 titulo="Otro", slug="destino-caribe", contenido="x", agencia=self.agencia
             )
@@ -115,12 +116,12 @@ class KBCategoryModelTest(TestCase):
 
     def test_unique_together(self):
         """test_unique_together."""
-        with self.assertRaises(Exception):
+        with self.assertRaises(IntegrityError):
             KBCategory.objects.create(name="Duplicado", slug="facturacion", agencia=self.agencia)
 
     def test_misma_agencia_mismo_slug_duplicado(self):
         """test_misma_agencia_mismo_slug_duplicado."""
-        with self.assertRaises(Exception):
+        with self.assertRaises(IntegrityError):
             KBCategory.objects.create(name="Otro", slug="facturacion", agencia=self.agencia)
 
     def test_diferente_agencia_mismo_slug_permitido(self):
@@ -155,7 +156,7 @@ class KBArticleModelTest(TestCase):
 
     def test_unique_together(self):
         """test_unique_together."""
-        with self.assertRaises(Exception):
+        with self.assertRaises(IntegrityError):
             KBArticle.objects.create(
                 title="Otro", slug="como-facturar", content="x", agencia=self.agencia
             )

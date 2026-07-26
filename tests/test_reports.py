@@ -1,6 +1,7 @@
 from datetime import date
 
 from django.contrib.auth import get_user_model
+from django.db.utils import IntegrityError
 from django.test import TestCase
 from django.urls import reverse
 
@@ -64,7 +65,7 @@ class KpiSnapshotModelTest(TestCase):
 
     def test_unique_together(self):
         """test_unique_together."""
-        with self.assertRaises(Exception):
+        with self.assertRaises(IntegrityError):
             KpiSnapshot.objects.create(
                 agencia=self.agencia,
                 metrica="ventas_totales",

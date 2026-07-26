@@ -38,25 +38,7 @@ class LinkeoService:
             return None
 
     @classmethod
-    def process_message(cls, text: str, user_id: int = None) -> str:
-        """
-        Main entry point. Receives text, returns a response string.
-        """
-        # ... existing classification code ... (omitted for brevity, will be preserved by logic if I don't touch it)
-        # Wait, I cannot omit code in REPLACE_FILE_CONTENT unless I target specific lines.
-        # I am targeting _get_gemini_model and _handle_ai_chat mainly.
-        # Let's target _get_gemini_model first.
-        pass
-
-    # Actually, I'll do two separate replacements or one large block if contiguous.
-    # They are not contiguous. I'll make two edits using AllowMultiple=True? No, tool says "Use this tool ONLY when you are making a SINGLE CONTIGUOUS block".
-    # I should use multi_replace_file_content.
-    pass
-
-    # Switching strategy: Use multi_replace
-
-    @classmethod
-    def process_message(cls, text: str, user_id: int = None, agencia=None) -> str:  # noqa: F811
+    def process_message(cls, text: str, user_id: int = None, agencia=None) -> str:
         """
         Main entry point. Receives text, returns a response string.
         Args:

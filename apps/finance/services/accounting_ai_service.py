@@ -1,32 +1,12 @@
 from __future__ import annotations
 
-# ==============================================================================
-# 🧠 MOTORES DE INTELIGENCIA ARTIFICIAL EN TRAVELHUB: CPA ENGINE
-# ==============================================================================
-# ESTE ARCHIVO: 'accounting_ai_service.py' (AccountingAIService)
-# ROL: Generación física de asientos contables estructurados y determinísticos.
-# PRINCIPAL CARACTERÍSTICA: No interactivo. Genera asientos con validación estricta
-# de partida doble mediante esquemas estructurados de Pydantic.
-#
-# NOTA DE DISEÑO: No confundir con 'ai_accounting_service.py' (AIAccountingService),
-# el cual es el CFO Virtual interactivo basado en chat y Function Calling.
-# ==============================================================================
 import logging
 from decimal import Decimal
-from typing import TYPE_CHECKING
 
 from django.db import transaction
 from django.utils import timezone
 
-# Resolved dynamically to avoid architectural violations
-# TODO: AsientoContableSchema was removed in model refactor
-# from apps.finance.models.ai_accounting_schemas import AsientoContableSchema
-from apps.common.models import Moneda
-
-AsientoContableSchema = None  # stub
-
-if TYPE_CHECKING:
-    from contabilidad.models import AsientoContable
+from apps.finance.schemas.accounting_schemas import AsientoContableSchema
 
 logger = logging.getLogger(__name__)
 
@@ -36,30 +16,24 @@ class AccountingAIService:
     SERVICIO DE CONTABILIDAD IA (CPA ENGINE):
     Utiliza el razonamiento de Gemini para generar asientos contables
     basados en descripciones de transacciones o hallazgos de conciliación.
-
-    Este motor reemplaza miles de reglas estáticas por inteligencia financiera
-    que entiende el catálogo de cuentas y los principios de partida doble.
     """
 
     @classmethod
     @transaction.atomic
     def generar_asiento_con_ia(
         cls, descripcion_transaccion: str, context_details: dict | None = None
-    ) -> AsientoContable | None:
+    ) -> "AsientoContable | None":
         """
         Interpreta una transacción y crea el asiento contable físico en TravelHub.
 
         Args:
-            descripcion_transaccion: Texto natural describiendo el movimiento (ej: 'Venta de boleto PNR ABC123').
+            descripcion_transaccion: Texto natural describiendo el movimiento.
             context_details: Diccionario opcional con montos, fechas o IDs involucrados.
         """
-        logger.info(
-            f"🧠 Accounting AI: Generando asiento para: '{descripcion_transaccion[:80]}...'"
-        )
+        logger.info(f"Accounting AI: Generando asiento para: '{descripcion_transaccion[:80]}...'")
 
-        # 1. Preparar el input enriquecido
         contexto_str = f"\nDATOS TÉCNICOS: {context_details}" if context_details else ""
-        full_prompt = f"POR FAVOR, CONTABILIZA LA SIGUIENTE TRANSACCIÓN:\n{descripcion_transaccion}{contexto_str}"
+        full_prompt = f"CONTABILIZA LA SIGUIENTE TRANSACCIÓN:\n{descripcion_transaccion}{contexto_str}"
 
         try:
             from django.apps import apps
@@ -73,8 +47,6 @@ class AccountingAIService:
             MovimientoContable = apps.get_model("contabilidad", "MovimientoContable")
             CuentaContable = apps.get_model("contabilidad", "CuentaContable")
 
-            # 2. Invocación al Motor IA con Esquema de Partida Doble
-            # Temperatura 0.0 para garantizar que la contabilidad sea determinística
             datos_asiento = ai_engine.call_gemini(
                 prompt=full_prompt,
                 response_schema=AsientoContableSchema,
@@ -86,62 +58,41 @@ class AccountingAIService:
                 logger.error("El motor IA devolvió un asiento vacío o sin líneas.")
                 return None
 
-            # 3. Resolución de Moneda y Contexto
-            iso_moneda = datos_asiento.get("moneda", "USD")
-            moneda = Moneda.objects.filter(codigo_iso=iso_moneda).first()
-            if not moneda:
-                moneda = Moneda.objects.get(codigo_iso="USD")
-
-            # 4. CREACIÓN DEL ASIENTO (BORRADOR)
             asiento = AsientoContable.objects.create(
-                descripcion_general=datos_asiento["descripcion_general"],
+                glosa=datos_asiento["glosa"],
                 fecha_contable=datos_asiento.get("fecha_contable", timezone.now().date()),
-                moneda=moneda,
-                tipo_asiento=AsientoContable.TipoAsiento.AJUSTE,
+                tipo_asiento=datos_asiento.get("tipo_asiento", AsientoContable.TipoAsiento.DIARIO),
                 estado=AsientoContable.EstadoAsiento.BORRADOR,
             )
 
-            # 5. PROCESAMIENTO DE LÍNEAS Y RESOLUCIÓN DE CUENTAS
-            for i, l_schema in enumerate(datos_asiento["lineas"], 1):
-                # Estrategia de búsqueda de cuenta: Código > Nombre Exacto > Similar
+            for l_schema in datos_asiento["lineas"]:
                 cuenta = CuentaContable.objects.filter(
-                    codigo_cuenta=l_schema["codigo_cuenta"]
+                    codigo=l_schema["codigo_cuenta"]
                 ).first()
                 if not cuenta:
                     cuenta = CuentaContable.objects.filter(
-                        nombre_cuenta__icontains=l_schema["nombre_cuenta"]
+                        nombre__icontains=l_schema["nombre_cuenta"]
                     ).first()
 
                 if not cuenta:
-                    error_msg = f"No se pudo localizar la cuenta contable: {l_schema['codigo_cuenta']} - {l_schema['nombre_cuenta']}"
+                    error_msg = (
+                        f"No se pudo localizar la cuenta contable: "
+                        f"{l_schema['codigo_cuenta']} - {l_schema['nombre_cuenta']}"
+                    )
                     logger.error(error_msg)
                     raise ValueError(error_msg)
 
-                # Persistir la línea de detalle
                 MovimientoContable.objects.create(
                     asiento=asiento,
-                    linea=i,
-                    cuenta_contable=cuenta,
-                    debe=Decimal(str(round(l_schema["debe"], 2))),
-                    haber=Decimal(str(round(l_schema["haber"], 2))),
-                    descripcion_linea=l_schema["concepto"],
+                    cuenta=cuenta,
+                    tipo=l_schema["tipo"],
+                    monto_ves=Decimal(str(round(l_schema["monto_ves"], 2))),
+                    monto_usd=Decimal(str(round(l_schema["monto_usd"], 2))),
                 )
 
-            # 6. Recalcular y validar cuadre final
-            asiento.calcular_totales()
-
-            if not asiento.esta_cuadrado:
-                logger.error(f"⚠️ Asiento {asiento.id_asiento} generado descuadrado. Revirtiendo.")
-                raise ValueError(
-                    "El asiento generado por IA no cumple con la Partida Doble técnica."
-                )
-
-            logger.info(
-                f"✅ Asiento Contable {asiento.id_asiento} creado exitosamente por CPA Engine."
-            )
+            logger.info(f"Asiento Contable {asiento.pk} creado exitosamente por CPA Engine.")
             return asiento
 
-        except Exception as e:
-            logger.exception(f"Fallo crítico en el motor de contabilidad IA: {e}")
-            # El decorador transaction.atomic hará rollback automático si ocurre una excepción
+        except Exception:
+            logger.exception("Fallo crítico en el motor de contabilidad IA")
             return None

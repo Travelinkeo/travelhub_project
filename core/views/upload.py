@@ -198,6 +198,7 @@ class ReviewBoletoView(View):
                 or "Sin texto fuente."
             )
         except Exception:
+            logger.warning("No se pudo extraer texto del boleto %s", boleto.pk, exc_info=True)
             source_text = boleto.log_parseo or "Error al leer el archivo."
 
         datos_crudos = boleto.datos_parseados or {}
@@ -359,7 +360,7 @@ class BoletoPdfStatusView(View):
                     boleto.archivo_pdf_generado.name
                 )
             except Exception:
-                # En R2/S3, asumimos que existe si hay nombre
+                logger.debug("Storage.exists() falló para %s, asumiendo accesible", boleto.archivo_pdf_generado.name)
                 pdf_accessible = bool(boleto.archivo_pdf_generado.name)
 
             if pdf_accessible:
@@ -433,6 +434,7 @@ class BoletoPdfStatusView(View):
                         boleto.archivo_pdf_generado.name
                     )
                 except Exception:
+                    logger.debug("Storage.exists() falló (2) para %s, asumiendo accesible", boleto.archivo_pdf_generado.name)
                     pdf_accessible = bool(boleto.archivo_pdf_generado.name)
 
                 if pdf_accessible:

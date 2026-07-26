@@ -248,6 +248,7 @@ class ParsedTicketData:
             try:
                 res["normalized"] = DataNormalizationService.sanitize_for_json(res)
             except Exception:
+                logger.debug("sanitize_for_json falló, usando raw res como normalized")
                 res["normalized"] = res
         return res
 
@@ -407,6 +408,7 @@ class BaseTicketParser(ABC):
                 "utf-8", errors="ignore"
             )
         except Exception:
+            logger.debug("HTML quoted-printable decode falló, usando raw")
             decoded_html = html_content
         return BeautifulSoup(decoded_html, "html.parser")
 

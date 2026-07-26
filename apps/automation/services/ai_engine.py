@@ -206,9 +206,11 @@ class AIEngine:
         try:
             return schema(**parsed_data)
         except Exception:
+            logger.debug("Pydantic v1 validation failed, trying v2")
             try:
                 return schema.model_validate(parsed_data)
             except Exception:
+                logger.warning("Pydantic validation failed for parsed data, returning raw")
                 return parsed_data
 
     def analyze_gds_terminal(self, raw_text: str, gds_type: str = "SABRE") -> dict[str, Any]:
@@ -342,6 +344,7 @@ def generate_content(prompt: str, model_name: str = "gemini-2.5-flash") -> str:
     except GeminiConfigurationError:
         raise
     except Exception:
+        logger.warning("analyze_gds_terminal falló, retornando vacío", exc_info=True)
         return ""
 
 
@@ -368,6 +371,7 @@ def generate_structured_data(prompt: str, model_name: str = "gemini-2.5-flash") 
             return json.dumps(result)
         return result or "{}"
     except Exception:
+        logger.warning("generate_structured_data call_gemini falló, retornando vacío", exc_info=True)
         return "{}"
 
 

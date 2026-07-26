@@ -160,6 +160,7 @@ services:
       - ./apps:/app/apps
       - ./core:/app/core
       - ./boletos_importados:/app/boletos_importados
+      - ./tests:/app/tests
       - ./entrypoint.sh:/app/entrypoint.sh
       - ./compose/healthcheck.py:/app/compose/healthcheck.py
     depends_on:

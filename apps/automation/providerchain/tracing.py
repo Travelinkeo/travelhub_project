@@ -73,6 +73,7 @@ def record_call(
                 new_val = (cache.get(key) or 0) + delta
                 cache.set(key, new_val, METRICS_TTL)
             except Exception:
+                logger.debug("Cache increment falló para %s, seteando directo", key)
                 cache.set(key, delta, METRICS_TTL)
 
         _record_latency_sample(hour_key, provider, duration_ms)
@@ -115,6 +116,7 @@ def _get_latency_samples(hour_key: str, provider: str) -> list[int]:
     try:
         return cache.get(f"ai_metrics:{hour_key}:latency:{provider}") or []
     except Exception:
+        logger.debug("Cache get falló para latency samples %s", f"ai_metrics:{hour_key}:latency:{provider}")
         return []
 
 

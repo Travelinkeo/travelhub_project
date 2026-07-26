@@ -106,7 +106,7 @@ def importar_clientes_excel_task(self, agencia_id, file_path, column_mapping, us
         try:
             default_storage.delete(file_path)
         except Exception:
-            pass
+            logger.debug("No se pudo eliminar archivo temporal %s", file_path)
 
     return {
         "creados": creados,

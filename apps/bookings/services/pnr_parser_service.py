@@ -282,6 +282,7 @@ class PNRParserService:
                             dt_llegada += datetime.timedelta(days=1)
                         fecha_llegada = dt_llegada
                     except Exception:
+                        logger.warning("Error calculando fecha_llegada, usando fecha_salida", exc_info=True)
                         fecha_llegada = fecha_salida
 
                 SegmentoVuelo.objects.get_or_create(
@@ -335,6 +336,7 @@ class PNRParserService:
             try:
                 return timezone.make_aware(datetime.datetime(year, month, day))
             except Exception:
+                logger.debug("Fecha inválida: %s/%s/%s", year, month, day)
                 return None
 
         # Sin año
@@ -351,5 +353,6 @@ class PNRParserService:
             try:
                 return timezone.make_aware(datetime.datetime(year, month, day))
             except Exception:
+                logger.debug("Fecha inválida (sin año): %s/%s/%s", year, month, day)
                 return None
         return None

@@ -45,6 +45,7 @@ def generar_asiento_desde_factura_signal(sender, instance, created, **kwargs):
             logger.debug(f"Factura {instance.numero_factura} sin items, omitiendo asiento")
             return
     except Exception:
+        logger.warning("Error verificando items_factura para factura %s", instance.numero_factura, exc_info=True)
         return
 
     _on_commit(_generar_asiento_contable, instance.pk)

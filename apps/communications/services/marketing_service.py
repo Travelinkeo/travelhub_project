@@ -65,7 +65,7 @@ class MarketingService:
                     img_file = default_storage.open(hotel.imagen_principal.name)
                     bg_img = Image.open(img_file).convert("RGB")
                 except Exception:
-                    # If url (Cloudinary), fetch it
+                    logger.debug("Local storage open falló para %s, intentando URL", hotel.imagen_principal.name)
                     url = hotel.imagen_principal.url
                     resp = requests.get(url, stream=True, timeout=30)
                     bg_img = Image.open(resp.raw).convert("RGB")
@@ -110,12 +110,13 @@ class MarketingService:
                 # Windows standard path
                 return ImageFont.truetype("arial.ttf", size)
             except Exception:
+                logger.debug("Arial font not found, trying DejaVu")
                 try:
-                    # Linux standard path
                     return ImageFont.truetype(
                         "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", size
                     )
                 except Exception:
+                    logger.debug("DejaVu font not found either, using PIL default")
                     return ImageFont.load_default()
 
         font_title = load_font(80)
@@ -159,6 +160,7 @@ class MarketingService:
                         f_logo = default_storage.open(agencia.logo.name)
                         logo_img = Image.open(f_logo).convert("RGBA")
                     except Exception:
+                        logger.debug("Local logo open falló para %s, intentando URL", agencia.logo.name)
                         resp = requests.get(agencia.logo.url, stream=True, timeout=30)
                         logo_img = Image.open(resp.raw).convert("RGBA")
 

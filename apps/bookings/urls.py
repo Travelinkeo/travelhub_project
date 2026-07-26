@@ -60,14 +60,6 @@ def dynamic_fb_view(view_path):
     return lazy_view_handler
 
 
-class ProductoServicioSerializer(viewsets.ModelViewSet):
-    """ProductoServicioSerializer."""
-
-    # This is a bit of a hack since the original had classes defined in core/urls.py
-    # I should probably import them, but for now I'll just register if I can.
-    pass
-
-
 # We will re-use the registration logic from core/urls.py
 try:
     ProductoServicioSerializer = import_string("core.serializers.ProductoServicioSerializer")

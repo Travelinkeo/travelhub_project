@@ -453,6 +453,7 @@ def notificar_boleto_procesado(boleto):
             try:
                 pdf_url = boleto.archivo_pdf_generado.url
             except Exception:
+                logger.debug("Fallback URL para PDF del boleto %s", boleto.pk)
                 pdf_url = f"{settings.MEDIA_URL if 'http' in settings.MEDIA_URL else 'https://travelhub.travelinkeo.com' + settings.MEDIA_URL}{boleto.archivo_pdf_generado.name}"
 
             if pdf_url and not pdf_url.startswith("http"):

@@ -13,6 +13,7 @@ from apps.bookings.services.revenue_auditor import RevenueAuditorService
 
 
 def test():
+    """test."""
     auditor = RevenueAuditorService()
     # Usar .all_objects para bypass del TenantManager en debug
     venta = Venta.all_objects.filter(localizador="WPYVSD").first()

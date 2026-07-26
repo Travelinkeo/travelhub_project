@@ -7,6 +7,7 @@ from django.utils import timezone
 
 
 def check_recent_tickets():
+    """check_recent_tickets."""
     from apps.bookings.models import BoletoImportado
 
     print("--- Buscando Boletos Recientes (Últimas 48 horas) ---")

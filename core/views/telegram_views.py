@@ -98,7 +98,7 @@ def generate_flyer_api(request):
         # Enviar resultado a Telegram
         # Usamos asyncio.run o async_to_sync para llamar al bot async
         async def send_photo():
-            """Función: send photo."""
+            """send_photo."""
             from telegram import Bot
 
             bot = Bot(token=settings.TELEGRAM_BOT_TOKEN)

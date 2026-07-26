@@ -2,6 +2,7 @@ import psycopg2
 
 
 def check_postgres(user, password, dbname="travelhub", host="localhost", port="5432"):
+    """check_postgres."""
     print(f"\n--- Probando conexión a '{dbname}' ---")
     try:
         conn = psycopg2.connect(dbname=dbname, user=user, password=password, host=host, port=port)

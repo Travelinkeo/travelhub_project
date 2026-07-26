@@ -1,6 +1,3 @@
-"""Servicio de catalog service para la aplicación common.
-"""
-
 from __future__ import annotations
 
 import json
@@ -79,7 +76,6 @@ class CatalogNormalizationService:
 
     @classmethod
     def _load_airports(cls) -> dict[str, Any]:
-        # _load_airports:  load airports. Args: según implementación. Returns: según implementación.
         if not cls._airports_master:
             # BASE_DIR es definido en project settings (no por django-stubs).
             path = os.path.join(settings.BASE_DIR, "core", "data", "airports_master.json")  # type: ignore[misc]

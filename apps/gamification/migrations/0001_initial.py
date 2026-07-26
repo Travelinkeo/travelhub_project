@@ -1,14 +1,9 @@
-"""Migración de base de datos para gamification.
-"""
-
 import django.db.models.deletion
 from django.conf import settings
 from django.db import migrations, models
 
 
-class Migration:
-    """Clase Migration. Uso: según contexto de la aplicación.
-    """
+class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
@@ -147,7 +142,10 @@ class Migration:
                         auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
                     ),
                 ),
-                ("progreso", models.PositiveIntegerField(default=0, help_text="Progreso actual (0-100)")),
+                (
+                    "progreso",
+                    models.PositiveIntegerField(default=0, help_text="Progreso actual (0-100)"),
+                ),
                 ("completado", models.BooleanField(default=False)),
                 ("fecha_completado", models.DateTimeField(blank=True, null=True)),
                 (

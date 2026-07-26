@@ -28,7 +28,7 @@ class APIKeyAuthentication(BaseAuthentication):
     keyword = "X-API-Key"
 
     def authenticate(self, request):
-        """Método: authenticate."""
+        """authenticate."""
         api_key_raw = request.META.get(f"HTTP_{self.keyword.replace('-', '_').upper()}")
 
         if not api_key_raw:
@@ -59,7 +59,7 @@ class APIKeyAuthentication(BaseAuthentication):
         return (api_key.user, api_key)
 
     def authenticate_header(self, request):
-        """Método: authenticate header."""
+        """authenticate_header."""
         return self.keyword
 
 
@@ -73,10 +73,11 @@ class HasAPIKeyScope(BasePermission):
     """
 
     def __init__(self, required_scope):
+        """__init__."""
         self.required_scope = required_scope
 
     def has_permission(self, request, view):
-        """Método que verifica  permission. Returns: bool."""
+        """has_permission."""
         api_key = getattr(request, "_api_key", None)
         if api_key is None:
             return False
@@ -100,7 +101,7 @@ def api_key_required(scope=None):
     from rest_framework.decorators import api_view, permission_classes
 
     def decorator(view_func):
-        """Función: decorator."""
+        """decorator."""
         wrapped = api_view(["GET", "POST", "PUT", "PATCH", "DELETE"])(view_func)
         perms = [APIKeyAuthentication]
         if scope:

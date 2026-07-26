@@ -1,6 +1,3 @@
-"""Servicio de report processors para la aplicación finance.
-"""
-
 import logging
 from abc import ABC, abstractmethod
 from decimal import Decimal
@@ -30,7 +27,7 @@ class KIUReportProcessor(BaseReportProcessor):
     """
 
     def parse(self, file_path):
-        # parse: Analiza/parsea . Args: datos de entrada. Returns: resultado del parseo.
+        """parse."""
         try:
             # KIU suele exportar CSV o Excel. Intentamos ambos.
             if file_path.endswith(".csv"):
@@ -66,6 +63,7 @@ class BSPReportProcessor(BaseReportProcessor):
     """
 
     def parse(self, file_path):
+        """parse."""
         # Implementación simplificada para el MVP
         try:
             df = pd.read_csv(file_path)  # Asumiendo CSV para simplificar

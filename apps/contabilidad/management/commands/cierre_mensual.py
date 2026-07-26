@@ -21,18 +21,19 @@ from apps.contabilidad.services import ContabilidadService
 logger = logging.getLogger(__name__)
 
 
-class Command:
-    """Clase Command. Uso: según contexto de la aplicación.
-    """
+class Command(BaseCommand):
+    """Command."""
+
     help = "Ejecuta el cierre contable mensual automatizado"
 
     def add_arguments(self, parser):
-        # add_arguments: Add arguments. Args: según implementación. Returns: según implementación.
+        """add_arguments."""
         parser.add_argument("--mes", type=int, help="Mes a cerrar (1-12)")
         parser.add_argument("--anio", type=int, help="Año a cerrar")
         parser.add_argument("--dry-run", action="store_true", help="Simula sin guardar")
 
     def handle(self, *args, **options):
+        """handle."""
         # Determinar período
         if options["mes"] and options["anio"]:
             mes = options["mes"]

@@ -1,6 +1,3 @@
-"""Módulo itinerary interactive de la aplicación bookings.
-"""
-
 import logging
 
 from django.core.signing import BadSignature, SignatureExpired
@@ -70,6 +67,7 @@ def public_itinerary_interactive_view(request, token):
         _enrich_segments(venta)
 
         from django.utils import timezone
+
         gantt_items = _get_service_dates(venta)
         gantt_start, gantt_end = _gantt_summary(gantt_items)
         ctx = {
@@ -101,7 +99,7 @@ class ItineraryMapDataView(View):
     """Endpoint JSON con datos geo para el mapa Leaflet."""
 
     def get(self, request, token):
-        # get: Get. Args: según implementación. Returns: según implementación.
+        """get."""
         try:
             venta_id, agencia_id = ItineraryCryptoService.verificar_y_desempaquetar_token(
                 token, max_age_days=30
@@ -118,23 +116,25 @@ class ItineraryMapDataView(View):
             routes = []
             for seg in venta.segmentos_vuelo.all():
                 if seg._origen_lat and seg._origen_lng and seg._destino_lat and seg._destino_lng:
-                    routes.append({
-                        "from": {
-                            "iata": seg.origen.codigo_iata,
-                            "name": seg.origen.nombre,
-                            "lat": seg._origen_lat,
-                            "lng": seg._origen_lng,
-                        },
-                        "to": {
-                            "iata": seg.destino.codigo_iata,
-                            "name": seg.destino.nombre,
-                            "lat": seg._destino_lat,
-                            "lng": seg._destino_lng,
-                        },
-                        "airline": seg.aerolinea,
-                        "flight": seg.numero_vuelo,
-                        "date": seg.fecha_salida.isoformat() if seg.fecha_salida else None,
-                    })
+                    routes.append(
+                        {
+                            "from": {
+                                "iata": seg.origen.codigo_iata,
+                                "name": seg.origen.nombre,
+                                "lat": seg._origen_lat,
+                                "lng": seg._origen_lng,
+                            },
+                            "to": {
+                                "iata": seg.destino.codigo_iata,
+                                "name": seg.destino.nombre,
+                                "lat": seg._destino_lat,
+                                "lng": seg._destino_lng,
+                            },
+                            "airline": seg.aerolinea,
+                            "flight": seg.numero_vuelo,
+                            "date": seg.fecha_salida.isoformat() if seg.fecha_salida else None,
+                        }
+                    )
 
             return JsonResponse({"routes": routes})
 
@@ -143,26 +143,32 @@ def _get_service_dates(venta):
     """Retorna lista de {inicio, fin, tipo, titulo} para el Gantt."""
     items = []
     for seg in venta.segmentos_vuelo.all():
-        items.append({
-            "title": f"{seg.aerolinea} {seg.numero_vuelo}",
-            "start": seg.fecha_salida,
-            "end": seg.fecha_llegada or seg.fecha_salida,
-            "type": "flight",
-        })
+        items.append(
+            {
+                "title": f"{seg.aerolinea} {seg.numero_vuelo}",
+                "start": seg.fecha_salida,
+                "end": seg.fecha_llegada or seg.fecha_salida,
+                "type": "flight",
+            }
+        )
     for h in venta.alojamientos.all():
-        items.append({
-            "title": h.nombre_establecimiento,
-            "start": h.check_in,
-            "end": h.check_out or h.check_in,
-            "type": "hotel",
-        })
+        items.append(
+            {
+                "title": h.nombre_establecimiento,
+                "start": h.check_in,
+                "end": h.check_out or h.check_in,
+                "type": "hotel",
+            }
+        )
     for a in venta.alquileres_autos.all():
-        items.append({
-            "title": f"Auto: {a.categoria_auto}",
-            "start": a.fecha_hora_retiro,
-            "end": a.fecha_hora_devolucion or a.fecha_hora_retiro,
-            "type": "car",
-        })
+        items.append(
+            {
+                "title": f"Auto: {a.categoria_auto}",
+                "start": a.fecha_hora_retiro,
+                "end": a.fecha_hora_devolucion or a.fecha_hora_retiro,
+                "type": "car",
+            }
+        )
     return items
 
 

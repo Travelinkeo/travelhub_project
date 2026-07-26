@@ -76,7 +76,7 @@ class TeamsChannel:
     CHANNEL_TYPE = "teams"
 
     def send(self, recipient: str, subject: str, message: str, **kwargs) -> bool:
-        # send: Envía . Args: datos del mensaje. Returns: resultado del envío.
+        """send."""
         webhook_url = self._get_webhook_url(recipient)
         if not webhook_url:
             return False
@@ -104,7 +104,7 @@ class TeamsChannel:
             return False
 
     def _get_webhook_url(self, identifier: str) -> str:
-        # _get_webhook_url:  get webhook url. Args: según implementación. Returns: según implementación.
+        """_get_webhook_url."""
         if identifier.startswith("https://"):
             return identifier
         webhooks = getattr(settings, "TEAMS_WEBHOOKS", {})

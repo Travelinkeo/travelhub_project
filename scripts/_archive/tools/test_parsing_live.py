@@ -14,6 +14,7 @@ from apps.automation.services.ticket_parser_service import TicketParserService
 
 
 def test_avior_eml():
+    """test_avior_eml."""
     eml_path = r"C:\Users\ARMANDO\Downloads\Tickets Avior Airlines.eml"
     if not os.path.exists(eml_path):
         print(f"Error: No existe el archivo {eml_path}")

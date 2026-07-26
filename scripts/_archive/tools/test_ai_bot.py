@@ -14,6 +14,7 @@ from apps.crm.tasks_bot import whatsapp_ai_task
 
 
 def simular_mensaje_whatsapp():
+    """simular_mensaje_whatsapp."""
     print("SIMULANDO MENSAJE DE WHATSAPP ENTRANTE...")
     print("--------------------------------------------------")
 

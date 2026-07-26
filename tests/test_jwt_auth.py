@@ -1,4 +1,3 @@
-"""Tests para Jwt auth."""
 import pytest
 from django.contrib.auth.models import User
 from rest_framework.test import APIClient
@@ -8,7 +7,7 @@ pytestmark = pytest.mark.skip(reason="Tests requieren configuración completa o 
 
 @pytest.mark.django_db
 def test_jwt_obtain_and_access_protected():
-    """Jwt obtain and access protected."""
+    """test_jwt_obtain_and_access_protected."""
     User.objects.create_user(username="jwtuser", password="StrongPass123")
     client = APIClient()
     # Obtain pair

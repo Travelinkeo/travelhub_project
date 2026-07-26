@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 # --- AUDIT SIGNALS FOR VENTA ---
 @receiver(post_delete, sender="bookings.Venta")
 def audit_delete_venta(sender, instance, **kwargs):
-    """Función: audit delete venta."""
+    """audit_delete_venta."""
     if are_signals_blocked():
         return
     crear_audit_log(
@@ -26,7 +26,7 @@ def audit_delete_venta(sender, instance, **kwargs):
 
 @receiver(pre_save, sender="bookings.Venta")
 def audit_pre_save_venta(sender, instance, **kwargs):
-    """Función: audit pre save venta."""
+    """audit_pre_save_venta."""
     if are_signals_blocked():
         return
     if instance.pk:
@@ -38,7 +38,7 @@ def audit_pre_save_venta(sender, instance, **kwargs):
 
 @receiver(post_save, sender="bookings.Venta")
 def audit_post_save_venta(sender, instance, created, **kwargs):
-    """Función: audit post save venta."""
+    """audit_post_save_venta."""
     if are_signals_blocked():
         return
     if created:
@@ -67,7 +67,7 @@ def audit_post_save_venta(sender, instance, created, **kwargs):
 # --- AUDIT SIGNALS FOR ITEMVENTA ---
 @receiver(post_delete, sender="bookings.ItemVenta")
 def audit_delete_itemventa(sender, instance, **kwargs):
-    """Función: audit delete itemventa."""
+    """audit_delete_itemventa."""
     if are_signals_blocked():
         return
     crear_audit_log(
@@ -81,7 +81,7 @@ def audit_delete_itemventa(sender, instance, **kwargs):
 
 @receiver(pre_save, sender="bookings.ItemVenta")
 def audit_pre_save_itemventa(sender, instance, **kwargs):
-    """Función: audit pre save itemventa."""
+    """audit_pre_save_itemventa."""
     if are_signals_blocked():
         return
     if instance.pk:
@@ -93,7 +93,7 @@ def audit_pre_save_itemventa(sender, instance, **kwargs):
 
 @receiver(post_save, sender="bookings.ItemVenta")
 def audit_post_save_itemventa(sender, instance, created, **kwargs):
-    """Función: audit post save itemventa."""
+    """audit_post_save_itemventa."""
     if are_signals_blocked():
         return
     if created:
@@ -122,7 +122,7 @@ def audit_post_save_itemventa(sender, instance, created, **kwargs):
 # --- AUDIT SIGNALS FOR PASAJERO (CRM) ---
 @receiver(post_delete, sender="crm.Pasajero")
 def audit_delete_pasajero(sender, instance, **kwargs):
-    """Función: audit delete pasajero."""
+    """audit_delete_pasajero."""
     if are_signals_blocked():
         return
     crear_audit_log(
@@ -136,7 +136,7 @@ def audit_delete_pasajero(sender, instance, **kwargs):
 
 @receiver(pre_save, sender="crm.Pasajero")
 def audit_pre_save_pasajero(sender, instance, **kwargs):
-    """Función: audit pre save pasajero."""
+    """audit_pre_save_pasajero."""
     if are_signals_blocked():
         return
     if instance.pk:
@@ -148,7 +148,7 @@ def audit_pre_save_pasajero(sender, instance, **kwargs):
 
 @receiver(post_save, sender="crm.Pasajero")
 def audit_post_save_pasajero(sender, instance, created, **kwargs):
-    """Función: audit post save pasajero."""
+    """audit_post_save_pasajero."""
     if are_signals_blocked():
         return
     if created:
@@ -175,7 +175,7 @@ def audit_post_save_pasajero(sender, instance, created, **kwargs):
 # --- AUDIT SIGNALS FOR FACTURA (FINANCE) ---
 @receiver(post_delete, sender="finance.Factura")
 def audit_delete_factura(sender, instance, **kwargs):
-    """Función: audit delete factura."""
+    """audit_delete_factura."""
     if are_signals_blocked():
         return
     venta = getattr(instance, "venta_asociada", None) or getattr(instance, "venta", None)
@@ -191,7 +191,7 @@ def audit_delete_factura(sender, instance, **kwargs):
 
 @receiver(pre_save, sender="finance.Factura")
 def audit_pre_save_factura(sender, instance, **kwargs):
-    """Función: audit pre save factura."""
+    """audit_pre_save_factura."""
     if are_signals_blocked():
         return
     if instance.pk:
@@ -203,7 +203,7 @@ def audit_pre_save_factura(sender, instance, **kwargs):
 
 @receiver(post_save, sender="finance.Factura")
 def audit_post_save_factura(sender, instance, created, **kwargs):
-    """Función: audit post save factura."""
+    """audit_post_save_factura."""
     if are_signals_blocked():
         return
     venta = getattr(instance, "venta_asociada", None) or getattr(instance, "venta", None)
@@ -234,7 +234,7 @@ def audit_post_save_factura(sender, instance, created, **kwargs):
 # --- AUDIT SIGNALS FOR PAGOVENTA ---
 @receiver(post_delete, sender="bookings.PagoVenta")
 def audit_delete_pagovanta(sender, instance, **kwargs):
-    """Función: audit delete pagovanta."""
+    """audit_delete_pagovanta."""
     if are_signals_blocked():
         return
     crear_audit_log(
@@ -248,7 +248,7 @@ def audit_delete_pagovanta(sender, instance, **kwargs):
 
 @receiver(pre_save, sender="bookings.PagoVenta")
 def audit_pre_save_pagovanta(sender, instance, **kwargs):
-    """Función: audit pre save pagovanta."""
+    """audit_pre_save_pagovanta."""
     if are_signals_blocked():
         return
     if instance.pk:
@@ -260,7 +260,7 @@ def audit_pre_save_pagovanta(sender, instance, **kwargs):
 
 @receiver(post_save, sender="bookings.PagoVenta")
 def audit_post_save_pagovanta(sender, instance, created, **kwargs):
-    """Función: audit post save pagovanta."""
+    """audit_post_save_pagovanta."""
     if are_signals_blocked():
         return
     if created:
@@ -293,7 +293,7 @@ def audit_post_save_pagovanta(sender, instance, created, **kwargs):
 # --- AUDIT SIGNALS FOR FEEVENTA ---
 @receiver(post_delete, sender="bookings.FeeVenta")
 def audit_delete_feeventa(sender, instance, **kwargs):
-    """Función: audit delete feeventa."""
+    """audit_delete_feeventa."""
     if are_signals_blocked():
         return
     crear_audit_log(
@@ -307,7 +307,7 @@ def audit_delete_feeventa(sender, instance, **kwargs):
 
 @receiver(pre_save, sender="bookings.FeeVenta")
 def audit_pre_save_feeventa(sender, instance, **kwargs):
-    """Función: audit pre save feeventa."""
+    """audit_pre_save_feeventa."""
     if are_signals_blocked():
         return
     if instance.pk:
@@ -319,7 +319,7 @@ def audit_pre_save_feeventa(sender, instance, **kwargs):
 
 @receiver(post_save, sender="bookings.FeeVenta")
 def audit_post_save_feeventa(sender, instance, created, **kwargs):
-    """Función: audit post save feeventa."""
+    """audit_post_save_feeventa."""
     if are_signals_blocked():
         return
     if created:
@@ -352,7 +352,7 @@ def audit_post_save_feeventa(sender, instance, created, **kwargs):
 # --- AUDIT SIGNALS FOR CLIENTE (CRM) ---
 @receiver(post_delete, sender="crm.Cliente")
 def audit_delete_cliente(sender, instance, **kwargs):
-    """Función: audit delete cliente."""
+    """audit_delete_cliente."""
     if are_signals_blocked():
         return
     crear_audit_log(
@@ -366,7 +366,7 @@ def audit_delete_cliente(sender, instance, **kwargs):
 
 @receiver(pre_save, sender="crm.Cliente")
 def audit_pre_save_cliente(sender, instance, **kwargs):
-    """Función: audit pre save cliente."""
+    """audit_pre_save_cliente."""
     if are_signals_blocked():
         return
     if instance.pk:
@@ -378,7 +378,7 @@ def audit_pre_save_cliente(sender, instance, **kwargs):
 
 @receiver(post_save, sender="crm.Cliente")
 def audit_post_save_cliente(sender, instance, created, **kwargs):
-    """Función: audit post save cliente."""
+    """audit_post_save_cliente."""
     if are_signals_blocked():
         return
     if created:
@@ -405,7 +405,7 @@ def audit_post_save_cliente(sender, instance, created, **kwargs):
 # --- AUDIT SIGNALS FOR PROVEEDOR (BOOKINGS) ---
 @receiver(post_delete, sender="bookings.Proveedor")
 def audit_delete_proveedor(sender, instance, **kwargs):
-    """Función: audit delete proveedor."""
+    """audit_delete_proveedor."""
     if are_signals_blocked():
         return
     crear_audit_log(
@@ -419,7 +419,7 @@ def audit_delete_proveedor(sender, instance, **kwargs):
 
 @receiver(pre_save, sender="bookings.Proveedor")
 def audit_pre_save_proveedor(sender, instance, **kwargs):
-    """Función: audit pre save proveedor."""
+    """audit_pre_save_proveedor."""
     if are_signals_blocked():
         return
     if instance.pk:
@@ -431,7 +431,7 @@ def audit_pre_save_proveedor(sender, instance, **kwargs):
 
 @receiver(post_save, sender="bookings.Proveedor")
 def audit_post_save_proveedor(sender, instance, created, **kwargs):
-    """Función: audit post save proveedor."""
+    """audit_post_save_proveedor."""
     if are_signals_blocked():
         return
     if created:

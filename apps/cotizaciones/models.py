@@ -21,9 +21,9 @@ from core.api import AgenciaMixin, SoftDeleteModel
 # ... (Cotizacion model unchanged)
 
 
-class Cotizacion:
-    """Clase Cotizacion. Uso: según contexto de la aplicación.
-    """
+class Cotizacion(AgenciaMixin, SoftDeleteModel):
+    """Cotizacion."""
+
     id_cotizacion = models.AutoField(primary_key=True, verbose_name=_("ID Cotización"))
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     numero_cotizacion = models.CharField(
@@ -59,6 +59,8 @@ class Cotizacion:
     impuestos = models.DecimalField(max_digits=12, decimal_places=2, default=0, editable=False)
 
     class EstadoCotizacion(models.TextChoices):
+        """EstadoCotizacion."""
+
         BORRADOR = "BOR", _("Borrador")
         ENVIADA = "ENV", _("Enviada al Cliente")
         VISTA = "VIS", _("Vista por Cliente")
@@ -113,10 +115,11 @@ class Cotizacion:
         ordering = ["-fecha_emision"]
 
     def __str__(self):
-        # __str__: Representación en string del objeto. Returns: str.
+        """__str__."""
         return self.numero_cotizacion or f"COT-{self.id_cotizacion}"
 
     def save(self, *args, **kwargs):
+        """save."""
         # Asegurar primero que la agencia esté asignada (para usar su subdominio_slug)
         if not self.agencia_id:
             from core.api import get_current_agency
@@ -138,7 +141,7 @@ class Cotizacion:
         super().save(*args, **kwargs)
 
     def calcular_total(self):
-        # calcular_total: Calcular total. Args: según implementación. Returns: según implementación.
+        """calcular_total."""
         total = self.items.aggregate(total=models.Sum("costo"))["total"] or Decimal("0.00")
         self.total_cotizado = total
         self.save(update_fields=["total_cotizado"])
@@ -223,15 +226,17 @@ class Cotizacion:
         return self.get_whatsapp_link()
 
 
-class ItemCotizacion:
-    """Clase ItemCotizacion. Uso: según contexto de la aplicación.
-    """
+class ItemCotizacion(AgenciaMixin, SoftDeleteModel):
+    """ItemCotizacion."""
+
     id_item_cotizacion = models.AutoField(primary_key=True, verbose_name=_("ID Item Cotización"))
     cotizacion = models.ForeignKey(
         Cotizacion, related_name="items", on_delete=models.CASCADE, verbose_name=_("Cotización")
     )
 
     class TipoItem(models.TextChoices):
+        """TipoItem."""
+
         VUELO = "VUE", _("Vuelo")
         ALOJAMIENTO = "ALO", _("Alojamiento")
         ACTIVIDAD = "ACT", _("Actividad")
@@ -280,5 +285,5 @@ class ItemCotizacion:
         ordering = ["id_item_cotizacion"]
 
     def __str__(self):
-        # __str__: Representación en string del objeto. Returns: str.
+        """__str__."""
         return f"{self.get_tipo_item_display()} - {self.descripcion}"

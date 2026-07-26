@@ -2,6 +2,7 @@ import re
 
 
 def _get_fecha_emision(texto: str) -> str:
+    """_get_fecha_emision."""
     patterns = [
         r"ISSUE DATE/FECHA DE EMISION\s*[:\s]*([0-9]{1,2}\s+[A-Z]{3}\s+[0-9]{4}\s+[0-9]{2}:[0-9]{2})",
         r"ISSUE DATE\s*[:\s]*([0-9]{1,2}\s+[A-Z]{3}\s+[0-9]{4}\s+[0-9]{2}:[0-9]{2})",

@@ -1,4 +1,3 @@
-"""Tests para Air tickets financial fields."""
 import pytest
 from django.urls import reverse
 
@@ -8,8 +7,8 @@ pytestmark = pytest.mark.skip(reason="Tests requieren configuración completa o 
 
 
 def test_create_boleto_with_financial_fields(client):
+    """test_create_boleto_with_financial_fields."""
     # Crear boleto vía modelo directamente (simulación import)
-    """Create boleto with financial fields."""
     boleto = BoletoImportado.objects.create(
         numero_boleto="1234567890123",
         tarifa_base=100,

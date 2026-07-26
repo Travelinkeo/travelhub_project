@@ -3,15 +3,10 @@
 # the state keeps db_table='core_xxx' for the renamed models. Future
 # AlterField migrations need this to target the right table.
 
-"""Migración de base de datos para bookings.
-"""
-
 from django.db import migrations
 
 
-class Migration:
-    """Clase Migration. Uso: según contexto de la aplicación.
-    """
+class Migration(migrations.Migration):
     dependencies = [
         ("bookings", "0018_boletoimportado_idx_boleto_json_gin"),
     ]

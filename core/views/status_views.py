@@ -21,7 +21,7 @@ from django.views.decorators.http import require_GET
 
 
 def _check_db():
-    """Función interna: check db."""
+    """_check_db."""
     t0 = time.time()
     try:
         connection.ensure_connection()
@@ -34,7 +34,7 @@ def _check_db():
 
 
 def _check_redis():
-    """Función interna: check redis."""
+    """_check_redis."""
     t0 = time.time()
     try:
         cache.set("_status_ping", "ok", timeout=5)
@@ -46,7 +46,7 @@ def _check_redis():
 
 
 def _check_celery():
-    """Función interna: check celery."""
+    """_check_celery."""
     try:
         from travelhub.celery import app as celery_app
 
@@ -61,7 +61,7 @@ def _check_celery():
 
 
 def _check_storage():
-    """Función interna: check storage."""
+    """_check_storage."""
     import shutil
 
     try:
@@ -79,7 +79,7 @@ def _check_storage():
 
 
 def _check_pdf_engine():
-    """Función interna: check pdf engine."""
+    """_check_pdf_engine."""
     try:
         import weasyprint  # noqa: F401
 
@@ -102,7 +102,7 @@ SERVICE_META = {
 
 
 def _run_checks():
-    """Función interna: run checks."""
+    """_run_checks."""
     checks = {
         "database": _check_db(),
         "cache": _check_redis(),

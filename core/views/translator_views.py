@@ -23,11 +23,12 @@ logger = logging.getLogger(__name__)
 
 
 class TraductorView(LoginRequiredMixin, TemplateView):
-    """Función: TraductorView."""
+    """TraductorView."""
+
     template_name = "core/tools/traductor.html"
 
     def get_context_data(self, **kwargs):
-        """Método que obtiene context data. Args: según implementación. Returns: datos solicitados."""
+        """get_context_data."""
         context = super().get_context_data(**kwargs)
         # Obtener tasa BCV para la calculadora
         try:

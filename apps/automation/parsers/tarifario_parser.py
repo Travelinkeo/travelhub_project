@@ -1,6 +1,3 @@
-"""Parser/procesador de tarifario parser para la aplicación automation.
-"""
-
 import logging
 import re
 from datetime import datetime
@@ -15,7 +12,7 @@ class TarifarioParser:
     """Parser para extraer datos de tarifarios de hoteles en PDF"""
 
     def __init__(self, pdf_path):
-        # __init__: Inicializa una nueva instancia de TarifarioParser. Args: parámetros de inicialización.
+        """__init__."""
         self.pdf_path = pdf_path
         self.reader = pypdf.PdfReader(open(pdf_path, "rb"))
         self.destino_actual = None

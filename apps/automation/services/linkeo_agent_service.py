@@ -1,6 +1,3 @@
-"""Servicio de linkeo agent service para la aplicación automation.
-"""
-
 import datetime
 import json
 import logging
@@ -64,20 +61,20 @@ class LinkeoAgentService:
         prompt = f"""
         Actúa como un clasificador de intenciones para una agencia de viajes.
         Analiza el siguiente texto y extrae la intención y parámetros en JSON.
-        
+
         TEXTO: "{text}"
-        
+
         INTENCIONES POSIBLES:
         - QUERY_SALES: Consultas de ventas, montos, reservas recientes. (Params: date_range_start, date_range_end, destination, airline)
         - QUERY_CLIENT: Búsqueda de teléfonos, emails o datos de clientes. (Params: name_query)
         - CHECK_MIGRATION: Preguntas sobre visas, pasaportes o requisitos de entrada. (Params: nationality, destination)
         - GENERAL: Saludos, agradecimientos, preguntas fuera de contexto.
-        
+
         REGLAS:
         - Fechas en formato YYYY-MM-DD. Si dice "hoy", usa {timezone.now().date()}.
         - Si dice "ayer", usa {timezone.now().date() - datetime.timedelta(days=1)}.
         - Nationalidad y Destinos en códigos ISO 3 letras si es posible, o nombre completo.
-        
+
         RESPUESTA JSON:
         {{
             "intent": "INTENTION_NAME",

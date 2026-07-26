@@ -1,6 +1,3 @@
-"""Utilidades de celery utils para common.
-"""
-
 import logging
 from collections.abc import Callable
 from functools import wraps
@@ -26,14 +23,15 @@ def idempotent_task(timeout: int = 3600, key_prefix: str = "celery_idem") -> Cal
         @shared_task
         @idempotent_task(timeout=3600)
         def procesar_pago(pago_id):
-            # procesar_pago: Procesa r pago. Args: datos a procesar. Returns: resultado procesado.
             ...
     """
 
     def decorator(func: _F) -> _F:
-        # decorator: Decorator. Args: según implementación. Returns: según implementación.
+        """decorator."""
+
         @wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
+            """wrapper."""
             # Generar clave única basada en nombre de tarea + argumentos
             task_name = func.__name__
             args_key = f"{key_prefix}:{task_name}:{args}:{sorted(kwargs.items())}"
@@ -141,7 +139,7 @@ def tenant_task(*task_args: Any, **task_kwargs: Any) -> Callable[[_F], _F]:
     """
 
     def decorator(func: _F) -> _F:
-        # decorator: Decorator. Args: según implementación. Returns: según implementación.
+        """decorator."""
         import inspect
         from functools import wraps
 
@@ -150,6 +148,7 @@ def tenant_task(*task_args: Any, **task_kwargs: Any) -> Callable[[_F], _F]:
         @shared_task(*task_args, **task_kwargs)
         @wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
+            """wrapper."""
             # 1. Intentar encontrar el agency_id en los argumentos
             agency_id = kwargs.pop(
                 "agency_id", kwargs.pop("agencia_id", kwargs.pop("id_agencia", None))

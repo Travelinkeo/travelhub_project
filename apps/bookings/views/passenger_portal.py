@@ -1,6 +1,3 @@
-"""Módulo passenger portal de la aplicación bookings.
-"""
-
 import base64
 import logging
 from datetime import datetime
@@ -22,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 
 def parse_date(date_str):
-    # parse_date: Analiza/parsea  date. Args: datos de entrada. Returns: resultado del parseo.
+    """parse_date."""
     if not date_str:
         return None
     for fmt in ("%Y-%m-%d", "%d/%m/%Y", "%Y/%m/%d"):

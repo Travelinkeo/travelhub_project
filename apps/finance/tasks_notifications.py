@@ -1,6 +1,3 @@
-"""Módulo tasks notifications de la aplicación finance.
-"""
-
 import logging
 
 from celery import shared_task
@@ -25,7 +22,7 @@ User = get_user_model()
     soft_time_limit=270,
 )
 def enviar_reporte_gerencia_task(self, reporte_id, user_id, email_destino, agencia_id=None):
-    # enviar_reporte_gerencia_task: Envía ar reporte gerencia task. Args: datos del mensaje. Returns: resultado del envío.
+    """enviar_reporte_gerencia_task."""
     from core.api import Agencia, agency_context, system_context
 
     try:

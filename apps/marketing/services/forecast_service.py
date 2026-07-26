@@ -1,6 +1,3 @@
-"""Servicio de forecast service para la aplicación marketing.
-"""
-
 import logging
 from datetime import timedelta
 from typing import Any
@@ -12,14 +9,14 @@ from pydantic import BaseModel, Field
 
 
 def _get_ai_engine():
-    # _get_ai_engine:  get ai engine. Args: según implementación. Returns: según implementación.
+    """_get_ai_engine."""
     from django.utils.module_loading import import_string
 
     return import_string("apps.automation.services.ai_engine.ai_engine")
 
 
 def _get_venta_model():
-    # _get_venta_model:  get venta model. Args: según implementación. Returns: según implementación.
+    """_get_venta_model."""
     from django.apps import apps
 
     return apps.get_model("bookings", "Venta")
@@ -28,25 +25,25 @@ def _get_venta_model():
 logger = logging.getLogger(__name__)
 
 
-class ForecastInsight:
-    """Clase ForecastInsight. Uso: según contexto de la aplicación.
-    """
+class ForecastInsight(BaseModel):
+    """ForecastInsight."""
+
     title: str = Field(description="Título corto del insight (Ej: Auge en Caribe)")
     description: str = Field(description="Descripción detallada y recomendación estratégica")
     impact_level: str = Field(description="Nivel de impacto esperado: HIGH, MEDIUM, LOW")
 
 
-class HotDestination:
-    """Clase HotDestination. Uso: según contexto de la aplicación.
-    """
+class HotDestination(BaseModel):
+    """HotDestination."""
+
     name: str = Field(description="Nombre del destino o país")
     growth_probability: str = Field(description="Probabilidad de crecimiento (Ej: 85%)")
     reason: str = Field(description="Razón breve de la tendencia")
 
 
-class SalesForecastSchema:
-    """Clase SalesForecastSchema. Uso: según contexto de la aplicación.
-    """
+class SalesForecastSchema(BaseModel):
+    """SalesForecastSchema."""
+
     predicted_sales_next_month: str = Field(
         description="Monto predicho de ventas para el próximo mes"
     )
@@ -136,22 +133,22 @@ class AIForecastService:
         # 2. Construir Prompt
         prompt = f"""
         Actúa como un Analista de Inteligencia de Negocios Senior especializado en el sector Turismo.
-        
+
         CONTEXTO ACTUAL:
         Fecha de reporte: {current_date}
-        
+
         DATOS HISTÓRICOS DE VENTAS (Últimos 12 meses):
         {historical_sales}
-        
+
         DESTINOS CON MÁS TRACCIÓN RECIENTE:
         {top_destinations}
-        
+
         TAREAS:
         1. Analiza los patrones de estacionalidad y el crecimiento mes a mes.
         2. Predice el volumen de ventas para el PRÓXIMO MES basándote en tendencias de la industria y datos locales.
         3. Identifica destinos que deberían ser promocionados (tendencias emergentes).
         4. Genera recomendaciones tácticas de marketing (ej: 'Vender paquetes de esquí por cercanía a temporada', 'Foco en B2B corporativo por reactivación post-vacacional').
-        
+
         REQUISITOS:
         - Sé específico y métrico.
         - Las recomendaciones deben ser accionables para una Agencia de Viajes.

@@ -4,11 +4,12 @@ from apps.automation.services.collection_ai_service import CollectionAIService
 
 
 class Command(BaseCommand):
-    """Comando de gestión personalizado."""
+    """Command."""
+
     help = "Detecta facturas vencidas y envía recordatorios personalizados vía WhatsApp con IA."
 
     def add_arguments(self, parser):
-        """Método: add arguments."""
+        """add_arguments."""
         parser.add_argument(
             "--dry-run",
             action="store_true",
@@ -21,7 +22,7 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        """Método: handle."""
+        """handle."""
         dry_run = options["dry_run"]
         agencia_id = options.get("agencia_id")
 

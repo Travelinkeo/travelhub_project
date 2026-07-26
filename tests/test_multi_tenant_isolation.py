@@ -34,7 +34,6 @@ class MultiTenantIsolationTestCase(TestCase):
     def setUpTestData(cls):
         # Create two agencies. subdominio_slug vive en AgenciaConfiguracion (creada
         # por signal al guardar Agencia); no es kwarg valido de Agencia.objects.create().
-        """SetUpTestData."""
         cls.agency1 = Agencia.objects.create(
             nombre="Agencia Test 1",
             email_principal="admin@agencia1.test",
@@ -90,7 +89,7 @@ class TestNotificationTemplateIsolation(MultiTenantIsolationTestCase):
     """Test NotificationTemplate/Log multi-tenant isolation."""
 
     def setUp(self):
-        """SetUp."""
+        """setUp."""
         self.clear_agency()
 
     def test_template_creation_with_agencia(self):
@@ -173,7 +172,7 @@ class TestBookingModelsIsolation(MultiTenantIsolationTestCase):
     """Test booking models (Venta, Cliente, ItemFactura) isolation."""
 
     def setUp(self):
-        """Setup."""
+        """setUp."""
         self.clear_agency()
 
     def test_venta_isolation(self):
@@ -261,7 +260,7 @@ class TestCRMModelsIsolation(MultiTenantIsolationTestCase):
     """Test CRM models (OportunidadViaje, MensajeWhatsApp) isolation."""
 
     def setUp(self):
-        """Setup."""
+        """setUp."""
         self.clear_agency()
 
     def test_oportunidad_isolation(self):
@@ -331,7 +330,7 @@ class TestFinanceModelsIsolation(MultiTenantIsolationTestCase):
     """Test finance models (Factura) isolation."""
 
     def setUp(self):
-        """Setup."""
+        """setUp."""
         self.clear_agency()
 
     def test_factura_isolation(self):
@@ -385,7 +384,7 @@ class TestLiquidacionProveedorIsolation(MultiTenantIsolationTestCase):
     """
 
     def setUp(self):
-        """Setup."""
+        """setUp."""
         self.clear_agency()
 
     def test_liquidacion_isolation_with_agencia_direct(self):
@@ -456,7 +455,7 @@ class TestFacturaConsolidadaIsolation(MultiTenantIsolationTestCase):
     """
 
     def setUp(self):
-        """Setup."""
+        """setUp."""
         self.clear_agency()
 
     def test_factura_consolidada_isolation(self):
@@ -511,7 +510,7 @@ class TestCascadeToDeleteSetNull(MultiTenantIsolationTestCase):
     """
 
     def setUp(self):
-        """Setup."""
+        """setUp."""
         self.clear_agency()
 
     def test_borrar_cliente_preserva_oportunidad_viaje(self):
@@ -592,7 +591,7 @@ class TestContabilidadModelsIsolation(MultiTenantIsolationTestCase):
     """Test modelos de Contabilidad (AsientoContable) aislamiento."""
 
     def setUp(self):
-        """Setup."""
+        """setUp."""
         self.clear_agency()
 
     def test_asiento_contable_isolation(self):
@@ -632,7 +631,7 @@ class TestAutomationModelsIsolation(MultiTenantIsolationTestCase):
     """Test automation models isolation."""
 
     def setUp(self):
-        """Setup."""
+        """setUp."""
         self.clear_agency()
 
     def test_notificacion_inteligente_isolation(self):
@@ -765,7 +764,7 @@ pytest_plugins = ["pytest_django"]
 
 
 def pytest_configure(config):
-    """Pytest configure."""
+    """pytest_configure."""
     config.option.django_settings_module = "travelhub.settings"
 
 

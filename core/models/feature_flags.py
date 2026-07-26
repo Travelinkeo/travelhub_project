@@ -29,12 +29,12 @@ class FeatureFlag(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        """Configuración del modelo."""
         unique_together = [("nombre", "agencia")]
         verbose_name = "Feature Flag"
         verbose_name_plural = "Feature Flags"
 
     def __str__(self):
+        """__str__."""
         scope = "GLOBAL" if self.agencia is None else self.agencia.nombre
         return f"{self.nombre} ({scope})"
 

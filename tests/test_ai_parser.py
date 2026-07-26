@@ -1,4 +1,3 @@
-"""Tests para Ai parser."""
 import os
 
 import pytest
@@ -12,7 +11,7 @@ SINGLE_TICKET_FILE = "0457281019415.txt"
 
 
 def read_ticket(filename: str):
-    """Read ticket."""
+    """read_ticket."""
     path = os.path.join(SABRE_DIR, filename)
     with open(path, encoding="utf-8", errors="ignore") as f:
         return f.read()
@@ -21,7 +20,7 @@ def read_ticket(filename: str):
 @pytest.mark.django_db
 @pytest.mark.vcr
 def test_parse_sabre_ticket_with_gemini():
-    """Parse sabre ticket with gemini."""
+    """test_parse_sabre_ticket_with_gemini."""
     try:
         from django.conf import settings
 

@@ -152,6 +152,7 @@ def test_parser_with_sample(parser, parser_name, file_path):
 
 
 def main():
+    """main."""
     print("🔍 PRUEBA DETALLADA DE PARSERS\n")
 
     all_results = []

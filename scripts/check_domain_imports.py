@@ -30,14 +30,17 @@ class ImportVisitor(ast.NodeVisitor):
     """
 
     def __init__(self):
+        """__init__."""
         self.imports = []
 
     def visit_Import(self, node):
+        """visit_Import."""
         for alias in node.names:
             self.imports.append((alias.name, node.lineno))
         self.generic_visit(node)
 
     def visit_ImportFrom(self, node):
+        """visit_ImportFrom."""
         # node.module es None para importaciones relativas como 'from . import models'
         if node.module:
             self.imports.append((node.module, node.lineno))

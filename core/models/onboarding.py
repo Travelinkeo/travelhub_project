@@ -10,7 +10,8 @@ logger = logging.getLogger(__name__)
 
 
 class AgenciaSetupProgress(AgenciaMixin):
-    """Función: AgenciaSetupProgress."""
+    """AgenciaSetupProgress."""
+
     STEPS = [
         ("welcome", _("Bienvenida")),
         ("profile", _("Perfil de Agencia")),
@@ -27,11 +28,11 @@ class AgenciaSetupProgress(AgenciaMixin):
     is_completed = models.BooleanField(default=False)
 
     class Meta:
-        """Meta definición del modelo."""
         verbose_name = _("Progreso de Onboarding")
         verbose_name_plural = _("Progresos de Onboarding")
 
     def __str__(self):
+        """__str__."""
         return f"Agencia {self.agencia_id}: {self.get_current_step_display()} ({'completado' if self.is_completed else 'en progreso'})"
 
     def complete_step(self, step):

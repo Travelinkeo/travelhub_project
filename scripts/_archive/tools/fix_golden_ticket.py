@@ -2,6 +2,7 @@ import os
 
 
 def fix_golden_ticket():
+    """fix_golden_ticket."""
     path = r"c:\Users\ARMANDO\travelhub_project\core\templates\core\tickets\golden_ticket_v2.html"
     if not os.path.exists(path):
         print(f"File not found: {path}")

@@ -16,6 +16,7 @@ from core.models import Agencia, MigrationCheck
 
 
 def test_automation():
+    """test_automation."""
     print("🧪 PRUEBA AUTOMATIZACION MIGRACION")
 
     # 1. Crear Agencia dummy (si no existe)

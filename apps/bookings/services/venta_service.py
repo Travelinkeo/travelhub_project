@@ -1,6 +1,3 @@
-"""Servicio de venta service para la aplicación bookings.
-"""
-
 import datetime
 import logging
 
@@ -135,7 +132,7 @@ class VentaService:
                     from apps.communications.services.whatsapp_unified import enviar_whatsapp
 
                     def _send_cancelacion():
-                        # _send_cancelacion:  send cancelacion. Args: según implementación. Returns: según implementación.
+                        """_send_cancelacion."""
                         cliente = venta.cliente
                         if not cliente or not cliente.telefono_principal:
                             return

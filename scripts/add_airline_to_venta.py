@@ -16,6 +16,7 @@ AIRLINE_NAME = "WINGO"
 
 
 def run():
+    """run."""
     print(f"Actualizando Venta ID: {VENTA_ID} para asegurar el nombre de la aerolínea...")
     try:
         venta = Venta.objects.get(pk=VENTA_ID)

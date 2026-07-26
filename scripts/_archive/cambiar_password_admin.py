@@ -17,6 +17,7 @@ from django.contrib.auth.models import User
 
 
 def cambiar_password_admin():
+    """cambiar_password_admin."""
     try:
         admin = User.objects.get(username="admin")
     except User.DoesNotExist:

@@ -19,11 +19,12 @@ from apps.bookings.models import (
 
 
 class Command(BaseCommand):
-    """Comando de gestión personalizado."""
+    """Command."""
+
     help = "Importa tarifario de hoteles desde JSON parseado del PDF de BT Travel"
 
     def add_arguments(self, parser):
-        """Método: add arguments."""
+        """add_arguments."""
         parser.add_argument("json_path", type=str, help="Ruta al archivo JSON del tarifario")
         parser.add_argument(
             "--proveedor-id", type=int, default=1, help="ID del proveedor (default: 1)"
@@ -38,7 +39,7 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        """Método: handle."""
+        """handle."""
         json_path = options["json_path"]
         proveedor_id = options["proveedor_id"]
         dry_run = options["dry_run"]

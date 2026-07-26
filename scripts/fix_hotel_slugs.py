@@ -14,6 +14,7 @@ from core.models import HotelTarifario
 
 
 def fix_slugs():
+    """fix_slugs."""
     hoteles = HotelTarifario.objects.all()
     print(f"Fixing slugs for {hoteles.count()} hotels...")
     for h in hoteles:

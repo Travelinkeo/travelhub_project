@@ -10,6 +10,7 @@ from apps.contabilidad.models import CuentaContable
 
 
 def initialize_accounts():
+    """initialize_accounts."""
     accounts = [
         # ACTIVOS
         {

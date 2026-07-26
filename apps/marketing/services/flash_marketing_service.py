@@ -1,6 +1,3 @@
-"""Servicio de flash marketing service para la aplicación marketing.
-"""
-
 import logging
 import os
 import random
@@ -20,7 +17,7 @@ class FlashMarketingService:
     """
 
     def __init__(self):
-        # __init__: Inicializa una nueva instancia de FlashMarketingService. Args: parámetros de inicialización.
+        """__init__."""
         self.width = 1080
         self.height = 1920  # Formato Historia (9:16)
         self.assets_dir = os.path.join(settings.BASE_DIR, "static", "images")

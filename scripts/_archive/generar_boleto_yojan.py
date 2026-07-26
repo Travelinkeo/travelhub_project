@@ -55,11 +55,13 @@ datos_boleto = {
 
 
 def parse_flight_datetime(date_str, time_str, year=2025):
+    """parse_flight_datetime."""
     dt_format = f"{date_str} {year} {time_str}"
     return datetime.strptime(dt_format, "%a, %d %b %Y %I:%M %p")
 
 
 def get_city_by_name(city_string):
+    """get_city_by_name."""
     city_name_match = re.match(r"^(.*?)\s*\(", city_string)
     city_name = city_name_match.group(1).strip() if city_name_match else city_string
 
@@ -79,6 +81,7 @@ def get_city_by_name(city_string):
 
 
 def run():
+    """run."""
     print(f"Iniciando proceso para pasajero: {datos_boleto['passenger_name']}...")
 
     try:

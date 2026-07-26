@@ -1,6 +1,3 @@
-"""Módulo secuencia de la aplicación bookings.
-"""
-
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -24,5 +21,5 @@ class SecuenciaVentaDiaria(AgenciaMixin, models.Model):
         db_table = "bookings_secuencia_venta_diaria"
 
     def __str__(self):
-        # __str__: Representación en string del objeto. Returns: str.
+        """__str__."""
         return f"Secuencia {self.agencia_id} - {self.fecha}: {self.contador}"

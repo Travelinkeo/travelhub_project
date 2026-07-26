@@ -1,6 +1,3 @@
-"""Tareas asíncronas (Celery) para la aplicación common.
-"""
-
 import base64
 import logging
 from email.header import decode_header
@@ -14,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 def get_filename_from_header(header):
-    # get_filename_from_header: Obtiene/recupera filename from header. Args: según implementación. Returns: dato solicitado.
+    """get_filename_from_header."""
     if not header:
         return None
     decoded_header = decode_header(header)
@@ -34,7 +31,7 @@ def get_filename_from_header(header):
     name="core.tasks.procesar_correo_individual_agencia", time_limit=300, soft_time_limit=270
 )
 def procesar_correo_individual_agencia(agencia_id):
-    # procesar_correo_individual_agencia: Procesa r correo individual agencia. Args: datos a procesar. Returns: resultado procesado.
+    """procesar_correo_individual_agencia."""
     from apps.communications.services.email_unified import EmailMonitorService
     from core.middleware import agency_context
     from core.models.agencia import Agencia
@@ -147,7 +144,7 @@ def _notificar_operador_whatsapp(agencia, cantidad_correos):
     acks_late=True,
 )
 def process_incoming_emails():
-    # process_incoming_emails: Procesa  incoming emails. Args: datos a procesar. Returns: resultado procesado.
+    """process_incoming_emails."""
     from django.core.cache import cache
     from django.db.models import Q
 
@@ -212,7 +209,7 @@ def process_incoming_emails():
     default_retry_delay=600,
 )
 def migrar_logos_agencia_task(agencia_id, **kwargs):
-    # migrar_logos_agencia_task: Migrar logos agencia task. Args: según implementación. Returns: según implementación.
+    """migrar_logos_agencia_task."""
     from apps.communications.services.telegram_unified import upload_logo_to_telegram
     from core.models.agencia import Agencia
 
@@ -280,7 +277,7 @@ def migrar_logos_agencia_task(agencia_id, **kwargs):
     soft_time_limit=50,
 )
 def send_email_task(self, recipient, subject, message, from_email=None, agencia_id=None, **kwargs):
-    # send_email_task: Envía  email task. Args: datos del mensaje. Returns: resultado del envío.
+    """send_email_task."""
     from apps.communications.services.email_unified import enviar_email_generico
 
     try:
@@ -312,7 +309,7 @@ def send_email_task(self, recipient, subject, message, from_email=None, agencia_
     soft_time_limit=50,
 )
 def notify_migration_alert_task(self, check_id):
-    # notify_migration_alert_task: Notify migration alert task. Args: según implementación. Returns: según implementación.
+    """notify_migration_alert_task."""
     from apps.communications.services.notification_dispatcher import notificar_alerta_migratoria
     from core.models.migration_checks import MigrationCheck
 

@@ -181,7 +181,7 @@ def setup_cache_signals():
 
     @receiver(post_save, sender="core.Agencia")
     def invalidate_agencia_on_save(sender, instance, **kwargs):
-        """Función: invalidate agencia on save."""
+        """invalidate_agencia_on_save."""
         invalidate_agencia_cache(instance.pk)
         # Invalida también el cache del active agency para todos sus usuarios
         for ua in instance.usuarios.all():
@@ -190,7 +190,7 @@ def setup_cache_signals():
 
     @receiver(post_delete, sender="core.Agencia")
     def invalidate_agencia_on_delete(sender, instance, **kwargs):
-        """Función: invalidate agencia on delete."""
+        """invalidate_agencia_on_delete."""
         invalidate_agencia_cache(instance.pk)
         # Invalida también el cache del active agency para todos sus usuarios
         for ua in instance.usuarios.all():
@@ -201,7 +201,7 @@ def setup_cache_signals():
 
     @receiver(post_save, sender="core.UsuarioAgencia")
     def invalidate_usuario_agencias_on_save(sender, instance, **kwargs):
-        """Función: invalidate usuario agencias on save."""
+        """invalidate_usuario_agencias_on_save."""
         invalidate_usuario_agencias_cache(instance.usuario_id)
         cache.delete(f"th:user_agencia:{instance.usuario_id}")
         logger.debug(
@@ -210,7 +210,7 @@ def setup_cache_signals():
 
     @receiver(post_delete, sender="core.UsuarioAgencia")
     def invalidate_usuario_agencias_on_delete(sender, instance, **kwargs):
-        """Función: invalidate usuario agencias on delete."""
+        """invalidate_usuario_agencias_on_delete."""
         invalidate_usuario_agencias_cache(instance.usuario_id)
         cache.delete(f"th:user_agencia:{instance.usuario_id}")
         logger.debug(

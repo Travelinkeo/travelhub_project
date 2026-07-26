@@ -5,8 +5,7 @@ from django.db import migrations, models
 import core.fields
 
 
-class Migration:
-    """Migración de base de datos generada por Django."""
+class Migration(migrations.Migration):
     dependencies = [
         ("core", "0030_agenciaconfiguracion_email_monitor_host_and_more"),
     ]

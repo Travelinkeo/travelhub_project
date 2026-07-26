@@ -1,6 +1,3 @@
-"""Servicio de magic link service para la aplicación common.
-"""
-
 import logging
 from datetime import timedelta
 
@@ -17,7 +14,7 @@ MAGIC_LINK_EXPIRY_MINUTES = 15
 
 
 def create_magic_link(email, redirect_url="", is_onboarding=False, onboarding_data=None):
-    # create_magic_link: Crea un nuevo magic link. Args: datos del objeto. Returns: objeto creado.
+    """create_magic_link."""
     token_obj = MagicLinkToken.objects.create(
         email=email.lower().strip(),
         token=MagicLinkToken.generate_token(),
@@ -30,7 +27,7 @@ def create_magic_link(email, redirect_url="", is_onboarding=False, onboarding_da
 
 
 def send_magic_link_email(token_obj, request=None):
-    # send_magic_link_email: Envía  magic link email. Args: datos del mensaje. Returns: resultado del envío.
+    """send_magic_link_email."""
     base_url = getattr(settings, "MAGIC_LINK_BASE_URL", "")
     if not base_url and request:
         scheme = "https" if request.is_secure() else "http"
@@ -78,7 +75,7 @@ def send_magic_link_email(token_obj, request=None):
 
 
 def verify_magic_link(token_str):
-    # verify_magic_link: Verify magic link. Args: según implementación. Returns: según implementación.
+    """verify_magic_link."""
     try:
         token_obj = MagicLinkToken.objects.get(token=token_str)
     except MagicLinkToken.DoesNotExist:

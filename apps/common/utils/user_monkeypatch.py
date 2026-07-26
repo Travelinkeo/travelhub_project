@@ -1,6 +1,3 @@
-"""Utilidades de user monkeypatch para common.
-"""
-
 import logging
 
 logger = logging.getLogger(__name__)

@@ -20,11 +20,12 @@ from apps.bookings.models import HotelTarifario, ImagenHotel
 
 
 class Command(BaseCommand):
-    """Comando de gestión personalizado."""
+    """Command."""
+
     help = "Enriquece hoteles con fotos de Google Places API"
 
     def add_arguments(self, parser):
-        """Método: add arguments."""
+        """add_arguments."""
         parser.add_argument("--agencia-id", type=int, default=None)
         parser.add_argument("--hotel-id", type=int, default=None)
         parser.add_argument("--dry-run", action="store_true")
@@ -39,7 +40,7 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        """Método: handle."""
+        """handle."""
         api_key = getattr(settings, "GOOGLE_PLACES_API_KEY", "")
         if not api_key:
             self.stdout.write(self.style.ERROR("GOOGLE_PLACES_API_KEY no configurada"))

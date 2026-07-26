@@ -1,6 +1,3 @@
-"""Pruebas para fase2 en finance.
-"""
-
 from decimal import Decimal
 from unittest.mock import patch
 
@@ -20,14 +17,14 @@ _factura_counter = 0
 
 
 def _next_factura_numero(prefix="FT"):
-    # _next_factura_numero:  next factura numero. Args: según implementación. Returns: según implementación.
+    """_next_factura_numero."""
     global _factura_counter
     _factura_counter += 1
     return f"{prefix}-{_factura_counter:06d}"
 
 
 def _crear_venta(agencia, moneda, localizador="VTEST"):
-    # _crear_venta:  crear venta. Args: según implementación. Returns: según implementación.
+    """_crear_venta."""
     return Venta.objects.create(
         localizador=localizador,
         agencia=agencia,
@@ -38,7 +35,7 @@ def _crear_venta(agencia, moneda, localizador="VTEST"):
 
 
 def _crear_factura_minima(agencia, venta, moneda, numero=None):
-    # _crear_factura_minima:  crear factura minima. Args: según implementación. Returns: según implementación.
+    """_crear_factura_minima."""
     return Factura.objects.create(
         numero_control=numero or _next_factura_numero(),
         agencia=agencia,
@@ -54,7 +51,7 @@ class TestCrossTenantIsolation:
     def test_venta_queryset_filtered_by_agencia(
         self, agencia_premium, agencia_estandar, moneda_usd
     ):
-        # test_venta_queryset_filtered_by_agencia: Test venta queryset filtered by agencia. Args: según implementación. Returns: según implementación.
+        """test_venta_queryset_filtered_by_agencia."""
         with agency_context(agencia_premium):
             _crear_venta(agencia_premium, moneda_usd, "VP1")
         with agency_context(agencia_estandar):
@@ -74,7 +71,7 @@ class TestCrossTenantIsolation:
     def test_factura_queryset_filtered_by_agencia(
         self, agencia_premium, agencia_estandar, moneda_usd
     ):
-        # test_factura_queryset_filtered_by_agencia: Test factura queryset filtered by agencia. Args: según implementación. Returns: según implementación.
+        """test_factura_queryset_filtered_by_agencia."""
         with agency_context(agencia_premium):
             vp = _crear_venta(agencia_premium, moneda_usd, "VP2")
             _crear_factura_minima(agencia_premium, vp, moneda_usd)
@@ -91,7 +88,7 @@ class TestCrossTenantIsolation:
         assert len(facturas_estandar) == 1
 
     def test_no_agency_context_returns_nothing(self, agencia_premium, moneda_usd):
-        # test_no_agency_context_returns_nothing: Test no agency context returns nothing. Args: según implementación. Returns: según implementación.
+        """test_no_agency_context_returns_nothing."""
         with agency_context(agencia_premium):
             _crear_venta(agencia_premium, moneda_usd, "VP3")
 
@@ -106,7 +103,7 @@ class TestCrossTenantIsolation:
         assert len(ventas) == 0
 
     def test_superuser_sees_all(self, agencia_premium, agencia_estandar, moneda_usd):
-        # test_superuser_sees_all: Test superuser sees all. Args: según implementación. Returns: según implementación.
+        """test_superuser_sees_all."""
         from django.contrib.auth import get_user_model
 
         User = get_user_model()
@@ -137,7 +134,7 @@ class TestHardDeleteQueryset:
     """Verifica que .hard_delete() en querysets elimina fisicamente los registros."""
 
     def test_itemfactura_hard_delete_clears_rows(self, agencia_premium, moneda_usd):
-        # test_itemfactura_hard_delete_clears_rows: Test itemfactura hard delete clears rows. Args: según implementación. Returns: según implementación.
+        """test_itemfactura_hard_delete_clears_rows."""
         with agency_context(agencia_premium):
             venta = _crear_venta(agencia_premium, moneda_usd)
             factura = _crear_factura_minima(agencia_premium, venta, moneda_usd)
@@ -170,7 +167,7 @@ class TestHardDeleteQueryset:
             assert ItemFactura.all_objects.filter(factura=factura).count() == 0
 
     def test_soft_delete_leaves_ghost_rows(self, agencia_premium, moneda_usd):
-        # test_soft_delete_leaves_ghost_rows: Test soft delete leaves ghost rows. Args: según implementación. Returns: según implementación.
+        """test_soft_delete_leaves_ghost_rows."""
         with agency_context(agencia_premium):
             venta = _crear_venta(agencia_premium, moneda_usd)
             factura = _crear_factura_minima(agencia_premium, venta, moneda_usd)
@@ -197,7 +194,7 @@ class TestConciliacionBoletoHardDelete:
     para permitir recreacion sin IntegrityError."""
 
     def test_hard_delete_clears_onetoone_slots(self, agencia_premium, moneda_usd):
-        # test_hard_delete_clears_onetoone_slots: Test hard delete clears onetoone slots. Args: según implementación. Returns: según implementación.
+        """test_hard_delete_clears_onetoone_slots."""
         with agency_context(agencia_premium):
             from apps.bookings.models import BoletoImportado
 
@@ -237,7 +234,7 @@ class TestConciliacionBoletoHardDelete:
             assert ConciliacionBoleto.all_objects.filter(reporte=reporte).count() == 0
 
     def test_recreate_after_hard_delete_no_integrityerror(self, agencia_premium, moneda_usd):
-        # test_recreate_after_hard_delete_no_integrityerror: Test recreate after hard delete no integrityerror. Args: según implementación. Returns: según implementación.
+        """test_recreate_after_hard_delete_no_integrityerror."""
         with agency_context(agencia_premium):
             from apps.bookings.models import BoletoImportado
 
@@ -286,7 +283,7 @@ class TestConciliacionBoletoHardDelete:
 
     @pytest.mark.skip(reason="ConciliacionBoleto stub may lack unique constraint on linea_reporte")
     def test_soft_delete_blocks_recreate_onetoone(self, agencia_premium, moneda_usd):
-        # test_soft_delete_blocks_recreate_onetoone: Test soft delete blocks recreate onetoone. Args: según implementación. Returns: según implementación.
+        """test_soft_delete_blocks_recreate_onetoone."""
         with agency_context(agencia_premium):
             from django.db import IntegrityError
 
@@ -340,7 +337,7 @@ class TestRelatedManagerFiltersSoftDeleted:
     gracias a que _default_manager ahora es AgenciaManager (MRO swap)."""
 
     def test_reverse_fk_excludes_soft_deleted_items(self, agencia_premium, moneda_usd):
-        # test_reverse_fk_excludes_soft_deleted_items: Test reverse fk excludes soft deleted items. Args: según implementación. Returns: según implementación.
+        """test_reverse_fk_excludes_soft_deleted_items."""
         with agency_context(agencia_premium):
             venta = _crear_venta(agencia_premium, moneda_usd)
             factura = _crear_factura_minima(agencia_premium, venta, moneda_usd)
@@ -376,7 +373,7 @@ class TestRelatedManagerFiltersSoftDeleted:
             assert with_deleted.count() == 2
 
     def test_default_manager_is_agencia_manager(self):
-        # test_default_manager_is_agencia_manager: Test default manager is agencia manager. Args: según implementación. Returns: según implementación.
+        """test_default_manager_is_agencia_manager."""
         assert ItemFactura._default_manager.__class__.__name__ == "AgenciaManager"
 
 
@@ -385,7 +382,7 @@ class TestReportDataAggregatorAgencyFilter:
     """Verifica que ReportDataAggregator filtra por agencia cuando se provee."""
 
     def test_agencia_param_filters_ventas(self, agencia_premium, agencia_estandar, moneda_usd):
-        # test_agencia_param_filters_ventas: Test agencia param filters ventas. Args: según implementación. Returns: según implementación.
+        """test_agencia_param_filters_ventas."""
         from apps.common.services.reports.report_data_aggregator import ReportDataAggregator
 
         with agency_context(agencia_premium):
@@ -401,7 +398,7 @@ class TestReportDataAggregatorAgencyFilter:
         assert len(data_estandar) == 1
 
     def test_agencia_none_returns_all_ventas(self, agencia_premium, agencia_estandar, moneda_usd):
-        # test_agencia_none_returns_all_ventas: Test agencia none returns all ventas. Args: según implementación. Returns: según implementación.
+        """test_agencia_none_returns_all_ventas."""
         from apps.common.services.reports.report_data_aggregator import ReportDataAggregator
 
         with agency_context(agencia_premium):
@@ -419,7 +416,7 @@ class TestLinkeoAgentServiceAgencyFilter:
     """Verifica que LinkeoAgentService filtra por agencia cuando se provee."""
 
     def test_sales_query_with_agencia(self, agencia_premium, agencia_estandar, moneda_usd):
-        # test_sales_query_with_agencia: Test sales query with agencia. Args: según implementación. Returns: según implementación.
+        """test_sales_query_with_agencia."""
         from django.utils.module_loading import import_string
 
         LinkeoAgentService = import_string(
@@ -441,7 +438,7 @@ class TestLinkeoAgentServiceAgencyFilter:
         )
 
     def test_client_query_with_agencia(self, agencia_premium, agencia_estandar):
-        # test_client_query_with_agencia: Test client query with agencia. Args: según implementación. Returns: según implementación.
+        """test_client_query_with_agencia."""
         from django.utils.module_loading import import_string
 
         LinkeoAgentService = import_string(

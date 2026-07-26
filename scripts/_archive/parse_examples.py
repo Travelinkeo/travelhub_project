@@ -4,6 +4,7 @@ from apps.automation.parsers import ticket_parser as tp
 
 
 def load_and_parse(path):
+    """load_and_parse."""
     with open(path, encoding="utf-8", errors="ignore") as f:
         txt = f.read()
     out = tp.extract_data_from_text(txt)

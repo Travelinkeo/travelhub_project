@@ -11,6 +11,7 @@ from apps.bookings.models import BoletoImportado
 
 
 def inspect_last_boleto_json():
+    """inspect_last_boleto_json."""
     b = BoletoImportado.objects.order_by("-id_boleto_importado").first()
     if not b:
         print("No boletos found.")

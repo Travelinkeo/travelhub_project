@@ -18,6 +18,7 @@ KIU_DIR = os.path.join(ROOT, "external_ticket_generator", "KIU")
 
 
 def load_eml(path: str):
+    """load_eml."""
     with open(path, "rb") as f:
         msg = email.message_from_binary_file(f, policy=policy.default)
     html_body = ""
@@ -55,6 +56,7 @@ def load_eml(path: str):
 
 
 def main():
+    """main."""
     print("=== Parseo masivo de EML KIU ===")
     eml_files = [f for f in os.listdir(KIU_DIR) if f.lower().endswith(".eml")]
     eml_files.sort()

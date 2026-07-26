@@ -17,6 +17,7 @@ from core.models import Agencia, MigrationCheck, UsuarioAgencia
 
 
 def verify_alert():
+    """verify_alert."""
     print("🧪 Verificando Alertas de Migración...")
 
     # 1. Configurar Usuario con Telegram ID

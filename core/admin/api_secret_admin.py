@@ -20,7 +20,8 @@ def _test_api_secret(obj: APISecret) -> tuple[bool, str]:
 
 @admin.register(APISecret)
 class APISecretAdmin(admin.ModelAdmin):
-    """Admin para gestionar claves secretas de servicios externos."""
+    """APISecretAdmin."""
+
     list_display = [
         "service_colored",
         "category_badge",
@@ -52,7 +53,7 @@ class APISecretAdmin(admin.ModelAdmin):
     actions = ["test_selected", "mark_active", "mark_inactive"]
 
     def get_queryset(self, request):
-        """Método que obtiene queryset. Args: según implementación. Returns: datos solicitados."""
+        """get_queryset."""
         return (
             super()
             .get_queryset(request)
@@ -69,7 +70,7 @@ class APISecretAdmin(admin.ModelAdmin):
 
     @admin.display(description="Servicio")
     def service_colored(self, obj):
-        """Método: service colored."""
+        """service_colored."""
         colors = {
             "ai": "#8B5CF6",
             "payment": "#10B981",
@@ -89,7 +90,7 @@ class APISecretAdmin(admin.ModelAdmin):
 
     @admin.display(description="Categoría")
     def category_badge(self, obj):
-        """Método: category badge."""
+        """category_badge."""
         colors = {
             "ai": "bg-purple-100 text-purple-800",
             "payment": "bg-green-100 text-green-800",
@@ -137,7 +138,7 @@ class APISecretAdmin(admin.ModelAdmin):
 
     @admin.display(description="Valor")
     def value_masked(self, obj):
-        """Método: value masked."""
+        """value_masked."""
         raw = obj.value or ""
         if not raw:
             return format_html('<span style="color:#9CA3AF;">—</span>')
@@ -154,7 +155,7 @@ class APISecretAdmin(admin.ModelAdmin):
 
     @admin.display(description="Estado")
     def test_badge(self, obj):
-        """Método: test badge."""
+        """test_badge."""
         icons = {"unknown": "◯", "ok": "✓", "fail": "✗"}
         colors = {"unknown": "#9CA3AF", "ok": "#10B981", "fail": "#EF4444"}
         color = colors.get(obj.test_status, "#9CA3AF")
@@ -170,7 +171,7 @@ class APISecretAdmin(admin.ModelAdmin):
 
     @admin.action(description="Probar conexión de las claves seleccionadas")
     def test_selected(self, request, queryset):
-        """Método: test selected."""
+        """test_selected."""
         from django.utils import timezone
 
         ok = 0
@@ -193,20 +194,19 @@ class APISecretAdmin(admin.ModelAdmin):
 
     @admin.action(description="Marcar como activas")
     def mark_active(self, request, queryset):
-        """Método: mark active."""
+        """mark_active."""
         updated = queryset.update(is_active=True)
         self.message_user(request, f"{updated} clave(s) activada(s).")
 
     @admin.action(description="Marcar como inactivas")
     def mark_inactive(self, request, queryset):
-        """Método: mark inactive."""
+        """mark_inactive."""
         updated = queryset.update(is_active=False)
         self.message_user(request, f"{updated} clave(s) desactivada(s).")
 
     def save_model(self, request, obj, form, change):
-        """Método que actualiza/guarda model."""
+        """save_model."""
         super().save_model(request, obj, form, change)
 
     class Media:
-        """Función: Media."""
         css = {"all": ("admin/css/api_secret.css",)}

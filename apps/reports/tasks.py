@@ -1,8 +1,5 @@
-"""Tareas asíncronas (Celery) para la aplicación reports.
-"""
-
 import logging
-from datetime import date, timedelta
+from datetime import timedelta
 
 from celery import shared_task
 
@@ -18,7 +15,7 @@ logger = logging.getLogger(__name__)
     soft_time_limit=240,
 )
 def enviar_reportes_programados_task(self):
-    # enviar_reportes_programados_task: Envía ar reportes programados task. Args: datos del mensaje. Returns: resultado del envío.
+    """enviar_reportes_programados_task."""
     from django.utils import timezone
 
     from .models import ReporteProgramado
@@ -49,12 +46,14 @@ def enviar_reportes_programados_task(self):
             logger.error("Error enviando reporte %s: %s", reporte.nombre, e)
             continue
 
-    logger.info("Reportes programados: %d enviados de %d revisados", reportes_enviados, reportes.count())
+    logger.info(
+        "Reportes programados: %d enviados de %d revisados", reportes_enviados, reportes.count()
+    )
     return reportes_enviados
 
 
 def _debe_enviarse(reporte, hoy):
-    # _debe_enviarse:  debe enviarse. Args: según implementación. Returns: según implementación.
+    """_debe_enviarse."""
     if not reporte.ultimo_envio:
         return True
 
@@ -81,7 +80,7 @@ def _debe_enviarse(reporte, hoy):
 
 
 def _generar_csv_reporte(reporte):
-    # _generar_csv_reporte:  generar csv reporte. Args: según implementación. Returns: según implementación.
+    """_generar_csv_reporte."""
     from .services.kpi_metrics import KPIMetrics
     from .services.report_exporter import exportar_csv
 
@@ -91,12 +90,12 @@ def _generar_csv_reporte(reporte):
 
 
 def _enviar_por_email(reporte, csv_content):
-    # _enviar_por_email:  enviar por email. Args: según implementación. Returns: según implementación.
+    """_enviar_por_email."""
     if not reporte.destinatarios:
         return
 
-    from django.core.mail import EmailMultiAlternatives
     from django.conf import settings
+    from django.core.mail import EmailMultiAlternatives
 
     agencia = reporte.agencia
     subject = f"Reporte KPI: {reporte.nombre} - {agencia.nombre}"
@@ -113,9 +112,7 @@ def _enviar_por_email(reporte, csv_content):
 
     for destinatario in reporte.destinatarios:
         try:
-            email = EmailMultiAlternatives(
-                subject, text_body, sender, [destinatario.strip()]
-            )
+            email = EmailMultiAlternatives(subject, text_body, sender, [destinatario.strip()])
             email.attach(
                 f"reporte_{reporte.nombre.lower().replace(' ', '_')}.csv",
                 csv_content,

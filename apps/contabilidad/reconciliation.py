@@ -1,6 +1,3 @@
-"""Módulo reconciliation de la aplicación contabilidad.
-"""
-
 import logging
 
 from django.db import transaction
@@ -35,8 +32,8 @@ logger = logging.getLogger(__name__)
 #      o regenerando el asiento contable de forma atómica a través de `ContabilidadService`.
 # =========================================================================================
 class ContabilidadReconciliationService:
-    """Servicio para contabilidadreconciliation. Uso: instanciar según necesidad del dominio.
-    """
+    """ContabilidadReconciliationService."""
+
     @staticmethod
     def audit_and_reconcile():
         """

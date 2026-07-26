@@ -30,42 +30,41 @@ SMOKE_URLS = [
 
 
 class TestViewSmoke:
+    """TestViewSmoke."""
+
     @pytest.mark.django_db
     @pytest.mark.parametrize("url", SMOKE_URLS)
-    """Test View Smoke."""
     def test_view_returns_valid_status(self, url, client):
         """Verifica que la URL no lance 500."""
         response = client.get(url)
         # Aceptamos 200, 302 (redirect), 301 (redirect perm), 403 (forbidden sin auth)
-        assert response.status_code not in (500,), (
-            f"{url} retornó 500 INTERNAL SERVER ERROR"
-        )
+        assert response.status_code not in (500,), f"{url} retornó 500 INTERNAL SERVER ERROR"
 
     def test_admin_login_template(self, client):
-        """Admin login template."""
+        """test_admin_login_template."""
         response = client.get("/admin/login/")
         assert response.status_code == 200
 
     @pytest.mark.django_db
     def test_health_check_json(self, client):
-        """Health check json."""
+        """test_health_check_json."""
         response = client.get("/health/", HTTP_ACCEPT="application/json")
         assert response.status_code in (200, 302)
 
     @pytest.mark.django_db
     def test_health_check_html(self, client):
-        """Health check html."""
+        """test_health_check_html."""
         response = client.get("/health/")
         assert response.status_code in (200, 302)
 
     @pytest.mark.django_db
     def test_api_schema_returns_json(self, client):
-        """Api schema returns json."""
+        """test_api_schema_returns_json."""
         response = client.get("/api/schema/")
         assert response.status_code in (200, 302)
 
     def test_login_page_has_form(self, client):
-        """Login page has form."""
+        """test_login_page_has_form."""
         response = client.get("/login/")
         assert response.status_code == 200
         assert "form" in response.content.decode().lower()

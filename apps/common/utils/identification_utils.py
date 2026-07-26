@@ -1,6 +1,3 @@
-"""Utilidades de identification utils para common.
-"""
-
 import re
 
 FOID_LINE_REGEX = re.compile(

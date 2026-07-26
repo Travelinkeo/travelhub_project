@@ -44,11 +44,12 @@ def _discover_encrypted_fields():
 
 
 class Command(BaseCommand):
-    """Comando de gestión personalizado."""
+    """Command."""
+
     help = "Re-encrypts all EncryptedCharField/TextField values with a new ENCRYPTION_KEY"
 
     def add_arguments(self, parser):
-        """Método: add arguments."""
+        """add_arguments."""
         parser.add_argument(
             "--new-key",
             required=True,
@@ -68,7 +69,7 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        """Método: handle."""
+        """handle."""
         new_key = options["new_key"]
         dry_run = options["dry_run"]
         batch_size = options["batch_size"]

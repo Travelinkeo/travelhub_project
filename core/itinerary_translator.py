@@ -1,7 +1,5 @@
 # Archivo: core/itinerary_translator.py
 
-"""Traductor de itinerarios aéreos desde formato GDS a HTML legible."""
-
 import json
 import logging
 import re
@@ -21,6 +19,7 @@ class ItineraryTranslator:
     }
 
     def __init__(self):
+        """__init__."""
         self.airlines = self._load_airlines_catalog()
         self.airports = self._load_airports_catalog()
 

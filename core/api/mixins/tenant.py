@@ -10,7 +10,7 @@ class TenantViewSetMixin:
     """
 
     def get_queryset(self):
-        """Método que obtiene queryset. Args: según implementación. Returns: datos solicitados."""
+        """get_queryset."""
         user = self.request.user
 
         # Superusuarios pueden ver todo (God Mode)

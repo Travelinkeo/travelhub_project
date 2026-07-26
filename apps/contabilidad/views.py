@@ -1,6 +1,3 @@
-"""Vistas (views) de la aplicación contabilidad.
-"""
-
 import io
 import json
 from datetime import date
@@ -24,7 +21,7 @@ _agent_instance = None
 
 
 def get_agent():
-    # get_agent: Obtiene/recupera agent. Args: según implementación. Returns: dato solicitado.
+    """get_agent."""
     global _agent_instance
     if _agent_instance is None:
         from django.utils.module_loading import import_string

@@ -17,6 +17,7 @@ from apps.common.models import Aerolinea
 
 
 def main():
+    """main."""
     print("=== Actualizando catálogo de aerolíneas KIU ===\n")
 
     # 1. Desactivar aerolíneas internacionales con códigos conflictivos

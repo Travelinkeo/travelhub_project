@@ -13,6 +13,7 @@ from core.models import Agencia
 
 
 def test_assistant():
+    """test_assistant."""
     print("--- Iniciando Prueba de Asistente Contable AI ---")
 
     agencia = Agencia.objects.filter(nombre="Agencia AI Test").first()

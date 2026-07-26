@@ -1,6 +1,3 @@
-"""Serializadores para la API de contabilidad.
-"""
-
 from rest_framework import serializers
 
 from apps.contabilidad.models import (
@@ -10,9 +7,9 @@ from apps.contabilidad.models import (
 from apps.finance.serializers import MonedaSerializer
 
 
-class MovimientoContableSerializer:
-    """Serializador para movimientocontable. Uso: instanciar según necesidad del dominio.
-    """
+class MovimientoContableSerializer(serializers.ModelSerializer):
+    """MovimientoContableSerializer."""
+
     cuenta_contable_codigo = serializers.CharField(
         source="cuenta_contable.codigo_cuenta", read_only=True
     )
@@ -35,9 +32,9 @@ class MovimientoContableSerializer:
         extra_kwargs = {"asiento": {"write_only": True, "required": False}}
 
 
-class AsientoContableSerializer:
-    """Serializador para asientocontable. Uso: instanciar según necesidad del dominio.
-    """
+class AsientoContableSerializer(serializers.ModelSerializer):
+    """AsientoContableSerializer."""
+
     detalles_asiento = MovimientoContableSerializer(many=True)
     moneda_detalle = MonedaSerializer(source="moneda", read_only=True)
     estado_display = serializers.CharField(source="get_estado_display", read_only=True)
@@ -75,7 +72,7 @@ class AsientoContableSerializer:
         extra_kwargs = {"moneda": {"write_only": True, "allow_null": False, "required": True}}
 
     def create(self, validated_data):
-        # create: Create. Args: según implementación. Returns: según implementación.
+        """create."""
         detalles_data = validated_data.pop("detalles_asiento", [])
         asiento = AsientoContable.objects.create(**validated_data)
 
@@ -89,7 +86,7 @@ class AsientoContableSerializer:
         return asiento
 
     def update(self, instance, validated_data):
-        # update: Update. Args: según implementación. Returns: según implementación.
+        """update."""
         detalles_data = validated_data.pop("detalles_asiento", None)
         instance.fecha_contable = validated_data.get("fecha_contable", instance.fecha_contable)
         instance.descripcion_general = validated_data.get(

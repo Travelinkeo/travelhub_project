@@ -23,10 +23,11 @@ User = get_user_model()
 
 @method_decorator(csrf_exempt, name="dispatch")
 class MagicLinkRequestView(View):
-    """Función: MagicLinkRequestView."""
+    """MagicLinkRequestView."""
+
     def post(self, request):
+        """post."""
         try:
-        """Método: post."""
             data = json.loads(request.body)
         except (json.JSONDecodeError, TypeError):
             data = request.POST.dict()
@@ -109,9 +110,10 @@ class MagicLinkRequestView(View):
 
 
 class MagicLinkVerifyView(View):
-    """Función: MagicLinkVerifyView."""
+    """MagicLinkVerifyView."""
+
     def get(self, request, token):
-        """Método: get."""
+        """get."""
         token_obj, status = verify_magic_link(token)
 
         if status == "invalid":
@@ -203,5 +205,5 @@ class TokenLogoutView(View):
     """
 
     def post(self, request, *args, **kwargs):
-        """Método: post."""
+        """post."""
         return JsonResponse({"message": "Successfully logged out"}, status=200)

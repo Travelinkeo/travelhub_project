@@ -1,6 +1,3 @@
-"""Servicio de commission service para la aplicación finance.
-"""
-
 import logging
 from decimal import Decimal
 
@@ -13,8 +10,8 @@ logger = logging.getLogger(__name__)
 
 
 class CommissionService:
-    """Servicio para commission. Uso: instanciar según necesidad del dominio.
-    """
+    """CommissionService."""
+
     @classmethod
     @transaction.atomic
     def calcular_comision_venta(cls, venta_id: int) -> bool:

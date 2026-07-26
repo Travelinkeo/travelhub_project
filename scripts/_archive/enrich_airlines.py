@@ -34,6 +34,7 @@ JSON_PATH = "core/data/airlines.json"
 
 
 def enrich_airlines():
+    """enrich_airlines."""
     with open(JSON_PATH, encoding="utf-8") as f:
         data = json.load(f)
 

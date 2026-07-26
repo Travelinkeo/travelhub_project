@@ -1,4 +1,3 @@
-"""Tests para Sabre parser hybrid."""
 # pytestmark = pytest.mark.skip(reason='Parser/Gemini refactorizado - pendiente actualización')
 import os
 import unittest
@@ -10,8 +9,9 @@ from apps.automation.services.ticket_parser_service import extract_data_from_tex
 
 @pytest.mark.django_db
 class TestHybridSabreParser(unittest.TestCase):
+    """TestHybridSabreParser."""
+
     @classmethod
-    """Test Hybrid Sabre Parser."""
     def setUpClass(cls):
         """Carga el contenido del fixture de texto una vez para todas las pruebas de la clase."""
         fixture_path = os.path.join(

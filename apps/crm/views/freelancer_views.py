@@ -1,6 +1,3 @@
-"""Vistas (views) de la aplicación crm.
-"""
-
 import logging
 
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -14,12 +11,13 @@ from apps.crm.models import ComisionFreelancer
 logger = logging.getLogger(__name__)
 
 
-class FreelancerDashboardView:
-    """Vista para gestionar freelancerdashboard. Uso: instanciar según necesidad del dominio.
-    """
+class FreelancerDashboardView(LoginRequiredMixin, View):
+    """FreelancerDashboardView."""
+
     template_name = "crm/freelancer/dashboard.html"
 
     def get(self, request, *args, **kwargs):
+        """get."""
         # Validar que el usuario logueado tenga un perfil de Freelancer
         if not hasattr(request.user, "perfil_freelancer"):
             logger.warning(

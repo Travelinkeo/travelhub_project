@@ -18,10 +18,11 @@ def cache_queryset(timeout=3600, key_prefix=""):
     """
 
     def decorator(func):
-        """Función: decorator."""
+        """decorator."""
+
         @wraps(func)
         def wrapper(*args, **kwargs):
-            """Función: wrapper."""
+            """wrapper."""
             # Construir clave de caché
             cache_key = f"{key_prefix}:{func.__name__}"
             if args:

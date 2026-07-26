@@ -1,6 +1,3 @@
-"""Vistas (views) de la aplicación finance.
-"""
-
 import logging
 import uuid
 
@@ -42,7 +39,7 @@ class VentaDoubleInvoiceAPIView(InternalAPIAuthMixin, APIView):
         },
     )
     def post(self, request, pk):
-        # post: Post. Args: según implementación. Returns: según implementación.
+        """post."""
         try:
             # P0-003 FIX: Verificación explícita de tenant para prevenir IDOR en Ventas.
             # Devuelve 404 (no 403) si la venta no pertenece a la agencia, para no
@@ -76,9 +73,9 @@ class VentaDoubleInvoiceAPIView(InternalAPIAuthMixin, APIView):
             )
 
 
-class FacturaViewSet:
-    """Clase FacturaViewSet. Uso: según contexto de la aplicación.
-    """
+class FacturaViewSet(TenantViewSetMixin, viewsets.ModelViewSet):
+    """FacturaViewSet."""
+
     queryset = (
         Factura.objects.select_related("cliente")
         .prefetch_related("items")
@@ -95,10 +92,10 @@ class FacturaViewSet:
     ]
 
     def list(self, request, *args, **kwargs):
-        # list: Lista . Args: filtros. Returns: listado.
+        """list."""
         logger.info("FacturaViewSet.list() called")
         return super().list(request, *args, **kwargs)
 
     def perform_create(self, serializer):
-        # perform_create: Perform create. Args: según implementación. Returns: según implementación.
+        """perform_create."""
         serializer.save()

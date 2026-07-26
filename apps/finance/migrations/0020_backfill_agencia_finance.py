@@ -59,13 +59,10 @@ def backfill_agencia(apps, schema_editor):
 
 
 def reverse_backfill(apps, schema_editor):
-    # reverse_backfill: Reverse backfill. Args: según implementación. Returns: según implementación.
     pass
 
 
-class Migration:
-    """Clase Migration. Uso: según contexto de la aplicación.
-    """
+class Migration(migrations.Migration):
     dependencies = [
         ("finance", "0019_add_facturafiscal_agencia"),
     ]

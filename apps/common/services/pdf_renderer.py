@@ -1,13 +1,10 @@
-"""Servicio de pdf renderer para la aplicación common.
-"""
-
 import logging
 
 logger = logging.getLogger(__name__)
 
 
 def _render_with_weasyprint(html_content: str) -> bytes:
-    # _render_with_weasyprint:  render with weasyprint. Args: según implementación. Returns: según implementación.
+    """_render_with_weasyprint."""
     from weasyprint import HTML
 
     pdf_bytes = HTML(string=html_content, base_url=None).write_pdf()
@@ -30,7 +27,6 @@ class PdfRendererService:
 
     @staticmethod
     def render_html_to_pdf(html_content: str, margins: float = 0.0) -> bytes:
-        # render_html_to_pdf: Renderiza  html to pdf. Args: contexto/datos. Returns: HTML renderizado.
         try:
             pdf_bytes = _render_with_weasyprint(html_content)
             logger.info(f"WeasyPrint generó {len(pdf_bytes)} bytes")

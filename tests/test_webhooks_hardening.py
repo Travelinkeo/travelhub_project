@@ -27,7 +27,7 @@ from rest_framework.test import APIClient
 
 @pytest.fixture
 def api_client():
-    """Api client."""
+    """api_client."""
     return APIClient()
 
 
@@ -41,8 +41,8 @@ class TestTelegramWebhookFailClosed:
     """El webhook de Telegram debe rechazar peticiones sin WEBHOOK_SECRET."""
 
     def test_rechaza_cuando_secret_no_configurado(self, api_client):
+        """test_rechaza_cuando_secret_no_configurado."""
         # Simula entorno sin TELEGRAM_WEBHOOK_SECRET (fail-closed).
-        """Rechaza cuando secret no configurado."""
         with override_settings(TELEGRAM_WEBHOOK_SECRET=None):
             response = api_client.post(
                 "/finance/webhooks/telegram/staff-control/",
@@ -54,7 +54,7 @@ class TestTelegramWebhookFailClosed:
         assert "TELEGRAM_WEBHOOK_SECRET" in body["error"]
 
     def test_rechaza_cuando_secret_vacio(self, api_client):
-        """Rechaza cuando secret vacio."""
+        """test_rechaza_cuando_secret_vacio."""
         with override_settings(TELEGRAM_WEBHOOK_SECRET=""):
             response = api_client.post(
                 "/finance/webhooks/telegram/staff-control/",
@@ -64,7 +64,7 @@ class TestTelegramWebhookFailClosed:
         assert response.status_code == 403
 
     def test_rechaza_cuando_secret_no_coincide(self, api_client):
-        """Rechaza cuando secret no coincide."""
+        """test_rechaza_cuando_secret_no_coincide."""
         with override_settings(TELEGRAM_WEBHOOK_SECRET="valor_correcto_y_largo"):
             response = api_client.post(
                 "/finance/webhooks/telegram/staff-control/",
@@ -75,7 +75,7 @@ class TestTelegramWebhookFailClosed:
         assert response.status_code == 403
 
     def test_rechaza_cuando_header_no_enviado(self, api_client):
-        """Rechaza cuando header no enviado."""
+        """test_rechaza_cuando_header_no_enviado."""
         with override_settings(TELEGRAM_WEBHOOK_SECRET="valor_correcto_y_largo"):
             response = api_client.post(
                 "/finance/webhooks/telegram/staff-control/",
@@ -109,7 +109,7 @@ class TestBinanceWebhookFailClosed:
     """El webhook de Binance debe rechazar peticiones sin WEBHOOK_SECRET."""
 
     def test_rechaza_cuando_secret_no_configurado(self, api_client):
-        """Rechaza cuando secret no configurado."""
+        """test_rechaza_cuando_secret_no_configurado."""
         with override_settings(BINANCE_WEBHOOK_SECRET=None):
             response = api_client.post(
                 "/finance/webhooks/binance/",
@@ -121,7 +121,7 @@ class TestBinanceWebhookFailClosed:
         assert "Webhook not configured" in body["error"]
 
     def test_rechaza_cuando_secret_vacio(self, api_client):
-        """Rechaza cuando secret vacio."""
+        """test_rechaza_cuando_secret_vacio."""
         with override_settings(BINANCE_WEBHOOK_SECRET=""):
             response = api_client.post(
                 "/finance/webhooks/binance/",
@@ -131,7 +131,7 @@ class TestBinanceWebhookFailClosed:
         assert response.status_code == 503
 
     def test_rechaza_cuando_sin_signature(self, api_client):
-        """Rechaza cuando sin signature."""
+        """test_rechaza_cuando_sin_signature."""
         with override_settings(BINANCE_WEBHOOK_SECRET="secret_largo_y_secreto"):
             response = api_client.post(
                 "/finance/webhooks/binance/",
@@ -143,7 +143,7 @@ class TestBinanceWebhookFailClosed:
         assert "Missing signature" in body["error"]
 
     def test_rechaza_cuando_signature_invalida(self, api_client):
-        """Rechaza cuando signature invalida."""
+        """test_rechaza_cuando_signature_invalida."""
         payload = json.dumps({"bizId": "bin_123", "custom_venta_id": 1, "amount": 100})
         with override_settings(BINANCE_WEBHOOK_SECRET="secret_largo_y_secreto"):
             response = api_client.post(
@@ -199,7 +199,7 @@ class TestStripeWebhookFailClosed:
     """El webhook de Stripe debe rechazar peticiones sin WEBHOOK_SECRET."""
 
     def test_rechaza_cuando_secret_no_configurado(self, api_client):
-        """Rechaza cuando secret no configurado."""
+        """test_rechaza_cuando_secret_no_configurado."""
         with override_settings(STRIPE_WEBHOOK_SECRET=None):
             response = api_client.post(
                 "/finance/webhooks/stripe/",
@@ -211,7 +211,7 @@ class TestStripeWebhookFailClosed:
         assert "Webhook not configured" in body["error"]
 
     def test_rechaza_cuando_secret_vacio(self, api_client):
-        """Rechaza cuando secret vacio."""
+        """test_rechaza_cuando_secret_vacio."""
         with override_settings(STRIPE_WEBHOOK_SECRET=""):
             response = api_client.post(
                 "/finance/webhooks/stripe/",
@@ -221,7 +221,7 @@ class TestStripeWebhookFailClosed:
         assert response.status_code == 503
 
     def test_rechaza_cuando_sin_signature_header(self, api_client):
-        """Rechaza cuando sin signature header."""
+        """test_rechaza_cuando_sin_signature_header."""
         with override_settings(STRIPE_WEBHOOK_SECRET="whsec_test_secret_largo"):
             response = api_client.post(
                 "/finance/webhooks/stripe/",
@@ -233,7 +233,7 @@ class TestStripeWebhookFailClosed:
         assert "Missing signature" in body["error"]
 
     def test_rechaza_cuando_signature_invalida(self, api_client):
-        """Rechaza cuando signature invalida."""
+        """test_rechaza_cuando_signature_invalida."""
         with override_settings(STRIPE_WEBHOOK_SECRET="whsec_test_secret_largo"):
             # Mock stripe.webhook.construct_event para lanzar SignatureVerificationError
             with mock.patch("stripe.Webhook.construct_event") as mock_construct:

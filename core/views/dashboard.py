@@ -16,7 +16,8 @@ logger = logging.getLogger(__name__)
 
 # --- ESQUEMAS IA ---
 class ConsejosIASchema(BaseModel):
-    """Función: ConsejosIASchema."""
+    """ConsejosIASchema."""
+
     saludo: str = Field(
         description="Un saludo enérgico para el CEO (ej. '¡Buen día, equipo directivo!')"
     )
@@ -59,7 +60,7 @@ class CEODashboardView(LoginRequiredMixin, View):
     template_name = "core/dashboard_ceo.html"
 
     def get(self, request, *args, **kwargs):
-        """Método: get."""
+        """get."""
         agencia = _get_active_agencia(request.user)
         if not agencia:
             return render(
@@ -87,7 +88,7 @@ class AIBusinessAdvisorView(LoginRequiredMixin, View):
     """
 
     def get(self, request, *args, **kwargs):
-        """Método: get."""
+        """get."""
         agencia = _get_active_agencia(request.user)
         if not agencia:
             return HttpResponse("No se detectó agencia.", status=400)
@@ -101,7 +102,7 @@ class AIBusinessAdvisorView(LoginRequiredMixin, View):
         - Crecimiento vs mes pasado: {kpis["crecimiento_porcentaje"]}%
         - Utilidad bruta: ${kpis["utilidad_bruta"]}
         - Dinero en la mesa (Tax Refund): ${kpis["tax_refund_disponible"]}
-        
+
         Dame un diagnóstico rápido y un consejo accionable basado en rentabilidad.
         """
 

@@ -1,5 +1,3 @@
-"""Configuración visual del panel de administración Unfold — tema, colores, sidebar y navegación."""
-
 UNFOLD = {
     "SITE_TITLE": "TravelHub Admin",
     "SITE_SYMBOL": "travel_explore",

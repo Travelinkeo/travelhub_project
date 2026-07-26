@@ -44,7 +44,6 @@ class AgenciaSettingsForm(forms.ModelForm):
     idioma = forms.CharField(max_length=5, required=False)
 
     class Meta:
-        """Configuración del modelo."""
         model = Agencia
         fields = [
             "nombre_comercial",
@@ -63,6 +62,7 @@ class AgenciaSettingsForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
+        """__init__."""
         super().__init__(*args, **kwargs)
 
         # Cargar valores iniciales de los componentes si existen
@@ -112,7 +112,7 @@ class AgenciaSettingsForm(forms.ModelForm):
                 field.widget.attrs["class"] = "size-10 rounded-lg p-0 border-none cursor-pointer"
 
     def save(self, commit=True):
-        """Método: save."""
+        """save."""
         agencia = super().save(commit=False)
         if commit:
             agencia.save()
@@ -188,7 +188,7 @@ class UsuarioAgenciaForm(forms.Form):
     rol = forms.ChoiceField(choices=UsuarioAgencia.ROLES, label="Rol")
 
     def clean_email(self):
-        """Método: clean email."""
+        """clean_email."""
         email = self.cleaned_data["email"]
         if User.objects.filter(email=email).exists():
             raise forms.ValidationError(_("Este correo ya está registrado en TravelHub."))

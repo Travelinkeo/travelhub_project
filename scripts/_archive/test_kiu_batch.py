@@ -26,6 +26,7 @@ OUTPUT_DIR = r"C:\Users\ARMANDO\travelhub_project\KIU_BATCH_OUTPUT"
 
 
 def extract_text_from_eml(file_path):
+    """extract_text_from_eml."""
     text_content = ""
     try:
         with open(file_path, "rb") as f:
@@ -55,6 +56,7 @@ def extract_text_from_eml(file_path):
 
 
 def run_kiu_test():
+    """run_kiu_test."""
     print("--- INICIANDO TEST MASIVO KIU ---")
 
     if not os.path.exists(OUTPUT_DIR):

@@ -1,6 +1,4 @@
 # core/locale_patch.py
-"""Parche de seguridad para locale.setlocale en entornos Docker."""
-
 import locale
 import logging
 
@@ -21,7 +19,7 @@ def apply_locale_patch():
         original_setlocale = locale.setlocale
 
         def safe_setlocale(category, locale_name=None):
-            """Función: safe setlocale."""
+            """safe_setlocale."""
             try:
                 return original_setlocale(category, locale_name)
             except Exception as e:

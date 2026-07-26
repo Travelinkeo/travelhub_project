@@ -23,15 +23,16 @@ from core.middleware import get_current_agency
 
 
 class HotelListView(LoginRequiredMixin, ListView):
-    """Función: HotelListView."""
+    """HotelListView."""
+
     model = HotelTarifario
     template_name = "core/hotels/search.html"
     context_object_name = "hoteles"
     paginate_by = 12
 
     def get_queryset(self) -> QuerySet[HotelTarifario]:
+        """get_queryset."""
         qs = HotelTarifario.objects.filter(activo=True).prefetch_related("amenidades")
-        """Método que obtiene queryset. Args: según implementación. Returns: datos solicitados."""
 
         # Filtro de Búsqueda General
         q = self.request.GET.get("q")
@@ -52,8 +53,8 @@ class HotelListView(LoginRequiredMixin, ListView):
         return qs
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
+        """get_context_data."""
         ctx = super().get_context_data(**kwargs)
-        """Método que obtiene context data. Args: según implementación. Returns: datos solicitados."""
         agencia = get_current_agency()
 
         # --- ANALÍTICA DE HOTELES (30 DÍAS) ---
@@ -101,14 +102,15 @@ class HotelListView(LoginRequiredMixin, ListView):
 
 
 class HotelDetailView(LoginRequiredMixin, DetailView):
-    """Función: HotelDetailView."""
+    """HotelDetailView."""
+
     model = HotelTarifario
     template_name = "core/hotels/detail.html"
     context_object_name = "hotel"
     slug_url_kwarg = "slug"
 
     def get_queryset(self):
-        """Método que obtiene queryset. Args: según implementación. Returns: datos solicitados."""
+        """get_queryset."""
         return (
             super()
             .get_queryset()
@@ -118,7 +120,7 @@ class HotelDetailView(LoginRequiredMixin, DetailView):
         )
 
     def post(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
-        """Método: post."""
+        """post."""
         hotel = self.get_object()
         tipo_hab_id = request.POST.get("tipo_habitacion")
         check_in = request.POST.get("check_in")
@@ -168,7 +170,7 @@ class GenerateCopyAPI(InternalAPIAuthMixin, APIView):  # type: ignore[misc]
     """Genera textos de venta para redes sociales con IA."""
 
     def post(self, request: HttpRequest) -> Response:
-        """Método: post."""
+        """post."""
         hotel_id = request.data.get("hotel_id")
         tone = request.data.get("tone", "AVENTURERO")
 

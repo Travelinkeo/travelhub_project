@@ -1,5 +1,3 @@
-"""Configuración de Celery para TravelHub — define colas, rutas, beat schedule y manejadores de fallos."""
-
 import logging
 import os
 
@@ -8,13 +6,14 @@ from kombu import Exchange, Queue
 
 logger = logging.getLogger(__name__)
 
-# Configura Django settings (development por defecto local, production en server real)
+# Configurar Django settings
+# P2-004: Usar development por defecto local, production en server real
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "travelhub.settings.development")
 
-# Crea la instancia de Celery
 app = Celery("travelhub")
 
-# Carga configuración desde Django settings con prefijo CELERY_
+
+# Cargar configuración desde Django settings con prefijo CELERY_
 app.config_from_object("django.conf:settings", namespace="CELERY")
 
 # ==========================================
@@ -31,13 +30,11 @@ app.config_from_object("django.conf:settings", namespace="CELERY")
 # La separación de notifications evita que notificaciones urgentes (cobranza,
 # confirmación de pago) se bloqueen detrás de tareas batch pesadas.
 
-# Define las colas disponibles (2 colas optimizadas Fase 5)
 app.conf.task_queues = (
     Queue("celery", Exchange("celery"), routing_key="celery"),
     Queue("notifications", Exchange("notifications"), routing_key="notifications"),
 )
 
-# Configura la cola por defecto
 app.conf.task_default_queue = "celery"
 app.conf.task_default_exchange = "celery"
 app.conf.task_default_routing_key = "celery"
@@ -49,13 +46,14 @@ app.conf.task_default_routing_key = "celery"
 # Anteriormente se definian aqui, pero app.conf.task_routes sobreescribe
 # las rutas de settings, causando conflictos. Ahora solo se usa settings.
 
-# Auto-descubre tareas registradas en apps y apps.finance
+# Auto-descubrir tareas en todas las apps
 app.autodiscover_tasks(packages=["apps", "apps.finance"])
 
 # ==========================================
 
 
-# Carga CELERY_BEAT_SCHEDULE con import diferido para evitar AppRegistryNotReady
+# Cargar CELERY_BEAT_SCHEDULE — import de settings diferido para evitar
+# AppRegistryNotReady si celery.py se importa antes de django.setup()
 _beat_schedule = None
 try:
     from django.conf import settings as _dj_settings
@@ -80,7 +78,7 @@ app.conf.beat_schedule = _beat_schedule
 
 @app.task(bind=True, ignore_result=True, time_limit=30, soft_time_limit=20)
 def debug_task(self):
-    """Tarea de depuración — loggea el request de la tarea para verificar que Celery funciona."""
+    """debug_task."""
     logger.debug(f"Request: {self.request!r}")
 
 
@@ -93,7 +91,7 @@ from celery.signals import task_failure, task_retry  # noqa: E402
 
 @task_failure.connect
 def handle_task_failure(sender, task_id, exception, args, kwargs, traceback, einfo, **kw):
-    """Captura fallos de tareas Celery y los reporta a Sentry con contexto completo. Args: sender (Task), task_id (str), exception (Exception)."""
+    """Captura fallos de tareas Celery y los reporta a Sentry con contexto completo."""
     try:
         import sentry_sdk
 
@@ -115,5 +113,5 @@ def handle_task_failure(sender, task_id, exception, args, kwargs, traceback, ein
 
 @task_retry.connect
 def handle_task_retry(sender, reason, **kw):
-    """Loggea reintentos de tareas para debugging. Args: sender (Task), reason (str)."""
+    """Loggea reintentos de tareas para debugging."""
     logger.warning("⚠️ Celery task retry: %s — reason: %s", sender.name, reason)

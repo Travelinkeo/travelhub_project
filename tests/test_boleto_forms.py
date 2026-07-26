@@ -1,4 +1,3 @@
-"""Tests para Boleto forms."""
 from datetime import date
 
 import pytest
@@ -14,7 +13,7 @@ pytestmark = pytest.mark.skip(reason="Tests requieren configuración completa o 
 
 @pytest.mark.django_db
 def test_boleto_manual_form_valid_creates_instance():
-    """Boleto manual form valid creates instance."""
+    """test_boleto_manual_form_valid_creates_instance."""
     form = BoletoManualForm(
         data={
             "numero_boleto": "308-0201196996",
@@ -39,8 +38,8 @@ def test_boleto_manual_form_valid_creates_instance():
 
 @pytest.mark.django_db
 def test_boleto_manual_form_minimal_valid():
+    """test_boleto_manual_form_minimal_valid."""
     # Dado que los campos son opcionales (blank=True), un formulario casi vacío puede ser válido.
-    """Boleto manual form minimal valid."""
     form = BoletoManualForm(data={})
     assert form.is_valid(), form.errors
     inst = form.save(commit=False)
@@ -50,7 +49,7 @@ def test_boleto_manual_form_minimal_valid():
 
 @pytest.mark.django_db
 def test_boleto_aereo_update_form_recalculates_total():
-    """Boleto aereo update form recalculates total."""
+    """test_boleto_aereo_update_form_recalculates_total."""
     boleto = BoletoImportado.objects.create(numero_boleto="111", nombre_pasajero_completo="A B")
     form = BoletoAereoUpdateForm(
         instance=boleto,
@@ -72,7 +71,7 @@ def test_boleto_aereo_update_form_recalculates_total():
 
 @pytest.mark.django_db
 def test_boleto_aereo_update_form_respects_provided_total():
-    """Boleto aereo update form respects provided total."""
+    """test_boleto_aereo_update_form_respects_provided_total."""
     boleto = BoletoImportado.objects.create(numero_boleto="222", nombre_pasajero_completo="C D")
     form = BoletoAereoUpdateForm(
         instance=boleto,

@@ -10,6 +10,7 @@ logger = logging.getLogger(__name__)
 
 # Simular la lógica de TicketParserService.extraer_texto_desde_archivo para EML
 def simulate_eml_extraction(file_path):
+    """simulate_eml_extraction."""
     from email import policy
     from email.parser import BytesParser
 

@@ -17,6 +17,7 @@ from apps.automation.parsers.web_receipt_parser import WebReceiptParser
 
 
 def test_estelar_fix():
+    """test_estelar_fix."""
     print("Testing Estelar Fix...")
     parser = WebReceiptParser()
 

@@ -1,4 +1,3 @@
-"""Tests para Sanitize passenger name."""
 import pytest
 
 from apps.common.utils import sanitize_passenger_name
@@ -29,7 +28,7 @@ from apps.common.utils import sanitize_passenger_name
     ],
 )
 def test_sanitize_passenger_name(raw, expected):
-    """Sanitize passenger name."""
+    """test_sanitize_passenger_name."""
     assert sanitize_passenger_name(raw) == expected
 
 

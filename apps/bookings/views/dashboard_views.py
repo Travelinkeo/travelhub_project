@@ -1,7 +1,4 @@
 # core/views/dashboard_views.py
-"""Vistas (views) de la aplicación bookings.
-"""
-
 import logging
 from datetime import timedelta
 
@@ -56,7 +53,7 @@ logger = logging.getLogger(__name__)
 @throttle_classes([DashboardRateThrottle])
 @cache_api_response(timeout=300, key_prefix="dashboard")
 def dashboard_metricas(request):
-    # dashboard_metricas: Dashboard metricas. Args: según implementación. Returns: según implementación.
+    """dashboard_metricas."""
     fecha_desde = request.GET.get("fecha_desde")
     fecha_hasta = request.GET.get("fecha_hasta")
 
@@ -183,7 +180,7 @@ def dashboard_metricas(request):
 @internal_auth
 @permission_classes([IsAuthenticated])
 def dashboard_alertas(request):
-    # dashboard_alertas: Dashboard alertas. Args: según implementación. Returns: según implementación.
+    """dashboard_alertas."""
     agencia = get_user_active_agency(request.user)
 
     if not agencia:
@@ -239,11 +236,11 @@ def dashboard_alertas(request):
     )
 
 
-class DashboardView:
-    """Vista para gestionar dashboard. Uso: instanciar según necesidad del dominio.
-    """
+class DashboardView(LoginRequiredMixin, View):
+    """DashboardView."""
+
     def get_vendedor_dashboard(self, request, agencia):
-        # get_vendedor_dashboard: Obtiene/recupera vendedor dashboard. Args: según implementación. Returns: dato solicitado.
+        """get_vendedor_dashboard."""
         hoy = timezone.now().date()
         inicio_mes = hoy.replace(day=1)
 
@@ -302,6 +299,7 @@ class DashboardView:
         return render(request, "core/dashboard_asesor.html", context)
 
     def get(self, request):
+        """get."""
         # 1. Detección de Agencia Activa (Multi-tenant)
         agencia = get_user_active_agency(request.user)
 

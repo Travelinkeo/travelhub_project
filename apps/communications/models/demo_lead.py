@@ -1,12 +1,9 @@
-"""Módulo demo lead de la aplicación communications.
-"""
-
 from django.db import models
 
 
-class DemoRequest:
-    """Clase DemoRequest. Uso: según contexto de la aplicación.
-    """
+class DemoRequest(models.Model):
+    """DemoRequest."""
+
     nombre = models.CharField(max_length=150)
     email = models.EmailField()
     telefono = models.CharField(max_length=30, blank=True, default="")
@@ -22,5 +19,5 @@ class DemoRequest:
         ordering = ["-created_at"]
 
     def __str__(self):
-        # __str__: Representación en string del objeto. Returns: str.
+        """__str__."""
         return f"{self.nombre} — {self.email}"

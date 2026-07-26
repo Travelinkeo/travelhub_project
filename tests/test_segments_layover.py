@@ -1,4 +1,3 @@
-"""Tests para Segments layover."""
 import pytest
 
 from apps.automation.parsers import ticket_parser
@@ -7,9 +6,9 @@ pytestmark = pytest.mark.skip(reason="Tests requieren configuración completa o 
 
 
 def test_sabre_two_segment_layover():
+    """test_sabre_two_segment_layover."""
     # Segmento 1: 09:00 -> 10:30  (duración 90)
     # Segmento 2: sale 12:00 mismo día (layover 90 min)
-    """Sabre two segment layover."""
     sample = (
         "Itinerary Details\n"
         "Issue Date 17 Aug 25\n"

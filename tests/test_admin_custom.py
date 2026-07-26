@@ -1,4 +1,3 @@
-"""Tests para Admin custom."""
 import pytest
 from django.contrib import admin
 from django.contrib.auth.models import User
@@ -17,19 +16,19 @@ pytestmark = pytest.mark.skip(reason="Métodos de admin refactorizados - pendien
 
 @pytest.fixture
 def rf():
-    """Rf."""
+    """rf."""
     return RequestFactory()
 
 
 @pytest.fixture
 def admin_site():
-    """Admin site."""
+    """admin_site."""
     return admin.site
 
 
 @pytest.mark.django_db
 def test_venta_admin_boleto_importado_link_no_boleto(admin_site):
-    """Venta admin boleto importado link no boleto."""
+    """test_venta_admin_boleto_importado_link_no_boleto."""
     moneda = Moneda.objects.create(
         nombre="Dolar", codigo_iso="USD", simbolo="$", es_moneda_local=True
     )
@@ -41,7 +40,7 @@ def test_venta_admin_boleto_importado_link_no_boleto(admin_site):
 
 @pytest.mark.django_db
 def test_venta_admin_boleto_importado_link_with_boleto(admin_site, tmp_path):
-    """Venta admin boleto importado link with boleto."""
+    """test_venta_admin_boleto_importado_link_with_boleto."""
     moneda = Moneda.objects.create(
         nombre="Dolar", codigo_iso="USD", simbolo="$", es_moneda_local=True
     )
@@ -58,7 +57,7 @@ def test_venta_admin_boleto_importado_link_with_boleto(admin_site, tmp_path):
 
 @pytest.mark.django_db
 def test_venta_admin_get_changeform_initial_data_with_boleto(rf, admin_site):
-    """Venta admin get changeform initial data with boleto."""
+    """test_venta_admin_get_changeform_initial_data_with_boleto."""
     Moneda.objects.create(nombre="Dolar", codigo_iso="USD", simbolo="$", es_moneda_local=True)
     Cliente.objects.create(nombres="Maria", apellidos="Gomez", email="maria@example.com")
     archivo = SimpleUploadedFile("ticket.eml", b"Subject: Test\n\nBody")
@@ -83,7 +82,7 @@ def test_venta_admin_get_changeform_initial_data_with_boleto(rf, admin_site):
 
 @pytest.mark.django_db
 def test_boleto_importado_admin_crear_venta_desde_boleto_link_variants(admin_site, tmp_path):
-    """Boleto importado admin crear venta desde boleto link variants."""
+    """test_boleto_importado_admin_crear_venta_desde_boleto_link_variants."""
     bia = BoletoImportadoAdmin(BoletoImportado, admin_site)
     archivo = SimpleUploadedFile("ticket.eml", b"Subject: Test\n\nBody")
     boleto_no_parseado = BoletoImportado.objects.create(
@@ -109,7 +108,7 @@ def test_boleto_importado_admin_crear_venta_desde_boleto_link_variants(admin_sit
 
 @pytest.mark.django_db
 def test_boleto_importado_admin_reintentar_parseo_action(rf, admin_site):
-    """Boleto importado admin reintentar parseo action."""
+    """test_boleto_importado_admin_reintentar_parseo_action."""
     bia = BoletoImportadoAdmin(BoletoImportado, admin_site)
     archivo = SimpleUploadedFile("ticket.eml", b"Subject: Test\n\nBody")
     boleto = BoletoImportado.objects.create(

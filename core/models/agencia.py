@@ -76,7 +76,6 @@ class Agencia(models.Model):
     )
 
     class Meta:
-        """Meta definición del modelo."""
         verbose_name = "Agencia"
         verbose_name_plural = "Agencias"
         ordering = ["nombre"]
@@ -108,6 +107,7 @@ class Agencia(models.Model):
     ]
 
     def __str__(self):
+        """__str__."""
         return f"{self.nombre} ({self.plan})"
 
     # --- CAPA DE COMPATIBILIDAD (READ-ONLY PROPERTIES) ---
@@ -118,52 +118,43 @@ class Agencia(models.Model):
 
     @property
     def plan(self):
-        """Método: plan."""
         return self.configuracion.plan if self.configuracion else "FREE"
 
     @property
     def logo(self):
-        """Método: logo."""
         return self.branding.logo if self.branding else None
 
     @property
     def logo_pdf_base64(self):
-        """Método: logo pdf base64."""
         return self.branding.logo_pdf_base64 if self.branding else None
 
     @property
     def logo_dark(self):
-        """Método: logo dark."""
         return self.branding.logo_dark if self.branding else None
 
     @property
     def logo_light(self):
-        """Método: logo light."""
         return self.branding.logo_light if self.branding else None
 
     @property
     def logo_telegram_url(self):
-        """Método: logo telegram url."""
         return self.branding.logo_telegram_url if self.branding else None
 
     @property
     def logo_base64(self):
-        """Método: logo base64."""
         return self.branding.logo_base64 if self.branding else None
 
     @property
     def logo_pdf_dark_base64(self):
-        """Método: logo pdf dark base64."""
         return self.branding.logo_pdf_dark_base64 if self.branding else None
 
     @property
     def subdominio_slug(self):
-        """Método: subdominio slug."""
         return self.configuracion.subdominio_slug if self.configuracion else None
 
     @subdominio_slug.setter
     def subdominio_slug(self, value):
-        """Método: subdominio slug."""
+        """subdominio_slug."""
         if not self.configuracion:
             from core.models.agencia import AgenciaConfiguracion
 
@@ -173,47 +164,39 @@ class Agencia(models.Model):
 
     @property
     def moneda_principal(self):
-        """Método: moneda principal."""
         return self.configuracion.moneda_principal if self.configuracion else "USD"
 
     @property
     def color_primario(self):
-        """Método: color primario."""
         return self.branding.color_primario if self.branding else "#1976d2"
 
     @property
     def email_monitor_active(self):
-        """Método: email monitor active."""
         return self.configuracion.email_monitor_active if self.configuracion else False
 
     @property
     def telegram_bot_token(self):
-        """Método: telegram bot token."""
         return self.configuracion.telegram_bot_token if self.configuracion else None
 
     @property
     def telegram_chat_id(self):
-        """Método: telegram chat id."""
         return self.configuracion.telegram_chat_id if self.configuracion else None
 
     @property
     def correo_emisiones(self):
-        """Método: correo emisiones."""
         return self.configuracion.correo_emisiones if self.configuracion else None
 
     @property
     def password_app_correo(self):
-        """Método: password app correo."""
         return self.configuracion.password_app_correo if self.configuracion else None
 
     @property
     def gemini_api_key(self):
-        """Método: gemini api key."""
         return self.configuracion.gemini_api_key if self.configuracion else None
 
     @gemini_api_key.setter
     def gemini_api_key(self, value):
-        """Método: gemini api key."""
+        """gemini_api_key."""
         if not self.configuracion:
             from core.models.agencia import AgenciaConfiguracion
 
@@ -223,40 +206,34 @@ class Agencia(models.Model):
 
     @property
     def ui_theme(self):
-        """Método: ui theme."""
         if self.branding:
             return self.branding.ui_theme
         return "obsidian"
 
     @property
     def plantilla_boletos(self):
-        """Método: plantilla boletos."""
         if self.branding:
             return self.branding.plantilla_boletos
         return "m1"
 
     @property
     def plantilla_vouchers(self):
-        """Método: plantilla vouchers."""
         if self.branding:
             return self.branding.plantilla_vouchers
         return "m1"
 
     @property
     def plantilla_facturas(self):
-        """Método: plantilla facturas."""
         if self.branding:
             return self.branding.plantilla_facturas
         return "m1"
 
     @property
     def configuracion_api(self):
-        """Método: configuracion api."""
         return self.configuracion.configuracion_api if self.configuracion else {}
 
     @property
     def configuracion_correo(self):
-        """Método: configuracion correo."""
         if not self.configuracion:
             return {}
         cfg_correo = self.configuracion.configuracion_correo or {}
@@ -363,10 +340,10 @@ class Agencia(models.Model):
             slug = self.configuracion.subdominio_slug if self.configuracion else None
 
             def _provision_whatsapp():
+                """_provision_whatsapp."""
                 if not slug:
                     return
                 from apps.common.tasks import fetch_evolution_qr_task
-                """Función interna: provision whatsapp."""
                 from apps.communications.services.evolution_api_service import EvolutionService
 
                 estado = EvolutionService.get_instance_state(slug)
@@ -420,13 +397,13 @@ class UsuarioAgencia(models.Model):
     )
 
     class Meta:
-        """Meta definición del modelo."""
         verbose_name = "Usuario de Agencia"
         verbose_name_plural = "Usuarios de Agencias"
         unique_together = ["usuario", "agencia"]
         ordering = ["agencia", "usuario__username"]
 
     def __str__(self):
+        """__str__."""
         return f"{self.usuario.username} - {self.agencia.nombre} ({self.get_rol_display()})"
 
 
@@ -484,11 +461,11 @@ class AgenciaBranding(models.Model):
     )
 
     class Meta:
-        """Meta definición del modelo."""
         verbose_name = "Agencia - Branding"
         verbose_name_plural = "Agencias - Branding"
 
     def __str__(self):
+        """__str__."""
         return f"Branding: {self.agencia.nombre}"
 
 
@@ -597,9 +574,9 @@ class AgenciaConfiguracion(models.Model):
     )
 
     class Meta:
-        """Meta definición del modelo."""
         verbose_name = "Agencia - Configuración"
         verbose_name_plural = "Agencias - Configuraciones"
 
     def __str__(self):
+        """__str__."""
         return f"Config: {self.agencia.nombre}"

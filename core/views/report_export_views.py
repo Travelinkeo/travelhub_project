@@ -13,7 +13,7 @@ class ExportReportView(LoginRequiredMixin, View):
     """View to handle report export requests. Supports Excel format initially."""
 
     def get(self, request, *args, **kwargs):
-        """Método: get."""
+        """get."""
         report_type = request.GET.get("report_type", "ventas_generales")
         file_format = request.GET.get("format", "excel")
         start_date_str = request.GET.get("start_date")

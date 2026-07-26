@@ -10,9 +10,6 @@
 # el cual es el motor (CPA Engine) no interactivo de generación física de asientos.
 # ==============================================================================
 
-"""Servicio de ai accounting service para la aplicación finance.
-"""
-
 import json
 import logging
 
@@ -28,7 +25,7 @@ class AIAccountingService:
     """
 
     def __init__(self, agencia):
-        # __init__: Inicializa una nueva instancia de AIAccountingService. Args: parámetros de inicialización.
+        """__init__."""
         self.agencia = agencia
         from django.utils.module_loading import import_string
         from google import genai

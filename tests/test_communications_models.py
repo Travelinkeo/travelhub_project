@@ -15,9 +15,10 @@ from apps.communications.models.push_subscription import PushSubscription
 
 @pytest.mark.django_db
 class TestNotificationPreference:
-    """Test Notification Preference."""
+    """TestNotificationPreference."""
+
     def test_crear_preferencia(self, usuario_staff, agencia_premium):
-        """Crear preferencia."""
+        """test_crear_preferencia."""
         pref = NotificationPreference.objects.create(
             user=usuario_staff,
             agencia=agencia_premium,
@@ -32,7 +33,7 @@ class TestNotificationPreference:
         )
 
     def test_unique_together(self, usuario_staff, agencia_premium):
-        """Unique together."""
+        """test_unique_together."""
         NotificationPreference.objects.create(
             user=usuario_staff,
             agencia=agencia_premium,
@@ -48,7 +49,7 @@ class TestNotificationPreference:
             )
 
     def test_preferencia_sin_agencia(self, usuario_staff):
-        """Preferencia sin agencia."""
+        """test_preferencia_sin_agencia."""
         pref = NotificationPreference.objects.create(
             user=usuario_staff,
             agencia=None,
@@ -58,7 +59,7 @@ class TestNotificationPreference:
         assert str(pref) == f"{usuario_staff.username} - venta_creada - push"
 
     def test_preferencia_default_enabled(self, usuario_staff, agencia_premium):
-        """Preferencia default enabled."""
+        """test_preferencia_default_enabled."""
         pref = NotificationPreference.objects.create(
             user=usuario_staff,
             agencia=agencia_premium,
@@ -70,9 +71,10 @@ class TestNotificationPreference:
 
 @pytest.mark.django_db
 class TestNotificationTemplate:
-    """Test Notification Template."""
+    """TestNotificationTemplate."""
+
     def test_crear_plantilla(self):
-        """Crear plantilla."""
+        """test_crear_plantilla."""
         tmpl = NotificationTemplate.objects.create(
             name="venta_confirmacion",
             event_type="venta_creada",
@@ -84,7 +86,7 @@ class TestNotificationTemplate:
         assert str(tmpl) == "venta_confirmacion (email - es)"
 
     def test_render_body_simple(self):
-        """Render body simple."""
+        """test_render_body_simple."""
         tmpl = NotificationTemplate.objects.create(
             name="test",
             event_type="test_event",
@@ -95,7 +97,7 @@ class TestNotificationTemplate:
         assert result["body"] == "Hola Juan, tu código es ABC123"
 
     def test_render_missing_variable(self):
-        """Render missing variable."""
+        """test_render_missing_variable."""
         tmpl = NotificationTemplate.objects.create(
             name="test",
             event_type="test_event",
@@ -106,7 +108,7 @@ class TestNotificationTemplate:
         assert "{{codigo}}" in result["body"]
 
     def test_render_subject(self):
-        """Render subject."""
+        """test_render_subject."""
         tmpl = NotificationTemplate.objects.create(
             name="test",
             event_type="test_event",
@@ -118,7 +120,7 @@ class TestNotificationTemplate:
         assert result["subject"] == "Notificación para admin"
 
     def test_render_html(self):
-        """Render html."""
+        """test_render_html."""
         tmpl = NotificationTemplate.objects.create(
             name="test",
             event_type="test_event",
@@ -131,7 +133,7 @@ class TestNotificationTemplate:
         assert "<p>Mensaje</p>" in result["html"]
 
     def test_render_empty_subject(self):
-        """Render empty subject."""
+        """test_render_empty_subject."""
         tmpl = NotificationTemplate.objects.create(
             name="test",
             event_type="test_event",
@@ -142,7 +144,7 @@ class TestNotificationTemplate:
         assert result["subject"] == ""
 
     def test_is_default_flag(self):
-        """Is default flag."""
+        """test_is_default_flag."""
         tmpl = NotificationTemplate.objects.create(
             name="default_template",
             event_type="test_event",
@@ -153,7 +155,7 @@ class TestNotificationTemplate:
         assert tmpl.is_default is True
 
     def test_agencia_scoped_template(self, agencia_premium):
-        """Agencia scoped template."""
+        """test_agencia_scoped_template."""
         tmpl = NotificationTemplate.objects.create(
             name="agencia_template",
             event_type="test_event",
@@ -164,7 +166,7 @@ class TestNotificationTemplate:
         assert tmpl.agencia == agencia_premium
 
     def test_render_complex_variables(self):
-        """Render complex variables."""
+        """test_render_complex_variables."""
         tmpl = NotificationTemplate.objects.create(
             name="complex",
             event_type="test_event",
@@ -177,9 +179,10 @@ class TestNotificationTemplate:
 
 @pytest.mark.django_db
 class TestNotificationLog:
-    """Test Notification Log."""
+    """TestNotificationLog."""
+
     def test_crear_log(self):
-        """Crear log."""
+        """test_crear_log."""
         log = NotificationLog.objects.create(
             event_type="venta_creada",
             channel="email",
@@ -191,7 +194,7 @@ class TestNotificationLog:
         assert str(log) == "venta_creada -> test@example.com (sent)"
 
     def test_log_default_status(self):
-        """Log default status."""
+        """test_log_default_status."""
         log = NotificationLog.objects.create(
             event_type="venta_creada",
             channel="whatsapp",
@@ -201,7 +204,7 @@ class TestNotificationLog:
         assert log.status == "pending"
 
     def test_log_with_error(self):
-        """Log with error."""
+        """test_log_with_error."""
         log = NotificationLog.objects.create(
             event_type="venta_creada",
             channel="email",
@@ -217,9 +220,10 @@ class TestNotificationLog:
 
 @pytest.mark.django_db
 class TestEmailMonitorLog:
-    """Test Email Monitor Log."""
+    """TestEmailMonitorLog."""
+
     def test_crear_monitor_log(self, agencia_premium):
-        """Crear monitor log."""
+        """test_crear_monitor_log."""
         log = EmailMonitorLog.objects.create(
             agencia=agencia_premium,
             estado=EmailMonitorLog.Estado.SUCCESS,
@@ -232,7 +236,7 @@ class TestEmailMonitorLog:
         assert agencia_premium.nombre in str(log)
 
     def test_monitor_log_default_estado(self, agencia_premium):
-        """Monitor log default estado."""
+        """test_monitor_log_default_estado."""
         log = EmailMonitorLog.objects.create(
             agencia=agencia_premium,
             mensaje="Log sin estado explícito",
@@ -240,7 +244,7 @@ class TestEmailMonitorLog:
         assert log.estado == EmailMonitorLog.Estado.SUCCESS
 
     def test_monitor_log_error_state(self, agencia_premium):
-        """Monitor log error state."""
+        """test_monitor_log_error_state."""
         log = EmailMonitorLog.objects.create(
             agencia=agencia_premium,
             estado=EmailMonitorLog.Estado.ERROR,
@@ -253,9 +257,10 @@ class TestEmailMonitorLog:
 
 @pytest.mark.django_db
 class TestComunicacionProveedor:
-    """Test Comunicacion Proveedor."""
+    """TestComunicacionProveedor."""
+
     def test_crear_comunicacion(self, agencia_premium):
-        """Crear comunicacion."""
+        """test_crear_comunicacion."""
         com = ComunicacionProveedor.objects.create(
             agencia=agencia_premium,
             remitente="reservas@aerolinea.com",
@@ -268,7 +273,7 @@ class TestComunicacionProveedor:
         assert str(com) == "reservas@aerolinea.com - E-Ticket Confirmación - ABC123..."
 
     def test_comunicacion_default_categoria(self, agencia_premium):
-        """Comunicacion default categoria."""
+        """test_comunicacion_default_categoria."""
         com = ComunicacionProveedor.objects.create(
             agencia=agencia_premium,
             remitente="test@test.com",
@@ -277,7 +282,7 @@ class TestComunicacionProveedor:
         assert com.categoria == ComunicacionProveedor.Categoria.OTHER
 
     def test_comunicacion_con_contenido_extraido(self, agencia_premium):
-        """Comunicacion con contenido extraido."""
+        """test_comunicacion_con_contenido_extraido."""
         com = ComunicacionProveedor.objects.create(
             agencia=agencia_premium,
             remitente="alerts@aerolinea.com",
@@ -290,7 +295,7 @@ class TestComunicacionProveedor:
         assert com.procesado is True
 
     def test_unique_message_id(self, agencia_premium):
-        """Unique message id."""
+        """test_unique_message_id."""
         ComunicacionProveedor.objects.create(
             agencia=agencia_premium,
             remitente="test@test.com",
@@ -308,9 +313,10 @@ class TestComunicacionProveedor:
 
 @pytest.mark.django_db
 class TestPushSubscription:
-    """Test Push Subscription."""
+    """TestPushSubscription."""
+
     def test_crear_suscripcion(self, usuario_staff):
-        """Crear suscripcion."""
+        """test_crear_suscripcion."""
         sub = PushSubscription.objects.create(
             user=usuario_staff,
             endpoint="https://push.example.com/endpoint-abc",
@@ -323,7 +329,7 @@ class TestPushSubscription:
         assert str(sub) == f"PushSubscription({usuario_staff.id})"
 
     def test_subscription_default_active(self, usuario_staff):
-        """Subscription default active."""
+        """test_subscription_default_active."""
         sub = PushSubscription.objects.create(
             user=usuario_staff,
             endpoint="https://push.example.com/endpoint-def",
@@ -333,7 +339,7 @@ class TestPushSubscription:
         assert sub.active is True
 
     def test_unique_endpoint(self, usuario_staff):
-        """Unique endpoint."""
+        """test_unique_endpoint."""
         PushSubscription.objects.create(
             user=usuario_staff,
             endpoint="https://push.example.com/endpoint-ghi",
@@ -351,9 +357,10 @@ class TestPushSubscription:
 
 @pytest.mark.django_db
 class TestLeadModel:
-    """Test Lead Model."""
+    """TestLeadModel."""
+
     def test_crear_lead(self):
-        """Crear lead."""
+        """test_crear_lead."""
         from apps.communications.models.lead import Lead
 
         lead = Lead.objects.create(email="test@example.com", nombre="Test")
@@ -363,7 +370,7 @@ class TestLeadModel:
         assert lead.guia_descargada is False
 
     def test_lead_unique_email(self):
-        """Lead unique email."""
+        """test_lead_unique_email."""
         from apps.communications.models.lead import Lead
 
         Lead.objects.create(email="dup@example.com")
@@ -371,7 +378,7 @@ class TestLeadModel:
             Lead.objects.create(email="dup@example.com")
 
     def test_lead_ordering(self):
-        """Lead ordering."""
+        """test_lead_ordering."""
         from datetime import timedelta
 
         from django.utils import timezone
@@ -386,7 +393,7 @@ class TestLeadModel:
         assert leads[1] == l1
 
     def test_lead_default_fields(self):
-        """Lead default fields."""
+        """test_lead_default_fields."""
         from apps.communications.models.lead import Lead
 
         lead = Lead.objects.create(email="defaults@example.com")

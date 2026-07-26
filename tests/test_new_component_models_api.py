@@ -1,4 +1,3 @@
-"""Tests para New component models api."""
 import pytest
 
 pytestmark = pytest.mark.skip(reason="Tests requieren configuración completa - pendiente")
@@ -6,7 +5,7 @@ pytestmark = pytest.mark.skip(reason="Tests requieren configuración completa - 
 
 @pytest.mark.django_db
 def test_create_and_list_new_components(api_client_staff, venta_base):
-    """Create and list new components."""
+    """test_create_and_list_new_components."""
     venta = venta_base
     client = api_client_staff
 

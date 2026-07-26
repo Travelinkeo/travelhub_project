@@ -1,4 +1,3 @@
-"""Tests para Freelancer portal."""
 from decimal import Decimal
 
 import pytest
@@ -22,8 +21,8 @@ class TestFreelancerPortal:
 
     @pytest.fixture(autouse=True)
     def setup_data(self):
+        """setup_data."""
         # 1. Crear Agencia
-        """Setup data."""
         self.agencia = Agencia.objects.create(nombre="Freelancer Test Agency")
 
         # 2. Crear Usuario Freelancer y su Perfil

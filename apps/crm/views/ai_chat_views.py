@@ -1,6 +1,3 @@
-"""Vistas (views) de la aplicación crm.
-"""
-
 import logging
 
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -20,7 +17,7 @@ class GenerateSuggestedReplyView(LoginRequiredMixin, View):
     """
 
     def get(self, request, cliente_id, *args, **kwargs):
-        # get: Get. Args: según implementación. Returns: según implementación.
+        """get."""
         cliente = get_object_or_404(Cliente, pk=cliente_id)
 
         # 1. Obtener los últimos mensajes del chat para contexto
@@ -38,10 +35,10 @@ class GenerateSuggestedReplyView(LoginRequiredMixin, View):
         # 2. Instrucciones para Gemini
         prompt_ia = f"""
         Actúa como un experto asesor de ventas de TravelHub. Lee el siguiente historial de chat y genera exactamente 2 sugerencias de respuesta para el agente humano.
-        
+
         HISTORIAL DE CHAT:
         {contexto_chat}
-        
+
         REGLAS:
         - Sé breve, profesional y persuasivo.
         - Usa emojis amigables.

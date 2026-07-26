@@ -1,6 +1,3 @@
-"""Configuración del panel de administración para gamification.
-"""
-
 from django.contrib import admin
 
 from core.api import SaaSAdminMixin
@@ -9,17 +6,17 @@ from .models import Logro, LogroProgreso, Nivel, PuntuacionUsuario
 
 
 @admin.register(Nivel)
-class NivelAdmin:
-    """Configuración de administración para nivel. Uso: instanciar según necesidad del dominio.
-    """
+class NivelAdmin(SaaSAdminMixin, admin.ModelAdmin):
+    """NivelAdmin."""
+
     list_display = ["nombre", "puntos_minimos", "icono", "color"]
     ordering = ["puntos_minimos"]
 
 
 @admin.register(Logro)
-class LogroAdmin:
-    """Configuración de administración para logro. Uso: instanciar según necesidad del dominio.
-    """
+class LogroAdmin(SaaSAdminMixin, admin.ModelAdmin):
+    """LogroAdmin."""
+
     list_display = ["codigo", "nombre", "categoria", "puntos", "activo"]
     list_filter = ["categoria", "activo"]
     search_fields = ["nombre", "codigo"]
@@ -27,17 +24,17 @@ class LogroAdmin:
 
 
 @admin.register(LogroProgreso)
-class LogroProgresoAdmin:
-    """Configuración de administración para logroprogreso. Uso: instanciar según necesidad del dominio.
-    """
+class LogroProgresoAdmin(SaaSAdminMixin, admin.ModelAdmin):
+    """LogroProgresoAdmin."""
+
     list_display = ["usuario", "logro", "progreso", "completado", "fecha_completado"]
     list_filter = ["completado"]
     search_fields = ["usuario__email", "logro__nombre"]
 
 
 @admin.register(PuntuacionUsuario)
-class PuntuacionUsuarioAdmin:
-    """Configuración de administración para puntuacionusuario. Uso: instanciar según necesidad del dominio.
-    """
+class PuntuacionUsuarioAdmin(SaaSAdminMixin, admin.ModelAdmin):
+    """PuntuacionUsuarioAdmin."""
+
     list_display = ["usuario", "puntos_total", "nivel", "logros_completados"]
     ordering = ["-puntos_total"]

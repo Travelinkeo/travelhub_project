@@ -13,6 +13,7 @@ from apps.automation.parsers.sabre_parser import SabreParser
 
 
 def test_json_output():
+    """test_json_output."""
     # Simulated text based on 11 Marzo PDF structure and "Shanghai" case
     raw_text = """
     Información De Vuelo

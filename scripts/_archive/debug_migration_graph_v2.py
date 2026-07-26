@@ -9,6 +9,7 @@ django.setup()
 
 
 def debug_graph():
+    """debug_graph."""
     connection = connections["default"]
     loader = MigrationLoader(connection, ignore_no_migrations=True)
 

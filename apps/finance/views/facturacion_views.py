@@ -1,6 +1,3 @@
-"""Vistas (views) de la aplicación finance.
-"""
-
 import logging
 
 from django.contrib import messages
@@ -25,9 +22,9 @@ from core.api import (
 logger = logging.getLogger(__name__)
 
 
-class FacturacionDashboardView:
-    """Vista para gestionar facturaciondashboard. Uso: instanciar según necesidad del dominio.
-    """
+class FacturacionDashboardView(HtmxResponseMixin, SaaSMixin, LoginRequiredMixin, ListView):
+    """FacturacionDashboardView."""
+
     model = Factura
     template_name = "core/erp/facturacion/dashboard.html"
     htmx_template_name = "finance/partials/factura_list_htmx.html"
@@ -35,7 +32,7 @@ class FacturacionDashboardView:
     paginate_by = 20
 
     def get_queryset(self):
-        # get_queryset: Obtiene/recupera queryset. Args: según implementación. Returns: dato solicitado.
+        """get_queryset."""
         queryset = (
             super()
             .get_queryset()
@@ -60,7 +57,7 @@ class FacturacionDashboardView:
         return queryset
 
     def get_context_data(self, **kwargs):
-        # get_context_data: Obtiene/recupera context data. Args: según implementación. Returns: dato solicitado.
+        """get_context_data."""
         context = super().get_context_data(**kwargs)
         # Stats reusing the agency-filtered queryset from SaaSMixin.get_queryset()
         # Evita .model.objects.all() (que omite el SaaSMixin) y el filtro manual
@@ -71,9 +68,9 @@ class FacturacionDashboardView:
         return context
 
 
-class FacturaDetailView:
-    """Vista para gestionar facturadetail. Uso: instanciar según necesidad del dominio.
-    """
+class FacturaDetailView(HtmxResponseMixin, SaaSMixin, LoginRequiredMixin, DetailView):
+    """FacturaDetailView."""
+
     model = Factura
     template_name = "core/erp/facturacion/detalle.html"
     htmx_template_name = "finance/partials/factura_detalle_htmx.html"
@@ -81,7 +78,7 @@ class FacturaDetailView:
     # 🔐 SaaSMixin.get_queryset() filtra por agencia — Django usa ese QS en DetailView
 
     def get_context_data(self, **kwargs):
-        # get_context_data: Obtiene/recupera context data. Args: según implementación. Returns: dato solicitado.
+        """get_context_data."""
         context = super().get_context_data(**kwargs)
         context["items"] = self.object.items.all()
         return context
@@ -134,7 +131,7 @@ def generar_factura_desde_venta(request, pk):
 
 
 def descargar_pdf_factura(request, pk):
-    # descargar_pdf_factura: Descargar pdf factura. Args: según implementación. Returns: según implementación.
+    """descargar_pdf_factura."""
     agencia = get_agencia_or_403(request)
     factura = get_object_tenant_or_404(Factura, agencia, pk=pk)
     try:

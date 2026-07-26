@@ -18,6 +18,7 @@ User = get_user_model()
 
 
 def probar_comision_freelancer():
+    """probar_comision_freelancer."""
     print("🧪 Iniciando Prueba de Comisión Freelancer B2B2C...")
 
     # 2. Obtener Actor (Freelancer)

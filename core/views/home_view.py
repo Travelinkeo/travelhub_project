@@ -2,5 +2,6 @@ from django.views.generic import TemplateView
 
 
 class HomeView(TemplateView):
-    """Función: HomeView."""
+    """HomeView."""
+
     template_name = "core/home.html"

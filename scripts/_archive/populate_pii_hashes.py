@@ -12,12 +12,14 @@ from personas.models import Cliente, Pasajero
 
 
 def get_sha256(text):
+    """get_sha256."""
     if not text:
         return None
     return hashlib.sha256(text.encode()).hexdigest()
 
 
 def populate_hashes():
+    """populate_hashes."""
     print("🔐 Iniciando generación de hashes para PII...")
 
     # 1. Pasajeros

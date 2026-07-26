@@ -8,11 +8,12 @@ from apps.common.models import Aerolinea, Ciudad, Moneda, Pais
 
 
 class Command(BaseCommand):
-    """Comando de gestión personalizado."""
+    """Command."""
+
     help = "Calienta el caché con datos de catálogos frecuentes"
 
     def handle(self, *args, **options):
-        """Método: handle."""
+        """handle."""
         self.stdout.write("Calentando caché...")
 
         CHUNK_SIZE = 1000

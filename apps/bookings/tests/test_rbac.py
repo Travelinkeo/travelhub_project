@@ -1,6 +1,3 @@
-"""Pruebas para rbac en bookings.
-"""
-
 from decimal import Decimal
 from unittest.mock import patch
 
@@ -24,6 +21,7 @@ class RBACSecurityTest(TestCase):
     """
 
     def setUp(self):
+        """setUp."""
         # Desactivar tareas de Celery reales
         patcher = patch("core.tasks.migrar_logos_agencia_task.delay")
         self.mock_delay = patcher.start()

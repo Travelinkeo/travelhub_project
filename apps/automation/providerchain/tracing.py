@@ -1,6 +1,3 @@
-"""Proveedor de IA/configuración para automation: tracing.
-"""
-
 import logging
 from collections import defaultdict
 from datetime import datetime, timedelta
@@ -22,13 +19,13 @@ PROVIDER_PRICING: dict[str, dict[str, float]] = {
 
 
 def _estimated_cost(provider: str, tokens_in: int, tokens_out: int) -> float:
-    # _estimated_cost:  estimated cost. Args: según implementación. Returns: según implementación.
+    """_estimated_cost."""
     pricing = PROVIDER_PRICING.get(provider, {"input": 0.0001, "output": 0.0004})
     return (tokens_in * pricing["input"] + tokens_out * pricing["output"]) / 1000
 
 
 def _categorize_error(error_str: str) -> str:
-    # _categorize_error:  categorize error. Args: según implementación. Returns: según implementación.
+    """_categorize_error."""
     error_lower = error_str.lower()
     if any(w in error_lower for w in ("timeout", "timed out", "deadline")):
         return "timeout"
@@ -114,7 +111,7 @@ def _record_latency_sample(hour_key: str, provider: str, duration_ms: int) -> No
 
 
 def _get_latency_samples(hour_key: str, provider: str) -> list[int]:
-    # _get_latency_samples:  get latency samples. Args: según implementación. Returns: según implementación.
+    """_get_latency_samples."""
     try:
         return cache.get(f"ai_metrics:{hour_key}:latency:{provider}") or []
     except Exception:
@@ -122,7 +119,7 @@ def _get_latency_samples(hour_key: str, provider: str) -> list[int]:
 
 
 def _get_percentiles(values: list[int]) -> dict[str, float]:
-    # _get_percentiles:  get percentiles. Args: según implementación. Returns: según implementación.
+    """_get_percentiles."""
     if not values:
         return {"p50": 0, "p95": 0, "p99": 0}
     values.sort()

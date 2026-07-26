@@ -9,8 +9,6 @@
 # ==============================================================================
 
 # --- Multi-Tenancy & Context ---
-"""Inicializador del paquete."""
-
 from core.cache import cache_api_response
 
 # --- Performance & Caching ---
@@ -209,7 +207,6 @@ _LAZY_ADMIN_ATTRS = {
 
 
 def __getattr__(name: str):
-    """Función interna: getattr."""
     if name in _LAZY_ADMIN_ATTRS:
         from django.utils.module_loading import import_string
 

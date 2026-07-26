@@ -1,6 +1,3 @@
-"""Módulo mydestiny parser de la aplicación contabilidad.
-"""
-
 import io
 import logging
 import re
@@ -15,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 def parse_latin_decimal(val_str: str) -> Decimal:
-    # parse_latin_decimal: Analiza/parsea  latin decimal. Args: datos de entrada. Returns: resultado del parseo.
+    """parse_latin_decimal."""
     if not val_str or val_str.strip() in ["-", ""]:
         return Decimal("0.00")
     clean = val_str.replace("%", "").strip()
@@ -27,7 +24,7 @@ def parse_latin_decimal(val_str: str) -> Decimal:
 
 
 def parse_date(date_str: str) -> str | None:
-    # parse_date: Analiza/parsea  date. Args: datos de entrada. Returns: resultado del parseo.
+    """parse_date."""
     if not date_str:
         return None
     parts = date_str.strip().split("/")
@@ -42,11 +39,11 @@ def parse_date(date_str: str) -> str | None:
     return None
 
 
-class MyDestinyReportParser:
-    """Parser para procesar mydestinyreport. Uso: instanciar según necesidad del dominio.
-    """
+class MyDestinyReportParser(BaseSupplierReportParser):
+    """MyDestinyReportParser."""
+
     def parse(self) -> dict[str, Any]:
-        # parse: Analiza/parsea . Args: datos de entrada. Returns: resultado del parseo.
+        """parse."""
         reader = pypdf.PdfReader(io.BytesIO(self.pdf_bytes))
         full_text = "\n".join([page.extract_text() or "" for page in reader.pages])
 

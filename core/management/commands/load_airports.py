@@ -6,11 +6,12 @@ from django.core.management.base import BaseCommand
 
 
 class Command(BaseCommand):
-    """Comando de gestión personalizado."""
+    """Command."""
+
     help = "Descarga la base de datos de OurAirports e importa los aeropuertos comerciales en la base de datos local."
 
     def handle(self, *args, **options):
-        """Método: handle."""
+        """handle."""
         from core.models import Aeropuerto
 
         url = "https://davidmegginson.github.io/ourairports-data/airports.csv"

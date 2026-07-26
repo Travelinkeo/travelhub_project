@@ -1,6 +1,3 @@
-"""Servicio de venta automation para la aplicación automation.
-"""
-
 import datetime
 import json
 import logging
@@ -22,8 +19,8 @@ logger = logging.getLogger(__name__)
 
 
 class VentaAutomationService:
-    """Servicio para ventaautomation. Uso: instanciar según necesidad del dominio.
-    """
+    """VentaAutomationService."""
+
     @classmethod
     def crear_venta_desde_parser(
         cls,

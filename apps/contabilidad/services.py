@@ -1,6 +1,3 @@
-"""Módulo services de la aplicación contabilidad.
-"""
-
 import logging
 from datetime import date
 from decimal import Decimal
@@ -17,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 def _debitar(asiento, cuenta, monto_usd, monto_ves):
-    # _debitar:  debitar. Args: según implementación. Returns: según implementación.
+    """_debitar."""
     MovimientoContable.objects.create(
         asiento=asiento,
         cuenta=cuenta,
@@ -28,7 +25,7 @@ def _debitar(asiento, cuenta, monto_usd, monto_ves):
 
 
 def _acreditar(asiento, cuenta, monto_usd, monto_ves):
-    # _acreditar:  acreditar. Args: según implementación. Returns: según implementación.
+    """_acreditar."""
     MovimientoContable.objects.create(
         asiento=asiento,
         cuenta=cuenta,
@@ -39,11 +36,10 @@ def _acreditar(asiento, cuenta, monto_usd, monto_ves):
 
 
 class ContabilidadService:
-    """Servicio para contabilidad. Uso: instanciar según necesidad del dominio.
-    """
+    """ContabilidadService."""
+
     @staticmethod
     def _buscar_cuenta(codigo: str):
-        # _buscar_cuenta:  buscar cuenta. Args: según implementación. Returns: según implementación.
         cuenta = CuentaContable.objects.filter(codigo=codigo).first()
         if cuenta:
             return cuenta
@@ -60,7 +56,6 @@ class ContabilidadService:
 
     @staticmethod
     def obtener_tasa_bcv(fecha: date) -> Decimal:
-        # obtener_tasa_bcv: Obtener tasa bcv. Args: según implementación. Returns: según implementación.
         try:
             tasa = TasaCambioBCV.objects.filter(fecha=fecha).first()
             if not tasa:
@@ -77,7 +72,6 @@ class ContabilidadService:
     @staticmethod
     @transaction.atomic
     def generar_asiento_desde_factura(factura: Factura) -> AsientoContable:
-        # generar_asiento_desde_factura: Genera asiento desde factura. Args: parámetros de generación. Returns: resultado generado.
         try:
             tasa_dia = factura.tasa_cambio or ContabilidadService.obtener_tasa_bcv(
                 factura.fecha_emision.date()
@@ -121,7 +115,6 @@ class ContabilidadService:
 
     @staticmethod
     def _generar_lineas_intermediacion(asiento: AsientoContable, factura: Factura, tasa: Decimal):
-        # _generar_lineas_intermediacion:  generar lineas intermediacion. Args: según implementación. Returns: según implementación.
         comision_usd = factura.base_imponible
         total_cxc = comision_usd + factura.monto_iva_16 + factura.monto_igtf
 
@@ -145,7 +138,6 @@ class ContabilidadService:
 
     @staticmethod
     def _generar_lineas_venta_propia(asiento: AsientoContable, factura: Factura, tasa: Decimal):
-        # _generar_lineas_venta_propia:  generar lineas venta propia. Args: según implementación. Returns: según implementación.
         cxc = ContabilidadService._buscar_cuenta("1.1.02.02")
         ingreso = ContabilidadService._buscar_cuenta("4.2")
         iva = ContabilidadService._buscar_cuenta("2.1.02.01")
@@ -164,7 +156,6 @@ class ContabilidadService:
     @staticmethod
     @transaction.atomic
     def registrar_pago_y_diferencial(pago: PagoVenta) -> AsientoContable | None:
-        # registrar_pago_y_diferencial: Registrar pago y diferencial. Args: según implementación. Returns: según implementación.
         try:
             venta = pago.venta
             factura = venta.factura
@@ -233,7 +224,6 @@ class ContabilidadService:
     @staticmethod
     @transaction.atomic
     def provisionar_contribucion_inatur(mes: int, anio: int) -> AsientoContable:
-        # provisionar_contribucion_inatur: Provisionar contribucion inatur. Args: según implementación. Returns: según implementación.
         try:
             from datetime import date
 

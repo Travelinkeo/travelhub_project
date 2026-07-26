@@ -13,6 +13,7 @@ User = get_user_model()
 
 
 def check_users():
+    """check_users."""
     print("--- Usuarios en Base de Datos ---")
     users = User.objects.all()
     if not users.exists():

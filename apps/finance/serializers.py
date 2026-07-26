@@ -1,6 +1,3 @@
-"""Serializadores para la API de finance.
-"""
-
 from decimal import Decimal
 
 from rest_framework import serializers
@@ -11,17 +8,17 @@ from apps.crm.serializers import CoreClienteSerializer
 from .models import Factura, ItemFactura, Pago
 
 
-class MonedaSerializer:
-    """Serializador para moneda. Uso: instanciar según necesidad del dominio.
-    """
+class MonedaSerializer(serializers.ModelSerializer):
+    """MonedaSerializer."""
+
     class Meta:
         model = Moneda
         fields = ["id", "codigo_iso", "nombre", "simbolo", "es_moneda_local"]
 
 
-class ItemFacturaSerializer:
-    """Serializador para itemfactura. Uso: instanciar según necesidad del dominio.
-    """
+class ItemFacturaSerializer(serializers.ModelSerializer):
+    """ItemFacturaSerializer."""
+
     class Meta:
         model = ItemFactura
         fields = [
@@ -37,9 +34,9 @@ class ItemFacturaSerializer:
         extra_kwargs = {"factura": {"write_only": True, "required": False}}
 
 
-class FacturaSerializer:
-    """Serializador para factura. Uso: instanciar según necesidad del dominio.
-    """
+class FacturaSerializer(serializers.ModelSerializer):
+    """FacturaSerializer."""
+
     items = ItemFacturaSerializer(many=True, required=False)
     cliente_detalle = CoreClienteSerializer(source="cliente", read_only=True)
     estado_display = serializers.CharField(source="get_estado_display", read_only=True)
@@ -70,7 +67,7 @@ class FacturaSerializer:
         }
 
     def create(self, validated_data):
-        # create: Create. Args: según implementación. Returns: según implementación.
+        """create."""
         items_data = validated_data.pop("items", [])
         factura = Factura.objects.create(**validated_data)
 
@@ -88,7 +85,7 @@ class FacturaSerializer:
         return factura
 
     def update(self, instance, validated_data):
-        # update: Update. Args: según implementación. Returns: según implementación.
+        """update."""
         items_data = validated_data.pop("items", None)
 
         for attr, value in validated_data.items():
@@ -106,9 +103,9 @@ class FacturaSerializer:
         return instance
 
 
-class PagoSerializer:
-    """Serializador para pago. Uso: instanciar según necesidad del dominio.
-    """
+class PagoSerializer(serializers.ModelSerializer):
+    """PagoSerializer."""
+
     class Meta:
         model = Pago
         fields = [

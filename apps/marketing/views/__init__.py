@@ -1,6 +1,3 @@
-"""Inicialización del paquete marketing.
-"""
-
 from apps.marketing.views.dashboard_views import MarketingDashboardView
 from apps.marketing.views.generation_views import (
     AIForecastView,

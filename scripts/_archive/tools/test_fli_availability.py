@@ -12,6 +12,7 @@ from fli.search import SearchFlights
 
 
 def test_availability():
+    """test_availability."""
     print("\n🚀 Iniciando búsqueda de disponibilidad REAL con 'fli'...")
 
     try:

@@ -1,6 +1,3 @@
-"""Módulo pdf service de la aplicación cotizaciones.
-"""
-
 from django.template.loader import render_to_string
 
 from apps.common.services.pdf_renderer import PdfRendererService

@@ -1,6 +1,3 @@
-"""Módulo evolution de la aplicación common.
-"""
-
 import datetime
 import json
 import logging
@@ -24,7 +21,7 @@ _WHATSAPP_HEALTH_LAST_STATE_TTL = 3600  # 1 hora de gracia (evita reset)
     soft_time_limit=50,
 )
 def send_evolution_message_task(self, agencia_id, phone_number, text):
-    # send_evolution_message_task: Envía  evolution message task. Args: datos del mensaje. Returns: resultado del envío.
+    """send_evolution_message_task."""
     from apps.communications.services.whatsapp_service import WhatsAppEvolutionService
 
     try:
@@ -51,7 +48,7 @@ def send_evolution_message_task(self, agencia_id, phone_number, text):
 def send_evolution_document_task(
     self, agencia_id, phone_number, document_url, filename, caption=""
 ):
-    # send_evolution_document_task: Envía  evolution document task. Args: datos del mensaje. Returns: resultado del envío.
+    """send_evolution_document_task."""
     from apps.communications.services.whatsapp_service import WhatsAppEvolutionService
 
     try:

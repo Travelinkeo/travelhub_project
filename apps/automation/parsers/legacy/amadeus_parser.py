@@ -1,6 +1,3 @@
-"""Parser/procesador de amadeus parser para la aplicación automation.
-"""
-
 import logging
 import re
 
@@ -127,6 +124,7 @@ class AmadeusParser(BaseTicketParser):
         )
 
     def _extract_passenger(self, text: str) -> str | None:
+        """_extract_passenger."""
         # Cleaner logic for passenger name
         patterns = [
             r"Traveler\s+(?:MR|MRS|MS|MISS)?\s*([^\n]+?)\s+(?:Agency|Ticket|Booking)",
@@ -143,7 +141,7 @@ class AmadeusParser(BaseTicketParser):
         return None
 
     def _extract_itinerary(self, text: str) -> list[dict]:
-        # _extract_itinerary:  extract itinerary. Args: según implementación. Returns: según implementación.
+        """_extract_itinerary."""
         segments = []
         lines = text.splitlines()
 

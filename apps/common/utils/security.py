@@ -1,6 +1,3 @@
-"""Utilidades de security para common.
-"""
-
 import hashlib
 import hmac
 

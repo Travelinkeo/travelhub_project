@@ -16,11 +16,12 @@ from core.forms.profile_forms import (
 
 
 class UserProfileView(LoginRequiredMixin, TemplateView):
-    """Función: UserProfileView."""
+    """UserProfileView."""
+
     template_name = "core/config/profile.html"
 
     def get_context_data(self, **kwargs):
-        """Método que obtiene context data. Args: según implementación. Returns: datos solicitados."""
+        """get_context_data."""
         context = super().get_context_data(**kwargs)
         user = self.request.user
 
@@ -49,7 +50,7 @@ class UserProfileView(LoginRequiredMixin, TemplateView):
         return context
 
     def post(self, request, *args, **kwargs):
-        """Método: post."""
+        """post."""
         user = request.user
         # Determinar qué formulario se envió
         form_type = request.POST.get("form_type")

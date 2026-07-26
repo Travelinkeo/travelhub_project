@@ -1,6 +1,3 @@
-"""Módulo views webhooks de la aplicación finance.
-"""
-
 import hashlib
 import hmac
 import logging
@@ -20,13 +17,13 @@ from apps.finance.models_stubs import TransaccionPago
 logger = logging.getLogger(__name__)
 
 
-class WebhookPagoBaseView:
-    """Vista para gestionar webhookpagobase. Uso: instanciar según necesidad del dominio.
-    """
+class WebhookPagoBaseView(APIView):
+    """WebhookPagoBaseView."""
+
     permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
-        # post: Post. Args: según implementación. Returns: según implementación.
+        """post."""
         provider_data = request.data
 
         webhook_id = provider_data.get("bizId") or provider_data.get("id")
@@ -92,23 +89,23 @@ class WebhookPagoBaseView:
         )
 
     def get_provider_key(self):
-        # get_provider_key: Obtiene/recupera provider key. Args: según implementación. Returns: dato solicitado.
+        """get_provider_key."""
         return "OTR"
 
     def procesar_logica_contable(self, transaccion):
-        # procesar_logica_contable: Procesa r logica contable. Args: datos a procesar. Returns: resultado procesado.
+        """procesar_logica_contable."""
         pass
 
 
-class BinanceWebhookView:
-    """Vista para gestionar binancewebhook. Uso: instanciar según necesidad del dominio.
-    """
+class BinanceWebhookView(WebhookPagoBaseView):
+    """BinanceWebhookView."""
+
     def get_provider_key(self):
-        # get_provider_key: Obtiene/recupera provider key. Args: según implementación. Returns: dato solicitado.
+        """get_provider_key."""
         return "BIN"
 
     def post(self, request, *args, **kwargs):
-        # post: Post. Args: según implementación. Returns: según implementación.
+        """post."""
         webhook_secret = getattr(settings, "BINANCE_WEBHOOK_SECRET", None)
         if not webhook_secret:
             logger.error(
@@ -133,15 +130,15 @@ class BinanceWebhookView:
         return super().post(request, *args, **kwargs)
 
 
-class StripeWebhookView:
-    """Vista para gestionar stripewebhook. Uso: instanciar según necesidad del dominio.
-    """
+class StripeWebhookView(WebhookPagoBaseView):
+    """StripeWebhookView."""
+
     def get_provider_key(self):
-        # get_provider_key: Obtiene/recupera provider key. Args: según implementación. Returns: dato solicitado.
+        """get_provider_key."""
         return "STR"
 
     def post(self, request, *args, **kwargs):
-        # post: Post. Args: según implementación. Returns: según implementación.
+        """post."""
         webhook_secret = getattr(settings, "STRIPE_WEBHOOK_SECRET", None)
         if not webhook_secret:
             logger.error(

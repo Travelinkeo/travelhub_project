@@ -1,4 +1,3 @@
-"""Tests para Gemini module no key."""
 import importlib
 import sys
 
@@ -8,7 +7,7 @@ pytestmark = pytest.mark.skip(reason="Parser/Gemini refactorizado - pendiente ac
 
 
 def test_gemini_without_api_key(settings, monkeypatch):
-    """Gemini without api key."""
+    """test_gemini_without_api_key."""
     if hasattr(settings, "GEMINI_API_KEY"):
         delattr(settings, "GEMINI_API_KEY")
 

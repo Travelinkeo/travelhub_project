@@ -2,6 +2,7 @@ import re
 
 
 def test_regex():
+    """test_regex."""
     s_clean = "MADRID, SPAIN SHANGHAI PUDONG, Código de"
 
     # Current Regex

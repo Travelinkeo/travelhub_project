@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 def test_sentry():
+    """test_sentry."""
     print("\n" + "=" * 60)
     print("🚀 TEST: Sentry Integration")
     print("=" * 60 + "\n")

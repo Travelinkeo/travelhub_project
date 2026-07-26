@@ -1,6 +1,3 @@
-"""Módulo tasks settlements de la aplicación finance.
-"""
-
 import logging
 from decimal import Decimal
 
@@ -22,7 +19,7 @@ logger = logging.getLogger(__name__)
     soft_time_limit=540,
 )
 def generar_liquidaciones_mensuales_task(anio=None, mes=None, agencia_id=None):
-    # generar_liquidaciones_mensuales_task: Genera liquidaciones mensuales task. Args: parámetros de generación. Returns: resultado generado.
+    """generar_liquidaciones_mensuales_task."""
     from core.api import Agencia, agency_context
 
     referencia = timezone.now()

@@ -1,4 +1,3 @@
-"""Tests para Fetch tickets command."""
 import imaplib
 from io import StringIO
 from unittest.mock import patch
@@ -8,8 +7,9 @@ from django.test import TestCase, override_settings
 
 
 class FetchTicketsCommandTest(TestCase):
+    """FetchTicketsCommandTest."""
+
     @override_settings(GMAIL_USER=None, GMAIL_APP_PASSWORD=None)
-    """Fetch Tickets Command Test."""
     def test_missing_credentials(self):
         """
         Verifica que el comando termina limpiamente si faltan las credenciales de correo.

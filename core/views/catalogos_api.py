@@ -21,7 +21,7 @@ class ComisionProveedorServicioViewSet(
     search_fields = ["proveedor__nombre", "tipo_servicio"]
 
     def get_queryset(self):
-        """Método que obtiene queryset. Args: según implementación. Returns: datos solicitados."""
+        """get_queryset."""
         queryset = super().get_queryset()
         proveedor_id = self.request.query_params.get("proveedor", None)
         if proveedor_id:

@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 
 def _on_commit(fn, *args, **kwargs):
-    # _on_commit:  on commit. Args: según implementación. Returns: según implementación.
+    """_on_commit."""
     transaction.on_commit(partial(fn, *args, **kwargs))
 
 
@@ -51,7 +51,7 @@ def generar_asiento_desde_factura_signal(sender, instance, created, **kwargs):
 
 
 def _generar_asiento_contable(factura_id):
-    # _generar_asiento_contable:  generar asiento contable. Args: según implementación. Returns: según implementación.
+    """_generar_asiento_contable."""
     from apps.finance.models import Factura as FacturaModel
 
     try:
@@ -81,7 +81,7 @@ def registrar_pago_y_diferencial_signal(sender, instance, created, **kwargs):
 
 
 def _registrar_pago_contable(pago_id):
-    # _registrar_pago_contable:  registrar pago contable. Args: según implementación. Returns: según implementación.
+    """_registrar_pago_contable."""
     from apps.bookings.models import PagoVenta as PagoVentaModel
 
     try:

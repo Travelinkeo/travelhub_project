@@ -16,7 +16,6 @@ class TestAgencyCacheService:
     @pytest.fixture(autouse=True)
     def setup_data(self):
         """Configuración común para todos los tests"""
-        """Setup data."""
         cache.clear()
         self.agencia = Agencia.objects.create(nombre="Test Agency")
         self.user = User.objects.create_user(
@@ -138,7 +137,7 @@ class TestSecurityCacheIntegration:
 
     @pytest.fixture(autouse=True)
     def setup_data(self):
-        """Setup data."""
+        """setup_data."""
         cache.clear()
         self.agencia = Agencia.objects.create(nombre="Test Agency")
         self.user = User.objects.create_user(

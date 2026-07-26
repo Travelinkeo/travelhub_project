@@ -1,6 +1,4 @@
 # core/urls_admin.py
-"""Registros y configuraciones del panel de administración Django."""
-
 import json
 
 from django.contrib.admin.views.decorators import staff_member_required
@@ -18,7 +16,7 @@ class HealthDashboardView(View):
     """Dashboard de salud del sistema (admin)."""
 
     def get(self, request):
-        """Método: get."""
+        """get."""
         from apps.automation.providerchain.health import get_health_history, get_health_summary
 
         summary = get_health_summary()

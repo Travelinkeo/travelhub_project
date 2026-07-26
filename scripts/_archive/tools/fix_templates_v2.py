@@ -8,11 +8,13 @@ directories = [
 
 
 def fix_template(filepath):
+    """fix_template."""
     with open(filepath, encoding="utf-8") as f:
         content = f.read()
 
     # 1. Fix default filter syntax: default('N/A') -> default:'N/A'
     def replace_default(match):
+        """replace_default."""
         inner = match.group(1).strip()
         return f"default:{inner}"
 
@@ -20,6 +22,7 @@ def fix_template(filepath):
 
     # 2. Fix variable slicing: flight.origen[:3] -> flight.origen|slice:":3"
     def replace_slice(match):
+        """replace_slice."""
         var = match.group(1)
         slc = match.group(2)
         return f'{var}|slice:"{slc}"'
@@ -36,6 +39,7 @@ def fix_template(filepath):
     # 5. Fix logical OR in print statement: {{ flight.fecha or flight.fecha_salida }} -> {{ flight.fecha|default:flight.fecha_salida }}
     # Need to find {{ a or b }}
     def replace_or(match):
+        """replace_or."""
         a = match.group(1).strip()
         b = match.group(2).strip()
         # what if there are filters? flight.fecha|default:'N/A' or flight.fecha_salida

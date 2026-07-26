@@ -1,6 +1,3 @@
-"""Formularios Django para la aplicación cotizaciones.
-"""
-
 from django import forms
 from django.forms import inlineformset_factory
 from django.utils.translation import gettext_lazy as _
@@ -9,9 +6,9 @@ from apps.common.models import Moneda
 from apps.cotizaciones.models import Cotizacion, ItemCotizacion
 
 
-class CotizacionForm:
-    """Formulario para cotizacion. Uso: instanciar según necesidad del dominio.
-    """
+class CotizacionForm(forms.ModelForm):
+    """CotizacionForm."""
+
     class Meta:
         model = Cotizacion
         fields = [
@@ -74,7 +71,7 @@ class CotizacionForm:
         }
 
     def __init__(self, *args, **kwargs):
-        # __init__: Método de inicialización de la clase.
+        """__init__."""
         super().__init__(*args, **kwargs)
         # Order currencies: Local first, then by name
         self.fields["moneda"].queryset = Moneda.objects.order_by("-es_moneda_local", "nombre")
@@ -82,7 +79,7 @@ class CotizacionForm:
         self.fields["cliente"].required = False
 
     def clean(self):
-        # clean: Limpia/valida los campos del modelo. Args: None. Returns: None.
+        """clean."""
         cleaned_data = super().clean()
         cliente = cleaned_data.get("cliente")
         nombre_manual = cleaned_data.get("nombre_cliente_manual")

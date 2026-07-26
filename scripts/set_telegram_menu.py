@@ -4,6 +4,7 @@ import requests
 
 
 def set_menu_button():
+    """set_menu_button."""
     # Load env vars manually
     try:
         from dotenv import load_dotenv

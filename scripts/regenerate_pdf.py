@@ -17,6 +17,7 @@ VENTA_ID = 12
 
 
 def run():
+    """run."""
     print(f"Regenerando PDF para Venta ID: {VENTA_ID} con la nueva plantilla...")
 
     try:

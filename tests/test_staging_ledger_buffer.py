@@ -1,4 +1,3 @@
-"""Tests para Staging ledger buffer."""
 import unittest
 from decimal import Decimal
 
@@ -23,10 +22,11 @@ User = get_user_model()
     SESSION_ENGINE="django.contrib.sessions.backends.db",
 )
 class StagingLedgerBufferTest(TestCase):
-    """Staging Ledger Buffer Test."""
+    """StagingLedgerBufferTest."""
+
     def setUp(self):
+        """setUp."""
         # Create user first
-        """SetUp."""
         self.user = User.objects.create_user(
             username="cfo_user", email="cfo_user@test.com", password="securepassword123"
         )

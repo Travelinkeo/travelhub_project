@@ -17,6 +17,7 @@ from fli.search import SearchFlights
 
 
 def test_search():
+    """test_search."""
     origin = Airport.CCS
     destination = Airport.BOG
     departure_date = "2026-05-14"

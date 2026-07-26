@@ -17,7 +17,7 @@ def test_rate_limit_atomico():
     results = []
 
     def incr_concurrent():
-        """Incr concurrent."""
+        """incr_concurrent."""
         try:
             val = cache.incr(key)
             results.append(val)
@@ -45,7 +45,7 @@ def test_rate_limit_add_atomico():
     successes = []
 
     def add_concurrent():
-        """Add concurrent."""
+        """add_concurrent."""
         if cache.add(key, "locked", timeout=60):
             successes.append(True)
 

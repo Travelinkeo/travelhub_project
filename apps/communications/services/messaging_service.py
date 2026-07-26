@@ -1,6 +1,3 @@
-"""Servicio de messaging service para la aplicación communications.
-"""
-
 import logging
 from typing import Any
 
@@ -10,7 +7,7 @@ logger = logging.getLogger(__name__)
 def generate_whatsapp_message_for_document(
     document_type: str, client_name: str, data: dict[str, Any]
 ) -> str:
-    # generate_whatsapp_message_for_document: Genera  whatsapp message for document. Args: parámetros de generación. Returns: resultado generado.
+    """generate_whatsapp_message_for_document."""
     from django.utils.module_loading import import_string
 
     generate_content = import_string("apps.automation.services.ai_engine.generate_content")

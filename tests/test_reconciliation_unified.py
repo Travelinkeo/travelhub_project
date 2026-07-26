@@ -15,7 +15,7 @@ class TestSmartReconciliationService:
     @patch.object(SmartReconciliationService, "_guardar_lineas_extraidas")
     @patch.object(SmartReconciliationService, "_ejecutar_cruce_conciliacion")
     def test_procesar_reporte_success(self, mock_cruce, mock_guardar, mock_extraer, mock_get):
-        """Procesar reporte success."""
+        """test_procesar_reporte_success."""
         reporte = Mock()
         reporte.estado = "PENDIENTE"
         reporte.save = Mock()
@@ -38,7 +38,7 @@ class TestSmartReconciliationService:
     @patch("apps.finance.services.smart_reconciliation_service.ReporteReconciliacion.objects.get")
     @patch.object(SmartReconciliationService, "_extraer_datos_archivo")
     def test_procesar_reporte_error(self, mock_extraer, mock_get):
-        """Procesar reporte error."""
+        """test_procesar_reporte_error."""
         reporte = Mock()
         reporte.estado = "PENDIENTE"
         reporte.save = Mock()
@@ -56,9 +56,9 @@ class TestSmartReconciliationService:
     @patch.object(SmartReconciliationService, "_guardar_lineas_extraidas")
     @patch.object(SmartReconciliationService, "_ejecutar_cruce_conciliacion")
     def test_procesar_reporte_con_discrepancias(
-        """Procesar reporte con discrepancias."""
         self, mock_cruce, mock_guardar, mock_extraer, mock_get
     ):
+        """test_procesar_reporte_con_discrepancias."""
         reporte = Mock()
         reporte.estado = "PENDIENTE"
         reporte.save = Mock()
@@ -100,7 +100,7 @@ class TestReconciliationDataExtraction:
     @patch("apps.finance.services.smart_reconciliation_service.pd.read_csv")
     @patch.object(SmartReconciliationService, "_mapear_columnas_df_con_ia")
     def test_extraer_datos_csv(self, mock_map, mock_read_csv):
-        """Extraer datos csv."""
+        """test_extraer_datos_csv."""
         import pandas as pd
 
         mock_df = pd.DataFrame({"col1": [1, 2], "col2": [3, 4]})

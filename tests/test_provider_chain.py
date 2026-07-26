@@ -1,4 +1,3 @@
-"""Tests para Provider chain."""
 import pytest
 from django.core.cache import cache
 
@@ -15,47 +14,50 @@ pytestmark = [pytest.mark.django_db, pytest.mark.unit]
 
 
 class OkProvider(AbstractBaseProvider):
-    """Ok Provider."""
+    """OkProvider."""
+
     provider_name = "test_ok"
     supports_structured_output = True
 
     def test_connection(self):
-        """Connection."""
+        """test_connection."""
         return True
 
     def generate(self, prompt, **kw):
-        """Generate."""
+        """generate."""
         return ProviderResult(
             text="ok response", provider=self.provider_name, model="test-model", success=True
         )
 
 
 class FailProvider(AbstractBaseProvider):
-    """Fail Provider."""
+    """FailProvider."""
+
     provider_name = "test_fail"
     supports_structured_output = False
 
     def test_connection(self):
-        """Connection."""
+        """test_connection."""
         return False
 
     def generate(self, prompt, **kw):
-        """Generate."""
+        """generate."""
         return ProviderResult(success=False, error="test error", provider=self.provider_name)
 
 
 class EmergencyProvider(AbstractBaseProvider):
-    """Emergency Provider."""
+    """EmergencyProvider."""
+
     provider_name = "test_emergency"
     supports_structured_output = False
     is_emergency_only = True
 
     def test_connection(self):
-        """Connection."""
+        """test_connection."""
         return True
 
     def generate(self, prompt, **kw):
-        """Generate."""
+        """generate."""
         return ProviderResult(
             text="emergency response",
             provider=self.provider_name,
@@ -68,9 +70,10 @@ class EmergencyProvider(AbstractBaseProvider):
 
 
 class TestProviderResult:
-    """Test Provider Result."""
+    """TestProviderResult."""
+
     def test_defaults(self):
-        """Defaults."""
+        """test_defaults."""
         r = ProviderResult()
         assert r.text == ""
         assert r.success is True
@@ -79,7 +82,7 @@ class TestProviderResult:
         assert r.input_tokens == 0
 
     def test_full_constructor(self):
-        """Full constructor."""
+        """test_full_constructor."""
         r = ProviderResult(
             text="hello",
             provider="gemini",
@@ -96,14 +99,15 @@ class TestProviderResult:
 
 
 class TestAbstractBaseProvider:
-    """Test Abstract Base Provider."""
+    """TestAbstractBaseProvider."""
+
     def test_cannot_instantiate_abstract(self):
-        """Cannot instantiate abstract."""
+        """test_cannot_instantiate_abstract."""
         with pytest.raises(TypeError):
             AbstractBaseProvider()
 
     def test_concrete_provider(self):
-        """Concrete provider."""
+        """test_concrete_provider."""
         p = OkProvider()
         assert p.provider_name == "test_ok"
         assert p.supports_structured_output is True
@@ -111,7 +115,7 @@ class TestAbstractBaseProvider:
         assert p.test_connection() is True
 
     def test_api_key_status_default(self):
-        """Api key status default."""
+        """test_api_key_status_default."""
         p = OkProvider()
         assert p.get_api_key_status() == {"available": False, "last_tested": None}
 
@@ -120,25 +124,26 @@ class TestAbstractBaseProvider:
 
 
 class TestProviderRegistry:
-    """Test Provider Registry."""
+    """TestProviderRegistry."""
+
     def setup_method(self):
-        """Setup method."""
+        """setup_method."""
         self.reg = ProviderRegistry()
 
     def test_register_and_get(self):
-        """Register and get."""
+        """test_register_and_get."""
         p = OkProvider()
         self.reg.register(p)
         assert self.reg.get("test_ok") is p
 
     def test_all(self):
-        """All."""
+        """test_all."""
         self.reg.register(OkProvider())
         self.reg.register(FailProvider())
         assert len(self.reg.all()) == 2
 
     def test_fallback_chain_order(self):
-        """Fallback chain order."""
+        """test_fallback_chain_order."""
         gemini = OkProvider()
         gemini.provider_name = "gemini"
         openai = OkProvider()
@@ -155,7 +160,7 @@ class TestProviderRegistry:
         assert chain[1].provider_name == "openai"
 
     def test_fallback_chain_excludes_emergency_for_structured(self):
-        """Fallback chain excludes emergency for structured."""
+        """test_fallback_chain_excludes_emergency_for_structured."""
         gemini = OkProvider()
         gemini.provider_name = "gemini"
         deepseek = EmergencyProvider()
@@ -168,7 +173,7 @@ class TestProviderRegistry:
         assert "deepseek" not in names
 
     def test_fallback_chain_includes_emergency_for_text(self):
-        """Fallback chain includes emergency for text."""
+        """test_fallback_chain_includes_emergency_for_text."""
         gemini = OkProvider()
         gemini.provider_name = "gemini"
         deepseek = EmergencyProvider()
@@ -181,7 +186,7 @@ class TestProviderRegistry:
         assert "deepseek" in names
 
     def test_circuit_breaker(self):
-        """Circuit breaker."""
+        """test_circuit_breaker."""
         p = OkProvider()
         self.reg.register(p)
         assert self.reg._circuit_open("test_ok") is False
@@ -193,7 +198,7 @@ class TestProviderRegistry:
         assert len(self.reg.available()) == 1
 
     def test_available_excludes_circuit_open(self):
-        """Available excludes circuit open."""
+        """test_available_excludes_circuit_open."""
         p1 = OkProvider()
         p1.provider_name = "p1"
         p2 = OkProvider()
@@ -210,14 +215,15 @@ class TestProviderRegistry:
 
 
 class TestFallbackRouter:
-    """Test Fallback Router."""
+    """TestFallbackRouter."""
+
     def setup_method(self):
-        """Setup method."""
+        """setup_method."""
         provider_registry._providers.clear()
         cache.clear()
 
     def _make(self, name, cls=OkProvider, **kw):
-        """Make."""
+        """_make."""
         p = cls()
         p.provider_name = name
         if "supports_structured" in kw:
@@ -226,7 +232,7 @@ class TestFallbackRouter:
         return p
 
     def test_router_returns_first_ok(self):
-        """Router returns first ok."""
+        """test_router_returns_first_ok."""
         self._make("gemini")
         self._make("openai", cls=FailProvider)
 
@@ -235,7 +241,7 @@ class TestFallbackRouter:
         assert result.provider == "gemini"
 
     def test_router_falls_back(self):
-        """Router falls back."""
+        """test_router_falls_back."""
         self._make("gemini", cls=FailProvider)
         self._make("openai")
 
@@ -244,7 +250,7 @@ class TestFallbackRouter:
         assert result.provider == "openai"
 
     def test_router_all_fail(self):
-        """Router all fail."""
+        """test_router_all_fail."""
         self._make("gemini", cls=FailProvider)
         self._make("openai", cls=FailProvider)
         result = fallback_router.generate("test prompt")
@@ -252,12 +258,12 @@ class TestFallbackRouter:
         assert "Todos los proveedores fallaron" in (result.error or "")
 
     def test_router_no_providers(self):
-        """Router no providers."""
+        """test_router_no_providers."""
         result = fallback_router.generate("test prompt")
         assert result.success is False
 
     def test_router_opens_circuit_on_failure(self):
-        """Router opens circuit on failure."""
+        """test_router_opens_circuit_on_failure."""
         self._make("gemini", cls=FailProvider)
         self._make("openai")
 
@@ -265,7 +271,7 @@ class TestFallbackRouter:
         assert provider_registry._circuit_open("gemini") is True
 
     def test_test_all(self):
-        """Test all."""
+        """test_test_all."""
         self._make("gemini")
         self._make("openai", cls=FailProvider)
 
@@ -279,26 +285,27 @@ class TestFallbackRouter:
 
 
 class TestTracing:
-    """Test Tracing."""
+    """TestTracing."""
+
     def setup_method(self):
-        """Setup method."""
+        """setup_method."""
         cache.clear()
 
     def test_record_call(self):
-        """Record call."""
+        """test_record_call."""
         record_call("gemini", "pro", 100, 10, 20, True, "test")
         metrics = get_hourly_metrics(hours=1)
         assert metrics["total_calls"] >= 1
         assert metrics["total_errors"] == 0
 
     def test_record_call_failure(self):
-        """Record call failure."""
+        """test_record_call_failure."""
         record_call("openai", "gpt4", 50, 0, 0, False, "test", error_str="429 rate limit")
         metrics = get_hourly_metrics(hours=1)
         assert metrics["total_errors"] >= 1
 
     def test_record_multiple_calls(self):
-        """Record multiple calls."""
+        """test_record_multiple_calls."""
         for _ in range(5):
             record_call("gemini", "flash", 10, 1, 1, True, "batch")
         metrics = get_hourly_metrics(hours=1)
@@ -306,20 +313,20 @@ class TestTracing:
         assert metrics["total_errors"] == 0
 
     def test_avg_duration(self):
-        """Avg duration."""
+        """test_avg_duration."""
         record_call("p", "m", 100, 0, 0, True, "t")
         record_call("p", "m", 200, 0, 0, True, "t")
         metrics = get_hourly_metrics(hours=1)
         assert metrics["avg_duration_ms"] == 150
 
     def test_empty_history(self):
-        """Empty history."""
+        """test_empty_history."""
         metrics = get_hourly_metrics(hours=1)
         assert metrics["total_calls"] == 0
         assert metrics["avg_duration_ms"] == 0
 
     def test_error_categorization(self):
-        """Error categorization."""
+        """test_error_categorization."""
         record_call("gemini", "m", 10, 0, 0, False, "test", error_str="429 Too Many Requests")
         record_call("gemini", "m", 10, 0, 0, False, "test", error_str="timed out")
         record_call("gemini", "m", 10, 0, 0, False, "test", error_str="401 Unauthorized")
@@ -329,13 +336,13 @@ class TestTracing:
         assert metrics["error_types"]["auth"] >= 1
 
     def test_cost_estimation(self):
-        """Cost estimation."""
+        """test_cost_estimation."""
         record_call("gemini", "m", 100, 1000, 500, True, "test")
         metrics = get_hourly_metrics(hours=1)
         assert metrics["estimated_cost_usd"] > 0
 
     def test_error_rate(self):
-        """Error rate."""
+        """test_error_rate."""
         for _ in range(10):
             record_call("gemini", "m", 10, 0, 0, True, "test")
         for _ in range(2):
@@ -348,22 +355,23 @@ class TestTracing:
 
 
 class TestHealth:
-    """Test Health."""
+    """TestHealth."""
+
     def setup_method(self):
-        """Setup method."""
+        """setup_method."""
         provider_registry._providers.clear()
         cache.clear()
         cache.delete("health_history")
         cache.delete("health_check_providers_last_run")
 
     def test_get_health_summary_empty(self):
-        """Get health summary empty."""
+        """test_get_health_summary_empty."""
         summary = get_health_summary()
         assert summary["providers"] == []
         assert summary["api_secrets"]["total"] == 0
 
     def test_get_health_summary_with_providers(self):
-        """Get health summary with providers."""
+        """test_get_health_summary_with_providers."""
         p = OkProvider()
         p.provider_name = "gemini"
         provider_registry.register(p)
@@ -372,7 +380,7 @@ class TestHealth:
         assert summary["providers"][0]["name"] == "gemini"
 
     def test_run_health_checks_updates_status(self, monkeypatch):
-        """Run health checks updates status."""
+        """test_run_health_checks_updates_status."""
         p = OkProvider()
         p.provider_name = "gemini"
         provider_registry.register(p)
@@ -385,7 +393,7 @@ class TestHealth:
         assert len(ok_providers) >= 1
 
     def test_run_health_checks_with_failing_provider(self, monkeypatch):
-        """Run health checks with failing provider."""
+        """test_run_health_checks_with_failing_provider."""
         p = FailProvider()
         p.provider_name = "gemini"
         provider_registry.register(p)
@@ -396,7 +404,7 @@ class TestHealth:
         assert len(fail_providers) >= 1
 
     def test_health_interval_respected(self, monkeypatch):
-        """Health interval respected."""
+        """test_health_interval_respected."""
         p = OkProvider()
         p.provider_name = "gemini"
         provider_registry.register(p)
@@ -408,6 +416,6 @@ class TestHealth:
         assert results_second == []
 
     def test_health_force_bypasses_interval(self):
-        """Health force bypasses interval."""
+        """test_health_force_bypasses_interval."""
         results = run_health_checks(force=True)
         assert isinstance(results, list)

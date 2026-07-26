@@ -7,7 +7,7 @@ class HealthDashboardMixin:
     """Agrega un dashboard de salud del sistema al admin."""
 
     def get_urls(self):
-        """Método que obtiene urls. Args: según implementación. Returns: datos solicitados."""
+        """get_urls."""
         urls = super().get_urls()
         custom_urls = [
             path(
@@ -19,14 +19,14 @@ class HealthDashboardMixin:
         return custom_urls + urls
 
     def health_summary_view(self, request):
-        """Método: health summary view."""
+        """health_summary_view."""
         from apps.automation.providerchain.health import get_health_summary
 
         summary = get_health_summary()
         return JsonResponse(summary)
 
     def health_status_badge(self, request):
-        """Método: health status badge."""
+        """health_status_badge."""
         from apps.automation.providerchain.health import get_health_summary
 
         summary = get_health_summary()

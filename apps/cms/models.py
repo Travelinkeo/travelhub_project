@@ -1,16 +1,15 @@
-"""Modelos de base de datos para la aplicación cms.
-"""
-
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from core.api import AgenciaMixin
 
 
-class Articulo:
-    """Clase Articulo. Uso: según contexto de la aplicación.
-    """
+class Articulo(AgenciaMixin, models.Model):
+    """Articulo."""
+
     class EstadoArticulo(models.TextChoices):
+        """EstadoArticulo."""
+
         BORRADOR = "BOR", _("Borrador")
         PUBLICADO = "PUB", _("Publicado")
         ARCHIVADO = "ARC", _("Archivado")
@@ -41,13 +40,13 @@ class Articulo:
         ordering = ["-fecha_creacion"]
 
     def __str__(self):
-        # __str__: Representación en string del objeto. Returns: str.
+        """__str__."""
         return self.titulo
 
 
-class GuiaDestino:
-    """Clase GuiaDestino. Uso: según contexto de la aplicación.
-    """
+class GuiaDestino(AgenciaMixin, models.Model):
+    """GuiaDestino."""
+
     nombre = models.CharField(_("Nombre del Destino"), max_length=100)
     descripcion = models.TextField(_("Descripción General"))
     mejor_epoca = models.CharField(_("Mejor época para viajar"), max_length=255, blank=True)
@@ -63,14 +62,16 @@ class GuiaDestino:
         verbose_name_plural = _("Guías de Destino")
 
     def __str__(self):
-        # __str__: Representación en string del objeto. Returns: str.
+        """__str__."""
         return self.nombre
 
 
-class PostRedesSociales:
-    """Clase PostRedesSociales. Uso: según contexto de la aplicación.
-    """
+class PostRedesSociales(AgenciaMixin, models.Model):
+    """PostRedesSociales."""
+
     class Plataforma(models.TextChoices):
+        """Plataforma."""
+
         INSTAGRAM = "INS", "Instagram"
         FACEBOOK = "FAC", "Facebook"
         TELEGRAM = "TEL", "Telegram"
@@ -91,13 +92,13 @@ class PostRedesSociales:
         verbose_name_plural = _("Posts en Redes Sociales")
 
     def __str__(self):
-        # __str__: Representación en string del objeto. Returns: str.
+        """__str__."""
         return f"{self.get_plataforma_display()} - {self.articulo.titulo if self.articulo else 'Promo'}"
 
 
-class KBCategory:
-    """Clase KBCategory. Uso: según contexto de la aplicación.
-    """
+class KBCategory(AgenciaMixin, models.Model):
+    """KBCategory."""
+
     name = models.CharField(_("Nombre"), max_length=100)
     slug = models.SlugField(max_length=120)
     description = models.TextField(_("Descripción"), blank=True)
@@ -111,13 +112,13 @@ class KBCategory:
         unique_together = [("agencia", "slug")]
 
     def __str__(self):
-        # __str__: Representación en string del objeto. Returns: str.
+        """__str__."""
         return self.name
 
 
-class KBArticle:
-    """Clase KBArticle. Uso: según contexto de la aplicación.
-    """
+class KBArticle(AgenciaMixin, models.Model):
+    """KBArticle."""
+
     title = models.CharField(_("Título"), max_length=255)
     slug = models.SlugField(max_length=280)
     content = models.TextField(_("Contenido (Markdown)"))
@@ -147,5 +148,5 @@ class KBArticle:
         ]
 
     def __str__(self):
-        # __str__: Representación en string del objeto. Returns: str.
+        """__str__."""
         return self.title

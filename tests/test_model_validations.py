@@ -18,7 +18,7 @@ class TestVentaValidaciones:
     """Tests para las validaciones de Venta (Fase 2.3)"""
 
     def setup_method(self):
-        """Setup method."""
+        """setup_method."""
         self.moneda, _ = Moneda.objects.get_or_create(
             codigo_iso="USD", defaults={"nombre": "Dólar", "simbolo": "$"}
         )
@@ -122,7 +122,7 @@ class TestCalculosFinancieros:
     """Tests para cálculos financieros con .quantize() (Fase 2.6-2.8)"""
 
     def setup_method(self):
-        """Setup method."""
+        """setup_method."""
         self.moneda, _ = Moneda.objects.get_or_create(
             codigo_iso="USD", defaults={"nombre": "Dólar", "simbolo": "$"}
         )

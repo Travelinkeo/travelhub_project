@@ -12,11 +12,12 @@ logger = logging.getLogger(__name__)
 
 
 class ReportesVentasView(LoginRequiredMixin, TemplateView):
-    """Función: ReportesVentasView."""
+    """ReportesVentasView."""
+
     template_name = "reports/dashboard_reports_v3.html"
 
     def get_context_data(self, **kwargs):
-        """Método que obtiene context data. Args: según implementación. Returns: datos solicitados."""
+        """get_context_data."""
         context = super().get_context_data(**kwargs)
 
         # Filtros

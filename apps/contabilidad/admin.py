@@ -1,6 +1,3 @@
-"""Configuración del panel de administración para contabilidad.
-"""
-
 from django.contrib import admin
 
 from core.api import SaaSAdminMixin
@@ -8,18 +5,18 @@ from core.api import SaaSAdminMixin
 from .models import AsientoContable, CuentaContable, MovimientoContable
 
 
-class MovimientoContableInline:
-    """Clase MovimientoContableInline. Uso: según contexto de la aplicación.
-    """
+class MovimientoContableInline(admin.TabularInline):
+    """MovimientoContableInline."""
+
     model = MovimientoContable
     extra = 2
     fields = ("cuenta", "tipo", "monto_ves", "monto_usd")
 
 
 @admin.register(CuentaContable)
-class CuentaContableAdmin:
-    """Configuración de administración para cuentacontable. Uso: instanciar según necesidad del dominio.
-    """
+class CuentaContableAdmin(SaaSAdminMixin, admin.ModelAdmin):
+    """CuentaContableAdmin."""
+
     list_display = ("codigo", "nombre", "tipo", "cuenta_padre", "acepta_movimientos")
     list_filter = ("tipo", "acepta_movimientos")
     search_fields = ("codigo", "nombre")
@@ -32,9 +29,9 @@ class CuentaContableAdmin:
 
 
 @admin.register(AsientoContable)
-class AsientoContableAdmin:
-    """Configuración de administración para asientocontable. Uso: instanciar según necesidad del dominio.
-    """
+class AsientoContableAdmin(SaaSAdminMixin, admin.ModelAdmin):
+    """AsientoContableAdmin."""
+
     list_display = ("id", "fecha_contable", "glosa", "content_object")
     list_filter = ("fecha_contable",)
     search_fields = ("glosa",)

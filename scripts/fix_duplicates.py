@@ -14,6 +14,7 @@ from core.models import HotelTarifario
 
 
 def remove_duplicates():
+    """remove_duplicates."""
     duplicates = (
         HotelTarifario.objects.values("nombre").annotate(count=Count("id")).filter(count__gt=1)
     )

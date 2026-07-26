@@ -105,7 +105,7 @@ def estadisticas_auditoria(request):
 @internal_auth
 @permission_classes([IsAuthenticated])
 def api_audit_logs(request):
-    """Función: api audit logs."""
+    """api_audit_logs."""
     modelo = request.GET.get("modelo")
     object_id = request.GET.get("object_id")
     if not modelo or not object_id:

@@ -1,14 +1,9 @@
-"""Migración de base de datos para crm.
-"""
-
 from django.conf import settings
 from django.db import migrations, models
 import django.db.models.deletion
 
 
-class Migration:
-    """Clase Migration. Uso: según contexto de la aplicación.
-    """
+class Migration(migrations.Migration):
     dependencies = [
         ("crm", "0030_clean_null_charfields"),
     ]

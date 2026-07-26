@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 
 
 def agency_context(request):
-    """# Context manager para establecer contexto de agencia manualmente. Args: agency, reason."""
+    """agency_context."""
     agencia = None
     rol = None
     user_agencies = []  # Lista de agencias del usuario para el selector

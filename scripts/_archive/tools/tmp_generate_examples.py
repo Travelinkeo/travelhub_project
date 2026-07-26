@@ -13,6 +13,7 @@ from core.models import Agencia
 
 
 def generate_examples():
+    """generate_examples."""
     # Mock data based on the Turkish Airlines example from previous user messages
     data = {
         "pnr": "FQTTPH",

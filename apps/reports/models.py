@@ -1,15 +1,12 @@
-"""Modelos de base de datos para la aplicación reports.
-"""
-
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from core.models.base import AgenciaMixin
 
 
-class ReporteKPI:
-    """Clase ReporteKPI. Uso: según contexto de la aplicación.
-    """
+class ReporteKPI(AgenciaMixin):
+    """ReporteKPI."""
+
     TIPOS = [
         ("ventas", _("Ventas")),
         ("rentabilidad", _("Rentabilidad")),
@@ -38,7 +35,7 @@ class ReporteKPI:
         verbose_name_plural = _("Reportes KPI")
 
     def __str__(self):
-        # __str__: Representación en string del objeto. Returns: str.
+        """__str__."""
         return self.nombre
 
 
@@ -72,13 +69,13 @@ class KpiSnapshot(AgenciaMixin):
         ordering = ["-fecha"]
 
     def __str__(self):
-        # __str__: Representación en string del objeto. Returns: str.
+        """__str__."""
         return f"{self.get_metrica_display()}: {self.valor} ({self.fecha})"
 
 
-class ReporteProgramado:
-    """Clase ReporteProgramado. Uso: según contexto de la aplicación.
-    """
+class ReporteProgramado(AgenciaMixin):
+    """ReporteProgramado."""
+
     DIAS_SEMANA = [
         (1, _("Lunes")),
         (2, _("Martes")),
@@ -92,7 +89,9 @@ class ReporteProgramado:
     nombre = models.CharField(max_length=120)
     tipo = models.CharField(max_length=30, choices=ReporteKPI.TIPOS, default="general")
     frecuencia = models.CharField(max_length=20, choices=ReporteKPI.PERIODOS, default="semanal")
-    dia_semana = models.IntegerField(choices=DIAS_SEMANA, null=True, blank=True, help_text="Para frecuencia semanal")
+    dia_semana = models.IntegerField(
+        choices=DIAS_SEMANA, null=True, blank=True, help_text="Para frecuencia semanal"
+    )
     activo = models.BooleanField(default=True)
     destinatarios = models.JSONField(default=list, help_text="Lista de emails")
     ultimo_envio = models.DateTimeField(null=True, blank=True)
@@ -103,5 +102,5 @@ class ReporteProgramado:
         verbose_name_plural = _("Reportes Programados")
 
     def __str__(self):
-        # __str__: Representación en string del objeto. Returns: str.
+        """__str__."""
         return f"{self.nombre} ({self.get_frecuencia_display()})"

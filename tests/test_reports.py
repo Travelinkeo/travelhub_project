@@ -1,4 +1,3 @@
-"""Tests para Reports."""
 from datetime import date
 
 from django.contrib.auth import get_user_model
@@ -10,9 +9,10 @@ from core.models.agencia import Agencia
 
 
 class ReporteKPIModelTest(TestCase):
-    """Reporte Kpimodel Test."""
+    """ReporteKPIModelTest."""
+
     def setUp(self):
-        """SetUp."""
+        """setUp."""
         self.agencia = Agencia.objects.create(nombre="Report Agency")
         self.reporte = ReporteKPI.objects.create(
             nombre="Ventas Mensuales",
@@ -22,33 +22,34 @@ class ReporteKPIModelTest(TestCase):
         )
 
     def test_str(self):
-        """Str."""
+        """test_str."""
         self.assertEqual(str(self.reporte), "Ventas Mensuales")
 
     def test_defaults(self):
-        """Defaults."""
+        """test_defaults."""
         self.assertTrue(self.reporte.activo)
         self.assertEqual(self.reporte.tipo, "ventas")
         self.assertEqual(self.reporte.periodo, "mensual")
 
     def test_tipos_disponibles(self):
-        """Tipos disponibles."""
+        """test_tipos_disponibles."""
         tipos = dict(ReporteKPI.TIPOS)
         self.assertIn("ventas", tipos)
         self.assertIn("rentabilidad", tipos)
         self.assertIn("general", tipos)
 
     def test_periodos_disponibles(self):
-        """Periodos disponibles."""
+        """test_periodos_disponibles."""
         periodos = dict(ReporteKPI.PERIODOS)
         self.assertIn("diario", periodos)
         self.assertIn("anual", periodos)
 
 
 class KpiSnapshotModelTest(TestCase):
-    """Kpi Snapshot Model Test."""
+    """KpiSnapshotModelTest."""
+
     def setUp(self):
-        """Setup."""
+        """setUp."""
         self.agencia = Agencia.objects.create(nombre="Snapshot Agency")
         self.snap = KpiSnapshot.objects.create(
             agencia=self.agencia,
@@ -58,11 +59,11 @@ class KpiSnapshotModelTest(TestCase):
         )
 
     def test_str(self):
-        """Str."""
+        """test_str."""
         self.assertIn("Ventas Totales", str(self.snap))
 
     def test_unique_together(self):
-        """Unique together."""
+        """test_unique_together."""
         with self.assertRaises(Exception):
             KpiSnapshot.objects.create(
                 agencia=self.agencia,
@@ -72,7 +73,7 @@ class KpiSnapshotModelTest(TestCase):
             )
 
     def test_diferente_fecha_permitida(self):
-        """Diferente fecha permitida."""
+        """test_diferente_fecha_permitida."""
         snap2 = KpiSnapshot.objects.create(
             agencia=self.agencia,
             metrica="ventas_totales",
@@ -82,7 +83,7 @@ class KpiSnapshotModelTest(TestCase):
         self.assertEqual(snap2.valor, 99)
 
     def test_ordering(self):
-        """Ordering."""
+        """test_ordering."""
         older = KpiSnapshot.objects.create(
             agencia=self.agencia,
             metrica="clientes_nuevos",
@@ -101,9 +102,10 @@ class KpiSnapshotModelTest(TestCase):
 
 
 class ReporteProgramadoModelTest(TestCase):
-    """Reporte Programado Model Test."""
+    """ReporteProgramadoModelTest."""
+
     def setUp(self):
-        """Setup."""
+        """setUp."""
         self.agencia = Agencia.objects.create(nombre="Scheduled Agency")
         self.rp = ReporteProgramado.objects.create(
             nombre="Reporte Semanal",
@@ -115,21 +117,21 @@ class ReporteProgramadoModelTest(TestCase):
         )
 
     def test_str(self):
-        """Str."""
+        """test_str."""
         self.assertIn("Reporte Semanal", str(self.rp))
 
     def test_defaults(self):
-        """Defaults."""
+        """test_defaults."""
         self.assertTrue(self.rp.activo)
         self.assertIsNone(self.rp.ultimo_envio)
 
     def test_destinatarios_json(self):
-        """Destinatarios json."""
+        """test_destinatarios_json."""
         self.assertEqual(len(self.rp.destinatarios), 2)
         self.assertIn("admin@test.com", self.rp.destinatarios)
 
     def test_sin_destinatarios(self):
-        """Sin destinatarios."""
+        """test_sin_destinatarios."""
         rp2 = ReporteProgramado.objects.create(
             nombre="Sin Destinatarios", tipo="ventas", frecuencia="mensual", agencia=self.agencia
         )
@@ -137,9 +139,10 @@ class ReporteProgramadoModelTest(TestCase):
 
 
 class ReportsViewsTest(TestCase):
-    """Reports Views Test."""
+    """ReportsViewsTest."""
+
     def setUp(self):
-        """Setup."""
+        """setUp."""
         self.user = get_user_model().objects.create_user(
             username="reports_view", password="pass1234"
         )
@@ -147,38 +150,36 @@ class ReportsViewsTest(TestCase):
         self.client.login(username="reports_view", password="pass1234")
 
     def test_kpi_dashboard_requires_login(self):
-        """Kpi dashboard requires login."""
+        """test_kpi_dashboard_requires_login."""
         self.client.logout()
         response = self.client.get(reverse("reports:kpi_dashboard"))
         self.assertEqual(response.status_code, 302)
 
     def test_kpi_dashboard_renders(self):
-        """Kpi dashboard renders."""
+        """test_kpi_dashboard_renders."""
         response = self.client.get(reverse("reports:kpi_dashboard"))
         self.assertEqual(response.status_code, 200)
 
     def test_chart_data_returns_json(self):
-        """Chart data returns json."""
+        """test_chart_data_returns_json."""
         response = self.client.get(reverse("reports:kpi_chart_data"))
         self.assertEqual(response.status_code, 200)
         self.assertIn("application/json", response["Content-Type"])
 
     def test_chart_data_invalid_chart(self):
-        """Chart data invalid chart."""
-        response = self.client.get(
-            reverse("reports:kpi_chart_data"), {"chart": "invalid"}
-        )
+        """test_chart_data_invalid_chart."""
+        response = self.client.get(reverse("reports:kpi_chart_data"), {"chart": "invalid"})
         self.assertEqual(response.status_code, 200)
 
     def test_export_csv(self):
-        """Export csv."""
+        """test_export_csv."""
         response = self.client.get(reverse("reports:kpi_export"))
         self.assertEqual(response.status_code, 200)
         self.assertIn("text/csv", response["Content-Type"])
         self.assertIn("Content-Disposition", response)
 
     def test_export_csv_contains_headers(self):
-        """Export csv contains headers."""
+        """test_export_csv_contains_headers."""
         response = self.client.get(reverse("reports:kpi_export"))
         content = response.content.decode("utf-8")
         self.assertIn("Métrica", content)
@@ -186,28 +187,35 @@ class ReportsViewsTest(TestCase):
 
 
 class ReportsKPIMetricsServiceTest(TestCase):
-    """Reports Kpimetrics Service Test."""
+    """ReportsKPIMetricsServiceTest."""
+
     def setUp(self):
-        """Setup."""
+        """setUp."""
         self.agencia = Agencia.objects.create(nombre="KPI Agency")
         self.user = get_user_model().objects.create_user(username="kpi_user")
 
     def test_kpi_metrics_resumen_structure(self):
-        """Kpi metrics resumen structure."""
+        """test_kpi_metrics_resumen_structure."""
         from apps.reports.services.kpi_metrics import KPIMetrics
 
         metrics = KPIMetrics(self.agencia)
         resumen = metrics.resumen()
         expected_keys = [
-            "total_ventas", "monto_total", "ticket_promedio",
-            "utilidad", "margen_bruto", "clientes",
-            "boletos", "comisiones_pendientes", "comisiones_liquidadas",
+            "total_ventas",
+            "monto_total",
+            "ticket_promedio",
+            "utilidad",
+            "margen_bruto",
+            "clientes",
+            "boletos",
+            "comisiones_pendientes",
+            "comisiones_liquidadas",
         ]
         for key in expected_keys:
             self.assertIn(key, resumen)
 
     def test_ventas_por_dia_empty(self):
-        """Ventas por dia empty."""
+        """test_ventas_por_dia_empty."""
         from apps.reports.services.kpi_metrics import KPIMetrics
 
         metrics = KPIMetrics(self.agencia)
@@ -215,14 +223,14 @@ class ReportsKPIMetricsServiceTest(TestCase):
         self.assertEqual(data, {})
 
     def test_ticket_promedio_zero_when_no_sales(self):
-        """Ticket promedio zero when no sales."""
+        """test_ticket_promedio_zero_when_no_sales."""
         from apps.reports.services.kpi_metrics import KPIMetrics
 
         metrics = KPIMetrics(self.agencia)
         self.assertEqual(metrics.ticket_promedio(), 0)
 
     def test_margen_bruto_zero_when_no_sales(self):
-        """Margen bruto zero when no sales."""
+        """test_margen_bruto_zero_when_no_sales."""
         from apps.reports.services.kpi_metrics import KPIMetrics
 
         metrics = KPIMetrics(self.agencia)
@@ -231,14 +239,14 @@ class ReportsKPIMetricsServiceTest(TestCase):
         self.assertEqual(margen, 0)
 
     def test_clientes_nuevos_zero(self):
-        """Clientes nuevos zero."""
+        """test_clientes_nuevos_zero."""
         from apps.reports.services.kpi_metrics import KPIMetrics
 
         metrics = KPIMetrics(self.agencia)
         self.assertEqual(metrics.clientes_nuevos(30), 0)
 
     def test_boletos_por_aerolinea_empty(self):
-        """Boletos por aerolinea empty."""
+        """test_boletos_por_aerolinea_empty."""
         from apps.reports.services.kpi_metrics import KPIMetrics
 
         metrics = KPIMetrics(self.agencia)
@@ -246,24 +254,25 @@ class ReportsKPIMetricsServiceTest(TestCase):
 
 
 class ReportsChartDataServiceTest(TestCase):
-    """Reports Chart Data Service Test."""
+    """ReportsChartDataServiceTest."""
+
     def setUp(self):
-        """Setup."""
+        """setUp."""
         self.agencia = Agencia.objects.create(nombre="Chart Agency")
 
     def test_resumen_cards_structure(self):
-        """Resumen cards structure."""
-        from apps.reports.services.kpi_metrics import KPIMetrics
+        """test_resumen_cards_structure."""
         from apps.reports.services.chart_data import resumen_cards
+        from apps.reports.services.kpi_metrics import KPIMetrics
 
         metrics = KPIMetrics(self.agencia)
         cards = resumen_cards(metrics)
         self.assertIsInstance(cards, list)
 
     def test_ventas_diarias_chart_structure(self):
-        """Ventas diarias chart structure."""
-        from apps.reports.services.kpi_metrics import KPIMetrics
+        """test_ventas_diarias_chart_structure."""
         from apps.reports.services.chart_data import ventas_diarias_chart
+        from apps.reports.services.kpi_metrics import KPIMetrics
 
         metrics = KPIMetrics(self.agencia)
         chart = ventas_diarias_chart(metrics)
@@ -271,9 +280,9 @@ class ReportsChartDataServiceTest(TestCase):
         self.assertIn("datasets", chart)
 
     def test_boletos_por_aerolinea_chart(self):
-        """Boletos por aerolinea chart."""
-        from apps.reports.services.kpi_metrics import KPIMetrics
+        """test_boletos_por_aerolinea_chart."""
         from apps.reports.services.chart_data import boletos_por_aerolinea_chart
+        from apps.reports.services.kpi_metrics import KPIMetrics
 
         metrics = KPIMetrics(self.agencia)
         chart = boletos_por_aerolinea_chart(metrics)
@@ -281,9 +290,9 @@ class ReportsChartDataServiceTest(TestCase):
         self.assertIn("datasets", chart)
 
     def test_ventas_por_vendedor_chart(self):
-        """Ventas por vendedor chart."""
-        from apps.reports.services.kpi_metrics import KPIMetrics
+        """test_ventas_por_vendedor_chart."""
         from apps.reports.services.chart_data import ventas_por_vendedor_chart
+        from apps.reports.services.kpi_metrics import KPIMetrics
 
         metrics = KPIMetrics(self.agencia)
         chart = ventas_por_vendedor_chart(metrics)
@@ -292,13 +301,14 @@ class ReportsChartDataServiceTest(TestCase):
 
 
 class ReportsExporterServiceTest(TestCase):
-    """Reports Exporter Service Test."""
+    """ReportsExporterServiceTest."""
+
     def setUp(self):
-        """Setup."""
+        """setUp."""
         self.agencia = Agencia.objects.create(nombre="Export Agency")
 
     def test_exportar_csv_generates_content(self):
-        """Exportar csv generates content."""
+        """test_exportar_csv_generates_content."""
         from apps.reports.services.kpi_metrics import KPIMetrics
         from apps.reports.services.report_exporter import exportar_csv
 

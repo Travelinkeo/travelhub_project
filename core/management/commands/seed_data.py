@@ -10,11 +10,12 @@ from core.models.agencia import Agencia
 
 
 class Command(BaseCommand):
-    """Comando de gestión personalizado."""
+    """Command."""
+
     help = "Semilla de datos iniciales para TravelHub (Admin, Agencia, Config)"
 
     def handle(self, *args, **options):
-        """Método: handle."""
+        """handle."""
         self.stdout.write(self.style.WARNING("🌱 Iniciando siembra de datos..."))
 
         # 1. Superusuario

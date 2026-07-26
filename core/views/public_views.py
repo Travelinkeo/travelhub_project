@@ -14,7 +14,7 @@ class PublicItineraryView(View):
     """
 
     def get(self, request, token):
-        """Método: get."""
+        """get."""
         from apps.bookings.views.itinerary_views import public_itinerary_view
 
         return public_itinerary_view(request, token)
@@ -26,7 +26,7 @@ class PublicVoucherPDFView(View):
     """
 
     def get(self, request, token):
-        """Método: get."""
+        """get."""
         from django.core.signing import BadSignature, SignatureExpired
 
         from apps.bookings.models import Venta
@@ -57,7 +57,7 @@ class PublicHotelVoucherPDFView(View):
     """
 
     def get(self, request, alojamiento_id):
-        """Método: get."""
+        """get."""
         from apps.bookings.models.componentes import AlojamientoReserva
         from core.api import agency_context
         from core.views.voucher_views import generar_voucher

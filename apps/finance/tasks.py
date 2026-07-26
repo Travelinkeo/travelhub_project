@@ -1,6 +1,3 @@
-"""Tareas asíncronas (Celery) para la aplicación finance.
-"""
-
 import logging
 
 from celery import shared_task
@@ -21,7 +18,7 @@ logger = logging.getLogger(__name__)
 )
 @idempotent_task(timeout=1800, key_prefix="celery_alert_pago")
 def enviar_alerta_pago_telegram_task(pago_id, **kwargs):
-    # enviar_alerta_pago_telegram_task: Envía ar alerta pago telegram task. Args: datos del mensaje. Returns: resultado del envío.
+    """enviar_alerta_pago_telegram_task."""
     import requests
     from django.conf import settings
 
@@ -92,7 +89,7 @@ def enviar_alerta_pago_telegram_task(pago_id, **kwargs):
     soft_time_limit=270,
 )
 def auditar_fuga_ingresos_task(**kwargs):
-    # auditar_fuga_ingresos_task: Auditar fuga ingresos task. Args: según implementación. Returns: según implementación.
+    """auditar_fuga_ingresos_task."""
     from django.utils import timezone
 
     from apps.bookings.models.venta import Venta
@@ -167,7 +164,7 @@ def auditar_fuga_ingresos_task(**kwargs):
     default_retry_delay=600,
 )
 def check_pending_payments():
-    # check_pending_payments: Check pending payments. Args: según implementación. Returns: según implementación.
+    """check_pending_payments."""
     from datetime import timedelta
 
     from django.utils import timezone
@@ -232,7 +229,7 @@ def check_pending_payments():
 )
 @idempotent_task(timeout=7200, key_prefix="celery_facturacion_masiva")
 def procesar_facturacion_masiva_task(boleto_ids, cliente_id, **kwargs):
-    # procesar_facturacion_masiva_task: Procesa r facturacion masiva task. Args: datos a procesar. Returns: resultado procesado.
+    """procesar_facturacion_masiva_task."""
     from apps.bookings.models import BoletoImportado
     from apps.crm.models import Cliente
     from apps.finance.services.invoice_service import InvoiceService
@@ -265,7 +262,7 @@ def procesar_facturacion_masiva_task(boleto_ids, cliente_id, **kwargs):
 )
 @idempotent_task(timeout=3600, key_prefix="celery_create_invoice")
 def create_invoice_from_sale_task(venta_id):
-    # create_invoice_from_sale_task: Crea un nuevo invoice from sale task. Args: datos del objeto. Returns: objeto creado.
+    """create_invoice_from_sale_task."""
     from apps.finance.services.invoice_service import InvoiceService
 
     logger.info(f"📩 Generando factura automática para Venta {venta_id}")

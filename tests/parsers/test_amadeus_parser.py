@@ -1,4 +1,3 @@
-"""Tests para Amadeus parser (Parsers)."""
 from unittest.mock import patch
 
 from apps.automation.parsers.base_parser import ParsedTicketData
@@ -49,9 +48,10 @@ MOCK_AI_RESPONSE_AMADEUS = {
 
 
 class TestAmadeusParser:
-    """Test Amadeus Parser."""
+    """TestAmadeusParser."""
+
     def test_can_parse_valid_amadeus(self):
-        """Can parse valid amadeus."""
+        """test_can_parse_valid_amadeus."""
         parser = AmadeusParser()
         # Caso 1: CheckMyTrip
         assert parser.can_parse("Some text with CheckMyTrip inside") is True
@@ -61,7 +61,7 @@ class TestAmadeusParser:
         assert parser.can_parse("ELECTRONIC TICKET RECEIPT\nBOOKING REF: ABC123") is True
 
     def test_can_parse_invalid_amadeus(self):
-        """Can parse invalid amadeus."""
+        """test_can_parse_invalid_amadeus."""
         parser = AmadeusParser()
         # Evitar colisión con KIUSYS
         assert parser.can_parse("KIUSYS SYSTEM ELECTRONIC TICKET RECEIPT BOOKING REF") is False
@@ -69,7 +69,7 @@ class TestAmadeusParser:
         assert parser.can_parse("Random airline ticket layout") is False
 
     def test_parse_complete_regex(self):
-        """Parse complete regex."""
+        """test_parse_complete_regex."""
         parser = AmadeusParser()
         res = parser.parse(SAMPLE_AMADEUS_TICKET_REGEX)
 
@@ -85,7 +85,7 @@ class TestAmadeusParser:
 
     @patch("apps.automation.parsers.ai_universal_parser.UniversalAIParser.parse")
     def test_parse_incomplete_triggers_ai_reinforcement(self, mock_ai_parse):
-        """Parse incomplete triggers ai reinforcement."""
+        """test_parse_incomplete_triggers_ai_reinforcement."""
         mock_ai_parse.return_value = MOCK_AI_RESPONSE_AMADEUS.copy()
 
         parser = AmadeusParser()
@@ -105,8 +105,8 @@ class TestAmadeusParser:
 
     @patch("apps.automation.parsers.ai_universal_parser.UniversalAIParser.parse")
     def test_parse_ai_failure_fallback_to_regex(self, mock_ai_parse):
+        """test_parse_ai_failure_fallback_to_regex."""
         # La IA lanza excepción, el parser debe devolver lo que extrajo la regex
-        """Parse ai failure fallback to regex."""
         mock_ai_parse.side_effect = Exception("IA down")
 
         parser = AmadeusParser()
@@ -121,8 +121,8 @@ class TestAmadeusParser:
 
     @patch("apps.automation.parsers.ai_universal_parser.UniversalAIParser.parse")
     def test_parse_empty_itinerary_triggers_ai_reinforcement(self, mock_ai_parse):
+        """test_parse_empty_itinerary_triggers_ai_reinforcement."""
         # Un ticket con datos básicos por regex pero sin itinerario
-        """Parse empty itinerary triggers ai reinforcement."""
         TICKET_NO_FLIGHTS = """
         ELECTRONIC TICKET RECEIPT
         Booking ref: XYZ789

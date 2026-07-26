@@ -172,6 +172,7 @@ def crear_venta_hotel(token, catalogos):
 
 
 def main():
+    """main."""
     print("=== SCRIPT DE PRUEBA - VENTA DE HOTEL ===")
 
     # 1. Obtener token

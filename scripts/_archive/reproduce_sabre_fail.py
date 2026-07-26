@@ -14,6 +14,7 @@ from apps.automation.parsers.sabre_parser import SabreParser
 
 
 def analyze_sabre_pdfs():
+    """analyze_sabre_pdfs."""
     import glob
 
     # File logging because console pipe is flaky
@@ -21,6 +22,7 @@ def analyze_sabre_pdfs():
     try:
 
         def log_print(msg):
+            """log_print."""
             # Still print to console for liveness
             print(msg, flush=True)
             log_file.write(str(msg) + "\n")

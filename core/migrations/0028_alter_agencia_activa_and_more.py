@@ -7,8 +7,7 @@ from django.contrib.postgres.operations import TrigramExtension
 from django.db import migrations, models
 
 
-class Migration:
-    """Migración de base de datos generada por Django."""
+class Migration(migrations.Migration):
     dependencies = [
         (
             "bookings",

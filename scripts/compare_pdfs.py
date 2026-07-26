@@ -2,6 +2,7 @@ import pdfplumber
 
 
 def analyze_pdf(path, label):
+    """analyze_pdf."""
     print(f"\n{'=' * 20} ANALYZING {label} {'=' * 20}")
     text = ""
     try:

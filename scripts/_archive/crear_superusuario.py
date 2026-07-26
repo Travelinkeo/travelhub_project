@@ -16,6 +16,7 @@ from django.contrib.auth.models import User
 
 
 def crear_superusuario():
+    """crear_superusuario."""
     print("🔐 Crear Superusuario")
     print("=" * 50)
 

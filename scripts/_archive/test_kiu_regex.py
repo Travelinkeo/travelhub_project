@@ -2,6 +2,7 @@ import re
 
 
 def _parse_kiu_flight_segments(itinerary_text: str):
+    """_parse_kiu_flight_segments."""
     vuelos = []
     if not itinerary_text:
         return vuelos

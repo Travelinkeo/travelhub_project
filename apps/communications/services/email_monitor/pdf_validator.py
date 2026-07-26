@@ -1,6 +1,3 @@
-"""Servicio de pdf validator para la aplicación communications.
-"""
-
 import io
 import logging
 
@@ -47,7 +44,7 @@ PALABRAS_CLAVE_SOPORTE = [
 
 
 def es_pdf_boleto_valido(pdf_content, filename=""):
-    # es_pdf_boleto_valido: Es pdf boleto valido. Args: según implementación. Returns: según implementación.
+    """es_pdf_boleto_valido."""
     if not PYPDF_AVAILABLE:
         logger.info("pypdf no está disponible. Omitiendo filtro anti-ruido.")
         return True

@@ -1,6 +1,3 @@
-"""Módulo tasks marketing de la aplicación crm.
-"""
-
 import logging
 
 from celery import shared_task
@@ -16,7 +13,7 @@ logger = logging.getLogger(__name__)
 def despachar_campana_masiva_task(
     cliente_ids: list, asunto: str, cuerpo_html_template: str, agencia_id=None
 ):
-    # despachar_campana_masiva_task: Despachar campana masiva task. Args: según implementación. Returns: según implementación.
+    """despachar_campana_masiva_task."""
     from core.api import Agencia, agency_context, system_context
 
     if agencia_id:

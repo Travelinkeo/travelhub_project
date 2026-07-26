@@ -1,14 +1,11 @@
-"""Formularios Django para la aplicación crm.
-"""
-
 from django import forms
 
 from apps.crm.models import Pasajero
 
 
-class PasajeroForm:
-    """Formulario para pasajero. Uso: instanciar según necesidad del dominio.
-    """
+class PasajeroForm(forms.ModelForm):
+    """PasajeroForm."""
+
     # Campos virtuales para preferencias (se serializan al JSON field)
     pref_comida_veg = forms.BooleanField(required=False, label="Vegetariana (VGML)")
     pref_comida_kosher = forms.BooleanField(required=False, label="Kosher (KSML)")
@@ -107,7 +104,7 @@ class PasajeroForm:
         }
 
     def __init__(self, *args, **kwargs):
-        # __init__: Método de inicialización de la clase.
+        """__init__."""
         super().__init__(*args, **kwargs)
         # Cargar preferencias guardadas en JSON si editamos una instancia
         if self.instance and self.instance.pk and self.instance.preferencias:
@@ -120,7 +117,7 @@ class PasajeroForm:
             self.fields["pref_notas"].initial = prefs.get("notas", "")
 
     def save(self, commit=True):
-        # save: Guarda/persiste . Args: datos a guardar. Returns: objeto guardado.
+        """save."""
         pasajero = super().save(commit=False)
         # Construir el JSON de preferencias
         pasajero.preferencias = {

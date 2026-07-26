@@ -29,10 +29,10 @@ class AIUsageLog(models.Model):
     status = models.CharField(max_length=100, default="SUCCESS")  # SUCCESS, FAILED, 429_LIMIT
 
     class Meta:
-        """Meta definición del modelo."""
         verbose_name = "Log de Uso de IA"
         verbose_name_plural = "Logs de Uso de IA"
         ordering = ["-timestamp"]
 
     def __str__(self):
+        """__str__."""
         return f"{self.agencia or 'Global'} - {self.feature} - {self.timestamp}"

@@ -1,9 +1,8 @@
-"""Tests para Sabre parser mejorado."""
 from apps.automation.services.ticket_parser_service import _parse_sabre_ticket
 
 
 def test_parse_sabre_ticket_mejorado():
-    """Parse sabre ticket mejorado."""
+    """test_parse_sabre_ticket_mejorado."""
     plain_text = """
 ETICKET RECEIPT
 Prepared For JUAREZ/RAUL [AS639110]

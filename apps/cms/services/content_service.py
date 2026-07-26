@@ -1,6 +1,3 @@
-"""Servicio de content service para la aplicación cms.
-"""
-
 import json
 import logging
 
@@ -12,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 def _get_genai():
-    # _get_genai:  get genai. Args: según implementación. Returns: según implementación.
+    """_get_genai."""
     from google import genai
 
     return genai
@@ -24,7 +21,7 @@ class AIContentService:
     """
 
     def __init__(self):
-        # __init__: Inicializa una nueva instancia de AIContentService. Args: parámetros de inicialización.
+        """__init__."""
         from django.conf import settings
 
         genai = _get_genai()

@@ -22,6 +22,7 @@ def load_env_manually():
 
 
 def test_amadeus():
+    """test_amadeus."""
     load_env_manually()
 
     client_id = os.environ.get("AMADEUS_CLIENT_ID")

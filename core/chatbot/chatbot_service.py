@@ -16,6 +16,7 @@ class TravelHubChatbot:
     """
 
     def __init__(self):
+        """__init__."""
         self.context_history = []
         self.max_history = 10
 

@@ -1,6 +1,3 @@
-"""Módulo views whatsapp de la aplicación cotizaciones.
-"""
-
 import hashlib
 import hmac
 import logging
@@ -16,11 +13,11 @@ logger = logging.getLogger(__name__)
 
 
 @method_decorator(csrf_exempt, name="dispatch")
-class IncomingWhatsAppWebhook:
-    """Clase IncomingWhatsAppWebhook. Uso: según contexto de la aplicación.
-    """
+class IncomingWhatsAppWebhook(View):
+    """IncomingWhatsAppWebhook."""
+
     def _verify_signature(self, request):
-        # _verify_signature:  verify signature. Args: según implementación. Returns: según implementación.
+        """_verify_signature."""
         auth_token = getattr(settings, "TWILIO_AUTH_TOKEN", None)
         if not auth_token:
             return False
@@ -45,7 +42,7 @@ class IncomingWhatsAppWebhook:
         return hmac.compare_digest(signature, expected)
 
     def post(self, request, *args, **kwargs):
-        # post: Post. Args: según implementación. Returns: según implementación.
+        """post."""
         auth_token = getattr(settings, "TWILIO_AUTH_TOKEN", None)
         if not auth_token:
             logger.error("TWILIO_AUTH_TOKEN no configurado")

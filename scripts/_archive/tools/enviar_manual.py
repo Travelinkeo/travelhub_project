@@ -12,6 +12,7 @@ resend.api_key = os.getenv("RESEND_API_KEY")
 
 
 def generar_y_enviar():
+    """generar_y_enviar."""
     output_pdf = "c:/Users/ARMANDO/travelhub_project/Manual_TravelHub_2026.pdf"
 
     # Contenido HTML con diseño Premium (Stripe Style)

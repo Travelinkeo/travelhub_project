@@ -9,14 +9,14 @@ class TestParserRegistry:
     """Tests para registro de parsers"""
 
     def test_register_parser(self):
-        """Register parser."""
+        """test_register_parser."""
         registry = ParserRegistry()
         parser = SabreParser()
         registry.register(parser)
         assert len(registry.get_all_parsers()) == 1
 
     def test_find_parser_sabre(self):
-        """Find parser sabre."""
+        """test_find_parser_sabre."""
         registry = ParserRegistry()
         registry.register(SabreParser())
 
@@ -26,7 +26,7 @@ class TestParserRegistry:
         assert isinstance(parser, SabreParser)
 
     def test_find_parser_amadeus(self):
-        """Find parser amadeus."""
+        """test_find_parser_amadeus."""
         registry = ParserRegistry()
         registry.register(AmadeusParser())
 
@@ -36,7 +36,7 @@ class TestParserRegistry:
         assert isinstance(parser, AmadeusParser)
 
     def test_find_parser_no_match(self):
-        """Find parser no match."""
+        """test_find_parser_no_match."""
         registry = ParserRegistry()
         registry.register(SabreParser())
 
@@ -45,7 +45,7 @@ class TestParserRegistry:
         assert parser is None
 
     def test_clear_registry(self):
-        """Clear registry."""
+        """test_clear_registry."""
         registry = ParserRegistry()
         registry.register(SabreParser())
         registry.register(AmadeusParser())

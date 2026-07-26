@@ -15,6 +15,7 @@ from apps.marketing.services.flyer_service import FlyerService
 
 
 def test_hotel_flyer_generation():
+    """test_hotel_flyer_generation."""
     # Buscar un hotel cualquiera
     hotel = HotelTarifario.objects.first()
     if not hotel:

@@ -22,7 +22,7 @@ class SaasQuerySet(models.QuerySet):
     """
 
     def update(self, **kwargs):
-        """Método: update."""
+        """update."""
         from core.middleware import get_current_agency, get_current_user, is_system_context
 
         user = get_current_user()
@@ -33,7 +33,7 @@ class SaasQuerySet(models.QuerySet):
         return super().update(**kwargs)
 
     def bulk_create(self, objs, **kwargs):
-        """Método: bulk create."""
+        """bulk_create."""
         from core.middleware import get_current_agency, get_current_user, is_system_context
 
         user = get_current_user()
@@ -61,7 +61,7 @@ class AgenciaManager(models.Manager):
     """
 
     def get_queryset(self):
-        """Método que obtiene queryset. Args: según implementación. Returns: datos solicitados."""
+        """get_queryset."""
         from core.middleware import is_system_context
 
         if issubclass(self.model, SoftDeleteModel):
@@ -115,7 +115,7 @@ class GlobalAwareAgenciaManager(AgenciaManager):
     """
 
     def get_queryset(self):
-        """Método que obtiene queryset. Args: según implementación. Returns: datos solicitados."""
+        """get_queryset."""
         from core.middleware import is_system_context
 
         queryset = SaasQuerySet(self.model, using=self._db)
@@ -142,15 +142,15 @@ class SoftDeleteQuerySet(models.QuerySet):
     """QuerySet que permite operaciones bulk respetando soft-delete."""
 
     def delete(self):
-        """Método: delete."""
+        """delete."""
         self.update(is_deleted=True, deleted_at=timezone.now())
 
     def hard_delete(self):
-        """Método: hard delete."""
+        """hard_delete."""
         super().delete()
 
     def restore(self):
-        """Método: restore."""
+        """restore."""
         self.update(is_deleted=False, deleted_at=None)
 
 
@@ -158,7 +158,7 @@ class SoftDeleteManager(models.Manager):
     """Manager que retorna SoftDeleteQuerySet sin filtrar is_deleted."""
 
     def get_queryset(self):
-        """Método que obtiene queryset. Args: según implementación. Returns: datos solicitados."""
+        """get_queryset."""
         return SoftDeleteQuerySet(self.model, using=self._db)
 
 
@@ -173,7 +173,6 @@ class SoftDeleteModel(models.Model):
     with_deleted = SoftDeleteManager()
 
     class Meta:
-        """Configuración del modelo."""
         abstract = True
 
     def delete(self, *args, **kwargs):
@@ -235,7 +234,6 @@ class AgenciaMixin(models.Model):
     all_objects = models.Manager()
 
     class Meta:
-        """Configuración del modelo."""
         abstract = True
 
     def save(self, *args, **kwargs):

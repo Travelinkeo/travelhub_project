@@ -1,6 +1,3 @@
-"""Servicio de copywriter service para la aplicación marketing.
-"""
-
 import logging
 from typing import Any
 
@@ -8,14 +5,14 @@ from pydantic import BaseModel, Field
 
 
 def _get_ai_engine():
-    # _get_ai_engine:  get ai engine. Args: según implementación. Returns: según implementación.
+    """_get_ai_engine."""
     from django.utils.module_loading import import_string
 
     return import_string("apps.automation.services.ai_engine.ai_engine")
 
 
 def _get_hotel_tarifario_model():
-    # _get_hotel_tarifario_model:  get hotel tarifario model. Args: según implementación. Returns: según implementación.
+    """_get_hotel_tarifario_model."""
     from django.apps import apps
 
     return apps.get_model("bookings", "HotelTarifario")
@@ -24,16 +21,16 @@ def _get_hotel_tarifario_model():
 logger = logging.getLogger(__name__)
 
 
-class CaptionVariant:
-    """Clase CaptionVariant. Uso: según contexto de la aplicación.
-    """
+class CaptionVariant(BaseModel):
+    """CaptionVariant."""
+
     tone_name: str = Field(description="Nombre del tono (Ej: Emocional, Enganchador, Minimalista)")
     text: str = Field(description="El texto del caption")
 
 
-class SocialMediaPackage:
-    """Clase SocialMediaPackage. Uso: según contexto de la aplicación.
-    """
+class SocialMediaPackage(BaseModel):
+    """SocialMediaPackage."""
+
     variants: list[CaptionVariant] = Field(description="3 variaciones del caption")
     hashtags: list[str] = Field(description="Lista de hashtags optimizados para alcance")
     best_time_to_post: str = Field(description="Recomendación de horario (Ej: Hoy, 6:30 PM)")
@@ -46,7 +43,7 @@ class CopywriterService:
     """
 
     def __init__(self):
-        # __init__: Inicializa una nueva instancia de CopywriterService. Args: parámetros de inicialización.
+        """__init__."""
         pass
 
     def generate_caption(self, hotel_id, tone="PROFESIONAL_AVENTURERO"):
@@ -70,16 +67,16 @@ class CopywriterService:
         prompt = f"""
         Actúa como un experto Community Manager de viajes.
         Escribe un POST DE INSTAGRAM atractivo para vender este hotel.
-        
+
         HOTEL: {hotel.nombre}
         DESTINO: {hotel.destino}
         CATEGORÍA: {hotel.categoria} Estrellas
         AMENIDADES: {amenities_str}
         DESCRIPCIÓN: {hotel.descripcion_larga[:300]}...
-        
+
         TONO SOLICITADO: {tone}
         (Opciones: PROFESIONAL_AVENTURERO (Mesa entre ambos), FORMAL, AVENTURERO, ROMÁNTICO)
-        
+
         REQUISITOS:
         1. Empieza con un Hook (Gancho) emocional.
         2. Usa emojis relevantes.
@@ -127,13 +124,13 @@ class CopywriterService:
         Categoría: {hotel.categoria} estrellas.
         Descripción base: {hotel.descripcion_larga[:400]}
         Amenidades clave: {", ".join(amenities)}
-        
+
         ESTILO VISUAL Y VOZ: {selected_tone_desc}
-        
+
         {"INSTRUCCIÓN ADICIONAL DEL USUARIO: " + extra_prompt if extra_prompt else ""}
 
         REQUISITOS ESTRATÉGICOS:
-        1. Variantes: 
+        1. Variantes:
            - Variante 1 (EMOCIONAL): Conecta con los deseos profundos del viajero.
            - Variante 2 (ENGANCHADOR): Usa un 'hook' potente y una pregunta al final.
            - Variante 3 (MINIMALISTA): Máximo 2 líneas de texto puro impacto.

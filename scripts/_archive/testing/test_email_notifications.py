@@ -19,6 +19,7 @@ from apps.common.models import Moneda
 
 
 def test_notifications():
+    """test_notifications."""
     print("=== Test Sistema de Notificaciones ===\n")
 
     # 1. Crear o buscar cliente de prueba

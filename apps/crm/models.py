@@ -1,6 +1,3 @@
-"""Modelos de base de datos para la aplicación crm.
-"""
-
 import logging
 import uuid
 
@@ -17,14 +14,13 @@ logger = logging.getLogger(__name__)
 # ==========================================
 # 1. MODELO CORE: CLIENTE
 # ==========================================
-class Cliente:
-    """Clase Cliente. Uso: según contexto de la aplicación.
-    """
+class Cliente(AgenciaMixin, SoftDeleteModel, models.Model):
+    """Cliente."""
+
     id = models.AutoField(primary_key=True, db_column="id_cliente")
 
     @property
     def id_cliente(self):
-        # id_cliente: Id cliente. Args: según implementación. Returns: según implementación.
         return self.id
 
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, db_index=True)
@@ -66,6 +62,8 @@ class Cliente:
     )
 
     class TipoCliente(models.TextChoices):
+        """TipoCliente."""
+
         PARTICULAR = "IND", "Individual / Particular"
         CORPORATIVO = "COR", "Corporativo / B2B"
         FREELANCE = "FRE", "Freelance / Aliado"
@@ -94,7 +92,7 @@ class Cliente:
         ]
 
     def __str__(self):
-        # __str__: Representación en string del objeto. Returns: str.
+        """__str__."""
         return f"{self.nombres} {self.apellidos or ''}".strip()
 
     def calcular_cliente_frecuente(self):
@@ -108,16 +106,14 @@ class Cliente:
 
     @property
     def nombre_completo(self):
-        # nombre_completo: Nombre completo. Args: según implementación. Returns: según implementación.
         return f"{self.nombres} {self.apellidos or ''}".strip()
 
     def get_nombre_completo(self):
-        # get_nombre_completo: Obtiene/recupera nombre completo. Args: según implementación. Returns: dato solicitado.
+        """get_nombre_completo."""
         return self.nombre_completo
 
     @property
     def esta_pasaporte_vencido(self):
-        # esta_pasaporte_vencido: Esta pasaporte vencido. Args: según implementación. Returns: según implementación.
         if not self.fecha_expiracion_pasaporte:
             return False
         return self.fecha_expiracion_pasaporte < timezone.now().date()
@@ -126,10 +122,12 @@ class Cliente:
 # ==========================================
 # 2. MODELO KANBAN: OPORTUNIDAD (LEAD)
 # ==========================================
-class OportunidadViaje:
-    """Clase OportunidadViaje. Uso: según contexto de la aplicación.
-    """
+class OportunidadViaje(AgenciaMixin, SoftDeleteModel, models.Model):
+    """OportunidadViaje."""
+
     class Etapa(models.TextChoices):
+        """Etapa."""
+
         NUEVO = "NEW", "Nuevo Lead"
         COTIZANDO = "QUO", "Armando Cotización"
         ESPERANDO_PAGO = "PAY", "Esperando Pago"
@@ -164,16 +162,16 @@ class OportunidadViaje:
         ]
 
     def __str__(self):
-        # __str__: Representación en string del objeto. Returns: str.
+        """__str__."""
         return f"Lead: {self.destino} - {self.cliente.nombres}"
 
 
 # ==========================================
 # 3. MODELOS B2B2C: FREELANCERS Y COMISIONES
 # ==========================================
-class FreelancerProfile:
-    """Clase FreelancerProfile. Uso: según contexto de la aplicación.
-    """
+class FreelancerProfile(AgenciaMixin, SoftDeleteModel, models.Model):
+    """FreelancerProfile."""
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     usuario = models.OneToOneField(
         settings.AUTH_USER_MODEL,
@@ -203,13 +201,13 @@ class FreelancerProfile:
         ]
 
     def __str__(self):
-        # __str__: Representación en string del objeto. Returns: str.
+        """__str__."""
         return f"{self.usuario.get_full_name()} (Freelancer)"
 
 
-class ComisionFreelancer:
-    """Clase ComisionFreelancer. Uso: según contexto de la aplicación.
-    """
+class ComisionFreelancer(AgenciaMixin, SoftDeleteModel, models.Model):
+    """ComisionFreelancer."""
+
     venta = models.OneToOneField(
         "bookings.Venta",
         # 🔴 R1: era CASCADE — borrar venta borraba la comisión histórica del freelancer.
@@ -243,7 +241,7 @@ class ComisionFreelancer:
         ]
 
     def __str__(self):
-        # __str__: Representación en string del objeto. Returns: str.
+        """__str__."""
         return f"Comisión {self.monto_comision_ganada} para {self.freelancer}"
 
 
@@ -252,9 +250,9 @@ class ComisionFreelancer:
 # ==========================================
 
 
-class Pasajero:
-    """Clase Pasajero. Uso: según contexto de la aplicación.
-    """
+class Pasajero(AgenciaMixin, SoftDeleteModel, models.Model):
+    """Pasajero."""
+
     id_pasajero = models.AutoField(primary_key=True)
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, db_index=True)
     nombres = models.CharField(max_length=100)
@@ -323,17 +321,15 @@ class Pasajero:
         ]
 
     def __str__(self):
-        # __str__: Representación en string del objeto. Returns: str.
+        """__str__."""
         return f"{self.nombres} {self.apellidos}"
 
     @property
     def nombre_completo(self):
-        # nombre_completo: Nombre completo. Args: según implementación. Returns: según implementación.
         return f"{self.nombres} {self.apellidos}".strip()
 
     @property
     def numero_documento(self):
-        # numero_documento: Numero documento. Args: según implementación. Returns: según implementación.
         if self.numero_pasaporte:
             return self.numero_pasaporte
         if self.cedula_identidad:
@@ -341,12 +337,11 @@ class Pasajero:
         return ""
 
     def get_nombre_completo(self):
-        # get_nombre_completo: Obtiene/recupera nombre completo. Args: según implementación. Returns: dato solicitado.
+        """get_nombre_completo."""
         return self.nombre_completo
 
     @property
     def esta_vencido(self):
-        # esta_vencido: Esta vencido. Args: según implementación. Returns: según implementación.
         today = timezone.now().date()
         if self.fecha_vencimiento_pasaporte and self.fecha_vencimiento_pasaporte < today:
             return True
@@ -355,9 +350,9 @@ class Pasajero:
         return False
 
 
-class MensajeWhatsApp:
-    """Clase MensajeWhatsApp. Uso: según contexto de la aplicación.
-    """
+class MensajeWhatsApp(AgenciaMixin, SoftDeleteModel, models.Model):
+    """MensajeWhatsApp."""
+
     # 🔴 R1: era CASCADE — borrar cliente borraba histórico de chats.
     cliente = models.ForeignKey(
         Cliente, on_delete=models.SET_NULL, related_name="mensajes_whatsapp", null=True, blank=True
@@ -407,7 +402,7 @@ class MensajeWhatsApp:
         ]
 
     def __str__(self):
-        # __str__: Representación en string del objeto. Returns: str.
+        """__str__."""
         prefix = "WA OUT" if self.direccion == "OUT" else "WA IN"
         cliente_id = self.cliente_id if self.cliente_id else "?"
         return (
@@ -463,19 +458,23 @@ class WhatsAppScheduledMessage(AgenciaMixin, models.Model):
         ]
 
     def __str__(self):
-        # __str__: Representación en string del objeto. Returns: str.
+        """__str__."""
         return f"WA Programado #{self.pk} -> {self.telefono} ({self.estado})"
 
 
-class PasaporteEscaneado:
-    """Clase PasaporteEscaneado. Uso: según contexto de la aplicación.
-    """
+class PasaporteEscaneado(AgenciaMixin, models.Model):
+    """PasaporteEscaneado."""
+
     class ConfianzaChoices(models.TextChoices):
+        """ConfianzaChoices."""
+
         HIGH = "HIGH", _("Alta")
         MEDIUM = "MEDIUM", _("Media")
         LOW = "LOW", _("Baja")
 
     class SexoChoices(models.TextChoices):
+        """SexoChoices."""
+
         M = "M", _("Masculino")
         F = "F", _("Femenino")
 
@@ -512,17 +511,15 @@ class PasaporteEscaneado:
         ordering = ["-fecha_procesamiento"]
 
     def __str__(self):
-        # __str__: Representación en string del objeto. Returns: str.
+        """__str__."""
         return f"Pasaporte {self.numero_pasaporte} - {self.nombres} {self.apellidos}"
 
     @property
     def nombre_completo(self):
-        # nombre_completo: Nombre completo. Args: según implementación. Returns: según implementación.
         return f"{self.nombres} {self.apellidos}".strip()
 
     @property
     def es_valido(self):
-        # es_valido: Es valido. Args: según implementación. Returns: según implementación.
         if not self.numero_pasaporte:
             return False
         from django.utils import timezone
@@ -532,7 +529,7 @@ class PasaporteEscaneado:
         return True
 
     def to_cliente_data(self):
-        # to_cliente_data: To cliente data. Args: según implementación. Returns: según implementación.
+        """to_cliente_data."""
         return {
             "nombres": self.nombres,
             "apellidos": self.apellidos,

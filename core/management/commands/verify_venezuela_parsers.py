@@ -14,18 +14,20 @@ sys.path.append(r"c:\Users\ARMANDO\travelhub_project")
 
 
 class Command(BaseCommand):
-    """Comando de gestión personalizado."""
+    """Command."""
+
     help = "Proba los parsers de aerolineas venezolanas"
 
     def handle(self, *args, **options):
+        """handle."""
         pass
-        """Método: handle."""
 
 
 class Command(BaseCommand):  # noqa: F811
-    """Función: Command."""
+    """Command."""
+
     def handle(self, *args, **options):
-        """Método: handle."""
+        """handle."""
         base_path = r"c:\Users\ARMANDO\travelhub_project\core\tests\fixtures\venezuela_web"
         # Lista ampliada de archivos a probar
         files = [

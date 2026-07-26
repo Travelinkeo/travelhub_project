@@ -94,6 +94,7 @@ class APIKey(models.Model):
     """
 
     def __init__(self, *args, **kwargs):
+        """__init__."""
         from django.conf import settings
 
         if not getattr(settings, "DEBUG", True):
@@ -179,7 +180,6 @@ class APIKey(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        """Meta definición del modelo."""
         verbose_name = "API Key"
         verbose_name_plural = "API Keys"
         ordering = ["-created_at"]
@@ -189,6 +189,7 @@ class APIKey(models.Model):
         ]
 
     def __str__(self):
+        """__str__."""
         return f"{self.name} ({self.prefix}...) [{self.get_plan_display()}]"
 
     @classmethod

@@ -1,6 +1,3 @@
-"""Servicio de stripe service para la aplicación finance.
-"""
-
 import logging
 from datetime import UTC
 
@@ -14,16 +11,14 @@ logger = logging.getLogger(__name__)
 
 
 class StripeService:
-    """Servicio para stripe. Uso: instanciar según necesidad del dominio.
-    """
+    """StripeService."""
+
     @staticmethod
     def _ensure_stripe_key():
-        # _ensure_stripe_key:  ensure stripe key. Args: según implementación. Returns: según implementación.
         stripe.api_key = getattr(settings, "STRIPE_SECRET_KEY", "")
 
     @staticmethod
     def create_checkout_session(agencia, price_id, success_url, cancel_url):
-        # create_checkout_session: Crea un nuevo checkout session. Args: datos del objeto. Returns: objeto creado.
         StripeService._ensure_stripe_key()
 
         if not agencia.stripe_customer_id:
@@ -50,7 +45,6 @@ class StripeService:
 
     @staticmethod
     def create_portal_session(agencia, return_url):
-        # create_portal_session: Crea un nuevo portal session. Args: datos del objeto. Returns: objeto creado.
         StripeService._ensure_stripe_key()
         if not agencia.stripe_customer_id:
             raise ValueError("La agencia no tiene un Stripe Customer ID asociado.")
@@ -63,7 +57,6 @@ class StripeService:
 
     @staticmethod
     def handle_webhook(event):
-        # handle_webhook: Maneja/gestiona  webhook. Args: evento/datos. Returns: respuesta.
         StripeService._ensure_stripe_key()
         evt_type = event["type"]
 
@@ -101,7 +94,6 @@ class StripeService:
 
     @staticmethod
     def _provision_new_agency(session, auth_method="password"):
-        # _provision_new_agency:  provision new agency. Args: según implementación. Returns: según implementación.
         from django.contrib.auth.models import User
 
         metadata = session.get("metadata", {})
@@ -192,7 +184,6 @@ class StripeService:
 
     @staticmethod
     def _update_agencia_plan(agencia_id, plan, subscription_id):
-        # _update_agencia_plan:  update agencia plan. Args: según implementación. Returns: según implementación.
         try:
             agencia = Agencia.objects.get(id=agencia_id)
             agencia.plan = plan
@@ -205,7 +196,6 @@ class StripeService:
 
     @staticmethod
     def _handle_subscription_deleted(subscription):
-        # _handle_subscription_deleted:  handle subscription deleted. Args: según implementación. Returns: según implementación.
         try:
             agencia = Agencia.objects.get(stripe_subscription_id=subscription["id"])
             agencia.plan = "FREE"
@@ -218,7 +208,6 @@ class StripeService:
 
     @staticmethod
     def _handle_invoice_payment(invoice, status):
-        # _handle_invoice_payment:  handle invoice payment. Args: según implementación. Returns: según implementación.
         subscription_id = invoice.get("subscription")
         if not subscription_id:
             return

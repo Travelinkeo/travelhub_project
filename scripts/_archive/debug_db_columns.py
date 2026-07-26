@@ -14,6 +14,7 @@ django.setup()
 
 
 def check_table(table_name):
+    """check_table."""
     print(f"\nChecking columns for table: {table_name}")
     with connection.cursor() as cursor:
         cursor.execute(

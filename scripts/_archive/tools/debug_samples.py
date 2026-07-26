@@ -4,6 +4,7 @@ import pdfplumber
 
 
 def extract_from_pdf(path):
+    """extract_from_pdf."""
     print(f"\n--- FILE: {os.path.basename(path)} ---")
     try:
         with pdfplumber.open(path) as pdf:

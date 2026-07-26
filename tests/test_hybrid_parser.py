@@ -1,4 +1,3 @@
-"""Tests para Hybrid parser."""
 from unittest.mock import patch
 
 import pytest
@@ -53,9 +52,10 @@ MOCK_AI_RESPONSE = {
 
 @patch("apps.automation.services.ticket_parser_service._generate_pdf_sync")
 class TestHybridParser:
+    """TestHybridParser."""
+
     @patch("apps.automation.services.ticket_parser_service.extract_data_from_text")
     @patch("apps.automation.parsers.ai_universal_parser.UniversalAIParser.parse")
-    """Test Hybrid Parser."""
     def test_regex_first_strategy_success(self, mock_ai_parse, mock_extract_regex, mock_pdf_sync):
         """
         Verifica que si el Regex local devuelve un resultado completo y válido,

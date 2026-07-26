@@ -1,6 +1,3 @@
-"""Parser/procesador de supplier report parser para la aplicación automation.
-"""
-
 import logging
 from typing import Any
 
@@ -18,7 +15,7 @@ class SupplierReportParser:
 
     SYSTEM_PROMPT = """
     Eres un experto contable de agencias de viajes. Tu tarea es extraer la lista de transacciones de un reporte de ventas de un proveedor.
-    
+
     INSTRUCCIONES:
     1. Identifica el proveedor (ej: CTG, MY DESTINY, CONSOLIDATOR).
     2. Extrae cada fila de venta/boleto.

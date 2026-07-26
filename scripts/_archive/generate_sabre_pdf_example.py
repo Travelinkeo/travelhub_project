@@ -13,6 +13,7 @@ SABRE_DIR = os.path.join(BASE_DIR, "external_ticket_generator", "SABRE")
 
 
 def main():
+    """main."""
     import argparse
 
     parser = argparse.ArgumentParser(description="Genera PDF de un boleto Sabre (texto plano).")

@@ -9,6 +9,7 @@ BASE_URL = "http://127.0.0.1:8000/api"
 
 
 def test_endpoint(endpoint, description):
+    """test_endpoint."""
     try:
         response = requests.get(f"{BASE_URL}{endpoint}")
         status = "[OK]" if response.status_code == 200 else "[ERROR]"
@@ -29,6 +30,7 @@ def test_endpoint(endpoint, description):
 
 
 def main():
+    """main."""
     print("=== PRUEBA DE ENDPOINTS DEL FRONTEND ===\n")
 
     endpoints = [

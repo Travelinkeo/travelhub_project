@@ -33,7 +33,6 @@ class TravelHubAgent(HttpUser):
 
     def on_start(self):
         """Login al inicio de la sesión."""
-        """On start."""
         response = self.client.post(
             "/api/auth/jwt/obtain/",
             json={"username": "agent@loadtest.com", "password": "loadtest123!"},
@@ -112,7 +111,7 @@ class AdminReports(HttpUser):
     wait_time = between(5, 15)  # Admins hacen menos requests pero más pesados
 
     def on_start(self):
-        """On start."""
+        """on_start."""
         response = self.client.post(
             "/api/auth/jwt/obtain/",
             json={"username": "admin@loadtest.com", "password": "loadtest123!"},

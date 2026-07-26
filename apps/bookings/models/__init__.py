@@ -1,6 +1,3 @@
-"""Inicialización del paquete bookings.
-"""
-
 from core.api import AuditLog
 
 from .componentes import (

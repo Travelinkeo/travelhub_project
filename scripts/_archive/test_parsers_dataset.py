@@ -117,6 +117,7 @@ def test_parser_on_samples(gds_folder, max_samples=3):
 
 
 def main():
+    """main."""
     print("🔍 Iniciando prueba de parsers con dataset de muestra...\n")
 
     all_results = []

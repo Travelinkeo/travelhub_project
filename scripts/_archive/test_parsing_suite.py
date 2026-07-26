@@ -18,6 +18,7 @@ DATASET_DIR = r"c:\Users\ARMANDO\travelhub_project\core\tests\dataset"
 
 
 def extract_text_from_eml(file_path):
+    """extract_text_from_eml."""
     with open(file_path, encoding="utf-8", errors="ignore") as f:
         msg = email.message_from_file(f)
 
@@ -36,6 +37,7 @@ def extract_text_from_eml(file_path):
 
 
 def extract_text_from_pdf(file_path):
+    """extract_text_from_pdf."""
     text = ""
     try:
         with pdfplumber.open(file_path) as pdf:
@@ -47,6 +49,7 @@ def extract_text_from_pdf(file_path):
 
 
 def run_debug():
+    """run_debug."""
     # Pick a few representative files
     target_files = ["Gmail - E-TICKET ITINERARY RECEIPT - MURILLO CORTES_DIANA PATRICIA.pdf"]
 

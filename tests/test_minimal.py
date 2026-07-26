@@ -1,8 +1,7 @@
-"""Tests para Minimal."""
 import pytest
 
 
 @pytest.mark.django_db
 def test_minimal():
-    """Minimal."""
+    """test_minimal."""
     assert True

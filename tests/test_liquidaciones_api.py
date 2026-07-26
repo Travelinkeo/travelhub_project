@@ -1,4 +1,3 @@
-"""Tests para Liquidaciones api."""
 # tests/test_liquidaciones_api.py
 from decimal import Decimal
 
@@ -18,50 +17,50 @@ User = get_user_model()
 
 @pytest.fixture
 def api_client():
-    """Api client."""
+    """api_client."""
     return APIClient()
 
 
 @pytest.fixture
 def user(db):
-    """User."""
+    """user."""
     return User.objects.create_user(username="testuser", password="testpass123")
 
 
 @pytest.fixture
 def authenticated_client(api_client, user):
-    """Authenticated client."""
+    """authenticated_client."""
     api_client.force_authenticate(user=user)
     return api_client
 
 
 @pytest.fixture
 def proveedor(db):
-    """Proveedor."""
+    """proveedor."""
     return Proveedor.objects.create(nombre="Proveedor Test", tipo_proveedor="MAY")
 
 
 @pytest.fixture
 def moneda_usd(db):
-    """Moneda usd."""
+    """moneda_usd."""
     return Moneda.objects.get_or_create(codigo_iso="USD", defaults={"nombre": "Dólar"})[0]
 
 
 @pytest.fixture
 def cliente(db):
-    """Cliente."""
+    """cliente."""
     return Cliente.objects.create(nombres="Test", apellidos="Cliente")
 
 
 @pytest.fixture
 def venta(db, cliente, moneda_usd, user):
-    """Venta."""
+    """venta."""
     return Venta.objects.create(cliente=cliente, moneda=moneda_usd, subtotal=1000, creado_por=user)
 
 
 @pytest.fixture
 def liquidacion(db, proveedor, venta):
-    """Liquidacion."""
+    """liquidacion."""
     return LiquidacionProveedor.objects.create(
         proveedor=proveedor, venta=venta, monto_total=Decimal("500.00")
     )
@@ -69,20 +68,21 @@ def liquidacion(db, proveedor, venta):
 
 @pytest.mark.django_db
 class TestLiquidacionesAPI:
-    """Test Liquidaciones Api."""
+    """TestLiquidacionesAPI."""
+
     def test_listar_liquidaciones(self, authenticated_client, liquidacion):
-        """Listar liquidaciones."""
+        """test_listar_liquidaciones."""
         response = authenticated_client.get("/api/liquidaciones/")
         assert response.status_code == 200
         assert response.data["count"] == 1
 
     def test_filtrar_por_estado(self, authenticated_client, liquidacion):
-        """Filtrar por estado."""
+        """test_filtrar_por_estado."""
         response = authenticated_client.get("/api/liquidaciones/?estado=PEN")
         assert response.status_code == 200
 
     def test_marcar_pagada(self, authenticated_client, liquidacion):
-        """Marcar pagada."""
+        """test_marcar_pagada."""
         response = authenticated_client.post(
             f"/api/liquidaciones/{liquidacion.id_liquidacion}/marcar_pagada/"
         )
@@ -93,7 +93,7 @@ class TestLiquidacionesAPI:
         assert liquidacion.saldo_pendiente == 0
 
     def test_pago_parcial(self, authenticated_client, liquidacion):
-        """Pago parcial."""
+        """test_pago_parcial."""
         response = authenticated_client.post(
             f"/api/liquidaciones/{liquidacion.id_liquidacion}/registrar_pago_parcial/",
             {"monto": 200.00},
@@ -106,7 +106,7 @@ class TestLiquidacionesAPI:
         assert liquidacion.saldo_pendiente == Decimal("300.00")
 
     def test_pago_parcial_excede_saldo(self, authenticated_client, liquidacion):
-        """Pago parcial excede saldo."""
+        """test_pago_parcial_excede_saldo."""
         response = authenticated_client.post(
             f"/api/liquidaciones/{liquidacion.id_liquidacion}/registrar_pago_parcial/",
             {"monto": 600.00},
@@ -115,7 +115,7 @@ class TestLiquidacionesAPI:
         assert response.status_code == 400
 
     def test_liquidaciones_pendientes(self, authenticated_client, liquidacion):
-        """Liquidaciones pendientes."""
+        """test_liquidaciones_pendientes."""
         response = authenticated_client.get("/api/liquidaciones/pendientes/")
         assert response.status_code == 200
         assert len(response.data) == 1

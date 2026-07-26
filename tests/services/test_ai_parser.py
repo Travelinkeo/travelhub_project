@@ -1,14 +1,14 @@
-"""Tests para Ai parser (Services)."""
 import unittest.mock
 
 import pytest
 
 
 class TestParseTicketWithGemini:
+    """TestParseTicketWithGemini."""
+
     @pytest.fixture(autouse=True)
-    """Test Parse Ticket With Gemini."""
     def _mock_generate_content(self, monkeypatch):
-        """Mock generate content."""
+        """_mock_generate_content."""
         self.mock_generate = unittest.mock.MagicMock()
         monkeypatch.setattr(
             "apps.automation.services.ai_parser.generate_content",
@@ -17,28 +17,26 @@ class TestParseTicketWithGemini:
         return self.mock_generate
 
     def test_returns_parsed_data_on_success(self):
-        """Returns parsed data on success."""
+        """test_returns_parsed_data_on_success."""
         from apps.automation.services.ai_parser import parse_ticket_with_gemini
 
-        self.mock_generate.return_value = (
-            '{"passenger": {"name": "JUAREZ/RAUL"}, "bookingDetails": {"ticketNumber": "0457281019415"}}'
-        )
+        self.mock_generate.return_value = '{"passenger": {"name": "JUAREZ/RAUL"}, "bookingDetails": {"ticketNumber": "0457281019415"}}'
         result = parse_ticket_with_gemini("ticket text here")
         assert result is not None
         assert result["SOURCE_SYSTEM"] == "GEMINI_AI"
         assert result["normalized"]["passenger"]["name"] == "JUAREZ/RAUL"
 
     def test_returns_none_on_configuration_error(self):
-        """Returns none on configuration error."""
-        from apps.automation.services.ai_parser import parse_ticket_with_gemini
+        """test_returns_none_on_configuration_error."""
         from apps.automation.services.ai_engine import GeminiConfigurationError
+        from apps.automation.services.ai_parser import parse_ticket_with_gemini
 
         self.mock_generate.side_effect = GeminiConfigurationError("no key")
         result = parse_ticket_with_gemini("ticket text")
         assert result is None
 
     def test_returns_none_on_json_decode_error(self):
-        """Returns none on json decode error."""
+        """test_returns_none_on_json_decode_error."""
         from apps.automation.services.ai_parser import parse_ticket_with_gemini
 
         self.mock_generate.return_value = "not json at all"
@@ -46,7 +44,7 @@ class TestParseTicketWithGemini:
         assert result is None
 
     def test_returns_none_on_unexpected_exception(self):
-        """Returns none on unexpected exception."""
+        """test_returns_none_on_unexpected_exception."""
         from apps.automation.services.ai_parser import parse_ticket_with_gemini
 
         self.mock_generate.side_effect = Exception("unexpected")

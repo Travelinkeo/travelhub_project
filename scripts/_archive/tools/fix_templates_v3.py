@@ -8,6 +8,7 @@ directories = [
 
 
 def fix_template(filepath):
+    """fix_template."""
     with open(filepath, encoding="utf-8") as f:
         content = f.read()
 

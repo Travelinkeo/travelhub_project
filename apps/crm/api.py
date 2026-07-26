@@ -1,6 +1,3 @@
-"""Módulo api de la aplicación crm.
-"""
-
 from rest_framework import permissions, viewsets
 
 from core.api.mixins.tenant import TenantViewSetMixin
@@ -10,17 +7,17 @@ from .models import Cliente, Pasajero
 from .serializers import ClienteSerializer, PasajeroSerializer
 
 
-class ClienteViewSet:
-    """Clase ClienteViewSet. Uso: según contexto de la aplicación.
-    """
+class ClienteViewSet(InternalAPIAuthMixin, TenantViewSetMixin, viewsets.ModelViewSet):
+    """ClienteViewSet."""
+
     queryset = Cliente.objects.all()
     serializer_class = ClienteSerializer
     permission_classes = [permissions.IsAuthenticated]
 
 
-class PasajeroViewSet:
-    """Clase PasajeroViewSet. Uso: según contexto de la aplicación.
-    """
+class PasajeroViewSet(InternalAPIAuthMixin, TenantViewSetMixin, viewsets.ModelViewSet):
+    """PasajeroViewSet."""
+
     queryset = Pasajero.objects.all()
     serializer_class = PasajeroSerializer
     permission_classes = [permissions.IsAuthenticated]

@@ -15,6 +15,7 @@ from django.core.mail import send_mail
 
 
 def test_email():
+    """test_email."""
     print("Probando configuración de email...")
     print(f"Backend: {settings.EMAIL_BACKEND}")
     print(f"Host: {settings.EMAIL_HOST}")

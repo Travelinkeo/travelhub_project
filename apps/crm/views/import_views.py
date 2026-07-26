@@ -1,6 +1,3 @@
-"""Vistas (views) de la aplicación crm.
-"""
-
 import json
 import logging
 import os
@@ -16,8 +13,6 @@ from django.shortcuts import redirect, render
 from django.views import View
 
 from core.api import SaaSMixin, get_user_active_agency
-
-from ..models import Cliente
 
 logger = logging.getLogger(__name__)
 
@@ -43,11 +38,11 @@ class ImportarClientesView(SaaSMixin, LoginRequiredMixin, View):
     template_name = "crm/importar_clientes.html"
 
     def get(self, request):
-        # get: Get. Args: según implementación. Returns: según implementación.
+        """get."""
         return render(request, self.template_name, {"campos": CAMPOS_CLIENTE})
 
     def post(self, request):
-        # post: Post. Args: según implementación. Returns: según implementación.
+        """post."""
         agencia = get_user_active_agency(request.user)
         if not agencia:
             messages.error(request, "No hay agencia activa")
@@ -84,22 +79,25 @@ class ImportarClientesView(SaaSMixin, LoginRequiredMixin, View):
             request.session["import_columnas"] = columnas_origen
             request.session["import_filas"] = len(df)
 
-            return render(request, "crm/mapeo_columnas.html", {
-                "campos": CAMPOS_CLIENTE,
-                "campos_json": json.dumps(CAMPOS_CLIENTE),
-                "columnas_origen": columnas_origen,
-                "preview_rows": preview_rows,
-                "preview_rows_json": json.dumps(preview_rows),
-                "total_filas": len(df),
-                "session_id": session_id,
-            })
+            return render(
+                request,
+                "crm/mapeo_columnas.html",
+                {
+                    "campos": CAMPOS_CLIENTE,
+                    "campos_json": json.dumps(CAMPOS_CLIENTE),
+                    "columnas_origen": columnas_origen,
+                    "preview_rows": preview_rows,
+                    "preview_rows_json": json.dumps(preview_rows),
+                    "total_filas": len(df),
+                    "session_id": session_id,
+                },
+            )
 
         except Exception as e:
             logger.error(f"Error leyendo archivo: {e}")
             default_storage.delete(saved_path)
             messages.error(request, f"Error al leer el archivo: {str(e)}")
             return redirect("crm:importar_clientes")
-
 
     def delete(self, request):
         """Limpiar sesión de importación."""
@@ -114,7 +112,7 @@ class MapeoColumnasView(SaaSMixin, LoginRequiredMixin, View):
     template_result = "crm/importar_resultados.html"
 
     def post(self, request):
-        # post: Post. Args: según implementación. Returns: según implementación.
+        """post."""
         agencia = get_user_active_agency(request.user)
         if not agencia:
             return JsonResponse({"error": "No hay agencia activa"}, status=400)
@@ -123,7 +121,9 @@ class MapeoColumnasView(SaaSMixin, LoginRequiredMixin, View):
         session_id = request.session.get("import_session_id")
         file_path = request.session.get("import_file_path")
         if not session_id or not file_path:
-            return JsonResponse({"error": "Sesión de importación expirada. Vuelve a subir el archivo."}, status=400)
+            return JsonResponse(
+                {"error": "Sesión de importación expirada. Vuelve a subir el archivo."}, status=400
+            )
 
         # Obtener mapeo del formulario
         mapping_raw = request.POST.get("mapping", "{}")
@@ -155,27 +155,34 @@ class MapeoColumnasView(SaaSMixin, LoginRequiredMixin, View):
         for key in ["import_session_id", "import_file_path", "import_columnas", "import_filas"]:
             request.session.pop(key, None)
 
-        return render(request, self.template_result, {
-            "task_id": task.id,
-            "total_filas": request.session.get("import_filas", 0),
-        })
+        return render(
+            request,
+            self.template_result,
+            {
+                "task_id": task.id,
+                "total_filas": request.session.get("import_filas", 0),
+            },
+        )
 
 
 class ImportarClientesProgressView(View):
     """Verificar estado de una importación en progreso."""
 
     def get(self, request, task_id):
-        # get: Get. Args: según implementación. Returns: según implementación.
+        """get."""
         from celery.result import AsyncResult
+
         result = AsyncResult(task_id)
         if result.ready():
             data = result.result or {}
-            return JsonResponse({
-                "ready": True,
-                "success": result.successful(),
-                "creados": data.get("creados", 0),
-                "duplicados": data.get("duplicados", 0),
-                "errores": data.get("errores", []),
-                "total": data.get("total", 0),
-            })
+            return JsonResponse(
+                {
+                    "ready": True,
+                    "success": result.successful(),
+                    "creados": data.get("creados", 0),
+                    "duplicados": data.get("duplicados", 0),
+                    "errores": data.get("errores", []),
+                    "total": data.get("total", 0),
+                }
+            )
         return JsonResponse({"ready": False})

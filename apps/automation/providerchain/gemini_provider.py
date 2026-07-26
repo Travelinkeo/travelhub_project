@@ -1,6 +1,3 @@
-"""Proveedor de IA/configuración para automation: gemini provider.
-"""
-
 import logging
 import time
 
@@ -16,14 +13,14 @@ MODEL_PRO = "gemini-2.5-flash"
 MODEL_FLASH = "gemini-2.5-flash-8b"
 
 
-class GeminiProvider:
-    """Clase GeminiProvider. Uso: según contexto de la aplicación.
-    """
+class GeminiProvider(AbstractBaseProvider):
+    """GeminiProvider."""
+
     provider_name = "gemini"
     supports_structured_output = True
 
     def _resolve_api_key(self, agency_id: int | None = None) -> str | None:
-        # _resolve_api_key:  resolve api key. Args: según implementación. Returns: según implementación.
+        """_resolve_api_key."""
         if agency_id:
             try:
                 config = AgenciaConfiguracion.objects.filter(agencia_id=agency_id).first()
@@ -34,7 +31,7 @@ class GeminiProvider:
         return get_api_secret("GEMINI_API_KEY") or get_api_secret("GOOGLE_API_KEY")
 
     def test_connection(self) -> bool:
-        # test_connection: Test connection. Args: según implementación. Returns: según implementación.
+        """test_connection."""
         key = self._resolve_api_key()
         if not key:
             return False
@@ -56,7 +53,7 @@ class GeminiProvider:
         agency_id: int | None = None,
         feature: str = "unknown",
     ) -> ProviderResult:
-        # generate: Genera . Args: parámetros de generación. Returns: resultado generado.
+        """generate."""
         import google.genai as genai
         from google.genai import types as genai_types
 

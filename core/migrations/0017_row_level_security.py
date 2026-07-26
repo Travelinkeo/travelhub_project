@@ -34,7 +34,6 @@ RLS_TABLES = [
 
 
 def _build_forward_sql():
-    """Función interna: build forward sql."""
     sql = [
         "DO $$ BEGIN IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'travelhub_app') "
         "THEN CREATE ROLE travelhub_app; END IF; END $$;",
@@ -74,7 +73,6 @@ def _build_forward_sql():
 
 
 def _build_reverse_sql():
-    """Función interna: build reverse sql."""
     sql = []
     for t in RLS_TABLES:
         sql.append(
@@ -90,8 +88,7 @@ def _build_reverse_sql():
     return sql
 
 
-class Migration:
-    """Migración de base de datos generada por Django."""
+class Migration(migrations.Migration):
     dependencies = [
         ("core", "0016_add_critical_indexes"),
     ]

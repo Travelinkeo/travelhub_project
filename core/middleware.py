@@ -142,10 +142,10 @@ class ThreadLocalContextMiddleware:
     """
 
     def __init__(self, get_response):
+        """__init__."""
         self.get_response = get_response
 
     def __call__(self, request):
-        """Método interna: call."""
         request.agencia = None
         request.agency = None
         request.is_impersonating = False
@@ -358,10 +358,10 @@ class SecurityHeadersMiddleware:
     """
 
     def __init__(self, get_response):
+        """__init__."""
         self.get_response = get_response
 
     def __call__(self, request):
-        """Método interna: call."""
         nonce = secrets.token_hex(16)
         request.csp_nonce = nonce
         request.META["CSP_NONCE"] = nonce
@@ -501,10 +501,10 @@ class MultiTenantDomainMiddleware:
     """Middleware de enrutamiento avanzado para resolver inquilinos (tenants)."""
 
     def __init__(self, get_response):
+        """__init__."""
         self.get_response = get_response
 
     def __call__(self, request):
-        """Método interna: call."""
         host = request.get_host().split(":")[0].lower()
         main_domain = os.getenv("MAIN_DOMAIN", "travelhub.cc").lower()
 

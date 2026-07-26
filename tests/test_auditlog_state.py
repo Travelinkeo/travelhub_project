@@ -1,4 +1,3 @@
-"""Tests para Auditlog state."""
 from decimal import Decimal
 
 import pytest
@@ -12,7 +11,7 @@ pytestmark = pytest.mark.skip(reason="Tests requieren configuración completa o 
 
 @pytest.mark.django_db
 def test_auditlog_state_change_creates_log():
-    """Auditlog state change creates log."""
+    """test_auditlog_state_change_creates_log."""
     moneda, _ = Moneda.objects.get_or_create(codigo_iso="USD", defaults={"nombre": "Dólar"})
     cliente, _ = Cliente.objects.get_or_create(
         nombres="Cambio", apellidos="Estado", email="estado@example.com"

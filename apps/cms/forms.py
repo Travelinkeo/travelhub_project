@@ -1,14 +1,11 @@
-"""Formularios Django para la aplicación cms.
-"""
-
 from django import forms
 
 from .models import Articulo, GuiaDestino
 
 
-class ArticuloForm:
-    """Formulario para articulo. Uso: instanciar según necesidad del dominio.
-    """
+class ArticuloForm(forms.ModelForm):
+    """ArticuloForm."""
+
     class Meta:
         model = Articulo
         fields = [
@@ -68,9 +65,9 @@ class ArticuloForm:
         }
 
 
-class GuiaDestinoForm:
-    """Formulario para guiadestino. Uso: instanciar según necesidad del dominio.
-    """
+class GuiaDestinoForm(forms.ModelForm):
+    """GuiaDestinoForm."""
+
     class Meta:
         model = GuiaDestino
         fields = [

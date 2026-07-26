@@ -1,4 +1,3 @@
-"""Tests para Date normalization parsers."""
 import pytest
 
 from apps.automation.parsers import ticket_parser
@@ -8,8 +7,8 @@ pytestmark = pytest.mark.skip(reason="Funciones de parser refactorizadas - pendi
 
 @pytest.mark.skip(reason="KIU parser is a placeholder")
 def test_kiu_fecha_emision_iso_present():
+    """test_kiu_fecha_emision_iso_present."""
     # Ejemplo simplificado de línea KIU con ISSUE DATE/FECHA DE EMISION
-    """Kiu fecha emision iso present."""
     sample = "ISSUE DATE/FECHA DE EMISION: 17 AUG 2025 19:14\nOTHER LINE"
     data = ticket_parser._parse_kiu_ticket(sample, "")
     assert "FECHA_DE_EMISION" in data
@@ -19,8 +18,8 @@ def test_kiu_fecha_emision_iso_present():
 
 
 def test_sabre_fecha_emision_iso_present():
+    """test_sabre_fecha_emision_iso_present."""
     # Ejemplo simplificado para Sabre
-    """Sabre fecha emision iso present."""
     sample = (
         "Itinerary Details\n...\nIssue Date 17 Aug 25\n...\nPlease contact your travel arranger"
     )

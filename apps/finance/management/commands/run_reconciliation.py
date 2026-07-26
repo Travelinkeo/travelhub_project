@@ -9,19 +9,19 @@ from apps.finance.models_stubs import ReporteReconciliacion
 from apps.finance.services.smart_reconciliation_service import SmartReconciliationService
 
 
-class Command:
-    """Clase Command. Uso: según contexto de la aplicación.
-    """
+class Command(BaseCommand):
+    """Command."""
+
     help = "Procesa un reporte de reconciliación usando IA y cruce determinístico"
 
     def add_arguments(self, parser):
-        # add_arguments: Add arguments. Args: según implementación. Returns: según implementación.
+        """add_arguments."""
         parser.add_argument(
             "reporte_id", type=str, help="UUID del ReporteReconciliacion a procesar"
         )
 
     def handle(self, *args, **options):
-        # handle: Maneja/gestiona . Args: evento/datos. Returns: respuesta.
+        """handle."""
         reporte_id = options["reporte_id"]
         self.stdout.write(
             self.style.SUCCESS(f"Iniciando procesamiento del reporte {reporte_id}...")

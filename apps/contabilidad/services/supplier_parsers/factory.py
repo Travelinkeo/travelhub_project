@@ -1,6 +1,3 @@
-"""Servicio de factory para la aplicación contabilidad.
-"""
-
 import logging
 
 from .base_parser import BaseSupplierReportParser
@@ -24,7 +21,6 @@ class SupplierReportParserFactory:
         subject: str = "",
         sender_email: str = "",
     ) -> BaseSupplierReportParser | None:
-        # get_parser: Obtiene/recupera parser. Args: según implementación. Returns: dato solicitado.
         sender_clean = (sender_email or "").lower()
         subject_clean = (subject or "").lower()
         filename_clean = (filename or "").lower()

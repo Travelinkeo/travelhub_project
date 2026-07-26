@@ -1,15 +1,10 @@
 # Generated manually — adds SoftDeleteModel fields + missing indexes
 
-"""Migración de base de datos para cotizaciones.
-"""
-
 from django.db import migrations, models
 from django.utils import timezone
 
 
-class Migration:
-    """Clase Migration. Uso: según contexto de la aplicación.
-    """
+class Migration(migrations.Migration):
     dependencies = [
         ("cotizaciones", "0008_alter_cotizacion_table_alter_itemcotizacion_table"),
     ]

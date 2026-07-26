@@ -18,7 +18,7 @@ class TestCacheUtils:
 
         @cache_queryset(timeout=60, key_prefix="test")
         def expensive_function():
-            """Expensive function."""
+            """expensive_function."""
             nonlocal call_count
             call_count += 1
             return {"data": "test"}
@@ -38,7 +38,7 @@ class TestCacheUtils:
 
         @cache_queryset(timeout=60, key_prefix="test")
         def function_with_args(arg1, arg2):
-            """Function with args."""
+            """function_with_args."""
             return f"{arg1}-{arg2}"
 
         result1 = function_with_args("a", "b")

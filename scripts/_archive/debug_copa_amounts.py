@@ -4,6 +4,7 @@ from typing import Any
 
 
 def extract_amounts(text: str) -> dict[str, Any]:
+    """extract_amounts."""
     amounts = {}
 
     # Buscar Total

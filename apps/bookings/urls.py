@@ -1,6 +1,3 @@
-"""Configuración de rutas (URLs) para la aplicación bookings.
-"""
-
 import logging
 
 from django.urls import include, path
@@ -42,9 +39,10 @@ router = DefaultRouter()
 
 
 def dynamic_view(view_path):
-    # dynamic_view: Dynamic view. Args: según implementación. Returns: según implementación.
+    """dynamic_view."""
+
     def lazy_view_handler(request, *args, **kwargs):
-        # lazy_view_handler: Lazy view handler. Args: según implementación. Returns: según implementación.
+        """lazy_view_handler."""
         view_class = import_string(view_path)
         return view_class.as_view()(request, *args, **kwargs)
 
@@ -52,18 +50,19 @@ def dynamic_view(view_path):
 
 
 def dynamic_fb_view(view_path):
-    # dynamic_fb_view: Dynamic fb view. Args: según implementación. Returns: según implementación.
+    """dynamic_fb_view."""
+
     def lazy_view_handler(request, *args, **kwargs):
-        # lazy_view_handler: Lazy view handler. Args: según implementación. Returns: según implementación.
+        """lazy_view_handler."""
         view_fn = import_string(view_path)
         return view_fn(request, *args, **kwargs)
 
     return lazy_view_handler
 
 
-class ProductoServicioSerializer:
-    """Serializador para productoservicio. Uso: instanciar según necesidad del dominio.
-    """
+class ProductoServicioSerializer(viewsets.ModelViewSet):
+    """ProductoServicioSerializer."""
+
     # This is a bit of a hack since the original had classes defined in core/urls.py
     # I should probably import them, but for now I'll just register if I can.
     pass
@@ -76,13 +75,15 @@ try:
     ItemCotizacionViewSet = import_string("apps.cotizaciones.views.ItemCotizacionViewSet")
 
     class ProductoServicioViewSet(InternalAPIAuthMixin, TenantViewSetMixin, viewsets.ModelViewSet):
+        """ProductoServicioViewSet."""
+
         serializer_class = ProductoServicioSerializer
         permission_classes = [permissions.IsAuthenticated]
         filter_backends = [filters.SearchFilter]
         search_fields = ["nombre", "codigo_interno", "descripcion"]
 
         def get_queryset(self):
-            # get_queryset: Obtiene/recupera queryset. Args: según implementación. Returns: dato solicitado.
+            """get_queryset."""
             return ProductoServicio.objects.filter(activo=True)
 
     from apps.bookings.views.proveedores_views import ProveedorViewSet
@@ -308,7 +309,9 @@ urlpatterns = [
     # --- ITINERARIO INTERACTIVO ---
     path(
         "itinerary/v2/<str:token>/",
-        dynamic_fb_view("apps.bookings.views.itinerary_interactive.public_itinerary_interactive_view"),
+        dynamic_fb_view(
+            "apps.bookings.views.itinerary_interactive.public_itinerary_interactive_view"
+        ),
         name="public_itinerary_interactive",
     ),
     path(

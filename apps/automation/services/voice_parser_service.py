@@ -1,6 +1,3 @@
-"""Servicio de voice parser service para la aplicación automation.
-"""
-
 import json
 import logging
 import os
@@ -16,21 +13,21 @@ TWILIO_AUTH = getattr(settings, "TWILIO_AUTH_TOKEN", None)
 
 
 def _get_genai():
-    # _get_genai:  get genai. Args: según implementación. Returns: según implementación.
+    """_get_genai."""
     from google import genai
 
     return genai
 
 
 def _get_genai_types():
-    # _get_genai_types:  get genai types. Args: según implementación. Returns: según implementación.
+    """_get_genai_types."""
     from google.genai import types
 
     return types
 
 
 def _get_client():
-    # _get_client:  get client. Args: según implementación. Returns: según implementación.
+    """_get_client."""
     genai = _get_genai()
     from apps.automation.services.ai_engine import get_gemini_api_key
 

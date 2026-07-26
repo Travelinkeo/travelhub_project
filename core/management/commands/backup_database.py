@@ -10,11 +10,12 @@ logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
-    """Comando de gestión personalizado."""
+    """Command."""
+
     help = "Realiza backup de la base de datos PostgreSQL y rota backups antiguos"
 
     def add_arguments(self, parser):
-        """Método: add arguments."""
+        """add_arguments."""
         parser.add_argument(
             "--retention-days",
             type=int,
@@ -23,7 +24,7 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        """Método: handle."""
+        """handle."""
         retention_days = options["retention_days"]
         db_url = os.environ.get("DATABASE_URL", "")
 
@@ -92,7 +93,7 @@ class Command(BaseCommand):
             logger.error(f"Backup failed: {e}")
 
     def _cleanup_old_backups(self, backup_dir, retention_days):
-        """Método interna: cleanup old backups."""
+        """_cleanup_old_backups."""
         cutoff = datetime.now() - timedelta(days=retention_days)
         deleted = 0
 

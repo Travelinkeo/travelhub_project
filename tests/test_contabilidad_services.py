@@ -18,9 +18,10 @@ pytestmark = pytest.mark.django_db
 
 @pytest.mark.django_db
 class TestHelpers:
-    """Test Helpers."""
+    """TestHelpers."""
+
     def test_debitar_creates_debito(self, agencia_premium):
-        """Debitar creates debito."""
+        """test_debitar_creates_debito."""
         asiento = AsientoContable.objects.create(agencia=agencia_premium, glosa="test")
         cuenta = CuentaContable.objects.create(
             codigo="1.1.01.01",
@@ -35,7 +36,7 @@ class TestHelpers:
         assert mov.monto_ves == Decimal("1000")
 
     def test_acreditar_creates_credito(self, agencia_premium):
-        """Acreditar creates credito."""
+        """test_acreditar_creates_credito."""
         asiento = AsientoContable.objects.create(agencia=agencia_premium, glosa="test")
         cuenta = CuentaContable.objects.create(
             codigo="4.1.01",
@@ -52,9 +53,10 @@ class TestHelpers:
 
 @pytest.mark.django_db
 class TestBuscarCuenta:
-    """Test Buscar Cuenta."""
+    """TestBuscarCuenta."""
+
     def test_exact_match(self, agencia_premium):
-        """Exact match."""
+        """test_exact_match."""
         cuenta = CuentaContable.objects.create(
             codigo="1.1.02.02",
             nombre="Cuentas por Cobrar USD",
@@ -65,7 +67,7 @@ class TestBuscarCuenta:
         assert result == cuenta
 
     def test_fallback_prefix(self, agencia_premium):
-        """Fallback prefix."""
+        """test_fallback_prefix."""
         CuentaContable.objects.create(
             codigo="1.1.02.99",
             nombre="Otras CxC",
@@ -77,16 +79,17 @@ class TestBuscarCuenta:
         assert result.codigo.startswith("1.1.02")
 
     def test_not_found_raises(self, agencia_premium):
-        """Not found raises."""
+        """test_not_found_raises."""
         with pytest.raises(ValueError, match="No encontrada"):
             ContabilidadService._buscar_cuenta("9.9.99.99")
 
 
 @pytest.mark.django_db
 class TestGenerarLineasIntermediacion:
-    """Test Generar Lineas Intermediacion."""
+    """TestGenerarLineasIntermediacion."""
+
     def test_creates_entries(self, agencia_premium):
-        """Creates entries."""
+        """test_creates_entries."""
         from apps.finance.models import Factura
 
         _cuenta_cxc = CuentaContable.objects.create(
@@ -148,9 +151,10 @@ class TestGenerarLineasIntermediacion:
 
 @pytest.mark.django_db
 class TestGenerarLineasVentaPropia:
-    """Test Generar Lineas Venta Propia."""
+    """TestGenerarLineasVentaPropia."""
+
     def test_creates_entries(self, agencia_premium):
-        """Creates entries."""
+        """test_creates_entries."""
         from apps.finance.models import Factura
 
         for codigo, nombre, tipo in [
@@ -192,7 +196,7 @@ class TestGenerarLineasVentaPropia:
         assert abs(debito_usd - credito_usd) < Decimal("0.01")
 
     def test_igtf_zero_skips_entry(self, agencia_premium):
-        """Igtf zero skips entry."""
+        """test_igtf_zero_skips_entry."""
         from apps.finance.models import Factura
 
         for codigo, nombre, tipo in [
@@ -232,9 +236,10 @@ class TestGenerarLineasVentaPropia:
 
 @pytest.mark.django_db
 class TestProveedorInatur:
-    """Test Proveedor Inatur."""
+    """TestProveedorInatur."""
+
     def test_provisionar_creates_asiento(self, agencia_premium):
-        """Provisionar creates asiento."""
+        """test_provisionar_creates_asiento."""
         _cuenta_gasto = CuentaContable.objects.create(
             codigo="6.1.05",
             nombre="Gasto INATUR",
@@ -278,9 +283,10 @@ class TestProveedorInatur:
 
 
 class TestObtenerTasaBCV:
-    """Test Obtener Tasa Bcv."""
+    """TestObtenerTasaBCV."""
+
     def test_tasa_exacta(self, agencia_premium):
-        """Tasa exacta."""
+        """test_tasa_exacta."""
         from apps.finance.models import TasaCambioBCV
 
         TasaCambioBCV.objects.create(
@@ -292,7 +298,7 @@ class TestObtenerTasaBCV:
         assert tasa == Decimal("50.00")
 
     def test_tasa_fallback_fecha_cercana(self, agencia_premium):
-        """Tasa fallback fecha cercana."""
+        """test_tasa_fallback_fecha_cercana."""
         from apps.finance.models import TasaCambioBCV
 
         TasaCambioBCV.objects.create(
@@ -304,15 +310,16 @@ class TestObtenerTasaBCV:
         assert tasa == Decimal("49.50")
 
     def test_tasa_sin_datos_raise(self):
-        """Tasa sin datos raise."""
+        """test_tasa_sin_datos_raise."""
         with pytest.raises(ValueError, match="No hay tasa BCV"):
             ContabilidadService.obtener_tasa_bcv(date(2026, 1, 1))
 
 
 class TestGenerarAsientoDesdeFactura:
-    """Test Generar Asiento Desde Factura."""
+    """TestGenerarAsientoDesdeFactura."""
+
     def _setup_cuentas(self):
-        """Setup cuentas."""
+        """_setup_cuentas."""
         CuentaContable.objects.create(
             codigo="1.1.02.02",
             nombre="CxC USD",
@@ -351,7 +358,7 @@ class TestGenerarAsientoDesdeFactura:
         )
 
     def test_genera_asiento_intermediacion(self, agencia_premium):
-        """Genera asiento intermediacion."""
+        """test_genera_asiento_intermediacion."""
         from apps.finance.models import Factura
 
         self._setup_cuentas()
@@ -382,7 +389,7 @@ class TestGenerarAsientoDesdeFactura:
         assert abs(debito_total - credito_total) < Decimal("0.01")
 
     def test_genera_asiento_venta_propia(self, agencia_premium):
-        """Genera asiento venta propia."""
+        """test_genera_asiento_venta_propia."""
         from apps.finance.models import Factura
 
         self._setup_cuentas()
@@ -411,7 +418,7 @@ class TestGenerarAsientoDesdeFactura:
         assert abs(debito_total - credito_total) < Decimal("0.01")
 
     def test_asiento_reentrante_actualiza(self, agencia_premium):
-        """Asiento reentrante actualiza."""
+        """test_asiento_reentrante_actualiza."""
         from apps.finance.models import Factura
 
         self._setup_cuentas()
@@ -434,9 +441,10 @@ class TestGenerarAsientoDesdeFactura:
 
 
 class TestRegistrarPagoYDiferencial:
-    """Test Registrar Pago Ydiferencial."""
+    """TestRegistrarPagoYDiferencial."""
+
     def _setup_cuentas(self):
-        """ setup cuentas."""
+        """_setup_cuentas."""
         CuentaContable.objects.create(
             codigo="1.1.01.04",
             nombre="Banco",
@@ -469,7 +477,7 @@ class TestRegistrarPagoYDiferencial:
         )
 
     def test_registra_pago_sin_diferencial(self, agencia_premium, moneda_usd):
-        """Registra pago sin diferencial."""
+        """test_registra_pago_sin_diferencial."""
         from apps.bookings.models import PagoVenta, Venta
 
         self._setup_cuentas()
@@ -488,7 +496,7 @@ class TestRegistrarPagoYDiferencial:
         assert asiento.tipo_asiento == AsientoContable.TipoAsiento.DIARIO
 
     def test_registra_pago_sin_factura_retorna_none(self, agencia_premium, moneda_usd):
-        """Registra pago sin factura retorna none."""
+        """test_registra_pago_sin_factura_retorna_none."""
         from apps.bookings.models import PagoVenta, Venta
 
         venta = Venta.objects.create(
@@ -504,7 +512,7 @@ class TestRegistrarPagoYDiferencial:
         assert result is None
 
     def test_registra_pago_con_ganancia_cambiaria(self, agencia_premium, moneda_usd):
-        """Registra pago con ganancia cambiaria."""
+        """test_registra_pago_con_ganancia_cambiaria."""
         from apps.bookings.models import PagoVenta, Venta
         from apps.finance.models import Factura
 
@@ -536,9 +544,10 @@ class TestRegistrarPagoYDiferencial:
 
 
 class TestGenerarNotaDebitoDiferencial:
-    """Test Generar Nota Debito Diferencial."""
+    """TestGenerarNotaDebitoDiferencial."""
+
     def test_genera_nota_debito_con_iva(self, agencia_premium, moneda_usd):
-        """Genera nota debito con iva."""
+        """test_genera_nota_debito_con_iva."""
         from apps.finance.models import Factura
 
         factura = Factura.objects.create(

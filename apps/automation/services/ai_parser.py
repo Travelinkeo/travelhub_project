@@ -1,6 +1,3 @@
-"""Servicio de ai parser para la aplicación automation.
-"""
-
 import json
 import logging
 import re

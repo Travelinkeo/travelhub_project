@@ -23,9 +23,10 @@ from core.serializers import ComunicacionProveedorSerializer
     ),
 )
 class ComunicacionProveedorViewSet(
-    """Función: ComunicacionProveedorViewSet."""
     TenantViewSetMixin, InternalAPIAuthMixin, viewsets.ReadOnlyModelViewSet
 ):
+    """ComunicacionProveedorViewSet."""
+
     queryset = ComunicacionProveedor.objects.all().order_by("-fecha_recepcion")
     serializer_class = ComunicacionProveedorSerializer
     permission_classes = [IsAuthenticated]

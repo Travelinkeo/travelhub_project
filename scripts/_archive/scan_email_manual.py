@@ -5,6 +5,7 @@ import django
 
 
 def manual_scan():
+    """manual_scan."""
     print("--- Iniciando Escaneo Manual de Correo ---")
     from apps.communications.services.email_monitor_service import EmailMonitorService
     from core.models import Agencia

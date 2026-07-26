@@ -1,6 +1,3 @@
-"""Parser/procesador de kiu parser para la aplicación automation.
-"""
-
 import logging
 import re
 from decimal import Decimal
@@ -93,6 +90,7 @@ class KIUParser(BaseTicketParser):
 
         # Calcular SOLO_NOMBRE (Nombre/s de pila sin títulos) para el saludo
         from apps.automation.parsers.ticket_parser import _get_solo_nombre_pasajero
+
         solo_nombre = _get_solo_nombre_pasajero(passenger_name)
 
         return ParsedTicketData(
@@ -177,6 +175,7 @@ class KIUParser(BaseTicketParser):
         )
 
     def _heuristic_extract_total_and_currency(self, text: str) -> tuple[Decimal, str]:
+        """_heuristic_extract_total_and_currency."""
         # 1. Determinar Moneda Globalmente
         moneda = "USD"
         if re.search(r"\b(VES|BS\.?|BOLIVARES)\b", text, re.IGNORECASE):
@@ -223,6 +222,7 @@ class KIUParser(BaseTicketParser):
         return monto_total, moneda
 
     def _extract_amounts(self, text: str) -> dict[str, Any]:
+        """_extract_amounts."""
         # 1. Estrategia Robusta: "Max Number Strategy"
         heur_total, heur_currency = self._heuristic_extract_total_and_currency(text)
 
@@ -335,10 +335,11 @@ class KIUParser(BaseTicketParser):
         return self.extract_passenger_name_robust(text)
 
     def _extract_agency_iata(self, text: str) -> str:
-        # _extract_agency_iata:  extract agency iata. Args: según implementación. Returns: según implementación.
+        """_extract_agency_iata."""
         return self.extract_field(text, [r"IATA\s*[:\s]*([0-9]{8})"])
 
     def _extract_agency_name(self, text: str) -> str:
+        """_extract_agency_name."""
         # PRIORIDAD: Capturar exactamente lo que sigue a ISSUE AGENT / AGENTE EMISOR
         # El usuario indica que este es el código de la agencia (ej: BLA005RSJ)
         # y NO la aerolínea. Usamos lógica de main (3).py.
@@ -367,6 +368,7 @@ class KIUParser(BaseTicketParser):
         return "No encontrado"
 
     def _extract_agency_address(self, text: str) -> str:
+        """_extract_agency_address."""
         # Rutaca specifics
         if "RUTACA" in text.upper():
             return "AV JESUS SOTO SECTOR AEROPUERTO EDIF TALLER MARES, CIUDAD BOLIVAR, VE"
@@ -672,6 +674,7 @@ class KIUParser(BaseTicketParser):
         return date_str
 
     def _extract_itinerary_text(self, text: str) -> str:
+        """_extract_itinerary_text."""
         # Extraer bloque de itinerario
         start_pattern = r"(FROM/TO|DESDE/HACIA)[\s/]+(FLIGHT|VUELO)"
         end_keywords = ["ENDORSEMENTS", "CONDICIONES", "FARE CALC", "TOUR CODE", "PAYMENT", "TOTAL"]

@@ -13,6 +13,7 @@ DUMP_FILE = "XYZ/amadeus_samples/analysis_dump.txt"
 
 
 def main():
+    """main."""
     if not os.path.exists(DUMP_FILE):
         print("Dump file not found.")
         return

@@ -13,6 +13,7 @@ from apps.finance.services.smart_reconciliation_service import SmartReconciliati
 
 
 def test_ajuste():
+    """test_ajuste."""
     # Mock a reconciliation with discrepancy
     conciliacion = ConciliacionBoleto.objects.filter(estado="DISCREPANCIA").first()
     if not conciliacion:

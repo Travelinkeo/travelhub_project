@@ -50,7 +50,6 @@ _SERIALIZER_MAPPINGS = {
 
 
 def __getattr__(name):
-    """Función interna: getattr."""
     if name in _SERIALIZER_MAPPINGS:
         module_path = _SERIALIZER_MAPPINGS[name]
         module = importlib.import_module(module_path)

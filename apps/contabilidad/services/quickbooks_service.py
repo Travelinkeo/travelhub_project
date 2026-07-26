@@ -26,7 +26,7 @@ class QuickBooksService:
     """Integración con QuickBooks Online API v3."""
 
     def __init__(self, company_id: str | None = None):
-        # __init__: Inicializa una nueva instancia de QuickBooksService. Args: parámetros de inicialización.
+        """__init__."""
         self.client_id = getattr(settings, "QB_CLIENT_ID", "")
         self.client_secret = getattr(settings, "QB_CLIENT_SECRET", "")
         self.company_id = company_id or getattr(settings, "QB_COMPANY_ID", "")
@@ -35,7 +35,6 @@ class QuickBooksService:
 
     @property
     def base_url(self) -> str:
-        # base_url: Base url. Args: según implementación. Returns: según implementación.
         env = getattr(settings, "ENVIRONMENT", "development")
         base = QB_BASE if env in ("development", "test") else QB_BASE_PROD
         return f"{base}/v3/company/{self.company_id}"
@@ -68,7 +67,6 @@ class QuickBooksService:
 
     @property
     def access_token(self) -> str:
-        # access_token: Access token. Args: según implementación. Returns: según implementación.
         if not self._access_token or time.time() > self._token_expires:
             return self._refresh_token()
         return self._access_token

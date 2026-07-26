@@ -10,40 +10,40 @@ class TestBaseParserMethods:
     """Tests para métodos comunes de BaseTicketParser"""
 
     def test_extract_currency_amount_usd(self):
-        """Extract currency amount usd."""
+        """test_extract_currency_amount_usd."""
         parser = SabreParser()
         currency, amount = parser.extract_currency_amount("USD 1,234.56")
         assert currency == "USD"
         assert amount == Decimal("1234.56")
 
     def test_extract_currency_amount_eur(self):
-        """Extract currency amount eur."""
+        """test_extract_currency_amount_eur."""
         parser = SabreParser()
         currency, amount = parser.extract_currency_amount("EUR 500.00")
         assert currency == "EUR"
         assert amount == Decimal("500.00")
 
     def test_extract_currency_amount_no_match(self):
-        """Extract currency amount no match."""
+        """test_extract_currency_amount_no_match."""
         parser = SabreParser()
         currency, amount = parser.extract_currency_amount("No encontrado")
         assert currency is None
         assert amount is None
 
     def test_clean_text(self):
-        """Clean text."""
+        """test_clean_text."""
         parser = SabreParser()
         result = parser.clean_text("  Multiple   spaces   ")
         assert result == "Multiple spaces"
 
     def test_purify_text_for_detection(self):
-        """Purify text for detection."""
+        """test_purify_text_for_detection."""
         parser = SabreParser()
         result = parser.purify_text_for_detection("  <p>Some   HTML   &nbsp; elements</p>   ")
         assert result == "SOME HTML ELEMENTS"
 
     def test_extract_field_first_pattern(self):
-        """Extract field first pattern."""
+        """test_extract_field_first_pattern."""
         parser = SabreParser()
         text = "Reservation Code: ABC123"
         result = parser.extract_field(
@@ -52,7 +52,7 @@ class TestBaseParserMethods:
         assert result == "ABC123"
 
     def test_extract_field_second_pattern(self):
-        """Extract field second pattern."""
+        """test_extract_field_second_pattern."""
         parser = SabreParser()
         text = "PNR: XYZ789"
         result = parser.extract_field(
@@ -61,7 +61,7 @@ class TestBaseParserMethods:
         assert result == "XYZ789"
 
     def test_extract_field_no_match(self):
-        """Extract field no match."""
+        """test_extract_field_no_match."""
         parser = SabreParser()
         text = "Some random text"
         result = parser.extract_field(text, [r"PNR:\s*([A-Z0-9]+)"])
@@ -90,13 +90,13 @@ class TestResolveIataFromCity:
         assert DataNormalizationService._resolve_iata_from_city("VALENCIA") == "VLN"
 
     def test_resolve_alias_santo_domingo_to_std(self):
-        """Resolve alias santo domingo to std."""
+        """test_resolve_alias_santo_domingo_to_std."""
         from apps.automation.parsers.normalization import DataNormalizationService
 
         assert DataNormalizationService._resolve_iata_from_city("SANTO DOMINGO") == "STD"
 
     def test_resolve_explicit_3_letter_iata_passes_through(self):
-        """Resolve explicit 3 letter iata passes through."""
+        """test_resolve_explicit_3_letter_iata_passes_through."""
         from apps.automation.parsers.normalization import DataNormalizationService
 
         assert DataNormalizationService._resolve_iata_from_city("MAD") == "MAD"
@@ -125,7 +125,7 @@ class TestResolveIataFromCity:
         assert DataNormalizationService._resolve_iata_from_city("SAN ANTONIO TX") == "SVZ"
 
     def test_resolve_empty_returns_none(self):
-        """Resolve empty returns none."""
+        """test_resolve_empty_returns_none."""
         from apps.automation.parsers.normalization import DataNormalizationService
 
         assert DataNormalizationService._resolve_iata_from_city("") is None
@@ -148,7 +148,7 @@ class TestCatalogNormalizationServiceIndices:
     """
 
     def test_airports_by_iata_index_has_vln(self):
-        """Airports by iata index has vln."""
+        """test_airports_by_iata_index_has_vln."""
         from apps.common.services.catalog_service import CatalogNormalizationService
 
         CatalogNormalizationService._load_airports()
@@ -158,7 +158,7 @@ class TestCatalogNormalizationServiceIndices:
         assert "MAD" in CatalogNormalizationService._airports_by_iata
 
     def test_airports_by_city_index_has_valencia(self):
-        """Airports by city index has valencia."""
+        """test_airports_by_city_index_has_valencia."""
         from apps.common.services.catalog_service import CatalogNormalizationService
 
         CatalogNormalizationService._load_airports()
@@ -171,7 +171,7 @@ class TestCatalogNormalizationServiceIndices:
         assert "VLC" in iatas
 
     def test_get_airports_by_iata_returns_dict_or_none(self):
-        """Get airports by iata returns dict or none."""
+        """test_get_airports_by_iata_returns_dict_or_none."""
         from apps.common.services.catalog_service import CatalogNormalizationService
 
         info = CatalogNormalizationService._get_airports_by_iata("VLN")
@@ -181,7 +181,7 @@ class TestCatalogNormalizationServiceIndices:
         assert CatalogNormalizationService._get_airports_by_iata("ZZZ") is None
 
     def test_get_airports_by_city_returns_list(self):
-        """Get airports by city returns list."""
+        """test_get_airports_by_city_returns_list."""
         from apps.common.services.catalog_service import CatalogNormalizationService
 
         results = CatalogNormalizationService._get_airports_by_city("Caracas")
@@ -194,7 +194,7 @@ class TestParsedTicketData:
     """Tests para ParsedTicketData"""
 
     def test_to_dict(self):
-        """To dict."""
+        """test_to_dict."""
         data = ParsedTicketData(
             source_system="TEST",
             pnr="ABC123",

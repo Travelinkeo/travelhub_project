@@ -3,8 +3,7 @@
 from django.db import migrations
 
 
-class Migration:
-    """Migración de base de datos generada por Django."""
+class Migration(migrations.Migration):
     dependencies = [
         ("bookings", "0009_alter_venta_factura_consolidada_and_more"),
         ("core", "0008_remove_hoteltarifario_amenidades_and_more"),

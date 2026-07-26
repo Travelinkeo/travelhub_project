@@ -23,17 +23,18 @@ GOD_MODE_RATE_WINDOW = 3600
 
 
 class GodModeDashboardView(UserPassesTestMixin, View):
-    """Función: GodModeDashboardView."""
+    """GodModeDashboardView."""
+
     template_name = "god_mode/dashboard.html"
 
     def test_func(self):
+        """test_func."""
         return self.request.user.is_superuser
 
-        """Método: test func."""
     def get(self, request, *args, **kwargs):
+        """get."""
         from apps.finance.models_stubs import ConciliacionBoleto
         from core.models.ai import AIUsageLog
-        """Método: get."""
 
         total_agencias = Agencia.objects.count()
         agencias_activas_objs = Agencia.objects.filter(activa=True)
@@ -177,14 +178,15 @@ class GodModeDashboardView(UserPassesTestMixin, View):
 
 
 class ImpersonateAgencyView(UserPassesTestMixin, View):
-    """Función: ImpersonateAgencyView."""
+    """ImpersonateAgencyView."""
+
     def test_func(self):
+        """test_func."""
         return self.request.user.is_superuser
-        """Método: test func."""
 
     def get(self, request, agencia_id, *args, **kwargs):
+        """get."""
         user = request.user
-        """Método: get."""
 
         rate_key = f"god_mode:impersonate:{user.pk}"
         try:
@@ -225,13 +227,14 @@ class ImpersonateAgencyView(UserPassesTestMixin, View):
 
 
 class StopImpersonateView(UserPassesTestMixin, View):
-    """Función: StopImpersonateView."""
+    """StopImpersonateView."""
+
     def test_func(self):
-        """Método: test func."""
+        """test_func."""
         return self.request.user.is_superuser
 
     def get(self, request, *args, **kwargs):
-        """Método: get."""
+        """get."""
         if "impersonated_agencia_id" in request.session:
             agencia_id = request.session["impersonated_agencia_id"]
             agencia_name = request.session.get("impersonated_agencia_name", "Desconocida")

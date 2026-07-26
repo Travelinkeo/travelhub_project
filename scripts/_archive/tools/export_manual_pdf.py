@@ -235,6 +235,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
 
 def generar_pdf():
+    """generar_pdf."""
     print("📄 Leyendo el manual en Markdown...")
     with open(MANUAL_MD_PATH, encoding="utf-8") as f:
         md_text = f.read()
@@ -283,6 +284,7 @@ def generar_pdf():
 
 
 def enviar_correo():
+    """enviar_correo."""
     print(f"\n📧 Enviando correo a {EMAIL_TO}...")
 
     msg = MIMEMultipart()

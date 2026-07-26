@@ -1,6 +1,3 @@
-"""Proveedor de IA/configuración para automation: health.
-"""
-
 import json
 import logging
 from datetime import datetime, timedelta

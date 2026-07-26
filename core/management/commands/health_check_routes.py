@@ -5,11 +5,12 @@ from django.urls import reverse
 
 
 class Command(BaseCommand):
-    """Comando de gestión personalizado."""
+    """Command."""
+
     help = "Simula un usuario navegando por las rutas críticas"
 
     def handle(self, *args, **kwargs):
-        """Método: handle."""
+        """handle."""
         client = Client()
         User = get_user_model()
 

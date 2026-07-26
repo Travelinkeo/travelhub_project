@@ -22,13 +22,14 @@ _e2e_available = os.environ.get("CI") == "true" or os.environ.get("E2E_TESTS") =
 
 
 class TestAdminNavigation:
+    """TestAdminNavigation."""
+
     @pytest.mark.skipif(
-        """Test Admin Navigation."""
         not _e2e_available,
         reason="E2E tests requieren CI=1 o E2E_TESTS=1 para ejecutarse localmente",
     )
     async def test_admin_login_page(self, page, live_server):
-        """Admin login page."""
+        """test_admin_login_page."""
         await page.goto(f"{live_server.url}/admin/login/")
         content = await page.content()
         assert "admin" in content.lower() or "iniciar" in content.lower()
@@ -38,7 +39,7 @@ class TestAdminNavigation:
         reason="E2E tests requieren CI=1 o E2E_TESTS=1",
     )
     async def test_health_page_accessible(self, page, live_server):
-        """Health page accessible."""
+        """test_health_page_accessible."""
         await page.goto(f"{live_server.url}/health/")
         content = await page.content()
         assert "ok" in content.lower() or "health" in content.lower()

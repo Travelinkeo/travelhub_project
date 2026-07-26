@@ -14,9 +14,7 @@ Razon: preservar históricos al borrar físicamente entidades referenciadas.
 from django.db import migrations, models
 
 
-class Migration:
-    """Clase Migration. Uso: según contexto de la aplicación.
-    """
+class Migration(migrations.Migration):
     dependencies = [
         ("crm", "0032_cliente_telegram_chat_id"),
     ]

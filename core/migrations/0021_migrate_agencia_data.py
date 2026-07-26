@@ -2,7 +2,6 @@ from django.db import migrations
 
 
 def migrate_agencia_data(apps, schema_editor):
-    """Función: migrate agencia data."""
     Agencia = apps.get_model("core", "Agencia")
     AgenciaBranding = apps.get_model("core", "AgenciaBranding")
     AgenciaConfiguracion = apps.get_model("core", "AgenciaConfiguracion")
@@ -80,12 +79,10 @@ def migrate_agencia_data(apps, schema_editor):
 
 
 def reverse_migrate_agencia_data(apps, schema_editor):
-    """Función: reverse migrate agencia data."""
     pass  # No es necesario revertir para este caso, o se puede implementar si se desea
 
 
-class Migration:
-    """Migración de base de datos generada por Django."""
+class Migration(migrations.Migration):
     dependencies = [
         ("core", "0020_agenciabranding_agencia_branding_and_more"),
     ]

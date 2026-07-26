@@ -72,7 +72,7 @@ if SENTRY_DSN and SENTRY_DSN.startswith("http"):
     import threading as _sentry_thread
 
     def _init_sentry():
-        """Inicializa Sentry SDK en un hilo separado (no bloqueante). Integra Django, Celery y Redis."""
+        """_init_sentry."""
         import sentry_sdk as _sdk
         from sentry_sdk.integrations.celery import CeleryIntegration as _CeleryInt
         from sentry_sdk.integrations.django import DjangoIntegration as _DjangoInt

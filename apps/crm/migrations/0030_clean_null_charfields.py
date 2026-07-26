@@ -80,13 +80,10 @@ def clean_null_charfields(apps, schema_editor):
 
 
 def reverse_noop(apps, schema_editor):
-    # reverse_noop: Reverse noop. Args: según implementación. Returns: según implementación.
     pass
 
 
-class Migration:
-    """Clase Migration. Uso: según contexto de la aplicación.
-    """
+class Migration(migrations.Migration):
     dependencies = [
         ("crm", "0029_remove_cliente_es_proveedor_and_more"),
     ]

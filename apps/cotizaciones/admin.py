@@ -1,6 +1,3 @@
-"""Configuración del panel de administración para cotizaciones.
-"""
-
 from django.contrib import admin
 from django.core.files.base import ContentFile
 from django.utils.html import format_html
@@ -11,9 +8,9 @@ from .models import Cotizacion, ItemCotizacion
 from .pdf_service import generar_pdf_cotizacion
 
 
-class ItemCotizacionInline:
-    """Clase ItemCotizacionInline. Uso: según contexto de la aplicación.
-    """
+class ItemCotizacionInline(admin.TabularInline):
+    """ItemCotizacionInline."""
+
     model = ItemCotizacion
     extra = 1
     fields = ("tipo_item", "descripcion", "costo")
@@ -21,9 +18,9 @@ class ItemCotizacionInline:
 
 
 @admin.register(Cotizacion)
-class CotizacionAdmin:
-    """Configuración de administración para cotizacion. Uso: instanciar según necesidad del dominio.
-    """
+class CotizacionAdmin(SaaSAdminMixin, admin.ModelAdmin):
+    """CotizacionAdmin."""
+
     list_display = (
         "numero_cotizacion",
         "cliente_display",
@@ -75,13 +72,13 @@ class CotizacionAdmin:
     )
 
     def cliente_display(self, obj):
-        # cliente_display: Cliente display. Args: según implementación. Returns: según implementación.
+        """cliente_display."""
         return obj.cliente if obj.cliente else f"{obj.nombre_cliente_manual} (Manual)"
 
     cliente_display.short_description = "Cliente"
 
     def ver_pdf(self, obj):
-        # ver_pdf: Ver pdf. Args: según implementación. Returns: según implementación.
+        """ver_pdf."""
         if obj.archivo_pdf:
             return format_html(
                 '<a href="{}" target="_blank">📄 Ver PDF Generado</a>', obj.archivo_pdf.url
@@ -91,7 +88,7 @@ class CotizacionAdmin:
     ver_pdf.short_description = "Archivo PDF"
 
     def ver_link_publico(self, obj):
-        # ver_link_publico: Ver link publico. Args: según implementación. Returns: según implementación.
+        """ver_link_publico."""
         if obj.uuid:
             from django.urls import reverse
 
@@ -105,7 +102,7 @@ class CotizacionAdmin:
 
     @admin.action(description="Generar PDF de Cotización")
     def generar_pdf_action(self, request, queryset):
-        # generar_pdf_action: Genera pdf action. Args: parámetros de generación. Returns: resultado generado.
+        """generar_pdf_action."""
         for cotizacion in queryset:
             try:
                 # Asegurar cálculo antes de generar
@@ -124,12 +121,12 @@ class CotizacionAdmin:
                 )
 
     def save_model(self, request, obj, form, change):
-        # save_model: Guarda/persiste  model. Args: datos a guardar. Returns: objeto guardado.
+        """save_model."""
         if not obj.consultor_id:
             obj.consultor = request.user
         super().save_model(request, obj, form, change)
 
     def save_related(self, request, form, formsets, change):
-        # save_related: Guarda/persiste  related. Args: datos a guardar. Returns: objeto guardado.
+        """save_related."""
         super().save_related(request, form, formsets, change)
         form.instance.calcular_total()

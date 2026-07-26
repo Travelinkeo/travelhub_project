@@ -1,6 +1,3 @@
-"""Inicialización del paquete common.
-"""
-
 import logging
 import re
 from decimal import Decimal, InvalidOperation
@@ -158,7 +155,6 @@ def sanitize_passenger_name(nombre: str) -> str:
 
 
 def clean_simple(value: Any) -> str:
-    # clean_simple: Clean simple. Args: según implementación. Returns: según implementación.
     if value is None:
         return ""
     return str(value).strip()
@@ -175,7 +171,6 @@ def strip_trailing_location_fragment(upper_text: str) -> str:
 
 
 def truncate_on_stop_tokens(upper_text: str) -> str:
-    # truncate_on_stop_tokens: Truncate on stop tokens. Args: según implementación. Returns: según implementación.
     for token in STOP_NAME_TOKENS:
         idx = upper_text.find(token)
         if idx != -1:

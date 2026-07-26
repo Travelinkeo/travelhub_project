@@ -6,11 +6,12 @@ logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
-    """Comando de gestión personalizado."""
+    """Command."""
+
     help = "Ejecuta health checks de proveedores IA y claves API"
 
     def add_arguments(self, parser):
-        """Método: add arguments."""
+        """add_arguments."""
         parser.add_argument(
             "--force",
             action="store_true",
@@ -18,7 +19,7 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        """Método: handle."""
+        """handle."""
         from apps.automation.providerchain.health import get_health_summary, run_health_checks
 
         results = run_health_checks(force=options["force"])

@@ -1,18 +1,13 @@
 # Generated manually — reemplaza 0036 con CreateModel explícito para los 3 modelos
 # que fueron managed=False y ahora son managed=True con tablas reales.
 
-"""Migración de base de datos para finance.
-"""
-
 import django.db.models.deletion
 from decimal import Decimal
 from django.conf import settings
 from django.db import migrations, models
 
 
-class Migration:
-    """Clase Migration. Uso: según contexto de la aplicación.
-    """
+class Migration(migrations.Migration):
     dependencies = [
         ("finance", "0035_alter_canalrecaudacion_table_and_more"),
         ("common", "0001_initial"),

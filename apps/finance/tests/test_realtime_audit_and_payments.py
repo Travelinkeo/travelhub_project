@@ -1,6 +1,3 @@
-"""Pruebas para realtime audit and payments en finance.
-"""
-
 from decimal import Decimal
 
 import pytest
@@ -12,8 +9,8 @@ from core.middleware import agency_context
 
 @pytest.mark.django_db(transaction=True)
 class TestRealTimeAuditAndPayments:
-    """Clase TestRealTimeAuditAndPayments. Uso: según contexto de la aplicación.
-    """
+    """TestRealTimeAuditAndPayments."""
+
     def test_cobro_asiento_contable_y_anulacion(self, agencia_premium, moneda_usd):
         """
         Prueba la integración entre PagoVenta y el módulo de contabilidad:

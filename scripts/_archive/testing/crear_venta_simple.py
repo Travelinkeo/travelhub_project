@@ -9,6 +9,7 @@ PASSWORD = "Linkeo1331*"
 
 
 def main():
+    """main."""
     # 1. Obtener token
     login_data = {"username": USERNAME, "password": PASSWORD}
     response = requests.post(f"{BASE_URL}/auth/login/", json=login_data)

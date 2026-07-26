@@ -28,17 +28,17 @@ class AIRateLimitMiddleware(MiddlewareMixin):
     """
 
     def __init__(self, get_response):
+        """__init__."""
         super().__init__(get_response)
         self._memory_store = {}
 
     @staticmethod
     def _get_plan_limits(agencia):
-        """Método interna: get plan limits."""
         plan = getattr(agencia, "plan", "FREE") or "FREE"
         return AI_RATE_LIMITS.get(plan, DEFAULT_AI_LIMIT)
 
     def _check_rate_limit(self, agencia_id, plan):
-        """Método interna: check rate limit."""
+        """_check_rate_limit."""
         limit_config = AI_RATE_LIMITS.get(plan, DEFAULT_AI_LIMIT)
         max_calls = limit_config["max_calls"]
         window = limit_config["window_seconds"]
@@ -73,7 +73,7 @@ class AIRateLimitMiddleware(MiddlewareMixin):
             return True, max_calls, current + 1
 
     def process_request(self, request):
-        """Método: process request."""
+        """process_request."""
         agencia = getattr(request, "agencia", None) or getattr(request, "agency", None)
         if not agencia:
             return None

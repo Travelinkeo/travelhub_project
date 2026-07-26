@@ -8,6 +8,7 @@ django.setup()
 
 
 def get_count(table_name):
+    """get_count."""
     try:
         with connection.cursor() as cursor:
             cursor.execute(f"SELECT COUNT(*) FROM {table_name}")

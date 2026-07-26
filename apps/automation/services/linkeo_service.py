@@ -1,6 +1,3 @@
-"""Servicio de linkeo service para la aplicación automation.
-"""
-
 import datetime
 import logging
 
@@ -25,7 +22,6 @@ class LinkeoService:
 
     @staticmethod
     def _get_gemini_model(agency=None):
-        # _get_gemini_model:  get gemini model. Args: según implementación. Returns: según implementación.
         try:
             from google import genai
 
@@ -64,7 +60,6 @@ class LinkeoService:
         """
         Main entry point. Receives text, returns a response string.
         Args:
-        # process_message: Procesa  message. Args: datos a procesar. Returns: resultado procesado.
             text: Message text
             user_id: Django User ID (optional)
             agencia: Agency instance (optional but recommended for SaaS)
@@ -151,7 +146,6 @@ class LinkeoService:
 
     @classmethod
     def _handle_ticket_query(cls, text: str, agencia=None) -> str:
-        # _handle_ticket_query:  handle ticket query. Args: según implementación. Returns: según implementación.
         if not agencia:
             return "⚠️ Error: No se ha identificado tu agencia."
 
@@ -188,7 +182,6 @@ class LinkeoService:
 
     @classmethod
     def _handle_general_chat(cls, text: str) -> str:
-        # _handle_general_chat:  handle general chat. Args: según implementación. Returns: según implementación.
         return "¡Hola! Soy Linkeo 🤖. Puedo ayudarte consultando tus ventas o el estatus de tus boletos."
 
     @classmethod
@@ -265,7 +258,6 @@ class LinkeoService:
 
     @staticmethod
     def _extract_pnr(text):
-        # _extract_pnr:  extract pnr. Args: según implementación. Returns: según implementación.
         import re
 
         return re.search(r"\b[A-Z0-9]{6}\b", text)

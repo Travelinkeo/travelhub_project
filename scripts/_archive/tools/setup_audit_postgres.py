@@ -9,6 +9,7 @@ django.setup()
 
 
 def setup_audit_table():
+    """setup_audit_table."""
     with connection.cursor() as cursor:
         # Obtener nombres de tablas reales
         cursor.execute(

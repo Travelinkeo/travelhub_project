@@ -2,6 +2,7 @@ import re
 
 
 def debug_sabre_logic():
+    """debug_sabre_logic."""
     # The string after removing airline/dates/metadata
     s_clean = "MADRID, SPAIN SHANGHAI PUDONG,"
 
@@ -14,6 +15,7 @@ def debug_sabre_logic():
     anchor_regex = r"\b([A-ZÁÉÍÓÚ]{3,}(?:\s+[A-ZÁÉÍÓÚ]+)*),"
 
     def parse_anchors(text):
+        """parse_anchors."""
         print(f"Parsing: '{text}'")
         matches = list(re.finditer(anchor_regex, text))
         results = []

@@ -11,11 +11,12 @@ from apps.finance.services.libro_ventas import LibroVentasService
 
 
 class Command(BaseCommand):
-    """Comando de gestión personalizado."""
+    """Command."""
+
     help = "Genera el Libro de Ventas para un período específico"
 
     def add_arguments(self, parser):
-        """Método: add arguments."""
+        """add_arguments."""
         parser.add_argument(
             "--mes",
             type=int,
@@ -50,7 +51,7 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        """Método: handle."""
+        """handle."""
         # Determinar período
         if options["mes"] and options["anio"]:
             mes = options["mes"]

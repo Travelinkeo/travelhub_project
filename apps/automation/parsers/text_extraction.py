@@ -1,6 +1,3 @@
-"""Parser/procesador de text extraction para la aplicación automation.
-"""
-
 import email
 import logging
 import os

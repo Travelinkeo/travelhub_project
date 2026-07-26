@@ -1,4 +1,3 @@
-"""Tests para Core validators (Unit)."""
 import io
 
 import pytest
@@ -8,9 +7,10 @@ pytestmark = [pytest.mark.unit]
 
 
 class TestValidateFileExtension:
-    """Test Validate File Extension."""
+    """TestValidateFileExtension."""
+
     def test_valid_extension(self):
-        """Valid extension."""
+        """test_valid_extension."""
         from core.validators import validate_file_extension
 
         f = io.BytesIO(b"\xff\xd8\xff")
@@ -18,7 +18,7 @@ class TestValidateFileExtension:
         validate_file_extension(f)
 
     def test_invalid_extension(self):
-        """Invalid extension."""
+        """test_invalid_extension."""
         from core.validators import validate_file_extension
 
         f = io.BytesIO(b"some data")
@@ -27,7 +27,7 @@ class TestValidateFileExtension:
             validate_file_extension(f)
 
     def test_valid_document(self):
-        """Valid document."""
+        """test_valid_document."""
         from core.validators import validate_file_extension
 
         f = io.BytesIO(b"%PDF-1.4")
@@ -35,7 +35,7 @@ class TestValidateFileExtension:
         validate_file_extension(f)
 
     def test_emoji_file_is_invalid(self):
-        """Emoji file is invalid."""
+        """test_emoji_file_is_invalid."""
         from core.validators import validate_file_extension
 
         f = io.BytesIO(b"some data")
@@ -45,35 +45,36 @@ class TestValidateFileExtension:
 
 
 class TestValidateNoVacio:
-    """Test Validate No Vacio."""
+    """TestValidateNoVacio."""
+
     def test_valid_string(self):
-        """Valid string."""
+        """test_valid_string."""
         from core.validators import validar_no_vacio_o_espacios
 
         validar_no_vacio_o_espacios("hello")
 
     def test_empty_string_raises(self):
-        """Empty string raises."""
+        """test_empty_string_raises."""
         from core.validators import validar_no_vacio_o_espacios
 
         with pytest.raises(ValidationError):
             validar_no_vacio_o_espacios("")
 
     def test_whitespace_only_raises(self):
-        """Whitespace only raises."""
+        """test_whitespace_only_raises."""
         from core.validators import validar_no_vacio_o_espacios
 
         with pytest.raises(ValidationError):
             validar_no_vacio_o_espacios("   ")
 
     def test_none_passes(self):
-        """None passes."""
+        """test_none_passes."""
         from core.validators import validar_no_vacio_o_espacios
 
         validar_no_vacio_o_espacios(None)
 
     def test_number_passes(self):
-        """Number passes."""
+        """test_number_passes."""
         from core.validators import validar_no_vacio_o_espacios
 
         validar_no_vacio_o_espacios(0)

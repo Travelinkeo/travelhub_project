@@ -14,6 +14,7 @@ from core.models import Agencia, UsuarioAgencia
 
 
 def debug_data():
+    """debug_data."""
     print("-" * 50)
     print("DEBUGGING AGENCIES & BOLETOS")
     print("-" * 50)

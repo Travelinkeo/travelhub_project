@@ -1,6 +1,3 @@
-"""Pruebas para recaudacion en finance.
-"""
-
 import pytest
 
 from apps.finance.models_stubs import CanalRecaudacion
@@ -8,8 +5,8 @@ from apps.finance.models_stubs import CanalRecaudacion
 
 @pytest.mark.django_db
 class TestEngineRecaudacionFiscal:
-    """Clase TestEngineRecaudacionFiscal. Uso: según contexto de la aplicación.
-    """
+    """TestEngineRecaudacionFiscal."""
+
     def test_canal_crud(self, agencia_premium, moneda_usd):
         """Test básico de creación y filtrado de CanalRecaudacion."""
         canal = CanalRecaudacion.objects.create(

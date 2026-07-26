@@ -106,7 +106,6 @@ class MigrationCheck(models.Model):
     )
 
     class Meta:
-        """Meta definición del modelo."""
         ordering = ["-checked_at"]
         verbose_name = "Validación Migratoria"
         verbose_name_plural = "Validaciones Migratorias"
@@ -117,6 +116,7 @@ class MigrationCheck(models.Model):
         ]
 
     def __str__(self):
+        """__str__."""
         emoji = dict(self.ALERT_LEVELS).get(self.alert_level, "")
         return f"{emoji} {self.pasajero.get_nombre_completo()} → {self.destino} ({self.checked_at.strftime('%Y-%m-%d')})"
 

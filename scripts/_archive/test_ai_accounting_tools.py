@@ -12,6 +12,7 @@ from apps.finance.services.ai_accounting_service import AIAccountingService
 
 
 def test_tools():
+    """test_tools."""
     print("🚀 Iniciando prueba de herramientas del Asistente Contable AI...")
 
     try:

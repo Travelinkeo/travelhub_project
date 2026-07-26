@@ -1,6 +1,3 @@
-"""Vistas (views) de la aplicación crm.
-"""
-
 from django.contrib import messages
 from django.db import IntegrityError
 from django.db.models import Q
@@ -12,11 +9,11 @@ from apps.crm.models import Cliente, Pasajero
 from apps.crm.views.pasajeros_views import CRMBaseMixin
 
 
-class PasajeroConvertToClienteView:
-    """Vista para gestionar pasajeroconverttocliente. Uso: instanciar según necesidad del dominio.
-    """
+class PasajeroConvertToClienteView(CRMBaseMixin, View):
+    """PasajeroConvertToClienteView."""
+
     def post(self, request, pk, *args, **kwargs):
-        # post: Post. Args: según implementación. Returns: según implementación.
+        """post."""
         pasajero = get_object_or_404(Pasajero, pk=pk)
         if pasajero.clientes.exists():
             messages.warning(
@@ -53,11 +50,11 @@ class PasajeroConvertToClienteView:
             return redirect("crm:pasajero_detail", pk=pk)
 
 
-class PasajeroSearchView:
-    """Vista para gestionar pasajerosearch. Uso: instanciar según necesidad del dominio.
-    """
+class PasajeroSearchView(CRMBaseMixin, View):
+    """PasajeroSearchView."""
+
     def get(self, request, *args, **kwargs):
-        # get: Get. Args: según implementación. Returns: según implementación.
+        """get."""
         q = request.GET.get("q", "").strip()
         if len(q) < 2:
             return HttpResponse(
@@ -78,11 +75,11 @@ class PasajeroSearchView:
         )
 
 
-class VincularPasajeroActionView:
-    """Vista para gestionar vincularpasajeroaction. Uso: instanciar según necesidad del dominio.
-    """
+class VincularPasajeroActionView(CRMBaseMixin, View):
+    """VincularPasajeroActionView."""
+
     def post(self, request, pk, *args, **kwargs):
-        # post: Post. Args: según implementación. Returns: según implementación.
+        """post."""
         cliente = get_object_or_404(Cliente, pk=pk)
         pasajero_id = request.POST.get("pasajero_id")
         if pasajero_id:

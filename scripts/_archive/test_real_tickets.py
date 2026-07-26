@@ -31,6 +31,7 @@ USER_DOWNLOADS = r"C:\Users\ARMANDO\Downloads\Boletos"
 
 
 def extract_text_from_pdf(path):
+    """extract_text_from_pdf."""
     text = ""
     try:
         reader = pypdf.PdfReader(path)
@@ -42,6 +43,7 @@ def extract_text_from_pdf(path):
 
 
 def extract_text_from_eml(path):
+    """extract_text_from_eml."""
     text = ""
     try:
         with open(path, "rb") as f:
@@ -61,6 +63,7 @@ def extract_text_from_eml(path):
 
 
 def process_file(router, file_path):
+    """process_file."""
     ext = os.path.splitext(file_path)[1].lower()
     text = ""
 
@@ -109,6 +112,7 @@ def process_file(router, file_path):
 
 
 def main():
+    """main."""
     print("🚀 Starting Batch Test on Real Tickets...")
 
     try:

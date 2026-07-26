@@ -14,10 +14,12 @@ templates_to_process = {
 
 
 def process_template(content):
+    """process_template."""
     # Inyectar logo dinamico (Jinja2 syntax)
     img_pattern = re.compile(r'<img\s+class="logo"\s+src="(.*?)"\s+alt="(.*?)">', re.DOTALL)
 
     def repl_img(match):
+        """repl_img."""
         default_src = match.group(1)
         alt_text = match.group(2)
         return f"""{{% if agencia and agencia.logo_base64 %}}
@@ -46,6 +48,7 @@ def process_template(content):
     )
 
     def repl_contact(match):
+        """repl_contact."""
         return """<div class="header-contact">
                 TELEFONO: {{ agencia.telefono | default('+58 000 000 0000') }}<br>
                 MAIL INFO: {{ agencia.email | default('info@agencia.com') | upper }}
@@ -59,6 +62,7 @@ def process_template(content):
     )
 
     def repl_footer(match):
+        """repl_footer."""
         return """<footer class="ticket-footer">
             <div class="thank-you">Gracias por elegirnos. ¡Te deseamos un excelente viaje!</div>
             @{{ agencia.nombre | default('AGENCIA') | upper }} | {{ agencia.telefono | default('+58 000 000 0000') }} | {{ agencia.direccion | default('S/D') | upper }}

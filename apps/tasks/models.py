@@ -1,15 +1,12 @@
-"""Modelos de base de datos para la aplicación tasks.
-"""
-
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from core.models.base import AgenciaMixin
 
 
-class Tarea:
-    """Clase Tarea. Uso: según contexto de la aplicación.
-    """
+class Tarea(AgenciaMixin):
+    """Tarea."""
+
     PRIORIDADES = [
         ("baja", _("Baja")),
         ("media", _("Media")),
@@ -30,9 +27,15 @@ class Tarea:
     prioridad = models.CharField(max_length=20, choices=PRIORIDADES, default="media")
     estado = models.CharField(max_length=20, choices=ESTADOS, default="pendiente")
     asignado_a = models.ForeignKey(
-        "auth.User", on_delete=models.SET_NULL, null=True, blank=True, related_name="tareas_asignadas"
+        "auth.User",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="tareas_asignadas",
     )
-    creado_por = models.ForeignKey("auth.User", on_delete=models.CASCADE, related_name="tareas_creadas")
+    creado_por = models.ForeignKey(
+        "auth.User", on_delete=models.CASCADE, related_name="tareas_creadas"
+    )
     fecha_vencimiento = models.DateField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -43,13 +46,13 @@ class Tarea:
         ordering = ["-prioridad", "created_at"]
 
     def __str__(self):
-        # __str__: Representación en string del objeto. Returns: str.
+        """__str__."""
         return self.titulo
 
 
-class ComentarioTarea:
-    """Clase ComentarioTarea. Uso: según contexto de la aplicación.
-    """
+class ComentarioTarea(AgenciaMixin):
+    """ComentarioTarea."""
+
     tarea = models.ForeignKey(Tarea, on_delete=models.CASCADE, related_name="comentarios")
     usuario = models.ForeignKey("auth.User", on_delete=models.CASCADE)
     texto = models.TextField()
@@ -61,5 +64,5 @@ class ComentarioTarea:
         ordering = ["created_at"]
 
     def __str__(self):
-        # __str__: Representación en string del objeto. Returns: str.
+        """__str__."""
         return f"{self.usuario} - {self.created_at}"

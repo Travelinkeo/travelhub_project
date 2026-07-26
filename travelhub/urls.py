@@ -1,5 +1,3 @@
-"""Configuración de URLs globales de TravelHub — administración, API, autenticación, páginas públicas, SSO y más."""
-
 import logging
 
 from django.conf import settings
@@ -37,7 +35,7 @@ from core.views.status_views import status_api, status_page
 
 
 def favicon_view(request):
-    """Redirige al archivo estático del favicon de TravelHub. Args: request (HttpRequest). Returns: HttpResponseRedirect."""
+    """favicon_view."""
     from django.shortcuts import redirect
 
     return redirect("/static/images/Logo TravelHub.png")
@@ -47,7 +45,7 @@ logger = logging.getLogger(__name__)
 
 
 def _protect_docs(view):
-    """Protege vistas de documentación — solo staff en producción, público en DEBUG. Args: view (callable). Returns: callable."""
+    """_protect_docs."""
     if not settings.DEBUG:
         return staff_member_required(view)
     return view

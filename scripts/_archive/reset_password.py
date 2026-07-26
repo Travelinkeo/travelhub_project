@@ -14,6 +14,7 @@ User = get_user_model()
 
 
 def reset_password():
+    """reset_password."""
     print("--- Restaurando Acceso ---")
     u = User.objects.filter(is_superuser=True).first()
     if u:

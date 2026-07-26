@@ -10,6 +10,7 @@ django.setup()
 
 
 def inspect_table(table_name):
+    """inspect_table."""
     print(f"--- Inspecting {table_name} ---")
     with connection.cursor() as cursor:
         try:

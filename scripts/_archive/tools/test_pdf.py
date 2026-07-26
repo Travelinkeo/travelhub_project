@@ -13,6 +13,7 @@ from core.models import BoletoImportado, Venta
 
 
 def test():
+    """test."""
     b = BoletoImportado.objects.first()
     if b:
         print(f"Testing Boleto {b.id}")

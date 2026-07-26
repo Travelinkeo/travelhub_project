@@ -1,4 +1,3 @@
-"""Tests para Sso security."""
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -14,7 +13,7 @@ User = get_user_model()
 
 @pytest.fixture
 def oidc_provider(db):
-    """Oidc provider."""
+    """oidc_provider."""
     return SSOProvider.objects.create(
         agencia=None,  # Global provider for tests
         name="Test Provider",
@@ -28,9 +27,10 @@ def oidc_provider(db):
 
 
 class TestSSOCallback:
-    """Test Ssocallback."""
+    """TestSSOCallback."""
+
     def test_invalid_state_rejected(self, rf, oidc_provider):
-        """Invalid state rejected."""
+        """test_invalid_state_rejected."""
         request = rf.get("/sso/callback/1/", {"state": "invalid-state", "code": "some-code"})
         request.session = {
             "sso_oauth_state": {"state": "valid-state", "provider_id": oidc_provider.id}
@@ -41,7 +41,7 @@ class TestSSOCallback:
         assert response.content == b"Invalid state (CSRF check failed)"
 
     def test_idp_error_handled_gracefully(self, rf, oidc_provider):
-        """Idp error handled gracefully."""
+        """test_idp_error_handled_gracefully."""
         request = rf.get("/sso/callback/1/", {"error": "access_denied"})
         request.session = {}
 
@@ -50,8 +50,8 @@ class TestSSOCallback:
         assert b"Identity Provider Error: access_denied" in response.content
 
     def test_auto_provision_false_blocks_new_users(self, rf, db):
+        """test_auto_provision_false_blocks_new_users."""
         # We need a provider with auto_provision=False
-        """Auto provision false blocks new users."""
         provider = SSOProvider.objects.create(
             agencia=None,
             name="No Provision",
@@ -66,7 +66,7 @@ class TestSSOCallback:
         assert not User.objects.filter(email="newuser@example.com").exists()
 
     def test_email_verified_validation(self, rf, oidc_provider):
-        """Email verified validation."""
+        """test_email_verified_validation."""
         request = rf.get("/sso/callback/1/", {"state": "valid-state", "code": "code"})
         request.session = {
             "sso_oauth_state": {"state": "valid-state", "provider_id": oidc_provider.id}
@@ -146,7 +146,6 @@ class TestVerifyJWT:
 
     def test_kid_not_in_jwks_rejects_token(self, oidc_provider):
         """Si el kid del token no está en el JWKS, debe rechazarse."""
-        import jwt as pyjwt
 
         fake_token = "header.payload.signature"
 
@@ -183,4 +182,3 @@ class TestVerifyJWT:
             "FALLO DE SEGURIDAD: _verify_jwt() aceptó un token cuando la "
             "configuración OIDC no incluía jwks_uri."
         )
-

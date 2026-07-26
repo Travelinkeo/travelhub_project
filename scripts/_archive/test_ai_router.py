@@ -12,6 +12,7 @@ from apps.automation.services.ai_router import EmailType, GeminiRouter
 
 
 def test_ai_router():
+    """test_ai_router."""
     print("--- 🧪 Testing AI Router ---")
 
     try:

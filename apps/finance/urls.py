@@ -1,6 +1,3 @@
-"""Configuración de rutas (URLs) para la aplicación finance.
-"""
-
 import logging
 
 from django.urls import include, path
@@ -17,36 +14,36 @@ from .views import invoice_views, payment_views
 logger = logging.getLogger(__name__)
 
 
-class PaisViewSet:
-    """Clase PaisViewSet. Uso: según contexto de la aplicación.
-    """
+class PaisViewSet(viewsets.ReadOnlyModelViewSet):
+    """PaisViewSet."""
+
     serializer_class = PaisSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     def get_queryset(self):
-        # get_queryset: Obtiene/recupera queryset. Args: según implementación. Returns: dato solicitado.
+        """get_queryset."""
         return Pais.objects.all()
 
 
-class CiudadViewSet:
-    """Clase CiudadViewSet. Uso: según contexto de la aplicación.
-    """
+class CiudadViewSet(viewsets.ReadOnlyModelViewSet):
+    """CiudadViewSet."""
+
     serializer_class = CiudadSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     def get_queryset(self):
-        # get_queryset: Obtiene/recupera queryset. Args: según implementación. Returns: dato solicitado.
+        """get_queryset."""
         return Ciudad.objects.all()
 
 
-class AerolineaViewSet:
-    """Clase AerolineaViewSet. Uso: según contexto de la aplicación.
-    """
+class AerolineaViewSet(viewsets.ReadOnlyModelViewSet):
+    """AerolineaViewSet."""
+
     serializer_class = AerolineaSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     def get_queryset(self):
-        # get_queryset: Obtiene/recupera queryset. Args: según implementación. Returns: dato solicitado.
+        """get_queryset."""
         return Aerolinea.objects.filter(activa=True)
 
 

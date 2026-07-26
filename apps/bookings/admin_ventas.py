@@ -39,9 +39,9 @@ logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
 @admin.register(ItemVenta)
-class ItemVentaAdmin:
-    """Configuración de administración para itemventa. Uso: instanciar según necesidad del dominio.
-    """
+class ItemVentaAdmin(SaaSAdminMixin, ModelAdmin):
+    """ItemVentaAdmin."""
+
     list_display = (
         "id_item_venta",
         "venta",
@@ -58,9 +58,9 @@ class ItemVentaAdmin:
 # ---------------------------------------------------------------------------
 # Formulario de selección de cliente para acción de facturación
 # ---------------------------------------------------------------------------
-class FacturaClienteSelectionForm:
-    """Formulario para facturaclienteselection. Uso: instanciar según necesidad del dominio.
-    """
+class FacturaClienteSelectionForm(forms.Form):
+    """FacturaClienteSelectionForm."""
+
     cliente = forms.ModelChoiceField(
         queryset=Cliente.objects.all(),
         label="Cliente a Facturar",
@@ -71,9 +71,9 @@ class FacturaClienteSelectionForm:
 # ---------------------------------------------------------------------------
 # Inlines de Venta
 # ---------------------------------------------------------------------------
-class ItemVentaInline:
-    """Clase ItemVentaInline. Uso: según contexto de la aplicación.
-    """
+class ItemVentaInline(TabularInline):
+    """ItemVentaInline."""
+
     model = ItemVenta
     extra = 1
     autocomplete_fields = ["producto_servicio", "proveedor_servicio"]
@@ -94,25 +94,25 @@ class ItemVentaInline:
     )
 
 
-class SegmentoVueloInline:
-    """Clase SegmentoVueloInline. Uso: según contexto de la aplicación.
-    """
+class SegmentoVueloInline(TabularInline):
+    """SegmentoVueloInline."""
+
     model = SegmentoVuelo
     extra = 0
     autocomplete_fields = ["origen", "destino"]
 
 
-class AlojamientoReservaInline:
-    """Clase AlojamientoReservaInline. Uso: según contexto de la aplicación.
-    """
+class AlojamientoReservaInline(StackedInline):
+    """AlojamientoReservaInline."""
+
     model = AlojamientoReserva
     extra = 0
     autocomplete_fields = ["proveedor", "ciudad"]
 
 
-class AlquilerAutoReservaInline:
-    """Clase AlquilerAutoReservaInline. Uso: según contexto de la aplicación.
-    """
+class AlquilerAutoReservaInline(StackedInline):
+    """AlquilerAutoReservaInline."""
+
     model = AlquilerAutoReserva
     extra = 0
     autocomplete_fields = ["proveedor", "ciudad_retiro", "ciudad_devolucion"]
@@ -137,9 +137,9 @@ class AlquilerAutoReservaInline:
     )
 
 
-class ServicioAdicionalDetalleInline:
-    """Clase ServicioAdicionalDetalleInline. Uso: según contexto de la aplicación.
-    """
+class ServicioAdicionalDetalleInline(StackedInline):
+    """ServicioAdicionalDetalleInline."""
+
     model = ServicioAdicionalDetalle
     extra = 0
     autocomplete_fields = ["proveedor"]
@@ -158,41 +158,41 @@ class ServicioAdicionalDetalleInline:
     )
 
 
-class TrasladoServicioInline:
-    """Clase TrasladoServicioInline. Uso: según contexto de la aplicación.
-    """
+class TrasladoServicioInline(TabularInline):
+    """TrasladoServicioInline."""
+
     model = TrasladoServicio
     extra = 0
     autocomplete_fields = ["proveedor"]
 
 
-class ActividadServicioInline:
-    """Clase ActividadServicioInline. Uso: según contexto de la aplicación.
-    """
+class ActividadServicioInline(TabularInline):
+    """ActividadServicioInline."""
+
     model = ActividadServicio
     extra = 0
     autocomplete_fields = ["proveedor"]
 
 
-class FeeVentaInline:
-    """Clase FeeVentaInline. Uso: según contexto de la aplicación.
-    """
+class FeeVentaInline(TabularInline):
+    """FeeVentaInline."""
+
     model = FeeVenta
     extra = 0
     autocomplete_fields = ["moneda"]
 
 
-class PagoVentaInline:
-    """Clase PagoVentaInline. Uso: según contexto de la aplicación.
-    """
+class PagoVentaInline(TabularInline):
+    """PagoVentaInline."""
+
     model = PagoVenta
     extra = 0
     autocomplete_fields = ["moneda"]
 
 
-class VentaAdminForm:
-    """Formulario para ventaadmin. Uso: instanciar según necesidad del dominio.
-    """
+class VentaAdminForm(forms.ModelForm):
+    """VentaAdminForm."""
+
     class Meta:
         model = Venta
         fields = "__all__"
@@ -202,11 +202,11 @@ class VentaAdminForm:
 # VentaAdmin
 # ---------------------------------------------------------------------------
 @admin.register(Venta)
-class VentaAdmin:
-    """Configuración de administración para venta. Uso: instanciar según necesidad del dominio.
-    """
+class VentaAdmin(SaaSAdminMixin, ModelAdmin):
+    """VentaAdmin."""
+
     def get_queryset(self, request):
-        # get_queryset: Obtiene/recupera queryset. Args: según implementación. Returns: dato solicitado.
+        """get_queryset."""
         return (
             super()
             .get_queryset(request)
@@ -259,7 +259,7 @@ class VentaAdmin:
     # --- Métodos de display ---
 
     def venta_link(self, obj):
-        # venta_link: Venta link. Args: según implementación. Returns: según implementación.
+        """venta_link."""
         url = reverse("admin:bookings_venta_change", args=[obj.id_venta])
         display_text = obj.localizador or f"Venta #{obj.id_venta}"
         return format_html('<a href="{}">{}</a>', url, display_text)
@@ -267,7 +267,7 @@ class VentaAdmin:
     venta_link.short_description = "Venta (ID/Localizador)"
 
     def boleto_importado_link(self, obj):
-        # boleto_importado_link: Boleto importado link. Args: según implementación. Returns: según implementación.
+        """boleto_importado_link."""
         boleto = BoletoImportado.objects.filter(venta_asociada=obj).first()
         if boleto:
             url = reverse("admin:bookings_boletoimportado_change", args=[boleto.pk])
@@ -277,7 +277,7 @@ class VentaAdmin:
     boleto_importado_link.short_description = "Boleto de Origen"
 
     def get_changeform_initial_data(self, request):
-        # get_changeform_initial_data: Obtiene/recupera changeform initial data. Args: según implementación. Returns: dato solicitado.
+        """get_changeform_initial_data."""
         initial = super().get_changeform_initial_data(request)
         boleto_id = request.GET.get("boleto_id")
         if boleto_id:
@@ -295,14 +295,14 @@ class VentaAdmin:
         return initial
 
     def has_add_permission(self, request):
-        # has_add_permission: Has add permission. Args: según implementación. Returns: según implementación.
+        """has_add_permission."""
         return True
 
     # --- Acciones ---
 
     @admin.action(description="🔥 ELIMINACIÓN FÍSICA (Irreversible)")
     def hard_delete_ventas(self, request, queryset):
-        # hard_delete_ventas: Hard delete ventas. Args: según implementación. Returns: según implementación.
+        """hard_delete_ventas."""
         if not request.user.is_superuser:
             self.message_user(
                 request, "Solo superusuarios pueden realizar la eliminación física.", level="error"
@@ -315,7 +315,7 @@ class VentaAdmin:
 
     @admin.action(description="Generar Link de Pago B2C para Ventas seleccionadas")
     def generar_links_de_pago(self, request, queryset):
-        # generar_links_de_pago: Genera links de pago. Args: parámetros de generación. Returns: resultado generado.
+        """generar_links_de_pago."""
         from apps.finance.models_stubs import LinkDePago
 
         creados = 0
@@ -338,7 +338,7 @@ class VentaAdmin:
         )
 
     def generar_doble_facturacion(self, request, queryset):
-        # generar_doble_facturacion: Genera doble facturacion. Args: parámetros de generación. Returns: resultado generado.
+        """generar_doble_facturacion."""
         from django.utils.module_loading import import_string
 
         InvoiceService = import_string("apps.finance.services.invoice_service.InvoiceService")
@@ -357,7 +357,7 @@ class VentaAdmin:
     )
 
     def generar_voucher_unificado(self, request, queryset):
-        # generar_voucher_unificado: Genera voucher unificado. Args: parámetros de generación. Returns: resultado generado.
+        """generar_voucher_unificado."""
         if queryset.count() != 1:
             messages.error(
                 request,
@@ -381,7 +381,7 @@ class VentaAdmin:
     generar_voucher_unificado.short_description = "Generar Voucher Unificado (PDF)"
 
     def asignar_cliente_y_facturar(self, request, queryset):
-        # asignar_cliente_y_facturar: Asignar cliente y facturar. Args: según implementación. Returns: según implementación.
+        """asignar_cliente_y_facturar."""
         queryset = queryset.filter(cliente__isnull=True, factura__isnull=True)
         if not queryset.exists():
             self.message_user(
@@ -429,15 +429,16 @@ class VentaAdmin:
 
     @admin.action(description="Generar Liquidación a Proveedor(es)")
     def generar_liquidaciones_proveedor(self, request, queryset):
+        """generar_liquidaciones_proveedor."""
         # ELIMINADO: LiquidacionProveedor/ItemLiquidacion creation
         # Feature de liquidaciones a proveedores eliminada en refactor
         self.message_user(request, "Función de liquidaciones desactivada (refactor en curso).")
 
 
 @admin.register(VentaParseMetadata)
-class VentaParseMetadataAdmin:
-    """Configuración de administración para ventaparsemetadata. Uso: instanciar según necesidad del dominio.
-    """
+class VentaParseMetadataAdmin(SaaSAdminMixin, ModelAdmin):
+    """VentaParseMetadataAdmin."""
+
     saas_agency_field = "venta__agencia"
     list_display = ("id_metadata", "venta", "fuente", "creado")
     readonly_fields = ("raw_normalized_json", "segments_json", "creado")

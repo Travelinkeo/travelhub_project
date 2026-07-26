@@ -13,6 +13,7 @@ from apps.communications.services.marketing_service import MarketingService
 
 
 def verify_imagen_3():
+    """verify_imagen_3."""
     print("🎨 Verifying Google Imagen 3 Integration...")
 
     try:

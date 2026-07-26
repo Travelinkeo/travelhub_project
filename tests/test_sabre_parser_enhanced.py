@@ -1,4 +1,3 @@
-"""Tests para Sabre parser enhanced."""
 import os
 
 import pytest
@@ -17,14 +16,14 @@ MULTI_FILE = "sabre_0577280309142_fixture.txt"
 
 
 def read_ticket(filename: str):
-    """Read ticket."""
+    """read_ticket."""
     path = os.path.join(SABRE_DIR, filename)
     with open(path, encoding="utf-8", errors="ignore") as f:
         return f.read()
 
 
 def get_parsed_dto(text: str):
-    """Get parsed dto."""
+    """get_parsed_dto."""
     _register_parsers()
     parser = registry.find_parser(text)
     assert parser is not None, "No se encontró parser compatible con Sabre"
@@ -34,7 +33,7 @@ def get_parsed_dto(text: str):
 
 @pytest.mark.django_db
 def test_single_segment_sabre():
-    """Single segment sabre."""
+    """test_single_segment_sabre."""
     text = read_ticket(SINGLE_FILE)
     res = get_parsed_dto(text)
 
@@ -58,7 +57,7 @@ def test_single_segment_sabre():
 
 @pytest.mark.django_db
 def test_multi_segment_sabre():
-    """Multi segment sabre."""
+    """test_multi_segment_sabre."""
     text = read_ticket(MULTI_FILE)
     res = get_parsed_dto(text)
 

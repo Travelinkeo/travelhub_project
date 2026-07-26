@@ -1,6 +1,3 @@
-"""Servicio de excel generator para la aplicación common.
-"""
-
 import logging
 from datetime import datetime
 from io import BytesIO
@@ -44,6 +41,7 @@ class ExcelGenerator:
         return output
 
     def _write_headers(self):
+        """_write_headers."""
         # Header style
         header_font = Font(bold=True, color="FFFFFF")
         header_fill = PatternFill(
@@ -58,7 +56,7 @@ class ExcelGenerator:
             cell.alignment = center_alignment
 
     def _write_data(self):
-        # _write_data:  write data. Args: según implementación. Returns: según implementación.
+        """_write_data."""
         for row_num, row_data in enumerate(self.data, 2):
             for col_num, cell_value in enumerate(row_data, 1):
                 cell = self.ws.cell(row=row_num, column=col_num, value=cell_value)
@@ -77,6 +75,7 @@ class ExcelGenerator:
                     )  # Gray-50
 
     def _style_worksheet(self):
+        """_style_worksheet."""
         # Auto-adjust column widths
         for col_num, column_cells in enumerate(self.ws.columns, 1):
             max_length = 0

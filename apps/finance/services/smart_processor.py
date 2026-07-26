@@ -1,6 +1,3 @@
-"""Servicio de smart processor para la aplicación finance.
-"""
-
 import json
 import logging
 from decimal import Decimal
@@ -14,14 +11,14 @@ logger = logging.getLogger(__name__)
 
 
 def _get_genai():
-    # _get_genai:  get genai. Args: según implementación. Returns: según implementación.
+    """_get_genai."""
     from google import genai
 
     return genai
 
 
 def _get_genai_types():
-    # _get_genai_types:  get genai types. Args: según implementación. Returns: según implementación.
+    """_get_genai_types."""
     from google.genai import types
 
     return types
@@ -30,9 +27,9 @@ def _get_genai_types():
 # --- Esquema para el Mapeo de Columnas ---
 
 
-class ColumnMappingSchema:
-    """Clase ColumnMappingSchema. Uso: según contexto de la aplicación.
-    """
+class ColumnMappingSchema(BaseModel):
+    """ColumnMappingSchema."""
+
     numero_boleto: str | None = Field(description="Column name for Ticket/Document number")
     pnr: str | None = Field(description="Column name for PNR/Locator")
     pasajero: str | None = Field(description="Column name for Passenger Name")
@@ -52,7 +49,6 @@ class SmartReportProcessor:
 
     @classmethod
     def parse(cls, file_path: str) -> list:
-        # parse: Analiza/parsea . Args: datos de entrada. Returns: resultado del parseo.
         try:
             if file_path.endswith(".csv"):
                 df = pd.read_csv(file_path)
@@ -92,7 +88,6 @@ class SmartReportProcessor:
 
     @classmethod
     def _get_smart_mapping(cls, columns: list, sample_json: str) -> dict[str, str | None]:
-        # _get_smart_mapping:  get smart mapping. Args: según implementación. Returns: según implementación.
         from django.utils.module_loading import import_string
 
         get_gemini_api_key = import_string("apps.automation.services.ai_engine.get_gemini_api_key")
@@ -143,7 +138,6 @@ class SmartReportProcessor:
 
     @classmethod
     def _fallback_mapping(cls, columns):
-        # _fallback_mapping:  fallback mapping. Args: según implementación. Returns: según implementación.
         keywords = {
             "numero_boleto": ["boleto", "ticket", "doc", "number", "tkt"],
             "pnr": ["pnr", "record", "locator", "resloc"],

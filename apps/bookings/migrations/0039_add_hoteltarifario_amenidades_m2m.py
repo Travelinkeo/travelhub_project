@@ -1,12 +1,7 @@
-"""Migración de base de datos para bookings.
-"""
-
 from django.db import migrations, models
 
 
-class Migration:
-    """Clase Migration. Uso: según contexto de la aplicación.
-    """
+class Migration(migrations.Migration):
     dependencies = [
         ("bookings", "0038_add_missing_fk_and_softdelete_columns"),
     ]

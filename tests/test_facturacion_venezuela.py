@@ -23,7 +23,6 @@ class TestFacturaConsolidada(TestCase):
 
     def setUp(self):
         """Configuración inicial para tests"""
-        """SetUp."""
         self.moneda_usd = Moneda.objects.get_or_create(
             codigo_iso="USD", defaults={"nombre": "Dólar Estadounidense", "simbolo": "$"}
         )[0]
@@ -257,7 +256,7 @@ class TestItemFacturaConsolidada(TestCase):
     """Tests para el modelo ItemFacturaConsolidada"""
 
     def setUp(self):
-        """Setup."""
+        """setUp."""
         self.moneda_usd = Moneda.objects.get_or_create(
             codigo_iso="USD", defaults={"nombre": "Dólar Estadounidense", "simbolo": "$"}
         )[0]
@@ -315,7 +314,7 @@ class TestDocumentoExportacionConsolidado(TestCase):
     """Tests para el modelo DocumentoExportacionConsolidado"""
 
     def setUp(self):
-        """Setup."""
+        """setUp."""
         self.moneda_usd = Moneda.objects.get_or_create(
             codigo_iso="USD", defaults={"nombre": "Dólar Estadounidense", "simbolo": "$"}
         )[0]

@@ -47,7 +47,7 @@ class MigrationCheckInline(admin.TabularInline):
     transit_display.short_description = "Tránsitos"
 
     def has_add_permission(self, request, obj=None):
-        """Método que verifica  add permission. Returns: bool."""
+        """has_add_permission."""
         return False
 
 

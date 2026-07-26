@@ -37,11 +37,13 @@ MODEL_TO_APP = {m: app for app, models in MAPPING.items() for m in models}
 
 
 def fix_imports(content):
+    """fix_imports."""
     # Match lines like: from core.models import Venta, Cliente, Agencia
     # Also handle multiline imports by searching for ( and )
     pattern = r"from core\.models import\s+(\(?[^\)\n]+\)?)"
 
     def replacer(match):
+        """replacer."""
         items_str = match.group(1).strip("()")
         items = [i.strip() for i in items_str.replace("\n", " ").split(",")]
 
@@ -80,6 +82,7 @@ def fix_imports(content):
 
 
 def process_directory(path):
+    """process_directory."""
     for root, dirs, files in os.walk(path):
         if any(x in root for x in ["venv", ".git", "__pycache__", ".next", "node_modules"]):
             continue

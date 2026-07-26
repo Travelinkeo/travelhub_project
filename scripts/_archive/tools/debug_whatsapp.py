@@ -18,6 +18,7 @@ from apps.crm.services.whatsapp_bot_service import procesar_mensaje_entrante
 
 
 def run_debug():
+    """run_debug."""
     print(f"DEBUG: GEMINI_API_KEY is {'SET' if os.environ.get('GEMINI_API_KEY') else 'NOT SET'}")
     print("INICIANDO DEBUG DE WHATSAPP BOT...")
     try:

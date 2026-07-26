@@ -1,6 +1,3 @@
-"""Vistas (views) de la aplicación finance.
-"""
-
 from unittest.mock import patch
 
 from django.contrib.auth.models import User
@@ -19,6 +16,7 @@ class TestAuditTimelineView(TestCase):
     """
 
     def setUp(self):
+        """setUp."""
         # Desactivar tareas de Celery reales
         patcher = patch("core.tasks.migrar_logos_agencia_task.delay")
         self.mock_delay = patcher.start()

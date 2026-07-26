@@ -1,4 +1,3 @@
-"""Tests para Rls."""
 import pytest
 from django.db import connection
 from django.test import TestCase
@@ -7,9 +6,10 @@ pytestmark = pytest.mark.skip(reason="Tests requieren configuración completa o 
 
 
 class RLSPolicyTest(TestCase):
-    """Rlspolicy Test."""
+    """RLSPolicyTest."""
+
     def test_rls_policies_exist(self):
-        """Rls policies exist."""
+        """test_rls_policies_exist."""
         with connection.cursor() as cursor:
             cursor.execute("""
                 SELECT tablename, policyname
@@ -32,7 +32,7 @@ class RLSPolicyTest(TestCase):
             self.assertIn(table, table_names, f"RLS policy missing for {table}")
 
     def test_tenant_isolation_policy_uses_agencia_id(self):
-        """Tenant isolation policy uses agencia id."""
+        """test_tenant_isolation_policy_uses_agencia_id."""
         with connection.cursor() as cursor:
             cursor.execute("""
                 SELECT tablename, policyname, qual
@@ -51,7 +51,7 @@ class RLSPolicyTest(TestCase):
             )
 
     def test_superadmin_bypass_policy_exists(self):
-        """Superadmin bypass policy exists."""
+        """test_superadmin_bypass_policy_exists."""
         with connection.cursor() as cursor:
             cursor.execute("""
                 SELECT COUNT(*)

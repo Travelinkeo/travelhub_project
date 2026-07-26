@@ -1,6 +1,3 @@
-"""Vistas (views) de la aplicación bookings.
-"""
-
 from django.core.signing import BadSignature, SignatureExpired
 from django.http import Http404
 from django.shortcuts import render

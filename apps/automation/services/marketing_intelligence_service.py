@@ -1,6 +1,3 @@
-"""Servicio de marketing intelligence service para la aplicación automation.
-"""
-
 import logging
 from datetime import timedelta
 
@@ -14,7 +11,7 @@ from core.api import Agencia
 
 
 def _get_marketing_models():
-    # _get_marketing_models:  get marketing models. Args: según implementación. Returns: según implementación.
+    """_get_marketing_models."""
     from django.apps import apps
 
     return apps.get_model("marketing", "Campania"), apps.get_model("marketing", "ActivoMarketing")
@@ -127,21 +124,21 @@ class MarketingIntelligenceService:
         Uses Gemini to generate persuasive copy.
         """
         prompt = f"""
-        Actúa como un experto en Marketing Turístico. 
+        Actúa como un experto en Marketing Turístico.
         Escribe un post de Instagram altamente persuasivo para la agencia "{agencia.nombre}".
         El destino a promocionar es "{destino}".
-        
+
         CONTEXTO:
         - Hemos notado que muchos de nuestros clientes están viajando a este destino recientemente.
         - Queremos animar a otros a reservar ahora.
-        
+
         ESTILO:
         - Emocional, aventurero y profesional.
         - Usa ganchos (hooks) al inicio.
         - Incluye emojis de viajes.
         - Incluye un Call to Action (CTA) para contactar a la agencia.
         - Agrega 5 hashtags relevantes.
-        
+
         IMPORTANTE: Solo devuelve el texto del post, sin explicaciones.
         """
 
@@ -161,13 +158,13 @@ class MarketingIntelligenceService:
         prompt = f"""
         Genera el código HTML para una Newsletter de viajes profesional y moderna para la agencia "{agencia.nombre}".
         Los destinos destacados de este mes son: {destinations_str}.
-        
+
         REQUISITOS:
         - Diseño responsive (usar tablas y estilos inline para compatibilidad con email).
         - Estética premium, colores elegantes.
         - Secciones: Header con logo (placeholder), Hero image (placeholder), cuadrícula de destinos con descripciones cortas y tentadoras, Footer con contacto.
         - El texto debe ser en español.
-        
+
         IMPORTANTE: Solo devuelve el código HTML completo. No agregues bloques de código markdown (```html). Solo el código crudo.
         """
 

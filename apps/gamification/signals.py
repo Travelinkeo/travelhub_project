@@ -1,6 +1,3 @@
-"""Señales Django para la aplicación gamification.
-"""
-
 import logging
 
 from django.db.models.signals import post_save
@@ -15,7 +12,7 @@ gamification_event = Signal()
 
 @receiver(post_save, sender="bookings.Venta")
 def on_venta_creada(sender, instance, created, **kwargs):
-    # on_venta_creada: On venta creada. Args: según implementación. Returns: según implementación.
+    """on_venta_creada."""
     if not created:
         return
     _disparar(instance.agencia, instance.creado_por, evento="venta_creada")
@@ -23,7 +20,7 @@ def on_venta_creada(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender="bookings.BoletoImportado")
 def on_boleto_importado(sender, instance, created, **kwargs):
-    # on_boleto_importado: On boleto importado. Args: según implementación. Returns: según implementación.
+    """on_boleto_importado."""
     if not created:
         return
     _disparar(instance.agencia, instance.importado_por, evento="boleto_importado")
@@ -31,7 +28,7 @@ def on_boleto_importado(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender="crm.Cliente")
 def on_cliente_creado(sender, instance, created, **kwargs):
-    # on_cliente_creado: On cliente creado. Args: según implementación. Returns: según implementación.
+    """on_cliente_creado."""
     if not created:
         return
     _disparar(instance.agencia, instance.creado_por, evento="cliente_creado")
@@ -39,7 +36,7 @@ def on_cliente_creado(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender="bookings.PagoVenta")
 def on_pago_confirmado(sender, instance, created, **kwargs):
-    # on_pago_confirmado: On pago confirmado. Args: según implementación. Returns: según implementación.
+    """on_pago_confirmado."""
     if not created or not instance.confirmado:
         return
     _disparar(instance.agencia, instance.creado_por, evento="pago_confirmado")
@@ -47,7 +44,7 @@ def on_pago_confirmado(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender="cms.Articulo")
 def on_articulo_creado(sender, instance, created, **kwargs):
-    # on_articulo_creado: On articulo creado. Args: según implementación. Returns: según implementación.
+    """on_articulo_creado."""
     if not created:
         return
     agencia = getattr(instance, "agencia", None) or get_current_agency()
@@ -57,7 +54,7 @@ def on_articulo_creado(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender="core.Webhook")
 def on_webhook_creado(sender, instance, created, **kwargs):
-    # on_webhook_creado: On webhook creado. Args: según implementación. Returns: según implementación.
+    """on_webhook_creado."""
     if not created:
         return
     _disparar(instance.agencia, get_current_user(), evento="webhook_creado")
@@ -65,18 +62,19 @@ def on_webhook_creado(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender="core.UsuarioAgencia")
 def on_usuario_agregado(sender, instance, created, **kwargs):
-    # on_usuario_agregado: On usuario agregado. Args: según implementación. Returns: según implementación.
+    """on_usuario_agregado."""
     if not created:
         return
     _disparar(instance.agencia, instance.usuario, evento="usuario_agregado")
 
 
 def _disparar(agencia, usuario, evento):
-    # _disparar:  disparar. Args: según implementación. Returns: según implementación.
+    """_disparar."""
     if not agencia or not usuario:
         return
     try:
         from .services import evaluar_logros
+
         logros_completados = evaluar_logros(agencia, usuario, evento=evento)
         if logros_completados:
             gamification_event.send(

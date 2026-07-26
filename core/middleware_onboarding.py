@@ -47,10 +47,10 @@ class OnboardingRedirectMiddleware:
     """Redirige usuarios autenticados sin onboarding a /onboarding/."""
 
     def __init__(self, get_response):
+        """__init__."""
         self.get_response = get_response
 
     def __call__(self, request):
-        """Método interna: call."""
         # Solo para usuarios autenticados
         if not request.user.is_authenticated:
             return self.get_response(request)
@@ -104,5 +104,6 @@ class OnboardingRedirectMiddleware:
         if not agencia:
             return False
         from core.models.onboarding import AgenciaSetupProgress
+
         progress = AgenciaSetupProgress.objects.filter(agencia=agencia).first()
         return progress is not None and not progress.is_completed

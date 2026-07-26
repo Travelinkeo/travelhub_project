@@ -5,8 +5,7 @@ from django.db import migrations
 import core.fields
 
 
-class Migration:
-    """Migración de base de datos generada por Django."""
+class Migration(migrations.Migration):
     dependencies = [
         ("core", "0011_delete_pais_delete_ciudad_and_more"),
     ]

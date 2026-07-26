@@ -1,6 +1,3 @@
-"""Servicio de ctg parser para la aplicación contabilidad.
-"""
-
 import io
 import logging
 import re
@@ -43,7 +40,7 @@ class CTGReportParser(BaseSupplierReportParser):
     """
 
     def parse(self) -> dict[str, Any]:
-        # parse: Analiza/parsea . Args: datos de entrada. Returns: resultado del parseo.
+        """parse."""
         reader = pypdf.PdfReader(io.BytesIO(self.pdf_bytes))
         full_text = "\n".join([page.extract_text() or "" for page in reader.pages])
 

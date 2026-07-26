@@ -1,13 +1,8 @@
-"""Migración de base de datos para automation.
-"""
-
 import django.db.models.deletion
 from django.db import migrations, models
 
 
-class Migration:
-    """Clase Migration. Uso: según contexto de la aplicación.
-    """
+class Migration(migrations.Migration):
     dependencies = [
         ("automation", "0006_alter_notificacionagente_table_and_more"),
         ("auth", "0012_alter_user_first_name_max_length"),

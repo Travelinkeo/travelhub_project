@@ -1,4 +1,3 @@
-"""Tests para Crm models."""
 import pytest
 from rest_framework import status
 from rest_framework.test import APIClient
@@ -14,9 +13,10 @@ from apps.crm.models import (
 
 @pytest.mark.django_db
 class TestClienteModel:
-    """Test Cliente Model."""
+    """TestClienteModel."""
+
     def test_crear_cliente(self, agencia_premium):
-        """Crear cliente."""
+        """test_crear_cliente."""
         cliente = Cliente.objects.create(
             agencia=agencia_premium, nombres="Juan", apellidos="Pérez", email="juan@example.com"
         )
@@ -25,12 +25,12 @@ class TestClienteModel:
         assert str(cliente) == "Juan Pérez"
 
     def test_cliente_str_sin_apellidos(self, agencia_premium):
-        """Cliente str sin apellidos."""
+        """test_cliente_str_sin_apellidos."""
         cliente = Cliente.objects.create(agencia=agencia_premium, nombres="María")
         assert str(cliente).strip() == "María"
 
     def test_cliente_es_frecuente_por_puntos(self, agencia_premium):
-        """Cliente es frecuente por puntos."""
+        """test_cliente_es_frecuente_por_puntos."""
         cliente = Cliente.objects.create(
             agencia=agencia_premium,
             nombres="Carlos",
@@ -40,7 +40,7 @@ class TestClienteModel:
         assert cliente.es_cliente_frecuente is True
 
     def test_cliente_no_frecuente_sin_puntos(self, agencia_premium):
-        """Cliente no frecuente sin puntos."""
+        """test_cliente_no_frecuente_sin_puntos."""
         cliente = Cliente.objects.create(
             agencia=agencia_premium,
             nombres="Ana",
@@ -50,12 +50,12 @@ class TestClienteModel:
         assert cliente.es_cliente_frecuente is False
 
     def test_cliente_tipo_default(self, agencia_premium):
-        """Cliente tipo default."""
+        """test_cliente_tipo_default."""
         cliente = Cliente.objects.create(agencia=agencia_premium, nombres="Test")
         assert cliente.tipo_cliente == Cliente.TipoCliente.PARTICULAR
 
     def test_cliente_tipo_cliente_choices(self, agencia_premium):
-        """Cliente tipo cliente choices."""
+        """test_cliente_tipo_cliente_choices."""
         cliente = Cliente.objects.create(
             agencia=agencia_premium,
             nombres="Empresa",
@@ -64,30 +64,31 @@ class TestClienteModel:
         assert cliente.tipo_cliente == "COR"
 
     def test_cliente_soft_delete_isolation(self, agencia_premium):
-        """Cliente soft delete isolation."""
+        """test_cliente_soft_delete_isolation."""
         cliente = Cliente.objects.create(agencia=agencia_premium, nombres="Test")
         cliente.delete()
         assert Cliente.objects.filter(pk=cliente.pk).count() == 0
         assert Cliente.all_objects.filter(pk=cliente.pk).count() == 1
 
     def test_cliente_multi_tenant_isolation(self, agencia_premium, agencia_estandar):
-        """Cliente multi tenant isolation."""
+        """test_cliente_multi_tenant_isolation."""
         Cliente.objects.create(agencia=agencia_premium, nombres="Agency1")
         Cliente.objects.create(agencia=agencia_estandar, nombres="Agency2")
         assert Cliente.objects.filter(agencia=agencia_premium).count() == 1
         assert Cliente.objects.filter(agencia=agencia_estandar).count() == 1
 
     def test_cliente_uuid_auto_generado(self, agencia_premium):
-        """Cliente uuid auto generado."""
+        """test_cliente_uuid_auto_generado."""
         cliente = Cliente.objects.create(agencia=agencia_premium, nombres="Test")
         assert cliente.uuid is not None
 
 
 @pytest.mark.django_db
 class TestPasajeroModel:
-    """Test Pasajero Model."""
+    """TestPasajeroModel."""
+
     def test_crear_pasajero(self, agencia_premium):
-        """Crear pasajero."""
+        """test_crear_pasajero."""
         pasajero = Pasajero.objects.create(
             agencia=agencia_premium,
             nombres="Ana",
@@ -97,7 +98,7 @@ class TestPasajeroModel:
         assert pasajero.pk is not None
 
     def test_pasajero_asociado_a_cliente(self, agencia_premium):
-        """Pasajero asociado a cliente."""
+        """test_pasajero_asociado_a_cliente."""
         cliente = Cliente.objects.create(agencia=agencia_premium, nombres="Test")
         pasajero = Pasajero.objects.create(
             agencia=agencia_premium, nombres="Pasajero", apellidos="Test"
@@ -106,7 +107,7 @@ class TestPasajeroModel:
         assert pasajero in cliente.pasajeros.all()
 
     def test_pasajero_soft_delete(self, agencia_premium):
-        """Pasajero soft delete."""
+        """test_pasajero_soft_delete."""
         pasajero = Pasajero.objects.create(agencia=agencia_premium, nombres="Test")
         pasajero.delete()
         assert Pasajero.objects.filter(pk=pasajero.pk).count() == 0
@@ -115,9 +116,10 @@ class TestPasajeroModel:
 
 @pytest.mark.django_db
 class TestOportunidadViaje:
-    """Test Oportunidad Viaje."""
+    """TestOportunidadViaje."""
+
     def test_crear_oportunidad(self, agencia_premium):
-        """Crear oportunidad."""
+        """test_crear_oportunidad."""
         cliente = Cliente.objects.create(agencia=agencia_premium, nombres="Test")
         op = OportunidadViaje.objects.create(
             agencia=agencia_premium,
@@ -129,7 +131,7 @@ class TestOportunidadViaje:
         assert op.etapa == OportunidadViaje.Etapa.NUEVO
 
     def test_oportunidad_defaults(self, agencia_premium):
-        """Oportunidad defaults."""
+        """test_oportunidad_defaults."""
         cliente = Cliente.objects.create(agencia=agencia_premium, nombres="Test")
         op = OportunidadViaje.objects.create(
             agencia=agencia_premium, cliente=cliente, origen="CCS", destino="MAD"
@@ -139,9 +141,10 @@ class TestOportunidadViaje:
 
 @pytest.mark.django_db
 class TestFreelancerProfile:
-    """Test Freelancer Profile."""
+    """TestFreelancerProfile."""
+
     def test_crear_freelancer(self, agencia_premium, usuario_staff):
-        """Crear freelancer."""
+        """test_crear_freelancer."""
         perfil = FreelancerProfile.objects.create(
             agencia=agencia_premium,
             usuario=usuario_staff,
@@ -153,7 +156,7 @@ class TestFreelancerProfile:
         assert perfil.total_historico_pagado == 0
 
     def test_freelancer_soft_delete(self, agencia_premium, usuario_staff):
-        """Freelancer soft delete."""
+        """test_freelancer_soft_delete."""
         perfil = FreelancerProfile.objects.create(agencia=agencia_premium, usuario=usuario_staff)
         perfil.delete()
         assert FreelancerProfile.objects.filter(pk=perfil.pk).count() == 0
@@ -161,9 +164,10 @@ class TestFreelancerProfile:
 
 @pytest.mark.django_db
 class TestComisionFreelancer:
-    """Test Comision Freelancer."""
+    """TestComisionFreelancer."""
+
     def test_crear_comision(self, agencia_premium, usuario_staff):
-        """Crear comision."""
+        """test_crear_comision."""
         perfil = FreelancerProfile.objects.create(agencia=agencia_premium, usuario=usuario_staff)
         comision = ComisionFreelancer.objects.create(
             agencia=agencia_premium,
@@ -177,9 +181,10 @@ class TestComisionFreelancer:
 
 @pytest.mark.django_db
 class TestClienteAPI:
-    """Test Cliente Api."""
+    """TestClienteAPI."""
+
     def _setup_user_agencia(self, usuario_staff, agencia):
-        """Setup user agencia."""
+        """_setup_user_agencia."""
         from core.api import UsuarioAgencia
 
         UsuarioAgencia.objects.get_or_create(
@@ -187,7 +192,7 @@ class TestClienteAPI:
         )
 
     def test_list_clientes_authenticated(self, agencia_premium, usuario_staff):
-        """List clientes authenticated."""
+        """test_list_clientes_authenticated."""
         self._setup_user_agencia(usuario_staff, agencia_premium)
         Cliente.objects.create(agencia=agencia_premium, nombres="Juan", apellidos="Pérez")
         client = APIClient()
@@ -196,13 +201,13 @@ class TestClienteAPI:
         assert response.status_code == status.HTTP_200_OK
 
     def test_list_clientes_unauthenticated(self):
-        """List clientes unauthenticated."""
+        """test_list_clientes_unauthenticated."""
         client = APIClient()
         response = client.get("/crm/api/clientes/")
         assert response.status_code in (status.HTTP_401_UNAUTHORIZED, status.HTTP_403_FORBIDDEN)
 
     def test_create_cliente_authenticated(self, agencia_premium, usuario_staff):
-        """Create cliente authenticated."""
+        """test_create_cliente_authenticated."""
         self._setup_user_agencia(usuario_staff, agencia_premium)
         client = APIClient()
         client.force_authenticate(user=usuario_staff)
@@ -215,7 +220,7 @@ class TestClienteAPI:
         assert response.data["nombres"] == "María"
 
     def test_retrieve_cliente(self, agencia_premium, usuario_staff):
-        """Retrieve cliente."""
+        """test_retrieve_cliente."""
         self._setup_user_agencia(usuario_staff, agencia_premium)
         cliente = Cliente.objects.create(agencia=agencia_premium, nombres="Juan", apellidos="Pérez")
         client = APIClient()
@@ -225,7 +230,7 @@ class TestClienteAPI:
         assert response.data["nombres"] == "Juan"
 
     def test_update_cliente(self, agencia_premium, usuario_staff):
-        """Update cliente."""
+        """test_update_cliente."""
         self._setup_user_agencia(usuario_staff, agencia_premium)
         cliente = Cliente.objects.create(agencia=agencia_premium, nombres="Juan", apellidos="Pérez")
         client = APIClient()
@@ -239,7 +244,7 @@ class TestClienteAPI:
         assert response.data["nombres"] == "Juan Actualizado"
 
     def test_delete_cliente(self, agencia_premium, usuario_staff):
-        """Delete cliente."""
+        """test_delete_cliente."""
         self._setup_user_agencia(usuario_staff, agencia_premium)
         cliente = Cliente.objects.create(agencia=agencia_premium, nombres="Juan", apellidos="Pérez")
         client = APIClient()
@@ -250,9 +255,10 @@ class TestClienteAPI:
 
 @pytest.mark.django_db
 class TestPasajeroAPI:
-    """Test Pasajero Api."""
+    """TestPasajeroAPI."""
+
     def _setup_user_agencia(self, usuario_staff, agencia):
-        """ setup user agencia."""
+        """_setup_user_agencia."""
         from core.api import UsuarioAgencia
 
         UsuarioAgencia.objects.get_or_create(
@@ -260,7 +266,7 @@ class TestPasajeroAPI:
         )
 
     def test_list_pasajeros_authenticated(self, agencia_premium, usuario_staff):
-        """List pasajeros authenticated."""
+        """test_list_pasajeros_authenticated."""
         self._setup_user_agencia(usuario_staff, agencia_premium)
         Pasajero.objects.create(agencia=agencia_premium, nombres="Ana", apellidos="García")
         client = APIClient()
@@ -269,7 +275,7 @@ class TestPasajeroAPI:
         assert response.status_code == status.HTTP_200_OK
 
     def test_create_pasajero_authenticated(self, agencia_premium, usuario_staff):
-        """Create pasajero authenticated."""
+        """test_create_pasajero_authenticated."""
         self._setup_user_agencia(usuario_staff, agencia_premium)
         client = APIClient()
         client.force_authenticate(user=usuario_staff)
@@ -281,7 +287,7 @@ class TestPasajeroAPI:
         assert response.status_code == status.HTTP_201_CREATED
 
     def test_create_pasajero_unauthenticated(self):
-        """Create pasajero unauthenticated."""
+        """test_create_pasajero_unauthenticated."""
         client = APIClient()
         response = client.post(
             "/crm/api/pasajeros/",

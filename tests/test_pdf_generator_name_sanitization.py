@@ -1,4 +1,3 @@
-"""Tests para Pdf generator name sanitization."""
 from unittest.mock import patch
 
 import pytest
@@ -8,7 +7,7 @@ from apps.automation.parsers.pdf_generation import generate_ticket_pdf
 
 @pytest.fixture(autouse=True)
 def mock_pdf_renderer():
-    """Mock pdf renderer."""
+    """mock_pdf_renderer."""
     with patch("apps.automation.parsers.pdf_generation.PdfRendererService") as mock_renderer:
         mock_renderer.check_health.return_value = True
         mock_renderer.render_html_to_pdf.return_value = b"%PDF-1.4 dummy contents"
@@ -26,7 +25,7 @@ def mock_pdf_renderer():
     ],
 )
 def test_pdf_generator_passenger_name_sanitization(raw_name, expected):
-    """Pdf generator passenger name sanitization."""
+    """test_pdf_generator_passenger_name_sanitization."""
     data = {
         "SOURCE_SYSTEM": "KIU",
         "NOMBRE_DEL_PASAJERO": raw_name,

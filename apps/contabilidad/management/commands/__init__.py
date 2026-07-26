@@ -1,3 +1,0 @@
-
-"""Inicialización del paquete contabilidad.
-"""

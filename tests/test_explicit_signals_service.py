@@ -1,4 +1,3 @@
-"""Tests para Explicit signals service."""
 from decimal import Decimal
 from unittest.mock import patch
 

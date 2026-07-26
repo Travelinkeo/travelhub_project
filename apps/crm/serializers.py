@@ -1,14 +1,11 @@
-"""Serializadores para la API de crm.
-"""
-
 from rest_framework import serializers
 
 from .models import Cliente, Pasajero, PasaporteEscaneado
 
 
-class CoreClienteSerializer:
-    """Serializador para corecliente. Uso: instanciar según necesidad del dominio.
-    """
+class CoreClienteSerializer(serializers.ModelSerializer):
+    """CoreClienteSerializer."""
+
     get_nombre_completo = serializers.CharField(read_only=True)
     id_cliente = serializers.IntegerField(source="id", read_only=True)
 
@@ -17,9 +14,9 @@ class CoreClienteSerializer:
         fields = ["id_cliente", "get_nombre_completo", "email", "nombre_empresa"]
 
 
-class ClienteSerializer:
-    """Serializador para cliente. Uso: instanciar según necesidad del dominio.
-    """
+class ClienteSerializer(serializers.ModelSerializer):
+    """ClienteSerializer."""
+
     get_nombre_completo = serializers.CharField(read_only=True)
     id_cliente = serializers.IntegerField(source="id", read_only=True)
 
@@ -47,9 +44,9 @@ class ClienteSerializer:
         ]
 
 
-class PasajeroSerializer:
-    """Serializador para pasajero. Uso: instanciar según necesidad del dominio.
-    """
+class PasajeroSerializer(serializers.ModelSerializer):
+    """PasajeroSerializer."""
+
     nombre_completo = serializers.CharField(read_only=True)
     numero_documento = serializers.CharField(read_only=True)
 
@@ -86,9 +83,9 @@ class PasajeroSerializer:
         read_only_fields = ["agencia", "is_deleted", "deleted_at", "documento_hash", "uuid"]
 
 
-class PasaporteEscaneadoSerializer:
-    """Serializador para pasaporteescaneado. Uso: instanciar según necesidad del dominio.
-    """
+class PasaporteEscaneadoSerializer(serializers.ModelSerializer):
+    """PasaporteEscaneadoSerializer."""
+
     es_valido = serializers.ReadOnlyField()
     nombre_completo = serializers.ReadOnlyField()
 

@@ -1,6 +1,3 @@
-"""Servicio de amadeus service para la aplicación automation.
-"""
-
 import logging
 import os
 
@@ -16,7 +13,7 @@ class AmadeusService:
     """
 
     def __init__(self):
-        # __init__: Inicializa una nueva instancia de AmadeusService. Args: parámetros de inicialización.
+        """__init__."""
         try:
             self.amadeus = Client(
                 client_id=os.getenv("AMADEUS_CLIENT_ID"),

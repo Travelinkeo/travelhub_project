@@ -35,10 +35,10 @@ class PlanLimitMiddleware:
     """Verifica que la agencia no exceda los límites de su plan."""
 
     def __init__(self, get_response):
+        """__init__."""
         self.get_response = get_response
 
     def __call__(self, request):
-        """Método interna: call."""
         if not request.user.is_authenticated:
             return self.get_response(request)
 

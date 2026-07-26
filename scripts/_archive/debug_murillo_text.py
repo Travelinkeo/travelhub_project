@@ -2,6 +2,7 @@ import pdfplumber
 
 
 def extract_text_from_pdf(file_path):
+    """extract_text_from_pdf."""
     text = ""
     try:
         with pdfplumber.open(file_path) as pdf:

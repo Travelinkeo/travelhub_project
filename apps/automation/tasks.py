@@ -1,6 +1,3 @@
-"""Tareas asíncronas (Celery) para la aplicación automation.
-"""
-
 import logging
 
 from celery import shared_task
@@ -10,7 +7,7 @@ logger = logging.getLogger(__name__)
 
 @shared_task(bind=True, max_retries=3, soft_time_limit=20, time_limit=30)
 def process_web_uploaded_ticket(self, boleto_id, agencia_id=None):
-    # process_web_uploaded_ticket: Procesa  web uploaded ticket. Args: datos a procesar. Returns: resultado procesado.
+    """process_web_uploaded_ticket."""
     from celery.exceptions import SoftTimeLimitExceeded
 
     from apps.automation.services.ticket_parser_service import TicketParserService

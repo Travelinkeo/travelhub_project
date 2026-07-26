@@ -12,6 +12,7 @@ from apps.bookings.models import BoletoImportado
 
 
 def list_latest():
+    """list_latest."""
     print("--- Latest 5 Imported Tickets ---")
     boletos = BoletoImportado.objects.all().order_by("-fecha_subida")[:10]
     for b in boletos:

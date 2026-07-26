@@ -9,6 +9,7 @@ from apps.bookings.models import BoletoImportado
 
 
 def delete_ticket(pk):
+    """delete_ticket."""
     try:
         boleto = BoletoImportado.objects.get(pk=pk)
         boleto.delete()

@@ -69,7 +69,7 @@ ALLOWED_PROTOCOLS = ["http", "https", "mailto"]
 
 
 def _sanitize_html(html_content):
-    """Función interna: sanitize html."""
+    """_sanitize_html."""
     if bleach:
         return bleach.clean(
             html_content,

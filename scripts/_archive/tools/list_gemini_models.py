@@ -13,6 +13,7 @@ load_dotenv()
 
 
 def list_models():
+    """list_models."""
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
         print("No API Key found in env.")

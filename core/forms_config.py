@@ -5,9 +5,9 @@ from .models import Agencia, UsuarioAgencia
 
 
 class AgenciaForm(forms.ModelForm):
-    """Formulario para crear/editar agencias."""
+    """AgenciaForm."""
+
     class Meta:
-        """Configuración del modelo."""
         model = Agencia
         fields = [
             "nombre",
@@ -45,7 +45,8 @@ class AgenciaForm(forms.ModelForm):
 
 
 class UsuarioAgenciaForm(forms.ModelForm):
-    """Formulario para gestionar usuarios de agencia con creación de User."""
+    """UsuarioAgenciaForm."""
+
     username = forms.CharField(label="Nombre de Usuario")
     email = forms.EmailField(label="Email")
     first_name = forms.CharField(label="Nombre", required=False)
@@ -58,11 +59,11 @@ class UsuarioAgenciaForm(forms.ModelForm):
     )
 
     class Meta:
-        """Configuración del modelo."""
         model = UsuarioAgencia
         fields = ["rol", "activo"]
 
     def __init__(self, *args, **kwargs):
+        """__init__."""
         self.user_instance = kwargs.pop("user_instance", None)
         super().__init__(*args, **kwargs)
         if self.user_instance:
@@ -73,7 +74,7 @@ class UsuarioAgenciaForm(forms.ModelForm):
             self.fields["username"].disabled = True  # No permitir cambiar username fácilmente
 
     def save(self, commit=True):
-        """Método: save."""
+        """save."""
         usuario_agencia = super().save(commit=False)
 
         # Logic to create or update User

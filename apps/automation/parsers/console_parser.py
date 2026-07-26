@@ -1,6 +1,3 @@
-"""Parser/procesador de console parser para la aplicación automation.
-"""
-
 import logging
 import re
 from typing import Any
@@ -66,7 +63,7 @@ class ConsoleParser:
         }
 
     def _parse_kiu_raw(self, text: str) -> dict[str, Any]:
-        # _parse_kiu_raw:  parse kiu raw. Args: según implementación. Returns: según implementación.
+        """_parse_kiu_raw."""
         flights = []
         lines = text.splitlines()
 
@@ -118,7 +115,7 @@ class ConsoleParser:
         }
 
     def _parse_sabre_raw(self, text: str) -> dict[str, Any]:
-        # _parse_sabre_raw:  parse sabre raw. Args: según implementación. Returns: según implementación.
+        """_parse_sabre_raw."""
         flights = []
         lines = text.splitlines()
         # Regex flexible para Sabre: 1 AV 123 Y 10OCT 2 BOGMIA HK1 1000 1400

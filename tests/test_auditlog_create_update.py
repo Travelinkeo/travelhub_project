@@ -1,4 +1,3 @@
-"""Tests para Auditlog create update."""
 from decimal import Decimal
 
 import pytest
@@ -12,7 +11,7 @@ pytestmark = pytest.mark.skip(reason="Tests requieren configuración completa o 
 
 @pytest.mark.django_db
 def test_auditlog_venta_create_and_update():
-    """Auditlog venta create and update."""
+    """test_auditlog_venta_create_and_update."""
     moneda, _ = Moneda.objects.get_or_create(codigo_iso="USD", defaults={"nombre": "Dólar"})
     cliente, _ = Cliente.objects.get_or_create(
         nombres="CU", apellidos="Venta", email="cuventa@example.com"
@@ -50,7 +49,7 @@ def test_auditlog_venta_create_and_update():
 
 @pytest.mark.django_db
 def test_auditlog_itemventa_create_and_update():
-    """Auditlog itemventa create and update."""
+    """test_auditlog_itemventa_create_and_update."""
     moneda, _ = Moneda.objects.get_or_create(codigo_iso="USD", defaults={"nombre": "Dólar"})
     cliente, _ = Cliente.objects.get_or_create(
         nombres="CU", apellidos="Item", email="cuitem@example.com"

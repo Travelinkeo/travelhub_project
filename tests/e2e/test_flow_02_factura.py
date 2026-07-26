@@ -1,4 +1,3 @@
-"""Tests para Flow 02 factura (E2E)."""
 import pytest
 
 pytestmark = [
@@ -10,7 +9,7 @@ pytestmark = [
 
 @pytest.fixture
 def venta_con_cliente(db, moneda_usd, sample_cliente):
-    """Venta con cliente."""
+    """venta_con_cliente."""
     from apps.bookings.models import Venta
 
     venta = Venta.objects.create(
@@ -26,7 +25,7 @@ def venta_con_cliente(db, moneda_usd, sample_cliente):
 
 
 def test_detalle_venta(logged_in_page, live_server, venta_con_cliente):
-    """Detalle venta."""
+    """test_detalle_venta."""
     detail_url = f"{live_server.url}/bookings/ventas/{venta_con_cliente.pk}/"
     logged_in_page.goto(detail_url)
     logged_in_page.wait_for_timeout(1000)
@@ -36,7 +35,7 @@ def test_detalle_venta(logged_in_page, live_server, venta_con_cliente):
 
 
 def test_listado_ventas(logged_in_page, live_server, venta_con_cliente):
-    """Listado ventas."""
+    """test_listado_ventas."""
     list_url = f"{live_server.url}/bookings/ventas/"
     logged_in_page.goto(list_url)
     logged_in_page.wait_for_timeout(1000)

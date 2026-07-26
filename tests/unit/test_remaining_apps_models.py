@@ -6,9 +6,10 @@ pytestmark = [pytest.mark.django_db, pytest.mark.models]
 
 
 class TestCotizacionesModels:
-    """Test Cotizaciones Models."""
+    """TestCotizacionesModels."""
+
     def test_cotizacion_creation(self, db):
-        """Cotizacion creation."""
+        """test_cotizacion_creation."""
         from apps.cotizaciones.models import Cotizacion
         from tests.helpers import create_test_agencia, create_test_cliente, create_test_moneda
 
@@ -27,9 +28,10 @@ class TestCotizacionesModels:
 
 
 class TestGamificationModels:
-    """Test Gamification Models."""
+    """TestGamificationModels."""
+
     def test_puntaje_creation(self, db):
-        """Puntaje creation."""
+        """test_puntaje_creation."""
         from apps.gamification.models import Puntaje
         from tests.helpers import create_test_user
 
@@ -42,7 +44,7 @@ class TestGamificationModels:
         assert puntaje.id is not None
 
     def test_logro_creation(self, db):
-        """Logro creation."""
+        """test_logro_creation."""
         from apps.gamification.models import Logro
 
         logro = Logro.objects.create(
@@ -54,9 +56,10 @@ class TestGamificationModels:
 
 
 class TestMarketingModels:
-    """Test Marketing Models."""
+    """TestMarketingModels."""
+
     def test_campania_creation(self, db):
-        """Campania creation."""
+        """test_campania_creation."""
         from apps.marketing.models import Campania
         from tests.helpers import create_test_agencia
 
@@ -71,9 +74,10 @@ class TestMarketingModels:
 
 
 class TestReportsModels:
-    """Test Reports Models."""
+    """TestReportsModels."""
+
     def test_reporte_programado_creation(self, db):
-        """Reporte programado creation."""
+        """test_reporte_programado_creation."""
         from apps.reports.models import ReporteProgramado
         from tests.helpers import create_test_agencia
 
@@ -90,9 +94,10 @@ class TestReportsModels:
 
 
 class TestTasksModels:
-    """Test Tasks Models."""
+    """TestTasksModels."""
+
     def test_tarea_creation(self, db):
-        """Tarea creation."""
+        """test_tarea_creation."""
         from apps.tasks.models import Tarea
         from tests.helpers import create_test_agencia, create_test_user
 
@@ -110,9 +115,10 @@ class TestTasksModels:
 
 
 class TestCmsModels:
-    """Test Cms Models."""
+    """TestCmsModels."""
+
     def test_articulo_creation(self, db):
-        """Articulo creation."""
+        """test_articulo_creation."""
         from apps.cms.models import Articulo
         from tests.helpers import create_test_user
 
@@ -127,10 +133,10 @@ class TestCmsModels:
 
 
 class TestCrmModels:
-    """Test Crm Models."""
+    """TestCrmModels."""
+
     def test_cliente_creation(self, db):
-        """Cliente creation."""
-        from apps.crm.models import Cliente
+        """test_cliente_creation."""
         from tests.helpers import create_test_cliente
 
         cliente = create_test_cliente()

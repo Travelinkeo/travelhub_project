@@ -17,6 +17,7 @@ from apps.automation.services.amadeus_service import AmadeusService
 
 
 def debug_search():
+    """debug_search."""
     print("--- Probando Amadeus Service (Depuración) ---")
     service = AmadeusService()
 

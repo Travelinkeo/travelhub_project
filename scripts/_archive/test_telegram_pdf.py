@@ -20,6 +20,7 @@ logger = logging.getLogger(__name__)
 
 
 def test_send_pdf():
+    """test_send_pdf."""
     print("--- STARTING TELEGRAM PDF TEST ---")
 
     token = settings.TELEGRAM_BOT_TOKEN

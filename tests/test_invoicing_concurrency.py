@@ -1,4 +1,3 @@
-"""Tests para Invoicing concurrency."""
 import threading
 from datetime import date
 from decimal import Decimal
@@ -30,7 +29,7 @@ def test_invoice_generation_concurrency():
     errors = []
 
     def create_invoice_thread(thread_idx):
-        """Create invoice thread."""
+        """create_invoice_thread."""
         try:
             # Cada hilo ejecuta su propia transacción e inserción
             with transaction.atomic():

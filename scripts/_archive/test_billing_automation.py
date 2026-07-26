@@ -15,6 +15,7 @@ from core.models.agencia import Agencia
 
 
 def test_billing_logic():
+    """test_billing_logic."""
     print("💳 Iniciando pruebas de Lógica de Facturación SaaS...")
 
     # 1. Crear Usuario y Agencia de Prueba

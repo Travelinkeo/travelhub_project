@@ -1,4 +1,3 @@
-"""Tests para Boleto importado compat."""
 from apps.bookings.models import BoletoImportado
 
 

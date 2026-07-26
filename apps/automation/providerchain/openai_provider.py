@@ -1,6 +1,3 @@
-"""Proveedor de IA/configuración para automation: openai provider.
-"""
-
 import logging
 import time
 
@@ -15,14 +12,14 @@ MODEL_DEFAULT = "gpt-4o-mini"
 MODEL_STRUCTURED = "gpt-4o-mini"
 
 
-class OpenAIProvider:
-    """Clase OpenAIProvider. Uso: según contexto de la aplicación.
-    """
+class OpenAIProvider(AbstractBaseProvider):
+    """OpenAIProvider."""
+
     provider_name = "openai"
     supports_structured_output = True
 
     def _get_client(self):
-        # _get_client:  get client. Args: según implementación. Returns: según implementación.
+        """_get_client."""
         import openai
 
         key = get_api_secret("OPENAI_API_KEY")
@@ -31,7 +28,7 @@ class OpenAIProvider:
         return openai.OpenAI(api_key=key)
 
     def test_connection(self) -> bool:
-        # test_connection: Test connection. Args: según implementación. Returns: según implementación.
+        """test_connection."""
         client = self._get_client()
         if not client:
             return False
@@ -50,7 +47,7 @@ class OpenAIProvider:
         agency_id: int | None = None,
         feature: str = "unknown",
     ) -> ProviderResult:
-        # generate: Genera . Args: parámetros de generación. Returns: resultado generado.
+        """generate."""
         start = time.monotonic()
         client = self._get_client()
         if not client:

@@ -30,11 +30,11 @@ class NumberingSequence(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        """Meta definición del modelo."""
         app_label = "core"
         verbose_name = "Secuencia numérica"
         verbose_name_plural = "Secuencias numéricas"
         db_table = "core_numbering_sequence"
 
     def __str__(self):
+        """__str__."""
         return f"{self.prefix}-{self.last_number:04d}"

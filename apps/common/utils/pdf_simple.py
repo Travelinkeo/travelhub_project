@@ -1,6 +1,3 @@
-"""Utilidades de pdf simple para common.
-"""
-
 import logging
 import re
 

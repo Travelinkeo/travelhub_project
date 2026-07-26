@@ -10,6 +10,7 @@ from apps.communications.services.email_service import send_custom_email
 
 
 def test_send():
+    """test_send."""
     print("🚀 Iniciando prueba de envío con Resend...")
 
     # Intenta enviar a una dirección de prueba (Cámbiala si quieres recibirla tú)

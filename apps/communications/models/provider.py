@@ -1,6 +1,3 @@
-"""Módulo provider de la aplicación communications.
-"""
-
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -14,6 +11,8 @@ class ComunicacionProveedor(AgenciaMixin, models.Model):
     """
 
     class Categoria(models.TextChoices):
+        """Categoria."""
+
         TICKET = "TICKET", _("Boleto / E-Ticket")
         RESERVATION = "RESERVATION", _("Reserva / PNR")
         ALERT = "ALERT", _("Alerta de Vuelo")
@@ -39,5 +38,5 @@ class ComunicacionProveedor(AgenciaMixin, models.Model):
         ordering = ["-fecha_recepcion"]
 
     def __str__(self):
-        # __str__: Representación en string del objeto. Returns: str.
+        """__str__."""
         return f"{self.remitente} - {self.asunto[:50]}..."

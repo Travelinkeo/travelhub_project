@@ -19,7 +19,7 @@ pytestmark = pytest.mark.skip(reason="Tests requieren configuración completa - 
 
 @pytest.fixture
 def regular_user_client(db, django_user_model):
-    """Regular user client."""
+    """regular_user_client."""
     django_user_model.objects.create_user(username="tester", password="pass123")
     client = APIClient()
     client.login(username="tester", password="pass123")
@@ -28,7 +28,7 @@ def regular_user_client(db, django_user_model):
 
 @pytest.fixture
 def staff_user_client(db, django_user_model):
-    """Staff user client."""
+    """staff_user_client."""
     django_user_model.objects.create_user(username="staffer", password="pass123", is_staff=True)
     client = APIClient()
     client.login(username="staffer", password="pass123")
@@ -37,7 +37,7 @@ def staff_user_client(db, django_user_model):
 
 @pytest.fixture
 def cliente_moneda_ciudad(db):
-    """Cliente moneda ciudad."""
+    """cliente_moneda_ciudad."""
     pais = Pais.objects.create(nombre="Peru", codigo_iso_2="PE", codigo_iso_3="PER")
     ciudad = Ciudad.objects.create(nombre="Lima", pais=pais)
     moneda = Moneda.objects.create(nombre="Dolar", codigo_iso="USD", simbolo="$")
@@ -47,14 +47,14 @@ def cliente_moneda_ciudad(db):
 
 @pytest.fixture
 def venta_base(cliente_moneda_ciudad):
-    """Venta base."""
+    """venta_base."""
     cliente, moneda, _ = cliente_moneda_ciudad
     return Venta.objects.create(cliente=cliente, moneda=moneda, subtotal=100, impuestos=20)
 
 
 @pytest.mark.django_db
 def test_create_alquiler_auto_staff_ok(staff_user_client, venta_base, cliente_moneda_ciudad):
-    """Create alquiler auto staff ok."""
+    """test_create_alquiler_auto_staff_ok."""
     _, _, ciudad = cliente_moneda_ciudad
     url = reverse("core:alquiler-auto-list")
     payload = {
@@ -71,9 +71,9 @@ def test_create_alquiler_auto_staff_ok(staff_user_client, venta_base, cliente_mo
 
 @pytest.mark.django_db
 def test_create_alquiler_auto_regular_forbidden(
-    """Create alquiler auto regular forbidden."""
     regular_user_client, venta_base, cliente_moneda_ciudad
 ):
+    """test_create_alquiler_auto_regular_forbidden."""
     _, _, ciudad = cliente_moneda_ciudad
     url = reverse("core:alquiler-auto-list")
     payload = {
@@ -89,7 +89,7 @@ def test_create_alquiler_auto_regular_forbidden(
 
 @pytest.mark.django_db
 def test_create_evento_servicio_staff_ok(staff_user_client, venta_base):
-    """Create evento servicio staff ok."""
+    """test_create_evento_servicio_staff_ok."""
     url = reverse("core:evento-servicio-list")
     payload = {"venta": venta_base.id_venta, "nombre_evento": "Concierto", "ubicacion": "Arena"}
     resp = staff_user_client.post(url, payload, format="json")
@@ -99,7 +99,7 @@ def test_create_evento_servicio_staff_ok(staff_user_client, venta_base):
 
 @pytest.mark.django_db
 def test_create_evento_servicio_regular_forbidden(regular_user_client, venta_base):
-    """Create evento servicio regular forbidden."""
+    """test_create_evento_servicio_regular_forbidden."""
     url = reverse("core:evento-servicio-list")
     payload = {"venta": venta_base.id_venta, "nombre_evento": "Concierto", "ubicacion": "Arena"}
     resp = regular_user_client.post(url, payload, format="json")
@@ -108,7 +108,7 @@ def test_create_evento_servicio_regular_forbidden(regular_user_client, venta_bas
 
 @pytest.mark.django_db
 def test_create_circuito_con_dia_staff_ok(staff_user_client, venta_base, cliente_moneda_ciudad):
-    """Create circuito con dia staff ok."""
+    """test_create_circuito_con_dia_staff_ok."""
     url_circuito = reverse("core:circuito-turistico-list")
     resp_c = staff_user_client.post(
         url_circuito, {"venta": venta_base.id_venta, "nombre_circuito": "Andes Tour"}, format="json"
@@ -129,7 +129,7 @@ def test_create_circuito_con_dia_staff_ok(staff_user_client, venta_base, cliente
 
 @pytest.mark.django_db
 def test_create_paquete_aereo_staff_ok(staff_user_client, venta_base):
-    """Create paquete aereo staff ok."""
+    """test_create_paquete_aereo_staff_ok."""
     url = reverse("core:paquete-aereo-list")
     resp = staff_user_client.post(
         url,
@@ -142,7 +142,7 @@ def test_create_paquete_aereo_staff_ok(staff_user_client, venta_base):
 
 @pytest.mark.django_db
 def test_create_paquete_aereo_regular_forbidden(regular_user_client, venta_base):
-    """Create paquete aereo regular forbidden."""
+    """test_create_paquete_aereo_regular_forbidden."""
     url = reverse("core:paquete-aereo-list")
     resp = regular_user_client.post(
         url,
@@ -154,7 +154,7 @@ def test_create_paquete_aereo_regular_forbidden(regular_user_client, venta_base)
 
 @pytest.mark.django_db
 def test_create_servicio_adicional_staff_ok(staff_user_client, venta_base):
-    """Create servicio adicional staff ok."""
+    """test_create_servicio_adicional_staff_ok."""
     url = reverse("core:servicio-adicional-detalle-list")
     resp = staff_user_client.post(
         url,
@@ -167,7 +167,7 @@ def test_create_servicio_adicional_staff_ok(staff_user_client, venta_base):
 
 @pytest.mark.django_db
 def test_create_servicio_adicional_regular_forbidden(regular_user_client, venta_base):
-    """Create servicio adicional regular forbidden."""
+    """test_create_servicio_adicional_regular_forbidden."""
     url = reverse("core:servicio-adicional-detalle-list")
     resp = regular_user_client.post(
         url,
@@ -179,8 +179,8 @@ def test_create_servicio_adicional_regular_forbidden(regular_user_client, venta_
 
 @pytest.mark.django_db
 def test_venta_serializer_includes_new_components(regular_user_client, venta_base):
+    """test_venta_serializer_includes_new_components."""
     # Crear uno de cada tipo
-    """Venta serializer includes new components."""
     AlquilerAutoReserva.objects.create(venta=venta_base, categoria_auto="Sedan")
     EventoServicio.objects.create(venta=venta_base, nombre_evento="Show")
     circuito = CircuitoTuristico.objects.create(venta=venta_base, nombre_circuito="Ruta")

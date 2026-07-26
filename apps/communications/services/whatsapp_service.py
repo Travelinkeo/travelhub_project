@@ -1,6 +1,3 @@
-"""Servicio de whatsapp service para la aplicación communications.
-"""
-
 import logging
 
 import requests
@@ -18,7 +15,7 @@ class WhatsAppEvolutionService:
     """
 
     def __init__(self, agencia_id):
-        # __init__: Inicializa una nueva instancia de WhatsAppEvolutionService. Args: parámetros de inicialización.
+        """__init__."""
         self.agencia_id = agencia_id
         self.config = self._load_config()
 
@@ -31,7 +28,7 @@ class WhatsAppEvolutionService:
             return None
 
     def _get_headers(self):
-        # _get_headers:  get headers. Args: según implementación. Returns: según implementación.
+        """_get_headers."""
         if not self.config or not self.config.evolution_api_key:
             # Fallback a settings globales si no hay específicos por agencia
             api_key = getattr(settings, "WHATSAPP_MICROSERVICE_TOKEN", None)
@@ -41,13 +38,13 @@ class WhatsAppEvolutionService:
         return {"apikey": api_key, "Content-Type": "application/json"}
 
     def _get_base_url(self):
-        # _get_base_url:  get base url. Args: según implementación. Returns: según implementación.
+        """_get_base_url."""
         if self.config and self.config.evolution_api_url:
             return self.config.evolution_api_url.rstrip("/")
         return getattr(settings, "WHATSAPP_MICROSERVICE_URL", "http://evolution:8080").rstrip("/")
 
     def _get_instance(self):
-        # _get_instance:  get instance. Args: según implementación. Returns: según implementación.
+        """_get_instance."""
         if self.config and self.config.evolution_instance_name:
             return self.config.evolution_instance_name
         return f"agencia_{self.agencia_id}"

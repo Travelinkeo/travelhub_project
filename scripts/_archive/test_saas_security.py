@@ -12,6 +12,7 @@ from personas.models import Pasajero
 
 
 def test_security():
+    """test_security."""
     print("🛡️ probando Seguridad SaaS...")
 
     # 1. Verificar Encriptación

@@ -13,6 +13,7 @@ from apps.common.utils.telegram_utils import send_telegram_alert
 
 
 async def test():
+    """test."""
     print("📨 Enviando alerta de prueba a Telegram...")
     success = await send_telegram_alert(
         "🚀 **Prueba de Sistema TravelHub**\n\n"

@@ -1,6 +1,3 @@
-"""Parser/procesador de pdf generation para la aplicación automation.
-"""
-
 import datetime as dt
 import logging
 from typing import Any
@@ -167,7 +164,7 @@ class PdfGenerationService:
             """Proxy que garantiza que TODOS los atributos de agencia tengan un valor por defecto."""
 
             def __init__(self, obj=None, color_prim="#0D1E40"):
-                # __init__: Inicializa una nueva instancia de SafeAgencia. Args: parámetros de inicialización.
+                """__init__."""
                 self._obj = obj
 
             def __getattr__(self, name):
@@ -247,12 +244,10 @@ class PdfGenerationService:
 
     @staticmethod
     def generate_ticket_pdf(data: dict[str, Any], agencia_obj=None, **kwargs) -> tuple[bytes, str]:
-        # generate_ticket_pdf: Genera  ticket pdf. Args: parámetros de generación. Returns: resultado generado.
         return PdfGenerationService.generate_ticket(data, agencia_obj, **kwargs)
 
     @staticmethod
     def _is_dark_color(hex_color: str) -> bool:
-        # _is_dark_color:  is dark color. Args: según implementación. Returns: según implementación.
         try:
             hex_color = str(hex_color).lstrip("#")
             if len(hex_color) == 3:
@@ -266,5 +261,5 @@ class PdfGenerationService:
 
 
 def generate_ticket_pdf(data: dict[str, Any], agencia_obj=None, **kwargs) -> tuple[bytes, str]:
-    # generate_ticket_pdf: Genera  ticket pdf. Args: parámetros de generación. Returns: resultado generado.
+    """generate_ticket_pdf."""
     return PdfGenerationService.generate_ticket(data, agencia_obj, **kwargs)

@@ -1,6 +1,3 @@
-"""Comando de gestión Django para bookings: import_boletos.
-"""
-
 import hashlib
 from pathlib import Path
 
@@ -12,13 +9,13 @@ from apps.bookings.models import BoletoImportado
 from core.models.agencia import Agencia
 
 
-class Command:
-    """Clase Command. Uso: según contexto de la aplicación.
-    """
+class Command(BaseCommand):
+    """Command."""
+
     help = "Importa todos los boletos desde el directorio boletos_importados/"
 
     def add_arguments(self, parser):
-        # add_arguments: Add arguments. Args: según implementación. Returns: según implementación.
+        """add_arguments."""
         parser.add_argument(
             "--dry-run",
             action="store_true",
@@ -36,7 +33,7 @@ class Command:
         )
 
     def handle(self, *args, **options):
-        # handle: Maneja/gestiona . Args: evento/datos. Returns: respuesta.
+        """handle."""
         dry_run = options["dry_run"]
         agencia_id = options["agencia_id"]
         process_after = options["process"]

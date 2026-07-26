@@ -16,6 +16,7 @@ from apps.communications.services.telegram_notification_service import TelegramN
 
 
 def test_manual_notify():
+    """test_manual_notify."""
     print("🔍 Buscando último boleto importado...")
     boleto = BoletoImportado.objects.order_by("-fecha_subida").first()
 

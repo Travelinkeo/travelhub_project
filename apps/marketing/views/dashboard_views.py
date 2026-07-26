@@ -1,6 +1,3 @@
-"""Vistas (views) de la aplicación marketing.
-"""
-
 from django.views.generic import TemplateView
 
 from apps.marketing.models import ActivoMarketing, Campania
@@ -8,19 +5,19 @@ from core.api import get_user_active_agency
 
 
 def _get_hotel_tarifario():
-    # _get_hotel_tarifario:  get hotel tarifario. Args: según implementación. Returns: según implementación.
+    """_get_hotel_tarifario."""
     from django.apps import apps
 
     return apps.get_model("bookings", "HotelTarifario")
 
 
-class MarketingDashboardView:
-    """Vista para gestionar marketingdashboard. Uso: instanciar según necesidad del dominio.
-    """
+class MarketingDashboardView(TemplateView):
+    """MarketingDashboardView."""
+
     template_name = "marketing/dashboard.html"
 
     def get_context_data(self, **kwargs):
-        # get_context_data: Obtiene/recupera context data. Args: según implementación. Returns: dato solicitado.
+        """get_context_data."""
         context = super().get_context_data(**kwargs)
         agencia = get_user_active_agency(self.request.user)
         if agencia:

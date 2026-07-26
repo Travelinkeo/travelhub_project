@@ -29,10 +29,10 @@ class SaaSLimitMiddleware:
     }
 
     def __init__(self, get_response):
+        """__init__."""
         self.get_response = get_response
 
     def __call__(self, request):
-        """Método interna: call."""
         if request.method in ["POST", "PUT", "PATCH"]:
             # Identificar si la ruta actual está en nuestro mapa de recursos controlados
             resource_type = None

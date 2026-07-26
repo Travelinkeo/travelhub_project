@@ -6,6 +6,7 @@ import django
 
 
 def inspect_ticket(ticket_id):
+    """inspect_ticket."""
     from apps.bookings.models import BoletoImportado
 
     try:

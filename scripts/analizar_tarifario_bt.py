@@ -8,6 +8,7 @@ import PyPDF2
 
 
 def analizar_tarifario():
+    """analizar_tarifario."""
     pdf_path = Path(__file__).parent.parent / "TARIFARIO NACIONAL SEPTIEMBRE 2025-028.pdf"
 
     with open(pdf_path, "rb") as file:

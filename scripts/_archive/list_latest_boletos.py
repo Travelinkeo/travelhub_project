@@ -11,6 +11,7 @@ from apps.bookings.models import BoletoImportado
 
 
 def list_latest():
+    """list_latest."""
     # Only select PK and Status to avoid triggering complex __str__ or related lookups
     boletos = (
         BoletoImportado.objects.all()

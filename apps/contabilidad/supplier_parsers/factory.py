@@ -1,6 +1,3 @@
-"""Módulo factory de la aplicación contabilidad.
-"""
-
 import logging
 
 from .base_parser import BaseSupplierReportParser
@@ -11,8 +8,8 @@ logger = logging.getLogger(__name__)
 
 
 class SupplierReportParserFactory:
-    """Factory para crear instancias de supplierreportparser. Uso: instanciar según necesidad del dominio.
-    """
+    """SupplierReportParserFactory."""
+
     @classmethod
     def get_parser(
         cls,
@@ -21,7 +18,6 @@ class SupplierReportParserFactory:
         subject: str = "",
         sender_email: str = "",
     ) -> BaseSupplierReportParser | None:
-        # get_parser: Obtiene/recupera parser. Args: según implementación. Returns: dato solicitado.
         sender_clean = (sender_email or "").lower()
         subject_clean = (subject or "").lower()
         filename_clean = (filename or "").lower()

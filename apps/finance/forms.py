@@ -1,14 +1,11 @@
-"""Formularios Django para la aplicación finance.
-"""
-
 from django import forms
 
 from .models import Pago
 
 
-class RegistroPagoFastForm:
-    """Formulario para registropagofast. Uso: instanciar según necesidad del dominio.
-    """
+class RegistroPagoFastForm(forms.ModelForm):
+    """RegistroPagoFastForm."""
+
     class Meta:
         model = Pago
         fields = [

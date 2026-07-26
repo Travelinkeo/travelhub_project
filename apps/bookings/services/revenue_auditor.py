@@ -1,6 +1,3 @@
-"""Servicio de revenue auditor para la aplicación bookings.
-"""
-
 import logging
 
 from django.db.models import Q

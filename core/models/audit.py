@@ -20,9 +20,10 @@ class AuditLog(models.Model):
     """
 
     class Accion(models.TextChoices):
+        """Accion."""
+
         CREATE = "CREATE", _("Creación")
         UPDATE = "UPDATE", _("Actualización")
-        """Función: Accion."""
         DELETE = "DELETE", _("Eliminación")
         STATE = "STATE", _("Cambio de Estado")
         LOGIN = "LOGIN", _("Inicio de Sesión")
@@ -80,7 +81,6 @@ class AuditLog(models.Model):
     class Meta:
         verbose_name = _("Log de Auditoría")
         verbose_name_plural = _("Logs de Auditoría")
-        """Función: Meta."""
         ordering = ["-creado"]
         indexes = [
             models.Index(fields=["descripcion"]),
@@ -92,14 +92,15 @@ class AuditLog(models.Model):
         ]
 
     def __str__(self):
+        """__str__."""
         return (
             f"AuditLog {self.modelo} {self.object_id} {self.accion} {self.creado:%Y-%m-%d %H:%M:%S}"
         )
 
     def save(self, *args, **kwargs):
+        """save."""
         from django.db import transaction
 
-        """Método: save."""
         es_creacion = self.pk is None
         if es_creacion and not self.creado:
             self.creado = _tz.now()
@@ -206,7 +207,7 @@ def crear_audit_log(
 
 
 def _sanitize_value(val):
-    """Función interna: sanitize value."""
+    """_sanitize_value."""
     import datetime
     from decimal import Decimal
 
@@ -228,7 +229,7 @@ def _sanitize_value(val):
 
 
 def _calcular_diff(prev, current, exclude_fields=None):
-    """Función interna: calcular diff."""
+    """_calcular_diff."""
     if exclude_fields is None:
         exclude_fields = [
             "creado",

@@ -23,6 +23,7 @@ OUTPUT_DIR = r"C:\Users\ARMANDO\travelhub_project\KIU_SINGLE_OUTPUT"
 
 
 def extract_text_from_file(file_path):
+    """extract_text_from_file."""
     text = ""
     if file_path.lower().endswith(".pdf"):
         import fitz
@@ -61,6 +62,7 @@ def extract_text_from_file(file_path):
 
 
 def test_single_file(query):
+    """test_single_file."""
     if not os.path.exists(OUTPUT_DIR):
         os.makedirs(OUTPUT_DIR)
 

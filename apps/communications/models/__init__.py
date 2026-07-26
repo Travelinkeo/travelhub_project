@@ -1,6 +1,3 @@
-"""Inicialización del paquete communications.
-"""
-
 from .demo_lead import DemoRequest
 from .lead import Lead
 from .monitor_log import EmailMonitorLog

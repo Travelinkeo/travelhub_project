@@ -69,6 +69,7 @@ BOOKINGS_TABLE_RENAMES = [
 
 
 def section(title: str) -> None:
+    """section."""
     print("\n" + "=" * 60)
     print(title)
     print("=" * 60)
@@ -166,6 +167,7 @@ def check_columns() -> int:
 
 
 def main() -> int:
+    """main."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--skip-columns", action="store_true", help="Omitir el chequeo de columnas."

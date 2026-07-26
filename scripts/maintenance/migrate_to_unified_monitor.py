@@ -17,6 +17,7 @@ django.setup()
 
 
 def main():
+    """main."""
     print("=" * 60)
     print("MIGRACIÓN A MONITOR UNIFICADO")
     print("=" * 60)
@@ -34,7 +35,7 @@ def main():
         mark_as_read=False
     )
     monitor.start()
-    
+
     # Email
     monitor = EmailMonitorService(
         notification_type='email',
@@ -42,7 +43,7 @@ def main():
         interval=60
     )
     monitor.start()
-    
+
     # WhatsApp + Google Drive
     monitor = EmailMonitorService(
         notification_type='whatsapp_drive',

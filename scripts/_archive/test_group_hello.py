@@ -12,6 +12,7 @@ from apps.common.utils.telegram_utils import send_telegram_alert_sync
 
 
 def test_group_alert():
+    """test_group_alert."""
     print("📢 Enviando saludo al GRUPO...")
     send_telegram_alert_sync(
         "👋 <b>¡Hola Equipo Travelinkeo!</b>\n\n"

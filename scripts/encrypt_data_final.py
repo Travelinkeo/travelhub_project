@@ -11,6 +11,7 @@ from personas.models import Cliente, Pasajero
 
 
 def encrypt_data():
+    """encrypt_data."""
     print("🔒 Iniciando encriptación final de PII...")
 
     # 1. Pasajeros

@@ -1,4 +1,3 @@
-"""Tests para Moneda name conflict fallback."""
 import json
 
 import pytest

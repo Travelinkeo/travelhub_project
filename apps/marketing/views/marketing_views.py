@@ -1,6 +1,3 @@
-"""Vistas (views) de la aplicación marketing.
-"""
-
 import json
 
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -21,7 +18,7 @@ class MarketingHubView(HtmxResponseMixin, SaaSMixin, LoginRequiredMixin, View):
     htmx_template_name = "marketing/partials/marketing_hub_htmx.html"
 
     def get(self, request, *args, **kwargs):
-        # get: Get. Args: según implementación. Returns: según implementación.
+        """get."""
         return render(request, self.template_name)
 
     def post(self, request, *args, **kwargs):
@@ -54,9 +51,9 @@ class MarketingHubView(HtmxResponseMixin, SaaSMixin, LoginRequiredMixin, View):
         return JsonResponse({"error": "Acción no válida"}, status=400)
 
 
-class GenerateAIImageView:
-    """Vista para gestionar generateaiimage. Uso: instanciar según necesidad del dominio.
-    """
+class GenerateAIImageView(LoginRequiredMixin, View):
+    """GenerateAIImageView."""
+
     def post(self, request, *args, **kwargs):
         """
         Endpoint to generate an AI image for marketing.

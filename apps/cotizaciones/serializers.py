@@ -1,14 +1,11 @@
-"""Serializadores para la API de cotizaciones.
-"""
-
 from rest_framework import serializers
 
 from .models import Cotizacion, ItemCotizacion
 
 
-class ItemCotizacionSerializer:
-    """Serializador para itemcotizacion. Uso: instanciar según necesidad del dominio.
-    """
+class ItemCotizacionSerializer(serializers.ModelSerializer):
+    """ItemCotizacionSerializer."""
+
     class Meta:
         model = ItemCotizacion
         fields = [
@@ -30,9 +27,9 @@ class ItemCotizacionSerializer:
         read_only_fields = ["agencia"]
 
 
-class CotizacionSerializer:
-    """Serializador para cotizacion. Uso: instanciar según necesidad del dominio.
-    """
+class CotizacionSerializer(serializers.ModelSerializer):
+    """CotizacionSerializer."""
+
     items = ItemCotizacionSerializer(many=True, read_only=True)
     cliente_nombre = serializers.CharField(source="cliente.get_nombre_completo", read_only=True)
     consultor_nombre = serializers.CharField(source="consultor.get_full_name", read_only=True)
@@ -82,7 +79,7 @@ class CotizacionSerializer:
         read_only_fields = ["agencia", "uuid", "numero_cotizacion", "estado"]
 
     def create(self, validated_data):
-        # create: Create. Args: según implementación. Returns: según implementación.
+        """create."""
         cotizacion = super().create(validated_data)
         cotizacion.calcular_total()
         return cotizacion

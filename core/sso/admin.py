@@ -10,7 +10,8 @@ from core.sso.models import SSOProvider
 
 @admin.register(SSOProvider)
 class SSOProviderAdmin(SaaSAdminMixin, admin.ModelAdmin):
-    """Función: SSOProviderAdmin."""
+    """SSOProviderAdmin."""
+
     list_display = ("name", "agencia", "provider_type", "is_active", "auto_provision")
     list_filter = ("provider_type", "is_active", "auto_provision")
     search_fields = ("name", "agencia__nombre", "client_id")

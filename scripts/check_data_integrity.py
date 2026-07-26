@@ -17,6 +17,7 @@ User = get_user_model()
 
 
 def check_integrity():
+    """check_integrity."""
     print("\n--- DIAGNÓSTICO DE DATOS ---\n")
 
     # 1. Agencias

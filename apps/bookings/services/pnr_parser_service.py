@@ -1,6 +1,3 @@
-"""Servicio de pnr parser service para la aplicación bookings.
-"""
-
 import datetime
 import logging
 import re
@@ -9,13 +6,12 @@ from decimal import Decimal
 from django.db import transaction
 from django.utils import timezone
 
+from apps.automation.parsers.normalization import GDS_SHORT_TO_NUM
 from apps.bookings.models import SegmentoVuelo, Venta
 from apps.common.services.catalog_service import CatalogNormalizationService
 from apps.common.services.customer_service import CustomerService
 from apps.crm.models import Pasajero
 from core.api import agency_context
-
-from apps.automation.parsers.normalization import GDS_SHORT_TO_NUM
 
 logger = logging.getLogger(__name__)
 
@@ -159,7 +155,7 @@ class PNRParserService:
         for flight in flight_matches:
             # Normalizar horas (0700A -> 07:00, 2330 -> 23:30)
             def norm_h(h):
-                # norm_h: Norm h. Args: según implementación. Returns: según implementación.
+                """norm_h."""
                 h = re.sub(r"[A-Z\+\*\d]", "", h)  # Limpiar letras y offsets
                 if len(h) == 4:
                     return f"{h[:2]}:{h[2:]}"

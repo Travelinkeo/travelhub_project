@@ -6,7 +6,8 @@ from core.models.audit import AuditLog
 
 
 class AgenciaAuditLogListView(AgencyRoleRequiredMixin, ListView):
-    """Función: AgenciaAuditLogListView."""
+    """AgenciaAuditLogListView."""
+
     allowed_roles = ["admin", "gerente"]
     model = AuditLog
     template_name = "core/audit/audit_list.html"
@@ -14,7 +15,7 @@ class AgenciaAuditLogListView(AgencyRoleRequiredMixin, ListView):
     paginate_by = 50
 
     def get_queryset(self):
-        """Método que obtiene queryset. Args: según implementación. Returns: datos solicitados."""
+        """get_queryset."""
         # Aseguramos que tenemos la agencia (el mixin ya valida validación, pero por seguridad)
         agencia = getattr(self.request, "agencia", None)
         if not agencia:
@@ -60,7 +61,7 @@ class AgenciaAuditLogListView(AgencyRoleRequiredMixin, ListView):
         return queryset.distinct()
 
     def get_context_data(self, **kwargs):
-        """Método que obtiene context data. Args: según implementación. Returns: datos solicitados."""
+        """get_context_data."""
         context = super().get_context_data(**kwargs)
         # Pasar lista de usuarios de la agencia para el filtro
         if self.request.agencia:

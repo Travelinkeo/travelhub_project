@@ -1,6 +1,3 @@
-"""Vistas (views) de la aplicación finance.
-"""
-
 import logging
 import time
 
@@ -15,12 +12,13 @@ from core.api import get_agencia_from_request
 logger = logging.getLogger(__name__)
 
 
-class TaxRefundDashboardView:
-    """Vista para gestionar taxrefunddashboard. Uso: instanciar según necesidad del dominio.
-    """
+class TaxRefundDashboardView(LoginRequiredMixin, View):
+    """TaxRefundDashboardView."""
+
     template_name = "finance/tax_refund/dashboard.html"
 
     def get(self, request, *args, **kwargs):
+        """get."""
         # 🛡️ ENGINE DE DETECCIÓN DE AGENCIA (REUTILIZADO)
         agencia = getattr(request.user, "agencia_activa", None)
         if not agencia:
@@ -50,7 +48,7 @@ class IniciarTramiteRefundView(LoginRequiredMixin, View):
     """
 
     def post(self, request, reclamo_id, *args, **kwargs):
-        # post: Post. Args: según implementación. Returns: según implementación.
+        """post."""
         agencia = getattr(request.user, "agencia_activa", None)
         if not agencia:
             agencia = get_agencia_from_request(request)

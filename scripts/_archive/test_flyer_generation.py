@@ -5,6 +5,7 @@ import django
 
 
 def test_flyer():
+    """test_flyer."""
     print("--- Probando Generador de Flyers ---")
     try:
         from apps.marketing.services.flash_marketing_service import FlashMarketingService

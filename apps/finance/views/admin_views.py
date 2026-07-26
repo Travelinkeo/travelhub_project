@@ -1,7 +1,4 @@
 # apps/finance/views/admin_views.py
-"""Vistas (views) de la aplicación finance.
-"""
-
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
@@ -11,75 +8,75 @@ from apps.common.models import Moneda
 from core.api import SaaSMixin
 
 
-class MonedaListView:
-    """Vista para gestionar monedalist. Uso: instanciar según necesidad del dominio.
-    """
+class MonedaListView(SaaSMixin, LoginRequiredMixin, ListView):
+    """MonedaListView."""
+
     model = Moneda
     template_name = "finance/admin/monedas_y_tasas.html"
     context_object_name = "monedas"
 
     def get_queryset(self):
-        # get_queryset: Obtiene/recupera queryset. Args: según implementación. Returns: dato solicitado.
+        """get_queryset."""
         return Moneda.objects.all().order_by("nombre")
 
     def get_context_data(self, **kwargs):
-        # get_context_data: Obtiene/recupera context data. Args: según implementación. Returns: dato solicitado.
+        """get_context_data."""
         context = super().get_context_data(**kwargs)
         context["tasas"] = []
         return context
 
 
-class MonedaCreateView:
-    """Vista para gestionar monedacreate. Uso: instanciar según necesidad del dominio.
-    """
+class MonedaCreateView(SaaSMixin, LoginRequiredMixin, CreateView):
+    """MonedaCreateView."""
+
     model = Moneda
     template_name = "finance/admin/moneda_form.html"
     fields = ["nombre", "codigo_iso", "simbolo", "es_moneda_local"]
     success_url = reverse_lazy("finance_admin:moneda_list")
 
     def get_form(self, form_class=None):
-        # get_form: Obtiene/recupera form. Args: según implementación. Returns: dato solicitado.
+        """get_form."""
         form = super().get_form(form_class)
         for field in form.fields.values():
             field.widget.attrs["class"] = "input-base"
         return form
 
     def form_valid(self, form):
-        # form_valid: Form valid. Args: según implementación. Returns: según implementación.
+        """form_valid."""
         messages.success(self.request, "Moneda creada exitosamente.")
         return super().form_valid(form)
 
 
-class MonedaUpdateView:
-    """Vista para gestionar monedaupdate. Uso: instanciar según necesidad del dominio.
-    """
+class MonedaUpdateView(SaaSMixin, LoginRequiredMixin, UpdateView):
+    """MonedaUpdateView."""
+
     model = Moneda
     template_name = "finance/admin/moneda_form.html"
     fields = ["nombre", "codigo_iso", "simbolo", "es_moneda_local"]
     success_url = reverse_lazy("finance_admin:moneda_list")
 
     def get_form(self, form_class=None):
-        # get_form: Obtiene/recupera form. Args: según implementación. Returns: dato solicitado.
+        """get_form."""
         form = super().get_form(form_class)
         for field in form.fields.values():
             field.widget.attrs["class"] = "input-base"
         return form
 
     def form_valid(self, form):
-        # form_valid: Form valid. Args: según implementación. Returns: según implementación.
+        """form_valid."""
         messages.success(self.request, "Moneda actualizada exitosamente.")
         return super().form_valid(form)
 
 
-class MonedaDeleteView:
-    """Vista para gestionar monedadelete. Uso: instanciar según necesidad del dominio.
-    """
+class MonedaDeleteView(SaaSMixin, LoginRequiredMixin, DeleteView):
+    """MonedaDeleteView."""
+
     model = Moneda
     template_name = "core/erp/catalogos/confirm_delete_generic.html"
     success_url = reverse_lazy("finance_admin:moneda_list")
 
     def get_context_data(self, **kwargs):
-        # get_context_data: Obtiene/recupera context data. Args: según implementación. Returns: dato solicitado.
+        """get_context_data."""
         context = super().get_context_data(**kwargs)
         context["object_name"] = "Moneda"
         context["object_instance"] = f"{self.object.nombre} ({self.object.codigo_iso})"
@@ -87,6 +84,6 @@ class MonedaDeleteView:
         return context
 
     def delete(self, request, *args, **kwargs):
-        # delete: Elimina el objeto de la base de datos. Args: None. Returns: None.
+        """delete."""
         messages.success(self.request, "Moneda eliminada correctamente.")
         return super().delete(request, *args, **kwargs)

@@ -19,6 +19,7 @@ from core.models.agencia import Agencia
 
 
 def test_isolation():
+    """test_isolation."""
     print("=" * 60)
     print("🧪 TEST DE AISLAMIENTO MULTI-TENANT")
     print("=" * 60)

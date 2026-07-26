@@ -1,6 +1,3 @@
-"""Servicio de marketing service para la aplicación communications.
-"""
-
 import base64
 import io
 import logging
@@ -20,8 +17,8 @@ logger = logging.getLogger(__name__)
 
 
 class MarketingService:
-    """Servicio para marketing. Uso: instanciar según necesidad del dominio.
-    """
+    """MarketingService."""
+
     @staticmethod
     def generate_instagram_story(hotel_id: int, agencia_id: int | None = None) -> io.BytesIO:
         """
@@ -108,7 +105,7 @@ class MarketingService:
 
         # Fonts (Try to load system fonts or fallback)
         def load_font(size):
-            # load_font: Carga  font. Args: fuente/origen. Returns: datos cargados.
+            """load_font."""
             try:
                 # Windows standard path
                 return ImageFont.truetype("arial.ttf", size)
@@ -127,6 +124,7 @@ class MarketingService:
 
         # Helper Center Text
         def draw_text_center(y, text, font, color="white"):
+            """draw_text_center."""
             # Text bounding box
             bbox = draw.textbbox((0, 0), text, font=font)
             text_w = bbox[2] - bbox[0]
@@ -200,19 +198,19 @@ class MarketingService:
         prompt = f"""
         Actúa como un experto experto en Marketing Turístico y Redes Sociales.
         Escribe un CAPTION (Pie de foto) para Instagram para promocionar lo siguiente:
-        
+
         PRODUCTO: {nombre_producto}
         DESTINO: {destino}
         DETALLES CLAVE: {detalles}
-        
+
         TONO: {tono} (Opciones: Divertido, Lujoso, Urgente, Informativo)
-        
+
         ESTRUCTURA:
         1. Hook/Gancho inicial (pregunta o afirmación fuerte).
         2. Cuerpo corto y persuasivo (beneficios).
         3. Llamada a la acción (CTA) clara (Reserva ya, Escríbenos).
         4. Bloque de 10 Hashtags optimizados para turismo en Venezuela/Latam.
-        
+
         Usa emojis estratégicamente. No uses comillas envolviendo el texto.
         """
 
@@ -247,12 +245,12 @@ class MarketingService:
 
         prompt = f"""
         Eres un Copywriter de Email Marketing experto en turismo.
-        Genera el CONTENIDO HTML (solo el <body> interno, sin tags html/head externos) 
+        Genera el CONTENIDO HTML (solo el <body> interno, sin tags html/head externos)
         para un Newsletter semanal de ofertas de viaje.
-        
+
         OFERTAS A INCLUIR:
         {lista_ofertas}
-        
+
         REQUISITOS:
         - Usa un tono entusiasta y profesional.
         - Estructura HTML limpia con estilos inline básicos (CSS) para que se vea bien en Gmail.
@@ -261,7 +259,7 @@ class MarketingService:
         - Lista las ofertas con un diseño atractivo (tarjetas o lista bullet points estilizada).
         - Un botón CTA final "Ver todas las ofertas".
         - Despedida de "El equipo de TravelHub".
-        
+
         Output esperado: Solo código HTML.
         """
 

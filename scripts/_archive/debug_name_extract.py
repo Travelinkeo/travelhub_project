@@ -2,7 +2,10 @@ import re
 
 
 def _extract_passenger_name_debug(text):
+    """_extract_passenger_name_debug."""
+
     def extract_field(text, patterns):
+        """extract_field."""
         for p in patterns:
             match = re.search(p, text, re.IGNORECASE)
             if match:

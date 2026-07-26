@@ -19,10 +19,10 @@ class Aeropuerto(models.Model):
     es_principal = models.BooleanField(default=False, verbose_name="¿Es Aeropuerto Principal?")
 
     class Meta:
-        """Meta definición del modelo."""
         verbose_name = "Aeropuerto"
         verbose_name_plural = "Aeropuertos"
         ordering = ["pais", "ciudad", "nombre"]
 
     def __str__(self):
+        """__str__."""
         return f"{self.codigo_iata} - {self.nombre} ({self.ciudad}, {self.pais})"

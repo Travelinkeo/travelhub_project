@@ -42,7 +42,7 @@ class BoletoRetryParseIDORTest(TestCase):
     """
 
     def setUp(self):
-        # setUp: Setup. Args: según implementación. Returns: según implementación.
+        """setUp."""
         patcher_delay = _silence_celery()
         self.mock_delay = patcher_delay.start()
         self.addCleanup(patcher_delay.stop)
@@ -124,7 +124,7 @@ class VentaDoubleInvoiceIDORTest(TestCase):
     """
 
     def setUp(self):
-        # setUp: Setup. Args: según implementación. Returns: según implementación.
+        """setUp."""
         patcher_delay = _silence_celery()
         self.mock_delay = patcher_delay.start()
         self.addCleanup(patcher_delay.stop)

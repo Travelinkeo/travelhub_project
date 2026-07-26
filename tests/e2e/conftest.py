@@ -1,5 +1,3 @@
-"""Fixtures compartidos para tests E2E con Playwright — usuarios, monedas, clientes y página autenticada."""
-
 import pytest
 from django.contrib.auth import get_user_model
 
@@ -8,26 +6,26 @@ User = get_user_model()
 
 @pytest.fixture(scope="session")
 def browser_context_args(browser_context_args):
-    """Configura el locale español para el navegador en tests E2E."""
+    """browser_context_args."""
     return {**browser_context_args, "locale": "es-ES"}
 
 
 @pytest.fixture
 def page(page):
-    """Configura viewport de 1440x900 para las páginas E2E."""
+    """page."""
     page.set_viewport_size({"width": 1440, "height": 900})
     return page
 
 
 @pytest.fixture
 def test_password():
-    """Contraseña estándar para usuarios E2E."""
+    """test_password."""
     return "E2ePass1!"
 
 
 @pytest.fixture
 def e2e_user(db, test_password):
-    """Crea un usuario staff para tests E2E. Args: db, test_password. Returns: User."""
+    """e2e_user."""
     user = User.objects.create_user(
         username="e2e_tester",
         email="e2e@travelhub.cc",
@@ -40,7 +38,7 @@ def e2e_user(db, test_password):
 
 @pytest.fixture
 def moneda_usd(db):
-    """Crea moneda USD para tests E2E. Args: db. Returns: Moneda."""
+    """moneda_usd."""
     from apps.common.models import Moneda
 
     moneda, _ = Moneda.objects.get_or_create(
@@ -52,7 +50,7 @@ def moneda_usd(db):
 
 @pytest.fixture
 def moneda_ves(db):
-    """Crea moneda VES para tests E2E. Args: db. Returns: Moneda."""
+    """moneda_ves."""
     from apps.common.models import Moneda
 
     moneda, _ = Moneda.objects.get_or_create(
@@ -64,7 +62,7 @@ def moneda_ves(db):
 
 @pytest.fixture
 def sample_cliente(db):
-    """Crea un cliente de ejemplo para tests E2E. Args: db. Returns: Cliente."""
+    """sample_cliente."""
     from apps.crm.models import Cliente
 
     cliente = Cliente.objects.create(
@@ -80,7 +78,7 @@ def sample_cliente(db):
 
 @pytest.fixture
 def sample_cliente_2(db):
-    """Crea un segundo cliente de ejemplo para tests E2E. Args: db. Returns: Cliente."""
+    """sample_cliente_2."""
     from apps.crm.models import Cliente
 
     cliente = Cliente.objects.create(
@@ -96,7 +94,7 @@ def sample_cliente_2(db):
 
 @pytest.fixture
 def logged_in_page(page, live_server, e2e_user, test_password):
-    """Autentica la página Playwright con el usuario E2E. Args: page, live_server, e2e_user, test_password. Returns: Page."""
+    """logged_in_page."""
     page.goto(f"{live_server.url}/login/")
     page.fill('input[name="username"]', e2e_user.username)
     page.fill('input[name="password"]', test_password)

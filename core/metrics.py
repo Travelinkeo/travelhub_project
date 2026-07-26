@@ -31,7 +31,7 @@ DB_POOL_ALERT_PCT = 80
 
 
 def update_celery_queue_depth():
-    """# Actualiza métrica de profundidad de colas Celery en Prometheus."""
+    """update_celery_queue_depth."""
     if get_redis_connection is None:
         return
     try:
@@ -47,7 +47,7 @@ def update_celery_queue_depth():
 
 
 def update_db_connection_pool():
-    """# Actualiza métricas de conexiones activas de PostgreSQL."""
+    """update_db_connection_pool."""
     active = None
     max_conn = 0
     try:
@@ -77,7 +77,7 @@ def update_db_connection_pool():
 
 
 def health_metrics_view(request):
-    """# View que expone métricas Prometheus. Args: request. Returns: HttpResponse."""
+    """health_metrics_view."""
     update_celery_queue_depth()
     update_db_connection_pool()
     metrics = generate_latest(REGISTRY)

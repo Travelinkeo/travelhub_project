@@ -14,7 +14,7 @@ class TestSabreParserCoverage:
     """Tests adicionales para SabreParser"""
 
     def test_parse_with_minimal_data(self):
-        """Parse with minimal data."""
+        """test_parse_with_minimal_data."""
         parser = SabreParser()
         text = "ETICKET RECEIPT\nRESERVATION CODE: ABC123"
         result = parser.parse(text)
@@ -22,13 +22,13 @@ class TestSabreParserCoverage:
         assert result.pnr == "ABC123"
 
     def test_parse_flights_empty(self):
-        """Parse flights empty."""
+        """test_parse_flights_empty."""
         parser = SabreParser()
         flights = parser._parse_flights("")
         assert flights == []
 
     def test_extract_currency_with_commas(self):
-        """Extract currency with commas."""
+        """test_extract_currency_with_commas."""
         parser = SabreParser()
         currency, amount = parser.extract_currency_amount("USD 1,234.56")
         assert str(amount) == "1234.56"
@@ -39,14 +39,14 @@ class TestAmadeusParserCoverage:
     """Tests adicionales para AmadeusParser"""
 
     def test_parse_with_minimal_data(self):
-        """Parse with minimal data."""
+        """test_parse_with_minimal_data."""
         parser = AmadeusParser()
         text = "ELECTRONIC TICKET RECEIPT\nBOOKING REF: XYZ789"
         result = parser.parse(text)
         assert result.source_system == "AMADEUS"
 
     def test_extract_pnr_fallback(self):
-        """Extract pnr fallback."""
+        """test_extract_pnr_fallback."""
         parser = AmadeusParser()
         pnr = parser._extract_pnr("Booking ref: ABC123")
         assert pnr == "ABC123"
@@ -57,11 +57,11 @@ class TestKIUParserCoverage:
     """Tests adicionales para KIUParser"""
 
     def test_can_parse_kiusys(self):
-        """Can parse kiusys."""
+        """test_can_parse_kiusys."""
         parser = KIUParser()
         assert parser.can_parse("KIUSYS.COM ticket data") is True
 
     def test_can_parse_passenger_receipt(self):
-        """Can parse passenger receipt."""
+        """test_can_parse_passenger_receipt."""
         parser = KIUParser()
         assert parser.can_parse("PASSENGER ITINERARY RECEIPT") is True

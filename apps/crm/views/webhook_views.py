@@ -1,6 +1,3 @@
-"""Vistas (views) de la aplicación crm.
-"""
-
 import hashlib
 import hmac
 import json
@@ -18,11 +15,11 @@ logger = logging.getLogger(__name__)
 
 
 @method_decorator(csrf_exempt, name="dispatch")
-class WhatsAppWebhookView:
-    """Vista para gestionar whatsappwebhook. Uso: instanciar según necesidad del dominio.
-    """
+class WhatsAppWebhookView(View):
+    """WhatsAppWebhookView."""
+
     def get(self, request, *args, **kwargs):
-        # get: Get. Args: según implementación. Returns: según implementación.
+        """get."""
         verify_token = getattr(settings, "WHATSAPP_VERIFY_TOKEN", None)
         if not verify_token:
             return HttpResponse("Webhook not configured", status=503)
@@ -39,7 +36,7 @@ class WhatsAppWebhookView:
         return HttpResponse("TravelHub WhatsApp Bot Activo", status=200)
 
     def _verify_signature(self, request):
-        # _verify_signature:  verify signature. Args: según implementación. Returns: según implementación.
+        """_verify_signature."""
         app_secret = getattr(settings, "WHATSAPP_APP_SECRET", None)
         if not app_secret:
             return False
@@ -55,7 +52,7 @@ class WhatsAppWebhookView:
         return hmac.compare_digest(signature, expected)
 
     def post(self, request, *args, **kwargs):
-        # post: Post. Args: según implementación. Returns: según implementación.
+        """post."""
         app_secret = getattr(settings, "WHATSAPP_APP_SECRET", None)
         if not app_secret:
             logger.error("WHATSAPP_APP_SECRET no configurado")
@@ -190,7 +187,7 @@ class EvolutionWebhookView(View):
     """
 
     def post(self, request, *args, **kwargs):
-        # post: Post. Args: según implementación. Returns: según implementación.
+        """post."""
         try:
             body = json.loads(request.body)
         except json.JSONDecodeError:
@@ -216,7 +213,7 @@ class EvolutionWebhookView(View):
         return HttpResponse("OK", status=200)
 
     def _find_agencia_by_instance(self, instance_name: str):
-        # _find_agencia_by_instance:  find agencia by instance. Args: según implementación. Returns: según implementación.
+        """_find_agencia_by_instance."""
         try:
             from core.models import AgenciaConfiguracion
 

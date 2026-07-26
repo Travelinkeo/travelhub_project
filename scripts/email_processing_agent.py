@@ -36,6 +36,7 @@ SUPPLIER_EMAILS = settings.SUPPLIER_EMAILS
 
 
 def get_gmail_service() -> Any | None:
+    """get_gmail_service."""
     creds = None
     if os.path.exists(TOKEN_FILE):
         creds = Credentials.from_authorized_user_file(TOKEN_FILE, SCOPES)
@@ -61,6 +62,7 @@ def get_gmail_service() -> Any | None:
 
 
 def search_unread_emails(service: Any, sender_emails: list[str]) -> list[dict[str, str]]:
+    """search_unread_emails."""
     query = "is:unread (" + " OR ".join([f"from:{email}" for email in sender_emails]) + ")"
     logging.info(f"Ejecutando búsqueda con la consulta: {query}")
     try:
@@ -74,6 +76,7 @@ def search_unread_emails(service: Any, sender_emails: list[str]) -> list[dict[st
 
 
 def get_email_content(service: Any, message_id: str) -> dict[str, Any]:
+    """get_email_content."""
     content = {"body": "", "attachments": [], "subject": "", "from": ""}
     try:
         msg = service.users().messages().get(userId="me", id=message_id, format="full").execute()
@@ -88,6 +91,7 @@ def get_email_content(service: Any, message_id: str) -> dict[str, Any]:
                 content["from"] = header["value"]
 
         def extract_parts(parts_list):
+            """extract_parts."""
             body_text, attachments_data = "", []
             for part in parts_list:
                 mime_type = part.get("mimeType", "")
@@ -133,6 +137,7 @@ def get_email_content(service: Any, message_id: str) -> dict[str, Any]:
 
 
 def analyze_and_classify_with_gemini(email_content: dict[str, Any]) -> str:
+    """analyze_and_classify_with_gemini."""
     attachments_summary = "\n".join(
         [
             f"- Archivo: {att['filename']}\n  Contenido: {att['text'][:2000]}..."
@@ -149,7 +154,7 @@ def analyze_and_classify_with_gemini(email_content: dict[str, Any]) -> str:
     - **Asunto:** {email_content.get("subject", "No disponible")}
     - **Cuerpo del Mensaje:**\n{email_content["body"]}
 
-    **Contenido de Archivos Adjuntos:**\n{attachments_summary if attachments_summary else "No hay adjuntos."} 
+    **Contenido de Archivos Adjuntos:**\n{attachments_summary if attachments_summary else "No hay adjuntos."}
 
     Por favor, proporciona tu respuesta comenzando con la etiqueta de clasificación en la primera línea, seguida por el bloque de código JSON.
     """
@@ -157,6 +162,7 @@ def analyze_and_classify_with_gemini(email_content: dict[str, Any]) -> str:
 
 
 def main():
+    """main."""
     logging.info("Iniciando el Agente Autónomo de Operaciones de TravelHub...")
     gmail_service = get_gmail_service()
     if not gmail_service:

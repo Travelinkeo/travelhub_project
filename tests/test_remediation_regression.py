@@ -1,4 +1,3 @@
-"""Tests para Remediation regression."""
 from unittest.mock import Mock
 
 from django.core.cache import cache
@@ -12,7 +11,7 @@ class TestRateLimitAtomic:
     """Test que cache.incr() es atómico — Fase 1"""
 
     def test_incr_atomic_returns_correct_count(self):
-        """Incr atomic returns correct count."""
+        """test_incr_atomic_returns_correct_count."""
         cache.delete("test_incr_key")
         cache.set("test_incr_key", 0, timeout=60)
         for i in range(1, 11):
@@ -20,7 +19,7 @@ class TestRateLimitAtomic:
             assert val == i, f"Expected {i}, got {val}"
 
     def test_incr_initializes_with_try_except(self):
-        """Incr initializes with try except."""
+        """test_incr_initializes_with_try_except."""
         cache.delete("test_init_key")
         try:
             val = cache.incr("test_init_key")
@@ -32,7 +31,7 @@ class TestRateLimitAtomic:
         assert val == 2
 
     def test_incr_after_timeout_restarts(self):
-        """Incr after timeout restarts."""
+        """test_incr_after_timeout_restarts."""
         cache.delete("test_timeout_key")
         cache.set("test_timeout_key", 1, timeout=1)
         cache.incr("test_timeout_key")
@@ -53,7 +52,7 @@ class TestNPlusOneDetection:
 
     @override_settings(DEBUG=True)
     def test_middleware_tracks_query_count(self):
-        """Middleware tracks query count."""
+        """test_middleware_tracks_query_count."""
         get_response = Mock(return_value=HttpResponse())
         middleware = QueryCountDebugMiddleware(get_response)
         factory = RequestFactory()
@@ -63,7 +62,7 @@ class TestNPlusOneDetection:
 
     @override_settings(DEBUG=True)
     def test_middleware_adds_db_headers(self):
-        """Middleware adds db headers."""
+        """test_middleware_adds_db_headers."""
         get_response = Mock(return_value=HttpResponse())
         middleware = QueryCountDebugMiddleware(get_response)
         factory = RequestFactory()
@@ -73,7 +72,7 @@ class TestNPlusOneDetection:
 
     @override_settings(DEBUG=True)
     def test_cache_header_middleware_paises(self):
-        """Cache header middleware paises."""
+        """test_cache_header_middleware_paises."""
         get_response = Mock(return_value=HttpResponse())
         middleware = CacheHeaderMiddleware(get_response)
         factory = RequestFactory()
@@ -83,7 +82,7 @@ class TestNPlusOneDetection:
 
     @override_settings(DEBUG=True)
     def test_cache_header_middleware_ciudades(self):
-        """Cache header middleware ciudades."""
+        """test_cache_header_middleware_ciudades."""
         get_response = Mock(return_value=HttpResponse())
         middleware = CacheHeaderMiddleware(get_response)
         factory = RequestFactory()
@@ -93,7 +92,7 @@ class TestNPlusOneDetection:
 
     @override_settings(DEBUG=True)
     def test_no_cache_headers_for_other(self):
-        """No cache headers for other."""
+        """test_no_cache_headers_for_other."""
         get_response = Mock(return_value=HttpResponse())
         middleware = CacheHeaderMiddleware(get_response)
         factory = RequestFactory()
@@ -106,7 +105,7 @@ class TestSecurityRegression:
     """Test que los fixes de seguridad no regresionan — Fase 1"""
 
     def test_rate_limit_csp_report_ip(self):
-        """Rate limit csp report ip."""
+        """test_rate_limit_csp_report_ip."""
         cache.delete("csp_report_rate_ip_test")
         cache.set("csp_report_rate_ip_test", 0, timeout=60)
         for _i in range(6):

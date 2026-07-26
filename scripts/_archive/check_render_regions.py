@@ -2,6 +2,7 @@ import psycopg2
 
 
 def test_region(base_host, region):
+    """test_region."""
     full_host = f"{base_host}.{region}-postgres.render.com"
     url = f"postgresql://travelhub:2jNgY6qdqcXNuDnSLS3uajexLKwTXxSf@{full_host}/travelhub_0a07?sslmode=require"
 

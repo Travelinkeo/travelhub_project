@@ -19,7 +19,7 @@ class TestIVAInternacional(TestCase):
     """Tests para verificar IVA aéreo internacional (50% base imponible, 50% exento)"""
 
     def setUp(self):
-        """SetUp."""
+        """setUp."""
         self.moneda_usd = Moneda.objects.get_or_create(
             codigo_iso="USD", defaults={"nombre": "Dólar Estadounidense", "simbolo": "$"}
         )[0]

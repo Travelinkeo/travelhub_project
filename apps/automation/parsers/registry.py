@@ -14,7 +14,7 @@ class ParserRegistry:
     """Registro centralizado de parsers de boletos"""
 
     def __init__(self):
-        # __init__: Inicializa una nueva instancia de ParserRegistry. Args: parámetros de inicialización.
+        """__init__."""
         self._parsers: list[BaseTicketParser] = []
 
     def register(self, parser: BaseTicketParser) -> None:

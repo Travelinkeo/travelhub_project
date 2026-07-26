@@ -5,6 +5,7 @@ import requests
 
 
 def get_updates():
+    """get_updates."""
     # Load env vars manually
     try:
         from dotenv import load_dotenv

@@ -1,6 +1,3 @@
-"""Servicio de ai copywriter para la aplicación automation.
-"""
-
 import logging
 
 from apps.automation.services.ai_engine import ai_engine
@@ -15,7 +12,7 @@ class AICopywriter:
     """
 
     def __init__(self):
-        # __init__: Inicializa una nueva instancia de AICopywriter. Args: parámetros de inicialización.
+        """__init__."""
         pass
 
     def generate_caption(self, hotel_id, tone="PROFESIONAL_AVENTURERO"):
@@ -37,16 +34,16 @@ class AICopywriter:
         prompt = f"""
         Actúa como un experto Community Manager de viajes.
         Escribe un POST DE INSTAGRAM atractivo para vender este hotel.
-        
+
         HOTEL: {hotel.nombre}
         DESTINO: {hotel.destino}
         CATEGORÍA: {hotel.categoria} Estrellas
         AMENIDADES: {amenities_str}
         DESCRIPCIÓN: {hotel.descripcion_larga[:300]}...
-        
+
         TONO SOLICITADO: {tone}
         (Opciones: PROFESIONAL_AVENTURERO (Mezcla profesional/aventura), FORMAL, AVENTURERO, ROMÁNTICO)
-        
+
         REQUISITOS:
         1. Empieza con un Hook (Gancho) emocional.
         2. Usa emojis relevantes.

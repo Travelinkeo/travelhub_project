@@ -3,14 +3,13 @@ import logging
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Count, Q, Sum
-from django.http import HttpResponse, JsonResponse
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render
-from django.urls import reverse
 from django.utils import timezone
 from django.views import View
 
 from core.api.webhook_dispatcher import dispatch_webhook_event
-from core.models.webhooks import Webhook, WebhookDelivery, WebhookEvent
+from core.models.webhooks import Webhook, WebhookEvent
 from core.security import get_agencia_from_request
 
 logger = logging.getLogger(__name__)
@@ -22,11 +21,11 @@ class WebhookListView(LoginRequiredMixin, View):
     template_name = "core/webhooks/list.html"
 
     def _get_agencia(self, request):
-        """Método interna: get agencia."""
+        """_get_agencia."""
         return get_agencia_from_request(request)
 
     def get(self, request):
-        """Método: get."""
+        """get."""
         agencia = self._get_agencia(request)
         if not agencia:
             return render(request, self.template_name, {"error": "No hay agencia activa"})
@@ -52,7 +51,7 @@ class WebhookListView(LoginRequiredMixin, View):
         return render(request, self.template_name, context)
 
     def post(self, request):
-        """Método: post."""
+        """post."""
         agencia = self._get_agencia(request)
         if not agencia:
             return JsonResponse({"error": "No hay agencia activa"}, status=400)
@@ -112,11 +111,11 @@ class WebhookDeliveryListView(LoginRequiredMixin, View):
     template_name = "core/webhooks/deliveries.html"
 
     def _get_agencia(self, request):
-        """Método interna: get agencia."""
+        """_get_agencia."""
         return get_agencia_from_request(request)
 
     def get(self, request, webhook_id):
-        """Método: get."""
+        """get."""
         agencia = self._get_agencia(request)
         if not agencia:
             return render(request, self.template_name, {"error": "No hay agencia activa"})

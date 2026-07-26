@@ -7,6 +7,7 @@ PASSWORD = "Linkeo1331*"
 
 
 def main():
+    """main."""
     print("=== DIAGNÓSTICO API TRAVELHUB ===\n")
 
     # 1. Obtener token

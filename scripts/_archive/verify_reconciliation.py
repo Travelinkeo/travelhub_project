@@ -16,6 +16,7 @@ from apps.finance.services.reconciliation_service import ReconciliationService
 
 
 def verify_reconciliation():
+    """verify_reconciliation."""
     print("--- Verificando Módulo de Conciliación ---")
 
     # 1. Crear Datos de Prueba (Proveedor)

@@ -2,15 +2,10 @@
 # Edited 2026-06-06: removed AlterModelTable(table=None) so state keeps
 # db_table='core_xxx' for the renamed models.
 
-"""Migración de base de datos para finance.
-"""
-
 from django.db import migrations
 
 
-class Migration:
-    """Clase Migration. Uso: según contexto de la aplicación.
-    """
+class Migration(migrations.Migration):
     dependencies = [
         ("finance", "0005_diferenciafinanciera_agencia_itemfactura_agencia_and_more"),
     ]

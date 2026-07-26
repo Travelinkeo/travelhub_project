@@ -12,6 +12,7 @@ from apps.marketing.services.forecast_service import AIForecastService
 
 
 def test_forecast():
+    """test_forecast."""
     print("Iniciando prueba de AI Forecast...")
     service = AIForecastService()
 

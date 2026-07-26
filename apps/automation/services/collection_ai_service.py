@@ -1,6 +1,3 @@
-"""Servicio de collection ai service para la aplicación automation.
-"""
-
 import logging
 from datetime import timedelta
 
@@ -13,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 def _get_genai():
-    # _get_genai:  get genai. Args: según implementación. Returns: según implementación.
+    """_get_genai."""
     from google import genai
 
     return genai
@@ -25,7 +22,7 @@ class CollectionAIService:
     """
 
     def __init__(self, agencia=None):
-        # __init__: Inicializa una nueva instancia de CollectionAIService. Args: parámetros de inicialización.
+        """__init__."""
         self.agencia = agencia
         from apps.automation.services.ai_engine import get_gemini_api_key
 

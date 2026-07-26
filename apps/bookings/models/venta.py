@@ -1,6 +1,3 @@
-"""Módulo venta de la aplicación bookings.
-"""
-
 from __future__ import annotations
 
 import logging
@@ -111,6 +108,8 @@ class Venta(AgenciaMixin, SoftDeleteModel, models.Model):
     )
 
     class EstadoVenta(models.TextChoices):
+        """EstadoVenta."""
+
         PENDIENTE_PAGO = "PEN", _("Pendiente de Pago")
         PAGADA_PARCIAL = "PAR", _("Pagada Parcialmente")
         PAGADA_TOTAL = "PAG", _("Pagada Totalmente")
@@ -128,6 +127,8 @@ class Venta(AgenciaMixin, SoftDeleteModel, models.Model):
     )
 
     class TipoVenta(models.TextChoices):
+        """TipoVenta."""
+
         B2C = "B2C", _("B2C (Ocio)")
         B2B = "B2B", _("B2B (Corporativo)")
         MICE = "MICE", _("MICE / Eventos")
@@ -146,6 +147,8 @@ class Venta(AgenciaMixin, SoftDeleteModel, models.Model):
     )
 
     class CanalOrigen(models.TextChoices):
+        """CanalOrigen."""
+
         ADMIN = "ADM", _("Admin")
         IMPORTACION = "IMP", _("Importación")
         API = "API", _("API")
@@ -195,7 +198,6 @@ class Venta(AgenciaMixin, SoftDeleteModel, models.Model):
 
     @property
     def asiento_contable_venta(self):
-        # asiento_contable_venta: Asiento contable venta. Args: según implementación. Returns: según implementación.
         if not self.asiento_contable_venta_id:
             return None
         from django.apps import apps
@@ -205,12 +207,11 @@ class Venta(AgenciaMixin, SoftDeleteModel, models.Model):
 
     @asiento_contable_venta.setter
     def asiento_contable_venta(self, value):
-        # asiento_contable_venta: Asiento contable venta. Args: según implementación. Returns: según implementación.
+        """asiento_contable_venta."""
         self.asiento_contable_venta_id = value.pk if value else None
 
     @property
     def factura(self):
-        # factura: Factura. Args: según implementación. Returns: según implementación.
         if not self.factura_id:
             return None
         from django.apps import apps
@@ -220,12 +221,11 @@ class Venta(AgenciaMixin, SoftDeleteModel, models.Model):
 
     @factura.setter
     def factura(self, value):
-        # factura: Factura. Args: según implementación. Returns: según implementación.
+        """factura."""
         self.factura_id = value.pk if value else None
 
     @property
     def factura_consolidada(self):
-        # factura_consolidada: Factura consolidada. Args: según implementación. Returns: según implementación.
         if not self.factura_consolidada_id:
             return None
         from django.apps import apps
@@ -235,7 +235,7 @@ class Venta(AgenciaMixin, SoftDeleteModel, models.Model):
 
     @factura_consolidada.setter
     def factura_consolidada(self, value):
-        # factura_consolidada: Factura consolidada. Args: según implementación. Returns: según implementación.
+        """factura_consolidada."""
         self.factura_consolidada_id = value.pk if value else None
 
     notas = models.TextField(_("Notas de la Venta"), blank=True, null=True, default="")
@@ -262,13 +262,13 @@ class Venta(AgenciaMixin, SoftDeleteModel, models.Model):
     contador_vistas_cliente = models.PositiveIntegerField(_("Contador de Vistas"), default=0)
 
     def registrar_vista_cliente(self):
-        # registrar_vista_cliente: Registrar vista cliente. Args: según implementación. Returns: según implementación.
+        """registrar_vista_cliente."""
         self.ultima_vista_cliente = timezone.now()
         self.contador_vistas_cliente += 1
         self.save(update_fields=["ultima_vista_cliente", "contador_vistas_cliente"])
 
     def get_status_badge(self):
-        # get_status_badge: Obtiene/recupera status badge. Args: según implementación. Returns: dato solicitado.
+        """get_status_badge."""
         colors = {
             self.EstadoVenta.PENDIENTE_PAGO: "bg-amber-900/40 text-amber-400 border border-amber-700/50",
             self.EstadoVenta.PAGADA_PARCIAL: "bg-blue-900/40 text-blue-400 border border-blue-700/50",
@@ -292,7 +292,7 @@ class Venta(AgenciaMixin, SoftDeleteModel, models.Model):
         ]
 
     def __str__(self):
-        # __str__: Representación en string del objeto. Returns: str.
+        """__str__."""
         try:
             cliente_str = str(self.cliente)
         except (AttributeError, ValueError):
@@ -300,7 +300,7 @@ class Venta(AgenciaMixin, SoftDeleteModel, models.Model):
         return f"Venta {self.localizador or self.id_venta} a {cliente_str}"
 
     def clean(self):
-        # clean: Limpia/valida los campos del modelo. Args: None. Returns: None.
+        """clean."""
         super().clean()
         if self.total_venta < 0:
             raise ValidationError({"total_venta": _("El total de la venta no puede ser negativo.")})
@@ -316,7 +316,7 @@ class Venta(AgenciaMixin, SoftDeleteModel, models.Model):
             )
 
     def save(self, *args, **kwargs):
-        # save: Guarda/persiste . Args: datos a guardar. Returns: objeto guardado.
+        """save."""
         self.full_clean()
         if not self.localizador:
             # FIX CONCURRENCIA (P2-011): Generación atómica del localizador usando SecuenciaVentaDiaria con select_for_update()
@@ -350,7 +350,7 @@ class Venta(AgenciaMixin, SoftDeleteModel, models.Model):
         super().save(*args, **kwargs)
 
     def _evaluar_otorgar_puntos(self, contexto: str):
-        # _evaluar_otorgar_puntos:  evaluar otorgar puntos. Args: según implementación. Returns: según implementación.
+        """_evaluar_otorgar_puntos."""
         try:
             if (
                 self.cliente
@@ -404,7 +404,7 @@ class Venta(AgenciaMixin, SoftDeleteModel, models.Model):
         return super().delete(using=using, keep_parents=keep_parents, force=force)
 
     def _latest_metadata(self):
-        # _latest_metadata:  latest metadata. Args: según implementación. Returns: según implementación.
+        """_latest_metadata."""
         try:
             return self.metadata_parseo.first()
         except (AttributeError, ValueError):
@@ -412,7 +412,6 @@ class Venta(AgenciaMixin, SoftDeleteModel, models.Model):
 
     @property
     def notas_manuales(self) -> str:
-        # notas_manuales: Notas manuales. Args: según implementación. Returns: según implementación.
         if not self.notas:
             return ""
         if "[IA SALES REPORT]" in self.notas:
@@ -421,7 +420,6 @@ class Venta(AgenciaMixin, SoftDeleteModel, models.Model):
 
     @property
     def ai_report(self) -> str | None:
-        # ai_report: Ai report. Args: según implementación. Returns: según implementación.
         if not self.notas or "[IA SALES REPORT]" not in self.notas:
             return None
         parts = self.notas.split("[IA SALES REPORT]", 1)
@@ -439,7 +437,6 @@ class Venta(AgenciaMixin, SoftDeleteModel, models.Model):
 
     @property
     def total_fees(self):
-        # total_fees: Total fees. Args: según implementación. Returns: según implementación.
         return self.fees_venta.aggregate(s=Sum("monto"))["s"] or Decimal("0.00")
 
     @property
@@ -462,19 +459,16 @@ class Venta(AgenciaMixin, SoftDeleteModel, models.Model):
 
     @property
     def amount_consistency(self):
-        # amount_consistency: Amount consistency. Args: según implementación. Returns: según implementación.
         md = self._latest_metadata()
         return md.amount_consistency if md else None
 
     @property
     def amount_difference(self):
-        # amount_difference: Amount difference. Args: según implementación. Returns: según implementación.
         md = self._latest_metadata()
         return str(md.amount_difference) if md and md.amount_difference is not None else None
 
     @property
     def taxes_amount_expected(self):
-        # taxes_amount_expected: Taxes amount expected. Args: según implementación. Returns: según implementación.
         md = self._latest_metadata()
         return (
             str(md.taxes_amount_expected) if md and md.taxes_amount_expected is not None else None
@@ -482,7 +476,6 @@ class Venta(AgenciaMixin, SoftDeleteModel, models.Model):
 
     @property
     def taxes_difference(self):
-        # taxes_difference: Taxes difference. Args: según implementación. Returns: según implementación.
         md = self._latest_metadata()
         return str(md.taxes_difference) if md and md.taxes_difference is not None else None
 
@@ -580,6 +573,8 @@ class ItemVenta(AgenciaMixin, SoftDeleteModel, models.Model):
     )
 
     class EstadoItemVenta(models.TextChoices):
+        """EstadoItemVenta."""
+
         PENDIENTE_CONFIRMACION = "PCO", _("Pendiente Confirmación Proveedor")
         CONFIRMADO = "CNF", _("Confirmado por Proveedor")
         CANCELADO_PROVEEDOR = "CAP", _("Cancelado por Proveedor")
@@ -604,11 +599,11 @@ class ItemVenta(AgenciaMixin, SoftDeleteModel, models.Model):
         ]
 
     def __str__(self):
-        # __str__: Representación en string del objeto. Returns: str.
+        """__str__."""
         return f"{self.cantidad} x {self.producto_servicio.nombre if self.producto_servicio else 'Producto'} en Venta {self.venta.localizador if self.venta else 'N/A'}"
 
     def save(self, *args, **kwargs):
-        # save: Guarda/persiste . Args: datos a guardar. Returns: objeto guardado.
+        """save."""
         self.subtotal_item_venta = (self.precio_unitario_venta * self.cantidad).quantize(
             Decimal("0.01")
         )
@@ -618,9 +613,9 @@ class ItemVenta(AgenciaMixin, SoftDeleteModel, models.Model):
         super().save(*args, **kwargs)
 
 
-class VentaParseMetadata:
-    """Clase VentaParseMetadata. Uso: según contexto de la aplicación.
-    """
+class VentaParseMetadata(AgenciaMixin, models.Model):
+    """VentaParseMetadata."""
+
     id_metadata = models.AutoField(primary_key=True, verbose_name=_("ID Metadata Parseo"))
     venta = models.ForeignKey(
         Venta,
@@ -683,13 +678,13 @@ class VentaParseMetadata:
         ordering = ["-creado"]
 
     def __str__(self):
-        # __str__: Representación en string del objeto. Returns: str.
+        """__str__."""
         return f"Metadata Parseo Venta {self.venta_id} {self.fuente or ''} {self.creado:%Y-%m-%d %H:%M:%S}".strip()
 
 
-class VentaAuditFinding:
-    """Clase VentaAuditFinding. Uso: según contexto de la aplicación.
-    """
+class VentaAuditFinding(AgenciaMixin, models.Model):
+    """VentaAuditFinding."""
+
     venta = models.ForeignKey(
         Venta,
         on_delete=models.CASCADE,
@@ -700,6 +695,8 @@ class VentaAuditFinding:
     )
 
     class FindingType(models.TextChoices):
+        """FindingType."""
+
         CRITICAL_ZERO_SALE = "CZS", _("Venta con Total 0")
         MISSING_COSTS = "MSC", _("Costos No Registrados")
         NEGATIVE_MARGIN = "NMG", _("Margen Negativo")
@@ -710,6 +707,8 @@ class VentaAuditFinding:
     mensaje = models.TextField(_("Descripción del Hallazgo"))
 
     class FindingStatus(models.TextChoices):
+        """FindingStatus."""
+
         PENDIENTE = "PEN", _("Pendiente")
         REVISADO = "REV", _("Revisado")
         IGNORADO = "IGN", _("Ignorado")
@@ -748,5 +747,5 @@ class VentaAuditFinding:
         ]
 
     def __str__(self):
-        # __str__: Representación en string del objeto. Returns: str.
+        """__str__."""
         return f"{self.get_tipo_display()} - {self.venta.localizador if self.venta else 'N/A'} ({self.get_estado_display()})"

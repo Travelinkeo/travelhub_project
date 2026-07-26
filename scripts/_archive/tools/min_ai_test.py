@@ -12,6 +12,7 @@ from apps.crm.services.whatsapp_bot_service import PROMPT_VENDEDOR_IA, AnalisisM
 
 
 def test():
+    """test."""
     print("LLAMANDO A GEMINI...")
     try:
         raw = ai_engine.call_gemini(

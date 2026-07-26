@@ -14,11 +14,12 @@ logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
-    """Comando de gestión personalizado."""
+    """Command."""
+
     help = "Runs the Telegram Bot for TravelHub. Use --webhook to run in webhook mode."
 
     def add_arguments(self, parser):
-        """Método: add arguments."""
+        """add_arguments."""
         parser.add_argument(
             "--webhook",
             type=str,
@@ -33,7 +34,7 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        """Método: handle."""
+        """handle."""
         self.stdout.write(self.style.SUCCESS("Starting TravelHub Telegram Bot..."))
 
         # Obtener token
@@ -136,7 +137,7 @@ class Command(BaseCommand):
             await update.message.reply_html(help_text)
 
         async def get_id(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-            """Función que obtiene id. Args: según implementación. Returns: datos solicitados."""
+            """get_id."""
             chat_id = update.effective_chat.id
             await update.message.reply_html(f"🆔 Tu ID es: <code>{chat_id}</code>")
 
@@ -165,7 +166,7 @@ class Command(BaseCommand):
                 # Búsqueda asíncrona
                 @sync_to_async
                 def query_db():
-                    """Función: query db."""
+                    """query_db."""
                     return list(
                         Cliente.objects.filter(
                             agencia=agencia  # SaaS Filter
@@ -248,7 +249,7 @@ class Command(BaseCommand):
 
                 @sync_to_async
                 def ask_linkeo():
-                    """Función: ask linkeo."""
+                    """ask_linkeo."""
                     # print("DEBUG: Llamando a LinkeoService...")
                     # Pasamos contexto básico del usuario y AGENCIA
                     return LinkeoService.process_message(user_msg, user_id=user.id, agencia=agencia)
@@ -333,7 +334,7 @@ class Command(BaseCommand):
 
                 @sync_to_async
                 def generate():
-                    """Función: generate."""
+                    """generate."""
                     return service.generate_flyer(destination, price, airline)
 
                 img_buffer = await generate()
@@ -390,7 +391,7 @@ class Command(BaseCommand):
 
                 @sync_to_async
                 def search():
-                    """Función: search."""
+                    """search."""
                     service = AmadeusService()
                     return service.buscar_vuelos(origin, destination, date)
 
@@ -451,7 +452,7 @@ class Command(BaseCommand):
 
                 @sync_to_async
                 def perform_check():
-                    """Función: perform check."""
+                    """perform_check."""
                     service = MigrationCheckerService()
                     # Si el input es largo (>3 chars), prob. es nombre completo.
                     # El servicio (quick_check) espera códigos ISO para cache/reglas locales,
@@ -518,7 +519,7 @@ class Command(BaseCommand):
                 # Buscar boleto (sync wrapper)
                 @sync_to_async
                 def get_boleto_data(pk):
-                    """Función que obtiene boleto data. Args: según implementación. Returns: datos solicitados."""
+                    """get_boleto_data."""
                     try:
                         # SaaS Filter: Solo boletos de mi agencia
                         b = BoletoImportado.objects.get(pk=pk, agencia=agencia)
@@ -575,7 +576,7 @@ class Command(BaseCommand):
                 # Procesar con Gemini (Sync wrapper)
                 @sync_to_async
                 def process_audio(path):
-                    """Función: process audio."""
+                    """process_audio."""
                     service = AudioTranscriptionService()
                     return service.transcribe_and_extract(path)
 
@@ -644,7 +645,7 @@ class Command(BaseCommand):
 
                     @sync_to_async
                     def create_flyer():
-                        """Función que crea un nuevo flyer. Args: datos necesarios. Returns: instancia creada."""
+                        """create_flyer."""
                         service = FlashMarketingService()
                         return service.generate_flyer(destination, price, airline)
 

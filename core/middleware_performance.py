@@ -37,10 +37,10 @@ class QueryCountDebugMiddleware:
     """Middleware que monitorea queries y exporta métricas Prometheus"""
 
     def __init__(self, get_response):
+        """__init__."""
         self.get_response = get_response
 
     def __call__(self, request):
-        """Método interna: call."""
         connection.queries_log.clear()
         start_time = time.time()
 
@@ -79,10 +79,10 @@ class CacheHeaderMiddleware:
     """Middleware para agregar headers de caché"""
 
     def __init__(self, get_response):
+        """__init__."""
         self.get_response = get_response
 
     def __call__(self, request):
-        """Método interna: call."""
         response = self.get_response(request)
 
         if (

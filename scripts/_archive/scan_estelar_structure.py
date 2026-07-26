@@ -12,6 +12,7 @@ sys.path.append(os.getcwd())
 
 
 def extract_body(eml_path):
+    """extract_body."""
     with open(eml_path, "rb") as f:
         msg = email.message_from_binary_file(f, policy=policy.default)
 
@@ -40,6 +41,7 @@ def extract_body(eml_path):
 
 
 def scan_tickets():
+    """scan_tickets."""
     files = [
         r"C:\Users\ARMANDO\Downloads\E-TICKET ITINERARY RECEIPT - DUQUE ECHEVERRY_CRISTIAN DAVID (1).eml",
         r"C:\Users\ARMANDO\Downloads\E-TICKET ITINERARY RECEIPT - GIRALDO GARCIA_INGRID ALEJANDRA (1).eml",

@@ -21,13 +21,15 @@ from ..forms import BoletoManualForm
 
 
 class PasaportesListView(SaaSMixin, LoginRequiredMixin, ListView):
-    """Función: PasaportesListView."""
+    """PasaportesListView."""
+
     model = PasaporteEscaneado
     template_name = "core/erp/pasaportes.html"
     context_object_name = "pasaportes"
     paginate_by = 12
 
     def get_queryset(self):
+        """get_queryset."""
         queryset = super().get_queryset().select_related("cliente").order_by("-fecha_procesamiento")
 
         # Filters
@@ -37,7 +39,6 @@ class PasaportesListView(SaaSMixin, LoginRequiredMixin, ListView):
         if estado == "pendientes":
             queryset = queryset.filter(cliente__isnull=True)
         elif estado == "baja_confianza":
-        """Método que obtiene queryset. Args: según implementación. Returns: datos solicitados."""
             queryset = queryset.filter(confianza_ocr="LOW")
 
         if search:
@@ -50,6 +51,7 @@ class PasaportesListView(SaaSMixin, LoginRequiredMixin, ListView):
         return queryset
 
     def get_context_data(self, **kwargs):
+        """get_context_data."""
         context = super().get_context_data(**kwargs)
         context["active_tab"] = "pasaportes"
         context["today"] = timezone.now().date()
@@ -57,14 +59,15 @@ class PasaportesListView(SaaSMixin, LoginRequiredMixin, ListView):
 
 
 class AuditoriaListView(SaaSMixin, LoginRequiredMixin, ListView):
-    """Función: AuditoriaListView."""
+    """AuditoriaListView."""
+
     model = AuditLog
-        """Método que obtiene context data. Args: según implementación. Returns: datos solicitados."""
     template_name = "core/erp/auditoria.html"
     context_object_name = "logs"
     paginate_by = 20
 
     def get_queryset(self):
+        """get_queryset."""
         queryset = super().get_queryset().select_related("venta").order_by("-creado")
 
         # Filters
@@ -73,7 +76,6 @@ class AuditoriaListView(SaaSMixin, LoginRequiredMixin, ListView):
         search = self.request.GET.get("search")
         venta_id = self.request.GET.get("venta_id")
 
-        """Método que obtiene queryset. Args: según implementación. Returns: datos solicitados."""
         if accion:
             queryset = queryset.filter(accion=accion)
 
@@ -93,6 +95,7 @@ class AuditoriaListView(SaaSMixin, LoginRequiredMixin, ListView):
         return queryset
 
     def get_context_data(self, **kwargs):
+        """get_context_data."""
         context = super().get_context_data(**kwargs)
         context["active_tab"] = "auditoria"
 
@@ -101,7 +104,6 @@ class AuditoriaListView(SaaSMixin, LoginRequiredMixin, ListView):
         context["acciones_stats"] = (
             AuditLog.objects.values("accion")
             .annotate(total=Count("id_audit_log"))
-        """Método que obtiene context data. Args: según implementación. Returns: datos solicitados."""
             .order_by("-total")
         )
         context["modelos_stats"] = (
@@ -114,13 +116,15 @@ class AuditoriaListView(SaaSMixin, LoginRequiredMixin, ListView):
 
 
 class ComunicacionesListView(SaaSMixin, LoginRequiredMixin, ListView):
-    """Función: ComunicacionesListView."""
+    """ComunicacionesListView."""
+
     model = ComunicacionProveedor
     template_name = "core/erp/comunicaciones.html"
     context_object_name = "comunicaciones"
     paginate_by = 20
 
     def get_queryset(self):
+        """get_queryset."""
         queryset = super().get_queryset().order_by("-fecha_recepcion")
 
         search = self.request.GET.get("search")
@@ -128,7 +132,6 @@ class ComunicacionesListView(SaaSMixin, LoginRequiredMixin, ListView):
 
         if search:
             queryset = queryset.filter(
-        """Método que obtiene queryset. Args: según implementación. Returns: datos solicitados."""
                 Q(asunto__icontains=search)
                 | Q(remitente__icontains=search)
                 | Q(cuerpo_completo__icontains=search)
@@ -140,6 +143,7 @@ class ComunicacionesListView(SaaSMixin, LoginRequiredMixin, ListView):
         return queryset
 
     def get_context_data(self, **kwargs):
+        """get_context_data."""
         context = super().get_context_data(**kwargs)
         context["active_tab"] = "comunicaciones"
 
@@ -147,7 +151,6 @@ class ComunicacionesListView(SaaSMixin, LoginRequiredMixin, ListView):
         context["categorias_stats"] = (
             ComunicacionProveedor.objects.values("categoria")
             .annotate(total=Count("id"))
-        """Método que obtiene context data. Args: según implementación. Returns: datos solicitados."""
             .order_by("-total")
         )
 
@@ -155,37 +158,40 @@ class ComunicacionesListView(SaaSMixin, LoginRequiredMixin, ListView):
 
 
 class DashboardBoletosView(LoginRequiredMixin, TemplateView):
-    """Función: DashboardBoletosView."""
+    """DashboardBoletosView."""
+
     template_name = "core/erp/dashboard_boletos.html"
 
     def get_context_data(self, **kwargs):
+        """get_context_data."""
         context = super().get_context_data(**kwargs)
         context["active_tab"] = "boletos_dashboard"
         return context
 
 
 class BoletosBusquedaView(SaaSMixin, LoginRequiredMixin, TemplateView):
-        """Método que obtiene context data. Args: según implementación. Returns: datos solicitados."""
-    """Función: BoletosBusquedaView."""
+    """BoletosBusquedaView."""
+
     template_name = "core/erp/boletos_busqueda.html"
 
     def get_context_data(self, **kwargs):
+        """get_context_data."""
         context = super().get_context_data(**kwargs)
         context["active_tab"] = "boletos_busqueda"
         return context
 
 
-        """Método que obtiene context data. Args: según implementación. Returns: datos solicitados."""
 class BoletosReportesView(SaaSMixin, LoginRequiredMixin, TemplateView):
-    """Función: BoletosReportesView."""
+    """BoletosReportesView."""
+
     template_name = "core/erp/boletos_reportes.html"
 
     def get_context_data(self, **kwargs):
+        """get_context_data."""
         context = super().get_context_data(**kwargs)
         context["active_tab"] = "boletos_reportes"
 
         agencia = get_agencia_from_request(self.request)
-        """Método que obtiene context data. Args: según implementación. Returns: datos solicitados."""
         fecha_inicio = self.request.GET.get("fecha_inicio")
         fecha_fin = self.request.GET.get("fecha_fin")
         aerolinea = self.request.GET.get("aerolinea")
@@ -220,25 +226,27 @@ class BoletosReportesView(SaaSMixin, LoginRequiredMixin, TemplateView):
 
 
 class BoletosAnulacionesView(SaaSMixin, LoginRequiredMixin, TemplateView):
-    """Función: BoletosAnulacionesView."""
+    """BoletosAnulacionesView."""
+
     template_name = "core/erp/boletos_anulaciones.html"
 
     def get_context_data(self, **kwargs):
+        """get_context_data."""
         context = super().get_context_data(**kwargs)
         context["active_tab"] = "boletos_anulaciones"
         return context
-        """Método que obtiene context data. Args: según implementación. Returns: datos solicitados."""
 
 
 @method_decorator(ensure_csrf_cookie, name="dispatch")
 class BoletosImportarView(SaaSMixin, LoginRequiredMixin, TemplateView):
-    """Función: BoletosImportarView."""
+    """BoletosImportarView."""
+
     template_name = "core/erp/boletos_importar.html"
 
     def get_context_data(self, **kwargs):
+        """get_context_data."""
         context = super().get_context_data(**kwargs)
         context["active_tab"] = "boletos_importar"
-        """Método que obtiene context data. Args: según implementación. Returns: datos solicitados."""
 
         # Fetch recent imported tickets
         qs = BoletoImportado.objects.all()
@@ -275,23 +283,25 @@ class BoletosImportarView(SaaSMixin, LoginRequiredMixin, TemplateView):
 
 
 class BoletosManualView(SaaSMixin, LoginRequiredMixin, CreateView):
-    """Función: BoletosManualView."""
+    """BoletosManualView."""
+
     model = BoletoImportado
     form_class = BoletoManualForm
     template_name = "core/erp/boletos_manual.html"
     success_url = reverse_lazy("core:boletos_dashboard")
 
     def get_context_data(self, **kwargs):
+        """get_context_data."""
         context = super().get_context_data(**kwargs)
-        """Método que obtiene context data. Args: según implementación. Returns: datos solicitados."""
         context["active_tab"] = "boletos_manual"
         return context
 
 
 class ExportarBoletosExcelView(SaaSMixin, LoginRequiredMixin, View):
-    """Función: ExportarBoletosExcelView."""
+    """ExportarBoletosExcelView."""
+
     def get(self, request, *args, **kwargs):
-        """Método: get."""
+        """get."""
         agencia = get_agencia_from_request(request)
         fecha_inicio = request.GET.get("fecha_inicio")
         fecha_fin = request.GET.get("fecha_fin")

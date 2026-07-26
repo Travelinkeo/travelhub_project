@@ -24,14 +24,14 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 
 
-class EstadoColorFilter:
-    """Clase EstadoColorFilter. Uso: según contexto de la aplicación.
-    """
+class EstadoColorFilter(admin.SimpleListFilter):
+    """EstadoColorFilter."""
+
     title = "Estado"
     parameter_name = "estado"
 
     def lookups(self, request, model_admin):
-        # lookups: Lookups. Args: según implementación. Returns: según implementación.
+        """lookups."""
         return [
             (EmailMonitorLog.Estado.SUCCESS, "✅ Éxito"),
             (EmailMonitorLog.Estado.WARNING, "⚠️ Advertencia"),
@@ -39,20 +39,20 @@ class EstadoColorFilter:
         ]
 
     def queryset(self, request, queryset):
-        # queryset: Queryset. Args: según implementación. Returns: según implementación.
+        """queryset."""
         if self.value():
             return queryset.filter(estado=self.value())
         return queryset
 
 
-class UltimasHorasFilter:
-    """Clase UltimasHorasFilter. Uso: según contexto de la aplicación.
-    """
+class UltimasHorasFilter(admin.SimpleListFilter):
+    """UltimasHorasFilter."""
+
     title = "Período"
     parameter_name = "periodo"
 
     def lookups(self, request, model_admin):
-        # lookups: Lookups. Args: según implementación. Returns: según implementación.
+        """lookups."""
         return [
             ("1h", "Última hora"),
             ("6h", "Últimas 6 horas"),
@@ -62,7 +62,7 @@ class UltimasHorasFilter:
         ]
 
     def queryset(self, request, queryset):
-        # queryset: Queryset. Args: según implementación. Returns: según implementación.
+        """queryset."""
         ahora = timezone.now()
         deltas = {
             "1h": timezone.timedelta(hours=1),
@@ -83,7 +83,7 @@ class UltimasHorasFilter:
 
 @admin.action(description="🗑️ Purgar logs seleccionados (> 30 días)")
 def purgar_logs_antiguos(modeladmin, request, queryset):
-    # purgar_logs_antiguos: Purgar logs antiguos. Args: según implementación. Returns: según implementación.
+    """purgar_logs_antiguos."""
     hace_30_dias = timezone.now() - timezone.timedelta(days=30)
     antiguos = queryset.filter(fecha_ejecucion__lt=hace_30_dias)
     count = antiguos.count()
@@ -155,11 +155,11 @@ class EmailMonitorLogAdmin(SaaSAdminMixin, admin.ModelAdmin):
 
     # Sin permiso de agregar ni editar (sólo lectura + acciones)
     def has_add_permission(self, request):
-        # has_add_permission: Has add permission. Args: según implementación. Returns: según implementación.
+        """has_add_permission."""
         return False
 
     def has_change_permission(self, request, obj=None):
-        # has_change_permission: Has change permission. Args: según implementación. Returns: según implementación.
+        """has_change_permission."""
         return False  # No se editan logs, sólo se consultan
 
     # -----------------------------------------------------------------------
@@ -168,7 +168,7 @@ class EmailMonitorLogAdmin(SaaSAdminMixin, admin.ModelAdmin):
 
     @admin.display(description="Estado", ordering="estado")
     def badge_estado(self, obj):
-        # badge_estado: Badge estado. Args: según implementación. Returns: según implementación.
+        """badge_estado."""
         colores = {
             EmailMonitorLog.Estado.SUCCESS: ("#1a7f37", "✅"),
             EmailMonitorLog.Estado.WARNING: ("#9a6700", "⚠️"),
@@ -185,7 +185,7 @@ class EmailMonitorLogAdmin(SaaSAdminMixin, admin.ModelAdmin):
 
     @admin.display(description="Duración", ordering="tiempo_ejecucion")
     def tiempo_ejecucion_display(self, obj):
-        # tiempo_ejecucion_display: Tiempo ejecucion display. Args: según implementación. Returns: según implementación.
+        """tiempo_ejecucion_display."""
         if obj.tiempo_ejecucion is None:
             return "—"
         seg = obj.tiempo_ejecucion
@@ -199,7 +199,7 @@ class EmailMonitorLogAdmin(SaaSAdminMixin, admin.ModelAdmin):
 
     @admin.display(description="Mensaje")
     def mensaje_truncado(self, obj):
-        # mensaje_truncado: Mensaje truncado. Args: según implementación. Returns: según implementación.
+        """mensaje_truncado."""
         texto = obj.mensaje or ""
         if len(texto) <= 120:
             return texto
@@ -211,7 +211,7 @@ class EmailMonitorLogAdmin(SaaSAdminMixin, admin.ModelAdmin):
 
     @admin.display(description="📊 Resumen de Salud de la Agencia (últimas 24h)")
     def panel_salud_agencia(self, obj):
-        # panel_salud_agencia: Panel salud agencia. Args: según implementación. Returns: según implementación.
+        """panel_salud_agencia."""
         if not obj.agencia:
             return "Sin agencia"
 
@@ -329,9 +329,9 @@ class EmailMonitorLogAdmin(SaaSAdminMixin, admin.ModelAdmin):
 
 
 @admin.register(DemoRequest)
-class DemoRequestAdmin:
-    """Configuración de administración para demorequest. Uso: instanciar según necesidad del dominio.
-    """
+class DemoRequestAdmin(SaaSAdminMixin, admin.ModelAdmin):
+    """DemoRequestAdmin."""
+
     list_display = [
         "atendido_badge",
         "nombre",
@@ -376,7 +376,7 @@ class DemoRequestAdmin:
 
     @admin.display(description="", ordering="atendido")
     def atendido_badge(self, obj):
-        # atendido_badge: Atendido badge. Args: según implementación. Returns: según implementación.
+        """atendido_badge."""
         if obj.atendido:
             return format_html(
                 '<span style="background:#D1FAE5;color:#065F46;padding:2px 8px;'
@@ -389,7 +389,7 @@ class DemoRequestAdmin:
 
     @admin.display(description="Mensaje")
     def mensaje_corto(self, obj):
-        # mensaje_corto: Mensaje corto. Args: según implementación. Returns: según implementación.
+        """mensaje_corto."""
         if not obj.mensaje:
             return "—"
         if len(obj.mensaje) <= 80:
@@ -402,12 +402,12 @@ class DemoRequestAdmin:
 
     @admin.action(description="Marcar como atendidas")
     def marcar_atendido(self, request, queryset):
-        # marcar_atendido: Marcar atendido. Args: según implementación. Returns: según implementación.
+        """marcar_atendido."""
         updated = queryset.update(atendido=True)
         self.message_user(request, f"{updated} solicitud(es) marcada(s) como atendida(s).")
 
     @admin.action(description="Marcar como no atendidas")
     def marcar_no_atendido(self, request, queryset):
-        # marcar_no_atendido: Marcar no atendido. Args: según implementación. Returns: según implementación.
+        """marcar_no_atendido."""
         updated = queryset.update(atendido=False)
         self.message_user(request, f"{updated} solicitud(es) marcada(s) como pendiente(s).")

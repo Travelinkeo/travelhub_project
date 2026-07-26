@@ -1,6 +1,3 @@
-"""Módulo mantenimiento de la aplicación common.
-"""
-
 import datetime
 import logging
 import os
@@ -18,7 +15,7 @@ logger = logging.getLogger(__name__)
     default_retry_delay=3600,
 )
 def cleanup_temporary_storage_files(days=7):
-    # cleanup_temporary_storage_files: Cleanup temporary storage files. Args: según implementación. Returns: según implementación.
+    """cleanup_temporary_storage_files."""
     from django.core.files.storage import default_storage
     from django.utils import timezone
 
@@ -65,7 +62,7 @@ def cleanup_temporary_storage_files(days=7):
     soft_time_limit=540,
 )
 def backup_database_task(self):
-    # backup_database_task: Backup database task. Args: según implementación. Returns: según implementación.
+    """backup_database_task."""
     from django.core.management import call_command
 
     from core.middleware import system_context
@@ -88,7 +85,7 @@ def backup_database_task(self):
     default_retry_delay=60,
 )
 def limpiar_axes_logs():
-    # limpiar_axes_logs: Limpiar axes logs. Args: según implementación. Returns: según implementación.
+    """limpiar_axes_logs."""
     try:
         from datetime import timedelta
 
@@ -112,7 +109,7 @@ def limpiar_axes_logs():
     default_retry_delay=60,
 )
 def limpiar_sesiones_expiradas():
-    # limpiar_sesiones_expiradas: Limpiar sesiones expiradas. Args: según implementación. Returns: según implementación.
+    """limpiar_sesiones_expiradas."""
     try:
         from django.contrib.sessions.models import Session
         from django.utils import timezone
@@ -132,7 +129,7 @@ def limpiar_sesiones_expiradas():
     default_retry_delay=60,
 )
 def limpiar_celery_results(days=30):
-    # limpiar_celery_results: Limpiar celery results. Args: según implementación. Returns: según implementación.
+    """limpiar_celery_results."""
     try:
         from django.utils import timezone
         from django_celery_results.models import TaskResult

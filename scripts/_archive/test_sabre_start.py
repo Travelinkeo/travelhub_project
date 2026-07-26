@@ -13,6 +13,7 @@ from apps.automation.parsers.sabre_parser import SabreParser
 
 
 def test_sabre_split():
+    """test_sabre_split."""
     parser = SabreParser()
 
     # CASE 1: Date at start of string (The reported bug)

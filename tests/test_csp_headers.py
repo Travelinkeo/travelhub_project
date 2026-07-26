@@ -1,11 +1,10 @@
-"""Tests para Csp headers."""
 import pytest
 from django.test import Client
 
 
 @pytest.mark.django_db
 def test_csp_header_enforced():
-    """Csp header enforced."""
+    """test_csp_header_enforced."""
     c = Client()
     resp = c.get("/login/")
     assert resp.status_code == 200
@@ -22,7 +21,7 @@ def test_csp_header_enforced():
 
 @pytest.mark.django_db
 def test_csp_admin_allows_unsafe_eval_for_alpine(client):
-    """Csp admin allows unsafe eval for alpine."""
+    """test_csp_admin_allows_unsafe_eval_for_alpine."""
     resp = client.get("/admin/login/")
     csp = resp.headers.get("Content-Security-Policy")
     assert csp is not None
@@ -33,7 +32,7 @@ def test_csp_admin_allows_unsafe_eval_for_alpine(client):
 
 @pytest.mark.django_db
 def test_home_page_loads_with_csp(client):
-    """Home page loads with csp."""
+    """test_home_page_loads_with_csp."""
     resp = client.get("/")
     assert resp.status_code in [200, 302]
     csp = resp.headers.get("Content-Security-Policy")

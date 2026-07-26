@@ -1,6 +1,3 @@
-"""Proveedor de IA/configuración para automation: deepseek provider.
-"""
-
 import logging
 import time
 
@@ -15,15 +12,15 @@ DEEPSEEK_BASE_URL = "https://api.deepseek.com"
 MODEL_DEFAULT = "deepseek-chat"
 
 
-class DeepSeekProvider:
-    """Clase DeepSeekProvider. Uso: según contexto de la aplicación.
-    """
+class DeepSeekProvider(AbstractBaseProvider):
+    """DeepSeekProvider."""
+
     provider_name = "deepseek"
     supports_structured_output = False
     is_emergency_only = True
 
     def _get_client(self):
-        # _get_client:  get client. Args: según implementación. Returns: según implementación.
+        """_get_client."""
         import openai
 
         key = get_api_secret("DEEPSEEK_API_KEY")
@@ -32,7 +29,7 @@ class DeepSeekProvider:
         return openai.OpenAI(api_key=key, base_url=DEEPSEEK_BASE_URL)
 
     def test_connection(self) -> bool:
-        # test_connection: Test connection. Args: según implementación. Returns: según implementación.
+        """test_connection."""
         client = self._get_client()
         if not client:
             return False
@@ -51,7 +48,7 @@ class DeepSeekProvider:
         agency_id: int | None = None,
         feature: str = "unknown",
     ) -> ProviderResult:
-        # generate: Genera . Args: parámetros de generación. Returns: resultado generado.
+        """generate."""
         start = time.monotonic()
         client = self._get_client()
         if not client:

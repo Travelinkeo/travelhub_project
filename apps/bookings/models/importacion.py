@@ -1,6 +1,3 @@
-"""Módulo importacion de la aplicación bookings.
-"""
-
 from __future__ import annotations
 
 import logging
@@ -22,9 +19,9 @@ from core.api import (
 logger = logging.getLogger(__name__)
 
 
-class BoletoImportado:
-    """Clase BoletoImportado. Uso: según contexto de la aplicación.
-    """
+class BoletoImportado(AgenciaMixin, SoftDeleteModel, models.Model):
+    """BoletoImportado."""
+
     id_boleto_importado = models.AutoField(primary_key=True, verbose_name=_("ID Boleto Importado"))
 
     @property
@@ -34,7 +31,7 @@ class BoletoImportado:
 
     @id.setter
     def id(self, value):
-        # id: Id. Args: según implementación. Returns: según implementación.
+        """id."""
         self.id_boleto_importado = value
 
     archivo_boleto = models.FileField(
@@ -51,6 +48,8 @@ class BoletoImportado:
     updated_at = models.DateTimeField(_("Fecha de Actualización"), auto_now=True)
 
     class FormatoDetectado(models.TextChoices):
+        """FormatoDetectado."""
+
         PDF_KIU = "PDF_KIU", _("PDF (KIU)")
         PDF_SABRE = "PDF_SAB", _("PDF (Sabre)")
         PDF_AMADEUS = "PDF_AMA", _("PDF (Amadeus)")
@@ -78,6 +77,8 @@ class BoletoImportado:
     )
 
     class EstadoParseo(models.TextChoices):
+        """EstadoParseo."""
+
         PENDIENTE = "PEN", _("Pendiente de Parseo")
         EN_PROCESO = "PRO", _("En Proceso")
         COMPLETADO = "COM", _("Parseo Completado")
@@ -235,6 +236,8 @@ class BoletoImportado:
     )
 
     class EstadoEmision(models.TextChoices):
+        """EstadoEmision."""
+
         ORIGINAL = "ORI", _("Original")
         REEMISION = "REE", _("Re-emisión")
         ANULADO = "ANU", _("Anulado / Void")
@@ -267,7 +270,7 @@ class BoletoImportado:
         ]
 
     def __str__(self):
-        # __str__: Representación en string del objeto. Returns: str.
+        """__str__."""
         return f"Boleto {self.id_boleto_importado} ({self.archivo_boleto.name if self.archivo_boleto else 'N/A'})"
 
     def get_pdf_url(self):
@@ -281,48 +284,44 @@ class BoletoImportado:
 
     @property
     def pasajero_nombre_completo(self):
-        # pasajero_nombre_completo: Pasajero nombre completo. Args: según implementación. Returns: según implementación.
         return self.nombre_pasajero_completo
 
     @pasajero_nombre_completo.setter
     def pasajero_nombre_completo(self, value):
-        # pasajero_nombre_completo: Pasajero nombre completo. Args: según implementación. Returns: según implementación.
+        """pasajero_nombre_completo."""
         self.nombre_pasajero_completo = value
 
     @property
     def pnr(self):
-        # pnr: Pnr. Args: según implementación. Returns: según implementación.
         return self.localizador_pnr
 
     @pnr.setter
     def pnr(self, value):
-        # pnr: Pnr. Args: según implementación. Returns: según implementación.
+        """pnr."""
         self.localizador_pnr = value
 
     @property
     def id_boleto(self):
-        # id_boleto: Id boleto. Args: según implementación. Returns: según implementación.
         return self.id_boleto_importado
 
     @id_boleto.setter
     def id_boleto(self, value):
-        # id_boleto: Id boleto. Args: según implementación. Returns: según implementación.
+        """id_boleto."""
         self.id_boleto_importado = value
 
     @property
     def fecha_emision(self):
-        # fecha_emision: Fecha emision. Args: según implementación. Returns: según implementación.
         return self.fecha_emision_boleto
 
     @fecha_emision.setter
     def fecha_emision(self, value):
-        # fecha_emision: Fecha emision. Args: según implementación. Returns: según implementación.
+        """fecha_emision."""
         self.fecha_emision_boleto = value
 
 
-class SolicitudAnulacion:
-    """Clase SolicitudAnulacion. Uso: según contexto de la aplicación.
-    """
+class SolicitudAnulacion(AgenciaMixin, models.Model):
+    """SolicitudAnulacion."""
+
     id_anulacion = models.AutoField(primary_key=True, verbose_name=_("ID Anulación"))
     boleto = models.ForeignKey(
         BoletoImportado,
@@ -334,6 +333,8 @@ class SolicitudAnulacion:
     )
 
     class TipoAnulacion(models.TextChoices):
+        """TipoAnulacion."""
+
         VOLUNTARIA = "VOL", _("Voluntaria")
         INVOLUNTARIA = "INV", _("Involuntaria")
         CAMBIO = "CAM", _("Cambio de Itinerario")
@@ -355,6 +356,8 @@ class SolicitudAnulacion:
     monto_reembolso = models.DecimalField(_("Monto a Reembolsar"), max_digits=12, decimal_places=2)
 
     class EstadoSolicitud(models.TextChoices):
+        """EstadoSolicitud."""
+
         PENDIENTE = "PEN", _("Pendiente")
         APROBADA = "APR", _("Aprobada")
         RECHAZADA = "REC", _("Rechazada")
@@ -383,13 +386,13 @@ class SolicitudAnulacion:
         ordering = ["-fecha_solicitud"]
 
     def __str__(self):
-        # __str__: Representación en string del objeto. Returns: str.
+        """__str__."""
         return f"Anulación {self.id_anulacion} - Boleto {self.id_anulacion}"
 
 
-class BoletoImportadoTransito:
-    """Clase BoletoImportadoTransito. Uso: según contexto de la aplicación.
-    """
+class BoletoImportadoTransito(AgenciaMixin, models.Model):
+    """BoletoImportadoTransito."""
+
     id_transito = models.AutoField(primary_key=True, verbose_name=_("ID Tránsito"))
     boleto_origen = models.ForeignKey(
         BoletoImportado,
@@ -416,5 +419,5 @@ class BoletoImportadoTransito:
         ]
 
     def __str__(self):
-        # __str__: Representación en string del objeto. Returns: str.
+        """__str__."""
         return f"Tránsito {self.id_transito} - Boleto {self.numero_boleto or 'N/A'} ({self.nombre_pasajero or 'N/A'})"

@@ -8,11 +8,12 @@ from apps.communications.services.email_unified import EmailMonitorService
 
 
 class Command(BaseCommand):
-    """Comando de gestión personalizado."""
+    """Command."""
+
     help = "Monitorea correos de boletos (KIU/SABRE) y envía por WhatsApp"
 
     def add_arguments(self, parser):
-        """Método: add arguments."""
+        """add_arguments."""
         parser.add_argument(
             "--phone", type=str, required=True, help="Número WhatsApp destino (ej: +584121234567)"
         )
@@ -30,7 +31,7 @@ class Command(BaseCommand):
         parser.add_argument("--agencia", type=str, help="Nombre de la agencia (opcional)")
 
     def handle(self, *args, **options):
-        """Método: handle."""
+        """handle."""
         self.stdout.write(self.style.SUCCESS(f"Iniciando monitor de boletos -> {options['phone']}"))
 
         from core.models.agencia import Agencia

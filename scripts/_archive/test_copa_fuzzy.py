@@ -12,6 +12,7 @@ logging.basicConfig(level=logging.INFO)
 
 
 def test_copa_fuzzy():
+    """test_copa_fuzzy."""
     parser = CopaParser()
 
     # 1. SAMPLE IN SPANISH (Simulated)

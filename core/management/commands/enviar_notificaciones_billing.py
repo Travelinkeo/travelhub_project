@@ -17,11 +17,12 @@ from core.models.agencia import Agencia
 
 
 class Command(BaseCommand):
-    """Comando de gestión personalizado."""
+    """Command."""
+
     help = "Envía notificaciones automáticas de billing"
 
     def handle(self, *args, **options):
-        """Método: handle."""
+        """handle."""
         hoy = timezone.now().date()
 
         # 1. Trials que expiran en 7 días

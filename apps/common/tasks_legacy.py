@@ -1,6 +1,3 @@
-"""Módulo tasks legacy de la aplicación common.
-"""
-
 import base64
 import datetime
 import logging
@@ -17,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 def get_filename_from_header(header):
-    # get_filename_from_header: Obtiene/recupera filename from header. Args: según implementación. Returns: dato solicitado.
+    """get_filename_from_header."""
     if not header:
         return None
     decoded_header = decode_header(header)
@@ -37,7 +34,7 @@ def get_filename_from_header(header):
     name="core.tasks.procesar_correo_individual_agencia", time_limit=300, soft_time_limit=270
 )
 def procesar_correo_individual_agencia(agencia_id):
-    # procesar_correo_individual_agencia: Procesa r correo individual agencia. Args: datos a procesar. Returns: resultado procesado.
+    """procesar_correo_individual_agencia."""
     from apps.communications.services.email_unified import EmailMonitorService
     from core.middleware import agency_context
     from core.models.agencia import Agencia
@@ -150,7 +147,7 @@ def _notificar_operador_whatsapp(agencia, cantidad_correos):
     acks_late=True,
 )
 def process_incoming_emails():
-    # process_incoming_emails: Procesa  incoming emails. Args: datos a procesar. Returns: resultado procesado.
+    """process_incoming_emails."""
     from django.core.cache import cache
     from django.db.models import Q
 
@@ -217,7 +214,7 @@ def process_incoming_emails():
 def enviar_notificacion_whatsapp_task(
     self, numero_cliente, mensaje, email_cliente=None, media_url=None, file_name=None, **kwargs
 ):
-    # enviar_notificacion_whatsapp_task: Envía ar notificacion whatsapp task. Args: datos del mensaje. Returns: resultado del envío.
+    """enviar_notificacion_whatsapp_task."""
     from django.core.mail import send_mail
 
     from apps.communications.services.telegram_unified import enviar_alerta_telegram
@@ -287,7 +284,7 @@ def enviar_notificacion_whatsapp_task(
     default_retry_delay=600,
 )
 def migrar_logos_agencia_task(agencia_id, **kwargs):
-    # migrar_logos_agencia_task: Migrar logos agencia task. Args: según implementación. Returns: según implementación.
+    """migrar_logos_agencia_task."""
     from apps.communications.services.telegram_unified import upload_logo_to_telegram
     from core.models.agencia import Agencia
 
@@ -354,7 +351,7 @@ def migrar_logos_agencia_task(agencia_id, **kwargs):
     default_retry_delay=3600,
 )
 def cleanup_temporary_storage_files(days=7):
-    # cleanup_temporary_storage_files: Cleanup temporary storage files. Args: según implementación. Returns: según implementación.
+    """cleanup_temporary_storage_files."""
     from django.core.files.storage import default_storage
     from django.utils import timezone
 
@@ -401,7 +398,7 @@ def cleanup_temporary_storage_files(days=7):
     soft_time_limit=50,
 )
 def send_telegram_task(self, message, chat_id=None, parse_mode="HTML", agencia_id=None):
-    # send_telegram_task: Envía  telegram task. Args: datos del mensaje. Returns: resultado del envío.
+    """send_telegram_task."""
     from apps.communications.services.telegram_unified import TelegramNotificationService
 
     try:
@@ -432,7 +429,7 @@ def send_telegram_task(self, message, chat_id=None, parse_mode="HTML", agencia_i
     soft_time_limit=100,
 )
 def send_whatsapp_task(self, sender_id, recipient_number, message_text, agencia_id=None):
-    # send_whatsapp_task: Envía  whatsapp task. Args: datos del mensaje. Returns: resultado del envío.
+    """send_whatsapp_task."""
     from apps.communications.services.whatsapp_unified import enviar_whatsapp
 
     try:
@@ -453,7 +450,7 @@ def send_whatsapp_task(self, sender_id, recipient_number, message_text, agencia_
     soft_time_limit=50,
 )
 def send_email_task(self, recipient, subject, message, from_email=None, agencia_id=None, **kwargs):
-    # send_email_task: Envía  email task. Args: datos del mensaje. Returns: resultado del envío.
+    """send_email_task."""
     from apps.communications.services.email_unified import enviar_email_generico
 
     try:
@@ -485,7 +482,7 @@ def send_email_task(self, recipient, subject, message, from_email=None, agencia_
     soft_time_limit=50,
 )
 def enviar_bienvenida_agencia_task(self, agencia_id, user_id):
-    # enviar_bienvenida_agencia_task: Envía ar bienvenida agencia task. Args: datos del mensaje. Returns: resultado del envío.
+    """enviar_bienvenida_agencia_task."""
     from django.contrib.auth import get_user_model
 
     from apps.communications.services.notification_dispatcher import NotificationService
@@ -512,7 +509,7 @@ def enviar_bienvenida_agencia_task(self, agencia_id, user_id):
     soft_time_limit=100,
 )
 def notificar_confirmacion_pago_task(self, pago_id):
-    # notificar_confirmacion_pago_task: Notificar confirmacion pago task. Args: según implementación. Returns: según implementación.
+    """notificar_confirmacion_pago_task."""
     from apps.bookings.models import PagoVenta
     from apps.communications.services.notification_dispatcher import notificar_confirmacion_pago
 
@@ -535,7 +532,7 @@ def notificar_confirmacion_pago_task(self, pago_id):
     soft_time_limit=100,
 )
 def notificar_recordatorio_pago_task(self, venta_id):
-    # notificar_recordatorio_pago_task: Notificar recordatorio pago task. Args: según implementación. Returns: según implementación.
+    """notificar_recordatorio_pago_task."""
     from apps.bookings.models import Venta
     from apps.communications.services.notification_dispatcher import notificar_recordatorio_pago
 
@@ -558,7 +555,7 @@ def notificar_recordatorio_pago_task(self, venta_id):
     soft_time_limit=100,
 )
 def notificar_boleto_procesado_task(self, boleto_id):
-    # notificar_boleto_procesado_task: Notificar boleto procesado task. Args: según implementación. Returns: según implementación.
+    """notificar_boleto_procesado_task."""
     from apps.bookings.models import BoletoImportado
     from apps.communications.services.notification_dispatcher import notificar_boleto_procesado
 
@@ -581,7 +578,7 @@ def notificar_boleto_procesado_task(self, boleto_id):
     soft_time_limit=100,
 )
 def generate_pdf_task(self, html_content, margins=0.0):
-    # generate_pdf_task: Genera  pdf task. Args: parámetros de generación. Returns: resultado generado.
+    """generate_pdf_task."""
     from apps.common.services.pdf_renderer import PdfRendererService
 
     try:
@@ -602,7 +599,7 @@ def generate_pdf_task(self, html_content, margins=0.0):
     soft_time_limit=540,
 )
 def backup_database_task(self):
-    # backup_database_task: Backup database task. Args: según implementación. Returns: según implementación.
+    """backup_database_task."""
     from django.core.management import call_command
 
     from core.middleware import system_context
@@ -626,7 +623,7 @@ def backup_database_task(self):
     soft_time_limit=100,
 )
 def send_telegram_document_task(self, file_path, caption=None, chat_id=None, agencia_id=None):
-    # send_telegram_document_task: Envía  telegram document task. Args: datos del mensaje. Returns: resultado del envío.
+    """send_telegram_document_task."""
     from apps.communications.services.telegram_unified import TelegramNotificationService
 
     try:
@@ -657,7 +654,7 @@ def send_telegram_document_task(self, file_path, caption=None, chat_id=None, age
     soft_time_limit=100,
 )
 def send_telegram_photo_task(self, agencia_id, filename="logo.png"):
-    # send_telegram_photo_task: Envía  telegram photo task. Args: datos del mensaje. Returns: resultado del envío.
+    """send_telegram_photo_task."""
     from apps.communications.services.telegram_unified import upload_logo_to_telegram
     from core.models.agencia import Agencia
 
@@ -688,7 +685,7 @@ def send_telegram_photo_task(self, agencia_id, filename="logo.png"):
     soft_time_limit=100,
 )
 def send_factura_to_telegram_task(self, factura_id):
-    # send_factura_to_telegram_task: Envía  factura to telegram task. Args: datos del mensaje. Returns: resultado del envío.
+    """send_factura_to_telegram_task."""
     from apps.finance.models import Factura
     from apps.finance.services.factura_service import FacturaService
 
@@ -712,7 +709,7 @@ def send_factura_to_telegram_task(self, factura_id):
     soft_time_limit=100,
 )
 def send_factura_to_whatsapp_task(self, factura_id):
-    # send_factura_to_whatsapp_task: Envía  factura to whatsapp task. Args: datos del mensaje. Returns: resultado del envío.
+    """send_factura_to_whatsapp_task."""
     from apps.finance.models import Factura
     from apps.finance.services.factura_service import FacturaService
 
@@ -732,7 +729,7 @@ def send_factura_to_whatsapp_task(self, factura_id):
 )
 @idempotent_task(timeout=3600, key_prefix="celery_binance_order")
 def create_binance_order_task(factura_id):
-    # create_binance_order_task: Crea un nuevo binance order task. Args: datos del objeto. Returns: objeto creado.
+    """create_binance_order_task."""
     from celery import current_task
     from django.core.cache import cache
 
@@ -774,7 +771,7 @@ def create_binance_order_task(factura_id):
     soft_time_limit=50,
 )
 def notify_migration_alert_task(self, check_id):
-    # notify_migration_alert_task: Notify migration alert task. Args: según implementación. Returns: según implementación.
+    """notify_migration_alert_task."""
     from apps.communications.services.notification_dispatcher import notificar_alerta_migratoria
     from core.models.migration_checks import MigrationCheck
 
@@ -797,7 +794,7 @@ def notify_migration_alert_task(self, check_id):
     soft_time_limit=20,
 )
 def answer_telegram_callback_task(self, bot_token, query_id, text):
-    # answer_telegram_callback_task: Answer telegram callback task. Args: según implementación. Returns: según implementación.
+    """answer_telegram_callback_task."""
     import requests
 
     url = f"https://api.telegram.org/bot{bot_token}/answerCallbackQuery"
@@ -821,7 +818,7 @@ def answer_telegram_callback_task(self, bot_token, query_id, text):
     soft_time_limit=20,
 )
 def edit_telegram_message_task(self, bot_token, chat_id, message_id, text):
-    # edit_telegram_message_task: Edit telegram message task. Args: según implementación. Returns: según implementación.
+    """edit_telegram_message_task."""
     import requests
 
     url = f"https://api.telegram.org/bot{bot_token}/editMessageText"
@@ -851,7 +848,7 @@ def edit_telegram_message_task(self, bot_token, chat_id, message_id, text):
     soft_time_limit=50,
 )
 def send_evolution_message_task(self, agencia_id, phone_number, text):
-    # send_evolution_message_task: Envía  evolution message task. Args: datos del mensaje. Returns: resultado del envío.
+    """send_evolution_message_task."""
     from apps.communications.services.whatsapp_service import WhatsAppEvolutionService
 
     try:
@@ -878,7 +875,7 @@ def send_evolution_message_task(self, agencia_id, phone_number, text):
 def send_evolution_document_task(
     self, agencia_id, phone_number, document_url, filename, caption=""
 ):
-    # send_evolution_document_task: Envía  evolution document task. Args: datos del mensaje. Returns: resultado del envío.
+    """send_evolution_document_task."""
     from apps.communications.services.whatsapp_service import WhatsAppEvolutionService
 
     try:
@@ -903,7 +900,7 @@ def send_evolution_document_task(
     soft_time_limit=100,
 )
 def fetch_unsplash_image_task(self, query):
-    # fetch_unsplash_image_task: Fetch unsplash image task. Args: según implementación. Returns: según implementación.
+    """fetch_unsplash_image_task."""
     import requests
 
     access_key = os.environ.get("UNSPLASH_ACCESS_KEY")
@@ -950,7 +947,7 @@ def fetch_unsplash_image_task(self, query):
     soft_time_limit=20,
 )
 def fetch_airline_logo_task(self, airline_name):
-    # fetch_airline_logo_task: Fetch airline logo task. Args: según implementación. Returns: según implementación.
+    """fetch_airline_logo_task."""
     import json
 
     import requests
@@ -1004,7 +1001,7 @@ def fetch_airline_logo_task(self, airline_name):
     soft_time_limit=100,
 )
 def download_twilio_media_task(self, media_url):
-    # download_twilio_media_task: Download twilio media task. Args: según implementación. Returns: según implementación.
+    """download_twilio_media_task."""
     from apps.automation.services.voice_parser_service import (
         download_twilio_media,
         extract_quote_intent_from_audio,
@@ -1032,7 +1029,7 @@ def download_twilio_media_task(self, media_url):
     soft_time_limit=50,
 )
 def send_whatsapp_meta_task(self, numero_cliente, mensaje, agencia_id=None):
-    # send_whatsapp_meta_task: Envía  whatsapp meta task. Args: datos del mensaje. Returns: resultado del envío.
+    """send_whatsapp_meta_task."""
     from apps.communications.services.whatsapp_unified import enviar_mensaje_meta_api
 
     try:
@@ -1063,7 +1060,7 @@ def send_whatsapp_meta_task(self, numero_cliente, mensaje, agencia_id=None):
     soft_time_limit=50,
 )
 def get_telegram_file_url_task(self, file_id, agencia_id=None):
-    # get_telegram_file_url_task: Obtiene/recupera telegram file url task. Args: según implementación. Returns: dato solicitado.
+    """get_telegram_file_url_task."""
     from apps.communications.services.telegram_unified import TelegramNotificationService
 
     try:
@@ -1089,7 +1086,7 @@ def get_telegram_file_url_task(self, file_id, agencia_id=None):
     soft_time_limit=50,
 )
 def fetch_bcv_rates_task(self):
-    # fetch_bcv_rates_task: Fetch bcv rates task. Args: según implementación. Returns: según implementación.
+    """fetch_bcv_rates_task."""
     from apps.finance.services.bcv_scraper import obtener_tasas_bcv
 
     try:
@@ -1113,7 +1110,7 @@ def fetch_bcv_rates_task(self):
     soft_time_limit=50,
 )
 def fetch_tasas_venezuela_task(self):
-    # fetch_tasas_venezuela_task: Fetch tasas venezuela task. Args: según implementación. Returns: según implementación.
+    """fetch_tasas_venezuela_task."""
     from apps.contabilidad.tasas_venezuela_client import TasasVenezuelaClient
 
     try:
@@ -1137,7 +1134,7 @@ def fetch_tasas_venezuela_task(self):
     soft_time_limit=50,
 )
 def fetch_image_base64_task(self, image_source):
-    # fetch_image_base64_task: Fetch image base64 task. Args: según implementación. Returns: según implementación.
+    """fetch_image_base64_task."""
     from apps.common.utils.images import get_image_as_base64
 
     try:
@@ -1447,7 +1444,7 @@ def process_scheduled_whatsapp_messages():
     default_retry_delay=60,
 )
 def limpiar_axes_logs():
-    # limpiar_axes_logs: Limpiar axes logs. Args: según implementación. Returns: según implementación.
+    """limpiar_axes_logs."""
     try:
         from datetime import timedelta
 
@@ -1471,7 +1468,7 @@ def limpiar_axes_logs():
     default_retry_delay=60,
 )
 def limpiar_sesiones_expiradas():
-    # limpiar_sesiones_expiradas: Limpiar sesiones expiradas. Args: según implementación. Returns: según implementación.
+    """limpiar_sesiones_expiradas."""
     try:
         from django.contrib.sessions.models import Session
         from django.utils import timezone
@@ -1553,7 +1550,7 @@ def notify_cliente_alerta_migratoria_task(cliente_id, destino, requisitos):
     default_retry_delay=60,
 )
 def limpiar_celery_results(days=30):
-    # limpiar_celery_results: Limpiar celery results. Args: según implementación. Returns: según implementación.
+    """limpiar_celery_results."""
     try:
         from django.utils import timezone
         from django_celery_results.models import TaskResult

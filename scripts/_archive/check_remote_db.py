@@ -5,6 +5,7 @@ import psycopg2
 
 
 def test_connection(url, description):
+    """test_connection."""
     print(f"\n--- Probando: {description} ---")
     print(f"URL: {url}")
 

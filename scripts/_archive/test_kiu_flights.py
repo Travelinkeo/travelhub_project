@@ -38,6 +38,7 @@ Total:                           VES 5.500,00
 
 
 def test_extraction():
+    """test_extraction."""
     parser = KIUParser()
     parsed_data = parser.parse(sample_text)
 

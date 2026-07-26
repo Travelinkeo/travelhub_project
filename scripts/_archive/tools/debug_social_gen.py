@@ -18,6 +18,7 @@ from core.models import HotelTarifario
 
 
 def test_generation():
+    """test_generation."""
     service = CopywriterService()
     hotel = HotelTarifario.objects.first()
     if not hotel:

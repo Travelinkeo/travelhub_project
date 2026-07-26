@@ -40,7 +40,7 @@ class APIKeyViewSet(TenantViewSetMixin, viewsets.ModelViewSet):
     http_method_names = ["get", "post", "patch", "delete"]
 
     def get_queryset(self):
-        """Método que obtiene queryset. Args: según implementación. Returns: datos solicitados."""
+        """get_queryset."""
         return CronApiKey.objects.filter(
             agencia=self.request.user.usuarioagencia_set.first().agencia
             if hasattr(self.request.user, "usuarioagencia_set")
@@ -49,7 +49,7 @@ class APIKeyViewSet(TenantViewSetMixin, viewsets.ModelViewSet):
         )
 
     def get_serializer_class(self):
-        """Método que obtiene serializer class. Args: según implementación. Returns: datos solicitados."""
+        """get_serializer_class."""
         if self.action == "create":
             return APIKeyCreateSerializer
         return APIKeySerializer
@@ -125,7 +125,7 @@ class WebhookViewSet(TenantViewSetMixin, viewsets.ModelViewSet):
     http_method_names = ["get", "post", "patch", "delete"]
 
     def get_queryset(self):
-        """Método que obtiene queryset. Args: según implementación. Returns: datos solicitados."""
+        """get_queryset."""
         return Webhook.objects.filter(
             agencia=self.request.user.usuarioagencia_set.first().agencia
             if hasattr(self.request.user, "usuarioagencia_set")
@@ -133,7 +133,7 @@ class WebhookViewSet(TenantViewSetMixin, viewsets.ModelViewSet):
         )
 
     def perform_create(self, serializer):
-        """Método: perform create."""
+        """perform_create."""
         agencia = None
         if hasattr(self.request.user, "usuarioagencia_set"):
             ua = self.request.user.usuarioagencia_set.first()

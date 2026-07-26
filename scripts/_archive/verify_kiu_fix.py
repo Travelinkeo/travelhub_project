@@ -23,6 +23,7 @@ mock_data_kiu = {
 
 
 def unwrap_generate_ticket():
+    """unwrap_generate_ticket."""
     # We need to inspect what template is being selected.
     # Since generate_ticket renders the template, we can't easily see the template name variable.
     # However, we can check if the function runs without error using the forced template.

@@ -1,4 +1,3 @@
-"""Tests para Api permissions."""
 import pytest
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
@@ -12,27 +11,27 @@ pytestmark = pytest.mark.skip(reason="Tests requieren configuración completa de
 
 @pytest.fixture
 def user() -> any:
-    """User."""
+    """user."""
     User = get_user_model()
     return User.objects.create_user(username="normal", password="pass123", is_staff=False)
 
 
 @pytest.fixture
 def staff_user() -> any:
-    """Staff user."""
+    """staff_user."""
     User = get_user_model()
     return User.objects.create_user(username="staff", password="pass123", is_staff=True)
 
 
 @pytest.fixture
 def api_client():
-    """Api client."""
+    """api_client."""
     return APIClient()
 
 
 @pytest.fixture
 def venta_base(moneda_usd, cliente_demo):
-    """Venta base."""
+    """venta_base."""
     return Venta.objects.create(
         cliente=cliente_demo,
         moneda=moneda_usd,
@@ -49,13 +48,13 @@ def venta_base(moneda_usd, cliente_demo):
 
 @pytest.fixture
 def moneda_usd():
-    """Moneda usd."""
+    """moneda_usd."""
     return Moneda.objects.create(nombre="USD", codigo_iso="USD", simbolo="$", es_moneda_local=False)
 
 
 @pytest.fixture
 def cliente_demo():
-    """Cliente demo."""
+    """cliente_demo."""
     return Cliente.objects.create(nombres="Test", apellidos="User", email="t@example.com")
 
 
@@ -63,13 +62,13 @@ def cliente_demo():
 
 
 def test_health_public(api_client):
-    """Health public."""
+    """test_health_public."""
     resp = api_client.get("/api/health/")
     assert resp.status_code == 200
 
 
 def test_login_public(api_client):
-    """Login public."""
+    """test_login_public."""
     resp = api_client.post("/api/auth/login/", {"username": "x", "password": "y"}, format="json")
     # 401 for invalid credentials but endpoint reachable unauthenticated
     assert resp.status_code in (400, 401)
@@ -79,20 +78,20 @@ def test_login_public(api_client):
 
 
 def test_ventas_list_requires_auth(api_client):
-    """Ventas list requires auth."""
+    """test_ventas_list_requires_auth."""
     resp = api_client.get("/api/ventas/")
     assert resp.status_code in (401, 403)
 
 
 def test_ventas_create_requires_auth(api_client, venta_payload):
-    """Ventas create requires auth."""
+    """test_ventas_create_requires_auth."""
     resp = api_client.post("/api/ventas/", venta_payload, format="json")
     assert resp.status_code in (401, 403)
 
 
 @pytest.fixture
 def venta_payload(moneda_usd, cliente_demo):
-    """Venta payload."""
+    """venta_payload."""
     return {
         "cliente": cliente_demo.id_cliente,
         "moneda": moneda_usd.id_moneda,
@@ -103,7 +102,7 @@ def venta_payload(moneda_usd, cliente_demo):
 
 
 def test_ventas_create_authenticated(api_client, user, venta_payload):
-    """Ventas create authenticated."""
+    """test_ventas_create_authenticated."""
     api_client.login(username="normal", password="pass123")
     resp = api_client.post("/api/ventas/", venta_payload, format="json")
     assert resp.status_code == 201, resp.content
@@ -113,7 +112,7 @@ def test_ventas_create_authenticated(api_client, user, venta_payload):
 
 
 def test_asiento_requires_staff_for_write(api_client, user, staff_user):
-    """Asiento requires staff for write."""
+    """test_asiento_requires_staff_for_write."""
     api_client.login(username="staff", password="pass123")
     from apps.common.models import Moneda
 
@@ -138,13 +137,13 @@ def test_asiento_requires_staff_for_write(api_client, user, staff_user):
 
 
 def test_audit_logs_requires_auth(api_client):
-    """Audit logs requires auth."""
+    """test_audit_logs_requires_auth."""
     resp = api_client.get("/api/audit-logs/")
     assert resp.status_code in (401, 403)
 
 
 def test_audit_logs_read_authenticated(api_client, user):
-    """Audit logs read authenticated."""
+    """test_audit_logs_read_authenticated."""
     api_client.login(username="normal", password="pass123")
     resp = api_client.get("/api/audit-logs/")
     # Vacío pero accesible

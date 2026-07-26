@@ -18,7 +18,7 @@ class UserProgressModelTest(TestCase):
     """Tests para el modelo UserProgress."""
 
     def setUp(self):
-        """SetUp."""
+        """setUp."""
         self.user = User.objects.create_user(
             username="testuser",
             email="test@example.com",
@@ -106,7 +106,7 @@ class OnboardingViewsTest(TestCase):
     """Tests para las vistas del wizard."""
 
     def setUp(self):
-        """Setup."""
+        """setUp."""
         self.client = Client()
         self.user = User.objects.create_user(
             username="testuser",
@@ -178,7 +178,7 @@ class OnboardingMiddlewareTest(TestCase):
     """Tests para el middleware de redirección."""
 
     def setUp(self):
-        """Setup."""
+        """setUp."""
         self.client = Client()
         self.user = User.objects.create_user(
             username="testuser",

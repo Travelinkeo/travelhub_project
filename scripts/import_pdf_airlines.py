@@ -14,12 +14,14 @@ from apps.common.models import Aerolinea
 
 
 def clean_text(text):
+    """clean_text."""
     if not text:
         return ""
     return text.replace("\n", " ").strip()
 
 
 def run():
+    """run."""
     file_path = r"C:\Users\ARMANDO\Downloads\Tabla Mundial de Aerolíneas.pdf"
 
     if not os.path.exists(file_path):

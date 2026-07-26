@@ -10,11 +10,12 @@ logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
-    """Comando de gestión personalizado."""
+    """Command."""
+
     help = "Genera un nuevo artículo de blog sobre un tema específico usando IA."
 
     def add_arguments(self, parser: CommandParser) -> None:
-        """Método: add arguments."""
+        """add_arguments."""
         parser.add_argument(
             "--topic",
             type=str,
@@ -23,7 +24,7 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        """Método: handle."""
+        """handle."""
         topic = options["topic"]
         self.stdout.write(
             self.style.SUCCESS(f'Iniciando la generación de un artículo de blog sobre: "{topic}"')
@@ -73,11 +74,11 @@ class Command(BaseCommand):
             )
 
     def _create_prompt(self, topic: str) -> str:
-        """Método interna: create prompt."""
+        """_create_prompt."""
         return f"""
         Actúa como un experto en SEO y un blogger de viajes apasionado. Tu tarea es generar un artículo de blog completo sobre el siguiente tema.
         El contenido debe ser original, atractivo, informativo y estar bien estructurado para la web (usa párrafos cortos, listas, etc.).
-        
+
         Tema: "{topic}"
 
         Devuelve la respuesta como un único objeto JSON con la siguiente estructura y claves:

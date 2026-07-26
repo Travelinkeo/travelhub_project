@@ -31,9 +31,10 @@ from ..settings_unfold import UNFOLD  # noqa: F401
 
 
 class ZoneInfoEncoder(json.JSONEncoder):
-    """Encoder JSON personalizado que serializa objetos ZoneInfo a string."""
+    """Custom JSON encoder that handles ZoneInfo serialization."""
 
     def default(self, obj):
+        """default."""
         if isinstance(obj, ZoneInfo):
             return str(obj)
         return super().default(obj)
@@ -601,7 +602,7 @@ _redis_evolution_port = os.getenv("REDIS_EVOLUTION_PORT", _default_redis_port or
 
 
 def _build_redis_url(host, port, password=None, db_num=0):
-    """Construye una URL de Redis con autenticación opcional. Args: host (str), port (str|int), password (str|None), db_num (int). Returns: str."""
+    """Build Redis URL with optional password authentication."""
     if password:
         return f"redis://:{password}@{host}:{port}/{db_num}"
     return f"redis://{host}:{port}/{db_num}"

@@ -1,6 +1,3 @@
-"""Servicio de ai engine para la aplicación automation.
-"""
-
 import json
 import logging
 import os
@@ -13,39 +10,39 @@ logger = logging.getLogger(__name__)
 
 
 def _get_genai():
-    # _get_genai:  get genai. Args: según implementación. Returns: según implementación.
+    """_get_genai."""
     from google import genai
 
     return genai
 
 
 def _get_genai_types():
-    # _get_genai_types:  get genai types. Args: según implementación. Returns: según implementación.
+    """_get_genai_types."""
     from google.genai import types
 
     return types
 
 
-class CircuitBreakerException:
-    """Clase CircuitBreakerException. Uso: según contexto de la aplicación.
-    """
+class CircuitBreakerException(Exception):
+    """CircuitBreakerException."""
+
     pass
 
 
-class QuotaExhaustedException:
-    """Clase QuotaExhaustedException. Uso: según contexto de la aplicación.
-    """
+class QuotaExhaustedException(Exception):
+    """QuotaExhaustedException."""
+
     pass
 
 
-class GeminiConfigurationError:
-    """Clase GeminiConfigurationError. Uso: según contexto de la aplicación.
-    """
+class GeminiConfigurationError(RuntimeError):
+    """GeminiConfigurationError."""
+
     pass
 
 
 def get_gemini_api_key(agency=None) -> str | None:
-    # get_gemini_api_key: Obtiene/recupera gemini api key. Args: según implementación. Returns: dato solicitado.
+    """get_gemini_api_key."""
     try:
         from core.api import get_current_agency
 
@@ -78,13 +75,12 @@ class AIEngine:
 
     @classmethod
     def _ensure_configured(cls):
-        # _ensure_configured:  ensure configured. Args: según implementación. Returns: según implementación.
         from core.api import get_api_secret
 
         return bool(get_api_secret("GEMINI_API_KEY") or get_gemini_api_key())
 
     def __init__(self):
-        # __init__: Inicializa una nueva instancia de AIEngine. Args: parámetros de inicialización.
+        """__init__."""
         self.is_ready = False
 
     def call_gemini(
@@ -216,7 +212,7 @@ class AIEngine:
                 return parsed_data
 
     def analyze_gds_terminal(self, raw_text: str, gds_type: str = "SABRE") -> dict[str, Any]:
-        # analyze_gds_terminal: Analyze gds terminal. Args: según implementación. Returns: según implementación.
+        """analyze_gds_terminal."""
         from core.api import ResultadoParseoSchema
 
         system_prompt = (
@@ -249,7 +245,7 @@ class AIEngine:
         system_prompt: str | None = None,
         images: list[Any] | None = None,
     ) -> dict[str, Any]:
-        # parse_structured_data: Analiza/parsea  structured data. Args: datos de entrada. Returns: resultado del parseo.
+        """parse_structured_data."""
         return self.call_gemini(
             prompt=text,
             content_list=images,
@@ -258,7 +254,7 @@ class AIEngine:
         )
 
     def _clean_json_response(self, text: str) -> str:
-        # _clean_json_response:  clean json response. Args: según implementación. Returns: según implementación.
+        """_clean_json_response."""
         if not text:
             return "{}"
 
@@ -284,7 +280,7 @@ class AIEngine:
         return text.strip()
 
     def _extract_json_aggressive(self, text: str) -> str | None:
-        # _extract_json_aggressive:  extract json aggressive. Args: según implementación. Returns: según implementación.
+        """_extract_json_aggressive."""
         import re
 
         match = re.search(r"(\{.*\})", text, re.DOTALL)
@@ -295,7 +291,7 @@ class AIEngine:
         return None
 
     def _has_media(self, content_list: list[Any] | None) -> bool:
-        # _has_media:  has media. Args: según implementación. Returns: según implementación.
+        """_has_media."""
         if not content_list:
             return False
         for item in content_list:
@@ -306,7 +302,7 @@ class AIEngine:
         return False
 
     def _log_usage(self, agencia, model_name, feature, input_tokens, output_tokens, status):
-        # _log_usage:  log usage. Args: según implementación. Returns: según implementación.
+        """_log_usage."""
         try:
             from core.api import AIUsageLog, get_current_agency
 
@@ -337,7 +333,7 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 
 def generate_content(prompt: str, model_name: str = "gemini-2.5-flash") -> str:
-    # generate_content: Genera  content. Args: parámetros de generación. Returns: resultado generado.
+    """generate_content."""
     try:
         res = ai_engine.call_gemini(prompt, model_name=model_name)
         if isinstance(res, dict) and "text" in res:
@@ -350,7 +346,7 @@ def generate_content(prompt: str, model_name: str = "gemini-2.5-flash") -> str:
 
 
 def generate_text_from_prompt(prompt: str, model_name: str = "gemini-2.5-flash") -> str:
-    # generate_text_from_prompt: Genera  text from prompt. Args: parámetros de generación. Returns: resultado generado.
+    """generate_text_from_prompt."""
     try:
         res = ai_engine.call_gemini(prompt, model_name=model_name)
         if isinstance(res, dict) and "text" in res:
@@ -365,7 +361,7 @@ def generate_text_from_prompt(prompt: str, model_name: str = "gemini-2.5-flash")
 
 
 def generate_structured_data(prompt: str, model_name: str = "gemini-2.5-flash") -> str:
-    # generate_structured_data: Genera  structured data. Args: parámetros de generación. Returns: resultado generado.
+    """generate_structured_data."""
     try:
         result = ai_engine.call_gemini(prompt, model_name=model_name)
         if isinstance(result, dict):

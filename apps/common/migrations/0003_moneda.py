@@ -6,17 +6,12 @@
 # allows fresh-DB migrations to succeed (later AlterField operations on Moneda
 # generate SQL referencing `core_moneda` which is the real table).
 
-"""Migración de base de datos para common.
-"""
-
 from django.db import migrations, models
 
 import core.validators
 
 
-class Migration:
-    """Clase Migration. Uso: según contexto de la aplicación.
-    """
+class Migration(migrations.Migration):
     dependencies = [
         ("common", "0002_alter_aerolinea_table_alter_ciudad_table_and_more"),
     ]

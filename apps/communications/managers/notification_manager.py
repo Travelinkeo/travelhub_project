@@ -60,7 +60,7 @@ class NotificationManager:
     RETRY_DELAYS = [30, 90, 270]  # segundos (backoff exponencial)
 
     def __init__(self):
-        # __init__: Método de inicialización de la clase.
+        """__init__."""
         self.channels = self._init_channels()
 
     def _init_channels(self) -> dict[str, Any]:

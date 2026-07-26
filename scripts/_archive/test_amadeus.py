@@ -12,6 +12,7 @@ from apps.automation.services.amadeus_service import AmadeusService
 
 
 def test_amadeus():
+    """test_amadeus."""
     print("🌍 Iniciando prueba de Amadeus API...")
 
     service = AmadeusService()

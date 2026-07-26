@@ -6,8 +6,7 @@ from django.conf import settings
 from django.db import migrations, models
 
 
-class Migration:
-    """Migración de base de datos generada por Django."""
+class Migration(migrations.Migration):
     dependencies = [
         ("core", "0044_alter_agenciaconfiguracion_evolution_api_url"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),

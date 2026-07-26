@@ -1,6 +1,3 @@
-"""Servicio de sales intelligence service para la aplicación automation.
-"""
-
 import logging
 from typing import Any
 
@@ -11,9 +8,9 @@ from apps.automation.services.ai_engine import ai_engine
 logger = logging.getLogger(__name__)
 
 
-class UpsellingOpportunity:
-    """Clase UpsellingOpportunity. Uso: según contexto de la aplicación.
-    """
+class UpsellingOpportunity(BaseModel):
+    """UpsellingOpportunity."""
+
     product_type: str = Field(
         description="Tipo de producto sugerido (Hotel, Seguro, Traslado, Tour, etc.)"
     )
@@ -24,9 +21,9 @@ class UpsellingOpportunity:
     estimated_revenue: str = Field(description="Rango de ingreso estimado (ej. '$50 - $200')")
 
 
-class SalesIntelligenceReport:
-    """Clase SalesIntelligenceReport. Uso: según contexto de la aplicación.
-    """
+class SalesIntelligenceReport(BaseModel):
+    """SalesIntelligenceReport."""
+
     summary: str = Field(description="Resumen de la estrategia de venta para este boleto")
     opportunities: list[UpsellingOpportunity] = Field(
         description="Lista de productos complementarios"
@@ -67,8 +64,8 @@ class SalesIntelligenceService:
             - Fechas: {", ".join(fechas)}
             - Valor del vuelo: ${total_ticket}
             - Agencia: {agencia.nombre if agencia else "TravelHub"}
-            
-            Tu objetivo es identificar 3 oportunidades de upselling (venta cruzada) para maximizar la rentabilidad de este viaje. 
+
+            Tu objetivo es identificar 3 oportunidades de upselling (venta cruzada) para maximizar la rentabilidad de este viaje.
             Considera factores como: longitud del vuelo, tipo de destino (vacacional vs negocios), y necesidades logísticas obvias.
             """
 

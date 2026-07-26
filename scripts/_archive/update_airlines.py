@@ -12,6 +12,7 @@ from apps.common.models import Aerolinea
 
 
 def run():
+    """run."""
     # Data format: "NUMERIC-IATA-NAME"
     kiu_airlines_raw = """
 765-5R-RUTACA

@@ -1,10 +1,6 @@
-"""Vistas (views) de la aplicación gamification.
-"""
-
 import logging
 
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Count, Prefetch
 from django.shortcuts import render
 from django.views import View
 
@@ -21,7 +17,7 @@ class GamificationDashboardView(LoginRequiredMixin, View):
     template_name = "gamification/dashboard.html"
 
     def get(self, request):
-        # get: Get. Args: según implementación. Returns: según implementación.
+        """get."""
         agencia = get_agencia_from_request(request)
         if not agencia:
             return render(request, self.template_name, {"sin_agencia": True})
@@ -29,7 +25,8 @@ class GamificationDashboardView(LoginRequiredMixin, View):
         usuario = request.user
 
         puntuacion, _ = PuntuacionUsuario.objects.get_or_create(
-            usuario=usuario, agencia=agencia,
+            usuario=usuario,
+            agencia=agencia,
         )
         niveles = list(Nivel.objects.all().order_by("puntos_minimos"))
         siguiente_nivel = None
@@ -38,9 +35,14 @@ class GamificationDashboardView(LoginRequiredMixin, View):
                 siguiente_nivel = nivel
                 break
 
-        progresos = LogroProgreso.objects.filter(
-            usuario=usuario, agencia=agencia,
-        ).select_related("logro").order_by("-completado", "-progreso")
+        progresos = (
+            LogroProgreso.objects.filter(
+                usuario=usuario,
+                agencia=agencia,
+            )
+            .select_related("logro")
+            .order_by("-completado", "-progreso")
+        )
 
         logros_ids_completados = set(
             progresos.filter(completado=True).values_list("logro_id", flat=True)
@@ -73,13 +75,14 @@ class GamificationBadgesView(LoginRequiredMixin, View):
     template_name = "gamification/badges.html"
 
     def get(self, request):
-        # get: Get. Args: según implementación. Returns: según implementación.
+        """get."""
         agencia = get_agencia_from_request(request)
         if not agencia:
             return render(request, self.template_name, {"sin_agencia": True})
 
         progresos = LogroProgreso.objects.filter(
-            usuario=request.user, agencia=agencia,
+            usuario=request.user,
+            agencia=agencia,
         ).select_related("logro")
 
         completados = [p for p in progresos if p.completado]
@@ -105,7 +108,7 @@ class GamificationLeaderboardView(LoginRequiredMixin, View):
     template_name = "gamification/leaderboard.html"
 
     def get(self, request):
-        # get: Get. Args: según implementación. Returns: según implementación.
+        """get."""
         agencia = get_agencia_from_request(request)
         if not agencia:
             return render(request, self.template_name, {"sin_agencia": True})

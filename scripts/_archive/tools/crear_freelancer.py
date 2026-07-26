@@ -15,6 +15,7 @@ User = get_user_model()
 
 
 def generar_freelancer_de_prueba():
+    """generar_freelancer_de_prueba."""
     print("🚀 Iniciando creación de Freelancer de prueba...")
 
     # 1. Buscamos tu agencia principal

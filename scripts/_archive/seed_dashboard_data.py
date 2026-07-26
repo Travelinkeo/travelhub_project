@@ -17,6 +17,7 @@ from core.models import Ciudad, Moneda, ProductoServicio, Proveedor
 
 
 def seed_data():
+    """seed_data."""
     print("Seeding dashboard data for 2026...")
 
     # Ensure catalogs exist

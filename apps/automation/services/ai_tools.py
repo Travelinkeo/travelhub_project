@@ -1,6 +1,3 @@
-"""Servicio de ai tools para la aplicación automation.
-"""
-
 import json
 import logging
 import math
@@ -157,7 +154,7 @@ class AgentTools:
 
             # Convertir Decimal a float para JSON
             def decimal_default(obj):
-                # decimal_default: Decimal default. Args: según implementación. Returns: según implementación.
+                """decimal_default."""
                 if isinstance(obj, Decimal):
                     return float(obj)
                 if isinstance(obj, date | datetime):

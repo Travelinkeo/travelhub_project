@@ -12,6 +12,7 @@ from core.models import Agencia
 
 
 def fix_orphans():
+    """fix_orphans."""
     print("-" * 50)
     print("FIXING ORPHAN BOLETOS")
     print("-" * 50)

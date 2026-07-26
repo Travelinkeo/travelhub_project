@@ -14,12 +14,14 @@ from apps.automation.parsers.sabre_parser import SabreParser
 
 
 def decimal_default(obj):
+    """decimal_default."""
     if isinstance(obj, Decimal):
         return str(obj)
     raise TypeError
 
 
 def run_test():
+    """run_test."""
     # Lista explícita de archivos proporcionada por el usuario
     # Caso específico reportado como fallido
     files = [

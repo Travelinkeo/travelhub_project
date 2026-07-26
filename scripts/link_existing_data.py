@@ -32,6 +32,7 @@ VENTAS_A_CONECTAR = [
 
 
 def run():
+    """run."""
     print("Iniciando script para enlazar Ventas existentes con Boletos Importados...")
 
     with transaction.atomic():

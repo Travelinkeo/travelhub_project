@@ -8,6 +8,7 @@ django.setup()
 
 
 def table_exists(table_name):
+    """table_exists."""
     with connection.cursor() as cursor:
         cursor.execute(
             f"SELECT exists (SELECT FROM information_schema.tables WHERE table_name = '{table_name}')"

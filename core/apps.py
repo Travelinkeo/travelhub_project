@@ -2,12 +2,13 @@ from django.apps import AppConfig
 
 
 class CoreConfig(AppConfig):
-    """Configuración de la app core. Conecta señales y aplica parches al inicio."""
+    """CoreConfig."""
+
     default_auto_field = "django.db.models.BigAutoField"
     name = "core"
 
     def ready(self):
-        """Método: ready."""
+        """ready."""
         import logging
         import os
 

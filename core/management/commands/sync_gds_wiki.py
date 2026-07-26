@@ -7,11 +7,12 @@ from django.core.management.base import BaseCommand
 
 
 class Command(BaseCommand):
-    """Comando de gestión personalizado."""
+    """Command."""
+
     help = "Sincroniza manuales técnicos GDS desde el escritorio del usuario a la Wiki interna de TravelHub."
 
     def handle(self, *args, **options):
-        """Método: handle."""
+        """handle."""
         # Rutas identificadas en la conversación
         user_desktop_source = Path(r"C:\Users\ARMANDO\Desktop\Referencias GDS")
         project_wiki_root = Path(settings.BASE_DIR) / "docs" / "wiki" / "GDS"

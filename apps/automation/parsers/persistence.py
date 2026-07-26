@@ -1,6 +1,3 @@
-"""Parser/procesador de persistence para la aplicación automation.
-"""
-
 import logging
 
 from django.db import transaction
@@ -126,7 +123,6 @@ class BoletoPersistenceService:
 
     @staticmethod
     def _truncate(val, max_len):
-        # _truncate:  truncate. Args: según implementación. Returns: según implementación.
         if not val:
             return None
         s = str(val).strip()
@@ -134,7 +130,6 @@ class BoletoPersistenceService:
 
     @staticmethod
     def _find_provider(iata, office_id):
-        # _find_provider:  find provider. Args: según implementación. Returns: según implementación.
         if not iata and not office_id:
             return None
         try:

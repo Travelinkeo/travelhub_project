@@ -1,8 +1,6 @@
-"""Modelos de base de datos para la aplicación finance.
-"""
+from decimal import Decimal
 
 from django.db import models, transaction
-from decimal import Decimal
 
 from apps.common.models import Moneda  # noqa: F401 re-export for backwards compatibility
 from core.models.base import AgenciaMixin
@@ -37,9 +35,9 @@ def generar_numero_factura_atomico(model_cls, fecha_emision, prefix=""):
 # Stubs for migration & apps.get_model compatibility
 
 
-class TasaCambioBCV:
-    """Clase TasaCambioBCV. Uso: según contexto de la aplicación.
-    """
+class TasaCambioBCV(models.Model):
+    """TasaCambioBCV."""
+
     fecha = models.DateField(unique=True, db_index=True)
     tasa = models.DecimalField(max_digits=15, decimal_places=4, null=True, blank=True)
 
@@ -49,13 +47,13 @@ class TasaCambioBCV:
         ordering = ["-fecha"]
 
     def __str__(self):
-        # __str__: Representación en string del objeto. Returns: str.
+        """__str__."""
         return f"{self.fecha}: {self.tasa} VES/USD"
 
 
-class ConfiguracionFiscal:
-    """Clase ConfiguracionFiscal. Uso: según contexto de la aplicación.
-    """
+class ConfiguracionFiscal(AgenciaMixin, models.Model):
+    """ConfiguracionFiscal."""
+
     PAISES = [
         ("VEN", "Venezuela"),
         ("COL", "Colombia"),
@@ -72,13 +70,13 @@ class ConfiguracionFiscal:
         verbose_name_plural = "Configuraciones Fiscales"
 
     def __str__(self):
-        # __str__: Representación en string del objeto. Returns: str.
+        """__str__."""
         return f"ConfigFiscal #{self.agencia_id} — IVA={self.iva_por_defecto}%"
 
 
-class Factura:
-    """Clase Factura. Uso: según contexto de la aplicación.
-    """
+class Factura(AgenciaMixin, models.Model):
+    """Factura."""
+
     cliente = models.ForeignKey(
         "crm.Cliente",
         on_delete=models.PROTECT,
@@ -100,6 +98,8 @@ class Factura:
     gran_total_ves = models.DecimalField(max_digits=15, decimal_places=4, default=0)
 
     class EstadoFactura(models.TextChoices):
+        """EstadoFactura."""
+
         BORRADOR = "BORRADOR", "Borrador"
         EMITIDA = "EMITIDA", "Emitida"
         ANULADA = "ANULADA", "Anulada"
@@ -116,13 +116,13 @@ class Factura:
         ordering = ["-fecha_emision"]
 
     def __str__(self):
-        # __str__: Representación en string del objeto. Returns: str.
+        """__str__."""
         return f"Factura #{self.numero_control}"
 
 
-class ItemFactura:
-    """Clase ItemFactura. Uso: según contexto de la aplicación.
-    """
+class ItemFactura(AgenciaMixin, models.Model):
+    """ItemFactura."""
+
     factura = models.ForeignKey(
         Factura,
         on_delete=models.CASCADE,
@@ -141,13 +141,13 @@ class ItemFactura:
         verbose_name_plural = "Items de Factura"
 
     def __str__(self):
-        # __str__: Representación en string del objeto. Returns: str.
+        """__str__."""
         return f"{self.descripcion} x {self.cantidad}"
 
 
-class Pago:
-    """Clase Pago. Uso: según contexto de la aplicación.
-    """
+class Pago(AgenciaMixin, models.Model):
+    """Pago."""
+
     factura = models.ForeignKey(
         Factura,
         on_delete=models.PROTECT,
@@ -167,7 +167,7 @@ class Pago:
         ordering = ["-fecha_pago"]
 
     def __str__(self):
-        # __str__: Representación en string del objeto. Returns: str.
+        """__str__."""
         return f"Pago {self.referencia or self.pk} — {self.monto_usd} USD / {self.monto_ves} VES"
 
 
@@ -188,6 +188,8 @@ class GastoOperativo(AgenciaMixin, models.Model):
     """
 
     class CategoriaGasto(models.TextChoices):
+        """CategoriaGasto."""
+
         ALQUILER = "ALQ", "Alquiler de Oficina"
         SERVICIOS = "SER", "Servicios (Luz/Agua/Internet)"
         NOMINA = "NOM", "Nómina y Sueldos"
@@ -197,22 +199,24 @@ class GastoOperativo(AgenciaMixin, models.Model):
         OTROS = "OTR", "Otros Gastos"
 
     class EstadoContable(models.TextChoices):
+        """EstadoContable."""
+
         PENDIENTE = "PEN", "Pendiente de Contabilizar"
         CONTABILIZADO = "CON", "Contabilizado"
         ERROR = "ERR", "Error en Contabilización"
 
     descripcion = models.CharField(max_length=255, verbose_name="Descripción")
-    monto = models.DecimalField(
-        max_digits=12, decimal_places=2, verbose_name="Monto"
-    )
+    monto = models.DecimalField(max_digits=12, decimal_places=2, verbose_name="Monto")
     moneda = models.ForeignKey(
         "common.Moneda",
         on_delete=models.PROTECT,
         verbose_name="Moneda",
     )
     tasa_bcv = models.DecimalField(
-        max_digits=12, decimal_places=4,
-        null=True, blank=True,
+        max_digits=12,
+        decimal_places=4,
+        null=True,
+        blank=True,
         verbose_name="Tasa BCV al registro",
         help_text="Tasa USD/VES del BCV en la fecha del gasto. Se llena automáticamente.",
     )
@@ -225,7 +229,8 @@ class GastoOperativo(AgenciaMixin, models.Model):
     )
     comprobante = models.FileField(
         upload_to="gastos/comprobantes/%Y/%m/",
-        null=True, blank=True,
+        null=True,
+        blank=True,
         verbose_name="Comprobante",
     )
     notas = models.TextField(blank=True, default="", verbose_name="Notas")
@@ -236,13 +241,15 @@ class GastoOperativo(AgenciaMixin, models.Model):
         verbose_name="Estado Contable",
     )
     error_contable_msg = models.TextField(
-        blank=True, null=True,
+        blank=True,
+        null=True,
         verbose_name="Mensaje de Error Contable",
     )
     creado_por = models.ForeignKey(
         "auth.User",
         on_delete=models.SET_NULL,
-        null=True, blank=True,
+        null=True,
+        blank=True,
         verbose_name="Registrado por",
     )
     creado = models.DateTimeField(auto_now_add=True)
@@ -259,7 +266,7 @@ class GastoOperativo(AgenciaMixin, models.Model):
         ]
 
     def __str__(self):
-        # __str__: Representación en string del objeto. Returns: str.
+        """__str__."""
         return f"{self.descripcion} — {self.monto} ({self.fecha})"
 
     @property
@@ -283,19 +290,21 @@ class FacturaConsolidada(AgenciaMixin, models.Model):
     """
 
     class EstadoFactura(models.TextChoices):
+        """EstadoFactura."""
+
         BORRADOR = "BOR", "Borrador"
         EMITIDA = "EMI", "Emitida"
         PAGADA = "PAG", "Pagada"
         ANULADA = "ANU", "Anulada"
 
     class TipoOperacion(models.TextChoices):
+        """TipoOperacion."""
+
         VENTA_PROPIA = "VP", "Venta Propia"
         INTERMEDIACION = "IN", "Intermediación"
 
     # Identificación fiscal
-    numero_factura = models.CharField(
-        max_length=50, unique=True, verbose_name="Número de Factura"
-    )
+    numero_factura = models.CharField(max_length=50, unique=True, verbose_name="Número de Factura")
     numero_control = models.CharField(
         max_length=50, blank=True, default="", verbose_name="Número de Control"
     )
@@ -305,7 +314,8 @@ class FacturaConsolidada(AgenciaMixin, models.Model):
     cliente = models.ForeignKey(
         "crm.Cliente",
         on_delete=models.PROTECT,
-        null=True, blank=True,
+        null=True,
+        blank=True,
         verbose_name="Cliente",
     )
     cliente_rif = models.CharField(
@@ -328,37 +338,55 @@ class FacturaConsolidada(AgenciaMixin, models.Model):
 
     # Montos base (USD)
     subtotal_base_gravada = models.DecimalField(
-        max_digits=12, decimal_places=2, default=Decimal("0.00"),
+        max_digits=12,
+        decimal_places=2,
+        default=Decimal("0.00"),
         verbose_name="Base Gravada (USD)",
     )
     subtotal_exento = models.DecimalField(
-        max_digits=12, decimal_places=2, default=Decimal("0.00"),
+        max_digits=12,
+        decimal_places=2,
+        default=Decimal("0.00"),
         verbose_name="Monto Exento (USD)",
     )
     monto_iva_16 = models.DecimalField(
-        max_digits=12, decimal_places=2, default=Decimal("0.00"),
+        max_digits=12,
+        decimal_places=2,
+        default=Decimal("0.00"),
         verbose_name="IVA 16% (USD)",
     )
     monto_iva_adicional = models.DecimalField(
-        max_digits=12, decimal_places=2, default=Decimal("0.00"),
+        max_digits=12,
+        decimal_places=2,
+        default=Decimal("0.00"),
         verbose_name="IVA Adicional 25% suntuario (USD)",
     )
     monto_igtf = models.DecimalField(
-        max_digits=12, decimal_places=2, default=Decimal("0.00"),
+        max_digits=12,
+        decimal_places=2,
+        default=Decimal("0.00"),
         verbose_name="IGTF 3% (USD)",
     )
     gran_total_usd = models.DecimalField(
-        max_digits=12, decimal_places=2, default=Decimal("0.00"),
+        max_digits=12,
+        decimal_places=2,
+        default=Decimal("0.00"),
         verbose_name="Total General (USD)",
     )
 
     # Equivalente en bolívares
     tasa_cambio_bcv = models.DecimalField(
-        max_digits=12, decimal_places=4, null=True, blank=True,
+        max_digits=12,
+        decimal_places=4,
+        null=True,
+        blank=True,
         verbose_name="Tasa BCV aplicada",
     )
     gran_total_ves = models.DecimalField(
-        max_digits=15, decimal_places=2, null=True, blank=True,
+        max_digits=15,
+        decimal_places=2,
+        null=True,
+        blank=True,
         verbose_name="Total General (VES)",
     )
 
@@ -378,7 +406,8 @@ class FacturaConsolidada(AgenciaMixin, models.Model):
     )
     archivo_pdf = models.FileField(
         upload_to="facturas/pdfs/%Y/%m/",
-        null=True, blank=True,
+        null=True,
+        blank=True,
         verbose_name="PDF de Factura",
     )
     notas = models.TextField(blank=True, default="", verbose_name="Notas")
@@ -396,7 +425,7 @@ class FacturaConsolidada(AgenciaMixin, models.Model):
         ]
 
     def __str__(self):
-        # __str__: Representación en string del objeto. Returns: str.
+        """__str__."""
         return f"FC-{self.numero_factura} | {self.gran_total_usd} USD ({self.estado})"
 
     def calcular_totales(self):
@@ -423,15 +452,13 @@ class FacturaConsolidada(AgenciaMixin, models.Model):
         self.monto_iva_16 = iva_16
 
         if self.es_contribuyente_especial:
-            self.monto_igtf = ((base_gravada + iva_16) * Decimal("0.03")).quantize(
-                Decimal("0.01")
-            )
+            self.monto_igtf = ((base_gravada + iva_16) * Decimal("0.03")).quantize(Decimal("0.01"))
         else:
             self.monto_igtf = Decimal("0.00")
 
-        self.gran_total_usd = (
-            base_gravada + exento + iva_16 + self.monto_igtf
-        ).quantize(Decimal("0.01"))
+        self.gran_total_usd = (base_gravada + exento + iva_16 + self.monto_igtf).quantize(
+            Decimal("0.01")
+        )
 
         if self.tasa_cambio_bcv:
             self.gran_total_ves = (self.gran_total_usd * self.tasa_cambio_bcv).quantize(
@@ -443,6 +470,8 @@ class ItemFacturaConsolidada(AgenciaMixin, models.Model):
     """Línea de ítem dentro de una FacturaConsolidada."""
 
     class TipoServicio(models.TextChoices):
+        """TipoServicio."""
+
         AEREO_INTERNACIONAL = "TAI", "Transporte Aéreo Internacional"
         AEREO_NACIONAL = "TAN", "Transporte Aéreo Nacional"
         HOTEL = "HOT", "Alojamiento"
@@ -465,11 +494,15 @@ class ItemFacturaConsolidada(AgenciaMixin, models.Model):
         verbose_name="Tipo de Servicio",
     )
     cantidad = models.DecimalField(
-        max_digits=10, decimal_places=2, default=Decimal("1.00"),
+        max_digits=10,
+        decimal_places=2,
+        default=Decimal("1.00"),
         verbose_name="Cantidad",
     )
     precio_unitario = models.DecimalField(
-        max_digits=12, decimal_places=2, default=Decimal("0.00"),
+        max_digits=12,
+        decimal_places=2,
+        default=Decimal("0.00"),
         verbose_name="Precio Unitario (USD)",
     )
     exento = models.BooleanField(
@@ -478,7 +511,9 @@ class ItemFacturaConsolidada(AgenciaMixin, models.Model):
         help_text="Ej: transporte internacional exento conforme a Ley IVA art. 16",
     )
     alicuota_iva = models.DecimalField(
-        max_digits=5, decimal_places=2, default=Decimal("16.00"),
+        max_digits=5,
+        decimal_places=2,
+        default=Decimal("16.00"),
         verbose_name="Alícuota IVA %",
     )
     # Referencia al boleto si aplica
@@ -490,12 +525,11 @@ class ItemFacturaConsolidada(AgenciaMixin, models.Model):
         verbose_name_plural = "Ítems de Factura Consolidada"
 
     def __str__(self):
-        # __str__: Representación en string del objeto. Returns: str.
+        """__str__."""
         return f"{self.descripcion} x {self.cantidad}"
 
     @property
     def subtotal(self):
-        # subtotal: Subtotal. Args: según implementación. Returns: según implementación.
         return (self.cantidad * self.precio_unitario).quantize(Decimal("0.01"))
 
 
@@ -509,24 +543,31 @@ class RetencionISLR(AgenciaMixin, models.Model):
     """
 
     class TipoOperacion(models.TextChoices):
+        """TipoOperacion."""
+
         COMISIONES_MERCANTILES = "CM", "Comisiones Mercantiles (5%)"
         HONORARIOS_PROFESIONALES = "HP", "Honorarios Profesionales (3%)"
         ARRENDAMIENTO = "AR", "Arrendamiento (3%)"
         OTROS = "OT", "Otros"
 
     class Estado(models.TextChoices):
+        """Estado."""
+
         PENDIENTE = "PEN", "Pendiente"
         APLICADA = "APL", "Aplicada"
         ANULADA = "ANU", "Anulada"
 
     # Identificación del comprobante
     numero_comprobante = models.CharField(
-        max_length=50, unique=True,
+        max_length=50,
+        unique=True,
         verbose_name="Número de Comprobante de Retención",
     )
     fecha_emision = models.DateField(verbose_name="Fecha de Emisión")
     periodo_fiscal = models.CharField(
-        max_length=7, blank=True, null=True,
+        max_length=7,
+        blank=True,
+        null=True,
         verbose_name="Período Fiscal (YYYY-MM)",
         help_text="Se genera automáticamente de la fecha de emisión",
     )
@@ -541,25 +582,35 @@ class RetencionISLR(AgenciaMixin, models.Model):
 
     # Sujeto retenido
     retenido_rif = models.CharField(
-        max_length=20, blank=True, default="",
+        max_length=20,
+        blank=True,
+        default="",
         verbose_name="RIF del Sujeto Retenido",
     )
     retenido_nombre = models.CharField(
-        max_length=200, blank=True, default="",
+        max_length=200,
+        blank=True,
+        default="",
         verbose_name="Nombre / Razón Social del Retenido",
     )
 
     # Montos
     base_imponible = models.DecimalField(
-        max_digits=12, decimal_places=2,
+        max_digits=12,
+        decimal_places=2,
         verbose_name="Base Imponible (USD)",
     )
     porcentaje_retencion = models.DecimalField(
-        max_digits=5, decimal_places=2, default=Decimal("5.00"),
+        max_digits=5,
+        decimal_places=2,
+        default=Decimal("5.00"),
         verbose_name="Porcentaje de Retención %",
     )
     monto_retenido = models.DecimalField(
-        max_digits=12, decimal_places=2, null=True, blank=True,
+        max_digits=12,
+        decimal_places=2,
+        null=True,
+        blank=True,
         verbose_name="Monto Retenido (USD)",
         help_text="Se calcula automáticamente al guardar",
     )
@@ -568,7 +619,8 @@ class RetencionISLR(AgenciaMixin, models.Model):
     factura = models.ForeignKey(
         FacturaConsolidada,
         on_delete=models.SET_NULL,
-        null=True, blank=True,
+        null=True,
+        blank=True,
         related_name="retenciones_islr",
         verbose_name="Factura Asociada",
     )
@@ -583,7 +635,8 @@ class RetencionISLR(AgenciaMixin, models.Model):
     )
     archivo_comprobante = models.FileField(
         upload_to="retenciones/comprobantes/%Y/%m/",
-        null=True, blank=True,
+        null=True,
+        blank=True,
         verbose_name="Comprobante PDF",
     )
     observaciones = models.TextField(blank=True, default="", verbose_name="Observaciones")
@@ -600,10 +653,11 @@ class RetencionISLR(AgenciaMixin, models.Model):
         ]
 
     def __str__(self):
-        # __str__: Representación en string del objeto. Returns: str.
+        """__str__."""
         return f"ISLR {self.numero_comprobante} — {self.monto_retenido} USD ({self.estado})"
 
     def save(self, *args, **kwargs):
+        """save."""
         # Calcular monto retenido automáticamente
         if self.base_imponible is not None and self.porcentaje_retencion:
             self.monto_retenido = (
@@ -613,4 +667,3 @@ class RetencionISLR(AgenciaMixin, models.Model):
         if self.fecha_emision and not self.periodo_fiscal:
             self.periodo_fiscal = self.fecha_emision.strftime("%Y-%m")
         super().save(*args, **kwargs)
-

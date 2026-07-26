@@ -1,6 +1,3 @@
-"""Tareas asíncronas (Celery) para la aplicación crm.
-"""
-
 import logging
 
 from celery import shared_task

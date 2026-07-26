@@ -40,5 +40,5 @@ class PushSubscription(models.Model):
         ]
 
     def __str__(self):
-        # __str__: Representación en string del objeto. Returns: str.
+        """__str__."""
         return f"PushSubscription({self.user_id})"

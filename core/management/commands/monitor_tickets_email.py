@@ -4,11 +4,12 @@ from apps.communications.services.email_unified import EmailMonitorService
 
 
 class Command(BaseCommand):
-    """Comando de gestión personalizado."""
+    """Command."""
+
     help = "Monitorea correos de boletos y envia por email"
 
     def add_arguments(self, parser):
-        """Método: add arguments."""
+        """add_arguments."""
         parser.add_argument("--email", type=str, required=True, help="Email destino")
         parser.add_argument("--interval", type=int, default=60, help="Intervalo en segundos")
         parser.add_argument("--mark-read", action="store_true", help="Marcar como leidos")
@@ -22,7 +23,7 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        """Método: handle."""
+        """handle."""
         self.stdout.write(f"Iniciando monitor -> {options['email']}")
 
         from core.models.agencia import Agencia

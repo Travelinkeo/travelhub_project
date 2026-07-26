@@ -13,6 +13,7 @@ from apps.cms.services.cms_ai_service import CMSContentService
 
 
 def test_cms_automation():
+    """test_cms_automation."""
     results = {"meta": "Validacion CMS AI TravelHub"}
     service = CMSContentService()
 

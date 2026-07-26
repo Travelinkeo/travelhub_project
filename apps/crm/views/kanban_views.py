@@ -1,6 +1,3 @@
-"""Vistas (views) de la aplicación crm.
-"""
-
 import logging
 
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -36,6 +33,7 @@ class KanbanBoardView(LoginRequiredMixin, View):
         return qs.none()
 
     def get(self, request, *args, **kwargs):
+        """get."""
         # Obtenemos todos los leads en UNA sola consulta, agrupando en Python
         # (evita 4 queries + 4 COUNT queries en el template)
         all_leads = list(
@@ -70,7 +68,7 @@ class UpdateLeadStageView(LoginRequiredMixin, View):
     """
 
     def post(self, request, *args, **kwargs):
-        # post: Post. Args: según implementación. Returns: según implementación.
+        """post."""
         lead_id = request.POST.get("lead_id")
         new_stage = request.POST.get("new_stage")
 

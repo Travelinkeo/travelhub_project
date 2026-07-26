@@ -56,7 +56,6 @@ class _FernetMixin:
 
     @property
     def fernet(self):
-        """Método: fernet."""
         return self._get_fernet()
 
     def _encrypt(self, value: str) -> str:
@@ -88,19 +87,19 @@ class _FernetMixin:
             return ""
 
     def get_prep_value(self, value):
-        """Método que obtiene prep value. Args: según implementación. Returns: datos solicitados."""
+        """get_prep_value."""
         if value is None or value == "":
             return value
         return self._encrypt(value)
 
     def from_db_value(self, value, expression, connection):
-        """Método: from db value."""
+        """from_db_value."""
         if value is None or value == "":
             return value
         return self._decrypt(value)
 
     def to_python(self, value):
-        """Método que convierte a python. Returns: representación convertida."""
+        """to_python."""
         if value is None or value == "":
             return value
         return value
@@ -118,13 +117,14 @@ class EncryptedCharField(_FernetMixin, models.CharField):
     description = "Encrypted CharField"
 
     def __init__(self, *args, **kwargs):
+        """__init__."""
         # El token Fernet es ~4x más largo que el plaintext
         if "max_length" in kwargs:
             kwargs["max_length"] = int(kwargs["max_length"] * 4)
         super().__init__(*args, **kwargs)
 
     def deconstruct(self):
-        """Método: deconstruct."""
+        """deconstruct."""
         name, path, args, kwargs = super().deconstruct()
         # Restaurar el max_length original en la migración
         if "max_length" in kwargs:

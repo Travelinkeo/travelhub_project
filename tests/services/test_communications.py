@@ -8,9 +8,10 @@ pytestmark = [pytest.mark.django_db, pytest.mark.services]
 
 
 class TestEmailUnified:
-    """Test Email Unified."""
+    """TestEmailUnified."""
+
     def test_send_email_basic(self, monkeypatch):
-        """Send email basic."""
+        """test_send_email_basic."""
         mock_send = unittest.mock.MagicMock(return_value={"id": "mock-email-id"})
         monkeypatch.setattr(
             "apps.communications.services.email_unified.resend.Emails.send",
@@ -27,9 +28,10 @@ class TestEmailUnified:
 
 
 class TestWhatsAppUnified:
-    """Test Whats App Unified."""
+    """TestWhatsAppUnified."""
+
     def test_send_whatsapp_message(self, monkeypatch):
-        """Send whatsapp message."""
+        """test_send_whatsapp_message."""
         mock_send = unittest.mock.MagicMock(return_value={"messages": [{"id": "wam-id"}]})
         monkeypatch.setattr(
             "apps.communications.services.whatsapp_unified.requests.post",
@@ -42,9 +44,10 @@ class TestWhatsAppUnified:
 
 
 class TestNotificationService:
-    """Test Notification Service."""
+    """TestNotificationService."""
+
     def test_create_notification(self, db):
-        """Create notification."""
+        """test_create_notification."""
         from apps.communications.models.notifications import Notification
 
         notification = Notification.objects.create(

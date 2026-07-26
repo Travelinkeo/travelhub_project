@@ -1,13 +1,12 @@
 """Tests extendidos para la Provider Chain — cubre cada proveedor individual."""
 
 import unittest.mock
-from datetime import datetime, timedelta
 
 import pytest
 from django.core.cache import cache
 
 from apps.automation.providerchain.base import ProviderResult
-from apps.automation.providerchain.health import get_health_history, get_health_summary
+from apps.automation.providerchain.health import get_health_history
 from apps.automation.providerchain.registry import ProviderRegistry
 
 pytestmark = [pytest.mark.django_db, pytest.mark.unit]
@@ -17,32 +16,34 @@ pytestmark = [pytest.mark.django_db, pytest.mark.unit]
 
 
 class OkProviderStub:
-    """Ok Provider Stub."""
+    """OkProviderStub."""
+
     provider_name = "stub_ok"
     supports_structured_output = True
     is_emergency_only = False
 
     def test_connection(self):
-        """Connection."""
+        """test_connection."""
         return True
 
     def generate(self, prompt, **kw):
-        """Generate."""
+        """generate."""
         return ProviderResult(text="ok", provider="stub_ok", success=True)
 
 
 class FailProviderStub:
-    """Fail Provider Stub."""
+    """FailProviderStub."""
+
     provider_name = "stub_fail"
     supports_structured_output = False
     is_emergency_only = False
 
     def test_connection(self):
-        """Connection."""
+        """test_connection."""
         return False
 
     def generate(self, prompt, **kw):
-        """Generate."""
+        """generate."""
         return ProviderResult(success=False, error="fail", provider="stub_fail")
 
 
@@ -50,10 +51,11 @@ class FailProviderStub:
 
 
 class TestGeminiProvider:
+    """TestGeminiProvider."""
+
     @pytest.fixture(autouse=True)
-    """Test Gemini Provider."""
     def _setup(self, monkeypatch):
-        """Setup."""
+        """_setup."""
         self.mock_genai = unittest.mock.MagicMock()
         monkeypatch.setattr("google.genai", self.mock_genai)
 
@@ -67,7 +69,7 @@ class TestGeminiProvider:
         )
 
     def test_resolve_api_key_returns_secret(self):
-        """Resolve api key returns secret."""
+        """test_resolve_api_key_returns_secret."""
         from apps.automation.providerchain.gemini_provider import GeminiProvider
 
         provider = GeminiProvider()
@@ -75,7 +77,7 @@ class TestGeminiProvider:
         assert key == "mock-key"
 
     def test_resolve_api_key_returns_agency_key(self, db, monkeypatch):
-        """Resolve api key returns agency key."""
+        """test_resolve_api_key_returns_agency_key."""
         from apps.automation.providerchain.gemini_provider import GeminiProvider
         from core.models.agencia import Agencia
 
@@ -89,7 +91,7 @@ class TestGeminiProvider:
         assert key == "agency-key-123"
 
     def test_test_connection_returns_true_on_success(self):
-        """Test connection returns true on success."""
+        """test_test_connection_returns_true_on_success."""
         from apps.automation.providerchain.gemini_provider import GeminiProvider
 
         provider = GeminiProvider()
@@ -97,7 +99,7 @@ class TestGeminiProvider:
         self.mock_client.models.get.assert_called_once()
 
     def test_test_connection_returns_false_on_failure(self):
-        """Test connection returns false on failure."""
+        """test_test_connection_returns_false_on_failure."""
         from apps.automation.providerchain.gemini_provider import GeminiProvider
 
         provider = GeminiProvider()
@@ -105,7 +107,7 @@ class TestGeminiProvider:
         assert provider.test_connection() is False
 
     def test_test_connection_returns_false_without_key(self, monkeypatch):
-        """Test connection returns false without key."""
+        """test_test_connection_returns_false_without_key."""
         monkeypatch.setattr(
             "apps.automation.providerchain.gemini_provider.get_api_secret",
             lambda svc, default=None: None,
@@ -116,7 +118,7 @@ class TestGeminiProvider:
         assert provider.test_connection() is False
 
     def test_generate_success(self):
-        """Generate success."""
+        """test_generate_success."""
         from apps.automation.providerchain.gemini_provider import GeminiProvider
 
         mock_response = unittest.mock.MagicMock()
@@ -133,7 +135,7 @@ class TestGeminiProvider:
         assert result.input_tokens == 10
 
     def test_generate_failure(self):
-        """Generate failure."""
+        """test_generate_failure."""
         from apps.automation.providerchain.gemini_provider import GeminiProvider
 
         self.mock_client.models.generate_content.side_effect = Exception("API error")
@@ -144,7 +146,7 @@ class TestGeminiProvider:
         assert "API error" in (result.error or "")
 
     def test_generate_returns_error_without_key(self, monkeypatch):
-        """Generate returns error without key."""
+        """test_generate_returns_error_without_key."""
         monkeypatch.setattr(
             "apps.automation.providerchain.gemini_provider.get_api_secret",
             lambda svc, default=None: None,
@@ -161,10 +163,11 @@ class TestGeminiProvider:
 
 
 class TestOpenAIProvider:
+    """TestOpenAIProvider."""
+
     @pytest.fixture(autouse=True)
-    """Test Open Aiprovider."""
     def _setup(self, monkeypatch):
-        """ setup."""
+        """_setup."""
         self.mock_openai = unittest.mock.MagicMock()
         monkeypatch.setattr("openai", self.mock_openai)
 
@@ -174,7 +177,7 @@ class TestOpenAIProvider:
         )
 
     def test_resolve_api_key(self):
-        """Resolve api key."""
+        """test_resolve_api_key."""
         from apps.automation.providerchain.openai_provider import OpenAIProvider
 
         provider = OpenAIProvider()
@@ -182,7 +185,7 @@ class TestOpenAIProvider:
         assert key == "sk-mock-key"
 
     def test_test_connection_returns_true(self):
-        """Test connection returns true."""
+        """test_test_connection_returns_true."""
         from apps.automation.providerchain.openai_provider import OpenAIProvider
 
         provider = OpenAIProvider()
@@ -191,7 +194,7 @@ class TestOpenAIProvider:
         assert provider.test_connection() is True
 
     def test_test_connection_returns_false(self):
-        """Test connection returns false."""
+        """test_test_connection_returns_false."""
         from apps.automation.providerchain.openai_provider import OpenAIProvider
 
         provider = OpenAIProvider()
@@ -199,7 +202,7 @@ class TestOpenAIProvider:
         assert provider.test_connection() is False
 
     def test_generate_success(self):
-        """Generate success."""
+        """test_generate_success."""
         from apps.automation.providerchain.openai_provider import OpenAIProvider
 
         mock_message = unittest.mock.MagicMock()
@@ -222,7 +225,7 @@ class TestOpenAIProvider:
         assert result.provider == "openai"
 
     def test_generate_failure(self):
-        """Generate failure."""
+        """test_generate_failure."""
         from apps.automation.providerchain.openai_provider import OpenAIProvider
 
         mock_client = unittest.mock.MagicMock()
@@ -238,10 +241,11 @@ class TestOpenAIProvider:
 
 
 class TestDeepSeekProvider:
+    """TestDeepSeekProvider."""
+
     @pytest.fixture(autouse=True)
-    """Test Deep Seek Provider."""
     def _setup(self, monkeypatch):
-        """ setup."""
+        """_setup."""
         self.mock_openai = unittest.mock.MagicMock()
         monkeypatch.setattr("openai", self.mock_openai)
 
@@ -251,7 +255,7 @@ class TestDeepSeekProvider:
         )
 
     def test_is_emergency_only(self):
-        """Is emergency only."""
+        """test_is_emergency_only."""
         from apps.automation.providerchain.deepseek_provider import DeepSeekProvider
 
         provider = DeepSeekProvider()
@@ -259,7 +263,7 @@ class TestDeepSeekProvider:
         assert provider.supports_structured_output is False
 
     def test_generate_success(self):
-        """Generate success."""
+        """test_generate_success."""
         from apps.automation.providerchain.deepseek_provider import DeepSeekProvider
 
         mock_message = unittest.mock.MagicMock()
@@ -282,7 +286,7 @@ class TestDeepSeekProvider:
         assert result.provider == "deepseek"
 
     def test_generate_failure(self):
-        """Generate failure."""
+        """test_generate_failure."""
         from apps.automation.providerchain.deepseek_provider import DeepSeekProvider
 
         mock_client = unittest.mock.MagicMock()
@@ -298,24 +302,23 @@ class TestDeepSeekProvider:
 
 
 class TestHealthHistory:
-    """Test Health History."""
+    """TestHealthHistory."""
+
     def setup_method(self):
-        """Setup method."""
+        """setup_method."""
         cache.delete("health_history")
 
     def test_get_health_history_empty(self):
-        """Get health history empty."""
+        """test_get_health_history_empty."""
         history = get_health_history()
         assert history == []
 
     def test_run_checks_and_get_history(self, monkeypatch):
-        """Run checks and get history."""
+        """test_run_checks_and_get_history."""
         from apps.automation.providerchain.health import run_health_checks
 
         reg = ProviderRegistry()
-        monkeypatch.setattr(
-            "apps.automation.providerchain.health.provider_registry", reg
-        )
+        monkeypatch.setattr("apps.automation.providerchain.health.provider_registry", reg)
         monkeypatch.setattr(
             "apps.automation.providerchain.health.APISecret",
             unittest.mock.MagicMock(),
@@ -325,21 +328,22 @@ class TestHealthHistory:
         health_mod.APISecret.objects.filter.return_value.distinct.return_value = []
 
         class AlwaysOkProvider:
-            """Always Ok Provider."""
+            """AlwaysOkProvider."""
+
             provider_name = "ok"
             supports_structured_output = True
             is_emergency_only = False
 
             def test_connection(self):
-                """Connection."""
+                """test_connection."""
                 return True
 
             def generate(self, **kw):
-                """Generate."""
+                """generate."""
                 return ProviderResult(text="ok", success=True)
 
             def get_api_key_status(self):
-                """Get api key status."""
+                """get_api_key_status."""
                 return {"available": True, "last_tested": None}
 
         reg.register(AlwaysOkProvider())
@@ -353,9 +357,10 @@ class TestHealthHistory:
 
 
 class TestRegistrySingleton:
-    """Test Registry Singleton."""
+    """TestRegistrySingleton."""
+
     def test_provider_registry_is_singleton(self):
-        """Provider registry is singleton."""
+        """test_provider_registry_is_singleton."""
         from apps.automation.providerchain.registry import provider_registry as r1
         from apps.automation.providerchain.registry import provider_registry as r2
 

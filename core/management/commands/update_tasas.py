@@ -11,11 +11,12 @@ logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
-    """Comando de gestión personalizado."""
+    """Command."""
+
     help = "Actualiza las tasas de cambio desde el BCV (USD, EUR)"
 
     def handle(self, *args, **options):
-        """Método: handle."""
+        """handle."""
         self.stdout.write("Iniciando actualización de tasas BCV...")
 
         tasas = obtener_tasas_bcv()

@@ -10,9 +10,10 @@ from core.auth_helpers import InternalAPIAuthMixin
 
 
 class HotelQuoteAPI(InternalAPIAuthMixin, APIView):
-    """API para cotizar precio de habitaciones de hotel por fechas."""
+    """HotelQuoteAPI."""
+
     def get(self, request):
-        """Método: get."""
+        """get."""
         try:
             # 1. Inputs
             room_id = request.GET.get("room_type_id")

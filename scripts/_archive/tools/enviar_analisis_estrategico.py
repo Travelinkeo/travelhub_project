@@ -119,6 +119,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
 
 def generar_pdf():
+    """generar_pdf."""
     print("📄 Leyendo análisis estratégico...")
     with open(ANALISIS_MD, encoding="utf-8") as f:
         md_text = f.read()
@@ -137,6 +138,7 @@ def generar_pdf():
 
 
 def enviar_correo():
+    """enviar_correo."""
     print(f"\n📧 Enviando a {EMAIL_TO}...")
 
     msg = MIMEMultipart()

@@ -1,6 +1,3 @@
-"""Servicio de passport ocr service para la aplicación automation.
-"""
-
 import json
 import logging
 
@@ -10,14 +7,14 @@ logger = logging.getLogger(__name__)
 
 
 def _get_genai():
-    # _get_genai:  get genai. Args: según implementación. Returns: según implementación.
+    """_get_genai."""
     from google import genai
 
     return genai
 
 
 def _get_genai_types():
-    # _get_genai_types:  get genai types. Args: según implementación. Returns: según implementación.
+    """_get_genai_types."""
     from google.genai import types
 
     return types
@@ -32,7 +29,7 @@ class PassportOCRService:
     MODEL_NAME = "gemini-2.5-flash"  # gemini-2.5-flash cuando esté GA
 
     def __init__(self):
-        # __init__: Inicializa una nueva instancia de PassportOCRService. Args: parámetros de inicialización.
+        """__init__."""
         from apps.automation.services.ai_engine import get_gemini_api_key
 
         self.api_key = get_gemini_api_key()

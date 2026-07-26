@@ -82,7 +82,7 @@ class NotificationPreference(models.Model):
         ]
 
     def __str__(self):
-        # __str__: Representación en string del objeto. Returns: str.
+        """__str__."""
         agencia_str = f" - {self.agencia.nombre}" if self.agencia else ""
         return f"{self.user.username} - {self.event_type} - {self.channel}{agencia_str}"
 
@@ -176,7 +176,7 @@ class NotificationTemplate(models.Model):
         ]
 
     def __str__(self):
-        # __str__: Representación en string del objeto. Returns: str.
+        """__str__."""
         return f"{self.name} ({self.channel} - {self.language})"
 
     def render(self, context: dict) -> dict:
@@ -187,7 +187,7 @@ class NotificationTemplate(models.Model):
         import re
 
         def replace_var(match):
-            # replace_var: Replace var. Args: según implementación. Returns: según implementación.
+            """replace_var."""
             var_name = match.group(1)
             return str(context.get(var_name, match.group(0)))
 
@@ -265,5 +265,5 @@ class NotificationLog(models.Model):
         ]
 
     def __str__(self):
-        # __str__: Representación en string del objeto. Returns: str.
+        """__str__."""
         return f"{self.event_type} -> {self.recipient} ({self.status})"

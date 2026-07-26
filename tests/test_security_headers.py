@@ -1,4 +1,3 @@
-"""Tests para Security headers."""
 import pytest
 from django.test import override_settings
 from django.urls import reverse
@@ -13,13 +12,13 @@ SEC_HEADERS = [
 
 @pytest.fixture
 def client():
-    """Client."""
+    """client."""
     return APIClient()
 
 
 @pytest.mark.django_db
 def test_security_headers_and_csp_relaxed(client):
-    """Security headers and csp relaxed."""
+    """test_security_headers_and_csp_relaxed."""
     url = reverse("health")
     r1 = client.get(url)
     assert r1.status_code == 200
@@ -49,7 +48,7 @@ def test_security_headers_and_csp_relaxed(client):
 @pytest.mark.django_db
 @override_settings(DEBUG=False, SECURE_HSTS_SECONDS=31536000)
 def test_hsts_when_not_debug(client):
-    """Hsts when not debug."""
+    """test_hsts_when_not_debug."""
     url = reverse("health")
     r = client.get(url)
     assert r.status_code == 200

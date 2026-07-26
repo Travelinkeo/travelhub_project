@@ -1,6 +1,3 @@
-"""Vistas (views) de la aplicación bookings.
-"""
-
 import json
 import logging
 import os
@@ -26,11 +23,11 @@ from .models import FeeVenta, ItemVenta, PagoVenta, Venta, VentaAuditFinding
 logger = logging.getLogger(__name__)
 
 
-class BookingBaseMixin:
-    """Mixin que agrega funcionalidad de bookingbase. Uso: instanciar según necesidad del dominio.
-    """
+class BookingBaseMixin(SaaSMixin, LoginRequiredMixin):
+    """BookingBaseMixin."""
+
     def get_context_data(self, **kwargs):
-        # get_context_data: Obtiene/recupera context data. Args: según implementación. Returns: dato solicitado.
+        """get_context_data."""
         context = super().get_context_data(**kwargs)
         context["active_tab"] = "ventas"
         return context
@@ -39,9 +36,9 @@ class BookingBaseMixin:
 # --- VENTAS ---
 
 
-class VentaListView:
-    """Vista para gestionar ventalist. Uso: instanciar según necesidad del dominio.
-    """
+class VentaListView(ExportMixin, HtmxResponseMixin, BookingBaseMixin, ListView):
+    """VentaListView."""
+
     model = Venta
     template_name = "bookings/venta_list.html"
     htmx_template_name = "bookings/partials/venta_list_rows.html"
@@ -61,7 +58,7 @@ class VentaListView:
     export_filename = "ventas"
 
     def get_queryset(self):
-        # get_queryset: Obtiene/recupera queryset. Args: según implementación. Returns: dato solicitado.
+        """get_queryset."""
         queryset = (
             super().get_queryset().select_related("cliente", "moneda").order_by("-fecha_venta")
         )
@@ -75,15 +72,15 @@ class VentaListView:
         return queryset
 
 
-class VentaDetailView:
-    """Vista para gestionar ventadetail. Uso: instanciar según necesidad del dominio.
-    """
+class VentaDetailView(BookingBaseMixin, DetailView):
+    """VentaDetailView."""
+
     model = Venta
     template_name = "bookings/venta_detail_modern.html"
     context_object_name = "venta"
 
     def get_context_data(self, **kwargs):
-        # get_context_data: Obtiene/recupera context data. Args: según implementación. Returns: dato solicitado.
+        """get_context_data."""
         context = super().get_context_data(**kwargs)
         context["items"] = self.object.items_venta.all().select_related(
             "producto_servicio", "proveedor_servicio"
@@ -93,15 +90,15 @@ class VentaDetailView:
         return context
 
 
-class VentaTimelineView:
-    """Vista para gestionar ventatimeline. Uso: instanciar según necesidad del dominio.
-    """
+class VentaTimelineView(BookingBaseMixin, DetailView):
+    """VentaTimelineView."""
+
     model = Venta
     template_name = "bookings/venta_timeline.html"
     context_object_name = "venta"
 
     def get_queryset(self):
-        # get_queryset: Obtiene/recupera queryset. Args: según implementación. Returns: dato solicitado.
+        """get_queryset."""
         return (
             super()
             .get_queryset()
@@ -110,7 +107,7 @@ class VentaTimelineView:
         )
 
     def get_context_data(self, **kwargs):
-        # get_context_data: Obtiene/recupera context data. Args: según implementación. Returns: dato solicitado.
+        """get_context_data."""
         context = super().get_context_data(**kwargs)
         venta = self.object
 
@@ -202,41 +199,41 @@ class VentaTimelineView:
         return context
 
 
-class VentaCreateView:
-    """Vista para gestionar ventacreate. Uso: instanciar según necesidad del dominio.
-    """
+class VentaCreateView(BookingBaseMixin, CreateView):
+    """VentaCreateView."""
+
     model = Venta
     template_name = "bookings/venta_form.html"
     fields = ["cliente", "moneda", "tipo_venta", "descripcion_general", "notas"]
     success_url = reverse_lazy("bookings:venta_list")
 
     def form_valid(self, form):
-        # form_valid: Form valid. Args: según implementación. Returns: según implementación.
+        """form_valid."""
         messages.success(self.request, "Venta creada correctamente.")
         return super().form_valid(form)
 
 
-class VentaUpdateView:
-    """Vista para gestionar ventaupdate. Uso: instanciar según necesidad del dominio.
-    """
+class VentaUpdateView(BookingBaseMixin, UpdateView):
+    """VentaUpdateView."""
+
     model = Venta
     template_name = "bookings/venta_form.html"
     fields = ["cliente", "moneda", "estado", "tipo_venta", "descripcion_general", "notas"]
 
     def get_success_url(self):
-        # get_success_url: Obtiene/recupera success url. Args: según implementación. Returns: dato solicitado.
+        """get_success_url."""
         return reverse_lazy("bookings:venta_detail", kwargs={"pk": self.object.pk})
 
 
-class VentaDeleteView:
-    """Vista para gestionar ventadelete. Uso: instanciar según necesidad del dominio.
-    """
+class VentaDeleteView(BookingBaseMixin, DeleteView):
+    """VentaDeleteView."""
+
     model = Venta
     template_name = "bookings/venta_confirm_delete.html"
     success_url = reverse_lazy("bookings:venta_list")
 
     def form_valid(self, form):
-        # form_valid: Form valid. Args: según implementación. Returns: según implementación.
+        """form_valid."""
         success_url = self.get_success_url()
         obj = self.get_object()
 
@@ -339,13 +336,13 @@ class FeeVentaCreateView(BookingBaseMixin, CreateView):
     fields = ["tipo_fee", "monto", "descripcion"]
 
     def get_context_data(self, **kwargs):
-        # get_context_data: Obtiene/recupera context data. Args: según implementación. Returns: dato solicitado.
+        """get_context_data."""
         context = super().get_context_data(**kwargs)
         context["venta_pk"] = self.kwargs["venta_pk"]
         return context
 
     def form_valid(self, form):
-        # form_valid: Form valid. Args: según implementación. Returns: según implementación.
+        """form_valid."""
         venta = get_object_or_404(Venta, pk=self.kwargs["venta_pk"])
         form.instance.venta = venta
         form.instance.moneda = venta.moneda
@@ -383,13 +380,13 @@ class PagoVentaCreateView(BookingBaseMixin, CreateView):
     fields = ["monto", "metodo", "referencia"]
 
     def get_context_data(self, **kwargs):
-        # get_context_data: Obtiene/recupera context data. Args: según implementación. Returns: dato solicitado.
+        """get_context_data."""
         context = super().get_context_data(**kwargs)
         context["venta_pk"] = self.kwargs["venta_pk"]
         return context
 
     def form_valid(self, form):
-        # form_valid: Form valid. Args: según implementación. Returns: según implementación.
+        """form_valid."""
         venta = get_object_or_404(Venta, pk=self.kwargs["venta_pk"])
         form.instance.venta = venta
         form.instance.moneda = venta.moneda
@@ -412,9 +409,9 @@ class PagoVentaCreateView(BookingBaseMixin, CreateView):
         return redirect("bookings:venta_detail", pk=venta.pk)
 
 
-class ItemVentaUpdateView:
-    """Vista para gestionar itemventaupdate. Uso: instanciar según necesidad del dominio.
-    """
+class ItemVentaUpdateView(BookingBaseMixin, UpdateView):
+    """ItemVentaUpdateView."""
+
     model = ItemVenta
     template_name = "bookings/partials/item_venta_form.html"
     fields = [
@@ -425,7 +422,7 @@ class ItemVentaUpdateView:
     ]
 
     def form_valid(self, form):
-        # form_valid: Form valid. Args: según implementación. Returns: según implementación.
+        """form_valid."""
         response = super().form_valid(form)
         from apps.bookings.services.venta_service import VentaService
 
@@ -433,7 +430,7 @@ class ItemVentaUpdateView:
         return response
 
     def get_success_url(self):
-        # get_success_url: Obtiene/recupera success url. Args: según implementación. Returns: dato solicitado.
+        """get_success_url."""
         return reverse_lazy("bookings:venta_detail", kwargs={"pk": self.object.venta.pk})
 
 
@@ -450,6 +447,7 @@ class RevenueLeakDashboardView(BookingBaseMixin, ListView):
     context_object_name = "findings"
 
     def get_queryset(self):
+        """get_queryset."""
         # Obtener la agencia activa del usuario logueado de forma segura
         try:
             agencia = get_agencia_from_request(self.request)
@@ -463,7 +461,7 @@ class RevenueLeakDashboardView(BookingBaseMixin, ListView):
         )
 
     def get_context_data(self, **kwargs):
-        # get_context_data: Obtiene/recupera context data. Args: según implementación. Returns: dato solicitado.
+        """get_context_data."""
         context = super().get_context_data(**kwargs)
         findings = self.get_queryset()
 
@@ -643,7 +641,7 @@ def whatsapp_qr_view(request):
 
 @login_required
 def whatsapp_pairing_code_view(request):
-    # whatsapp_pairing_code_view: Whatsapp pairing code view. Args: según implementación. Returns: según implementación.
+    """whatsapp_pairing_code_view."""
     logger.info("whatsapp_pairing_code_view hit!")
     """
     Vista HTMX que solicita el código de emparejamiento por número de teléfono.

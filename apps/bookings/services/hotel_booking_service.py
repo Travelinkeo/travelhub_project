@@ -1,6 +1,3 @@
-"""Servicio de hotel booking service para la aplicación bookings.
-"""
-
 from datetime import date
 
 from django.db import transaction

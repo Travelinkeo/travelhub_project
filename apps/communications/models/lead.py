@@ -1,12 +1,9 @@
-"""Módulo lead de la aplicación communications.
-"""
-
 from django.db import models
 
 
-class Lead:
-    """Clase Lead. Uso: según contexto de la aplicación.
-    """
+class Lead(models.Model):
+    """Lead."""
+
     email = models.EmailField(unique=True)
     nombre = models.CharField(max_length=150, blank=True, default="")
     fuente = models.CharField(max_length=50, default="landing_page")
@@ -24,5 +21,5 @@ class Lead:
         ordering = ["-created_at"]
 
     def __str__(self):
-        # __str__: Representación en string del objeto. Returns: str.
+        """__str__."""
         return self.email

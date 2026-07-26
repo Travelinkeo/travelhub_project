@@ -1,7 +1,5 @@
 # Archivo: core/knowledge_base_handler.py
 
-"""Manejador para crear artículos en la base de conocimiento desde Gemini."""
-
 import logging
 
 from django.utils import timezone
@@ -84,9 +82,9 @@ def crear_articulo_desde_gemini(
 def procesar_email_clasificado_como_general(contenido_json):
     # Suponiendo que 'contenido_json' es el diccionario que devuelve Gemini
     # ej: {'titulo': 'Nuevas políticas de equipaje', 'resumen': '...', 'puntos_clave': ['...']}
-    
+
     # La fuente podría ser más específica si la tenemos, ej: el 'From' del email
-    fuente_email = "Email de marketing de Iberia" 
+    fuente_email = "Email de marketing de Iberia"
     categoria_email = "Políticas de Aerolíneas"
 
     articulo_creado = crear_articulo_desde_gemini(

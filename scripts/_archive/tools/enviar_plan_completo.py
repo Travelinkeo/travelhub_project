@@ -71,6 +71,7 @@ strong{{color:#1a1a2e;font-weight:700}}
 
 
 def convertir_md(path, titulo, num):
+    """convertir_md."""
     with open(path, encoding="utf-8") as f:
         txt = f.read()
     cuerpo = markdown.markdown(txt, extensions=["tables", "fenced_code", "toc"])
@@ -79,6 +80,7 @@ def convertir_md(path, titulo, num):
 
 
 def generar_pdf():
+    """generar_pdf."""
     print("📄 Construyendo PDF unificado...")
     partes = [convertir_md(p, t, i + 1) for i, (p, t) in enumerate(DOCS)]
     html = HTML_WRAP.format(body="\n".join(partes))
@@ -90,6 +92,7 @@ def generar_pdf():
 
 
 def enviar():
+    """enviar."""
     print(f"📧 Enviando a {EMAIL_TO}...")
     msg = MIMEMultipart()
     msg["From"] = f"TravelHub Strategy <{EMAIL_USER}>"

@@ -58,7 +58,7 @@ def get_plan_size_limit(agencia=None):
 
 
 def validate_file_size(value, agencia=None):
-    """Función que valida file size. Returns: resultado de validación."""
+    """validate_file_size."""
     limit = get_plan_size_limit(agencia)
     limit_mb = limit / (1024 * 1024)
     if value.size > limit:
@@ -69,7 +69,7 @@ def validate_file_size(value, agencia=None):
 
 
 def validate_file_extension(value):
-    """Función que valida file extension. Returns: resultado de validación."""
+    """validate_file_extension."""
     ext = os.path.splitext(value.name)[1]
     if ext.lower() not in VALID_EXTENSIONS:
         raise ValidationError(
@@ -147,13 +147,13 @@ def antivirus_hook(value):
 
 
 def validar_no_vacio_o_espacios(value):
-    """Función: validar no vacio o espacios."""
+    """validar_no_vacio_o_espacios."""
     if isinstance(value, str) and not value.strip():
         raise ValidationError(_("Este campo no puede consistir unicamente en espacios en blanco."))
 
 
 def validar_numero_pasaporte(value):
-    """Función: validar numero pasaporte."""
+    """validar_numero_pasaporte."""
     if not isinstance(value, str) or not value.strip():
         raise ValidationError(_("El numero de documento no puede estar vacio."))
 

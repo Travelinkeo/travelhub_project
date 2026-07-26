@@ -4,8 +4,7 @@ import django.db.models.deletion
 from django.db import migrations, models
 
 
-class Migration:
-    """Migración de base de datos generada por Django."""
+class Migration(migrations.Migration):
     dependencies = [
         ("core", "0003_asientocontable_moneda_ciudad_pais_and_more"),
     ]

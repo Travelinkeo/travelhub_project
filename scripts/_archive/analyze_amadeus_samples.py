@@ -7,6 +7,7 @@ OUTPUT_FILE = "XYZ/amadeus_samples/analysis_dump.txt"
 
 
 def extract_pdf_text(path):
+    """extract_pdf_text."""
     text = ""
     try:
         with pdfplumber.open(path) as pdf:
@@ -19,6 +20,7 @@ def extract_pdf_text(path):
 
 
 def main():
+    """main."""
     with open(OUTPUT_FILE, "w", encoding="utf-8") as f_out:
         # PDFs
         for i in range(1, 9):

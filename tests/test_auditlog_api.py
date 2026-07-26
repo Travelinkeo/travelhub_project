@@ -1,4 +1,3 @@
-"""Tests para Auditlog api."""
 from decimal import Decimal
 
 import pytest
@@ -13,8 +12,8 @@ pytestmark = pytest.mark.skip(reason="Tests requieren configuración completa - 
 
 @pytest.mark.django_db
 def test_auditlog_api_list(api_client_autenticado):
+    """test_auditlog_api_list."""
     # Crear datos y generar logs (eliminar item + venta)
-    """Auditlog api list."""
     moneda, _ = Moneda.objects.get_or_create(codigo_iso="USD", defaults={"nombre": "Dólar"})
     cliente, _ = Cliente.objects.get_or_create(
         nombres="Test", apellidos="User", email="testuser@example.com"
@@ -52,8 +51,8 @@ def test_auditlog_api_list(api_client_autenticado):
 
 @pytest.mark.django_db
 def test_auditlog_api_filters(api_client_autenticado):
+    """test_auditlog_api_filters."""
     # Crear una venta y generarle un log (eliminando directamente sin componentes)
-    """Auditlog api filters."""
     moneda, _ = Moneda.objects.get_or_create(codigo_iso="USD", defaults={"nombre": "Dólar"})
     cliente, _ = Cliente.objects.get_or_create(
         nombres="Solo", apellidos="Venta", email="solo@example.com"

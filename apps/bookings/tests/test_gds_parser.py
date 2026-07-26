@@ -1,6 +1,3 @@
-"""Pruebas para gds parser en bookings.
-"""
-
 from unittest.mock import patch
 
 import pytest
@@ -11,8 +8,8 @@ from apps.bookings.services.pnr_parser_service import PNRParserService
 
 @pytest.mark.django_db
 class TestMotorGdsParser:
-    """Parser para procesar testmotorgds. Uso: instanciar según necesidad del dominio.
-    """
+    """TestMotorGdsParser."""
+
     @patch("apps.bookings.tasks.verificar_cumplimiento_pasaportes_reserva_task.delay")
     def test_parseo_exitoso_pnr_amadeus(self, mock_delay, agencia_premium):
         """Simula la ingesta headless de un string críptico real de Amadeus."""

@@ -5,6 +5,7 @@ import requests
 
 # Minimal script without Django overhead to test network/token
 def test_simple_telegram():
+    """test_simple_telegram."""
     print("--- SIMPLE TELEGRAM TEST ---")
 
     # Load env vars manually to be sure

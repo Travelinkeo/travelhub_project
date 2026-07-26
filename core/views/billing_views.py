@@ -326,7 +326,7 @@ class AccountBillingView(View):
     template_name = "core/account_billing.html"
 
     def get(self, request):
-        """Método: get."""
+        """get."""
         user = request.user
         agencia = self._get_user_agency(user)
 
@@ -425,7 +425,6 @@ class AccountBillingView(View):
 
     @staticmethod
     def _plan_display_name(plan):
-        """Método interna: plan display name."""
         names = {
             "FREE": "Gratuito",
             "BASIC": "Básico",

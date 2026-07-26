@@ -1,7 +1,3 @@
-"""Tareas asíncronas (Celery) para la aplicación crm.
-"""
-
-import json
 import logging
 import os
 
@@ -10,7 +6,6 @@ from celery import shared_task
 from django.conf import settings
 from django.core.files.storage import default_storage
 
-from apps.common.models import Moneda
 from apps.crm.models import Cliente
 
 logger = logging.getLogger(__name__)
@@ -47,7 +42,9 @@ def importar_clientes_excel_task(self, agencia_id, file_path, column_mapping, us
                 nombres = str(nombres).strip()
                 apellidos = str(row.get(column_mapping.get("apellidos", ""), "") or "").strip()
                 email = str(row.get(column_mapping.get("email", ""), "") or "").strip()
-                telefono = str(row.get(column_mapping.get("telefono_principal", ""), "") or "").strip()
+                telefono = str(
+                    row.get(column_mapping.get("telefono_principal", ""), "") or ""
+                ).strip()
 
                 # Detección de duplicados
                 dup_query = Cliente.objects.filter(agencia_id=agencia_id)
@@ -98,7 +95,11 @@ def importar_clientes_excel_task(self, agencia_id, file_path, column_mapping, us
 
     except Exception as e:
         logger.error(f"Error en importación: {e}")
-        return {"creados": creados, "duplicados": duplicados, "errores": [{"fila": 0, "error": str(e)[:500]}]}
+        return {
+            "creados": creados,
+            "duplicados": duplicados,
+            "errores": [{"fila": 0, "error": str(e)[:500]}],
+        }
 
     finally:
         # Limpiar archivo temporal

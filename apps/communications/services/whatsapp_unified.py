@@ -388,6 +388,8 @@ try:
     from pydantic import BaseModel
 
     class AnalisisMensajeSchema(BaseModel):
+        """AnalisisMensajeSchema."""
+
         es_solicitud_viaje: bool
         origen: str
         destino: str
@@ -510,7 +512,7 @@ except ImportError as e:
     def procesar_mensaje_entrante(
         telefono_cliente: str, nombre_perfil: str, mensaje_texto: str
     ) -> bool:
-        # procesar_mensaje_entrante: Procesa r mensaje entrante. Args: datos a procesar. Returns: resultado procesado.
+        """procesar_mensaje_entrante."""
         logger.error(
             "WhatsApp Bot no disponible: faltan dependencias (pydantic, ai_engine, crm models)"
         )

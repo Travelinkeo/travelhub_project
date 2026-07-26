@@ -16,7 +16,7 @@ class TestWhatsAppUnified:
 
     @patch("apps.communications.services.whatsapp_unified.requests.post")
     def test_enviar_mensaje_meta_api_success(self, mock_post, settings):
-        """Enviar mensaje meta api success."""
+        """test_enviar_mensaje_meta_api_success."""
         settings.WHATSAPP_TOKEN = "test_token"
         settings.WHATSAPP_PHONE_ID = "test_phone"
         mock_response = Mock()
@@ -31,7 +31,7 @@ class TestWhatsAppUnified:
 
     @patch("apps.communications.services.whatsapp_unified.requests.post")
     def test_enviar_mensaje_meta_api_failure(self, mock_post):
-        """Enviar mensaje meta api failure."""
+        """test_enviar_mensaje_meta_api_failure."""
         mock_post.side_effect = Exception("Network error")
 
         result = enviar_mensaje_meta_api("+1234567890", "Hello")
@@ -39,7 +39,7 @@ class TestWhatsAppUnified:
         assert result["success"] is False
 
     def test_send_whatsapp_message_no_agencia(self):
-        """Send whatsapp message no agencia."""
+        """test_send_whatsapp_message_no_agencia."""
         result = send_whatsapp_message("+1234567890", "Hello", agencia=None)
         assert result["success"] is False
         assert "agencia" in result.get("error_message", "").lower() or "subdominio" in result.get(
@@ -48,7 +48,7 @@ class TestWhatsAppUnified:
 
     @patch("apps.communications.services.whatsapp_unified.EvolutionService.send_text")
     def test_send_whatsapp_message_evolution_success(self, mock_send):
-        """Send whatsapp message evolution success."""
+        """test_send_whatsapp_message_evolution_success."""
         mock_send.return_value = True
         agencia = Mock()
         agencia.subdominio_slug = "test-agency"
@@ -61,7 +61,7 @@ class TestWhatsAppUnified:
     @patch("apps.communications.services.whatsapp_unified.EvolutionService.send_text")
     @patch("apps.communications.services.whatsapp_unified.enviar_mensaje_meta_api")
     def test_send_whatsapp_message_fallback_to_meta(self, mock_meta, mock_evolution):
-        """Send whatsapp message fallback to meta."""
+        """test_send_whatsapp_message_fallback_to_meta."""
         mock_evolution.return_value = False
         mock_meta.return_value = {"success": True, "provider": "meta"}
         agencia = Mock()
@@ -78,32 +78,32 @@ class TestWhatsAppServiceWrapper:
 
     @patch("apps.communications.services.whatsapp_unified.EvolutionService.get_instance_state")
     def test_get_status_open(self, mock_state):
-        """Get status open."""
+        """test_get_status_open."""
         mock_state.return_value = "open"
         assert WhatsAppService.get_status("test") == "WORKING"
 
     @patch("apps.communications.services.whatsapp_unified.EvolutionService.get_instance_state")
     def test_get_status_connecting(self, mock_state):
-        """Get status connecting."""
+        """test_get_status_connecting."""
         mock_state.return_value = "connecting"
         assert WhatsAppService.get_status("test") == "CONNECTING"
 
     @patch("apps.communications.services.whatsapp_unified.EvolutionService.get_instance_state")
     def test_get_status_disconnected(self, mock_state):
-        """Get status disconnected."""
+        """test_get_status_disconnected."""
         mock_state.return_value = "close"
         assert WhatsAppService.get_status("test") == "DISCONNECTED"
 
     @patch("apps.communications.services.whatsapp_unified.EvolutionService.create_instance")
     def test_start_session(self, mock_create):
-        """Start session."""
+        """test_start_session."""
         mock_create.return_value = {"instanceName": "test"}
         result = WhatsAppService.start_session("test")
         assert result is not None
 
     @patch("apps.communications.services.whatsapp_unified.EvolutionService.delete_instance")
     def test_logout(self, mock_delete):
-        """Logout."""
+        """test_logout."""
         mock_delete.return_value = True
         result = WhatsAppService.logout("test")
         assert result is True
@@ -113,12 +113,12 @@ class TestTwilioAvailability:
     """Tests para disponibilidad de Twilio"""
 
     def test_twilio_available_flag(self):
-        """Twilio available flag."""
+        """test_twilio_available_flag."""
         assert isinstance(TWILIO_AVAILABLE, bool)
 
     @patch("apps.communications.services.whatsapp_unified.get_twilio_client")
     def test_enviar_whatsapp_no_client(self, mock_client):
-        """Enviar whatsapp no client."""
+        """test_enviar_whatsapp_no_client."""
         mock_client.return_value = None
         result = enviar_whatsapp("+1234567890", "Hello")
         assert result is False

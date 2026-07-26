@@ -6,6 +6,7 @@ from bs4 import BeautifulSoup
 
 # Mocking the function from ticket_parser.py
 def _extract_field_single_line(texto: str, patterns: list, default="No encontrado") -> str:
+    """_extract_field_single_line."""
     for pattern in patterns:
         match = re.search(pattern, texto, re.IGNORECASE)
         if match:
@@ -22,6 +23,7 @@ def _extract_field_single_line(texto: str, patterns: list, default="No encontrad
 
 
 def _get_nombre_completo_pasajero(texto: str) -> str:
+    """_get_nombre_completo_pasajero."""
     blacklist = [
         "DATE/FECHA",
         "FECHA/EMISION",
@@ -73,6 +75,7 @@ def _get_nombre_completo_pasajero(texto: str) -> str:
 
 
 def test_file():
+    """test_file."""
     path = "c:\\Users\\ARMANDO\\travelhub_project\\media\\boletos_importados\\2026\\02\\email_ticket_b1243.html"
     if not os.path.exists(path):
         print("File not found")

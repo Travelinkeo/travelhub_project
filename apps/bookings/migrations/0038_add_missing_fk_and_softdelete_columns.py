@@ -1,13 +1,8 @@
-"""Migración de base de datos para bookings.
-"""
-
 import django.db.models.deletion
 from django.db import migrations, models
 
 
-class Migration:
-    """Clase Migration. Uso: según contexto de la aplicación.
-    """
+class Migration(migrations.Migration):
     dependencies = [
         ("bookings", "0037_tarifarioproveedor_add_agencia_proveedor"),
         ("common", "0004_alter_aerolinea_table_alter_ciudad_table_and_more"),

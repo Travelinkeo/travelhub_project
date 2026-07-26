@@ -44,18 +44,17 @@ class SafeDict(dict):
         return super().get(key, "")
 
 
-        """Método interna: getitem."""
 @method_decorator(login_required, name="dispatch")
 class UploadBoletoView(View):
-    """Función: UploadBoletoView."""
-        """Método interna: getattr."""
+    """UploadBoletoView."""
+
     def post(self, request, *args, **kwargs):
+        """post."""
         archivo = request.FILES.get("archivo")
         if not archivo:
             return HttpResponse(
                 '<div class="text-red-400 text-sm">Error: Falta archivo</div>', status=400
             )
-        """Método: post."""
 
         try:
             agencia = getattr(request, "agencia", None)
@@ -122,15 +121,16 @@ class UploadBoletoView(View):
 
 @method_decorator(login_required, name="dispatch")
 class ReviewBoletoView(View):
-    """Función: ReviewBoletoView."""
+    """ReviewBoletoView."""
+
     template_name = "core/tickets/review_master.html"
 
     def get(self, request, pk, *args, **kwargs):
+        """get."""
         manager = getattr(BoletoImportado, "all_objects", BoletoImportado.objects)
         boleto = get_object_or_404(manager, pk=pk)
 
         agencia = getattr(request, "agencia", None)
-        """Método: get."""
         if not request.user.is_superuser and boleto.agencia != agencia:
             return HttpResponse("Acceso Denegado", status=403)
 
@@ -232,11 +232,11 @@ class ReviewBoletoView(View):
         return response
 
     def post(self, request, pk, *args, **kwargs):
+        """post."""
         try:
             next_url = request.GET.get("next") or request.POST.get("next")
             manager = getattr(BoletoImportado, "all_objects", BoletoImportado.objects)
             boleto = manager.get(pk=pk)
-        """Método: post."""
 
             agencia = getattr(request, "agencia", None)
             if not request.user.is_superuser and boleto.agencia != agencia:
@@ -283,21 +283,23 @@ class ReviewBoletoView(View):
 
 @method_decorator(login_required, name="dispatch")
 class BoletoStatusView(View):
-    """Función: BoletoStatusView."""
+    """BoletoStatusView."""
+
     def get(self, request, pk, *args, **kwargs):
+        """get."""
         return HttpResponse("<script>window.location.reload();</script>")
 
 
-        """Método: get."""
 @method_decorator(login_required, name="dispatch")
 class BoletoPdfStatusView(View):
-    """Función: BoletoPdfStatusView."""
+    """BoletoPdfStatusView."""
+
     MAX_POLLS = 30  # ~2 minutos (30 * 4s)
 
     def get(self, request, pk, *args, **kwargs):
+        """get."""
         manager = getattr(BoletoImportado, "all_objects", BoletoImportado.objects)
         boleto = get_object_or_404(manager, pk=pk)
-        """Método: get."""
 
         agencia = getattr(request, "agencia", None)
         if not request.user.is_superuser and boleto.agencia != agencia:
@@ -479,10 +481,11 @@ class BoletoPdfStatusView(View):
 
 @method_decorator(login_required, name="dispatch")
 class DesasociarVentaView(View):
-    """Función: DesasociarVentaView."""
+    """DesasociarVentaView."""
+
     def post(self, request, pk):
+        """post."""
         boleto = get_object_or_404(BoletoImportado, pk=pk)
-        """Método: post."""
         agencia = getattr(request, "agencia", None)
         if not request.user.is_superuser and boleto.agencia != agencia:
             return HttpResponse("Acceso Denegado", status=403)
@@ -498,7 +501,7 @@ class DesasociarVentaView(View):
 
 @login_required
 def eliminar_boleto(request, pk):
-    """Función: eliminar boleto."""
+    """eliminar_boleto."""
     manager = getattr(BoletoImportado, "all_objects", BoletoImportado.objects)
     boleto = get_object_or_404(manager, pk=pk)
 

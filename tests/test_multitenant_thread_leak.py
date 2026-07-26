@@ -1,4 +1,3 @@
-"""Tests para Multitenant thread leak."""
 import threading
 import time
 
@@ -17,8 +16,10 @@ User = get_user_model()
 
 
 class MockRequest:
-    """Mock Request."""
+    """MockRequest."""
+
     def __init__(self, user, agency, session):
+        """__init__."""
         self.user = user
         self.agencia = agency
         self.agency = agency
@@ -51,8 +52,8 @@ def test_multitenant_thread_concurrency_leak():
     errors = []
 
     def get_response_a(request):
+        """get_response_a."""
         # Simula procesamiento de la petición.
-        """Get response a."""
         time.sleep(0.02)
         current_agency = get_current_agency()
         current_user = get_current_user()
@@ -65,7 +66,7 @@ def test_multitenant_thread_concurrency_leak():
         return HttpResponse("OK")
 
     def get_response_b(request):
-        """Get response b."""
+        """get_response_b."""
         time.sleep(0.02)
         current_agency = get_current_agency()
         current_user = get_current_user()
@@ -78,7 +79,7 @@ def test_multitenant_thread_concurrency_leak():
         return HttpResponse("OK")
 
     def run_client_a():
-        """Run client a."""
+        """run_client_a."""
         middleware = ThreadLocalContextMiddleware(get_response=get_response_a)
         try:
             for _ in range(20):
@@ -95,7 +96,7 @@ def test_multitenant_thread_concurrency_leak():
             connections.close_all()
 
     def run_client_b():
-        """Run client b."""
+        """run_client_b."""
         middleware = ThreadLocalContextMiddleware(get_response=get_response_b)
         try:
             for _ in range(20):

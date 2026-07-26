@@ -12,15 +12,15 @@ class MultiParsedTicketData:
     """
 
     def __init__(self, data: dict):
-        # __init__: Inicializa una nueva instancia de MultiParsedTicketData. Args: parámetros de inicialización.
+        """__init__."""
         self.data = data
 
     def to_dict(self) -> dict:
-        # to_dict: To dict. Args: según implementación. Returns: según implementación.
+        """to_dict."""
         return self.data
 
     def to_pydantic(self) -> Any:
-        # to_pydantic: To pydantic. Args: según implementación. Returns: según implementación.
+        """to_pydantic."""
         from core.api import (
             BoletoAereoSchema,
             ResultadoParseoSchema,

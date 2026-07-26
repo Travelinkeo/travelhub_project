@@ -1,13 +1,13 @@
-"""Tests para Ai router (Services)."""
 import unittest.mock
 
 import pytest
 
 
 class TestGeminiRouterInit:
-    """Test Gemini Router Init."""
+    """TestGeminiRouterInit."""
+
     def test_raises_value_error_when_no_api_key(self, monkeypatch):
-        """Raises value error when no api key."""
+        """test_raises_value_error_when_no_api_key."""
         monkeypatch.setattr(
             "apps.automation.services.ai_router.get_gemini_api_key",
             lambda agency=None: None,
@@ -19,10 +19,11 @@ class TestGeminiRouterInit:
 
 
 class TestClassifyEmail:
+    """TestClassifyEmail."""
+
     @pytest.fixture(autouse=True)
-    """Test Classify Email."""
     def _setup_router(self, monkeypatch):
-        """Setup router."""
+        """_setup_router."""
         mock_client = unittest.mock.MagicMock()
         mock_completion = unittest.mock.MagicMock()
         mock_completion.choices = [
@@ -44,14 +45,14 @@ class TestClassifyEmail:
         self.router = GeminiRouter()
 
     def test_classify_email_returns_enum(self, monkeypatch):
-        """Classify email returns enum."""
+        """test_classify_email_returns_enum."""
         result = self.router.classify_email("test email content")
         from apps.automation.services.ai_router import EmailType
 
         assert result == EmailType.TICKET_ISSUANCE
 
     def test_classify_email_returns_other_on_error(self, monkeypatch):
-        """Classify email returns other on error."""
+        """test_classify_email_returns_other_on_error."""
         self.router.client.chat.completions.create.side_effect = Exception("API error")
         from apps.automation.services.ai_router import EmailType
 
@@ -60,10 +61,11 @@ class TestClassifyEmail:
 
 
 class TestExtractTicketData:
+    """TestExtractTicketData."""
+
     @pytest.fixture(autouse=True)
-    """Test Extract Ticket Data."""
     def _setup_router(self, monkeypatch):
-        """ setup router."""
+        """_setup_router."""
         mock_client = unittest.mock.MagicMock()
         mock_completion = unittest.mock.MagicMock()
         mock_completion.choices = [
@@ -89,23 +91,24 @@ class TestExtractTicketData:
         self.router = GeminiRouter()
 
     def test_extract_ticket_data(self):
-        """Extract ticket data."""
+        """test_extract_ticket_data."""
         result = self.router.extract_ticket_data("email content")
         assert result is not None
         assert result.pnr == "ABC123"
         assert result.passenger_name == "TEST"
 
     def test_extract_ticket_data_returns_none_on_error(self):
-        """Extract ticket data returns none on error."""
+        """test_extract_ticket_data_returns_none_on_error."""
         self.router.client.chat.completions.create.side_effect = Exception("API error")
         result = self.router.extract_ticket_data("content")
         assert result is None
 
 
 class TestValidateTicket:
-    """Test Validate Ticket."""
+    """TestValidateTicket."""
+
     def test_validates_valid_ticket(self):
-        """Validates valid ticket."""
+        """test_validates_valid_ticket."""
         from apps.automation.services.ai_router import TicketSchema, validate_ticket
 
         ticket = TicketSchema(
@@ -116,7 +119,7 @@ class TestValidateTicket:
         assert validate_ticket(ticket) is True
 
     def test_rejects_none_ticket(self):
-        """Rejects none ticket."""
+        """test_rejects_none_ticket."""
         from apps.automation.services.ai_router import validate_ticket
 
         assert validate_ticket(None) is False

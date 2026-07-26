@@ -10,6 +10,7 @@ from core.models.agencia import Agencia
 
 
 def seed_insights():
+    """seed_insights."""
     # Buscamos la primera agencia disponible
     agencia = Agencia.objects.first()
     if not agencia:

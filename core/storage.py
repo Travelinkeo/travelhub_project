@@ -26,6 +26,7 @@ if use_r2:
         """
 
         def __init__(self, **kwargs):
+            """__init__."""
             kwargs.setdefault("access_key", os.getenv("R2_ACCESS_KEY_ID"))
             kwargs.setdefault("secret_key", os.getenv("R2_SECRET_ACCESS_KEY"))
             kwargs.setdefault("bucket_name", os.getenv("R2_BUCKET_NAME"))

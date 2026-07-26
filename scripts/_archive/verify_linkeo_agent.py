@@ -32,6 +32,7 @@ print(f"🔑 GEMINI_API_KEY status: {'LOADED' if key else 'MISSING'}")
 
 
 def verify_linkeo():
+    """verify_linkeo."""
     print("🧠 Verificando Linkeo Agent Service (Gemini AI)...")
 
     # 1. Setup Data
@@ -74,6 +75,7 @@ def verify_linkeo():
     original_generate = LinkeoAgentService._detect_intent
 
     def mock_detect_intent(self, text):
+        """mock_detect_intent."""
         print(f"[MOCK] Detectando intento para: {text}")
         if "Juan" in text:
             return {"intent": "QUERY_CLIENT", "params": {"name_query": "Juan"}}

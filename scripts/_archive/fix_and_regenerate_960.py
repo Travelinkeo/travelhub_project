@@ -15,6 +15,7 @@ from apps.bookings.models import BoletoImportado
 
 
 def fix_iata_files():
+    """fix_iata_files."""
     print("DEBUG: Fixing IATA JSON files...")
     # ... (Keep IATA fix logic or assume it is done. I'll include it for safety)
     base_dir = os.path.dirname(os.path.abspath(ticket_parser.__file__))
@@ -86,6 +87,7 @@ def fix_iata_files():
 
 
 def run():
+    """run."""
     print("DEBUG: STARTING SCRIPT")
     fix_iata_files()
 

@@ -5,6 +5,7 @@ import pdfplumber
 
 
 def analyze_pdf(path):
+    """analyze_pdf."""
     print(f"\n{'=' * 50}")
     print(f"ANALYZING: {os.path.basename(path)}")
     print(f"{'=' * 50}")

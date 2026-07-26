@@ -14,16 +14,17 @@ from apps.common.models import Proveedor
 
 
 class Command(BaseCommand):
-    """Comando de gestión personalizado."""
+    """Command."""
+
     help = "Importa hoteles desde JSON estructurado"
 
     def add_arguments(self, parser):
-        """Método: add arguments."""
+        """add_arguments."""
         parser.add_argument("json_path", type=str, help="Ruta al archivo JSON")
         parser.add_argument("--proveedor-id", type=int, required=True)
 
     def handle(self, *args, **options):
-        """Método: handle."""
+        """handle."""
         json_path = options["json_path"]
         proveedor_id = options["proveedor_id"]
 
@@ -112,7 +113,7 @@ class Command(BaseCommand):
         )
 
     def _parse_regimen(self, regimen_str):
-        """Método interna: parse regimen."""
+        """_parse_regimen."""
         regimen_map = {
             "SOLO ALOJAMIENTO": "SO",
             "SOLO DESAYUNO": "SD",
@@ -124,7 +125,7 @@ class Command(BaseCommand):
         return regimen_map.get(regimen_str.upper(), "SD")
 
     def _parse_decimal(self, value):
-        """Método interna: parse decimal."""
+        """_parse_decimal."""
         if value is None or value == "N/A":
             return None
         return Decimal(str(value))

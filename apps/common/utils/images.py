@@ -1,6 +1,3 @@
-"""Utilidades de images para common.
-"""
-
 import base64
 import logging
 

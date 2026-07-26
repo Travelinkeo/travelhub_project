@@ -2,9 +2,6 @@
 # Contiene funciones auxiliares de parseo específicas para GDS.
 # Importa utilidades centralizadas desde apps/common/utils cuando sea posible.
 
-"""Parser/procesador de parsing utils para la aplicación automation.
-"""
-
 import datetime as dt
 import logging
 import re

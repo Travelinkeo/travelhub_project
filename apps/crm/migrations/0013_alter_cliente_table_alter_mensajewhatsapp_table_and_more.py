@@ -2,15 +2,10 @@
 # Edited 2026-06-06: removed AlterModelTable(table=None) so state keeps
 # db_table='core_xxx' for the renamed models.
 
-"""Migración de base de datos para crm.
-"""
-
 from django.db import migrations
 
 
-class Migration:
-    """Clase Migration. Uso: según contexto de la aplicación.
-    """
+class Migration(migrations.Migration):
     dependencies = [
         ("crm", "0012_pasaporteescaneado_agencia_alter_cliente_deleted_at_and_more"),
     ]

@@ -93,7 +93,6 @@ class Webhook(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        """Meta definición del modelo."""
         verbose_name = "Webhook"
         verbose_name_plural = "Webhooks"
         ordering = ["-created_at"]
@@ -102,10 +101,11 @@ class Webhook(models.Model):
         ]
 
     def __str__(self):
+        """__str__."""
         return f"{self.url} ({', '.join(self.events[:3])})"
 
     def save(self, *args, **kwargs):
-        """Método: save."""
+        """save."""
         if not self.secret:
             self.secret = secrets.token_hex(32)
         super().save(*args, **kwargs)
@@ -187,7 +187,6 @@ class WebhookDelivery(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        """Meta definición del modelo."""
         verbose_name = "Webhook Delivery"
         verbose_name_plural = "Webhook Deliveries"
         ordering = ["-created_at"]
@@ -197,5 +196,6 @@ class WebhookDelivery(models.Model):
         ]
 
     def __str__(self):
+        """__str__."""
         status = "✅" if self.success else "❌"
         return f"{status} {self.event_type} → {self.webhook.url}"

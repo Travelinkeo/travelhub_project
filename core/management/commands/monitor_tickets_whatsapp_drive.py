@@ -4,18 +4,19 @@ from apps.communications.services.email_unified import EmailMonitorService
 
 
 class Command(BaseCommand):
-    """Comando de gestión personalizado."""
+    """Command."""
+
     help = "Monitorea correos y envia por WhatsApp con link de Google Drive"
 
     def add_arguments(self, parser):
-        """Método: add arguments."""
+        """add_arguments."""
         parser.add_argument("--phone", type=str, required=True, help="Numero WhatsApp")
         parser.add_argument("--interval", type=int, default=60, help="Intervalo en segundos")
         parser.add_argument("--mark-read", action="store_true", help="Marcar como leidos")
         parser.add_argument("--agencia", type=str, help="Nombre de la agencia")
 
     def handle(self, *args, **options):
-        """Método: handle."""
+        """handle."""
         self.stdout.write(f"Iniciando monitor -> WhatsApp {options['phone']}")
         self.stdout.write("PDFs se subiran a Google Drive")
 

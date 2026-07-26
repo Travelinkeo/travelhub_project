@@ -1,6 +1,3 @@
-"""Servicio de bcv scraper para la aplicación finance.
-"""
-
 import logging
 from decimal import Decimal
 

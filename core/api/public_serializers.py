@@ -27,7 +27,6 @@ class APIKeySerializer(serializers.ModelSerializer):
     is_expired = serializers.SerializerMethodField()
 
     class Meta:
-        """Configuración del modelo."""
         model = CronApiKey
         fields = [
             "id",
@@ -47,7 +46,7 @@ class APIKeySerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "prefix", "request_count", "created_at"]
 
     def get_is_expired(self, obj):
-        """Método que obtiene is expired. Args: según implementación. Returns: datos solicitados."""
+        """get_is_expired."""
         if obj.expires_at is None:
             return False
         from django.utils import timezone
@@ -74,7 +73,6 @@ class WebhookSerializer(serializers.ModelSerializer):
     delivery_stats = serializers.SerializerMethodField()
 
     class Meta:
-        """Configuración del modelo."""
         model = Webhook
         fields = [
             "id",
@@ -99,11 +97,11 @@ class WebhookSerializer(serializers.ModelSerializer):
         ]
 
     def get_events_display(self, obj):
-        """Método que obtiene events display. Args: según implementación. Returns: datos solicitados."""
+        """get_events_display."""
         return [{"value": e, "label": dict(WebhookEvent.choices).get(e, e)} for e in obj.events]
 
     def get_delivery_stats(self, obj):
-        """Método que obtiene delivery stats. Args: según implementación. Returns: datos solicitados."""
+        """get_delivery_stats."""
         return {
             "total": obj.total_deliveries,
             "failures": obj.failure_count,
@@ -121,7 +119,6 @@ class WebhookDeliverySerializer(serializers.ModelSerializer):
     webhook_url = serializers.CharField(source="webhook.url", read_only=True)
 
     class Meta:
-        """Configuración del modelo."""
         model = WebhookDelivery
         fields = [
             "id",

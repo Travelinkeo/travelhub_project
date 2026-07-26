@@ -13,6 +13,7 @@ folders = ["SABRE", "COPA", "KIU", "AVIOR", "ESTELAR", "RUTACA", "WINGO", "TK CO
 
 
 def run_test():
+    """run_test."""
     report = []
 
     for folder in folders:

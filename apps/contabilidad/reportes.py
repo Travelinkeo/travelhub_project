@@ -15,7 +15,6 @@ class ReportesContables:
 
     @staticmethod
     def balance_comprobacion(fecha_desde: date, fecha_hasta: date, moneda: str = "USD") -> dict:
-        # balance_comprobacion: Balance comprobacion. Args: según implementación. Returns: según implementación.
         monto_field = "monto_ves" if moneda in ("BSD", "VES") else "monto_usd"
 
         cuentas = CuentaContable.objects.filter(acepta_movimientos=True).order_by("codigo")
@@ -70,7 +69,6 @@ class ReportesContables:
 
     @staticmethod
     def estado_resultados(fecha_desde: date, fecha_hasta: date, moneda: str = "USD") -> dict:
-        # estado_resultados: Estado resultados. Args: según implementación. Returns: según implementación.
         monto_field = "monto_ves" if moneda in ("BSD", "VES") else "monto_usd"
 
         movs_ingreso = MovimientoContable.objects.filter(
@@ -111,7 +109,6 @@ class ReportesContables:
 
     @staticmethod
     def balance_general(fecha_corte: date, moneda: str = "USD") -> dict:
-        # balance_general: Balance general. Args: según implementación. Returns: según implementación.
         monto_field = "monto_ves" if moneda in ("BSD", "VES") else "monto_usd"
 
         movs_activo = MovimientoContable.objects.filter(
@@ -156,7 +153,6 @@ class ReportesContables:
 
     @staticmethod
     def libro_diario(fecha_desde: date, fecha_hasta: date, moneda: str = "USD") -> list[dict]:
-        # libro_diario: Libro diario. Args: según implementación. Returns: según implementación.
         monto_field = "monto_ves" if moneda in ("BSD", "VES") else "monto_usd"
 
         asientos = AsientoContable.objects.filter(
@@ -172,7 +168,9 @@ class ReportesContables:
             for mov in asiento.movimientos.all():
                 val = getattr(mov, monto_field) or Decimal("0")
                 debe = val if mov.tipo == MovimientoContable.TipoMovimiento.DEBITO else Decimal("0")
-                haber = val if mov.tipo == MovimientoContable.TipoMovimiento.CREDITO else Decimal("0")
+                haber = (
+                    val if mov.tipo == MovimientoContable.TipoMovimiento.CREDITO else Decimal("0")
+                )
                 t_debe += debe
                 t_haber += haber
                 detalles.append(
@@ -209,7 +207,6 @@ class ReportesContables:
     def libro_mayor(
         cuenta_id: int, fecha_desde: date, fecha_hasta: date, moneda: str = "USD"
     ) -> dict:
-        # libro_mayor: Libro mayor. Args: según implementación. Returns: según implementación.
         monto_field = "monto_ves" if moneda in ("BSD", "VES") else "monto_usd"
         cuenta = CuentaContable.objects.get(id=cuenta_id)
 

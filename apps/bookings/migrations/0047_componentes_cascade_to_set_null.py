@@ -16,7 +16,6 @@ from django.db import migrations, models
 
 
 def _fk(to, related_name, verbose_name=None):
-    # _fk:  fk. Args: según implementación. Returns: según implementación.
     field_kwargs = {
         "blank": True,
         "null": True,
@@ -29,9 +28,7 @@ def _fk(to, related_name, verbose_name=None):
     return models.ForeignKey(**field_kwargs)
 
 
-class Migration:
-    """Clase Migration. Uso: según contexto de la aplicación.
-    """
+class Migration(migrations.Migration):
     dependencies = [
         ("bookings", "0046_alter_ventaparsemetadata_options_and_more"),
     ]

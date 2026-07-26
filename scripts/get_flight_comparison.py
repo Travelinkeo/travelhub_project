@@ -4,6 +4,7 @@ from amadeus import Client, ResponseError
 
 
 def load_env_manually():
+    """load_env_manually."""
     env_path = os.path.join(os.getcwd(), ".env")
     if not os.path.exists(env_path):
         return
@@ -15,6 +16,7 @@ def load_env_manually():
 
 
 def get_comparison_flight():
+    """get_comparison_flight."""
     load_env_manually()
 
     amadeus = Client(

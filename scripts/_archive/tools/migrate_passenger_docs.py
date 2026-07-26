@@ -10,6 +10,7 @@ from apps.crm.models import Pasajero
 
 
 def migrate_docs():
+    """migrate_docs."""
     pasajeros = Pasajero.objects.all()
     count_pass = 0
     count_ci = 0

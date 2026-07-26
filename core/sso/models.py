@@ -11,7 +11,8 @@ class SSOProvider(models.Model):
     """Configuración de un proveedor SSO para una agencia."""
 
     class ProviderType(models.TextChoices):
-        """Función: ProviderType."""
+        """ProviderType."""
+
         AZURE_AD = "azure_ad", "Azure AD (OIDC)"
         OKTA_OIDC = "okta_oidc", "Okta (OIDC)"
         OKTA_SAML = "okta_saml", "Okta (SAML)"
@@ -85,7 +86,6 @@ class SSOProvider(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        """Meta definición del modelo."""
         verbose_name = "Proveedor SSO"
         verbose_name_plural = "Proveedores SSO"
         unique_together = [("agencia", "provider_type", "client_id")]
@@ -94,4 +94,5 @@ class SSOProvider(models.Model):
         ]
 
     def __str__(self):
+        """__str__."""
         return f"[{self.agencia}] {self.name} ({self.provider_type})"

@@ -23,14 +23,16 @@ logger = logging.getLogger(__name__)
 
 @admin.register(Pais)
 class PaisAdmin(ModelAdmin):
-    """Admin para gestionar países."""
+    """PaisAdmin."""
+
     list_display = ("nombre", "codigo_iso_2", "codigo_iso_3")
     search_fields = ("nombre", "codigo_iso_2", "codigo_iso_3")
 
 
 @admin.register(Ciudad)
 class CiudadAdmin(ModelAdmin):
-    """Admin para gestionar ciudades con autocomplete de país."""
+    """CiudadAdmin."""
+
     list_display = ("nombre", "pais", "codigo_iata")
     search_fields = ("nombre", "codigo_iata", "pais__nombre")
     list_filter = ("pais",)
@@ -39,7 +41,8 @@ class CiudadAdmin(ModelAdmin):
 
 @admin.register(Moneda)
 class MonedaAdmin(ModelAdmin):
-    """Admin para gestionar monedas."""
+    """MonedaAdmin."""
+
     list_display = ("nombre", "codigo_iso", "simbolo", "es_moneda_local")
     search_fields = ("nombre", "codigo_iso")
     list_filter = ("es_moneda_local",)
@@ -47,7 +50,8 @@ class MonedaAdmin(ModelAdmin):
 
 @admin.register(Aerolinea)
 class AerolineaAdmin(ModelAdmin):
-    """Admin para gestionar aerolíneas."""
+    """AerolineaAdmin."""
+
     list_display = ("nombre", "codigo_iata", "activa")
     search_fields = ("nombre", "codigo_iata")
     list_filter = ("activa",)
@@ -55,14 +59,16 @@ class AerolineaAdmin(ModelAdmin):
 
 
 class AgenciaBrandingInline(StackedInline):
-    """Inline para gestionar branding y assets de la agencia."""
+    """AgenciaBrandingInline."""
+
     model = AgenciaBranding
     can_delete = False
     verbose_name_plural = "Branding y Assets"
 
 
 class AgenciaConfiguracionInline(StackedInline):
-    """Inline para gestionar configuración de negocio SaaS."""
+    """AgenciaConfiguracionInline."""
+
     model = AgenciaConfiguracion
     can_delete = False
     verbose_name_plural = "Configuración de Negocio y SaaS"
@@ -70,7 +76,8 @@ class AgenciaConfiguracionInline(StackedInline):
 
 @admin.register(Agencia)
 class AgenciaAdmin(ModelAdmin):
-    """Admin para gestionar agencias con inlines de branding y configuración."""
+    """AgenciaAdmin."""
+
     list_display = ["nombre", "rif", "iata", "email_principal", "activa"]
     list_filter = ["activa", "pais"]
     search_fields = ["nombre", "rif", "iata"]
@@ -78,7 +85,7 @@ class AgenciaAdmin(ModelAdmin):
     inlines = [AgenciaBrandingInline, AgenciaConfiguracionInline]
 
     def get_readonly_fields(self, request, obj=None):
-        """Método que obtiene readonly fields. Args: según implementación. Returns: datos solicitados."""
+        """get_readonly_fields."""
         if not request.user.is_superuser:
             return self.readonly_fields + ["rif", "iata"]
         return self.readonly_fields
@@ -86,14 +93,16 @@ class AgenciaAdmin(ModelAdmin):
 
 @admin.register(AgenciaBranding)
 class AgenciaBrandingAdmin(ModelAdmin):
-    """Admin para gestionar branding y temas visuales de agencias."""
+    """AgenciaBrandingAdmin."""
+
     list_display = ["agencia_master", "ui_theme", "color_primario"]
     search_fields = ["agencia_master__nombre"]
 
 
 @admin.register(AgenciaConfiguracion)
 class AgenciaConfiguracionAdmin(ModelAdmin):
-    """Admin para gestionar configuración de negocio, plan y claves API."""
+    """AgenciaConfiguracionAdmin."""
+
     list_display = ["agencia_master", "plan", "subdominio_slug", "short_keys_status"]
     search_fields = ["agencia_master__nombre", "subdominio_slug"]
     readonly_fields = ["ventas_mes_actual"]
@@ -183,7 +192,7 @@ class AgenciaConfiguracionAdmin(ModelAdmin):
 
     @admin.display(description="Claves")
     def short_keys_status(self, obj):
-        """Método: short keys status."""
+        """short_keys_status."""
         parts = []
         if obj.gemini_api_key:
             parts.append("🤖")
@@ -197,31 +206,31 @@ class AgenciaConfiguracionAdmin(ModelAdmin):
 
     @admin.display(description="API Key Evolution")
     def evolution_api_key_display(self, obj):
-        """Método: evolution api key display."""
+        """evolution_api_key_display."""
         return self._masked_field(obj.evolution_api_key)
 
     @admin.display(description="API Key Gemini")
     def gemini_api_key_display(self, obj):
-        """Método: gemini api key display."""
+        """gemini_api_key_display."""
         return self._masked_field(obj.gemini_api_key)
 
     @admin.display(description="Password App Correo")
     def password_app_correo_display(self, obj):
-        """Método: password app correo display."""
+        """password_app_correo_display."""
         return self._masked_field(obj.password_app_correo)
 
     @admin.display(description="Token Telegram")
     def telegram_bot_token_display(self, obj):
-        """Método: telegram bot token display."""
+        """telegram_bot_token_display."""
         return self._masked_field(obj.telegram_bot_token)
 
     @admin.display(description="Password IMAP")
     def email_monitor_password_display(self, obj):
-        """Método: email monitor password display."""
+        """email_monitor_password_display."""
         return self._masked_field(obj.email_monitor_password)
 
     def _masked_field(self, value):
-        """Método interna: masked field."""
+        """_masked_field."""
         if not value:
             return format_html('<span style="color:#9CA3AF;">—</span>')
         visible = str(value)[:8]
@@ -231,29 +240,30 @@ class AgenciaConfiguracionAdmin(ModelAdmin):
         )
 
     def get_fieldsets(self, request, obj=None):
-        """Método que obtiene fieldsets. Args: según implementación. Returns: datos solicitados."""
+        """get_fieldsets."""
         if obj is None:
             return [(None, {"fields": ["agencia_master", "plan"]})]
         return super().get_fieldsets(request, obj)
 
     def has_add_permission(self, request):
-        """Método que verifica  add permission. Returns: bool."""
+        """has_add_permission."""
         return request.user.is_superuser
 
     def has_delete_permission(self, request, obj=None):
-        """Método que verifica  delete permission. Returns: bool."""
+        """has_delete_permission."""
         return request.user.is_superuser
 
 
 @admin.register(UsuarioAgencia)
 class UsuarioAgenciaAdmin(ModelAdmin):
-    """Admin para gestionar usuarios asociados a agencias."""
+    """UsuarioAgenciaAdmin."""
+
     list_display = ["usuario", "agencia", "rol", "activo"]
     list_filter = ["rol", "activo", "agencia"]
     autocomplete_fields = ["usuario", "agencia"]
 
     def get_readonly_fields(self, request, obj=None):
-        """Método que obtiene readonly fields. Args: según implementación. Returns: datos solicitados."""
+        """get_readonly_fields."""
         if not request.user.is_superuser:
             return ["usuario", "agencia", "rol"]
         return []
@@ -264,7 +274,8 @@ class UsuarioAgenciaAdmin(ModelAdmin):
 
 @admin.register(FeatureFlag)
 class FeatureFlagAdmin(SaaSAdminMixin, ModelAdmin):
-    """Admin para gestionar feature flags por agencia con rollout."""
+    """FeatureFlagAdmin."""
+
     list_display = ["nombre", "agencia", "enabled_badge", "rollout_percentage", "updated_at"]
     list_filter = ["enabled", "agencia"]
     search_fields = ["nombre", "description"]
@@ -289,7 +300,7 @@ class FeatureFlagAdmin(SaaSAdminMixin, ModelAdmin):
 
     @admin.display(description="Activo")
     def enabled_badge(self, obj):
-        """Método: enabled badge."""
+        """enabled_badge."""
         if obj.enabled:
             return format_html(
                 '<span style="background:#D1FAE5;color:#065F46;padding:2px 8px;'
@@ -301,7 +312,7 @@ class FeatureFlagAdmin(SaaSAdminMixin, ModelAdmin):
         )
 
     def get_queryset(self, request):
-        """Método que obtiene queryset. Args: según implementación. Returns: datos solicitados."""
+        """get_queryset."""
         return super().get_queryset(request).select_related("agencia")
 
 
@@ -310,7 +321,8 @@ class FeatureFlagAdmin(SaaSAdminMixin, ModelAdmin):
 
 @admin.register(CronApiKey)
 class CronApiKeyAdmin(SaaSAdminMixin, ModelAdmin):
-    """Admin para gestionar claves API con generación segura."""
+    """CronApiKeyAdmin."""
+
     list_display = ["name", "prefix_display", "agencia", "is_active", "expires_at", "last_used"]
     list_filter = ["is_active", "agencia"]
     search_fields = ["name", "prefix"]
@@ -349,7 +361,7 @@ class CronApiKeyAdmin(SaaSAdminMixin, ModelAdmin):
 
     @admin.display(description="Prefijo")
     def prefix_display(self, obj):
-        """Método: prefix display."""
+        """prefix_display."""
         return format_html(
             '<code style="background:#F3F4F6;padding:2px 6px;border-radius:3px;font-size:12px;">{}</code>',
             obj.prefix,
@@ -357,7 +369,7 @@ class CronApiKeyAdmin(SaaSAdminMixin, ModelAdmin):
 
     @admin.action(description="Generar nueva clave API")
     def generate_key_action(self, request, queryset):
-        """Método que construye/genera key action. Returns: resultado generado."""
+        """generate_key_action."""
         if queryset.count() != 1:
             self.message_user(
                 request, "Selecciona exactamente 1 fila para generar una clave.", level="error"
@@ -372,7 +384,7 @@ class CronApiKeyAdmin(SaaSAdminMixin, ModelAdmin):
         )
 
     def save_model(self, request, obj, form, change):
-        """Método que actualiza/guarda model."""
+        """save_model."""
         if not change:
             obj, raw_key = CronApiKey.generate(name=obj.name, agencia=obj.agencia)
             obj._raw_key = raw_key
@@ -380,7 +392,7 @@ class CronApiKeyAdmin(SaaSAdminMixin, ModelAdmin):
         super().save_model(request, obj, form, change)
 
     def response_add(self, request, obj, post_url_continue=None):
-        """Método: response add."""
+        """response_add."""
         if hasattr(obj, "_raw_key"):
             self.message_user(
                 request,
@@ -390,13 +402,13 @@ class CronApiKeyAdmin(SaaSAdminMixin, ModelAdmin):
         return super().response_add(request, obj, post_url_continue)
 
     def get_readonly_fields(self, request, obj=None):
-        """Método que obtiene readonly fields. Args: según implementación. Returns: datos solicitados."""
+        """get_readonly_fields."""
         if obj is None:
             return []
         return self.readonly_fields
 
     def get_fieldsets(self, request, obj=None):
-        """Método que obtiene fieldsets. Args: según implementación. Returns: datos solicitados."""
+        """get_fieldsets."""
         if obj is None:
             return [(None, {"fields": ["name", "agencia"]})]
         return super().get_fieldsets(request, obj)

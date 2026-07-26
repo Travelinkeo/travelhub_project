@@ -4,7 +4,8 @@ from core.fields import EncryptedCharField
 
 
 class APISecret(models.Model):
-    """Función: APISecret."""
+    """APISecret."""
+
     CATEGORIES = [
         ("ai", "IA / ML"),
         ("payment", "Pagos"),
@@ -31,11 +32,11 @@ class APISecret(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        """Meta definición del modelo."""
         verbose_name = "Clave API"
         verbose_name_plural = "Claves API"
         ordering = ["category", "service"]
 
     def __str__(self):
+        """__str__."""
         prefix = self.value[:8] if self.value else ""
         return f"[{self.get_category_display()}] {self.service} ({prefix}...)"

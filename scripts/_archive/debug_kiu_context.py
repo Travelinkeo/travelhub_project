@@ -2,6 +2,7 @@ import json
 
 
 def test_kiu_context():
+    """test_kiu_context."""
     # DATOS EXACTOS DEL USUARIO (Log Parseo)
     data = {
         "TOTAL": "VES 29988.14",

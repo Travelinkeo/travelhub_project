@@ -1,7 +1,4 @@
 # contabilidad/urls.py
-"""Configuración de rutas (URLs) para la aplicación contabilidad.
-"""
-
 from django.urls import path
 
 from . import views

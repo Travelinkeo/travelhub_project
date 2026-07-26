@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 
 
 def debug():
+    """debug."""
     try:
         boleto = BoletoImportado.objects.get(pk=980)
         print(f"Boleto ID: {boleto.pk}", flush=True)

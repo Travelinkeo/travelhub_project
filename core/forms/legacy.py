@@ -9,14 +9,14 @@ from apps.crm.models import Pasajero
 
 
 class FeeVentaForm(forms.ModelForm):
-    """Función: FeeVentaForm."""
+    """FeeVentaForm."""
+
     class Meta:
         model = FeeVenta
         fields = ["tipo_fee", "monto", "moneda", "descripcion", "es_comision_agencia"]
         widgets = {
             "tipo_fee": forms.Select(
                 attrs={
-        """Función: Meta."""
                     "class": "bg-gray-800/50 border border-gray-700 text-white rounded-xl px-4 py-2 w-full"
                 }
             ),
@@ -46,13 +46,13 @@ class FeeVentaForm(forms.ModelForm):
 
 
 class BoletoManualForm(forms.ModelForm):
-    """Función: BoletoManualForm."""
+    """BoletoManualForm."""
+
     class Meta:
         model = BoletoImportado
         fields = [
             "numero_boleto",
             "nombre_pasajero_completo",
-        """Función: Meta."""
             "ruta_vuelo",
             "fecha_emision_boleto",
             "aerolinea_emisora",
@@ -72,19 +72,19 @@ class BoletoManualForm(forms.ModelForm):
 
 
 class BoletoFileUploadForm(forms.ModelForm):
-    """Función: BoletoFileUploadForm."""
+    """BoletoFileUploadForm."""
+
     class Meta:
         model = BoletoImportado
         fields = ["archivo_boleto"]
 
-        """Función: Meta."""
 
 class BoletoAereoUpdateForm(forms.ModelForm):
-    """Función: BoletoAereoUpdateForm."""
+    """BoletoAereoUpdateForm."""
+
     class Meta:
         model = BoletoImportado
         fields = [
-        """Función: Meta."""
             "tarifa_base",
             "impuestos_total_calculado",
             "total_boleto",
@@ -122,9 +122,9 @@ class BoletoAereoUpdateForm(forms.ModelForm):
         }
 
     def clean(self):
+        """clean."""
         cleaned = super().clean()
         # Opcional: recalcular total si usuario deja total vacío pero provee tarifa + impuestos
-        """Método: clean."""
         tarifa = cleaned.get("tarifa_base")
         impuestos = cleaned.get("impuestos_total_calculado")
         total = cleaned.get("total_boleto")
@@ -134,10 +134,10 @@ class BoletoAereoUpdateForm(forms.ModelForm):
 
 
 class CotizacionForm(forms.ModelForm):
-    """Función: CotizacionForm."""
+    """CotizacionForm."""
+
     class Meta:
         model = Cotizacion
-        """Función: Meta."""
         fields = [
             "cliente",
             "nombre_cliente_manual",
@@ -198,6 +198,7 @@ class CotizacionForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
+        """__init__."""
         super().__init__(*args, **kwargs)
         from apps.common.models import Moneda
 
@@ -207,8 +208,8 @@ class CotizacionForm(forms.ModelForm):
         self.fields["cliente"].required = False
 
     def clean(self):
+        """clean."""
         cleaned_data = super().clean()
-        """Método: clean."""
         cliente = cleaned_data.get("cliente")
         nombre_manual = cleaned_data.get("nombre_cliente_manual")
 
@@ -266,7 +267,8 @@ ItemCotizacionFormSet = inlineformset_factory(
 
 
 class PasajeroForm(forms.ModelForm):
-    """Función: PasajeroForm."""
+    """PasajeroForm."""
+
     # Campos virtuales para preferencias (se serializan al JSON field)
     pref_comida_veg = forms.BooleanField(required=False, label="Vegetariana (VGML)")
     pref_comida_kosher = forms.BooleanField(required=False, label="Kosher (KSML)")
@@ -296,7 +298,6 @@ class PasajeroForm(forms.ModelForm):
     )
 
     class Meta:
-        """Configuración del modelo."""
         model = Pasajero
         fields = [
             "nombres",
@@ -368,6 +369,7 @@ class PasajeroForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
+        """__init__."""
         super().__init__(*args, **kwargs)
         # Cargar valores iniciales desde el JSON field si existe
         if self.instance and self.instance.preferencias:
@@ -380,7 +382,7 @@ class PasajeroForm(forms.ModelForm):
             self.fields["pref_notas"].initial = prefs.get("notas", "")
 
     def clean(self):
-        """Método: clean."""
+        """clean."""
         cleaned_data = super().clean()
         # Construir el JSON
         preferencias = {

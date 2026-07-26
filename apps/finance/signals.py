@@ -1,6 +1,3 @@
-"""Señales Django para la aplicación finance.
-"""
-
 import logging
 from functools import partial
 
@@ -18,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 @receiver(post_save, sender=Pago)
 def disparar_alerta_recaudacion(sender, instance, created, **kwargs):
-    # disparar_alerta_recaudacion: Disparar alerta recaudacion. Args: según implementación. Returns: según implementación.
+    """disparar_alerta_recaudacion."""
     if created:
         transaction.on_commit(
             partial(
@@ -30,7 +27,7 @@ def disparar_alerta_recaudacion(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=Factura)
 def disparar_asiento_contable_factura(sender, instance, created, **kwargs):
-    # disparar_asiento_contable_factura: Disparar asiento contable factura. Args: según implementación. Returns: según implementación.
+    """disparar_asiento_contable_factura."""
     if instance.estado == Factura.EstadoFactura.EMITIDA:
         if not getattr(instance, "_contabilizando", False):
             factura_id = instance.pk
@@ -38,7 +35,7 @@ def disparar_asiento_contable_factura(sender, instance, created, **kwargs):
 
 
 def _generar_asiento_factura_sync(factura_id):
-    # _generar_asiento_factura_sync:  generar asiento factura sync. Args: según implementación. Returns: según implementación.
+    """_generar_asiento_factura_sync."""
     try:
         instance = Factura.objects.get(pk=factura_id)
         instance._contabilizando = True
@@ -57,7 +54,7 @@ def _generar_asiento_factura_sync(factura_id):
 def procesar_facturacion_automatica_boleto(
     sender, venta_id, formato_detectado, agencia_id, **kwargs
 ):
-    # procesar_facturacion_automatica_boleto: Procesa r facturacion automatica boleto. Args: datos a procesar. Returns: resultado procesado.
+    """procesar_facturacion_automatica_boleto."""
     logger.info(
         f"Evento ticket_invoicing_requested para Venta {venta_id} (Formato: {formato_detectado})"
     )

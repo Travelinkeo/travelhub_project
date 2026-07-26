@@ -1,6 +1,3 @@
-"""Módulo pagos de la aplicación bookings.
-"""
-
 from __future__ import annotations
 
 from decimal import Decimal
@@ -13,9 +10,9 @@ from apps.common.models import Moneda
 from core.api import AgenciaMixin, SoftDeleteModel
 
 
-class FeeVenta:
-    """Clase FeeVenta. Uso: según contexto de la aplicación.
-    """
+class FeeVenta(AgenciaMixin, SoftDeleteModel, models.Model):
+    """FeeVenta."""
+
     id_fee_venta = models.AutoField(primary_key=True, verbose_name=_("ID Fee"))
     venta = models.ForeignKey(
         "bookings.Venta",
@@ -27,6 +24,8 @@ class FeeVenta:
     )
 
     class TipoFee(models.TextChoices):
+        """TipoFee."""
+
         EMISION = "EMI", _("Emisión")
         CAMBIO = "CAM", _("Cambio / Exchange")
         GESTION = "GST", _("Gestión")
@@ -51,13 +50,13 @@ class FeeVenta:
         ordering = ["-creado"]
 
     def __str__(self):
-        # __str__: Representación en string del objeto. Returns: str.
+        """__str__."""
         return f"{self.get_tipo_fee_display()} {self.monto} {self.moneda.codigo_iso if self.moneda else ''}"
 
 
-class PagoVenta:
-    """Clase PagoVenta. Uso: según contexto de la aplicación.
-    """
+class PagoVenta(AgenciaMixin, models.Model):
+    """PagoVenta."""
+
     id_pago_venta = models.AutoField(primary_key=True, verbose_name=_("ID Pago"))
     venta = models.ForeignKey(
         "bookings.Venta",
@@ -74,6 +73,8 @@ class PagoVenta:
     )
 
     class MetodoPago(models.TextChoices):
+        """MetodoPago."""
+
         EFECTIVO = "EFE", _("Efectivo")
         TARJETA = "TAR", _("Tarjeta")
         TRANSFERENCIA = "TRF", _("Transferencia")
@@ -106,11 +107,11 @@ class PagoVenta:
         ]
 
     def __str__(self):
-        # __str__: Representación en string del objeto. Returns: str.
+        """__str__."""
         return f"Pago {self.monto} {self.moneda.codigo_iso if self.moneda else ''}"
 
     def save(self, *args, **kwargs):
-        # save: Guarda/persiste . Args: datos a guardar. Returns: objeto guardado.
+        """save."""
         if self.aplica_igtf and self.monto:
             self.monto_igtf = (self.monto * (self.tasa_igtf / Decimal("100"))).quantize(
                 Decimal("0.01")

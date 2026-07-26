@@ -4,18 +4,19 @@ from core.models.cron_api_key import CronApiKey
 
 
 class Command(BaseCommand):
-    """Comando de gestión personalizado."""
+    """Command."""
+
     help = "Genera una nueva CronApiKey para usar en cron-job.org"
 
     def add_arguments(self, parser):
-        """Método: add arguments."""
+        """add_arguments."""
         parser.add_argument("--name", required=True, help="Nombre descriptivo de la key")
         parser.add_argument(
             "--expires", type=int, default=90, help="Dias hasta expiracion (default: 90)"
         )
 
     def handle(self, *args, **options):
-        """Método: handle."""
+        """handle."""
         name = options["name"]
         expires = options["expires"]
 

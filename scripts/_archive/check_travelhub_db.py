@@ -4,10 +4,12 @@ import psycopg2
 
 
 def _get_db_password() -> str:
+    """_get_db_password."""
     return os.environ.get("DB_PASSWORD", "")
 
 
 def check_db(dbname):
+    """check_db."""
     user = "postgres"
     password = _get_db_password()
     host = "localhost"

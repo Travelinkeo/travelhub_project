@@ -1,6 +1,3 @@
-"""Vistas (views) de la aplicación crm.
-"""
-
 import base64
 import logging
 
@@ -17,11 +14,11 @@ from apps.crm.views.pasajeros_views import CRMBaseMixin
 logger = logging.getLogger(__name__)
 
 
-class PasajeroOCRProcessView:
-    """Vista para gestionar pasajeroocrprocess. Uso: instanciar según necesidad del dominio.
-    """
+class PasajeroOCRProcessView(CRMBaseMixin, View):
+    """PasajeroOCRProcessView."""
+
     def post(self, request, *args, **kwargs):
-        # post: Post. Args: según implementación. Returns: según implementación.
+        """post."""
         if "archivo" not in request.FILES:
             return HttpResponse(
                 "<div class='p-4 text-red-500'>Error: No se recibió ningún archivo.</div>",
@@ -71,11 +68,11 @@ class PasajeroOCRProcessView:
             )
 
 
-class PasajeroOCRSaveView:
-    """Vista para gestionar pasajeroocrsave. Uso: instanciar según necesidad del dominio.
-    """
+class PasajeroOCRSaveView(CRMBaseMixin, View):
+    """PasajeroOCRSaveView."""
+
     def post(self, request, *args, **kwargs):
-        # post: Post. Args: según implementación. Returns: según implementación.
+        """post."""
         form = PasajeroForm(request.POST)
         if form.is_valid():
             pasajero = form.save(commit=False)

@@ -1,6 +1,3 @@
-"""Parser/procesador de web receipt parser para la aplicación automation.
-"""
-
 import datetime as mt  # Alias
 import logging
 import re
@@ -16,18 +13,13 @@ logger = logging.getLogger(__name__)
 
 
 class MultiParsedTicketData:
-    """Clase MultiParsedTicketData. Uso: según contexto de la aplicación.
-    """
     def __init__(self, data: dict):
-        # __init__: Inicializa una nueva instancia de MultiParsedTicketData. Args: parámetros de inicialización.
         self.data = data
 
     def to_dict(self) -> dict:
-        # to_dict: To dict. Args: según implementación. Returns: según implementación.
         return self.data
 
     def to_pydantic(self) -> Any:
-        # to_pydantic: To pydantic. Args: según implementación. Returns: según implementación.
         from core.api import (
             BoletoAereoSchema,
             ResultadoParseoSchema,
@@ -148,7 +140,6 @@ class WebReceiptParser(BaseTicketParser):
             return Decimal(0)
 
     def parse(self, text: str, html_text: str = "") -> Any:
-        # parse: Analiza/parsea . Args: datos de entrada. Returns: resultado del parseo.
         html_content = html_text if html_text else text
         soup = BeautifulSoup(html_content, "html.parser")
         text_content = soup.get_text().upper()
@@ -295,7 +286,6 @@ class WebReceiptParser(BaseTicketParser):
 
         # Regex Helpers
         def get_match(pattern, group=1, default=""):
-            # get_match: Obtiene/recupera match. Args: según implementación. Returns: dato solicitado.
             m = re.search(pattern, text, re.IGNORECASE | re.MULTILINE)
             return m.group(group).strip() if m else default
 
@@ -889,7 +879,6 @@ class WebReceiptParser(BaseTicketParser):
 
         # Helper extraction
         def get_text_by_id(node, eid):
-            # get_text_by_id: Obtiene/recupera text by id. Args: según implementación. Returns: dato solicitado.
             found = node.find(id=eid) if node else soup.find(id=eid)
             return found.get_text(strip=True) if found else ""
 
@@ -951,7 +940,6 @@ class WebReceiptParser(BaseTicketParser):
         for seg in segments:
             # Helper local para scope de segmento
             def seg_val(eid, seg=seg):
-                # seg_val: Seg val. Args: según implementación. Returns: según implementación.
                 node = seg.find(id=eid) if seg != soup else soup.find(id=eid)
                 return node.get_text(strip=True) if node else ""
 
@@ -1075,7 +1063,6 @@ class WebReceiptParser(BaseTicketParser):
         # 1. Datos del Pasajero
         # Helper seguro
         def get_val_next_p(label_pattern):
-            # get_val_next_p: Obtiene/recupera val next p. Args: según implementación. Returns: dato solicitado.
             node = soup.find(string=re.compile(label_pattern, re.I))
             if node:
                 parent = node.parent

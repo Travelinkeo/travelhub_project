@@ -1,6 +1,3 @@
-"""Servicio de analytics service para la aplicación common.
-"""
-
 import io
 import logging
 from typing import TYPE_CHECKING
@@ -32,11 +29,10 @@ logger = logging.getLogger(__name__)
 
 
 class AnalyticsService:
-    """Servicio para analytics. Uso: instanciar según necesidad del dominio.
-    """
+    """AnalyticsService."""
+
     @staticmethod
     def get_ventas_mensuales(year=None):
-        # get_ventas_mensuales: Obtiene/recupera ventas mensuales. Args: según implementación. Returns: dato solicitado.
         from django.apps import apps
 
         Venta = apps.get_model("bookings", "Venta")
@@ -73,7 +69,6 @@ class AnalyticsService:
 
     @staticmethod
     def get_top_vendedores(year=None, limit=5):
-        # get_top_vendedores: Obtiene/recupera top vendedores. Args: según implementación. Returns: dato solicitado.
         from django.apps import apps
 
         Venta = apps.get_model("bookings", "Venta")
@@ -99,7 +94,6 @@ class AnalyticsService:
 
     @staticmethod
     def get_top_aerolineas(year=None, limit=5):
-        # get_top_aerolineas: Obtiene/recupera top aerolineas. Args: según implementación. Returns: dato solicitado.
         from django.apps import apps
 
         BoletoImportado = apps.get_model("bookings", "BoletoImportado")
@@ -138,7 +132,6 @@ class AnalyticsService:
 
     @staticmethod
     def get_kpis_resumen(year=None):
-        # get_kpis_resumen: Obtiene/recupera kpis resumen. Args: según implementación. Returns: dato solicitado.
         from django.apps import apps
 
         Venta = apps.get_model("bookings", "Venta")

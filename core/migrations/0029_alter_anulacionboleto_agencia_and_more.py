@@ -5,8 +5,7 @@ from django.conf import settings
 from django.db import migrations, models
 
 
-class Migration:
-    """Migración de base de datos generada por Django."""
+class Migration(migrations.Migration):
     dependencies = [
         ("bookings", "0024_alter_actividadservicio_agencia_and_more"),
         ("core", "0028_alter_agencia_activa_and_more"),

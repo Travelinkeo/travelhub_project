@@ -1,12 +1,7 @@
-"""Migración de base de datos para crm.
-"""
-
 from django.db import migrations, models
 
 
-class Migration:
-    """Clase Migration. Uso: según contexto de la aplicación.
-    """
+class Migration(migrations.Migration):
     dependencies = [
         ("crm", "0027_mensajewhatsapp_es_bot_alter_cliente_foto_perfil_and_more"),
         ("bookings", "0037_tarifarioproveedor_add_agencia_proveedor"),

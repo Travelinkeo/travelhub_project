@@ -20,6 +20,7 @@ TARGET_PATTERNS = [
 
 
 def load_eml(path: str):
+    """load_eml."""
     with open(path, "rb") as f:
         msg = email.message_from_binary_file(f, policy=policy.default)
     html_body = ""
@@ -57,6 +58,7 @@ def load_eml(path: str):
 
 
 def main():
+    """main."""
     print("=== Prueba de parseo para EML de DUQUE ECHEVERRY / OSCAR HUMBERTO ===")
     for fname in TARGET_PATTERNS:
         path = os.path.join(BASE_DIR, fname)

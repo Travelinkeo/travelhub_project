@@ -17,6 +17,7 @@ logging.basicConfig(level=logging.INFO)
 
 
 def debug_flights():
+    """debug_flights."""
     try:
         boleto = BoletoImportado.objects.get(pk=980)
         print(f"Loading Boleto ID: {boleto.pk}")

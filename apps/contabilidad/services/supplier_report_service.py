@@ -1,6 +1,3 @@
-"""Servicio de supplier report service para la aplicación contabilidad.
-"""
-
 import logging
 
 from django.db import transaction

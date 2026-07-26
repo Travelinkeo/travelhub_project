@@ -5,11 +5,12 @@ from core.models.wiki import WikiArticulo
 
 
 class Command(BaseCommand):
-    """Comando de gestión personalizado."""
+    """Command."""
+
     help = "Loads GDS Master Guides into Wiki Knowledge Base"
 
     def handle(self, *args, **kwargs):
-        """Método: handle."""
+        """handle."""
         guides = [
             {
                 "title": "Guía Maestra AMADEUS (Comandos GDS)",

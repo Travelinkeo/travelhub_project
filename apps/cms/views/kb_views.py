@@ -1,6 +1,3 @@
-"""Vistas (views) de la aplicación cms.
-"""
-
 import logging
 
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -24,14 +21,12 @@ class KBListView(TemplateView):
     template_name = "cms/kb/list.html"
 
     def get_context_data(self, **kwargs):
-        # get_context_data: Obtiene/recupera context data. Args: según implementación. Returns: dato solicitado.
+        """get_context_data."""
         ctx = super().get_context_data(**kwargs)
         agencia = get_current_agency()
         if not agencia:
             return ctx
-        ctx["categories"] = KBCategory.objects.filter(agencia=agencia).prefetch_related(
-            "articles"
-        )
+        ctx["categories"] = KBCategory.objects.filter(agencia=agencia).prefetch_related("articles")
         ctx["recent_articles"] = KBArticle.objects.filter(
             agencia=agencia, is_public=True, is_published=True
         ).order_by("-published_at")[:5]
@@ -47,7 +42,7 @@ class KBSearchView(TemplateView):
     template_name = "cms/kb/search.html"
 
     def get_context_data(self, **kwargs):
-        # get_context_data: Obtiene/recupera context data. Args: según implementación. Returns: dato solicitado.
+        """get_context_data."""
         ctx = super().get_context_data(**kwargs)
         q = self.request.GET.get("q", "").strip()
         agencia = get_current_agency()
@@ -58,11 +53,7 @@ class KBSearchView(TemplateView):
         if q:
             articles = KBArticle.objects.filter(
                 agencia=agencia, is_public=True, is_published=True
-            ).filter(
-                Q(title__icontains=q)
-                | Q(content__icontains=q)
-                | Q(tags__icontains=q)
-            )
+            ).filter(Q(title__icontains=q) | Q(content__icontains=q) | Q(tags__icontains=q))
             ctx["results"] = articles
             ctx["result_count"] = articles.count()
         else:
@@ -77,7 +68,7 @@ class KBDetailView(TemplateView):
     template_name = "cms/kb/detail.html"
 
     def get(self, request, *args, **kwargs):
-        # get: Get. Args: según implementación. Returns: según implementación.
+        """get."""
         agencia = get_current_agency()
         article = get_object_or_404(
             KBArticle,
@@ -92,7 +83,7 @@ class KBDetailView(TemplateView):
         return self.render_to_response(self.get_context_data(article=article))
 
     def get_context_data(self, **kwargs):
-        # get_context_data: Obtiene/recupera context data. Args: según implementación. Returns: dato solicitado.
+        """get_context_data."""
         ctx = super().get_context_data(**kwargs)
         agencia = get_current_agency()
         article = kwargs["article"]
@@ -110,14 +101,12 @@ class KBHelpfulView(View):
     """Voto de útil/no útil."""
 
     def post(self, request, slug):
-        # post: Post. Args: según implementación. Returns: según implementación.
+        """post."""
         agencia = get_current_agency()
         article = get_object_or_404(KBArticle, agencia=agencia, slug=slug)
         action = request.POST.get("action")
         if action == "yes":
-            KBArticle.objects.filter(pk=article.pk).update(
-                helpful_count=article.helpful_count + 1
-            )
+            KBArticle.objects.filter(pk=article.pk).update(helpful_count=article.helpful_count + 1)
         elif action == "no":
             KBArticle.objects.filter(pk=article.pk).update(
                 not_helpful_count=article.not_helpful_count + 1
@@ -137,41 +126,37 @@ class KBAdminListView(SaaSMixin, LoginRequiredMixin, ListView):
     paginate_by = 20
 
     def get_queryset(self):
-        # get_queryset: Obtiene/recupera queryset. Args: según implementación. Returns: dato solicitado.
+        """get_queryset."""
         agencia = get_user_active_agency(self.request.user)
         if not agencia:
             return KBArticle.objects.none()
         qs = KBArticle.objects.filter(agencia=agencia)
         q = self.request.GET.get("q")
         if q:
-            qs = qs.filter(
-                Q(title__icontains=q)
-                | Q(content__icontains=q)
-                | Q(tags__icontains=q)
-            )
+            qs = qs.filter(Q(title__icontains=q) | Q(content__icontains=q) | Q(tags__icontains=q))
         cat = self.request.GET.get("category")
         if cat:
             qs = qs.filter(category_id=cat)
         return qs.order_by("-updated_at")
 
     def get_context_data(self, **kwargs):
-        # get_context_data: Obtiene/recupera context data. Args: según implementación. Returns: dato solicitado.
+        """get_context_data."""
         ctx = super().get_context_data(**kwargs)
         agencia = get_user_active_agency(self.request.user)
         ctx["categories"] = KBCategory.objects.filter(agencia=agencia) if agencia else []
         return ctx
 
 
-class KBArticleCreateView:
-    """Vista para gestionar kbarticlecreate. Uso: instanciar según necesidad del dominio.
-    """
+class KBArticleCreateView(SaaSMixin, LoginRequiredMixin, CreateView):
+    """KBArticleCreateView."""
+
     model = KBArticle
     template_name = "cms/kb/admin_form.html"
     fields = ["title", "slug", "content", "category", "tags", "is_public", "is_published"]
     success_url = reverse_lazy("cms:kb_admin_list")
 
     def form_valid(self, form):
-        # form_valid: Form valid. Args: según implementación. Returns: según implementación.
+        """form_valid."""
         agencia = get_user_active_agency(self.request.user)
         if agencia:
             form.instance.agencia = agencia
@@ -180,48 +165,48 @@ class KBArticleCreateView:
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
-        # get_context_data: Obtiene/recupera context data. Args: según implementación. Returns: dato solicitado.
+        """get_context_data."""
         ctx = super().get_context_data(**kwargs)
         ctx["is_new"] = True
         return ctx
 
 
-class KBArticleUpdateView:
-    """Vista para gestionar kbarticleupdate. Uso: instanciar según necesidad del dominio.
-    """
+class KBArticleUpdateView(SaaSMixin, LoginRequiredMixin, UpdateView):
+    """KBArticleUpdateView."""
+
     model = KBArticle
     template_name = "cms/kb/admin_form.html"
     fields = ["title", "slug", "content", "category", "tags", "is_public", "is_published"]
     success_url = reverse_lazy("cms:kb_admin_list")
 
     def get_queryset(self):
-        # get_queryset: Obtiene/recupera queryset. Args: según implementación. Returns: dato solicitado.
+        """get_queryset."""
         agencia = get_user_active_agency(self.request.user)
         if not agencia:
             return KBArticle.objects.none()
         return KBArticle.objects.filter(agencia=agencia)
 
     def form_valid(self, form):
-        # form_valid: Form valid. Args: según implementación. Returns: según implementación.
+        """form_valid."""
         if form.instance.is_published and not form.instance.published_at:
             form.instance.published_at = timezone.now()
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
-        # get_context_data: Obtiene/recupera context data. Args: según implementación. Returns: dato solicitado.
+        """get_context_data."""
         ctx = super().get_context_data(**kwargs)
         ctx["is_new"] = False
         return ctx
 
 
-class KBArticleDeleteView:
-    """Vista para gestionar kbarticledelete. Uso: instanciar según necesidad del dominio.
-    """
+class KBArticleDeleteView(SaaSMixin, LoginRequiredMixin, DeleteView):
+    """KBArticleDeleteView."""
+
     model = KBArticle
     success_url = reverse_lazy("cms:kb_admin_list")
 
     def get_queryset(self):
-        # get_queryset: Obtiene/recupera queryset. Args: según implementación. Returns: dato solicitado.
+        """get_queryset."""
         agencia = get_user_active_agency(self.request.user)
         if not agencia:
             return KBArticle.objects.none()

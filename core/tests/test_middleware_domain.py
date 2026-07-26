@@ -1,6 +1,4 @@
 # core/tests/test_middleware_domain.py
-"""Middlewares core: contexto multi-tenant, CSP, seguridad y enrutamiento."""
-
 import pytest
 from django.http import Http404
 from django.test import RequestFactory, override_settings
@@ -9,14 +7,14 @@ from core.middleware import MultiTenantDomainMiddleware
 
 
 def mock_get_response(request):
-    """Función: mock get response."""
+    """mock_get_response."""
     return "response"
 
 
 @pytest.mark.django_db
 @override_settings(ALLOWED_HOSTS=["*"])
 def test_multitenant_domain_middleware_global_hosts():
-    """Función: test multitenant domain middleware global hosts."""
+    """test_multitenant_domain_middleware_global_hosts."""
     factory = RequestFactory()
     middleware = MultiTenantDomainMiddleware(mock_get_response)
 
@@ -31,7 +29,7 @@ def test_multitenant_domain_middleware_global_hosts():
 @pytest.mark.django_db
 @override_settings(ALLOWED_HOSTS=["*"])
 def test_multitenant_domain_middleware_custom_domain(agencia):
-    """Función: test multitenant domain middleware custom domain."""
+    """test_multitenant_domain_middleware_custom_domain."""
     # Asignar dominio personalizado a la agencia de prueba
     agencia.dominio_personalizado = "viajes.humboldt.com"
     agencia.save()
@@ -48,7 +46,7 @@ def test_multitenant_domain_middleware_custom_domain(agencia):
 @pytest.mark.django_db
 @override_settings(ALLOWED_HOSTS=["*"])
 def test_multitenant_domain_middleware_subdomain(agencia):
-    """Función: test multitenant domain middleware subdomain."""
+    """test_multitenant_domain_middleware_subdomain."""
     # Registrar el subdominio en la configuración de la agencia
     config = agencia.configuracion
     config.subdominio_slug = "humboldt"
@@ -73,7 +71,7 @@ def test_multitenant_domain_middleware_subdomain(agencia):
 @pytest.mark.django_db
 @override_settings(ALLOWED_HOSTS=["*"])
 def test_multitenant_domain_middleware_unregistered_domain():
-    """Función: test multitenant domain middleware unregistered domain."""
+    """test_multitenant_domain_middleware_unregistered_domain."""
     factory = RequestFactory()
     middleware = MultiTenantDomainMiddleware(mock_get_response)
 

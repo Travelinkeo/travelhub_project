@@ -18,7 +18,7 @@ class HealthCheckSmokeTests(TestCase):
     """Smoke tests for /health/ endpoint and dependencies."""
 
     def setUp(self):
-        """SetUp."""
+        """setUp."""
         self.client = Client()
         # Add ATOMIC_REQUESTS to test database settings to avoid KeyError with SQLite
         from django.db import connections
@@ -209,8 +209,8 @@ class MetricsEndpointTests(TestCase):
     """Verify Prometheus metrics exposed correctly."""
 
     def setUp(self):
+        """setUp."""
         # Add ATOMIC_REQUESTS to test database settings to avoid KeyError with SQLite
-        """Setup."""
         from django.db import connections
 
         if "ATOMIC_REQUESTS" not in connections.databases["default"]:

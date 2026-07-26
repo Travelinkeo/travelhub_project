@@ -1,6 +1,3 @@
-"""Servicio de ai parser service para la aplicación automation.
-"""
-
 import logging
 from typing import Any
 
@@ -14,9 +11,9 @@ class AIParserService:
     """
 
     SYSTEM_INSTRUCTION = """
-    Eres el motor de extracción de datos de TravelHub. 
+    Eres el motor de extracción de datos de TravelHub.
     Analizas boletos aéreos de GDS (Sabre, KIU, Amadeus) y devuelves exclusivamente JSON.
-    
+
     REGLAS DE ORO:
     1. Si hay múltiples pasajeros, devuelve una lista en 'boletos'.
     2. Convierte todas las fechas a ISO (YYYY-MM-DD).

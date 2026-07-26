@@ -14,6 +14,7 @@ from django.conf import settings
 
 
 def verify_text_gen():
+    """verify_text_gen."""
     print("📝 Verifying Vertex AI Text Generation (Gemini Pro)...")
 
     try:

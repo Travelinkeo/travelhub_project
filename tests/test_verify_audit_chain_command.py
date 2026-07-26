@@ -1,4 +1,3 @@
-"""Tests para Verify audit chain command."""
 import pytest
 from django.core.management import call_command
 
@@ -8,9 +7,10 @@ pytestmark = pytest.mark.skip(reason="Tests requieren configuración completa o 
 
 
 def test_verify_audit_chain_success(monkeypatch, capsys):
-    """Verify audit chain success."""
+    """test_verify_audit_chain_success."""
+
     def fake_verify(limit=None):  # pragma: no cover - simple stub
-        """Fake verify."""
+        """fake_verify."""
         return True, None, None
 
     # Patch the symbol actually imported in the command module
@@ -23,9 +23,10 @@ def test_verify_audit_chain_success(monkeypatch, capsys):
 
 
 def test_verify_audit_chain_failure_with_break(monkeypatch, capsys):
-    """Verify audit chain failure with break."""
+    """test_verify_audit_chain_failure_with_break."""
+
     def fake_verify(limit=None):  # pragma: no cover - simple stub
-        """Fake verify."""
+        """fake_verify."""
         return False, 5, "previous_hash mismatch"
 
     monkeypatch.setattr(
@@ -38,9 +39,10 @@ def test_verify_audit_chain_failure_with_break(monkeypatch, capsys):
 
 
 def test_verify_audit_chain_failure_generic(monkeypatch, capsys):
-    """Verify audit chain failure generic."""
+    """test_verify_audit_chain_failure_generic."""
+
     def fake_verify(limit=None):  # pragma: no cover - simple stub
-        """Fake verify."""
+        """fake_verify."""
         return False, None, "exception: boom"
 
     monkeypatch.setattr(
@@ -54,7 +56,7 @@ def test_verify_audit_chain_failure_generic(monkeypatch, capsys):
 
 @pytest.mark.django_db
 def test_verify_audit_chain_real_ok(capsys):
-    """Verify audit chain real ok."""
+    """test_verify_audit_chain_real_ok."""
     AuditLog.objects.create(
         modelo="Z", object_id="1", accion=AuditLog.Accion.CREATE, descripcion="uno"
     )
@@ -68,7 +70,7 @@ def test_verify_audit_chain_real_ok(capsys):
 
 @pytest.mark.django_db
 def test_verify_audit_chain_real_break(capsys):
-    """Verify audit chain real break."""
+    """test_verify_audit_chain_real_break."""
     AuditLog.objects.create(
         modelo="W", object_id="1", accion=AuditLog.Accion.CREATE, descripcion="a"
     )

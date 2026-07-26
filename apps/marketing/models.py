@@ -1,16 +1,15 @@
-"""Modelos de base de datos para la aplicación marketing.
-"""
-
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from core.api import AgenciaMixin
 
 
-class Campania:
-    """Clase Campania. Uso: según contexto de la aplicación.
-    """
+class Campania(AgenciaMixin, models.Model):
+    """Campania."""
+
     class EstadoCampania(models.TextChoices):
+        """EstadoCampania."""
+
         BORRADOR = "BORRADOR", _("Borrador")
         PROGRAMADA = "PROGRAMADA", _("Programada")
         ACTIVA = "ACTIVA", _("Activa")
@@ -30,7 +29,7 @@ class Campania:
     publicar_en_whatsapp = models.BooleanField(default=True)
 
     def __str__(self):
-        # __str__: Representación en string del objeto. Returns: str.
+        """__str__."""
         return self.nombre
 
     class Meta:
@@ -38,10 +37,12 @@ class Campania:
         verbose_name_plural = _("Campañas")
 
 
-class ActivoMarketing:
-    """Clase ActivoMarketing. Uso: según contexto de la aplicación.
-    """
+class ActivoMarketing(AgenciaMixin, models.Model):
+    """ActivoMarketing."""
+
     class TipoActivo(models.TextChoices):
+        """TipoActivo."""
+
         FLYER = "FLYER", _("Flyer (Imagen)")
         STORY = "STORY", _("Story (Instagram)")
         COPY = "COPY", _("Texto (Copywriting)")
@@ -78,7 +79,7 @@ class ActivoMarketing:
     telegram_file_id = models.CharField(max_length=255, blank=True, null=True)
 
     def __str__(self):
-        # __str__: Representación en string del objeto. Returns: str.
+        """__str__."""
         return f"{self.tipo} - {self.hotel.nombre if self.hotel else 'Genérico'}"
 
     class Meta:
@@ -86,9 +87,9 @@ class ActivoMarketing:
         verbose_name_plural = _("Activos de Marketing")
 
 
-class ConfiguracionMarketing:
-    """Clase ConfiguracionMarketing. Uso: según contexto de la aplicación.
-    """
+class ConfiguracionMarketing(AgenciaMixin, models.Model):
+    """ConfiguracionMarketing."""
+
     color_primario = models.CharField(max_length=7, default="#0f172a")  # Hexadecimal
     color_secundario = models.CharField(max_length=7, default="#fbbf24")
     fuente_principal = models.CharField(max_length=100, default="Arial")
@@ -98,5 +99,5 @@ class ConfiguracionMarketing:
     )
 
     def __str__(self):
-        # __str__: Representación en string del objeto. Returns: str.
+        """__str__."""
         return f"Config Marketing - {self.agencia.nombre}"

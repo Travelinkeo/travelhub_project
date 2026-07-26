@@ -1,9 +1,5 @@
-"""Módulo urls core de la aplicación finance.
-"""
-
 from django.urls import path
 from django.utils.module_loading import import_string
-from django.views.decorators.csrf import csrf_exempt
 
 from apps.finance.views.facturacion_views import (
     FacturacionDashboardView,
@@ -15,11 +11,11 @@ from apps.finance.views.facturacion_views import (
 
 
 def dynamic_view(view_path):
-    # dynamic_view: Dynamic view. Args: según implementación. Returns: según implementación.
+    """dynamic_view."""
     from django.utils.module_loading import import_string
 
     def lazy_view_handler(request, *args, **kwargs):
-        # lazy_view_handler: Lazy view handler. Args: según implementación. Returns: según implementación.
+        """lazy_view_handler."""
         view_class = import_string(view_path)
         return view_class.as_view()(request, *args, **kwargs)
 

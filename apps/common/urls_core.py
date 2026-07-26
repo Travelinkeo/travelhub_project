@@ -1,6 +1,3 @@
-"""Módulo urls core de la aplicación common.
-"""
-
 from django.urls import path
 from django.utils.module_loading import import_string
 

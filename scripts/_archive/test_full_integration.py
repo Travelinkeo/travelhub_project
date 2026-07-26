@@ -14,6 +14,7 @@ from apps.bookings.models import BoletoImportado
 
 
 def test_full_integration():
+    """test_full_integration."""
     print("🚀 Starting End-to-End Integration Test...")
 
     # 1. Pick a test file

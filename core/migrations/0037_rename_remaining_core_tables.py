@@ -54,7 +54,6 @@ _APP_TABLES = list(_TABLE_PREFIX_MAP.values())
 
 
 def _get_existing_tables(cursor):
-    """Función interna: get existing tables."""
     cursor.execute(
         "SELECT table_name FROM information_schema.tables "
         "WHERE table_schema = 'public' AND table_type = 'BASE TABLE'"
@@ -63,7 +62,6 @@ def _get_existing_tables(cursor):
 
 
 def _index_exists(cursor, name):
-    """Función interna: index exists."""
     cursor.execute(
         "SELECT 1 FROM pg_indexes WHERE indexname = %s AND schemaname = 'public'",
         [name],
@@ -72,7 +70,6 @@ def _index_exists(cursor, name):
 
 
 def _constraint_exists(cursor, name):
-    """Función interna: constraint exists."""
     cursor.execute(
         "SELECT 1 FROM pg_constraint WHERE conname = %s AND connamespace = 'public'::regnamespace",
         [name],
@@ -81,19 +78,16 @@ def _constraint_exists(cursor, name):
 
 
 def _rename_index(cursor, idx_name, new_name):
-    """Función interna: rename index."""
     if not _index_exists(cursor, new_name):
         cursor.execute(f'ALTER INDEX "{idx_name}" RENAME TO "{new_name}"')
 
 
 def _rename_constraint(cursor, table, con_name, new_name):
-    """Función interna: rename constraint."""
     if not _constraint_exists(cursor, new_name):
         cursor.execute(f'ALTER TABLE "{table}" RENAME CONSTRAINT "{con_name}" TO "{new_name}"')
 
 
 def _replace_core_prefix(name, new_table):
-    """Función interna: replace core prefix."""
     for old_core, new_app in _TABLE_PREFIX_MAP.items():
         if name.startswith(old_core + "_"):
             return new_app + name[len(old_core) :]
@@ -101,7 +95,6 @@ def _replace_core_prefix(name, new_table):
 
 
 def _rename_tables(apps, schema_editor):
-    """Función interna: rename tables."""
     with connection.cursor() as cursor:
         existing = _get_existing_tables(cursor)
         for old_name, new_name in _TABLE_RENAMES:
@@ -118,7 +111,6 @@ def _rename_tables(apps, schema_editor):
 
 
 def _rename_indexes_and_constraints(apps, schema_editor):
-    """Función interna: rename indexes and constraints."""
     with connection.cursor() as cursor:
         existing = _get_existing_tables(cursor)
         for table in _APP_TABLES:
@@ -153,7 +145,6 @@ def _rename_indexes_and_constraints(apps, schema_editor):
 
 
 def _rename_fk_references_on_other_tables(cursor):
-    """Función interna: rename fk references on other tables."""
     cursor.execute(
         "SELECT conrelid::regclass::text AS from_table, conname, "
         "confrelid::regclass::text AS to_table "
@@ -177,7 +168,6 @@ def _rename_fk_references_on_other_tables(cursor):
 
 
 def _reverse_rename_tables(apps, schema_editor):
-    """Función interna: reverse rename tables."""
     with connection.cursor() as cursor:
         existing = _get_existing_tables(cursor)
         for old_name, new_name in reversed(_TABLE_RENAMES):
@@ -186,12 +176,10 @@ def _reverse_rename_tables(apps, schema_editor):
 
 
 def _reverse_rename_indexes_and_constraints(apps, schema_editor):
-    """Función interna: reverse rename indexes and constraints."""
     _rename_indexes_and_constraints(apps, schema_editor)
 
 
-class Migration:
-    """Migración de base de datos generada por Django."""
+class Migration(migrations.Migration):
     dependencies = [
         ("core", "0036_alter_agenciabranding_agencia_and_more"),
         ("bookings", "0036_rename_core_tables_to_bookings"),

@@ -1,9 +1,6 @@
 # 🔒 PADLOCK: CRITICAL INFRASTRUCTURE (REFACTORED)
 # Maintained by: Antigravity/Gemini
 # -----------------------------------------------------
-"""Servicio de ticket parser service para la aplicación automation.
-"""
-
 import hashlib
 import logging
 import time
@@ -218,7 +215,7 @@ class TicketParserService:
     def _run_pipeline(
         self, boleto_id, forced_client_id, ignore_manual, bypass_cache=False, manual_only=False
     ):
-        # _run_pipeline:  run pipeline. Args: según implementación. Returns: según implementación.
+        """_run_pipeline."""
         from core.api import agency_context
 
         # 0. Carga de instancia (Bypass global manager para obtener el objeto inicial)
@@ -738,7 +735,7 @@ class TicketParserService:
             return self._finalize_error(boleto, f"Error en procesamiento final: {e}")
 
     def _trigger_whatsapp(self, venta, boleto):
-        # _trigger_whatsapp:  trigger whatsapp. Args: según implementación. Returns: según implementación.
+        """_trigger_whatsapp."""
         try:
             from core.api import enviar_notificacion_whatsapp_task
 
@@ -752,7 +749,7 @@ class TicketParserService:
                 b_pk=boleto.pk,
                 loc=venta.localizador,
             ):
-                # enqueue_whatsapp: Enqueue whatsapp. Args: según implementación. Returns: según implementación.
+                """enqueue_whatsapp."""
                 if num is None:
                     num = getattr(venta.cliente, "telefono_principal", None) or getattr(
                         venta.cliente, "telefono_secundario", None
@@ -778,7 +775,7 @@ class TicketParserService:
             logger.error(f"❌ Error encolando WhatsApp en on_commit: {e_ws}")
 
     def _finalize_error(self, boleto, error_msg):
-        # _finalize_error:  finalize error. Args: según implementación. Returns: según implementación.
+        """_finalize_error."""
         logger.error(f"❌ Error Boleto {boleto.pk}: {error_msg}")
         # Si ya está marcado como REV (Revisión Requerida), lo mantenemos
         # De lo contrario, marcamos como ERR
@@ -798,7 +795,7 @@ class TicketParserService:
         return None
 
     def _notify_success(self, venta):
-        # _notify_success:  notify success. Args: según implementación. Returns: según implementación.
+        """_notify_success."""
         if not venta:
             return
         try:
@@ -835,12 +832,12 @@ def orquestar_parseo_de_boleto(boleto_id, forced_client_id=None, ignore_manual=F
 
 # Mock para compatibilidad
 def generar_pdf_en_memoria(data, agencia_obj=None, boleto_obj=None):
-    # generar_pdf_en_memoria: Genera pdf en memoria. Args: parámetros de generación. Returns: resultado generado.
+    """generar_pdf_en_memoria."""
     return PdfGenerationService.generate_ticket(data, agencia_obj, boleto_obj)
 
 
 def _parse_sabre_ticket(plain_text: str):
-    # _parse_sabre_ticket:  parse sabre ticket. Args: según implementación. Returns: según implementación.
+    """_parse_sabre_ticket."""
     from apps.automation.parsers.ticket_parser import extract_data_from_text
 
     data = extract_data_from_text(plain_text)

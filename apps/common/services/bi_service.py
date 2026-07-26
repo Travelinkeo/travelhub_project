@@ -1,6 +1,3 @@
-"""Servicio de bi service para la aplicación common.
-"""
-
 import logging
 from datetime import datetime, timedelta
 from decimal import Decimal
@@ -37,7 +34,6 @@ class BusinessIntelligenceEngine:
 
     @staticmethod
     def obtener_kpis_ceo(agencia: Any) -> dict[str, Any]:
-        # obtener_kpis_ceo: Obtener kpis ceo. Args: según implementación. Returns: según implementación.
         hoy = timezone.now()
         inicio_mes_actual = hoy.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
 

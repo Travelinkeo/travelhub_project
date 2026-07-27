@@ -156,7 +156,7 @@ services:
       - .env.local
     volumes:
       - static_volume:/app/staticfiles
-      - media_volume:/app/media
+      - ./media:/app/media
       - ./apps:/app/apps
       - ./core:/app/core
       - ./boletos_importados:/app/boletos_importados
@@ -201,7 +201,7 @@ services:
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
       - static_volume:/app/staticfiles:ro
-      - media_volume:/app/media:ro
+      - ./media:/app/media:ro
     depends_on:
       web:
         condition: service_healthy
@@ -273,7 +273,7 @@ services:
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
     volumes:
-      - media_volume:/app/media
+      - ./media:/app/media
       - ./boletos_importados:/app/boletos_importados
     depends_on:
       pgbouncer:
@@ -292,7 +292,7 @@ services:
       resources:
         limits:
           memory: 2G
-          cpus: '2.0'
+          cpus: '1.0'
 
   celery_notifications:
     build:
@@ -310,7 +310,7 @@ services:
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
     volumes:
-      - media_volume:/app/media
+      - ./media:/app/media
     depends_on:
       pgbouncer:
         condition: service_started
@@ -455,9 +455,6 @@ volumes:
   static_volume:
     external: true
     name: travelhub_static_volume
-  media_volume:
-    external: true
-    name: travelhub_media_volume
   evolution_data:
     external: true
     name: travelhub_project_evolution_data

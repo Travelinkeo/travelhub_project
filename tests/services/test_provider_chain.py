@@ -346,8 +346,7 @@ class TestHealthHistory:
                 """get_api_key_status."""
                 return {"available": True, "last_tested": None}
 
-        reg.register(AlwaysOkProvider())
-        results = run_health_checks(force=True)
+        run_health_checks(force=True)
 
         history = get_health_history()
         assert len(history) >= 1

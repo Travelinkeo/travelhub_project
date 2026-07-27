@@ -6,9 +6,6 @@ Cada fixture aquí debería ser autouse=False (activación explícita)
 a menos que genuinamente deba aplicarse a todos los tests.
 """
 
-import json
-import unittest.mock
-
 import pytest
 
 

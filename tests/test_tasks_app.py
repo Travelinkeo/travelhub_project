@@ -158,7 +158,7 @@ class TareasViewsTest(TestCase):
         tarea = Tarea.objects.create(
             titulo="Para Update", creado_por=self.user, agencia=self.agencia
         )
-        response = self.client.post(
+        self.client.post(
             reverse("tasks:update", args=[tarea.pk]),
             {"titulo": "Updated", "prioridad": "urgente", "estado": "en_progreso"},
         )

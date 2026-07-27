@@ -390,7 +390,7 @@ class VentaAdmin(SaaSAdminMixin, ModelAdmin):
                 level="warning",
             )
             return
-        form = ClienteSelectionForm(request.POST or None)
+        form = FacturaClienteSelectionForm(request.POST or None)
         if "apply" in request.POST and form.is_valid():
             cliente = form.cleaned_data["cliente"]
             from django.utils.module_loading import import_string

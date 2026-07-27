@@ -4,7 +4,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render
 from django.views import View
 
-from core.security import get_agencia_from_request
+from core.api import get_agencia_from_request
 
 from .models import Logro, LogroProgreso, Nivel, PuntuacionUsuario
 
@@ -30,7 +30,7 @@ class GamificationDashboardView(LoginRequiredMixin, View):
         )
         niveles = list(Nivel.objects.all().order_by("puntos_minimos"))
         siguiente_nivel = None
-        for i, nivel in enumerate(niveles):
+        for _i, nivel in enumerate(niveles):
             if nivel.puntos_minimos > puntuacion.puntos_total:
                 siguiente_nivel = nivel
                 break
@@ -88,7 +88,6 @@ class GamificationBadgesView(LoginRequiredMixin, View):
         completados = [p for p in progresos if p.completado]
         pendientes = [p for p in progresos if not p.completado]
 
-        completados_ids = {p.logro_id for p in progresos if p.completado}
         sin_iniciar = Logro.objects.filter(activo=True).exclude(
             id__in=[p.logro_id for p in progresos]
         )

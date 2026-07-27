@@ -34,8 +34,8 @@ def parse_date(date_str: str) -> str | None:
             if month > 12:
                 day, month = month, day
             return f"{year:04d}-{month:02d}-{day:02d}"
-        except Exception:
-            pass
+        except (ValueError, TypeError, IndexError):
+            return None
     return None
 
 
@@ -77,7 +77,7 @@ class MyDestinyReportParser(BaseSupplierReportParser):
             r"^(\d{1,2}/\d{1,2}/\d{4})\s+([A-Z0-9]+)\s+([A-Z0-9]+)\s+([A-Z0-9\s\/]+?)\s+(\d{8,15})\s+([A-Z0-9\s]+?)\s+([\d\.\,-]+)\s+([\d\.\,-]+)\s+([\d\.\,-]+|-)\s+([\d\.\,-]+|-)\s+([\d\.\,-]+)\s+([\d\.\,-]+)\s+([\d\.\,-]+%?)\s+([\d\.\,-]+)\s+([\d\.\,-]+)$"
         )
 
-        lines = [l.strip() for l in full_text.splitlines() if l.strip()]
+        lines = [line.strip() for line in full_text.splitlines() if line.strip()]
 
         for line in lines:
             m = row_pattern.match(line)

@@ -31,7 +31,7 @@ class WebhookListView(LoginRequiredMixin, View):
             return render(request, self.template_name, {"error": "No hay agencia activa"})
 
         webhooks = Webhook.objects.filter(agencia=agencia).order_by("-created_at")
-        eventos_disponibles = [{"value": v, "label": l} for v, l in WebhookEvent.choices]
+        eventos_disponibles = [{"value": val, "label": lbl} for val, lbl in WebhookEvent.choices]
 
         # Estadísticas agregadas
         stats = webhooks.aggregate(

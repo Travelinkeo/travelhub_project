@@ -79,7 +79,7 @@ class CTGReportParser(BaseSupplierReportParser):
         if acc_bal:
             result["saldo_final"] = parse_decimal(acc_bal.group(1))
 
-        lines = [l.strip() for l in full_text.splitlines() if l.strip()]
+        lines = [line.strip() for line in full_text.splitlines() if line.strip()]
 
         current_issue_dt = None
         current_invoice_no = ""

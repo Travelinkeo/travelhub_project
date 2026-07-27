@@ -59,8 +59,10 @@ class LogroModelTest(TestCase):
     def test_categorias(self):
         """test_categorias."""
         for cat_code, _ in Logro.CATEGORIAS:
-            l = Logro.objects.create(codigo=f"cat_{cat_code}", nombre=cat_code, categoria=cat_code)
-            self.assertEqual(l.categoria, cat_code)
+            logro_obj = Logro.objects.create(
+                codigo=f"cat_{cat_code}", nombre=cat_code, categoria=cat_code
+            )
+            self.assertEqual(logro_obj.categoria, cat_code)
 
 
 class LogroProgresoModelTest(TestCase):
@@ -239,7 +241,7 @@ class GamificationSignalsTest(TestCase):
 
         moneda = Moneda.objects.create(codigo_iso="USD", nombre="Dólar", simbolo="$")
         cliente = Cliente.objects.create(nombres="Test", apellidos="Client", agencia=self.agencia)
-        venta = Venta.objects.create(
+        Venta.objects.create(
             cliente=cliente, moneda=moneda, agencia=self.agencia, creado_por=self.user
         )
         prog = LogroProgreso.objects.filter(usuario=self.user, agencia=self.agencia).first()

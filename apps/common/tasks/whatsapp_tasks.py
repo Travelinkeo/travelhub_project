@@ -40,8 +40,8 @@ def enviar_notificacion_whatsapp_task(
 
             agencia = Agencia.objects.get(id=agencia_id)
             agencia_nombre = agencia.nombre
-        except Exception:
-            pass
+        except Exception as exc:
+            logger.debug("No se encontró agencia_id %s: %s", agencia_id, exc)
 
     if not agencia:
         from core.middleware import get_current_agency

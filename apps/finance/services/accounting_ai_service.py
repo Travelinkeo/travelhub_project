@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 from decimal import Decimal
+from typing import Any
 
 from django.db import transaction
 from django.utils import timezone
@@ -22,7 +23,7 @@ class AccountingAIService:
     @transaction.atomic
     def generar_asiento_con_ia(
         cls, descripcion_transaccion: str, context_details: dict | None = None
-    ) -> "AsientoContable | None":
+    ) -> Any:
         """
         Interpreta una transacción y crea el asiento contable físico en TravelHub.
 
@@ -33,7 +34,9 @@ class AccountingAIService:
         logger.info(f"Accounting AI: Generando asiento para: '{descripcion_transaccion[:80]}...'")
 
         contexto_str = f"\nDATOS TÉCNICOS: {context_details}" if context_details else ""
-        full_prompt = f"CONTABILIZA LA SIGUIENTE TRANSACCIÓN:\n{descripcion_transaccion}{contexto_str}"
+        full_prompt = (
+            f"CONTABILIZA LA SIGUIENTE TRANSACCIÓN:\n{descripcion_transaccion}{contexto_str}"
+        )
 
         try:
             from django.apps import apps
@@ -66,9 +69,7 @@ class AccountingAIService:
             )
 
             for l_schema in datos_asiento["lineas"]:
-                cuenta = CuentaContable.objects.filter(
-                    codigo=l_schema["codigo_cuenta"]
-                ).first()
+                cuenta = CuentaContable.objects.filter(codigo=l_schema["codigo_cuenta"]).first()
                 if not cuenta:
                     cuenta = CuentaContable.objects.filter(
                         nombre__icontains=l_schema["nombre_cuenta"]

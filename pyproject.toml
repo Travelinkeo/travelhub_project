@@ -18,4 +18,15 @@ exclude = [
     "wpp_sessions",
 ]
 
-
+[tool.ruff]
+target-version = "py312"
+exclude = [
+    ".agents",
+    "scripts",
+    "scratch",
+    "capturas_promocionales",
+    "generar_video_hd.py",
+    "capture_real_screenshots.py",
+    "migrations",
+    ".venv",
+]
